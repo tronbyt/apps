@@ -2,5 +2,5 @@
 id: hass-media
 name: HASS Media
 summary: HA media player entity
-desc: Now Playing for a media player entity, e.g. Spotify
+desc: Now Playing for a media player entity, e.g. Spotify.
 author: vincentezw
