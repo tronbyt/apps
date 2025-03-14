@@ -6,11 +6,11 @@ Author: Cavallando
 """
 
 load("encoding/base64.star", "base64")
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("encoding/json.star", "json")
 
 DEBUG = False
 TEST_RUN = """{
@@ -62,7 +62,8 @@ iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKaElE
 )
 
 DEFAULT_BRANCH = "main"
-def should_show_jobs(repos,dwell_time):
+
+def should_show_jobs(repos, dwell_time):
     print("dwell time is " + str(dwell_time))
     if dwell_time == 0:
         return True
@@ -144,7 +145,7 @@ def fetch_workflow_data(repos, access_token):
             if (resp.status_code != 200):
                 print("status_code : " + str(resp.status_code))
                 print(data)
-                return("error",data.get("message"))
+                return ("error", data.get("message"))
         else:
             data = json.decode(TEST_RUN)
         if data and data.get("workflow_runs"):
@@ -163,7 +164,6 @@ def fetch_workflow_data(repos, access_token):
 #     return config.get("display_text") or "{}/{}".format(repo[0], repo[1])
 
 def render_status_badge(status, repos):
-
     # workflow_data is an array
     rows = []
     print(type(repos))
@@ -270,7 +270,7 @@ def main(config):
         #     return render_status_badge("success", "no data")
 
     elif workflow_data and type(workflow_data) != "string":
-        if not should_show_jobs(workflow_data, int(config.get("timeout","0"))):
+        if not should_show_jobs(workflow_data, int(config.get("timeout", "0"))):
             return []
 
         return render_status_badge("success", workflow_data)
@@ -315,7 +315,7 @@ def get_schema():
                 name = "All Success Timeout",
                 desc = "How long to show all green",
                 icon = "clock",
-                default = "0"
-            )
+                default = "0",
+            ),
         ],
     )
