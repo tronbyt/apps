@@ -47,6 +47,26 @@ iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKaElE
 )
 
 DEFAULT_BRANCH = "main"
+def should_show_jobs(repos,dwell_time):
+    print("dwell time is " + str(dwell_time))
+    if dwell_time == 0:
+        return True
+
+    now = time.now().in_location("UTC")
+    for repo in repos:
+        if "data" not in repo:
+            continue
+        job = repo["data"]
+        if job.get("conclusion", "unknown") != "success":
+            return True
+        updated_at = time.parse_time(job["updated_at"], format = "2006-01-02T15:04:05Z").in_location("UTC")
+        duration = now - updated_at
+        print("comparing " + str(duration.seconds) + " and " + str(dwell_time * 60))
+        if duration.seconds <= dwell_time * 60:
+            return True
+        else:
+            print("all successes are old")
+    return False
 
 def get_status_icon(status):
     """Gets the decoded icon string for a given Workflow Status from github
