@@ -1,5 +1,5 @@
 ---
-id: recycle
+id: trashrecycle
 name: Recycle
 summary: 'Notification: recycle'
 desc: Displays a reminder to take out the recycle bins.

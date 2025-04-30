@@ -1,5 +1,5 @@
 ---
-id: garage-closing
+id: garageclosing
 name: Garage Closing
 summary: Notification garage closing
 desc: Displays a notification that a garage door is closing.

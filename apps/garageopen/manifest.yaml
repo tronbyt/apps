@@ -1,5 +1,5 @@
 ---
-id: garage-open
+id: garageopen
 name: Garage Open
 summary: 'Notification: garage open'
 desc: Displays a notification that a garage door is open.
