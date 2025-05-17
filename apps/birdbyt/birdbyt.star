@@ -12,10 +12,8 @@ load("humanize.star", "humanize")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-EBIRD_API_KEY = "AV6+xWcECVOVS+y/jlkVqyE0oxKa9Ql7M/h05Xh+ilG7K+8ELfdgmPX6FPFcDdDuEz5PSbWO1sNs+XjhuS8Bm4qbT00tO0A3DIG5mDo78bAg2dhYVIhPyp/AyiCDzVadqN2KKGduX2NKdihnCyn4NWHW"
 EBIRD_URL = "https://api.ebird.org/v2"
 MAX_API_RESULTS = "300"
 
@@ -164,10 +162,10 @@ def main(config):
     """
     random.seed(time.now().unix // 10)
 
-    ebird_key = secret.decrypt(EBIRD_API_KEY) or config.get("ebird_api_key")
+    ebird_key = config.get("ebird_api_key")
     if not ebird_key:
         ebird_key = "BIRDERROR-NO-API-KEY"
-        log("unable to decrypt API key or retrieve from local config")
+        log("unable to retrieve from local config")
 
     params = get_params(config)
     timezone = params.pop("tz")
@@ -263,6 +261,12 @@ def get_schema():
                 name = "Location",
                 desc = "Location to search for bird sightings.",
                 icon = "locationDot",
+            ),
+            schema.Text(
+                id = "ebird_api_key",
+                name = "eBird API Key",
+                desc = "Enter your eBird API Key. Generate one at https://ebird.org/api/keygen",
+                icon = "gear",
             ),
             schema.Dropdown(
                 id = "distance",
