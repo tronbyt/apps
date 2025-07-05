@@ -186,15 +186,15 @@ def main(config):
             children = [
                 render.Row(
                     children = [
-                        render.Column(
-                            children = [
-                                render.Box(
-                                    width = 18,
-                                    height = 25,
-                                    child = render.Image(src = bird_image),
-                                ),
-                            ],
-                        ),
+                        # render.Column(
+                        #     children = [
+                        #         render.Box(
+                        #             width = 18,
+                        #             height = 25,
+                        #             child = render.Image(src = bird_image),
+                        #         ),
+                        #     ],
+                        # ),
                         render.Box(
                             height = 25,
                             padding = 1,
@@ -325,7 +325,7 @@ def get_scroll_text(sighting):
 
         # local timezone should = bird sighting timezone since both are derived from location config
         sighting_day = "Today" if day_of_week == humanize.day_of_week(time.now()) else days[day_of_week]
-        scroll_text = sighting_day + ": " + sighting.get("loc")
+        scroll_text = sighting.get("loc") + " " + sighting_day
     else:
         scroll_text = sighting.get("loc")
 
