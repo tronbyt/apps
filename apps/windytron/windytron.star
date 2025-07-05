@@ -5,6 +5,14 @@ load("time.star", "time")
 load("schema.star", "schema")
 
 
+# Define your station lookup dictionary at the top of the file
+station_lookup = {
+    "kanaha_simple.json": "Kanaha",
+    "meco_ukumehame.json": "Ukumehame",
+    "kihei.json": "Kihei",
+    "kailua.json": "Kailua",
+}
+
 def fetch_data(station):
     url = "http://wildc.net/wind/{}?time={}".format(station,time.now().unix)
     print(url)
@@ -48,7 +56,8 @@ def main(config):
     elif (wind_avg >= 30):
         wind_color = color_beast
 
-    label = custom_label if custom_label != "" else data.get("label", "Wind")
+    # Use custom label if set, otherwise use display name from lookup
+    label = custom_label if custom_label != "" else station_lookup.get(station, "Wind")
 
     return render.Root(
         child = render.Box(
@@ -76,11 +85,10 @@ def main(config):
     )
 
 def get_schema():
+    # Build station options from the lookup dict
     station_options = [
-        schema.Option(display = "Kanaha", value = "kanaha_simple.json"),
-        schema.Option(display = "Ukumehame", value = "meco_ukumehame.json"),
-        schema.Option(display = "Kihei", value = "kihei.json"),
-        schema.Option(display = "Kailua", value = "kailua.json"),
+        schema.Option(display = display, value = value)
+        for value, display in station_lookup.items()
     ]
     wind_unit_options = [
         schema.Option(display = "mph", value = "mph"),
@@ -96,7 +104,7 @@ def get_schema():
                 icon = "flag",
                 desc = "Select wind station",
                 options = station_options,
-                default = "kanaha",
+                default = "kanaha_simple.json",
             ),
             schema.Dropdown(
                 id = "wind_units",
@@ -122,4 +130,8 @@ def get_schema():
             ),
         ]
     )
+
+# Helper function to get display name from value
+def get_station_display_name(station_value):
+    return station_lookup.get(station_value, station_value)
 
