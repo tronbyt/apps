@@ -30,8 +30,11 @@ def debug_print(arg):
     if print_debug:
         print(arg)
 
-def swell_over_threshold(thresh, units, data):  # assuming threshold is already in preferred units
-    height = data["WVHT"]
+def swell_over_threshold(thresh, units, data, use_wind_swell):  # assuming threshold is already in preferred units
+    if use_wind_swell:
+        height = data.get("WIND_WVHT", "0")
+    else:
+        height = data.get("WVHT", "0")
     if thresh == "" or float(thresh) == 0.0:
         return True
     elif units == "m":
@@ -331,7 +334,7 @@ def main(config):
             wt = int(float(wt) + 0.5)
             wtemp = " %s%s" % (str(wt), t_unit_pref)
 
-        if not swell_over_threshold(min_size, h_unit_pref, data):
+        if not swell_over_threshold(min_size, h_unit_pref, data, use_wind):
             return []
 
         period_display = str(int(float(period) + 0.5)) if type(period) == type("") and period.replace(".", "", 1).isdigit() else str(period)
