@@ -114,6 +114,11 @@ def fetch_data(buoy_id, last_data):
         wtmp = re.match(r".*<b>Water Temp:</b> ([0-9.]+) &#176;F.*", weather)
         if len(wtmp) > 0:
             data["WTMP"] = wtmp[0][1]
+            
+        # Air Temp (ATMP)
+        atmp = re.match(r".*<b>Air Temp:</b> ([0-9.]+) &#176;F.*", weather)
+        if len(atmp) > 0:
+            data["ATMP"] = atmp[0][1]
 
     # Wave Summary section
     wave_start = html.find("<h2>Wave Summary</h2>")
