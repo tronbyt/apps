@@ -8,9 +8,9 @@ load("schema.star", "schema")
 # Define your station lookup dictionary at the top of the file
 station_lookup = {
     "kanaha_simple.json": "Kanaha",
+    "WS8A.json": "Ho'okipa",
     "meco_ukumehame.json": "Ukumehame",
-    "kihei.json": "Kihei",
-    "kailua.json": "Kailua",
+    "kihei.json": "Kihei"
 }
 
 def fetch_data(station):
@@ -29,7 +29,7 @@ def main(config):
     custom_label = config.get("custom_label", "")
     label_color = config.get("label_color", "#FFFFFF")
     data = fetch_data(station)
-    print(data)
+    
     wind_avg = int(data["avg"] + 0.5)
     wind_gust = int(data["gust"] + 0.5)
     wind_dir = data["dir_card"]
