@@ -6,3 +6,4 @@ desc: Share a custom status with coworkers.
 author: Brian Bell
 fileName: custom_status.star
 packageName: customstatus
+recommended_interval: 300

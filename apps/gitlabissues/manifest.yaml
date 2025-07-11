@@ -6,3 +6,4 @@ desc: Shows the amount of currently open issues on Gitlab for a user.
 author: Sven Ringger
 fileName: gitlab_issues.star
 packageName: gitlabissues
+recommended_interval: 300

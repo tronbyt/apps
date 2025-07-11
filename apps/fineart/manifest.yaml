@@ -6,3 +6,4 @@ desc: The masterpieces of van Gogh, Picasso, Monet, and more. See a new work of 
 author: chrisbateman
 fileName: fine_art.star
 packageName: fineart
+recommended_interval: 300

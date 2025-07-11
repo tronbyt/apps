@@ -4,3 +4,4 @@ name: House of Commons
 summary: Predicted election results
 desc: Predicted seat and vote shares for the UK's House of Commons based on opinion polls.
 author: dinosaursrarr
+recommended_interval: 300

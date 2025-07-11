@@ -6,3 +6,4 @@ desc: Shows the recent status of provided validators on the Ethereum beacon chai
 author: ColinCampbell
 fileName: ethstaker.star
 packageName: ethstaker
+recommended_interval: 300

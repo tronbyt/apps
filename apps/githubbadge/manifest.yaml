@@ -6,3 +6,4 @@ desc: Displays a GitHub badge for the status of the configured Action.
 author: Cavallando
 fileName: github_badge.star
 packageName: githubbadge
+recommended_interval: 300

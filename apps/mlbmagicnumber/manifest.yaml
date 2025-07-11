@@ -6,3 +6,4 @@ desc: Displays the magic number or the elimination number of your favorite MLB t
 author: Jake Manske
 fileName: mlb_magic_number.star
 packageName: mlbmagicnumber
+recommended_interval: 300

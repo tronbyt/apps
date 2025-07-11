@@ -6,3 +6,4 @@ desc: Display the time in addition to current weather conditions from either Ope
 author: sudeepban
 fileName: time_and_weather.star
 packageName: timeandweather
+recommended_interval: 300

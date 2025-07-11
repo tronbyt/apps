@@ -6,3 +6,4 @@ desc: Shows upcoming games, current score, date and time of game for selected le
 author: jvivona
 fileName: soccermens.star
 packageName: soccermens
+recommended_interval: 300

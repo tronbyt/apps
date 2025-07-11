@@ -6,3 +6,4 @@ desc: Displays time, temperature, wind, sunrise, and sunset on one page.
 author: jordan-p
 fileName: dense_time_temp.star
 packageName: densetimetemp
+recommended_interval: 300

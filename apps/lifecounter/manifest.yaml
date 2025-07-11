@@ -4,3 +4,4 @@ name: Life Counter
 summary: Lifespan elapsed/remaining
 desc: Visually represents the months elapsed since DOB and remaining before reaching a user-selected age.
 author: danceforheaven
+recommended_interval: 300

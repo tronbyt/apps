@@ -6,3 +6,4 @@ desc: Shows your estimated travel duration using traffic information from Bing/M
 author: Rob Kimball
 fileName: traffic.star
 packageName: traffic
+recommended_interval: 300

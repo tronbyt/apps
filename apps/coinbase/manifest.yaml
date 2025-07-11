@@ -6,3 +6,4 @@ desc: Displays your current Coinbase balance and holdings.
 author: harrywynn
 fileName: coinbase.star
 packageName: coinbase
+recommended_interval: 60

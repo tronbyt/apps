@@ -6,3 +6,4 @@ desc: Simple app for displaying the next arrival at a bus stop.
 author: thedriver
 fileName: trimet_arrivals.star
 packageName: trimetarrivals
+recommended_interval: 300

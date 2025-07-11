@@ -6,3 +6,4 @@ desc: Shows a visualization of currently active Go games on OGS (Online Go Serve
 author: Neal Wright
 fileName: ogs_games_viewer.star
 packageName: ogsgamesviewer
+recommended_interval: 300

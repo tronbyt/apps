@@ -4,3 +4,4 @@ name: ShipWeatherClock
 summary: Ship scene w time/weather
 desc: Clock with ship on the ocean scene that changes with weather.
 author: Peter Uth
+recommended_interval: 0

@@ -6,3 +6,4 @@ desc: Results for the most recent draw of the EuroMillions transnational lottery
 author: dinosaursrarr
 fileName: euromillions.star
 packageName: euromillions
+recommended_interval: 300

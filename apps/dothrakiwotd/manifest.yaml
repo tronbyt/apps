@@ -6,3 +6,4 @@ desc: Display a random Dothraki word of the day.
 author: tavdog
 fileName: dothraki_wotd.star
 packageName: dothrakiwotd
+recommended_interval: 300

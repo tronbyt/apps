@@ -6,3 +6,4 @@ desc: Display info for a Twitch username.
 author: Nick Penree
 fileName: twitch.star
 packageName: twitch
+recommended_interval: 300

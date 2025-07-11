@@ -6,3 +6,4 @@ desc: Shows the Bitcoin halving- and the difficulty adjustment progress.
 author: PMK (@pmk)
 fileName: btchalving.star
 packageName: btchalving
+recommended_interval: 60

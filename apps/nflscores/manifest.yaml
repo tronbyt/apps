@@ -6,3 +6,4 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: LunchBox8484
 fileName: nfl_scores.star
 packageName: nflscores
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Displays a Piet Mondrian inspired clock face, De Stijl.
 author: '@theredwillow'
 fileName: mondrianclock.star
 packageName: mondrianclock
+recommended_interval: 0

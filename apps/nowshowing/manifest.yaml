@@ -4,3 +4,4 @@ name: NowShowing
 summary: Current movies in theaters
 desc: Displays current movies in theaters.
 author: Robert Ison
+recommended_interval: 300

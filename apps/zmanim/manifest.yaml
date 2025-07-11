@@ -5,6 +5,7 @@ desc: Displays daily Jewish prayer times (zmanim) for your location. Shows dawn,
 author: Shimon Savitsky
 fileName: zmanim.star
 packageName: zmanim
+recommended_interval: 3600
 
 categories:
   - utility

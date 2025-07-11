@@ -6,3 +6,4 @@ desc: View the current status and color of your lights.
 author: Daniel Sitnik
 fileName: lifx_lights.star
 packageName: lifxlights
+recommended_interval: 300

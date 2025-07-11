@@ -6,3 +6,4 @@ desc: Display ticker and stats for stock indices.
 author: M0ntyP
 fileName: index_ticker.star
 packageName: indexticker
+recommended_interval: 60

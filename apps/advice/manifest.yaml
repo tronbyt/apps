@@ -6,3 +6,4 @@ desc: Shows random advice from AdviceSlip.com.
 author: mrrobot245
 fileName: advice.star
 packageName: advice
+recommended_interval: 300

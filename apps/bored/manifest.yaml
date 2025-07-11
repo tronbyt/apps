@@ -6,3 +6,4 @@ desc: This app will suggest things you can do alone or with your friends if you 
 author: Anders Heie
 fileName: bored.star
 packageName: bored
+recommended_interval: 300

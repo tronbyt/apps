@@ -6,3 +6,4 @@ desc: Displays Pulsechain token prices and price changes in USD over the last 24
 author: kmphua
 fileName: pulsetracker.star
 packageName: pulsetracker
+recommended_interval: 300

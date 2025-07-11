@@ -6,3 +6,4 @@ desc: After playing Wordle on your phone, click Share>Copy text. In the Tidbyt a
 author: skola28
 fileName: wordlebyt.star
 packageName: wordlebyt
+recommended_interval: 300

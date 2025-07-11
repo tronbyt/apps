@@ -6,3 +6,4 @@ desc: A beautiful countdown timer that displays time remaining until your import
 author: Matthew Grasmick
 fileName: countdowntimer.star
 packageName: countdowntimer
+recommended_interval: 60

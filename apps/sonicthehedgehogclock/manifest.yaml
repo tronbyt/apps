@@ -6,3 +6,4 @@ desc: A customizable clock featuring characters from Sonic the Hedgehog.
 author: RichardALeon
 fileName: sonicthehedgehogclock.star
 packageName: sonicthehedgehogclock
+recommended_interval: 0

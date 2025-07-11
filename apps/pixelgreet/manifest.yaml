@@ -6,3 +6,4 @@ desc: PixelGreet is an app that allows hosts to craft customized messages and im
 author: Justin Gerber
 fileName: pixelgreet.star
 packageName: pixelgreet
+recommended_interval: 300

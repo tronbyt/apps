@@ -6,3 +6,4 @@ desc: Shows the Fear And Greed Index for Bitcoin.
 author: PMK (@pmk)
 fileName: btcfagi.star
 packageName: btcfagi
+recommended_interval: 60

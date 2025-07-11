@@ -6,3 +6,4 @@ desc: Show readings from your Ambient weather station.
 author: Jon Maddox
 fileName: ambient_weather.star
 packageName: ambientweather
+recommended_interval: 300

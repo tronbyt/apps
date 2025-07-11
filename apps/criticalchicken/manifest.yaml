@@ -6,3 +6,4 @@ desc: Shows the latest post from CriticalChicken.com.
 author: Critical Chicken
 fileName: critical_chicken.star
 packageName: criticalchicken
+recommended_interval: 300

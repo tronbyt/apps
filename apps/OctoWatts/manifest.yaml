@@ -4,3 +4,4 @@ name: OctoWatts
 summary: Live energy monitoring
 desc: Octopus Energy live consumption monitor, diplays your current usage and one minute energy trend. Requires an Octopus Home Mini device.
 author: TomForeman86
+recommended_interval: 300

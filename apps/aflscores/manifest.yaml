@@ -6,3 +6,4 @@ desc: Shows AFL (Australian Football League) scores.
 author: M0ntyP
 fileName: afl_scores.star
 packageName: aflscores
+recommended_interval: 300

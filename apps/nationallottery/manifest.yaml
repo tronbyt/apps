@@ -6,3 +6,4 @@ desc: Results for the most recent draw of the UK national lottery main game.
 author: dinosaursrarr
 fileName: national_lottery.star
 packageName: nationallottery
+recommended_interval: 300

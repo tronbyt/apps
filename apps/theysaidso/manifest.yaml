@@ -6,3 +6,4 @@ desc: Quote of the day powered by theysaidso.com.
 author: Henry So, Jr.
 fileName: they_said_so.star
 packageName: theysaidso
+recommended_interval: 300

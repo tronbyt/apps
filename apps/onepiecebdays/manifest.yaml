@@ -6,3 +6,4 @@ desc: Lists all One Piece characters celebrating their birthday today.
 author: raymbartlett
 fileName: one_piece_bdays.star
 packageName: onepiecebdays
+recommended_interval: 300

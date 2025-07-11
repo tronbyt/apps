@@ -6,3 +6,4 @@ desc: Shows random one of the latest news items from the Dutch website nu.nl.
 author: PMK (@pmk)
 fileName: nunl.star
 packageName: nunl
+recommended_interval: 300

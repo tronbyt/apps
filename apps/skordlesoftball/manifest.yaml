@@ -6,3 +6,4 @@ desc: This app gets softball data from the Skordle website to display on the Tid
 author: Woolycoin437420
 fileName: skordlesoftball.star
 packageName: skordlesoftball
+recommended_interval: 300

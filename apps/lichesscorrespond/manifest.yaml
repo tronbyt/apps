@@ -6,3 +6,4 @@ desc: Shows active correspondence games currently waiting on you for a move.
 author: Denton-L
 fileName: lichesscorrespond.star
 packageName: lichesscorrespond
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Renders a tartan based on thread count instructions and displays it on scr
 author: dinosaursrarr
 fileName: tartan.star
 packageName: tartan
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Shows current rank from SSBM Slippi profile.
 author: noahpodgurski
 fileName: slippirank.star
 packageName: slippirank
+recommended_interval: 300

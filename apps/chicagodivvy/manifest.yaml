@@ -6,3 +6,4 @@ desc: Shows bike availability of a Divvy Station in the Chicagoland area.
 author: wilcot
 fileName: chicago_divvy.star
 packageName: chicagodivvy
+recommended_interval: 300

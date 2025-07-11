@@ -6,3 +6,4 @@ desc: Displays state flags.
 author: Robert Ison
 fileName: state_flags.star
 packageName: stateflags
+recommended_interval: 300

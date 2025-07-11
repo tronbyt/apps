@@ -6,3 +6,4 @@ desc: Shows the current playing song on Smooth FM for various stations around Au
 author: M0ntyP
 fileName: smooth_fm.star
 packageName: smoothfm
+recommended_interval: 300

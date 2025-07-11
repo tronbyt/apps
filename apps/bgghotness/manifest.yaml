@@ -6,3 +6,4 @@ desc: Shows the top items from BoardGameGeek's Board Game Hotness list.
 author: Henry So, Jr.
 fileName: bgg_hotness.star
 packageName: bgghotness
+recommended_interval: 300

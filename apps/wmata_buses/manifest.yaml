@@ -6,3 +6,4 @@ desc: This app tells you the next buses to arrive at 1-2 bus stops in in Washing
 author: abrahamrowe
 fileName: wmata_buses.star
 packageName: wmatabuses
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Shows the Fear And Greed Index from CNN Markets RapidAPI endpoint. Updates
 author: jondklley
 fileName: stockfagi.star
 packageName: stockfagi
+recommended_interval: 60

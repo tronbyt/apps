@@ -6,3 +6,4 @@ desc: Displays random tarot card spreads with their images, names, and meanings.
 author: frame-shift
 fileName: tarot_cards.star
 packageName: tarotcards
+recommended_interval: 3600

@@ -6,3 +6,4 @@ desc: Energy production and consumption monitor for your Tesla solar panels.
 author: jweier
 fileName: tesla_solar.star
 packageName: teslasolar
+recommended_interval: 300

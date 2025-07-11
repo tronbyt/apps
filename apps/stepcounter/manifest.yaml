@@ -6,3 +6,4 @@ desc: Fetches your Step Data from Google Fit, Reports progress versus daily goal
 author: Matt-Pesce
 fileName: stepcounter.star
 packageName: stepcounter
+recommended_interval: 300

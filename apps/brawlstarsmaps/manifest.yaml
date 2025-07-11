@@ -6,3 +6,4 @@ desc: Shows a random map from the current maps available in the game Brawl Stars
 author: Lucas Farah
 fileName: brawlstars_maps.star
 packageName: brawlstarsmaps
+recommended_interval: 300

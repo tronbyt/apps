@@ -6,3 +6,4 @@ desc: Displays the Noun currently under auctionand bid details.
 author: miracle2k
 fileName: nouns.star
 packageName: nouns
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Watch snake play out.
 author: dgoldstein1
 fileName: snake2.star
 packageName: snake2
+recommended_interval: 300

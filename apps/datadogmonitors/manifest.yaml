@@ -6,3 +6,4 @@ desc: By default displays any monitors that are in the status alert but allows f
 author: Cavallando
 fileName: datadog_monitors.star
 packageName: datadogmonitors
+recommended_interval: 300

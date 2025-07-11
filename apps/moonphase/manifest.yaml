@@ -6,3 +6,4 @@ desc: Shows phase of moon based on location.
 author: Chris Wyman
 fileName: moon_phase.star
 packageName: moonphase
+recommended_interval: 300

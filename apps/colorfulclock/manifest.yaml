@@ -6,3 +6,4 @@ desc: Shows the time like on an old wall clock.
 author: LukiLeu
 fileName: colorful_clock.star
 packageName: colorfulclock
+recommended_interval: 0

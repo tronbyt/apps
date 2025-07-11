@@ -6,3 +6,4 @@ desc: Shows the top 10 charts for movies or TV shows on Netflix.
 author: Matt Broussard
 fileName: netflix_top_10.star
 packageName: netflixtop10
+recommended_interval: 300

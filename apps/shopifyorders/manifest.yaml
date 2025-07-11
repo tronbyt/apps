@@ -6,3 +6,4 @@ desc: View orders you've received during a specific time period like Black Frida
 author: Shopify
 fileName: shopify_orders.star
 packageName: shopifyorders
+recommended_interval: 300

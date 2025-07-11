@@ -6,3 +6,4 @@ desc: Shows the the latest news article from NoBsBitcoin.
 author: PMK (@pmk)
 fileName: nobsbitcoin.star
 packageName: nobsbitcoin
+recommended_interval: 60

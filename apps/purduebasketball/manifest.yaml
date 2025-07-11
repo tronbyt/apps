@@ -6,3 +6,4 @@ desc: Shows Purdues basketball record of current year provided that you use a fr
 author: Griffinov22
 fileName: purdue_basketball.star
 packageName: purduebasketball
+recommended_interval: 300

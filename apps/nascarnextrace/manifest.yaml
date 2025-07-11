@@ -6,3 +6,4 @@ desc: Shows time, date and location of next NASCAR race for selected series.
 author: jvivona
 fileName: nascarnextrace.star
 packageName: nascarnextrace
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: A calendar that shows the coming week of occupancy for multiple Airbnb lis
 author: Jed Schmidt
 fileName: airbnb_calendar.star
 packageName: airbnbcalendar
+recommended_interval: 3600

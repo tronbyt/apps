@@ -6,3 +6,4 @@ desc: This app gets football data from the Skordle website to display on the Tid
 author: Woolycoin437420
 fileName: skordle_scores.star
 packageName: skordlescores
+recommended_interval: 300

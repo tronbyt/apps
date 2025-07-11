@@ -6,3 +6,4 @@ desc: Shows item information from Runescape using the Runescape API.
 author: blakekwehrle
 fileName: runescape.star
 packageName: runescape
+recommended_interval: 300

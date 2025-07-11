@@ -6,3 +6,4 @@ desc: Periodically call the GitHub status page and display any outages that occu
 author: hross
 fileName: github_status.star
 packageName: githubstatus
+recommended_interval: 300

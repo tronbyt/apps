@@ -6,3 +6,4 @@ desc: Provides inspirational, humorous or otherwise interesting quotes throughou
 author: Taylor White
 fileName: quote_of_the_day.star
 packageName: quoteoftheday
+recommended_interval: 300

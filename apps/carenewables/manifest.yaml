@@ -6,3 +6,4 @@ desc: See how California is using renewable energy in its power grid right now.
 author: sloanesturz
 fileName: ca_renewables.star
 packageName: carenewables
+recommended_interval: 300

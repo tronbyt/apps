@@ -6,3 +6,4 @@ desc: Results for the most recent draw of the UK national lottery's Set For Life
 author: dinosaursrarr
 fileName: set_for_life.star
 packageName: setforlife
+recommended_interval: 300

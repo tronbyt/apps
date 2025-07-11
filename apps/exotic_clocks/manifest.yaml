@@ -4,3 +4,4 @@ name: Exotic Clocks
 summary: Weird localized time
 desc: Stylish and localized way to tell the time.
 author: vzsky
+recommended_interval: 0

@@ -6,3 +6,4 @@ desc: Display the standings for the MLB division of your choice.
 author: Jake Manske
 fileName: mlbdivstandings.star
 packageName: mlbdivstandings
+recommended_interval: 300

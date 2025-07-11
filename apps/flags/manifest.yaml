@@ -6,3 +6,4 @@ desc: Displays a random or specific country flag.
 author: btjones
 fileName: flags.star
 packageName: flags
+recommended_interval: 300

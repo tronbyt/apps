@@ -6,3 +6,4 @@ desc: Tells you the cycle that's active in each of the Warframe open areas and i
 author: grantmatheny
 fileName: warframe_cycles.star
 packageName: warframecycles
+recommended_interval: 300

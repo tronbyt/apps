@@ -6,3 +6,4 @@ desc: Display next departure times for SF Bay Ferry routes.
 author: nyergler
 fileName: sfbf.star
 packageName: sfbayferry
+recommended_interval: 300

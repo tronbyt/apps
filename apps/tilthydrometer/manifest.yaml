@@ -6,3 +6,4 @@ desc: The Tilt hydrometer tracks brewing stats (specific gravity, temperature, a
 author: DSUmjham
 fileName: tilt_hydrometer.star
 packageName: tilthydrometer
+recommended_interval: 300

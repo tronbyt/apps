@@ -6,3 +6,4 @@ desc: Shows if you need a jacket. Uses OpenWeather API.
 author: noahpodgurski
 fileName: jacket.star
 packageName: jacket
+recommended_interval: 300

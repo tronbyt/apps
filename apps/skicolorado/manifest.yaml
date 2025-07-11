@@ -6,3 +6,4 @@ desc: Checks all the colorado ski resorts for their current conditions.
 author: mharlach
 fileName: skicolorado.star
 packageName: skicolorado
+recommended_interval: 300

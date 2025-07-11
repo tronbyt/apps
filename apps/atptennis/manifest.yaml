@@ -6,3 +6,4 @@ desc: Display tennis scores from a tournament chosen in the dropdown. Shows live
 author: M0ntyP
 fileName: atp_tennis.star
 packageName: atptennis
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Monitor your local air quality with the OpenWeather Air Pollution API.
 author: Daniel Sitnik
 fileName: air_quality.star
 packageName: airquality
+recommended_interval: 300

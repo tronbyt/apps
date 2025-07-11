@@ -6,3 +6,4 @@ desc: Show up to six images.
 author: rs7q5
 fileName: multiple_images.star
 packageName: multipleimages
+recommended_interval: 300

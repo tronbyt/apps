@@ -6,3 +6,4 @@ desc: MBTA bus and rail departure times.
 author: Marcus Better
 fileName: mbta.star
 packageName: mbta
+recommended_interval: 300

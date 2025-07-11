@@ -6,3 +6,4 @@ desc: Displays interesting facts and pictures of various national parks in the U
 author: hklim1
 fileName: national_parks.star
 packageName: nationalparks
+recommended_interval: 300

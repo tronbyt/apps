@@ -6,3 +6,4 @@ desc: Shows status of Roomba and Braava (i7/i7+, 980, 960, 900, e5, 690, 675, m6
 author: noahpodgurski
 fileName: roomba.star
 packageName: roomba
+recommended_interval: 300

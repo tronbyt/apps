@@ -6,3 +6,4 @@ desc: Shows random pictures of dogs from dog.ceo.
 author: mattmcquinn
 fileName: random_dogs.star
 packageName: randomdogs
+recommended_interval: 300

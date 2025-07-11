@@ -6,3 +6,4 @@ desc: Tracks the position of the International Space Station using LAT/LONG coor
 author: Chris Jones (@IPv6Freely)
 fileName: iss_tracker.star
 packageName: isstracker
+recommended_interval: 300

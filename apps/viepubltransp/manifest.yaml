@@ -6,3 +6,4 @@ desc: Show real time departures for desired Public Transport stops in Vienna.
 author: Lukas Peer
 fileName: viepubltransp.star
 packageName: viepubltransp
+recommended_interval: 300

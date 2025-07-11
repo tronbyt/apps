@@ -6,3 +6,4 @@ desc: Tracks average mortgage rates in the US based on FRED economic data.
 author: sullivan1337
 fileName: us_mortgage_rates.star
 packageName: usmortgagerates
+recommended_interval: 300

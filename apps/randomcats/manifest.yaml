@@ -6,3 +6,4 @@ desc: Shows random pictures/gifs of cats. Powered by Cat as a Service (cataas.co
 author: mrrobot245
 fileName: random_cats.star
 packageName: randomcats
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: This app simulates flying through a starfield.
 author: gabe565
 fileName: starfield.star
 packageName: starfield
+recommended_interval: 300

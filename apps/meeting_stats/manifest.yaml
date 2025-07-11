@@ -6,3 +6,4 @@ desc: Analyzes your Outlook calendar and provides a summary of your weekly meeti
 author: Matt-Pesce
 fileName: meeting_stats.star
 packageName: meetingstats
+recommended_interval: 300

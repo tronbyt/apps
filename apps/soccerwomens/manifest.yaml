@@ -6,3 +6,4 @@ desc: Shows upcoming games, current score, date and time of game for selected le
 author: jvivona
 fileName: soccerwomens.star
 packageName: soccerwomens
+recommended_interval: 300

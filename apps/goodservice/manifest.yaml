@@ -6,3 +6,4 @@ desc: Real-Time New York City Subway projected departure times for a selected st
 author: Sunny Ng
 fileName: goodservice.star
 packageName: goodservice
+recommended_interval: 300

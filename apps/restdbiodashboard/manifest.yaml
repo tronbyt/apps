@@ -6,3 +6,4 @@ desc: Generic dashboard based on a restdb.io database. Head to https://restdb.io
 author: romerod
 fileName: restdbiodashboard.star
 packageName: restdbiodashboard
+recommended_interval: 300

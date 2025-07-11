@@ -4,3 +4,4 @@ name: BKK Schedule
 summary: Budapest public transit
 desc: Public transit display for Budapest, show upcoming BKK departures for a stop.
 author: tomzorz
+recommended_interval: 300

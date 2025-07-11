@@ -6,3 +6,4 @@ desc: Displays current NCAA Softball Scores. Use the Top 25 toggle to show games
 author: Jake Manske
 fileName: ncaa_softball.star
 packageName: ncaasoftball
+recommended_interval: 300

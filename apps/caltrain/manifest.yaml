@@ -6,3 +6,4 @@ desc: Check the departures for your nearest Caltrain stop, the one near your wor
 author: quacksire
 fileName: caltrain.star
 packageName: caltrain
+recommended_interval: 300

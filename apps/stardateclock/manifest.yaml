@@ -4,3 +4,4 @@ name: Stardate Clock
 summary: TNG stardate clock
 desc: An LCARS-like clock displaying the current stardate in a TNG-style format.
 author: Christian Dannie Storgaard (Cybolic)
+recommended_interval: 1

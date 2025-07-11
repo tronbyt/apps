@@ -6,3 +6,4 @@ desc: Energy production and consumption monitor for your SolarEdge solar panels.
 author: Ingmar Stein
 fileName: solaredge.star
 packageName: solaredge
+recommended_interval: 300

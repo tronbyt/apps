@@ -6,3 +6,4 @@ desc: Allows you to track the value of a stock that you currently own historical
 author: kanroot
 fileName: marketstack.star
 packageName: marketstack
+recommended_interval: 60

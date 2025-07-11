@@ -6,3 +6,4 @@ desc: Show your Trakt now watching, most recently watched, and stats, on your Ti
 author: cbattlegear
 fileName: trakt.star
 packageName: trakt
+recommended_interval: 300

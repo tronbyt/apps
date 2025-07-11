@@ -6,3 +6,4 @@ desc: Shows the top post (or random of last 5 posts) on Stacker.news in category
 author: PMK (@pmk)
 fileName: stackernews.star
 packageName: stackernews
+recommended_interval: 300

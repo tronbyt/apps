@@ -6,3 +6,4 @@ desc: Displays the standings (in terms of games behind) for the MLB wild card in
 author: Jake Manske
 fileName: mlb_wildcard_race.star
 packageName: mlbwildcardrace
+recommended_interval: 300

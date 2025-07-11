@@ -6,3 +6,4 @@ desc: Monitor your Vercel deployments and view important information.
 author: Chase Roossin
 fileName: vercel_dashboard.star
 packageName: verceldashboard
+recommended_interval: 300

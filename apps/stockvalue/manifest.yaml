@@ -6,3 +6,4 @@ desc: This app will allow you track the value of your portfolio for a single sto
 author: gshipley
 fileName: stock_value.star
 packageName: stockvalue
+recommended_interval: 60

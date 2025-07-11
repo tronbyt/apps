@@ -6,3 +6,4 @@ desc: Shows todays daily reflection title, summary and reference from aa.org/dai
 author: jvivona
 fileName: aadailyreflect.star
 packageName: aadailyreflect
+recommended_interval: 300

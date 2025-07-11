@@ -4,3 +4,4 @@ name: Timer
 summary: Timer
 desc: Counts down the inputted time.
 author: rwong2888
+recommended_interval: 60

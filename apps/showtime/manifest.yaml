@@ -4,3 +4,4 @@ name: ShowTime
 summary: Displays shows in your area
 desc: Displays shows coming to your area.
 author: Robert Ison
+recommended_interval: 43200

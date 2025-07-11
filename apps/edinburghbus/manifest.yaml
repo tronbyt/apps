@@ -6,3 +6,4 @@ desc: Give it an Edinburgh stop ID and it will show the next 3 arrivals for the 
 author: dan0
 fileName: edinburgh_bus.star
 packageName: edinburghbus
+recommended_interval: 300

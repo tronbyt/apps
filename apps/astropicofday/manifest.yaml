@@ -6,3 +6,4 @@ desc: Displays the astronomy picture of the day from NASA.
 author: Brian Bell
 fileName: astro_pic_of_day.star
 packageName: astropicofday
+recommended_interval: 300

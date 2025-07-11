@@ -6,3 +6,4 @@ desc: Displays a Hanukkah Menorah during the holiday with the correct number of 
 author: Bryan Slavin
 fileName: hanukkah.star
 packageName: hanukkah
+recommended_interval: 300

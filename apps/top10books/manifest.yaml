@@ -6,3 +6,4 @@ desc: Displays the current top 10 books on Barnes & Nobles top 100 book list.
 author: shhhmuck
 fileName: top_10_books.star
 packageName: top10books
+recommended_interval: 300

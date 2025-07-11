@@ -6,3 +6,4 @@ desc: This is a simple stock ticker app, that will display a stock ticker for 3 
 author: Matt Holloway
 fileName: stock_ticker.star
 packageName: stockticker
+recommended_interval: 60

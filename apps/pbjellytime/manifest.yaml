@@ -6,3 +6,4 @@ desc: The Peanut Butter Jelly Time Dancing Banana.
 author: jay-medina
 fileName: pb_jelly_time.star
 packageName: pbjellytime
+recommended_interval: 300

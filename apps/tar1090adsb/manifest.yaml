@@ -6,3 +6,4 @@ desc: ADS-B Information from your publically available tar1090 instance.
 author: Cameron Battagler
 fileName: tar1090_ads_b.star
 packageName: tar1090adsb
+recommended_interval: 300

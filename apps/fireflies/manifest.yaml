@@ -6,3 +6,4 @@ desc: Animated fireflies that move and glow, with an optional clock display. No 
 author: J. Keybl
 fileName: fireflies.star
 packageName: fireflies
+recommended_interval: 300

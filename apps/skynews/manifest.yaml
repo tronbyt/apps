@@ -6,3 +6,4 @@ desc: The current top story (and a short blurb) from SkyNews.com.
 author: meejle
 fileName: skynews.star
 packageName: skynews
+recommended_interval: 600

@@ -6,3 +6,4 @@ desc: Show any progress bar using properties.
 author: wojciechka
 fileName: any_progressbar.star
 packageName: anyprogressbar
+recommended_interval: 300

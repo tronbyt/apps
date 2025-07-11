@@ -6,3 +6,4 @@ desc: Displays next train times for Patterson SkyTrain station in Vancouver. Mor
 author: Aiden Mitchell
 fileName: patterson_times.star
 packageName: pattersontimes
+recommended_interval: 300

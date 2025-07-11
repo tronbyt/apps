@@ -6,3 +6,4 @@ desc: View MLB standings by division.
 author: LunchBox8484
 fileName: mlb_standings.star
 packageName: mlbstandings
+recommended_interval: 300

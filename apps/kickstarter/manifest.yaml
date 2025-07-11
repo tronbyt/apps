@@ -6,3 +6,4 @@ desc: Display the total amount raised and the number of backers for a Kickstarte
 author: sethvargo
 fileName: kickstarter.star
 packageName: kickstarter
+recommended_interval: 300

@@ -6,3 +6,4 @@ desc: Info for the music service Goose.fm. Supports station overview and individ
 author: jqr
 fileName: goose_fm.star
 packageName: goosefm
+recommended_interval: 300
