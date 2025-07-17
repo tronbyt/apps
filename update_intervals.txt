@@ -109,8 +109,8 @@ feelslike: 300
 knmialert: 300
 meteireann: 300
 metar: 300
-noaabuoy: 300
-noaatides: 300
+noaabuoy: 30
+noaatides: 30
 northernlights: 300
 nws_live_forecast: 300
 phaseofmoon: 300

@@ -6,4 +6,4 @@ desc: Display daily tides from NOAA stations.
 author: tavdog
 fileName: noaa_tides.star
 packageName: noaatides
-recommended_interval: 300
+recommended_interval: 30
