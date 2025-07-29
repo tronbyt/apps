@@ -92,8 +92,6 @@ def main(config):
     # Process forecast data into daily highs and lows
     daily_data = process_forecast(weather_data["list"])
 
-    if 
-
     # Create the display
     if showthreeday:
         return render_weather(daily_data, lang)
