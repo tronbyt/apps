@@ -96,9 +96,9 @@ def main(config):
     if showthreeday:
         return render_weather(daily_data, lang)
     else:
-        return render_single_day(daily_data, lang, 2)
+        return render_single_day(daily_data, lang)
 
-def render_single_day(daily_data, lang, slide_start_seconds=2):
+def render_single_day(daily_data, lang):
 
    if len(daily_data) < 2:  # If we don't have at least 2 days
      return error_display("Weather API Error")
@@ -109,6 +109,7 @@ def render_single_day(daily_data, lang, slide_start_seconds=2):
    tomorrow_abbr = _get_day_abbr(tomorrow["date"], lang)
    
    # TIMING CALCULATIONS
+   slide_start_seconds = 2
    slide_percentage = get_slide_percentage(day["weather"])
    delay_ms = 100
    static_frames_before = int(slide_start_seconds * 1000 / delay_ms)
