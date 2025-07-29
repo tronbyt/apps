@@ -92,19 +92,23 @@ def main(config):
     # Process forecast data into daily highs and lows
     daily_data = process_forecast(weather_data["list"])
 
+    if 
+
     # Create the display
     if showthreeday:
         return render_weather(daily_data, lang)
     else:
-        return render_single_day(daily_data[0], daily_data[1], lang, 2)
+        return render_single_day(daily_data, lang, 2)
 
-def render_single_day(day, tomorrow, lang, slide_start_seconds=2):
+def render_single_day(daily_data, lang, slide_start_seconds=2):
+
+   if len(daily_data) < 2:  # If we don't have at least 2 days
+     return error_display("Weather API Error")
+   day = daily_data[0]
+   tomorrow = daily_data[1]
    # Get day abbreviation
-   day_abbr = day["date"].format("Mon")[:3].upper()
-   day_abbr = LANGUAGE_LOCALES[day_abbr][lang]
-   
-   tomorrow_abbr = tomorrow["date"].format("Mon")[:3].upper()
-   tomorrow_abbr = LANGUAGE_LOCALES[tomorrow_abbr][lang]
+   day_abbr = _get_day_abbr(day["date"], lang)
+   tomorrow_abbr = _get_day_abbr(tomorrow["date"], lang)
    
    # TIMING CALCULATIONS
    slide_percentage = get_slide_percentage(day["weather"])
@@ -174,7 +178,10 @@ def get_slide_percentage(forecast):
         "Partly_Sun": 33
     }
     return slide_map.get(forecast, 33) 
-
+    
+def _get_day_abbr(date, lang):
+    abbr = date.format("Mon")[:3].upper()
+    return LANGUAGE_LOCALES[abbr][lang]
 
 def get_weather_image(forecast):    
     return WEATHER_FULL_IMAGE.get(forecast, "")
