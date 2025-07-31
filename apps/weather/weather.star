@@ -102,32 +102,26 @@ def render_single_day(daily_data, lang):
 
    if len(daily_data) < 2:  # If we don't have at least 2 days
      return error_display("Weather API Error")
-
    day = daily_data[0]
    tomorrow = daily_data[1]
    # Get day abbreviation
    day_abbr = _get_day_abbr(day["date"], lang)
    tomorrow_abbr = _get_day_abbr(tomorrow["date"], lang)
-   slide_percentage = get_slide_percentage(day["weather"])
-   should_render_day_at_top = get_should_render_day_at_top(day["weather"])
-   
-   # Calculate forecast width and adjust today_width accordingly
-   forecast_width = get_forecast_width(((day["high"] * 10 + 5) // 10), True)
-   width_adjustment = forecast_width - 16  # How much wider than base 16
    
    # TIMING CALCULATIONS
-   slide_start_seconds=2
+   slide_start_seconds = 2
+   slide_percentage = get_slide_percentage(day["weather"])
    delay_ms = 100
    static_frames_before = int(slide_start_seconds * 1000 / delay_ms)
    slide_distance = int(64 * slide_percentage / 100)
    static_frames_after = 100
-
+   
    # Animation parameters
    today_width_start = 63
    today_width_end = 42
    slide_distance_start = 0
    slide_distance_end = slide_distance
-
+   
    # STUTTER ANIMATION PARAMETERS
    stutter_distance = 3  # How far to move in first step
    stutter_width_change = 3  # How much today_width shrinks in first step
@@ -135,51 +129,37 @@ def render_single_day(daily_data, lang):
    stutter_pause_frames = 6  # How long to pause after stutter (0.5 seconds)
    finish_frames = 7  # How many frames to complete the rest
    
-   # BACKGROUND ANIMATION PARAMETERS (moves faster)
-   bg_stutter_frames = 2  # Background moves faster in stutter
-   bg_finish_frames = 5   # Background finishes faster
-   
    return render.Root(
        delay = delay_ms,
        child = render.Animation(
            children = [
                # PHASE 1: STATIC
-               render_frame(slide_distance_start, today_width_start, day, day_abbr, tomorrow, tomorrow_abbr, should_render_day_at_top )
+               render_frame(slide_distance_start, today_width_start, day, day_abbr, tomorrow, tomorrow_abbr)
            ] * static_frames_before + [
-               # PHASE 2A: STUTTER MOVEMENT
+               # PHASE 2A: STUTTER MOVEMENT (gradual over multiple frames)
                render_frame(
-                   # Background moves faster during stutter
-                   int((min(i+1, bg_stutter_frames)) * stutter_distance / bg_stutter_frames),
-                   # Width changes at normal pace
+                   int((i+1) * stutter_distance / stutter_frames),
                    today_width_start - int((i+1) * stutter_width_change / stutter_frames),
-                   day, day_abbr, tomorrow, tomorrow_abbr, should_render_day_at_top
+                   day, day_abbr, tomorrow, tomorrow_abbr
                )
                for i in range(stutter_frames)
            ] + [
                # PHASE 2B: PAUSE on the stutter position
-               render_frame(stutter_distance, today_width_start - stutter_width_change, day, day_abbr, tomorrow, tomorrow_abbr, should_render_day_at_top)
+               render_frame(stutter_distance, today_width_start - stutter_width_change, day, day_abbr, tomorrow, tomorrow_abbr)
            ] * stutter_pause_frames + [
                # PHASE 2C: COMPLETE the rest of the animation
                render_frame(
-                   # Background finishes faster
-                   stutter_distance + int((min(i+1, bg_finish_frames)) * (slide_distance_end - stutter_distance) / bg_finish_frames),
-                   # Width changes at normal pace
+                   stutter_distance + int((i+1) * (slide_distance_end - stutter_distance) / finish_frames),
                    (today_width_start - stutter_width_change) + int((i+1) * ((today_width_end) - (today_width_start - stutter_width_change)) / finish_frames),
-                   day, day_abbr, tomorrow, tomorrow_abbr, should_render_day_at_top
+                   day, day_abbr, tomorrow, tomorrow_abbr
                )
                for i in range(finish_frames)
            ] + [
                # PHASE 3: STATIC AFTER
-               render_frame(slide_distance_end, today_width_end, day, day_abbr, tomorrow, tomorrow_abbr, should_render_day_at_top)
+               render_frame(slide_distance_end, today_width_end, day, day_abbr, tomorrow, tomorrow_abbr)
            ] * static_frames_after,
        ),
    )
-   
-
-def get_should_render_day_at_top(forecast):
-    if forecast == "Snow":
-        return True
-    return False
 
 def get_slide_percentage(forecast):
     """
@@ -188,16 +168,16 @@ def get_slide_percentage(forecast):
     """
     slide_map = {
         "Clear": 10,
-        "Clouds": 40,
+        "Clouds": 33,
         "Rain": 33,
-        "Snow": 40,
-        "Thunderstorm": 40,
+        "Snow": 33,
+        "Thunderstorm": 33,
         "Drizzle": 33,
-        "Mist": 40,
-        "Partly Sun": 33
+        "Mist": 33,
+        "Partly_Sun": 33
     }
-    return slide_map.get(forecast, 40) 
-
+    return slide_map.get(forecast, 33) 
+    
 def _get_day_abbr(date, lang):
     abbr = date.format("Mon")[:3].upper()
     return LANGUAGE_LOCALES[abbr][lang]
@@ -205,7 +185,7 @@ def _get_day_abbr(date, lang):
 def get_weather_image(forecast):    
     return WEATHER_FULL_IMAGE.get(forecast, "")
 
-def render_frame(slide_distance,today_width, day, day_abbr, tomorrow, tomorrow_abbr, day_top = False):
+def render_frame(slide_distance,today_width, day, day_abbr, tomorrow, tomorrow_abbr):
     return render.Stack(
                         children = [
                             # BACKGROUND IMAGE - In final slid position
@@ -227,7 +207,17 @@ def render_frame(slide_distance,today_width, day, day_abbr, tomorrow, tomorrow_a
                                     cross_align="start",
                                     expanded= True,
                                     children = [
-                                       render_today_forecast_column(day, day_abbr, today_width, day_top),#end row
+                                       render.Column (
+                                           expanded = True,
+                                           main_align="start",
+                                           cross_align="center",
+                                           children = [
+                                               render.Row(children=[render.Box(width=1, height=13)]),
+                                               render.Row(children=[render.Box(width=today_width, height=19,  #63 -> 42
+                                                   child=render_today_forecast(day, day_abbr, today_width-30)), #33 -> 12
+                                              ]),#end column
+                                           ]
+                                       ),#end row
                                        render.Row(children=[render.Padding(pad = (1, 3, 1, 3),child = render.Box(width = 1, height = 26, color = "#FFFFFF1A"))]),
                                        render.Column (
                                            main_align="start",
@@ -237,7 +227,7 @@ def render_frame(slide_distance,today_width, day, day_abbr, tomorrow, tomorrow_a
                                                render.Row( main_align="start", cross_align="start", expanded=True,children=[render.Box(width=16, height=13, child=
                                                    render.Column(main_align="start",cross_align="center", expanded=True, children=[render.Padding(pad = (0, 1, 0, 0),child =render.Text(tomorrow_abbr, font = "5x8", color = "#FFF"))])
                                                )]),
-                                               render_forecast(tomorrow, False),
+                                               render_forecast(tomorrow),
                                            ]
                                        ),
                                     ]
@@ -245,42 +235,8 @@ def render_frame(slide_distance,today_width, day, day_abbr, tomorrow, tomorrow_a
                             )
                         ]        
               )
-def render_today_forecast_column(day, day_abbr, today_width, day_top = False):
-    day_offset = get_day_offset(((day["high"] * 10 + 5) // 10))
-    if day_top == True:
-        return render.Column (
-                  expanded = True,
-                  main_align="start",
-                  cross_align="start",
-                  children = [
-                      render.Row(children=[render.Box(width=20, height=13, child = render.Padding(
-                               pad = (-1, 0, 1 , 2),  # (left, top, right, bottom) padding
-                               child = render.Box(
-                                       width = 20,
-                                       height = 8,
-                                       color = "#00000000",
-                                       child = render.Text(day_abbr, font = "5x8", color = "#FFF"),
-                                   ),
-                            ),)]),
-                      render.Row(children=[render.Box(width=today_width, height=19,  
-                          child=render_today_forecast(day, "", today_width-day_offset, "#00000000")), 
-                     ]),#end column
-                  ]
-              )
-        
-    return render.Column (
-              expanded = True,
-              main_align="start",
-              cross_align="center",
-              children = [
-                  render.Row(children=[render.Box(width=1, height=13)]),
-                  render.Row(children=[render.Box(width=today_width, height=19,  #63 -> 42
-                      child=render_today_forecast(day, day_abbr, today_width-day_offset)), #33 -> 12
-                 ]),#end column
-              ]
-          )
 
-def render_today_forecast(day, day_abbr, padding, color = "#000000CC"):
+def render_today_forecast(day, day_abbr, padding):
         return render.Row(
           expanded = True,
           main_align = "space_evenly",  # Spreads items to opposite ends
@@ -292,23 +248,21 @@ def render_today_forecast(day, day_abbr, padding, color = "#000000CC"):
                  child = render.Box(
                          width = 14,
                          height = 8,
-                         color = color,
+                         color = "#000000CC",
                          child = render.Text(day_abbr, font = "5x8", color = "#FFF"),
                      ),
               ),
-              render_forecast(day, True)
+              render_forecast(day)
           ],
       )
 
-def render_forecast(day, is_today):
-    forecast_width = get_forecast_width(((day["high"] * 10 + 5) // 10), is_today)
-    forecast_padding = get_forecast_padding(((day["high"] * 10 + 5) // 10), is_today)
+def render_forecast(day):
     return render.Row( main_align="center", cross_align="start", expanded=True,
         children=[
-            render.Box(width=forecast_width, height=19, child= #containing box
+            render.Box(width=16, height=19, child= #containing box
                  render.Column(main_align="start",cross_align="start", expanded=True, 
                     children=[
-                        render.Padding(pad = (0, 1, forecast_padding, 2), 
+                        render.Padding(pad = (0, 1, 0, 2), 
                         child = render.Column(cross_align = "end",
                             children = [ #column children
                                 render.Text("%d°" % ((day["high"] * 10 + 5) // 10), font = "tb-8", color = "#FFF"),
@@ -319,26 +273,7 @@ def render_forecast(day, is_today):
                   )#end containing box
             ]#end row children
     )
-    
-def get_forecast_padding(temp, is_today):
-    if temp >= 100 or temp <= -10:
-        return 4
-    if is_today:
-        return 0
-    return 0
-    
-def get_day_offset(temp):
-    if temp >= 100 or temp <= -10:
-        return 38
-    return 30
    
-def get_forecast_width(temp, is_today):
-    if temp >= 100 or temp <= -10:
-        return 24
-    if is_today:
-        return 16
-    return 20
-    
 def process_forecast(forecast_list):
     # Group forecasts by day and find high/low temps
     days = {}
