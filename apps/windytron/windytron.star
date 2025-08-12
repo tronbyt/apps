@@ -7,14 +7,22 @@ load("schema.star", "schema")
 
 # Define your station lookup dictionary at the top of the file
 station_lookup = {
-    "kanaha_simple.json": "Kanaha",
-    "WS8A.json": "Ho'okipa",
-    "meco_ukumehame.json": "Ukumehame",
-    "kihei.json": "Kihei"
+    "kanaha.json": "Kanaha",
+    "hookipa.json": "Ho'okipa",
+    "ukumehame.json": "Ukumehame",
+    "kihei.json": "Kihei",
+    "swell_city.json":"Swell City",
+    "stevenson_light.json": "Stevenson",
+    "viento.json": "Viento",
+    "event_site.json": "Event Site",
+    "the_wall.json": "Theh Wall",
+    "arlington.json": "Arlington",
+    "maryhill.json": "Mary Hill",
+    "loroc.json": "Loroc"
 }
 
 def fetch_data(station):
-    url = "http://wildc.net/wind/{}?time={}".format(station,time.now().unix)
+    url = "http://windytron.com/out/{}?time={}".format(station,time.now().unix)
     print(url)
     rep = http.get(url, ttl_seconds = 10)
     if rep.status_code != 200:
