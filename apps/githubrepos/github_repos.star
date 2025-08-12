@@ -84,7 +84,7 @@ def should_show_jobs(repos, dwell_time):
             print("all successes are old")
     return False
 
-def get_status_icon(status):
+def get_status_icon(status,conclusion):
     """Gets the decoded icon string for a given Workflow Status from github
 
     Args:
@@ -94,10 +94,10 @@ def get_status_icon(status):
     Returns:
     The appropriate icon string
     """
-    if status == "completed" or status == "success":
-        return GITHUB_SUCCESS_ICON
-    elif status == "failed" or status == "timed_out":
+    if status == "failed" or status == "timed_out" or conclusion == "failure":
         return GITHUB_FAILED_ICON
+    elif status == "completed" or status == "success":
+        return GITHUB_SUCCESS_ICON
     elif (
         status == "cancelled" or
         status == "skipped" or
@@ -148,6 +148,7 @@ def fetch_workflow_data(repos, access_token):
                 return ("error", data.get("message"))
         else:
             data = json.decode(TEST_RUN)
+
         if data and data.get("workflow_runs"):
             repo_copy = {
                 "owner": repo["owner"],
@@ -170,6 +171,7 @@ def render_status_badge(status, repos):
     if type(repos) == "list":
         for repo in repos:
             status = repo["data"]["status"]
+            conclusion = repo["data"]["conclusion"]
             print("appending row " + status)
             rows.append(
                 render.Row(
@@ -182,7 +184,7 @@ def render_status_badge(status, repos):
                                 font = "tom-thumb",
                             ),
                         ),
-                        render.Image(src = get_status_icon(status)),
+                        render.Image(src = get_status_icon(status,conclusion)),
                     ],
                 ),
             )
