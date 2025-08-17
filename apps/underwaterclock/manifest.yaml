@@ -1,9 +1,0 @@
----
-id: underwater-clock
-name: Underwater Clock
-summary: Shows time underwater
-desc: Displays the current time in an underwater scene that changes with the time of day.
-author: asea-aranion
-fileName: underwater_clock.star
-packageName: underwaterclock
-recommended_interval: 0

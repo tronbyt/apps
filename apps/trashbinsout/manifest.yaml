@@ -1,7 +1,0 @@
----
-id: trashbinsout
-name: Trash Bins Out
-summary: 'Notification: trash bins'
-desc: Displays a reminder that the trash bins are out.
-author: savdagod
-recommended_interval: 300

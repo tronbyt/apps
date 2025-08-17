@@ -1,9 +1,0 @@
----
-id: weight-gurus
-name: Weight Gurus
-summary: Displays recent weigh-ins
-desc: Displays the most recent weigh-ins from your Weight Gurus scale.
-author: grantmd
-fileName: weight_gurus.star
-packageName: weightgurus
-recommended_interval: 300

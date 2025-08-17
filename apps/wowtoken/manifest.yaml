@@ -1,9 +1,0 @@
----
-id: wow-token
-name: WoW Token
-summary: Display WoW Token Price
-desc: Displays the current price of the World of Warcraft token in various regions. Data provided by wowtoken.app.
-author: '@ledif'
-fileName: wow_token.star
-packageName: wowtoken
-recommended_interval: 300

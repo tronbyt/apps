@@ -1,9 +1,0 @@
----
-id: tv-quotes
-name: TV Quotes
-summary: Display Television Quotes
-desc: Displays Television Quotes.
-author: rs7q5
-fileName: tv_quotes.star
-packageName: tvquotes
-recommended_interval: 300

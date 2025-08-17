@@ -1,9 +1,0 @@
----
-id: xboxplaydates
-name: XboxPlaydates
-summary: Quotes from Xbox Playdates
-desc: Displays quotes from the Xbox Playdates Teams.  Find out more at XboxPlaydates.org!
-author: PalmettoBling
-fileName: xboxplaydates.star
-packageName: xboxplaydates
-recommended_interval: 300

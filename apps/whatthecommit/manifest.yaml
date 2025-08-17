@@ -1,9 +1,0 @@
----
-id: whatthecommit
-name: WhatTheCommit
-summary: Random commit message
-desc: This app displays a random funny commit message from whatthecommit.com.
-author: dev-manuel
-fileName: whatthecommit.star
-packageName: whatthecommit
-recommended_interval: 300

@@ -1,9 +1,0 @@
----
-id: ynab
-name: You Need A Budget
-summary: Display your budget in YNAB
-desc: Display information about your monthly budget in YNAB.
-author: DanielJRutledge
-fileName: ynab.star
-packageName: ynab
-recommended_interval: 300

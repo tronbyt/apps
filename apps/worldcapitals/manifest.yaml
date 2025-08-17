@@ -1,9 +1,0 @@
----
-id: worldcapitals
-name: WorldCapitals
-summary: Displays a world capital
-desc: Displays a world capital each day for a specific country.
-author: Jake Manske
-fileName: worldcapitals.star
-packageName: worldcapitals
-recommended_interval: 300

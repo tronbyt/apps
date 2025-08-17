@@ -1,9 +1,0 @@
----
-id: unsplash
-name: Unsplash
-summary: Shows random photos
-desc: Displays a random image from Unsplash.
-author: zephyern
-fileName: unsplash.star
-packageName: unsplash
-recommended_interval: 300
