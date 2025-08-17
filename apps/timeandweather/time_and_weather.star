@@ -612,7 +612,7 @@ def main(config):
             result_current_conditions["pressure"] = int(raw_current_conditions["pres"] * (1 if display_metric else 0.02952998307))  # 1 inHg (imperial) = 33.863886666667 hPa (metric)
             result_current_conditions["aqi"] = int(raw_current_conditions["aqi"])
 
-        # print(result_current_conditions)  # uncomment to debug
+        print(result_current_conditions)  # uncomment to debug
 
     if icon_ref:
         weather_image = render.Image(width = 24, height = 24, src = base64.decode(WEATHER_ICONS[icon_ref]))
@@ -620,24 +620,37 @@ def main(config):
         weather_image = render.Box(width = 24, height = 24)
 
     # wind direction, reduce to cardinal and ordinal directions only
-    if result_current_conditions.get("wind_dir", "N"):
-        wind_dir = result_current_conditions["wind_dir"]
-        if type(wind_dir) == "int" and wind_dir >= 0 and wind_dir < 45:
+    wind_dir = result_current_conditions.get("wind_dir", "N")
+
+    if type(wind_dir) == "int" or type(wind_dir) == "float":
+        deg = int(wind_dir) % 360  # normalize to 0–359
+        if deg < 22 or deg >= 338:
             wind_dir = "N"
-        elif (type(wind_dir) == "int" and wind_dir >= 45 and wind_dir < 90) or wind_dir == "NNE" or wind_dir == "ENE":
+        elif deg < 68:
             wind_dir = "NE"
-        elif type(wind_dir) == "int" and wind_dir >= 90 and wind_dir < 135:
+        elif deg < 113:
             wind_dir = "E"
-        elif (type(wind_dir) == "int" and wind_dir >= 135 and wind_dir < 180) or wind_dir == "ESE" or wind_dir == "SSE":
+        elif deg < 158:
             wind_dir = "SE"
-        elif type(wind_dir) == "int" and wind_dir >= 180 and wind_dir < 225:
+        elif deg < 203:
             wind_dir = "S"
-        elif (type(wind_dir) == "int" and wind_dir >= 225 and wind_dir < 270) or wind_dir == "SSW" or wind_dir == "WSW":
+        elif deg < 248:
             wind_dir = "SW"
-        elif type(wind_dir) == "int" and wind_dir >= 270 and wind_dir < 315:
+        elif deg < 293:
             wind_dir = "W"
-        elif (type(wind_dir) == "int" and wind_dir >= 315 and wind_dir < 360) or wind_dir == "WNW" or wind_dir == "NNW":
+        else:
             wind_dir = "NW"
+
+    elif type(wind_dir) == "string":
+        if wind_dir == "NNE" or wind_dir == "ENE":
+            wind_dir = "NE"
+        elif wind_dir == "ESE" or wind_dir == "SSE":
+            wind_dir = "SE"
+        elif wind_dir == "SSW" or wind_dir == "WSW":
+            wind_dir = "SW"
+        elif wind_dir == "WNW" or wind_dir == "NNW":
+            wind_dir = "NW"
+        # else keep as-is if already N, NE, E, etc.
 
     if hours == 0:
         hours_str = ("12" if time_format == "12 hour" else "00")
