@@ -650,6 +650,7 @@ def main(config):
             wind_dir = "SW"
         elif wind_dir == "WNW" or wind_dir == "NNW":
             wind_dir = "NW"
+
         # else keep as-is if already N, NE, E, etc.
 
     if hours == 0:
