@@ -1,9 +1,0 @@
----
-id: milb-scores
-name: MiLB Scores
-summary: Minor League scores
-desc: Shows baseball scores for the Minor Leagues.
-author: M0ntyP
-fileName: milb_scores.star
-packageName: milbscores
-recommended_interval: 300

@@ -1,9 +1,0 @@
----
-id: iss-tracker
-name: ISS Tracker
-summary: Tracks the ISS Position
-desc: Tracks the position of the International Space Station using LAT/LONG coordinates.
-author: Chris Jones (@IPv6Freely)
-fileName: iss_tracker.star
-packageName: isstracker
-recommended_interval: 300

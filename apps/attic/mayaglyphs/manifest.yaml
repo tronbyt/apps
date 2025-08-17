@@ -1,9 +1,0 @@
----
-id: maya-glyphs
-name: Maya Glyphs
-summary: Shows a random glpyh
-desc: Displays different syllabic glyphs from the Maya script and how to pronounce them.
-author: dinosaursrarr
-fileName: maya_glyphs.star
-packageName: mayaglyphs
-recommended_interval: 300

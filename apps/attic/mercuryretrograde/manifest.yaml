@@ -1,9 +1,0 @@
----
-id: mercuryretrograde
-name: MercuryRetrograde
-summary: Mercury Retrograde
-desc: Is Mercury in retrograde?
-author: FlyingLooper
-fileName: mercuryretrograde.star
-packageName: mercuryretrograde
-recommended_interval: 300

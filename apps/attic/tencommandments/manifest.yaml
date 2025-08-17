@@ -1,9 +1,0 @@
----
-id: ten-commandments
-name: Ten Commandments
-summary: Displays ten commandments
-desc: Displays the ten commandments.
-author: Robert Ison
-fileName: ten_commandments.star
-packageName: tencommandments
-recommended_interval: 300

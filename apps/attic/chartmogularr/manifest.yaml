@@ -1,8 +1,0 @@
----
-id: chartmogul-arr
-name: ChartMogul ARR
-summary: Displays ChartMogul ARR
-desc: Displays the user's ChartMogul monthly ARR value.
-author: Luke Hutchinson and Dakota Walker
-fileName: chartmogul_arr.star
-packageName: chartmogularr

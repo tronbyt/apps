@@ -1,9 +1,0 @@
----
-id: relay-fm-live
-name: Relay Live
-summary: Relay Live
-desc: Shows live stream information for the Relay podcast network.
-author: radiocolin
-fileName: relay_fm_live.star
-packageName: relayfmlive
-recommended_interval: 300

@@ -1,9 +1,0 @@
----
-id: leetcodestats
-name: LeetCodeStats
-summary: Gets LeetCode stats
-desc: Displays your LeetCode stats in a nice way.
-author: Jake Manske
-fileName: leetcodestats.star
-packageName: leetcodestats
-recommended_interval: 300

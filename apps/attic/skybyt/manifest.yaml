@@ -1,9 +1,0 @@
----
-id: skybyt
-name: Skybyt
-summary: Bluesky follower count
-desc: Displays a Bluesky user's follower count.
-author: Alex Karp
-fileName: skybyt.star
-packageName: skybyt
-recommended_interval: 300

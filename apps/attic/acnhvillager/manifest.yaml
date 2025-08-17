@@ -1,9 +1,0 @@
----
-id: acnhvillager
-name: AC:NH Villager
-summary: Random AC:NH villager
-desc: See your favorite villagers from Animal Crossing New Horizons.
-author: colinscruggs
-fileName: acnhvillager.star
-packageName: acnhvillager
-recommended_interval: 300

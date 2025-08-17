@@ -1,9 +1,0 @@
----
-id: instagram
-name: Instagram
-summary: Instagram Follows
-desc: Your Instagram followers count.
-author: Daniel Sitnik
-fileName: instagram.star
-packageName: instagram
-recommended_interval: 300

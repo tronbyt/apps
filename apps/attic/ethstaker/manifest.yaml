@@ -1,9 +1,0 @@
----
-id: ethstaker
-name: Ethstaker
-summary: Ethereum validator status
-desc: Shows the recent status of provided validators on the Ethereum beacon chain.
-author: ColinCampbell
-fileName: ethstaker.star
-packageName: ethstaker
-recommended_interval: 300

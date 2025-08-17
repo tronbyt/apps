@@ -1,9 +1,0 @@
----
-id: farcaster-follows
-name: Farcaster Follows
-summary: Display your follower count
-desc: Display your follower count from Farcaster.
-author: 0xmetaclass
-fileName: farcaster_follows.star
-packageName: farcasterfollows
-recommended_interval: 300

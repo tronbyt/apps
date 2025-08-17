@@ -1,9 +1,0 @@
----
-id: kopps-custard
-name: Kopp's Custard
-summary: Today's Kopp's flavors
-desc: Get today's flavors at Kopp's Frozen Custard.
-author: Josiah Winslow
-fileName: kopps_custard.star
-packageName: koppscustard
-recommended_interval: 300

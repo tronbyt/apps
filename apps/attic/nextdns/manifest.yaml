@@ -1,9 +1,0 @@
----
-id: nextdns
-name: NextDNS
-summary: NextDNS Account Stats
-desc: Displays NextDNS account total query & total blocked query counts + 7-day activity graph.
-author: ndhotsky
-fileName: nextdns.star
-packageName: nextdns
-recommended_interval: 300

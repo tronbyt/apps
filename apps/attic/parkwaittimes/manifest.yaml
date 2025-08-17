@@ -1,9 +1,0 @@
----
-id: park-wait-times
-name: ParkWaitTimes
-summary: Theme Park Wait Times
-desc: Displays theme park ride wait times at various theme parks.
-author: hx009
-fileName: parkwaittimes.star
-packageName: parkwaittimes
-recommended_interval: 300

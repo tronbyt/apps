@@ -1,9 +1,0 @@
----
-id: currencyconverter
-name: CurrencyConverter
-summary: Displays Currency Exchange
-desc: Displays current currency exchange rates.
-author: Robert Ison
-fileName: currencyconverter.star
-packageName: currencyconverter
-recommended_interval: 300

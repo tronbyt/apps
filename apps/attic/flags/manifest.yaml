@@ -1,9 +1,0 @@
----
-id: flags
-name: Flags
-summary: Displays a country flag
-desc: Displays a random or specific country flag.
-author: btjones
-fileName: flags.star
-packageName: flags
-recommended_interval: 300

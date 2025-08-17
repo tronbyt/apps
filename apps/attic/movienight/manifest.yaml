@@ -1,9 +1,0 @@
----
-id: movie-night
-name: Movie Night
-summary: Marquee for a Movie Night
-desc: Displays a marquee for a movie title along with a countdown to the movie night.
-author: Piper Gillman
-fileName: movie_night.star
-packageName: movienight
-recommended_interval: 300

@@ -1,8 +1,0 @@
----
-id: cpl
-name: CPL
-summary: Caribbean Premier League
-desc: Shows scores for the Caribbean Premier League cricket tournament..
-author: M0ntyP
-fileName: cpl.star
-packageName: cpl

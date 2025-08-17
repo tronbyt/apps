@@ -1,7 +1,0 @@
----
-id: coffeeorders
-name: Coffee
-summary: Displays Coffee Orders
-desc: Displays Coffee Orders with explanations.
-author: Robert Ison
-recommended_interval: 300

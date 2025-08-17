@@ -1,7 +1,0 @@
----
-id: on-air
-name: On Air
-summary: Displays On Air Sign
-desc: ' Displays ''On Air'' Sign that you turn on or off.'
-author: Robert Ison
-recommended_interval: 300

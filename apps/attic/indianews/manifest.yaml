@@ -1,9 +1,0 @@
----
-id: india-news
-name: India News
-summary: Top India news
-desc: Top 4 news headlines from India.
-author: vipulchhajer
-fileName: india_news.star
-packageName: indianews
-recommended_interval: 600

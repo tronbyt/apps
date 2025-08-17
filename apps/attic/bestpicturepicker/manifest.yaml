@@ -1,9 +1,0 @@
----
-id: bestpicturepicker
-name: BestPicturePicker
-summary: Show Best Picture Nominees
-desc: Randomly Display Best Picture Nominee.
-author: joshuakopman
-fileName: bestpicturepicker.star
-packageName: bestpicturepicker
-recommended_interval: 300

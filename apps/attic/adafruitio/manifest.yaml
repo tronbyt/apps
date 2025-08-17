@@ -1,8 +1,0 @@
----
-id: adafruitio
-name: AdafruitIO
-summary: Display AdafruitIO Feed
-desc: Show value or graph of various Adafruit IO Feeds.
-author: tavdog
-fileName: adafruitio.star
-packageName: adafruitio

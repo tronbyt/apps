@@ -1,9 +1,0 @@
----
-id: should-i-deploy
-name: Should I Deploy
-summary: Display shouldideploy.today
-desc: Display shouldideploy.today answer.
-author: humbertogontijo
-fileName: should_i_deploy.star
-packageName: shouldideploy
-recommended_interval: 300

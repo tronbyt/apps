@@ -1,9 +1,0 @@
----
-id: github-unread
-name: GitHub Unread
-summary: GitHub notification count
-desc: Displays the number of unread GitHub notifications.
-author: ElliottAYoung
-fileName: github_unread.star
-packageName: githubunread
-recommended_interval: 300

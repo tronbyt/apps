@@ -1,9 +1,0 @@
----
-id: loterias
-name: Loterias
-summary: Loterias do Brasil
-desc: Veja os prêmios das principais modalidades da loteria.
-author: Daniel Sitnik
-fileName: loterias.star
-packageName: loterias
-recommended_interval: 300

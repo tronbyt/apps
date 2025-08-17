@@ -1,9 +1,0 @@
----
-id: tagesschau-news
-name: Tagesschau News
-summary: News of Tagesschau
-desc: Fetches and displays only the headline of the german Tagesschau.
-author: dev-manuel
-fileName: tagesschau_news.star
-packageName: tagesschau_news
-recommended_interval: 600

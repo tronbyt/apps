@@ -1,9 +1,0 @@
----
-id: islamic-prayer
-name: Islamic Prayer
-summary: Islamic prayer times
-desc: Islamic prayer times for the day.
-author: Austin Fonacier
-fileName: islamic_prayer.star
-packageName: islamicprayer
-recommended_interval: 300

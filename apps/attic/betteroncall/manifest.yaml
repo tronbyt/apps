@@ -1,9 +1,0 @@
----
-id: better-on-call
-name: Better On Call
-summary: See who's on call
-desc: Show's who is currently on call in Better Uptime.
-author: tidbyt
-fileName: better_on_call.star
-packageName: betteroncall
-recommended_interval: 300

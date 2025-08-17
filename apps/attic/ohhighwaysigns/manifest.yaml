@@ -1,9 +1,0 @@
----
-id: oh-highway-signs
-name: OH Highway Signs
-summary: Displays OH highway signs
-desc: Displays messages from overhead signs on Ohio highways.
-author: noahcolvin
-fileName: oh_highway_signs.star
-packageName: ohhighwaysigns
-recommended_interval: 300

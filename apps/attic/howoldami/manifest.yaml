@@ -1,9 +1,0 @@
----
-id: how-old-am-i
-name: How Old Am I
-summary: Calculates age
-desc: Calculates age based on given date and time.
-author: mabroadfo1027
-fileName: howoldami.star
-packageName: howoldami
-recommended_interval: 300

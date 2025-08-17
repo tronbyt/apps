@@ -1,9 +1,0 @@
----
-id: nhl-next-game
-name: NHL Next Game
-summary: Gets Next Game Info
-desc: Gets info on preferred NHL teams next game.
-author: AKKanMan
-fileName: nhl_next_game.star
-packageName: nhlnextgame
-recommended_interval: 300

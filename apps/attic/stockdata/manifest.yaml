@@ -1,9 +1,0 @@
----
-id: stockdata
-name: StockData
-summary: Track stock price
-desc: Allows you to track stock prices (intraday, week, or month) using data from stockdata.org.
-author: ingmarstein
-fileName: stockdata.star
-packageName: stockdata
-recommended_interval: 60

@@ -1,7 +1,0 @@
----
-id: rachio
-name: Rachio
-summary: Rachio sprinkler system
-desc: View schedules and data for a Rachio sprinkler system.
-author: Matt Fischer
-recommended_interval: 300

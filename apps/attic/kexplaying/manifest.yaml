@@ -1,9 +1,0 @@
----
-id: kexplaying
-name: KEXPlaying
-summary: KEXP Now Playing
-desc: Displays song, artist, and info currently streaming on kexp.org.
-author: Ken Winke
-fileName: kexplaying.star
-packageName: kexplaying
-recommended_interval: 300

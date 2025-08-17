@@ -1,9 +1,0 @@
----
-id: san-diego-trolley
-name: San Diego Trolley
-summary: Trolley arrival times
-desc: Shows scheduled and, when possible, live arrival times for San Diego MTS Trolleys.
-author: Alex Serriere
-fileName: san_diego_trolley.star
-packageName: sandiegotrolley
-recommended_interval: 300

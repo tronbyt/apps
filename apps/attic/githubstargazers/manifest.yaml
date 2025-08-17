@@ -1,9 +1,0 @@
----
-id: github-stargazers
-name: GitHub Stargazers
-summary: Display GitHub repo stars
-desc: Display the GitHub stargazer count for a repo.
-author: fulghum
-fileName: github_stargazers.star
-packageName: githubstargazers
-recommended_interval: 300

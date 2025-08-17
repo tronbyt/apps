@@ -1,9 +1,0 @@
----
-id: summer-countdown
-name: Summer Countdown
-summary: Shows a countdown to summer
-desc: Shows a countdown to the start or end of astronomical summer in your hemisphere.
-author: Andrew Knotts
-fileName: summer_countdown.star
-packageName: summercountdown
-recommended_interval: 3600

@@ -1,9 +1,0 @@
----
-id: binary-clock
-name: Binary Clock
-summary: Shows a binary clock
-desc: This app show the current date and time in a binary format.
-author: LukiLeu
-fileName: binary_clock.star
-packageName: binaryclock
-recommended_interval: 0

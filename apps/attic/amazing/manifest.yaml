@@ -1,9 +1,0 @@
----
-id: amazing
-name: Amazing
-summary: Draws lovely mazes
-desc: Draws mazes on the screen and animates progress as it goes.
-author: dinosaursrarr
-fileName: amazing.star
-packageName: amazing
-recommended_interval: 300

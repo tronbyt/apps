@@ -1,9 +1,0 @@
----
-id: pubg-stats
-name: PUBG Stats
-summary: Shows PUBG Player Stats
-desc: Displays individual player's gaming stats from PlayerUnknown's Battlegrounds.
-author: joes-io
-fileName: pubg_stats.star
-packageName: pubgstats
-recommended_interval: 300

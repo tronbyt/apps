@@ -1,9 +1,0 @@
----
-id: office-status
-name: Office Status
-summary: Show coworkers your status
-desc: Show coworkers whether you're free, busy, remote, or away.
-author: Brian Bell
-fileName: office_status.star
-packageName: officestatus
-recommended_interval: 300

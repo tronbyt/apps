@@ -1,9 +1,0 @@
----
-id: billboardtop10
-name: BillboardTop10
-summary: Display top 10 songs
-desc: Displays top 10 songs from Billboard.
-author: Robert Ison
-fileName: billboardtop10.star
-packageName: billboardtop10
-recommended_interval: 300

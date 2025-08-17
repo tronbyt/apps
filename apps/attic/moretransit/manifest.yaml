@@ -1,9 +1,0 @@
----
-id: moretransit
-name: MoreTransit
-summary: See next transit arrivals
-desc: See next transit arrivals from TransSee. Optimized for NYC Subway and more customizable than the default apps.
-author: gdcolella
-fileName: moretransit.star
-packageName: moretransit
-recommended_interval: 300
