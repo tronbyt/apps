@@ -6,4 +6,4 @@ desc: Display your Xbox Live Gamerscore on your Tidbyt.
 author: Nick Penree
 fileName: xbox_gamerscore.star
 packageName: xboxgamerscore
-recommended_interval: 300
+recommended_interval: 5

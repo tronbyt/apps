@@ -6,4 +6,4 @@ desc: Displays the current Office of Personnel Management status, which is used 
 author: AdamMoses-GitHub
 fileName: opm_status.star
 packageName: opmstatus
-recommended_interval: 300
+recommended_interval: 5

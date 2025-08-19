@@ -6,4 +6,4 @@ desc: Displays whether your chosen MLB team has recently won or lost, previews t
 author: Jake Manske
 fileName: flythel.star
 packageName: flythel
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: Displays league tables for various football leagues.
 author: plumbob86
 fileName: footballtable.star
 packageName: footballtable
-recommended_interval: 300
+recommended_interval: 5

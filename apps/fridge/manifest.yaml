@@ -4,4 +4,4 @@ name: Fridge
 summary: 'Notification: fridge'
 desc: Displays a notification that a fridge door was left open.
 author: savdagod
-recommended_interval: 300
+recommended_interval: 5

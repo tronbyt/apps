@@ -6,4 +6,4 @@ desc: Checks for the lastest episodes (subs and dubs) for an anime on Crunchyrol
 author: Schoperation
 fileName: cranimechecker.star
 packageName: cranimechecker
-recommended_interval: 300
+recommended_interval: 5

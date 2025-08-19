@@ -6,4 +6,4 @@ desc: Displays a random Pokedex entry from any generation. This includes its nam
 author: Forrest Syrett
 fileName: pokedexplus.star
 packageName: pokedexplus
-recommended_interval: 300
+recommended_interval: 5

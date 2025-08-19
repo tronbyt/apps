@@ -6,4 +6,4 @@ desc: Adorn your Tidbyt with an array of animated retro synths. Most of the clas
 author: Owain Rich
 fileName: tiddlysynth.star
 packageName: tiddlysynth
-recommended_interval: 300
+recommended_interval: 5

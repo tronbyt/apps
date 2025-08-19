@@ -6,4 +6,4 @@ desc: View official and blue dollar exchange rates for USD to Argentine Peso (AR
 author: Connick Shields
 fileName: dolar_blue.star
 packageName: dolarblue
-recommended_interval: 60
+recommended_interval: 1

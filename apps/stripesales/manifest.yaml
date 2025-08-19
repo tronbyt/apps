@@ -6,4 +6,4 @@ desc: Shows the order count and total sum of sales you've made today on Stripe.
 author: Jon Bilous
 fileName: stripe_sales.star
 packageName: stripesales
-recommended_interval: 300
+recommended_interval: 5

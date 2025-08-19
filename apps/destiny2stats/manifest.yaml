@@ -6,4 +6,4 @@ desc: Gets the emblem, race, class, and light level of your most recently played
 author: brandontod97
 fileName: destiny_2_stats.star
 packageName: destiny2stats
-recommended_interval: 300
+recommended_interval: 5

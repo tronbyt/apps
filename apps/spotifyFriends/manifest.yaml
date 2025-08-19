@@ -6,4 +6,4 @@ desc: Displays last listening activity for random Spotify friend. Requires provi
 author: klaffitte
 fileName: spotify_friends.star
 packageName: spotifyfriends
-recommended_interval: 300
+recommended_interval: 5

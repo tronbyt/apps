@@ -6,4 +6,4 @@ desc: Shows a cuneiform sign and its Sumerian transliterations.
 author: dinosaursrarr
 fileName: cuneiform.star
 packageName: cuneiform
-recommended_interval: 300
+recommended_interval: 5

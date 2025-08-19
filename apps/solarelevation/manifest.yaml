@@ -6,4 +6,4 @@ desc: A clock for when you cannot look out of the window or at an actual clock. 
 author: dinosaursrarr
 fileName: solar_elevation.star
 packageName: solarelevation
-recommended_interval: 300
+recommended_interval: 5

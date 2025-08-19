@@ -6,4 +6,4 @@ desc: Displays information about an upcoming SpaceX rocket launch.
 author: rytrose
 fileName: spacex_launch.star
 packageName: spacexlaunch
-recommended_interval: 300
+recommended_interval: 5

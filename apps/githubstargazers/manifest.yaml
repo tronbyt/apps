@@ -6,4 +6,4 @@ desc: Display the GitHub stargazer count for a repo.
 author: fulghum
 fileName: github_stargazers.star
 packageName: githubstargazers
-recommended_interval: 300
+recommended_interval: 5

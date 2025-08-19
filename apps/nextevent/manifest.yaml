@@ -6,4 +6,4 @@ desc: Displays the next calendar event, no matter how far away, from iCal (.ics)
 author: mattcaruso <Matt Caruso>
 fileName: next_event.star
 packageName: nextevent
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: Developer Excuse app generates playful and imaginative excuses to bring a 
 author: masonwongcs
 fileName: developer_excuse.star
 packageName: developerexcuse
-recommended_interval: 300
+recommended_interval: 5

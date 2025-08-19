@@ -6,4 +6,4 @@ desc: Shows the availability of bikes and e-bikes at a Divvy Bike station.
 author: Andy Day (@adayNU)
 fileName: divvy.star
 packageName: divvy
-recommended_interval: 300
+recommended_interval: 5

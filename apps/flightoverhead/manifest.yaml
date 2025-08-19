@@ -6,4 +6,4 @@ desc: Uses AirLabs or OpenSky to find the flight overhead a location.
 author: Kyle Bolstad
 fileName: flight_overhead.star
 packageName: flightoverhead
-recommended_interval: 300
+recommended_interval: 5

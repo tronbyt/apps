@@ -6,4 +6,4 @@ desc: Display a message with one of 75 predefined icons or your photo.
 author: J. Keybl
 fileName: iconote.star
 packageName: iconote
-recommended_interval: 300
+recommended_interval: 5

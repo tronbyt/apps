@@ -6,4 +6,4 @@ desc: METAR text weather reports for pilots.
 author: tabrindle
 fileName: raw_metar.star
 packageName: rawmetar
-recommended_interval: 300
+recommended_interval: 5

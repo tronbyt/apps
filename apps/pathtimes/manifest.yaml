@@ -6,4 +6,4 @@ desc: Show real time NJ Path Train arrival times.
 author: DavidGoldman
 fileName: path_times.star
 packageName: pathtimes
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: Randomly shows one of the 8-bit style Megaman bosses with a slick title ca
 author: Greg Burkett
 fileName: bluebomber.star
 packageName: bluebomber
-recommended_interval: 300
+recommended_interval: 5

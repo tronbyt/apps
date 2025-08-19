@@ -6,4 +6,4 @@ desc: " Displays up-to-date statistics (currently POKT/USD price and latest bloc
 author: al-bargsys
 fileName: poktstats.star
 packageName: poktstats
-recommended_interval: 300
+recommended_interval: 5

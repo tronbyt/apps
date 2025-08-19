@@ -6,4 +6,4 @@ desc: Shows the top story from bigblagger.co.uk.
 author: meejle
 fileName: big_brother_news.star
 packageName: bigbrothernews
-recommended_interval: 600
+recommended_interval: 10

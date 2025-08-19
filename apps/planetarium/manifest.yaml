@@ -6,4 +6,4 @@ desc: A simulated orrery showing the relative position of the planets around the
 author: dinosaursrarr
 fileName: planetarium.star
 packageName: planetarium
-recommended_interval: 300
+recommended_interval: 5

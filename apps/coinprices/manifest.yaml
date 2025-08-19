@@ -6,4 +6,4 @@ desc: Show Current exchange rate for multiple coins.
 author: alan-oliv
 fileName: coin_prices.star
 packageName: coinprices
-recommended_interval: 60
+recommended_interval: 1

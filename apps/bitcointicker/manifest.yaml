@@ -6,4 +6,4 @@ desc: Shows the price of Bitcoin. Choose to convert into USD, EUR, GBP, CNY, JPY
 author: PMK (@pmk)
 fileName: bitcointicker.star
 packageName: bitcointicker
-recommended_interval: 60
+recommended_interval: 1

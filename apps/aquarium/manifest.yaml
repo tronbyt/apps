@@ -4,4 +4,4 @@ name: Aquarium
 summary: Digital Aquarium
 desc: A digital aquarium.
 author: Robert Ison
-recommended_interval: 300
+recommended_interval: 5

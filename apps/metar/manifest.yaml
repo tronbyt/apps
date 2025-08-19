@@ -6,4 +6,4 @@ desc: Show METAR (aviation weather) text for one airport or flight category (VFR
 author: Alexander Valys
 fileName: metar.star
 packageName: metar
-recommended_interval: 300
+recommended_interval: 5

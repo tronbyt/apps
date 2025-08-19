@@ -4,4 +4,4 @@ name: News
 summary: News feed display
 desc: Select an RSS feed and receive the latest headlines in return.
 author: JeffLac
-recommended_interval: 600
+recommended_interval: 10

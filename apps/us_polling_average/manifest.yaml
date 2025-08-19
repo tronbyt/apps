@@ -4,4 +4,4 @@ name: US PollingAverage
 summary: Election polls from 538
 desc: Shows current polling averages from FiveThirtyEight.
 author: jwoglom
-recommended_interval: 300
+recommended_interval: 5

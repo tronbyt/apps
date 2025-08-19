@@ -6,4 +6,4 @@ desc: Islamic prayer times for the day.
 author: Austin Fonacier
 fileName: islamic_prayer.star
 packageName: islamicprayer
-recommended_interval: 300
+recommended_interval: 5

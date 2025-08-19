@@ -6,4 +6,4 @@ desc: Select the states you have been to and show them off on your Tidbyt!
 author: sloanesturz
 fileName: states_visited.star
 packageName: statesvisited
-recommended_interval: 300
+recommended_interval: 5

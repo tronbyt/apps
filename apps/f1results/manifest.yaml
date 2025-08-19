@@ -6,4 +6,4 @@ desc: Shows F1 qualifying or race results for the current round. Otherwise the a
 author: M0ntyP
 fileName: f1_results.star
 packageName: f1results
-recommended_interval: 300
+recommended_interval: 5

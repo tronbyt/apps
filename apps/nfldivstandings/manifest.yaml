@@ -6,4 +6,4 @@ desc: Displays NFL division standings for your favorite division.
 author: Jake Manske
 fileName: nfldivstandings.star
 packageName: nfldivstandings
-recommended_interval: 300
+recommended_interval: 5

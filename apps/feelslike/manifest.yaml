@@ -6,4 +6,4 @@ desc: An abstract weather display that communicates feeling in a natural way.
 author: eanplatter
 fileName: feels_like.star
 packageName: feelslike
-recommended_interval: 300
+recommended_interval: 5

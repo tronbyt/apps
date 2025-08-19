@@ -4,4 +4,4 @@ name: Coffee
 summary: 'Notification: coffee ready'
 desc: Displays a configuration that a coffee is ready.
 author: savdagod
-recommended_interval: 300
+recommended_interval: 5

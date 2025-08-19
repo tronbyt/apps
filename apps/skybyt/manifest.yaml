@@ -6,4 +6,4 @@ desc: Displays a Bluesky user's follower count.
 author: Alex Karp
 fileName: skybyt.star
 packageName: skybyt
-recommended_interval: 300
+recommended_interval: 5

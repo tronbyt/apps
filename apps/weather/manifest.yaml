@@ -4,4 +4,4 @@ name: Weather
 summary: Weather forecast
 desc: Weather forecasts for your location.
 author: JeffLac & RichardD012
-recommended_interval: 300
+recommended_interval: 5

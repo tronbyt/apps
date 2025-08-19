@@ -6,4 +6,4 @@ desc: Displays either ATP or WTA Top 20 tennis players with options to display t
 author: M0ntyP
 fileName: tennis_rankings.star
 packageName: tennisrankings
-recommended_interval: 300
+recommended_interval: 5

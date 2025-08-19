@@ -6,4 +6,4 @@ desc: Displays a random pixel art character from https://www.avatarsinpixels.com
 author: Daniel Sitnik
 fileName: avatars_in_pixels.star
 packageName: avatarsinpixels
-recommended_interval: 300
+recommended_interval: 5

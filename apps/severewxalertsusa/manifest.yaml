@@ -6,4 +6,4 @@ desc: Show Severe Weather Alerts in your location issued by the US National Weat
 author: aschechter88
 fileName: severewxalertsusa.star
 packageName: severewxalertsusa
-recommended_interval: 300
+recommended_interval: 5

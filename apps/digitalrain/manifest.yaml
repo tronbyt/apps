@@ -6,4 +6,4 @@ desc: Generates an animation loop of falling code similar to that from the Matri
 author: Henry So, Jr.
 fileName: digital_rain.star
 packageName: digitalrain
-recommended_interval: 300
+recommended_interval: 5

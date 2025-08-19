@@ -6,4 +6,4 @@ desc: Display RetroAchievements for a random game on a specified or random conso
 author: UnBurn
 fileName: retro_game_goals.star
 packageName: retrogamegoals
-recommended_interval: 300
+recommended_interval: 5

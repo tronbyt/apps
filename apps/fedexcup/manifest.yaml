@@ -6,4 +6,4 @@ desc: Shows the standings for the PGA Tour's FedEx Cup.
 author: M0ntyP
 fileName: fedex_cup.star
 packageName: fedexcup
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: The Zapier app allows you to trigger information on your Tidbyt from a Zap
 author: Tidbyt
 fileName: zapier.star
 packageName: zapier
-recommended_interval: 300
+recommended_interval: 5

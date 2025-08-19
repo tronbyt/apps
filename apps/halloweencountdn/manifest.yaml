@@ -6,4 +6,4 @@ desc: Displays the number of days until Halloween.
 author: Anthony Rocchio
 fileName: halloween_countdn.star
 packageName: halloweencountdn
-recommended_interval: 300
+recommended_interval: 5

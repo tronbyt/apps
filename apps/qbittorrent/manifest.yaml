@@ -6,4 +6,4 @@ desc: Displays server stats (speeds and active counts) along with the progress o
 author: DoubleGremlin181
 fileName: qbittorrent.star
 packageName: qbittorrent
-recommended_interval: 300
+recommended_interval: 5

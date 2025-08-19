@@ -6,4 +6,4 @@ desc: Upcoming arrivals for a particular Tube, Elizabeth Line, DLR or Overground
 author: dinosaursrarr
 fileName: tube.star
 packageName: tube
-recommended_interval: 300
+recommended_interval: 5

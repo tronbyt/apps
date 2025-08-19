@@ -6,4 +6,4 @@ desc: Stonks is a simple stock market app that fetches end-of-day stock quotes u
 author: harrisonpage
 fileName: stonks.star
 packageName: stonks
-recommended_interval: 60
+recommended_interval: 1

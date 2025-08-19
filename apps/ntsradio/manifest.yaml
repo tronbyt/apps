@@ -6,4 +6,4 @@ desc: Shows live show info for NTS Radio.
 author: M0ntyP
 fileName: nts_radio.star
 packageName: ntsradio
-recommended_interval: 300
+recommended_interval: 5

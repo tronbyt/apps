@@ -6,4 +6,4 @@ desc: Display standings or scores for a Sleeper Fantasy Football league (NFL).
 author: jweier
 fileName: sleeperfantasynfl.star
 packageName: sleeperfantasynfl
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: Shows available bikes and docks at an Indego station.
 author: radiocolin
 fileName: indego.star
 packageName: indego
-recommended_interval: 300
+recommended_interval: 5

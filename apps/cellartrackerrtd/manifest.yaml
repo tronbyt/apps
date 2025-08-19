@@ -6,4 +6,4 @@ desc: Displays a random wine from your CellarTracker Ready to Drink report.
 author: Matt Kent
 fileName: cellartrackerrtd.star
 packageName: cellartrackerrtd
-recommended_interval: 300
+recommended_interval: 5

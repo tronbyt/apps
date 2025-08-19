@@ -4,4 +4,4 @@ name: LOL Stats
 summary: Shows LOL summoner stats
 desc: Displays League of Legends summoner wins/loss status, rank and recent match kda, champ, gold and minions. Also lists win/losses sequence of the most recent matches.
 author: thiagoss
-recommended_interval: 300
+recommended_interval: 5

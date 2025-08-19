@@ -6,4 +6,4 @@ desc: Displays a pollen count for your area. Enter your location for updates eve
 author: Nicole Brooks
 fileName: pollen_count.star
 packageName: pollencount
-recommended_interval: 300
+recommended_interval: 5

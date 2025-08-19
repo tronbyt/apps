@@ -6,4 +6,4 @@ desc: Displays a marquee for a movie title along with a countdown to the movie n
 author: Piper Gillman
 fileName: movie_night.star
 packageName: movienight
-recommended_interval: 300
+recommended_interval: 5

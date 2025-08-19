@@ -6,4 +6,4 @@ desc: Displays a new cocktail every hour, on the hour. Cheers to my mom for the 
 author: Nicole Brooks
 fileName: happy_hour.star
 packageName: happyhour
-recommended_interval: 300
+recommended_interval: 5

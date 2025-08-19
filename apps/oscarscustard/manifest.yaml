@@ -6,4 +6,4 @@ desc: Get today's flavors at Oscar's Frozen Custard.
 author: Josiah Winslow
 fileName: oscars_custard.star
 packageName: oscarscustard
-recommended_interval: 300
+recommended_interval: 5

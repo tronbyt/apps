@@ -6,4 +6,4 @@ desc: Displays your LeetCode stats in a nice way.
 author: Jake Manske
 fileName: leetcodestats.star
 packageName: leetcodestats
-recommended_interval: 300
+recommended_interval: 5

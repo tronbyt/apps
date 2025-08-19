@@ -4,4 +4,4 @@ name: ESPN FF Standings
 summary: Fantasy Football Standings
 desc: Displays the ordered standings with team name and team record.
 author: gmatthews1182
-recommended_interval: 300
+recommended_interval: 5

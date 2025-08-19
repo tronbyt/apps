@@ -6,4 +6,4 @@ desc: The app gets Fall baseball data from the Skordle website to diplay on the 
 author: Woolycoin437420
 fileName: skordlefbaseball.star
 packageName: skordlefbaseball
-recommended_interval: 300
+recommended_interval: 5

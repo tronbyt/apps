@@ -6,4 +6,4 @@ desc: Display your website's traffic stats using your Plausible Analytics accoun
 author: brettohland
 fileName: plausibleanalytics.star
 packageName: plausibleanalytics
-recommended_interval: 300
+recommended_interval: 5

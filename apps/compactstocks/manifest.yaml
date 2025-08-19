@@ -6,4 +6,4 @@ desc: A stock ticker app that shows the current prices & daily changes for 5 sto
 author: tobyxdd
 fileName: stocks.star
 packageName: compactstocks
-recommended_interval: 300
+recommended_interval: 5

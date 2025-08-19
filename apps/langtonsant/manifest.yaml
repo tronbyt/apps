@@ -6,4 +6,4 @@ desc: Automata with simple rules but complex emergent behavior.
 author: alewando
 fileName: langtons_ant.star
 packageName: langtonsant
-recommended_interval: 300
+recommended_interval: 5

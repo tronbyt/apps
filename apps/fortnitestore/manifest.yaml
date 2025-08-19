@@ -6,4 +6,4 @@ desc: See items currently featured in the Fortnite shop.
 author: naominori
 fileName: fortnite_store.star
 packageName: fortnitestore
-recommended_interval: 300
+recommended_interval: 5

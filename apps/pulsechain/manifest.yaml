@@ -6,4 +6,4 @@ desc: Display the price of PLS and PLSX. Choose between testnet and mainnet pric
 author: bretep
 fileName: pulsechain.star
 packageName: pulsechain
-recommended_interval: 300
+recommended_interval: 5

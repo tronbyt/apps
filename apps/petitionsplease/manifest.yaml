@@ -6,4 +6,4 @@ desc: Shows currently popular petitions for the UK Parliament and HM Government 
 author: dinosaursrarr
 fileName: petitions_please.star
 packageName: petitionsplease
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: This app displays some nearby cheap gas stations in Germany (Tankerkönig)
 author: dev-manuel
 fileName: tankerkoenig.star
 packageName: tankerkoenig
-recommended_interval: 300
+recommended_interval: 5

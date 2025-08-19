@@ -6,4 +6,4 @@ desc: Show elapsed time and calculate a cost based on a given rate.
 author: rs7q5
 fileName: cost_calculator.star
 packageName: costcalculator
-recommended_interval: 300
+recommended_interval: 5

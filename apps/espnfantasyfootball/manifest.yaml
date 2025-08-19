@@ -6,4 +6,4 @@ desc: Connects to your ESPN fantasy football league and randomly displays the sc
 author: jack_markle
 fileName: espn_fantasy_fb.star
 packageName: espnfantasyfb
-recommended_interval: 300
+recommended_interval: 5

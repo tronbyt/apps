@@ -6,4 +6,4 @@ desc: Displays the name, speed, distance, and arrival of the next near Earth obj
 author: noahcolvin
 fileName: near_earth_objs.star
 packageName: nearearthobjs
-recommended_interval: 300
+recommended_interval: 5

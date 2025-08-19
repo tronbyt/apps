@@ -6,4 +6,4 @@ desc: Displays random quotes from LOTR trilogy.
 author: Jake Manske
 fileName: lordoftherings.star
 packageName: lordoftherings
-recommended_interval: 300
+recommended_interval: 5

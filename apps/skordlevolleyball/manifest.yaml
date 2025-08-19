@@ -6,4 +6,4 @@ desc: This app gets Volleyball data from the Skordle website to dplay on the Tid
 author: Woolycoin437420
 fileName: skordlevolleyball.star
 packageName: skordlevolleyball
-recommended_interval: 300
+recommended_interval: 5

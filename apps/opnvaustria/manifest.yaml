@@ -6,4 +6,4 @@ desc: App uses VAO API (users can get free API keys) to display the next three d
 author: Thomas Hutterer, ThHutterer
 fileName: opnv_austria.star
 packageName: opnvaustria
-recommended_interval: 300
+recommended_interval: 5

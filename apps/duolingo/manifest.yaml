@@ -6,4 +6,4 @@ desc: 'Track your Duolingo study progress. The app has multiple views: Today, We
 author: Olly Stedall @saltedlolly
 fileName: duolingo.star
 packageName: duolingo
-recommended_interval: 300
+recommended_interval: 5

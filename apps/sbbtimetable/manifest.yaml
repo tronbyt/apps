@@ -6,4 +6,4 @@ desc: Shows a timetable for a station in the Swiss Public Transport network.
 author: LukiLeu
 fileName: sbb_timetable.star
 packageName: sbbtimetable
-recommended_interval: 300
+recommended_interval: 5

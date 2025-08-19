@@ -6,4 +6,4 @@ desc: Shows Tesla information from the Tessie API.
 author: inderpal
 fileName: tessie.star
 packageName: tessie
-recommended_interval: 300
+recommended_interval: 5

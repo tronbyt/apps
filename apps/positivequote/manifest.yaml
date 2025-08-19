@@ -6,4 +6,4 @@ desc: Shows the user a random positive quote.
 author: Brian Bell
 fileName: positive_quote.star
 packageName: positivequote
-recommended_interval: 300
+recommended_interval: 5

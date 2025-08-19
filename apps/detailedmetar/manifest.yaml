@@ -6,4 +6,4 @@ desc: Display detailed, decoded METAR information.
 author: SamuelSagarino
 fileName: detailedmetar.star
 packageName: detailedmetar
-recommended_interval: 300
+recommended_interval: 5

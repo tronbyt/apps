@@ -6,4 +6,4 @@ desc: Displays the current price of the World of Warcraft token in various regio
 author: '@ledif'
 fileName: wow_token.star
 packageName: wowtoken
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: Shows train arrivals for upcoming inbound and outbound trains at path trai
 author: Todd Greenberg
 fileName: path_train_schedule.star
 packageName: pathtrainschedule
-recommended_interval: 300
+recommended_interval: 5

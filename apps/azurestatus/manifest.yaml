@@ -6,4 +6,4 @@ desc: Simple app that looks at the Azure Status RSS feed and shows the latest in
 author: M0ntyP
 fileName: azure_status.star
 packageName: azurestatus
-recommended_interval: 600
+recommended_interval: 10

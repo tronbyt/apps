@@ -6,4 +6,4 @@ desc: Track packages from Amazon/DHL/FedEx/UPS/USPS and more. (Free) pkge.net AP
 author: Kyle Bolstad
 fileName: package_tracker.star
 packageName: packagetracker
-recommended_interval: 300
+recommended_interval: 5

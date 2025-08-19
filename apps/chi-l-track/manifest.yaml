@@ -6,4 +6,4 @@ desc: Track arrivals at Chicago CTA L (rapid transit) stations. App allows two d
 author: FabioCZ
 fileName: chi_l_track.star
 packageName: chiltrack
-recommended_interval: 300
+recommended_interval: 5

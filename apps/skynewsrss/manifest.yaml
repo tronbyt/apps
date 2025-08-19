@@ -6,4 +6,4 @@ desc: Sky News RSS feed display all 9 sources.
 author: jvivona
 fileName: sky_news_rss.star
 packageName: skynewsrss
-recommended_interval: 600
+recommended_interval: 10

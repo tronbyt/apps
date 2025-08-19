@@ -6,4 +6,4 @@ desc: Display Arrival Times for TCAT Ithaca Buses at a Specific Stop.
 author: Harry Samuels
 fileName: tcat_bus_arrivals.star
 packageName: tcatbusarrivals
-recommended_interval: 300
+recommended_interval: 5

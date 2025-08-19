@@ -6,4 +6,4 @@ desc: Displays the total dollar value of lost assets due to various crypto scams
 author: Nick Kuzmik (github.com/kuzmik)
 fileName: web_3_counter.star
 packageName: web3counter
-recommended_interval: 300
+recommended_interval: 5

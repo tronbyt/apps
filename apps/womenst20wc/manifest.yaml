@@ -6,4 +6,4 @@ desc: Shows live scores for the selected Womens T20 team. Also can show post gam
 author: M0ntyP
 fileName: womens_t20_wc.star
 packageName: womenst20wc
-recommended_interval: 300
+recommended_interval: 5

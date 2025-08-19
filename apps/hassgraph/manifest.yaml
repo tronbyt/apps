@@ -4,4 +4,4 @@ name: HASS Graph
 summary: Graph for HA entity
 desc: Shows a graph and stats for a Home Assistant entity (e.g. temperature).
 author: vincentezw
-recommended_interval: 300
+recommended_interval: 5

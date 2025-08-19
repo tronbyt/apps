@@ -6,4 +6,4 @@ desc: Track important revenue metrics. Manage plans and pricing. Improve custome
 author: Mantle Rev Ops
 fileName: mantle.star
 packageName: mantle
-recommended_interval: 300
+recommended_interval: 5

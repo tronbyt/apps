@@ -6,4 +6,4 @@ desc: Display Wall Street Journal news headlines.
 author: jvivona
 fileName: wsj_news.star
 packageName: wsjnews
-recommended_interval: 600
+recommended_interval: 10

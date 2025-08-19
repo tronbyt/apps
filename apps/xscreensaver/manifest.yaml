@@ -5,4 +5,4 @@ desc: Shows two hundred and sixty-five different XScreenSaver animations, all sc
 author: Greg Knauss and XScreenSaver
 fileName: xscreensaver.star
 packageName: xscreensaver
-recommended_interval: 300
+recommended_interval: 5

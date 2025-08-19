@@ -6,4 +6,4 @@ desc: Tindie is an online marketplace for maker-made products. This app displays
 author: Joey Castillo
 fileName: tindie_sales.star
 packageName: tindiesales
-recommended_interval: 300
+recommended_interval: 5

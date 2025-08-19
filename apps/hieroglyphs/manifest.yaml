@@ -6,4 +6,4 @@ desc: Displays Egyptian Hieroglyphs from Gardiner's Sign List plus details of pr
 author: dinosaursrarr
 fileName: hieroglyphs.star
 packageName: hieroglyphs
-recommended_interval: 300
+recommended_interval: 5

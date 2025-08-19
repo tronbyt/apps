@@ -6,4 +6,4 @@ desc: Displays upcoming services for train stations and bus & tram stops around 
 author: M0ntyP
 fileName: adelaide_metro.star
 packageName: adelaidemetro
-recommended_interval: 300
+recommended_interval: 5

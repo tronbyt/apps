@@ -6,4 +6,4 @@ desc: Displays different jokes from JokeAPI.
 author: rs7q5
 fileName: jokes_jokeapi.star
 packageName: jokesjokeapi
-recommended_interval: 300
+recommended_interval: 5

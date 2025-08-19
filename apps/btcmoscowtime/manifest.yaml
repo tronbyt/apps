@@ -6,4 +6,4 @@ desc: Shows how many satoshis for 1 USD.
 author: PMK (@pmk)
 fileName: btcmoscowtime.star
 packageName: btcmoscowtime
-recommended_interval: 60
+recommended_interval: 1

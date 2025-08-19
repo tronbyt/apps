@@ -6,4 +6,4 @@ desc: Track changes to the yield curve over different US Treasury maturities.
 author: Rob Kimball
 fileName: us_yield_curve.star
 packageName: usyieldcurve
-recommended_interval: 60
+recommended_interval: 1

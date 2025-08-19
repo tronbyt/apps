@@ -4,4 +4,4 @@ name: Madison Metro Bus
 summary: Track Madison Buses
 desc: Check arrivals for a given stop in Madison.
 author: Corey Johnsen
-recommended_interval: 300
+recommended_interval: 5

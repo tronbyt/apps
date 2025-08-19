@@ -6,4 +6,4 @@ desc: Displays the three scores from your Oura Ring along with a historical char
 author: Aiden Vigue
 fileName: ouraring.star
 packageName: ouraring
-recommended_interval: 300
+recommended_interval: 5

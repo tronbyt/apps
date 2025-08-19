@@ -6,4 +6,4 @@ desc: Runs a famous cellular automaton and animates the state on screen.
 author: dinosaursrarr
 fileName: life.star
 packageName: life
-recommended_interval: 300
+recommended_interval: 5

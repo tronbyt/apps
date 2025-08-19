@@ -6,4 +6,4 @@ desc: Shows a bible verse on a daily cadence.
 author: danrods
 fileName: bible_votd.star
 packageName: biblevotd
-recommended_interval: 300
+recommended_interval: 5

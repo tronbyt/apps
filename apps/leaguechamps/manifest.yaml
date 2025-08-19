@@ -6,4 +6,4 @@ desc: Shows league of legends champsions and info about them.
 author: xl0lli
 fileName: league_champs.star
 packageName: leaguechamps
-recommended_interval: 300
+recommended_interval: 5

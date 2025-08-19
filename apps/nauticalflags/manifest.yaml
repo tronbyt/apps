@@ -4,4 +4,4 @@ name: NauticalFlags
 summary: Display nautical flags
 desc: Displays nautical flags.
 author: Robert Ison
-recommended_interval: 300
+recommended_interval: 5

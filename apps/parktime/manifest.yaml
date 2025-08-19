@@ -6,4 +6,4 @@ desc: Display park hours, show times, boarding groups, and attraction wait times
 author: beyondutility
 fileName: park_time.star
 packageName: parktime
-recommended_interval: 300
+recommended_interval: 5

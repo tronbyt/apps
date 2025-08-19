@@ -6,4 +6,4 @@ desc: SailGP Next Race Info and Current Leaderboard.
 author: jvivona
 fileName: sailgp.star
 packageName: sailgp
-recommended_interval: 300
+recommended_interval: 5

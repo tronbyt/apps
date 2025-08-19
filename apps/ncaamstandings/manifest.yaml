@@ -6,4 +6,4 @@ desc: View NCAAM standings by conference.
 author: LunchBox8484
 fileName: ncaam_standings.star
 packageName: ncaamstandings
-recommended_interval: 300
+recommended_interval: 5

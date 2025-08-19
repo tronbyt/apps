@@ -6,4 +6,4 @@ desc: Displays the top artist and track for a last.fm user over a given period o
 author: skinner452
 fileName: lastfmstats.star
 packageName: lastfmstats
-recommended_interval: 300
+recommended_interval: 5

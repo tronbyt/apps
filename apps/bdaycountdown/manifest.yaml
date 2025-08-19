@@ -6,4 +6,4 @@ desc: Create a bday countdown!
 author: Jared Brockmyre
 fileName: bday_countdown.star
 packageName: bdaycountdown
-recommended_interval: 300
+recommended_interval: 5

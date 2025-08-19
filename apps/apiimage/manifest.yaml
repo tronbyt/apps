@@ -4,4 +4,4 @@ name: API Image
 summary: Pull an image from an API
 desc: Configure a URL, headers and the response path to the image to display.
 author: MichaelYagi
-recommended_interval: 300
+recommended_interval: 5

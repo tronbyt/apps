@@ -6,4 +6,4 @@ desc: Show Tesla Powerwall battery percentage state.
 author: tabrindle
 fileName: powerwall.star
 packageName: powerwall
-recommended_interval: 300
+recommended_interval: 5

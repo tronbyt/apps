@@ -6,4 +6,4 @@ desc: ' National Weather Service data showing the current temperature and weathe
 author: czarandy
 fileName: nws_live_forecast.star
 packageName: nwsliveforecast
-recommended_interval: 300
+recommended_interval: 5

@@ -6,4 +6,4 @@ desc: Display a random public api from api.publicapis.org/random.
 author: noahpodgurski
 fileName: publicapi.star
 packageName: publicapi
-recommended_interval: 300
+recommended_interval: 5
