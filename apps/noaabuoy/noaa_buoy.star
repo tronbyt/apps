@@ -13,16 +13,16 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
-print_debug = True
+print_debug = False
 
 default_location = """
 {
-    "lat": "20.8911",
-    "lng": "-156.5047",
-    "description": "Wailuku, HI, USA",
-    "locality": "Maui",
-    "place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
-    "timezone": "America/Honolulu"
+	"lat": "20.8911",
+	"lng": "-156.5047",
+	"description": "Wailuku, HI, USA",
+	"locality": "Maui",
+	"place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
+	"timezone": "America/Honolulu"
 }
 """
 
@@ -30,11 +30,8 @@ def debug_print(arg):
     if print_debug:
         print(arg)
 
-def swell_over_threshold(thresh, units, data, use_wind_swell):  # assuming threshold is already in preferred units
-    if use_wind_swell:
-        height = data.get("WIND_WVHT", "0")
-    else:
-        height = data.get("WVHT", "0")
+def swell_over_threshold(thresh, units, data):  # assuming threshold is already in preferred units
+    height = data["WVHT"]
     if thresh == "" or float(thresh) == 0.0:
         return True
     elif units == "m":
@@ -69,12 +66,13 @@ def name_from_rss(xml):
 def fetch_data(buoy_id, last_data):
     debug_print("fetching....")
     data = dict()
-    url = "https://www.ndbc.noaa.gov/mobile/station.php?station=%s" % buoy_id.lower()
+    url = "https://www.ndbc.noaa.gov/data/latest_obs/%s.rss" % buoy_id.lower()
     debug_print("url: " + url)
     resp = http.get(url, ttl_seconds = 600)  # 10 minutes http cache time
     debug_print(resp)
     if resp.status_code != 200:
-        if len(last_data) != 0:
+        if len(last_data) != 0:  # try to return the last cached data if it exists to account for spurious api failures
+            # add the stale counter so we know it's not new data and how many cycles the buoy has been down for.
             if "stale" not in last_data:
                 last_data["stale"] = 1
             else:
@@ -89,106 +87,48 @@ def fetch_data(buoy_id, last_data):
             data["name"] = buoy_id
             data["error"] = "Code: " + str(resp.status_code)
             return data
+    else:
+        data["name"] = name_from_rss(xpath.loads(resp.body())) or buoy_id
 
-    html = resp.body()
-    data["name"] = buoy_id  # fallback, no name in mobile page
+        #print_rss(xpath.loads(resp.body()))
+        data_string = xpath.loads(resp.body()).query("/rss/channel/item/description")
 
-    # Weather Conditions section (Starlark re does not support DOTALL, so do manual search)
-    weather_start = html.find("<h2>Weather Conditions</h2>")
-    weather_p_start = html.find("<p>", weather_start)
-    weather_p_end = html.find("</p>", weather_p_start)
-    if weather_start != -1 and weather_p_start != -1 and weather_p_end != -1:
-        weather = html[weather_p_start + 3:weather_p_end]
+        #data_string = xpath.loads(xml).query("/rss/channel/item/description")
+        # continue with parsing build up the list
+        re_dict = dict()
 
-        # Seas (WVHT)
-        seas = re.match(r".*<b>Seas:</b> ([0-9.]+) ft.*", weather)
-        if len(seas) > 0:
-            data["WVHT"] = seas[0][1]
+        # coordinates, not used for anything yet
+        re_dict["location"] = r"Location:</strong>\s+(.*)<b"
 
-        # Peak Period (DPD)
-        peak = re.match(r".*<b>Peak Period:</b> ([0-9.]+) sec.*", weather)
-        if len(peak) > 0:
-            data["DPD"] = peak[0][1]
+        # swell data
+        re_dict["WVHT"] = r"Significant Wave Height:</strong> (\d+\.?\d+?) ft<br"
+        re_dict["DPD"] = r"Dominant Wave Period:</strong> (\d+) sec"
+        re_dict["MWD"] = r"Mean Wave Direction:</strong> ([ENSW]+ \(\d+)&#176;"
 
-        # Water Temp (WTMP)
-        wtmp = re.match(r".*<b>Water Temp:</b> ([0-9.]+) &#176;F.*", weather)
-        if len(wtmp) > 0:
-            data["WTMP"] = wtmp[0][1]
+        # wind data
+        re_dict["WSPD"] = r"Wind Speed:</strong>\s+(\d+\.?\d+?)\sknots"
+        re_dict["GST"] = r"Wind Gust:</strong>\s+(\d+\.?\d+?)\sknots"
+        re_dict["WDIR"] = r"Wind Direction:</strong> ([ENSW]+ \(\d+)&#176;"
 
-        # Air Temp (ATMP)
-        atmp = re.match(r".*<b>Air Temp:</b> ([0-9.]+) &#176;F.*", weather)
-        if len(atmp) > 0:
-            data["ATMP"] = atmp[0][1]
+        # temperatures
+        re_dict["ATMP"] = r"Air Temperature:</strong> (\d+\.\d+?)&#176;F"
+        re_dict["WTMP"] = r"Water Temperature:</strong> (\d+\.\d+?)&#176;F"
 
-    # Wave Summary section
-    wave_start = html.find("<h2>Wave Summary</h2>")
-    wave_p_start = html.find("<p>", wave_start)
-    wave_p_end = html.find("</p>", wave_p_start)
-    if wave_start != -1 and wave_p_start != -1 and wave_p_end != -1:
-        wave = html[wave_p_start + 3:wave_p_end]
+        # misc other data
+        re_dict["DEW"] = r"Dew Point:</strong> (\d+\.\d+?)&#176;F"
+        re_dict["VIS"] = r"Visibility:</strong> (\d\.?\d? nmi)"
+        re_dict["TIDE"] = r"Tide:</strong> (-?\d+\.\d+?) ft"
 
-        # Swell (WVHT, override if present)
-        swell_match = re.match(r"<b>Swell:</b> ([0-9.]+) ft", wave)
-        if len(swell_match) > 0:
-            data["WVHT"] = swell_match[0][1]
+        for field in re_dict.items():
+            field_data = re.match(field[1], data_string)
+            if len(field_data) == 0:
+                #debug_print(field[0] + "  : no match, using " + str(last_data.get(field[0])) )
+                data[field[0]] = last_data.get(field[0])  # use old cached data, None if non existant
+            else:
+                debug_print(field[0] + " : " + field_data[0][1])
+                data[field[0]] = field_data[0][1].replace("(", "")
 
-        # Parse periods and directions by splitting on <br> and matching each line
-        lines = wave.split("<br>")
-        swell_period = None
-        swell_dir = None
-        wind_wave = None
-        wind_period = None
-        wind_dir = None
-        for i in range(len(lines)):
-            line = lines[i].strip()
-
-            # Swell period
-            m = re.match(r"<b>Period:</b> ([0-9.]+) sec", line)
-            if m and swell_period == None:
-                swell_period = m[0][1]
-
-            # Swell direction
-            m = re.match(r"<b>Direction:</b> ([A-Z]+)", line)
-            if m and swell_dir == None:
-                swell_dir = m[0][1]
-
-            # Wind wave
-            m = re.match(r"<b>Wind Wave:</b> ([0-9.]+) ft", line)
-            if m:
-                wind_wave = m[0][1]
-
-            # Wind period (after wind wave)
-            if wind_wave != None and wind_period == None:
-                m = re.match(r"<b>Period:</b> ([0-9.]+) sec", line)
-                if m:
-                    wind_period = m[0][1]
-
-            # Wind direction (after wind period)
-            if wind_period != None and wind_dir == None:
-                m = re.match(r"<b>Direction:</b> ([A-Z]+)", line)
-                if m:
-                    wind_dir = m[0][1]
-
-        if swell_period:
-            data["DPD"] = swell_period
-        if swell_dir:
-            data["MWD"] = swell_dir
-        if wind_wave:
-            data["WIND_WVHT"] = wind_wave
-        if wind_period:
-            data["WIND_DPD"] = wind_period
-        if wind_dir:
-            data["WIND_MWD"] = wind_dir
-
-    # Wind Wave (not mapped, but could be added)
-    # Air Temp (not present in mobile page)
-    # Wind Speed, Gust, Direction (not present in mobile page)
-
-    # Fallback to last_data for missing fields
-    for k in ["WVHT", "DPD", "MWD", "WTMP"]:
-        if k not in data or data[k] == None:
-            data[k] = last_data.get(k)
-
+        #debug_print(data)
     return data
 
 def main(config):
@@ -289,60 +229,44 @@ def main(config):
             ),
         )
 
-    elif (data.get("DPD") and config.bool("display_swell", True)):
-        # If wind swell option is selected and wind swell data is present, display wind swell instead of ground swell
-        show_wind_swell = config.bool("wind_swell", False)
-        use_wind = show_wind_swell and data.get("WIND_WVHT") and data.get("WIND_DPD")
-        if use_wind:
-            height = data["WIND_WVHT"]
-            period = data["WIND_DPD"]
-            mwd = data.get("WIND_MWD", "--")
+    elif (data.get("DPD") and config.get("display_swell", True) == "true" and swell_over_threshold(min_size, h_unit_pref, data)):
+        #SWELL###########################################################
+        height = ""
+        if "MWD" in data:
+            mwd = data["MWD"]
         else:
-            height = data["WVHT"]
-            period = data["DPD"]
-            mwd = data.get("MWD", "--")
-        if type(height) == type(""):
-            if height.replace(".", "", 1).isdigit():
-                height_f = float(height)
-            else:
-                height_f = 0.0
-        else:
-            height_f = float(height)
-        if (height_f < 2):
+            mwd = "--"
+        height = float(data["WVHT"])
+        if (height < 2):
             swell_color = color_small
-        elif (height_f < 5):
+        elif (height < 5):
             swell_color = color_medium
-        elif (height_f < 12):
+        elif (height < 12):
             swell_color = color_big
-        elif (height_f >= 13):
+        elif (height >= 13):
             swell_color = color_huge
 
+        height = data["WVHT"]
         unit_display = "f"
         if h_unit_pref == "meters":
             unit_display = "m"
-
-            # Only convert if height is a number
-            if type(height) == type("") and height.replace(".", "", 1).isdigit():
-                height = float(height) / 3.281
-                height = int(height * 10)
-                height = height / 10.0
-            elif type(height) != type(""):
-                height = float(height) / 3.281
-                height = int(height * 10)
-                height = height / 10.0
+            height = float(height) / 3.281
+            height = int(height * 10)
+            height = height / 10.0
 
         wtemp = ""
-        if (data.get("WTMP") and config.bool("display_temps", True)):
+
+        if (data.get("WTMP") and config.get("display_temps") == "true"):  # we have some room at the bottom for wtmp if desired
             wt = data["WTMP"]
             if (t_unit_pref == "C"):
                 wt = FtoC(wt)
             wt = int(float(wt) + 0.5)
             wtemp = " %s%s" % (str(wt), t_unit_pref)
 
-        if not swell_over_threshold(min_size, h_unit_pref, data, use_wind):
+        # don't render anything if swell height is below minimum
+        if min_size != "" and float(height) < float(min_size):
             return []
 
-        period_display = str(int(float(period) + 0.5)) if type(period) == type("") and period.replace(".", "", 1).isdigit() else str(period)
         return render.Root(
             child = render.Box(
                 render.Column(
@@ -355,7 +279,7 @@ def main(config):
                             color = swell_color,
                         ),
                         render.Text(
-                            content = "%s%s %ss" % (height, unit_display, period_display),
+                            content = "%s%s %ss" % (height, unit_display, data["DPD"]),
                             font = "6x13",
                             color = swell_color,
                         ),
@@ -369,7 +293,7 @@ def main(config):
         )
         #WIND#################################################
 
-    elif (data.get("WSPD") and data.get("WDIR") and config.bool("display_wind", True)):
+    elif (data.get("WSPD") and data.get("WDIR") and config.get("display_wind", False) == "true"):
         gust = ""
         avg = data["WSPD"]
         avg = str(int(float(avg) + 0.5))
@@ -412,7 +336,7 @@ def main(config):
         )
         #TEMPS#################################################
 
-    elif (config.bool("display_temps", False)):
+    elif (config.get("display_temps", False) == "true"):
         air = "--"
         if data.get("ATMP"):
             air = data["ATMP"]
@@ -450,7 +374,7 @@ def main(config):
             ),
         )
 
-    elif (config.bool("display_misc", False)):
+    elif (config.get("display_misc", False) == "true"):
         # MISC ################################################################
         # DEW with PRES with ATMP    or  TIDE with WTMP with SAL  or
         if "TIDE" in data:  # do some tide stuff, usually wtmp is included and somties SAL?
@@ -644,13 +568,6 @@ def get_schema():
                 desc = "if available",
                 icon = "gear",
                 default = True,
-            ),
-            schema.Toggle(
-                id = "wind_swell",
-                name = "Display Wind Swell",
-                desc = "instead of ground swell.",
-                icon = "gear",
-                default = False,
             ),
             schema.Toggle(
                 id = "display_wind",
