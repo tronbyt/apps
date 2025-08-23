@@ -30,6 +30,24 @@ def debug_print(arg):
     if print_debug:
         print(arg)
 
+
+# Extract the value cell text following a label inside the Wave Summary table
+# Looks for: ... <td>LABEL</td><td> VALUE </td>
+def td_value(wave_section, label):
+    i = wave_section.find(label)
+    if i == -1:
+        return None
+    j = wave_section.find("</td><td", i)
+    if j == -1:
+        return None
+    k = wave_section.find('>', j)
+    if k == -1:
+        return None
+    l = wave_section.find("</td>", k)
+    if l == -1:
+        return None
+    return wave_section[k + 1:l].strip()
+
 def swell_over_threshold(thresh, units, data, use_wind_swell):  # assuming threshold is already in preferred units
     if use_wind_swell:
         height = data.get("WIND_WVHT", "0")
@@ -51,25 +69,10 @@ def FtoC(F):  # returns rounded to 1 decimal
     c = int(c * 10)
     return c / 10.0
 
-def name_from_rss(xml):
-    #re/Station\s+.*\s+\-\s+(.+),/
-    string = xml.query("/rss/channel/item/title")
-    name_match = re.match(r"Station\s+.*\s+\-\s+(.+),", string)
-    if len(name_match) == 0:
-        #try again
-        name_match = re.match(r"Station\s+.*\s+\-\s+(.+)$", string)
-        if len(name_match) == 0:
-            return None
-        else:
-            return name_match[0][1]
-
-    else:
-        return name_match[0][1]
-
 def fetch_data(buoy_id, last_data):
     debug_print("fetching....")
     data = dict()
-    url = "https://www.ndbc.noaa.gov/mobile/station.php?station=%s" % buoy_id.lower()
+    url = "https://www.ndbc.noaa.gov/station_page.php?station=%s" % buoy_id.lower()
     debug_print("url: " + url)
     resp = http.get(url, ttl_seconds = 600)  # 10 minutes http cache time
     debug_print(resp)
@@ -95,100 +98,180 @@ def fetch_data(buoy_id, last_data):
             return data
 
     html = resp.body()
-    data["name"] = buoy_id  # fallback, no name in mobile page
+    data["name"] = buoy_id  # fallback, no name in desktop page
 
-    # Weather Conditions section (Starlark re does not support DOTALL, so do manual search)
-    weather_start = html.find("<h2>Weather Conditions</h2>")
-    weather_p_start = html.find("<p>", weather_start)
-    weather_p_end = html.find("</p>", weather_p_start)
-    if weather_start != -1 and weather_p_start != -1 and weather_p_end != -1:
-        weather = html[weather_p_start + 3:weather_p_end]
+    # Extract station name from page title if available
+    title_match = re.findall(r"<title>.*Station (\w+) - (.+?) -.*</title>", html)
+    if len(title_match) > 0:
+        data["name"] = title_match[0][1].strip()
 
-        # Seas (WVHT)
-        seas = re.match(r".*<b>Seas:</b> ([0-9.]+) ft.*", weather)
-        if len(seas) > 0:
-            data["WVHT"] = seas[0][1]
+    # Weather Conditions section - try desktop format first
+    weather_start = html.find('<section id="metdata"')
+    if weather_start != -1:
+        weather_end = html.find('</section>', weather_start)
+        if weather_end != -1:
+            weather_section = html[weather_start:weather_end]
 
-        # Peak Period (DPD)
-        peak = re.match(r".*<b>Peak Period:</b> ([0-9.]+) sec.*", weather)
-        if len(peak) > 0:
-            data["DPD"] = peak[0][1]
+            # Air Temperature
+            atmp_match = re.findall(r'Air Temperature[^>]*</td><td[^>]*>\s*([0-9.]+)\s*°F', weather_section)
+            if len(atmp_match) > 0:
+                data["ATMP"] = atmp_match[0]
 
-        # Water Temp (WTMP)
-        wtmp = re.match(r".*<b>Water Temp:</b> ([0-9.]+) &#176;F.*", weather)
-        if len(wtmp) > 0:
-            data["WTMP"] = wtmp[0][1]
+            # Water Temperature
+            wtmp_match = re.findall(r'Water Temperature[^>]*</td><td[^>]*>\s*([0-9.]+)\s*°F', weather_section)
+            if len(wtmp_match) > 0:
+                data["WTMP"] = wtmp_match[0]
 
-        # Air Temp (ATMP)
-        atmp = re.match(r".*<b>Air Temp:</b> ([0-9.]+) &#176;F.*", weather)
-        if len(atmp) > 0:
-            data["ATMP"] = atmp[0][1]
-
-    # Wave Summary section
-    wave_start = html.find("<h2>Wave Summary</h2>")
-    wave_p_start = html.find("<p>", wave_start)
-    wave_p_end = html.find("</p>", wave_p_start)
+    # Wave Summary section - desktop format
+    # First try to find structured table format (like the HTML you provided)
+    wave_start = html.find('<section id="wavedata"')
+    debug_print("Structured wave section search result: " + str(wave_start))
     wave_summary_found = False
-    if wave_start != -1 and wave_p_start != -1 and wave_p_end != -1:
-        wave_summary_found = True
-        wave = html[wave_p_start + 3:wave_p_end]
 
-        # Swell (WVHT, override if present)
-        swell_match = re.match(r"<b>Swell:</b> ([0-9.]+) ft", wave)
-        if len(swell_match) > 0:
-            data["WVHT"] = swell_match[0][1]
+    if wave_start != -1:
+        # Found structured table format
+        wave_end = html.find('</section>', wave_start)
+        if wave_end != -1:
+            wave_summary_found = True
+            wave_section = html[wave_start:wave_end]
+            debug_print("Found structured wave section, length: " + str(len(wave_section)))
 
-        # Parse periods and directions by splitting on <br> and matching each line
-        lines = wave.split("<br>")
-        swell_period = None
-        swell_dir = None
-        wind_wave = None
-        wind_period = None
-        wind_dir = None
-        for i in range(len(lines)):
-            line = lines[i].strip()
 
-            # Swell period
-            m = re.match(r"<b>Period:</b> ([0-9.]+) sec", line)
-            if m and swell_period == None:
-                swell_period = m[0][1]
+        # Parse desktop Wave Summary table using label->value td extraction
+        # WVHT
+        cell = td_value(wave_section, "Significant Wave Height (WVHT):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*ft", cell)
+            if len(m) > 0:
+                data["WVHT"] = m[0][1]
 
-            # Swell direction
-            m = re.match(r"<b>Direction:</b> ([A-Z]+)", line)
-            if m and swell_dir == None:
-                swell_dir = m[0][1]
+        # SWH (prefer SWH for swell height; override WVHT if present)
+        cell = td_value(wave_section, "Swell Height (SwH):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*ft", cell)
+            if len(m) > 0:
+                data["SWH"] = m[0][1]
+                # Always use SwH as the swell height shown by this app
+                data["WVHT"] = data["SWH"]
 
-            # Wind wave
-            m = re.match(r"<b>Wind Wave:</b> ([0-9.]+) ft", line)
-            if m:
-                wind_wave = m[0][1]
+        # DPD (swell period; override any other period)
+        cell = td_value(wave_section, "Swell Period (SwP):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*sec", cell)
+            if len(m) > 0:
+                data["DPD"] = m[0][1]
+                data["WIND_DPD"] = None  # ensure UI uses swell period unless wind_swell is chosen
 
-            # Wind period (after wind wave)
-            if wind_wave != None and wind_period == None:
-                m = re.match(r"<b>Period:</b> ([0-9.]+) sec", line)
-                if m:
-                    wind_period = m[0][1]
+        # APD (fallback for DPD if missing)
+        cell = td_value(wave_section, "Average Wave Period (APD):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*sec", cell)
+            if len(m) > 0:
+                if "DPD" not in data:
+                    data["DPD"] = m[0][1]
+                data["APD"] = m[0][1]
 
-            # Wind direction (after wind period)
-            if wind_period != None and wind_dir == None:
-                m = re.match(r"<b>Direction:</b> ([A-Z]+)", line)
-                if m:
-                    wind_dir = m[0][1]
+        # MWD (use swell direction, not mean direction)
+        cell = td_value(wave_section, "Swell Direction (SwD):")
+        if cell != None:
+            m = re.match(r"\s*([A-Z]+)", cell)
+            if len(m) > 0:
+                data["MWD"] = m[0][1]
+                data["WIND_MWD"] = None  # ensure UI uses swell direction unless wind_swell is chosen
 
-        if swell_period:
-            data["DPD"] = swell_period
-        if swell_dir:
-            data["MWD"] = swell_dir
-        if wind_wave:
-            data["WIND_WVHT"] = wind_wave
-        if wind_period:
-            data["WIND_DPD"] = wind_period
-        if wind_dir:
-            data["WIND_MWD"] = wind_dir
+        # WIND_WVHT
+        cell = td_value(wave_section, "Wind Wave Height (WWH):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*ft", cell)
+            if len(m) > 0:
+                data["WIND_WVHT"] = m[0][1]
 
-    # Wind Wave (not mapped, but could be added)
-    # Air Temp (not present in mobile page)
-    # Wind Speed, Gust, Direction (not present in mobile page)
+        # WIND_DPD
+        cell = td_value(wave_section, "Wind Wave Period (WWP):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*sec", cell)
+            if len(m) > 0:
+                data["WIND_DPD"] = m[0][1]
+
+        # WIND_MWD
+        cell = td_value(wave_section, "Wind Wave Direction (WWD):")
+        if cell != None:
+            m = re.match(r"\s*([A-Z]+)", cell)
+            if len(m) > 0:
+                data["WIND_MWD"] = m[0][1]
+
+        # STEEPNESS
+        cell = td_value(wave_section, "Wave Steepness (STEEPNESS):")
+        if cell != None:
+            m = re.match(r"\s*([A-Z]+)", cell)
+            if len(m) > 0:
+                data["STEEPNESS"] = m[0][1]
+
+
+    # Additional data extraction for wind and other metrics from desktop format
+    # Parse values directly from the Conditions table using td_value helper
+    # Wind Direction (WDIR)
+    cell = td_value(html, "Wind Direction (WDIR):")
+    if cell != None:
+        m = re.match(r"\s*([A-Z]+)", cell)
+        if len(m) > 0:
+            data["WDIR"] = m[0][1]
+
+    # Wind Speed (WSPD)
+    cell = td_value(html, "Wind Speed (WSPD):")
+    if cell != None:
+        m = re.match(r"\s*([0-9.]+)\s*kts", cell)
+        if len(m) > 0:
+            data["WSPD"] = m[0][1]
+    # Fallbacks: use 10m or 20m wind speed if base WSPD missing
+    if "WSPD" not in data:
+        cell = td_value(html, "Wind Speed at 10 meters (WSPD10M):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*kts", cell)
+            if len(m) > 0:
+                data["WSPD"] = m[0][1]
+    if "WSPD" not in data:
+        cell = td_value(html, "Wind Speed at 20 meters (WSPD20M):")
+        if cell != None:
+            m = re.match(r"\s*([0-9.]+)\s*kts", cell)
+            if len(m) > 0:
+                data["WSPD"] = m[0][1]
+
+    # Wind Gust (GST)
+    cell = td_value(html, "Wind Gust (GST):")
+    if cell != None:
+        m = re.match(r"\s*([0-9.]+)\s*kts", cell)
+        if len(m) > 0:
+            data["GST"] = m[0][1]
+
+    # Air Temperature (ATMP)
+    cell = td_value(html, "Air Temperature (ATMP):")
+    if cell != None:
+        m = re.match(r"\s*([0-9.]+)", cell)
+        if len(m) > 0:
+            data["ATMP"] = m[0][1]
+
+    # Water Temperature (WTMP)
+    cell = td_value(html, "Water Temperature (WTMP):")
+    if cell != None:
+        m = re.match(r"\s*([0-9.]+)", cell)
+        if len(m) > 0:
+            data["WTMP"] = m[0][1]
+
+    # Atmospheric Pressure (PRES)
+    cell = td_value(html, "Atmospheric Pressure (PRES):")
+    if cell != None:
+        m = re.match(r"\s*([0-9.]+)", cell)
+        if len(m) > 0:
+            data["PRES"] = m[0][1]
+
+    # Pressure Tendency (PTDY) - store as raw cell, or parse numeric change if desired
+    cell = td_value(html, "Pressure Tendency (PTDY):")
+    if cell != None:
+        # Capture signed numeric change
+        m = re.match(r"\s*([+\-]?[0-9.]+)", cell)
+        if len(m) > 0:
+            data["PTDY"] = m[0][1]
 
     # Fallback to last_data for missing fields
     # If Wave Summary section was not found, mark data as stale and use last_data for swell fields
@@ -200,12 +283,12 @@ def fetch_data(buoy_id, last_data):
         debug_print("Wave Summary missing, using last data. Stale counter: " + str(data.get("stale", 0)))
 
         # Use last_data for swell-related fields when wave summary is missing
-        for k in ["WVHT", "DPD", "MWD", "WIND_WVHT", "WIND_DPD", "WIND_MWD"]:
+        for k in ["WVHT", "DPD", "MWD", "WIND_WVHT", "WIND_DPD", "WIND_MWD", "SWH", "APD", "STEEPNESS"]:
             if k not in data or data[k] == None:
                 data[k] = last_data.get(k)
 
     # General fallback for all fields
-    for k in ["WVHT", "DPD", "MWD", "WTMP", "WIND_WVHT", "WIND_DPD", "WIND_MWD"]:
+    for k in ["WVHT", "DPD", "MWD", "WTMP", "ATMP", "WSPD", "GST", "WDIR", "WIND_WVHT", "WIND_DPD", "WIND_MWD", "SWH", "APD", "STEEPNESS"]:
         if k not in data or data[k] == None:
             data[k] = last_data.get(k)
 
