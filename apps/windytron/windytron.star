@@ -32,7 +32,7 @@ def fetch_data(station):
 
 def main(config):
 
-    station = config.get("station", None) or "kanaha_simple.json"
+    station = config.get("station", None) or "kanaha.json"
     wind_units = config.get("wind_units", "mph")
     custom_label = config.get("custom_label", "")
     label_color = config.get("label_color", "#FFFFFF")
