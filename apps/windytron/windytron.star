@@ -112,7 +112,7 @@ def get_schema():
                 icon = "flag",
                 desc = "Select wind station",
                 options = station_options,
-                default = "kanaha_simple.json",
+                default = "kanaha.json",
             ),
             schema.Dropdown(
                 id = "wind_units",
