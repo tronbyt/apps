@@ -5,7 +5,7 @@
   "main": "generate-apps-json.js",
   "scripts": {
     "build": "node generate-apps-json.js",
-    "serve": "python3 -m http.server 8080"
+    "serve": "http-server ../ -p 8888 --no-dotfiles -d false"
   },
   "keywords": [
     "tidbyt",
@@ -17,6 +17,9 @@
   "author": "Tronbyt Apps",
   "license": "MIT",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
   }
 }

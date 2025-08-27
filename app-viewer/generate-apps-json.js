@@ -30,7 +30,8 @@ function getReadmeDescription(appPath, mdFile) {
       .trim();
 
     return plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText;
-  } catch {
+  } catch (e) {
+    console.error(`Error reading description from ${mdPath}:`, e);
     return null;
   }
 }
@@ -46,7 +47,8 @@ function scanApps() {
     let files;
     try {
       files = fs.readdirSync(appPath);
-    } catch {
+    } catch (e) {
+      console.error(`Failed to read directory ${appPath}:`, e);
       continue;
     }
     const image = findFirstImage(files);

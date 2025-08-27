@@ -31,3 +31,5 @@ BUILD.bazel
 !apps/**/*.webp
 
 .vscode
+node_modules/
+

@@ -6,6 +6,12 @@ body {
   font-family: 'Press Start 2P', monospace;
 }
 
+.main-title {
+  font-family: 'Press Start 2P', monospace;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 #000;
+}
+
 .card {
   background: #222;
   border: 2px solid #444;
@@ -60,6 +66,11 @@ body {
   color: #ffd700;
   border: 2px solid #333;
   font-family: 'Press Start 2P', monospace;
+}
+
+.form-control::placeholder {
+  color: #888;
+  opacity: 1;
 }
 
 .card-img-top {
@@ -124,4 +135,8 @@ body {
 .tooltip-custom {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.7rem;
+}
+
+.report-button {
+  font-family: 'Press Start 2P', monospace;
 }

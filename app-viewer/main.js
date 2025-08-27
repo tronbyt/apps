@@ -37,35 +37,90 @@ function renderAppsList(apps, brokenApps = []) {
   apps.forEach(app => {
     const card = document.createElement('div');
     card.className = 'col-md-4';
+
     // Check if any of the app's star files are in the broken apps list
     const isBroken = app.starFiles && app.starFiles.some(starFile => brokenApps.includes(starFile));
-    let buttonHtml;
-    if (app.md) {
-      buttonHtml = `<a href="app.html?app=${encodeURIComponent(app.name)}" class="btn btn-primary mt-auto">📄 View Details</a>`;
-    } else {
-      buttonHtml = `<button class="btn btn-secondary mt-auto" disabled>🚫 No Details</button>`;
-    }
 
-    let imageHtml;
+    // Create card structure
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card h-100';
+
+    // Create image container
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'position-relative';
+
+    // Create image element
+    let imageElement;
     if (app.image) {
-      imageHtml = `<img src="${APPS_DIR}/${app.image}" class="card-img-top" alt="${app.name}">`;
+      imageElement = document.createElement('img');
+      imageElement.src = `${APPS_DIR}/${app.image}`;
+      imageElement.className = 'card-img-top';
+      imageElement.alt = app.name; // Safe: alt attribute is automatically escaped
     } else {
-      imageHtml = `<div class="card-img-top d-flex align-items-center justify-content-center bg-secondary text-white">No Image</div>`;
+      imageElement = document.createElement('div');
+      imageElement.className = 'card-img-top d-flex align-items-center justify-content-center bg-secondary text-white';
+      imageElement.textContent = 'No Image';
+    }
+    imageContainer.appendChild(imageElement);
+
+    // Add broken badge if needed
+    if (isBroken) {
+      const brokenBadge = document.createElement('div');
+      brokenBadge.className = 'broken-badge';
+      brokenBadge.title = 'This app is marked as broken';
+      brokenBadge.setAttribute('data-bs-toggle', 'tooltip');
+      brokenBadge.textContent = '⚠️';
+      imageContainer.appendChild(brokenBadge);
     }
 
-    card.innerHTML = `
-      <div class="card h-100">
-        <div class="position-relative">
-          ${imageHtml}
-          ${isBroken ? '<div class="broken-badge" title="This app is marked as broken" data-bs-toggle="tooltip">⚠️</div>' : ''}
-        </div>
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${app.name}${isBroken ? ' <span class="text-warning" title="Broken app" data-bs-toggle="tooltip">⚠️</span>' : ''}</h5>
-          ${app.description ? `<p class="card-description small mb-3">${app.description}</p>` : ''}
-          ${buttonHtml}
-        </div>
-      </div>
-    `;
+    // Create card body
+    const cardBody = document.createElement('div');
+    cardBody.className = 'card-body d-flex flex-column';
+
+    // Create title
+    const title = document.createElement('h5');
+    title.className = 'card-title';
+    title.textContent = app.name; // Safe: textContent prevents XSS
+
+    if (isBroken) {
+      const warningSpan = document.createElement('span');
+      warningSpan.className = 'text-warning';
+      warningSpan.title = 'Broken app';
+      warningSpan.setAttribute('data-bs-toggle', 'tooltip');
+      warningSpan.textContent = ' ⚠️';
+      title.appendChild(warningSpan);
+    }
+
+    cardBody.appendChild(title);
+
+    // Create description if it exists
+    if (app.description) {
+      const description = document.createElement('p');
+      description.className = 'card-description small mb-3';
+      description.textContent = app.description; // Safe: textContent prevents XSS
+      cardBody.appendChild(description);
+    }
+
+    // Create button
+    let button;
+    if (app.md) {
+      button = document.createElement('a');
+      button.href = `app.html?app=${encodeURIComponent(app.name)}`;
+      button.className = 'btn btn-primary mt-auto';
+      button.textContent = '📄 View Details';
+    } else {
+      button = document.createElement('button');
+      button.className = 'btn btn-secondary mt-auto';
+      button.disabled = true;
+      button.textContent = '🚫 No Details';
+    }
+
+    cardBody.appendChild(button);
+
+    // Assemble the card
+    cardDiv.appendChild(imageContainer);
+    cardDiv.appendChild(cardBody);
+    card.appendChild(cardDiv);
     list.appendChild(card);
   });
 
@@ -93,7 +148,9 @@ async function fetchAppMarkdown(appName) {
     try {
       const res = await fetch(`${APPS_DIR}/${appName}/${mdFile}`);
       if (res.ok) return await res.text();
-    } catch {}
+    } catch (e) {
+      console.error(`Failed to fetch markdown for ${appName}/${mdFile}:`, e);
+    }
   }
   return null;
 }
@@ -107,9 +164,13 @@ async function renderAppDetail() {
   const appName = getAppNameFromURL();
   const container = document.getElementById('app-content');
   if (!appName) {
+    // Safe: static HTML content
     container.innerHTML = '<div class="alert alert-danger">App not specified.</div>';
     return;
   }
+
+  // Clear container and create elements programmatically
+  container.innerHTML = '';
 
   // Get app data and check if app is broken
   const apps = await fetchAppsList();
@@ -117,12 +178,25 @@ async function renderAppDetail() {
   const brokenApps = await fetchBrokenApps();
   const isBroken = app && app.starFiles && app.starFiles.some(starFile => brokenApps.includes(starFile));
 
-  const md = await fetchAppMarkdown(appName);
-  let content = '';
-
+  // Add broken app warning if needed
   if (isBroken) {
-    content += '<div class="alert alert-warning"><strong><span title="This app has been reported as broken" data-bs-toggle="tooltip">⚠️</span> This app is marked as broken</strong></div>';
+    const brokenAlert = document.createElement('div');
+    brokenAlert.className = 'alert alert-warning';
+
+    const strongElement = document.createElement('strong');
+
+    const warningIcon = document.createElement('span');
+    warningIcon.title = 'This app has been reported as broken';
+    warningIcon.setAttribute('data-bs-toggle', 'tooltip');
+    warningIcon.textContent = '⚠️';
+
+    strongElement.appendChild(warningIcon);
+    strongElement.appendChild(document.createTextNode(' This app is marked as broken'));
+    brokenAlert.appendChild(strongElement);
+    container.appendChild(brokenAlert);
   }
+
+  const md = await fetchAppMarkdown(appName);
 
   if (md) {
     try {
@@ -147,27 +221,46 @@ async function renderAppDetail() {
         out += ' />';
         return out;
       };
-      content += DOMPurify.sanitize(marked.parse(md, { renderer }));
+
+      // Create a div to hold the sanitized markdown content
+      const markdownContainer = document.createElement('div');
+      markdownContainer.innerHTML = DOMPurify.sanitize(marked.parse(md, { renderer }));
+      container.appendChild(markdownContainer);
     } catch (error) {
       console.error('Marked.js error:', error);
-      content += '<div class="alert alert-danger">Error rendering markdown: ' + error.message + '</div>';
-      content += '<pre>' + md + '</pre>'; // Show raw markdown as fallback
+
+      // Create error alert
+      const errorAlert = document.createElement('div');
+      errorAlert.className = 'alert alert-danger';
+      errorAlert.textContent = 'Error rendering markdown: ' + error.message;
+      container.appendChild(errorAlert);
+
+      // Show raw markdown as fallback
+      const pre = document.createElement('pre');
+      pre.textContent = md; // Safe: textContent prevents XSS
+      container.appendChild(pre);
     }
   } else {
-    content += '<div class="alert alert-warning">No documentation available.</div>';
+    // No documentation available
+    const noDocsAlert = document.createElement('div');
+    noDocsAlert.className = 'alert alert-warning';
+    noDocsAlert.textContent = 'No documentation available.';
+    container.appendChild(noDocsAlert);
   }
 
   // Add Report Broken button
-  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=The%20app%20%60${encodeURIComponent(appName)}%60%20appears%20to%20be%20broken.%0A%0APlease%20add%20the%20appropriate%20.star%20file%20to%20the%20%60broken_apps.txt%60%20file.`;
-  content += `
-    <div class="mt-4 pt-4 border-top">
-      <a href="${reportUrl}" target="_blank" class="btn btn-warning" style="font-family: 'Press Start 2P', monospace;">
-        ${isBroken ? '⚠️ Already Reported' : '🐛 Report Broken'}
-      </a>
-    </div>
-  `;
+  const reportContainer = document.createElement('div');
+  reportContainer.className = 'mt-4 pt-4 border-top';
 
-  container.innerHTML = content;
+  const reportButton = document.createElement('a');
+  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=The%20app%20%60${encodeURIComponent(appName)}%60%20appears%20to%20be%20broken.%0A%0APlease%20add%20the%20appropriate%20.star%20file%20to%20the%20%60broken_apps.txt%60%20file.`;
+  reportButton.href = reportUrl;
+  reportButton.target = '_blank';
+  reportButton.className = 'btn btn-warning report-button';
+  reportButton.textContent = isBroken ? '⚠️ Already Reported' : '🐛 Report Broken';
+
+  reportContainer.appendChild(reportButton);
+  container.appendChild(reportContainer);
 
   // Initialize tooltips for the app detail page
   const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
