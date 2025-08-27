@@ -147,7 +147,7 @@ async function renderAppDetail() {
         out += ' />';
         return out;
       };
-      content += marked.parse(md, { renderer });
+      content += DOMPurify.sanitize(marked.parse(md, { renderer }));
     } catch (error) {
       console.error('Marked.js error:', error);
       content += '<div class="alert alert-danger">Error rendering markdown: ' + error.message + '</div>';
