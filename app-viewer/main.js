@@ -143,7 +143,7 @@ function renderAppsList(apps, brokenApps = []) {
     // Create title
     const title = document.createElement('h5');
     title.className = 'card-title';
-    title.textContent = app.name; // Safe: textContent prevents XSS
+    title.textContent = app.displayName || app.name; // Use displayName from manifest or fallback to folder name
 
     if (isBroken) {
       const warningSpan = document.createElement('span');
@@ -156,27 +156,20 @@ function renderAppsList(apps, brokenApps = []) {
 
     cardBody.appendChild(title);
 
-    // Create description if it exists
-    if (app.description) {
+    // Create summary/description if it exists (use summary first, then description)
+    const cardText = app.summary || app.description;
+    if (cardText) {
       const description = document.createElement('p');
       description.className = 'card-description small mb-3';
-      description.textContent = app.description; // Safe: textContent prevents XSS
+      description.textContent = cardText; // Safe: textContent prevents XSS
       cardBody.appendChild(description);
     }
 
-    // Create button
-    let button;
-    if (app.md) {
-      button = document.createElement('a');
-      button.href = `app.html?app=${encodeURIComponent(app.name)}`;
-      button.className = 'btn btn-primary mt-auto';
-      button.textContent = '📄 View Details';
-    } else {
-      button = document.createElement('button');
-      button.className = 'btn btn-secondary mt-auto';
-      button.disabled = true;
-      button.textContent = '🚫 No Details';
-    }
+    // Create button - all apps should have details from manifest
+    const button = document.createElement('a');
+    button.href = `app.html?app=${encodeURIComponent(app.name)}`;
+    button.className = 'btn btn-primary mt-auto';
+    button.textContent = '📄 View Details';
 
     cardBody.appendChild(button);
 
@@ -200,7 +193,11 @@ function setupSearch(apps, brokenApps) {
   const search = document.getElementById('search');
   search.addEventListener('input', () => {
     const val = search.value.toLowerCase();
-    renderAppsList(apps.filter(app => app.name.toLowerCase().includes(val)), brokenApps);
+    renderAppsList(apps.filter(app =>
+      app.name.toLowerCase().includes(val) ||
+      (app.displayName && app.displayName.toLowerCase().includes(val)) ||
+      (app.summary && app.summary.toLowerCase().includes(val))
+    ), brokenApps);
   });
 }
 
@@ -238,8 +235,17 @@ async function renderAppDetail() {
   // Get app data and check if app is broken
   const apps = await fetchAppsList();
   const app = apps.find(a => a.name === appName);
+
+  if (!app) {
+    const notFoundAlert = document.createElement('div');
+    notFoundAlert.className = 'alert alert-danger';
+    notFoundAlert.textContent = 'App not found.';
+    container.appendChild(notFoundAlert);
+    return;
+  }
+
   const brokenApps = await fetchBrokenApps();
-  const isBroken = app && app.starFiles && app.starFiles.some(starFile => brokenApps.includes(starFile));
+  const isBroken = app.starFiles && app.starFiles.some(starFile => brokenApps.includes(starFile));
 
   // Add broken app warning if needed
   if (isBroken) {
@@ -259,9 +265,96 @@ async function renderAppDetail() {
     container.appendChild(brokenAlert);
   }
 
+  // Create app details section from manifest data
+  const detailsSection = document.createElement('div');
+  detailsSection.className = 'mb-4';
+
+  // App title
+  const title = document.createElement('h1');
+  title.className = 'mb-3';
+  title.textContent = app.displayName || app.name;
+  detailsSection.appendChild(title);
+
+  // App details table
+  const detailsTable = document.createElement('div');
+  detailsTable.className = 'row mb-4';
+
+  const leftCol = document.createElement('div');
+  leftCol.className = 'col-md-8';
+
+  // Create details list
+  const detailsList = document.createElement('dl');
+  detailsList.className = 'row';
+
+  // Add details from manifest
+  if (app.author) {
+    const authorTerm = document.createElement('dt');
+    authorTerm.className = 'col-sm-3';
+    authorTerm.textContent = 'Author:';
+    const authorDesc = document.createElement('dd');
+    authorDesc.className = 'col-sm-9';
+    authorDesc.textContent = app.author;
+    detailsList.appendChild(authorTerm);
+    detailsList.appendChild(authorDesc);
+  }
+
+  if (app.recommendedInterval) {
+    const intervalTerm = document.createElement('dt');
+    intervalTerm.className = 'col-sm-3';
+    intervalTerm.textContent = 'Update Interval:';
+    const intervalDesc = document.createElement('dd');
+    intervalDesc.className = 'col-sm-9';
+    intervalDesc.textContent = `${app.recommendedInterval} minutes`;
+    detailsList.appendChild(intervalTerm);
+    detailsList.appendChild(intervalDesc);
+  }
+
+  if (app.description) {
+    const descTerm = document.createElement('dt');
+    descTerm.className = 'col-sm-3';
+    descTerm.textContent = 'Description:';
+    const descDesc = document.createElement('dd');
+    descDesc.className = 'col-sm-9';
+    descDesc.textContent = app.description;
+    detailsList.appendChild(descTerm);
+    detailsList.appendChild(descDesc);
+  }
+
+  leftCol.appendChild(detailsList);
+  detailsTable.appendChild(leftCol);
+
+  // Add app image if available
+  if (app.image) {
+    const rightCol = document.createElement('div');
+    rightCol.className = 'col-md-4';
+
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'text-center';
+
+    const image = document.createElement('img');
+    image.src = `${APPS_DIR}/${app.image}`;
+    image.alt = app.displayName || app.name;
+    image.className = 'img-fluid rounded border';
+    image.style.maxHeight = '200px';
+
+    imageContainer.appendChild(image);
+    rightCol.appendChild(imageContainer);
+    detailsTable.appendChild(rightCol);
+  }
+
+  detailsSection.appendChild(detailsTable);
+  container.appendChild(detailsSection);
+
+  // Try to load markdown for additional details
   const md = await fetchAppMarkdown(appName);
 
   if (md) {
+    // Add "More Details" section header
+    const moreDetailsHeader = document.createElement('h2');
+    moreDetailsHeader.className = 'mt-4 mb-3';
+    moreDetailsHeader.textContent = 'Readme';
+    container.appendChild(moreDetailsHeader);
+
     try {
       // Custom renderer to fix image paths
       const renderer = new marked.Renderer();
@@ -303,12 +396,6 @@ async function renderAppDetail() {
       pre.textContent = md; // Safe: textContent prevents XSS
       container.appendChild(pre);
     }
-  } else {
-    // No documentation available
-    const noDocsAlert = document.createElement('div');
-    noDocsAlert.className = 'alert alert-warning';
-    noDocsAlert.textContent = 'No documentation available.';
-    container.appendChild(noDocsAlert);
   }
 
   // Add Report Broken button
