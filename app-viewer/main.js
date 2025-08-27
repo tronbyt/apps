@@ -4,36 +4,99 @@ const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 const BROKEN_APPS_FILE = '../broken_apps.txt';
 
+// --- CACHE MANAGEMENT ---
+// Simple in-memory cache to avoid redundant network requests
+// Data persists for the duration of the browser session
+const appCache = {
+  appsList: null,
+  brokenApps: null,
+  isAppsListLoaded: false,
+  isBrokenAppsLoaded: false
+};
+
+// Function to clear cache (useful for development or manual refresh)
+function clearAppCache() {
+  appCache.appsList = null;
+  appCache.brokenApps = null;
+  appCache.isAppsListLoaded = false;
+  appCache.isBrokenAppsLoaded = false;
+}
+
+// Function to preload all data (useful for optimizing initial page load)
+async function preloadAppData() {
+  const [apps, brokenApps] = await Promise.all([
+    fetchAppsList(),
+    fetchBrokenApps()
+  ]);
+  return { apps, brokenApps };
+}
+
 // --- INDEX PAGE LOGIC ---
 async function fetchBrokenApps() {
+  // Return cached data if available
+  if (appCache.isBrokenAppsLoaded) {
+    console.log('📋 Using cached broken apps data');
+    return appCache.brokenApps;
+  }
+
+  console.log('🔄 Fetching broken apps from server...');
   try {
     const res = await fetch(BROKEN_APPS_FILE);
     if (res.ok) {
       const text = await res.text();
-      return text.split('\n').map(line => line.trim()).filter(line => line);
+      const brokenApps = text.split('\n').map(line => line.trim()).filter(line => line);
+
+      // Cache the result
+      appCache.brokenApps = brokenApps;
+      appCache.isBrokenAppsLoaded = true;
+      console.log(`✅ Cached ${brokenApps.length} broken apps`);
+
+      return brokenApps;
     }
   } catch (e) {
     console.error('Failed to load broken apps:', e);
   }
+
+  // Cache empty array as fallback
+  appCache.brokenApps = [];
+  appCache.isBrokenAppsLoaded = true;
   return [];
 }
 
 async function fetchAppsList() {
+  // Return cached data if available
+  if (appCache.isAppsListLoaded) {
+    console.log('📋 Using cached apps list data');
+    return appCache.appsList;
+  }
+
+  console.log('🔄 Fetching apps list from server...');
   // Load the generated apps.json file
   try {
     const res = await fetch('apps.json');
     if (res.ok) {
-      return await res.json();
+      const apps = await res.json();
+
+      // Cache the result
+      appCache.appsList = apps;
+      appCache.isAppsListLoaded = true;
+      console.log(`✅ Cached ${apps.length} apps`);
+
+      return apps;
     }
   } catch (e) {
     console.error('Failed to load apps.json:', e);
   }
+
+  // Cache empty array as fallback
+  appCache.appsList = [];
+  appCache.isAppsListLoaded = true;
   return [];
 }
 
 function renderAppsList(apps, brokenApps = []) {
   const list = document.getElementById('apps-list');
-  list.innerHTML = '';
+  list.replaceChildren();
   apps.forEach(app => {
     const card = document.createElement('div');
     card.className = 'col-md-4';
@@ -170,7 +233,7 @@ async function renderAppDetail() {
   }
 
   // Clear container and create elements programmatically
-  container.innerHTML = '';
+  container.replaceChildren();
 
   // Get app data and check if app is broken
   const apps = await fetchAppsList();
@@ -274,9 +337,8 @@ async function renderAppDetail() {
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('apps-list')) {
-    // Index page
-    const apps = await fetchAppsList();
-    const brokenApps = await fetchBrokenApps();
+    // Index page - preload all data simultaneously
+    const { apps, brokenApps } = await preloadAppData();
     renderAppsList(apps, brokenApps);
     setupSearch(apps, brokenApps);
   } else if (document.getElementById('app-content')) {

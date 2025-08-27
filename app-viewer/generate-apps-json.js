@@ -26,7 +26,7 @@ function getReadmeDescription(appPath, mdFile) {
       .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links
       .replace(/`(.*?)`/g, '$1') // Remove inline code
       .replace(/^\s*[-*+]\s+/gm, '') // Remove list markers
-      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .replace(/\s+/g, ' ') // Replace all whitespace sequences with a single space
       .trim();
 
     return plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText;
