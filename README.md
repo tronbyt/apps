@@ -4,9 +4,13 @@
 [![Discourse](https://img.shields.io/discourse/status?server=https%3A%2F%2Fdiscuss.tidbyt.com&style=flat-square)](https://discuss.tidbyt.com/)
 [![Discord Server](https://img.shields.io/discord/928484660785336380?style=flat-square)](https://discord.gg/r45MXG4kZc)
 
-## 🔍 [**Browse Apps →**](https://tronbyt.github.io/apps/app-viewer/)
+---
 
-**Explore all available apps with search, documentation, and screenshots in our interactive web viewer.**
+### **Discover, explore, and install hundreds of apps!**
+
+**[🎯 View the Current Apps →](https://tronbyt.github.io/apps/app-viewer/)**
+
+---
 
 Tronbyt-Apps is a hard fork of the Tidbyt's Community repo. These apps have been developed by the [Tidbyt community][3] 🚀
 This exists because the Tidbyt folks have stopped merging pull requests since their acquisition by Modal.
