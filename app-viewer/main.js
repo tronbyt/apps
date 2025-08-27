@@ -1,5 +1,6 @@
 // --- CONFIG ---
-const APPS_DIR = '../apps';
+// Use different paths for local development vs GitHub Pages
+const APPS_DIR = window.location.hostname === 'tronbyt.github.io' ? '..' : '../apps';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 const BROKEN_APPS_FILE = '../broken_apps.txt';
@@ -214,7 +215,8 @@ async function renderAppDetail() {
 
         // If href is relative, prefix with correct app path
         if (href && typeof href === 'string' && !href.match(/^(https?:\/\/|\/|apps\/)/)) {
-          href = `../apps/${appName}/${href}`;
+          const basePath = window.location.hostname === 'tronbyt.github.io' ? '..' : '../apps';
+          href = `${basePath}/${appName}/${href}`;
         }
         let out = `<img src="${href || ''}" alt="${text || ''}"`;
         if (title) out += ` title="${title}"`;
