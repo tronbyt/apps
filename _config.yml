@@ -1,0 +1,7 @@
+# Jekyll configuration for GitHub Pages
+# Exclude app README files from Jekyll processing to prevent Liquid syntax errors
+exclude:
+  - apps/*/README.md
+  - apps/*/readme.md
+  - apps/*/index.md
+  - apps/**/*.md
