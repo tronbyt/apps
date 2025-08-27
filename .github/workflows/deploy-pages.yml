@@ -28,6 +28,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        run: |
+          cd app-viewer
+          npm install
+
       - name: Generate apps.json
         run: |
           cd app-viewer
