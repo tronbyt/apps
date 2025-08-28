@@ -221,23 +221,22 @@ function setupSearch(apps, brokenApps) {
 
 // --- APP DETAIL PAGE LOGIC ---
 async function fetchAppMarkdown(appName) {
-  // Try to fetch the markdown file
-  for (const mdFile of MD_FILES) {
-    try {
-      const url = `${APPS_DIR}/${appName}/${mdFile}`;
-      console.log(`🔄 Trying to fetch markdown: ${url}`);
-      const res = await fetch(url);
-      if (res.ok) {
-        console.log(`✅ Successfully fetched: ${url}`);
-        return await res.text();
-      } else {
-        console.log(`❌ Failed to fetch ${url}: ${res.status} ${res.statusText}`);
-      }
-    } catch (e) {
-      console.error(`Failed to fetch markdown for ${appName}/${mdFile}:`, e);
-    }
+  const apps = await fetchAppsList();
+  const app = apps.find(a => a.name === appName);
+
+  if (!app || !app.md) {
+    return null;
   }
-  console.log(`⚠️ No markdown found for ${appName}`);
+
+  try {
+    const response = await fetch(`${APPS_DIR}/${app.md}`);
+    if (response.ok) {
+      return await response.text();
+    }
+  } catch (error) {
+    console.error('Error fetching markdown:', error);
+  }
+
   return null;
 }
 
