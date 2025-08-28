@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Apps Viewer</title>
+        <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/200508996?s=48&v=4">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        <div class="container py-4">
+            <h1 class="mb-4 main-title"><img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4"> Apps
+                Viewer</h1>
+
+            <div class="input-group mb-4">
+                <input type="text" id="search" class="form-control" placeholder="Search apps...">
+                <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
+                    <label class="form-check-label" for="dot-matrix-toggle">
+                        Enable dot matrix overlay
+                    </label>
+                </div>
+            </div>
+
+            <div id="apps-list" class="row g-4"></div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="main.js"></script>
+    </body>
+
+</html>
