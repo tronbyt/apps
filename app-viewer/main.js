@@ -1,8 +1,10 @@
 // --- CONFIG ---
-const APPS_DIR = '../apps';
+// Detect if we're running on GitHub Pages or locally
+const isGitHubPages = window.location.hostname.includes('github.io');
+const APPS_DIR = isGitHubPages ? 'apps' : '../apps';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
-const BROKEN_APPS_FILE = '../broken_apps.txt';
+const BROKEN_APPS_FILE = isGitHubPages ? 'broken_apps.txt' : '../broken_apps.txt';
 
 // --- CACHE MANAGEMENT ---
 // Simple in-memory cache to avoid redundant network requests
@@ -191,6 +193,9 @@ function renderAppsList(apps, brokenApps = []) {
 
 function setupSearch(apps, brokenApps) {
   const search = document.getElementById('search');
+  const clearButton = document.getElementById('clear-search');
+
+  // Handle search input
   search.addEventListener('input', () => {
     const val = search.value.toLowerCase();
     renderAppsList(apps.filter(app =>
@@ -198,7 +203,21 @@ function setupSearch(apps, brokenApps) {
       (app.displayName && app.displayName.toLowerCase().includes(val)) ||
       (app.summary && app.summary.toLowerCase().includes(val))
     ), brokenApps);
+
+    // Show/hide clear button based on input
+    clearButton.style.display = val ? 'block' : 'none';
   });
+
+  // Handle clear button click
+  clearButton.addEventListener('click', () => {
+    search.value = '';
+    renderAppsList(apps, brokenApps);
+    clearButton.style.display = 'none';
+    search.focus(); // Return focus to search input
+  });
+
+  // Initially hide clear button
+  clearButton.style.display = 'none';
 }
 
 // --- APP DETAIL PAGE LOGIC ---
@@ -370,7 +389,7 @@ async function renderAppDetail() {
 
         // If href is relative, prefix with correct app path
         if (href && typeof href === 'string' && !href.match(/^(https?:\/\/|\/|apps\/)/)) {
-          href = `../apps/${appName}/${href}`;
+          href = `${APPS_DIR}/${appName}/${href}`;
         }
         let out = `<img src="${href || ''}" alt="${text || ''}"`;
         if (title) out += ` title="${title}"`;
