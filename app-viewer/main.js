@@ -109,9 +109,14 @@ function renderAppsList(apps, brokenApps = []) {
     const cardDiv = document.createElement('div');
     cardDiv.className = 'card h-100';
 
-    // Create image container
+    // Create image container with clickable link
     const imageContainer = document.createElement('div');
     imageContainer.className = 'position-relative';
+
+    // Wrap image in a link
+    const imageLink = document.createElement('a');
+    imageLink.href = `app.html?app=${encodeURIComponent(app.name)}`;
+    imageLink.className = 'text-decoration-none';
 
     // Create image element
     let imageElement;
@@ -125,7 +130,8 @@ function renderAppsList(apps, brokenApps = []) {
       imageElement.className = 'card-img-top d-flex align-items-center justify-content-center bg-secondary text-white';
       imageElement.textContent = 'No Image';
     }
-    imageContainer.appendChild(imageElement);
+    imageLink.appendChild(imageElement);
+    imageContainer.appendChild(imageLink);
 
     // Add broken badge if needed
     if (isBroken) {
@@ -141,7 +147,11 @@ function renderAppsList(apps, brokenApps = []) {
     const cardBody = document.createElement('div');
     cardBody.className = 'card-body d-flex flex-column';
 
-    // Create title
+    // Create clickable title
+    const titleLink = document.createElement('a');
+    titleLink.href = `app.html?app=${encodeURIComponent(app.name)}`;
+    titleLink.className = 'text-decoration-none';
+
     const title = document.createElement('h5');
     title.className = 'card-title';
     title.textContent = app.displayName || app.name; // Use displayName from manifest or fallback to folder name
@@ -155,7 +165,8 @@ function renderAppsList(apps, brokenApps = []) {
       title.appendChild(warningSpan);
     }
 
-    cardBody.appendChild(title);
+    titleLink.appendChild(title);
+    cardBody.appendChild(titleLink);
 
     // Create summary/description if it exists (use summary first, then description)
     const cardText = app.summary || app.description;
@@ -462,8 +473,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { apps, brokenApps } = await preloadAppData();
     renderAppsList(apps, brokenApps);
     setupSearch(apps, brokenApps);
+    setupDotMatrixToggle();
   } else if (document.getElementById('app-content')) {
     // App detail page
     renderAppDetail();
+    setupDotMatrixToggle();
   }
 });
+
+// --- DOT MATRIX TOGGLE ---
+function setupDotMatrixToggle() {
+  const toggle = document.getElementById('dot-matrix-toggle');
+  if (!toggle) return;
+
+  // Load saved preference from localStorage, default to true (enabled)
+  const savedState = localStorage.getItem('dotMatrixEnabled');
+  if (savedState === null) {
+    // First time visiting - use the default checked state
+    toggle.checked = true;
+    document.body.classList.add('dot-matrix-enabled');
+    localStorage.setItem('dotMatrixEnabled', 'true');
+  } else if (savedState === 'true') {
+    toggle.checked = true;
+    document.body.classList.add('dot-matrix-enabled');
+  } else {
+    toggle.checked = false;
+    document.body.classList.remove('dot-matrix-enabled');
+  }
+
+  // Handle toggle changes
+  toggle.addEventListener('change', function() {
+    if (this.checked) {
+      document.body.classList.add('dot-matrix-enabled');
+      localStorage.setItem('dotMatrixEnabled', 'true');
+    } else {
+      document.body.classList.remove('dot-matrix-enabled');
+      localStorage.setItem('dotMatrixEnabled', 'false');
+    }
+  });
+}

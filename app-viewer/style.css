@@ -47,6 +47,25 @@ body {
   text-shadow: 1px 1px 0 #000;
 }
 
+/* Clickable title styling */
+.card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-title a:hover {
+  color: #ffed4a;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* Clickable image hover effect */
+.card .position-relative a:hover img,
+.card .position-relative a:hover div {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+  border-color: #ffd700;
+}
+
 .btn-primary {
   background: #3333cc;
   border: none;
@@ -77,14 +96,41 @@ body {
   height: 180px;
   background: #111;
   border-bottom: 2px solid #444;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+}
+
+/* Only apply dot matrix to actual images when toggle is enabled */
+body.dot-matrix-enabled .card-img-top[src]:not([src=""]) {
+  -webkit-mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
+  mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  width: 100%;
 }
 
 #app-content img {
   max-width: 100%;
-  height: auto;
+  height: 200px;
   image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
   border: 2px solid #333;
   background: #111;
+}
+
+/* Only apply dot matrix to images when toggle is enabled */
+body.dot-matrix-enabled #app-content img {
+  -webkit-mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
+  mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  mask-repeat: no-repeat;
+  mask-size: cover;
 }
 
 #app-content {
@@ -138,4 +184,24 @@ body {
 
 .report-button {
   font-family: 'Press Start 2P', monospace;
+}
+
+.form-check-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.8rem;
+  color: #e0e0e0;
+}
+
+.form-check-input {
+  background-color: #222;
+  border: 2px solid #444;
+}
+
+.form-check-input:checked {
+  background-color: #ffd700;
+  border-color: #ffd700;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25);
 }
