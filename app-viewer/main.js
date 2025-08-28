@@ -1,9 +1,9 @@
 // --- CONFIG ---
-// Both cases serve the apps directory at the root level
-const APPS_DIR = 'apps';  // Always use 'apps' since http-server serves from ../
+// Use GitHub Pages structure for both local and production
+const APPS_DIR = '../apps';
+const BROKEN_APPS_FILE = '../broken_apps.txt';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
-const BROKEN_APPS_FILE = 'broken_apps.txt';  // Always at root level
 
 // --- CACHE MANAGEMENT ---
 // Simple in-memory cache to avoid redundant network requests
@@ -102,8 +102,8 @@ function renderAppsList(apps, brokenApps = []) {
     const card = document.createElement('div');
     card.className = 'col-md-4';
 
-    // Check if any of the app's star files are in the broken apps list
-    const isBroken = app.starFiles && app.starFiles.some(starFile => brokenApps.includes(starFile));
+    // Check if the app's star file is in the broken apps list
+    const isBroken = app.starFile && brokenApps.includes(app.starFile);
 
     // Create card structure
     const cardDiv = document.createElement('div');
@@ -271,7 +271,7 @@ async function renderAppDetail() {
   }
 
   const brokenApps = await fetchBrokenApps();
-  const isBroken = app.starFiles && app.starFiles.some(starFile => brokenApps.includes(starFile));
+  const isBroken = app.starFile && brokenApps.includes(app.starFile);
 
   // Add broken app warning if needed
   if (isBroken) {
@@ -424,17 +424,26 @@ async function renderAppDetail() {
     }
   }
 
-  // Add Report Broken button
+  // Add buttons at the bottom - Back to Apps on left, Report Broken on right
   const reportContainer = document.createElement('div');
-  reportContainer.className = 'mt-4 pt-4 border-top';
+  reportContainer.className = 'mt-4 pt-4 border-top d-flex justify-content-between';
 
+  // Back to Apps button (left side)
+  const backButton = document.createElement('a');
+  backButton.href = './';
+  backButton.className = 'btn btn-secondary';
+  backButton.textContent = '← Back to Apps';
+
+  // Report Broken button (right side)
   const reportButton = document.createElement('a');
-  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=The%20app%20%60${encodeURIComponent(appName)}%60%20appears%20to%20be%20broken.%0A%0APlease%20add%20the%20appropriate%20.star%20file%20to%20the%20%60broken_apps.txt%60%20file.`;
+  const starFileText = app.starFile ? `\n\nStar file to add: \`${app.starFile}\`` : '\n\nNo .star file found for this app.';
+  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=The%20app%20%60${encodeURIComponent(appName)}%60%20appears%20to%20be%20broken.%0A%0APlease%20add%20the%20following%20line%20to%20the%20%60broken_apps.txt%60%20file:${encodeURIComponent(starFileText)}`;
   reportButton.href = reportUrl;
   reportButton.target = '_blank';
   reportButton.className = 'btn btn-warning report-button';
   reportButton.textContent = isBroken ? '⚠️ Already Reported' : '🐛 Report Broken';
 
+  reportContainer.appendChild(backButton);
   reportContainer.appendChild(reportButton);
   container.appendChild(reportContainer);
 

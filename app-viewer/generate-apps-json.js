@@ -67,6 +67,7 @@ function scanApps() {
     const image = findFirstImage(files);
     const md = findMarkdown(files);
     const starFiles = files.filter(f => f.endsWith('.star'));
+    const starFile = starFiles.length > 0 ? starFiles[0] : null; // Take the first .star file
     const manifest = parseManifest(appPath);
 
     // Get description from manifest first, then fallback to README
@@ -98,7 +99,7 @@ function scanApps() {
       recommendedInterval: recommendedInterval,
       image: image ? `${appName}/${image}` : null,
       md: md ? `${appName}/${md}` : null,
-      starFiles: starFiles
+      starFile: starFile
     });
   }
   return apps;
