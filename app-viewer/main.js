@@ -1,10 +1,9 @@
 // --- CONFIG ---
-// Detect if we're running on GitHub Pages or locally
-const isGitHubPages = window.location.hostname.includes('github.io');
-const APPS_DIR = isGitHubPages ? 'apps' : '../apps';
+// Both cases serve the apps directory at the root level
+const APPS_DIR = 'apps';  // Always use 'apps' since http-server serves from ../
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
-const BROKEN_APPS_FILE = isGitHubPages ? 'broken_apps.txt' : '../broken_apps.txt';
+const BROKEN_APPS_FILE = 'broken_apps.txt';  // Always at root level
 
 // --- CACHE MANAGEMENT ---
 // Simple in-memory cache to avoid redundant network requests
@@ -225,12 +224,20 @@ async function fetchAppMarkdown(appName) {
   // Try to fetch the markdown file
   for (const mdFile of MD_FILES) {
     try {
-      const res = await fetch(`${APPS_DIR}/${appName}/${mdFile}`);
-      if (res.ok) return await res.text();
+      const url = `${APPS_DIR}/${appName}/${mdFile}`;
+      console.log(`🔄 Trying to fetch markdown: ${url}`);
+      const res = await fetch(url);
+      if (res.ok) {
+        console.log(`✅ Successfully fetched: ${url}`);
+        return await res.text();
+      } else {
+        console.log(`❌ Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+      }
     } catch (e) {
       console.error(`Failed to fetch markdown for ${appName}/${mdFile}:`, e);
     }
   }
+  console.log(`⚠️ No markdown found for ${appName}`);
   return null;
 }
 
