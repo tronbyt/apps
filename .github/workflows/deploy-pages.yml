@@ -3,8 +3,6 @@ name: Build and Deploy App Viewer to GitHub Pages
 on:
   push:
     branches: [ main, master, app-viewer-tester ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 permissions:
