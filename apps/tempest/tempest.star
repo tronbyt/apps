@@ -35,19 +35,6 @@ def main(config):
         print(url)
         res = http.get(
             url = TEMPEST_OBSERVATION_URL % (station_id, token),
-            headers = {
-                "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-                "DNT": "1",
-                "Pragma": "no-cache",
-                "Referer": "https://xscreensaver.eod.com/",
-                "Sec-Fetch-Dest": "image",
-                "Sec-Fetch-Mode": "no-cors",
-                "Sec-Fetch-Site": "same-origin",
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-            },
         )
         if res.status_code != 200:
             fail("station observation request failed with status code: %d - %s" %
@@ -5360,7 +5347,7 @@ def wind_direction(heading):
         return "WNW"
     elif heading >= 303.75 and heading <= 326.25:
         return "NW"
-    elif heading >= 326.25 and heading <= 348.47:
+    elif heading >= 326.25 and heading <= 348.74:
         return "NNW"
 
     return "-"
