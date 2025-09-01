@@ -328,13 +328,12 @@ def main(config):
     grid_anim = EMPTY
     grid_color = GRAY
     grid_rate = o["GRID"]["currentPower"]
-    if o["GRID"]["status"] == "Active":
-        if {"from": "Load", "to": "GRID"} in connections:
-            grid_anim = GREEN_ANIM
-            grid_color = GREEN
-        elif {"from": "GRID", "to": "Load"} in connections:
-            grid_anim = RED_ANIM
-            grid_color = RED
+    if {"from": "Load", "to": "GRID"} in connections:
+        grid_anim = GREEN_ANIM
+        grid_color = GREEN
+    elif {"from": "GRID", "to": "Load"} in connections:
+        grid_anim = RED_ANIM
+        grid_color = RED
 
     # MAIN FRAME
     #######################################
