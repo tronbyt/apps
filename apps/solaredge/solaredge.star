@@ -21,9 +21,6 @@ URL_SITE = "https://monitoringapi.solaredge.com/site/{}/details"
 # one per 5 minutes
 CACHE_TTL = 300
 
-DEBUG = False
-#DEBUG = True # set to True to skip api calls and use dummy data
-
 DUMMY_DATA = {
     "siteCurrentPowerFlow": {
         "updateRefreshRate": 3,
@@ -328,12 +325,13 @@ def main(config):
     grid_anim = EMPTY
     grid_color = GRAY
     grid_rate = o["GRID"]["currentPower"]
-    if {"from": "Load", "to": "GRID"} in connections:
-        grid_anim = GREEN_ANIM
-        grid_color = GREEN
-    elif {"from": "GRID", "to": "Load"} in connections:
-        grid_anim = RED_ANIM
-        grid_color = RED
+    if o["GRID"]["status"] == "Active":
+        if {"from": "LOAD", "to": "Grid"} in connections:
+            grid_anim = GREEN_ANIM
+            grid_color = GREEN
+        elif {"from": "GRID", "to": "Load"} in connections:
+            grid_anim = RED_ANIM
+            grid_color = RED
 
     # MAIN FRAME
     #######################################
