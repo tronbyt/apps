@@ -218,8 +218,11 @@ def main(config):
     if system_id_cached == None:
         status, system_id = get_system_id(api_key, unique_suffix)
         if status == 401:
-            # Token expired or missing, refresh it and retry
-            request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
+            # Token expired or missing, try to refresh it.
+            refresh_token_code = cache.get(REFRESH_TOKEN_KEY.format(unique_suffix))
+            if not refresh_token_code:
+                return render_msg("Refresh token is missing or expired. Please re-configure the app.")
+            request_refresh_token(refresh_token_code, client_id, client_secret)
             status, system_id = get_system_id(api_key, unique_suffix)
 
         if status == 200:
@@ -238,8 +241,11 @@ def main(config):
     if engery_cached == None:
         status, energy_today = get_system_stats(api_key, unique_suffix, system_id)
         if status == 401:
-            # Token expired or missing, refresh it and retry
-            request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
+            # Token expired or missing, try to refresh it.
+            refresh_token_code = cache.get(REFRESH_TOKEN_KEY.format(unique_suffix))
+            if not refresh_token_code:
+                return render_msg("Refresh token is missing or expired. Please re-configure the app.")
+            request_refresh_token(refresh_token_code, client_id, client_secret)
             status, energy_today = get_system_stats(api_key, unique_suffix, system_id)
 
         if status == 200:
