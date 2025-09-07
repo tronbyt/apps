@@ -47,8 +47,12 @@ def check_response(response):
         return response.status_code, None
 
 def get_system_id(api_key, unique_suffix):
+    access_token = cache.get(ACCESS_TOKEN_KEY.format(unique_suffix))
+    if not access_token:
+        return 401, None
+
     headers = {
-        "Authorization": "Bearer " + cache.get(ACCESS_TOKEN_KEY.format(unique_suffix)),
+        "Authorization": "Bearer " + access_token,
         "Content-Type": "application/json",
     }
 
@@ -72,8 +76,12 @@ def get_system_id(api_key, unique_suffix):
         return status, msg
 
 def get_system_stats(api_key, unique_suffix, system_id):
+    access_token = cache.get(ACCESS_TOKEN_KEY.format(unique_suffix))
+    if not access_token:
+        return 401, None
+
     headers = {
-        "Authorization": "Bearer " + cache.get(ACCESS_TOKEN_KEY.format(unique_suffix)),
+        "Authorization": "Bearer " + access_token,
         "Content-Type": "application/json",
     }
 
@@ -193,41 +201,33 @@ def main(config):
     if init == None:
         # Cache is scoped to the app, not individual user. So the cache keys need to be
         # unique to the user/configuration
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             ACCESS_TOKEN_KEY.format(unique_suffix),
             access_token,
             ttl_seconds = TTL_SECONDS,
         )
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             REFRESH_TOKEN_KEY.format(unique_suffix),
             refresh_token,
             ttl_seconds = TTL_SECONDS * 7,
         )
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(INIT_KEY.format(unique_suffix), "1")
-
-    # refresh access token
-    request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
 
     # Get "system_id"
     system_id_cached = cache.get(SYSTEM_ID_KEY.format(unique_suffix))
     if system_id_cached == None:
         status, system_id = get_system_id(api_key, unique_suffix)
+        if status == 401:
+            # Token expired or missing, refresh it and retry
+            request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
+            status, system_id = get_system_id(api_key, unique_suffix)
+
         if status == 200:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(
                 SYSTEM_ID_KEY.format(unique_suffix),
                 system_id,
                 ttl_seconds = TTL_SECONDS,
             )
-        elif status == 401:
-            request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
-            return render_msg("System token just refreshed wait for next call.")
         else:
             return render_msg("Unable to get system id, status code: {}".format(status))
     else:
@@ -237,16 +237,17 @@ def main(config):
     engery_cached = cache.get(ENERGY_TODAY_KEY.format(unique_suffix))
     if engery_cached == None:
         status, energy_today = get_system_stats(api_key, unique_suffix, system_id)
+        if status == 401:
+            # Token expired or missing, refresh it and retry
+            request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
+            status, energy_today = get_system_stats(api_key, unique_suffix, system_id)
+
         if status == 200:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(
                 ENERGY_TODAY_KEY.format(unique_suffix),
                 energy_today,
                 ttl_seconds = TTL_SECONDS,
             )
-        elif status == 401:
-            request_refresh_token(cache.get(REFRESH_TOKEN_KEY.format(unique_suffix)), client_id, client_secret)
-            return render_msg("Summary token just refreshed wait for next call.")
         else:
             return render_msg("Unable to get system stats, status code: {}".format(status))
     else:
