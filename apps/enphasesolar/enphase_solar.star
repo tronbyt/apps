@@ -158,6 +158,23 @@ def render_information(msg, scroll = False):
         )
     return format_msg(msg)
 
+def _api_call_with_retry(api_func, client_id, client_secret, unique_suffix):
+    """Calls a given API function, handles token refresh and retries on 401."""
+    status, result = api_func()
+
+    if status == 401:
+        # Token expired or missing, try to refresh it.
+        refresh_token_code = cache.get(REFRESH_TOKEN_KEY.format(unique_suffix))
+        if not refresh_token_code:
+            return 403, "Refresh token is missing or expired. Please re-configure the app."
+
+        request_refresh_token(refresh_token_code, client_id, client_secret)
+
+        # Retry the call
+        status, result = api_func()
+
+    return status, result
+
 def render_msg(msg):
     """Render message to App"""
     scroll = len(msg) > SCROLL_MSG_LEN
@@ -216,16 +233,16 @@ def main(config):
     # Get "system_id"
     system_id_cached = cache.get(SYSTEM_ID_KEY.format(unique_suffix))
     if system_id_cached == None:
-        status, system_id = get_system_id(api_key, unique_suffix)
-        if status == 401:
-            # Token expired or missing, try to refresh it.
-            refresh_token_code = cache.get(REFRESH_TOKEN_KEY.format(unique_suffix))
-            if not refresh_token_code:
-                return render_msg("Refresh token is missing or expired. Please re-configure the app.")
-            request_refresh_token(refresh_token_code, client_id, client_secret)
-            status, system_id = get_system_id(api_key, unique_suffix)
+        status, system_id = _api_call_with_retry(
+            lambda: get_system_id(api_key, unique_suffix),
+            client_id,
+            client_secret,
+            unique_suffix,
+        )
 
-        if status == 200:
+        if status == 403:
+            return render_msg(system_id)
+        elif status == 200:
             cache.set(
                 SYSTEM_ID_KEY.format(unique_suffix),
                 system_id,
@@ -239,16 +256,16 @@ def main(config):
     # Get "energy_today"
     engery_cached = cache.get(ENERGY_TODAY_KEY.format(unique_suffix))
     if engery_cached == None:
-        status, energy_today = get_system_stats(api_key, unique_suffix, system_id)
-        if status == 401:
-            # Token expired or missing, try to refresh it.
-            refresh_token_code = cache.get(REFRESH_TOKEN_KEY.format(unique_suffix))
-            if not refresh_token_code:
-                return render_msg("Refresh token is missing or expired. Please re-configure the app.")
-            request_refresh_token(refresh_token_code, client_id, client_secret)
-            status, energy_today = get_system_stats(api_key, unique_suffix, system_id)
+        status, energy_today = _api_call_with_retry(
+            lambda: get_system_stats(api_key, unique_suffix, system_id),
+            client_id,
+            client_secret,
+            unique_suffix,
+        )
 
-        if status == 200:
+        if status == 403:
+            return render_msg(energy_today)
+        elif status == 200:
             cache.set(
                 ENERGY_TODAY_KEY.format(unique_suffix),
                 energy_today,
