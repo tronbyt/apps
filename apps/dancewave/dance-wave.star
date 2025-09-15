@@ -133,7 +133,7 @@ def fetch_current_track():
                 "artist": current.get("artist", "Unknown Artist"),
                 "title": current.get("title", "Unknown Title"),
             }
-            cache.set("current_track", json.encode(track_data), ttl_seconds = 30)
+            cache.set("current_track", json.encode(track_data), ttl_seconds = CACHE_TTL_SECONDS)
             return track_data
         else:
             print("No playlist data found")
