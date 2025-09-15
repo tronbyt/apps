@@ -16,8 +16,7 @@ This app connects to Dance Wave Online Radio's live stream API to show what's cu
 
 The app supports the following configuration options:
 
-- **Show Time**: Display timestamp along with track info (default: false)
-- **Choose Colors**: Pick colors for the Now Playing Banner, Artist, and Title
+- **Text Color**: Color for track information text.
 
 ## License
 
