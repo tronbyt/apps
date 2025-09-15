@@ -126,8 +126,9 @@ def fetch_current_track():
         data = resp.json()
 
         # Extract the current track (first item in playlist)
-        if data.get("mscp", {}).get("playlist") and len(data["mscp"]["playlist"]) > 0:
-            current = data["mscp"]["playlist"][0]
+        playlist = data.get("mscp", {}).get("playlist")
+        if playlist:
+            current = playlist[0]
             track_data = {
                 "artist": current.get("artist", "Unknown Artist"),
                 "title": current.get("title", "Unknown Title"),
