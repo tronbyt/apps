@@ -15,7 +15,7 @@ R0lGODlhQABAAPcAAAAAAAz7rg/6shD5tRb2vhr2vweD/wiF/wyL/xGS/xSY/xme/x2j/yOs/yey/ym1
 """)
 
 # Cache TTL for API responses
-CACHE_TTL_SECONDS = 120  # Cache for 2 minutes (more frequent updates for live radio)
+CACHE_TTL_SECONDS = 30  # Cache for 30 seconds (more frequent updates for live radio)
 
 def main(config):
     """
