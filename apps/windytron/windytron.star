@@ -1,9 +1,20 @@
 load("render.star", "render")
 load("http.star", "http")
 load("encoding/base64.star", "base64")
+load("encoding/json.star", "json")
 load("time.star", "time")
 load("schema.star", "schema")
 
+DEBUG = True
+DEFAULT_DATA = """{
+  "avg": 18,
+  "gust": 21,
+  "lull": 12,
+  "dir_card": "NE",
+  "dir_deg": 45,
+  "stamp": "2025-07-17T20:49:47",
+  "label": "Kanaha"
+}"""
 
 # Define your station lookup dictionary at the top of the file
 station_lookup = {
@@ -11,18 +22,20 @@ station_lookup = {
     "hookipa.json": "Ho'okipa",
     "ukumehame.json": "Ukumehame",
     "kihei.json": "Kihei",
-    "swell_city.json":"Swell City",
+    "swell_city.json": "Swell City",
     "stevenson_light.json": "Stevenson",
     "viento.json": "Viento",
     "event_site.json": "Event Site",
     "the_wall.json": "Theh Wall",
     "arlington.json": "Arlington",
     "maryhill.json": "Mary Hill",
-    "loroc.json": "Loroc"
+    "loroc.json": "Loroc",
 }
 
 def fetch_data(station):
-    url = "http://windytron.com/out/{}?time={}".format(station,time.now().unix)
+    if DEBUG:
+        return json.decode(DEFAULT_DATA)
+    url = "http://windytron.com/out/{}?time={}".format(station, time.now().unix)
     print(url)
     rep = http.get(url, ttl_seconds = 10)
     if rep.status_code != 200:
@@ -31,17 +44,30 @@ def fetch_data(station):
     return data
 
 def main(config):
-
     station = config.get("station", None) or "kanaha.json"
     wind_units = config.get("wind_units", "mph")
     custom_label = config.get("custom_label", "")
     label_color = config.get("label_color", "#FFFFFF")
+    avg_condition = config.get("avg_condition")
+    dir_condition = config.get("dir_condition")
+
     data = fetch_data(station)
-    
+
     wind_avg = int(data["avg"] + 0.5)
     wind_gust = int(data["gust"] + 0.5)
     wind_dir = data["dir_card"]
     wind_dir_degrees = int(data["dir_deg"] + 0.5)
+
+    if avg_condition and "-" in avg_condition:
+        (bottom, top) = avg_condition.split("-")
+        if wind_avg < int(bottom) or wind_avg > int(top):
+            return []
+
+    if dir_condition and "-" in dir_condition:
+        (bottom, top) = dir_condition.split("-")
+        print(dir_condition.split("-"))
+        if wind_dir < int(bottom) or wind_dir > int(top):
+            return []
 
     # Convert to knots if needed
     display_units = "mph"
@@ -50,10 +76,10 @@ def main(config):
         wind_gust = int(wind_gust / 1.15078 + 0.5)
         display_units = "kts"
 
-    color_light = "#00FFFF" #cyan
-    color_medium = "#AAEEDD" #??
-    color_strong = "#00FF00" #green
-    color_beast = "#FF0000" # red
+    color_light = "#00FFFF"  #cyan
+    color_medium = "#AAEEDD"  #??
+    color_strong = "#00FF00"  #green
+    color_beast = "#FF0000"  # red
     wind_color = color_medium
     if (wind_avg < 10):
         wind_color = color_light
@@ -70,7 +96,7 @@ def main(config):
     return render.Root(
         child = render.Box(
             render.Column(
-                cross_align="center",
+                cross_align = "center",
                 main_align = "center",
                 children = [
                     render.Text(
@@ -81,7 +107,7 @@ def main(config):
                     render.Text(
                         content = "%dg%d %s" % (wind_avg, wind_gust, display_units),
                         font = "6x13",
-                        color = wind_color
+                        color = wind_color,
                     ),
                     render.Text(
                         content = "%s %d°" % (wind_dir, wind_dir_degrees),
@@ -120,7 +146,7 @@ def get_schema():
                 icon = "wind",
                 desc = "mph or kts",
                 options = wind_unit_options,
-                default = "mph"
+                default = "mph",
             ),
             schema.Text(
                 id = "custom_label",
@@ -136,10 +162,23 @@ def get_schema():
                 desc = "Pick a color for the label",
                 default = "#FFFFFF",
             ),
-        ]
+            schema.Text(
+                id = "avg_condition",
+                name = "Wind range to show",
+                icon = "edit",
+                desc = "Syntax is min-max eg. '10-15'",
+                default = "0-50",
+            ),
+            schema.Text(
+                id = "dir_condition",
+                name = "Direction range to show",
+                icon = "edit",
+                desc = "Syntax is min-max eg. '30-180'",
+                default = "0-50",
+            ),
+        ],
     )
 
 # Helper function to get display name from value
 def get_station_display_name(station_value):
     return station_lookup.get(station_value, station_value)
-
