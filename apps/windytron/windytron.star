@@ -5,7 +5,7 @@ load("encoding/json.star", "json")
 load("time.star", "time")
 load("schema.star", "schema")
 
-DEBUG = True
+DEBUG = False
 DEFAULT_DATA = """{
   "avg": 18,
   "gust": 21,
