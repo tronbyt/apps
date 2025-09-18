@@ -14,7 +14,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 ############
 FONT = "tom-thumb"  #set font
@@ -61,26 +60,12 @@ iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAbpJREFUOE/Nk7FP
 PEOPLE_ICON = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAd5JREFUOE+tk79rFFEQx7/z9q7QFEYhjb1NtIkIQasTLA3amMZKjlyTH3cbcnuc567P7HJedkN298QiQfIPpEiMnRFsAyEQFBVEREQ8sLJMsftGdnUvlxgDIb7qwZv5zHe+M49wwkMnzMdfgJoTXmPFl1mgI5T6OGdNvz2qyD5AzQ4nGdzuSfjKUGOeOf3yX5AuYMbz+sRu/hsBG0ITkiM+FRPPE1DICT7fbOgdww4fslDPvYa+kwG7AMP2bwO0KnL5C636+KckYMb2CwL0moGRvODtSNH334kkXbP8KL1lpOpsWCLixcMAWYIuF87lNJIEmgRwyzUr63st2P4NAdogYOVACwOuWbmUFao32wNxrH6AWXctPdhnYtIjwLLXMCaMeg8qK12ltt9OFAimKy2rvL3ngeMvgqnEoFdE6jMURSBcBTBEoIk5s/y0x5M3ffHPYSnlbgownOAJGBPMXPQsfTmrVpLydL92tpqoEkIUW42p5ZoTrjPzCIDNOI7uURJ0RuvvEGghc/bgzNPxgQueWbmevFXt4CYBLwCskWEHRQDPNE1cfHx/6v1hC1NvtgfjWL0DeNA19Q+p6j9+pS0kI/Ss8tJRK1t1gjtaxFstqX/J4gzHv/v/P9Nxf+cvOtjHXAVbbF4AAAAASUVORK5CYII=
 """)
-
-############
-#oauth variables
-CLIENT_ID_DEFAULT = "123456"
-CLIENT_SECRET_DEFAULT = "78910"
-
-CLIENT_ID = "AV6+xWcELqs3DIzsKxE+sbeSwpyr6od4qQ5P50JbpXeDbvJ9jTY9PmNKwjsGuoRcqDm3O6Ycla5WW2c/QWkSsEE6+Qvx8h6dpXXnc7sJH/KFHT7PKAwQpBB4Lpoo+/SXnaajzs7CE2Whmgi6btkOddyxyZSQVGaC0OQ="
-CLIENT_SECRET = "AV6+xWcEctKRED4FFQz/BS/u5MlGScY7F3x1xZ5Tg+8spZX/+Y/dfMnd+6RPagWOYzh63Xea4bP8qnHf5kGuplixKHx3dfeQoxmsORFbMW2Da98T716B/8EcWuQhw2hb4gbQr0oKPwZr6RANKywUWBUt3/0LAhoG9EziqBUGJFAeLuDnFeGdAvjYz/w1lg=="
-
-############
-#debug stuff
-AUTH_TOKEN = None  #can get by using pixlet serve and login with DEBUG_OAUTH ON
-
-DEBUG_OAUTH = False
-DEBUG = False
+DEBUG = True
 
 ############
 def main(config):
     #get user data
-    auth_token = config.get("auth", AUTH_TOKEN)
+    auth_token = config.get("access_token")
     if auth_token == None:
         data = None  #creates empty stat information
     else:
@@ -130,17 +115,17 @@ def get_schema():
     ]
 
     return [
-        schema.OAuth2(
-            id = "auth",
-            name = "GitHub",
-            desc = "Connect your GitHub account.",
-            icon = "github",
-            handler = oauth_handler,
-            client_id = secret.decrypt(CLIENT_ID) or CLIENT_ID_DEFAULT,
-            authorization_endpoint = "https://github.com/login/oauth/authorize",
-            scopes = [
-                "read:user",
-            ],
+        schema.Text(
+            id = "github_username",
+            name = "GitHub Username",
+            desc = "Personal Username",
+            icon = "person",
+        ),
+        schema.Text(
+            id = "access_token",
+            name = "GitHub Personal Access Token",
+            desc = "Personal Access token",
+            icon = "lock",
         ),
         schema.Dropdown(
             id = "background_theme",
@@ -159,37 +144,6 @@ def get_schema():
             default = theme_opts[0].value,
         ),
     ]
-
-######################################################
-#functions for getting data
-def oauth_handler(params):
-    params = json.decode(params)
-    if DEBUG_OAUTH:
-        print(params)
-
-    # handle oauth2 flow (see Example App)
-    auth_params = {
-        "client_id": params["client_id"],
-        "client_secret": secret.decrypt(CLIENT_SECRET) or CLIENT_SECRET_DEFAULT,
-        "code": params["code"],
-        "redirect_uri": params["redirect_uri"],
-    }
-    auth_resp = http.post(
-        url = "https://github.com/login/oauth/access_token",
-        params = auth_params,
-        headers = {
-            "Accept": "application/json",
-        },
-    )
-
-    if auth_resp.status_code != 200:
-        access_token = "%s Error, could not get authorization token!!!!" % auth_resp.status_code
-        return None
-    else:
-        access_token = auth_resp.json()["access_token"]
-        if DEBUG_OAUTH:
-            print(access_token)
-    return access_token
 
 def get_contributions(auth_token):
     #get the contribution data for a user
@@ -251,9 +205,6 @@ def get_contributions(auth_token):
         json_body = dataQuery,
         ttl_seconds = 600,  #store data for 10 minutes
     )
-    if DEBUG_OAUTH:
-        for key in ["X-Oauth-Scopes", "X-Accepted-Oauth-Scopes"]:
-            print("%s: %s" % (key, rep.headers[key]))
 
     if rep.status_code != 200:
         print("%s Error, could not get authorization token!!!!" % rep.status_code)
@@ -395,7 +346,7 @@ def contribution_activity(data):
 def contribution_stats(data):
     #get stats like total contributions (in last year), open issues/pulls, and followers/following
     if data == None:
-        final_text = render.Text("Sign in to GitHub!!!!", height = 9, offset = 1, font = FONT)
+        final_text = render.Text("Set username and token !!!!", height = 9, offset = 1, font = FONT)
     else:
         #get data
         total = int(data["contributionsCollection"]["contributionCalendar"]["totalContributions"])  #total contributions in last year
