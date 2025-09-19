@@ -212,6 +212,7 @@ def main(config):
     enabledMetrics["pressure"] = config.get("pressureEnabled", False)
     enabledMetrics["aqi"] = config.get("aqiEnabled", False)
     enabledMetrics["bigClock"] = config.get("bigClockEnabled", True)
+    enabledMetrics["feelsLike"] = config.get("feelsLikeEnabled", True)
 
     if display_sample:
         # sample data to display if user-specified API / location key are not available, also useful for testing
@@ -661,16 +662,17 @@ def main(config):
     else:
         hours_str = ("0" if hours < 10 and time_format != "12 hour" else "") + str(hours)
 
-    if enabledMetrics["bigClock"]:
-        time_hh_text = render.Text(
-            content = hours_str,
-            font = "tom-thumb",
-            height = 24
-        )
-        time_mm_text = render.Text(content = ("0000" + str(minutes))[-2:], font = "tom-thumb",height = 24)
-        time_ampm_text = render.Text(content = "AM" if hours < 12 else "PM", font = "tom-thumb",height = 24)
-
-    else:
+    if enabledMetrics["bigClock"]: # for big clock we don't care about compressing space
+        time_ampm_str = "AM" if hours < 12 else "PM"
+        if time_format == "12 hour":
+            time_text = render.Text(content = (hours_str + ":" + ("0000" + str(minutes))[-2:] + " " + time_ampm_str),
+            font = "6x13"
+            )
+        else:
+            time_text = render.Text(content = (hours_str + ":" + ("0000" + str(minutes))[-2:]),
+            font = "6x13"
+            )
+    else: #for small clock the colon is going to be individually rendered, this is a decision by the original dev I will respect
         time_hh_text = render.Text(
             content = hours_str,
             font = "tom-thumb",
@@ -795,26 +797,16 @@ def main(config):
                                         render.Box(width = 1) if time_format == "12 hour" else None,
                                         time_ampm_text if time_format == "12 hour" else None,
                                     ],
-                                ) if enabledMetrics["bigClock"] == False else None, ##TODO: Put in the logic for additional rows when big clock is enabled
+                                ) if enabledMetrics["bigClock"] == False else None, ##Theoretically something could go under the clock but it looks fine to me now.
                             ],
                             expanded = True,
                             cross_align = "center",
                         ),
                         render.Column(
                             children = [
-                                render.Box( child = 
-                                    render.Row(
-                                        children = [
-                                            time_hh_text,
-                                            render.Image(width = 2, height = 5, src = base64.decode(COLON)),
-                                            time_mm_text,
-                                            render.Box(width = 1) if time_format == "12 hour" else None,
-                                            time_ampm_text if time_format == "12 hour" else None,
-                                        ],
-                                    )
-                         ) if enabledMetrics["bigClock"] == True else temp_text, 
-                                #temp_text,
-                                #feels_like_text,
+                                time_text if enabledMetrics["bigClock"] == True else None, 
+                                temp_text,
+                                feels_like_text if enabledMetrics["feelsLike"] == True else None,
                                 render.Padding(
                                     pad = (0, 2, 0, 0),
                                     child = render.Animation(
@@ -1151,6 +1143,13 @@ def get_schema():
                 desc = "Move the temperature down and make the time more prominent",
                 icon = "maximize",
                 default = False,
+            ),
+            schema.Toggle(
+                id = "feelsLikeEnabled",
+                name = "Show 'feels like' temperature",
+                desc = "Display 'feels like' temperature below actual temperature",
+                icon = "temperatureThreeQuarters",
+                default = True,
             ),
             schema.Color(
                 id = "tempColor",
