@@ -6,3 +6,4 @@ desc: Reports the number of eBikes and normal bikes available at a given dock in
 author: abrahamrowe
 fileName: capital_bikeshare.star
 packageName: capitalbikeshare
+recommended_interval: 5

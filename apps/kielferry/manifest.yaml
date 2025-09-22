@@ -6,3 +6,4 @@ desc: Next scheduled ferry departure time for any stop and direction in the Kiel
 author: hloeding
 fileName: kiel_ferry.star
 packageName: kielferry
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: 'View live tracking information for Milwaukee County Transit System buses.
 author: Josiah Winslow
 fileName: mcts_tracker.star
 packageName: mctstracker
+recommended_interval: 5

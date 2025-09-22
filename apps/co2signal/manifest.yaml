@@ -6,3 +6,4 @@ desc: Shows the carbon intensity of your local electricity.
 author: Harper Trow
 fileName: co2_signal.star
 packageName: co2signal
+recommended_interval: 5

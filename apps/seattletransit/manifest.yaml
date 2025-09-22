@@ -6,3 +6,4 @@ desc: Displays transit arrivals in the Seattle area for a user selected stop.
 author: maxa010
 fileName: seattle_transit.star
 packageName: seattletransit
+recommended_interval: 5

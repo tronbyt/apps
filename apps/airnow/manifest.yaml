@@ -6,3 +6,4 @@ desc: Displays the current AQI value and level by location using data provided b
 author: mjc-gh
 fileName: airnow.star
 packageName: airnow
+recommended_interval: 5

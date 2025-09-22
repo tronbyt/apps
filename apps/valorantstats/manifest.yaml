@@ -6,3 +6,4 @@ desc: Pulls live VALORANT rank stats using henrikdev's Valorant API based on pro
 author: ohdxnte
 fileName: valorant_stats.star
 packageName: valorantstats
+recommended_interval: 5

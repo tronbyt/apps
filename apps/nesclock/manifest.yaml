@@ -6,3 +6,4 @@ desc: Short animations of various Nintendo characters with a background clock.
 author: hx009
 fileName: nes_clock.star
 packageName: nesclock
+recommended_interval: 0

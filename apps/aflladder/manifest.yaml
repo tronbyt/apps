@@ -6,3 +6,4 @@ desc: Shows the AFL Ladder with option for rotation speed.
 author: M0ntyP
 fileName: afl_ladder.star
 packageName: aflladder
+recommended_interval: 5

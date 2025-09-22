@@ -278,7 +278,11 @@ def get_schema():
 def get_cacheable_data(url, articlecount):
     articles = []
 
-    res = http.get(RSS_STUB.format(url), ttl_seconds = CACHE_TTL_SECONDS)
+    # The CBC website blocks requests from the default user agent (Go-http-client/1.1),
+    # so we need to set it to literally anything different. If you encounter a vague "stream error",
+    # try changing the user agent string to something else.
+    res = http.get(RSS_STUB.format(url),  ttl_seconds = CACHE_TTL_SECONDS,
+                   headers= {"User-Agent": "Mozilla/5.0 (compatible; Pixlet)"})
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
     data = res.body()

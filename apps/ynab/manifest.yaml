@@ -6,3 +6,4 @@ desc: Display information about your monthly budget in YNAB.
 author: DanielJRutledge
 fileName: ynab.star
 packageName: ynab
+recommended_interval: 5

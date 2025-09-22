@@ -6,3 +6,4 @@ desc: Get daily scores or live updates of sports. Scores for the previous day ar
 author: rs7q5
 fileName: sports_scores.star
 packageName: sportsscores
+recommended_interval: 5

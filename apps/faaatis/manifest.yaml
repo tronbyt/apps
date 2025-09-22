@@ -4,3 +4,4 @@ name: FAA ATIS
 summary: ATIS runway information
 desc: Display FAA ATIS information (runways in use) for a given airport.
 author: Connick Shields
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Display prices from selected Murphy USA station.
 author: jvivona
 fileName: murphy_usa_gas.star
 packageName: murphyusagas
+recommended_interval: 5

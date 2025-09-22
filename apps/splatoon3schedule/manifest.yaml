@@ -6,3 +6,4 @@ desc: Displays Splatoon 3 schedule info, data courtesy of Splatoon3.ink.
 author: Denton-L
 fileName: splatoon3schedule.star
 packageName: splatoon3schedule
+recommended_interval: 5

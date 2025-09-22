@@ -6,3 +6,4 @@ desc: A clock that displays the current time using math.
 author: rs7q5
 fileName: math_clock.star
 packageName: mathclock
+recommended_interval: 0

@@ -6,3 +6,4 @@ desc: Displays three upcoming ferry depature times for the Charlestown, MA Ferry
 author: jblaker
 fileName: charlestownferry.star
 packageName: charlestownferry
+recommended_interval: 5

@@ -1,0 +1,28 @@
+{
+  "name": "tronbyt-apps-viewer",
+  "version": "1.0.0",
+  "description": "Static web viewer for Tronbyt apps with search and documentation",
+  "main": "generate-apps-json.js",
+  "scripts": {
+    "build": "node generate-apps-json.js",
+    "serve": "cd .. && http-server . -p 8888 --no-dotfiles -d false"
+  },
+  "keywords": [
+    "tidbyt",
+    "pixlet",
+    "apps",
+    "viewer",
+    "static-site"
+  ],
+  "author": "Tronbyt Apps",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

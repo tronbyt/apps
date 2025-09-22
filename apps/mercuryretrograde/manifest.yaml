@@ -6,3 +6,4 @@ desc: Is Mercury in retrograde?
 author: FlyingLooper
 fileName: mercuryretrograde.star
 packageName: mercuryretrograde
+recommended_interval: 5

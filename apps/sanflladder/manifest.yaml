@@ -4,3 +4,4 @@ name: SANFL Ladder
 summary: Shows the SANFL Ladder
 desc: Shows the SANFL Ladder.
 author: M0ntyP
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Displays the time using a quote from a piece of literature. Based on work 
 author: Alysha Kwok
 fileName: literature_clock.star
 packageName: literatureclock
+recommended_interval: 1

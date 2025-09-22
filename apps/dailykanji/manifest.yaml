@@ -6,3 +6,4 @@ desc: Displays a random Kanji character with translation.
 author: Robert Ison
 fileName: dailykanji.star
 packageName: dailykanji
+recommended_interval: 5

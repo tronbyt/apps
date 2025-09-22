@@ -6,3 +6,4 @@ desc: Shows what's currently playing on All Classical Portland (KQAC).
 author: Andrew Westling
 fileName: kqac.star
 packageName: kqac
+recommended_interval: 5

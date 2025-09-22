@@ -6,3 +6,4 @@ desc: Shows Steam user avatar, name, status, and currently playing.
 author: Mike Toscano
 fileName: steam_plus.star
 packageName: steamplus
+recommended_interval: 5

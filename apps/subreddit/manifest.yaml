@@ -6,3 +6,4 @@ desc: 'Display the #1 post of a subreddit.'
 author: Petros Fytilis
 fileName: subreddit.star
 packageName: subreddit
+recommended_interval: 5

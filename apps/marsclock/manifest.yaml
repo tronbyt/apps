@@ -6,3 +6,4 @@ desc: See Mars time and (optional) Sol Date for your selected location on Mars. 
 author: Adam Henson
 fileName: mars_clock.star
 packageName: marsclock
+recommended_interval: 0

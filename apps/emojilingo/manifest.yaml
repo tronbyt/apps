@@ -6,3 +6,4 @@ desc: Displays a random emoji and its unique short text annotation from the Unic
 author: Cedric Sam
 fileName: emoji_lingo.star
 packageName: emojilingo
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: View NCAAF standings by conference.
 author: LunchBox8484
 fileName: ncaaf_standings.star
 packageName: ncaafstandings
+recommended_interval: 5

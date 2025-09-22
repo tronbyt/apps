@@ -6,3 +6,4 @@ desc: Beer Die scoreboard with dropdown menus to keep track of score. Customized
 author: zachtempel3
 fileName: die_scoreboard_gt.star
 packageName: diescoreboardgt
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Displays a random quote from the hit TV sitcom, Friends.
 author: kaffolder7
 fileName: friends_quotes.star
 packageName: friendsquotes
+recommended_interval: 5

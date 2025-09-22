@@ -6,3 +6,4 @@ desc: Feed of the flights tracked by a radar recording data for Flightradar24.
 author: kinson
 fileName: flight_radar_feed.star
 packageName: flightradarfeed
+recommended_interval: 5

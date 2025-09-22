@@ -1,20 +1,19 @@
 """
 Applet: MBTA
 Summary: MBTA departures
-Description: MBTA bus and rail departure times.
-Author: marcusb
+Description: MBTA bus and rail departure times. Updated to work with Tronbyt.
+Author: marcusb, eric-pierce
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 URL = "https://api-v3.mbta.com/predictions"
 
-API_KEY = secret.decrypt("AV6+xWcEFe8B+1zoMJpL7mvq/utSOtMw6qSGeCYZjUhKnv21BwCdrfQWjtr/mYvReXGmpd1Wf2SD+EjIZl+/Uh+VxTDZQhJpYqChzPvioRUmj2y6rnxTVuOl8llWXrShy9aXWkVFRsNRFuZ4XZre1Q4Mf6Qmd+DWNzVESSFONPh3Vv0Jieo=")
+API_KEY = ""
 
 T_ABBREV = {
     "Blue": "BL",
@@ -22,12 +21,14 @@ T_ABBREV = {
     "Orange": "OL",
     "Red": "RL",
     "Silver": "SL",
+    "Commuter Rail": "CR",
 }
 
 def main(config):
     option = config.get("stop", '{"display": "South Station", "value": "place-sstat"}')
     stop = json.decode(option)
     mintime = config.get("mintime", "0")
+    api_key = (config.get("api", "") or "").strip()
 
     widgetMode = config.bool("$widget")
 
@@ -36,8 +37,8 @@ def main(config):
         "include": "route",
         "filter[stop]": stop["value"],
     }
-    if API_KEY:
-        params["api_key"] = API_KEY
+    if api_key != "":
+        params["api_key"] = api_key
     rep = http.get(URL, params = params)
     if rep.status_code != 200:
         fail("MBTA API request failed with status {}".format(rep.status_code))
@@ -58,7 +59,7 @@ def main(config):
             arr = t - time.now()
             if arr.minutes >= float(mintime):
                 rows.extend(r)
-                rows.append(render.Box(height = 1, width = 64, color = "#ccffff"))
+                rows.append(render.Box(height = 1, width = 64, color = "#8c8c8c"))
 
     if rows:
         return render.Root(
@@ -69,13 +70,13 @@ def main(config):
             child = render.Marquee(
                 width = 64,
                 child = render.Text(
-                    content = "No current departures",
+                    content = "No departures",
                     height = 8,
                     offset = -1,
                     font = "Dina_r400-6",
                 ),
             ) if not widgetMode else render.WrappedText(
-                content = "No current departures",
+                content = "No departures",
                 width = 62,
                 font = "Dina_r400-6",
             ),
@@ -92,7 +93,7 @@ def renderSched(prediction, route, widgetMode = False):
         return []
     dest = route["attributes"]["direction_destinations"][int(attrs["direction_id"])].upper()
     minutes = int(arr.minutes)
-    short_name = route["attributes"]["short_name"] or T_ABBREV.get(route["id"], "")
+    short_name = route["attributes"]["short_name"] or T_ABBREV.get(route["id"], "") or T_ABBREV.get(route["attributes"]["fare_class"], "")
     msg = "{} min".format(minutes) if minutes else "Now"
     first_line = dest
     if attrs["status"]:
@@ -181,8 +182,6 @@ def get_stops(location):
         "filter[longitude]": loc["lng"],
         "sort": "distance",
     }
-    if API_KEY:
-        params["api_key"] = API_KEY
 
     rep = http.get("https://api-v3.mbta.com/stops", params = params)
     if rep.status_code != 200:
@@ -238,6 +237,12 @@ def get_schema():
                 icon = "bus",
                 default = options[0].value,
                 options = options,
+            ),
+            schema.Text(
+                id = "api",
+                name = "MBTA v3 API Key",
+                desc = "Go to https://www.mbta.com/developers/v3-api, sign up for a free account and enter your API key here. Limited to 1000 requests per minute",
+                icon = "gear",
             ),
         ],
     )

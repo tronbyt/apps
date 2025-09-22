@@ -6,3 +6,4 @@ desc: The user selects an Indego (Philadelphia bike share) station and Tidbyt wi
 author: RayPatt
 fileName: indego_stations.star
 packageName: indegostations
+recommended_interval: 5

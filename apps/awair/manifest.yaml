@@ -6,3 +6,4 @@ desc: Display air quality data for an Awair device.
 author: tabrindle, flavorjones
 fileName: awair.star
 packageName: awair
+recommended_interval: 5

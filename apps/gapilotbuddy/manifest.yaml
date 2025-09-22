@@ -6,3 +6,4 @@ desc: See local aerodrome flight rules and current abbreviated METAR information
 author: icdevin
 fileName: ga_pilot_buddy.star
 packageName: gapilotbuddy
+recommended_interval: 5

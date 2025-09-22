@@ -6,3 +6,4 @@ desc: Monitor client usages for your Meraki network.
 author: UnBurn
 fileName: meraki_usage.star
 packageName: merakiusage
+recommended_interval: 5

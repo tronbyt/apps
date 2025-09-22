@@ -6,3 +6,4 @@ desc: No Laying Up produces golf and golf adjacent media content. This app displ
 author: M0ntyP
 fileName: no_laying_up.star
 packageName: nolayingup
+recommended_interval: 10

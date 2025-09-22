@@ -29,3 +29,7 @@ BUILD.bazel
 
 # allow thumbnails in app folders
 !apps/**/*.webp
+
+.vscode
+node_modules/
+

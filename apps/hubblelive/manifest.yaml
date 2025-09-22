@@ -6,3 +6,4 @@ desc: Displays the currently scheduled observation status of the Hubble Space Te
 author: Brian McLaughlin (SpinStabilized)
 fileName: hubble_live.star
 packageName: hubblelive
+recommended_interval: 5

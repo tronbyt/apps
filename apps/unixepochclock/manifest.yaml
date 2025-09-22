@@ -6,3 +6,4 @@ desc: A clock showing seconds from the Unix epoch.
 author: paultyng
 fileName: unix_epoch_clock.star
 packageName: unixepochclock
+recommended_interval: 0

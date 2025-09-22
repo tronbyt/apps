@@ -6,3 +6,4 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: LunchBox8484
 fileName: wbc_scores.star
 packageName: wbcscores
+recommended_interval: 5

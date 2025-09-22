@@ -6,3 +6,4 @@ desc: Enter your location and fuel type, then find the cheapest fuel in a 5km ra
 author: M0ntyP
 fileName: raa_fuel_watch.star
 packageName: raafuelwatch
+recommended_interval: 5

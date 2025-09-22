@@ -6,3 +6,4 @@ desc: Shows a random list of your favorite disgruntled Bastard Operator From Hel
 author: jondkelley
 fileName: bofh_quotes.star
 packageName: bofhquotes
+recommended_interval: 5

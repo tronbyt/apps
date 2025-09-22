@@ -6,3 +6,4 @@ desc: Shows today's remaining tasks and subtasks as rows or columns of dots. Gre
 author: shannonmoeller
 fileName: todoist_routines.star
 packageName: todoistroutines
+recommended_interval: 60

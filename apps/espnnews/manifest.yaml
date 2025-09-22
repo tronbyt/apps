@@ -6,3 +6,4 @@ desc: Displays the top three headlines from the Top Headlines section on ESPN or
 author: rs7q5
 fileName: espn_news.star
 packageName: espnnews
+recommended_interval: 10

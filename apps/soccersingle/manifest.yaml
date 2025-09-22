@@ -6,3 +6,4 @@ desc: Show upcoming / current / future game for a single soccer team across all 
 author: jvivona
 fileName: soccer_single.star
 packageName: soccersingle
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Plays Conway's Game of Life using the pixels of a clock display as the sta
 author: kevwoods
 fileName: life_clock.star
 packageName: lifeclock
+recommended_interval: 0

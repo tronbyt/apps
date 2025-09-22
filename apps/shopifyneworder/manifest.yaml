@@ -6,3 +6,4 @@ desc: Display how many items and the total dollar amount of every order, so you 
 author: Shopify
 fileName: shopify_new_order.star
 packageName: shopifyneworder
+recommended_interval: 5

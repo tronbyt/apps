@@ -4,3 +4,4 @@ name: Overwatch Meta
 summary: Overatch 2 Meta Statistics
 desc: This app polls the Overwatch 2 Meta information from Overbuff.
 author: GeoffBarrett
+recommended_interval: 5

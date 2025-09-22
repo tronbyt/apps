@@ -6,3 +6,4 @@ desc: Set a reminder for each day of week.
 author: sepowitz
 fileName: daily_reminder.star
 packageName: dailyreminder
+recommended_interval: 5

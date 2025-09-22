@@ -6,3 +6,4 @@ desc: Get the latest headlines from the Electronic Frontier Foundation.
 author: hainish
 fileName: effheadlines.star
 packageName: effheadlines
+recommended_interval: 5

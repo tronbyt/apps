@@ -6,3 +6,4 @@ desc: Shows the predicted arrival times from NextBus for a given SF Muni stop.
 author: Martin Strauss
 fileName: sf_next_muni.star
 packageName: sfnextmuni
+recommended_interval: 5

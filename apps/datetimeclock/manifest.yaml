@@ -6,3 +6,4 @@ desc: Displays the full date and current time for user.
 author: Alex Miller/AmillionAir
 fileName: date_time_clock.star
 packageName: datetimeclock
+recommended_interval: 0

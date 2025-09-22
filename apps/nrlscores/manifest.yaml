@@ -6,3 +6,4 @@ desc: Shows scores for the Australian Rugby League competition (NRL).
 author: M0ntyP
 fileName: nrl_scores.star
 packageName: nrlscores
+recommended_interval: 5

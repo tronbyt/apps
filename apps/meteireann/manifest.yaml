@@ -4,3 +4,4 @@ name: Met Eireann
 summary: Met Eireann weather
 desc: Forecast from Met Eireann.
 author: vincentezw
+recommended_interval: 5

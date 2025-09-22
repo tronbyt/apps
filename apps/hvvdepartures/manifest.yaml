@@ -6,3 +6,4 @@ desc: Display real-time departure times for trains, buses and ferries in Hamburg
 author: Felix Bruns
 fileName: hvv_departures.star
 packageName: hvvdepartures
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: A screensaver from before the streaming era. Will it hit the corner this t
 author: Mack Ward
 fileName: dvd_logo.star
 packageName: dvdlogo
+recommended_interval: 5

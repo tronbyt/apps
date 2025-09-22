@@ -6,3 +6,4 @@ desc: Display the days remaining till New Years with Fireworks.
 author: dereklarmstrong
 fileName: new_years_countdown.star
 packageName: newyearscountdown
+recommended_interval: 60

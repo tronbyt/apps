@@ -6,3 +6,4 @@ desc: Score updates for your favorite team at the Cricket World Cup.
 author: jatinrampal
 fileName: cricket_world_cup.star
 packageName: cricketworldcup
+recommended_interval: 5

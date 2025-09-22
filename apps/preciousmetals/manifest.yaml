@@ -6,3 +6,4 @@ desc: Quotes for gold, platinum and silver.
 author: threeio
 fileName: precious_metals.star
 packageName: preciousmetals
+recommended_interval: 5

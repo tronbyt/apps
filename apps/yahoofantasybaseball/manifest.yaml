@@ -6,3 +6,4 @@ desc: Display standings or scores for a Yahoo Fantasy Baseball league (MLB).
 author: jweier
 fileName: yahoofantasymlb.star
 packageName: yahoofantasymlb
+recommended_interval: 5

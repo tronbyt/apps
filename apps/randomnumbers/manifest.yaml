@@ -6,3 +6,4 @@ desc: Display random numbers.
 author: Kyle Bolstad
 fileName: random_numbers.star
 packageName: randomnumbers
+recommended_interval: 5

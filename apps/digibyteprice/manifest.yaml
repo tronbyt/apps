@@ -6,3 +6,4 @@ desc: Displays the current DigiByte price in one or two fiat currencies and/or i
 author: Olly Stedall @saltedlolly
 fileName: digibyte_price.star
 packageName: digibyteprice
+recommended_interval: 1
