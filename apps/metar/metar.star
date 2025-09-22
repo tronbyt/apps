@@ -36,7 +36,15 @@ def decoded_result_for_airport(airport):
             "flight_category": "ERR",
         }
 
-    result = dict(rep.json()[0])
+    json_data = rep.json()
+    if not json_data or len(json_data) == 0:
+        return {
+            "color": "#000000",
+            "text": "No METAR data available for %s" % airport,
+            "flight_category": "ERR",
+        }
+
+    result = dict(json_data[0])
 
     if result["rawOb"] == "":
         return {
