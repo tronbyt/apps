@@ -6,3 +6,4 @@ desc: Live scores and upcoming match details for the Hampton and Richmond Boroug
 author: Jonathan Damico
 fileName: hrbfc.star
 packageName: hrbfc
+recommended_interval: 5

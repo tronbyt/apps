@@ -6,3 +6,4 @@ desc: Real time tram departures for your preferred stop in Melbourne, Australia.
 author: bendiep
 fileName: melbourne_trams.star
 packageName: melbournetrams
+recommended_interval: 5

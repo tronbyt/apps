@@ -6,3 +6,4 @@ desc: Shows todays date as colorful progressbars, you can show the progress of t
 author: possan
 fileName: date_progress.star
 packageName: dateprogress
+recommended_interval: 5

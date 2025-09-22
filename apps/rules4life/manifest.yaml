@@ -6,3 +6,4 @@ desc: Display Jordan B. Peterson's Rules for Life from his book.
 author: Robert Ison
 fileName: rules4life.star
 packageName: rules4life
+recommended_interval: 5

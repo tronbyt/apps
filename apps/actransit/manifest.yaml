@@ -6,3 +6,4 @@ desc: Shows bus departures times for AC Transit.
 author: wshue0
 fileName: ac_transit.star
 packageName: actransit
+recommended_interval: 5

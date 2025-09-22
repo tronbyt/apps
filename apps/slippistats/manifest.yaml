@@ -6,3 +6,4 @@ desc: Takes stats from SSBM replays uploaded to chartslp.com and shows you stats
 author: Tyler Barron
 fileName: slippistats.star
 packageName: slippistats
+recommended_interval: 5

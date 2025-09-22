@@ -6,3 +6,4 @@ desc: Display daily Shopify metrics and charts for revenue, orders, or units.
 author: kcharwood
 fileName: shopify_chart.star
 packageName: shopifychart
+recommended_interval: 5

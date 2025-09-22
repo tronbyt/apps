@@ -6,3 +6,4 @@ desc: Displays departure times for SEPTA buses, trolleys, MFL/BSL, and NHSL in a
 author: radiocolin
 fileName: septatransit.star
 packageName: septatransit
+recommended_interval: 5

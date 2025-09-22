@@ -6,3 +6,4 @@ desc: View current status of your Fly.io App's machines.
 author: Cavallando
 fileName: flyio.star
 packageName: flyio
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Latest news, sports and other topics from the Chicago Tribune. Choose from
 author: sgomez72
 fileName: chicago_tribune.star
 packageName: chicagotribune
+recommended_interval: 10

@@ -6,3 +6,4 @@ desc: Displays the arrival times of the next 4 trains of any CTA 'L' station, ca
 author: imcnaugh
 fileName: cta_train_tracker.star
 packageName: ctatraintracker
+recommended_interval: 5

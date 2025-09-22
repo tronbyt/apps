@@ -6,3 +6,4 @@ desc: Nixie Tube Clock + Pixels = Nixel Clock!
 author: Olly Stedall @saltedlolly
 fileName: nixel_clock.star
 packageName: nixelclock
+recommended_interval: 0

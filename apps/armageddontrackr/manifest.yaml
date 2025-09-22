@@ -6,3 +6,4 @@ desc: Provides information from NASA about the nearest Near Earth Object on a gi
 author: flynnt
 fileName: armageddon_trackr.star
 packageName: armageddontrackr
+recommended_interval: 5

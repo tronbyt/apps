@@ -6,3 +6,4 @@ desc: Displays a rendition of the clock from the game "Lethal Company".
 author: qqvq-d
 fileName: company_clock.star
 packageName: companyclock
+recommended_interval: 0

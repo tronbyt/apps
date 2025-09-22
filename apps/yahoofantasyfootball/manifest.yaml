@@ -6,3 +6,4 @@ desc: Display standings or scores for a Yahoo Fantasy Football league (NFL). The
 author: jweier
 fileName: yahoofantasynfl.star
 packageName: yahoofantasynfl
+recommended_interval: 5

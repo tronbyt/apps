@@ -6,3 +6,4 @@ desc: The Idle Gardener is an Idle tree growing tycoon that takes absolutely no 
 author: yonodactyl
 fileName: idle_gardener.star
 packageName: idlegardener
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: View NFL standings by division.
 author: LunchBox8484
 fileName: nfl_standings.star
 packageName: nflstandings
+recommended_interval: 5

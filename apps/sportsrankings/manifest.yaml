@@ -6,3 +6,4 @@ desc: Shows the AP poll rankings for various sports. Currently supports college 
 author: Derek Holevinsky
 fileName: sports_rankings.star
 packageName: sportsrankings
+recommended_interval: 5

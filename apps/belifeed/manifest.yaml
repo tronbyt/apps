@@ -6,3 +6,4 @@ desc: Displays activity from you and your friends on Beli (beliapp.com).
 author: leoadberg
 fileName: beli_feed.star
 packageName: belifeed
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Make your Tidbyt look like it is showing static on an old TV that is turne
 author: Snuckey
 fileName: tv_static.star
 packageName: tvstatic
+recommended_interval: 5

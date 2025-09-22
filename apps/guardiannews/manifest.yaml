@@ -6,3 +6,4 @@ desc: Show the latest Guardian top story from your preferred Edition.
 author: meejle
 fileName: guardian_news.star
 packageName: guardiannews
+recommended_interval: 10

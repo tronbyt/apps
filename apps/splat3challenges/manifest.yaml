@@ -6,3 +6,4 @@ desc: Shows upcoming Challenges in Splatoon 3, their descriptions and modifiers,
 author: MarkGamed7794
 fileName: splat3_challenges.star
 packageName: splat3challenges
+recommended_interval: 5

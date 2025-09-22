@@ -6,3 +6,4 @@ desc: Shows the next two arriving CTA "L" Trains for a selected station.
 author: samshapiro13
 fileName: cta_l_tracker.star
 packageName: ctaltracker
+recommended_interval: 5

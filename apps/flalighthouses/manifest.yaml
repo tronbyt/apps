@@ -4,3 +4,4 @@ name: FLA Lighthouses
 summary: Displays Florida lighhouses
 desc: Displays Florida Lighhouse locations.
 author: Robert Ison
+recommended_interval: 5

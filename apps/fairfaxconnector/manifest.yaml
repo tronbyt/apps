@@ -6,3 +6,4 @@ desc: Shows when your next bus is arriving. Stop IDs can be found on the bus sto
 author: Austin Pearce
 fileName: fairfax_connector.star
 packageName: fairfaxconnector
+recommended_interval: 5

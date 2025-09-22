@@ -6,3 +6,4 @@ desc: Show departures for Västtrafik stops.
 author: protocol7
 fileName: trambyt.star
 packageName: trambyt
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Use the display to show a contestant bid screen like on the show, for use 
 author: Blkhwks19
 fileName: price_is_right.star
 packageName: priceisright
+recommended_interval: 5

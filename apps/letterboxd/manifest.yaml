@@ -6,3 +6,4 @@ desc: Show 3 most recent movies in Recent Activity.
 author: protolexus
 fileName: letterboxd.star
 packageName: letterboxd
+recommended_interval: 5

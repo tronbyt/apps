@@ -4,3 +4,4 @@ name: Text Title
 summary: Displays a text and title
 desc: Displays a text and a title.
 author: savdagod
+recommended_interval: 5

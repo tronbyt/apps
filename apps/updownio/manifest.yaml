@@ -6,3 +6,4 @@ desc: Updown.io checks your website's status by periodically sending an HTTP req
 author: jcarbaugh
 fileName: updownio.star
 packageName: updownio
+recommended_interval: 5

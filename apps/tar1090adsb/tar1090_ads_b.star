@@ -316,7 +316,12 @@ def aircraft_distance_sort(aircraft):
 
 # Return nearest aircraft to station
 def find_nearest_aircraft(aircrafts):
-    return sorted(aircrafts, key = aircraft_distance_sort)[0]
+    aircrafts = sorted(aircrafts, key = aircraft_distance_sort)
+    for aircraft in aircrafts:
+        if "category" in aircraft and "flight" in aircraft and "alt_baro" in aircraft:
+            # print(aircraft)
+            return aircraft
+    return None
 
 # Handling some results not having callsigns
 def get_callsign(aircraft):
@@ -438,6 +443,8 @@ def main(config):
     aircrafts = response.json()["aircraft"]
 
     aircraft = find_nearest_aircraft(aircrafts)
+    if aircraft == None:
+        return unable_to_reach_tar_error(tar_url)
 
     flag = find_flag(aircraft["hex"])
 
@@ -454,8 +461,9 @@ def main(config):
         aircraft["category"],
         aircraft_data[1],
         aircraft_desc,
-        aircraft["type"],
+        aircraft.get("type", None),
         get_altitude_icon_color(aircraft["alt_baro"]),
+        # get_altitude_icon_color(aircraft.get("alt_baro",0)),
     )
 
     animation_frames = list()
@@ -487,7 +495,7 @@ def main(config):
         render.Row(
             children = [
                 render.Box(
-                    child = render.Text(content = "Alt: %d" % (convert_alt(conversion_unit, aircraft["alt_baro"]))),
+                    child = render.Text(content = "Alt: %d" % (convert_alt(conversion_unit, aircraft.get("alt_baro", 0)))),
                     height = 10,
                 ),
             ],
@@ -496,11 +504,18 @@ def main(config):
         ),
     )
 
+    spd = convert_spd(conversion_unit, aircraft.get("gs", 0))
+    if "r_dst" in aircraft:
+        dst = convert_dst(conversion_unit, aircraft["r_dst"])
+        content = "Sp: %d Dst: %d" % (spd, dst)
+    else:
+        content = "Sp: %d" % spd
+
     frame1.append(
         render.Row(
             children = [
                 render.Box(
-                    child = render.Text(content = "Sp: %d Dst: %d" % (convert_spd(conversion_unit, aircraft["gs"]), convert_dst(conversion_unit, aircraft["r_dst"]))),
+                    child = render.Text(content = content),
                 ),
             ],
             main_align = "space_around",

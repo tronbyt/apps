@@ -6,3 +6,4 @@ desc: This app shows a clock and a hex number. The background will change colors
 author: gabe565
 fileName: hex_color_clock.star
 packageName: hexcolorclock
+recommended_interval: 0

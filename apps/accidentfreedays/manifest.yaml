@@ -6,3 +6,4 @@ desc: Displays the days since the last accident.
 author: Robert Ison
 fileName: accidentfreedays.star
 packageName: accidentfreedays
+recommended_interval: 240

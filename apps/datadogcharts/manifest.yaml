@@ -6,3 +6,4 @@ desc: Shows the first chart of a Datadog dashboard!
 author: Gabe Ochoa
 fileName: datadog_charts.star
 packageName: datadogcharts
+recommended_interval: 5

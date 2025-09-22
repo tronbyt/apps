@@ -6,3 +6,4 @@ desc: Display the current temperature, humidity, and AQI, according to OpenWeath
 author: Ariel Tian
 fileName: weather_snapshot.star
 packageName: weathersnapshot
+recommended_interval: 5

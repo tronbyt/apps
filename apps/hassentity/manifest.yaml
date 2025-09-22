@@ -6,3 +6,4 @@ desc: Display an externally accessible Home Assistant entity state or attribute.
 author: InTheDaylight14
 fileName: hass_entity.star
 packageName: hassentity
+recommended_interval: 5

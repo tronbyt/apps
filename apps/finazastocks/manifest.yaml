@@ -6,3 +6,4 @@ desc: Displays Stock Ticker. No API Key Reuquired. Configure upto 5 Symbols to s
 author: Sunil Taneja
 fileName: finaza_stocks.star
 packageName: finazastocks
+recommended_interval: 1

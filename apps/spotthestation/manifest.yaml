@@ -6,3 +6,4 @@ desc: Enter your spotthestation.nasa.gov location's RSS Feed URL.
 author: Robert Ison
 fileName: spotthestation.star
 packageName: spotthestation
+recommended_interval: 5

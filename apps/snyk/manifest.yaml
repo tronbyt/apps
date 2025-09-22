@@ -6,3 +6,4 @@ desc: Shows medium/high/critical issue counts for the configured Snyk project.
 author: Andrew Powell
 fileName: snyk.star
 packageName: snyk
+recommended_interval: 5

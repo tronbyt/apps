@@ -6,3 +6,4 @@ desc: Displays the next rocket launch in the world.
 author: Robert Ison
 fileName: launchcountdown.star
 packageName: launchcountdown
+recommended_interval: 5

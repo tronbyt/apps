@@ -6,3 +6,4 @@ desc: Long Island Railroad Train Times.
 author: bralax
 fileName: lirr.star
 packageName: lirr
+recommended_interval: 5

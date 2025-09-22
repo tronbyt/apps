@@ -4,3 +4,4 @@ name: German Transit
 summary: German transit departures
 desc: Provides upcoming train and bus departures for a given station throughout Germany, based on consolidated data from VRN.
 author: kmartinez834
+recommended_interval: 5

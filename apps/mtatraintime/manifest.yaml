@@ -6,3 +6,4 @@ desc: Displays the next trains between two stations for Metro North or Long Isla
 author: rai
 fileName: mtatraintime.star
 packageName: mtatraintime
+recommended_interval: 5

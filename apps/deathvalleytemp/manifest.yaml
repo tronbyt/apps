@@ -6,3 +6,4 @@ desc: Shows the current temperature in Death Valley, one of the hottest places o
 author: kstardesigns
 fileName: deathvalleytemp.star
 packageName: deathvalleytemp
+recommended_interval: 5

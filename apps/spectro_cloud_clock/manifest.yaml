@@ -6,3 +6,4 @@ desc: A collection of Spectro Cloud images with a clock.
 author: Karl Cardenas
 fileName: spectro_cloud.star
 packageName: spectrocloudclock
+recommended_interval: 0

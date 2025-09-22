@@ -6,3 +6,4 @@ desc: Picks an Oblique Strategy at random and displays it.
 author: '@parsnbl'
 fileName: obliquestrategies.star
 packageName: obliquestrategies
+recommended_interval: 5

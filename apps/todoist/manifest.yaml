@@ -6,3 +6,4 @@ desc: Shows the number of tasks you have due today.
 author: zephyern
 fileName: todoist.star
 packageName: todoist
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Get celebratory notifications when you hit specific order milestones.
 author: Shopify
 fileName: order_moments.star
 packageName: ordermoments
+recommended_interval: 5

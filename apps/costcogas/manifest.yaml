@@ -6,3 +6,4 @@ desc: Displays gas prices from a selected Costco warehouse in the US.
 author: Dan Adam
 fileName: costco_gas.star
 packageName: costcogas
+recommended_interval: 5

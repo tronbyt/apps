@@ -6,3 +6,4 @@ desc: Gives you the description or number of comics a random character has been 
 author: Kaitlyn Musial
 fileName: marvel_facts.star
 packageName: marvelfacts
+recommended_interval: 5

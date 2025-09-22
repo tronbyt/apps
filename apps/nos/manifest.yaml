@@ -6,3 +6,4 @@ desc: Laat een willekeurig recente nieuwsbericht zien van de website nos.nl.
 author: PMK (@pmk)
 fileName: nos.star
 packageName: nos
+recommended_interval: 5

@@ -6,3 +6,4 @@ desc: Displays a recent headline from Defector.com.
 author: Rory Sawyer
 fileName: defector.star
 packageName: defector
+recommended_interval: 10

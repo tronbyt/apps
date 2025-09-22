@@ -6,3 +6,4 @@ desc: Displays recently added on Plex server. Recommended to set up a local prox
 author: noahpodgurski
 fileName: plex_recently_added.star
 packageName: plexrecentlyadded
+recommended_interval: 5

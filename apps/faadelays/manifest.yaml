@@ -6,3 +6,4 @@ desc: Displays FAA ground stop and delay programs for specified airports.
 author: Matt Broussard
 fileName: faa_delays.star
 packageName: faadelays
+recommended_interval: 5

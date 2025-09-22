@@ -6,3 +6,4 @@ desc: Shows the current song on Nova for various stations around Australia.
 author: M0ntyP
 fileName: nova.star
 packageName: nova
+recommended_interval: 5

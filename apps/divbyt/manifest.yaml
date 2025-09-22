@@ -6,3 +6,4 @@ desc: Looping geometric animations from animated GIF artist Mr. Div, designed sp
 author: imnotdannorton
 fileName: mrdiv_gifs.star
 packageName: divbyt
+recommended_interval: 5

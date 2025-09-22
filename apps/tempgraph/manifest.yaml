@@ -6,3 +6,4 @@ desc: Shows the date/time/temperature with a graph.
 author: Daniel Segel
 fileName: tempgraph.star
 packageName: tempgraph
+recommended_interval: 5

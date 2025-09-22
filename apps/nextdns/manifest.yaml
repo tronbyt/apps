@@ -6,3 +6,4 @@ desc: Displays NextDNS account total query & total blocked query counts + 7-day 
 author: ndhotsky
 fileName: nextdns.star
 packageName: nextdns
+recommended_interval: 5

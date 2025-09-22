@@ -6,3 +6,4 @@ desc: Displays your Fitbit recent weigh-ins.
 author: Robert Ison
 fileName: fitbitweight.star
 packageName: fitbitweight
+recommended_interval: 5

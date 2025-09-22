@@ -6,3 +6,4 @@ desc: Displays events that happened on today's date.
 author: Andrew Hefele
 fileName: onthisday.star
 packageName: onthisday
+recommended_interval: 5

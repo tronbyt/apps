@@ -6,3 +6,4 @@ desc: Display a large retro-style clock; the clock can change color at night bas
 author: Joey Hoer
 fileName: big_clock.star
 packageName: bigclock
+recommended_interval: 0

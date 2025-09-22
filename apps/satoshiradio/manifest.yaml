@@ -6,4 +6,5 @@ desc: Show pool and user stats for the satoshiradio.nl mining pool.
 author: redboer
 fileName: satoshiradio.star
 packageName: satoshiradio
+recommended_interval: 5
 

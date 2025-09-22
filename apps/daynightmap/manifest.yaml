@@ -6,3 +6,4 @@ desc: A map of the Earth showing the day and the night. The map is based on Equi
 author: Henry So, Jr.
 fileName: day_night_map.star
 packageName: daynightmap
+recommended_interval: 5

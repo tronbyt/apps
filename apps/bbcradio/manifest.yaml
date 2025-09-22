@@ -6,3 +6,4 @@ desc: Shows what program is currently being broadcast on each of the BBC's radio
 author: dinosaursrarr
 fileName: bbc_radio.star
 packageName: bbcradio
+recommended_interval: 10

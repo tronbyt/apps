@@ -6,3 +6,4 @@ desc: Display predicted tides from NOAA tide stations and water temperature from
 author: sudeepban
 fileName: tides_and_temp.star
 packageName: tidesandtemp
+recommended_interval: 5
