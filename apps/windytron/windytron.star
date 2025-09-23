@@ -26,10 +26,11 @@ station_lookup = {
     "stevenson_light.json": "Stevenson",
     "viento.json": "Viento",
     "event_site.json": "Event Site",
-    "the_wall.json": "Theh Wall",
+    "the_wall.json": "The Wall",
     "arlington.json": "Arlington",
     "maryhill.json": "Mary Hill",
     "loroc.json": "Loroc",
+    "pointe_rouge.json": "Pointe Rouge"
 }
 
 def fetch_data(station):
@@ -52,7 +53,7 @@ def main(config):
     dir_condition = config.get("dir_condition")
 
     data = fetch_data(station)
-
+    print(data)
     wind_avg = int(data["avg"] + 0.5)
     wind_gust = int(data["gust"] + 0.5)
     wind_dir = data["dir_card"]
@@ -66,7 +67,7 @@ def main(config):
     if dir_condition and "-" in dir_condition:
         (bottom, top) = dir_condition.split("-")
         print(dir_condition.split("-"))
-        if wind_dir < int(bottom) or wind_dir > int(top):
+        if wind_dir_degrees < int(bottom) or wind_dir_degrees > int(top):
             return []
 
     # Convert to knots if needed
@@ -174,7 +175,7 @@ def get_schema():
                 name = "Direction range to show",
                 icon = "edit",
                 desc = "Syntax is min-max eg. '30-180'",
-                default = "0-50",
+                default = "0-360",
             ),
         ],
     )
