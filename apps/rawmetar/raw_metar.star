@@ -9,6 +9,8 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
+ADDS_URL = "https://www.aviationweather.gov/api/data/metar?requestType=retrieve&format=json&ids=%s&mostrecentforeachstation=constraint&hoursBeforeNow=2"
+
 def main(config):
     station_id = config.str("station_id") or "KMCO"
     seconds = config.str("seconds") or "4"
@@ -22,8 +24,8 @@ def main(config):
             ),
         )
 
-    response = http.get("https://www.aviationweather.gov/cgi-bin/data/metar.php?ids={}".format(station_id))
-    content = response.body()
+    response = http.get(ADDS_URL % station_id, ttl_seconds = 60)
+    content = response.json()
 
     if not content:
         return render.Root(
@@ -33,6 +35,17 @@ def main(config):
                 color = "#f00",
             ),
         )
+
+    metar_data = content[0]
+    if "rawOb" not in metar_data:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Bad API Response Format",
+                font = "tb-8",
+                color = "#f00",
+            ),
+        )
+    content = metar_data["rawOb"]
 
     max_line_width = 12
     lines_per_page = 4
