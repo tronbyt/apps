@@ -27,7 +27,7 @@ def main(config):
     response = http.get(ADDS_URL % station_id, ttl_seconds = 60)
     content = response.json()
 
-    if not content or len(content) == 0:
+    if not content:
         return render.Root(
             child = render.WrappedText(
                 content = "Bad Response From Server",
