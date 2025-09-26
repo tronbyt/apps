@@ -36,7 +36,16 @@ def main(config):
             ),
         )
 
-    content = dict(content[0])["rawOb"]
+    metar_data = content[0]
+    if "rawOb" not in metar_data:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Bad API Response Format",
+                font = "tb-8",
+                color = "#f00",
+            ),
+        )
+    content = metar_data["rawOb"]
 
     max_line_width = 12
     lines_per_page = 4
