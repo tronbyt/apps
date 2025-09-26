@@ -175,8 +175,8 @@ def get_schema():
             schema.Dropdown(
                 id = "units",
                 name = "Units",
-                desc = "Units to display temperature in, either Celsius or Fahrenheit.",
-                default = "F",
+                desc = "Units to display temperature in, either Fahrenheit, Celsius, or Kelvin.",
+                default = "F",, 
                 icon = "calendar",
                 options = [
                     schema.Option(display = "Fahrenheit", value = "F"),
