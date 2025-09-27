@@ -20,6 +20,8 @@ WEATHER_URL = "https://api.weather.gov/points/"
 # This is how many fit comfortaly on the screen
 MAX_DAYS_TO_SHOW = 3
 
+DEFAULT_UNITS = "F"
+
 DEFAULT_LOCATION = """
 {
   "lat": "37.27",
@@ -42,6 +44,7 @@ DAY_LABELS = [
 def main(config):
     # Config
     location = json.decode(config.get("location") or DEFAULT_LOCATION)
+    units = config.get("units") or DEFAULT_UNITS
 
     response = http.get(WEATHER_URL + location["lat"] + "," + location["lng"], ttl_seconds = 300)
     if response.status_code != 200:
@@ -66,7 +69,13 @@ def main(config):
             prevDay = day
         days[len(days) - 1].append(period)
 
-    nowTemp = int(math.round(rightNow["temperature"]))
+    if units == "C":
+        nowTemp = int(math.round(convert_fahrenheit_to_celsius(rightNow["temperature"])))
+    elif units == "K":
+        nowTemp = int(math.round(convert_fahrenheit_to_kelvin(rightNow["temperature"])))
+    else:
+        nowTemp = int(math.round(rightNow["temperature"]))
+
     cols = [render.Column(
         cross_align = "center",
         children = [
@@ -80,7 +89,13 @@ def main(config):
         if len(cols) >= MAX_DAYS_TO_SHOW:
             break
         dayStart = time.parse_time(day[0]["startTime"])
-        temps = [p["temperature"] for p in day]
+        if units == "C":
+            temps = [convert_fahrenheit_to_celsius(p["temperature"]) for p in day]
+        elif units == "K":
+            temps = [convert_fahrenheit_to_kelvin(p["temperature"]) for p in day]
+        else:
+            temps = [p["temperature"] for p in day]
+
         high = int(math.round(max(temps)))
         forecast = mode([p["shortForecast"] for p in day])
 
@@ -109,6 +124,12 @@ def main(config):
             children = cols,
         ),
     )
+
+def convert_fahrenheit_to_celsius(temperature):
+    return (temperature - 32) / 1.8
+
+def convert_fahrenheit_to_kelvin(temperature):
+    return (temperature + 459.67) / 1.8
 
 def mode(lst):
     count = {}
@@ -150,6 +171,18 @@ def get_schema():
                 name = "Location",
                 desc = "Location for which to display weather data.",
                 icon = "locationDot",
+            ),
+            schema.Dropdown(
+                id = "units",
+                name = "Units",
+                desc = "Units to display temperature in, either Fahrenheit, Celsius, or Kelvin.",
+                default = "F",, 
+                icon = "calendar",
+                options = [
+                    schema.Option(display = "Fahrenheit", value = "F"),
+                    schema.Option(display = "Celsius", value = "C"),
+                    schema.Option(display = "Kelvin", value = "K"),
+                ],
             ),
         ],
     )
