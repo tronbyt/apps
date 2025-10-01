@@ -13,13 +13,13 @@ load("schema.star", "schema")
 CACHE_TIMEOUT = 120
 
 NOWPLAYING_PREFIX_URL = "https://music.abcradio.net.au/api/v1/plays/"
-NOWPLAYING_SUFFIX_URL = "/now.json?tz="
+NOWPLAYING_SUFFIX_URL = "/now.json"
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 
 def main(config):
     StationSelection = config.get("station", "triplej")
     timezone = config.get("$tz", DEFAULT_TIMEZONE)
-    NOWPLAYING_URL = NOWPLAYING_PREFIX_URL + StationSelection + NOWPLAYING_SUFFIX_URL + timezone
+    NOWPLAYING_URL = NOWPLAYING_PREFIX_URL + StationSelection + NOWPLAYING_SUFFIX_URL #+ timezone
 
     # Get song data every 2 mins
     MUSICDATA = get_cachable_data(NOWPLAYING_URL, CACHE_TIMEOUT)
