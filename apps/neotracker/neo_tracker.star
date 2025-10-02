@@ -48,7 +48,7 @@ def main():
                     children = [
                         r.Row(
                             children = [
-                                r.Image(src = img, width = 9, height = 9),
+                                #r.Image(src = img, width = 9, height = 9),
                                 r.Text(content = " " + hazard + name, color = "#8093f1", height = 10),
                             ],
                         ),
