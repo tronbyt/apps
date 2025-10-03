@@ -129,7 +129,7 @@ def rgb_to_hex(r, g, b):
     return "#" + str("%x" % ((1 << 24) + (r << 16) + (g << 8) + b))[1:]
 
 def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity):
-    """Fetch Tesla data from Home Assistant REST API"""
+    """Fetch Tesla data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
         "Authorization": "Bearer " + ha_token,
         "Content-Type": "application/json",
@@ -139,62 +139,56 @@ def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, c
     base_url = ha_url.rstrip("/")
 
     # Default values in case of errors
-    name = "Tesla"
-    rangemi = "0"
-    batterylevel = "0"
-    charger_power = "0"
-    plugged_in = "off"
-    charge_limit = "80"
+    defaults = {
+        "name": "Tesla",
+        "rangemi": "0",
+        "batterylevel": "0",
+        "charger_power": "0",
+        "plugged_in": "off",
+        "charge_limit": "80",
+    }
 
-    # Fetch battery level
-    battery_url = base_url + "/api/states/" + battery_entity
-    battery_resp = http.get(battery_url, headers = headers)
-    if battery_resp.status_code == 200:
-        battery_data = battery_resp.json()
-        batterylevel = battery_data.get("state", "0")
+    # Create a template that fetches all entities in a single request
+    # The template returns a JSON string with all values
+    template = """
+{
+  "name": "{{ states('%s') | default('Tesla') }}",
+  "rangemi": "{{ states('%s') | default('0') }}",
+  "batterylevel": "{{ states('%s') | default('0') }}",
+  "charger_power": "{{ states('%s') | default('0') }}",
+  "plugged_in": "{{ states('%s') | default('off') }}",
+  "charge_limit": "{{ states('%s') | default('80') }}"
+}
+""".strip() % (name_entity, range_entity, battery_entity, charger_power_entity, plugged_in_entity, charge_limit_entity)
 
-    # Fetch range
-    range_url = base_url + "/api/states/" + range_entity
-    range_resp = http.get(range_url, headers = headers)
-    if range_resp.status_code == 200:
-        range_data = range_resp.json()
-        rangemi = range_data.get("state", "0")
+    # Make single request to template endpoint
+    template_url = base_url + "/api/template"
+    payload = {"template": template}
 
-    # Fetch display name
-    name_url = base_url + "/api/states/" + name_entity
-    name_resp = http.get(name_url, headers = headers)
-    if name_resp.status_code == 200:
-        name_data = name_resp.json()
-        name = name_data.get("state", "Tesla")
+    resp = http.post(template_url, headers = headers, json_body = payload)
 
-    # Fetch charger power
-    charger_url = base_url + "/api/states/" + charger_power_entity
-    charger_resp = http.get(charger_url, headers = headers)
-    if charger_resp.status_code == 200:
-        charger_data = charger_resp.json()
-        charger_power = charger_data.get("state", "0")
+    if resp.status_code == 200:
+        # Parse the JSON response from the template
+        response_body = resp.body()
+        if response_body:
+            data = json.decode(response_body)
+            return (
+                data.get("name", defaults["name"]),
+                data.get("rangemi", defaults["rangemi"]),
+                data.get("batterylevel", defaults["batterylevel"]),
+                data.get("charger_power", defaults["charger_power"]),
+                data.get("plugged_in", defaults["plugged_in"]),
+                data.get("charge_limit", defaults["charge_limit"]),
+            )
 
-    # Fetch plugged in status
-    plugged_url = base_url + "/api/states/" + plugged_in_entity
-    plugged_resp = http.get(plugged_url, headers = headers)
-    if plugged_resp.status_code == 200:
-        plugged_data = plugged_resp.json()
-        plugged_in = plugged_data.get("state", "off")
-
-    # Fetch charge limit
-    limit_url = base_url + "/api/states/" + charge_limit_entity
-    limit_resp = http.get(limit_url, headers = headers)
-    if limit_resp.status_code == 200:
-        limit_data = limit_resp.json()
-        charge_limit = limit_data.get("state", "80")
-
-    return name, rangemi, batterylevel, charger_power, plugged_in, charge_limit
+    # Return defaults if request failed or parsing failed
+    return defaults["name"], defaults["rangemi"], defaults["batterylevel"], defaults["charger_power"], defaults["plugged_in"], defaults["charge_limit"]
 
 def main(config):
     ha_url = config.str("ha_url")
     ha_token = config.str("ha_token")
     battery_entity = config.str("battery_entity", "sensor.tesla_battery_level")
-    range_entity = config.str("range_entity", "sensor.tesla_est_battery_range_mi")
+    range_entity = config.str("range_entity", "sensor.tesla_est_battery_range")
     name_entity = config.str("name_entity", "sensor.tesla_display_name")
     charger_power_entity = config.str("charger_power_entity", "sensor.tesla_charger_power")
     plugged_in_entity = config.str("plugged_in_entity", "binary_sensor.tesla_plugged_in")
@@ -216,7 +210,6 @@ def main(config):
     # Try to get cached data first
     cached_data = cache.get(cache_key)
     if cached_data != None:
-        print("Hit! Displaying cached data.")
         data = json.decode(cached_data)
         name = data.get("name", "Tesla")
         rangemi = data.get("range", "0")
@@ -261,7 +254,7 @@ def main(config):
     elif battery_val >= limit_val and is_plugged:
         image = BOLT_GREEN
     elif is_plugged:
-        image = BOLT_GREY
+        image = BOLT
     else:
         image = BOLT_GREY
 
@@ -459,7 +452,7 @@ def get_schema():
                 id = "battery_entity",
                 name = "Battery Level",
                 desc = "Entity name for battery level",
-                icon = "battery-half",
+                icon = "batteryHalf",
                 default = "sensor.tesla_battery_level",
             ),
             schema.Text(
@@ -494,7 +487,7 @@ def get_schema():
                 id = "charge_limit_entity",
                 name = "Charge Limit",
                 desc = "Entity name for charge limit",
-                icon = "battery-full",
+                icon = "batteryFull",
                 default = "sensor.tesla_charge_limit_soc",
             ),
             schema.Toggle(
