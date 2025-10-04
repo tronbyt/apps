@@ -366,7 +366,7 @@ def get_frame(state, fr, config, animprogress):
 
     delay = 0
     color = state["color"]
-    if config.bool("carimg") == True:
+    if config.bool("carimg"):
         children.append(
             render.Row(
                 expanded = True,
