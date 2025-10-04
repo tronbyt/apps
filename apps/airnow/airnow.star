@@ -50,12 +50,12 @@ def get_current_observation_url(api_key, lat, lng):
         api_key = api_key,
     )
 
-def get_current_observation(lat, lng):
+def get_current_observation(api_key, lat, lng):
     cache_key = "current_observation:{lat},{lng}".format(lat = lat, lng = lng)
     body = cache.get(cache_key)
 
     if body == None:
-        response = http.get(url = get_current_observation_url(lat, lng))
+        response = http.get(url = get_current_observation_url(api_key, lat, lng))
         body = response.body()
 
         cache.set(cache_key, body, ttl_seconds = 1800)
