@@ -14,7 +14,8 @@ load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 
-API_KEY = "EAC9C956-3EDE-4955-A5BE-53492091A0DE"
+# original tidbyt api key
+DEFAULT_API_KEY = "EAC9C956-3EDE-4955-A5BE-53492091A0DE"
 ACCURACY = "#.###"
 
 DEFAULT_LOCATION = """
@@ -42,11 +43,11 @@ def get_alert_colors(category_num):
     else:
         return ("#7e0023", "#FFF")
 
-def get_current_observation_url(lat, lng):
-    return "https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude={lat}&longitude={lng}&&API_KEY={api_key}".format(
+def get_current_observation_url(api_key, lat, lng):
+    return "https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude={lat}&longitude={lng}&api_key={api_key}".format(
         lat = lat,
         lng = lng,
-        api_key = API_KEY,
+        api_key = api_key,
     )
 
 def get_current_observation(lat, lng):
@@ -119,11 +120,12 @@ def render_category_text(category_name, reporting_area, alert_colors):
 
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
+    api_key = config.get("api_key", DEFAULT_API_KEY)
 
     lat = humanize.float(ACCURACY, float(location["lat"]))
     lng = humanize.float(ACCURACY, float(location["lng"]))
 
-    observation = get_current_observation(lat, lng)
+    observation = get_current_observation(api_key, lat, lng)
 
     category_num = observation["Category"]["Number"]
     category_name = observation["Category"]["Name"]
@@ -152,6 +154,13 @@ def get_schema():
                 name = "Location",
                 desc = "Location for which to display weather radar.",
                 icon = "locationDot",
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "API Key, freely available at airnowapi.org",
+                icon = "key",
+                default = "",
             ),
         ],
     )
