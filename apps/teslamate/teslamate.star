@@ -9,7 +9,6 @@ Based on the original TeslaFi app by @mrrobot245
 Licensed under the Apache License, Version 2.0
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
@@ -19,6 +18,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 FRAME_WIDTH = 64
+DEFAULT_CACHE_DURATION = 300  # seconds
 
 TESLA = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAPCAYAAADkmO9VAAAAAXNSR0IArs4c6QAAAoNJREFUOE+tk89PE0EUx7+zO/QHpZQ2xV08EOWAeoFNY0/GmMhNvZGKiSZeuFP+gSpc1APGK4lpPGhiPSrCQRMOoB641J7UmIBAwrapbW3Xtmx3d8zMugRCPZD4ks3Mvjfv837MG4L/LKQbb319nRWLRRiGAcdxYFmWOCbLsvii0ShCoRAmJiaO+R9TpNNpxh1s2+YgxyIsTyUptm+aTlwZMqq6PhYMBkEIQaPRwMLCwhHGkZ9qtfokm83O7OzsgDEmoIdXvg8EAgLGZXBwENPT032qqv72KhUWvVR0tjY3V/vC4aufPnxEoVAQIK9MSZIExDRNoed7Dh4dHUUqlUK+8Pn7uKadjkUGQgcZlsvlu7quP1MURRzmfeMgDvBWDuJ7DubCK6jX6xgZGTlLCNniOgE0DGO2VCo95jDLsYWTMLpJdhVGXCCVZOzu7mJ4ePhHb2/vGQH8Wa2wuXv34ff7EYvFcHNqCuqQegDijl75nlLf0/Eql0OlUkGz2UQmk4GiKG53a/VfrEemoh/JZBIzs2lQSsWIeBdwOE2u50EePXiIjY0N5HI50aJoNOoC9/Qy8wcCkAgRkFKpCNPsoNPpwDQtMOaI7vDTMpXRQ6kIqKgqbMsWQW3Hxqn4gAtcWn7LXjx/icnJFDRtDK1WG/v7Jiy7JaD8YpjjwGupz+cTgcPhMPL5PN68XsbtO7dw49p1F/jl21fWbtkwjIZwbJptyDJFLB6Hj1L0+Ki4PYkBDR6s3UatVoNMbIAxhPv7EYlEcOHceRe4svqeaZom0pckP9bW1vB0cRHvVpa6Ps3xxEV2+colZObngI4NyWHY3t5GIpH4O/L/no4TW7pmcGLKIYc/tCUlHwMw6zsAAAAASUVORK5CYII=
@@ -128,7 +128,7 @@ def hex_to_rgb(color):
 def rgb_to_hex(r, g, b):
     return "#" + str("%x" % ((1 << 24) + (r << 16) + (g << 8) + b))[1:]
 
-def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity):
+def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity, cache_duration):
     """Fetch Tesla data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
         "Authorization": "Bearer " + ha_token,
@@ -165,7 +165,7 @@ def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, c
     template_url = base_url + "/api/template"
     payload = {"template": template}
 
-    resp = http.post(template_url, headers = headers, json_body = payload)
+    resp = http.post(template_url, headers = headers, json_body = payload, ttl_seconds = cache_duration)
 
     if resp.status_code == 200:
         # Parse the JSON response from the template
@@ -193,6 +193,12 @@ def main(config):
     charger_power_entity = config.str("charger_power_entity", "sensor.tesla_charger_power")
     plugged_in_entity = config.str("plugged_in_entity", "binary_sensor.tesla_plugged_in")
     charge_limit_entity = config.str("charge_limit_entity", "sensor.tesla_charge_limit_soc")
+    cache_duration_str = config.str("cache_duration", str(DEFAULT_CACHE_DURATION))
+
+    if cache_duration_str.isdigit():
+        cache_duration = int(cache_duration_str)
+    else:
+        cache_duration = DEFAULT_CACHE_DURATION
 
     if not ha_url:
         return render.Root(
@@ -204,33 +210,8 @@ def main(config):
             child = render.WrappedText("Please configure Home Assistant token!"),
         )
 
-    # Create cache key based on entity names
-    cache_key = "teslamate-ha-" + battery_entity.replace(".", "-")
-
-    # Try to get cached data first
-    cached_data = cache.get(cache_key)
-    if cached_data != None:
-        data = json.decode(cached_data)
-        name = data.get("name", "Tesla")
-        rangemi = data.get("range", "0")
-        batterylevel = data.get("battery", "0")
-        charger_power = data.get("charger_power", "0")
-        plugged_in = data.get("plugged_in", "off")
-        charge_limit = data.get("charge_limit", "80")
-    else:
-        # Fetch data from Home Assistant REST API
-        name, rangemi, batterylevel, charger_power, plugged_in, charge_limit = fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity)
-
-        # Cache the data
-        data = {
-            "name": name,
-            "range": rangemi,
-            "battery": batterylevel,
-            "charger_power": charger_power,
-            "plugged_in": plugged_in,
-            "charge_limit": charge_limit,
-        }
-        cache.set(cache_key, json.encode(data), ttl_seconds = 300)  # 5 minute cache
+    # Fetch data from Home Assistant REST API
+    name, rangemi, batterylevel, charger_power, plugged_in, charge_limit = fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity, cache_duration)
 
     # Determine the correct range value and unit for display
     range_value = rangemi
@@ -524,6 +505,13 @@ def get_schema():
                 desc = "Show car image",
                 icon = "car",
                 default = True,
+            ),
+            schema.Text(
+                id = "cache_duration",
+                name = "Cache Duration",
+                desc = "How long to cache data from Home Assistant (in seconds)",
+                icon = "clock",
+                default = str(DEFAULT_CACHE_DURATION),
             ),
         ],
     )
