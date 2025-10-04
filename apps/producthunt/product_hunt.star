@@ -1,7 +1,7 @@
 """
 Applet: Product Hunt
 Summary: Product Hunt top products
-Description: View the daily top tech products from Product Hunt.
+Description: View the daily top tech products from Product Hunt. Generate your Developer Token at https://www.producthunt.com/v2/oauth/applications.
 Author: Daniel Sitnik
 """
 
@@ -35,11 +35,18 @@ def main(config):
 
     # get config
     config_display = config.get("display", DEFAULT_DISPLAY)
+    dev_token = config.get("dev_token", "")
+
+    # if there's no token, render instructions
+    if dev_token == "":
+        return render_no_dev_token()
 
     # call product hunt API (graphql)
-    res = http.post("https://ph-graph-api-explorer.herokuapp.com/graphql", ttl_seconds = CACHE_TTL, json_body = {
+    res = http.post("https://api.producthunt.com/v2/api/graphql", ttl_seconds = CACHE_TTL, json_body = {
         "operationName": "Posts",
         "query": "query Posts {\nposts(featured: true, first: 3) {\nnodes {\nname\nvotesCount\nthumbnail {\ntype\nurl\n}\n}\n}\n}",
+    }, headers = {
+        "Authorization": "Bearer %s" % dev_token,
     })
 
     # handle api errors
@@ -105,6 +112,12 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "dev_token",
+                name = "Developer Token",
+                desc = "Product Hunt Developer Token",
+                icon = "key",
+            ),
             schema.Dropdown(
                 id = "display",
                 name = "Display",
@@ -246,6 +259,31 @@ def render_empty():
                 render.Box(height = 1, width = 64, color = "#fdf0ee"),
                 render.Text(content = "No data", color = "#ff0"),
                 render.Text(content = "to display!", color = "#ff0"),
+            ],
+        ),
+    )
+
+def render_no_dev_token():
+    """Renders a default message when no developer token is configured.
+
+    Returns:
+        render.Root: Root widget tree.
+    """
+
+    return render.Root(
+        child = render.Column(
+            main_align = "space_around",
+            cross_align = "center",
+            expanded = True,
+            children = [
+                render_header(),
+                render.Box(height = 1, width = 64, color = "#fdf0ee"),
+                render.Text(content = "Developer Token", font = "tom-thumb", color = "#ff0"),
+                render.Marquee(
+                    width = 64,
+                    offset_start = 32,
+                    child = render.Text(content = "Create at producthunt.com/v2/oauth/applications", font = "tom-thumb", color = "#0f0"),
+                ),
             ],
         ),
     )
