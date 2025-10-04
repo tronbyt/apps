@@ -232,9 +232,13 @@ def main(config):
         }
         cache.set(cache_key, json.encode(data), ttl_seconds = 300)  # 5 minute cache
 
-    # Convert miles to km if requested
-    if config.bool("mi2km") == True and rangemi:
-        rangemi = str(math.round((float(rangemi) * 1.60934)))
+    # Determine the correct range value and unit for display
+    range_value = rangemi
+    unit = config.str("unit", "mi")
+
+    if unit == "mi" and config.bool("mi2km") and range_value:
+        range_value = str(math.round((float(range_value) * 1.60934)))
+        unit = "km"
 
     # Determine charging state based on TeslaMate entities
     # Any non-zero charger power = charging
@@ -262,11 +266,11 @@ def main(config):
         "batterylevel": int(float(batterylevel)) if batterylevel else 0,
         "color": "#0f0",
         "name": name,
-        "rangemi": int(float(rangemi)),
+        "range_value": int(float(range_value)),
+        "unit": unit,
         "image": image,
         "is_plugged": is_plugged,
         "plugged_in_debug": plugged_in,  # For debugging
-        "mi2km": config.bool("mi2km") == True,
     }
 
     return render.Root(
@@ -421,7 +425,7 @@ def get_frame(state, fr, config, animprogress):
             children = [
                 render.Text("Range: "),
                 render.Box(width = 1, height = 1),
-                render.Text("%s %s" % (state["rangemi"], "km" if config.bool("mi2km") else "mi"), font = "", color = lightness("#e5a00d", animprogress / 100)),
+                render.Text("%s %s" % (state["range_value"], state["unit"]), font = "", color = lightness("#e5a00d", animprogress / 100)),
             ],
         ),
     )
@@ -490,10 +494,27 @@ def get_schema():
                 icon = "batteryFull",
                 default = "sensor.tesla_charge_limit_soc",
             ),
+            schema.Dropdown(
+                id = "unit",
+                name = "Unit",
+                desc = "The unit of the 'Range' entity from Home Assistant. Select 'Kilometers (km)' if your sensor already provides range in kilometers.",
+                icon = "ruler",
+                default = "mi",
+                options = [
+                    schema.Option(
+                        display = "Miles (mi)",
+                        value = "mi",
+                    ),
+                    schema.Option(
+                        display = "Kilometers (km)",
+                        value = "km",
+                    ),
+                ],
+            ),
             schema.Toggle(
                 id = "mi2km",
-                name = "Mi/KM",
-                desc = "Convert miles to kilometers",
+                name = "Display as KM",
+                desc = "Convert range from miles to kilometers for display. Only applies when 'Unit' is set to 'Miles (mi)'.",
                 icon = "codeFork",
                 default = False,
             ),
