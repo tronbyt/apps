@@ -4,4 +4,3 @@ olympic_medals.star
 ca_renewables.star
 dense_time_temp.star
 cellartrackerrtd.star
-product_hunt.star
