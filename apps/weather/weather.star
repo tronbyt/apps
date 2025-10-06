@@ -79,20 +79,39 @@ def main(config):
     showthreeday = config.bool("showthreeday", False)  # Add new config option
     lang = config.get("lang", "en")
 
-    # Create API URL with parameters for One Call API 3.0
-    api_key = config.get("api", "xxx")
-    url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_key)
+    # Get API keys - check for both V3 and V2.5
+    api_v3_key = config.get("api_v3", "")
+    api_v2_key = config.get("api_v2", config.get("api", ""))  # fallback to original field for backward compatibility
 
-    # Fetch weather data
-    rep = http.get(url)
-    if rep.status_code != 200:
-        return error_display("Weather API Error")
+    # Determine which API to use - prefer V3 if available, fallback to V2.5
+    if api_v3_key and api_v3_key != "":
+        # Use One Call API 3.0
+        url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v3_key)
+        
+        # Fetch weather data
+        rep = http.get(url)
+        if rep.status_code != 200:
+            return error_display("Weather API Error")
 
-    weather_data = json.decode(rep.body())
+        weather_data = json.decode(rep.body())
 
-    # Process forecast data into daily highs and lows
-    # One Call API 3.0 provides daily data directly
-    daily_data = process_forecast_onecall(weather_data)
+        # Process forecast data using One Call API 3.0 processing
+        daily_data = process_forecast_onecall(weather_data)
+    elif api_v2_key and api_v2_key != "":
+        # Use Standard Forecast API 2.5
+        url = "https://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v2_key)
+        
+        # Fetch weather data
+        rep = http.get(url)
+        if rep.status_code != 200:
+            return error_display("Weather API Error")
+
+        weather_data = json.decode(rep.body())
+
+        # Process forecast data using Standard API 2.5 processing
+        daily_data = process_forecast(weather_data["list"])
+    else:
+        return error_display("No API Key Provided")
 
     # Create the display
     if showthreeday:
@@ -439,6 +458,7 @@ def process_forecast_onecall(weather_data):
 
 def process_forecast(forecast_list):
     # Group forecasts by day and find high/low temps
+    # This function processes Standard API 2.5 forecast data
     days = {}
 
     for item in forecast_list:
@@ -456,9 +476,9 @@ def process_forecast(forecast_list):
         if weather_icon.startswith(("02", "03")):
             weather_main = "Partly_Sun"
 
-        # Check if weather is some atmosphereic condition that can be represented as fog
+        # Check if weather is some atmospheric condition that can be represented as fog
         if weather_main == "Haze" or weather_main == "Smoke" or weather_main == "Ash":
-            weather_main = "Fog"
+            weather_main = "Mist"
 
         if day_key not in days:
             days[day_key] = {
@@ -615,9 +635,15 @@ def get_schema():
                 icon = "calendar",
             ),
             schema.Text(
-                id = "api",
-                name = "OpenWeather API Key",
-                desc = "Go to OpenWeatherMap.org, sign up for a free account and get One Call API 3.0 subscription. Enter your API key here. Requires 'One Call by Call' subscription with 1000 free calls/day.",
+                id = "api_v3",
+                name = "OpenWeather One Call API 3.0 Key (Optional)",
+                desc = "One Call API 3.0 key for enhanced features. Requires 'One Call by Call' subscription with 1000 free calls/day.",
+                icon = "gear",
+            ),
+            schema.Text(
+                id = "api_v2",
+                name = "OpenWeather API 2.5 Key",
+                desc = "Standard API 2.5 key for basic weather data (free tier available). Go to OpenWeatherMap.org to get your free API key.",
                 icon = "gear",
             ),
             schema.Dropdown(
