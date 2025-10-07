@@ -23,7 +23,8 @@ FONT_DEFAULT = FONTS[0]
 FAIL_IMAGE = "aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy90aHVtYi81LzU4L0FuaW1hbF9Dcm9zc2luZ19MZWFmLnBuZy81MDBweC1BbmltYWxfQ3Jvc3NpbmdfTGVhZi5wbmc="
 FAIL_MESSAGE = "%s failed with status: %d"
 
-ACNH_API_URL = "https://acnhapi.com/v1/villagers/"
+ACNH_API_VILLAGERS = "https://raw.githubusercontent.com/alexislours/ACNHAPI/refs/heads/master/villagers.json"
+ACNH_API_ICON_TEMPLATE = "https://github.com/alexislours/ACNHAPI/raw/master/icons/villagers/{}.png"
 
 def main(config):
     language = config.get("language") or "USen"
@@ -38,9 +39,9 @@ def main(config):
         fail("Unable to find villager :c")
 
     # Set villager icon
-    villager_icon = villager["icon_uri"]
+    villager_icon = ACNH_API_ICON_TEMPLATE.format(villager["file-name"])
     if villager_icon == None:
-        villager_icon = get_villager_icon(base64.decode(FAIL_IMAGE))
+        villager_icon = base64.decode(FAIL_IMAGE)
     else:
         villager_icon = get_villager_icon(villager_icon)
 
@@ -123,9 +124,9 @@ def get_villager_data():
     if villager_data_cached != None:
         villager_data = json.decode(villager_data_cached)
     else:
-        rep = http.get(ACNH_API_URL)
+        rep = http.get(ACNH_API_VILLAGERS)
         if rep.status_code != 200:
-            fail(FAIL_MESSAGE % (ACNH_API_URL, rep.status_code))
+            fail(FAIL_MESSAGE % (ACNH_API_VILLAGERS, rep.status_code))
         villager_data = rep.json()
 
         # TODO: Determine if this cache call can be converted to the new HTTP cache.
