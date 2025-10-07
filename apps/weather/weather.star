@@ -218,7 +218,7 @@ def get_slide_percentage(forecast):
         "Thunderstorm": 33,
         "Drizzle": 33,
         "Mist": 40,
-        "Partly Sun": 33,
+        "Partly_Sun": 33,
     }
     return slide_map.get(forecast, 40)
 
