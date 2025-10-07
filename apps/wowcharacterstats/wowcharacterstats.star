@@ -78,6 +78,21 @@ def main(config):
     client_id = config.get("client")
     client_secret = config.get("secret")
 
+    if not client_id or not client_secret:
+        return render.Root(
+            child = render.Row(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.WrappedText(
+                        content = "Client ID/Secret required.",
+                        align = "center",
+                    ),
+                ],
+            ),
+        )
+
     blizzard_auth_url = "https://oauth.battle.net/token?grant_type=client_credentials"
     blizzard_profile_url = "https://%s.api.blizzard.com/profile/wow/character/%s/%s?namespace=profile-%s&locale=en_US" % (region, realm_name, character_name, region)
     blizzard_mythic_url = "https://%s.api.blizzard.com/profile/wow/character/%s/%s/mythic-keystone-profile?namespace=profile-%s&locale=en_US" % (region, realm_name, character_name, region)
