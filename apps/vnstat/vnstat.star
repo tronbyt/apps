@@ -566,50 +566,183 @@ def create_particle_scatter_display(label, text_length, color, status):
     )
 
 def create_particle_background_display(label, target_value, color, status, progress):
-    """Create full-screen particle explosion effect"""
+    """Create full-screen particle explosion effect - following Matrix Rain pattern"""
 
-    # Create background particle field
+    # Create particle explosion background using same pattern as Matrix Rain
     particle_elements = []
+    center_x, center_y = 32, 16
 
-    # Generate particles across the entire screen
-    for y in range(0, 32, 4):  # Every 4 pixels vertically
-        for x in range(0, 64, 6):  # Every 6 pixels horizontally
-            # Particle animation based on distance from center and progress
-            center_x, center_y = 32, 16
-            dx = x - center_x
-            dy = y - center_y
-            distance = math.sqrt(dx * dx + dy * dy)
+    # Create expanding particle rings
+    for ring in range(5):  # 5 rings of particles
+        ring_radius = int(progress * (8 + ring * 6))  # Expanding rings
+        particles_in_ring = 8 + ring * 4  # More particles in outer rings
 
-            # Particles appear at different times based on distance
-            appear_time = (distance / 30.0) * 0.6  # Normalize distance
+        for i in range(particles_in_ring):
+            angle = (i * 360.0) / particles_in_ring + (ring * 15)  # Offset each ring
 
-            if progress >= appear_time:
-                # Choose particle character based on position
-                particles = "*+.ox"
-                char_index = (x + y + int(progress * 20)) % len(particles)
-                particle_char = particles[char_index]
+            # Calculate position
+            x = center_x + int(ring_radius * math.cos(angle * math.pi / 180))
+            y = center_y + int(ring_radius * math.sin(angle * math.pi / 180))
 
-                # Particle fades as explosion progresses
-                particle_color = color if progress < 0.7 else "#666666"
+            # Keep particles on screen
+            if x >= 0 and x < 64 and y >= 0 and y < 32:
+                # Colorful explosion - cycle through rainbow colors
+                colorful_palette = ["#FF0000", "#FF4500", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF", "#8000FF", "#FF00FF"]
+
+                # Color based on ring, particle position, and progress for rainbow effect
+                if ring == 0:
+                    # Bright center - cycle through warm colors including theme color
+                    color_index = (i + int(progress * 10)) % 5
+                    if color_index == 0:
+                        particle_color = color  # Use theme color
+                    else:
+                        particle_color = ["#FFFF00", "#FF4500", "#FF0000", "#FF00FF"][color_index - 1]
+                elif ring == 1:
+                    # Inner ring - full rainbow
+                    color_index = (i + int(progress * 20)) % len(colorful_palette)
+                    particle_color = colorful_palette[color_index]
+                elif ring == 2:
+                    # Middle ring - cooler colors
+                    color_index = (i + int(progress * 15)) % 4
+                    particle_color = ["#00FFFF", "#0000FF", "#8000FF", "#00FF00"][color_index]
+                else:
+                    # Outer rings - dimmer rainbow
+                    color_index = (i + int(progress * 5)) % len(colorful_palette)
+                    base_color = colorful_palette[color_index]
+
+                    # Make outer particles dimmer
+                    if base_color == "#FF0000":
+                        particle_color = "#880000"
+                    elif base_color == "#00FF00":
+                        particle_color = "#008800"
+                    elif base_color == "#0000FF":
+                        particle_color = "#000088"
+                    else:
+                        particle_color = "#666666"
+
+                # Add sparkle effect with random bright colors
+                if progress > 0.5 and (i % 3) == 0:
+                    sparkle_colors = ["#FFFFFF", "#FFFF00", "#FF00FF", "#00FFFF"]
+                    particle_color = sparkle_colors[i % len(sparkle_colors)]
 
                 particle_elements.append(
                     render.Padding(
                         pad = (x, y, 0, 0),
-                        child = render.Text(
-                            content = particle_char,
-                            font = FONT_SMALL,
+                        child = render.Box(
+                            width = 1,
+                            height = 1,
                             color = particle_color,
                         ),
                     ),
                 )
 
-    # Create main content overlay
-    main_content = create_metric_display(label, target_value, color, status)
+    # Add scattered background particles for density
+    for i in range(int(progress * 30)):
+        # Pseudo-random positions
+        scatter_x = (center_x + (i * 7) % 32 - 16) % 64
+        scatter_y = (center_y + (i * 11) % 16 - 8) % 32
 
-    # Stack background particles with main content
-    return render.Stack(
-        children = particle_elements + [main_content],
+        if progress > 0.3:  # Only show after initial explosion
+            scatter_color = "#444444" if (i % 3) == 0 else "#222222"
+            particle_elements.append(
+                render.Padding(
+                    pad = (scatter_x, scatter_y, 0, 0),
+                    child = render.Box(
+                        width = 1,
+                        height = 1,
+                        color = scatter_color,
+                    ),
+                ),
+            )
+
+    # Add central flash
+    if progress > 0.1:
+        flash_size = int((progress - 0.1) * 6)
+        if flash_size > 0 and flash_size <= 5:
+            flash_x = center_x - flash_size // 2
+            flash_y = center_y - flash_size // 2
+            flash_color = "#FFFF00" if progress > 0.5 else "#FFFFFF"
+
+            particle_elements.append(
+                render.Padding(
+                    pad = (flash_x, flash_y, 0, 0),
+                    child = render.Box(
+                        width = flash_size,
+                        height = flash_size,
+                        color = flash_color,
+                    ),
+                ),
+            )
+
+    # Create transparent text overlay so particles show behind text
+    text_overlay = render.Column(
+        expanded = True,
+        main_align = "space_between",
+        children = [
+            # Header with minimal background for readability
+            render.Box(
+                height = 8,
+                color = "#00000080",  # Semi-transparent black
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Padding(
+                            pad = (2, 1, 0, 0),
+                            child = render.Text(
+                                content = label,
+                                font = FONT_SMALL,
+                                color = "#FFFFFF",  # White for visibility
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (0, 1, 2, 0),
+                            child = render.Text(
+                                content = status,
+                                font = FONT_SMALL,
+                                color = "#FFFFFF",  # White for visibility
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            # Main content with minimal background
+            render.Box(
+                height = 24,
+                color = "#00000000",  # Fully transparent
+                child = render.Column(
+                    expanded = True,
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        # Add text shadow effect with multiple text elements
+                        render.Stack(
+                            children = [
+                                # Shadow text for readability
+                                render.Padding(
+                                    pad = (1, 1, 0, 0),
+                                    child = render.Text(
+                                        content = target_value,
+                                        font = FONT_LARGE,
+                                        color = "#000000",  # Black shadow
+                                    ),
+                                ),
+                                # Main text
+                                render.Text(
+                                    content = target_value,
+                                    font = FONT_LARGE,
+                                    color = "#FFFFFF",  # White main text
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ),
+        ],
     )
+
+    # Stack particles behind transparent text overlay
+    return render.Stack(children = particle_elements + [text_overlay])
 
 def create_matrix_background_display(label, target_value, color, status, progress):
     """Create full-screen matrix rain effect"""
