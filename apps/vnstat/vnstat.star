@@ -237,7 +237,7 @@ def create_particle_frames(data, status_message):
     ]
 
     static_frames = 20  # 1.2 seconds static
-    particle_frames = 20  # 1.2 seconds particles
+    particle_frames = 30  # 1.8 seconds particles
 
     for metric in metrics:
         target_value = format_bytes(metric["value"])
@@ -245,40 +245,22 @@ def create_particle_frames(data, status_message):
         # Particle explosion frames
         for frame in range(particle_frames):
             progress = frame / (particle_frames - 1)
-
-            if progress < 0.3:
-                # Scattered particles phase
-                frames.append(create_particle_scatter_display(
-                    metric["label"],
-                    len(target_value),
-                    metric["color"],
-                    status_message,
-                ))
-            elif progress < 0.7:
-                # Convergence phase
-                frames.append(create_particle_converge_display(
-                    metric["label"],
-                    target_value,
-                    metric["color"],
-                    status_message,
-                    progress,
-                ))
-            else:
-                # Final stable phase
-                frames.append(create_metric_display(
-                    metric["label"],
-                    target_value,
-                    metric["color"],
-                    status_message,
-                ))
-
-        # Static frames
-        for _ in range(static_frames):
-            frames.append(create_metric_display(
+            frames.append(create_particle_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
+                progress,
+            ))
+
+        # Static frames - keep particle background
+        for _ in range(static_frames):
+            frames.append(create_particle_background_display(
+                metric["label"],
+                target_value,
+                metric["color"],
+                status_message,
+                1.0,  # Full progress for final state
             ))
 
     return frames
@@ -295,7 +277,7 @@ def create_matrix_frames(data, status_message):
     ]
 
     static_frames = 20  # 1 second static
-    matrix_frames = 30  # 1.5 seconds matrix effect
+    matrix_frames = 40  # 2 seconds matrix effect
 
     for metric in metrics:
         target_value = format_bytes(metric["value"])
@@ -303,7 +285,7 @@ def create_matrix_frames(data, status_message):
         # Matrix rain frames
         for frame in range(matrix_frames):
             progress = frame / (matrix_frames - 1)
-            frames.append(create_matrix_display(
+            frames.append(create_matrix_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
@@ -311,13 +293,14 @@ def create_matrix_frames(data, status_message):
                 progress,
             ))
 
-        # Static frames
+        # Static frames - keep matrix background
         for _ in range(static_frames):
-            frames.append(create_metric_display(
+            frames.append(create_matrix_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
+                1.0,  # Full progress for final state
             ))
 
     return frames
@@ -582,71 +565,148 @@ def create_particle_scatter_display(label, text_length, color, status):
         ],
     )
 
-def create_particle_converge_display(label, target_value, color, status, progress):
-    """Create converging particles effect"""
+def create_particle_background_display(label, target_value, color, status, progress):
+    """Create full-screen particle explosion effect"""
 
-    # Simple character-by-character reveal
-    result_text = ""
-    reveal_count = int(len(target_value) * (progress - 0.3) / 0.4)
+    # Create background particle field
+    particle_elements = []
 
-    if reveal_count < 0:
-        reveal_count = 0
-    if reveal_count > len(target_value):
-        reveal_count = len(target_value)
+    # Generate particles across the entire screen
+    for y in range(0, 32, 4):  # Every 4 pixels vertically
+        for x in range(0, 64, 6):  # Every 6 pixels horizontally
+            # Particle animation based on distance from center and progress
+            center_x, center_y = 32, 16
+            dx = x - center_x
+            dy = y - center_y
+            distance = math.sqrt(dx * dx + dy * dy)
 
-    for i in range(len(target_value)):
-        if i < reveal_count:
-            result_text += target_value[i]
-        else:
-            result_text += "*"
+            # Particles appear at different times based on distance
+            appear_time = (distance / 30.0) * 0.6  # Normalize distance
 
-    return render.Column(
-        expanded = True,
-        main_align = "space_between",
-        children = [
-            # Header
-            render.Box(
-                height = 8,
-                color = COLOR_HEADER,
-                child = render.Row(
-                    expanded = True,
-                    main_align = "space_between",
-                    children = [
-                        render.Padding(
-                            pad = (2, 1, 0, 0),
-                            child = render.Text(
-                                content = label,
-                                font = FONT_SMALL,
-                                color = COLOR_TEXT,
+            if progress >= appear_time:
+                # Choose particle character based on position
+                particles = "*+.ox"
+                char_index = (x + y + int(progress * 20)) % len(particles)
+                particle_char = particles[char_index]
+
+                # Particle fades as explosion progresses
+                particle_color = color if progress < 0.7 else "#666666"
+
+                particle_elements.append(
+                    render.Padding(
+                        pad = (x, y, 0, 0),
+                        child = render.Text(
+                            content = particle_char,
+                            font = FONT_SMALL,
+                            color = particle_color,
+                        ),
+                    ),
+                )
+
+    # Create main content overlay
+    main_content = create_metric_display(label, target_value, color, status)
+
+    # Stack background particles with main content
+    return render.Stack(
+        children = particle_elements + [main_content],
+    )
+
+def create_matrix_background_display(label, target_value, color, status, progress):
+    """Create full-screen matrix rain effect"""
+
+    # Create matrix rain background
+    matrix_elements = []
+    matrix_chars = "01ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+    # Create falling columns of text
+    for x in range(0, 64, 4):  # Columns every 4 pixels
+        for y in range(0, 32, 3):  # Rows every 3 pixels
+            # Calculate animation offset
+            fall_offset = int((progress * 50 + x * 3) % 35) - 3
+            actual_y = y + fall_offset
+
+            # Only show if within screen bounds
+            if actual_y >= 0 and actual_y <= 29:
+                # Character changes over time
+                char_index = int((progress * 30 + x + y) % len(matrix_chars))
+                matrix_char = matrix_chars[char_index]
+
+                # Fade characters based on position in fall
+                char_color = color if actual_y < 20 else "#006600"
+
+                matrix_elements.append(
+                    render.Padding(
+                        pad = (x, actual_y, 0, 0),
+                        child = render.Text(
+                            content = matrix_char,
+                            font = FONT_SMALL,
+                            color = char_color,
+                        ),
+                    ),
+                )
+
+    # Create main content overlay with semi-transparent background
+    content_background = render.Box(
+        width = 60,
+        height = 28,
+        color = "#001100",  # Dark background
+        child = render.Column(
+            expanded = True,
+            main_align = "space_between",
+            children = [
+                # Header
+                render.Box(
+                    height = 8,
+                    color = "#002200",
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        children = [
+                            render.Padding(
+                                pad = (2, 1, 0, 0),
+                                child = render.Text(
+                                    content = label,
+                                    font = FONT_SMALL,
+                                    color = color,
+                                ),
                             ),
-                        ),
-                        render.Padding(
-                            pad = (0, 1, 2, 0),
-                            child = render.Text(
-                                content = status,
-                                font = FONT_SMALL,
-                                color = COLOR_TEXT,
+                            render.Padding(
+                                pad = (0, 1, 2, 0),
+                                child = render.Text(
+                                    content = status,
+                                    font = FONT_SMALL,
+                                    color = color,
+                                ),
                             ),
-                        ),
-                    ],
+                        ],
+                    ),
                 ),
-            ),
-            # Converging text
-            render.Box(
-                height = 24,
-                color = COLOR_BACKGROUND,
-                child = render.Column(
-                    expanded = True,
-                    main_align = "center",
-                    cross_align = "center",
-                    children = [
-                        render.Text(
-                            content = result_text,
-                            font = FONT_LARGE,
-                            color = color,
-                        ),
-                    ],
+                # Main content
+                render.Box(
+                    height = 18,
+                    child = render.Column(
+                        expanded = True,
+                        main_align = "center",
+                        cross_align = "center",
+                        children = [
+                            render.Text(
+                                content = target_value,
+                                font = FONT_LARGE,
+                                color = color,
+                            ),
+                        ],
+                    ),
                 ),
+            ],
+        ),
+    )
+
+    # Stack matrix rain with content overlay
+    return render.Stack(
+        children = matrix_elements + [
+            render.Padding(
+                pad = (2, 2, 0, 0),
+                child = content_background,
             ),
         ],
     )
