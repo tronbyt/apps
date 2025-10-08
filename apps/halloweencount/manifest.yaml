@@ -1,0 +1,9 @@
+---
+id: halloweencount
+name: Halloween Counter
+summary: Halloween Counter
+desc: Renders how many days until Halloween, includes multiple sprites and ability to set GIF images with customizable spooky animation effects including floating sprites, orbiting motion, particles, and pulsing text.
+author: Starrlord
+fileName: halloweencount.star
+packageName: halloweencount
+recommended_interval: 5
