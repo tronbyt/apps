@@ -27,9 +27,7 @@ MARQUEE_DELAY = 32
 DEFAULT_BIRD_NAME = "No recent visitors"
 
 # Embedded House Finch icon (32px height, WebP format, 688 bytes)
-DEFAULT_FINCH_ICON = base64.decode("""
-UklGRqgCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSIcBAAABkHRrmyHJ0t+2bdurXtu27d7atnts27Zta2dz1XZnDCIicxARE4D/s6aTm6HsH1DOvPLl+9NOU8nkmybI70f0eWRleMKGCHXmdKwSza56x9p0HYbKAcL+FkbxeUYImd1nQpErGmNMHIjXAmBQ95pQB2UBaDYPEeYVLfxeNkbo75wAk22zhL0OVJ3g3QKFdCsYHiS8B+UpgMMb2viarQLXBRWG6hUaEQTCfVyRoXmbIXYZmDoPpZlNZSmfleaBMQvtkkzlgdP9kxTrVHlk6mfEHTMFt8VDMaNrTMFtsm7m+zDXaIEiuN3OCtc8Is+NcQirlbj8ns5utgA0fVe+fz5y8+S7Kw/Hh7PkOPw/jrWqA4Bqe3x1n4ZCwQLHxJfDFSqssOOJCoCcnEZTsfsCXeeSxjvXDl96OblIhyGjBMCpcu2RCyuuxqno29uap+xuiDk+t9ucRjXJ335s28PLC/J0AUBRHSZb587b8sgq2qctj9DWUZH77XetrocePADU5CFSQV9OxH8bAFZQOCD6AAAA0AUAnQEqIAAgAD6JOpdHpSOiITAYDACgEQlsAJ0y0HtK0GFK9GAHmNsmqw7vyW55QMqSzbigAAD9HA4d1FhaRU4gK+vJY77KIge08aCwuwMWmP/cU9qLFFE7Fb8//GyN9QFsL7m8JlAk19x3+tLtrMmjlgOS9oajz1/xngIk0b9doBcx3kFp9BHQ1ZYjkB7+EweYxkzW/EY7xW4BU/qvcmglxp+vweI7XdCXb/c2Q0A+Hz7BSdhXUs0Hp0qDgtDPZL0Kz3VzAmya2k0BbJU/QLLmtFEqEiXR+cmyeW1mGkg41CqWThGPKnG/1c5u/39e0ZiyyNblAHnAAA==
-""")
+DEFAULT_FINCH_ICON = base64.decode("UklGRqgCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSIcBAAABkHRrmyHJ0t+2bdurXtu27d7atnts27Zta2dz1XZnDCIicxARE4D/s6aTm6HsH1DOvPLl+9NOU8nkmybI70f0eWRleMKGCHXmdKwSza56x9p0HYbKAcL+FkbxeUYImd1nQpErGmNMHIjXAmBQ95pQB2UBaDYPEeYVLfxeNkbo75wAk22zhL0OVJ3g3QKFdCsYHiS8B+UpgMMb2viarQLXBRWG6hUaEQTCfVyRoXmbIXYZmDoPpZlNZSmfleaBMQvtkkzlgdP9kxTrVHlk6mfEHTMFt8VDMaNrTMFtsm7m+zDXaIEiuN3OCtc8Is+NcQirlbj8ns5utgA0fVe+fz5y8+S7Kw/Hh7PkOPw/jrWqA4Bqe3x1n4ZCwQLHxJfDFSqssOOJCoCcnEZTsfsCXeeSxjvXDl96OblIhyGjBMCpcu2RCyuuxqno29uap+xuiDk+t9ucRjXJ335s28PLC/J0AUBRHSZb587b8sgq2qctj9DWUZH77XetrocePADU5CFSQV9OxH8bAFZQOCD6AAAA0AUAnQEqIAAgAD6JOpdHpSOiITAYDACgEQlsAJ0y0HtK0GFK9GAHmNsmqw7vyW55QMqSzbigAAD9HA4d1FhaRU4gK+vJY77KIge08aCwuwMWmP/cU9qLFFE7Fb8//GyN9QFsL7m8JlAk19x3+tLtrMmjlgOS9oajz1/xngIk0b9doBcx3kFp9BHQ1ZYjkB7+EweYxkzW/EY7xW4BU/qvcmglxp+vweI7XdCXb/c2Q0A+Hz7BSdhXUs0Hp0qDgtDPZL0Kz3VzAmya2k0BbJU/QLLmtFEqEiXR+cmyeW1mGkg41CqWThGPKnG/1c5u/39e0ZiyyNblAHnAAA==")
 
 # Relevant feed item types for bird sightings
 VALID_BIRD_NODE_TYPES = [
@@ -122,7 +120,11 @@ def get_auth_token(username, password):
         return None
 
     auth_response = response.json()
-    if auth_response and "data" in auth_response:
+    if not auth_response:
+        print("Failed to parse auth JSON response")
+        return None
+
+    if "data" in auth_response:
         auth_data = auth_response.get("data", {}).get("authEmailSignIn")
         if auth_data:
             # Check if it's a successful Auth response
@@ -221,7 +223,11 @@ def get_feeders(token):
         return None
 
     feeders_response = response.json()
-    if feeders_response and "data" in feeders_response:
+    if not feeders_response:
+        print("Failed to parse JSON response")
+        return []
+
+    if "data" in feeders_response:
         me_data = feeders_response.get("data", {}).get("me", {})
         if me_data:
             feeders_data = me_data.get("feeders", [])
@@ -340,7 +346,9 @@ def get_latest_sighting(token, feeders):
 
     if response.status_code == 200:
         feed_response = response.json()
-        if feed_response and "data" in feed_response:
+        if not feed_response:
+            print("Failed to parse feed JSON response")
+        elif "data" in feed_response:
             me_data = feed_response.get("data", {}).get("me", {})
             if me_data and "feed" in me_data:
                 feed_edges = me_data.get("feed", {}).get("edges", [])
@@ -467,8 +475,9 @@ def get_postcard_sighting(token, postcard_id):
 
     if response.status_code == 200:
         sighting_response = response.json()
-
-        if sighting_response and "data" in sighting_response:
+        if not sighting_response:
+            print("Failed to parse sighting JSON response")
+        elif "data" in sighting_response:
             data = sighting_response.get("data")
             if data and "sightingCreateFromPostcard" in data:
                 create_data = data.get("sightingCreateFromPostcard")
@@ -568,8 +577,9 @@ def get_from_collections(token):
 
     if response.status_code == 200:
         collections_response = response.json()
-
-        if collections_response and "data" in collections_response:
+        if not collections_response:
+            print("Failed to parse collections JSON response")
+        elif "data" in collections_response:
             me_data = collections_response.get("data", {}).get("me", {})
             if me_data and "collections" in me_data:
                 collections = me_data.get("collections", [])
