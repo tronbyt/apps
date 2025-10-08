@@ -10,6 +10,7 @@ load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # Constants
 DEFAULT_CACHE_TTL = 300  # 5 minutes
@@ -108,6 +109,12 @@ def main(config):
 
 def get_animation_delay(animation_type):
     """Get appropriate delay for animation type"""
+    if animation_type == "random":
+        # Use same logic to select the random type for delay consistency
+        available_types = ["slide", "counter", "particle", "matrix", "fade", "zoom", "wave"]
+        seed = int(time.now().unix // 300)  # Changes every 5 minutes
+        animation_type = available_types[seed % len(available_types)]
+
     delays = {
         "slide": 100,
         "counter": 80,
@@ -121,6 +128,14 @@ def get_animation_delay(animation_type):
 
 def create_animation_frames(data, status_message, animation_type):
     """Create animation frames based on selected type"""
+    if animation_type == "random":
+        # Select a random animation from available types
+        available_types = ["slide", "counter", "particle", "matrix", "fade", "zoom", "wave"]
+
+        # Use current time as seed to ensure it changes periodically but stays consistent during app load
+        seed = int(time.now().unix // 300)  # Changes every 5 minutes
+        animation_type = available_types[seed % len(available_types)]
+
     if animation_type == "slide":
         return create_simple_sliding_frames(data, status_message)
     elif animation_type == "counter":
@@ -184,7 +199,7 @@ def create_simple_sliding_frames(data, status_message):
     return frames
 
 def create_counter_frames(data, status_message):
-    """Create counter effect animation frames"""
+    """Create counter effect animation frames with seamless transitions"""
     frames = []
 
     metrics = [
@@ -226,7 +241,7 @@ def create_counter_frames(data, status_message):
     return frames
 
 def create_particle_frames(data, status_message):
-    """Create particle explosion animation frames"""
+    """Create particle explosion animation frames with seamless flow"""
     frames = []
 
     metrics = [
@@ -238,35 +253,41 @@ def create_particle_frames(data, status_message):
 
     static_frames = 20  # 1.2 seconds static
     particle_frames = 30  # 1.8 seconds particles
+    
+    # Global frame counter for seamless animation
+    global_frame = 0
 
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Particle explosion frames
-        for frame in range(particle_frames):
-            progress = frame / (particle_frames - 1)
+        # Particle explosion frames with continuous progress
+        for _ in range(particle_frames):
+            continuous_progress = (global_frame % 80) / 80.0  # Cycle every 80 frames
             frames.append(create_particle_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
-        # Static frames - keep particle background
+        # Static frames - continue particle animation
         for _ in range(static_frames):
+            continuous_progress = (global_frame % 80) / 80.0
             frames.append(create_particle_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                1.0,  # Full progress for final state
+                continuous_progress,
             ))
+            global_frame += 1
 
     return frames
 
 def create_matrix_frames(data, status_message):
-    """Create matrix rain animation frames"""
+    """Create matrix rain animation frames with seamless continuous animation"""
     frames = []
 
     metrics = [
@@ -279,29 +300,36 @@ def create_matrix_frames(data, status_message):
     static_frames = 20  # 1 second static
     matrix_frames = 40  # 2 seconds matrix effect
 
+    # Global frame counter for seamless animation
+    global_frame = 0
+
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Matrix rain frames
-        for frame in range(matrix_frames):
-            progress = frame / (matrix_frames - 1)
+        # Matrix rain frames with continuous progress
+        for _ in range(matrix_frames):
+            # Continuous progress that doesn't reset between metrics
+            continuous_progress = global_frame / 100.0  # Slower, continuous progression
             frames.append(create_matrix_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
-        # Static frames - keep matrix background
+        # Static frames - continue matrix animation
         for _ in range(static_frames):
+            continuous_progress = global_frame / 100.0
             frames.append(create_matrix_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                1.0,  # Full progress for final state
+                continuous_progress,
             ))
+            global_frame += 1
 
     return frames
 
@@ -345,7 +373,7 @@ def create_fade_frames(data, status_message):
     return frames
 
 def create_zoom_frames(data, status_message):
-    """Create zoom effect animation frames"""
+    """Create zoom effect animation frames with seamless transitions"""
     frames = []
 
     metrics = [
@@ -357,20 +385,24 @@ def create_zoom_frames(data, status_message):
 
     static_frames = 20  # 1.8 seconds static
     zoom_frames = 15  # 1.35 seconds zoom
+    
+    # Global frame counter for seamless animation
+    global_frame = 0
 
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Zoom in frames
-        for frame in range(zoom_frames):
-            progress = frame / (zoom_frames - 1)
+        # Zoom in frames with continuous progress
+        for _ in range(zoom_frames):
+            continuous_progress = (global_frame % 30) / 30.0  # Cycle every 30 frames
             frames.append(create_zoom_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
         # Static frames
         for _ in range(static_frames):
@@ -380,11 +412,12 @@ def create_zoom_frames(data, status_message):
                 metric["color"],
                 status_message,
             ))
+            global_frame += 1
 
     return frames
 
 def create_wave_frames(data, status_message):
-    """Create wave pattern animation frames"""
+    """Create wave pattern animation frames with seamless flow"""
     frames = []
 
     metrics = [
@@ -396,20 +429,24 @@ def create_wave_frames(data, status_message):
 
     static_frames = 20  # 1.4 seconds static
     wave_frames = 25  # 1.75 seconds wave
+    
+    # Global frame counter for seamless animation
+    global_frame = 0
 
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Wave animation frames
-        for frame in range(wave_frames):
-            progress = frame / (wave_frames - 1)
+        # Wave animation frames with continuous progress
+        for _ in range(wave_frames):
+            continuous_progress = (global_frame % 50) / 50.0  # Cycle every 50 frames
             frames.append(create_wave_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
         # Static frames
         for _ in range(static_frames):
@@ -419,6 +456,7 @@ def create_wave_frames(data, status_message):
                 metric["color"],
                 status_message,
             ))
+            global_frame += 1
 
     return frames
 
@@ -778,71 +816,67 @@ def create_matrix_background_display(label, target_value, color, status, progres
                     ),
                 )
 
-    # Create main content overlay with semi-transparent background
-    content_background = render.Box(
-        width = 60,
-        height = 28,
-        color = "#001100",  # Dark background
-        child = render.Column(
-            expanded = True,
-            main_align = "space_between",
-            children = [
-                # Header
-                render.Box(
-                    height = 8,
-                    color = "#002200",
-                    child = render.Row(
-                        expanded = True,
-                        main_align = "space_between",
-                        children = [
-                            render.Padding(
-                                pad = (2, 1, 0, 0),
+    # Create text overlay with readable background areas
+    text_overlay = render.Column(
+        expanded = True,
+        main_align = "space_between",
+        children = [
+            # Header with semi-transparent background for readability
+            render.Box(
+                height = 8,
+                color = "#001100DD",  # Semi-transparent dark green
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Padding(
+                            pad = (2, 1, 0, 0),
+                            child = render.Text(
+                                content = label,
+                                font = FONT_SMALL,
+                                color = "#FFFFFF",
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (0, 1, 2, 0),
+                            child = render.Text(
+                                content = status,
+                                font = FONT_SMALL,
+                                color = "#FFFFFF",
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            # Main content with centered semi-transparent background
+            render.Box(
+                height = 24,
+                color = "#00000000",  # Transparent container
+                child = render.Column(
+                    expanded = True,
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        # Semi-transparent background behind main text
+                        render.Box(
+                            color = "#001100DD",  # Semi-transparent dark green
+                            child = render.Padding(
+                                pad = (6, 3, 6, 3),
                                 child = render.Text(
-                                    content = label,
-                                    font = FONT_SMALL,
+                                    content = target_value,
+                                    font = FONT_LARGE,
                                     color = color,
                                 ),
                             ),
-                            render.Padding(
-                                pad = (0, 1, 2, 0),
-                                child = render.Text(
-                                    content = status,
-                                    font = FONT_SMALL,
-                                    color = color,
-                                ),
-                            ),
-                        ],
-                    ),
+                        ),
+                    ],
                 ),
-                # Main content
-                render.Box(
-                    height = 18,
-                    child = render.Column(
-                        expanded = True,
-                        main_align = "center",
-                        cross_align = "center",
-                        children = [
-                            render.Text(
-                                content = target_value,
-                                font = FONT_LARGE,
-                                color = color,
-                            ),
-                        ],
-                    ),
-                ),
-            ],
-        ),
-    )
-
-    # Stack matrix rain with content overlay
-    return render.Stack(
-        children = matrix_elements + [
-            render.Padding(
-                pad = (2, 2, 0, 0),
-                child = content_background,
             ),
         ],
     )
+
+    # Stack matrix rain behind text overlay with readable backgrounds
+    return render.Stack(children = matrix_elements + [text_overlay])
 
 def create_matrix_display(label, target_value, color, status, progress):
     """Create matrix rain effect"""
@@ -1238,6 +1272,10 @@ def get_schema():
     ]
 
     animation_options = [
+        schema.Option(
+            display = "Random Selection",
+            value = "random",
+        ),
         schema.Option(
             display = "Sliding (Classic)",
             value = "slide",
