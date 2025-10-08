@@ -26,6 +26,15 @@ MARQUEE_DELAY = 32
 DEFAULT_BIRD_NAME = "No recent visitors"
 DEFAULT_FINCH_ICON = "https://assets.cms-api-graphql.cms-api.prod.aws.mybirdbuddy.com/asset/icon/bird-illustration-thumbnails/88999787-62b3-4142-985a-216ba54a5b02_HouseFinch_thumbnail.png"
 
+# Relevant feed item types for bird sightings
+VALID_BIRD_NODE_TYPES = [
+    "FeedItemSpeciesSighting",
+    "FeedItemSpeciesUnlocked",
+    "FeedItemCollectedPostcard",
+    "FeedItemNewPostcard",
+    "FeedItemMysteryVisitorNotRecognized",
+]
+
 def main(config):
     username = config.str("username", "")
     password = config.str("password", "")
@@ -337,7 +346,7 @@ def get_latest_sighting(token, feeders):
                         node_type = node.get("__typename", "")
 
                         # Only include actual bird sighting items, not setup/admin items
-                        if node_type in ["FeedItemSpeciesSighting", "FeedItemSpeciesUnlocked", "FeedItemCollectedPostcard", "FeedItemNewPostcard", "FeedItemMysteryVisitorNotRecognized"]:
+                        if node_type in VALID_BIRD_NODE_TYPES:
                             parsed_result = parse_feed_item(node)
                             if parsed_result:  # Only return if we got actual data
                                 # Check if this is a postcard that needs bird detail lookup
@@ -656,77 +665,6 @@ def parse_feed_item(feed_node):
         "raw_data": feed_node,
     }
 
-def parse_graphql_sighting(sighting_node):
-    """Parse a single sighting from GraphQL response (legacy)"""
-
-    if not sighting_node:
-        return create_default_sighting()
-
-    # Extract bird name from species data
-    bird_name = "Unknown Bird"
-    species = sighting_node.get("species", {})
-    if species:
-        bird_name = species.get("commonName") or species.get("name") or "Unknown Bird"
-
-    # Extract timestamp
-    timestamp_str = sighting_node.get("createdAt", "")
-
-    return {
-        "bird_name": bird_name,
-        "timestamp": timestamp_str,
-        "raw_data": sighting_node,
-    }
-
-def parse_sightings_data(data):
-    """Parse sightings data from API response"""
-
-    sightings = []
-
-    # Handle different response structures
-    if type(data) == "list":
-        sightings = data
-    elif type(data) == "dict":
-        # Try common field names for sightings arrays
-        for field in ["sightings", "collections", "data", "results"]:
-            if field in data and type(data[field]) == "list":
-                sightings = data[field]
-                break
-
-    if not sightings:
-        return None
-
-    # Sort by timestamp to get most recent (try different timestamp fields)
-    def get_timestamp(sighting):
-        for field in ["timestamp", "createdAt", "created_at", "date", "sightedAt"]:
-            if field in sighting:
-                return sighting[field]
-        return "1970-01-01T00:00:00Z"
-
-    sightings.sort(key = get_timestamp, reverse = True)
-
-    latest = sightings[0]
-
-    # Extract bird name (try different field names)
-    bird_name = None
-    for field in ["species", "bird", "name", "speciesName", "species_name"]:
-        if field in latest:
-            if type(latest[field]) == "dict":
-                # Species might be nested object
-                bird_name = latest[field].get("name") or latest[field].get("commonName")
-            else:
-                bird_name = latest[field]
-            if bird_name:
-                break
-
-    # Extract timestamp
-    timestamp_str = get_timestamp(latest)
-
-    return {
-        "bird_name": bird_name or "Unknown Bird",
-        "timestamp": timestamp_str,
-        "raw_data": latest,
-    }
-
 def create_default_sighting():
     """Create a default sighting when no data is available"""
     return {
@@ -736,14 +674,10 @@ def create_default_sighting():
         "raw_data": {},
     }
 
-def humanize_time_ago(timestamp_str):
-    """Convert timestamp to human readable 'time ago' format using Pixlet's built-in time functions"""
-
+def clean_timestamp(timestamp_str):
+    """Clean up timestamp string to handle ISO format variations"""
     if not timestamp_str:
-        return "Unknown time"
-
-    # Parse the ISO timestamp using Pixlet's time.parse_time
-    # Handle common ISO formats that Bird Buddy might send
+        return None
 
     # Clean up the timestamp - handle both with and without milliseconds
     clean_timestamp = timestamp_str
@@ -754,8 +688,21 @@ def humanize_time_ago(timestamp_str):
     elif not timestamp_str.endswith("Z"):
         clean_timestamp = timestamp_str + "Z"
 
+    return clean_timestamp
+
+def humanize_time_ago(timestamp_str):
+    """Convert timestamp to human readable 'time ago' format using Pixlet's built-in time functions"""
+
+    if not timestamp_str:
+        return "Unknown time"
+
+    # Clean up the timestamp using helper function
+    clean_timestamp_result = clean_timestamp(timestamp_str)
+    if not clean_timestamp_result:
+        return "Recently"
+
     # Parse the timestamp - Pixlet uses Go's reference time format
-    sighting_time = time.parse_time(clean_timestamp, format = "2006-01-02T15:04:05Z")
+    sighting_time = time.parse_time(clean_timestamp_result, format = "2006-01-02T15:04:05Z")
     if not sighting_time:
         return "Recently"
 
@@ -798,15 +745,12 @@ def get_timestamp_color(timestamp_str):
     if not timestamp_str:
         return "#CCCCCC"  # Gray for unknown time
 
-    # Parse timestamp similar to humanize_time_ago
-    clean_timestamp = timestamp_str
-    if "." in timestamp_str and "Z" in timestamp_str:
-        parts = timestamp_str.split(".")
-        clean_timestamp = parts[0] + "Z"
-    elif not timestamp_str.endswith("Z"):
-        clean_timestamp = timestamp_str + "Z"
+    # Clean up the timestamp using helper function
+    clean_timestamp_result = clean_timestamp(timestamp_str)
+    if not clean_timestamp_result:
+        return "#CCCCCC"  # Gray for invalid timestamp
 
-    sighting_time = time.parse_time(clean_timestamp, format = "2006-01-02T15:04:05Z")
+    sighting_time = time.parse_time(clean_timestamp_result, format = "2006-01-02T15:04:05Z")
     if not sighting_time:
         return "#CCCCCC"  # Gray for unparseable time
 
@@ -830,9 +774,9 @@ def get_timestamp_color(timestamp_str):
         progress = (diff_seconds - 900) / (86400 - 900)  # 0.0 to 1.0
 
         # Interpolate each color component
-        red = int(0 + (204 * progress)) # Red goes from 0 to 204
+        red = int(0 + (204 * progress))  # Red goes from 0 to 204
         green = 204  # Green stays constant at 204
-        blue = int(102 + (102 * progress)) # Blue goes from 102 to 204
+        blue = int(102 + (102 * progress))  # Blue goes from 102 to 204
 
         # Format as hex color (manual hex conversion for Starlark compatibility)
         hex_chars = "0123456789ABCDEF"

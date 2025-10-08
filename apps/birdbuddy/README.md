@@ -11,7 +11,7 @@ Display your latest Bird Buddy feeder visitors on your Tidbyt display!
 ### Prerequisites
 
 - A [Bird Buddy](https://mybirdbuddy.com/) smart bird feeder and account
-- Your Bird Buddy login credentials (email and password) Sorry no Oauth Support, only Email/password account work
+- Your Bird Buddy login credentials (email and password) Sorry no OAuth Support, only Email/password accounts work
 
 ### Installation
 
@@ -28,7 +28,7 @@ The app connects to Bird Buddy's GraphQL API to:
 1. **Authenticate** with your Bird Buddy account
 2. **Fetch your feeders** and recent activity
 3. **Display the latest visitor** with species name and timestamp
-5. **Cache data** to reduce API calls and improve performance
+4. **Cache data** to reduce API calls and improve performance
 
 ## Troubleshooting
 
