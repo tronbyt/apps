@@ -10,6 +10,7 @@ load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # Constants
 DEFAULT_CACHE_TTL = 300  # 5 minutes
@@ -108,6 +109,12 @@ def main(config):
 
 def get_animation_delay(animation_type):
     """Get appropriate delay for animation type"""
+    if animation_type == "random":
+        # Use same logic to select the random type for delay consistency
+        available_types = ["slide", "counter", "particle", "matrix", "fade", "zoom", "wave"]
+        seed = int(time.now().unix // 300)  # Changes every 5 minutes
+        animation_type = available_types[seed % len(available_types)]
+
     delays = {
         "slide": 100,
         "counter": 80,
@@ -121,6 +128,14 @@ def get_animation_delay(animation_type):
 
 def create_animation_frames(data, status_message, animation_type):
     """Create animation frames based on selected type"""
+    if animation_type == "random":
+        # Select a random animation from available types
+        available_types = ["slide", "counter", "particle", "matrix", "fade", "zoom", "wave"]
+
+        # Use current time as seed to ensure it changes periodically but stays consistent during app load
+        seed = int(time.now().unix // 300)  # Changes every 5 minutes
+        animation_type = available_types[seed % len(available_types)]
+
     if animation_type == "slide":
         return create_simple_sliding_frames(data, status_message)
     elif animation_type == "counter":
@@ -184,7 +199,7 @@ def create_simple_sliding_frames(data, status_message):
     return frames
 
 def create_counter_frames(data, status_message):
-    """Create counter effect animation frames"""
+    """Create counter effect animation frames with seamless transitions"""
     frames = []
 
     metrics = [
@@ -226,7 +241,7 @@ def create_counter_frames(data, status_message):
     return frames
 
 def create_particle_frames(data, status_message):
-    """Create particle explosion animation frames"""
+    """Create particle explosion animation frames with seamless flow"""
     frames = []
 
     metrics = [
@@ -239,34 +254,40 @@ def create_particle_frames(data, status_message):
     static_frames = 20  # 1.2 seconds static
     particle_frames = 30  # 1.8 seconds particles
 
+    # Global frame counter for seamless animation
+    global_frame = 0
+
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Particle explosion frames
-        for frame in range(particle_frames):
-            progress = frame / (particle_frames - 1)
+        # Particle explosion frames with continuous progress
+        for _ in range(particle_frames):
+            continuous_progress = (global_frame % 80) / 80.0  # Cycle every 80 frames
             frames.append(create_particle_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
-        # Static frames - keep particle background
+        # Static frames - continue particle animation
         for _ in range(static_frames):
+            continuous_progress = (global_frame % 80) / 80.0
             frames.append(create_particle_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                1.0,  # Full progress for final state
+                continuous_progress,
             ))
+            global_frame += 1
 
     return frames
 
 def create_matrix_frames(data, status_message):
-    """Create matrix rain animation frames"""
+    """Create matrix rain animation frames with seamless continuous animation"""
     frames = []
 
     metrics = [
@@ -279,29 +300,36 @@ def create_matrix_frames(data, status_message):
     static_frames = 20  # 1 second static
     matrix_frames = 40  # 2 seconds matrix effect
 
+    # Global frame counter for seamless animation
+    global_frame = 0
+
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Matrix rain frames
-        for frame in range(matrix_frames):
-            progress = frame / (matrix_frames - 1)
+        # Matrix rain frames with continuous progress
+        for _ in range(matrix_frames):
+            # Continuous progress that doesn't reset between metrics
+            continuous_progress = global_frame / 100.0  # Slower, continuous progression
             frames.append(create_matrix_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
-        # Static frames - keep matrix background
+        # Static frames - continue matrix animation
         for _ in range(static_frames):
+            continuous_progress = global_frame / 100.0
             frames.append(create_matrix_background_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                1.0,  # Full progress for final state
+                continuous_progress,
             ))
+            global_frame += 1
 
     return frames
 
@@ -345,7 +373,7 @@ def create_fade_frames(data, status_message):
     return frames
 
 def create_zoom_frames(data, status_message):
-    """Create zoom effect animation frames"""
+    """Create zoom effect animation frames with seamless transitions"""
     frames = []
 
     metrics = [
@@ -358,19 +386,23 @@ def create_zoom_frames(data, status_message):
     static_frames = 20  # 1.8 seconds static
     zoom_frames = 15  # 1.35 seconds zoom
 
+    # Global frame counter for seamless animation
+    global_frame = 0
+
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Zoom in frames
-        for frame in range(zoom_frames):
-            progress = frame / (zoom_frames - 1)
+        # Zoom in frames with continuous progress
+        for _ in range(zoom_frames):
+            continuous_progress = (global_frame % 30) / 30.0  # Cycle every 30 frames
             frames.append(create_zoom_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
         # Static frames
         for _ in range(static_frames):
@@ -380,11 +412,12 @@ def create_zoom_frames(data, status_message):
                 metric["color"],
                 status_message,
             ))
+            global_frame += 1
 
     return frames
 
 def create_wave_frames(data, status_message):
-    """Create wave pattern animation frames"""
+    """Create wave pattern animation frames with seamless flow"""
     frames = []
 
     metrics = [
@@ -397,19 +430,23 @@ def create_wave_frames(data, status_message):
     static_frames = 20  # 1.4 seconds static
     wave_frames = 25  # 1.75 seconds wave
 
+    # Global frame counter for seamless animation
+    global_frame = 0
+
     for metric in metrics:
         target_value = format_bytes(metric["value"])
 
-        # Wave animation frames
-        for frame in range(wave_frames):
-            progress = frame / (wave_frames - 1)
+        # Wave animation frames with continuous progress
+        for _ in range(wave_frames):
+            continuous_progress = (global_frame % 50) / 50.0  # Cycle every 50 frames
             frames.append(create_wave_display(
                 metric["label"],
                 target_value,
                 metric["color"],
                 status_message,
-                progress,
+                continuous_progress,
             ))
+            global_frame += 1
 
         # Static frames
         for _ in range(static_frames):
@@ -419,6 +456,7 @@ def create_wave_frames(data, status_message):
                 metric["color"],
                 status_message,
             ))
+            global_frame += 1
 
     return frames
 
@@ -778,71 +816,67 @@ def create_matrix_background_display(label, target_value, color, status, progres
                     ),
                 )
 
-    # Create main content overlay with semi-transparent background
-    content_background = render.Box(
-        width = 60,
-        height = 28,
-        color = "#001100",  # Dark background
-        child = render.Column(
-            expanded = True,
-            main_align = "space_between",
-            children = [
-                # Header
-                render.Box(
-                    height = 8,
-                    color = "#002200",
-                    child = render.Row(
-                        expanded = True,
-                        main_align = "space_between",
-                        children = [
-                            render.Padding(
-                                pad = (2, 1, 0, 0),
+    # Create text overlay with readable background areas
+    text_overlay = render.Column(
+        expanded = True,
+        main_align = "space_between",
+        children = [
+            # Header with semi-transparent background for readability
+            render.Box(
+                height = 8,
+                color = "#001100DD",  # Semi-transparent dark green
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Padding(
+                            pad = (2, 1, 0, 0),
+                            child = render.Text(
+                                content = label,
+                                font = FONT_SMALL,
+                                color = "#FFFFFF",
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (0, 1, 2, 0),
+                            child = render.Text(
+                                content = status,
+                                font = FONT_SMALL,
+                                color = "#FFFFFF",
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            # Main content with centered semi-transparent background
+            render.Box(
+                height = 24,
+                color = "#00000000",  # Transparent container
+                child = render.Column(
+                    expanded = True,
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        # Semi-transparent background behind main text
+                        render.Box(
+                            color = "#001100DD",  # Semi-transparent dark green
+                            child = render.Padding(
+                                pad = (6, 3, 6, 3),
                                 child = render.Text(
-                                    content = label,
-                                    font = FONT_SMALL,
+                                    content = target_value,
+                                    font = FONT_LARGE,
                                     color = color,
                                 ),
                             ),
-                            render.Padding(
-                                pad = (0, 1, 2, 0),
-                                child = render.Text(
-                                    content = status,
-                                    font = FONT_SMALL,
-                                    color = color,
-                                ),
-                            ),
-                        ],
-                    ),
+                        ),
+                    ],
                 ),
-                # Main content
-                render.Box(
-                    height = 18,
-                    child = render.Column(
-                        expanded = True,
-                        main_align = "center",
-                        cross_align = "center",
-                        children = [
-                            render.Text(
-                                content = target_value,
-                                font = FONT_LARGE,
-                                color = color,
-                            ),
-                        ],
-                    ),
-                ),
-            ],
-        ),
-    )
-
-    # Stack matrix rain with content overlay
-    return render.Stack(
-        children = matrix_elements + [
-            render.Padding(
-                pad = (2, 2, 0, 0),
-                child = content_background,
             ),
         ],
     )
+
+    # Stack matrix rain behind text overlay with readable backgrounds
+    return render.Stack(children = matrix_elements + [text_overlay])
 
 def create_matrix_display(label, target_value, color, status, progress):
     """Create matrix rain effect"""
@@ -937,24 +971,121 @@ def create_fade_display(current, next_display, status, progress):
         )
 
 def create_zoom_display(label, target_value, color, status, progress):
-    """Create zoom effect using different font sizes"""
+    """Create awesome fluid zoom effect with expanding ripples like water"""
 
-    # Start small and grow to normal size
-    if progress < 0.3:
+    # Create ripple effect elements following Tidbyt best practices
+    ripple_elements = []
+    center_x, center_y = 32, 16
+
+    # Calculate zoom phase (0-1 cycle)
+    zoom_cycle = (progress * 3) % 1.0  # Smooth 3x cycles for fluid motion
+
+    # Create expanding concentric ripples
+    for ripple in range(5):  # 5 ripples at different phases
+        # Stagger ripple timing so they don't all start at once
+        ripple_phase = (zoom_cycle + ripple * 0.2) % 1.0
+
+        if ripple_phase > 0.1:  # Start ripple after small delay
+            # Calculate ripple radius - starts small, expands outward
+            max_radius = 25 + ripple * 3  # Different max radius for each ripple
+            ripple_radius = int(ripple_phase * max_radius)
+
+            # Create circular ripple by drawing points around circumference
+            if ripple_radius > 0:
+                points_on_circle = int(ripple_radius * 1.5)  # More points for larger circles
+                if points_on_circle > 60:  # Cap for performance
+                    points_on_circle = 60
+
+                for i in range(points_on_circle):
+                    angle = (i * 360.0) / points_on_circle
+
+                    # Calculate position on circle
+                    x = center_x + int(ripple_radius * math.cos(angle * math.pi / 180))
+                    y = center_y + int(ripple_radius * math.sin(angle * math.pi / 180))
+
+                    # Keep ripples on screen
+                    if x >= 0 and x < 64 and y >= 0 and y < 32:
+                        # Fade ripples as they expand (closer to 1.0 = more faded)
+                        fade_factor = ripple_phase
+
+                        # Color based on ripple and fade
+                        if ripple == 0:
+                            # Inner ripple - bright theme color
+                            ripple_color = color if fade_factor < 0.7 else "#666666"
+                        elif ripple == 1:
+                            # Second ripple - white
+                            ripple_color = "#FFFFFF" if fade_factor < 0.6 else "#888888"
+                        elif ripple == 2:
+                            # Third ripple - light theme color
+                            if color == COLOR_PRIMARY:  # Green
+                                ripple_color = "#88FF88" if fade_factor < 0.5 else "#444444"
+                            else:  # Yellow
+                                ripple_color = "#FFFF88" if fade_factor < 0.5 else "#444444"
+                        else:
+                            # Outer ripples - subtle
+                            ripple_color = "#444444" if fade_factor < 0.4 else "#222222"
+
+                        ripple_elements.append(
+                            render.Padding(
+                                pad = (x, y, 0, 0),
+                                child = render.Box(
+                                    width = 1,
+                                    height = 1,
+                                    color = ripple_color,
+                                ),
+                            ),
+                        )
+
+    # Create central pulsing dot - the "drop" center
+    pulse_intensity = math.sin(zoom_cycle * math.pi * 2) * 0.5 + 0.5  # 0.0 to 1.0
+    if pulse_intensity > 0.3:
+        pulse_size = int(pulse_intensity * 4) + 1
+        pulse_x = center_x - pulse_size // 2
+        pulse_y = center_y - pulse_size // 2
+        pulse_color = "#FFFFFF" if pulse_intensity > 0.7 else color
+
+        ripple_elements.append(
+            render.Padding(
+                pad = (pulse_x, pulse_y, 0, 0),
+                child = render.Box(
+                    width = pulse_size,
+                    height = pulse_size,
+                    color = pulse_color,
+                ),
+            ),
+        )
+
+    # Create fluid text scaling effect with smooth sine wave
+    scale_wave = math.sin(zoom_cycle * math.pi * 2) * 0.4 + 0.6  # 0.2 to 1.0 scaling
+
+    # Choose font and effects based on scale
+    if scale_wave < 0.4:
         font = FONT_SMALL
-    elif progress < 0.7:
+        text_color = color
+        header_brightness = 0.3
+    elif scale_wave < 0.7:
         font = FONT_MEDIUM
+        text_color = "#FFFFFF" if scale_wave > 0.5 else color
+        header_brightness = 0.6
     else:
         font = FONT_LARGE
+        text_color = "#FFFFFF"
+        header_brightness = 1.0
 
-    return render.Column(
+    # Create text overlay with ripple-synchronized effects
+    header_color = COLOR_HEADER
+    if header_brightness > 0.5:
+        # Lighten header during zoom peaks
+        header_color = "#555555" if header_brightness > 0.8 else "#444444"
+
+    text_overlay = render.Column(
         expanded = True,
         main_align = "space_between",
         children = [
-            # Header
+            # Header with ripple-synchronized brightness
             render.Box(
                 height = 8,
-                color = COLOR_HEADER,
+                color = header_color,
                 child = render.Row(
                     expanded = True,
                     main_align = "space_between",
@@ -964,7 +1095,7 @@ def create_zoom_display(label, target_value, color, status, progress):
                             child = render.Text(
                                 content = label,
                                 font = FONT_SMALL,
-                                color = COLOR_TEXT,
+                                color = "#FFFFFF" if header_brightness > 0.5 else COLOR_TEXT,
                             ),
                         ),
                         render.Padding(
@@ -972,31 +1103,49 @@ def create_zoom_display(label, target_value, color, status, progress):
                             child = render.Text(
                                 content = status,
                                 font = FONT_SMALL,
-                                color = COLOR_TEXT,
+                                color = "#FFFFFF" if header_brightness > 0.5 else COLOR_TEXT,
                             ),
                         ),
                     ],
                 ),
             ),
-            # Zooming text
+            # Main content with smooth zoom and ripple effects
             render.Box(
                 height = 24,
-                color = COLOR_BACKGROUND,
+                color = "#00000000",  # Transparent to show ripples
                 child = render.Column(
                     expanded = True,
                     main_align = "center",
                     cross_align = "center",
                     children = [
-                        render.Text(
-                            content = target_value,
-                            font = font,
-                            color = color,
+                        # Text with subtle shadow for readability
+                        render.Stack(
+                            children = [
+                                # Shadow text
+                                render.Padding(
+                                    pad = (1, 1, 0, 0),
+                                    child = render.Text(
+                                        content = target_value,
+                                        font = font,
+                                        color = "#000000",
+                                    ),
+                                ),
+                                # Main text with ripple-synchronized color
+                                render.Text(
+                                    content = target_value,
+                                    font = font,
+                                    color = text_color,
+                                ),
+                            ],
                         ),
                     ],
                 ),
             ),
         ],
     )
+
+    # Stack ripples behind text overlay following Tidbyt pattern
+    return render.Stack(children = ripple_elements + [text_overlay])
 
 def create_wave_display(label, target_value, color, status, progress):
     """Create wave pattern effect"""
@@ -1239,6 +1388,10 @@ def get_schema():
 
     animation_options = [
         schema.Option(
+            display = "Random Selection",
+            value = "random",
+        ),
+        schema.Option(
             display = "Sliding (Classic)",
             value = "slide",
         ),
@@ -1291,20 +1444,20 @@ def get_schema():
                 icon = "lock",
             ),
             schema.Dropdown(
-                id = "cacheTtl",
-                name = "Refresh Interval",
-                desc = "How often to fetch new data",
-                icon = "clock",
-                default = cache_options[1].value,
-                options = cache_options,
-            ),
-            schema.Dropdown(
                 id = "animationType",
                 name = "Animation Effect",
                 desc = "Choose the visual animation style",
                 icon = "wandMagicSparkles",
                 default = animation_options[0].value,
                 options = animation_options,
+            ),
+            schema.Dropdown(
+                id = "cacheTtl",
+                name = "Refresh Interval",
+                desc = "How often to fetch new data",
+                icon = "clock",
+                default = cache_options[1].value,
+                options = cache_options,
             ),
         ],
     )
