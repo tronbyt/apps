@@ -11,7 +11,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 WARRIOR_ICON = base64.decode("""
 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
@@ -72,19 +71,27 @@ CURRENT_EXPANSION = "The War Within"
 CURRENT_INSTANCE = "Manaforge Omega"
 
 def main(config):
-    client_id = secret.decrypt(
-        "AV6+xWcEK3ttMwoBOdFBvpJ6mhRkE1fvDYW+JYmxMY1sTmyaTz1RuNYFkZN9IsfvyolFeknXQLmYkZOuSfCtLII7XHU7tSmT8pVrmS9Am025jZ4QUs25fSLknwMqwAecue4iBMUubsI4CbYrNVDJFrSABxXJljtSueQxsM+/QMtNO3pumZg=",
-    ) or config.get(
-        "client_id",
-    )
-    client_secret = secret.decrypt(
-        "AV6+xWcEghHB4IYtF4KGd4dBFfKi4eiY9kyAQp9NHc/Lpe+IF6YkwIOyT/09XYEmZJZnUFmcgbIeot1x6JZgzIp9gEwvfHboAIN3L0r7iTrjQTylskTkGB2oQ/0Unkmii//7khorLAJ6CW3UxN6BnRuK9prp6gfHynAFwOykcPMArz5TMQ8=",
-    ) or config.get(
-        "client_secret",
-    )
+
     character_name = config.get("character", DEFAULT_CHARACTER).lower()
     realm_name = config.get("realm", DEFAULT_REALM).replace(" ", "-").lower()
     region = config.get("region", DEFAULT_REGION)
+    client_id = config.get("client")
+    client_secret = config.get("secret")
+
+    if not client_id or not client_secret:
+        return render.Root(
+            child = render.Row(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.WrappedText(
+                        content = "Client ID/Secret required.",
+                        align = "center",
+                    ),
+                ],
+            ),
+        )
 
     blizzard_auth_url = "https://oauth.battle.net/token?grant_type=client_credentials"
     blizzard_profile_url = "https://%s.api.blizzard.com/profile/wow/character/%s/%s?namespace=profile-%s&locale=en_US" % (region, realm_name, character_name, region)
@@ -240,6 +247,18 @@ def get_schema():
                 icon = "globe",
                 default = options[0].value,
                 options = options,
+            ),
+            schema.Text(
+                id = "client",
+                name = "Client Id",
+                desc = "Battle.net Client ID",                
+                icon = "user",
+            ),
+            schema.Text(
+                id = "secret",
+                name = "Client Secret",
+                desc = "Battle.net Client Secret",
+                icon = "key",
             ),
         ],
     )
