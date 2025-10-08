@@ -17,9 +17,14 @@ BIRD_BUDDY_GRAPHQL_URL = "https://graphql.app-api.prod.aws.mybirdbuddy.com/graph
 # Cache TTL (5 minutes)
 CACHE_TTL = 300
 
+# Display constants
+BIRD_ICON_SIZE = 32
+TEXT_AREA_WIDTH = 32
+MARQUEE_DELAY = 32
+
 # Default values
 DEFAULT_BIRD_NAME = "No recent visitors"
-DEFAULT_LOCATION = "Check your feeder"
+DEFAULT_FINCH_ICON = "https://assets.cms-api-graphql.cms-api.prod.aws.mybirdbuddy.com/asset/icon/bird-illustration-thumbnails/88999787-62b3-4142-985a-216ba54a5b02_HouseFinch_thumbnail.png"
 
 def main(config):
     username = config.str("username", "")
@@ -113,7 +118,8 @@ def get_auth_token(username, password):
                     # Cache token for 14 minutes (tokens usually last 15 min)
                     cache.set(cache_key, token, ttl_seconds = 840)
                     return token
-            # Check if it's a different response type (Problem, etc.)
+
+                # Check if it's a different response type (Problem, etc.)
             else:
                 response_type = auth_data.get("__typename", "Unknown")
                 if response_type == "Problem":
@@ -325,11 +331,11 @@ def get_latest_sighting(token, feeders):
             if me_data and "feed" in me_data:
                 feed_edges = me_data.get("feed", {}).get("edges", [])
                 if feed_edges:
-
                     # Look for the most recent BIRD-related feed item only
                     for edge in feed_edges:
                         node = edge.get("node", {})
                         node_type = node.get("__typename", "")
+
                         # Only include actual bird sighting items, not setup/admin items
                         if node_type in ["FeedItemSpeciesSighting", "FeedItemSpeciesUnlocked", "FeedItemCollectedPostcard", "FeedItemNewPostcard", "FeedItemMysteryVisitorNotRecognized"]:
                             parsed_result = parse_feed_item(node)
@@ -566,14 +572,12 @@ def get_from_collections(token):
                         def get_visit_time(collection):
                             return collection.get("visitLastTime", "1970-01-01T00:00:00Z")
 
-                        bird_collections.sort(key=get_visit_time, reverse=True)
+                        bird_collections.sort(key = get_visit_time, reverse = True)
 
                         latest_collection = bird_collections[0]
                         species = latest_collection.get("species", {})
                         bird_name = species.get("name", "Unknown Bird")
                         visit_time = latest_collection.get("visitLastTime", "")
-                        visit_count = latest_collection.get("visitsAllTime", 0)
-
                         icon_url = species.get("iconUrl", "")
 
                         return {
@@ -728,21 +732,9 @@ def create_default_sighting():
     return {
         "bird_name": DEFAULT_BIRD_NAME,
         "timestamp": None,
-        "icon_url": "https://assets.cms-api-graphql.cms-api.prod.aws.mybirdbuddy.com/asset/icon/bird-illustration-thumbnails/88999787-62b3-4142-985a-216ba54a5b02_HouseFinch_thumbnail.png",
+        "icon_url": DEFAULT_FINCH_ICON,
         "raw_data": {},
     }
-
-# Debug function removed for production
-
-def is_recent_sighting(timestamp_str):
-    """Check if sighting is within the last hour"""
-
-    if not timestamp_str:
-        return False
-
-    # For now, assume any timestamp indicates recent activity
-    # In a real implementation, we'd parse the timestamp properly
-    return True
 
 def humanize_time_ago(timestamp_str):
     """Convert timestamp to human readable 'time ago' format using Pixlet's built-in time functions"""
@@ -755,15 +747,15 @@ def humanize_time_ago(timestamp_str):
 
     # Clean up the timestamp - handle both with and without milliseconds
     clean_timestamp = timestamp_str
-    if '.' in timestamp_str and 'Z' in timestamp_str:
+    if "." in timestamp_str and "Z" in timestamp_str:
         # Remove milliseconds: 2025-10-08T14:45:34.497Z -> 2025-10-08T14:45:34Z
-        parts = timestamp_str.split('.')
-        clean_timestamp = parts[0] + 'Z'
-    elif not timestamp_str.endswith('Z'):
-        clean_timestamp = timestamp_str + 'Z'
+        parts = timestamp_str.split(".")
+        clean_timestamp = parts[0] + "Z"
+    elif not timestamp_str.endswith("Z"):
+        clean_timestamp = timestamp_str + "Z"
 
     # Parse the timestamp - Pixlet uses Go's reference time format
-    sighting_time = time.parse_time(clean_timestamp, format="2006-01-02T15:04:05Z")
+    sighting_time = time.parse_time(clean_timestamp, format = "2006-01-02T15:04:05Z")
     if not sighting_time:
         return "Recently"
 
@@ -794,12 +786,60 @@ def humanize_time_ago(timestamp_str):
             return "{} days ago".format(days)
     else:
         # For older sightings, just show the date
-        formatted = time.format_time(sighting_time, format="Jan 2")
+        formatted = time.format_time(sighting_time, format = "Jan 2")
         if formatted:
             return formatted
         else:
             return "Long ago"
 
+def get_timestamp_color(timestamp_str):
+    """Calculate color based on how recent the sighting is - decays from green to gray"""
+
+    if not timestamp_str:
+        return "#CCCCCC"  # Gray for unknown time
+
+    # Parse timestamp similar to humanize_time_ago
+    clean_timestamp = timestamp_str
+    if "." in timestamp_str and "Z" in timestamp_str:
+        parts = timestamp_str.split(".")
+        clean_timestamp = parts[0] + "Z"
+    elif not timestamp_str.endswith("Z"):
+        clean_timestamp = timestamp_str + "Z"
+
+    sighting_time = time.parse_time(clean_timestamp, format = "2006-01-02T15:04:05Z")
+    if not sighting_time:
+        return "#CCCCCC"  # Gray for unparseable time
+
+    current_time = time.now()
+    diff_seconds = current_time.unix - sighting_time.unix
+
+    # Color decay over 24 hours (86400 seconds)
+    # 0-15 minutes (900 seconds): Full green #00cc66
+    # 15 minutes - 24 hours: Decay to gray #CCCCCC
+
+    if diff_seconds <= 900:  # 15 minutes or less - full green
+        return "#00CC66"
+    elif diff_seconds >= 86400:  # 24 hours or more - full gray
+        return "#CCCCCC"
+    else:
+        # Linear interpolation between green and gray
+        # Green: R=0, G=204, B=102
+        # Gray:  R=204, G=204, B=204
+
+        # Calculate progress from 15 minutes to 24 hours
+        progress = (diff_seconds - 900) / (86400 - 900)  # 0.0 to 1.0
+
+        # Interpolate each color component
+        red = int(0 + (204 * progress)) # Red goes from 0 to 204
+        green = 204  # Green stays constant at 204
+        blue = int(102 + (102 * progress)) # Blue goes from 102 to 204
+
+        # Format as hex color (manual hex conversion for Starlark compatibility)
+        hex_chars = "0123456789ABCDEF"
+        red_hex = hex_chars[red // 16] + hex_chars[red % 16]
+        green_hex = hex_chars[green // 16] + hex_chars[green % 16]
+        blue_hex = hex_chars[blue // 16] + hex_chars[blue % 16]
+        return "#" + red_hex + green_hex + blue_hex
 
 def render_bird_display(sighting):
     """Render the main bird display"""
@@ -807,23 +847,24 @@ def render_bird_display(sighting):
     bird_name = sighting["bird_name"]
     timestamp_str = sighting["timestamp"]
     icon_url = sighting.get("icon_url", "")
-    is_recent = is_recent_sighting(timestamp_str)
 
     # Format timestamp for display - use humanized time
     time_display = humanize_time_ago(timestamp_str)
+
+    # Calculate timestamp color based on recency - decays from green to gray over 24 hours
+    timestamp_color = get_timestamp_color(timestamp_str)
 
     # Create bird display - use icon if available, otherwise finch fallback
     if icon_url:
         bird_display = render.Image(
             src = http.get(icon_url).body(),
-            height = 32,
+            height = BIRD_ICON_SIZE,
         )
     else:
         # Fallback to finch icon instead of text
-        finch_url = "https://assets.cms-api-graphql.cms-api.prod.aws.mybirdbuddy.com/asset/icon/bird-illustration-thumbnails/88999787-62b3-4142-985a-216ba54a5b02_HouseFinch_thumbnail.png"
         bird_display = render.Image(
-            src = http.get(finch_url).body(),
-            height = 32,
+            src = http.get(DEFAULT_FINCH_ICON).body(),
+            height = BIRD_ICON_SIZE,
         )
 
     # Create children list for the main row
@@ -832,23 +873,23 @@ def render_bird_display(sighting):
         render.Column(
             children = [
                 render.Box(
-                    width = 32,
-                    height = 32,
+                    width = BIRD_ICON_SIZE,
+                    height = BIRD_ICON_SIZE,
                     child = bird_display,
                 ),
             ],
         ),
         # Text information column - use remaining space after bird icon
         render.Box(
-            width = 32,  # Maximum remaining space (64 - 32 = 32)
-            height = 32,
+            width = TEXT_AREA_WIDTH,  # Maximum remaining space (64 - 32 = 32)
+            height = BIRD_ICON_SIZE,
             child = render.Column(
                 main_align = "space_around",
                 cross_align = "start",
                 children = [
                     render.Marquee(
-                        width = 32,
-                        delay = 32,  # 32 frame delay before scrolling starts
+                        width = TEXT_AREA_WIDTH,
+                        delay = MARQUEE_DELAY,  # 32 frame delay before scrolling starts
                         child = render.Text(
                             content = bird_name,
                             font = "tom-thumb",
@@ -856,28 +897,18 @@ def render_bird_display(sighting):
                         ),
                     ),
                     render.Marquee(
-                        width = 32,
-                        delay = 32,  # 32 frame delay before scrolling starts
+                        width = TEXT_AREA_WIDTH,
+                        delay = MARQUEE_DELAY,  # 32 frame delay before scrolling starts
                         child = render.Text(
                             content = time_display,
                             font = "tom-thumb",
-                            color = "#00cc66",
+                            color = timestamp_color,
                         ),
                     ),
                 ],
             ),
         ),
     ]
-
-    # Add music note if recent sighting (no extra space needed now)
-    if is_recent:
-        row_children.append(
-            render.Text(
-                content = MUSIC_NOTE,
-                font = "tom-thumb",
-                color = "#FFD700",
-            ),
-        )
 
     return render.Root(
         child = render.Stack(
@@ -886,7 +917,7 @@ def render_bird_display(sighting):
                 render.Row(
                     main_align = "start",
                     children = row_children,
-                )
+                ),
             ],
         ),
     )
@@ -933,6 +964,3 @@ def get_schema():
             ),
         ],
     )
-
-# Music note for recent sightings (using ASCII character that renders in Tidbyt fonts)
-MUSIC_NOTE = "♪"
