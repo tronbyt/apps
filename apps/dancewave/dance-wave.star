@@ -31,7 +31,7 @@ def main(config):
     if current_track == None:
         # Fallback display if API is unavailable
         return render.Root(
-            show_full_animation = true,
+            show_full_animation = True,
             child = render.Box(
                 render.Column(
                     expanded = True,
