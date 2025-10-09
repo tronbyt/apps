@@ -129,6 +129,7 @@ def get_data_select_period(response, provider, query_type, colors, select_period
     start_date = time.parse_time(data[0][API_FIELDS[provider]["date"]], time_format)
     start_date = time.parse_time(start_date.format("2006-01-02"), "2006-01-02")
     start_date -= (select_period - 1) * 24 * time.hour
+    print("start date : " + str(start_date))
 
     list_data = []
     previous_last_price = None
@@ -157,6 +158,10 @@ def get_data_select_period(response, provider, query_type, colors, select_period
     min_price = min(prices)
     max_price = max(prices)
     last_price = list_data[-1][API_FIELDS[provider]["close"]]
+
+    # Print the entire last price data line
+    last_data_entry = list_data[-1]
+    print("Last data entry: %s" % str(last_data_entry))
 
     chart_data = []
     i = 0
@@ -444,6 +449,7 @@ def get_preferences(config):
     return colors
 
 def make_stockdata_request(query_type, api_token, symbol, extended_hours, select_period, ttl):
+
     if query_type == "eod":
         interval = "day"
     elif select_period > 7:
@@ -463,6 +469,8 @@ def make_stockdata_request(query_type, api_token, symbol, extended_hours, select
         else:
             url += "&extended_hours=false"
 
+    print(url)
+    print("ttl: " + str(ttl))
     response = http.get(url, ttl_seconds = ttl)
     if response.status_code != 200:
         return None, response.status_code
