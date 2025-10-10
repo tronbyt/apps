@@ -31,7 +31,6 @@ def main(config):
     if current_track == None:
         # Fallback display if API is unavailable
         return render.Root(
-            show_full_animation = True,
             child = render.Box(
                 render.Column(
                     expanded = True,
@@ -70,7 +69,6 @@ def main(config):
         ),
         render.Marquee(
             width = 64,
-            delay = 1000,
             child = render.Text(
                 content = artist + " • " + title,
                 font = "tb-8",
