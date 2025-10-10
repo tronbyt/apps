@@ -28,7 +28,8 @@ WARNING_IMG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXN
 ## run the main applications
 def main(config):
     jsonLocation = json.decode(config.str("location") or DEFAULT_LOCATION)  ## set the location from the schema data or use the default
-    jsonLocation["locality"] = config.str("display_name") or jsonLocation["name"][0:13]
+    if "locality" not in jsonLocation:
+        jsonLocation["locality"] = config.str("display_name") or jsonLocation.get("name","")[0:13]
     alerts = get_alerts(jsonLocation["lat"], jsonLocation["lng"])  ## call for the alerts for this location
 
     foundAlerts = 0  # default alert detection to false
