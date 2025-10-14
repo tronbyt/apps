@@ -24,6 +24,8 @@ DEFAULT_LOCATION = """
 }
 """
 
+DEFAULT_CACHE_MINS = 5
+
 LANGUAGE_LOCALES = {
     "MON": {
         "de": "MON",
@@ -83,13 +85,17 @@ def main(config):
     api_v3_key = config.get("api_v3", "")
     api_v2_key = config.get("api_v2", config.get("api", ""))  # fallback to original field for backward compatibility
 
+    cache_mins_str = config.str("cache_mins", str(DEFAULT_CACHE_MINS))
+    cache_mins = int(cache_mins_str) if cache_mins_str.isdigit() else DEFAULT_CACHE_MINS
+    cache_sec = cache_mins * 60
+
     # Determine which API to use - prefer V3 if available, fallback to V2.5
     if api_v3_key and api_v3_key != "":
         # Use One Call API 3.0
         url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v3_key)
-        
+
         # Fetch weather data
-        rep = http.get(url)
+        rep = http.get(url, ttl_seconds = cache_sec)
         if rep.status_code != 200:
             return error_display("Weather API Error")
 
@@ -100,9 +106,9 @@ def main(config):
     elif api_v2_key and api_v2_key != "":
         # Use Standard Forecast API 2.5
         url = "https://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v2_key)
-        
+
         # Fetch weather data
-        rep = http.get(url)
+        rep = http.get(url, ttl_seconds = cache_sec)
         if rep.status_code != 200:
             return error_display("Weather API Error")
 
@@ -656,6 +662,13 @@ def get_schema():
                     schema.Option(display = "Deutsch", value = "de"),
                     schema.Option(display = "English", value = "en"),
                 ],
+            ),
+            schema.Text(
+                id = "cache_mins",
+                name = "Cache Duration",
+                desc = "How long to cache weather data (in minutes)",
+                icon = "clock",
+                default = str(DEFAULT_CACHE_MINS),
             ),
         ],
     )
