@@ -128,6 +128,53 @@ def hex_to_rgb(color):
 def rgb_to_hex(r, g, b):
     return "#" + str("%x" % ((1 << 24) + (r << 16) + (g << 8) + b))[1:]
 
+def get_battery_color(battery_level):
+    """
+    Calculate battery color based on level using gradient from red to bright blue.
+    Color points:
+    - 10% and below: Red (#FF0000)
+    - 20%: Orange (#FF8000)
+    - 30%: Yellow (#FFFF00)
+    - 50%: Green (#00FF00)
+    - 80% and above: Bright Blue (#00AAFF)
+    """
+
+    # Clamp battery level between 0 and 100
+    level = max(0, min(100, battery_level))
+
+    # Define color stops with RGB values
+    color_stops = [
+        (0, (255, 0, 0)),  # Red at 0%
+        (10, (255, 0, 0)),  # Red at 10%
+        (20, (255, 128, 0)),  # Orange at 20%
+        (30, (255, 255, 0)),  # Yellow at 30%
+        (50, (0, 255, 0)),  # Green at 50%
+        (80, (0, 170, 255)),  # Bright Blue at 80%
+        (100, (0, 170, 255)),  # Bright Blue at 100%
+    ]
+
+    # Find the two color stops to interpolate between
+    for i in range(len(color_stops) - 1):
+        current_stop = color_stops[i]
+        next_stop = color_stops[i + 1]
+
+        if level <= next_stop[0]:
+            # Calculate interpolation factor
+            if next_stop[0] == current_stop[0]:
+                factor = 0
+            else:
+                factor = (level - current_stop[0]) / (next_stop[0] - current_stop[0])
+
+            # Interpolate RGB values
+            r = int(current_stop[1][0] + (next_stop[1][0] - current_stop[1][0]) * factor)
+            g = int(current_stop[1][1] + (next_stop[1][1] - current_stop[1][1]) * factor)
+            b = int(current_stop[1][2] + (next_stop[1][2] - current_stop[1][2]) * factor)
+
+            return rgb_to_hex(r, g, b)
+
+    # Fallback to bright blue if somehow we get here
+    return "#00AAFF"
+
 def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity, cache_duration):
     """Fetch Tesla data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
@@ -243,9 +290,10 @@ def main(config):
     else:
         image = BOLT_GREY
 
+    battery_level = int(float(batterylevel)) if batterylevel else 0
     state = {
-        "batterylevel": int(float(batterylevel)) if batterylevel else 0,
-        "color": "#0f0",
+        "batterylevel": battery_level,
+        "color": get_battery_color(battery_level),
         "name": name,
         "range_value": int(float(range_value)),
         "unit": unit,
@@ -270,12 +318,18 @@ def easeOut(t):
     sqt = t * t
     return sqt / (2.0 * (sqt - t) + 1.0)
 
-def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
+def render_progress_bar(state, label, percent, col1, col3, animprogress):
     animpercent = easeOut(animprogress / 100) * percent
 
     label1color = lightness("#fff", animprogress / 100)
     label2align = "start"
-    label2color = lightness(col3, animprogress / 100)
+
+    # HSL approach for better text contrast:
+    # - Bar fill (col2): 20% brightness for dark muted background
+    # - Text: Full brightness for vibrant readability
+    # - Bar edge (col3): Full brightness for crisp border
+    bar_fill_color = lightness(col3, 0.20)  # 20% brightness for bar fill
+    label2color = lightness(col3, animprogress / 100)  # Full brightness for text
 
     labelcomponent = None
     widthmax = FRAME_WIDTH - 1
@@ -300,8 +354,8 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
             cross_align = "center",
             expanded = True,
             children = [
-                render.Box(width = progresswidth, height = 7, color = col2),
-                render.Box(width = 1, height = 7, color = col3),
+                render.Box(width = progresswidth, height = 7, color = bar_fill_color),  # 50% brightness
+                render.Box(width = 1, height = 7, color = col3),  # Full brightness edge
             ],
         )
 
@@ -396,7 +450,7 @@ def get_frame(state, fr, config, animprogress):
             ),
         )
     children.append(
-        render_progress_bar(state, "", int(state["batterylevel"]), lightness(color, 0.06), lightness(color, 0.18), color, capanim((fr - delay) * 3)),
+        render_progress_bar(state, "", int(state["batterylevel"]), lightness(color, 0.06), color, capanim((fr - delay) * 3)),
     )
 
     children.append(
