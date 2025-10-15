@@ -128,35 +128,21 @@ def hex_to_rgb(color):
 def rgb_to_hex(r, g, b):
     return "#" + str("%x" % ((1 << 24) + (r << 16) + (g << 8) + b))[1:]
 
-def get_battery_color(battery_level):
+def get_battery_color(battery_level, color_stops):
     """
-    Calculate battery color based on level using gradient from red to bright blue.
-    Color points:
-    - 10% and below: Red (#FF0000)
-    - 20%: Orange (#FF8000)
-    - 30%: Yellow (#FFFF00)
-    - 50%: Green (#00FF00)
-    - 80% and above: Bright Blue (#00AAFF)
+    Calculate battery color based on level using configurable gradient colors.
+    Color points are determined by the color_stops parameter passed from config.
     """
+
+    stops = color_stops
 
     # Clamp battery level between 0 and 100
     level = max(0, min(100, battery_level))
 
-    # Define color stops with RGB values
-    color_stops = [
-        (0, (255, 0, 0)),  # Red at 0%
-        (10, (255, 0, 0)),  # Red at 10%
-        (20, (255, 128, 0)),  # Orange at 20%
-        (30, (255, 255, 0)),  # Yellow at 30%
-        (50, (0, 255, 0)),  # Green at 50%
-        (80, (0, 170, 255)),  # Bright Blue at 80%
-        (100, (0, 170, 255)),  # Bright Blue at 100%
-    ]
-
     # Find the two color stops to interpolate between
-    for i in range(len(color_stops) - 1):
-        current_stop = color_stops[i]
-        next_stop = color_stops[i + 1]
+    for i in range(len(stops) - 1):
+        current_stop = stops[i]
+        next_stop = stops[i + 1]
 
         if level <= next_stop[0]:
             # Calculate interpolation factor
@@ -165,15 +151,17 @@ def get_battery_color(battery_level):
             else:
                 factor = (level - current_stop[0]) / (next_stop[0] - current_stop[0])
 
-            # Interpolate RGB values
-            r = int(current_stop[1][0] + (next_stop[1][0] - current_stop[1][0]) * factor)
-            g = int(current_stop[1][1] + (next_stop[1][1] - current_stop[1][1]) * factor)
-            b = int(current_stop[1][2] + (next_stop[1][2] - current_stop[1][2]) * factor)
+            # Interpolate RGB values using list comprehension
+            start_rgb = current_stop[1]
+            end_rgb = next_stop[1]
+            rgb = [
+                int(start_rgb[c] + (end_rgb[c] - start_rgb[c]) * factor)
+                for c in range(3)
+            ]
+            return rgb_to_hex(rgb[0], rgb[1], rgb[2])
 
-            return rgb_to_hex(r, g, b)
-
-    # Fallback to bright blue if somehow we get here
-    return "#00AAFF"
+    # Fallback to the last color if somehow we get here
+    return rgb_to_hex(*stops[-1][1])
 
 def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity, cache_duration):
     """Fetch Tesla data from Home Assistant REST API using template endpoint for efficiency"""
@@ -247,6 +235,18 @@ def main(config):
     else:
         cache_duration = DEFAULT_CACHE_DURATION
 
+    # Build custom color stops from config
+    color_stops = [
+        (10, hex_to_rgb(config.str("color_10", "#FF0000"))),  # Red at 10%
+        (20, hex_to_rgb(config.str("color_20", "#FF8000"))),  # Orange at 20%
+        (30, hex_to_rgb(config.str("color_30", "#FFFF00"))),  # Yellow at 30%
+        (50, hex_to_rgb(config.str("color_50", "#00FF00"))),  # Green at 50%
+        (80, hex_to_rgb(config.str("color_80", "#00AAFF"))),  # Bright Blue at 80%
+    ]
+
+    # Add 0% and 100% stops to match the gradient boundaries
+    color_stops = [(0, color_stops[0][1])] + color_stops + [(100, color_stops[-1][1])]
+
     if not ha_url:
         return render.Root(
             child = render.WrappedText("Please configure Home Assistant URL!"),
@@ -293,7 +293,7 @@ def main(config):
     battery_level = int(float(batterylevel)) if batterylevel else 0
     state = {
         "batterylevel": battery_level,
-        "color": get_battery_color(battery_level),
+        "color": get_battery_color(battery_level, color_stops),
         "name": name,
         "range_value": int(float(range_value)),
         "unit": unit,
@@ -354,8 +354,8 @@ def render_progress_bar(state, label, percent, col1, col3, animprogress):
             cross_align = "center",
             expanded = True,
             children = [
-                render.Box(width = progresswidth, height = 7, color = bar_fill_color),  # 50% brightness
-                render.Box(width = 1, height = 7, color = col3),  # Full brightness edge
+                render.Box(width = progresswidth, height = 7, color = bar_fill_color),
+                render.Box(width = 1, height = 7, color = col3),
             ],
         )
 
@@ -566,6 +566,41 @@ def get_schema():
                 desc = "How long to cache data from Home Assistant (in seconds)",
                 icon = "clock",
                 default = str(DEFAULT_CACHE_DURATION),
+            ),
+            schema.Color(
+                id = "color_10",
+                name = "Color at 10%",
+                desc = "Battery color when at 10% or below",
+                icon = "palette",
+                default = "#FF0000",
+            ),
+            schema.Color(
+                id = "color_20",
+                name = "Color at 20%",
+                desc = "Battery color when at 20%",
+                icon = "palette",
+                default = "#FF8000",
+            ),
+            schema.Color(
+                id = "color_30",
+                name = "Color at 30%",
+                desc = "Battery color when at 30%",
+                icon = "palette",
+                default = "#FFFF00",
+            ),
+            schema.Color(
+                id = "color_50",
+                name = "Color at 50%",
+                desc = "Battery color when at 50%",
+                icon = "palette",
+                default = "#00FF00",
+            ),
+            schema.Color(
+                id = "color_80",
+                name = "Color at 80%",
+                desc = "Battery color when at 80% and above",
+                icon = "palette",
+                default = "#00AAFF",
             ),
         ],
     )
