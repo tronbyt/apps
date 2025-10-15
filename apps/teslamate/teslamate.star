@@ -128,6 +128,41 @@ def hex_to_rgb(color):
 def rgb_to_hex(r, g, b):
     return "#" + str("%x" % ((1 << 24) + (r << 16) + (g << 8) + b))[1:]
 
+def get_battery_color(battery_level, color_stops):
+    """
+    Calculate battery color based on level using configurable gradient colors.
+    Color points are determined by the color_stops parameter passed from config.
+    """
+
+    stops = color_stops
+
+    # Clamp battery level between 0 and 100
+    level = max(0, min(100, battery_level))
+
+    # Find the two color stops to interpolate between
+    for i in range(len(stops) - 1):
+        current_stop = stops[i]
+        next_stop = stops[i + 1]
+
+        if level <= next_stop[0]:
+            # Calculate interpolation factor
+            if next_stop[0] == current_stop[0]:
+                factor = 0
+            else:
+                factor = (level - current_stop[0]) / (next_stop[0] - current_stop[0])
+
+            # Interpolate RGB values using list comprehension
+            start_rgb = current_stop[1]
+            end_rgb = next_stop[1]
+            rgb = [
+                int(start_rgb[c] + (end_rgb[c] - start_rgb[c]) * factor)
+                for c in range(3)
+            ]
+            return rgb_to_hex(rgb[0], rgb[1], rgb[2])
+
+    # Fallback to the last color if somehow we get here
+    return rgb_to_hex(*stops[-1][1])
+
 def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, charger_power_entity, plugged_in_entity, charge_limit_entity, cache_duration):
     """Fetch Tesla data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
@@ -200,6 +235,18 @@ def main(config):
     else:
         cache_duration = DEFAULT_CACHE_DURATION
 
+    # Build custom color stops from config
+    color_stops = [
+        (10, hex_to_rgb(config.str("color_10", "#FF0000"))),  # Red at 10%
+        (20, hex_to_rgb(config.str("color_20", "#FF8000"))),  # Orange at 20%
+        (30, hex_to_rgb(config.str("color_30", "#FFFF00"))),  # Yellow at 30%
+        (50, hex_to_rgb(config.str("color_50", "#00FF00"))),  # Green at 50%
+        (80, hex_to_rgb(config.str("color_80", "#00AAFF"))),  # Bright Blue at 80%
+    ]
+
+    # Add 0% and 100% stops to match the gradient boundaries
+    color_stops = [(0, color_stops[0][1])] + color_stops + [(100, color_stops[-1][1])]
+
     if not ha_url:
         return render.Root(
             child = render.WrappedText("Please configure Home Assistant URL!"),
@@ -243,9 +290,10 @@ def main(config):
     else:
         image = BOLT_GREY
 
+    battery_level = int(float(batterylevel)) if batterylevel else 0
     state = {
-        "batterylevel": int(float(batterylevel)) if batterylevel else 0,
-        "color": "#0f0",
+        "batterylevel": battery_level,
+        "color": get_battery_color(battery_level, color_stops),
         "name": name,
         "range_value": int(float(range_value)),
         "unit": unit,
@@ -270,12 +318,18 @@ def easeOut(t):
     sqt = t * t
     return sqt / (2.0 * (sqt - t) + 1.0)
 
-def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
+def render_progress_bar(state, label, percent, col1, col3, animprogress):
     animpercent = easeOut(animprogress / 100) * percent
 
     label1color = lightness("#fff", animprogress / 100)
     label2align = "start"
-    label2color = lightness(col3, animprogress / 100)
+
+    # HSL approach for better text contrast:
+    # - Bar fill (col2): 20% brightness for dark muted background
+    # - Text: Full brightness for vibrant readability
+    # - Bar edge (col3): Full brightness for crisp border
+    bar_fill_color = lightness(col3, 0.20)  # 20% brightness for bar fill
+    label2color = lightness(col3, animprogress / 100)  # Full brightness for text
 
     labelcomponent = None
     widthmax = FRAME_WIDTH - 1
@@ -300,7 +354,7 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
             cross_align = "center",
             expanded = True,
             children = [
-                render.Box(width = progresswidth, height = 7, color = col2),
+                render.Box(width = progresswidth, height = 7, color = bar_fill_color),
                 render.Box(width = 1, height = 7, color = col3),
             ],
         )
@@ -396,7 +450,7 @@ def get_frame(state, fr, config, animprogress):
             ),
         )
     children.append(
-        render_progress_bar(state, "", int(state["batterylevel"]), lightness(color, 0.06), lightness(color, 0.18), color, capanim((fr - delay) * 3)),
+        render_progress_bar(state, "", int(state["batterylevel"]), lightness(color, 0.06), color, capanim((fr - delay) * 3)),
     )
 
     children.append(
@@ -512,6 +566,41 @@ def get_schema():
                 desc = "How long to cache data from Home Assistant (in seconds)",
                 icon = "clock",
                 default = str(DEFAULT_CACHE_DURATION),
+            ),
+            schema.Color(
+                id = "color_10",
+                name = "Color at 10%",
+                desc = "Battery color when at 10% or below",
+                icon = "palette",
+                default = "#FF0000",
+            ),
+            schema.Color(
+                id = "color_20",
+                name = "Color at 20%",
+                desc = "Battery color when at 20%",
+                icon = "palette",
+                default = "#FF8000",
+            ),
+            schema.Color(
+                id = "color_30",
+                name = "Color at 30%",
+                desc = "Battery color when at 30%",
+                icon = "palette",
+                default = "#FFFF00",
+            ),
+            schema.Color(
+                id = "color_50",
+                name = "Color at 50%",
+                desc = "Battery color when at 50%",
+                icon = "palette",
+                default = "#00FF00",
+            ),
+            schema.Color(
+                id = "color_80",
+                name = "Color at 80%",
+                desc = "Battery color when at 80% and above",
+                icon = "palette",
+                default = "#00AAFF",
             ),
         ],
     )
