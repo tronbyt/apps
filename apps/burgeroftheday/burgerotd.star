@@ -87,6 +87,7 @@ def main(config):
         BURGER_PAR = DEFAULT_BURGER_PAR
 
     return render.Root(
+        show_full_animation = True,
         delay = int(SCROLL_SPEED),
         child = render.Column(
             children = [
