@@ -81,7 +81,7 @@ def get_next_recording(api_key, live, timezone):
     )
 
 def main(config):
-    api_key = config.str("api_key")
+    api_key = config.str("api_key") or ""
     timezone = config.get("timezone") or "America/New_York"
     img = render.Image(src = relay_logo)
     live = check_live()
