@@ -10,8 +10,8 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
-REFRESH_TIME = 0
 C_DISPLAY_WIDTH = 64
 C_BACKGROUND = [0, 0, 0]
 C_TEXT_COLOR = [255, 255, 255]
@@ -24,7 +24,7 @@ RED = "#FF0000"
 WHITE = "#FFFFFF"
 GREEN = "#00FF00"
 
-def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_layers_entity, progress_entity, remaining_time_entity, status_entity, cache_duration):
+def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_layers_entity, progress_entity, remaining_time_entity, end_time_entity, status_entity, cache_duration):
     """Fetch printer data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
         "Authorization": "Bearer " + ha_token,
@@ -41,6 +41,7 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
         "total_layers": "0",
         "progress": "0",
         "remaining_time": "0",
+        "end_time": "0",
         "status": "Unknown",
     }
 
@@ -52,6 +53,7 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
     "total_layers": "{{ states('%s') | default('0') }}",
     "progress": "{{ states('%s') | default('0') }}",
     "remaining_time": "{{ states('%s') | default('0') }}",
+    "end_time": "{{ states('%s') | default('0') }}",
     "status": "{{ states('%s') | default('Unknown') }}"
 }
 """ % (
@@ -60,6 +62,7 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
         total_layers_entity,
         progress_entity,
         remaining_time_entity,
+        end_time_entity,
         status_entity,
     )
 
@@ -85,18 +88,9 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
                     data.get("total_layers", defaults["total_layers"]),
                     data.get("progress", defaults["progress"]),
                     data.get("remaining_time", defaults["remaining_time"]),
+                    data.get("end_time", defaults["end_time"]),
                     data.get("status", defaults["status"]),
                 )
-
-    # Return dummy values for development/testing if no API call or request failed
-    return (
-        "Test Printer",
-        "42",  # current_layer
-        "100",  # total_layers
-        "65",  # progress (%)
-        "3600",  # remaining_time (seconds)
-        "PRINTING",
-    )
 
 # convert color specification from JSON to hex string
 def to_rgb(color, combine = None, combine_level = 0.5):
@@ -207,10 +201,11 @@ def main(config):
     progress_entity = config.str("progress", "test_progress")
     remaining_time_entity = config.str("remaining_time", "test_remaining_time")
     status_entity = config.str("status", "test_status")
-    cache_duration = 0
+    end_time_entity = config.str("end_time", "")
+    cache_duration = 4
 
     # Always fetch printer data for rendering
-    (name, current_layer, total_layers, progress, remaining_time, status) = fetch_ha_data(
+    result = fetch_ha_data(
         ha_url,
         ha_token,
         name_entity,
@@ -218,9 +213,31 @@ def main(config):
         total_layers_entity,
         progress_entity,
         remaining_time_entity,
+        end_time_entity,
         status_entity,
         cache_duration,
     )
+    if result == None:
+        result = ("Printer", "0", "0", "0", "0", "0", "Unknown")
+    (name, current_layer, total_layers, progress, remaining_time, end_time, status) = result
+
+    # Check if we should render anything
+    skip_render = False
+    # Check status
+    if str(status).lower() == "offline":
+        skip_render = True
+        print("Printer is offline, skipping render")
+    # Check end_time using Starlark's time.parse_time and duration
+    if not skip_render and end_time != None and str(end_time) != "":
+        end_dt = time.parse_time(str(end_time))
+        now_dt = time.now()
+        diff = end_dt - now_dt
+        if diff.total_seconds() > 4 * 3600:
+            skip_render = True
+            print("Printer finished more than 4 hours from now, skipping render")
+
+    if skip_render:
+        return []
 
     # Format time left (handles float hours, minutes)
     time_left = ""
@@ -295,12 +312,13 @@ def get_schema():
         schema.Text(id = "haUrl", name = "Home Assistant URL", desc = "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)", icon = "server"),
         schema.Text(id = "haApiKey", name = "Home Assistant API Key", desc = "Long-Lived Access Token from Home Assistant user profile", icon = "key"),
         schema.Text(id = "task_name", name = "Task Name", desc = "Currently Printing Task", icon = "file"),
-        schema.Text(id = "current_layer", name = "Current Layer Entity", desc = "Entity ID for current layer", icon = "layerGroup"),
-        schema.Text(id = "total_layers", name = "Total Layers Entity", desc = "Entity ID for total layers", icon = "layerGroup"),
-        schema.Text(id = "progress", name = "Print Progress Entity", desc = "Entity ID for print progress (%)", icon = "percent"),
-        schema.Text(id = "remaining_time", name = "Remaining Time Entity", desc = "Entity ID for remaining time (seconds)", icon = "clock"),
-        schema.Text(id = "status", name = "Print Status Entity", desc = "Entity ID for print status", icon = "info"),
+        schema.Text(id = "current_layer", name = "Current Layer", desc = "Entity ID for current layer", icon = "layerGroup"),
+        schema.Text(id = "total_layers", name = "Total Layers", desc = "Entity ID for total layers", icon = "layerGroup"),
+        schema.Text(id = "progress", name = "Print Progress", desc = "Entity ID for print progress (%)", icon = "percent"),
+        schema.Text(id = "remaining_time", name = "Remaining Time", desc = "Entity ID for remaining time (decimal hours/minutes)", icon = "clock"),
+        schema.Text(id = "end_time", name = "Print End Time", desc = "Entity ID for print end time (Y-M-D H:M:S)", icon = "calendar"),
+        schema.Text(id = "status", name = "Print Status", desc = "Entity ID for print status", icon = "info"),
+
     ]
 
-    # Device dropdown population (safe fallback, no try/except)
     return schema.Schema(version = "1", fields = fields)
