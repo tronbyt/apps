@@ -12,9 +12,9 @@ load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 
-# Cache for 1 hour (3600 seconds) to reduce API calls
-# Keeps usage under 1000 calls/month limit
-CACHE_TTL = 3600
+# Cache for 1 minute only - let Tronbyt control refresh timing
+# Tronbyt will render every 60 min and get fresh data from proxy
+CACHE_TTL = 60
 
 # Colors
 GRAY = "#777777"
