@@ -9,10 +9,22 @@ from flask import Flask, jsonify, request
 import requests
 import os
 from datetime import datetime, timedelta
+from functools import wraps
+import time
 
 app = Flask(__name__)
 
 token_store = {"access_token": None, "refresh_token": None, "expires_at": None}
+
+# Cache storage
+cache_store = {
+    "data": None,
+    "timestamp": None
+}
+
+# Cache for 60 minutes to match Tidbyt refresh interval
+# With 60-min refresh: ~24 requests/day = 720/month (well under 1000 limit)
+CACHE_DURATION = 3600  # 60 minutes (1 hour) in seconds
 
 ENPHASE_API_BASE = "https://api.enphaseenergy.com/api/v4"
 ENPHASE_AUTH_URL = "https://api.enphaseenergy.com/oauth/token"
@@ -81,6 +93,18 @@ def get_solar_data():
     if auth_key != PROXY_API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
     
+    # Check if we have cached data that's still fresh
+    if cache_store["data"] and cache_store["timestamp"]:
+        age = time.time() - cache_store["timestamp"]
+        if age < CACHE_DURATION:
+            print(f"Returning cached data (age: {int(age)}s)")
+            response = jsonify(cache_store["data"])
+            # Set cache headers for HTTP clients
+            response.headers['Cache-Control'] = f'public, max-age={int(CACHE_DURATION - age)}'
+            return response
+    
+    print("Cache expired or empty, fetching fresh data...")
+    
     try:
         summary = call_enphase_api(f"systems/{SYSTEM_ID}/summary")
         timezone = summary.get("timezone", "America/New_York")
@@ -121,7 +145,7 @@ def get_solar_data():
         week_cons = sum(v for i, v in enumerate(consumption) if v and week_start <= (cons_start_date + timedelta(days=i)) < today)
         lifetime_cons = sum(v for v in consumption if v)
         
-        return jsonify({
+        result = {
             "timezone": timezone,
             "timestamp": now.isoformat(),
             "periods": {
@@ -131,7 +155,17 @@ def get_solar_data():
                 "year": {"production_wh": year_prod, "consumption_wh": year_cons},
                 "lifetime": {"production_wh": lifetime_prod, "consumption_wh": lifetime_cons}
             }
-        })
+        }
+        
+        # Cache the result
+        cache_store["data"] = result
+        cache_store["timestamp"] = time.time()
+        print("Data cached successfully")
+        
+        response = jsonify(result)
+        # Set cache headers for HTTP clients
+        response.headers['Cache-Control'] = f'public, max-age={CACHE_DURATION}'
+        return response
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500

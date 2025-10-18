@@ -12,8 +12,9 @@ load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 
-# Cache for 5 minutes (300 seconds)
-CACHE_TTL = 300
+# Cache for 1 hour (3600 seconds) to reduce API calls
+# Keeps usage under 1000 calls/month limit
+CACHE_TTL = 3600
 
 # Colors
 GRAY = "#777777"
