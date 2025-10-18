@@ -298,7 +298,7 @@ def main(config):
                             offset_end = 8,
                         ) if len(str(name)) > 15 else render.Text(str(name), font = "tom-thumb"),
                         render.WrappedText(status_upper, color = stateColor),
-                        render.Text(time_left) if time_left else render.Text(""),
+                        render.Text(time_left)
                         # Safely convert progress to int, default to 0 if not a number
                         renderProgress("Completion", int(progress) if str(progress).isdigit() else 0, 1, "#64BFE5"),
                     ],
