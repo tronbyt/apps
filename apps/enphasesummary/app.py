@@ -18,13 +18,17 @@ token_store = {"access_token": None, "refresh_token": None, "expires_at": None}
 
 # Cache storage
 cache_store = {
-    "data": None,
-    "timestamp": None
+    "hourly_data": None,  # Frequently updated data (summary + today's production)
+    "hourly_timestamp": None,
+    "daily_data": None,   # Lifetime data (updated once per day)
+    "daily_timestamp": None,
 }
 
-# Cache for 60 minutes to match Tidbyt refresh interval
-# With 60-min refresh: ~24 requests/day = 720/month (well under 1000 limit)
-CACHE_DURATION = 3600  # 60 minutes (1 hour) in seconds
+# Hourly cache for summary (includes today's production)
+HOURLY_CACHE = 3600  # 1 hour
+
+# Daily cache for lifetime data (doesn't change much)
+DAILY_CACHE = 86400  # 24 hours
 
 ENPHASE_API_BASE = "https://api.enphaseenergy.com/api/v4"
 ENPHASE_AUTH_URL = "https://api.enphaseenergy.com/oauth/token"
@@ -93,39 +97,66 @@ def get_solar_data():
     if auth_key != PROXY_API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
     
-    # Check if we have cached data that's still fresh
-    if cache_store["data"] and cache_store["timestamp"]:
-        age = time.time() - cache_store["timestamp"]
-        if age < CACHE_DURATION:
-            print(f"Returning cached data (age: {int(age)}s)")
-            response = jsonify(cache_store["data"])
-            # Set cache headers for HTTP clients
-            response.headers['Cache-Control'] = f'public, max-age={int(CACHE_DURATION - age)}'
-            return response
-    
-    print("Cache expired or empty, fetching fresh data...")
-    
     try:
-        summary = call_enphase_api(f"systems/{SYSTEM_ID}/summary")
-        timezone = summary.get("timezone", "America/New_York")
-        day_prod = summary.get("energy_today", 0)
-        
         now = datetime.utcnow()
         today = datetime(now.year, now.month, now.day)
         month_start = datetime(now.year, now.month, 1)
         year_start = datetime(now.year, 1, 1)
         week_start = today - timedelta(days=6)
         
-        # Get FULL lifetime data (1 API call for all production data)
-        prod_data = call_enphase_api(f"systems/{SYSTEM_ID}/energy_lifetime")
-        production = prod_data.get("production", [])
-        start_date = datetime.strptime(prod_data["start_date"], "%Y-%m-%d")
+        # STEP 1: Get summary data (refreshed hourly) - 1 API call
+        hourly_age = time.time() - cache_store["hourly_timestamp"] if cache_store["hourly_timestamp"] else float('inf')
         
-        # Calculate all production periods from the full array
-        month_prod = sum(v for i, v in enumerate(production) if v and month_start <= (start_date + timedelta(days=i)) < today)
-        year_prod = sum(v for i, v in enumerate(production) if v and year_start <= (start_date + timedelta(days=i)) < today)
-        week_prod = sum(v for i, v in enumerate(production) if v and week_start <= (start_date + timedelta(days=i)) < today)
-        lifetime_prod = sum(v for v in production if v)
+        if hourly_age < HOURLY_CACHE and cache_store["hourly_data"]:
+            print(f"Using cached summary (age: {int(hourly_age)}s)")
+            summary = cache_store["hourly_data"]["summary"]
+            day_prod = cache_store["hourly_data"]["day_prod"]
+        else:
+            print("Fetching fresh summary data...")
+            summary = call_enphase_api(f"systems/{SYSTEM_ID}/summary")
+            day_prod = summary.get("energy_today", 0)
+            
+            cache_store["hourly_data"] = {
+                "summary": summary,
+                "day_prod": day_prod
+            }
+            cache_store["hourly_timestamp"] = time.time()
+        
+        timezone = summary.get("timezone", "America/New_York")
+        
+        # STEP 2: Get lifetime data (refreshed daily) - 2 API calls per day
+        daily_age = time.time() - cache_store["daily_timestamp"] if cache_store["daily_timestamp"] else float('inf')
+        
+        if daily_age < DAILY_CACHE and cache_store["daily_data"]:
+            print(f"Using cached lifetime data (age: {int(daily_age/3600)}h)")
+            prod_data = cache_store["daily_data"]["production"]
+            cons_data = cache_store["daily_data"]["consumption"]
+            start_date = cache_store["daily_data"]["prod_start_date"]
+            cons_start_date = cache_store["daily_data"]["cons_start_date"]
+        else:
+            print("Fetching fresh lifetime data...")
+            prod_data_raw = call_enphase_api(f"systems/{SYSTEM_ID}/energy_lifetime")
+            cons_data_raw = call_enphase_api(f"systems/{SYSTEM_ID}/consumption_lifetime")
+            
+            prod_data = prod_data_raw.get("production", [])
+            start_date = datetime.strptime(prod_data_raw["start_date"], "%Y-%m-%d")
+            
+            cons_data = cons_data_raw.get("consumption", [])
+            cons_start_date = datetime.strptime(cons_data_raw["start_date"], "%Y-%m-%d")
+            
+            cache_store["daily_data"] = {
+                "production": prod_data,
+                "consumption": cons_data,
+                "prod_start_date": start_date,
+                "cons_start_date": cons_start_date
+            }
+            cache_store["daily_timestamp"] = time.time()
+        
+        # STEP 3: Calculate periods from cached lifetime data
+        month_prod = sum(v for i, v in enumerate(prod_data) if v and month_start <= (start_date + timedelta(days=i)) < today)
+        year_prod = sum(v for i, v in enumerate(prod_data) if v and year_start <= (start_date + timedelta(days=i)) < today)
+        week_prod = sum(v for i, v in enumerate(prod_data) if v and week_start <= (start_date + timedelta(days=i)) < today)
+        lifetime_prod = sum(v for v in prod_data if v)
         
         # Add today's production
         month_prod += day_prod
@@ -133,17 +164,12 @@ def get_solar_data():
         week_prod += day_prod
         lifetime_prod += day_prod
         
-        # Get FULL lifetime consumption data (1 API call for all consumption data)
-        cons_data = call_enphase_api(f"systems/{SYSTEM_ID}/consumption_lifetime")
-        consumption = cons_data.get("consumption", [])
-        cons_start_date = datetime.strptime(cons_data["start_date"], "%Y-%m-%d")
-        
-        # Calculate all consumption periods from the full array
-        day_cons = 0  # Not available
-        month_cons = sum(v for i, v in enumerate(consumption) if v and month_start <= (cons_start_date + timedelta(days=i)) < today)
-        year_cons = sum(v for i, v in enumerate(consumption) if v and year_start <= (cons_start_date + timedelta(days=i)) < today)
-        week_cons = sum(v for i, v in enumerate(consumption) if v and week_start <= (cons_start_date + timedelta(days=i)) < today)
-        lifetime_cons = sum(v for v in consumption if v)
+        # Calculate consumption periods
+        day_cons = 0
+        month_cons = sum(v for i, v in enumerate(cons_data) if v and month_start <= (cons_start_date + timedelta(days=i)) < today)
+        year_cons = sum(v for i, v in enumerate(cons_data) if v and year_start <= (cons_start_date + timedelta(days=i)) < today)
+        week_cons = sum(v for i, v in enumerate(cons_data) if v and week_start <= (cons_start_date + timedelta(days=i)) < today)
+        lifetime_cons = sum(v for v in cons_data if v)
         
         result = {
             "timezone": timezone,
@@ -157,14 +183,8 @@ def get_solar_data():
             }
         }
         
-        # Cache the result
-        cache_store["data"] = result
-        cache_store["timestamp"] = time.time()
-        print("Data cached successfully")
-        
         response = jsonify(result)
-        # Set cache headers for HTTP clients
-        response.headers['Cache-Control'] = f'public, max-age={CACHE_DURATION}'
+        response.headers['Cache-Control'] = f'public, max-age={HOURLY_CACHE}'
         return response
     
     except Exception as e:
