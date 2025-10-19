@@ -1,3 +1,5 @@
+ C_DEFAULT_END_TIME = "1970-01-01 00:00:00"
+ C_MAX_PRINT_AGE_SECONDS = 4 * 3600
 """
 Applet: ha3dprint
 Summary: View HA 3D printer status
@@ -195,6 +197,8 @@ def renderProgress(label, progress_value, padding, bar_color):
 def main(config):
     ha_url = config.str("haUrl", "http://homeassistant.local:8123")
     ha_token = config.str("haApiKey", "APIKEY")
+    max_print_age_hours = config.num("maxPrintAgeHours", 4)
+    max_print_age_seconds = int(max_print_age_hours * 3600)
     name_entity = config.str("task_name", "task_name")
     current_layer_entity = config.str("current_layer", "test_current_layer")
     total_layers_entity = config.str("total_layers", "test_total_layers")
@@ -218,7 +222,7 @@ def main(config):
         cache_duration,
     )
     if result == None:
-        result = ("Printer", "0", "0", "0", "0", "1970-01-01 00:00:00", "Unknown")
+        result = ("Printer", "0", "0", "0", "0", C_DEFAULT_END_TIME, "Unknown")
     (name, current_layer, total_layers, progress, remaining_time, end_time, status) = result
 
     # Check if we should render anything
@@ -231,7 +235,7 @@ def main(config):
     if not skip_render and end_time != None and str(end_time) != "":
         # Convert 'YYYY-MM-DD HH:MM:SS' to ISO 8601 'YYYY-MM-DDTHH:MM:SSZ'
         end_time_str = str(end_time)
-        if end_time_str == "1970-01-01 00:00:00" or end_time_str.strip() == "":
+        if end_time_str == C_DEFAULT_END_TIME or end_time_str.strip() == "":
             skip_render = True
             print("Invalid end_time, skipping render")
         else:
@@ -246,9 +250,9 @@ def main(config):
                 end_dt = time.parse_time(end_time_str)
                 now_dt = time.now()
                 diff = end_dt - now_dt
-                if diff.total_seconds() > 4 * 3600:
+                    if diff.total_seconds() < -max_print_age_seconds:
                     skip_render = True
-                    print("Printer finished more than 4 hours from now, skipping render")
+                        print("Print finished more than {} hours ago, skipping render".format(max_print_age_hours))
             else:
                 skip_render = True
                 print("Failed to parse end_time, skipping render")
@@ -335,6 +339,7 @@ def get_schema():
         schema.Text(id = "remaining_time", name = "Remaining Time", desc = "Entity ID for remaining time (decimal hours/minutes)", icon = "clock"),
         schema.Text(id = "end_time", name = "Print End Time", desc = "Entity ID for print end time (Y-M-D H:M:S)", icon = "calendar"),
         schema.Text(id = "status", name = "Print Status", desc = "Entity ID for print status", icon = "info"),
+        schema.Number(id = "maxPrintAgeHours", name = "Max Print Age (hours)", desc = "Hide completed prints older than this many hours", icon = "clock", default = 4),
 
     ]
 
