@@ -197,6 +197,8 @@ def renderProgress(label, progress_value, padding, bar_color):
 def main(config):
     ha_url = config.str("haUrl", "http://homeassistant.local:8123")
     ha_token = config.str("haApiKey", "APIKEY")
+    max_print_age_hours = config.num("maxPrintAgeHours", 4)
+    max_print_age_seconds = int(max_print_age_hours * 3600)
     name_entity = config.str("task_name", "task_name")
     current_layer_entity = config.str("current_layer", "test_current_layer")
     total_layers_entity = config.str("total_layers", "test_total_layers")
@@ -248,9 +250,9 @@ def main(config):
                 end_dt = time.parse_time(end_time_str)
                 now_dt = time.now()
                 diff = end_dt - now_dt
-                if diff.total_seconds() < -C_MAX_PRINT_AGE_SECONDS:
+                    if diff.total_seconds() < -max_print_age_seconds:
                     skip_render = True
-                    print("Print finished more than 4 hours ago, skipping render")
+                        print("Print finished more than {} hours ago, skipping render".format(max_print_age_hours))
             else:
                 skip_render = True
                 print("Failed to parse end_time, skipping render")
@@ -337,6 +339,7 @@ def get_schema():
         schema.Text(id = "remaining_time", name = "Remaining Time", desc = "Entity ID for remaining time (decimal hours/minutes)", icon = "clock"),
         schema.Text(id = "end_time", name = "Print End Time", desc = "Entity ID for print end time (Y-M-D H:M:S)", icon = "calendar"),
         schema.Text(id = "status", name = "Print Status", desc = "Entity ID for print status", icon = "info"),
+        schema.Number(id = "maxPrintAgeHours", name = "Max Print Age (hours)", desc = "Hide completed prints older than this many hours", icon = "clock", default = 4),
 
     ]
 
