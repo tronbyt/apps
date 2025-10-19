@@ -1,3 +1,5 @@
+ C_DEFAULT_END_TIME = "1970-01-01 00:00:00"
+ C_MAX_PRINT_AGE_SECONDS = 4 * 3600
 """
 Applet: ha3dprint
 Summary: View HA 3D printer status
@@ -218,7 +220,7 @@ def main(config):
         cache_duration,
     )
     if result == None:
-        result = ("Printer", "0", "0", "0", "0", "1970-01-01 00:00:00", "Unknown")
+        result = ("Printer", "0", "0", "0", "0", C_DEFAULT_END_TIME, "Unknown")
     (name, current_layer, total_layers, progress, remaining_time, end_time, status) = result
 
     # Check if we should render anything
@@ -231,7 +233,7 @@ def main(config):
     if not skip_render and end_time != None and str(end_time) != "":
         # Convert 'YYYY-MM-DD HH:MM:SS' to ISO 8601 'YYYY-MM-DDTHH:MM:SSZ'
         end_time_str = str(end_time)
-        if end_time_str == "1970-01-01 00:00:00" or end_time_str.strip() == "":
+        if end_time_str == C_DEFAULT_END_TIME or end_time_str.strip() == "":
             skip_render = True
             print("Invalid end_time, skipping render")
         else:
@@ -246,9 +248,9 @@ def main(config):
                 end_dt = time.parse_time(end_time_str)
                 now_dt = time.now()
                 diff = end_dt - now_dt
-                if diff.total_seconds() > 4 * 3600:
+                if diff.total_seconds() < -C_MAX_PRINT_AGE_SECONDS:
                     skip_render = True
-                    print("Printer finished more than 4 hours from now, skipping render")
+                    print("Print finished more than 4 hours ago, skipping render")
             else:
                 skip_render = True
                 print("Failed to parse end_time, skipping render")
