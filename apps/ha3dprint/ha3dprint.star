@@ -218,7 +218,7 @@ def main(config):
         cache_duration,
     )
     if result == None:
-        result = ("Printer", "0", "0", "0", "0", "0", "Unknown")
+        result = ("Printer", "0", "0", "0", "0", "1970-01-01 00:00:00", "Unknown")
     (name, current_layer, total_layers, progress, remaining_time, end_time, status) = result
 
     # Check if we should render anything
@@ -229,12 +229,29 @@ def main(config):
         print("Printer is offline, skipping render")
     # Check end_time using Starlark's time.parse_time and duration
     if not skip_render and end_time != None and str(end_time) != "":
-        end_dt = time.parse_time(str(end_time))
-        now_dt = time.now()
-        diff = end_dt - now_dt
-        if diff.total_seconds() > 4 * 3600:
+        # Convert 'YYYY-MM-DD HH:MM:SS' to ISO 8601 'YYYY-MM-DDTHH:MM:SSZ'
+        end_time_str = str(end_time)
+        if end_time_str == "1970-01-01 00:00:00" or end_time_str.strip() == "":
             skip_render = True
-            print("Printer finished more than 4 hours from now, skipping render")
+            print("Invalid end_time, skipping render")
+        else:
+            # Replace space with 'T' and append 'Z' if not present
+            if "T" not in end_time_str:
+                end_time_str = end_time_str.replace(" ", "T")
+            if not end_time_str.endswith("Z"):
+                end_time_str += "Z"
+            # Only parse if format matches expected ISO 8601
+            # Simple check: length and presence of 'T' and 'Z'
+            if len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z"):
+                end_dt = time.parse_time(end_time_str)
+                now_dt = time.now()
+                diff = end_dt - now_dt
+                if diff.total_seconds() > 4 * 3600:
+                    skip_render = True
+                    print("Printer finished more than 4 hours from now, skipping render")
+            else:
+                skip_render = True
+                print("Failed to parse end_time, skipping render")
 
     if skip_render:
         return []
@@ -298,7 +315,7 @@ def main(config):
                             offset_end = 8,
                         ) if len(str(name)) > 15 else render.Text(str(name), font = "tom-thumb"),
                         render.WrappedText(status_upper, color = stateColor),
-                        render.Text(time_left)
+                        render.Text(time_left),
                         # Safely convert progress to int, default to 0 if not a number
                         renderProgress("Completion", int(progress) if str(progress).isdigit() else 0, 1, "#64BFE5"),
                     ],
