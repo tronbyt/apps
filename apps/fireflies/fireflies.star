@@ -398,7 +398,6 @@ def render_clock(timezone):
 def render_animation(frames):
     return render.Root(
         delay = DELAY,
-        show_full_animation = True,
         child = render.Animation(children = frames),
     )
 
