@@ -47,6 +47,7 @@ DEFAULT_SHOW_GRAPH_HOUR_BARS = True
 DEFAULT_GRAPH_HEIGHT = 300
 DEFAULT_CLOCK_OPTION = "Clock"
 DEFAULT_CLOCK_COLOR = COLOR_ORANGE
+DEFAULT_NIGHT_COLOR = COLOR_NIGHT
 DEFAULT_ID_BORDER_COLOR = COLOR_BLACK
 DEFAULT_IN_RANGE_BG_COLOR = COLOR_GREEN
 DEFAULT_HIGH_BG_COLOR = COLOR_YELLOW
@@ -109,6 +110,7 @@ def main(config):
     low_color = config.get("low_color", DEFAULT_LOW_BG_COLOR)
     urgent_high_color = config.get("urgent_high_color", DEFAULT_URGENT_HIGH_COLOR)
     urgent_low_color = config.get("urgent_low_color", DEFAULT_URGENT_LOW_COLOR)
+    night_color = config.get("night_color", DEFAULT_NIGHT_COLOR)
     show_24_hour_time = config.bool("show_24_hour_time", DEFAULT_SHOW_24_HOUR_TIME)
     night_mode = config.bool("night_mode", DEFAULT_NIGHT_MODE)
     nightscout_iob = "n/a"
@@ -270,6 +272,7 @@ def main(config):
     color_iob = iob_color
     color_cob = cob_color
     color_id_border = id_border_color
+    hour_marker_color = COLOR_HOURS
 
     lg_clock_row = []
     sm_clock_row = []
@@ -312,17 +315,18 @@ def main(config):
         color_arrow = urgent_low_color
     print("night_mode:", night_mode)
     if (night_mode and (now > sun_set or now < sun_rise)):
-        color_reading = COLOR_NIGHT
-        color_delta = COLOR_NIGHT
-        color_arrow = COLOR_NIGHT
-        color_ago = COLOR_NIGHT
-        color_graph_urgent_high = COLOR_NIGHT
-        color_graph_high = COLOR_NIGHT
-        color_graph_normal = COLOR_NIGHT
-        color_graph_low = COLOR_NIGHT
-        color_graph_urgent_low = COLOR_NIGHT
-        color_graph_lines = COLOR_NIGHT
-        color_clock = COLOR_NIGHT
+        color_reading = night_color
+        color_delta = night_color
+        color_arrow = night_color
+        color_ago = night_color
+        color_graph_urgent_high = night_color
+        color_graph_high = night_color
+        color_graph_normal = night_color
+        color_graph_low = night_color
+        color_graph_urgent_low = night_color
+        color_graph_lines = night_color
+        color_clock = night_color
+        hour_marker_color = night_color
 
     #If there's no clock/iob/cob row
     if clock_option == "None":
@@ -865,7 +869,7 @@ def main(config):
                         child = render.Box(
                             width = 1,
                             height = 30,
-                            color = COLOR_HOURS,
+                            color = hour_marker_color,
                         ),
                     ))
 
@@ -1396,6 +1400,31 @@ def get_schema():
                 desc = "Dim display between sunset and sunrise",
                 icon = "moon",
                 default = False,
+            ),
+            schema.Color(
+                id = "night_color",
+                name = "Night Mode Color",
+                desc = "Color applied when Night Mode is active",
+                icon = "brush",
+                default = DEFAULT_NIGHT_COLOR,
+                palette = [
+                    COLOR_BLACK,
+                    COLOR_WHITE,
+                    COLOR_GREY,
+                    COLOR_RED,
+                    COLOR_DARK_RED,
+                    COLOR_PINK,
+                    COLOR_ORANGE,
+                    COLOR_YELLOW,
+                    COLOR_BRIGHT_GREEN,
+                    COLOR_GREEN,
+                    COLOR_DARK_GREEN,
+                    COLOR_BLUE,
+                    COLOR_DARK_BLUE,
+                    COLOR_PURPLE,
+                    COLOR_MAGENTA,
+                    COLOR_BRIGHT_RED,
+                ],
             ),
         ],
     )
