@@ -25,8 +25,9 @@ cache_store = {
     "daily_timestamp": None,
 }
 
-# Hourly cache for summary (includes today's production)
-HOURLY_CACHE = 3600  # 1 hour
+# Cache for summary + today's consumption (120 minutes to stay under limit)
+# With 120-min cache: ~12 requests/day × 2 calls = 24/day + 2 midnight = 26/day = ~780/month ✅
+HOURLY_CACHE = 7200  # 120 minutes (2 hours)
 
 # Daily cache for lifetime data (doesn't change much)
 DAILY_CACHE = 86400  # 24 hours
@@ -105,21 +106,47 @@ def get_solar_data():
         year_start = datetime(now.year, 1, 1)
         week_start = today - timedelta(days=6)
         
-        # STEP 1: Get summary data (refreshed hourly) - 1 API call
+        # STEP 1: Get summary and today's consumption (refreshed hourly) - 2 API calls
         hourly_age = time.time() - cache_store["hourly_timestamp"] if cache_store["hourly_timestamp"] else float('inf')
         
         if hourly_age < HOURLY_CACHE and cache_store["hourly_data"]:
-            print(f"Using cached summary (age: {int(hourly_age)}s)")
+            print(f"Using cached summary + consumption (age: {int(hourly_age)}s)")
             summary = cache_store["hourly_data"]["summary"]
             day_prod = cache_store["hourly_data"]["day_prod"]
+            day_cons = cache_store["hourly_data"]["day_cons"]
         else:
-            print("Fetching fresh summary data...")
+            print("Fetching fresh summary and today's consumption data...")
             summary = call_enphase_api(f"systems/{SYSTEM_ID}/summary")
             day_prod = summary.get("energy_today", 0)
             
+            # Get today's consumption from telemetry endpoint
+            today_str = now_local.strftime("%Y-%m-%d") if 'now_local' in locals() else now.strftime("%Y-%m-%d")
+            try:
+                cons_telemetry = call_enphase_api(
+                    f"systems/{SYSTEM_ID}/telemetry/consumption_meter",
+                    params={
+                        "granularity": "day",
+                        "start_date": today_str
+                    }
+                )
+                
+                # Sum up the consumption from intervals
+                day_cons = 0
+                if "intervals" in cons_telemetry and len(cons_telemetry["intervals"]) > 0:
+                    for interval in cons_telemetry["intervals"]:
+                        if "enwh" in interval and interval["enwh"]:
+                            day_cons += interval["enwh"]
+                    print(f"Got today's consumption from telemetry: {day_cons} Wh ({len(cons_telemetry['intervals'])} intervals)")
+                else:
+                    print("No consumption intervals in telemetry response")
+            except Exception as e:
+                print(f"Could not fetch today's consumption: {e}")
+                day_cons = 0
+            
             cache_store["hourly_data"] = {
                 "summary": summary,
-                "day_prod": day_prod
+                "day_prod": day_prod,
+                "day_cons": day_cons
             }
             cache_store["hourly_timestamp"] = time.time()
         
@@ -190,7 +217,6 @@ def get_solar_data():
         lifetime_prod += day_prod
         
         # Calculate consumption periods
-        day_cons = 0
         month_cons = sum(v for i, v in enumerate(cons_data) if v and month_start <= (cons_start_date + timedelta(days=i)) < today)
         year_cons = sum(v for i, v in enumerate(cons_data) if v and year_start <= (cons_start_date + timedelta(days=i)) < today)
         week_cons = sum(v for i, v in enumerate(cons_data) if v and week_start <= (cons_start_date + timedelta(days=i)) < today)

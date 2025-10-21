@@ -14,7 +14,7 @@ This project consists of two components:
 - ✅ Historical consumption data (week, month, year, lifetime)
 - ✅ Automatic OAuth token refresh
 - ✅ 5 rotating screens: Today → Week → Month → Year → Lifetime
-- ⚠️ Note: Today's consumption shows animated dots (Enphase API limitation)
+
 
 ## Prerequisites
 
@@ -229,8 +229,8 @@ In the Tidbyt app configuration:
 The Tidbyt cycles through 5 screens, each showing for 3 seconds:
 
 ### Screen 1: Energy Today
-- 🌞 **Production**: Real-time today's solar production
-- 🔌 **Consumption**: Animated dots `···` (not available in API)
+- 🌞 **Production**: Today's solar production (up to 2hrs delay)
+- 🔌 **Consumption**: Today's solar production (up to 2hrs delay)
 
 ### Screen 2: Energy Week
 - Last 7 days of production and consumption
@@ -265,20 +265,8 @@ Tokens expire periodically. To refresh:
 
 ### Data Not Updating
 - Production updates in real-time ✅
-- Consumption updates once daily (shows previous days accurately)
 - Week/Month/Year/Lifetime update daily with new data
 
----
-
-## API Limitations
-
-**Why doesn't today's consumption show?**
-
-Enphase's public API v4 provides `energy_today` for production but not for consumption. The consumption_lifetime endpoint only updates once daily with completed days. 
-
-Enlighten's website has access to internal APIs or local Envoy data that we don't have via the public API. This is a known limitation.
-
-**Solution**: The app shows animated dots for today's consumption to indicate data is ongoing but not available. All other periods (week, month, year, lifetime) show accurate consumption data.
 
 ---
 
@@ -322,17 +310,6 @@ Render will automatically redeploy.
 - Icons: Sun and plug from original app
 
 
-
----
-
-## Changelog
-
-### Version 1.0 (2025-10-17)
-- Initial release
-- Support for production and consumption data
-- 5 screens: Today, Week, Month, Year, Lifetime
-- Automatic OAuth token refresh
-- Animated indicator for unavailable today's consumption
 
 ---
 
