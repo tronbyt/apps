@@ -1,5 +1,3 @@
- C_DEFAULT_END_TIME = "1970-01-01 00:00:00"
- C_MAX_PRINT_AGE_SECONDS = 4 * 3600
 """
 Applet: ha3dprint
 Summary: View HA 3D printer status
@@ -14,6 +12,9 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+C_DEFAULT_END_TIME = "1970-01-01 00:00:00"
+C_MAX_PRINT_AGE_SECONDS = 4 * 3600
+
 C_DISPLAY_WIDTH = 64
 C_BACKGROUND = [0, 0, 0]
 C_TEXT_COLOR = [255, 255, 255]
@@ -26,7 +27,7 @@ RED = "#FF0000"
 WHITE = "#FFFFFF"
 GREEN = "#00FF00"
 
-def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_layers_entity, progress_entity, remaining_time_entity, end_time_entity, status_entity, cache_duration):
+def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time_entity, end_time_entity, status_entity, cache_duration):
     """Fetch printer data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
         "Authorization": "Bearer " + ha_token,
@@ -39,8 +40,6 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
     # Default values in case of errors
     defaults = {
         "name": "Printer",
-        "current_layer": "0",
-        "total_layers": "0",
         "progress": "0",
         "remaining_time": "0",
         "end_time": "0",
@@ -51,8 +50,6 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
     template = """
 {
     "name": "{{ states('%s') | default('Printer') }}",
-    "current_layer": "{{ states('%s') | default('0') }}",
-    "total_layers": "{{ states('%s') | default('0') }}",
     "progress": "{{ states('%s') | default('0') }}",
     "remaining_time": "{{ states('%s') | default('0') }}",
     "end_time": "{{ states('%s') | default('0') }}",
@@ -60,8 +57,6 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
 }
 """ % (
         name_entity,
-        current_layer_entity,
-        total_layers_entity,
         progress_entity,
         remaining_time_entity,
         end_time_entity,
@@ -86,8 +81,6 @@ def fetch_ha_data(ha_url, ha_token, name_entity, current_layer_entity, total_lay
                 data = json.decode(response_body)
                 return (
                     data.get("name", defaults["name"]),
-                    data.get("current_layer", defaults["current_layer"]),
-                    data.get("total_layers", defaults["total_layers"]),
                     data.get("progress", defaults["progress"]),
                     data.get("remaining_time", defaults["remaining_time"]),
                     data.get("end_time", defaults["end_time"]),
@@ -197,11 +190,26 @@ def renderProgress(label, progress_value, padding, bar_color):
 def main(config):
     ha_url = config.str("haUrl", "http://homeassistant.local:8123")
     ha_token = config.str("haApiKey", "APIKEY")
-    max_print_age_hours = config.num("maxPrintAgeHours", 4)
+    max_print_age_hours_str = config.str("maxPrintAgeHours", "4")
+    # Safe float parsing: allow only digits and one dot
+    max_print_age_hours = 4.0
+    s = max_print_age_hours_str.strip()
+    dot_count = 0
+    valid = len(s) > 0
+    for i in range(len(s)):
+        c = s[i]
+        if c == ".":
+            dot_count += 1
+            if dot_count > 1:
+                valid = False
+                break
+        elif c < "0" or c > "9":
+            valid = False
+            break
+    if valid:
+        max_print_age_hours = float(s)
     max_print_age_seconds = int(max_print_age_hours * 3600)
     name_entity = config.str("task_name", "task_name")
-    current_layer_entity = config.str("current_layer", "test_current_layer")
-    total_layers_entity = config.str("total_layers", "test_total_layers")
     progress_entity = config.str("progress", "test_progress")
     remaining_time_entity = config.str("remaining_time", "test_remaining_time")
     status_entity = config.str("status", "test_status")
@@ -213,8 +221,6 @@ def main(config):
         ha_url,
         ha_token,
         name_entity,
-        current_layer_entity,
-        total_layers_entity,
         progress_entity,
         remaining_time_entity,
         end_time_entity,
@@ -222,8 +228,8 @@ def main(config):
         cache_duration,
     )
     if result == None:
-        result = ("Printer", "0", "0", "0", "0", C_DEFAULT_END_TIME, "Unknown")
-    (name, current_layer, total_layers, progress, remaining_time, end_time, status) = result
+        result = ("Printer", "0", "0", C_DEFAULT_END_TIME, "Unknown")
+    (name, progress, remaining_time, end_time, status) = result
 
     # Check if we should render anything
     skip_render = False
@@ -239,23 +245,28 @@ def main(config):
             skip_render = True
             print("Invalid end_time, skipping render")
         else:
-            # Replace space with 'T' and append 'Z' if not present
+            # Replace space with 'T' if not present
             if "T" not in end_time_str:
                 end_time_str = end_time_str.replace(" ", "T")
-            if not end_time_str.endswith("Z"):
-                end_time_str += "Z"
-            # Only parse if format matches expected ISO 8601
-            # Simple check: length and presence of 'T' and 'Z'
-            if len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z"):
-                end_dt = time.parse_time(end_time_str)
-                now_dt = time.now()
-                diff = end_dt - now_dt
-                    if diff.total_seconds() < -max_print_age_seconds:
-                    skip_render = True
-                        print("Print finished more than {} hours ago, skipping render".format(max_print_age_hours))
+            # Accept both with and without 'Z' at the end
+            valid_iso = len(end_time_str) == 19 and end_time_str[10] == "T"
+            valid_iso_z = len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z")
+            if valid_iso:
+                # Add 'Z' for parsing if not present
+                end_time_str_z = end_time_str + "Z"
+            elif valid_iso_z:
+                end_time_str_z = end_time_str
             else:
                 skip_render = True
                 print("Failed to parse end_time, skipping render")
+                end_time_str_z = None
+            if not skip_render and end_time_str_z:
+                end_dt = time.parse_time(end_time_str_z)
+                now_dt = time.now()
+                diff = end_dt - now_dt
+                if diff.seconds < -max_print_age_seconds:
+                    skip_render = True
+                    print("Print finished more than {} hours ago, skipping render".format(max_print_age_hours))
 
     if skip_render:
         return []
@@ -333,14 +344,11 @@ def get_schema():
         schema.Text(id = "haUrl", name = "Home Assistant URL", desc = "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)", icon = "server"),
         schema.Text(id = "haApiKey", name = "Home Assistant API Key", desc = "Long-Lived Access Token from Home Assistant user profile", icon = "key"),
         schema.Text(id = "task_name", name = "Task Name", desc = "Currently Printing Task", icon = "file"),
-        schema.Text(id = "current_layer", name = "Current Layer", desc = "Entity ID for current layer", icon = "layerGroup"),
-        schema.Text(id = "total_layers", name = "Total Layers", desc = "Entity ID for total layers", icon = "layerGroup"),
         schema.Text(id = "progress", name = "Print Progress", desc = "Entity ID for print progress (%)", icon = "percent"),
         schema.Text(id = "remaining_time", name = "Remaining Time", desc = "Entity ID for remaining time (decimal hours/minutes)", icon = "clock"),
         schema.Text(id = "end_time", name = "Print End Time", desc = "Entity ID for print end time (Y-M-D H:M:S)", icon = "calendar"),
         schema.Text(id = "status", name = "Print Status", desc = "Entity ID for print status", icon = "info"),
-        schema.Number(id = "maxPrintAgeHours", name = "Max Print Age (hours)", desc = "Hide completed prints older than this many hours", icon = "clock", default = 4),
-
+        schema.Text(id = "maxPrintAgeHours", name = "Max Print Age (hours)", desc = "Hide completed prints older than this many hours", icon = "clock", default = "4"),
     ]
 
     return schema.Schema(version = "1", fields = fields)
