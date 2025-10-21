@@ -105,6 +105,7 @@ def main(config):
     nightscout_token = config.get("nightscout_token", DEFAULT_NSTOKEN)
     show_graph = config.bool("show_graph", DEFAULT_SHOW_GRAPH)
     show_graph_hour_bars = config.bool("show_graph_hour_bars", DEFAULT_SHOW_GRAPH_HOUR_BARS)
+    scale = 2 if config.bool("$2x") else 1
 
     # for backward compatibilty
     if (config.bool("show_clock") == True):
@@ -140,7 +141,7 @@ def main(config):
         nightscout_data, status_code = get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_unit)
 
         if status_code > 200:
-            return display_failure("Nightscout Error: " + str(status_code) + " " + HTTPstatusMessages[str(status_code)])
+            return display_failure("Nightscout Error: " + str(status_code) + " " + HTTPstatusMessages[str(status_code)], scale = scale)
     else:
         nightscout_data, status_code = {
             "api_version": "n/a",
@@ -229,8 +230,8 @@ def main(config):
         if (int(sgv_delta) >= 0):
             str_delta = "+" + str_delta
             print("str_delta: ", str_delta)
-        left_col_width = 28
-        graph_width = 34
+        left_col_width = 28 if scale == 1 else 50
+        graph_width = 34 if scale == 1 else 74
     else:
         graph_height = int(float(config.get("mmol_graph_height", mgdl_to_mmol(DEFAULT_GRAPH_HEIGHT))) * 18)
         normal_high = int(float(config.get("mmol_normal_high", mgdl_to_mmol(DEFAULT_NORMAL_HIGH))) * 18)
@@ -247,8 +248,8 @@ def main(config):
         elif (sgv_delta > 0):
             str_delta = "+" + str_delta
 
-        left_col_width = 28
-        graph_width = 34
+        left_col_width = 28 if scale == 1 else 50
+        graph_width = 34 if scale == 1 else 74
 
     OLDEST_READING_TARGET = UTC_TIME_NOW - time.parse_duration(str(5 * graph_width) + "m")
 
@@ -353,8 +354,8 @@ def main(config):
         if (reading_mins_ago > 5):
             one_column_delta_row = [
                 render.Box(
-                    width = 2,
-                    height = 17,
+                    width = 2 * scale,
+                    height = 17 * scale,
                 ),
                 render.Row(
                     cross_align = "center",
@@ -363,10 +364,10 @@ def main(config):
                     children = [
                         render.WrappedText(
                             content = str_delta.replace("0", "O"),
-                            font = "5x8",
+                            font = "5x8" if scale == 1 else "terminus-20-light",
                             color = color_delta,
                             align = "center",
-                            linespacing = -3,
+                            linespacing = -3 * scale,
                         ),
                     ],
                 ),
@@ -374,8 +375,8 @@ def main(config):
         else:
             one_column_delta_row = [
                 render.Box(
-                    width = 2,
-                    height = 16,
+                    width = 2 * scale,
+                    height = 16 * scale,
                 ),
                 render.Row(
                     cross_align = "center",
@@ -383,18 +384,18 @@ def main(config):
                     expanded = True,
                     children = [
                         render.Box(
-                            width = 2,
-                            height = 1,
+                            width = 2 * scale,
+                            height = scale,
                         ),
                         render.Text(
                             content = str_delta.replace("0", "O"),
-                            font = "6x13",
+                            font = "6x13" if scale == 1 else "terminus-20-light",
                             color = color_delta,
                             offset = 0,
                         ),
                         render.Text(
                             content = " " + ARROWS[direction],
-                            font = "tb-8",
+                            font = "tb-8" if scale == 1 else "10x20",
                             color = color_arrow,
                             offset = 0,
                         ),
@@ -406,12 +407,12 @@ def main(config):
             render.Stack(
                 children = [
                     render.Box(
-                        height = 32,
-                        width = 64,
+                        height = 32 * scale,
+                        width = 64 * scale,
                         color = color_id_border,
                         child = render.Box(
-                            height = 30,
-                            width = 62,
+                            height = 30 * scale,
+                            width = 62 * scale,
                             color = COLOR_BLACK,
                         ),
                     ),
@@ -426,7 +427,7 @@ def main(config):
                                 children = [
                                     render.Text(
                                         content = str_current,
-                                        font = "10x20",
+                                        font = "10x20" if scale == 1 else "terminus-32",
                                         color = color_reading,
                                         offset = 0,
                                     ),
@@ -443,7 +444,7 @@ def main(config):
                         main_align = "start",
                         cross_align = "center",
                         children = [
-                            render.Box(height = 26),
+                            render.Box(height = 26 * scale),
                             render.Row(
                                 cross_align = "center",
                                 main_align = "space_evenly",
@@ -451,9 +452,9 @@ def main(config):
                                 children = [
                                     render.Text(
                                         content = full_ago_dashes,
-                                        font = "tom-thumb",
+                                        font = "tom-thumb" if scale == 1 else "terminus-14-light",
                                         color = color_ago,
-                                        offset = -1,
+                                        offset = -scale,
                                     ),
                                 ],
                             ),
@@ -469,11 +470,11 @@ def main(config):
             left_delta_row = [
                 render.WrappedText(
                     content = str_delta.replace("0", "O"),
-                    font = "CG-pixel-3x5-mono",
+                    font = "CG-pixel-3x5-mono" if scale == 1 else "10x13",
                     color = color_delta,
-                    linespacing = 2,
+                    linespacing = 2 * scale,
                     width = left_col_width,
-                    height = 14,
+                    height = 14 * scale,
                     align = "center",
                 ),
             ]
@@ -481,17 +482,17 @@ def main(config):
             left_delta_row = [
                 render.Text(
                     content = str_delta.replace("0", "O"),
-                    font = "tb-8",
+                    font = "tb-8" if scale == 1 else "terminus-14-light",
                     color = color_delta,
                     offset = 0,
                 ),
                 render.Box(
-                    height = 1,
-                    width = 1,
+                    height = scale,
+                    width = 1 if scale == 1 else 4,
                 ),
                 render.Text(
                     content = ARROWS[direction],
-                    font = "5x8",
+                    font = "5x8" if scale == 1 else "6x13",
                     color = color_arrow,
                     offset = 0,
                 ),
@@ -501,8 +502,8 @@ def main(config):
             render.Row(
                 children = [
                     render.Box(
-                        height = 3,
-                        width = 1,
+                        height = 3 * scale,
+                        width = scale,
                     ),
                 ],
             ),
@@ -510,10 +511,10 @@ def main(config):
                 children = [
                     render.WrappedText(
                         content = str_current,
-                        font = "6x13",
+                        font = "6x13" if scale == 1 else "terminus-28",
                         color = color_reading,
                         width = left_col_width,
-                        height = 14,
+                        height = 14 * scale,
                         align = "center",
                     ),
                 ],
@@ -524,8 +525,8 @@ def main(config):
             render.Row(
                 children = [
                     render.Box(
-                        height = 2,
-                        width = 1,
+                        height = 2 * scale,
+                        width = scale,
                     ),
                 ],
             ),
@@ -535,7 +536,7 @@ def main(config):
                 children = [
                     render.WrappedText(
                         content = full_ago_dashes,
-                        font = "tom-thumb",
+                        font = "tom-thumb" if scale == 1 else "terminus-14-light",
                         color = color_ago,
                         width = left_col_width,
                         align = "center",
@@ -548,7 +549,7 @@ def main(config):
     else:
         if clock_option == "Clock":
             lg_clock_row = [
-                render.Box(height = 1),
+                render.Box(height = scale),
                 render.Row(
                     cross_align = "center",
                     main_align = "space_evenly",
@@ -558,12 +559,12 @@ def main(config):
                             children = [
                                 render.Text(
                                     content = now.format("15:04" if show_24_hour_time else "3:04 PM"),
-                                    font = "6x13",
+                                    font = "6x13" if scale == 1 else "terminus-28",
                                     color = color_clock,
                                 ),
                                 render.Text(
                                     content = now.format("15 04" if show_24_hour_time else "3 04 PM"),
-                                    font = "6x13",
+                                    font = "6x13" if scale == 1 else "terminus-28",
                                     color = color_clock,
                                 ),
                             ],
@@ -575,25 +576,25 @@ def main(config):
             sm_clock_row = [
                 render.WrappedText(
                     content = now.format("15:04" if show_24_hour_time else "3:04"),
-                    font = "tom-thumb",
+                    font = "tom-thumb" if scale == 1 else "terminus-14-light",
                     color = color_clock,
                     width = left_col_width,
                     align = "center",
-                    height = 6,
+                    height = 6 * scale,
                 ),
                 render.WrappedText(
                     content = now.format("15 04" if show_24_hour_time else "3 04"),
-                    font = "tom-thumb",
+                    font = "tom-thumb" if scale == 1 else "terminus-14-light",
                     color = color_clock,
                     width = left_col_width,
                     align = "center",
-                    height = 6,
+                    height = 6 * scale,
                 ),
             ]
 
         elif clock_option == "IOB" or clock_option == "COB":
             lg_clock_row = [
-                render.Box(height = 14),
+                render.Box(height = 14 * scale),
                 render.Row(
                     cross_align = "center",
                     main_align = "space_evenly",
@@ -601,7 +602,7 @@ def main(config):
                     children = [
                         render.Text(
                             content = nightscout_iob if clock_option == "IOB" else nightscout_cob,
-                            font = "6x13",
+                            font = "6x13" if scale == 1 else "terminus-24",
                             color = color_iob if clock_option == "IOB" else color_cob,
                         ),
                     ],
@@ -611,11 +612,11 @@ def main(config):
             sm_clock_row = [
                 render.WrappedText(
                     content = nightscout_iob if clock_option == "IOB" else nightscout_cob,
-                    font = "tom-thumb",
+                    font = "tom-thumb" if scale == 1 else "6x10",
                     color = color_iob if clock_option == "IOB" else color_cob,
                     width = left_col_width,
                     align = "center",
-                    height = 6,
+                    height = 6 * scale,
                 ),
             ]
 
@@ -623,8 +624,8 @@ def main(config):
         if (reading_mins_ago > 5):
             one_column_delta_row = [
                 render.Box(
-                    width = 2,
-                    height = 14 if clock_option == "Clock" else 1,
+                    width = 2 * scale,
+                    height = 14 * scale if clock_option == "Clock" else scale,
                 ),
                 render.Row(
                     cross_align = "center",
@@ -632,40 +633,40 @@ def main(config):
                     expanded = True,
                     children = [
                         render.Box(
-                            width = 7,
-                            height = 18,
+                            width = 7 * scale,
+                            height = 18 * scale,
                         ),
                         render.WrappedText(
                             content = str_current,
-                            font = "6x13",
+                            font = "6x13" if scale == 1 else "terminus-28",
                             color = color_reading,
-                            width = 18,
+                            width = 18 if scale == 1 else 40,
                             align = "center",
-                            height = 18,
+                            height = 18 * scale,
                         ),
                         render.Box(
-                            width = 4,
-                            height = 18,
+                            width = 4 * scale,
+                            height = 18 * scale,
                         ),
                         render.WrappedText(
                             content = str_delta.replace("0", "O"),
-                            font = "tom-thumb",
+                            font = "tom-thumb" if scale == 1 else "terminus-12",
                             color = color_delta,
                             align = "center",
-                            width = 30,
+                            width = 30 * scale,
                             linespacing = 0,
-                            height = 14,
+                            height = 14 * scale,
                         ),
                         render.Box(
-                            width = 5,
-                            height = 18,
+                            width = 5 * scale,
+                            height = 18 * scale,
                         ),
                     ],
                 ),
             ]
         else:
             one_column_delta_row = [
-                render.Box(height = 14 if clock_option == "Clock" else 1),
+                render.Box(height = 14 * scale if clock_option == "Clock" else scale),
                 render.Row(
                     cross_align = "center",
                     main_align = "center",
@@ -673,20 +674,20 @@ def main(config):
                     children = [
                         render.Text(
                             content = str_current,
-                            font = "6x13",
+                            font = "6x13" if scale == 1 else "terminus-28",
                             color = color_reading,
                         ),
                         render.Text(
                             content = " " + str_delta.replace("0", "O"),
-                            font = "tb-8",
+                            font = "tb-8" if scale == 1 else "terminus-14-light",
                             color = color_delta,
-                            offset = -1,
+                            offset = -scale,
                         ),
                         render.Text(
                             content = " " + ARROWS[direction],
-                            font = "tb-8",
+                            font = "tb-8" if scale == 1 else "10x20",
                             color = color_arrow,
-                            offset = -1,
+                            offset = -scale,
                         ),
                     ],
                 ),
@@ -696,12 +697,12 @@ def main(config):
             render.Stack(
                 children = [
                     render.Box(
-                        height = 32,
-                        width = 64,
+                        height = 32 * scale,
+                        width = 64 * scale,
                         color = color_id_border,
                         child = render.Box(
-                            height = 30,
-                            width = 62,
+                            height = 30 * scale,
+                            width = 62 * scale,
                             color = COLOR_BLACK,
                         ),
                     ),
@@ -719,7 +720,7 @@ def main(config):
                         main_align = "start",
                         cross_align = "center",
                         children = [
-                            render.Box(height = 27),
+                            render.Box(height = 27 * scale),
                             render.Row(
                                 cross_align = "center",
                                 main_align = "space_evenly",
@@ -727,7 +728,7 @@ def main(config):
                                 children = [
                                     render.Text(
                                         content = full_ago_dashes,
-                                        font = "tom-thumb",
+                                        font = "tom-thumb" if scale == 1 else "terminus-14-light",
                                         color = color_ago,
                                         offset = 0,
                                     ),
@@ -742,31 +743,33 @@ def main(config):
         # If there's a clock row in the left column and a graph in the right
         if (reading_mins_ago > 5):
             left_delta_row = [
-                render.WrappedText(
-                    content = str_delta.replace("0", "O"),
-                    font = "CG-pixel-3x5-mono",
-                    color = color_delta,
-                    linespacing = 1,
-                    width = left_col_width - 0,
-                    height = 12,
-                    align = "center",
+                render.Box(
+                    width = left_col_width,
+                    height = 12 if scale == 1 else 20,
+                    child = render.WrappedText(
+                        content = str_delta.replace("0", "O"),
+                        font = "CG-pixel-3x5-mono" if scale == 1 else "6x10",
+                        color = color_delta,
+                        linespacing = 1 if scale == 1 else 0,
+                        align = "center",
+                    ),
                 ),
             ]
         else:
             left_delta_row = [
                 render.Text(
                     content = str_delta.replace("0", "O"),
-                    font = "tb-8",
+                    font = "tb-8" if scale == 1 else "terminus-14-light",
                     color = color_delta,
                     offset = 0,
                 ),
                 render.Box(
-                    height = 9,
-                    width = 1,
+                    height = 9 if scale == 1 else 14,
+                    width = 1 if scale == 1 else 4,
                 ),
                 render.Text(
                     content = ARROWS[direction],
-                    font = "5x8",
+                    font = "5x8" if scale == 1 else "6x13",
                     color = color_arrow,
                     offset = 0,
                 ),
@@ -776,8 +779,8 @@ def main(config):
             render.Row(
                 children = [
                     render.Box(
-                        height = 1,
-                        width = 1,
+                        height = scale,
+                        width = scale,
                     ),
                 ],
             ),
@@ -787,10 +790,10 @@ def main(config):
                 children = [
                     render.WrappedText(
                         content = str_current,
-                        font = "6x13",
+                        font = "6x13" if scale == 1 else "terminus-28",
                         color = color_reading,
                         width = left_col_width,
-                        height = 12,
+                        height = 12 * scale,
                         align = "center",
                     ),
                 ],
@@ -813,9 +816,9 @@ def main(config):
                 children = [
                     render.Text(
                         content = full_ago_dashes,
-                        font = "tom-thumb",
+                        font = "tom-thumb" if scale == 1 else "terminus-14-light",
                         color = color_ago,
-                        offset = 1,
+                        offset = scale,
                     ),
                 ],
             ),
@@ -882,14 +885,16 @@ def main(config):
                 max_hour = time.from_timestamp(max_time, 0).hour
                 if min_hour != max_hour:
                     # Add hour marker at this point
-                    graph_hour_bars.append(render.Padding(
-                        pad = (point, 0, 0, 0),
-                        child = render.Box(
-                            width = 1,
-                            height = 30,
-                            color = hour_marker_color,
+                    graph_hour_bars.append(
+                        render.Padding(
+                            pad = (point, 0, 0, 0),
+                            child = render.Box(
+                                width = 1,
+                                height = 30 * scale,
+                                color = hour_marker_color,
+                            ),
                         ),
-                    ))
+                    )
 
             graph_plot.append(
                 render.Plot(
@@ -898,7 +903,7 @@ def main(config):
                         (1, this_point),
                     ],
                     width = 1,
-                    height = 30,
+                    height = 30 * scale,
                     color = graph_point_color,
                     color_inverted = graph_point_color,
                     fill = False,
@@ -913,19 +918,19 @@ def main(config):
             render.Stack(
                 children = [
                     render.Box(
-                        height = 32,
-                        width = 64,
+                        height = 32 * scale,
+                        width = 64 * scale,
                         color = color_id_border,
                         child =
                             render.Box(
-                                height = 30,
-                                width = 62,
+                                height = 30 * scale,
+                                width = 62 * scale,
                                 color = COLOR_BLACK,
                             ),
                     ),
                     render.Box(
-                        height = 32,
-                        width = 64,
+                        height = 32 * scale,
+                        width = 64 * scale,
                         child =
                             render.Box(
                                 render.Row(
@@ -936,8 +941,8 @@ def main(config):
                                         render.Column(
                                             children = [
                                                 render.Box(
-                                                    width = 1,
-                                                    height = 32,
+                                                    width = scale,
+                                                    height = 32 * scale,
                                                 ),
                                             ],
                                         ),
@@ -953,7 +958,7 @@ def main(config):
                                             expanded = False,
                                             children = [
                                                 render.Box(
-                                                    height = 1,
+                                                    height = scale,
                                                     width = graph_width,
                                                 ),
                                                 render.Stack(
@@ -967,7 +972,7 @@ def main(config):
                                                                 (1, normal_low),
                                                             ],
                                                             width = graph_width,
-                                                            height = 30,
+                                                            height = 30 * scale,
                                                             color = color_graph_lines,
                                                             color_inverted = color_graph_lines,
                                                             fill = False,
@@ -980,7 +985,7 @@ def main(config):
                                                                 (1, normal_high),
                                                             ],
                                                             width = graph_width,
-                                                            height = 30,
+                                                            height = 30 * scale,
                                                             color = color_graph_lines,
                                                             color_inverted = color_graph_lines,
                                                             fill = False,
@@ -1015,11 +1020,11 @@ def main(config):
                     render.Animation(
                         children = [
                             render.WrappedText(
-                                width = 64,
+                                width = 64 * scale,
                                 align = "center",
-                                font = "10x20",
+                                font = "10x20" if scale == 1 else "terminus-32-light",
                                 color = "#f00",
-                                linespacing = -6,
+                                linespacing = -6 if scale == 1 else 0,
                                 content = "SAMPLE DATA",
                             ),
                             render.Box(),
@@ -1458,22 +1463,22 @@ def mgdl_to_mmol(mgdl):
     mmol = float(math.round((mgdl / 18) * 10) / 10)
     return mmol
 
-def display_failure(msg):
+def display_failure(msg, scale = 1):
     return render.Root(
         max_age = 120,
         child = render.Box(
             color = COLOR_RED,
-            width = 64,
-            height = 32,
+            width = 64 * scale,
+            height = 32 * scale,
             child = render.Box(
                 color = "#000",
-                width = 62,
-                height = 30,
+                width = 62 * scale,
+                height = 30 * scale,
                 child = render.WrappedText(
-                    width = 60,
+                    width = 60 * scale,
                     content = msg,
                     color = COLOR_NIGHT,
-                    font = "tom-thumb",
+                    font = "tom-thumb" if scale == 1 else "terminus-12",
                     align = "center",
                 ),
             ),
