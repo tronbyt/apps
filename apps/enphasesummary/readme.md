@@ -129,6 +129,7 @@ cd enphase-tidbyt-proxy
 Flask==3.0.0
 requests==2.31.0
 gunicorn==21.2.0
+pytz==2024.1
 ```
 
 4. Create `.gitignore`:
@@ -219,6 +220,7 @@ pixlet push YOUR_DEVICE_ID enphase_summary.star \
 In the Tidbyt app configuration:
 - **Proxy URL**: `https://your-app-name.onrender.com` (no trailing slash)
 - **Proxy API Key**: Your `PROXY_API_KEY` from Render
+- **Render Interval (minutes)**: 5 recommended (no more than 15min to prevent render.com service from shutting down)
 
 ---
 
