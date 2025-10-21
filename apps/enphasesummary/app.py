@@ -11,6 +11,7 @@ import os
 from datetime import datetime, timedelta
 from functools import wraps
 import time
+import pytz
 
 app = Flask(__name__)
 
@@ -122,19 +123,43 @@ def get_solar_data():
             }
             cache_store["hourly_timestamp"] = time.time()
         
-        timezone = summary.get("timezone", "America/New_York")
+        timezone_str = summary.get("timezone", "America/New_York")
+        print(f"System timezone: {timezone_str}")
         
-        # STEP 2: Get lifetime data (refreshed daily) - 2 API calls per day
+        # Get current time in system's timezone for date change detection
+        try:
+            tz = pytz.timezone(timezone_str)
+            now_local = datetime.now(tz)
+            current_date_local = now_local.date()
+            print(f"Current time in {timezone_str}: {now_local.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+        except Exception as e:
+            # Fallback to UTC if timezone not recognized
+            print(f"Could not parse timezone {timezone_str}: {e}, using UTC")
+            now_local = datetime.utcnow()
+            current_date_local = now_local.date()
+        
+        # STEP 2: Get lifetime data (refreshed at midnight local time)
         daily_age = time.time() - cache_store["daily_timestamp"] if cache_store["daily_timestamp"] else float('inf')
         
-        if daily_age < DAILY_CACHE and cache_store["daily_data"]:
-            print(f"Using cached lifetime data (age: {int(daily_age/3600)}h)")
+        # Check if we crossed midnight in LOCAL timezone since last cache
+        if cache_store["daily_timestamp"]:
+            cache_time_local = datetime.fromtimestamp(cache_store["daily_timestamp"], tz) if 'tz' in locals() else datetime.utcfromtimestamp(cache_store["daily_timestamp"])
+            cache_date_local = cache_time_local.date()
+            crossed_midnight = cache_date_local != current_date_local
+        else:
+            crossed_midnight = True
+        
+        if daily_age < DAILY_CACHE and cache_store["daily_data"] and not crossed_midnight:
+            print(f"Using cached lifetime data (age: {int(daily_age/3600)}h, date: {cache_date_local})")
             prod_data = cache_store["daily_data"]["production"]
             cons_data = cache_store["daily_data"]["consumption"]
             start_date = cache_store["daily_data"]["prod_start_date"]
             cons_start_date = cache_store["daily_data"]["cons_start_date"]
         else:
-            print("Fetching fresh lifetime data...")
+            if crossed_midnight:
+                print(f"Date changed in {timezone_str} (was {cache_date_local if cache_store['daily_timestamp'] else 'never'}, now {current_date_local}), fetching fresh lifetime data...")
+            else:
+                print("Fetching fresh lifetime data...")
             prod_data_raw = call_enphase_api(f"systems/{SYSTEM_ID}/energy_lifetime")
             cons_data_raw = call_enphase_api(f"systems/{SYSTEM_ID}/consumption_lifetime")
             
@@ -172,7 +197,7 @@ def get_solar_data():
         lifetime_cons = sum(v for v in cons_data if v)
         
         result = {
-            "timezone": timezone,
+            "timezone": timezone_str,
             "timestamp": now.isoformat(),
             "periods": {
                 "day": {"production_wh": day_prod, "consumption_wh": day_cons},
