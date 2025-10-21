@@ -13,7 +13,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 # Cache for 1 minute only - let Tronbyt control refresh timing
-# Tronbyt will render every 60 min and get fresh data from proxy
+# Proxy has 2-hour cache, so API calls are minimized regardless of render frequency
 CACHE_TTL = 60
 
 # Colors
@@ -28,7 +28,7 @@ iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAJZlWElmTU0AKgAA
 """)
 
 PLUG_SUM = base64.decode("""
-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
+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
 """)
 
 def format_energy(wh):
@@ -39,40 +39,6 @@ def format_energy(wh):
         return humanize.float("#,###.##", wh / 1000000) + " MWh"
     else:  # kWh
         return humanize.float("#,###.##", wh / 1000) + " kWh"
-
-def create_today_frame(title, production):
-    """Create today's frame with production only (no consumption line)."""
-    return render.Stack(
-        children = [
-            render.Column(
-                main_align = "space_evenly",
-                expanded = True,
-                cross_align = "center",
-                children = [
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_evenly",
-                        cross_align = "center",
-                        children = [
-                            render.Text(title),
-                        ],
-                    ),
-                    render.Row(
-                        main_align = "center",
-                        cross_align = "center",
-                        children = [
-                            render.Image(src = SUN_SUM),
-                            render.Text(
-                                content = " " + format_energy(production),
-                                font = "5x8",
-                                color = GREEN,
-                            ),
-                        ],
-                    ),
-                ],
-            ),
-        ],
-    )
 
 def create_summary_frame(title, production, consumption):
     """Create a summary frame with title and energy values."""
@@ -164,14 +130,15 @@ def main(config):
         
         periods = data.get("periods", {})
         
-        # Day - production only (cleaner design)
+        # Day
         day_data = periods.get("day", {})
-        frames.append(create_today_frame(
+        frames.append(create_summary_frame(
             "Energy Today",
-            day_data.get("production_wh", 0)
+            day_data.get("production_wh", 0),
+            day_data.get("consumption_wh", 0)
         ))
         
-        # Week - both production and consumption
+        # Week
         week_data = periods.get("week", {})
         frames.append(create_summary_frame(
             "Energy Week",
@@ -179,7 +146,7 @@ def main(config):
             week_data.get("consumption_wh", 0)
         ))
         
-        # Month - both production and consumption
+        # Month
         month_data = periods.get("month", {})
         frames.append(create_summary_frame(
             "Energy Month",
@@ -187,7 +154,7 @@ def main(config):
             month_data.get("consumption_wh", 0)
         ))
         
-        # Year - both production and consumption
+        # Year
         year_data = periods.get("year", {})
         frames.append(create_summary_frame(
             "Energy Year",
@@ -195,7 +162,7 @@ def main(config):
             year_data.get("consumption_wh", 0)
         ))
         
-        # Lifetime - both production and consumption
+        # Lifetime
         lifetime_data = periods.get("lifetime", {})
         frames.append(create_summary_frame(
             "Energy Life",
@@ -204,11 +171,11 @@ def main(config):
         ))
     else:
         # Demo data if no credentials
-        frames.append(create_today_frame("Energy Today", 6282))
+        frames.append(create_summary_frame("Energy Today", 6282, 3141))
         frames.append(create_summary_frame("Energy Week", 43974, 21987))
         frames.append(create_summary_frame("Energy Month", 188460, 94230))
         frames.append(create_summary_frame("Energy Year", 2261520, 1130760))
-        frames.append(create_summary_frame("Energy Life", 11307600, 5653800))
+        frames.append(create_summary_frame("Energy Life", 11307600, 0))
     
     # Return animation with frames
     return render.Root(
