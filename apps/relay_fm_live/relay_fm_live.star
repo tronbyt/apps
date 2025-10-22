@@ -81,7 +81,7 @@ def get_next_recording(api_key, live, timezone):
     )
 
 def main(config):
-    api_key = config.str("api_key")
+    api_key = "AIzaSyAVhU0GdCZQidylxz7whIln82rWtZ4cIDQ"
     timezone = config.get("timezone") or "America/New_York"
     img = render.Image(src = relay_logo)
     live = check_live()
@@ -142,12 +142,6 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(
-                id = "api_key",
-                name = "API key",
-                desc = "Google Calendar API key",
-                icon = "calendar",
-            ),
             schema.Dropdown(
                 id = "show_art",
                 name = "Artwork/QR code settings",
