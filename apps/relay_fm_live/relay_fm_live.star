@@ -34,7 +34,7 @@ def check_live():
         return True
     return False
 
-def get_next_recording(api_key, live, timezone):
+def get_next_recording(live, timezone):
     if live:
         r = http.get(live_status_url, ttl_seconds = 60)
         header = render.Text("Live:")
@@ -43,7 +43,7 @@ def get_next_recording(api_key, live, timezone):
     else:
         header = render.Text("Up next:")
         calendar_minimum_time = time.now().in_location("UTC").format("2006-01-02T15:04:05.000Z")
-        calendar_url = "https://www.googleapis.com/calendar/v3/calendars/relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o%40group.calendar.google.com/events?key=" + api_key + "&orderBy=startTime&singleEvents=true&timeMin=" + calendar_minimum_time
+        calendar_url = "https://www.googleapis.com/calendar/v3/calendars/relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o%40group.calendar.google.com/events?key=AIzaSyAVhU0GdCZQidylxz7whIln82rWtZ4cIDQ&orderBy=startTime&singleEvents=true&timeMin=" + calendar_minimum_time
         r = http.get(calendar_url, ttl_seconds = 60)
         if "items" in r.json():
             next = r.json()["items"][0]
@@ -81,7 +81,6 @@ def get_next_recording(api_key, live, timezone):
     )
 
 def main(config):
-    api_key = "AIzaSyAVhU0GdCZQidylxz7whIln82rWtZ4cIDQ"
     timezone = config.get("timezone") or "America/New_York"
     img = render.Image(src = relay_logo)
     live = check_live()
@@ -97,7 +96,7 @@ def main(config):
         img = render.Image(src = relay_logo)
     elif live:
         img = generate_qrcode(art)
-    show = get_next_recording(api_key, live, timezone)
+    show = get_next_recording(live, timezone)
     main_content = render.Row(
         children = [
             img,
