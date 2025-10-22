@@ -10,9 +10,33 @@ load("http.star", "http")
 load("render.star", "render")
 
 SEPTA_API = "https://www3.septa.org/api/TransitView/index.php?route=G1"
+SEPTA_STOPS_API = "https://www3.septa.org/api/Stops/?req1=G1"
 TROLLEY_IMAGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACYAAAAMCAYAAAAOCs/+AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAJqADAAQAAAABAAAADAAAAAAPgxf+AAAA30lEQVQ4EWNkQAJXr179D+Nqa2szwtgDQWO1fDA4EMVhkyZNgofYQIRSXl4e3D1gxkA7CDkQYI5jvLS5meRQunXzOrJZDGrqmih8UjnI5j1jswBrZwGRkzY+BHPy/OWJYoMVoxGkmoGsHtkoB8WPYC4TsuBgYjNuFWcgOSo3/gQHNNwf/ux/4GxyGMjmwcxiZClkJNlh/++gWs+ogsonlYdsHsysQRuVqHEC9eqffkgg6uvrwz1/8eJFMBsYwgwwX8El8TAImQXSis08FqBGeKGGZD7O6MWhHkkrBpMsswAM9VlIRGdcdwAAAABJRU5ErkJggg==")
 
+def get_stop_name_by_id(stop_id):
+    """Look up stop name by ID using SEPTA stops API
+    
+    Args:
+      stop_id: The stop ID to look up
+      
+    Returns:
+      The stop name if found, None otherwise
+    """
+    if stop_id == None:
+        return None
+    r = http.get(SEPTA_STOPS_API, ttl_seconds = 300)
+    stops = r.json()
+    for stop in stops:
+        if stop.get("stopid") == str(stop_id):
+            return stop.get("stopname")
+    return None
+
 def get_route_15():
+    """Get trolley information for Route 15 (G1) using next_stop_id
+    
+    Returns:
+      List of trolley render objects
+    """
     trolley_ids = ["2320", "2321", "2322", "2323", "2324", "2325", "2326", "2327", "2328", "2329", "2330", "2331", "2332", "2333", "2334", "2335", "2336", "2337"]
     trolleys_found = []
     r = http.get(SEPTA_API, ttl_seconds = 300)
@@ -21,10 +45,21 @@ def get_route_15():
         id = i.get("VehicleID")
         if id not in trolley_ids:
             continue
-        if i.get("next_stop_name") == None:
+        next_stop_id = i.get("next_stop_id")
+        if next_stop_id == None:
             continue
-        string = "Now" if i.get("Direction") == "N/A" else i.get("Direction")
-        string += " at " + i.get("next_stop_name").replace("& ", "&\n")
+        stop_name = get_stop_name_by_id(next_stop_id)
+        if stop_name == None:
+            continue
+        destination = i.get("destination")
+        if destination == "63rd-Girard":
+            direction = "Westbound"
+        elif destination == "Richmond-Westmoreland":
+            direction = "Eastbound"
+        else:
+            direction = "Now"
+        string = direction
+        string += " at " + stop_name.replace("& ", "&\n")
         output = render.Column(
             children = [
                 render.Row(
