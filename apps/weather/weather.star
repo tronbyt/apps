@@ -622,6 +622,7 @@ def render_weather(daily_data, lang, scale = 1):
     DIVIDER_WIDTH = scale
     TOTAL_WIDTH = (DAY_WIDTH * 3) + (DIVIDER_WIDTH * 2)
     HEIGHT = 32 * scale
+    SUFFIX = "°" if scale == 2 else ""
 
     # Create columns first
     columns = []
@@ -650,13 +651,13 @@ def render_weather(daily_data, lang, scale = 1):
                 ),
                 # High temp
                 render.Text(
-                    "%d" % ((day["high"] * 10 + 5) // 10),
+                    "%d" % ((day["high"] * 10 + 5) // 10) + SUFFIX,
                     font = "CG-pixel-4x5-mono" if scale == 1 else "terminus-12",
                     color = "#FFF",
                 ),
                 # Low temp
                 render.Text(
-                    "%d" % ((day["low"] * 10 + 5) // 10),
+                    "%d" % ((day["low"] * 10 + 5) // 10) + SUFFIX,
                     font = "CG-pixel-4x5-mono" if scale == 1 else "terminus-12",
                     color = "#FFF",
                 ),
