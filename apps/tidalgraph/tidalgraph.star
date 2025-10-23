@@ -23,6 +23,10 @@ TIMEZONE_MAP = {
 
 def main(config):
     station_id = config.get("stationid") or config.get("station")
+
+    if station_id == None:
+        return station_not_found(station_id)
+
     station_timezone = get_station_timezone(station_id)
 
     if station_timezone == None:
