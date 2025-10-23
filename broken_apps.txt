@@ -5,5 +5,5 @@ hubble_live.star
 olympic_medals.star
 netflix_top_10.star
 pollen_count.star
+spinbyt.star
 spotthestation.star
-
