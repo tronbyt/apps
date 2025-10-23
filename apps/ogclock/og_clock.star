@@ -295,10 +295,11 @@ def main(config):
         station_url = get_nws_observation_station(latitude, longitude, 3600)
         observation_data = get_nws_latest_observation(station_url, 300)
         
-        properties = observation_data["properties"]
+        properties = observation_data.get("properties", {})
         
         # Get temperature - NWS observations use Celsius by default
-        temp_celsius = properties["temperature"]["value"]
+        temp_data = properties.get("temperature", {})
+        temp_celsius = temp_data.get("value") if temp_data else None
         if temp_celsius != None:
             if display_metric:
                 result_current_conditions["temp"] = int(temp_celsius)
@@ -308,14 +309,17 @@ def main(config):
             result_current_conditions["temp"] = "?"
         
         # Get humidity
-        humidity_value = properties["relativeHumidity"]["value"]
+        humidity_data = properties.get("relativeHumidity", {})
+        humidity_value = humidity_data.get("value") if humidity_data else None
         if humidity_value != None:
             result_current_conditions["humidity"] = int(humidity_value)
         else:
             result_current_conditions["humidity"] = "?"
         
         # Determine icon based on text description and time of day
-        text_description = properties.get("textDescription", "").lower() if properties.get("textDescription") else ""
+        text_description = properties.get("textDescription", "")
+        if text_description:
+            text_description = text_description.lower()
         
         # Check if it's daytime (simple check - can be improved)
         current_hour = now.hour
