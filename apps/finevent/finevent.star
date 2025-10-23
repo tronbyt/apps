@@ -428,13 +428,20 @@ def main(config):
 
         if len(filtered_events):
             times = []
+            print("got " + str(len(filtered_events)) + " events")
             for event in filtered_events:
                 times.append(time.parse_time(event.get("Date", ""), format = DATEFMT).in_location(timezone))
-            next_release = abs(max([int((now - t).seconds) for t in times if t > now]))
-            print("Caching %s results as %s until next release in %s seconds" % (len(filtered_events), cache_id, next_release))
+            future_times = [int((now - t).seconds) for t in times if t > now]
+            if future_times:
+                next_release = abs(max(future_times))
+                print("Caching %s results as %s until next release in %s seconds" % (len(filtered_events), cache_id, next_release))
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(filtered_events), ttl_seconds = next_release)
+                # TODO: Determine if this cache call can be converted to the new HTTP cache.
+                cache.set(cache_id, json.encode(filtered_events), ttl_seconds = next_release)
+            else:
+                print("No future events found, caching for 1 hour")
+                # TODO: Determine if this cache call can be converted to the new HTTP cache.
+                cache.set(cache_id, json.encode(filtered_events), ttl_seconds = 3600)
     else:
         print("Displaying cached data from %s" % cache_id)
         filtered_events = json.decode(data)
