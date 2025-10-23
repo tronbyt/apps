@@ -26,8 +26,9 @@ DEFAULT_LOCATION = """
 """
 
 # Weather API URLs from Time & Weather
-NWS_GRID_FORECAST_POINT_URL = "https://api.weather.gov/points/{latitude},{longitude}"
-NWS_HOURLY_GRID_FORECAST_URL = "https://api.weather.gov/gridpoints/BOX/{gridX},{gridY}/forecast/hourly"
+NWS_POINTS_URL = "https://api.weather.gov/points/{latitude},{longitude}"
+NWS_STATIONS_URL = "https://api.weather.gov/gridpoints/{grid_id}/{grid_x},{grid_y}/stations"
+NWS_LATEST_OBSERVATION_URL = "{station_url}/observations/latest"
 OPENWEATHER_CURRWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units={units}&lang=en"
 OPENWEATHER_AIR_POLLUTION_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat={latitude}&lon={longitude}&appid={api_key}"
 OPENWEATHER_ONECALL_URL = "https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&exclude=minutely,hourly,daily,alerts&appid={api_key}&units={units}&lang=en"
@@ -89,14 +90,45 @@ iVBORw0KGgoAAAANSUhEUgAAAA4AAAASCAYAAABrXO8xAAAAzUlEQVR42mJgIBMw4pJYd+1jAZCyB+LE
 """
 
 # Weather API functions from Time & Weather
-def get_nws_hourly_grid_forecast_url(lat, lon, ttl = 3600):
-    res = http.get(NWS_GRID_FORECAST_POINT_URL.format(
+def get_nws_observation_station(lat, lon, ttl = 3600):
+    # Get the grid point data
+    res = http.get(NWS_POINTS_URL.format(
         latitude = lat,
         longitude = lon,
     ), ttl_seconds = ttl)
     if res.status_code != 200:
-        fail("Could not obtain the grid forecast for a point location.", res.status_code)
-    return res.json()["properties"]["forecastHourly"]
+        fail("Could not obtain the grid point data.", res.status_code)
+    
+    properties = res.json()["properties"]
+    grid_id = properties["gridId"]
+    grid_x = properties["gridX"]
+    grid_y = properties["gridY"]
+    
+    # Get the stations list from the gridpoint
+    stations_url = NWS_STATIONS_URL.format(
+        grid_id = grid_id,
+        grid_x = grid_x,
+        grid_y = grid_y,
+    )
+    stations_res = http.get(stations_url, ttl_seconds = ttl)
+    if stations_res.status_code != 200:
+        fail("Could not obtain stations list.", stations_res.status_code)
+    
+    # Get the first station from the observationStations list
+    observation_stations = stations_res.json()["observationStations"]
+    if len(observation_stations) == 0:
+        fail("No observation stations found for this location.")
+    
+    first_station = observation_stations[0]
+    return first_station
+
+def get_nws_latest_observation(station_url, ttl = 300):
+    # Call the station's latest observation endpoint
+    latest_url = NWS_LATEST_OBSERVATION_URL.format(station_url = station_url)
+    res = http.get(latest_url, ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Could not obtain latest observation.", res.status_code)
+    return res.json()
 
 def get_current_weather_conditions(url, ttl):
     res = http.get(url, ttl_seconds = ttl)
@@ -260,33 +292,59 @@ def main(config):
         result_current_conditions["temp"] = 14 if display_metric else 57
         result_current_conditions["humidity"] = 50
     elif api_service == "National Weather Service (NWS)":
-        hourly_forecast_url = get_nws_hourly_grid_forecast_url(latitude, longitude, 3600)
-        raw_current_conditions = get_current_weather_conditions(hourly_forecast_url, 300)["properties"]["periods"][0]
-
-        result_current_conditions["icon"] = {"condition": str(raw_current_conditions["shortForecast"]).lower(), "daytime": raw_current_conditions["isDaytime"]}
-        temperature = int(raw_current_conditions["temperature"])
-        result_current_conditions["temp"] = int(temperature if raw_current_conditions["temperatureUnit"] == "F" and not (display_metric) else ((temperature - 32) * (5 / 9)))
-
-        icon_phrase = result_current_conditions["icon"]["condition"]
-        is_daytime = result_current_conditions["icon"]["daytime"]
-        if (icon_phrase == "sunny" or "fair" in icon_phrase or "clear" in icon_phrase) and is_daytime:
-            icon_ref = "sunny.png"
-        elif ("mostly sunny" in icon_phrase or "partly sunny" in icon_phrase or "few clouds" in icon_phrase or "partly cloudy" in icon_phrase) and is_daytime:
-            icon_ref = "sunnyish.png"
-        elif icon_phrase == "cloudy" or "mostly cloudy" in icon_phrase or "overcast" in icon_phrase:
-            icon_ref = "cloudy.png"
-        elif "rain" in icon_phrase:
-            icon_ref = "rainy.png"
-        elif "thunderstorm" in icon_phrase:
-            icon_ref = "thundery.png"
-        elif "snow" in icon_phrase:
-            icon_ref = "snowy2.png"
-        elif ("fair" in icon_phrase or "clear" in icon_phrase) and not (is_daytime):
-            icon_ref = "moony.png"
-        elif ("few clouds" in icon_phrase or "partly cloudy" in icon_phrase) and not (is_daytime):
-            icon_ref = "moonyish.png"
-
-        result_current_conditions["humidity"] = int(raw_current_conditions["relativeHumidity"]["value"])
+        station_url = get_nws_observation_station(latitude, longitude, 3600)
+        observation_data = get_nws_latest_observation(station_url, 300)
+        
+        properties = observation_data["properties"]
+        
+        # Get temperature - NWS observations use Celsius by default
+        temp_celsius = properties["temperature"]["value"]
+        if temp_celsius != None:
+            if display_metric:
+                result_current_conditions["temp"] = int(temp_celsius)
+            else:
+                result_current_conditions["temp"] = int((temp_celsius * 9.0 / 5.0) + 32)
+        else:
+            result_current_conditions["temp"] = "?"
+        
+        # Get humidity
+        humidity_value = properties["relativeHumidity"]["value"]
+        if humidity_value != None:
+            result_current_conditions["humidity"] = int(humidity_value)
+        else:
+            result_current_conditions["humidity"] = "?"
+        
+        # Determine icon based on text description and time of day
+        text_description = properties.get("textDescription", "").lower() if properties.get("textDescription") else ""
+        
+        # Check if it's daytime (simple check - can be improved)
+        current_hour = now.hour
+        is_daytime = current_hour >= 6 and current_hour < 19
+        
+        # Icon mapping based on text description
+        if text_description:
+            if ("clear" in text_description or "fair" in text_description) and is_daytime:
+                icon_ref = "sunny.png"
+            elif ("mostly clear" in text_description or "partly cloudy" in text_description or "few clouds" in text_description) and is_daytime:
+                icon_ref = "sunnyish.png"
+            elif "cloudy" in text_description or "overcast" in text_description:
+                icon_ref = "cloudy.png"
+            elif "rain" in text_description or "drizzle" in text_description:
+                icon_ref = "rainy.png"
+            elif "thunder" in text_description or "storm" in text_description:
+                icon_ref = "thundery.png"
+            elif "snow" in text_description:
+                icon_ref = "snowy2.png"
+            elif "fog" in text_description or "mist" in text_description:
+                icon_ref = "foggy.png"
+            elif ("clear" in text_description or "fair" in text_description) and not is_daytime:
+                icon_ref = "moony.png"
+            elif ("mostly clear" in text_description or "partly cloudy" in text_description) and not is_daytime:
+                icon_ref = "moonyish.png"
+            else:
+                icon_ref = "cloudy.png"  # default
+        else:
+            icon_ref = "cloudy.png"  # default if no description
 
     elif api_service == "OpenWeather":
         request_url = OPENWEATHER_CURRWEATHER_URL.format(
@@ -361,8 +419,10 @@ def main(config):
         weather_image = render.Box(width = 16, height = 16)
 
     # Temperature and humidity display
+    show_unit = config.bool("show_temp_unit", True)
+    temp_unit = ("C" if display_metric else "F") if show_unit else ""
     temp_text = render.Text(
-        content = str(result_current_conditions.get("temp", "?")) + "°" + ("C" if display_metric else "F"),
+        content = str(result_current_conditions.get("temp", "?")) + "°" + temp_unit,
         font = "5x8",
         color = temp_color,
     )
@@ -504,6 +564,13 @@ def get_schema():
                 desc = "Color for temperature display",
                 icon = "brush",
                 default = TEMP_COLOR_DEFAULT,
+            ),
+            schema.Toggle(
+                id = "show_temp_unit",
+                name = "Show temperature unit",
+                desc = "Display C or F after temperature",
+                icon = "thermometer",
+                default = True,
             ),
             schema.Toggle(
                 id = "blink",
