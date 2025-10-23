@@ -10,6 +10,7 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 production = True
 debug = False  #  debug mode will not hit network apis
@@ -38,7 +39,7 @@ def get_stations(location):  # assume we have a valid location json string
     url = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/tidepredstations.json?lat=%s&lon=%s&radius=50" % (humanize.float("#.##", float(location["lat"])), humanize.float("#.##", float(location["lng"])))
     debug_print(url)
     if not debug:
-        req_result = http.get(url)
+        req_result = http.get(url, ttl_seconds = 14400)
         if req_result.status_code == 200:
             stations_json = req_result.body()
     else:
@@ -306,6 +307,7 @@ def main(config):
         if tides_graph == None or "predictions" not in tides_graph:
             tides_graph = tides_hilo
         x = 0
+        total_points = len(tides_graph["predictions"])
         for height_at_time in tides_graph["predictions"]:
             points.append((x, float(height_at_time["v"])))
             x = x + 1
@@ -342,7 +344,77 @@ def main(config):
     root_children = [main_text]
 
     if config.bool("display_graph") and len(points) > 0:  # panic if we try to render an empty graph object
-        root_children = [data_graph, main_text]
+        # Calculate current time position on the graph (graph x-axis is 0-64 pixels for 24 hours)
+        current_time_x = None
+        if tides_graph != None and "predictions" in tides_graph and len(tides_graph["predictions"]) > 0:
+            # Get current time in local timezone (NOAA returns times in local station time)
+            current_time = time.now()
+
+            # Calculate current time as hours since midnight (0-24)
+            current_hour = float(current_time.hour) + float(current_time.minute) / 60.0
+
+            # Find the corresponding point in our data - use the SAME x-coordinate system as the graph
+            # The data points are indexed 0 to total_points-1
+            point_index = int((current_hour / 24.0) * (total_points - 1))
+            point_time_x = 0
+            point_time_y = 0
+            if point_index >= 0 and point_index < len(points):
+                point_time_x = points[point_index][0]
+                point_time_y = points[point_index][1]
+            else:
+                point_time_x = 0
+                point_time_y = 0
+
+            # Use the same x-coordinate as the graph data points
+            current_time_x = point_time_x
+            current_tide_height = point_time_y
+
+        # Create time indicator if we have a valid position
+        if current_time_x != None and current_time_x > 0:
+            # Calculate pixel position for the dot
+            # Map from data coordinates to pixel coordinates
+            pixel_x = int((current_time_x / (total_points - 1)) * 64)
+
+            # Map y from data coordinates to pixel coordinates (inverted because y=0 is top)
+            y_range = (y_lim_max if y_lim_max else 15) - (y_lim_min if y_lim_min else -5)
+            y_normalized = (current_tide_height - (y_lim_min if y_lim_min else -5)) / y_range
+            pixel_y = int((1 - y_normalized) * 32)  # inverted: 0 is top, 32 is bottom
+
+            # Create a small cross shape using Padding to position it
+            dot = render.Stack(
+                children = [
+                    data_graph,
+                    # Center pixel
+                    render.Padding(
+                        pad = (pixel_x, pixel_y, 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color_label),
+                    ),
+                    # Left pixel
+                    render.Padding(
+                        pad = (pixel_x - 1, pixel_y, 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color_label),
+                    ),
+                    # Right pixel
+                    render.Padding(
+                        pad = (pixel_x + 1, pixel_y, 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color_label),
+                    ),
+                    # Top pixel
+                    render.Padding(
+                        pad = (pixel_x, pixel_y - 1, 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color_label),
+                    ),
+                    # Bottom pixel
+                    render.Padding(
+                        pad = (pixel_x, pixel_y + 1, 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color_label),
+                    ),
+                    main_text,
+                ],
+            )
+            root_children = [dot]
+        else:
+            root_children = [data_graph, main_text]
 
     return render.Root(
         render.Stack(
