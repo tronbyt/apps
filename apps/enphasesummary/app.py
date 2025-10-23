@@ -114,13 +114,30 @@ def get_solar_data():
             summary = cache_store["hourly_data"]["summary"]
             day_prod = cache_store["hourly_data"]["day_prod"]
             day_cons = cache_store["hourly_data"]["day_cons"]
+            timezone_str = summary.get("timezone", "America/New_York")
         else:
             print("Fetching fresh summary and today's consumption data...")
             summary = call_enphase_api(f"systems/{SYSTEM_ID}/summary")
             day_prod = summary.get("energy_today", 0)
             
+            # Get timezone first, before fetching consumption
+            timezone_str = summary.get("timezone", "America/New_York")
+            print(f"System timezone: {timezone_str}")
+            
+            # Get current time in system's timezone
+            try:
+                tz = pytz.timezone(timezone_str)
+                now_local = datetime.now(tz)
+                today_str = now_local.strftime("%Y-%m-%d")
+                print(f"Current time in {timezone_str}: {now_local.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+                print(f"Fetching consumption for date: {today_str}")
+            except Exception as e:
+                # Fallback to UTC if timezone not recognized
+                print(f"Could not parse timezone {timezone_str}: {e}, using UTC")
+                now_local = datetime.utcnow()
+                today_str = now_local.strftime("%Y-%m-%d")
+            
             # Get today's consumption from telemetry endpoint
-            today_str = now_local.strftime("%Y-%m-%d") if 'now_local' in locals() else now.strftime("%Y-%m-%d")
             try:
                 cons_telemetry = call_enphase_api(
                     f"systems/{SYSTEM_ID}/telemetry/consumption_meter",
@@ -150,15 +167,11 @@ def get_solar_data():
             }
             cache_store["hourly_timestamp"] = time.time()
         
-        timezone_str = summary.get("timezone", "America/New_York")
-        print(f"System timezone: {timezone_str}")
-        
         # Get current time in system's timezone for date change detection
         try:
             tz = pytz.timezone(timezone_str)
             now_local = datetime.now(tz)
             current_date_local = now_local.date()
-            print(f"Current time in {timezone_str}: {now_local.strftime('%Y-%m-%d %H:%M:%S %Z')}")
         except Exception as e:
             # Fallback to UTC if timezone not recognized
             print(f"Could not parse timezone {timezone_str}: {e}, using UTC")
@@ -221,6 +234,12 @@ def get_solar_data():
         year_cons = sum(v for i, v in enumerate(cons_data) if v and year_start <= (cons_start_date + timedelta(days=i)) < today)
         week_cons = sum(v for i, v in enumerate(cons_data) if v and week_start <= (cons_start_date + timedelta(days=i)) < today)
         lifetime_cons = sum(v for v in cons_data if v)
+        
+        # Add today's consumption to periods
+        month_cons += day_cons
+        year_cons += day_cons
+        week_cons += day_cons
+        lifetime_cons += day_cons
         
         result = {
             "timezone": timezone_str,
