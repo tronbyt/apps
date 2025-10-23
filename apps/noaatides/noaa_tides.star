@@ -376,8 +376,11 @@ def main(config):
             pixel_x = int((current_time_x / (total_points - 1)) * 64)
 
             # Map y from data coordinates to pixel coordinates (inverted because y=0 is top)
-            y_range = (y_lim_max if y_lim_max else 15) - (y_lim_min if y_lim_min else -5)
-            y_normalized = (current_tide_height - (y_lim_min if y_lim_min else -5)) / y_range
+            # Use the actual y_lim values being used by the graph
+            actual_y_min = y_lim_min
+            actual_y_max = y_lim_max if y_lim_max else max([p[1] for p in points])
+            y_range = actual_y_max - actual_y_min
+            y_normalized = (current_tide_height - actual_y_min) / y_range if y_range > 0 else 0
             pixel_y = int((1 - y_normalized) * 32)  # inverted: 0 is top, 32 is bottom
 
             # Create a small cross shape using Padding to position it
