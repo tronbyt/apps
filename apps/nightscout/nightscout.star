@@ -71,6 +71,7 @@ DEFAULT_HIGH_BG_COLOR = COLOR_YELLOW
 DEFAULT_LOW_BG_COLOR = COLOR_YELLOW
 DEFAULT_URGENT_HIGH_COLOR = COLOR_RED
 DEFAULT_URGENT_LOW_COLOR = COLOR_RED
+DEFAULT_TIME_AGO_COLOR = COLOR_GREY
 DEFAULT_SHOW_24_HOUR_TIME = False
 DEFAULT_NIGHT_MODE = False
 GRAPH_BOTTOM = 40
@@ -129,6 +130,7 @@ def main(config):
     urgent_high_color = config.get("urgent_high_color", DEFAULT_URGENT_HIGH_COLOR)
     urgent_low_color = config.get("urgent_low_color", DEFAULT_URGENT_LOW_COLOR)
     night_color = config.get("night_color", DEFAULT_NIGHT_COLOR)
+    time_ago_color = config.get("time_ago_color", DEFAULT_TIME_AGO_COLOR)
     show_24_hour_time = config.bool("show_24_hour_time", DEFAULT_SHOW_24_HOUR_TIME)
     night_mode = config.bool("night_mode", DEFAULT_NIGHT_MODE)
     nightscout_iob = "n/a"
@@ -279,7 +281,7 @@ def main(config):
     color_reading = COLOR_YELLOW
     color_delta = COLOR_YELLOW
     color_arrow = COLOR_YELLOW
-    color_ago = COLOR_GREY
+    color_ago = time_ago_color
     color_graph_urgent_high = urgent_high_color
     color_graph_high = high_color
     color_graph_normal = in_range_color
@@ -296,12 +298,11 @@ def main(config):
     sm_clock_row = []
     if (reading_mins_ago > 5):
         # The information is stale (i.e. over 5 minutes old) - overrides everything.
-        color_reading = COLOR_GREY
-        color_delta = COLOR_GREY
-        color_arrow = COLOR_GREY
-        color_ago = COLOR_GREY
-        color_iob = COLOR_GREY
-        color_cob = COLOR_GREY
+        color_reading = color_ago
+        color_delta = color_ago
+        color_arrow = color_ago
+        color_iob = color_ago
+        color_cob = color_ago
         direction = "None"
         str_delta = human_reading_ago
         ago_dashes = ">" + str(reading_mins_ago)
@@ -1133,6 +1134,14 @@ def display_unit_options(display_unit):
             desc = "Color of readings when BG is Below the Urgent Low Threshold",
             icon = "brush",
             default = DEFAULT_URGENT_LOW_COLOR,
+            palette = PALETTE,
+        ),
+        schema.Color(
+            id = "time_ago_color",
+            name = "Dashes/time ago color",
+            desc = "Color of the dashes and time ago message.",
+            icon = "brush",
+            default = DEFAULT_TIME_AGO_COLOR,
             palette = PALETTE,
         ),
     ]
