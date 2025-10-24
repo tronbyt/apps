@@ -141,10 +141,10 @@ def render_single_day(daily_data, lang, scale = 1):
 
     # TIMING CALCULATIONS
     slide_start_seconds = 2
-    delay_ms = 100
+    delay_ms = int(100 / scale)
     static_frames_before = int(slide_start_seconds * 1000 / delay_ms)
     slide_distance = int(64 * slide_percentage / 100) * scale
-    static_frames_after = 100
+    static_frames_after = 100 * scale
 
     # Animation parameters
     today_width_start = 63 * scale
@@ -155,13 +155,13 @@ def render_single_day(daily_data, lang, scale = 1):
     # STUTTER ANIMATION PARAMETERS
     stutter_distance = 3 * scale  # How far to move in first step
     stutter_width_change = 3 * scale  # How much today_width shrinks in first step
-    stutter_frames = 3  # How many frames for the initial stutter movement
-    stutter_pause_frames = 6  # How long to pause after stutter (0.5 seconds)
-    finish_frames = 7  # How many frames to complete the rest
+    stutter_frames = 3 * scale  # How many frames for the initial stutter movement
+    stutter_pause_frames = 6 * scale # How long to pause after stutter (0.5 seconds)
+    finish_frames = 7 * scale # How many frames to complete the rest
 
     # BACKGROUND ANIMATION PARAMETERS (moves faster)
-    bg_stutter_frames = 2  # Background moves faster in stutter
-    bg_finish_frames = 5  # Background finishes faster
+    bg_stutter_frames = 2 * scale  # Background moves faster in stutter
+    bg_finish_frames = 5 * scale  # Background finishes faster
 
     return render.Root(
         delay = delay_ms,
