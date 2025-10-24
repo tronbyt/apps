@@ -7,7 +7,6 @@ For support, join the Nightscout for Tidbyt Facebook group.
 Authors: Paul Murphy, Jason Hanson, Jeremy Tavener
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
@@ -76,7 +75,7 @@ DEFAULT_SHOW_24_HOUR_TIME = False
 DEFAULT_NIGHT_MODE = False
 GRAPH_BOTTOM = 40
 
-CACHE_TTL_SECONDS = 1800  #30 mins
+CACHE_TTL_SECONDS = 10
 
 DEFAULT_LOCATION = """
 {
@@ -1296,7 +1295,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     print(json_url)
 
     # Request latest properties from the Nightscout URL
-    resp = http.get(json_url, headers = headers)
+    resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
     print("resp.status_code:", resp.status_code)
     if resp.status_code != 200:
         # Fall back to v1
@@ -1376,20 +1375,10 @@ def get_nightscout_history(nightscout_url, nightscout_token):
 
     print(json_url)
 
-    key = nightscout_url + "_nightscout_data"
-
     # Request latest entries from the Nightscout URL
-    resp = http.get(json_url, headers = headers)
+    resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
     if resp.status_code != 200:
-        # If Error, Get the JSON object from the cache
-        nightscout_data_cached = cache.get(key)
-        if nightscout_data_cached != None:
-            print("NS Error - displaying cached data")
-            return json.decode(nightscout_data_cached), 0
-
-        # If it's not in the cache, return the NS error.
         print("NS Error - Display Error")
-
         return {}, resp.status_code
 
     history = []
@@ -1413,10 +1402,8 @@ def get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit):
 
     print(json_url)
 
-    key = nightscout_url + "_nightscout_data"
-
     # Request latest entries from the Nightscout URL
-    resp = http.get(json_url, headers = headers)
+    resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
     if resp.status_code != 200:
         return {}, resp.status_code
 
@@ -1453,9 +1440,6 @@ def get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit):
         "iob": "n/a",
         "cob": "n/a",
     }
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, json.encode(nightscout_data), ttl_seconds = CACHE_TTL_SECONDS)
 
     return nightscout_data, resp.status_code
 
