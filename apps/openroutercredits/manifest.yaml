@@ -1,0 +1,9 @@
+---
+id: openrouter-credits
+name: OpenRouter Creds
+summary: OpenRouter Credits
+desc: Shows remaining credits available on OpenRouter API.
+author: tavdog
+fileName: openrouter_credits.star
+packageName: openroutercredits
+recommended_interval: 300
