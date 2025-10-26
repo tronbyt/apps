@@ -62,6 +62,7 @@ def main(config):
 
     # Create the display
     return render.Root(
+        show_full_animation = True,
         child = create_display(station, artist, title, album_art, station_key),
     )
 
