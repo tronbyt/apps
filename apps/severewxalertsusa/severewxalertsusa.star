@@ -27,6 +27,7 @@ WARNING_IMG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXN
 
 ## run the main applications
 def main(config):
+    scale = 2 if config.bool("$2x") else 1
     jsonLocation = json.decode(config.str("location") or DEFAULT_LOCATION)  ## set the location from the schema data or use the default
     if "locality" not in jsonLocation:
         jsonLocation["locality"] = config.str("display_name") or jsonLocation.get("name","")[0:13]
@@ -41,17 +42,17 @@ def main(config):
 
     ## if found, render summary frame
     if (foundAlerts):  ## render the summary card and then each card
-        columnFrames.append(render_summary_card_for_alerts(jsonLocation, foundAlerts))
+        columnFrames.append(render_summary_card_for_alerts(jsonLocation, foundAlerts, scale))
 
         alertCounter = 0  ## this...could have been done differently
 
         for alert in alerts:
             alertCounter += 1
-            columnFrames.append(render_alert(alert, alertCounter, foundAlerts))
+            columnFrames.append(render_alert(alert, alertCounter, foundAlerts, scale))
     elif config.bool("alert_only", False):  ## no alerts, hide app
         return []
     else:  ## no alerts, show the green no alerts screen
-        columnFrames.append(render_summary_card_zero_alerts(jsonLocation))
+        columnFrames.append(render_summary_card_zero_alerts(jsonLocation, scale))
 
     return render.Root(
         delay = 5000,
@@ -129,7 +130,7 @@ def get_alerts(lat, long):
         return alerts
 
 ## Render the alert frame
-def render_alert(alert, alertIndex, totalAlerts):
+def render_alert(alert, alertIndex, totalAlerts, scale = 1):
     ## Master column.
     column = []
 
@@ -137,11 +138,11 @@ def render_alert(alert, alertIndex, totalAlerts):
     alertCountRenderText = render.Text(
         content = "WX ALERT " + str(alertIndex) + "/" + str(totalAlerts),
         color = "#FFFF00",
-        font = "CG-pixel-3x5-mono",  # tiny
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",  # tiny
     )
     alertCountRenderBox = render.Box(
         child = alertCountRenderText,
-        height = 5,
+        height = 5 if scale == 1 else 11,
     )
     alertCounterRenderRow = render.Row(
         children = [alertCountRenderBox],
@@ -157,13 +158,13 @@ def render_alert(alert, alertIndex, totalAlerts):
     if (alert["properties"]["severity"] == "Moderate" or alert["properties"]["severity"] == "Minor"):
         circle = render.Image(
             src = EXCLAMATIONPOINT_IMG,
-            height = 16,
-            width = 16,
+            height = 16 * scale,
+            width = 16 * scale,
         )
         box = render.Box(
             child = circle,
-            width = 16,
-            height = 22,
+            width = 16 * scale,
+            height = 22 if scale == 1 else 40,
         )
         titleRowWidgets.append(box)
 
@@ -171,13 +172,13 @@ def render_alert(alert, alertIndex, totalAlerts):
     elif ((alert["properties"]["severity"] == "Severe" or alert["properties"]["severity"] == "Extreme")):
         circle = render.Image(
             src = WARNING_IMG,
-            height = 16,
-            width = 16,
+            height = 16 * scale,
+            width = 16 * scale,
         )
         box = render.Box(
             child = circle,
-            width = 16,
-            height = 22,
+            width = 16 * scale,
+            height = 22 if scale == 1 else 40,
         )
         titleRowWidgets.append(box)
 
@@ -187,15 +188,15 @@ def render_alert(alert, alertIndex, totalAlerts):
     mainAlertTextWrappedWidget = render.WrappedText(
         content = mainAlertText.upper(),
         align = "center",
-        font = "CG-pixel-4x5-mono",  # tiny
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-14",  # tiny
         color = "#FF0000",  # red
-        linespacing = 1,
+        linespacing = 1 if scale == 1 else -1,
     )
 
     mainAlertTextWrappedWidget = render.Box(
         child = mainAlertTextWrappedWidget,
-        height = 22,
-        width = 48,
+        height = 22 if scale == 1 else 40,
+        width = 48 * scale,
     )
     titleRowWidgets.append(mainAlertTextWrappedWidget)
 
@@ -213,7 +214,7 @@ def render_alert(alert, alertIndex, totalAlerts):
     ## see https://github.com/weather-gov/api/discussions/385#discussioncomment-592840
 
     if (alert["properties"]["ends"] == None):
-        untilText = "ongoing"
+        untilText = "ONGOING"
     else:
         alertExpirationTime = time.parse_time(alert["properties"]["ends"])
         untilText = "End: " + alertExpirationTime.format("15:04 Mon")  ## format date
@@ -221,11 +222,11 @@ def render_alert(alert, alertIndex, totalAlerts):
     alertRenderText = render.WrappedText(
         untilText,
         align = "center",
-        font = "CG-pixel-3x5-mono",  ## make it small
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",  ## make it small
     )
     alertRenderBox = render.Box(
         child = alertRenderText,
-        height = 5,
+        height = 5 if scale == 1 else 11,
     )
     alertRow = render.Row(
         children = [alertRenderBox],
@@ -241,7 +242,7 @@ def render_alert(alert, alertIndex, totalAlerts):
         main_align = "center",
     )
 
-def render_summary_card_for_alerts(location, alerts):
+def render_summary_card_for_alerts(location, alerts, scale = 1):
     # master column list
     master_column = []
 
@@ -249,11 +250,11 @@ def render_summary_card_for_alerts(location, alerts):
     titleText = render.Text(
         content = "WEATHER ALERTS",
         color = "#FFFF00",
-        font = "CG-pixel-3x5-mono",  # tiny
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",  # tiny
     )
     titleBox = render.Box(
         child = titleText,
-        height = 5,
+        height = 5 if scale == 1 else 11,
     )
     titleRow = render.Row(
         children = [titleBox],
@@ -272,11 +273,11 @@ def render_summary_card_for_alerts(location, alerts):
     alertsText = render.Text(
         content = str(alerts) + alertsCountString,
         color = "#FFFF00",
-        font = "6x13",
+        font = "6x13" if scale == 1 else "terminus-24",
     )
     alertsBox = render.Box(
         child = alertsText,
-        height = 16,
+        height = 16 * scale,
     )
 
     alertsRow = render.Row(
@@ -292,12 +293,12 @@ def render_summary_card_for_alerts(location, alerts):
     locationText = render.WrappedText(
         content = location["locality"][0:16],
         align = "center",
-        font = "CG-pixel-3x5-mono",  # tiny
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-14-light",  # tiny
         linespacing = 1,
     )
     locationBox = render.Box(
         child = locationText,
-        height = 11,
+        height = 11 * scale,
     )
     locationRow = render.Row(
         children = [locationBox],
@@ -309,7 +310,7 @@ def render_summary_card_for_alerts(location, alerts):
 
     return render.Column(master_column)
 
-def render_summary_card_zero_alerts(location):
+def render_summary_card_zero_alerts(location, scale = 1):
     # master column list
     master_column = []
 
@@ -317,11 +318,11 @@ def render_summary_card_zero_alerts(location):
     titleText = render.Text(
         content = "WEATHER ALERTS",
         color = "#FFFF00",
-        font = "CG-pixel-3x5-mono",  # tiny
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",  # tiny
     )
     titleBox = render.Box(
         child = titleText,
-        height = 5,
+        height = 5 if scale == 1 else 11,
     )
     titleRow = render.Row(
         children = [titleBox],
@@ -335,12 +336,12 @@ def render_summary_card_zero_alerts(location):
     alertsText = render.Text(
         content = "No Alerts",
         color = "#00FF00",
-        font = "6x13",
+        font = "6x13" if scale == 1 else "terminus-24",
     )
 
     alertsBox = render.Box(
         child = alertsText,
-        height = 17,
+        height = 17 if scale == 1 else 32,
     )
 
     alertsRow = render.Row(
@@ -355,11 +356,11 @@ def render_summary_card_zero_alerts(location):
     locationText = render.WrappedText(
         content = location["locality"],
         align = "center",
-        font = "CG-pixel-3x5-mono",  # tiny
+        font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-14-light",  # tiny
     )
     locationBox = render.Box(
         child = locationText,
-        height = 10,
+        height = 10 * scale,
     )
     locationRow = render.Row(
         children = [locationBox],
