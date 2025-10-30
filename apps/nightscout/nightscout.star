@@ -261,8 +261,6 @@ def main(config):
         if (int(sgv_delta) >= 0):
             str_delta = "+" + str_delta
             print("str_delta: ", str_delta)
-        left_col_width = 28 if scale == 1 else 50
-        graph_width = 34 if scale == 1 else 74
     else:
         graph_height = int(float(config.get("mmol_graph_height", mgdl_to_mmol(DEFAULT_GRAPH_HEIGHT))) * 18)
         normal_high = int(float(config.get("mmol_normal_high", mgdl_to_mmol(DEFAULT_NORMAL_HIGH))) * 18)
@@ -279,8 +277,8 @@ def main(config):
         elif (sgv_delta > 0):
             str_delta = "+" + str_delta
 
-        left_col_width = 28 if scale == 1 else 50
-        graph_width = 34 if scale == 1 else 74
+    left_col_width = 28 if scale == 1 else 50
+    graph_width = 34 if scale == 1 else 74
 
     OLDEST_READING_TARGET = UTC_TIME_NOW - time.parse_duration(str(5 * graph_width) + "m")
 
