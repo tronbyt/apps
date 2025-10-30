@@ -6,5 +6,5 @@ desc: Displays Continuous Glucose Monitoring (CGM) blood sugar data (BG, Trend, 
 author: Paul Murphy, Jason Hanson, Jeremy Tavener
 fileName: nightscout.star
 packageName: nightscout
-recommended_interval: 5
+recommended_interval: 0
 supports2x: true
