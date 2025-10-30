@@ -30,7 +30,7 @@ def main(config):
     scale = 2 if config.bool("$2x") else 1
     jsonLocation = json.decode(config.str("location") or DEFAULT_LOCATION)  ## set the location from the schema data or use the default
     if "locality" not in jsonLocation:
-        jsonLocation["locality"] = config.str("display_name") or jsonLocation.get("name","")[0:13]
+        jsonLocation["locality"] = config.str("display_name") or jsonLocation.get("name", "")[0:13]
     alerts = get_alerts(jsonLocation["lat"], jsonLocation["lng"])  ## call for the alerts for this location
 
     foundAlerts = 0  # default alert detection to false
