@@ -266,7 +266,7 @@ def get_weather_image(forecast):
     return WEATHER_FULL_IMAGE.get(forecast, "")
 
 def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_abbr, day_top = False, scale = 1):
-    tomorrow_width = get_forecast_width(((tomorrow["high"] * 10 + 5) // 10), False) * scale if scale == 2 else 16
+    tomorrow_width = get_forecast_width(tomorrow["high"], False) * scale if scale == 2 else 16
     return render.Stack(
         children = [
             # BACKGROUND IMAGE - In final slid position
@@ -342,7 +342,7 @@ def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_
     )
 
 def render_today_forecast_column(day, day_abbr, today_width, day_top = False, scale = 1):
-    day_offset = get_day_offset(((day["high"] * 10 + 5) // 10)) * scale
+    day_offset = get_day_offset(day["high"]) * scale
     if day_top == True:
         return render.Column(
             expanded = True,
@@ -432,8 +432,8 @@ def render_today_forecast(day, day_abbr, padding, color = "#000000CC", scale = 1
     )
 
 def render_forecast(day, is_today, scale = 1):
-    forecast_width = get_forecast_width(((day["high"] * 10 + 5) // 10), is_today) * scale
-    forecast_padding = get_forecast_padding(((day["high"] * 10 + 5) // 10), is_today) * scale
+    forecast_width = get_forecast_width(day["high"], is_today) * scale
+    forecast_padding = get_forecast_padding(day["high"], is_today) * scale
     return render.Row(
         main_align = "center",
         cross_align = "start",
@@ -455,12 +455,12 @@ def render_forecast(day, is_today, scale = 1):
                                     children = [
                                         #column children
                                         render.Text(
-                                            "%d°" % ((day["high"] * 10 + 5) // 10),
+                                            "%d°" % round_temp(day["high"]),
                                             font = "tb-8" if scale == 1 else "terminus-16",
                                             color = "#FFF",
                                         ),
                                         render.Text(
-                                            "%d°" % ((day["low"] * 10 + 5) // 10),
+                                            "%d°" % round_temp(day["low"]),
                                             font = "tb-8" if scale == 1 else "terminus-16",
                                             color = "#888",
                                         ),
@@ -474,6 +474,7 @@ def render_forecast(day, is_today, scale = 1):
     )
 
 def get_forecast_padding(temp, is_today):
+    temp = round_temp(temp)
     if temp >= 100 or temp <= -10:
         return 4
     if is_today:
@@ -481,16 +482,21 @@ def get_forecast_padding(temp, is_today):
     return 0
 
 def get_day_offset(temp):
+    temp = round_temp(temp)
     if temp >= 100 or temp <= -10:
         return 38
     return 30
 
 def get_forecast_width(temp, is_today):
+    temp = round_temp(temp)
     if temp >= 100 or temp <= -10:
         return 24
     if is_today:
         return 16
     return 20
+
+def round_temp(temp):
+    return (temp * 10 + 5) // 10
 
 def process_forecast_onecall(weather_data):
     """
@@ -652,13 +658,13 @@ def render_weather(daily_data, lang, scale = 1):
                 ),
                 # High temp
                 render.Text(
-                    "%d" % ((day["high"] * 10 + 5) // 10) + SUFFIX,
+                    "%d" % round_temp(day["high"]) + SUFFIX,
                     font = "CG-pixel-4x5-mono" if scale == 1 else "terminus-12",
                     color = "#FFF",
                 ),
                 # Low temp
                 render.Text(
-                    "%d" % ((day["low"] * 10 + 5) // 10) + SUFFIX,
+                    "%d" % round_temp(day["low"]) + SUFFIX,
                     font = "CG-pixel-4x5-mono" if scale == 1 else "terminus-12",
                     color = "#FFF",
                 ),
