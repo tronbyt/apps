@@ -155,28 +155,20 @@ def render_alert(alert, alertIndex, totalAlerts, scale = 1):
     titleRowWidgets = []
 
     ## Severity Icon for moderate
-    if (alert["properties"]["severity"] == "Moderate" or alert["properties"]["severity"] == "Minor"):
-        circle = render.Image(
-            src = EXCLAMATIONPOINT_IMG,
-            height = 16 * scale,
-            width = 16 * scale,
-        )
-        box = render.Box(
-            child = circle,
-            width = 16 * scale,
-            height = 22 if scale == 1 else 40,
-        )
-        titleRowWidgets.append(box)
+    severity = alert["properties"]["severity"]
+    icon_src = None
+    if severity in ("Moderate", "Minor"):
+        icon_src = EXCLAMATIONPOINT_IMG
+    elif severity in ("Severe", "Extreme"):
+        icon_src = WARNING_IMG
 
-        ## Severity Icon for severe/extreme
-    elif ((alert["properties"]["severity"] == "Severe" or alert["properties"]["severity"] == "Extreme")):
-        circle = render.Image(
-            src = WARNING_IMG,
-            height = 16 * scale,
-            width = 16 * scale,
-        )
+    if icon_src:
         box = render.Box(
-            child = circle,
+            child = render.Image(
+                src = icon_src,
+                height = 16 * scale,
+                width = 16 * scale,
+            ),
             width = 16 * scale,
             height = 22 if scale == 1 else 40,
         )
