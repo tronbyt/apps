@@ -266,6 +266,7 @@ def get_weather_image(forecast):
     return WEATHER_FULL_IMAGE.get(forecast, "")
 
 def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_abbr, day_top = False, scale = 1):
+    tomorrow_width = get_forecast_width(((tomorrow["high"] * 10 + 5) // 10), False) * scale if scale == 2 else 16
     return render.Stack(
         children = [
             # BACKGROUND IMAGE - In final slid position
@@ -311,7 +312,7 @@ def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_
                                     expanded = True,
                                     children = [
                                         render.Box(
-                                            width = 16 * scale,
+                                            width = tomorrow_width,
                                             height = 13 * scale,
                                             child = render.Column(
                                                 main_align = "start",
