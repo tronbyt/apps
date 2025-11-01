@@ -7,3 +7,4 @@ author: Max Timkovich
 fileName: fuzzy_clock.star
 packageName: fuzzyclock
 recommended_interval: 1
+supports2x: true

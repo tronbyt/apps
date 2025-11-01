@@ -261,9 +261,7 @@ def display_hour(hour):
         hour to display (in 12h format with 12 instead of 0)
     """
 
-    # Handle 24 hour time.
-    if hour > 12:
-        hour -= 12
+    hour = hour % 12
 
     # Handle midnight.
     if hour == 0:
@@ -298,6 +296,7 @@ def main(config):
     loc = json.decode(location) if location else DEFAULT_LOCATION
     timezone = loc.get("timezone", DEFAULT_TIMEZONE)
     now = time.now().in_location(timezone)
+    scale = 2 if config.bool("$2x") else 1
 
     hours = now.hour
     minutes = now.minute
@@ -312,14 +311,16 @@ def main(config):
     fuzzed = fuzzy_time(hours, minutes, language)
 
     # Add some left padding for ~style~.
-    texts = [render.Text(" " * i + s) for i, s in enumerate(fuzzed)]
+    font = "terminus-16" if scale == 2 else "5x8"
+    texts = [render.Text(" " * i * scale + s, font = font) for i, s in enumerate(fuzzed)]
 
     return render.Root(
         max_age = 60 * 10,
         child = render.Padding(
-            pad = 3,
+            pad = (3 * scale, 4 * scale, 3 * scale, 4 * scale),
             child = render.Column(
                 children = texts,
+                main_align = "space_evenly",
             ),
         ),
     )
