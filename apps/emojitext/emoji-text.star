@@ -3,6 +3,7 @@ load("schema.star", "schema")
 
 main_font = "6x13"
 subtext_font = "tom-thumb"
+MarqueeWidth = 44
 
 def main(config):
     main_text = config.get("main_text", "Main Text")
@@ -30,7 +31,7 @@ def main(config):
                         cross_align = "start",
                         children = [
                             render.Marquee(
-                                width = 44,
+                                width = MarqueeWidth,
                                 child = render.Text(
                                     content = main_text,
                                     font = main_font,
@@ -61,6 +62,7 @@ def get_schema():
                 name = "Main Text",
                 desc = "Primary text to display",
                 icon = "font",
+                default = "Main Text",
             ),
             schema.Color(
                 id = "main_color",
@@ -74,6 +76,7 @@ def get_schema():
                 name = "Subtext",
                 desc = "Secondary text to display",
                 icon = "font",
+                default = "Subtext",
             ),
             schema.Color(
                 id = "subtext_color",
@@ -87,6 +90,7 @@ def get_schema():
                 name = "Emoji",
                 desc = "Emoji to display",
                 icon = "faceSmile",
+                default = "🟢",
             ),
             schema.Color(
                 id = "background_color",
