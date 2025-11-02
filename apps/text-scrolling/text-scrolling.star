@@ -5,15 +5,17 @@ def main(config):
     font = config.get("font", "tb-8")
     background_color = config.get("background_color", "#000")
     color = config.get("color", "#fff")
+    emoji = config.get("emoji")
 
     return render.Root(
         child = render.Box(
             color = background_color,
-            child = render.Row(
-                expanded = True,  # Use as much horizontal space as possible
-                main_align = "space_evenly",  # Controls horizontal alignment
-                cross_align = "center",  # Controls vertical alignment
+            child = render.Column(
+                main_align = "space_evenly",
+                cross_align = "center",
+                expanded = True,
                 children = [
+                    render.Emoji(emoji) if emoji else None,
                     render.Marquee(
                         width = 50,
                         offset_start = 49,

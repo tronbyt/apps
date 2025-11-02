@@ -12,31 +12,40 @@ def main(config):
     title = config.get("title", default_title)
     titlefont = config.get("titlefont", default_font)
     titlecolor = config.get("titlecolor", default_color)
+    emoji = config.get("emoji")
 
     return render.Root(
         child = render.Box(
             color = background_color,
-            child = render.Column(
+            child = render.Row(
                 expanded = True,
-                main_align = "center",
+                main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.WrappedText(
-                        content = title,
-                        font = titlefont,
-                        color = titlecolor,
-                        align = "center",
-                        linespacing = 0,
-                    ),
-                    render.Marquee(
-                        width = 60,
-                        offset_start = 59,
-                        offset_end = 59,
-                        child = render.Text(
-                            content = content,
-                            font = font,
-                            color = color,
-                        ),
+                    render.Emoji(emoji, height = 20) if emoji else None,
+                    render.Column(
+                        expanded = True,
+                        main_align = "center",
+                        cross_align = "center",
+                        children = [
+                            render.WrappedText(
+                                content = title,
+                                font = titlefont,
+                                color = titlecolor,
+                                align = "center",
+                                linespacing = 0,
+                            ),
+                            render.Marquee(
+                                width = 60 if not emoji else 40,
+                                offset_start = 59 if not emoji else 39,
+                                offset_end = 59 if not emoji else 39,
+                                child = render.Text(
+                                    content = content,
+                                    font = font,
+                                    color = color,
+                                ),
+                            ),
+                        ],
                     ),
                 ],
             ),
