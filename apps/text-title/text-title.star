@@ -36,8 +36,8 @@ def main(config):
                         children = [
                             render.Marquee(
                                 width = 60 if not emoji else 50,
-                                offset_start = 59 if not emoji else 49,
-                                offset_end = 59 if not emoji else 49,
+                                offset_start = 60 if not emoji else 50,
+                                offset_end = 60 if not emoji else 50,
                                 child = render.Text(
                                     content = title,
                                     font = titlefont,
@@ -46,8 +46,8 @@ def main(config):
                             ) if title else None,
                             render.Marquee(
                                 width = 60 if not emoji else 50,
-                                offset_start = 59 if not emoji else 49,
-                                offset_end = 59 if not emoji else 49,
+                                offset_start = 60 if not emoji else 50,
+                                offset_end = 60 if not emoji else 50,
                                 child = render.Text(
                                     content = content,
                                     font = font,

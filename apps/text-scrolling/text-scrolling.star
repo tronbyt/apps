@@ -25,8 +25,8 @@ def main(config):
                     render.Emoji(emoji) if emoji else None,
                     render.Marquee(
                         width = 60,
-                        offset_start = 59,
-                        offset_end = 59,
+                        offset_start = 60,
+                        offset_end = 60,
                         align = "center",
                         child = render.Text(
                             content = content,
