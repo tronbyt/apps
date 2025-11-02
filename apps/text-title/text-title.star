@@ -31,6 +31,7 @@ def main(config):
                     render.Marquee(
                         width = 60,
                         offset_start = 59,
+                        offset_end = 59,
                         child = render.Text(
                             content = content,
                             font = font,
