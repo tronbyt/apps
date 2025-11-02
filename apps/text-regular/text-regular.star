@@ -16,10 +16,17 @@ def main(config):
                 expanded = True,
                 children = [
                     render.Emoji(emoji, height = 20) if emoji else None,
-                    render.WrappedText(
-                        content = content,
-                        font = font,
-                        color = color,
+                    render.Marquee(
+                        height = 32,
+                        offset_start = 31,
+                        offset_end = 31,
+                        align = "center",
+                        scroll_direction = "vertical",
+                        child = render.WrappedText(
+                            content = content,
+                            font = font,
+                            color = color,
+                        ),
                     ),
                 ],
             ),
