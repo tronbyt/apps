@@ -34,12 +34,15 @@ def main(config):
                         main_align = "center",
                         cross_align = "center",
                         children = [
-                            render.WrappedText(
-                                content = title,
-                                font = titlefont,
-                                color = titlecolor,
-                                align = "center",
-                                linespacing = 0,
+                            render.Marquee(
+                                width = 60 if not emoji else 40,
+                                offset_start = 59 if not emoji else 39,
+                                offset_end = 59 if not emoji else 39,
+                                child = render.Text(
+                                    content = title,
+                                    font = titlefont,
+                                    color = titlecolor,
+                                ),
                             ) if title else None,
                             render.Marquee(
                                 width = 60 if not emoji else 40,
