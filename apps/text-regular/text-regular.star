@@ -7,14 +7,12 @@ def main(config):
     color = config.get("color", "#fff")
 
     return render.Root(
-        child = render.Stack(
-            children = [
-                render.Box(color = background_color),
-                render.WrappedText(
-                    content = content,
-                    font = font,
-                    color = color,
-                ),
-            ],
+        child = render.Box(
+            color = background_color,
+            child = render.WrappedText(
+                content = content,
+                font = font,
+                color = color,
+            ),
         ),
     )
