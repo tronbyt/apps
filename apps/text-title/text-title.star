@@ -35,9 +35,9 @@ def main(config):
                         cross_align = "center",
                         children = [
                             render.Marquee(
-                                width = 60 if not emoji else 40,
-                                offset_start = 59 if not emoji else 39,
-                                offset_end = 59 if not emoji else 39,
+                                width = 60 if not emoji else 50,
+                                offset_start = 59 if not emoji else 49,
+                                offset_end = 59 if not emoji else 49,
                                 child = render.Text(
                                     content = title,
                                     font = titlefont,
@@ -45,9 +45,9 @@ def main(config):
                                 ),
                             ) if title else None,
                             render.Marquee(
-                                width = 60 if not emoji else 40,
-                                offset_start = 59 if not emoji else 39,
-                                offset_end = 59 if not emoji else 39,
+                                width = 60 if not emoji else 50,
+                                offset_start = 59 if not emoji else 49,
+                                offset_end = 59 if not emoji else 49,
                                 child = render.Text(
                                     content = content,
                                     font = font,
