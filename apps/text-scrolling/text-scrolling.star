@@ -32,7 +32,7 @@ def main(config):
                             font = font,
                             color = color,
                         ),
-                    ),
+                    ) if content else None,
                 ],
             ),
         ),
