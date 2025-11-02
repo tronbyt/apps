@@ -20,6 +20,7 @@ def main(config):
     emoji = config.get("emoji")
 
     return render.Root(
+        show_full_animation = True,
         child = render.Box(
             color = background_color,
             child = render.Row(
