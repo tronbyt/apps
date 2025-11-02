@@ -1,38 +1,131 @@
 load("render.star", "render")
+load("schema.star", "schema")
 
-default_title = "TITLE"
-default_font = "6x10"
-default_color = "#00f"
+DEFAULT_CONTENT = "Text"
+DEFAULT_FONT = "tb-8"
+DEFAULT_BACKGROUND_COLOR = "#000"
+DEFAULT_COLOR = "#fff"
+DEFAULT_TITLE = "TITLE"
+DEFAULT_TITLE_FONT = "6x10"
+DEFAULT_TITLE_COLOR = "#00f"
 
 def main(config):
-    content = config.get("content", "text")
-    font = config.get("font", "tb-8")
-    color = config.get("color", "#ffffff")
-    title = config.get("title", default_title)
-    titlefont = config.get("titlefont", default_font)
-    titlecolor = config.get("titlecolor", default_color)
+    content = config.get("content", DEFAULT_CONTENT)
+    font = config.get("font", DEFAULT_FONT)
+    background_color = config.get("background_color", DEFAULT_BACKGROUND_COLOR)
+    color = config.get("color", DEFAULT_COLOR)
+    title = config.get("title", DEFAULT_TITLE)
+    titlefont = config.get("titlefont", DEFAULT_TITLE_FONT)
+    titlecolor = config.get("titlecolor", DEFAULT_TITLE_COLOR)
+    emoji = config.get("emoji")
+
     return render.Root(
-        child = render.Column(
-            expanded = True,
-            main_align = "center",
-            cross_align = "center",
-            children = [
-                render.WrappedText(
-                    content = title,
-                    font = titlefont,
-                    color = titlecolor,
-                    align = "center",
-                    linespacing = 0,
-                ),
-                render.Marquee(
-                    width = 60,
-                    offset_start = 59,
-                    child = render.Text(
-                        content = content,
-                        font = font,
-                        color = color,
-                    ),
-                ),
-            ],
+        show_full_animation = True,
+        child = render.Box(
+            color = background_color,
+            child = render.Row(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Emoji(emoji, height = 20) if emoji else None,
+                    render.Column(
+                        expanded = True,
+                        main_align = "center",
+                        cross_align = "center",
+                        children = [
+                            render.Marquee(
+                                width = 60 if not emoji else 50,
+                                offset_start = 60 if not emoji else 50,
+                                offset_end = 60 if not emoji else 50,
+                                child = render.Text(
+                                    content = title,
+                                    font = titlefont,
+                                    color = titlecolor,
+                                ),
+                            ) if title else None,
+                            render.Marquee(
+                                width = 60 if not emoji else 50,
+                                offset_start = 60 if not emoji else 50,
+                                offset_end = 60 if not emoji else 50,
+                                child = render.Text(
+                                    content = content,
+                                    font = font,
+                                    color = color,
+                                ),
+                            ) if content else None,
+                        ],
+                    ) if title or content else None,
+                ],
+            ),
         ),
+    )
+
+def get_schema():
+    fonts = [
+        schema.Option(display = key, value = value)
+        for key, value in sorted(render.fonts.items())
+    ]
+
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "title",
+                name = "Title",
+                desc = "Headline text shown above the content",
+                icon = "font",
+                default = DEFAULT_TITLE,
+            ),
+            schema.Dropdown(
+                id = "titlefont",
+                name = "Title Font",
+                desc = "Change the font of the title.",
+                icon = "font",
+                default = DEFAULT_TITLE_FONT,
+                options = fonts,
+            ),
+            schema.Color(
+                id = "titlecolor",
+                name = "Title Color",
+                desc = "Color of the title text",
+                icon = "palette",
+                default = DEFAULT_TITLE_COLOR,
+            ),
+            schema.Text(
+                id = "content",
+                name = "Content",
+                desc = "Scrolling body text",
+                icon = "message",
+                default = DEFAULT_CONTENT,
+            ),
+            schema.Dropdown(
+                id = "font",
+                name = "Content Font",
+                desc = "Change the font of the body text.",
+                icon = "font",
+                default = DEFAULT_FONT,
+                options = fonts,
+            ),
+            schema.Color(
+                id = "background_color",
+                name = "Background",
+                desc = "Background color",
+                icon = "palette",
+                default = DEFAULT_BACKGROUND_COLOR,
+            ),
+            schema.Color(
+                id = "color",
+                name = "Content Color",
+                desc = "Color of the body text",
+                icon = "palette",
+                default = DEFAULT_COLOR,
+            ),
+            schema.Text(
+                id = "emoji",
+                name = "Emoji",
+                desc = "Optional emoji to show next to the title",
+                icon = "faceSmile",
+            ),
+        ],
     )
