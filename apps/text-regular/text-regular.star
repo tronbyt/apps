@@ -22,7 +22,10 @@ def main(config):
                 cross_align = "center",
                 expanded = True,
                 children = [
-                    render.Emoji(emoji, height = 20) if emoji else None,
+                    render.Padding(
+                        pad = 2,
+                        child = render.Emoji(emoji, height = 20),
+                    ) if emoji else None,
                     render.Marquee(
                         height = 32,
                         offset_start = 32,
@@ -30,7 +33,7 @@ def main(config):
                         align = "center",
                         scroll_direction = "vertical",
                         child = render.WrappedText(
-                            width = 50 if emoji else 0,
+                            width = 40 if emoji else 64,
                             content = content,
                             font = font,
                             color = color,

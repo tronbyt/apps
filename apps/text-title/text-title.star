@@ -28,16 +28,19 @@ def main(config):
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Emoji(emoji, height = 20) if emoji else None,
+                    render.Padding(
+                        pad = 2,
+                        child = render.Emoji(emoji, height = 20),
+                    ) if emoji else None,
                     render.Column(
                         expanded = True,
                         main_align = "center",
                         cross_align = "center",
                         children = [
                             render.Marquee(
-                                width = 60 if not emoji else 50,
-                                offset_start = 60 if not emoji else 50,
-                                offset_end = 60 if not emoji else 50,
+                                width = 60 if not emoji else 44,
+                                offset_start = 60 if not emoji else 44,
+                                offset_end = 60 if not emoji else 44,
                                 child = render.Text(
                                     content = title,
                                     font = titlefont,
@@ -45,9 +48,9 @@ def main(config):
                                 ),
                             ) if title else None,
                             render.Marquee(
-                                width = 60 if not emoji else 50,
-                                offset_start = 60 if not emoji else 50,
-                                offset_end = 60 if not emoji else 50,
+                                width = 60 if not emoji else 44,
+                                offset_start = 60 if not emoji else 44,
+                                offset_end = 60 if not emoji else 44,
                                 child = render.Text(
                                     content = content,
                                     font = font,
