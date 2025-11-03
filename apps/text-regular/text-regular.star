@@ -33,7 +33,7 @@ def main(config):
                         align = "center",
                         scroll_direction = "vertical",
                         child = render.WrappedText(
-                            width = 40 if emoji else 64,
+                            width = 40 if emoji else 0,
                             content = content,
                             font = font,
                             color = color,

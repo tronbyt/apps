@@ -41,6 +41,7 @@ def main(config):
                                 width = 60 if not emoji else 44,
                                 offset_start = 60 if not emoji else 44,
                                 offset_end = 60 if not emoji else 44,
+                                align = "center",
                                 child = render.Text(
                                     content = title,
                                     font = titlefont,
@@ -51,6 +52,7 @@ def main(config):
                                 width = 60 if not emoji else 44,
                                 offset_start = 60 if not emoji else 44,
                                 offset_end = 60 if not emoji else 44,
+                                align = "center",
                                 child = render.Text(
                                     content = content,
                                     font = font,
