@@ -8,7 +8,6 @@ Author: InTheDaylight14
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_TEXT_COLOR = "#aaaaaa"
 DEFAULT_ORIENTATION_BOOL = False  #Default to horizontal
@@ -122,6 +121,12 @@ def get_schema():
                     "#aaaaaa",
                     "#ffffff",
                 ],
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "MARTA API key",
+                icon = "key",
             ),
         ],
     )
@@ -313,10 +318,9 @@ def render_arrivals(config):
     user_station_arrivals = []
 
     ARRIVALS_API_URL = "https://developerservices.itsmarta.com:18096/itsmarta/railrealtimearrivals/traindata"
-    API_KEY = ""
-    API_KEY_ENCRYPTED = "AV6+xWcE7DuYYEVwcZYWZKjl58uv5cacFumB2xlPBOcfQJjypotuykP8EzpmX1ap10XA7v/txa8cujef8ToRAg6UvtconQ+DSJ14Krz8bTvxVhj165hvEGDhYjt89Chd0Vz6JF1rW4aLnJ5YFVt6FAShLWpBRP91ZvTQrMR0EvVcmXs+YutWg0xnjJ4JurKkoUQ="
-    api_key = secret.decrypt(API_KEY_ENCRYPTED) or API_KEY
-
+    api_key = config.get("api_key")
+    if not api_key:
+        return render.Text("API Key Missing", font = FONT, color = "#F00")
     all_arrivals = get_chachable_json(ARRIVALS_API_URL + api_key, 10)
 
     user_station = STATIONS_MAP[config.get("station") or DEFAULT_STATION]

@@ -9,10 +9,10 @@ Uses Smart Cambridge parking API
 
 load("http.star", "http")
 load("render.star", "render")
-load("secret.star", "secret")
+load("schema.star", "schema")
 
 # constants
-SECRET = "AV6+xWcEWfKUGe/P0Ndmq+DM9dPl/v//QNSfFjI+XkhQtHl59qJzWkT0cGkKVCbfpNsZQphvxjuG6jtmPYxsd1qBotcLqc6KaUCUDsUOqmhV1vtnpwel5GDk7EgzpLd+1lh6uHgiHbRCC/Sz0rJe75tqK7rLBW5cZovC8b3JSKaaeYWukYXWrJXp7CCU/A=="
+
 API_BASE = "https://smartcambridge.org/api/v1/parking/"
 SCREEN_WIDTH = 64
 BIG_FONT = "5x8"
@@ -53,6 +53,16 @@ def render_row(capacity, free, name, font):
         render.Marquee(child = render.Text(name, font = font), width = (SCREEN_WIDTH - len(free_text) * 5)),
     ])
 
+def get_schema():
+    return [
+        schema.Text(
+            id = "api_token",
+            name = "API Token",
+            desc = "API key for Smart Cambridge parking API",
+            icon = "key",
+        ),
+    ]
+
 def main(config):
     """ Entry point
 
@@ -65,8 +75,7 @@ def main(config):
 
     # Collect output rows here
     rows = []
-
-    api_token = secret.decrypt(SECRET) or config.get("api_token")
+    api_token = config.get("api_token")
 
     # check for missing api_token
     if not api_token:

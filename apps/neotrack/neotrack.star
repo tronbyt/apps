@@ -11,7 +11,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
-load("secret.star", "secret")
+load("schema.star", "schema")
 load("time.star", "time")
 
 ASTEROID = base64.decode("""
@@ -373,11 +373,9 @@ QqWKkzICEI2UOCZNlUR/DP0pYECPmClZDlkBJFQOjsYJBQ0Qk4XQnTxR7rRJQHJggkR7/sxJ
 B/8VPHeBGqUnfBgUYkqRE+PGRYhy45yAADs=
 """)
 
-NASA_ENCRYPTED_KEY = "AV6+xWcERU3AKBthH/usok+VvTNZG/tt2S/KdesVg1alT8A6EhrF+eHsQLTTjukoKMw4F6/494Z+lzgMjsFT5yVXX1q5eXBXI5xPncGlE06Le5PKx9DrSnVhpJyDfv2WnO/tA0RJXCvHwoVHepPAAHMKDo+tetRGCPShxj87msEG2mrpUOnmwK2VtJkZLg=="
-
 CACHE_KEY = "neo_response"
 
-def main():
+def main(config):
     # NASA's API requires that the date be in a specific format
     today = humanize.time_format("yyyy-MM-dd", time.now())
 
@@ -388,7 +386,7 @@ def main():
         data = json.decode(cached_response)
     else:
         print("Fetching data")
-        data = fetch_and_cache_neos(today)
+        data = fetch_and_cache_neos(today, config)
 
     neos = data["near_earth_objects"][today]
 
@@ -451,11 +449,24 @@ def main():
         ),
     )
 
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "api_key",
+                name = "NASA API Key",
+                desc = "NASA API key for NeoW API.",
+                icon = "key",
+            ),
+        ],
+    )
+
 # Fetch data from NASA's API, cache the result.
-def fetch_and_cache_neos(today_string):
+def fetch_and_cache_neos(today_string, config):
     base_url = "https://api.nasa.gov/neo/rest/v1/feed"
     today = today_string
-    api_key = secret.decrypt(NASA_ENCRYPTED_KEY) or "DEMO_KEY"  # NASA's demo key has a 50 req/hr limit.
+    api_key = config.get("api_key") or "DEMO_KEY"  # NASA's demo key has a 50 req/hr limit.
     final_url = base_url + "?start_date=" + today + "&end_date=" + today + "&api_key=" + api_key
     response = http.get(final_url)
     if response.status_code != 200:

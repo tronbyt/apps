@@ -9,28 +9,26 @@ load("hash.star", "hash")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
-load("secret.star", "secret")
+load("schema.star", "schema")
 load("time.star", "time")
 
 BASE_URL = "https://gateway.marvel.com/v1/public/characters"
-PUBLIC_KEY = secret.decrypt("AV6+xWcE+glik4Q/UJ64HVitCtX/Iw4GMs4PXCybCA8EyTUt1POPVYqKOU3RGgOe2mjHa8PjfUuOBJRUjmViYUg+siN6ApfbF9qbr4N4JjcIblHXyLK5Pud1Ur5dgWkKpUZU1OdzTWz4pUnS7WKWnKXqASO81oGyzth03l+vQ3Wk1oVxZIA=")
-PRIVATE_KEY = secret.decrypt("AV6+xWcEPi0x8wyUv3WvkbErpatqjOP8YnClZuerV7D3Y/8tFLtFEw5FhlxuN2mNEPt54DqB+94xcybYJ5dNglGmc2XmXIrtISvO1+7TQ2U3djvTPARlZg7vOS/EXFWnSGMiLw8Bx8733nzQPbhklqMUBW27Bi6Nji7Y2ByDQuTexA74mtZRmuYPXV4XVA==")
 
-def main():
+def main(config):
     """
     App entrypoint.
     Retrieves and parses a single Marvel character.
     Returns rendered application root.
     """
-    if PUBLIC_KEY == None or PRIVATE_KEY == None:
+    if config.get("public_key") == None or config.get("private_key") == None:
         image = http.get("http://i.annihil.us/u/prod/marvel/i/mg/2/60/537bcaef0f6cf.jpg").body()
         name = "Something went wrong, enjoy this image of Wolverine while we fix it."
 
         return render_data(image, name)
     else:
         random.seed(time.now().unix // 86400)
-        characterId = get_random_character_id()
-        params = get_auth_params()
+        characterId = get_random_character_id(config)
+        params = get_auth_params(config)
         req = http.get(BASE_URL + "/" + str(characterId), ttl_seconds = 86400, params = params)
         if req.status_code != 200:
             fail("API request failed with status:", req.status_code)
@@ -67,20 +65,39 @@ def render_data(image, name):
         ),
     )
 
-def get_auth_params():
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "public_key",
+                name = "Marvel API Public Key",
+                desc = "Your Marvel API public key.",
+                icon = "key",
+            ),
+            schema.Text(
+                id = "private_key",
+                name = "Marvel API Private Key",
+                desc = "Your Marvel API private key.",
+                icon = "key",
+            ),
+        ],
+    )
+
+def get_auth_params(config):
     """
     Returns Marvel API authentication params.
     """
     timestamp = str(1699392191)
     params = {
         "ts": timestamp,
-        "apikey": PUBLIC_KEY,
-        "hash": hash.md5(timestamp + PRIVATE_KEY + PUBLIC_KEY),
+        "apikey": config.get("public_key"),
+        "hash": hash.md5(timestamp + config.get("private_key") + config.get("public_key")),
     }
 
     return params
 
-def get_random_character_id():
+def get_random_character_id(config):
     """
     Get a single, random character.
     Only return a character if the character has an image.
@@ -89,7 +106,7 @@ def get_random_character_id():
     maxOffset = 1562
     offset = random.number(0, maxOffset)
     baseParams = {"limit": str(limit), "offset": str(offset)}
-    params = baseParams | get_auth_params()
+    params = baseParams | get_auth_params(config)
 
     req = http.get(BASE_URL, ttl_seconds = 82800, params = params)
     if req.status_code != 200:

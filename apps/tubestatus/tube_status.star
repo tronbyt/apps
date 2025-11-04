@@ -8,10 +8,9 @@ Author: dinosaursrarr
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 # Allows 500 queries per minute
-ENCRYPTED_APP_KEY = "AV6+xWcEeixSBkR1KHTzJPTxGSqVwSCoXVa90hniq68hepDEK6uLPeeaVIhCHcXK6sdiBY/7M7a8Z794VOQDkmUWQS8Xi+ieOBxZQFl31GWq5Obm58GH+jmYHn5TXC1UJJobXfFuxoENuB7VG/mfB8UJpSh0zyPqje6F4iPih+MOsTW2U5c="
+
 STATUS_URL = "https://api.tfl.gov.uk/Line/Mode/%s/Status"
 USER_AGENT = "Tidbyt tube_status"
 
@@ -201,8 +200,8 @@ SEVERITIES = {
 
 # Cache response for all users. It's always the same info with the same inputs so
 # no need to fetch repeatedly.
-def fetch_response():
-    app_key = secret.decrypt(ENCRYPTED_APP_KEY) or ""  # fall back to anonymous quota
+def fetch_response(config):
+    app_key = config.get("app_key") or ""  # fall back to anonymous quota
     resp = http.get(
         url = STATUS_URL % ",".join(["tube", "elizabeth-line", "overground", "dlr", "tram"]),
         params = {
@@ -218,9 +217,9 @@ def fetch_response():
         return None
     return resp.json()
 
-def fetch_lines():
+def fetch_lines(config):
     lines = []
-    resp = fetch_response()
+    resp = fetch_response(config)
     if not resp:
         return None
     for line in resp:
@@ -405,7 +404,7 @@ def render_error(message):
     )
 
 def main(config):
-    lines = fetch_lines()
+    lines = fetch_lines(config)
     if not lines or len(lines) == 0:
         return render_error("Could not load tube status")
 
@@ -455,6 +454,12 @@ def get_schema():
                 icon = "display",
                 default = PROBLEMS_FIRST,
                 options = display_modes,
+            ),
+            schema.Text(
+                id = "app_key",
+                name = "TfL App Key",
+                desc = "TfL App Key for API access.",
+                icon = "key",
             ),
         ],
     )
