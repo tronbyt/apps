@@ -9,13 +9,13 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
-load("secret.star", "secret")
+load("schema.star", "schema")
 load("time.star", "time")
 
 JFT_HEADER = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAEAAAAAHCAYAAAC4NEsKAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAnklEQVQ4jd1VQQ7AIAgry/7/ZXYZSYMg4G7rRedobZVEAaAAoKoQEXRR1U/1PNfQ0fiy13XEKmCGOMgEFuY0VAX2tRwA//Rz+/ZjBg7A/IlGxq/WIn2bs69WB3ji7oayjUVk6Ypup0R8Xovqurg6NxCZ5019LY+Vbrf2FOY76+zbCthM1FbeqOd1THiNaQjmRz4z78YJc+B9Bf6M3eE/k3mm7Mey7SMAAAAASUVORK5CYII=
 """)
-JFT_DATA_ROOT_URL = "AV6+xWcEKPLjDbdJGf3RexNgJoUHMxP/Nxje9MXnURIZKK4stlqT9bmyMfw66UZdGqP5C8i+p2JR1XqLojlrvu7zIVu1W+H6PZrGSfoG2ik0RdQFIQgDmqcRSNNrKbTHzeBHUNF25DVeK9klriA6mHl6keVPXpDuoWBIiSsQQQ=="
+
 JFT_SOURCE = "na-just-for-today"
 FILE_TYPE = ".txt"
 DEFAULT_TEXT = "God, grant me the serenity to accept the things I cannot change, the courage to change the things I can, and the wisdom to know the difference."
@@ -29,9 +29,7 @@ def getJftText(config):
     curr_date = getCurrentDate(config)
     jft_text = cache.get(curr_date)
     if jft_text == None:
-        root_url = secret.decrypt(JFT_DATA_ROOT_URL) or config.get(
-            "JFT_DATA_ROOT_URL",
-        )
+        root_url = config.get("JFT_DATA_ROOT_URL")
         if root_url == None:
             return DEFAULT_TEXT
         req_url = "%s/%s/%s%s" % (
@@ -46,6 +44,19 @@ def getJftText(config):
         jft_text = request.body()
         cache.set(curr_date, jft_text, ttl_seconds = 86400)
     return jft_text
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "JFT_DATA_ROOT_URL",
+                name = "JFT Data Root URL",
+                desc = "The root URL for the JFT data.",
+                icon = "link",
+            ),
+        ],
+    )
 
 def main(config):
     jft_text = getJftText(config)

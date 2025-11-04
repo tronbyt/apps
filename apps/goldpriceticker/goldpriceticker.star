@@ -9,7 +9,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 is_debug = True
@@ -56,7 +55,7 @@ PRICE_HISTORY_URL = "https://dpms.mcio.org/metals/v1/"
 REALTIME_QUOTE = "https://dpms.mcio.org/metals/v1/latest"
 
 def main(config):
-    API_KEY = secret.decrypt("AV6+xWcEXpR9hD3BS4eRwb8BRQcDiK9luQOfbbmE0O2NsiSKUif/WZ9Ooptn5uZh6HKbo0vDZVrluhuNE7/dzRWrxoPBQyIfdk2Y2o7DvxGnEbM1yLPziFGJ+D0Yo0sfztGgMlVCqn/eCCTywDQ2a7wBhs2BhF+i91MIdKTueUgZsDtJtmU=") or config.get("dev_api_key") or ""
+    API_KEY = config.get("dev_api_key") or ""
     PRECIOUS_METAL = "gold"
     GRAPH_PERIOD = "twentyfourhour"
     GOLDPRICETICKER_VERSION = "2.0"
@@ -380,8 +379,8 @@ def get_schema():
             schema.Text(
                 id = "dev_api_key",
                 name = "API Key",
-                desc = "Test use only",
-                icon = "bomb",
+                desc = "API key for metals-dev API.",
+                icon = "key",
             ),
         ],
     )

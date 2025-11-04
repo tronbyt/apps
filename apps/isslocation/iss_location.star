@@ -10,9 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-API_KEY = "AV6+xWcEoZ2Ghxo/Pq1V7vLvA85rHwn8myqaKgarAU7o8q+Jl3fXIJ4WeeR6AMvFbrgeUW4I2KPGG1/3pSwIscAPeNDLci4LPRpl4CbO+tc+fxhe1G6YKTkwNGaXfJrSWRZ3qhQS9oBEh/mRu/eA8sv4"
 API_URL = "http://api.open-notify.org/iss-now.json"
 GEO_URL = "http://api.geonames.org/findNearbyPlaceNameJSON?username="
 OCEAN_URL = "http://api.geonames.org/oceanJSON?username="
@@ -107,7 +105,7 @@ def get_iss_dict(api_key):
 ################################################################################
 
 def main(config):
-    api_key = config.get("api_key") or secret.decrypt(API_KEY)
+    api_key = config.get("api_key")
     if (api_key == None):
         return render.Root(child = render.Text("Need api_key."))
 
@@ -130,4 +128,14 @@ def main(config):
 ################################################################################
 
 def get_schema():
-    return schema.Schema(version = "1", fields = [])
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Geonames API Key",
+                desc = "API key for Geonames (http://www.geonames.org/enablefreewebservice)",
+                icon = "key",
+            ),
+        ],
+    )
