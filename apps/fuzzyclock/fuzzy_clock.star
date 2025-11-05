@@ -6,7 +6,7 @@ Description: Display the time in a groovy, human-readable way.
 """
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "render", "canvas")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -296,7 +296,7 @@ def main(config):
     loc = json.decode(location) if location else DEFAULT_LOCATION
     timezone = loc.get("timezone", DEFAULT_TIMEZONE)
     now = time.now().in_location(timezone)
-    scale = 2 if config.bool("$2x") else 1
+    scale = 2 if canvas.is2x() else 1
 
     hours = now.hour
     minutes = now.minute

@@ -9,7 +9,7 @@ Authors: JeffLac, RichardD012 (Recreation of Tidbyt Original)
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "render", "canvas")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -70,7 +70,7 @@ WEATHER_FULL_IMAGE = {
 
 def main(config):
     # Get configuration values with defaults
-    scale = 2 if config.bool("$2x") else 1
+    scale = 2 if canvas.is2x() else 1
     location = config.get("location", DEFAULT_LOCATION)
     loc = json.decode(location)
 
