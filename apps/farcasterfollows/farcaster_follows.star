@@ -4,7 +4,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 # 1. Copy logo from Figma as SVG: https://www.figma.com/file/E1RJ5DNTM8eHZpJI1bcaP3/Public-logo?node-id=1-2&t=4PuwjeL9pH70lnxv-0
 # 2. Crop & revert the colors (for dark), export to PNG.
@@ -16,7 +15,7 @@ FARCASTER_ICON_LIGHT_BG = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAA
 def main(config):
     # https://gist.github.com/danromero/87be7035aab27bf6a603b2c956022370
     # pixlet encrypt farcasterfollows $KEY
-    api_key = secret.decrypt("AV6+xWcE3RYzxZ92Z9lOT0XBWIqjOpZ4hExHXbCOIC8XwninH1mJouAfj+JQTGcXuibmG/DhzhBxhlf7P6EjpEbzGcZmElq+jGX+aq8hvcZaLNawjsYIGWyQ93U36rvsdBoDr1VnTvLJDqshmWvdcZ9AZjYOTWYZ84vvEvXTNyOPnpcdTi3jDHRnWxu5LcyopG0OHRlCAveDeYxmPjfP95zT9N39O/YieSZyktJyd9TwC2+ORAgCve2otB7LfbkbvA==") or config.get("dev_api_key")
+    api_key = config.get("farcaster_api_key")
 
     username = config.str("who", "nix")
     count = get_followercount(username, api_key)
@@ -108,6 +107,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "farcaster_api_key",
+                name = "Farcaster API Key",
+                desc = "Your Farcaster API key. See https://warpcast.com/~/developers/api for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "who",
                 name = "Who?",

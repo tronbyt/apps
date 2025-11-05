@@ -6,7 +6,6 @@ load("hmac.star", "hmac")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 DEFAULT_USERNAME = "danny"
@@ -17,10 +16,6 @@ REWATCH_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAEkAAABJCAYAAABxcwvcAAAMPWlDQ1BJQ0MgUHJ
 BASE_URL = "https://api.letterboxd.com/api/v0"
 LB_URL = "https://letterboxd.com/"
 
-HASHED_KEY = "AV6+xWcEQPFSKBUqIIUkoH0KxhqlfuyTNthY2/3woucrvDTy5Wdr5w9L1fbRmPALALYR6NTKzGwghZPaFOSAoPiNRIerHzEmoIAJfEQXlYk3ZHH3/5SDF3/wBwhUgAUwmrJnYDrv25JvahXVPkN1KPNHuz/vZCDvopJh3lNCVzOrGn/GmDGgLY15xKs5rZLZUn0ZQRdUq6XvN7oZ0LaQJvPzac4ZbQ=="
-HASHED_SECRET = "AV6+xWcEx8i5d2dh86K8Yk1O1bRGP6teMMCEUZiuC1My6wXH14eZFI4t4/43X8uw2i2pUPw6Pr/jvMofoFkRsiaA4zEA++6M+7WHUAEXQqQnTSXlx1DAH6Cxth5yeMaQQErM0IIvFQfcAjjJ3EQeYiQtTJNp7hnO7s1GIVOBBiFNNqN/K3IA4aFLVN+GKFwaueETS0ogY6abcZ+GQ97On8j1jLt/xg=="
-api_key = secret.decrypt(HASHED_KEY)
-api_secret = secret.decrypt(HASHED_SECRET)
 UUID_URL = "https://www.uuidtools.com/api/generate/v4"
 LB_ICON = base64.decode(LB_IMAGE)
 STAR_ICON = base64.decode(STAR_IMAGE)
@@ -38,36 +33,42 @@ ACTIVITY_END_INDEX = 4
 REVIEW_COUNT = 3
 
 def main(config):
+    api_key = config.get("letterboxd_api_key")
+    api_secret = config.get("letterboxd_api_secret")
+    if not api_key or not api_secret:
+        return render.Root(
+            child = render.Text("Please set your Letterboxd API key and secret in the config."),
+        )
     username = config.str("username", DEFAULT_USERNAME)
     Lid = getLID(username)
     activityUrl = "/member/%s/activity" % (Lid)
-    memberActivity = getMemberActivity(Lid, activityUrl)
+    memberActivity = getMemberActivity(api_key, api_secret, Lid, activityUrl)
     recentActivity = memberActivity["items"]
     entryList = recentActivity[ACTIVITY_START_INDEX:ACTIVITY_END_INDEX]
-    entryList = [getEntry(Lid, entryList[i]) for i in range(REVIEW_COUNT)]
+    entryList = [getEntry(api_key, api_secret, Lid, entryList[i]) for i in range(REVIEW_COUNT)]
     return render.Root(
         child = renderReviews(entryList),
     )
 
 # functions
-def get(Lid, route, params = ""):
+def get(api_key, api_secret, Lid, route, params = ""):
     method = "GET"
     toSalt = constructUrl(route, api_key, params)
-    signature = getSignature(method, toSalt)
+    signature = getSignature(api_secret, method, toSalt)
     url = "%s&signature=%s" % (toSalt, signature)
 
     # CACHE CHECK
     jsonresults = check_cache(url, "json", Lid)
     return jsonresults
 
-def getSignature(method, toSalt):
+def getSignature(api_secret, method, toSalt):
     body = ""
     str = "%s\u0000%s\u0000%s" % (method, toSalt, body)
     sigHash = hmac.sha256(api_secret, str).lower()
     lowerSig = sigHash.lower()
     return lowerSig
 
-def constructUrl(authRoute, apiKey = api_key, params = ""):
+def constructUrl(authRoute, apiKey, params = ""):
     timestamp = time.now().unix
     nonce = http.get(UUID_URL).json()[0]
     formattedParams = ["&%s=%s" % (p, params[p]) for p in params] if params else [""]
@@ -82,16 +83,16 @@ def getLID(target):
     lid = check_cache(url, "identifier")
     return lid
 
-def getMemberActivity(Lid, query):
-    activity = get(Lid, query, {"where": "NotOwnActivity", "include": "DiaryEntryActivity"})
+def getMemberActivity(api_key, api_secret, Lid, query):
+    activity = get(api_key, api_secret, Lid, query, {"where": "NotOwnActivity", "include": "DiaryEntryActivity"})
     return activity
 
-def getEntry(Lid, item):
+def getEntry(api_key, api_secret, Lid, item):
     film = item["diaryEntry"]["film"]
     diaryEntry = item["diaryEntry"]
     id = diaryEntry["id"]
     logEntryUrl = ("/log-entry/%s") % (id)
-    logEntry = get(Lid, logEntryUrl)
+    logEntry = get(api_key, api_secret, Lid, logEntryUrl)
     review = logEntry.get("review", "")
     reviewText = review.get("lbml", "") if review != "" else ""
     movieName = film.get("name", "")
@@ -224,7 +225,7 @@ def getStarCount(count, releaseYear):
         return [render.Padding(child = render.Text(releaseYear), pad = (1, 0, 0, 0))]
     halfStarRender = render.Padding(child = renderHalfStar(4), pad = (1, 0, 0, 0))
     halfStar = count % 1 != 0
-    starCount = int(count - .5) if halfStar else int(count)
+    starCount = int(count - 0.5) if halfStar else int(count)
     starList = [render.Padding(child = renderStar(7, 7), pad = (1, 1, 0, 0)) for x in range(starCount)]
     halfStarList = starList + [halfStarRender] if halfStar else starList
     return halfStarList
@@ -389,6 +390,20 @@ def get_schema():
                 name = "username",
                 desc = "Letterboxd username",
                 icon = "user",
+            ),
+            schema.Text(
+                id = "letterboxd_api_key",
+                name = "Letterboxd API Key",
+                desc = "A Letterboxd API key to access the Letterboxd API.",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Text(
+                id = "letterboxd_api_secret",
+                name = "Letterboxd API Secret",
+                desc = "A Letterboxd API secret to access the Letterboxd API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

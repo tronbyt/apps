@@ -10,12 +10,9 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
-
-ENCRYPTED_API_KEY = "AV6+xWcEhALFeAkaO4q1aYXDTm4yFiCx1H6qhmrLmXDZaapsABtJzAyD0TelD6CkpX8nNlxDU2deCXMUiVPNMAbovbSfCC0wUq8qsPF/A6PSdKXR4A9SVX5t9VA/gHsp4f1YGCVL40/E8edn61MMtb/4FYvp5derIaU4Gc5wmyUx9vPOeH5uyZdb"
 
 def main(config):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+    api_key = config.get("onebusaway_api_key")
 
     stopid = config.get("stop")
     if stopid == None:
@@ -378,6 +375,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "onebusaway_api_key",
+                name = "OneBusAway API Key",
+                desc = "Your OneBusAway API key. See https://developer.onebusaway.org/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "stop",
                 name = "Stop",
@@ -403,9 +407,9 @@ def get_schema():
         ],
     )
 
-def get_stops(location):
+def get_stops(location, config):
     loc = json.decode(location)
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+    api_key = config.get("onebusaway_api_key")
 
     stop_search = "http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json?key=" + api_key + "&lat=" + str(loc["lat"]) + "&lon=" + str(loc["lng"])
     res = http.get(stop_search)

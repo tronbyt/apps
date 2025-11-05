@@ -8,10 +8,8 @@ Author: connorwashere
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-API_KEY = "AV6+xWcErqad0ef53RLRO50TvZfNtiFFPyOfM0rQqEjNP6E5cIcPNuliIwHh60TMq0mz1uWHCWIAcgl1YNk/Rn1XgVnj+6XY+0k2xcd7PUfJCS/STzCali40J55xojx1zatNaVXjYMXzvNaigXJz0xBtE8gmh8HPvpec9zLhBPXS+NM9atf7SHtkxYZfd5cJEQ=="
 DEFAULT_STOP_ID = "METRRCA:2806"
 DEFAULT_LINE_NAME = "A"
 SHORTENED_NAMES = {
@@ -22,7 +20,11 @@ SHORTENED_NAMES = {
 def main(config):
     transit_stop_id = config.get("stop_id", DEFAULT_STOP_ID)
     transit_line = config.get("metro_line", DEFAULT_LINE_NAME)
-    api_key = secret.decrypt(API_KEY) or config.get("dev_api_key")
+    api_key = config.get("transit_api_key")
+    if not api_key:
+        return render.Root(
+            child = render.Text("No Transit App API Key provided.", font = "5x8"),
+        )
     route_info = parse_api_response(get_times(transit_stop_id, api_key))
     stop_renders = []
     for stop_name in route_info:
@@ -133,6 +135,13 @@ def get_schema():
                 desc = "The metro stops line name using LA metro letter designations.",
                 icon = "l",
                 default = "A",
+            ),
+            schema.Text(
+                id = "transit_api_key",
+                name = "Transit App API Key",
+                desc = "A Transit App API key to access the Transit App API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

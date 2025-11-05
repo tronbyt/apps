@@ -11,19 +11,17 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 NEXTBUS_URL = "https://api.wmata.com/NextBusService.svc/json/jPredictions"
 DEFAULT_STOPID1 = "1001155"
 DEFAULT_STOPID2 = ""
-ENCRYPTED_API_KEY = "AV6+xWcES/gMdrg972dJlYM7I3LF3UXYTSPv/+lz7A7gYqYlVouA0V1Hp1KEE8PaE2OcMYwNZVTjuvAMxxW2rs+BgcBsJMwzB7UV8qNaD6VXM3LRHpKzTSywYBHqcoSFGkU/91Z1a/Raxnh0zvygyxKAcNypjFs/+ZW1qarI7+Xm/aqwt4g="
 
 def main(config):
     numPredictions = 0
     numPredictions2 = 0
     iMinutes = [0, 0, 0, 0, 0, 0, 0, 0]
 
-    apiKey = secret.decrypt(ENCRYPTED_API_KEY)
+    apiKey = config.get("apiKey")
 
     Bus = [render.Row(
         children = [
@@ -502,6 +500,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "apiKey",
+                name = "API Key",
+                desc = "Your WMATA API key.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "StopID_1",
                 name = "Stop ID #1 (e.g. 1001155)",

@@ -9,11 +9,7 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
-
-# using "lordoftherings"
-API_KEY = secret.decrypt("AV6+xWcE4VltFa9T2uqMvHJJvQmY+pl+upIgaFFPddIeaqFrJOg8lTPlzBnd4jN+EFw9k+ixYNjfzmJSCjYl4NLIw3NTUq96cWO0erM1BTMMh5SsurAc+4R2LZQ2iI+YHAlP5Go0Y5oe1WtMAfv3Zc47AaCh5Xl61QM=")
 
 MOVIE_FONT = "CG-pixel-3x5-mono"
 MOVIE_COLOR = "#701010"
@@ -35,7 +31,7 @@ def main(config):
     # set up web request
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(API_KEY),
+        "Authorization": "Bearer {0}".format(config.get("lotr_api_key")),
     }
     resp = http.get("https://the-one-api.dev/v2/character/{0}/quote".format(char_id), headers = headers, ttl_seconds = CACHE_TIMEOUT)
 
@@ -225,6 +221,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "lotr_api_key",
+                name = "Lord of the Rings API Key",
+                desc = "Your The One API key. See https://the-one-api.dev/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "character",
                 name = "Character",

@@ -9,7 +9,6 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 # Set to true to work on this locally; should be False for deployment.
 LOCAL_DEV = False
@@ -47,8 +46,6 @@ fElEQVQYGWO8xsLyn4ECsKqoiIGBZe6V/yCDQhNXgzE5bCYKHAHXyghyyaV0A4ZLjIxgQb3//0lmM8LC
 CTTfPy4Gx0BjZ1LBP+/QOrswaSB44eZXCwtmaAiaEbAOKjq5v17x8jC4iASv4HGQACMDEwB40AqsBQBwBXhV/r
 O8Ek+wAAAABJRU5ErkJggg==
 """)
-
-DEV_API_KEY_ENCRYPTED = """AV6+xWcE61BPCHQ3V1S5Q9FlIz6KKPA2NhR45JUTWFDz/7f0UANHaBYMxsdJuCsFY88/CopT2XkKZzA7BBOjhjn6b/oH7G6Sbe3qSxPGc+dG9FG4z4AS5u+6qjzFmNJe3+LGFD0IZO4tAgv8Uob6TzbECuD4Ffg6DBgvfyOWMw=="""
 
 PRT_API_URL = "http://realtime.portauthority.org/bustime/api/v3/"
 PTR_RT_LIMIT_URL = "&rt={rtlimit}"
@@ -359,7 +356,7 @@ def main(config):
     line_pattern = ensure_valid_route_pattern(config.get("line_pattern"))
 
     # Decrypt the API key.
-    api_key = secret.decrypt(DEV_API_KEY_ENCRYPTED) or config.get("dev_api_key")
+    api_key = config.get("api_key")
 
     # Gather the data from the web.
     lines_times, stop_name, inbound = get_times(stop_number, line_pattern, api_key)
@@ -374,6 +371,13 @@ def get_schema():
     """
     fields = [
         schema.Text(
+            id = "api_key",
+            name = "PRT API Key",
+            desc = "Your Port Authority of Allegheny County (PRT) API key. See http://realtime.portauthority.org/bustime/api/v3/ for details.",
+            icon = "key",
+            secret = True,
+        ),
+        schema.Text(
             id = "stop_number",
             name = "Stop Number",
             desc = "Stop number to display",
@@ -386,16 +390,6 @@ def get_schema():
             icon = "bus",
         ),
     ]
-
-    if LOCAL_DEV:
-        fields.append(
-            schema.Text(
-                id = "dev_api_key",
-                name = "PRT API Key",
-                desc = "For local debugging",
-                icon = "key",
-            ),
-        )
 
     return schema.Schema(
         version = "1",

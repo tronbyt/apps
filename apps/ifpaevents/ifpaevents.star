@@ -9,11 +9,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
-
-API_KEY = """
-AV6+xWcExdMNUN6PYH+JotIsNKvKdvxNA5Efhe5DxwEfoTUjlS3lCzN/EwbIcxY2FmhuIBuf9d0oM8OFv54WMnQFWd50vQ6wT3kXCuGYwxCcicp2jtRvz7k3WeSnDlsVC5cOLDCTYEg6nU+/acQQvUwfsXC3Qd77EKrDAFi67BclFQTyyBA=
-"""
 
 CACHE_TIME_IN_SECONDS = 3600
 DEFAULT_MAX_DISTANCE = 50
@@ -33,7 +28,7 @@ def main(config):
     location = json.decode(location_cfg)
     max_distance = config.str("max_distance", DEFAULT_MAX_DISTANCE)
 
-    apiKey = secret.decrypt(API_KEY) or config.get("dev_api_key")
+    apiKey = config.get("ifpa_api_key")
 
     upcoming_events_url = "https://api.ifpapinball.com/v2/calendar/search?latitude=%s&longitude=%s&distance=%s&distance_type=Miles&api_key=%s" % (location["lat"], location["lng"], max_distance, apiKey)
     upcoming_events_data = http.get(upcoming_events_url, ttl_seconds = CACHE_TIME_IN_SECONDS)
@@ -115,6 +110,13 @@ def get_schema():
                 name = "Location",
                 desc = "Monitor new machines from this location",
                 icon = "locationDot",
+            ),
+            schema.Text(
+                id = "ifpa_api_key",
+                name = "IFPA API Key",
+                desc = "An IFPA API key to access the IFPA API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

@@ -10,7 +10,6 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_IMAGE = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAIAAAAt/+nTAAAABGdBTUEAALGPC/xh
@@ -136,13 +135,12 @@ AAAAAElFTkSuQmCC
 """)
 
 UNSPLASH_URL = "https://api.unsplash.com/photos/random"
-UNSPLASH_ACCESS_KEY = secret.decrypt("AV6+xWcEouhNH5fsxoWNM3TM76UpnbST7Sn/0QRgPNaO9sC647frYR6kdexgwoKgKCTQr0ovkQF3SwJgivV39gCRkhzYAonlY272+8a8P6y/7Ya6cMHmvHM6FybM2k2opEoTnBcOdVzcZVq1ho0fU7KFv4L+g4kgyAVxIkGpFHrU7Tt2MxgifsNcipjt+h9kWg==")
 
 def main(config):
     image = cache.get("image")
     if not image:
         image = DEFAULT_IMAGE
-        key = UNSPLASH_ACCESS_KEY or config.get("dev_api_key")
+        key = config.get("unsplash_access_key")
         if key:
             print("Querying for image.")
             rep = http.get(
@@ -183,5 +181,13 @@ def main(config):
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Text(
+                id = "unsplash_access_key",
+                name = "Unsplash Access Key",
+                desc = "Your Unsplash API Access Key. See https://unsplash.com/developers for details.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )

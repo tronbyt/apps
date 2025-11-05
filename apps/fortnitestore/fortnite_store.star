@@ -10,7 +10,6 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 color_key = {
     "handmade": "#fff",
@@ -33,7 +32,7 @@ iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAYAAAB/HSuDAAUeNElEQVR42uy9e5hbd3nv+5HWLHnJy6NI
 }
 
 def main(config):
-    api_key = secret.decrypt("AV6+xWcEuaKV5wZdc1Ga54t9PMb53Whf4JhhnUBnhFBqczkewlzfLHNQlBpYnkOOv26zJJXx2Wdk5b0UpVqR2PLXOLmKmd+ORAhKfY6wP+yS8DS/HgrlQ+lqaX1TCr/N0F8OlkTVtf1ROsvjoOinPJb5T2zg3jdv+458QFeu7hmDYhsunyqcTK8Y") or config.get("dev_api_key")
+    api_key = config.get("api_key")
     if api_key:
         store_api = "https://api.fortnitetracker.com/v1/store"
         items_resp = http.get(store_api, headers = {"TRN-Api-Key": api_key}, ttl_seconds = 120)
@@ -104,5 +103,13 @@ def get_cachable_data(url, ttl_seconds = 3600):
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Your Fortnite Tracker API key.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )

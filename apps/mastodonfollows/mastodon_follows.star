@@ -11,7 +11,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 MASTODON_ICON = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAA8AAAAQCAYAAADJViUEAAAAAXNSR0IArs4c6QAAAIRlWElmTU0AKgAA
@@ -36,14 +35,7 @@ Jna/uh7kVu6J6nVb+8/r3nUKYYGyKpgRxsv4YBwTQ7BdrR7qQlj0SONoh+TanpMl5HKO1m0AwrxN4ZUI
 REFLV9RaFHm4ijqfD9Xg50QqV3+WNpvfXLn12Z/aG1NmkOPOWqOoK/C2cZO0PUpJvN0LKgDCCdASQVel
 UK8nb336ImOnVCLVnpzvdjx7sCLo2xabWsZEg3v49dW7Wx5nj/4vJEolSP4YHJTlhy+f9jrhr+d0zxgj
 wRN3zzb/5p+UTUp/oFau56k+eO3eF5dLo9O5qelRnk9AnjpFcrK8efHavS3jsVn8OTHVG8Y0ZqSQm5i2
-zdzn2Njlsx7uj8xhdHoqy64t7wG1QaJ1LoGzlAAAAABJRU5ErkJggg==
-""")
-
-INSTANCES_API_TOKEN = secret.decrypt("""
-AV6+xWcE/8+unRiK8XkPTrMjBib0FD0gsCVHVnWCbK1Q2QhUfZzJMGlP3wZURRgDhyF+kUsJUS+BblJo
-XKPacQol2+THpdf1SDjsL8WoXZy8a9FvFi0wpIKH6o2Zs104i8n4cSPXHu6C93+3hd8JFGDLvjMUvmlO
-1+lS5S7U4YvWAVH12N/ZHgUObNpuimBuIpoc4wVqx9pvD9dKiGlW8hWlc8qVmWsRV2HhqwQgcFt1Fxl2
-irBThl5EZKG0l5xrlQL/Lw2O4kHOCHzzH6J6eeTaYhipO9wa5uBYgNMHfs2MKyLvrjk=
+    zdzn2Njlsx7uj8xhdHoqy64t7wG1QaJ1LoGzlAAAAABJRU5ErkJggg==
 """)
 
 def main(config):
@@ -111,7 +103,7 @@ def get_followers_count(instance, username):
             return int(body["followers_count"])
     return None
 
-def search_instances(pattern):
+def search_instances(pattern, config):
     matched_instances = []
     response = http.get(
         "https://instances.social/api/1.0/instances/search",
@@ -120,7 +112,7 @@ def search_instances(pattern):
             "q": pattern,
         },
         headers = {
-            "Authorization": "Bearer %s" % INSTANCES_API_TOKEN,
+            "Authorization": "Bearer %s" % config.get("instances_api_token"),
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -144,6 +136,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "instances_api_token",
+                name = "Instances.social API Token",
+                desc = "Your API token for instances.social. See https://instances.social/api/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Typeahead(
                 id = "instance",
                 name = "Instance",

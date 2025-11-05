@@ -11,16 +11,16 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 PIN_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAANJJREFUSEvV1tENhCAMBuBjI+ZgGIZhGOZgo7uUpKbWtoBUk7snc5p+/lUp4TPxizF+tctaa2FUwrwAi+ec1TqllH7OwkRkpjhXLeyCAGDd+ag1gPFUJ2QEpJRORq1VNDl0ICOAVpvBKHQLQZBiPNUFWUkh9QcxDepJdhGoIUGYJngAGgL/A+SGWGn+D8E09AVwb9driLSmuT4T6Rvq7fL6TjQAFsv3kCfSuC2Q1mwREc806jzBu9pdy4aTkUJwvDKGl2Y87fPMhuL2boU/0N191w+8LrYDiiRhIgAAAABJRU5ErkJggg==""")
-API_KEY = """
-AV6+xWcEFHNh6PsqmJYMRNJeYkNiOx8tUBB6Wns7QgKLc8HI2AS6LRhNuDrTWvyddBtUM24wUEhuIG42LGpefh6CmYkxBfVS7295Yz5OW7ygTXsEZZybB3U6ouO/Qvis8dpDwQX/ubai5jCjAqf/3XvG9e4XbWaK5a5WnOT81j5093JbVxI=
-"""
 
 def main(config):
-    apiKey = secret.decrypt(API_KEY) or config.get("dev_api_key")
+    apiKey = config.get("ifpa_api_key")
     playerId = config.str("playerId", "1")  # Default to KME, also specified in schema
+    if apiKey == None:
+        return render.Root(
+            child = render.Text("No IFPA API Key provided.", font = "5x8"),
+        )
     IFPA_URL = "https://api.ifpapinball.com/v1/player/" + playerId + "?api_key=" + apiKey
 
     # Keep a cache of the JSON response from the IFPA servers. Key is the user ID, value is the response as a String
@@ -73,6 +73,13 @@ def get_schema():
                 desc = "IFPA Player ID",
                 icon = "user",
                 default = "1",
+            ),
+            schema.Text(
+                id = "ifpa_api_key",
+                name = "IFPA API Key",
+                desc = "An IFPA API key to access the IFPA API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

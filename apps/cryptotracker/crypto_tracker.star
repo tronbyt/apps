@@ -12,14 +12,11 @@ load("humanize.star", "humanize")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_SYMBOL = "BTC"
 RED_RGB = "#FF0000"
 GREEN_RGB = "#00FF00"
 WHITE_RGB = "#FFFFFF"
-
-PIN = """AV6+xWcEusHpmsVuv3T3x5sZCIs7M7pe4JOOypcu+Xo53jo5IBtjbh2OD9vDODM8GJtHVnquRu3J24R2BogCRRqEFy3O1ZzOwcT5NKRzuPESxZMKULP5gD7kcuqXu8xhmhTNbFC47t+oI1Vxntc7NbC7mJJRvQ=="""
 
 def display_symbol(crypto_symbol):
     "returns crypto symbol render"
@@ -126,7 +123,7 @@ def main(config):
     tr_format_percent = config.str("tr_format_percent", False) == "true"
     interval = "15min"
 
-    API_KEY = secret.decrypt(PIN) or config.get("dev_api_key")
+    API_KEY = config.get("api_key")
     API_URL = "https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol={s}&market=USD&interval={i}&outputsize=full&apikey={a}".format(s = symbol, i = interval, a = API_KEY)
 
     cache_name = "{}_price_data".format(symbol)
@@ -252,6 +249,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Alphavantage API Key",
+                desc = "Your Alphavantage API Key.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "symbol",
                 name = "crypto symbol",

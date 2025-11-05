@@ -9,7 +9,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 DEFAULT_LOCATION = """
@@ -32,8 +31,7 @@ ROUTES_URL = "https://api.511.org/transit/lines?format=json&api_key=%s&operator_
 STOPS_URL = "https://api.511.org/transit/stops?format=json&api_key=%s&operator_id=SF"
 ALERTS_URL = "https://api.511.org/transit/servicealerts?format=json&api_key=%s&agency=SF"
 
-API_KEY_SECRET = "AV6+xWcEae1/w/g0/fc1chDa3ueiTNg5areqHTlKBSpte2a6zWT3PaXGXlrkIHDssdZkVE5fsQTTd+a7FHQoK15rkrvmYWW7cnzmpZUsiM7Bv/XPKaQSg1HXLQig87WCwJJbvArawxI/Q4jiZYK5Up5/AMGLbBfpQSYFBI6kpq5IMNzVlvw5SGiv"
-API_KEY = secret.decrypt(API_KEY_SECRET)
+API_KEY = None
 
 # Colours for Muni Metro/Street Car lines
 MUNI_COLORS = {
@@ -210,6 +208,13 @@ def get_schema():
                 icon = "clock",
                 default = "0",
             ),
+            schema.Text(
+                id = "511_api_key",
+                name = "511.org API Key",
+                desc = "A 511.org API key to access the 511.org API.",
+                icon = "key",
+                secret = True,
+            ),
         ],
     )
 
@@ -294,7 +299,11 @@ def main(config):
     stop = json.decode(config.get("stop_code", default_stop))
     stopId = stop["value"]
 
-    api_key = API_KEY or config.get("dev_api_key")
+    api_key = config.get("511_api_key")
+    if not api_key:
+        return render.Root(
+            child = render.Text("No 511.org API Key provided.", font = "tom-thumb")
+        )
 
     ## Fetch and parse predictions
     (stopTitle, routes, predictions) = getPredictions(api_key, config, stop)

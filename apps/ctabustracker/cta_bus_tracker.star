@@ -10,7 +10,6 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_LOCATION = """
 {
@@ -25,21 +24,23 @@ DEFAULT_LOCATION = """
 
 DEFAULT_ROUTE = "36"
 
-ENCRYPTED_API_KEY = "AV6+xWcEAmKCn23NmgtZCEM5GyvmBk8mOiDwqZHoN8MeNwBQU8TXhaKmoOy0quXZkYL5venMc80y9zvKGr3vabQ3y93W7F1PBT4FHp9INXOzakv4r+JViX9oJBzZOS7cuWfLSS7fFUixVVXRKUfcRdgz/8fzUoASfvqOyGhudA=="
-
 def get_schema():
-    options = get_bus_route_options()
-
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "CTA API Key",
+                desc = "Your CTA Bus Tracker API key. See https://www.transitchicago.com/developers/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "route",
                 name = "Bus Route",
                 desc = "The CTA Bus Route to get departure schedule for.",
                 icon = "bus",
-                default = options[0].value,
-                options = options,
+                options = get_bus_route_options,
             ),
             schema.Location(
                 id = "location",
@@ -54,17 +55,11 @@ def get_schema():
                 icon = "eye",
                 default = True,
             ),
-            # schema.Text(
-            #     id = "dev_api_key",
-            #     name = "CTA API Key",
-            #     desc = "For local debugging",
-            #     icon = "key",
-            # ),
         ],
     )
 
 def main(config):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("dev_api_key")
+    api_key = config.get("api_key")
     route = config.get("route", DEFAULT_ROUTE)
     hide = config.bool("hide", True)
     location = config.get("location", DEFAULT_LOCATION)
@@ -132,8 +127,8 @@ def main(config):
 ######################
 # Build Config options
 ######################
-def get_bus_route_options():
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+def get_bus_route_options(config):
+    api_key = config.get("api_key")
 
     if not api_key:
         return [

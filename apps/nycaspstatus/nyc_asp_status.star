@@ -9,14 +9,12 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 months = ["", "Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."]
 days = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th", "13th", "14th", "15th", "16th", "17th", "18th", "19th", "20th", "21st", "22nd", "23rd", "24th", "25th", "26th", "27th", "28th", "29th", "30th", "31st"]
 
 URL = "https://api.nyc.gov/public/api/GetCalendar?"
-API_KEY = "AV6+xWcE+YMm4G7gYV3hsgC6XO9XBxoNBMw1B4gG84iLo24VAPx3tG0tmCSyzMglcBeNT5LFENVoEmi5foVQ6S85R4uYaVTr/Cl8FTs98wIoh9DVpW7ixeguWF/T9hoLgNrhEp201IbPBYkeOWUBV9Lofm8m2k6KTVvQrZAKM49tKUP3iao="
 
 TTL_SECONDS = 300
 
@@ -28,7 +26,7 @@ GREEN_IMG = "PD94bWwgdmVyc2lvbj0iMS4wIj8+Cjxzdmcgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjA
 def main(config):
     showApp = config.bool("showOnlySuspended", DEFAULT_SHOW_APP)
 
-    status = get_asp_status(URL + "fromdate=%s&todate=%s" % (display_date()[0].format("2006-01-02"), display_date()[1].format("2006-01-02")), TTL_SECONDS)
+    status = get_asp_status(URL + "fromdate=%s&todate=%s" % (display_date()[0].format("2006-01-02"), display_date()[1].format("2006-01-02")), TTL_SECONDS, config)
 
     if (status[0] == "IN EFFECT" and showApp == True):
         # Don't display the app in the user's rotation
@@ -71,8 +69,8 @@ def main(config):
         ),
     )
 
-def get_asp_status(url, timeout):
-    headers = {"Cache-Control": "no-cache", "Ocp-Apim-Subscription-Key": secret.decrypt(API_KEY) or "demo"}
+def get_asp_status(url, timeout, config):
+    headers = {"Cache-Control": "no-cache", "Ocp-Apim-Subscription-Key": config.get("nyc_asp_api_key") or "demo"}
     if headers["Ocp-Apim-Subscription-Key"] == "demo":
         return ["IN EFFECT", "- DEMO MODE"]
     response = http.get(url = url, headers = headers, ttl_seconds = timeout)
@@ -111,6 +109,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "nyc_asp_api_key",
+                name = "NYC ASP API Key",
+                desc = "Your NYC Alternate Side Parking API key. See https://api.nyc.gov/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Toggle(
                 id = "showOnlySuspended",
                 name = "Show Only When Suspended",

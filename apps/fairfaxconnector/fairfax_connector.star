@@ -11,9 +11,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-apiKey = secret.decrypt("AV6+xWcEqn7eWtGqY2uNALHMELi9Wb5rnnlFxLW0nk3JQU9k1Lu7KrMNCyX8nsK2a92gzXtxYqt+j+MB45sUHbbR/njfoHLiUn3Iz6yCD42UF1/2d7u//6rmgf9OsY+ezLmjL4zRiC0Kzna4VWndWrgVK7K1b9En+o6x2DgOdA==")
 ONE_MINUTE = 60
 ONE_DAY = ONE_MINUTE * 60 * 24
 ONE_WEEK = ONE_DAY * 7
@@ -24,10 +22,10 @@ BUS_STOP_PICTURE = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAABVElEQVRoQ+1ZwQ3CMAxM/yAk/vDlzwadoit0pK7QKboBb/gyABJiAKgrubLStEnAFoHYr4pe3dzl4tShMJlHEcP/2UcMPhZb9BH7zKf4oBci8bIsTVVVpm3boPf6sF3XDXkgL1wnJwAljox9pKgyc1hKHPHJCACkcSYkLQ+zTiMZAXar8+I6vz4Og2VDAki5sK7fkxEAHQBCAFka+/XFZCcAkIYA4lkKoA7IzQFaBK1t0LVdZbELwNqHHUEFcHywqANy+BDSJaA1YFoEsYsL6QN8mKZpRkhd18N1Eu2w3Q1iwcNmhd73kZy7T3cXzrzvjGdyIOISgHZqnAJw5xURQMKaeM7wDcvbInkdIDFIDhe9M9uuZ1QAWxW7BqgDBI6qf2YJcK2zlPMs1oCUB841NhVA8uyfa5Yk84ADRP/vkxw8R24V4H47jg7YbE9OUXvM+Pu/YV4KR786gTkzfwAAAABJRU5ErkJggg==
 """)
 
-def getAllRoutes():
+def getAllRoutes(config):
     routes = cache.get("ROUTES")
     if routes == None:
-        routesUrl = BASE_URL + "/getroutes?key=" + apiKey + "&format=json"
+        routesUrl = BASE_URL + "/getroutes?key=" + config.get("fairfax_connector_api_key") + "&format=json"
         routes = http.get(routesUrl).body()
 
         # TODO: Determine if this cache call can be converted to the new HTTP cache.
@@ -36,11 +34,11 @@ def getAllRoutes():
     routes = json.decode(routes).get("bustime-response").get("routes")
     return routes
 
-def getRouteDirections(route):
+def getRouteDirections(route, config):
     cacheKey = "DIRECTIONS-" + route.get("rt")
     directions = cache.get(cacheKey)
     if directions == None:
-        dirUrl = BASE_URL + "/getdirections?key=" + apiKey + "&rt=" + route.get("rt") + "&format=json"
+        dirUrl = BASE_URL + "/getdirections?key=" + config.get("fairfax_connector_api_key") + "&rt=" + route.get("rt") + "&format=json"
         directions = http.get(dirUrl).body()
 
         # TODO: Determine if this cache call can be converted to the new HTTP cache.
@@ -49,11 +47,11 @@ def getRouteDirections(route):
     directions = json.decode(directions).get("bustime-response").get("directions")
     return directions
 
-def getStops(route, direction):
+def getStops(route, direction, config):
     cacheKey = "STOPS-" + route.get("rt") + "-" + direction.get("id")
     stops = cache.get(cacheKey)
     if stops == None:
-        stopsUrl = BASE_URL + "/getstops?key=" + apiKey + "&rt=" + route.get("rt") + "&dir=" + direction.get("id") + "&format=json"
+        stopsUrl = BASE_URL + "/getstops?key=" + config.get("fairfax_connector_api_key") + "&rt=" + route.get("rt") + "&dir=" + direction.get("id") + "&format=json"
 
         # Some of the directions have spaces in their IDs. Why this is allowed, I have no clue. I can't seem to find a starlark lib
         # for URL encoding, so I'm doing this one-off here where it's needed.
@@ -68,13 +66,13 @@ def getStops(route, direction):
 
 # Warning: Expensive operation! Sends a lot of network requests the first time it's called
 # before the cache is filled up (and again every 24h when the cache expires).
-def getAllStops():
+def getAllStops(config):
     allStops = []
-    routes = getAllRoutes()
+    routes = getAllRoutes(config)
     for route in routes:
-        directions = getRouteDirections(route)
+        directions = getRouteDirections(route, config)
         for direction in directions:
-            stops = getStops(route, direction)
+            stops = getStops(route, direction, config)
             if stops == None:
                 continue
             for stop in stops:
@@ -82,10 +80,10 @@ def getAllStops():
 
     return allStops
 
-def getRouteColor(routeId):
+def getRouteColor(routeId, config):
     routeColor = cache.get("COLOR-" + routeId)
     if routeColor == None:
-        routes = getAllRoutes()
+        routes = getAllRoutes(config)
 
         # Find the matching route and extract its color
         for route in routes:
@@ -98,10 +96,10 @@ def getRouteColor(routeId):
     return routeColor or "#ffffff"
 
 # Gets the list of predicted bus times for an individual bus stop
-def getPredictions(stopId):
+def getPredictions(stopId, config):
     stopPredictions = cache.get(stopId)
     if stopPredictions == None:
-        predictionUrl = BASE_URL + "/getpredictions?key=" + apiKey + "&stpid=" + stopId + "&format=json"
+        predictionUrl = BASE_URL + "/getpredictions?key=" + config.get("fairfax_connector_api_key") + "&stpid=" + stopId + "&format=json"
         stopPredictions = http.get(predictionUrl).body()
 
         # TODO: Determine if this cache call can be converted to the new HTTP cache.
@@ -115,8 +113,8 @@ def getPredictions(stopId):
             return None
     return stopPredictions.get("prd")
 
-def renderBusRow(prediction):
-    routeColor = getRouteColor(prediction.get("rt"))
+def renderBusRow(prediction, config):
+    routeColor = getRouteColor(prediction.get("rt"), config)
     if prediction == None:
         return render.Text("")
     minutesRemaining = prediction.get("prdctdn")
@@ -150,7 +148,7 @@ def main(config):
             ),
         ],
     )
-    predictions = getPredictions(stop)
+    predictions = getPredictions(stop, config)
     if predictions == None:
         return render.Root(
             child = render.Column(
@@ -190,7 +188,7 @@ def main(config):
         ),
     ]
     for prediction in predictions:
-        rows.append(renderBusRow(prediction))
+        rows.append(renderBusRow(prediction, config))
     return render.Root(
         child = render.Column(
             children = rows,
@@ -201,6 +199,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "fairfax_connector_api_key",
+                name = "Fairfax Connector API Key",
+                desc = "Your Fairfax Connector API key. See https://www.fairfaxcounty.gov/bustime/api/v3 for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "stop",
                 name = "Stop ID",

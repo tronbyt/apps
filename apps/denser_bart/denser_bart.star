@@ -8,19 +8,15 @@ Author: scoobmx
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 PREDICTIONS_URL = "https://api.bart.gov/api/etd.aspx"
 STATIONS_URL = "https://api.bart.gov/api/stn.aspx"
 DEFAULT_ABBR = "WOAK"
 DEFAULT_KEY = "MW9S-E7SL-26DU-VV8V"
-DECRYPT_KEY = "AV6+xWcEvAmJupxlFpNntfXPgT8ZeyIa0i/IID7UjyanaDbzrSwtt/aaPlx4/Rq4ElmV2e1VpXNjlFqk3szZYsznTluhr23AalHk3DxTgsC1M4BObGZOvKnu5r2a+j/Fps1XzTFwIZ5Zcu3jXREe/SRwhAZo1IazKg=="
 
 def main(config):
     api_key = config.get("api_key")
-    if api_key == "":
-        api_key = secret.decrypt(DECRYPT_KEY)
-    if api_key == None:
+    if not api_key:
         api_key = DEFAULT_KEY
 
     abbr = config.get("abbr")
@@ -293,27 +289,25 @@ def get_times(station, api_key):
 
     return predictions
 
-def get_stations(api_key):
-    if api_key == "":
-        api_key = secret.decrypt(DECRYPT_KEY)
-    if api_key == None:
-        api_key = DEFAULT_KEY
-    rep = http.get(STATIONS_URL, params = {"cmd": "stns", "json": "y", "key": api_key}, ttl_seconds = 30)
+def search_stations(prefix, config):
+    api_key = config.get("api_key", DEFAULT_KEY)
+    rep = http.get(STATIONS_URL, params = {"cmd": "stns", "json": "y", "key": api_key}, ttl_seconds = 3600) # Cache for an hour
     if rep.status_code != 200:
         return []
     data = rep.json()
     if "root" not in data or "stations" not in data["root"] or "station" not in data["root"]["stations"]:
         return []
+    
     stationlist = data["root"]["stations"]["station"]
     stations = []
-    for i in range(0, len(stationlist)):
-        stations.append(
-            schema.Option(
-                value = stationlist[i]["abbr"],
-                display = stationlist[i]["name"],
-            ),
-        )
-
+    for station in stationlist:
+        if prefix.lower() in station["name"].lower():
+            stations.append(
+                schema.Option(
+                    value = station["abbr"],
+                    display = station["name"],
+                ),
+            )
     return stations
 
 def get_schema():
@@ -326,14 +320,14 @@ def get_schema():
                 desc = "Optional BART legacy API key",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
-            schema.Dropdown(
+            schema.Typeahead(
                 id = "abbr",
                 name = "Station",
                 desc = "Station to show times for",
                 icon = "trainSubway",
-                default = DEFAULT_ABBR,
-                options = get_stations(""),
+                handler = search_stations,
             ),
             schema.Toggle(
                 id = "long_abbr",

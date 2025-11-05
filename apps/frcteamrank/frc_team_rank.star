@@ -11,7 +11,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 ## ==================== BEGIN CONSTANTS ====================
@@ -37,7 +36,6 @@ DEFAULT_NO_EVENTS_MSG = "No active events for team %d!"
 # Use The Blue Alliance API to get the team's current competition ranking
 TBA_BASE_URL = "https://www.thebluealliance.com/api/v3"
 TBA_API_KEY_DEFAULT = "YOUR_TBA_READ_API_KEY_HERE"
-TBA_API_KEY_ENCRYPTED = "AV6+xWcEi7teQ3dIi5syCMRdr8X9t5Cc0NS2zyaivQLlKToPL+7cd0MQk3ZXQSvLNh2DvGJUgxvX9vfkT6GASc1+ZYni9ENlOyeVAsmvnmgDCQtYogqW0UkKluSxSWc/p9k7HKQT3dzAXitJfzIio6aFZvg1KejmuVO2TLXicXTp91hGO65ci4Cudz8m9Jo0zwL+k1vh6ppKBqA2e74Ie9DsMSgP9A=="  # Encrypted READ key
 
 ## ==================== END CONSTANTS ====================
 
@@ -232,7 +230,7 @@ def main(config):
     team_avatar = DEFAULT_TEAM_AVATAR
 
     # Get Blue Alliance API key from the user
-    TBA_API_KEY = secret.decrypt(TBA_API_KEY_ENCRYPTED) or config.get("tba_api_key", TBA_API_KEY_DEFAULT)
+    TBA_API_KEY = config.get("tba_api_key", TBA_API_KEY_DEFAULT)
 
     # Check if we have a valid API key
     if TBA_API_KEY and TBA_API_KEY != TBA_API_KEY_DEFAULT:
@@ -375,6 +373,7 @@ def get_schema():
                 name = "TheBlueAlliance API Key",
                 desc = "READ Api key to access TheBlueAlliance API. Can be generated from your TBA account settings: https://www.thebluealliance.com/account",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

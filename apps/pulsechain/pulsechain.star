@@ -10,7 +10,6 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 NO_PRICE = "$  ------- "
 
@@ -53,13 +52,11 @@ def hasData(json):
     return "data" in json
 
 def main(config):
-    PULSE_URL = secret.decrypt("AV6+xWcEwLL4pRoJwUrtaXE3CI9igLnERsQGHOaKT71Tx9ZK4KNzX7RnM44TUUH331nV7qC1HZyDQjWz5dRSOfhR+FygZJuuAA0U6lVtMJ0ec/LhP7g6njwRFMazQm5WKVzIEiiBZSu8j1cFt8p0nvnIX/YIzdkHD7oGmBeC4yJJS00Ff2mwdgk7thwyxzVASOxPhfqHx0wzF5+V9Hqt4TQKLNHrZraKaMvAlPNwYg==")
-    PULSE_TESTNET_URL = secret.decrypt("AV6+xWcEZgIlJbik5keAYBYapZFttKMveUNXoc+U/ZmzjZqkhHu3c+gYZAFcOLIDCZOri+2mDZb+evfRS/vvvrkORXD/J/ccWmSgldILwc0lAPOeNv4Z0oaxWnCAdHSAFKbpMUSf5lUoztjRBM3Nhb9DoCoYV7cFK1CMqDYc+8M6MscgBof7c5E+91L4kAB+DLn4Vwd5ixFCgisNJNcqpGipSCgD0Lll5MI8lFPrkQ==")
-    PULSE_QUERY_ENC = secret.decrypt("AV6+xWcELDwtAPQSjVEqygAqa9qzv4hjSCqBXUEk1usU3pv/jtFnEbSBEKP7/CodFUG51ngOaOX2EjQOuMFUpm7pUOZQadMPMy06/UvktK52nV5Lapp0Sl5HWf5UMq0K6nI5K2bdEreIGPkp8c7pH9zjoWJrwhEdSpEGqH7WWUWyn9C/FQwjyFvGo2hEU7AOJewscoceQrq8PJispbJ1s+xzFzlFsfu+Hv5OWgnys5vjKpk9ARkZPeRKScFLQWjML+iezJeT7o7eZbDEpYbhXBXReT//8f5GIqXLxaQcJdB4LpqVtQ+Q+hSFd/7mERgzhtCv7894vuxB0Nbkch/fkgpY9sLqx+fSlY8l9BYnkyVa/19Piv98iQCpLfVcv4srJRe9aVcQUK7kdUFA+p0bnXwUDohGIqX9ZIkPPYjjlx6rpCOmTNj2dpyh8wyWXM2nmA7DDEKghS407PkJ8aak+k8pygsFVhdTcCqYrdPxzxWBc1+xitBprVDhJKDDdoEocJcQe32Jd95+LunIZeqh1juhGnMsQXXovOQ45yslqzkoOg==")
-
+    PULSE_URL = config.get("pulse_url")
+    PULSE_TESTNET_URL = config.get("pulse_testnet_url")
+    PULSE_QUERY = config.get("pulse_query")
     ETH_MAINNET_URL = "https://api.thegraph.com/subgraphs/name/toihoang12/uniswapv3"
-    ETH_MAINNET_HEX_QUERY_ENC = "eyJxdWVyeSI6IntcbiAgZXRoOiBidW5kbGUoaWQ6IFwiMVwiKSB7ICAgIFxuICAgIGV0aFByaWNlVVNEXG4gIH1cbiAgaGV4OiB0b2tlbihpZDogXCIweDJiNTkxZTk5YWZlOWYzMmVhYTYyMTRmN2I3NjI5NzY4YzQwZWViMzlcIikge1xuICAgIHN5bWJvbFxuICAgIGRlcml2ZWRFVEhcbiAgXG4gIH1cbiAgfSIsInZhcmlhYmxlcyI6bnVsbH0K"
-    PULSE_QUERY = base64.decode(PULSE_QUERY_ENC)
+    ETH_MAINNET_HEX_QUERY_ENC = "eyJxdWVyeSI6IntcbiAgZXRoOiBidW5kbGUoaWQ6IFwiMVwiKSB7ICAgIFxuICAgIGV0aFByaWNlVVNEXG4gIGh1eDogdG9rZW4oaWQ6IFwiMHgyYjU5MWU5OWFmZTlmMzJlYWE2MjE0ZjdiNzYyOTc2OGM0MGVlYjM5XCIpIHtcbiAgICBzeW1ib2xcbiAgICBkZXJpdmVkRVRIXG4gIFxuICB9XG4gIH0iLCJ2YXJpYWJsZXMiOm51bGx9Cg=="
     ETH_MAINNET_HEX_QUERY = base64.decode(ETH_MAINNET_HEX_QUERY_ENC)
 
     cached_pls = cache.get("pls_price")
@@ -194,6 +191,27 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "pulse_url",
+                name = "PulseChain Mainnet API URL",
+                desc = "The API URL for PulseChain mainnet. Obtain this from a trusted source.",
+                icon = "link",
+                default = "https://api.thegraph.com/subgraphs/name/pulsechaincom/pulsechain-main",
+            ),
+            schema.Text(
+                id = "pulse_testnet_url",
+                name = "PulseChain Testnet API URL",
+                desc = "The API URL for PulseChain testnet. Obtain this from a trusted source.",
+                icon = "link",
+                default = "https://api.thegraph.com/subgraphs/name/pulsechaincom/pulsechain-testnet-v4",
+            ),
+            schema.Text(
+                id = "pulse_query",
+                name = "PulseChain GraphQL Query",
+                desc = "The GraphQL query for PulseChain data. Do not modify unless you know what you're doing.",
+                icon = "code",
+                default = """{"query":"{\n  pls: bundle(id: \"1\") {\n    derivedUSD\n  }\n  plsx: token(id: \"0x07890c29ed6dcf8cc59a686b24a317924d63a923\") {\n    derivedUSD\n  }\n}","variables":null}""",
+            ),
             schema.Toggle(
                 id = "testnet",
                 name = "Testnet",

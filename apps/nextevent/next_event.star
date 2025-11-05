@@ -2,16 +2,12 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 DEFAULT_TIMEZONE = "America/New_York"
 LAMBDA_URL = "https://ozjgejjru4.execute-api.us-east-1.amazonaws.com/prod/"
 DEFAULT_ICS_URL = "https://ics.calendarlabs.com/76/8d23255e/US_Holidays.ics"
 DEFAULT_TITLE = "Next event"
-
-# Encrypted by Pixlet
-ENCRYPTED_LAMBDA_API_KEY = "AV6+xWcEtMbUpsRykZf6mtBgpjR026w2oTFDZT/Ff4wSVfdMcQrsIu82FTZoNIPAEHRDVWWkG44Jndgc5ap4ZNaJNtO0rlHoN58dUulNTgxtxIsxl3mYIjOxM34cVoUuevlGtyOEQtV3MHf7Q2O1QhxWpRGY+R/AFQ0OWFHf9qrfJ7vyJYDbrLHR9yJz6g=="
 
 def main(config):
     location = config.str("loc")
@@ -24,7 +20,7 @@ def main(config):
     if (ics_url == None):
         fail("Calendar URL is missing")
 
-    lambda_api_key = secret.decrypt(ENCRYPTED_LAMBDA_API_KEY)
+    lambda_api_key = config.get("lambda_api_key")
 
     # API Key will be returned if running on Tidbyt's prodution environment. If running local or in CI/CD,
     # the value will return as None. In that case, don't attempt to contact the Lambda function and
@@ -148,6 +144,13 @@ def get_schema():
                 desc = "What are the events on this calendar?",
                 icon = "calendar",
                 default = DEFAULT_TITLE,
+            ),
+            schema.Text(
+                id = "lambda_api_key",
+                name = "Lambda API Key",
+                desc = "A Lambda API key to access the Lambda API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

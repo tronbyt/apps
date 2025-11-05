@@ -11,7 +11,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 # Converts period values to display strings
 PERIOD_STRINGS = {
@@ -35,11 +34,6 @@ DEMO_TRACK = {
     "plays": "10",
 }
 
-# Decrypt the default API Key
-# Encrypted with `pixlet encrypt lastfmstats <apikey>`
-DEFAULT_API_KEY = secret.decrypt("AV6+xWcEMpic5Qa9aeMvuCkgUcDo+y8Ss5dDyiQPAQ7ulLP5TAWzms85w37wrjBimdEkp1lkVdBUwGt/gz1crVW7x1Z7LVCLCPCd5Cql/OofkaJeRDgYeCNKWPJtCRp22hER6a+CpFJShcjkVTEJVThJw9lK7ij0HrP5a3J9eHEXo10xv5M=")
-
-# Load default artwork
 DEFAULT_ARTWORK = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAAZ0lEQVQ4T2O0sLD4z0BlwEg3Q9eJMpLt9qDX/xmwunToGQryCrEA5juC3h81lNggZRgNU3BQ0SdJoWdPYtIpNj3wvI8tvxMyFJcesKG4ChB8huLTQztDQbFGrfAEmUW/kp/ovIlDIQDgTH/J851RMQAAAABJRU5ErkJggg==")
 
 def main(config):
@@ -54,7 +48,7 @@ def main(config):
 
     username = config.str("username")
     period = config.str("period")
-    apikey = config.str("apikey", DEFAULT_API_KEY)
+    apikey = config.str("apikey")
     if not username or not period:
         top_artist = DEMO_ARTIST
         top_track = DEMO_TRACK
@@ -140,6 +134,7 @@ def get_schema():
                 name = "API Key (optional)",
                 desc = "Overrides the built-in API key for last.fm",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

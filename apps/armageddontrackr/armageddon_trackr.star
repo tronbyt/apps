@@ -11,11 +11,9 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 BASE_URL = "https://api.nasa.gov/neo/rest/v1/feed"
-API_KEY = secret.decrypt("AV6+xWcEChnmX1GoWd9y78+eys+Z3IWB8fEhAih/LN4Rfxlu1wMRhqi2O07GoDccB3ommPUMen2XV0Ijb9Gn2aCfOmfoyZV5wdKQeNwDqWvWhkv2CRsU8310wm1gHrlHMZjWAyMss6ISNUdrvs+p6PIuhUc2syErX3X8MnYd3E1Gcu6ZLXaLHmuOSmNtSg==")
 DEFAULT_UNIT = "miles"
 TERMINAL_TEXT_COLOR = "#33ff00"
 DINO = base64.decode("""
@@ -27,7 +25,8 @@ def main(config):
     Retrieves the nearest earth objects from the NASA NeoWS.
     Returns rendered application root.
     """
-    if API_KEY == None:
+    api_key = config.get("api_key")
+    if not api_key:
         return render.Root(
             child = render_static_dino(),
         )
@@ -37,7 +36,7 @@ def main(config):
         pretty_now = now.format("January 2, 2006")
         query_now = now.format("2006-01-02")
 
-        neos = get_neos(query_now)
+        neos = get_neos(query_now, api_key)
         if not neos:
             return render.Root(
                 child = render.Box(
@@ -121,6 +120,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "NASA API Key",
+                desc = "Your NASA API key. See https://api.nasa.gov/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "distance_key",
                 name = "Distance Unit",
@@ -141,9 +147,9 @@ def get_schema():
         ],
     )
 
-def get_neos(query_now):
+def get_neos(query_now, api_key):
     params = {
-        "api_key": API_KEY,
+        "api_key": api_key,
         "start_date": query_now,
         "end_date": query_now,
     }

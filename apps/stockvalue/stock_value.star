@@ -11,7 +11,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 STOCK_PRICE_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol="
 DEFAULT_SHARES = 1
@@ -31,17 +30,12 @@ nnx2RzTsf762Mqx5+es/QBsMaX7pbQA0YAAAAASUVORK5CYII=
 """)
 
 def main(config):
-    DEFAULT_API_KEY = secret.decrypt("AV6+xWcEQtG/ol/N8Nlbz+ePdc+iiIGcJ1PQ2/PD4IXJ3U7AKzxfeBvOQJF2iJujgFTU6/biYa7dqUbki/oQoqgstb/w2bq8qtUWIWkXdG+aswSQ5pgoDvPpqNW7MA4I3sEqX9EP")
-
     price_cached = cache.get("price")
-
-    if DEFAULT_API_KEY == None:
-        DEFAULT_API_KEY = config.str("alphavantage", "demo")
 
     if price_cached != None:
         price = float(price_cached)
     else:
-        rep = http.get(STOCK_PRICE_URL + config.str("symbol", DEFAULT_SYMBOL) + "&apikey=" + config.str("API_KEY", DEFAULT_API_KEY))
+        rep = http.get(STOCK_PRICE_URL + config.str("symbol", DEFAULT_SYMBOL) + "&apikey=" + config.str("alphavantage", "demo"))
 
         if rep.status_code != 200:
             fail("Request failed with status %d", rep.status_code)
@@ -88,6 +82,7 @@ def get_schema():
                 name = "API KEY",
                 desc = "API key for Alpha Vantage (https://www.alphavantage.co)",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

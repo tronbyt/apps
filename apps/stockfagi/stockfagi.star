@@ -11,12 +11,11 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
-load("secret.star", "secret")
+load("schema.star", "schema")
 
 BACKGROUND = base64.decode("""
 R0lGODlhPAABAPQAAD9M7D9X7D9j7D9v7D977GtI3nRM23xP2UVG6kBH7EtG6FJG5lpG42JG4Ztfz4VU1opW1Y5Y04FR2JRb0Z5hzqNjzKlmyq5oyT+I7D+T7ECd7EKq7ES37ETH7ETX7ETk6SH5BAAAAAAAIf8LSW1hZ2VNYWdpY2sNZ2FtbWE9MC40NTQ1NQAsAAAAADwAAQAABS7gJ3pkZ3LctmlahmEEMQyCENwAkOwIoiiLBYPRaBQKBsNB8oBEJhMHpVKxWC4hADs=
 """)
-SECRET_ENCRYPTED = "AV6+xWcEzilpit4xwQAT7nT2tCgPumwhs1kudArmPiVnCv3FeCBpmFh1OCfJOqDmG0mg6mQGqkhcZli+WcSi7g5m2Q9h6Yydku7Yt7zkp4R2+C27VfMZX1Tpik33CymCL4FxfjoEzGBLnB+dizJu5Yvmjc485WNWrgpGN20163h3AYRDWa9Pmqf/RKhdq8+1y5Ds0rNTIV0="
 CACHE_SECONDS = 1800
 
 def get_text_color(index_value):
@@ -31,12 +30,12 @@ def get_text_color(index_value):
         text_color = "#519736"
     return text_color
 
-def main():
-    rapidapi_secret = secret.decrypt(SECRET_ENCRYPTED)
-    if not rapidapi_secret:
+def main(config):
+    rapidapi_key = config.get("rapidapi_key")
+    if not rapidapi_key:
         return render.Root(
             child = render.Marquee(
-                child = render.Text("This app requires a secret to run."),
+                child = render.Text("This app requires the RapidAPI Key to run."),
                 width = 64,
             ),
         )
@@ -50,7 +49,7 @@ def main():
         response = http.get(
             "https://fear-and-greed-index.p.rapidapi.com/v1/fgi",
             headers = {
-                "X-RapidAPI-Key": rapidapi_secret,
+                "X-RapidAPI-Key": rapidapi_key,
                 "X-RapidAPI-Host": "fear-and-greed-index.p.rapidapi.com",
             },
         )
@@ -150,4 +149,18 @@ def main():
                 ),
             ],
         ),
+    )
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "rapidapi_key",
+                name = "RapidAPI Key",
+                desc = "Your RapidAPI key for the Fear and Greed Index API.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )

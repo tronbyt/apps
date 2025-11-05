@@ -11,7 +11,6 @@ load("humanize.star", "humanize")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 RED = "#d3212c"
@@ -26,7 +25,6 @@ DEFAULT_NAPTAN_ID = "940GZZLURSQ"
 STATION_URL = "https://api.tfl.gov.uk/StopPoint"
 CROWDING_LIVE_URL = "https://api.tfl.gov.uk/Crowding/%s/Live"
 CROWDING_TYPICAL_URL = "https://api.tfl.gov.uk/Crowding/%s/%s"
-ENCRYPTED_APP_KEY = "AV6+xWcEaq4qKqYXJCjFV3FXEXfR8qKNHUa6Ogo62QvCkXiwjthoHQ4wSIzJr1VWIQHcgK0Y9kJJ/BKVAOIoHSVUAyapaRMDpqX3gp1qGQb6qzijtRhW3ZyUnpQR+VuvLq47x66kzRba8qjOAsid98keVyeCp7mUJw3lQWSqvXxrKmHGSQA="
 USER_AGENT = "Tidbyt busy_tube"
 
 CONTAINER_WIDTH = 62
@@ -39,17 +37,17 @@ MINUTES_PER_DAY = 1440
 QUIET_MAX = 0.4
 BUSY_MAX = 0.7
 
-def app_key():
-    return secret.decrypt(ENCRYPTED_APP_KEY)  # No freebie quota available, have to use app key
+def app_key(config):
+    return config.get("tfl_app_key")
 
 # Get list of stations near a given location, or look up from cache if available.
-def fetch_stations(loc):
+def fetch_stations(loc, config):
     rounded_lat = math.round(1000.0 * float(loc["lat"])) / 1000.0  # truncate to 3dp, which means
     rounded_lng = math.round(1000.0 * float(loc["lng"])) / 1000.0  # to the nearest ~110 metres.
     resp = http.get(
         STATION_URL,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
             "lat": str(rounded_lat),
             "lon": str(rounded_lng),
             "radius": "500",
@@ -80,7 +78,7 @@ def outside_uk_bounds(loc):
     return False
 
 # Find and extract details of all stations near a given location.
-def list_stations(location):
+def list_stations(location, config):
     loc = json.decode(location)
     if outside_uk_bounds(loc):
         return [schema.Option(
@@ -91,7 +89,7 @@ def list_stations(location):
             }),
         )]
 
-    data = fetch_stations(loc)
+    data = fetch_stations(loc, config)
     if not data:
         return []
     options = []
@@ -115,12 +113,12 @@ def list_stations(location):
     return options
 
 # Fetch data about how crowded the station currently is
-def fetch_live_crowdedness(naptan_id):
+def fetch_live_crowdedness(naptan_id, config):
     live_url = CROWDING_LIVE_URL % naptan_id
     resp = http.get(
         live_url,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -136,8 +134,8 @@ def fetch_live_crowdedness(naptan_id):
     return resp.json()
 
 # Extract data about currrent crowdedness from API response
-def get_live_crowdedness(naptan_id):
-    resp = fetch_live_crowdedness(naptan_id)
+def get_live_crowdedness(naptan_id, config):
+    resp = fetch_live_crowdedness(naptan_id, config)
     if not resp:
         return None
     return resp["percentageOfBaseline"]
@@ -162,12 +160,12 @@ def weekday_name(date):
     fail("Invalid day of the week")
 
 # Fetch data about how crowded the station typically is on a given day
-def fetch_typical_crowdedness(naptan_id, now):
+def fetch_typical_crowdedness(naptan_id, now, config):
     typical_url = CROWDING_TYPICAL_URL % (naptan_id, weekday_name(now))
     resp = http.get(
         typical_url,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -190,8 +188,8 @@ def extract_time(timeBand):
     return hour + minute
 
 # Extract data about typical crowdedness from API response.
-def get_typical_crowdedness(naptan_id, now):
-    resp = fetch_typical_crowdedness(naptan_id, now)
+def get_typical_crowdedness(naptan_id, now, config):
+    resp = fetch_typical_crowdedness(naptan_id, now, config)
     if not resp:
         return []
     data = []
@@ -222,7 +220,7 @@ def main(config):
         naptan_id = data["naptanId"]
 
     # Find out how busy things currently are.
-    pct_peak_crowdedness = get_live_crowdedness(naptan_id)
+    pct_peak_crowdedness = get_live_crowdedness(naptan_id, config)
 
     # Pick a colour and phrase to convey status.
     status, status_colour, status_number = format(pct_peak_crowdedness)
@@ -233,7 +231,7 @@ def main(config):
     now_indicator = int(pct_of_day * GRAPH_WIDTH)
 
     # Get the data to fill the graph of typical busyness.
-    typical_crowdedness = get_typical_crowdedness(naptan_id, now)
+    typical_crowdedness = get_typical_crowdedness(naptan_id, now, config)
 
     return render.Root(
         max_age = 300,  # Data updated every 5 mins
@@ -293,6 +291,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "tfl_app_key",
+                name = "TfL App Key",
+                desc = "Your Transport for London (TfL) App Key. See https://api.tfl.gov.uk/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "station",
                 name = "Station",

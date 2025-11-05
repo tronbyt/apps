@@ -12,14 +12,8 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-AVWX_TOKEN = """
-AV6+xWcEmXF9tH7xSP1ccFE9JaD7hAP2LM+mdFZCdIPfEgDwI7LLbosTAfKRDfHio6wzDzg9jMtfjd00
-Zvp/wa9mA9OcJ0yUxVpa35wNeZBcaQuaDoURxJRAFmlsdiYit6vkWuePirbZOmlVK0CkAg2OlX4SPAjr
-1T/sTc5KNBQKuivhA6bNi201+w/VC0CbcA==
-"""
 DEFAULT_LOCATION = """
 {
     "lat": "33.6295968",
@@ -45,7 +39,7 @@ FLIGHT_RULES_COLOR_MAP = {
 
 def get_avwx_headers(config):
     return {
-        "Authorization": "Token {}".format(secret.decrypt(AVWX_TOKEN) or config.get("avwx_token")),
+        "Authorization": "Token {}".format(config.get("avwx_api_token")),
     }
 
 def get_nearby_aerodromes(location, config):
@@ -187,6 +181,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "avwx_api_token",
+                name = "AVWX API Token",
+                desc = "Your AVWX API token. See https://avwx.rest/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Location(
                 id = "location",
                 name = "Location",

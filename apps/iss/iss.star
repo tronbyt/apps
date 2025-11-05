@@ -10,7 +10,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 ISS_IMG = base64.decode("""
@@ -40,10 +39,9 @@ ALTITUDE = 0  # location altitude
 SAT_ID = "25544"  # ISS code
 NUM_DAYS = "1"  # passes for the next 2 days
 MIN_DURATION = "10"  # minimum time of visible pass
-ENCRYPTED_API_KEY = "AV6+xWcEsXZATiO53Ve1JpH0NM3XZ4OGusmQXpCHReQk042dGY7VW2FiiNpxaSlIqAN8lxmEVlwbJVPWbObIdrjXdgUZypNzgnsUQzZy53qQdypQU2Dz9XdpBgVnqooGBjaG3vSX1PpGiXKiEjtspDpY2X9HYe3XQsyUpVDPdg=="
 
 def main(config):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)  # or config.get("dev_api_key")
+    api_key = config.get("n2yo_api_key")
     ttl_time = 5200
     display24hour = config.bool("24_hour", DEFAULT_24_HOUR)
     location = json.decode(config.get("location", DEFAULT_LOCATION))
@@ -135,13 +133,13 @@ def get_schema():
                 desc = "Location for which to display the ISS passes.",
                 icon = "locationDot",
             ),
-
-            #schema.Text(
-            #    id = "apiKey",
-            #    name = "N2YO API Key",
-            #    desc = "N2YO API Key",
-            #    icon = "code",
-            #),
+            schema.Text(
+                id = "n2yo_api_key",
+                name = "N2YO API Key",
+                desc = "A N2YO API key to access the N2YO API.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Toggle(
                 id = "24_hour",
                 name = "24 hour clock",
