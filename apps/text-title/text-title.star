@@ -1,25 +1,39 @@
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+FONT_DEFAULT = "default"
 DEFAULT_CONTENT = "Text"
 DEFAULT_FONT = "tb-8"
+DEFAULT_FONT_2X = "terminus-12"
 DEFAULT_BACKGROUND_COLOR = "#000"
 DEFAULT_COLOR = "#fff"
 DEFAULT_TITLE = "TITLE"
 DEFAULT_TITLE_FONT = "6x10"
+DEFAULT_TITLE_FONT_2X = "terminus-16"
 DEFAULT_TITLE_COLOR = "#00f"
 
 def main(config):
+    width, is2x = canvas.width(), canvas.is2x()
+
     content = config.get("content", DEFAULT_CONTENT)
-    font = config.get("font", DEFAULT_FONT)
+    font = config.get("font")
+    if not font or font == FONT_DEFAULT:
+        font = DEFAULT_FONT_2X if is2x else DEFAULT_FONT
     background_color = config.get("background_color", DEFAULT_BACKGROUND_COLOR)
     color = config.get("color", DEFAULT_COLOR)
     title = config.get("title", DEFAULT_TITLE)
-    titlefont = config.get("titlefont", DEFAULT_TITLE_FONT)
+    titlefont = config.get("titlefont")
+    if not titlefont or titlefont == FONT_DEFAULT:
+        titlefont = DEFAULT_TITLE_FONT_2X if is2x else DEFAULT_TITLE_FONT
     titlecolor = config.get("titlecolor", DEFAULT_TITLE_COLOR)
     emoji = config.get("emoji")
 
+    pad = 4 if is2x else 2
+    emoji_height = 30 if is2x else 20
+    text_width = (width - emoji_height - (width // 16)) if emoji else width
+
     return render.Root(
+        delay = 25 if is2x else 50,
         show_full_animation = True,
         child = render.Box(
             color = background_color,
@@ -29,8 +43,8 @@ def main(config):
                 cross_align = "center",
                 children = [
                     render.Padding(
-                        pad = 2,
-                        child = render.Emoji(emoji, height = 20),
+                        pad = pad,
+                        child = render.Emoji(emoji, height = emoji_height),
                     ) if emoji else None,
                     render.Column(
                         expanded = True,
@@ -38,9 +52,9 @@ def main(config):
                         cross_align = "center",
                         children = [
                             render.Marquee(
-                                width = 60 if not emoji else 44,
-                                offset_start = 60 if not emoji else 44,
-                                offset_end = 60 if not emoji else 44,
+                                width = text_width,
+                                offset_start = text_width,
+                                offset_end = text_width,
                                 align = "center",
                                 child = render.Text(
                                     content = title,
@@ -49,9 +63,9 @@ def main(config):
                                 ),
                             ) if title else None,
                             render.Marquee(
-                                width = 60 if not emoji else 44,
-                                offset_start = 60 if not emoji else 44,
-                                offset_end = 60 if not emoji else 44,
+                                width = text_width,
+                                offset_start = text_width,
+                                offset_end = text_width,
                                 align = "center",
                                 child = render.Text(
                                     content = content,
@@ -68,9 +82,12 @@ def main(config):
 
 def get_schema():
     fonts = [
+        schema.Option(display = "Default", value = FONT_DEFAULT),
+    ]
+    fonts.extend([
         schema.Option(display = key, value = value)
         for key, value in sorted(render.fonts.items())
-    ]
+    ])
 
     return schema.Schema(
         version = "1",
@@ -87,8 +104,8 @@ def get_schema():
                 name = "Title Font",
                 desc = "Change the font of the title.",
                 icon = "font",
-                default = DEFAULT_TITLE_FONT,
                 options = fonts,
+                default = FONT_DEFAULT,
             ),
             schema.Color(
                 id = "titlecolor",
@@ -109,8 +126,8 @@ def get_schema():
                 name = "Content Font",
                 desc = "Change the font of the body text.",
                 icon = "font",
-                default = DEFAULT_FONT,
                 options = fonts,
+                default = FONT_DEFAULT,
             ),
             schema.Color(
                 id = "background_color",
