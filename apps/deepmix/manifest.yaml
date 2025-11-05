@@ -1,0 +1,8 @@
+---
+name: Deep Mix
+summary: Now playing on Deep Mix
+desc: Stay in the loop with the latest tracks from Deep Mix Online Radio. This app displays the currently playing song and artist information.
+author: Brombomb
+fileName: deepmix.star
+packageName: deepmix
+id: deep-mix
