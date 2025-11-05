@@ -1,19 +1,32 @@
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+FONT_DEFAULT = "default"
 DEFAULT_CONTENT = "Text"
 DEFAULT_FONT = "tb-8"
+DEFAULT_FONT_2X = "terminus-12"
 DEFAULT_BACKGROUND_COLOR = "#000"
 DEFAULT_COLOR = "#fff"
 
 def main(config):
+    width, height, is2x = canvas.width(), canvas.height(), canvas.is2x()
+
     content = config.get("content", DEFAULT_CONTENT)
-    font = config.get("font", DEFAULT_FONT)
+    font = config.get("font")
+    if not font or font == FONT_DEFAULT:
+        font = DEFAULT_FONT_2X if is2x else DEFAULT_FONT
     background_color = config.get("background_color", DEFAULT_BACKGROUND_COLOR)
     color = config.get("color", DEFAULT_COLOR)
     emoji = config.get("emoji")
 
+    pad = 4 if is2x else 2
+    emoji_height = 30 if is2x else 20
+    text_width = 0
+    if emoji:
+        text_width = (width - emoji_height - (width // 16))
+
     return render.Root(
+        delay = 25 if is2x else 50,
         show_full_animation = True,
         child = render.Box(
             color = background_color,
@@ -23,17 +36,17 @@ def main(config):
                 expanded = True,
                 children = [
                     render.Padding(
-                        pad = 2,
-                        child = render.Emoji(emoji, height = 20),
+                        pad = pad,
+                        child = render.Emoji(emoji, height = emoji_height),
                     ) if emoji else None,
                     render.Marquee(
-                        height = 32,
-                        offset_start = 32,
-                        offset_end = 32,
+                        height = height,
+                        offset_start = height,
+                        offset_end = height,
                         align = "center",
                         scroll_direction = "vertical",
                         child = render.WrappedText(
-                            width = 40 if emoji else 0,
+                            width = text_width,
                             content = content,
                             font = font,
                             color = color,
@@ -46,9 +59,12 @@ def main(config):
 
 def get_schema():
     fonts = [
+        schema.Option(display = "Default", value = FONT_DEFAULT),
+    ]
+    fonts.extend([
         schema.Option(display = key, value = value)
         for key, value in sorted(render.fonts.items())
-    ]
+    ])
 
     return schema.Schema(
         version = "1",
@@ -65,8 +81,8 @@ def get_schema():
                 name = "Font",
                 desc = "Change the font of the text.",
                 icon = "font",
-                default = DEFAULT_FONT,
                 options = fonts,
+                default = FONT_DEFAULT,
             ),
             schema.Color(
                 id = "background_color",

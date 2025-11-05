@@ -5,3 +5,4 @@ summary: Displays a text
 desc: Displays a text.
 author: savdagod, gabe565
 recommended_interval: 5
+supports2x: true
