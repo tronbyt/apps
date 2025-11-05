@@ -11,7 +11,7 @@ load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "render", "canvas")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -105,7 +105,7 @@ def main(config):
     nightscout_token = config.get("nightscout_token", DEFAULT_NSTOKEN)
     show_graph = config.bool("show_graph", DEFAULT_SHOW_GRAPH)
     show_graph_hour_bars = config.bool("show_graph_hour_bars", DEFAULT_SHOW_GRAPH_HOUR_BARS)
-    scale = 2 if config.bool("$2x") else 1
+    scale = 2 if canvas.is2x() else 1
 
     # for backward compatibilty
     if (config.bool("show_clock") == True):

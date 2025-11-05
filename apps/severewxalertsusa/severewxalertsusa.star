@@ -10,7 +10,7 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "render", "canvas")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -27,7 +27,7 @@ WARNING_IMG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXN
 
 ## run the main applications
 def main(config):
-    scale = 2 if config.bool("$2x") else 1
+    scale = 2 if canvas.is2x() else 1
     jsonLocation = json.decode(config.str("location") or DEFAULT_LOCATION)  ## set the location from the schema data or use the default
     if "locality" not in jsonLocation:
         jsonLocation["locality"] = config.str("display_name") or jsonLocation.get("name", "")[0:13]

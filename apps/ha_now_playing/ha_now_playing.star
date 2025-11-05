@@ -7,7 +7,7 @@ Author: drudge, gabe565
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "render", "canvas")
 load("schema.star", "schema")
 
 DEFAULT_IMAGE = """
@@ -117,7 +117,7 @@ def main(config):
     if status != "playing":
         return []
 
-    scale = 2 if config.bool("$2x") else 1
+    scale = 2 if canvas.is2x() else 1
     font = "terminus-18" if scale == 2 else "tb-8"
 
     media_title = attributes.get("media_title")
