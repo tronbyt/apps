@@ -13,10 +13,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
-
-# Encrypted API Key for "pubgstats"
-ENCRYPTED_API_KEY = "AV6+xWcEawALXuQUcd1HmnSJuJB57+ivDXPv546IFBbkFOuZVwO0g4T8A/26uo0AxNRN6CcNnGHru4vLRo3zDi6Hj0aps5oF1Dc8AnehLwQDQ2pjinO2b6b0oUZzzm7VfP8KLs62RLlQq6C4Xghd/3q5bq62ofmbuH12AL6/AzL1YpTUFNPSSB7hM7Bcroe5HU/GBTbseO6FoOu/SbNkN1MnDAv8VKvPU3ExhBbysJDj5bZI5Kz74mIgQ6Chxncyymk5Cgidr9FYT3JJYPo2PZIJLG5+c5EnPb+nJngOdtYO4xxPFJzv/H9x7pq4GA+Im+xTM0olAKk40o+ytsJaIe/epaNhmlg6cPj13zh4BalXc1D9hIXpcCP+J7yThDGlhaVVDZtC1P3q1e+Pknvt4pztLFAxMb3N00GAB+aNG8ZhfkDQ9Z8qAQm4OvRDb6D7OtVjphmOxOcwux0s3iaxbIVwJg=="
 
 # Default settings if no configuration set in Tidbyt app
 DEFAULT_PLAYER_NAME = "chocoTaco"
@@ -47,12 +43,6 @@ stat_label_delay = name_delay + 7
 stat_label_duration = 7
 stat_delay = stat_label_delay + 7
 stat_duration = 7
-
-# API header to access PUBG developer API
-header = {
-    "Authorization": "Bearer {}".format(secret.decrypt(ENCRYPTED_API_KEY)),
-    "Accept": "application/vnd.api+json",
-}
 
 # Tuples are 0 = Stat label shown in options, 1 = API use, 2 = Tidbyt display label, 3 = Tidbyt display units of measure (if any)
 stat_details = [
@@ -89,6 +79,11 @@ stat_details = [
 ]
 
 def main(config):
+    header = {
+        "Authorization": "Bearer {}".format(config.get("pubg_api_key")),
+        "Accept": "application/vnd.api+json",
+    }
+
     # Load user settings from Tidbyt app, or grab defaults
     player_name = config.str("player_name", DEFAULT_PLAYER_NAME)
     platform = config.str("platform", DEFAULT_PLATFORM)
@@ -405,6 +400,13 @@ def get_schema():
                 icon = "chartLine",
                 default = stats[0].value,
                 options = stats,
+            ),
+            schema.Text(
+                id = "pubg_api_key",
+                name = "PUBG API Key",
+                desc = "A PUBG API key to access the PUBG API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

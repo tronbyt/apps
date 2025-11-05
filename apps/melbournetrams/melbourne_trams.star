@@ -21,7 +21,6 @@ load("hmac.star", "hmac")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 LOCAL_MODE = False
@@ -30,8 +29,6 @@ LOCAL_API_KEY = None
 
 BASE_URL = "https://timetableapi.ptv.vic.gov.au"
 CACHE_TTL_SECS = 60
-ENCRYPTED_API_ID = "AV6+xWcEIM2iOjwBGhNs3JMeHoYX/R0bDcXZDW3WC7XE3f8KftL3+9T/3zuK0utBCG5WL93CZjecRjHXfpbfC5w/CzqFyfTHzmICSVBOsVYSINoXoo2efGLSi8W+oWeTIgXBHcmL0gZjziKeIQ=="
-ENCRYPTED_API_KEY = "AV6+xWcErKRGH+v/Dxtu+6FEfsNZAuEUV0jn24sj3M6UWo0my7ftqrWNMWkf+N2g1Ak5wZiFNWloOV+DRnh8/DaK+JMWt0TrAPhfdXRQDRaLECBeJ8QZvdNR4+AU7aHWCU0OfmUihME7FiSfftF5i6ppHIzIkAYr7UKgER4qxBW8NHqEXFq8SYQo"
 
 COLOR_CODE_TRAM_ROUTE_1 = "#ADB838"
 COLOR_CODE_TRAM_ROUTE_3 = "#8EBFD9"
@@ -98,7 +95,7 @@ def main(config):
     #         color_code))
 
     if route_id and stop_id and direction_id:
-        departures = get_departures(route_id, stop_id, direction_id, route_number, stop_name, direction_data, color_code)
+        departures = get_departures(route_id, stop_id, direction_id, route_number, stop_name, direction_data, color_code, config)
 
         # Render - API Credential Error
         if departures == -1:
@@ -247,10 +244,10 @@ def build_divider_invisible_row():
     )
 
 # API - GET Departures Data and Transform
-def get_departures(route_id, stop_id, direction_id, route_number, stop_name, direction_data, color_code):
+def get_departures(route_id, stop_id, direction_id, route_number, stop_name, direction_data, color_code, config):
     # Set API ID/KEY
-    api_id = LOCAL_API_ID if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_ID)
-    api_key = LOCAL_API_KEY if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_KEY)
+    api_id = LOCAL_API_ID if LOCAL_MODE else config.get("ptv_api_id")
+    api_key = LOCAL_API_KEY if LOCAL_MODE else config.get("ptv_api_key")
     if api_id == None or api_key == None:
         print("[ERROR]: Failed to retrieve API credentials")
         return -1
@@ -7275,10 +7272,24 @@ def get_schema():
             schema.Dropdown(
                 id = "tram-route",
                 name = "Tram Route",
-                desc = "Choose your tram route",
-                icon = "trainTram",
+                desc = "Select your tram route",
+                icon = "train",
                 default = TramRouteOptions[0].value,
                 options = TramRouteOptions,
+            ),
+            schema.Text(
+                id = "ptv_api_id",
+                name = "PTV API ID",
+                desc = "A PTV API ID to access the PTV API.",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ptv_api_key",
+                name = "PTV API Key",
+                desc = "A PTV API key to access the PTV API.",
+                icon = "key",
+                secret = True,
             ),
             schema.Generated(
                 id = "generated",

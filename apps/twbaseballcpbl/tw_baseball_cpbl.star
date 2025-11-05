@@ -10,7 +10,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 DEFAULT_TEAM_ID = "ACN011"
@@ -19,10 +18,9 @@ GAME_INFO_CACHE_TTL_SECONDS = 120
 GAME_DETAIL_CACHE_TTL_SECONDS = 120
 GAME_INFO_URL = "https://en.cpbl.com.tw/home/getdetaillist"
 GAME_DETAIL_URL = "https://en.cpbl.com.tw/box/getlive"
-REQUEST_VERIFICATION_TOKEN_KEY = "AV6+xWcEb38Fuvn45zBGeaXER8+obOwGCyqs7cLDGYoOogOukLu8ChiRVIps8XAlxodTDZVzDjLk4k7uWXp4SNekQ3dDrwzSD8diFEydKDzS4wnikJOPDFyrrLqb6dN+r1STQFAqx6LC+uVnT9kmVC1dqHTUjfUuVpQCHTrlyEUB8feYcJ03MurXv1dmzLqp8mMkzwdZNqhzIEjfiwIdECIxQ+AfD6l6D9hmA4gXuVW2BxMr5Efu20xSMZTs/DjuCKg="
 
 def main(config):
-    request_verification_token = secret.decrypt(REQUEST_VERIFICATION_TOKEN_KEY) or config.get("dev_api_token")
+    request_verification_token = config.get("request_verification_token")
     target_team_id = config.str("target_team_id", DEFAULT_TEAM_ID)
     game_info = get_game_info(request_verification_token)
 
@@ -85,6 +83,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "request_verification_token",
+                name = "Request Verification Token",
+                desc = "Your request verification token.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "target_team_id",
                 name = "team",

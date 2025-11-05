@@ -16,7 +16,6 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 # stop ID examples
@@ -117,9 +116,7 @@ def get_meta(api_key, trip_id):
     }
 
 def main(config):
-    API_KEY = secret.decrypt(
-        "AV6+xWcEIQHsKyCnPiVb5c4FBJEyGIGmHfqd7Y+zBfEds9TJH93h6MYU3irY2FhMkvZmlLmqR5nEIF+VOH4RZSPHtH4YPDVh+lg2FZwYAFgIt2OmvdRhD2b789q9OXjQFQCSpQHWWTnFx2hTxxe9q1jn/6bPHtK5HpqAhnepjjXn532Syei6+AzI",
-    )  # or config.get("dev_api_key") # UNCOMMENT FOR DEV
+    API_KEY = config.get("api_key")
 
     if API_KEY == None or API_KEY == "":
         return render.Root(child = render.Text(content = "No API Key provided."))
@@ -248,12 +245,12 @@ def get_schema():
                 icon = "train",
                 default = DEFAULT_STOP_ID,
             ),
-            # schema.Text(
-            #     id = "dev_api_key",
-            #     name = "BKK Developer API Key",
-            #     desc = "Optional development API key.",
-            #     icon = "key",
-            #     default = "",
-            # ), # UNCOMMENT FOR DEV
+            schema.Text(
+                id = "api_key",
+                name = "BKK API Key",
+                desc = "Your BKK OpenData API Key.",
+                icon = "key",
+                secret = True,
+            ),
         ],
     )

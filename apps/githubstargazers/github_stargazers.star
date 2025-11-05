@@ -12,11 +12,8 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 GITHUB_REPO_SEARCH_URL = "https://api.github.com/search/repositories?q=%s"
-
-ENCRYPTED_GITHUB_API_KEY = "AV6+xWcEkMzxVAkrC/Txgv8dEHT31rQxH+L3nzJIbK7zObMxCvsdSDZEN+RW4apSb3lvIkjD71ByzUOf6avFDZK4CR336V8YbsgfgzFStxLJDws61Muklu0YkBWalSpXwmYBrYct2n2+d/nnw3xrGUkdaVVxd40b3PVrtblca9PCPeB956gB9fnW8rhjeA=="
 
 GITHUB_IMAGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAz1BMVEVAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMD///8e3z+UAAAAQ3RSTlMALZHU9JAsB5b9lQa+vZfPZ9Ht7NVoyZSZAxAPBPwrnZOOJhzT8ur1+wUC10lB3Cklki6FrbI2M7D6NLwVFNBLAf6AQ5ZiAAAAAAFiS0dERPm0mMEAAAAHdElNRQfmDAMUOiNHbbR3AAAArklEQVQY0z2P1xaCQAxEB0FhsVewVwR77535/39yQfC+bGayyZkAEiWhapqaTOGHbgiGCDMd6gz/ZAMnx3yhyFKZlWqNlpwXtFFvAM0WEmx3kCS70TL0yD4q5CA2huQIDjX8GdOBS28S66kruzNyHhsLUoVJLlc/vZbNDbZit/cOR+B0vsiwHcC4XO3bHXgEUa0w+vO1eMtCXnTTw2NMwZZ8P8LSo+2KH/zwlaD+AhuBGQTkgvNPAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIyLTEyLTAzVDIwOjQxOjQ2KzAwOjAwQzjB5gAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMi0xMi0wM1QyMDozMjoxNiswMDowMLiJ2b4AAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjItMTItMDNUMjA6NTg6MzUrMDA6MDBjxr8LAAAAAElFTkSuQmCC")
 
@@ -28,7 +25,7 @@ def get_stargazers_count(org_name, repo_name, config):
     return stargazers_count
 
 def send_github_request(url, query_params, config):
-    api_key = secret.decrypt(ENCRYPTED_GITHUB_API_KEY) or config.get("dev_api_key")
+    api_key = config.get("github_api_key")
 
     headers = {}
     if api_key == None:
@@ -49,8 +46,8 @@ def send_github_request(url, query_params, config):
     return json.decode(res.body())
 
 def main(config):
-    org_name = config.get("org_name", "tidbyt")
-    repo_name = config.get("repo_name", "community")
+    org_name = config.get("org_name", "tronbyt")
+    repo_name = config.get("repo_name", "apps")
 
     print("Fetching GitHub stargazer count...")
     cache_key = "repo_stargazers_%s/%s" % (org_name, repo_name)
@@ -117,6 +114,13 @@ def get_schema():
                 name = "Repo Name",
                 icon = "user",
                 desc = "Name of the GitHub repository for which to display stargazer count",
+            ),
+            schema.Text(
+                id = "github_api_key",
+                name = "GitHub API Key",
+                icon = "key",
+                desc = "A GitHub API key to increase rate limits.",
+                secret = True,
             ),
         ],
     )

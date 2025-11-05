@@ -10,13 +10,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
-
-# dev bot token
-DEV_BOT_TOKEN = ""
-
-# production bot token
-PROD_BOT_TOKEN = "AV6+xWcEm6x/cMdL/10i8G/yzrmrIgsz+i8I4h3TZzTPDR7NoOy66JgoPLJ2eGDyMMEmf0oRX2fC1R8bverW1JnMA/zdf9ZhGn/CgvFMN91ysxQhOJHDnu/mRoEYiVt9JHBzLjP3MqkIbwuTSeTbf0PhgASNG8P+3RQnprd90xU1BemlOXVO6FM6Xt0Ft+qjSoE7TA=="
 
 # telegram logo
 TG_LOGO = base64.decode("""
@@ -33,7 +26,7 @@ def main(config):
     dot_separator = config.bool("dot_separator", False)
 
     # decrypt bot token or use dev value
-    bot_token = secret.decrypt(PROD_BOT_TOKEN) or DEV_BOT_TOKEN
+    bot_token = config.get("telegram_bot_token")
 
     # validate if token was provided
     if bot_token in (None, ""):
@@ -98,6 +91,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "telegram_bot_token",
+                name = "Telegram Bot Token",
+                desc = "Your Telegram Bot Token. See https://core.telegram.org/bots/api#authorizing-your-bot for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "chat_id",
                 name = "Chat ID",

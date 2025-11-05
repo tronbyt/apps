@@ -13,11 +13,10 @@ load("humanize.star", "humanize")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 # Exchangerate-API.com Info
-exchange_rate_api_key_encrypted = "AV6+xWcE2EJ1am5cfNlWEh7R0E3NbcVBkpTEcQbuoSDokWbHW020B9OGl6dshXbNpl3oGGSEANUBz/M7B4LOQGCT/UnVOrcR1DHaijlxKN3UT+Y29y9ZgKs4XS2qk/OZQgFqvSWs/160vJCiM7DSktYV5kddXa7Iy4y42sVN"
+
 currencies = {
     "eur": {
         "name": "Euro",
@@ -640,9 +639,9 @@ def get_appropriate_humanize_display(number):
         mask = "#.##"
     elif (number > 10):
         mask = "#.####"
-    elif (number > .1):
+    elif (number > 0.1):
         mask = "#.###"
-    elif (number > .0001):
+    elif (number > 0.0001):
         mask = "#.####"
     else:
         mask = "#.######"
@@ -659,7 +658,7 @@ def main(config):
     local_currency = config.get("local") or "usd"
     foreign_currency = config.get("foreign") or "cad"
 
-    key = config.get("APIKEY", secret.decrypt(exchange_rate_api_key_encrypted))
+    key = config.get("api_key")
     exchange_rate_url = "https://v6.exchangerate-api.com/v6/%s/latest/%s" % (key, local_currency.lower())
 
     exchange_data_encoded_json = cache.get(exchange_rate_url)
@@ -894,6 +893,13 @@ def get_schema():
                 icon = "globe",
                 options = currency_options,
                 default = currency_options[24].value,
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "Exchangerate-API Key",
+                desc = "Your Exchangerate-API.com API Key.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

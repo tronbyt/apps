@@ -9,11 +9,9 @@ load("cache.star", "cache")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 CTA_ARRIVAL_URL = "http://lapi.transitchicago.com/api/1.0/ttarrivals.aspx"
-CTA_API_KEY_ENCRYPTED = "AV6+xWcExXu2MptD37JLjkz3aZBkAO7HBcLRIkN9+Z49P0+NOzgvskzwV7E/gWfN3vjUyQxvdXMeKkhuYlHA414OtiD/dHB7wjMBAQ7omAa7I4Ngo/RTAg7fGn+Y1Tkwa/TWMkbpDGWNON0b3iTB9tGm9k4DKIm3Gxgi3oRQnHeU01lFZVc="
 
 CTA_L_STATON_LIST_URL = "https://data.cityofchicago.org/resource/8pix-ypme.json"
 
@@ -84,10 +82,9 @@ def getPredictionSuffix(route, destinationName, destinationId, isScheduled):
     else:
         return ""
 
-def getPredictions(predConfig, devApiKey):
+def getPredictions(predConfig, apiKey):
     preds = []
     respJson = {}
-    apiKey = secret.decrypt(CTA_API_KEY_ENCRYPTED) or devApiKey
     resp = http.get(getApiUrl(predConfig, apiKey), ttl_seconds = 45)
 
     if resp.status_code != 200:
@@ -234,14 +231,14 @@ def getDestName(predConfig, preds):
         cache.set(cacheKey, destName, ttl_seconds = 315569520)  #ttl 10 years, whatevs
     return destName
 
-def renderPredictions(r, predConfig, devApiKey):
+def renderPredictions(r, predConfig, apiKey):
     if predConfig.stopId == None or predConfig.route == None:
         return r.Box(
             width = 64,
             height = 14,
             color = "#f00",
         )
-    preds = getPredictions(predConfig, devApiKey)
+    preds = getPredictions(predConfig, apiKey)
     routeColor = getRouteColor(predConfig.route)
     destName = getDestName(predConfig, preds)
     return r.Row(
@@ -326,15 +323,18 @@ def main(config):
     firstLineConfig = struct(stopId = config.str("firstStop", "30111"), route = config.str("firstRoute", "Blue"), showSched = config.bool("firstShowSched", False))
     showAnimatedTrain = config.bool("showAnimatedTrain", True)
     secondLineConfig = struct(stopId = config.str("secondStop", "30112"), route = config.str("secondRoute", "Blue"), showSched = config.bool("secondShowSched", False))
-    devApiKey = config.str("devApiKey", "dev_key_here")
+    apiKey = config.get("api_key")
+
+    if not apiKey:
+        return render.Root(child = render.Text("CTA API Key not set"))
 
     return render.Root(
         render.Column(
             children = [
                 render.Box(width = 1, height = 1),
-                renderPredictions(render, firstLineConfig, devApiKey),
+                renderPredictions(render, firstLineConfig, apiKey),
                 renderAnimatedTrain(render, showAnimatedTrain),
-                renderPredictions(render, secondLineConfig, devApiKey),
+                renderPredictions(render, secondLineConfig, apiKey),
             ],
         ),
     )
@@ -451,6 +451,13 @@ def get_schema():
                 desc = "Whether animated train is shown between top and bottom slot",
                 icon = "train",
                 default = True,
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "CTA API Key",
+                desc = "Your CTA L API Key.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

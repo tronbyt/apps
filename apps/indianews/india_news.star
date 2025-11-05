@@ -11,7 +11,6 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 #get dates to ping api
@@ -25,14 +24,14 @@ NEWS_URL = "http://newsapi.org/v2/everything?q=india&searchIn=description&sortBy
 
 def main(config):
     # set default api key
-    DEFAULT_API = secret.decrypt("AV6+xWcEX/4Xe45UOOKJO96fq/wjTvGwFn7rE8EUXwcONEWE7sG+eXYjEm5M+PmmS5GTV1NzbV3z3X5q7XWdN69xtfpB1KWMBedJf2kndTR6QWsBWZXizDHWDVMA5IUYO14Y7X2tlr+eKCuAZU7iri9BUTuBdO7+5sVRgPU3QoObSbsE9L8=")
+    API = config.get("news_api_key")
 
     #intialize headline randomizer
     random.seed(time.now().unix // 60)
     shift = random.number(0, 95)
 
     #Display error if no API found
-    if DEFAULT_API == None:
+    if API == None:
         return render.Root(
             child = render.Column(
                 children = [
@@ -52,7 +51,6 @@ def main(config):
         )
     else:
         #get data
-        API = DEFAULT_API
         NEWS_API_URL = NEWS_URL + API
         rep = http.get(url = NEWS_API_URL, ttl_seconds = 3600)  #update every 1 hour
         if rep.status_code != 200:
@@ -124,6 +122,13 @@ def get_schema():
                 icon = "gear",
                 default = scroll_speed[1].value,
                 options = scroll_speed,
+            ),
+            schema.Text(
+                id = "news_api_key",
+                name = "News API Key",
+                desc = "A News API key to access the News API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

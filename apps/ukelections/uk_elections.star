@@ -8,14 +8,13 @@ Author: dinosaursrarr
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 POSTCODE_API = "https://api.electoralcommission.org.uk/api/v1/postcode/%s/"
 ADDRESS_API = "https://api.electoralcommission.org.uk/api/v1/address/%s/"
 
-def api_key():
-    return secret.decrypt("AV6+xWcExZWQC6+Mex7mzNFvpOL6yjx9jpAXsULY+68u4UJRXxRd/nH3KcCbWAeN627sj7/Qzg7CUQUUMJw44baJn2bANMb/KmQxAytIkHMZ40QUpOuP1g/ppT1TDwVraV0V1RRuiVQs3YkCBuTC1EYdxXxCIzbGWUKf3IVFeEAwa50HfuyiDG50u0p9uA==") or ""
+def get_api_key(config):
+    return config.get("api_key")
 
 FONT = "tom-thumb"
 PURPLE = "#373151"  # Parliamentary branding for neutrality https://www.parliament.uk/globalassets/documents/foi/181321bg.pdf
@@ -107,11 +106,11 @@ def render_error(message):
         ),
     )
 
-def fetch_slug(slug):
+def fetch_slug(slug, config):
     resp = http.get(
         url = ADDRESS_API % slug.upper().replace(" ", ""),
         params = {
-            "token": api_key(),
+            "token": get_api_key(config),
         },
         ttl_seconds = 86400,  # once a day is plenty
     )
@@ -120,11 +119,11 @@ def fetch_slug(slug):
         return None
     return resp.json()
 
-def fetch_postcode(postcode):
+def fetch_postcode(postcode, config):
     resp = http.get(
         url = POSTCODE_API % postcode.upper().replace(" ", ""),
         params = {
-            "token": api_key(),
+            "token": get_api_key(config),
         },
         ttl_seconds = 86400,  # once a day is plenty
     )
@@ -137,10 +136,10 @@ def fetch_postcode(postcode):
 def main(config):
     slug = config.str("address")
     if slug:
-        json = fetch_slug(slug)
+        json = fetch_slug(slug, config)
     else:
         postcode = config.str("postcode", "SW1A 1AA")
-        json = fetch_postcode(postcode)
+        json = fetch_postcode(postcode, config)
 
     if not json:
         return render_error("Could not fetch data from API")
@@ -187,8 +186,8 @@ def main(config):
 # results for the postcode will contain an address picker. The user will
 # need to make an additional selection and the main app will call a different
 # end point.
-def check_address_handler(postcode):
-    json = fetch_postcode(postcode)
+def check_address_handler(postcode, config):
+    json = fetch_postcode(postcode, config)
     if not json:
         return []
     if not json["address_picker"]:
@@ -215,6 +214,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Electoral Commission API Key",
+                desc = "Your API key for the Electoral Commission. See https://api.electoralcommission.org.uk/docs for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Toggle(
                 id = "hide_empty",
                 name = "Hide when empty?",

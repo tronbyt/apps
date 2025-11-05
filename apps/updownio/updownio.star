@@ -12,10 +12,7 @@ load("hash.star", "hash")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
-
-ENCRYPTED_SALT = "AV6+xWcE9TSREL/cItw8d27I4uv2XsWMNf4y8zxIos6RXx2x0cFblymnW4uXVxPwnGnIEU/rR3sCVS0JGbxqlQC0flvFu/F6EpnGMEP7ippTCbhuQP9bvAMOHlu427aeoVekR+YhwQ40+T6yoKotytMMNO+YzH4f"
 
 LOGO_UP_IMG = base64.decode("""R0lGODdhIgAIAKIAAAAAAF9XTwCHUQDkNv/x6P///wAAAAAAACH5BAkAAAYALAAAAAAiAAgAAAM0CLrc/jCS6MabJJCpdv+ZVwkCCGBnimmauljwgs4u5qFKbClayJ2Z1KmFgpV2jh9lyWw2EwA7""")
 LOGO_DOWN_IMG = base64.decode("""R0lGODdhIgAIAKIAAAAAAP8ATX4lU19XT//x6P///wAAAAAAACH5BAkAAAYALAAAAAAiAAgAAAM0CLrc/jCS6MKbZJCpdv+ZVwkCCGBnimmauljwgs4u5qFKbClayJ2Z1KmFgpV2jh9lyWw2EwA7""")
@@ -39,7 +36,7 @@ def main(config):
     # 1. We combine api_key and check_token to prevent people from fetching other people's checks.
     # 2. We hash the cache_key so the api_key and check_token aren't stored in plaintext in the cache.
     # 3. We add a secret salt just for the fun of it.
-    salt = secret.decrypt(ENCRYPTED_SALT) or ""
+    salt = config.str("salt") or ""
     cache_key = "check-{}".format(hash.sha256(salt + api_key + check_token))
 
     data = cache.get(cache_key)
@@ -173,6 +170,13 @@ def get_schema():
                 name = "Check Token",
                 desc = "The check unique token",
                 icon = "check",
+            ),
+            schema.Text(
+                id = "salt",
+                name = "Salt",
+                desc = "A secret salt for cache key hashing",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

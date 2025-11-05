@@ -11,7 +11,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 CACHE_TTL_SECONDS = 300
 API_BASE_URL = "http://api.steampowered.com/"
@@ -21,11 +20,7 @@ API_OWNED_GAMES = API_BASE_URL + "IPlayerService/GetOwnedGames/v0001"
 
 def main(config):
     steam_id = config.get("steam_id", None)
-    api_key = secret.decrypt("""
-        AV6+xWcE9acn7G/Amrp+rzPaSppKSmwWdVBJklcT6q63X9wG8UFn0ma1U9oCtmwjzVyZFF1JzzpLre2K
-        mVuRNN+Lk7UICOvuChgDC6pstPv9ecAHFGu9h9C7kc3ntBcbUARJIVWXZVH2ji+PtIis/jekWarIgISt
-        qukjL49KF/GT3BtMwJ4=
-        """) or config.get("dev_api_key")
+    api_key = config.get("steam_api_key")
 
     if steam_id == None or api_key == None:
         return do_render(DEMO_DATA["player_name"], DEMO_DATA["main_icon"], DEMO_DATA["game_string"])
@@ -141,6 +136,13 @@ def get_schema():
                 name = "Steam ID",
                 desc = "Your 17 digit Steam ID (use https://steamid.xyz/ if you're unsure)",
                 icon = "user",
+            ),
+            schema.Text(
+                id = "steam_api_key",
+                name = "Steam API Key",
+                desc = "A Steam API key to access the Steam API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

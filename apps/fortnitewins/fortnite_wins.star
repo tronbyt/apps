@@ -16,7 +16,6 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 ######################################################################################### Global Variables #########################################################################################
 
@@ -25,8 +24,6 @@ blue = "#3399ff"
 
 icon_left = base64.decode("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")
 #icon_right = base64.decode("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")
-
-default_username = None
 
 ######################################################################################### Helper Functions ########################################################################################
 
@@ -39,7 +36,7 @@ def float_to_string_without_trailing_decimal(f):
 ######################################################################################### Main Function #########################################################################################
 
 def main(config):
-    decrypted_key = secret.decrypt("AV6+xWcEV7GacJDEp2zeLrBSz3B9Zs7vJXr0DjyUa2llQTDRSYQEZjfunRXRXG7cWxeIEda9H1nskXpFtFw1KmcYAf09+wjpCZe+T1p9vFdbYO72NYHc5s0vpjj+MXuqsQDhgkMPOlLpYdkH/Md0/aBnAdmU4lq4qWLx+kTMbnJAmfqido+6g1c=")
+    decrypted_key = config.get("fortnite_api_key")
     headers = {
         "Authorization": decrypted_key,
     }
@@ -139,6 +136,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "fortnite_api_key",
+                name = "Fortnite API Key",
+                desc = "Your FortniteAPI.io API key. See https://fortniteapi.io/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "username",
                 name = "Fortnite Username",

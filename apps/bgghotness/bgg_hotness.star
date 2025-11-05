@@ -37,7 +37,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 load("xpath.star", "xpath")
 
@@ -49,7 +48,7 @@ def main(config):
 
     if not data or (now - data["timestamp"]) > EXPIRY:
         print("Getting " + URL)
-        api_key = API_KEY or config.get("api_key")
+        api_key = config.get("bgg_api_key")
         content = http.get(URL, headers = {"Authorization": "Bearer %s" % api_key})
         if content.status_code == 200:
             content = xpath.loads(content.body())
@@ -126,7 +125,15 @@ def main(config):
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Text(
+                id = "bgg_api_key",
+                name = "BoardGameGeek API Key",
+                desc = "Your BoardGameGeek API key. See https://boardgamegeek.com/wiki/page/BGG_XML_API2 for details.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )
 
 def get_image(url):
@@ -194,8 +201,6 @@ def scroll_frames(item, next_item):
         )
         for offset in range(SCROLL_SIZE, SCROLL_LIMIT, SCROLL_SIZE)
     ]
-
-API_KEY = secret.decrypt("AV6+xWcERHMIh6gSb6efc8sw8opWeR5GxRZ12GWQ84b3iKtZA0Ks1iWJn7I+1Qv4IG30YAtVL4BfWFrGk5LEdPoAAQGvyJaQh+pP6Lntm/gCsyjUDH4DnbUQKWLlTojTQWOF5RgR9FeyEGU9Xf9xL37ITS7YXKm9MmPETM3om9OhL5TLflH0pcD5")
 
 URL = "http://boardgamegeek.com/xmlapi2/hot?type=boardgame"
 

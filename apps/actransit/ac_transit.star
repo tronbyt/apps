@@ -11,7 +11,6 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 PREDICTIONS_URL = "https://api.actransit.org/transit/actrealtime/prediction"
@@ -23,7 +22,9 @@ AC_TRANSIT_TIME_LAYOUT = "20060102 15:04"
 
 def main(config):
     # Initialize API token, bus stop, and max predictions number with fallbacks
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("api_key")
+    api_key = config.get("api_key")
+    if not api_key:
+        fail("API key not set")
 
     stop_id = config.get("stop_id")
     if stop_id == None:
@@ -289,9 +290,11 @@ def get_displayed_times(times, predictions_max):
     times = [str(t) if t != 0 else "now" for t in times]
     return "%s min" % ",".join(times)
 
-def get_stops(location):
+def get_stops(location, config):
     # Hits the AC Transit API to get a list of all stops and then returns the 20 nearest based on location
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or "390A953479513D55007D63462A08C068"
+    api_key = config.get("api_key")
+    if not api_key:
+        fail("API key not set")
     loc = json.decode(location)
 
     res = http.get(
@@ -349,6 +352,13 @@ def get_schema():
                         value = "3",
                     ),
                 ],
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Your AC Transit API key. See https://api.actransit.org/transit/actrealtime/prediction for details.",
+                icon = "key",
+                secret = True,
             ),
             schema.LocationBased(
                 id = "stop_id",

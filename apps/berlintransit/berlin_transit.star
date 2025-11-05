@@ -11,14 +11,13 @@ load("humanize.star", "humanize")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 #Constants for the VBB API
 VBB_API_BASE_URL = "https://fahrinfo.vbb.de/restproxy/2.32/"
 DEPARTURE_BOARD_PREFIX = "departureBoard"
 LOCATION_SEARCH_PREFIX = "location.nearbystops"
-VBB_API_ACCESS_ID = "AV6+xWcEI8CsOUIFnXt0vF1LdXyxqE5dXpHL81cPAKdfM2GVcejYVFUlAellkLXdCLl00kJwil5IZHItOndUUwBqoYocm23s1EXe/fB1G78M6+qU/zU5uYk5wB2tFM8+XupxRRk2HTdwAZEk0ZS4R78jZyLVX/HsP73pW+fCR8dkHRQ="
+VBB_API_ACCESS_ID = ""
 
 #Styling stuff
 ORANGE = "#FFA500"
@@ -108,7 +107,7 @@ def main(config):
     if not offset_minutes in CONFIG_DEPARTURE_TIME_OFFSET_VALUES:
         return get_error_message("Invalid departure time offset selected")
 
-    departures = get_station_departures(station_id, show_u_bahn, show_s_bahn, show_tram, show_bus, show_regional, show_ice, offset_minutes)
+    departures = get_station_departures(config, station_id, show_u_bahn, show_s_bahn, show_tram, show_bus, show_regional, show_ice, offset_minutes)
     return get_root_element(departures, station_name)
 
 #RENDERING FUNCTIONS
@@ -267,13 +266,13 @@ def should_use_extra_line_padding(departure):
 #show_regional: whether to show regional train departures
 #show_ice: whether to show ICE train departuress
 #Returns a list of dictionaries, each representing a departure
-def get_station_departures(station_id, show_u_bahn, show_s_bahn, show_tram, show_bus, show_regional, show_ice, departure_offset_minutes):
+def get_station_departures(config, station_id, show_u_bahn, show_s_bahn, show_tram, show_bus, show_regional, show_ice, departure_offset_minutes):
     product = compute_product_bitwise(show_u_bahn, show_s_bahn, show_tram, show_bus, show_regional, show_ice)
     if product == "0":  #no products selected
         return []
 
     params = {
-        "accessId": get_VBB_API_access_id(),
+        "accessId": get_VBB_API_access_id(config),
         "id": station_id,
         "maxJourneys": MAX_DEPARTURES,
         "format": JSON_FORMAT,
@@ -339,8 +338,8 @@ def format_int_as_time_number(integer):
 
 #Decrypts the VBB API access ID for use in the HTTP request. See https://tidbyt.dev/docs/build/authoring-apps#secrets
 #Returns the decrypted VBB API access ID
-def get_VBB_API_access_id():
-    return secret.decrypt(VBB_API_ACCESS_ID)  #NOTE: When running locally, secret.decrypt will return None. Add in "or <the access id>"
+def get_VBB_API_access_id(config):
+    return config.get("api_key")  #NOTE: When running locally, add in "or <the access id>"
 
 #We need a bitwise product of the target products to tell the VBB departureboard API the specific products we want
 #show_u_bahn: whether to show U-Bahn departures
@@ -528,6 +527,13 @@ def get_schema():
                 icon = "train",
                 handler = get_stations,
             ),
+            schema.Text(
+                id = "api_key",
+                name = "VBB API Access ID",
+                desc = "Your VBB API Access ID. See https://www.vbb.de/en/developer for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = CONFIG_DEPARTURE_TIME_OFFSET,
                 name = "Departure Time Offset",
@@ -591,10 +597,10 @@ def get_departure_time_offset_options():
 #Given a location as provided by the LocationBased schema, returns a list of stations near that location for selection by the user
 #location: a JSON object representing a location, as provided by the LocationBased schema
 #Returns a list of schema.Option objects representing the stations near the location
-def get_stations(location):
+def get_stations(location, config):
     found_stations = []
 
-    stations_json = fetch_stations(json.decode(location))
+    stations_json = fetch_stations(json.decode(location), config)
     if not stations_json:
         return found_stations
 
@@ -616,11 +622,11 @@ def get_stations(location):
 #Fetches the stations near a location from the VBB API
 #location: a JSON object representing a location, as provided by the LocationBased schema
 #Returns the JSON response from the VBB API
-def fetch_stations(location):
+def fetch_stations(location, config):
     truncated_lat = math.round(1000.0 * float(location["lat"])) / 1000.0  # Truncate to 3dp for better caching and to protect user privacy
     truncated_lng = math.round(1000.0 * float(location["lng"])) / 1000.0  # Means to the nearest ~110 metres.
     params = {
-        "accessId": get_VBB_API_access_id(),
+        "accessId": get_VBB_API_access_id(config),
         "originCoordLat": str(truncated_lat),
         "originCoordLong": str(truncated_lng),
         "r": MAX_DISTANCE_FROM_STATION_METERS,  #radius from the user's location for station lookup

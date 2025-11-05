@@ -8,13 +8,10 @@ Author: imcnaugh
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 DEFAULT_DIRECTION = "all"
 DEFAULT_MAPID = "41320"
-
-ENCRYPTED_API_KEY = "AV6+xWcEE3lTNDf9lC7lj6byf3fmYoppi1yYXLC2Gzt5qP2pIIran/J8INad5fuixlmUZMRAgCYnWDNj7FUsfU8CeGhOf06c0lKqjr5Kb3Y0FvMUSim1GRF6NmkR1IGCzZOt3HrZ2ldUONvjKj2dLD2fXHWpmUSiCyawDwRZSS+KMCKr7iQ="
 
 def get_color(line):
     if (line == "Pink"):  # pink line , FF99AA
@@ -115,7 +112,7 @@ def render_error_message():
 def main(config):
     train_dir = config.str("directions", DEFAULT_DIRECTION)
     map_id = int(config.get("mapId", DEFAULT_MAPID))
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("apiKey")
+    api_key = config.get("api_key")
 
     if api_key == None:
         return render_error_message()
@@ -749,6 +746,13 @@ def get_schema():
                 icon = "arrowsLeftRight",
                 default = direction_options[0].value,
                 options = direction_options,
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "CTA API Key",
+                desc = "Your CTA Train Tracker API Key.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

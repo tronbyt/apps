@@ -9,7 +9,6 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 LH1_ICON = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAA4AAAAgCAYAAAAi7kmXAAAAAXNSR0IArs4c6QAA
@@ -70,8 +69,6 @@ UsqdPfR7KaVcR8yyrHYQy22/RgH1WmFhW9J+qvvP6nC1quUw+/7rNZ+cOhNTNUH7
 1bj1DW6DUv/QjsaOX8IH2YnmwUtoAAAAAElFTkSuQmCC
 """)
 
-API_KEY = "AV6+xWcEtpMtBn6PPh4L8DWUydu4O7uc1Zdb8ANbGmfkp0ASxOPrnmBHYs+cIj4y1JsZSPi5ASKPr69erzFRGqJCp01y7Qg9H9R1z4l4pK7xiFyVgnR7e++p5OGCXSCV3M8FPEBkXlAJQekEfVuhIYFGKCguD3F5YFV73KCGoGfEinMd1+Q="
-
 FORECAST_URL = "https://weather.lmbrn.ca/v1/forecast"
 
 DEFAULT_LAT = "57.5979648"
@@ -125,7 +122,7 @@ def main(config):
     location = config.get("location", "")
     lat, lon = parse_location(location)
 
-    api_key = secret.decrypt(API_KEY) or config.get("dev_api_key")
+    api_key = config.get("shipping_forecast_api_key")
 
     if api_key != None:
         url = FORECAST_URL + "?lat=" + str(lat) + "&lon=" + str(lon)
@@ -189,6 +186,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "shipping_forecast_api_key",
+                name = "Shipping Forecast API Key",
+                desc = "Your Shipping Forecast API key. See https://weather.lmbrn.ca/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "location",
                 name = "Location",

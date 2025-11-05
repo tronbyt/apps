@@ -10,14 +10,12 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
-load("secret.star", "secret")
+load("schema.star", "schema")
 
 MEH_CACHE = "meh"
 MEH_IMAGE_CACHE = "meh-image"
 MEH_URL = "https://meh.com/api/1/current.json?apikey="
 TTL_SECONDS = 600
-
-ENCRYPTED_API_KEY = "AV6+xWcEpadSSHWrfsPfqzfkU86tJQxSamXKz9Ya+sdQHvXAw5oYBxdsBhU94lEDMB4yhT9Y/seAKLCdW2EzWGt/UOx6YkAm0ojADUNhrnXw3U8tgfJPMkbdtKlojngw2iwdjhWmNEeZZxtZNfMU3Xf1OA+kAMiCFdtFKItmXPcLNdk037w="
 
 NO_DEAL_IMAGE = """
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9
@@ -38,8 +36,22 @@ xCn9lNQRNY1CtXcMTAMmc2Dowy/aKpm05rrKCd8aNtaB1EeqIrEHfGZLcc7TmXAdMemuf467asv/
 SPdro7ngP1qyfjWlvWjLezGY9GI068Vwuorx/Bc/vstf17aXXwAAAABJRU5ErkJggg==
 """
 
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "meh_api_key",
+                name = "Meh API Key",
+                desc = "Your Meh.com API key. See https://meh.com/developers for details.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
+    )
+
 def main(config):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("dev_api_key")
+    api_key = config.get("meh_api_key")
 
     deal = get_deal(api_key)
     image = base64.decode(get_image(deal))

@@ -10,23 +10,19 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_STOP_ID = "490020255S"
 STOP_URL = "https://api.tfl.gov.uk/StopPoint"
 ARRIVALS_URL = "https://api.tfl.gov.uk/StopPoint/%s/Arrivals"
 USER_AGENT = "Tidbyt london_bus_stop"
 
-# Allows 500 queries per minute
-ENCRYPTED_API_KEY = "AV6+xWcE57T6HnoAondgpmruu4+AXhzassCIQvkqjSPhB2Mkt62EdGUNp1W6B78nn7Kc8EQQTBznglejF3OhE/g1ET75qRw6aWTkZSXu/W8Ux6G6rEFpxHuZgTas7uAGgJ7jTGs5EmqJiccjpPV0jn85qQ0MlHqcw/5YvteVv3qF+366gfg="
-
 RED = "#DA291C"  # Pantone 485 C - same as the buses
 ORANGE = "#FFA500"  # Like the countdown timers at bus stops
 COUNTDOWN_HEIGHT = 24
 FONT = "tom-thumb"
 
-def app_key():
-    return secret.decrypt(ENCRYPTED_API_KEY) or ""  # fall back to anonymous quota
+def app_key(config):
+    return config.get("tfl_app_key") or ""  # fall back to anonymous quota
 
 # Validate and get stop details from search results.
 def extract_stop(stop):
@@ -49,13 +45,13 @@ def extract_stop(stop):
     )
 
 # Perform the actual fetch of stops for a location, but use cache if available
-def fetch_stops(loc):
+def fetch_stops(loc, config):
     truncated_lat = math.round(1000.0 * float(loc["lat"])) / 1000.0  # Truncate to 3dp for better caching
     truncated_lng = math.round(1000.0 * float(loc["lng"])) / 1000.0  # Means to the nearest ~110 metres.
     resp = http.get(
         STOP_URL,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
             "lat": str(truncated_lat),
             "lon": str(truncated_lng),
             "radius": "300",
@@ -86,7 +82,7 @@ def outside_uk_bounds(loc):
     return False
 
 # Find list of stops near a given location.
-def get_stops(location):
+def get_stops(location, config):
     loc = json.decode(location)
     if outside_uk_bounds(loc):
         return [schema.Option(
@@ -94,18 +90,18 @@ def get_stops(location):
             value = DEFAULT_STOP_ID,
         )]
 
-    data = fetch_stops(loc)
+    data = fetch_stops(loc, config)
     if not data:
         return []
     extracted = [extract_stop(stop) for stop in data["stopPoints"]]
     return [e for e in extracted if e]
 
 # Perform the actual fetch for a stop, but use cache if available.
-def fetch_stop(stop_id):
+def fetch_stop(stop_id, config):
     resp = http.get(
         url = STOP_URL + "/" + stop_id,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -135,8 +131,8 @@ def extract_child(stop_id, children):
 # StopPoints. It seems like for buses, there is a parent ID for all the stops
 # with a given name/at a given junction, and then a child ID for each stop.
 # This looks for the inner-most child to get specific arrivals.
-def get_stop(stop_id):
-    data = fetch_stop(stop_id)
+def get_stop(stop_id, config):
+    data = fetch_stop(stop_id, config)
     if not data:
         return None
 
@@ -153,12 +149,12 @@ def get_stop(stop_id):
         "code": data.get("stopLetter", "?"),
     }
 
-def get_arrivals(stop_id):
+def get_arrivals(stop_id, config):
     resp = http.get(
         ARRIVALS_URL % stop_id,
         params = {
             "serviceTypes": "bus,night",
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -358,13 +354,13 @@ def main(config):
     else:
         stop_id = json.decode(stop_id)["value"]
 
-    stop = get_stop(stop_id)
+    stop = get_stop(stop_id, config)
     if not stop:
         arrivals = []
         stop_name = "Unknown stop"
         stop_code = "?"
     else:
-        arrivals = get_arrivals(stop_id)
+        arrivals = get_arrivals(stop_id, config)
         stop_name = stop["name"]
         stop_code = stop["code"]
 
@@ -386,16 +382,23 @@ def main(config):
         ),
     )
 
-def get_schema():
+def get_schema(config):
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "tfl_app_key",
+                name = "TfL App Key",
+                desc = "Your Transport for London (TfL) App Key. See https://api.tfl.gov.uk/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "stop_id",
                 name = "Bus Stop",
                 desc = "A list of bus stops based on a location.",
                 icon = "bus",
-                handler = get_stops,
+                handler = lambda location: get_stops(location, config),
             ),
         ],
     )

@@ -10,10 +10,7 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-# Can handle 500 requests per minute
-ENCRYPTED_APP_KEY = "AV6+xWcEgG4Ru4ZCA4ggWDRK+4zP4YCk4pCZrLiuXoCVSc677Sipk1Wnrag92v1k4qfa9n8e9FuCdsoLbov5osfGWOWUCYDkR3xh/uEsXOLVJvAr8iUXf6RSac2PXnDZ//z+hhgBzVldDDI/9CD8K8MJa0u75SG9EhZYidD9OXh0NggRHeE="
 STATION_URL = "https://api.tfl.gov.uk/StopPoint"
 ARRIVALS_URL = "https://api.tfl.gov.uk/StopPoint/%s/Arrivals"
 USER_AGENT = "Tidbyt tube"
@@ -104,17 +101,17 @@ LINES = {
     },
 }
 
-def app_key():
-    return secret.decrypt(ENCRYPTED_APP_KEY) or ""  # Fall back to freebie quota
+def app_key(config):
+    return config.get("tfl_api_key") or ""  # Fall back to freebie quota
 
 # Get list of stations near a given location, or look up from cache if available.
-def fetch_stations(loc):
+def fetch_stations(loc, config):
     truncated_lat = math.round(1000.0 * float(loc["lat"])) / 1000.0  # Truncate to 3dp for better caching
     truncated_lng = math.round(1000.0 * float(loc["lng"])) / 1000.0  # Means to the nearest ~110 metres.
     resp = http.get(
         STATION_URL,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
             "lat": str(truncated_lat),
             "lon": str(truncated_lng),
             "radius": "500",
@@ -211,7 +208,7 @@ def format_destination_station(name):
     return " ".join(words)
 
 # Find and extract details of all stations near a given location.
-def get_stations(location):
+def get_stations(location, config):
     loc = json.decode(location)
     if outside_uk_bounds(loc):
         return [schema.Option(
@@ -223,7 +220,7 @@ def get_stations(location):
             }),
         )]
 
-    data = fetch_stations(loc)
+    data = fetch_stations(loc, config)
     if not data:
         return []
     options = []
@@ -264,11 +261,11 @@ def get_stations(location):
     return options
 
 # Lookup upcoming arrivals for our given station, or use cache if available.
-def fetch_arrivals(stop_id):
+def fetch_arrivals(stop_id, config):
     resp = http.get(
         ARRIVALS_URL % stop_id,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -297,8 +294,8 @@ def format_times(seconds):
     return result
 
 # Group arrivals data by platform/direction and format for humans
-def get_arrivals(stop_id, line_id):
-    all_arrivals = fetch_arrivals(stop_id)
+def get_arrivals(stop_id, line_id, config):
+    all_arrivals = fetch_arrivals(stop_id, config)
     if not all_arrivals:
         return []
     by_direction = {}
@@ -407,7 +404,7 @@ def main(config):
         station_name = format_title_station(data["station_name"])
         line_id = data["line_id"]
 
-    arrivals = get_arrivals(station_id, line_id)
+    arrivals = get_arrivals(station_id, line_id, config)
 
     # Considered including a roundel logo because we all love them, but
     # some station names are very long like High Street Kensington or
@@ -469,6 +466,13 @@ def get_schema():
                 desc = "The station and line to get arrival times for",
                 icon = "trainSubway",
                 handler = get_stations,
+            ),
+            schema.Text(
+                id = "tfl_api_key",
+                name = "TFL API Key",
+                desc = "A TFL API key to access the TFL API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

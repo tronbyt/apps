@@ -9,7 +9,6 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 PLAYER_FONT = "6x10-rounded"
@@ -24,9 +23,6 @@ MATCH_PATH = "/lol/match/v5/matches/"
 
 DEFAULT_QUEUE = "solo"
 DEFAULT_REGION = "NA1"
-
-# TODO to add once RIOT API key is approved
-ENCRYPTED_API_KEY = ""
 
 # standard components:
 win = render.Text(content = "W", color = "#00FF00", font = WL_FONT)
@@ -56,7 +52,7 @@ def random_famous_player():
 def main(config):
     random.seed(time.now().unix // 15)
 
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("apikey", "")
+    api_key = config.get("apikey", "")
     if not api_key:
         return render_error(
             title = "No API key",
@@ -460,6 +456,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Riot Games API key. (ideally we have a production key - if not, use your own dev key)",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

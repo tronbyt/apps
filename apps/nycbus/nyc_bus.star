@@ -13,11 +13,9 @@ load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 EXAMPLE_STOP_CODE = "550685"
-ENCRYPTED_API_KEY = "AV6+xWcEyevKcdrIpIo95aDtG0+14nQ1GG+kEuwmjiUiyFaJBRX6CL1/bi31WpHXwyV2AgApxwxDgWlGtvT5SDapGAwoma96vsVKfrXnH4Jlr5Oy38r5F3y+GbDm0Obw1fo6aaqIvr1y4fI7W0neS30mbmdkVBc6H2oK6KpB4HMtOxkm2UkXKSGA"
 BUSTIME_STOP_TIMES_URL = "http://bustime.mta.info/api/siri/stop-monitoring.json"
 BUSTIME_STOP_INFO_URL = "http://bustime.mta.info/api/where/stop/%s.json"
 BUSTIME_STOPS_FOR_LOCATION_URL = "http://bustime.mta.info/api/where/stops-for-location.json"
@@ -27,6 +25,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "MTA BusTime API Key",
+                desc = "Your MTA BusTime API key. See http://bustime.mta.info/wiki/Developers/Index for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "stop_code",
                 name = "Bus Stop",
@@ -37,8 +42,8 @@ def get_schema():
         ],
     )
 
-def get_stops(location):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+def get_stops(location, config):
+    api_key = config.get("api_key")
     loc = json.decode(location)
 
     res = http.get(
@@ -68,7 +73,7 @@ def get_stops(location):
     return stops
 
 def main(config):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("api_key")
+    api_key = config.get("api_key")
     widgetMode = config.bool("$widget")
     stop_code = config.get("stop_code")
     if stop_code == None:

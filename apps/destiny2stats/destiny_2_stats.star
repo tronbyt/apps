@@ -11,20 +11,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
-
-DEFAULT_DISPLAY_NAME = secret.decrypt("""
-AV6+xWcEQzMLYpoXESTHjum6eunoCR0xllGtKSVY7mqZhMvFklc8EOND
-BOB8N0rTqWD0zVPiK7oM8DX+JSF49Edq/+tHIldHRpjToMx0ojWk0/tn
-vF/v05SPqQdbpH1Rhcarl4u/Olur28JCGs7Ne1Cu2bU=
-""") or "Placeholder"
-
-DEFAULT_DISPLAY_NAME_CODE = secret.decrypt("""
-AV6+xWcEdNoPkccJeNCM054AamFiuw9WZBrnh5QZqJeVZYXek9J5ObQBg
-fLx/16F8yXlEwXf+Bz3FuZtvbwX6sQgvyHZVfhdBta8ZwGivPqmhqW430
-4lua+JG0HZlRN+7A0omSRgzkDbnA==
-""") or "1234"
 
 API_BASE_URL = "https://www.bungie.net/platform"
 API_USER_PROFILE = API_BASE_URL + "/User/GetBungieNetUserById/"
@@ -32,16 +19,12 @@ API_SEARCH_BUNGIE_ID = API_BASE_URL + "/User/Search/GlobalName/0/"
 API_SEARCH_BUNGIE_ID_NAME = API_BASE_URL + "/Destiny2/SearchDestinyPlayerByBungieName/-1/"
 
 def main(config):
-    display_name = config.get("display_name", DEFAULT_DISPLAY_NAME)
-    display_name_code = config.get("display_name_code", DEFAULT_DISPLAY_NAME_CODE)
+    display_name = config.get("display_name")
+    display_name_code = config.get("display_name_code")
     show_id = config.bool("show_id", False)
     displayed_character = ""
 
-    api_key = secret.decrypt("""
-        AV6+xWcEa0PWnbSGOs6uaaycU788pvVazw2uNol96VTG7uJDCuhWFPR7m7Ak4obvv9BR+dJLrbDo5NVE
-        3hlX15hL20d39sGIlFT8jCi801zXvTBz8B+F/GEjmOcQRSWhiEExGURjDim3ZjHNU/dLyTJH72OZ+9vD
-        6oeiR880ujBdIQq8ZDg=
-        """) or config.get("dev_api_key")
+    api_key = config.get("api_key")
 
     character_cached = cache.get("character" + display_name + display_name_code)
 
@@ -257,6 +240,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Your Bungie API key.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "display_name",
                 name = "Display Name",

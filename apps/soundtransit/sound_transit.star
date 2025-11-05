@@ -9,7 +9,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 # Some TidByt APIs require strings, but we want to use `None` values.
@@ -27,21 +26,48 @@ CACHE_TIMETABLE_SECONDS = 60
 # Cache route information (which stops exist, etc) for one day:
 CACHE_ROUTE_SECONDS = 60 * 60 * 24
 
-OBA_API_KEY = "AV6+xWcE9X2WhzcfyjFYnfyqYSO3+o3N+72Bm2ngiMGp3uuQ314jrCe7BmIOwckaWzKWblMgtXk3crXs7uf3cu5q4pai6+36CorE8pe/4iDKD6ibZaBq8IqoI9GbBqmwuPqgHxbBQnCk2q2J"
-
 def none_str_to_none_val(maybe_none_str):
     if maybe_none_str == NONE_STR:
         return None
     return maybe_none_str
 
+def search_stations(prefix, config):
+    if not prefix:
+        return []
+
+    # Use the OneBusAway API to search for stops by location/query
+    response = http.get(
+        "https://api.pugetsound.onebusaway.org/api/where/stops-for-location.json?key=" + get_api_token(config) + "&query=" + prefix,
+        ttl_seconds = CACHE_ROUTE_SECONDS,
+    )
+
+    if response.status_code != 200 or not response.body():
+        print("Could not access OBA for stop search. HTTP Status: " + str(response.status_code))
+        return []
+
+    data = json.decode(response.body())["data"]
+    stops = data.get("list", [])  # OBA uses 'list' for stops-for-location results
+
+    # Filter for light rail stops only (routeType == 0)
+    light_rail_stops = [
+        stop
+        for stop in stops
+        if any([route.get("type") == 0 for route in stop.get("routes", [])])
+    ]
+
+    return [
+        schema.Option(display=stop["name"], value=stop["id"])
+        for stop in light_rail_stops
+    ]
+
 now = time.now().unix
 
-def get_api_token():
+def get_api_token(config):
     # "OBAKEY" API key seems to work, but only use this as fallback
-    return secret.decrypt(OBA_API_KEY) or "OBAKEY"
+    return config.get("oba_api_key") or "OBAKEY"
 
-def get_stop_data(stop_id):
-    rep = http.get("https://api.pugetsound.onebusaway.org/api/where/schedule-for-stop/" + stop_id + ".json?key=" + get_api_token(), ttl_seconds = CACHE_TIMETABLE_SECONDS)
+def get_stop_data(stop_id, config):
+    rep = http.get("https://api.pugetsound.onebusaway.org/api/where/schedule-for-stop/" + stop_id + ".json?key=" + get_api_token(config), ttl_seconds = CACHE_TIMETABLE_SECONDS)
     if rep.status_code != 200:
         fail("Could not access OBA")
     rep = rep.body()
@@ -80,9 +106,9 @@ def get_stop_data(stop_id):
 
     return result_data
 
-def show_stops(stop_id1, stop_id2, scroll_names, widgetMode):
-    stop1_data = get_stop_data(stop_id1) if stop_id1 != None else []
-    stop2_data = get_stop_data(stop_id2) if stop_id2 != None else []
+def show_stops(stop_id1, stop_id2, scroll_names, widgetMode, config):
+    stop1_data = get_stop_data(stop_id1, config) if stop_id1 != None else []
+    stop2_data = get_stop_data(stop_id2, config) if stop_id2 != None else []
 
     max_length = 0
     route_count = 0
@@ -158,69 +184,27 @@ def main(config):
     widgetMode = config.bool("$widget")
 
     return render.Root(
-        child = show_stops(station1, station2, scroll_names, widgetMode),
+        child = show_stops(station1, station2, scroll_names, widgetMode, config),
         delay = 0 if scroll_names else 5 * 1000,
     )
-
-def stop_options_for_route(route_id):
-    rep = http.get("https://api.pugetsound.onebusaway.org/api/where/stops-for-route/" + route_id + ".json?key=" + get_api_token(), ttl_seconds = CACHE_ROUTE_SECONDS)
-    if rep.status_code != 200:
-        fail("Could not access OBA")
-    rep = rep.body()
-    data = json.decode(rep)["data"]
-
-    def full_name(stop):
-        return stop["name"] + " " + stop["direction"]
-
-    stops = sorted(data["references"]["stops"], key = full_name)
-
-    return [
-        schema.Option(display = full_name(stop), value = stop["id"])
-        for stop in stops
-        if stop["routeIds"]
-    ]
-
-def light_rail_routes():
-    # "40" is Sound Transit, the light rail operator in the Puget Sound
-    rep = http.get("https://api.pugetsound.onebusaway.org/api/where/routes-for-agency/40.json?key=" + get_api_token(), ttl_seconds = CACHE_ROUTE_SECONDS)
-    if rep.status_code != 200:
-        fail("Could not access OBA")
-    rep = rep.body()
-    data = json.decode(rep)["data"]
-
-    routes = []
-    for route in data["list"]:
-        # "0" = light rail, ref "route_type" here: https://developers.google.com/transit/gtfs/reference#routestxt
-        if route["type"] == 0:
-            routes.append(route)
-    return routes
-
-def all_station_options():
-    stops = []
-    for route in light_rail_routes():
-        stops.extend(stop_options_for_route(route["id"]))
-
-    return stops + [schema.Option(display = "None", value = NONE_STR)]
 
 def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Dropdown(
+            schema.Typeahead(
                 id = "station1",
                 name = "Top station",
                 desc = "The first station to show",
                 icon = "arrowUp",
-                options = all_station_options(),
-                default = STATION1_DEFAULT,
+                handler = search_stations,
             ),
-            schema.Dropdown(
+            schema.Typeahead(
                 id = "station2",
                 name = "Bottom station",
                 desc = "The second station to show",
                 icon = "arrowDown",
-                options = all_station_options(),
-                default = STATION2_DEFAULT,
+                handler = search_stations,
             ),
             schema.Toggle(
                 id = "scroll_names",
@@ -228,6 +212,13 @@ def get_schema():
                 desc = "Scroll the stop names if they're too long to fit on screen",
                 icon = "scissors",
                 default = SHOULD_SCROLL_DEFAULT,
+            ),
+            schema.Text(
+                id = "oba_api_key",
+                name = "OBA API Key",
+                desc = "An OBA API key to access the OBA API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

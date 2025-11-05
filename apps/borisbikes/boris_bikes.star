@@ -11,7 +11,6 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 BIKE_IMAGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACgAAAAYCAYAAACIhL/AAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAKKADAAQAAAABAAAAGAAAAADbx94qAAACIElEQVRIDe2VMUrEQBSG4+IZFryCBxAsxAWt9BKC3kAWtLCyUFi8gYIXERQLYQ9gZWch2FvH+d/mn/0zyWRmXLYzEOfN5P/f++ZlslbV/+U7UPuoIBgVaP8knZ5f1bgbs40yT+ZcO+Ds7noDFA7K7iRRINgM5smp7p7FUybo4Ds+OoSU3UzZ7LntLkvpRAqnnlzQ56eXenKwX1RT6xTFKFZkcGJ4Sn1rP4N+Ezu39eTyzaYlkP1n0CXziRnMLzqvBoWyXllfPuZNjO2ikuj7695bx1tnPq4EtBiw8Zqv6SYST/d+LH/fWV4CNnAKtqRaRAR9vtn1j5IddHmR07wAdHP61asfoIIuADPgSPT++GAhkvMsaSHqbGzgEI8/PwzO1h1orPsEJaT/SIY6Z0ndHw+H1+OKR8FgGIBjPm6Qc4wEI6gB4gxgh3qrCTHhtk9Oq+RmmjcCX9g5rOEa2hwhoRuRFBO9CAswhVMN41YnQjiK5OPiEsaWVx+4GGzWQSUONDZF13DrxS+v1QmB069dfRq3vPrAxWTq/x1sxNydvaYgwTT8nzoAh83M5kGCzOkgIH/5ceDDfLNXt9Ksex1EkVcZ+jkf6iI0/iumYaVxAC521mP1vB6Bn8TUwXqpHvZSD/UjHkYuBCydaa6uYyyA7K2Bxd4HUilHI/JOmOMPNcv/xcEO2VlUUXBd7xBkLMRyxdZbgMyvYq6tCsY8HHNr/AIqRDFbkUuQeQAAAABJRU5ErkJggg==")
 
@@ -22,19 +21,18 @@ LIGHTNING_IMAGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAA
 DEFAULT_DOCK_ID = "BikePoints_614"
 
 # Allows 500 queries per minute
-ENCRYPTED_APP_KEY = "AV6+xWcEdUJILKBdjy5qyWT1EKpcqVUeWg8lbsXbUTDZC5Saw4fhOpZFk0fLG3dtJKG10xj/wmrOejsU8PAGcfzJya7pL2USs4BLPCotZ5v/VZEL2yntupZiUFJa+gugOr+krr2ucZub9eyufOHYFqgcCI+bi0GclQe1lcku1CGfnxvLJ2A="
 LIST_DOCKS_URL = "https://api.tfl.gov.uk/BikePoint"
 DOCK_URL = "https://api.tfl.gov.uk/BikePoint/%s"
 USER_AGENT = "Tidbyt boris_bikes"
 
-def app_key():
-    return secret.decrypt(ENCRYPTED_APP_KEY) or ""  # Fall back to freebie quota
+def app_key(config):
+    return config.get("tfl_app_key") or ""  # Fall back to freebie quota
 
-def fetch_docks():
+def fetch_docks(config):
     resp = http.get(
         LIST_DOCKS_URL,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -54,7 +52,7 @@ def outside_uk_bounds(loc):
         return True
     return False
 
-def list_docks(location):
+def list_docks(location, config):
     loc = json.decode(location)
     if outside_uk_bounds(loc):
         return [schema.Option(
@@ -62,7 +60,7 @@ def list_docks(location):
             value = DEFAULT_DOCK_ID,
         )]
 
-    docks = fetch_docks()
+    docks = fetch_docks(config)
     if not docks:
         return []
     options = []
@@ -83,11 +81,11 @@ def list_docks(location):
     options = sorted(options, key = lambda x: x[1])
     return [option[0] for option in options]
 
-def fetch_dock(dock_id):
+def fetch_dock(dock_id, config):
     resp = http.get(
         DOCK_URL % dock_id,
         params = {
-            "app_key": app_key(),
+            "app_key": app_key(config),
         },
         headers = {
             "User-Agent": USER_AGENT,
@@ -120,8 +118,8 @@ def tidy_name(name):
 
     return " ".join(words)
 
-def get_dock(dock_id):
-    resp = fetch_dock(dock_id)
+def get_dock(dock_id, config):
+    resp = fetch_dock(dock_id, config)
     if not resp:
         return "No data", "?", "?"
     name = tidy_name(resp["commonName"])
@@ -140,7 +138,7 @@ def main(config):
         dock_id = json.decode(dock)["value"]
     else:
         dock_id = DEFAULT_DOCK_ID
-    dock_name, acoustic_count, electric_count = get_dock(dock_id)
+    dock_name, acoustic_count, electric_count = get_dock(dock_id, config)
 
     return render.Root(
         max_age = 120,
@@ -204,6 +202,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "tfl_app_key",
+                name = "TfL App Key",
+                desc = "Your TfL app key. See https://api-portal.tfl.gov.uk/",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "dock",
                 name = "Dock",

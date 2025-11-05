@@ -9,7 +9,6 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 # Theme
 TEXT_COLOR = "#FFFFFF"
@@ -23,16 +22,14 @@ AIRPORT_DB_CACHE_TTL = 28800  # 8 hours
 API_URL = "https://datis.clowd.io/api/"
 AIRPORT_DB_URL = "https://airportdb.io/api/v1/airport/{icao}?apiToken={token}"
 
-AIRPORT_DB_API_TOKEN = secret.decrypt("AV6+xWcEQXjzZyOEHWUuwx3QFq57+plCzYbcCRaaDX0c6HkPPQDRqozjj6aSfiC+s23hwG4UavuLJ9+oJMqIsSXJyvtI78upbEqm12DZZSUjTzXfYQalOjY0rJHN/Rzm19uAwIPq+xSZVCfRk4HodnpoD5QNiV0ilGzliejPdyb15Pa+0lM7JUvO5yL4O9rmqL8EOGqbdyfK1Igre83QQ1kMU+OZaTtYRKsv0hHyBiLRyFabOrSKRs8cHGxaCzxzxrA9ieyM")
-
 def debug_print(label, value):
     """Helper function to print debug info"""
     print("%s: %s" % (label, json.encode(value)))
 
-def get_airport_runways(icao):
+def get_airport_runways(icao, config):
     """Fetch runway information from airport database."""
 
-    url = AIRPORT_DB_URL.format(icao = icao, token = AIRPORT_DB_API_TOKEN)
+    url = AIRPORT_DB_URL.format(icao = icao, token = config.get("airport_db_api_token"))
     response = http.get(url, ttl_seconds = AIRPORT_DB_CACHE_TTL)
 
     if response.status_code != 200:
@@ -71,9 +68,9 @@ def extract_number(runway):
     num = runway[:-1] if runway[-1] in ["L", "R", "C"] else runway
     return int(num)
 
-def extract_runways(text, icao):
+def extract_runways(text, icao, config):
     # Get valid runways for this airport
-    valid_runways = get_airport_runways(icao)
+    valid_runways = get_airport_runways(icao, config)
     if not valid_runways:
         return [], []
 
@@ -261,7 +258,7 @@ def main(config):
     datis = atis_data.get("datis", "")
 
     # Extract active runways
-    arrivals, departures = extract_runways(datis, airport)
+    arrivals, departures = extract_runways(datis, airport, config)
     if len(departures) == 0:
         departures = arrivals
 
@@ -314,6 +311,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "airport_db_api_token",
+                name = "AirportDB API Token",
+                desc = "Your AirportDB.io API token. See https://airportdb.io/api/v1/docs for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "airport",
                 name = "Airport",

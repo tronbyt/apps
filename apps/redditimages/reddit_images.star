@@ -12,7 +12,6 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_SUBREDDITS = ["blackcats", "aww", "eyebleach", "itookapicture", "cats", "pic", "otters", "plants"]
 APPROVED_FILETYPES = [".png", ".jpg", ".jpeg", ".bmp"]
@@ -26,10 +25,6 @@ fO5PI9OqOcPICMhohiJzt1o+5JQ3VtjJtKTy+L7dvZIpognBcHV4MFxJbEoV1apx+8wZJiX9bkJCjmhC
 4bzhHcnLUdsloglFxgrr2GtuziC7RDRuZCZV2kg3RTShPoMYI5owDL2f5PPDa3yy4fGfeJoQDOeMfFlSA7PKG9GE
 YOhHSGUgGreaxu4jnp/bZzyDMdcnBfMH+p/AM/kQywMAAAAASUVORK5CYII=
 """)
-REDDIT_CLIENT_SECRET = """
-AV6+xWcEQDjYVKYw9hSu4lxuC1MdSDyFJ3zXnGwK7/HBdz3nQRdorFSj40AXh3my9VvqL7ZAf8dvBNgPkpQz4a59
-SR1PButYX8EpyWhfH6RnR+laCcDbZBbZVLw19R2e6SwjO/XuSmSUXX4vRknYwfDR6VD+Ps40k8ljftkXDPB2UIoQ
-"""
 
 def main(config):
     # Build full sub list based on user options.
@@ -37,7 +32,7 @@ def main(config):
 
     # Get subreddit name and chosen post (pseudo)randomly.
     chosenSub = allSubs[getRandomNumber(len(allSubs))]
-    currentPost = getPosts(chosenSub)
+    currentPost = getPosts(chosenSub, config)
 
     # Render image/text
     if currentPost["id"] != "00000":
@@ -132,7 +127,7 @@ def buildSubPrefix(name):
     return formattedName
 
 # Gets either the cached posts or runs an API call to reddit for more.
-def getPosts(subname):
+def getPosts(subname, config):
     print("Pulling posts for subreddit " + subname)
     cacheName = "reddit-image-posts-" + subname
     cachedPosts = cache.get(cacheName)
@@ -149,7 +144,7 @@ def getPosts(subname):
     accessToken = cache.get("reddit-image-posts-access-token")
     if accessToken == None:
         print("Access token expired, getting new one")
-        newTokenRes = getNewAccessToken()
+        newTokenRes = getNewAccessToken(config)
         if "error" in newTokenRes.keys() or newTokenRes["access_token"] == None:
             return handleApiError(newTokenRes)
         accessToken = newTokenRes["access_token"]
@@ -232,8 +227,8 @@ def setRandomPost(allImagePosts, subname):
 
 # Get a new reddit access token.
 # https://github.com/reddit-archive/reddit/wiki/OAuth2#application-only-oauth
-def getNewAccessToken():
-    authSecret = secret.decrypt(REDDIT_CLIENT_SECRET) or "thiswillfail"
+def getNewAccessToken(config):
+    authSecret = config.get("reddit_client_secret") or "thiswillfail"
     auth = tuple([
         "DxzJmjTSGHMt4Oj_8X7FkQ",
         authSecret,
@@ -325,6 +320,13 @@ def get_schema():
                 desc = "In addition to custom subreddits, include defaults? (/r/cats, /r/otters, /r/blackcats, /r/plants, /r/itookapicture, /r/aww, /r/eyebleach, /r/pic)",
                 icon = "otter",
                 default = False,
+            ),
+            schema.Text(
+                id = "reddit_client_secret",
+                name = "Reddit Client Secret",
+                desc = "A Reddit client secret to access the Reddit API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

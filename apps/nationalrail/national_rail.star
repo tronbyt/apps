@@ -10,12 +10,8 @@ load("http.star", "http")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("xpath.star", "xpath")
 
-# Used to query Darwin to get live train information.
-# Allows 5000 requests per hour (~1.38 qps) for free. Can buy more if needed.
-ENCRYPTED_DARWIN_APP_KEY = "AV6+xWcEW64SUyBE2O/65VFbdcMepQ2EeNFZd4mDkOYY7MufQWq4q9VFzsoA/BoTExvFY4FxTM+lT3zXYO63sZGqBCsyud7GqaJKcpTA9dCA5ixTnzKPddMwid0SA9E8XnA7eiKm4bRhg/tRYQQHDqgR6LPI4/ZWGhlJwPVNtFxITVSaKePPtOji"
 DARWIN_SOAP_URL = "https://lite.realtime.nationalrail.co.uk/OpenLDBWS/ldb9.asmx"
 
 # Filters for trains that call at a given station, if selected. This is an excerpt
@@ -2659,16 +2655,16 @@ STATIONS = {
     "ZLW": {"crs": "ZLW", "name": "Whitechapel", "sixteen_char_name": "Whitechapel", "lat": 51.519467, "lng": -0.059757122},
 }
 
-def darwin_app_key():
-    return secret.decrypt(ENCRYPTED_DARWIN_APP_KEY)
+def darwin_app_key(config):
+    return config.get("darwin_token", "")
 
-def fetch_departures(station, via):
+def fetch_departures(config, station, via):
     if len(via) > 0:
         filter = DEPARTURES_FILTER % via
     else:
         filter = ""
 
-    app_key = darwin_app_key()
+    app_key = darwin_app_key(config)
     if not app_key:
         return None
     request = DEPARTURES_REQUEST % (app_key, station, filter)
@@ -2870,7 +2866,7 @@ def main(config):
     else:
         fail("Invalid display mode %s" % display_mode)
 
-    resp = fetch_departures(origin_station["crs"], filter_crs)
+    resp = fetch_departures(config, origin_station["crs"], filter_crs)
     if not resp:
         return render_error("Train times not available")
     departures = xpath.loads(resp)
@@ -2943,6 +2939,13 @@ def get_schema():
                         value = DISPLAY_COMPACT,
                     ),
                 ],
+            ),
+            schema.Text(
+                id = "darwin_token",
+                name = "Darwin Token",
+                desc = "A Darwin API token.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

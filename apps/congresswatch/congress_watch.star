@@ -11,11 +11,8 @@ load("encoding/json.star", "json")  #JSON Data from congress.gov API site
 load("http.star", "http")  #HTTP Client
 load("render.star", "render")  #Render the display for Tidbyt
 load("schema.star", "schema")  #Keep Track of Settings
-load("secret.star", "secret")  #Encrypt the API Key
 load("time.star", "time")  #Ensure Timely display of congressional actions
 
-API_KEY = ""  #Remove before committing
-API_KEY_ENCRYPTED = "AV6+xWcEONGMeP4KdGqCO9aQ5vhdBFz4VLyxinpFW+SIsoiYmqcCR33CU6kNEc01NR/ywxYUNJl0CeNkNTZ/lT8rDEjKlENdTMU8/A8YsYjnrUhnq6QLIeO6BRVtGRTwcILtm0fPZrEWId8Ta4cETXU09Ib6LO8AYeHorr0mvi2wNiNn776WxcF+UIkBXg=="  #
 CONGRESS_API_URL = "https://api.congress.gov/v3/"
 CONGRESS_SESSION_LENGTH_IN_DAYS = 720  #730, but we'll shorten it some to make sure we don't miss
 CONGRESS_BILL_TTL = 12 * 60 * 60  #12 hours * 60 mins/hour * 60 seconds/min
@@ -74,14 +71,14 @@ scroll_speed_options = [
 ]
 
 def main(config):
-    api_key = secret.decrypt(API_KEY_ENCRYPTED) or API_KEY
+    api_key = config.get("congress_api_key")
 
     #initialize
     senate_start = None
     house_start = None
     congress_number = ""
 
-    if api_key == "":
+    if not api_key:
         #test environment or app preview
         congress_session_body = json.decode(SAMPLE_CONGRESS_BODY)
         congress_data = json.decode(SAMPLE_CONGRESS_DATA)
@@ -126,7 +123,7 @@ def main(config):
         bill_data_from_date = (time.now() - time.parse_duration("%sh" % config.get("period", period_options[-1].value) * 24))
         congress_bill_url = "%sbill/%s?limit=%s&sort=updateDate+desc&api_key=%s&format=json&fromDateTime=%sT00:00:00Z" % (CONGRESS_API_URL, congress_number, MAX_ITEMS, api_key, bill_data_from_date.format("2006-01-02"))
 
-        congress_data = json.decode(get_cachable_data(congress_bill_url, CONGRESS_BILL_TTL))
+        congress_data = json.decode(get_cachable_data(congress_bill_url, CONGRESS_BILL_TTL, config))
 
     #We have either live or test data, now display it.
 
@@ -205,8 +202,8 @@ def randomize(min, max):
     rand = int(str(now.nanosecond)[-6:-3]) / 1000
     return int(rand * (max - min) + min)
 
-def get_cachable_data(url, timeout):
-    res = http.get(url = url, ttl_seconds = timeout)
+def get_cachable_data(url, timeout, config):
+    res = http.get(url = url, ttl_seconds = timeout, headers = {"API_KEY": config.get("congress_api_key")})
 
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
@@ -217,6 +214,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "congress_api_key",
+                name = "Congress API Key",
+                desc = "Your Congress.gov API key. See https://api.congress.gov/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "period",
                 name = "Period",
