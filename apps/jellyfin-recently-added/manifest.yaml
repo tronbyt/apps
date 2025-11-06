@@ -1,0 +1,9 @@
+---
+id: jellyfin-recently-added
+name: JellyfinRecentlyAdded
+summary: Display Jellyfin recently added
+desc: Displays recently added on Jellyfin server. Recommended to run Tronbyt on same network that hosts Jellyfin.
+author: noahpodgurski
+fileName: jellyfin_recently_added.star
+packageName: jellyfinrecentlyadded
+recommended_interval: 720
