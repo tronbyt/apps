@@ -69,7 +69,7 @@ def main(config):
     serverPort = config.get("serverPort", "")
     apiKey = config.get("apiKey", "")
     userId = config.get("userId")
-    collectionName = config.get("collectionName", "movies")
+    collectionName = config.get("collectionName", "Movies")
     titleText = config.get("titleText", "Recently added")
     showTitleCard = config.bool("showTitleCard", True)
     title = ""
