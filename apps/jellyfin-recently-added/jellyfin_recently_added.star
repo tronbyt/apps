@@ -90,8 +90,12 @@ def main(config):
 
     recentlyAdded = []
 
+    n = 3
+    l = len(data["Items"])
+    if l < 3:
+        n = l
     #only show last 3
-    for i in range(0, 3):
+    for i in range(0, n):
         entry = data["Items"][i]
         id = entry["Id"]
         title = entry["Name"]
@@ -113,9 +117,10 @@ def main(config):
                 ],
             ),
         )
-        recentlyAdded.append(
-            render.Box(height = 32, width = 1, color = "#a160c4"),
-        )
+        if i < l-1:
+            recentlyAdded.append(
+                render.Box(height = 32, width = 1, color = "#a160c4"),
+            )
 
     if showTitleCard:
         return render.Root(
