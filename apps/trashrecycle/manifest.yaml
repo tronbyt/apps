@@ -5,3 +5,4 @@ summary: 'Notification: recycle'
 desc: Displays a reminder to take out the recycle bins.
 author: savdagod
 recommended_interval: 5
+supports2x: true

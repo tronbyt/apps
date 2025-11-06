@@ -5,3 +5,4 @@ summary: 'Notification: dishwasher'
 desc: Displays a notification that a dishwasher is done.
 author: savdagod
 recommended_interval: 5
+supports2x: true

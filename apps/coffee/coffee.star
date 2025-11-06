@@ -1,5 +1,5 @@
 load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ICON_COFFEE_1 = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAc9JREFUOE91VNu27CAIA/3/T67skwvoPJyuNdPWCoQkkpFRWRmRFRWJ16iIyAi9l974z8Xf7+FLO7CHT4loJ8XNabMTRhSz4UIZ3IhEz37HC2sKjWExuTYqiRACKVe9xJIukgLH3rBEhOq6m9XHiSYVTwAiDGWoYEaVZCHmMk94FgKn7B60W62aFiH64d6fyNflsdvsKiooukWSHh00/Qwj+GARh2hBf4SQgv/h+LfDEeF8x0jGOK2jUYgblN+5jLDxsnlrZA3qHKISf73YBI+7DOd6JNdmKvqwqknNOPWNkR5tncCJZaRYayGYv1zSwCpjUeHf+egJ8Wn9rqevGBFKmBXnq9gbyBzHmyRWwja3jTueHG8J8F7bCE9kbjH76ggODjm0AeHFrnpPtEUBQlAkd2QucTi0us2PCdXqXKzaa8J7j6NahxhefY8EckEUux80zDmVEH22ezrBOvY5XZFJ27RP0DIyPCMLKvoUdWAX2ctdeIj0uW4tPZiUVFy4zWdOaCpV7LUGbItod2A4vJNF+2CF9kgPXfSGQuDsjlCPtctsFsfWzFiNsvrkR8rxqI64tZet5YHRAo7KM4JEn7gwtS2FxrRDNe+Gs7bDv4U/i8M+LfEMu3cAAAAASUVORK5CYII=
@@ -14,56 +14,32 @@ iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAgNJREFUOE9tVAGO
 """)
 
 LOCALIZED_STRINGS = {
-    "ready": {
-        "de": "Fertig!",
-        "en": "Ready!",
-    },
+    "en": "Ready!",
+    "de": "Fertig!",
 }
 
 def main(config):
     lang = config.get("lang", "en")
+    font = "terminus-18" if canvas.is2x() else "tb-8"
+    image_size = 40 if canvas.is2x() else 20
 
     return render.Root(
         delay = 500,
         child = render.Box(
-            child = render.Animation(
+            child = render.Row(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
                 children = [
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                    render.Animation(
                         children = [
-                            render.Image(src = ICON_COFFEE_1),
-                            render.Text(LOCALIZED_STRINGS["ready"][lang]),
+                            render.Image(src = ICON_COFFEE_1, width = image_size),
+                            render.Image(src = ICON_COFFEE_2, width = image_size),
+                            render.Image(src = ICON_COFFEE_3, width = image_size),
+                            render.Image(src = ICON_COFFEE_4, width = image_size),
                         ],
                     ),
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
-                        children = [
-                            render.Image(src = ICON_COFFEE_2),
-                            render.Text(LOCALIZED_STRINGS["ready"][lang]),
-                        ],
-                    ),
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
-                        children = [
-                            render.Image(src = ICON_COFFEE_3),
-                            render.Text(LOCALIZED_STRINGS["ready"][lang]),
-                        ],
-                    ),
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
-                        children = [
-                            render.Image(src = ICON_COFFEE_4),
-                            render.Text(LOCALIZED_STRINGS["ready"][lang]),
-                        ],
-                    ),
+                    render.WrappedText(LOCALIZED_STRINGS[lang], font = font),
                 ],
             ),
         ),

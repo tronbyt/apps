@@ -1,5 +1,5 @@
 load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ICON_FILTER1 = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAghJREFUOE9VVAlyxDAIA/z/Jxs6OnC2mWmzjrEsJCAjYwLPZGROTCSXORORGX7FzGDJNX/g2GQwXB/5c1G+GKHzUO6ZRTWIGXwxoCEehB0cbN4iLPzzKpIscSCjqvh9SSEjfTBj8jPhniajOsdBAs3JuNP8BkCyMBvt+/rHEEpkRveNzMN3nXospofr2zdOiqFS24SknZgzEzphoMON7o7DSybyIAddeAr7Q3mKNGWKJOt3Ebx6QQMzsL5iuny0/uToO5EFtGTsoRzLFiTABgFgMx/DOkwk5nYkpHia6RscpRQ2hinD4NUOaSKddUvg0LCj6tgQ1RPAYNqKuIazlm9LblGfnwJG+k2hAIg9pFtOlyUbOA9Tja0PE+ek3gi2xNAHqU53pAFp4nRUljQEe2bFP6WMAzABLkIbGPCMsEkApBRQdeKrT5uFgmGDQQakBQO2r3tuVCpFPCwllA2Qtt8pzc8M2I5FCFNyzQ3BZARA8Nz5qcMreciEHKBrazgwg4R2l6IzdfSvhwPdr6NOca0h32tjXg2jz8VQPoEBSkD96gbTpusNFaBO0jACKLrjO4OyloZM+X5d+jPjXpfmlpTDOAZVMxxZNMougyvlYLGqyf8/W0Yepu4KFLAGg+IF6GZagDexEfZ2PUB3ZBJfUIR8c8wXoCDFcgUw058p/5G28svLnaKhMvEHcHOKIuh/fCgAAAAASUVORK5CYII=
@@ -12,100 +12,31 @@ iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAglJREFUOE9VVEeS
 """)
 
 LOCALIZED_STRINGS = {
-    "change": {
-        "de": "Filter",
-        "en": "Change",
-    },
-    "the": {
-        "de": "",
-        "en": "the",
-    },
-    "filters": {
-        "de": "wechseln!",
-        "en": "filters!",
-    },
+    "en": "Change the filters!",
+    "de": "Filter wechseln!",
 }
 
 def main(config):
     lang = config.get("lang", "en")
+    font = "terminus-18" if canvas.is2x() else "tb-8"
+    image_size = 40 if canvas.is2x() else 20
 
     return render.Root(
         delay = 500,
         child = render.Box(
-            child = render.Animation(
+            child = render.Row(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
                 children = [
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                    render.Animation(
                         children = [
-                            render.Image(src = ICON_FILTER1),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["change"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["the"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 20, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["filters"][lang]),
-                                    ),
-                                ],
-                            ),
+                            render.Image(src = ICON_FILTER1, width = image_size),
+                            render.Image(src = ICON_FILTER2, width = image_size),
+                            render.Image(src = ICON_FILTER3, width = image_size),
                         ],
                     ),
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
-                        children = [
-                            render.Image(src = ICON_FILTER2),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["change"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["the"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 20, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["filters"][lang]),
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
-                        children = [
-                            render.Image(src = ICON_FILTER3),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["change"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["the"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 20, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["filters"][lang]),
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
+                    render.WrappedText(LOCALIZED_STRINGS[lang], font = font),
                 ],
             ),
         ),

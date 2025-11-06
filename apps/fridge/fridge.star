@@ -1,5 +1,5 @@
 load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ICON_FRIDGE_CLOSED = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAfZJREFUOE9dVQlyRSEIA73/kYU2C/razp8uopCEQDMiG5/ojMCnQ986ox2KzOhohBGMCMd5pnfRHZ0ZmZn4lXcyM6qOH/E1Eyk2yXTGwki3EUhheOVUBcn2WqrrC0MA8fuAyfA6o8+JXFvomYbMQAmoEVymjQOdI5Uv6md3VFesXFHVsYGSdykL0uHvjq4m7VvOmC5aPDDSPs3iYLX2tq6UDZkkKINAaPmlFShIdBSbs2N5qkqU3x0lxNfpjsWIUrIho8tF625axlMlEBZYDOSHqFN2j3S6jX36WCUxnKegDoiEMpQBRfDHbV9/SWn6UuynzVEtmUiFhKwhLoKybCP8Usx+e953QsmBRqLbkgdv/EoJocd+JiVYGfJab9gaS52OtdeFzcaRAqrBClum9mh86Dm5m3QOikMm+bBb2GwrWaPO85TMPq3zzHqGUZwJkegfCBnbZuXoQQ9oQZqTcKi7YdlOuNlIWE0+dFPmMYPTsTeufxaE++zBTloNjQSCO+taQc0gxmgCxAWBScHzTJ3s08yAscFqVgdto1WEbVNqyt15s8LeeEN8GtoToQ2FWTZl9/TOK7p2d+a48EK2UEQu3TiqM26XjDc1l3YHaRAntRk2poxF4lHBVJHNNFDG9nKYrfXdpFaTcy0Z778J77w7z2T8W/wHepFpL2+vpssAAAAASUVORK5CYII=
@@ -9,64 +9,30 @@ iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAjVJREFUOE9VVMGR
 """)
 
 LOCALIZED_STRINGS = {
-    "close": {
-        "de": "Kühlschrank",
-        "en": "Close the",
-    },
-    "fridge": {
-        "de": "schliessen!",
-        "en": "fridge!",
-    },
+    "en": "Close the fridge!",
+    "de": "Kühlschrank schliessen!",
 }
 
 def main(config):
     lang = config.get("lang", "en")
+    font = "terminus-18" if canvas.is2x() else "tb-8"
+    image_size = 40 if canvas.is2x() else 20
 
     return render.Root(
         delay = 1000,
         child = render.Box(
-            child = render.Animation(
+            child = render.Row(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
                 children = [
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                    render.Animation(
                         children = [
-                            render.Image(src = ICON_FRIDGE_OPEN),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["close"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["fridge"][lang]),
-                                    ),
-                                ],
-                            ),
+                            render.Image(src = ICON_FRIDGE_OPEN, width = image_size),
+                            render.Image(src = ICON_FRIDGE_CLOSED, width = image_size),
                         ],
                     ),
-                    render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
-                        children = [
-                            render.Image(src = ICON_FRIDGE_CLOSED),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["close"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["fridge"][lang]),
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
+                    render.WrappedText(LOCALIZED_STRINGS[lang], font = font),
                 ],
             ),
         ),
