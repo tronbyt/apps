@@ -1,5 +1,5 @@
 load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ICON_TRASH_CLOSED = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAgNJREFUOE9tVEmuwjAMddYtpwCORjlTy9HanoJ2na83OCnSRwiFDPYbbJeIqCUKfqJU/sFWYC9q1X8e4rzyRF9fLtjDhxfxDmF0mTG41qO8yvsZtO0ypR8wdxQ9i1pKiZo7vFQj9/zMKBi64RElBuDSOIFHVJCBCBlTiCVI/wio6FZGabS4TuJcMkjLEzFOD+kiIVuy47MLGX6IDlorrcEmwuogiVTYxVcM0qhEci5r0+9CSv5IiBLj697oX9j6WO7jwjGvaa4ckfaprPAi9PB60JTvvDbENCkijmVTwihck7hFxt6v7K6pcXry4DtvcZvu0t3ynp9NSWrE8dmkBoxzEf+YIiow48mL57zF+L67NPQQQZgEaOfdhX+pGXpk1tkxQICtY1ljwLrJJt2I0JKk2Lrj+k0Xs+1u05McUR4DDXLZ1AhQRhJAo8Pdy6is2WaKltgcJ7n8Xfa4vaChDEGS1BDqnMvuDpJU3ZQmupoRGqGMoOFgU7K14OzwRsH3svE0UBMw+aWNUPWkJJatp1VSuadGQELoT+1z5qgT3c0cEm65rK3e3K299MJlw3rqyqmws8eJSK0GWiotTRJiYhIlRfmkDGnmpbWNMcdQsmtlIK6cSzmAsz2oWJIG0tTwv7nrodCnimebx1uX1f1hs8Uxh55HlYeRRHfgNCoHuAeqFZNuf57vWy5dKYV9AAAAAElFTkSuQmCC
@@ -15,26 +15,20 @@ iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAgxJREFUOE9VVFt2
 """)
 
 LOCALIZED_STRINGS = {
-    "trash": {
-        "de": "Müll",
-        "en": "Trash",
+    "en": {
+        "trash_day": "Trash\nDay!",
+        "recycling_day": "Recycling Day!",
     },
-    "recycling": {
-        "de": "Recycling",
-        "en": "Recycling",
-    },
-    "trash_day": {
-        "de": "rausbringen!",
-        "en": "Day!",
-    },
-    "recycling_day": {
-        "de": "Tag!",
-        "en": "Day!",
+    "de": {
+        "trash_day": "Müll rausbringen!",
+        "recycling_day": "Recycling Tag!",
     },
 }
 
 def main(config):
     lang = config.get("lang", "en")
+    font = "terminus-18" if canvas.is2x() else "tb-8"
+    image_size = 40 if canvas.is2x() else 20
 
     return render.Root(
         delay = 1000,
@@ -42,83 +36,39 @@ def main(config):
             child = render.Animation(
                 children = [
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_TRASH_CLOSED),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["trash"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["trash_day"][lang]),
-                                    ),
-                                ],
-                            ),
+                            render.Image(src = ICON_TRASH_CLOSED, width = image_size),
+                            render.WrappedText(LOCALIZED_STRINGS[lang]["trash_day"], font = font),
                         ],
                     ),
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_TRASH_OPEN),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["trash"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["trash_day"][lang]),
-                                    ),
-                                ],
-                            ),
+                            render.Image(src = ICON_TRASH_OPEN, width = image_size),
+                            render.WrappedText(LOCALIZED_STRINGS[lang]["trash_day"], font = font),
                         ],
                     ),
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_RECYCLE_CLOSED),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["recycling"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["recycling_day"][lang]),
-                                    ),
-                                ],
-                            ),
+                            render.Image(src = ICON_RECYCLE_CLOSED, width = image_size),
+                            render.WrappedText(LOCALIZED_STRINGS[lang]["recycling_day"], font = font),
                         ],
                     ),
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_RECYCLE_OPEN),
-                            render.Stack(
-                                children = [
-                                    render.Padding(
-                                        pad = (0, 0, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["recycling"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["recycling_day"][lang]),
-                                    ),
-                                ],
-                            ),
+                            render.Image(src = ICON_RECYCLE_OPEN, width = image_size),
+                            render.WrappedText(LOCALIZED_STRINGS[lang]["recycling_day"], font = font),
                         ],
                     ),
                 ],

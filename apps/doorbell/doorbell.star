@@ -1,5 +1,5 @@
 load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ICON_PRESS1 = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAhxJREFUOE9dVUFyI0EIE/T//xBnz+t9m3PvJiUJxuOdSo2remiQhCCBiIoqVAT4iwBQwb/PpwoRgEP8PYoh77vKwWMG8sM+xVDwff3q0jyFyEUMOrjVZxbliODNvl67kIswAMO55QrgnINUdV0aiEJqRhfCUrUircwufUsYxAycfRBrdUFVFSpnM6+QhqTJ99mIlQ5sPvoqYUoI+d0K8VAKWktdaYQGC+zaWJHNeBBSdFM/p5DJcydTEz+eRii4BWxqREoEcI5RkgSTUDcxWEP0hqy7oC6LsvWT6KIU2LzMJAVkpnq098bK9bZU28YumabYH+pqUfS0tKf2aOIzdbnc5Qic1zC3zVj5z/NhJdQpBgmBm0I9hT2oGzvfkgjtQCqcF5tmyR7Pr/GhnUBbrOWmEK2UCVLmFBE1GWRPlL1YLw8FY53Q9pZWpLliOXltq0Ir0ErS+G58O4MIOxCPv189Yy2pECYRsqNE6OqZS7c9KWbQOFz8x8J9/3uYsuegUBI9ry7a8G+jkXKGbSX0l7Htyz7TrlFm2oJolMhrQ6U9ATMpTPiejo95lwvHNrRKG3cMfdsePcseTQ1Ye9fu6/cMkAd7bNHr6b4TNdfjU9rK8Tq7Erau7Qx1nqK74xZOdutBlvsjsPhdI9Z7s5fNOFN72lvjWm/Xir22SVtNm7jR9kYcrLfFrH8BvYYGUZczUjfGE99rygL+t4Qd+wuWw2uVegtaNgAAAABJRU5ErkJggg==
@@ -12,18 +12,21 @@ iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAhNJREFUOE9NVFty
 """)
 
 LOCALIZED_STRINGS = {
-    "ding": {
-        "de": "Ding",
-        "en": "Ding",
+    "en": {
+        "ding": "Ding",
+        "dong": "Dong",
     },
-    "dong": {
-        "de": "Dong",
-        "en": "Dong",
+    "de": {
+        "ding": "Ding",
+        "dong": "Dong",
     },
 }
 
 def main(config):
+    is2x = canvas.is2x()
     lang = config.get("lang", "en")
+    font = "terminus-18" if is2x else "tb-8"
+    image_size = 40 if is2x else 20
 
     return render.Root(
         delay = 500,
@@ -31,57 +34,49 @@ def main(config):
             child = render.Animation(
                 children = [
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS1),
+                            render.Image(src = ICON_PRESS1, width = image_size),
                         ],
                     ),
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS2),
+                            render.Image(src = ICON_PRESS2, width = image_size),
                         ],
                     ),
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS3),
-                            render.Stack(
+                            render.Image(src = ICON_PRESS3, width = image_size),
+                            render.Column(
+                                expanded = True,
+                                main_align = "center",
                                 children = [
-                                    render.Padding(
-                                        pad = (0, 0, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["ding"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(" "),
-                                    ),
+                                    render.Text(LOCALIZED_STRINGS[lang]["ding"], font = font),
+                                    render.Text(LOCALIZED_STRINGS[lang]["dong"], font = font, color = "#000"),
                                 ],
                             ),
                         ],
                     ),
                     render.Row(
-                        expanded = True,  # Use as much horizontal space as possible
-                        main_align = "space_evenly",  # Controls horizontal alignment
-                        cross_align = "center",  # Controls vertical alignment
+                        expanded = True,
+                        main_align = "space_evenly",
+                        cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS3),
-                            render.Stack(
+                            render.Image(src = ICON_PRESS3, width = image_size),
+                            render.Column(
+                                expanded = True,
+                                main_align = "center",
                                 children = [
-                                    render.Padding(
-                                        pad = (0, 0, 1, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["ding"][lang]),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 10, 0, 0),
-                                        child = render.Text(LOCALIZED_STRINGS["dong"][lang]),
-                                    ),
+                                    render.Text(LOCALIZED_STRINGS[lang]["ding"], font = font),
+                                    render.Text(LOCALIZED_STRINGS[lang]["dong"], font = font),
                                 ],
                             ),
                         ],

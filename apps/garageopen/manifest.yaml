@@ -5,3 +5,4 @@ summary: 'Notification: garage open'
 desc: Displays a notification that a garage door is open.
 author: savdagod
 recommended_interval: 5
+supports2x: true
