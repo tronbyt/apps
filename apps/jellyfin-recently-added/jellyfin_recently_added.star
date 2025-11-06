@@ -74,7 +74,7 @@ def main(config):
     showTitleCard = config.bool("showTitleCard", True)
     title = ""
 
-    if not serverIP:
+    if not serverIP or not serverPort or not apiKey or not userId:
         usingSampleData = True
 
     if usingSampleData:
