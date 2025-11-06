@@ -1,6 +1,9 @@
 load("encoding/base64.star", "base64")
 load("render.star", "canvas", "render")
 
+ICON_OPEN = base64.decode("""
+iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAoRJREFUOE9lVEtWG0EMLPWYba4SWJMF4BMEjpH483wQ7MHkGDgniCEPZ41zlWzxtPKqpBkH4sV4plutLpWqZDBzg0M/N8Acrk/jVu4YNxVi/NOnKZzB/OOim8MM5nrJhHxnpC6xPpHpYJzjTsQwuy7gaYbEdiR8GwBUJkg0ThRKHoiYqyklto/1CQTj3IkowVTvshzH4v6nEKiCqI9HcPv1IikwlIbV5OEoaqgXXVe1ufv1jIeXA65PT/B9f8Dn0xE2e36PsPl9wM3HER72B9xOLnShlShZqXt2vFal3+2eVWpQlKhU7bvGJG/nn86VqFjpqTRnNyvRlUY8uK4RYVED1/iqTmanB1E4Oq9orAlqJBsHOu/QlGZoxKzdphwCLTeioxGymo4DNBy11jjbN4U7tXYoeQszzNc/sPxyGYiSg1ADsPj2hNVkHMiZprK6ktrNLnORHWNp8/VW/KmbKV7SYNKiYXH/pLqXmbRWR2lKiNzSDpRLKQ3md9vgq6dR6N5pvBeKO9rpWHTx7P8JrWB2t0U7u4pS/gD2YZCcwNZc4/usfcRqeolAKAGmU0isO0oxzNttMJ8tuT5rpEHecHN2gs3La/g2jd1OrtBVR0O6wnqgUVC74IHL6rBBwg656CGXEMVm/6r31fRKcZRcYVPCI/FUU+hPd8zvHoVvOb3MeRDNSgyYraOKNvfpMJ7lmRwOgHd18OoguL74Xs1ZUwyeHGeaPkDRMAjz5QAcLH6cWqmzMN3RelFXfqd5Q/xE2KtzmH3JVeLVbBzGYphcAs/RFRMomsi40OGwGAaNWfDPtA4Cs6Sj/yT2fpL09GgeZmjOzxRMDNIQtex0jOrHX7roeBnwFyJ6fy+gno16AAAAAElFTkSuQmCC
+""")
 ICON_CLOSED = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAktJREFUOE9lVNF1IjEMlHZJPSQVwJVwXBnAR6CObD5IyuBSAlwFIfWEte/NjOSFF+CZXVuWRiON3Myqu1u1/OST48g8XqvfvuMZp9W0rbNqjq9XXMKC17BkABrrZi7cxFVL23yCj7gDT/JeFQW/UsaIDB/V6l0Es57RhGzyDXz0xZWRaykN1P793x2azGRYL5kNsuq6XrRoiX26cBsD1e79TLRMNECESWLiwbBdEkjXdXQoBoP2sRY+7d7OjCzekD4Ko//K/0gUAd0MaPGBUxTX3cVcKdX2bydeWj3NkBBR4OzjciW3f55mrZYg9e/XSA5JQd+LThQNxuBuB4eqUMKYUKqJGIg2scLwZb20vu/ESrYgED4fTqzP6vGhFQkGx89v7c8fgnwV9/h1ZcBhs7Dee/IdId1KHW13OCdt0T6BJRDTmGlFW0fFXre/rCOyaBuogCkfTpCNreb91Lhu9nH55vvvx9nU5O7cR6xXcIj2QQHBGDZLhcOz1JIVzY5E9cBdVJ6NHsnBZNjAYcciBoduZSz2jP4za0iYmZsdL+Cq2mo+mygBws8rgw8bpcwmVNtIantwGKpNJWQ/EuGNuLM3WZT1gimH6NKh2ibrJH2iCFJMov0xk6rby3YhtbTb6OG4eDdZqFdkFfMlCW8BNPZwjsZWnSGsJHkaitMUuRFza+wfqUdlNWecEk0doJTgqg2HzLeNr6CAyoyRp8ZQwaSUzEUjKQ8l53BOjcbsS9ThKEcz6RHC2NI8oMMc7znq5IMDftK7pkEoWxPqP1goXzJ7NgxkAAAAAElFTkSuQmCC
 """)
@@ -37,10 +40,12 @@ def main(config):
                 children = [
                     render.Animation(
                         children = [
+                            render.Image(src = ICON_OPEN, width = image_size),
                             render.Image(src = ICON_CLOSING_1, width = image_size),
                             render.Image(src = ICON_CLOSING_2, width = image_size),
                             render.Image(src = ICON_CLOSING_3, width = image_size),
                             render.Image(src = ICON_CLOSING_4, width = image_size),
+                            render.Image(src = ICON_CLOSED, width = image_size),
                             render.Image(src = ICON_CLOSED, width = image_size),
                         ],
                     ),
