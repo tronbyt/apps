@@ -11,7 +11,7 @@ load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
-REFRESH_TIME = 300
+REFRESH_TIME = 30
 C_DISPLAY_WIDTH = 64
 C_BACKGROUND = [0, 0, 0]
 C_TEXT_COLOR = [255, 255, 255]
@@ -30,6 +30,7 @@ SAMPLE_PRINTER = {"sd": {"ready": False}, "state": {"error": "", "flags": {"prin
 def request(endpoint, serverIP, serverPort, apiKey):
     res = http.get("http://%s:%s%s" % (serverIP, serverPort, endpoint), headers = {"X-API-Key": apiKey}, ttl_seconds = REFRESH_TIME)
     if res.status_code != 200:
+        print("request failed with status %d", res.status_code)
         fail("request failed with status %d", res.status_code)
     return res.json()
 
