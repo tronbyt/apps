@@ -239,6 +239,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Enter API key",
                 icon = "certificate",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

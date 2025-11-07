@@ -219,6 +219,7 @@ def get_schema():
                 name = "API key",
                 desc = "The API key to access restdb.io (read only is enough)",
                 icon = "user",
+                secret = True,
             ),
             schema.Text(
                 id = "cache_time",

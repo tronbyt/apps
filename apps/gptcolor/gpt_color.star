@@ -258,6 +258,7 @@ def get_schema():
                 desc = "Access token provided by OpenAI",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "cache_ttl_min",

@@ -129,6 +129,7 @@ def get_schema():
                 name = "Github Personal Access Token",
                 desc = "Personal Access token",
                 icon = "lock",
+                secret = True,
             ),
         ],
     )

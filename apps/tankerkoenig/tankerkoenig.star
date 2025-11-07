@@ -228,6 +228,7 @@ def get_schema():
                 name = "Tankerkönig API Key",
                 desc = "API key for the Tankerkönig API (Request from creativecommons.tankerkoenig.de)",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "radius",

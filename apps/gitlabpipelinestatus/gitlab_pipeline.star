@@ -69,6 +69,7 @@ def get_schema():
                 desc = "Your Gitlab access token",
                 icon = "gitlab",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "project-id",

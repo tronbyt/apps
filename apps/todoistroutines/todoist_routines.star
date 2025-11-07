@@ -32,6 +32,7 @@ def get_schema():
                 name = "Todoist API token",
                 desc = "Todoist > Settings > Integrations > Developer > API token",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "task_layout",

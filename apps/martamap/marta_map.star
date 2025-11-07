@@ -127,6 +127,7 @@ def get_schema():
                 name = "API Key",
                 desc = "MARTA API key",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

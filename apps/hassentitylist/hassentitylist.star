@@ -133,6 +133,7 @@ def get_schema():
                 name = "HomeAssistant Token",
                 desc = "HomeAssistant Token. Find in User Settings > Long-lived access tokens.",
                 icon = "book",
+                secret = True,
             ),
             schema.Toggle(
                 id = "sort_entities",

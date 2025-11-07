@@ -332,6 +332,7 @@ def get_schema():
                 name = "API key",
                 desc = "Flight Radar API key",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

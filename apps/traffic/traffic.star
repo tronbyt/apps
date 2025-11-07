@@ -782,6 +782,7 @@ def get_schema():
                 desc = "Enter your API Key from bingmapsportal.com/Application. Bringing your own key means all Tidbyt owners can use this app!",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "mq_auth",
@@ -789,6 +790,7 @@ def get_schema():
                 desc = "Enter your free or paid API Key from mapquestapi.com. Bringing your own key means all Tidbyt owners can use this app!",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "ors_auth",
@@ -796,6 +798,7 @@ def get_schema():
                 desc = "Enter your free API Key from openrouteservice.org. Bringing your own key means all Tidbyt owners can use this app!",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
         ],
     )

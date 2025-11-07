@@ -89,6 +89,7 @@ def get_schema():
                 desc = "Visit https://stupid.chat to get started",
                 icon = "eye",
                 default = "",
+                secret = True,
             ),
         ],
     )

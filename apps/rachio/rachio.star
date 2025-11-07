@@ -380,6 +380,7 @@ def get_schema():
                 name = "Rachio API Key",
                 desc = "From the phone app or rachio.com you can acquire your API key. From the web app select Account Settings and GET API KEY",
                 icon = "key",
+                secret = True,
             ),
             schema.Toggle(
                 id = "title_display",

@@ -195,6 +195,7 @@ def get_schema():
                 desc = "",
                 icon = "compress",
                 default = "",
+                secret = True,
             ),
             schema.Toggle(
                 id = "no_assigment",

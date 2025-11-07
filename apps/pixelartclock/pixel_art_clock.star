@@ -363,12 +363,14 @@ def get_schema():
                 name = "AccuWeather API Key",
                 desc = "API key for AccuWeather data access",
                 icon = "gear",
+                secret = True,
             ),
             schema.Text(
                 id = "locationKey",
                 name = "AccuWeather Location Key",
                 desc = "Location key for AccuWeather data access",
                 icon = "locationDot",
+                secret = True,
             ),
             schema.Text(
                 id = "timezone",

@@ -154,6 +154,7 @@ def get_schema():
                 name = "Snyk API Key",
                 desc = "API Key for authorization to Snyk",
                 icon = "gears",
+                secret = True,
             ),
             schema.Text(
                 id = "orgId",

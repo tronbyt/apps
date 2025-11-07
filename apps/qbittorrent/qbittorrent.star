@@ -365,6 +365,7 @@ def get_schema():
                 name = "Password",
                 desc = "qBittorrent password",
                 icon = "lock",
+                secret = True,
             ),
             schema.Text(
                 id = "category",

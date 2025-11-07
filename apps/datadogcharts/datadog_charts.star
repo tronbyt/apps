@@ -269,12 +269,14 @@ def get_schema():
                 name = "API Key",
                 desc = "DataDog API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "app_key",
                 name = "App Key",
                 desc = "DataDog App Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "dashboard_id",

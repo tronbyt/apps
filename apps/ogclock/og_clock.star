@@ -544,6 +544,7 @@ def get_schema():
                 desc = "API key for weather data access (not needed for NWS)",
                 icon = "gear",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "systemOfMeasurement",

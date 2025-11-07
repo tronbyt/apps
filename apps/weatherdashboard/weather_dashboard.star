@@ -49,12 +49,14 @@ def get_schema():
                 name = "Application Key",
                 desc = "Ambient Weather Application Key.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "api_key",
                 name = "API Key",
                 desc = "Ambient Weather API Key.",
                 icon = "key",
+                secret = True,
             ),
             schema.Toggle(
                 id = "show_precip",

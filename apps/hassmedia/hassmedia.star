@@ -166,6 +166,7 @@ def get_schema():
                 desc = "Home Assistant token. Navigate to User Settings > Long-lived access tokens.",
                 icon = "key",
                 name = "Home Assistant Token",
+                secret = True,
             ),
             schema.Text(
                 id = "ha_entity",

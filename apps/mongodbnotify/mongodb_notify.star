@@ -289,6 +289,7 @@ def get_schema():
                 name = "Atlas API KEY:",
                 desc = "The Atlas API Key for the Data API URL.",
                 icon = "database",
+                secret = True,
             ),
             schema.Text(
                 id = "datasource",

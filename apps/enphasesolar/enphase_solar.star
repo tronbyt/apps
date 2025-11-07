@@ -296,6 +296,7 @@ def get_schema():
                 name = "API Key",
                 desc = "API key for the Enphase API. Follow https://developer-v4.enphase.com/docs/quickstart.html#create_account.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "client_id",
@@ -308,18 +309,21 @@ def get_schema():
                 name = "Client Secret",
                 desc = "The client secret of Enphase application",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "access_token",
                 name = "Access Token",
                 desc = "Access token to allow App read information via Enphase API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "refresh_token",
                 name = "Refresh Token",
                 desc = "Refresh token used to refresh access token when it is expired.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

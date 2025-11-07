@@ -378,6 +378,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Enter your BetsAPI token",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

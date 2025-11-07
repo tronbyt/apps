@@ -486,6 +486,7 @@ def get_schema():
                 name = "Home Assistant Token",
                 desc = "Long-lived access token from HA",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "battery_entity",

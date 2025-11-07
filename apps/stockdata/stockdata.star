@@ -369,6 +369,7 @@ def get_schema():
                 name = "API Token",
                 desc = "The API token",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "provider",

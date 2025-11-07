@@ -207,6 +207,7 @@ def get_schema():
                 name = "Bearer Token",
                 icon = "key",
                 desc = "Long-lived access token for Home Assistant",
+                secret = True,
             ),
             schema.Toggle(
                 id = "upper",

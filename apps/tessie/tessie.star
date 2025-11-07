@@ -65,6 +65,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Tessie API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "vin",

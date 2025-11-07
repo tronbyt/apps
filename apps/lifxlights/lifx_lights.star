@@ -119,6 +119,7 @@ def get_schema():
                 name = "Personal Access Token",
                 desc = "Token generated at https://cloud.lifx.com.",
                 icon = "hashtag",
+                secret = True,
             ),
             schema.Generated(
                 id = "light_id",

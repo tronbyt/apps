@@ -257,6 +257,7 @@ def get_schema():
                 name = "Cisco Meraki API key",
                 desc = "Your API Key to access your data",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "network_id",

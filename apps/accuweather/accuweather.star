@@ -1133,6 +1133,7 @@ def get_schema():
                 name = "AccuWeather API Key",
                 desc = "API key for AccuWeather data access",
                 icon = "gear",
+                secret = True,
             ),
             # would prefer to use https://developer.accuweather.com/accuweather-locations-api/apis/get/locations/v1/cities/geoposition/search
             # with LocationBased to determine AccuWeather location key, but geoposition search API will require user-specified AccuWeather API key
@@ -1141,6 +1142,7 @@ def get_schema():
                 name = "AccuWeather Location Key",
                 desc = "Location key for AccuWeather data access",
                 icon = "locationDot",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "tempUnits",

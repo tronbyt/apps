@@ -210,6 +210,7 @@ def get_schema():
                 name = "API Key",
                 desc = "NextDNS API key value",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

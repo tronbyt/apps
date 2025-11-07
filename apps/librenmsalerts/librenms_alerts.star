@@ -50,6 +50,7 @@ def get_schema():
                 name = "LibreNMS API Key:",
                 desc = "API Key for the LibreNMS server. Create/manage keys from the LibreNMS web interface at Home -> Settings -> API Settings",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

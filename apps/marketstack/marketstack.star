@@ -277,6 +277,7 @@ def get_schema():
                 name = "API Token",
                 desc = "The API Token for your MarketStack",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "select_period",

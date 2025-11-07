@@ -134,6 +134,7 @@ def get_schema():
                 name = "Todoist API Token",
                 desc = "Enter Token",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

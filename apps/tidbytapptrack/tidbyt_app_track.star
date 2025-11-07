@@ -215,6 +215,7 @@ def get_schema():
                 name = "Tidbyt API key",
                 desc = "Found in Settings > General > Get API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Toggle(
                 id = "new_apps_first",

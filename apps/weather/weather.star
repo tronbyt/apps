@@ -749,12 +749,14 @@ def get_schema():
                 name = "OpenWeather One Call API 3.0 Key (Optional)",
                 desc = "One Call API 3.0 key for enhanced features. Requires 'One Call by Call' subscription with 1000 free calls/day.",
                 icon = "gear",
+                secret = True,
             ),
             schema.Text(
                 id = "api_v2",
                 name = "OpenWeather API 2.5 Key",
                 desc = "Standard API 2.5 key for basic weather data (free tier available). Go to OpenWeatherMap.org to get your free API key.",
                 icon = "gear",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "lang",

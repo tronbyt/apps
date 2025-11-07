@@ -418,6 +418,7 @@ def get_schema():
                 name = "API key",
                 desc = "MCTS Real-Time API key.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

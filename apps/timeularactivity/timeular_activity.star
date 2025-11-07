@@ -294,12 +294,14 @@ def get_schema():
                 name = "Timeular API Key",
                 desc = "Your Timeular API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "timeular_api_secret",
                 name = "Timeular API Secret",
                 desc = "Your Timeular API Secret",
                 icon = "lock",
+                secret = True,
             ),
             schema.Toggle(
                 id = "active_only_when_tracking",

@@ -381,6 +381,7 @@ def get_schema():
                 name = "API Key",
                 desc = "API key for metals-dev API.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

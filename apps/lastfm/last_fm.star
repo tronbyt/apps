@@ -147,6 +147,7 @@ def get_schema():
                 desc = "Get from Last.fm, used to authenticate.",
                 icon = "key",
                 default = "DemoKey",
+                secret = True,
             ),
             schema.Toggle(
                 id = "showClock",

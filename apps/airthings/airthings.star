@@ -252,6 +252,7 @@ def get_schema():
                 name = "AirThings API Client Secret",
                 desc = "REQUIRED: API secret from https://dashboard.airthings.com/integrations/api-integration",
                 icon = "gear",
+                secret = True,
             ),
             schema.Text(
                 id = "clientId",

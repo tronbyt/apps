@@ -117,6 +117,7 @@ def get_schema():
                 name = "Developer Token",
                 desc = "Product Hunt Developer Token",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "display",

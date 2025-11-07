@@ -235,6 +235,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Private WeatherSTEM API Key. Register for free here https://www.weatherstem.com/register",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "station_id",

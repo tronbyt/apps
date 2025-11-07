@@ -148,6 +148,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Your OpenRouter API key",
                 icon = "key",
+                secret = True,
             ),
             schema.Color(
                 id = "text_color",

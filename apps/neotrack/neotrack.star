@@ -458,6 +458,7 @@ def get_schema():
                 name = "NASA API Key",
                 desc = "NASA API key for NeoW API.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

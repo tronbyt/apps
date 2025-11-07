@@ -251,6 +251,7 @@ def get_schema():
             name = "AIO Key",
             desc = "AIO Acess Key",
             icon = "key",
+            secret = True,
         ),
     )
     fields.append(

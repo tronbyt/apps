@@ -46,6 +46,7 @@ def get_schema():
                 name = "CO2Signal API key",
                 desc = "Get API key: https://www.co2signal.com",
                 icon = "gear",
+                secret = True,
             ),
         ],
     )

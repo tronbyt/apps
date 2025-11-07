@@ -138,6 +138,7 @@ def get_schema():
                 name = "Lichess Token",
                 desc = "Navigate to https://lichess.org/account/oauth/token/create?description=Tidbyt+Lichess+Correspond, generate a token and paste it here.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "warning_minutes",

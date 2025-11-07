@@ -372,6 +372,7 @@ def get_schema():
                 name = "PartnerMetrics.io cookie",
                 desc = "Cookie from PartnerMetrics.io",
                 icon = "shopify",
+                secret = True,
             ),
         ],
     )

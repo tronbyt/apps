@@ -332,6 +332,7 @@ def get_schema():
                 name = "Octoprint API Key",
                 desc = "Found in Octoprint API settings",
                 icon = "gear",
+                secret = True,
             ),
             schema.Toggle(
                 id = "showSnapshot",

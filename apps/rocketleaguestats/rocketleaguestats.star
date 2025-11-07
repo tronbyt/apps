@@ -184,6 +184,7 @@ def get_schema():
                 name = "Ballchasing API Token",
                 desc = "https://ballchasing.com/upload",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "tag",

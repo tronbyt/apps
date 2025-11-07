@@ -238,12 +238,14 @@ def get_schema():
                 name = "Plex-Token",
                 desc = "\"X-Plex-Token\"",
                 icon = "gear",
+                secret = True,
             ),
             schema.Text(
                 id = "apiKey",
                 name = "API Key",
                 desc = "Use with proxy server (optional)",
                 icon = "gear",
+                secret = True,
             ),
             schema.Toggle(
                 id = "showTitleCard",

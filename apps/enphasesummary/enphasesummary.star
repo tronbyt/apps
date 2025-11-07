@@ -198,6 +198,7 @@ def get_schema():
                 name = "Proxy API Key",
                 desc = "API key for authenticating with your proxy service",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

@@ -338,6 +338,7 @@ def get_schema():
                 name = "Secret key",
                 desc = "Secret key from tomorrow.io.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

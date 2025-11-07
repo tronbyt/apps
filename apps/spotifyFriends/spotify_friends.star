@@ -107,6 +107,7 @@ def get_schema():
                 name = "spDc Cookie",
                 desc = "Your Spotify web browser authentication cookie",
                 icon = "spotify",
+                secret = True,
             ),
             schema.Text(
                 id = "username",

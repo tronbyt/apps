@@ -120,6 +120,7 @@ def get_schema():
                 desc = "Specify the API key to use",
                 icon = "gear",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "sensor_id_direct",

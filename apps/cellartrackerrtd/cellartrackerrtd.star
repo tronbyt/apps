@@ -211,6 +211,7 @@ def get_schema():
                 name = "CellarTracker password",
                 desc = "CellarTracker password",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "exclusion_keywords",

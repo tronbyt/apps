@@ -465,12 +465,14 @@ def get_schema():
                 name = "Consumer Key",
                 desc = "The consumer key for your WooCommerce API. Generate read only keys under WooCommerce > Settings > Advanced > Rest API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "consumerSecretKey",
                 name = "Consumer Secret Key",
                 desc = "The consumer secret key for your WooCommerce API. Generate read only keys under WooCommerce > Settings > Advanced > Rest API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Location(
                 id = "shopLocation",

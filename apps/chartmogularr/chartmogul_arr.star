@@ -57,6 +57,7 @@ def get_schema():
                 name = "ChartMogul API Key",
                 desc = "ChartMogul authentication API key for completing requests to ChartMogul API.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

@@ -144,6 +144,7 @@ def get_schema():
                 name = "Switchboard API Token",
                 desc = "The API Token found in your Organization Settings",
                 icon = "key",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

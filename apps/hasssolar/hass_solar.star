@@ -927,6 +927,7 @@ def get_schema():
                 name = "HomeAssistant Token",
                 desc = "Find in User Settings > Long-lived access tokens.",
                 icon = "book",
+                secret = True,
             ),
             schema.Text(
                 id = ENTITY_ENERGY_PRODUCTION,

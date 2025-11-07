@@ -47,6 +47,7 @@ def get_schema():
                 name = "client_secret",
                 desc = "From OpenSky API Client details (Note: OpenSky requiring new OAuth2 flow, replacing old Username + Password auth)",
                 icon = "lock",
+                secret = True,
             ),
         ],
     )
