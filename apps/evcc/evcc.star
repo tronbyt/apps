@@ -593,6 +593,7 @@ def get_schema():
                 name = "InfluxDB API key",
                 desc = "API key for InfluxDB Cloud, if not set the app is in DEMO MODE",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "bucket",

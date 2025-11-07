@@ -934,6 +934,7 @@ def get_schema():
                 name = "Bird Buddy Password",
                 desc = "Enter your Bird Buddy account password",
                 icon = "lock",
+                secret = True,
             ),
         ],
     )

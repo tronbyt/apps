@@ -79,12 +79,14 @@ def get_schema():
                 name = "Nabu Casa Url Key",
                 desc = "The random letters and numbers in your Nabu Casa URL. Ex. Input 'abc123' for this nabu casa url https://abc123.ui.nabu.casa",
                 icon = "link",
+                secret = True,
             ),
             schema.Text(
                 id = "token",
                 name = "Long-Lived Token",
                 desc = "Home Assistant Long-Lived Access Token. Profile -> Long-Lived Access Tokens -> Create Token",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "entity_name",

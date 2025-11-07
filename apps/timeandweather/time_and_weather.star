@@ -1094,6 +1094,7 @@ def get_schema():
                 desc = "API key for weather data access",
                 icon = "gear",
                 default = "",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

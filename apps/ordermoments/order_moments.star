@@ -340,6 +340,7 @@ def get_schema():
                 name = "API Token",
                 desc = "The API Token for your Shopify Private App",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "store_name",

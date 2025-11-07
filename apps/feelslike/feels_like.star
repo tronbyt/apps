@@ -264,6 +264,7 @@ def get_schema():
                 name = "Open Weathermap API Key",
                 desc = "Api key from your personal Open Weathermap account",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "size",

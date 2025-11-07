@@ -311,6 +311,7 @@ def get_schema():
                 name = "API key",
                 desc = "Paste your VAO API Key here, you can get it from https://www.verkehrsauskunft.at/start",
                 icon = "key",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

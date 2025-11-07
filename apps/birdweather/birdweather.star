@@ -55,6 +55,7 @@ def get_schema():
                 name = "Birdweather API Token",
                 desc = "Token for calling Birdweather API with a station.",
                 icon = "userGear",
+                secret = True,
             ),
         ],
     )

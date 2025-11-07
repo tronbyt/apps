@@ -343,6 +343,7 @@ def get_schema():
             icon = "key",
             desc = "Mandatory Personal API Key",
             default = "",
+            secret = True,
         ),
     )
     fields.append(

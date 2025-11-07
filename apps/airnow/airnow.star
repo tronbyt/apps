@@ -160,6 +160,7 @@ def get_schema():
                 name = "API Key",
                 desc = "API Key, freely available at airnowapi.org",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

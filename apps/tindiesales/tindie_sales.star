@@ -136,6 +136,7 @@ def get_schema():
                 name = "Tindie API Key",
                 desc = "Your seller account's API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.DateTime(
                 id = "since",

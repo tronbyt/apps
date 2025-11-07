@@ -173,6 +173,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Your Vercel API key generated via the Vercel dashboard",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = CONFIG_TEAM_ID,

@@ -167,6 +167,7 @@ def get_schema():
                 name = "Key",
                 desc = "Pixel Greet API Key",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

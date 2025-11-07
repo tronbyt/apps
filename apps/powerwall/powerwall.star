@@ -151,6 +151,7 @@ def get_schema():
                 name = "Refresh Token",
                 desc = "Refresh Token for the Tesla Owner API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "site_id",

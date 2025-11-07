@@ -261,6 +261,7 @@ def get_schema():
                 desc = "Get it at plausible.io/settings",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = METRIC_KEY,

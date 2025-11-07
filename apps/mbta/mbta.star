@@ -243,6 +243,7 @@ def get_schema():
                 name = "MBTA v3 API Key",
                 desc = "Go to https://www.mbta.com/developers/v3-api, sign up for a free account and enter your API key here. Limited to 1000 requests per minute",
                 icon = "gear",
+                secret = True,
             ),
         ],
     )

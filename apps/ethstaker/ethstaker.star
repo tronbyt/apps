@@ -99,6 +99,7 @@ def get_schema():
                 name = "Beaconcha.in API Key",
                 desc = "The API key from your Beaconcha.in account used to load your validator data",
                 icon = "server",
+                secret = True,
             ),
             schema.Text(
                 id = "validators",

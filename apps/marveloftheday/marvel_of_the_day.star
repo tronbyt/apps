@@ -74,12 +74,14 @@ def get_schema():
                 name = "Marvel API Public Key",
                 desc = "Your Marvel API public key.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "private_key",
                 name = "Marvel API Private Key",
                 desc = "Your Marvel API private key.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

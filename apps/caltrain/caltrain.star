@@ -560,6 +560,7 @@ def get_schema():
                 name = "511 API Token",
                 desc = "Request from https://ducks.win/511 then find key in your second email",
                 icon = "gears",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "stop",

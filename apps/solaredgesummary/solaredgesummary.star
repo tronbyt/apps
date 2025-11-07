@@ -243,6 +243,7 @@ def get_schema():
                 name = "API key",
                 desc = "API key for the SolarEdge monitoring API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "site_id",

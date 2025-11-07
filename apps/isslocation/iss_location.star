@@ -136,6 +136,7 @@ def get_schema():
                 name = "Geonames API Key",
                 desc = "API key for Geonames (http://www.geonames.org/enablefreewebservice)",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

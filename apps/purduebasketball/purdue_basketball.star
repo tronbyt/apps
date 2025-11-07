@@ -70,6 +70,7 @@ def get_schema():
                 name = "api key",
                 desc = "API key you can get for free at https://sportsdata.io/",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

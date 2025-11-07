@@ -158,7 +158,8 @@ def get_schema():
                 name = "API Key",
                 desc = "Create a rapidapi account and go to https://rapidapi.com/KanjiAlive/api/learn-to-read-and-write-japanese-kanji/playground for key",
                 icon = "code",
-                default = ""
+                default = "",
+                secret = True,
             )
         ],
     )

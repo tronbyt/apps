@@ -162,6 +162,7 @@ def get_schema():
             name = "GitHub Auth Token",
             desc = "GitHub personal access token (classic) with public_repo scope.",
             icon = "key",
+            secret = True,
         ),
     ]
 

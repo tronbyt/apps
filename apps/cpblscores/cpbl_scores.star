@@ -431,6 +431,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Enter your theSportDB API key",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

@@ -227,6 +227,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Pi-hole API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "version",

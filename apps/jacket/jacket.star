@@ -162,6 +162,7 @@ def get_schema():
                 name = "API Key",
                 desc = "OpenWeather API Key.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "jacketLimit",

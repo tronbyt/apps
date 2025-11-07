@@ -382,12 +382,14 @@ def get_schema():
                 name = "Zenhub REST API Token",
                 desc = "Your personal Zenhub REST API Token",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "zenhub_gql_api_key",
                 name = "Zenhub GraphQL Personal API Key",
                 desc = "Your personal Zenhub GraphQL API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "workspace_id",

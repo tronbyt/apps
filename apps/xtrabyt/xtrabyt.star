@@ -141,6 +141,7 @@ def get_schema():
                 name = "Xtrabyt Key",
                 desc = "The Xtrabyt.com key for your view",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

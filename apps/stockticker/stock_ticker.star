@@ -102,6 +102,7 @@ def get_schema():
                 desc = "API key for Alpha Vantage (https://www.alphavantage.co)",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
         ],
     )

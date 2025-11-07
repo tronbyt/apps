@@ -460,6 +460,7 @@ def get_schema():
                 name = "TfL App Key",
                 desc = "TfL App Key for API access.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

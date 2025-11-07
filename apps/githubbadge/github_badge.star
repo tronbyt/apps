@@ -157,6 +157,7 @@ def get_schema():
                 name = "GitHub Personal Access Token",
                 desc = "Personal Access token (optional, only required for private repos)",
                 icon = "lock",
+                secret = True,
             ),
             schema.Text(
                 id = "repo_name",

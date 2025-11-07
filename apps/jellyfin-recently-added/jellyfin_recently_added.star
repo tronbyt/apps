@@ -237,6 +237,7 @@ def get_schema():
                 name = "Api Key",
                 desc = "Add API key from server dashboard advanced settings",
                 icon = "gear",
+                secret = True,
             ),
             schema.Text(
                 id = "userId",

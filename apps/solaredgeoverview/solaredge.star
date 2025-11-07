@@ -258,6 +258,7 @@ def show_apikey_options(apiversion):
                 name = "v1 API KEY",
                 desc = "Contact your solar installer if necessary to obtain an API key",
                 icon = "key",
+                secret = True,
             ),
         ]
     else:
@@ -267,5 +268,6 @@ def show_apikey_options(apiversion):
                 name = "v2 User KEY",
                 desc = "Contact your solar installer if necessary to obtain an API key",
                 icon = "key",
+                secret = True,
             ),
         ]

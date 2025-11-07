@@ -187,6 +187,7 @@ def get_schema():
                 name = "Read API Key",
                 desc = "A read API key if the channel is private.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "title",

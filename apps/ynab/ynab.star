@@ -219,6 +219,7 @@ def get_schema():
                 name = "Auth Key",
                 desc = "Auth Key supplied from YNAB",
                 icon = "key",
+                secret = True,
             ),
             schema.Toggle(
                 id = "transactions",

@@ -26,6 +26,7 @@ def get_schema():
                 name = "Weatherstack API Key",
                 desc = "Get key at weatherstack.com",
                 icon = "cloud",
+                secret = True,
             ),
             schema.Toggle(
                 id = "weatherpaid",

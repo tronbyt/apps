@@ -532,6 +532,7 @@ def get_schema():
         name = "511.org API Key",
         desc = "Free API key from 511.org/developers (required)",
         icon = "key",
+        secret = True,
     ))
 
     # Line 1

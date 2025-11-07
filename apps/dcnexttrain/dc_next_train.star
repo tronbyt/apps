@@ -454,6 +454,7 @@ def get_schema():
                 name = "WMATA API Key",
                 desc = "Enter API key",
                 icon = "certificate",
+                secret = True,
             ),
         ],
     )

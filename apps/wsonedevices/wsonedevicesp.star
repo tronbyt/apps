@@ -203,6 +203,7 @@ def get_schema():
                 name = "API Admin's Password",
                 desc = "Password for the API admin user.",
                 icon = "unlock",
+                secret = True,
             ),
         ],
     )

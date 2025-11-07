@@ -55,6 +55,7 @@ def get_schema():
                 name = "FA API Key",
                 desc = "Flight Aware API Key",
                 icon = "code",
+                secret = True,
             ),
         ],
     )

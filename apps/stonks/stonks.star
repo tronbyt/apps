@@ -31,6 +31,7 @@ def get_schema():
                 name = "Polygon.io API Key",
                 desc = "Basic (free) API tier is fine",
                 icon = "moneyBill",
+                secret = True,
             ),
             schema.Text(
                 id = "symbol",

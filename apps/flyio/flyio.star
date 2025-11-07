@@ -238,6 +238,7 @@ def get_schema():
                 name = "API Key",
                 desc = "The API key to use to authenticate with the Fly.io API.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

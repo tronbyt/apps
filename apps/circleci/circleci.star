@@ -180,6 +180,7 @@ def get_schema():
                 name = "API Token",
                 desc = "Your CircleCI Personal Token",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "vcs",

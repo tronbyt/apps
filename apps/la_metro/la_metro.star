@@ -197,6 +197,7 @@ def get_schema():
                 name = "Swiftly API Key",
                 desc = "API Key from Swiftly. Must have access to predictions-near-location for lametro-rail",
                 icon = "key",
+                secret = True,
             ),
             schema.Toggle(
                 id = "include_bus",

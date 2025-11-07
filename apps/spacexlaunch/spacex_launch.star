@@ -63,6 +63,7 @@ def get_schema():
                 desc = "(optional) An API key for the Lauch Library 2 API (https://thespacedevs.com/llapi).",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = SEARCH_CONFIG_KEY,

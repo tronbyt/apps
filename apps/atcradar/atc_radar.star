@@ -649,6 +649,7 @@ def get_schema():
                 name = "RapidAPI FlightRadar Key",
                 desc = "FlightRadar API key",
                 icon = "key",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

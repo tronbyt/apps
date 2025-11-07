@@ -403,6 +403,7 @@ def get_schema():
                 desc = "business.pkge.net/settings/api-key",
                 icon = "box",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "courier_id",

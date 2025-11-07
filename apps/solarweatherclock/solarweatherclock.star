@@ -148,6 +148,7 @@ def get_schema():
                 name = "Bearer Token for Home Assistant",
                 desc = "The long lasting token for home assistant authentication.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

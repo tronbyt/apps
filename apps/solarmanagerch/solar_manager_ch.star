@@ -957,6 +957,7 @@ def get_schema():
                 name = "API key",
                 desc = "API key for the SolarManager monitoring API. Authorize with your solarmanager username and password on: https://external-web.solar-manager.ch/swagger and copy the long string that follows after '-H authorization: Basic'",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "site_id",

@@ -139,6 +139,7 @@ def get_schema():
                 name = "Google Sheets API Key",
                 desc = "Google how to get API Key if you're not familiar",
                 icon = "code",
+                secret = True,
             ),
         ],
     )

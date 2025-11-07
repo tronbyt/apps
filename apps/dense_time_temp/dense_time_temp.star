@@ -445,6 +445,7 @@ def get_schema():
                 desc = "Enter API key",
                 icon = "certificate",
                 default = "ffef7893280358cd9f42fca8216140b0",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

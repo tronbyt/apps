@@ -271,6 +271,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Google API key with access to Sheets",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "fg",

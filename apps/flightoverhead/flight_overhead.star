@@ -457,6 +457,7 @@ def get_schema():
                 desc = "An AirLabs API Key is required to use AirLabs as the provider",
                 icon = "key",
                 default = DEFAULT_AIRLABS_API_KEY,
+                secret = True,
             ),
             schema.Text(
                 id = "opensky_username",
@@ -471,6 +472,7 @@ def get_schema():
                 desc = "An OpenSky account can be used to extend the request quota",
                 icon = "key",
                 default = DEFAULT_OPENSKY_PASSWORD,
+                secret = True,
             ),
             schema.Text(
                 id = "provider_ttl_seconds",

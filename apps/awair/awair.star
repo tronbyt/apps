@@ -70,6 +70,7 @@ def api_connection_options(api_connection_type):
                 desc = "Your API access token from your Awair developer console at https://developer.getawair.com/.",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "device_id",

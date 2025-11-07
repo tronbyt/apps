@@ -42,6 +42,7 @@ def get_schema():
                 desc = "What is your WiFi Password?",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "encryption",

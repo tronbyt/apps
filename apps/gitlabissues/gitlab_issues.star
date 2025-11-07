@@ -83,6 +83,7 @@ def get_schema():
                 desc = "Your Gitlab access token",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "custom-domain",

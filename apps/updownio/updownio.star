@@ -164,12 +164,14 @@ def get_schema():
                 name = "API Key",
                 desc = "Read-only API key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "check_token",
                 name = "Check Token",
                 desc = "The check unique token",
                 icon = "check",
+                secret = True,
             ),
             schema.Text(
                 id = "salt",

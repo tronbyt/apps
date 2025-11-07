@@ -1225,6 +1225,7 @@ def get_schema():
                 name = "Nightscout Token",
                 desc = "Token for Nightscout Subject with 'readable' Role (optional)",
                 icon = "key",
+                secret = True,
             ),
             schema.Color(
                 id = "id_border_color",

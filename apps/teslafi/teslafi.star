@@ -331,6 +331,7 @@ def get_schema():
                 name = "API Key",
                 desc = "API Key for TeslaFi",
                 icon = "arrowUpFromBracket",
+                secret = True,
             ),
             schema.Toggle(
                 id = "mi2km",

@@ -442,6 +442,7 @@ def get_schema():
                 name = "API Key (optional)",
                 desc = "API Key setup in index.js",
                 icon = "gear",
+                secret = True,
             ),
         ],
     )

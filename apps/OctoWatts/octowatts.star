@@ -442,6 +442,7 @@ def get_schema():
                 name = "API_KEY",
                 desc = "Your Octopus API KEY ",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "DEVICE_ID",

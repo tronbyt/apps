@@ -342,7 +342,7 @@ def main(config):
 def get_schema():
     fields = [
         schema.Text(id = "haUrl", name = "Home Assistant URL", desc = "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)", icon = "server"),
-        schema.Text(id = "haApiKey", name = "Home Assistant API Key", desc = "Long-Lived Access Token from Home Assistant user profile", icon = "key"),
+        schema.Text(id = "haApiKey", name = "Home Assistant API Key", desc = "Long-Lived Access Token from Home Assistant user profile", icon = "key", secret = True),
         schema.Text(id = "task_name", name = "Task Name", desc = "Currently Printing Task", icon = "file"),
         schema.Text(id = "progress", name = "Print Progress", desc = "Entity ID for print progress (%)", icon = "percent"),
         schema.Text(id = "remaining_time", name = "Remaining Time", desc = "Entity ID for remaining time (decimal hours/minutes)", icon = "clock"),

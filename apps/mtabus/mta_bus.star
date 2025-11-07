@@ -222,6 +222,7 @@ def get_schema():
                 name = "MTA BusTime API Key",
                 desc = "MTA BusTime Developer API Key. Request at: https://register.developer.obanyc.com/",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "stop",

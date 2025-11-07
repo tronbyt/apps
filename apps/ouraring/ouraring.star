@@ -180,6 +180,7 @@ def get_schema():
                 desc = "Oura API Key. Get yours at cloud.ouraring.com",
                 icon = "user",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "days",

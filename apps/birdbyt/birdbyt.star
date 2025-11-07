@@ -267,6 +267,7 @@ def get_schema():
                 name = "eBird API Key",
                 desc = "Enter your eBird API Key. Generate one at https://ebird.org/api/keygen",
                 icon = "gear",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "distance",

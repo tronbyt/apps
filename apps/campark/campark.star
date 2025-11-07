@@ -60,6 +60,7 @@ def get_schema():
             name = "API Token",
             desc = "API key for Smart Cambridge parking API",
             icon = "key",
+            secret = True,
         ),
     ]
 

@@ -126,6 +126,7 @@ def get_schema():
             name = "GitHub Personal Access Token",
             desc = "Personal Access token",
             icon = "lock",
+            secret = True,
         ),
         schema.Dropdown(
             id = "background_theme",
