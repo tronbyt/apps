@@ -49,6 +49,7 @@ load("schema.star", "schema")
 #URL TO NJ TRANSIT DEPARTURE VISION WEBSITE
 NJ_TRANSIT_DV_URL = "https://www.njtransit.com/dv-to"
 NJ_TRANSIT_STATIONS_URL = "https://www.njtransit.com/station-park-ride-to"
+NJ_TRANSIT_GRAPHQL_URL = "https://www.njtransit.com/api/graphql/graphql"
 DEFAULT_STATION = "DEFAULT_STATION"
 
 STATION_CACHE_KEY = "stations"
@@ -381,7 +382,7 @@ def get_schema():
 
 def get_departures_for_station(station):
     """
-    Function gets all depatures for a given station
+    Function gets all depatures for a given station using the GraphQL API
     returns a list of structs with the following fields
 
     depature_item struct:
@@ -392,178 +393,140 @@ def get_departures_for_station(station):
         track_number: string
         departing_in: string
     """
-    #print("Getting departures for '%s'" % station)
-
     if station == DEFAULT_STATION:
         return []
 
-    station_suffix = station.replace(" ", "%20")
-    station_url = "{}/{}".format(NJ_TRANSIT_DV_URL, station_suffix)
+    # Construct GraphQL query
+    graphql_query = {
+        "operationName": "TrainDepartureScreens",
+        "variables": {"station": station},
+        "query": """query TrainDepartureScreens($station: String!) {
+  getTrainDepartureScreens(station: $station) {
+    items {
+      background
+      color
+      departureDate
+      destination
+      inlineMessage
+      line
+      lineAbbreviation
+      status
+      track
+      trainID
+      __typename
+    }
+    __typename
+  }
+}""",
+    }
 
-    #print(station_url)
-
-    nj_dv_page_response = http.get(station_url)
-
-    if nj_dv_page_response.status_code != 200:
-        #print("Got code '%s' from page response" % nj_dv_page_response.status_code)
-        return None
-
-    selector = html(nj_dv_page_response.body())
-    departures = selector.find(".border.mb-3.rounded")
-
-    #print("Found '%s' departures" % departures.len())
-
-    result = []
-
-    for index in range(0, departures.len()):
-        departure = departures.eq(index)
-        item = extract_fields_from_departure(departure)
-        result.append(item)
-
-        #since we dont know at this point if we are displaying any particular train
-        #cant reduce the number of trains to the DISPLAY_COUNT here
-        #if len(result) == DISPLAY_COUNT:
-        #    return result
-
-    return result
-
-def extract_fields_from_departure(departure):
-    """
-    Function Extracts necessary data from HTML of a given depature
-    """
-    data = departure.find(".media-body").first()
-
-    departure_time = get_departure_time(data)
-    destination_name = get_destination_name(data)
-    service_line = get_service_line(data)
-    train_number = get_train_number(data)
-    track_number = get_track_number(data)
-    departing_in = get_real_time_estimated_departure(data, departure_time)
-
-    #print(
-    #    "{}\t{}\t{}\t{}\t{}\t{}\n".format(
-    #        departure_time,
-    #        destination_name,
-    #        service_line,
-    #        train_number,
-    #        track_number,
-    #        departing_in,
-    #    ),
-    #)
-
-    return struct(
-        departing_at = departure_time,
-        destination = destination_name,
-        service_line = service_line,
-        train_number = train_number,
-        track_number = track_number,
-        departing_in = departing_in,
+    # Make GraphQL API request
+    response = http.post(
+        NJ_TRANSIT_GRAPHQL_URL,
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "*/*",
+        },
+        body = json.encode(graphql_query),
     )
 
-def get_departure_time(data):
-    """
-    Function gets depature time for a given depature
-    """
-    time_string = data.find(".d-block.ff-secondary--bold.flex-grow-1.h2.mb-0").first().text().strip()
-    return time_string
+    if response.status_code != 200:
+        print("GraphQL API returned status code: %s" % response.status_code)
+        return []
 
-def get_service_line(data):
-    """
-    Function gets the service line the train is running on
-    """
-    nodes = data.find(".media-body").first().find(".mb-0")
-    string = nodes.eq(1).text().strip().split()
-    service_line = string[0].strip()
+    # Parse the GraphQL response
+    response_data = json.decode(response.body())
 
-    return service_line
+    if response_data == None:
+        print("Failed to parse GraphQL response")
+        return []
 
-def get_train_number(data):
-    """
-    Function gets the train number from a given depature
-    """
-    nodes = data.find(".media-body").first().find(".mb-0")
-    srvc_train_number = nodes.eq(1).text().strip().split()
-    train_number = srvc_train_number[2].strip()
-    return train_number
+    train_screens = response_data.get("data")
+    if train_screens == None:
+        print("No data in GraphQL response")
+        return []
 
-def get_destination_name(data):
-    """
-    Function gets the destation froma  given depature
-    """
-    nodes = data.find(".media-body").first().find(".mb-0")
-    destination_name = nodes.eq(0).text().strip().replace("\\u2708", "EWR").upper()
-    return destination_name
+    departure_screens = train_screens.get("getTrainDepartureScreens")
+    if departure_screens == None:
+        print("No getTrainDepartureScreens in response")
+        return []
 
-def get_real_time_estimated_departure(data, scheduled_time):
-    """
-    Will attempt to get given departing time from nj transit
-    If not availble will return the in X min via the scheduled
-    Departure time - time.now()
-    """
-    nodes = data.find(".media-body").first().find(".mb-0")
-    node = nodes.eq(2)
+    departures_data = departure_screens.get("items", [])
 
-    departing_in = ""
+    # Convert GraphQL response to our departure struct format
+    result = []
+    for item in departures_data:
+        departure_struct = struct(
+            departing_at = item.get("departureDate", ""),
+            destination = str(item.get("destination", "")).upper(),
+            service_line = item.get("lineAbbreviation", "AMTK"),
+            train_number = str(item.get("trainID", "")),
+            track_number = item.get("track"),
+            departing_in = item.get("status", ""),
+        )
+        result.append(departure_struct)
 
-    if node != None:
-        departing_in = node.text().strip().removeprefix("in ")
-
-    #If we cant get from NJT return scheduled Departure time
-    if len(departing_in) == 0:
-        departing_in = "at {}".format(scheduled_time)
-
-    return departing_in
-
-def get_track_number(data):
-    """
-    Returns the track number the train will be departing from.
-    May not be availble until about 10 minutes before scheduled departure time.
-    """
-    node = data.find(".align-self-end.mb-0").first()
-
-    if node != None:
-        text = node.text().strip().split()
-        if len(text) > 1:
-            track = text[1].strip()
-        else:
-            track = None
-    else:
-        track = None
-
-    return track
+    print("Found '%s' departures from GraphQL API" % len(result))
+    return result
 
 def fetch_stations_from_website():
     """
     Function fetches trains station list from NJ Transit website
     To be used for creating Schema option list
+    Parses the Nuxt.js __NUXT_DATA__ JSON payload
     """
     result = []
 
     nj_dv_page_response_body = cache.get(DEPARTURES_CACHE_KEY)
-
     if nj_dv_page_response_body == None:
         nj_dv_page_response = http.get(NJ_TRANSIT_STATIONS_URL)
 
         if nj_dv_page_response.status_code != 200:
-            #print("Got code '%s' from page response" % nj_dv_page_response.status_code)
+            print("Got code '%s' from page response" % nj_dv_page_response.status_code)
             return result
 
         nj_dv_page_response_body = nj_dv_page_response.body()
-
         # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(DEPARTURES_CACHE_KEY, nj_dv_page_response.body(), DEPARTURES_CACHE_TTL)
 
+    # Parse the HTML to find the __NUXT_DATA__ script tag
     selector = html(nj_dv_page_response_body)
-    stations = selector.find(".vbt-autocomplete-list.list-unstyled.shadow.w-100.list-main").children_filtered(".scrollable-items").children()
+    script_tag = selector.find("script#__NUXT_DATA__").first()
 
-    #print("Got response of '%s' stations" % stations.len())
+    if script_tag == None:
+        print("Could not find __NUXT_DATA__ script tag")
+        return result
 
-    for index in range(0, stations.len()):
-        station = stations.eq(index)
-        station_name = station.find("a").first().text()
+    # Get the JSON content from the script tag
+    json_content = script_tag.text()
 
-        #print("Found station '%s' from page response" % station_name)
-        result.append(station_name)
+    # Parse the Nuxt.js data array format
+    # The format uses indexed references where objects contain indices pointing to values
+    data = json.decode(json_content)
+
+    # Iterate through the data array to find station objects
+    # Station objects have the pattern: {"__typename": idx1, "title": idx2, "path": idx3}
+    # where data[idx1] == "TrainScheduleStation" and data[idx2] is the station name
+    stations_found = 0
+    for i in range(len(data)):
+        item = data[i]
+
+        # Check if this is a dict with the expected station structure
+        if type(item) == "dict" and "__typename" in item and "title" in item and "path" in item:
+            typename_idx = item["__typename"]
+            title_idx = item["title"]
+
+            # Safely get values by index
+            if typename_idx < len(data) and title_idx < len(data):
+                typename = data[typename_idx]
+                title = data[title_idx]
+
+                # Check if this is a TrainScheduleStation with a valid title
+                if typename == "TrainScheduleStation" and type(title) == "string" and len(title) > 0:
+                    result.append(title)
+                    stations_found = stations_found + 1
+
+    print("Got response of '%s' stations" % stations_found)
 
     return result
 
