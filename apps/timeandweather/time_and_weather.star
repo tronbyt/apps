@@ -319,6 +319,12 @@ def main(config):
             elif icon_num == 800 and "n" in icon_code:
                 # clear (night)
                 icon_ref = "moony.png"
+            elif icon_num == 781:
+                # tornado
+                icon_ref = "tornady.png"
+            elif icon_num >= 702 and icon_num < 781:
+                # foggy, misty, dusty, squall, smoke, sand - OpenWeather classifies these as "atmosphere"
+                icon_ref = "foggy.png"
             elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
                 # partly cloudy (night)
                 icon_ref = "moonyish.png"
@@ -443,6 +449,12 @@ def main(config):
             elif icon_num == 731:
                 # wind
                 icon_ref = "windy.png"
+            elif icon_num == 781:
+                # tornado
+                icon_ref = "tornady.png"
+            elif icon_num >= 702 and icon_num < 781:
+                # foggy, misty, dusty, squall, smoke, sand - OpenWeather classifies these as "atmosphere"
+                icon_ref = "foggy.png"
             elif icon_num == 800 and "n" in icon_code:
                 # clear (night)
                 icon_ref = "moony.png"
