@@ -18,6 +18,11 @@ DEFAULT_IMAGE_2X = """
 iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAgMAAACcbnALAAAACVBMVEUAAAD///8mRckgsHh3AAAAA3RSTlP//wDXyg1BAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAZUlEQVQYlY3QsQ3AMAgEQC8JBSOwD9nARZgybyfhG6TEhXWSwXoY+Z7xXyEiunTKOg5NwxOukbGrFDq2D0gzHG2QZaBy3tKSUF6ykpaE8kZNhzU/NwmeVEzK9JyIU3LyvQ372toF2su87R8cvrAAAAAASUVORK5CYII=
 """
 
+SCROLL_TOGETHER = "together"
+SCROLL_SEPARATE = "separate"
+SCROLL_DISABLED = "disabled"
+DEFAULT_SCROLL = SCROLL_TOGETHER
+
 def get_entity_status(ha_server, entity_id, token):
     if not ha_server:
         fail("Home Assistant server not configured")
@@ -35,31 +40,32 @@ def get_entity_status(ha_server, entity_id, token):
 
     return rep.json()
 
-def render_media_title(title, app_name, font = "tb-8", scale = 1):
-    return render.Padding(
-        pad = (2 * scale, 0, 0, 0),
-        child = render.Marquee(
-            width = 60 * scale,
-            child = render.Padding(
-                pad = (0, 2, 0, 0),
-                child = render.Text(
-                    content = title,
-                    color = get_title_color(app_name),
-                    font = font,
-                ),
-            ),
-        ),
+def render_text_widget(content, width, color = "", font = "", scroll = DEFAULT_SCROLL):
+    text = render.Text(
+        content = content,
+        color = color,
+        font = font,
     )
 
-def render_detail_text(name, color = "#ffffff", font = "tb-8", scale = 1):
+    if scroll == SCROLL_DISABLED:
+      return text
+
+    offset = width if scroll == SCROLL_TOGETHER else 0
     return render.Marquee(
-        width = 41 * scale,
-        child = render.Text(
-            content = name or "",
-            color = color,
-            font = font,
-        ),
+        width = width,
+        offset_start = offset,
+        offset_end = offset,
+        child = text,
     )
+
+def render_media_title(title, app_name, font = "tb-8", scale = 1, scroll = DEFAULT_SCROLL):
+    return render.Padding(
+        pad = (2 * scale, 2, 0, 0),
+        child = render_text_widget(title, 60 * scale, color = get_title_color(app_name), font = font, scroll = scroll)
+    )
+
+def render_detail_text(name, color = "", font = "", scale = 1, scroll = DEFAULT_SCROLL):
+    return render_text_widget(name or "", 41 * scale, color = color, font = font, scroll = scroll)
 
 def get_title_color(app_name):
     APP_COLORS = {
@@ -157,6 +163,7 @@ def main(config):
         media_title, line1, line2 = media_title.upper(), line1.upper(), line2.upper()
 
     image_size = 36 if scale == 2 else 17 * scale
+    scroll = config.get("scroll", DEFAULT_SCROLL)
 
     return render.Root(
         delay = 50 if scale == 1 else 25,
@@ -175,8 +182,8 @@ def main(config):
                             render.Padding(
                                 pad = (2 * scale, 0, 0, 0),
                                 child = render.Column(children = [
-                                    render_detail_text(line1, font = font, scale = scale),
-                                    render_detail_text(line2, color = "#cccccc", font = font, scale = scale),
+                                    render_detail_text(line1, font = font, scale = scale, scroll = scroll),
+                                    render_detail_text(line2, color = "#cccccc", font = font, scale = scale, scroll = scroll),
                                 ]),
                             ),
                         ],
@@ -214,6 +221,27 @@ def get_schema():
                 desc = "Outputs text in upper case.",
                 icon = "font",
                 default = False,
+            ),
+            schema.Dropdown(
+                id = "scroll",
+                name = "Scroll Mode",
+                desc = "Changes how text lines scrolls.",
+                icon = "gripLines",
+                default = DEFAULT_SCROLL,
+                options = [
+                    schema.Option(
+                        display = "Together",
+                        value = SCROLL_TOGETHER,
+                    ),
+                    schema.Option(
+                        display = "Separate",
+                        value = SCROLL_SEPARATE,
+                    ),
+                    schema.Option(
+                        display = "Disabled",
+                        value = SCROLL_DISABLED,
+                    ),
+                ]
             ),
         ],
     )
