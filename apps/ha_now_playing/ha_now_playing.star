@@ -74,11 +74,18 @@ def get_title_color(app_name):
     }
     return APP_COLORS.get(app_name, "#009cc4")
 
-def get_app_name(app_name, app_id, friendly_name):
+def get_app_name(attributes):
+    media_content_id = attributes.get("media_content_id", "")
+    if media_content_id.startswith("spotify:"):
+        return "Spotify"
+
+    app_name = attributes.get("app_name") or attributes.get("source")
     if app_name:
         return app_name
+
+    app_id = attributes.get("app_id")
     if not app_id:
-        return friendly_name
+        return attributes.get("friendly_name", "")
 
     APP_ID_FULL_MAP = {
         "com.apple.TVAirPlay": "AirPlay",
@@ -131,10 +138,8 @@ def main(config):
 
     media_content_type = attributes.get("media_content_type")
     media_artist = attributes.get("media_artist")
-    app_name = attributes.get("app_name") or attributes.get("source")
-    app_id = attributes.get("app_id")
     friendly_name = attributes.get("friendly_name", "")
-    app_name = get_app_name(app_name, app_id, friendly_name)
+    app_name = get_app_name(attributes)
     media_artist = media_artist or friendly_name
     media_title = media_title or app_name
     media_album_name = attributes.get("media_album_name", app_name)
