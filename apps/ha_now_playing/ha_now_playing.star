@@ -58,15 +58,6 @@ def render_text_widget(content, width, color = "", font = "", scroll = DEFAULT_S
         child = text,
     )
 
-def render_media_title(title, app_name, font = "tb-8", scale = 1, scroll = DEFAULT_SCROLL):
-    return render.Padding(
-        pad = (2 * scale, 2, 0, 0),
-        child = render_text_widget(title, 60 * scale, color = get_title_color(app_name), font = font, scroll = scroll)
-    )
-
-def render_detail_text(name, color = "", font = "", scale = 1, scroll = DEFAULT_SCROLL):
-    return render_text_widget(name or "", 41 * scale, color = color, font = font, scroll = scroll)
-
 def get_title_color(app_name):
     APP_COLORS = {
         "HBO": "#b535f6",
@@ -127,15 +118,16 @@ def main(config):
     font = "terminus-18" if scale == 2 else "tb-8"
 
     media_title = attributes.get("media_title")
+
     media_image = None
-
-    if "entity_picture" in attributes:
-        res = http.get("%s%s" % (ha_server, attributes.get("entity_picture")), ttl_seconds = 600)
-        if res.status_code == 200:
-            media_image = res.body()
-
-    if not media_image:
-        media_image = base64.decode(DEFAULT_IMAGE_2X if scale >= 2 else DEFAULT_IMAGE)
+    show_art = config.bool("show_art", True)
+    if show_art:
+        if "entity_picture" in attributes:
+            res = http.get("%s%s" % (ha_server, attributes.get("entity_picture")), ttl_seconds = 600)
+            if res.status_code == 200:
+                media_image = res.body()
+        if not media_image:
+            media_image = base64.decode(DEFAULT_IMAGE_2X if scale >= 2 else DEFAULT_IMAGE)
 
     media_content_type = attributes.get("media_content_type")
     media_artist = attributes.get("media_artist")
@@ -164,26 +156,31 @@ def main(config):
 
     image_size = 36 if scale == 2 else 17 * scale
     scroll = config.get("scroll", DEFAULT_SCROLL)
+    secondary_width = 41 * scale if show_art else 60 * scale
+    pad = 2 * scale
 
     return render.Root(
         delay = 50 if scale == 1 else 25,
         child = render.Column(
             children = [
-                render_media_title(media_title, app_name, font = font, scale = scale),
                 render.Padding(
-                    pad = (2 * scale, 2, 0, 0),
+                    pad = (pad, 2, 0 if show_art else pad, 0),
+                    child = render_text_widget(media_title, 60 * scale, color = get_title_color(app_name), font = font, scroll = scroll)
+                ),
+                render.Padding(
+                    pad = (pad, 2, 0 if show_art else pad, 0),
                     child = render.Row(
                         children = [
                             render.Image(
                                 src = media_image,
                                 height = image_size,
                                 width = image_size,
-                            ),
+                            ) if show_art else None,
                             render.Padding(
-                                pad = (2 * scale, 0, 0, 0),
+                                pad = (pad, 0, 0, 0) if show_art else 0,
                                 child = render.Column(children = [
-                                    render_detail_text(line1, font = font, scale = scale, scroll = scroll),
-                                    render_detail_text(line2, color = "#cccccc", font = font, scale = scale, scroll = scroll),
+                                    render_text_widget(line1, width = secondary_width, font = font, scroll = scroll),
+                                    render_text_widget(line2, width = secondary_width, color = "#cccccc", font = font, scroll = scroll),
                                 ]),
                             ),
                         ],
@@ -221,6 +218,13 @@ def get_schema():
                 desc = "Outputs text in upper case.",
                 icon = "font",
                 default = False,
+            ),
+            schema.Toggle(
+                id = "show_art",
+                name = "Show Album Art",
+                desc = "Toggles album art.",
+                icon = "image",
+                default = True,
             ),
             schema.Dropdown(
                 id = "scroll",
