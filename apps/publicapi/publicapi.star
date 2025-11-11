@@ -24,7 +24,9 @@ def get_all_apis():
 
 def main():
     random.seed(time.now().unix // 30)
-    all_apis = get_all_apis()["entries"]
+    all_apis = get_all_apis().get("entries")
+    if not all_apis:
+        fail("API response is missing 'entries' key or it is empty")
     random_api = all_apis[random.number(0, len(all_apis)-1)]
 
     return render.Root(
