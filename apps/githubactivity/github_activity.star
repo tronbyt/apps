@@ -74,6 +74,8 @@ def main(config):
 
     #create parts of the final frame (error handling done in each of these)
     chart = contribution_chart(data, config)
+    if config.get("fullscreen_chart"):
+        return render.Root(child=chart)
     activity_overview = contribution_activity(data)  #get the activity overview
 
     #get stats like total contributions (in last year), open issues/pulls, and followers/following
@@ -318,7 +320,7 @@ def contribution_chart(data, config):
 
         #add empty squares for days that have not occurred yet
         w.extend([
-            contribution_square_fullscreen(ctmp, background_color, (top or bottom)) if fullscreen_chart else contribution_square(background_color, background_color)
+            contribution_square_fullscreen(background_color, background_color, (j==6)) if fullscreen_chart else contribution_square(background_color, background_color)
         ] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
 
         cdata2.append(render.Column(children = w))
