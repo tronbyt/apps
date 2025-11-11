@@ -202,7 +202,7 @@ def get_schema():
             schema.Text(
                 id = "homeassistant_server",
                 name = "Home Assistant Server",
-                desc = "URL of Home Assistant server",
+                desc = "Home Assistant base URL (e.g. http://homeassistant:8123). Supports https.",
                 icon = "server",
             ),
             schema.Text(
