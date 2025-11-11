@@ -74,6 +74,8 @@ def main(config):
 
     #create parts of the final frame (error handling done in each of these)
     chart = contribution_chart(data, config)
+    if config.get("fullscreen_chart"):
+        return render.Root(child=chart)
     activity_overview = contribution_activity(data)  #get the activity overview
 
     #get stats like total contributions (in last year), open issues/pulls, and followers/following
@@ -144,6 +146,13 @@ def get_schema():
             options = theme_opts,
             default = theme_opts[0].value,
         ),
+        schema.Toggle(
+            id = "fullscreen_chart",
+            name = "Fullscreen chart",
+            desc = "Make the contributions chart fullscreen",
+            icon = "gear",
+            default = False
+        )
     ]
 
 def get_contributions(auth_token):
@@ -234,6 +243,30 @@ def contribution_square(fill, background):
         child = render.Box(width = x1, height = x1, color = fill),
     )  #don't use padding otherwise have to distinguish between inner and outer edges
 
+def contribution_square_fullscreen(fill, background, isTopBotEdge):
+    #make github square for contribution
+    #size of squares
+    x1 = 4  #size of inner square
+    pad = 1
+    x2 = x1 + pad  #size of outer square
+
+    if isTopBotEdge:
+        return render.Box(
+            width = x2,
+            height = x1-1,
+            color = background,
+            child = render.Box(width = x1, height = x1-1, color = fill),
+        )
+
+    #return render.Padding(child=render.Box(width=x1,height=x1,color=color),pad=1,color=BACKGROUND_COLOR)
+    return render.Box(
+        width = x2,
+        height = x2,
+        color = background,
+        child = render.Box(width = x1, height = x1, color = fill),
+    )  #don't use padding otherwise have to distinguish between inner and outer edges
+
+
 def contribution_chart(data, config):
     #replicate the contributions chart that is seen on GitHub for the last 13 weeks
     ###########
@@ -241,6 +274,7 @@ def contribution_chart(data, config):
     background_name = config.str("background_theme", "Dark dimmed")
     empty_color, background_color = BACKGROUND_THEMES[background_name].values()
     fill_name = config.str("theme", "GitHub")
+    fullscreen_chart = config.bool("fullscreen_chart")
 
     if data == None:
         cdata = range(0, 13)  #only need to iterate through 13 weeks
@@ -276,14 +310,19 @@ def contribution_chart(data, config):
 
             #add extra padding around the top and left border squares
             top = 1 if j == 0 else 0  #padding to squares along the top edge
+            bottom = 1 if j == 6 else 0
             w.append(render.Padding(
-                child = contribution_square(ctmp, background_color),
-                pad = (left, top, 0, 0),
+                child = contribution_square_fullscreen(ctmp, background_color, (top or bottom)) 
+                    if fullscreen_chart else 
+                    contribution_square(ctmp, background_color),
+                pad = (0, 0, 0, top) if fullscreen_chart else (left, top, 0, 0),
                 color = background_color,
             ))
 
         #add empty squares for days that have not occurred yet
-        w.extend([contribution_square(background_color, background_color)] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
+        w.extend([
+            contribution_square_fullscreen(background_color, background_color, (j==6)) if fullscreen_chart else contribution_square(background_color, background_color)
+        ] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
 
         cdata2.append(render.Column(children = w))
 
