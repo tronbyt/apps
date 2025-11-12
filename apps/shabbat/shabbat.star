@@ -141,9 +141,9 @@ def make_message(start, end, use_24_hour_clock):
     if use_24_hour_clock:
         time_format = "15:04"
 
-    message = "shabbat \n"
-    message += "start: " + round_down(start).format(time_format) + "\n"
-    message += "end: " + round_up(end).format(time_format)
+    message = "Shabbat \n"
+    message += "Start: " + round_down(start).format(time_format) + "\n"
+    message += "End: " + round_up(end).format(time_format)
     return render.WrappedText(
         content = message,
         align = "center",
