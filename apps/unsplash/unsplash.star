@@ -2,13 +2,13 @@
 Applet: Unsplash
 Summary: Shows random photos
 Description: Displays a random image from Unsplash.
-Author: zephyern
+Author: zephyern, gabe565
 """
 
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_IMAGE = base64.decode("""
@@ -137,7 +137,10 @@ AAAAAElFTkSuQmCC
 UNSPLASH_URL = "https://api.unsplash.com/photos/random"
 
 def main(config):
-    image = cache.get("image")
+    width, height = str(canvas.width()), str(canvas.height())
+    cache_key = "image-%sx%s" % (width, height)
+
+    image = cache.get(cache_key)
     if not image:
         image = DEFAULT_IMAGE
         key = config.get("unsplash_access_key")
@@ -162,8 +165,8 @@ def main(config):
                     params = {
                         "fit": "crop",
                         "crop": "edges",
-                        "w": "64",
-                        "h": "32",
+                        "w": width,
+                        "h": height,
                         "fm": "png",
                     },
                 )
@@ -172,7 +175,7 @@ def main(config):
                     image = image_rep.body()
 
             # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("image", image, ttl_seconds = 3600)
+            cache.set(cache_key, image, ttl_seconds = 3600)
 
     return render.Root(
         child = render.Image(src = image),
