@@ -5,7 +5,6 @@ Description: Displays a random image from Unsplash.
 Author: zephyern, gabe565
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "canvas", "render")
@@ -139,49 +138,43 @@ AAAAAElFTkSuQmCC
 UNSPLASH_URL = "https://api.unsplash.com/photos/random"
 
 def main(config):
-    width, height = str(canvas.width()), str(canvas.height())
-    cache_key = "image-%sx%s" % (width, height)
+    cache_mins_str = config.str("cache_mins", str(DEFAULT_CACHE_MINS))
+    cache_mins = int(cache_mins_str) if cache_mins_str.isdigit() else DEFAULT_CACHE_MINS
+    cache_sec = cache_mins * 60
 
-    image = cache.get(cache_key)
-    if not image:
-        image = DEFAULT_IMAGE
-        key = config.get("unsplash_access_key")
-        if key:
-            print("Querying for image.")
-            rep = http.get(
-                UNSPLASH_URL,
-                headers = {
-                    "Accept-Version": "v1",
-                    "Authorization": "Client-ID %s" % key,
-                },
+    image = DEFAULT_IMAGE
+    key = config.get("unsplash_access_key")
+    if key:
+        print("Querying for image.")
+        rep = http.get(
+            UNSPLASH_URL,
+            headers = {
+                "Accept-Version": "v1",
+                "Authorization": "Client-ID %s" % key,
+            },
+            params = {
+                "orientation": "landscape",
+            },
+            ttl_seconds = cache_sec,
+        )
+
+        if rep.status_code == 200:
+            response = rep.json()
+            thumb_url = response["urls"]["thumb"]
+            image_rep = http.get(
+                thumb_url,
                 params = {
-                    "orientation": "landscape",
+                    "fit": "crop",
+                    "crop": "edges",
+                    "w": str(canvas.width()),
+                    "h": str(canvas.height()),
+                    "fm": "png",
                 },
+                ttl_seconds = cache_sec,
             )
 
-            if rep.status_code == 200:
-                response = rep.json()
-                thumb_url = response["urls"]["thumb"]
-                image_rep = http.get(
-                    thumb_url,
-                    params = {
-                        "fit": "crop",
-                        "crop": "edges",
-                        "w": width,
-                        "h": height,
-                        "fm": "png",
-                    },
-                )
-
-                if image_rep.status_code == 200:
-                    image = image_rep.body()
-
-            cache_mins_str = config.str("cache_mins", str(DEFAULT_CACHE_MINS))
-            cache_mins = int(cache_mins_str) if cache_mins_str.isdigit() else DEFAULT_CACHE_MINS
-            cache_sec = cache_mins * 60
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, image, ttl_seconds = cache_sec)
+            if image_rep.status_code == 200:
+                image = image_rep.body()
 
     return render.Root(
         child = render.Image(src = image),
