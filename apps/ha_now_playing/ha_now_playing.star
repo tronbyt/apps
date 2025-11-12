@@ -129,8 +129,11 @@ def main(config):
     media_image = None
     show_art = config.bool("show_art", True)
     if show_art:
-        if "entity_picture" in attributes:
-            res = http.get("%s%s" % (ha_server, attributes.get("entity_picture")), ttl_seconds = 600)
+        url = attributes.get("entity_picture")
+        if url:
+            if url.startswith("/"):
+                url = ha_server.rstrip("/") + url
+            res = http.get(url, ttl_seconds = 600)
             if res.status_code == 200:
                 media_image = res.body()
         if not media_image:
