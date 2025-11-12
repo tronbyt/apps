@@ -56,8 +56,8 @@ def main(config):
 
         if res.status_code == 200:
             json = res.json()
-            thumb_url = json["urls"]["thumb"]
-            image = get_image(thumb_url, ttl_seconds = cache_sec)
+            image_url = json["urls"]["raw"]
+            image = get_image(image_url, ttl_seconds = cache_sec)
 
     if not image:
         image = get_image(DEFAULT_IMAGE_URL, ttl_seconds = cache_sec)
