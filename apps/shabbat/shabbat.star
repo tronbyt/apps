@@ -157,14 +157,11 @@ def display_error():
         render: Error Message
     """
     return render.Root(
-        child = render.Padding(
-            pad = (0, 4, 0, 4),
+        child = render.Box(
             child = render.WrappedText(
                 content = "Can't Display Shabbat Times",
                 font = "tb-8",
                 align = "center",
-                height = 64,
-                width = 64,
             ),
         ),
     )
@@ -185,11 +182,14 @@ def make_progress_bar(now, shabbat_start, shabbat_end):
 
     fill_width = math.floor(64 - ((shabbat_rem / shabbat_len) * 64))
 
-    progress_bar = render.Stack(
-        children = [
-            render.Box(width = 64, height = 1, color = "#F000F0"),
-            render.Box(width = fill_width, height = 1, color = "#4D8FAC"),
-        ],
+    progress_bar = render.Padding(
+        pad = (0, 2, 0, 0),
+        child = render.Stack(
+            children = [
+                render.Box(width = 64, height = 1, color = "#F000F0"),
+                render.Box(width = fill_width, height = 1, color = "#4D8FAC"),
+            ],
+        ),
     )
     return progress_bar
 
@@ -270,6 +270,7 @@ def main(config):
     )
 
     # Add progress bar
+    progress_bar = None
     show_progress_bar = config.bool("show_progress_bar", DEFAULT_SHOW_PROGRESS_BAR)
     if show_progress_bar and ((weekday == FRIDAY) and (now >= shabbat_start)) or ((weekday == SATURDAY) and (now < shabbat_end)):
         progress_bar = make_progress_bar(
@@ -278,18 +279,16 @@ def main(config):
             shabbat_end = shabbat_end,
         )
 
-        return render.Root(
-            render.Column(
+    return render.Root(
+        child = render.Box(
+            child = render.Column(
                 children = [
                     message,
                     progress_bar,
                 ],
             ),
-        )
-    else:
-        return render.Root(
-            message,
-        )
+        ),
+    )
 
 def get_schema():
     end_method_options = [
