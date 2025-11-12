@@ -11,6 +11,8 @@ load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+DEFAULT_CACHE_MINS = 5
+
 DEFAULT_IMAGE = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAIAAAAt/+nTAAAABGdBTUEAALGPC/xh
 BQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAA
@@ -174,8 +176,12 @@ def main(config):
                 if image_rep.status_code == 200:
                     image = image_rep.body()
 
+            cache_mins_str = config.str("cache_mins", str(DEFAULT_CACHE_MINS))
+            cache_mins = int(cache_mins_str) if cache_mins_str.isdigit() else DEFAULT_CACHE_MINS
+            cache_sec = cache_mins * 60
+
             # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, image, ttl_seconds = 3600)
+            cache.set(cache_key, image, ttl_seconds = cache_sec)
 
     return render.Root(
         child = render.Image(src = image),
@@ -191,6 +197,13 @@ def get_schema():
                 desc = "Your Unsplash API Access Key. See https://unsplash.com/developers for details.",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Text(
+                id = "cache_mins",
+                name = "Cache Duration",
+                desc = "How long to cache images (in minutes)",
+                icon = "clock",
+                default = str(DEFAULT_CACHE_MINS),
             ),
         ],
     )
