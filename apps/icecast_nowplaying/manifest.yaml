@@ -6,4 +6,4 @@ author: Brombomb
 fileName: icecast-nowplaying.star
 packageName: icecast_nowplaying
 id: icecast-nowplaying
-recommendedInterval: 1
+recommended_interval: 1
