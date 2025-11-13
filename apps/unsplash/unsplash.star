@@ -15,6 +15,22 @@ DEFAULT_CACHE_MINS = 5
 UNSPLASH_URL = "https://api.unsplash.com"
 DEFAULT_IMAGE_URL = "https://images.unsplash.com/photo-1645069258059-6f5a71256c4a"
 
+def parse_imgix_params(raw):
+    if not raw:
+        return {}
+
+    params = {}
+    for entry in raw.split("&"):
+        item = entry.strip()
+        if not item or "=" not in item:
+            continue
+        key, value = item.split("=", 1)
+        key = key.strip()
+        if key:
+            params[key] = value.strip()
+
+    return params
+
 def get_topic_id(slug, key):
     cache_key = "topic:" + slug
     id = cache.get(cache_key)
@@ -37,18 +53,16 @@ def get_topic_id(slug, key):
     cache.set(cache_key, id, ttl_seconds = 86400)
     return id
 
-def get_image(url, ttl_seconds = DEFAULT_CACHE_MINS * 60):
-    res = http.get(
-        url,
-        params = {
-            "fit": "crop",
-            "crop": "edges",
-            "w": str(canvas.width()),
-            "h": str(canvas.height()),
-            "fm": "png",
-        },
-        ttl_seconds = ttl_seconds,
-    )
+def get_image(url, params = {}, ttl_seconds = DEFAULT_CACHE_MINS * 60):
+    if "fit" not in params:
+        params["fit"] = "crop"
+    if "crop" not in params:
+        params["crop"] = "edges"
+    params["w"] = str(canvas.width())
+    params["h"] = str(canvas.height())
+    params["fm"] = "png"
+
+    res = http.get(url, params = params, ttl_seconds = ttl_seconds)
 
     if res.status_code != 200:
         fail("HTTP request failed with status %d" % res.status_code)
@@ -61,6 +75,7 @@ def main(config):
     cache_sec = cache_mins * 60
 
     image = None
+    image_params = parse_imgix_params(config.get("imgix_params"))
 
     key = config.get("unsplash_access_key")
     if key:
@@ -88,13 +103,12 @@ def main(config):
         )
 
         if res.status_code == 200:
-            json = res.json()
-            image_url = json["urls"]["raw"]
+            image_url = res.json()["urls"]["raw"]
             print("Image URL:", image_url)
-            image = get_image(image_url, ttl_seconds = cache_sec)
+            image = get_image(image_url, params = image_params, ttl_seconds = cache_sec)
 
     if not image:
-        image = get_image(DEFAULT_IMAGE_URL, ttl_seconds = cache_sec)
+        image = get_image(DEFAULT_IMAGE_URL, params = image_params, ttl_seconds = cache_sec)
 
     return render.Root(
         child = render.Image(src = image),
@@ -155,6 +169,13 @@ def get_schema():
                         value = "high",
                     ),
                 ],
+            ),
+            schema.Text(
+                id = "imgix_params",
+                name = "Imgix Render Params",
+                desc = "Query parameters to pass to Imgix. See https://docs.imgix.com/apis/rendering for details. (e.g. \"con=20&sat=20\")",
+                icon = "image",
+                default = "",
             ),
             schema.Text(
                 id = "cache_mins",
