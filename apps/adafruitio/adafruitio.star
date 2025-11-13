@@ -64,6 +64,10 @@ def main(config):
     hours = int(config.get("hours_history", 24))
     feed = get_feed(username, key, feed_id, hours)
 
+    # Parse value range filters
+    feed_value_range = parse_range(config.get("feed_value_range", None))
+    feed2_value_range = parse_range(config.get("feed2_value_range", None))
+
     # check for feed2
     feed2 = None
     if config.get("feed2_id", None):
@@ -152,30 +156,41 @@ def main(config):
                 color = config.str("graph2_color", "#00c"),
                 y_lim = y2_lim,
             )
+        # Check if feed values are in range - if not, return empty
+        feed_value = float(feed["data"][-1][1])
+        if not is_in_range(feed_value, feed_value_range):
+            return []
+
+        # Check if feed2 exists and is in range
         if feed2:
+            feed2_value = float(feed2["data"][-1][1])
+            if not is_in_range(feed2_value, feed2_value_range):
+                return []
+            # Both feeds in range - show both values
             data_line = render.Row(
                 expanded = True,
                 main_align = "center",
                 children = [
                     render.Text(
-                        content = str(round(float(feed["data"][-1][1]), 1)) + config.get("feed_units", "") + " ",
+                        content = str(round(feed_value, 1)) + config.get("feed_units", "") + " ",
                         font = "6x13",
                         color = config.str("feed_color", None) or ORANGE,
                     ),
                     render.Text(
-                        content = str(round(float(feed2["data"][-1][1]), 1)) + config.get("feed2_units", ""),
+                        content = str(round(feed2_value, 1)) + config.get("feed2_units", ""),
                         font = "6x13",
                         color = config.str("feed2_color", None) or BLUE,
                     ),
                 ],
             )
-        else:  # just one data item
+        else:
+            # Only feed1 and it's in range
             data_line = render.Row(
                 expanded = True,
                 main_align = "center",
                 children = [
                     render.Text(
-                        content = str(round(float(feed["data"][-1][1]), 2)) + config.get("feed_units", ""),
+                        content = str(round(feed_value, 2)) + config.get("feed_units", ""),
                         font = "6x13",
                         color = config.str("feed_color", None) or ORANGE,
                     ),
@@ -235,6 +250,28 @@ def get_feed(username, key, feed_id, hours):
 
     return feed
 
+def parse_range(range_str):
+    """Parse a min-max range string like '10-20' into a tuple (min, max).
+    Returns None if range_str is empty or invalid."""
+    if not range_str:
+        return None
+    if "-" in range_str:
+        parts = range_str.split("-")
+        if len(parts) == 2:
+            if parts[0] and parts[1]:
+                # Use float() directly - if it fails, the app will show an error
+                return (float(parts[0]), float(parts[1]))
+    return None
+
+def is_in_range(value, range_tuple):
+    """Check if a value is within the specified range.
+    If range_tuple is None, always returns True (no filtering)."""
+    if not range_tuple:
+        return True
+    min_val = range_tuple[0]
+    max_val = range_tuple[1]
+    return value >= min_val and value <= max_val
+
 def get_schema():
     fields = []
     fields.append(
@@ -251,7 +288,6 @@ def get_schema():
             name = "AIO Key",
             desc = "AIO Acess Key",
             icon = "key",
-            secret = True,
         ),
     )
     fields.append(
@@ -287,6 +323,15 @@ def get_schema():
             name = "Feed Units",
             icon = "quoteRight",
             desc = "Feed height units preference",
+        ),
+    )
+    fields.append(
+        schema.Text(
+            id = "feed_value_range",
+            name = "Value Range Filter",
+            icon = "filter",
+            desc = "Only show app if in range (e.g., '10-20'). Leave blank to always show.",
+            default = "",
         ),
     )
     fields.append(
@@ -368,6 +413,15 @@ def get_schema():
             name = "Feed 2 Units",
             icon = "quoteRight",
             desc = "Feed height units preference",
+        ),
+    )
+    fields.append(
+        schema.Text(
+            id = "feed2_value_range",
+            name = "Feed 2 Value Range Filter",
+            icon = "filter",
+            desc = "Only show app if in range (e.g., '10-20'). Leave blank to always show.",
+            default = "",
         ),
     )
     fields.append(
