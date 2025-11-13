@@ -34,3 +34,4 @@ BUILD.bazel
 node_modules/
 
 .claude/*
+.claude/settings.local.json
