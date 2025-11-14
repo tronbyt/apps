@@ -42,7 +42,7 @@ def main(config):
 
     return render.Root(
         delay = delay,
-        show_full_animation = True,
+        show_full_animation = config.bool("show_full_animation", True),
         child = render.Animation(
             children = all_frames,
         ),
@@ -249,6 +249,13 @@ def get_schema():
                 icon = "film",
                 default = "random",
                 options = animation_options,
+            ),
+            schema.Toggle(
+                id = "show_full_animation",
+                name = "Show Full Animation",
+                desc = "Renders the full animation before moving to the next app.",
+                icon = "hourglass",
+                default = True,
             ),
         ],
     )
