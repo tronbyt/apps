@@ -1,0 +1,9 @@
+---
+name: Double Pendulum
+summary: Animated double pendulum
+desc: Display a mesmerizing double pendulum animation showing chaotic motion.
+author: tavdog
+fileName: double_pendulum.star
+packageName: doublependulum
+id: double-pendulum
+recommended_interval: 5
