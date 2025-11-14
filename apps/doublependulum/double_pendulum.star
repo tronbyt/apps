@@ -22,9 +22,10 @@ def main(config):
         delay = 33  # Slow: normal speed (~30fps)
 
     # Render all frames from the selected simulation
+    hsv_to_rgb = make_hsv_to_rgb()
     all_frames = []
     for frame_idx in range(len(simulation)):
-        all_frames.append(render_frame(sim_idx, frame_idx))
+        all_frames.append(render_frame(sim_idx, frame_idx, hsv_to_rgb))
 
     return render.Root(
         delay = delay,
@@ -33,35 +34,48 @@ def main(config):
         ),
     )
 
-def hsv_to_rgb(h, s, v):
-    """Convert HSV to RGB color. H in [0,360], S and V in [0,1]"""
-    c = v * s
-    x = c * (1 - abs((h / 60.0) % 2 - 1))
-    m = v - c
+def make_hsv_to_rgb():
+    """Returns a memoized hsv_to_rgb function"""
 
-    if h < 60:
-        r, g, b = c, x, 0
-    elif h < 120:
-        r, g, b = x, c, 0
-    elif h < 180:
-        r, g, b = 0, c, x
-    elif h < 240:
-        r, g, b = 0, x, c
-    elif h < 300:
-        r, g, b = x, 0, c
-    else:
-        r, g, b = c, 0, x
-
-    r = int((r + m) * 255)
-    g = int((g + m) * 255)
-    b = int((b + m) * 255)
+    cache = {}
 
     # Convert digits to hex chars
     def to_hex(val):
         digits = "0123456789ABCDEF"
         return digits[val // 16] + digits[val % 16]
 
-    return "#" + to_hex(r) + to_hex(g) + to_hex(b)
+    def hsv_to_rgb(h, s, v):
+        """Convert HSV to RGB color. H in [0,360], S and V in [0,1]"""
+        cache_key = (h, s, v)
+        if cache_key in cache:
+            return cache[cache_key]
+
+        c = v * s
+        x = c * (1 - abs((h / 60.0) % 2 - 1))
+        m = v - c
+
+        if h < 60:
+            r, g, b = c, x, 0
+        elif h < 120:
+            r, g, b = x, c, 0
+        elif h < 180:
+            r, g, b = 0, c, x
+        elif h < 240:
+            r, g, b = 0, x, c
+        elif h < 300:
+            r, g, b = x, 0, c
+        else:
+            r, g, b = c, 0, x
+
+        r = int((r + m) * 255)
+        g = int((g + m) * 255)
+        b = int((b + m) * 255)
+
+        result = "#" + to_hex(r) + to_hex(g) + to_hex(b)
+        cache[cache_key] = result
+        return result
+
+    return hsv_to_rgb
 
 def draw_line(x0, y0, x1, y1):
     """Draw a line using simple linear interpolation"""
@@ -86,7 +100,11 @@ def draw_line(x0, y0, x1, y1):
 
     return points
 
-def render_frame(sim_idx, frame_idx):
+BG_BOX = render.Box(width = 64, height = 32, color = "#000")
+WHITE_BOX = render.Box(width = 1, height = 1, color = "#FFF")
+CYAN_CIRCLE = render.Circle(color = "#0FF", diameter = 2)
+
+def render_frame(sim_idx, frame_idx, hsv_to_rgb):
     simulation = ALL_SIMULATIONS[sim_idx]
     frame = simulation[frame_idx]
     x1, y1, x2, y2 = frame[0], frame[1], frame[2], frame[3]
@@ -111,11 +129,7 @@ def render_frame(sim_idx, frame_idx):
     return render.Stack(
         children = [
             # Black background
-            render.Box(
-                width = 64,
-                height = 32,
-                color = "#000",
-            ),
+            BG_BOX,
 
             # Display simulation number in top left corner
             render.Padding(
@@ -142,7 +156,7 @@ def render_frame(sim_idx, frame_idx):
                     render.Padding(
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = pt[2]),
-                    ) if (pt[0] >= 0 and pt[0] < 64 and pt[1] >= 0 and pt[1] < 32) else render.Box(width = 0, height = 0)
+                    ) if (pt[0] >= 0 and pt[0] < 64 and pt[1] >= 0 and pt[1] < 32) else None
                     for pt in trail_points
                 ],
             ),
@@ -153,7 +167,7 @@ def render_frame(sim_idx, frame_idx):
                 children = [
                     render.Padding(
                         pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
+                        child = WHITE_BOX,
                     )
                     for pt in draw_line(origin_x, origin_y, x1, y1)
                 ],
@@ -163,7 +177,7 @@ def render_frame(sim_idx, frame_idx):
                 children = [
                     render.Padding(
                         pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
+                        child = WHITE_BOX,
                     )
                     for pt in draw_line(x1, y1, x2, y2)
                 ],
@@ -172,11 +186,8 @@ def render_frame(sim_idx, frame_idx):
             # First bob (cyan)
             render.Padding(
                 pad = (x1 - 1, y1 - 1, 0, 0),
-                child = render.Circle(
-                    color = "#00FFFF",
-                    diameter = 2,
-                ),
-            ) if (x1 >= 0 and x1 < 64 and y1 >= 0 and y1 < 32) else render.Box(width = 0, height = 0),
+                child = CYAN_CIRCLE,
+            ) if (x1 >= 0 and x1 < 64 and y1 >= 0 and y1 < 32) else None,
 
             # Second bob (color changes over time)
             render.Padding(
@@ -185,7 +196,7 @@ def render_frame(sim_idx, frame_idx):
                     color = bob2_color,
                     diameter = 3,
                 ),
-            ) if (x2 >= 0 and x2 < 64 and y2 >= 0 and y2 < 32) else render.Box(width = 0, height = 0),
+            ) if (x2 >= 0 and x2 < 64 and y2 >= 0 and y2 < 32) else None,
         ],
     )
 
