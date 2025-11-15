@@ -50,10 +50,11 @@ def ani_image():
                         children = [
                             render.Marquee(
                                 width = 48,
+                                offset_start = 48,
+                                offset_end = 48,
                                 child = render.Text(
                                     content = "PLEASE STAND BY",
                                 ),
-                                offset_start = 1,
                             ),
                         ],
                     ),
