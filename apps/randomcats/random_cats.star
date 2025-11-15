@@ -42,20 +42,11 @@ def main(config):
     )
 
 def get_cached(url, ttl_seconds = 20):
-    data = cache.get(url)
-    if data:
-        return data
-
-    res = http.get(url)
+    res = http.get(url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
         fail("status %d from %s: %s" % (res.status_code, url, res.body()))
 
-    data = res.body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(url, data, ttl_seconds = ttl_seconds)
-
-    return data
+    return res.body()
 
 def get_schema():
     return schema.Schema(
