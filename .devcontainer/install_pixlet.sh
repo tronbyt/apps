@@ -7,7 +7,7 @@ set -e
 # This script will install the latest released version of pixlet,
 # Unless this argument is set to a specific version tag
 # e.g. v0.22.7
-PIN_VERSION_TAG="v0.40.0"
+PIN_VERSION_TAG="v0.47.3"
 
 cd /tmp
 
@@ -27,7 +27,7 @@ echo "Installing version ${TAG}"
 
 URL="https://github.com/tronbyt/pixlet/releases/download/${TAG}/pixlet_${TAG}_linux_amd64.tar.gz"
 
-wget -O pixlet.tar.gz $URL
+wget -O pixlet.tar.gz "$URL"
 tar -xzf pixlet.tar.gz pixlet
 sudo mv pixlet /usr/local/bin/
 
