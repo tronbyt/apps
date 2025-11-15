@@ -7,3 +7,4 @@ author: Ethan Fuerst (@ethanfuerst)
 fileName: please_stand_by.star
 packageName: pleasestandby
 recommended_interval: 5
+supports2x: true
