@@ -7,14 +7,13 @@ Author: Mack Ward
 
 load("encoding/base64.star", "base64")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-FRAME_WIDTH = 64
-FRAME_HEIGHT = 32
-
 IMAGE = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAJCAYAAADtj3ZXAAAAQUlEQVQokWNgwA3+I2Fc8hgK/iPR//HwMWxhYMBuEDZDcSpCNwiX4VhdgK4AlxiKBnRMUB5fiBJyIUHnE6WQZJsBSnw7xZmNBscAAAAASUVORK5CYII="""
+
+IMAGE_2X = """iVBORw0KGgoAAAANSUhEUgAAAB4AAAASAQMAAAB2PPyaAAAABlBMVEUAAAAmRcn2EULJAAAAAnRSTlP/AOW3MEoAAAAJcEhZcwAACxMAAAsTAQCanBgAAABRSURBVAiZY/j/wf4DA5D4wcBuUCDDwGxRwMNwWCIZSMg8BhI8h3kYjvMflmH4x978g+EPe/MHBgZmBgYIwfz/PwOD/f//QAMO8P+BEGAuSAIA01gjFrd6c6wAAAAASUVORK5CYII="""
 
 COLORS = [
     "#0ef",  # light blue
@@ -33,10 +32,15 @@ def get_schema():
     )
 
 def main(config):
-    delay = 100 * time.millisecond
+    width, height, is2x = canvas.width(), canvas.height(), canvas.is2x()
+    delay = (50 if is2x else 100) * time.millisecond
     frames_per_second = time.second / delay
 
-    image = render.Image(base64.decode(config.get("image", IMAGE)))
+    image = render.Image(
+        base64.decode(
+            config.get("image", IMAGE_2X if is2x else IMAGE),
+        ),
+    )
 
     now = time.now().unix_nano / (1000 * 1000 * 1000)
     frames_since_epoch = int(now * frames_per_second)
@@ -47,7 +51,7 @@ def main(config):
     num_frames = math.ceil(app_cycle_speed / delay)
 
     frames = [
-        get_frame(get_state(i, image), image)
+        get_frame(get_state(i, width, height, image), image)
         for i in range(index, index + num_frames)
     ]
 
@@ -56,9 +60,9 @@ def main(config):
         child = render.Animation(frames),
     )
 
-def get_state(index, image):
-    num_x_positions = FRAME_WIDTH - image.size()[0]
-    num_y_positions = FRAME_HEIGHT - image.size()[1]
+def get_state(index, width, height, image):
+    num_x_positions = width - image.size()[0]
+    num_y_positions = height - image.size()[1]
 
     num_x_hits = index // num_x_positions
     vel_x = num_x_hits % 2 == 0 and 1 or -1
