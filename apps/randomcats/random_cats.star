@@ -23,25 +23,12 @@ def main(config):
 
     imgSrc = get_cached(url)
 
-    children = []
-    children.append(
-        render.Row(
-            expanded = True,
-            main_align = "center",
-            children = [
-                render.Image(
-                    src = imgSrc,
-                    height = height,
-                ),
-            ],
-        ),
-    )
     return render.Root(
-        # delay = 60,
-        child = render.Column(
-            main_align = "space_between",
-            cross_align = "center",
-            children = children,
+        child = render.Box(
+            child = render.Image(
+                src = imgSrc,
+                height = height,
+            ),
         ),
     )
 
