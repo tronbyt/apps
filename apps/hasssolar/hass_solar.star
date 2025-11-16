@@ -9,7 +9,7 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CACHE_TTL = 10
@@ -143,6 +143,7 @@ BATTERY = base64.decode("""
 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
 """)
 
+# 16x16
 PLUG = base64.decode("""
 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
 """)
@@ -151,26 +152,33 @@ SUN = base64.decode("""
 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
 """)
 
+# 16x16
 SOLAR = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACeklEQVQ4jY2TT0hUQRzHvzPz3u7bfe6umroQuKwmhCQbLNIfyDCIkoiog9XJolsdOglBVOKlgrqI9xAvhUJEEIKXwjpFqJERmbCRGKbRqrv73vO9+RPz8BCxoj+YP78fzGe+850ZKKV218YORPQoJnI3/82J7naMyYO24OQiq8Sfcds9ZpDylCQ1V2gpGNkdQMfEkaSEtwCgEQpLboV32r1zyzsD3rRY0qvtU0CRKDWmS0FZgTBy14irDdL//PO7mRXeEWyUTcKoMuIx7q2uWlZTkwfga9dy7ujAACRe5eoE6CJ3lA0JGVWsGZenf9JrHVYKQMpM1sR5qWSDkBSzrKhwXF0/NJX+1Bd6QNkZ5iNPDPo4apOMSMrTGO+I0CjD4uFGNS1cDzQSgf+nCGpG4BeL0DXpOQ87Z54YjMkXuDA7b8TwDWdnl5ihxtA751MAt861WXsguaCmCe44kEEAFovBX1uH4iKdiMt+nPpY0een1tpo6M1WHppYKBRGJr8HLePz3nG56YNXKojU18Fb/gUr3QSlUJJK5F/fyC/877FWoB/KvZMZYx/1PVcKDu664BUHNBqFt/JbK0mIsvey2iWFgNbW1h+Ukqc9zcYXCAkzkQg9IIxBeB4U55CB3949/L6rKkAHY+z++Vx9uqExsWImE+Hu+omYtbWQnINZFiAwui0gk8kUCVFDV9vNBV6uAIQiWNcmcqggCJUIx812P3p7vSogdJSQ4f0N0b3gQRDmjEH6PphtQ5TLW5+OPdgWkM1mPZOSwUv5hoKWbCaToQI9p5YVAsFoqnvow+2qgC3IaE9bbDMeYQ4ICRdq+caWijCkvHNiEAYA/AVIsU5KC49FbgAAAABJRU5ErkJggg==
 """)
+
+# 16x16
 HOUSE = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACxUlEQVQ4jXWSbUhTYRTHz3nuXq66efNlmzXFzKb5mltjM6sPBZVBZvq1PvWlooImFEooWSASlWDoPkQfIihKkSilUkHKXnyh8qXSwlq+Tm2WuJpe3e4Td+S1tTxwuIff+f8fzvPcg5RSWC2s0THXkCDpmHaeWE0j+x9ERLREaW+WJhsPIQJYNDFct2vKlpyaXkXkjEAFIMNDn0o8Hs9o0ASIyFijtHfLkrIKGlhKRFbIAz3Z19lx0HbGnGE2yyfHx+DKhVKLy+nsJv+Y5dZo3YPy5M2FDWGEFNXWgpgNoQzaM7Ozv7Y2uwWfD8JUalBxnEv0kL/MbE50zONyQ+a++nAlnrXb4UX7M3+KdX24Ao8CG9FUWfF9YnQEZicnDX7jnyuodmjWPn+0dbdwLK+AfnaM0ObmNrol3eRPsRaZ2BM1lg2GOY7j9ohegogR2yO1LSUb03Oa9JFYXFMDqjA1xMbFgixE4U+xFpnYEzXndetVJjlbhogcpqm5zooUU+aT+Bi2+GoVKJVK6U0WF3n/V6FYYTzPQ2WRDfYOTy6cG3jbh4msauc8CqcuXb+RF6IgshHHkCQ2pGSAjwJ8HOgP+FNqLtp78bStMQRJtWxo3t2GiNNKlt3ffKca8nUOSdjyPgN+LCxBltArsfHZJXCZjsAE7ymnlPYsL9IXo9EoPK1jICqMkcTMPAHQbILx9MMSmx4bAZ3PHbSJyV1dnQE7sRyhag7Sdh1YGX+gD352NAUdEBBegULr4C8ALcCCew7ab9VI/ZkpJ6Tp1qwcoDcwlzXxmHC/8TajXYYEITdVBXUugG3WJHjd+1IyrAsH6B/8QDTxWKo3MA5ZollWmHtcmfDm3jsKroSgaV71PISE/PYApgcgVlAVPrbzDoxLIb2xKTJYmNbFK92hPqNeLr1F3xT18qwA+tTFgKtSoPTbzNjo2IAXfgP14QtOLPDWZgAAAABJRU5ErkJggg==
 """)
+
+# 12x16
 GRID = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGeGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDYwLCAyMDIwLzA1LzEyLTE2OjA0OjE3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIiB4bWxuczpwaG90b3Nob3A9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGhvdG9zaG9wLzEuMC8iIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjIgKE1hY2ludG9zaCkiIHhtcDpDcmVhdGVEYXRlPSIyMDIzLTAyLTEzVDE1OjM5OjQwKzAxOjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMy0wMi0xN1QwODozODoxNCswMTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMy0wMi0xN1QwODozODoxNCswMTowMCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxMTQ4NjFkYi1mMDk2LTQ0ODUtYjMyNy1jN2Y3ZWNlYjRiYTMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QTY4NjlFRkFBM0M5MTFFREI1RkZGNzIwOTI2RUIzNzEiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpBNjg2OUVGQUEzQzkxMUVEQjVGRkY3MjA5MjZFQjM3MSIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkE2ODY5RUY3QTNDOTExRURCNUZGRjcyMDkyNkVCMzcxIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkE2ODY5RUY4QTNDOTExRURCNUZGRjcyMDkyNkVCMzcxIi8+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjExNDg2MWRiLWYwOTYtNDQ4NS1iMzI3LWM3ZjdlY2ViNGJhMyIgc3RFdnQ6d2hlbj0iMjAyMy0wMi0xN1QwODozODoxNCswMTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjIgKE1hY2ludG9zaCkiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDxwaG90b3Nob3A6RG9jdW1lbnRBbmNlc3RvcnM+IDxyZGY6QmFnPiA8cmRmOmxpPnhtcC5kaWQ6QTY4NjlFRkFBM0M5MTFFREI1RkZGNzIwOTI2RUIzNzE8L3JkZjpsaT4gPC9yZGY6QmFnPiA8L3Bob3Rvc2hvcDpEb2N1bWVudEFuY2VzdG9ycz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz648dNvAAACH0lEQVQokZVRX0hTcRT+zu9uzt27u7nhZBKUexECZ+UQxYKyXrICCVkkZVAQ4V5Det2DIFG9VAzyoaA/oxgR9RCGUJrEnPYHC0REECUh0hzqbl7v3e7pYWzMvfU9nnO+73zfOcTM+B/YAICIUCSGBh7F13//WgYAX11g749bl6PlBGJmEBE674xf0jbM45nVxfCFK82vAeDZw+/dXn/wi+Kxv/9w/ehjZoYoqI4OBeqkc6dOq+uWZW2BqQZMNZZlbXWdcWfq/SISGhgdKlnyqKLh54qxPDu7vS67qCmZSE0BgOxyNr15tfHW5ZEcHlU0AACYGX3vVs8zM5gZjf3D6dh0ejA2nR5s7B9OF+vFGRsAbGadayduj90TEimGaelgqgEAw8xvd90du7+tWbJ7f/g5gEKGxfTk2aZmh9xxpHpGUSmUTKRyyUQqp6iiub3DuXAw7LSWUp+7SxncHlGb+vh3Td9BPSyaj1xszwJA8unM/MsX2UCVAztuj6gtEQItrePJk644AOzpS8fAVAsAmT+rIytPrsYAIDKSjZb+UI5DN+Jf82b+EwBIdunwt5vRlvK+2PVFImib+kRPb5vU09smaZv6BBGBiHYTyouy4vAyI8OMjKw4vOViuzYU7+3zq0EWPMeC53x+NVhp2YYK5I38pGDRCQCmbk5V9omZca31wBgA5ESVYlQr+5AztwpydrVK15ZslqEBwIPpmWP/AP8h6z0LPIXhAAAAAElFTkSuQmCC
 """)
+
+# 7x16
 GREEN_ANIM = base64.decode("""
 R0lGODlhBwAQAKIEAEhsBIXBDb/iQElsBP///wAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDYuMC1jMDAyIDc5LjE2NDQ2MCwgMjAyMC8wNS8xMi0xNjowNDoxNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo2ZjcyNmRlMi05NTNmLTQwYmEtOTA3Yy0yNmVlMDg3ZTMxOWEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MTAxQzdERTdBMjQ1MTFFREI1RkZGNzIwOTI2RUIzNzEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MTAxQzdERTZBMjQ1MTFFREI1RkZGNzIwOTI2RUIzNzEiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjIgKE1hY2ludG9zaCkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpiZmU5YTI5MS02MjBhLTQ3NTItOWRhZS1lOWU2MGM1YWViOWUiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo2ZWYxNzU1Zi0zYzE1LWY5NGMtODkzNC1jN2FjYjhjZTVhMDEiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFAAAEACwAAAAABwAQAAADDki63P4wskEAoVTqzWMCACH5BAUAAAQALAAAAAABAAEAAAMCSAkAIfkEBQAABAAsAAAHAAEAAQAAAwIoCQAh+QQFAAAEACwAAAAAAQABAAADAkgJACH5BAUAAAQALAAABwABAAEAAAMCOAkAIfkEBQAABAAsAAAAAAEAAQAAAwJICQAh+QQFAAAEACwCAAcAAQABAAADAhgJACH5BAUAAAQALAAAAAABAAEAAAMCSAkAIfkEBQAABAAsAgAHAAEAAQAAAwIICQAh+QQFAAAEACwAAAAAAQABAAADAkgJACH5BAUAAAQALAIABwADAAEAAAMDOBQJACH5BAUAAAQALAAAAAABAAEAAAMCSAkAIfkEBQAABAAsAgAHAAMAAQAAAwMINAkAIfkEBQAABAAsAAAAAAEAAQAAAwJICQAh+QQFAAAEACwGAAcAAQABAAADAhgJACH5BAUAAAQALAAAAAABAAEAAAMCSAkAOw==
 """)
 RED_ANIM = base64.decode("""
 R0lGODlhBwAQAJECAP8AAIUJCf///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDYuMC1jMDAyIDc5LjE2NDQ2MCwgMjAyMC8wNS8xMi0xNjowNDoxNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo2ZjcyNmRlMi05NTNmLTQwYmEtOTA3Yy0yNmVlMDg3ZTMxOWEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QTY4NjlFRjJBM0M5MTFFREI1RkZGNzIwOTI2RUIzNzEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QTY4NjlFRjFBM0M5MTFFREI1RkZGNzIwOTI2RUIzNzEiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjIgKE1hY2ludG9zaCkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpiNDE5ZDEyZC1jYzY3LTQwYmQtODY5Mi0wMGY1MzMwZmI5N2YiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDplMGFkZGY2Zi1jZGMzLWI3NDQtYTRkNC02MGYyMTg4NjhjOGUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFAAACACwAAAAABwAQAAACDJSPqcuNIaB0tFpXAAAh+QQFAAACACwAAAAAAQABAAACAlQBACH5BAUAAAIALAYABwABAAEAAAICRAEAIfkEBQAAAgAsAAAAAAEAAQAAAgJUAQAh+QQFAAACACwGAAcAAQABAAACAkwBACH5BAUAAAIALAAAAAABAAEAAAICVAEAIfkEBQAAAgAsBAAHAAEAAQAAAgJEAQAh+QQFAAACACwAAAAAAQABAAACAlQBACH5BAUAAAIALAQABwABAAEAAAICTAEAIfkEBQAAAgAsAAAAAAEAAQAAAgJUAQAh+QQFAAACACwCAAcAAQABAAACAkQBACH5BAUAAAIALAAAAAABAAEAAAICVAEAIfkEBQAAAgAsAgAHAAEAAQAAAgJMAQAh+QQFAAACACwAAAAAAQABAAACAlQBACH5BAUAAAIALAAABwABAAEAAAICRAEAIfkEBQAAAgAsAAAAAAEAAQAAAgJUAQA7
 """)
-
 YELLOW_ANIM = base64.decode("""
 R0lGODlhBwAQAKIGAKRrHKNqHKNrHKNqG///Vv//Vf///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDYuMC1jMDAyIDc5LjE2NDQ2MCwgMjAyMC8wNS8xMi0xNjowNDoxNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo2ZjcyNmRlMi05NTNmLTQwYmEtOTA3Yy0yNmVlMDg3ZTMxOWEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QTRCODI4RkFBNkQ5MTFFRDhBMTNDN0FFMjJBREQxNEYiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QTRCODI4RjlBNkQ5MTFFRDhBMTNDN0FFMjJBREQxNEYiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjIgKE1hY2ludG9zaCkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo0MWI3ODc4My01YjZiLTRmYjEtOWVhMC00Y2E1NTIxZjViZDUiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDphMzU5MjQxZi02ZTQ5LWY1NDQtODRmMy1hZWYyNzIxZWE3MTciLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFAAAGACwAAAAABwAQAAADDmi63P4wsmAoMEPqzWUCACH5BAUAAAYALAAABwAHAAEAAAMECKYaCQAh+QQFAAAGACwCAAcABQABAAADBCgWJgkAIfkEBQAABgAsAAAHAAcAAQAAAwUYNiYGCQAh+QQFAAAGACwAAAcABwABAAADBEi2YJIAIfkEBQAABgAsAAAAAAEAAQAAAwJoCQAh+QQFAAAGACwAAAcABwABAAADBAhW1pAAIfkEBQAABgAsAAAHAAcAAQAAAwQYRqaTACH5BAUAAAYALAIABwAFAAEAAAMECEYmCQAh+QQFAAAGACwAAAcABwABAAADBAi2CwkAIfkEBQAABgAsAgAHAAUAAQAAAwQYNlYJACH5BAUAAAYALAIABwADAAEAAAMDKAYJADs=
 """)
 
+# 10x10
 SUN_SUM = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAJZlWElmTU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgExAAIAAAARAAAAWodpAAQAAAABAAAAbAAAAAAAAABIAAAAAQAAAEgAAAABd3d3Lmlua3NjYXBlLm9yZwAAAAOgAQADAAAAAQABAACgAgAEAAAAAQAAAAqgAwAEAAAAAQAAAAoAAAAAFL8o+gAAAAlwSFlzAAALEwAACxMBAJqcGAAAAi1pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+d3d3Lmlua3NjYXBlLm9yZzwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8dGlmZjpZUmVzb2x1dGlvbj43MjwvdGlmZjpZUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+NzI8L3RpZmY6WFJlc29sdXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgp0/eNQAAABK0lEQVQYGU2QvUpDQRCFz+xujJCACKKgFoKdjyAEa30AYyX+pIqgtfaCT2CV2ElQe7E26WMj2JqAYKGF5N549+7uuJNIyIEtZvg45+yAGYQppe3qmbypFYQxRODhc7UWmD9KW/ePXumu4cACJp3qtgJWiO4aRhYCsaIl93p8FMcDjh72Zf8hDPLcMd6FmcQKpOdmmsg8IH5Fgu3/nBc3W1cjMG3vncb4bmG+dKlndcUPnQWRQpYbm9qeIlP3wa3FCiM+9v0XSQoT5z7yQPSPYp5E81vtEOXCDZIcfmChywb2K4vRt+No4ZPO7o4KarGwUDI+tRc+c0YTrtnztwP1ypXW0zg60DIp/jQbzYb7tSeKVF0+IZCmsCpmRo4pd5JBpKHX4f2osjjJTpg/YduKRIzK4+cAAAAASUVORK5CYII=
 """)
@@ -345,6 +353,18 @@ def render_entity(entity, absolute_value = False, convert_to_kw = False, with_un
 def main(config):
     lang = config.get("lang", "en")
 
+    scale = 2 if canvas.is2x() else 1
+
+    # Scaled fonts
+    if scale == 2:
+        font_default = "terminus-16"
+        font_medium = "terminus-16"
+        font_small = "terminus-12"
+    else:
+        font_default = "tb-8"
+        font_medium = "5x8"
+        font_small = "tom-thumb"  # 4x6
+
     # fetch data from HA
     energy_consumption = fetch_entity(ENTITY_ENERGY_CONSUMPTION, config, "kWh")
     energy_production = fetch_entity(ENTITY_ENERGY_PRODUCTION, config, "kWh")
@@ -403,21 +423,21 @@ def main(config):
     main_frame = render.Row(
         children = [
             render.Box(
-                height = 32,
-                width = 15,
+                height = canvas.height(),
+                width = 16 * scale,
                 child = render.Column(
                     expanded = True,
                     cross_align = "center",
                     main_align = "space_evenly",
                     children = [
-                        render.Image(src = solar_icon, height = 15),
+                        render.Image(src = solar_icon, width = 16 * scale, height = 16 * scale),
                         render.Padding(
-                            pad = (1, 0, 0, 0),
+                            pad = (1 * scale, 0, 0, 0),
                             child = render.Column(
                                 cross_align = "center",
                                 children = [
-                                    render.Text(render_entity(solar_value, absolute_value = True, convert_to_kw = True, with_unit = False), color = solar_color),
-                                    render.Text("kW", color = GRAY),
+                                    render.Text(render_entity(solar_value, absolute_value = True, convert_to_kw = True, with_unit = False), color = solar_color, font = font_default),
+                                    render.Text("kW", color = GRAY, font = font_default),
                                 ],
                             ),
                         ),
@@ -425,33 +445,33 @@ def main(config):
                 ),
             ),
             render.Box(
-                height = 32,
-                width = 10,
+                height = canvas.height(),
+                width = 9 * scale,
                 child = render.Column(
                     expanded = True,
                     cross_align = "center",
                     main_align = "start",
                     children = [
-                        render.Image(src = solar_anim),
+                        render.Image(src = solar_anim, width = 7 * scale, height = 16 * scale),
                     ],
                 ),
             ),
             render.Box(
-                height = 32,
-                width = 15,
+                height = canvas.height(),
+                width = 16 * scale,
                 child = render.Column(
                     expanded = True,
                     cross_align = "center",
                     main_align = "space_evenly",
                     children = [
-                        render.Image(src = HOUSE, height = 15),
+                        render.Image(src = HOUSE, width = 16 * scale, height = 16 * scale),
                         render.Padding(
                             pad = (0, 0, 0, 0),
                             child = render.Column(
                                 cross_align = "center",
                                 children = [
-                                    render.Text(render_entity(power_load, convert_to_kw = True, with_unit = False)),
-                                    render.Text("kW", color = GRAY),
+                                    render.Text(render_entity(power_load, convert_to_kw = True, with_unit = False), font = font_default),
+                                    render.Text("kW", color = GRAY, font = font_default),
                                 ],
                             ),
                         ),
@@ -459,33 +479,33 @@ def main(config):
                 ),
             ),
             render.Box(
-                height = 32,
-                width = 10,
+                height = canvas.height(),
+                width = 9 * scale,
                 child = render.Column(
                     expanded = True,
                     cross_align = "center",
                     main_align = "start",
                     children = [
-                        render.Image(src = grid_anim),
+                        render.Image(src = grid_anim, width = 7 * scale, height = 16 * scale),
                     ],
                 ),
             ),
             render.Box(
-                height = 32,
-                width = 14,
+                height = canvas.height(),
+                width = 14 * scale,
                 child = render.Column(
                     expanded = True,
                     cross_align = "center",
                     main_align = "space_evenly",
                     children = [
-                        render.Image(src = GRID),
+                        render.Image(src = GRID, width = 12 * scale, height = 16 * scale),
                         render.Padding(
                             pad = (0, 0, 0, 0),
                             child = render.Column(
                                 cross_align = "center",
                                 children = [
-                                    render.Text(render_entity(power_grid, absolute_value = True, convert_to_kw = True, with_unit = False), color = grid_color),
-                                    render.Text("kW", color = GRAY),
+                                    render.Text(render_entity(power_grid, absolute_value = True, convert_to_kw = True, with_unit = False), color = grid_color, font = font_default),
+                                    render.Text("kW", color = GRAY, font = font_default),
                                 ],
                             ),
                         ),
@@ -526,7 +546,7 @@ def main(config):
                             main_align = "space_evenly",
                             cross_align = "center",
                             children = [
-                                render.Text(" ", height = 1),
+                                render.Text(" ", height = 1, font = font_default),  # spacer to align with other frames
                             ],
                         ),
                         render.Row(
@@ -548,13 +568,13 @@ def main(config):
                                     children = [
                                         render.Text(
                                             content = " " + render_entity(soc_battery, dec = 0),
-                                            font = "5x8",
+                                            font = font_medium,
                                             #font = "6x13",
                                             color = soc_color[int(float(soc_battery["state"]) / 25)],
                                         ),
                                         render.Text(
                                             content = " " + render_entity(power_battery, dec = 0),
-                                            font = "5x8",
+                                            font = font_medium,
                                             #font = "6x13",
                                             #min = a if a < b else b
                                             color = flow_color,
@@ -577,10 +597,10 @@ def main(config):
                 cross_align = "center",
                 main_align = "space_evenly",
                 children = [
-                    render.Image(src = SUN),
+                    render.Image(src = SUN, width = 16 * scale, height = 16 * scale),
                     render.Text(
                         content = render_entity(power_solar),
-                        font = "5x8",
+                        font = font_medium,
                         color = GREEN,
                     ),
                 ],
@@ -596,11 +616,11 @@ def main(config):
                 cross_align = "center",
                 main_align = "space_evenly",
                 children = [
-                    render.Image(src = PLUG),
+                    render.Image(src = PLUG, width = 16 * scale, height = 16 * scale),
                     render.Text(
                         content = render_entity(power_load),
                         #font = "6x13",
-                        font = "5x8",
+                        font = font_medium,
                         color = RED,
                     ),
                 ],
@@ -623,7 +643,7 @@ def main(config):
                             main_align = "space_evenly",
                             cross_align = "center",
                             children = [
-                                render.Text(LANGUAGE_LOCALES["Energy Today"][lang]),
+                                render.Text(LANGUAGE_LOCALES["Energy Today"][lang], font = font_default),
                             ],
                         ),
                         render.Row(
@@ -634,8 +654,8 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = SUN_SUM),
-                                        render.Image(src = PLUG_SUM),
+                                        render.Image(src = SUN_SUM, width = 10 * scale, height = 10 * scale),
+                                        render.Image(src = PLUG_SUM, width = 10 * scale, height = 10 * scale),
                                     ],
                                 ),
                                 render.Column(
@@ -645,12 +665,12 @@ def main(config):
                                     children = [
                                         render.Text(
                                             content = " " + render_entity(energy_production),
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GREEN,
                                         ),
                                         render.Text(
                                             content = " " + render_entity(energy_consumption),
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = RED,
                                         ),
                                     ],
@@ -668,9 +688,9 @@ def main(config):
         autarky_frame = render.Stack(
             children = [
                 render.Box(
-                    height = 32,
-                    width = 64,
-                    child = render.Image(src = AUTARKY_16x16),
+                    height = canvas.height(),
+                    width = canvas.width(),
+                    child = render.Image(src = AUTARKY_16x16, width = 16 * scale, height = 16 * scale),
                 ),
                 render.Column(
                     # column for the top
@@ -682,8 +702,8 @@ def main(config):
                             expanded = True,
                             main_align = "space_between",
                             children = [
-                                render.Row([render.Text(LANGUAGE_LOCALES["Today:"][lang], font = "tom-thumb", color = GRAY)]),
-                                render.Row([render.Text(LANGUAGE_LOCALES["Month:"][lang], font = "tom-thumb", color = GRAY)]),
+                                render.Row([render.Text(LANGUAGE_LOCALES["Today:"][lang], font = font_small, color = GRAY)]),
+                                render.Row([render.Text(LANGUAGE_LOCALES["Month:"][lang], font = font_small, color = GRAY)]),
                             ],
                         ),
 
@@ -693,8 +713,8 @@ def main(config):
                             main_align = "space_between",
                             cross_align = "end",
                             children = [
-                                render.Row([render.Text(" " + render_entity(autarky_day, dec = 0), color = GREEN)]),
-                                render.Row([render.Text(render_entity(autarky_month, dec = 0), color = GREEN)]),
+                                render.Row([render.Text(" " + render_entity(autarky_day, dec = 0), color = GREEN, font = font_default)]),
+                                render.Row([render.Text(render_entity(autarky_month, dec = 0), color = GREEN, font = font_default)]),
                             ],
                         ),
                     ],
@@ -708,8 +728,8 @@ def main(config):
                             expanded = True,
                             main_align = "space_between",
                             children = [
-                                render.Row([render.Text(LANGUAGE_LOCALES["Week:"][lang], font = "tom-thumb", color = GRAY)]),
-                                render.Row([render.Text(LANGUAGE_LOCALES["Year:"][lang], font = "tom-thumb", color = GRAY)]),
+                                render.Row([render.Text(LANGUAGE_LOCALES["Week:"][lang], font = font_small, color = GRAY)]),
+                                render.Row([render.Text(LANGUAGE_LOCALES["Year:"][lang], font = font_small, color = GRAY)]),
                             ],
                         ),
 
@@ -719,8 +739,8 @@ def main(config):
                             main_align = "space_between",
                             cross_align = "end",
                             children = [
-                                render.Row([render.Text(" " + render_entity(autarky_week, dec = 0), color = GREEN)]),
-                                render.Row([render.Text(render_entity(autarky_year, dec = 0), color = GREEN)]),
+                                render.Row([render.Text(" " + render_entity(autarky_week, dec = 0), color = GREEN, font = font_default)]),
+                                render.Row([render.Text(render_entity(autarky_year, dec = 0), color = GREEN, font = font_default)]),
                             ],
                         ),
                     ],
@@ -738,7 +758,7 @@ def main(config):
                     expanded = True,
                     cross_align = "center",
                     children = [
-                        render.Text(LANGUAGE_LOCALES["EV Energy"][lang], font = "tom-thumb"),
+                        render.Text(LANGUAGE_LOCALES["EV Energy"][lang], font = font_small),
                         render.Row(
                             expanded = True,
                             main_align = "space_between",
@@ -748,7 +768,7 @@ def main(config):
                                     main_align = "center",
                                     #cross_align = "center",
                                     children = [
-                                        render.Image(src = EV_CHARGING_16x16),
+                                        render.Image(src = EV_CHARGING_16x16, width = 16 * scale, height = 16 * scale),
                                     ],
                                 ),
                                 render.Column(
@@ -758,17 +778,17 @@ def main(config):
                                     children = [
                                         render.Text(
                                             content = LANGUAGE_LOCALES["D"][lang],
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GRAY,
                                         ),
                                         render.Text(
                                             content = LANGUAGE_LOCALES["W"][lang],
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GRAY,
                                         ),
                                         render.Text(
                                             content = LANGUAGE_LOCALES["M"][lang],
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GRAY,
                                         ),
                                     ],
@@ -780,17 +800,17 @@ def main(config):
                                     children = [
                                         render.Text(
                                             content = render_entity(energy_ev_day, with_unit = False, dec = 0),
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GREEN,
                                         ),
                                         render.Text(
                                             content = render_entity(energy_ev_week, with_unit = False, dec = 0),
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GREEN,
                                         ),
                                         render.Text(
                                             content = render_entity(energy_ev_month, with_unit = False, dec = 0),
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GREEN,
                                         ),
                                     ],
@@ -802,17 +822,17 @@ def main(config):
                                     children = [
                                         render.Text(
                                             content = " kWh",
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GRAY,
                                         ),
                                         render.Text(
                                             content = " kWh",
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GRAY,
                                         ),
                                         render.Text(
                                             content = " kWh",
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GRAY,
                                         ),
                                     ],
@@ -828,6 +848,8 @@ def main(config):
     # EV battery soc frame
     ###############################################
     if soc_ev:
+        ev_brand = config.get("ev_icon", "TESLA")
+        ev_logo = EV_LOGOS.get(ev_brand, EV_LOGOS["TESLA"])
         ev_frame = render.Stack(
             children = [
                 render.Column(
@@ -840,7 +862,7 @@ def main(config):
                             main_align = "space_evenly",
                             cross_align = "center",
                             children = [
-                                render.Text(config.get("ev_name", "EV")),
+                                render.Text(config.get("ev_name", "EV"), font = font_default),
                             ],
                         ),
                         render.Row(
@@ -851,7 +873,7 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = get_ev_logo(config.get("ev_icon", "TESLA"))),
+                                        render.Image(src = ev_logo["logo"], width = ev_logo["width"] * scale, height = ev_logo["height"] * scale),
                                         # render.Image(src = PLUG_SUM),
                                     ],
                                 ),
@@ -862,7 +884,7 @@ def main(config):
                                     children = [
                                         render.Text(
                                             content = render_entity(soc_ev),
-                                            font = "5x8",
+                                            font = font_medium,
                                             color = GREEN,
                                         ),
                                     ],
@@ -886,31 +908,63 @@ def main(config):
             child = render.Animation(children = frames),
         )
 
-def get_ev_logo(name):
-    if name == "TESLA":
-        return TESLA_LOGO_18x18
-    elif name == "AUDI":
-        return AUDI_LOGO_24x9
-    elif name == "VW":
-        return VW_LOGO_18x18
-    elif name == "BMW":
-        return BMW_LOGO_18x18
-    elif name == "SEAT":
-        return SEAT_LOGO_18x16
-    elif name == "SKODA":
-        return SKODA_LOGO_18x18
-    elif name == "OPEL":
-        return OPEL_LOGO_23x18
-    elif name == "RENAULT":
-        return RENAULT_LOGO_18x18
-    elif name == "HYUNDAI":
-        return HYUNDAI_LOGO_24x12
-    elif name == "CUPRA":
-        return CUPRA_LOGO_18x18
-    elif name == "FIAT":
-        return FIAT_LOGO_18x18
-    else:
-        return BMW_LOGO_18x18
+EV_LOGOS = {
+    "TESLA": {
+        "logo": TESLA_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+    "AUDI": {
+        "logo": AUDI_LOGO_24x9,
+        "width": 24,
+        "height": 9,
+    },
+    "VW": {
+        "logo": VW_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+    "BMW": {
+        "logo": BMW_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+    "SEAT": {
+        "logo": SEAT_LOGO_18x16,
+        "width": 18,
+        "height": 16,
+    },
+    "SKODA": {
+        "logo": SKODA_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+    "OPEL": {
+        "logo": OPEL_LOGO_23x18,
+        "width": 23,
+        "height": 18,
+    },
+    "RENAULT": {
+        "logo": RENAULT_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+    "HYUNDAI": {
+        "logo": HYUNDAI_LOGO_24x12,
+        "width": 24,
+        "height": 12,
+    },
+    "CUPRA": {
+        "logo": CUPRA_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+    "FIAT": {
+        "logo": FIAT_LOGO_18x18,
+        "width": 18,
+        "height": 18,
+    },
+}
 
 def get_schema():
     return schema.Schema(
