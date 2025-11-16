@@ -13,10 +13,8 @@ load("schema.star", "schema")
 def main(config):
     height = canvas.height()
 
-    if config.bool("gifs", True):
-        url = "https://cataas.com/cat/gif?height=" + str(height)
-    else:
-        url = "https://cataas.com/cat?height=" + str(height)
+    cat_type = "/gif" if config.bool("gifs", True) else ""
+    url = "https://cataas.com/cat{}?height={}".format(cat_type, height)
 
     # Preview
     # url = https://cataas.com/cat/vHWxUr3RH8Gp0bke?height=" + str(height)
