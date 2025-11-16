@@ -2113,15 +2113,16 @@ def main(config):
     preface = "PARK"
     config_item = "park"
 
-    if config.get("type") == "national_parks":
+    type = config.get("type", TRACKING_OPTIONS[0].value)
+    if type == "national_parks":
         usa_locations = usa_national_parks
         preface = "PARK"
         config_item = "park"
-    elif config.get("type") == "capitols":
+    elif type == "capitols":
         usa_locations = usa_capitols
         preface = "STATE"
         config_item = "location"
-    elif config.get("type") == "world_heritage_sites":
+    elif type == "world_heritage_sites":
         usa_locations = world_heritage_sites
         preface = "HERITAGE"
         config_item = "site"
