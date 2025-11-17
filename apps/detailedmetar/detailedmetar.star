@@ -9,6 +9,7 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -61,39 +62,10 @@ def main(config):
     minute = int(decodedObservationMetar[14:16])
     second = int(decodedObservationMetar[17:19])
 
-    # Create observation time in UTC
-    observationDate = time.time(
-        year = year,
-        month = month,
-        day = day,
-        hour = hour,
-        minute = minute,
-        second = second,
-        location = "Etc/UTC",
-    )
+    observationDate = time.time(year = year, month = month, day = day, hour = hour, minute = minute, second = second, location = "Etc/UTC")
 
-    # Current UTC time
-    nowUTC = time.now(location = "Etc/UTC")
-
-    # This used to work, presumably because the tidbyt servers that ran the code were set
-    # to UTC. However, when running on an arbitrary server, like a pi, the timezone cannot
-    # be guaranteed to be set that way. humantize.time() uses time.now(), we we cannot use it.
-    # The proper fix would be to modify humanize.time to take two timezones, but for now we can do it ourselves.
-
-    # Calculate difference in seconds
-    diff = nowUTC.unix - observationDate.unix
-
-    # Then format a humanized string manually
-    if diff < 60:
-        humanizedTime = "%d seconds ago" % diff
-    elif diff < 3600:
-        humanizedTime = "%d minutes ago" % (diff // 60)
-    elif diff < 86400:
-        humanizedTime = "%d hours ago" % (diff // 3600)
-    else:
-        humanizedTime = "%d days ago" % (diff // 86400)
-
-    print(humanizedTime)
+    # Create "humanized" readout. Ex; "5 minutes ago"
+    humanizedTime = humanize.time(observationDate)
 
     #Icon
     cacheName = getFlightCategory(decodedMetar) + "/" + str(getWindDirection_value(decodedMetar))
@@ -341,6 +313,9 @@ def getCloudCover(decodedMetar, type):
     # This function can be used to return either "cover" = sky cover or "levels" = base levels.
 
     if (type == "cover"):
+        if (layerCount == 0):
+            layerZero = render.Text("CLR", color = getCloudCeiling_textColor(12000), font = "tom-thumb")
+
         if (layerCount >= 1):
             layerZero = render.Text(decodedMetar["clouds"][0]["cover"], color = getCloudCeiling_textColor(decodedMetar["clouds"][0]["base"]), font = "tom-thumb")
 
@@ -354,6 +329,9 @@ def getCloudCover(decodedMetar, type):
             layerThr = render.Text(decodedMetar["clouds"][3]["cover"], color = getCloudCeiling_textColor(decodedMetar["clouds"][3]["base"]), font = "tom-thumb")
 
     if (type == "levels"):
+        if (layerCount == 0):
+            layerZero = None
+
         if (layerCount >= 1):
             if decodedMetar["clouds"][0]["base"] != None:
                 layerZero = render.Text(str(int(decodedMetar["clouds"][0]["base"])), color = getCloudCeiling_textColor(decodedMetar["clouds"][0]["base"]), font = "tom-thumb")
@@ -369,7 +347,7 @@ def getCloudCover(decodedMetar, type):
         if (layerCount >= 4):
             layerThr = render.Text(str(int(decodedMetar["clouds"][3]["base"])), color = getCloudCeiling_textColor(decodedMetar["clouds"][3]["base"]), font = "tom-thumb")
 
-    if (layerCount >= 1):
+    if (layerCount >= 0):
         extendedOutput = [
             layerZero,
             layerZero,
@@ -541,7 +519,7 @@ def getWindDirection(decodedMetar):
             resultTextColor = "#f5737c"
 
     if int(getWindDirection_value(decodedMetar)) == 0:
-        windDirection = "Var @"
+        windDirection = "VRB @"
     else:
         windDirection = getWindDirection_value(decodedMetar) + " @"
 
@@ -551,6 +529,8 @@ def getWindDirection(decodedMetar):
 
 # Returns raw wind direction value.
 def getWindDirection_value(decodedMetar):
+    if (decodedMetar.get("wdir", 0) == "VRB"):
+        return "0"
     return str(int(decodedMetar.get("wdir", 0)))
 
 # Returns current flight category.
