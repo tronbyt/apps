@@ -8,18 +8,6 @@ Author: Robert Ison
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-SCREEN_WIDTH, SCREEN_HEIGHT = canvas.width(), canvas.height()
-IS2X = canvas.is2x()
-FONT = "terminus-14" if IS2X else "CG-pixel-3x5-mono"
-
-# This map of USA includes Alaska and Hawaii
-# Offset for Mainland, Hawaii, Alaska - width of map, height of map, move right, move up
-OFFSETS = [
-    [SCREEN_WIDTH - 3, SCREEN_HEIGHT - 2, 4, -2],
-    [16, 16, 20, -2] if IS2X else [10, 10, 10, 0],
-    [20, 20, 2, -2] if IS2X else [12, 12, 0, 0],
-]
-
 DEFAULT_COLORS = ["#009A17", "#708090", "#FFD700"]  #map, unvisted, visited
 
 # USA JSON structure
@@ -1991,7 +1979,7 @@ def get_bounds(coordinates):
 
     return {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
 
-def normalize_coordinates(coords, bounds, grid_width = SCREEN_WIDTH, grid_height = SCREEN_HEIGHT):
+def normalize_coordinates(coords, bounds, grid_width, grid_height):
     # Extract all coordinate pairs from the nested structure
     raw_coords = []
     for point in coords:
@@ -2020,7 +2008,7 @@ def normalize_coordinates(coords, bounds, grid_width = SCREEN_WIDTH, grid_height
 
     return grid_points  # Return as a list with duplicates allowed
 
-def get_plot(grid_points, color = "#ff0", width = SCREEN_WIDTH, height = SCREEN_HEIGHT):
+def get_plot(grid_points, width, height, color = "#ff0"):
     return render.Plot(
         data = grid_points,
         width = width,
@@ -2030,10 +2018,10 @@ def get_plot(grid_points, color = "#ff0", width = SCREEN_WIDTH, height = SCREEN_
         y_lim = (0, height - 1),
     )
 
-def get_dot(color):
+def get_dot(color, size = 1):
     return render.Box(
-        width = 2 if IS2X else 1,
-        height = 2 if IS2X else 1,
+        width = size,
+        height = size,
         color = color,
     )
 
@@ -2087,21 +2075,39 @@ def main(config):
     items_to_plot = []  #As we progress through the list of items for our display, we keep adding to stacked_items
     gridpoints = []
 
+    width, height = canvas.width(), canvas.height()
+    is2x = canvas.is2x()
+    font = "terminus-14" if is2x else "CG-pixel-3x5-mono"
+    dot_size = 2 if is2x else 1
+
+    # This map of USA includes Alaska and Hawaii
+    # Offset for Mainland, Hawaii, Alaska - width of map, height of map, move right, move up
+    offsets = [
+        [width - 3, height - 2, 4, -2],
+        [16, 16, 20, -2] if is2x else [10, 10, 10, 0],
+        [20, 20, 2, -2] if is2x else [12, 12, 0, 0],
+    ]
+
     # now that we figured out the bounds for each geographic area, we can
     # calculate the plot points
     subgroup_counter = 0
     for group in usa_map_data["coordinates"]:
         for subgroup in group:
             subgroup_counter = subgroup_counter + 1
+            offset_idx = -1
             if subgroup_counter in mainland_sections:
-                gridpoints = normalize_coordinates(subgroup, mainland_bounds, OFFSETS[0][0], OFFSETS[0][1])
-                items_to_plot.append(add_padding_to_child_element(get_plot(gridpoints, map_color), OFFSETS[0][2], OFFSETS[0][3]))
+                offset_idx = 0
             elif subgroup_counter in hawaii_sections:
-                gridpoints = normalize_coordinates(subgroup, hawaii_bounds, OFFSETS[1][0], OFFSETS[1][1])
-                items_to_plot.append(add_padding_to_child_element(get_plot(gridpoints, map_color), OFFSETS[1][2], OFFSETS[1][3]))
+                offset_idx = 1
             elif subgroup_counter in alaska_sections:
-                gridpoints = normalize_coordinates(subgroup, alaska_bounds, OFFSETS[2][0], OFFSETS[2][1])
-                items_to_plot.append(add_padding_to_child_element(get_plot(gridpoints, map_color), OFFSETS[2][2], OFFSETS[2][3]))
+                offset_idx = 2
+            if offset_idx != -1:
+                bounds = maps[offset_idx]
+                offset_vals = offsets[offset_idx]
+                gridpoints = normalize_coordinates(subgroup, bounds, offset_vals[0], offset_vals[1])
+                plot = get_plot(gridpoints, width, height, map_color)
+                padded_plot = add_padding_to_child_element(plot, offset_vals[2], offset_vals[3])
+                items_to_plot.append(padded_plot)
 
             # Animation Frames start with each group of outlines for USA areas
             animation_frames.append(render.Stack(children = items_to_plot))
@@ -2143,17 +2149,17 @@ def main(config):
 
         # Loop through all three groups of unvisited
         for i, group in enumerate(group_coordinates):
-            gridpoints = normalize_coordinates(group, maps[i], OFFSETS[i][0], OFFSETS[i][1])
+            gridpoints = normalize_coordinates(group, maps[i], offsets[i][0], offsets[i][1])
 
             for point in gridpoints:
                 # The plot coordinates start at the bottom left
                 # however, the coordinates of the individual dots start at the top right
                 # also, these points are moved around to fit on the 'inset' map they belong to
                 # these formulae account for those adjustments to get the items on the right spot on the right map
-                converted_x = point[0] + OFFSETS[i][2]
-                converted_y = SCREEN_HEIGHT - point[1] + OFFSETS[i][3]
+                converted_x = point[0] + offsets[i][2]
+                converted_y = height - point[1] + offsets[i][3]
 
-                items_to_plot.append(add_padding_to_child_element(get_dot(unvisited_color), converted_x, converted_y))
+                items_to_plot.append(add_padding_to_child_element(get_dot(unvisited_color, dot_size), converted_x, converted_y))
 
                 # Next set of frames is MAP + unvisited Items one at a time
                 animation_frames.append(render.Stack(children = items_to_plot))
@@ -2161,26 +2167,26 @@ def main(config):
         # Loop through all three groups of visited
         total_visited = 0
         for i, group in enumerate(visited_group_coordinates):
-            gridpoints = normalize_coordinates(group, maps[i], OFFSETS[i][0], OFFSETS[i][1])
+            gridpoints = normalize_coordinates(group, maps[i], offsets[i][0], offsets[i][1])
 
             for point in gridpoints:
                 # The plot coordinates start at the bottom left
                 # however, the coordinates of the individual dots start at the top right
                 # also, these points are moved around to fit on the 'inset' map they belong to
                 # these formulae account for those adjustments to get the items on the right spot on the right map
-                converted_x = point[0] + OFFSETS[i][2]
-                converted_y = SCREEN_HEIGHT - point[1] + OFFSETS[i][3]
+                converted_x = point[0] + offsets[i][2]
+                converted_y = height - point[1] + offsets[i][3]
                 total_visited = total_visited + 1
-                items_to_plot.append(add_padding_to_child_element(get_dot(visited_color), converted_x, converted_y))
+                items_to_plot.append(add_padding_to_child_element(get_dot(visited_color, dot_size), converted_x, converted_y))
 
                 if config.get("showCount") == "true":
                     display_text = render.Text(
                         content = str(total_visited),
-                        font = FONT,
+                        font = font,
                         color = visited_color,
                     )
                     text_w, text_h = display_text.size()
-                    pad = 2 if IS2X else 1
+                    pad = 2 if is2x else 1
                     items_to_plot.append(add_padding_to_child_element(
                         render.Box(
                             color = "#000",
@@ -2188,8 +2194,8 @@ def main(config):
                             height = text_h,
                             child = display_text,
                         ),
-                        SCREEN_WIDTH - pad - text_w,
-                        SCREEN_HEIGHT - pad - text_h,
+                        width - pad - text_w,
+                        height - pad - text_h,
                     ))
 
                     # Frame 4 is map + unvisited + visited + Count
