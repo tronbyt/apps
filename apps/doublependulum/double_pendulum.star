@@ -127,9 +127,9 @@ def main(config):
     all_frames = []
     for frame_idx in range(len(simulation)):
         if is_api_mode:
-            all_frames.append(render_frame_simple(simulation, frame_idx, hsv_to_rgb))
+            all_frames.append(render_frame_simple(config, simulation, frame_idx, hsv_to_rgb))
         else:
-            all_frames.append(render_frame(sim_idx, frame_idx, hsv_to_rgb))
+            all_frames.append(render_frame(config, sim_idx, frame_idx, hsv_to_rgb))
 
     return render.Root(
         delay = delay,
@@ -205,7 +205,7 @@ def draw_line(x0, y0, x1, y1):
 
     return points
 
-def render_frame_simple(simulation, frame_idx, hsv_to_rgb):
+def render_frame_simple(config, simulation, frame_idx, hsv_to_rgb):
     """Render frame for API-fetched simulation (without showing simulation number)."""
     frame = simulation[frame_idx]
     x1, y1, x2, y2 = frame[0], frame[1], frame[2], frame[3]
@@ -227,6 +227,8 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb):
         trail_color = hsv_to_rgb(trail_hue, 1.0, 0.5)  # Dimmer for trail
         trail_points.append((f[2], f[3], trail_color))  # x2, y2, color
 
+    label = "api" if config.bool("show_label", False) else ""
+
     return render.Stack(
         children = [
             # Black background
@@ -240,7 +242,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb):
             render.Padding(
                 pad = (1, 1, 0, 0),
                 child = render.Text(
-                    content = "api",
+                    content = label,
                     color = "#888",
                     font = "tom-thumb",
                 ),
@@ -308,7 +310,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb):
         ],
     )
 
-def render_frame(sim_idx, frame_idx, hsv_to_rgb):
+def render_frame(config, sim_idx, frame_idx, hsv_to_rgb):
     """Render frame for embedded simulation (with simulation number displayed)."""
     simulation = ALL_SIMULATIONS[sim_idx]
     frame = simulation[frame_idx]
@@ -331,6 +333,8 @@ def render_frame(sim_idx, frame_idx, hsv_to_rgb):
         trail_color = hsv_to_rgb(trail_hue, 1.0, 0.5)  # Dimmer for trail
         trail_points.append((f[2], f[3], trail_color))  # x2, y2, color
 
+    label = "no." + str(sim_idx + 1) if config.bool("show_label", False) else ""
+
     return render.Stack(
         children = [
             # Black background
@@ -344,7 +348,7 @@ def render_frame(sim_idx, frame_idx, hsv_to_rgb):
             render.Padding(
                 pad = (1, 1, 0, 0),
                 child = render.Text(
-                    content = "no." + str(sim_idx + 1),
+                    content = label,
                     color = "#888",
                     font = "tom-thumb",
                 ),
@@ -416,7 +420,7 @@ def get_schema():
     # Build animation options dynamically
     animation_options = [
         schema.Option(display = "Random", value = "random"),
-        schema.Option(display = "Random params from API)", value = "api"),
+        schema.Option(display = "Random params from API", value = "api"),
     ]
     for i in range(1, len(ALL_SIMULATIONS) + 1):
         animation_options.append(
@@ -457,6 +461,13 @@ def get_schema():
                 desc = "Renders the full animation before moving to the next app.",
                 icon = "hourglass",
                 default = True,
+            ),
+            schema.Toggle(
+                id = "show_label",
+                name = "Show Label",
+                desc = "Displays a label for the current animation.",
+                icon = "label",
+                default = False,
             ),
         ],
     )
