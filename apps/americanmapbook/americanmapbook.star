@@ -2151,7 +2151,7 @@ def main(config):
                 # also, these points are moved around to fit on the 'inset' map they belong to
                 # these formulae account for those adjustments to get the items on the right spot on the right map
                 converted_x = point[0] + OFFSETS[i][2]
-                converted_y = ((SCREEN_HEIGHT - OFFSETS[i][1]) + OFFSETS[i][1] - point[1] + OFFSETS[i][3])
+                converted_y = SCREEN_HEIGHT - point[1] + OFFSETS[i][3]
 
                 items_to_plot.append(add_padding_to_child_element(get_dot(unvisited_color), converted_x, converted_y))
 
@@ -2169,7 +2169,7 @@ def main(config):
                 # also, these points are moved around to fit on the 'inset' map they belong to
                 # these formulae account for those adjustments to get the items on the right spot on the right map
                 converted_x = point[0] + OFFSETS[i][2]
-                converted_y = ((SCREEN_HEIGHT - OFFSETS[i][1]) + OFFSETS[i][1] - point[1] + OFFSETS[i][3])
+                converted_y = SCREEN_HEIGHT - point[1] + OFFSETS[i][3]
                 total_visited = total_visited + 1
                 items_to_plot.append(add_padding_to_child_element(get_dot(visited_color), converted_x, converted_y))
 
