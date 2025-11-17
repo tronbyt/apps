@@ -2094,15 +2094,20 @@ def main(config):
     for group in usa_map_data["coordinates"]:
         for subgroup in group:
             subgroup_counter = subgroup_counter + 1
+            offset_idx = -1
             if subgroup_counter in mainland_sections:
-                gridpoints = normalize_coordinates(subgroup, mainland_bounds, offsets[0][0], offsets[0][1])
-                items_to_plot.append(add_padding_to_child_element(get_plot(gridpoints, width, height, map_color), offsets[0][2], offsets[0][3]))
+                offset_idx = 0
             elif subgroup_counter in hawaii_sections:
-                gridpoints = normalize_coordinates(subgroup, hawaii_bounds, offsets[1][0], offsets[1][1])
-                items_to_plot.append(add_padding_to_child_element(get_plot(gridpoints, width, height, map_color), offsets[1][2], offsets[1][3]))
+                offset_idx = 1
             elif subgroup_counter in alaska_sections:
-                gridpoints = normalize_coordinates(subgroup, alaska_bounds, offsets[2][0], offsets[2][1])
-                items_to_plot.append(add_padding_to_child_element(get_plot(gridpoints, width, height, map_color), offsets[2][2], offsets[2][3]))
+                offset_idx = 2
+            if offset_idx != -1:
+                bounds = maps[offset_idx]
+                offset_vals = offsets[offset_idx]
+                gridpoints = normalize_coordinates(subgroup, bounds, offset_vals[0], offset_vals[1])
+                plot = get_plot(gridpoints, width, height, map_color)
+                padded_plot = add_padding_to_child_element(plot, offset_vals[2], offset_vals[3])
+                items_to_plot.append(padded_plot)
 
             # Animation Frames start with each group of outlines for USA areas
             animation_frames.append(render.Stack(children = items_to_plot))
