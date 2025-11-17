@@ -110,6 +110,7 @@ def render_category_text(category_name, reporting_area, alert_colors):
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     api_key = config.get("api_key", DEFAULT_API_KEY)
+    hide_below = config.get("hide_below", "0")
 
     lat = humanize.float(ACCURACY, float(location["lat"]))
     lng = humanize.float(ACCURACY, float(location["lng"]))
@@ -120,6 +121,9 @@ def main(config):
     category_name = observation["Category"]["Name"]
     reporting_area = observation["ReportingArea"]
     aqi = observation["AQI"]
+
+    if category_num < int(hide_below):
+        return []
 
     alert_colors = get_alert_colors(category_num)
 
@@ -135,6 +139,33 @@ def main(config):
     )
 
 def get_schema():
+    hide_options = [
+        schema.Option(
+            display = "Always Show",
+            value = "0",
+        ),
+        schema.Option(
+            display = "Moderate (100)",
+            value = "2",
+        ),
+        schema.Option(
+            display = "Unhealthy for Sensitive Groups (150)",
+            value = "3",
+        ),
+        schema.Option(
+            display = "Unhealthy (200)",
+            value = "4",
+        ),
+        schema.Option(
+            display = "Very Unhealthy (300)",
+            value = "5",
+        ),
+        schema.Option(
+            display = "Hazardous (500)",
+            value = "6",
+        ),
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -150,6 +181,14 @@ def get_schema():
                 desc = "API Key, freely available at airnowapi.org",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Dropdown(
+                id = "hide_below",
+                name = "Hide Below",
+                desc = "Hide this app if the AQI is below the chosen value.",
+                icon = "eye",
+                default = hide_options[0].value,
+                options = hide_options,
             ),
         ],
     )
