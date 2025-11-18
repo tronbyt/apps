@@ -8,7 +8,7 @@ Author: mjc-gh
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # original tidbyt api key
@@ -58,32 +58,37 @@ def get_current_observation(api_key, lat, lng):
     return None
 
 def render_alert_circle(aqi, alert_colors):
+    scale = 2 if canvas.is2x() else 1
+
     bg_color, txt_color = alert_colors
-    font = "10x20"
+    font = "terminus-32" if scale == 2 else "10x20"
 
     if aqi > 99:
-        font = "6x13"
+        font = "terminus-28" if scale == 2 else "6x13"
 
     return render.Box(
-        width = 26,
-        height = 32,
-        padding = 1,
+        width = 26 * scale,
+        height = 32 * scale,
+        padding = 1 * scale,
         child = render.Circle(
             color = bg_color,
-            diameter = 24,
+            diameter = 24 * scale,
             child = render.Text("%d" % (aqi), font = font, color = txt_color),
         ),
     )
 
 def render_category_text(category_name, reporting_area, alert_colors):
+    scale = 2 if canvas.is2x() else 1
+
     bg_color, _ = alert_colors
+    font = "terminus-14" if scale == 2 else "tom-thumb"
 
     if category_name == "Unhealthy for Sensitive Groups":
         category_name = "Unhealthy for Sensitive"
 
     return render.Box(
-        width = 38,
-        height = 32,
+        width = 38 * scale,
+        height = 32 * scale,
         child = render.Column(
             expanded = True,
             main_align = "space_around",
@@ -93,14 +98,14 @@ def render_category_text(category_name, reporting_area, alert_colors):
                     category_name,
                     align = "center",
                     color = bg_color,
-                    font = "tom-thumb",
+                    font = font,
                 ),
                 render.Marquee(
-                    width = 30,
+                    width = 30 * scale,
                     child = render.Text(
                         reporting_area,
                         color = "#DDD",
-                        font = "tom-thumb",
+                        font = font,
                     ),
                 ),
             ],
@@ -128,6 +133,7 @@ def main(config):
     alert_colors = get_alert_colors(category_num)
 
     return render.Root(
+        delay = 25 if canvas.is2x() else 50,
         child = render.Row(
             main_align = "start",
             expanded = True,
