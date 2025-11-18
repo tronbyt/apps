@@ -126,6 +126,17 @@ def main(config):
     lng = humanize.float(ACCURACY, float(location["lng"]))
 
     observation = get_current_observation(api_key, lat, lng)
+    if not observation:
+        return render.Root(
+            child = render.Box(
+                child = render.WrappedText(
+                    content = "No PM2.5 data for this location",
+                    width = canvas.width(),
+                    align = "center",
+                    color = "#f66",
+                ),
+            ),
+        )
 
     category_num = observation["Category"]["Number"]
     category_name = observation["Category"]["Name"]
