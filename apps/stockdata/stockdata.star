@@ -7,7 +7,6 @@ Author: ingmarstein
 
 load("demo_response_eod.json", DEMO_RESPONSE_EOD = "file")
 load("demo_response_intraday.json", DEMO_RESPONSE_INTRADAY = "file")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -151,9 +150,6 @@ def get_data_select_period(response, provider, query_type, colors, select_period
     min_price = min(prices)
     max_price = max(prices)
     last_price = list_data[-1][API_FIELDS[provider]["close"]]
-
-    # Print the entire last price data line
-    last_data_entry = list_data[-1]
 
     chart_data = []
     i = 0
