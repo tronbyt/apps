@@ -107,13 +107,25 @@ def main(config):
         if scroll_direction == "horizontal":
             left_col_width, _ = render.Text("1:", font = font).size()
             left_col_width += spacer_width
-            return render.Marquee(child = child, width = width - left_col_width)
+            marquee_width = width - left_col_width
+            return render.Marquee(
+                width = marquee_width,
+                offset_start = marquee_width,
+                offset_end = marquee_width,
+                child = child,
+            )
         else:
             return child
 
     def v_marquee(child):
         if scroll_direction == "vertical":
-            return render.Marquee(child = child, scroll_direction = "vertical", height = height)
+            return render.Marquee(
+                scroll_direction = "vertical",
+                height = height,
+                offset_start = height,
+                offset_end = height,
+                child = child,
+            )
         else:
             return child
 
