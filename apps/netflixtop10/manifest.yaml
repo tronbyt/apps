@@ -3,7 +3,7 @@ id: netflix-top-10
 name: Netflix Top 10
 summary: Top shows on Netflix
 desc: Shows the top 10 charts for movies or TV shows on Netflix.
-author: Matt Broussard
+author: Matt Broussard, gabe565
 fileName: netflix_top_10.star
 packageName: netflixtop10
 recommended_interval: 5

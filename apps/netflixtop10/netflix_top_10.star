@@ -2,14 +2,36 @@
 Applet: Netflix Top 10
 Summary: Top shows on Netflix
 Description: Shows the top 10 charts for movies or TV shows on Netflix.
-Author: Matt Broussard
+Author: Matt Broussard, gabe565
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
+load("html.star", "html")
 load("http.star", "http")
+load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+
+TTL_SECONDS = 3 * 60 * 60
+
+REGION_GLOBAL = "global"
+REGION_UNITED_STATES = "united-states"
+
+CATEGORY_FILMS_ENGLISH = "Films (English)"
+CATEGORY_FILMS_NON_ENGLISH = "Films (Non-English)"
+CATEGORY_TV_ENGLISH = "TV (English)"
+CATEGORY_TV_NON_ENGLISH = "TV (Non-English)"
+CATEGORY_FILMS = "Films"
+CATEGORY_TV = "TV"
+
+CATEGORY_MAPPING = {
+    CATEGORY_FILMS_ENGLISH: "films",
+    CATEGORY_FILMS_NON_ENGLISH: "films-non-english",
+    CATEGORY_TV_ENGLISH: "tv",
+    CATEGORY_TV_NON_ENGLISH: "tv-non-english",
+    CATEGORY_FILMS: "films",
+    CATEGORY_TV: "tv",
+}
 
 def get_schema():
     return schema.Schema(
@@ -32,8 +54,8 @@ def get_schema():
                 name = "Region",
                 desc = "The region for which to show the Netflix chart.",
                 icon = "globe",
-                default = "global",
-                options = get_region_options(),
+                default = REGION_GLOBAL,
+                options = get_regions(),
             ),
             schema.Generated(
                 id = "category_gen",
@@ -55,18 +77,18 @@ def get_schema():
     )
 
 def main(config):
-    region = config["region"] if "region" in config else "global"
+    region = config["region"] if "region" in config else REGION_GLOBAL
     category = config["category"] if "category" in config else default_category_for_region(region)
     font = config["font"] if "font" in config else "tb-8"
     scroll_direction = config["scroll_direction"] if "scroll_direction" in config else "vertical"
 
     n = 10 if scroll_direction == "vertical" else 4 if font == "tb-8" else 5
-    rows = get_rows_for_display(region, category)[:n]
+    rows = get_entries(region, category, n)
 
     # workaround: when changing regions, can have a category setting left over from previous region
     # that matches nothing in the current region
     if len(rows) == 0:
-        rows = get_rows_for_display(region, default_category_for_region(region))[:n]
+        rows = get_entries(region, default_category_for_region(region), n)
 
     def h_marquee(child):
         if scroll_direction == "horizontal":
@@ -100,7 +122,7 @@ def main(config):
                     col_spacer,
                     render.Column(
                         children = [
-                            h_marquee(render.Text(get_title(row), font = font))
+                            h_marquee(render.Text(row, font = font))
                             for row in rows
                         ],
                     ),
@@ -111,38 +133,40 @@ def main(config):
     )
 
 def get_regions():
-    val = cache.get("regions")
-    if val != None:
-        return json.decode(val)
+    url = build_page_url()
+    resp = http.get(url, ttl_seconds = TTL_SECONDS)
+    if resp.status_code != 200:
+        fail("HTTP request failed with status {}".format(resp.status_code))
 
-    table = load_countries_table()
-    regions = {row["country_iso2"]: row["country_name"] for row in table}
+    matches = re.findall(r"\"countries\":\[.+?\]", resp.body())
+    if len(matches) == 0:
+        fail("Could not find countries listing")
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("regions", json.encode(regions), ttl_seconds = 60 * 60)
-    return regions
-
-def get_region_options():
-    regions = get_regions()
+    # Convert \xXX escape sequences to \u00XX Unicode escapes for JSON decoder
+    countriesStr = "{" + re.sub(r"\\x(..)", r"\u00$1", matches[0]) + "}"
+    countries = json.decode(countriesStr)
 
     return [
-        schema.Option(display = "Global", value = "global"),
-
-        # for convenience, list US at top of the list instead of bottom
-        schema.Option(display = "United States", value = "US"),
+        schema.Option(display = "Global", value = REGION_GLOBAL),
+        schema.Option(display = "United States", value = REGION_UNITED_STATES),
     ] + [
-        schema.Option(display = region_name, value = region_iso)
-        for region_iso, region_name in regions.items()
-        if region_iso != "US"
+        schema.Option(display = country["displayName"], value = country["urlSegment"])
+        for country in sorted(countries["countries"], key = lambda x: x["displayName"])
+        if country["urlSegment"] != REGION_UNITED_STATES
     ]
 
 def get_categories(region):
-    table = load_global_table() if region == "global" else load_countries_table()
-    cat_set = {row["category"]: True for row in table}
-    return cat_set.keys()
+    if region == REGION_GLOBAL:
+        return [
+            CATEGORY_FILMS_ENGLISH,
+            CATEGORY_FILMS_NON_ENGLISH,
+            CATEGORY_TV_ENGLISH,
+            CATEGORY_TV_NON_ENGLISH,
+        ]
+    return [CATEGORY_FILMS, CATEGORY_TV]
 
 def default_category_for_region(region):
-    return "TV (English)" if region == "global" else "TV"
+    return CATEGORY_FILMS_ENGLISH if region == REGION_GLOBAL else CATEGORY_FILMS
 
 def gen_category_dropdown(region):
     categories = get_categories(region)
@@ -158,67 +182,35 @@ def gen_category_dropdown(region):
         ],
     )]
 
-def get_title(row):
-    season = row["season_title"] if "season_title" in row else ""
-    if season == "" or season == "N/A":
-        return row["show_title"]
-    return season
+def category_slug(category, region = REGION_GLOBAL):
+    return CATEGORY_MAPPING.get(category, default_category_for_region(region))
 
-def load_url_cached(url):
-    cache_key = "url-%s" % (url,)
+def build_page_url(region = REGION_GLOBAL, category = ""):
+    url = "https://www.netflix.com/tudum/top10"
+    if region and region != REGION_GLOBAL:
+        url += "/" + region
+    if category:
+        url += "/" + category_slug(category, region)
+    return url
 
-    val = cache.get(cache_key)
-    if val != None:
-        return val
-
-    resp = http.get(url)
+def get_entries(region, category, limit):
+    url = build_page_url(region, category)
+    resp = http.get(url, ttl_seconds = TTL_SECONDS)
     if resp.status_code != 200:
-        return None
+        fail("HTTP request failed with status {}".format(resp.status_code))
 
-    val = resp.body()
+    doc = html(resp.body())
+    trs = doc.find("table tr")
+    if trs.len() == 0:
+        return []
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, val, ttl_seconds = 60 * 60)
-    return val
+    result = []
+    for i in range(trs.len()):
+        tr = trs.eq(i)
+        title = tr.find("button").text().strip()
+        if title:
+            result.append(title)
+        if limit != 0 and len(result) >= limit:
+            break
 
-def load_countries_table():
-    body = load_url_cached("https://top10.netflix.com/data/all-weeks-countries.tsv")
-    return parse_tsv(body)
-
-def load_global_table():
-    body = load_url_cached("https://top10.netflix.com/data/all-weeks-global.tsv")
-    return parse_tsv(body)
-
-def get_rows_for_display(region, category):
-    data = load_global_table() if region == "global" else load_countries_table()
-    if data == None:
-        return [{"show_title": "Error loading chart"}]
-
-    latest_week = data[0]["week"]
-
-    def matches(row):
-        return row["category"] == category and \
-               row["week"] == latest_week and \
-               (region == "global" or row["country_iso2"] == region)
-
-    filtered = [row for row in data if matches(row)]
-    rows = sorted(filtered, key = lambda row: int(row["weekly_rank"]))
-
-    return rows
-
-def parse_tsv(tsvString):
-    if tsvString == None:
-        return None
-
-    header = None
-    rows = []
-
-    for line in tsvString.split("\n"):
-        parts = line.split("\t")
-        if header == None:
-            header = parts
-            continue
-
-        rows.append({k: v for k, v in zip(header, parts)})
-
-    return rows
+    return result
