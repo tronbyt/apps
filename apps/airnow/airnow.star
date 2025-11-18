@@ -167,23 +167,23 @@ def get_schema():
             value = "0",
         ),
         schema.Option(
-            display = "Moderate (100)",
+            display = "Moderate (51-100)",
             value = "2",
         ),
         schema.Option(
-            display = "Unhealthy for Sensitive Groups (150)",
+            display = "Unhealthy for Sensitive Groups (101-150)",
             value = "3",
         ),
         schema.Option(
-            display = "Unhealthy (200)",
+            display = "Unhealthy (151-200)",
             value = "4",
         ),
         schema.Option(
-            display = "Very Unhealthy (300)",
+            display = "Very Unhealthy (201-300)",
             value = "5",
         ),
         schema.Option(
-            display = "Hazardous (500)",
+            display = "Hazardous (301-500)",
             value = "6",
         ),
     ]
