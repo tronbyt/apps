@@ -77,10 +77,10 @@ def get_schema():
     )
 
 def main(config):
-    region = config["region"] if "region" in config else REGION_GLOBAL
-    category = config["category"] if "category" in config else default_category_for_region(region)
-    font = config["font"] if "font" in config else "tb-8"
-    scroll_direction = config["scroll_direction"] if "scroll_direction" in config else "vertical"
+    region = config.get("region", REGION_GLOBAL)
+    category = config.get("category", default_category_for_region(region))
+    font = config.get("font", "tb-8")
+    scroll_direction = config.get("scroll_direction", "vertical")
 
     n = 10 if scroll_direction == "vertical" else 4 if font == "tb-8" else 5
     rows = get_entries(region, category, n)
