@@ -7,3 +7,4 @@ author: ingmarstein
 fileName: stockdata.star
 packageName: stockdata
 recommended_interval: 1
+supports2x: true
