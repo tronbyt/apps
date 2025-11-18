@@ -102,6 +102,8 @@ def render_category_text(category_name, reporting_area, alert_colors):
                 ),
                 render.Marquee(
                     width = 30 * scale,
+                    offset_start = 30 * scale,
+                    offset_end = 30 * scale,
                     child = render.Text(
                         reporting_area,
                         color = "#DDD",
