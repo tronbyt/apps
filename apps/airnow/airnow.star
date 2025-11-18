@@ -64,10 +64,10 @@ def render_alert_circle(aqi, alert_colors):
     scale = 2 if canvas.is2x() else 1
 
     bg_color, txt_color = alert_colors
-    font = "terminus-32" if scale == 2 else "10x20"
+    font = "terminus-28-light" if scale == 2 else "terminus-14-light"
 
     if aqi > 99:
-        font = "terminus-28" if scale == 2 else "6x13"
+        font = "terminus-24-light" if scale == 2 else "terminus-12"
 
     return render.Box(
         width = 26 * scale,
