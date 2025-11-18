@@ -49,6 +49,9 @@ def get_current_observation_url(api_key, lat, lng):
 
 def get_current_observation(api_key, lat, lng):
     response = http.get(url = get_current_observation_url(api_key, lat, lng), ttl_seconds = 30 * 60)
+    if response.status_code != 200:
+        fail("HTTP request failed with status %d" % response.status_code)
+
     data = response.json()
 
     for obj in data:
