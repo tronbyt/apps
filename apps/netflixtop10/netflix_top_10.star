@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 TTL_SECONDS = 3 * 60 * 60
@@ -32,6 +32,9 @@ CATEGORY_MAPPING = {
     CATEGORY_FILMS: "films",
     CATEGORY_TV: "tv",
 }
+
+FONT_LARGE = "large"
+FONT_SMALL = "small"
 
 def get_schema():
     return schema.Schema(
@@ -63,26 +66,34 @@ def get_schema():
                 handler = gen_category_dropdown,
             ),
             schema.Dropdown(
-                id = "font",
+                id = "font_size",
                 name = "Font",
                 desc = "Font size. Small allows 5 rows on screen; large only allows 4.",
                 icon = "font",
-                default = "tb-8",
+                default = "large",
                 options = [
-                    schema.Option(display = "Large", value = "tb-8"),
-                    schema.Option(display = "Small", value = "tom-thumb"),
+                    schema.Option(display = "Large", value = "large"),
+                    schema.Option(display = "Small", value = "small"),
                 ],
             ),
         ],
     )
 
 def main(config):
+    width, height, is2x = canvas.width(), canvas.height(), canvas.is2x()
+
     region = config.get("region", REGION_GLOBAL)
     category = config.get("category", default_category_for_region(region))
-    font = config.get("font", "tb-8")
     scroll_direction = config.get("scroll_direction", "vertical")
 
-    n = 10 if scroll_direction == "vertical" else 4 if font == "tb-8" else 5
+    font_size = config.get("font_size", FONT_LARGE)
+
+    if font_size == FONT_LARGE:
+        font = "terminus-16-light" if is2x else "tb-8"
+    else:
+        font = "terminus-12" if is2x else "tom-thumb"
+
+    n = 10 if scroll_direction == "vertical" else 4 if font_size == FONT_LARGE else 5
     rows = get_entries(region, category, n)
 
     # workaround: when changing regions, can have a category setting left over from previous region
@@ -90,20 +101,23 @@ def main(config):
     if len(rows) == 0:
         rows = get_entries(region, default_category_for_region(region), n)
 
+    spacer_width = width // 32
+
     def h_marquee(child):
         if scroll_direction == "horizontal":
-            left_col_width = 10
-            return render.Marquee(child = child, width = 64 - left_col_width)
+            left_col_width, _ = render.Text("1:", font = font).size()
+            left_col_width += spacer_width
+            return render.Marquee(child = child, width = width - left_col_width)
         else:
             return child
 
     def v_marquee(child):
         if scroll_direction == "vertical":
-            return render.Marquee(child = child, scroll_direction = "vertical", height = 32)
+            return render.Marquee(child = child, scroll_direction = "vertical", height = height)
         else:
             return child
 
-    col_spacer = render.Box(width = 2, height = 32) if scroll_direction != "vertical" else None
+    col_spacer = render.Box(width = spacer_width, height = height) if scroll_direction != "vertical" else None
 
     return render.Root(
         child = v_marquee(
@@ -129,7 +143,7 @@ def main(config):
                 ],
             ),
         ),
-        delay = 100,
+        delay = 50 if is2x else 100,
     )
 
 def get_regions():
