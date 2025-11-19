@@ -649,7 +649,7 @@ WEATHER_ICONS = {
 def get_weather_icon(forecast):
     if forecast not in WEATHER_ICONS:
         return ""
-    return WEATHER_ICONS[forecast]
+    return WEATHER_ICONS[forecast].readall()
 
 def render_weather(daily_data, lang, scale = 1):
     # Create weather icons mapping
