@@ -285,9 +285,8 @@ def _get_day_abbr(date, lang):
     return LANGUAGE_LOCALES[abbr][lang]
 
 def get_weather_image(forecast):
-    if forecast not in WEATHER_FULL_IMAGE:
-        return ""
-    return WEATHER_FULL_IMAGE[forecast].readall()
+    image = WEATHER_FULL_IMAGE.get(forecast)
+    return image.readall() if image else ""
 
 def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_abbr, day_top = False, scale = 1):
     tomorrow_width = get_forecast_width(tomorrow["high"], False) * scale if scale == 2 else 16
@@ -647,9 +646,8 @@ WEATHER_ICONS = {
 }
 
 def get_weather_icon(forecast):
-    if forecast not in WEATHER_ICONS:
-        return ""
-    return WEATHER_ICONS[forecast]
+    icon = WEATHER_ICONS.get(forecast)
+    return icon.readall() if icon else ""
 
 def render_weather(daily_data, lang, scale = 1):
     # Create weather icons mapping
