@@ -6,13 +6,11 @@ Author: dinosaursrarr
 """
 
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ALIVE = True
 DEAD = False
-WIDTH = 64
-HEIGHT = 32
 APP_DURATION_MILLISECONDS = 15000
 REFRESH_MILLISECONDS = 75
 
@@ -52,16 +50,18 @@ def generate_initial_state():
     changed = []
     living = {}
 
-    for x in range(WIDTH):
-        for y in range(HEIGHT):
+    width, height = canvas.width(), canvas.height()
+
+    for x in range(width):
+        for y in range(height):
             is_alive = random.number(0, 1) > 0.5
             if is_alive:
                 changed.append((x, y))
                 living[(x, y)] = True
                 for dx, dy in NEIGHBOUR_DIFFS.keys():
                     #dx, dy = neighbour
-                    nx = (x + dx) % WIDTH
-                    ny = (y + dy) % HEIGHT
+                    nx = (x + dx) % width
+                    ny = (y + dy) % height
                     neighbours.setdefault((nx, ny), 0)
                     neighbours[(nx, ny)] += 1
 
@@ -86,11 +86,13 @@ def update_changed_cells(living, neighbours, changed):
     next_living = {}
     next_changed = []
 
+    width, height = canvas.width(), canvas.height()
+
     checked = {}
     for x, y in changed:
         for dx, dy in NEIGHBOUR_AND_CELL_DIFFS.keys():
-            nx = (x + dx) % WIDTH
-            ny = (y + dy) % HEIGHT
+            nx = (x + dx) % width
+            ny = (y + dy) % height
             if checked.get((nx, ny)):
                 continue
             checked[(nx, ny)] = True
@@ -105,11 +107,12 @@ def update_changed_cells(living, neighbours, changed):
 
 # Returns details of how many living neighbours each cell in the next generation has.
 def update_neighbours(living):
+    width, height = canvas.width(), canvas.height()
     neighbours = {}
     for x, y in living.keys():
         for dx, dy in NEIGHBOUR_DIFFS.keys():
-            nx = (x + dx) % WIDTH
-            ny = (y + dy) % HEIGHT
+            nx = (x + dx) % width
+            ny = (y + dy) % height
             neighbours.setdefault((nx, ny), 0)
             neighbours[(nx, ny)] += 1
     return neighbours
@@ -133,7 +136,8 @@ def render_frame(living, alive_cell, dead_cell, cache):
     if cached != None:
         return cached
 
-    rows = [[dead_cell for c in range(WIDTH)] for r in range(HEIGHT)]
+    width, height = canvas.width(), canvas.height()
+    rows = [[dead_cell for c in range(width)] for r in range(height)]
     for x, y in living:
         rows[y][x] = alive_cell
 
