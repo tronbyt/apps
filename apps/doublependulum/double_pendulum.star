@@ -130,21 +130,27 @@ def main(config):
 
         # Handle fetch failure
         if sim_data == None:
-            return render.Root(
-                child = render.Text("API Error", color = "#FF0000"),
-            )
+            print("API request failed, falling back to random embedded simulation")
+            sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
+            simulation = ALL_SIMULATIONS[sim_idx]
+            api_origin_y = None
+            api_name = None
+            is_api_mode = False
+        else:
+            simulation = sim_data.get("frames", [])
+            api_origin_y = sim_data.get("origin_y", ORIGIN_Y)
+            api_name = sim_data.get("name", "api")
 
-        simulation = sim_data.get("frames", [])
-        api_origin_y = sim_data.get("origin_y", ORIGIN_Y)
-        api_name = sim_data.get("name", "api")
-
-        # Check if we have valid frames
-        if len(simulation) == 0:
-            return render.Root(
-                child = render.Text("API Error", color = "#FF0000"),
-            )
-
-        is_api_mode = True
+            # Check if we have valid frames
+            if len(simulation) == 0:
+                print("API returned empty frames, falling back to random embedded simulation")
+                sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
+                simulation = ALL_SIMULATIONS[sim_idx]
+                api_origin_y = None
+                api_name = None
+                is_api_mode = False
+            else:
+                is_api_mode = True
     else:
         # Use embedded simulation
         print("Picked simulation no." + str(sim_idx + 1) + " (out of " + str(len(ALL_SIMULATIONS)) + ")")
@@ -510,5 +516,3 @@ def get_schema():
             ),
         ],
     )
-
-    
