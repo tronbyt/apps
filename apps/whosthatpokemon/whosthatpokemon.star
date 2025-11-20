@@ -45,6 +45,7 @@ def main(config):
 
     return render.Root(
         delay = 125,
+        show_full_animation = True,
         child = render.Stack(
             children = [
                 render.Image(
