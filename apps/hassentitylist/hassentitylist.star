@@ -47,11 +47,11 @@ def add_children(config, *childs):
 
 def render_entity(entity_id, config):
     name = config.get(entity_id + "_name")
-    if not name:
-        name = config.get(entity_id)
     fetch = fetch_entity(entity_id, config)
     if not fetch:
         return 0, None
+    if not name:
+        name = fetch.get("attributes", {}).get("friendly_name") or config.get(entity_id)
 
     count = int(fetch["state"])
     unit = ""
