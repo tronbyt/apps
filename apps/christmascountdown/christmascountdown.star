@@ -64,6 +64,11 @@ def main(config):
     image_width = 27
     image_height = 32
 
+    text_col_padding = (image_width * scale, 0, 0, 0)
+    if lang == "de":
+        # German text is wider, so let it overlap the tree a bit
+        text_col_padding = (image_width * scale - 7 * scale, 0, 0, 0)
+
     displayChildren = [
         render.Text(content = line1Text, font = font, color = line1Color),
         render.Text(content = line2Text, font = font, color = line2Color),
@@ -79,47 +84,59 @@ def main(config):
     # Prepare
     #---------
     displayChildren = [
-        render.Row(
+        render.Stack(
             children = [
                 render.Image(src = CHRISTMASTree.readall(), width = image_width * scale, height = image_height * scale),
-                render.Column(
-                    cross_align = "center",
-                    main_align = "center",
-                    expanded = True,
-                    children = displayChildren,
+                render.Padding(
+                    pad = text_col_padding,
+                    child = render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        expanded = True,
+                        children = displayChildren,
+                    ),
                 ),
             ],
         ),
-        render.Row(
+        render.Stack(
             children = [
                 render.Image(src = CHRISTMASTree1.readall(), width = image_width * scale, height = image_height * scale),
-                render.Column(
-                    cross_align = "center",
-                    main_align = "center",
-                    expanded = True,
-                    children = displayChildren,
+                render.Padding(
+                    pad = text_col_padding,
+                    child = render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        expanded = True,
+                        children = displayChildren,
+                    ),
                 ),
             ],
         ),
-        render.Row(
+        render.Stack(
             children = [
                 render.Image(src = CHRISTMASTree2.readall(), width = image_width * scale, height = image_height * scale),
-                render.Column(
-                    cross_align = "center",
-                    main_align = "center",
-                    expanded = True,
-                    children = displayChildren,
+                render.Padding(
+                    pad = text_col_padding,
+                    child = render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        expanded = True,
+                        children = displayChildren,
+                    ),
                 ),
             ],
         ),
-        render.Row(
+        render.Stack(
             children = [
                 render.Image(src = CHRISTMASTree3.readall(), width = image_width * scale, height = image_height * scale),
-                render.Column(
-                    cross_align = "center",
-                    main_align = "center",
-                    expanded = True,
-                    children = displayChildren,
+                render.Padding(
+                    pad = text_col_padding,
+                    child = render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        expanded = True,
+                        children = displayChildren,
+                    ),
                 ),
             ],
         ),
