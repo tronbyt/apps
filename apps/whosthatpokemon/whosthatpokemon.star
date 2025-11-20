@@ -6,8 +6,6 @@ Author: Nicole Brooks
 """
 
 load("background.png", BACKGROUND = "file")
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
@@ -35,8 +33,8 @@ def main(config):
 
     # Variables that will be used by the render.
     name = formatName(pokemon["name"])
-    revealedImage = getCachedImage(sprite_url)
-    silhouette = getCachedImage(IMGIX_URL.format(chosenId))
+    revealedImage = getImage(sprite_url)
+    silhouette = getImage(IMGIX_URL.format(chosenId))
 
     # If something went wrong with the API, skip the app completely.
     if revealedImage == None or silhouette == None:
@@ -59,27 +57,14 @@ def main(config):
         ),
     )
 
-# Gets cache or pulls from API. Returns a Pokemon or None.
+# Gets new Pokemon from API and caches.
 def getPokemon(id):
     url = POKEAPI_URL.format(id)
-    cacheKey = base64.encode(url)
-
-    # Check cache
-    data = cache.get(cacheKey)
-    if data != None:
-        return base64.decode(data)
-
-    return pullFromApi(url, cacheKey)
-
-# Gets new Pokemon from API and caches.
-def pullFromApi(url, key):
-    res = http.get(url)
+    res = http.get(url, ttl_seconds = CACHE_TTL_SECONDS)
     if res.status_code != 200:
         print("ERROR: " + str(res.status_code))
         return None
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), CACHE_TTL_SECONDS)
     return res.body()
 
 # Formats all names. Removes all hyphens that don't belong for forms and spaces.
@@ -96,23 +81,13 @@ def formatName(name):
     else:
         return name.capitalize()
 
-# Gets cached image or new one if cache isn't available.
+# Gets requested image
 # Returns image encoded and ready for use.
-def getCachedImage(url):
-    cacheKey = base64.encode(url)
-
-    # Check cache
-    data = cache.get(cacheKey)
-    if data != None:
-        return base64.decode(data)
-
-    res = http.get(url)
+def getImage(url):
+    res = http.get(url, ttl_seconds = CACHE_TTL_SECONDS)
     if res.status_code != 200:
         print("Failed to pull pokemon image: " + str(res.status_code))
         return None
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cacheKey, base64.encode(res.body()), CACHE_TTL_SECONDS)
 
     return res.body()
 
