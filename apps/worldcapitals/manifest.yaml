@@ -7,3 +7,4 @@ author: Jake Manske
 fileName: worldcapitals.star
 packageName: worldcapitals
 recommended_interval: 5
+supports2x: true
