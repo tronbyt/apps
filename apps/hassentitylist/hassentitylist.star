@@ -6,6 +6,7 @@ Author: James Woglom
 """
 
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 
@@ -67,18 +68,12 @@ def render_entity(entity_id, config):
                 color = "#f1f1f1",
             ),
             render.Text(
-                content = num_format(fetch["state"]) + " " + unit,
+                content = humanize.comma(count) + " " + unit,
                 font = "tb-8",
                 color = get_color(count, config),
             ),
         ],
     )
-
-def num_format(raw):
-    num = raw + ""
-    if len(num) > 3:
-        return num[:-3] + "," + num[-3:]
-    return num
 
 def get_color(count, config):
     if not config.get("target_value"):
