@@ -380,7 +380,7 @@
     "description": "Provides information from NASA about the nearest Near Earth Object on a given date.",
     "author": "flynnt",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "armageddontrackr/armageddon_trackr.webp",
     "md": null,
     "starFile": "armageddon_trackr.star"
   },
@@ -578,7 +578,7 @@
     "description": "Provides upcoming train and bus departures for a given Berlin station.",
     "author": "flambeauRiverTours",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "berlintransit/berlin_transit.webp",
     "md": null,
     "starFile": "berlin_transit.star"
   },
@@ -611,7 +611,7 @@
     "description": "Shows the top items from BoardGameGeek's Board Game Hotness list. Powered by BGG.",
     "author": "Henry So, Jr.",
     "recommendedInterval": 5,
-    "image": "bgghotness/bgghotness.webp",
+    "image": "bgghotness/bgg_hotness.webp",
     "md": null,
     "starFile": "bgg_hotness.star"
   },
@@ -715,6 +715,17 @@
     "starFile": "biorhythm.star"
   },
   {
+    "name": "birdbuddy",
+    "displayName": "Bird Buddy",
+    "summary": "Who's visiting your feeder",
+    "description": "See your latest Bird Buddy feeder visitors. Must use username/password for auth.",
+    "author": "Brombomb",
+    "recommendedInterval": null,
+    "image": "birdbuddy/bird_buddy.webp",
+    "md": "birdbuddy/README.md",
+    "starFile": "bird_buddy.star"
+  },
+  {
     "name": "birdbyt",
     "displayName": "Birdbyt",
     "summary": "Show nearby bird sightings",
@@ -754,7 +765,7 @@
     "description": "Public transit display for Budapest, show upcoming BKK departures for a stop.",
     "author": "tomzorz",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "bkkschedule/bkk_schedule.webp",
     "md": null,
     "starFile": "bkk_schedule.star"
   },
@@ -817,8 +828,8 @@
     "name": "bored",
     "displayName": "Bored",
     "summary": "Things to do when bored",
-    "description": "This app will suggest things you can do alone or with your friends if you are bored.",
-    "author": "Anders Heie",
+    "description": "This app will give you things to do suggestion if you're bored. Or add your own. We're cool with that.",
+    "author": "AndersHeie",
     "recommendedInterval": 5,
     "image": "bored/bored.gif",
     "md": "bored/README.md",
@@ -1128,7 +1139,7 @@
     "description": "A complete list of today's holidays, most of which you won't find on a calendar!",
     "author": "westy92",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "checkiday/checkiday.webp",
     "md": null,
     "starFile": "checkiday.star"
   },
@@ -1436,7 +1447,7 @@
     "description": "Displays updates from U.S. Congress.",
     "author": "Robert Ison",
     "recommendedInterval": 5,
-    "image": "congresswatch/congress_watch.webp",
+    "image": null,
     "md": "congresswatch/readme.md",
     "starFile": "congress_watch.star"
   },
@@ -1716,6 +1727,17 @@
     "starFile": "currencyconverter.star"
   },
   {
+    "name": "customanimation",
+    "displayName": "Custom Animation",
+    "summary": "Display custom animated GIFs and images",
+    "description": "Display a single custom image with full support for animated GIFs and static images in PNG, JPG, and BMP formats.",
+    "author": "tronbyt",
+    "recommendedInterval": 10000,
+    "image": "customanimation/custom_animation.webp",
+    "md": "customanimation/README.md",
+    "starFile": "custom_animation.star"
+  },
+  {
     "name": "customclock",
     "displayName": "Custom Clock",
     "summary": "Clock with display options",
@@ -1813,6 +1835,17 @@
     "image": "dailyreminder/screenshot.png",
     "md": "dailyreminder/README.md",
     "starFile": "daily_reminder.star"
+  },
+  {
+    "name": "dancewave",
+    "displayName": "Dance Wave",
+    "summary": "Now playing on Dance Wave",
+    "description": "Stay in the loop with the latest tracks from Dance Wave Online Radio. This app displays the currently playing song and artist information.",
+    "author": "Brombomb",
+    "recommendedInterval": null,
+    "image": "dancewave/dance-wave.webp",
+    "md": "dancewave/README.md",
+    "starFile": "dance-wave.star"
   },
   {
     "name": "datadogcharts",
@@ -1934,6 +1967,17 @@
     "image": "deathvalleytemp/deathvalleytemp.webp",
     "md": "deathvalleytemp/README.md",
     "starFile": "deathvalleytemp.star"
+  },
+  {
+    "name": "deepmix",
+    "displayName": "Deep Mix",
+    "summary": "Now playing on Deep Mix",
+    "description": "Stay in the loop with the latest tracks from Deep Mix Online Radio. This app displays the currently playing song and artist information.",
+    "author": "Brombomb",
+    "recommendedInterval": null,
+    "image": null,
+    "md": "deepmix/README.md",
+    "starFile": "deep-mix.star"
   },
   {
     "name": "defcon",
@@ -2156,6 +2200,17 @@
     "starFile": "dothraki_wotd.star"
   },
   {
+    "name": "doublependulum",
+    "displayName": "Double Pendulum",
+    "summary": "Animated double pendulum",
+    "description": "Display a mesmerizing double pendulum animation showing chaotic motion.",
+    "author": "tavdog",
+    "recommendedInterval": 5,
+    "image": "doublependulum/double_pendulum.webp",
+    "md": null,
+    "starFile": "double_pendulum.star"
+  },
+  {
     "name": "drawbridgestatus",
     "displayName": "Drawbridge Status",
     "summary": "Display Drawbridge Status",
@@ -2266,6 +2321,17 @@
     "starFile": "emoji_lingo.star"
   },
   {
+    "name": "emojitext",
+    "displayName": "Emoji Text",
+    "summary": "Display an Emoji and Text",
+    "description": "Displays a customizable emoji with two lines of text that can scroll if they are too long.",
+    "author": "brombomb",
+    "recommendedInterval": null,
+    "image": "emojitext/emoji-text.webp",
+    "md": null,
+    "starFile": "emoji-text.star"
+  },
+  {
     "name": "enphasesolar",
     "displayName": "Enphase Solar",
     "summary": "Solar energy monitor",
@@ -2275,6 +2341,17 @@
     "image": "enphasesolar/enphasesolar.webp",
     "md": "enphasesolar/README.md",
     "starFile": "enphase_solar.star"
+  },
+  {
+    "name": "enphasesummary",
+    "displayName": "enphasesummary",
+    "summary": "Enphase system summary",
+    "description": "Daily, weekly, monthly, annual and lifetime energy production and consumption monitor for your Enphase solar panels.",
+    "author": "ckyr",
+    "recommendedInterval": 5,
+    "image": "enphasesummary/screenshot.png",
+    "md": "enphasesummary/readme.md",
+    "starFile": "enphasesummary.star"
   },
   {
     "name": "envoydesk",
@@ -3053,7 +3130,7 @@
     "description": "Display various statistics of a public GitHub repo.",
     "author": "rs7q5",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "githubrepo/github_repo.webp",
     "md": null,
     "starFile": "github_repo.star"
   },
@@ -3075,7 +3152,7 @@
     "description": "Display the GitHub stargazer count for a repo.",
     "author": "fulghum",
     "recommendedInterval": 5,
-    "image": "githubstargazers/screenshot.png",
+    "image": "githubstargazers/github_stargazers.webp",
     "md": null,
     "starFile": "github_stargazers.star"
   },
@@ -3130,15 +3207,15 @@
     "description": "Close to realtime precious metal prices and a graph comparing the price to the 5PM closing price from the day before.",
     "author": "Aaron Brace",
     "recommendedInterval": 5,
-    "image": "goldpriceticker/screenshot.png",
+    "image": "goldpriceticker/goldpriceticker.webp",
     "md": null,
     "starFile": "goldpriceticker.star"
   },
   {
     "name": "goodservice",
-    "displayName": "The Weekendest",
-    "summary": "The Weekendest - NYC Subway",
-    "description": "Real-Time New York City Subway projected departure times for a selected station, as seen on The Weekendest app. Takes into account of overnight and weekend service changes.",
+    "displayName": "Subway Now",
+    "summary": "Subway Now - NYC Subway",
+    "description": "More accurate realtime New York City Subway arrival times for a selected station, as seen on Subway Now app. Shows actual train destinations including overnight and weekend service changes.",
     "author": "Sunny Ng",
     "recommendedInterval": 5,
     "image": "goodservice/goodservice.webp",
@@ -3187,11 +3264,11 @@
     "recommendedInterval": null,
     "image": "gradientclock/gradientclock.webp",
     "md": null,
-    "starFile": "gradient_clock.star"
+    "starFile": "gradientclock.star"
   },
   {
     "name": "gradientclock2",
-    "displayName": "Gradient Clock",
+    "displayName": "Gradient Clock Anim",
     "summary": "Animated Gradient Clock",
     "description": "Clock displayed over animated, colorful gradient background.",
     "author": "tpatel12",
@@ -3245,6 +3322,28 @@
     "starFile": "gw2_fractals.star"
   },
   {
+    "name": "ha3dprint",
+    "displayName": "ha3dprint",
+    "summary": "View HA 3D printer status",
+    "description": "Display current print's status and time remaining. All information comes from Home Assistant.",
+    "author": "brombomb",
+    "recommendedInterval": 5,
+    "image": "ha3dprint/ha3dprint.webp",
+    "md": null,
+    "starFile": "ha3dprint.star"
+  },
+  {
+    "name": "ha_now_playing",
+    "displayName": "HA Now Playing",
+    "summary": "Home Assistant Now Playing",
+    "description": "Display track details and artwork from any Home Assistant media_player entity.",
+    "author": "drudge, gabe565",
+    "recommendedInterval": null,
+    "image": "ha_now_playing/ha_now_playing.webp",
+    "md": "ha_now_playing/README.md",
+    "starFile": "ha_now_playing.star"
+  },
+  {
     "name": "hackernews",
     "displayName": "Hacker News",
     "summary": "Hacker News Top Stories",
@@ -3276,6 +3375,17 @@
     "image": "haikuboxlinker/haikuboxlinker.gif",
     "md": null,
     "starFile": "haikuboxlinker.star"
+  },
+  {
+    "name": "halloweencount",
+    "displayName": "Halloween Counter",
+    "summary": "Halloween Counter",
+    "description": "Renders how many days until Halloween, includes multiple sprites and ability to set GIF images with customizable spooky animation effects including floating sprites, orbiting motion, particles, and pulsing text.",
+    "author": "Starrlord",
+    "recommendedInterval": 5,
+    "image": "halloweencount/halloweencount.webp",
+    "md": null,
+    "starFile": "halloweencount.star"
   },
   {
     "name": "halloweencountdn",
@@ -3553,6 +3663,17 @@
     "starFile": "hvv_departures.star"
   },
   {
+    "name": "icecast_nowplaying",
+    "displayName": "Icecast Now Playing",
+    "summary": "Now playing on your Icecast stream",
+    "description": "Display the currently playing track from any Icecast streaming server. Configure your Icecast status-json.xsl URL and optionally customize the stream name.",
+    "author": "tavdog",
+    "recommendedInterval": 1,
+    "image": "icecast_nowplaying/icecast-nowplaying.webp",
+    "md": "icecast_nowplaying/README.md",
+    "starFile": "icecast-nowplaying.star"
+  },
+  {
     "name": "iconote",
     "displayName": "IcoNote",
     "summary": "Scrolling message and image",
@@ -3581,7 +3702,7 @@
     "description": "Display a list of upcoming International Flipper Pinball Association (IFPA) events based on location.",
     "author": "coreyhulse",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "ifpaevents/ifpaevents.webp",
     "md": "ifpaevents/README.md",
     "starFile": "ifpaevents.star"
   },
@@ -3658,7 +3779,7 @@
     "description": "Top 4 news headlines from India.",
     "author": "vipulchhajer",
     "recommendedInterval": 10,
-    "image": null,
+    "image": "indianews/india_news.webp",
     "md": null,
     "starFile": "india_news.star"
   },
@@ -3707,6 +3828,17 @@
     "starFile": "ipl.star"
   },
   {
+    "name": "iquit",
+    "displayName": "HAIM I Quit",
+    "summary": "HAIM's I Quit",
+    "description": "Based on the HAIM band's I Quit album cover.",
+    "author": "kaisle51",
+    "recommendedInterval": null,
+    "image": "iquit/iquit.png",
+    "md": "iquit/README.md",
+    "starFile": "iquit.star"
+  },
+  {
     "name": "isaacdance",
     "displayName": "Isaac Dance",
     "summary": "Isaac Specialist Dance",
@@ -3746,7 +3878,7 @@
     "description": "Displays the time, starting direction and magnitude of the next International Space Station visible pass.",
     "author": "Diogo Ribeiro Machado @ diogodh",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "iss/iss.webp",
     "md": null,
     "starFile": "iss.star"
   },
@@ -3757,7 +3889,7 @@
     "description": "Current city/country/ocean the ISS is flying over.",
     "author": "carmineguida",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "isslocation/iss_location.webp",
     "md": null,
     "starFile": "iss_location.star"
   },
@@ -3793,6 +3925,17 @@
     "image": "javelexi/javelexi.webp",
     "md": null,
     "starFile": "javelexi.star"
+  },
+  {
+    "name": "jellyfin-recently-added",
+    "displayName": "JellyfinRecentlyAdded",
+    "summary": "Display Jellyfin recently added",
+    "description": "Displays recently added on Jellyfin server. Recommended to run Tronbyt on same network that hosts Jellyfin.",
+    "author": "noahpodgurski",
+    "recommendedInterval": 720,
+    "image": "jellyfin-recently-added/jellyfin_recently_added.webp",
+    "md": null,
+    "starFile": "jellyfin_recently_added.star"
   },
   {
     "name": "jeopardy",
@@ -3922,7 +4065,7 @@
     "description": "Get departure times for LA metro train stop.",
     "author": "connorwashere",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "lametrostop/la_metro_stop.webp",
     "md": null,
     "starFile": "la_metro_stop.star"
   },
@@ -4010,7 +4153,7 @@
     "description": "Show 3 most recent movies in Recent Activity.",
     "author": "protolexus",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "letterboxd/letterboxd.webp",
     "md": null,
     "starFile": "letterboxd.star"
   },
@@ -4296,7 +4439,7 @@
     "description": "Display real-time MARTA train locations and optionaly show station arrivals.",
     "author": "InTheDaylight14",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "martamap/marta_map.webp",
     "md": null,
     "starFile": "marta_map.star"
   },
@@ -4329,7 +4472,7 @@
     "description": "Shows the name and image of a Marvel Comics character using the Marvel API.",
     "author": "flynnt",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "marveloftheday/marvel_of_the_day.webp",
     "md": null,
     "starFile": "marvel_of_the_day.star"
   },
@@ -4483,7 +4626,7 @@
     "description": "Real time bus departures for your preferred stop in Melbourne, Australia.",
     "author": "bendiep",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "melbournebuses/melbourne_buses.webp",
     "md": null,
     "starFile": "melbourne_buses.star"
   },
@@ -4505,7 +4648,7 @@
     "description": "Real time tram departures for your preferred stop in Melbourne, Australia.",
     "author": "bendiep",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "melbournetrams/melbourne_trams.webp",
     "md": null,
     "starFile": "melbourne_trams.star"
   },
@@ -4802,7 +4945,7 @@
     "description": "Display information about random games from the extensive MobyGames database. Includes basic information such as a thumbnail, year of release, etc.",
     "author": "pandincus",
     "recommendedInterval": null,
-    "image": null,
+    "image": "mobygames/moby_games.webp",
     "md": "mobygames/README.md",
     "starFile": "moby_games.star"
   },
@@ -5253,7 +5396,7 @@
     "description": "Shows the closest object on approach to Earth today according to NASA's NeoW API.",
     "author": "brettohland",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "neotrack/neotrack.webp",
     "md": "neotrack/README.md",
     "starFile": "neotrack.star"
   },
@@ -5306,9 +5449,9 @@
     "displayName": "Netflix Top 10",
     "summary": "Top shows on Netflix",
     "description": "Shows the top 10 charts for movies or TV shows on Netflix.",
-    "author": "Matt Broussard",
+    "author": "Matt Broussard, gabe565",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "netflixtop10/netflixtop10.webp",
     "md": null,
     "starFile": "netflix_top_10.star"
   },
@@ -5385,7 +5528,7 @@
     "description": "Displays the next calendar event, no matter how far away, from iCal (.ics) files. Note; This app will process your iCal data via an external service outside of the Tidbyt ecosystem.",
     "author": "mattcaruso <Matt Caruso>",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "nextevent/next_event.webp",
     "md": null,
     "starFile": "next_event.star"
   },
@@ -5440,7 +5583,7 @@
     "description": "Displays a random NFT associated with an Ethereum public address.",
     "author": "nipterink",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "nft/nft.webp",
     "md": null,
     "starFile": "nft.star"
   },
@@ -5505,8 +5648,8 @@
     "summary": "Shows Nightscout CGM Data",
     "description": "Displays Continuous Glucose Monitoring (CGM) blood sugar data (BG, Trend, Delta, IOB, COB) from Nightscout. Will display blood sugar as mg/dL or mmol/L. Optionally display historical readings on a graph. Also a clock. For support, join the Nightscout for Tidbyt Facebook group. (v2.6.2).",
     "author": "Paul Murphy, Jason Hanson, Jeremy Tavener",
-    "recommendedInterval": 5,
-    "image": "nightscout/screenshot.png",
+    "recommendedInterval": null,
+    "image": "nightscout/nightscout.webp",
     "md": "nightscout/README.md",
     "starFile": "nightscout.star"
   },
@@ -5608,6 +5751,17 @@
     "image": "northernlights/northernlights.webp",
     "md": null,
     "starFile": "northern_lights.star"
+  },
+  {
+    "name": "norwaytransit",
+    "displayName": "Norway Transit",
+    "summary": "Check departures in Norway",
+    "description": "Check your favorite stop in real time, anywhere in Norway.",
+    "author": "Mats Grosvik",
+    "recommendedInterval": null,
+    "image": "norwaytransit/norway_transit.webp",
+    "md": null,
+    "starFile": "norway_transit.star"
   },
   {
     "name": "nos",
@@ -5852,6 +6006,17 @@
     "starFile": "office_status.star"
   },
   {
+    "name": "ogclock",
+    "displayName": "OG Clock",
+    "summary": "Display time & weather",
+    "description": "Display the time in addition to current weather and humidity from either OpenWeather or National Weather Service (no API key required for NWS). To request an OpenWeather API key, see https://home.openweathermap.org/users/sign_up.",
+    "author": "g3rmanaviator",
+    "recommendedInterval": 1,
+    "image": "ogclock/og_clock.webp",
+    "md": null,
+    "starFile": "og_clock.star"
+  },
+  {
     "name": "ogsgamesviewer",
     "displayName": "OGS Games Viewer",
     "summary": "Shows OGS Games",
@@ -5929,6 +6094,17 @@
     "starFile": "onthisday.star"
   },
   {
+    "name": "openroutercredits",
+    "displayName": "OpenRouter Creds",
+    "summary": "OpenRouter Credits",
+    "description": "Shows remaining credits available on OpenRouter API.",
+    "author": "tavdog",
+    "recommendedInterval": 300,
+    "image": "openroutercredits/openrouter_credits.webp",
+    "md": null,
+    "starFile": "openrouter_credits.star"
+  },
+  {
     "name": "opmstatus",
     "displayName": "OPM Status",
     "summary": "Displays current OPM status",
@@ -6001,7 +6177,7 @@
     "description": "Shows the date, next meeting and time from your Outlook Calendar.",
     "author": "Matt-Pesce",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "outlookcalendar/outlook_calendar.webp",
     "md": null,
     "starFile": "outlook_calendar.star"
   },
@@ -6158,6 +6334,28 @@
     "image": "peanutspictures/screenshot.png",
     "md": "peanutspictures/README.md",
     "starFile": "peanuts_pictures.star"
+  },
+  {
+    "name": "penndot_signs",
+    "displayName": "PennDOT Signs",
+    "summary": "Display PennDOT DMS signs",
+    "description": "Display messages from PennDOT DMS signage on PA highways.",
+    "author": "radiocolin",
+    "recommendedInterval": null,
+    "image": "penndot_signs/penndot_signs.webp",
+    "md": null,
+    "starFile": "penndot_signs.star"
+  },
+  {
+    "name": "pentagonpizzaix",
+    "displayName": "Pentagon Pizza IX",
+    "summary": "Track Pentagon Pizza Index",
+    "description": "My index tracking pizza prices near the pentagon! Powered by BestTime http://besttime.app !",
+    "author": "eSoLu",
+    "recommendedInterval": null,
+    "image": "pentagonpizzaix/pentagon_pizza_ix.webp",
+    "md": null,
+    "starFile": "pentagon_pizza_ix.star"
   },
   {
     "name": "permtimeline",
@@ -6331,7 +6529,7 @@
     "description": "Displays Please Stand By message.",
     "author": "Ethan Fuerst (@ethanfuerst)",
     "recommendedInterval": 5,
-    "image": "pleasestandby/screenshot.png",
+    "image": "pleasestandby/pleasestandby.webp",
     "md": "pleasestandby/README.md",
     "starFile": "please_stand_by.star"
   },
@@ -6493,7 +6691,7 @@
     "name": "producthunt",
     "displayName": "Product Hunt",
     "summary": "Product Hunt top products",
-    "description": "View the daily top tech products from Product Hunt.",
+    "description": "View the daily top tech products from Product Hunt. Generate your Developer Token at https://www.producthunt.com/v2/oauth/applications.",
     "author": "Daniel Sitnik",
     "recommendedInterval": 5,
     "image": null,
@@ -6666,6 +6864,17 @@
     "starFile": "rachio.star"
   },
   {
+    "name": "rainbows",
+    "displayName": "Rainbows",
+    "summary": "Rainbow color animations",
+    "description": "Relax with soothing rainbow wave animations. Choose from Rainbow Magic, Rainbow Smoke, Rainbow Drops (water ripples), or Rainbow Farts. Multiple dynamic color patterns to brighten your display.",
+    "author": "AndersHeie",
+    "recommendedInterval": null,
+    "image": "rainbows/rainbows.webp",
+    "md": "rainbows/README.md",
+    "starFile": "rainbows.star"
+  },
+  {
     "name": "randomcats",
     "displayName": "Random Cats",
     "summary": "Shows pictures of cats",
@@ -6782,7 +6991,7 @@
     "description": "Description: Show a random image post from a custom list of subreddits (up to 10) and/or a list of default subreddits. Use the ID displayed to access the post on a computer, at http://www.reddit.com/{id}. All fields are optional.",
     "author": "Nicole Brooks",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "redditimages/reddit_images.webp",
     "md": "redditimages/README.md",
     "starFile": "reddit_images.star"
   },
@@ -6873,6 +7082,17 @@
     "image": "roomba/roomba.webp",
     "md": "roomba/README.md",
     "starFile": "roomba.star"
+  },
+  {
+    "name": "roundels",
+    "displayName": "Roundels",
+    "summary": "See air force roundels",
+    "description": "Display Air Force roundels of world.",
+    "author": "Robert Ison",
+    "recommendedInterval": null,
+    "image": "roundels/roundels.webp",
+    "md": "roundels/README.md",
+    "starFile": "roundels.star"
   },
   {
     "name": "rssmiscfeeds",
@@ -7414,6 +7634,17 @@
     "starFile": "skybyt.star"
   },
   {
+    "name": "skylines",
+    "displayName": "Skylines",
+    "summary": "City Skylines",
+    "description": "Displays city skylines.",
+    "author": "Robert Ison",
+    "recommendedInterval": null,
+    "image": "skylines/Frasier.webp",
+    "md": "skylines/README.md",
+    "starFile": "skylines.star"
+  },
+  {
     "name": "skynews",
     "displayName": "Sky News",
     "summary": "Latest news",
@@ -7530,7 +7761,7 @@
     "description": "Shows the time with a snake slithering around in the background. Every user will see the same snake.",
     "author": "paxos",
     "recommendedInterval": null,
-    "image": "snakeclock/snakeclock.webp",
+    "image": "snakeclock/snake_clock.webp",
     "md": null,
     "starFile": "snake_clock.star"
   },
@@ -7643,6 +7874,17 @@
     "image": "solaredgeprod/solaredgeprod.webp",
     "md": null,
     "starFile": "solaredge_prod.star"
+  },
+  {
+    "name": "solaredgesummary",
+    "displayName": "SolarEdgeSummary",
+    "summary": "SolarEdge system summary",
+    "description": "Daily, monthly, annual and lifetime energy production and consumption monitor for your SolarEdge solar panels.",
+    "author": "ckyr (credit to Ingmar Stein)",
+    "recommendedInterval": 30,
+    "image": "solaredgesummary/screenshot.png",
+    "md": "solaredgesummary/README.md",
+    "starFile": "solaredgesummary.star"
   },
   {
     "name": "solarelevation",
@@ -7948,7 +8190,7 @@
     "description": "Displays current game or previous games. Use https://steamid.xyz/ to find your 17 digit Steam ID.",
     "author": "Jeremy Tavener",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "steam/steam.webp",
     "md": null,
     "starFile": "steam.star"
   },
@@ -8256,7 +8498,7 @@
     "description": "Fetches and displays only the headline of the german Tagesschau.",
     "author": "dev-manuel",
     "recommendedInterval": 10,
-    "image": null,
+    "image": "tagesschau-news/tagesschau_news.webp",
     "md": null,
     "starFile": "tagesschau_news.star"
   },
@@ -8346,7 +8588,7 @@
     "recommendedInterval": 5,
     "image": "tempest/tempest.webp",
     "md": null,
-    "starFile": "resources.star"
+    "starFile": "tempest.star"
   },
   {
     "name": "tempgraph",
@@ -8391,6 +8633,17 @@
     "image": "teslafi/teslafi.webp",
     "md": null,
     "starFile": "teslafi.star"
+  },
+  {
+    "name": "teslamate",
+    "displayName": "TeslaMate",
+    "summary": "Tesla info via HA",
+    "description": "Shows your Tesla's current Name, Charge in Mi/KM and battery %, Plugged In Status via TeslaMate integration through Home Assistant REST API. Big thanks to @mrrobot245 for the original TeslaFi app which this is based on.",
+    "author": "brombomb",
+    "recommendedInterval": 30,
+    "image": "teslamate/teslamate.webp",
+    "md": null,
+    "starFile": "teslamate.star"
   },
   {
     "name": "teslasolar",
@@ -8452,7 +8705,7 @@
     "displayName": "Text Regular",
     "summary": "Displays a text",
     "description": "Displays a text.",
-    "author": "savdagod",
+    "author": "savdagod, gabe565",
     "recommendedInterval": 5,
     "image": "text-regular/text-regular.webp",
     "md": null,
@@ -8463,7 +8716,7 @@
     "displayName": "Text Scrolling",
     "summary": "Displays a scrolling text",
     "description": "Displays a scrolling text.",
-    "author": "savedagod",
+    "author": "savedagod, gabe565",
     "recommendedInterval": 5,
     "image": "text-scrolling/text-scrolling.webp",
     "md": null,
@@ -8474,7 +8727,7 @@
     "displayName": "Text Title",
     "summary": "Displays a text and title",
     "description": "Displays a text and a title.",
-    "author": "savdagod",
+    "author": "savdagod, gabe565",
     "recommendedInterval": 5,
     "image": "text-title/text-title.webp",
     "md": null,
@@ -8916,7 +9169,7 @@
     "description": "Simple app for displaying the next arrival at a bus stop.",
     "author": "thedriver",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "trimetarrivals/trimet_arrivals.webp",
     "md": "trimetarrivals/README.md",
     "starFile": "trimet_arrivals.star"
   },
@@ -9112,7 +9365,7 @@
     "displayName": "Unsplash",
     "summary": "Shows random photos",
     "description": "Displays a random image from Unsplash.",
-    "author": "zephyern",
+    "author": "zephyern, gabe565",
     "recommendedInterval": 5,
     "image": "unsplash/unsplash.webp",
     "md": "unsplash/README.md",
@@ -9136,7 +9389,7 @@
     "description": "Updown.io checks your website's status by periodically sending an HTTP request to the URL of your choice and notifies you when your website is not responding correctly.",
     "author": "jcarbaugh",
     "recommendedInterval": 5,
-    "image": null,
+    "image": "updownio/updownio.webp",
     "md": null,
     "starFile": "updownio.star"
   },
@@ -9183,6 +9436,17 @@
     "image": "usgsearthquakes/usgsearthquakes.webp",
     "md": "usgsearthquakes/README.md",
     "starFile": "usgs_earthquakes.star"
+  },
+  {
+    "name": "usgswaterlevels",
+    "displayName": "USGS Water Levels",
+    "summary": "Shows USGS Water Info",
+    "description": "This app shows data from the USGS sensor network, allowing you to display water levels, temperatures, and other info.",
+    "author": "nalanbar",
+    "recommendedInterval": null,
+    "image": "usgswaterlevels/usgs_water_levels.webp",
+    "md": null,
+    "starFile": "usgs_water_levels.star"
   },
   {
     "name": "usmortgagerates",
@@ -9392,6 +9656,17 @@
     "image": null,
     "md": null,
     "starFile": "vital_occupancy.star"
+  },
+  {
+    "name": "vnstat",
+    "displayName": "VNStat Monitor",
+    "summary": "Network usage statistics",
+    "description": "Display network usage statistics from VNStat via OPNsense API including total and monthly data transfer amounts.",
+    "author": "StarrLord",
+    "recommendedInterval": 15,
+    "image": "vnstat/vnstat.webp",
+    "md": null,
+    "starFile": "vnstat.star"
   },
   {
     "name": "wanikanireminder",
@@ -9843,6 +10118,17 @@
     "image": "wtatennis/wta_tennis.gif",
     "md": null,
     "starFile": "wta_tennis.star"
+  },
+  {
+    "name": "wxpn_now_playing",
+    "displayName": "WXPN Now Playing",
+    "summary": "Show now playing on WXPN",
+    "description": "Now playing with album art from WXPN, XPN2, and XPN Kids Corner.",
+    "author": "radiocolin",
+    "recommendedInterval": null,
+    "image": "wxpn_now_playing/wxpn_now_playing.webp",
+    "md": null,
+    "starFile": "wxpn_now_playing.star"
   },
   {
     "name": "xboxgamerscore",
