@@ -104,10 +104,10 @@ body {
 
 /* Only apply dot matrix to actual images when toggle is enabled */
 body.dot-matrix-enabled .card-img-top[src]:not([src=""]) {
-  -webkit-mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  -webkit-mask-image: url('./dots.svg');
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: cover;
-  mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  mask-image: url('./dots.svg');
   mask-repeat: no-repeat;
   mask-size: cover;
   width: 100%;
@@ -125,10 +125,10 @@ body.dot-matrix-enabled .card-img-top[src]:not([src=""]) {
 
 /* Only apply dot matrix to images when toggle is enabled */
 body.dot-matrix-enabled #app-content img {
-  -webkit-mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  -webkit-mask-image: url('./dots.svg');
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: cover;
-  mask-image: url('https://raw.githubusercontent.com/tronbyt/server/refs/heads/main/tronbyt_server/static/images/dots.svg');
+  mask-image: url('./dots.svg');
   mask-repeat: no-repeat;
   mask-size: cover;
 }

@@ -2,7 +2,7 @@ name: Build and Deploy App Viewer to GitHub Pages
 
 on:
   push:
-    branches: [ main, master, app-viewer-tester ]
+    branches: [ main, app-viewer-tester ]
   workflow_dispatch:
 
 permissions:
@@ -22,12 +22,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: 'lts/jod'
 
       - name: Install dependencies
         run: |
@@ -43,7 +43,7 @@ jobs:
         run: touch .nojekyll
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: './'
 
