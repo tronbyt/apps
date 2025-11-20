@@ -55,10 +55,15 @@ def render_entity(entity_id, config):
     if not name:
         name = fetch.get("attributes", {}).get("friendly_name") or config.get(entity_id)
 
-    count = float(fetch["state"])
+    state = fetch["state"]
+    isnum = (state.count(".") == 1 and state.replace(".", "").isdigit()) or state.isdigit()
+    count = float(state) if isnum else 0
+    display = humanize.comma(math.round(count * 10) / 10) if isnum else state
+
     unit = ""
     if config.bool("show_units") and "attributes" in fetch and "unit_of_measurement" in fetch["attributes"]:
         unit = fetch["attributes"]["unit_of_measurement"] + " "
+
     return count, render.Row(
         main_align = "space_between",
         expanded = True,
@@ -69,16 +74,16 @@ def render_entity(entity_id, config):
                 color = "#f1f1f1",
             ),
             render.Text(
-                content = "{} {}".format(humanize.comma(math.round(count * 10) / 10), unit),
+                content = "{} {}".format(display, unit),
                 font = "tb-8",
-                color = get_color(count, config),
+                color = get_color(count, config) if isnum else "#fff",
             ),
         ],
     )
 
 def get_color(count, config):
     if not config.get("target_value"):
-        return "#ffffff"
+        return "#fff"
 
     range = ["#AD1A1A", "#ad3a1a", "#ad721a", "#ada11a", "#92ad1a", "#37ad1a"]
     max_target = float(config.get("target_value"))
