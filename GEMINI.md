@@ -53,8 +53,8 @@ pixlet check apps/<app_name>/<app_name>.star
 
 *   Each application must have a `manifest.yaml` file that contains metadata about the app.
 *   The main application file should be a `.star` file in a separate directory. An application can consist of multiple Starlark files.
-*   Each application should have a `.webp` image that serves as a preview of the app which can be produced by running `pixlet render` with the app directory as input parameter.
-*   If an app supports 2x rendering, it should have a separate 2x preview image with an `@2x.webp` suffix. It can be produced with `pixlet render -2`.
+*   Each application should have a `.webp` image that serves as a preview of the app which can be produced by running `pixlet render -z 9` with the app directory as input parameter.
+*   If an app supports 2x rendering, it should have a separate 2x preview image with an `@2x.webp` suffix. It can be produced with a command like `pixlet render -2 -z 9 -o apps/app/app@2x.webp`.
 *   The code should be formatted according to the Starlark style guide (use `pixlet format`).
 *   The code should pass the `pixlet lint` checks.
 
