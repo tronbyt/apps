@@ -7,6 +7,7 @@ Author: James Woglom
 
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
@@ -54,7 +55,7 @@ def render_entity(entity_id, config):
     if not name:
         name = fetch.get("attributes", {}).get("friendly_name") or config.get(entity_id)
 
-    count = int(fetch["state"])
+    count = float(fetch["state"])
     unit = ""
     if config.bool("show_units") and "attributes" in fetch and "unit_of_measurement" in fetch["attributes"]:
         unit = fetch["attributes"]["unit_of_measurement"] + " "
@@ -68,7 +69,7 @@ def render_entity(entity_id, config):
                 color = "#f1f1f1",
             ),
             render.Text(
-                content = humanize.comma(count) + " " + unit,
+                content = "{} {}".format(humanize.comma(math.round(count * 10) / 10), unit),
                 font = "tb-8",
                 color = get_color(count, config),
             ),
@@ -80,7 +81,7 @@ def get_color(count, config):
         return "#ffffff"
 
     range = ["#AD1A1A", "#ad3a1a", "#ad721a", "#ada11a", "#92ad1a", "#37ad1a"]
-    max_target = int(config.get("target_value"))
+    max_target = float(config.get("target_value"))
     if count >= max_target:
         return range[-1]
 
