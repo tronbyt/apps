@@ -16,7 +16,7 @@ ALL_POKEMON = 1000
 CLASSIC_POKEMON = 386
 POKEAPI_URL = "https://pokeapi.co/api/v2/pokemon/{}"
 IMGIX_URL = "https://pokesprites.imgix.net/{}.png?bri=-100"
-CACHE_TTL_SECONDS = 3600 * 24 * 60  # 60 days in seconds.
+CACHE_TTL_SECONDS = 3600 * 24 * 7  # 7 days in seconds.
 
 def main(config):
     print("Let's play...WHO'S. THAT. POKEMON?!")
