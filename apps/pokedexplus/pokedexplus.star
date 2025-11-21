@@ -9,7 +9,7 @@ Collaborators: Eric Pierce
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -25,6 +25,8 @@ POKEMON_API = "https://pokeapi.co/api/v2/pokemon/{}"
 POKEMON_SPECIES_API = "https://pokeapi.co/api/v2/pokemon-species/{}"
 
 def main(config):
+    is2x = canvas.is2x()
+    scale = 2 if is2x else 1
     bgColor = config.str("bgColor", DEFAULT_COLOR)
     fontColor = config.str("fontColor", DEFAULT_FONT_COLOR)
     region = config.get("region", DEFAULT_REGION)
@@ -68,9 +70,6 @@ def main(config):
     else:
         pass
 
-    imageHeight = 36
-    imageWidth = 36
-
     # Generate a random Pokémon ID based on the user's desired region.
     random.seed(time.now().unix // 15)
     random_pokemon_id = random.number(min, max)
@@ -91,6 +90,8 @@ def main(config):
             break
     flavor_text = pokemonRawFlavorText.replace("\n", " ")
 
+    imageSize = 36 * scale
+
     # Get the Pokémon sprite. Check if there is an animated version available, if not revert to the default.
     spriteURL = pokemon["sprites"]["versions"]["generation-v"]["black-white"]["animated"]["front_default"]
     if spriteURL == None:
@@ -98,11 +99,10 @@ def main(config):
         # Set the animated image size to be slightly smaller so animations don't get cropped.
 
     else:
-        imageHeight = 30
-        imageWidth = 30
+        imageSize = 30 * scale
 
     pokemonSprite = get_cacheable_data(spriteURL)
-    pokemonImage = render.Image(src = pokemonSprite, width = imageWidth, height = imageHeight)
+    pokemonImage = render.Image(src = pokemonSprite, width = imageSize, height = imageSize)
 
     return render.Root(
         delay = 70,
@@ -111,8 +111,8 @@ def main(config):
                 children = [
                     render.Column(
                         children = [
-                            render.Marquee(width = 45, child = render.Text(pokemonName, font = "tb-8", color = fontColor)),
-                            render.Text("#" + str(random_pokemon_id), font = "6x13", color = fontColor),
+                            render.Marquee(width = 45 * scale, child = render.Text(pokemonName, color = fontColor)),
+                            render.Text("#" + str(random_pokemon_id), font = "terminus-24" if is2x else "6x13", color = fontColor),
                         ],
                         expanded = True,
                         main_align = "start",
@@ -120,10 +120,10 @@ def main(config):
                     render.Column(
                         children = [
                             render.Marquee(
-                                child = render.Text(flavor_text, font = "5x8", color = fontColor),
-                                width = 64,
-                                offset_start = 32,
-                                offset_end = 64,
+                                child = render.Text(flavor_text, color = fontColor, font = "terminus-14-light" if is2x else "tb-8"),
+                                width = canvas.width(),
+                                offset_start = canvas.width() // 2,
+                                offset_end = canvas.width() // 2,
                             ),
                         ],
                         expanded = True,
@@ -131,15 +131,15 @@ def main(config):
                     ),
                     render.Row(
                         children = [
-                            render.Box(width = 28, height = 32),  # used for padding
-                            render.Box(child = pokemonImage, width = 30, height = 30, padding = 0),
+                            render.Box(width = 28 * scale, height = 32 * scale),  # used for padding
+                            render.Box(child = pokemonImage, width = 30 * scale, height = 30 * scale, padding = 0),
                         ],
                         expanded = True,
                         main_align = "end",
                     ),
                 ],
             ),
-            padding = 1,
+            padding = scale,
             color = bgColor,
         ),
     )
