@@ -44,26 +44,22 @@ def get_schema():
         ],
     )
 
+REGION_RANGES = {
+    "Kanto": (1, 151),
+    "Johto": (152, 251),
+    "Hoenn": (252, 386),
+    "Sinnoh": (387, 493),
+    "Unova": (494, 649),
+    "Kalos": (650, 721),
+    "Alola": (722, 809),
+}
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
-    MIN, MAX = 1, 809
     dex_region = config.get(REGIONAL_DEX_ID)
-    if dex_region == "National":
-        pass
-    elif dex_region == "Kanto":
-        MIN, MAX = 1, 151
-    elif dex_region == "Johto":
-        MIN, MAX = 152, 251
-    elif dex_region == "Hoenn":
-        MIN, MAX = 252, 386
-    elif dex_region == "Sinnoh":
-        MIN, MAX = 387, 493
-    elif dex_region == "Unova":
-        MIN, MAX = 494, 649
-    elif dex_region == "Kalos":
-        MIN, MAX = 650, 721
-    elif dex_region == "Alola":
-        MIN, MAX = 722, 809
+    MIN, MAX = 1, 809
+    if dex_region in region_ranges:
+        MIN, MAX = region_ranges[dex_region]
 
     random.seed(time.now().unix // 15)
     dex_number = random.number(MIN, MAX)
