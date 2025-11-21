@@ -8,7 +8,7 @@ Author: Lauren Kopac
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -45,6 +45,7 @@ def get_schema():
     )
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     MIN, MAX = 1, 809
     dex_region = config.get(REGIONAL_DEX_ID)
     if dex_region == "National":
@@ -71,37 +72,37 @@ def main(config):
 
     sprite_url = pokemon["sprites"]["versions"]["generation-vii"]["icons"]["front_default"]
     sprite = get_cachable_data(sprite_url)
+    sprite_img = render.Image(sprite)
+    sprite_width, _ = sprite_img.size()
+    sprite_width *= scale
+
     return render.Root(
-        child = render.Box(
-            render.Row(
-                expanded = True,
-                main_align = "start",
-                cross_align = "center",
+        child = render.Padding(
+            pad = scale,
+            child = render.Stack(
                 children = [
-                    render.Image(src = sprite),
                     render.Padding(
-                        pad = (0, 0, 0, 0),
-                        child = render.Marquee(
-                            child = render.Row(
-                                main_align = "start",
-                                cross_align = "center",
+                        pad = (-2 * scale, -2 * scale, 0, 0),
+                        child = render.Image(src = sprite, width = sprite_width),
+                    ),
+                    render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        children = [
+                            render.Column(
                                 expanded = True,
+                                main_align = "start",
+                                cross_align = "end",
                                 children = [
                                     render.Text(
                                         content = name,
-                                        font = "CG-pixel-4x5-mono",
+                                        font = "terminus-14-light" if canvas.is2x() else "CG-pixel-3x5-mono",
                                     ),
-                                    render.Text(
-                                        content = " | #",
-                                    ),
-                                    render.Text(
-                                        content = dex_number,
-                                    ),
+                                    render.Box(height = 2),
+                                    render.Text("#{}".format(dex_number)),
                                 ],
                             ),
-                            width = 64,
-                            scroll_direction = "horizontal",
-                        ),
+                        ],
                     ),
                 ],
             ),
