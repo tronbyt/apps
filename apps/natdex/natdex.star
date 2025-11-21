@@ -35,7 +35,7 @@ REGION_RANGES = {
 }
 
 def get_regions():
-    regions = ["National", "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola", "Galar", "Paldea"]
+    regions = ["National"] + list(REGION_RANGES.keys())
     region_options = []
     for x in regions:
         region_options.append(
@@ -64,7 +64,7 @@ def get_schema():
 
 def main(config):
     dex_region = config.get(REGIONAL_DEX_ID)
-    MIN, MAX = 1, 1025
+    MIN, MAX = 1, max([r[1] for r in REGION_RANGES.values()])
     if dex_region in REGION_RANGES:
         MIN, MAX = REGION_RANGES[dex_region]
 
@@ -75,10 +75,8 @@ def main(config):
 
     scale = 2 if canvas.is2x() else 1
 
-    if scale == 2:
-        sprite_url = "https://pokesprites.imgix.net/{}.png?trim=auto&fit=max&w=60&h=60".format(dex_number)
-    else:
-        sprite_url = "https://pokesprites.imgix.net/{}.png?trim=auto&fit=max&w=30&h=30".format(dex_number)
+    size = 30 * scale
+    sprite_url = "https://pokesprites.imgix.net/%d.png?trim=auto&fit=max&w=%d&h=%d" % (dex_number, size, size)
     sprite = get_cachable_data(sprite_url)
     name_font = NAME_FONT_2X if scale == 2 else NAME_FONT_1X
     number_font = NUMBER_FONT_2X if scale == 2 else NUMBER_FONT_1X
@@ -94,6 +92,7 @@ def main(config):
     if name_width + sprite_width > display_width:
         name_widget = render.Marquee(
             width = display_width - sprite_width,
+            align = "end",
             child = render.Text(content = name, font = NAME_FONT_SMALL),
         )
         number_font = NAME_FONT_SMALL
@@ -102,8 +101,7 @@ def main(config):
 
     number_text = render.Text(content = "#{}".format(dex_number), font = number_font)
     _, number_height = number_text.size()
-    bottom_margin = 0
-    number_top_padding = (32 * scale) - number_height - bottom_margin
+    number_top_padding = (32 * scale) - number_height
 
     return render.Root(
         child = render.Stack(
