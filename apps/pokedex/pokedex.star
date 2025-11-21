@@ -8,7 +8,7 @@ Author: Mack Ward
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 NUM_POKEMON = 386
@@ -45,13 +45,17 @@ def main(config):
 
     sprite_url = pokemon["sprites"]["versions"]["generation-vii"]["icons"]["front_default"]
     sprite = get_cachable_data(sprite_url)
+    sprite_img = render.Image(sprite)
+    sprite_width, _ = sprite_img.size()
+    sprite_width *= 2 if canvas.is2x() else 1
+
     return render.Root(
         child = render.Stack(
             children = [
                 render.Row(
                     children = [
-                        render.Box(width = 32),
-                        render.Box(render.Image(sprite)),
+                        render.Box(width = canvas.width() // 2),
+                        render.Box(render.Image(sprite, width = sprite_width)),
                     ],
                 ),
                 render.Column(
