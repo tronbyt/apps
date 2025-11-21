@@ -82,13 +82,13 @@ def main(config):
         #FEED
         # build the feed_graph
         feed_graph = None
-        print(metric_data)
+        # print(metric_data)
         if config.bool("display_graph") and len(metric_data["data"]) > 3:  # only make the graph if we have more than 3 points
             # interate through the points and convert to float and stick them an array
             points = []
             for i in range(len(metric_data["data"])):
                 points.append((i, float(metric_data["data"][i][1])))
-            print("points " + str(points))
+            # print("points " + str(points))
             y_lim = (None, None)
             min_max = config.get("y_min_max", None)
             if min_max and "," in min_max:
@@ -109,7 +109,7 @@ def main(config):
             points = []
             for i in range(len(feed2["data"])):
                 points.append((i, float(feed2["data"][i][1])))
-            print("points " + str(points))
+            # print("points " + str(points))
             y2_lim = (None, None)
             min_max = config.get("y2_min_max", None)
             if min_max and "," in min_max:
