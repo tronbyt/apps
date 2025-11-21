@@ -8,7 +8,7 @@ Author: AmillionAir
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -72,7 +72,17 @@ F1_API_TTL = 1800
 METADATA_TTL = 43200
 
 def main(config):
-    #TIme and date Information
+    scale = 2 if canvas.is2x() else 1
+    if scale == 2:
+        font_medium = "6x13"
+        font_small = "5x8"
+        font_small_base_height = 10  # includes 2px padding
+    else:
+        font_medium = "5x8"
+        font_small = "tom-thumb"
+        font_small_base_height = 7  # includes 1px padding
+
+    #Time and date Information
     timezone = config.get("$tz", DEFAULTS["timezone"])
 
     # get display option - default to Next Race
@@ -81,6 +91,10 @@ def main(config):
     # Get Data
     Year = time.now().in_location(timezone).format("2006")
     f1_cached = get_f1_data(F1_URLS[display].format(Year), F1_API_TTL)["MRData"]
+
+    MARQUEE_OFFSET = 5
+    TRACK_IMG_BASE_HEIGHT = 23
+    TRACK_IMG_BASE_WIDTH = 28
 
     if display == "NRI":
         tracks = get_f1_data(METADATA_URLS["TRACKS"], METADATA_TTL)
@@ -110,21 +124,24 @@ def main(config):
             child = render.Column(
                 children = [
                     render.Marquee(
-                        width = 64,
+                        width = canvas.width(),
                         child = render.Text(" " + next_race["raceName"] + " - " + next_race["Circuit"]["Location"]["locality"] + " " + next_race["Circuit"]["Location"]["country"]),
-                        offset_start = 5,
-                        offset_end = 5,
+                        offset_start = MARQUEE_OFFSET * scale,
+                        offset_end = MARQUEE_OFFSET * scale,
                     ),
-                    render.Box(width = 64, height = 1, color = "#a0a"),
+                    render.Box(width = canvas.width(), height = 1 * scale, color = "#a0a"),
                     render.Row(
                         children = [
-                            render.Image(src = base64.decode(tracks[next_race["Circuit"]["circuitId"].lower()]), height = 23, width = 28),
-                            render.Column(
-                                children = [
-                                    render.Text(date_str, font = "5x8"),
-                                    render.Text(time_str),
-                                    render.Text("Race " + next_race["round"]),
-                                ],
+                            render.Image(src = base64.decode(tracks[next_race["Circuit"]["circuitId"].lower()]), height = TRACK_IMG_BASE_HEIGHT * scale, width = TRACK_IMG_BASE_WIDTH * scale),
+                            render.Padding(
+                                child = render.Column(
+                                    children = [
+                                        render.Text(date_str, font = font_medium),
+                                        render.Text(time_str, font = font_small),
+                                        render.Text("Race " + next_race["round"], font = font_small),
+                                    ],
+                                ),
+                                pad = (4, 0, 0, 0) if scale == 2 else (0, 0, 0, 0),
                             ),
                         ],
                     ),
@@ -141,68 +158,46 @@ def main(config):
             return []
 
         standings = f1_cached["StandingsTable"]["StandingsLists"][0]
-        Constructor1 = standings["ConstructorStandings"][0]["Constructor"]["constructorId"]
-        Constructor2 = standings["ConstructorStandings"][1]["Constructor"]["constructorId"]
-        Constructor3 = standings["ConstructorStandings"][2]["Constructor"]["constructorId"]
 
-        Points1 = text_justify_trunc(3, standings["ConstructorStandings"][0]["points"], "right")
-        Points2 = text_justify_trunc(3, standings["ConstructorStandings"][1]["points"], "right")
-        Points3 = text_justify_trunc(3, standings["ConstructorStandings"][2]["points"], "right")
+        children = [
+            render.Text("WCC Standings", font = font_medium),
+            render.Box(width = canvas.width(), height = 1 * scale, color = "#a0a"),
+        ]
+
+        constructor_standings = standings.get("ConstructorStandings", [])
+
+        NUM_CONSTRUCTORS_TO_SHOW = 3
+        CONSTRUCTOR_LOGO_BASE_HEIGHT = 7
+        CONSTRUCTOR_LOGO_BASE_WIDTH = 14
+        CONSTRUCTOR_NAME_MAX_LEN = 12
+        POINTS_TRUNC_LEN = 3
+
+        for i in range(min(NUM_CONSTRUCTORS_TO_SHOW, len(constructor_standings))):
+            constructor = constructor_standings[i]
+            constructor_id = constructor["Constructor"]["constructorId"]
+            points = text_justify_trunc(POINTS_TRUNC_LEN, constructor["points"], "right")
+            name = names[constructor_id]
+
+            children.append(render.Row(
+                children = [
+                    render.Stack(
+                        children = [
+                            render.Image(src = base64.decode(logos[constructor_id]), height = CONSTRUCTOR_LOGO_BASE_HEIGHT * scale, width = CONSTRUCTOR_LOGO_BASE_WIDTH * scale),
+                            render.Text(str(i + 1), font = font_small),
+                        ],
+                    ),
+                    render.Marquee(
+                        width = canvas.width() - CONSTRUCTOR_LOGO_BASE_WIDTH * scale,
+                        child = render.Text(points + " pts - " + text_justify_trunc(CONSTRUCTOR_NAME_MAX_LEN, name, "left"), font = font_medium),
+                        offset_start = canvas.width(),
+                        offset_end = canvas.width(),
+                    ),
+                ],
+            ))
 
         return render.Root(
             child = render.Column(
-                children = [
-                    render.Text("WCC Standings"),
-                    render.Box(width = 64, height = 1, color = "#a0a"),
-                    render.Row(
-                        children = [
-                            render.Stack(
-                                children = [
-                                    render.Image(src = base64.decode(logos[Constructor1])),
-                                    render.Text("1", font = "5x8"),
-                                ],
-                            ),
-                            render.Marquee(
-                                width = 50,
-                                child = render.Text(Points1 + " pts - " + text_justify_trunc(12, names[Constructor1], "left"), font = "5x8"),
-                                offset_start = 64,
-                                offset_end = 64,
-                            ),
-                        ],
-                    ),
-                    render.Row(
-                        children = [
-                            render.Stack(
-                                children = [
-                                    render.Image(src = base64.decode(logos[Constructor2])),
-                                    render.Text("2", font = "5x8"),
-                                ],
-                            ),
-                            render.Marquee(
-                                width = 50,
-                                child = render.Text(Points2 + " pts - " + text_justify_trunc(12, names[Constructor2], "left"), font = "5x8"),
-                                offset_start = 64,
-                                offset_end = 64,
-                            ),
-                        ],
-                    ),
-                    render.Row(
-                        children = [
-                            render.Stack(
-                                children = [
-                                    render.Image(src = base64.decode(logos[Constructor3])),
-                                    render.Text("3", font = "5x8"),
-                                ],
-                            ),
-                            render.Marquee(
-                                width = 50,
-                                child = render.Text(Points3 + " pts - " + text_justify_trunc(12, names[Constructor3], "left"), font = "5x8"),
-                                offset_start = 64,
-                                offset_end = 64,
-                            ),
-                        ],
-                    ),
-                ],
+                children = children,
             ),
         )
     else:
@@ -212,60 +207,43 @@ def main(config):
 
         standings = f1_cached["StandingsTable"]["StandingsLists"][0]
 
-        #F1_FNAME = standings["DriverStandings"][0]["Driver"]["givenName"]
-        F1_LNAME = standings["DriverStandings"][0]["Driver"]["familyName"]
-        F1_POINTS = text_justify_trunc(3, standings["DriverStandings"][0]["points"], "right")
+        children = [
+            render.Text("WDC Standings", font = font_medium),
+            render.Box(width = canvas.width(), height = 1 * scale, color = "#a0a"),
+        ]
 
-        #F1_FNAME2 = standings["DriverStandings"][1]["Driver"]["givenName"]
-        F1_LNAME2 = standings["DriverStandings"][1]["Driver"]["familyName"]
-        F1_POINTS2 = text_justify_trunc(3, standings["DriverStandings"][1]["points"], "right")
+        driver_standings = standings.get("DriverStandings", [])
 
-        #F1_FNAME3 = standings["DriverStandings"][2]["Driver"]["givenName"]
-        F1_LNAME3 = standings["DriverStandings"][2]["Driver"]["familyName"]
-        F1_POINTS3 = text_justify_trunc(3, standings["DriverStandings"][2]["points"], "right")
+        NUM_DRIVERS_TO_SHOW_1X = 3
+        NUM_DRIVERS_TO_SHOW_2X = 5
+        POINTS_TRUNC_LEN = 3
+        POINTS_BOX_WIDTH = 14
+        SPACER_BOX_WIDTH = 2
+
+        num_drivers_to_show = NUM_DRIVERS_TO_SHOW_2X if scale == 2 else NUM_DRIVERS_TO_SHOW_1X
+
+        for i in range(min(num_drivers_to_show, len(driver_standings))):
+            driver = driver_standings[i]
+            points = text_justify_trunc(POINTS_TRUNC_LEN, driver["points"], "right")
+            lname = driver["Driver"]["familyName"]
+
+            children.append(render.Row(
+                children = [
+                    render.Stack(
+                        children = [
+                            render.Box(width = POINTS_BOX_WIDTH * scale, height = font_small_base_height),
+                            render.Text(points, font = font_small),
+                        ],
+                    ),
+                    render.Box(width = SPACER_BOX_WIDTH * scale, height = font_small_base_height),
+                    render.Text(lname, font = font_small),
+                ],
+            ))
 
         return render.Root(
             child = render.Column(
-                children = [
-                    render.Text("WDC Standings"),
-                    render.Box(width = 64, height = 1, color = "#a0a"),
-                    render.Row(
-                        children = [
-                            render.Stack(
-                                children = [
-                                    render.Box(width = 14, height = 7),
-                                    render.Text(F1_POINTS, font = "5x8"),
-                                ],
-                            ),
-                            render.Box(width = 2, height = 5),
-                            render.Text(F1_LNAME),
-                        ],
-                    ),
-                    render.Row(
-                        children = [
-                            render.Stack(
-                                children = [
-                                    render.Box(width = 14, height = 7),
-                                    render.Text(F1_POINTS2, font = "5x8"),
-                                ],
-                            ),
-                            render.Box(width = 2, height = 5),
-                            render.Text(F1_LNAME2),
-                        ],
-                    ),
-                    render.Row(
-                        children = [
-                            render.Stack(
-                                children = [
-                                    render.Box(width = 14, height = 7),
-                                    render.Text(F1_POINTS3, font = "5x8"),
-                                ],
-                            ),
-                            render.Box(width = 2, height = 5),
-                            render.Text(F1_LNAME3),
-                        ],
-                    ),
-                ],
+                expanded = True,
+                children = children,
             ),
         )
 

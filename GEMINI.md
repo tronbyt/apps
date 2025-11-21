@@ -74,3 +74,7 @@ packageName: fuzzyclock
 recommended_interval: 1
 supports2x: true
 ```
+
+### Things to remember
+
+Padding is a 4-tuple `(left, top, right, bottom)`.
