@@ -7,3 +7,4 @@ author: Forrest Syrett
 fileName: pokedexplus.star
 packageName: pokedexplus
 recommended_interval: 5
+supports2x: true
