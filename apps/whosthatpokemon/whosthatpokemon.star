@@ -44,7 +44,7 @@ def main(config):
     print("The game is afoot. The secret Pokemon is: " + name)
 
     return render.Root(
-        delay = 125,
+        delay = 40,
         show_full_animation = True,
         child = render.Stack(
             children = [
@@ -106,24 +106,23 @@ def getSpeed(config):
 
 # Gets all frames needed for the animation.
 def compileFrames(name, silhouette, revealedImage, speed):
+    startWidth = 30
+    spinFrames = (startWidth - 1) // 2
+    dwellFrames = int(speed) * 12
+
     frames = []
-    frameCount = int(speed * 8)
-    startTransition = frameCount / 2 - 4
-    endTransition = frameCount / 2 + 4
-    transitionFrame = 0
-    for frame in range(1, frameCount):
-        if frame < startTransition:
-            frames.append(fullLayoutHidden(silhouette, 30))
-        elif frame >= endTransition:
-            frames.append(fullLayoutRevealed(revealedImage, 30, name))
-        else:
-            # if it's transitioning, get transition width
-            width = getTransitionWidth(transitionFrame)
-            if transitionFrame > 3:
-                frames.append(fullLayoutRevealed(revealedImage, width, name))
-            else:
-                frames.append(fullLayoutHidden(silhouette, width))
-            transitionFrame += 1
+    frames.extend([fullLayoutHidden(silhouette, startWidth)] * dwellFrames)
+
+    width = startWidth
+    for _ in range(spinFrames):
+        width -= 2
+        frames.append(fullLayoutHidden(silhouette, width))
+
+    for _ in range(spinFrames):
+        width += 2
+        frames.append(fullLayoutRevealed(revealedImage, width, name))
+
+    frames.extend([fullLayoutRevealed(revealedImage, startWidth, name)] * dwellFrames)
 
     return frames
 
@@ -204,11 +203,6 @@ def fullLayoutRevealed(image, width, text):
             ),
         ],
     )
-
-# Gets the width the image has to be at this frame of the transition.
-def getTransitionWidth(frame):
-    widths = [18, 12, 6, 1, 1, 6, 12, 18]
-    return widths[frame]
 
 def get_schema():
     return schema.Schema(
