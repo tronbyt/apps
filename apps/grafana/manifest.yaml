@@ -1,0 +1,8 @@
+---
+id: grafana
+name: Grafana
+summary: Display Grafana Metrics
+desc: Show value or graph of Grafana metrics.
+author: tavdog
+fileName: grafana.star
+packageName: grafana
