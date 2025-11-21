@@ -31,9 +31,10 @@ def main(config):
     metric = config.str("metric", "node_load1")
     hours = int(config.get("hours_history", 24))
     display_graph = config.bool("display_graph")
+    step_interval = config.str("step_interval", "1m")
 
     # Get the metric data
-    metric_data = get_metric_data(grafana_url, api_key, instance, metric, hours, display_graph)
+    metric_data = get_metric_data(grafana_url, api_key, instance, metric, hours, display_graph, step_interval)
 
     # Parse value range filters
     feed_value_range = parse_range(config.get("feed_value_range", None))
@@ -44,7 +45,7 @@ def main(config):
     display_graph2 = config.bool("display_graph2")
     metric2 = config.str("metric2", "")
     if metric2:
-        feed2 = get_metric_data(grafana_url, api_key, instance, metric2, hours, display_graph2)
+        feed2 = get_metric_data(grafana_url, api_key, instance, metric2, hours, display_graph2, step_interval)
 
     if "error" in metric_data or (feed2 and "error" in feed2):  # if we have error key, then we display an error
         error_dict = dict()
@@ -82,12 +83,14 @@ def main(config):
         #FEED
         # build the feed_graph
         feed_graph = None
+
         # print(metric_data)
         if config.bool("display_graph") and len(metric_data["data"]) > 3:  # only make the graph if we have more than 3 points
             # interate through the points and convert to float and stick them an array
             points = []
             for i in range(len(metric_data["data"])):
                 points.append((i, float(metric_data["data"][i][1])))
+
             # print("points " + str(points))
             y_lim = (None, None)
             min_max = config.get("y_min_max", None)
@@ -109,6 +112,7 @@ def main(config):
             points = []
             for i in range(len(feed2["data"])):
                 points.append((i, float(feed2["data"][i][1])))
+
             # print("points " + str(points))
             y2_lim = (None, None)
             min_max = config.get("y2_min_max", None)
@@ -194,7 +198,7 @@ def main(config):
             ),
         )
 
-def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_series):
+def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_series, step_interval = "1m"):
     if not grafana_url or not api_key or not instance:
         dummy = json.decode(JSON_DUMMY_DATA)
 
@@ -227,11 +231,12 @@ def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_ser
         start_time = end_time - (hours * 3600)
 
         # Query range endpoint for time series data
-        url = "https://%s/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query_range?query=%s&start=%d&end=%d&step=15s" % (
+        url = "https://%s/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query_range?query=%s&start=%d&end=%d&step=%s" % (
             grafana_url,
             query,
             start_time,
             end_time,
+            step_interval,
         )
     else:
         # Instant query endpoint for single value
@@ -323,71 +328,128 @@ def is_in_range(value, range_tuple):
     max_val = range_tuple[1]
     return value >= min_val and value <= max_val
 
-def get_schema():
-    fields = []
-    fields.append(
-        schema.Text(
-            id = "grafana_url",
-            name = "Grafana Host",
-            desc = "Grafana hostname (e.g., tronbyt.grafana.net)",
-            icon = "server",
-        ),
+def get_metric_dropdown(api_key, config):
+    """Generate metric dropdown options from Grafana API"""
+    if DEBUG:
+        print("DEBUG: get_metric_dropdown called with api_key length:", len(api_key) if api_key else 0)
+
+    if not api_key:
+        if DEBUG:
+            print("DEBUG: No api_key provided, returning empty list")
+        return []
+
+    grafana_url = config.str("grafana_url", "")
+    if DEBUG:
+        print("DEBUG: grafana_url from config:", grafana_url)
+
+    if not grafana_url:
+        if DEBUG:
+            print("DEBUG: No grafana_url provided, returning empty list")
+        return []
+
+    # Fetch available metrics from Grafana
+    url = "https://%s/api/datasources/proxy/uid/grafanacloud-prom/api/v1/label/__name__/values" % grafana_url
+
+    if DEBUG:
+        print("DEBUG: Fetching metrics from:", url)
+
+    res = http.get(
+        url,
+        headers = {"Authorization": "Bearer " + api_key},
+        ttl_seconds = TTL_SECONDS,
     )
-    fields.append(
-        schema.Text(
-            id = "api_key",
-            name = "API Key",
-            desc = "Grafana API Key or Service Account Token",
-            icon = "key",
+
+    if DEBUG:
+        print("DEBUG: Metrics API response status:", res.status_code)
+
+    if res.status_code != 200:
+        if DEBUG:
+            print("DEBUG: Failed to fetch metrics, status:", res.status_code)
+        return []
+
+    data = res.json()
+    if DEBUG:
+        print("DEBUG: Metrics response status field:", data.get("status"))
+        print("DEBUG: Number of metrics in response:", len(data.get("data", [])))
+
+    options = []
+    if data.get("status") == "success" and "data" in data:
+        metrics = data["data"]
+        if DEBUG:
+            print("DEBUG: First 5 metrics:", metrics[:5])
+        options = [
+            schema.Option(display = metric, value = metric)
+            for metric in metrics[:100]  # Limit to first 100 metrics
+        ]
+        if DEBUG:
+            print("DEBUG: Created", len(options), "options for dropdown")
+
+    if not options:
+        if DEBUG:
+            print("DEBUG: No options created, using default node_load1")
+        options = [schema.Option(display = "node_load1", value = "node_load1")]
+
+    if DEBUG:
+        print("DEBUG: Returning dropdown with", len(options), "options")
+
+    if DEBUG:
+        print("DEBUG: About to check for selected metric")
+
+    result = [
+        schema.Dropdown(
+            id = "metric",
+            name = "Metric",
+            desc = "Select Prometheus metric to query",
+            icon = "chartLine",
+            default = options[0].value if options else "node_load1",
+            options = options,
         ),
-    )
-    fields.append(
-        schema.Text(
-            id = "instance",
-            name = "Instance",
-            desc = "Instance name to query",
-            icon = "server",
-            default = "default",
-        ),
-    )
-    fields.append(
+    ]
+
+    # Get the currently selected metric from config to show additional fields
+    selected_metric = config.str("metric", "")
+    if DEBUG:
+        print("DEBUG: Currently selected metric from config:", selected_metric)
+        print("DEBUG: selected_metric bool:", bool(selected_metric))
+
+    if selected_metric:
+        if DEBUG:
+            print("DEBUG: Adding config fields for metric:", selected_metric)
+        config_fields = get_config_fields_list(config)
+        if DEBUG:
+            print("DEBUG: Got", len(config_fields), "config fields")
+        result.extend(config_fields)
+    elif DEBUG:
+        print("DEBUG: No metric selected, not adding config fields")
+
+    if DEBUG:
+        print("DEBUG: Returning", len(result), "total fields")
+
+    return result
+
+def get_config_fields_list():
+    """Return list of configuration fields"""
+    fields = [
         schema.Text(
             id = "feed_name",
             name = "Chart Label",
             icon = "tag",
             desc = "Optional Custom Label",
-            default = "",
+            default = "Grafana",
         ),
-    )
-
-    fields.append(
-        schema.Text(
-            id = "metric",
-            name = "Metric",
-            desc = "Prometheus metric name (e.g., node_load1, node_memory_MemAvailable_bytes)",
-            icon = "chartLine",
-            default = "node_load1",
-        ),
-    )
-    fields.append(
         schema.Color(
             id = "feed_color",
-            name = "Color",
-            desc = "Metric 1 Color",
+            name = "Metric 1 Color",
+            desc = "Text Color",
             icon = "brush",
             default = "#b07f51",
         ),
-    )
-
-    fields.append(
         schema.Text(
             id = "feed_units",
             name = "Metric Units",
             icon = "quoteRight",
             desc = "Metric units (e.g., %, MB, req/s)",
         ),
-    )
-    fields.append(
         schema.Text(
             id = "feed_value_range",
             name = "Value Range Filter",
@@ -395,8 +457,6 @@ def get_schema():
             desc = "Only show app if in range (e.g., '10-20'). Leave blank to always show.",
             default = "",
         ),
-    )
-    fields.append(
         schema.Toggle(
             id = "display_graph",
             name = "Display Graph",
@@ -404,8 +464,6 @@ def get_schema():
             icon = "compress",
             default = True,
         ),
-    )
-    fields.append(
         schema.Color(
             id = "graph_color",
             name = "Graph Color",
@@ -413,9 +471,6 @@ def get_schema():
             icon = "brush",
             default = "#304463",
         ),
-    )
-
-    fields.append(
         schema.Text(
             id = "hours_history",
             name = "Graph history hours",
@@ -423,8 +478,13 @@ def get_schema():
             icon = "compress",
             default = "",
         ),
-    )
-    fields.append(
+        schema.Text(
+            id = "step_interval",
+            name = "Data Point Interval",
+            desc = "Time between data points (e.g., 15s, 1m, 5m, 1h)",
+            icon = "clock",
+            default = "1m",
+        ),
         schema.Text(
             id = "y_min_max",
             name = "Graph min,max",
@@ -432,7 +492,7 @@ def get_schema():
             icon = "compress",
             default = "",
         ),
-    )
+    ]
 
     fields.append(
         schema.Text(
@@ -443,7 +503,8 @@ def get_schema():
             default = "",
         ),
     )
-    fields.append(
+
+    fields.extend([
         schema.Color(
             id = "feed2_color",
             name = "Metric 2 Color",
@@ -451,8 +512,6 @@ def get_schema():
             icon = "brush",
             default = "#5c9949",
         ),
-    )
-    fields.append(
         schema.Text(
             id = "feed2_name",
             name = "Metric 2 Name",
@@ -460,16 +519,12 @@ def get_schema():
             desc = "Optional Custom Label",
             default = "",
         ),
-    )
-    fields.append(
         schema.Text(
             id = "feed2_units",
             name = "Metric 2 Units",
             icon = "quoteRight",
             desc = "Metric units preference",
         ),
-    )
-    fields.append(
         schema.Text(
             id = "feed2_value_range",
             name = "Metric 2 Value Range Filter",
@@ -477,8 +532,6 @@ def get_schema():
             desc = "Only show app if in range (e.g., '10-20'). Leave blank to always show.",
             default = "",
         ),
-    )
-    fields.append(
         schema.Toggle(
             id = "display_graph2",
             name = "Show Graph 2",
@@ -486,8 +539,6 @@ def get_schema():
             icon = "compress",
             default = False,
         ),
-    )
-    fields.append(
         schema.Color(
             id = "graph2_color",
             name = "Graph 2 Color",
@@ -495,8 +546,6 @@ def get_schema():
             icon = "brush",
             default = "#5c4796",
         ),
-    )
-    fields.append(
         schema.Text(
             id = "y2_min_max",
             name = "Graph 2 min,max",
@@ -504,11 +553,39 @@ def get_schema():
             icon = "compress",
             default = "",
         ),
-    )
+    ])
 
+    return fields
+
+def get_schema():
     return schema.Schema(
         version = "1",
-        fields = fields,
+        fields = [
+            schema.Text(
+                id = "grafana_url",
+                name = "Grafana Host",
+                desc = "Grafana hostname (e.g., tronbyt.grafana.net)",
+                icon = "server",
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Grafana API Key or Service Account Token",
+                icon = "key",
+            ),
+            schema.Text(
+                id = "instance",
+                name = "Instance",
+                desc = "Instance name to query",
+                icon = "server",
+                default = "default",
+            ),
+            schema.Generated(
+                id = "metric_gen",
+                source = "api_key",
+                handler = get_metric_dropdown,
+            ),
+        ],
     )
 
 def round(num, precision):
