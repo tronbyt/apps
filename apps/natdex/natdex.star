@@ -7,9 +7,10 @@ Author: Lauren Kopac
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("re.star", "re")
+load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 POKEAPI_URL = "https://pokeapi.co/api/v2/pokemon/{}"
 REGIONAL_DEX_ID = "regional_dex_code"
@@ -44,41 +45,28 @@ def get_schema():
     )
 
 def main(config):
-    MIN = "1"
-    MAX = "809"
+    MIN, MAX = 1, 809
     dex_region = config.get(REGIONAL_DEX_ID)
     if dex_region == "National":
         pass
     elif dex_region == "Kanto":
-        MIN = "1"
-        MAX = "151"
+        MIN, MAX = 1, 151
     elif dex_region == "Johto":
-        MIN = "152"
-        MAX = "251"
+        MIN, MAX = 152, 251
     elif dex_region == "Hoenn":
-        MIN = "252"
-        MAX = "386"
+        MIN, MAX = 252, 386
     elif dex_region == "Sinnoh":
-        MIN = "387"
-        MAX = "493"
+        MIN, MAX = 387, 493
     elif dex_region == "Unova":
-        MIN = "494"
-        MAX = "649"
+        MIN, MAX = 494, 649
     elif dex_region == "Kalos":
-        MIN = "650"
-        MAX = "721"
+        MIN, MAX = 650, 721
     elif dex_region == "Alola":
-        MIN = "722"
-        MAX = "809"
-    else:
-        pass
-    resp = http.get("https://www.random.org/integers/?num=1&min=" + MIN + "&max=" + MAX + "&col=1&base=10&format=plain&rnd=new1")
-    if resp.status_code != 200:
-        fail("Request failed with status %d", resp.status_code)
-    dex_number = resp.body()
-    dex_number = re.sub("\n", "", dex_number)
-    id_ = dex_number
-    pokemon = get_pokemon(id_)
+        MIN, MAX = 722, 809
+
+    random.seed(time.now().unix // 15)
+    dex_number = random.number(MIN, MAX)
+    pokemon = get_pokemon(dex_number)
     name = pokemon["name"].title()
 
     sprite_url = pokemon["sprites"]["versions"]["generation-vii"]["icons"]["front_default"]
