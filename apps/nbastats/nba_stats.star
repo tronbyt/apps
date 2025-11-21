@@ -31,7 +31,7 @@ def get_current_season():
     year = current_time.year
     month = current_time.month
     season_start = year if month >= 10 else year - 1
-    return str(season_start) + "-" + str(year)[2:4]
+    return "{}-{}".format(season_start, str(season_start + 1)[-2:])
 
 def fetch_player_data(base_url, index):
     stat_name, stat_url, stat_index, rank = get_stat_info(index)
