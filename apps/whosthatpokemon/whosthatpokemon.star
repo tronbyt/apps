@@ -5,11 +5,11 @@ Description: Test your Pokemon Master knowledge with this rendition of "Who's Th
 Author: Nicole Brooks
 """
 
-load("background.png", BACKGROUND = "file")
+load("background.webp", BACKGROUND = "file")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ALL_POKEMON = 1000
@@ -21,6 +21,7 @@ CACHE_TTL_SECONDS = 3600 * 24 * 60  # 60 days in seconds.
 def main(config):
     print("Let's play...WHO'S. THAT. POKEMON?!")
 
+    scale = 2 if canvas.is2x() else 1
     allPokemon = howManyPokemon(config)
     chosenId = random.number(1, allPokemon)
     pokemon = json.decode(getPokemon(chosenId))
@@ -40,16 +41,17 @@ def main(config):
     if revealedImage == None or silhouette == None:
         return []
 
-    frames = compileFrames(name, silhouette, revealedImage, speed)
+    frames = compileFrames(name, silhouette, revealedImage, speed, scale)
     print("The game is afoot. The secret Pokemon is: " + name)
 
     return render.Root(
-        delay = 40,
+        delay = 40 // scale,
         show_full_animation = True,
         child = render.Stack(
             children = [
                 render.Image(
                     src = BACKGROUND.readall(),
+                    width = canvas.width(),
                 ),
                 render.Animation(
                     children = frames,
@@ -105,71 +107,55 @@ def getSpeed(config):
     return strSpeed
 
 # Gets all frames needed for the animation.
-def compileFrames(name, silhouette, revealedImage, speed):
-    startWidth = 30
+def compileFrames(name, silhouette, revealedImage, speed, scale):
+    font = "terminus-14" if scale == 2 else "tom-thumb"
+    startWidth = 30 * scale
     spinFrames = (startWidth - 1) // 2
-    dwellFrames = int(speed) * 12
+    dwellFrames = int(speed) * 12 * scale
 
     frames = []
-    frames.extend([fullLayoutHidden(silhouette, startWidth)] * dwellFrames)
+    frames.extend([fullLayoutHidden(silhouette, startWidth, scale, font)] * dwellFrames)
 
     width = startWidth
     for _ in range(spinFrames):
         width -= 2
-        frames.append(fullLayoutHidden(silhouette, width))
+        frames.append(fullLayoutHidden(silhouette, width, scale, font))
 
     for _ in range(spinFrames):
         width += 2
-        frames.append(fullLayoutRevealed(revealedImage, width, name))
+        frames.append(fullLayoutRevealed(revealedImage, width, name, scale))
 
-    frames.extend([fullLayoutRevealed(revealedImage, startWidth, name)] * dwellFrames)
+    frames.extend([fullLayoutRevealed(revealedImage, startWidth, name, scale)] * dwellFrames)
 
     return frames
 
 # Layout function with text on side.
-def fullLayoutHidden(image, width):
-    return render.Row(
-        expanded = True,
-        main_align = "center",
+def fullLayoutHidden(image, width, scale, font):
+    return render.Stack(
         children = [
             render.Box(
-                width = 30,
-                height = 30,
-                child = render.Padding(
-                    pad = (5, 0, 0, 0),
-                    child = render.Image(
-                        src = image,
-                        width = width,
-                        height = 30,
-                    ),
+                width = 38 * scale,
+                height = 30 * scale,
+                child =  render.Image(
+                    src = image,
+                    width = width,
+                    height = 30 * scale,
                 ),
             ),
             render.Box(
-                width = 32,
-                height = 32,
-                child = render.Column(
-                    cross_align = "center",
+                render.Row(
+                    expanded = True,
+                    main_align = "end",
                     children = [
-                        render.Text(
-                            content = "Who's",
-                            color = "#3B0301",
-                            font = "tom-thumb",
-                        ),
-                        render.Box(
-                            height = 3,
-                        ),
-                        render.Text(
-                            content = "That",
-                            color = "#3B0301",
-                            font = "tom-thumb",
-                        ),
-                        render.Box(
-                            height = 3,
-                        ),
-                        render.Text(
-                            content = "Pokemon?",
-                            color = "#3B0301",
-                            font = "tom-thumb",
+                        render.Padding(
+                            pad = (0, 3 * scale, scale, 0),
+                            child = render.WrappedText(
+                                content = "Who's\nThat\nPokemon?",
+                                align = "center",
+                                color = "#3B0301",
+                                font = font,
+                                linespacing = 3 * scale,
+                            ),
                         ),
                     ],
                 ),
@@ -178,27 +164,28 @@ def fullLayoutHidden(image, width):
     )
 
 # Layout function with text on bottom.
-def fullLayoutRevealed(image, width, text):
+def fullLayoutRevealed(image, width, text, scale):
     return render.Stack(
         children = [
             render.Box(
-                width = 38,
-                height = 30,
+                width = 38 * scale,
+                height = 30 * scale,
                 child = render.Image(
                     src = image,
                     width = width,
-                    height = 30,
+                    height = 30 * scale,
                 ),
             ),
-            render.Padding(
-                pad = (0, 24, 0, 0),
-                child = render.Box(
-                    height = 9,
-                    child = render.Text(
-                        content = text,
-                        offset = 0,
-                        color = "#240109",
-                    ),
+            render.Box(
+                render.Column(
+                    expanded = True,
+                    main_align = "end",
+                    children = [
+                        render.Text(
+                            content = text,
+                            color = "#240109",
+                        ),
+                    ],
                 ),
             ),
         ],
