@@ -4,6 +4,6 @@ name: Archer Dog
 summary: Archer Dog Animation
 desc: Displays our favorite dog, Archer!
 author: Jeremy Harnden
-fileName: archer_dog.star
+fileName: archerdog.star
 packageName: archerdog
 recommended_interval: 5
