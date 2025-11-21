@@ -58,8 +58,8 @@ def main(config):
     scale = 2 if canvas.is2x() else 1
     dex_region = config.get(REGIONAL_DEX_ID)
     MIN, MAX = 1, 809
-    if dex_region in region_ranges:
-        MIN, MAX = region_ranges[dex_region]
+    if dex_region in REGION_RANGES:
+        MIN, MAX = REGION_RANGES[dex_region]
 
     random.seed(time.now().unix // 15)
     dex_number = random.number(MIN, MAX)
