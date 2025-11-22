@@ -1,6 +1,6 @@
 """
 Applet: National Pokedex
-Summary: Display a random Pokemon from Gen I - VII
+Summary: Display a random Pokemon from Gen I - IX
 Description: Display a random Pokemon from your region of choice
 Author: Lauren Kopac
 """
@@ -16,8 +16,26 @@ POKEAPI_URL = "https://pokeapi.co/api/v2/pokemon/{}"
 REGIONAL_DEX_ID = "regional_dex_code"
 CACHE_TTL_SECONDS = 3600 * 24 * 7  # 7 days in seconds.
 
+NAME_FONT_1X = "tb-8"
+NAME_FONT_2X = "terminus-14"
+NAME_FONT_SMALL = "tb-8"
+NUMBER_FONT_1X = "tb-8"
+NUMBER_FONT_2X = "terminus-14"
+
+REGION_RANGES = {
+    "Kanto": (1, 151),
+    "Johto": (152, 251),
+    "Hoenn": (252, 386),
+    "Sinnoh": (387, 493),
+    "Unova": (494, 649),
+    "Kalos": (650, 721),
+    "Alola": (722, 809),
+    "Galar": (810, 905),
+    "Paldea": (906, 1025),
+}
+
 def get_regions():
-    regions = ["National", "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola"]
+    regions = ["National"] + list(REGION_RANGES.keys())
     region_options = []
     for x in regions:
         region_options.append(
@@ -44,20 +62,9 @@ def get_schema():
         ],
     )
 
-REGION_RANGES = {
-    "Kanto": (1, 151),
-    "Johto": (152, 251),
-    "Hoenn": (252, 386),
-    "Sinnoh": (387, 493),
-    "Unova": (494, 649),
-    "Kalos": (650, 721),
-    "Alola": (722, 809),
-}
-
 def main(config):
-    scale = 2 if canvas.is2x() else 1
     dex_region = config.get(REGIONAL_DEX_ID)
-    MIN, MAX = 1, 809
+    MIN, MAX = 1, max([r[1] for r in REGION_RANGES.values()])
     if dex_region in REGION_RANGES:
         MIN, MAX = REGION_RANGES[dex_region]
 
@@ -66,71 +73,70 @@ def main(config):
     pokemon = get_pokemon(dex_number)
     name = pokemon["name"].title()
 
-    sprite_url = pokemon["sprites"]["versions"]["generation-vii"]["icons"]["front_default"]
+    scale = 2 if canvas.is2x() else 1
+
+    size = 30 * scale
+    sprite_url = "https://pokesprites.imgix.net/%d.png?trim=auto&fit=max&w=%d&h=%d" % (dex_number, size, size)
     sprite = get_cachable_data(sprite_url)
-    sprite_img = render.Image(sprite)
+    name_font = NAME_FONT_2X if scale == 2 else NAME_FONT_1X
+    number_font = NUMBER_FONT_2X if scale == 2 else NUMBER_FONT_1X
+
+    display_width = 64 * scale
+
+    sprite_img = render.Image(src = sprite)
     sprite_width, _ = sprite_img.size()
-    sprite_width *= scale
+
+    name_text = render.Text(content = name, font = name_font)
+    name_width, _ = name_text.size()
+
+    if name_width + sprite_width > display_width:
+        name_widget = render.Marquee(
+            width = display_width - sprite_width,
+            align = "end",
+            child = render.Text(content = name, font = NAME_FONT_SMALL),
+        )
+        number_font = NAME_FONT_SMALL
+    else:
+        name_widget = name_text
+
+    number_text = render.Text(content = "#{}".format(dex_number), font = number_font)
+    _, number_height = number_text.size()
+    number_top_padding = (32 * scale) - number_height
 
     return render.Root(
-        child = render.Padding(
-            pad = scale,
-            child = render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (-2 * scale, -2 * scale, 0, 0),
-                        child = render.Image(src = sprite, width = sprite_width),
-                    ),
-                    render.Row(
+        child = render.Stack(
+            children = [
+                render.Box(
+                    width = 32 * scale,
+                    height = 32 * scale,
+                    child = sprite_img,
+                ),
+                render.Row(
+                    expanded = True,
+                    main_align = "end",
+                    cross_align = "start",
+                    children = [
+                        name_widget,
+                    ],
+                ),
+                render.Padding(
+                    pad = (0, number_top_padding, 0, 0),
+                    child = render.Row(
                         expanded = True,
                         main_align = "end",
                         children = [
-                            render.Column(
-                                expanded = True,
-                                main_align = "start",
-                                cross_align = "end",
-                                children = [
-                                    render.Text(
-                                        content = name,
-                                        font = "terminus-14-light" if canvas.is2x() else "CG-pixel-3x5-mono",
-                                    ),
-                                    render.Box(height = 2),
-                                    render.Text("#{}".format(dex_number)),
-                                ],
-                            ),
+                            number_text,
                         ],
                     ),
-                ],
-            ),
+                ),
+            ],
         ),
     )
-
-def round(num):
-    """Rounds floats to a single decimal place."""
-    return float(int(num * 10) / 10)
 
 def get_pokemon(id):
     url = POKEAPI_URL.format(id)
     data = get_cachable_data(url)
     return json.decode(data)
-
-def get_region(dex_number):
-    if int(dex_number) < 152:
-        return "Kanto"
-    elif int(dex_number) < 252:
-        return "Johto"
-    elif int(dex_number) < 387:
-        return "Hoenn"
-    elif int(dex_number) < 494:
-        return "Sinnoh"
-    elif int(dex_number) < 650:
-        return "Unova"
-    elif int(dex_number) < 722:
-        return "Kalos"
-    elif int(dex_number) < 810:
-        return "Alola"
-    else:
-        return "Habitat Unknown"
 
 def get_cachable_data(url, ttl_seconds = CACHE_TTL_SECONDS):
     res = http.get(url = url, ttl_seconds = ttl_seconds)
