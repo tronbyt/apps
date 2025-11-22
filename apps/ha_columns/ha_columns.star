@@ -33,6 +33,14 @@ def _get_default_fonts(column_count, scale):
 
     return label_font, value_font
 
+def _format_sensor_value(value, decimals):
+    if decimals == 0:
+        return "%.0f" % value
+    elif decimals == 1:
+        return "%.1f" % value
+    else:
+        return "%.2f" % value
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
     column_count = int(config.get("column_count", DEFAULT_COLUMN_COUNT))
@@ -45,10 +53,8 @@ def main(config):
         sensor1 = fetch_sensor(config.get("col%d_sensor1_entity" % i), config)
         sensor2 = fetch_sensor(config.get("col%d_sensor2_entity" % i), config)
 
-        if sensor1 == None:
-            sensor1 = {"value": None, "unit": ""}
-        if sensor2 == None:
-            sensor2 = {"value": None, "unit": ""}
+        sensor1 = sensor1 or {"value": None, "unit": ""}
+        sensor2 = sensor2 or {"value": None, "unit": ""}
 
         sensor1_decimals = int(config.get("col%d_sensor1_decimals" % i, "1"))
         sensor2_decimals = int(config.get("col%d_sensor2_decimals" % i, "1"))
@@ -161,26 +167,14 @@ def render_column(label, label_color, sensor1_data, sensor2_data, sensor1_decima
     if sensor1_value == None:
         sensor1_text = "N/A"
     else:
-        if sensor1_decimals == 0:
-            sensor1_formatted = str(int(math.round(sensor1_value)))
-        elif sensor1_decimals == 1:
-            sensor1_formatted = str(math.round(sensor1_value * 10) / 10)
-        else:
-            sensor1_formatted = str(math.round(sensor1_value * 100) / 100)
-
+        sensor1_formatted = _format_sensor_value(sensor1_value, sensor1_decimals)
         sensor1_unit = sensor1_unit_override if sensor1_unit_override else sensor1_data["unit"]
         sensor1_text = sensor1_formatted + sensor1_unit if scale == 2 else sensor1_formatted
 
     if sensor2_value == None:
         sensor2_text = "N/A"
     else:
-        if sensor2_decimals == 0:
-            sensor2_formatted = str(int(math.round(sensor2_value)))
-        elif sensor2_decimals == 1:
-            sensor2_formatted = str(math.round(sensor2_value * 10) / 10)
-        else:
-            sensor2_formatted = str(math.round(sensor2_value * 100) / 100)
-
+        sensor2_formatted = _format_sensor_value(sensor2_value, sensor2_decimals)
         sensor2_unit = sensor2_unit_override if sensor2_unit_override else sensor2_data["unit"]
         sensor2_text = sensor2_formatted + sensor2_unit if scale == 2 else sensor2_formatted
 
