@@ -144,6 +144,7 @@ def main(config):
         "name": name,
         "rangemi": rangemi,
         "image": image.readall(),
+        "logo": TESLA.readall(),
     }
 
     return render.Root(
@@ -239,7 +240,7 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
                         cross_align = "center",
                         expanded = True,
                         children = [
-                            render.Image(src = state["image"].readall()),
+                            render.Image(src = state["image"]),
                             render.Box(width = 2, height = 8),
                         ],
                     ),
@@ -257,14 +258,14 @@ def get_frame(state, fr, config, animprogress):
 
     delay = 0
     color = state["color"]
-    if config.bool("carimg") == True:
+    if config.bool("carimg", True) == True:
         children.append(
             render.Row(
                 expanded = True,
                 main_align = "space_around",
                 cross_align = "center",
                 children = [
-                    render.Image(src = TESLA.readall()),
+                    render.Image(src = state["logo"]),
                     render.Marquee(
                         width = 40,
                         child = render.Text("%s" % state["name"], font = ""),
