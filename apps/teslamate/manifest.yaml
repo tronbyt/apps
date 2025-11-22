@@ -7,3 +7,4 @@ author: brombomb
 fileName: teslamate.star
 packageName: teslamate
 recommended_interval: 30
+supports2x: true
