@@ -20,6 +20,19 @@ DEFAULT_LABEL_COLOR = "#FF0"
 DEFAULT_VALUE_COLOR = "#FFF"
 DEFAULT_DIVIDER_COLOR = "#444"
 
+def _get_default_fonts(column_count, scale):
+    if column_count >= 4:
+        label_font = "terminus-12" if scale == 2 else "tom-thumb"
+        value_font = "terminus-14" if scale == 2 else "tb-8"
+    elif column_count >= 3:
+        label_font = "terminus-12" if scale == 2 else "tb-8"
+        value_font = "terminus-16" if scale == 2 else "tb-8"
+    else:
+        label_font = DEFAULT_LABEL_FONT_2X if scale == 2 else DEFAULT_LABEL_FONT
+        value_font = DEFAULT_VALUE_FONT_2X if scale == 2 else DEFAULT_VALUE_FONT
+
+    return label_font, value_font
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
     column_count = int(config.get("column_count", DEFAULT_COLUMN_COUNT))
@@ -32,12 +45,15 @@ def main(config):
         sensor1 = fetch_sensor(config.get("col%d_sensor1_entity" % i), config)
         sensor2 = fetch_sensor(config.get("col%d_sensor2_entity" % i), config)
 
-        if sensor1 == None or sensor2 == None:
-            return render.Root(
-                child = render.Box(
-                    render.Text("Check sensor config", font = "tb-8", color = "#f00"),
-                ),
-            )
+        if sensor1 == None:
+            sensor1 = {"value": None, "unit": ""}
+        if sensor2 == None:
+            sensor2 = {"value": None, "unit": ""}
+
+        sensor1_decimals = int(config.get("col%d_sensor1_decimals" % i, "1"))
+        sensor2_decimals = int(config.get("col%d_sensor2_decimals" % i, "1"))
+        sensor1_unit_override = config.get("col%d_sensor1_unit" % i, "")
+        sensor2_unit_override = config.get("col%d_sensor2_unit" % i, "")
 
         columns.append({
             "label": label,
@@ -45,25 +61,20 @@ def main(config):
             "value_color": value_color,
             "sensor1": sensor1,
             "sensor2": sensor2,
+            "sensor1_decimals": sensor1_decimals,
+            "sensor2_decimals": sensor2_decimals,
+            "sensor1_unit_override": sensor1_unit_override,
+            "sensor2_unit_override": sensor2_unit_override,
         })
 
     label_font = config.get("label_font")
-    if not label_font or label_font == FONT_DEFAULT:
-        if column_count >= 4:
-            label_font = "terminus-12" if scale == 2 else "tom-thumb"
-        elif column_count >= 3:
-            label_font = "terminus-12" if scale == 2 else "tb-8"
-        else:
-            label_font = DEFAULT_LABEL_FONT_2X if scale == 2 else DEFAULT_LABEL_FONT
-
     value_font = config.get("value_font")
-    if not value_font or value_font == FONT_DEFAULT:
-        if column_count >= 4:
-            value_font = "terminus-14" if scale == 2 else "tb-8"
-        elif column_count >= 3:
-            value_font = "terminus-16" if scale == 2 else "tb-8"
-        else:
-            value_font = DEFAULT_VALUE_FONT_2X if scale == 2 else DEFAULT_VALUE_FONT
+    if not label_font or label_font == FONT_DEFAULT or not value_font or value_font == FONT_DEFAULT:
+        default_label_font, default_value_font = _get_default_fonts(column_count, scale)
+        if not label_font or label_font == FONT_DEFAULT:
+            label_font = default_label_font
+        if not value_font or value_font == FONT_DEFAULT:
+            value_font = default_value_font
 
     divider_color = config.get("divider_color", DEFAULT_DIVIDER_COLOR)
 
@@ -93,11 +104,17 @@ def fetch_sensor(entity_id, config):
     if not state:
         return None
 
-    isnum = (state.count(".") == 1 and state.replace(".", "").isdigit()) or state.isdigit()
+    isnum = state.strip().lstrip("-").replace(".", "", 1).isdigit()
     if not isnum:
         return None
 
-    return float(state)
+    attributes = data.get("attributes", {})
+    unit = attributes.get("unit_of_measurement", "")
+
+    return {
+        "value": float(state),
+        "unit": unit if unit else "",
+    }
 
 def render_columns(columns, label_font, value_font, divider_color, scale):
     DIVIDER_WIDTH = 1 * scale
@@ -111,6 +128,10 @@ def render_columns(columns, label_font, value_font, divider_color, scale):
                 col["label_color"],
                 col["sensor1"],
                 col["sensor2"],
+                col["sensor1_decimals"],
+                col["sensor2_decimals"],
+                col["sensor1_unit_override"],
+                col["sensor2_unit_override"],
                 label_font,
                 value_font,
                 col["value_color"],
@@ -133,11 +154,35 @@ def render_columns(columns, label_font, value_font, divider_color, scale):
         children = children,
     )
 
-def render_column(label, label_color, sensor1, sensor2, label_font, value_font, value_color, scale):
-    degree_symbol = "°" if scale == 2 else ""
+def render_column(label, label_color, sensor1_data, sensor2_data, sensor1_decimals, sensor2_decimals, sensor1_unit_override, sensor2_unit_override, label_font, value_font, value_color, scale):
+    sensor1_value = sensor1_data["value"]
+    sensor2_value = sensor2_data["value"]
 
-    sensor1_rounded = math.round(sensor1 * 10) / 10
-    sensor2_rounded = int(math.round(sensor2))
+    if sensor1_value == None:
+        sensor1_text = "N/A"
+    else:
+        if sensor1_decimals == 0:
+            sensor1_formatted = str(int(math.round(sensor1_value)))
+        elif sensor1_decimals == 1:
+            sensor1_formatted = str(math.round(sensor1_value * 10) / 10)
+        else:
+            sensor1_formatted = str(math.round(sensor1_value * 100) / 100)
+
+        sensor1_unit = sensor1_unit_override if sensor1_unit_override else sensor1_data["unit"]
+        sensor1_text = sensor1_formatted + sensor1_unit if scale == 2 else sensor1_formatted
+
+    if sensor2_value == None:
+        sensor2_text = "N/A"
+    else:
+        if sensor2_decimals == 0:
+            sensor2_formatted = str(int(math.round(sensor2_value)))
+        elif sensor2_decimals == 1:
+            sensor2_formatted = str(math.round(sensor2_value * 10) / 10)
+        else:
+            sensor2_formatted = str(math.round(sensor2_value * 100) / 100)
+
+        sensor2_unit = sensor2_unit_override if sensor2_unit_override else sensor2_data["unit"]
+        sensor2_text = sensor2_formatted + sensor2_unit if scale == 2 else sensor2_formatted
 
     return render.Column(
         expanded = True,
@@ -150,12 +195,12 @@ def render_column(label, label_color, sensor1, sensor2, label_font, value_font, 
                 color = label_color,
             ),
             render.Text(
-                str(sensor1_rounded) + degree_symbol,
+                sensor1_text,
                 font = value_font,
                 color = value_color,
             ),
             render.Text(
-                "%d%%" % sensor2_rounded,
+                sensor2_text,
                 font = value_font,
                 color = value_color,
             ),
@@ -198,11 +243,49 @@ def generate_column_fields(column_count):
                 desc = "Entity ID for column %d, row 1" % i,
                 icon = "gauge",
             ),
+            schema.Dropdown(
+                id = "col%d_sensor1_decimals" % i,
+                name = "Column %d Sensor 1 Decimals" % i,
+                desc = "Decimal places for sensor 1",
+                icon = "gear",
+                options = [
+                    schema.Option(display = "0 decimals", value = "0"),
+                    schema.Option(display = "1 decimal", value = "1"),
+                    schema.Option(display = "2 decimals", value = "2"),
+                ],
+                default = "1",
+            ),
+            schema.Text(
+                id = "col%d_sensor1_unit" % i,
+                name = "Column %d Sensor 1 Unit" % i,
+                desc = "Override unit for sensor 1 (leave blank to use HA unit)",
+                icon = "tag",
+                default = "",
+            ),
             schema.Text(
                 id = "col%d_sensor2_entity" % i,
                 name = "Column %d Sensor 2" % i,
                 desc = "Entity ID for column %d, row 2" % i,
                 icon = "gauge",
+            ),
+            schema.Dropdown(
+                id = "col%d_sensor2_decimals" % i,
+                name = "Column %d Sensor 2 Decimals" % i,
+                desc = "Decimal places for sensor 2",
+                icon = "gear",
+                options = [
+                    schema.Option(display = "0 decimals", value = "0"),
+                    schema.Option(display = "1 decimal", value = "1"),
+                    schema.Option(display = "2 decimals", value = "2"),
+                ],
+                default = "1",
+            ),
+            schema.Text(
+                id = "col%d_sensor2_unit" % i,
+                name = "Column %d Sensor 2 Unit" % i,
+                desc = "Override unit for sensor 2 (leave blank to use HA unit)",
+                icon = "tag",
+                default = "",
             ),
         ])
 
