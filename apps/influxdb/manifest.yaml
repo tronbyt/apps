@@ -1,0 +1,10 @@
+---
+id: influxdb
+name: InfluxDB
+summary: Display InfluxDB Data
+desc: Query an InfluxDB instance and display the result as a plot.
+author: ingmarstein
+fileName: influxdb.star
+packageName: influxdb
+recommended_interval: 60
+supports2x: true
