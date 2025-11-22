@@ -31,9 +31,10 @@ def main(config):
     metric = config.str("metric", "node_load1")
     hours = int(config.get("hours_history", 24))
     display_graph = config.bool("display_graph")
+    step_interval = config.str("step_interval", "1m")
 
     # Get the metric data
-    metric_data = get_metric_data(grafana_url, api_key, instance, metric, hours, display_graph)
+    metric_data = get_metric_data(grafana_url, api_key, instance, metric, hours, display_graph, step_interval)
 
     # Parse value range filters
     feed_value_range = parse_range(config.get("feed_value_range", None))
@@ -43,8 +44,9 @@ def main(config):
     feed2 = None
     display_graph2 = config.bool("display_graph2")
     metric2 = config.str("metric2", "")
+    step_interval2 = config.str("step_interval2", "1m")
     if metric2:
-        feed2 = get_metric_data(grafana_url, api_key, instance, metric2, hours, display_graph2)
+        feed2 = get_metric_data(grafana_url, api_key, instance, metric2, hours, display_graph2, step_interval2)
 
     if "error" in metric_data or (feed2 and "error" in feed2):  # if we have error key, then we display an error
         error_dict = dict()
@@ -82,12 +84,14 @@ def main(config):
         #FEED
         # build the feed_graph
         feed_graph = None
+
         # print(metric_data)
         if config.bool("display_graph") and len(metric_data["data"]) > 3:  # only make the graph if we have more than 3 points
             # interate through the points and convert to float and stick them an array
             points = []
             for i in range(len(metric_data["data"])):
                 points.append((i, float(metric_data["data"][i][1])))
+
             # print("points " + str(points))
             y_lim = (None, None)
             min_max = config.get("y_min_max", None)
@@ -109,6 +113,7 @@ def main(config):
             points = []
             for i in range(len(feed2["data"])):
                 points.append((i, float(feed2["data"][i][1])))
+
             # print("points " + str(points))
             y2_lim = (None, None)
             min_max = config.get("y2_min_max", None)
@@ -194,7 +199,7 @@ def main(config):
             ),
         )
 
-def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_series):
+def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_series, step_interval):
     if not grafana_url or not api_key or not instance:
         dummy = json.decode(JSON_DUMMY_DATA)
 
@@ -227,11 +232,12 @@ def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_ser
         start_time = end_time - (hours * 3600)
 
         # Query range endpoint for time series data
-        url = "https://%s/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query_range?query=%s&start=%d&end=%d&step=15s" % (
+        url = "https://%s/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query_range?query=%s&start=%d&end=%d&step=%s" % (
             grafana_url,
             query,
             start_time,
             end_time,
+            step_interval,
         )
     else:
         # Instant query endpoint for single value
@@ -253,12 +259,9 @@ def get_metric_data(grafana_url, api_key, instance, metric, hours, need_time_ser
     if res.status_code != 200:
         if DEBUG:
             print("DEBUG: API error - status code:", res.status_code)
-            print("DEBUG: Response body:", res.body())
         return {"error": "API returned status %d" % res.status_code}
 
     data = res.json()
-    if DEBUG:
-        print("DEBUG: API Response:", data)
 
     if data.get("status") == "success" and "data" in data:
         results = data["data"].get("result", [])
@@ -426,6 +429,15 @@ def get_schema():
     )
     fields.append(
         schema.Text(
+            id = "step_interval",
+            name = "Data Point Interval",
+            desc = "Time between data points (e.g., 15s, 1m, 5m, 1h)",
+            icon = "clock",
+            default = "1m",
+        ),
+    )
+    fields.append(
+        schema.Text(
             id = "y_min_max",
             name = "Graph min,max",
             desc = "Scale the graph by setting min and max. Leave blank to disable",
@@ -450,15 +462,6 @@ def get_schema():
             desc = "Metric Color",
             icon = "brush",
             default = "#5c9949",
-        ),
-    )
-    fields.append(
-        schema.Text(
-            id = "feed2_name",
-            name = "Metric 2 Name",
-            icon = "tag",
-            desc = "Optional Custom Label",
-            default = "",
         ),
     )
     fields.append(
@@ -503,6 +506,15 @@ def get_schema():
             desc = "Scale the graph by setting min and max. Leave blank to disable",
             icon = "compress",
             default = "",
+        ),
+    )
+    fields.append(
+        schema.Text(
+            id = "step_interval2",
+            name = "Graph 2 Data Point Interval",
+            desc = "Time between data points for graph 2 (e.g., 15s, 1m, 5m, 1h)",
+            icon = "clock",
+            default = "1m",
         ),
     )
 
