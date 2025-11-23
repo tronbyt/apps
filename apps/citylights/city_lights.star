@@ -32,8 +32,6 @@ DELAY = 200  # Delay between frames in milliseconds
 DURATION_SECONDS = 15  # Total animation duration in seconds
 NUM_FRAMES = DURATION_SECONDS * 1000 // DELAY  # Number of frames in the animation
 
-tallestBuilding = 0
-
 def gen_buildings(frame):
     buildings = [[0, 0, 0, 0, 0, False] for _ in range(BUILDINGS)]
     tallestBuildingHeight = 0
@@ -125,23 +123,17 @@ def update_tallest(building, frame):
         frame[light_y][light_x] = LIGHT_COLOR_ON
 
 def render_frame(frame):
-    children = [render_column(frame)]
-    return render.Stack(children = children)
-
-def render_column(frame):
-    rows = []
-    for row in frame:
-        rows.append(render_row(row))
-    return render.Column(children = rows)
-
-def render_row(row):
-    cells = []
-    for cell in row:
-        cells.append(render_cell(cell))
-    return render.Row(children = cells)
-
-def render_cell(cell):
-    return render.Box(width = 1, height = 1, color = cell)
+    return render.Column(
+        children = [
+            render.Row(
+                children = [
+                    render.Box(width = 1, height = 1, color = cell)
+                    for cell in row
+                ],
+            )
+            for row in frame
+        ],
+    )
 
 def main():
     random.seed(time.now().unix)
@@ -149,7 +141,7 @@ def main():
     frames = []
     frame = [[BACKGROUND_COLOR for _ in range(WIDTH)] for _ in range(HEIGHT)]
 
-    buildings = [[0, 0, 0, 0, 0, 0, 0] for _ in range(BUILDINGS)]
+    buildings = [[0, 0, 0, 0, 0, False] for _ in range(BUILDINGS)]
     buildings = gen_buildings(frame)
 
     for counter in range(NUM_FRAMES):
