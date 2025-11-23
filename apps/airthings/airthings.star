@@ -44,6 +44,7 @@ def main(config):
     onlyDisplayNotNormal = config.bool("onlyDisplayNotNormal")
     enableScrolling = config.bool("enableScrolling", True)
     scrollSpeed = int(config.get("scrollSpeed", "100"))
+    scrollDuration = int(config.get("scrollDuration") or "120")
     fontSize = config.get("fontSize", "medium")
     tempUnit = config.get("tempUnit", "celsius")
 
@@ -202,10 +203,10 @@ def main(config):
         radon = "n/a"
     else:
         # Round radon to 1 decimal place
-        radon = int(radon * 10) / 10
+        radon = int(radon * 10 + 0.5) / 10
     
     # Round temperature to 1 decimal place
-    temp = int(temp * 10) / 10
+    temp = int(temp * 10 + 0.5) / 10
     
     # Set font based on fontSize option
     if fontSize == "small":
@@ -260,7 +261,7 @@ def main(config):
                 ),
             ),
             delay = scrollSpeed,
-            max_age = 120,
+            max_age = scrollDuration,
         )
     else:
         return render.Root(
@@ -337,6 +338,7 @@ def get_schema():
                 name = "AirThings API Client Secret",
                 desc = "REQUIRED: API secret from https://dashboard.airthings.com/integrations/api-integration",
                 icon = "gear",
+                secret = True,
             ),
             schema.Text(
                 id = "clientId",
@@ -399,6 +401,13 @@ def get_schema():
                         value = "20",
                     ),
                 ],
+            ),
+            schema.Text(
+                id = "scrollDuration",
+                name = "Scroll Duration (seconds)",
+                desc = "Maximum time in seconds for one complete scroll cycle (default: 120)",
+                icon = "clock",
+                default = "120",
             ),
             schema.Dropdown(
                 id = "fontSize",
