@@ -5,18 +5,18 @@ Description: City Lights generates a random and mesmerizing nighttime cityscape.
 Author: Nicholas Arent
 """
 
+load("render.star", "canvas", "render")
 load("random.star", "random")
-load("render.star", "render")
-load("time.star", "time")
 
 # Constants
-HEIGHT = 32
-WIDTH = 64
+HEIGHT = canvas.height()
+WIDTH = canvas.width()
+IS_2X = canvas.is2x()
 BUILDINGS = 8
-BUILDING_MAX_W = 8
-BUILDING_MIN_W = 2
-BUILDING_MAX_H = 18
-BUILDING_MIN_H = 6
+BUILDING_MAX_W = 16 if IS_2X else 8
+BUILDING_MIN_W = 4 if IS_2X else 2
+BUILDING_MAX_H = 36 if IS_2X else 18
+BUILDING_MIN_H = 12 if IS_2X else 6
 WINDOW_COLOR_ON = "#E8E337"
 WINDOW_COLOR_OFF = "#222222"
 LIGHT_COLOR_ON = "#FF0000"
@@ -136,8 +136,6 @@ def render_frame(frame):
     )
 
 def main():
-    random.seed(time.now().unix)
-
     frames = []
     frame = [[BACKGROUND_COLOR for _ in range(WIDTH)] for _ in range(HEIGHT)]
 
