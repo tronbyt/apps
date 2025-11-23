@@ -1,7 +1,7 @@
 """
 Applet: City Lights
 Summary: Nighttime cityscape
-Description: City Lights generates a random and mesmorizing nighttime cityscape.
+Description: City Lights generates a random and mesmerizing nighttime cityscape.
 Author: Nicholas Arent
 """
 
@@ -23,7 +23,6 @@ LIGHT_COLOR_ON = "#FF0000"
 LIGHT_COLOR_OFF = "#420000ff"
 STAR_COLOR = "#DDDDDD"
 BACKGROUND_COLOR = "#000000"
-BORDER_COLOR = "#000001"
 
 # 0-x, 1-y, 2-height, 3-width, 4-windows, 5-tallest
 BUILDING_X, BUILDING_Y, BUILDING_H, BUILDING_W, BUILDING_WINDOWS, IS_TALLEST = range(6)
@@ -36,7 +35,7 @@ NUM_FRAMES = DURATION_SECONDS * 1000 // DELAY  # Number of frames in the animati
 tallestBuilding = 0
 
 def gen_buildings(frame):
-    buildings = [[0, 0, 0, 0, 0, 0, 0] for _ in range(BUILDINGS)]
+    buildings = [[0, 0, 0, 0, 0, False] for _ in range(BUILDINGS)]
     tallestBuildingHeight = 0
     tallestBuilding = 0
 
@@ -48,15 +47,15 @@ def gen_buildings(frame):
         buildings[b][BUILDING_WINDOWS] = buildings[b][BUILDING_W] * buildings[b][BUILDING_H]
         buildings[b][IS_TALLEST] = False
 
-        frame = set_windows_off(buildings[b], frame)
+        set_windows_off(buildings[b], frame)
 
         if tallestBuildingHeight <= buildings[b][BUILDING_H]:
             tallestBuilding = b
             tallestBuildingHeight = buildings[b][BUILDING_H]
 
-    frame = set_tallest_building(buildings[tallestBuilding], frame)
+    set_tallest_building(buildings[tallestBuilding], frame)
 
-    return buildings, frame
+    return buildings
 
 def set_windows_off(building, frame):
     for y in range(building[BUILDING_H]):
@@ -64,7 +63,6 @@ def set_windows_off(building, frame):
             window_x = building[BUILDING_X] + x
             window_y = building[BUILDING_Y] - y
             frame[window_y][window_x] = WINDOW_COLOR_OFF
-    return frame
 
 def set_tallest_building(building, frame):
     building[IS_TALLEST] = True
@@ -77,12 +75,11 @@ def set_tallest_building(building, frame):
             if window_x > 63:
                 window_x = 63
             frame[window_y][window_x] = WINDOW_COLOR_OFF
+        building[BUILDING_WINDOWS] = building[BUILDING_W] * building[BUILDING_H]
 
     light_x = building[BUILDING_X] + (building[BUILDING_W] // 2)
     light_y = building[BUILDING_Y] - building[BUILDING_H]
     frame[light_y][light_x] = LIGHT_COLOR_OFF
-
-    return frame
 
 def stars(frame):
     for _ in range(random.number(3, 5)):
@@ -91,7 +88,6 @@ def stars(frame):
 
         if not_star_collision(frame, star_y, star_x):
             frame[star_y][star_x] = STAR_COLOR
-    return frame
 
 def not_star_collision(frame, star_y, star_x):
     no_collision = not_color_collision(frame[star_y][star_x]) and not_color_collision(frame[star_y + 1][star_x])
@@ -105,7 +101,7 @@ def not_star_collision(frame, star_y, star_x):
     return no_collision
 
 def not_color_collision(f):
-    return (f != WINDOW_COLOR_ON) and (f != WINDOW_COLOR_OFF) and (f != LIGHT_COLOR_ON) and (f != LIGHT_COLOR_OFF)
+    return f not in (WINDOW_COLOR_ON, WINDOW_COLOR_OFF, LIGHT_COLOR_ON, LIGHT_COLOR_OFF)
 
 def update_view(frame, buildings, light_counter):
     for b in range(BUILDINGS):
@@ -117,10 +113,8 @@ def update_view(frame, buildings, light_counter):
         if window_x > 63:
             window_x = 63
         frame[window_y][window_x] = WINDOW_COLOR_ON
-        if (buildings[b][IS_TALLEST] == True) and (light_counter % 6 == 0):
-            frame = update_tallest(buildings[b], frame)
-
-    return frame
+        if (buildings[b][IS_TALLEST]) and (light_counter % 6 == 0):
+            update_tallest(buildings[b], frame)
 
 def update_tallest(building, frame):
     light_x = building[BUILDING_X] + (building[BUILDING_W] // 2)
@@ -129,8 +123,6 @@ def update_tallest(building, frame):
         frame[light_y][light_x] = LIGHT_COLOR_OFF
     else:
         frame[light_y][light_x] = LIGHT_COLOR_ON
-
-    return frame
 
 def render_frame(frame):
     children = [render_column(frame)]
@@ -158,11 +150,11 @@ def main():
     frame = [[BACKGROUND_COLOR for _ in range(WIDTH)] for _ in range(HEIGHT)]
 
     buildings = [[0, 0, 0, 0, 0, 0, 0] for _ in range(BUILDINGS)]
-    buildings, frame = gen_buildings(frame)
+    buildings = gen_buildings(frame)
 
     for counter in range(NUM_FRAMES):
-        frame = stars(frame)
-        frame = update_view(frame, buildings, counter)
+        stars(frame)
+        update_view(frame, buildings, counter)
         frames.append(render_frame(frame))
 
     return render.Root(
