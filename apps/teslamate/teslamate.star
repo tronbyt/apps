@@ -266,7 +266,7 @@ def main(config):
     plugged_states = ["on", "true", "1", "yes", "plugged in", "plugged", "connected"]
     is_plugged = str(plugged_in).lower() in plugged_states
 
-    if charger_power > 0:
+    if float(charger_power) > 0:
         image = BOLT_ANIMATED
     elif battery_val >= limit_val and is_plugged:
         image = BOLT_GREEN
