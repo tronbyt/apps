@@ -156,11 +156,11 @@ def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, c
     # Default values in case of errors
     defaults = {
         "name": "Tesla",
-        "rangemi": "0",
-        "batterylevel": "0",
-        "charger_power": "0",
+        "rangemi": 0.0,
+        "batterylevel": 0.0,
+        "charger_power": 0.0,
         "plugged_in": "off",
-        "charge_limit": "80",
+        "charge_limit": 80.0,
     }
 
     # Create a template that fetches all entities in a single request
@@ -168,11 +168,11 @@ def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, c
     template = """
 {
   "name": "{{ states('%s') | default('Tesla') }}",
-  "rangemi": "{{ states('%s') | default('0') }}",
-  "batterylevel": "{{ states('%s') | default('0') }}",
-  "charger_power": "{{ states('%s') | default('0') }}",
+  "rangemi": "{{ states('%s') | float(0) }}",
+  "batterylevel": "{{ states('%s') | float(0) }}",
+  "charger_power": "{{ states('%s') | float(0) }}",
   "plugged_in": "{{ states('%s') | default('off') }}",
-  "charge_limit": "{{ states('%s') | default('80') }}"
+  "charge_limit": "{{ states('%s') | float(80) }}"
 }
 """.strip() % (name_entity, range_entity, battery_entity, charger_power_entity, plugged_in_entity, charge_limit_entity)
 
@@ -258,16 +258,15 @@ def main(config):
     # Any non-zero charger power = charging
     # Battery level equals charge limit = complete
     # Plugged in but not charging = connected/not charging
-    charger_power_val = float(charger_power) if charger_power else 0
-    battery_val = int(float(batterylevel)) if batterylevel else 0
-    limit_val = int(float(charge_limit)) if charge_limit else 80
+    battery_val = int(batterylevel)
+    limit_val = int(charge_limit)
 
     # Handle various string representations of boolean values
     # Added common TeslaMate states: "unplugged", "plugged in"
     plugged_states = ["on", "true", "1", "yes", "plugged in", "plugged", "connected"]
     is_plugged = str(plugged_in).lower() in plugged_states
 
-    if charger_power_val > 0:
+    if charger_power > 0:
         image = BOLT_ANIMATED
     elif battery_val >= limit_val and is_plugged:
         image = BOLT_GREEN
@@ -276,7 +275,7 @@ def main(config):
     else:
         image = BOLT_GREY
 
-    battery_level = int(float(batterylevel)) if batterylevel else 0
+    battery_level = int(batterylevel)
     state = {
         "batterylevel": battery_level,
         "color": get_battery_color(battery_level, color_stops),
