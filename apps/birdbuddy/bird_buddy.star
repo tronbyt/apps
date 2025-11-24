@@ -63,6 +63,24 @@ def main(config):
     # Get the latest bird sighting
     latest_sighting = get_latest_sighting(token, feeders)
 
+    # Only render if there was a sighting in the last hour
+    timestamp = latest_sighting.get("timestamp")
+    if not timestamp:
+        return []
+
+    clean_ts = clean_timestamp(timestamp)
+    if not clean_ts:
+        return []
+
+    sighting_time = time.parse_time(clean_ts, format = "2006-01-02T15:04:05Z")
+    if not sighting_time:
+        return []
+
+    now = time.now()
+    diff_seconds = now.unix - sighting_time.unix
+    if diff_seconds > 3600:  # older than 1 hour
+        return []
+
     return render_bird_display(latest_sighting)
 
 def get_auth_token(username, password):
@@ -772,21 +790,16 @@ def get_timestamp_color(timestamp_str):
     current_time = time.now()
     diff_seconds = current_time.unix - sighting_time.unix
 
-    # Color decay over 24 hours (86400 seconds)
-    # 0-15 minutes (900 seconds): Full green #00cc66
-    # 15 minutes - 24 hours: Decay to gray #CCCCCC
-
-    if diff_seconds <= 900:  # 15 minutes or less - full green
-        return "#00CC66"
-    elif diff_seconds >= 86400:  # 24 hours or more - full gray
+    # Color decay over 1 hour (3600 seconds)
+    if diff_seconds >= 3600:  # 1 hour or more - full gray
         return "#CCCCCC"
     else:
         # Linear interpolation between green and gray
         # Green: R=0, G=204, B=102
         # Gray:  R=204, G=204, B=204
 
-        # Calculate progress from 15 minutes to 24 hours
-        progress = (diff_seconds - 900) / (86400 - 900)  # 0.0 to 1.0
+        # Calculate progress from 0 minutes to 1 hour
+        progress = (diff_seconds) / (3600)  # 0.0 to 1.0
 
         # Interpolate each color component
         red = int(0 + (204 * progress))  # Red goes from 0 to 204
