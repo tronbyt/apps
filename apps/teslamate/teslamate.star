@@ -232,11 +232,11 @@ def main(config):
     if not ha_url:
         # Use dummy data
         name = "Shadow"
-        rangemi = "133"
-        batterylevel = "43"
-        charger_power = "0"
+        rangemi = 133.0
+        batterylevel = 43.0
+        charger_power = 0.0
         plugged_in = "on"  # Represents is_plugged: True
-        charge_limit = "80"
+        charge_limit = 80.0
     else:
         if not ha_token:
             return render.Root(
