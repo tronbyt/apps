@@ -5,6 +5,7 @@ Description: Displays an animated tree and Merry Christmas and (optionally) the 
 Author: Michael Creamer
 """
 
+load("humanize.star", "humanize")
 load("images/christmastree.png", CHRISTMASTree = "file")
 load("images/christmastree1.png", CHRISTMASTree1 = "file")
 load("images/christmastree2.png", CHRISTMASTree2 = "file")
@@ -30,7 +31,6 @@ def main(config):
     line2Text = translations["Christmas"].get(lang, "Christmas")
     line1Color = config.get("line1Color", "#ff0000")
     line2Color = config.get("line2Color", "#00ff00")
-    line3Color = config.get("line3Color", "#0000ff")
     showCountdown = config.bool("showCountdown", True)
     maxCountdownValue = config.get("maxCountdownValue", 365)
 
@@ -51,11 +51,6 @@ def main(config):
     date_diff = current_xmas - now
     days = math.ceil(date_diff.hours / 24)
 
-    if days == 1:
-        line3Text = "1 " + translations["day"].get(lang, "day")
-    else:
-        line3Text = str(days) + " " + translations["days"].get(lang, "days")
-
     #---------------------------
     # Setup array of text lines
     #---------------------------
@@ -74,6 +69,8 @@ def main(config):
         render.Text(content = line2Text, font = font, color = line2Color),
     ]
     if showCountdown and days > 0:
+        line3Color = config.get("line3Color", "#0000ff")
+        line3Text = humanize.pluralize(days, translations["day"].get(lang, "day"), translations["days"].get(lang, "days"))
         child = render.Padding(
             child = render.Text(content = line3Text, font = font, color = line3Color),
             pad = (0, 3 * scale, 0, 0),
