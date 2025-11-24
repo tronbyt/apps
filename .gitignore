@@ -22,13 +22,7 @@ BUILD.bazel
 # MacOS
 .DS_Store
 
-# Pixlet
-*.webp
-*.gif
 *.tar.gz
-
-# allow thumbnails in app folders
-!apps/**/*.webp
 
 .vscode
 node_modules/
