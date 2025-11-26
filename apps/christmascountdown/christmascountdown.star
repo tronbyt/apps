@@ -6,6 +6,7 @@ Author: Michael Creamer
 """
 
 load("humanize.star", "humanize")
+load("i18n.star", "tr")
 load("images/christmastree.png", CHRISTMASTree = "file")
 load("images/christmastree1.png", CHRISTMASTree1 = "file")
 load("images/christmastree2.png", CHRISTMASTree2 = "file")
@@ -15,20 +16,12 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-translations = {
-    "Merry": {"en": "Merry", "de": "Frohe"},
-    "Christmas": {"en": "Christmas", "de": "Weihnachten"},
-    "days": {"en": "days", "de": "Tage"},
-    "day": {"en": "day", "de": "Tag"},
-}
-
 def main(config):
     #-----------------------
     # Get Configured Values
     #-----------------------
-    lang = config.get("lang", "en")
-    line1Text = translations["Merry"].get(lang, "Merry")
-    line2Text = translations["Christmas"].get(lang, "Christmas")
+    line1Text = tr("Merry")
+    line2Text = tr("Christmas")
     line1Color = config.get("line1Color", "#ff0000")
     line2Color = config.get("line2Color", "#00ff00")
     showCountdown = config.bool("showCountdown", True)
@@ -60,8 +53,10 @@ def main(config):
     image_height = 32
 
     text_col_padding = (image_width * scale, 0, 0, 0)
-    if lang == "de":
-        # German text is wider, so let it overlap the tree a bit
+
+    # If text is long, let it overlap the tree a bit
+    max_text_len = max(len(line1Text), len(line2Text))
+    if max_text_len > 9:
         text_col_padding = (image_width * scale - 7 * scale, 0, 0, 0)
 
     displayChildren = [
@@ -70,7 +65,7 @@ def main(config):
     ]
     if showCountdown and days > 0:
         line3Color = config.get("line3Color", "#0000ff")
-        line3Text = humanize.pluralize(days, translations["day"].get(lang, "day"), translations["days"].get(lang, "days"))
+        line3Text = humanize.plural(days, tr("day"), tr("days"))
         child = render.Padding(
             child = render.Text(content = line3Text, font = font, color = line3Color),
             pad = (0, 3 * scale, 0, 0),
@@ -188,17 +183,6 @@ def get_schema():
                 desc = "Max Remaining Value",
                 icon = "gear",
                 default = "365",
-            ),
-            schema.Dropdown(
-                id = "lang",
-                name = "Language",
-                desc = "The language for the text",
-                icon = "language",
-                default = "en",
-                options = [
-                    schema.Option(display = "English", value = "en"),
-                    schema.Option(display = "Deutsch", value = "de"),
-                ],
             ),
         ],
     )
