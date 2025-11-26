@@ -5,10 +5,10 @@ Description: Energy production and consumption monitor using Home Assistant.
 Author: ingmarstein
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("i18n.star", "tr")
 load("images/audi_logo.png", AUDI_LOGO_24x9 = "file")
 load("images/autarky.png", AUTARKY_16x16 = "file")
 
@@ -91,45 +91,6 @@ ENTITY_AUTARKY_DAY = "entity_autarky_day"
 ENTITY_AUTARKY_WEEK = "entity_autarky_week"
 ENTITY_AUTARKY_MONTH = "entity_autarky_month"
 ENTITY_AUTARKY_YEAR = "entity_autarky_year"
-
-LANGUAGE_LOCALES = {
-    "Energy Today": {
-        "de": "Energie heute",
-        "en": "Energy Today",
-    },
-    "Today:": {
-        "de": "Heute:",
-        "en": "Today:",
-    },
-    "Week:": {
-        "de": "Woche:",
-        "en": "Week:",
-    },
-    "Month:": {
-        "de": "Monat:",
-        "en": "Month:",
-    },
-    "Year:": {
-        "de": "Jahr:",
-        "en": "Year:",
-    },
-    "EV Energy": {
-        "de": "Auto Energie",
-        "en": "EV Energy",
-    },
-    "D": {
-        "de": "T",
-        "en": "D",
-    },
-    "W": {
-        "de": "W",
-        "en": "W",
-    },
-    "M": {
-        "de": "M",
-        "en": "M",
-    },
-}
 
 GRAY = "#777777"
 RED = "#AA0000"  # very bright at FF, dim a little to AA
@@ -259,8 +220,6 @@ def render_entity(entity, absolute_value = False, convert_to_kw = False, with_un
     return value_str
 
 def main(config):
-    lang = config.get("lang", "en")
-
     scale = 2 if canvas.is2x() else 1
 
     # Scaled fonts
@@ -551,7 +510,7 @@ def main(config):
                             main_align = "space_evenly",
                             cross_align = "center",
                             children = [
-                                render.Text(LANGUAGE_LOCALES["Energy Today"][lang], font = font_default),
+                                render.Text(tr("Energy Today"), font = font_default),
                             ],
                         ),
                         render.Row(
@@ -610,8 +569,8 @@ def main(config):
                             expanded = True,
                             main_align = "space_between",
                             children = [
-                                render.Row([render.Text(LANGUAGE_LOCALES["Today:"][lang], font = font_small, color = GRAY)]),
-                                render.Row([render.Text(LANGUAGE_LOCALES["Month:"][lang], font = font_small, color = GRAY)]),
+                                render.Row([render.Text(tr("Today:"), font = font_small, color = GRAY)]),
+                                render.Row([render.Text(tr("Month:"), font = font_small, color = GRAY)]),
                             ],
                         ),
 
@@ -636,8 +595,8 @@ def main(config):
                             expanded = True,
                             main_align = "space_between",
                             children = [
-                                render.Row([render.Text(LANGUAGE_LOCALES["Week:"][lang], font = font_small, color = GRAY)]),
-                                render.Row([render.Text(LANGUAGE_LOCALES["Year:"][lang], font = font_small, color = GRAY)]),
+                                render.Row([render.Text(tr("Week:"), font = font_small, color = GRAY)]),
+                                render.Row([render.Text(tr("Year:"), font = font_small, color = GRAY)]),
                             ],
                         ),
 
@@ -666,7 +625,7 @@ def main(config):
                     expanded = True,
                     cross_align = "center",
                     children = [
-                        render.Text(LANGUAGE_LOCALES["EV Energy"][lang], font = font_small),
+                        render.Text(tr("EV Energy"), font = font_small),
                         render.Row(
                             expanded = True,
                             main_align = "space_between",
@@ -685,17 +644,17 @@ def main(config):
                                     cross_align = "start",
                                     children = [
                                         render.Text(
-                                            content = LANGUAGE_LOCALES["D"][lang],
+                                            content = tr("D"),
                                             font = font_medium,
                                             color = GRAY,
                                         ),
                                         render.Text(
-                                            content = LANGUAGE_LOCALES["W"][lang],
+                                            content = tr("W"),
                                             font = font_medium,
                                             color = GRAY,
                                         ),
                                         render.Text(
-                                            content = LANGUAGE_LOCALES["M"][lang],
+                                            content = tr("M"),
                                             font = font_medium,
                                             color = GRAY,
                                         ),
@@ -1096,17 +1055,6 @@ def get_schema():
                         display = "5 sec",
                         value = "5",
                     ),
-                ],
-            ),
-            schema.Dropdown(
-                id = "lang",
-                name = "Language",
-                desc = "The language to display the information",
-                icon = "language",
-                default = "en",
-                options = [
-                    schema.Option(display = "Deutsch", value = "de"),
-                    schema.Option(display = "English", value = "en"),
                 ],
             ),
             schema.Toggle(

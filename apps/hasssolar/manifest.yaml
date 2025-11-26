@@ -9,3 +9,4 @@ packageName: hasssolar
 recommended_interval: 5
 recommendedInterval: 5
 supports2x: true
+minPixletVersion: 0.49.0
