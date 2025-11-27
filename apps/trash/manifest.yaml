@@ -5,4 +5,5 @@ summary: 'Notification: trash'
 desc: Displays a reminder to take out the trash.
 author: savdagod
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

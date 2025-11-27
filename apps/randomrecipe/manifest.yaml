@@ -5,3 +5,4 @@ summary: Get a random recipe idea
 desc: Display a random recipe from themealdb.com.
 author: noahpodgurski
 recommended_interval: 5
+recommendedInterval: 5

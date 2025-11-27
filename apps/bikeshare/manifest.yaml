@@ -7,3 +7,4 @@ author: snorremd
 fileName: bikeshare.star
 packageName: bikeshare
 recommended_interval: 5
+recommendedInterval: 5

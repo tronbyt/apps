@@ -12,3 +12,4 @@ author: Kevin Eder
 fileName: mta_bus.star
 packageName: mtabus
 recommended_interval: 5
+recommendedInterval: 5

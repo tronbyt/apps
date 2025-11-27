@@ -7,3 +7,4 @@ author: mattcaruso <Matt Caruso>
 fileName: next_event.star
 packageName: nextevent
 recommended_interval: 5
+recommendedInterval: 5

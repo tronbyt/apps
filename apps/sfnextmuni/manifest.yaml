@@ -7,3 +7,4 @@ author: Martin Strauss
 fileName: sf_next_muni.star
 packageName: sfnextmuni
 recommended_interval: 5
+recommendedInterval: 5

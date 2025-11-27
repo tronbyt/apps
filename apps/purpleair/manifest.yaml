@@ -7,3 +7,4 @@ author: posburn
 fileName: purpleair.star
 packageName: purpleair
 recommended_interval: 5
+recommendedInterval: 5

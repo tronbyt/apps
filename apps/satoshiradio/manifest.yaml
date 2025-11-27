@@ -7,4 +7,5 @@ author: redboer
 fileName: satoshiradio.star
 packageName: satoshiradio
 recommended_interval: 5
+recommendedInterval: 5
 

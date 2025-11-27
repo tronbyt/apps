@@ -5,3 +5,4 @@ summary: Track Madison Buses
 desc: Check arrivals for a given stop in Madison.
 author: Corey Johnsen
 recommended_interval: 5
+recommendedInterval: 5

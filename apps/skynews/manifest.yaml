@@ -7,3 +7,4 @@ author: meejle
 fileName: skynews.star
 packageName: skynews
 recommended_interval: 10
+recommendedInterval: 10

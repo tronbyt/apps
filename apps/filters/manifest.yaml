@@ -5,4 +5,5 @@ summary: 'Notification: filters'
 desc: Displays a notification that filters need to be replaced.
 author: savdagod
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

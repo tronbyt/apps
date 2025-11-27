@@ -5,3 +5,4 @@ summary: Random Schopenhauer quote
 desc: The App displays a random quote by Arthur Schopenhauer.
 author: nelken
 recommended_interval: 5
+recommendedInterval: 5

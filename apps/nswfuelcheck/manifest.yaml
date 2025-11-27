@@ -7,3 +7,4 @@ author: M0ntyP
 fileName: nsw_fuel_check.star
 packageName: nswfuelcheck
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Felix Bruns
 fileName: hvv_departures.star
 packageName: hvvdepartures
 recommended_interval: 5
+recommendedInterval: 5

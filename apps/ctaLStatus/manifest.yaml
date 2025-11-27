@@ -7,3 +7,4 @@ author: sgomez72
 fileName: ctaLStatus.star
 packageName: ctalstatus
 recommended_interval: 5
+recommendedInterval: 5

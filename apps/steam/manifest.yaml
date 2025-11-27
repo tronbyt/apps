@@ -7,3 +7,4 @@ author: Jeremy Tavener
 fileName: steam.star
 packageName: steam
 recommended_interval: 5
+recommendedInterval: 5

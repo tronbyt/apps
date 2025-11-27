@@ -5,3 +5,4 @@ summary: Anime next episode
 desc: Tells when the next episode of an anime is via anilist.
 author: brianmakesthings
 recommended_interval: 5
+recommendedInterval: 5

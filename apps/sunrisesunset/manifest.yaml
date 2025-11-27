@@ -7,3 +7,4 @@ author: Alan Fleming
 fileName: sunrise_sunset.star
 packageName: sunrisesunset
 recommended_interval: 5
+recommendedInterval: 5

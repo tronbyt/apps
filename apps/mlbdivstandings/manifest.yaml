@@ -7,3 +7,4 @@ author: Jake Manske
 fileName: mlbdivstandings.star
 packageName: mlbdivstandings
 recommended_interval: 5
+recommendedInterval: 5

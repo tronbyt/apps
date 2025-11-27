@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: atc_radar.star
 packageName: atcradar
 recommended_interval: 5
+recommendedInterval: 5

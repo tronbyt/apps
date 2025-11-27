@@ -7,3 +7,4 @@ author: quacksire
 fileName: caltrain.star
 packageName: caltrain
 recommended_interval: 5
+recommendedInterval: 5

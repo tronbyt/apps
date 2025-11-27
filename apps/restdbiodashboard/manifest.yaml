@@ -7,3 +7,4 @@ author: romerod
 fileName: restdbiodashboard.star
 packageName: restdbiodashboard
 recommended_interval: 5
+recommendedInterval: 5

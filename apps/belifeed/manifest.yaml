@@ -7,3 +7,4 @@ author: leoadberg
 fileName: beli_feed.star
 packageName: belifeed
 recommended_interval: 5
+recommendedInterval: 5

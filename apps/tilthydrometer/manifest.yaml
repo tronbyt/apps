@@ -7,3 +7,4 @@ author: DSUmjham
 fileName: tilt_hydrometer.star
 packageName: tilthydrometer
 recommended_interval: 5
+recommendedInterval: 5

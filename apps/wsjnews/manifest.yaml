@@ -7,3 +7,4 @@ author: jvivona
 fileName: wsj_news.star
 packageName: wsjnews
 recommended_interval: 10
+recommendedInterval: 10

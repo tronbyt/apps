@@ -7,3 +7,4 @@ author: wojciechka
 fileName: any_progressbar.star
 packageName: anyprogressbar
 recommended_interval: 5
+recommendedInterval: 5

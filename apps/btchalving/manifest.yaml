@@ -7,3 +7,4 @@ author: PMK (@pmk)
 fileName: btchalving.star
 packageName: btchalving
 recommended_interval: 1
+recommendedInterval: 1

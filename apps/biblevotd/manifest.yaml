@@ -7,3 +7,4 @@ author: danrods
 fileName: bible_votd.star
 packageName: biblevotd
 recommended_interval: 5
+recommendedInterval: 5

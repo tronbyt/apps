@@ -15,12 +15,13 @@ while IFS=': ' read -r app interval || [[ -n "$app" ]]; do
     # Check if recommended_interval already exists
     if grep -q "recommended_interval:" "$manifest_file"; then
       # Replace existing recommended_interval line - compatible with both GNU and BSD sed
-      sed -i.bak "s/recommended_interval:.*$/recommended_interval: $interval/" "$manifest_file" && rm -f "${manifest_file}.bak"
+      sed -i.bak "s/recommended_interval:.*$/recommended_interval: $interval\nrecommendedInterval: $interval/" "$manifest_file" && rm -f "${manifest_file}.bak"
     else
       # Add recommended_interval before the first blank line or at the end of file
-      awk -v interval="$interval" '
-        /^$/ && !added { print "recommended_interval: " interval; added=1; print ""; next }
-        END { if(!added) print "recommended_interval: " interval }
+      awk -v interval="$interval" \
+        '
+        /^$/ && !added { print "recommended_interval: " interval; print "recommendedInterval: " interval; added=1; print ""; next }
+        END { if(!added) { print "recommended_interval: " interval; print "recommendedInterval: " interval; } }
         { print }
       ' "$manifest_file" > "${manifest_file}.tmp" && mv "${manifest_file}.tmp" "$manifest_file"
     fi

@@ -7,3 +7,4 @@ author: sumara523
 fileName: drawbridge_status.star
 packageName: drawbridgestatus
 recommended_interval: 5
+recommendedInterval: 5

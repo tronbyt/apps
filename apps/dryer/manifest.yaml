@@ -5,4 +5,5 @@ summary: 'Notification: dryer'
 desc: Displays a notification that a dryer is done.
 author: savdagod
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

@@ -7,3 +7,4 @@ author: dev-manuel
 fileName: tagesschau_news.star
 packageName: tagesschau_news
 recommended_interval: 10
+recommendedInterval: 10

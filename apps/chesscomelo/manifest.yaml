@@ -7,3 +7,4 @@ author: UnBurn
 fileName: chesscom_elo.star
 packageName: chesscomelo
 recommended_interval: 5
+recommendedInterval: 5

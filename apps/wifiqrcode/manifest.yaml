@@ -7,3 +7,4 @@ author: misusage
 fileName: wifi_qr_code.star
 packageName: wifiqrcode
 recommended_interval: 5
+recommendedInterval: 5

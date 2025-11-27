@@ -5,3 +5,4 @@ summary: 'Unleashed Firmware'
 desc: Displays Flipper Zero Unleashed release date.
 author: W00tock
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Gabe Ochoa
 fileName: datadog_charts.star
 packageName: datadogcharts
 recommended_interval: 5
+recommendedInterval: 5

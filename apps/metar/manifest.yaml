@@ -7,3 +7,4 @@ author: Alexander Valys
 fileName: metar.star
 packageName: metar
 recommended_interval: 5
+recommendedInterval: 5

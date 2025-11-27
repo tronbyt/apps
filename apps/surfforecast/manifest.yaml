@@ -7,3 +7,4 @@ author: smith-kyle
 fileName: surf_forecast.star
 packageName: surfforecast
 recommended_interval: 5
+recommendedInterval: 5

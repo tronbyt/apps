@@ -7,3 +7,4 @@ author: Cavallando
 fileName: datadog_monitors.star
 packageName: datadogmonitors
 recommended_interval: 5
+recommendedInterval: 5

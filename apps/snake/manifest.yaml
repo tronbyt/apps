@@ -7,3 +7,4 @@ author: noahpodgurski
 fileName: snake.star
 packageName: snake
 recommended_interval: 5
+recommendedInterval: 5

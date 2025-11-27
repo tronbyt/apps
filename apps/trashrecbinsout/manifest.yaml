@@ -5,4 +5,5 @@ summary: 'Notification: recycle bins'
 desc: Displays a reminder that the recycle bins are out.
 author: savdagod
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

@@ -7,3 +7,4 @@ author: Chris Jones (@IPv6Freely)
 fileName: iss_tracker.star
 packageName: isstracker
 recommended_interval: 5
+recommendedInterval: 5

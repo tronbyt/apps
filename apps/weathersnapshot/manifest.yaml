@@ -7,3 +7,4 @@ author: Ariel Tian
 fileName: weather_snapshot.star
 packageName: weathersnapshot
 recommended_interval: 5
+recommendedInterval: 5

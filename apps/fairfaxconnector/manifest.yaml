@@ -7,3 +7,4 @@ author: Austin Pearce
 fileName: fairfax_connector.star
 packageName: fairfaxconnector
 recommended_interval: 5
+recommendedInterval: 5

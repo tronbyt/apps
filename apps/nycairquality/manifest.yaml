@@ -7,3 +7,4 @@ author: theterg
 fileName: nyc_air_quality.star
 packageName: nycairquality
 recommended_interval: 5
+recommendedInterval: 5

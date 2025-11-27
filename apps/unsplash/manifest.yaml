@@ -7,4 +7,5 @@ author: zephyern, gabe565
 fileName: unsplash.star
 packageName: unsplash
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

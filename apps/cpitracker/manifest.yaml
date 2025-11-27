@@ -5,3 +5,4 @@ summary: Track monthly CPI trends
 desc: Track monthly CPI trends as well as the current CPI value today!
 author: Robert Ison
 recommended_interval: 1
+recommendedInterval: 1

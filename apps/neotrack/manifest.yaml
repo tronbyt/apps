@@ -7,3 +7,4 @@ author: brettohland
 fileName: neotrack.star
 packageName: neotrack
 recommended_interval: 5
+recommendedInterval: 5

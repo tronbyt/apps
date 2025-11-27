@@ -7,3 +7,4 @@ author: maxa010
 fileName: seattle_transit.star
 packageName: seattletransit
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: imcnaugh
 fileName: cta_train_tracker.star
 packageName: ctatraintracker
 recommended_interval: 5
+recommendedInterval: 5

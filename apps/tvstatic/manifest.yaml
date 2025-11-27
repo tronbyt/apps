@@ -7,3 +7,4 @@ author: Snuckey
 fileName: tv_static.star
 packageName: tvstatic
 recommended_interval: 5
+recommendedInterval: 5

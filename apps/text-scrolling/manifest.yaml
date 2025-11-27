@@ -5,4 +5,5 @@ summary: Displays a scrolling text
 desc: Displays a scrolling text.
 author: savedagod, gabe565
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

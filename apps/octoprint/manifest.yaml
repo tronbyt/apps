@@ -7,3 +7,4 @@ author: noahpodgurski
 fileName: octoprint.star
 packageName: octoprint
 recommended_interval: 5
+recommendedInterval: 5

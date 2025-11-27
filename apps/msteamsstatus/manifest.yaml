@@ -7,3 +7,4 @@ author: schumatt
 fileName: ms_teams_status.star
 packageName: msteamsstatus
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Sebastian Ekström
 fileName: sveriges_radio.star
 packageName: sverigesradio
 recommended_interval: 10
+recommendedInterval: 10

@@ -7,3 +7,4 @@ author: LukiLeu
 fileName: sbb_timetable.star
 packageName: sbbtimetable
 recommended_interval: 5
+recommendedInterval: 5

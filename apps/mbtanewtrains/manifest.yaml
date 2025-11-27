@@ -7,3 +7,4 @@ author: joshspicer
 fileName: mbta_new_trains.star
 packageName: mbtanewtrains
 recommended_interval: 5
+recommendedInterval: 5

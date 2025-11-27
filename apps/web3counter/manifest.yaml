@@ -7,3 +7,4 @@ author: Nick Kuzmik (github.com/kuzmik)
 fileName: web_3_counter.star
 packageName: web3counter
 recommended_interval: 5
+recommendedInterval: 5

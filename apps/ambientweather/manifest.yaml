@@ -7,3 +7,4 @@ author: Jon Maddox
 fileName: ambient_weather.star
 packageName: ambientweather
 recommended_interval: 5
+recommendedInterval: 5

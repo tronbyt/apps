@@ -7,3 +7,4 @@ author: sepowitz
 fileName: daily_reminder.star
 packageName: dailyreminder
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Aaron Brace
 fileName: goldpriceticker.star
 packageName: goldpriceticker
 recommended_interval: 5
+recommendedInterval: 5

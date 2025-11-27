@@ -7,3 +7,4 @@ author: Adam Wojciechowski
 fileName: nyc_asp_status.star
 packageName: nycaspstatus
 recommended_interval: 5
+recommendedInterval: 5

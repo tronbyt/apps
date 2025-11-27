@@ -7,3 +7,4 @@ author: noahpodgurski
 fileName: publicapi.star
 packageName: publicapi
 recommended_interval: 5
+recommendedInterval: 5

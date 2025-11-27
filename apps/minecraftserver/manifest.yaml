@@ -7,3 +7,4 @@ author: Michael Blades
 fileName: minecraft_server.star
 packageName: minecraftserver
 recommended_interval: 5
+recommendedInterval: 5

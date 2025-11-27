@@ -7,3 +7,4 @@ author: tavdog
 fileName: solar_manager_ch.star
 packageName: solarmanagerch
 recommended_interval: 5
+recommendedInterval: 5

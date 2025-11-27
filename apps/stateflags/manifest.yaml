@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: state_flags.star
 packageName: stateflags
 recommended_interval: 5
+recommendedInterval: 5

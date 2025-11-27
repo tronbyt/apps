@@ -5,3 +5,4 @@ summary: Track visted sports venues
 desc: Track MLB, NFL and NBA venues visted.
 author: Robert Ison
 recommended_interval: 5
+recommendedInterval: 5

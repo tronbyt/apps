@@ -7,3 +7,4 @@ author: sullivan1337
 fileName: us_mortgage_rates.star
 packageName: usmortgagerates
 recommended_interval: 5
+recommendedInterval: 5

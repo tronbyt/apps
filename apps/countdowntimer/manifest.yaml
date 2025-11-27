@@ -7,3 +7,4 @@ author: Matthew Grasmick
 fileName: countdowntimer.star
 packageName: countdowntimer
 recommended_interval: 1
+recommendedInterval: 1

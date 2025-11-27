@@ -7,3 +7,4 @@ author: noahpodgurski
 fileName: roomba.star
 packageName: roomba
 recommended_interval: 5
+recommendedInterval: 5

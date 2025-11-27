@@ -7,3 +7,4 @@ author: Doug Ewell
 fileName: maya_calendar.star
 packageName: mayacalendar
 recommended_interval: 5
+recommendedInterval: 5

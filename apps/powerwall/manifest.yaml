@@ -7,3 +7,4 @@ author: tabrindle
 fileName: powerwall.star
 packageName: powerwall
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: M0ntyP
 fileName: index_ticker.star
 packageName: indexticker
 recommended_interval: 1
+recommendedInterval: 1

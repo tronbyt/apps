@@ -7,3 +7,4 @@ author: tavdog
 fileName: dothraki_wotd.star
 packageName: dothrakiwotd
 recommended_interval: 5
+recommendedInterval: 5

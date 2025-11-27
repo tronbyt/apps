@@ -7,3 +7,4 @@ author: alan-oliv
 fileName: coin_prices.star
 packageName: coinprices
 recommended_interval: 1
+recommendedInterval: 1

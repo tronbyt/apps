@@ -7,3 +7,4 @@ author: Jed Schmidt
 fileName: airbnb_calendar.star
 packageName: airbnbcalendar
 recommended_interval: 60
+recommendedInterval: 60

@@ -7,3 +7,4 @@ author: Marcus Better
 fileName: solaredge_monitor.star
 packageName: solaredgemonitor
 recommended_interval: 5
+recommendedInterval: 5

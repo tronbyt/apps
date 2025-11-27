@@ -7,3 +7,4 @@ author: scottwainstock
 fileName: trimet_stops.star
 packageName: trimetstops
 recommended_interval: 5
+recommendedInterval: 5

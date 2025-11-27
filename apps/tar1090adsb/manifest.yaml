@@ -7,3 +7,4 @@ author: Cameron Battagler
 fileName: tar1090_ads_b.star
 packageName: tar1090adsb
 recommended_interval: 5
+recommendedInterval: 5

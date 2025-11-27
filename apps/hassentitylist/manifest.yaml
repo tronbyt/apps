@@ -7,4 +7,5 @@ author: James Woglom
 fileName: hassentitylist.star
 packageName: hassentitylist
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

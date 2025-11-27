@@ -7,3 +7,4 @@ author: Brian Bell
 fileName: astro_pic_of_day.star
 packageName: astropicofday
 recommended_interval: 5
+recommendedInterval: 5

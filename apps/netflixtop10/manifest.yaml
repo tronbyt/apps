@@ -7,4 +7,5 @@ author: Matt Broussard, gabe565
 fileName: netflix_top_10.star
 packageName: netflixtop10
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

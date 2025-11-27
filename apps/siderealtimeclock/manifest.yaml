@@ -5,3 +5,4 @@ summary: A sidereal time clock
 desc: A clock that shows the current sidereal time and (optionally) the local time.
 author: Daniel Sitnik
 recommended_interval: 0
+recommendedInterval: 0

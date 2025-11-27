@@ -7,3 +7,4 @@ author: PMK (@pmk)
 fileName: lightningnode.star
 packageName: lightningnode
 recommended_interval: 5
+recommendedInterval: 5

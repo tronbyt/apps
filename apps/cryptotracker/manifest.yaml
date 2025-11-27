@@ -7,3 +7,4 @@ author: Ethan Fuerst (@ethanfuerst)
 fileName: crypto_tracker.star
 packageName: cryptotracker
 recommended_interval: 1
+recommendedInterval: 1

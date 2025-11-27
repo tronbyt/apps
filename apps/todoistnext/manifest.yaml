@@ -7,3 +7,4 @@ author: Alisdair/Akeslo
 fileName: todoist_next.star
 packageName: todoistnext
 recommended_interval: 60
+recommendedInterval: 60

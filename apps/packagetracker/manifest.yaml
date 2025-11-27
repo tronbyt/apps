@@ -7,3 +7,4 @@ author: Kyle Bolstad
 fileName: package_tracker.star
 packageName: packagetracker
 recommended_interval: 5
+recommendedInterval: 5

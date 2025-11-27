@@ -7,3 +7,4 @@ author: Godfrey Systems Web Development
 fileName: days_to_xmas.star
 packageName: daystoxmas
 recommended_interval: 60
+recommendedInterval: 60

@@ -7,3 +7,4 @@ author: Kevin Connell
 fileName: clt_lightrail.star
 packageName: cltlightrail
 recommended_interval: 5
+recommendedInterval: 5

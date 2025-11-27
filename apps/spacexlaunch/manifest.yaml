@@ -7,3 +7,4 @@ author: rytrose
 fileName: spacex_launch.star
 packageName: spacexlaunch
 recommended_interval: 5
+recommendedInterval: 5

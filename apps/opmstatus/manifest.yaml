@@ -7,3 +7,4 @@ author: AdamMoses-GitHub
 fileName: opm_status.star
 packageName: opmstatus
 recommended_interval: 5
+recommendedInterval: 5

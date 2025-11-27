@@ -7,3 +7,4 @@ author: dev-manuel
 fileName: pull_request_status.star
 packageName: pull_request_status
 recommended_interval: 5
+recommendedInterval: 5

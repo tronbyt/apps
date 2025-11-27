@@ -7,3 +7,4 @@ author: tobyxdd
 fileName: stocks.star
 packageName: compactstocks
 recommended_interval: 5
+recommendedInterval: 5

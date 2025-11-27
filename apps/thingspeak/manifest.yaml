@@ -7,3 +7,4 @@ author: Bennett Schoonerman
 fileName: thingspeak.star
 packageName: thingspeak
 recommended_interval: 5
+recommendedInterval: 5

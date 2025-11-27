@@ -7,3 +7,4 @@ author: tidbyt
 fileName: better_on_call.star
 packageName: betteroncall
 recommended_interval: 5
+recommendedInterval: 5

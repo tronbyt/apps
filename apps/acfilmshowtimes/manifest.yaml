@@ -7,3 +7,4 @@ author: Platt Thompson & Jim Cummings
 fileName: ac_film_showtimes.star
 packageName: acfilmshowtimes
 recommended_interval: 5
+recommendedInterval: 5

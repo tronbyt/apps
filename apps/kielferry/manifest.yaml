@@ -7,3 +7,4 @@ author: hloeding
 fileName: kiel_ferry.star
 packageName: kielferry
 recommended_interval: 5
+recommendedInterval: 5

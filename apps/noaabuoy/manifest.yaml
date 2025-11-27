@@ -7,3 +7,4 @@ author: tavdog
 fileName: noaa_buoy.star
 packageName: noaabuoy
 recommended_interval: 15
+recommendedInterval: 15

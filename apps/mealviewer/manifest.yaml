@@ -7,3 +7,4 @@ author: Jed Schmidt
 fileName: mealviewer.star
 packageName: mealviewer
 recommended_interval: 5
+recommendedInterval: 5

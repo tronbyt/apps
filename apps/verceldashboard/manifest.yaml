@@ -7,3 +7,4 @@ author: Chase Roossin
 fileName: vercel_dashboard.star
 packageName: verceldashboard
 recommended_interval: 5
+recommendedInterval: 5

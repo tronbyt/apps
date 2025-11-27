@@ -7,3 +7,4 @@ author: gstark
 fileName: maze.star
 packageName: maze
 recommended_interval: 5
+recommendedInterval: 5
