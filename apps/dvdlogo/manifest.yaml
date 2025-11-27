@@ -7,4 +7,5 @@ author: Mack Ward
 fileName: dvd_logo.star
 packageName: dvdlogo
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

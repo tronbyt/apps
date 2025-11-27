@@ -7,3 +7,4 @@ author: AKKanMan
 fileName: nhl_next_game.star
 packageName: nhlnextgame
 recommended_interval: 5
+recommendedInterval: 5

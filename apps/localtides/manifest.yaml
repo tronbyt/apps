@@ -7,3 +7,4 @@ author: J. Keybl
 fileName: local_tides.star
 packageName: localtides
 recommended_interval: 5
+recommendedInterval: 5

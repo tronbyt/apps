@@ -7,3 +7,4 @@ author: dmarcucci
 fileName: nh_des_data.star
 packageName: nhdesdata
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: rs7q5
 fileName: espn_news.star
 packageName: espnnews
 recommended_interval: 10
+recommendedInterval: 10

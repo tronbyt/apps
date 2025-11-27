@@ -7,3 +7,4 @@ author: Jeffery Bennett
 fileName: dailycountdown.star
 packageName: dailycountdown
 recommended_interval: 5
+recommendedInterval: 5

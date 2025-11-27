@@ -7,3 +7,4 @@ author: PMK (@pmk)
 fileName: btcdifficulty.star
 packageName: btcdifficulty
 recommended_interval: 1
+recommendedInterval: 1

@@ -7,3 +7,4 @@ author: Marcus Better & Eric Pierce
 fileName: mbta.star
 packageName: mbta
 recommended_interval: 5
+recommendedInterval: 5

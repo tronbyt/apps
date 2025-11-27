@@ -7,3 +7,4 @@ author: Shopify
 fileName: shopify_orders.star
 packageName: shopifyorders
 recommended_interval: 5
+recommendedInterval: 5

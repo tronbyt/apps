@@ -7,3 +7,4 @@ author: Rory Sawyer
 fileName: defector.star
 packageName: defector
 recommended_interval: 10
+recommendedInterval: 10

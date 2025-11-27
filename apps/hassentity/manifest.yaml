@@ -7,3 +7,4 @@ author: InTheDaylight14
 fileName: hass_entity.star
 packageName: hassentity
 recommended_interval: 5
+recommendedInterval: 5

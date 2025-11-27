@@ -6,3 +6,4 @@ desc: This app shows your Letterboxd movie watching progress. It gets your Lette
 author: caropinzonsilva
 fileName: movie_challenge.star
 recommended_interval: 5
+recommendedInterval: 5

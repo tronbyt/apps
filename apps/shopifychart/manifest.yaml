@@ -7,3 +7,4 @@ author: kcharwood
 fileName: shopify_chart.star
 packageName: shopifychart
 recommended_interval: 5
+recommendedInterval: 5

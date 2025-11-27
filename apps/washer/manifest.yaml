@@ -5,4 +5,5 @@ summary: 'Notification: washer'
 desc: Displays a notification that the washing machine is done.
 author: savdagod
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

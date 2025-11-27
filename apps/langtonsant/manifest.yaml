@@ -7,3 +7,4 @@ author: alewando
 fileName: langtons_ant.star
 packageName: langtonsant
 recommended_interval: 5
+recommendedInterval: 5

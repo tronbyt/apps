@@ -7,3 +7,4 @@ author: Rob Kimball
 fileName: us_yield_curve.star
 packageName: usyieldcurve
 recommended_interval: 1
+recommendedInterval: 1

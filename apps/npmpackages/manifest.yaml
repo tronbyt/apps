@@ -7,3 +7,4 @@ author: Daniel Sitnik
 fileName: npm_packages.star
 packageName: npmpackages
 recommended_interval: 5
+recommendedInterval: 5

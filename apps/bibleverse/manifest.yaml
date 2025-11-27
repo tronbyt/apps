@@ -5,3 +5,4 @@ summary: Bible verse every 3 minutes
 desc: Displays new bible verse every 3 seconds from different bible translations.
 author: blaiseAI
 recommended_interval: 5
+recommendedInterval: 5

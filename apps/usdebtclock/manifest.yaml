@@ -7,3 +7,4 @@ author: PMK (@pmk)
 fileName: usdebtclock.star
 packageName: usdebtclock
 recommended_interval: 60
+recommendedInterval: 60

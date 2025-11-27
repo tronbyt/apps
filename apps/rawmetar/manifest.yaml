@@ -7,3 +7,4 @@ author: tabrindle
 fileName: raw_metar.star
 packageName: rawmetar
 recommended_interval: 5
+recommendedInterval: 5

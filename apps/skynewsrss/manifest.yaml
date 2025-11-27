@@ -7,3 +7,4 @@ author: jvivona
 fileName: sky_news_rss.star
 packageName: skynewsrss
 recommended_interval: 10
+recommendedInterval: 10

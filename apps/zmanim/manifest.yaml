@@ -6,6 +6,7 @@ author: Shimon Savitsky
 fileName: zmanim.star
 packageName: zmanim
 recommended_interval: 60
+recommendedInterval: 60
 
 categories:
   - utility

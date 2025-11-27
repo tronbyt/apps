@@ -7,3 +7,4 @@ author: John Sylvain
 fileName: cta_bus_tracker.star
 packageName: ctabustracker
 recommended_interval: 5
+recommendedInterval: 5

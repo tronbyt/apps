@@ -7,3 +7,4 @@ author: ndhotsky
 fileName: nextdns.star
 packageName: nextdns
 recommended_interval: 5
+recommendedInterval: 5

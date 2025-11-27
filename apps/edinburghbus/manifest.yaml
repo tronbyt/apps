@@ -7,3 +7,4 @@ author: dan0
 fileName: edinburgh_bus.star
 packageName: edinburghbus
 recommended_interval: 5
+recommendedInterval: 5

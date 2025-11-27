@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: fitbitweight.star
 packageName: fitbitweight
 recommended_interval: 5
+recommendedInterval: 5

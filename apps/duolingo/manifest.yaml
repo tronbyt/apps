@@ -7,3 +7,4 @@ author: Olly Stedall @saltedlolly
 fileName: duolingo.star
 packageName: duolingo
 recommended_interval: 5
+recommendedInterval: 5

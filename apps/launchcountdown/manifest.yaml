@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: launchcountdown.star
 packageName: launchcountdown
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: jvivona
 fileName: cbc_rss_feed.star
 packageName: cbcrssfeed
 recommended_interval: 5
+recommendedInterval: 5

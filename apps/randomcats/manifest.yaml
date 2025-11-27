@@ -7,4 +7,5 @@ author: mrrobot245
 fileName: random_cats.star
 packageName: randomcats
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

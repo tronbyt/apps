@@ -5,3 +5,4 @@ summary: Shows more BART routes
 desc: Like the official BART applet but shows up to 8 routes for a station.
 author: scoobmx
 recommended_interval: 5
+recommendedInterval: 5

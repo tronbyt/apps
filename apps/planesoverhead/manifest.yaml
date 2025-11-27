@@ -7,3 +7,4 @@ author: Conor McLaughlin
 fileName: planes_overhead.star
 packageName: planesoverhead
 recommended_interval: 5
+recommendedInterval: 5

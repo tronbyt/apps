@@ -5,3 +5,4 @@ summary: Status of up to 3 repos
 desc: Shows the workflow status of up to 3 workflows.
 author: tavdog
 recommended_interval: 5
+recommendedInterval: 5

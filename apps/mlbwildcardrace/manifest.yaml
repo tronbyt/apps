@@ -7,3 +7,4 @@ author: Jake Manske
 fileName: mlb_wildcard_race.star
 packageName: mlbwildcardrace
 recommended_interval: 5
+recommendedInterval: 5

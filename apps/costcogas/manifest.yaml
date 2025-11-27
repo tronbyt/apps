@@ -7,3 +7,4 @@ author: Dan Adam
 fileName: costco_gas.star
 packageName: costcogas
 recommended_interval: 5
+recommendedInterval: 5

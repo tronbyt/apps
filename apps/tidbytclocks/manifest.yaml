@@ -7,3 +7,4 @@ author: rs7q5
 fileName: tidbyt_clocks.star
 packageName: tidbytclocks
 recommended_interval: 60
+recommendedInterval: 60

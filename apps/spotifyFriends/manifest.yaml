@@ -7,3 +7,4 @@ author: klaffitte
 fileName: spotify_friends.star
 packageName: spotifyfriends
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Neal Wright
 fileName: chess_viewer.star
 packageName: chessviewer
 recommended_interval: 5
+recommendedInterval: 5

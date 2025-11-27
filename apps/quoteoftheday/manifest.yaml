@@ -7,3 +7,4 @@ author: Taylor White
 fileName: quote_of_the_day.star
 packageName: quoteoftheday
 recommended_interval: 5
+recommendedInterval: 5

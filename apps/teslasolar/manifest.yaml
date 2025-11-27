@@ -7,3 +7,4 @@ author: jweier
 fileName: tesla_solar.star
 packageName: teslasolar
 recommended_interval: 5
+recommendedInterval: 5

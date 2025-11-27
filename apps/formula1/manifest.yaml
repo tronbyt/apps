@@ -7,4 +7,5 @@ author: AmillionAir
 fileName: formula1.star
 packageName: formula1
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

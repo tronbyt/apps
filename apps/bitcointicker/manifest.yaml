@@ -7,3 +7,4 @@ author: PMK (@pmk)
 fileName: bitcointicker.star
 packageName: bitcointicker
 recommended_interval: 1
+recommendedInterval: 1

@@ -7,3 +7,4 @@ author: Felix Bruns
 fileName: weather_map.star
 packageName: weathermap
 recommended_interval: 5
+recommendedInterval: 5

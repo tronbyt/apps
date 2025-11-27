@@ -7,3 +7,4 @@ author: Andrew Knotts
 fileName: summer_countdown.star
 packageName: summercountdown
 recommended_interval: 60
+recommendedInterval: 60

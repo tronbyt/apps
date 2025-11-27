@@ -7,3 +7,4 @@ author: Thomas Hutterer, ThHutterer
 fileName: opnv_austria.star
 packageName: opnvaustria
 recommended_interval: 5
+recommendedInterval: 5

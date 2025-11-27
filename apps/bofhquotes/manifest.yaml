@@ -7,3 +7,4 @@ author: jondkelley
 fileName: bofh_quotes.star
 packageName: bofhquotes
 recommended_interval: 5
+recommendedInterval: 5

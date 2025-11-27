@@ -7,4 +7,5 @@ author: Ingmar Stein
 fileName: hass_solar.star
 packageName: hasssolar
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

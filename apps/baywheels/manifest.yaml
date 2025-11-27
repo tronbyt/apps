@@ -7,3 +7,4 @@ author: Martin Strauss
 fileName: bay_wheels.star
 packageName: baywheels
 recommended_interval: 5
+recommendedInterval: 5

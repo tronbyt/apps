@@ -7,3 +7,4 @@ author: Harper Trow
 fileName: co2_signal.star
 packageName: co2signal
 recommended_interval: 5
+recommendedInterval: 5

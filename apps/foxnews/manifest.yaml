@@ -7,3 +7,4 @@ author: jvivona
 fileName: fox_news.star
 packageName: foxnews
 recommended_interval: 10
+recommendedInterval: 10

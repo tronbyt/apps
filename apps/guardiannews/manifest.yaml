@@ -7,3 +7,4 @@ author: meejle
 fileName: guardian_news.star
 packageName: guardiannews
 recommended_interval: 10
+recommendedInterval: 10

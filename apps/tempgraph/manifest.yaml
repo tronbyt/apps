@@ -7,3 +7,4 @@ author: Daniel Segel
 fileName: tempgraph.star
 packageName: tempgraph
 recommended_interval: 5
+recommendedInterval: 5

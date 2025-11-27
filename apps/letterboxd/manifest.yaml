@@ -7,3 +7,4 @@ author: protolexus
 fileName: letterboxd.star
 packageName: letterboxd
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: accidentfreedays.star
 packageName: accidentfreedays
 recommended_interval: 240
+recommendedInterval: 240

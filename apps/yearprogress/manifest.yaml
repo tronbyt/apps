@@ -7,3 +7,4 @@ author: chrisbateman
 fileName: year_progress.star
 packageName: yearprogress
 recommended_interval: 60
+recommendedInterval: 60

@@ -7,3 +7,4 @@ author: PMK (@pmk)
 fileName: mempool.star
 packageName: mempool
 recommended_interval: 1
+recommendedInterval: 1

@@ -7,3 +7,4 @@ author: dev-manuel
 fileName: whatthecommit.star
 packageName: whatthecommit
 recommended_interval: 5
+recommendedInterval: 5

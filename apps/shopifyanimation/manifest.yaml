@@ -7,3 +7,4 @@ author: Shopify
 fileName: shopify_animation.star
 packageName: shopifyanimation
 recommended_interval: 5
+recommendedInterval: 5

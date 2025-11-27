@@ -7,3 +7,4 @@ author: gshipley
 fileName: stock_value.star
 packageName: stockvalue
 recommended_interval: 1
+recommendedInterval: 1

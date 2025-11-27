@@ -7,3 +7,4 @@ author: flip_z
 fileName: vital_occupancy.star
 packageName: vitaloccupancy
 recommended_interval: 5
+recommendedInterval: 5

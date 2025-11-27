@@ -7,3 +7,4 @@ author: ckingsford
 fileName: pittsburgh_buses.star
 packageName: pittsburghbuses
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: daltonclaybrook
 fileName: live_on_twitch.star
 packageName: liveontwitch
 recommended_interval: 5
+recommendedInterval: 5

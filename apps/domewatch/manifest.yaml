@@ -7,3 +7,4 @@ author: Shaun Brown
 fileName: dome_watch.star
 packageName: domewatch
 recommended_interval: 5
+recommendedInterval: 5

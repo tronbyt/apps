@@ -5,3 +5,4 @@ summary: Timer
 desc: Counts down the inputted time.
 author: rwong2888
 recommended_interval: 1
+recommendedInterval: 1

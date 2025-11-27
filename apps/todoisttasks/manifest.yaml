@@ -7,3 +7,4 @@ author: Noste
 fileName: todoisttasks.star
 packageName: todoisttasks
 recommended_interval: 60
+recommendedInterval: 60

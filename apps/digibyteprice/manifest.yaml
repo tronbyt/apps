@@ -7,3 +7,4 @@ author: Olly Stedall @saltedlolly
 fileName: digibyte_price.star
 packageName: digibyteprice
 recommended_interval: 1
+recommendedInterval: 1

@@ -7,3 +7,4 @@ author: carmineguida
 fileName: iss_location.star
 packageName: isslocation
 recommended_interval: 5
+recommendedInterval: 5

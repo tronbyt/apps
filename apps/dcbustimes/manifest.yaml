@@ -7,3 +7,4 @@ author: JetgirlDC
 fileName: dc_bus_times.star
 packageName: dcbustimes
 recommended_interval: 5
+recommendedInterval: 5

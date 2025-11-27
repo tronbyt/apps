@@ -7,3 +7,4 @@ author: Allen Schober (@aschober)
 fileName: coingecko_price.star
 packageName: coingeckoprice
 recommended_interval: 1
+recommendedInterval: 1

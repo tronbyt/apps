@@ -7,3 +7,4 @@ author: DoubleGremlin181
 fileName: qbittorrent.star
 packageName: qbittorrent
 recommended_interval: 5
+recommendedInterval: 5

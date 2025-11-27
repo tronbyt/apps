@@ -7,4 +7,5 @@ author: Lauren Kopac
 fileName: natdex.star
 packageName: natdex
 recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

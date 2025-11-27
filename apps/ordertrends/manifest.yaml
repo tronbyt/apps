@@ -7,3 +7,4 @@ author: Shopify
 fileName: order_trends.star
 packageName: ordertrends
 recommended_interval: 5
+recommendedInterval: 5

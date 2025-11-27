@@ -7,3 +7,4 @@ author: harrywynn
 fileName: coinbase.star
 packageName: coinbase
 recommended_interval: 1
+recommendedInterval: 1

@@ -7,3 +7,4 @@ author: Andrew Knotts
 fileName: fireworks.star
 packageName: fireworks
 recommended_interval: 5
+recommendedInterval: 5

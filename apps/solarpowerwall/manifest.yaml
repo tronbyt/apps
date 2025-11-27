@@ -7,3 +7,4 @@ author: lcervo
 filename: solar-powerwall.star
 packageName: solar-powerwall
 recommended_interval: 5
+recommendedInterval: 5

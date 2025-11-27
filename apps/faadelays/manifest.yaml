@@ -7,3 +7,4 @@ author: Matt Broussard
 fileName: faa_delays.star
 packageName: faadelays
 recommended_interval: 5
+recommendedInterval: 5

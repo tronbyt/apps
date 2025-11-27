@@ -7,3 +7,4 @@ author: Matt Holloway
 fileName: stock_ticker.star
 packageName: stockticker
 recommended_interval: 1
+recommendedInterval: 1

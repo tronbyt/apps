@@ -7,3 +7,4 @@ author: Mike Toscano
 fileName: steam_plus.star
 packageName: steamplus
 recommended_interval: 5
+recommendedInterval: 5

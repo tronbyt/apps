@@ -7,3 +7,4 @@ author: jvivona
 fileName: rss_misc_feeds.star
 packageName: rssmiscfeeds
 recommended_interval: 10
+recommendedInterval: 10

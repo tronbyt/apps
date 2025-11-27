@@ -7,3 +7,4 @@ author: Shopify
 fileName: order_moments.star
 packageName: ordermoments
 recommended_interval: 5
+recommendedInterval: 5

@@ -7,3 +7,4 @@ author: Jon Janzen
 fileName: sound_transit.star
 packageName: soundtransit
 recommended_interval: 5
+recommendedInterval: 5

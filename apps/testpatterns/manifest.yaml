@@ -7,3 +7,4 @@ author: harrisonpage
 fileName: test_patterns.star
 packageName: testpatterns
 recommended_interval: 5
+recommendedInterval: 5

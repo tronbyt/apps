@@ -7,3 +7,4 @@ author: WaveJam
 fileName: fredscanner_alert.star
 packageName: fredscanneralert
 recommended_interval: 5
+recommendedInterval: 5

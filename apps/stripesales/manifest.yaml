@@ -7,3 +7,4 @@ author: Jon Bilous
 fileName: stripe_sales.star
 packageName: stripesales
 recommended_interval: 5
+recommendedInterval: 5

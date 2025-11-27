@@ -7,3 +7,4 @@ author: Daniel Sitnik
 fileName: air_quality.star
 packageName: airquality
 recommended_interval: 5
+recommendedInterval: 5

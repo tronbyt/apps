@@ -7,3 +7,4 @@ author: Chris Silverberg
 fileName: usgs_earthquakes.star
 packageName: usgsearthquakes
 recommended_interval: 5
+recommendedInterval: 5

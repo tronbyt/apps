@@ -7,3 +7,4 @@ author: ghensley
 fileName: sports_scoreboard.star
 packageName: sportsscoreboard
 recommended_interval: 5
+recommendedInterval: 5
