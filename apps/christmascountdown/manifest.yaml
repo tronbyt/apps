@@ -9,4 +9,4 @@ packageName: christmascountdown
 recommended_interval: 60
 recommendedInterval: 60
 supports2x: true
-minPixletVersion: 0.49.0
+minPixletVersion: v0.49.0
