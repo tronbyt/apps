@@ -291,13 +291,13 @@ def get_times(station, api_key):
 
 def search_stations(prefix, config):
     api_key = config.get("api_key", DEFAULT_KEY)
-    rep = http.get(STATIONS_URL, params = {"cmd": "stns", "json": "y", "key": api_key}, ttl_seconds = 3600) # Cache for an hour
+    rep = http.get(STATIONS_URL, params = {"cmd": "stns", "json": "y", "key": api_key}, ttl_seconds = 3600)  # Cache for an hour
     if rep.status_code != 200:
         return []
     data = rep.json()
     if "root" not in data or "stations" not in data["root"] or "station" not in data["root"]["stations"]:
         return []
-    
+
     stationlist = data["root"]["stations"]["station"]
     stations = []
     for station in stationlist:

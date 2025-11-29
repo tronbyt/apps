@@ -21,7 +21,7 @@ def main():
     if len(name) > 20:
         name = name[:17] + "..."
 
-    img = http.get("https://upload.wikimedia.org/wikipedia/commons/f/ff/Vesta_Rotation.gif").body()
+    # img = http.get("https://upload.wikimedia.org/wikipedia/commons/f/ff/Vesta_Rotation.gif").body()
 
     raw_date = neo.get("date", "N/A")
     parts = raw_date.split("-")

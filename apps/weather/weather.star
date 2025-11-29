@@ -8,6 +8,7 @@ Authors: JeffLac, RichardD012 (Recreation of Tidbyt Original)
 
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("i18n.star", "tr")
 load("images/clear.png", CLEAR_IMAGE = "file")
 load("images/clear_full.png", CLEAR_FULL_IMAGE = "file")
 load("images/clouds.png", CLOUDS_IMAGE = "file")
@@ -48,37 +49,6 @@ DEFAULT_LOCATION = """
 
 DEFAULT_CACHE_MINS = 5
 
-LANGUAGE_LOCALES = {
-    "MON": {
-        "de": "MON",
-        "en": "MON",
-    },
-    "TUE": {
-        "de": "DIE",
-        "en": "TUE",
-    },
-    "WED": {
-        "de": "MIT",
-        "en": "WED",
-    },
-    "THU": {
-        "de": "DON",
-        "en": "THU",
-    },
-    "FRI": {
-        "de": "FRE",
-        "en": "FRI",
-    },
-    "SAT": {
-        "de": "SAM",
-        "en": "SAT",
-    },
-    "SUN": {
-        "de": "SON",
-        "en": "SUN",
-    },
-}
-
 WEATHER_FULL_IMAGE = {
     "Thunderstorm": THUNDERSTORM_FULL_IMAGE,
     "Clear": CLEAR_FULL_IMAGE,
@@ -102,7 +72,6 @@ def main(config):
     lng = loc["lng"]
     units = config.get("units", "imperial")
     showthreeday = config.bool("showthreeday", False)  # Add new config option
-    lang = config.get("lang", "en")
 
     # Get API keys - check for both V3 and V2.5
     api_v3_key = config.get("api_v3", "")
@@ -144,11 +113,11 @@ def main(config):
 
     # Create the display
     if showthreeday:
-        return render_weather(daily_data, lang, scale)
+        return render_weather(daily_data, scale)
     else:
-        return render_single_day(daily_data, lang, scale)
+        return render_single_day(daily_data, scale)
 
-def render_single_day(daily_data, lang, scale = 1):
+def render_single_day(daily_data, scale = 1):
     if len(daily_data) < 2:  # If we don't have at least 2 days
         return error_display("Weather API Error")
 
@@ -156,8 +125,8 @@ def render_single_day(daily_data, lang, scale = 1):
     tomorrow = daily_data[1]
 
     # Get day abbreviation
-    day_abbr = _get_day_abbr(day["date"], lang)
-    tomorrow_abbr = _get_day_abbr(tomorrow["date"], lang)
+    day_abbr = _get_day_abbr(day["date"])
+    tomorrow_abbr = _get_day_abbr(tomorrow["date"])
     slide_percentage = get_slide_percentage(day["weather"])
     should_render_day_at_top = get_should_render_day_at_top(day["weather"])
 
@@ -280,9 +249,9 @@ def get_slide_percentage(forecast):
     }
     return slide_map.get(forecast, 40)
 
-def _get_day_abbr(date, lang):
+def _get_day_abbr(date):
     abbr = date.format("Mon")[:3].upper()
-    return LANGUAGE_LOCALES[abbr][lang]
+    return tr(abbr)
 
 def get_weather_image(forecast):
     image = WEATHER_FULL_IMAGE.get(forecast)
@@ -649,7 +618,7 @@ def get_weather_icon(forecast):
     icon = WEATHER_ICONS.get(forecast)
     return icon.readall() if icon else ""
 
-def render_weather(daily_data, lang, scale = 1):
+def render_weather(daily_data, scale = 1):
     # Create weather icons mapping
 
     # Calculate dimensions
@@ -664,7 +633,7 @@ def render_weather(daily_data, lang, scale = 1):
     for i, day in enumerate(daily_data):
         # Get day abbreviation
         day_abbr = day["date"].format("Mon")[:3].upper()
-        day_abbr = LANGUAGE_LOCALES[day_abbr][lang]
+        day_abbr = tr(day_abbr)
 
         # Create day column
         day_column = render.Column(
@@ -785,17 +754,6 @@ def get_schema():
                 desc = "Standard API 2.5 key for basic weather data (free tier available). Go to OpenWeatherMap.org to get your free API key.",
                 icon = "gear",
                 secret = True,
-            ),
-            schema.Dropdown(
-                id = "lang",
-                name = "Language",
-                desc = "The language to display the information",
-                icon = "language",
-                default = "en",
-                options = [
-                    schema.Option(display = "Deutsch", value = "de"),
-                    schema.Option(display = "English", value = "en"),
-                ],
             ),
             schema.Text(
                 id = "cache_mins",

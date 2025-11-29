@@ -5,8 +5,8 @@ Description: City Lights generates a random and mesmerizing nighttime cityscape.
 Author: Nicholas Arent
 """
 
-load("render.star", "canvas", "render")
 load("random.star", "random")
+load("render.star", "canvas", "render")
 
 # Constants
 HEIGHT = canvas.height()

@@ -160,6 +160,6 @@ def get_schema():
                 icon = "code",
                 default = "",
                 secret = True,
-            )
+            ),
         ],
     )

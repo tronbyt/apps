@@ -6,7 +6,6 @@ Author: Mitchell Scott
 """
 
 load("http.star", "http")
-load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 

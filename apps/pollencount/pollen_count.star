@@ -189,11 +189,11 @@ def roundToHalf(floatNum):
     oneDecimal = float(int(floatNum * 10) / 10)
     noDecimal = int(floatNum)
     decimal = oneDecimal - noDecimal
-    if decimal >= .3 and decimal <= .7:
+    if decimal >= 0.3 and decimal <= 0.7:
         num = noDecimal + 0.5
-    elif decimal < .3:
+    elif decimal < 0.3:
         num = noDecimal
-    elif decimal > .7:
+    elif decimal > 0.7:
         num = noDecimal + 1
     else:
         num = None

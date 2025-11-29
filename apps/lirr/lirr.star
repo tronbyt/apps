@@ -15,7 +15,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DELTA = .1
+DELTA = 0.1
 STATIC_GTFS_FILE = "static_gtfs"
 
 CORE_BACKGROUND_COLOR = "#4D5357"

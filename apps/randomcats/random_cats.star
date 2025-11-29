@@ -5,7 +5,6 @@ Description: Shows random pictures of cats/gifs of cats from Cats as a Service (
 Author: mrrobot245
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")

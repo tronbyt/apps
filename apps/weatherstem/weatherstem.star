@@ -211,7 +211,7 @@ def deg_to_compass(degress):
        String containing named compass direction.
     """
 
-    val = int((degress / 22.5) + .5)
+    val = int((degress / 22.5) + 0.5)
     arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
     return arr[(val % 16)]
 

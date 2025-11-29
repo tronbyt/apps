@@ -136,7 +136,7 @@ def fullLayoutHidden(image, width, scale, font):
             render.Box(
                 width = 38 * scale,
                 height = 30 * scale,
-                child =  render.Image(
+                child = render.Image(
                     src = image,
                     width = width,
                     height = 30 * scale,

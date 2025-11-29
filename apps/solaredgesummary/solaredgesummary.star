@@ -39,18 +39,18 @@ def get_time_zone(site_id, api_key):
     url = URL_SITE.format(site_id)
     rep = http.get(url, params = {"api_key": api_key}, ttl_seconds = CACHE_TTL)
     default_tz = "Etc/UTC"
-    
+
     if rep.status_code == 200:
         data = json.decode(rep.body())
         if "details" in data and "location" in data["details"] and "timeZone" in data["details"]["location"]:
             default_tz = data["details"]["location"]["timeZone"]
-    
+
     return default_tz
 
 def get_energy_for_period(site_id, api_key, tz, time_unit):
     """Get production and consumption energy for a time period."""
     now = time.now().in_location(tz)
-    
+
     if time_unit == "DAY":
         start_string = humanize.time_format("yyyy-MM-dd 00:00:00", now)
     elif time_unit == "MONTH":
@@ -59,9 +59,9 @@ def get_energy_for_period(site_id, api_key, tz, time_unit):
         start_string = humanize.time_format("yyyy-01-01 00:00:00", now)
     else:
         return None, None
-    
+
     now_string = humanize.time_format("yyyy-MM-dd HH:mm:ss", now)
-    
+
     rep = http.get(
         URL_ENERGY.format(site_id),
         params = {
@@ -72,15 +72,15 @@ def get_energy_for_period(site_id, api_key, tz, time_unit):
         },
         ttl_seconds = CACHE_TTL,
     )
-    
+
     if rep.status_code != 200:
         print("API error:", rep.status_code)
         return None, None
-    
+
     data = rep.json()["energyDetails"]
     consumption = 0
     production = 0
-    
+
     for meter in data["meters"]:
         if meter["type"] == "Consumption":
             for value in meter["values"]:
@@ -88,16 +88,17 @@ def get_energy_for_period(site_id, api_key, tz, time_unit):
         elif meter["type"] == "Production":
             for value in meter["values"]:
                 production += value["value"]
-    
+
     return production, consumption
 
 def get_lifetime_energy(site_id, api_key, tz):
     """Get lifetime production energy using energyDetails API."""
+
     # Get installation date or use a very early date
     now = time.now().in_location(tz)
     start_string = "2000-01-01 00:00:00"  # Use early date to capture all history
     now_string = humanize.time_format("yyyy-MM-dd HH:mm:ss", now)
-    
+
     rep = http.get(
         URL_ENERGY.format(site_id),
         params = {
@@ -108,15 +109,15 @@ def get_lifetime_energy(site_id, api_key, tz):
         },
         ttl_seconds = CACHE_TTL,
     )
-    
+
     if rep.status_code != 200:
         print("Lifetime API error:", rep.status_code, rep.body())
         return None, None
-    
+
     data = rep.json()["energyDetails"]
     consumption = 0
     production = 0
-    
+
     # Sum all years
     for meter in data["meters"]:
         if meter["type"] == "Consumption":
@@ -127,7 +128,7 @@ def get_lifetime_energy(site_id, api_key, tz):
             for value in meter["values"]:
                 if value.get("value"):
                     production += value["value"]
-    
+
     return production, consumption
 
 def format_energy(wh):
@@ -194,29 +195,29 @@ def create_summary_frame(title, production, consumption):
 def main(config):
     api_key = config.str("api_key")
     site_id = config.str("site_id", "")
-    
+
     frames = []
-    
+
     # Get energy data
     if api_key and site_id:
         tz = get_time_zone(site_id, api_key)
-        
+
         # Day
         day_prod, day_cons = get_energy_for_period(site_id, api_key, tz, "DAY")
         if day_prod == None:
             return render.Root(render.Box(render.WrappedText("API Error", color = RED)))
         frames.append(create_summary_frame("Energy Today", day_prod, day_cons))
-        
+
         # Month
         month_prod, month_cons = get_energy_for_period(site_id, api_key, tz, "MONTH")
         if month_prod != None:
             frames.append(create_summary_frame("Energy Month", month_prod, month_cons))
-        
+
         # Year
         year_prod, year_cons = get_energy_for_period(site_id, api_key, tz, "YEAR")
         if year_prod != None:
             frames.append(create_summary_frame("Energy Year", year_prod, year_cons))
-        
+
         # Lifetime (sum all years)
         lifetime_prod, lifetime_cons = get_lifetime_energy(site_id, api_key, tz)
         if lifetime_prod != None:
@@ -227,7 +228,7 @@ def main(config):
         frames.append(create_summary_frame("Energy Month", 188460, 94230))
         frames.append(create_summary_frame("Energy Year", 2261520, 1130760))
         frames.append(create_summary_frame("Energy Life", 11307600, 0))
-    
+
     # Return animation with frames
     return render.Root(
         delay = 3000,  # 3 seconds per frame

@@ -35,22 +35,22 @@ def main(config):
     image_src = base64.decode(apod["image_src"])
 
     children = [
-                render.Column(
-                    cross_align = "center",
-                    main_align = "space_between",
+        render.Column(
+            cross_align = "center",
+            main_align = "space_between",
+            children = [
+                render.Row(
+                    expanded = True,
+                    main_align = "center",
                     children = [
-                        render.Row(
-                            expanded = True,
-                            main_align = "center",
-                            children = [
-                                render.Image(
-                                    src = image_src,
-                                    height = 32,
-                                ),
-                            ],
+                        render.Image(
+                            src = image_src,
+                            height = 32,
                         ),
                     ],
-                )
+                ),
+            ],
+        ),
     ]
 
     if display_info:
@@ -95,11 +95,11 @@ def main(config):
                         transforms = [animation.Translate(0, 0)],
                     ),
                 ],
-            )
+            ),
         )
     return render.Root(
         child = render.Stack(
-            children = children
+            children = children,
         ),
     )
 
@@ -134,6 +134,6 @@ def get_schema():
                 desc = "if available",
                 icon = "gear",
                 default = True,
-            )
-        ]
+            ),
+        ],
     )

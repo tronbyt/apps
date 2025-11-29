@@ -40,7 +40,7 @@ V1DEMO_DATA = {
     "overview": {
         "lastUpdateTime": "2024-10-11 12:19:42",
         "lifeTimeData": {
-            "energy": 7.01093E10,
+            "energy": 7.01093e10,
         },
         "lastYearData": {
             "energy": 8447192.0,

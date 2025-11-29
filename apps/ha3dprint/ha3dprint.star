@@ -86,6 +86,7 @@ def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time
                     data.get("end_time", defaults["end_time"]),
                     data.get("status", defaults["status"]),
                 )
+    return defaults
 
 # convert color specification from JSON to hex string
 def to_rgb(color, combine = None, combine_level = 0.5):
@@ -191,6 +192,7 @@ def main(config):
     ha_url = config.str("haUrl", "http://homeassistant.local:8123")
     ha_token = config.str("haApiKey", "APIKEY")
     max_print_age_hours_str = config.str("maxPrintAgeHours", "4")
+
     # Safe float parsing: allow only digits and one dot
     max_print_age_hours = 4.0
     s = max_print_age_hours_str.strip()
@@ -233,10 +235,12 @@ def main(config):
 
     # Check if we should render anything
     skip_render = False
+
     # Check status
     if str(status).lower() == "offline":
         skip_render = True
         print("Printer is offline, skipping render")
+
     # Check end_time using Starlark's time.parse_time and duration
     if not skip_render and end_time != None and str(end_time) != "":
         # Convert 'YYYY-MM-DD HH:MM:SS' to ISO 8601 'YYYY-MM-DDTHH:MM:SSZ'
@@ -248,6 +252,7 @@ def main(config):
             # Replace space with 'T' if not present
             if "T" not in end_time_str:
                 end_time_str = end_time_str.replace(" ", "T")
+
             # Accept both with and without 'Z' at the end
             valid_iso = len(end_time_str) == 19 and end_time_str[10] == "T"
             valid_iso_z = len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z")

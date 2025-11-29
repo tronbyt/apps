@@ -18,8 +18,9 @@ DEFAULT_TIMEZONE = "Australia/Adelaide"
 
 def main(config):
     StationSelection = config.get("station", "triplej")
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
-    NOWPLAYING_URL = NOWPLAYING_PREFIX_URL + StationSelection + NOWPLAYING_SUFFIX_URL #+ timezone
+
+    # timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    NOWPLAYING_URL = NOWPLAYING_PREFIX_URL + StationSelection + NOWPLAYING_SUFFIX_URL  #+ timezone
 
     # Get song data every 2 mins
     MUSICDATA = get_cachable_data(NOWPLAYING_URL, CACHE_TIMEOUT)

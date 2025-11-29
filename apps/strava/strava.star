@@ -220,12 +220,12 @@ def progress_chart(config, refresh_token, sport, units):
     # Immediately before each activity we add the previous distance to create the "step" effect in the graph
     curr_plot = [(0.0, 0.0)]
     for item in included_current_activities:
-        curr_plot.append((item["date_pct"] - .025, curr_plot[-1][1]))
+        curr_plot.append((item["date_pct"] - 0.025, curr_plot[-1][1]))
         curr_plot.append((item["date_pct"], distance_conv(item["cum_%s" % graph_stat])))
 
     prev_plot = [(0.0, 0.0)]
     for item in included_previous_activities:
-        prev_plot.append((item["date_pct"] - .025, prev_plot[-1][1]))
+        prev_plot.append((item["date_pct"] - 0.025, prev_plot[-1][1]))
         prev_plot.append((item["date_pct"], distance_conv(item["cum_%s" % graph_stat])))
 
     # At the end of the current plot we want today's date as a percentage of the month,

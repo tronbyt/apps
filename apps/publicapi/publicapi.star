@@ -6,11 +6,11 @@ Author: noahpodgurski
 """
 
 load("http.star", "http")
-load("render.star", "render")
 load("random.star", "random")
+load("render.star", "render")
 load("time.star", "time")
 
-REFRESH_TIME = 86400*7 #once a week
+REFRESH_TIME = 86400 * 7  #once a week
 
 # colors
 YELLOW = "8eb707"
@@ -27,7 +27,7 @@ def main():
     all_apis = get_all_apis().get("entries")
     if not all_apis:
         fail("API response is missing 'entries' key or it is empty")
-    random_api = all_apis[random.number(0, len(all_apis)-1)]
+    random_api = all_apis[random.number(0, len(all_apis) - 1)]
 
     return render.Root(
         child = render.Box(

@@ -71,7 +71,6 @@ CURRENT_EXPANSION = "The War Within"
 CURRENT_INSTANCE = "Manaforge Omega"
 
 def main(config):
-
     character_name = config.get("character", DEFAULT_CHARACTER).lower()
     realm_name = config.get("realm", DEFAULT_REALM).replace(" ", "-").lower()
     region = config.get("region", DEFAULT_REGION)
@@ -251,7 +250,7 @@ def get_schema():
             schema.Text(
                 id = "client",
                 name = "Client Id",
-                desc = "Battle.net Client ID",                
+                desc = "Battle.net Client ID",
                 icon = "user",
             ),
             schema.Text(

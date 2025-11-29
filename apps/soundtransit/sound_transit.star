@@ -56,7 +56,7 @@ def search_stations(prefix, config):
     ]
 
     return [
-        schema.Option(display=stop["name"], value=stop["id"])
+        schema.Option(display = stop["name"], value = stop["id"])
         for stop in light_rail_stops
     ]
 

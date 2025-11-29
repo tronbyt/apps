@@ -84,8 +84,8 @@ def main(config):
     sunrise_time = sunrise.sunrise(float(location["lat"]), float(location["lng"]), now).in_location(location["timezone"])
     sunset_time = sunrise.sunset(float(location["lat"]), float(location["lng"]), now).in_location(location["timezone"])
 
-    near_sunrise_now = True if ((now - sunrise_time).hours) < .5 else False
-    near_sunset_now = True if ((now - sunset_time).hours) < .5 else False
+    near_sunrise_now = True if ((now - sunrise_time).hours) < 0.5 else False
+    near_sunset_now = True if ((now - sunset_time).hours) < 0.5 else False
 
     is_after_sunrise = now > sunrise_time
     is_before_sunset = now < sunset_time
@@ -99,7 +99,7 @@ def main(config):
     elif is_before_sunset and is_after_sunrise:
         #during the day you can't see much so let's get the early evening's sky and present that.
         #so during the day your Tidbyt will tell you what you can see this evening.
-        check_offset = abs((now - sunset_time).hours) - .5
+        check_offset = abs((now - sunset_time).hours) - 0.5
         cache_ttl_seconds = check_offset * 60 * 60
 
     #we've calculated sunset and sunrise with the exact gps coordinates, but now we will round the coordinates to one decimal

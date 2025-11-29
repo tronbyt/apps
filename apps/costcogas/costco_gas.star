@@ -103,9 +103,9 @@ TIME_FORMAT_MAP = {
 
 API_HEADERS = {
     "Accept": "*/*",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", # Only product directive is needed, others can be stripped
-	"Accept-Encoding": "identity",
- 	"Connection": "keep-alive",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",  # Only product directive is needed, others can be stripped
+    "Accept-Encoding": "identity",
+    "Connection": "keep-alive",
 }
 
 # Note - These API GET calls are flaky at best. You can only make 1-2 calls per day before the server stops responding
