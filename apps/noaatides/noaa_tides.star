@@ -237,6 +237,7 @@ def main(config):
             lines.append(render.Text(content = station_name, color = color_label, font = "tom-thumb"))
 
     points = []
+    total_points = 0
 
     # generate up HILO lines
     debug_print("generating hilos")
@@ -346,6 +347,7 @@ def main(config):
     if config.bool("display_graph") and len(points) > 0:  # panic if we try to render an empty graph object
         # Calculate current time position on the graph (graph x-axis is 0-64 pixels for 24 hours)
         current_time_x = None
+        current_tide_height = 0
         if tides_graph != None and "predictions" in tides_graph and len(tides_graph["predictions"]) > 0:
             # Get current time in local timezone (NOAA returns times in local station time)
             current_time = time.now()

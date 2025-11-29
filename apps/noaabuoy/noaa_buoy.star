@@ -129,6 +129,7 @@ def fetch_data(buoy_id, last_data):
 
     if wave_start != -1:
         # Found structured table format
+        wave_section = ""
         wave_end = html.find("</section>", wave_start)
         if wave_end != -1:
             wave_summary_found = True

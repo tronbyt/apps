@@ -317,7 +317,7 @@ def contribution_chart(data, config):
 
         #add empty squares for days that have not occurred yet
         w.extend([
-            contribution_square_fullscreen(background_color, background_color, (j == 6)) if fullscreen_chart else contribution_square(background_color, background_color),
+            contribution_square_fullscreen(background_color, background_color, False) if fullscreen_chart else contribution_square(background_color, background_color),
         ] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
 
         cdata2.append(render.Column(children = w))
