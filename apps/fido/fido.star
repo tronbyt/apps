@@ -48,7 +48,7 @@ FIDO_FETCH = PET_ACTIONS["Fetch"]
 
 def main(config):
     # Set configuration variables
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     pet_name = config.get("pet_name", DEFAULT_PAL_NAME)
     pet_birthday = config.str("pet_birthday", DEFAULT_BIRTHDAY)
 

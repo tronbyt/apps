@@ -33,7 +33,7 @@ def main(config):
     #--------------------------------
     # Calculate days until Christmas
     #--------------------------------
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     today = time.time(year = now.year, month = now.month, day = now.day, location = timezone)
     current_xmas = time.time(year = today.year, month = 12, day = 25, location = timezone)

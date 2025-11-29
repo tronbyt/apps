@@ -58,7 +58,7 @@ def main(config):
     renderCategory = []
 
     # we already need now value in multiple places - so just go ahead and get it and use it
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     if config.get("teamid"):

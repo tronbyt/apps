@@ -17,7 +17,7 @@ DEFAULT_TEXT = "the Noodle Incident."  # No one can prove Calvin did it, maybe e
 
 def main(config):
     last_incident = time.parse_time(config.get("last_incident", DEFAULT_DATE_TIME))
-    time_zone = config.get("$tz", "US/Eastern")  # Utilize special time_zone variable
+    time_zone = time.tz()
     todays_date = time.now().in_location(time_zone)
     duration = todays_date - last_incident
     days_since = math.round(duration.hours / 24)

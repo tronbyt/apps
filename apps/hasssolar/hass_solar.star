@@ -169,8 +169,7 @@ def fetch_entity(entity_key, config, default_unit):
         return rep.json()
     return None
 
-def get_time_zone(config):
-    return config.get("$tz", "Etc/UTC")
+
 
 def unit_for_entity(entity):
     if "attributes" in entity and "unit_of_measurement" in entity["attributes"]:

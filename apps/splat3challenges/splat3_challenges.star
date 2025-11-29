@@ -152,7 +152,7 @@ def main(config):
 
     location = config.get("location", DEFAULT_LOCATION)
     loc = json.decode(location)
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Utilize special timezone variable
+    timezone = loc.get("timezone", time.tz())  # Utilize special timezone variable
     now = time.now().in_location(timezone)
 
     BG_INFO = int(config.get("bginfo", "3"))

@@ -75,14 +75,8 @@ def get_schema():
 
 def main(config):
     # Get the current time in 24 hour format
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)  # Utilize special timezone variable
-    now = time.now()
-
-    # Because the times returned by this API do not include the date, we need to
-    # strip the date from "now" to get the current time in order to perform
-    # acurate comparissons.
-    # Local time must be localized with a timezone
-    current_time = time.parse_time(now.in_location(timezone).format("3:04:05 PM"), format = "3:04:05 PM", location = timezone)
+    timezone = time.tz()  # Utilize special timezone variable
+    current_time = time.parse_time(time.now().in_location(timezone).format("3:04:05 PM"), format = "3:04:05 PM", location = timezone)
 
     # Get config values
     is_24_hour_format = config.bool("is_24_hour_format", DEFAULT_IS_24_HOUR_FORMAT)

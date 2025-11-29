@@ -15,7 +15,7 @@ DEFAULT_DATE_TIME = "2020-01-01T00:00:00Z"
 
 def main(config):
     last_accident = time.parse_time(config.get("last_accident", DEFAULT_DATE_TIME))
-    time_zone = config.get("$tz", "America/Chicago")  # Utilize special time_zone variable
+    time_zone = time.tz()
     todays_date = time.now().in_location(time_zone)
     accident_free_duration = todays_date - last_accident
     accident_free_days = math.round(accident_free_duration.hours / 24)

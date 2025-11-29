@@ -60,7 +60,7 @@ def main(config):
 
     tz = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
 
     tm = config.get("force_time")

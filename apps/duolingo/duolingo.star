@@ -319,7 +319,7 @@ def main(config):
     duolingo_streak_daystart_cached = cache.get(duolingo_cache_key_streak_daystart)
 
     # Get time and location variables
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     print("Using timezone " + timezone)
 
     # DEBUG

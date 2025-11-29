@@ -174,7 +174,7 @@ def get_gas_data(config):
     station_data = get_station_details(API_STATION_DETAILS.format(station_id))
 
     # determine what day today is in local time and get dayname in lowercase
-    today_dow = time.now().in_location(config.get("$tz", DEFAULT_CONFIG["timezone"])).format("Monday").lower()
+    today_dow = time.now().in_location(time.tz()).format("Monday").lower()
 
     gas_data = {}
 

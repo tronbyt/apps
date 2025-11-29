@@ -37,7 +37,7 @@ LOGO_BASE_URL = "https://a.espncdn.com/i/teamlogos/ncaa/500-dark/{0}.png"
 
 def get_config(config):
     return struct(
-        Timezone = config.get("$tz", DEFAULT_TIMEZONE),
+        Timezone = time.tz(),
         Team = config.str("team", DEFAULT_TEAM),
         SwitchHour = int(config.str("hour", DEFAULT_HOUR_TO_SWITCH)),
         GameTime = config.str("game_time", DEFAULT_RELATIVE),

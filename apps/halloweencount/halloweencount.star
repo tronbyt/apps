@@ -528,7 +528,7 @@ def create_crossing_frame(progress, display_content, font_size, enable_particles
     return render.Stack(children = animated_elements + [text_overlay])
 
 def main(config):
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     halloween_year = now.year

@@ -16,7 +16,7 @@ def main(config):
 
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
     now = config.get("time")
 

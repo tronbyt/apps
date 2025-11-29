@@ -189,7 +189,7 @@ def grid(location):
 
 def main(config):
     count = int(config.get("count", "0"))
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
 
     stack = [grid(timezone)]
 

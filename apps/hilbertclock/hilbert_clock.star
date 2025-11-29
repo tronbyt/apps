@@ -213,7 +213,7 @@ def main(config):
 
     # set time zone
     location = json.decode(location) if location else {}
-    timezone = location.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))
+    timezone = location.get("timezone", time.tz())
     now = time.now().in_location(timezone)
 
     # get the cycle of points and randomly get one of the options for color cycles

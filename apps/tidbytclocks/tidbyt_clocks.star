@@ -16,7 +16,7 @@ BASE_URL = "https://api.tidbyt.com/v0/apps"
 FONT = "tom-thumb"
 DEFAULT_TIMEZONE = "America/New_York"
 
-def main(config):
+def main():
     #get list of apps
     rep = http.get(url = BASE_URL, ttl_seconds = 3600)  #refresh list every hour
     if rep.status_code != 200:
@@ -40,7 +40,7 @@ def main(config):
     final_list = format_text(clock_list, FONT)
 
     #get current time
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     time_text = [render.Text(content = now.format("15:04"), font = "10x20")] * 5  #mulitply by 5 so the time animation is actually as if delay=500

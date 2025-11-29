@@ -65,7 +65,7 @@ ALL_MATCH_CACHE = 2 * 3600  # 2 hours
 FUTURE_FIXTURE_CACHE = 6 * 3600  # 6 hours
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
 
     # Cache the "current match" data for 2 hours
     AllMatchData = get_cachable_data(LiveGames_URL, ALL_MATCH_CACHE)

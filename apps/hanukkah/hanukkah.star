@@ -25,7 +25,7 @@ def get_hanukkah_dates(year):
     return hanukkah_first_day, hanukkah_last_day
 
 def main(config):
-    tz = config.get("$tz", "America/New_York")
+    tz = time.tz()
     current_time = time.now().in_location(tz)
     current_year = current_time.year
 

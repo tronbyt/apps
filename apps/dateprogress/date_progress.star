@@ -158,10 +158,7 @@ def calc_year_progress(now, timezone):
 def main(config):
     location = config.get(P_LOCATION)
     location = json.decode(location) if location else {}
-    timezone = location.get(
-        "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
-    )
+    timezone = location.get("timezone", time.tz())
     now = config.get("time")
     now = (time.parse_time(now) if now else time.now()).in_location(timezone)
 

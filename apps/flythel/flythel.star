@@ -133,7 +133,7 @@ MLB_SCHED_ENDPOINT = "/api/v1/schedule/games/"
 MLB_BASE_URL = "https://statsapi.mlb.com{0}"
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     team = config.str("team", DEFAULT_TEAM)
     hour_to_switch = int(config.str("hour", DEFAULT_HOUR_TO_SWITCH))
     relative_or_absolute = config.str("game_time", DEFAULT_RELATIVE)

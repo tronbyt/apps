@@ -37,7 +37,7 @@ def main(config):
     TeamListSelection = config.get("TeamList", DEFAULT_TEAM)
     UpcomingSelection = config.get("Upcoming", "Record")
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     renderDisplay = []
 

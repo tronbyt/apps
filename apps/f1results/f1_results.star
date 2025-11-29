@@ -31,8 +31,6 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DEFAULT_TIMEZONE = "Australia/Adelaide"
-
 # Alternate URL thanks to @jvivona for the hosting :)
 F1_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/refs/heads/main/formula1/"
 
@@ -50,7 +48,7 @@ def main(config):
     MyRaceDate = ""
     MyRaceTime = ""
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     Year = now.format("2006")
 

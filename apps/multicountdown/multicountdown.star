@@ -11,7 +11,7 @@ load("time.star", "time")
 
 def main(config):
     #Set up our clock/time/now:
-    timezone = config.get("$tz", "America/New_York")  # Utilize special timezone variable
+    timezone = time.tz()  # Utilize special timezone variable
     now = time.now().in_location(timezone)
 
     eventCount = config.str("eventCount")

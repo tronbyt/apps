@@ -139,7 +139,7 @@ def main(config):
     # Determine timezone based on location
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Use special timezone variable.
+    timezone = loc.get("timezone", time.tz())  # Use special timezone variable.
 
     # The smallest bit shown corresponds to a period of ~1.3 seconds, so we should update
     # the screen while the app is showing.

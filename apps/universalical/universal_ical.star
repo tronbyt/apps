@@ -11,7 +11,7 @@ def main(config):
     location = json.decode(location) if location else {}
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
 
     show_expanded_time_window = config.bool("show_expanded_time_window", DEFAULT_SHOW_EXPANDED_TIME_WINDOW)
@@ -413,7 +413,6 @@ DEFAULT_SHOW_EXPANDED_TIME_WINDOW = True
 DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
 DEFAULT_SHOW_IN_PROGRESS = True
-DEFAULT_TIMEZONE = "America/New_York"
 FRAME_DELAY = 100
 LAMBDA_URL = "https://6bfnhr9vy7.execute-api.us-east-1.amazonaws.com/ics-next-event"
 

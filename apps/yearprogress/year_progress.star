@@ -19,7 +19,7 @@ def main(config):
     milestones_only = config.bool("milestones_only", False)
     display_decimal = not milestones_only
 
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     yearstart = time.time(location = timezone, year = now.year, month = 1, day = 1, hour = 0, minute = 0, second = 0).unix

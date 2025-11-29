@@ -116,7 +116,7 @@ DEFAULT_TIMEZONE = "Asia/Bangkok"
 def main(config):
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))
+    timezone = loc.get("timezone", time.tz())
 
     current_time = time.now().in_location(timezone)
 

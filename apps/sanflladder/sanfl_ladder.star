@@ -25,7 +25,7 @@ def main(config):
     renderCategory = []
     LADDER_CACHE = 43200  #12 hours
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     DayofWeek = now.format("Mon")
 

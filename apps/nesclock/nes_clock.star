@@ -543,7 +543,7 @@ def main(config):
     # Get the current time in 24 hour format
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Utilize special timezone variable
+    timezone = loc.get("timezone", time.tz())  # Utilize special timezone variable
     now = time.now()
 
     # Because the times returned by this API do not include the date, we need to

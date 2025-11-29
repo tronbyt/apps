@@ -564,7 +564,7 @@ def main(config):
     location = location.replace("DumontDUrville", "Dumont-d'Urville")  # for Antarctica/DumontDUrville
     location = location.replace("EasterIsland", "Easter Island")  # for Chile/EasterIsland
 
-    current_time_here = time.now().in_location(config.get("$tz", "America/Los_Angeles"))
+    current_time_here = time.now().in_location(time.tz())
     threshold_minutes = int(config.get("past_the_hour", "15"))
 
     if current_time_here.hour == 17 and current_time_here.minute < threshold_minutes:

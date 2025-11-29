@@ -19,7 +19,7 @@ iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAO1JREFUOE9jZKAQ
 """)
 
 def main(config):
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     bday = time.time(year = now.year, month = int(config.get("birthMonth", "1"), 10), day = int(config.get("birthDay", "1"), 10), location = timezone)
     name = config.str("name", "Name")

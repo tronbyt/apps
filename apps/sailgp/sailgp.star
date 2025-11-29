@@ -78,7 +78,7 @@ def main(config):
 def nri(nri, standings, config):
     text_color = config.get("text_color", DEFAULTS["text_color"])
     standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
-    timezone = config.get("$tz", DEFAULTS["timezone"])  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
+    timezone = time.tz()  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
 
     date_and_time_first = nri["startDateTime"]
     date_and_time_second = nri["endDateTime"]

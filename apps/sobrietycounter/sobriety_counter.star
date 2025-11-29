@@ -70,7 +70,7 @@ def get_sober_day_count(config):
     if (user_sober_datetime == None):
         return None
 
-    timezone = config.get("$tz") or DEFAULT_TIMEZONE
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     user_sober_date = user_sober_datetime.partition("T")[0]
     sober_date = time.parse_time(user_sober_date, format = "2006-01-02", location = timezone).in_location(timezone)

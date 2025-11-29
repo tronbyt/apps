@@ -331,17 +331,12 @@ def ripen_random_seeds(width, seeds_widget_list, ripen_percent):
 def render_all_frames(frame_count, config):
     frames = []
 
-    hemisphere = config.get("hemisphere", None)
-    if hemisphere != None:
-        # Handle legacy config option
-        timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    timezone = location["timezone"]
+    if float(location["lat"]) < 0:
+        hemisphere = "southern"
     else:
-        location = json.decode(config.get("location", DEFAULT_LOCATION))
-        timezone = location["timezone"]
-        if float(location["lat"]) < 0:
-            hemisphere = "southern"
-        else:
-            hemisphere = "northern"
+        hemisphere = "northern"
     time_now = time.now().in_location(timezone)
 
     # Calculate days until summer and autumn

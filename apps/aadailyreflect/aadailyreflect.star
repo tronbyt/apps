@@ -85,7 +85,7 @@ def get_cachable_data(url):
     return res.body()
 
 def render_text(config):
-    current_month_day = time.now().in_location(config.get("$tz", "America/Chicago")).format("01/02/06")[:5]
+    current_month_day = time.now().in_location(time.tz()).format("01/02/06")[:5]
     daily_reflection = json.decode(get_cachable_data(API_STUB + current_month_day))["data"].replace("&quot;", "\"").replace("&nbsp;", " ")
 
     title = extract_text(daily_reflection, TITLE_FINDER, TITLE_FINDER_END, TITLE_OFFSET).title()

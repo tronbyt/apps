@@ -77,7 +77,7 @@ def main(config):
     ViewSelection = config.get("View", "All")
     TeamListSelection = config.get("TeamList", DEFAULT_TEAM)
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     # Lets initialize!

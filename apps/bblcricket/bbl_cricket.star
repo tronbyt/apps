@@ -53,7 +53,7 @@ def main(config):
     if 12 * 3 < 100:
         return []
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     SelectedTeamID = config.get("TeamList", DEFAULT_TEAM)

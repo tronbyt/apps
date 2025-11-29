@@ -262,7 +262,7 @@ def draw_clock(hour, minute, show_clock):
     )
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     hour = now.hour
 

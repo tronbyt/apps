@@ -31,7 +31,7 @@ DEFAULT_TIMEZONE = "America/New_York"
 CACHE_TTL_SECONDS = 43200
 
 def main(config):
-    now_unformatted = time.now().in_location(config.get("$tz", DEFAULT_TIMEZONE))
+    now_unformatted = time.now().in_location(time.tz())
     json_data = ""
     rc, data = getData()
 

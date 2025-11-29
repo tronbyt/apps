@@ -482,7 +482,7 @@ def get_date_str(timezone):
 def adjust_gametime(gametime_raw, config):
     #return gametime string and adjust for local time
     if config.bool("local_tz", False):
-        timezone = config.get("$tz", "America/New_York")
+        timezone = time.tz()
     else:
         timezone = "America/New_York"
     game_time = time.parse_time(gametime_raw).in_location(timezone)

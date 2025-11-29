@@ -24,7 +24,7 @@ def main(config):
         "Dec 31": CONFETTI,
     }
 
-    timezone = config.get("$tz") or DEFAULT_TIMEZONE
+    timezone = time.tz()
 
     now = time.now().in_location(timezone)
     date = now.format("Jan 2")

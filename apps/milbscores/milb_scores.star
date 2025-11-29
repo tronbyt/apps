@@ -125,7 +125,7 @@ def main(config):
     Display = []
     Title = ""
     SportID = ""
-    localtimezone = config.get("$tz", DEFAULT_TIMEZONE)
+    localtimezone = time.tz()
     SelectedLeague = config.get("League", "1")
     RotationSpeed = config.get("speed", "3")
 

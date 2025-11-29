@@ -94,7 +94,7 @@ def main(config):
 # ###################################################
 
 def nextrace(api_data, config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
+    timezone = time.tz()  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
     date_and_time = api_data["Race_Date"]
     date_and_time3 = time.parse_time(date_and_time, "2006-01-02T15:04:05-0700").in_location(timezone)
     date_str = date_and_time3.format("Jan 2" if config.bool("is_us_date_format", DEFAULT_DATE_US) else "2 Jan").title()  #current format of your current date str
