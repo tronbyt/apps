@@ -6,5 +6,4 @@ desc: Only the MLB, NFL, NHL, and NBA scores that you care about.
 author: ghensley
 fileName: sports_scoreboard.star
 packageName: sportsscoreboard
-recommended_interval: 5
 recommendedInterval: 5

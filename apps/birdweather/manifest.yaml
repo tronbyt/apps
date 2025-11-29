@@ -4,5 +4,4 @@ name: Birdweather
 summary: Sightings from Birdweather
 desc: Display recent sightings from a Birdweather station using their API. Requires an API token.
 author: marstonstudio
-recommended_interval: 5
 recommendedInterval: 5

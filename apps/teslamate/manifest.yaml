@@ -6,5 +6,5 @@ desc: Shows your Tesla's current Name, Charge in Mi/KM and battery %, Plugged In
 author: brombomb
 fileName: teslamate.star
 packageName: teslamate
-recommended_interval: 30
+recommendedInterval: 30
 supports2x: true

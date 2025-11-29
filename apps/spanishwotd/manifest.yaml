@@ -6,5 +6,4 @@ desc: Displays the Spanish Word of the Day from SpanishDict.com.
 author: logancornelius
 fileName: spanish_wotd.star
 packageName: spanishwotd
-recommended_interval: 5
 recommendedInterval: 5

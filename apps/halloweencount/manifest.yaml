@@ -6,4 +6,4 @@ desc: Renders how many days until Halloween, includes multiple sprites and abili
 author: Starrlord
 fileName: halloweencount.star
 packageName: halloweencount
-recommended_interval: 5
+recommendedInterval: 5

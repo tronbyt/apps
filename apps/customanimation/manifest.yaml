@@ -6,4 +6,4 @@ desc: Display a single custom image with full support for animated GIFs and stat
 author: tronbyt
 fileName: custom_animation.star
 packageName: customanimation
-recommended_interval: 10000
+recommendedInterval: 10000

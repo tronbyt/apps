@@ -6,4 +6,4 @@ desc: A clock that shows the current solar time and (optionally) the local time.
 author: Daniel Sitnik
 fileName: solar_time_clock.star
 packageName: solartimeclock
-recommended_interval: 0
+recommendedInterval: 0

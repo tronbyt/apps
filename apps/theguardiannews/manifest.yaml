@@ -6,5 +6,4 @@ desc: Gets latest new articles from The Guardian and displays up to 3 articles f
 author: jvivona
 fileName: theguardiannews.star
 packageName: theguardiannews
-recommended_interval: 10
 recommendedInterval: 10

@@ -4,6 +4,5 @@ name: Garage Closed
 summary: 'Notification: garage closed'
 desc: Displays a notification that a garage door was closed.
 author: savdagod
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

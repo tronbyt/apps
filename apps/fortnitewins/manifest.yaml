@@ -6,5 +6,4 @@ desc: Shows how many wins the user has in each main game mode (i.e., Solos, Duos
 author: Hunter Berry 
 fileName: fortnite_wins.star
 packageName: fortnitewins
-recommended_interval: 5
 recommendedInterval: 5

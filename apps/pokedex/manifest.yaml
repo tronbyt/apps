@@ -6,6 +6,5 @@ desc: Display a random Pokemon alongside its name, number, height, and weight.
 author: Mack Ward
 fileName: pokedex.star
 packageName: pokedex
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

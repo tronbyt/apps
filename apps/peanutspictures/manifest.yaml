@@ -6,5 +6,4 @@ desc: Shows a specific or random pixel art piece of characters from the Peanuts 
 author: michaelalbinson
 fileName: peanuts_pictures.star
 packageName: peanutspictures
-recommended_interval: 5
 recommendedInterval: 5

@@ -6,5 +6,4 @@ desc: Displays current currency exchange rates.
 author: Robert Ison
 fileName: currencyconverter.star
 packageName: currencyconverter
-recommended_interval: 5
 recommendedInterval: 5

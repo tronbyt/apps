@@ -6,4 +6,4 @@ desc: A Tidbyt version of the TIX clock. It uses arrays of colorful blocks to sh
 author: pawliger
 fileName: tix_clock.star
 packageName: tixclock
-recommended_interval: 0
+recommendedInterval: 0

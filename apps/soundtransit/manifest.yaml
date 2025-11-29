@@ -6,5 +6,4 @@ desc: Shows upcoming arrivals at up to 2 different stations in Sound Transit's L
 author: Jon Janzen
 fileName: sound_transit.star
 packageName: soundtransit
-recommended_interval: 5
 recommendedInterval: 5

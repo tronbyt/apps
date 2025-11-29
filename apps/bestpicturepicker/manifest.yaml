@@ -6,5 +6,4 @@ desc: Randomly Display Best Picture Nominee.
 author: joshuakopman
 fileName: bestpicturepicker.star
 packageName: bestpicturepicker
-recommended_interval: 5
 recommendedInterval: 5

@@ -6,5 +6,4 @@ desc: Display the current Australian Football League standings and the next game
 author: andymcrae
 fileName: afl.star
 packageName: afl
-recommended_interval: 5
 recommendedInterval: 5

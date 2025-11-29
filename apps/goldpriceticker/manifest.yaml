@@ -6,5 +6,4 @@ desc: Close to realtime precious metal prices and a graph comparing the price to
 author: Aaron Brace
 fileName: goldpriceticker.star
 packageName: goldpriceticker
-recommended_interval: 5
 recommendedInterval: 5

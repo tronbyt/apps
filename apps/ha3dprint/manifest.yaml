@@ -6,4 +6,4 @@ desc: Display current print's status and time remaining. All information comes f
 author: brombomb
 fileName: ha3dprint.star
 packageName: ha3dprint
-recommended_interval: 5
+recommendedInterval: 5

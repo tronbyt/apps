@@ -6,6 +6,5 @@ desc: Allows you to track stock prices (intraday, week, or month) using data fro
 author: ingmarstein
 fileName: stockdata.star
 packageName: stockdata
-recommended_interval: 1
 recommendedInterval: 1
 supports2x: true

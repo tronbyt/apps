@@ -6,5 +6,4 @@ desc: See the Pizza of the Day at any Sliver Pizzeria location.
 author: Aaron Janse
 fileName: sliver_pizza.star
 packageName: sliverpizza
-recommended_interval: 5
 recommendedInterval: 5

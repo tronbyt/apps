@@ -6,5 +6,4 @@ desc: UV index for your location.
 author: j-esse
 fileName: uv.star
 packageName: uv
-recommended_interval: 5
 recommendedInterval: 5

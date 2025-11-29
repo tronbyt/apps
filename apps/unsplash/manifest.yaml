@@ -6,6 +6,5 @@ desc: Displays a random image from Unsplash.
 author: zephyern, gabe565
 fileName: unsplash.star
 packageName: unsplash
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

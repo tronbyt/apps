@@ -6,5 +6,4 @@ desc: View NCAAW standings by conference.
 author: LunchBox8484
 fileName: ncaaw_standings.star
 packageName: ncaawstandings
-recommended_interval: 5
 recommendedInterval: 5

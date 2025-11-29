@@ -6,5 +6,4 @@ desc: Shows the status of the most recent pipeline in a selected Gitlab project.
 author: Sven Ringger
 fileName: gitlab_pipeline.star
 packageName: gitlabpipeline
-recommended_interval: 5
 recommendedInterval: 5

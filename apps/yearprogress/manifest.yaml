@@ -6,5 +6,4 @@ desc: The only progress bar you wish was slower. The option for milestone days w
 author: chrisbateman
 fileName: year_progress.star
 packageName: yearprogress
-recommended_interval: 60
 recommendedInterval: 60

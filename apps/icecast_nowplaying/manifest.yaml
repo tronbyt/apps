@@ -6,4 +6,4 @@ author: tavdog
 fileName: icecast-nowplaying.star
 packageName: icecast_nowplaying
 id: icecast-nowplaying
-recommended_interval: 1
+recommendedInterval: 1

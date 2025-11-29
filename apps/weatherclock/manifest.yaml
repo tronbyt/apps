@@ -6,4 +6,4 @@ desc: Display time and current weather.
 author: J. Keybl
 fileName: weatherclock.star
 packageName: weatherclock
-recommended_interval: 0
+recommendedInterval: 0

@@ -6,5 +6,4 @@ desc: This app displays the leaderboard for the current PGA Tour golf tournament
 author: M0ntyP
 fileName: pga_tour.star
 packageName: pgatour
-recommended_interval: 5
 recommendedInterval: 5

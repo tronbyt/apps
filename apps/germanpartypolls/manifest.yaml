@@ -6,5 +6,4 @@ desc: This app displays the latest Bundestagswahl polls based on wahlrecht.de.
 author: dev-manuel
 fileName: germanpartypolls.star
 packageName: germanpartypolls
-recommended_interval: 5
 recommendedInterval: 5

@@ -6,5 +6,4 @@ desc: Displays our favorite dog, Archer!
 author: Jeremy Harnden
 fileName: archerdog.star
 packageName: archerdog
-recommended_interval: 5
 recommendedInterval: 5

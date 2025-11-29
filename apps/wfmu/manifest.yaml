@@ -4,5 +4,4 @@ name: WFMU
 summary: WFMU Now Playing
 desc: Displays what's currently playing on the WFMU radio station. WFMU-FM 91.1/Jersey City, NJ; 90.1/Hudson Valley.
 author: Tom O'Dea
-recommended_interval: 5
 recommendedInterval: 5

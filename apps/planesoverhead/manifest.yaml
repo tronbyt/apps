@@ -6,5 +6,4 @@ desc: Fetch the closest plane flying overhead from the OpenSky API and display i
 author: Conor McLaughlin
 fileName: planes_overhead.star
 packageName: planesoverhead
-recommended_interval: 5
 recommendedInterval: 5

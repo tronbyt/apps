@@ -6,5 +6,4 @@ desc: Shows the daily pick deal from Guitar Center.
 author: Bennett Schoonerman
 fileName: gc_daily_pick.star
 packageName: gcdailypick
-recommended_interval: 5
 recommendedInterval: 5

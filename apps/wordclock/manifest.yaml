@@ -6,4 +6,4 @@ desc: Display the accurate time in a human-readable way.
 author: Jeffrey Lancaster
 fileName: word_clock.star
 packageName: wordclock
-recommended_interval: 0
+recommendedInterval: 0

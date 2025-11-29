@@ -6,5 +6,4 @@ desc: This app takes the selected team and displays the current match situation 
 author: M0ntyP
 fileName: test_cricket.star
 packageName: testcricket
-recommended_interval: 5
 recommendedInterval: 5

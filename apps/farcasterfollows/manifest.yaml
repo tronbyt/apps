@@ -6,5 +6,4 @@ desc: Display your follower count from Farcaster.
 author: 0xmetaclass
 fileName: farcaster_follows.star
 packageName: farcasterfollows
-recommended_interval: 5
 recommendedInterval: 5

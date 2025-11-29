@@ -4,5 +4,4 @@ name: Jeopardy
 summary: Final Jeopardy questions
 desc: Shows a random historical Final Jeopardy question.
 author: abochnak
-recommended_interval: 5
 recommendedInterval: 5

@@ -6,4 +6,4 @@ desc: Displays the time in up to four different locations.
 author: Elliot Bentley
 fileName: world_clock.star
 packageName: worldclock
-recommended_interval: 0
+recommendedInterval: 0

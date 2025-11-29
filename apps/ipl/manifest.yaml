@@ -6,5 +6,4 @@ desc: Shows scores for the Indian Premier League.
 author: M0ntyP
 fileName: ipl.star
 packageName: ipl
-recommended_interval: 5
 recommendedInterval: 5

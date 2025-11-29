@@ -6,4 +6,4 @@ desc: Show the time with numbers you can see from across the room! Bonus date in
 author: Henry So, Jr.
 fileName: clock_by_henry.star
 packageName: clockbyhenry
-recommended_interval: 0
+recommendedInterval: 0

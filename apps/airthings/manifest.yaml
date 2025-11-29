@@ -6,5 +6,4 @@ desc: Interact with the API by creating a client app at https://dashboard.airthi
 author: joshspicer
 fileName: airthings.star
 packageName: airthings
-recommended_interval: 5
 recommendedInterval: 5

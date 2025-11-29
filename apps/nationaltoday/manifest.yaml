@@ -6,5 +6,4 @@ desc: Displays today's holidays from NationalToday.
 author: rs7q5
 fileName: nationaltoday.star
 packageName: nationaltoday
-recommended_interval: 5
 recommendedInterval: 5

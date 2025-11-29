@@ -6,5 +6,4 @@ desc: Based upon a curated list, allow user to select display of various RSS fee
 author: jvivona
 fileName: rss_misc_feeds.star
 packageName: rssmiscfeeds
-recommended_interval: 10
 recommendedInterval: 10

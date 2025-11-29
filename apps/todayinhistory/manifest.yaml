@@ -6,5 +6,4 @@ desc: Looks at wikipedia for births, deaths and events for the current day. Pick
 author: Alan Moore
 fileName: today_in_history.star
 packageName: todayinhistory
-recommended_interval: 5
 recommendedInterval: 5

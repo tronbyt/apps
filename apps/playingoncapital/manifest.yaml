@@ -4,5 +4,4 @@ name: PlayingOnCapital
 summary: Now Playing on Capital 604
 desc: Shows the current song playing on Capital Radio 604.
 author: Craig James Johnston
-recommended_interval: 5
 recommendedInterval: 5

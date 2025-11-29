@@ -6,5 +6,4 @@ desc: Shows the current playing song on various ABC stations in Australia.
 author: M0ntyP
 fileName: abc_radio.star
 packageName: abcradio
-recommended_interval: 10
 recommendedInterval: 10

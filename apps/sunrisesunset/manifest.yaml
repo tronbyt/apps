@@ -6,5 +6,4 @@ desc: Displays with icon sunrise and sunset times.
 author: Alan Fleming
 fileName: sunrise_sunset.star
 packageName: sunrisesunset
-recommended_interval: 5
 recommendedInterval: 5

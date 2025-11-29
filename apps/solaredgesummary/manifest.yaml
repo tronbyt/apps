@@ -6,4 +6,4 @@ desc: Daily, monthly, annual and lifetime energy production and consumption moni
 author: ckyr (credit to Ingmar Stein)
 fileName: solaredgesummary.star
 packageName: solaredgesummary
-recommended_interval: 30
+recommendedInterval: 30

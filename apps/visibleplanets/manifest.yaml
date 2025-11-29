@@ -6,5 +6,4 @@ desc: Displays info on planet visibility.
 author: Robert Ison
 fileName: visibleplanets.star
 packageName: visibleplanets
-recommended_interval: 5
 recommendedInterval: 5

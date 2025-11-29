@@ -6,5 +6,4 @@ desc: Enter your location and fuel type, then find the cheapest fuel in a 3km ra
 author: M0ntyP
 fileName: nsw_fuel_check.star
 packageName: nswfuelcheck
-recommended_interval: 5
 recommendedInterval: 5

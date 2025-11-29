@@ -6,4 +6,4 @@ desc: Daily, weekly, monthly, annual and lifetime energy production and consumpt
 author: ckyr
 fileName: enphasesummary.star
 packageName: enphasesummary
-recommended_interval: 5
+recommendedInterval: 5

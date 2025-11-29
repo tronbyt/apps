@@ -6,5 +6,4 @@ desc: Displays the time, starting direction and magnitude of the next Internatio
 author: Diogo Ribeiro Machado @ diogodh
 fileName: iss.star
 packageName: iss
-recommended_interval: 5
 recommendedInterval: 5

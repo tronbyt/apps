@@ -6,5 +6,4 @@ desc: This shows you the most recently added pinball machines near your location
 author: scottwainstock
 fileName: pinball_map.star
 packageName: pinballmap
-recommended_interval: 5
 recommendedInterval: 5

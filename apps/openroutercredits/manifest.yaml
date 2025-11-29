@@ -6,4 +6,4 @@ desc: Shows remaining credits available on OpenRouter API.
 author: tavdog
 fileName: openrouter_credits.star
 packageName: openroutercredits
-recommended_interval: 300
+recommendedInterval: 300

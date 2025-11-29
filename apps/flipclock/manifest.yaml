@@ -3,4 +3,4 @@ name: FlipClock
 summary: A classic flip clock
 desc: FlipClock comes to your display.
 author: W00tock
-recommended_interval: 0
+recommendedInterval: 0

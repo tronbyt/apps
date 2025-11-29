@@ -6,5 +6,4 @@ desc: Shows the location of restored PCC trolleys running on SEPTA Route G1.
 author: radiocolin
 fileName: trolley_detector.star
 packageName: trolleydetector
-recommended_interval: 5
 recommendedInterval: 5

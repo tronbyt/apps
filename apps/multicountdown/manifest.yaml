@@ -6,5 +6,4 @@ desc: A clock that counts down to a series of events, one time or daily.
 author: BestDistress
 fileName: multicountdown.star
 packageName: multicountdown
-recommended_interval: 5
 recommendedInterval: 5

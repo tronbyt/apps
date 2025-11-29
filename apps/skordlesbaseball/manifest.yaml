@@ -6,5 +6,4 @@ desc: This app gets spring baseball data from the Skordle website to display on 
 author: Woolycoin437420
 fileName: skordlesbaseball.star
 packageName: skordlesbaseball
-recommended_interval: 5
 recommendedInterval: 5

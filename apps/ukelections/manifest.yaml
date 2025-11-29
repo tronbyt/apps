@@ -6,5 +6,4 @@ desc: Details about upcoming elections in the United Kingdom.
 author: dinosaursrarr
 fileName: uk_elections.star
 packageName: ukelections
-recommended_interval: 5
 recommendedInterval: 5

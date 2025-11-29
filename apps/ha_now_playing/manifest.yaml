@@ -5,4 +5,4 @@ summary: Home Assistant Now Playing
 desc: Display track details and artwork from any Home Assistant media_player entity.
 author: drudge, gabe565
 supports2x: true
-recommended_interval: 0
+recommendedInterval: 0

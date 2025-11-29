@@ -6,5 +6,4 @@ desc: This app shows price info for the top cryptocurrencies. Prices are provide
 author: playak
 fileName: top_crypto_prices.star
 packageName: topcryptoprices
-recommended_interval: 1
 recommendedInterval: 1

@@ -4,5 +4,4 @@ name: Retrograde Planet
 summary: Show Retrograde Planets
 desc: Display when planets change from retrograde to direct and viceversa and current status.
 author: tidbytdev
-recommended_interval: 5
 recommendedInterval: 5

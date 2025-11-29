@@ -71,7 +71,7 @@ desc: Display the time in a groovy, human-readable way.
 author: Max Timkovich
 fileName: fuzzy_clock.star
 packageName: fuzzyclock
-recommended_interval: 1
+recommendedInterval: 1
 supports2x: true
 ```
 

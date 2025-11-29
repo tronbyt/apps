@@ -6,6 +6,5 @@ desc: Displays multiple HomeAssistant entities (e.g. step counts).
 author: James Woglom
 fileName: hassentitylist.star
 packageName: hassentitylist
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

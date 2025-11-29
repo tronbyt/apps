@@ -6,5 +6,4 @@ desc: Displays your baby's age in days, weeks, and months!
 author: helmc2
 fileName: baby_age.star
 packageName: babyage
-recommended_interval: 5
 recommendedInterval: 5

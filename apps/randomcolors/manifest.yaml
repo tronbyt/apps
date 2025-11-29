@@ -6,5 +6,4 @@ desc: Generates random color and corresponding hex code.
 author: M0ntyP
 fileName: random_colors.star
 packageName: randomcolors
-recommended_interval: 5
 recommendedInterval: 5

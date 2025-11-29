@@ -6,5 +6,4 @@ desc: Houston Metro arrivals.
 author: DanielJRutledge
 fileName: houstonmetro.star
 packageName: houstonmetro
-recommended_interval: 5
 recommendedInterval: 5

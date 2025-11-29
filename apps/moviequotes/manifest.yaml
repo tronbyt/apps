@@ -6,5 +6,4 @@ desc: Random movie quote from AFI top 100 movie quotes.
 author: Austin Fonacier
 fileName: movie_quotes.star
 packageName: moviequotes
-recommended_interval: 5
 recommendedInterval: 5

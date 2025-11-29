@@ -4,6 +4,5 @@ name: Garage Closing
 summary: Notification garage closing
 desc: Displays a notification that a garage door is closing.
 author: savdagod
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

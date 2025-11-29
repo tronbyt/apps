@@ -6,5 +6,4 @@ desc: Displays the total debt by the United States of America in dollars.
 author: PMK (@pmk)
 fileName: usdebtclock.star
 packageName: usdebtclock
-recommended_interval: 60
 recommendedInterval: 60
