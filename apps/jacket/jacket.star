@@ -7,6 +7,9 @@ load("schema.star", "schema")
 
 REFRESH_RATE = 3600
 OPEN_WEATHER_URL = "https://api.openweathermap.org/data/3.0/onecall"
+NOAA_POINTS_URL = "https://api.weather.gov/points"
+NOAA_USER_AGENT = "JacketApp/1.0 (tidbyt; contact@example.com)"
+
 ADVERBS = [
     "damn cold",
     "darn cold",
@@ -34,6 +37,10 @@ RANGE_MIN = -10
 RANGE_MAX = 110
 DEFAULT_JACKET_LIMIT = 60
 DEFAULT_COAT_LIMIT = 35
+
+# Weather provider constants
+PROVIDER_OPENWEATHER = "openweather"
+PROVIDER_NOAA = "noaa"
 
 def ktof(k):
     return c2f(k - 273.15)
@@ -96,8 +103,10 @@ def getSubString(temp, unit = "f", widgetMode = False):
 
 def main(config):
     widgetMode = config.bool("$widget")
-    current_data = get_weather_data(config)
-    feels_like = ktof(current_data["feels_like"])
+    
+    # Get weather data - returns feels_like temp in Fahrenheit
+    feels_like = get_feels_like_temp(config)
+    
     jacketLimit = config.get("jacketLimit", DEFAULT_JACKET_LIMIT)
     coatLimit = config.get("coatLimit", DEFAULT_COAT_LIMIT)
     jacketLimit = int(jacketLimit)
@@ -109,8 +118,6 @@ def main(config):
 
     weather_info = []
 
-    # weather_info.append(add_row("Temp", "{0}{1}".format(outside_temp, degree_sign)))
-    # weather_info.append(add_row("Feel", "{0}{1}".format(feels_like, degree_sign)))
     weather_info.append(
         render.Row(
             expanded = True,
@@ -126,7 +133,6 @@ def main(config):
         weather_info.append(render.Box(width = 64, height = 1, color = config.get("divider_color", "#1167B1")))
         weather_info.append(
             render.Row(
-                # expanded = True,
                 main_align = "center",
                 cross_align = "center",
                 children = [
@@ -157,10 +163,27 @@ def get_schema():
                 icon = "locationDot",
                 desc = "Location for which to display time and weather",
             ),
+            schema.Dropdown(
+                id = "weather_provider",
+                name = "Weather Provider",
+                desc = "Choose weather data source",
+                icon = "cloud",
+                default = PROVIDER_OPENWEATHER,
+                options = [
+                    schema.Option(
+                        display = "OpenWeather (requires API key)",
+                        value = PROVIDER_OPENWEATHER,
+                    ),
+                    schema.Option(
+                        display = "NOAA (US only, no API key needed)",
+                        value = PROVIDER_NOAA,
+                    ),
+                ],
+            ),
             schema.Text(
                 id = "api_key",
-                name = "API Key",
-                desc = "OpenWeather API Key.",
+                name = "OpenWeather API Key",
+                desc = "OpenWeather API Key (not needed for NOAA)",
                 icon = "key",
                 secret = True,
             ),
@@ -193,39 +216,139 @@ def get_schema():
         ],
     )
 
-def get_weather_data(config):
+def get_feels_like_temp(config):
+    """Get feels like temperature in Fahrenheit from configured provider"""
+    provider = config.get("weather_provider", PROVIDER_OPENWEATHER)
+    
+    if provider == PROVIDER_NOAA:
+        return get_noaa_feels_like(config)
+    else:
+        # Default to OpenWeather for backward compatibility
+        current_data = get_openweather_data(config)
+        feels_like = current_data.get("feels_like")
+        if feels_like == None:
+            return SAMPLE_NOAA_TEMP
+        return ktof(feels_like)
+
+def get_noaa_feels_like(config):
+    """Get feels like temperature from NOAA API (returns Fahrenheit)"""
+    location = config.get("location", None)
+    
+    if location == None:
+        return SAMPLE_NOAA_TEMP
+    
+    location = json.decode(location)
+    lat = location["lat"]
+    lng = location["lng"]
+    
+    # Create cache key based on location
+    cache_key = "noaa_weather_%s_%s" % (lat, lng)
+    cached_data = cache.get(cache_key)
+    
+    if cached_data != None:
+        return float(cached_data)
+    
+    # Step 1: Get the grid point info from coordinates
+    points_url = "%s/%s,%s" % (NOAA_POINTS_URL, lat, lng)
+    points_res = http.get(
+        url = points_url,
+        headers = {"User-Agent": NOAA_USER_AGENT},
+        ttl_seconds = REFRESH_RATE,
+    )
+    
+    if points_res.status_code != 200:
+        # NOAA only works for US locations
+        return SAMPLE_NOAA_TEMP
+    
+    points_data = points_res.json()
+    
+    # Get the hourly forecast URL from the points response
+    properties = points_data.get("properties")
+    if properties == None:
+        return SAMPLE_NOAA_TEMP
+    
+    forecast_hourly_url = properties.get("forecastHourly")
+    if forecast_hourly_url == None:
+        return SAMPLE_NOAA_TEMP
+    
+    # Step 2: Get the hourly forecast
+    forecast_res = http.get(
+        url = forecast_hourly_url,
+        headers = {"User-Agent": NOAA_USER_AGENT},
+        ttl_seconds = REFRESH_RATE,
+    )
+    
+    if forecast_res.status_code != 200:
+        return SAMPLE_NOAA_TEMP
+    
+    forecast_data = forecast_res.json()
+    
+    # Get the first period (current hour) temperature
+    # NOAA returns temperature in Fahrenheit by default
+    forecast_props = forecast_data.get("properties")
+    if forecast_props == None:
+        return SAMPLE_NOAA_TEMP
+    
+    periods = forecast_props.get("periods")
+    if periods == None or len(periods) == 0:
+        return SAMPLE_NOAA_TEMP
+    
+    current_period = periods[0]
+    temp = current_period.get("temperature")
+    if temp == None:
+        return SAMPLE_NOAA_TEMP
+    
+    # NOAA doesn't provide a separate "feels like" temperature in the hourly forecast
+    # The temperature returned is the actual temperature, but for simplicity we use it
+    # as the effective temperature (feels like would require additional calculation
+    # based on wind chill / heat index which NOAA doesn't directly provide in this endpoint)
+    feels_like = float(temp)
+    
+    # Cache the result
+    cache.set(cache_key, str(feels_like), ttl_seconds = REFRESH_RATE)
+    
+    return feels_like
+
+def get_openweather_data(config):
+    """Get weather data from OpenWeather API (original implementation)"""
     api_key = config.get("api_key", None)
     location = config.get("location", None)
-    cached_data = cache.get("weather_data-{0}".format(api_key))
+
+    if api_key == None:
+        return SAMPLE_STATION_RESPONSE["current"]
+    if location == None:
+        return SAMPLE_STATION_RESPONSE["current"]
+
+    location = json.decode(location)
+    lat = location["lat"]
+    lng = location["lng"]
+
+    # Cache key must include location to avoid serving wrong data for different locations
+    cache_key = "openweather_%s_%s_%s" % (api_key, lat, lng)
+    cached_data = cache.get(cache_key)
 
     if cached_data != None:
-        # print("Using existing weather data")
         cache_res = json.decode(cached_data)
         return cache_res
 
-    else:
-        if api_key == None:
-            # print("Missing api_key")
-            return SAMPLE_STATION_RESPONSE["current"]
-        if location == None:
-            # print("Missing location")
-            return SAMPLE_STATION_RESPONSE["current"]
+    query = "%s?exclude=minutely,hourly,daily,alerts&lat=%s&lon=%s&appid=%s" % (OPEN_WEATHER_URL, lat, lng, api_key)
+    res = http.get(
+        url = query,
+        ttl_seconds = REFRESH_RATE,
+    )
+    if res.status_code != 200:
+        return SAMPLE_STATION_RESPONSE["current"]
 
-        # print("Getting new weather data")
-        location = json.decode(location)
-        query = "%s?exclude=minutely,hourly,daily,alerts&lat=%s&lon=%s&appid=%s" % (OPEN_WEATHER_URL, location["lat"], location["lng"], api_key)
-        res = http.get(
-            url = query,
-            ttl_seconds = REFRESH_RATE,
-        )
-        if res.status_code != 200:
-            # print("Open Weather request failed with status %d", res.status_code)
-            return SAMPLE_STATION_RESPONSE["current"]
+    response_data = res.json()
+    current_data = response_data.get("current")
+    if current_data == None:
+        return SAMPLE_STATION_RESPONSE["current"]
 
-        current_data = res.json()["current"]
+    cache.set(cache_key, json.encode(current_data), ttl_seconds = REFRESH_RATE)
+    return current_data
 
-        cache.set("weather_data-{0}".format(api_key), json.encode(current_data), ttl_seconds = REFRESH_RATE)
-        return current_data
+# Sample temperature for NOAA fallback (in Fahrenheit)
+SAMPLE_NOAA_TEMP = 65.0
 
 SAMPLE_STATION_RESPONSE = {
     "lat": 40.678,
@@ -259,7 +382,6 @@ SAMPLE_STATION_RESPONSE = {
 
 def add_row(title, font):
     return render.Row(
-        # expanded = True,
         main_align = "center",
         cross_align = "center",
         children = [
