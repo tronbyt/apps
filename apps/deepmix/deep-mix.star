@@ -57,7 +57,7 @@ def main(config):
         )
 
     # Display current track info
-    artist = current_track.get("artist", "Unknown Artist")
+    # artist = current_track.get("artist", "Unknown Artist")
     title = current_track.get("title", "Unknown Track")
 
     # Build the display children

@@ -103,10 +103,10 @@ def getSubString(temp, unit = "f", widgetMode = False):
 
 def main(config):
     widgetMode = config.bool("$widget")
-    
+
     # Get weather data - returns feels_like temp in Fahrenheit
     feels_like = get_feels_like_temp(config)
-    
+
     jacketLimit = config.get("jacketLimit", DEFAULT_JACKET_LIMIT)
     coatLimit = config.get("coatLimit", DEFAULT_COAT_LIMIT)
     jacketLimit = int(jacketLimit)
@@ -219,7 +219,7 @@ def get_schema():
 def get_feels_like_temp(config):
     """Get feels like temperature in Fahrenheit from configured provider"""
     provider = config.get("weather_provider", PROVIDER_OPENWEATHER)
-    
+
     if provider == PROVIDER_NOAA:
         return get_noaa_feels_like(config)
     else:
@@ -233,21 +233,21 @@ def get_feels_like_temp(config):
 def get_noaa_feels_like(config):
     """Get feels like temperature from NOAA API (returns Fahrenheit)"""
     location = config.get("location", None)
-    
+
     if location == None:
         return SAMPLE_NOAA_TEMP
-    
+
     location = json.decode(location)
     lat = location["lat"]
     lng = location["lng"]
-    
+
     # Create cache key based on location
     cache_key = "noaa_weather_%s_%s" % (lat, lng)
     cached_data = cache.get(cache_key)
-    
+
     if cached_data != None:
         return float(cached_data)
-    
+
     # Step 1: Get the grid point info from coordinates
     points_url = "%s/%s,%s" % (NOAA_POINTS_URL, lat, lng)
     points_res = http.get(
@@ -255,58 +255,58 @@ def get_noaa_feels_like(config):
         headers = {"User-Agent": NOAA_USER_AGENT},
         ttl_seconds = REFRESH_RATE,
     )
-    
+
     if points_res.status_code != 200:
         # NOAA only works for US locations
         return SAMPLE_NOAA_TEMP
-    
+
     points_data = points_res.json()
-    
+
     # Get the hourly forecast URL from the points response
     properties = points_data.get("properties")
     if properties == None:
         return SAMPLE_NOAA_TEMP
-    
+
     forecast_hourly_url = properties.get("forecastHourly")
     if forecast_hourly_url == None:
         return SAMPLE_NOAA_TEMP
-    
+
     # Step 2: Get the hourly forecast
     forecast_res = http.get(
         url = forecast_hourly_url,
         headers = {"User-Agent": NOAA_USER_AGENT},
         ttl_seconds = REFRESH_RATE,
     )
-    
+
     if forecast_res.status_code != 200:
         return SAMPLE_NOAA_TEMP
-    
+
     forecast_data = forecast_res.json()
-    
+
     # Get the first period (current hour) temperature
     # NOAA returns temperature in Fahrenheit by default
     forecast_props = forecast_data.get("properties")
     if forecast_props == None:
         return SAMPLE_NOAA_TEMP
-    
+
     periods = forecast_props.get("periods")
     if periods == None or len(periods) == 0:
         return SAMPLE_NOAA_TEMP
-    
+
     current_period = periods[0]
     temp = current_period.get("temperature")
     if temp == None:
         return SAMPLE_NOAA_TEMP
-    
+
     # NOAA doesn't provide a separate "feels like" temperature in the hourly forecast
     # The temperature returned is the actual temperature, but for simplicity we use it
     # as the effective temperature (feels like would require additional calculation
     # based on wind chill / heat index which NOAA doesn't directly provide in this endpoint)
     feels_like = float(temp)
-    
+
     # Cache the result
     cache.set(cache_key, str(feels_like), ttl_seconds = REFRESH_RATE)
-    
+
     return feels_like
 
 def get_openweather_data(config):
