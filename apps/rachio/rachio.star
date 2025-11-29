@@ -68,7 +68,7 @@ WEATHER_SKIP = "WEATHER_INTELLIGENCE_SKIP"
 ZONE_STARTED = "ZONE_STARTED"
 
 def main(config):
-    tz = config.get("$tz", "America/New_York")
+    tz = time.tz()
     now = time.now().in_location(tz)
     api_key = config.str("api_key", "")
     delay = int(config.get("scroll", 45))

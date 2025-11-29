@@ -285,7 +285,7 @@ def get_autarky_percent(site_id, api_key, tz, interval):
 def main(config):
     api_key = config.str("api_key")
     site_id = config.str("site_id")
-    tz = config.get("$tz", "Europe/Zurich")
+    tz = time.tz()
     has_battery = False  #  assume no battery until we have data
 
     # verify api key doesn't have non key characters in there eg. "Basic"

@@ -35,7 +35,7 @@ LADDER_URL = "https://api3.sanflstats.com/ladder/2025/sanfl"
 LIVE_CACHE = 30
 LADDER_CACHE = 86400  #24 hours
 
-def main(config):
+def main():
     # Lets initialize!
     renderDisplay = []
 
@@ -50,7 +50,7 @@ def main(config):
     MATCH_CACHE = 43200  #12 hours
     RotationSpeed = 5
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     DayofWeek = now.format("Mon")
 

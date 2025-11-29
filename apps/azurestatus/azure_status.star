@@ -17,8 +17,8 @@ RSS_URL = "https://rssfeed.azure.status.microsoft/en-au/status/feed/"
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 CACHE_TIMEOUT = 1800  # 30 mins
 
-def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+def main():
+    timezone = time.tz()
     feed = get_cachable_data(RSS_URL, CACHE_TIMEOUT)
     rss = xpath.loads(feed)
     channel = rss.query_node("//rss/channel")

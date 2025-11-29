@@ -135,7 +135,7 @@ def main(config):
     # Get the current time in 24 hour format
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Utilize special timezone variable
+    timezone = loc.get("timezone", time.tz())  # Utilize special timezone variable
 
     # Get the current time
     current_time = time.parse_time(time.now().in_location(timezone).format("2006-01-02 15:04:05"), format = "2006-01-02 15:04:05", location = timezone)

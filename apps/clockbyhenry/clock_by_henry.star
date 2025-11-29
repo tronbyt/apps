@@ -60,7 +60,7 @@ def main(config):
 
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
     now = config.get("time")
     now = (time.parse_time(now) if now else time.now()).in_location(timezone)

@@ -101,7 +101,7 @@ def main(config):
     else:
         # Get today's date based on shop location for the reporting end date
         location = json.decode(location) if location else {}
-        timezone = location.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))
+        timezone = location.get("timezone", time.tz())
         end_date = time.now().in_location(timezone)
         end_date_str = end_date.format("2006-01-02")  # YYYY-MM-DD
 

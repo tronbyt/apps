@@ -88,7 +88,7 @@ def build_days_since_str(last_play_date, timezone):
             return "{} days since".format(days_since)
 
 def build_last_play(config, last_play_date, last_play_game):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     label_choice = config.get("label")
     days_since_str = build_days_since_str(last_play_date, timezone)
 
@@ -153,7 +153,7 @@ def render_main(config, game_image, last_play_date, last_play_game):
     )
 
 def demo(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     yesterday_long = time.now().in_location(timezone) - time.parse_duration("86400s")
     yesterday = yesterday_long.format("2006-01-02")
     game_image = get_image(DEMO_GAME_ID)

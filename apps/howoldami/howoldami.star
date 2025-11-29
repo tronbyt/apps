@@ -16,7 +16,7 @@ def main(config):
     font = "CG-pixel-3x5-mono"
 
     birthdate = config.get("birthdate", DEFAULT_BIRTH_DATE_TIME)
-    tz = config.get("$tz", DEFAULT_TIME_ZONE)
+    tz = time.tz()
 
     sd = time.parse_time(birthdate).in_location(tz)
 

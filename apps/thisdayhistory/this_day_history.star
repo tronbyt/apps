@@ -83,7 +83,7 @@ LANG = {
 
 def main(config):
     language = config.get(OPTDISPLANG, ENGLISH)
-    rc, json_data = getData(language, config.get("$tz", DEFAULT_TIMEZONE))
+    rc, json_data = getData(language, time.tz())
 
     return render.Root(
         delay = 100,

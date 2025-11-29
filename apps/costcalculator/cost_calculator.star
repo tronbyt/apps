@@ -116,7 +116,7 @@ def get_schema():
 #functions
 def get_duration(config):
     #calculate duration
-    current_time = time.now().in_location(config.get("$tz", DEFAULT_TIMEZONE))
+    current_time = time.now().in_location(time.tz())
     start_time = time.parse_time(config.str("start_time", current_time.format("2006-01-02T15:04:05Z07:00")))
 
     #get duration hours and minutes

@@ -42,10 +42,9 @@ colorOpt = [
 ]
 
 def main(config):
-    timezone = config.get("$tz", "America/Chicago")  # Utilize special timezone variable
-    DEFAULT_TIME = time.now().in_location(timezone).format("2006-01-02T15:04:05Z07:00")
+    timezone = time.tz()  # Utilize special timezone variable
 
-    future = time.parse_time(config.str("event_time", DEFAULT_TIME))
+    future = time.parse_time(config.str("event_time"))
     dateDiff = future - time.now().in_location(timezone)
     days = math.floor(dateDiff.hours / 24)
     hours = math.floor(dateDiff.hours - days * 24)

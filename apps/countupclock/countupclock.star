@@ -86,7 +86,7 @@ def get_render_children(config, widgetMode):
     displayhours = config.bool("display_hours", True)
     displayminutes = config.bool("display_minutes", True) if displayhours else False
     titlebelow = config.bool("title_below", False)
-    current_time = time.now().in_location(config.get("$tz", DEFAULT_TIMEZONE))
+    current_time = time.now().in_location(time.tz())
 
     origin_time = time.parse_time(config.str("event_time", current_time.format("2006-01-02T15:04:05Z07:00")))
     datediff = current_time - origin_time

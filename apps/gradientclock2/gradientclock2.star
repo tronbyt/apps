@@ -116,7 +116,7 @@ def render_frame(frame_num, now, show_date, scale, box_size, use_24h, blinking_s
     ])
 
 def main(config):
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     show_date = config.bool("show_date", False)
     use_24h = config.bool("use_24h", True)

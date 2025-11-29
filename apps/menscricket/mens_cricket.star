@@ -50,7 +50,7 @@ WHITE_COLOR = "#FFFFFF"
 CHARCOAL_COLOR = "#36454F"
 
 def main(config):
-    tz = config.get("$tz", DEFAULT_TIMEZONE)
+    tz = time.tz()
     team_id = config.get("team", DEFAULT_TEAM_ID)
     fixture_days = config.get("days_forward", ALWAYS_SHOW_FIXTURES_SCHEMA_KEY)
     result_days = int(config.get("days_back", DEFAULT_PAST_RESULT_DAYS))

@@ -57,7 +57,7 @@ def main(config):
     return display_fn(config)
 
 def display_next_race_event(config):
-    tz = config.get("$tz", DEFAULT_TIMEZONE)
+    tz = time.tz()
     now = time.now().in_location(tz)
     show_practice = config.bool(DISPLAY_PRACTICE_KEY, True)
     show_qualifying = config.bool(DISPLAY_QUALIFYING_KEY, True)
@@ -99,7 +99,7 @@ def display_next_race_event(config):
     )
 
 def display_current_standings(config):
-    tz = config.get("$tz", DEFAULT_TIMEZONE)
+    tz = time.tz()
     now = time.now().in_location(tz)
     standings = fetch_standings(now.year)
     rider_rows = [render_rider_row(r["rider"]["full_name"], r["points"]) for r in standings["classification"]]

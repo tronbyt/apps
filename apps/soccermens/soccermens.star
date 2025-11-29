@@ -62,7 +62,7 @@ def main(config):
     leagueAbbr = LEAGUE_ABBR[selectedLeague]
 
     # we already need now value in multiple places - so just go ahead and get it and use it
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     # calculate start and end date if we are set to use range of days

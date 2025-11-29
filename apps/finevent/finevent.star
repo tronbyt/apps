@@ -389,7 +389,7 @@ def random(max):
     return (time.now().nanosecond // 1000) % max
 
 def main(config):
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     countries = REGIONS.get(config.get("region"), [])
     future_events = config.bool("future")
     self_hide = config.bool("self-hide", DEFAULT_HIDDEN)

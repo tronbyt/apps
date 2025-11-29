@@ -19,13 +19,12 @@ LiveGames_URL = "https://hs-consumer-api.espncricinfo.com/v1/pages/series/home?l
 Standings_URL = "https://hs-consumer-api.espncricinfo.com/v1/pages/series/standings?lang=en&seriesId=1332128"
 
 DEFAULT_TEAM = "5795"  # Islamabad
-DEFAULT_TIMEZONE = "Australia/Adelaide"
 MATCH_CACHE = 60
 ALL_MATCH_CACHE = 2 * 3600  # 2 hours
 STANDINGS_CACHE = 6 * 3600  # 6 hours
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     SelectedTeam = config.get("TeamList", DEFAULT_TEAM)

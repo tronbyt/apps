@@ -252,7 +252,7 @@ def get_gas_hours(raw_gas_hours, config):
     gas_hours = get_gas_hours_dictionary(raw_gas_hours)
 
     # We will use the user's device time zone with $tz variable as the user's device will likely correspond to the warehouse timezone
-    timezone = config.get("$tz", DEFAULT_CONFIG["timezone"])
+    timezone = time.tz()
 
     current_time = time.now().in_location(timezone)
     current_day = current_time.format("Mon")

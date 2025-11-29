@@ -268,7 +268,7 @@ def no_data(display_name, color):
 def main(config):
     display_widgets = []
     color = DEFAULT_COLOR
-    timezone = config.get("$tz", "America/New_York")  # Utilize special timezone variable
+    timezone = time.tz()  # Utilize special timezone variable
     today = time.now().in_location(timezone).format("2006-01-02")
     tomorrow = (time.now().in_location(timezone) + time.parse_duration("24h")).format("2006-01-02")
 

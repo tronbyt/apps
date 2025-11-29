@@ -93,7 +93,7 @@ def main(config):
 # ##############################################
 def nextrace(config, data):
     IMAGES = json.decode(get_cachable_data(DEFAULTS["api"].format("tracks", "tracks"), DEFAULTS["trackttl"]))
-    timezone = config.get("$tz", DEFAULTS["timezone"])  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
+    timezone = time.tz()  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
     date_and_time = data["start"]
     date_and_time3 = time.parse_time(date_and_time, "2006-01-02T15:04:05-0700").in_location(timezone)
     date_str = date_and_time3.format("Jan 2" if config.bool("is_us_date_format", DEFAULTS["date_us"]) else "2 Jan").title()  #current format of your current date str

@@ -24,7 +24,6 @@ igXjqA5QVcqRFbSkRWS73MhBxwpGRnAGAwmUGS9KHUAAAAAElFTkSuQmCC
 # https://tidbyt.dev/docs/publish/publishing-apps
 
 P_LOCATION = "location"
-DEFAULT_TIMEZONE = "America/New_York"
 
 def main(config):
     location = config.get(P_LOCATION)
@@ -32,7 +31,7 @@ def main(config):
 
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
     now = config.get("time")
     now = (time.parse_time(now) if now else time.now()).in_location(timezone)

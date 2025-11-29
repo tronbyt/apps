@@ -18,7 +18,7 @@ DEFAULT_TIMEZONE = "America/Merida"  # could have chosen America/Guatemala inste
 IMAGE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABQAAAAQCAIAAACZeshMAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADCSURBVDhPY2TABjYXSkNZMODb/xTKQgLYNT+fpAxlwYBk3l0oCwkMHpvhdgoErdjbGwBkOBdv+LAuAiKIZj8TlIYBE0UOCILywQCrIBCgaAZae+b+DwiCCoEBXBAtLFA0w21AswSXOAuUhlkL5QD9bAhlAAGyOFAZ3OcIm5GNR7MBlxTUZjRrgQCXzUAAtxyqGdk8CLgDpUEAUxYCQJoxrQUCPDYDAcRykGasBhNlM1ZrgQC/zUAA1MiCy1TCNjMwAACNWFpLrbT+OAAAAABJRU5ErkJggg==""")
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     days_since_creation = get_days_since_creation(now, config)

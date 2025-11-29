@@ -116,7 +116,7 @@ def main(config):
     outlook_refresh_token = config.get("auth") or config.get("outlook_refresh_token")
 
     # Capture the user's time zone.   Allow timezone to be passed via command line for debug and test
-    timezone = config.get("time_zone") if config.get("time_zone") else config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = config.get("time_zone") if config.get("time_zone") else time.tz()
 
     # At present this application checks the calendar from the current time until end of day.
     # RFC3339 format works with MSFT Graph API calls (default Starlark time object does not)

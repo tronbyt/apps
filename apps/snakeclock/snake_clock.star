@@ -117,7 +117,7 @@ DEFAULT_TIMEZONE = "US/Eastern"
 def main(config):
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Utilize special timezone variable
+    timezone = loc.get("timezone", time.tz())  # Utilize special timezone variable
     now = time.now().in_location(timezone)
 
     use_24hour = config.bool("24hour", False)

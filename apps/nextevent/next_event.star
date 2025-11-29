@@ -14,7 +14,7 @@ def main(config):
     location = json.decode(location) if location else {}
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
     ics_url = config.str("url", DEFAULT_ICS_URL)
     if (ics_url == None):

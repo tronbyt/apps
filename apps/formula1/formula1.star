@@ -83,7 +83,7 @@ def main(config):
         font_small_base_height = 7  # includes 1px padding
 
     #Time and date Information
-    timezone = config.get("$tz", DEFAULTS["timezone"])
+    timezone = time.tz()
 
     # get display option - default to Next Race
     display = config.get("F1_Information", DEFAULTS["display"])

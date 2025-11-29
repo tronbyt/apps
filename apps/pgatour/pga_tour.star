@@ -164,7 +164,7 @@ def main(config):
     i = 0
     mainFont = "CG-pixel-3x5-mono"
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     RotationSpeed = config.get("speed", "3")
     OppField = config.bool("OppFieldToggle")
     ColorGradient = config.get("ColorGradient", "False")

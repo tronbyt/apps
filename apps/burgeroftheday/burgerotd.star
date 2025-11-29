@@ -62,7 +62,7 @@ def main(config):
     LOCATION = json.decode(LOCATION) if LOCATION else {}
     TIME_ZONE = LOCATION.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIME_ZONE),
+        time.tz(),
     )
     TIME_NOW = time.now().in_location(TIME_ZONE)
     CURRENT_YEAR = int(TIME_NOW.year)

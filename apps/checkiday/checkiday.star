@@ -105,7 +105,7 @@ def get_schema():
 def get_timezone(config):
     location = config.get("location")
     loc = json.decode(location) if location else {}
-    return loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))
+    return loc.get("timezone", time.tz())
 
 def get_events(config):
     timezone = get_timezone(config)

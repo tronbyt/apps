@@ -35,7 +35,7 @@ ALL_MATCH_CACHE = 2 * 3600  # 2 hours
 STANDINGS_CACHE = 6 * 3600  # 6 hours
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     SelectedTeamID = config.get("TeamList", DEFAULT_TEAM)

@@ -12,9 +12,9 @@ load("math.star", "math")
 load("render.star", "render")
 load("time.star", "time")
 
-def main(config):
+def main():
     # Get the timezone from the config, defaulting to America/Chicago
-    timezone = config.get("$tz", "America/Chicago")
+    timezone = time.tz()
 
     # Get the current time in the specified timezone
     now = time.now().in_location(timezone)

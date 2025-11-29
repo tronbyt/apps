@@ -18,7 +18,7 @@ def main(config):
     birthdate = config.get("birthdate", DEFAULT_BIRTH_DATE_TIME)
 
     baby = config.get("name", DEFAULT_BABY_NAME)
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
 
     current_time = time.now().in_location(timezone)
     birth_time = time.parse_time(birthdate).in_location(timezone)

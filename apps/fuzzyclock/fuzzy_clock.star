@@ -5,7 +5,6 @@ Summary: Human readable time
 Description: Display the time in a groovy, human-readable way.
 """
 
-load("encoding/json.star", "json")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -292,10 +291,7 @@ def fuzzy_time(hours, minutes, language):
     return pattern.format(hour = cur_hour, next_hour = next_hour).split(",")
 
 def main(config):
-    location = config.get("location")
-    loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", DEFAULT_TIMEZONE)
-    now = time.now().in_location(timezone)
+    now = time.now().in_location(time.tz())
     scale = 2 if canvas.is2x() else 1
 
     hours = now.hour
