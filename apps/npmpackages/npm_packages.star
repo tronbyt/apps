@@ -18,7 +18,7 @@ iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lD
 DOWNLOAD_LOGO = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAERJREFUKFNjZCASMKKr+////3+QGCMjI4ocDRXCrER3CswJKFajK0Z2J1ghSAFMEN0zMDkMhdhCAWQIXCG+4IQrJCbMAVhpLAt4D3VAAAAAAElFTkSuQmCC
 """)
-SEARCH_URL = "https://www.npmjs.com/search?q=%s"
+SEARCH_URL = "https://registry.npmjs.com/-/v1/search?text={}&size=20"
 DATA_URL = "https://api.npmjs.org/downloads/range/last-%s/%s"
 DEFAULT_PACKAGE = json.encode({"display": "axios", "value": "axios"})
 DEFAULT_DOWNLOAD_PERIOD = "week"
@@ -171,10 +171,8 @@ def search_package(name):
         list of schema.Option: Options to be displayed for the user.
     """
 
-    url = SEARCH_URL % humanize.url_encode(name)
-    res = http.get(url, headers = {
-        "X-Spiferack": "1",
-    })
+    url = SEARCH_URL.format(humanize.url_encode(name))
+    res = http.get(url)
 
     if res.status_code != 200:
         print("API error %d: %s" % (res.status_code, res.body()))
