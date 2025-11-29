@@ -9,9 +9,12 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
+load("images/portcullis.png", PORTCULLIS_ASSET = "file")
 load("qrcode.star", "qrcode")
 load("render.star", "render")
 load("schema.star", "schema")
+
+PORTCULLIS = PORTCULLIS_ASSET.readall()
 
 # Data is provided under the Open Government Licence v3.0, which allows
 # commercial and non-commercial use of the information. Wish they had an
@@ -24,7 +27,6 @@ FONT = "tom-thumb"
 GREEN = "#008800"  # from the House of Commons website
 
 # Public domain per https://commons.wikimedia.org/wiki/File:Crowned_Portcullis_redesign_2018.svg
-PORTCULLIS = "iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAD1BMVEUAAAAARAAAiAAAIgAAZgAh56PKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA4ElEQVR4nG2R2xHEIAhFL8YCXEwBES3APAowxv5rWtxX/Fh+HAbO5cwIvIol4leTm1ZZ9ekNRVDYk/C6ObDTxknyIrLWSpwBWXyYvByZd9N6VECCFYcK7qHGozbdrwlr6YFSRdrcqiRRnLIE9z5bE2Wc7bF/63GeiEbXP5WWQ+PtdaRddr6OorfI2WIDBFxsIdfnd88XLmN/fImMuQ18aqAy8gV2zLMOrQ58U59t4N8+w72/Pjevc/W5+bh1n3v/v08wiSTXyB+fRf+kz033WYzNtGCGydR9jkBAgYc+eb6eTl0ztCv+CVQAAAAASUVORK5CYII="
 
 def extract_petition(node):
     link = node.find("a")
@@ -88,7 +90,7 @@ def render_petition(petition):
     background = [
         render.Padding(
             pad = (1, 0, 0, 0),
-            child = render.Image(base64.decode(PORTCULLIS)),
+            child = render.Image(PORTCULLIS),
         ),
         render.Padding(
             pad = (34, 1, 0, 100),

@@ -8,11 +8,18 @@ Author: jordan-p
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/img_render_sunrise.png", IMG_RENDER_SUNRISE_ASSET = "file")
+load("images/img_render_sunset.png", IMG_RENDER_SUNSET_ASSET = "file")
+load("images/img_render_suntracker.png", IMG_RENDER_SUNTRACKER_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
+
+IMG_RENDER_SUNRISE = IMG_RENDER_SUNRISE_ASSET.readall()
+IMG_RENDER_SUNSET = IMG_RENDER_SUNSET_ASSET.readall()
+IMG_RENDER_SUNTRACKER = IMG_RENDER_SUNTRACKER_ASSET.readall()
 
 DEBUG = False
 TIME_FONT = "6x13"
@@ -88,16 +95,6 @@ ADRJREFUGFdjZMADGEFyM2+++p+uLgZmIwO4ALICGBtFNUwQqyTMChANsgbFWGT7
 UCSxORoAZkAcCBGYzvAAAAAASUVORK5CYII=
 """,
 }
-
-img_render_sunrise = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAIAAABvrngfAAAFE2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMTItMjlUMTI6NDQ6MzktMDUwMCIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjMtMTItMjlUMTI6NTg6NTYtMDU6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjMtMTItMjlUMTI6NTg6NTYtMDU6MDAiCiAgIHBob3Rvc2hvcDpEYXRlQ3JlYXRlZD0iMjAyMy0xMi0yOVQxMjo0NDozOS0wNTAwIgogICBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIgogICBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiCiAgIGV4aWY6UGl4ZWxYRGltZW5zaW9uPSI2IgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iNiIKICAgZXhpZjpDb2xvclNwYWNlPSIxIgogICB0aWZmOkltYWdlV2lkdGg9IjYiCiAgIHRpZmY6SW1hZ2VMZW5ndGg9IjYiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSI+CiAgIDx4bXBNTTpIaXN0b3J5PgogICAgPHJkZjpTZXE+CiAgICAgPHJkZjpsaQogICAgICBzdEV2dDphY3Rpb249InByb2R1Y2VkIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZmZpbml0eSBEZXNpZ25lciAyIDIuMy4wIgogICAgICBzdEV2dDp3aGVuPSIyMDIzLTEyLTI5VDEyOjU4OjU2LTA1OjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz5xIrZKAAABgmlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kd8rg1EYxz/baGJCXLiglsaNHzG1cKFsCSVppvy62V7vNrXN2/tOWm6V2xUlbvy64C/gVrlWikjJLdfEDev1vJvakj2n5zyf8z3neTrnOWAPJZSkUdELyVRaD4753XPzC27nCy5aaaCTobBiaCPT05OUtc97bFa87bZqlT/3r9Usq4YCtirhYUXT08LjwpPrac3iHeEmJR5eFj4T7tLlgsJ3lh4p8KvFsQJ/W6yHggGw1wu7YyUcKWElrieF5eV4kok15fc+1ktcamp2RmKbeAsGQcbw42aCUQL46GNQZh/deOmRFWXye/P5U6xKriKzRgadFWLESdMl6ppUVyVGRVdlJMhY/f/bVyPa7y1Ud/mh8tk039vBuQ25rGl+HZlm7hgcT3CZKuavHsLAh+jZouY5gLpNOL8qapFduNiC5kctrIfzkkPcHo3C2ynUzkPjDVQvFnr2u8/JA4Q25KuuYW8fOuR83dIP1/hoGTf5aKwAAAAJcEhZcwAALiMAAC4jAXilP3YAAABzSURBVAiZY2BgYGBmZrYy4oAw1OQZGEoSGVlZWTg5ORkZGd1tWBgZGRnOr2XYNIWZg4OjOIGBmZmZgYGB4c8lhgvrmDdPg2o00WZg/HOJkYGR+epd1gePfwQXMv/9+5eJgZGJgYFJS5lRXpqpII6JiYkJAAYxFoS1P01BAAAAAElFTkSuQmCC
-""")
-img_render_sunset = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAIAAABvrngfAAAFr2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMTItMjlUMTI6NTk6MTMtMDUwMCIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjMtMTItMjlUMTM6MDM6MzctMDU6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjMtMTItMjlUMTM6MDM6MzctMDU6MDAiCiAgIHBob3Rvc2hvcDpEYXRlQ3JlYXRlZD0iMjAyMy0xMi0yOVQxMjo1OToxMy0wNTAwIgogICBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIgogICBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiCiAgIGV4aWY6UGl4ZWxYRGltZW5zaW9uPSI2IgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iNiIKICAgZXhpZjpDb2xvclNwYWNlPSIxIgogICB0aWZmOkltYWdlV2lkdGg9IjYiCiAgIHRpZmY6SW1hZ2VMZW5ndGg9IjYiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+c3Vuc2V0PC9yZGY6bGk+CiAgICA8L3JkZjpBbHQ+CiAgIDwvZGM6dGl0bGU+CiAgIDx4bXBNTTpIaXN0b3J5PgogICAgPHJkZjpTZXE+CiAgICAgPHJkZjpsaQogICAgICBzdEV2dDphY3Rpb249InByb2R1Y2VkIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZmZpbml0eSBEZXNpZ25lciAyIDIuMy4wIgogICAgICBzdEV2dDp3aGVuPSIyMDIzLTEyLTI5VDEzOjAzOjM3LTA1OjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz7IVbZiAAABgmlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kd8rg1EYxz/baGJCXLiglsaNHzG1cKFsCSVppvy62V7vNrXN2/tOWm6V2xUlbvy64C/gVrlWikjJLdfEDev1vJvakj2n5zyf8z3neTrnOWAPJZSkUdELyVRaD4753XPzC27nCy5aaaCTobBiaCPT05OUtc97bFa87bZqlT/3r9Usq4YCtirhYUXT08LjwpPrac3iHeEmJR5eFj4T7tLlgsJ3lh4p8KvFsQJ/W6yHggGw1wu7YyUcKWElrieF5eV4kok15fc+1ktcamp2RmKbeAsGQcbw42aCUQL46GNQZh/deOmRFWXye/P5U6xKriKzRgadFWLESdMl6ppUVyVGRVdlJMhY/f/bVyPa7y1Ud/mh8tk039vBuQ25rGl+HZlm7hgcT3CZKuavHsLAh+jZouY5gLpNOL8qapFduNiC5kctrIfzkkPcHo3C2ynUzkPjDVQvFnr2u8/JA4Q25KuuYW8fOuR83dIP1/hoGTf5aKwAAAAJcEhZcwAALiMAAC4jAXilP3YAAABgSURBVAiZNcZLDoJAEEXR+6qK2A0DaWe6AiQEiGvws/+hm7EcGM/oMIG7l1J+AZAUEbVWSV3ES4r8e2Terrkd0yYA7rDP7I3mxFtyaZu1DGqh80FhZk+ztWn82KU3TvkFh2YUeJ4ienEAAAAASUVORK5CYII=
-""")
-img_render_suntracker = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAABCAIAAADhDz9AAAAFtmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgeG1wOkNyZWF0ZURhdGU9IjIwMjQtMDEtMTRUMTY6MDA6MzItMDUwMCIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjQtMDEtMTRUMTY6MDQ6MDMtMDU6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjQtMDEtMTRUMTY6MDQ6MDMtMDU6MDAiCiAgIHBob3Rvc2hvcDpEYXRlQ3JlYXRlZD0iMjAyNC0wMS0xNFQxNjowMDozMi0wNTAwIgogICBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIgogICBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiCiAgIGV4aWY6UGl4ZWxYRGltZW5zaW9uPSI2NCIKICAgZXhpZjpQaXhlbFlEaW1lbnNpb249IjEiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSI2NCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMSIKICAgdGlmZjpSZXNvbHV0aW9uVW5pdD0iMiIKICAgdGlmZjpYUmVzb2x1dGlvbj0iMzAwLzEiCiAgIHRpZmY6WVJlc29sdXRpb249IjMwMC8xIj4KICAgPGRjOnRpdGxlPgogICAgPHJkZjpBbHQ+CiAgICAgPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ij5zdW5fdHJhY2tlcjwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMiAyLjMuMSIKICAgICAgc3RFdnQ6d2hlbj0iMjAyNC0wMS0xNFQxNjowNDowMy0wNTowMCIvPgogICAgPC9yZGY6U2VxPgogICA8L3htcE1NOkhpc3Rvcnk+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+1vxJVgAAAYBpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZHfK4NRGMc/24iYH4VSXCyNKxNTixtlEmppzZThZnvth9qPt/fd0nKr3K4ocePXBX8Bt8q1UkRKrndN3KDX826rSfacznM+53ue5+mc54A1mFRSet0wpNJZLTDjdSyFlh0NRSy00gX0hBVdnfT7fdS0jweJFrtzmbVqx/1rzWtRXQFLo/CEompZ4Vlh30ZWNXlXuFNJhNeEz4UHNbmg8L2pR8pcNDle5i+TtWBgCqztwo74L478YiWhpYTl5ThTyZxSuY/5Ens0vbgga5/MXnQCzODFwRzTTOFhhHHxHly4GZIdNfKHS/nzZCRXEa+SR2OdOAmyDIqak+pRWWOiR2UkyZv9/9tXPTbqLle3e6H+xTDe+qFhB74LhvF5bBjfJ2B7hqt0NT9zBGPvoheqmvMQ2rbg4rqqRfbgchu6n9SwFi5JNpnWWAxez6AlBB230LRS7lnlnNNHCG7KV93A/gEMSHzb6g8G22e6ojvFMwAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAElJREFUCJldjsENwDAMAi/df7rOE3N9pHLSSsgPdAbGvC/FYGE+QgwpECVzOcNCeW/DIf3VQNjhYoHkZLq3EMgqGueAHfXbVhgeMWR0HyibYDwAAAAASUVORK5CYII=
-""")
 
 def main(config):
     dt = 0
@@ -396,7 +393,7 @@ def main(config):
                             cross_align = "end",
                             children = [
                                 render.Image(
-                                    src = img_render_sunrise,
+                                    src = IMG_RENDER_SUNRISE,
                                 ),
                                 render.Text(
                                     content = "%s" % rise.in_location(loc["timezone"]).format("3:04"),
@@ -409,7 +406,7 @@ def main(config):
                                     color = "#BA4A00",
                                 ),
                                 render.Image(
-                                    src = img_render_sunset,
+                                    src = IMG_RENDER_SUNSET,
                                 ),
                             ],
                         ),
@@ -423,7 +420,7 @@ def main(config):
                                         width = box_width,
                                         height = 1,
                                         child = render.Image(
-                                            src = img_render_suntracker,
+                                            src = IMG_RENDER_SUNTRACKER,
                                         ),
                                     ),
                                 ),

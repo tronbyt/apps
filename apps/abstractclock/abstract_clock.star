@@ -5,11 +5,13 @@ Description: Uses 60 Pixels to display time across width of Tidbyt.
 Author: AmillionAir
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/top.png", TOP_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+TOP = TOP_ASSET.readall()
 
 DEFAULT_LOCATION = """
 {
@@ -30,8 +32,6 @@ def main(config):
     COLOR_MINUTE = config.get("color_minute", P_COLOR_MINUTE)
     COLOR_HOUR = config.get("color_hour", P_COLOR_HOUR)
     COLOR_MONTH = config.get("color_month", P_COLOR_MONTH)
-
-    Top = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAEAAAAALCAYAAADP9otxAAAAAXNSR0IArs4c6QAAALhJREFUSEvtVdsNwCAIhHm6/yjOQ0MTDCUKaP1pq38iD+88AeHnCyP8RESIWP14zzGeTWJmY+VOrRpSW+6h9+Kv69q76P0VO0oA+1tg1uYRoEH1crXsHhDOOXpea2wCAgai15ZwKztPxp60W/nktXTO3hfIKmFaAZke0AORkbZHgJa69csCf9wDWorI9IVZYD2gKwhgQoeb4CYgMQajf7yiB3jKWDoGoynx9vPbFygAdBhEBQC+bDsBXa855qlHHEIAAAAASUVORK5CYII=")
 
     location = config.get("location", DEFAULT_LOCATION)
     loc = json.decode(location)
@@ -130,7 +130,7 @@ def main(config):
         max_age = 120,
         child = render.Column(
             children = [
-                render.Image(Top),
+                render.Image(TOP),
                 render.Stack(
                     children = [
                         render.Row(

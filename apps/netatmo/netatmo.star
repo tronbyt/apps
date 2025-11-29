@@ -6,17 +6,21 @@ Author: danmcclain
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/down_deg.png", DOWN_DEG_ASSET = "file")
+load("images/down_press.png", DOWN_PRESS_ASSET = "file")
+load("images/up_deg.png", UP_DEG_ASSET = "file")
+load("images/up_press.png", UP_PRESS_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 
-DOWN_DEG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAAC5JREFUGFdjZACBmcb/GdLPMoLZaAAhiKwIiY2qCyaBUwHMOhANtRLVCmT7oQoACOEVBpf67iYAAAAASUVORK5CYII=")
-UP_DEG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAAC5JREFUGFdjZICBmcb/4WwQI/0sI4gCEygAphCrApAkSAJGo5iAJIipAFkSzUYAQtIVBjuf38UAAAAASUVORK5CYII=")
-UP_PRESS = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAADBJREFUGFdjZICCmcYM/2FsEJ1+loERRIMJZABTiFUBSBIkAaNRTEAWxFCALIBuJQBQ0hUGX0wZ5wAAAABJRU5ErkJggg==")
-DOWN_PRESS = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAADFJREFUGFdjZGBgYJhpzPA//SwDI4iNDuCCyIqQ2Si6YBI4FcCsA9EwK1GsQLYfpgAAFuEVBt9EUIYAAAAASUVORK5CYII=")
+DOWN_DEG = DOWN_DEG_ASSET.readall()
+DOWN_PRESS = DOWN_PRESS_ASSET.readall()
+UP_DEG = UP_DEG_ASSET.readall()
+UP_PRESS = UP_PRESS_ASSET.readall()
+
 OAUTH2_CLIENT_SECRET = secret.decrypt("AV6+xWcEY+xlza5nc6Vx3IhSZOD+MGdeVROlRBYrpIwypN5EIIncp7hyCiIQMGVnPS0Q1SlVfHZXB92095MTfHew3wzuEJ14ihbjpxbZNQJhuYA+4O3fR4GFjOTy98EfJobFvxLguAtnNE149hITsJeIxyKfnI2yHZFVgg2Y2pYHoHzSqA==")
 CLIENT_ID = "622106585db6d223df25fdf8"
 

@@ -6,23 +6,18 @@ Author: ColinCampbell
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
+CHECKMARK = CHECKMARK_ASSET.readall()
+
 API_VALIDATOR_LIMIT = 10
 FULL_ROW_LIMIT = 30
 FULL_COLUMN_LIMIT = 11
-
-CHECKMARK = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAFCAYAAACJmvbYAAAAAXNSR0IArs4c6QAAAERlW
-ElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAA
-AAB6ADAAQAAAABAAAABQAAAACrlow2AAAAIklEQVQIHWNgwAHknoX9xyoFl4AzoMrQ+Qw
-wARiNYRw2CQBc5RBwfuwjGAAAAABJRU5ErkJggg==
-""")
 
 def main(config):
     statuses = validator_statuses(config)

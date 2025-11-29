@@ -5,15 +5,15 @@ Description: Quotes for gold, platinum and silver.
 Author: threeio
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/image.png", IMAGE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+IMAGE = IMAGE_ASSET.readall()
+
 #METALS_PRICE_URL = "https://api.metals.live/v1/spot"
 METALS_PRICE_URL = "https://data-asg.goldprice.org/dbXRates/USD"
-
-IMAGE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAHhJREFUOE+1k7sNwDAIRPGojBB5DisjMGoiCiTCJyJGoXHhu2dOhgHNGk0/pABEvCyciJw+BLB5HtM1t84FFuIAmVloFvIAWDOLpXRHGpICWBTFYGAJIEI+LagM0Lm3IkT5XyPwZesX5MXWHGjI9iR+2Y//lqnaxQ21HFYRgy5eOgAAAABJRU5ErkJggg==""")
 
 def main():
     rep = http.get(METALS_PRICE_URL, ttl_seconds = 300)  # 5 minutes cache.

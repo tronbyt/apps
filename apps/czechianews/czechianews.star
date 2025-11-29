@@ -5,20 +5,21 @@ Description: Dispaly only the news title from Czechia.
 Author: solarisle
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
+load("images/irozhlas_icon.webp", IROZHLAS_ICON_ASSET = "file")
+load("images/seznam_icon.webp", SEZNAM_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+IROZHLAS_ICON = IROZHLAS_ICON_ASSET.readall()
+SEZNAM_ICON = SEZNAM_ICON_ASSET.readall()
 
 MEDIA_SEZNAM = "seznam"
 MEDIA_IROZHLAS = "irozhlas"
 
 SEZNAM_URL = "https://www.seznamzpravy.cz/"
 IROZHLAS_URL = "https://www.irozhlas.cz/"
-
-SEZNAM_ICON = base64.decode("UklGRswAAABXRUJQVlA4TMAAAAAvH8AHEDcgEEjaH3oNgUCSv9tMCwiK/B+NIIAkf6o2GGWDA/yvwFALhOPatp3k0QGHNPcCzi0hz7GCbP9FvGAJEf1XmLYNY6fzFLMW7wiNWeC36BUAnhdJmhzAUc4B3E/BDjA4lCw5DVusAYDIZcJ7dHyJPiVpIFOS7imrJI1prlK1rKqyLfW6udyL1Gs1YCcph1WailGTH3+xT4llbeSi00STcNNpgMZcnosuE4CZGdx0+gFumj2W0xcgTGvxegA=")
-IROZHLAS_ICON = base64.decode("UklGRmwAAABXRUJQVlA4TGAAAAAvH8AHACegEEAAxJ+2oREIJP5ezbOCQCDZH3eB5j/441gGGLRtJKkQ9hisBsFB2I8/qflnCET0fwLABz1dALBc04UjkVHKJ6MEY5f6kJfrd2G7Vlh9GH3XNV247LMe1h8=")
 
 DEFAULT_COLOR = "#FF0000"
 TEXT_SPEED = "100"

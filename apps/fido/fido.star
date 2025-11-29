@@ -6,14 +6,18 @@ Author: yonodactyl
 """
 
 load("cache.star", "cache")
-
-# LOAD MODULES
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/fence.png", FENCE_ASSET = "file")
+load("images/grass.png", GRASS_ASSET = "file")
+load("images/sky.png", SKY_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+FENCE = FENCE_ASSET.readall()
+GRASS = GRASS_ASSET.readall()
+SKY = SKY_ASSET.readall()
 
 # CONFIG
 TTL = 86400
@@ -25,15 +29,6 @@ HOURS_IN_MONTH = 730
 DEFAULT_PAL_NAME = "Fido"
 
 # Static Base64 Image Data
-GRASS = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAAKJJREFUaIHt0CEOwyAUBuD/NRVcB2TlEmQVR+gROMeO0COgKudrtoxzzE8wxRRN2mymBsH/GfLzgDweQERERERERERERERE1AgBgGkdcwwJ2inMwyIAYLzN2qntYAwJz+tNpnXMJZf6PCxivM2lXvLZ+2ff/3X++L9jP/Kv2EruYkjbZotrVyahndpNppUsxtuMhvWXx7t2D1X199endg9VfQGuNRNssoJHlQAAAABJRU5ErkJggg==
-""")
-SKY = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAAXtJREFUaIHtVzsOwjAMpRU3YWHgWByFY3ApNhZ2DsBeFhIFp44/iZ2o6lseT0KRHT+/ttPl/VkOnfC8vw7n6ynTnjxLiuVoCYcitM1T52A65cnCAdhkoe7BAagDWkyaO5GaJqSTxvowcQCGkZxAZsBWd37PgB+iAzwnrW2eey6HYV+mGcB1AtSeTjDNAO3u1jqDwwF7BoyYAdxzNAz7GiIDekw+YE6LgcWvaU8nWOw81PEC0smU9Bqnky3pWsbOLzHVz3S8PZbeAZUWVdIWmCWTljLXCdT/W9f1dwHhh2cG1O58y0xQZUDvnS9pbj/xAjSTbp3u2smvMewD0wFN3wPgJDA9UtCSGdBi57nNS8+R1If1SWaAJN2h9th5LN2xnYeYpTdpkQHcczkcgO18dgE1z1Pt5LSTl3AApasyQLu7tc7gMNVXdgEjZADXGSWm+oGI3wIejyLqkQS1B1wywGPntU6IL0KeDpA6wxJZBmx95yFcMiAtqvfOQ3wBeCUrKD8qqeQAAAAASUVORK5CYII=
-""")
-FENCE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAAUdJREFUaIHtlTFLAzEYht/EA5cDl8IpXUQcOpaCo3Tp4Og/8S/4F/wnjg5ZCt0OSsYudhQzCha8QeqUMx6XS9LkWqHfs1yekLt78+U7DiAIgiAIgiAIgiCODwYALw/3Wz1x9/TMfFxIhdm4+Lfuux8+HU1qAQBfn42LaBdSBXnI8333w/VASGXO78V1aCFVp/eZ5+RycPFYfX7VL1u8fsDmQiq8bb6T+zDPOj32+bfXZ7g6z1udA7/tprG5LorNXffb3PfEmh3hymNbb/qfDoit+Pp9s5MP86wOZvO+OoR3VSj0hGLcRcr3mR3I2ya1m4S6i1JVrWNfYvKZh93bX6CLUlWYr5ZMb9wc+5Iqb4YDMF8tmXk9JNy9JB365Jvz09Fke1Oc7jNKjbMDUgdrbnaX7z8EV34WWv1SVVFFCb2/7/UEQRBHzQ8p2EzduEqDNAAAAABJRU5ErkJggg==
-""")
 
 # Animated Actions
 BALL_THROW = "https://raw.githubusercontent.com/Yonodactyl/TidbytGIFs/main/Fido/ball_throw.gif"

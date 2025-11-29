@@ -5,20 +5,22 @@ Description: Count the days left until St. Patrick's Day while watching a rainbo
 Author: oogashaka
 """
 
-load("encoding/base64.star", "base64")
 load("humanize.star", "humanize")
+load("images/clover.png", CLOVER_ASSET = "file")
+load("images/gold_pot.png", GOLD_POT_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("time.star", "time")
 
+CLOVER = CLOVER_ASSET.readall()
+GOLD_POT = GOLD_POT_ASSET.readall()
+
 DURATION = 15100
 FRAME_DELAY = 100
 
-GOLD_POT = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAKpJREFUKFNjZEAC/z8x/L91Wxssom58lRFZDs4BKWK4wAeW+6Ehw8DBcQ3MZuRjAKsBE2BFIAU/tMCSIEUgNseNJxDFdp8YEQqRTYMqYDD4BLed8eZZbbBpuZXSDDvX7AJLuIe4gWkQH8QG0Yxubm5ghbt2QRShAzc3iCaw1SDFRCvEZirMtF27djEy/j/E9x/kK3QnICsCq4EFDSgM3VssUJy4s+YEA8znABBtUUte+5c/AAAAAElFTkSuQmCC")
 GOLD_POT_WIDTH = 10
 GOLD_POT_HEIGHT = 10
 
-CLOVER = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAASNJREFUKFNtUl1OwzAM/pxW3GXd4ACTWAcSd2ASGw+72EQ7JMQhBkMgeIZm4iastDay00wUkZcmdvz9pYS4iAQgQAS6tQ9BtKR1Yel2etQGgOzxyjZEDj4vMdjM7DI5wE/KAGIERDLczlFNCmQPM5BLrcxNA3IEP72F9n1+o4Qkw6f5QVl1WmCwuTRaMGN3fofY93mhfAFdkZTTbLCi13DpUQ8IkCBJPYgQRs8LCDNcmuJ9vDIZv5dKDh5AMnq5hrQMlzhwy72L8VBNyhDd8evSkAHBx3iFbLvoSVEPzf4Lnxf3wfTJ2xJtXf+LqkWTYlr0Wagb2NfW+Ks7ovhpqZL7ppUvDmi8Mc7d2drQuekGDn+HcxpsiFdjI5IkTez1+bsxUT+kg40YKNjTrQAAAABJRU5ErkJggg==")
 CLOVER_WIDTH = 12
 CLOVER_HEIGHT = 12
 

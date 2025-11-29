@@ -5,41 +5,24 @@ Description: Displays a random wine from your CellarTracker Ready to Drink repor
 Author: Matt Kent
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/red_wine_glass_icon.png", RED_WINE_GLASS_ICON_ASSET = "file")
+load("images/rose_wine_glass_icon.png", ROSE_WINE_GLASS_ICON_ASSET = "file")
+load("images/sparkling_wine_glass_icon.png", SPARKLING_WINE_GLASS_ICON_ASSET = "file")
+load("images/white_wine_glass_icon.png", WHITE_WINE_GLASS_ICON_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
+RED_WINE_GLASS_ICON = RED_WINE_GLASS_ICON_ASSET.readall()
+ROSE_WINE_GLASS_ICON = ROSE_WINE_GLASS_ICON_ASSET.readall()
+SPARKLING_WINE_GLASS_ICON = SPARKLING_WINE_GLASS_ICON_ASSET.readall()
+WHITE_WINE_GLASS_ICON = WHITE_WINE_GLASS_ICON_ASSET.readall()
+
 CACHE_TTL_SECONDS = 600
 
 DEFAULT_TOP_N_VALUE = 10
-
-WHITE_WINE_GLASS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAWCAYAAAD5Jg1dAAAAAXNSR0IArs4c6QAAAH1JREFUOE9jPPvi138GIgAjS
-KGROCtepede/mYYfgr12boZmAWrGP6+b8Pw/ZMHVxjeSi2E+Jo2CnGFOIbV1FMIMgnmIXRTYdYaS7AxMsIkQYqFn8
-WjqAUFC0gRSBCuEGYyTDGyIgyFMMUgGmYSzAoUEwdIIa68A/c1sZkLAHHel5t001MXAAAAAElFTkSuQmCC
-""")
-
-SPARKLING_WINE_GLASS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAkAAAAWCAYAAAASEbZeAAAAAXNSR0IArs4c6QAAAJtJREFUOE9jZGBgYDj74td/E
-I0NGEuwMTLCFBmJs2KoOffyNwPxikBWYTMFZizINMYBUKTP1o3V+08eXGF4K7UQ4iaQImbBKoa/79vgikH8h+ejUB
-XBZJEVY5iEzb6Bsg4WwejBAHMPPIJhCoWfxcPdDwofkAKQAJiAAVCYgRQiK8BQBDMRZgJMM4pJ1FOEnNaRrQRHMK5
-MABMHACiPoD+N8QF/AAAAAElFTkSuQmCC
-""")
-
-ROSE_WINE_GLASS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAWCAYAAAD5Jg1dAAAAAXNSR0IArs4c6QAAAIFJREFUOE9jPPvi138GIgAjS
-KGROCtepede/mYYfgr1O1YzMPdHMfwtXIbh+8/7DjPc2zUJ4mvaKMQV4hhWU08hyCSYh9BNhVlrLMHGyAiTBClWcs
-tDUQsKFpAikCBcIcxkmGJkRRgKYYpBNMwkmBUoJg6gQvT8g+xOsBsJZTCQBgBCkp7t6fyTqwAAAABJRU5ErkJggg==
-""")
-
-RED_WINE_GLASS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAWCAYAAAD5Jg1dAAAAAXNSR0IArs4c6QAAAIFJREFUOE9jPPvi138GIgAjS
-KGROCtepede/mYYfgp5g60ZVI+cYrhtY4bh+80fPjE47L0M8TVtFOIKcQyrqacQZBLMQ+imwqw1lmBjZIRJghQfcN
-ZFUQsKFpAikCBcIcxkmGJkRRgKYYpBNMwkmBUoJg6gQvT8g+xOsBsJZTCQBgA6R5ftTBH+3wAAAABJRU5ErkJggg==
-""")
 
 def inventory_xml_to_dict_list(raw_xml_string):
     result = []

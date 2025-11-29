@@ -5,12 +5,14 @@ Description: View live tracking information for Milwaukee County Transit System 
 Author: Josiah Winslow
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/mcts_icon.webp", MCTS_ICON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
+
+MCTS_ICON = MCTS_ICON_ASSET.readall()
 
 WIDTH = 64
 HEIGHT = 32
@@ -21,12 +23,6 @@ DEFAULT_STOP_ID = "743"
 
 MCTS_ICON_WIDTH = 23
 MCTS_ICON_HEIGHT = 32
-MCTS_ICON = base64.decode("""
-UklGRr4AAABXRUJQVlA4TLEAAAAvFsAHEKdgIG2bbVzmzV/CDaw2zLRtk3Sgxh/VvlVRI0lR73IbxH/
-CFwmEFhAU+T9a/J2rAKoA5hOiSgoMbnFsGZj27k1CyA98qsYFjiRJchq2AQmzpmT+/9mdwcM5ov8TEP
-dkrTFTy6dOMQJaC+yzZSUbkG3IR/5B3lK3YrBesj0pSPT9imEY2sYYwhRGz0V+hQM4GHwomZXGlnv8p
-b/kSEj7bLvL77tJjBCXQzQ3e7oA
-""")
 
 INFO_COLOR = "#fff"
 INFO_COLOR_NOKEY = "#f80"

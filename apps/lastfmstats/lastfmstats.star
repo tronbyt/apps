@@ -6,11 +6,13 @@ Author: skinner452
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/default_artwork.png", DEFAULT_ARTWORK_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+DEFAULT_ARTWORK = DEFAULT_ARTWORK_ASSET.readall()
 
 # Converts period values to display strings
 PERIOD_STRINGS = {
@@ -33,8 +35,6 @@ DEMO_TRACK = {
     "artwork": "https://lastfm.freetls.fastly.net/i/u/770x0/d83c5d906703a8c8042285d0902d9cf4.jpg",
     "plays": "10",
 }
-
-DEFAULT_ARTWORK = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAAZ0lEQVQ4T2O0sLD4z0BlwEg3Q9eJMpLt9qDX/xmwunToGQryCrEA5juC3h81lNggZRgNU3BQ0SdJoWdPYtIpNj3wvI8tvxMyFJcesKG4ChB8huLTQztDQbFGrfAEmUW/kp/ovIlDIQDgTH/J851RMQAAAABJRU5ErkJggg==")
 
 def main(config):
     """Entry point to the TidByt app

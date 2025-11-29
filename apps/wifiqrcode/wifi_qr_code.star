@@ -5,14 +5,12 @@ Description: This app creates a scannable WiFi QR code. It is not compatible wit
 Author: misusage
 """
 
-load("encoding/base64.star", "base64")
+load("images/wifi_icon.png", WIFI_ICON_ASSET = "file")
 load("qrcode.star", "qrcode")
 load("render.star", "render")
 load("schema.star", "schema")
 
-WIFI_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAC2klEQVRYR+2Wv09aURTHDySAgCSQVFxoiykxUWkKYXHjLyCykQATKwv/AJN/g7sDuOripg5OjmAhhKQdWkJiZKgD0gCx9nyP3ubxeJVb2oaFm7y89+49734/58c779lowcO2YH1aAiwjME8E8MxrPhymAh7zfYePxz8p7HkAvDs7O30rkWazucrz9/8LIMrCH9XmLDalw+syx2vv+dTQAdGNgIc3F8+shE1CP9jWznZ+nv9uWBtZAVkBmHPsVp6/JO5wOCgUCpHdbqeVlZUprV6v9+H29hYRnKgRKwDLHM/yHOE/Ozuj1VWUweTgucdoNGqzqhEjAK4R6l8FBlGV11arRVtbW7Kz8VrZmMVtNht5PB66v3+qyZubG0qn00ghCAcqEkaANyz2Bcb7+/vk8/moVCrRyckJDYdDymQyVK1W6e7ujorFIh0cHJDb7aZCoSACh4eHcu1yueQe6YB9MpkkpOf4+Jj6/T7t7e0B4i2bfIWdEeAdA3xSHuHhXC5HjUZDABKJBF1dXdH6+jptbGwQPES+Hx4e6OjoSGDi8bh4ioE1zNXrdbHd3t4WEE4FACJs8vlFgEqlQvl8fgoAkUFazs/Pyev10u7urkQJIxaLiZfGgZpwOp3UbrdpbW1NHwDeWhUUvAGAWodHRgCI+/1+EQQg7AHQ6XQoGAzqA1xeXlIgEKDR6On1RfjG47G8Yi8B1Go1CX84HJbzXAAqZ8htNpsVABRmuVyWRgQArKHKUdmnp6dik0ql6Pr6eiIFkUhEInBxcSFvxMwixNMQURDq/YeosRcgvPASqQAIxmAwmEqbqgmd11A2YSHpVH/TeCZCwDe6jUg9N/HRUZNmINTE5uamWeu3991uN8Y9BPmZ2YqxiZsP1SPQHXs6UXmOoEAw8Cs+GT9G6H5TQ/dr6GeIb8anzRFRLftZ/J9/jo3aC/shURAL/yXTLjwdQ90a0NlrLpslwDICPwEtiFAw6YIxRAAAAABJRU5ErkJggg==
-""")
+WIFI_ICON = WIFI_ICON_ASSET.readall()
 
 def get_schema():
     options = [

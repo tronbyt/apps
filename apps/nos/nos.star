@@ -5,18 +5,16 @@ Description: Laat een willekeurig recente nieuwsbericht zien van de website nos.
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/logo.png", LOGO_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
-DEFAULT_CATEGORY = "nosnieuwsalgemeen"
+LOGO = LOGO_ASSET.readall()
 
-LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAGRJREFUeNpifCYnwgAEU4A4GogFGCDgAxAvBeIcRqACkGQmEDMxoIJ/QDwdpOA9VOd3yYevuUAyz+VFvwEpTpBJIAX/QYJASUZk7UBFYHF0YzEAE9RBMGMZ0NgfiHIkXm8CBBgAX08js92LI2MAAAAASUVORK5CYII=
-""")
+DEFAULT_CATEGORY = "nosnieuwsalgemeen"
 
 def get_news_feed(category = DEFAULT_CATEGORY, ttl_seconds = 60 * 5):
     url = "https://feeds.nos.nl/{}".format(category)

@@ -6,15 +6,13 @@ Author: elliotstoner
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/jft_header.png", JFT_HEADER_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-JFT_HEADER = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAHCAYAAAC4NEsKAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAnklEQVQ4jd1VQQ7AIAgry/7/ZXYZSYMg4G7rRedobZVEAaAAoKoQEXRR1U/1PNfQ0fiy13XEKmCGOMgEFuY0VAX2tRwA//Rz+/ZjBg7A/IlGxq/WIn2bs69WB3ji7oayjUVk6Ypup0R8Xovqurg6NxCZ5019LY+Vbrf2FOY76+zbCthM1FbeqOd1THiNaQjmRz4z78YJc+B9Bf6M3eE/k3mm7Mey7SMAAAAASUVORK5CYII=
-""")
+JFT_HEADER = JFT_HEADER_ASSET.readall()
 
 JFT_SOURCE = "na-just-for-today"
 FILE_TYPE = ".txt"

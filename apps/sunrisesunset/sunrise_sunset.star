@@ -32,10 +32,15 @@ Author: Alan Fleming
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/sunriseimage.png", SUNRISEIMAGE_ASSET = "file")
+load("images/sunsetimage.png", SUNSETIMAGE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
+
+SUNRISEIMAGE = SUNRISEIMAGE_ASSET.readall()
+SUNSETIMAGE = SUNSETIMAGE_ASSET.readall()
 
 # Defaults
 DEFAULT_LOCATION = """
@@ -51,8 +56,6 @@ DEFAULT_24_HOUR = False
 DEFAULT_ITEMS_TO_DISPLAY = "both"
 
 # Images
-sunriseImage = """iVBORw0KGgoAAAANSUhEUgAAAB0AAAAOCAYAAADT0Rc6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAHaADAAQAAAABAAAADgAAAAD5O/sDAAAA8klEQVQ4Eb1UMQoCMRDMiWBlJdcKVoK1jfgjH+RnrrKQa6xtBVvRxgdEJjrLZkmOHHqmSXYzs5PZ5M65gYa/bX2u9DjaaHwAtstHlE4Fm/ms0nmIVPUxyuX2R3qjdG0FwYMg3fnDxLvzyUlsDvQ+WaHDlJg9aBBEcrWWLduBbDuE0WOREiRdC/e+05RbthEtzQ1iIB6L5hgq317v4bFpcboQpwrPJTGIf9peFBThzjv9PCIQSj4V4LRLxBxoIRxp4RCb10v81zPvjIW6YmnvYv/M/kFYCPNlNw2cUrzmar7NDx6LU6uknZS6S+GYs/X/Hr8A8WR14FqWMJkAAAAASUVORK5CYII="""
-sunsetImage = """iVBORw0KGgoAAAANSUhEUgAAAB0AAAAOCAYAAADT0Rc6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAHaADAAQAAAABAAAADgAAAAD5O/sDAAAAyElEQVQ4EWNgGADASAs7582b9x/Z3KSkJBR7UDjICqnBRrYc2WImahiOywxki5DV4LX0/2trlGBC1kgMG9mnyOpZkDkgSxhFj+IMckLyMLPQLcPlY5h6BpjvQDQMgyRh4nCFFDCw+gpuwbUzDAxaJmDj8YUAqfZjWIpiIcw0KlsMt/T/Qfb/DNd/wqzBTWuyMzDa/4Trw60QtwxYs+K0zySn0vtZvHj14pKHieN2Eo1kcAYTzPcwl8H4+NwBUouuDqYfnz66yAEAg+FU6JspIAwAAAAASUVORK5CYII="""
 
 def main(config):
     # Get longditude and latitude from location
@@ -93,7 +96,7 @@ def main(config):
                 main_align = "start",
                 cross_align = "center",
                 children = [
-                    render.Image(src = base64.decode(sunriseImage)),
+                    render.Image(src = SUNRISEIMAGE),
                     render.Text(sunriseText),
                 ],
             ),
@@ -109,7 +112,7 @@ def main(config):
             main_align = "start",
             cross_align = "center",
             children = [
-                render.Image(src = base64.decode(sunsetImage)),
+                render.Image(src = SUNSETIMAGE),
                 render.Text(sunsetText),
             ],
         )
@@ -118,12 +121,12 @@ def main(config):
         if itemsToDisplay == "sunrise":
             title = "Sunrise"
             text = sunriseText
-            image = sunriseImage
+            image = SUNRISEIMAGE
 
         else:
             title = "Sunset"
             text = sunsetText
-            image = sunsetImage
+            image = SUNSETIMAGE
 
         top = render.Padding(
             pad = (0, 2, 0, 4),

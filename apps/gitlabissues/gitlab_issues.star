@@ -1,11 +1,12 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/icon.png", ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+ICON = ICON_ASSET.readall()
+
 # Load GitLab icon from base64 encoded data
-ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABM0lEQVRYR2NkGGDAOMD2M+B0wNuprf9Bjvu2dgnYjbL7rpPl2MdOmmBzcOkfvA6AuRwWRZSGgFDjZLBR3LYuKJ7GGQJD3gHoHsAVkjQLAbIdgEsjqWlh+DqAWgUXLFdhpAFCUUBzB/zJVQOXXJ9eQ6z6+oqZKnZKav9FMYdl8i2w5zFCYNA4AN3bz6+SFxLoPoeZSzAEBp0DYA4iFBK4fIzuIZJDgG4O+DkjG5wLmK/uJir1w0KEVJ/DDMfIBQPuAHRvw7IlzuAwg/rhFDjgcAJYnKMrINjMGnAHwFwMdwjMx7j8Cg2Jv9JGYBXsFSvwepJgCAwaB8Adslgdb2SzxN4k2lNY6wJCee/PQDsAI5dAHUSqz3GWA4RCYNA5gFQHk1wOUGoBIf0kpVhChpEjP+AOAAC5hLghLwV8cwAAAABJRU5ErkJggg==""")
 
 def main(config):
     token = config.get("api-token")

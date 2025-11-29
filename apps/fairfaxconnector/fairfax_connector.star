@@ -6,21 +6,19 @@ Author: Austin Pearce
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/bus_stop_picture.png", BUS_STOP_PICTURE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+BUS_STOP_PICTURE = BUS_STOP_PICTURE_ASSET.readall()
 
 ONE_MINUTE = 60
 ONE_DAY = ONE_MINUTE * 60 * 24
 ONE_WEEK = ONE_DAY * 7
 BASE_URL = "https://www.fairfaxcounty.gov/bustime/api/v3"
 DEFAULT_STOP = "6484"
-
-BUS_STOP_PICTURE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAABVElEQVRoQ+1ZwQ3CMAxM/yAk/vDlzwadoit0pK7QKboBb/gyABJiAKgrubLStEnAFoHYr4pe3dzl4tShMJlHEcP/2UcMPhZb9BH7zKf4oBci8bIsTVVVpm3boPf6sF3XDXkgL1wnJwAljox9pKgyc1hKHPHJCACkcSYkLQ+zTiMZAXar8+I6vz4Og2VDAki5sK7fkxEAHQBCAFka+/XFZCcAkIYA4lkKoA7IzQFaBK1t0LVdZbELwNqHHUEFcHywqANy+BDSJaA1YFoEsYsL6QN8mKZpRkhd18N1Eu2w3Q1iwcNmhd73kZy7T3cXzrzvjGdyIOISgHZqnAJw5xURQMKaeM7wDcvbInkdIDFIDhe9M9uuZ1QAWxW7BqgDBI6qf2YJcK2zlPMs1oCUB841NhVA8uyfa5Yk84ADRP/vkxw8R24V4H47jg7YbE9OUXvM+Pu/YV4KR786gTkzfwAAAABJRU5ErkJggg==
-""")
 
 def getAllRoutes(config):
     routes = cache.get("ROUTES")

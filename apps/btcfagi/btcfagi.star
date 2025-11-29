@@ -6,13 +6,11 @@ Author: PMK (@pmk)
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/background.gif", BACKGROUND_ASSET = "file")
 load("render.star", "render")
 
-BACKGROUND = base64.decode("""
-R0lGODlhPAABAMQAAMCoE71VE7s4E8CzE7q5FbsoE8CEE8B3E5S3IYuzJGukLp25HrsbFsCcE7tIE7S5F625GaW5HFycM1aZNb9iE3qrKcCQE3GnLHWpKn6uJ2SgMFGXNsBsE4OwJmGeMb+4EyH5BAAAAAAALAAAAAA8AAEAAAUuICMWpGA6ThBQFHcchmFZTQPcw/DtBPE8EEgkslggEIlEJ1PBXBQKjUcimUw2IQA7
-""")
+BACKGROUND = BACKGROUND_ASSET.readall()
 
 def get_data(url, ttl_seconds = 60 * 60 * 6):
     response = http.get(url = url, ttl_seconds = ttl_seconds)

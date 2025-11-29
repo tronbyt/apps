@@ -7,14 +7,17 @@ Author: shmauk
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/export.png", EXPORT_ASSET = "file")
+load("images/import.png", IMPORT_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+EXPORT = EXPORT_ASSET.readall()
+IMPORT = IMPORT_ASSET.readall()
+
 CLOCK_FORMAT = "03:04 PM"
-EXPORT = "iVBORw0KGgoAAAANSUhEUgAAAB4AAAALCAYAAABoKz2KAAAAAXNSR0IArs4c6QAAAO9JREFUOE9jZMACbt++/R9ZWFVVlRGbOkrEUAxEtxBkMDUsfSuj8l/4yR0Uu+AckKUgS2A0Id8obfT5f89/C8GQAFkKMwvZcrjGpqam/3V1dYwwGp/FIEtB8oQshlnKcaKC4YdFB9hImOUkWwyzFJvDkB2CbClMLbLlJFmMz1LkEMBmKbrlYIu3bNmCkoqRfePj44MSj8T6+OuTOTjN5JZJYYRb7G3nw7D10BYGdBrdYpCjiIljdIuXfPUD+yeGexMDisWEUjE2n+NLXCCLl8hMgVj2JIcBp8W4fAwTx+ZzfI5FtxhZLUU+JhRChCwGAPhhqzh/U+GiAAAAAElFTkSuQmCC"
-IMPORT = "iVBORw0KGgoAAAANSUhEUgAAAB4AAAALCAYAAABoKz2KAAAAAXNSR0IArs4c6QAAAOpJREFUOE9jZMACbt++/R9ZWFVVlRGbOkrEUAxEtxBkMDUsfSuj8l/4yR0Uu+AckKUgS2A0Mb65xsD9X4vhK97QAFkKMwvZcrimpqam/3V1dYwwmliLQepwWQ6zlONEBcMPiw6wkTDLSbIY5ENcDkK3HNlSmB5ky6lmMbLPsVmKbjnY4i1btuD0iY+PD9xxpPj465M5OM3klklhhFvsbefDsPXQFgZ0Gtli9GCGOQRbHKNbvOSrH1h7DPcmBhSLCSUmbA7Al6pBFi+RmQKx7EkOA06LcfkYJo7P59gcjW4xshqKfYwvlAhZDAC0M6Q4/36UsAAAAABJRU5ErkJggg=="
 
 def main(config):
     now = time.now()
@@ -36,7 +39,7 @@ def main(config):
                             cross_align = "center",
                             children = [
                                 render.Text("0.0" + " " + "kW"),
-                                render.Image(src = base64.decode(EXPORT)),
+                                render.Image(src = EXPORT),
                             ],
                         ),
                         render.Box(
@@ -72,9 +75,9 @@ def main(config):
     sol = str(sol_d)
 
     if sol_n > 0:
-        sol_i = base64.decode(EXPORT)
+        sol_i = EXPORT
     else:
-        sol_i = base64.decode(IMPORT)
+        sol_i = IMPORT
 
     weather = http.get(config.str("hass", "") + "/api/states/" + config.str("wthr", ""), headers = headers, ttl_seconds = 60)
     weather_j = weather.json()

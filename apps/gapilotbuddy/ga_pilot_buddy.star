@@ -6,13 +6,15 @@ Author: icdevin
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/error_icon.png", ERROR_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ERROR_ICON = ERROR_ICON_ASSET.readall()
 
 DEFAULT_LOCATION = """
 {
@@ -25,11 +27,7 @@ DEFAULT_LOCATION = """
 }
 """
 DEFAULT_FLIGHT_RULES_COLOR = "#C3C3C3"
-ERROR_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAATElEQVQoU2P8L8L8n/HNX0YGAgCmDq
-yQkCZkebjJuDShi6M4BV0SmyEYbocpwmUjVs/i8xNlNpDkB5JCiaR4IKQYlgBQYppQskCWBwCgNlQN
-phkLigAAAABJRU5ErkJggg==
-""")
+
 FLIGHT_RULES_COLOR_MAP = {
     "VFR": "#01CF00",
     "MVFR": "#0061E7",

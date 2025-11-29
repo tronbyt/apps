@@ -6,15 +6,13 @@ Author: UnBurn
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/icon.png", ICON_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 
-ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAN0lEQVQIW2PcsmXLfwY8gBGmYNKkSQx5eXkYSsEKQJIwAFNkmVHAcHzGBAasJsAkQZrgCnA5AwA+Gx6Nb5UO7QAAAABJRU5ErkJggg==
-""")
+ICON = ICON_ASSET.readall()
 
 ONE_HOUR_IN_SECONDS = 3600
 TEN_MINUTES_IN_SECONDS = 600

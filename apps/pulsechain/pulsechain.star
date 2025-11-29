@@ -8,45 +8,21 @@ Author: bretep
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/hex_icon_sm.png", HEX_ICON_SM_ASSET = "file")
+load("images/pls_icon_sm.png", PLS_ICON_SM_ASSET = "file")
+load("images/plsx_icon_sm.png", PLSX_ICON_SM_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+HEX_ICON_SM = HEX_ICON_SM_ASSET.readall()
+PLSX_ICON_SM = PLSX_ICON_SM_ASSET.readall()
+PLS_ICON_SM = PLS_ICON_SM_ASSET.readall()
 
 NO_PRICE = "$  ------- "
 
 POST_HEADERS = {
     "Content-Type": "application/json",
 }
-
-PLS_ICON_SM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAkAAAAICAYAAAArzdW1AAAACXBIWXMAAAWJAAAF
-iQFtaJ36AAABC0lEQVQYlT3Ku07CUACA4b/0ioA9saE5MSTA4mQURyZ8CQcfwUkX
-Z+oLGB/AgcfQURdXXVwcLAmBg6GxEi5p0R4HE4dv+wytNbVLokWDPrvwr8oX0NJ1
-UnN8G7WqSwalFd48Y1isEayBAo8K5ajGnXX0sbmRyvalAqlI4xaMEpokQMK5kTCw
-9itLEeTOQxA7HaksIRVp/JfT2QyYcWztueNeYNcJ7M1LkLkifHWQqiSk4jBW8N7m
-2ewbbtszfzo7Xii3TC3KZnFfXdPzRya1uUFtwalRGNsic7tx7nT93Omysg6Gk9xp
-TnKHSeZeneV2hNYaDRffZkOvyic69a/1NHzSb+E0fhSfQmvNL6VjbO/VkT3+AAAA
-AElFTkSuQmCC
-""")
-PLSX_ICON_SM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAYAAAAPU20uAAAACXBIWXMAAAWJAAAF
-iQFtaJ36AAABLklEQVQYlT3KTSiDAQAG4Hd8tljL/qSV5KeWvoxYc6CViIOQ5mYO
-kiaHTbIkcpCi2VKUA2scNKJxctFSDg67TVlJS+SgNdKW2k/bvteJ69Mj2xocawEg
-e9HrX/1Bfw4ADNH1zUSHeln9lmnFU21jgJBLD3XGPZIwH7hNoKcgK26nu71uORZt
-kzX5clWSUBW8Q6OdlV9r9+AGG+5WnCRR5rs8+QyLptWSrCJza9cNZ3VSjyKdixqv
-s/sAIADAqbk98GjS5MPjWh9QKIpXpdkb744EACAJktDGXUegi/VR56HDPqP9c5BE
-W3DeCjpKQmbu46K/zxMzdB3/h4GlBUGRmo6BU7SEHBM/cjFOiNJur81KEsLzSM6c
-r86GlMkqnyaiPDs3N0cs799NYiKVBoBfQPqMHBohfUwAAAAASUVORK5CYII=
-""")
-HEX_ICON_SM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAkAAAAICAYAAAArzdW1AAAACXBIWXMAAAsTAAAL
-EwEAmpwYAAABG0lEQVQYlQXBPUsCYQDA8f+dz6WXr3cqZlpkkSCBBI2NITSI0NTi
-B2jpOzT1CRqipYjmliKiJQiioWhoiYqIuDDMzJcwz7vTp99PkZUNeJw3qNkPuIko
-6hTSmwBftqPkkkV0qyUQEtTbA/yjLNok9L9QlDTSqYelld9VCoF1RVZXy1jdE37N
-bZr+OF7cxUsU+AmvIGdgLr/o26qo10THTmGQR/4to7kxDO0IpzuN3Uxh2yXBgrrD
-Z7uENooRDn7z0V9i4KjMpo55aRWRzpggIw7RB0XG3XuS/SbpyCvP1hpDLuj72hjB
-qiCuvxHqnOM19ghEwBT7xMQZ77UyunKHkbkSjDzImpeojRZtt05v0CMyfMIMpQnl
-Nrlx+AeJZmcOHgyOkAAAAABJRU5ErkJggg==
-""")
 
 def hasData(json):
     return "data" in json

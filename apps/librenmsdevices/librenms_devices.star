@@ -5,21 +5,17 @@ Description: Displays a LibreNMS device availability map.
 Author: @jtinel
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/librenms_icon.png", LIBRENMS_ICON_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 
+LIBRENMS_ICON = LIBRENMS_ICON_ASSET.readall()
+
 ENDPOINT_DEVICES = "/api/v0/devices"
 MARQUEE_SCROLL_SPEED = 100
 BOX_SIZE = 4
-LIBRENMS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAiklEQVQoU42SQRLAEAxF6wws
-a6dXcWhXqZ0u6wwpHTFEaG1MIn+en0Rsk3PrA1Q4BffMJu/dgLq8iNqADH6oGRIxEWRDsNaC
-c66r64KYCDITyo0CKqwiLEQPtLCNX9EXgRLrV5Dwh8iSZp6QOPW0Ii67R4loYZxTaffMY86z
-G0G7SVeJFbVj4HbvAYKAnd83qTc7AAAAAElFTkSuQmCC
-""")
 
 colors = {
     "red": "F92323",

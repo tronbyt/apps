@@ -7,11 +7,13 @@ Author: Christian Dannie Storgaard (Cybolic)
 # This is compatible with the system described my Mike and Denise Okuda in their book "Star Trek: Chronology"
 # but based on current local time in order to be usable as a clock
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/background_img.png", BACKGROUND_IMG_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+BACKGROUND_IMG = BACKGROUND_IMG_ASSET.readall()
 
 # Constants
 DEFAULT_TIMEZONE = "UTC"
@@ -199,7 +201,5 @@ def get_schema():
             ),
         ],
     )
-
-BACKGROUND_IMG = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAABIklEQVRo3u2UsW7CQAyG/1y753akUy7wCB2Yqhu78xqIudtRJjZeh27AVCEeAaQoUp7DXRoUIsIVkHKDbel0TuxE8uffTgDQ+OMLg5HDYPgObvbaLr467VAdN/hZex4AmsXvvxe9F35YEt4+k7NfW/NdO971HPrftXzMVkSzFdFkuiUAvZ7Dki7uLv/R+5ZfH1WDqI6baDK86EjPdgYQY+absrw1Il0j85/8UFzFXkIhCO1i780PxaMCCHWr1xGI2f1ndsC937ehJ3/bkK0pMDcBIAAEgAAQAAJAAAgAASAABIAA4AnAew/vvShAAHAH4JzjDcBayxNAWZYAAGMMSxW8aK3nSimkaYosy5DnObTWKIqCBYAEADnnYK2FMYadAn4B3tDB+yaBnyQAAAAASUVORK5CYII=""")
 
 # vi:et:sw=4:ts=4

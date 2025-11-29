@@ -5,13 +5,11 @@ Description: Shows the current player count.
 Author: Daniel Sitnik
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/h2_logo.webp", H2_LOGO_ASSET = "file")
 load("render.star", "render")
 
-H2_LOGO = base64.decode("""
-UklGRiwBAABXRUJQVlA4TB8BAAAvE8AEEA4GbSM5Ov5I3zi+UZi9Ov8BV9v2880X27aT08icrLa2nEJOwc6Muh1t23a7cbLbbwLyqFSndW+8Hjorr1eCch3m3PBFrCqf3TCrY0loIFFk3iM/62M83AobiCZvxZ9jJyo8+7N7osDtP2skspz/c9JApDr0x0GpiUS7/9g1klgXPbTpsr+349L0ULTWQKLEKXe0RrH9N/tWtA0nlUSlXaKZBhIjN8NJzJZdKh0Ry2G5DUg0fxsS0x2uinm/yp9jyoYvog8+VrduygF/RL/MybQiPvphwqQf9WhZZgMKj+izd2K5reu4U+XtLPsUJFFnWrs+P8X4tP2qHO2m1TXwrMJT8dGT3sBHiVb8ui3LEr9EqS4bnqaO0gYeAQA=
-""")
+H2_LOGO = H2_LOGO_ASSET.readall()
 
 H2_URL = "https://api.live.prod.thehelldiversgame.com/api/WarSeason/801/Status"
 

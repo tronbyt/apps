@@ -6,14 +6,31 @@ Author: smith-kyle
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/icon_e.png", ICON_E_ASSET = "file")
+load("images/icon_n.png", ICON_N_ASSET = "file")
+load("images/icon_ne.png", ICON_NE_ASSET = "file")
+load("images/icon_nw.png", ICON_NW_ASSET = "file")
+load("images/icon_s.png", ICON_S_ASSET = "file")
+load("images/icon_se.png", ICON_SE_ASSET = "file")
+load("images/icon_sw.png", ICON_SW_ASSET = "file")
+load("images/icon_w.png", ICON_W_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
+
+ICON_E = ICON_E_ASSET.readall()
+ICON_N = ICON_N_ASSET.readall()
+ICON_NW = ICON_NW_ASSET.readall()
+ICON_S = ICON_S_ASSET.readall()
+ICON_SE = ICON_SE_ASSET.readall()
+ICON_SW = ICON_SW_ASSET.readall()
+ICON_W = ICON_W_ASSET.readall()
+
+ICON_NE = ICON_NE_ASSET.readall()
 
 SURFLINE_RATING_URL = "https://services.surfline.com/kbyg/spots/forecasts/rating?spotId={spot_id}&days=1&intervalHours=1&correctedWind=False"
 SURFLINE_WAVE_URL = "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={spot_id}&days=1&intervalHours=1"
@@ -52,14 +69,6 @@ DUSK_WIDTH = 1
 LONG_CACHE_TTL = 60 * 60
 SHORT_CACHE_TTL = 60 * 15
 
-ICON_S = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAGCAYAAAAL+1RLAAAAAXNSR0IArs4c6QAAAClJREFUGFdjZICC/////2dkZGQEccEECBAWBKmAqYbRYO3IEiBzsZoJABkvGANjBbRdAAAAAElFTkSuQmCC")
-ICON_SW = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAACpJREFUGFdjZEAD/////88IJhgZGUFyMDZcEFkSLAhSBVMNZsMEYUaDJAFiBBwCWd8MxQAAAABJRU5ErkJggg==")
-ICON_W = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAAXNSR0IArs4c6QAAACVJREFUGFdjZICC/////2dkZGSE8cEMkCCIRpGACcJUEtaByw4ASr0UAvY3+sgAAAAASUVORK5CYII=")
-ICON_NW = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAAClJREFUGFdj/P///38GJMAIAjBBEBsmBxaEScIk4IIgVTAFcC0wrSAJALtFHAJ+HdxnAAAAAElFTkSuQmCC")
-ICON_N = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAGCAYAAAAL+1RLAAAAAXNSR0IArs4c6QAAACpJREFUGFdjZICC/////2dkZGQEccEESAAmCZJgRBaAS+DUDjMCxUx0QQAY2xgDTjk8gQAAAABJRU5ErkJggg==")
-ICON_NE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAACtJREFUGFdNjEEKAAAIwtz/H20YGHWxlook2Xa0wz/6PBgAsNp4wO11/JoBWA8b9g+V3gQAAAAASUVORK5CYII=""")
-ICON_E = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAAXNSR0IArs4c6QAAACdJREFUGFdjZEAC/////8/IyMgIEgITMACSAAuCAIyDrAC/Dlx2AADqrhQC9wOdGgAAAABJRU5ErkJggg==")
-ICON_SE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAACdJREFUGFdj/P///39GRkZGBiQA5iBLgNkwBTAJFEGYDhAN145sJgABbhv21OuJ2wAAAABJRU5ErkJggg==")
 ICONS_AND_DIRECTIONS = [
     (ICON_S, 0),
     (ICON_SW, 45),

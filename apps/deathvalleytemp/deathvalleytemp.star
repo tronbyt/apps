@@ -8,25 +8,22 @@ Thanks: Dubhouze-Tāvis/tavdog for general help and FtoC, Chad Milburn for dark 
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/img_celcius.png", IMG_CELCIUS_ASSET = "file")
+load("images/img_celcius_white.png", IMG_CELCIUS_WHITE_ASSET = "file")
+load("images/img_fahrenheit.png", IMG_FAHRENHEIT_ASSET = "file")
+load("images/img_fahrenheit_white.png", IMG_FAHRENHEIT_WHITE_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
+IMG_CELCIUS = IMG_CELCIUS_ASSET.readall()
+IMG_CELCIUS_WHITE = IMG_CELCIUS_WHITE_ASSET.readall()
+IMG_FAHRENHEIT = IMG_FAHRENHEIT_ASSET.readall()
+IMG_FAHRENHEIT_WHITE = IMG_FAHRENHEIT_WHITE_ASSET.readall()
+
 DEFAULT_DARK_MODE = False
 CACHE_TTL_SECONDS = 1799  #half hour
 WEATHER_URL = "https://api.weather.gov/gridpoints/VEF/63,120/forecast/hourly"
-IMG_CELCIUS = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAANCAYAAACdKY9CAAAAAXNSR0IArs4c6QAAAE9JREFUKJGtkVEKACAIQ2d0/yvbRwaZxhJ6EEo4lymYqEWBR5GgJNftoGcdDpFz7XZxe1JgOdDCF9KBv5I6tKqICcoOAba4fUcAIOz/wwwDfZoPEer2YU8AAAAASUVORK5CYII=
-""")
-IMG_CELCIUS_WHITE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAANCAYAAACdKY9CAAAAAXNSR0IArs4c6QAAAFNJREFUKJGtkUkKwEAIBKuD//9y5zQgEzUZSJ1U1HYRgG0DSBKJFacLVrYTAPHosDXbVUOSupEq4mviK+XCv9IpXKdFY8GxQsX4uPyj5Y/3r3a4Ael+O/mTPITQAAAAAElFTkSuQmCC
-""")
-IMG_FAHRENHEIT = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAAEtJREFUKJGVkFEKACAIQ2d4/yvbRwZqhuxBKOG2UnAwr4KMocGG3sKBdg5FlFLVL35PergJ42AV/IjpACCTc7slanixoklAJ1C0f9jIHw8RR0OxxAAAAABJRU5ErkJggg==
-""")
-IMG_FAHRENHEIT_WHITE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAAE9JREFUKJGVkMENwDAIA88V+6/sviKRFKJyL0DYJhGAbQNIEok1pxtWtRMA8XE4zM7UkKTupIr4u7gJOnL66q/O5S9Nl5+p6CoYJ4zo3vACENE7+ZrutVcAAAAASUVORK5CYII=
-""")
 
 def main(config):
     dark_mode = config.bool("dark_mode") if config.bool("dark_mode") != None and config.bool("dark_mode") != "" else DEFAULT_DARK_MODE

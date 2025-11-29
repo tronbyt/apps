@@ -6,28 +6,17 @@ Author: gshipley
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/dollar_icon.png", DOLLAR_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+DOLLAR_ICON = DOLLAR_ICON_ASSET.readall()
 
 STOCK_PRICE_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol="
 DEFAULT_SHARES = 1
 DEFAULT_SYMBOL = "IBM"
-
-DOLLAR_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAA
-Cxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGtSURBVDhPpZPNK4RRFMaf9y1KrCQLG2ZK
-1iLZsrKTslXSZCRF+QOEtWLhY14S5Q9goaymLOxIliwmLCRLH0kKv3PvfTNDkjzT6T33POecue
-fjRvqKFbUrVl6RevWuFmeLdIle1JsKGtepswV8JlhQjWq1hJZDSsguic4Jivi1kaAfWxbZ0JMm
-Na1n9JDAgut0gFM7lindaEuzhJZjhnRNGsZnEZ9TPaovTSKtKUHukU5vCEg04KQc5uN9EztGoe
-YTtByVbzonQ6Ju7jCPVoVsw+/AvzquoBFusgHfEbuGWc127RSJMpCHaA0EPvCd45txnMH7liw2
-huhF9ipqfnO9qEZbxnmAFmY0qgtPAvO1GGJjrtKCnAfKI9Ixtlu+6zTuDnaVUhsD62ExxMbhWI
-m8rvXiRjfB6YxEOa674slKWAmXSFs4fyJmsGOUkFcPpyN8mj0RYDHEWglFpN/NOUWiQXp/xaiK
-dHwfvgvrjieB+VoMsTHtKGDKuiVJ0eq2cJh/sEWrR4a4iW2ph/fNhljw0yKtMgGTcnxbJMM/Vv
-nnx2RzTsf762Mqx5+es/QBsMaX7pbQA0YAAAAASUVORK5CYII=
-""")
 
 def main(config):
     price_cached = cache.get("price")

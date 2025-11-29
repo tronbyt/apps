@@ -6,25 +6,17 @@ Author: Nicole Brooks
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/error_img.png", ERROR_IMG_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 
+ERROR_IMG = ERROR_IMG_ASSET.readall()
+
 DEFAULT_SUBREDDITS = ["blackcats", "aww", "eyebleach", "itookapicture", "cats", "pic", "otters", "plants"]
 APPROVED_FILETYPES = [".png", ".jpg", ".jpeg", ".bmp"]
-
-ERROR_IMG = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAACMAAAAjCAYAAAAe2bNZAAAAAXNSR0IArs4c6QAAAXJJREFUWEftlz1OAzEQhe1V
-+tCQnoarUADHgQJqUoTjAAVXoaEPDemjNZpEI00Wz4+fttiVkjLOe/k8nhmPc5rQJ0+IJc0D5vZy+dTl/KJFri/l
-+eNnt5briEbqq5Fh0+uuqKf41eckgRDN0LwKc7+6KAxy1f3n+e6P3xHQ2/b34IFommBqIGxAQDWYFk0Y5mahHxGb
-fO5PI9OqOcPICMhohiJzt1o+5JQ3VtjJtKTy+L7dvZIpognBcHV4MFxJbEoV1apx+8wZJiX9bkJCjmhCx2Ql5DB5
-2RDRhGCsvLHKU4uOpWEgc4RAjBHN/GBqOaDli5U3niYUGTka0G08vKm1YYfHiRYNebljp5xThjOMB8PrctTQNPOD
-4bzhHcnLUdsloglFxgrr2GtuziC7RDRuZCZV2kg3RTShPoMYI5owDL2f5PPDa3yy4fGfeJoQDOeMfFlSA7PKG9GE
-YOhHSGUgGreaxu4jnp/bZzyDMdcnBfMH+p/AM/kQywMAAAAASUVORK5CYII=
-""")
 
 def main(config):
     # Build full sub list based on user options.

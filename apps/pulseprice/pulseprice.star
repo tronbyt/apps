@@ -6,40 +6,16 @@ Author: kmphua
 Thanks: aschober, bretep, codeakk, Poseidon
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/inc_icon_sm.png", INC_ICON_SM_ASSET = "file")
+load("images/pls_icon_sm.png", PLS_ICON_SM_ASSET = "file")
+load("images/plsx_icon_sm.png", PLSX_ICON_SM_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 
-PLS_ICON_SM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAkAAAAICAYAAAArzdW1AAAACXBIWXMAAAWJAAAF
-iQFtaJ36AAABC0lEQVQYlT3Ku07CUACA4b/0ioA9saE5MSTA4mQURyZ8CQcfwUkX
-Z+oLGB/AgcfQURdXXVwcLAmBg6GxEi5p0R4HE4dv+wytNbVLokWDPrvwr8oX0NJ1
-UnN8G7WqSwalFd48Y1isEayBAo8K5ajGnXX0sbmRyvalAqlI4xaMEpokQMK5kTCw
-9itLEeTOQxA7HaksIRVp/JfT2QyYcWztueNeYNcJ7M1LkLkifHWQqiSk4jBW8N7m
-2ewbbtszfzo7Xii3TC3KZnFfXdPzRya1uUFtwalRGNsic7tx7nT93Omysg6Gk9xp
-TnKHSeZeneV2hNYaDRffZkOvyic69a/1NHzSb+E0fhSfQmvNL6VjbO/VkT3+AAAA
-AElFTkSuQmCC
-""")
-PLSX_ICON_SM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAYAAAAPU20uAAAACXBIWXMAAAWJAAAF
-iQFtaJ36AAABLklEQVQYlT3KTSiDAQAG4Hd8tljL/qSV5KeWvoxYc6CViIOQ5mYO
-kiaHTbIkcpCi2VKUA2scNKJxctFSDg67TVlJS+SgNdKW2k/bvteJ69Mj2xocawEg
-e9HrX/1Bfw4ADNH1zUSHeln9lmnFU21jgJBLD3XGPZIwH7hNoKcgK26nu71uORZt
-kzX5clWSUBW8Q6OdlV9r9+AGG+5WnCRR5rs8+QyLptWSrCJza9cNZ3VSjyKdixqv
-s/sAIADAqbk98GjS5MPjWh9QKIpXpdkb744EACAJktDGXUegi/VR56HDPqP9c5BE
-W3DeCjpKQmbu46K/zxMzdB3/h4GlBUGRmo6BU7SEHBM/cjFOiNJur81KEsLzSM6c
-r86GlMkqnyaiPDs3N0cs799NYiKVBoBfQPqMHBohfUwAAAAASUVORK5CYII=
-""")
-INC_ICON_SM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAABEUlEQVQY012QP0vD
-UBRHz315AUswwTgIUnBQnDI42LkiQgVdi1+g0NFNipMO0gpuTiq4tF9AqIs42EEQ
-rFvBQQSRrqJRh/xB6/AaAl74LZfDGY6Q3ehoE6xl0JgpgD5S7wKIgfaKYA/A9nJQ
-AyoECZD6UBld2qzhO9esUUGzjo4iapyw6MBP0xhH22Wwb0Dzzu7nA0/uNC4+LnO0
-x2ZZURC3IAZizug6s/hvSyxwwEWY/SFtKUiACIjY4c5ymJjq8/hxyouXgwkK0kZu
-LH/N4KtJCt4hATkYNxTS7kHSWcX53aJSuOI2eeb1u8R8bKCog+z3xnmqRZABqH95
-7BB0gBwPJQ9e3QBKJnQGWvfI+SXAH33pUizRrvIoAAAAAElFTkSuQmCC
-""")
+INC_ICON_SM = INC_ICON_SM_ASSET.readall()
+PLSX_ICON_SM = PLSX_ICON_SM_ASSET.readall()
+PLS_ICON_SM = PLS_ICON_SM_ASSET.readall()
 
 NO_DATA = "---------- "
 

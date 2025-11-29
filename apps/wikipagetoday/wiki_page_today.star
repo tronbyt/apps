@@ -5,15 +5,17 @@ Description: Display Wikipedia's Featured Article of the Day in a Tidbyt format.
 Author: UnBurn
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/wikipedia_icon.png", WIKIPEDIA_ICON_ASSET = "file")
+load("images/wikipedia_thumbnail.png", WIKIPEDIA_THUMBNAIL_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+WIKIPEDIA_ICON = WIKIPEDIA_ICON_ASSET.readall()
+WIKIPEDIA_THUMBNAIL = WIKIPEDIA_THUMBNAIL_ASSET.readall()
+
 WIKIPEDIA_URL = "https://api.wikimedia.org/feed/v1/wikipedia/%s/featured/%s"
-WIKIPEDIA_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAYAAAAPDoR2AAAALUlEQVQIW2NkAIL/QACikQEjCIAkgBRIAVwOxkeRhAtCFROWBJmHrgsshs9BAO7FNfeFAdnIAAAAAElFTkSuQmCC")
-WIKIPEDIA_THUMBNAIL = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAM6SURBVFhH7ZfLK7RxFMd/80xvhIUklyiSWIh6SbmEjbKgpkRZKclrIyv8A1aYjetMk4WFWVJko9hY0ZRZoCgLJAkb5JLb9/2d85x554m5WbwzG5966jnfM/Oc7+/8Ls+MIgAYHx8fffra1deLjv8L9Gyp0adDw1rcy5+II1LTsJEbm83mYTdxRhv4QwZ2tYHfosUVbcBve9H80ogWV141NpoPiROCuRITyI+BL2vA6XSq5+dniUwaGhpUU1OT8ng86urqSlSlysvLlcPhUPPz8+ry8lJUpTo7O1VOTo6anp4WxSQ5OVkNDQ1JJJABK36/H729vWSKr9XVVeiHc25vbw91dXWst7S04OTkhPWjoyN0dHRAbyZ4vV7c399DL3Bsb2+jtbUVeptjcHAQPp+PP2/liwHi9vYW6enp/wxYoYfSA/Py8vD4+MiaPktQWVmJ/v5+jq309PSgvb1doq+ENECMjIywgcbGRlGCNDc3c25mZobjtbU16Pbi7OyM4wA3NzdISUkJOfIAYQ2cn58jKSmJR7uzsyOqyebmJhsoKCiAXi88LdTiz4yPj4ccgJWwBghqHxXSi0oUE2p5TU0N57q7u5GamoqLiwvJmry9vaGoqAjLy8uihCaigYODAxiGAbvdjuPjY1FNVlZW2ABdw8PDogahtVNcXMxGIhHRANHW1sZFBgYGRDF5f3+H3oacW1xcFDUI7ZKpqSmJwhPVwNbWFhdJS0vD9fW1qCa1tbWcq6ioYEMBDg8PkZGRgbu7O1HCE9WAdb5HR0dFBdbX15GVlYWSkhLOWeeaFmSoaQlFVAPE0tISF8nOzua9T6b06YiJiQksLCxwrqqqinUadWZmJk5PT+XbkYnJALU3MFJ9HGNjYwO5ubl4eHiA/jmBwsJCztF5MDc3h66uLvlmdGIyQLjdbi5SWlqK+vp6TE5OSgaYnZ3lXHV1NcrKyvi0jJWYDVDr9QuGC+Xn5+Pp6UkyZo46Qjky9x1iNkDQIqQiLpdLlCB06lGO1st3+JYBesuNjY3xm+4z1BGaCut2jIWf34SGbsCr3Mcdqk0d2DfDhLBPBlzmfUJwURsS+ueUbdCNFhLw91ypvxbdg++ANBC+AAAAAElFTkSuQmCC")
 
 TTL_TIME = 86400
 MARQUEE_DELAY = 150

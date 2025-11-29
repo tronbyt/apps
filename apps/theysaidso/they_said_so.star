@@ -30,12 +30,16 @@ Author: Henry So, Jr.
 # Note: this app uses theysaidso.com's public RSS feed (via feedburner)
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/lquote.png", LQUOTE_ASSET = "file")
+load("images/rquote.png", RQUOTE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
+
+LQUOTE = LQUOTE_ASSET.readall()
+RQUOTE = RQUOTE_ASSET.readall()
 
 URL = "http://feeds.feedburner.com/theysaidso/qod"
 
@@ -196,14 +200,3 @@ def get_schema():
             ),
         ],
     )
-
-LQUOTE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABYAAAATAgMAAADpFxUbAAAACVBMVEUAAAAAAAD///+D3c/SAAAA
-AXRSTlMAQObYZgAAADlJREFUCNeVybENADAIA8GnSE/DPh4hjfdfJZA+RbDkkwzGZnc8JayhrNrM
-q+ew4wUUZLO494kokQelgwyOl8+GjgAAAABJRU5ErkJggg==
-""")
-RQUOTE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABYAAAATAgMAAADpFxUbAAAACVBMVEUAAAAAAAD///+D3c/SAAAA
-AXRSTlMAQObYZgAAADpJREFUCNeVyaERADEQQtFv8DHbDyUgsv23kk38iQPxZgBTZgHi5SdGHnqr
-9xdRZ3C1F6HCZbbpXMoB+pgMpp7gufIAAAAASUVORK5CYII=
-""")

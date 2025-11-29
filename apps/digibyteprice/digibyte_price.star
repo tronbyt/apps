@@ -7,21 +7,17 @@ Thanks: drudge, inxi, whyamihere, Amillion Air
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/dgb_icon.png", DGB_ICON_ASSET = "file")
+load("images/sats_symbol.png", SATS_SYMBOL_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
+DGB_ICON = DGB_ICON_ASSET.readall()
+SATS_SYMBOL = SATS_SYMBOL_ASSET.readall()
+
 print("----------------------------------------------------------------------------------------")
-
-DGB_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAdVJREFUOE9dVFtSw0AMk4HhLNn0iyPRtB/ciBmSnomfNuUqDMSMLG+yIR+ZPNayJD8MvAwwB5wPee8Gd7gDZvA4wjswTw+2nVcsfxGiosRBAcQjMepj5mM2g5vjTsAmdn0prwvzZwoBrVdmDdpBgSzEf74QsDKCowwEMljIEZOIg+E2OvqT4ToCh1OghAGU2wAB3dFJOILnUdQpoTLfmKRtAPozSenM12R0wdANv/yE6ygq/LplTXY7HjKYYJR4vzyYlSMVRclUodTuFsXJq/ovmQ1h9IOKZfQmiqt7glGipzpDGTwrKHCChdVO7xhnsHJcZH/+YARNrW7zV8nDZBu9RAsCR0ABtRpNKVndK+lLflQpPY3327SXXIasPT1ilRRo+Hxf8PxkYB0Y2J8kt9p4m7JZ3VHOapfI31Ha2uk0k3Eyn72jGogq//EDGR6GzcMcEdDMVA/MH3Us1ISkSnPXLkUaHDOohFF+HoiudkfQroZoDmQkQ5xyBZ6jqBo5xyQaUhe9ksliQYPqNvj+WfDy9rh1Vc6PuQXIbtY69lP4Ki/YO2TYZ1UqwShCrhUmupPNukaaZRENGobWdmjCcmcxMvbSvwWxf2UruAa5XUytHy1AXWx/2vAhVoi8DZsAAAAASUVORK5CYII=
-""")
-
-SATS_SYMBOL = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAYAAAAHCAYAAAArkDztAAAAAXNSR0IArs4c6QAAAEJJREFUGFddjsENADEIwxL2nxlXQFv1zq8IxYC1SSAcluiJATr7VCQXM5nWiyH51Eu+htlSLZg8N37Ea5Dg+sq0tAAQLh4KW15wlwAAAABJRU5ErkJggg==
-""")
 
 #this list contains the currently supported fiat currencies
 MAIN_CURRENCY_LIST = {

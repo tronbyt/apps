@@ -7,15 +7,15 @@ Version: 1.1.0
 Date: 2023-12-20 (13.0.11.2.16  3 K’ib’ 4 K’ank’in)
 """
 
-load("encoding/base64.star", "base64")
+load("images/image.png", IMAGE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+IMAGE = IMAGE_ASSET.readall()
+
 DEFAULT_CORRELATION = "584283"
 DEFAULT_TIMEZONE = "America/Merida"  # could have chosen America/Guatemala instead
-
-IMAGE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABQAAAAQCAIAAACZeshMAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADCSURBVDhPY2TABjYXSkNZMODb/xTKQgLYNT+fpAxlwYBk3l0oCwkMHpvhdgoErdjbGwBkOBdv+LAuAiKIZj8TlIYBE0UOCILywQCrIBCgaAZae+b+DwiCCoEBXBAtLFA0w21AswSXOAuUhlkL5QD9bAhlAAGyOFAZ3OcIm5GNR7MBlxTUZjRrgQCXzUAAtxyqGdk8CLgDpUEAUxYCQJoxrQUCPDYDAcRykGasBhNlM1ZrgQC/zUAA1MiCy1TCNjMwAACNWFpLrbT+OAAAAABJRU5ErkJggg==""")
 
 def main(config):
     timezone = time.tz()

@@ -42,13 +42,15 @@ Author: Chris Silverberg (csilv)
 
 load("animation.star", "animation")
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/icon.png", ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ICON = ICON_ASSET.readall()
 
 BASE_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
 
@@ -71,12 +73,6 @@ DEFAULT_LOCATION = """
 DEFAULT_MAGNITUDE = "3"
 DEFAULT_RADIUS = "0"
 DEFAULT_DAYS = "30"
-
-ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAICAYAAADA+m62AAAAAXNSR0IArs4c6QAAAD1JREFUKFNjZM
-AC/jMw/GdkYGBElkLhgCRAikA0XoUwk/CaiCyJVSE2q9A1QZ2C6RtsTsDwDC4P4VSI7msAgYEaB3C6
-FRsAAAAASUVORK5CYIIA
-""")
 
 def main(config):
     # Get latitude and longitude from location.

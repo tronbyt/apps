@@ -7,11 +7,14 @@ Author: hx009
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/smb3_colon_img.png", SMB3_COLON_IMG_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+SMB3_COLON_IMG = SMB3_COLON_IMG_ASSET.readall()
 
 FRAME_HEIGHT = 32
 FRAME_WIDTH = 64
@@ -528,7 +531,6 @@ SMB3_NUMBER_IMGS = [
     """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAHCAYAAAA1WQxeAAAAAXNSR0IArs4c6QAAACpJREFUGFdjZICA/1AanWJkhEn+/4+qhhEsxcAAVgCThAki8+lkAl5fAABLphwD4rXoBgAAAABJRU5ErkJggg==""",
     """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAHCAYAAAA1WQxeAAAAAXNSR0IArs4c6QAAADhJREFUGFd9T0EKADAI0v8/2oGb0Bqri6QmRuzRwQ5kROn20BJgQ8SQdf8m+Jp0wtOhJ9gwdRi/WCyrGQO85BJQAAAAAElFTkSuQmCC""",
 ]
-SMB3_COLON_IMG = """iVBORw0KGgoAAAANSUhEUgAAAAUAAAAHCAYAAADAp4fuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAiSURBVBhXY8AGGKH0fygNAoxMUAbD//8IcQpVQmlkwMAAAKEdCQKWHfAeAAAAAElFTkSuQmCC"""
 
 def main(config):
     """App entry point
@@ -641,7 +643,7 @@ def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_l
     seperator = render.Box(
         width = 5,
         height = 7,
-        child = render.Image(src = base64.decode(SMB3_COLON_IMG)),
+        child = render.Image(src = SMB3_COLON_IMG),
     )
 
     if selected_game == int(GAME_LIST["Contra"]):

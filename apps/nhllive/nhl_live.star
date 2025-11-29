@@ -6,14 +6,16 @@ Author: Reed Arneson
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/nhl_logo.png", NHL_LOGO_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+NHL_LOGO = NHL_LOGO_ASSET.readall()
 
 APP_VERSION = "2.3.0"
 
@@ -42,23 +44,6 @@ CACHE_SHUFFLETEAMS_SECONDS = 3600
 
 BASE_API_URL = "https://api-web.nhle.com"
 BASE_IMAGE_URL = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/{}.png&scale=crop&cquality=40&location=origin&w=80&h=80"
-
-NHL_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAATCAYAAACZZ43PAAAAAXNSR0IArs4c6QAABCdJREFUOE9jZIACAQEBBQMjo4AD+/ZNgImpamj4yElLf9y7d
-+9hmJiLu3vBmZMnN3z48OEBSIwRJhESEpJibG4RxM/Nda+qqmpNWGSkyveff6JsLUwZPnz4sKytre12eHRsKC8vr9KLJ4/WLVmyZA7cAJDtFZU1M2
-bNnqkmJSX5UUlR8cejR48ZhYSERJlZWBj+/v71hpOL69/ly5d5ONjZmVNSUx+VlZZmgFzBGBMT06enp2e2YuUqDk8fP+NvX748YGNjVZCXl2OYMmn
-iLZAtlZVVap8+fWLwDwhguHHjBkNzU+NZb1/fT7t27bnAWF1dXbNj1+7wkPBIna7Wpg8MDAwCMG/BaGVlld/tHR0MmRnpN96+fSu7es1agdramgvi
-UjJrGQUEBAwsrW0namtr282dPRNdL4O/vz+Dq6vbtcmTJ72/efOmNUhBS0srw5Zt2w8dP3o4HhyINnaOB9LSUuzzc3NQDAApvHbj+pETx479bmpuk
-Y6JjlIDKZg3fwHDrFmzD27ftsUBbICtg+OBvNxc+7SUZLABPDw87yZNniI0deqUA2fPnHGYNGnyRZD43LlzXr1//0GkobHRcOOG9QcXLFjgAPaCgb
-FJn7+vj0FTY6Ogqqrq6+KS0n8F+Xkf5sydx9jc1Pg6OzuHB2TAipUrfmhraQm4uXuoL1wwf//mzZuLGKura2s2b9kUrKenJygmJsYvKyt7va+3l83
-S2vqLr7ePwPHjxz5aWlrxV1VV8vb3TxSZPGXSLUkJCR4mZuYPf/4xbGJsb2/vOHX6tEd2do7+rJkz96tpqLPu2bWLUU5B4Q/IgLy8XH19fYML+QUF
-BjnZWbe+ffumJiAg8NDB0en3+0+fFzJOmz59wamTJ3UOHDjA/PHjR4MlS5fdUlJSkqhvqD//6MEDZikpKV7/gEC9gvy8j8hRHBkdw/D81et5jLNmz
-albsGCex6tXr+Tevn0rDQqwzVu3fLh3587/pORkyWNHj7Jt3bpVETl6REREbqqoabDz8guuZOzs7Ezcvn17WGBQsH1DfR1nTk7O0Xnz5olPnjJVob
-am+v6zZ89U0RNHbGLy17OnTx3k4+PfDYoFgdLS0t5jx45rKyjIi1+8ePFlcUmpeUpy0qd///7xoWv2CQh8cfP69YfaOroP1q9ZlQFOB87OzrbOLi7
-ZC+bPl66trbMBpfujR4/c37t3L+e/f//+6+kbPtfR01P5/fcf375d23f7+gf83LtrZ9e5c+cOw7NzcHCwnq6eQdHxU6cUP394JywhIcklISmp+PPX
-L4bXr17e//L58zcJcck3hkZGD/YeOtC3Y9OmSyjlAVLBYmBgZGrCy8erx8bOYWRubMDAysp65MqVK3fWrl175sOHDxeQvQV3AUYuYmBgMDc3j5CSk
-mJYv379CmzyIDEA/Aa7ZTTsFScAAAAASUVORK5CYII=
-""")
 
 # Some teams have abbr_fix due to inconsistent pattern by logo scrape source
 TEAMS_LIST = {

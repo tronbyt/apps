@@ -6,21 +6,17 @@ Author: Kyle Bolstad
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-CHECKMARK = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAFCAYAAACJmvbYAAAAAXNSR0IArs4c6QAAAERlW
-ElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAA
-AAB6ADAAQAAAABAAAABQAAAACrlow2AAAAIklEQVQIHWNgwAHknoX9xyoFl4AzoMrQ+Qw
-wARiNYRw2CQBc5RBwfuwjGAAAAABJRU5ErkJggg==
-""")
+CHECKMARK = CHECKMARK_ASSET.readall()
+
 CHECKMARK_RIGHT_PADDING = 9
 
 COURIER_ID_UNKNOWN = -1

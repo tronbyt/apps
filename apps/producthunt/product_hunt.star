@@ -6,18 +6,14 @@ Author: Daniel Sitnik
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/ph_logo.png", PH_LOGO_ASSET = "file")
+load("images/upvote_icon.png", UPVOTE_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-UPVOTE_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAAAXNSR0IArs4c6QAAAC9JREFUGFd9ykEKADAIxEDz/0evtFCxi5hjGMKSJAD/3zjoAccFO5rwhRNyzIY6TswcFAbAvxbgAAAAAElFTkSuQmCC
-""")
-
-PH_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAACUElEQVR4nL2WPWsUURSG3xsXBC2yhdipk1+QTW3h5B8o7IpdslFBiKCFWI+lsbEJCBInVkpWcC20UXC2sFHIboqAVk4sxWJTKAhZbt4zH8lkdu7s1yQPnDvnDgwP98y5d0ZhCPTtWgU9vQCNCqdlRoUhdBhdKHg4pd6p5w2Z55Ir1PXrCxwdhoWhUD7DUe7GSxhQjD70nRsW/u+5TG2Mh4fTpbp69tpHij6hvlW10cNbpmXGJHRRUvPpMh8RRrLPTIujpOaS0gNhVMY20zKjSLos71xc3kNhvSors3E8eMp9M89rKNRLtUVo7TLN5kWDQw6bX4FPH4Dv25wYmJq6ptY2mqGwXvvJ0YKJQcKYtVXgi4dslK/cxowKNvWebvOOmaTwxzaHBBcs4MxZHPBwGfjzm0kG0kBc3VOu7h6nZpLCpRqHFDeXgcs2Aj6+B16tIxOFRxRWPQBXGGYGCc+dB1ZWmRCpwGMHBloibDOpMMwMEl60AOcJAvKFHRFqJvnkCWV1dx9QOsMJkXJKWQ2MLszj39+waeRqgMJah00zy9zMMEKRrDjALx9m1BaFIzaNvKM0m9/C/SfSfKRpCtgWwxJsi1E3/iRC2fi88Gir+gAuMbIpRrjDA9wKhaMc3uMKk4e3wFV6GNQ849Pi6myQQ2H4Ae4wnWYUyS4/wJW+D7Bwor8YMZG0yXSaMQm7lNlJmdAnFKLyrmP8d9piGRfjMibJFMZE3esgb8scZYfdeF+6kXkmucKY4HDo6av81bf5SJl3ZhGgtpjHv/rNdPmy2AeKXO+vf7/W8gAAAABJRU5ErkJggg==
-""")
+PH_LOGO = PH_LOGO_ASSET.readall()
+UPVOTE_ICON = UPVOTE_ICON_ASSET.readall()
 
 DEFAULT_DISPLAY = "top1"
 

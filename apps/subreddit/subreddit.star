@@ -6,12 +6,14 @@ Author: Petros Fytilis
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/reddit_icon.png", REDDIT_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+REDDIT_ICON = REDDIT_ICON_ASSET.readall()
 
 SCREEN_WIDTH = 64
 STATUS_OK = 200
@@ -31,25 +33,6 @@ DEFAULT_LOCATION = """
 """
 
 REDDIT_API_URL_TEMPLATE = "https://www.reddit.com/r/{}/hot.json?limit=1"
-
-REDDIT_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv
-8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAMXSURBVEhLpVVLSJRRGP2nzEdBT9/GWCQaOaRoOfbwMT
-4WalhtCixQsxaJRBD0UFpEUBblQiOK2gQpLQxdlFDRohJcRNGiRYsei1pJRS96gHA65793xn/G0UV9c
-OD+3//d839z7vnuOAzMjvmozlqGEwXp6A9kuDjOtXJ6F39PBHGSScm4HcwFGlcBNZlAyIOKFcxluO+G
-y/xwfPNm7jeITuzNy+ImklZzcyVRRbIwypcAuzcCRQnAOgcoJA5UoSUtKYrDYvrhXAk7rCdBLKGwNZU
-dZyMSf34Db1+Z9fdJnPGneEkFs3A7nY1U2LAIuHYWGBwActhpRTrw5aMhVhQ7aFmTGUNMTd2fH0uq5/
-KlQEkK4CfZ189AnZ8fWWjy1Wxm6BKwIwBsXu5yOInJ08QjOihpuonFRQtMd8Jakh1sAm70AXcGTWd9x
-4BDO4HAPGC9R+sg9SeHDt0S82UTtQ0uBlorgaePgPNHgJMdhmiuuN7Lun3AsydA13bTjLqWFWvoSYSo
-VxmJ/zca8ihhKkLyeTcNj6o0o128uDtkF54Yu2UXMbG/nu4xA+VcKaKFpK+0vdlvK2yc7gTSqd/RPTb
-BuHzK5DpqbcLG4zGjNbkGOKEk5smKWKfaXGirbDwfpyPomPF7NsF4/dK4JPaXdDWbc+J0usQ9kkKj6g
-5Ajq36h2gP0VU6r0xIXqc2mw+6D+RbWefDO1tpo/cw8P6NfWD8+AZ0t9kHT8ia8j25ZAhjt/BwbNEFs
-9JW2ngxQakolzYGfEApZbg/bF/a2FVqZkActK443QEZDdIR0lldy+i6Ez5N2l1zxNSUmTr5V3vJoWGz
-A+LAl8QuvCOtzvPZYec24OGoGeVw/PoJTDwwTilgjXQNj38Dr1FeDxFioT2fB1dnC8KFuiaLE42NJIW
-gc5A15QBvLS+wVnKE+SLEwsXS1dHkMxAnb0kvcK+Xi4h6QHsBO5cs0nzWDxB6p5pGP9qiOw1jRoKaJ5
-sD1QfCf00iEbRWrikXI/xr0vnE4yDiJi0SUEef9+Sn4WpxDjT+Wsv7js+11Cxw8Bdaz42o7/df2gAAA
-ABJRU5ErkJggg==
-""")
 
 def main(config):
     location = config.get("location", DEFAULT_LOCATION)

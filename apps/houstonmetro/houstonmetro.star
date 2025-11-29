@@ -1,14 +1,13 @@
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/metro_icon.png", METRO_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+METRO_ICON = METRO_ICON_ASSET.readall()
+
 DEFAULT_STOP = "Ho414_4620_12308"
 SUBSCRIPTION_KEY = "da271ffa89c74196b9c9e64efae57100"
-METRO_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABUAAAAMCAYAAACNzvbFAAAAAXNSR0IArs4c6QAAAE5JREFUOE9jZKABYCRkpm/u5//Y1CxYb4hVq/CTO4x4DSXHQJBNOA0l10CchlJiIF6XEgprfPIY3qfUlRgupYaBtPc+tVwJdyk1DaSZ9wEBvjANhhbdqgAAAABJRU5ErkJggg==
-""")
 
 ROUTE_INFO_CACHE_KEY = "routeinfo"
 ROUTE_INFO_CACHE_TTL = 604800  #1 Week

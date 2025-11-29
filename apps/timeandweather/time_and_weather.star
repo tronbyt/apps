@@ -8,10 +8,21 @@ Author: sudeepban
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/cloud_icon.png", CLOUD_ICON_ASSET = "file")
+load("images/colon.png", COLON_ASSET = "file")
+load("images/droplets_icon.png", DROPLETS_ICON_ASSET = "file")
+load("images/eyeglasses_icon.png", EYEGLASSES_ICON_ASSET = "file")
+load("images/raindrop_icon.png", RAINDROP_ICON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+CLOUD_ICON = CLOUD_ICON_ASSET.readall()
+COLON = COLON_ASSET.readall()
+DROPLETS_ICON = DROPLETS_ICON_ASSET.readall()
+EYEGLASSES_ICON = EYEGLASSES_ICON_ASSET.readall()
+RAINDROP_ICON = RAINDROP_ICON_ASSET.readall()
 
 # Default location
 DEFAULT_LOCATION = """
@@ -115,25 +126,7 @@ iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAANElEQVQYV2NkwAMYQXIzb776n64uBmYj
 """,
 }
 
-RAINDROP_ICON = """
-iVBORw0KGgoAAAANSUhEUgAAAA4AAAASCAYAAABrXO8xAAAAzUlEQVR42mJgIBMw4pJYd+1jAZCyB+LEIC3+D+jyLDg0JQCpfihXAIgd0dUwYdGkgKQJBByAYg0ENQLBfKgtyKAeqNkAp0aovxxweHs+Vo1QJ9bjCUgDZCcj21iPxYnoIB+oWQCuEWpbAhHRB9JUgGxjPglxn4+s0YEEjQJAFzrANBqQmuRgGh+Qq/EACXo+ANPuAZjGRhI0LoDbCDQB5NREIjRdgFkCTwBAzQugmj/g0LQBlEtgWYwRS+4ARXIAECvA/ATSBHUVHAAEGADlNDsN6Dca6wAAAABJRU5ErkJggg==
-"""
-
-DROPLETS_ICON = """
-iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABEUlEQVR42qxTwRGCMBAExgJSgnbAzy90ECuQDsSfP3n6xAosAe0An760BEqgA91zLszNGRAcd2YnXmL2LrdHEPwJoW/zcHvOsdzB424ZFmOEop79PWjADYtOF+KLGYdvsV8r0hczkSQGK9CMEYpVbMTzTqDl9avQVcUtGt5ArBBJLGLrdY3LpcwNWIEJ/16RGLson0R7CyShNZgpp3I+TJUBlRJxRtD/i+5p3INc9EGKJNwX75i4/kWiGoeE3Blw0etypC1mrEXf7BehbGiy455R8MFIoUYdXqZ+tE6ILD6DNVjCtZI2sdaeJBp1Zz8uPFjMhy3PlQ8tn/f2qAOSUKWpy6wqSbmIaSAXea4+8BJgAD0vWg0EJA+pAAAAAElFTkSuQmCC
-"""
-
-EYEGLASSES_ICON = """
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAOCAYAAAAi2ky3AAABH0lEQVR42oxTwXHCQAw8MxSQVIBdAe4AlxA+focKCBUEKiCpIOTrD+nASQW4A9wB7iBZZfaYRbnMWDOyfL493a4kZ0GsaZoS4Q7e13Xdh4QBY/uGG4Dp4veJAB4RTvAWfubaJ3lAuBBzwnr7JxFsbUzgS/gHvEsQ6rm34vs6bmRC1246gO4qjDCyeYYXVobIqGT8CuMtMq5UWuU2x9gn48IeU1kM1jFQjklvukI5OULualZqjb7/udWAr4x7l0Ttfpo42IvcnAlSkpRdeZMIUgo3V2+UPPDQDpitYFpfbJ3aaHNGm5t3vs8SE/5bz8xl9tKCDF8rnR1Emv1ORZS2gR+d7sABPfCyF4QnYRGYcHntmtCtFDSi/R0wliz8CDAA0rFviB0eAx8AAAAASUVORK5CYII=
-"""
-
-CLOUD_ICON = """
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAOCAYAAAAi2ky3AAAAq0lEQVR42mJgoBJgxCa4atUqByAVD8QKQPwAiBeGhYUdIMkgoCHzgVQCFrWJQMMWEGUQ1CX7ifDJBSB2BBr8ASbAhKYgnsggMQDifmQBJiTXgMLDgYTwVcAwCGgIyIbz6JKEXAXU14DuovVALEBijIPU1wMN60c2SIGCJFSALbDJAqDwhRn0gAJzPgCTwQOYQYEgATINKkRJkNDorychvD5As84GBmoCgAADACo0LGmMFE1wAAAAAElFTkSuQmCC
-"""
-
 # simple colon image to save space when displaying time
-COLON = """
-iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFCAYAAABvsz2cAAAAFUlEQVQYV2NkgALG/////2cEAdwiAMSUCAZY17zuAAAAAElFTkSuQmCC"""
 
 def get_nws_hourly_grid_forecast_url(lat, lon, ttl = 3600):
     res = http.get(NWS_GRID_FORECAST_POINT_URL.format(
@@ -698,12 +691,12 @@ def main(config):
             pad = (0, 1, 0, 0),
         )
         humidity_unit_text = render.Text(content = "%", font = "tom-thumb", color = "#AED6F1")
-        humidity_image = render.Image(width = 5, height = 6, src = base64.decode(RAINDROP_ICON))
+        humidity_image = render.Image(width = 5, height = 6, src = RAINDROP_ICON)
 
     if enabledMetrics["dewPoint"]:
         dew_point_text = render.Text(content = str(result_current_conditions["dew_point"]), font = "tom-thumb", color = "#88D1FF")
         dew_point_unit_text = render.Text(content = "°C" if display_metric else "°F", font = "tom-thumb", color = "#88D1FF")
-        dew_image = render.Image(width = 6, height = 7, src = base64.decode(DROPLETS_ICON))
+        dew_image = render.Image(width = 6, height = 7, src = DROPLETS_ICON)
 
     if enabledMetrics["uvIndex"]:
         uv_index = result_current_conditions["uv_index"]
@@ -736,7 +729,7 @@ def main(config):
             pad = (0, 1, 0, 0),
         )
         visibility_unit_text = render.Text(content = "km" if display_metric else "mi", font = "tom-thumb", color = "#FFF")
-        eye_image = render.Image(src = base64.decode(EYEGLASSES_ICON), width = 7, height = 6)
+        eye_image = render.Image(src = EYEGLASSES_ICON, width = 7, height = 6)
 
     if enabledMetrics["cloudCoverage"]:
         cloud_coverage_text = render.Padding(
@@ -752,7 +745,7 @@ def main(config):
             font = "tom-thumb",
             color = "#FFF",
         )
-        cloud_image = render.Image(width = 8, height = 6, src = base64.decode(CLOUD_ICON))
+        cloud_image = render.Image(width = 8, height = 6, src = CLOUD_ICON)
 
     if enabledMetrics["pressure"]:
         pressure_text = render.Padding(
@@ -791,7 +784,7 @@ def main(config):
                                 render.Row(
                                     children = [
                                         time_hh_text,
-                                        render.Image(width = 2, height = 5, src = base64.decode(COLON)),
+                                        render.Image(width = 2, height = 5, src = COLON),
                                         time_mm_text,
                                         render.Box(width = 1) if time_format == "12 hour" else None,
                                         time_ampm_text if time_format == "12 hour" else None,

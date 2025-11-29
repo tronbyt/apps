@@ -6,18 +6,18 @@ Author: Platt Thompson & Jim Cummings
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/camera_icon.png", CAMERA_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+CAMERA_ICON = CAMERA_ICON_ASSET.readall()
+
 # ---------------------------------------------------------------------------- #
 #                                   CONSTANTS                                  #
 # ---------------------------------------------------------------------------- #
-
-CAMERA_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABUAAAAXCAYAAADk3wSdAAAAAXNSR0IArs4c6QAAAR1JREFUSEtjZGBgYFAwrPsPokEgszoMTJeH6DASkoPpQacZkQ1EN3h66yoMfeiWYjMYq6HqJppgtTfPXMfQA5PbOTsS7JMhbih6ZKB7DznMifE6yDyc4YIrvGDiIMsWrSokPkzRVd6/v43BI7QYLgyLQJChgQ5RcHFeMVMGkBg49j+/Oo3TYSCFIG9jSwmg5NWVX8qw/sAysOEgtSAxuKEgAXQAsowYQ0284hjObFuE3VBkF4MMI9ZQmGOwuhSfoci+gAUFzPtUMRSW22BZFmveh3kTX5jiikls2ZXo2CfZUEIJHZaTsKnD6lJkhcLSnvByFST+9ul2snIciiZkQ0HJ48H5pkFuKCWuxCilYMUcKGLwleyEIhYlzAa1oQARYMFWHZmc4wAAAABJRU5ErkJggg==")
 
 CINEMATHEQUE_SHOWTIMES_URL = "https://www.americancinematheque.com/wp-json/wp/v2/algolia_get_events?environment=production&startDate={start_time}&endDate={end_time}"
 

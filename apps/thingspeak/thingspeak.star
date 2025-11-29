@@ -1,14 +1,13 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/thingspeak_icon.png", THINGSPEAK_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+THINGSPEAK_ICON = THINGSPEAK_ICON_ASSET.readall()
+
 # Load Thingspeak icon from base64 encoded data
-THINGSPEAK_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAY9JREFUOE9VUzFWQkEMnFQ2XgRo7PgWwgUETmEFHoHPQzgBPA7ix2crVEBpI3IZ48skuyzN/r/Z7GQykxURgQIQVSgEvgNULJZ3jInYAX/9YzkWfZh/2F1AFTeAEoCRzUJQgn9Pn8ULAujUW91NKmfCCLH4b7xYJ5UG8LQ64XcxYCZJdGaNfk0qp2mtROUEku9auwr010ecF0OBcxB0agPo2p6Xr4165cSBcUkMCoB23ejeWvDMYEI6IbBDsmMCHHFZDkmHEQfo+mWXvySRJRcDVEF/fcB5MXINbG3NGt2PTYOwlDgO4q6wNxdVgd7qgMtyRH5iCa36XXfjx0wgqCXTsrWuuoYLSYOwkS5YVYOh/Kmd8DRbLOitwgWOntlYN/oXaruCbsT9HfD5UnHb25wc2I3DeT4QtzuSC/PchlCoPW10/1q5cG9GO+vLUU/TRPFjSZiZik2qnVvV8h1Q2Mw3esyzkEY5Hk97ttUfAtxyjbmLiUtnMUyZUcEu8AKmYJA8LkUMIa6a+GDEnPkD/geJa9gfs+euSAAAAABJRU5ErkJggg==
-""")
 
 # Learn more about error codes
 # https://www.mathworks.com/help/thingspeak/error-codes.html

@@ -5,16 +5,18 @@ Description: Show how many days you've been sober from any addiction.
 Author: elliotstoner
 """
 
-load("encoding/base64.star", "base64")
+load("images/comma_10x20.png", COMMA_10X20_ASSET = "file")
+load("images/exclamation_6x13.png", EXCLAMATION_6X13_ASSET = "file")
+load("images/space_6x13.png", SPACE_6X13_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DEFAULT_TIMEZONE = "America/New_York"
+COMMA_10X20 = COMMA_10X20_ASSET.readall()
+EXCLAMATION_6X13 = EXCLAMATION_6X13_ASSET.readall()
+SPACE_6X13 = SPACE_6X13_ASSET.readall()
 
-COMMA_10x20 = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAIAAABvrngfAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAI0lEQVQImWNkYGBgYGD4//8/hMHIyMjEgAEY0ZRAtcCFSAEAVKQL/9I+OiMAAAAASUVORK5CYII=")
-SPACE_6x13 = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAIAAAASFvFNAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAC0lEQVQImWNgwAQAABQAAWX1h1kAAAAASUVORK5CYII=")
-EXCLAMATION_6x13 = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAALCAIAAAAx7HC4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAHElEQVQImWP4//8/EwMDAzbMwMDAwPD//38YEwCc+AYH2051aAAAAABJRU5ErkJggg==")
+DEFAULT_TIMEZONE = "America/New_York"
 
 def get_schema():
     return schema.Schema(
@@ -105,7 +107,7 @@ def format_days(days):
                 font = "10x20",
             ),
             render.Image(
-                src = COMMA_10x20,
+                src = COMMA_10X20,
             ),
             render.Text(
                 content = post_text,
@@ -129,14 +131,14 @@ def get_subtext(addiction, isSingular):
                     font = "6x13",
                 ),
                 render.Image(
-                    src = SPACE_6x13,
+                    src = SPACE_6X13,
                 ),
                 render.Text(
                     content = "Sober",
                     font = "6x13",
                 ),
                 render.Image(
-                    src = EXCLAMATION_6x13,
+                    src = EXCLAMATION_6X13,
                 ),
             ],
         )
@@ -159,21 +161,21 @@ def get_subtext(addiction, isSingular):
                         font = "6x13",
                     ),
                     render.Image(
-                        src = SPACE_6x13,
+                        src = SPACE_6X13,
                     ),
                     render.Text(
                         content = "Without",
                         font = "6x13",
                     ),
                     render.Image(
-                        src = SPACE_6x13,
+                        src = SPACE_6X13,
                     ),
                     render.Text(
                         content = addiction_text,
                         font = "6x13",
                     ),
                     render.Image(
-                        src = EXCLAMATION_6x13,
+                        src = EXCLAMATION_6X13,
                     ),
                 ],
             ),

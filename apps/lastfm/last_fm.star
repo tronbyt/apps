@@ -5,11 +5,13 @@ Description: Show title, artist and album art from most recently scrobbled song 
 Author: Chuck
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/demoicon.jpg", DEMOICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+DEMOICON = DEMOICON_ASSET.readall()
 
 def main(config):
     userName = config.get("lastFmUser") or "badUser"
@@ -119,9 +121,8 @@ def renderIt(now, albumWidget, track):
 
 def demoMode():
     now = time.now()
-    demoIcon = base64.decode("""/9j/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCAAmACYDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDzOAfMB0z69q1sYs29Ngt4NQRgCXHPyyKFBz0rO7MZN2PZrNp5rVXuLc274+4zAkfXHFehCTa1OOUTPl8VaPCZI/tQeSPqApwfx6VnKvBLQuFNydjzvxNqk+t6mZ5JIVhiGyDaNylcnP1Oe9csqjlqzqUVDRHJYcqGKYBUkH1qrmjL2mSHBZgDGGAPQc9Rz1HSokRJHquteJbfTtAiijcTXE9qNpRhhRjGT+v5VtOpaKS6nPGF2eZXWoEWrRQ/MJAN+05Iz1Fc0Y63Z0KFjGE8iYySOOB6CtjSxp6fp0k8oN3I8dtEvzMCDsB9BTcZWbQuaN0n1Oi8nSbR447R4b21ZQrtIG2Ic7vl6E8/l61lq9yrK5ba5gXyp3hggZm8tGK8rwcdOah66Dgkita+GLzVtVS5tYrYuQCyKQy4A5POOetDmkrItRvqzIm0HUvPMn9mxTJjH7lzg+9WpLuQb76OLO7W0tGhuplG6dYyWUAdVJ6fl3qozfK76XM3HXvYr6tabZ1sYSLpfKLv5SsoUbc9x1A/nUrTVlJdiDVbdpbyPS7S7jmEMf2wlQRvCpuAGehKkjnvUp9S7W0Ov8KQLYaq/mzwi3vU2WcxJBn3LuBj/AjOfp1qJaoqKsyqQLW9ls9TljsZ4gPmkdwJR6gqDmi2l0L1LurzReD9Bgs9OVvPuCyidsZHGWb6+g6ClG8ndlNcq0JfAdgq6bLqDndJdOYxnnCqec/U/wAhSm9bDgtLmDpU4k8eLMI1HnXjKw2jleVx+VU17oluanjuzt4o7O4gjWIwN5RVFCgZ+ZSuOmCp/SlTe6HLY1tOFj4z0OCfU7QPLC7IzAlTuHUgjnByDj1qJXpyshr3lqf/2Q==""")
 
-    albumWidget = render.Image(src = demoIcon, height = 32, width = 32)
+    albumWidget = render.Image(src = DEMOICON, height = 32, width = 32)
     track = {}
     track["name"] = "Come Together"
     artist = {}

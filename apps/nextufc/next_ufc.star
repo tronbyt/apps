@@ -5,19 +5,17 @@ Description: Shows next upcoming UFC event with date and time.
 Author: Stephen So
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
+load("images/icon.png", ICON_ASSET = "file")
 load("render.star", "render")
 load("time.star", "time")
+
+ICON = ICON_ASSET.readall()
 
 now = time.now()
 nowyear = now.year
 url = "https://www.espn.com/mma/schedule/_/year/" + str(nowyear)
-
-ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABkAAAAICAYAAAAMY1RdAAAAAXNSR0IArs4c6QAAAWZJREFUOE91Ur1KA0EQ/mYWxIhIUtnZauDujGBpI9gJiuQFfAAbwdZGX0AQH8DCUgj4DPYmFyUvYKEk/hT+oJkZ2WMvXI7zir3dmW+/b+bbIYQvdc6yrZnFqpwyD0C07EMk0oqA7gSTXwr/OZH6J9EVmLdLqexIfukDq+bcXdA4S1QPi4SxCPWZzw3YqiKJVZtTBZgNchwBkon0mLtElGQJkaVr4LHtnORAL1JFXoxNRFQ7sdleMZddLlfdA3bJuU7o7DJR3f/PqqxL4MScO/b4scjGGnA7JWIA9Z3TzDuzi0j1IGX+AtGsj82L1D6AI3PuNGCGBowmXaqu9JhfiajuY1VdU8r8AqJGeOCdCLgpDMFvrDqTMj+AqOkxQ5HaJvBdaZXZc6y6WLbWiwiIOEzWyACXV2Vmb4lqo2xniYTS4ATMxgY85fkf1dY6MPQi7yBaqJya8OC5iKneJ2ZREVu0u8yRW/cHptSvjUBW6vcAAAAASUVORK5CYII=
-""")
 
 def main():
     rep = http.get(url, ttl_seconds = 3600)
