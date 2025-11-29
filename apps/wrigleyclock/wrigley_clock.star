@@ -613,7 +613,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, 14),
-                                                (-.5, 14),
+                                                (-0.5, 14),
                                             ],
                                             width = 32,
                                             height = 32,
@@ -624,7 +624,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, 13),
-                                                (-.5, 13),
+                                                (-0.5, 13),
                                             ],
                                             width = 32,
                                             height = 32,
@@ -635,7 +635,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, -12),
-                                                (-.5, -12),
+                                                (-0.5, -12),
                                             ],
                                             width = 32,
                                             height = 32,
@@ -646,7 +646,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, -11),
-                                                (-.5, -11),
+                                                (-0.5, -11),
                                             ],
                                             width = 32,
                                             height = 32,

@@ -68,7 +68,7 @@ def main(config):
                                                                        color = "#000000",
                                                                    ),
                                                                    render.Padding(
-                                                                       pad = (-2*scale, 0, -2*scale, 0),  # Adjust horizontal padding
+                                                                       pad = (-2 * scale, 0, -2 * scale, 0),  # Adjust horizontal padding
                                                                        child = render.Text(
                                                                            content = ":" if i % 1000 < 500 else " ",
                                                                            font = time_font,

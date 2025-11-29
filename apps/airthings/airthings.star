@@ -109,7 +109,7 @@ def main(config):
         pm25 = samples["data"]["pm25"]
     else:
         pm25 = -1
-    
+
     # Convert temperature based on user preference
     temp_celsius = samples["data"]["temp"]
     if tempUnit == "fahrenheit":
@@ -120,13 +120,14 @@ def main(config):
         temp = temp_celsius
         temp_threshold_yellow = temp_c_yellow
         temp_threshold_red = temp_c_red
-    
+
     voc = samples["data"]["voc"]
     humidity = samples["data"]["humidity"]
-    
+
     # Get radon short term value and convert from Bq/m³ to pCi/L
     if "radonShortTermAvg" in samples["data"]:
         radon_bq = samples["data"]["radonShortTermAvg"]
+
         # Convert Bq/m³ to pCi/L (1 Bq/m³ = 0.027 pCi/L)
         radon = radon_bq * 0.027
     else:
@@ -204,10 +205,10 @@ def main(config):
     else:
         # Round radon to 1 decimal place
         radon = int(radon * 10 + 0.5) / 10
-    
+
     # Round temperature to 1 decimal place
     temp = int(temp * 10 + 0.5) / 10
-    
+
     # Set font based on fontSize option
     if fontSize == "small":
         font = "tom-thumb"
@@ -215,7 +216,7 @@ def main(config):
         font = "6x13"
     else:  # medium
         font = "tb-8"
-    
+
     for (hide, reading, color, displayName) in [
         (hideTemp, temp, temp_color, "Temp"),
         (hideHumidity, humidity, humidity_color, "Humidity"),

@@ -7,7 +7,7 @@ Author: drudge, gabe565
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render", "canvas")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_IMAGE = """
@@ -48,7 +48,7 @@ def render_text_widget(content, width, color = "", font = "", scroll = DEFAULT_S
     )
 
     if scroll == SCROLL_DISABLED:
-      return text
+        return text
 
     offset = width if scroll == SCROLL_TOGETHER else 0
     return render.Marquee(
@@ -173,7 +173,7 @@ def main(config):
             children = [
                 render.Padding(
                     pad = (pad, 2, 0 if show_art else pad, 0),
-                    child = render_text_widget(media_title, 60 * scale, color = get_title_color(app_name), font = font, scroll = scroll)
+                    child = render_text_widget(media_title, 60 * scale, color = get_title_color(app_name), font = font, scroll = scroll),
                 ),
                 render.Padding(
                     pad = (pad, 2, 0 if show_art else pad, 0),
@@ -254,7 +254,7 @@ def get_schema():
                         display = "Disabled",
                         value = SCROLL_DISABLED,
                     ),
-                ]
+                ],
             ),
         ],
     )

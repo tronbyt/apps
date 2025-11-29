@@ -440,6 +440,7 @@ def main(config):
                 cache.set(cache_id, json.encode(filtered_events), ttl_seconds = next_release)
             else:
                 print("No future events found, caching for 1 hour")
+
                 # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set(cache_id, json.encode(filtered_events), ttl_seconds = 3600)
     else:

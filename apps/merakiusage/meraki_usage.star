@@ -99,11 +99,11 @@ def render_increase_number(num, color):
     for i in range(num_frames):
         rendered_value = math.round((increment * i) * 100) / 100
         renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
-        if (i / num_frames) > .75:
+        if (i / num_frames) > 0.75:
             renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
-        if (i / num_frames) > .90:
+        if (i / num_frames) > 0.90:
             renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
-        if (i / num_frames) > .95:
+        if (i / num_frames) > 0.95:
             renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
 
     for i in range(500):

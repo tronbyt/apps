@@ -63,10 +63,10 @@ DUMMY_OVERVIEW = {
                 "siteOverview": {
                     "lastUpdateTime": "2024-10-16 20:00:41",
                     "lifeTimeData": {
-                        "energy": 8.6302544E7,
+                        "energy": 8.6302544e7,
                     },
                     "lastYearData": {
-                        "energy": 1.0232828E7,
+                        "energy": 1.0232828e7,
                     },
                     "lastMonthData": {
                         "energy": 470202.0,

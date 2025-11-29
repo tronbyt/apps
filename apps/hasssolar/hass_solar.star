@@ -11,9 +11,6 @@ load("humanize.star", "humanize")
 load("i18n.star", "tr")
 load("images/audi_logo.png", AUDI_LOGO_24x9 = "file")
 load("images/autarky.png", AUTARKY_16x16 = "file")
-
-# 16x16
-load("images/battery.png", BATTERY = "file")
 load("images/battery_0_25_main_screen.png", BATTERY_0_TO_25_MAIN_SCREEN = "file")
 load("images/battery_25_50_main_screen.png", BATTERY_25_TO_50_MAIN_SCREEN = "file")
 load("images/battery_50_75_main_screen.png", BATTERY_50_TO_75_MAIN_SCREEN = "file")

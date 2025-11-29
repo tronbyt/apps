@@ -6,7 +6,6 @@ Author: Converted from SolarEdge version by ckyr
 """
 
 load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
@@ -95,79 +94,79 @@ def create_summary_frame(title, production, consumption):
 def main(config):
     proxy_url = config.str("proxy_url", "")
     api_key = config.str("api_key", "")
-    
+
     frames = []
-    
+
     # Get energy data from proxy
     if proxy_url and api_key:
         # Clean up the proxy URL
         proxy_url = proxy_url.strip()
         proxy_url = proxy_url.rstrip("/")
-        
+
         # Ensure it has https://
         if not proxy_url.startswith("http://") and not proxy_url.startswith("https://"):
             proxy_url = "https://" + proxy_url
-        
+
         # Build the full URL
         full_url = proxy_url + "/api/solar"
-        
+
         print("Calling:", full_url)
-        
+
         # Call the proxy service
         rep = http.get(
             full_url,
             headers = {"X-API-Key": api_key},
             ttl_seconds = CACHE_TTL,
         )
-        
+
         if rep.status_code != 200:
             return render.Root(render.Box(render.WrappedText("Proxy Error: " + str(rep.status_code), color = RED)))
-        
+
         data = rep.json()
-        
+
         if "error" in data:
             return render.Root(render.Box(render.WrappedText("Error: " + data["error"], color = RED)))
-        
+
         periods = data.get("periods", {})
-        
+
         # Day
         day_data = periods.get("day", {})
         frames.append(create_summary_frame(
             "Energy Today",
             day_data.get("production_wh", 0),
-            day_data.get("consumption_wh", 0)
+            day_data.get("consumption_wh", 0),
         ))
-        
+
         # Week
         week_data = periods.get("week", {})
         frames.append(create_summary_frame(
             "Energy Week",
             week_data.get("production_wh", 0),
-            week_data.get("consumption_wh", 0)
+            week_data.get("consumption_wh", 0),
         ))
-        
+
         # Month
         month_data = periods.get("month", {})
         frames.append(create_summary_frame(
             "Energy Month",
             month_data.get("production_wh", 0),
-            month_data.get("consumption_wh", 0)
+            month_data.get("consumption_wh", 0),
         ))
-        
+
         # Year
         year_data = periods.get("year", {})
         frames.append(create_summary_frame(
             "Energy Year",
             year_data.get("production_wh", 0),
-            year_data.get("consumption_wh", 0)
+            year_data.get("consumption_wh", 0),
         ))
-        
+
         # Lifetime
         lifetime_data = periods.get("lifetime", {})
         frames.append(create_summary_frame(
             "Energy Life",
             lifetime_data.get("production_wh", 0),
-            lifetime_data.get("consumption_wh", 0)
+            lifetime_data.get("consumption_wh", 0),
         ))
     else:
         # Demo data if no credentials
@@ -176,7 +175,7 @@ def main(config):
         frames.append(create_summary_frame("Energy Month", 188460, 94230))
         frames.append(create_summary_frame("Energy Year", 2261520, 1130760))
         frames.append(create_summary_frame("Energy Life", 11307600, 0))
-    
+
     # Return animation with frames
     return render.Root(
         delay = 3000,  # 3 seconds per frame

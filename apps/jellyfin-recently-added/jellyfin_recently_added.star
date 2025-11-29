@@ -94,12 +94,13 @@ def main(config):
     l = len(data["Items"])
     if l < 3:
         n = l
+
     #only show last 3
     for i in range(0, n):
         entry = data["Items"][i]
         id = entry["Id"]
         title = entry["Name"]
-        
+
         if not usingSampleData:
             thumbnail = requestThumb(serverIP, serverPort, apiKey, id)
         else:
@@ -117,7 +118,7 @@ def main(config):
                 ],
             ),
         )
-        if i < l-1:
+        if i < l - 1:
             recentlyAdded.append(
                 render.Box(height = 32, width = 1, color = "#a160c4"),
             )
@@ -138,7 +139,7 @@ def main(config):
                                         cross_align = "center",
                                         expanded = True,
                                         children = [
-                                            render.Image(src = base64.decode(JELLYFIN_ICON), width=16),
+                                            render.Image(src = base64.decode(JELLYFIN_ICON), width = 16),
                                             render.Box(width = 2),
                                             render.WrappedText(titleText, align = "center"),
                                         ],

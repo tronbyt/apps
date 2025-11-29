@@ -156,6 +156,7 @@ def main(config):
                 color = config.str("graph2_color", "#00c"),
                 y_lim = y2_lim,
             )
+
         # Check if feed values are in range - if not, return empty
         feed_value = float(feed["data"][-1][1])
         if not is_in_range(feed_value, feed_value_range):
@@ -166,6 +167,7 @@ def main(config):
             feed2_value = float(feed2["data"][-1][1])
             if not is_in_range(feed2_value, feed2_value_range):
                 return []
+
             # Both feeds in range - show both values
             data_line = render.Row(
                 expanded = True,

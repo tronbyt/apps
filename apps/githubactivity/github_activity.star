@@ -10,7 +10,6 @@ Author: rs7q5
 #Last Modified 20230607 RIS
 
 load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -75,7 +74,7 @@ def main(config):
     #create parts of the final frame (error handling done in each of these)
     chart = contribution_chart(data, config)
     if config.get("fullscreen_chart"):
-        return render.Root(child=chart)
+        return render.Root(child = chart)
     activity_overview = contribution_activity(data)  #get the activity overview
 
     #get stats like total contributions (in last year), open issues/pulls, and followers/following
@@ -151,8 +150,8 @@ def get_schema():
             name = "Fullscreen chart",
             desc = "Make the contributions chart fullscreen",
             icon = "gear",
-            default = False
-        )
+            default = False,
+        ),
     ]
 
 def get_contributions(auth_token):
@@ -253,9 +252,9 @@ def contribution_square_fullscreen(fill, background, isTopBotEdge):
     if isTopBotEdge:
         return render.Box(
             width = x2,
-            height = x1-1,
+            height = x1 - 1,
             color = background,
-            child = render.Box(width = x1, height = x1-1, color = fill),
+            child = render.Box(width = x1, height = x1 - 1, color = fill),
         )
 
     #return render.Padding(child=render.Box(width=x1,height=x1,color=color),pad=1,color=BACKGROUND_COLOR)
@@ -265,7 +264,6 @@ def contribution_square_fullscreen(fill, background, isTopBotEdge):
         color = background,
         child = render.Box(width = x1, height = x1, color = fill),
     )  #don't use padding otherwise have to distinguish between inner and outer edges
-
 
 def contribution_chart(data, config):
     #replicate the contributions chart that is seen on GitHub for the last 13 weeks
@@ -312,16 +310,14 @@ def contribution_chart(data, config):
             top = 1 if j == 0 else 0  #padding to squares along the top edge
             bottom = 1 if j == 6 else 0
             w.append(render.Padding(
-                child = contribution_square_fullscreen(ctmp, background_color, (top or bottom)) 
-                    if fullscreen_chart else 
-                    contribution_square(ctmp, background_color),
+                child = contribution_square_fullscreen(ctmp, background_color, (top or bottom)) if fullscreen_chart else contribution_square(ctmp, background_color),
                 pad = (0, 0, 0, top) if fullscreen_chart else (left, top, 0, 0),
                 color = background_color,
             ))
 
         #add empty squares for days that have not occurred yet
         w.extend([
-            contribution_square_fullscreen(background_color, background_color, (j==6)) if fullscreen_chart else contribution_square(background_color, background_color)
+            contribution_square_fullscreen(background_color, background_color, (j == 6)) if fullscreen_chart else contribution_square(background_color, background_color),
         ] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
 
         cdata2.append(render.Column(children = w))

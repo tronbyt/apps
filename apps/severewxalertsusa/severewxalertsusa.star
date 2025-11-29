@@ -10,7 +10,7 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render", "canvas")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 

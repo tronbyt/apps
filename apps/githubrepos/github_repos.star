@@ -80,7 +80,7 @@ def should_show_jobs(repos, dwell_time):
         print("repo " + repo_name + " has conclusion: " + conclusion + ", status: " + status)
 
         # Show all repos if any repo is not success (including cancelled)
-        if conclusion not in ["success","cancelled"]:
+        if conclusion not in ["success", "cancelled"]:
             print("repo " + repo_name + " is not success, showing all jobs")
             return True
 
@@ -97,7 +97,7 @@ def should_show_jobs(repos, dwell_time):
     print("all repos have old successes, hiding all jobs")
     return False
 
-def get_status_icon(status,conclusion):
+def get_status_icon(status, conclusion):
     """Gets the decoded icon string for a given Workflow Status from github
 
     Args:
@@ -197,7 +197,7 @@ def render_status_badge(status, repos):
                                 font = "tom-thumb",
                             ),
                         ),
-                        render.Image(src = get_status_icon(status,conclusion)),
+                        render.Image(src = get_status_icon(status, conclusion)),
                     ],
                 ),
             )

@@ -486,6 +486,7 @@ def fetch_stations_from_website():
             return result
 
         nj_dv_page_response_body = nj_dv_page_response.body()
+
         # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(DEPARTURES_CACHE_KEY, nj_dv_page_response.body(), DEPARTURES_CACHE_TTL)
 

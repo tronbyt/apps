@@ -15,21 +15,21 @@ TROLLEY_IMAGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACYAAAAMCAYAAAAOCs/+AAAAA
 
 def get_route_15():
     """Get trolley information for Route 15 (G1) using next_stop_id
-    
+
     Returns:
       List of trolley render objects
     """
     trolley_ids = ["2320", "2321", "2322", "2323", "2324", "2325", "2326", "2327", "2328", "2329", "2330", "2331", "2332", "2333", "2334", "2335", "2336", "2337"]
     trolleys_found = []
-    
+
     r = http.get(SEPTA_API, ttl_seconds = 300)
     if r == None or r.status_code != 200:
         return trolleys_found
-    
+
     result = r.json()
     if result == None or result.get("bus") == None:
         return trolleys_found
-    
+
     for i in result.get("bus"):
         id = i.get("VehicleID")
         if id not in trolley_ids:

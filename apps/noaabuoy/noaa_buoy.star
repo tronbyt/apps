@@ -30,7 +30,6 @@ def debug_print(arg):
     if print_debug:
         print(arg)
 
-
 # Extract the value cell text following a label inside the Wave Summary table
 # Looks for: ... <td>LABEL</td><td> VALUE </td>
 def td_value(wave_section, label):
@@ -40,7 +39,7 @@ def td_value(wave_section, label):
     j = wave_section.find("</td><td", i)
     if j == -1:
         return None
-    k = wave_section.find('>', j)
+    k = wave_section.find(">", j)
     if k == -1:
         return None
     l = wave_section.find("</td>", k)
@@ -108,17 +107,17 @@ def fetch_data(buoy_id, last_data):
     # Weather Conditions section - try desktop format first
     weather_start = html.find('<section id="metdata"')
     if weather_start != -1:
-        weather_end = html.find('</section>', weather_start)
+        weather_end = html.find("</section>", weather_start)
         if weather_end != -1:
             weather_section = html[weather_start:weather_end]
 
             # Air Temperature
-            atmp_match = re.findall(r'Air Temperature[^>]*</td><td[^>]*>\s*([0-9.]+)\s*°F', weather_section)
+            atmp_match = re.findall(r"Air Temperature[^>]*</td><td[^>]*>\s*([0-9.]+)\s*°F", weather_section)
             if len(atmp_match) > 0:
                 data["ATMP"] = atmp_match[0]
 
             # Water Temperature
-            wtmp_match = re.findall(r'Water Temperature[^>]*</td><td[^>]*>\s*([0-9.]+)\s*°F', weather_section)
+            wtmp_match = re.findall(r"Water Temperature[^>]*</td><td[^>]*>\s*([0-9.]+)\s*°F", weather_section)
             if len(wtmp_match) > 0:
                 data["WTMP"] = wtmp_match[0]
 
@@ -130,12 +129,11 @@ def fetch_data(buoy_id, last_data):
 
     if wave_start != -1:
         # Found structured table format
-        wave_end = html.find('</section>', wave_start)
+        wave_end = html.find("</section>", wave_start)
         if wave_end != -1:
             wave_summary_found = True
             wave_section = html[wave_start:wave_end]
             debug_print("Found structured wave section, length: " + str(len(wave_section)))
-
 
         # Parse desktop Wave Summary table using label->value td extraction
         # WVHT
@@ -151,6 +149,7 @@ def fetch_data(buoy_id, last_data):
             m = re.match(r"\s*([0-9.]+)\s*ft", cell)
             if len(m) > 0:
                 data["SWH"] = m[0][1]
+
                 # Always use SwH as the swell height shown by this app
                 data["WVHT"] = data["SWH"]
 
@@ -207,7 +206,6 @@ def fetch_data(buoy_id, last_data):
             if len(m) > 0:
                 data["STEEPNESS"] = m[0][1]
 
-
     # Additional data extraction for wind and other metrics from desktop format
     # Parse values directly from the Conditions table using td_value helper
     # Wind Direction (WDIR)
@@ -223,6 +221,7 @@ def fetch_data(buoy_id, last_data):
         m = re.match(r"\s*([0-9.]+)\s*kts", cell)
         if len(m) > 0:
             data["WSPD"] = m[0][1]
+
     # Fallbacks: use 10m or 20m wind speed if base WSPD missing
     if "WSPD" not in data:
         cell = td_value(html, "Wind Speed at 10 meters (WSPD10M):")

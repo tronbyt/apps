@@ -1,4 +1,5 @@
 load("encoding/base64.star", "base64")
+load("i18n.star", "tr")
 load("render.star", "canvas", "render")
 
 ICON_FILTER1 = base64.decode("""
@@ -11,13 +12,7 @@ ICON_FILTER3 = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAglJREFUOE9VVEeSBDEII/z/yTZbCnh6Lx0wBiEEGRkTEZGRga+J4TffCdta4EUXPVNeNsSkzmlN222D1cGZxp4KtTcZAHFtEoRPwDP4/UZWMLoRUEZlOaav4ihVET3tNzMZM4fZq3BpBMQO51wGqjZeg3WNKhv0+CVsMwx274msCtKQGfcc2nUOTs0Ry0MsM24EGZn8xMXsJtHnTFRXzLlEdY8QNxJcwJ6obJO7cJGIHObkTIDDznpdvnOF1NzcGaLOEmP8f2VKIXDIzByUM/dGNvhLIsPFYVCgjjj3KCGpkpzuvVE41y/NUBMxi7vmG+USPJD70uAclKiVBmSNGqCbAhe0XFywJBD/ETiQQgni9TAZ1bACNmjAF8IEEhBdQSQFwo0EiLPIGVI2qQhTpCZS75aOhP7k0cwK3XU1y21ob1KlkwpXAtuAQ+vPQS3fzVi8zC6iSeyoLqgB+l7Rv7nj3LvRko272Cr1sssQ+UR38R9BCpVQPsMGSdYqlwoimEySg+521a80Eqwuo3wFhVabDdtk28ydOygHE8aLSLW62rTIzvI9HSxnV91oLN//zjLOkdHK+a0kzrP2n4rB5HgDmVsNi0XG6bGwuYYcYN/S1Sbatev1SHH/Ov7bTg64eT8bleSTD47pv10uNyfbhlDSb2N7RnVR0icGsqxV9jTIznK1eGvv/sz4AzlJjSv4gUIUAAAAAElFTkSuQmCC
 """)
 
-LOCALIZED_STRINGS = {
-    "en": "Change the filters!",
-    "de": "Filter wechseln!",
-}
-
-def main(config):
-    lang = config.get("lang", "en")
+def main():
     font = "terminus-18" if canvas.is2x() else "tb-8"
     image_size = 40 if canvas.is2x() else 20
 
@@ -36,7 +31,7 @@ def main(config):
                             render.Image(src = ICON_FILTER3, width = image_size),
                         ],
                     ),
-                    render.WrappedText(LOCALIZED_STRINGS[lang], font = font),
+                    render.WrappedText(tr("Change the filters!"), font = font),
                 ],
             ),
         ),

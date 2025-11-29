@@ -98,12 +98,12 @@ def get_nws_observation_station(lat, lon, ttl = 3600):
     ), ttl_seconds = ttl)
     if res.status_code != 200:
         fail("Could not obtain the grid point data.", res.status_code)
-    
+
     properties = res.json()["properties"]
     grid_id = properties["gridId"]
     grid_x = properties["gridX"]
     grid_y = properties["gridY"]
-    
+
     # Get the stations list from the gridpoint
     stations_url = NWS_STATIONS_URL.format(
         grid_id = grid_id,
@@ -113,12 +113,12 @@ def get_nws_observation_station(lat, lon, ttl = 3600):
     stations_res = http.get(stations_url, ttl_seconds = ttl)
     if stations_res.status_code != 200:
         fail("Could not obtain stations list.", stations_res.status_code)
-    
+
     # Get the first station from the observationStations list
     observation_stations = stations_res.json()["observationStations"]
     if len(observation_stations) == 0:
         fail("No observation stations found for this location.")
-    
+
     first_station = observation_stations[0]
     return first_station
 
@@ -294,9 +294,9 @@ def main(config):
     elif api_service == "National Weather Service (NWS)":
         station_url = get_nws_observation_station(latitude, longitude, 3600)
         observation_data = get_nws_latest_observation(station_url, 300)
-        
+
         properties = observation_data.get("properties", {})
-        
+
         # Get temperature - NWS observations use Celsius by default
         temp_data = properties.get("temperature", {})
         temp_celsius = temp_data.get("value") if temp_data else None
@@ -307,7 +307,7 @@ def main(config):
                 result_current_conditions["temp"] = int((temp_celsius * 9.0 / 5.0) + 32)
         else:
             result_current_conditions["temp"] = "?"
-        
+
         # Get humidity
         humidity_data = properties.get("relativeHumidity", {})
         humidity_value = humidity_data.get("value") if humidity_data else None
@@ -315,16 +315,16 @@ def main(config):
             result_current_conditions["humidity"] = int(humidity_value)
         else:
             result_current_conditions["humidity"] = "?"
-        
+
         # Determine icon based on text description and time of day
         text_description = properties.get("textDescription", "")
         if text_description:
             text_description = text_description.lower()
-        
+
         # Check if it's daytime (simple check - can be improved)
         current_hour = now.hour
         is_daytime = current_hour >= 6 and current_hour < 19
-        
+
         # Icon mapping based on text description
         if text_description:
             if ("clear" in text_description or "fair" in text_description) and is_daytime:

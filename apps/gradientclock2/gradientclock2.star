@@ -5,7 +5,7 @@ Description: Clock displayed over animated, colorful gradient background.
 Author: tpatel12
 """
 
-load("render.star", "render", "canvas")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 

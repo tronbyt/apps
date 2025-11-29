@@ -114,7 +114,7 @@ def main(config):
 
 def calculate_stardate(now):
     # TNG-style stardate calculation
-    base_year = 2323 # year 0 of TNG stardates (referenced in the episode "The Neutral Zone")
+    base_year = 2323  # year 0 of TNG stardates (referenced in the episode "The Neutral Zone")
     year = now.year
     day_of_year = calculate_day_of_year(now)
     days_in_year = 365 if not is_leap_year(year) else 366
@@ -132,7 +132,7 @@ def zero_pad(number, width):
 
 def calculate_day_of_year(date):
     cumulative_days_non_leap = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
-    cumulative_days_leap     = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
+    cumulative_days_leap = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
 
     day_of_year = date.day
     if is_leap_year(date.year):

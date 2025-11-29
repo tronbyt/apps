@@ -6,7 +6,7 @@ Description: Display the time in a groovy, human-readable way.
 """
 
 load("encoding/json.star", "json")
-load("render.star", "render", "canvas")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 

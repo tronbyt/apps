@@ -1,9 +1,8 @@
-load("render.star", "render")
-load("http.star", "http")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
-load("time.star", "time")
+load("http.star", "http")
+load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 DEBUG = False
 DEFAULT_DATA = """{
@@ -30,7 +29,7 @@ station_lookup = {
     "arlington.json": "Arlington",
     "maryhill.json": "Mary Hill",
     "loroc.json": "Loroc",
-    "pointe_rouge.json": "Pointe Rouge"
+    "pointe_rouge.json": "Pointe Rouge",
 }
 
 def fetch_data(station):

@@ -302,7 +302,7 @@ def main(config):
     api_key = config.get("511_api_key")
     if not api_key:
         return render.Root(
-            child = render.Text("No 511.org API Key provided.", font = "tom-thumb")
+            child = render.Text("No 511.org API Key provided.", font = "tom-thumb"),
         )
 
     ## Fetch and parse predictions
