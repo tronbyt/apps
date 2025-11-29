@@ -6,5 +6,4 @@ desc: This app will give you things to do suggestion if you're bored. Or add you
 author: AndersHeie
 fileName: bored.star
 packageName: bored
-recommended_interval: 5
 recommendedInterval: 5

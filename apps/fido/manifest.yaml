@@ -6,5 +6,4 @@ desc: Fido is a pixel pal that will sit, walk, and feast inside your Tidbyt.
 author: yonodactyl
 fileName: fido.star
 packageName: fido
-recommended_interval: 5
 recommendedInterval: 5

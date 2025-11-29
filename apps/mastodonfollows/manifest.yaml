@@ -6,5 +6,4 @@ desc: Display your follower count from a Mastodon instance.
 author: Nick Penree
 fileName: mastodon_follows.star
 packageName: mastodonfollows
-recommended_interval: 5
 recommendedInterval: 5

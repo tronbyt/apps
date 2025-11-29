@@ -6,4 +6,4 @@ desc: Display the time in addition to current weather and humidity from either O
 author: g3rmanaviator
 fileName: og_clock.star
 packageName: og_clock
-recommended_interval: 1
+recommendedInterval: 1

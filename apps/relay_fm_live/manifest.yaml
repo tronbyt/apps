@@ -6,5 +6,4 @@ desc: Shows live stream information for the Relay podcast network.
 author: radiocolin
 fileName: relay_fm_live.star
 packageName: relayfmlive
-recommended_interval: 5
 recommendedInterval: 5

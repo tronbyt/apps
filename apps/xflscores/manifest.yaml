@@ -6,5 +6,4 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: LunchBox8484
 fileName: xfl_scores.star
 packageName: xflscores
-recommended_interval: 5
 recommendedInterval: 5

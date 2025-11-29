@@ -4,6 +4,5 @@ name: Text Title
 summary: Displays a text and title
 desc: Displays a text and a title.
 author: savdagod, gabe565
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

@@ -6,5 +6,4 @@ desc: Displays a random NFT associated with an Ethereum public address.
 author: nipterink
 fileName: nft.star
 packageName: nft
-recommended_interval: 5
 recommendedInterval: 5

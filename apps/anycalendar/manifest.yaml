@@ -6,5 +6,4 @@ desc: Show current or upcoming events from a Google or Outlook calendar with jus
 author: Vik Boyechko
 fileName: any_calendar.star
 packageName: anycalendar
-recommended_interval: 5
 recommendedInterval: 5

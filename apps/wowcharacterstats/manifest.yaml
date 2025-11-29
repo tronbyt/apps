@@ -6,5 +6,4 @@ desc: Show statistics for a World of Warcraft character. Stats shown include nam
 author: KDubs
 fileName: wowcharacterstats.star
 packageName: wowcharacterstats
-recommended_interval: 5
 recommendedInterval: 5

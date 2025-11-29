@@ -6,5 +6,5 @@ desc: Shows the time and date with a gradient in the background.
 author: Wilf
 fileName: gradientclock.star
 packageName: gradientclock
-recommended_interval: 0
+recommendedInterval: 0
 supports2x: true

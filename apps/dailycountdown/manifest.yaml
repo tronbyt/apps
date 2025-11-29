@@ -6,5 +6,4 @@ desc: A countdown timer for recurring daily events.
 author: Jeffery Bennett
 fileName: dailycountdown.star
 packageName: dailycountdown
-recommended_interval: 5
 recommendedInterval: 5

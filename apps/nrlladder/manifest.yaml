@@ -6,6 +6,5 @@ desc: Shows NRL Ladder.
 author: M0ntyP
 fileName: nrl_ladder.star
 packageName: nrlladder
-recommended_interval: 5
 recommendedInterval: 5
 recommendedInterval: 5

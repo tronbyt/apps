@@ -6,5 +6,4 @@ desc: Displays the latest tagline from the top of popular tech news site The Ver
 author: '@joevgreathead'
 fileName: verge_taglines.star
 packageName: vergetaglines
-recommended_interval: 10
 recommendedInterval: 10

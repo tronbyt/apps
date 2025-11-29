@@ -6,5 +6,4 @@ desc: Displays Vancouver's Lions Gate Bridge information, including the current 
 author: Aiden Mitchell
 fileName: lions_gate_status.star
 packageName: lionsgatestatus
-recommended_interval: 5
 recommendedInterval: 5

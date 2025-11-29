@@ -6,5 +6,4 @@ desc: Display the last 13 weeks of your GitHub contribution graph in addition to
 author: rs7q5
 fileName: github_activity.star
 packageName: githubactivity
-recommended_interval: 5
 recommendedInterval: 5

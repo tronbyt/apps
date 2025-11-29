@@ -6,6 +6,5 @@ desc: Test your Pokemon Master knowledge with this rendition of "Who's That Poke
 author: Nicole Brooks
 fileName: whosthatpokemon.star
 packageName: whosthatpokemon
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

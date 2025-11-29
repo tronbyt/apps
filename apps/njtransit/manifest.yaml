@@ -6,5 +6,4 @@ desc: See the upcoming departures of a selected NJ Transit station.
 author: Jason-J-Hunt
 fileName: nj_transit.star
 packageName: njtransit
-recommended_interval: 5
 recommendedInterval: 5

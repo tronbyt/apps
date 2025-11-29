@@ -6,5 +6,4 @@ desc: Track the Tidbyt app page and see new listings.
 author: UnBurn
 fileName: tidbyt_app_track.star
 packageName: tidbytapptrack
-recommended_interval: 60
 recommendedInterval: 60

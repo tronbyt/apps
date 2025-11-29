@@ -6,5 +6,4 @@ desc: This shows you the next two estimated (or scheduled) arrivals at a given s
 author: scottwainstock
 fileName: trimet_stops.star
 packageName: trimetstops
-recommended_interval: 5
 recommendedInterval: 5

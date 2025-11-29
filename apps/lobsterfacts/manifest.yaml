@@ -6,5 +6,4 @@ desc: Displays a random lobster fact.
 author: Marc ten Bosch
 fileName: lobster_facts.star
 packageName: lobsterfacts
-recommended_interval: 5
 recommendedInterval: 5

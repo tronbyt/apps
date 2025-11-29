@@ -6,5 +6,4 @@ desc: Shows the date, next meeting and time from your Outlook Calendar.
 author: Matt-Pesce
 fileName: outlook_calendar.star
 packageName: outlookcalendar
-recommended_interval: 5
 recommendedInterval: 5

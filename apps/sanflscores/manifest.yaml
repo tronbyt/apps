@@ -4,5 +4,4 @@ name: SANFL Scores
 summary: Shows SANFL Scores
 desc: Shows football scores for the SANFL.
 author: M0ntyP
-recommended_interval: 5
 recommendedInterval: 5

@@ -6,5 +6,4 @@ desc: Draws the evolution of one-dimensional cellular automata.
 author: dinosaursrarr
 fileName: cellularautomata.star
 packageName: cellularautomata
-recommended_interval: 5
 recommendedInterval: 5

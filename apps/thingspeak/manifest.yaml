@@ -6,5 +6,4 @@ desc: View field data from your Thingspeak channels.
 author: Bennett Schoonerman
 fileName: thingspeak.star
 packageName: thingspeak
-recommended_interval: 5
 recommendedInterval: 5

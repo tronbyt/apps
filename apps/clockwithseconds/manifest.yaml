@@ -6,4 +6,4 @@ desc: A clock that shows time including seconds.
 author: Daniel Segel
 fileName: clockwithseconds.star
 packageName: clockwithseconds
-recommended_interval: 0
+recommendedInterval: 0

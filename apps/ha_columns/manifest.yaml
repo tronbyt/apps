@@ -6,5 +6,5 @@ desc: Displays Home Assistant sensors in configurable columns (2-4 columns suppo
 author: Mitchell Scott
 fileName: ha_columns.star
 packageName: ha_columns
-recommended_interval: 5
+recommendedInterval: 5
 supports2x: true

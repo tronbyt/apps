@@ -4,5 +4,4 @@ name: SolarEdge_Prod
 summary: SolarEdge daily production
 desc: Monitor SolarEdge PV panel daily current and daily production.
 author: Billy_McSkintos
-recommended_interval: 5
 recommendedInterval: 5

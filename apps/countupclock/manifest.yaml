@@ -6,4 +6,4 @@ desc: Shows elapsed time in days, hours and minutes since an event with custom t
 author: jvivona
 fileName: countupclock.star
 packageName: countupclock
-recommended_interval: 0
+recommendedInterval: 0

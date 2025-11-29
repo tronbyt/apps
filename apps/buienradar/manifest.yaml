@@ -6,5 +6,4 @@ desc: Shows the rain radar of Belgium or The Netherlands.
 author: PMK (@pmk)
 fileName: buienradar.star
 packageName: buienradar
-recommended_interval: 5
 recommendedInterval: 5

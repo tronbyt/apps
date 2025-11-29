@@ -6,5 +6,4 @@ desc: Displays random webcam images from Loveland Ski Area.
 author: John Sprunger
 fileName: loveland_webcams.star
 packageName: lovelandwebcams
-recommended_interval: 5
 recommendedInterval: 5

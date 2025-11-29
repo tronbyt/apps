@@ -6,5 +6,4 @@ desc: Enter phrases your wife says and app will cycle through them.
 author: vipulchhajer
 fileName: things_wife_says.star
 packageName: thingswifesays
-recommended_interval: 5
 recommendedInterval: 5

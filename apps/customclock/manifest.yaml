@@ -6,4 +6,4 @@ desc: A clock that can be customized.
 author: rs7q5
 fileName: custom_clock.star
 packageName: customclock
-recommended_interval: 0
+recommendedInterval: 0

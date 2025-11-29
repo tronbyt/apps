@@ -6,6 +6,5 @@ desc: Shows Time date and location of Next F1 race.
 author: AmillionAir
 fileName: formula1.star
 packageName: formula1
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

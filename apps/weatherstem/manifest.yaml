@@ -6,5 +6,4 @@ desc: Display real-time current weather conditons provided by WeatherSTEM API.
 author: jflood937
 fileName: weatherstem.star
 packageName: weatherstem
-recommended_interval: 5
 recommendedInterval: 5

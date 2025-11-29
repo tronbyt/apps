@@ -6,5 +6,4 @@ desc: This app enabled the user to display info about the specified airport pull
 author: Marijn-de-Mul
 fileName: vatsimapp.star
 packageName: vatsimapp
-recommended_interval: 5
 recommendedInterval: 5

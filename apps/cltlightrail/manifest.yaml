@@ -6,5 +6,4 @@ desc: Displays in real-time when North & South lightrail trains will arrive in C
 author: Kevin Connell
 fileName: clt_lightrail.star
 packageName: cltlightrail
-recommended_interval: 5
 recommendedInterval: 5

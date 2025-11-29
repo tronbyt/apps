@@ -6,5 +6,4 @@ desc: Weather and Trail status for Mountains that are part of the Epic Pass reso
 author: Colin Morrisseau
 fileName: ski_report.star
 packageName: skireport
-recommended_interval: 5
 recommendedInterval: 5

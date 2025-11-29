@@ -6,5 +6,4 @@ desc: Display random Craft NFT owned by a user.
 author: tavdog
 fileName: craftnft.star
 packageName: craftnft
-recommended_interval: 5
 recommendedInterval: 5

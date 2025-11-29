@@ -6,5 +6,4 @@ desc: Displays the devices you manage in Workspace ONE UEM by type and amount of
 author: Craig Johnston
 fileName: wsonedevbytypep.star
 packageName: wsonedevbytypep
-recommended_interval: 5
 recommendedInterval: 5

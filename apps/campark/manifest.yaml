@@ -6,5 +6,4 @@ desc: Real Time spaces in Cambridge UK Car Parks.
 author: derekllaw
 fileName: campark.star
 packageName: campark
-recommended_interval: 5
 recommendedInterval: 5

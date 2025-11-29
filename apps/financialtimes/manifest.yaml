@@ -6,5 +6,4 @@ desc: Display Financial Times news based upon user selected section.
 author: jvivona
 fileName: financial_times.star
 packageName: financialtimes
-recommended_interval: 10
 recommendedInterval: 10

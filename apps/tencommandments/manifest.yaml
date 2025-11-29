@@ -6,5 +6,4 @@ desc: Displays the ten commandments.
 author: Robert Ison
 fileName: ten_commandments.star
 packageName: tencommandments
-recommended_interval: 5
 recommendedInterval: 5

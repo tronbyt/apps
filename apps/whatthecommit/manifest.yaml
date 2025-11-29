@@ -6,5 +6,4 @@ desc: This app displays a random funny commit message from whatthecommit.com.
 author: dev-manuel
 fileName: whatthecommit.star
 packageName: whatthecommit
-recommended_interval: 5
 recommendedInterval: 5

@@ -82,7 +82,7 @@ function scanApps() {
       description = manifest.desc || null;
       displayName = manifest.name || appName;
       author = manifest.author || null;
-      recommendedInterval = manifest.recommended_interval || null;
+      recommendedInterval = manifest.recommendedInterval || null;
     }
 
     // Fallback to README if no manifest description

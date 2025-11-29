@@ -6,5 +6,4 @@ desc: Availability for a Santander bicycle dock in London.
 author: dinosaursrarr
 fileName: boris_bikes.star
 packageName: borisbikes
-recommended_interval: 5
 recommendedInterval: 5

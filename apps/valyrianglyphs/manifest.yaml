@@ -6,5 +6,4 @@ desc: Display a random glyph and translations from the High Valyrian language, a
 author: frame-shift and David J. Peterson
 fileName: valyrian_glyphs.star
 packageName: valyrianglyphs
-recommended_interval: 5
 recommendedInterval: 5

@@ -4,5 +4,4 @@ name: Berlin Transit
 summary: Trains/Bus in Berlin
 desc: Provides upcoming train and bus departures for a given Berlin station.
 author: flambeauRiverTours
-recommended_interval: 5
 recommendedInterval: 5

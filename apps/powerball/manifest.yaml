@@ -6,5 +6,4 @@ desc: Shows up to date powerball numbers and next drawing.
 author: AmillionAir
 fileName: powerball.star
 packageName: powerball
-recommended_interval: 5
 recommendedInterval: 5

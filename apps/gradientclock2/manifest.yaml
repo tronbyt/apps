@@ -5,4 +5,4 @@ summary: Animated Gradient Clock
 desc: Clock displayed over animated, colorful gradient background.
 author: tpatel12
 supports2x: true
-recommended_interval: 0
+recommendedInterval: 0

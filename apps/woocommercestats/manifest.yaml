@@ -6,5 +6,4 @@ desc: Display stats from your WooCommerce store including number of orders and a
 author: Jeremy Launder
 fileName: woocommerce_stats.star
 packageName: woocommercestats
-recommended_interval: 5
 recommendedInterval: 5

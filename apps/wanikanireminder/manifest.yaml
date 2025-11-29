@@ -6,5 +6,4 @@ desc: Provides lesson and review counts for WaniKani.
 author: Bardiches
 fileName: wanikani_reminder.star
 packageName: wanikanireminder
-recommended_interval: 5
 recommendedInterval: 5

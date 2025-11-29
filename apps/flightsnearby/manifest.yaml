@@ -6,5 +6,4 @@ desc: Find the closest flight to your location. Requires a Flight Radar API key 
 author: eddichen
 fileName: flights_nearby.star
 packageName: flightsnearby
-recommended_interval: 5
 recommendedInterval: 5

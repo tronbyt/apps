@@ -6,5 +6,4 @@ desc: Show Indy Car next race info and current driver standings.  Track images b
 author: jvivona
 fileName: indycar.star
 packageName: indycar
-recommended_interval: 5
 recommendedInterval: 5

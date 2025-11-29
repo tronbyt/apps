@@ -6,5 +6,4 @@ desc: Show coworkers whether you're free, busy, remote, or away.
 author: Brian Bell
 fileName: office_status.star
 packageName: officestatus
-recommended_interval: 5
 recommendedInterval: 5

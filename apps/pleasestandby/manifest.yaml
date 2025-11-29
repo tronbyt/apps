@@ -6,6 +6,5 @@ desc: Displays Please Stand By message.
 author: Ethan Fuerst (@ethanfuerst)
 fileName: please_stand_by.star
 packageName: pleasestandby
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

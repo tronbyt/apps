@@ -6,5 +6,4 @@ desc: Randomly generate fantasy/RPG characters.
 author: Ryan Allison
 fileName: fantasynamegen.star
 packageName: fantasynamegen
-recommended_interval: 5
 recommendedInterval: 5

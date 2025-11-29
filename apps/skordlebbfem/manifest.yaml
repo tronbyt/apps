@@ -6,5 +6,4 @@ desc: This app gets female basketball data from the Skordle website to display o
 author: Woolycoin437420
 fileName: skordle_bb_fem.star
 packageName: skordlebbfem
-recommended_interval: 5
 recommendedInterval: 5

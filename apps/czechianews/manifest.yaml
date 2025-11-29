@@ -4,5 +4,4 @@ name: Czechianews
 summary: Headline news from Czechia
 desc: Dispaly only the news title from Czechia.
 author: solarisle
-recommended_interval: 10
 recommendedInterval: 10

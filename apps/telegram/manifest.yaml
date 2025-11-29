@@ -6,5 +6,4 @@ desc: View your channel's member count. Add the @tidbytbot to your channel to ge
 author: Daniel Sitnik
 fileName: telegram.star
 packageName: telegram
-recommended_interval: 5
 recommendedInterval: 5

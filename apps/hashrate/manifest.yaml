@@ -6,5 +6,4 @@ desc: Plotting the hashrate of Bitcoin.
 author: PMK (@pmk)
 fileName: hashrate.star
 packageName: hashrate
-recommended_interval: 1
 recommendedInterval: 1

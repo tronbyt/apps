@@ -6,5 +6,4 @@ desc: Shows Light Rail Departure Times from Selected Stop.
 author: Alex Miller
 fileName: mn_light_rail.star
 packageName: mnlightrail
-recommended_interval: 5
 recommendedInterval: 5

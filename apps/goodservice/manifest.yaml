@@ -6,5 +6,4 @@ desc: More accurate realtime New York City Subway arrival times for a selected s
 author: Sunny Ng
 fileName: goodservice.star
 packageName: goodservice
-recommended_interval: 5
 recommendedInterval: 5

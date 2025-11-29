@@ -6,5 +6,4 @@ desc: Pulls the current hour average price from hourlypricing.comed.com.
 author: Andrew Hill
 fileName: comed_price.star
 packageName: comedprice
-recommended_interval: 5
 recommendedInterval: 5

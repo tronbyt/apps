@@ -6,6 +6,5 @@ desc: Displays a world capital each day for a specific country.
 author: Jake Manske
 fileName: worldcapitals.star
 packageName: worldcapitals
-recommended_interval: 5
 recommendedInterval: 5
 supports2x: true

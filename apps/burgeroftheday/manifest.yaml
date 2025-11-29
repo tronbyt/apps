@@ -6,5 +6,4 @@ desc: Display the set Burger of the Day, show a random burger every time, or ent
 author: Kyle Stark
 fileName: burgerotd.star
 packageName: burgeroftheday
-recommended_interval: 5
 recommendedInterval: 5

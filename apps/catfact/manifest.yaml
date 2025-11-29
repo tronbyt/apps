@@ -6,5 +6,4 @@ desc: Calls an external API and retrieves a random cat fact and renders it. Rota
 author: broepke
 fileName: catfact.star
 packageName: catfact
-recommended_interval: 5
 recommendedInterval: 5

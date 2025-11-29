@@ -6,5 +6,4 @@ desc: 'Description: Show a random image post from a custom list of subreddits (u
 author: Nicole Brooks
 fileName: reddit_images.star
 packageName: redditimages
-recommended_interval: 5
 recommendedInterval: 5

@@ -6,5 +6,4 @@ desc: Display time of the next buses for any Pittsburgh PRT bus stop.
 author: ckingsford
 fileName: pittsburgh_buses.star
 packageName: pittsburghbuses
-recommended_interval: 5
 recommendedInterval: 5

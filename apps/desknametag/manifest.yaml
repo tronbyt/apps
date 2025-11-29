@@ -6,5 +6,4 @@ desc: Displays basic employee information to coworkers.
 author: Brian Bell
 fileName: desk_name_tag.star
 packageName: desknametag
-recommended_interval: 5
 recommendedInterval: 5
