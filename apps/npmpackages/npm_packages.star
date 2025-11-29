@@ -22,7 +22,6 @@ SEARCH_URL = "https://registry.npmjs.com/-/v1/search?text={}&size=20"
 DATA_URL = "https://api.npmjs.org/downloads/range/last-%s/%s"
 DEFAULT_PACKAGE = json.encode({"display": "axios", "value": "axios"})
 DEFAULT_DOWNLOAD_PERIOD = "week"
-DEFAULT_DOT_SEPARATOR = False
 CACHE_TTL = 21600  # 6 hours
 
 def main(config):
@@ -38,7 +37,6 @@ def main(config):
     # get configs
     package = json.decode(config.get("package", DEFAULT_PACKAGE))
     download_period = config.get("download_period", DEFAULT_DOWNLOAD_PERIOD)
-    dot_separator = config.bool("dot", DEFAULT_DOT_SEPARATOR)
 
     # get package data
     package_name = package["value"]
@@ -67,10 +65,7 @@ def main(config):
         total_downloads += item["downloads"]
         counter += 1
 
-    # check if needs to format downloads
     humanized_downloads = humanize.comma(total_downloads)
-    if dot_separator:
-        humanized_downloads = humanized_downloads.replace(",", ".")
 
     return render.Root(
         child = render.Column(
@@ -150,13 +145,6 @@ def get_schema():
                 icon = "cloudArrowDown",
                 default = DEFAULT_DOWNLOAD_PERIOD,
                 options = download_options,
-            ),
-            schema.Toggle(
-                id = "dot",
-                name = "Dot separator",
-                desc = "Use dots instead of commas.",
-                icon = "toggleOn",
-                default = DEFAULT_DOT_SEPARATOR,
             ),
         ],
     )
