@@ -7,3 +7,4 @@ author: dev-manuel
 fileName: tagesschau_news.star
 packageName: tagesschau_news
 recommendedInterval: 10
+supports2x: true
