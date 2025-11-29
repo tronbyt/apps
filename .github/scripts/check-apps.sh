@@ -2,8 +2,8 @@
 
 set -e
 
-# Trim quotes in case any were introduced.
-TARGETS=$(echo ${TARGETS} | tr -d '"' | awk '{$1=$1};1')
+# Trim quotes in case any were introduced and populate an array.
+readarray -t targets_array < <(echo "${TARGETS}" | tr -d '"' | awk '{$1=$1};1')
 
 # Override the max runtime for specific apps. This is useful for apps
 # that have a longer runtime on cold cache, but perform well when it's
@@ -26,18 +26,18 @@ if [ -z "${TARGETS}" ]; then
     exit 0
 fi
 
-for target in ${TARGETS}; do
+for target in "${targets_array[@]}"; do
     if [[ ! -d "$target" ]]; then
-	# app was deleted
-	continue
+        # app was deleted
+        continue
     fi
 
-    if [ ${runtime_exceptions[$target]} ]; then
-	t=${runtime_exceptions[$target]}
-	echo "pixlet check --max-render-time ${t} ${target}"
-	pixlet check --max-render-time ${t} ${target}
+    if [ "${runtime_exceptions[$target]}" ]; then
+        t=${runtime_exceptions[$target]}
+        echo "pixlet check --max-render-time ${t} ${target}"
+        pixlet check --max-render-time "${t}" "${target}"
     else
-	echo "pixlet check ${target}"
-	pixlet check ${target}
+        echo "pixlet check ${target}"
+        pixlet check "${target}"
     fi
 done
