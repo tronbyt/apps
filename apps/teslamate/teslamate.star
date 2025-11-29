@@ -168,11 +168,11 @@ def fetch_ha_data(ha_url, ha_token, battery_entity, range_entity, name_entity, c
     template = """
 {
   "name": "{{ states('%s') | default('Tesla') }}",
-  "rangemi": "{{ states('%s') | float(0) }}",
-  "batterylevel": "{{ states('%s') | float(0) }}",
-  "charger_power": "{{ states('%s') | float(0) }}",
+  "rangemi": {{ states('%s') | float(0) }},
+  "batterylevel": {{ states('%s') | float(0) }},
+  "charger_power": {{ states('%s') | float(0) }},
   "plugged_in": "{{ states('%s') | default('off') }}",
-  "charge_limit": "{{ states('%s') | float(80) }}"
+  "charge_limit": {{ states('%s') | float(80) }}
 }
 """.strip() % (name_entity, range_entity, battery_entity, charger_power_entity, plugged_in_entity, charge_limit_entity)
 
