@@ -1,13 +1,21 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/weathericon_clear.png", WEATHERICON_CLEAR_ASSET = "file")
+load("images/weathericon_cloudy.png", WEATHERICON_CLOUDY_ASSET = "file")
+load("images/weathericon_partlycloudy.png", WEATHERICON_PARTLYCLOUDY_ASSET = "file")
+load("images/weathericon_precipitation.png", WEATHERICON_PRECIPITATION_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
+
+WEATHERICON_CLEAR = WEATHERICON_CLEAR_ASSET.readall()
+WEATHERICON_CLOUDY = WEATHERICON_CLOUDY_ASSET.readall()
+WEATHERICON_PARTLYCLOUDY = WEATHERICON_PARTLYCLOUDY_ASSET.readall()
+WEATHERICON_PRECIPITATION = WEATHERICON_PRECIPITATION_ASSET.readall()
 
 #SCHEMA
 
@@ -271,10 +279,6 @@ MONTHSTRS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT
 MONTHSEASON = [0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4]
 DAYSOFMONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 WEEKDAYSTRS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-WEATHERICON_CLEAR = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHklEQVR42mP4/5+hAYj/Q3EDAwggCYAxXkFM7dgAAK7ULdUdcihQAAAAAElFTkSuQmCC")
-WEATHERICON_PARTLYCLOUDY = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAKElEQVR42mP4/5+hAYj/Q3EDAwhAOEBxKIAKIgTgEv+xAKhqOACbCQBJmUw3DPvOEwAAAABJRU5ErkJggg==")
-WEATHERICON_CLOUDY = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAH0lEQVR42mNgwAX+///f8B8KMATgEv+xAJhqGGgA8QExCz5EHxiM1gAAAABJRU5ErkJggg==")
-WEATHERICON_PRECIPITATION = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAALElEQVR42mNgAIL///83/IcCBnQBuMR/LACsur4ewgkN/X+AAQL+N6DSDAwAMd8/LpL83qAAAAAASUVORK5CYII=")
 
 #/STATIC
 

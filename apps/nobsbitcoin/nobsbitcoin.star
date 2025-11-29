@@ -5,17 +5,15 @@ Description: Shows the the latest news article from NoBsBitcoin.
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/logo.gif", LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
-DEFAULT_CATEGORY = "all"
+LOGO = LOGO_ASSET.readall()
 
-LOGO = base64.decode("""
-R0lGODlhKAAdAIABAAEzhAAAACH5BAEAAAEALAAAAAAoAB0AAAKNjI+JAOoPE5sz2kdzvlcrz30VR4VBaS4jxqTRaqCuJc/2iedngze8vuvtfBtfTGg8KodLopHXQh5+udHPKZQmgVLds3nFVqJP8u28QsnSYTIRrJpSW2H5Rh6PzbfRoVmfF4RXp3fnh2eHeBhEdZZS46jSVxiZCAFpgnkJ88KZaWjnOaNB2lhZWkljylEAADs=
-""")
+DEFAULT_CATEGORY = "all"
 
 def get_news_feed(category = DEFAULT_CATEGORY, ttl_seconds = 60 * 5):
     url = "https://www.nobsbitcoin.com/rss/"

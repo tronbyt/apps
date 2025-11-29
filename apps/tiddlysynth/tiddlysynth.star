@@ -5,19 +5,21 @@ Description: Adorn your Tidbyt with an array of animated retro synths. Most of t
 Author: Owain Rich
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/failsafe_image.png", FAILSAFE_IMAGE_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
+
+FAILSAFE_IMAGE = FAILSAFE_IMAGE_ASSET.readall()
 
 jsonUrl = "https://www.fourontuesday.com/tidbyt/synths/synths.json"
 
 DEFAULT_TYPE = "all"
 
 #this image will be rendered if we can't reach the server to parse json
-FAILSAFE_IMAGE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAMAAACVQ462AAAAAXNSR0IArs4c6QAAADxQTFRFAAAAtLS0AAAARkZGeHh4KSkpejkb7Rwkpg0U82VsqOYdIrFMqVAl3Nzc2n5S4px6AAAA/U8A/7QACrG9Qk9H/wAAABR0Uk5TAP////////////////////////+64WOpAAABF0lEQVRIibWV2w7DIAiGSxiXJia8/7uOg0zrbEt3QNkwyif96bLt8aVtPwVQTRgdA1L5M2G7nT8RRkDa/lZBrSjbEMdWuaj7xwAEEMeBQHuMHriswPM1U5xQbmRxH1cVTI8aAec1kAvdqeX7I3AIw5eA5hi3Ew6JYN/5RxiN2Wrwz5SIWoTM3gXmJiefAEBaGG0kal0YqjBLv0hh0DSApmZKA4zrm5q862cCQCFAaMCuQj2r4KQHLkDHLwFeeu/CK57XaicAGz77UBviJSBuAfVSC0Tsa4DdXj0CQC3qRWeL57XF7wD77RS5wdwO4XrtgLoGSI/M9VDE89rjGeD5tpnzTvgZQKoCkTrrnRCA+zaL+GH+9//OT4clTLzSjtQ/AAAAAElFTkSuQmCC""")
+
 jsonData = False
 
 def main(config):

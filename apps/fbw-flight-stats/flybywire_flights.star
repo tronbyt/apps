@@ -6,11 +6,12 @@ Author: Philippe Dellaert (pdellaert)
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/fbw_icon.png", FBW_ICON_ASSET = "file")
 load("render.star", "render")
 
-FBW_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACAAAAAeCAYAAABNChwpAAAABmJLR0QA/wD/AP+gvaeTAAACNklEQVRIibWWvW4TQRSFv7k2YEBCJB2ksKkoI/EGFKFzWiRAoqSIUtEgaBCKRAEFj0BJQ8MLpKPxelFcU9vvwI8Phb3O7M7sj9fLkVbyXu/e+831uTN2/A8lusI1XjvjOaYhhuFABmTXSot+58Ul52Z8Bca5sAOy61JTo2P1LniKY4xfMF4cpI4BzjUQnHkVwmd8CGeTTgHsNqc4hqWrL3YA0jDUVjPt2ZKfcuxvjGYCK5jvsuKckR101gH7wxtgv3L1/nLFFPyB2EWphhgn+WKR3z9H7LoDMHGGGAQlKyeABGD3fSDVIfCkrOWKmw8ghQ464JZ8CPPUjB/MGbnFzgD9RI+c46jWeGH7p9nH9gCSLeF9ljxmuVIbrg24E0Av4RnwAKhffYkB2wOcayDHu3ihmvFbKd0JwG5xCgyz+1zJ+u13Y8B2ADPtIV6VFvPHLybPgK0A7Nd6yy3JnlOsA54BtwdINQROcsm3Md+KMfFvtwKwv5wBgw0AW47fSql/0/w4TnVoS1Iy6PXxmjtqY8dvXnNGduAHGncgt+VG29xg/AoGbAzQm+jYwVGYL6MruYJqrgXAd12X41MuVjV+VbkKBmwEYFf5CNyrfsorW9kBfhRDlSbsTfVY4kvwRmBAhbEw84KR3Q2ZStRP9FDic9n3W49fpP2lAL2JjpfwjWzmfbXdgFAai+b/kiW6YeKtHC+jcNECjU4/MAsmYAVwoZv85r45xogXOO7U5VIRpnb1gAv3AIB/ckOaE1gXKjEAAAAASUVORK5CYII=")
+FBW_ICON = FBW_ICON_ASSET.readall()
+
 FBW_COUNT_API = "https://api.flybywiresim.com/txcxn/_count"
 
 def getCount():

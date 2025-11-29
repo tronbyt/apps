@@ -7,15 +7,14 @@ Author: jondkelley, with base code borrowed from btcfagi & PMK (@pmk)
 
 load("animation.star", "animation")
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/background.gif", BACKGROUND_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-BACKGROUND = base64.decode("""
-R0lGODlhPAABAPQAAD9M7D9X7D9j7D9v7D977GtI3nRM23xP2UVG6kBH7EtG6FJG5lpG42JG4Ztfz4VU1opW1Y5Y04FR2JRb0Z5hzqNjzKlmyq5oyT+I7D+T7ECd7EKq7ES37ETH7ETX7ETk6SH5BAAAAAAAIf8LSW1hZ2VNYWdpY2sNZ2FtbWE9MC40NTQ1NQAsAAAAADwAAQAABS7gJ3pkZ3LctmlahmEEMQyCENwAkOwIoiiLBYPRaBQKBsNB8oBEJhMHpVKxWC4hADs=
-""")
+BACKGROUND = BACKGROUND_ASSET.readall()
+
 CACHE_SECONDS = 1800
 
 def get_text_color(index_value):

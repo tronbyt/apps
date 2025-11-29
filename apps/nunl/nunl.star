@@ -5,18 +5,16 @@ Description: Shows random one of the latest news items from the Dutch website nu
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/logo.gif", LOGO_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
-DEFAULT_CATEGORY = "Algemeen"
+LOGO = LOGO_ASSET.readall()
 
-LOGO = base64.decode("""
-R0lGODlhCgAKAJEDALUMFv///wIAUQAAACH5BAEAAAMALAAAAAAKAAoAAAIanIWmyDkNX5giVCGvDQBo3X2T9UDMYSoophQAOw==
-""")
+DEFAULT_CATEGORY = "Algemeen"
 
 def get_news_feed(category = DEFAULT_CATEGORY, ttl_seconds = 60 * 5):
     url = "https://www.nu.nl/rss/{}".format(category)

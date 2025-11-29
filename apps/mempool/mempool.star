@@ -5,11 +5,17 @@ Description: Showing details of the mempool of Bitcoin, such as the latest block
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/box_orange_img.gif", BOX_ORANGE_IMG_ASSET = "file")
+load("images/box_purple_img.gif", BOX_PURPLE_IMG_ASSET = "file")
+load("images/line_img.gif", LINE_IMG_ASSET = "file")
 load("render.star", "render")
 load("time.star", "time")
+
+BOX_ORANGE_IMG = BOX_ORANGE_IMG_ASSET.readall()
+BOX_PURPLE_IMG = BOX_PURPLE_IMG_ASSET.readall()
+LINE_IMG = LINE_IMG_ASSET.readall()
 
 DEFAULT_FIAT = "usd"
 URL_BLOCK_TIP_HEIGHT = "https://mempool.space/api/blocks/tip/height"
@@ -18,16 +24,6 @@ URL_FEES = "https://mempool.space/api/v1/fees/recommended"
 
 BOX_SIZE_WIDTH = 28
 BOX_SIZE_HEIGHT = 27
-BOX_ORANGE_IMG = base64.decode("""
-R0lGODlhHAAbAJEDAC0oJUA4NKp9DwAAACH5BAEAAAMALAAAAAAcABsAAAJMjI+pNz2wonQAyotatRi/LYTiSJbiBpjqiq4u2b5yLLt0rd54qe9j7wsBg0NfcXfEJWvLGSjIe0J/0qmwav2krCLNliuggEOOwVhQAAA7
-""")
-BOX_PURPLE_IMG = base64.decode("""
-R0lGODlhHAAbAJEDACklSDs5dFNL0wAAACH5BAEAAAMALAAAAAAcABsAAAJMjI+pNz2wonQAyotatRi/LYTiSJbiBpjqiq4u2b5yLLt0rd54qe9j7wsBg0NfcXfEJWvLGSjIe0J/0qmwav2krCLNliuggEOOwVhQAAA7
-""")
-
-LINE_IMG = base64.decode("""
-R0lGODlhAQAVAIABAP///wAAACH5BAEAAAEALAAAAAABABUAAAIHhIMGGMpaAAA7
-""")
 
 def get_mempool_data(url, ttl_seconds = 30):
     response = http.get(url = url, ttl_seconds = ttl_seconds)

@@ -6,11 +6,13 @@ Author: Brombomb
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/default_finch_icon.webp", DEFAULT_FINCH_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+DEFAULT_FINCH_ICON = DEFAULT_FINCH_ICON_ASSET.readall()
 
 # Bird Buddy GraphQL API URL
 BIRD_BUDDY_GRAPHQL_URL = "https://graphql.app-api.prod.aws.mybirdbuddy.com/graphql"
@@ -27,7 +29,6 @@ MARQUEE_DELAY = 32
 DEFAULT_BIRD_NAME = "No recent visitors"
 
 # Embedded House Finch icon (32px height, WebP format, 688 bytes)
-DEFAULT_FINCH_ICON = base64.decode("UklGRqgCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSIcBAAABkHRrmyHJ0t+2bdurXtu27d7atnts27Zta2dz1XZnDCIicxARE4D/s6aTm6HsH1DOvPLl+9NOU8nkmybI70f0eWRleMKGCHXmdKwSza56x9p0HYbKAcL+FkbxeUYImd1nQpErGmNMHIjXAmBQ95pQB2UBaDYPEeYVLfxeNkbo75wAk22zhL0OVJ3g3QKFdCsYHiS8B+UpgMMb2viarQLXBRWG6hUaEQTCfVyRoXmbIXYZmDoPpZlNZSmfleaBMQvtkkzlgdP9kxTrVHlk6mfEHTMFt8VDMaNrTMFtsm7m+zDXaIEiuN3OCtc8Is+NcQirlbj8ns5utgA0fVe+fz5y8+S7Kw/Hh7PkOPw/jrWqA4Bqe3x1n4ZCwQLHxJfDFSqssOOJCoCcnEZTsfsCXeeSxjvXDl96OblIhyGjBMCpcu2RCyuuxqno29uap+xuiDk+t9ucRjXJ335s28PLC/J0AUBRHSZb587b8sgq2qctj9DWUZH77XetrocePADU5CFSQV9OxH8bAFZQOCD6AAAA0AUAnQEqIAAgAD6JOpdHpSOiITAYDACgEQlsAJ0y0HtK0GFK9GAHmNsmqw7vyW55QMqSzbigAAD9HA4d1FhaRU4gK+vJY77KIge08aCwuwMWmP/cU9qLFFE7Fb8//GyN9QFsL7m8JlAk19x3+tLtrMmjlgOS9oajz1/xngIk0b9doBcx3kFp9BHQ1ZYjkB7+EweYxkzW/EY7xW4BU/qvcmglxp+vweI7XdCXb/c2Q0A+Hz7BSdhXUs0Hp0qDgtDPZL0Kz3VzAmya2k0BbJU/QLLmtFEqEiXR+cmyeW1mGkg41CqWThGPKnG/1c5u/39e0ZiyyNblAHnAAA==")
 
 # Relevant feed item types for bird sightings
 VALID_BIRD_NODE_TYPES = [

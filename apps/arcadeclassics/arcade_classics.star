@@ -6,11 +6,24 @@ Author: Steve Otteson
 """
 
 load("encoding/base64.star", "base64")
+load("images/alien1_a.png", ALIEN1_A_ASSET = "file")
+load("images/alien1_b.png", ALIEN1_B_ASSET = "file")
+load("images/alien2_a.png", ALIEN2_A_ASSET = "file")
+load("images/alien2_b.png", ALIEN2_B_ASSET = "file")
+load("images/alien3_a.png", ALIEN3_A_ASSET = "file")
+load("images/alien3_b.png", ALIEN3_B_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ALIEN1_A = ALIEN1_A_ASSET.readall()
+ALIEN1_B = ALIEN1_B_ASSET.readall()
+ALIEN2_A = ALIEN2_A_ASSET.readall()
+ALIEN2_B = ALIEN2_B_ASSET.readall()
+ALIEN3_A = ALIEN3_A_ASSET.readall()
+ALIEN3_B = ALIEN3_B_ASSET.readall()
 
 FRAME_WIDTH = 64
 FRAME_HEIGHT = 32
@@ -259,17 +272,10 @@ ALIENS_PER_ROW = 3
 SPACE_BETWEEN_ALIENS = 4
 INVADER_ROW_WIDTH = (BIG_ALIEN_WIDTH * ALIENS_PER_ROW) + (SPACE_BETWEEN_ALIENS * (ALIENS_PER_ROW - 1))
 
-alien1_A = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAPElEQVR42mL8yXGFAQn8h9KMMAEmLJIobCYskiiKmLAZi8T+T9AKFmTV2NhMaAL/0dhgE5AF0E34DxBgAJjmFOHenXrNAAAAAElFTkSuQmCC"""
-alien1_B = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAPUlEQVR42mL8yXGFAQn8h9KMMAEmLJIobCYskiiKmLAZi8T+T9AKFmTV2NhMWCRhVvxHVsCIxQqwBoAAAwAbERDiEXss2wAAAABJRU5ErkJggg=="""
-alien2_A = """iVBORw0KGgoAAAANSUhEUgAAAAsAAAAICAYAAAAvOAWIAAAASklEQVR42nxPCQoAMAjS6OH7+Q7YRriaEESaFtFw0GcRL+7cwpCbSIULLgR+CyYCPYORN3HKXG9vhSOyBC9iU3cPAsrt+geHAAMA8jsQlUAQEDcAAAAASUVORK5CYII="""
-alien2_B = """iVBORw0KGgoAAAANSUhEUgAAAAsAAAAICAYAAAAvOAWIAAAASklEQVR42oRQgQkAIAibo8P73AosyrQEQbc5RUHFDO0puGPhtAYGaCYcdXEEXgN0An+G7DydIHJdg0wcEW0oydrQnZ+3HV9qAgwA+98Qkq04gCQAAAAASUVORK5CYII="""
-alien3_A = """iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAARUlEQVR42oRQQQoAMAjK6P9fdpcxhuUWdDBMLTBa6Qg3KENyAsgPuS3nYI8HPpFc/uZeokA5VHGkIXO3LgY4qLy+tQQYAHVUERDg61VsAAAAAElFTkSuQmCC"""
-alien3_B = """iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAARklEQVR42oRPQQoAMAia0f+/3NgOIzJb0EExNcSiqRQycCFSBrCPmI6ticeAXyXVn9I9OUTzKHH1aQz4LBAcD1Hr8luAAQBuTxEUquo0cAAAAABJRU5ErkJggg=="""
-
 SPACEINVADERS_IMAGES = [
-    [base64.decode(alien1_A), base64.decode(alien1_B)],
-    [base64.decode(alien2_A), base64.decode(alien2_B)],
-    [base64.decode(alien3_A), base64.decode(alien3_B)],
+    [ALIEN1_A, ALIEN1_B],
+    [ALIEN2_A, ALIEN2_B],
+    [ALIEN3_A, ALIEN3_B],
 ]
 
 SI_NUM_X_POSITIONS = FRAME_WIDTH - INVADER_ROW_WIDTH + 1

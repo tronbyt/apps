@@ -5,13 +5,15 @@ Description: Get today's flavors at Oscar's Frozen Custard.
 Author: Josiah Winslow
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
+load("images/oscars_icon.webp", OSCARS_ICON_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("re.star", "re")
 load("render.star", "render")
+
+OSCARS_ICON = OSCARS_ICON_ASSET.readall()
 
 WIDTH = 64
 HEIGHT = 32
@@ -23,31 +25,7 @@ TTL_SECONDS = 60 * 30  # 30 minutes
 
 OSCARS_ICON_WIDTH = 64
 OSCARS_ICON_HEIGHT = 23
-OSCARS_ICON = base64.decode("""
-UklGRjYFAABXRUJQVlA4WAoAAAAQAAAAPwAAFgAAQUxQSH4BAAABkCvbtmlb89q2bdu2zQjP70W2/VL
-btm1H17Ztc+8ZbNW56wciYgKAr7jLns8Nzf/2aAChpifbKETEpfNyItMr3JOlKiy+FDnHAkRl+Y3Ghb
-dBYgLSepF7IU1UJ5DZv0mal2sT8pwKFpHsNxacjOMjex/5tpoypNX01KQYErouvk5aqhYG4gDKRuaas
-T1seJRLNe3GNK/m1eYSdluel9aVPNlgIhNxtWpwsr/sf3vt4cRT/5raKgeQ842zJEvk1zkUSNXfaUH2
-iqejyE3NokC675QxAOT3IcFf7SC6H4l+pP0TyW5fMUdY6Uskmz7UQBje6yCtp5E0+jVpVMEMYR0qTwi
-7BLb/lt3UPJ8GVwDLW1McM73L48FpimskDwBALvZicc/oUMOLXN/vNGP+w46SRRaq/sDNflpAuYfC7m
-4WqjxTnAEgruPq62UuC2B8qLiv9cNaTTDb+LF1sPX7HnuQ8d95+/Xr169f3Lpx48aNm0edAMT8zlUMd
-P7ebQkAVlA4IJIDAAAQEgCdASpAABcAPpE+mkkloyKhLAgAsBIJbACdM0dBt7neL2qg1G2o52PTYPQl
-8s79gPhO/cD0gKxByA+HPZzKSMEf+A/JTgCeKfzr/bflHzGaSCZ945fpD/r+4Z/Jv7H/yuxAKZoGJtr
-uNwrpGwLGvPLNYjAiqPJzc5bOEoZACJN0ZMp/B7mHL/mapiow0508+9IHs6rlsyAA/uvjCd+kNHvgXV
-l08dJjQIrF/NBhBXXmnaH4bg7gSzcqhvcrOsjALSONTZMcs4tjyxtHNK2nozYqK/2QB+QIo6Hrg3lCu
-nCS5CFeQRgRe0wMNnFgvt9zaBH/zuapPv7TDxVeHUpJjU8x3kGEB0kDiXrqvdNNjzrt7EfP5Plv/rGP
-GSPZRKqoIlG+QtvTeKX+g0C7SiAm8dqn+LXqgb1/Ikt2V//fVe5ZNC6k3w6nxvOvzPy+Pr30Jqf+cK6
-i/pBZlnW1AC2QOa7ofgzH8f9f+MzzL2K+e2vy4zIcQvgXxMSw17dJ6ijqd1LR4Zy+ODP+UzygLOsCiQ
-uhsv90G82Ym4jNytEWBf/v/WrZ2uPMORS/349tZg0Fyf2y+lS/TRl0Qv/6+1iX0DIjcctVyslv9p/+D
-hNQWChmPBRLPmiYym4PtQvIHtEuvWLL/TIk8O//woK1oOZv1YkCyNsdzojqYRvANFgZiVluFrHBWzn6
-KGfM/JrlB/ZvZdjUyVNh+aJJuUH9y26zIdzYqYHShF70hwV7PTDhwyjJ0XtMbUREEaD3n4IO3/76O3u
-c7UCqBeH4nFJYLwmLol2l/y2H5QWGEF9dTvoI/UArOhNramTHZ3Kl/z/ZtG+T0nwO1w+HCa/7/l3FHQ
-dF0gLcueiUgCWD9dkFOgCzwb4Q6wqDLx4X/+h4y97IC2cBHvaeb/3/4fNN86af3q/pq++z/+PwVGUxQ
-BPkXo5xf2gyp/8TDNgfdD3l30cfuauCcF/81Oe/nF9PCRU8y/30QubrqY/X0UJuGWSQAT3DSVjIJsgQ
-AAqy2L14IbZGOPGT3fG6LepLm8geOQ9+fkW61jjOH+f+Xmza46B2ZsCQbPAqFQg3TaIEpQ2qNLBSl3Y
-AFQF0IkHDgezHGOt+p3f9mlbxq/devA4gRy5380rqWMR2k6nPiD8aoWWLW/YFDDl7RF7zGsHlnCi2cE
-gqAfXoNL+fLMNL+4HPQL3my73+/+t3b62ghSXrIzSj/In5a2uEAA==
-""")
+
 OSCARS_HOMEPAGE_EXCERPT_URL = (
     "https://www.oscarscustard.com/index.php/wp-json/wp/v2/pages/41?_fields=" +
     "excerpt"

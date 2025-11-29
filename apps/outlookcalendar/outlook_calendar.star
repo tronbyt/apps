@@ -6,15 +6,15 @@ Description: Shows the date, next meeting and time from your Outlook Calendar.
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/cal_icon.png", CAL_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
 
-CAL_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAAOlJREFUaEPtl0EKg1AMRPUW3Xsv957i80/Rfe/VvbewKG1RERO+TzEwrj6SPxlnJgHr6sQnpTTknOuxBXWm6U7kkOfVD2uc9H5Wuemm19R50aN9HOZ/GOBPaBRgRYhyfY6z16/EyFMFKCHkvrMhuPvurFAClKi2eQdyxM0H6qcEuBW3CiFHrDZagj8FIME1Au7IWYWQI1YbjYBG4KsAlDjtAPfMWYWQI1abe+8AN3uo8FZ/g9A3XQ3D7YCrmUP9JAAkZFgYJSCsdRBxJQASMiyMEhDWOoi4EgAJGRZGCQhrHURcCYCEDAvzAXMPoSHYT20lAAAAAElFTkSuQmCC""")
+CAL_ICON = CAL_ICON_ASSET.readall()
 
 # Enable Print statements for key data
 DEBUG_ON = 1

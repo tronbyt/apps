@@ -6,13 +6,25 @@ Author: lcervo (based on jweier & marcusb's Tesla Solar applet)
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/battery.png", BATTERY_ASSET = "file")
+load("images/clouds.png", CLOUDS_ASSET = "file")
+load("images/grid.png", GRID_ASSET = "file")
+load("images/house.png", HOUSE_ASSET = "file")
+load("images/solar_panel.png", SOLAR_PANEL_ASSET = "file")
+load("images/sun.png", SUN_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+
+BATTERY = BATTERY_ASSET.readall()
+CLOUDS = CLOUDS_ASSET.readall()
+GRID = GRID_ASSET.readall()
+HOUSE = HOUSE_ASSET.readall()
+SOLAR_PANEL = SOLAR_PANEL_ASSET.readall()
+SUN = SUN_ASSET.readall()
 
 DUMMY_DATA = {
     "response": {
@@ -31,62 +43,6 @@ TESLA_AUTH_URL = "https://auth.tesla.com/oauth2/v3/token"
 URL = "https://owner-api.teslamotors.com/api/1/energy_sites/{}/live_status?language=en"
 
 CACHE_TTL = 25200
-
-BATTERY = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA8AAAAJCAYAAADtj3ZXAAAAAXNSR0IArs4c6QAAAK5JREFUKFN1
-UVsSxCAMAnv/46ina9jJo5O6M/UrGiAQCQAmiRAkgCDgNb0SBIACxOyRdIC/gk4cg44rWrb6lEho
-EmaW+BA1iZeTc+Kj2vUpJJnmmjm7J78nfLsI8pwBoDxv5OiMmejPR9mWbq21o0mTaXBkhoz15Tje
-Zaa1d4DoF14jFlZLbIW3WomaSWtPUDxtp5ec3LwzzrEjB92+cb7cOvmxz/r/+t5B+rfH+QF3QH+b
-d75IOgAAAABJRU5ErkJggg==
-""")
-
-CLOUDS = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAAXNSR0IArs4c6QAAAKRJREFUKFNd
-UNsRBCEIS5rDasRaxGrcLY4bwL3bOT8cXkkIJABpzQEgvsjdM83HKIBwOK59kU3EdSjcecrf2QM/
-JHCYGSjSXLVnk3QUeer8VIKKgM0HMHr232MZnyFVzWYCgqZUNFltGbSPtyOYLYDh4WZ6CiYRSRc9
-1ovCS3LZwr537pUKtUuZlibe+8g46nMu3NdmOXoAf4eJy9WNib13kR7ABwQlU4HKN3e7AAAAAElF
-TkSuQmCC
-""")
-
-SUN = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAAXNSR0IArs4c6QAAAJJJREFUKFNV
-UEsWAyEMAvfa+x+zzrrSB3HsdJdH+CUkgDUhDnJNiSAEwLgItC5qQgayzcKiCzKj6KUIC0LrGQq+
-nZxS3HIpmRLThrN+u70k1qXDi5PlnXS6q8XM4LqoilWqBZbA4aFqrUm1AeYgvly9+id8z5+H0W18
-jgkwofYQO5k7+f8GN3g7Utw/Om89+H7nF6BfW+6PI0ouAAAAAElFTkSuQmCC
-""")
-
-SOLAR_PANEL = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAAXNSR0IArs4c6QAAAVZJREFUOE+F
-U0t2gzAMHDkHgqwgB4KcqXCgmBVwoFrtSLJDX/tevUhAvxnNGAGPAND29ytg6fgRKEvbYfj/EwBX
-sNr05wDlgToxg5Ogp5DoYFbUa+IIKj3Vot2wRtxKcWwz+uGjrcfomSfL2YLvZtVuWBpbPux5Rj9G
-TNT04kBJiYR+LujoS4sye2wTeg5lue0k2LcZSZLYSq4wULSo8EVcAYK1Z9OePL3WwR2+0f0sqv0Y
-e8bQc5vQjWsM8+YjzzbAsK6GllL0PqzN5yNP6B9ro83q40XhYPuz3QcIUJsNwtYSnK+3eNXTunul
-3xiE9bbzlZhPu2hB79NNqms2gM3u8VsR932Bmm1Odc8TUrrRijAvVqgDSNtzij0/cX8s9l7vPu28
-STLxqnVSiup9JJKzZzHRGTPPSVYVR366dVff2UPvTRBr9hvpdz9w67fArCl/8f079wWvrsgLTGBJ
-QQAAAABJRU5ErkJggg==
-""")
-
-HOUSE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAAXNSR0IArs4c6QAAAVZJREFUOE9l
-U0GSwjAMs9Lz7k+AG33Slh+VJ8GeylO419qRnYR0ttPJhNqWZckAZsY4LJ/hfp7vBM2254++foK1
-CMZI/4QGtMu8cnvcIOS8Lz231VRImJBGFpf5HgXkTtKslILzdeXrd4ESI39o3GmrxWle+XrcQDoB
-RFd3skxIkIGJggdakfCsxQXRrYlDJ1GAZNc0CYBManNG4pTF/ibFAV86aXQnyoSzWEpYmgVHdd6e
-C5zOgtJB+Y4UK99EI9OZBNtFlFLhFugKj9aOsksTOicUnK6rcGHuexia3Y+70PZixHMyCEGitIKY
-TwDDkvzfrbQwAKpDfcPCtlA++XoANsdhpRaoAXflJtt+7PK6ZgmDQxftwVSgrY4SLViwjTGq07k4
-bQSrlqUjYiPw1jFHUGz4L4SFolVHODDo9ibn2EyNlIYnBxWY3vY17skxhdKvQZOq1x+E4fgQaS4O
-uwAAAABJRU5ErkJggg==
-""")
-
-GRID = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAV9JREFUOE9d
-k9uWxSAMQoP+/ycrZ3Yubdf40HbZSICgIiIUCuebZ8SxHa5viV2HHKG1NLXBXp8NuYpmXV9vLc4U
-SCjuPV6796wQp23e+VV4qk7n2ntRXLyAv9eGQUG+zeRa3ar+w9SHA/RR2MfSlhOlAfKIQtf2Qmgv
-aqp7JO3U2Z39sKiGdBZ6qbYUW9K91+sBQKRjFZXIWi0VEQfoKlSsUPgevA4YnY+RHAQEtshfO0cT
-SHqoj4SxZIrK4poCdtIsbU3atPssfp1TEh6nazhJ1+fWJGavc9KReAuSWsnuFshDv1IGXqWJABXF
-ni5Fe6U+CudfppBTZAQ/1p7ofiUw7+oyjQHBNQzsvGWg8KctwBX901g0ienkgUllSok3zJDXBr46
-eyzwzo6FnXmv0CkuJuJYG4kJxSAchwBpv+63urlmgJH4DNRkZ24juU+KeQlq7nPFvmOe8aVE7syf
-Xz9QUiESRvuC3gAAAABJRU5ErkJggg==
-""")
 
 RED_COLOR = "#ff0000"
 LIGHT_RED_COLOR = "#ff9999"

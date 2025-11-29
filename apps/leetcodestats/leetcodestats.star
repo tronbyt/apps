@@ -5,11 +5,13 @@ Description: Displays your LeetCode stats in a nice way.
 Author: Jake Manske
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/leet_code_logo.png", LEET_CODE_LOGO_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+
+LEET_CODE_LOGO = LEET_CODE_LOGO_ASSET.readall()
 
 LEETCODE_BASE_URL = "https://leetcode.com/{0}"
 EASY_COLOR = "#00E400"
@@ -17,9 +19,7 @@ MEDIUM_COLOR = "#FFA400"
 HARD_COLOR = "#E60707"
 FONT = "5x8"
 TOTAL_HIST_LENGTH = 62
-LEET_CODE_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAYAAAAPU20uAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAACKADAAQAAAABAAAACQAAAACo5FLiAAAAWklEQVQYGV1OgQ3AMAiCZVfupt7RnenEpUYlaUJBBQIwfwkzA8n8X8mcTFNeDsjES9iuKz93z7EjSnGNU17NnPv3FNZaTVJdHWnN60SUVISGDmrRuDANPkcBPgGIK90UIPuQAAAAAElFTkSuQmCC
-""")
+
 HEADER_FONT = "CG-pixel-3x5-mono"
 HTTP_SUCCESS_CODE = 200
 

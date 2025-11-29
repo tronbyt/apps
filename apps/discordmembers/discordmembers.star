@@ -6,17 +6,15 @@ Author: Dennis Zoma (https://zoma.dev)
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/twitter_icon.png", TWITTER_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-DISCORD_API_URL = "https://discord.com/api/v9/invites/%s?with_counts=true"
+TWITTER_ICON = TWITTER_ICON_ASSET.readall()
 
-TWITTER_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAC1ElEQVQ4Ec1Tz4vNURQ/59z7/b433pvhMUjIjwhZIJGMxSSxwqSepiSKbKysKKW3VHZWkiSTjbdRFhZCSlYiCbuJMmg05pdmvt/vu/cen/vG+JE/gLP43vv93HM+95zPOZfofzOeTajRUHn9YXyFqNlLwgfV0YDJKvcnk5FSZ2tBnlVGFpY4vRjUD5pQuv3Njr28e3XJNBFr5GgT9TbULv44eoLUXmLihEhTVZpiVq+qwthoUGLhKkK8cFqo+nuifObWtTkfIpHEz+KhydVM6Xlh0wmScsQRG4PmMgsw7mKRLqzRPwlaVCQp9eXaOlCvq4kc0turNgQ9YjhZhlsi9sN+Vj0L/LGqy20i5nRHLVsaD2TJ1k/zRPgobmlHIgMypkQiKY5/kTEb4GXgqBwGrUhseX3m8h3UaIi4iepOYbsKWlAkgRiZ9/nT4Iu38EeKM2TI9qv32WPgg5E0moZCwNzf++5YKgjdp2hRO4AN6PSxz4vDPrhTcEVQJOIsqF7OWr4PDueVwngki1IIU08tJBWs3BPZY0AIhcf/o+bN7qHm9flP0NfXIMapfsu9u37nRm2sSKYfwnEwlhirgDqLrKnuEeyXR6IIWlMSDWFH/K+fyNZgQtbxTGMrZbGHIm5deZMyr56pIiIBWnEf95+cyCFDVLatEUScQlbPcRdaTxtI2eKaeDyM5Q3mD10yayPBrCGHzxb1opz2OCFjH6cuTdLqNvXOQnTBeVs+4aQb3eyBLsG5qQi2g9AgTA8NWWyugOgU1rInX6AVD4ps4iVU3IIbNzJpTT3ngVvvQ3DP4DuKjI5geJfDp/Cu9cJQcYHr9eGq1NKdpHIOAm73oTWmTP1Ena8sTSZWWCx0zZ13gX2VXHoW83TcuekvEuSqMdM38tHu4dkh4f0HPnV0Leza5UVX+vHqQLPJeJB/W/3k2FZDsjmxnXez3TTSPMy/P4e/A/4Z8h28+06zjQXyTQAAAABJRU5ErkJggg==
-""")
+DISCORD_API_URL = "https://discord.com/api/v9/invites/%s?with_counts=true"
 
 def main(config):
     invite_id = config.get("invite_id", "r45MXG4kZc")

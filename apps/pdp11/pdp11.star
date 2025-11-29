@@ -10,15 +10,11 @@ Author: Matt Fischer
 
 # Copyright (C) 2024 Matt Fischer - All Rights Reserved
 
-load("encoding/base64.star", "base64")
+load("images/pdp11_icon.png", PDP11_ICON_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 
-PDP11_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAB4AAAAJCAYAAAAl45yBAAAAeElEQVQ4T9VTQQ7AIAgb/3/0JktqaiNVDzuMy
-yLUljKMy8TdIlo4jNZ271jSigR5rXPeNZtmIsEAwR3nmEDxWeOJzBoFF3N3YRV0Z4jzNxuoRCvc6/i3ws6tTg
-PY43/MRNWSVWKcH0Y928TV81i5hZgu6SfCO+/+AT5O7ApMY07rAAAAAElFTkSuQmCC
-""")
+PDP11_ICON = PDP11_ICON_ASSET.readall()
 
 RED = "#a12627"
 PURPLE = "#4f1932"

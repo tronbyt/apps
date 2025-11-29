@@ -1,13 +1,12 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/pokt_icon.png", POKT_ICON_ASSET = "file")
 load("render.star", "render")
+
+POKT_ICON = POKT_ICON_ASSET.readall()
 
 COINSTATS_PRICE_URL = "https://api.coinstats.app/public/v1/coins/pocket-network"
 PNI_HEIGHT_URL = "https://supply.research.pokt.network:8192/height"
-POKT_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IArs4c6QAAAQBJREFUSEu1lTEOwjAMRZ0KFQmJjZF7MHADFnbgFtyHCbFxBwYQYuYKqAudEZUQRSlKCY5ju4Jma+y8Oj9ftsmyrATFGq27MOwDbKeFIhvAxMAWRK3T4g128eO8gMSEmSQ4BrXHMdjf8/FfYA7oDlFgHLPf7YI1V8cqSm9QVSwlaaG+JFGw09Ila/RvBOaAgx5AfgutZosSK5ZkouIVeLK6luc8CX7L2Qp7F8PbBcdc8XPFHFjrb1IKzsdcE+JsyLrCh2JPS96uwX4bxFVSUI1EdRPaXwwsd2lj28VuJnY3yR0qsE0ab1J4PD8jQQOm5BJH09/BsVbZSQwcZndxoL4AMITkTbi6GN8AAAAASUVORK5CYII=
-""")
 
 def main():
     cached_price = cache.get("pokt_price")

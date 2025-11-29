@@ -7,10 +7,13 @@ Author: nataliemakhijani
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/alert_icon.png", ALERT_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ALERT_ICON = ALERT_ICON_ASSET.readall()
 
 # OBJECTS
 STATION_NAMES = {
@@ -401,7 +404,6 @@ BRANCH_ICONS = {
     "Hudson": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAX0lEQVQ4jWP8//8/AzqwK7+GIXioU4sRQyEDAwMTNkFsAJuhOA3AZRs2Q3C6AJchRBtALMBpAC4/U+QCbN7CagBNohEXwDCAWL+T5AJ8UUp9L2CzDZ+3aJMXSAEUZyYAh9Qlp5cl7HIAAAAASUVORK5CYII="),
     "New Canaan": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAfElEQVQ4jaVTWw7AIAhrvf+duy+TyopzG4kRCC0vBUwkyfXOdp2JgCQdPMX9JAkAwwOnM9kJLEkxUwV1Fd1aqHNIhI8EHUkCA8A4zdRJJHhDeETwu4LtYE+CWnDd727fHuNJP1XgJMPB3VOu95Ks+2U736JLmmdpIQYH/QLxQKXCZoE0WAAAAABJRU5ErkJggg=="),
 }
-ALERT_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAMAAAAICAYAAAA870V8AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAK0lEQVQImYXJMQoAIAzAwLT/f6U+QyHdxKHQbEdQOQtVkq9QHxLg7rA/MwqE2hG8taxbkwAAAABJRU5ErkJggg==")
 
 # MAIN CODE
 def main(config):

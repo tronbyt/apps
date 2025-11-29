@@ -6,12 +6,14 @@ Author: UnBurn
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/tidbyt_logo.png", TIDBYT_LOGO_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
+
+TIDBYT_LOGO = TIDBYT_LOGO_ASSET.readall()
 
 API_URI = "https://api.tidbyt.com/v0"
 
@@ -30,8 +32,6 @@ KNOWN_APPS_CACHE_TTL = ONE_DAY * 30
 TEAL_COLOR = "#78DECC"
 PINK_COLOR = "#FFB4F5"
 PURPLE_COLOR = "#7E8AF8"
-
-TIDBYT_LOGO = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAICAYAAADaxo44AAAANElEQVQIW2Msv3f6PwMS6LimBeYx4pSAKa7r+gHW2VTGwQjWQb7Eg/X/wEYpBDKhGkW0BACjNCFX+QeJOwAAAABJRU5ErkJggg==")
 
 fake_data = [
     {

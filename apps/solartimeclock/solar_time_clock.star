@@ -5,12 +5,14 @@ Description: A clock that shows the current solar time and (optionally) the loca
 Author: Daniel Sitnik
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/sun_icon.png", SUN_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+SUN_ICON = SUN_ICON_ASSET.readall()
 
 DEFAULT_24H_FORMAT = False
 DEFAULT_BLINK_TIME = True
@@ -25,10 +27,6 @@ DEFAULT_LOCATION = """
     "timezone": "America/New_York"
 }
 """
-
-SUN_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAH5JREFUKFNjZMABPlzO+S+gO4URmzRWQZAGTk5lhu/f7zJg0wjXhM9kkG3I8hg2gSTRnYRuG4ommLOQNbEpFzB8vJKL4kywJpjV2DSB5GF+g6ljhClkVymEs9GdB9P0807/fxCbPJuQTSXkPJhaykKPoniChSZRKQI9xPDZDAANlGs8ZqpPTQAAAABJRU5ErkJggg==
-""")
 
 DEBUG = False
 

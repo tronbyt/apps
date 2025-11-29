@@ -6,16 +6,15 @@ Author: broepke
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/cat_icon.png", CAT_ICON_ASSET = "file")
 load("render.star", "render")
+
+CAT_ICON = CAT_ICON_ASSET.readall()
 
 CAT_URL = "https://catfact.ninja/fact"
 
 # https://www.pixilart.com/art/tidycat-sr2866c333cb471
-CAT_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAACKADAAQAAAABAAAACAAAAACVhHtSAAAAVElEQVQYGV1OwRGAMAwqPfdzAqfTBXTBmOQOyjWfUCAFxP3GyMF1ojaH/BQR0cZ6JxQ+aNgF8nA3Sd+KAFYFx4ro2OfrY6swZrrXqf+duDSJexdqPwAMIrIbCvXsAAAAAElFTkSuQmCC
-""")
 
 def main():
     """Main entry point of the applicaiton.  Returns the rendering for the Tidbyt applet.

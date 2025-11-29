@@ -5,38 +5,14 @@ Description: Display your follower count from a Mastodon instance.
 Author: Nick Penree
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/mastodon_icon.png", MASTODON_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-MASTODON_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA8AAAAQCAYAAADJViUEAAAAAXNSR0IArs4c6QAAAIRlWElmTU0AKgAA
-AAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAAB
-AAAAWgAAAAAAAABIAAAAAQAAAEgAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAAA+gAwAEAAAAAQAA
-ABAAAAAAFry2WQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAA
-ADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4w
-Ij4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1z
-eW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
-eG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpP
-cmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAg
-PC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KGV7hBwAAAwBJREFUKBVlU01oVFcU/u7Pm+fMmKRJ1JpYQrCU
-aiJWXEnSihRBi7gQOpQ2baWCKOJGKULBha7cFBFciOI6KlkVFARFqA4KSlG0WVjRUBozmDgTk5k38967
-P8fzxtn1wOXec8895zvnO+cKdOTAfjshtPxRa1ovBLqtpR7vRcjnSGs0st2mNO8hbtTr8vepKZGKzPfA
-/nQyXwi+dxaozAFJAqxa41AsElotiYU3EjoABgaAXAhEkXmSLwZfqV9+ah4rFsJf6+/iJE0t9u7zGBv3
-tLTo8HzaiaEhT/u+JRoZcfTyH+OiZWu6u8JPmo14jSbvJ9LYo9W0+vSZFWrjiG4Xsms34fy5Fg4eDkVv
-r2xnuG3MypMnYhW3UoDcTqmE/3ihEmN8uxCZ49ycxaULEZaXPE78VgB5wuWLEWZmDIaHNXbuEph9ZREE
-Li/hbdhcsuhfRW3Evx4mOHQkwp3brbZ+vxwzeoQHZSaCpa8faNYMhHeK07YGTBT5tg1SeQyClc4F8T7A
-upKdB6xTyov9NLxLYSToAzBfesxxNCLXjpY5V1j3vqOzHQmfvbOaC09cIqFUB1kStjLSo3ILs/+mqMw6
-jK/NUD8g8xzAvOVUGV874xrcM7yrWqpWDd7OG+rb4ES1QnjxOEV3v8BHg4TagkGtamhh3tieYRU403op
-Jna/uh7kVu6J6nVb+8/r3nUKYYGyKpgRxsv4YBwTQ7BdrR7qQlj0SONoh+TanpMl5HKO1m0AwrxN4ZUI
-REFLV9RaFHm4ijqfD9Xg50QqV3+WNpvfXLn12Z/aG1NmkOPOWqOoK/C2cZO0PUpJvN0LKgDCCdASQVel
-UK8nb336ImOnVCLVnpzvdjx7sCLo2xabWsZEg3v49dW7Wx5nj/4vJEolSP4YHJTlhy+f9jrhr+d0zxgj
-wRN3zzb/5p+UTUp/oFau56k+eO3eF5dLo9O5qelRnk9AnjpFcrK8efHavS3jsVn8OTHVG8Y0ZqSQm5i2
-    zdzn2Njlsx7uj8xhdHoqy64t7wG1QaJ1LoGzlAAAAABJRU5ErkJggg==
-""")
+MASTODON_ICON = MASTODON_ICON_ASSET.readall()
 
 def main(config):
     username = config.get("username", "lisamelton")

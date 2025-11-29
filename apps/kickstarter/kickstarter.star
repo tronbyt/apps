@@ -6,22 +6,17 @@ Author: sethvargo
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/kickstarter_icon.png", KICKSTARTER_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+KICKSTARTER_ICON = KICKSTARTER_ICON_ASSET.readall()
+
 KICKSTARTER_URL = "https://www.kickstarter.com/projects/{slug}/stats.json?v=1"
-KICKSTARTER_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAPCAYAAAA/I0V3AAAAwklEQVR4AWNw
-L/Bh4DxXYcp6rnI767mKJ6znK3axna8IBYmzXqgxBPK3AcWfAvFxII4EiTNw
-XKqwBHJ+A/F/ZMx2rnIJVvELFUUMQMZBEIcE/A2k6SuJmv4zgAiaa2I7V7GY
-VE2nBe928JOi6Qfn+SppUJCTatMh8Qvd3OT4aRbZofeddE3nK46SqOknA/v5
-agcg4x+mZOVGIP0XXRyYmKtBqRym8QgQfwSlZqDtiSBxjgvVNkD+YZA4MACu
-AMXTQOIAaoOmULmqfxIAAAAASUVORK5CYII=
-""")
+
 KICKSTARTER_COLOR_GREEN = "#05ce78"
 KICKSTARTER_COLOR_BLACK = "#222"
 KICKSTARTER_CACHE_KEY = "kickstarter_{slug}"

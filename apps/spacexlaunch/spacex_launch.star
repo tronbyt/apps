@@ -6,12 +6,14 @@ Author: rytrose
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/error_image.png", ERROR_IMAGE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ERROR_IMAGE = ERROR_IMAGE_ASSET.readall()
 
 # Cache constants
 UPCOMING_LAUNCH_CACHE_KEY = "upcoming_launch"
@@ -31,21 +33,6 @@ DEV_DATA_SOURCE_URL_TEMPLATE = "https://lldev.thespacedevs.com/2.2.0/launch/upco
 DATA_SOURCE_URL_TEMPLATE = "https://ll.thespacedevs.com/2.2.0/launch/upcoming?search={}&mode=normal&limit=1"
 
 # Background image for error screen
-ERROR_IMAGE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACsAAAAgCAMAAAC8RHExAAAAIGNIUk0AAHomAACAhAAA+gAAAIDo
-AAB1MAAA6mAAADqYAAAXcJy6UTwAAAIrUExURcDAwMDAwcDAtb+/J8DAAL3AAzy/hADAwwDAwADAwgDAUwDAAADDAFRsVMIAwsAAwMAAw78A
-g8AAAsAAAMMAAJcAKAoAtQAAwQAAwMDAJ5gAKL+/wL+/wb+/tb+/ALy/Azy+hAC/wwG/wAG/wgC/VAC/AADCAMEAwr8BwL8Bw74Bg78AA78A
-AMIAAAsBtQABwQEBwEREwEREwUVFtk5OMVFRClBQDFFQD25Ih31Ew3xEwH1Ewj1LWwpRCQxQDAtQCSVjW0V8wkR8wER+w0hZh1AOD1AMDFAL
-ClkkMnl2tnx8wXx8wAAAwgAAtwwMNxAQEA4OEREOFIoBicYAwsMAwMQAwMQAwWEIXxMQExQNEAlfXwDGwwDFwQDIxAONixAWFhATEw4RETY4
-OLu7uMXFwsXFwQAEsgAEswEFqg0RORweHy8vLzIvMpgkmMoeysgfyLgLvK4AtbAAt1kJYBQRGxcRHRcRHhYRHBQQEgxVVQKsrAKrqwKurgd7
-exIUFBISEhMTEzQ0NKOjo6ysrKurqwAdWgAdWQAbR1Bje+Hh4ePj4+Pi4/Hh8fjg+Pfg94ZTpUAAckMAdTcBaS4CXy4CYCsEWBcQHRIcGxEo
-KA8fHwoKCg0NDRUVFRsbGx4eHicnJygoKAAhSwAdSVlui////31foS0AZzEAaTIAajIAay8CYhcQHxMTEhMSEhAPDwkJCQwMDB0dHQAhTFhu
-iv3+/n5foS4AZy8CYRQUFAimUx8AAAABYktHRKRZvnq5AAAAB3RJTUUH5wILDg0M3NJKlwAAAUJJREFUOMtjYAACRiZmFiBgZWPn4ODg5OIG
-Ah5ePn5+fgFBIWFhYRFRMXEJIGAYVTuqdlQtLrWSeNVKQdVKA4GMLLMcEMgrKCopKSmrqAKBGq+6hoaGppa2jo6OrqievgEQMBgCgZGxiamZ
-mZm5haWVlZW1ja2dnZ29g6OTk5Ozi6ubm5u7h6eXNxAwiAOBj6+ff0BAQGBQcEhoWHC4f0RERGRUdExMTGxcfEJCQmJSckoqEDCkAUF6RmZW
-dnZ2Tm5efkFhUXFJaVl5RWVVdXV1TW1dfUNDfWNTcwsQMLSCQFt7R2dXV3dPb1//hImTJk+ZMnXa9BkgMHPW7IY5c+fNXwACDAvBYNHiJRCw
-dNnyFStXrly1es1aEFi3fkPDnI1z68GAYRMYLNq8BaJ267YVQLBy++o1DSDgD1G7A8wZzmoBr/8slG0y/HEAAAAldEVYdGRhdGU6Y3JlYXRl
-ADIwMjMtMDItMTFUMTQ6MTI6MTIrMDA6MDCrZgI7AAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAyLTExVDE0OjEyOjAxKzAwOjAwJ3mghAAA
-ACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wMi0xMVQxNDoxMzoxMSswMDowMFME6vsAAAAASUVORK5CYII=""")
 
 def get_schema():
     """Returns the pixlet app schema.

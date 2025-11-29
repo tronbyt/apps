@@ -9,11 +9,14 @@ Author: Joey Hoer
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/sep.png", SEP_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
+
+SEP = SEP_ASSET.readall()
 
 # Default configuration values
 DEFAULT_LOCATION = {
@@ -73,11 +76,6 @@ iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAuSURBVHgBY7B
 /wDD/BMP5GQwPLPChAxJAZUDFICR/goFBgoHBAh/in8EgD1IPAMkGGTcArQUNAAAAAElFTkSuQmCC
 """,  # 9
 ]
-
-SEP = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAQAAAAOAQAAAAAgEYC1AAAAAnRSTlMAAQGU/a4AAAAPSURBVHgBY0g
-AQzQAEQUAH5wCQbfIiwYAAAAASUVORK5CYII=
-""")
 
 # Convert hex color to RGB tuple
 def hex_to_rgb(color):

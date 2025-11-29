@@ -30,19 +30,17 @@ Author: github.com/danrods
 #
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/bible_icon.png", BIBLE_ICON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 
+BIBLE_ICON = BIBLE_ICON_ASSET.readall()
+
 # https://ourmanna.readme.io/reference/get-verse-of-the-day
 VOTD_URL = "https://beta.ourmanna.com/api/v1/get?format=json"
-
-BIBLE_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAALklEQVQYlWNgYGD4jw8wMDD8Z4ApgnJQME5FONgIDro15JtEtCKiHI5XEb5wAgAK2rZKrYeFRwAAAABJRU5ErkJggg==
-""")
 
 ABBREV_LOOKUP = json.decode("{\"Genesis\":\"Gen.\",\"Exodus\":\"Ex.\",\"Leviticus\":\"Lev.\",\"Numbers\":\"Num.\",\"Deuteronomy\":\"Dt.\",\"Joshua\":\"Josh.\",\"Judges\":\"Judg.\",\"Ruth\":\"Ruth\",\"1 Samuel\":\"1 S.\",\"2 Samuel\":\"2 S.\",\"1 Kings\":\"1 K.\",\"2 Kings\":\"2 K.\",\"1 Chronicles\":\"1 Chr.\",\"2 Chronicles\":\"2 Chr.\",\"Ezra\":\"Ezra\",\"Nehemiah\":\"Neh.\",\"Esther\":\"Esth.\",\"Job\":\"Job\",\"Psalms\":\"Ps.\",\"Proverbs\":\"Prov.\",\"Ecclesiastes\":\"Eccl.\",\"Song of Solomon\":\"S. S.\",\"Isaiah\":\"Is.\",\"Jeremiah\":\"Jer.\",\"Lamentations\":\"Lam.\",\"Ezekiel\":\"Ezek.\",\"Daniel\":\"Dan.\",\"Hosea\":\"Hos.\",\"Joel\":\"Joel\",\"Amos\":\"Am.\",\"Obadiah\":\"Obad.\",\"Jonah\":\"Jon.\",\"Micah\":\"Mic.\",\"Nahum\":\"Nah.\",\"Habakkuk\":\"Hab.\",\"Zephaniah\":\"Zeph.\",\"Haggai\":\"Hag.\",\"Zechariah\":\"Zech.\",\"Malachi\":\"Mal.\",\"Matthew\":\"Mt.\",\"Mark\":\"Mk.\",\"Luke\":\"Lk.\",\"John\":\"Jn.\",\"Acts\":\"Acts\",\"Romans\":\"Rom.\",\"1 Corinthians\":\"1 Cor.\",\"2 Corinthians\":\"2 Cor.\",\"Galatians\":\"Gal.\",\"Ephesians\":\"Eph.\",\"Philippians\":\"Phil.\",\"Colossians\":\"Col.\",\"1 Thessalonians\":\"1 Th.\",\"2 Thessalonians\":\"2 Th.\",\"1 Timothy\":\"1 Tim.\",\"2 Timothy\":\"2 Tim.\",\"Titus\":\"Tit.\",\"Philemon\":\"Philem.\",\"Hebrews\":\"Heb.\",\"James\":\"Jas.\",\"1 Peter\":\"1 Pet.\",\"2 Peter\":\"2 Pet.\",\"1 John\":\"1 Jn.\",\"2 John\":\"2 Jn.\",\"3 John\":\"3 Jn.\",\"Jude\":\"Jude\",\"Revelation\":\"Rev.\"}")
 

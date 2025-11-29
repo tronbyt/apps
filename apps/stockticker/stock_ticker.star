@@ -6,18 +6,14 @@ Author: hollowmatt
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/symbol_b64.png", SYMBOL_B64_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+SYMBOL_B64 = SYMBOL_B64_ASSET.readall()
+
 STOCK_QUOTE_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol="
-SYMBOL_B64 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAIxJREFUOE
-9jZGBg+M+ABl6UMqMLgfkS3X8xxBmRDYBpxKYQpBObPNwAkCQujdhcCFMLNgCf5u8f9jBwCrhg
-OB2mB6cBII3oANkguAEvSpn/ozsd2VZcbFiYMJJiALawoI0BIJsIhQFeLyA7lawwIMkAbOmAmF
-igXjqA5QVcqRFbSkRWS73MhBxwpGRnAGAwmUGS9KHUAAAAAElFTkSuQmCC
-""")
 
 def main(config):
     APIKEY = config.get("ALPHA_KEY", None)

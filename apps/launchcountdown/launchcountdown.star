@@ -6,13 +6,27 @@ Author: Robert Ison
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/rocket_icon.png", ROCKET_ICON_ASSET = "file")
+load("images/rocket_icon_b.png", ROCKET_ICON_B_ASSET = "file")
+load("images/rocket_icon_c.png", ROCKET_ICON_C_ASSET = "file")
+load("images/rocket_icon_d.png", ROCKET_ICON_D_ASSET = "file")
+load("images/rocket_icon_e.png", ROCKET_ICON_E_ASSET = "file")
+load("images/rocket_icon_f.png", ROCKET_ICON_F_ASSET = "file")
+load("images/rocket_icon_g.png", ROCKET_ICON_G_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ROCKET_ICON = ROCKET_ICON_ASSET.readall()
+ROCKET_ICON_B = ROCKET_ICON_B_ASSET.readall()
+ROCKET_ICON_C = ROCKET_ICON_C_ASSET.readall()
+ROCKET_ICON_D = ROCKET_ICON_D_ASSET.readall()
+ROCKET_ICON_E = ROCKET_ICON_E_ASSET.readall()
+ROCKET_ICON_F = ROCKET_ICON_F_ASSET.readall()
+ROCKET_ICON_G = ROCKET_ICON_G_ASSET.readall()
 
 #Constants
 ROCKET_LAUNCH_URL = "https://fdo.rocketlaunch.live/json/launches/next/5"
@@ -32,32 +46,6 @@ default_location = """
 """
 
 #Rocket Icons to loop through
-rocket_icon = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAACY0lEQVQ4jY3P30tTYRzH8c/zPMdtHd2Za95oGYUU4Q+IIpk/iiSCsKSIFBOCAqM/oG6DcyXRXRdedhHFDOtuhRd5kaz9EEQpZ0RQ/kCRULd5zna2s/k8Txe1FXNi39svrzffL8F/zsPRUJ9SpdyglJ4SQjQIIWukkITsB3VdUutQLKA6q3qPNTW4NU2Fw1UFSik+TM6llf1wrj4WqNXUqx3drdWM0dLONCwQkL0Dui6p3RAb83jUK/4/eOxNFADBrZt+5HJ5UEZX6V44Vx8LuP/BxSGQAADDsKTgfJYAQL8+7rAL7keM0iNC7kRONnov19ZWXyrHxeFcYGpyzsykswOkXx93cK69c7vdnT7fQVXYKV7nVUnX+VZafnYRRz7GLdOwgo/vdQwqdr7mOVPIhabjTQrPbMFRrbLO7hZUOptzgWg4bpmmFXSt+YcAgJ24ODhFOXPSgtHu0Ry0q7sFTGEl3NbciNbmxhI2DCvoWvUP6ToRv+MAHoyGzxIqp7vOtRFfnVbx52gonkmZ1lt17S8GAAoAi+vG/URa2NORL0gl07twJDQvU0bmfTkuBZw8f13zeJ01dYcRCcVLEc4FYuEFbCQt8W15e6IcAwCN9fT0Dn8dO5BaWySJhIFiZGtzG9HwArIFBuLwMsqYf9dvACh1uYZbTh9Vn9w1kVj5jo3NlNwwCnY4tCBX15NcUX3YSiSyAF+pGIAQZ2ALiBfzuD0fsH4u/UgkU5mXfEe2r29mn87NftoxTTPCqDlSKaAIIZzLM5+XiZQzaqHw7NXItYnisk8PLhGb1judmTuv9YF8pcAvJgMvFQ4bgRAAAAAASUVORK5CYII=
-""")
-
-rocket_icon_b = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAACY0lEQVQ4jY3P30tTYRzH8c/zPMdtHd2Za95oGYUU4Q+IIpk/iiSCsKSIFBOCAqM/oG6DcyXRXRdedhHFDOtuhRd5kaz9EEQpZ0RQ/kCRULd5zna2s/k8Txe1FXNi39svrzffL8F/zsPRUJ9SpdyglJ4SQjQIIWukkITsB3VdUutQLKA6q3qPNTW4NU2Fw1UFSik+TM6llf1wrj4WqNXUqx3drdWM0dLONCwQkL0Dui6p3RAb83jUK/4/eOxNFADBrZt+5HJ5UEZX6V44Vx8LuP/BxSGQAADDsKTgfJYAQL8+7rAL7keM0iNC7kRONnov19ZWXyrHxeFcYGpyzsykswOkXx93cK69c7vdnT7fQVXYKV7nVUnX+VZafnYRRz7GLdOwgo/vdQwqdr7mOVPIhabjTQrPbMFRrbLO7hZUOptzgWg4bpmmFXSt+YcAgJ24ODhFOXPSgtHu0Ry0q7sFTGEl3NbciNbmxhI2DCvoWvUP6ToRv+MAHoyGzxIqp7vOtRFfnVbx52gonkmZ1lt17S8GAAoAi+vG/URa2NORL0gl07twJDQvU0bmfTkuBZw8f13zeJ01dYcRCcVLEc4FYuEFbCQt8W15e6IcAwCN9fT0Dn8dO5BaWySJhIFiZGtzG9HwArIFBuLwMsqYf9dvACh1uYZbTh9Vn9w1kVj5jo3NlNwwCnY4tCBX15NcUX3YSiSyAF+pGIAQZ2ALiBfzuD0fsH4u/UgkU5mXfEe2r29mn87NftoxTTPCqDlSKaAIIZzLM5+XiZQzaqHw7NXItYnisk8PLhGb1judmTuv9YF8pcAvJgMvFQ4bgRAAAAAASUVORK5CYII=
-""")
-
-rocket_icon_c = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMRDhkvmYOhXgAAAmFJREFUOMuN0l1Ik1Ecx/HfOedxW49uc203WQYhRfgCRaTzpUgiCEuISDEhKDC66a5ug+cqorsCL7sIQsG6WyGRiLL2IoQSzoigTFEs1GePz7M989k853RRW7HWy//2z+d7zoFD8J9zezjaq1QpFymlR4QQdULIGikkIf+CmiapvTc5orqreg401Hl9PhUuTxUopZiamMso/8Lbe5IjtT71fHtXczVjtLSzTBsE5M8BTZPUqUuO+v3qufAPPPosAYDg8qUwtrfzoIyu0L+d7P0FF4dAAgBM05aC81kCAH3amMspeO8wSvcLuRM/XB84W1tbfaYcF4dzgemJOSubyfWTPm3Mxbnvhdfr7QgGd6vCMXgooJLOk820/NpFHH+dsi3Tjty73j6gOPmax0whpxoONig8uwlXtco6uppQ6dqcCyRiKduy7IhnNTwIAOzQ6YFpypmbFsxWv89FO7uawBRWwi2N9WhurC9h07QjnpXwoKYR8T0O4NZw7DihcqbzRAsJhnwV35yIprKGZT9XV39iAKAAsLhm3tAzwpmJv4ORzvyG49F5aZjZV+W4FHDz/AWfP+CuCe1DPJoqRTgXSMYWsJ62xYelrfFyDAA02d3dM/R+dJexukh03UQxsrmxhURsAbkCA3EFGGUsXOnPUOrxDDVNvVTvX7OgL3/E+oYh182CE4suyJW1NFfUIDZ1PQfw5YoBCHEMAMTRm7gyP2J//fxJTxvZJ3xHtq5t5B7Mzb7dsSwrzqh1t1KAfAkE5FJb2xKR8g0vFB61T06OF5e9WiREHPrQ7c5efar15ysFvgFRBSwZaopWfwAAAABJRU5ErkJggg==
-""")
-
-rocket_icon_d = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMRDhs0IdAKMAAAAmRJREFUOMuN0k1IFGEcx/Hf8zyzs9vozrrtXjQNQorwBboo60uRRBCWEJFinQoMu9c1GOgSHQMPHTp00dA6bSWRiLbui5c8tEoEIcmKxrrrOrMz6+z2PNOhdotty/7Xh8/3+T/wEPzn3J2IDEku6Qql9JQQokkIp94RDiEHQU1zqHUkMam4XYPHWpu8qqpA9rhAKcXC3EpeOgjvNyYmG1TlUk9/Rx1jtHJm6BYIyN8DmuZQuykx5fMpF0M/8dTzOACCa1dD2N8vgjKaov+62fsbLg+BAwDQdcsRnL8nADCsTct2yXuPUXpUON9iJ1v8Fxoa6s5X4/JwLrA4t2KY+cIIGdamZc7VV16vtzcQOKwIO8eDfoX0nemg1WuXcWwpaRm6FX5wq2dUsov1T5lEzrYeb5W4mYFcp7De/nbUWptzgXg0aRmGFfZshq4DADtxbnSRcuamJb3bp8q0r78dTGIV3NnWgo62lgrWdSvsSYWuaxoRP+IA7kxEuwh1lvtOd5JAUK355ngkaeYM66Wy+QsDAAWA9S19PJsX9nJsDbnd/B84Fvng5HTzbTWuBNy8eFn1+d31wWbEIslKhHOBRHQV6V1LfPqyN1uNAYAmBgYGxz5OHcptrpNsVkc5ktnZQzy6ikKJgch+RhkL1fozlHo8Y+0Lb5SHNw1kNz4jvZNz0nrJjkZWndTWLpeUADLZbAHgG7UC7H4m8wwAnMev0agUrHeuZsO0xbSqyOOptGVub33tKhbtJYkat9cWZnh1gGz7/Q4AbHR3v+Cl0pOe+fnZ8uGQFg4Smz5yu80bM9pIsdYG3wFGIiiy+bwJ8gAAAABJRU5ErkJggg==
-""")
-
-rocket_icon_e = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMRDhwXzPbthQAAAlpJREFUOMuNk81LVFEYh3/nnOvMdHXuOI0bLaOQIvyAWiTjR5FEEJYUoWJCUFC0aVfb4K4k2rXwDwhCw9pNIpELZZoPN2o4RgSliSLleOd678yduTOec1vUTDVN2W91Di/Pc94X3kPwn7k/Gu6TqqSrlNITQogGIZwaRziE7AWqqkOtA/Ex2V3Ve6SpwasoMlyeKlBKMTO9kJb2gnP18bFaRb7U0d1azRgt1UzDAgH5u0BVHWo3xMd9Pvli8Ac8/iIGgOBafxC5XB6U0XX6r5e9v8DFEDgAAMOwHMH5PAGAAXXCZRe8Dxilh4SzGz3e6L9QW1t9vhwuhnOB2ekFM5PODpIBdcLFuTLp9Xo7A4H9srB1XueXSdeZVlredhGOvklYpmGFHt7uGJLsfM0TJpGzTUebJJ7ZhqtaZp3dLajUNucCsUjCMk0r5NkIDgMAO3ZuaJZy5qYFo92nuGhXdwuYxEpwW3MjWpsbS7BhWCHPenBYVYn4LgdwbzRyilBnrut0GwnUKRVnjoUTGd20XsobP2EAoACwsmnc0dLCnou+g55K/wFHw0uObmRel8MlgZvnryg+v7um7iCi4URJwrlAPLKMrZQlPnzemSqHAYDGe3p6b70f36dvrBBNM1CUbCd3EIssI1tgIC4/o4wFK+0MPby4ONky80p+dNOEtvYRW0nd2TIKdiS87KxvprgkB7CtaVmAr1UUFA/i5F1cXxqzvqx+0lJ65infddo3k9nHC/Nvd03TjDJqjlQS/PYX5J2v/c9GLk8V731qaJXYtN7tztx4rg7mKwm+AeP6I6z2tLb7AAAAAElFTkSuQmCC
-""")
-
-rocket_icon_f = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABWGlDQ1BJQ0MgcHJvZmlsZQAAKJFtkL9LQlEcxY9lCCbh4CQFL2iosIinQ9FkDhE0vOx32/VqKj3t8t6Tag6a2oLGqKVaagpsrK29qOgfcIkggreU3L5XK7W6ly/nw5dzL4cDtHmZEKYXQKHoWMnJCW1peUXzVRBAD/wII8S4LeKGMU0WfGvrce/hUXo7pP7auRt38+d6+PX0ubR2lj756285/nTG5qQfNINcWA7g6Sc2NhyheJM4ZFEo4l3F2TofKk7V+aLmmUsmiG+IgzzH0sSPxJFU0z7bxAWzxL8yqPSBTHF+lrSLphsG4tARwyhmsEDd/O+N1bwJrENgCxbyyCIHBxq9FnRNZIinUATHMCLEOkZooqrj3901dmIbGNsjeGnsmAlcUvfBg8aur0Jxe4HrI8Es9tOox/Xaq1G9zp1loGNfyrdFwDcAVB+kfC9LWT0G2p+AK/cTJspkFpxq0b4AAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfoAQQQDQLDRzG5AAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAoJJREFUOMuN00tME1EUBuB/7gylTrE8phEEsSQQwBakPIXSOBglKooQwwZcmUBw40YTd4agG0OiC5eycgOJwRggoEHRtlCQCAUVasSABFTA0kJpO6XozLiRhqd4tn++/57FPRT+c5Izi8vTc09djtOmGVRqLp4OU0aU9d5nmf0gRRFSXtfYos/jy9L1KQfVahYKZRgIIejGDR+zH75U29iSbSq9yJ/OV9E0CWXeVQG/g4G9CyiKkIq6O63ZpjMXTv7FrW2DAChUVxVibW0dPs/SN/Kvlw2bcCiDDADwePzy/MwnOwMAhGYUqaaa26qo2KOuufGBnBP8uayiktLtuLqqCAAgihK+OKZ9n+3mZwyhGYWx+m6X9liBMTYunhUD7iuaGJYy8cfJ9rU3sKV3WHCMWLq/OoZeMNnlNx9rkrJK0nR6RvS7oFBF0EaTHrutLYoSrK+HhVFbT2dHc0MNANCu2Y8WQsLCOc3hgqjIcFJs0oNm6BDO1CUiQ5cYwvb+ns6ORw01sixJAEDWhdUl56S1lVXSRJ+RtAVvjChKsLx65x/p24oBgABAfObZeqcnGBwacGBl2bcD26wf5PdD5pedzVtxqCApJa8yOuZQeITmCAb6xkMloijhrW0CTrdfGh20PN+OAYAYOa6sdrr9wMqPGcrtXsVGiWvJg0HbBAK/aBAlR3OJusLd/gyp1Gprc/KT2aarXrhnp+B0LssLbiFos47Lc99dIsNy+Lk4HxA8i7O7FdDXU1ObEhISIuUJJ2LsZuGNFO2dHDM/6X/6oN617PUHqcj8+Sl7/1jXw2uyLIk7Grp5fqGd52fuGQxtRRx3fnOmYNWa3IpbLYRmFHvdzB9eQho77MS9ewAAAABJRU5ErkJggg==
-""")
-
-rocket_icon_g = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABWGlDQ1BJQ0MgcHJvZmlsZQAAKJFtkL9LQlEcxY9lCCbh4CQFL2iosIinQ9FkDhE0vOx32/VqKj3t8t6Tag6a2oLGqKVaagpsrK29qOgfcIkggreU3L5XK7W6ly/nw5dzL4cDtHmZEKYXQKHoWMnJCW1peUXzVRBAD/wII8S4LeKGMU0WfGvrce/hUXo7pP7auRt38+d6+PX0ubR2lj756285/nTG5qQfNINcWA7g6Sc2NhyheJM4ZFEo4l3F2TofKk7V+aLmmUsmiG+IgzzH0sSPxJFU0z7bxAWzxL8yqPSBTHF+lrSLphsG4tARwyhmsEDd/O+N1bwJrENgCxbyyCIHBxq9FnRNZIinUATHMCLEOkZooqrj3901dmIbGNsjeGnsmAlcUvfBg8aur0Jxe4HrI8Es9tOox/Xaq1G9zp1loGNfyrdFwDcAVB+kfC9LWT0G2p+AK/cTJspkFpxq0b4AAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfoAQQQEh2DFTLSAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAoJJREFUOMuN00tME1EUBuB/7gylTrE8phEEoSQQwBakPIXSOBglKooQwwbYQnDjRhN3hqAbY6ILd8rKDSQGY4CABkXbQnlEKKhQIwYkoAKWFgrtlKIz40YanuLZ/vn+exb3UPjPScooKkvLOX0lRptqUKm5WDpEGVbac59lDoIURUhZXWOzPpcvTdMnH1arWSiUISCEoAvXvcxB+HJtY3OWqeQSfyZPRdMkmK2tCvgd8O9fQFGElNfdbskynb146i9uaR0AQKGqsgDr6xvwepa+kX+9bNiCgxlkAIDH45PnZz7ZGQAgNKNIMVXfUkVEJ7jmxvuzT/LnMwuLS3biqspCAIAoSvjimPZ+tpufM4RmFMaqO53a4/nG6JhYVvS7azRRLGXiT5Cda29iS8+w4BixdH11DL1ksspuPNEkZhan6vSM6HNBoQqjjSY99lpbFCVY3wwLo7bujvamhmoAoF2zHy2EhIRymqP5EeGhpMikB83QQZyhi0e6Lj6I7X3dHe2PG6plWZIAgGwIq0vOSWsLq6SJPj1xG94cUZRgef3ON9K7HQMAAYDYjHP1Tk8gMNTvwMqydxe2WT/I74fMrzqatuNgQWJybkVk1JHQMM0x9PeOB0tEUcKgbQJOt08aHbC82IkBgBg5rrR2uu3Qyo8Zyu1exWaJa8mDAdsE/L9oECVHc/G6gr3+DKnQamuz85LYmrFHcM9OwelclhfcQsBmHZfnvrtEhuXwc3HeL3gWZ/cqoK+lpNyLi4sLj06IQZTdLLyVItcmx8xP+549qHctr/kCVHje/JS9b6zz4VVZlsRdDV08v9DG8zN3DYbWQo67sDVTsGpNTvnNZkIziv1u5g8mDxevHDczqgAAAABJRU5ErkJggg==""")
 
 period_options = [
     schema.Option(value = "1", display = "1 hour"),
@@ -357,37 +345,37 @@ def main(config):
                                 ),
                                 render.Animation(
                                     children = [
-                                        render.Image(src = rocket_icon),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_d),
-                                        render.Image(src = rocket_icon_e),
-                                        render.Image(src = rocket_icon_f),
-                                        render.Image(src = rocket_icon_g),
-                                        render.Image(src = rocket_icon_f),
-                                        render.Image(src = rocket_icon_d),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_d),
-                                        render.Image(src = rocket_icon_e),
-                                        render.Image(src = rocket_icon_d),
-                                        render.Image(src = rocket_icon_c),
-                                        render.Image(src = rocket_icon_b),
-                                        render.Image(src = rocket_icon),
-                                        render.Image(src = rocket_icon),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_E),
+                                        render.Image(src = ROCKET_ICON_F),
+                                        render.Image(src = ROCKET_ICON_G),
+                                        render.Image(src = ROCKET_ICON_F),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_E),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON),
                                     ],
                                 ),
                             ],

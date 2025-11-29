@@ -6,15 +6,25 @@ Author: Robert Ison
 """
 
 load("cache.star", "cache")  #Caching
-load("encoding/base64.star", "base64")  #Used to read encoded image
 load("encoding/json.star", "json")  #Used to figure out timezone
 load("http.star", "http")  #HTTP Client
+load("images/iss_icon.png", ISS_ICON_ASSET = "file")
+load("images/iss_icon2.png", ISS_ICON2_ASSET = "file")
+load("images/iss_icon3.png", ISS_ICON3_ASSET = "file")
+load("images/iss_icon4.png", ISS_ICON4_ASSET = "file")
+load("images/iss_icon5.png", ISS_ICON5_ASSET = "file")
 load("math.star", "math")  #Used to calculate duration between timestamps
 load("re.star", "re")  #Used for Regular Expressions
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")  #Used to display time and calcuate lenght of TTL cache
 load("xpath.star", "xpath")  #XPath Expressions to read XML RSS Feed
+
+ISS_ICON = ISS_ICON_ASSET.readall()
+ISS_ICON2 = ISS_ICON2_ASSET.readall()
+ISS_ICON3 = ISS_ICON3_ASSET.readall()
+ISS_ICON4 = ISS_ICON4_ASSET.readall()
+ISS_ICON5 = ISS_ICON5_ASSET.readall()
 
 #Requires the RSS feed for your location from spotthestation.nasa.gov
 #Use the map tool to find the nearest location, click the blue marker then the "View sighting opportunities"
@@ -30,25 +40,6 @@ MINIMUM_CACHE_TIME_IN_SECONDS = 300
 MAXIMUM_CACHE_TIME_IN_SECONDS = 600000
 
 # Load icon from base64 encoded data
-ISS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA1ElEQVQ4y5WTOw7DIBBEhygn4ThL7T5ufYmQ82xtWt/Eck4yKQLIBvzbBgkxTzs7C1AXcaMetdgfQQ7hBDxJEvBsPKYT4R5kI25A6ESoqhyGYQNJFgzgYcwH5DufyY4TwavvMU0TAMCJZDumNYMEATxK8XdZMIaQtWbHziVxCeDqjlfE6xlQVaGqGTSG0BDXET/L/iMEANB1HZxIFv9nA8SEKvuc55mqythRiuss4i0giVcA3IakTo4g6f5RpGCstbDWtrY1L1scpjn7aHt7f+u3ntYP6dzKrlS3n+0AAAAASUVORK5CYII=
-""")
-
-ISS_ICON2 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAywFUG1eCAAAANpJREFUOMuVk7uNwzAQRB+Nq4TlkLHyc6omjlfPxlaqTgS7knFgkaAk6uNNCBCch52dJWxLfFG3rTgdQQ7hgiRJgqTGY8UQtAdZiBsQxRBkZur7fgHJFhwknPtH+itnthND4Pd+ZxxHAGIIxY5rzSBDILEWv55PHsNQtG7HziXxGqDqTlfE9QxkZphZAT2GoSHeRvyz7n+GANB1HTGEIv7MBuaENvY1TZPMTPp0lOM6i3gJmO3UAC5BVEFyJ0eQfH+r4hDgvPd471vbWpZtHqY7+2h7e//Vbz2tN1RXzK3nlhc3AAAAAElFTkSuQmCC
-""")
-
-ISS_ICON3 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAywYM2sy0QAAANpJREFUOMuVk7uNwzAQRB+Nq4TlkLHyc6omjlfPxlaqTgS7knFgkaAk6uNNCBCch52dJWxLfFG3rTgdQQ7hgiRJgqTGY8UQtAdZiBsQxRBkZur7fgHJFhwknPtH+itnthND4Pd+ZxxHAGIIxY5rzSBDILEWv55PHsNQtG7HziXxGqDqTlfE9QxkZphZAT2GoSHeRvyz7n+GANB1HTGEIv7MBuaENvY1TZPMTPp0lOM6i3gJyOIKwCWIKkju5AiS729VHAKc9x7vfWtby7LNw3RnH21v77/6raf1Bocyzax1x99PAAAAAElFTkSuQmCC
-""")
-
-ISS_ICON4 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAywoFbICfQAAANhJREFUOMulkzsOwyAQRIfIJ/Fxltp93PoSIefZ2m59E+ScZFIYEAb/omyDQMzTzg4AdRE/1KMWuzPIKZyAI0kCjjuXaUV4BNmIdyC0IlRVDsOwgUQLBnAw5g3yldZox4rg2feY5xkAYEWSHbM3gwgBHErxZ1kwTlPSmgM7t8QlgNkZ74jzGVBVoaoJNE7TjriOuCn7DxAAQNd1sCJJvM4GCAlV9um9p6qSa0cxrquIt4AozgC4BQk7eu9TJ2eQeN5kcay+2pblLLLHxjCDoydQfRz++1sv6wttM9GjkfVivgAAAABJRU5ErkJggg==
-""")
-
-ISS_ICON5 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAyw65gtzNQAAANlJREFUOMulkztuwzAQRB+DnMTHWdbq41aXMHOera1WNyGck4wLiwT1tYxsQ5DgPOzMkrAu8UF9rcXpCHIIFyRJEiRtXFY00x5kJt6AKJrJ3dX3/QxSLARIhPCLdKtrsRPN+LleGccRgGhW7YStDAoEEkvx3+PBfRiqNuzYOSVeAtSc6Yy4zUDujrtX0H0YNsTrEX8v+58gAHRdRzSr4lc2ME1oZV85Z7m79OqojOvdiOeAIm4AnIJMO+WcaydHkHLeZqAAgctFyyyax6Ypg70nsPo4+u9vfVtPbS/Ro5V9Dx8AAAAASUVORK5CYII=
-""")
 
 DEFAULT_LOCATION = """
 {

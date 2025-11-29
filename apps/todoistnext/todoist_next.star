@@ -5,11 +5,13 @@ Description: Displays the next due or overdue task from todoist.
 Author: alisdair(https://discuss.tidbyt.com/t/todoist-integration/502/5), Updated by: akeslo
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/zen_icon.png", ZEN_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ZEN_ICON = ZEN_ICON_ASSET.readall()
 
 TODOIST_API_BASE_URL = "https://api.todoist.com/rest/v2"
 
@@ -22,9 +24,6 @@ MODEL_KEY_ZEN = False
 CACHE_KEY_MODEL = "todoist_model"
 
 # Load Icon as Base 64
-ZEN_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAAFAAAAACy3fD9AAADrElEQVQ4EY2UW2hcVRSGv33OmZNJZ9Imk6mpM2mmpG16UyqNWkmpSqEWb0+C1icFI0EDxTdFURAVFB+CSgWV4kPFpNRCKBRNDVWkBS1prKkBE5M0qbZNTJrJZdJJ5rZde5KTaWy0Lljn7Mva/16Xf20FqAW1WLfOofQuP7ufjbBx77sEVjxOWnZvlCKZxCeaOH3oA4Z+muDc0VlZyYrmRLUBs0Utwrv8PN+0g8idb6FzFrZbg89ZnTcTg0WxZJRODZFJD2HZc/za9hKtbwwx0pWSnZwB87FhZzFPNd1HxcbnWFnyGMpXhbIC6EWYwsCs2XYpjhvDdtYTCFlU3XGZgfNxro8awNXF1H96NxWb6ikvfxpzz/+QoKOpKYW1keA9OeVPzoS3XuHcd3GHoF1MtPZtgsE65iQJDQU09UlhvGQkGdsZgWMPwaoizcPtlQdOpt3iHMlXLPYdqCabtsksOXLLSVpCT2RMCQRUacJWMsgTr1U71DW8iRvYcEuEGwyU4Dii83DwwhbNyly47nNVXyY0Ce3Le7dQgH8N0wMUGm2r0DxaBQGfWVQ8EFF0XAvE+DMQc27imXdwub+kZXtY8+oOeHK959+8YTojHqUVznLn8msLHntjS/hQWQLv79LsrZTiiWdLIeeRlgW0xbLMr/MhaQE2umYF4pnifgkPSeJyYAbyZkBpIEc41rBZ6BAzbWG8Ab94uK0Misxt/yEOpjdNv+Y7ESoCmvfuzfFITBnK/0O8PBRAtbhvqu668hEsi96OFhKTf3kxBH2KB6OWgBUOXZmBpi7Nyz9Cb9yAesD56PmyT3Gm+3Kf7jnbbNHceITZyRHPFWOayb8ZBcDhJBzsVnzUqeif8iy9v+LoALRd+KM3+0Vji8Vw77hspTwPc4I4ldLMSCvMGiqImLVpmSfnNGkz8UTCNXSZkP6/nmaWq93XpOWy5Yz1D1AadYnEahLizfFBxaEexWxWsft2TbnkZr/00ovbDQ8V7kJhsoK955Ti569bD8+deOcYo33DUrtcCSO/pcgkJ3HLdC5avWlaHolxeTYvjGumZLwnCiG/olzUgLX0w+ud8Jlc2nH8yOFE28GT/P79oDg+aWgjKZf6dH7VI5W25Z1zZV7Mmi2bR1X4NpOfIlvjEwaZYM3uD12XBtt/uTggKUlmv/nwWy6evSRbJrszJvMhUekBVgkDQ7j+ENW1UfZ//Axrt9YqoZQlVoslkvD1+fYT2ebGVuJXx0hNj8nZiQVN/A1hXkA63HVM/QAAAABJRU5ErkJggg==
-""")
 
 def dateStringToTime(dateString):
     return time.parse_time(dateString, "2006-01-02")

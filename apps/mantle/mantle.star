@@ -8,10 +8,13 @@ Author: Mantle Rev Ops
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/mantle_logo.png", MANTLE_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
+
+MANTLE_LOGO = MANTLE_LOGO_ASSET.readall()
 
 MANTLE_HOST = "https://app.heymantle.com"
 
@@ -98,8 +101,6 @@ DATE_RANGES = [
         "interval": "month",
     },
 ]
-
-MANTLE_LOGO = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAADzUExURf/Ie//Hef/Iev/Hef/Hef/Hef/Hef/Hef/Hef/Hef/Hef/Hef7Hef7GeP7Gef3GeP/Jes2hZG1XOmtWOcCXXtGkZW9ZO2pVObyUXP/Ke7GMWBoYFhUTFGFONfjCdnpiQBYUFJV3TLKNWB4aGCskHc6iZOKxbTkvIxkXFhoXFpd4TR0aGCwlHiAcGYRpRJ18Ty0mHhsYF1pJMlRELzMqITwxJUI3KGdTOBcWFWhUOKiFVB4bGJJ0SoJnQxYVFWRRNum3cEs9LN6ua4FmQxIRE5Z3TMieYnJbPLSOWdSmZsygY8KZX3NcPbaPWv/Iev3FeP///3xR0csAAAALdFJOUwAABUem4voXke6vMi/hnwAAAAFiS0dEUONuTLwAAAAHdElNRQfnCBIRNyS8FdjtAAAAvElEQVQY02WPRxaCQBBEZ8jQKGMWMWAEA+accw73v40zLFxI7eq/111VCGHM8YIoSaLAcxgj6mVFBV+qIlOCZQ1+0mSMOAX0UJi5sKGDwiFeJZFoLE5IIplKE5VHApgZK5vLQ8G2iyYISASzVLYq1Zrj1hsmiEiioNny2h2vy4Dkg15/MByNJ1MfsBNrNl+4y5Xtn7Cn68125+wPxxN7SmPPl6t+u+uP54vF0mIGECAE3vBhxQLVA+P+538B3McUE/Dc/ekAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDgtMThUMTc6NTU6MzYrMDA6MDBSrTDKAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTA4LTE4VDE3OjU1OjM2KzAwOjAwI/CIdgAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wOC0xOFQxNzo1NTozNiswMDowMHTlqakAAAAASUVORK5CYII="
 
 def pad_left(in_str, width, character = "0"):
     out_str = in_str
@@ -654,7 +655,7 @@ def main(config):
                         main_align = "space_around",
                         children = [
                             render.Image(
-                                src = base64.decode(MANTLE_LOGO),
+                                src = MANTLE_LOGO,
                                 width = 16,
                                 height = 16,
                             ),

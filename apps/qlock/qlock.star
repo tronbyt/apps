@@ -6,16 +6,19 @@ Author: craigerskine
 """
 
 load("encoding/base64.star", "base64")
+load("images/img_at.png", IMG_AT_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+IMG_AT = IMG_AT_ASSET.readall()
 
 # contants
 COLOR_LIGHT = "#FFF"
 COLOR_MEDIUM = "#AAA"
 COLOR_DARK = "#444"
 COLOR_ACTIVE = "#60A5FA"
-IMG_AT = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAABnRSTlMARwBwAEyv7uYjAAAAHklEQVR4AWMAAvcCHwiCchhAAMoGYTQlCFUIPlwSACKBDShuPBCFAAAAAElFTkSuQmCC"
+
 FONT_LG = {
     0: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAGklEQVR4AWMAAvcCHwhCcBBCcBla8hEI3T0ApgwoeZVEgsQAAAAASUVORK5CYII=",
     1: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAF0lEQVR4AWMAAvcCHyBiAAMoH11owPgAx6oVQCDcnwcAAAAASUVORK5CYII=",
@@ -141,7 +144,7 @@ def main(config):
                                     render.Stack(
                                         children = [
                                             render.Box(width = 5, height = 5, color = "#666"),
-                                            render.Image(src = base64.decode(IMG_AT)),
+                                            render.Image(src = IMG_AT),
                                         ],
                                     ),
                                     render.Box(width = 2, height = 1),

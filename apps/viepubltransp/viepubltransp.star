@@ -5,17 +5,18 @@ Description: Show real time departures for desired  Public Transport stops in Vi
 Author: Lukas Peer
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/wl_icon_8_x_8.png", WL_ICON_8_X_8_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+WL_ICON_8_X_8 = WL_ICON_8_X_8_ASSET.readall()
 
 DEFAULT_STOPPS = "4111,4118,4906,4911"  # Stephansplatz
 N_DISPLAYED_STOPPS = 3
 DEFAULT_SWITCH_SPEED = "5000"
 
 # Wiener Linien Logo
-WL_ICON_8_x_8 = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAIJJREFUKFNjZICC12KyTUz/mWrB3P8M74XfPBQCMRlhCt6Kyv+Hsf8z/XeBscEKkCVhEiBa+PVDRkZkSUYGhtb/DAySDAwMSSBJFCsYLLJAVlxiYGDgZGBgUEWxAiqJbDqEfWIaIyODcRo/XIaV5QOcfWIaVisg8v//6zOcnA6yjgEAusskDjQfi6cAAAAASUVORK5CYII="""
 
 # Execute API request for given stopps (stopIDs) and store data in lists
 def get_data(stopps):
@@ -88,7 +89,7 @@ def build_rows(linien, haltestellen, endstationen, abfahrten, linien_colors):
             row = render.Row(
                 children = [
                     render.Box(width = width_first_box, height = 8, child = render.Row(children = [
-                        render.Image(src = base64.decode(WL_ICON_8_x_8)),
+                        render.Image(src = WL_ICON_8_X_8),
                     ])),
                     render.Box(width = 64 - (width_first_box), height = 8, child = render.Row(children = [
                         render.Text(haltestellen[i], font = "tb-8"),

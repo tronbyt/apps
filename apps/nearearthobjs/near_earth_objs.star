@@ -6,41 +6,19 @@ Author: noahcolvin
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/image.png", IMAGE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+IMAGE = IMAGE_ASSET.readall()
 
 URL = "https://www.neowsapp.com/rest/v1/feed?detailed=false&start_date={}"
 CACHE_KEY = "neos"
 
 # taken from https://pixabay.com/illustrations/planetarium-comet-falling-star-5636947/
-IMAGE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABfGlDQ1
-BJQ0MgUHJvZmlsZQAAKM+VkblLA0EUh794EPEggoIWFot4NIl4QFALwYioICIxglez2VxCNll2E0
-RsBVtBQbTxKvQv0FawFgRFEcTKwlrRRmV9mwgJQgpnmPe++c28x7w3UBZKarpV0Q16KmMGxwLK3P
-yC4n6mGjdNDNKpapYxPD09ScnxcYfL8Tc+Jxf/GzWRqKWBq0p4SDPMjPC48ORKxnB4W7hRS6gR4V
-NhrykPFL519HCeXxyO5/nLYTMUHJHa6oWVeBGHi1hLmLqwVE6bnsxqv+9xKqmNpmZnxLfKasEiyB
-gBFCYYZQQ/PQyI9eOjly7ZUSK+Oxc/RVpiNbEGq5gsEydBBq+oWckeFR8TPSozyarT/799tWJ9vf
-nstQGofLLtt3Zwb8H3pm1/Htr29xGUP8JFqhCfPoD+d9E3C1rbPnjW4eyyoIV34HwDmh8M1VRzUr
-msslgMXk+gbh4arqF6Md+z33OO7yG0Jl91Bbt70CH3PUs/oLNoAE197gQAAAAJcEhZcwAADsMAAA
-7DAcdvqGQAAALWSURBVDhPrVRNTBNBGP1mp92y/YNCKIZ60ZaVAwcxhnDRxMQDeCYmeDMhxMREY1
-AkRI+eNB6MXtSzifGEchCPmngQNZI0gkVqBEqUn5af0m5/dsc3u4gCKqC+5O33zTfzvX0zs1lG/w
-l39+vNCDP/JAiRCMIyeBPMdCcTvYqc+BtA7BjCefAl2ApeAWlXDiHiRwiDB8BHoAkGwR7wMRx+3L
-FDiJ1EGALPgE9AH9xIMQFeQD6FSNsKTjTo6ouYfg/pQ050OKrQJUQehEKlsz/5vAbVgBz8UTDZoG
-sIA1jctQdtrZzUOsR96DoILktvRKPgKVCVA+cdm5DSdWYIOoK0D2yXfZsXfkUxbtmpfN7B+Z2Tgy
-0OkzFdgdhZpA/ADWJOv4MyGHImhsHLdgZsEMR5McFIntetAmORGcVFBnO60oxTnv1YXo9yTtBbpC
-fgLu9UcbhrUZ4Xg5vbGca7FxTOFriLZEHay0Iso3AKW+V1twWikU+CjkMsvVayYc/DmZJn7P6o5j
-39KlRFDQGDrKygsFGgsFkkS35tGFcLkzxCyG3NonIoOp5Iyf6fYTvsqK3rfx4K9Uz4vBT3+2icga
-qP5twqtYayZCxhe2UFb2fkExZOhToh9sZW2ARlqLHJlfRqF1N+D035NBJwUCqVSSmWqCWzSAOFaq
-rfa5LqEfZFQOwGxAad9q1QcHPR2qBZldACtIhz45yDCkXLRfpcqdGkWyN5L6UiM7C+F1y/0V9BXl
-vVsuZCgIOySf7VHPlNkyaw3dfuAEW5QV9m+CiMNx/98P56bDwhr+q3kIKlYpGRZVkkZTuX5qljZZ
-ZqsO0KzMZWVtPZFdbWPhYfszu2gYLdvIvM5wdbaJVcbk6Jaj+NeIM0r1VQW3rOqpw2uiA2ubZ+W9
-ifzdPGJu5WRV+oRvSnFI93OqcKd8EcjuSMqxB7Zq/cIWzB74Cw/B1Fwem2sficXdwViL4B9lr4D1
-NqhzUAAAAASUVORK5CYII=
-""")
 
 def main(config):
     metric = config.bool("metric") or False

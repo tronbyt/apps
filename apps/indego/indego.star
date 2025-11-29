@@ -5,22 +5,28 @@ Description: Shows available bikes and docks at an Indego station.
 Author: radiocolin
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/bike_dock.png", BIKE_DOCK_ASSET = "file")
+load("images/bike_dock_gray.png", BIKE_DOCK_GRAY_ASSET = "file")
+load("images/electric_bike.png", ELECTRIC_BIKE_ASSET = "file")
+load("images/electric_bike_gray.png", ELECTRIC_BIKE_GRAY_ASSET = "file")
+load("images/regular_bike.png", REGULAR_BIKE_ASSET = "file")
+load("images/regular_bike_gray.png", REGULAR_BIKE_GRAY_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+BIKE_DOCK = BIKE_DOCK_ASSET.readall()
+BIKE_DOCK_GRAY = BIKE_DOCK_GRAY_ASSET.readall()
+ELECTRIC_BIKE = ELECTRIC_BIKE_ASSET.readall()
+ELECTRIC_BIKE_GRAY = ELECTRIC_BIKE_GRAY_ASSET.readall()
+REGULAR_BIKE = REGULAR_BIKE_ASSET.readall()
+REGULAR_BIKE_GRAY = REGULAR_BIKE_GRAY_ASSET.readall()
 
 indego_api_endpoint = "https://bts-status.bicycletransit.workers.dev/phl"
 indego_green = "#93D500"
 indego_blue = "#0082CA"
 white = "#fff"
 default_dock = "3162.0"
-regular_bike = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADQAAAADfLQUOAAAAhklEQVQ4Ec2SUQ6AIAxDwXhcj+N9wZF0qYUJ/GlCtpX2sQ9T+stX7lTsLO0DM6qGGMS9+ro5Mke6AXJHESEK52ucPSXvI4M4zLqbqXGgGgFh3fqRbjzojc0hPMaa9TrDh4r7A0JUYXxtEJkffQo0kB2AP1jtagoEYHVD/210gxlg14/FtmsFsqhKMWPbUYEAAAAASUVORK5CYII=")
-electric_bike = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADQAAAADfLQUOAAAApUlEQVQ4EcWS0Q3CMBBDU8QcrMSsrNRFSt/HqxyrhR8kLKW58zmOFXWMf+LxGhuLDO6dZ2niTLw+x6TDLLltx7LjzGvirlIkj1keumfTNSnycM/brOdTj5ErB16AGcgZ9ZFQoQLfKHlq+DSynt4wD2mYHHX2aDBqwN/4fIJGJlZLIpC99ek/pZGi7uFNqIb9a0LFnVA+U8IdkTvBlYFGpGszZz/d33D9cM8te9pUAAAAAElFTkSuQmCC")
-bike_dock = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADQAAAADfLQUOAAAAV0lEQVQ4EWNgoDlY+O8/AwgTAjjUMaLoQzconglVHqaYKHXoikCayRBjgllKLXrUQMpDknAYIsc0MhuH3RADYQphNA7FWIVheqA0C1ZF6IIwTeji9OADAPvYLVbN8V1pAAAAAElFTkSuQmCC")
-regular_bike_gray = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAZ0lEQVQ4jc2SQQ4AIQgDZeNf+6a+1j2ZEFcoetoem3aCYGt/EclBchyFo5L3ytAsnEHsFgpg2+0VkC+rJ/YoOCHrvnb+Z+LK4tUhpvdk4/tgtLNVEgjAAFj1e0igB1dy4fUU4DR/rRcn/VixMyJ6lgAAAABJRU5ErkJggg==")
-electric_bike_gray = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAcElEQVQ4jcVSWw6AMAgbxrv2TD3t9kWCyEOXGPmCAi2wjfGnkZwkp/qvGy2Bz1dxSdzhvuasCAFIpb69dkSSnUMyNQCiuPcjIq25NVkBS2SbsnUByPFkdU+mscUu+d2vEd2xnTCcoMDbR8ksuvsntgARZXkK5zt/IwAAAABJRU5ErkJggg==")
-bike_dock_gray = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAASElEQVQ4jWNgoDWYOXPm/5kzZ/4nVx0juiJkfnp6OiMDFkCUOmy2kSPGhM0FlIBRA+lgIHIMEpM+mZAVEqMBl4UwmoUUTQMCADmdMerNYrWMAAAAAElFTkSuQmCC")
 
 def get_indego_data():
     r = http.get(indego_api_endpoint, ttl_seconds = 600)
@@ -55,24 +61,24 @@ def main(config):
 
     if dock_data.get("classicBikesAvailable") > 0:
         regular_bike_color = "#FF9400"
-        regular_bike_image = regular_bike
+        regular_bike_image = REGULAR_BIKE
     else:
         regular_bike_color = "#999999"
-        regular_bike_image = regular_bike_gray
+        regular_bike_image = REGULAR_BIKE_GRAY
 
     if dock_data.get("electricBikesAvailable") > 0:
         electric_bike_color = "#1EB100"
-        electric_bike_image = electric_bike
+        electric_bike_image = ELECTRIC_BIKE
     else:
         electric_bike_color = "#999999"
-        electric_bike_image = electric_bike_gray
+        electric_bike_image = ELECTRIC_BIKE_GRAY
 
     if dock_data.get("docksAvailable") > 0:
         dock_color = "#00A1FE"
-        dock_image = bike_dock
+        dock_image = BIKE_DOCK
     else:
         dock_color = "#999999"
-        dock_image = bike_dock_gray
+        dock_image = BIKE_DOCK_GRAY
 
     return render.Root(
         show_full_animation = True,

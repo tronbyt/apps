@@ -7,12 +7,14 @@ Author: joes-io
 
 load("animation.star", "animation")
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/pubg_logo.png", PUBG_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+PUBG_LOGO = PUBG_LOGO_ASSET.readall()
 
 # Default settings if no configuration set in Tidbyt app
 DEFAULT_PLAYER_NAME = "chocoTaco"
@@ -25,7 +27,6 @@ text_color = "#000000"
 background_render = render.Box(width = 64, height = 32, color = background_color)
 
 # Base64 PUBG logo displayed in app
-pubg_logo = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAATlJREFUaEPtWEkOwyAMLP9/dKNUJaKWlzEmjQD3GDUOs3ijvDb/FYL/vQkfF+4kIB3wywBNAeqQWTNExGWlwDYESMVvVQKqk0sFiBBgdYiWLMlyWopF4nOpqZ3nFgLOoBKh1vPz3UcJqIx4FOJAWUDR+L1x2viIIy/FkoAvA6hCkt17laMpEInD1YMhbRApbJGDc/ZFvtmKIc0pSQBhBt4FkEIyQjmrA1CVOUV70hcugsgBI20QiW+JMTUByBzgJdgi7JMVnl3AUgn5IKpSbzF9ZA7wtJ0kQKrGZBROBxiDGTIfICkZqgHaqowcUGtt6YB/O6DnPsDjAGlERXb29l3r/oL7r9ZiQxci1m2Rp20ic4DVsiXwwwiQVJzh+ZBlaAagt26DWxIwM2jt7PA6nAQsyoDogEXxyrAO/E6qIVyYj7UAAAAASUVORK5CYII=""")
 
 # Cache timers for API calls (seconds)
 # 604800 = 7 days
@@ -189,7 +190,7 @@ def main(config):
 
                 # PUBG logo animation
                 animation.Transformation(
-                    child = render.Image(src = pubg_logo),
+                    child = render.Image(src = PUBG_LOGO),
                     duration = logo_duration,
                     delay = logo_delay,
                     keyframes = [

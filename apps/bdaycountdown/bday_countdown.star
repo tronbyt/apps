@@ -5,18 +5,15 @@ Description: Create a bday countdown!
 Author: Jared Brockmyre
 """
 
-load("encoding/base64.star", "base64")
+load("images/cake_frame1.png", CAKE_FRAME1_ASSET = "file")
+load("images/cake_frame2.png", CAKE_FRAME2_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-CAKE_FRAME1 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAO1JREFUOE9jZKAQMFKon4E2Bvz/b/CfkfECIzqNzbVYXfA/w+A/44wLjOg0UQYY/Df4fz6TgcFQ+jzD+aeGDAwnrBkYLI4yGE5nYNj7uZRBmC8axVI4x6D5//+9+cvAlgiVdTO86yrFoMFydscY3h2yghsENuDtp6X/kZ2HzwCYOueJUQwXahkZwQb8N8j+DzKVVADyDlYXEGOQM283wwXGCxADvn6/8N+aIwEcSIQAyOmgsOJg1Wbg5jRAGADTyGU5GxxIMIUgm0AGwwIPpBEGsBpAyAXI8tQzABYOpNoOUo+RlEEBis8gkLOR5QECa3kRTskN4gAAAABJRU5ErkJggg==
-""")
-CAKE_FRAME2 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAO1JREFUOE9jZKAQMFKonwGrAf//G/xnZLzAiE5js4xGBmQY/GeccYHxPxpNlAsM/hv8P5/JwGAofZ7h/FNDBoYT1gwMFkcZDKczMOz9XMogzBeN4mo4x6D5//+9+cvAlgiVdTO86yrFoMFydscY3h2yghsENuDtp6X/kZ2HzwCYOueJUQwXahkZwQb8N8j+DzKVVADyDlYXEGOQM283wwXGCxADvn6/8N+aIwEcSIQAyOmgsOJg1Wbg5jRAGADTyGU5GxxIMIUgm0AGwwIPpBEGsBpAyAXI8tQzABYOpNoOUo+RF0ABis8gkLOR5QE07oUR5KDQZwAAAABJRU5ErkJggg==
-""")
+CAKE_FRAME1 = CAKE_FRAME1_ASSET.readall()
+CAKE_FRAME2 = CAKE_FRAME2_ASSET.readall()
 
 def main(config):
     timezone = time.tz()

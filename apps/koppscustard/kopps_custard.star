@@ -5,11 +5,13 @@ Description: Get today's flavors at Kopp's Frozen Custard.
 Author: Josiah Winslow
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/kopps_icon.webp", KOPPS_ICON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("time.star", "time")
+
+KOPPS_ICON = KOPPS_ICON_ASSET.readall()
 
 WIDTH = 64
 HEIGHT = 32
@@ -21,23 +23,7 @@ TTL_SECONDS = 60 * 30  # 30 minutes
 
 KOPPS_ICON_WIDTH = 62
 KOPPS_ICON_HEIGHT = 21
-KOPPS_ICON = base64.decode("""
-UklGRmIDAABXRUJQVlA4WAoAAAAQAAAAPQAAFAAAQUxQSB0DAAABoEVt2/G4etLUdpvUdlCb/9S2bdu
-2bY3Kr9jmv23btj2q74N8+bfPI2ICphtjzLnSnYwx+yS1v7Rr3YODfFJNY4yZP+7QkiqSY4wxg5fvn1
-VKGmHOSBr4wIm5F/qk5o58D+zLEXyM7yZIO7nWoFYayT7lN8DlVt9zfagCzwLrB1/lt+Zaw0/Sdj5pW
-jEVAnoe6CIt/iwgTYE3pKdhoTQ+Rkchs6R2xOhp+MQ/jbdV5yZ7JSV7KPVlVMrxA7wiPQ6/5o+zH+gT
-51Ggen8e0Xz4qYNU6VYc313Xg1Ib4tHd0whP0Vac0Qbg1oMJGp3NNg0WSlO9LI5zFKgT5ynIyJt/QEg
-DsboBWfqnwbvSUi+bbAXehJOylfkd5ik258sW3shp6ZkBNNdML4ttu75+dro/zv1fPDxA9mKXbsUw1N
-LFAMfUyUs/m+wWeRzWRw3ui9lk6wek5c/3a7zMwn/P9icldfwRZtly/waM0hJ4S3oONuhvoqekRK5Vq
-vYNsL7Qe8AbRbKdJatMyT+4PYdyHgfer2kp/DDwSNBT2rAcbb5jvha7ruve2/1B13XdnvKNeiZl2xPD
-fVLIjV1n6eHGjvcwfsuOLxJ+e6CT/ufrOJEOlZxoXZ9KNK6gZmGnRuv29aO1nWCtsKQ6jcMVnUillgo
-3qFo94kQqKdRUFZ1oPV9pJ1JemsDoJ9qxJGte+R8a/Nr09kVMuZTV8nTja4/1GC31+7jmuy1ZXHtTn6
-dqujuWs2yFTHqOlqxIX1SB3e/302BGDmvAhD+WrCSQllr00V/yJWb1r17tIkuaSc+9pM4hpvrHrrx5v
-ntoIB3C5VNoHGLqLyuKsPHpZzSYNaMbsO/HdjsIpN0ZYYsSszYF6ib8+GlA+uglyVLpOT7UQDpoaBPm
-hjjwkxPztgbTLncDJvxs+hJMn5V4vebExKxci6NNJ9NMSnlZQ8ozvXzf9aWmf2OZMDPtUoip310uzcb
-ndmiY6a8OZsaKxFzjhiz2J63aOnrb6cnrhoz1H6suFdk6OEFTtozP1W/hlGYaawZW2pc/ObGrmb00uZ
-GZuSy3AABWUDggHgAAAJABAJ0BKj4AFQAAAAAlpAADyWiYeAD+/97c8AAAAA==
-""")
+
 KOPPS_FLAVOR_URL = "https://kopps.com/wp-json/kopps/todays-flavors"
 TEXT_COLOR = "#fff"
 

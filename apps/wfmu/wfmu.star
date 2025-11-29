@@ -5,14 +5,14 @@ Description: Displays what's currently playing on the WFMU radio station. WFMU-F
 Author: Tom O'Dea
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/wfmu_logo.png", WFMU_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-DEFAULT_COLOR = "#6699FF"
+WFMU_LOGO = WFMU_LOGO_ASSET.readall()
 
-WFMU_LOGO = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAADoAAAANBAMAAAAK6mAOAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAwUExURQEBARgYGCYmJjc3N0dHR1RUVGlpaXd3d4qKipeXl6ampra2tsjIyNnZ2efn5/39/UxwiA8AAAAJcEhZcwAALiMAAC4jAXilP3YAAAD8SURBVCjPfdAxSwNBEAXgt0mMp4gG0tjZKjZb29gp/oqkC1idAQ12QSzsYqFgdzZWFmdjpZIyARH9ASG5NgjqITFnsfucvUshChmm+3i8YTB9vAt4x1g7h6o1DurY3r/eW308QqEB1DQWDZa+sZkgR3KMkDSk1Z6FYjPVxGme9u1LtE/7wJs581ebUhQmavCpGKXqO11JtZBp5Pb547+eigYvmXq/tTLGIbsnZwgit+1YNCe6QF0xCEZKTmYyybbjWYui6Dwt2WOs7vl6d4vWJDvDq5Zo/t2FpDO7OdMwxoAcamD5qbvR7wCqVxXdvcSOjy0f6zR6yovLJeAHH3qZ6ZBOBtsAAAAASUVORK5CYII=""")
+DEFAULT_COLOR = "#6699FF"
 
 def get_schema():
     return schema.Schema(

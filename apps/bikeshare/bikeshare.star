@@ -6,19 +6,20 @@ Author: snorremd
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/csv.star", "csv")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/bike_icon.png", BIKE_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+BIKE_ICON = BIKE_ICON_ASSET.readall()
 
 # URL to a CSV file containing the bikeshare providers supporting GBFS
 BIKESHARE_STATION_START = '{"url": "https://gbfs.urbansharing.com/bergenbysykkel.no/station_status.json", "station": { "station_id": "368", "name": "Festplassen", "address": "Christies gate 3A", "rental_uris": {"android": "bergenbysykkel://stations/368", "ios": "bergenbysykkel://stations/368"}, "lat": 60.391123958982405, "lon": 5.325713785893413, "capacity": 25 } }'
 BIKESHARE_STATION_STOP = '{"url": "https://gbfs.urbansharing.com/bergenbysykkel.no/station_status.json", "station": { "station_id": "1898", "name": "Kronstad", "address": "St. Olavs vei 15", "rental_uris": {"android": "bergenbysykkel://stations/1898", "ios": "bergenbysykkel://stations/1898"}, "lat": 60.3720506380196, "lon": 5.352659970408496, "capacity": 25 } }'
 
 # Renders a cute little green bike
-BIKE_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAADaADAAQAAAABAAAACQAAAABcSr5uAAAAhElEQVQYGWNkIAJUhnr8hylrX72DkQXGAdHokjA5oTwmMLPUdhsjiAEmYJIguvuwF9xUmDhMMYyPQmPTgE0M7DxkZ6GYAuSAbAFpfDfpH1gK5Ce4P2AmohsA4sPkQLpAfIgPgRyYSWDj0AiQbciGwTWBrUVTjMxFlgeHHrIpyJIwTejyAJ4kPPvu7EtQAAAAAElFTkSuQmCC""")
 
 # Used to fetch list of available Bikeshare companies and their general bikeshare feed specification APIs
 GBFS_LIST = "https://raw.githubusercontent.com/NABSA/gbfs/master/systems.csv"

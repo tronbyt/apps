@@ -6,16 +6,17 @@ Author: jcarbaugh
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
+load("images/logo_down_img.gif", LOGO_DOWN_IMG_ASSET = "file")
+load("images/logo_up_img.gif", LOGO_UP_IMG_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-LOGO_UP_IMG = base64.decode("""R0lGODdhIgAIAKIAAAAAAF9XTwCHUQDkNv/x6P///wAAAAAAACH5BAkAAAYALAAAAAAiAAgAAAM0CLrc/jCS6MabJJCpdv+ZVwkCCGBnimmauljwgs4u5qFKbClayJ2Z1KmFgpV2jh9lyWw2EwA7""")
-LOGO_DOWN_IMG = base64.decode("""R0lGODdhIgAIAKIAAAAAAP8ATX4lU19XT//x6P///wAAAAAAACH5BAkAAAYALAAAAAAiAAgAAAM0CLrc/jCS6MKbZJCpdv+ZVwkCCGBnimmauljwgs4u5qFKbClayJ2Z1KmFgpV2jh9lyWw2EwA7""")
+LOGO_DOWN_IMG = LOGO_DOWN_IMG_ASSET.readall()
+LOGO_UP_IMG = LOGO_UP_IMG_ASSET.readall()
 
 def main(config):
     api_key = config.str("api_key")

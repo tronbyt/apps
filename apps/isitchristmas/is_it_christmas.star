@@ -5,30 +5,21 @@ Description: Is it christmas: yes/no.
 Author: Austin Fonacier
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/tree_img_1.png", TREE_IMG_1_ASSET = "file")
+load("images/tree_img_2.png", TREE_IMG_2_ASSET = "file")
+load("images/tree_img_3.png", TREE_IMG_3_ASSET = "file")
+load("images/tree_img_4.png", TREE_IMG_4_ASSET = "file")
+load("images/tree_img_no_lights.png", TREE_IMG_NO_LIGHTS_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-TREE_IMG_NO_LIGHTS = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAExJREFUKFNjZMACfNYH/N8SuIERXQpDAKQQpghdA/mKkU3FZjqKyUQrxqYQ3XS4yUQrxqcQ2XSwySQpRg/8ylCP/+2rdxCOFJBGXIoBe08sDMFoReYAAAAASUVORK5CYII=
-""")
-
-TREE_IMG_1 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGtJREFUKFNjZMACfNYH/N8SuIERXQpDAKQQpghdA/mKkU2dmy/MkDzxLQOy6SgmIyvG5hS4YmwK0TVgKIZZv/nlBgZf8QCwephTwIrxmYpsOopiZNNgipA9ihF0IEWVoR7/21fvIBwp+BQDAKXIOwz136MKAAAAAElFTkSuQmCC
-""")
-
-TREE_IMG_2 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAHRJREFUKFNjZMACfNYH/N8SuIERXQpDAKQQpghdA4biOeob/m/oWABWj1cxiqm8LQw+n2tQNKCYjKwYm1PgirEpRNeAoXgL1PqAigQGdLeDFYNMRZbEFpwgz8IVY1UAtQUWMhhBB5KoDPX43756B+FIwacYADxMPQxwP73/AAAAAElFTkSuQmCC
-""")
-TREE_IMG_3 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAIRJREFUKFNjZMACfNYH/N8SuIERXQpDAKQQpghdA4biOeob/m/oWABWj1cxsqlz84UZkie+RdGAYjKyYmxOgSvGphBdA4ZimPWbX25g8BUPQHE7WDHI1ICKBAaYx7AFJ8izcMUgBcimgUODt4XhZVI/3KMYQQdSVBnq8b999Q7CkYJPMQBqdkIMUVjCigAAAABJRU5ErkJggg==
-""")
-
-TREE_IMG_4 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAIlJREFUKFNjZMACfNYH/N8SuIERXQpDAKQQpghdA1bFW3hbGP7zhTAwmt1AkUfhIJuKzXQMxZulbzD4PtWAOxfZKXDFKG7lbWHw+VzDANMI04CieLPQdgbfd54Y4YOiGJtbQTpAHgXZAGYHbmAEmwxTjCyJbgtcMbq9laEe/9tX7yAcKSCNuBQDAG5kQwwkXuh1AAAAAElFTkSuQmCC
-""")
+TREE_IMG_1 = TREE_IMG_1_ASSET.readall()
+TREE_IMG_2 = TREE_IMG_2_ASSET.readall()
+TREE_IMG_3 = TREE_IMG_3_ASSET.readall()
+TREE_IMG_4 = TREE_IMG_4_ASSET.readall()
+TREE_IMG_NO_LIGHTS = TREE_IMG_NO_LIGHTS_ASSET.readall()
 
 DEFAULT_LOCATION = {
     "lat": 34.0522,

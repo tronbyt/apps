@@ -8,12 +8,14 @@ Author: posburn
 # jvivona 20230821 - helped out @frame-shift to fix syntax error in code
 #                    while I was in there - removed the cache.star module dependency
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/range.png", RANGE_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+
+RANGE = RANGE_ASSET.readall()
 
 # DEFAULTS
 
@@ -561,7 +563,6 @@ CACHE_KEY_DATA = "purpleAirData"
 BACKGROUND_COLOR = "#21024D"
 
 # Images
-RANGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAEAAAAADCAYAAAAjpQkcAAAABHNCSVQICAgIfAhkiAAAAQ5JREFUKFONkm1ShDAQRHsS2I+r6bX0HHrMJYHENyGwYmHpj1SnZygq3fXs7eOl3segazTdhjPVc853oyTLUklFylV16tp9+eHbfjZVjkpYdemKLzP/wxfm1vy6zzUo2aiHuDeNymHQo0bmgyYNSvjJvSt7W4osZYV55o1ZcV7+9u+fr/UY3tYyCHtDrxEdnuVcAmE8bCI8Wr2E3VdKYcZu3/t3hNRCsJngqJ+9BC/j4Nd9JqCHSq72LXQLv/nIjiLwEyWJ4CFzunoJ293nmzfusXvbCLgQ9v4rAZEiVhIuvJ3XQcDS9IwAo5QDIacE8J8STwlwIlInYAvbCCDsSgJE+B7dCYCERkAP/V8CvgB8qhUiAN3IHAAAAABJRU5ErkJggg==")
 
 # AQI
 AQI_TITLE = ["Good", "Moderate", "Unhealthy for SG", "Unhealthy", "Very Unhealthy", "Hazardous"]

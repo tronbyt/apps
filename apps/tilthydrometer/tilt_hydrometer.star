@@ -6,25 +6,20 @@ Author: DSUmjham
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/tilt_logo.png", TILT_LOGO_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+
+TILT_LOGO = TILT_LOGO_ASSET.readall()
 
 CACHE_TTL_SECONDS = 300
 DEFAULT_SHEET_LINK = ""
 DEFAULT_GOOGLE_API = ""
 DEFAULT_FG = 1.010
 REGULAR_FONT = "tom-thumb"
-TILT_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAY
-dpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAADqADAAQAAAABAAAADQAAAAD6UEMqAAAA
-qElEQVQoFb1SsQ3DQAi8WN4gbcoskR1+EJceJWUG+R2yhEu3mcHmUE66f7lJCiMh4DjgwQaAjVprTfu53bdePS
-/+5QuilIIowPv1DKiVxzTjui6I5snLrE+SH4mcLkucr2BsHCRoQFN0VJwYO3lRv58maZriMYBGuAslCLlXk7Rg
-MP8n9/xCPu/wqjoC81T/JInpoiTKF1nWi8T5/8/xrvQ5uVfimiT+Dsl6xQaBxswDAAAAAElFTkSuQmCC
-""")
 
 def main(config):
     api = config.str("googleAPI", DEFAULT_GOOGLE_API)

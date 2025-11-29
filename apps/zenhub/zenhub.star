@@ -9,16 +9,17 @@ Author: thiagobrez
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
+load("images/zenhub_icon.png", ZENHUB_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+ZENHUB_ICON = ZENHUB_ICON_ASSET.readall()
+
 ZENHUB_REST_API_URL = "https://api.zenhub.com"
 ZENHUB_GQL_API_URL = "https://api.zenhub.com/public/graphql"
-ZENHUB_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAN1JREFUKFM1jjFKA2EUhL9RVjC9hlitYBHwALoRIU3wBIIQ9QQWgWittQpu4Q0SQcgRkkbBoBcQCyXZIhK0T0hWePJ+sRtm5n3zlGYVk0Ej7msry4N+Xo9Ub04NDKXZjskMA+714B4btz8gQ4AkcTOoeE5rfIctiM3OKt5sXxekZDg3T/PvT8qPNT56Z+QXe0TFkt+g7WFuEszGI5bPu8S1S952u0TFNV9BSBw1J2Hwdf8L//J4pe42jfhJOjydBoLPvJ8sBuyBVR3+N/FfaF0VlGQzc9RLvKR0kAT9C5GsVRBZZKbEAAAAAElFTkSuQmCC""")
 
 issue_colors = [
     "#91e03a",  # ZH Green

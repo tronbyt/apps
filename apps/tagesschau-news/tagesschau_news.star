@@ -16,10 +16,11 @@ def format_text(original_text, chars_per_line):
     for line in original_text.split("\n"):
         new_line_words = []
         for word in line.split(" "):
-            while len(word) > chars_per_line:
-                new_line_words.append(word[:chars_per_line])
-                word = word[chars_per_line:]
-            new_line_words.append(word)
+            if len(word) <= chars_per_line:
+                new_line_words.append(word)
+            else:
+                for i in range(0, len(word), chars_per_line):
+                    new_line_words.append(word[i:i+chars_per_line])
         lines.append(" ".join(new_line_words))
     return "\n".join(lines)
 

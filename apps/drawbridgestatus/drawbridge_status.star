@@ -5,14 +5,16 @@ Description: Shows whether a drawbridge is open or not, and when it is expected 
 Author: sumara523
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
+load("images/boat_icon_base64_str.png", BOAT_ICON_BASE64_STR_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+BOAT_ICON_BASE64_STR = BOAT_ICON_BASE64_STR_ASSET.readall()
+
 BRIDGE_API_URL = "https://www.seaway-greatlakes.com/bridgestatus/detailsmai2?key=BridgeSBS"
-BOAT_ICON_BASE64_STR = "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAhGVYSWZNTQAqAAAACAAFARIAAwAAAAEAAQAAARoABQAAAAEAAABKARsABQAAAAEAAABSASgAAwAAAAEAAgAAh2kABAAAAAEAAABaAAAAAAAAAEgAAAABAAAASAAAAAEAA6ABAAMAAAABAAEAAKACAAQAAAABAAAADKADAAQAAAABAAAADAAAAADgNpdeAAAACXBIWXMAAAsTAAALEwEAmpwYAAABWWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgoZXuEHAAAB6klEQVQoFWVQTWgTQRR+b3Z21zSbnzalpWIDhaiXKtocPEqqnpSKF/EknvRQDwpe2osLQo+C1EuOohcbRJBWhSILHsSKikilUGlCDWyXpInZpPnbv3Fmi1DxzWG+me9n3jyAA2UYBhXHawDjjDFygPofGgYLxUtfKpk7t2a/ccWEUOn6v8YwRedpuRx6T40fGbfffq2NjqeWPm4v7hswELzAokJwfx8DQ5rXYskjLau8k86kL64WnSeC0hF4hwwFJgZjFBGDF5/MucnssWlgQVNRIxG71nFHxuTry+uNPACyQqEQhtMcordS8i7LkqT/tsF2Cem1KA34LllV6NCodvPBq7WvV2fO5A3doOEzb+8+zMjP343smiu0dOPeFXV363z07EzTLpeL3Y2N4qj5qzqd+Pzm6If+VmiwZs/NDSWHF/acoCmB58uSPOB6nT0EwkBSok6719p+vHwhC/A97OvlqUtrHUepxFUtzmKHByN9T40HkRQm0sOKklAqx6fms4/yDfFpvL24eoKlT75PxYai1HeohwhqwPgckPUR+HzA6yqHelA31XJp/TR9tlkjcm0nVh3wEALfB4k7mMjiJRr2GQwSotntujNWb1CqWeZmktCpia7FaZcvAFmIef3FLr9xe3XWsKyffwC2k80ucjBLQQAAAABJRU5ErkJggg=="
+
 LANGUAGE_LOCALES = {
     "not_200_error": {
         "fr": "Tenté de contacter l'API ayant l'info du pont, mais reçu un statut %d.",
@@ -95,7 +97,7 @@ def fetch_bridge_status(config):
 
 def render_view(bridge_status):
     # Decode the boat icon image from Base64.
-    imgBase64 = base64.decode(BOAT_ICON_BASE64_STR)
+    imgBase64 = BOAT_ICON_BASE64_STR
 
     # Create banner_row list, with the boat icon image to start with.
     banner_row = [render.Image(src = imgBase64)]
@@ -128,7 +130,7 @@ def render_view(bridge_status):
 
 def render_error(err):
     # Decode the boat icon image from Base64.
-    imgBase64 = base64.decode(BOAT_ICON_BASE64_STR)
+    imgBase64 = BOAT_ICON_BASE64_STR
 
     # Create banner_row list, with the boat icon image to start with.
     banner_row = [render.Image(src = imgBase64)]

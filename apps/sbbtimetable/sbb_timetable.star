@@ -7,21 +7,14 @@ Description: Shows a timetable for a station in the Swiss Public Transport
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/error_icon.png", ERROR_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-ERROR_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/
-9hAAAAbklEQVQ4y72S0Q2AIAwFj8YRZBf2/2IXVtDU
-D6LRBAsIsUm/aHMvV8AoTUE1BbVmhMFyFv0x6KP7L8
-FFP1/1PYUUlgXYAFhj7k6JO7C0eJniQGqEWop5V2ih
-l/6FncDH3DUHvfT7zriDL/SpVzgA+N8ttq4TxtUAAA
-AASUVORK5CYII=
-""")
+ERROR_ICON = ERROR_ICON_ASSET.readall()
 
 # Define some constants
 SBB_URL = "https://fahrplan.search.ch/api/stationboard.json?show_delays=1&transportation_types=train"

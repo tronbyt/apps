@@ -8,8 +8,13 @@ Author: Donald Mull Jr
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/envelope_icon.png", ENVELOPE_ICON_ASSET = "file")
+load("images/person_icon.png", PERSON_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+ENVELOPE_ICON = ENVELOPE_ICON_ASSET.readall()
+PERSON_ICON = PERSON_ICON_ASSET.readall()
 
 TTL_SECONDS = 60
 
@@ -38,8 +43,6 @@ p0lwJuErXNh85tr+EYChjde04/wuvG/HO3DSUVm+df8J+6BRr/YCK4FRoAgcAlaUaoNf/+PG29A5
 98AsYJYgIZtbCbHmfYJeiqVNYjr0n5Z+Xl39wIvARuCDvPOvA1tu8KCJzC3fPTjA/z2NerWjUa+W
 8/tzjXr1pfxebtRnzD6d/l+EVGcqps4DawAAAABJRU5ErkJggg==
 """
-PERSON_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAHCAYAAADAp4fuAAAAAXNSR0IArs4c6QAAADRJREFUGFd1jMEKAEAQQfn/j57tKTVzWAckWNIImpFtrOCEGwlpFbRNguk8+v08Leb93BcPLuwk/neqrrgAAAAASUVORK5CYII=")
-ENVELOPE_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAYAAAD+Bd/7AAAAAXNSR0IArs4c6QAAADdJREFUGFd9jtEKACAMAr3//2jDoLGC5ZNMuYlt6yMkjR1AJI15Qee2C/nQS5fv/ARRpxVh2rkAha0m8k92rkgAAAAASUVORK5CYII=")
 
 API_URL = "https://app.homefiniti.com/api/v2/tidbyt_summary/"
 

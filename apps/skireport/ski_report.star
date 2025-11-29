@@ -6,19 +6,24 @@ Author: Colin Morrisseau
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/black_diamond.png", BLACK_DIAMOND_ASSET = "file")
+load("images/blue_square.png", BLUE_SQUARE_ASSET = "file")
+load("images/green_circle.png", GREEN_CIRCLE_ASSET = "file")
+load("images/mountain_icon.png", MOUNTAIN_ICON_ASSET = "file")
+load("images/spacer.png", SPACER_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+BLACK_DIAMOND = BLACK_DIAMOND_ASSET.readall()
+BLUE_SQUARE = BLUE_SQUARE_ASSET.readall()
+GREEN_CIRCLE = GREEN_CIRCLE_ASSET.readall()
+MOUNTAIN_ICON = MOUNTAIN_ICON_ASSET.readall()
+SPACER = SPACER_ASSET.readall()
+
 #Icons
-MOUNTAIN_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABAAAAANCAYAAACgu+4kAAAA0ElEQVQoU4WRsQ0CMQxFkykogIaWHeBKGIEmBVtAdVRsgZQ0bIEQNZRsQMMUR74lR8bny/0mUhw//+94l9Vl4fRZOKVqNerRDQxkGAPkAAntAWKMXQiBuDVHPNhLGppRYMAQRLouAFymlNzlunTNauLaw8y15w+9PR3nxSkGSmdUwGQ0sgDQAsSK59ebJ9mWsgCL6Y2e6HhVAMe4P75/7nBfljjkABN5WrN9mfEAMh3sd+9iF4vEQ4boeD0AN/NvyN0gyihgbJl64WaE2ndqwA/LoG2en1wa6AAAAABJRU5ErkJggg==""")
-GREEN_CIRCLE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAIElEQVQIW2NkAAKeNJX/IBoEvsy6w8iILACTIEEQm5kApvsMxdxRJEEAAAAASUVORK5CYII=""")
-BLUE_SQUARE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAE0lEQVQIW2PkZP3+nwENMNJAEABZ6goan8O6FAAAAABJRU5ErkJggg==""")
-BLACK_DIAMOND = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAI0lEQVQIW2NkgIL/QMAIBCAumAAJwCRBEozIAnAJrCqxmQkAWm4UAkSaUWwAAAAASUVORK5CYII=""")
-SPACER = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAEAAAAFCAYAAACEhIafAAAAC0lEQVQIW2NgwAEAABkAAUGqWyUAAAAASUVORK5CYII=""")
 
 #These are used for scraping the data from each site. most epic resort websites follow a similar structure. This doesn't work for the austrailian resorts
 TERRAIN_URL_STUB = "the-mountain/mountain-conditions/terrain-and-lift-status.aspx"
