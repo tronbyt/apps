@@ -225,7 +225,10 @@ def get_feels_like_temp(config):
     else:
         # Default to OpenWeather for backward compatibility
         current_data = get_openweather_data(config)
-        return ktof(current_data["feels_like"])
+        feels_like = current_data.get("feels_like")
+        if feels_like == None:
+            return SAMPLE_NOAA_TEMP
+        return ktof(feels_like)
 
 def get_noaa_feels_like(config):
     """Get feels like temperature from NOAA API (returns Fahrenheit)"""
@@ -260,7 +263,13 @@ def get_noaa_feels_like(config):
     points_data = points_res.json()
     
     # Get the hourly forecast URL from the points response
-    forecast_hourly_url = points_data["properties"]["forecastHourly"]
+    properties = points_data.get("properties")
+    if properties == None:
+        return SAMPLE_NOAA_TEMP
+    
+    forecast_hourly_url = properties.get("forecastHourly")
+    if forecast_hourly_url == None:
+        return SAMPLE_NOAA_TEMP
     
     # Step 2: Get the hourly forecast
     forecast_res = http.get(
@@ -276,12 +285,18 @@ def get_noaa_feels_like(config):
     
     # Get the first period (current hour) temperature
     # NOAA returns temperature in Fahrenheit by default
-    periods = forecast_data["properties"]["periods"]
-    if len(periods) == 0:
+    forecast_props = forecast_data.get("properties")
+    if forecast_props == None:
+        return SAMPLE_NOAA_TEMP
+    
+    periods = forecast_props.get("periods")
+    if periods == None or len(periods) == 0:
         return SAMPLE_NOAA_TEMP
     
     current_period = periods[0]
-    temp = current_period["temperature"]
+    temp = current_period.get("temperature")
+    if temp == None:
+        return SAMPLE_NOAA_TEMP
     
     # NOAA doesn't provide a separate "feels like" temperature in the hourly forecast
     # The temperature returned is the actual temperature, but for simplicity we use it
@@ -298,31 +313,39 @@ def get_openweather_data(config):
     """Get weather data from OpenWeather API (original implementation)"""
     api_key = config.get("api_key", None)
     location = config.get("location", None)
-    cached_data = cache.get("weather_data-{0}".format(api_key))
+
+    if api_key == None:
+        return SAMPLE_STATION_RESPONSE["current"]
+    if location == None:
+        return SAMPLE_STATION_RESPONSE["current"]
+
+    location = json.decode(location)
+    lat = location["lat"]
+    lng = location["lng"]
+
+    # Cache key must include location to avoid serving wrong data for different locations
+    cache_key = "openweather_%s_%s_%s" % (api_key, lat, lng)
+    cached_data = cache.get(cache_key)
 
     if cached_data != None:
         cache_res = json.decode(cached_data)
         return cache_res
 
-    else:
-        if api_key == None:
-            return SAMPLE_STATION_RESPONSE["current"]
-        if location == None:
-            return SAMPLE_STATION_RESPONSE["current"]
+    query = "%s?exclude=minutely,hourly,daily,alerts&lat=%s&lon=%s&appid=%s" % (OPEN_WEATHER_URL, lat, lng, api_key)
+    res = http.get(
+        url = query,
+        ttl_seconds = REFRESH_RATE,
+    )
+    if res.status_code != 200:
+        return SAMPLE_STATION_RESPONSE["current"]
 
-        location = json.decode(location)
-        query = "%s?exclude=minutely,hourly,daily,alerts&lat=%s&lon=%s&appid=%s" % (OPEN_WEATHER_URL, location["lat"], location["lng"], api_key)
-        res = http.get(
-            url = query,
-            ttl_seconds = REFRESH_RATE,
-        )
-        if res.status_code != 200:
-            return SAMPLE_STATION_RESPONSE["current"]
+    response_data = res.json()
+    current_data = response_data.get("current")
+    if current_data == None:
+        return SAMPLE_STATION_RESPONSE["current"]
 
-        current_data = res.json()["current"]
-
-        cache.set("weather_data-{0}".format(api_key), json.encode(current_data), ttl_seconds = REFRESH_RATE)
-        return current_data
+    cache.set(cache_key, json.encode(current_data), ttl_seconds = REFRESH_RATE)
+    return current_data
 
 # Sample temperature for NOAA fallback (in Fahrenheit)
 SAMPLE_NOAA_TEMP = 65.0
