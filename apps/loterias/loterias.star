@@ -5,22 +5,21 @@ Description: Veja os premios das principais modalidades da loteria.
 Author: Daniel Sitnik
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/icon_diadesorte.png", ICON_DIADESORTE_ASSET = "file")
+load("images/icon_duplasena.png", ICON_DUPLASENA_ASSET = "file")
+load("images/icon_lotofacil.png", ICON_LOTOFACIL_ASSET = "file")
+load("images/icon_lotomania.png", ICON_LOTOMANIA_ASSET = "file")
+load("images/icon_maismilionaria.png", ICON_MAISMILIONARIA_ASSET = "file")
+load("images/icon_megasena.png", ICON_MEGASENA_ASSET = "file")
+load("images/icon_quina.png", ICON_QUINA_ASSET = "file")
+load("images/icon_supersete.png", ICON_SUPERSETE_ASSET = "file")
+load("images/icon_timemania.png", ICON_TIMEMANIA_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_09887a13.png", IMG_09887a13_ASSET = "file")
-load("images/img_17a26da4.png", IMG_17a26da4_ASSET = "file")
-load("images/img_18e27725.png", IMG_18e27725_ASSET = "file")
-load("images/img_2dc029ba.png", IMG_2dc029ba_ASSET = "file")
-load("images/img_54dbf868.png", IMG_54dbf868_ASSET = "file")
-load("images/img_65621ebc.png", IMG_65621ebc_ASSET = "file")
-load("images/img_80d3e641.png", IMG_80d3e641_ASSET = "file")
-load("images/img_9065715b.png", IMG_9065715b_ASSET = "file")
-load("images/img_fb4c57f4.png", IMG_fb4c57f4_ASSET = "file")
 
 # default values
 DEFAULT_MODALITY = "megasena"
@@ -41,48 +40,48 @@ MODALITIES = {
     "megasena": {
         "name": "MEGASENA",
         "color": "#4b966d",
-        "icon": IMG_2dc029ba_ASSET.readall(),
+        "icon": ICON_MEGASENA_ASSET.readall(),
     },
     "diaDeSorte": {
         "name": "DIA DE SORTE",
         "color": "#c1893f",
         "font": "CG-pixel-3x5-mono",
-        "icon": IMG_54dbf868_ASSET.readall(),
+        "icon": ICON_DIADESORTE_ASSET.readall(),
     },
     "duplasena": {
         "name": "DUPLA SENA",
         "color": "#98262a",
-        "icon": IMG_09887a13_ASSET.readall(),
+        "icon": ICON_DUPLASENA_ASSET.readall(),
     },
     "maisMilionaria": {
         "name": "MILIONÁRIA",
         "color": "#1c3176",
-        "icon": IMG_80d3e641_ASSET.readall(),
+        "icon": ICON_MAISMILIONARIA_ASSET.readall(),
     },
     "lotofacil": {
         "name": "LOTOFÁCIL",
         "color": "#871985",
-        "icon": IMG_65621ebc_ASSET.readall(),
+        "icon": ICON_LOTOFACIL_ASSET.readall(),
     },
     "lotomania": {
         "name": "LOTOMANIA",
         "color": "#e88732",
-        "icon": IMG_18e27725_ASSET.readall(),
+        "icon": ICON_LOTOMANIA_ASSET.readall(),
     },
     "timemania": {
         "name": "TIMEMANIA",
         "color": "#75fb4c",
-        "icon": IMG_9065715b_ASSET.readall(),
+        "icon": ICON_TIMEMANIA_ASSET.readall(),
     },
     "superSete": {
         "name": "SUPER SETE",
         "color": "#b1ce5b",
-        "icon": IMG_17a26da4_ASSET.readall(),
+        "icon": ICON_SUPERSETE_ASSET.readall(),
     },
     "quina": {
         "name": "QUINA",
         "color": "#21027f",
-        "icon": IMG_fb4c57f4_ASSET.readall(),
+        "icon": ICON_QUINA_ASSET.readall(),
     },
 }
 
@@ -157,7 +156,7 @@ def main(config):
                         main_align = "space_around",
                         cross_align = "center",
                         children = [
-                            render.Image(src = base64.decode(modality_icon), height = 10),
+                            render.Image(src = modality_icon, height = 10),
                             render.Text(modality_name, color = modality_color, font = modality_font),
                         ],
                     ),
@@ -256,7 +255,7 @@ def render_error(status_code):
                         main_align = "center",
                         cross_align = "center",
                         children = [
-                            render.Image(src = base64.decode(MODALITIES["megasena"]["icon"]), height = 10),
+                            render.Image(src = MODALITIES["megasena"]["icon"], height = 10),
                             render.Text("  LOTERIAS", color = "#4b966d"),
                         ],
                     ),

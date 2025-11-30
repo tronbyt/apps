@@ -7,16 +7,16 @@ Author: Rory Sawyer
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/defector_logo.png", defector_logo_asset = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("xpath.star", "xpath")
-load("images/img_1553b6ef.png", IMG_1553b6ef_ASSET = "file")
 
 DEFECTOR_RSS_URL = "https://defector.com/feed"
 
 # base64-encoded contents of the image in the rss feed
 DEFECTOR_LOGO = base64.decode(
-    (IMG_1553b6ef_ASSET.readall() +
+    (defector_logo_asset.readall() +
      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///+BgYF4eHiKioq5ubns7Owc" +

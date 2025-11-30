@@ -7,22 +7,22 @@ Author: Andrew Knotts
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/days_to_autumn.png", DAYS_TO_AUTUMN_ASSET = "file")
+load("images/days_to_summer.png", DAYS_TO_SUMMER_ASSET = "file")
+load("images/flower_stage_0.png", FLOWER_STAGE_0_ASSET = "file")
+load("images/flower_stage_1.png", FLOWER_STAGE_1_ASSET = "file")
+load("images/flower_stage_2.png", FLOWER_STAGE_2_ASSET = "file")
+load("images/flower_stage_3.png", FLOWER_STAGE_3_ASSET = "file")
+load("images/flower_stage_4.png", FLOWER_STAGE_4_ASSET = "file")
+load("images/flower_stage_5.png", FLOWER_STAGE_5_ASSET = "file")
+load("images/flower_stage_6.png", FLOWER_STAGE_6_ASSET = "file")
+load("images/flower_stage_7.png", FLOWER_STAGE_7_ASSET = "file")
+load("images/flower_stage_8.png", FLOWER_STAGE_8_ASSET = "file")
+load("images/flower_stage_9.png", FLOWER_STAGE_9_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_06e2f432.png", IMG_06e2f432_ASSET = "file")
-load("images/img_139db747.png", IMG_139db747_ASSET = "file")
-load("images/img_154825ff.png", IMG_154825ff_ASSET = "file")
-load("images/img_244dcf0e.png", IMG_244dcf0e_ASSET = "file")
-load("images/img_711ff954.png", IMG_711ff954_ASSET = "file")
-load("images/img_77020cdb.png", IMG_77020cdb_ASSET = "file")
-load("images/img_78b8cf3c.png", IMG_78b8cf3c_ASSET = "file")
-load("images/img_8d6ff36c.png", IMG_8d6ff36c_ASSET = "file")
-load("images/img_8daa7c12.png", IMG_8daa7c12_ASSET = "file")
-load("images/img_952d1435.png", IMG_952d1435_ASSET = "file")
-load("images/png_days_to_autumn_8f24a12f.png", PNG_DAYS_TO_AUTUMN_8f24a12f_ASSET = "file")
-load("images/png_days_to_summer_c73c4f7d.png", PNG_DAYS_TO_SUMMER_c73c4f7d_ASSET = "file")
 
 COLOR_SKY = "#0077BB"
 COLOR_GRASS = "#538F00"
@@ -49,19 +49,19 @@ FPS = 6
 FRAME_COUNT = int(DURATION_MS / 1000 * FPS)
 
 # Images
-PNG_DAYS_TO_AUTUMN = PNG_DAYS_TO_AUTUMN_8f24a12f_ASSET.readall()
-PNG_DAYS_TO_SUMMER = PNG_DAYS_TO_SUMMER_c73c4f7d_ASSET.readall()
+PNG_DAYS_TO_AUTUMN = DAYS_TO_AUTUMN_ASSET.readall()
+PNG_DAYS_TO_SUMMER = DAYS_TO_SUMMER_ASSET.readall()
 FLOWER_STAGES_PNG = [
-    IMG_8d6ff36c_ASSET.readall(),
-    IMG_06e2f432_ASSET.readall(),
-    IMG_154825ff_ASSET.readall(),
-    IMG_244dcf0e_ASSET.readall(),
-    IMG_77020cdb_ASSET.readall(),
-    IMG_8daa7c12_ASSET.readall(),
-    IMG_139db747_ASSET.readall(),
-    IMG_711ff954_ASSET.readall(),
-    IMG_952d1435_ASSET.readall(),
-    IMG_78b8cf3c_ASSET.readall(),
+    FLOWER_STAGE_0_ASSET.readall(),
+    FLOWER_STAGE_1_ASSET.readall(),
+    FLOWER_STAGE_2_ASSET.readall(),
+    FLOWER_STAGE_3_ASSET.readall(),
+    FLOWER_STAGE_4_ASSET.readall(),
+    FLOWER_STAGE_5_ASSET.readall(),
+    FLOWER_STAGE_6_ASSET.readall(),
+    FLOWER_STAGE_7_ASSET.readall(),
+    FLOWER_STAGE_8_ASSET.readall(),
+    FLOWER_STAGE_9_ASSET.readall(),
 ]
 
 # Reuse render.Box for efficiency gains

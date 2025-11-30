@@ -30,7 +30,6 @@ Author: Henry So, Jr.
 
 # See comments in the code for further attribution
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/map.png", MAP_ASSET = "file")
 load("images/pixel.png", PIXEL_ASSET = "file")
@@ -38,19 +37,6 @@ load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_02ee11d4.png", IMG_02ee11d4_ASSET = "file")
-load("images/img_2761509b.png", IMG_2761509b_ASSET = "file")
-load("images/img_2be6bbb0.png", IMG_2be6bbb0_ASSET = "file")
-load("images/img_300d8848.png", IMG_300d8848_ASSET = "file")
-load("images/img_48f220a9.png", IMG_48f220a9_ASSET = "file")
-load("images/img_5e5c2678.png", IMG_5e5c2678_ASSET = "file")
-load("images/img_6317ead0.png", IMG_6317ead0_ASSET = "file")
-load("images/img_682be486.png", IMG_682be486_ASSET = "file")
-load("images/img_c09d1805.png", IMG_c09d1805_ASSET = "file")
-load("images/img_d4b9fed0.png", IMG_d4b9fed0_ASSET = "file")
-load("images/img_daca6b2b.png", IMG_daca6b2b_ASSET = "file")
-load("images/img_f7175748.png", IMG_f7175748_ASSET = "file")
-load("images/img_f72092a0.png", IMG_f72092a0_ASSET = "file")
 
 MAP = MAP_ASSET.readall()
 PIXEL = PIXEL_ASSET.readall()
@@ -336,22 +322,22 @@ TIME_FORMATS = {
 }
 
 CHARS = {
-    "0": IMG_daca6b2b_ASSET.readall(),
-    "1": IMG_682be486_ASSET.readall(),
-    "2": IMG_48f220a9_ASSET.readall(),
-    "3": IMG_5e5c2678_ASSET.readall(),
-    "4": IMG_2be6bbb0_ASSET.readall(),
-    "5": IMG_f7175748_ASSET.readall(),
-    "6": IMG_c09d1805_ASSET.readall(),
-    "7": IMG_2761509b_ASSET.readall(),
-    "8": IMG_d4b9fed0_ASSET.readall(),
-    "9": IMG_6317ead0_ASSET.readall(),
-    ":": IMG_300d8848_ASSET.readall(),
+    "0": CHAR_0_ASSET.readall(),
+    "1": CHAR_1_ASSET.readall(),
+    "2": CHAR_2_ASSET.readall(),
+    "3": CHAR_3_ASSET.readall(),
+    "4": CHAR_4_ASSET.readall(),
+    "5": CHAR_5_ASSET.readall(),
+    "6": CHAR_6_ASSET.readall(),
+    "7": CHAR_7_ASSET.readall(),
+    "8": CHAR_8_ASSET.readall(),
+    "9": CHAR_9_ASSET.readall(),
+    ":": COLON_ASSET.readall(),
 }
 
 AM_PM = {
-    True: IMG_f72092a0_ASSET.readall(),
-    False: IMG_02ee11d4_ASSET.readall(),
+    True: AM_ASSET.readall(),
+    False: PM_ASSET.readall(),
 }
 
 # The following Base64-encoded image is a scaled-down version of

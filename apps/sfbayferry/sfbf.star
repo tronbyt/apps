@@ -7,10 +7,10 @@ Author: nyergler
 
 load("encoding/base64.star", "base64")
 load("encoding/csv.star", "csv")
+load("images/sfbf_icon.png", SFBF_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_66cf89bc.png", IMG_66cf89bc_ASSET = "file")
 
 def main(config):
     route = config.str("route", "")
@@ -951,5 +951,5 @@ t_5582562_b_80277_tn_0,21:30:00,21:30:00,72012,2,,0,0,16121.04430654,1,,,,,1,1,,
 """
 
 ICON = base64.decode(
-    IMG_66cf89bc_ASSET.readall(),
+    SFBF_ICON_ASSET.readall(),
 )

@@ -7,9 +7,9 @@ Author: Michael Blades
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/minecraft_server.webp", minecraft_server_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_0e5f994f.png", IMG_0e5f994f_ASSET = "file")
 
 def main(config):
     minecraftURL = config.get("server", "mc.azitoth.com")
@@ -31,7 +31,7 @@ def main(config):
     motd = result_json["motd"]["clean"][0] if "motd" in result_json and len(result_json["motd"]["clean"]) > 0 else ""
     motd2 = result_json["motd"]["clean"][1] if "motd" in result_json and len(result_json["motd"]["clean"]) > 1 else ""
 
-    iconURL = result_json["icon"].split(",")[1] if "icon" in result_json else IMG_0e5f994f_ASSET.readall()
+    iconURL = result_json["icon"].split(",")[1] if "icon" in result_json else minecraft_server_ASSET.readall()
 
     serverIcon = base64.decode(iconURL)
 

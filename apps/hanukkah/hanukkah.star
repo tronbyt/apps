@@ -20,7 +20,7 @@ def get_hanukkah_dates(year):
     hanukkah_last_day = hanukkah_first_day + time.parse_duration("192h")
     return hanukkah_first_day, hanukkah_last_day
 
-def main(config):
+def main():
     tz = time.tz()
     current_time = time.now().in_location(tz)
     current_year = current_time.year

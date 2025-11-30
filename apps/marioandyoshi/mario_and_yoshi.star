@@ -6,23 +6,23 @@ Author: BriHen
 """
 
 load("encoding/base64.star", "base64")
+load("images/frame_0.png", FRAME_0_ASSET = "file")
+load("images/frame_1.png", FRAME_1_ASSET = "file")
+load("images/frame_2.png", FRAME_2_ASSET = "file")
+load("images/frame_3.png", FRAME_3_ASSET = "file")
+load("images/frame_4.png", FRAME_4_ASSET = "file")
+load("images/frame_5.png", FRAME_5_ASSET = "file")
+load("images/frame_6.png", FRAME_6_ASSET = "file")
 load("render.star", "render")
-load("images/img_15344a36.png", IMG_15344a36_ASSET = "file")
-load("images/img_48f2d107.png", IMG_48f2d107_ASSET = "file")
-load("images/img_89e723ea.png", IMG_89e723ea_ASSET = "file")
-load("images/img_b1f8eed9.png", IMG_b1f8eed9_ASSET = "file")
-load("images/img_cc9e5fc9.png", IMG_cc9e5fc9_ASSET = "file")
-load("images/img_cd34ad5f.png", IMG_cd34ad5f_ASSET = "file")
-load("images/img_d89d10ba.png", IMG_d89d10ba_ASSET = "file")
 
 FRAMES = [
-    IMG_48f2d107_ASSET.readall(),
-    IMG_d89d10ba_ASSET.readall(),
-    IMG_15344a36_ASSET.readall(),
-    IMG_b1f8eed9_ASSET.readall(),
-    IMG_cc9e5fc9_ASSET.readall(),
-    IMG_cd34ad5f_ASSET.readall(),
-    IMG_89e723ea_ASSET.readall(),
+    FRAME_0_ASSET.readall(),
+    FRAME_1_ASSET.readall(),
+    FRAME_2_ASSET.readall(),
+    FRAME_3_ASSET.readall(),
+    FRAME_4_ASSET.readall(),
+    FRAME_5_ASSET.readall(),
+    FRAME_6_ASSET.readall(),
 ]
 
 def main():

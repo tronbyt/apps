@@ -6,12 +6,12 @@ Author: Mack Ward
 """
 
 load("encoding/base64.star", "base64")
+load("images/image_2x_410ac6ff.png", IMAGE_2X_410ac6ff_ASSET = "file")
+load("images/image_7634e782.png", IMAGE_7634e782_ASSET = "file")
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/image_2x_410ac6ff.png", IMAGE_2X_410ac6ff_ASSET = "file")
-load("images/image_7634e782.png", IMAGE_7634e782_ASSET = "file")
 
 IMAGE = IMAGE_7634e782_ASSET.readall()
 

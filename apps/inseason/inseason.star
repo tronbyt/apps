@@ -9,54 +9,6 @@ load("encoding/base64.star", "base64")  #Used to read encoded image
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_01bd9e5f.png", IMG_01bd9e5f_ASSET = "file")
-load("images/img_063ac7cb.png", IMG_063ac7cb_ASSET = "file")
-load("images/img_064a8383.png", IMG_064a8383_ASSET = "file")
-load("images/img_0680f9f3.png", IMG_0680f9f3_ASSET = "file")
-load("images/img_114464d7.png", IMG_114464d7_ASSET = "file")
-load("images/img_17ebae2d.png", IMG_17ebae2d_ASSET = "file")
-load("images/img_19df056f.png", IMG_19df056f_ASSET = "file")
-load("images/img_25f49966.png", IMG_25f49966_ASSET = "file")
-load("images/img_28e8ff80.png", IMG_28e8ff80_ASSET = "file")
-load("images/img_2f716788.png", IMG_2f716788_ASSET = "file")
-load("images/img_33dc04d0.png", IMG_33dc04d0_ASSET = "file")
-load("images/img_38c5d89e.png", IMG_38c5d89e_ASSET = "file")
-load("images/img_40f3e4c2.png", IMG_40f3e4c2_ASSET = "file")
-load("images/img_481ee65d.png", IMG_481ee65d_ASSET = "file")
-load("images/img_4967d45a.png", IMG_4967d45a_ASSET = "file")
-load("images/img_499f91cb.png", IMG_499f91cb_ASSET = "file")
-load("images/img_4a3d712d.png", IMG_4a3d712d_ASSET = "file")
-load("images/img_4f7c9a59.png", IMG_4f7c9a59_ASSET = "file")
-load("images/img_590cdc64.png", IMG_590cdc64_ASSET = "file")
-load("images/img_5bf48d7f.png", IMG_5bf48d7f_ASSET = "file")
-load("images/img_5bfa6d1d.png", IMG_5bfa6d1d_ASSET = "file")
-load("images/img_5ece558b.png", IMG_5ece558b_ASSET = "file")
-load("images/img_667f5043.png", IMG_667f5043_ASSET = "file")
-load("images/img_6fee8141.png", IMG_6fee8141_ASSET = "file")
-load("images/img_721734fa.png", IMG_721734fa_ASSET = "file")
-load("images/img_7a1f2e08.png", IMG_7a1f2e08_ASSET = "file")
-load("images/img_7abe27ed.png", IMG_7abe27ed_ASSET = "file")
-load("images/img_87839352.png", IMG_87839352_ASSET = "file")
-load("images/img_8b3799f4.png", IMG_8b3799f4_ASSET = "file")
-load("images/img_8f4ac4da.png", IMG_8f4ac4da_ASSET = "file")
-load("images/img_933a80e2.png", IMG_933a80e2_ASSET = "file")
-load("images/img_969c7d43.png", IMG_969c7d43_ASSET = "file")
-load("images/img_9e877618.png", IMG_9e877618_ASSET = "file")
-load("images/img_9ee81ac5.png", IMG_9ee81ac5_ASSET = "file")
-load("images/img_a819a760.png", IMG_a819a760_ASSET = "file")
-load("images/img_ab995983.png", IMG_ab995983_ASSET = "file")
-load("images/img_ae61468d.png", IMG_ae61468d_ASSET = "file")
-load("images/img_bf5600be.png", IMG_bf5600be_ASSET = "file")
-load("images/img_c6a4d978.png", IMG_c6a4d978_ASSET = "file")
-load("images/img_cbb7179c.png", IMG_cbb7179c_ASSET = "file")
-load("images/img_cf7a77a0.png", IMG_cf7a77a0_ASSET = "file")
-load("images/img_e86a81d4.png", IMG_e86a81d4_ASSET = "file")
-load("images/img_e9d579ad.png", IMG_e9d579ad_ASSET = "file")
-load("images/img_ebe679f1.png", IMG_ebe679f1_ASSET = "file")
-load("images/img_ec81005b.png", IMG_ec81005b_ASSET = "file")
-load("images/img_f2cf6c1c.png", IMG_f2cf6c1c_ASSET = "file")
-load("images/img_f71c9d87.png", IMG_f71c9d87_ASSET = "file")
-load("images/img_fcbf5f4d.png", IMG_fcbf5f4d_ASSET = "file")
 
 REGION_OPTIONS = [
     schema.Option(value = "0", display = "Northwest (Wyoming, Montana, Idaho, Washington, Oregon"),
@@ -110,54 +62,54 @@ REGIONS = ("Northwest", "Southwest", "Midwest", "Southeast", "NorthEast")
 ITEMS = ("arugula", "apples", "apricots", "artichokes", "arugula", "asparagus", "avocados", "beans", "beets", "blueberries", "broccoli", "brussel sprouts", "cabbage", "cantaloupes", "carrots", "cauliflower", "celery", "chard", "cherries", "chilis", "clementines", "collards", "corn", "cranberries", "cucumbers", "dates", "eggplant", "fennel", "figs", "garlic", "grapefruit", "grapes", "green beans", "kale", "leeks", "lemons", "lettuce", "limes", "mangoes (florida)", "mushrooms", "nectarines", "okra", "onions", "oranges", "parsnips", "peaches", "pears", "peas", "peppers", "plums", "pomegranates", "potatoes", "pumpkins", "radishes", "raspberries", "rhubarb", "salad greens", "spinach", "squash", "strawberries", "sweet potatoes", "tangerines", "tomatoes", "turnips", "watermelon", "zucchini")
 
 ITEM_IMAGES = {
-    "apples": IMG_5bf48d7f_ASSET.readall(),
-    "celery": IMG_ae61468d_ASSET.readall(),
-    "avocados": IMG_933a80e2_ASSET.readall(),
-    "beans": IMG_7abe27ed_ASSET.readall(),
-    "beets": IMG_19df056f_ASSET.readall(),
-    "blueberries": IMG_667f5043_ASSET.readall(),
-    "broccoli": IMG_17ebae2d_ASSET.readall(),
-    "brussel sprouts": IMG_4a3d712d_ASSET.readall(),
-    "cabbage": IMG_481ee65d_ASSET.readall(),
-    "carrots": IMG_38c5d89e_ASSET.readall(),
-    "cauliflower": IMG_33dc04d0_ASSET.readall(),
-    "cherries": IMG_01bd9e5f_ASSET.readall(),
-    "chilis": IMG_721734fa_ASSET.readall(),
-    "clementines": IMG_e9d579ad_ASSET.readall(),
-    "corn": IMG_25f49966_ASSET.readall(),
-    "cranberries": IMG_a819a760_ASSET.readall(),
-    "cucumbers": IMG_5bfa6d1d_ASSET.readall(),
-    "eggplant": IMG_f2cf6c1c_ASSET.readall(),
-    "garlic": IMG_cf7a77a0_ASSET.readall(),
-    "grapefruit": IMG_8f4ac4da_ASSET.readall(),
-    "grapes": IMG_cbb7179c_ASSET.readall(),
-    "green beans": IMG_4f7c9a59_ASSET.readall(),
-    "lemons": IMG_499f91cb_ASSET.readall(),
-    "lettuce": IMG_e86a81d4_ASSET.readall(),
-    "limes": IMG_ab995983_ASSET.readall(),
-    "mangoes (florida)": IMG_8b3799f4_ASSET.readall(),
-    "mushrooms": IMG_ebe679f1_ASSET.readall(),
-    "nectarines": IMG_4967d45a_ASSET.readall(),
-    "okra": IMG_064a8383_ASSET.readall(),
-    "onions": IMG_7a1f2e08_ASSET.readall(),
-    "oranges": IMG_6fee8141_ASSET.readall(),
-    "peaches": IMG_ec81005b_ASSET.readall(),
-    "pears": IMG_5ece558b_ASSET.readall(),
-    "peas": IMG_fcbf5f4d_ASSET.readall(),
-    "peppers": IMG_969c7d43_ASSET.readall(),
-    "plums": IMG_9ee81ac5_ASSET.readall(),
-    "pomegranates": IMG_87839352_ASSET.readall(),
-    "potatoes": IMG_114464d7_ASSET.readall(),
-    "pumpkins": IMG_c6a4d978_ASSET.readall(),
-    "radishes": IMG_0680f9f3_ASSET.readall(),
-    "raspberries": IMG_40f3e4c2_ASSET.readall(),
-    "rhubarb": IMG_9e877618_ASSET.readall(),
-    "spinach": IMG_f71c9d87_ASSET.readall(),
-    "squash": IMG_063ac7cb_ASSET.readall(),
-    "strawberries": IMG_bf5600be_ASSET.readall(),
-    "tomatoes": IMG_28e8ff80_ASSET.readall(),
-    "watermelon": IMG_590cdc64_ASSET.readall(),
-    "zucchini": IMG_2f716788_ASSET.readall(),
+    "apples": APPLES_ASSET.readall(),
+    "celery": CELERY_ASSET.readall(),
+    "avocados": AVOCADOS_ASSET.readall(),
+    "beans": BEANS_ASSET.readall(),
+    "beets": BEETS_ASSET.readall(),
+    "blueberries": BLUEBERRIES_ASSET.readall(),
+    "broccoli": BROCCOLI_ASSET.readall(),
+    "brussel sprouts": BRUSSEL_SPROUTS_ASSET.readall(),
+    "cabbage": CABBAGE_ASSET.readall(),
+    "carrots": CARROTS_ASSET.readall(),
+    "cauliflower": CAULIFLOWER_ASSET.readall(),
+    "cherries": CHERRIES_ASSET.readall(),
+    "chilis": CHILIS_ASSET.readall(),
+    "clementines": CLEMENTINES_ASSET.readall(),
+    "corn": CORN_ASSET.readall(),
+    "cranberries": CRANBERRIES_ASSET.readall(),
+    "cucumbers": CUCUMBERS_ASSET.readall(),
+    "eggplant": EGGPLANT_ASSET.readall(),
+    "garlic": GARLIC_ASSET.readall(),
+    "grapefruit": GRAPEFRUIT_ASSET.readall(),
+    "grapes": GRAPES_ASSET.readall(),
+    "green beans": GREEN_BEANS_ASSET.readall(),
+    "lemons": LEMONS_ASSET.readall(),
+    "lettuce": LETTUCE_ASSET.readall(),
+    "limes": LIMES_ASSET.readall(),
+    "mangoes (florida)": MANGOES_FLORIDA__ASSET.readall(),
+    "mushrooms": MUSHROOMS_ASSET.readall(),
+    "nectarines": NECTARINES_ASSET.readall(),
+    "okra": OKRA_ASSET.readall(),
+    "onions": ONIONS_ASSET.readall(),
+    "oranges": ORANGES_ASSET.readall(),
+    "peaches": PEACHES_ASSET.readall(),
+    "pears": PEARS_ASSET.readall(),
+    "peas": PEAS_ASSET.readall(),
+    "peppers": PEPPERS_ASSET.readall(),
+    "plums": PLUMS_ASSET.readall(),
+    "pomegranates": POMEGRANATES_ASSET.readall(),
+    "potatoes": POTATOES_ASSET.readall(),
+    "pumpkins": PUMPKINS_ASSET.readall(),
+    "radishes": RADISHES_ASSET.readall(),
+    "raspberries": RASPBERRIES_ASSET.readall(),
+    "rhubarb": RHUBARB_ASSET.readall(),
+    "spinach": SPINACH_ASSET.readall(),
+    "squash": SQUASH_ASSET.readall(),
+    "strawberries": STRAWBERRIES_ASSET.readall(),
+    "tomatoes": TOMATOES_ASSET.readall(),
+    "watermelon": WATERMELON_ASSET.readall(),
+    "zucchini": ZUCCHINI_ASSET.readall(),
 }
 
 def main(config):

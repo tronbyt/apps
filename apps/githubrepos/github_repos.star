@@ -5,13 +5,17 @@ Description: Displays a GitHub badge for the status of the configured action.
 Author: Cavallando
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/github_failed.png", GITHUB_FAILED_ICON = "file")
+load("images/github_fault.png", GITHUB_FAULT_ICON = "file")
+load("images/github_loading.png", GITHUB_LOADING_ICON = "file")
+load("images/github_logo.png", GITHUB_LOGO_ASSET = "file")
+load("images/github_neutral.png", GITHUB_NEUTRAL_ICON = "file")
+load("images/github_success.png", GITHUB_SUCCESS_ICON = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_7392dfe9.png", IMG_7392dfe9_ASSET = "file")
 
 DEBUG = False
 TEST_RUN = """{
@@ -26,7 +30,15 @@ TEST_RUN = """{
     ]
 }"""
 
-GITHUB_LOGO = IMG_7392dfe9_ASSET.readall()
+GITHUB_LOGO = GITHUB_LOGO_ASSET.readall()
+GITHUB_FAILED_ICON = GITHUB_FAILED_ICON.readall()
+GITHUB_SUCCESS_ICON = GITHUB_SUCCESS_ICON.readall()
+GITHUB_NEUTRAL_ICON = GITHUB_NEUTRAL_ICON.readall()
+GITHUB_FAULT_ICON = GITHUB_FAULT_ICON.readall()
+GITHUB_LOADING_ICON = GITHUB_LOADING_ICON.readall()
+
+def should_show_jobs(repos, dwell_time):
+    now = time.now()
     for repo in repos:
         if "data" not in repo:
             continue

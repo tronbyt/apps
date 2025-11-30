@@ -9,16 +9,15 @@ Author: Dan Adam
 # Attribution: Gas Icon from "https://www.iconfinder.com/icons/111078/gas_icon", Costco Icon from "https://play-lh.googleusercontent.com/gqOziTbVWioRJtHh7OvfOq07NCTcAHKWBYPQKJOZqNcczpOz5hdrnQNY7i2OatJxmuY=w240-h480-rw"
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/costco.png", COSTCO_ICON_ASSET = "file")
+load("images/gas.png", GAS_ICON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_bc73f15e.png", IMG_bc73f15e_ASSET = "file")
-load("images/img_e27ab5aa.png", IMG_e27ab5aa_ASSET = "file")
 
 DEFAULT_LOCATION = """
 {
@@ -69,8 +68,8 @@ DUMMY_WAREHOUSE = [
 ]
 
 ICONS = {
-    "gas-icon": IMG_bc73f15e_ASSET.readall(),
-    "costco-icon": IMG_e27ab5aa_ASSET.readall(),
+    "gas-icon": GAS_ICON_ASSET.readall(),
+    "costco-icon": COSTCO_ICON_ASSET.readall(),
 }
 
 PRICE_COLOURS = {

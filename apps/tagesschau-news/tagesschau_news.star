@@ -20,7 +20,7 @@ def format_text(original_text, chars_per_line):
                 new_line_words.append(word)
             else:
                 for i in range(0, len(word), chars_per_line):
-                    new_line_words.append(word[i:i+chars_per_line])
+                    new_line_words.append(word[i:i + chars_per_line])
         lines.append(" ".join(new_line_words))
     return "\n".join(lines)
 
@@ -82,48 +82,48 @@ def main(config):
                 height = canvas.height(),
             ),
             render.Padding(pad = scale, child =
-                                                render.Column(
-                                                    expanded = True,
-                                                    children = [
-                                                        render.Padding(
-                                                            child =
-                                                                render.Row(
-                                                                    expanded = True,
-                                                                    main_align = "space_between",
-                                                                    children = [
-                                                                        render.Image(height = HEADING_HEIGHT, src = ARD_LOGO_WHITE.readall()),
-                                                                        render.Text(
-                                                                            formatted_date,
-                                                                            # font family
-                                                                            font = font_small,
-                                                                        ),
-                                                                    ],
-                                                                    cross_align = "center",
-                                                                ),
-                                                            pad = scale,
-                                                        ),
-                                                        render.Marquee(
-                                                            height = TEXT_HEIGHT,
-                                                            scroll_direction = "vertical",
-                                                            delay = 20,
-                                                            child = render.Column(children = [
+                                            render.Column(
+                                                expanded = True,
+                                                children = [
+                                                    render.Padding(
+                                                        child =
+                                                            render.Row(
+                                                                expanded = True,
+                                                                main_align = "space_between",
+                                                                children = [
+                                                                    render.Image(height = HEADING_HEIGHT, src = ARD_LOGO_WHITE.readall()),
+                                                                    render.Text(
+                                                                        formatted_date,
+                                                                        # font family
+                                                                        font = font_small,
+                                                                    ),
+                                                                ],
+                                                                cross_align = "center",
+                                                            ),
+                                                        pad = scale,
+                                                    ),
+                                                    render.Marquee(
+                                                        height = TEXT_HEIGHT,
+                                                        scroll_direction = "vertical",
+                                                        delay = 20,
+                                                        child = render.Column(children = [
+                                                            render.WrappedText(
+                                                                content = ("+++ " if news_is_urgent else "") + format_text(topline, chars_per_line) + ":",
+                                                                color = "#FFFF00" if news_is_urgent else "#FFFFFF",
+                                                                font = font_normal,
+                                                            ),
+                                                            render.Padding(
                                                                 render.WrappedText(
-                                                                    content = ("+++ " if news_is_urgent else "") + format_text(topline, chars_per_line) + ":",
+                                                                    content = format_text(title, chars_per_line) + (" +++" if news_is_urgent else ""),
                                                                     color = "#FFFF00" if news_is_urgent else "#FFFFFF",
                                                                     font = font_normal,
                                                                 ),
-                                                                render.Padding(
-                                                                    render.WrappedText(
-                                                                        content = format_text(title, chars_per_line) + (" +++" if news_is_urgent else ""),
-                                                                        color = "#FFFF00" if news_is_urgent else "#FFFFFF",
-                                                                        font = font_normal,
-                                                                    ),
-                                                                    pad = (0, 2 * scale, 0, 0),
-                                                                ),
-                                                            ]),
-                                                        ),
-                                                    ],
-                                                )),
+                                                                pad = (0, 2 * scale, 0, 0),
+                                                            ),
+                                                        ]),
+                                                    ),
+                                                ],
+                                            )),
         ]),
         delay = 100 // scale,
         show_full_animation = True,

@@ -6,61 +6,57 @@ Author: PMK (@pmk)
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/weather_a.png", WEATHER_A_ASSET = "file")
+load("images/weather_aa.png", WEATHER_AA_ASSET = "file")
+load("images/weather_bb.png", WEATHER_BB_ASSET = "file")
+load("images/weather_cc.png", WEATHER_CC_ASSET = "file")
+load("images/weather_dd.png", WEATHER_DD_ASSET = "file")
+load("images/weather_f.png", WEATHER_F_ASSET = "file")
+load("images/weather_ff.png", WEATHER_FF_ASSET = "file")
+load("images/weather_g.png", WEATHER_G_ASSET = "file")
+load("images/weather_gg.png", WEATHER_GG_ASSET = "file")
+load("images/weather_h.png", WEATHER_H_ASSET = "file")
+load("images/weather_hh.png", WEATHER_HH_ASSET = "file")
+load("images/weather_ii.png", WEATHER_II_ASSET = "file")
+load("images/weather_j.png", WEATHER_J_ASSET = "file")
+load("images/weather_jj.png", WEATHER_JJ_ASSET = "file")
+load("images/weather_ll.png", WEATHER_LL_ASSET = "file")
+load("images/weather_m.png", WEATHER_M_ASSET = "file")
+load("images/weather_n.png", WEATHER_N_ASSET = "file")
+load("images/weather_nn.png", WEATHER_NN_ASSET = "file")
+load("images/weather_o.png", WEATHER_O_ASSET = "file")
+load("images/weather_q.png", WEATHER_Q_ASSET = "file")
+load("images/weather_r.png", WEATHER_R_ASSET = "file")
+load("images/weather_rr.png", WEATHER_RR_ASSET = "file")
+load("images/weather_s.png", WEATHER_S_ASSET = "file")
+load("images/weather_ss.png", WEATHER_SS_ASSET = "file")
+load("images/weather_t.png", WEATHER_T_ASSET = "file")
+load("images/weather_tt.png", WEATHER_TT_ASSET = "file")
+load("images/weather_u.png", WEATHER_U_ASSET = "file")
+load("images/weather_uu.png", WEATHER_UU_ASSET = "file")
+load("images/weather_v.png", WEATHER_V_ASSET = "file")
+load("images/weather_vv.png", WEATHER_VV_ASSET = "file")
+load("images/weather_w.png", WEATHER_W_ASSET = "file")
+load("images/weather_ww.png", WEATHER_WW_ASSET = "file")
+load("images/wind_n.png", WIND_N_ASSET = "file")
+load("images/wind_nno.png", WIND_NNO_ASSET = "file")
+load("images/wind_nnw.png", WIND_NNW_ASSET = "file")
+load("images/wind_no.png", WIND_NO_ASSET = "file")
+load("images/wind_nw.png", WIND_NW_ASSET = "file")
+load("images/wind_o.png", WIND_O_ASSET = "file")
+load("images/wind_w.png", WIND_W_ASSET = "file")
+load("images/wind_z.png", WIND_Z_ASSET = "file")
+load("images/wind_zo.png", WIND_ZO_ASSET = "file")
+load("images/wind_zw.png", WIND_ZW_ASSET = "file")
+load("images/wind_zzo.png", WIND_ZZO_ASSET = "file")
+load("images/wind_zzw.png", WIND_ZZW_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_03ffccb0.png", IMG_03ffccb0_ASSET = "file")
-load("images/img_0489534a.png", IMG_0489534a_ASSET = "file")
-load("images/img_0e23884e.png", IMG_0e23884e_ASSET = "file")
-load("images/img_0e915f20.png", IMG_0e915f20_ASSET = "file")
-load("images/img_10a4ce88.png", IMG_10a4ce88_ASSET = "file")
-load("images/img_1646288d.png", IMG_1646288d_ASSET = "file")
-load("images/img_19ca3fd6.png", IMG_19ca3fd6_ASSET = "file")
-load("images/img_22f880aa.png", IMG_22f880aa_ASSET = "file")
-load("images/img_25159af9.png", IMG_25159af9_ASSET = "file")
-load("images/img_25b2084c.png", IMG_25b2084c_ASSET = "file")
-load("images/img_282c0f28.png", IMG_282c0f28_ASSET = "file")
-load("images/img_2fd7f174.png", IMG_2fd7f174_ASSET = "file")
-load("images/img_30b449d6.png", IMG_30b449d6_ASSET = "file")
-load("images/img_3594951f.png", IMG_3594951f_ASSET = "file")
-load("images/img_3a1c6a6e.png", IMG_3a1c6a6e_ASSET = "file")
-load("images/img_3be304ee.png", IMG_3be304ee_ASSET = "file")
-load("images/img_4cab80f1.png", IMG_4cab80f1_ASSET = "file")
-load("images/img_4e8cad9e.png", IMG_4e8cad9e_ASSET = "file")
-load("images/img_573f64b7.png", IMG_573f64b7_ASSET = "file")
-load("images/img_58baa058.png", IMG_58baa058_ASSET = "file")
-load("images/img_60f468b6.png", IMG_60f468b6_ASSET = "file")
-load("images/img_75ea090f.png", IMG_75ea090f_ASSET = "file")
-load("images/img_79c7994a.png", IMG_79c7994a_ASSET = "file")
-load("images/img_7b0652db.png", IMG_7b0652db_ASSET = "file")
-load("images/img_7dc545cc.png", IMG_7dc545cc_ASSET = "file")
-load("images/img_82cbb27b.png", IMG_82cbb27b_ASSET = "file")
-load("images/img_91a510fe.png", IMG_91a510fe_ASSET = "file")
-load("images/img_9469ae8a.png", IMG_9469ae8a_ASSET = "file")
-load("images/img_9b8ca8cf.png", IMG_9b8ca8cf_ASSET = "file")
-load("images/img_a32c3fa1.png", IMG_a32c3fa1_ASSET = "file")
-load("images/img_a8573711.png", IMG_a8573711_ASSET = "file")
-load("images/img_ab46d489.png", IMG_ab46d489_ASSET = "file")
-load("images/img_ab84862d.png", IMG_ab84862d_ASSET = "file")
-load("images/img_abf0f1e8.png", IMG_abf0f1e8_ASSET = "file")
-load("images/img_b201c517.png", IMG_b201c517_ASSET = "file")
-load("images/img_b3297dfd.png", IMG_b3297dfd_ASSET = "file")
-load("images/img_c4c0d427.png", IMG_c4c0d427_ASSET = "file")
-load("images/img_c97bb50d.png", IMG_c97bb50d_ASSET = "file")
-load("images/img_cda743e8.png", IMG_cda743e8_ASSET = "file")
-load("images/img_d0617c84.png", IMG_d0617c84_ASSET = "file")
-load("images/img_d7ccce9a.png", IMG_d7ccce9a_ASSET = "file")
-load("images/img_d868f264.png", IMG_d868f264_ASSET = "file")
-load("images/img_e690a807.png", IMG_e690a807_ASSET = "file")
-load("images/img_eeda651b.png", IMG_eeda651b_ASSET = "file")
-load("images/img_f53f325e.png", IMG_f53f325e_ASSET = "file")
-load("images/img_f67896b5.png", IMG_f67896b5_ASSET = "file")
-load("images/img_f993e539.png", IMG_f993e539_ASSET = "file")
 
 DEFAULT_COUNTRY = "NL"
 DEFAULT_DISPLAYING = "radar"
@@ -188,7 +184,7 @@ def render_today(location):
                         cross_align = "center",
                         children = [
                             render.Image(
-                                src = get_icon(today["iconcode"]),
+                                src = get_icon(today["iconcode"]).readall(),
                                 width = 19,
                                 height = 19,
                             ),
@@ -441,7 +437,7 @@ def render_weather_column(data):
                 main_align = "center",
                 children = [
                     render.Image(
-                        src = get_icon(data["iconcode"]),
+                        src = get_icon(data["iconcode"].readall()),
                         width = 19,
                         height = 19,
                     ),
@@ -570,122 +566,122 @@ def get_schema():
 
 def get_icon(icon_code):
     if icon_code == "ww":
-        return IMG_7dc545cc_ASSET.readall()
+        return WEATHER_WW_ASSET
     if icon_code == "vv":
-        return IMG_10a4ce88_ASSET.readall()
+        return WEATHER_VV_ASSET
     if icon_code == "uu":
-        return IMG_f993e539_ASSET.readall()
+        return WEATHER_UU_ASSET
     if icon_code == "tt":
-        return IMG_c4c0d427_ASSET.readall()
+        return WEATHER_TT_ASSET
     if icon_code == "ss":
-        return IMG_573f64b7_ASSET.readall()
+        return WEATHER_SS_ASSET
     if icon_code == "qq":
-        return IMG_a32c3fa1_ASSET.readall()
+        return WEATHER_LL_ASSET
     if icon_code == "rr":
-        return IMG_30b449d6_ASSET.readall()
+        return WEATHER_RR_ASSET
     if icon_code == "pp":
-        return IMG_91a510fe_ASSET.readall()
+        return WEATHER_LL_ASSET
     if icon_code == "nn":
-        return IMG_f53f325e_ASSET.readall()
+        return WEATHER_NN_ASSET
     if icon_code == "oo":
-        return IMG_19ca3fd6_ASSET.readall()
+        return WEATHER_BB_ASSET
     if icon_code == "mm":
-        return IMG_b201c517_ASSET.readall()
+        return WEATHER_M_ASSET
     if icon_code == "ll":
-        return IMG_a32c3fa1_ASSET.readall()
+        return WEATHER_LL_ASSET
     if icon_code == "kk":
-        return IMG_282c0f28_ASSET.readall()
+        return WEATHER_FF_ASSET
     if icon_code == "jj":
-        return IMG_2fd7f174_ASSET.readall()
+        return WEATHER_JJ_ASSET
     if icon_code == "ii":
-        return IMG_a8573711_ASSET.readall()
+        return WEATHER_II_ASSET
     if icon_code == "hh":
-        return IMG_3be304ee_ASSET.readall()
+        return WEATHER_HH_ASSET
     if icon_code == "gg":
-        return IMG_b3297dfd_ASSET.readall()
+        return WEATHER_GG_ASSET
     if icon_code == "ff":
-        return IMG_282c0f28_ASSET.readall()
+        return WEATHER_FF_ASSET
     if icon_code == "dd":
-        return IMG_cda743e8_ASSET.readall()
+        return WEATHER_DD_ASSET
     if icon_code == "cc":
-        return IMG_91a510fe_ASSET.readall()
+        return WEATHER_CC_ASSET
     if icon_code == "bb":
-        return IMG_19ca3fd6_ASSET.readall()
+        return WEATHER_BB_ASSET
     if icon_code == "aa":
-        return IMG_7b0652db_ASSET.readall()
+        return WEATHER_AA_ASSET
 
     if icon_code == "w":
-        return IMG_58baa058_ASSET.readall()
+        return WEATHER_W_ASSET
     if icon_code == "v":
-        return IMG_0e915f20_ASSET.readall()
+        return WEATHER_V_ASSET
     if icon_code == "u":
-        return IMG_4cab80f1_ASSET.readall()
+        return WEATHER_U_ASSET
     if icon_code == "t":
-        return IMG_60f468b6_ASSET.readall()
+        return WEATHER_T_ASSET
     if icon_code == "s":
-        return IMG_3594951f_ASSET.readall()
+        return WEATHER_S_ASSET
     if icon_code == "r":
-        return IMG_82cbb27b_ASSET.readall()
+        return WEATHER_R_ASSET
     if icon_code == "q":
-        return IMG_4e8cad9e_ASSET.readall()
+        return WEATHER_Q_ASSET
     if icon_code == "p":
-        return IMG_91a510fe_ASSET.readall()
+        return WEATHER_LL_ASSET
     if icon_code == "o":
-        return IMG_f67896b5_ASSET.readall()
+        return WEATHER_O_ASSET
     if icon_code == "n":
-        return IMG_e690a807_ASSET.readall()
+        return WEATHER_N_ASSET
     if icon_code == "m":
-        return IMG_b201c517_ASSET.readall()
+        return WEATHER_M_ASSET
     if icon_code == "l":
-        return IMG_a32c3fa1_ASSET.readall()
+        return WEATHER_LL_ASSET
     if icon_code == "k":
-        return IMG_9469ae8a_ASSET.readall()
+        return WEATHER_F_ASSET
     if icon_code == "j":
-        return IMG_abf0f1e8_ASSET.readall()
+        return WEATHER_J_ASSET
     if icon_code == "i":
-        return IMG_22f880aa_ASSET.readall()
+        return WEATHER_II_ASSET
     if icon_code == "h":
-        return IMG_3a1c6a6e_ASSET.readall()
+        return WEATHER_H_ASSET
     if icon_code == "g":
-        return IMG_75ea090f_ASSET.readall()
+        return WEATHER_G_ASSET
     if icon_code == "f":
-        return IMG_9469ae8a_ASSET.readall()
+        return WEATHER_F_ASSET
     if icon_code == "d":
-        return IMG_ab84862d_ASSET.readall()
+        return WEATHER_DD_ASSET
     if icon_code == "c":
-        return IMG_91a510fe_ASSET.readall()
+        return WEATHER_CC_ASSET
     if icon_code == "b":
-        return IMG_f67896b5_ASSET.readall()
+        return WEATHER_BB_ASSET
     if icon_code == "a":
-        return IMG_25b2084c_ASSET.readall()
+        return WEATHER_A_ASSET
 
-    return IMG_25b2084c_ASSET.readall()
+    return WEATHER_A_ASSET
 
 def get_wind_icon(direction):
     d = direction.upper()
     if d == "N":
-        return IMG_d7ccce9a_ASSET.readall()
+        return WIND_N_ASSET.readall()
     if d == "NO":
-        return IMG_d0617c84_ASSET.readall()
+        return WIND_NO_ASSET.readall()
     if d == "NNO":
-        return IMG_0489534a_ASSET.readall()
+        return WIND_NNO_ASSET.readall()
     if d == "O":
-        return IMG_c97bb50d_ASSET.readall()
+        return WIND_O_ASSET.readall()
     if d == "Z":
-        return IMG_ab46d489_ASSET.readall()
+        return WIND_Z_ASSET.readall()
     if d == "ZO":
-        return IMG_eeda651b_ASSET.readall()
+        return WIND_ZO_ASSET.readall()
     if d == "ZZO":
-        return IMG_0e23884e_ASSET.readall()
+        return WIND_ZZO_ASSET.readall()
     if d == "W":
-        return IMG_79c7994a_ASSET.readall()
+        return WIND_W_ASSET.readall()
     if d == "ZW":
-        return IMG_25159af9_ASSET.readall()
+        return WIND_ZW_ASSET.readall()
     if d == "ZZW":
-        return IMG_1646288d_ASSET.readall()
+        return WIND_ZZW_ASSET.readall()
     if d == "NW":
-        return IMG_03ffccb0_ASSET.readall()
+        return WIND_NW_ASSET.readall()
     if d == "NNW":
-        return IMG_9b8ca8cf_ASSET.readall()
+        return WIND_NNW_ASSET.readall()
 
-    return IMG_d868f264_ASSET.readall()
+    return WIND_NNW_ASSET.readall()

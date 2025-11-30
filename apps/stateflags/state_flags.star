@@ -6,60 +6,60 @@ Author: Robert Ison
 """
 
 load("encoding/base64.star", "base64")  #Used to read encoded image
+load("images/flag_ak.png", FLAG_AK_ASSET = "file")
+load("images/flag_al.png", FLAG_AL_ASSET = "file")
+load("images/flag_ar.png", FLAG_AR_ASSET = "file")
+load("images/flag_az.png", FLAG_AZ_ASSET = "file")
+load("images/flag_ca.png", FLAG_CA_ASSET = "file")
+load("images/flag_co.png", FLAG_CO_ASSET = "file")
+load("images/flag_ct.png", FLAG_CT_ASSET = "file")
+load("images/flag_dc.png", FLAG_DC_ASSET = "file")
+load("images/flag_de.png", FLAG_DE_ASSET = "file")
+load("images/flag_fl.png", FLAG_FL_ASSET = "file")
+load("images/flag_ga.png", FLAG_GA_ASSET = "file")
+load("images/flag_hi.png", FLAG_HI_ASSET = "file")
+load("images/flag_ia.png", FLAG_IA_ASSET = "file")
+load("images/flag_id.png", FLAG_ID_ASSET = "file")
+load("images/flag_il.png", FLAG_IL_ASSET = "file")
+load("images/flag_in.png", FLAG_IN_ASSET = "file")
+load("images/flag_ks.png", FLAG_KS_ASSET = "file")
+load("images/flag_ky.png", FLAG_KY_ASSET = "file")
+load("images/flag_la.png", FLAG_LA_ASSET = "file")
+load("images/flag_ma.png", FLAG_MA_ASSET = "file")
+load("images/flag_md.png", FLAG_MD_ASSET = "file")
+load("images/flag_me.png", FLAG_ME_ASSET = "file")
+load("images/flag_mi.png", FLAG_MI_ASSET = "file")
+load("images/flag_mn.png", FLAG_MN_ASSET = "file")
+load("images/flag_mo.png", FLAG_MO_ASSET = "file")
+load("images/flag_ms.png", FLAG_MS_ASSET = "file")
+load("images/flag_mt.png", FLAG_MT_ASSET = "file")
+load("images/flag_nc.png", FLAG_NC_ASSET = "file")
+load("images/flag_nd.png", FLAG_ND_ASSET = "file")
+load("images/flag_ne.png", FLAG_NE_ASSET = "file")
+load("images/flag_nh.png", FLAG_NH_ASSET = "file")
+load("images/flag_nj.png", FLAG_NJ_ASSET = "file")
+load("images/flag_nm.png", FLAG_NM_ASSET = "file")
+load("images/flag_nv.png", FLAG_NV_ASSET = "file")
+load("images/flag_ny.png", FLAG_NY_ASSET = "file")
+load("images/flag_oh.png", FLAG_OH_ASSET = "file")
+load("images/flag_ok.png", FLAG_OK_ASSET = "file")
+load("images/flag_or.png", FLAG_OR_ASSET = "file")
+load("images/flag_pa.png", FLAG_PA_ASSET = "file")
+load("images/flag_ri.png", FLAG_RI_ASSET = "file")
+load("images/flag_sc.png", FLAG_SC_ASSET = "file")
+load("images/flag_sd.png", FLAG_SD_ASSET = "file")
+load("images/flag_tn.png", FLAG_TN_ASSET = "file")
+load("images/flag_tx.png", FLAG_TX_ASSET = "file")
+load("images/flag_ut.png", FLAG_UT_ASSET = "file")
+load("images/flag_va.png", FLAG_VA_ASSET = "file")
+load("images/flag_vt.png", FLAG_VT_ASSET = "file")
+load("images/flag_wa.png", FLAG_WA_ASSET = "file")
+load("images/flag_wi.png", FLAG_WI_ASSET = "file")
+load("images/flag_wv.png", FLAG_WV_ASSET = "file")
+load("images/flag_wy.png", FLAG_WY_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_04d1bf9a.png", IMG_04d1bf9a_ASSET = "file")
-load("images/img_06d3431d.png", IMG_06d3431d_ASSET = "file")
-load("images/img_0a27c5d2.png", IMG_0a27c5d2_ASSET = "file")
-load("images/img_11017c91.png", IMG_11017c91_ASSET = "file")
-load("images/img_1b51d67d.png", IMG_1b51d67d_ASSET = "file")
-load("images/img_1ed7ddf1.png", IMG_1ed7ddf1_ASSET = "file")
-load("images/img_2639335e.png", IMG_2639335e_ASSET = "file")
-load("images/img_2ada35fa.png", IMG_2ada35fa_ASSET = "file")
-load("images/img_309ea9bb.png", IMG_309ea9bb_ASSET = "file")
-load("images/img_30ac6b0b.png", IMG_30ac6b0b_ASSET = "file")
-load("images/img_3c76df69.png", IMG_3c76df69_ASSET = "file")
-load("images/img_3d6614c8.png", IMG_3d6614c8_ASSET = "file")
-load("images/img_42e6ae32.png", IMG_42e6ae32_ASSET = "file")
-load("images/img_43b24441.png", IMG_43b24441_ASSET = "file")
-load("images/img_47f17164.png", IMG_47f17164_ASSET = "file")
-load("images/img_520492ae.png", IMG_520492ae_ASSET = "file")
-load("images/img_57079cf3.png", IMG_57079cf3_ASSET = "file")
-load("images/img_5a5c90af.png", IMG_5a5c90af_ASSET = "file")
-load("images/img_5d693a6c.png", IMG_5d693a6c_ASSET = "file")
-load("images/img_61cdd3ab.png", IMG_61cdd3ab_ASSET = "file")
-load("images/img_6780e5e6.png", IMG_6780e5e6_ASSET = "file")
-load("images/img_67926122.png", IMG_67926122_ASSET = "file")
-load("images/img_6bd8d451.png", IMG_6bd8d451_ASSET = "file")
-load("images/img_713b5e21.png", IMG_713b5e21_ASSET = "file")
-load("images/img_80055138.png", IMG_80055138_ASSET = "file")
-load("images/img_8112cb2a.png", IMG_8112cb2a_ASSET = "file")
-load("images/img_82d8bc29.png", IMG_82d8bc29_ASSET = "file")
-load("images/img_83e6eb30.png", IMG_83e6eb30_ASSET = "file")
-load("images/img_84aa384a.png", IMG_84aa384a_ASSET = "file")
-load("images/img_87389e52.png", IMG_87389e52_ASSET = "file")
-load("images/img_8b70b1ea.png", IMG_8b70b1ea_ASSET = "file")
-load("images/img_9227be5c.png", IMG_9227be5c_ASSET = "file")
-load("images/img_96466064.png", IMG_96466064_ASSET = "file")
-load("images/img_979e1351.png", IMG_979e1351_ASSET = "file")
-load("images/img_9cfca98b.png", IMG_9cfca98b_ASSET = "file")
-load("images/img_a0a88751.png", IMG_a0a88751_ASSET = "file")
-load("images/img_a3a888e2.png", IMG_a3a888e2_ASSET = "file")
-load("images/img_a71ed156.png", IMG_a71ed156_ASSET = "file")
-load("images/img_a775e393.png", IMG_a775e393_ASSET = "file")
-load("images/img_aff113cf.png", IMG_aff113cf_ASSET = "file")
-load("images/img_b0c189de.png", IMG_b0c189de_ASSET = "file")
-load("images/img_ba2135d0.png", IMG_ba2135d0_ASSET = "file")
-load("images/img_c5d69c7b.png", IMG_c5d69c7b_ASSET = "file")
-load("images/img_c7e06b00.png", IMG_c7e06b00_ASSET = "file")
-load("images/img_c7e66d67.png", IMG_c7e66d67_ASSET = "file")
-load("images/img_cc2c771e.png", IMG_cc2c771e_ASSET = "file")
-load("images/img_d3af4e28.png", IMG_d3af4e28_ASSET = "file")
-load("images/img_d3e15147.png", IMG_d3e15147_ASSET = "file")
-load("images/img_dfbd410d.png", IMG_dfbd410d_ASSET = "file")
-load("images/img_e6f7cb59.png", IMG_e6f7cb59_ASSET = "file")
-load("images/img_f817700d.png", IMG_f817700d_ASSET = "file")
 
 DISPLAY_FONT = "5x8"
 DISPLAY_COLOR_1 = "#B31942"  #Red
@@ -73,7 +73,7 @@ STATE_FLAGS = {
         "entry": "Dec 7, 1787",
         "capital": "Dover",
         "nickname": "First State",
-        "flag": IMG_84aa384a_ASSET.readall(),
+        "flag": FLAG_DE_ASSET.readall(),
     },
     "pa": {
         "name": "Pennsylvania",
@@ -81,7 +81,7 @@ STATE_FLAGS = {
         "entry": "Dec 12, 1787",
         "capital": "Harrisburg",
         "nickname": "Keystone",
-        "flag": IMG_2ada35fa_ASSET.readall(),
+        "flag": FLAG_PA_ASSET.readall(),
     },
     "nj": {
         "name": "New Jersey",
@@ -89,7 +89,7 @@ STATE_FLAGS = {
         "entry": "Dec 18, 1787",
         "capital": "Trenton",
         "nickname": "Garden",
-        "flag": IMG_1b51d67d_ASSET.readall(),
+        "flag": FLAG_NJ_ASSET.readall(),
     },
     "ga": {
         "name": "Georgia",
@@ -97,7 +97,7 @@ STATE_FLAGS = {
         "entry": "Jan 2, 1788",
         "capital": "Atlanta",
         "nickname": "Peach",
-        "flag": IMG_a0a88751_ASSET.readall(),
+        "flag": FLAG_GA_ASSET.readall(),
     },
     "ct": {
         "name": "Connecticut",
@@ -105,7 +105,7 @@ STATE_FLAGS = {
         "entry": "Jan 9, 1788",
         "capital": "Hartford",
         "nickname": "Nutmeg",
-        "flag": IMG_06d3431d_ASSET.readall(),
+        "flag": FLAG_CT_ASSET.readall(),
     },
     "ma": {
         "name": "Massachusetts",
@@ -113,7 +113,7 @@ STATE_FLAGS = {
         "entry": "Feb 6, 1788",
         "capital": "Boston",
         "nickname": "Bay State",
-        "flag": IMG_dfbd410d_ASSET.readall(),
+        "flag": FLAG_MA_ASSET.readall(),
     },
     "md": {
         "name": "Maryland",
@@ -121,7 +121,7 @@ STATE_FLAGS = {
         "entry": "Apr 28, 1788",
         "capital": "Annapolis",
         "nickname": "Old Line",
-        "flag": IMG_3c76df69_ASSET.readall(),
+        "flag": FLAG_MD_ASSET.readall(),
     },
     "sc": {
         "name": "S. Carolina",
@@ -129,7 +129,7 @@ STATE_FLAGS = {
         "entry": "May 23, 1788",
         "capital": "Columbia",
         "nickname": "Palmetto",
-        "flag": IMG_9227be5c_ASSET.readall(),
+        "flag": FLAG_SC_ASSET.readall(),
     },
     "nh": {
         "name": "New Hampshire",
@@ -137,7 +137,7 @@ STATE_FLAGS = {
         "entry": "Jun 21, 1788",
         "capital": "Concord",
         "nickname": "Granite",
-        "flag": IMG_5a5c90af_ASSET.readall(),
+        "flag": FLAG_NH_ASSET.readall(),
     },
     "va": {
         "name": "Virginia",
@@ -145,7 +145,7 @@ STATE_FLAGS = {
         "entry": "Jun 25, 1788",
         "capital": "Richmond",
         "nickname": "Old Dominion",
-        "flag": IMG_80055138_ASSET.readall(),
+        "flag": FLAG_VA_ASSET.readall(),
     },
     "ny": {
         "name": "New York",
@@ -153,7 +153,7 @@ STATE_FLAGS = {
         "entry": "Jul 26, 1788",
         "capital": "Albany",
         "nickname": "Empire State",
-        "flag": IMG_57079cf3_ASSET.readall(),
+        "flag": FLAG_NY_ASSET.readall(),
     },
     "nc": {
         "name": "N. Carolina",
@@ -161,7 +161,7 @@ STATE_FLAGS = {
         "entry": "Nov 21, 1789",
         "capital": "Raleigh",
         "nickname": "Tar Heel",
-        "flag": IMG_42e6ae32_ASSET.readall(),
+        "flag": FLAG_NC_ASSET.readall(),
     },
     "ri": {
         "name": "Rhode Island",
@@ -169,7 +169,7 @@ STATE_FLAGS = {
         "entry": "May 29, 1790",
         "capital": "Providence",
         "nickname": "Ocean State",
-        "flag": IMG_2639335e_ASSET.readall(),
+        "flag": FLAG_RI_ASSET.readall(),
     },
     "vt": {
         "name": "Vermont",
@@ -177,7 +177,7 @@ STATE_FLAGS = {
         "entry": "Mar 4, 1791",
         "capital": "Montpelier",
         "nickname": "Green Mtn.",
-        "flag": IMG_b0c189de_ASSET.readall(),
+        "flag": FLAG_VT_ASSET.readall(),
     },
     "ky": {
         "name": "Kentucky",
@@ -185,7 +185,7 @@ STATE_FLAGS = {
         "entry": "Jun 1, 1792",
         "capital": "Frankfort",
         "nickname": "Bluegrass",
-        "flag": IMG_6bd8d451_ASSET.readall(),
+        "flag": FLAG_KY_ASSET.readall(),
     },
     "tn": {
         "name": "Tennessee",
@@ -193,7 +193,7 @@ STATE_FLAGS = {
         "entry": "Jun 1, 1796",
         "capital": "Nashville",
         "nickname": "Volunteer",
-        "flag": IMG_6780e5e6_ASSET.readall(),
+        "flag": FLAG_TN_ASSET.readall(),
     },
     "oh": {
         "name": "Ohio",
@@ -201,7 +201,7 @@ STATE_FLAGS = {
         "entry": "Mar 1, 1803",
         "capital": "Columbus",
         "nickname": "Buckeye",
-        "flag": IMG_c5d69c7b_ASSET.readall(),
+        "flag": FLAG_OH_ASSET.readall(),
     },
     "la": {
         "name": "Louisiana",
@@ -209,7 +209,7 @@ STATE_FLAGS = {
         "entry": "Apr 30, 1812",
         "capital": "Baton Rouge",
         "nickname": "Pelican",
-        "flag": IMG_1ed7ddf1_ASSET.readall(),
+        "flag": FLAG_LA_ASSET.readall(),
     },
     "in": {
         "name": "Indiana",
@@ -217,7 +217,7 @@ STATE_FLAGS = {
         "entry": "Dec 11, 1816",
         "capital": "Indianapolis",
         "nickname": "Hoosier",
-        "flag": IMG_83e6eb30_ASSET.readall(),
+        "flag": FLAG_IN_ASSET.readall(),
     },
     "ms": {
         "name": "Mississippi",
@@ -225,7 +225,7 @@ STATE_FLAGS = {
         "entry": "Dec 10, 1817",
         "capital": "Jackson",
         "nickname": "Magnolia",
-        "flag": IMG_87389e52_ASSET.readall(),
+        "flag": FLAG_MS_ASSET.readall(),
     },
     "il": {
         "name": "Illinois",
@@ -233,7 +233,7 @@ STATE_FLAGS = {
         "entry": "Dec 3, 1818",
         "capital": "Springfield",
         "nickname": "Lincoln",
-        "flag": IMG_96466064_ASSET.readall(),
+        "flag": FLAG_IL_ASSET.readall(),
     },
     "al": {
         "name": "Alabama",
@@ -241,7 +241,7 @@ STATE_FLAGS = {
         "entry": "Dec 14, 1819",
         "capital": "Montgomery",
         "nickname": "Heart Dixie",
-        "flag": IMG_aff113cf_ASSET.readall(),
+        "flag": FLAG_AL_ASSET.readall(),
     },
     "me": {
         "name": "Maine",
@@ -249,7 +249,7 @@ STATE_FLAGS = {
         "entry": "Mar 15, 1820",
         "capital": "Augusta",
         "nickname": "Pine Tree",
-        "flag": IMG_cc2c771e_ASSET.readall(),
+        "flag": FLAG_ME_ASSET.readall(),
     },
     "mo": {
         "name": "Missouri",
@@ -257,7 +257,7 @@ STATE_FLAGS = {
         "entry": "Aug 10, 1821",
         "capital": "Jefferson Cty",
         "nickname": "Show Me",
-        "flag": IMG_979e1351_ASSET.readall(),
+        "flag": FLAG_MO_ASSET.readall(),
     },
     "ar": {
         "name": "Arkansas",
@@ -265,7 +265,7 @@ STATE_FLAGS = {
         "entry": "Jun 15, 1836",
         "capital": "Little Rock",
         "nickname": "Razorback",
-        "flag": IMG_0a27c5d2_ASSET.readall(),
+        "flag": FLAG_AR_ASSET.readall(),
     },
     "mi": {
         "name": "Michigan",
@@ -273,7 +273,7 @@ STATE_FLAGS = {
         "entry": "Jan 26, 1837",
         "capital": "Lansing",
         "nickname": "Great Lakes",
-        "flag": IMG_82d8bc29_ASSET.readall(),
+        "flag": FLAG_MI_ASSET.readall(),
     },
     "fl": {
         "name": "Florida",
@@ -281,7 +281,7 @@ STATE_FLAGS = {
         "entry": "Mar 3, 1845",
         "capital": "Tallahassee",
         "nickname": "Sunshine",
-        "flag": IMG_67926122_ASSET.readall(),
+        "flag": FLAG_FL_ASSET.readall(),
     },
     "tx": {
         "name": "Texas",
@@ -289,7 +289,7 @@ STATE_FLAGS = {
         "entry": "Dec 29, 1845",
         "capital": "Austin",
         "nickname": "Lone Star",
-        "flag": IMG_c7e06b00_ASSET.readall(),
+        "flag": FLAG_TX_ASSET.readall(),
     },
     "ia": {
         "name": "Iowa",
@@ -297,7 +297,7 @@ STATE_FLAGS = {
         "entry": "Dec 28, 1846",
         "capital": "Des Moines",
         "nickname": "Hawkeye",
-        "flag": IMG_8112cb2a_ASSET.readall(),
+        "flag": FLAG_IA_ASSET.readall(),
     },
     "wi": {
         "name": "Wisconsin",
@@ -305,7 +305,7 @@ STATE_FLAGS = {
         "entry": "May 29, 1848",
         "capital": "Madison",
         "nickname": "Badger",
-        "flag": IMG_11017c91_ASSET.readall(),
+        "flag": FLAG_WI_ASSET.readall(),
     },
     "ca": {
         "name": "California",
@@ -313,7 +313,7 @@ STATE_FLAGS = {
         "entry": "Sep 9, 1850",
         "capital": "",
         "nickname": "Golden",
-        "flag": IMG_d3af4e28_ASSET.readall(),
+        "flag": FLAG_CA_ASSET.readall(),
     },
     "mn": {
         "name": "Minnesota",
@@ -321,7 +321,7 @@ STATE_FLAGS = {
         "entry": "May 11, 1858",
         "capital": "St. Paul",
         "nickname": "Gopher",
-        "flag": IMG_47f17164_ASSET.readall(),
+        "flag": FLAG_MN_ASSET.readall(),
     },
     "or": {
         "name": "Oregon",
@@ -329,7 +329,7 @@ STATE_FLAGS = {
         "entry": "Feb 14, 1859",
         "capital": "Salem",
         "nickname": "Beaver",
-        "flag": IMG_ba2135d0_ASSET.readall(),
+        "flag": FLAG_OR_ASSET.readall(),
     },
     "ks": {
         "name": "Kansas",
@@ -337,7 +337,7 @@ STATE_FLAGS = {
         "entry": "Jan 29, 1861",
         "capital": "Topeka",
         "nickname": "Sunflower",
-        "flag": IMG_43b24441_ASSET.readall(),
+        "flag": FLAG_KS_ASSET.readall(),
     },
     "wv": {
         "name": "W. Virginia",
@@ -345,7 +345,7 @@ STATE_FLAGS = {
         "entry": "Jun 20, 1863",
         "capital": "Charleston",
         "nickname": "Mountain",
-        "flag": IMG_c7e66d67_ASSET.readall(),
+        "flag": FLAG_WV_ASSET.readall(),
     },
     "nv": {
         "name": "Nevada",
@@ -353,7 +353,7 @@ STATE_FLAGS = {
         "entry": "Oct 31, 1864",
         "capital": "Carson City",
         "nickname": "Silver",
-        "flag": IMG_520492ae_ASSET.readall(),
+        "flag": FLAG_NV_ASSET.readall(),
     },
     "ne": {
         "name": "Nebraska",
@@ -361,7 +361,7 @@ STATE_FLAGS = {
         "entry": "Mar 1, 1867",
         "capital": "Lincoln",
         "nickname": "Cornhusker",
-        "flag": IMG_f817700d_ASSET.readall(),
+        "flag": FLAG_NE_ASSET.readall(),
     },
     "co": {
         "name": "Colorado",
@@ -369,7 +369,7 @@ STATE_FLAGS = {
         "entry": "Aug 1, 1876",
         "capital": "Denver",
         "nickname": "Centennial",
-        "flag": IMG_a3a888e2_ASSET.readall(),
+        "flag": FLAG_CO_ASSET.readall(),
     },
     "nd": {
         "name": "N. Dakota",
@@ -377,7 +377,7 @@ STATE_FLAGS = {
         "entry": "Nov 2, 1889",
         "capital": "Bismark",
         "nickname": "Roughrider",
-        "flag": IMG_04d1bf9a_ASSET.readall(),
+        "flag": FLAG_ND_ASSET.readall(),
     },
     "sd": {
         "name": "S. Dakota",
@@ -385,7 +385,7 @@ STATE_FLAGS = {
         "entry": "Nov 2, 1889",
         "capital": "Pierre",
         "nickname": "Coyote",
-        "flag": IMG_d3e15147_ASSET.readall(),
+        "flag": FLAG_SD_ASSET.readall(),
     },
     "mt": {
         "name": "Montana",
@@ -393,7 +393,7 @@ STATE_FLAGS = {
         "entry": "Nov 8, 1889",
         "capital": "Helena",
         "nickname": "Big Sky",
-        "flag": IMG_8b70b1ea_ASSET.readall(),
+        "flag": FLAG_MT_ASSET.readall(),
     },
     "wa": {
         "name": "Washington",
@@ -401,7 +401,7 @@ STATE_FLAGS = {
         "entry": "Nov 11, 1889",
         "capital": "Olympia",
         "nickname": "Evergreen",
-        "flag": IMG_61cdd3ab_ASSET.readall(),
+        "flag": FLAG_WA_ASSET.readall(),
     },
     "id": {
         "name": "Idaho",
@@ -409,7 +409,7 @@ STATE_FLAGS = {
         "entry": "Jul 3, 1890",
         "capital": "Boise",
         "nickname": "Gem State",
-        "flag": IMG_30ac6b0b_ASSET.readall(),
+        "flag": FLAG_ID_ASSET.readall(),
     },
     "wy": {
         "name": "Wyoming",
@@ -417,7 +417,7 @@ STATE_FLAGS = {
         "entry": "Jul 10, 1890",
         "capital": "Cheyenne",
         "nickname": "Cowboy",
-        "flag": IMG_a775e393_ASSET.readall(),
+        "flag": FLAG_WY_ASSET.readall(),
     },
     "ut": {
         "name": "Utah",
@@ -425,7 +425,7 @@ STATE_FLAGS = {
         "entry": "Jan 4, 1896",
         "capital": "Salt Lake Cty",
         "nickname": "Beehive",
-        "flag": IMG_713b5e21_ASSET.readall(),
+        "flag": FLAG_UT_ASSET.readall(),
     },
     "ok": {
         "name": "Oklahoma",
@@ -433,7 +433,7 @@ STATE_FLAGS = {
         "entry": "Nov 16, 1907",
         "capital": "Oklahoma City",
         "nickname": "Sooner",
-        "flag": IMG_309ea9bb_ASSET.readall(),
+        "flag": FLAG_OK_ASSET.readall(),
     },
     "nm": {
         "name": "New Mexico",
@@ -441,7 +441,7 @@ STATE_FLAGS = {
         "entry": "Jan 6, 1912",
         "capital": "Santa Fe",
         "nickname": "Enchantment",
-        "flag": IMG_a71ed156_ASSET.readall(),
+        "flag": FLAG_NM_ASSET.readall(),
     },
     "az": {
         "name": "Arizona",
@@ -449,7 +449,7 @@ STATE_FLAGS = {
         "entry": "Feb 14, 1912",
         "capital": "Phoenix",
         "nickname": "Grand Canyon",
-        "flag": IMG_5d693a6c_ASSET.readall(),
+        "flag": FLAG_AZ_ASSET.readall(),
     },
     "ak": {
         "name": "Alaska",
@@ -457,7 +457,7 @@ STATE_FLAGS = {
         "entry": "Jan 3, 1959",
         "capital": "Juneau",
         "nickname": "Last Frontier",
-        "flag": IMG_3d6614c8_ASSET.readall(),
+        "flag": FLAG_AK_ASSET.readall(),
     },
     "hi": {
         "name": "Hawaii",
@@ -465,7 +465,7 @@ STATE_FLAGS = {
         "entry": "Aug 21, 1959",
         "capital": "Honolulu",
         "nickname": "Aloha State",
-        "flag": IMG_9cfca98b_ASSET.readall(),
+        "flag": FLAG_HI_ASSET.readall(),
     },
     "dc": {
         "name": "Washington DC",
@@ -473,7 +473,7 @@ STATE_FLAGS = {
         "entry": "Jan 24, 1791",
         "capital": "Washington DC",
         "nickname": "The District",
-        "flag": IMG_e6f7cb59_ASSET.readall(),
+        "flag": FLAG_DC_ASSET.readall(),
     },
 }
 

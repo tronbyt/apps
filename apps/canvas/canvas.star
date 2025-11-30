@@ -1,18 +1,21 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/canvas_logo.png", CANVAS_LOGO_ASSET = "file")
 load("random.star", "random")
 
 #Add in the needed code bases
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_55a84839.png", IMG_55a84839_ASSET = "file")
 
 #Code for the canvas logo
-CanvasLogo = IMG_55a84839_ASSET.readall(),
-                ],
-            ),
+CanvasLogo = CANVAS_LOGO_ASSET.readall()
+
+def showEvent(event):
+    return render.Column(
+        children = [
+            render.Text(content = event[1]),
+            render.Text(content = event[0]),
         ],
     )
 

@@ -5,34 +5,33 @@ Description: Beer Die scoreboard with dropdown menus to keep track of score. Cus
 Author: zachtempel3
 """
 
-load("encoding/base64.star", "base64")
+load("images/num_0.png", NUM_0_ASSET = "file")
+load("images/num_1.png", NUM_1_ASSET = "file")
+load("images/num_2.png", NUM_2_ASSET = "file")
+load("images/num_3.png", NUM_3_ASSET = "file")
+load("images/num_4.png", NUM_4_ASSET = "file")
+load("images/num_6.png", NUM_6_ASSET = "file")
+load("images/num_8.png", NUM_8_ASSET = "file")
+load("images/num_9.png", NUM_9_ASSET = "file")
+load("images/num_bizz.png", NUM_BIZZ_ASSET = "file")
+load("images/num_buzz.png", NUM_BUZZ_ASSET = "file")
+load("images/old_num_5.png", OLD_NUM_5_ASSET = "file")
+load("images/old_num_7.png", OLD_NUM_7_ASSET = "file")
+load("images/separator.png", SEPARATOR_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_949bdcc4.png", IMG_949bdcc4_ASSET = "file")
-load("images/img_3f57dab3.png", IMG_3f57dab3_ASSET = "file")
-load("images/img_4122336c.png", IMG_4122336c_ASSET = "file")
-load("images/img_4a66d97e.png", IMG_4a66d97e_ASSET = "file")
-load("images/img_abb7c3c4.png", IMG_abb7c3c4_ASSET = "file")
-load("images/img_b5c3ddf3.png", IMG_b5c3ddf3_ASSET = "file")
-load("images/img_ba0899cd.png", IMG_ba0899cd_ASSET = "file")
-load("images/img_c3c685c2.png", IMG_c3c685c2_ASSET = "file")
-load("images/img_c952e998.png", IMG_c952e998_ASSET = "file")
-load("images/img_c97ef02d.png", IMG_c97ef02d_ASSET = "file")
-load("images/img_e44c3784.png", IMG_e44c3784_ASSET = "file")
-load("images/img_145cd676.png", IMG_145cd676_ASSET = "file")
-load("images/img_a8dbf45f.png", IMG_a8dbf45f_ASSET = "file")
 
 NUMBER_IMGS = [
-    IMG_e44c3784_ASSET.readall(),  # 0
-    IMG_4122336c_ASSET.readall(),  # 1
-    IMG_c3c685c2_ASSET.readall(),  # 2
-    IMG_4a66d97e_ASSET.readall(),  # 3
-    IMG_3f57dab3_ASSET.readall(),  # 4
-    IMG_abb7c3c4_ASSET.readall(),  # bizz
-    IMG_c97ef02d_ASSET.readall(),  # 6
-    IMG_c952e998_ASSET.readall(),  # buzz
-    IMG_b5c3ddf3_ASSET.readall(),  # 8
-    IMG_ba0899cd_ASSET.readall(),  # 9
+    NUM_0_ASSET.readall(),  # 0
+    NUM_1_ASSET.readall(),  # 1
+    NUM_2_ASSET.readall(),  # 2
+    NUM_3_ASSET.readall(),  # 3
+    NUM_4_ASSET.readall(),  # 4
+    NUM_BIZZ_ASSET.readall(),  # bizz
+    NUM_6_ASSET.readall(),  # 6
+    NUM_BUZZ_ASSET.readall(),  # buzz
+    NUM_8_ASSET.readall(),  # 8
+    NUM_9_ASSET.readall(),  # 9
 ]
 
 def render_seperator():
@@ -40,7 +39,28 @@ def render_seperator():
         width = 2,
         height = 100,
         color = "#d30",
-        child = render.Image(src = IMG_949bdcc4_ASSET.readall()
+        child = render.Image(src = SEPARATOR_ASSET.readall()),
+    )
+
+def get_num_image(num):
+    specialNum = int(num)
+    if specialNum == 5 or specialNum == 7:
+        return render.Box(
+            width = 32,
+            height = 32,
+            color = "000",
+            child = render.Image(src = NUMBER_IMGS[specialNum]),
+        )
+    else:
+        return render.Box(
+            width = 13,
+            height = 32,
+            color = "fff",
+            child = render.Image(src = NUMBER_IMGS[specialNum]),
+        )
+
+def main(config):
+    firstTeamScore = "%s" % config.str("team1", "00")
     secondTeamScore = "%s" % config.str("team2", "00")
 
     if int(firstTeamScore) == 5 or int(firstTeamScore) == 7:
@@ -175,6 +195,6 @@ def get_schema():
     )
 
 OLD_NUMS = [
-    IMG_145cd676_ASSET.readall(),  # 5
-    IMG_a8dbf45f_ASSET.readall(),  # 7
+    OLD_NUM_5_ASSET.readall(),  # 5
+    OLD_NUM_7_ASSET.readall(),  # 7
 ]

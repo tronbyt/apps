@@ -5,13 +5,12 @@ Description: The Zapier app allows you to trigger information on your Tidbyt fro
 Author: Tidbyt
 """
 
-load("encoding/base64.star", "base64")
+load("images/icon_generic.png", ICON_GENERIC_ASSET = "file")
+load("images/icon_github.png", ICON_GITHUB_ASSET = "file")
+load("images/icon_shopify.png", ICON_SHOPIFY_ASSET = "file")
+load("images/icon_slack.png", ICON_SLACK_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_89b1f0c9.png", IMG_89b1f0c9_ASSET = "file")
-load("images/img_934ef4d2.png", IMG_934ef4d2_ASSET = "file")
-load("images/img_bd94cb83.png", IMG_bd94cb83_ASSET = "file")
-load("images/img_f77fc027.png", IMG_f77fc027_ASSET = "file")
 
 def main(config):
     primary = config.str("primary", "")
@@ -78,7 +77,7 @@ def render_core(primary, secondary, icon):
             child = render.Row(
                 children = [
                     render.Image(
-                        src = base64.decode(icon),
+                        src = icon,
                         width = 16,
                         height = 18,
                     ),
@@ -103,7 +102,7 @@ def render_core(primary, secondary, icon):
         child = render.Row(
             children = [
                 render.Image(
-                    src = base64.decode(icon),
+                    src = icon,
                     width = 16,
                     height = 18,
                 ),
@@ -176,13 +175,13 @@ DEFAULT_TYPE = "generic"
 # To add an icon, create a 16x18 pixel png file and run the following and paste
 # the results: cat icon.png | base64 | fold | pbcopy
 
-GENERIC_ICON = IMG_934ef4d2_ASSET.readall()
+GENERIC_ICON = ICON_GENERIC_ASSET.readall()
 
-SLACK_ICON = IMG_89b1f0c9_ASSET.readall()
+SLACK_ICON = ICON_SLACK_ASSET.readall()
 
-SHOPIFY_ICON = IMG_f77fc027_ASSET.readall()
+SHOPIFY_ICON = ICON_SHOPIFY_ASSET.readall()
 
-GITHUB_ICON = IMG_bd94cb83_ASSET.readall()
+GITHUB_ICON = ICON_GITHUB_ASSET.readall()
 
 MESSAGE_TYPES = {
     "generic": {

@@ -5,14 +5,36 @@ Description: Display the time in addition to current weather conditions from eit
 Author: sudeepban
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/cloud_icon.png", CLOUD_ICON_ASSET = "file")
+load("images/cloudy.png", CLOUDY_ASSET = "file")
 load("images/colon.png", COLON_ASSET = "file")
 load("images/droplets_icon.png", DROPLETS_ICON_ASSET = "file")
+load("images/E.png", E_ASSET = "file")
 load("images/eyeglasses_icon.png", EYEGLASSES_ICON_ASSET = "file")
+load("images/foggy.png", FOGGY_ASSET = "file")
+load("images/haily.png", HAILY_ASSET = "file")
+load("images/moony.png", MOONY_ASSET = "file")
+load("images/moonyish.png", MOONYISH_ASSET = "file")
+load("images/N.png", N_ASSET = "file")
+load("images/NE.png", NE_ASSET = "file")
+load("images/NW.png", NW_ASSET = "file")
 load("images/raindrop_icon.png", RAINDROP_ICON_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/S.png", S_ASSET = "file")
+load("images/SE.png", SE_ASSET = "file")
+load("images/sleety.png", SLEETY_ASSET = "file")
+load("images/sleety2.png", SLEETY2_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/snowy2.png", SNOWY2_ASSET = "file")
+load("images/sunny.png", SUNNY_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_ASSET = "file")
+load("images/SW.png", SW_ASSET = "file")
+load("images/thundery.png", THUNDERY_ASSET = "file")
+load("images/tornady.png", TORNADY_ASSET = "file")
+load("images/W.png", W_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -51,79 +73,33 @@ TEMP_COLOR_DEFAULT = "#FFFFFF"
 
 # weather icons borrowed from stock Tidbyt Weather app
 WEATHER_ICONS = {
-    "cloudy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABHSURBVHjaxI/BDQAgCMTAjdh/iLKRPojGgManfQHpJZzIH3RfgBjM7JoA+gRYmau0228p2S1Udz8+s+6aGlSik9ayyfjLGABillSriIbjdwAAAABJRU5ErkJggg==
-""",
-    "foggy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABvSURBVHjalI+xDcAgDASfbMSEFBSM5YKC8tmAUZzCCkIQlHAVWOeXH/iHGz8k7eG9326Q1AeSfWcrjfa3NNmXqbXW12P63E0NVqyTW8tOxjkxRgvLOasqAFUtpQBoraWUziNDCABEpOeJSJ8fcA8APZp02VzAMvcAAAAASUVORK5CYII=
-""",
-    "haily.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABjSURBVHjapI/LDcAgDEMNG2Xv7GIGyC7uISpCtNBW9Smfl4+BdypjQjIDM1tOkNQpkn1mCY30MzTRNdHW2u0zvV4mB1ftPO3MApDUKxlv7vzbVzOJCADunm1J7g4gIr6dPgYAveR7WPNsUTIAAAAASUVORK5CYII=
-""",
-    "moony.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABESURBVHjaYmCgLmBE5vx/bY0iJ3oUizq4ImRpOGBCNx+bIhQb0SwlYB5R6vAYyYTmLDSlCM/hNwyunxHTQ8T6nSIAGAA1nBh8d3skkwAAAABJRU5ErkJggg==
-""",
-    "moonyish.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABnSURBVHjatNAxDoAgDAXQX84gm4eQGY8vc7kHhyhDFSVpExb/2LyUT4G1kDmVll8Ri+0GUmHvMxGAsNjvdsyiwXa5dqApn6/46AmzaOkAoFb7HZ1LyxQL6Uqv0rGf0/1MmhLhr/QBAAkLWK/QE7DqAAAAAElFTkSuQmCC
-""",
-    "rainy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABgSURBVHjaYmAgDjAic+bNmwdhJCUl4VQ3b948Q0NDCPv8+fNoqhkxFcHB+fPn4UoZcSlCU82EbBGmCrg4I5oPMAHEakZMz6KpIBcoTvvMwMAg4F2JxiYLYBoDYZMMAAMAIzEsSN19Ip8AAAAASUVORK5CYII=
-""",
-    "sleety.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABuSURBVHjaYmAgDjAic86f/w9hGBoy4tRx/vx/ODh//j9cD05FyKoJK0JTzQRReuECdsfAxRnRfIAJEH4S8K5EVqo47TOyZogsFMybdx/NVEwRKPj//z+aG+AiDGgWYTUGWZYB2R1wY1BcRiQADAAtrnieBFAHfQAAAABJRU5ErkJggg==
-""",
-    "sleety2.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABLSURBVHjaYmAgFZw//x/CUJz2GU0EAebNu48mgSkCBf///0czBi4CBQLelXiMQZbFbjABf+ARoa4/4AGG1RhkWRR/wY3B6VMqAMAAN35GO1pYhkoAAAAASUVORK5CYII=
-""",
-    "snowy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABYSURBVHjahI/JDQAhDAMJHdEwLZkOthTvAxShXMwrMo6DpV0A3MMY0jIAKgB1JzXd7rfJuPu2rhV/RnUxDTxVpwofGRyZ8zMPXjmQNDGqBKQxnirm2eMfAMWodYqa7/ycAAAAAElFTkSuQmCC
-""",
-    "snowy2.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAAySURBVHjaYmAgCZw//5+w+Lx597EqxSL+//9/rGYgixMyAxfAacZI8wcxAAAAAP//AwDMP0MnAPn91gAAAABJRU5ErkJggg==
-""",
-    "sunny.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABISURBVHjaYmAgG9SXyhIl9/+1NT49yNK4RFAM/v/aGp/VcEUQhEUpRBpi0f/X1v9f20AYEBGcGnCaR5r7iPIvCeFHlBxBABgALlQ+G9vS6kUAAAAASUVORK5CYII=
-""",
-    "sunnyish.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABWSURBVHjaYmAgG9SXyhIl9/+1NT49yNK4RFAM/v/aGp/VcEUQhF3pf2QAUwqxGqHhPzaAZh7j////8QcTIyMjAwMDE5GBygixF79hUHVYlcJVkAYAAwAEFUsViVL8ywAAAABJRU5ErkJggg==
-""",
-    "thundery.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABfSURBVHjarNC7DcAwCATQIxtRZxsGu5UYJEMkBRKyQP4UOVFg9CwLA2eR8UAyGjObOpKqGr27Fy0dZdw9qcxQ0df4UBc5l7JBT92JJMn3uaMWNwEg0OYzj1DSn9A63wDfPjgqyFON1wAAAABJRU5ErkJggg==
-""",
-    "tornady.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAB6SURBVHjapI/RDQMhDMXcU4eALViDMWCwZAzWYIuwRfuBlJOi67VS/W1MHvyOiLw+ICIiAjy3qqqlFCDn7O/HGEDvHXh4EmituaSqLp2eq7XWUNocoZdSMrMgnfft0loLmHN+WW1mYeadeikdYccmHHfRu/suqPzDewBSg1u5d9GMZAAAAABJRU5ErkJggg==
-""",
-    "windy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAYElEQVR42mJiIA4wkaOuubn5////mGzs4PDhw3A2XCkLRCuQdHBwsLGxATIYGRnh6oBsoDZbW1sCzkI3D2IYUDces4kzD2IAxAwgiWYMAffBvYwzaJCDjUD4URRvAAEGAEibMzC5039xAAAAAElFTkSuQmCC
-""",
+    "cloudy.png": CLOUDY_ASSET.readall(),
+    "foggy.png": FOGGY_ASSET.readall(),
+    "haily.png": HAILY_ASSET.readall(),
+    "moony.png": MOONY_ASSET.readall(),
+    "moonyish.png": MOONYISH_ASSET.readall(),
+    "rainy.png": RAINY_ASSET.readall(),
+    "sleety.png": SLEETY_ASSET.readall(),
+    "sleety2.png": SLEETY2_ASSET.readall(),
+    "snowy.png": SNOWY_ASSET.readall(),
+    "snowy2.png": SNOWY2_ASSET.readall(),
+    "sunny.png": SUNNY_ASSET.readall(),
+    "sunnyish.png": SUNNYISH_ASSET.readall(),
+    "thundery.png": THUNDERY_ASSET.readall(),
+    "tornady.png": TORNADY_ASSET.readall(),
+    "windy.png": WINDY_ASSET.readall(),
 }
 
 # wind icons representing wind direction as arrows
 WIND_ICONS = {
-    "N": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAK0lEQVQYV2NkQAIzb776n64uxggTgjNAAlSWhBmHTsPtBEnAHAJzFF4HAQBWXiQItxZOyAAAAABJRU5ErkJggg==
-""",
-    "NE": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAANUlEQVQYV2NkwAMYscnNvPnqf7q6GCNYEsZBZ6NIIisCKYRLgjggo5CtQZGEScAUYXUQTBEAxkAcCKmkdzkAAAAASUVORK5CYII=
-""",
-    "E": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAKklEQVQYV2NkwAMYYXIzb776n64uBueDxMEcbBJgSZAELpPx6yRoJy5jAS5WE2MMrMZ9AAAAAElFTkSuQmCC
-""",
-    "SE": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAANklEQVQYV2NkwAMYQXIzb776j6wmXV0MLI4iCROEKYRLgiRAJiArQJGEWYFiLLqbYCaAdeICAN4xHAhDnlr8AAAAAElFTkSuQmCC
-""",
-    "S": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAALElEQVQYV2NkQAIzb776n64uxggTgjNAEjBBmAKwJEwHOg3XiawIw1jqSgIAJnwkCGaQSg0AAAAASUVORK5CYII=
-""",
-    "SW": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAANUlEQVQYV2NkwAMYYXIzb776j6wuXV2MES6JrghDEqQbJAijUYwFSYBMQJGEcdDdhmEnsgIAfjEcCOnI6BYAAAAASUVORK5CYII=
-""",
-    "W": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAKklEQVQYV2NkwAMY0eVm3nz1P11dDCyOIQkShClgBDFwmYxfJ8l2wjQAAG5HE2P4mYCGAAAAAElFTkSuQmCC
-""",
-    "NW": """
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAANElEQVQYV2NkwAMYQXIzb776n64uBmYjA7gAsgIYG0U1TBCrJMwKEA2yBsVYZPtQJLE5GgBmQBwIEZjO8AAAAABJRU5ErkJggg==
-""",
+    "N": N_ASSET.readall(),
+    "NE": NE_ASSET.readall(),
+    "E": E_ASSET.readall(),
+    "SE": SE_ASSET.readall(),
+    "S": S_ASSET.readall(),
+    "SW": SW_ASSET.readall(),
+    "W": W_ASSET.readall(),
+    "NW": NW_ASSET.readall(),
 }
 
 # simple colon image to save space when displaying time
@@ -229,8 +205,10 @@ def main(config):
 
             hourly_forecast_url = get_nws_hourly_grid_forecast_url(latitude, longitude, 3600)  # cache for minimum of 1 hr. (this does not really change once 'Location' has been set via schema field)
             raw_current_conditions = get_current_weather_conditions(hourly_forecast_url, 300)["properties"]["periods"][0]  # ttl of 5 min. (to prevent abuse)
-
-            result_current_conditions["icon"] = {"condition": str(raw_current_conditions["shortForecast"]).lower(), "daytime": raw_current_conditions["isDaytime"]}
+            result_current_conditions["icon"] = {
+                "condition": str(raw_current_conditions["shortForecast"]).lower(),
+                "daytime": raw_current_conditions["isDaytime"],
+            }
             temperature = int(raw_current_conditions["temperature"])
             result_current_conditions["temp"] = int(temperature if raw_current_conditions["temperatureUnit"] == "F" and not (display_metric) else ((temperature - 32) * (5 / 9)))
             wind_speed = int(re.match("\\d+", raw_current_conditions["windSpeed"])[0][0])
@@ -343,13 +321,13 @@ def main(config):
 
             #print(location_key) # uncomment to debug
             units = ("Metric" if system_of_measurement == "metric" else "Imperial")
-
             request_url = ACCUWEATHER_URL.format(
                 locationKey = location_key,
                 api_key = api_key,
             )
             raw_current_conditions = get_current_weather_conditions(request_url, 300)  # allows only 60 free calls per minute (ttl of 5 min.)
             raw_current_conditions = raw_current_conditions[0]
+
             #print(raw_current_conditions["Day"])
             #result_current_conditions["icon"] = int(raw_current_conditions["Day"]["Icon"])
 
@@ -454,7 +432,6 @@ def main(config):
             elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
                 # partly cloudy (night)
                 icon_ref = "moonyish.png"
-
             result_current_conditions["humidity"] = int(raw_current_conditions["current"]["humidity"])
             result_current_conditions["dew_point"] = int(raw_current_conditions["current"]["dew_point"])
             result_current_conditions["uv_index"] = int(raw_current_conditions["current"]["uvi"])
@@ -620,7 +597,7 @@ def main(config):
         print(result_current_conditions)  # uncomment to debug
 
     if icon_ref:
-        weather_image = render.Image(width = 24, height = 24, src = base64.decode(WEATHER_ICONS[icon_ref]))
+        weather_image = render.Image(width = 24, height = 24, src = WEATHER_ICONS[icon_ref])
     else:
         weather_image = render.Box(width = 24, height = 24)
 
@@ -681,7 +658,7 @@ def main(config):
 
         arrow_src = WIND_ICONS[wind_dir]
         if arrow_src:
-            arrow_image = render.Image(width = 7, height = 7, src = base64.decode(arrow_src))
+            arrow_image = render.Image(width = 7, height = 7, src = arrow_src)
         else:
             arrow_image = render.Box(width = 7, height = 7)
 
@@ -965,7 +942,7 @@ def more_toggles(weatherApiService):
         "aqi": schema.Toggle(
             id = "aqiEnabled",
             name = "AQI",
-            desc = "Display air qualiity index",
+            desc = "Display air quality index",
             icon = "star",
             default = False,
         ),

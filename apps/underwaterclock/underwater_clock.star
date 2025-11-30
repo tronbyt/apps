@@ -5,89 +5,88 @@ Description: Displays the current time in an underwater scene that changes with 
 Author: asea-aranion
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/fish_1.png", FISH_1_ASSET = "file")
+load("images/fish_2.png", FISH_2_ASSET = "file")
+load("images/fish_3.png", FISH_3_ASSET = "file")
+load("images/fish_4.png", FISH_4_ASSET = "file")
+load("images/scene_0.png", SCENE_0_ASSET = "file")
+load("images/scene_1.png", SCENE_1_ASSET = "file")
+load("images/scene_10.png", SCENE_10_ASSET = "file")
+load("images/scene_11.png", SCENE_11_ASSET = "file")
+load("images/scene_12.png", SCENE_12_ASSET = "file")
+load("images/scene_13.png", SCENE_13_ASSET = "file")
+load("images/scene_14.png", SCENE_14_ASSET = "file")
+load("images/scene_15.png", SCENE_15_ASSET = "file")
+load("images/scene_16.png", SCENE_16_ASSET = "file")
+load("images/scene_17.png", SCENE_17_ASSET = "file")
+load("images/scene_18.png", SCENE_18_ASSET = "file")
+load("images/scene_19.png", SCENE_19_ASSET = "file")
+load("images/scene_2.png", SCENE_2_ASSET = "file")
+load("images/scene_20.png", SCENE_20_ASSET = "file")
+load("images/scene_21.png", SCENE_21_ASSET = "file")
+load("images/scene_22.png", SCENE_22_ASSET = "file")
+load("images/scene_23.png", SCENE_23_ASSET = "file")
+load("images/scene_3.png", SCENE_3_ASSET = "file")
+load("images/scene_4.png", SCENE_4_ASSET = "file")
+load("images/scene_5.png", SCENE_5_ASSET = "file")
+load("images/scene_6.png", SCENE_6_ASSET = "file")
+load("images/scene_7.png", SCENE_7_ASSET = "file")
+load("images/scene_8.png", SCENE_8_ASSET = "file")
+load("images/scene_9.png", SCENE_9_ASSET = "file")
+load("images/seagrass_1.png", SEAGRASS_1_ASSET = "file")
+load("images/seagrass_2.png", SEAGRASS_2_ASSET = "file")
+load("images/seagrass_3.png", SEAGRASS_3_ASSET = "file")
+load("images/shark_1.png", SHARK_1_ASSET = "file")
+load("images/shark_2.png", SHARK_2_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_02f72b37.png", IMG_02f72b37_ASSET = "file")
-load("images/img_19d4139e.png", IMG_19d4139e_ASSET = "file")
-load("images/img_2c164df3.png", IMG_2c164df3_ASSET = "file")
-load("images/img_2ff6ac15.png", IMG_2ff6ac15_ASSET = "file")
-load("images/img_30d472a3.png", IMG_30d472a3_ASSET = "file")
-load("images/img_3440caf9.png", IMG_3440caf9_ASSET = "file")
-load("images/img_47a95a80.png", IMG_47a95a80_ASSET = "file")
-load("images/img_5522c826.png", IMG_5522c826_ASSET = "file")
-load("images/img_5b300e7b.png", IMG_5b300e7b_ASSET = "file")
-load("images/img_5b98a2c5.png", IMG_5b98a2c5_ASSET = "file")
-load("images/img_6fd1dc5f.png", IMG_6fd1dc5f_ASSET = "file")
-load("images/img_754cd438.png", IMG_754cd438_ASSET = "file")
-load("images/img_79447aad.png", IMG_79447aad_ASSET = "file")
-load("images/img_7bca54ec.png", IMG_7bca54ec_ASSET = "file")
-load("images/img_7fa88b0d.png", IMG_7fa88b0d_ASSET = "file")
-load("images/img_80da381d.png", IMG_80da381d_ASSET = "file")
-load("images/img_84bf8ddb.png", IMG_84bf8ddb_ASSET = "file")
-load("images/img_84e49083.png", IMG_84e49083_ASSET = "file")
-load("images/img_85497e0b.png", IMG_85497e0b_ASSET = "file")
-load("images/img_85acd69c.png", IMG_85acd69c_ASSET = "file")
-load("images/img_98f8cba3.png", IMG_98f8cba3_ASSET = "file")
-load("images/img_a77422f1.png", IMG_a77422f1_ASSET = "file")
-load("images/img_a987eb9c.png", IMG_a987eb9c_ASSET = "file")
-load("images/img_ad417eb4.png", IMG_ad417eb4_ASSET = "file")
-load("images/img_ad87fe44.png", IMG_ad87fe44_ASSET = "file")
-load("images/img_b691d187.png", IMG_b691d187_ASSET = "file")
-load("images/img_b6b11a8e.png", IMG_b6b11a8e_ASSET = "file")
-load("images/img_b85973fc.png", IMG_b85973fc_ASSET = "file")
-load("images/img_cfb91d58.png", IMG_cfb91d58_ASSET = "file")
-load("images/img_d409368d.png", IMG_d409368d_ASSET = "file")
-load("images/img_edfa2de3.png", IMG_edfa2de3_ASSET = "file")
-load("images/img_f1b40477.png", IMG_f1b40477_ASSET = "file")
-load("images/img_f5b54992.png", IMG_f5b54992_ASSET = "file")
 
 shark = [
-    IMG_85acd69c_ASSET.readall(),
-    IMG_3440caf9_ASSET.readall(),
+    SHARK_1_ASSET.readall(),
+    SHARK_2_ASSET.readall(),
 ]
 
 fish = [
-    IMG_d409368d_ASSET.readall(),
-    IMG_a987eb9c_ASSET.readall(),
-    IMG_79447aad_ASSET.readall(),
-    IMG_98f8cba3_ASSET.readall(),
+    FISH_1_ASSET.readall(),
+    FISH_2_ASSET.readall(),
+    FISH_3_ASSET.readall(),
+    FISH_4_ASSET.readall(),
 ]
 
 seagrass = [
-    IMG_754cd438_ASSET.readall(),
-    IMG_b6b11a8e_ASSET.readall(),
-    IMG_5b300e7b_ASSET.readall(),
+    SEAGRASS_1_ASSET.readall(),
+    SEAGRASS_2_ASSET.readall(),
+    SEAGRASS_3_ASSET.readall(),
 ]
 
 scenes = [
-    IMG_7fa88b0d_ASSET.readall(),
-    IMG_30d472a3_ASSET.readall(),
-    IMG_85497e0b_ASSET.readall(),
-    IMG_ad417eb4_ASSET.readall(),
-    IMG_ad87fe44_ASSET.readall(),
-    IMG_5b98a2c5_ASSET.readall(),
-    IMG_19d4139e_ASSET.readall(),
-    IMG_2c164df3_ASSET.readall(),
-    IMG_84e49083_ASSET.readall(),
-    IMG_7bca54ec_ASSET.readall(),
-    IMG_2ff6ac15_ASSET.readall(),
-    IMG_b85973fc_ASSET.readall(),
-    IMG_6fd1dc5f_ASSET.readall(),
-    IMG_02f72b37_ASSET.readall(),
-    IMG_b691d187_ASSET.readall(),
-    IMG_edfa2de3_ASSET.readall(),
-    IMG_5522c826_ASSET.readall(),
-    IMG_84bf8ddb_ASSET.readall(),
-    IMG_a77422f1_ASSET.readall(),
-    IMG_cfb91d58_ASSET.readall(),
-    IMG_f5b54992_ASSET.readall(),
-    IMG_f1b40477_ASSET.readall(),
-    IMG_80da381d_ASSET.readall(),
-    IMG_47a95a80_ASSET.readall(),
+    SCENE_0_ASSET.readall(),
+    SCENE_1_ASSET.readall(),
+    SCENE_2_ASSET.readall(),
+    SCENE_3_ASSET.readall(),
+    SCENE_4_ASSET.readall(),
+    SCENE_5_ASSET.readall(),
+    SCENE_6_ASSET.readall(),
+    SCENE_7_ASSET.readall(),
+    SCENE_8_ASSET.readall(),
+    SCENE_9_ASSET.readall(),
+    SCENE_10_ASSET.readall(),
+    SCENE_11_ASSET.readall(),
+    SCENE_12_ASSET.readall(),
+    SCENE_13_ASSET.readall(),
+    SCENE_14_ASSET.readall(),
+    SCENE_15_ASSET.readall(),
+    SCENE_16_ASSET.readall(),
+    SCENE_17_ASSET.readall(),
+    SCENE_18_ASSET.readall(),
+    SCENE_19_ASSET.readall(),
+    SCENE_20_ASSET.readall(),
+    SCENE_21_ASSET.readall(),
+    SCENE_22_ASSET.readall(),
+    SCENE_23_ASSET.readall(),
 ]
 
 default_location = {
@@ -134,10 +133,10 @@ def main(config):
         render.Box(
             child = render.Animation(
                 children = [
-                    render.Image(base64.decode(seagrass[0])),
-                    render.Image(base64.decode(seagrass[1])),
-                    render.Image(base64.decode(seagrass[0])),
-                    render.Image(base64.decode(seagrass[2])),
+                    render.Image(seagrass[0]),
+                    render.Image(seagrass[1]),
+                    render.Image(seagrass[0]),
+                    render.Image(seagrass[2]),
                 ],
             ),
         ),
@@ -148,10 +147,10 @@ def main(config):
             render.Box(
                 child = render.Animation(
                     children = [
-                        render.Image(base64.decode(fish[3])),
-                        render.Image(base64.decode(fish[0])),
-                        render.Image(base64.decode(fish[1])),
-                        render.Image(base64.decode(fish[2])),
+                        render.Image(fish[3]),
+                        render.Image(fish[0]),
+                        render.Image(fish[1]),
+                        render.Image(fish[2]),
                     ],
                 ),
             ),
@@ -160,10 +159,10 @@ def main(config):
             render.Box(
                 child = render.Animation(
                     children = [
-                        render.Image(base64.decode(shark[0])),
-                        render.Image(base64.decode(shark[1])),
-                        render.Image(base64.decode(shark[1])),
-                        render.Image(base64.decode(shark[0])),
+                        render.Image(shark[0]),
+                        render.Image(shark[1]),
+                        render.Image(shark[1]),
+                        render.Image(shark[0]),
                     ],
                 ),
             ),
@@ -178,11 +177,11 @@ def main(config):
 
 def get_frames(hour_2, hour_1, hour, cycle_speed):
     frames = [
-        render.Image(base64.decode(scenes[hour_2])),
-        render.Image(base64.decode(scenes[hour_1])),
+        render.Image(scenes[hour_2]),
+        render.Image(scenes[hour_1]),
     ]
     for _i in range(2, int(cycle_speed)):
-        frames.append(render.Image(base64.decode(scenes[hour])))
+        frames.append(render.Image(scenes[hour]))
     return frames
 
 def get_schema():

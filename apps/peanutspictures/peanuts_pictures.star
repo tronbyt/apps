@@ -6,14 +6,14 @@ Author: michaelalbinson
 """
 
 load("encoding/base64.star", "base64")
+load("images/fancy_snoopy.png", FANCY_SNOOPY_ASSET = "file")
+load("images/lucy_classic.png", LUCY_CLASSIC_ASSET = "file")
+load("images/lucy_cool.png", LUCY_COOL_ASSET = "file")
+load("images/red_barron.png", RED_BARRON_ASSET = "file")
+load("images/snoopy_and_woodstock.png", SNOOPY_AND_WOODSTOCK_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_205f94d0.png", IMG_205f94d0_ASSET = "file")
-load("images/img_3c80d065.png", IMG_3c80d065_ASSET = "file")
-load("images/img_4e1f6e53.png", IMG_4e1f6e53_ASSET = "file")
-load("images/img_5bc41f84.png", IMG_5bc41f84_ASSET = "file")
-load("images/img_e5b2b4c6.png", IMG_e5b2b4c6_ASSET = "file")
 
 DEFAULT_SPEED = 500
 OPT_RANDOM = "random"
@@ -58,19 +58,19 @@ def main(config):
     )
 
 def fancy_snoopy():
-    return IMG_3c80d065_ASSET.readall()
+    return FANCY_SNOOPY_ASSET.readall()
 
 def lucy_classic():
-    return IMG_4e1f6e53_ASSET.readall()
+    return LUCY_CLASSIC_ASSET.readall()
 
 def lucy_cool():
-    return IMG_5bc41f84_ASSET.readall()
+    return LUCY_COOL_ASSET.readall()
 
 def red_barron():
-    return IMG_e5b2b4c6_ASSET.readall()
+    return RED_BARRON_ASSET.readall()
 
 def snoopy_and_woodstock():
-    return IMG_205f94d0_ASSET.readall()
+    return SNOOPY_AND_WOODSTOCK_ASSET.readall()
 
 def snoopy_and_woodstock_walking():
     return """

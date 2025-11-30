@@ -7,143 +7,142 @@ Author: hx009
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/bionic_bg_1.png", BIONIC_BG_1_ASSET = "file")
+load("images/bionic_bg_2.png", BIONIC_BG_2_ASSET = "file")
+load("images/bionic_rad.png", BIONIC_RAD_ASSET = "file")
+load("images/bubblebobble_bg_1.png", BUBBLEBOBBLE_BG_1_ASSET = "file")
+load("images/bubblebobble_bg_2.png", BUBBLEBOBBLE_BG_2_ASSET = "file")
+load("images/bubblebobble_bg_3.png", BUBBLEBOBBLE_BG_3_ASSET = "file")
+load("images/bubblebobble_bg_4.png", BUBBLEBOBBLE_BG_4_ASSET = "file")
+load("images/bubblebobble_bob_1.png", BUBBLEBOBBLE_BOB_1_ASSET = "file")
+load("images/bubblebobble_bob_2.png", BUBBLEBOBBLE_BOB_2_ASSET = "file")
+load("images/bubblebobble_bob_3.png", BUBBLEBOBBLE_BOB_3_ASSET = "file")
+load("images/bubblebobble_bob_4.png", BUBBLEBOBBLE_BOB_4_ASSET = "file")
+load("images/bubblebobble_bub_1.png", BUBBLEBOBBLE_BUB_1_ASSET = "file")
+load("images/bubblebobble_bub_2.png", BUBBLEBOBBLE_BUB_2_ASSET = "file")
+load("images/bubblebobble_bub_3.png", BUBBLEBOBBLE_BUB_3_ASSET = "file")
+load("images/bubblebobble_bub_4.png", BUBBLEBOBBLE_BUB_4_ASSET = "file")
+load("images/bubblebobble_colon.png", BUBBLEBOBBLE_COLON_ASSET = "file")
+load("images/bubblebobble_num_0.png", BUBBLEBOBBLE_NUM_0_ASSET = "file")
+load("images/bubblebobble_num_1.png", BUBBLEBOBBLE_NUM_1_ASSET = "file")
+load("images/bubblebobble_num_2.png", BUBBLEBOBBLE_NUM_2_ASSET = "file")
+load("images/bubblebobble_num_3.png", BUBBLEBOBBLE_NUM_3_ASSET = "file")
+load("images/bubblebobble_num_4.png", BUBBLEBOBBLE_NUM_4_ASSET = "file")
+load("images/bubblebobble_num_5.png", BUBBLEBOBBLE_NUM_5_ASSET = "file")
+load("images/bubblebobble_num_6.png", BUBBLEBOBBLE_NUM_6_ASSET = "file")
+load("images/bubblebobble_num_7.png", BUBBLEBOBBLE_NUM_7_ASSET = "file")
+load("images/bubblebobble_num_8.png", BUBBLEBOBBLE_NUM_8_ASSET = "file")
+load("images/bubblebobble_num_9.png", BUBBLEBOBBLE_NUM_9_ASSET = "file")
+load("images/castlevania_bg_1.png", CASTLEVANIA_BG_1_ASSET = "file")
+load("images/castlevania_bg_2.png", CASTLEVANIA_BG_2_ASSET = "file")
+load("images/castlevania_simon_1.png", CASTLEVANIA_SIMON_1_ASSET = "file")
+load("images/castlevania_simon_2.png", CASTLEVANIA_SIMON_2_ASSET = "file")
+load("images/castlevania_simon_3.png", CASTLEVANIA_SIMON_3_ASSET = "file")
+load("images/chipndale_bg_1.png", CHIPNDALE_BG_1_ASSET = "file")
+load("images/chipndale_bg_2.png", CHIPNDALE_BG_2_ASSET = "file")
+load("images/chipndale_bg_3.png", CHIPNDALE_BG_3_ASSET = "file")
+load("images/chipndale_chip_1.png", CHIPNDALE_CHIP_1_ASSET = "file")
+load("images/chipndale_chip_2.png", CHIPNDALE_CHIP_2_ASSET = "file")
+load("images/chipndale_chip_3.png", CHIPNDALE_CHIP_3_ASSET = "file")
+load("images/chipndale_dale_1.png", CHIPNDALE_DALE_1_ASSET = "file")
+load("images/chipndale_dale_2.png", CHIPNDALE_DALE_2_ASSET = "file")
+load("images/chipndale_dale_3.png", CHIPNDALE_DALE_3_ASSET = "file")
+load("images/contra_bg_1.png", CONTRA_BG_1_ASSET = "file")
+load("images/contra_bg_2.png", CONTRA_BG_2_ASSET = "file")
+load("images/contra_bg_3.png", CONTRA_BG_3_ASSET = "file")
+load("images/contra_bullet.png", CONTRA_BULLET_ASSET = "file")
+load("images/contra_num_0.png", CONTRA_NUM_0_ASSET = "file")
+load("images/contra_num_1.png", CONTRA_NUM_1_ASSET = "file")
+load("images/contra_num_2.png", CONTRA_NUM_2_ASSET = "file")
+load("images/contra_num_3.png", CONTRA_NUM_3_ASSET = "file")
+load("images/contra_num_4.png", CONTRA_NUM_4_ASSET = "file")
+load("images/contra_num_5.png", CONTRA_NUM_5_ASSET = "file")
+load("images/contra_num_6.png", CONTRA_NUM_6_ASSET = "file")
+load("images/contra_num_7.png", CONTRA_NUM_7_ASSET = "file")
+load("images/contra_num_8.png", CONTRA_NUM_8_ASSET = "file")
+load("images/contra_num_9.png", CONTRA_NUM_9_ASSET = "file")
+load("images/doubledragon_bg_1.png", DOUBLEDRAGON_BG_1_ASSET = "file")
+load("images/doubledragon_bg_2.png", DOUBLEDRAGON_BG_2_ASSET = "file")
+load("images/doubledragon_bg_3.png", DOUBLEDRAGON_BG_3_ASSET = "file")
+load("images/doubledragon_billy_1.png", DOUBLEDRAGON_BILLY_1_ASSET = "file")
+load("images/doubledragon_billy_2.png", DOUBLEDRAGON_BILLY_2_ASSET = "file")
+load("images/doubledragon_billy_3.png", DOUBLEDRAGON_BILLY_3_ASSET = "file")
+load("images/ducktales_bg_1.png", DUCKTALES_BG_1_ASSET = "file")
+load("images/ducktales_bg_2.png", DUCKTALES_BG_2_ASSET = "file")
+load("images/ducktales_scrooge_1.png", DUCKTALES_SCROOGE_1_ASSET = "file")
+load("images/ducktales_scrooge_2.png", DUCKTALES_SCROOGE_2_ASSET = "file")
+load("images/ducktales_scrooge_3.png", DUCKTALES_SCROOGE_3_ASSET = "file")
+load("images/excitebike_bg_1.png", EXCITEBIKE_BG_1_ASSET = "file")
+load("images/excitebike_bg_2.png", EXCITEBIKE_BG_2_ASSET = "file")
+load("images/excitebike_bg_3.png", EXCITEBIKE_BG_3_ASSET = "file")
+load("images/excitebike_ride_1.png", EXCITEBIKE_RIDE_1_ASSET = "file")
+load("images/excitebike_ride_2.png", EXCITEBIKE_RIDE_2_ASSET = "file")
+load("images/excitebike_ride_3.png", EXCITEBIKE_RIDE_3_ASSET = "file")
+load("images/finalfantasy_bg_1.png", FINALFANTASY_BG_1_ASSET = "file")
+load("images/finalfantasy_bg_2.png", FINALFANTASY_BG_2_ASSET = "file")
+load("images/finalfantasy_brown_1.png", FINALFANTASY_BROWN_1_ASSET = "file")
+load("images/finalfantasy_brown_2.png", FINALFANTASY_BROWN_2_ASSET = "file")
+load("images/finalfantasy_red_1.png", FINALFANTASY_RED_1_ASSET = "file")
+load("images/finalfantasy_red_2.png", FINALFANTASY_RED_2_ASSET = "file")
+load("images/finalfantasy_white_1.png", FINALFANTASY_WHITE_1_ASSET = "file")
+load("images/finalfantasy_white_2.png", FINALFANTASY_WHITE_2_ASSET = "file")
+load("images/kidicarus_bg_1.png", KIDICARUS_BG_1_ASSET = "file")
+load("images/kidicarus_bg_2.png", KIDICARUS_BG_2_ASSET = "file")
+load("images/kidicarus_pit_1.png", KIDICARUS_PIT_1_ASSET = "file")
+load("images/kidicarus_pit_2.png", KIDICARUS_PIT_2_ASSET = "file")
+load("images/kidicarus_pit_3.png", KIDICARUS_PIT_3_ASSET = "file")
+load("images/kirby_bg_1.png", KIRBY_BG_1_ASSET = "file")
+load("images/kirby_bg_2.png", KIRBY_BG_2_ASSET = "file")
+load("images/kirby_bg_3.png", KIRBY_BG_3_ASSET = "file")
+load("images/kirby_walk_1.png", KIRBY_WALK_1_ASSET = "file")
+load("images/kirby_walk_2.png", KIRBY_WALK_2_ASSET = "file")
+load("images/kirby_walk_3.png", KIRBY_WALK_3_ASSET = "file")
+load("images/kirby_walk_4.png", KIRBY_WALK_4_ASSET = "file")
+load("images/megaman_bg_1.png", MEGAMAN_BG_1_ASSET = "file")
+load("images/megaman_run_1.png", MEGAMAN_RUN_1_ASSET = "file")
+load("images/megaman_run_2.png", MEGAMAN_RUN_2_ASSET = "file")
+load("images/megaman_run_3.png", MEGAMAN_RUN_3_ASSET = "file")
+load("images/nemo_bg_1.png", NEMO_BG_1_ASSET = "file")
+load("images/nemo_bg_2.png", NEMO_BG_2_ASSET = "file")
+load("images/nemo_walk_1.png", NEMO_WALK_1_ASSET = "file")
+load("images/nemo_walk_2.png", NEMO_WALK_2_ASSET = "file")
+load("images/nemo_walk_3.png", NEMO_WALK_3_ASSET = "file")
+load("images/ninjagaiden_bg_1.png", NINJAGAIDEN_BG_1_ASSET = "file")
+load("images/ninjagaiden_bg_2.png", NINJAGAIDEN_BG_2_ASSET = "file")
+load("images/ninjagaiden_bg_3.png", NINJAGAIDEN_BG_3_ASSET = "file")
+load("images/ninjagaiden_ryu_1.png", NINJAGAIDEN_RYU_1_ASSET = "file")
+load("images/ninjagaiden_ryu_2.png", NINJAGAIDEN_RYU_2_ASSET = "file")
+load("images/ninjagaiden_ryu_3.png", NINJAGAIDEN_RYU_3_ASSET = "file")
+load("images/smb3_bg_1.png", SMB3_BG_1_ASSET = "file")
+load("images/smb3_bg_2.png", SMB3_BG_2_ASSET = "file")
+load("images/smb3_bg_3.png", SMB3_BG_3_ASSET = "file")
 load("images/smb3_colon_img.png", SMB3_COLON_IMG_ASSET = "file")
+load("images/smb3_mario_swim_1.png", SMB3_MARIO_SWIM_1_ASSET = "file")
+load("images/smb3_mario_swim_2.png", SMB3_MARIO_SWIM_2_ASSET = "file")
+load("images/smb3_mario_swim_3.png", SMB3_MARIO_SWIM_3_ASSET = "file")
+load("images/smb3_mario_swim_4.png", SMB3_MARIO_SWIM_4_ASSET = "file")
+load("images/smb3_mario_walk_1.png", SMB3_MARIO_WALK_1_ASSET = "file")
+load("images/smb3_mario_walk_2.png", SMB3_MARIO_WALK_2_ASSET = "file")
+load("images/smb3_num_0.png", SMB3_NUM_0_ASSET = "file")
+load("images/smb3_num_1.png", SMB3_NUM_1_ASSET = "file")
+load("images/smb3_num_2.png", SMB3_NUM_2_ASSET = "file")
+load("images/smb3_num_3.png", SMB3_NUM_3_ASSET = "file")
+load("images/smb3_num_4.png", SMB3_NUM_4_ASSET = "file")
+load("images/smb3_num_5.png", SMB3_NUM_5_ASSET = "file")
+load("images/smb3_num_6.png", SMB3_NUM_6_ASSET = "file")
+load("images/smb3_num_7.png", SMB3_NUM_7_ASSET = "file")
+load("images/smb3_num_8.png", SMB3_NUM_8_ASSET = "file")
+load("images/smb3_num_9.png", SMB3_NUM_9_ASSET = "file")
+load("images/zelda_bg_1.png", ZELDA_BG_1_ASSET = "file")
+load("images/zelda_bg_2.png", ZELDA_BG_2_ASSET = "file")
+load("images/zelda_bg_3.png", ZELDA_BG_3_ASSET = "file")
+load("images/zelda_link_walk_1.png", ZELDA_LINK_WALK_1_ASSET = "file")
+load("images/zelda_link_walk_2.png", ZELDA_LINK_WALK_2_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_019b1534.png", IMG_019b1534_ASSET = "file")
-load("images/img_01f81e5e.png", IMG_01f81e5e_ASSET = "file")
-load("images/img_02b8a170.png", IMG_02b8a170_ASSET = "file")
-load("images/img_05bb1cfc.png", IMG_05bb1cfc_ASSET = "file")
-load("images/img_06c5812e.png", IMG_06c5812e_ASSET = "file")
-load("images/img_07679ad5.png", IMG_07679ad5_ASSET = "file")
-load("images/img_09e3b7ca.png", IMG_09e3b7ca_ASSET = "file")
-load("images/img_0a2d9c6b.png", IMG_0a2d9c6b_ASSET = "file")
-load("images/img_0a7ca2ef.png", IMG_0a7ca2ef_ASSET = "file")
-load("images/img_0b65e38a.png", IMG_0b65e38a_ASSET = "file")
-load("images/img_0fb7fb12.png", IMG_0fb7fb12_ASSET = "file")
-load("images/img_11c267b3.png", IMG_11c267b3_ASSET = "file")
-load("images/img_12973e97.png", IMG_12973e97_ASSET = "file")
-load("images/img_1dfebfa8.png", IMG_1dfebfa8_ASSET = "file")
-load("images/img_2431d478.png", IMG_2431d478_ASSET = "file")
-load("images/img_26eadb44.png", IMG_26eadb44_ASSET = "file")
-load("images/img_2921da27.png", IMG_2921da27_ASSET = "file")
-load("images/img_2bcae432.png", IMG_2bcae432_ASSET = "file")
-load("images/img_2f62d7ef.png", IMG_2f62d7ef_ASSET = "file")
-load("images/img_2ff77c1a.png", IMG_2ff77c1a_ASSET = "file")
-load("images/img_31b786ba.png", IMG_31b786ba_ASSET = "file")
-load("images/img_31d445e8.png", IMG_31d445e8_ASSET = "file")
-load("images/img_33bda527.png", IMG_33bda527_ASSET = "file")
-load("images/img_360704ba.png", IMG_360704ba_ASSET = "file")
-load("images/img_37435224.png", IMG_37435224_ASSET = "file")
-load("images/img_3746fb9e.png", IMG_3746fb9e_ASSET = "file")
-load("images/img_38925660.png", IMG_38925660_ASSET = "file")
-load("images/img_418cd57d.png", IMG_418cd57d_ASSET = "file")
-load("images/img_44a8301b.png", IMG_44a8301b_ASSET = "file")
-load("images/img_480fd046.png", IMG_480fd046_ASSET = "file")
-load("images/img_4a8f0074.png", IMG_4a8f0074_ASSET = "file")
-load("images/img_4c3e17b4.png", IMG_4c3e17b4_ASSET = "file")
-load("images/img_4c76a818.png", IMG_4c76a818_ASSET = "file")
-load("images/img_503d9e02.png", IMG_503d9e02_ASSET = "file")
-load("images/img_53869b3a.png", IMG_53869b3a_ASSET = "file")
-load("images/img_572b3c68.png", IMG_572b3c68_ASSET = "file")
-load("images/img_59c02290.png", IMG_59c02290_ASSET = "file")
-load("images/img_5bb2b7a6.png", IMG_5bb2b7a6_ASSET = "file")
-load("images/img_6701b8af.png", IMG_6701b8af_ASSET = "file")
-load("images/img_67b64e06.png", IMG_67b64e06_ASSET = "file")
-load("images/img_67e31060.png", IMG_67e31060_ASSET = "file")
-load("images/img_68335b06.png", IMG_68335b06_ASSET = "file")
-load("images/img_68acd74d.png", IMG_68acd74d_ASSET = "file")
-load("images/img_6af5bf4c.png", IMG_6af5bf4c_ASSET = "file")
-load("images/img_6cc18832.png", IMG_6cc18832_ASSET = "file")
-load("images/img_6cd55f5c.png", IMG_6cd55f5c_ASSET = "file")
-load("images/img_6df90569.png", IMG_6df90569_ASSET = "file")
-load("images/img_6fd19ab3.png", IMG_6fd19ab3_ASSET = "file")
-load("images/img_730176c3.png", IMG_730176c3_ASSET = "file")
-load("images/img_73bbf92a.png", IMG_73bbf92a_ASSET = "file")
-load("images/img_75184f40.png", IMG_75184f40_ASSET = "file")
-load("images/img_76ce9345.png", IMG_76ce9345_ASSET = "file")
-load("images/img_7a5f0736.png", IMG_7a5f0736_ASSET = "file")
-load("images/img_7cecc161.png", IMG_7cecc161_ASSET = "file")
-load("images/img_8024c415.png", IMG_8024c415_ASSET = "file")
-load("images/img_80519bc0.png", IMG_80519bc0_ASSET = "file")
-load("images/img_8141ea11.png", IMG_8141ea11_ASSET = "file")
-load("images/img_81cf28ea.png", IMG_81cf28ea_ASSET = "file")
-load("images/img_81dcc3fc.png", IMG_81dcc3fc_ASSET = "file")
-load("images/img_81f7110b.png", IMG_81f7110b_ASSET = "file")
-load("images/img_81f970b9.png", IMG_81f970b9_ASSET = "file")
-load("images/img_84709572.png", IMG_84709572_ASSET = "file")
-load("images/img_8474d7e3.png", IMG_8474d7e3_ASSET = "file")
-load("images/img_84d86b71.png", IMG_84d86b71_ASSET = "file")
-load("images/img_89843bb5.png", IMG_89843bb5_ASSET = "file")
-load("images/img_8a5f4770.png", IMG_8a5f4770_ASSET = "file")
-load("images/img_8c12eb3c.png", IMG_8c12eb3c_ASSET = "file")
-load("images/img_8fa3dfa7.png", IMG_8fa3dfa7_ASSET = "file")
-load("images/img_909b1d3c.png", IMG_909b1d3c_ASSET = "file")
-load("images/img_912200d9.png", IMG_912200d9_ASSET = "file")
-load("images/img_92305251.png", IMG_92305251_ASSET = "file")
-load("images/img_92883064.png", IMG_92883064_ASSET = "file")
-load("images/img_9348be0a.png", IMG_9348be0a_ASSET = "file")
-load("images/img_9386a9b2.png", IMG_9386a9b2_ASSET = "file")
-load("images/img_951ecb98.png", IMG_951ecb98_ASSET = "file")
-load("images/img_96fc27d4.png", IMG_96fc27d4_ASSET = "file")
-load("images/img_979df11a.png", IMG_979df11a_ASSET = "file")
-load("images/img_9895f339.png", IMG_9895f339_ASSET = "file")
-load("images/img_98d2bfd3.png", IMG_98d2bfd3_ASSET = "file")
-load("images/img_98f761fb.png", IMG_98f761fb_ASSET = "file")
-load("images/img_9b09996f.png", IMG_9b09996f_ASSET = "file")
-load("images/img_9b56379e.png", IMG_9b56379e_ASSET = "file")
-load("images/img_9d4af1ca.png", IMG_9d4af1ca_ASSET = "file")
-load("images/img_9dbba56a.png", IMG_9dbba56a_ASSET = "file")
-load("images/img_a4e152d4.png", IMG_a4e152d4_ASSET = "file")
-load("images/img_a4f80e17.png", IMG_a4f80e17_ASSET = "file")
-load("images/img_a5559e91.png", IMG_a5559e91_ASSET = "file")
-load("images/img_a69639cf.png", IMG_a69639cf_ASSET = "file")
-load("images/img_a6ba330e.png", IMG_a6ba330e_ASSET = "file")
-load("images/img_a72f2008.png", IMG_a72f2008_ASSET = "file")
-load("images/img_a8e470b2.png", IMG_a8e470b2_ASSET = "file")
-load("images/img_a93ba4a0.png", IMG_a93ba4a0_ASSET = "file")
-load("images/img_aaa1f330.png", IMG_aaa1f330_ASSET = "file")
-load("images/img_abbe5b14.png", IMG_abbe5b14_ASSET = "file")
-load("images/img_addc34de.png", IMG_addc34de_ASSET = "file")
-load("images/img_affc823c.png", IMG_affc823c_ASSET = "file")
-load("images/img_b5bffdbb.png", IMG_b5bffdbb_ASSET = "file")
-load("images/img_b62e8d48.png", IMG_b62e8d48_ASSET = "file")
-load("images/img_b7713dd7.png", IMG_b7713dd7_ASSET = "file")
-load("images/img_ba1de49a.png", IMG_ba1de49a_ASSET = "file")
-load("images/img_bd264dc1.png", IMG_bd264dc1_ASSET = "file")
-load("images/img_c015fc36.png", IMG_c015fc36_ASSET = "file")
-load("images/img_c169250e.png", IMG_c169250e_ASSET = "file")
-load("images/img_c1dd6457.png", IMG_c1dd6457_ASSET = "file")
-load("images/img_c2b3e096.png", IMG_c2b3e096_ASSET = "file")
-load("images/img_c53969c2.png", IMG_c53969c2_ASSET = "file")
-load("images/img_c604c127.png", IMG_c604c127_ASSET = "file")
-load("images/img_c7c4821e.png", IMG_c7c4821e_ASSET = "file")
-load("images/img_cd9d357c.png", IMG_cd9d357c_ASSET = "file")
-load("images/img_d20e9db6.png", IMG_d20e9db6_ASSET = "file")
-load("images/img_d3506872.png", IMG_d3506872_ASSET = "file")
-load("images/img_d3caf80f.png", IMG_d3caf80f_ASSET = "file")
-load("images/img_d477542e.png", IMG_d477542e_ASSET = "file")
-load("images/img_d5909d94.png", IMG_d5909d94_ASSET = "file")
-load("images/img_d60557d0.png", IMG_d60557d0_ASSET = "file")
-load("images/img_d6937786.png", IMG_d6937786_ASSET = "file")
-load("images/img_d85d44fe.png", IMG_d85d44fe_ASSET = "file")
-load("images/img_e1005c11.png", IMG_e1005c11_ASSET = "file")
-load("images/img_e146f208.png", IMG_e146f208_ASSET = "file")
-load("images/img_e223a62b.png", IMG_e223a62b_ASSET = "file")
-load("images/img_e6c9177a.png", IMG_e6c9177a_ASSET = "file")
-load("images/img_e7087ce4.png", IMG_e7087ce4_ASSET = "file")
-load("images/img_ef81a872.png", IMG_ef81a872_ASSET = "file")
-load("images/img_f3df6310.png", IMG_f3df6310_ASSET = "file")
-load("images/img_f483363d.png", IMG_f483363d_ASSET = "file")
-load("images/img_f5f15aac.png", IMG_f5f15aac_ASSET = "file")
-load("images/img_f75a2f8a.png", IMG_f75a2f8a_ASSET = "file")
-load("images/img_f8e99fde.png", IMG_f8e99fde_ASSET = "file")
-load("images/img_fbfae61b.png", IMG_fbfae61b_ASSET = "file")
-load("images/img_fcfa1dcd.png", IMG_fcfa1dcd_ASSET = "file")
-load("images/img_fda881c8.png", IMG_fda881c8_ASSET = "file")
 
 SMB3_COLON_IMG = SMB3_COLON_IMG_ASSET.readall()
 
@@ -196,9 +195,9 @@ GAME_CONFIGS = [
     # 1 - Super Mario Bros. 3
     {
         "BACKGROUND_IMGS": [
-            IMG_a72f2008_ASSET.readall(),
-            IMG_6cd55f5c_ASSET.readall(),
-            IMG_d3506872_ASSET.readall(),
+            SMB3_BG_1_ASSET.readall(),
+            SMB3_BG_2_ASSET.readall(),
+            SMB3_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -213,22 +212,22 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Mario walking
-                IMG_8024c415_ASSET.readall(),
-                IMG_81cf28ea_ASSET.readall(),
+                SMB3_MARIO_WALK_1_ASSET.readall(),
+                SMB3_MARIO_WALK_2_ASSET.readall(),
             ],
             [
                 # Mario swimming
-                IMG_f483363d_ASSET.readall(),
-                IMG_aaa1f330_ASSET.readall(),
-                IMG_92883064_ASSET.readall(),
-                IMG_9b56379e_ASSET.readall(),
+                SMB3_MARIO_SWIM_1_ASSET.readall(),
+                SMB3_MARIO_SWIM_2_ASSET.readall(),
+                SMB3_MARIO_SWIM_3_ASSET.readall(),
+                SMB3_MARIO_SWIM_4_ASSET.readall(),
             ],
         ],
     },
     # 2 - Mega Man
     {
         "BACKGROUND_IMGS": [
-            IMG_76ce9345_ASSET.readall(),
+            MEGAMAN_BG_1_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -243,18 +242,18 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Mega Man
-                IMG_d20e9db6_ASSET.readall(),
-                IMG_418cd57d_ASSET.readall(),
-                IMG_6701b8af_ASSET.readall(),
+                MEGAMAN_RUN_1_ASSET.readall(),
+                MEGAMAN_RUN_2_ASSET.readall(),
+                MEGAMAN_RUN_3_ASSET.readall(),
             ],
         ],
     },
     # 3 - Kirby's Adventure
     {
         "BACKGROUND_IMGS": [
-            IMG_951ecb98_ASSET.readall(),
-            IMG_979df11a_ASSET.readall(),
-            IMG_9348be0a_ASSET.readall(),
+            KIRBY_BG_1_ASSET.readall(),
+            KIRBY_BG_2_ASSET.readall(),
+            KIRBY_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -269,19 +268,19 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Kirby
-                IMG_53869b3a_ASSET.readall(),
-                IMG_84709572_ASSET.readall(),
-                IMG_0a2d9c6b_ASSET.readall(),
-                IMG_9b09996f_ASSET.readall(),
+                KIRBY_WALK_1_ASSET.readall(),
+                KIRBY_WALK_2_ASSET.readall(),
+                KIRBY_WALK_3_ASSET.readall(),
+                KIRBY_WALK_4_ASSET.readall(),
             ],
         ],
     },
     # 4 - The Legend of Zelda
     {
         "BACKGROUND_IMGS": [
-            IMG_6af5bf4c_ASSET.readall(),
-            IMG_0b65e38a_ASSET.readall(),
-            IMG_c604c127_ASSET.readall(),
+            ZELDA_BG_1_ASSET.readall(),
+            ZELDA_BG_2_ASSET.readall(),
+            ZELDA_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -296,32 +295,32 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Link
-                IMG_730176c3_ASSET.readall(),
-                IMG_59c02290_ASSET.readall(),
+                ZELDA_LINK_WALK_1_ASSET.readall(),
+                ZELDA_LINK_WALK_2_ASSET.readall(),
             ],
         ],
     },
     # 5 - Contra
     {
         "BACKGROUND_IMGS": [
-            IMG_c7c4821e_ASSET.readall(),
-            IMG_4c3e17b4_ASSET.readall(),
-            IMG_02b8a170_ASSET.readall(),
+            CONTRA_BG_1_ASSET.readall(),
+            CONTRA_BG_2_ASSET.readall(),
+            CONTRA_BG_3_ASSET.readall(),
         ],
-        "COLON_IMG": IMG_c015fc36_ASSET.readall(),
+        "COLON_IMG": CONTRA_COLON_ASSET.readall(),
         "NUMBER_IMG_HEIGHT": 7,
         "NUMBER_IMG_WIDTH": 7,
         "NUMBER_IMGS": [
-            IMG_572b3c68_ASSET.readall(),
-            IMG_33bda527_ASSET.readall(),
-            IMG_a69639cf_ASSET.readall(),
-            IMG_6df90569_ASSET.readall(),
-            IMG_4a8f0074_ASSET.readall(),
-            IMG_e1005c11_ASSET.readall(),
-            IMG_98d2bfd3_ASSET.readall(),
-            IMG_38925660_ASSET.readall(),
-            IMG_7a5f0736_ASSET.readall(),
-            IMG_f3df6310_ASSET.readall(),
+            CONTRA_NUM_0_ASSET.readall(),
+            CONTRA_NUM_1_ASSET.readall(),
+            CONTRA_NUM_2_ASSET.readall(),
+            CONTRA_NUM_3_ASSET.readall(),
+            CONTRA_NUM_4_ASSET.readall(),
+            CONTRA_NUM_5_ASSET.readall(),
+            CONTRA_NUM_6_ASSET.readall(),
+            CONTRA_NUM_7_ASSET.readall(),
+            CONTRA_NUM_8_ASSET.readall(),
+            CONTRA_NUM_9_ASSET.readall(),
         ],
         "SPRITE_WIDTH": 4,
         "DIST_BETWEEN_SPRITES": 10,
@@ -332,16 +331,16 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # A single bullet
-                IMG_e146f208_ASSET.readall(),
+                CONTRA_BULLET_ASSET.readall(),
             ],
         ],
     },
     # 6 - Excitebike
     {
         "BACKGROUND_IMGS": [
-            IMG_31b786ba_ASSET.readall(),
-            IMG_d6937786_ASSET.readall(),
-            IMG_bd264dc1_ASSET.readall(),
+            EXCITEBIKE_BG_1_ASSET.readall(),
+            EXCITEBIKE_BG_2_ASSET.readall(),
+            EXCITEBIKE_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -355,17 +354,17 @@ GAME_CONFIGS = [
         "SPRITE_FRAMES_PER_FRAME": 1,
         "SPRITE_SETS": [
             [
-                IMG_d5909d94_ASSET.readall(),
-                IMG_b5bffdbb_ASSET.readall(),
-                IMG_73bbf92a_ASSET.readall(),
+                EXCITEBIKE_RIDE_1_ASSET.readall(),
+                EXCITEBIKE_RIDE_2_ASSET.readall(),
+                EXCITEBIKE_RIDE_3_ASSET.readall(),
             ],
         ],
     },
     # 7 - Little Nemo
     {
         "BACKGROUND_IMGS": [
-            IMG_44a8301b_ASSET.readall(),
-            IMG_cd9d357c_ASSET.readall(),
+            NEMO_BG_1_ASSET.readall(),
+            NEMO_BG_2_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -380,17 +379,17 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Nemo
-                IMG_fda881c8_ASSET.readall(),
-                IMG_26eadb44_ASSET.readall(),
-                IMG_d85d44fe_ASSET.readall(),
+                NEMO_WALK_1_ASSET.readall(),
+                NEMO_WALK_2_ASSET.readall(),
+                NEMO_WALK_3_ASSET.readall(),
             ],
         ],
     },
     # 8 - DuckTales
     {
         "BACKGROUND_IMGS": [
-            IMG_6cc18832_ASSET.readall(),
-            IMG_92305251_ASSET.readall(),
+            DUCKTALES_BG_1_ASSET.readall(),
+            DUCKTALES_BG_2_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -405,34 +404,34 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Scrooge McDuck
-                IMG_909b1d3c_ASSET.readall(),
-                IMG_2bcae432_ASSET.readall(),
-                IMG_05bb1cfc_ASSET.readall(),
+                DUCKTALES_SCROOGE_1_ASSET.readall(),
+                DUCKTALES_SCROOGE_2_ASSET.readall(),
+                DUCKTALES_SCROOGE_3_ASSET.readall(),
             ],
         ],
     },
     # 9 - Bubble Bobble
     {
         "BACKGROUND_IMGS": [
-            IMG_d3caf80f_ASSET.readall(),
-            IMG_67e31060_ASSET.readall(),
-            IMG_9d4af1ca_ASSET.readall(),
-            IMG_68acd74d_ASSET.readall(),
+            BUBBLEBOBBLE_BG_1_ASSET.readall(),
+            BUBBLEBOBBLE_BG_2_ASSET.readall(),
+            BUBBLEBOBBLE_BG_3_ASSET.readall(),
+            BUBBLEBOBBLE_BG_4_ASSET.readall(),
         ],
-        "COLON_IMG": IMG_0fb7fb12_ASSET.readall(),
+        "COLON_IMG": BUBBLEBOBBLE_COLON_ASSET.readall(),
         "NUMBER_IMG_HEIGHT": 8,
         "NUMBER_IMG_WIDTH": 4,
         "NUMBER_IMGS": [
-            IMG_c53969c2_ASSET.readall(),
-            IMG_e7087ce4_ASSET.readall(),
-            IMG_affc823c_ASSET.readall(),
-            IMG_4c76a818_ASSET.readall(),
-            IMG_6fd19ab3_ASSET.readall(),
-            IMG_2431d478_ASSET.readall(),
-            IMG_e6c9177a_ASSET.readall(),
-            IMG_c1dd6457_ASSET.readall(),
-            IMG_37435224_ASSET.readall(),
-            IMG_e223a62b_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_0_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_1_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_2_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_3_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_4_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_5_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_6_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_7_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_8_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_9_ASSET.readall(),
         ],
         "SPRITE_WIDTH": 16,
         "DIST_BETWEEN_SPRITES": 5,
@@ -443,26 +442,26 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Bub
-                IMG_ba1de49a_ASSET.readall(),
-                IMG_8fa3dfa7_ASSET.readall(),
-                IMG_480fd046_ASSET.readall(),
-                IMG_360704ba_ASSET.readall(),
+                BUBBLEBOBBLE_BUB_1_ASSET.readall(),
+                BUBBLEBOBBLE_BUB_2_ASSET.readall(),
+                BUBBLEBOBBLE_BUB_3_ASSET.readall(),
+                BUBBLEBOBBLE_BUB_4_ASSET.readall(),
             ],
             [
                 # Bob
-                IMG_12973e97_ASSET.readall(),
-                IMG_019b1534_ASSET.readall(),
-                IMG_abbe5b14_ASSET.readall(),
-                IMG_2f62d7ef_ASSET.readall(),
+                BUBBLEBOBBLE_BOB_1_ASSET.readall(),
+                BUBBLEBOBBLE_BOB_2_ASSET.readall(),
+                BUBBLEBOBBLE_BOB_3_ASSET.readall(),
+                BUBBLEBOBBLE_BOB_4_ASSET.readall(),
             ],
         ],
     },
     # 10 - Chip 'n Dale: Rescue Rangers
     {
         "BACKGROUND_IMGS": [
-            IMG_01f81e5e_ASSET.readall(),
-            IMG_2ff77c1a_ASSET.readall(),
-            IMG_addc34de_ASSET.readall(),
+            CHIPNDALE_BG_1_ASSET.readall(),
+            CHIPNDALE_BG_2_ASSET.readall(),
+            CHIPNDALE_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -477,23 +476,23 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Chip
-                IMG_3746fb9e_ASSET.readall(),
-                IMG_31d445e8_ASSET.readall(),
-                IMG_75184f40_ASSET.readall(),
+                CHIPNDALE_CHIP_1_ASSET.readall(),
+                CHIPNDALE_CHIP_2_ASSET.readall(),
+                CHIPNDALE_CHIP_3_ASSET.readall(),
             ],
             [
                 # Dale
-                IMG_b7713dd7_ASSET.readall(),
-                IMG_06c5812e_ASSET.readall(),
-                IMG_07679ad5_ASSET.readall(),
+                CHIPNDALE_DALE_1_ASSET.readall(),
+                CHIPNDALE_DALE_2_ASSET.readall(),
+                CHIPNDALE_DALE_3_ASSET.readall(),
             ],
         ],
     },
     # 11 - Bionic Commando
     {
         "BACKGROUND_IMGS": [
-            IMG_8474d7e3_ASSET.readall(),
-            IMG_f8e99fde_ASSET.readall(),
+            BIONIC_BG_1_ASSET.readall(),
+            BIONIC_BG_2_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -508,15 +507,15 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Ladd 'Rad' Spencer
-                IMG_2921da27_ASSET.readall(),
+                BIONIC_RAD_ASSET.readall(),
             ],
         ],
     },
     # 12 - Kid Icarus
     {
         "BACKGROUND_IMGS": [
-            IMG_f75a2f8a_ASSET.readall(),
-            IMG_81f7110b_ASSET.readall(),
+            KIDICARUS_BG_1_ASSET.readall(),
+            KIDICARUS_BG_2_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -531,17 +530,17 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Pit walking
-                IMG_11c267b3_ASSET.readall(),
-                IMG_81f970b9_ASSET.readall(),
-                IMG_8a5f4770_ASSET.readall(),
+                KIDICARUS_PIT_1_ASSET.readall(),
+                KIDICARUS_PIT_2_ASSET.readall(),
+                KIDICARUS_PIT_3_ASSET.readall(),
             ],
         ],
     },
     # 13 - Final Fantasy
     {
         "BACKGROUND_IMGS": [
-            IMG_a8e470b2_ASSET.readall(),
-            IMG_a5559e91_ASSET.readall(),
+            FINALFANTASY_BG_1_ASSET.readall(),
+            FINALFANTASY_BG_2_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -556,26 +555,26 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Light warrior red walking
-                IMG_f5f15aac_ASSET.readall(),
-                IMG_1dfebfa8_ASSET.readall(),
+                FINALFANTASY_RED_1_ASSET.readall(),
+                FINALFANTASY_RED_2_ASSET.readall(),
             ],
             [
                 # Light warrior brown walking
-                IMG_d477542e_ASSET.readall(),
-                IMG_503d9e02_ASSET.readall(),
+                FINALFANTASY_BROWN_1_ASSET.readall(),
+                FINALFANTASY_BROWN_2_ASSET.readall(),
             ],
             [
                 # Light warrior white walking
-                IMG_8c12eb3c_ASSET.readall(),
-                IMG_09e3b7ca_ASSET.readall(),
+                FINALFANTASY_WHITE_1_ASSET.readall(),
+                FINALFANTASY_WHITE_2_ASSET.readall(),
             ],
         ],
     },
     # 14 - Castlevania
     {
         "BACKGROUND_IMGS": [
-            IMG_fbfae61b_ASSET.readall(),
-            IMG_ef81a872_ASSET.readall(),
+            CASTLEVANIA_BG_1_ASSET.readall(),
+            CASTLEVANIA_BG_2_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -590,18 +589,18 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Simon Belmont walking
-                IMG_a6ba330e_ASSET.readall(),
-                IMG_7cecc161_ASSET.readall(),
-                IMG_b62e8d48_ASSET.readall(),
+                CASTLEVANIA_SIMON_1_ASSET.readall(),
+                CASTLEVANIA_SIMON_2_ASSET.readall(),
+                CASTLEVANIA_SIMON_3_ASSET.readall(),
             ],
         ],
     },
     # 15 - Double Dragon
     {
         "BACKGROUND_IMGS": [
-            IMG_89843bb5_ASSET.readall(),
-            IMG_fcfa1dcd_ASSET.readall(),
-            IMG_80519bc0_ASSET.readall(),
+            DOUBLEDRAGON_BG_1_ASSET.readall(),
+            DOUBLEDRAGON_BG_2_ASSET.readall(),
+            DOUBLEDRAGON_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -616,18 +615,18 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Billy Lee walking
-                IMG_0a7ca2ef_ASSET.readall(),
-                IMG_5bb2b7a6_ASSET.readall(),
-                IMG_68335b06_ASSET.readall(),
+                DOUBLEDRAGON_BILLY_1_ASSET.readall(),
+                DOUBLEDRAGON_BILLY_2_ASSET.readall(),
+                DOUBLEDRAGON_BILLY_3_ASSET.readall(),
             ],
         ],
     },
     # 16 - Ninja Gaiden
     {
         "BACKGROUND_IMGS": [
-            IMG_98f761fb_ASSET.readall(),
-            IMG_a4e152d4_ASSET.readall(),
-            IMG_d60557d0_ASSET.readall(),
+            NINJAGAIDEN_BG_1_ASSET.readall(),
+            NINJAGAIDEN_BG_2_ASSET.readall(),
+            NINJAGAIDEN_BG_3_ASSET.readall(),
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -642,25 +641,25 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Ryu Hayabusa Lee walking
-                IMG_84d86b71_ASSET.readall(),
-                IMG_a93ba4a0_ASSET.readall(),
-                IMG_81dcc3fc_ASSET.readall(),
+                NINJAGAIDEN_RYU_1_ASSET.readall(),
+                NINJAGAIDEN_RYU_2_ASSET.readall(),
+                NINJAGAIDEN_RYU_3_ASSET.readall(),
             ],
         ],
     },
 ]
 
 SMB3_NUMBER_IMGS = [
-    IMG_8141ea11_ASSET.readall(),
-    IMG_9386a9b2_ASSET.readall(),
-    IMG_96fc27d4_ASSET.readall(),
-    IMG_67b64e06_ASSET.readall(),
-    IMG_a4f80e17_ASSET.readall(),
-    IMG_9895f339_ASSET.readall(),
-    IMG_c2b3e096_ASSET.readall(),
-    IMG_912200d9_ASSET.readall(),
-    IMG_c169250e_ASSET.readall(),
-    IMG_9dbba56a_ASSET.readall(),
+    SMB3_NUM_0_ASSET.readall(),
+    SMB3_NUM_1_ASSET.readall(),
+    SMB3_NUM_2_ASSET.readall(),
+    SMB3_NUM_3_ASSET.readall(),
+    SMB3_NUM_4_ASSET.readall(),
+    SMB3_NUM_5_ASSET.readall(),
+    SMB3_NUM_6_ASSET.readall(),
+    SMB3_NUM_7_ASSET.readall(),
+    SMB3_NUM_8_ASSET.readall(),
+    SMB3_NUM_9_ASSET.readall(),
 ]
 
 def main(config):
@@ -741,14 +740,14 @@ def get_num_image(selected_game, num):
             child = render.Box(
                 width = GAME_CONFIGS[selected_game]["NUMBER_IMG_WIDTH"],
                 height = GAME_CONFIGS[selected_game]["NUMBER_IMG_HEIGHT"],
-                child = render.Image(src = base64.decode(GAME_CONFIGS[selected_game]["NUMBER_IMGS"][int(num)])),
+                child = render.Image(src = GAME_CONFIGS[selected_game]["NUMBER_IMGS"][int(num)]),
             ),
         )
     else:
         return render.Box(
             width = 8,
             height = 7,
-            child = render.Image(src = base64.decode(SMB3_NUMBER_IMGS[int(num)])),
+            child = render.Image(src = SMB3_NUMBER_IMGS[int(num)]),
         )
 
 def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_leading_zero = False, has_seperator = True):
@@ -781,13 +780,13 @@ def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_l
         seperator = render.Box(
             width = 3,
             height = 7,
-            child = render.Image(src = base64.decode(GAME_CONFIGS[selected_game]["COLON_IMG"])),
+            child = render.Image(src = GAME_CONFIGS[selected_game]["COLON_IMG"]),
         )
     elif selected_game == int(GAME_LIST["Bubble Bobble"]):
         seperator = render.Box(
             width = 4,
             height = 8,
-            child = render.Image(src = base64.decode(GAME_CONFIGS[selected_game]["COLON_IMG"])),
+            child = render.Image(src = GAME_CONFIGS[selected_game]["COLON_IMG"]),
         )
 
     if not has_seperator:
@@ -801,7 +800,7 @@ def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_l
             width = 7,
         )
 
-    bg_img = render.Image(base64.decode(GAME_CONFIGS[selected_game]["BACKGROUND_IMGS"][level_number]))
+    bg_img = render.Image(GAME_CONFIGS[selected_game]["BACKGROUND_IMGS"][level_number])
 
     return render.Stack(
         children = [
@@ -880,7 +879,7 @@ def sprite_get_frame(selected_game, time_box, x_pos, y_pos, sprite_set_index):
                     render.Row(
                         expanded = True,
                         children = [
-                            render.Image(base64.decode(sprite_image)),
+                            render.Image(sprite_image),
                         ],
                     ),
             ),

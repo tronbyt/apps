@@ -20,13 +20,6 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")  #to calcuate day/night and when planets will be visible
 load("time.star", "time")  #Used to display time and calcuate lenght of TTL cache
-load("images/img_084d80d8.png", IMG_084d80d8_ASSET = "file")
-load("images/img_14bff1c0.png", IMG_14bff1c0_ASSET = "file")
-load("images/img_16cbff57.png", IMG_16cbff57_ASSET = "file")
-load("images/img_34317a4c.png", IMG_34317a4c_ASSET = "file")
-load("images/img_8dc08024.png", IMG_8dc08024_ASSET = "file")
-load("images/img_b513bd6e.png", IMG_b513bd6e_ASSET = "file")
-load("images/img_ccd93ef2.png", IMG_ccd93ef2_ASSET = "file")
 
 app_hash = "M2IxYmY2OWUtZWIzMS00NTM0LTkyOWItMmRiMDlhMWVkYjI5OmZhN2YxOTM2M2I2N2QzZDNiYjEzNmNkMDhjMzM3YmUzZTQwMjE3ODg1MjIzY2QyYTNiNzFkZDlhYzU1YzBkODdkOWE0YjFiODkwMWUxN2JkZDU3YmZjOTBmZWI4NmE5MjdlMTBjNjZhYWFkYzFhMjE1NjdiOGYxNTUxOGNmMDU1ZGMwOTFhNzg5Nzc5M2FhNDE5OTUyMDAzNTUyY2U2ZWQ5NWUxNDZmMjkxZWQ0M2RhYzNjNGRmMjNmYTc5NTU2OTQ0MGVlNWY1N2NhOTJmYjNmYTg4OWYxOWFlNWQxMzU2"
 time_display_format = "3:04 PM"
@@ -34,13 +27,13 @@ application_delimiter = ":"
 
 #planet images
 planet_images = {
-    "mercury": IMG_084d80d8_ASSET.readall(),
-    "venus": IMG_16cbff57_ASSET.readall(),
-    "mars": IMG_14bff1c0_ASSET.readall(),
-    "jupiter": IMG_8dc08024_ASSET.readall(),
-    "saturn": IMG_34317a4c_ASSET.readall(),
-    "uranus": IMG_ccd93ef2_ASSET.readall(),
-    "neptune": IMG_b513bd6e_ASSET.readall(),
+    "mercury": MERCURY_ASSET.readall(),
+    "venus": VENUS_ASSET.readall(),
+    "mars": MARS_ASSET.readall(),
+    "jupiter": JUPITER_ASSET.readall(),
+    "saturn": SATURN_ASSET.readall(),
+    "uranus": URANUS_ASSET.readall(),
+    "neptune": NEPTUNE_ASSET.readall(),
 }
 
 #color of text used to display planet name

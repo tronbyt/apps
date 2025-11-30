@@ -8,45 +8,45 @@ Author: J. Keybl
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/broken_clouds_day.png", BROKEN_CLOUDS_DAY_ICON = "file")
+load("images/broken_clouds_night.png", BROKEN_CLOUDS_NIGHT_ICON = "file")
+load("images/clear_day.png", CLEAR_DAY_ICON = "file")
+load("images/clear_night.png", CLEAR_NIGHT_ICON = "file")
+load("images/drizzle_day.png", DRIZZLE_DAY_ICON = "file")
+load("images/drizzle_night.png", DRIZZLE_NIGHT_ICON = "file")
+load("images/dust_day.png", DUST_DAY_ICON = "file")
+load("images/dust_night.png", DUST_NIGHT_ICON = "file")
+load("images/few_clouds_day.png", FEW_CLOUDS_DAY_ICON = "file")
+load("images/few_clouds_night.png", FEW_CLOUDS_NIGHT_ICON = "file")
+load("images/fog_day.png", FOG_DAY_ICON = "file")
+load("images/fog_night.png", FOG_NIGHT_ICON = "file")
+load("images/freezing_rain_day.png", FREEZING_RAIN_DAY_ICON = "file")
+load("images/freezing_rain_night.png", FREEZING_RAIN_NIGHT_ICON = "file")
+load("images/gust_day.png", GUST_DAY_ICON = "file")
+load("images/gust_night.png", GUST_NIGHT_ICON = "file")
+load("images/haze.png", HAZE_ICON = "file")
+load("images/overcast_clouds_day.png", OVERCAST_CLOUDS_DAY_ICON = "file")
+load("images/overcast_clouds_night.png", OVERCAST_CLOUDS_NIGHT_ICON = "file")
+load("images/rain_shower_day.png", RAIN_SHOWER_DAY_ICON = "file")
+load("images/rain_shower_night.png", RAIN_SHOWER_NIGHT_ICON = "file")
+load("images/rain_snow_day.png", RAIN_SNOW_DAY_ICON = "file")
+load("images/rain_snow_night.png", RAIN_SNOW_NIGHT_ICON = "file")
+load("images/scattered_clouds_day.png", SCATTERED_CLOUDS_DAY_ICON = "file")
+load("images/scattered_clouds_night.png", SCATTERED_CLOUDS_NIGHT_ICON = "file")
+load("images/sleet_day.png", SLEET_DAY_ICON = "file")
+load("images/sleet_night.png", SLEET_NIGHT_ICON = "file")
+load("images/smoke_day.png", SMOKE_DAY_ICON = "file")
+load("images/smoke_night.png", SMOKE_NIGHT_ICON = "file")
+load("images/snow_day.png", SNOW_DAY_ICON = "file")
+load("images/snow_night.png", SNOW_NIGHT_ICON = "file")
+load("images/thunderstorm_day.png", THUNDERSTORM_DAY_ICON = "file")
+load("images/thunderstorm_night.png", THUNDERSTORM_NIGHT_ICON = "file")
+load("images/tornado_day.png", TORNADO_DAY_ICON = "file")
+load("images/tornado_night.png", TORNADO_NIGHT_ICON = "file")
+load("images/unknown.png", UNKNOWN_ICON = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_04286315.png", IMG_04286315_ASSET = "file")
-load("images/img_26ef32bd.png", IMG_26ef32bd_ASSET = "file")
-load("images/img_287f3612.png", IMG_287f3612_ASSET = "file")
-load("images/img_28d317d9.png", IMG_28d317d9_ASSET = "file")
-load("images/img_389f5a2e.png", IMG_389f5a2e_ASSET = "file")
-load("images/img_3dcbc539.png", IMG_3dcbc539_ASSET = "file")
-load("images/img_4020d19f.png", IMG_4020d19f_ASSET = "file")
-load("images/img_48146e0e.png", IMG_48146e0e_ASSET = "file")
-load("images/img_4bcd2fbe.png", IMG_4bcd2fbe_ASSET = "file")
-load("images/img_5545d86f.png", IMG_5545d86f_ASSET = "file")
-load("images/img_60695c33.png", IMG_60695c33_ASSET = "file")
-load("images/img_6561be0e.png", IMG_6561be0e_ASSET = "file")
-load("images/img_67a0db0c.png", IMG_67a0db0c_ASSET = "file")
-load("images/img_6af59ee1.png", IMG_6af59ee1_ASSET = "file")
-load("images/img_7366bfbb.png", IMG_7366bfbb_ASSET = "file")
-load("images/img_7631784e.png", IMG_7631784e_ASSET = "file")
-load("images/img_793aaab3.png", IMG_793aaab3_ASSET = "file")
-load("images/img_81605eb4.png", IMG_81605eb4_ASSET = "file")
-load("images/img_84f1ec7f.png", IMG_84f1ec7f_ASSET = "file")
-load("images/img_8741fec2.png", IMG_8741fec2_ASSET = "file")
-load("images/img_87c0af71.png", IMG_87c0af71_ASSET = "file")
-load("images/img_8d371176.png", IMG_8d371176_ASSET = "file")
-load("images/img_8e75d876.png", IMG_8e75d876_ASSET = "file")
-load("images/img_8fbbd99d.png", IMG_8fbbd99d_ASSET = "file")
-load("images/img_92154f83.png", IMG_92154f83_ASSET = "file")
-load("images/img_9fbf242d.png", IMG_9fbf242d_ASSET = "file")
-load("images/img_a9381dd9.png", IMG_a9381dd9_ASSET = "file")
-load("images/img_b1d696c6.png", IMG_b1d696c6_ASSET = "file")
-load("images/img_b2196755.png", IMG_b2196755_ASSET = "file")
-load("images/img_c05b4dd1.png", IMG_c05b4dd1_ASSET = "file")
-load("images/img_c25100d3.png", IMG_c25100d3_ASSET = "file")
-load("images/img_c670a6e3.png", IMG_c670a6e3_ASSET = "file")
-load("images/img_c897522f.png", IMG_c897522f_ASSET = "file")
-load("images/img_cd79f5f6.png", IMG_cd79f5f6_ASSET = "file")
-load("images/img_e02334f5.png", IMG_e02334f5_ASSET = "file")
-load("images/img_ee7b47dc.png", IMG_ee7b47dc_ASSET = "file")
 
 DEBUG = False
 TIME_FONT = "6x13"
@@ -418,184 +418,184 @@ def get_unknown():
     # no graphic available
 
     return (
-        IMG_287f3612_ASSET.readall()
+        UNKNOWN_ICON.readall()
     )
 
 def get_clear_sky():
     # Clear sky graphic
 
     return (
-        IMG_4020d19f_ASSET.readall()
+        CLEAR_DAY_ICON.readall()
     )
 
 def get_night_clear_sky():
     # Night clear sky graphic
 
     return (
-        IMG_48146e0e_ASSET.readall()
+        CLEAR_NIGHT_ICON.readall()
     )
 
 def get_thunderstorm():
     # Thunderstorm day
 
-    return (IMG_67a0db0c_ASSET.readall())
+    return (THUNDERSTORM_DAY_ICON.readall())
 
 def get_night_thunderstorm():
     # Thunderstorm night
 
-    return (IMG_c05b4dd1_ASSET.readall())
+    return (THUNDERSTORM_NIGHT_ICON.readall())
 
 def get_drizzle():
     # Drizzle day
 
-    return (IMG_28d317d9_ASSET.readall())
+    return (DRIZZLE_DAY_ICON.readall())
 
 def get_night_drizzle():
     # Drizzle night
 
-    return (IMG_6af59ee1_ASSET.readall())
+    return (DRIZZLE_NIGHT_ICON.readall())
 
 def get_freezing_rain():
     # Freezing rain
 
-    return (IMG_c25100d3_ASSET.readall())
+    return (FREEZING_RAIN_DAY_ICON.readall())
 
 def get_night_freezing_rain():
     # Freezing rain at night
 
-    return (IMG_8e75d876_ASSET.readall())
+    return (FREEZING_RAIN_NIGHT_ICON.readall())
 
 def get_few_clouds():
     # Few clouds
 
-    return (IMG_c897522f_ASSET.readall())
+    return (FEW_CLOUDS_DAY_ICON.readall())
 
 def get_night_few_clouds():
     # Few clouds at night
 
-    return (IMG_4bcd2fbe_ASSET.readall())
+    return (FEW_CLOUDS_NIGHT_ICON.readall())
 
 def get_scattered_clouds():
     # Scattered clouds
 
-    return (IMG_26ef32bd_ASSET.readall())
+    return (SCATTERED_CLOUDS_DAY_ICON.readall())
 
 def get_night_scattered_clouds():
     # Scattered clouds at night
 
-    return (IMG_793aaab3_ASSET.readall())
+    return (SCATTERED_CLOUDS_NIGHT_ICON.readall())
 
 def get_broken_clouds():
     # Broken clouds
 
-    return (IMG_5545d86f_ASSET.readall())
+    return (BROKEN_CLOUDS_DAY_ICON.readall())
 
 def get_night_broken_clouds():
     # Broken clouds at night
 
-    return (IMG_8741fec2_ASSET.readall())
+    return (BROKEN_CLOUDS_NIGHT_ICON.readall())
 
 def get_overcast_clouds():
     # Overcast clouds
 
-    return (IMG_b2196755_ASSET.readall())
+    return (OVERCAST_CLOUDS_DAY_ICON.readall())
 
 def get_night_overcast_clouds():
     # Overcast clouds at night
 
-    return (IMG_04286315_ASSET.readall())
+    return (OVERCAST_CLOUDS_NIGHT_ICON.readall())
 
 def get_rain_shower():
     # Rain showers
 
-    return (IMG_92154f83_ASSET.readall())
+    return (RAIN_SHOWER_DAY_ICON.readall())
 
 def get_night_rain_shower():
     # Rain shower at night
 
-    return (IMG_c670a6e3_ASSET.readall())
+    return (RAIN_SHOWER_NIGHT_ICON.readall())
 
 def get_snow():
     # Snow
 
-    return (IMG_b1d696c6_ASSET.readall())
+    return (SNOW_DAY_ICON.readall())
 
 def get_night_snow():
     # Snow at night
 
-    return (IMG_87c0af71_ASSET.readall())
+    return (SNOW_NIGHT_ICON.readall())
 
 def get_sleet():
     # Sleet
 
-    return (IMG_7366bfbb_ASSET.readall())
+    return (SLEET_DAY_ICON.readall())
 
 def get_night_sleet():
     # Sleet at night
 
-    return (IMG_3dcbc539_ASSET.readall())
+    return (SLEET_NIGHT_ICON.readall())
 
 def get_rain_snow():
     # Rain and snow
 
-    return (IMG_cd79f5f6_ASSET.readall())
+    return (RAIN_SNOW_DAY_ICON.readall())
 
 def get_night_rain_snow():
     # Rain and snow at night
 
-    return (IMG_389f5a2e_ASSET.readall())
+    return (RAIN_SNOW_NIGHT_ICON.readall())
 
 def get_smoke():
     # Smoke
 
-    return (IMG_60695c33_ASSET.readall())
+    return (SMOKE_DAY_ICON.readall())
 
 def get_night_smoke():
     # Smoke at night
 
-    return (IMG_6561be0e_ASSET.readall())
+    return (SMOKE_NIGHT_ICON.readall())
 
 def get_haze():
     # Haze
 
-    return (IMG_9fbf242d_ASSET.readall())
+    return (HAZE_ICON.readall())
 
 def get_dust():
     # Dust
 
-    return (IMG_7631784e_ASSET.readall())
+    return (DUST_DAY_ICON.readall())
 
 def get_night_dust():
     # Dust at night
 
-    return (IMG_e02334f5_ASSET.readall())
+    return (DUST_NIGHT_ICON.readall())
 
 def get_fog():
     # Fog
 
-    return (IMG_81605eb4_ASSET.readall())
+    return (FOG_DAY_ICON.readall())
 
 def get_night_fog():
     # Fog at night
 
-    return (IMG_84f1ec7f_ASSET.readall())
+    return (FOG_NIGHT_ICON.readall())
 
 def get_gust():
     # Gusts
 
-    return (IMG_a9381dd9_ASSET.readall())
+    return (GUST_DAY_ICON.readall())
 
 def get_night_gust():
     # Night gusts
 
-    return (IMG_8fbbd99d_ASSET.readall())
+    return (GUST_NIGHT_ICON.readall())
 
 def get_tornado():
     # Tornado
 
-    return (IMG_ee7b47dc_ASSET.readall())
+    return (TORNADO_DAY_ICON.readall())
 
 def get_night_tornado():
     # Tornado at night
 
-    return (IMG_8d371176_ASSET.readall())
+    return (TORNADO_NIGHT_ICON.readall())

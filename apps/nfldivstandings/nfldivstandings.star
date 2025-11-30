@@ -6,42 +6,41 @@ Author: Jake Manske
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/logo_ari.png", LOGO_ARI_ASSET = "file")
+load("images/logo_atl.png", LOGO_ATL_ASSET = "file")
+load("images/logo_bal.png", LOGO_BAL_ASSET = "file")
+load("images/logo_buf.png", LOGO_BUF_ASSET = "file")
+load("images/logo_car.png", LOGO_CAR_ASSET = "file")
+load("images/logo_chi.png", LOGO_CHI_ASSET = "file")
+load("images/logo_cin.png", LOGO_CIN_ASSET = "file")
+load("images/logo_cle.png", LOGO_CLE_ASSET = "file")
+load("images/logo_dal.png", LOGO_DAL_ASSET = "file")
+load("images/logo_den.png", LOGO_DEN_ASSET = "file")
+load("images/logo_det.png", LOGO_DET_ASSET = "file")
+load("images/logo_gb.png", LOGO_GB_ASSET = "file")
+load("images/logo_hou.png", LOGO_HOU_ASSET = "file")
+load("images/logo_ind.png", LOGO_IND_ASSET = "file")
+load("images/logo_jax.png", LOGO_JAX_ASSET = "file")
+load("images/logo_kc.png", LOGO_KC_ASSET = "file")
+load("images/logo_lac.png", LOGO_LAC_ASSET = "file")
+load("images/logo_lar.png", LOGO_LAR_ASSET = "file")
+load("images/logo_mia.png", LOGO_MIA_ASSET = "file")
+load("images/logo_min.png", LOGO_MIN_ASSET = "file")
+load("images/logo_ne.png", LOGO_NE_ASSET = "file")
+load("images/logo_no.png", LOGO_NO_ASSET = "file")
+load("images/logo_nyg.png", LOGO_NYG_ASSET = "file")
+load("images/logo_nyj.png", LOGO_NYJ_ASSET = "file")
+load("images/logo_oak.png", LOGO_OAK_ASSET = "file")
+load("images/logo_phi.png", LOGO_PHI_ASSET = "file")
+load("images/logo_pit.png", LOGO_PIT_ASSET = "file")
+load("images/logo_sea.png", LOGO_SEA_ASSET = "file")
+load("images/logo_sf.png", LOGO_SF_ASSET = "file")
+load("images/logo_tb.png", LOGO_TB_ASSET = "file")
+load("images/logo_ten.png", LOGO_TEN_ASSET = "file")
+load("images/logo_wsh.png", LOGO_WSH_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_02b6b944.png", IMG_02b6b944_ASSET = "file")
-load("images/img_0684d182.png", IMG_0684d182_ASSET = "file")
-load("images/img_0a427d3d.png", IMG_0a427d3d_ASSET = "file")
-load("images/img_23fdee3d.png", IMG_23fdee3d_ASSET = "file")
-load("images/img_2a9528de.png", IMG_2a9528de_ASSET = "file")
-load("images/img_2ce0b95d.png", IMG_2ce0b95d_ASSET = "file")
-load("images/img_2ded6fe3.png", IMG_2ded6fe3_ASSET = "file")
-load("images/img_44ef2435.png", IMG_44ef2435_ASSET = "file")
-load("images/img_46d5297b.png", IMG_46d5297b_ASSET = "file")
-load("images/img_4be90796.png", IMG_4be90796_ASSET = "file")
-load("images/img_4f8cf2d6.png", IMG_4f8cf2d6_ASSET = "file")
-load("images/img_53b0cafe.png", IMG_53b0cafe_ASSET = "file")
-load("images/img_68324f0a.png", IMG_68324f0a_ASSET = "file")
-load("images/img_76fdd79e.png", IMG_76fdd79e_ASSET = "file")
-load("images/img_96953582.png", IMG_96953582_ASSET = "file")
-load("images/img_9939009d.png", IMG_9939009d_ASSET = "file")
-load("images/img_99a5176b.png", IMG_99a5176b_ASSET = "file")
-load("images/img_a50d5a2c.png", IMG_a50d5a2c_ASSET = "file")
-load("images/img_a63bbc79.png", IMG_a63bbc79_ASSET = "file")
-load("images/img_a67e36e7.png", IMG_a67e36e7_ASSET = "file")
-load("images/img_a842f1a5.png", IMG_a842f1a5_ASSET = "file")
-load("images/img_aabc28c7.png", IMG_aabc28c7_ASSET = "file")
-load("images/img_b5681a13.png", IMG_b5681a13_ASSET = "file")
-load("images/img_b6636184.png", IMG_b6636184_ASSET = "file")
-load("images/img_bc02d3f3.png", IMG_bc02d3f3_ASSET = "file")
-load("images/img_c7e67f66.png", IMG_c7e67f66_ASSET = "file")
-load("images/img_daf9f036.png", IMG_daf9f036_ASSET = "file")
-load("images/img_dfb7ae17.png", IMG_dfb7ae17_ASSET = "file")
-load("images/img_e654c4a4.png", IMG_e654c4a4_ASSET = "file")
-load("images/img_eaceb8dc.png", IMG_eaceb8dc_ASSET = "file")
-load("images/img_ee3cd44a.png", IMG_ee3cd44a_ASSET = "file")
-load("images/img_eef6e8d0.png", IMG_eef6e8d0_ASSET = "file")
 
 STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/football/nfl/standings"
 STANDINGS_TTL_SECONDS = 300  # 5 minutes
@@ -373,103 +372,38 @@ def team_ctor(fg, bg, logo, offset = -15):
     return struct(ForegroundColor = fg, BackgroundColor = bg, Logo = logo, Offset = offset)
 
 # LOGOS
-ATL_LOGO = base64.decode(
-    IMG_daf9f036_ASSET.readall(),
-)
-ARI_LOGO = base64.decode(
-    IMG_0a427d3d_ASSET.readall(),
-)
-BAL_LOGO = base64.decode(
-    IMG_b6636184_ASSET.readall(),
-)
-BUF_LOGO = base64.decode(
-    IMG_ee3cd44a_ASSET.readall(),
-)
-CAR_LOGO = base64.decode(
-    IMG_bc02d3f3_ASSET.readall(),
-)
-CHI_LOGO = base64.decode(
-    IMG_02b6b944_ASSET.readall(),
-)
-CIN_LOGO = base64.decode(
-    IMG_e654c4a4_ASSET.readall(),
-)
-CLE_LOGO = base64.decode(
-    IMG_23fdee3d_ASSET.readall(),
-)
-DAL_LOGO = base64.decode(
-    IMG_eaceb8dc_ASSET.readall(),
-)
-DEN_LOGO = base64.decode(
-    IMG_9939009d_ASSET.readall(),
-)
-DET_LOGO = base64.decode(
-    IMG_eef6e8d0_ASSET.readall(),
-)
-GB_LOGO = base64.decode(
-    IMG_a63bbc79_ASSET.readall(),
-)
-HOU_LOGO = base64.decode(
-    IMG_76fdd79e_ASSET.readall(),
-)
-IND_LOGO = base64.decode(
-    IMG_b5681a13_ASSET.readall(),
-)
-JAX_LOGO = base64.decode(
-    IMG_99a5176b_ASSET.readall(),
-)
-KC_LOGO = base64.decode(
-    IMG_46d5297b_ASSET.readall(),
-)
-LAC_LOGO = base64.decode(
-    IMG_68324f0a_ASSET.readall(),
-)
-LAR_LOGO = base64.decode(
-    IMG_96953582_ASSET.readall(),
-)
-MIA_LOGO = base64.decode(
-    IMG_53b0cafe_ASSET.readall(),
-)
-MIN_LOGO = base64.decode(
-    IMG_aabc28c7_ASSET.readall(),
-)
-NE_LOGO = base64.decode(
-    IMG_4f8cf2d6_ASSET.readall(),
-)
-NO_LOGO = base64.decode(
-    IMG_c7e67f66_ASSET.readall(),
-)
-NYG_LOGO = base64.decode(
-    IMG_a50d5a2c_ASSET.readall(),
-)
-NYJ_LOGO = base64.decode(
-    IMG_4be90796_ASSET.readall(),
-)
-OAK_LOGO = base64.decode(
-    IMG_0684d182_ASSET.readall(),
-)
-PHI_LOGO = base64.decode(
-    IMG_a67e36e7_ASSET.readall(),
-)
-PIT_LOGO = base64.decode(
-    IMG_a842f1a5_ASSET.readall(),
-)
-SEA_LOGO = base64.decode(
-    IMG_2a9528de_ASSET.readall(),
-)
-SF_LOGO = base64.decode(
-    IMG_44ef2435_ASSET.readall(),
-)
-TB_LOGO = base64.decode(
-    IMG_2ce0b95d_ASSET.readall(),
-)
-TEN_LOGO = base64.decode(
-    IMG_2ded6fe3_ASSET.readall(),
-)
-WSH_LOGO = base64.decode(
-    IMG_dfb7ae17_ASSET.readall(),
-)
-
+ATL_LOGO = LOGO_ATL_ASSET.readall()
+ARI_LOGO = LOGO_ARI_ASSET.readall()
+BAL_LOGO = LOGO_BAL_ASSET.readall()
+BUF_LOGO = LOGO_BUF_ASSET.readall()
+CAR_LOGO = LOGO_CAR_ASSET.readall()
+CHI_LOGO = LOGO_CHI_ASSET.readall(),
+CIN_LOGO = LOGO_CIN_ASSET.readall()
+CLE_LOGO = LOGO_CLE_ASSET.readall()
+DAL_LOGO = LOGO_DAL_ASSET.readall()
+DEN_LOGO = LOGO_DEN_ASSET.readall()
+DET_LOGO = LOGO_DET_ASSET.readall(),
+GB_LOGO = LOGO_GB_ASSET.readall()
+HOU_LOGO = LOGO_HOU_ASSET.readall()
+IND_LOGO = LOGO_IND_ASSET.readall()
+JAX_LOGO = LOGO_JAX_ASSET.readall()
+KC_LOGO = LOGO_KC_ASSET.readall()
+LAC_LOGO = LOGO_LAC_ASSET.readall()
+LAR_LOGO = LOGO_LAR_ASSET.readall()
+MIA_LOGO = LOGO_MIA_ASSET.readall()
+MIN_LOGO = LOGO_MIN_ASSET.readall()
+NE_LOGO = LOGO_NE_ASSET.readall()
+NO_LOGO = LOGO_NO_ASSET.readall()
+NYG_LOGO = LOGO_NYG_ASSET.readall()
+NYJ_LOGO = LOGO_NYJ_ASSET.readall()
+OAK_LOGO = LOGO_OAK_ASSET.readall(),
+PHI_LOGO = LOGO_PHI_ASSET.readall()
+PIT_LOGO = LOGO_PIT_ASSET.readall()
+SEA_LOGO = LOGO_SEA_ASSET.readall()
+SF_LOGO = LOGO_SF_ASSET.readall()
+TB_LOGO = LOGO_TB_ASSET.readall(),
+TEN_LOGO = LOGO_TEN_ASSET.readall()
+WSH_LOGO = LOGO_WSH_ASSET.readall()
 TEAM_INFO = {
     # ATL
     1: team_ctor("#A71930", "#000000", ATL_LOGO, -10),

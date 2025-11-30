@@ -6,33 +6,34 @@ Author: Brian Bell
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
+load("images/icon_check.png", ICON_CHECK_ASSET = "file")
+load("images/icon_clock.png", ICON_CLOCK_ASSET = "file")
+load("images/icon_do_not_enter.png", ICON_DO_NOT_ENTER_ASSET = "file")
+load("images/icon_exclamation.png", ICON_EXCLAMATION_ASSET = "file")
+load("images/icon_heart.png", ICON_HEART_ASSET = "file")
+load("images/icon_house.png", ICON_HOUSE_ASSET = "file")
+load("images/icon_lightning.png", ICON_LIGHTNING_ASSET = "file")
+load("images/icon_music.png", ICON_MUSIC_ASSET = "file")
+load("images/icon_plane.png", ICON_PLANE_ASSET = "file")
+load("images/icon_question.png", ICON_QUESTION_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_10079ca3.png", IMG_10079ca3_ASSET = "file")
-load("images/img_20fb9202.png", IMG_20fb9202_ASSET = "file")
-load("images/img_2edfbc66.png", IMG_2edfbc66_ASSET = "file")
-load("images/img_490c9e76.png", IMG_490c9e76_ASSET = "file")
-load("images/img_53c19a8d.png", IMG_53c19a8d_ASSET = "file")
-load("images/img_83a977e8.png", IMG_83a977e8_ASSET = "file")
-load("images/img_86b33191.png", IMG_86b33191_ASSET = "file")
-load("images/img_a0e920b3.png", IMG_a0e920b3_ASSET = "file")
-load("images/img_e5482988.png", IMG_e5482988_ASSET = "file")
-load("images/img_f819c4ad.png", IMG_f819c4ad_ASSET = "file")
 
 DEFAULT_NAME = "Jane Smith"
 DEFAULT_STATUS = "Focusing"
 DEFAULT_COLOR = "#FFFF00"
-DEFAULT_ICON = IMG_10079ca3_ASSET.readall()
+DEFAULT_ICON = ICON_CHECK_ASSET.readall()
 DEFAULT_MESSAGE = "Until later"
 
 def main(config):
     name = config.str("name", DEFAULT_NAME)
     status = config.get("status", DEFAULT_STATUS)
     color = config.get("color", DEFAULT_COLOR)
-    icon = base64.decode(config.get("icon", DEFAULT_ICON))
+    icon_setting = config.get("icon")
     message = config.get("message", DEFAULT_MESSAGE)
     animations = config.bool("animation", False)
+
+    icon = base.decode(icon_setting) if icon_setting != None else DEFAULT_ICON
 
     if config.bool("hide_app", False):  ## hide app
         return []
@@ -305,43 +306,43 @@ def get_schema():
     icon_options = [
         schema.Option(
             display = "Check",
-            value = IMG_10079ca3_ASSET.readall(),
+            value = ICON_CHECK_ASSET.readall(),
         ),
         schema.Option(
             display = "Clock",
-            value = IMG_86b33191_ASSET.readall(),
+            value = ICON_CLOCK_ASSET.readall(),
         ),
         schema.Option(
             display = "Do Not Enter",
-            value = IMG_490c9e76_ASSET.readall(),
+            value = ICON_DO_NOT_ENTER_ASSET.readall(),
         ),
         schema.Option(
             display = "Exclamation",
-            value = IMG_e5482988_ASSET.readall(),
+            value = ICON_EXCLAMATION_ASSET.readall(),
         ),
         schema.Option(
             display = "Heart",
-            value = IMG_83a977e8_ASSET.readall(),
+            value = ICON_HEART_ASSET.readall(),
         ),
         schema.Option(
             display = "House",
-            value = IMG_2edfbc66_ASSET.readall(),
+            value = ICON_HOUSE_ASSET.readall(),
         ),
         schema.Option(
             display = "Lightning",
-            value = IMG_53c19a8d_ASSET.readall(),
+            value = ICON_LIGHTNING_ASSET.readall(),
         ),
         schema.Option(
             display = "Music",
-            value = IMG_20fb9202_ASSET.readall(),
+            value = ICON_MUSIC_ASSET.readall(),
         ),
         schema.Option(
             display = "Plane",
-            value = IMG_a0e920b3_ASSET.readall(),
+            value = ICON_PLANE_ASSET.readall(),
         ),
         schema.Option(
             display = "Question",
-            value = IMG_f819c4ad_ASSET.readall(),
+            value = ICON_QUESTION_ASSET.readall(),
         ),
     ]
 

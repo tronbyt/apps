@@ -1,14 +1,13 @@
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
-load("schema.star", "schema")
-load("time.star", "time")
 load("images/img_2274bcef.bin", IMG_2274bcef_ASSET = "file")
 load("images/img_7b76fdf3.bin", IMG_7b76fdf3_ASSET = "file")
 load("images/img_adff806b.svg", IMG_adff806b_ASSET = "file")
 load("images/img_fbe29b76.svg", IMG_fbe29b76_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
+load("time.star", "time")
 
 DEFAULT_COLOURS = {
     "line_positive": "#FFA500",

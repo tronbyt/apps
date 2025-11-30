@@ -5,15 +5,14 @@ Description: ADS-B Information from your publically available tar1090 instance.
 Author: Cameron Battagler
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("images/src.gif", SRC_ASSET = "file")
+load("images/blank.png", BLANK_ASSET = "file")
+load("images/error.gif", ERROR_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_1fce0775.png", IMG_1fce0775_ASSET = "file")
 
-SRC = SRC_ASSET.readall()
+ERROR_ICON = ERROR_ASSET.readall()
 
 TAR1090_URL_DEFAULT = "SET YOUR URL"
 
@@ -265,7 +264,7 @@ def find_flag(icao):
         print("ADSB-EX request for flag icon failed with status %d" % (flag_response.status_code))
 
         # If we can't reach the server, return a copy of the blank flag
-        return IMG_1fce0775_ASSET.readall()
+        return BLANK_ASSET.readall()
     return flag_response.body()
 
 # Get our database version
@@ -406,7 +405,7 @@ def unable_to_reach_tar_error(tar_url):
         child = render.Column(
             children = [
                 render.Image(
-                    src = SRC,
+                    src = ERROR_ICON,
                 ),
                 render.Marquee(
                     width = 64,

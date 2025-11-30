@@ -98,7 +98,7 @@ def display_next_race_event(config):
         ),
     )
 
-def display_current_standings(config):
+def display_current_standings(_):
     tz = time.tz()
     now = time.now().in_location(tz)
     standings = fetch_standings(now.year)

@@ -7,34 +7,33 @@ Author: frame-shift
 Version 1.1.1
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/aquarius.webp", AQUARIUS_ICON_ASSET = "file")
+load("images/aries.webp", ARIES_ICON_ASSET = "file")
+load("images/cancer.webp", CANCER_ICON_ASSET = "file")
+load("images/capricorn.webp", CAPRICORN_ICON_ASSET = "file")
+load("images/first_quarter.webp", FIRST_QUARTER_ICON_ASSET = "file")
+load("images/full_moon.webp", FULL_MOON_ICON_ASSET = "file")
+load("images/gemini.webp", GEMINI_ICON_ASSET = "file")
+load("images/last_quarter.webp", LAST_QUARTER_ICON_ASSET = "file")
+load("images/leo.webp", LEO_ICON_ASSET = "file")
+load("images/libra.webp", LIBRA_ICON_ASSET = "file")
+load("images/new_moon.webp", NEW_MOON_ICON_ASSET = "file")
+load("images/pisces.webp", PISCES_ICON_ASSET = "file")
+load("images/sagittarius.webp", SAGITTARIUS_ICON_ASSET = "file")
+load("images/scorpio.webp", SCORPIO_ICON_ASSET = "file")
+load("images/taurus.webp", TAURUS_ICON_ASSET = "file")
+load("images/virgo.webp", VIRGO_ICON_ASSET = "file")
+load("images/waning_crescent.webp", WANING_CRESCENT_ICON_ASSET = "file")
+load("images/waning_gibbous.webp", WANING_GIBBOUS_ICON_ASSET = "file")
+load("images/waxing_crescent.webp", WAXING_CRESCENT_ICON_ASSET = "file")
+load("images/waxing_gibbous.webp", WAXING_GIBBOUS_ICON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_04259440.png", IMG_04259440_ASSET = "file")
-load("images/img_125d6710.png", IMG_125d6710_ASSET = "file")
-load("images/img_172c6fc5.png", IMG_172c6fc5_ASSET = "file")
-load("images/img_1ffead42.png", IMG_1ffead42_ASSET = "file")
-load("images/img_2c4c03b2.png", IMG_2c4c03b2_ASSET = "file")
-load("images/img_4bd43207.png", IMG_4bd43207_ASSET = "file")
-load("images/img_57ae7562.png", IMG_57ae7562_ASSET = "file")
-load("images/img_58e7ceda.png", IMG_58e7ceda_ASSET = "file")
-load("images/img_6350ed59.png", IMG_6350ed59_ASSET = "file")
-load("images/img_63abc988.png", IMG_63abc988_ASSET = "file")
-load("images/img_63e4fa16.png", IMG_63e4fa16_ASSET = "file")
-load("images/img_68001971.png", IMG_68001971_ASSET = "file")
-load("images/img_6ea6c5b0.png", IMG_6ea6c5b0_ASSET = "file")
-load("images/img_9dfa334f.png", IMG_9dfa334f_ASSET = "file")
-load("images/img_aafdd643.png", IMG_aafdd643_ASSET = "file")
-load("images/img_ab5bfdd7.png", IMG_ab5bfdd7_ASSET = "file")
-load("images/img_b09f0a92.png", IMG_b09f0a92_ASSET = "file")
-load("images/img_b0d420cc.png", IMG_b0d420cc_ASSET = "file")
-load("images/img_e4fdea21.png", IMG_e4fdea21_ASSET = "file")
-load("images/img_fe65eea4.png", IMG_fe65eea4_ASSET = "file")
 
 # Set default values
 DEFAULT_SIGN = "aries"
@@ -46,30 +45,30 @@ TTL = 3600  # One hour
 
 # 12x12 zodiac icons w/ transparent bg
 SIGN_ICONS = {
-    "aries": IMG_6ea6c5b0_ASSET.readall(),
-    "aquarius": IMG_04259440_ASSET.readall(),
-    "cancer": IMG_fe65eea4_ASSET.readall(),
-    "capricorn": IMG_aafdd643_ASSET.readall(),
-    "gemini": IMG_58e7ceda_ASSET.readall(),
-    "leo": IMG_6350ed59_ASSET.readall(),
-    "libra": IMG_b0d420cc_ASSET.readall(),
-    "pisces": IMG_4bd43207_ASSET.readall(),
-    "sagittarius": IMG_125d6710_ASSET.readall(),
-    "scorpio": IMG_63e4fa16_ASSET.readall(),
-    "taurus": IMG_2c4c03b2_ASSET.readall(),
-    "virgo": IMG_1ffead42_ASSET.readall(),
+    "aries": ARIES_ICON_ASSET.readall(),
+    "aquarius": AQUARIUS_ICON_ASSET.readall(),
+    "cancer": CANCER_ICON_ASSET.readall(),
+    "capricorn": CAPRICORN_ICON_ASSET.readall(),
+    "gemini": GEMINI_ICON_ASSET.readall(),
+    "leo": LEO_ICON_ASSET.readall(),
+    "libra": LIBRA_ICON_ASSET.readall(),
+    "pisces": PISCES_ICON_ASSET.readall(),
+    "sagittarius": SAGITTARIUS_ICON_ASSET.readall(),
+    "scorpio": SCORPIO_ICON_ASSET.readall(),
+    "taurus": TAURUS_ICON_ASSET.readall(),
+    "virgo": VIRGO_ICON_ASSET.readall(),
 }
 
 # 6x6 moon phase icons
 MPHASE_ICONS = {
-    "NM": IMG_b09f0a92_ASSET.readall(),
-    "XC": IMG_e4fdea21_ASSET.readall(),
-    "FQ": IMG_ab5bfdd7_ASSET.readall(),
-    "XG": IMG_9dfa334f_ASSET.readall(),
-    "FM": IMG_63abc988_ASSET.readall(),
-    "NG": IMG_68001971_ASSET.readall(),
-    "LQ": IMG_172c6fc5_ASSET.readall(),
-    "NC": IMG_57ae7562_ASSET.readall(),
+    "NM": NEW_MOON_ICON_ASSET.readall(),
+    "XC": WAXING_CRESCENT_ICON_ASSET.readall(),
+    "FQ": FIRST_QUARTER_ICON_ASSET.readall(),
+    "XG": WAXING_GIBBOUS_ICON_ASSET.readall(),
+    "FM": FULL_MOON_ICON_ASSET.readall(),
+    "NG": WANING_GIBBOUS_ICON_ASSET.readall(),
+    "LQ": LAST_QUARTER_ICON_ASSET.readall(),
+    "NC": WANING_CRESCENT_ICON_ASSET.readall(),
 }
 
 # Moon phases
@@ -163,7 +162,7 @@ def main(config):
     # Render moon data
     if show_moon:
         moon_phase, moon_sign = get_moon_info(date_parsed)
-        moon_icon = base64.decode(MPHASE_ICONS[moon_phase])
+        moon_icon = MPHASE_ICONS[moon_phase]
         m_width = 40
 
         moon_info = render.Column(
@@ -228,7 +227,7 @@ def main(config):
         )
 
     # Set the zodiac icon
-    sign_img = base64.decode(SIGN_ICONS[zodiac])
+    sign_img = SIGN_ICONS[zodiac]
     zodiac_icon = render.Padding(
         child = render.Stack(
             children = [

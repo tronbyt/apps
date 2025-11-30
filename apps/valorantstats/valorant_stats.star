@@ -9,10 +9,10 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/default_emblem.png", DEFAULT_EMBLEM_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_0ad593aa.png", IMG_0ad593aa_ASSET = "file")
 
 # DEFAULTS
 DEFAULT_RIOT_NAME = "Dante"
@@ -113,7 +113,7 @@ def getImage(url, ttl_seconds = 3600):
 
     res = http.get(url = url)
     if res.status_code != 200:
-        return IMG_0ad593aa_ASSET.readall()
+        return DEFAULT_EMBLEM_ASSET.readall()
 
     # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(key, base64.encode(res.body()), ttl_seconds = ttl_seconds)

@@ -5,13 +5,55 @@ Description: View the flights tracked by a radar on Flightradar24.
 Author: kinson
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/plane.png", PLANE_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_fe26b9dc.png", IMG_fe26b9dc_ASSET = "file")
 
-PLANE_ICON = IMG_fe26b9dc_ASSET.readall()]
+PLANE_ICON = PLANE_ICON_ASSET.readall()
+
+API_URL = "https://data-cloud.flightradar24.com/zones/fcgi/feed.js?radar="
+
+def get_data(url, radar_code):
+    res = http.get(url + radar_code, ttl_seconds = 60)  # cache for 1 minute
+    if res.status_code != 200:
+        fail("GET %s failed with status %d: %s", url, res.status_code, res.body())
+    json_res = res.json()
+
+    flight_strings = []
+
+    index = 0
+    for _id, flight in json_res.items():
+        index = index + 1
+        if type(flight) == "string" or type(flight) == "int" or type(flight) == "float":
+            continue
+
+        callsign = flight[16]
+        origin = flight[11]
+        destination = flight[12]
+
+        has_route = origin != "" and destination != ""
+        has_callsign = callsign != ""
+        if has_route or has_callsign:
+            flight_strings.append(flight)
+
+    return flight_strings
+
+def render_flight_info_screen(flight, radar, show_radar):
+    origin = flight.get("origin", "???")
+    destination = flight.get("destination", "???")
+    model = flight.get("model", "???")
+    registration = flight.get("registration", "???")
+    speed = str(flight.get("speed", 0))
+    alt = str(flight.get("altitude", 0))
+    callsign = flight.get("callsign", "???")
+
+    callsign_row = [
+        render.Padding(
+            pad = (0, 1, 0, 1),
+            child = render.Text(content = callsign, font = "tom-thumb", color = "#E00"),
+        ),
+    ]
 
     if show_radar:
         callsign_row.append(

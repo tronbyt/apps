@@ -27,25 +27,24 @@ Author: Henry So, Jr.
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/digit_0.png", DIGIT_0_ASSET = "file")
+load("images/digit_1.png", DIGIT_1_ASSET = "file")
+load("images/digit_2.png", DIGIT_2_ASSET = "file")
+load("images/digit_3.png", DIGIT_3_ASSET = "file")
+load("images/digit_4.png", DIGIT_4_ASSET = "file")
+load("images/digit_5.png", DIGIT_5_ASSET = "file")
+load("images/digit_6.png", DIGIT_6_ASSET = "file")
+load("images/digit_7.png", DIGIT_7_ASSET = "file")
+load("images/digit_8.png", DIGIT_8_ASSET = "file")
+load("images/digit_9.png", DIGIT_9_ASSET = "file")
+load("images/digit_blank.png", DIGIT_BLANK_ASSET = "file")
+load("images/digit_colon.png", DIGIT_COLON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
-load("images/img_09472f99.png", IMG_09472f99_ASSET = "file")
-load("images/img_17d82e8e.png", IMG_17d82e8e_ASSET = "file")
-load("images/img_25144d1d.png", IMG_25144d1d_ASSET = "file")
-load("images/img_36586563.png", IMG_36586563_ASSET = "file")
-load("images/img_3761a61c.png", IMG_3761a61c_ASSET = "file")
-load("images/img_6afa9d7d.png", IMG_6afa9d7d_ASSET = "file")
-load("images/img_95a97b53.png", IMG_95a97b53_ASSET = "file")
-load("images/img_9a14bc03.png", IMG_9a14bc03_ASSET = "file")
-load("images/img_c8fa3f60.png", IMG_c8fa3f60_ASSET = "file")
-load("images/img_d28a98f2.png", IMG_d28a98f2_ASSET = "file")
-load("images/img_f65d8891.png", IMG_f65d8891_ASSET = "file")
-load("images/img_f6d28eff.png", IMG_f6d28eff_ASSET = "file")
 
 # parameters:
 # location - the location for rendering
@@ -424,16 +423,16 @@ SEASON_THEMES = {
 }
 
 DIGITS = {
-    "0": IMG_09472f99_ASSET.readall(),
-    "1": IMG_95a97b53_ASSET.readall(),
-    "2": IMG_25144d1d_ASSET.readall(),
-    "3": IMG_3761a61c_ASSET.readall(),
-    "4": IMG_36586563_ASSET.readall(),
-    "5": IMG_f65d8891_ASSET.readall(),
-    "6": IMG_c8fa3f60_ASSET.readall(),
-    "7": IMG_9a14bc03_ASSET.readall(),
-    "8": IMG_f6d28eff_ASSET.readall(),
-    "9": IMG_17d82e8e_ASSET.readall(),
-    ":": IMG_6afa9d7d_ASSET.readall(),
-    "_": IMG_d28a98f2_ASSET.readall(),
+    "0": DIGIT_0_ASSET.readall(),
+    "1": DIGIT_1_ASSET.readall(),
+    "2": DIGIT_2_ASSET.readall(),
+    "3": DIGIT_3_ASSET.readall(),
+    "4": DIGIT_4_ASSET.readall(),
+    "5": DIGIT_5_ASSET.readall(),
+    "6": DIGIT_6_ASSET.readall(),
+    "7": DIGIT_7_ASSET.readall(),
+    "8": DIGIT_8_ASSET.readall(),
+    "9": DIGIT_9_ASSET.readall(),
+    ":": DIGIT_COLON_ASSET.readall(),
+    "_": DIGIT_BLANK_ASSET.readall(),
 }

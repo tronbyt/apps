@@ -5,26 +5,25 @@ Description: Shows the current date along with icons for US national holidays an
 Author: Andrey Goder
 """
 
-load("encoding/base64.star", "base64")
 load("humanize.star", "humanize")
+load("images/icon_cake.png", ICON_CAKE_ASSET = "file")
+load("images/icon_calendar.png", ICON_CALENDAR_ASSET = "file")
+load("images/icon_clover.png", ICON_CLOVER_ASSET = "file")
+load("images/icon_columbus.png", ICON_COLUMBUS_ASSET = "file")
+load("images/icon_confetti.png", ICON_CONFETTI_ASSET = "file")
+load("images/icon_fireworks.png", ICON_FIREWORKS_ASSET = "file")
+load("images/icon_heart.png", ICON_HEART_ASSET = "file")
+load("images/icon_labor.png", ICON_LABOR_ASSET = "file")
+load("images/icon_memorial.png", ICON_MEMORIAL_ASSET = "file")
+load("images/icon_mlk.png", ICON_MLK_ASSET = "file")
+load("images/icon_new_year.png", ICON_NEW_YEAR_ASSET = "file")
+load("images/icon_president.png", ICON_PRESIDENT_ASSET = "file")
+load("images/icon_pumpkin.png", ICON_PUMPKIN_ASSET = "file")
+load("images/icon_tree.png", ICON_TREE_ASSET = "file")
+load("images/icon_turkey.png", ICON_TURKEY_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_15c4b116.png", IMG_15c4b116_ASSET = "file")
-load("images/img_1eabcf71.png", IMG_1eabcf71_ASSET = "file")
-load("images/img_41bd8a2a.png", IMG_41bd8a2a_ASSET = "file")
-load("images/img_548cc0d5.png", IMG_548cc0d5_ASSET = "file")
-load("images/img_7eb84c6d.png", IMG_7eb84c6d_ASSET = "file")
-load("images/img_92e4cea3.png", IMG_92e4cea3_ASSET = "file")
-load("images/img_99b8cddf.png", IMG_99b8cddf_ASSET = "file")
-load("images/img_9c4be22b.png", IMG_9c4be22b_ASSET = "file")
-load("images/img_a313ccef.png", IMG_a313ccef_ASSET = "file")
-load("images/img_b1a1c3ab.png", IMG_b1a1c3ab_ASSET = "file")
-load("images/img_b30e2cb6.png", IMG_b30e2cb6_ASSET = "file")
-load("images/img_bdac0df3.png", IMG_bdac0df3_ASSET = "file")
-load("images/img_c45a7f86.png", IMG_c45a7f86_ASSET = "file")
-load("images/img_d57404ed.png", IMG_d57404ed_ASSET = "file")
-load("images/img_f2509c56.png", IMG_f2509c56_ASSET = "file")
 
 DEFAULT_TIMEZONE = "America/Los_Angeles"
 
@@ -153,62 +152,18 @@ def more_options(num):
 
 # Icons from https://www.flaticon.com/free-icons/
 # (free with attribution)
-CALENDAR = base64.decode(
-    IMG_b1a1c3ab_ASSET.readall(),
-)
-
-FIREWORKS = base64.decode(
-    IMG_9c4be22b_ASSET.readall(),
-)
-
-HEART = base64.decode(
-    IMG_b30e2cb6_ASSET.readall(),
-)
-
-TREE = base64.decode(
-    IMG_c45a7f86_ASSET.readall(),
-)
-
-CAKE = base64.decode(
-    IMG_1eabcf71_ASSET.readall(),
-)
-
-CONFETTI = base64.decode(
-    IMG_99b8cddf_ASSET.readall(),
-)
-
-NEW_YEAR = base64.decode(
-    IMG_15c4b116_ASSET.readall(),
-)
-
-PUMPKIN = base64.decode(
-    IMG_548cc0d5_ASSET.readall(),
-)
-
-CLOVER = base64.decode(
-    IMG_7eb84c6d_ASSET.readall(),
-)
-
-TURKEY = base64.decode(
-    IMG_41bd8a2a_ASSET.readall(),
-)
-
-MLK = base64.decode(
-    IMG_bdac0df3_ASSET.readall(),
-)
-
-PRESIDENT = base64.decode(
-    IMG_d57404ed_ASSET.readall(),
-)
-
-COLUMBUS = base64.decode(
-    IMG_f2509c56_ASSET.readall(),
-)
-
-MEMORIAL = base64.decode(
-    IMG_a313ccef_ASSET.readall(),
-)
-
-LABOR = base64.decode(
-    IMG_92e4cea3_ASSET.readall(),
-)
+CALENDAR = ICON_CALENDAR_ASSET.readall()
+FIREWORKS = ICON_FIREWORKS_ASSET.readall()
+HEART = ICON_HEART_ASSET.readall()
+TREE = ICON_TREE_ASSET.readall()
+CAKE = ICON_CAKE_ASSET.readall()
+CONFETTI = ICON_CONFETTI_ASSET.readall()
+NEW_YEAR = ICON_NEW_YEAR_ASSET.readall()
+PUMPKIN = ICON_PUMPKIN_ASSET.readall()
+CLOVER = ICON_CLOVER_ASSET.readall()
+TURKEY = ICON_TURKEY_ASSET.readall()
+MLK = ICON_MLK_ASSET.readall()
+PRESIDENT = ICON_PRESIDENT_ASSET.readall()
+COLUMBUS = ICON_COLUMBUS_ASSET.readall()
+MEMORIAL = ICON_MEMORIAL_ASSET.readall()
+LABOR = ICON_LABOR_ASSET.readall()

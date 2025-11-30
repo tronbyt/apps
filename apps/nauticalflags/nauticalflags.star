@@ -5,146 +5,145 @@ Description: Displays nautical flags.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")
+load("images/alfa.png", ALFA_FLAG = "file")
+load("images/bravo.png", BRAVO_FLAG = "file")
+load("images/charlie.png", CHARLIE_FLAG = "file")
+load("images/delta.png", DELTA_FLAG = "file")
+load("images/echo.png", ECHO_FLAG = "file")
+load("images/foxtrot.png", FOXTROT_FLAG = "file")
+load("images/golf.png", GOLF_FLAG = "file")
+load("images/hotel.png", HOTEL_FLAG = "file")
+load("images/india.png", INDIA_FLAG = "file")
+load("images/juliet.png", JULIET_FLAG = "file")
+load("images/kilo.png", KILO_FLAG = "file")
+load("images/lima.png", LIMA_FLAG = "file")
+load("images/mike.png", MIKE_FLAG = "file")
+load("images/november.png", NOVEMBER_FLAG = "file")
+load("images/oscar.png", OSCAR_FLAG = "file")
+load("images/papa.png", PAPA_FLAG = "file")
+load("images/quebec.png", QUEBEC_FLAG = "file")
+load("images/romeo.png", ROMEO_FLAG = "file")
+load("images/sierra.png", SIERRA_FLAG = "file")
+load("images/space.png", SPACE_FLAG = "file")
+load("images/tango.png", TANGO_FLAG = "file")
+load("images/uniform.png", UNIFORM_FLAG = "file")
+load("images/victor.png", VICTOR_FLAG = "file")
+load("images/whiskey.png", WHISKEY_FLAG = "file")
+load("images/xray.png", XRAY_FLAG = "file")
+load("images/yankee.png", YANKEE_FLAG = "file")
+load("images/zulu.png", ZULU_FLAG = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_06d41a6e.png", IMG_06d41a6e_ASSET = "file")
-load("images/img_08979567.png", IMG_08979567_ASSET = "file")
-load("images/img_09cd1795.png", IMG_09cd1795_ASSET = "file")
-load("images/img_0ce6b50c.png", IMG_0ce6b50c_ASSET = "file")
-load("images/img_10321aaa.png", IMG_10321aaa_ASSET = "file")
-load("images/img_171021ca.png", IMG_171021ca_ASSET = "file")
-load("images/img_1e4dd24f.png", IMG_1e4dd24f_ASSET = "file")
-load("images/img_25fcc367.png", IMG_25fcc367_ASSET = "file")
-load("images/img_2b3e1c33.png", IMG_2b3e1c33_ASSET = "file")
-load("images/img_4fe5ac8e.png", IMG_4fe5ac8e_ASSET = "file")
-load("images/img_5ad5c86f.png", IMG_5ad5c86f_ASSET = "file")
-load("images/img_696b45aa.png", IMG_696b45aa_ASSET = "file")
-load("images/img_6a456f93.png", IMG_6a456f93_ASSET = "file")
-load("images/img_707f5c87.png", IMG_707f5c87_ASSET = "file")
-load("images/img_7c5621d7.png", IMG_7c5621d7_ASSET = "file")
-load("images/img_7e3bea22.png", IMG_7e3bea22_ASSET = "file")
-load("images/img_7f3dbd31.png", IMG_7f3dbd31_ASSET = "file")
-load("images/img_b6768953.png", IMG_b6768953_ASSET = "file")
-load("images/img_b7149aab.png", IMG_b7149aab_ASSET = "file")
-load("images/img_d41d80aa.png", IMG_d41d80aa_ASSET = "file")
-load("images/img_d9c20f83.png", IMG_d9c20f83_ASSET = "file")
-load("images/img_dc21fca6.png", IMG_dc21fca6_ASSET = "file")
-load("images/img_e0d88004.png", IMG_e0d88004_ASSET = "file")
-load("images/img_e1955924.png", IMG_e1955924_ASSET = "file")
-load("images/img_e3a1208f.png", IMG_e3a1208f_ASSET = "file")
-load("images/img_ede0610f.png", IMG_ede0610f_ASSET = "file")
-load("images/img_fb9eb262.png", IMG_fb9eb262_ASSET = "file")
 
 flags = {
     " ": {
         "name": " ",
-        "flag": IMG_7e3bea22_ASSET.readall(),
+        "flag": SPACE_FLAG.readall(),
     },
     "a": {
         "name": "Alfa",
-        "flag": IMG_6a456f93_ASSET.readall(),
+        "flag": ALFA_FLAG.readall(),
     },
     "b": {
         "name": "Bravo",
-        "flag": IMG_171021ca_ASSET.readall(),
+        "flag": BRAVO_FLAG.readall(),
     },
     "c": {
         "name": "Charlie",
-        "flag": IMG_dc21fca6_ASSET.readall(),
+        "flag": CHARLIE_FLAG.readall(),
     },
     "d": {
         "name": "Delta",
-        "flag": IMG_d41d80aa_ASSET.readall(),
+        "flag": DELTA_FLAG.readall(),
     },
     "e": {
         "name": "Echo",
-        "flag": IMG_08979567_ASSET.readall(),
+        "flag": ECHO_FLAG.readall(),
     },
     "f": {
         "name": "Foxtrot",
-        "flag": IMG_25fcc367_ASSET.readall(),
+        "flag": FOXTROT_FLAG.readall(),
     },
     "g": {
         "name": "Golf",
-        "flag": IMG_7f3dbd31_ASSET.readall(),
+        "flag": GOLF_FLAG.readall(),
     },
     "h": {
         "name": "Hotel",
-        "flag": IMG_7c5621d7_ASSET.readall(),
+        "flag": HOTEL_FLAG.readall(),
     },
     "i": {
         "name": "India",
-        "flag": IMG_09cd1795_ASSET.readall(),
+        "flag": INDIA_FLAG.readall(),
     },
     "j": {
         "name": "Juliet",
-        "flag": IMG_e3a1208f_ASSET.readall(),
+        "flag": JULIET_FLAG.readall(),
     },
     "k": {
         "name": "Kilo",
-        "flag": IMG_b7149aab_ASSET.readall(),
+        "flag": KILO_FLAG.readall(),
     },
     "l": {
         "name": "Lima",
-        "flag": IMG_e1955924_ASSET.readall(),
+        "flag": LIMA_FLAG.readall(),
     },
     "m": {
         "name": "Mike",
-        "flag": IMG_5ad5c86f_ASSET.readall(),
+        "flag": MIKE_FLAG.readall(),
     },
     "n": {
         "name": "November",
-        "flag": IMG_e0d88004_ASSET.readall(),
+        "flag": NOVEMBER_FLAG.readall(),
     },
     "o": {
         "name": "Oscar",
-        "flag": IMG_4fe5ac8e_ASSET.readall(),
+        "flag": OSCAR_FLAG.readall(),
     },
     "p": {
         "name": "Papa",
-        "flag": IMG_b6768953_ASSET.readall(),
+        "flag": PAPA_FLAG.readall(),
     },
     "q": {
         "name": "Quebec",
-        "flag": IMG_0ce6b50c_ASSET.readall(),
+        "flag": QUEBEC_FLAG.readall(),
     },
     "r": {
         "name": "Romeo",
-        "flag": IMG_2b3e1c33_ASSET.readall(),
+        "flag": ROMEO_FLAG.readall(),
     },
     "s": {
         "name": "Sierra",
-        "flag": IMG_06d41a6e_ASSET.readall(),
+        "flag": SIERRA_FLAG.readall(),
     },
     "t": {
         "name": "Tango",
-        "flag": IMG_fb9eb262_ASSET.readall(),
+        "flag": TANGO_FLAG.readall(),
     },
     "u": {
         "name": "Uniform",
-        "flag": IMG_707f5c87_ASSET.readall(),
+        "flag": UNIFORM_FLAG.readall(),
     },
     "v": {
         "name": "Victor",
-        "flag": IMG_696b45aa_ASSET.readall(),
+        "flag": VICTOR_FLAG.readall(),
     },
     "w": {
         "name": "Whiskey",
-        "flag": IMG_d9c20f83_ASSET.readall(),
+        "flag": WHISKEY_FLAG.readall(),
     },
     "x": {
         "name": "X-ray",
-        "flag": IMG_10321aaa_ASSET.readall(),
+        "flag": XRAY_FLAG.readall(),
     },
     "y": {
         "name": "Yankee",
-        "flag": IMG_1e4dd24f_ASSET.readall(),
+        "flag": YANKEE_FLAG.readall(),
     },
     "z": {
         "name": "Zulu",
-        "flag": IMG_ede0610f_ASSET.readall(),
+        "flag": ZULU_FLAG.readall(),
     },
 }
 
@@ -246,12 +245,12 @@ def get_word_in_flag(text, position):
     children = []
 
     for i in range(0, position):
-        children.append(render.Image(width = 32, height = 32, src = base64.decode(flags[" "]["flag"])))
+        children.append(render.Image(width = 32, height = 32, src = flags[" "]["flag"]))
 
     text = text.lower()
     for i in range(0, len(text)):
         if text[i] in flags:
-            children.append(render.Image(width = 32, height = 32, src = base64.decode(flags[text[i]]["flag"])))
+            children.append(render.Image(width = 32, height = 32, src = flags[text[i]]["flag"]))
 
     return children
 

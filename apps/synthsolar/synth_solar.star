@@ -6,7 +6,6 @@ Author: Synth Solar
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/baboon_icon.png", BABOON_ICON_ASSET = "file")
 load("images/bat_icon_10.png", BAT_ICON_10_ASSET = "file")
@@ -29,6 +28,7 @@ load("images/current_icon.png", CURRENT_ICON_ASSET = "file")
 load("images/goat_icon.png", GOAT_ICON_ASSET = "file")
 load("images/goblet_icon.png", GOBLET_ICON_ASSET = "file")
 load("images/gold_coin_icon.png", GOLD_COIN_ICON_ASSET = "file")
+load("images/img_bf4e974d.svg", IMG_bf4e974d_ASSET = "file")
 load("images/koala_icon.png", KOALA_ICON_ASSET = "file")
 load("images/lion_icon.png", LION_ICON_ASSET = "file")
 load("images/moneybag_icon.png", MONEYBAG_ICON_ASSET = "file")
@@ -45,7 +45,6 @@ load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_bf4e974d.svg", IMG_bf4e974d_ASSET = "file")
 
 BABOON_ICON = BABOON_ICON_ASSET.readall()
 BATTERY_0_10 = BATTERY_0_10_ASSET.readall()
