@@ -13,6 +13,29 @@ load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/cloudy.png", CLOUDY_d2678afa_ASSET = "file")
+load("images/foggy.png", FOGGY_52fd5abb_ASSET = "file")
+load("images/haily.png", HAILY_ded72a12_ASSET = "file")
+load("images/moony.png", MOONY_d93201c8_ASSET = "file")
+load("images/moonyish.png", MOONYISH_6fc96de9_ASSET = "file")
+load("images/rainy.png", RAINY_d8dd0838_ASSET = "file")
+load("images/sleety.png", SLEETY_a526b6e1_ASSET = "file")
+load("images/sleety2.png", SLEETY2_ff70eb50_ASSET = "file")
+load("images/snowy.png", SNOWY_e884145b_ASSET = "file")
+load("images/snowy2.png", SNOWY2_fd82b9d9_ASSET = "file")
+load("images/sunny.png", SUNNY_69c98205_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_947fbb49_ASSET = "file")
+load("images/thundery.png", THUNDERY_a2d13fa0_ASSET = "file")
+load("images/tornady.png", TORNADY_f956a16b_ASSET = "file")
+load("images/wind_e.png", WIND_E_1f948f03_ASSET = "file")
+load("images/wind_n.png", WIND_N_671fe497_ASSET = "file")
+load("images/wind_ne.png", WIND_NE_845bfa5c_ASSET = "file")
+load("images/wind_nw.png", WIND_NW_4e108062_ASSET = "file")
+load("images/wind_s.png", WIND_S_93510dc7_ASSET = "file")
+load("images/wind_se.png", WIND_SE_851e59e3_ASSET = "file")
+load("images/wind_sw.png", WIND_SW_fee08e01_ASSET = "file")
+load("images/wind_w.png", WIND_W_fe705116_ASSET = "file")
+load("images/windy.png", WINDY_77dee84f_ASSET = "file")
 
 ACCUWEATHER_FORECAST_URL = "http://dataservice.accuweather.com/forecasts/v1/daily/5day/{location_key}?apikey={api_key}&details=true"
 
@@ -1015,25 +1038,25 @@ def main(config):
 
         if icon_num == 1:
             # sunny
-            icon = base64.decode(WEATHER_ICONS["sunny.png"])
+            icon = WEATHER_ICONS["sunny.png"]
         elif icon_num >= 2 and icon_num <= 5:
             # mostly sunny
-            icon = base64.decode(WEATHER_ICONS["sunnyish.png"])
+            icon = WEATHER_ICONS["sunnyish.png"]
         elif (icon_num >= 6 and icon_num <= 8) or icon_num == 11:
             # cloudy
-            icon = base64.decode(WEATHER_ICONS["cloudy.png"])
+            icon = WEATHER_ICONS["cloudy.png"]
         elif (icon_num >= 12 and icon_num <= 14) or icon_num == 18:
             # rain
-            icon = base64.decode(WEATHER_ICONS["rainy.png"])
+            icon = WEATHER_ICONS["rainy.png"]
         elif icon_num >= 15 and icon_num <= 17:
             # thunderstorm
-            icon = base64.decode(WEATHER_ICONS["thundery.png"])
+            icon = WEATHER_ICONS["thundery.png"]
         elif (icon_num >= 19 and icon_num <= 26) or icon_num == 29:
             # snow
-            icon = base64.decode(WEATHER_ICONS["snowy2.png"])
+            icon = WEATHER_ICONS["snowy2.png"]
         elif icon_num == 32:
             # wind
-            icon = base64.decode(WEATHER_ICONS["windy.png"])
+            icon = WEATHER_ICONS["windy.png"]
         else:
             icon = None
 
