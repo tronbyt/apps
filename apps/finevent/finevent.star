@@ -12,6 +12,9 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/img_97b0bf95.png", IMG_97b0bf95_ASSET = "file")
+load("images/img_c21aef57.png", IMG_c21aef57_ASSET = "file")
+load("images/img_cb15e309.png", IMG_cb15e309_ASSET = "file")
 
 BASE_URL = "https://api.tradingeconomics.com"
 AUTH = "guest:guest"
@@ -364,9 +367,9 @@ ISO3166 = {
 }
 
 IMPORTANCE_ICONS = {
-    1: base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAEpJREFUKFNjZCASMOJTV1pa+h8k393dzYhXoZOT0395eXmG+fPnU6AQ2Tq8JiJLYij8n88AdjTjRAZG/ArDlf5/0/jKwN34ko4KAUofUQvpr/OmAAAAAElFTkSuQmCC"),
-    2: base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAFpJREFUKFNjZCASMOJTV1pa+h8k393dzYhXoZOT0395eXmG+fPnU6Dw/3I1sHWMkbcY8Zr4c4Xqf7YPtxkYMxgwFf7PZ4CYMpGBEb/CcKX/3zS+MnA3vqSjQgB3tVYLtGTHpgAAAABJRU5ErkJggg=="),
-    3: base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAFpJREFUKFNjZCASMOJT9/9j2X+QPCN/FyN+hT+P/Gf4c5OBkTuZAoX/l6tBrIu8xfgfn4k/V6j+Z/twm4ExgwFT4f98BogpExkY8SsMV/r/TeMrA3fjSzoqBABNA2YLBoHQ+QAAAABJRU5ErkJggg=="),
+    1: base64.decode(IMG_cb15e309_ASSET.readall()),
+    2: base64.decode(IMG_c21aef57_ASSET.readall()),
+    3: base64.decode(IMG_97b0bf95_ASSET.readall()),
 }
 
 def flag_api(country_name):

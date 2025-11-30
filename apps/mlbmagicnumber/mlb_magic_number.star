@@ -41,6 +41,7 @@ load("images/was_logo.png", WAS_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/img_c45ecc90.png", IMG_c45ecc90_ASSET = "file")
 
 ARI_LOGO = ARI_LOGO_ASSET.readall()
 ATH_LOGO = ATH_LOGO_ASSET.readall()
@@ -490,7 +491,7 @@ def http_get_number(team_id):
     return struct(Number = number, Magic = magic, Clinched = clinched, DivisionRank = division_rank, Eliminated = eliminated, Wins = wins, Losses = losses, Success = True, ResponseCode = response.status_code, HasData = has_data)
 
 CHECKMARK = base64.decode(
-    """iVBORw0KGgoAAAANSUhEUgAAACAAAAAZCAYAAABQDyyRAAAAAXNSR0IArs4c6QAAAO5JREFUSEvNl90NwjAMhNsR6BYwA0xfZoAtYARQKgUZ1z/n2kX0pS9J7sv14rjjEHwOt/NLm/I8XcfgcgM0wRLNwrgAW8Q7FOKICpAR5q5YICJApbjnxgpgD3EL4r8A9tj94zgvBkz3y/LmefhyoBqgi0MAvxCXsvBxoBJA2jk9mvQzlAN44jwHpQCIOAzA0+tdMqh4GIAmWIOIiMMAbSCyMDLGuhvcOmAJZMUbmAugObFF3K2EbYBWD6ggtbSXWC+kkvjKAQuAO4GEE+kLwv1A9HiG+4E+obI0hzsial0GJNUTZiEQcTGEXpqr/wveV96dGgbVDdkAAAAASUVORK5CYII=""",
+    IMG_c45ecc90_ASSET.readall(),
 )
 
 #################

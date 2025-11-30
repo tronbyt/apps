@@ -10,6 +10,7 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/img_34187763.png", IMG_34187763_ASSET = "file")
 
 # Set default spreadsheet, API keys and supported range (1000)
 default_spreadsheet_id = "default"
@@ -122,7 +123,7 @@ def main(config):
 # Define function to get random image
 def get_image():
     # Return a minimal black background image (1x1 pixel)
-    return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNgAAAAAgABSK+kcQAAAABJRU5ErkJggg=="
+    return IMG_34187763_ASSET.readall()
 
 def get_schema():
     return schema.Schema(
