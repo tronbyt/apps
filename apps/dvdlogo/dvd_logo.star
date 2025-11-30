@@ -10,10 +10,12 @@ load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/image_2x_410ac6ff.png", IMAGE_2X_410ac6ff_ASSET = "file")
+load("images/image_7634e782.png", IMAGE_7634e782_ASSET = "file")
 
-IMAGE = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAJCAYAAADtj3ZXAAAAQUlEQVQokWNgwA3+I2Fc8hgK/iPR//HwMWxhYMBuEDZDcSpCNwiX4VhdgK4AlxiKBnRMUB5fiBJyIUHnE6WQZJsBSnw7xZmNBscAAAAASUVORK5CYII="""
+IMAGE = IMAGE_7634e782_ASSET.readall()
 
-IMAGE_2X = """iVBORw0KGgoAAAANSUhEUgAAAB4AAAASAQMAAAB2PPyaAAAABlBMVEUAAAAmRcn2EULJAAAAAnRSTlP/AOW3MEoAAAAJcEhZcwAACxMAAAsTAQCanBgAAABRSURBVAiZY/j/wf4DA5D4wcBuUCDDwGxRwMNwWCIZSMg8BhI8h3kYjvMflmH4x978g+EPe/MHBgZmBgYIwfz/PwOD/f//QAMO8P+BEGAuSAIA01gjFrd6c6wAAAAASUVORK5CYII="""
+IMAGE_2X = IMAGE_2X_410ac6ff_ASSET.readall()
 
 COLORS = [
     "#0ef",  # light blue

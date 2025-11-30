@@ -15,6 +15,26 @@ load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/img_04259440.png", IMG_04259440_ASSET = "file")
+load("images/img_125d6710.png", IMG_125d6710_ASSET = "file")
+load("images/img_172c6fc5.png", IMG_172c6fc5_ASSET = "file")
+load("images/img_1ffead42.png", IMG_1ffead42_ASSET = "file")
+load("images/img_2c4c03b2.png", IMG_2c4c03b2_ASSET = "file")
+load("images/img_4bd43207.png", IMG_4bd43207_ASSET = "file")
+load("images/img_57ae7562.png", IMG_57ae7562_ASSET = "file")
+load("images/img_58e7ceda.png", IMG_58e7ceda_ASSET = "file")
+load("images/img_6350ed59.png", IMG_6350ed59_ASSET = "file")
+load("images/img_63abc988.png", IMG_63abc988_ASSET = "file")
+load("images/img_63e4fa16.png", IMG_63e4fa16_ASSET = "file")
+load("images/img_68001971.png", IMG_68001971_ASSET = "file")
+load("images/img_6ea6c5b0.png", IMG_6ea6c5b0_ASSET = "file")
+load("images/img_9dfa334f.png", IMG_9dfa334f_ASSET = "file")
+load("images/img_aafdd643.png", IMG_aafdd643_ASSET = "file")
+load("images/img_ab5bfdd7.png", IMG_ab5bfdd7_ASSET = "file")
+load("images/img_b09f0a92.png", IMG_b09f0a92_ASSET = "file")
+load("images/img_b0d420cc.png", IMG_b0d420cc_ASSET = "file")
+load("images/img_e4fdea21.png", IMG_e4fdea21_ASSET = "file")
+load("images/img_fe65eea4.png", IMG_fe65eea4_ASSET = "file")
 
 # Set default values
 DEFAULT_SIGN = "aries"
@@ -26,30 +46,30 @@ TTL = 3600  # One hour
 
 # 12x12 zodiac icons w/ transparent bg
 SIGN_ICONS = {
-    "aries": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAARElEQVQoU2NkIBEwwtT/BwIQmxEIkM1AFwdLggRhCgmx4RpgpmPTgGwLivX4bIM5E0MDTBM2/4DFsAUSrgAY1hrwpRYAdWVIDdrAt+QAAAAASUVORK5CYII=",
-    "aquarius": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAANklEQVQoU2NkIBEwkqieAUXDfyBgBAKQIbjYcA0gBSCFIA242GB5ZNPwaYLZPOoHYiKR5FACAHUYUA0cDsEbAAAAAElFTkSuQmCC",
-    "cancer": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAU0lEQVQoU5VR7RIAIATL+z900Z1uPir2KzI2aDRBzfoRCJOBTYhhYg20EAuQrPnNlg9N4DuT+yX4yUffTZKf/NxSJjVMEN2ZcWMazZXXWj1g+9ILA7BADV+u9iMAAAAASUVORK5CYII=",
-    "capricorn": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAATUlEQVQoU2NkIBEwkqieAa7hPxAwAgGIBhkCYmMzDEUQpgmkEJmNrJH6GtBtwmsDzC/ImvCGEnJAwAIBpwZsisE2ogcdScFKTCSSHNMA4qpEDezp/38AAAAASUVORK5CYII=",
-    "gemini": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAPklEQVQoU2NkIBEwkqieAa7hPxCANDMCAbIh6OJYJdFtRTYEw0kgE2EKkNkwQwa7BliIEOVpsoKVmEgkOaYB0zo4DbAkvRkAAAAASUVORK5CYII=",
-    "leo": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAUElEQVQoU5VRMRIAIAjS/z+6dKAzw0qmNEE8VJrQ5rxQwjBEITWgPggYxlCuN0L+hKr3IbAIsVm9XeBKYBuvluKm8mjmm97A8nha+gmxnfQEc/FADaGM59cAAAAASUVORK5CYII=",
-    "libra": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAASUlEQVQoU2NkIBEwkqieAauG/0AAMogRCNANxBAAKYYpRGbDNKJowKYAXYwyDSBriXYSzKPInsUmRn6wIpuGLW5gIUe+DcTGOABnLzANbvqV9AAAAABJRU5ErkJggg==",
-    "pisces": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAQUlEQVQoU2NkIBEwkqieAa7hPxAwAgE2A5DlUBRg04QuhmEisgJsBlCmAWQiNj8g+40yG0Cmk+QHkkKJrHggJtYB0gNEDZe22L0AAAAASUVORK5CYII=",
-    "sagittarius": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAT0lEQVQoU5VRSRIAIAjS/z+69MCMueTALQVJUSGhJF9awTHkQWrw2uoAcSvwJho+De9YLw4d6SuIk7EH7RAP8Hxp2qEVZPKUz3rWkgeb9AVR9jwNrX+F2QAAAABJRU5ErkJggg==",
-    "scorpio": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAQUlEQVQoU2NkIBEwkqieAazhPxCAaEYgQGZjMwyuAaYYmR6kGmB+gvmRKD8gBwRBDSDFyAGBMx5wBS95EUdKbAMAl/hkDTgw85gAAAAASUVORK5CYII=",
-    "taurus": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAATElEQVQoU2NkIBEwkqieAa7hPxCANDMCAbIh6OIYNoAUwDQhs2GGYHUSLtvALkD3A0k2YHMCuhiGB7F5GlmMMifB/EOSpwlFJMkxDQAL+DgNjubENAAAAABJRU5ErkJggg==",
-    "virgo": "iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAUklEQVQoU2NkIBEwkqieAa7hPxCANDMCATIb3UAUDTDF2GiYRrwakG0EGQLmw3SCnIHLZJgcbTQgm47XBpAkumIUDejBh+wnmOfxasAVoSTHNADArGwNgN6yOQAAAABJRU5ErkJggg==",
+    "aries": IMG_6ea6c5b0_ASSET.readall(),
+    "aquarius": IMG_04259440_ASSET.readall(),
+    "cancer": IMG_fe65eea4_ASSET.readall(),
+    "capricorn": IMG_aafdd643_ASSET.readall(),
+    "gemini": IMG_58e7ceda_ASSET.readall(),
+    "leo": IMG_6350ed59_ASSET.readall(),
+    "libra": IMG_b0d420cc_ASSET.readall(),
+    "pisces": IMG_4bd43207_ASSET.readall(),
+    "sagittarius": IMG_125d6710_ASSET.readall(),
+    "scorpio": IMG_63e4fa16_ASSET.readall(),
+    "taurus": IMG_2c4c03b2_ASSET.readall(),
+    "virgo": IMG_1ffead42_ASSET.readall(),
 }
 
 # 6x6 moon phase icons
 MPHASE_ICONS = {
-    "NM": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAIElEQVQIW2NkAIJ8wxn/QTQMTDyfwciILgiTpKYELssBPqwQ46zV5PYAAAAASUVORK5CYII=",
-    "XC": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAALklEQVQIW2NkAIJ8wxn/QfSEgxkgioGRj4GRESYIFkGWRJeASWLowCkBtweX5QAsGBfHpOY22AAAAABJRU5ErkJggg==",
-    "FQ": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAJklEQVQIW2NkAIJ8wxn/QfSEgxkgioGRj4GRESaILAGWpKIELssBVXAXx4NDGHMAAAAASUVORK5CYII=",
-    "XG": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAJklEQVQIW2NkAIJ8wxn/QfSEgxkgioGRj4GREV0QLAOSpKIELssBcQAXx6owFL0AAAAASUVORK5CYII=",
-    "FM": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAIElEQVQIW2NkAIL/nxj+g2gYYORjYGREF4RLUlECl+UA0JIRx3Bh73gAAAAASUVORK5CYII=",
-    "NG": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAJ0lEQVQIW2NkAIL/nxj+g+gC+xkgimHi+QxGRpggWARJkpoSuCwHANCpHOPSB3toAAAAAElFTkSuQmCC",
-    "LQ": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAJ0lEQVQIW2NkAIL/nxj+g+gC+xkgimHi+QxGRpggsgSITU0JXJYDAOUZHOPRxY5GAAAAAElFTkSuQmCC",
-    "NC": "iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAMElEQVQIW2NkAIL/nxj+g+gC+xkgimHi+QxGRnRBsAwQgCVgKmGChCWQzYcbhctyAAPQHOMk6boBAAAAAElFTkSuQmCC",
+    "NM": IMG_b09f0a92_ASSET.readall(),
+    "XC": IMG_e4fdea21_ASSET.readall(),
+    "FQ": IMG_ab5bfdd7_ASSET.readall(),
+    "XG": IMG_9dfa334f_ASSET.readall(),
+    "FM": IMG_63abc988_ASSET.readall(),
+    "NG": IMG_68001971_ASSET.readall(),
+    "LQ": IMG_172c6fc5_ASSET.readall(),
+    "NC": IMG_57ae7562_ASSET.readall(),
 }
 
 # Moon phases

@@ -12,6 +12,9 @@ load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/img_0ee36260.png", IMG_0ee36260_ASSET = "file")
+load("images/img_3e4bd4b4.png", IMG_3e4bd4b4_ASSET = "file")
+load("images/img_d02716e4.png", IMG_d02716e4_ASSET = "file")
 
 DEFAULT_STOP_ID = "M16"
 DEFAULT_DIRECTION = "both"
@@ -56,9 +59,9 @@ ABBREVIATIONS = {
 }
 
 DIAMONDS = {
-    "#00933c": "iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAcElEQVQYlX3QsRHCMAxA0YcWAfagADaBleg5MgkciwRvQpNwjnCsTuf3C3njdpBmizuuKPVDNOATZ7ymvYlnuJ/2XQ5iBWoF0YF/QeDRgXUwhMbVjSm4BEYcO0HBCeN84Gcl+EGWX5eDBcy4Dt4ZwhdZ8R3soZmzOQAAAABJRU5ErkJggg==",
-    "#b933ad": "iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAc0lEQVQYlX3QwREBQRBA0acTQQwSQCYEpghAAE6URNZk4rKrZtvs9K1r3j/0rB67uzRrXHBGqR+iAZ844jXuTTzB7bhvchALUCuIDvwLAtcOrINbaFzdmIJTYMC+ExQcMEwHfhaCH2T+dTmYwYzr4J0hfAHfSh628EQX+AAAAABJRU5ErkJggg==",
-    "#ff6319": "iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAcElEQVQYlX3QwREBQRBA0aezcEImyAR5KSKhJLImEi67arbNTt+65v1Dz+pzWUuzwRVnlPohGvCBI57j3sQT3I37NgexALWC6MC/IHDrwDq4h8bVjSk4BQbsO0HBAcN04Hsh+EHmX5eDGcy4Dl4ZwhemXh6YbpNeCwAAAABJRU5ErkJggg==",
+    "#00933c": IMG_3e4bd4b4_ASSET.readall(),
+    "#b933ad": IMG_0ee36260_ASSET.readall(),
+    "#ff6319": IMG_d02716e4_ASSET.readall(),
 }
 
 def main(config):

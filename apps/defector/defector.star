@@ -10,12 +10,13 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("xpath.star", "xpath")
+load("images/img_1553b6ef.png", IMG_1553b6ef_ASSET = "file")
 
 DEFECTOR_RSS_URL = "https://defector.com/feed"
 
 # base64-encoded contents of the image in the rss feed
 DEFECTOR_LOGO = base64.decode(
-    ("iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAABU1BMVEVHcEwAAAAAAAAAAAAA" +
+    (IMG_1553b6ef_ASSET.readall() +
      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///+BgYF4eHiKioq5ubns7Owc" +
