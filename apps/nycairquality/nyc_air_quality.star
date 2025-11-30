@@ -31,10 +31,10 @@ CLOUDS = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAAEAAAAAWCAYAAABwvpo0AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAdnJLH8AAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAP8A/wD/oL2nkwAAAJ5JREFUWMPtV0EOgCAMo3soj9tH9URiPAADNmBZz0ppaSemFAg0kXN+vGqjE8VbckK6CWaGpnBmRuHW5GoacNKpWxgRWHmSNw1N0oyxphHF6FkOaPd3VYclQiV8dEuttJ5Hz0K7p/BozHv23XUP8PwZgtRlb2ZgNGIjRnwrZVmvWprJupf/d3f/a8Ca0LparSs2ThC/c764T0AgEKjiBY++aaOgJgMNAAAAAElFTkSuQmCC
 """)
 
-# This source is derived from a public dashboard provided by the NYS DOH
-# https://a816-dohbesp.nyc.gov/IndicatorPublic/beta/key-topics/airquality/realtime/
+# This source is derived from a public dashboard provided by the NYC DOHMH
+# https://a816-dohbesp.nyc.gov/IndicatorPublic/data-features/realtime-air-quality/
 # It's updated every hour, so there's no need to hit it very often.
-NYC_DATA_URL = "https://azdohv2staticweb.blob.core.windows.net/$web/nyccas_realtime_DEC.csv"
+NYC_DATA_URL = "https://raw.githubusercontent.com/nychealth/nyccas-data/refs/heads/main/portal/view.csv"
 
 def hex_2B(val):
     nibble = (val & 0xF0) >> 4
