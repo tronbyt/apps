@@ -7,28 +7,27 @@ Version: 1.0
 
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/cloudy.png", CLOUDY_ASSET = "file")
+load("images/foggy.png", FOGGY_ASSET = "file")
+load("images/haily.png", HAILY_ASSET = "file")
+load("images/moony.png", MOONY_ASSET = "file")
+load("images/moonyish.png", MOONYISH_ASSET = "file")
+load("images/raindrop_icon.png", RAINDROP_ICON_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/sleety.png", SLEETY_ASSET = "file")
+load("images/sleety2.png", SLEETY2_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/snowy2.png", SNOWY2_ASSET = "file")
+load("images/sunny.png", SUNNY_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_ASSET = "file")
+load("images/thundery.png", THUNDERY_ASSET = "file")
+load("images/tornady.png", TORNADY_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_18f74269.png", IMG_18f74269_ASSET = "file")
-load("images/img_2b34806e.png", IMG_2b34806e_ASSET = "file")
-load("images/img_4350e1c9.png", IMG_4350e1c9_ASSET = "file")
-load("images/img_465bbafe.png", IMG_465bbafe_ASSET = "file")
-load("images/img_5ea95afd.png", IMG_5ea95afd_ASSET = "file")
-load("images/img_a65ff1e7.png", IMG_a65ff1e7_ASSET = "file")
-load("images/img_a7ddd5eb.png", IMG_a7ddd5eb_ASSET = "file")
-load("images/img_c5e4f08d.png", IMG_c5e4f08d_ASSET = "file")
-load("images/img_c7bb5f9b.png", IMG_c7bb5f9b_ASSET = "file")
-load("images/img_c9e24eb8.png", IMG_c9e24eb8_ASSET = "file")
-load("images/img_cb866872.png", IMG_cb866872_ASSET = "file")
-load("images/img_ccfef758.png", IMG_ccfef758_ASSET = "file")
-load("images/img_d0db6d90.png", IMG_d0db6d90_ASSET = "file")
-load("images/img_d4766f98.png", IMG_d4766f98_ASSET = "file")
-load("images/img_d5b45e6d.png", IMG_d5b45e6d_ASSET = "file")
-load("images/img_debb3f40.png", IMG_debb3f40_ASSET = "file")
 
 DEFAULT_LOCATION = """
 {
@@ -54,24 +53,24 @@ TIME_NIGHT_COLOR = "#333333"
 
 # Complete weather icons from Time & Weather
 WEATHER_ICONS = {
-    "cloudy.png": IMG_18f74269_ASSET.readall(),
-    "foggy.png": IMG_c9e24eb8_ASSET.readall(),
-    "haily.png": IMG_ccfef758_ASSET.readall(),
-    "moony.png": IMG_a7ddd5eb_ASSET.readall(),
-    "moonyish.png": IMG_2b34806e_ASSET.readall(),
-    "rainy.png": IMG_d5b45e6d_ASSET.readall(),
-    "sleety.png": IMG_5ea95afd_ASSET.readall(),
-    "sleety2.png": IMG_4350e1c9_ASSET.readall(),
-    "snowy.png": IMG_d0db6d90_ASSET.readall(),
-    "snowy2.png": IMG_c5e4f08d_ASSET.readall(),
-    "sunny.png": IMG_cb866872_ASSET.readall(),
-    "sunnyish.png": IMG_a65ff1e7_ASSET.readall(),
-    "thundery.png": IMG_c7bb5f9b_ASSET.readall(),
-    "tornady.png": IMG_d4766f98_ASSET.readall(),
-    "windy.png": IMG_debb3f40_ASSET.readall(),
+    "cloudy.png": CLOUDY_ASSET.readall(),
+    "foggy.png": FOGGY_ASSET.readall(),
+    "haily.png": HAILY_ASSET.readall(),
+    "moony.png": MOONY_ASSET.readall(),
+    "moonyish.png": MOONYISH_ASSET.readall(),
+    "rainy.png": RAINY_ASSET.readall(),
+    "sleety.png": SLEETY_ASSET.readall(),
+    "sleety2.png": SLEETY2_ASSET.readall(),
+    "snowy.png": SNOWY_ASSET.readall(),
+    "snowy2.png": SNOWY2_ASSET.readall(),
+    "sunny.png": SUNNY_ASSET.readall(),
+    "sunnyish.png": SUNNYISH_ASSET.readall(),
+    "thundery.png": THUNDERY_ASSET.readall(),
+    "tornady.png": TORNADY_ASSET.readall(),
+    "windy.png": WINDY_ASSET.readall(),
 }
 
-RAINDROP_ICON = IMG_465bbafe_ASSET.readall()
+RAINDROP_ICON = RAINDROP_ICON_ASSET.readall()
 
 # Weather API functions from Time & Weather
 def get_nws_observation_station(lat, lon, ttl = 3600):
@@ -402,7 +401,7 @@ def main(config):
 
     # Prepare weather display components
     if icon_ref:
-        weather_image = render.Image(width = 16, height = 16, src = base64.decode(WEATHER_ICONS[icon_ref]))
+        weather_image = render.Image(width = 16, height = 16, src = WEATHER_ICONS[icon_ref])
     else:
         weather_image = render.Box(width = 16, height = 16)
 
