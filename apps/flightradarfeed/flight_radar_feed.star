@@ -9,53 +9,9 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
+load("images/img_fe26b9dc.png", IMG_fe26b9dc_ASSET = "file")
 
-PLANE_ICON = base64.decode(
-    """
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAAXNSR0IArs4c6QAAANpJREFUKFNtkL9OwnAUhb9bIcRBFxYDhFljqgODkOCOYaPtAxBYbHwDZh/BMuID0DD4EjAQhzKxAombu4Fekh9/bANn/O495yRHwFIkBuUo2w+J+i5oAu6vkn940UK9SxQ4/w4E2x+ixMwCL8FBAL1/GyEKYe/JgHO6KxTZoDvDox8y7NVwxz8scjcQZxhX1iauOt1FqLXht1lC8nZDy88dvgOP+WoJYhGLoKpcnKkyDUluv36B/IEI0UfrxJIydN8/mayuzNMscNJJh5UODdnLa27bA4PTi6VLtlDpQKfUrwVNAAAAAElFTkSuQmCC
-""",
-)
-
-API_URL = "https://data-cloud.flightradar24.com/zones/fcgi/feed.js?radar="
-
-def get_data(url, radar_code):
-    res = http.get(url + radar_code, ttl_seconds = 60)  # cache for 1 minute
-    if res.status_code != 200:
-        fail("GET %s failed with status %d: %s", url, res.status_code, res.body())
-    json_res = res.json()
-
-    flight_strings = []
-
-    index = 0
-    for _id, flight in json_res.items():
-        index = index + 1
-        if type(flight) == "string" or type(flight) == "int" or type(flight) == "float":
-            continue
-
-        callsign = flight[16]
-        origin = flight[11]
-        destination = flight[12]
-
-        has_route = origin != "" and destination != ""
-        has_callsign = callsign != ""
-        if has_route or has_callsign:
-            flight_strings.append(flight)
-
-    return flight_strings
-
-def render_flight_info_screen(info, radar, show_radar):
-    flight_number = info[16] or "?"
-
-    origin = info[11] or "?"
-    destination = info[12] or "?"
-
-    model = info[8] or "?"
-    registration = info[9] or "?"
-
-    speed = str(int(info[5])) or "?"
-    alt = str(int(info[4])) or "?"
-
-    callsign_row = [render.Text(content = flight_number, font = "CG-pixel-3x5-mono")]
+PLANE_ICON = IMG_fe26b9dc_ASSET.readall()]
 
     if show_radar:
         callsign_row.append(

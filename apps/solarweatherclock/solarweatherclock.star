@@ -13,6 +13,21 @@ load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("images/img_00556125.png", IMG_00556125_ASSET = "file")
+load("images/img_0c789d62.png", IMG_0c789d62_ASSET = "file")
+load("images/img_0f98ff25.png", IMG_0f98ff25_ASSET = "file")
+load("images/img_5fde32e4.png", IMG_5fde32e4_ASSET = "file")
+load("images/img_7719fd13.png", IMG_7719fd13_ASSET = "file")
+load("images/img_82d9eb1d.bin", IMG_82d9eb1d_ASSET = "file")
+load("images/img_8938f152.png", IMG_8938f152_ASSET = "file")
+load("images/img_a2285224.png", IMG_a2285224_ASSET = "file")
+load("images/img_b462ca70.png", IMG_b462ca70_ASSET = "file")
+load("images/img_c4e0a08a.png", IMG_c4e0a08a_ASSET = "file")
+load("images/img_c7b85522.png", IMG_c7b85522_ASSET = "file")
+load("images/img_e3ac226b.png", IMG_e3ac226b_ASSET = "file")
+load("images/img_eb567ea4.png", IMG_eb567ea4_ASSET = "file")
+load("images/img_f40ba5e2.png", IMG_f40ba5e2_ASSET = "file")
+load("images/img_f4d4aeee.png", IMG_f4d4aeee_ASSET = "file")
 
 EXPORT = EXPORT_ASSET.readall()
 IMPORT = IMPORT_ASSET.readall()
@@ -158,34 +173,34 @@ def get_schema():
 
 def getImage(weather):
     if weather == "clear-night":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAFtJREFUKFNjZEACbm5u/5H5ILaNjQ1DXV0dI4gNJkAApBAkYWRkhKJ+0qRJcA0oipFVIWuEaYArRrce3SaQBpyKYU7Ly8sDmzNAivG6GT2M8YYGSeEM8z2+GAQAixI5K1I4YcUAAAAASUVORK5CYII=")
+        return IMG_a2285224_ASSET.readall()
     elif weather == "cloudy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGZJREFUKFONUUEOwDAIav+i/3+Q/mULzTDOaDYvVQIE615PmdnFXlU3+/weEEQRCdzdFwU0wbwrkQoIUDTBPJJrjEPuYgCjM92DTEF263aIrafseYcxRpv5y/Hl/IfMf48Y3cXqRW+KZE5sf1rybAAAAABJRU5ErkJggg==")
+        return IMG_b462ca70_ASSET.readall()
     elif weather == "fog":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAHRJREFUKFOFUcENACEIg2GMyzguyxiG8VISTIN3nh9JQ6G06u5LRKS1pvjxEptzJiRjDFUzW733AEFAIxOZHNNA2COo4CHo2atrMzZcZTDhTcpVBo7iYz9l1FsON6ruKuXXjSSEGxxK1uk5Wwobj1BqipzuA7AnWQ2rWwLMAAAAAElFTkSuQmCC")
+        return IMG_c4e0a08a_ASSET.readall()
     elif weather == "hail":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAG9JREFUKFNjZIACNze3/zD2rl27GGFsZBosCFKYl5cHF580aRIDTAPMEBCfEV0hTAdIAwjADAHxcSpGdwbpimFuxuYhZDGwm2ECvrmf/2+ezAvm42KTp5iQM0DycJNn3nz1P11dDMzHxcYaU7hsAQA2eEh/ny0tPAAAAABJRU5ErkJggg==")
+        return IMG_e3ac226b_ASSET.readall()
     elif weather == "lightning":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAG1JREFUKFOdUcERgCAMaxdwjS7TcbsMa7gAXnrGg4rnKR/akIRQVM4VEZ21uyvrcU8QRDO78NaaUEAT9FqJVECARRP0j+Qa4zuZmVcPGrHMTKDvktPQTRKrfZ79Iq/cqvs0/Lcot5+CgLl5G/sDCMFGXQf36V0AAAAASUVORK5CYII=")
+        return IMG_f40ba5e2_ASSET.readall()
     elif weather == "lightning-rainy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAIJJREFUKFOVkNENgCAMRNsBcA2WQTdxAr+dwE2UZVhDBsC08Uwhkmh/4I53pcB0V4yxYB9CYOztqqaA3vvHTykRAmgimlsQCQlIoYnoLtyO8R/GzG8Psp7ODGOcc9lXp5IH4lar34PFLyfpd0q4ghECMC2Zjs2xDVSd7eEnGLPiaqsv1TxZXf7YiPsAAAAASUVORK5CYII=")
+        return IMG_00556125_ASSET.readall()
     elif weather == "partlycloudy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAH5JREFUKFOVkLERwCAIRWEB2ywgffYvs4YukNYFyH0TPOS0CB3w/ucfTIvSRsqJOK76IC53/VAboFfS7ng2grsXTqc8aBF8nAGXUl5HIsqHTHFN0M/Uu1DOeQC11iHAzgwYjh40BQQd+kzQb+H4tv8wHHZRfCQR4eU3YgSAmD2pNkus7FVgLgAAAABJRU5ErkJggg==")
+        return IMG_7719fd13_ASSET.readall()
     elif weather == "pouring":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGZJREFUKFNjZIACNze3/zD2rl27GGFsZBosCFKYl5cHF580aRIDTAPMEBCfEV0hTAdIAwjADAHxcSpGdwbpimFuxuYhZDGwm0ECvrmf/2+ezMsIo2GK0MVRFONSBBNHCU9CNtDOGQCwWmh/jz7/swAAAABJRU5ErkJggg==")
+        return IMG_c7b85522_ASSET.readall()
     elif weather == "rainy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGVJREFUKFNjZICCLVu2/IexfXx8GGFsZBosCFKorq4OF7958yYDTAPMEBCfEV0hTAdIAwjADAHxcSpGdwbpimFuxuYhZDGwm2ECvrmf/2+ezIvBRxbHKwkyCKtidBvQbQLJ084ZABOGYF1W/WK/AAAAAElFTkSuQmCC")
+        return IMG_0f98ff25_ASSET.readall()
     elif weather == "snowy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAEtJREFUKFOlkVEKACAIQ939D71QGFgoKH1NXjplwcyMJAEg1xWD4Egrt24wVmvA1c/JzWKh/pDB63oZVc4d+3dub16lMcpXCW1+8AA6f7f8Csc6NgAAAABJRU5ErkJggg==")
+        return IMG_eb567ea4_ASSET.readall()
     elif weather == "snowy-rainy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAHhJREFUKFN9UUEOgDAIg7s+TX+ij9Gf6NP0juliF4a4XUZKU1pQEREzs3m95dxHRa2q9WcfWAWn5TKQfRM18SISlT2B9bENUpQB8NGCV6M9cBpvfgrVGqFIKApvFj81DQgrJIHwCRiD/HqmDY7vbiM7QrbzdM+9Cz4mcbT8zlTcvQAAAABJRU5ErkJggg==")
+        return IMG_0c789d62_ASSET.readall()
     elif weather == "sunny":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGJJREFUKFNjZMAC/n9i+M/Ix8CILgUWQJfExYfrhin4f4jvP9hEg08MINORNaJYhawQ5gRk5yBMRjIRw61Q94OtAUte4IOoMfiEzc9gMdJMRjaGeDdDw5ZgaJAczijOwRGDAKiLQPzl4xRFAAAAAElFTkSuQmCC")
+        return IMG_5fde32e4_ASSET.readall()
     elif weather == "windy":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAF5JREFUKFONUcENACEIg2HYfyCG0fRRUxFy97JAgRY9M5eZWUQ4MWLmiPG6BhPmkIesm2rzRQYRckBSzKaR3Ek6pnTipP2XwUdGNVbPeE73Zeya3DlvDTLZrdWfRH0DViU+TDZ+FYwAAAAASUVORK5CYII=")
+        return IMG_f4d4aeee_ASSET.readall()
     elif weather == "windy-variant":
-        return base64.decode("aiVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAF5JREFUKFONUcENACEIg2HYfyCG0fRRUxFy97JAgRY9M5eZWUQ4MWLmiPG6BhPmkIesm2rzRQYRckBSzKaR3Ek6pnTipP2XwUdGNVbPeE73Zeya3DlvDTLZrdWfRH0DViU+TDZ+FYwAAAAASUVORK5CYII=")
+        return IMG_82d9eb1d_ASSET.readall()
     elif weather == "exceptional":
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAQdJREFUKFNjZEACq1W0/zv9+Mmwj4Od4d0dVrBMOsMFRpgSOGMmg8H/tLoLDAwufHDt76LEGNY84YFrACuGK0S2BsR24WP4ptTHsERmClgDWDHI+pCoq3DJD8fugbWJvj8C1z4//RMDI8jUEJkvDELLXjH8vm4Al2SNPARm/15ux/DbO47hh0UHRHHaoXtg61i3LgJLcPGloDroAh/DmiRZhGIGg0/oLoabzPr0EMOaZdoQxSBRcEiUINQ/21HFIOXRxvDt0xwGrlkpDLOaDBgQoXEI4ikQePYih0FKYgrYaVz3isBis+yUIIphwSek8pshZN5jiMCeTwzv5qnAIwgedMiOxReLAAp7cILSbE4rAAAAAElFTkSuQmCC")
+        return IMG_8938f152_ASSET.readall()
     else:
-        return base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGJJREFUKFNjZMAC/n9i+M/Ix8CILgUWQJfExYfrhin4f4jvP9hEg08MINORNaJYhawQ5gRk5yBMRjIRw61Q94OtAUte4IOoMfiEzc9gMdJMRjaGeDdDw5ZgaJAczijOwRGDAKiLQPzl4xRFAAAAAElFTkSuQmCC")
+        return IMG_5fde32e4_ASSET.readall()

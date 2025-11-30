@@ -11,10 +11,9 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
+load("images/img_b7bb44e9.svg", IMG_b7bb44e9_ASSET = "file")
 
-TW_ICON = base64.decode("""
-PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5MDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZmZmIj48cGF0aCBkPSJNMCAwaDkwMHY2MDBIMHoiIGZpbGw9IiNmZTAwMDAiLz48cGF0aCBkPSJNMCAwaDQ1MHYzMDBIMHoiIGZpbGw9IiMwMDAwOTUiLz48cGF0aCBkPSJNMjI1IDM3LjVsLTU2LjI1IDIwOS45MjhMMzIyLjQyOCA5My43NSAxMTIuNSAxNTBsMjA5LjkyOCA1Ni4yNUwxNjguNzUgNTIuNTcyIDIyNSAyNjIuNWw1Ni4yNS0yMDkuOTI4TDEyNy41NzIgMjA2LjI1IDMzNy41IDE1MCAxMjcuNTcyIDkzLjc1IDI4MS4yNSAyNDcuNDI4IDIyNSAzNy41Ii8+PGNpcmNsZSBjeT0iMTUwIiBjeD0iMjI1IiByPSI2MCIgc3Ryb2tlPSIjMDAwMDk1IiBzdHJva2Utd2lkdGg9IjcuNSIvPjwvc3ZnPg==
-""")
+TW_ICON = IMG_b7bb44e9_ASSET.readall()
 
 # cache stock info for 2 minutes
 DEFAULT_API_CACHE_TTL = 120
