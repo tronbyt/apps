@@ -9,9 +9,9 @@ load("animation.star", "animation")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/img_b7bb44e9.svg", IMG_b7bb44e9_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_b7bb44e9.svg", IMG_b7bb44e9_ASSET = "file")
 
 TW_ICON = IMG_b7bb44e9_ASSET.readall()
 

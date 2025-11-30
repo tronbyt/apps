@@ -6,7 +6,6 @@ Author: Kyle Stark @kaisle51
 """
 
 load("encoding/base64.star", "base64")
-load("render.star", "render")
 load("images/frame_1_ca5f1a79.png", FRAME_1_ca5f1a79_ASSET = "file")
 load("images/frame_2_b469aea7.png", FRAME_2_b469aea7_ASSET = "file")
 load("images/frame_3_84d79be5.png", FRAME_3_84d79be5_ASSET = "file")
@@ -16,6 +15,7 @@ load("images/frame_6_289fa720.png", FRAME_6_289fa720_ASSET = "file")
 load("images/frame_7_4677f412.png", FRAME_7_4677f412_ASSET = "file")
 load("images/frame_8_340c5e61.png", FRAME_8_340c5e61_ASSET = "file")
 load("images/frame_9_5964adb8.png", FRAME_9_5964adb8_ASSET = "file")
+load("render.star", "render")
 
 def main():
     def getFrames(animationName):

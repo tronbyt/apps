@@ -9,12 +9,12 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/fitbit_logo.png", FITBIT_LOGO_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
-load("images/img_bcbcb6b8.png", IMG_bcbcb6b8_ASSET = "file")
 
 #App Settings
 CACHE_TTL = 60 * 60 * 24  # updates once daily
@@ -33,7 +33,7 @@ FITBIT_DATA_KEYS = ("weight", "fat", "bmi")
 #Fitbit Data Display
 DISPLAY_FONT = "CG-pixel-3x5-mono"
 FAT_COLOR = "#b9d9eb"
-FITBIT_LOGO = IMG_bcbcb6b8_ASSET.readall()
+FITBIT_LOGO = FITBIT_LOGO_ASSET.readall()
 KILOGRAMS_TO_POUNDS_MULTIPLIER = float(2.2)
 WEIGHT_COLOR = "#00B0B9"
 WHITE_COLOR = "#FFF"

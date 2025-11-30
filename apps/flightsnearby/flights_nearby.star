@@ -6,43 +6,42 @@ Author: eddichen
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")  #for easy reading numbers and times
+load("images/tail_aa.png", TAIL_AA_ASSET = "file")
+load("images/tail_ay.png", TAIL_AY_ASSET = "file")
+load("images/tail_b6.png", TAIL_B6_ASSET = "file")
+load("images/tail_ba.png", TAIL_BA_ASSET = "file")
+load("images/tail_cx.png", TAIL_CX_ASSET = "file")
+load("images/tail_dl.png", TAIL_DL_ASSET = "file")
+load("images/tail_ek.png", TAIL_EK_ASSET = "file")
+load("images/tail_ey.png", TAIL_EY_ASSET = "file")
+load("images/tail_fz.png", TAIL_FZ_ASSET = "file")
+load("images/tail_ib.png", TAIL_IB_ASSET = "file")
+load("images/tail_ix.png", TAIL_IX_ASSET = "file")
+load("images/tail_jl.png", TAIL_JL_ASSET = "file")
+load("images/tail_km.png", TAIL_KM_ASSET = "file")
+load("images/tail_la.png", TAIL_LA_ASSET = "file")
+load("images/tail_mh.png", TAIL_MH_ASSET = "file")
+load("images/tail_ms.png", TAIL_MS_ASSET = "file")
+load("images/tail_oz.png", TAIL_OZ_ASSET = "file")
+load("images/tail_pr.png", TAIL_PR_ASSET = "file")
+load("images/tail_q4.png", TAIL_Q4_ASSET = "file")
+load("images/tail_qf.png", TAIL_QF_ASSET = "file")
+load("images/tail_qr.png", TAIL_QR_ASSET = "file")
+load("images/tail_rj.png", TAIL_RJ_ASSET = "file")
+load("images/tail_sk.png", TAIL_SK_ASSET = "file")
+load("images/tail_sq.png", TAIL_SQ_ASSET = "file")
+load("images/tail_tg.png", TAIL_TG_ASSET = "file")
+load("images/tail_tk.png", TAIL_TK_ASSET = "file")
+load("images/tail_u2.png", TAIL_U2_ASSET = "file")
+load("images/tail_ua.png", TAIL_UA_ASSET = "file")
+load("images/tail_ul.png", TAIL_UL_ASSET = "file")
+load("images/tail_wy.png", TAIL_WY_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_0d507427.png", IMG_0d507427_ASSET = "file")
-load("images/img_1ff9bbd5.png", IMG_1ff9bbd5_ASSET = "file")
-load("images/img_267cc39a.png", IMG_267cc39a_ASSET = "file")
-load("images/img_2cc0784f.png", IMG_2cc0784f_ASSET = "file")
-load("images/img_35c4d1cd.png", IMG_35c4d1cd_ASSET = "file")
-load("images/img_3bcf3d20.png", IMG_3bcf3d20_ASSET = "file")
-load("images/img_4efad5ed.png", IMG_4efad5ed_ASSET = "file")
-load("images/img_5857d1fc.png", IMG_5857d1fc_ASSET = "file")
-load("images/img_6249c021.png", IMG_6249c021_ASSET = "file")
-load("images/img_74ffc22d.png", IMG_74ffc22d_ASSET = "file")
-load("images/img_780f9f33.png", IMG_780f9f33_ASSET = "file")
-load("images/img_7a132dd3.png", IMG_7a132dd3_ASSET = "file")
-load("images/img_846d6581.png", IMG_846d6581_ASSET = "file")
-load("images/img_89970317.png", IMG_89970317_ASSET = "file")
-load("images/img_8daf375d.png", IMG_8daf375d_ASSET = "file")
-load("images/img_920088e3.png", IMG_920088e3_ASSET = "file")
-load("images/img_95ff6baf.png", IMG_95ff6baf_ASSET = "file")
-load("images/img_9e5a1eb2.png", IMG_9e5a1eb2_ASSET = "file")
-load("images/img_a4c40ebb.png", IMG_a4c40ebb_ASSET = "file")
-load("images/img_b93d45c4.png", IMG_b93d45c4_ASSET = "file")
-load("images/img_ba07d7ec.png", IMG_ba07d7ec_ASSET = "file")
-load("images/img_bbc52586.png", IMG_bbc52586_ASSET = "file")
-load("images/img_bf094e0f.png", IMG_bf094e0f_ASSET = "file")
-load("images/img_ca7a9d4e.png", IMG_ca7a9d4e_ASSET = "file")
-load("images/img_cfe7b571.png", IMG_cfe7b571_ASSET = "file")
-load("images/img_dd9c5e24.png", IMG_dd9c5e24_ASSET = "file")
-load("images/img_e9aae2f6.png", IMG_e9aae2f6_ASSET = "file")
-load("images/img_f336b78a.png", IMG_f336b78a_ASSET = "file")
-load("images/img_f3812730.png", IMG_f3812730_ASSET = "file")
-load("images/img_f3b3e221.png", IMG_f3b3e221_ASSET = "file")
 
 DEFAULT_LOCATION = json.encode({
     "lat": "51.4395598",
@@ -56,36 +55,36 @@ DEFAULT_DISTANCE = "10"
 DEFAULT_CACHE = 180
 FLIGHT_RADAR_URL = "https://flight-radar1.p.rapidapi.com/flights/list-in-boundary"
 TAILS = {
-    "AA": IMG_846d6581_ASSET.readall(),
-    "AY": IMG_e9aae2f6_ASSET.readall(),
-    "B6": IMG_bf094e0f_ASSET.readall(),
-    "BA": IMG_2cc0784f_ASSET.readall(),
-    "CX": IMG_267cc39a_ASSET.readall(),
-    "DL": IMG_f3b3e221_ASSET.readall(),
-    "EK": IMG_5857d1fc_ASSET.readall(),
-    "EY": IMG_89970317_ASSET.readall(),
-    "FZ": IMG_3bcf3d20_ASSET.readall(),
-    "IB": IMG_cfe7b571_ASSET.readall(),
-    "IX": IMG_6249c021_ASSET.readall(),
-    "JL": IMG_1ff9bbd5_ASSET.readall(),
-    "KM": IMG_0d507427_ASSET.readall(),
-    "LA": IMG_ba07d7ec_ASSET.readall(),
-    "MH": IMG_4efad5ed_ASSET.readall(),
-    "MS": IMG_dd9c5e24_ASSET.readall(),
-    "OZ": IMG_780f9f33_ASSET.readall(),
-    "PR": IMG_35c4d1cd_ASSET.readall(),
-    "QF": IMG_f336b78a_ASSET.readall(),
-    "QR": IMG_74ffc22d_ASSET.readall(),
-    "Q4": IMG_7a132dd3_ASSET.readall(),
-    "RJ": IMG_8daf375d_ASSET.readall(),
-    "TG": IMG_95ff6baf_ASSET.readall(),
-    "TK": IMG_9e5a1eb2_ASSET.readall(),
-    "SK": IMG_f3812730_ASSET.readall(),
-    "SQ": IMG_b93d45c4_ASSET.readall(),
-    "U2": IMG_920088e3_ASSET.readall(),
-    "UA": IMG_ca7a9d4e_ASSET.readall(),
-    "UL": IMG_bbc52586_ASSET.readall(),
-    "WY": IMG_a4c40ebb_ASSET.readall(),
+    "AA": TAIL_AA_ASSET.readall(),
+    "AY": TAIL_AY_ASSET.readall(),
+    "B6": TAIL_B6_ASSET.readall(),
+    "BA": TAIL_BA_ASSET.readall(),
+    "CX": TAIL_CX_ASSET.readall(),
+    "DL": TAIL_DL_ASSET.readall(),
+    "EK": TAIL_EK_ASSET.readall(),
+    "EY": TAIL_EY_ASSET.readall(),
+    "FZ": TAIL_FZ_ASSET.readall(),
+    "IB": TAIL_IB_ASSET.readall(),
+    "IX": TAIL_IX_ASSET.readall(),
+    "JL": TAIL_JL_ASSET.readall(),
+    "KM": TAIL_KM_ASSET.readall(),
+    "LA": TAIL_LA_ASSET.readall(),
+    "MH": TAIL_MH_ASSET.readall(),
+    "MS": TAIL_MS_ASSET.readall(),
+    "OZ": TAIL_OZ_ASSET.readall(),
+    "PR": TAIL_PR_ASSET.readall(),
+    "QF": TAIL_QF_ASSET.readall(),
+    "QR": TAIL_QR_ASSET.readall(),
+    "Q4": TAIL_Q4_ASSET.readall(),
+    "RJ": TAIL_RJ_ASSET.readall(),
+    "TG": TAIL_TG_ASSET.readall(),
+    "TK": TAIL_TK_ASSET.readall(),
+    "SK": TAIL_SK_ASSET.readall(),
+    "SQ": TAIL_SQ_ASSET.readall(),
+    "U2": TAIL_U2_ASSET.readall(),
+    "UA": TAIL_UA_ASSET.readall(),
+    "UL": TAIL_UL_ASSET.readall(),
+    "WY": TAIL_WY_ASSET.readall(),
 }
 
 # (degrees–>radians)

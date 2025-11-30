@@ -6,18 +6,17 @@ Author: Nicole Brooks
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/ground_bare.png", GROUND_BARE_ASSET = "file")
+load("images/ground_grass.png", GROUND_GRASS_ASSET = "file")
+load("images/sky_high_pollen.png", SKY_HIGH_POLLEN_ASSET = "file")
+load("images/sky_low_pollen.png", SKY_LOW_POLLEN_ASSET = "file")
+load("images/sky_med_pollen.png", SKY_MED_POLLEN_ASSET = "file")
+load("images/trees.png", TREES_ASSET = "file")
+load("images/weeds.png", WEEDS_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_2e4a69f1.png", IMG_2e4a69f1_ASSET = "file")
-load("images/img_31eb082f.png", IMG_31eb082f_ASSET = "file")
-load("images/img_89f55314.png", IMG_89f55314_ASSET = "file")
-load("images/img_9d969e7c.png", IMG_9d969e7c_ASSET = "file")
-load("images/img_9fadae93.png", IMG_9fadae93_ASSET = "file")
-load("images/img_ba5dab11.png", IMG_ba5dab11_ASSET = "file")
-load("images/img_cba63d73.png", IMG_cba63d73_ASSET = "file")
 
 # DEFAULT_LOC = {
 #     "lat": "40.63",
@@ -351,11 +350,11 @@ def get_schema():
     )
 
 images = {
-    "skyLowPollen": IMG_31eb082f_ASSET.readall(),
-    "skyMedPollen": IMG_ba5dab11_ASSET.readall(),
-    "skyHighPollen": IMG_2e4a69f1_ASSET.readall(),
-    "groundBare": IMG_9d969e7c_ASSET.readall(),
-    "groundGrass": IMG_89f55314_ASSET.readall(),
-    "trees": IMG_cba63d73_ASSET.readall(),
-    "weeds": IMG_9fadae93_ASSET.readall(),
+    "skyLowPollen": SKY_LOW_POLLEN_ASSET.readall(),
+    "skyMedPollen": SKY_MED_POLLEN_ASSET.readall(),
+    "skyHighPollen": SKY_HIGH_POLLEN_ASSET.readall(),
+    "groundBare": GROUND_BARE_ASSET.readall(),
+    "groundGrass": GROUND_GRASS_ASSET.readall(),
+    "trees": TREES_ASSET.readall(),
+    "weeds": WEEDS_ASSET.readall(),
 }

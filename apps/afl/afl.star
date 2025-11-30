@@ -7,30 +7,29 @@ Author: andymcrae
 
 #some code borrowed or inspired by nhlnextgame by AKKanman
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/logo_adelaide.png", LOGO_ADELAIDE_ASSET = "file")
+load("images/logo_brisbane.png", LOGO_BRISBANE_ASSET = "file")
+load("images/logo_carlton.png", LOGO_CARLTON_ASSET = "file")
+load("images/logo_collingwood.png", LOGO_COLLINGWOOD_ASSET = "file")
+load("images/logo_essendon.png", LOGO_ESSENDON_ASSET = "file")
+load("images/logo_freemantle.png", LOGO_FREEMANTLE_ASSET = "file")
+load("images/logo_geelong.png", LOGO_GEELONG_ASSET = "file")
+load("images/logo_gold_coast.png", LOGO_GOLD_COAST_ASSET = "file")
+load("images/logo_greater_western_sydney.png", LOGO_GREATER_WESTERN_SYDNEY_ASSET = "file")
+load("images/logo_hawthorn.png", LOGO_HAWTHORN_ASSET = "file")
+load("images/logo_melbourne.png", LOGO_MELBOURNE_ASSET = "file")
+load("images/logo_north_melbourne.png", LOGO_NORTH_MELBOURNE_ASSET = "file")
+load("images/logo_port_adelaide.png", LOGO_PORT_ADELAIDE_ASSET = "file")
+load("images/logo_richmond.png", LOGO_RICHMOND_ASSET = "file")
+load("images/logo_st_kilda.png", LOGO_ST_KILDA_ASSET = "file")
+load("images/logo_sydney.png", LOGO_SYDNEY_ASSET = "file")
+load("images/logo_west_coast.png", LOGO_WEST_COAST_ASSET = "file")
+load("images/logo_western_bulldogs.png", LOGO_WESTERN_BULLDOGS_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_0b274dcd.png", IMG_0b274dcd_ASSET = "file")
-load("images/img_1aac21aa.png", IMG_1aac21aa_ASSET = "file")
-load("images/img_32569da5.png", IMG_32569da5_ASSET = "file")
-load("images/img_3ab23b2c.png", IMG_3ab23b2c_ASSET = "file")
-load("images/img_4133d22b.png", IMG_4133d22b_ASSET = "file")
-load("images/img_4efc1ef5.png", IMG_4efc1ef5_ASSET = "file")
-load("images/img_5fcab032.png", IMG_5fcab032_ASSET = "file")
-load("images/img_6eee3288.png", IMG_6eee3288_ASSET = "file")
-load("images/img_6f09d298.png", IMG_6f09d298_ASSET = "file")
-load("images/img_762b0e22.png", IMG_762b0e22_ASSET = "file")
-load("images/img_7cfe06b3.png", IMG_7cfe06b3_ASSET = "file")
-load("images/img_7f4400a6.png", IMG_7f4400a6_ASSET = "file")
-load("images/img_a6f4b77b.png", IMG_a6f4b77b_ASSET = "file")
-load("images/img_b3925bcb.png", IMG_b3925bcb_ASSET = "file")
-load("images/img_b80d17bf.png", IMG_b80d17bf_ASSET = "file")
-load("images/img_cd4916c8.png", IMG_cd4916c8_ASSET = "file")
-load("images/img_df9090d7.png", IMG_df9090d7_ASSET = "file")
-load("images/img_f6e2c9f4.png", IMG_f6e2c9f4_ASSET = "file")
 
 #URLs for AFL API data
 AFL_STANDINGS_URL = "https://api.squiggle.com.au/?q=standings"
@@ -42,41 +41,41 @@ DEFAULT_TEAM = "16"
 #team icons in base64
 def getTeamIconFromID(team_id):
     if team_id == 1:  #ADE
-        return (IMG_4133d22b_ASSET.readall())
+        return (LOGO_ADELAIDE_ASSET.readall())
     elif team_id == 2:  #BRI
-        return (IMG_0b274dcd_ASSET.readall())
+        return (LOGO_BRISBANE_ASSET.readall())
     elif team_id == 3:  #CAR
-        return (IMG_df9090d7_ASSET.readall())
+        return (LOGO_CARLTON_ASSET.readall())
     elif team_id == 4:  #COL
-        return (IMG_b80d17bf_ASSET.readall())
+        return (LOGO_COLLINGWOOD_ASSET.readall())
     elif team_id == 5:  #ESS
-        return (IMG_3ab23b2c_ASSET.readall())
+        return (LOGO_ESSENDON_ASSET.readall())
     elif team_id == 6:  #FRE
-        return (IMG_5fcab032_ASSET.readall())
+        return (LOGO_FREEMANTLE_ASSET.readall())
     elif team_id == 7:  #GEE
-        return (IMG_7f4400a6_ASSET.readall())
+        return (LOGO_GEELONG_ASSET.readall())
     elif team_id == 8:  #GCS
-        return (IMG_6eee3288_ASSET.readall())
+        return (LOGO_GOLD_COAST_ASSET.readall())
     elif team_id == 9:  #GWS
-        return (IMG_7cfe06b3_ASSET.readall())
+        return (LOGO_GREATER_WESTERN_SYDNEY_ASSET.readall())
     elif team_id == 10:  #HAW
-        return (IMG_a6f4b77b_ASSET.readall())
+        return (LOGO_HAWTHORN_ASSET.readall())
     elif team_id == 11:  #MEL
-        return (IMG_4efc1ef5_ASSET.readall())
+        return (LOGO_MELBOURNE_ASSET.readall())
     elif team_id == 12:  #NOR
-        return (IMG_cd4916c8_ASSET.readall())
+        return (LOGO_NORTH_MELBOURNE_ASSET.readall())
     elif team_id == 13:  #POR
-        return (IMG_6f09d298_ASSET.readall())
+        return (LOGO_PORT_ADELAIDE_ASSET.readall())
     elif team_id == 14:  #RIC
-        return (IMG_32569da5_ASSET.readall())
+        return (LOGO_RICHMOND_ASSET.readall())
     elif team_id == 15:  #STK
-        return (IMG_762b0e22_ASSET.readall())
+        return (LOGO_ST_KILDA_ASSET.readall())
     elif team_id == 16:  #SYD
-        return (IMG_f6e2c9f4_ASSET.readall())
+        return (LOGO_SYDNEY_ASSET.readall())
     elif team_id == 17:  #WCE
-        return (IMG_b3925bcb_ASSET.readall())
+        return (LOGO_WEST_COAST_ASSET.readall())
     elif team_id == 18:  #WBD
-        return (IMG_1aac21aa_ASSET.readall())
+        return (LOGO_WESTERN_BULLDOGS_ASSET.readall())
     return None
 
 #get abbreviated team name from the team_id. Teams are in alphabetical order
@@ -169,10 +168,22 @@ def main(config):
             agames.append(game_data[i]["id"])
 
     #make sure we have the first game either home or away
-    if agames[0] > hgames[0]:
+    if len(agames) > 0 and len(hgames) > 0:
+        if agames[0] > hgames[0]:
+            nextgame_id = int(hgames[0])
+        else:
+            nextgame_id = int(agames[0])
+    elif len(agames) > 0:
+        nextgame_id = int(agames[0])
+    elif len(hgames) > 0:
         nextgame_id = int(hgames[0])
     else:
-        nextgame_id = int(agames[0])
+        # No games found
+        return render.Root(
+            child = render.Box(
+                child = render.WrappedText("No upcoming games found.", font = "tom-thumb", align = "center"),
+            ),
+        )
 
     hometeam_id = ""
     awayteam_id = ""
@@ -198,8 +209,8 @@ def main(config):
     display_time = nextgamedate[11:16]
 
     #get icon data
-    home_team_icon = base64.decode(getTeamIconFromID(hometeam_id))
-    away_team_icon = base64.decode(getTeamIconFromID(awayteam_id))
+    home_team_icon = getTeamIconFromID(hometeam_id)
+    away_team_icon = getTeamIconFromID(awayteam_id)
 
     #get abbreviated team name
     home_team_abb = getTeamAbbFromID(hometeam_id)

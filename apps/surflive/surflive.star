@@ -6,22 +6,23 @@ Author: rcarton
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/wave.png", WAVE_ICON_ASSET = "file")
+load("images/wind.png", WIND_ICON_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_bb48d7f8.png", IMG_bb48d7f8_ASSET = "file")
 
 #### CONFIG THINGS
 
-# DISPLAY
-WIDTH = 64
-HEIGHT = 32
+WAVE_ICON = WAVE_ICON_ASSET.readall()
+WIND_ICON = WIND_ICON_ASSET.readall()
+WAVE_ICON_WIDTH = 12
 
-WAVE_ICON = IMG_bb48d7f8_ASSET.readall():
+def main(config):
+    if config.get("spot"):
         spot = json.decode(config.get("spot"))
         spot_name = spot["display"]
         spot_id = spot["value"]
@@ -75,9 +76,9 @@ def render_surf_and_period(wave, use_wave_height):
     else:
         content = "{swell_height}{wave_height_unit} @ {period}s".format(**wave)
 
-    if size_str(content) >= WIDTH - WAVE_ICON_WIDTH - 1:
+    if size_str(content) >= canvas.width() - WAVE_ICON_WIDTH - 1:
         render_content = render.Marquee(
-            width = WIDTH - WAVE_ICON_WIDTH - 1,
+            width = canvas.width() - WAVE_ICON_WIDTH - 1,
             child = render.Text(content = content),
         )
     else:

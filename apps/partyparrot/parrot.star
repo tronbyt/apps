@@ -5,9 +5,6 @@ Description: 12 different party parrots to choose from.
 Author: tobyxdd
 """
 
-load("encoding/base64.star", "base64")
-load("render.star", "render")
-load("schema.star", "schema")
 load("images/img_28055a15.gif", IMG_28055a15_ASSET = "file")
 load("images/img_36a3ea86.gif", IMG_36a3ea86_ASSET = "file")
 load("images/img_3bea0be5.gif", IMG_3bea0be5_ASSET = "file")
@@ -20,6 +17,8 @@ load("images/img_d0fe078e.gif", IMG_d0fe078e_ASSET = "file")
 load("images/img_de666e51.gif", IMG_de666e51_ASSET = "file")
 load("images/img_f139e258.gif", IMG_f139e258_ASSET = "file")
 load("images/img_f9caea9d.gif", IMG_f9caea9d_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
 
 GIFs = {
     "normal": IMG_de666e51_ASSET.readall(),

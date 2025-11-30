@@ -6,17 +6,17 @@ Author: Robert Ison
 """
 
 load("encoding/base64.star", "base64")  #to encode/decode json data going to and from cache
+load("images/ten_commandments_generic_1.png", TEN_COMMANDMENTS_GENERIC_1_ASSET = "file")
+load("images/ten_commandments_generic_2.png", TEN_COMMANDMENTS_GENERIC_2_ASSET = "file")
+load("images/ten_commandments_generic_3.png", TEN_COMMANDMENTS_GENERIC_3_ASSET = "file")
+load("images/ten_commandments_generic_4.png", TEN_COMMANDMENTS_GENERIC_4_ASSET = "file")
+load("images/ten_commandments_generic_5.png", TEN_COMMANDMENTS_GENERIC_5_ASSET = "file")
+load("images/ten_commandments_generic_6.png", TEN_COMMANDMENTS_GENERIC_6_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_15ea9473.png", IMG_15ea9473_ASSET = "file")
-load("images/img_2b2acc7c.png", IMG_2b2acc7c_ASSET = "file")
-load("images/img_314e6210.png", IMG_314e6210_ASSET = "file")
-load("images/img_69b63079.png", IMG_69b63079_ASSET = "file")
-load("images/img_9a6d18a4.png", IMG_9a6d18a4_ASSET = "file")
-load("images/img_9d801e9f.png", IMG_9d801e9f_ASSET = "file")
 
 DEFAULT_TIMEZONE = "America/New_York"
 
@@ -76,22 +76,22 @@ commandments = {
 #Christian images
 images = {
     0: {
-        "image": IMG_314e6210_ASSET.readall(),
+        "image": TEN_COMMANDMENTS_GENERIC_3_ASSET.readall(),
     },
     1: {
-        "image": IMG_9a6d18a4_ASSET.readall(),
+        "image": TEN_COMMANDMENTS_GENERIC_5_ASSET.readall(),
     },
     2: {
-        "image": IMG_2b2acc7c_ASSET.readall(),
+        "image": TEN_COMMANDMENTS_GENERIC_2_ASSET.readall(),
     },
     3: {
-        "image": IMG_9d801e9f_ASSET.readall(),
+        "image": TEN_COMMANDMENTS_GENERIC_6_ASSET.readall(),
     },
     4: {
-        "image": IMG_69b63079_ASSET.readall(),
+        "image": TEN_COMMANDMENTS_GENERIC_4_ASSET.readall(),
     },
     5: {
-        "image": IMG_15ea9473_ASSET.readall(),
+        "image": TEN_COMMANDMENTS_GENERIC_1_ASSET.readall(),
     },
 }
 

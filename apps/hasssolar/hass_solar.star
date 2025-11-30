@@ -169,8 +169,6 @@ def fetch_entity(entity_key, config, default_unit):
         return rep.json()
     return None
 
-
-
 def unit_for_entity(entity):
     if "attributes" in entity and "unit_of_measurement" in entity["attributes"]:
         return entity["attributes"]["unit_of_measurement"]

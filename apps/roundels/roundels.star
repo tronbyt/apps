@@ -5,40 +5,68 @@ Description: Display Air Force roundels of world.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")
+load("images/australia.png", AUSTRALIA_ASSET = "file")
+load("images/australia_flag.webp", AUSTRALIA_FLAG_ASSET = "file")
+load("images/brazil.png", BRAZIL_ASSET = "file")
+load("images/brazil_flag.webp", BRAZIL_FLAG_ASSET = "file")
+load("images/china.png", CHINA_ASSET = "file")
+load("images/china_flag.webp", CHINA_FLAG_ASSET = "file")
+load("images/egypt.png", EGYPT_ASSET = "file")
+load("images/egypt_flag.webp", EGYPT_FLAG_ASSET = "file")
+load("images/finland.png", FINLAND_ASSET = "file")
+load("images/finland_flag.webp", FINLAND_FLAG_ASSET = "file")
+load("images/france.png", FRANCE_ASSET = "file")
+load("images/france_flag.webp", FRANCE_FLAG_ASSET = "file")
+load("images/germany.png", GERMANY_ASSET = "file")
+load("images/germany_flag.webp", GERMANY_FLAG_ASSET = "file")
+load("images/greece.png", GREECE_ASSET = "file")
+load("images/greece_flag.webp", GREECE_FLAG_ASSET = "file")
+load("images/india.png", INDIA_ASSET = "file")
+load("images/india_flag.webp", INDIA_FLAG_ASSET = "file")
+load("images/indonesia.png", INDONESIA_ASSET = "file")
+load("images/indonesia_flag.webp", INDONESIA_FLAG_ASSET = "file")
+load("images/iran.png", IRAN_ASSET = "file")
+load("images/iran_flag.webp", IRAN_FLAG_ASSET = "file")
+load("images/israel.png", ISRAEL_ASSET = "file")
+load("images/israel_flag.webp", ISRAEL_FLAG_ASSET = "file")
+load("images/italy.png", ITALY_ASSET = "file")
+load("images/italy_flag.webp", ITALY_FLAG_ASSET = "file")
+load("images/japan.png", JAPAN_ASSET = "file")
+load("images/japan_flag.webp", JAPAN_FLAG_ASSET = "file")
+load("images/mexico.png", MEXICO_ASSET = "file")
+load("images/mexico_flag.webp", MEXICO_FLAG_ASSET = "file")
+load("images/norway.png", NORWAY_ASSET = "file")
+load("images/norway_flag.webp", NORWAY_FLAG_ASSET = "file")
+load("images/pakistan.png", PAKISTAN_ASSET = "file")
+load("images/pakistan_flag.webp", PAKISTAN_FLAG_ASSET = "file")
+load("images/russia.png", RUSSIA_ASSET = "file")
+load("images/russia_flag.webp", RUSSIA_FLAG_ASSET = "file")
+load("images/saudi_arabia.png", SAUDI_ARABIA_ASSET = "file")
+load("images/saudi_arabia_flag.webp", SAUDI_ARABIA_FLAG_ASSET = "file")
+load("images/south_korea.png", SOUTH_KOREA_ASSET = "file")
+load("images/south_korea_flag.webp", SOUTH_KOREA_FLAG_ASSET = "file")
+load("images/spain.png", SPAIN_ASSET = "file")
+load("images/spain_flag.webp", SPAIN_FLAG_ASSET = "file")
+load("images/sweden.png", SWEDEN_ASSET = "file")
+load("images/sweden_flag.webp", SWEDEN_FLAG_ASSET = "file")
+load("images/switzerland.png", SWITZERLAND_ASSET = "file")
+load("images/switzerland_flag.webp", SWITZERLAND_FLAG_ASSET = "file")
+load("images/thailand.png", THAILAND_ASSET = "file")
+load("images/thailand_flag.webp", THAILAND_FLAG_ASSET = "file")
+load("images/turkey.png", TURKEY_ASSET = "file")
+load("images/turkey_flag.webp", TURKEY_FLAG_ASSET = "file")
+load("images/uae.png", UAE_ASSET = "file")
+load("images/uae_flag.webp", UAE_FLAG_ASSET = "file")
+load("images/ukraine.png", UKRAINE_ASSET = "file")
+load("images/ukraine_flag.webp", UKRAINE_FLAG_ASSET = "file")
+load("images/united_kingdom.png", UNITED_KINGDOM_ASSET = "file")
+load("images/united_kingdom_flag.webp", UNITED_KINGDOM_FLAG_ASSET = "file")
+load("images/united_states.png", UNITED_STATES_ASSET = "file")
+load("images/united_states_flag.webp", UNITED_STATES_FLAG_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_03b8c495.png", IMG_03b8c495_ASSET = "file")
-load("images/img_0ba6c171.png", IMG_0ba6c171_ASSET = "file")
-load("images/img_11a0dccf.png", IMG_11a0dccf_ASSET = "file")
-load("images/img_1bb7fddc.png", IMG_1bb7fddc_ASSET = "file")
-load("images/img_2ce0454f.png", IMG_2ce0454f_ASSET = "file")
-load("images/img_37b77aa4.png", IMG_37b77aa4_ASSET = "file")
-load("images/img_3f2eb729.png", IMG_3f2eb729_ASSET = "file")
-load("images/img_430d3897.png", IMG_430d3897_ASSET = "file")
-load("images/img_4495ff38.png", IMG_4495ff38_ASSET = "file")
-load("images/img_4df8e501.png", IMG_4df8e501_ASSET = "file")
-load("images/img_51d8c9f3.png", IMG_51d8c9f3_ASSET = "file")
-load("images/img_5362593b.png", IMG_5362593b_ASSET = "file")
-load("images/img_71da1483.png", IMG_71da1483_ASSET = "file")
-load("images/img_75d532cf.png", IMG_75d532cf_ASSET = "file")
-load("images/img_772fa7b8.png", IMG_772fa7b8_ASSET = "file")
-load("images/img_7b521d67.png", IMG_7b521d67_ASSET = "file")
-load("images/img_800194ca.png", IMG_800194ca_ASSET = "file")
-load("images/img_83bb8130.png", IMG_83bb8130_ASSET = "file")
-load("images/img_98b6874d.png", IMG_98b6874d_ASSET = "file")
-load("images/img_a4b2255a.png", IMG_a4b2255a_ASSET = "file")
-load("images/img_aa8e7d27.png", IMG_aa8e7d27_ASSET = "file")
-load("images/img_b532fdb9.png", IMG_b532fdb9_ASSET = "file")
-load("images/img_b6c3b72a.png", IMG_b6c3b72a_ASSET = "file")
-load("images/img_c72be2e9.png", IMG_c72be2e9_ASSET = "file")
-load("images/img_cbdeef67.png", IMG_cbdeef67_ASSET = "file")
-load("images/img_ea8eed65.png", IMG_ea8eed65_ASSET = "file")
-load("images/img_ec9f1b39.png", IMG_ec9f1b39_ASSET = "file")
-load("images/img_ef12827e.png", IMG_ef12827e_ASSET = "file")
-load("images/img_fe652048.png", IMG_fe652048_ASSET = "file")
 
 SCREEN_WIDTH = 64
 SCREEN_HEIGHT = 32
@@ -46,148 +74,148 @@ SCREEN_HEIGHT = 32
 DATA = {
     "United States": {
         "order": 1,
-        "roundel": IMG_cbdeef67_ASSET.readall(),
-        "flag": "UklGRnoFAABXRUJQVlA4TG0FAAAvJ0AHEIcGsbbdtg0A0r2n7j9G5skIncD/H2tIsm23baQPkJVzXEWttNZYs5rm0M0A4H/IbSQ5kkr0avk7/3E2nSWyu6syE4otAAiTP2nu7hZXl4d2DsHjBH4R7sBB3GnuDsnbwmBaGjdEEgkgABsEEiSLRGATJLlRBDWwFUuygK1YIKCg1KLM8gKCSUSCgRIWNoBsA0HWHQWpomjllCwjDQNwRCwgAIBYJg+aRACgmi3aavg+XEoFgLFcoaCTVpmR8A/qENShT0KqcJbFhUEMiuFjp01RmjV4X+y2oIFRHyI/JaaavJZpqGwG/3LzUQx9kvuV8LuGPrzFl9HuDNrQxLuMbbfsedMiA7ShN5j5mbs/eIt/gz027KFXRyaua5drhn/Pxl8w3uzE8nGQ+sKYaGJQF/fgLYQHd+cePEQJsQYF/PqPw+9t4fCX63w6kMuwNNvw/vJ0uX86HF5s3tzt5u1lvGwvLuxCLt83u8uz2Q/OcbZZH/K/sKhJGe1/bBnALBVQCchSIYYFObAICeHLmimjVJBbQSaWSE1lWMCSFokikmGq7nyC2wmLkM37poBx4vOzjqWGag7LRovYPMgDo22Oxj3Z8W66GS1l9Pnn9dfcx/PnKWtasay9Uc3iZu0S9utvTKir8fjnb06/bfo6+Pb6+mYMgmyb1V/7OUNETEBhvLBs207bZP4/xphRVvTE5JSZaVidhBTR/5SmbdvxRnljO6lt225U27Zt2/o/65gV1Maevm++zhLuJ6L/ity2bcBjgFX3FYcQwv3d5dX1TQjx6vKirHlc9B9aOusOL7fPyvTqoTLzts+7B6isKN8WatfStN3R2IAbovqBdgjHCQEZHjKLXW5PFae6prIONbX1ADaPr54qhGNKm5GVHBWSMCiMXsHxOQ73Bm1yqDjBR3n/pniKIR4pZKJZZAVK9g+51mCyWQxaGQPwcaI2qDs6IgxjpGTSB6WZccF2g5wJkBnD8mYmH2t0IhnvJl5JXFp9wLOP0uzUxCggIa1kd2WZPKfmIT9RODKayXaxFUi1loCotJJ9YA/AKrBCpfHWhzezsXpgC8JsAEoWynjEcp3ZKzCMKMjHpBQzPJw/NAhoJsdFNBYqp/OSI/zNagmDYMEc4+ndbQ4sloLnrltCpfc5ewd5KdHhvuRHFB6fu7a0OHO4b6IZxIqw7BglqzD5hCfn7fN6YoVomZZosSTy8021iNHcLqvsHK+8YByp1uwXHp2cmpmWEhdiVzM83JxNQbksZSh8t/hKxwXb9HIx+4Xc+6j3vNlmcqsL1gcX153XpzQzOtjLbFSrYDD7R+asL0z3qt7SNv/7ev3/+ksiEvP2V3hDuB60CCwA+Rc/f/+8SNgvINZYAiJTch1rWFwnR268v0b88PN2zyR6n4jErGyizOSoIMEvJeYBAOXFzutXdAkvKmCVn8GyIzMuyGZQSvlPrraE5sxP9he6D/ZLUyJ87WbAJyAiIcuxvMQNocU1lyO/2LU+O0c0f3RZVRSs+6UAudErPDnXyZuGWZovTvpWPPxc3zOIVRafMCIK9oFQZjKt3gIYtbzWnyevD7b4Uv6/JV4Ejtz4oF8ilhpDCib7T117WN3PS42LAhLT8p1cUsACnLnpSYiMTUovnt8CGk7qNzKDDFLBusEempTrml0g4vrTFuDO8H76Of1gABR6o52sRp2C/UNptAeGxMQiJNCqZcDj2eu9KiDJsTmDac7MZlFGpJ9ZyYRJTbE7A1dHmw2YpKm2dqK21l6eyemqwozYEH9v4DskqbChb4CGGtDYsd3UIuIbb+7q7ulo6+3j6UUf+mmABsduRXWdEyIhgu1GRzqGhzBMo53NIgAA",
+        "roundel": UNITED_STATES_ASSET.readall(),
+        "flag": UNITED_STATES_FLAG_ASSET.readall(),
     },
     "Russia": {
         "order": 2,
-        "roundel": IMG_fe652048_ASSET.readall(),
-        "flag": "UklGRjYDAABXRUJQVlA4TCkDAAAvJ0AHEPfjOADbNJLUY2b43Rg3zO0/AjqK1oAb2ZIi6VUtM0mrr//SOrMeMPNdVX3HkWyrypmLu8PK1iQA+UdCCq5X3Ma2rSor+v/jWoB7GUTkDBEFUAj9UAEZTZBB7O4SQKL6R6X+3Pf7VfHVwrVwLZwzOEOvBDTrlWegDdA/qoPcLr1yHtUW6AC0jGrhjCNQDShHYyy3ff3/h84YRBXDdXvfzDrUf5q3J57HA6awBZmhQwYa6JCBDhlokGGgoc6p9Jcf/vrhV/IW/GsN04pNPjK6o1Yj5Rpb/k19tk3DtwenPr3bFj7E80g7N01eY3VqmucQNjKiyc2ed0goIXRSJ6H55HD2O9ffjiNihBFGNAgMGAECAYGRmZ+uRqOW+axnvWjJ9OI+2HAsPVYTp2XPfNw06zdN5l8vnfEB/uvVVUHoRKPyFjwLaFKAk01kH0bbfzlNqRhlJaoeXSVkjabr02Q73DPAliTZtLX34bVt27Zt27atfz9rz1rX790R/VeYtg3jYghdh1gA4lKjI8LDyPDI6JSYOOsrlZGaaMVGJYSSIcFBBELjSSYnhEepdxn6LDYlLSk5PSyUfq/bZcui2+P1Bcl3SQmJAJOSyfig4PRQv9uGLszv/EHBAOjzuF22Pz3Ua3+7XMQPAfxv4n023FknR4ckiZPMHPfXTk734rOPDzaxQa6Ta6vACncODo/N7zynhztTM/vbm0ItAcAyucTlnd0DksT2HEfHAgxv6ZoTuQhgAcA8lBK9a0w0Jcfx6dkAomtKn3cdFUNbn/hJEmvKCToIv5QM3QnBiKYxfcFJB+XyYH9fL8D+wZFPki5n3gMM9rRXoRKoIMvJ6vbOnr6Bca0rnOrrbLj8UB0oKoRlAFAKoLa9s6v7g+zu6mgrQP7ZS2t1FaB39VQCAMUsIgsBpUDzC4kqSSXCcqk5Gc11qIS5a0wmHWqU3+hKJRXlpTW1dfWi6lBTUGTuSvPOX1pr2dpANj40NfOh8RwAGlhfh7wCSFl3dv7C59aGlvu76ytLFl9v7h7vHy4uSfIcAPhCPjxeW823V9ZXynn3dP9M3uPt9tUCAAA=",
+        "roundel": RUSSIA_ASSET.readall(),
+        "flag": RUSSIA_FLAG_ASSET.readall(),
     },
     "China": {
         "order": 3,
-        "roundel": IMG_430d3897_ASSET.readall(),
-        "flag": "UklGRsACAABXRUJQVlA4TLQCAAAvJ0AHEKfCOpJkJXtPkD/yD48A3DnDgnAQSZIizewx+fdHBuD5u8uB27aRJDszs7v/f+y9kZvYtp1qGUABDmiRgIUc5KAHB+jgUYZf5VgmgkmaajsGgRb+m2NWnWDzYQOTsFOLY/QYXaMumz5WTmcM5iL8CEtDioylLAs5sJADR7835EgteiF/Sn+CwFo4Az9RJujfYH8jBMH/TiiMoYlyGeSckKyp7cfh4JinJojcUpkjkncoSXM9clWgC3CmZA+lCaWZNcsGsP5Yf+y/+Ktr/mmGh/p76Y5nbd89uXvBn7vk/0g1PYm4X4/BALGRJEXS3vP/MTMzM/M9M/rvy+/2zK0JVRH9d6C2kSS5MZjM7L2vMAB8vf/udweA+9+fj68/w8b5fh8bn/vtLTa3dyQ3WAPAdrfXPt33589kPuXhFndvfh/pJ11XAbzeP9ytVyQ5XyzHXMxnJMuY3r75SLos6bzwBIAggFc+POJZHLyk4nxSOPdaBLyKCAFhkhGS0VicifJA4HHceFxiuXZqS6PEeXXmAK79pry6FqVbYVaS5cHmH9eFA7gRjwr5rdKvwpSFnzxxwBkQ30dQXxoVnKeem0vxfQRu3Fapq2q6XN/cm3gDQY/82i6vNGWtiibre38ACIoKeMIBv3yUukozFqphOs88ah2TFRONdDs1pd4mzVYa63uNkaOl0+LhiDaLuUpj9WC/tOYtNEahlrJqFFjaXi1zpqj2Vw/q/1ZbmlWxYPIojMZwvLSiZqH+h46XYgGSCBm1vaoWa72ZSTRmf1WUyL+3jdIpePpX/ofslVDh38zLU7lSBVApo/SSk6W3VO/NyuCUHDZH41GTdZIc1Krl0ksBiqVavYf2bDqf/Hx+G/L8fX38/LaaDXHqJNnvAc3OpzF+/zZ0R/90nVabROe3+2UAAA==",
+        "roundel": CHINA_ASSET.readall(),
+        "flag": CHINA_FLAG_ASSET.readall(),
     },
     "India": {
         "order": 4,
-        "roundel": IMG_1bb7fddc_ASSET.readall(),
-        "flag": "UklGRsgDAABXRUJQVlA4TLwDAAAvJ0AHEN8EubbdRJK+1MwMEXQamP+q99y9YhgwSErDdSTZqjLn3ofbP2mROhm4u8N94zq23TR6kpaZoYntaJvcz20pzCRZUAMBQBBdwp1OhuZ7sQOVEZiBSKYxgjvN3V+CANf/1Um4T+jX+SmBaTgO0s+Ejwkfk35B+CjXVTupQmKDTOK9tv8qLWb6bkD3dymEc4Zw4W/yKfH3Gb3zTOWS+9lHfm+18iP38x79PWv/10bhUbBXS3UuqM4Ah5hOBdcpYBDTGeCACwrkIA42Eghn0FeRJJE1sHVDQYB/IQlJUIDxkUBrAjeEbwAdSdxrGX0EpRKYOr7nQhdJaD6eWl/7WQmMIYAxjGGAAQYYIIAwghGAMAIIYavCVYGFBm9VToStMhsVbgosFFgTFiqcPGaTzXSSfuayrP2/J79P9fdS133rsmzMx3/b0S9Unuxf5Ty7IiPOznoSswCF5zh4z0F5Yf7hjIDXUiwiJ2QsCmmG5LFiC6vD0g07T9QtxayGljVU5e1RYuBfobXSluqMVipuFZqiWDbiM0hvYa3KY923c7HO7PVt9YYnBom2tR1vlNS2bbdxbdu2bdu2O7jaJP///Zm5gueJ6L8jt20kSYF6hNqO8wgVgLPbu+srAL+ub37fnqlsma3fe6rTm8sLnl/cA3g4PyF5fPjL+tyWfO/096+dXVxd8Pvrc4gc5ADQ//H+w4eTIwA4ONzf28fBLoAXbF98D5MCAaCP7LU898hn4OUZT29sw9P2xZdEa0Fe7EE3uoBOsoPtaEPrqwWJiiWzQ6YE2TFhCVeltpg5/7IoWFUokRKsCgqKJVHCj9mh0fGJKQCY4NhIn7nEqxL5/ef8a2LWTi0czs9Mjo8OdwqOdY9Ozi/4/XVSK43rGulmfW5umiRn59UAzHg7KuG87ubusrKoFo2trLouri17rDor4u+lyJobN7DstvLvrLqtbIBua/+O86r7yuqS53/4YGnNzcV93d4GnNSAnU9gUHAIGODjoIbbKtdc1Ep4b5rxDYtJSASSgGQgJSE2KizIV+HXISjKVBIRlwhRkalkWjoQHxsVGR5KhiM6XqPVFZVo0mQKyioygEwyixpAC51ehmRVXgKzpOqoNxSW6tITIVoVlYISRKbBhpJqLCzVZ0hNJRVLKIrLLCSnZmh0eiMAA3WaLPGqTFNJmUEDownILsgl8/KLCkkCJqNBp5WvmgpLSssqjMhpqmsQ/Dk11tdVNxUUi6aklCyvblDl1m6pbBnLczVVTRVAZVVNbbMKAA==",
+        "roundel": INDIA_ASSET.readall(),
+        "flag": INDIA_FLAG_ASSET.readall(),
     },
     "Japan": {
         "order": 5,
-        "roundel": IMG_a4b2255a_ASSET.readall(),
-        "flag": "UklGRpQCAABXRUJQVlA4TIcCAAAvJ0AHEMfiOJIkR6nTCvy3B2t4ag1T7YajAA6caAKLBpTww78MTLSrSRi3beTIu3u5/6rue43kfCM7rbXtTa5NUznxkVgcB8sK7JANWINVemeP6lAdVK8BkvqfWjVoaNRiL9+aEwYG///PwMCgHAwMDEDLRmkOOoJ27ZQroObv9/UMDEAX0NqwAdVTR4Zro7QoR5o6A+WNUgKKUpfKsQWNUgep7wagVuqDYQuqgmqG1ft9l8vxOm1678dgmTsrrXE0FrWa4yne77v4///ZYZ0a35F8/Li9Z3dud4X/53DkUP/T73M7efNaku/n0Hw/Nz2CoQQlTAnKUIYylPFsiJ33kQGCbNumo+/w+8do27ZtY/4z6c7L/cEEzonoPyO3bRxxymrrbT+hAZiqlktJBUhYPqxObWk9jIXZljZdjoOQgQfADyOgVo+T8uGc8LnRmcN2c4SVgMWsbejqoGVn825QI+tsxi1gvNkga643EhRMvYdhWL/ZfNH14HvF/K9t6IWRMKcPZBTGhsfZ3ea+0T/n7P4LAE8zqSZTONdfAPBJ3u+nikTGZVd9kJ87smKKXaHegYeDPlwqpa433Bi9uxcLeN0VzUd5gfn1KRVecSGriT7leuGddOouinAv19MzTGlLcdVd+C/K3BQ7cn3jVpcsyawb9S2lgHNZXYSDh06p6wcHfcDuu/KWssQjvFTYu+sqXDmy9VTInD106vHE0FM0UgHGwTb3HB39g0EQPRnI8DsMO1vw/JAM1L+/F1b9j+fWRzg2MX4EjHOSJEciT/yc+euOrHNthM324cympo6tqZnZ4+WjRQCYHBshsbhObqxOa63ZBa2HsTU1N7u6srxGLmN1bkoDAAA=",
+        "roundel": JAPAN_ASSET.readall(),
+        "flag": JAPAN_FLAG_ASSET.readall(),
     },
     "Israel": {
         "order": 6,
-        "roundel": IMG_98b6874d_ASSET.readall(),
-        "flag": "UklGRvADAABXRUJQVlA4TOMDAAAvJ0AHEL/kOJIcRVK3jukHPp7X92YmqSU34Ei2rara+xzcMveYGTF8zRy+XDv3OA7ANo0kucd8M9z+O9wo/GdKbcENBIBgdFHpVDZqLuAy87HMDnku4PY726o/DNDu/3brCqolE0CbyMlsKLNFKDKraiqWpWRJSmSVFIsaSYHSU/xCRwptIpf/nymCrGS0b+kxhI83v6/pB96lQTtF6em3E7lYlrGlhxtDePMr/iEaX/UZUgD7oxf+yqCK/a2HIpmtNPWj4yCCCHGQgwI3iTu27VBD1J+vCREIIQQQQggBhCBACAKEJDo5aDuY6fXP1z7mI5vPXpbXnc3+Zzy2bsp69xC8Ww2XRsNnxIDMoNHFx+3RjKISyDzIc5Bpio7avTHgj6LAoNEB+QLyjaIvim4MmIKMUgTkiwGXFPUpYsAFyGsD/kDeV623dq9d45IiBhy6xoAirsE1DBodkEAaNgf2x0PbgFa745Fyrtomny92W99AVmW5zdu2uTvsTUljjF3kSpYaxSDBtm1DkkJl27btZtm2bdtVibI93kREZM7g3oj+M3DbSFEqmGN8hQDg9O7k+OjwAkfHJ/ePpxOCA1q8Wxdujw/Oz8BLA3B5tk/ubR8caZ9u8fZ+Y3OLF+c03rgqHt6BCPD0kBW3G7PxfI/k9s7BLrm2s73FPePl6LnJPSxxsOc38IusQkFWYkyoj2I7nclouISB5htX39i+j7eMnj+AymQlgArAerq4yPBgIDQyPr2ova3m499fe2tPQDcAdKET6GA721Q4PME20Tqh1Y6ejLiwAE8AXoGh0Qnp+ZXqCR1st3PvyNP/oWBF1JPsExqTmJlf3Il2CyV5qdE+kmnl4VrUV1So6iokCTtZ2HcAz7J8zSdzFP/0hKicpNRo55FyUvOK88uYlhDtpY1xef9K1Kmi0gDICdlpRS46sbynh5SXKgLuxSWhok7oE1lIDxFSWo7kJJ5lmXkJ7lJIeW+Qs0TEJpV3ljAvW6+MS3tmUVfRqciMiE/xcx6lsMRDBOAgMl08FdXfERou6mMY3zZLvjHp+WUd7W1geW92cmy4ryLp4RIx8PU0XKj13wItZDPRZz1dRIivN+kTEjmSW137/v1ZrWHVxCaSbAQaUE+yjqzl+48FtXUmTdfSng4WpsVHhgSDoZHxydl9zY12k7ZrBsY++2O8XW9Mhssz4NxgMt+4Kr7hsSm5fdWq3dCfEu62/Tx+adzb4sPq2jqwxhWS3No32E7n7u0XEuTtodwYt54xS25u3N8uCvaaeHlcmJtdW1oGsPKwRWL5GXidmxLW7xYFLWmfbn4WAGamHycFAAA=",
+        "roundel": ISRAEL_ASSET.readall(),
+        "flag": ISRAEL_FLAG_ASSET.readall(),
     },
     "France": {
         "order": 7,
-        "roundel": IMG_0ba6c171_ASSET.readall(),
-        "flag": "UklGRuACAABXRUJQVlA4TNMCAAAvJ0AHEG/jOJJtVTn32f84rMg/BEIhC1auT+45abipbduJzk8GqDBAhwhabGEOE/SpTTM/XseRbKvKufd+wWHJivQJhyAIwO3JPQdqLAAIqkd1ze5kjj04doDEAowCmcgaHJHsbsn+Tx4AJP3XWPx+PzUWNRbv581r/gXrPYD87/drmLGKpP4ofQuwGaX/S+oC5P0+DQKuq7vsVyw5en63dpkeVt0mve43ognRDM7rRYtleJqXX0TVQOS8seyMMiYwAQuGi7hKI0QIEUJCiBByiCSRjAL8DSqnAfkQ/Q7wKfCdzCIwm+U5yafCjiHYwlLMndmxmzPX7XxwkiRChEhEEUVSIkSRRKwUr5DCKPtJjMFuW1D5K4MPb70sq4TnbuTOZJPm/h37uRErNCzM+Q5gr6Y9mqIQZsxtaSVeeVwcDvHQHFUtNr3yMI37cgwaYNu2ZEiqtsfdY9u2bdv2zP8/V0ZkZH1C3Ij+O3DbNpIYaOA9H+Kp6uriQmMTgPlCKpnNeQFO/38vvaXG5hb78nEAiUxa/rv/75+7qxttamtBe0cXOlU7tDwURiQaYz9F1fml6sXVNYATvWlr76Kjpd0+68IRRKvP2J3+YWPz9KalXcoQr26N3Tr8tk4MFq0edZHSk1vS2cHrDWCdt01YtLTPzSwWY9enTutCO0Yb+1ov1V/mQItnLLdRbMGJtW1iWoUG4FBr3rXaPTakBl2kcPzg87OWOm1t2+HEEBpSF6k9erAGTQFgx4qsUGzpsMuOHRlfkQoAu7x9QrEFVDhIMVIjLrtCB8RuBC41tHj4evTZBcDfNTFjwhqFy57QoW9iTMhNiuGNIgBaSovjBSJ1xIyM6vgEMAnkY9FIWHRgpfe+cZ0EMDU9M6vTlUV0iTj7uxre0cnX/aM+T2JqfmHp37Muly0pTWeK6erv6R4eVZ/ePry5xX9POvnvGu6eAby8vn96qgoA",
+        "roundel": FRANCE_ASSET.readall(),
+        "flag": FRANCE_FLAG_ASSET.readall(),
     },
     "United Kingdom": {
         "order": 8,
-        "roundel": IMG_772fa7b8_ASSET.readall(),
-        "flag": "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",
+        "roundel": UNITED_KINGDOM_ASSET.readall(),
+        "flag": UNITED_KINGDOM_FLAG_ASSET.readall(),
     },
     "South Korea": {
         "order": 9,
-        "roundel": IMG_5362593b_ASSET.readall(),
-        "flag": "UklGRtwDAABXRUJQVlA4TNADAAAvJ0AHENXI3f9/UZstUyf2bpnq7u5uk7v7mIeJrTa5T+7u7k54mrq7uysPkeN3v+ufgEMMKgdR7JIUKV/kImgSqNW2LW+u/Da8QhRuQQNkh4yALiouknkNLoNsJZPMqapkKJIkq7YlZT9mkmxJMtln8eN1U2vbmyR0VDQFsZCZiTEC+E1QxioBJFQDv4D/YKA5KFs2psvAbSNF7sHSMTxCQuQSg2tMrrK6wvEKt2tEhUL+R3me4KA305L8RI7Qj6XikyRxFJfZX+N9DcwV3MAdEIkwlxEMXsJ5XOAht54nnKKki8l9svMEAScBtQDaa0SGeYBX+BJCJBIAnxAvAMD2DVnuZ7gnmEu4CPN5KM7z9ZznHg578s7B4TDTLB/MIwj/A5D0wQxkATk23Tu4A3aaZSOsPZCvs4G8kHkBQOwDB4tRCVlAGZsOkODkK6ajInIVh0HFzcUwxAuSMyDhoSnGoTUmoQFMeD8Q0XsqYAfI1AiaA49vCaLAgJgwCJFApeknIxoG1ydQ6IVJqANDYaq4ZVWhqne7peGwTeWdXal5FQuCSLSGq9zKRShe4NnXowa4oIVBAJiGtFrqTDtYttasQypVrSpUZQGoQyfhk0RhBZDz8qIgXnyCwgFgi6k2iEuE6osOsIibaoCLwhkwoIJ/AdACgO2ewMwAJ/JlCQCTgoum4AMwcFnwuYQpQZVlR/dOG3H53tYwAdkzYPFub2p2R9CSrFZtrFqvz+MhVhAvgOQYLoFC8+QVMr5R6qjNtpDW5vpHnfKGx4I9IZrKrLut9qtCvqz6ouNvahqRVvuCKqbaQMFMpiOc+hjz+/0tnh4KxCWl8j810hwNPgCE/zHg7MHvR0vKFseFslXpLrzDQNl2oJyLShAGQaxwc8HdcA0A6DDOAzEO01EJPCgMALD6fUmJlsrKZt1tIQ84QqWEgyVI0VhpADh8mOl28QUplQWJz+Yd9DxEQ4IU7oAkXnRGmbFsJHpBJADg9VfD7zE3dwUm157Dwl8AMDaFvTX6YBgQB4CCB9Cn6meAAyPg32h/U3wJkTIPvgDKQdpsDThwFbJOwOYTCrloCm9qLlCJF71geAWgyAbUABeFPIwEoIwkyP+AMu7CxfBpsGwm9yOwEUbNIF+/yYZr4mEcSA9fYXSw94SCj8LCM3xO8+CT0tMdp/h5xdGqWWJ34h3YTADC/8intX7jAaJWK6AWcDrBLI7iCH3Sz6l4N+NTlCWHWB/mdojHMf4aIieRqdVqMzV+v/8Qj1KnhE+KpVJJcMHv7hCH3Ozs7Fz3PuZ7mTqJU5EA",
+        "roundel": SOUTH_KOREA_ASSET.readall(),
+        "flag": SOUTH_KOREA_FLAG_ASSET.readall(),
     },
     "Italy": {
         "order": 10,
-        "roundel": IMG_2ce0454f_ASSET.readall(),
-        "flag": "UklGRvYCAABXRUJQVlA4TOoCAAAvJ0AHEJfjIJIkReqZ3XsmAST/5bwPZtqf6bbhMJJkVZm974qTCkWA5EJs7g53bgOwbRsQlNPbM7k3H+Sq7JncKQBqbduqqxVmZmbyYKkDcvGpIj2gQ59CouOYwTIo+D8AUPhfYdpn4/Oc+b1Xfu+V132ErgldCTdWP8/ZAyAHiAK041dbgE386h9gqnB9eTl0ixq770+y2Pgj6/CL7vXxL5wXyXh0M4/nV4olLuJKDACC/egD6QgDjBDECCGEMEIQQTpCEJGIRASkkYiZoBGs/CkIrgJzIh3xm1hTGCoFpxZ6nU1RGHI2Voagq52CfYS/amClEYxpVA5UklevSFu/l7/32tn+vhmG7uk9ItmADvR0RFclwyuNQL59tzIGID9F/gq7BfyIfBdwLBAeekI7LDxdeRi89+N4vLwvPSFmxEXMAhcxIy4CC1yBibhIUbJZjUoDbEmSTVv7nHNt27Zt27bte///5ew1a+Z+QndE/xm2bRuGgYCs3XZIAGBjZnF2DgBL09OysouCf8zf/U6wsTi/5E9xMsnUlMwM9Xd/h0fHu3snC0tcW2+sZwOJpsJojAmJSclMBVC+vQNwdw/APk+W1upJ0m1oLowgSgCMJSCx4kDO28f3V2jdrxkhdep+SfKH3/wSlFpoqHWb7FM+hK+JWg014lQkhMmNbZYfpQ9Hy6T1Hrey5tWGdhiq3Sbj6cXKqqtV1GERpy5J5DaYvpTehBZ5ik5atARRh4sFBreJnIFVl9jYZahSesXp5cCylkmeul7OQu2yLrLb8q4k+HXDpPXsKPXA9OYXGorzTntsWk+hfv8U6LW9evHsKs6vl5ZKdyrjeUirz6L16Ih6XSa3yULD/Uo2JUnWx3949vL0oG8QwxwhWZKUmBCLap68cBk3iBGSo+MTY5wsyyHJ1GTxu0rv9PT84op3wyOjs9NTf4Gcouys/IzMvFyS3Lwgeckr8vrmIRib+Qu0UX+XvnVHkrc39w8BAA==",
+        "roundel": ITALY_ASSET.readall(),
+        "flag": ITALY_FLAG_ASSET.readall(),
     },
     "Australia": {
         "order": 11,
-        "roundel": IMG_ea8eed65_ASSET.readall(),
-        "flag": "UklGRqIEAABXRUJQVlA4TJUEAAAvJ0AHEO/kOJJtVTnn2ceWTgjkn4MHwNbd5T3s3ZuG49q21eR8iSe4y5QZrVIhixbiHv5zGtu2q9xzXvpZUQn9eyrA4xjkT7z8HtRAABAo9+7un/5xjUQdg0GYgBGYgE6muTd3z5DcJYBQ6f+/qcpL9Z2qn8mQNGlKovWSJFG8tyQn2UX39/03SQcP5z35e/2TjwruRPF/eon3y7vberfj9nGnK4VQQQpIgaULzUKrLPzVYt3No+Y8ReOrEzrQGOQByF0mZQC6FISVClRCJhSCDGfyo0PNWdwvkFsi94SDRM9aNVS8cgULfjKyS8ejDD6URmmUxoJn4jKEABAiAIgAIQAACBAyiggQIGAgA1mdfIzgXImqRAqhgOoXoD0LPUlB2SiuW8xV0PaDgia1zBsxI+JzxsUUAvDG8p6ltZLddRkL3Z02P58h+7Rhh9pP9d7P20KzRaPutDXCNQrTxvnkksKbSTnrXDLyi1bLRoU1SinYUDOKsrkWqr47tqzT3hou6dJyaxycP7Oq55RjpRJPXJx5X4YR89AOi+nw/p/N30Ac/MlS/gNMiko8km+Qf6vu86G/e3GRWfYbMzn5fBgk2LZt2pFt206+Yr9v24hRsW3bdhpb7973kiacE9F/BmobOcpiMNt3rzwiCAAWh0eGDksA+4cGO4YXg/5Sutrmgm6PptwAcFYMe26vz735WfrUP9AxPN/Fbets71fI8OvhBo+Xp/EiN/tkGrdfy17vrnx+DAD0dffM9fT2KRkpo1LKP8uykiJCTiYv8rJPlj+yUiPD9qZd6LR76a6gBb3RbFKVj29+pGRDRNh9XvZ9UkZ0yMmkC9kgOsAOYLOiBf9jVJW7pyd3wqMjomLzcmIgKiLs6mR3gwturHkoDMrypdPIhLTs3DyAfACAnKz05ATabOC5RqDQKysfM3MReQAoQCzkjho9hX8mIwsylcVFbLLTU5Lyc5OSU9OzctjQhhYcRRodSVpcRHBsXER+TlhwdHz4fWRMgt1GYwYOWmnly83xbmhi+tZFQc7xbkhixpZzYo02NJuANcPCmFYjE6z/Ww1L+V5zkThX72Oy3v8R46vdCF3SqGUC33JY6gu6qDjso5dRWc/jFkTP0riZ7rYduqBGuXDsJvV50oXOi8KcYzvYHBiR/sLW4tUlMdRpRxdArSoXnn9TIDo4l7t9+WkG0+jF5ShroAWNGlXKcuHbD4WDwL/I2AKp5cBUiPxeCjugjc/QoOfY+opKCQxUsqGxrU78ZnTt5jpBWikKeAm28YWdjdV/ZhOwxlNLulGQ+AhWz3VY6OVfjINMIA74CGg5CIYdHuOp5UDip9gOCYbQLWqRX2sJcoFY5afu17MQimDgNVQp+UAhG/qTWtjZH+cuglybBZoKoUSpp7+8MaNvnG8UjfL0jKFgw2hZ6Af6q4F05uZqVk6oFJGY9RoVI5UhIgIwSq4BwArSCMQSqQpBXg5VNdWIUFUpAACorJCjTAqISBAIxRJokMoU/e2dPD+n+daO5paaWhFPEYMEaprrgubauoL+UuZb25ubWhoBsKm5rT4IAAAA",
+        "roundel": AUSTRALIA_ASSET.readall(),
+        "flag": AUSTRALIA_FLAG_ASSET.readall(),
     },
     "Brazil": {
         "order": 12,
-        "roundel": IMG_800194ca_ASSET.readall(),
-        "flag": "UklGRlYEAABXRUJQVlA4TEkEAAAvJ0AHEN/kNrZtVXn3vu+uOYT034DVQOwWfkWvtOE2tm1VWbi7RDTg/ceEVEGk0fePP8eRJDlKd8/u6cMM7b8J4AIm8NWamYEaCACC6HB3TTQfgBXoLMcAdJdhaPru7h8GnAP+FUgAAQLwB/CU+S/wMVgETStTFvSET/iz3cDz4hX14svPcDZuNPin1D/CLxWbNr7PRIX8Y4k/I7/ag/mD3zHS/HJ7dDgGKkHSCoklliBCAgQQECRAGP0k5kj4AscfcCIQYob9aQXXlt3+/J40eB/9ERB8Vr8MIYNXIncsMgBl4GVCzDEQjiQWWELcWjwifRg4AV451EPYBNpnZYuK3hwBACJAgP5EfDDHPgmqLMZaKSOo4FZr9hB8Ocgs6lpB2gQURJQdNWNZw/yjyVzIOKpQUkEErQQv9JA8a69h2DhPds9v5HJYfodhYc6Eih5b+ORBqh/0Tv8nIeNUzCe8CBf03lbrlXrUKlcnSW2nnbms0Yr6JmlSMhl1jdliWexvB8vd0fq09y+K3wcombzz4puPXlkySLRt29ib34xt23byI05qI7Zt509j1Xza3nu/r32EvSP678BtG0dSVoCwvdx9wgBgfHNyemaWxPTkxOj4tuE/5vWrJsPY1Nz8AjAPLKCikiQbZ6Z0T/d6bGLE68HsPBaXltdJcpkrWCstK6+orCPJhsYmshHNAAbe+OaXNkgqxRVgFVgjS+ShVaglyZrq3DwO+BXWSd1KTS4hi8kiFKIA+cxjrkSjttKDjPY0WboKFv6i2U1bgMkcpV2rmvNGoLs2VZbNbCKDkzRrFSWLGteYHGGE8+feB+7+CjO5UgrydcSbzoVFrVE2I8L3P5A84fFPG6O2ZClmt3QtLKqmuo2AU3qizB+b2Z2UpxYElYuKUWYjTPx6e3N9eSAIkD/NFnuUxixBmTBZebs0X11f4vbzp0u5HIdbAFecIj2C1bVklyzSeXR4QvLy7uN14BS/BLCGxGeR/Z7uyvK1VLtQ5YSBgwBPL27vD073RAFAaExmv0/C9GCTgm3v4DBA8hS4vOe5KuBK7PP11JWvlbA4RY3fh4HDwOkBcQbe3WgMzeh7Lymh/BGluQXhAR6f4liI0+MvKpGZf30nqFAsLNiKtpn58xQHODoWHPGbxBHbJ3zr662rKKbmp5YUbLH9OT1T1pA7DkFIYt974aC/t75Cqv6GtqJs/H5+psROmBXOmH5VdD6or1JVf0NxLkvYj51z7vwQHZmhUUXPHCAjxKqZiERRGocE1Zr/iiKycyJtkpD4fmWtKjofNlf/QyArzqktKIUhhZp85lGnkEUmJoiSa3VElyQvp2bgTYsHAFr4tq+f7FPX6ujrfdQ8QI/Pj9b2NrK9owsAOv0+T8ugTvk6ex8+euKBd2Ri7LVBne3x0ZfPX7R39ZBkN8me3gcP8fj5mKHp1bBBb/RP9+zF0yd4+uz5q3EDAAA=",
+        "roundel": BRAZIL_ASSET.readall(),
+        "flag": BRAZIL_FLAG_ASSET.readall(),
     },
     "Saudi Arabia": {
         "order": 13,
-        "roundel": IMG_75d532cf_ASSET.readall(),
-        "flag": "UklGRnQDAABXRUJQVlA4TGcDAAAvJ0AHEFfjNgDbtgFF22n/f+k1jSKA1B8YRpKkpHHLPz0ycHschpEkKdkTNP8USeAfh9t1W2vbk1wGgC7DAOyMaQQ7K10jZ6uctUVh0gZMd18B2Nutfc6n2i/XoZnhwevDp/T1meHW96+Pl+8ynw9uqfuBkx7HheFT4VbjpXPC9nuGy2M43J7DtiZ0RcjECpGJkAmIiZDJlyKf95cCQiJEEA/hihgG1QTEVhg0mophkfwI2gx+HjwOSC6mEeh1NA2RZuFfURZxX3cdENkFcKd6tf9wsA4iwj8/TIxWaQjJhZAkpCEszNkouT0+xvqrUqRpsGuwU0Xf7pSjYeOOTzJIsK3teKvYdmor1v8nvQ1r2zbmP4H+//d9vUN4noj+M1DbyNEsgrDt+j3CAuDg7OP97YXE+8fn+Z7lf9ruzoll/+P14V5st7gmydc3c7tdeWx/+3RZb7488HFk+AkgR4DRx4mpu5srXgA4Oj4Bjo/qGllF8xHPpJloJGCMHCfNqddXvLgEUCzklnLV5sOIaARQJHISmJ7hLDA3v7D4C7XWw6jg7zQ1Q5pJlK+37h9l6qTqFRTMEo0xlYhziOSEsEruRS6PQlFr3z5KxhN2pyMSi0boYTwzNWP0KoglTfO4bK5INOyI+YO2AN0/Xn86nhOVtM7thGQi4/XBGQshEHTG3H73l9/p9eXyBRZLKOudm0nJZDoecDhDCW88bE0h7gEcYV9BVDHqXoK03e0Jx9xxu5WxgDscD7g9fkm12b2+NxMngajP6484/G6vJxSLRIl40AFD2WDWnUB8BnOYTfx8RdLJlC8cdPmSbkmt1bu6M6YZFE+KS8ghk/2J5dPRkKRu1K1hSuyVkvAQWGTJTKzWWG+0ehc3Eul5Qkh/0tpGiRS9eWWvMM3Adv/iekrxQmaTmS8p/UVv9y+vVb1Ih31eH8LJbKFMmEnS7PQPr6SPAPJtK2RT0aDfw3BW2MMklER52yogv5PhuNhrYHdweCV9UorbJh2EbCi0eoPDokJRcXflPWVG1UsC5TOglMxekVla+VehXBPuEnVqjbqZFL2idn+g1ap6k63llX/kCtodAGi30NSlXqLd6w+wpunLp9v7ip/T3vn2xtZKtye3PgfA6sa+5WRn1/I/be9se2Nza43E+sbOgQUAAA==",
+        "roundel": SAUDI_ARABIA_ASSET.readall(),
+        "flag": SAUDI_ARABIA_FLAG_ASSET.readall(),
     },
     "Pakistan": {
         "order": 14,
-        "roundel": IMG_aa8e7d27_ASSET.readall(),
-        "flag": "UklGRiwDAABXRUJQVlA4TCADAAAvJ0AHEDfjuJEkRWpY3v2t/z4e31BVueGwjSRF8vF9/lky8++0A7dtHMnJ7PX7/y97v8vEclvbtqKccYmmgsE1mlqohZA+6EFzzWnA3d3dCSMU/gqwjArQJv/nh1GNAmiNvpP6L1DGOtloPVJoq+gLo+hzwXICrVFwjILjP1Msn9H6bjSJPnssl9cvyWVaM282PLYn+vfH7/bifbxSHm/K+0u5v/ldHtQq/ovU2D5fj92Fdnvzf3347+/UFKWK8fnjd788VsmAofhZpx2wdVG16piAAIEIEWQAjA6ERUBAAMZFU6iTTEAO0XXaN1QSuWvYOGkc1qQnulQ0RRdvzXe69c4rYCCRL/lP7uH4zoz4HEVDEpIQhCT7QemqIFwYbXMcXoME27aWNgtE6u7u7o07xNNf6u46/zHA+x4dwr0R/WfgtpGUDJHKDTOIR4QA9I0PDw3y5/Pr+/7x8mor9Iu6frwLjQ0P9GOkv6f37YXPjJPHT9n7x4vzLXPf2UO24riD/eiORcMWIh/kO99eX57jCSRxk0pn7sjMbanssFh2+7siFgCfd3oAr4D/Qv4u5Py6AUpuf4el8SZ8oQfJOBOAvFwARjKMq6Jc1Xj/XTJOcqojGtpZu/vKVmHeqWm8KWl+Q25VLHh0Khht24kuJ4TxxA1ywgBe5U0Ouu09uRWr2PGSZ9Gta/jGyXVrwTjrINa97W9lsRSAbO6CtZwU7i1F7B1pWceYQdTnRtxtcQNHQqfaGFVJAKBtzcsEbBcoDcCYQdQKH8j20k9C1poqsm29FtbFFORWz2DkPNcsxA69pOvWm6NdJsbXsRe1sKwlYQBGc7FiAasFFoWHObpkNQjZtqMFC1jc8xKcnXUhGjo5o20H/mIvrW1ibuFIiMZpAEbbjpYtWXOH0lrjdELhRkxK3mR3uTMcmdssG7Kpo80ADlkkXWGNrOvkZDKHQFdTYkdjXT29o/KBHOrJsHHKiR6OTgBT07xjq1Kr+1Ujq4r1RvOU/DOByZnZMfPnxPOLh3/tVr2p1CnJ1r+z0PT4Fn5RvLp8uP/bPvnDNu7/n4cAAA==",
+        "roundel": PAKISTAN_ASSET.readall(),
+        "flag": PAKISTAN_FLAG_ASSET.readall(),
     },
     "Germany": {
         "order": 15,
-        "roundel": IMG_71da1483_ASSET.readall(),
-        "flag": "UklGRnACAABXRUJQVlA4TGQCAAAvJ0AHEC/jIJIkRcq7Z2ay/17eEOPsPJhwG0mSItXQPTOD/469/PryqW3bhqFT/r82c5zGtu0qa778NsvfQgL3FbFJJEMDVEERuJyjZF4CCBAghl0lucCrknzgDTe4ww+OOf+jYX2Dea21bMU+L+W2TiJXXPHFGUcs8YBggcAaSxgmrLGGQSAQCBTCsLBdMHXGMFY6xkToK0tn53SUpdKGKqihhgpqqKGCfw0V3BLHRDNzH0Tm1YhGZl7NP7pbzm4FUZklKdJ3p3Qhu7qgzFlP5BX6GHaJka4aJcc4WjXd2tKi1WxaN8P9j/efww4DZNu20zYOMzMzp8zMzMzc/v83JJZUddTpvRH9Z+C2bRwZAtTueIgBIBLwedwu0g2fPxgxdGYLOBEOOawW9aIOt3f4O5v8LOx32y1wWaE72h1OEnar5R9fNJ5MZcwhmYhH9YinLLFUodEFOsLaZKOSTycTMRUxpsuVQrrahWxbuXqlmCOZLaJO1soFCvxeLQBNoAHUTQUkdQpyiYhqlaRAvjTgDyWoYKhmiarQsaG4lVcaYtofHRsHONLvNXRuyerP94CRyZm17S1gEwA25mamJkb7PXVhdOrz+utzm6Rc5DrXsArMTk9NTowBnJyamV/A59PxnqCqTFewbG6J5OICgHkTWbMolIYCW4IbpFaJisj+9pVSGek1qTRuZTaxs7t/cHhEHh4Qu3NSqZ19H3BAnACnZx/k+cUlALwfHQ5/tyA5u/v5/oTHY5y8vt28GOL4fPt29/pwfXVNXl2+A5fXT8DD3Y3x8fZi6Mz83f3rI8D7u9tnAwA=",
+        "roundel": GERMANY_ASSET.readall(),
+        "flag": GERMANY_FLAG_ASSET.readall(),
     },
     "Turkey": {
         "order": 16,
-        "roundel": IMG_b6c3b72a_ASSET.readall(),
-        "flag": "UklGRuACAABXRUJQVlA4TNMCAAAvJ0AHEJ/iuJEkRcqaRf9N3Dcd83W64biRJEXq5X2yIeu/V3jQU5WMIklS1AsHCs6/uHszLU45qm3babYAqgoMtDE2MIgKHDCH9N57IiBBiPB/U7zJLtxeJHd+L39eUZy53Py6+rJ68yQ5+/KM5O3fotWJ28fJg+Tp7NuJdEUnnRjDCAACAIYhAIBAm2SUr5jSxSgjWjPomlFar86upZdQh1hRafcvtbF2WakpNYhXVZaaJoWb1iOt+5RbhRwTpEEATWn8glp7Cudhn4cQguAW2MctwizwU/7MZK3SrKpef+u/oJHhDfl8LL0Bgm1rZ6v+tZGmtm0bz9b8B/OS7//TIdwvov8O3EZSpLQiZelg6RE2AG8v08nHGPjg6dPzm+2WeX/c214/ZyMAQ3PmZGYfn8bHvcvbfp8+VhuMR+gPEn/MnGTmVGLQ7w07CwBYzb6YZ6vlmpdt3oz6f8xEApk0soMeuh0yaJYL+dZmNLih6GSYOcuc4zxQMLEyrTKrUOb2tUwLxdZh1FcY8Xt9oT91yXLbQFJzC8DFzggpK0vtw7xP1+ouAZ+W4UQEilLI7eO8T0z7Denn6HGLMpRIAdAcgnV6cjPWSpDTGxHwqU5bTLOyLJFGUCAkF+djHsR1WsRK+zTvpZCmyKdNjwaEw5NVip/TokeuaVjAJ5+PdNgpEDNLtmpCrrtmFw6dnjUUEBMuf0mpTIazfgE/S2cNsQCiutKaCZF1l0AgQ8wWEyipypB/zosekXO6V8AV1nQtohfZ0vrPedmj5oGo1yHgDCYUpdCkK4tCMRFX7cFGwShT/jZQ35CWRZVQqC4rG9+XZVfpTUU0WP9jvZaUWkq+UG222j/fwA+41URVKqXNw2Xd5vUG2O72zDscAWCzNr+lTosbrZ/Dhe/Wm9XH06/i5fT2/PR5tzuROR6A4+l84evDq23/+G67ZYyPe7i/AwB+eHmzAQAA",
+        "roundel": TURKEY_ASSET.readall(),
+        "flag": TURKEY_FLAG_ASSET.readall(),
     },
     "Egypt": {
         "order": 17,
-        "roundel": IMG_4495ff38_ASSET.readall(),
-        "flag": "UklGRjgDAABXRUJQVlA4TCsDAAAvJ0AHEE8EO7JtVdE6972H659D/gkRgrvDzLlnp+E2sm2nOe/jIZKJ1H8pitQEBcj7b+A+15Fkq8refbj+OSRC/rE8dxfOOZADASDYXJ62vUR2zQQZyc7LttoAAPwD3oArYA24Ar6AG+AM2AL+ATvADbAGHAFHwAdwABwBS7k95cb9Txq4RuGzm3n+/a8V9uxhssR/XhR9q+gaf2tLrlw9XzuuSdboby25Rr4O/tfe3zLIXnHNsib3zc8+bP3qgyFHzeZoUt90qrN22KlmJwW6PSu+/D0/rZC6v2qtfWK1ztqbKzuN6CLrWfzc930d7c6Bz3dyumZCKqSuj9LlXnj/evXjm5mDOZiTIDNKRmZkRgYVItVOgswoGREXkSgkUiFFleAwSxbJcQvJV7g96Lao1rfkbP8xj9WY3C5St/IJjRRJUamoMmxYdJD9GdiD24ZLR7KKsEYgORZc5BKNojrfTZDDsSlZQWZJq73WcvMKaEej7q7JFouYT18Wade2p22TMnOblJmZGcbM63grjVcYM3QMf1typPG+On6dWHZXQ9AORvSfgdu2jSSoGLfvGTbknXe3b16/Jkk3Irfev9Vs3+Om/Jxprqsrq0FrDRv8gH36zKUL2qbzMUHffvValSxreXHh8hXDMC4pF+HChrK+FnyEfPzE4/P5PC9eIh+I6sqyaZqcGQ7gPPbcmY11eIgVt+7fu3uCj6uWmxt5pp1FCsI88nTg1EmJPy6+sdzEiDNKiNUl8wdnOC7kCDPSLk7noCiUGWmXEAdFMT9/GxzGhhJfPsUinJnzaZz0jzuCsdCovZRopKp/ILElzkvOuwtfh2J1kztrVZqOsopyfLvKsRGsVa0ize3xGiodcoNb0FWa5hSdQG9Pe0tb30/ADsFOASDw4zigq5mPQuTHkaN8ZwcDx08YmhCN3TLtZyEMVVXtEzOzuwDYdEJR3RbPt/qoQ2Jfwpjcc/BYEsGjh/fv3T1XT95RmOjT9CPa9/n/kBjTAUCPHfBo/3RTUtPSZYj+ABmaFs3MKyqxcZWKCxM5cUimAd4w0/Ml9j26ChLe7HgoFIpn5XpcjDEGAA==",
+        "roundel": EGYPT_ASSET.readall(),
+        "flag": EGYPT_FLAG_ASSET.readall(),
     },
     "Spain": {
         "order": 19,
-        "roundel": IMG_11a0dccf_ASSET.readall(),
-        "flag": "UklGRiIEAABXRUJQVlA4TBYEAAAvJ0AHEEflRpIkR+lVd4cWH1CfIXg4HiYegYul1entRnwCkiQ5iiRlcQ8z/P82H2Om3QJJbmPbVpVz7nfX7A8pJVAetZISut97nNa27Sh7okvkrHNyVECVNEADyCkBj8NOkFMABJM01XYMCLaKvwhIIIK/JIACASIQAQn+7zI4C11Qm3MvF6hQqcD98Z2qWfDnPKBgiJ9ER10wAF61M9OpL2kMsA8epjbQsaNjvInkWs7dKxUseZOGCnl1UqFtXP4+kqeMlIY+5+mhursUs5tQcX14VcqtYJS4sMuX1OkSdy2V1b01cW8pqUBEIlCBiCRARCIQEYv5N8hk2YjVo0UGYYsWIcXHqoIcJALDyjj2EHYgtazxCfNyYlLygGIT9XvHB9+01TczsrmAkoiRS8mEli+wd1DWPhUpSVsmR/yohMyMYCnwX6S0AusHqKHoKI03x/GEJ+MNAhgYA2NgDIyFidmZf0CBevwkcav49e67tVAMN+nlgSyRoRFI761r/vCfvb0309lGlJuNJ0v8GHRC2BwedCpkxztjpd7HTLtWjqNuH3a7g83+7LU96c4uXsMXgwTbtk07+rFt27Zt27btlCs2y3a187/zbtKEvSP6z8Bt20YOBKjz9j3CAGB6bmd7dwvg9s6T2WnDY2pqbtwws7O0sU5ukFxfFrW0q203pR+bGR3raO/c2uDR4cHe/h75mnx18PzZ05XleZJcWFocx+JCO9m21tq5cbRPktIAvATwgtpScm0ZwGpjbTXWOtcPFSiM5DFJnpCsQjVQo8seZa/CHkRE9soZUJqgWlCrZW//LD0xzhte3khITEk/K1eZnorMm83TBDMTmJJmJD3MzAFY+iSmZJyVVwpYfpYSZx94GRxtAkiLjQzzNIcFYEnSirQFYGdD2tMh8Co0Wk9YflYeIzz0Zk3aAHYCRy06PGMKCwqL4Pk4RCQxd365/97cR8YE602JU8B1aLTA3PPDxX98+fYj6tZaabR30BARIPxd8T98+foj/JO1bpWu14gzjYkSWJx/zvn/98/3H9lv/cUMNVpCogTIfh9Y9O9PMS/euSl7dbgE3YRECSxjPwYWAQXFsZ/9palx1SLgz98RBW/elRRH/LRV90pEBFbRsbaI/RXu/vN3pDAFLnSVEdjC3cdOvB0PmA4E5YZEWcalnJVXiheysqIsIzUp3tlRPQ3wTS7pu8ysULy3rGUdyXoYt0tLTkyIiwcSkzNKG1sm+tpXdd+KEqABABrJJpLNaBERKIxKozC0GNNvzEPTAIXp0KUa9atrrW2igJYmzR6ktae/HWvsBLomxwF295Bk54Q4CtksaJ3o6edAOzvGRmcUP6fp2dHhwcleUT0kgT5gcnjGMD43ZXhMadsNDQ6QgxgemTYAAA==",
+        "roundel": SPAIN_ASSET.readall(),
+        "flag": SPAIN_FLAG_ASSET.readall(),
     },
     "Indonesia": {
         "order": 20,
-        "roundel": IMG_4df8e501_ASSET.readall(),
-        "flag": "UklGRgYCAABXRUJQVlA4TPoBAAAvJ0AHEJXAkbZNkfJN12YQUaTUHoBYz8BRiAk5AsUNuINF6+6+EQ4ZRBa5rmvcMtK13TPruLZtNTlvZZwWUgJeh3ZACywqoAYqYVEAo7gHd3dGjJxwU2vbm2RLXMRAtjigKsBAlcHULYCGsHbWzt4k9LIxXbVt2zDUmHIIpZQuWLERV0ivTXojEo9Jb06Gq5mjSa9NgqYvynm0n2BHRlwx/DVdDBNNBleMaAxgAnNYshnT6OGcG/HfiE4kHrfewY46Z/BSy0H4hMtzMaKxhTs84Ad/7Sk8ORJ7WNKcc4QkwqcRnYzgaPhrxzOllNxmcGns4Ql/3er6DmdzLDHG2NyUeFKW+Qdn1jAaQ3MYMDD18LHle5NSDmSp7d9qz07LYU2x4E7zqWjFKllHRft1s+0O/0pvvjfvoComlrt2G9i3+EGv+IuqntJ6t6Xzr8iVDVuu2by9JudF9YM7JFEVD1Bteo/Uf5RS1da/JpgaSnZMOPcYlgbGzDV4HcMSxvBUxbgJYqi+xSse4ekztNK2ZwneD8EcU9sNlCFEjluOU4GdUrMctxxaiSa0Z72CdqCWXYYbRJCJECV+abIM1RzpMSEI2nMCxFHKGapRBmmyKKckWuXAhRA8iTBcV0cZnJKAoMAuQ/WYkPbT/7sIrSjDNFmUBWOmcp0AMQgopQ==",
+        "roundel": INDONESIA_ASSET.readall(),
+        "flag": INDONESIA_FLAG_ASSET.readall(),
     },
     "Ukraine": {
         "order": 21,
-        "roundel": IMG_c72be2e9_ASSET.readall(),
-        "flag": "UklGRvACAABXRUJQVlA4TOMCAAAvJ0AHEH/juJEkReru2WN+8p3/Fp0L/FreraoDJ1zVtq0q89oL8MhCGRITgz9313tcR5KtKnPkPdxdQuCf+MjX3Vk4ggAQbC62MZlfyO78LX/JmFeg7tRO7WRbXTC4Bv8CgoBAIPyv/2CWMUouf4Xi94En8Eb3Byv6jvSG3mh+8OBZwYmxy76rpaCJQqV7AX+gA4H0pzUMrjAwiEKp/zFSompBbTzQHmSW7xv3l7FcbdrSZHLWtK3bfK1djr22NbokPAZui7760Nb9ZPkYu99+cL+y57jLu84HAjlTNWDCTyg504KpECEhIZDAH/3BH/3A39jXSOqdtX6UKpr4kIeEO0t2NhDZ4KdI3zW69iuxkRuwJDzfBuPe9rxaOI09vODswhLD6B5PyeqpT/uJCSZxmm0ih+nh2wBbkmTT1j7GtW3btm3b1v8/3r1mzdrnD7oj+u9AbSNJcjCYuXef4QGYfnp9eXsHr15er5+mf70Au7++8KafP2YBzAGYwZHZ5dWz+rj7m+ur8zu8z2Jx+esH+Ca/yNWV+cOZo2Oz88sLEudnAE5xN7v4IyaKnwBWybWN+cMDnOCYAA52t3d8lmTRlNAArAMbm+QWuY0dgaKz6JfUJljZR4W7pw8zC5pKwSqKwq5AGKR09wT6UasoSpG3Pl/MsHwNR/OW6t8WwH2DcA1wl6rAKP82Biohbh+PDlcnRgZ7+3IBoI8DgyOjk9s7jqM4Gf2rnxruDQFAmGRELprXOzA0Mjo2CQDjo0MDeaniup5+24gtEAOAOJnDBMlkyqes36ldYpYorv9H6ipoxZRFsHKaNujqpZpV0mDIuJAlsLQqmJJMjloaGiVRuMs2iyrq0YTzqEJBJJrTX1BYVEoShQX5eUlTLrNr/ylEWTlQ01ldic6aWrKutry0qCA/O8uq7Pzi2kZ0lKOiqqul2ZP7bWrtauvorBOrNatraERnW4tX2dXsadMf195h1o7uJg8AAA==",
+        "roundel": UKRAINE_ASSET.readall(),
+        "flag": UKRAINE_FLAG_ASSET.readall(),
     },
     "Iran": {
         "order": 22,
-        "roundel": IMG_37b77aa4_ASSET.readall(),
-        "flag": "UklGRvgDAABXRUJQVlA4TOsDAAAvJ0AHEE8FO5JtVdUcwd0JwFIjZL4JQJ5cPVvSgBQAkiOlasK9MlkAZvCANvwg5nLuna6CHEmSIimGlum/tj84IU/IU2ElOB4ohhoIAILoqO7VIbENSzgrMJY3MtFdPrv7B4C7/i1DR5Uf0Lv4k3GX8NJQhDE33vpUbDqLWpPeqtWig6g06qHEThGKTW/VSRSYYiN2QmdKXkqxacasylFflG1TPZ986pdOosKoytEX39Kj84c/CBgIJJjAEwQYQCDBAOSZ4AOQIQFZ03nCtAiKgDgTB8Apoj1aJATMlsoN5oi50AlBUjQyHOgxeOSHKwQEBRAfvtjT6EOU+0KfSm4zuQkfTp9KQ1VIf63sz04eCzJJKLmJbywmYcppVG4zD2PHmTLFqbiSKZmCZzIFV3IlUzIFVzIndelbr1eQ2spt+B+UNjBFo2u90HqYmrOqpsqByllm1lzTQG51+ETT25LRd0UdEAUkc1imZXHz7Kh5LF23nWR2/rpV0qL99Nn2uj4ZyRS/r56/J79fv+6bN/PdweV5l2pnPj8IbAQ2AhuLxdHr/8Mj3q0/L1LvDP9ewXQdvg0SbWs73uhPatu2bdu2bdu2zbFn0stM50faK3ieiP4rbNu2kSqg+xABwP32zu4eyeODw5OjuxdBBzUn18Ld4f7WpsT1NQDYP5b/TnNzcnx1ebu3xafH8TGOkxPAJKY3sL62SpLnZ6fAGS8BXPB262kE+N+EKGCK5PTMBpaxIhaLC4uvPMolnZEz5CyAOWCeC1wUIUp2Jk4yE7ekZfNpjLK708q7okSIG8EoRhRfSZMw3NfT1dbe3dLThi72DgwOTc5BoY2h/gf0t7W3NDc01jXUk2hqbmnt6UU3+waHOfo4NDw6zMG+3oFOPnc0GqgUVBs0NDa3tvV2s6sbYFd3U6P619ffhiplzfQAQE2DunrqQwUAWn4qY2ZjB2OVnFKMFHG3caCdtTJffijjaetAR5f3wMnNDvTQge/KWDi6O7nbvwcwDYQJdEVNE3NLC1CPomEOlTIfvhmZ2tg6e3q5u9p7uXp6O8PRxspcTwGa23788/mTm7OXb0BQcAgJBMDHy9vV2deFDnaWNrSwsqaNqzd9/uX+9QsMqQVqgGqRVWRlcECgN33cPOgMeHj7MzQyPi8+ulaczIwMExmOUCA8IpKkFB1nABAhjvH5iH5DiJAWlZCP6NfesCtJRE11eFRMLOPiwdgYRkeFS2ayRadoiY1BIpmclk6mJacCQEpCXEx0VKR0FhOfms/ChMSksqwMjSD2JSc7q6QsLRcAUpECpObm5bOgpFxIz9QIcsp/V1pWSJYVFWdWCAAAAA==",
+        "roundel": IRAN_ASSET.readall(),
+        "flag": IRAN_FLAG_ASSET.readall(),
     },
     "Thailand": {
         "order": 23,
-        "roundel": IMG_51d8c9f3_ASSET.readall(),
-        "flag": "UklGRtwDAABXRUJQVlA4TM8DAAAvJ0AHELfkuJEkRaruxWP/Hbrffc8K5qWpdMN1JDuOIp33B0EQGCGTA3/eg6Td9xxGkuQ0+/d4T/4pyWSgLAC9uV2otQAgiD7uToYEG1CJ2lmAtViAyAI8KiO4y7lbO0IC/2++IQJEBEQgWFwBDZGUX7WkYk5O22BISZ5kycWcwDkZTeDf5+0kj7+Z4Z/9vn+G+30ug7nRksH+vu/bFNUclXi53oolnCnr1l1uyeRkOIMMMsgUQFAgQYBkkEGQIAEy3JKSkrLYX8m29ttT418iPKq2BIUyqVFKmDnzXKxWycyEouzEkksP8JfIGANlRPxLsJfiEWdfBepkgpquR7Y87gMUH4w+UhtkFYWbrBoagEyN9JSgikjE3PAfCSrxVwMwX3VtMWDJ6KwZirrUehSIRmPUgfqgoCqoAJHFiQ44pTZSwkptqEUd0EOhK7latbN1GN5Fd2uxGx3qVe9RU7aaurUpRn0zW7OzbieNNFozq36y6RabcrCKQTcPToeX4/fr/PhNoL5EPWcR72ZPx9XRhwYJkmSbtnWebdu2bdu2bdu2/nz/3Xufc4bQHdF/B27bOJK1Wgh7vbxCAzAz//vz/UV+4/dvbqZHM0FJX7U2+7u3u6OwsgxgaXJxQffpSmZ7ayoqy752uX9weAIcAjji8doqV5YnBNOTU9WcnK4iOYyy3f0TiJIUHJOUHjo2LjG2vbVJyw6kXVwKTiwlT7C+tg5skJvcGj7fPbi4e3F3tLKWcHB7f3m4vTiWhOrp/Zvv54uDFawNcXC3PN39jeDu8dXNhq6+ns5WZkbaUH4mGVsxc5IGyrN28AwIDhUEBfi4OuqVjgiI9/QIjEhIZBKTgRSkAilxkaGBPq4ONirOfmEJhUWRiaRsimQamc6MTDAhJjIKQExyHpBfWJSarGhQWcwmc0jmAhalqVcNysiCouL0FJ2rZkpVXjLUqxkwWWIZqarp1CljC/8vM1U1IxOGpaNYmsXkmMjwMCAiKjZZLvUqpSILorPTo4K9HPV+dievgJCImPQ83auZUYFe/hE+Rn8O2ko4ewcEh4STIcF+Hg72hL+3iyntBPaggoPOzJTeFXGW5/7ycHt9BfL2/vnN3VEpvYNOH/+83+5PN8ktktsSI9tnV+LpnJTh7elzuLHzfGyDBgpGBWNngvHBAQCNXVVj/90eGx6qqhQMEaNykYMSkv1NXVXDqCwDyutqybr6BkFjGfqH9Kq/sakL3VWVFTW9syWaTM/MXG97c11Dk0QjSXYCHe2zWnVfqWaCnpn53va25tYWNLe1981oAAAA",
+        "roundel": THAILAND_ASSET.readall(),
+        "flag": THAILAND_FLAG_ASSET.readall(),
     },
     "Mexico": {
         "order": 24,
-        "roundel": IMG_ec9f1b39_ASSET.readall(),
-        "flag": "UklGRiAEAABXRUJQVlA4TBQEAAAvJ0AHEEflOLJt09p73/s9sh3ezxlT2//ipOE4tl03uZLIOcOSEiiBMumBhlizzBl+sC3IkW2rqvbe5+DuI1IgNhIlAebu9uU+O1AEAUCY3Nx91X3VHrC6hH3Bf8APINH5BHvJqG7NnaYBwDz+zUP2UixK5v9iNrHIJf8Tkwkk8D8xNPxiEouCefxReAJwINXtN/xPAXZTWc5jUSwBNAHqIeetXFUVZ7YGMMijT6DcrFQS/EMS7JcFSKeeondUaj1OXanb49cfP//10p1Vp82Zm7SmFt6x3kk4uk19I62+T/XO6Eg1rf/nihQG8e3DTsj/Ls0GPM+2f/mUX/3an+cEnrb0j/lhe7FYqY075U76KLd3Hr+tfd098s32kLzvYEXDT57+l75vY+dxK4VveH2SHDvJ7r61cOhDqENQMDAmMRH2boIV51zzOI8rAIbxBCFChBAiIkSIIGIEEREkjMPc+ZUoRQqRXMFaczkzJK4ldmdgQde+7/msv12d1/sLy80aBP8QBiBEBdYEdYKBzLFu1DCs+ErhicTDINJUhUh8pU4MrQEp53IuWCrlXOKY2BCaQIhKFIEShaBEFSpBRGLs8LeTininYfl3+glZVWXpuMpl3IE4pmjPt2pLBgm2bRuSFBFl27ZttN1l27Zt27YxzYiPqCHcH9F/hm3bhmGgIWi3HSIBGB8dGR4cAgYTHOzsXZKkD0zB/Zo0PjLW20dPf6I1ABtbJwc7V87vCt7vHlaXxVAv2ju7eyCE6BLBiqGxiZmlFfkU3za31tY3VlcA7O4t93b2gNlEZ7BMD/W779vU7JxdXotdVRdbJzgAAJG31NzgWlyp+jo5dUAPL7G7pKFfQ0c7PuCGitLOnrajTQ91SnWp6m+na9fSdcNJ7Kl6mdqEaKUoFt6GFGoj0dhaRQth8eNzVrY5wetib7G/lxcl9OffnLxsAw2vc9VAnxr1WgvQrIkO9c7KzxVemitO2FsY6OtgTpuBINnCyC88K+9/bqaG2XBOaebVFKT4R/n8+peXliEM5AheZ/uqfvIaXWOQHBYcF5aWnZ8sUpWIS+o1ktifr+1XYzbRECSHhgVOik/pmRZhsuaC6ZRgaxAaA9+Q2PSJOOHjK0fwIhpITaR6BMkw9Qv+/ScmzF875mziRFU90MKc1lNgkhKQnB5mKiOC1zFBojbUEYCpuVBkDS8czKnY6sAAAMoZ6QTHlFpeNXq0U6YjVVUtVR1JFy8czKo46eOFg5mqGroaoUtRndBRKqvrUVNdVYkSAInmZiaGCvvQNqbDxanKKpB3iwuLhEC8MxlHa0vyuwjmdO9gYWb6qRLFFWWlBRI9SS6ubg5OHp4A8GVhUQjMz82Kt5d3qai8QOIN93fuXx+fgMfnl9d3CQA=",
+        "roundel": MEXICO_ASSET.readall(),
+        "flag": MEXICO_FLAG_ASSET.readall(),
     },
     "Sweden": {
         "order": 25,
-        "roundel": IMG_83bb8130_ASSET.readall(),
-        "flag": "UklGRvQDAABXRUJQVlA4TOcDAAAvJ0AHEL8EObZtVdE9++IOSZB/LMwIwEbajTy5Nw23sW2rynrv425N0xGNEGlE5O5w3UaSpEjdPfPMjNJ7/RaixrAwUGwBQNB83N0jNDgOj0M5nIEE0xu41C26ZV9yCwOHwH+AAAkSZECAAAESBMgvzdGwqP7ubvDuKB+Kj+vXjvI0n5xEPvEMrQnjKswLeG00y+Dp3yOu/z91S4HH+kf5f7WwSNMWr7iZdn6G1RHdu6aFGXXfejkZVJL39OD9Cu/4y9MAITWKfLufjFtT+m9uO72uVzPP8pgtPP4ft8edeleRyvl73xqd1rP5fLP6Hp72Rr+OSTPZNE2MLmh+HSe95L/Gm+AevIV3RBln4OCGyOT/lsqjwbPBKxhJMXz75DKVq/JPzw1PEKdFakv96iLa/DWZiX/DS2d3YkcOeaNG8VuVON7Z30kHDAgCEoFAQEJCTkRAIiAhkJCAIQEQDAjkRAjk6OOhFln+/noqejRUGZKCpinOe4ozT7ggvCBoGu5GIxbX262/Hx97BgmSZJu2dZ9t27Zt27Zt27bHe8/G/0Pojug/A7dtGynQwfDt9QkTgJ+e78/3LyA7iMEhkaWm/5jangbTz8fbozIZfgCy2t/eP3r7fkrVdf29v41N/Hp4vL+7ugGueZVn4erilvH0/NLWDqCjs7uL6GhGE1pb5h/ubgHhFQ0siZyLc+D04On5FW0kiefdPbTWPRpIrcCSZM45gDOSpyc4wuEB9/ewK1C9pIySeHJ8dKi4IxCbSV4IrHLO1Fa4L8kWgdQaItfSisyRktwKdw23W+pe7mUvgPNcK4Gyl7yZLFsGXu4Vz6Egktxq3Go20HgmoyZZkbApcVmVnxcX7wVvLwPr5Ht9K1tRGPFSneRuSdJKLGkNwMUzITmrpupRsaI6K8bZPzw6UEok5WQDALawI908vQEvNwc4OtGMb6BGTSLtSNqTNBpDlX8mO10ygJOCaFw8vRITvD10W2iV+DPjHpdfdS+99jRhTGqst5tIGp19MstGomrOeKp8kGlii4zdHT5XVhdkpMQAADNryleW60banw2VN5VmJ9jZJreATWysk2tchVnWjbY/S0rv08CeGVLC5gaNpLg0MNryrHE31Z4CKWla4aLBq/qvUMIhQ7OX4hIXJXTfbbp4uBm6pHFhYKz5Vfd5pzsAyNzQt7IShrvSdyvhmKm0WmXMbr+2tjQ3kUX+CAjM1CfF+ZGxplY2zdehfrCBLA4LZXjRAOvmmxaWlqXWcH5gZGx8somNv739tSZ5SiNDSqZnBoeHRkgCAEc5Nj4x3W9q6Kk1/ceUzvX1Tk3PTJLA1OycCQAA",
+        "roundel": SWEDEN_ASSET.readall(),
+        "flag": SWEDEN_FLAG_ASSET.readall(),
     },
     "Greece": {
         "order": 26,
-        "roundel": IMG_3f2eb729_ASSET.readall(),
-        "flag": "UklGRtwEAABXRUJQVlA4TNAEAAAvJ0AHEN/lNgDbtgFV0vv/c67KmqlNLoksAG84jmRbVc55uLNjTf6pEIW763vv3ntcR5KtKnvuwd01P1IlAnLg15+dswtFEAAEzeHukGkOX+EL/g1eQCbxARJs68uL7i7NPRMAWNo4hC4ykQtNHEIjFmEVU1SERnKQiEGu8MudqMVSE12UxQbNQ3QEnZ/VUNT5mX+VWhc7wxG95V9rqOTvSaFTNpUuD0yBc4++6wqK+XnLjdR+5E9R1ZObJjVNJJNnYXg/te5XWw1F3lI1KZw/QFEv1JFUhBL8gD8gyB1yL9VBWnc6qbGQGy5asu+Ovfgg0bQtppsU20r/kNVCWovsWgRfjAGiwIEiihRCkSSSWCSQJKJYJJFIFAmJIiqtUzICEEz+UsqE+v5RmH8JHSS9WXiT2OhKQurqANwNlLsAXhK9/VfdslTrpu65fTreNewlYPcZvedoYZ6gCBq42mBSSG77ip6AKxyozRQYKizADpByKkBcU/m0KO4YKhs4D+IejoXBjYnzv7X/BrIAihAq8qGYdhJnYvRy4ZU/LteeErWCnoSpkop3edu0v7PbfLiXbbbapKVH/+65qOIy9C37vi9vy27h92/439drcrsCYqpgtVtMDBJt2zYdqaKybdu2bdu2bdu2bbu+rpOXdD5hn4j+K5AkmRk5s45HSACYvP/5NVwDNtY3tyYmJcRxz6+jElN3q8sp36S3BMzTNrCD3Y3NrfHJZ+G2qZexhvrGtRW6vApms2SvAWRk5uQuLsxvTxMRHezvEe2jnqjuqLZx5fKG6JEFWUEOIc6+lJVDlHe7MIfZGSIC5ooLbyNNVq6EyEBmVrYvC+DKa1o4+afl5AH5RAUXYY6avHf9ZT7XAjKRTXxEOK6UIgBIc1gA+FzeXKc5scDTAmBhrqkixWaJ4ThGicsPFgqidqSWC6QHOlloKkqyhdvktWPPa1uN31jAf8gDY86LtEAgCOm3xSVUWtv6/SZQjAUpV3IhC3O/0CymblRAhURFKBaEskSP708r3+sQFmRzKBfwY4Ejp2bh7J+WL8gxwnmUmdy7fuRlZlY2H7lcAHl+oiSTUdIgdSIVaRaAD/3txaxsEkSMRYJVpMUaCegmbC9mU04oHyHZ6CLMx0Zb9HRcVbukps6dxewcBqJloyKcpwZ5k5c3haeXVQB8FnIoN5gFKVvA0ScoPZ8hG4oZ+lIZUF4BVB7HTS/4WsmL1IIjr2HmGJguyAmHMy+NDwPPL5Z4jqugbm1pB5hZq0oLhhn8vTNMU13bEtBUV5Bkiem+4//eVWwDL5i6CfQ4D/Pmj+SJRlo7qrHbPZlp3sLXLrTIeXi0g50Zkb1jxFkVVbd0H87lMR5BUIBPEFLPhWVDOSoAVBJVEVWj5ekf6c6aMsIDiaekaR4bfi6UY4RqSnLTM0jQFctASEpFx9TeK4aIHExVeSKGgSujpKKmrCTNZYnrPjz+3qW0Y1Nvha6dzsO9bLSV/zcdW9n+dNAkIr+wpOKotq6JiKgOR5UVAM7CY+xNdYiI4BBxUtPcNVh/RPWNwEj7KFF7W2sHEaGlsam2mqEvaoDm4a5B6qmnhrGXKRGf0+T4S19/e2cXABARoRuDNNA3JDH6+iwhjpuceOnr7e8hQm/f66QEAA==",
+        "roundel": GREECE_ASSET.readall(),
+        "flag": GREECE_FLAG_ASSET.readall(),
     },
     "Norway": {
         "order": 27,
-        "roundel": IMG_b532fdb9_ASSET.readall(),
-        "flag": "UklGRngEAABXRUJQVlA4TGwEAAAvJ0AHEGflsLbdtNGXgmWGWTp8J2JuLX2tATGSbFXVnHNwd4mIgImDPNzh631nIUaSo0hSSwPPTC68D+/5+3TMJ3XDsQaAwPL9NrLtI9gemzpCnchn6DVrtFbb2rQWgknpPyVOYpHyXcr/lY7lzsYjdz4cffLoa0cfnbzZK0pP7fx1cdXKQzuh9LCdtw6CFJR3HoVKUMKJlKAQChUnUUQokUQSoShUQiUlhFJEESH5M/IFzf+AAl6S/jv8gaS+KWa8FKnstPi1I0P0CyRtjcnPTPsU8U8Mg1mpRsJax7+v8XrWylFTnskiGpszOKreaoE1wFFSeyeyszr6mXzjoqlGL1KdmDoNp+mXZv4U4rYIJ1ROJVb14zLpvaviF/INMjdduWHt0D6nqtEsf9/wV/KHW6zYO7u+RPetH+zKuPak336rIs7rhs/ib0by/3G9G1LfjFWNOT3o3LO6q7yBHGpSR9d0nHa3NHDsJed9nSvrn08wrHvJOX7dX4+Hd6zmAADw9tbh8Md+G7wwUza/+0C3SvtSRrFxS2lgADngQFCCEQwATnFGMA+fXKg8lhO8wvSEQV8ad+8NO3eangz6XWcPrE/j4a1x/Uk1lF53jrt/p/2WQaIkyaZtnXWubdu2bdv2M69t27b9k2fvtfa9n9AT0X8IbiQpktwKKZfh4BEqADn1dQ2N+Dbde3F59X9G9YmD7NVCVW5dTXUVUTV9Xeo7J+qZ+l5aVp6fl5Mt3pabXxAbE1dbTZ1dcIYLbNnIGZ32635pbioBgKLSQqLSouIYREdSXHWnk7O8BDTEbN2JOtrRTK3caWmDHyI0uvhcSXZKQ8zO3QMAPAEvIm8fXz/IqrqE3OzYyClHTF58/hHxVZ1CSj64lovDxzvBELNXWGI8IXd7NnICDDJ7fknXCnGaNORF7pxjSLzEaxUKkEk52FhamJuykWMcST5YXNT8U8PKRF/NuDN8RBJDM0sbJx/FnCyNlsZ+LzH14lD38wMR3R3RYfecNgOgpW9oYmpBZGZiqKdmOj3vUyOvt6d0gmMcER0S0cHR7eNL3+i8Nv/hSGe253F3c/3u6JRPWACwf7CPvf3rm9v7u5vrbWwBGudHUsdntw9EBH4BUsAu0Q4RFzbfNG6ehxbU/F0k3QPdT3fXUorrrnsM9wNqRvrGpuZkJtnHAAOg1p3t7355wv3j00vPqC7D5I+pJRMrF+4H6sCG92XWMDc20FMz8WgbWjgsJ//q9BB+IUUO3A/L08HWCgDIKTAYIRolzVy+fpDtgRdARBQIBAHBUrScpcH/3nL2eAEfJituEX+9HSW7JFFYCoXK5L8CwS7tDDBHfkFeQhzhT4oc2eDujoxfivGEyIkN7tC2RFxinJgWP7RRRGRUdNVUzybQp+0UCIUlFJakEUmIIypKKKwY/7uxTn/GKuNXosIRJhYWvpyUhYyYuNiC/FyFf05r/ybKUxKSuZOYRITkLCAzLVdVuJqt+sRBTl5+WmpKBhFS01dzVAAA",
+        "roundel": NORWAY_ASSET.readall(),
+        "flag": NORWAY_FLAG_ASSET.readall(),
     },
     "Finland": {
         "order": 28,
-        "roundel": IMG_7b521d67_ASSET.readall(),
-        "flag": "UklGRkYDAABXRUJQVlA4TDkDAAAvJ0AHEO/jKpIkxeqle/D9LD3/8ZwwToMNh5Ekq8r8/3F38iJgEnL4LnvrOADbNFKZO0n3n+i+zGdHEtRYABBUD3drZB/AOscsTEJlAxoTEDmSdrJr8y8DEABif2PjQBKxIypQhUQSxSaRRBJJBLCLfXPoH2A7suZPYl/iF2AT+z/2HmAG8Auwib0G+DhU4FAA3Htan6rPrMQyQNShJEAx9hFgHPsB8HSoDdB1CMAWYHRczI/Yl1/eTUa/OCxHp+vusG5d7iflAtnP9SHv9qXy2v9nz+6tFa17PCDvqDOnQapwHP5DGP3fv1i8uq/FT43l++3thtE/L0pknpBy+i3yEapDT73S0EwHHdBr1DqVQe1LEGLEiLFAwYIYARYAWBAjhsyPSCCejeolVDdpUnd2s3nQPTT27aRTGzRq2hlJYySduT+X2pzHA2tvHXN4vh0RA0Tbtk03D/F7SWrbtm3btm3345N3c3PbL9g7ov8O3EZSJLdKqmU4eIQGoCwrOSMxgYtLWP5e+fzVFKY0q1DLTgqHgKBNLqzilRxPTUtMymws+43dlp2ZkZvHhBAsj8vQAc5tAZvrwz4rlJJKMjctHWBuDpBq2Xkhv6kDiAUM6oBhuj2+gGUzaFs+5+79eSGvLrVJOgADccafH8cmuSHCn8xHG1UF4tgg1/E/1oFtZSlS0QZVlsNobe/pH8LIxjaAnRGXocDd/ZXS3Du7tckNCmt3yN2dmeHeruZWt3g6elq6Rk+u7qbWtrC5QcY2knvkPgDOAMDb8cnZ+cXV/WuEdK2sHeCQRzzGyWk0AiHxmyRnTnB9/7Iq2U2lObs5uXQIEdaqtJhEPa86wezECCMkLW5w/RMx19fRauqA8SFksmdg8l3ShEz3NJVPd5o6AIHwckd1wGhr6ejuGxgjB9Dd3GboVnmqT5cQjopQGlvuXXhtqmrkjshjdTlSwsv9F9GGM1W1Um/CZ/AXhsvjt4MhPF0BuBwzVJipEbaVmsf8gqJCPN7e3AE/+XkptvBnAQCA6bHyamqr85ib0ZBdqonz+/nwXVVRVFxCkvl5ZH5JDVBXVaYVZpVqCvNb1thQVVlRDbCyvrFMAwAA",
+        "roundel": FINLAND_ASSET.readall(),
+        "flag": FINLAND_FLAG_ASSET.readall(),
     },
     "Switzerland": {
         "order": 29,
-        "roundel": IMG_ef12827e_ASSET.readall(),
-        "flag": "UklGRuQBAABXRUJQVlA4TNcBAAAvJ0AHEHfCoJEkRXW//o0+M++/DTaNJDnqs9GFD+H50zu7MwzbRlLk++2/0Wfm/Xck27bp7G/7JwPg/DtpZwJu2bbNANifQXDhwoQFAoNAIJAn0QQ8wFSisxYzbC5JqTDheUhuQlKXl8iKNanDS7Lz5FjMegYUkUqQbYRjcWkItmsVJYaWXX5Z0/jFpchWgiqrfPlTI4VXRdWMHq38s5AkSZIkMzMbGw8PHR0bGzc3IyM7Oz8/LS0bGzs7Gxs7OxcXAwM1NQMDBleSJJvW9X22bdu2tf/9XN+I9z8d0f8JYNTTi8loCIxm806PMYgmSLs7G3jgdsDp9hFRfzxpddMqvVY9FGhotb0eWeRZJSeIkuzxkd/bj4QjQX+AXHqmHoE1yIsSZKeLIIk8F6jq4YzoN+9nl9Vme7y9f7ripq0B7M3y/bfXBbg/PzY4rvXulnbBZn88X+mhiFmDzRrAVSVvjaqhhsr9CpwPWxuorzaW+I3tvu/Hnehj3Z7VySX+V8Wc5e99O23tQEuWiH5mBXQZN8KLstMDuGVJ5I0I+lwAgpFwJBqLEwIeWRI4FV7yJZJtPaFaq8co091WIReNAYgHgFiCUqUuo91EjwyiUyzlMtlMudBJM+oA",
+        "roundel": SWITZERLAND_ASSET.readall(),
+        "flag": SWITZERLAND_FLAG_ASSET.readall(),
     },
     "UAE": {
         "order": 30,
-        "roundel": IMG_03b8c495_ASSET.readall(),
-        "flag": "UklGRpoCAABXRUJQVlA4TI4CAAAvJ0AHENVI1bZtEaIXTSQOhMg5cAI0d3d3iCRrJJJL5CK6dKdC9e4j34/nH1hFZ2ZlZF1wdw1ubds2nfVGPty27XQZ+YC8LqVt207nwJFt27Q1+t+li+hp32c7Qmb7fyiCACBocHmEdhqZTOYHbm9wtydQqbCteucB07S8Ndr0FLZt20hI9+4XnHPuXJCy6yjbdvRtavZ2Tdc/Yu21238hvjjG2GMX4Y5FcCCqwcGiGBFs5lwLywifg56JIrnmG40Td6rJ27dsbTve0OP6GiMsK95UJhjpqBCMcNW+ggLxHOKLI73clx2vZNEN8cXRIxlnj2TNxo/ra8zBBZvnP9s3+PP1LFeaEc1SZNJVqVRNRhga7KsQ9YsUH693d3evD37hko2NDc43rrHlDH8ECXQ9U5ESfEnSZxINKdnU1XBXLtKRi7ZlYi0pk7un6q5xBH9kkJGuSr3MLpuqSaVoU4qq7u8nGBMvhmEyYJReFDFmS9KIdORoyBLZKgmNBbtEhLZBQpdYIYI22CPjY1tto6O8ZtVnl2rFieJ0R16gQmeUpKGlZ/pKVnsEjk8mJEyDxInvn6HHU/98r6G68u36R5I+Y0hbTS0pXHL98m8QOmAOnMmWG3p9DRwuuqdboofj3z9nggPAYK5KaIblC+osPQ7k/1skcF4JddAFf+ZKJ/gDgc3zH0CiM7iAO6RBKWz+oVHXNXv8KyQydV26XDikQT6cn689uYELKII0tLpCyYbhygHKCJzhwgHmYATqzBvrdHtvbw9572+QdwIegEcF+NTnjrq3h5KzTc0eBRXkFCBKAgGproVlBMgAJaABbIAr4BH4YgE8fgTy/N3OA6cklwMmwA44qKr6egr0rEfOOQc=",
+        "roundel": UAE_ASSET.readall(),
+        "flag": UAE_FLAG_ASSET.readall(),
     },
 }
 
@@ -367,13 +395,13 @@ def main(config):
     if (int(first["order"]) < int(second["order"])):
         winner = first_name
         loser = second_name
-        winner_roundel = render.Image(src = base64.decode(first["roundel"]), width = item_width, height = item_width)
-        winner_flag = render.Image(src = base64.decode(first["flag"]), width = item_width, height = item_width)
+        winner_roundel = render.Image(src = first["roundel"], width = item_width, height = item_width)
+        winner_flag = render.Image(src = first["flag"], width = item_width, height = item_width)
     else:
         winner = second_name
         loser = first_name
-        winner_roundel = render.Image(src = base64.decode(second["roundel"]), width = item_width, height = item_width)
-        winner_flag = render.Image(src = base64.decode(second["flag"]), width = item_width, height = item_width)
+        winner_roundel = render.Image(src = second["roundel"], width = item_width, height = item_width)
+        winner_flag = render.Image(src = second["flag"], width = item_width, height = item_width)
 
     #Store each frame
     animated_frames = []
@@ -381,10 +409,10 @@ def main(config):
     snapshot_roundels = render.Stack(
         children = [
             render.Image(
-                src = base64.decode(first["roundel"]),
+                src = first["roundel"],
             ),
             add_padding_to_child_element(render.Image(
-                src = base64.decode(second["roundel"]),
+                src = second["roundel"],
                 width = item_width,
                 height = item_width,
             ), item_width),
@@ -394,17 +422,17 @@ def main(config):
     snapshot_flags = render.Stack(
         children = [
             render.Image(
-                src = base64.decode(first["flag"]),
+                src = first["flag"],
             ),
             add_padding_to_child_element(render.Image(
-                src = base64.decode(second["flag"]),
+                src = second["flag"],
                 width = item_width,
                 height = item_width,
             ), item_width),
         ],
     )
 
-    append_stacks(animated_frames, transition_effect_crossover(render.Image(src = base64.decode(second["roundel"])), render.Image(src = base64.decode(first["roundel"]))))
+    append_stacks(animated_frames, transition_effect_crossover(render.Image(src = second["roundel"]), render.Image(src = first["roundel"])))
     append_stacks(animated_frames, transition_effect_two_circles(snapshot_flags, SCREEN_WIDTH / 2))
     append_stacks(animated_frames, transition_effect_two_squares(snapshot_roundels, SCREEN_WIDTH / 2))
     append_stacks(animated_frames, display_winner(winner_roundel, winner_flag))

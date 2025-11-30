@@ -10,39 +10,9 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")  # Added to parse JSON responses
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/default_icon_6585b711.png", DEFAULT_ICON_6585b711_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/default_icon_6585b711.png", DEFAULT_ICON_6585b711_ASSET = "file")
-load("images/img_0d36f67a.png", IMG_0d36f67a_ASSET = "file")
-load("images/img_19b40cfe.png", IMG_19b40cfe_ASSET = "file")
-load("images/img_1a1c9f15.png", IMG_1a1c9f15_ASSET = "file")
-load("images/img_1b9f9f55.png", IMG_1b9f9f55_ASSET = "file")
-load("images/img_24800038.png", IMG_24800038_ASSET = "file")
-load("images/img_285aff67.png", IMG_285aff67_ASSET = "file")
-load("images/img_29625966.png", IMG_29625966_ASSET = "file")
-load("images/img_3360aaf8.png", IMG_3360aaf8_ASSET = "file")
-load("images/img_34bb8105.png", IMG_34bb8105_ASSET = "file")
-load("images/img_377935ff.png", IMG_377935ff_ASSET = "file")
-load("images/img_37bd6832.png", IMG_37bd6832_ASSET = "file")
-load("images/img_3afe938c.png", IMG_3afe938c_ASSET = "file")
-load("images/img_401b3fe5.png", IMG_401b3fe5_ASSET = "file")
-load("images/img_49c321c0.png", IMG_49c321c0_ASSET = "file")
-load("images/img_6585b711.png", IMG_6585b711_ASSET = "file")
-load("images/img_69861f79.png", IMG_69861f79_ASSET = "file")
-load("images/img_7793e876.png", IMG_7793e876_ASSET = "file")
-load("images/img_844d879d.png", IMG_844d879d_ASSET = "file")
-load("images/img_913bc7e2.png", IMG_913bc7e2_ASSET = "file")
-load("images/img_b17d012d.png", IMG_b17d012d_ASSET = "file")
-load("images/img_b371f2f4.png", IMG_b371f2f4_ASSET = "file")
-load("images/img_b604a328.png", IMG_b604a328_ASSET = "file")
-load("images/img_b98c71c2.png", IMG_b98c71c2_ASSET = "file")
-load("images/img_ba22ad78.png", IMG_ba22ad78_ASSET = "file")
-load("images/img_cbf9c077.png", IMG_cbf9c077_ASSET = "file")
-load("images/img_d5dbbefd.png", IMG_d5dbbefd_ASSET = "file")
-load("images/img_d75a9021.png", IMG_d75a9021_ASSET = "file")
-load("images/img_f1a27796.png", IMG_f1a27796_ASSET = "file")
-load("images/img_f1bd6389.png", IMG_f1bd6389_ASSET = "file")
-load("images/img_f5797c05.png", IMG_f5797c05_ASSET = "file")
 
 CACHE_TTL = 300
 DEFAULT_CODE = "n1bmw0og"  # Updated to a sample ilo.so counter ID
@@ -220,36 +190,36 @@ def get_schema():
         schema.Option(display = "Slime Orange", value = "#FE4D00"),
     ]
     icons = [
-        schema.Option(display = "Logo - X", value = IMG_6585b711_ASSET.readall()),
-        schema.Option(display = "Logo - X Verified", value = IMG_f1a27796_ASSET.readall()),
-        schema.Option(display = "Logo - BlueSky", value = IMG_1b9f9f55_ASSET.readall()),
-        schema.Option(display = "Logo - Instagram", value = IMG_34bb8105_ASSET.readall()),
-        schema.Option(display = "Logo - YouTube", value = IMG_24800038_ASSET.readall()),
-        schema.Option(display = "Logo - Ghost", value = IMG_19b40cfe_ASSET.readall()),
-        schema.Option(display = "Logo - Paddle", value = IMG_7793e876_ASSET.readall()),
-        schema.Option(display = "Logo - Gumroad", value = IMG_d75a9021_ASSET.readall()),
-        schema.Option(display = "Logo - ChartMogul", value = IMG_401b3fe5_ASSET.readall()),
-        schema.Option(display = "Logo - Twitter Bird", value = IMG_0d36f67a_ASSET.readall()),
-        schema.Option(display = "Fire", value = IMG_3afe938c_ASSET.readall()),
-        schema.Option(display = "Lightning", value = IMG_285aff67_ASSET.readall()),
-        schema.Option(display = "Checkmark", value = IMG_b98c71c2_ASSET.readall()),
-        schema.Option(display = "Lightbulb", value = IMG_49c321c0_ASSET.readall()),
-        schema.Option(display = "Money", value = IMG_b371f2f4_ASSET.readall()),
-        schema.Option(display = "USD", value = IMG_377935ff_ASSET.readall()),
-        schema.Option(display = "Plant", value = IMG_d5dbbefd_ASSET.readall()),
-        schema.Option(display = "Potted Plant", value = IMG_29625966_ASSET.readall()),
-        schema.Option(display = "Bubbly", value = IMG_cbf9c077_ASSET.readall()),
-        schema.Option(display = "Confetti", value = IMG_ba22ad78_ASSET.readall()),
-        schema.Option(display = "Balloons", value = IMG_b604a328_ASSET.readall()),
-        schema.Option(display = "Heart", value = IMG_69861f79_ASSET.readall()),
-        schema.Option(display = "Storefront", value = IMG_37bd6832_ASSET.readall()),
-        schema.Option(display = "Megaphone", value = IMG_f5797c05_ASSET.readall()),
-        schema.Option(display = "Green Box", value = IMG_844d879d_ASSET.readall()),
-        schema.Option(display = "The Letter P", value = IMG_913bc7e2_ASSET.readall()),
-        schema.Option(display = "Hands - Finger Gun", value = IMG_1a1c9f15_ASSET.readall()),
-        schema.Option(display = "Hands - Pray", value = IMG_b17d012d_ASSET.readall()),
-        schema.Option(display = "Hands - Peace", value = IMG_3360aaf8_ASSET.readall()),
-        schema.Option(display = "Hands - Shaka", value = IMG_f1bd6389_ASSET.readall()),
+        schema.Option(display = "Logo - X", value = LOGO_X_ASSET.readall()),
+        schema.Option(display = "Logo - X Verified", value = LOGO_X_VERIFIED_ASSET.readall()),
+        schema.Option(display = "Logo - BlueSky", value = LOGO_BLUESKY_ASSET.readall()),
+        schema.Option(display = "Logo - Instagram", value = LOGO_INSTAGRAM_ASSET.readall()),
+        schema.Option(display = "Logo - YouTube", value = LOGO_YOUTUBE_ASSET.readall()),
+        schema.Option(display = "Logo - Ghost", value = LOGO_GHOST_ASSET.readall()),
+        schema.Option(display = "Logo - Paddle", value = LOGO_PADDLE_ASSET.readall()),
+        schema.Option(display = "Logo - Gumroad", value = LOGO_GUMROAD_ASSET.readall()),
+        schema.Option(display = "Logo - ChartMogul", value = LOGO_CHARTMOGUL_ASSET.readall()),
+        schema.Option(display = "Logo - Twitter Bird", value = LOGO_TWITTER_BIRD_ASSET.readall()),
+        schema.Option(display = "Fire", value = FIRE_ASSET.readall()),
+        schema.Option(display = "Lightning", value = LIGHTNING_ASSET.readall()),
+        schema.Option(display = "Checkmark", value = CHECKMARK_ASSET.readall()),
+        schema.Option(display = "Lightbulb", value = LIGHTBULB_ASSET.readall()),
+        schema.Option(display = "Money", value = MONEY_ASSET.readall()),
+        schema.Option(display = "USD", value = USD_ASSET.readall()),
+        schema.Option(display = "Plant", value = PLANT_ASSET.readall()),
+        schema.Option(display = "Potted Plant", value = POTTED_PLANT_ASSET.readall()),
+        schema.Option(display = "Bubbly", value = BUBBLY_ASSET.readall()),
+        schema.Option(display = "Confetti", value = CONFETTI_ASSET.readall()),
+        schema.Option(display = "Balloons", value = BALLOONS_ASSET.readall()),
+        schema.Option(display = "Heart", value = HEART_ASSET.readall()),
+        schema.Option(display = "Storefront", value = STOREFRONT_ASSET.readall()),
+        schema.Option(display = "Megaphone", value = MEGAPHONE_ASSET.readall()),
+        schema.Option(display = "Green Box", value = GREEN_BOX_ASSET.readall()),
+        schema.Option(display = "The Letter P", value = THE_LETTER_P_ASSET.readall()),
+        schema.Option(display = "Hands - Finger Gun", value = HANDS_FINGER_GUN_ASSET.readall()),
+        schema.Option(display = "Hands - Pray", value = HANDS_PRAY_ASSET.readall()),
+        schema.Option(display = "Hands - Peace", value = HANDS_PEACE_ASSET.readall()),
+        schema.Option(display = "Hands - Shaka", value = HANDS_SHAKA_ASSET.readall()),
     ]
     layouts = [
         schema.Option(display = "Top and Bottom (With Banner and Divider)", value = "Top"),

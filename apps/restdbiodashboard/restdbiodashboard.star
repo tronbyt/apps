@@ -9,15 +9,15 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/icon_new.png", ICON_NEW_ASSET = "file")
+load("images/icon_restdb.png", ICON_RESTDB_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_22521558.png", IMG_22521558_ASSET = "file")
-load("images/img_5ae43562.png", IMG_5ae43562_ASSET = "file")
 
 TTL_ICONS = 216000
 
 DEMO_PAGE = '[{"text":"create","colortext":"#FFFFFF","subtext":"","colorsubtext":"#FFFFFF","icon":"new","order":0,"name":"create"},{"text":"restdb.io","colortext":"#777777","subtext":"","colorsubtext":"#000000","icon":"restdb","order":1,"name":"restdb"},{"text":"database","colortext":"#FFFFFF","subtext":"","colorsubtext":"#FFFFFF","icon":"new","order":2,"name":"database"}]'
-DEMO_ICONS = '[{"name":"new","data":IMG_22521558_ASSET.readall()},{"name":"restdb","data":IMG_5ae43562_ASSET.readall()}]'
+DEMO_ICONS = '[{"name":"new","data":' + base64.encode(ICON_NEW_ASSET.readall()) + '},{"name":"restdb","data":' + base64.encode(ICON_RESTDB_ASSET.readall()) + "}]"
 
 def render_fail(rep):
     return render.Root(render.Box(render.WrappedText("%s" % rep.status_code), color = "#AA0000"))

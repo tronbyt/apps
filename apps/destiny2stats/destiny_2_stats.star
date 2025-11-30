@@ -6,13 +6,12 @@ Author: brandontod97
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/error.png", ERROR_IMAGE = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_0ad593aa.png", IMG_0ad593aa_ASSET = "file")
 
 API_BASE_URL = "https://www.bungie.net/platform"
 API_USER_PROFILE = API_BASE_URL + "/User/GetBungieNetUserById/"
@@ -115,7 +114,7 @@ def get_image(url):
         if response.status_code == 200:
             return response.body()
         else:
-            return IMG_0ad593aa_ASSET.readall()
+            return ERROR_IMAGE.readall()
 
     # Should never get here.
     return ""

@@ -15,17 +15,17 @@ load("images/cave.png", CAVE_ASSET = "file")
 load("images/cave2.png", CAVE2_ASSET = "file")
 load("images/colusseum.png", COLUSSEUM_ASSET = "file")
 load("images/dragon.png", DRAGON_ASSET = "file")
+load("images/dragonborn.png", DRAGONBORN_ASSET = "file")
 load("images/dungeon.png", DUNGEON_ASSET = "file")
 load("images/dungeon2.png", DUNGEON2_ASSET = "file")
 load("images/dungeon3.png", DUNGEON3_ASSET = "file")
+load("images/dwarf.png", DWARF_ASSET = "file")
 load("images/forest2.png", FOREST2_ASSET = "file")
 load("images/forest3.png", FOREST3_ASSET = "file")
 load("images/forest4.png", FOREST4_ASSET = "file")
 load("images/forest5.png", FOREST5_ASSET = "file")
-load("images/img_2.png", IMG_2_ASSET = "file")
-load("images/img_3.png", IMG_3_ASSET = "file")
-load("images/img_4.png", IMG_4_ASSET = "file")
-load("images/img_5.png", IMG_5_ASSET = "file")
+load("images/gnome.png", GNOME_ASSET = "file")
+load("images/half_elf.png", HALF_ELF_ASSET = "file")
 load("images/magma.png", MAGMA_ASSET = "file")
 load("images/market.png", MARKET_ASSET = "file")
 load("images/market2.png", MARKET2_ASSET = "file")
@@ -77,10 +77,15 @@ SWAMP = SWAMP_ASSET.readall()
 TAVERN = TAVERN_ASSET.readall()
 TAVERN2 = TAVERN2_ASSET.readall()
 
-IMG_2 = IMG_2_ASSET.readall()
-IMG_3 = IMG_3_ASSET.readall()
-IMG_4 = IMG_4_ASSET.readall()
-IMG_5 = IMG_5_ASSET.readall()
+DWARF_ICON = DWARF_ASSET.readall()
+DRAGONBORN_ICON = DRAGONBORN_ASSET.readall()
+GNOME_ICON = GNOME_ASSET.readall()
+HALF_ELF_ICON = HALF_ELF_ASSET.readall()
+
+IMG_2 = 2
+IMG_3 = 3
+IMG_4 = 4
+IMG_5 = 5
 
 DEFAULT_RACE = "all"
 

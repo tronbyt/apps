@@ -5,12 +5,11 @@ Description: By default, displays the first chart on your DataDog dashboard.
 Author: Gabe Ochoa
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/img_365abaca.bin", IMG_365abaca_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_365abaca.bin", IMG_365abaca_ASSET = "file")
 
 # Set your DataDog API and App keys here for development
 DEFAULT_APP_KEY = None

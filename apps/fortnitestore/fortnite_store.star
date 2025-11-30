@@ -5,12 +5,11 @@ Description: See items currently featured in the Fortnite store.
 Author: naomi-nori
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/default_item.png", DEFAULT_ITEM_IMAGE_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_bc696d5d.png", IMG_bc696d5d_ASSET = "file")
 
 color_key = {
     "handmade": "#fff",
@@ -27,7 +26,7 @@ default_item = {
     "vBucks": 800.00,
     "rarity": "uncommon",
     "name": "Tinseltoes",
-    "image": IMG_bc696d5d_ASSET.readall(),
+    "image": DEFAULT_ITEM_IMAGE_ASSET.readall(),
 }
 
 def main(config):

@@ -9,12 +9,12 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/importance_high.png", IMPORTANCE_HIGH_ASSET = "file")
+load("images/importance_medium.png", IMPORTANCE_MEDIUM_ASSET = "file")
+load("images/importance_low.png", IMPORTANCE_LOW_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_97b0bf95.png", IMG_97b0bf95_ASSET = "file")
-load("images/img_c21aef57.png", IMG_c21aef57_ASSET = "file")
-load("images/img_cb15e309.png", IMG_cb15e309_ASSET = "file")
 
 BASE_URL = "https://api.tradingeconomics.com"
 AUTH = "guest:guest"
@@ -367,9 +367,9 @@ ISO3166 = {
 }
 
 IMPORTANCE_ICONS = {
-    1: base64.decode(IMG_cb15e309_ASSET.readall()),
-    2: base64.decode(IMG_c21aef57_ASSET.readall()),
-    3: base64.decode(IMG_97b0bf95_ASSET.readall()),
+    1: IMPORTANCE_LOW_ASSET.readall(),
+    2: IMPORTANCE_MEDIUM_ASSET.readall(),
+    3: IMPORTANCE_HIGH_ASSET.readall(),
 }
 
 def flag_api(country_name):

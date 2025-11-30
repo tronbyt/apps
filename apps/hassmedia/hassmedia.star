@@ -1,9 +1,9 @@
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/home_assistant.svg", HA_ICON_ASSET = "file")
+load("images/spotify.png", SPOTIFY_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_3b2d6389.png", IMG_3b2d6389_ASSET = "file")
-load("images/img_fbe29b76.svg", IMG_fbe29b76_ASSET = "file")
 
 PLACEHOLDER_DATA = {
     "entity_id": "media_player.spotify",
@@ -16,8 +16,8 @@ PLACEHOLDER_DATA = {
 }
 
 ICONS = {
-    "ha": IMG_fbe29b76_ASSET.readall(),
-    "spotify": IMG_3b2d6389_ASSET.readall(),
+    "ha": HA_ICON_ASSET.readall(),
+    "spotify": SPOTIFY_ICON_ASSET.readall(),
 }
 
 def main(config):

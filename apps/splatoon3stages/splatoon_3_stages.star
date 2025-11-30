@@ -6,89 +6,88 @@ Author: MarkGamed7794
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/salmon_stage_bonerattle_arena.png", SALMON_STAGE_BONERATTLE_ARENA_ASSET = "file")
+load("images/salmon_stage_gone_fission_hydroplant.png", SALMON_STAGE_GONE_FISSION_HYDROPLANT_ASSET = "file")
+load("images/salmon_stage_grand_splatlands_bowl.png", SALMON_STAGE_GRAND_SPLATLANDS_BOWL_ASSET = "file")
+load("images/salmon_stage_jammin__salmon_junction.png", SALMON_STAGE_JAMMIN_SALMON_JUNCTION_ASSET = "file")
+load("images/salmon_stage_marooner_s_bay.png", SALMON_STAGE_MAROONER_S_BAY_ASSET = "file")
+load("images/salmon_stage_salmonid_smokeyard.png", SALMON_STAGE_SALMONID_SMOKEYARD_ASSET = "file")
+load("images/salmon_stage_sockeye_station.png", SALMON_STAGE_SOCKEYE_STATION_ASSET = "file")
+load("images/salmon_stage_spawning_grounds.png", SALMON_STAGE_SPAWNING_GROUNDS_ASSET = "file")
+load("images/stage_barnacle___dime.png", STAGE_BARNACLE__DIME_ASSET = "file")
+load("images/stage_bluefin_depot.png", STAGE_BLUEFIN_DEPOT_ASSET = "file")
+load("images/stage_brinewater_springs.png", STAGE_BRINEWATER_SPRINGS_ASSET = "file")
+load("images/stage_crableg_capital.png", STAGE_CRABLEG_CAPITAL_ASSET = "file")
+load("images/stage_eeltail_alley.png", STAGE_EELTAIL_ALLEY_ASSET = "file")
+load("images/stage_flounder_heights.png", STAGE_FLOUNDER_HEIGHTS_ASSET = "file")
+load("images/stage_hagglefish_market.png", STAGE_HAGGLEFISH_MARKET_ASSET = "file")
+load("images/stage_hammerhead_bridge.png", STAGE_HAMMERHEAD_BRIDGE_ASSET = "file")
+load("images/stage_humpback_pump_track.png", STAGE_HUMPBACK_PUMP_TRACK_ASSET = "file")
+load("images/stage_inkblot_art_academy.png", STAGE_INKBLOT_ART_ACADEMY_ASSET = "file")
+load("images/stage_lemuria_hub.png", STAGE_LEMURIA_HUB_ASSET = "file")
+load("images/stage_mahi_mahi_resort.png", STAGE_MAHI_MAHI_RESORT_ASSET = "file")
+load("images/stage_makomart.png", STAGE_MAKOMART_ASSET = "file")
+load("images/stage_manta_maria.png", STAGE_MANTA_MARIA_ASSET = "file")
+load("images/stage_marlin_airport.png", STAGE_MARLIN_AIRPORT_ASSET = "file")
+load("images/stage_mincemeat_metalworks.png", STAGE_MINCEMEAT_METALWORKS_ASSET = "file")
+load("images/stage_museum_d_alfonsino.png", STAGE_MUSEUM_D_ALFONSINO_ASSET = "file")
+load("images/stage_robo_rom_en.png", STAGE_ROBO_ROM_EN_ASSET = "file")
+load("images/stage_scorch_gorge.png", STAGE_SCORCH_GORGE_ASSET = "file")
+load("images/stage_shipshape_cargo_co.png", STAGE_SHIPSHAPE_CARGO_CO_ASSET = "file")
+load("images/stage_sturgeon_shipyard.png", STAGE_STURGEON_SHIPYARD_ASSET = "file")
+load("images/stage_um_ami_ruins.png", STAGE_UM_AMI_RUINS_ASSET = "file")
+load("images/stage_undertow_spillway.png", STAGE_UNDERTOW_SPILLWAY_ASSET = "file")
+load("images/stage_unknown.png", STAGE_UNKNOWN_ASSET = "file")
+load("images/stage_urchin_underpass.png", STAGE_URCHIN_UNDERPASS_ASSET = "file")
+load("images/stage_wahoo_world.png", STAGE_WAHOO_WORLD_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_1223e945.png", IMG_1223e945_ASSET = "file")
-load("images/img_1c8630cf.png", IMG_1c8630cf_ASSET = "file")
-load("images/img_264baac6.png", IMG_264baac6_ASSET = "file")
-load("images/img_29c682ff.png", IMG_29c682ff_ASSET = "file")
-load("images/img_3002522d.png", IMG_3002522d_ASSET = "file")
-load("images/img_32f24af5.png", IMG_32f24af5_ASSET = "file")
-load("images/img_37173444.png", IMG_37173444_ASSET = "file")
-load("images/img_38503e0f.png", IMG_38503e0f_ASSET = "file")
-load("images/img_45be861c.png", IMG_45be861c_ASSET = "file")
-load("images/img_46773268.png", IMG_46773268_ASSET = "file")
-load("images/img_4ad14c5e.png", IMG_4ad14c5e_ASSET = "file")
-load("images/img_524f7e6c.png", IMG_524f7e6c_ASSET = "file")
-load("images/img_54d9e287.png", IMG_54d9e287_ASSET = "file")
-load("images/img_716049a6.png", IMG_716049a6_ASSET = "file")
-load("images/img_7b4345a6.png", IMG_7b4345a6_ASSET = "file")
-load("images/img_80951f7b.png", IMG_80951f7b_ASSET = "file")
-load("images/img_912f6184.png", IMG_912f6184_ASSET = "file")
-load("images/img_97dccdc6.png", IMG_97dccdc6_ASSET = "file")
-load("images/img_9988b66f.png", IMG_9988b66f_ASSET = "file")
-load("images/img_9f1de678.png", IMG_9f1de678_ASSET = "file")
-load("images/img_a4e21a11.png", IMG_a4e21a11_ASSET = "file")
-load("images/img_a8dce8f7.png", IMG_a8dce8f7_ASSET = "file")
-load("images/img_ab75d239.png", IMG_ab75d239_ASSET = "file")
-load("images/img_b11944e7.png", IMG_b11944e7_ASSET = "file")
-load("images/img_b8eb4cb0.png", IMG_b8eb4cb0_ASSET = "file")
-load("images/img_bdfcaf6c.png", IMG_bdfcaf6c_ASSET = "file")
-load("images/img_c171d3fa.png", IMG_c171d3fa_ASSET = "file")
-load("images/img_c42b8223.png", IMG_c42b8223_ASSET = "file")
-load("images/img_e4af894f.png", IMG_e4af894f_ASSET = "file")
-load("images/img_e85ab87d.png", IMG_e85ab87d_ASSET = "file")
-load("images/img_ee31aae1.png", IMG_ee31aae1_ASSET = "file")
-load("images/img_f32176a7.png", IMG_f32176a7_ASSET = "file")
-load("images/img_f5e25add.png", IMG_f5e25add_ASSET = "file")
-load("images/img_fdb0c19c.png", IMG_fdb0c19c_ASSET = "file")
 
 # thanks s3.ink!
 STAGE_URL = "https://splatoon3.ink/data/schedules.json"
 
 STAGE_IMG = {
-    "no_stage": IMG_37173444_ASSET.readall(),
-    "Barnacle & Dime": IMG_264baac6_ASSET.readall(),
-    "Bluefin Depot": IMG_80951f7b_ASSET.readall(),
-    "Brinewater Springs": IMG_97dccdc6_ASSET.readall(),
-    "Crableg Capital": IMG_bdfcaf6c_ASSET.readall(),
-    "Eeltail Alley": IMG_29c682ff_ASSET.readall(),
-    "Flounder Heights": IMG_45be861c_ASSET.readall(),
-    "Hagglefish Market": IMG_e4af894f_ASSET.readall(),
-    "Hammerhead Bridge": IMG_4ad14c5e_ASSET.readall(),
-    "Humpback Pump Track": IMG_7b4345a6_ASSET.readall(),
-    "Inkblot Art Academy": IMG_b11944e7_ASSET.readall(),
-    "Lemuria Hub": IMG_c42b8223_ASSET.readall(),
-    "Mahi-Mahi Resort": IMG_46773268_ASSET.readall(),
-    "MakoMart": IMG_ee31aae1_ASSET.readall(),
-    "Manta Maria": IMG_fdb0c19c_ASSET.readall(),
-    "Marlin Airport": IMG_1c8630cf_ASSET.readall(),
-    "Mincemeat Metalworks": IMG_716049a6_ASSET.readall(),
-    "Museum d'Alfonsino": IMG_ab75d239_ASSET.readall(),
-    "Robo ROM-en": IMG_54d9e287_ASSET.readall(),
-    "Scorch Gorge": IMG_38503e0f_ASSET.readall(),
-    "Shipshape Cargo Co.": IMG_f5e25add_ASSET.readall(),
-    "Sturgeon Shipyard": IMG_a4e21a11_ASSET.readall(),
-    "Um'ami Ruins": IMG_b8eb4cb0_ASSET.readall(),
-    "Undertow Spillway": IMG_f32176a7_ASSET.readall(),
-    "Urchin Underpass": IMG_524f7e6c_ASSET.readall(),
-    "Wahoo World": IMG_1223e945_ASSET.readall(),
+    "no_stage": STAGE_UNKNOWN_ASSET.readall(),
+    "Barnacle & Dime": STAGE_BARNACLE__DIME_ASSET.readall(),
+    "Bluefin Depot": STAGE_BLUEFIN_DEPOT_ASSET.readall(),
+    "Brinewater Springs": STAGE_BRINEWATER_SPRINGS_ASSET.readall(),
+    "Crableg Capital": STAGE_CRABLEG_CAPITAL_ASSET.readall(),
+    "Eeltail Alley": STAGE_EELTAIL_ALLEY_ASSET.readall(),
+    "Flounder Heights": STAGE_FLOUNDER_HEIGHTS_ASSET.readall(),
+    "Hagglefish Market": STAGE_HAGGLEFISH_MARKET_ASSET.readall(),
+    "Hammerhead Bridge": STAGE_HAMMERHEAD_BRIDGE_ASSET.readall(),
+    "Humpback Pump Track": STAGE_HUMPBACK_PUMP_TRACK_ASSET.readall(),
+    "Inkblot Art Academy": STAGE_INKBLOT_ART_ACADEMY_ASSET.readall(),
+    "Lemuria Hub": STAGE_LEMURIA_HUB_ASSET.readall(),
+    "Mahi-Mahi Resort": STAGE_MAHI_MAHI_RESORT_ASSET.readall(),
+    "MakoMart": STAGE_MAKOMART_ASSET.readall(),
+    "Manta Maria": STAGE_MANTA_MARIA_ASSET.readall(),
+    "Marlin Airport": STAGE_MARLIN_AIRPORT_ASSET.readall(),
+    "Mincemeat Metalworks": STAGE_MINCEMEAT_METALWORKS_ASSET.readall(),
+    "Museum d'Alfonsino": STAGE_MUSEUM_D_ALFONSINO_ASSET.readall(),
+    "Robo ROM-en": STAGE_ROBO_ROM_EN_ASSET.readall(),
+    "Scorch Gorge": STAGE_SCORCH_GORGE_ASSET.readall(),
+    "Shipshape Cargo Co.": STAGE_SHIPSHAPE_CARGO_CO_ASSET.readall(),
+    "Sturgeon Shipyard": STAGE_STURGEON_SHIPYARD_ASSET.readall(),
+    "Um'ami Ruins": STAGE_UM_AMI_RUINS_ASSET.readall(),
+    "Undertow Spillway": STAGE_UNDERTOW_SPILLWAY_ASSET.readall(),
+    "Urchin Underpass": STAGE_URCHIN_UNDERPASS_ASSET.readall(),
+    "Wahoo World": STAGE_WAHOO_WORLD_ASSET.readall(),
 }
 
 SALMON_STAGE_IMG = {
-    "Bonerattle Arena": IMG_9f1de678_ASSET.readall(),
-    "Gone Fission Hydroplant": IMG_32f24af5_ASSET.readall(),
-    "Grand Splatlands Bowl": IMG_c171d3fa_ASSET.readall(),
-    "Marooner's Bay": IMG_e85ab87d_ASSET.readall(),
-    "Jammin' Salmon Junction": IMG_a8dce8f7_ASSET.readall(),
-    "Sockeye Station": IMG_3002522d_ASSET.readall(),
-    "Spawning Grounds": IMG_912f6184_ASSET.readall(),
-    "Salmonid Smokeyard": IMG_9988b66f_ASSET.readall(),
+    "Bonerattle Arena": SALMON_STAGE_BONERATTLE_ARENA_ASSET.readall(),
+    "Gone Fission Hydroplant": SALMON_STAGE_GONE_FISSION_HYDROPLANT_ASSET.readall(),
+    "Grand Splatlands Bowl": SALMON_STAGE_GRAND_SPLATLANDS_BOWL_ASSET.readall(),
+    "Marooner's Bay": SALMON_STAGE_MAROONER_S_BAY_ASSET.readall(),
+    "Jammin' Salmon Junction": SALMON_STAGE_JAMMIN_SALMON_JUNCTION_ASSET.readall(),
+    "Sockeye Station": SALMON_STAGE_SOCKEYE_STATION_ASSET.readall(),
+    "Spawning Grounds": SALMON_STAGE_SPAWNING_GROUNDS_ASSET.readall(),
+    "Salmonid Smokeyard": SALMON_STAGE_SALMONID_SMOKEYARD_ASSET.readall(),
 }
 
 ICONS = {

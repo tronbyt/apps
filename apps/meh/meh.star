@@ -9,16 +9,16 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/no_deal.png", NO_DEAL_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_f649742d.png", IMG_f649742d_ASSET = "file")
 
 MEH_CACHE = "meh"
 MEH_IMAGE_CACHE = "meh-image"
 MEH_URL = "https://meh.com/api/1/current.json?apikey="
 TTL_SECONDS = 600
 
-NO_DEAL_IMAGE = IMG_f649742d_ASSET.readall()
+NO_DEAL_IMAGE = NO_DEAL_ASSET.readall()
 
 def get_schema():
     return schema.Schema(

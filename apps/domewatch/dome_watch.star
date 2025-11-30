@@ -6,13 +6,12 @@ Author: Shaun Brown
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/adjourned_icon.png", ADJOURNED_ICON_ASSET = "file")
+load("images/voting_icon.png", VOTING_ICON_ASSET = "file")
 load("render.star", "render")
 load("time.star", "time")
-load("images/img_5f17f821.png", IMG_5f17f821_ASSET = "file")
-load("images/img_6bb25a47.png", IMG_6bb25a47_ASSET = "file")
 
 DEFAULT_TIMEZONE = "America/New_York"
 DOME_WATCH_API_URL = "https://api3.domewatch.us"
@@ -353,13 +352,13 @@ def getNonVotingMarquee(floor):
 
 def getStatusIcon(floor):
     if floor["now"]["value"] == "voting":
-        return IMG_6bb25a47_ASSET.readall()
+        return VOTING_ICON_ASSET.readall()
 
     elif floor["now"]["value"] != "adjourned":
-        return IMG_6bb25a47_ASSET.readall()
+        return VOTING_ICON_ASSET.readall()
 
     else:
-        return IMG_5f17f821_ASSET.readall()
+        return ADJOURNED_ICON_ASSET.readall()
 
 def getFloorStatusFont(floor):
     """

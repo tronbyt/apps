@@ -5,26 +5,20 @@ Description: A collection of Spectro Cloud images with a clock.
 Author: karl-cardenas-coding
 """
 
-load("encoding/base64.star", "base64")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_173b6721.png", IMG_173b6721_ASSET = "file")
-load("images/img_3424b475.png", IMG_3424b475_ASSET = "file")
-load("images/img_410587fe.png", IMG_410587fe_ASSET = "file")
-load("images/img_8cb80606.png", IMG_8cb80606_ASSET = "file")
-load("images/img_fcb7c040.png", IMG_fcb7c040_ASSET = "file")
 
 SPECTRO_FONT_COLOR_BLUE = "#3575CF"
 PALETTE_FONT_COLOR_PURPLE = "#6a5d9d"
 
 IMAGES = [
-    IMG_fcb7c040_ASSET.readall(),
-    IMG_8cb80606_ASSET.readall(),
-    IMG_3424b475_ASSET.readall(),
-    IMG_173b6721_ASSET.readall(),
-    IMG_410587fe_ASSET.readall(),
+    SPECTRO_CLOUD_1_ASSET.readall(),
+    SPECTRO_CLOUD_2_ASSET.readall(),
+    SPECTRO_CLOUD_3_ASSET.readall(),
+    SPECTRO_CLOUD_4_ASSET.readall(),
+    SPECTRO_CLOUD_5_ASSET.readall(),
 ]
 
 def main(config):

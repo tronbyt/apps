@@ -7,9 +7,6 @@ Author: RichardALeon
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
-load("render.star", "render")
-load("schema.star", "schema")
-load("time.star", "time")
 load("images/angel_island_zone_l1_f1_0972fd3a.png", ANGEL_ISLAND_ZONE_L1_F1_0972fd3a_ASSET = "file")
 load("images/carnival_night_zone_l1_f1_dcbbd781.png", CARNIVAL_NIGHT_ZONE_L1_F1_dcbbd781_ASSET = "file")
 load("images/ghz_8bit_l1_f1_7b697aa0.png", GHZ_8BIT_L1_F1_7b697aa0_ASSET = "file")
@@ -49,6 +46,9 @@ load("images/tails_sth3_l2_f2_11afa94f.png", TAILS_STH3_L2_F2_11afa94f_ASSET = "
 load("images/tails_sth3_l2_f3_250e5659.png", TAILS_STH3_L2_F3_250e5659_ASSET = "file")
 load("images/tails_sth3_l2_f4_57aa2b8e.png", TAILS_STH3_L2_F4_57aa2b8e_ASSET = "file")
 load("images/tails_sth3_l2_f5_55ab5d18.png", TAILS_STH3_L2_F5_55ab5d18_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
+load("time.star", "time")
 
 def animate(layerSpecs):
     layers = []

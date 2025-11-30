@@ -7,33 +7,32 @@ Author: Robert Ison
 
 load("animation.star", "animation")
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/cloud_icon.png", CLOUD_ICON_ASSET = "file")
 load("images/directional_arrow.png", DIRECTIONAL_ARROW_ASSET = "file")
 load("images/flag_base.png", FLAG_BASE_ASSET = "file")
+load("images/moon_0.png", MOON_0_ASSET = "file")
+load("images/moon_1.png", MOON_1_ASSET = "file")
+load("images/moon_2.png", MOON_2_ASSET = "file")
+load("images/moon_3.png", MOON_3_ASSET = "file")
+load("images/moon_4.png", MOON_4_ASSET = "file")
+load("images/moon_5.png", MOON_5_ASSET = "file")
+load("images/moon_6.png", MOON_6_ASSET = "file")
+load("images/moon_7.png", MOON_7_ASSET = "file")
 load("images/rain_icon.png", RAIN_ICON_ASSET = "file")
 load("images/sun_icon.png", SUN_ICON_ASSET = "file")
 load("images/windrose_icon.png", WINDROSE_ICON_ASSET = "file")
+load("images/windsock_1.png", WINDSOCK_1_ASSET = "file")
+load("images/windsock_2.png", WINDSOCK_2_ASSET = "file")
+load("images/windsock_3.png", WINDSOCK_3_ASSET = "file")
+load("images/windsock_4.png", WINDSOCK_4_ASSET = "file")
+load("images/windsock_5.png", WINDSOCK_5_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
-load("images/img_3f786ec0.png", IMG_3f786ec0_ASSET = "file")
-load("images/img_4072ddf6.png", IMG_4072ddf6_ASSET = "file")
-load("images/img_4227b260.png", IMG_4227b260_ASSET = "file")
-load("images/img_744d8f83.png", IMG_744d8f83_ASSET = "file")
-load("images/img_9a2cfc00.png", IMG_9a2cfc00_ASSET = "file")
-load("images/img_a2afcb9f.png", IMG_a2afcb9f_ASSET = "file")
-load("images/img_a61fcf56.png", IMG_a61fcf56_ASSET = "file")
-load("images/img_ca8077db.png", IMG_ca8077db_ASSET = "file")
-load("images/img_ca864a35.png", IMG_ca864a35_ASSET = "file")
-load("images/img_caafdcbd.png", IMG_caafdcbd_ASSET = "file")
-load("images/img_e19e6f1f.png", IMG_e19e6f1f_ASSET = "file")
-load("images/img_e2d03193.png", IMG_e2d03193_ASSET = "file")
-load("images/img_f149c019.png", IMG_f149c019_ASSET = "file")
 
 CLOUD_ICON = CLOUD_ICON_ASSET.readall()
 DIRECTIONAL_ARROW = DIRECTIONAL_ARROW_ASSET.readall()
@@ -50,22 +49,22 @@ CACHE_NAME = "%s_%s_CycleCast_Cache_%s"
 #Weather Icons
 
 WINDSOCKS = {
-    "1": IMG_a61fcf56_ASSET.readall(),
-    "2": IMG_e2d03193_ASSET.readall(),
-    "3": IMG_9a2cfc00_ASSET.readall(),
-    "4": IMG_4227b260_ASSET.readall(),
-    "5": IMG_e19e6f1f_ASSET.readall(),
+    "1": WINDSOCK_1_ASSET.readall(),
+    "2": WINDSOCK_2_ASSET.readall(),
+    "3": WINDSOCK_3_ASSET.readall(),
+    "4": WINDSOCK_4_ASSET.readall(),
+    "5": WINDSOCK_5_ASSET.readall(),
 }
 
 MOON_ICONS = {
-    "0": IMG_caafdcbd_ASSET.readall(),
-    "1": IMG_4072ddf6_ASSET.readall(),
-    "2": IMG_3f786ec0_ASSET.readall(),
-    "3": IMG_ca864a35_ASSET.readall(),
-    "4": IMG_ca8077db_ASSET.readall(),
-    "5": IMG_a2afcb9f_ASSET.readall(),
-    "6": IMG_744d8f83_ASSET.readall(),
-    "7": IMG_f149c019_ASSET.readall(),
+    "0": MOON_0_ASSET.readall(),
+    "1": MOON_1_ASSET.readall(),
+    "2": MOON_2_ASSET.readall(),
+    "3": MOON_3_ASSET.readall(),
+    "4": MOON_4_ASSET.readall(),
+    "5": MOON_5_ASSET.readall(),
+    "6": MOON_6_ASSET.readall(),
+    "7": MOON_7_ASSET.readall(),
 }
 
 # Parameters for Setting Options
@@ -399,15 +398,15 @@ def get_animated_windsock(wind, gusts):
 
     for _ in range(1, 3):
         for _ in range(0, 10):
-            children.append(render.Image(src = base64.decode(WINDSOCKS[str(get_wind_sock_category(float(wind)))])))
+            children.append(render.Image(src = WINDSOCKS[str(get_wind_sock_category(float(wind)))]))
 
         for j in range(get_wind_sock_category(float(wind)), get_wind_sock_category(float(gusts)) + 1):
             for _ in range(0, 2):
-                children.append(render.Image(src = base64.decode(WINDSOCKS[str(j)])))
+                children.append(render.Image(src = WINDSOCKS[str(j)]))
 
         for k in range(get_wind_sock_category(float(gusts)), get_wind_sock_category(float(wind)) - 1, -1):
             for _ in range(0, 6):
-                children.append(render.Image(src = base64.decode(WINDSOCKS[str(k)])))
+                children.append(render.Image(src = WINDSOCKS[str(k)]))
 
     return render.Animation(
         children = children,
@@ -476,7 +475,7 @@ def main(config):
         display_items.append(add_padding_to_child_element(render.Image(src = SUN_ICON), 48))
     else:
         # print("NightTime")
-        display_items.append(add_padding_to_child_element(render.Image(src = base64.decode(MOON_ICONS[str(moon_phase(current_time.year, current_time.month, current_time.day, False))])), 43, -2))
+        display_items.append(add_padding_to_child_element(render.Image(src = MOON_ICONS[str(moon_phase(current_time.year, current_time.month, current_time.day, False))]), 43, -2))
 
     #Display Rain if Raining
     if get_current_condition(local_data, closest_element_to_now, "rain", False) > 0:

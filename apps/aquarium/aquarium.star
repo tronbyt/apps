@@ -6,25 +6,25 @@ Author: Robert Ison
 """
 
 load("encoding/base64.star", "base64")
+load("images/anchor.png", ANCHOR_ASSET = "file")
+load("images/anglerfish.png", ANGLERFISH_ASSET = "file")
+load("images/blowfish.png", BLOWFISH_ASSET = "file")
+load("images/blue_tang.png", BLUE_TANG_ASSET = "file")
+load("images/clownfish.png", CLOWNFISH_ASSET = "file")
+load("images/coral_brain.png", CORAL_BRAIN_ASSET = "file")
+load("images/coral_finger.png", CORAL_FINGER_ASSET = "file")
+load("images/coral_tubes.png", CORAL_TUBES_ASSET = "file")
+load("images/crab.png", CRAB_ASSET = "file")
+load("images/cuttlefish.png", CUTTLEFISH_ASSET = "file")
+load("images/diver.png", DIVER_ASSET = "file")
+load("images/helmet.png", HELMET_ASSET = "file")
+load("images/lionfish.png", LIONFISH_ASSET = "file")
+load("images/shark.png", SHARK_ASSET = "file")
+load("images/shipwreck.png", SHIPWRECK_ASSET = "file")
+load("images/treasure.png", TREASURE_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_16f532d4.png", IMG_16f532d4_ASSET = "file")
-load("images/img_191d0d08.png", IMG_191d0d08_ASSET = "file")
-load("images/img_47f9b6e4.png", IMG_47f9b6e4_ASSET = "file")
-load("images/img_5c897dd8.png", IMG_5c897dd8_ASSET = "file")
-load("images/img_5fc1870a.png", IMG_5fc1870a_ASSET = "file")
-load("images/img_69ef2bee.png", IMG_69ef2bee_ASSET = "file")
-load("images/img_76487e62.png", IMG_76487e62_ASSET = "file")
-load("images/img_780a4fb2.png", IMG_780a4fb2_ASSET = "file")
-load("images/img_9685f9ed.png", IMG_9685f9ed_ASSET = "file")
-load("images/img_9c266b80.png", IMG_9c266b80_ASSET = "file")
-load("images/img_cba93242.png", IMG_cba93242_ASSET = "file")
-load("images/img_d766c3c6.png", IMG_d766c3c6_ASSET = "file")
-load("images/img_e2ad0e60.png", IMG_e2ad0e60_ASSET = "file")
-load("images/img_ebf2314d.png", IMG_ebf2314d_ASSET = "file")
-load("images/img_f444f7ed.png", IMG_f444f7ed_ASSET = "file")
-load("images/img_fdf59949.png", IMG_fdf59949_ASSET = "file")
 
 SCREEN_WIDTH = 64
 SCREEN_HEIGHT = 32
@@ -35,56 +35,56 @@ sealife = [
         "name": "Clownfish",
         "height": 15,
         "width": 27,
-        "image": IMG_47f9b6e4_ASSET.readall(),
+        "image": CLOWNFISH_ASSET.readall(),
     },
     {
         "direction": "left",
         "name": "AnglerFish",
         "height": 12,
         "width": 22,
-        "image": IMG_ebf2314d_ASSET.readall(),
+        "image": ANGLERFISH_ASSET.readall(),
     },
     {
         "direction": "right",
         "name": "Blue Tang",
         "height": 14,
         "width": 25,
-        "image": IMG_d766c3c6_ASSET.readall(),
+        "image": BLUE_TANG_ASSET.readall(),
     },
     {
         "direction": "right",
         "name": "Lionfish",
         "height": 14,
         "width": 25,
-        "image": IMG_16f532d4_ASSET.readall(),
+        "image": LIONFISH_ASSET.readall(),
     },
     {
         "direction": "left",
         "name": "Shark",
         "height": 11,
         "width": 29,
-        "image": IMG_e2ad0e60_ASSET.readall(),
+        "image": SHARK_ASSET.readall(),
     },
     {
         "direction": "right",
         "name": "Blowfish",
         "height": 16,
         "width": 25,
-        "image": IMG_76487e62_ASSET.readall(),
+        "image": BLOWFISH_ASSET.readall(),
     },
     {
         "direction": "right",
         "name": "Cuttlefish",
         "height": 14,
         "width": 30,
-        "image": IMG_f444f7ed_ASSET.readall(),
+        "image": CUTTLEFISH_ASSET.readall(),
     },
     {
         "direction": "right",
         "name": "Diver",
         "height": 15,
         "width": 25,
-        "image": IMG_5fc1870a_ASSET.readall(),
+        "image": DIVER_ASSET.readall(),
     },
 ]
 
@@ -93,49 +93,49 @@ ocean_floor = [
         "name": "Brain",
         "height": 12,
         "width": 20,
-        "image": IMG_69ef2bee_ASSET.readall(),
+        "image": CORAL_BRAIN_ASSET.readall(),
     },
     {
         "name": "Finger",
         "height": 15,
         "width": 17,
-        "image": IMG_9c266b80_ASSET.readall(),
+        "image": CORAL_FINGER_ASSET.readall(),
     },
     {
         "name": "Tubes",
         "height": 18,
         "width": 17,
-        "image": IMG_fdf59949_ASSET.readall(),
+        "image": CORAL_TUBES_ASSET.readall(),
     },
     {
         "name": "shipwreck",
         "height": 20,
         "width": 25,
-        "image": IMG_9685f9ed_ASSET.readall(),
+        "image": SHIPWRECK_ASSET.readall(),
     },
     {
         "name": "helmet",
         "height": 17,
         "width": 15,
-        "image": IMG_191d0d08_ASSET.readall(),
+        "image": HELMET_ASSET.readall(),
     },
     {
         "name": "anchor",
         "height": 12,
         "width": 12,
-        "image": IMG_5c897dd8_ASSET.readall(),
+        "image": ANCHOR_ASSET.readall(),
     },
     {
         "name": "crab",
         "height": 12,
         "width": 25,
-        "image": IMG_cba93242_ASSET.readall(),
+        "image": CRAB_ASSET.readall(),
     },
     {
         "name": "treasure",
         "height": 16,
         "width": 22,
-        "image": IMG_780a4fb2_ASSET.readall(),
+        "image": TREASURE_ASSET.readall(),
     },
 ]
 

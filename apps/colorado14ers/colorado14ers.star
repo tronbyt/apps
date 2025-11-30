@@ -7,61 +7,60 @@ Author: Robert Ison
 
 load("encoding/base64.star", "base64")
 load("humanize.star", "humanize")
+load("images/blanca_peak.png", BLANCA_PEAK_ASSET = "file")
+load("images/capitol_peak.png", CAPITOL_PEAK_ASSET = "file")
+load("images/castle_peak.png", CASTLE_PEAK_ASSET = "file")
+load("images/challenger_point.png", CHALLENGER_POINT_ASSET = "file")
+load("images/crestone_needle.png", CRESTONE_NEEDLE_ASSET = "file")
+load("images/culebra_peak.png", CULEBRA_PEAK_ASSET = "file")
+load("images/ellingwood_point.png", ELLINGWOOD_POINT_ASSET = "file")
+load("images/grays_peak.png", GRAYS_PEAK_ASSET = "file")
+load("images/humboldt_peak.png", HUMBOLDT_PEAK_ASSET = "file")
+load("images/huron_peak.png", HURON_PEAK_ASSET = "file")
+load("images/kit_carson_peak.png", KIT_CARSON_PEAK_ASSET = "file")
+load("images/la_plata_peak.png", LA_PLATA_PEAK_ASSET = "file")
+load("images/little_bear_peak.png", LITTLE_BEAR_PEAK_ASSET = "file")
+load("images/longs_peak.png", LONGS_PEAK_ASSET = "file")
+load("images/maroon_peak.png", MAROON_PEAK_ASSET = "file")
+load("images/missouri_mountain.png", MISSOURI_MOUNTAIN_ASSET = "file")
+load("images/mt_antero.png", MT_ANTERO_ASSET = "file")
+load("images/mt_belford.png", MT_BELFORD_ASSET = "file")
+load("images/mt_blue_sky.png", MT_BLUE_SKY_ASSET = "file")
+load("images/mt_bross.png", MT_BROSS_ASSET = "file")
+load("images/mt_columbia.png", MT_COLUMBIA_ASSET = "file")
+load("images/mt_democrat.png", MT_DEMOCRAT_ASSET = "file")
+load("images/mt_elbert.png", MT_ELBERT_ASSET = "file")
+load("images/mt_eolus.png", MT_EOLUS_ASSET = "file")
+load("images/mt_harvard.png", MT_HARVARD_ASSET = "file")
+load("images/mt_holy_cross.png", MT_HOLY_CROSS_ASSET = "file")
+load("images/mt_lincoln.png", MT_LINCOLN_ASSET = "file")
+load("images/mt_lindsey.png", MT_LINDSEY_ASSET = "file")
+load("images/mt_massive.png", MT_MASSIVE_ASSET = "file")
+load("images/mt_oxford.png", MT_OXFORD_ASSET = "file")
+load("images/mt_princeton.png", MT_PRINCETON_ASSET = "file")
+load("images/mt_shavano.png", MT_SHAVANO_ASSET = "file")
+load("images/mt_sherman.png", MT_SHERMAN_ASSET = "file")
+load("images/mt_sneffels.png", MT_SNEFFELS_ASSET = "file")
+load("images/mt_wilson.png", MT_WILSON_ASSET = "file")
+load("images/mt_yale.png", MT_YALE_ASSET = "file")
+load("images/pikes_peak.png", PIKES_PEAK_ASSET = "file")
+load("images/pyramid_peak.png", PYRAMID_PEAK_ASSET = "file")
+load("images/quandary_peak.png", QUANDARY_PEAK_ASSET = "file")
+load("images/redcloud_peak.png", REDCLOUD_PEAK_ASSET = "file")
+load("images/san_luis_peak.png", SAN_LUIS_PEAK_ASSET = "file")
+load("images/snowmass_mountain.png", SNOWMASS_MOUNTAIN_ASSET = "file")
+load("images/sunlight_peak.png", SUNLIGHT_PEAK_ASSET = "file")
+load("images/sunshine_peak.png", SUNSHINE_PEAK_ASSET = "file")
+load("images/tabeguache_peak.png", TABEGUACHE_PEAK_ASSET = "file")
+load("images/torreys_peak.png", TORREYS_PEAK_ASSET = "file")
+load("images/uncompahgre_peak.png", UNCOMPAHGRE_PEAK_ASSET = "file")
+load("images/wetterhorn_peak.png", WETTERHORN_PEAK_ASSET = "file")
+load("images/wilson_peak.png", WILSON_PEAK_ASSET = "file")
+load("images/windom_peak.png", WINDOM_PEAK_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_0147978c.png", IMG_0147978c_ASSET = "file")
-load("images/img_02e7b90e.png", IMG_02e7b90e_ASSET = "file")
-load("images/img_0590c845.png", IMG_0590c845_ASSET = "file")
-load("images/img_1eebcdd4.png", IMG_1eebcdd4_ASSET = "file")
-load("images/img_1f5c2b4d.png", IMG_1f5c2b4d_ASSET = "file")
-load("images/img_252d5998.png", IMG_252d5998_ASSET = "file")
-load("images/img_261327a6.png", IMG_261327a6_ASSET = "file")
-load("images/img_2912a42c.png", IMG_2912a42c_ASSET = "file")
-load("images/img_2bd92f83.png", IMG_2bd92f83_ASSET = "file")
-load("images/img_2d29822c.png", IMG_2d29822c_ASSET = "file")
-load("images/img_3948d2fb.png", IMG_3948d2fb_ASSET = "file")
-load("images/img_39bc6142.png", IMG_39bc6142_ASSET = "file")
-load("images/img_3b6b87b7.png", IMG_3b6b87b7_ASSET = "file")
-load("images/img_3cab88b2.png", IMG_3cab88b2_ASSET = "file")
-load("images/img_4006a550.png", IMG_4006a550_ASSET = "file")
-load("images/img_44dd263d.png", IMG_44dd263d_ASSET = "file")
-load("images/img_468d8b8b.png", IMG_468d8b8b_ASSET = "file")
-load("images/img_522510bf.png", IMG_522510bf_ASSET = "file")
-load("images/img_560fbf76.png", IMG_560fbf76_ASSET = "file")
-load("images/img_5aa7b74a.png", IMG_5aa7b74a_ASSET = "file")
-load("images/img_5b030311.png", IMG_5b030311_ASSET = "file")
-load("images/img_61477dc7.png", IMG_61477dc7_ASSET = "file")
-load("images/img_64542463.png", IMG_64542463_ASSET = "file")
-load("images/img_69c132be.png", IMG_69c132be_ASSET = "file")
-load("images/img_7b5a833e.png", IMG_7b5a833e_ASSET = "file")
-load("images/img_86729ece.png", IMG_86729ece_ASSET = "file")
-load("images/img_87a91884.png", IMG_87a91884_ASSET = "file")
-load("images/img_91b3628f.png", IMG_91b3628f_ASSET = "file")
-load("images/img_96e8be17.png", IMG_96e8be17_ASSET = "file")
-load("images/img_985eb171.png", IMG_985eb171_ASSET = "file")
-load("images/img_9f657ed5.png", IMG_9f657ed5_ASSET = "file")
-load("images/img_a28d209c.png", IMG_a28d209c_ASSET = "file")
-load("images/img_a85fd898.png", IMG_a85fd898_ASSET = "file")
-load("images/img_a9cd3c10.png", IMG_a9cd3c10_ASSET = "file")
-load("images/img_ad01ee86.png", IMG_ad01ee86_ASSET = "file")
-load("images/img_b12a055e.png", IMG_b12a055e_ASSET = "file")
-load("images/img_b2db8f1a.png", IMG_b2db8f1a_ASSET = "file")
-load("images/img_b388297c.png", IMG_b388297c_ASSET = "file")
-load("images/img_b39e497e.png", IMG_b39e497e_ASSET = "file")
-load("images/img_b6699672.png", IMG_b6699672_ASSET = "file")
-load("images/img_b6f4c098.png", IMG_b6f4c098_ASSET = "file")
-load("images/img_c4eddd13.png", IMG_c4eddd13_ASSET = "file")
-load("images/img_cdd7e163.png", IMG_cdd7e163_ASSET = "file")
-load("images/img_d231317a.png", IMG_d231317a_ASSET = "file")
-load("images/img_d8432e45.png", IMG_d8432e45_ASSET = "file")
-load("images/img_ea1f8a13.png", IMG_ea1f8a13_ASSET = "file")
-load("images/img_ef254a46.png", IMG_ef254a46_ASSET = "file")
-load("images/img_f0cac47b.png", IMG_f0cac47b_ASSET = "file")
-load("images/img_f10fcfb9.png", IMG_f10fcfb9_ASSET = "file")
-load("images/img_fb235c53.png", IMG_fb235c53_ASSET = "file")
-load("images/img_fb9394fa.png", IMG_fb9394fa_ASSET = "file")
 
 DISPLAY_OPTIONS = [
     schema.Option(value = "random", display = "Random 14er"),
@@ -107,7 +106,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 27.4,
         "Hiking Elevation Gain": 1981.2,
         "Class": "2+",
-        "Outline": IMG_3b6b87b7_ASSET.readall(),
+        "Outline": BLANCA_PEAK_ASSET.readall(),
         "Description": "Mt. Blanca is a challenging climb to the highest peak in the Sangre de Cristo and Sierra Blanca Massif Mountains.",
     },
     {
@@ -122,7 +121,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 27.4,
         "Hiking Elevation Gain": 1615.44,
         "Class": "4",
-        "Outline": IMG_02e7b90e_ASSET.readall(),
+        "Outline": CAPITOL_PEAK_ASSET.readall(),
         "Description": "A stunning mountain in the Maroon Bells-Snowmass Wilderness; said to be the most difficult 14er. It has one of the tallest northern mountain walls in Colorado.",
     },
     {
@@ -137,7 +136,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 21.7,
         "Hiking Elevation Gain": 1402.08,
         "Class": "2+",
-        "Outline": IMG_c4eddd13_ASSET.readall(),
+        "Outline": CASTLE_PEAK_ASSET.readall(),
         "Description": "Found near Aspen, this is the tallest summit in the Maroon Bells-Snowmass Wilderness and the Elk Mountains. It's said to be the \"easiest\" 14er in the Elk Range.",
     },
     {
@@ -152,7 +151,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 21.7,
         "Hiking Elevation Gain": 1645.92,
         "Class": "2+",
-        "Outline": IMG_39bc6142_ASSET.readall(),
+        "Outline": CHALLENGER_POINT_ASSET.readall(),
         "Description": "Lying in front and to the west of Kit Carson Peak, the trail to the top of this high-rising peak includes a waterfall, lake, and awesome views. It was named for the crew of Space Shuttle Challenger.",
     },
     {
@@ -167,7 +166,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 19.3,
         "Hiking Elevation Gain": 1341.12,
         "Class": "4",
-        "Outline": IMG_69c132be_ASSET.readall(),
+        "Outline": CRESTONE_NEEDLE_ASSET.readall(),
         "Description": "One of the top 5 toughest and most rugged, this peak was one of the last 14ers climbed. The route is difficult to navigate and there are sections where class 3 technical climbing is required.",
     },
     {
@@ -181,8 +180,7 @@ MOUNTAIN_DATA = [
         "Longitude Degrees": -105.5855,
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1737.36,
-        "Class": "3",
-        "Outline": IMG_69c132be_ASSET.readall(),
+        "Outline": CRESTONE_PEAK_ASSET.readall(),
         "Description": "Often called \"The Peak,\" this remote mountain is the second highest summit in the Sangre de Cristo Range. It has two summits, with the western one being 34 ft. higher.",
     },
     {
@@ -197,7 +195,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 8,
         "Hiking Elevation Gain": 822.96,
         "Class": "2",
-        "Outline": IMG_96e8be17_ASSET.readall(),
+        "Outline": CULEBRA_PEAK_ASSET.readall(),
         "Description": "This is the most historic 14er (dating back to the late 1600s) and the highest peak in the Culebra Range. It is also the only privately owned 14er.",
     },
     {
@@ -212,7 +210,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 27.4,
         "Hiking Elevation Gain": 1889.76,
         "Class": "2+",
-        "Outline": IMG_b12a055e_ASSET.readall(),
+        "Outline": ELLINGWOOD_POINT_ASSET.readall(),
         "Description": "Named after famous Colorado climber, Albert Ellingwood, this hike includes long exposure areas and a lake. The trail gets tricky, so best keep a detailed map at hand.",
     },
     {
@@ -227,7 +225,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 12.1,
         "Hiking Elevation Gain": 914.4,
         "Class": "1",
-        "Outline": IMG_a9cd3c10_ASSET.readall(),
+        "Outline": GRAYS_PEAK_ASSET.readall(),
         "Description": "Tallest point in the Front Range and the Continental Divide, this mountain peak is easily spotted from the Great Plains.",
     },
     {
@@ -242,7 +240,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.3,
         "Hiking Elevation Gain": 762,
         "Class": "1",
-        "Outline": IMG_a9cd3c10_ASSET.readall(),
+        "Outline": GRAYS_PEAK_ASSET.readall(),
         "Description": "From American Basin, a steady climb reveals views of the Grenadier, La Garita, and Needle Mountains, plus the Mt. Sneffels Wilderness.",
     },
     {
@@ -257,7 +255,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 17.7,
         "Hiking Elevation Gain": 1280.16,
         "Class": "2",
-        "Outline": IMG_2912a42c_ASSET.readall(),
+        "Outline": HUMBOLDT_PEAK_ASSET.readall(),
         "Description": "This is one of the easier 14ers to hike in the area. There are views of Needle, Crestone Peak, and the Wet Valley on the way up.",
     },
     {
@@ -272,7 +270,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 11.3,
         "Hiking Elevation Gain": 1066.8,
         "Class": "2",
-        "Outline": IMG_468d8b8b_ASSET.readall(),
+        "Outline": HURON_PEAK_ASSET.readall(),
         "Description": "Located along the western side of the Sawatch Range, this trail is a moderately steady hike with a more rugged climb to its summit.",
     },
     {
@@ -287,7 +285,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 24.1,
         "Hiking Elevation Gain": 1905,
         "Class": "3-",
-        "Outline": IMG_261327a6_ASSET.readall(),
+        "Outline": KIT_CARSON_PEAK_ASSET.readall(),
         "Description": "The fourth tallest point in the Sangre de Cristo Range, this peak has several sub-summits.",
     },
     {
@@ -302,7 +300,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 14.9,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": IMG_87a91884_ASSET.readall(),
+        "Outline": LA_PLATA_PEAK_ASSET.readall(),
         "Description": "Found in the Collegiate Peaks Wilderness in the San Isabel National forest, you can spot this mountain by its rocky summit and wide-spreading western flank.",
     },
     {
@@ -317,7 +315,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1889.76,
         "Class": "4",
-        "Outline": IMG_0147978c_ASSET.readall(),
+        "Outline": LITTLE_BEAR_PEAK_ASSET.readall(),
         "Description": "One of the toughest and most dangerous 14ers to scale, this monster stretches 6,000 ft. above the rest of the San Luis Valley. Climbers—beware of loose falling rock.",
     },
     {
@@ -332,7 +330,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 23.3,
         "Hiking Elevation Gain": 1554.48,
         "Class": "3",
-        "Outline": IMG_b388297c_ASSET.readall(),
+        "Outline": LONGS_PEAK_ASSET.readall(),
         "Description": "One of the hardest yet most popular 14ers, Longs Peak is 90 minutes outside of Denver. The climb is difficult, requiring endurance and experienced scrambling and mountaineering skills.",
     },
     {
@@ -347,7 +345,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 19.3,
         "Hiking Elevation Gain": 1463.04,
         "Class": "3",
-        "Outline": IMG_44dd263d_ASSET.readall(),
+        "Outline": MAROON_PEAK_ASSET.readall(),
         "Description": "Maroon Peak connects to nearby North Maroon Peak, together called The Maroon Bells. Maroon Peak is the main point, and this set is known for its brilliant colors each Fall.",
     },
     {
@@ -362,7 +360,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 16.9,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": IMG_b39e497e_ASSET.readall(),
+        "Outline": MISSOURI_MOUNTAIN_ASSET.readall(),
         "Description": "In the Collegiate Peaks Wilderness, this mountain is popular for beginners and families with a summit granting some of the best views around.",
     },
     {
@@ -377,7 +375,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 24.9,
         "Hiking Elevation Gain": 1584.96,
         "Class": "2",
-        "Outline": IMG_5b030311_ASSET.readall(),
+        "Outline": MT_ANTERO_ASSET.readall(),
         "Description": "Highest mountain out of the southern Sawatch Range, located in the San Isabel National Forest. There are several moderately rated hiking routes on the mountain.",
     },
     {
@@ -392,7 +390,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 12.9,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": IMG_64542463_ASSET.readall(),
+        "Outline": MT_BELFORD_ASSET.readall(),
         "Description": "Sits close to Mt. Oxford and Mt. Missouri. Its location and extravagant views make it a favorite among the 14ers.",
     },
     {
@@ -407,7 +405,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 11.7,
         "Hiking Elevation Gain": 868.68,
         "Class": "2",
-        "Outline": IMG_7b5a833e_ASSET.readall(),
+        "Outline": MT_BIERSTADT_ASSET.readall(),
         "Description": "In the Pike National Forest, this moderately rated peak is more accessible than other 14ers with its well-maintained trail and close vicinity to Denver.",
     },
     {
@@ -422,7 +420,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 8.9,
         "Hiking Elevation Gain": 609.6,
         "Class": "2",
-        "Outline": IMG_a85fd898_ASSET.readall(),
+        "Outline": MT_BLUE_SKY_ASSET.readall(),
         "Description": "On the Rockies’ eastern edge, this peak offers a 14-mile scenic drive to its summit with wildlife and sweeping views.",
     },
     {
@@ -437,7 +435,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 5.2,
         "Hiking Elevation Gain": 685.8,
         "Class": "2",
-        "Outline": IMG_3cab88b2_ASSET.readall(),
+        "Outline": MT_BROSS_ASSET.readall(),
         "Description": "In Pike National Forest, this is the easiest of three 14ers sharing a trailhead with Mt. Democrat and Mt. Lincoln.",
     },
     {
@@ -452,7 +450,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 19.3,
         "Hiking Elevation Gain": 1295.4,
         "Class": "2",
-        "Outline": IMG_3948d2fb_ASSET.readall(),
+        "Outline": MT_COLUMBIA_ASSET.readall(),
         "Description": "This Collegiate Peak overlooks the Arkansas River Valley and several fellow collegiate peaks. It's unpopular among hikers because of its battered, steep, and slippery trail.",
     },
     {
@@ -467,7 +465,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 6.4,
         "Hiking Elevation Gain": 655.32,
         "Class": "2",
-        "Outline": IMG_4006a550_ASSET.readall(),
+        "Outline": MT_DEMOCRAT_ASSET.readall(),
         "Description": "The first mountain in the DeCaliBron Loop, the climb to the summit is short and steep, granting 360-degree views of fellow 14ers.",
     },
     {
@@ -482,7 +480,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 15.7,
         "Hiking Elevation Gain": 1371.6,
         "Class": "1",
-        "Outline": IMG_5aa7b74a_ASSET.readall(),
+        "Outline": MT_ELBERT_ASSET.readall(),
         "Description": "Highest peak in Colorado and the Rocky Mountains and the second-highest in the lower 48. Climb to the summit is reasonably moderate and suitable for a variety of skill levels.",
     },
     {
@@ -497,7 +495,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 944.88,
         "Class": "3",
-        "Outline": IMG_522510bf_ASSET.readall(),
+        "Outline": MT_EOLUS_ASSET.readall(),
         "Description": "This mountain has 2 summits with the southern point as the larger. It's in the Needle Mountains and was named after the Greek God of the winds.",
     },
     {
@@ -512,7 +510,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1402.08,
         "Class": "2",
-        "Outline": IMG_ea1f8a13_ASSET.readall(),
+        "Outline": MT_HARVARD_ASSET.readall(),
         "Description": "The highest summit of the Collegiate Peaks and the fourth highest peak in the contiguous U.S., the climb begins gradually, steepens the closer you get to the summit.",
     },
     {
@@ -527,7 +525,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 792.48,
         "Class": "2",
-        "Outline": IMG_86729ece_ASSET.readall(),
+        "Outline": MT_LINCOLN_ASSET.readall(),
         "Description": "This towering peak is the highest in the Mosquito Range and Park County, and the mountain was given its name in honor of President Lincoln.",
     },
     {
@@ -542,7 +540,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 13.3,
         "Hiking Elevation Gain": 1066.8,
         "Class": "3-",
-        "Outline": IMG_d8432e45_ASSET.readall(),
+        "Outline": MT_LINDSEY_ASSET.readall(),
         "Description": "Most of the mountain is moderately easy to climb until you reach the ridge scramble that gets technical. Gear and helmet required.",
     },
     {
@@ -557,7 +555,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 23.3,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": IMG_1eebcdd4_ASSET.readall(),
+        "Outline": MT_MASSIVE_ASSET.readall(),
         "Description": "Difficult but not technical, though best suited for experienced hikers. Second-highest peak in the Rockies and it has five summits along 3 miles that reach above 14,000 ft.",
     },
     {
@@ -572,7 +570,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 18.1,
         "Hiking Elevation Gain": 1706.88,
         "Class": "2",
-        "Outline": IMG_9f657ed5_ASSET.readall(),
+        "Outline": MT_HOLY_CROSS_ASSET.readall(),
         "Description": "Northernmost mountain in the Sawatch, its northeastern side is often covered in snow that creates a crucifix design (hence the name given by Herbert Hoover.)",
     },
     {
@@ -587,7 +585,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 17.7,
         "Hiking Elevation Gain": 1798.32,
         "Class": "2",
-        "Outline": IMG_1f5c2b4d_ASSET.readall(),
+        "Outline": MT_OXFORD_ASSET.readall(),
         "Description": "This mountain is only 1.5 miles from Mt. Belford, and the two are often hiked as a set. The climb to its peak isn't technical, although it's steep with a long-exposed ridgeline.",
     },
     {
@@ -602,7 +600,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 10.5,
         "Hiking Elevation Gain": 975.36,
         "Class": "2",
-        "Outline": IMG_ef254a46_ASSET.readall(),
+        "Outline": MT_PRINCETON_ASSET.readall(),
         "Description": "In the San Isabel National Forest, this peak grants breathtaking views of both the Arkansas Valley and the rest of the Sawatch Range. The hike requires no technical skills.",
     },
     {
@@ -617,7 +615,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 15.3,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": IMG_f0cac47b_ASSET.readall(),
+        "Outline": MT_SHAVANO_ASSET.readall(),
         "Description": "Named for a Tabeguache Ute chief, this Sawatch Range peak in San Isabel National Forest features snowy eastern valleys resembling an angel with outstretched wings, the 'Angel of Shavano.'",
     },
     {
@@ -632,7 +630,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 8.4,
         "Hiking Elevation Gain": 640.08,
         "Class": "1",
-        "Outline": IMG_2d29822c_ASSET.readall(),
+        "Outline": MT_SHERMAN_ASSET.readall(),
         "Description": "This peak easily blends into its neighboring ones. There are 2 routes to its summit, both featuring gentle ridgelines that make for a kinder climb.",
     },
     {
@@ -647,7 +645,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 883.92,
         "Class": "3-",
-        "Outline": IMG_f10fcfb9_ASSET.readall(),
+        "Outline": MT_SNEFFELS_ASSET.readall(),
         "Description": "The highest peak in the Sneffels Range, the 'Queen of the San Juans' is a popular subject in photography and film.",
     },
     {
@@ -662,7 +660,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 20.1,
         "Hiking Elevation Gain": 1341.12,
         "Class": "3",
-        "Outline": IMG_0590c845_ASSET.readall(),
+        "Outline": MT_WILSON_ASSET.readall(),
         "Description": "The highest San Miguel Range peak, this Lizard Head Wilderness 14er sits near two others outside Telluride.",
     },
     {
@@ -677,7 +675,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 15.3,
         "Hiking Elevation Gain": 1310.64,
         "Class": "2",
-        "Outline": IMG_91b3628f_ASSET.readall(),
+        "Outline": MT_YALE_ASSET.readall(),
         "Description": "Eighth tallest peak in the Sawatch Range, it is one of the only 14ers in the area that has a paved road leading to the trailhead.",
     },
     {
@@ -692,7 +690,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 38.6,
         "Hiking Elevation Gain": 2316.48,
         "Class": "1",
-        "Outline": IMG_b6699672_ASSET.readall(),
+        "Outline": PIKES_PEAK_ASSET.readall(),
         "Description": "There is a road to this mountain peak. As for hiking, the climb is long and steep, filled with difficult terrain.",
     },
     {
@@ -707,7 +705,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 13.3,
         "Hiking Elevation Gain": 1371.6,
         "Class": "4",
-        "Outline": IMG_b2db8f1a_ASSET.readall(),
+        "Outline": PYRAMID_PEAK_ASSET.readall(),
         "Description": "13 miles outside Aspen, technical mountain is made of sedimentary loose rugged rock. A helmet is required to scale its last 1,000 ft.",
     },
     {
@@ -722,7 +720,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 10.9,
         "Hiking Elevation Gain": 1051.56,
         "Class": "1",
-        "Outline": IMG_fb9394fa_ASSET.readall(),
+        "Outline": QUANDARY_PEAK_ASSET.readall(),
         "Description": "The highest summit of the Tenmile Range in the Rocky Mountains, this is one of the most climbed 14ers.",
     },
     {
@@ -737,7 +735,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 14.5,
         "Hiking Elevation Gain": 1127.76,
         "Class": "2",
-        "Outline": IMG_252d5998_ASSET.readall(),
+        "Outline": REDCLOUD_PEAK_ASSET.readall(),
         "Description": "Named after the visible red coloring of its peak, this picturesque mountain is often hiked alongside Sunshine peak.",
     },
     {
@@ -752,7 +750,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 21.7,
         "Hiking Elevation Gain": 1097.28,
         "Class": "1",
-        "Outline": IMG_b6f4c098_ASSET.readall(),
+        "Outline": SAN_LUIS_PEAK_ASSET.readall(),
         "Description": "Highest point in the La Garita Mountains, this remote and often desolate peak is tricky to reach as it sits 2 hours from any paved roads.",
     },
     {
@@ -767,7 +765,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 35.4,
         "Hiking Elevation Gain": 1767.84,
         "Class": "3",
-        "Outline": IMG_cdd7e163_ASSET.readall(),
+        "Outline": SNOWMASS_MOUNTAIN_ASSET.readall(),
         "Description": "The Elk Mountains’ fourth-highest peak has one of Colorado’s largest eastern snowfields and is invisible from roads.",
     },
     {
@@ -782,7 +780,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 914.4,
         "Class": "4",
-        "Outline": IMG_2bd92f83_ASSET.readall(),
+        "Outline": SUNLIGHT_PEAK_ASSET.readall(),
         "Description": "A lofty peak tucked in the Chicago Basin in the Needle Mountains, there's an extensive amount of exposure, scrambling and a summit block on the way to its top.",
     },
     {
@@ -797,7 +795,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 19.7,
         "Hiking Elevation Gain": 1463.04,
         "Class": "2",
-        "Outline": IMG_d231317a_ASSET.readall(),
+        "Outline": SUNSHINE_PEAK_ASSET.readall(),
         "Description": "Often paired with Redcloud, Sunshine has a red-rock summit and mixed trail-and-scree terrain.",
     },
     {
@@ -812,7 +810,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 18.5,
         "Hiking Elevation Gain": 1706.88,
         "Class": "2",
-        "Outline": IMG_fb235c53_ASSET.readall(),
+        "Outline": TABEGUACHE_PEAK_ASSET.readall(),
         "Description": "In the southern Sawatch, this lesser-known 14er lies beside Mt. Shavano, with the climbing route now reversed to protect eroded trails.",
     },
     {
@@ -827,7 +825,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 12.5,
         "Hiking Elevation Gain": 914.4,
         "Class": "1",
-        "Outline": IMG_560fbf76_ASSET.readall(),
+        "Outline": TORREYS_PEAK_ASSET.readall(),
         "Description": "Near Denver and neighboring Grays Peak. It is the only 14er on the Continental Divide.",
     },
     {
@@ -842,7 +840,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 12.1,
         "Hiking Elevation Gain": 914.4,
         "Class": "2",
-        "Outline": IMG_985eb171_ASSET.readall(),
+        "Outline": UNCOMPAHGRE_PEAK_ASSET.readall(),
         "Description": "This peak is the highest point in the San Juan Mountain Range and Colorado's largest Western Slope. It is one of the easier 14ers in its area.",
     },
     {
@@ -857,7 +855,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 11.3,
         "Hiking Elevation Gain": 1005.84,
         "Class": "3",
-        "Outline": IMG_ad01ee86_ASSET.readall(),
+        "Outline": WETTERHORN_PEAK_ASSET.readall(),
         "Description": "A beloved 14er that's great for hikers trying their hand at scree and scrambling, this rock-faced mountain can be found just outside of Lake City.",
     },
     {
@@ -872,7 +870,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 16.1,
         "Hiking Elevation Gain": 1188.72,
         "Class": "3",
-        "Outline": IMG_a28d209c_ASSET.readall(),
+        "Outline": WILSON_PEAK_ASSET.readall(),
         "Description": "This gorgeous rocky mountain is the highest peak in San Miguel County, and it's the face of all Coors products!",
     },
     {
@@ -887,7 +885,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 914.4,
         "Class": "2+",
-        "Outline": IMG_61477dc7_ASSET.readall(),
+        "Outline": WINDOM_PEAK_ASSET.readall(),
         "Description": "In the Weminuche Wilderness’ Needle Mountains, this popular multi-day hike requires no technical gear.",
     },
 ]

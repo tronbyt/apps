@@ -6,32 +6,12 @@ Author: craigerskine
 """
 
 load("encoding/base64.star", "base64")
-load("images/img_at.png", IMG_AT_ASSET = "file")
+load("images/img_at.png", AT_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_0132286b.png", IMG_0132286b_ASSET = "file")
-load("images/img_17ad0c23.png", IMG_17ad0c23_ASSET = "file")
-load("images/img_1c2b41fa.png", IMG_1c2b41fa_ASSET = "file")
-load("images/img_21b03914.png", IMG_21b03914_ASSET = "file")
-load("images/img_44b72c8f.png", IMG_44b72c8f_ASSET = "file")
-load("images/img_53c1c737.png", IMG_53c1c737_ASSET = "file")
-load("images/img_58c1289c.png", IMG_58c1289c_ASSET = "file")
-load("images/img_5d766eab.png", IMG_5d766eab_ASSET = "file")
-load("images/img_709b45a4.png", IMG_709b45a4_ASSET = "file")
-load("images/img_764ea92a.png", IMG_764ea92a_ASSET = "file")
-load("images/img_ae32bbd7.png", IMG_ae32bbd7_ASSET = "file")
-load("images/img_b65ee8af.png", IMG_b65ee8af_ASSET = "file")
-load("images/img_b80c46a4.png", IMG_b80c46a4_ASSET = "file")
-load("images/img_cd13b529.png", IMG_cd13b529_ASSET = "file")
-load("images/img_d100a076.png", IMG_d100a076_ASSET = "file")
-load("images/img_d1ca41ac.png", IMG_d1ca41ac_ASSET = "file")
-load("images/img_d3697eee.png", IMG_d3697eee_ASSET = "file")
-load("images/img_df32fb41.png", IMG_df32fb41_ASSET = "file")
-load("images/img_e9950e65.png", IMG_e9950e65_ASSET = "file")
-load("images/img_fcd88a12.png", IMG_fcd88a12_ASSET = "file")
 
-IMG_AT = IMG_AT_ASSET.readall()
+IMG_AT = AT_ASSET.readall()()
 
 # contants
 COLOR_LIGHT = "#FFF"
@@ -40,29 +20,29 @@ COLOR_DARK = "#444"
 COLOR_ACTIVE = "#60A5FA"
 
 FONT_LG = {
-    0: IMG_21b03914_ASSET.readall(),
-    1: IMG_b65ee8af_ASSET.readall(),
-    2: IMG_ae32bbd7_ASSET.readall(),
-    3: IMG_d100a076_ASSET.readall(),
-    4: IMG_44b72c8f_ASSET.readall(),
-    5: IMG_764ea92a_ASSET.readall(),
-    6: IMG_cd13b529_ASSET.readall(),
-    7: IMG_d1ca41ac_ASSET.readall(),
-    8: IMG_58c1289c_ASSET.readall(),
-    9: IMG_1c2b41fa_ASSET.readall(),
+    0: FONT_LG_CHAR_0_ASSET.readall(),
+    1: FONT_LG_CHAR_1_ASSET.readall(),
+    2: FONT_LG_CHAR_2_ASSET.readall(),
+    3: FONT_LG_CHAR_3_ASSET.readall(),
+    4: FONT_LG_CHAR_4_ASSET.readall(),
+    5: FONT_LG_CHAR_5_ASSET.readall(),
+    6: FONT_LG_CHAR_6_ASSET.readall(),
+    7: FONT_LG_CHAR_7_ASSET.readall(),
+    8: FONT_LG_CHAR_8_ASSET.readall(),
+    9: FONT_LG_CHAR_9_ASSET.readall(),
 }
 
 FONT_SM = {
-    0: IMG_d3697eee_ASSET.readall(),
-    1: IMG_e9950e65_ASSET.readall(),
-    2: IMG_fcd88a12_ASSET.readall(),
-    3: IMG_709b45a4_ASSET.readall(),
-    4: IMG_df32fb41_ASSET.readall(),
-    5: IMG_5d766eab_ASSET.readall(),
-    6: IMG_53c1c737_ASSET.readall(),
-    7: IMG_b80c46a4_ASSET.readall(),
-    8: IMG_17ad0c23_ASSET.readall(),
-    9: IMG_0132286b_ASSET.readall(),
+    0: FONT_SM_CHAR_0_ASSET.readall(),
+    1: FONT_SM_CHAR_1_ASSET.readall(),
+    2: FONT_SM_CHAR_2_ASSET.readall(),
+    3: FONT_SM_CHAR_3_ASSET.readall(),
+    4: FONT_SM_CHAR_4_ASSET.readall(),
+    5: FONT_SM_CHAR_5_ASSET.readall(),
+    6: FONT_SM_CHAR_6_ASSET.readall(),
+    7: FONT_SM_CHAR_7_ASSET.readall(),
+    8: FONT_SM_CHAR_8_ASSET.readall(),
+    9: FONT_SM_CHAR_9_ASSET.readall(),
 }
 
 def zero_pad(number, width):

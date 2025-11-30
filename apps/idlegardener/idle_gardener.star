@@ -8,13 +8,13 @@ Author: yonodactyl
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/tree_chopped_c3e9b02b.png", TREE_CHOPPED_c3e9b02b_ASSET = "file")
+load("images/tree_growing_6ea9c186.png", TREE_GROWING_6ea9c186_ASSET = "file")
 load("images/tree_grown.png", TREE_GROWN_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/tree_chopped_c3e9b02b.png", TREE_CHOPPED_c3e9b02b_ASSET = "file")
-load("images/tree_growing_6ea9c186.png", TREE_GROWING_6ea9c186_ASSET = "file")
 
 TREE_GROWN = TREE_GROWN_ASSET.readall()
 

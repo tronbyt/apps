@@ -1,10 +1,5 @@
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("math.star", "math")
-load("render.star", "render")
-load("schema.star", "schema")
-load("time.star", "time")
 load("images/clouds_icon_36301c5e.png", CLOUDS_ICON_36301c5e_ASSET = "file")
 load("images/gray_clouds_icon_eec691a1.png", GRAY_CLOUDS_ICON_eec691a1_ASSET = "file")
 load("images/green_cloud_icon_45a029c4.png", GREEN_CLOUD_ICON_45a029c4_ASSET = "file")
@@ -19,6 +14,10 @@ load("images/super_humid_icon_6544bb42.png", SUPER_HUMID_ICON_6544bb42_ASSET = "
 load("images/thunder_icon_ce9654d1.png", THUNDER_ICON_ce9654d1_ASSET = "file")
 load("images/very_humid_icon_82b551d5.png", VERY_HUMID_ICON_82b551d5_ASSET = "file")
 load("images/yellow_cloud_icon_ddf87ffa.png", YELLOW_CLOUD_ICON_ddf87ffa_ASSET = "file")
+load("math.star", "math")
+load("render.star", "render")
+load("schema.star", "schema")
+load("time.star", "time")
 
 # Default cache value. Only query APIs once per 6 hours.
 CACHE_TTL_SEC = 60 * 60 * 6
@@ -217,13 +216,13 @@ def main(config):
         temperature = (temperature_kelvin - 273.15) * 1.8 + 32
 
     humidity = int(weather_response["main"]["humidity"])
-    humidity_icon = base64.decode(get_humidity_icon(humidity))
+    humidity_icon = get_humidity_icon(humidity)
 
     weather_id = weather_response["weather"][0]["id"]
-    weather_icon = base64.decode(get_weather_icon(weather_id))
+    weather_icon = get_weather_icon(weather_id)
 
     aqi = calculate_aqi(aqi_response["list"])
-    aqi_icon = base64.decode(get_aqi_icon(aqi))
+    aqi_icon = get_aqi_icon(aqi)
 
     return render.Root(
         child = render.Box(

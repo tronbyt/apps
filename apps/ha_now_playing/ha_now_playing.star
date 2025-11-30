@@ -5,16 +5,15 @@ Description: Display track details and artwork from any Home Assistant media_pla
 Author: drudge, gabe565
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/default_cover.png", DEFAULT_COVER_ASSET = "file")
+load("images/default_cover_2x.png", DEFAULT_COVER_2X_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("images/img_68ec3c78.png", IMG_68ec3c78_ASSET = "file")
-load("images/img_8f7fc995.png", IMG_8f7fc995_ASSET = "file")
 
-DEFAULT_IMAGE = IMG_8f7fc995_ASSET.readall()
+DEFAULT_IMAGE = DEFAULT_COVER_ASSET.readall()
 
-DEFAULT_IMAGE_2X = IMG_68ec3c78_ASSET.readall()
+DEFAULT_IMAGE_2X = DEFAULT_COVER_2X_ASSET.readall()
 
 SCROLL_TOGETHER = "together"
 SCROLL_SEPARATE = "separate"
@@ -135,7 +134,7 @@ def main(config):
             if res.status_code == 200:
                 media_image = res.body()
         if not media_image:
-            media_image = base64.decode(DEFAULT_IMAGE_2X if scale >= 2 else DEFAULT_IMAGE)
+            media_image = DEFAULT_IMAGE_2X if scale >= 2 else DEFAULT_IMAGE
 
     media_content_type = attributes.get("media_content_type")
     media_artist = attributes.get("media_artist")

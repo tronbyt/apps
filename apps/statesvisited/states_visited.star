@@ -6,106 +6,103 @@ Author: sloanesturz
 """
 
 load("encoding/base64.star", "base64")
+load("images/map_al.png", MAP_AL_ASSET = "file")
+load("images/map_ar.png", MAP_AR_ASSET = "file")
+load("images/map_az.png", MAP_AZ_ASSET = "file")
+load("images/map_ca.png", MAP_CA_ASSET = "file")
+load("images/map_co.png", MAP_CO_ASSET = "file")
+load("images/map_ct.png", MAP_CT_ASSET = "file")
+load("images/map_de.png", MAP_DE_ASSET = "file")
+load("images/map_ga.png", MAP_GA_ASSET = "file")
+load("images/map_ia.png", MAP_IA_ASSET = "file")
+load("images/map_id.png", MAP_ID_ASSET = "file")
+load("images/map_in.png", MAP_IN_ASSET = "file")
+load("images/map_ks.png", MAP_KS_ASSET = "file")
+load("images/map_ky.png", MAP_KY_ASSET = "file")
+load("images/map_la.png", MAP_LA_ASSET = "file")
+load("images/map_ma.png", MAP_MA_ASSET = "file")
+load("images/map_md.png", MAP_MD_ASSET = "file")
+load("images/map_me.png", MAP_ME_ASSET = "file")
+load("images/map_mi.png", MAP_MI_ASSET = "file")
+load("images/map_mn.png", MAP_MN_ASSET = "file")
+load("images/map_mo.png", MAP_MO_ASSET = "file")
+load("images/map_ms.png", MAP_MS_ASSET = "file")
+load("images/map_mt.png", MAP_MT_ASSET = "file")
+load("images/map_nc.png", MAP_NC_ASSET = "file")
+load("images/map_nd.png", MAP_ND_ASSET = "file")
+load("images/map_ne.png", MAP_NE_ASSET = "file")
+load("images/map_nh.png", MAP_NH_ASSET = "file")
+load("images/map_nj.png", MAP_NJ_ASSET = "file")
+load("images/map_nm.png", MAP_NM_ASSET = "file")
+load("images/map_nv.png", MAP_NV_ASSET = "file")
+load("images/map_ny.png", MAP_NY_ASSET = "file")
+load("images/map_oh.png", MAP_OH_ASSET = "file")
+load("images/map_ok.png", MAP_OK_ASSET = "file")
+load("images/map_or.png", MAP_OR_ASSET = "file")
+load("images/map_pa.png", MAP_PA_ASSET = "file")
+load("images/map_ri.png", MAP_RI_ASSET = "file")
+load("images/map_sd.png", MAP_SD_ASSET = "file")
+load("images/map_tn.png", MAP_TN_ASSET = "file")
+load("images/map_tx.png", MAP_TX_ASSET = "file")
+load("images/map_ut.png", MAP_UT_ASSET = "file")
+load("images/map_va.png", MAP_VA_ASSET = "file")
+load("images/map_vt.png", MAP_VT_ASSET = "file")
+load("images/map_wa.png", MAP_WA_ASSET = "file")
+load("images/map_wi.png", MAP_WI_ASSET = "file")
+load("images/map_wv.png", MAP_WV_ASSET = "file")
+load("images/map_wy.png", MAP_WY_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_02c77957.png", IMG_02c77957_ASSET = "file")
-load("images/img_0b707932.png", IMG_0b707932_ASSET = "file")
-load("images/img_0dbdb44d.png", IMG_0dbdb44d_ASSET = "file")
-load("images/img_12cd72c7.png", IMG_12cd72c7_ASSET = "file")
-load("images/img_1a163134.png", IMG_1a163134_ASSET = "file")
-load("images/img_1dd42802.png", IMG_1dd42802_ASSET = "file")
-load("images/img_1f2db57d.png", IMG_1f2db57d_ASSET = "file")
-load("images/img_250ab2c0.png", IMG_250ab2c0_ASSET = "file")
-load("images/img_253d2b29.png", IMG_253d2b29_ASSET = "file")
-load("images/img_29759483.png", IMG_29759483_ASSET = "file")
-load("images/img_29be94a1.png", IMG_29be94a1_ASSET = "file")
-load("images/img_2b8675b0.png", IMG_2b8675b0_ASSET = "file")
-load("images/img_3059b1a9.png", IMG_3059b1a9_ASSET = "file")
-load("images/img_328461c8.png", IMG_328461c8_ASSET = "file")
-load("images/img_330fe414.png", IMG_330fe414_ASSET = "file")
-load("images/img_38620887.png", IMG_38620887_ASSET = "file")
-load("images/img_41f6c9da.png", IMG_41f6c9da_ASSET = "file")
-load("images/img_42c5fcf8.png", IMG_42c5fcf8_ASSET = "file")
-load("images/img_4641518d.png", IMG_4641518d_ASSET = "file")
-load("images/img_4aba1569.png", IMG_4aba1569_ASSET = "file")
-load("images/img_4df45c58.png", IMG_4df45c58_ASSET = "file")
-load("images/img_53c9f9c5.png", IMG_53c9f9c5_ASSET = "file")
-load("images/img_55f7a9dc.png", IMG_55f7a9dc_ASSET = "file")
-load("images/img_70c9c804.png", IMG_70c9c804_ASSET = "file")
-load("images/img_70e5d3cc.png", IMG_70e5d3cc_ASSET = "file")
-load("images/img_77c21843.png", IMG_77c21843_ASSET = "file")
-load("images/img_7e5f0fe2.png", IMG_7e5f0fe2_ASSET = "file")
-load("images/img_82d4657b.png", IMG_82d4657b_ASSET = "file")
-load("images/img_85319811.png", IMG_85319811_ASSET = "file")
-load("images/img_8cb9146e.png", IMG_8cb9146e_ASSET = "file")
-load("images/img_913a0a03.png", IMG_913a0a03_ASSET = "file")
-load("images/img_91d682a5.png", IMG_91d682a5_ASSET = "file")
-load("images/img_9e0cc860.png", IMG_9e0cc860_ASSET = "file")
-load("images/img_a0954fe5.png", IMG_a0954fe5_ASSET = "file")
-load("images/img_a1a7848d.png", IMG_a1a7848d_ASSET = "file")
-load("images/img_a1cc444c.png", IMG_a1cc444c_ASSET = "file")
-load("images/img_a2374ab4.png", IMG_a2374ab4_ASSET = "file")
-load("images/img_a2e88e85.png", IMG_a2e88e85_ASSET = "file")
-load("images/img_b54112c5.png", IMG_b54112c5_ASSET = "file")
-load("images/img_bd8e36bc.png", IMG_bd8e36bc_ASSET = "file")
-load("images/img_c07bc2f0.png", IMG_c07bc2f0_ASSET = "file")
-load("images/img_d1c68ff8.png", IMG_d1c68ff8_ASSET = "file")
-load("images/img_d6421684.png", IMG_d6421684_ASSET = "file")
-load("images/img_d76c634a.png", IMG_d76c634a_ASSET = "file")
-load("images/img_e3b51f17.png", IMG_e3b51f17_ASSET = "file")
-load("images/img_ed2cb528.png", IMG_ed2cb528_ASSET = "file")
-load("images/img_f4a83903.png", IMG_f4a83903_ASSET = "file")
-load("images/img_f6a8827b.png", IMG_f6a8827b_ASSET = "file")
 
 STATES = {
-    "AL": IMG_0b707932_ASSET.readall(),
-    "AR": IMG_a1cc444c_ASSET.readall(),
-    "AZ": IMG_330fe414_ASSET.readall(),
-    "CA": IMG_f4a83903_ASSET.readall(),
-    "CO": IMG_55f7a9dc_ASSET.readall(),
-    "CT": IMG_53c9f9c5_ASSET.readall(),
-    "DE": IMG_d76c634a_ASSET.readall(),
-    "FL": IMG_253d2b29_ASSET.readall(),
-    "GA": IMG_ed2cb528_ASSET.readall(),
-    "IA": IMG_a1a7848d_ASSET.readall(),
-    "ID": IMG_d1c68ff8_ASSET.readall(),
-    "IL": IMG_2b8675b0_ASSET.readall(),
-    "IN": IMG_02c77957_ASSET.readall(),
-    "KS": IMG_70c9c804_ASSET.readall(),
-    "KY": IMG_328461c8_ASSET.readall(),
-    "LA": IMG_250ab2c0_ASSET.readall(),
-    "MA": IMG_70e5d3cc_ASSET.readall(),
-    "MD": IMG_8cb9146e_ASSET.readall(),
-    "ME": IMG_29759483_ASSET.readall(),
-    "MI": IMG_d6421684_ASSET.readall(),
-    "MN": IMG_a0954fe5_ASSET.readall(),
-    "MO": IMG_7e5f0fe2_ASSET.readall(),
-    "MS": IMG_3059b1a9_ASSET.readall(),
-    "MT": IMG_1f2db57d_ASSET.readall(),
-    "NC": IMG_9e0cc860_ASSET.readall(),
-    "ND": IMG_29be94a1_ASSET.readall(),
-    "NE": IMG_f6a8827b_ASSET.readall(),
-    "NH": IMG_c07bc2f0_ASSET.readall(),
-    "NJ": IMG_913a0a03_ASSET.readall(),
-    "NM": IMG_a2374ab4_ASSET.readall(),
-    "NV": IMG_1a163134_ASSET.readall(),
-    "NY": IMG_42c5fcf8_ASSET.readall(),
-    "OH": IMG_0dbdb44d_ASSET.readall(),
-    "OK": IMG_4df45c58_ASSET.readall(),
-    "OR": IMG_91d682a5_ASSET.readall(),
-    "PA": IMG_b54112c5_ASSET.readall(),
-    "RI": IMG_4aba1569_ASSET.readall(),
-    "SC": IMG_1dd42802_ASSET.readall(),
-    "SD": IMG_82d4657b_ASSET.readall(),
-    "TN": IMG_85319811_ASSET.readall(),
-    "TX": IMG_41f6c9da_ASSET.readall(),
-    "UT": IMG_4641518d_ASSET.readall(),
-    "VA": IMG_77c21843_ASSET.readall(),
-    "VT": IMG_12cd72c7_ASSET.readall(),
-    "WA": IMG_bd8e36bc_ASSET.readall(),
-    "WI": IMG_a2e88e85_ASSET.readall(),
-    "WV": IMG_e3b51f17_ASSET.readall(),
-    "WY": IMG_38620887_ASSET.readall(),
+    "AL": MAP_AL_ASSET.readall(),
+    "AR": MAP_AR_ASSET.readall(),
+    "AZ": MAP_AZ_ASSET.readall(),
+    "CA": MAP_CA_ASSET.readall(),
+    "CO": MAP_CO_ASSET.readall(),
+    "CT": MAP_CT_ASSET.readall(),
+    "DE": MAP_DE_ASSET.readall(),
+    "FL": MAP_FL_ASSET.readall(),
+    "GA": MAP_GA_ASSET.readall(),
+    "IA": MAP_IA_ASSET.readall(),
+    "ID": MAP_ID_ASSET.readall(),
+    "IL": MAP_IL_ASSET.readall(),
+    "IN": MAP_IN_ASSET.readall(),
+    "KS": MAP_KS_ASSET.readall(),
+    "KY": MAP_KY_ASSET.readall(),
+    "LA": MAP_LA_ASSET.readall(),
+    "MA": MAP_MA_ASSET.readall(),
+    "MD": MAP_MD_ASSET.readall(),
+    "ME": MAP_ME_ASSET.readall(),
+    "MI": MAP_MI_ASSET.readall(),
+    "MN": MAP_MN_ASSET.readall(),
+    "MO": MAP_MO_ASSET.readall(),
+    "MS": MAP_MS_ASSET.readall(),
+    "MT": MAP_MT_ASSET.readall(),
+    "NC": MAP_NC_ASSET.readall(),
+    "ND": MAP_ND_ASSET.readall(),
+    "NE": MAP_NE_ASSET.readall(),
+    "NH": MAP_NH_ASSET.readall(),
+    "NJ": MAP_NJ_ASSET.readall(),
+    "NM": MAP_NM_ASSET.readall(),
+    "NV": MAP_NV_ASSET.readall(),
+    "NY": MAP_NY_ASSET.readall(),
+    "OH": MAP_OH_ASSET.readall(),
+    "OK": MAP_OK_ASSET.readall(),
+    "OR": MAP_OR_ASSET.readall(),
+    "PA": MAP_PA_ASSET.readall(),
+    "RI": MAP_RI_ASSET.readall(),
+    "SC": MAP_SC_ASSET.readall(),
+    "SD": MAP_SD_ASSET.readall(),
+    "TN": MAP_TN_ASSET.readall(),
+    "TX": MAP_TX_ASSET.readall(),
+    "UT": MAP_UT_ASSET.readall(),
+    "VA": MAP_VA_ASSET.readall(),
+    "VT": MAP_VT_ASSET.readall(),
+    "WA": MAP_WA_ASSET.readall(),
+    "WI": MAP_WI_ASSET.readall(),
+    "WV": MAP_WV_ASSET.readall(),
+    "WY": MAP_WY_ASSET.readall(),
 }
 
 STATE_NAMES = {

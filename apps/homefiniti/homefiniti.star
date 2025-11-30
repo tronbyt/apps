@@ -9,10 +9,10 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/envelope_icon.png", ENVELOPE_ICON_ASSET = "file")
+load("images/oneil.png", ONEIL_ICON_ASSET = "file")
 load("images/person_icon.png", PERSON_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_550c7317.png", IMG_550c7317_ASSET = "file")
 
 ENVELOPE_ICON = ENVELOPE_ICON_ASSET.readall()
 PERSON_ICON = PERSON_ICON_ASSET.readall()
@@ -20,7 +20,7 @@ PERSON_ICON = PERSON_ICON_ASSET.readall()
 TTL_SECONDS = 60
 
 # 24x24
-ONEIL_ICON = IMG_550c7317_ASSET.readall()
+ONEIL_ICON = ONEIL_ICON_ASSET.readall()
 
 API_URL = "https://app.homefiniti.com/api/v2/tidbyt_summary/"
 

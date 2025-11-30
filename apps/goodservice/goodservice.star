@@ -8,13 +8,13 @@ Author: blahblahblah-
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/diamond_green.png", DIAMOND_GREEN_ASSET = "file")
+load("images/diamond_orange.png", DIAMOND_ORANGE_ASSET = "file")
+load("images/diamond_purple.png", DIAMOND_PURPLE_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_0ee36260.png", IMG_0ee36260_ASSET = "file")
-load("images/img_3e4bd4b4.png", IMG_3e4bd4b4_ASSET = "file")
-load("images/img_d02716e4.png", IMG_d02716e4_ASSET = "file")
 
 DEFAULT_STOP_ID = "M16"
 DEFAULT_DIRECTION = "both"
@@ -59,9 +59,9 @@ ABBREVIATIONS = {
 }
 
 DIAMONDS = {
-    "#00933c": IMG_3e4bd4b4_ASSET.readall(),
-    "#b933ad": IMG_0ee36260_ASSET.readall(),
-    "#ff6319": IMG_d02716e4_ASSET.readall(),
+    "#00933c": DIAMOND_GREEN_ASSET.readall(),
+    "#b933ad": DIAMOND_PURPLE_ASSET.readall(),
+    "#ff6319": DIAMOND_ORANGE_ASSET.readall(),
 }
 
 def main(config):

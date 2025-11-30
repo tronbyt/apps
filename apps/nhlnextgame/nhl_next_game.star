@@ -10,107 +10,107 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/ana.png", ANA_ICON = "file")
+load("images/ari.png", ARI_ICON = "file")
+load("images/bos.png", BOS_ICON = "file")
+load("images/buf.png", BUF_ICON = "file")
+load("images/car.png", CAR_ICON = "file")
+load("images/cbj.png", CBJ_ICON = "file")
+load("images/cgy.png", CGY_ICON = "file")
+load("images/chi.png", CHI_ICON = "file")
+load("images/col.png", COL_ICON = "file")
+load("images/dal.png", DAL_ICON = "file")
+load("images/det.png", DET_ICON = "file")
+load("images/edm.png", EDM_ICON = "file")
+load("images/fla.png", FLA_ICON = "file")
+load("images/lak.png", LAK_ICON = "file")
+load("images/min.png", MIN_ICON = "file")
+load("images/mtl.png", MTL_ICON = "file")
+load("images/njd.png", NJD_ICON = "file")
+load("images/nsh.png", NSH_ICON = "file")
+load("images/nyi.png", NYI_ICON = "file")
+load("images/nyr.png", NYR_ICON = "file")
+load("images/ott.png", OTT_ICON = "file")
+load("images/phi.png", PHI_ICON = "file")
+load("images/pit.png", PIT_ICON = "file")
+load("images/sea.png", SEA_ICON = "file")
+load("images/sjs.png", SJS_ICON = "file")
+load("images/stl.png", STL_ICON = "file")
+load("images/tbl.png", TBL_ICON = "file")
+load("images/tor.png", TOR_ICON = "file")
+load("images/van.png", VAN_ICON = "file")
+load("images/vgk.png", VGK_ICON = "file")
+load("images/wpg.png", WPG_ICON = "file")
+load("images/wsh.png", WSH_ICON = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_01d99a02.png", IMG_01d99a02_ASSET = "file")
-load("images/img_038e492a.png", IMG_038e492a_ASSET = "file")
-load("images/img_13e8e8f8.png", IMG_13e8e8f8_ASSET = "file")
-load("images/img_14824432.png", IMG_14824432_ASSET = "file")
-load("images/img_1b535193.png", IMG_1b535193_ASSET = "file")
-load("images/img_1f68820b.png", IMG_1f68820b_ASSET = "file")
-load("images/img_268d3e8f.png", IMG_268d3e8f_ASSET = "file")
-load("images/img_2efed4c8.png", IMG_2efed4c8_ASSET = "file")
-load("images/img_2fac0c2c.png", IMG_2fac0c2c_ASSET = "file")
-load("images/img_3431b90f.png", IMG_3431b90f_ASSET = "file")
-load("images/img_3fc9c4be.png", IMG_3fc9c4be_ASSET = "file")
-load("images/img_41468249.png", IMG_41468249_ASSET = "file")
-load("images/img_52ce3f9f.png", IMG_52ce3f9f_ASSET = "file")
-load("images/img_77716713.png", IMG_77716713_ASSET = "file")
-load("images/img_8548dabb.png", IMG_8548dabb_ASSET = "file")
-load("images/img_92602d88.png", IMG_92602d88_ASSET = "file")
-load("images/img_94c3653d.png", IMG_94c3653d_ASSET = "file")
-load("images/img_97bcc840.png", IMG_97bcc840_ASSET = "file")
-load("images/img_a31a5920.png", IMG_a31a5920_ASSET = "file")
-load("images/img_aa9f76da.png", IMG_aa9f76da_ASSET = "file")
-load("images/img_b59ce7fc.png", IMG_b59ce7fc_ASSET = "file")
-load("images/img_bd928a09.png", IMG_bd928a09_ASSET = "file")
-load("images/img_c0a3c133.png", IMG_c0a3c133_ASSET = "file")
-load("images/img_c36025a5.png", IMG_c36025a5_ASSET = "file")
-load("images/img_c9c2185d.png", IMG_c9c2185d_ASSET = "file")
-load("images/img_cb7906a9.png", IMG_cb7906a9_ASSET = "file")
-load("images/img_cba54416.png", IMG_cba54416_ASSET = "file")
-load("images/img_d3caf455.png", IMG_d3caf455_ASSET = "file")
-load("images/img_d59fde8d.png", IMG_d59fde8d_ASSET = "file")
-load("images/img_e6d07705.png", IMG_e6d07705_ASSET = "file")
-load("images/img_ebb5bd2e.png", IMG_ebb5bd2e_ASSET = "file")
-load("images/img_ec0980fe.png", IMG_ec0980fe_ASSET = "file")
 
 def getTeamIconFromID(teamID):
     if teamID == 2:  #NYI
-        return (IMG_d59fde8d_ASSET.readall())
+        return (NYI_ICON.readall())
     elif teamID == 24:  #ANA
-        return (IMG_14824432_ASSET.readall())
+        return (ANA_ICON.readall())
     elif teamID == 53:  #ARI
-        return (IMG_c36025a5_ASSET.readall())
+        return (ARI_ICON.readall())
     elif teamID == 6:  #BOS
-        return (IMG_2fac0c2c_ASSET.readall())
+        return (BOS_ICON.readall())
     elif teamID == 7:  #BUF
-        return (IMG_e6d07705_ASSET.readall())
+        return (BUF_ICON.readall())
     elif teamID == 20:  #CGY
-        return (IMG_d3caf455_ASSET.readall())
+        return (CGY_ICON.readall())
     elif teamID == 12:  #CAR
-        return (IMG_94c3653d_ASSET.readall())
+        return (CAR_ICON.readall())
     elif teamID == 16:  #CHI
-        return (IMG_c0a3c133_ASSET.readall())
+        return (CHI_ICON.readall())
     elif teamID == 21:  #COL
-        return (IMG_bd928a09_ASSET.readall())
+        return (COL_ICON.readall())
     elif teamID == 29:  #CBJ
-        return (IMG_ebb5bd2e_ASSET.readall())
+        return (CBJ_ICON.readall())
     elif teamID == 25:  #DAL
-        return (IMG_1b535193_ASSET.readall())
+        return (DAL_ICON.readall())
     elif teamID == 17:  #DET
-        return (IMG_a31a5920_ASSET.readall())
+        return (DET_ICON.readall())
     elif teamID == 22:  #EDM
-        return (IMG_77716713_ASSET.readall())
+        return (EDM_ICON.readall())
     elif teamID == 13:  #FLA
-        return (IMG_b59ce7fc_ASSET.readall())
+        return (FLA_ICON.readall())
     elif teamID == 26:  #LAK
-        return (IMG_01d99a02_ASSET.readall())
+        return (LAK_ICON.readall())
     elif teamID == 30:  #MIN
-        return (IMG_1f68820b_ASSET.readall())
+        return (MIN_ICON.readall())
     elif teamID == 8:  #MTL
-        return (IMG_038e492a_ASSET.readall())
+        return (MTL_ICON.readall())
     elif teamID == 18:  #NSH
-        return IMG_41468249_ASSET.readall()
+        return NSH_ICON.readall()
     elif teamID == 1:  #NJD
-        return IMG_268d3e8f_ASSET.readall()
+        return NJD_ICON.readall()
     elif teamID == 3:  #NYR
-        return IMG_cba54416_ASSET.readall()
+        return NYR_ICON.readall()
     elif teamID == 9:  #OTT
-        return IMG_ec0980fe_ASSET.readall()
+        return OTT_ICON.readall()
     elif teamID == 4:  #PHI
-        return IMG_c9c2185d_ASSET.readall()
+        return PHI_ICON.readall()
     elif teamID == 5:  #PIT
-        return IMG_aa9f76da_ASSET.readall()
+        return PIT_ICON.readall()
     elif teamID == 28:  #SJS
-        return IMG_3431b90f_ASSET.readall()
+        return SJS_ICON.readall()
     elif teamID == 55:  #SEA
-        return IMG_13e8e8f8_ASSET.readall()
+        return SEA_ICON.readall()
     elif teamID == 19:  #STL
-        return IMG_52ce3f9f_ASSET.readall()
+        return STL_ICON.readall()
     elif teamID == 14:  #TBL
-        return IMG_cb7906a9_ASSET.readall()
+        return TBL_ICON.readall()
     elif teamID == 10:  #TOR
-        return IMG_97bcc840_ASSET.readall()
+        return TOR_ICON.readall()
     elif teamID == 23:  #VAN
-        return IMG_2efed4c8_ASSET.readall()
+        return VAN_ICON.readall()
     elif teamID == 54:  #VGK
-        return IMG_92602d88_ASSET.readall()
+        return VGK_ICON.readall()
     elif teamID == 15:  #WSH
-        return IMG_8548dabb_ASSET.readall()
+        return WSH_ICON.readall()
     elif teamID == 52:  #WPG
-        return IMG_3fc9c4be_ASSET.readall()
+        return WPG_ICON.readall()
     else:
         return ""
 

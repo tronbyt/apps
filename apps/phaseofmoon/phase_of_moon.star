@@ -32,26 +32,26 @@ Author: Alan Fleming
 
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/phase_first_quarter.png", PHASE_FIRST_QUARTER_ASSET = "file")
+load("images/phase_first_quarter_zh.png", PHASE_FIRST_QUARTER_ZH_ASSET = "file")
+load("images/phase_full_moon.png", PHASE_FULL_MOON_ASSET = "file")
+load("images/phase_full_moon_zh.png", PHASE_FULL_MOON_ZH_ASSET = "file")
+load("images/phase_last_quarter.png", PHASE_LAST_QUARTER_ASSET = "file")
+load("images/phase_last_quarter_zh.png", PHASE_LAST_QUARTER_ZH_ASSET = "file")
+load("images/phase_new_moon.png", PHASE_NEW_MOON_ASSET = "file")
+load("images/phase_new_moon_zh.png", PHASE_NEW_MOON_ZH_ASSET = "file")
+load("images/phase_waning_crescent.png", PHASE_WANING_CRESCENT_ASSET = "file")
+load("images/phase_waning_crescent_zh.png", PHASE_WANING_CRESCENT_ZH_ASSET = "file")
+load("images/phase_waning_gibbous.png", PHASE_WANING_GIBBOUS_ASSET = "file")
+load("images/phase_waning_gibbous_zh.png", PHASE_WANING_GIBBOUS_ZH_ASSET = "file")
+load("images/phase_waxing_crescent.png", PHASE_WAXING_CRESCENT_ASSET = "file")
+load("images/phase_waxing_crescent_zh.png", PHASE_WAXING_CRESCENT_ZH_ASSET = "file")
+load("images/phase_waxing_gibbous.png", PHASE_WAXING_GIBBOUS_ASSET = "file")
+load("images/phase_waxing_gibbous_zh.png", PHASE_WAXING_GIBBOUS_ZH_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_0a5354c3.png", IMG_0a5354c3_ASSET = "file")
-load("images/img_20a08d13.png", IMG_20a08d13_ASSET = "file")
-load("images/img_5086a72c.png", IMG_5086a72c_ASSET = "file")
-load("images/img_88f66c2c.png", IMG_88f66c2c_ASSET = "file")
-load("images/img_943edf3a.png", IMG_943edf3a_ASSET = "file")
-load("images/img_99fb6de6.png", IMG_99fb6de6_ASSET = "file")
-load("images/img_9dc538e0.png", IMG_9dc538e0_ASSET = "file")
-load("images/img_a1bbaaff.png", IMG_a1bbaaff_ASSET = "file")
-load("images/img_a8f3b29b.png", IMG_a8f3b29b_ASSET = "file")
-load("images/img_cdd0e8c3.png", IMG_cdd0e8c3_ASSET = "file")
-load("images/img_d280a3d8.png", IMG_d280a3d8_ASSET = "file")
-load("images/img_e99f33dc.png", IMG_e99f33dc_ASSET = "file")
-load("images/img_e9ab0947.png", IMG_e9ab0947_ASSET = "file")
-load("images/img_ee4edaf4.png", IMG_ee4edaf4_ASSET = "file")
-load("images/img_eeb0f7be.png", IMG_eeb0f7be_ASSET = "file")
-load("images/img_f7ceb13c.png", IMG_f7ceb13c_ASSET = "file")
 
 # Default location
 
@@ -82,15 +82,15 @@ FIRSTMOON = 947182440  # Saturday, 6 January 2000 18:14:00 in unix epoch time
 # Moon Images
 # Rendered to 30x30 from NASA images at https://spaceplace.nasa.gov/oreo-moon/en/
 PHASE_IMAGES = [
-    IMG_ee4edaf4_ASSET.readall(),
-    IMG_cdd0e8c3_ASSET.readall(),
-    IMG_e9ab0947_ASSET.readall(),
-    IMG_a8f3b29b_ASSET.readall(),
-    IMG_943edf3a_ASSET.readall(),
-    IMG_f7ceb13c_ASSET.readall(),
-    IMG_a1bbaaff_ASSET.readall(),
-    IMG_99fb6de6_ASSET.readall(),
-    IMG_ee4edaf4_ASSET.readall(),
+    PHASE_NEW_MOON_ASSET.readall(),
+    PHASE_WAXING_CRESCENT_ASSET.readall(),
+    PHASE_FIRST_QUARTER_ASSET.readall(),
+    PHASE_WAXING_GIBBOUS_ASSET.readall(),
+    PHASE_FULL_MOON_ASSET.readall(),
+    PHASE_WANING_GIBBOUS_ASSET.readall(),
+    PHASE_LAST_QUARTER_ASSET.readall(),
+    PHASE_WANING_CRESCENT_ASSET.readall(),
+    PHASE_NEW_MOON_ASSET.readall(),
 ]
 
 # Phase of the moon data.
@@ -104,14 +104,14 @@ PHASE_CHANGES = [0, 1, 6.38264692644, 8.38264692644, 13.76529385288, 15.76529385
 
 # Moon phases in Chinese (simplified).
 MOON_PHASES_ZH = [
-    IMG_88f66c2c_ASSET.readall(),
-    IMG_5086a72c_ASSET.readall(),
-    IMG_e99f33dc_ASSET.readall(),
-    IMG_d280a3d8_ASSET.readall(),
-    IMG_20a08d13_ASSET.readall(),
-    IMG_eeb0f7be_ASSET.readall(),
-    IMG_0a5354c3_ASSET.readall(),
-    IMG_9dc538e0_ASSET.readall(),
+    PHASE_NEW_MOON_ZH_ASSET.readall(),
+    PHASE_WAXING_CRESCENT_ZH_ASSET.readall(),
+    PHASE_FIRST_QUARTER_ZH_ASSET.readall(),
+    PHASE_WAXING_GIBBOUS_ZH_ASSET.readall(),
+    PHASE_FULL_MOON_ZH_ASSET.readall(),
+    PHASE_WANING_GIBBOUS_ZH_ASSET.readall(),
+    PHASE_LAST_QUARTER_ZH_ASSET.readall(),
+    PHASE_WANING_CRESCENT_ZH_ASSET.readall(),
 ]
 
 def main(config):

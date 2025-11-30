@@ -13,6 +13,7 @@ load("images/atl_logo.png", ATL_LOGO_ASSET = "file")
 load("images/bal_logo.png", BAL_LOGO_ASSET = "file")
 load("images/bos_logo.png", BOS_LOGO_ASSET = "file")
 load("images/chc_logo.png", CHC_LOGO_ASSET = "file")
+load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("images/cin_logo.png", CIN_LOGO_ASSET = "file")
 load("images/cle_logo.png", CLE_LOGO_ASSET = "file")
 load("images/col_logo.png", COL_LOGO_ASSET = "file")
@@ -41,7 +42,6 @@ load("images/was_logo.png", WAS_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_c45ecc90.png", IMG_c45ecc90_ASSET = "file")
 
 ARI_LOGO = ARI_LOGO_ASSET.readall()
 ATH_LOGO = ATH_LOGO_ASSET.readall()
@@ -491,7 +491,7 @@ def http_get_number(team_id):
     return struct(Number = number, Magic = magic, Clinched = clinched, DivisionRank = division_rank, Eliminated = eliminated, Wins = wins, Losses = losses, Success = True, ResponseCode = response.status_code, HasData = has_data)
 
 CHECKMARK = base64.decode(
-    IMG_c45ecc90_ASSET.readall(),
+    CHECKMARK_ASSET.readall(),
 )
 
 #################

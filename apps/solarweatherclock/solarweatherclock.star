@@ -5,29 +5,18 @@ Description: Retrieves the output or input to the grid obtained from home assist
 Author: shmauk
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/export.png", EXPORT_ASSET = "file")
+load("images/img_82d9eb1d.bin", WINDY_VARIANT_ASSET = "file")
 load("images/import.png", IMPORT_ASSET = "file")
+load("images/solarweatherclock_generic_1.png", SOLARWEATHERCLOCK_GENERIC_1_ASSET = "file")
+load("images/solarweatherclock_generic_2.png", SOLARWEATHERCLOCK_GENERIC_2_ASSET = "file")
+load("images/solarweatherclock_generic_3.png", SOLARWEATHERCLOCK_GENERIC_3_ASSET = "file")
+load("images/solarweatherclock_generic_4.png", SOLARWEATHERCLOCK_GENERIC_4_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_00556125.png", IMG_00556125_ASSET = "file")
-load("images/img_0c789d62.png", IMG_0c789d62_ASSET = "file")
-load("images/img_0f98ff25.png", IMG_0f98ff25_ASSET = "file")
-load("images/img_5fde32e4.png", IMG_5fde32e4_ASSET = "file")
-load("images/img_7719fd13.png", IMG_7719fd13_ASSET = "file")
-load("images/img_82d9eb1d.bin", IMG_82d9eb1d_ASSET = "file")
-load("images/img_8938f152.png", IMG_8938f152_ASSET = "file")
-load("images/img_a2285224.png", IMG_a2285224_ASSET = "file")
-load("images/img_b462ca70.png", IMG_b462ca70_ASSET = "file")
-load("images/img_c4e0a08a.png", IMG_c4e0a08a_ASSET = "file")
-load("images/img_c7b85522.png", IMG_c7b85522_ASSET = "file")
-load("images/img_e3ac226b.png", IMG_e3ac226b_ASSET = "file")
-load("images/img_eb567ea4.png", IMG_eb567ea4_ASSET = "file")
-load("images/img_f40ba5e2.png", IMG_f40ba5e2_ASSET = "file")
-load("images/img_f4d4aeee.png", IMG_f4d4aeee_ASSET = "file")
 
 EXPORT = EXPORT_ASSET.readall()
 IMPORT = IMPORT_ASSET.readall()
@@ -173,34 +162,34 @@ def get_schema():
 
 def getImage(weather):
     if weather == "clear-night":
-        return IMG_a2285224_ASSET.readall()
+        return SOLARWEATHERCLOCK_GENERIC_3_ASSET.readall()
     elif weather == "cloudy":
-        return IMG_b462ca70_ASSET.readall()
+        return CLOUDY_ASSET.readall()
     elif weather == "fog":
-        return IMG_c4e0a08a_ASSET.readall()
+        return FOG_ASSET.readall()
     elif weather == "hail":
-        return IMG_e3ac226b_ASSET.readall()
+        return HAIL_ASSET.readall()
     elif weather == "lightning":
-        return IMG_f40ba5e2_ASSET.readall()
+        return LIGHTNING_ASSET.readall()
     elif weather == "lightning-rainy":
-        return IMG_00556125_ASSET.readall()
+        return LIGHTNING_RAINY_ASSET.readall()
     elif weather == "partlycloudy":
-        return IMG_7719fd13_ASSET.readall()
+        return PARTLYCLOUDY_ASSET.readall()
     elif weather == "pouring":
-        return IMG_c7b85522_ASSET.readall()
+        return POURING_ASSET.readall()
     elif weather == "rainy":
-        return IMG_0f98ff25_ASSET.readall()
+        return RAINY_ASSET.readall()
     elif weather == "snowy":
-        return IMG_eb567ea4_ASSET.readall()
+        return SNOWY_ASSET.readall()
     elif weather == "snowy-rainy":
-        return IMG_0c789d62_ASSET.readall()
+        return SNOWY_RAINY_ASSET.readall()
     elif weather == "sunny":
-        return IMG_5fde32e4_ASSET.readall()
+        return SOLARWEATHERCLOCK_GENERIC_1_ASSET.readall()
     elif weather == "windy":
-        return IMG_f4d4aeee_ASSET.readall()
+        return SOLARWEATHERCLOCK_GENERIC_4_ASSET.readall()
     elif weather == "windy-variant":
-        return IMG_82d9eb1d_ASSET.readall()
+        return WINDY_VARIANT_ASSET.readall()()
     elif weather == "exceptional":
-        return IMG_8938f152_ASSET.readall()
+        return SOLARWEATHERCLOCK_GENERIC_2_ASSET.readall()
     else:
-        return IMG_5fde32e4_ASSET.readall()
+        return SOLARWEATHERCLOCK_GENERIC_1_ASSET.readall()

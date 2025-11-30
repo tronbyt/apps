@@ -5,34 +5,33 @@ Description: Adds a realtime next train sign for any Metro-North or Long Island 
 Author: nataliemakhijani
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/alert_icon.png", ALERT_ICON_ASSET = "file")
+load("images/branch_babylon.png", BRANCH_BABYLON_ASSET = "file")
+load("images/branch_far_rockaway.png", BRANCH_FAR_ROCKAWAY_ASSET = "file")
+load("images/branch_harlem.png", BRANCH_HARLEM_ASSET = "file")
+load("images/branch_hempstead.png", BRANCH_HEMPSTEAD_ASSET = "file")
+load("images/branch_hudson.png", BRANCH_HUDSON_ASSET = "file")
+load("images/branch_long_beach.png", BRANCH_LONG_BEACH_ASSET = "file")
+load("images/branch_montauk.png", BRANCH_MONTAUK_ASSET = "file")
+load("images/branch_new_canaan.png", BRANCH_NEW_CANAAN_ASSET = "file")
+load("images/branch_new_haven.png", BRANCH_NEW_HAVEN_ASSET = "file")
+load("images/branch_oyster_bay.png", BRANCH_OYSTER_BAY_ASSET = "file")
+load("images/branch_port_jefferson.png", BRANCH_PORT_JEFFERSON_ASSET = "file")
+load("images/branch_port_washington.png", BRANCH_PORT_WASHINGTON_ASSET = "file")
+load("images/branch_ronkonkoma.png", BRANCH_RONKONKOMA_ASSET = "file")
+load("images/branch_west_hempstead.png", BRANCH_WEST_HEMPSTEAD_ASSET = "file")
+load("images/icon_atl.png", ICON_ATL_ASSET = "file")
+load("images/icon_gct.png", ICON_GCT_ASSET = "file")
+load("images/icon_hpa.png", ICON_HPA_ASSET = "file")
+load("images/icon_jam.png", ICON_JAM_ASSET = "file")
+load("images/icon_lic.png", ICON_LIC_ASSET = "file")
+load("images/icon_nyp.png", ICON_NYP_ASSET = "file")
+load("images/icon_unknown.png", ICON_UNKNOWN_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("images/img_13926c21.png", IMG_13926c21_ASSET = "file")
-load("images/img_19e94761.png", IMG_19e94761_ASSET = "file")
-load("images/img_1aeaa611.png", IMG_1aeaa611_ASSET = "file")
-load("images/img_2514fb38.png", IMG_2514fb38_ASSET = "file")
-load("images/img_2c972329.png", IMG_2c972329_ASSET = "file")
-load("images/img_2e3a727b.png", IMG_2e3a727b_ASSET = "file")
-load("images/img_3b30bc3b.png", IMG_3b30bc3b_ASSET = "file")
-load("images/img_485c94a7.png", IMG_485c94a7_ASSET = "file")
-load("images/img_4a1f51c0.png", IMG_4a1f51c0_ASSET = "file")
-load("images/img_51b84519.png", IMG_51b84519_ASSET = "file")
-load("images/img_5fd189ea.png", IMG_5fd189ea_ASSET = "file")
-load("images/img_5fdc3b60.png", IMG_5fdc3b60_ASSET = "file")
-load("images/img_71358aab.png", IMG_71358aab_ASSET = "file")
-load("images/img_72ff3d64.png", IMG_72ff3d64_ASSET = "file")
-load("images/img_7aa6aa91.png", IMG_7aa6aa91_ASSET = "file")
-load("images/img_7b469ff3.png", IMG_7b469ff3_ASSET = "file")
-load("images/img_acf95546.png", IMG_acf95546_ASSET = "file")
-load("images/img_ad13b136.png", IMG_ad13b136_ASSET = "file")
-load("images/img_b356754b.png", IMG_b356754b_ASSET = "file")
-load("images/img_f3feaf78.png", IMG_f3feaf78_ASSET = "file")
-load("images/img_f97e5229.png", IMG_f97e5229_ASSET = "file")
 
 ALERT_ICON = ALERT_ICON_ASSET.readall()
 
@@ -399,31 +398,31 @@ STATUS_COLORS = {
 
 # ICONS
 TERMINAL_ICONS = {
-    "HPA": IMG_19e94761_ASSET.readall(),
-    "NYK": IMG_5fdc3b60_ASSET.readall(),
-    "NYP": IMG_5fdc3b60_ASSET.readall(),
-    "GCT": IMG_ad13b136_ASSET.readall(),
-    "0NY": IMG_ad13b136_ASSET.readall(),  # GCT
-    "LIC": IMG_b356754b_ASSET.readall(),
-    "ATL": IMG_3b30bc3b_ASSET.readall(),
-    "JAM": IMG_485c94a7_ASSET.readall(),
-    "???": IMG_2e3a727b_ASSET.readall(),
+    "HPA": ICON_HPA_ASSET.readall(),
+    "NYK": ICON_NYP_ASSET.readall(),
+    "NYP": ICON_NYP_ASSET.readall(),
+    "GCT": ICON_GCT_ASSET.readall(),
+    "0NY": ICON_GCT_ASSET.readall(),  # GCT
+    "LIC": ICON_LIC_ASSET.readall(),
+    "ATL": ICON_ATL_ASSET.readall(),
+    "JAM": ICON_JAM_ASSET.readall(),
+    "???": ICON_UNKNOWN_ASSET.readall(),
 }
 BRANCH_ICONS = {
-    "Port Jefferson": IMG_7b469ff3_ASSET.readall(),
-    "Montauk": IMG_1aeaa611_ASSET.readall(),
-    "Ronkonkoma": IMG_72ff3d64_ASSET.readall(),
-    "Far Rockaway": IMG_2c972329_ASSET.readall(),
-    "Long Beach": IMG_51b84519_ASSET.readall(),
-    "Babylon": IMG_4a1f51c0_ASSET.readall(),
-    "Hempstead": IMG_7aa6aa91_ASSET.readall(),
-    "West Hempstead": IMG_13926c21_ASSET.readall(),
-    "Oyster Bay": IMG_71358aab_ASSET.readall(),
-    "Port Washington": IMG_2514fb38_ASSET.readall(),
-    "New Haven": IMG_f3feaf78_ASSET.readall(),
-    "Harlem": IMG_f97e5229_ASSET.readall(),
-    "Hudson": IMG_acf95546_ASSET.readall(),
-    "New Canaan": IMG_5fd189ea_ASSET.readall(),
+    "Port Jefferson": BRANCH_PORT_JEFFERSON_ASSET.readall(),
+    "Montauk": BRANCH_MONTAUK_ASSET.readall(),
+    "Ronkonkoma": BRANCH_RONKONKOMA_ASSET.readall(),
+    "Far Rockaway": BRANCH_FAR_ROCKAWAY_ASSET.readall(),
+    "Long Beach": BRANCH_LONG_BEACH_ASSET.readall(),
+    "Babylon": BRANCH_BABYLON_ASSET.readall(),
+    "Hempstead": BRANCH_HEMPSTEAD_ASSET.readall(),
+    "West Hempstead": BRANCH_WEST_HEMPSTEAD_ASSET.readall(),
+    "Oyster Bay": BRANCH_OYSTER_BAY_ASSET.readall(),
+    "Port Washington": BRANCH_PORT_WASHINGTON_ASSET.readall(),
+    "New Haven": BRANCH_NEW_HAVEN_ASSET.readall(),
+    "Harlem": BRANCH_HARLEM_ASSET.readall(),
+    "Hudson": BRANCH_HUDSON_ASSET.readall(),
+    "New Canaan": BRANCH_NEW_CANAAN_ASSET.readall(),
 }
 
 # MAIN CODE

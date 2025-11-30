@@ -6,33 +6,32 @@ Author: noahpodgurski
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/rank_bronze_1.png", RANK_BRONZE_1_ASSET = "file")
+load("images/rank_bronze_2.png", RANK_BRONZE_2_ASSET = "file")
+load("images/rank_bronze_3.png", RANK_BRONZE_3_ASSET = "file")
+load("images/rank_diamond_1.png", RANK_DIAMOND_1_ASSET = "file")
+load("images/rank_diamond_2.png", RANK_DIAMOND_2_ASSET = "file")
+load("images/rank_diamond_3.png", RANK_DIAMOND_3_ASSET = "file")
+load("images/rank_gm.png", RANK_GM_ASSET = "file")
+load("images/rank_gold_1.png", RANK_GOLD_1_ASSET = "file")
+load("images/rank_gold_2.png", RANK_GOLD_2_ASSET = "file")
+load("images/rank_gold_3.png", RANK_GOLD_3_ASSET = "file")
+load("images/rank_master_1.png", RANK_MASTER_1_ASSET = "file")
+load("images/rank_master_2.png", RANK_MASTER_2_ASSET = "file")
+load("images/rank_master_3.png", RANK_MASTER_3_ASSET = "file")
+load("images/rank_platinum_1.png", RANK_PLATINUM_1_ASSET = "file")
+load("images/rank_platinum_2.png", RANK_PLATINUM_2_ASSET = "file")
+load("images/rank_platinum_3.png", RANK_PLATINUM_3_ASSET = "file")
+load("images/rank_silver_1.png", RANK_SILVER_1_ASSET = "file")
+load("images/rank_silver_2.png", RANK_SILVER_2_ASSET = "file")
+load("images/rank_silver_3.png", RANK_SILVER_3_ASSET = "file")
+load("images/rank_unranked_1.png", RANK_UNRANKED_1_ASSET = "file")
+load("images/rank_unranked_2.png", RANK_UNRANKED_2_ASSET = "file")
+load("images/rank_unranked_3.png", RANK_UNRANKED_3_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/img_07a65b2b.png", IMG_07a65b2b_ASSET = "file")
-load("images/img_10d3ba6a.png", IMG_10d3ba6a_ASSET = "file")
-load("images/img_1495fb4a.png", IMG_1495fb4a_ASSET = "file")
-load("images/img_1c8150b1.png", IMG_1c8150b1_ASSET = "file")
-load("images/img_21dc8586.png", IMG_21dc8586_ASSET = "file")
-load("images/img_25a1d983.png", IMG_25a1d983_ASSET = "file")
-load("images/img_2c613b44.png", IMG_2c613b44_ASSET = "file")
-load("images/img_46533544.png", IMG_46533544_ASSET = "file")
-load("images/img_49498b46.png", IMG_49498b46_ASSET = "file")
-load("images/img_4af5a275.png", IMG_4af5a275_ASSET = "file")
-load("images/img_4e6ab285.png", IMG_4e6ab285_ASSET = "file")
-load("images/img_68148cc9.png", IMG_68148cc9_ASSET = "file")
-load("images/img_864cc267.png", IMG_864cc267_ASSET = "file")
-load("images/img_87ca9876.png", IMG_87ca9876_ASSET = "file")
-load("images/img_8bfa1995.png", IMG_8bfa1995_ASSET = "file")
-load("images/img_acc5feb5.png", IMG_acc5feb5_ASSET = "file")
-load("images/img_b2619eea.png", IMG_b2619eea_ASSET = "file")
-load("images/img_b572838d.png", IMG_b572838d_ASSET = "file")
-load("images/img_b9e83542.png", IMG_b9e83542_ASSET = "file")
-load("images/img_dc234e76.png", IMG_dc234e76_ASSET = "file")
-load("images/img_ee6638b0.png", IMG_ee6638b0_ASSET = "file")
-load("images/img_f2435098.png", IMG_f2435098_ASSET = "file")
 
 REFRESH_TIME = 43200  # twice a day
 DEFAULT_USER_CODE = "hbox-305"
@@ -131,28 +130,28 @@ RANKS = [
 ]
 
 RANK_IMGS = {
-    "Bronze 1": IMG_8bfa1995_ASSET.readall(),
-    "Bronze 2": IMG_864cc267_ASSET.readall(),
-    "Bronze 3": IMG_b2619eea_ASSET.readall(),
-    "Diamond 1": IMG_2c613b44_ASSET.readall(),
-    "Diamond 2": IMG_68148cc9_ASSET.readall(),
-    "Diamond 3": IMG_49498b46_ASSET.readall(),
-    "GM": IMG_10d3ba6a_ASSET.readall(),
-    "Gold 1": IMG_25a1d983_ASSET.readall(),
-    "Gold 2": IMG_21dc8586_ASSET.readall(),
-    "Gold 3": IMG_46533544_ASSET.readall(),
-    "Master 1": IMG_87ca9876_ASSET.readall(),
-    "Master 2": IMG_07a65b2b_ASSET.readall(),
-    "Master 3": IMG_ee6638b0_ASSET.readall(),
-    "Platinum1": IMG_b572838d_ASSET.readall(),
-    "Platinum2": IMG_1c8150b1_ASSET.readall(),
-    "Platinum3": IMG_1495fb4a_ASSET.readall(),
-    "Silver 1": IMG_b9e83542_ASSET.readall(),
-    "Silver 2": IMG_acc5feb5_ASSET.readall(),
-    "Silver 3": IMG_dc234e76_ASSET.readall(),
-    "Unranked 1": IMG_4af5a275_ASSET.readall(),
-    "Unranked 2": IMG_4e6ab285_ASSET.readall(),
-    "Unranked 3": IMG_f2435098_ASSET.readall(),
+    "Bronze 1": RANK_BRONZE_1_ASSET.readall(),
+    "Bronze 2": RANK_BRONZE_2_ASSET.readall(),
+    "Bronze 3": RANK_BRONZE_3_ASSET.readall(),
+    "Diamond 1": RANK_DIAMOND_1_ASSET.readall(),
+    "Diamond 2": RANK_DIAMOND_2_ASSET.readall(),
+    "Diamond 3": RANK_DIAMOND_3_ASSET.readall(),
+    "GM": RANK_GM_ASSET.readall(),
+    "Gold 1": RANK_GOLD_1_ASSET.readall(),
+    "Gold 2": RANK_GOLD_2_ASSET.readall(),
+    "Gold 3": RANK_GOLD_3_ASSET.readall(),
+    "Master 1": RANK_MASTER_1_ASSET.readall(),
+    "Master 2": RANK_MASTER_2_ASSET.readall(),
+    "Master 3": RANK_MASTER_3_ASSET.readall(),
+    "Platinum1": RANK_PLATINUM_1_ASSET.readall(),
+    "Platinum2": RANK_PLATINUM_2_ASSET.readall(),
+    "Platinum3": RANK_PLATINUM_3_ASSET.readall(),
+    "Silver 1": RANK_SILVER_1_ASSET.readall(),
+    "Silver 2": RANK_SILVER_2_ASSET.readall(),
+    "Silver 3": RANK_SILVER_3_ASSET.readall(),
+    "Unranked 1": RANK_UNRANKED_1_ASSET.readall(),
+    "Unranked 2": RANK_UNRANKED_2_ASSET.readall(),
+    "Unranked 3": RANK_UNRANKED_3_ASSET.readall(),
 }
 
 def getRank(elo):
@@ -226,7 +225,7 @@ def main(config):
         elo = rankedData["data"]["getConnectCode"]["user"]["rankedNetplayProfile"]["ratingOrdinal"]
         rank = getRank(elo)
         name = rankedData["data"]["getConnectCode"]["user"]["displayName"]
-        rankedImg = base64.decode(RANK_IMGS[rank])
+        rankedImg = RANK_IMGS[rank]
     else:
         fail("Ranked data did not respond correctly")
 

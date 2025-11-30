@@ -6,10 +6,10 @@ Author: Jeremy Launder
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/image_woo_square_16x16.webp", IMAGE_WOO_SQUARE_16X16_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -42,9 +42,7 @@ SUBHEADING_FONT = FONT_TB8
 DATA_FONT = FONT_6X13
 
 # IMAGES
-IMAGE_WOO_SQUARE_16X16 = """
-UklGRpACAABXRUJQVlA4WAoAAAAgAAAADwAADwAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggogAAAJACAJ0BKhAAEAABQCYlsAJ0OIAHKTdMngk0wLO8AP6JPwhphL110tdOSSPX2dkHK3oZdnfhjuMyMm+tNb+KWVLhTvEJYvzP3EmPguH2GojPUmvp3j86L5mRdNPL+sSkr6v6gYOnT/5g2xswwSpMkjSFNWjg/IFMe4utEr0rT/4Jtkcq/zv/GSrUtz5n7Ta9AE88CbxA3B6v3eupxI4bz+AAAA==
-"""
+IMAGE_WOO_SQUARE_16X16 = IMAGE_WOO_SQUARE_16X16_ASSET.readall()
 
 def main(config):
     """Main function that renders the Tidbyt display
@@ -226,7 +224,7 @@ def render_header_row(logo, heading, heading_color, subheading, subheading_color
         expanded = True,
         children = [
             render.Image(
-                src = base64.decode(logo),
+                src = logo,
                 width = 16,
                 height = 16,
             ),

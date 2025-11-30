@@ -1,10 +1,10 @@
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
-load("schema.star", "schema")
 load("images/closed_icon_36165f4e.png", CLOSED_ICON_36165f4e_ASSET = "file")
 load("images/merged_icon_f460a18e.png", MERGED_ICON_f460a18e_ASSET = "file")
 load("images/open_icon_edd4ab84.png", OPEN_ICON_edd4ab84_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
 
 TIDBYT_HEIGHT = 32
 TIDBYT_WIDTH = 64
