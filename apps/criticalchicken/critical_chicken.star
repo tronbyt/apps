@@ -7,240 +7,217 @@ Author: Critical Chicken
 
 load("animation.star", "animation")
 load("http.star", "http")
-load("images/e3.png", E3_ASSET = "file")
-load("images/img_2.png", IMG_2_ASSET = "file")
-load("images/img_24.png", IMG_24_ASSET = "file")
-load("images/imgbgaceattorney.png", IMGBGACEATTORNEY_ASSET = "file")
-load("images/imgbgdungeonsanddragons.png", IMGBGDUNGEONSANDDRAGONS_ASSET = "file")
-load("images/imgbge3.png", IMGBGE3_ASSET = "file")
-load("images/imgbgerror.png", IMGBGERROR_ASSET = "file")
-load("images/imgbgexclusive.png", IMGBGEXCLUSIVE_ASSET = "file")
-load("images/imgbgfeature.png", IMGBGFEATURE_ASSET = "file")
-load("images/imgbgforthegaymers.png", IMGBGFORTHEGAYMERS_ASSET = "file")
-load("images/imgbglatest.png", IMGBGLATEST_ASSET = "file")
-load("images/imgbglive.gif", IMGBGLIVE_ASSET = "file")
-load("images/imgbgnews.png", IMGBGNEWS_ASSET = "file")
-load("images/imgbgnintendodirect.png", IMGBGNINTENDODIRECT_ASSET = "file")
-load("images/imgbgpersona.png", IMGBGPERSONA_ASSET = "file")
-load("images/imgbgpokemon.png", IMGBGPOKEMON_ASSET = "file")
-load("images/imgbgreview.png", IMGBGREVIEW_ASSET = "file")
-load("images/imgbgstateofplay.png", IMGBGSTATEOFPLAY_ASSET = "file")
-load("images/imgbgsummergamefest.png", IMGBGSUMMERGAMEFEST_ASSET = "file")
-load("images/imgbgswitch2.png", IMGBGSWITCH2_ASSET = "file")
-load("images/imgbranding.png", IMGBRANDING_ASSET = "file")
-load("images/imgtagaceattorney.png", IMGTAGACEATTORNEY_ASSET = "file")
-load("images/imgtagbreakingnews.png", IMGTAGBREAKINGNEWS_ASSET = "file")
-load("images/imgtagdungeonsanddragons.png", IMGTAGDUNGEONSANDDRAGONS_ASSET = "file")
-load("images/imgtage3sfuture.png", IMGTAGE3SFUTURE_ASSET = "file")
-load("images/imgtagerror.png", IMGTAGERROR_ASSET = "file")
-load("images/imgtagexclusive.png", IMGTAGEXCLUSIVE_ASSET = "file")
-load("images/imgtagfeature.png", IMGTAGFEATURE_ASSET = "file")
-load("images/imgtagfirstimpressions.png", IMGTAGFIRSTIMPRESSIONS_ASSET = "file")
-load("images/imgtagforthegaymers.png", IMGTAGFORTHEGAYMERS_ASSET = "file")
-load("images/imgtagguestblog.png", IMGTAGGUESTBLOG_ASSET = "file")
-load("images/imgtagguide.png", IMGTAGGUIDE_ASSET = "file")
-load("images/imgtaghandson.png", IMGTAGHANDSON_ASSET = "file")
-load("images/imgtaginterview.png", IMGTAGINTERVIEW_ASSET = "file")
-load("images/imgtaglatest.png", IMGTAGLATEST_ASSET = "file")
-load("images/imgtaglink.png", IMGTAGLINK_ASSET = "file")
-load("images/imgtaglive.png", IMGTAGLIVE_ASSET = "file")
-load("images/imgtagliveupdates.png", IMGTAGLIVEUPDATES_ASSET = "file")
-load("images/imgtagnews.png", IMGTAGNEWS_ASSET = "file")
-load("images/imgtagnewsalert.png", IMGTAGNEWSALERT_ASSET = "file")
-load("images/imgtagnintendodirect.png", IMGTAGNINTENDODIRECT_ASSET = "file")
-load("images/imgtagnone.png", IMGTAGNONE_ASSET = "file")
-load("images/imgtagopinion.png", IMGTAGOPINION_ASSET = "file")
-load("images/imgtagpersona.png", IMGTAGPERSONA_ASSET = "file")
-load("images/imgtagpokemon.png", IMGTAGPOKEMON_ASSET = "file")
-load("images/imgtagpokemonpresents.png", IMGTAGPOKEMONPRESENTS_ASSET = "file")
-load("images/imgtagpreview.png", IMGTAGPREVIEW_ASSET = "file")
-load("images/imgtagreview.png", IMGTAGREVIEW_ASSET = "file")
-load("images/imgtagrumour.png", IMGTAGRUMOUR_ASSET = "file")
-load("images/imgtagsecondlook.png", IMGTAGSECONDLOOK_ASSET = "file")
-load("images/imgtagsiteupdate.png", IMGTAGSITEUPDATE_ASSET = "file")
-load("images/imgtagstateofplay.png", IMGTAGSTATEOFPLAY_ASSET = "file")
-load("images/imgtagsummergamefest24.png", IMGTAGSUMMERGAMEFEST24_ASSET = "file")
-load("images/imgtagswitch2.png", IMGTAGSWITCH2_ASSET = "file")
-load("images/imgtagupdate.png", IMGTAGUPDATE_ASSET = "file")
-load("images/imgtagupdated.png", IMGTAGUPDATED_ASSET = "file")
-load("images/imgtagvideo.png", IMGTAGVIDEO_ASSET = "file")
+load("images/aceattorney.png", IMGBGACEATTORNEY_ASSET = "file", IMGTAGACEATTORNEY_ASSET = "file")
+load("images/branding.png", IMGBRANDING_ASSET = "file")
+load("images/breakingnews.png", IMGTAGBREAKINGNEWS_ASSET = "file")
+load("images/dungeonsanddragons.png", IMGBGDUNGEONSANDDRAGONS_ASSET = "file", IMGTAGDUNGEONSANDDRAGONS_ASSET = "file")
+load("images/e3.png", IMGBGE3_ASSET = "file")
+load("images/e3sfuture.png", IMGTAGE3SFUTURE_ASSET = "file")
+load("images/error.png", IMGBGERROR_ASSET = "file", IMGTAGERROR_ASSET = "file")
+load("images/exclusive.png", IMGBGEXCLUSIVE_ASSET = "file", IMGTAGEXCLUSIVE_ASSET = "file")
+load("images/feature.png", IMGBGFEATURE_ASSET = "file", IMGTAGFEATURE_ASSET = "file")
+load("images/firstimpressions.png", IMGTAGFIRSTIMPRESSIONS_ASSET = "file")
+load("images/forthegaymers.png", IMGBGFORTHEGAYMERS_ASSET = "file", IMGTAGFORTHEGAYMERS_ASSET = "file")
+load("images/guestblog.png", IMGTAGGUESTBLOG_ASSET = "file")
+load("images/guide.png", IMGTAGGUIDE_ASSET = "file")
+load("images/handson.png", IMGTAGHANDSON_ASSET = "file")
+load("images/interview.png", IMGTAGINTERVIEW_ASSET = "file")
+load("images/latest.png", IMGBGLATEST_ASSET = "file", IMGTAGLATEST_ASSET = "file")
+load("images/link.png", IMGTAGLINK_ASSET = "file")
+load("images/live.png", IMGBGLIVE_ASSET = "file", IMGTAGLIVE_ASSET = "file")
+load("images/liveupdates.png", IMGTAGLIVEUPDATES_ASSET = "file")
+load("images/news.png", IMGBGNEWS_ASSET = "file", IMGTAGNEWS_ASSET = "file")
+load("images/newsalert.png", IMGTAGNEWSALERT_ASSET = "file")
+load("images/nintendodirect.png", IMGBGNINTENDODIRECT_ASSET = "file", IMGTAGNINTENDODIRECT_ASSET = "file")
+load("images/none.png", IMGTAGNONE_ASSET = "file")
+load("images/opinion.png", IMGTAGOPINION_ASSET = "file")
+load("images/persona.png", IMGBGPERSONA_ASSET = "file", IMGTAGPERSONA_ASSET = "file")
+load("images/pokemon.png", IMGBGPOKEMON_ASSET = "file", IMGTAGPOKEMON_ASSET = "file")
+load("images/pokemonpresents.png", IMGTAGPOKEMONPRESENTS_ASSET = "file")
+load("images/preview.png", IMGTAGPREVIEW_ASSET = "file")
+load("images/review.png", IMGBGREVIEW_ASSET = "file", IMGTAGREVIEW_ASSET = "file")
+load("images/rumour.png", IMGTAGRUMOUR_ASSET = "file")
+load("images/secondlook.png", IMGTAGSECONDLOOK_ASSET = "file")
+load("images/siteupdate.png", IMGTAGSITEUPDATE_ASSET = "file")
+load("images/stateofplay.png", IMGBGSTATEOFPLAY_ASSET = "file", IMGTAGSTATEOFPLAY_ASSET = "file")
+load("images/summergamefest.png", IMGBGSUMMERGAMEFEST_ASSET = "file")
+load("images/summergamefest24.png", IMGTAGSUMMERGAMEFEST24_ASSET = "file")
+load("images/switch2.png", IMGBGSWITCH2_ASSET = "file", IMGTAGSWITCH2_ASSET = "file")
+load("images/update.png", IMGTAGUPDATE_ASSET = "file")
+load("images/updated.png", IMGTAGUPDATED_ASSET = "file")
+load("images/video.png", IMGTAGVIDEO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-
-IMGBGACEATTORNEY = IMGBGACEATTORNEY_ASSET.readall()
-IMGBGDUNGEONSANDDRAGONS = IMGBGDUNGEONSANDDRAGONS_ASSET.readall()
-IMGBGE3 = IMGBGE3_ASSET.readall()
-IMGBGERROR = IMGBGERROR_ASSET.readall()
-IMGBGEXCLUSIVE = IMGBGEXCLUSIVE_ASSET.readall()
-IMGBGFEATURE = IMGBGFEATURE_ASSET.readall()
-IMGBGFORTHEGAYMERS = IMGBGFORTHEGAYMERS_ASSET.readall()
-IMGBGLATEST = IMGBGLATEST_ASSET.readall()
-IMGBGLIVE = IMGBGLIVE_ASSET.readall()
-IMGBGNEWS = IMGBGNEWS_ASSET.readall()
-IMGBGNINTENDODIRECT = IMGBGNINTENDODIRECT_ASSET.readall()
-IMGBGPERSONA = IMGBGPERSONA_ASSET.readall()
-IMGBGPOKEMON = IMGBGPOKEMON_ASSET.readall()
-IMGBGREVIEW = IMGBGREVIEW_ASSET.readall()
-IMGBGSTATEOFPLAY = IMGBGSTATEOFPLAY_ASSET.readall()
-IMGBGSUMMERGAMEFEST = IMGBGSUMMERGAMEFEST_ASSET.readall()
-IMGBGSWITCH2 = IMGBGSWITCH2_ASSET.readall()
-IMGBRANDING = IMGBRANDING_ASSET.readall()
-IMGTAGACEATTORNEY = IMGTAGACEATTORNEY_ASSET.readall()
-IMGTAGBREAKINGNEWS = IMGTAGBREAKINGNEWS_ASSET.readall()
-IMGTAGDUNGEONSANDDRAGONS = IMGTAGDUNGEONSANDDRAGONS_ASSET.readall()
-IMGTAGE3SFUTURE = IMGTAGE3SFUTURE_ASSET.readall()
-IMGTAGERROR = IMGTAGERROR_ASSET.readall()
-IMGTAGEXCLUSIVE = IMGTAGEXCLUSIVE_ASSET.readall()
-IMGTAGFEATURE = IMGTAGFEATURE_ASSET.readall()
-IMGTAGFIRSTIMPRESSIONS = IMGTAGFIRSTIMPRESSIONS_ASSET.readall()
-IMGTAGFORTHEGAYMERS = IMGTAGFORTHEGAYMERS_ASSET.readall()
-IMGTAGGUESTBLOG = IMGTAGGUESTBLOG_ASSET.readall()
-IMGTAGGUIDE = IMGTAGGUIDE_ASSET.readall()
-IMGTAGHANDSON = IMGTAGHANDSON_ASSET.readall()
-IMGTAGINTERVIEW = IMGTAGINTERVIEW_ASSET.readall()
-IMGTAGLATEST = IMGTAGLATEST_ASSET.readall()
-IMGTAGLINK = IMGTAGLINK_ASSET.readall()
-IMGTAGLIVE = IMGTAGLIVE_ASSET.readall()
-IMGTAGLIVEUPDATES = IMGTAGLIVEUPDATES_ASSET.readall()
-IMGTAGNEWS = IMGTAGNEWS_ASSET.readall()
-IMGTAGNEWSALERT = IMGTAGNEWSALERT_ASSET.readall()
-IMGTAGNINTENDODIRECT = IMGTAGNINTENDODIRECT_ASSET.readall()
-IMGTAGNONE = IMGTAGNONE_ASSET.readall()
-IMGTAGOPINION = IMGTAGOPINION_ASSET.readall()
-IMGTAGPERSONA = IMGTAGPERSONA_ASSET.readall()
-IMGTAGPOKEMON = IMGTAGPOKEMON_ASSET.readall()
-IMGTAGPOKEMONPRESENTS = IMGTAGPOKEMONPRESENTS_ASSET.readall()
-IMGTAGPREVIEW = IMGTAGPREVIEW_ASSET.readall()
-IMGTAGREVIEW = IMGTAGREVIEW_ASSET.readall()
-IMGTAGRUMOUR = IMGTAGRUMOUR_ASSET.readall()
-IMGTAGSECONDLOOK = IMGTAGSECONDLOOK_ASSET.readall()
-IMGTAGSITEUPDATE = IMGTAGSITEUPDATE_ASSET.readall()
-IMGTAGSTATEOFPLAY = IMGTAGSTATEOFPLAY_ASSET.readall()
-IMGTAGSUMMERGAMEFEST24 = IMGTAGSUMMERGAMEFEST24_ASSET.readall()
-IMGTAGSWITCH2 = IMGTAGSWITCH2_ASSET.readall()
-IMGTAGUPDATE = IMGTAGUPDATE_ASSET.readall()
-IMGTAGUPDATED = IMGTAGUPDATED_ASSET.readall()
-IMGTAGVIDEO = IMGTAGVIDEO_ASSET.readall()
-
-E3 = E3_ASSET.readall()
-IMG_2 = IMG_2_ASSET.readall()
-IMG_24 = IMG_24_ASSET.readall()
 
 # IMAGES
 
 # TITLETAGS
 
 # Ace Attorney
+IMGTAGACEATTORNEY = IMGTAGACEATTORNEY_ASSET.readall()
 
 # Breaking news
+IMGTAGBREAKINGNEWS = IMGTAGBREAKINGNEWS_ASSET.readall()
 
 # Dungeons + Dragons
+IMGTAGDUNGEONSANDDRAGONS = IMGTAGDUNGEONSANDDRAGONS_ASSET.readall()
 
 # E3's future
+IMGTAGE3SFUTURE = IMGTAGE3SFUTURE_ASSET.readall()
 
 # Error
+IMGTAGERROR = IMGTAGERROR_ASSET.readall()
 
 # Exclusive
+IMGTAGEXCLUSIVE = IMGTAGEXCLUSIVE_ASSET.readall()
 
 # Feature
+IMGTAGFEATURE = IMGTAGFEATURE_ASSET.readall()
 
 # First impressions
+IMGTAGFIRSTIMPRESSIONS = IMGTAGFIRSTIMPRESSIONS_ASSET.readall()
 
 # #ForTheGaymers
+IMGTAGFORTHEGAYMERS = IMGTAGFORTHEGAYMERS_ASSET.readall()
 
 # Guest blog
+IMGTAGGUESTBLOG = IMGTAGGUESTBLOG_ASSET.readall()
 
 # Guide
+IMGTAGGUIDE = IMGTAGGUIDE_ASSET.readall()
 
 # Hands on
+IMGTAGHANDSON = IMGTAGHANDSON_ASSET.readall()
 
 # Interview
+IMGTAGINTERVIEW = IMGTAGINTERVIEW_ASSET.readall()
 
 # Latest (placeholder)
+IMGTAGLATEST = IMGTAGLATEST_ASSET.readall()
 
 # Link
+IMGTAGLINK = IMGTAGLINK_ASSET.readall()
 
 # Live
+IMGTAGLIVE = IMGTAGLIVE_ASSET.readall()
 
 # Live updates
+IMGTAGLIVEUPDATES = IMGTAGLIVEUPDATES_ASSET.readall()
 
 # News
+IMGTAGNEWS = IMGTAGNEWS_ASSET.readall()
 
 # News alert
+IMGTAGNEWSALERT = IMGTAGNEWSALERT_ASSET.readall()
 
 # Nintendo Direct
+IMGTAGNINTENDODIRECT = IMGTAGNINTENDODIRECT_ASSET.readall()
 
 # None (transparent)
+IMGTAGNONE = IMGTAGNONE_ASSET.readall()
 
 # Opinion
+IMGTAGOPINION = IMGTAGOPINION_ASSET.readall()
 
 # Persona
+IMGTAGPERSONA = IMGTAGPERSONA_ASSET.readall()
 
 # Pokémon
+IMGTAGPOKEMON = IMGTAGPOKEMON_ASSET.readall()
 
 # Pokémon Presents
+IMGTAGPOKEMONPRESENTS = IMGTAGPOKEMONPRESENTS_ASSET.readall()
 
 # Preview
+IMGTAGPREVIEW = IMGTAGPREVIEW_ASSET.readall()
 
 # Review
+IMGTAGREVIEW = IMGTAGREVIEW_ASSET.readall()
 
 # Rumour
+IMGTAGRUMOUR = IMGTAGRUMOUR_ASSET.readall()
 
 # Second look
+IMGTAGSECONDLOOK = IMGTAGSECONDLOOK_ASSET.readall()
 
 # Site update
+IMGTAGSITEUPDATE = IMGTAGSITEUPDATE_ASSET.readall()
 
 # State of Play
+IMGTAGSTATEOFPLAY = IMGTAGSTATEOFPLAY_ASSET.readall()
 
-# Summer Game Fest IMG_24
+# Summer Game Fest 24
+IMGTAGSUMMERGAMEFEST24 = IMGTAGSUMMERGAMEFEST24_ASSET.readall()
 
-# Switch IMG_2
+# Switch 2
+IMGTAGSWITCH2 = IMGTAGSWITCH2_ASSET.readall()
 
 # Update
+IMGTAGUPDATE = IMGTAGUPDATE_ASSET.readall()
 
 # Updated (News | Updated)
+IMGTAGUPDATED = IMGTAGUPDATED_ASSET.readall()
 
 # Video
+IMGTAGVIDEO = IMGTAGVIDEO_ASSET.readall()
 
 # BACKDROPS
 
 # Ace Attorney
+IMGBGACEATTORNEY = IMGBGACEATTORNEY_ASSET.readall()
 
 # Dungeons and Dragons
+IMGBGDUNGEONSANDDRAGONS = IMGBGDUNGEONSANDDRAGONS_ASSET.readall()
 
 # E3
+IMGBGE3 = IMGBGE3_ASSET.readall()
 
 # Error
+IMGBGERROR = IMGBGERROR_ASSET.readall()
 
 # Exclusive
+IMGBGEXCLUSIVE = IMGBGEXCLUSIVE_ASSET.readall()
 
 # Feature
+IMGBGFEATURE = IMGBGFEATURE_ASSET.readall()
 
 # #ForTheGaymers
+IMGBGFORTHEGAYMERS = IMGBGFORTHEGAYMERS_ASSET.readall()
 
 # Latest (fallback)
+IMGBGLATEST = IMGBGLATEST_ASSET.readall()
 
 # Live (animated)
+IMGBGLIVE = IMGBGLIVE_ASSET.readall()
 
 # News
+IMGBGNEWS = IMGBGNEWS_ASSET.readall()
 
 # Nintendo Direct
+IMGBGNINTENDODIRECT = IMGBGNINTENDODIRECT_ASSET.readall()
 
 # Persona
+IMGBGPERSONA = IMGBGPERSONA_ASSET.readall()
 
 # Pokémon
+IMGBGPOKEMON = IMGBGPOKEMON_ASSET.readall()
 
 # Review
+IMGBGREVIEW = IMGBGREVIEW_ASSET.readall()
 
 # State of Play
+IMGBGSTATEOFPLAY = IMGBGSTATEOFPLAY_ASSET.readall()
 
 # Summer Game Fest
+IMGBGSUMMERGAMEFEST = IMGBGSUMMERGAMEFEST_ASSET.readall()
 
-# Switch IMG_2
+# Switch 2
+IMGBGSWITCH2 = IMGBGSWITCH2_ASSET.readall()
 
 # BRANDING
 
 # CriticalChicken.com
+IMGBRANDING = IMGBRANDING_ASSET.readall()
 
 # MAIN
 
@@ -294,7 +271,7 @@ def main():
     backdrop = IMGBGLATEST
 
     # News
-    if "[IMG_2.0" in finalcategory or " IMG_2.0" in finalcategory:
+    if "[2.0" in finalcategory or " 2.0" in finalcategory:
         ttleTag1 = IMGTAGNEWS
         backdrop = IMGBGNEWS
 
@@ -367,7 +344,7 @@ def main():
             ttleTag1 = IMGTAGHANDSON
 
         # First impressions
-        if "[IMG_24.0" in finalcategory or " IMG_24.0" in finalcategory:
+        if "[24.0" in finalcategory or " 24.0" in finalcategory:
             ttleTag1 = IMGTAGFIRSTIMPRESSIONS
 
     # #ForTheGaymers
@@ -375,7 +352,7 @@ def main():
         ttleTag2 = IMGTAGFORTHEGAYMERS
         backdrop = IMGBGFORTHEGAYMERS
 
-    # Switch IMG_2
+    # Switch 2
     if "[497.0" in finalcategory or " 497.0" in finalcategory:
         ttleTag2 = IMGTAGSWITCH2
         backdrop = IMGBGSWITCH2
@@ -415,7 +392,7 @@ def main():
         ttleTag2 = IMGTAGNINTENDODIRECT
         backdrop = IMGBGNINTENDODIRECT
 
-    # Summer Game Fest IMG_24
+    # Summer Game Fest 24
     if "[33.0" in finalcategory or " 33.0" in finalcategory:
         ttleTag2 = IMGTAGSUMMERGAMEFEST24
         backdrop = IMGBGSUMMERGAMEFEST
@@ -464,7 +441,7 @@ def main():
                         ),
                         animation.Keyframe(
                             percentage = 1.0,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                         ),
                     ],
                 ),
@@ -480,7 +457,7 @@ def main():
                         ),
                         animation.Keyframe(
                             percentage = 1.0,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                         ),
                     ],
                 ),
@@ -512,7 +489,7 @@ def main():
                         ),
                         animation.Keyframe(
                             percentage = 0.00000001,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                             curve = "ease_in_out",
                         ),
                         animation.Keyframe(
@@ -556,7 +533,7 @@ def main():
                                 ),
                                 render.Box(
                                     width = 64,
-                                    height = IMG_2,
+                                    height = 2,
                                 ),
                                 render.WrappedText(
                                     content = finalexcerpt,
@@ -588,7 +565,7 @@ def main():
                                 ),
                                 render.Box(
                                     width = 64,
-                                    height = IMG_2,
+                                    height = 2,
                                 ),
                                 render.WrappedText(
                                     content = finalexcerpt,
@@ -618,7 +595,7 @@ def main():
                         ),
                         animation.Keyframe(
                             percentage = 0.00000001,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                             curve = "ease_in_out",
                         ),
                         animation.Keyframe(
@@ -639,7 +616,7 @@ def main():
                         ),
                         animation.Keyframe(
                             percentage = 0.00000001,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                             curve = "ease_in_out",
                         ),
                         animation.Keyframe(
@@ -688,7 +665,7 @@ def connectionError():
                         ),
                         animation.Keyframe(
                             percentage = 1.0,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                         ),
                     ],
                 ),
@@ -704,7 +681,7 @@ def connectionError():
                         ),
                         animation.Keyframe(
                             percentage = 1.0,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                         ),
                     ],
                 ),
@@ -736,7 +713,7 @@ def connectionError():
                         ),
                         animation.Keyframe(
                             percentage = 0.00000001,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                             curve = "ease_in_out",
                         ),
                         animation.Keyframe(
@@ -780,7 +757,7 @@ def connectionError():
                                 ),
                                 render.Box(
                                     width = 64,
-                                    height = IMG_2,
+                                    height = 2,
                                 ),
                                 render.WrappedText(
                                     content = "We'll try again in a few minutes.",
@@ -812,7 +789,7 @@ def connectionError():
                                 ),
                                 render.Box(
                                     width = 64,
-                                    height = IMG_2,
+                                    height = 2,
                                 ),
                                 render.WrappedText(
                                     content = "We'll try again in a few minutes.",
@@ -842,7 +819,7 @@ def connectionError():
                         ),
                         animation.Keyframe(
                             percentage = 0.00000001,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                             curve = "ease_in_out",
                         ),
                         animation.Keyframe(
@@ -863,7 +840,7 @@ def connectionError():
                         ),
                         animation.Keyframe(
                             percentage = 0.00000001,
-                            transforms = [animation.Translate(0, IMG_24)],
+                            transforms = [animation.Translate(0, 24)],
                             curve = "ease_in_out",
                         ),
                         animation.Keyframe(

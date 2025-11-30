@@ -7,8 +7,17 @@ Description: Display a large retro-style clock; the clock can change color
 Author: Joey Hoer
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/number_0.png", NUMBER_0_ASSET = "file")
+load("images/number_1.png", NUMBER_1_ASSET = "file")
+load("images/number_2.png", NUMBER_2_ASSET = "file")
+load("images/number_3.png", NUMBER_3_ASSET = "file")
+load("images/number_4.png", NUMBER_4_ASSET = "file")
+load("images/number_5.png", NUMBER_5_ASSET = "file")
+load("images/number_6.png", NUMBER_6_ASSET = "file")
+load("images/number_7.png", NUMBER_7_ASSET = "file")
+load("images/number_8.png", NUMBER_8_ASSET = "file")
+load("images/number_9.png", NUMBER_9_ASSET = "file")
 load("images/sep.png", SEP_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
@@ -35,46 +44,16 @@ DEFAULT_SUNRISE_ELEVATION = "-1"  # -1 appears to be the default elevation for s
 # Constants
 TTL = 21600  # 6 hours
 NUMBER_IMGS = [
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAqSURBVHgBY7B
-/wDD/BMP5GQwPLPChAxIMDRwMYABkALn41QMNBBoLNBwAHrcge26o7fIAAAAASUVORK5CYII=
-""",  # 0
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAZSURBVHgBYwA
-BDgYGCQYGC7xIAqyMgVT1AOfwBOG2xNZsAAAAAElFTkSuQmCC
-""",  # 1
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAsSURBVHgBY7B
-/wCB/goF/BgODBV4kAVQGVAxC8w8wHGBgeIAXnW8AKgMqBgBzoBbH0MZ6/gAAAABJRU5ErkJggg==
-""",  # 2
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAlSURBVHgBY7B
-/wCB/goF/BgODBV4kAVQGVAxRD+TiVw80EKIeAJk5DfdkeUVkAAAAAElFTkSuQmCC
-""",  # 3
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAsSURBVHgBYwC
-CBg6GAxIMDyzwIJCC+ScY7B+AkPwJBgYJBgYLPAisgANoNgDVyhQd//DRbQAAAABJRU5ErkJggg==
-""",  # 4
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAuSURBVHgBY7B
-/wDD/AMP5BoYHDPjQAQagMqBiEJI/wcAgwcBggQ/xzwAqAyoGABq+Fsfy3SMpAAAAAElFTkSuQmCC
-""",  # 5
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAsSURBVHgBY7R
-fyDhfkfH8RsYHCvjQAQegMqBisHpNxgMRjA/wovMngcqAigEwiCIRDKuGtwAAAABJRU5ErkJggg==
-""",  # 6
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAhSURBVHgBY7B
-/wCB/goF/BgODBV4kwcDAwQAFHEAukeoB0jsHbnVM+9YAAAAASUVORK5CYII=
-""",  # 7
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAmSURBVHgBY7B
-/wDD/BMP5GQwPLPChAxJAZUDFEPVALn71QAMh6gHctSR33GtExAAAAABJRU5ErkJggg==
-""",  # 8
-    """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAuSURBVHgBY7B
-/wDD/BMP5GQwPLPChAxJAZUDFICR/goFBgoHBAh/in8EgD1IPAMkGGTcArQUNAAAAAElFTkSuQmCC
-""",  # 9
+    NUMBER_0_ASSET.readall(),
+    NUMBER_1_ASSET.readall(),
+    NUMBER_2_ASSET.readall(),
+    NUMBER_3_ASSET.readall(),
+    NUMBER_4_ASSET.readall(),
+    NUMBER_5_ASSET.readall(),
+    NUMBER_6_ASSET.readall(),
+    NUMBER_7_ASSET.readall(),
+    NUMBER_8_ASSET.readall(),
+    NUMBER_9_ASSET.readall(),
 ]
 
 # Convert hex color to RGB tuple
@@ -153,7 +132,7 @@ def get_num_image(num, color):
         width = 13,
         height = 32,
         color = color,
-        child = render.Image(src = base64.decode(NUMBER_IMGS[int(num)])),
+        child = render.Image(src = NUMBER_IMGS[int(num)]),
     )
 
 def get_time_image(t, color, is_24_hour_format = True, has_leading_zero = False, has_seperator = True):
