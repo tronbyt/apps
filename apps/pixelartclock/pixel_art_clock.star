@@ -44,36 +44,32 @@ clock_colors = {
     "snowy": "#fff",
 }
 
-# iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAbElEQVRoge3Suw2AMBCDYQch6JmAEVkAmkxJxwQMkCZUQRQ8KnIo/F95usKWLAHAjznrAG+I8xAlSX2331w7nXat8kQykMo34+1bnSGKjYfiSZkLOExfwUvLevla7gKCt04AAAAAAAAAAPicDbuDCkAllnRiAAAAAElFTkSuQmCC
-
-# iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAf0lEQVRoge3VOw6AIBBFUTVGe1fgEt0AFrhKl4LNWBhJjEBiIZPAPeWE4j3Cp2kAlEqcFe0M2cVKx+btv3F0yL5cZefJz9pxDXbt8kRScJcfTHJZURvwOOaDeZWv5k0QZ8VzVvyVCOhzBsvq2LQT6Pj6CxStytIAAAAAAAAAkk6mYDU7lBZnXQAAAABJRU5ErkJggg==
-
 sunny = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": render.Stack(children = [
-        render.Image(),
+        render.Image(src = SRC),
         render.Animation(
             children = [
-                render.Image(SRC = SUN),
-                render.Image(SRC = SUN),
-                render.Image(SRC = SUN_WITH_RAYS),
-                render.Image(SRC = SUN_WITH_RAYS),
+                render.Image(src = SUN),
+                render.Image(src = SUN),
+                render.Image(src = SUN_WITH_RAYS),
+                render.Image(src = SUN_WITH_RAYS),
             ],
         ),
     ]),
 }
 
 sunnyish = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": None,
 }
 
 rainy = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": render.Stack(children = [
-        render.Image(),
+        render.Image(src = SRC),
         animation.Transformation(
-            child = render.Image(SRC = RAIN_FOR_ANIMATION, width = 124, height = 63),
+            child = render.Image(src = RAIN_FOR_ANIMATION, width = 124, height = 63),
             duration = 8,
             delay = 0,
             keyframes = [
@@ -92,46 +88,46 @@ rainy = {
 }
 
 thunderstorm = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": render.Stack(children = [
         render.Animation(
             children = [
                 render.Box(width = 1, height = 1),
                 render.Box(width = 1, height = 1),
-                render.Image(SRC = SMALL_LIGHTNING),
+                render.Image(src = SMALL_LIGHTNING),
                 render.Box(width = 1, height = 1),
                 render.Box(width = 1, height = 1),
                 render.Box(width = 1, height = 1),
-                render.Image(SRC = SMALL_LIGHTNING),
-                render.Image(SRC = LARGE_LIGHTNING),
+                render.Image(src = SMALL_LIGHTNING),
+                render.Image(src = LARGE_LIGHTNING),
             ],
         ),
-        render.Image(),
+        render.Image(src = SRC),
     ]),
 }
 
 cloudy = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": None,
 }
 
 clear_night = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": None,
 }
 
 cloudy_night = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": None,
 }
 
 windy = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": None,
 }
 
 snowy = {
-    "background": render.Image(),
+    "background": render.Image(src = SRC),
     "foreground": None,
 }
 
