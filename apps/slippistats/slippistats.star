@@ -9,324 +9,322 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("images/icon_0_0.webp", ICON_0_0 = "file")
-load("images/icon_0_1.webp", ICON_0_1 = "file")
-load("images/icon_0_2.webp", ICON_0_2 = "file")
-load("images/icon_0_3.webp", ICON_0_3 = "file")
-load("images/icon_0_4.webp", ICON_0_4 = "file")
-load("images/icon_0_5.webp", ICON_0_5 = "file")
-load("images/icon_10_0.webp", ICON_10_0 = "file")
-load("images/icon_10_1.webp", ICON_10_1 = "file")
-load("images/icon_10_2.webp", ICON_10_2 = "file")
-load("images/icon_10_3.webp", ICON_10_3 = "file")
-load("images/icon_11_0.webp", ICON_11_0 = "file")
-load("images/icon_11_1.webp", ICON_11_1 = "file")
-load("images/icon_11_2.webp", ICON_11_2 = "file")
-load("images/icon_11_3.webp", ICON_11_3 = "file")
-load("images/icon_12_0.webp", ICON_12_0 = "file")
-load("images/icon_12_1.webp", ICON_12_1 = "file")
-load("images/icon_12_2.webp", ICON_12_2 = "file")
-load("images/icon_12_3.webp", ICON_12_3 = "file")
-load("images/icon_12_4.webp", ICON_12_4 = "file")
-load("images/icon_13_0.webp", ICON_13_0 = "file")
-load("images/icon_13_1.webp", ICON_13_1 = "file")
-load("images/icon_13_2.webp", ICON_13_2 = "file")
-load("images/icon_13_3.webp", ICON_13_3 = "file")
-load("images/icon_14_0.webp", ICON_14_0 = "file")
-load("images/icon_14_1.webp", ICON_14_1 = "file")
-load("images/icon_14_2.webp", ICON_14_2 = "file")
-load("images/icon_14_3.webp", ICON_14_3 = "file")
-load("images/icon_15_0.webp", ICON_15_0 = "file")
-load("images/icon_15_1.webp", ICON_15_1 = "file")
-load("images/icon_15_2.webp", ICON_15_2 = "file")
-load("images/icon_15_3.webp", ICON_15_3 = "file")
-load("images/icon_15_4.webp", ICON_15_4 = "file")
-load("images/icon_16_0.webp", ICON_16_0 = "file")
-load("images/icon_16_1.webp", ICON_16_1 = "file")
-load("images/icon_16_2.webp", ICON_16_2 = "file")
-load("images/icon_16_3.webp", ICON_16_3 = "file")
-load("images/icon_16_4.webp", ICON_16_4 = "file")
-load("images/icon_17_0.webp", ICON_17_0 = "file")
-load("images/icon_17_1.webp", ICON_17_1 = "file")
-load("images/icon_17_2.webp", ICON_17_2 = "file")
-load("images/icon_17_3.webp", ICON_17_3 = "file")
-load("images/icon_17_4.webp", ICON_17_4 = "file")
-load("images/icon_17_5.webp", ICON_17_5 = "file")
-load("images/icon_18_0.webp", ICON_18_0 = "file")
-load("images/icon_18_1.webp", ICON_18_1 = "file")
-load("images/icon_18_2.webp", ICON_18_2 = "file")
-load("images/icon_18_3.webp", ICON_18_3 = "file")
-load("images/icon_18_4.webp", ICON_18_4 = "file")
-load("images/icon_19_0.webp", ICON_19_0 = "file")
-load("images/icon_19_1.webp", ICON_19_1 = "file")
-load("images/icon_19_2.webp", ICON_19_2 = "file")
-load("images/icon_19_3.webp", ICON_19_3 = "file")
-load("images/icon_19_4.webp", ICON_19_4 = "file")
-load("images/icon_1_0.webp", ICON_1_0 = "file")
-load("images/icon_1_1.webp", ICON_1_1 = "file")
-load("images/icon_1_2.webp", ICON_1_2 = "file")
-load("images/icon_1_3.webp", ICON_1_3 = "file")
-load("images/icon_1_4.webp", ICON_1_4 = "file")
-load("images/icon_20_0.webp", ICON_20_0 = "file")
-load("images/icon_20_1.webp", ICON_20_1 = "file")
-load("images/icon_20_2.webp", ICON_20_2 = "file")
-load("images/icon_20_3.webp", ICON_20_3 = "file")
-load("images/icon_21_0.webp", ICON_21_0 = "file")
-load("images/icon_21_1.webp", ICON_21_1 = "file")
-load("images/icon_21_2.webp", ICON_21_2 = "file")
-load("images/icon_21_3.webp", ICON_21_3 = "file")
-load("images/icon_21_4.webp", ICON_21_4 = "file")
-load("images/icon_22_0.webp", ICON_22_0 = "file")
-load("images/icon_22_1.webp", ICON_22_1 = "file")
-load("images/icon_22_2.webp", ICON_22_2 = "file")
-load("images/icon_22_3.webp", ICON_22_3 = "file")
-load("images/icon_22_4.webp", ICON_22_4 = "file")
-load("images/icon_23_0.webp", ICON_23_0 = "file")
-load("images/icon_23_1.webp", ICON_23_1 = "file")
-load("images/icon_23_2.webp", ICON_23_2 = "file")
-load("images/icon_23_3.webp", ICON_23_3 = "file")
-load("images/icon_23_4.webp", ICON_23_4 = "file")
-load("images/icon_24_0.webp", ICON_24_0 = "file")
-load("images/icon_24_1.webp", ICON_24_1 = "file")
-load("images/icon_24_2.webp", ICON_24_2 = "file")
-load("images/icon_24_3.webp", ICON_24_3 = "file")
-load("images/icon_24_4.webp", ICON_24_4 = "file")
-load("images/icon_25_0.webp", ICON_25_0 = "file")
-load("images/icon_25_1.webp", ICON_25_1 = "file")
-load("images/icon_25_2.webp", ICON_25_2 = "file")
-load("images/icon_25_3.webp", ICON_25_3 = "file")
-load("images/icon_26_0.webp", ICON_26_0 = "file")
-load("images/icon_26_1.webp", ICON_26_1 = "file")
-load("images/icon_26_2.webp", ICON_26_2 = "file")
-load("images/icon_26_3.webp", ICON_26_3 = "file")
-load("images/icon_26_4.webp", ICON_26_4 = "file")
-load("images/icon_2_0.webp", ICON_2_0 = "file")
-load("images/icon_2_1.webp", ICON_2_1 = "file")
-load("images/icon_2_2.webp", ICON_2_2 = "file")
-load("images/icon_2_3.webp", ICON_2_3 = "file")
-load("images/icon_3_0.webp", ICON_3_0 = "file")
-load("images/icon_3_1.webp", ICON_3_1 = "file")
-load("images/icon_3_2.webp", ICON_3_2 = "file")
-load("images/icon_3_3.webp", ICON_3_3 = "file")
-load("images/icon_4_0.webp", ICON_4_0 = "file")
-load("images/icon_4_1.webp", ICON_4_1 = "file")
-load("images/icon_4_2.webp", ICON_4_2 = "file")
-load("images/icon_4_3.webp", ICON_4_3 = "file")
-load("images/icon_4_4.webp", ICON_4_4 = "file")
-load("images/icon_4_5.webp", ICON_4_5 = "file")
-load("images/icon_5_0.webp", ICON_5_0 = "file")
-load("images/icon_5_1.webp", ICON_5_1 = "file")
-load("images/icon_5_2.webp", ICON_5_2 = "file")
-load("images/icon_5_3.webp", ICON_5_3 = "file")
-load("images/icon_6_0.webp", ICON_6_0 = "file")
-load("images/icon_6_1.webp", ICON_6_1 = "file")
-load("images/icon_6_2.webp", ICON_6_2 = "file")
-load("images/icon_6_3.webp", ICON_6_3 = "file")
-load("images/icon_6_4.webp", ICON_6_4 = "file")
-load("images/icon_7_0.webp", ICON_7_0 = "file")
-load("images/icon_7_1.webp", ICON_7_1 = "file")
-load("images/icon_7_2.webp", ICON_7_2 = "file")
-load("images/icon_7_3.webp", ICON_7_3 = "file")
-load("images/icon_8_0.webp", ICON_8_0 = "file")
-load("images/icon_8_1.webp", ICON_8_1 = "file")
-load("images/icon_8_2.webp", ICON_8_2 = "file")
-load("images/icon_8_3.webp", ICON_8_3 = "file")
-load("images/icon_8_4.webp", ICON_8_4 = "file")
-load("images/icon_9_0.webp", ICON_9_0 = "file")
-load("images/icon_9_1.webp", ICON_9_1 = "file")
-load("images/icon_9_2.webp", ICON_9_2 = "file")
-load("images/icon_9_3.webp", ICON_9_3 = "file")
-load("images/icon_9_4.webp", ICON_9_4 = "file")
+load("images/bowser_0.webp", BOWSER_0 = "file")
+load("images/bowser_1.webp", BOWSER_1 = "file")
+load("images/bowser_2.webp", BOWSER_2 = "file")
+load("images/bowser_3.webp", BOWSER_3 = "file")
+load("images/dk_0.webp", DK_0 = "file")
+load("images/dk_1.webp", DK_1 = "file")
+load("images/dk_2.webp", DK_2 = "file")
+load("images/dk_3.webp", DK_3 = "file")
+load("images/dk_4.webp", DK_4 = "file")
+load("images/dr_mario_0.webp", DR_MARIO_0 = "file")
+load("images/dr_mario_1.webp", DR_MARIO_1 = "file")
+load("images/dr_mario_2.webp", DR_MARIO_2 = "file")
+load("images/dr_mario_3.webp", DR_MARIO_3 = "file")
+load("images/dr_mario_4.webp", DR_MARIO_4 = "file")
+load("images/falco_0.webp", FALCO_0 = "file")
+load("images/falco_1.webp", FALCO_1 = "file")
+load("images/falco_2.webp", FALCO_2 = "file")
+load("images/falco_3.webp", FALCO_3 = "file")
+load("images/falcon_0.webp", FALCON_0 = "file")
+load("images/falcon_1.webp", FALCON_1 = "file")
+load("images/falcon_2.webp", FALCON_2 = "file")
+load("images/falcon_3.webp", FALCON_3 = "file")
+load("images/falcon_4.webp", FALCON_4 = "file")
+load("images/falcon_5.webp", FALCON_5 = "file")
+load("images/fox_0.webp", FOX_0 = "file")
+load("images/fox_1.webp", FOX_1 = "file")
+load("images/fox_2.webp", FOX_2 = "file")
+load("images/fox_3.webp", FOX_3 = "file")
+load("images/game_and_watch_0.webp", GAME_AND_WATCH_0 = "file")
+load("images/game_and_watch_1.webp", GAME_AND_WATCH_1 = "file")
+load("images/game_and_watch_2.webp", GAME_AND_WATCH_2 = "file")
+load("images/game_and_watch_3.webp", GAME_AND_WATCH_3 = "file")
+load("images/ganondorf_0.webp", GANONDORF_0 = "file")
+load("images/ganondorf_1.webp", GANONDORF_1 = "file")
+load("images/ganondorf_2.webp", GANONDORF_2 = "file")
+load("images/ganondorf_3.webp", GANONDORF_3 = "file")
+load("images/ganondorf_4.webp", GANONDORF_4 = "file")
+load("images/ice_climbers_0.webp", ICE_CLIMBERS_0 = "file")
+load("images/ice_climbers_1.webp", ICE_CLIMBERS_1 = "file")
+load("images/ice_climbers_2.webp", ICE_CLIMBERS_2 = "file")
+load("images/ice_climbers_3.webp", ICE_CLIMBERS_3 = "file")
+load("images/jigglypuff_0.webp", JIGGLYPUFF_0 = "file")
+load("images/jigglypuff_1.webp", JIGGLYPUFF_1 = "file")
+load("images/jigglypuff_2.webp", JIGGLYPUFF_2 = "file")
+load("images/jigglypuff_3.webp", JIGGLYPUFF_3 = "file")
+load("images/jigglypuff_4.webp", JIGGLYPUFF_4 = "file")
+load("images/kirby_0.webp", KIRBY_0 = "file")
+load("images/kirby_1.webp", KIRBY_1 = "file")
+load("images/kirby_2.webp", KIRBY_2 = "file")
+load("images/kirby_3.webp", KIRBY_3 = "file")
+load("images/kirby_4.webp", KIRBY_4 = "file")
+load("images/kirby_5.webp", KIRBY_5 = "file")
+load("images/link_0.webp", LINK_0 = "file")
+load("images/link_1.webp", LINK_1 = "file")
+load("images/link_2.webp", LINK_2 = "file")
+load("images/link_3.webp", LINK_3 = "file")
+load("images/link_4.webp", LINK_4 = "file")
+load("images/luigi_0.webp", LUIGI_0 = "file")
+load("images/luigi_1.webp", LUIGI_1 = "file")
+load("images/luigi_2.webp", LUIGI_2 = "file")
+load("images/luigi_3.webp", LUIGI_3 = "file")
+load("images/mario_23_0.webp", MARIO_23_0 = "file")
+load("images/mario_23_1.webp", MARIO_23_1 = "file")
+load("images/mario_23_2.webp", MARIO_23_2 = "file")
+load("images/mario_23_3.webp", MARIO_23_3 = "file")
+load("images/mario_23_4.webp", MARIO_23_4 = "file")
+load("images/mario_8_0.webp", MARIO_8_0 = "file")
+load("images/mario_8_1.webp", MARIO_8_1 = "file")
+load("images/mario_8_2.webp", MARIO_8_2 = "file")
+load("images/mario_8_3.webp", MARIO_8_3 = "file")
+load("images/mario_8_4.webp", MARIO_8_4 = "file")
+load("images/marth_0.webp", MARTH_0 = "file")
+load("images/marth_1.webp", MARTH_1 = "file")
+load("images/marth_2.webp", MARTH_2 = "file")
+load("images/marth_3.webp", MARTH_3 = "file")
+load("images/marth_4.webp", MARTH_4 = "file")
+load("images/mewtwo_0.webp", MEWTWO_0 = "file")
+load("images/mewtwo_1.webp", MEWTWO_1 = "file")
+load("images/mewtwo_2.webp", MEWTWO_2 = "file")
+load("images/mewtwo_3.webp", MEWTWO_3 = "file")
+load("images/ness_0.webp", NESS_0 = "file")
+load("images/ness_1.webp", NESS_1 = "file")
+load("images/ness_2.webp", NESS_2 = "file")
+load("images/ness_3.webp", NESS_3 = "file")
+load("images/peach_0.webp", PEACH_0 = "file")
+load("images/peach_1.webp", PEACH_1 = "file")
+load("images/peach_2.webp", PEACH_2 = "file")
+load("images/peach_3.webp", PEACH_3 = "file")
+load("images/peach_4.webp", PEACH_4 = "file")
+load("images/pichu_0.webp", PICHU_0 = "file")
+load("images/pichu_1.webp", PICHU_1 = "file")
+load("images/pichu_2.webp", PICHU_2 = "file")
+load("images/pichu_3.webp", PICHU_3 = "file")
+load("images/pikachu_0.webp", PIKACHU_0 = "file")
+load("images/pikachu_1.webp", PIKACHU_1 = "file")
+load("images/pikachu_2.webp", PIKACHU_2 = "file")
+load("images/pikachu_3.webp", PIKACHU_3 = "file")
+load("images/roy_0.webp", ROY_0 = "file")
+load("images/roy_1.webp", ROY_1 = "file")
+load("images/roy_2.webp", ROY_2 = "file")
+load("images/roy_3.webp", ROY_3 = "file")
+load("images/roy_4.webp", ROY_4 = "file")
+load("images/samus_0.webp", SAMUS_0 = "file")
+load("images/samus_1.webp", SAMUS_1 = "file")
+load("images/samus_2.webp", SAMUS_2 = "file")
+load("images/samus_3.webp", SAMUS_3 = "file")
+load("images/samus_4.webp", SAMUS_4 = "file")
+load("images/sheik_0.webp", SHEIK_0 = "file")
+load("images/sheik_1.webp", SHEIK_1 = "file")
+load("images/sheik_2.webp", SHEIK_2 = "file")
+load("images/sheik_3.webp", SHEIK_3 = "file")
+load("images/sheik_4.webp", SHEIK_4 = "file")
+load("images/yoshi_0.webp", YOSHI_0 = "file")
+load("images/yoshi_1.webp", YOSHI_1 = "file")
+load("images/yoshi_2.webp", YOSHI_2 = "file")
+load("images/yoshi_3.webp", YOSHI_3 = "file")
+load("images/yoshi_4.webp", YOSHI_4 = "file")
+load("images/yoshi_5.webp", YOSHI_5 = "file")
+load("images/young_link_0.webp", YOUNG_LINK_0 = "file")
+load("images/young_link_1.webp", YOUNG_LINK_1 = "file")
+load("images/young_link_2.webp", YOUNG_LINK_2 = "file")
+load("images/young_link_3.webp", YOUNG_LINK_3 = "file")
+load("images/young_link_4.webp", YOUNG_LINK_4 = "file")
+load("images/zelda_0.webp", ZELDA_0 = "file")
+load("images/zelda_1.webp", ZELDA_1 = "file")
+load("images/zelda_2.webp", ZELDA_2 = "file")
+load("images/zelda_3.webp", ZELDA_3 = "file")
+load("images/zelda_4.webp", ZELDA_4 = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
 CHART_SLP_SERVER_URL = "https://chart-slp-server.herokuapp.com/api/matches?code="
 DEFAULT_CODE = "TRB-328"
 
-# Load icon from base64 encoded data
-# https://www.base64encoder.io/image-to-base64-converter/
 icons = {
     #c. falcon
-    "0_0": ICON_0_0.readall(),
-    "0_1": ICON_0_1.readall(),
-    "0_2": ICON_0_2.readall(),
-    "0_3": ICON_0_3.readall(),
-    "0_4": ICON_0_4.readall(),
-    "0_5": ICON_0_5.readall(),
+    "0_0": FALCON_0.readall(),
+    "0_1": FALCON_1.readall(),
+    "0_2": FALCON_2.readall(),
+    "0_3": FALCON_3.readall(),
+    "0_4": FALCON_4.readall(),
+    "0_5": FALCON_5.readall(),
 
     # dk
-    "1_0": ICON_1_0.readall(),
-    "1_1": ICON_1_1.readall(),
-    "1_2": ICON_1_2.readall(),
-    "1_3": ICON_1_3.readall(),
-    "1_4": ICON_1_4.readall(),
+    "1_0": DK_0.readall(),
+    "1_1": DK_1.readall(),
+    "1_2": DK_2.readall(),
+    "1_3": DK_3.readall(),
+    "1_4": DK_4.readall(),
 
     # fox
-    "2_0": ICON_2_0.readall(),
-    "2_1": ICON_2_1.readall(),
-    "2_2": ICON_2_2.readall(),
-    "2_3": ICON_2_3.readall(),
+    "2_0": FOX_0.readall(),
+    "2_1": FOX_1.readall(),
+    "2_2": FOX_2.readall(),
+    "2_3": FOX_3.readall(),
 
     #G&W
-    "3_0": ICON_3_0.readall(),
-    "3_1": ICON_3_1.readall(),
-    "3_2": ICON_3_2.readall(),
-    "3_3": ICON_3_3.readall(),
+    "3_0": GAME_AND_WATCH_0.readall(),
+    "3_1": GAME_AND_WATCH_1.readall(),
+    "3_2": GAME_AND_WATCH_2.readall(),
+    "3_3": GAME_AND_WATCH_3.readall(),
 
     #kirby
-    "4_0": ICON_4_0.readall(),
-    "4_1": ICON_4_1.readall(),
-    "4_2": ICON_4_2.readall(),
-    "4_3": ICON_4_3.readall(),
-    "4_4": ICON_4_4.readall(),
-    "4_5": ICON_4_5.readall(),
+    "4_0": KIRBY_0.readall(),
+    "4_1": KIRBY_1.readall(),
+    "4_2": KIRBY_2.readall(),
+    "4_3": KIRBY_3.readall(),
+    "4_4": KIRBY_4.readall(),
+    "4_5": KIRBY_5.readall(),
 
     #bowser
-    "5_0": ICON_5_0.readall(),
-    "5_1": ICON_5_1.readall(),
-    "5_2": ICON_5_2.readall(),
-    "5_3": ICON_5_3.readall(),
+    "5_0": BOWSER_0.readall(),
+    "5_1": BOWSER_1.readall(),
+    "5_2": BOWSER_2.readall(),
+    "5_3": BOWSER_3.readall(),
 
     #link
-    "6_0": ICON_6_0.readall(),
-    "6_1": ICON_6_1.readall(),
-    "6_2": ICON_6_2.readall(),
-    "6_3": ICON_6_3.readall(),
-    "6_4": ICON_6_4.readall(),
+    "6_0": LINK_0.readall(),
+    "6_1": LINK_1.readall(),
+    "6_2": LINK_2.readall(),
+    "6_3": LINK_3.readall(),
+    "6_4": LINK_4.readall(),
 
     #luigi
-    "7_0": ICON_7_0.readall(),
-    "7_1": ICON_7_1.readall(),
-    "7_2": ICON_7_2.readall(),
-    "7_3": ICON_7_3.readall(),
+    "7_0": LUIGI_0.readall(),
+    "7_1": LUIGI_1.readall(),
+    "7_2": LUIGI_2.readall(),
+    "7_3": LUIGI_3.readall(),
 
     #mario
-    "8_0": ICON_8_0.readall(),
-    "8_1": ICON_8_1.readall(),
-    "8_2": ICON_8_2.readall(),
-    "8_3": ICON_8_3.readall(),
-    "8_4": ICON_8_4.readall(),
+    "8_0": MARIO_8_0.readall(),
+    "8_1": MARIO_8_1.readall(),
+    "8_2": MARIO_8_2.readall(),
+    "8_3": MARIO_8_3.readall(),
+    "8_4": MARIO_8_4.readall(),
 
     #marth
-    "9_0": ICON_9_0.readall(),
-    "9_1": ICON_9_1.readall(),
-    "9_2": ICON_9_2.readall(),
-    "9_3": ICON_9_3.readall(),
-    "9_4": ICON_9_4.readall(),
+    "9_0": MARTH_0.readall(),
+    "9_1": MARTH_1.readall(),
+    "9_2": MARTH_2.readall(),
+    "9_3": MARTH_3.readall(),
+    "9_4": MARTH_4.readall(),
 
     #mew2
-    "10_0": ICON_10_0.readall(),
-    "10_1": ICON_10_1.readall(),
-    "10_2": ICON_10_2.readall(),
-    "10_3": ICON_10_3.readall(),
+    "10_0": MEWTWO_0.readall(),
+    "10_1": MEWTWO_1.readall(),
+    "10_2": MEWTWO_2.readall(),
+    "10_3": MEWTWO_3.readall(),
 
     #ness
-    "11_0": ICON_11_0.readall(),
-    "11_1": ICON_11_1.readall(),
-    "11_2": ICON_11_2.readall(),
-    "11_3": ICON_11_3.readall(),
+    "11_0": NESS_0.readall(),
+    "11_1": NESS_1.readall(),
+    "11_2": NESS_2.readall(),
+    "11_3": NESS_3.readall(),
 
     #peach
-    "12_0": ICON_12_0.readall(),
-    "12_1": ICON_12_1.readall(),
-    "12_2": ICON_12_2.readall(),
-    "12_3": ICON_12_3.readall(),
-    "12_4": ICON_12_4.readall(),
+    "12_0": PEACH_0.readall(),
+    "12_1": PEACH_1.readall(),
+    "12_2": PEACH_2.readall(),
+    "12_3": PEACH_3.readall(),
+    "12_4": PEACH_4.readall(),
 
     #pikachu
-    "13_0": ICON_13_0.readall(),
-    "13_1": ICON_13_1.readall(),
-    "13_2": ICON_13_2.readall(),
-    "13_3": ICON_13_3.readall(),
+    "13_0": PIKACHU_0.readall(),
+    "13_1": PIKACHU_1.readall(),
+    "13_2": PIKACHU_2.readall(),
+    "13_3": PIKACHU_3.readall(),
 
     #ICs
-    "14_0": ICON_14_0.readall(),
-    "14_1": ICON_14_1.readall(),
-    "14_2": ICON_14_2.readall(),
-    "14_3": ICON_14_3.readall(),
+    "14_0": ICE_CLIMBERS_0.readall(),
+    "14_1": ICE_CLIMBERS_1.readall(),
+    "14_2": ICE_CLIMBERS_2.readall(),
+    "14_3": ICE_CLIMBERS_3.readall(),
 
     #puff
-    "15_0": ICON_15_0.readall(),
-    "15_1": ICON_15_1.readall(),
-    "15_2": ICON_15_2.readall(),
-    "15_3": ICON_15_3.readall(),
-    "15_4": ICON_15_4.readall(),
+    "15_0": JIGGLYPUFF_0.readall(),
+    "15_1": JIGGLYPUFF_1.readall(),
+    "15_2": JIGGLYPUFF_2.readall(),
+    "15_3": JIGGLYPUFF_3.readall(),
+    "15_4": JIGGLYPUFF_4.readall(),
 
     #samus
-    "16_0": ICON_16_0.readall(),
-    "16_1": ICON_16_1.readall(),
-    "16_2": ICON_16_2.readall(),
-    "16_3": ICON_16_3.readall(),
-    "16_4": ICON_16_4.readall(),
+    "16_0": SAMUS_0.readall(),
+    "16_1": SAMUS_1.readall(),
+    "16_2": SAMUS_2.readall(),
+    "16_3": SAMUS_3.readall(),
+    "16_4": SAMUS_4.readall(),
 
     #yoshi
-    "17_0": ICON_17_0.readall(),
-    "17_1": ICON_17_1.readall(),
-    "17_2": ICON_17_2.readall(),
-    "17_3": ICON_17_3.readall(),
-    "17_4": ICON_17_4.readall(),
-    "17_5": ICON_17_5.readall(),
+    "17_0": YOSHI_0.readall(),
+    "17_1": YOSHI_1.readall(),
+    "17_2": YOSHI_2.readall(),
+    "17_3": YOSHI_3.readall(),
+    "17_4": YOSHI_4.readall(),
+    "17_5": YOSHI_5.readall(),
 
     #zelda
-    "18_0": ICON_18_0.readall(),
-    "18_1": ICON_18_1.readall(),
-    "18_2": ICON_18_2.readall(),
-    "18_3": ICON_18_3.readall(),
-    "18_4": ICON_18_4.readall(),
+    "18_0": ZELDA_0.readall(),
+    "18_1": ZELDA_1.readall(),
+    "18_2": ZELDA_2.readall(),
+    "18_3": ZELDA_3.readall(),
+    "18_4": ZELDA_4.readall(),
 
     #shiek
-    "19_0": ICON_19_0.readall(),
-    "19_1": ICON_19_1.readall(),
-    "19_2": ICON_19_2.readall(),
-    "19_3": ICON_19_3.readall(),
-    "19_4": ICON_19_4.readall(),
+    "19_0": SHEIK_0.readall(),
+    "19_1": SHEIK_1.readall(),
+    "19_2": SHEIK_2.readall(),
+    "19_3": SHEIK_3.readall(),
+    "19_4": SHEIK_4.readall(),
 
     #falco
-    "20_0": ICON_20_0.readall(),
-    "20_1": ICON_20_1.readall(),
-    "20_2": ICON_20_2.readall(),
-    "20_3": ICON_20_3.readall(),
+    "20_0": FALCO_0.readall(),
+    "20_1": FALCO_1.readall(),
+    "20_2": FALCO_2.readall(),
+    "20_3": FALCO_3.readall(),
 
     #y.link
-    "21_0": ICON_21_0.readall(),
-    "21_1": ICON_21_1.readall(),
-    "21_2": ICON_21_2.readall(),
-    "21_3": ICON_21_3.readall(),
-    "21_4": ICON_21_4.readall(),
+    "21_0": YOUNG_LINK_0.readall(),
+    "21_1": YOUNG_LINK_1.readall(),
+    "21_2": YOUNG_LINK_2.readall(),
+    "21_3": YOUNG_LINK_3.readall(),
+    "21_4": YOUNG_LINK_4.readall(),
 
     #dr. mario
-    "22_0": ICON_22_0.readall(),
-    "22_1": ICON_22_1.readall(),
-    "22_2": ICON_22_2.readall(),
-    "22_3": ICON_22_3.readall(),
-    "22_4": ICON_22_4.readall(),
+    "22_0": DR_MARIO_0.readall(),
+    "22_1": DR_MARIO_1.readall(),
+    "22_2": DR_MARIO_2.readall(),
+    "22_3": DR_MARIO_3.readall(),
+    "22_4": DR_MARIO_4.readall(),
 
     #mario
-    "23_0": ICON_23_0.readall(),
-    "23_1": ICON_23_1.readall(),
-    "23_2": ICON_23_2.readall(),
-    "23_3": ICON_23_3.readall(),
-    "23_4": ICON_23_4.readall(),
+    "23_0": MARIO_23_0.readall(),
+    "23_1": MARIO_23_1.readall(),
+    "23_2": MARIO_23_2.readall(),
+    "23_3": MARIO_23_3.readall(),
+    "23_4": MARIO_23_4.readall(),
 
     #roy
-    "24_0": ICON_24_0.readall(),
-    "24_1": ICON_24_1.readall(),
-    "24_2": ICON_24_2.readall(),
-    "24_3": ICON_24_3.readall(),
-    "24_4": ICON_24_4.readall(),
+    "24_0": ROY_0.readall(),
+    "24_1": ROY_1.readall(),
+    "24_2": ROY_2.readall(),
+    "24_3": ROY_3.readall(),
+    "24_4": ROY_4.readall(),
 
     #pichu
-    "25_0": ICON_25_0.readall(),
-    "25_1": ICON_25_1.readall(),
-    "25_2": ICON_25_2.readall(),
-    "25_3": ICON_25_3.readall(),
+    "25_0": PICHU_0.readall(),
+    "25_1": PICHU_1.readall(),
+    "25_2": PICHU_2.readall(),
+    "25_3": PICHU_3.readall(),
 
     #dorf
-    "26_0": ICON_26_0.readall(),
-    "26_1": ICON_26_1.readall(),
-    "26_2": ICON_26_2.readall(),
-    "26_3": ICON_26_3.readall(),
-    "26_4": ICON_26_4.readall(),
+    "26_0": GANONDORF_0.readall(),
+    "26_1": GANONDORF_1.readall(),
+    "26_2": GANONDORF_2.readall(),
+    "26_3": GANONDORF_3.readall(),
+    "26_4": GANONDORF_4.readall(),
 }
 
 def get_schema():

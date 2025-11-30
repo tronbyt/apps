@@ -5,7 +5,6 @@ Description: A digital aquarium.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")
 load("images/anchor.png", ANCHOR_ASSET = "file")
 load("images/anglerfish.png", ANGLERFISH_ASSET = "file")
 load("images/blowfish.png", BLOWFISH_ASSET = "file")
@@ -205,13 +204,13 @@ def get_frames(water_color):
 
         #base sand layer -
         children.append(add_padding_to_child_element(render.Box(color = sand_color, width = SCREEN_WIDTH, height = 1), 0, SCREEN_HEIGHT - 2))
-        children.append(add_padding_to_child_element(render.Image(src = base64.decode(random_ocean_floor[1]["image"])), second_offset, SCREEN_HEIGHT - random_ocean_floor[1]["height"]))
+        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[1]["image"]), second_offset, SCREEN_HEIGHT - random_ocean_floor[1]["height"]))
 
         for f in range(number_of_fish_to_display):
             children.append(get_fish_frame(random_sealife[f], i, f))
 
-        children.append(add_padding_to_child_element(render.Image(src = base64.decode(random_ocean_floor[0]["image"])), first_offset, SCREEN_HEIGHT - random_ocean_floor[0]["height"]))
-        children.append(add_padding_to_child_element(render.Image(src = base64.decode(random_ocean_floor[2]["image"])), third_offset, SCREEN_HEIGHT - random_ocean_floor[2]["height"]))
+        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[0]["image"]), first_offset, SCREEN_HEIGHT - random_ocean_floor[0]["height"]))
+        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[2]["image"]), third_offset, SCREEN_HEIGHT - random_ocean_floor[2]["height"]))
 
         #base sand layer
         children.append(add_padding_to_child_element(render.Box(color = sand_color, width = SCREEN_WIDTH, height = 1), 0, SCREEN_HEIGHT - 1))
@@ -230,7 +229,7 @@ def get_fish_frame(fish, frame, fish_number):
     increment = 1 if fish_number == 1 else 2
     left_offset = -fish["width"] - (10 * fish_number) * fish_number + (frame * increment) if fish["direction"] == "right" else SCREEN_WIDTH - (frame * increment)
     top_offset = fish_number * 9 - 2
-    return add_padding_to_child_element(render.Image(src = base64.decode(fish["image"]), width = fish["width"] + random.number(0, 1), height = fish["height"]), left_offset, top_offset)
+    return add_padding_to_child_element(render.Image(src = fish["image"], width = fish["width"] + random.number(0, 1), height = fish["height"]), left_offset, top_offset)
 
 def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
     padded_element = render.Padding(

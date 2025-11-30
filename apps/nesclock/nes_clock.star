@@ -5,7 +5,6 @@ Description: Short animations of various Nintendo characters with a clock in the
 Author: hx009
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/bionic_bg_1.png", BIONIC_BG_1_ASSET = "file")
 load("images/bionic_bg_2.png", BIONIC_BG_2_ASSET = "file")

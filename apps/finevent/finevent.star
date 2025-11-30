@@ -6,12 +6,11 @@ Author: Rob Kimball
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/importance_high.png", IMPORTANCE_HIGH_ASSET = "file")
-load("images/importance_medium.png", IMPORTANCE_MEDIUM_ASSET = "file")
 load("images/importance_low.png", IMPORTANCE_LOW_ASSET = "file")
+load("images/importance_medium.png", IMPORTANCE_MEDIUM_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
