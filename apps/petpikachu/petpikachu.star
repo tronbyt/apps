@@ -243,6 +243,7 @@ load("images/yoyo_3_5ac56af7.png", YOYO_3_5ac56af7_ASSET = "file")
 load("images/yoyo_4_10f38652.png", YOYO_4_10f38652_ASSET = "file")
 load("images/yoyo_5_dfbedb91.png", YOYO_5_dfbedb91_ASSET = "file")
 load("images/yoyo_6_42c21c11.png", YOYO_6_42c21c11_ASSET = "file")
+load("images/img_8bf4c222.png", IMG_8bf4c222_ASSET = "file")
 
 DEFAULT_TIME_ZONE = "America/Phoenix"
 BG_COLOR = "#95a87e"
@@ -462,8 +463,7 @@ BUILD_4 = BUILD_4_59413faa_ASSET.readall()
 BUILD_5 = BUILD_5_ed028d81_ASSET.readall()
 
 # GLIDE
-GLIDE_1 = """iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAAB5JREFUaIHtwQENAAAAwqD3T20PBxQAAAAAAAAA8G4gIAABOwRMqQAAAABJRU5ErkJggg==
-"""
+GLIDE_1 = IMG_8bf4c222_ASSET.readall()
 GLIDE_2 = GLIDE_2_94180ca2_ASSET.readall()
 GLIDE_3 = GLIDE_3_975472de_ASSET.readall()
 GLIDE_4 = GLIDE_4_ed824933_ASSET.readall()

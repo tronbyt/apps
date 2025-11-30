@@ -19,6 +19,8 @@ load("images/img_c3c685c2.png", IMG_c3c685c2_ASSET = "file")
 load("images/img_c952e998.png", IMG_c952e998_ASSET = "file")
 load("images/img_c97ef02d.png", IMG_c97ef02d_ASSET = "file")
 load("images/img_e44c3784.png", IMG_e44c3784_ASSET = "file")
+load("images/img_145cd676.png", IMG_145cd676_ASSET = "file")
+load("images/img_a8dbf45f.png", IMG_a8dbf45f_ASSET = "file")
 
 NUMBER_IMGS = [
     IMG_e44c3784_ASSET.readall(),  # 0
@@ -173,12 +175,6 @@ def get_schema():
     )
 
 OLD_NUMS = [
-    """
-    iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAuSURBVHgBY7B
-    /wDD/AMP5BoYHDPjQAQagMqBiEJI/wcAgwcBggQ/xzwAqAyoGABq+Fsfy3SMpAAAAAElFTkSuQmCC
-    """,  # 5
-    """
-    iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAhSURBVHgBY7B
-    /wCB/goF/BgODBV4kwcDAwQAFHEAukeoB0jsHbnVM+9YAAAAASUVORK5CYII=
-    """,  # 7
+    IMG_145cd676_ASSET.readall(),  # 5
+    IMG_a8dbf45f_ASSET.readall(),  # 7
 ]
