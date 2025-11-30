@@ -382,7 +382,7 @@ def main(config):
         ),
     )
 
-def get_schema(config):
+def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
@@ -398,7 +398,7 @@ def get_schema(config):
                 name = "Bus Stop",
                 desc = "A list of bus stops based on a location.",
                 icon = "bus",
-                handler = lambda location: get_stops(location, config),
+                handler = get_stops,
             ),
         ],
     )
