@@ -8,6 +8,7 @@ Author: zachtempel3
 load("encoding/base64.star", "base64")
 load("render.star", "render")
 load("schema.star", "schema")
+load("images/img_949bdcc4.png", IMG_949bdcc4_ASSET = "file")
 
 NUMBER_IMGS = [
     """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAqSURBVHgBY7B/wDD/BMP5GQwPLPChAxIMDRwMYABkALn41QMNBBoLNBwAHrcge26o7fIAAAAASUVORK5CYII=""",  # 0
@@ -27,30 +28,7 @@ def render_seperator():
         width = 2,
         height = 100,
         color = "#d30",
-        child = render.Image(src = base64.decode(
-            """iVBORw0KGgoAAAANSUhEUgAAAAQAAAAOAQAAAAAgEYC1AAAAAnRSTlMAAQGU/a4AAAAPSURBVHgBY0gAQzQAEQUAH5wCQbfIiwYAAAAASUVORK5CYII=""",
-        )),
-    )
-
-def get_num_image(num):
-    specialNum = int(num)
-    if specialNum == 5 or specialNum == 7:
-        return render.Box(
-            width = 32,
-            height = 32,
-            color = "000",
-            child = render.Image(src = base64.decode(NUMBER_IMGS[specialNum])),
-        )
-    else:
-        return render.Box(
-            width = 13,
-            height = 32,
-            color = "fff",
-            child = render.Image(src = base64.decode(NUMBER_IMGS[specialNum])),
-        )
-
-def main(config):
-    firstTeamScore = "%s" % config.str("team1", "00")
+        child = render.Image(src = IMG_949bdcc4_ASSET.readall()
     secondTeamScore = "%s" % config.str("team2", "00")
 
     if int(firstTeamScore) == 5 or int(firstTeamScore) == 7:
