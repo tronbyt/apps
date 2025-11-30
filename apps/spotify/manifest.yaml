@@ -1,0 +1,36 @@
+---
+# Spotify Now Playing - Ultimate Edition
+# For Tronbyt / Tidbyt displays
+
+id: spotify_now_playing
+name: Spotify Now Playing
+summary: Display currently playing Spotify track with album art
+desc: |
+  A comprehensive Spotify display featuring:
+  - Currently playing track with album art
+  - Progress bar with time remaining
+  - Podcast/episode support
+  - Multiple display modes (Full, Compact, Art Focus, Text, Minimal)
+  - Recently played fallback
+  - Customizable colors and appearance
+  
+  Requires a one-time OAuth setup using the included Python script
+  to obtain a refresh token.
+
+author: gshepperd
+version: 2.0.0
+
+# App source file
+source: spotify.star
+
+# Category for app discovery
+category: Music
+
+# Required setup
+setup_required: true
+setup_instructions: |
+  1. Create a Spotify Developer app at developer.spotify.com/dashboard
+  2. Select "Web API" when asked which APIs you'll use
+  3. Add http://127.0.0.1:8888/callback as Redirect URI (click "Add")
+  4. Run get_refresh_token.py to obtain your refresh token
+  5. Enter Client ID, Client Secret, and Refresh Token below
