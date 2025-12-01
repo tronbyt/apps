@@ -255,7 +255,7 @@ Too many API requests. The app will automatically back off and retry. If persist
 
 ### Nothing displays (blank/black)
 
-1. Check that Spotify is actually playing (not just paused)
+1. Check that a track is active (playing or paused) on one of your devices
 2. Some private sessions don't report to API
 3. Check Tronbyt logs for errors
 
