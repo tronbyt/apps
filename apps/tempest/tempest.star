@@ -4,6 +4,7 @@ Summary: Display your Tempest Weather data
 Description: Overview of your Tempest Weather Station, including current temperature, wind chill, pressure, inches of rain, and wind.
 Author: epifinygirl
 Adapted for Tronbyt: tavdog
+Enhanced: Added display options for secondary temp, labels, conditions, and high/low temps
 """
 
 load("encoding/json.star", "json")
@@ -27,9 +28,7 @@ load("sample_station_response.json", SAMPLE_STATION_RESPONSE = "file")
 load("schema.star", "schema")
 
 TEMPEST_STATIONS_URL = "https://swd.weatherflow.com/swd/rest/stations?token=%s"
-
 TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?token=%s"
-
 TEMPEST_OBSERVATION_URL = "https://swd.weatherflow.com/swd/rest/observations/station/%s?token=%s"
 
 def main(config):
@@ -39,7 +38,6 @@ def main(config):
         units = station_res["station_units"]
         token = "blah"
     else:
-        # ensure we have the station ID in the correct format
         station_id = config["station"]
         token = config["token"]
         if "." in station_id:
@@ -76,10 +74,32 @@ def main(config):
     # If we can't get an observation, we should just skip it in the rotation.
     if len(station_res["obs"]) == 0:
         return []
-    feel_dew_choice = config.get("Feels_Dew", "1")
-    conditions = forecast_res["current_conditions"]
 
-    temp = "%d°" % conditions["air_temperature"]
+    # Get config options (with backward compatibility for old Feels_Dew key)
+    secondary_temp_choice = config.get("secondary_temp", config.get("Feels_Dew", "1"))
+    show_labels = config.get("show_labels", "false") == "true"
+    show_conditions = config.get("show_conditions", "false") == "true"
+    show_highlow = config.get("show_highlow", "false") == "true"
+
+    conditions = forecast_res["current_conditions"]
+    
+    # Get forecast data for high/low temps
+    forecast_daily = forecast_res.get("forecast", {}).get("daily", [])
+    if len(forecast_daily) > 0:
+        today_forecast = forecast_daily[0]
+        high_temp = "%d°" % today_forecast.get("air_temp_high", 0)
+        low_temp = "%d°" % today_forecast.get("air_temp_low", 0)
+    else:
+        high_temp = "--"
+        low_temp = "--"
+
+    # Current temperature with optional label
+    temp_value = "%d°" % conditions["air_temperature"]
+    if show_labels:
+        temp = temp_value
+    else:
+        temp = temp_value
+
     humidity = "%d%%" % conditions["relative_humidity"]
     wind = "%s %d %s" % (
         conditions["wind_direction_cardinal"],
@@ -92,79 +112,127 @@ def main(config):
     dew_pt = "%d°" % conditions["dew_point"]
     pressure_trend = conditions["pressure_trend"]
     icon = ICON_MAP.get(conditions["icon"], ICON_MAP["cloudy"])
-    if feel_dew_choice == "1":
-        updated_temp = (feels)
-    elif feel_dew_choice == "2":
-        updated_temp = (dew_pt)
-    else:
-        updated_temp = (" ")
+    condition_text = conditions.get("conditions", "")
 
+    # Build secondary temperature element based on choice
+    secondary_temp_element = None
+    if secondary_temp_choice == "1":
+        # Feels Like
+        label = "F:" if show_labels else ""
+        secondary_temp_element = render.Text(
+            content = label + feels,
+            color = "#FFFF00",
+        )
+    elif secondary_temp_choice == "2":
+        # Dew Point
+        label = "D:" if show_labels else ""
+        secondary_temp_element = render.Text(
+            content = label + dew_pt,
+            color = "#FFFF00",
+        )
+    elif secondary_temp_choice == "4":
+        # High/Low
+        secondary_temp_element = render.Text(
+            content = high_temp + "/" + low_temp,
+            color = "#FFA500",
+            font = "CG-pixel-3x5-mono",
+        )
+    # else "3" = None, don't show anything
+
+    # Pressure trend icon
     if pressure_trend == "falling":
-        pressure_icon = ("↓")
-
+        pressure_icon = "↓"
     elif pressure_trend == "rising":
-        pressure_icon = ("↑")
-
+        pressure_icon = "↑"
     else:
-        pressure_icon = ("→")
+        pressure_icon = "→"
+
     rain_units = units["units_precip"]
 
+    # Build left column children
+    left_children = [
+        render.Text(
+            content = temp,
+            color = "#2a2",
+        ),
+    ]
+
+    # Add secondary temp if not "None"
+    if secondary_temp_element:
+        left_children.append(secondary_temp_element)
+
+    left_children.append(render.Image(icon))
+
+    # Build right column children
+    right_children = [
+        render.Text(
+            content = humidity,
+            color = "#66f",
+        ),
+        render.Text(
+            content = rain + " " + rain_units,
+            color = "#808080",
+        ),
+        render.Text(
+            content = pressure + " " + pressure_icon,
+        ),
+        render.Text(
+            content = wind,
+            font = "CG-pixel-3x5-mono",
+        ),
+    ]
+
+    # Build main content
+    main_content = render.Row(
+        expanded = True,
+        main_align = "space_evenly",
+        children = [
+            render.Column(
+                cross_align = "start",
+                children = left_children,
+            ),
+            render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "end",
+                children = right_children,
+            ),
+        ],
+    )
+
+    # If showing conditions, wrap in a column with scrolling condition text
+    if show_conditions and condition_text:
+        # Truncate or scroll condition text
+        display_content = render.Column(
+            children = [
+                main_content,
+                render.Marquee(
+                    width = 62,
+                    child = render.Text(
+                        content = condition_text,
+                        color = "#AAA",
+                        font = "CG-pixel-3x5-mono",
+                    ),
+                ),
+            ],
+        )
+    else:
+        display_content = render.Column(
+            children = [
+                main_content,
+            ],
+        )
+
     return render.Root(
-        delay = 500,
+        delay = 75,
         child = render.Box(
             padding = 1,
-            child = render.Column(
-                children = [
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_evenly",
-                        children = [
-                            render.Column(
-                                cross_align = "start",
-                                children = [
-                                    render.Text(
-                                        content = temp,
-                                        color = "#2a2",
-                                    ),
-                                    render.Text(
-                                        content = updated_temp,
-                                        color = "#FFFF00",
-                                    ),
-                                    render.Image(icon),
-                                    render.Box(width = 2, height = 1),
-                                ],
-                            ),
-                            render.Column(
-                                expanded = True,
-                                main_align = "space_evenly",
-                                cross_align = "end",
-                                children = [
-                                    render.Text(
-                                        content = humidity,
-                                        color = "#66f",
-                                    ),
-                                    render.Text(
-                                        content = rain + " " + rain_units,
-                                        color = "#808080",
-                                    ),
-                                    render.Text(
-                                        content = pressure + " " + pressure_icon,
-                                    ),
-                                    render.Text(
-                                        content = wind,
-                                        font = "CG-pixel-3x5-mono",
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
-                ],
-            ),
+            child = display_content,
         ),
     )
 
 def get_schema():
-    options = [
+    secondary_temp_options = [
         schema.Option(
             display = "Feels Like",
             value = "1",
@@ -174,10 +242,15 @@ def get_schema():
             value = "2",
         ),
         schema.Option(
-            display = "None",
+            display = "None (hide)",
             value = "3",
         ),
+        schema.Option(
+            display = "High/Low",
+            value = "4",
+        ),
     ]
+
     return [
         {
             "id": "token",
@@ -193,11 +266,33 @@ def get_schema():
             "handler": "get_stations",
         },
         {
-            "id": "Feels_Dew",
-            "name": "Feels Like or Dew Point Temperature",
+            "id": "secondary_temp",
+            "name": "Secondary Temperature Display",
+            "description": "Choose what to show below the current temperature",
             "type": "dropdown",
-            "options": options,
+            "options": secondary_temp_options,
             "default": "1",
+        },
+        {
+            "id": "show_labels",
+            "name": "Show Labels",
+            "description": "Add F:/D: prefix to secondary temperature",
+            "type": "onoff",
+            "default": "false",
+        },
+        {
+            "id": "show_conditions",
+            "name": "Show Conditions",
+            "description": "Show scrolling weather condition text at bottom",
+            "type": "onoff",
+            "default": "false",
+        },
+        {
+            "id": "show_highlow",
+            "name": "Show High/Low in Secondary",
+            "description": "When High/Low is selected, this option is automatically used",
+            "type": "onoff",
+            "default": "false",
         },
     ]
 
@@ -229,31 +324,6 @@ def get_stations(token):
             default = options[0].value if options else "",
         ),
     ]
-
-# def oauth_handler(params):
-#     # deserialize oauth2 parameters
-#     params = json.decode(params)
-
-#     # exchange parameters and client secret for an access token
-#     res = http.post(
-#         url = TEMPEST_TOKEN_URL,
-#         headers = {
-#             "Accept": "application/json",
-#         },
-#         form_body = dict(
-#             params,
-#             client_secret = OAUTH2_CLIENT_SECRET,
-#         ),
-#         form_encoding = "application/x-www-form-urlencoded",
-#     )
-#     if res.status_code != 200:
-#         fail("token request failed with status code: %d - %s" %
-#              (res.status_code, res.body()))
-
-#     token_params = res.json()
-#     access_token = token_params["access_token"]
-
-#     return access_token
 
 # Home made weather icons
 HOMEMADE_ICON = {
