@@ -7,3 +7,4 @@ author: Brian McLaughlin (SpinStabilized)
 fileName: hubble_live.star
 packageName: hubblelive
 recommendedInterval: 5
+broken: true
