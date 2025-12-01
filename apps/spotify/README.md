@@ -273,11 +273,11 @@ The app shows point-in-time progress. If your Tronbyt refresh rate is slow, prog
 ## Files
 
 ```
-spotify_tronbyt/
+spotify/
 ├── spotify.star          # Main Tronbyt/Tidbyt Starlark app
 ├── get_refresh_token.py  # Setup script for OAuth token
 ├── manifest.yaml         # App metadata for Tronbyt
-└── README.md            # This documentation
+└── README.md             # This documentation
 ```
 
 ## Technical Details
