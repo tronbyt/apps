@@ -122,17 +122,17 @@ def fetch_ha_data(ha_url, ha_token, name_entity, tesla_state_entity, route_dest_
 
 def main(config):
 
-    ha_url = config.str("ha_url", "http://192.168.1.15:8123")
+    ha_url = config.str("ha_url")
     ha_token = config.str("ha_token")
-    name_entity = config.str("name_entity", "sensor.tesla_display_name")
-    tesla_state_entity = config.str("tesla_state", "sensor.tesla_state")
+    name_entity = config.str("name_entity")
+    tesla_state_entity = config.str("tesla_state_entity")
     # Align config keys with schema and HA entity names
-    route_dest_entity = config.str("active_route_destination_entity", "sensor.tesla_active_route_destination")
-    route_time_entity = config.str("active_route_minutes_entity", "sensor.tesla_active_route_minutes_to_arrival")
-    route_dist_entity = config.str("active_route_distance_entity", "sensor.tesla_active_route_distance")
-    trip_total_entity = config.str("active_route_total_distance_entity", "sensor.tesla_active_route_total_distance")
-    traffic_delay_entity = config.str("active_route_traffic_delay_entity", "sensor.tesla_active_route_traffic_minutes_delay")
-    trip_progress_entity = config.str("active_route_progress_entity", "sensor.tesla_active_route_progress")
+    route_dest_entity = config.str("active_route_destination_entity")
+    route_time_entity = config.str("active_route_minutes_entity")
+    route_dist_entity = config.str("active_route_distance_entity")
+    trip_total_entity = config.str("active_route_total_distance_entity")
+    traffic_delay_entity = config.str("active_route_traffic_delay_entity")
+    trip_progress_entity = config.str("active_route_progress_entity")
     bar_complete_color = config.str("bar_complete_color", "#66666680")
     car_color = config.str("car_color", "#FFFFFF")
     dest_color = config.str("dest_color", "#FFFFFF")
@@ -153,11 +153,6 @@ def main(config):
 
     # Format destination with emoji
     dest_str = route_dest
-
-    # Conditionally include traffic delay
-    traffic_line = ""
-    if traffic_delay != "Unknown" and traffic_delay != "0" and traffic_delay != "None":
-        traffic_line = "Traffic: %s" % traffic_delay
 
     # Defensive: ensure all values are strings and not None
     def safe_str(val, default="Unknown"):
@@ -296,14 +291,14 @@ def main(config):
     header_row = render.Row(
         children = [
             render.Emoji(emoji = "📍", height = 8),
-            render.Text(content = " %s" % safe_str(dest_str) ),
+            render.Text(content = " %s" % safe_str(dest_str) , color = dest_color ),
         ],
     )
 
     info_row = render.Row(
         children = [
             render.Emoji(emoji = "🕒", height = 8),
-            render.Text(content = format_minutes(route_time))
+            render.Text(content = format_minutes(route_time), color = time_color ),
         ],
     )
 
@@ -333,6 +328,7 @@ def get_schema():
                 name = "Home Assistant Token",
                 desc = "Long-lived access token from HA",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "name_entity",

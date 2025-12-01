@@ -31,24 +31,23 @@ template:
 Add to `automations.yaml`
 
 ```yaml
-- alias: "Tesla Trip: Set Total Distance (Both Cars)"
-  mode: parallel
+- alias: "Tesla Trip: Set Total Distance"
   trigger:
     - platform: state
       entity_id: sensor.tesla_active_route_destination
-      to: null # Triggers whenever the destination changes to something non-empty
-      id: "car_1"
+  condition:
+    # Trigger only when a destination is set (state is not empty/unknown)
+    - condition: template
+      value_template: "{{ trigger.to_state.state not in ['unknown', 'unavailable', none] and trigger.to_state.state | string | length > 0 }}"
+    # Ensure there's a valid distance to set
+    - condition: numeric_state
+      entity_id: sensor.tesla_active_route_distance_to_arrival
+      above: 0
   action:
-    - conditions:
-        - condition: trigger
-            id: "car_1"
-        - condition: numeric_state
-            entity_id: sensor.tesla_active_route_distance_to_arrival
-            above: 0
-        sequence:
-        - service: input_number.set_value
-            target:
-            entity_id: input_number.tesla_1_trip_total
-            data:
-            value: "{{ states('sensor.tesla_active_route_distance_to_arrival') }}"
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.tesla_1_trip_total
+      data:
+        value: "{{ states('sensor.tesla_active_route_distance_to_arrival') }}"
+  mode: single
 ```
