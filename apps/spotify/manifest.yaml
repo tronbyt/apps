@@ -4,7 +4,7 @@
 
 id: spotify-now-playing
 name: Spotify
-summary: Display currently playing Spotify track with album art
+summary: Display playing Spotify song
 
 author: gshepperd
 version: 2.0.0
