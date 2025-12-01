@@ -8,3 +8,7 @@ fileName: tagesschau_news.star
 packageName: tagesschau_news
 recommendedInterval: 10
 supports2x: true
+minPixletVersion: v0.49.3
+tags:
+  - news
+  - germany
