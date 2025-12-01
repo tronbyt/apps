@@ -6,3 +6,4 @@ desc: Display CPBL scores and schedule, require theSportDB API key .
 author: yuping917
 fileName: cpbl_scores.star
 packageName: cpblscores
+broken: true

@@ -118,7 +118,7 @@ def handle_icon(config):
 def handle_photo(config):
     encoded = config.get("photo", ICONOTE)
 
-    return encoded
+    return base64.encode(encoded)
 
 def create_image_frame(icon):
     image_frame = render.Box(
@@ -181,7 +181,7 @@ def main(config):
     elif display_type == DISPLAY_PHOTO:
         encoded = handle_photo(config)
 
-    icon = base64.decode(encoded)
+    icon = encoded
 
     color_opt = config.str("color", DEFAULT_COLOR)
     msg_txt = config.str("msg", DEFAULT_MSG)

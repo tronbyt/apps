@@ -5,13 +5,12 @@ Description: Displays the ten commandments.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")  #to encode/decode json data going to and from cache
-load("images/ten_commandments_generic_1.png", TEN_COMMANDMENTS_GENERIC_1_ASSET = "file")
-load("images/ten_commandments_generic_2.png", TEN_COMMANDMENTS_GENERIC_2_ASSET = "file")
-load("images/ten_commandments_generic_3.png", TEN_COMMANDMENTS_GENERIC_3_ASSET = "file")
-load("images/ten_commandments_generic_4.png", TEN_COMMANDMENTS_GENERIC_4_ASSET = "file")
-load("images/ten_commandments_generic_5.png", TEN_COMMANDMENTS_GENERIC_5_ASSET = "file")
-load("images/ten_commandments_generic_6.png", TEN_COMMANDMENTS_GENERIC_6_ASSET = "file")
+load("images/commandment_0.png", TEN_COMMANDMENTS_GENERIC_1_ASSET = "file")
+load("images/commandment_1.png", TEN_COMMANDMENTS_GENERIC_2_ASSET = "file")
+load("images/commandment_2.png", TEN_COMMANDMENTS_GENERIC_3_ASSET = "file")
+load("images/commandment_3.png", TEN_COMMANDMENTS_GENERIC_4_ASSET = "file")
+load("images/commandment_4.png", TEN_COMMANDMENTS_GENERIC_5_ASSET = "file")
+load("images/commandment_5.png", TEN_COMMANDMENTS_GENERIC_6_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
@@ -141,7 +140,7 @@ def main(config):
                 render.Stack(
                     children = [
                         render.Image(
-                            src = base64.decode(images[current_image]["image"]),
+                            src = images[current_image]["image"],
                             width = 12,
                             height = 32,
                         ),

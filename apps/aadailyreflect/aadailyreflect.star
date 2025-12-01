@@ -44,7 +44,7 @@ REFERENCE_FINDER = "<strong>"
 REFERENCE_FINDER_END = "</strong>"
 REFERENCE_OFFSET = 0
 
-def main(config):
+def main():
     return render.Root(
         delay = 75,
         show_full_animation = True,
@@ -57,7 +57,7 @@ def main(config):
                     child =
                         render.Column(
                             main_align = "space_between",
-                            children = render_text(config),
+                            children = render_text(),
                         ),
                 ),
                 render.Box(

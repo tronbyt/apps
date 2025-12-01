@@ -12,7 +12,10 @@ load("images/capitol_peak.png", CAPITOL_PEAK_ASSET = "file")
 load("images/castle_peak.png", CASTLE_PEAK_ASSET = "file")
 load("images/challenger_point.png", CHALLENGER_POINT_ASSET = "file")
 load("images/crestone_needle.png", CRESTONE_NEEDLE_ASSET = "file")
+load("images/crestone_peak.png", CRESTONE_PEAK_ASSET = "file")
 load("images/culebra_peak.png", CULEBRA_PEAK_ASSET = "file")
+load("images/handies_peak.png", HANDIES_PEAK_ASSET = "file")
+load("images/mt_bierstadt.png", MT_BIERSTADT_ASSET = "file")
 load("images/ellingwood_point.png", ELLINGWOOD_POINT_ASSET = "file")
 load("images/grays_peak.png", GRAYS_PEAK_ASSET = "file")
 load("images/humboldt_peak.png", HUMBOLDT_PEAK_ASSET = "file")
@@ -240,7 +243,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.3,
         "Hiking Elevation Gain": 762,
         "Class": "1",
-        "Outline": GRAYS_PEAK_ASSET.readall(),
+        "Outline": HANDIES_PEAK_ASSET.readall(),
         "Description": "From American Basin, a steady climb reveals views of the Grenadier, La Garita, and Needle Mountains, plus the Mt. Sneffels Wilderness.",
     },
     {

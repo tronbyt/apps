@@ -7,3 +7,5 @@ author: Shopify
 fileName: order_trends.star
 packageName: ordertrends
 recommendedInterval: 5
+broken: true
+brokenReason: "www.shopcounter.app: no such host"

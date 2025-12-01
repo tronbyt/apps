@@ -50,6 +50,7 @@ load("images/contra_bg_1.png", CONTRA_BG_1_ASSET = "file")
 load("images/contra_bg_2.png", CONTRA_BG_2_ASSET = "file")
 load("images/contra_bg_3.png", CONTRA_BG_3_ASSET = "file")
 load("images/contra_bullet.png", CONTRA_BULLET_ASSET = "file")
+load("images/contra_colon.png", CONTRA_COLON_ASSET = "file")
 load("images/contra_num_0.png", CONTRA_NUM_0_ASSET = "file")
 load("images/contra_num_1.png", CONTRA_NUM_1_ASSET = "file")
 load("images/contra_num_2.png", CONTRA_NUM_2_ASSET = "file")
@@ -143,7 +144,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-SMB3_COLON_IMG = SMB3_COLON_IMG_ASSET.readall()
+SMB3_COLON_IMG = SMB3_COLON_IMG_ASSET
 
 FRAME_HEIGHT = 32
 FRAME_WIDTH = 64
@@ -194,9 +195,9 @@ GAME_CONFIGS = [
     # 1 - Super Mario Bros. 3
     {
         "BACKGROUND_IMGS": [
-            SMB3_BG_1_ASSET.readall(),
-            SMB3_BG_2_ASSET.readall(),
-            SMB3_BG_3_ASSET.readall(),
+            SMB3_BG_1_ASSET,
+            SMB3_BG_2_ASSET,
+            SMB3_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -211,22 +212,22 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Mario walking
-                SMB3_MARIO_WALK_1_ASSET.readall(),
-                SMB3_MARIO_WALK_2_ASSET.readall(),
+                SMB3_MARIO_WALK_1_ASSET,
+                SMB3_MARIO_WALK_2_ASSET,
             ],
             [
                 # Mario swimming
-                SMB3_MARIO_SWIM_1_ASSET.readall(),
-                SMB3_MARIO_SWIM_2_ASSET.readall(),
-                SMB3_MARIO_SWIM_3_ASSET.readall(),
-                SMB3_MARIO_SWIM_4_ASSET.readall(),
+                SMB3_MARIO_SWIM_1_ASSET,
+                SMB3_MARIO_SWIM_2_ASSET,
+                SMB3_MARIO_SWIM_3_ASSET,
+                SMB3_MARIO_SWIM_4_ASSET,
             ],
         ],
     },
     # 2 - Mega Man
     {
         "BACKGROUND_IMGS": [
-            MEGAMAN_BG_1_ASSET.readall(),
+            MEGAMAN_BG_1_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -241,18 +242,18 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Mega Man
-                MEGAMAN_RUN_1_ASSET.readall(),
-                MEGAMAN_RUN_2_ASSET.readall(),
-                MEGAMAN_RUN_3_ASSET.readall(),
+                MEGAMAN_RUN_1_ASSET,
+                MEGAMAN_RUN_2_ASSET,
+                MEGAMAN_RUN_3_ASSET,
             ],
         ],
     },
     # 3 - Kirby's Adventure
     {
         "BACKGROUND_IMGS": [
-            KIRBY_BG_1_ASSET.readall(),
-            KIRBY_BG_2_ASSET.readall(),
-            KIRBY_BG_3_ASSET.readall(),
+            KIRBY_BG_1_ASSET,
+            KIRBY_BG_2_ASSET,
+            KIRBY_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -267,19 +268,19 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Kirby
-                KIRBY_WALK_1_ASSET.readall(),
-                KIRBY_WALK_2_ASSET.readall(),
-                KIRBY_WALK_3_ASSET.readall(),
-                KIRBY_WALK_4_ASSET.readall(),
+                KIRBY_WALK_1_ASSET,
+                KIRBY_WALK_2_ASSET,
+                KIRBY_WALK_3_ASSET,
+                KIRBY_WALK_4_ASSET,
             ],
         ],
     },
     # 4 - The Legend of Zelda
     {
         "BACKGROUND_IMGS": [
-            ZELDA_BG_1_ASSET.readall(),
-            ZELDA_BG_2_ASSET.readall(),
-            ZELDA_BG_3_ASSET.readall(),
+            ZELDA_BG_1_ASSET,
+            ZELDA_BG_2_ASSET,
+            ZELDA_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -294,32 +295,32 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Link
-                ZELDA_LINK_WALK_1_ASSET.readall(),
-                ZELDA_LINK_WALK_2_ASSET.readall(),
+                ZELDA_LINK_WALK_1_ASSET,
+                ZELDA_LINK_WALK_2_ASSET,
             ],
         ],
     },
     # 5 - Contra
     {
         "BACKGROUND_IMGS": [
-            CONTRA_BG_1_ASSET.readall(),
-            CONTRA_BG_2_ASSET.readall(),
-            CONTRA_BG_3_ASSET.readall(),
+            CONTRA_BG_1_ASSET,
+            CONTRA_BG_2_ASSET,
+            CONTRA_BG_3_ASSET,
         ],
-        "COLON_IMG": CONTRA_COLON_ASSET.readall(),
+        "COLON_IMG": CONTRA_COLON_ASSET,
         "NUMBER_IMG_HEIGHT": 7,
         "NUMBER_IMG_WIDTH": 7,
         "NUMBER_IMGS": [
-            CONTRA_NUM_0_ASSET.readall(),
-            CONTRA_NUM_1_ASSET.readall(),
-            CONTRA_NUM_2_ASSET.readall(),
-            CONTRA_NUM_3_ASSET.readall(),
-            CONTRA_NUM_4_ASSET.readall(),
-            CONTRA_NUM_5_ASSET.readall(),
-            CONTRA_NUM_6_ASSET.readall(),
-            CONTRA_NUM_7_ASSET.readall(),
-            CONTRA_NUM_8_ASSET.readall(),
-            CONTRA_NUM_9_ASSET.readall(),
+            CONTRA_NUM_0_ASSET,
+            CONTRA_NUM_1_ASSET,
+            CONTRA_NUM_2_ASSET,
+            CONTRA_NUM_3_ASSET,
+            CONTRA_NUM_4_ASSET,
+            CONTRA_NUM_5_ASSET,
+            CONTRA_NUM_6_ASSET,
+            CONTRA_NUM_7_ASSET,
+            CONTRA_NUM_8_ASSET,
+            CONTRA_NUM_9_ASSET,
         ],
         "SPRITE_WIDTH": 4,
         "DIST_BETWEEN_SPRITES": 10,
@@ -330,16 +331,16 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # A single bullet
-                CONTRA_BULLET_ASSET.readall(),
+                CONTRA_BULLET_ASSET,
             ],
         ],
     },
     # 6 - Excitebike
     {
         "BACKGROUND_IMGS": [
-            EXCITEBIKE_BG_1_ASSET.readall(),
-            EXCITEBIKE_BG_2_ASSET.readall(),
-            EXCITEBIKE_BG_3_ASSET.readall(),
+            EXCITEBIKE_BG_1_ASSET,
+            EXCITEBIKE_BG_2_ASSET,
+            EXCITEBIKE_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -353,17 +354,17 @@ GAME_CONFIGS = [
         "SPRITE_FRAMES_PER_FRAME": 1,
         "SPRITE_SETS": [
             [
-                EXCITEBIKE_RIDE_1_ASSET.readall(),
-                EXCITEBIKE_RIDE_2_ASSET.readall(),
-                EXCITEBIKE_RIDE_3_ASSET.readall(),
+                EXCITEBIKE_RIDE_1_ASSET,
+                EXCITEBIKE_RIDE_2_ASSET,
+                EXCITEBIKE_RIDE_3_ASSET,
             ],
         ],
     },
     # 7 - Little Nemo
     {
         "BACKGROUND_IMGS": [
-            NEMO_BG_1_ASSET.readall(),
-            NEMO_BG_2_ASSET.readall(),
+            NEMO_BG_1_ASSET,
+            NEMO_BG_2_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -378,17 +379,17 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Nemo
-                NEMO_WALK_1_ASSET.readall(),
-                NEMO_WALK_2_ASSET.readall(),
-                NEMO_WALK_3_ASSET.readall(),
+                NEMO_WALK_1_ASSET,
+                NEMO_WALK_2_ASSET,
+                NEMO_WALK_3_ASSET,
             ],
         ],
     },
     # 8 - DuckTales
     {
         "BACKGROUND_IMGS": [
-            DUCKTALES_BG_1_ASSET.readall(),
-            DUCKTALES_BG_2_ASSET.readall(),
+            DUCKTALES_BG_1_ASSET,
+            DUCKTALES_BG_2_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -403,34 +404,34 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Scrooge McDuck
-                DUCKTALES_SCROOGE_1_ASSET.readall(),
-                DUCKTALES_SCROOGE_2_ASSET.readall(),
-                DUCKTALES_SCROOGE_3_ASSET.readall(),
+                DUCKTALES_SCROOGE_1_ASSET,
+                DUCKTALES_SCROOGE_2_ASSET,
+                DUCKTALES_SCROOGE_3_ASSET,
             ],
         ],
     },
     # 9 - Bubble Bobble
     {
         "BACKGROUND_IMGS": [
-            BUBBLEBOBBLE_BG_1_ASSET.readall(),
-            BUBBLEBOBBLE_BG_2_ASSET.readall(),
-            BUBBLEBOBBLE_BG_3_ASSET.readall(),
-            BUBBLEBOBBLE_BG_4_ASSET.readall(),
+            BUBBLEBOBBLE_BG_1_ASSET,
+            BUBBLEBOBBLE_BG_2_ASSET,
+            BUBBLEBOBBLE_BG_3_ASSET,
+            BUBBLEBOBBLE_BG_4_ASSET,
         ],
-        "COLON_IMG": BUBBLEBOBBLE_COLON_ASSET.readall(),
+        "COLON_IMG": BUBBLEBOBBLE_COLON_ASSET,
         "NUMBER_IMG_HEIGHT": 8,
         "NUMBER_IMG_WIDTH": 4,
         "NUMBER_IMGS": [
-            BUBBLEBOBBLE_NUM_0_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_1_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_2_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_3_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_4_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_5_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_6_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_7_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_8_ASSET.readall(),
-            BUBBLEBOBBLE_NUM_9_ASSET.readall(),
+            BUBBLEBOBBLE_NUM_0_ASSET,
+            BUBBLEBOBBLE_NUM_1_ASSET,
+            BUBBLEBOBBLE_NUM_2_ASSET,
+            BUBBLEBOBBLE_NUM_3_ASSET,
+            BUBBLEBOBBLE_NUM_4_ASSET,
+            BUBBLEBOBBLE_NUM_5_ASSET,
+            BUBBLEBOBBLE_NUM_6_ASSET,
+            BUBBLEBOBBLE_NUM_7_ASSET,
+            BUBBLEBOBBLE_NUM_8_ASSET,
+            BUBBLEBOBBLE_NUM_9_ASSET,
         ],
         "SPRITE_WIDTH": 16,
         "DIST_BETWEEN_SPRITES": 5,
@@ -441,26 +442,26 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Bub
-                BUBBLEBOBBLE_BUB_1_ASSET.readall(),
-                BUBBLEBOBBLE_BUB_2_ASSET.readall(),
-                BUBBLEBOBBLE_BUB_3_ASSET.readall(),
-                BUBBLEBOBBLE_BUB_4_ASSET.readall(),
+                BUBBLEBOBBLE_BUB_1_ASSET,
+                BUBBLEBOBBLE_BUB_2_ASSET,
+                BUBBLEBOBBLE_BUB_3_ASSET,
+                BUBBLEBOBBLE_BUB_4_ASSET,
             ],
             [
                 # Bob
-                BUBBLEBOBBLE_BOB_1_ASSET.readall(),
-                BUBBLEBOBBLE_BOB_2_ASSET.readall(),
-                BUBBLEBOBBLE_BOB_3_ASSET.readall(),
-                BUBBLEBOBBLE_BOB_4_ASSET.readall(),
+                BUBBLEBOBBLE_BOB_1_ASSET,
+                BUBBLEBOBBLE_BOB_2_ASSET,
+                BUBBLEBOBBLE_BOB_3_ASSET,
+                BUBBLEBOBBLE_BOB_4_ASSET,
             ],
         ],
     },
     # 10 - Chip 'n Dale: Rescue Rangers
     {
         "BACKGROUND_IMGS": [
-            CHIPNDALE_BG_1_ASSET.readall(),
-            CHIPNDALE_BG_2_ASSET.readall(),
-            CHIPNDALE_BG_3_ASSET.readall(),
+            CHIPNDALE_BG_1_ASSET,
+            CHIPNDALE_BG_2_ASSET,
+            CHIPNDALE_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -475,23 +476,23 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Chip
-                CHIPNDALE_CHIP_1_ASSET.readall(),
-                CHIPNDALE_CHIP_2_ASSET.readall(),
-                CHIPNDALE_CHIP_3_ASSET.readall(),
+                CHIPNDALE_CHIP_1_ASSET,
+                CHIPNDALE_CHIP_2_ASSET,
+                CHIPNDALE_CHIP_3_ASSET,
             ],
             [
                 # Dale
-                CHIPNDALE_DALE_1_ASSET.readall(),
-                CHIPNDALE_DALE_2_ASSET.readall(),
-                CHIPNDALE_DALE_3_ASSET.readall(),
+                CHIPNDALE_DALE_1_ASSET,
+                CHIPNDALE_DALE_2_ASSET,
+                CHIPNDALE_DALE_3_ASSET,
             ],
         ],
     },
     # 11 - Bionic Commando
     {
         "BACKGROUND_IMGS": [
-            BIONIC_BG_1_ASSET.readall(),
-            BIONIC_BG_2_ASSET.readall(),
+            BIONIC_BG_1_ASSET,
+            BIONIC_BG_2_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -506,15 +507,15 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Ladd 'Rad' Spencer
-                BIONIC_RAD_ASSET.readall(),
+                BIONIC_RAD_ASSET,
             ],
         ],
     },
     # 12 - Kid Icarus
     {
         "BACKGROUND_IMGS": [
-            KIDICARUS_BG_1_ASSET.readall(),
-            KIDICARUS_BG_2_ASSET.readall(),
+            KIDICARUS_BG_1_ASSET,
+            KIDICARUS_BG_2_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -529,17 +530,17 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Pit walking
-                KIDICARUS_PIT_1_ASSET.readall(),
-                KIDICARUS_PIT_2_ASSET.readall(),
-                KIDICARUS_PIT_3_ASSET.readall(),
+                KIDICARUS_PIT_1_ASSET,
+                KIDICARUS_PIT_2_ASSET,
+                KIDICARUS_PIT_3_ASSET,
             ],
         ],
     },
     # 13 - Final Fantasy
     {
         "BACKGROUND_IMGS": [
-            FINALFANTASY_BG_1_ASSET.readall(),
-            FINALFANTASY_BG_2_ASSET.readall(),
+            FINALFANTASY_BG_1_ASSET,
+            FINALFANTASY_BG_2_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -554,26 +555,26 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Light warrior red walking
-                FINALFANTASY_RED_1_ASSET.readall(),
-                FINALFANTASY_RED_2_ASSET.readall(),
+                FINALFANTASY_RED_1_ASSET,
+                FINALFANTASY_RED_2_ASSET,
             ],
             [
                 # Light warrior brown walking
-                FINALFANTASY_BROWN_1_ASSET.readall(),
-                FINALFANTASY_BROWN_2_ASSET.readall(),
+                FINALFANTASY_BROWN_1_ASSET,
+                FINALFANTASY_BROWN_2_ASSET,
             ],
             [
                 # Light warrior white walking
-                FINALFANTASY_WHITE_1_ASSET.readall(),
-                FINALFANTASY_WHITE_2_ASSET.readall(),
+                FINALFANTASY_WHITE_1_ASSET,
+                FINALFANTASY_WHITE_2_ASSET,
             ],
         ],
     },
     # 14 - Castlevania
     {
         "BACKGROUND_IMGS": [
-            CASTLEVANIA_BG_1_ASSET.readall(),
-            CASTLEVANIA_BG_2_ASSET.readall(),
+            CASTLEVANIA_BG_1_ASSET,
+            CASTLEVANIA_BG_2_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -588,18 +589,18 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Simon Belmont walking
-                CASTLEVANIA_SIMON_1_ASSET.readall(),
-                CASTLEVANIA_SIMON_2_ASSET.readall(),
-                CASTLEVANIA_SIMON_3_ASSET.readall(),
+                CASTLEVANIA_SIMON_1_ASSET,
+                CASTLEVANIA_SIMON_2_ASSET,
+                CASTLEVANIA_SIMON_3_ASSET,
             ],
         ],
     },
     # 15 - Double Dragon
     {
         "BACKGROUND_IMGS": [
-            DOUBLEDRAGON_BG_1_ASSET.readall(),
-            DOUBLEDRAGON_BG_2_ASSET.readall(),
-            DOUBLEDRAGON_BG_3_ASSET.readall(),
+            DOUBLEDRAGON_BG_1_ASSET,
+            DOUBLEDRAGON_BG_2_ASSET,
+            DOUBLEDRAGON_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -614,18 +615,18 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Billy Lee walking
-                DOUBLEDRAGON_BILLY_1_ASSET.readall(),
-                DOUBLEDRAGON_BILLY_2_ASSET.readall(),
-                DOUBLEDRAGON_BILLY_3_ASSET.readall(),
+                DOUBLEDRAGON_BILLY_1_ASSET,
+                DOUBLEDRAGON_BILLY_2_ASSET,
+                DOUBLEDRAGON_BILLY_3_ASSET,
             ],
         ],
     },
     # 16 - Ninja Gaiden
     {
         "BACKGROUND_IMGS": [
-            NINJAGAIDEN_BG_1_ASSET.readall(),
-            NINJAGAIDEN_BG_2_ASSET.readall(),
-            NINJAGAIDEN_BG_3_ASSET.readall(),
+            NINJAGAIDEN_BG_1_ASSET,
+            NINJAGAIDEN_BG_2_ASSET,
+            NINJAGAIDEN_BG_3_ASSET,
         ],
         "COLON_IMG": """""",
         "NUMBER_IMG_HEIGHT": 0,
@@ -640,25 +641,25 @@ GAME_CONFIGS = [
         "SPRITE_SETS": [
             [
                 # Ryu Hayabusa Lee walking
-                NINJAGAIDEN_RYU_1_ASSET.readall(),
-                NINJAGAIDEN_RYU_2_ASSET.readall(),
-                NINJAGAIDEN_RYU_3_ASSET.readall(),
+                NINJAGAIDEN_RYU_1_ASSET,
+                NINJAGAIDEN_RYU_2_ASSET,
+                NINJAGAIDEN_RYU_3_ASSET,
             ],
         ],
     },
 ]
 
 SMB3_NUMBER_IMGS = [
-    SMB3_NUM_0_ASSET.readall(),
-    SMB3_NUM_1_ASSET.readall(),
-    SMB3_NUM_2_ASSET.readall(),
-    SMB3_NUM_3_ASSET.readall(),
-    SMB3_NUM_4_ASSET.readall(),
-    SMB3_NUM_5_ASSET.readall(),
-    SMB3_NUM_6_ASSET.readall(),
-    SMB3_NUM_7_ASSET.readall(),
-    SMB3_NUM_8_ASSET.readall(),
-    SMB3_NUM_9_ASSET.readall(),
+    SMB3_NUM_0_ASSET,
+    SMB3_NUM_1_ASSET,
+    SMB3_NUM_2_ASSET,
+    SMB3_NUM_3_ASSET,
+    SMB3_NUM_4_ASSET,
+    SMB3_NUM_5_ASSET,
+    SMB3_NUM_6_ASSET,
+    SMB3_NUM_7_ASSET,
+    SMB3_NUM_8_ASSET,
+    SMB3_NUM_9_ASSET,
 ]
 
 def main(config):
@@ -739,14 +740,14 @@ def get_num_image(selected_game, num):
             child = render.Box(
                 width = GAME_CONFIGS[selected_game]["NUMBER_IMG_WIDTH"],
                 height = GAME_CONFIGS[selected_game]["NUMBER_IMG_HEIGHT"],
-                child = render.Image(src = GAME_CONFIGS[selected_game]["NUMBER_IMGS"][int(num)]),
+                child = render.Image(src = GAME_CONFIGS[selected_game]["NUMBER_IMGS"][int(num)].readall()),
             ),
         )
     else:
         return render.Box(
             width = 8,
             height = 7,
-            child = render.Image(src = SMB3_NUMBER_IMGS[int(num)]),
+            child = render.Image(src = SMB3_NUMBER_IMGS[int(num)].readall()),
         )
 
 def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_leading_zero = False, has_seperator = True):
@@ -772,20 +773,20 @@ def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_l
     seperator = render.Box(
         width = 5,
         height = 7,
-        child = render.Image(src = SMB3_COLON_IMG),
+        child = render.Image(src = SMB3_COLON_IMG.readall()),
     )
 
     if selected_game == int(GAME_LIST["Contra"]):
         seperator = render.Box(
             width = 3,
             height = 7,
-            child = render.Image(src = GAME_CONFIGS[selected_game]["COLON_IMG"]),
+            child = render.Image(src = GAME_CONFIGS[selected_game]["COLON_IMG"].readall()),
         )
     elif selected_game == int(GAME_LIST["Bubble Bobble"]):
         seperator = render.Box(
             width = 4,
             height = 8,
-            child = render.Image(src = GAME_CONFIGS[selected_game]["COLON_IMG"]),
+            child = render.Image(src = GAME_CONFIGS[selected_game]["COLON_IMG"].readall()),
         )
 
     if not has_seperator:
@@ -799,7 +800,7 @@ def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_l
             width = 7,
         )
 
-    bg_img = render.Image(GAME_CONFIGS[selected_game]["BACKGROUND_IMGS"][level_number])
+    bg_img = render.Image(GAME_CONFIGS[selected_game]["BACKGROUND_IMGS"][level_number].readall())
 
     return render.Stack(
         children = [
@@ -867,7 +868,7 @@ def sprite_get_frame(selected_game, time_box, x_pos, y_pos, sprite_set_index):
     """
     frame_index = x_pos // GAME_CONFIGS[selected_game]["SPRITE_MOVE_SPEED"]
     sprite_frame_index = (frame_index // GAME_CONFIGS[selected_game]["SPRITE_FRAMES_PER_FRAME"]) % len(GAME_CONFIGS[selected_game]["SPRITE_SETS"][sprite_set_index])
-    sprite_image = GAME_CONFIGS[selected_game]["SPRITE_SETS"][sprite_set_index][sprite_frame_index]
+    sprite_image = GAME_CONFIGS[selected_game]["SPRITE_SETS"][sprite_set_index][sprite_frame_index].readall()
 
     return render.Stack(
         children = [

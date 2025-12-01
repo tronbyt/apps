@@ -8444,7 +8444,7 @@ def get_schema():
                 id = "race",
                 name = "Race",
                 desc = "Race of beings to generate name for",
-                icon = "DRAGON",
+                icon = "dragon",
                 default = options[0].value,
                 options = options,
             ),

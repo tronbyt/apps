@@ -5,7 +5,54 @@ Description: Displays In Season Foods for your location.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")  #Used to read encoded image
+load("images/apples.png", APPLES_ASSET = "file")
+load("images/avocados.png", AVOCADOS_ASSET = "file")
+load("images/beans.png", BEANS_ASSET = "file")
+load("images/beets.png", BEETS_ASSET = "file")
+load("images/blueberries.png", BLUEBERRIES_ASSET = "file")
+load("images/broccoli.png", BROCCOLI_ASSET = "file")
+load("images/brussel_sprouts.png", BRUSSEL_SPROUTS_ASSET = "file")
+load("images/cabbage.png", CABBAGE_ASSET = "file")
+load("images/carrots.png", CARROTS_ASSET = "file")
+load("images/cauliflower.png", CAULIFLOWER_ASSET = "file")
+load("images/celery.png", CELERY_ASSET = "file")
+load("images/cherries.png", CHERRIES_ASSET = "file")
+load("images/chilis.png", CHILIS_ASSET = "file")
+load("images/clementines.png", CLEMENTINES_ASSET = "file")
+load("images/corn.png", CORN_ASSET = "file")
+load("images/cranberries.png", CRANBERRIES_ASSET = "file")
+load("images/cucumbers.png", CUCUMBERS_ASSET = "file")
+load("images/eggplant.png", EGGPLANT_ASSET = "file")
+load("images/garlic.png", GARLIC_ASSET = "file")
+load("images/grapefruit.png", GRAPEFRUIT_ASSET = "file")
+load("images/grapes.png", GRAPES_ASSET = "file")
+load("images/green_beans.png", GREEN_BEANS_ASSET = "file")
+load("images/lemons.png", LEMONS_ASSET = "file")
+load("images/lettuce.png", LETTUCE_ASSET = "file")
+load("images/limes.png", LIMES_ASSET = "file")
+load("images/mangoes_florida_.png", MANGOES_FLORIDA_ASSET = "file")
+load("images/mushrooms.png", MUSHROOMS_ASSET = "file")
+load("images/nectarines.png", NECTARINES_ASSET = "file")
+load("images/okra.png", OKRA_ASSET = "file")
+load("images/onions.png", ONIONS_ASSET = "file")
+load("images/oranges.png", ORANGES_ASSET = "file")
+load("images/peaches.png", PEACHES_ASSET = "file")
+load("images/pears.png", PEARS_ASSET = "file")
+load("images/peas.png", PEAS_ASSET = "file")
+load("images/peppers.png", PEPPERS_ASSET = "file")
+load("images/plums.png", PLUMS_ASSET = "file")
+load("images/pomegranates.png", POMEGRANATES_ASSET = "file")
+load("images/potatoes.png", POTATOES_ASSET = "file")
+load("images/pumpkins.png", PUMPKINS_ASSET = "file")
+load("images/radishes.png", RADISHES_ASSET = "file")
+load("images/raspberries.png", RASPBERRIES_ASSET = "file")
+load("images/rhubarb.png", RHUBARB_ASSET = "file")
+load("images/spinach.png", SPINACH_ASSET = "file")
+load("images/squash.png", SQUASH_ASSET = "file")
+load("images/strawberries.png", STRAWBERRIES_ASSET = "file")
+load("images/tomatoes.png", TOMATOES_ASSET = "file")
+load("images/watermelon.png", WATERMELON_ASSET = "file")
+load("images/zucchini.png", ZUCCHINI_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -87,7 +134,7 @@ ITEM_IMAGES = {
     "lemons": LEMONS_ASSET.readall(),
     "lettuce": LETTUCE_ASSET.readall(),
     "limes": LIMES_ASSET.readall(),
-    "mangoes (florida)": MANGOES_FLORIDA__ASSET.readall(),
+    "mangoes (florida)": MANGOES_FLORIDA_ASSET.readall(),
     "mushrooms": MUSHROOMS_ASSET.readall(),
     "nectarines": NECTARINES_ASSET.readall(),
     "okra": OKRA_ASSET.readall(),
@@ -206,7 +253,7 @@ def get_display_images(items):
     return_value = []
     for i in items:
         if ITEMS[i] in ITEM_IMAGES:
-            return_value.append(base64.decode(ITEM_IMAGES[ITEMS[i]]))
+            return_value.append(ITEM_IMAGES[ITEMS[i]])
 
     return return_value
 

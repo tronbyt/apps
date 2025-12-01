@@ -5,12 +5,12 @@ Description: Shows a specific or random pixel art piece of characters from the P
 Author: michaelalbinson
 """
 
-load("encoding/base64.star", "base64")
 load("images/fancy_snoopy.png", FANCY_SNOOPY_ASSET = "file")
 load("images/lucy_classic.png", LUCY_CLASSIC_ASSET = "file")
 load("images/lucy_cool.png", LUCY_COOL_ASSET = "file")
 load("images/red_barron.png", RED_BARRON_ASSET = "file")
 load("images/snoopy_and_woodstock.png", SNOOPY_AND_WOODSTOCK_ASSET = "file")
+load("images/snoopy_and_woodstock_walking.gif", SNOOPY_AND_WOODSTOCK_WALKING_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -54,7 +54,7 @@ def main(config):
 
     return render.Root(
         delay = int(DEFAULT_SPEED),
-        child = render.Image(base64.decode(img_to_display)),
+        child = render.Image(img_to_display),
     )
 
 def fancy_snoopy():
@@ -73,21 +73,7 @@ def snoopy_and_woodstock():
     return SNOOPY_AND_WOODSTOCK_ASSET.readall()
 
 def snoopy_and_woodstock_walking():
-    return """
-R0lGODlhQAAgAPIAAAAAAP/yAAC377S0tP///wAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQAMgD/ACwAAAAAQAAgAAAD
-yyi63P4wyjmJtTTrva73nPOF0GdipHCi5LqG7tXGJkeP2TXsxND7OM0tSBkSZrxbahnR+YBEplT0mlqv2Ky2ARB0t2AAQfwFY8We
-slmK/nTfaxKg7R6P45t52kLn4ylzdGh9d38SgTRtagxqi1eBhGl6hYwKX46PkDGKDwABc59mkJORfp0BqKiYU6OKJ6tenqqfsEut
-F2R2sLKpvLUpkF64XsSHqcehW3OWMhq8x8t4nBmy1b9naRqhntePbs6WydKveaqGkd1e0CQJACH5BAAyAP8ALAAAAABAACAAAAPM
-KLrc/jDKSau9mJG9s/8LJ4qgMpbaqBLg2n2um8WcR6/YfVbc4BMDYHBn0REpRtZMaEQ5Q5vf8PisxqoPgECL7ToABDDX6wWLxuSn
-eaRtp0GANTscfmfi541cb7fE5WZ7dX0UfzdraAxoiVV/gmd4g4oKXIyNjjSIWQFxnG+OkY98mwGlnmSgiCuWlACmrnGooBxidKxb
-pqWuurKxmm4Su7m8spQ1fsO6t1iaFbvPy12AFp6whAt70diUp4SP2tjE3qvIr9eBZ8664hcJACH5BAAyAP8ALAAAAABAACAAAAPI
-KLrc/jDKGYm1NOu9rvec84XQZ2KkcKLkuobu1cYmR4/ZNezE0Ps4zS1IGRJmvFtqWbHwgESmVPSaWq/YrPYBEHS3YABB/AVjxZ6y
-WYr+dN9rEqDtHo/jm3naQufjKXN0aH13fxKBNG1qDGqLV4GEaXqFjApfjo+QMYpcAXOeZpCTkX6dAaegW6KKJ5iWAKiwc6qiF2R2
-rl6op7C8tLOccIe7u7lMs14yGr3EyHGcGb3SxlmCGqCyhslpy5apeJHUjL5/4cvFJAkAIfkEADIA/wAsAAAAAEAAIAAAA8woutz+
-MMoZibU0672u95zzhdBnYqRwouS6hu7VxiZHj9k17MTQ+zjNLUgZEma8W2pZsfCARKZU9Jpar1aAQIvtOgAEMNfrBXvG5OxJy04v
-AWaTOOwOwc+W+AVdl8D1Znp5fRl/NHF8C2iJWYYujolckm5/d497DwABcJuUlYGPEJoBpJ1kn4hrEZykmnCnn3ths4wKo6W3tUyV
-W5htfqXBpmWSMhq3wa+EiMetrbplZxqdroSKH9AMksN9goPN3HXedIXJ1qCYFKPrJAkAOw==
-"""
+    return SNOOPY_AND_WOODSTOCK_WALKING_ASSET.readall()
 
 def get_schema():
     options = [

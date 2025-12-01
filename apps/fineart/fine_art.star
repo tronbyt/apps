@@ -7,6 +7,72 @@ Author: chrisbateman
 
 load("animation.star", "animation")
 load("cache.star", "cache")
+load("images/basquiat_untitled_1982_.png", BASQUIAT_UNTITLED_1982__ASSET = "file")
+load("images/bloch_in_a_roman_osteria.png", BLOCH_IN_A_ROMAN_OSTERIA_ASSET = "file")
+load("images/bosch_the_garden_of_earthly_delights.png", BOSCH_THE_GARDEN_OF_EARTHLY_DELIGHTS_ASSET = "file")
+load("images/botticelli_the_birth_of_venus.png", BOTTICELLI_THE_BIRTH_OF_VENUS_ASSET = "file")
+load("images/c_zanne_mont_sainte_victoire.png", C_ZANNE_MONT_SAINTE_VICTOIRE_ASSET = "file")
+load("images/constable_the_hay_wain.png", CONSTABLE_THE_HAY_WAIN_ASSET = "file")
+load("images/da_vinci_mona_lisa.png", DA_VINCI_MONA_LISA_ASSET = "file")
+load("images/da_vinci_the_last_supper.png", DA_VINCI_THE_LAST_SUPPER_ASSET = "file")
+load("images/dali_the_persistence_of_memory.png", DALI_THE_PERSISTENCE_OF_MEMORY_ASSET = "file")
+load("images/david_the_death_of_marat.png", DAVID_THE_DEATH_OF_MARAT_ASSET = "file")
+load("images/degas_the_absinthe_drinker.png", DEGAS_THE_ABSINTHE_DRINKER_ASSET = "file")
+load("images/delacroix_liberty_leading_the_people.png", DELACROIX_LIBERTY_LEADING_THE_PEOPLE_ASSET = "file")
+load("images/delaroche_the_execution_of_lady_jane_grey.png", DELAROCHE_THE_EXECUTION_OF_LADY_JANE_GREY_ASSET = "file")
+load("images/friedrich_wanderer_above_the_sea_of_fog.png", FRIEDRICH_WANDERER_ABOVE_THE_SEA_OF_FOG_ASSET = "file")
+load("images/gentileschi_judith_slaying_holofernes.png", GENTILESCHI_JUDITH_SLAYING_HOLOFERNES_ASSET = "file")
+load("images/goya_the_third_of_may_1808.png", GOYA_THE_THIRD_OF_MAY_1808_ASSET = "file")
+load("images/hokusai_the_great_wave_off_kanagawa.png", HOKUSAI_THE_GREAT_WAVE_OFF_KANAGAWA_ASSET = "file")
+load("images/hopper_nighthawks.png", HOPPER_NIGHTHAWKS_ASSET = "file")
+load("images/kahlo_the_two_fridas.png", KAHLO_THE_TWO_FRIDAS_ASSET = "file")
+load("images/kandinsky_the_blue_rider.png", KANDINSKY_THE_BLUE_RIDER_ASSET = "file")
+load("images/kandinsky_transverse_line.png", KANDINSKY_TRANSVERSE_LINE_ASSET = "file")
+load("images/klimt_the_kiss.png", KLIMT_THE_KISS_ASSET = "file")
+load("images/lam_the_jungle.png", LAM_THE_JUNGLE_ASSET = "file")
+load("images/leighton_flaming_june.png", LEIGHTON_FLAMING_JUNE_ASSET = "file")
+load("images/leutze_washington_crossing_the_delaware.png", LEUTZE_WASHINGTON_CROSSING_THE_DELAWARE_ASSET = "file")
+load("images/magritte_the_son_of_man.png", MAGRITTE_THE_SON_OF_MAN_ASSET = "file")
+load("images/manet_a_bar_at_the_folies_berg_re.png", MANET_A_BAR_AT_THE_FOLIES_BERG_RE_ASSET = "file")
+load("images/matejko_sta_czyk.png", MATEJKO_STA_CZYK_ASSET = "file")
+load("images/michelangelo_the_creation_of_adam.png", MICHELANGELO_THE_CREATION_OF_ADAM_ASSET = "file")
+load("images/millet_the_gleaners.png", MILLET_THE_GLEANERS_ASSET = "file")
+load("images/mondrian_composition_with_red_blue_and_yellow.png", MONDRIAN_COMPOSITION_WITH_RED_BLUE_AND_YELLOW_ASSET = "file")
+load("images/monet_impression_sunrise.png", MONET_IMPRESSION_SUNRISE_ASSET = "file")
+load("images/monet_san_giorgio_maggiore_at_dusk.png", MONET_SAN_GIORGIO_MAGGIORE_AT_DUSK_ASSET = "file")
+load("images/monet_water_lilies.png", MONET_WATER_LILIES_ASSET = "file")
+load("images/monet_woman_with_a_parasol.png", MONET_WOMAN_WITH_A_PARASOL_ASSET = "file")
+load("images/munch_the_scream.png", MUNCH_THE_SCREAM_ASSET = "file")
+load("images/picasso_guernica.png", PICASSO_GUERNICA_ASSET = "file")
+load("images/picasso_les_demoiselles_d_avignon.png", PICASSO_LES_DEMOISELLES_D_AVIGNON_ASSET = "file")
+load("images/picasso_portrait_of_dora_maar.png", PICASSO_PORTRAIT_OF_DORA_MAAR_ASSET = "file")
+load("images/picasso_three_musicians.png", PICASSO_THREE_MUSICIANS_ASSET = "file")
+load("images/pollock_untitled.png", POLLOCK_UNTITLED_ASSET = "file")
+load("images/raphael_the_school_of_athens.png", RAPHAEL_THE_SCHOOL_OF_ATHENS_ASSET = "file")
+load("images/rembrandt_the_anatomy_lesson_of_dr_nicolaes_tulp.png", REMBRANDT_THE_ANATOMY_LESSON_OF_DR_NICOLAES_TULP_ASSET = "file")
+load("images/rembrandt_the_night_watch.png", REMBRANDT_THE_NIGHT_WATCH_ASSET = "file")
+load("images/renoir_dance_at_le_moulin_de_la_galette.png", RENOIR_DANCE_AT_LE_MOULIN_DE_LA_GALETTE_ASSET = "file")
+load("images/renoir_luncheon_of_the_boating_party.png", RENOIR_LUNCHEON_OF_THE_BOATING_PARTY_ASSET = "file")
+load("images/rivera_the_flower_carrier.png", RIVERA_THE_FLOWER_CARRIER_ASSET = "file")
+load("images/seurat_a_sunday_afternoon_on_the_island_of_la_grande_jatte.png", SEURAT_A_SUNDAY_AFTERNOON_ON_THE_ISLAND_OF_LA_GRANDE_JATTE_ASSET = "file")
+load("images/tanner_the_banjo_lesson.png", TANNER_THE_BANJO_LESSON_ASSET = "file")
+load("images/thomas_the_eclipse.png", THOMAS_THE_ECLIPSE_ASSET = "file")
+load("images/turner_the_fighting_temeraire.png", TURNER_THE_FIGHTING_TEMERAIRE_ASSET = "file")
+load("images/van_eyck_arnolfini_portrait.png", VAN_EYCK_ARNOLFINI_PORTRAIT_ASSET = "file")
+load("images/van_gogh_caf_terrace_at_night.png", VAN_GOGH_CAF_TERRACE_AT_NIGHT_ASSET = "file")
+load("images/van_gogh_self_portrait_1889_.png", VAN_GOGH_SELF_PORTRAIT_1889__ASSET = "file")
+load("images/van_gogh_starry_night.png", VAN_GOGH_STARRY_NIGHT_ASSET = "file")
+load("images/van_gogh_starry_night_over_the_rh_ne.png", VAN_GOGH_STARRY_NIGHT_OVER_THE_RH_NE_ASSET = "file")
+load("images/van_gogh_the_night_caf_.png", VAN_GOGH_THE_NIGHT_CAF_ASSET = "file")
+load("images/van_gogh_the_red_vineyard.png", VAN_GOGH_THE_RED_VINEYARD_ASSET = "file")
+load("images/van_gogh_wheat_field_with_cypresses.png", VAN_GOGH_WHEAT_FIELD_WITH_CYPRESSES_ASSET = "file")
+load("images/van_gogh_wheatfield_with_crows.png", VAN_GOGH_WHEATFIELD_WITH_CROWS_ASSET = "file")
+load("images/vel_zquez_las_meninas.png", VEL_ZQUEZ_LAS_MENINAS_ASSET = "file")
+load("images/vermeer_girl_with_a_pearl_earring.png", VERMEER_GIRL_WITH_A_PEARL_EARRING_ASSET = "file")
+load("images/vermeer_the_milkmaid.png", VERMEER_THE_MILKMAID_ASSET = "file")
+load("images/whistler_whistler_s_mother.png", WHISTLER_WHISTLER_S_MOTHER_ASSET = "file")
+load("images/wood_american_gothic.png", WOOD_AMERICAN_GOTHIC_ASSET = "file")
+load("images/wyeth_christina_s_world.png", WYETH_CHRISTINA_S_WORLD_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "render")
@@ -50,7 +116,7 @@ def main(config):
 
     transform_start, transform_final, padding_final = get_transforms(painting)
 
-    image = render.Image(src = painting["binary"])
+    image = render.Image(src = painting["binary"].readall())
     finalFrame = render.Padding(
         child = image,
         pad = padding_final,
@@ -244,7 +310,7 @@ def get_schema():
 
 PAINTINGS = [
     {
-        "binary": VAN_GOGH_STARRY_NIGHT_ASSET.readall(),
+        "binary": VAN_GOGH_STARRY_NIGHT_ASSET,
         "title": "Starry Night",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -253,7 +319,7 @@ PAINTINGS = [
         "framing": 8,
     },
     {
-        "binary": MONDRIAN_COMPOSITION_WITH_RED_BLUE_AND_YELLOW_ASSET.readall(),
+        "binary": MONDRIAN_COMPOSITION_WITH_RED_BLUE_AND_YELLOW_ASSET,
         "title": "Composition with Red Blue and Yellow",
         "artistFirst": "Piet",
         "artistLast": "Mondrian",
@@ -262,7 +328,7 @@ PAINTINGS = [
         "framing": 32,
     },
     {
-        "binary": SEURAT_A_SUNDAY_AFTERNOON_ON_THE_ISLAND_OF_LA_GRANDE_JATTE_ASSET.readall(),
+        "binary": SEURAT_A_SUNDAY_AFTERNOON_ON_THE_ISLAND_OF_LA_GRANDE_JATTE_ASSET,
         "title": "A Sunday Afternoon on the Island of La Grande Jatte",
         "artistFirst": "Georges",
         "artistLast": "Seurat",
@@ -271,7 +337,7 @@ PAINTINGS = [
         "framing": 4,
     },
     {
-        "binary": MUNCH_THE_SCREAM_ASSET.readall(),
+        "binary": MUNCH_THE_SCREAM_ASSET,
         "title": "The Scream",
         "artistFirst": "Edvard",
         "artistLast": "Munch",
@@ -280,7 +346,7 @@ PAINTINGS = [
         "framing": 28,
     },
     {
-        "binary": GOYA_THE_THIRD_OF_MAY_1808_ASSET.readall(),
+        "binary": GOYA_THE_THIRD_OF_MAY_1808_ASSET,
         "title": "The Third of May 1808",
         "artistFirst": "Francisco ",
         "artistLast": "Goya",
@@ -289,7 +355,7 @@ PAINTINGS = [
         "framing": 14,
     },
     {
-        "binary": RAPHAEL_THE_SCHOOL_OF_ATHENS_ASSET.readall(),
+        "binary": RAPHAEL_THE_SCHOOL_OF_ATHENS_ASSET,
         "title": "The School of Athens",
         "artistFirst": "",
         "artistLast": "Raphael",
@@ -298,7 +364,7 @@ PAINTINGS = [
         "framing": 11,
     },
     {
-        "binary": RENOIR_DANCE_AT_LE_MOULIN_DE_LA_GALETTE_ASSET.readall(),
+        "binary": RENOIR_DANCE_AT_LE_MOULIN_DE_LA_GALETTE_ASSET,
         "title": "Dance at Le moulin de la Galette",
         "artistFirst": "Pierre-Auguste",
         "artistLast": "Renoir",
@@ -307,7 +373,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": VAN_GOGH_SELF_PORTRAIT_1889__ASSET.readall(),
+        "binary": VAN_GOGH_SELF_PORTRAIT_1889__ASSET,
         "title": "Self-Portrait (1889)",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -316,7 +382,7 @@ PAINTINGS = [
         "framing": 16,
     },
     {
-        "binary": WOOD_AMERICAN_GOTHIC_ASSET.readall(),
+        "binary": WOOD_AMERICAN_GOTHIC_ASSET,
         "title": "American Gothic",
         "artistFirst": "Grant",
         "artistLast": "Wood",
@@ -325,7 +391,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": PICASSO_THREE_MUSICIANS_ASSET.readall(),
+        "binary": PICASSO_THREE_MUSICIANS_ASSET,
         "title": "Three Musicians",
         "artistFirst": "Pablo",
         "artistLast": "Picasso",
@@ -334,7 +400,7 @@ PAINTINGS = [
         "framing": 4,
     },
     {
-        "binary": DALI_THE_PERSISTENCE_OF_MEMORY_ASSET.readall(),
+        "binary": DALI_THE_PERSISTENCE_OF_MEMORY_ASSET,
         "title": "The Persistence of Memory",
         "artistFirst": "Salvador",
         "artistLast": "Dali",
@@ -343,7 +409,7 @@ PAINTINGS = [
         "framing": 9,
     },
     {
-        "binary": MONET_IMPRESSION_SUNRISE_ASSET.readall(),
+        "binary": MONET_IMPRESSION_SUNRISE_ASSET,
         "title": "Impression, Sunrise",
         "artistFirst": "Claude",
         "artistLast": "Monet",
@@ -352,7 +418,7 @@ PAINTINGS = [
         "framing": 9,
     },
     {
-        "binary": HOPPER_NIGHTHAWKS_ASSET.readall(),
+        "binary": HOPPER_NIGHTHAWKS_ASSET,
         "title": "Nighthawks",
         "artistFirst": "Edward",
         "artistLast": "Hopper",
@@ -360,7 +426,7 @@ PAINTINGS = [
         "height": 32,
     },
     {
-        "binary": DELACROIX_LIBERTY_LEADING_THE_PEOPLE_ASSET.readall(),
+        "binary": DELACROIX_LIBERTY_LEADING_THE_PEOPLE_ASSET,
         "title": "Liberty Leading the People",
         "artistFirst": "Eugène",
         "artistLast": "Delacroix",
@@ -369,7 +435,7 @@ PAINTINGS = [
         "framing": 0,
     },
     {
-        "binary": VAN_EYCK_ARNOLFINI_PORTRAIT_ASSET.readall(),
+        "binary": VAN_EYCK_ARNOLFINI_PORTRAIT_ASSET,
         "title": "Arnolfini Portrait",
         "artistFirst": "Jan",
         "artistLast": "van Eyck",
@@ -378,7 +444,7 @@ PAINTINGS = [
         "framing": 12,
     },
     {
-        "binary": VAN_GOGH_CAF_TERRACE_AT_NIGHT_ASSET.readall(),
+        "binary": VAN_GOGH_CAF_TERRACE_AT_NIGHT_ASSET,
         "title": "Café Terrace at Night",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -387,7 +453,7 @@ PAINTINGS = [
         "framing": 35,
     },
     {
-        "binary": BASQUIAT_UNTITLED_1982__ASSET.readall(),
+        "binary": BASQUIAT_UNTITLED_1982__ASSET,
         "title": "Untitled (1982)",
         "artistFirst": "Jean-Michel",
         "artistLast": "Basquiat",
@@ -396,7 +462,7 @@ PAINTINGS = [
         "framing": 18,
     },
     {
-        "binary": WHISTLER_WHISTLER_S_MOTHER_ASSET.readall(),
+        "binary": WHISTLER_WHISTLER_S_MOTHER_ASSET,
         "title": "Whistler's Mother",
         "artistFirst": "James",
         "artistLast": "Whistler",
@@ -405,7 +471,7 @@ PAINTINGS = [
         "framing": 6,
     },
     {
-        "binary": MAGRITTE_THE_SON_OF_MAN_ASSET.readall(),
+        "binary": MAGRITTE_THE_SON_OF_MAN_ASSET,
         "title": "The Son of Man",
         "artistFirst": "René",
         "artistLast": "Magritte",
@@ -414,7 +480,7 @@ PAINTINGS = [
         "framing": 9,
     },
     {
-        "binary": REMBRANDT_THE_NIGHT_WATCH_ASSET.readall(),
+        "binary": REMBRANDT_THE_NIGHT_WATCH_ASSET,
         "title": "The Night Watch",
         "artistFirst": "",
         "artistLast": "Rembrandt",
@@ -423,7 +489,7 @@ PAINTINGS = [
         "framing": 20,
     },
     {
-        "binary": PICASSO_LES_DEMOISELLES_D_AVIGNON_ASSET.readall(),
+        "binary": PICASSO_LES_DEMOISELLES_D_AVIGNON_ASSET,
         "title": "Les Demoiselles d'Avignon",
         "artistFirst": "Pablo",
         "artistLast": "Picasso",
@@ -432,7 +498,7 @@ PAINTINGS = [
         "framing": 5,
     },
     {
-        "binary": VEL_ZQUEZ_LAS_MENINAS_ASSET.readall(),
+        "binary": VEL_ZQUEZ_LAS_MENINAS_ASSET,
         "title": "Las Meninas",
         "artistFirst": "Diego",
         "artistLast": "Velázquez",
@@ -441,7 +507,7 @@ PAINTINGS = [
         "framing": 38,
     },
     {
-        "binary": KANDINSKY_TRANSVERSE_LINE_ASSET.readall(),
+        "binary": KANDINSKY_TRANSVERSE_LINE_ASSET,
         "title": "Transverse Line",
         "artistFirst": "Wassily",
         "artistLast": "Kandinsky",
@@ -450,7 +516,7 @@ PAINTINGS = [
         "framing": 8,
     },
     {
-        "binary": FRIEDRICH_WANDERER_ABOVE_THE_SEA_OF_FOG_ASSET.readall(),
+        "binary": FRIEDRICH_WANDERER_ABOVE_THE_SEA_OF_FOG_ASSET,
         "title": "Wanderer above the Sea of Fog",
         "artistFirst": "Caspar",
         "artistLast": "Friedrich",
@@ -459,7 +525,7 @@ PAINTINGS = [
         "framing": 25,
     },
     {
-        "binary": VAN_GOGH_STARRY_NIGHT_OVER_THE_RH_NE_ASSET.readall(),
+        "binary": VAN_GOGH_STARRY_NIGHT_OVER_THE_RH_NE_ASSET,
         "title": "Starry Night Over the Rhône",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -468,7 +534,7 @@ PAINTINGS = [
         "framing": 4,
     },
     {
-        "binary": MONET_SAN_GIORGIO_MAGGIORE_AT_DUSK_ASSET.readall(),
+        "binary": MONET_SAN_GIORGIO_MAGGIORE_AT_DUSK_ASSET,
         "title": "San Giorgio Maggiore at Dusk",
         "artistFirst": "Claude",
         "artistLast": "Monet",
@@ -477,7 +543,7 @@ PAINTINGS = [
         "framing": 0,
     },
     {
-        "binary": VERMEER_THE_MILKMAID_ASSET.readall(),
+        "binary": VERMEER_THE_MILKMAID_ASSET,
         "title": "The Milkmaid",
         "artistFirst": "Johannes",
         "artistLast": "Vermeer",
@@ -486,7 +552,7 @@ PAINTINGS = [
         "framing": 13,
     },
     {
-        "binary": HOKUSAI_THE_GREAT_WAVE_OFF_KANAGAWA_ASSET.readall(),
+        "binary": HOKUSAI_THE_GREAT_WAVE_OFF_KANAGAWA_ASSET,
         "title": "The Great Wave off Kanagawa",
         "artistFirst": "Katsushika",
         "artistLast": "Hokusai",
@@ -495,7 +561,7 @@ PAINTINGS = [
         "framing": 5,
     },
     {
-        "binary": BOTTICELLI_THE_BIRTH_OF_VENUS_ASSET.readall(),
+        "binary": BOTTICELLI_THE_BIRTH_OF_VENUS_ASSET,
         "title": "The Birth of Venus",
         "artistFirst": "Sandro",
         "artistLast": "Botticelli",
@@ -504,7 +570,7 @@ PAINTINGS = [
         "framing": 2,
     },
     {
-        "binary": DA_VINCI_THE_LAST_SUPPER_ASSET.readall(),
+        "binary": DA_VINCI_THE_LAST_SUPPER_ASSET,
         "title": "The Last Supper",
         "artistFirst": "Leonardo",
         "artistLast": "da Vinci",
@@ -512,7 +578,7 @@ PAINTINGS = [
         "height": 32,
     },
     {
-        "binary": RIVERA_THE_FLOWER_CARRIER_ASSET.readall(),
+        "binary": RIVERA_THE_FLOWER_CARRIER_ASSET,
         "title": "The Flower Carrier",
         "artistFirst": "Diego",
         "artistLast": "Rivera",
@@ -521,7 +587,7 @@ PAINTINGS = [
         "framing": 9,
     },
     {
-        "binary": PICASSO_GUERNICA_ASSET.readall(),
+        "binary": PICASSO_GUERNICA_ASSET,
         "title": "Guernica",
         "artistFirst": "Pablo",
         "artistLast": "Picasso",
@@ -530,7 +596,7 @@ PAINTINGS = [
         "framing": 0,
     },
     {
-        "binary": VAN_GOGH_WHEAT_FIELD_WITH_CYPRESSES_ASSET.readall(),
+        "binary": VAN_GOGH_WHEAT_FIELD_WITH_CYPRESSES_ASSET,
         "title": "Wheat Field with Cypresses",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -539,7 +605,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": POLLOCK_UNTITLED_ASSET.readall(),
+        "binary": POLLOCK_UNTITLED_ASSET,
         "title": "Untitled",
         "artistFirst": "Jackson",
         "artistLast": "Pollock",
@@ -547,7 +613,7 @@ PAINTINGS = [
         "height": 46,
     },
     {
-        "binary": KLIMT_THE_KISS_ASSET.readall(),
+        "binary": KLIMT_THE_KISS_ASSET,
         "title": "The Kiss",
         "artistFirst": "Gustav",
         "artistLast": "Klimt",
@@ -556,7 +622,7 @@ PAINTINGS = [
         "framing": 0,
     },
     {
-        "binary": MICHELANGELO_THE_CREATION_OF_ADAM_ASSET.readall(),
+        "binary": MICHELANGELO_THE_CREATION_OF_ADAM_ASSET,
         "title": "The Creation of Adam",
         "artistFirst": "",
         "artistLast": "Michelangelo",
@@ -564,7 +630,7 @@ PAINTINGS = [
         "height": 32,
     },
     {
-        "binary": MONET_WOMAN_WITH_A_PARASOL_ASSET.readall(),
+        "binary": MONET_WOMAN_WITH_A_PARASOL_ASSET,
         "title": "Woman with a Parasol",
         "artistFirst": "Claude",
         "artistLast": "Monet",
@@ -573,7 +639,7 @@ PAINTINGS = [
         "framing": 28,
     },
     {
-        "binary": PICASSO_PORTRAIT_OF_DORA_MAAR_ASSET.readall(),
+        "binary": PICASSO_PORTRAIT_OF_DORA_MAAR_ASSET,
         "title": "Portrait of Dora Maar",
         "artistFirst": "Pablo",
         "artistLast": "Picasso",
@@ -582,7 +648,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": KAHLO_THE_TWO_FRIDAS_ASSET.readall(),
+        "binary": KAHLO_THE_TWO_FRIDAS_ASSET,
         "title": "The Two Fridas",
         "artistFirst": "Frida",
         "artistLast": "Kahlo",
@@ -591,7 +657,7 @@ PAINTINGS = [
         "framing": 3,
     },
     {
-        "binary": VAN_GOGH_THE_RED_VINEYARD_ASSET.readall(),
+        "binary": VAN_GOGH_THE_RED_VINEYARD_ASSET,
         "title": "The Red Vineyard",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -600,7 +666,7 @@ PAINTINGS = [
         "framing": 0,
     },
     {
-        "binary": VERMEER_GIRL_WITH_A_PEARL_EARRING_ASSET.readall(),
+        "binary": VERMEER_GIRL_WITH_A_PEARL_EARRING_ASSET,
         "title": "Girl with a Pearl Earring",
         "artistFirst": "Johannes",
         "artistLast": "Vermeer",
@@ -609,7 +675,7 @@ PAINTINGS = [
         "framing": 18,
     },
     {
-        "binary": MANET_A_BAR_AT_THE_FOLIES_BERG_RE_ASSET.readall(),
+        "binary": MANET_A_BAR_AT_THE_FOLIES_BERG_RE_ASSET,
         "title": "A Bar at the Folies-Bergère",
         "artistFirst": "Édouard",
         "artistLast": "Manet",
@@ -618,7 +684,7 @@ PAINTINGS = [
         "framing": 2,
     },
     {
-        "binary": MILLET_THE_GLEANERS_ASSET.readall(),
+        "binary": MILLET_THE_GLEANERS_ASSET,
         "title": "The Gleaners",
         "artistFirst": "Jean-François",
         "artistLast": "Millet",
@@ -627,7 +693,7 @@ PAINTINGS = [
         "framing": 11,
     },
     {
-        "binary": BLOCH_IN_A_ROMAN_OSTERIA_ASSET.readall(),
+        "binary": BLOCH_IN_A_ROMAN_OSTERIA_ASSET,
         "title": "In a Roman Osteria",
         "artistFirst": "Carl",
         "artistLast": "Bloch",
@@ -636,7 +702,7 @@ PAINTINGS = [
         "framing": 9,
     },
     {
-        "binary": TURNER_THE_FIGHTING_TEMERAIRE_ASSET.readall(),
+        "binary": TURNER_THE_FIGHTING_TEMERAIRE_ASSET,
         "title": "The Fighting Temeraire",
         "artistFirst": "J. M. W.",
         "artistLast": "Turner",
@@ -645,7 +711,7 @@ PAINTINGS = [
         "framing": 16,
     },
     {
-        "binary": C_ZANNE_MONT_SAINTE_VICTOIRE_ASSET.readall(),
+        "binary": C_ZANNE_MONT_SAINTE_VICTOIRE_ASSET,
         "title": "Mont Sainte-Victoire",
         "artistFirst": "Paul",
         "artistLast": "Cézanne",
@@ -654,7 +720,7 @@ PAINTINGS = [
         "framing": 4,
     },
     {
-        "binary": MONET_WATER_LILIES_ASSET.readall(),
+        "binary": MONET_WATER_LILIES_ASSET,
         "title": "Water Lilies",
         "artistFirst": "Claude",
         "artistLast": "Monet",
@@ -662,7 +728,7 @@ PAINTINGS = [
         "height": 32,
     },
     {
-        "binary": VAN_GOGH_WHEATFIELD_WITH_CROWS_ASSET.readall(),
+        "binary": VAN_GOGH_WHEATFIELD_WITH_CROWS_ASSET,
         "title": "Wheatfield with Crows",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -670,7 +736,7 @@ PAINTINGS = [
         "height": 32,
     },
     {
-        "binary": KANDINSKY_THE_BLUE_RIDER_ASSET.readall(),
+        "binary": KANDINSKY_THE_BLUE_RIDER_ASSET,
         "title": "The Blue Rider",
         "artistFirst": "Wassily",
         "artistLast": "Kandinsky",
@@ -679,7 +745,7 @@ PAINTINGS = [
         "framing": 15,
     },
     {
-        "binary": BOSCH_THE_GARDEN_OF_EARTHLY_DELIGHTS_ASSET.readall(),
+        "binary": BOSCH_THE_GARDEN_OF_EARTHLY_DELIGHTS_ASSET,
         "title": "The Garden of Earthly Delights",
         "artistFirst": "Hieronymus",
         "artistLast": "Bosch",
@@ -687,7 +753,7 @@ PAINTINGS = [
         "height": 32,
     },
     {
-        "binary": RENOIR_LUNCHEON_OF_THE_BOATING_PARTY_ASSET.readall(),
+        "binary": RENOIR_LUNCHEON_OF_THE_BOATING_PARTY_ASSET,
         "title": "Luncheon of the Boating Party",
         "artistFirst": "Pierre-Auguste",
         "artistLast": "Renoir",
@@ -696,7 +762,7 @@ PAINTINGS = [
         "framing": 3,
     },
     {
-        "binary": DEGAS_THE_ABSINTHE_DRINKER_ASSET.readall(),
+        "binary": DEGAS_THE_ABSINTHE_DRINKER_ASSET,
         "title": "The Absinthe Drinker",
         "artistFirst": "Edgar",
         "artistLast": "Degas",
@@ -705,7 +771,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": DA_VINCI_MONA_LISA_ASSET.readall(),
+        "binary": DA_VINCI_MONA_LISA_ASSET,
         "title": "Mona Lisa",
         "artistFirst": "Leonardo",
         "artistLast": "da Vinci",
@@ -714,7 +780,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": DELAROCHE_THE_EXECUTION_OF_LADY_JANE_GREY_ASSET.readall(),
+        "binary": DELAROCHE_THE_EXECUTION_OF_LADY_JANE_GREY_ASSET,
         "title": "The Execution of Lady Jane Grey",
         "artistFirst": "Paul",
         "artistLast": "Delaroche",
@@ -723,7 +789,7 @@ PAINTINGS = [
         "framing": 13,
     },
     {
-        "binary": TANNER_THE_BANJO_LESSON_ASSET.readall(),
+        "binary": TANNER_THE_BANJO_LESSON_ASSET,
         "title": "The Banjo Lesson",
         "artistFirst": "Henry Ossawa",
         "artistLast": "Tanner",
@@ -732,7 +798,7 @@ PAINTINGS = [
         "framing": 15,
     },
     {
-        "binary": CONSTABLE_THE_HAY_WAIN_ASSET.readall(),
+        "binary": CONSTABLE_THE_HAY_WAIN_ASSET,
         "title": "The Hay Wain",
         "artistFirst": "John",
         "artistLast": "Constable",
@@ -741,7 +807,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": LEUTZE_WASHINGTON_CROSSING_THE_DELAWARE_ASSET.readall(),
+        "binary": LEUTZE_WASHINGTON_CROSSING_THE_DELAWARE_ASSET,
         "title": "Washington Crossing the Delaware",
         "artistFirst": "Emanuel",
         "artistLast": "Leutze",
@@ -750,7 +816,7 @@ PAINTINGS = [
         "framing": 4,
     },
     {
-        "binary": MATEJKO_STA_CZYK_ASSET.readall(),
+        "binary": MATEJKO_STA_CZYK_ASSET,
         "title": "Stańczyk",
         "artistFirst": "Jan",
         "artistLast": "Matejko",
@@ -759,7 +825,7 @@ PAINTINGS = [
         "framing": 8,
     },
     {
-        "binary": WYETH_CHRISTINA_S_WORLD_ASSET.readall(),
+        "binary": WYETH_CHRISTINA_S_WORLD_ASSET,
         "title": "Christina's World",
         "artistFirst": "Andrew",
         "artistLast": "Wyeth",
@@ -768,7 +834,7 @@ PAINTINGS = [
         "framing": 4,
     },
     {
-        "binary": VAN_GOGH_THE_NIGHT_CAF__ASSET.readall(),
+        "binary": VAN_GOGH_THE_NIGHT_CAF_ASSET,
         "title": "The Night Café",
         "artistFirst": "Vincent",
         "artistLast": "van Gogh",
@@ -777,7 +843,7 @@ PAINTINGS = [
         "framing": 5,
     },
     {
-        "binary": LAM_THE_JUNGLE_ASSET.readall(),
+        "binary": LAM_THE_JUNGLE_ASSET,
         "title": "The Jungle",
         "artistFirst": "Wilfredo",
         "artistLast": "Lam",
@@ -786,7 +852,7 @@ PAINTINGS = [
         "framing": 10,
     },
     {
-        "binary": REMBRANDT_THE_ANATOMY_LESSON_OF_DR_NICOLAES_TULP_ASSET.readall(),
+        "binary": REMBRANDT_THE_ANATOMY_LESSON_OF_DR_NICOLAES_TULP_ASSET,
         "title": "The Anatomy Lesson of Dr. Nicolaes Tulp",
         "artistFirst": "",
         "artistLast": "Rembrandt",
@@ -795,7 +861,7 @@ PAINTINGS = [
         "framing": 7,
     },
     {
-        "binary": DAVID_THE_DEATH_OF_MARAT_ASSET.readall(),
+        "binary": DAVID_THE_DEATH_OF_MARAT_ASSET,
         "title": "The Death of Marat",
         "artistFirst": "Jacques-Louis",
         "artistLast": "David",
@@ -804,7 +870,7 @@ PAINTINGS = [
         "framing": 0,
     },
     {
-        "binary": GENTILESCHI_JUDITH_SLAYING_HOLOFERNES_ASSET.readall(),
+        "binary": GENTILESCHI_JUDITH_SLAYING_HOLOFERNES_ASSET,
         "title": "Judith Slaying Holofernes",
         "artistFirst": "Artemisia",
         "artistLast": "Gentileschi",
@@ -813,7 +879,7 @@ PAINTINGS = [
         "framing": 25,
     },
     {
-        "binary": LEIGHTON_FLAMING_JUNE_ASSET.readall(),
+        "binary": LEIGHTON_FLAMING_JUNE_ASSET,
         "title": "Flaming June",
         "artistFirst": "Frederic",
         "artistLast": "Leighton",
@@ -822,7 +888,7 @@ PAINTINGS = [
         "framing": 11,
     },
     {
-        "binary": THOMAS_THE_ECLIPSE_ASSET.readall(),
+        "binary": THOMAS_THE_ECLIPSE_ASSET,
         "title": "The Eclipse",
         "artistFirst": "Alma",
         "artistLast": "Thomas",

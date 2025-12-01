@@ -5,7 +5,6 @@ Description: View live visitor stats of your Homefiniti-hosted website.
 Author: Donald Mull Jr
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/envelope_icon.png", ENVELOPE_ICON_ASSET = "file")
@@ -51,8 +50,6 @@ def main(config):
         leads_today = config.str("leads_today", "999")
         logo = ONEIL_ICON
 
-    logo_decoded = base64.decode(logo)
-
     return render.Root(
         child = render.Row(
             expanded = True,
@@ -84,7 +81,7 @@ def main(config):
                 ),
                 render.Column(
                     children = [
-                        render.Image(src = logo_decoded),
+                        render.Image(src = logo),
                         render.Box(width = 2, height = 1),  # spacer
                         render.Row(
                             cross_align = "center",

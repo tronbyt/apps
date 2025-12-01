@@ -7,3 +7,5 @@ author: noahcolvin
 fileName: oh_highway_signs.star
 packageName: ohhighwaysigns
 recommendedInterval: 5
+broken: true
+brokenReason: "publicapi.ohgo.com: no such host"
