@@ -1288,19 +1288,19 @@ def get_schema():
             schema.Text(
                 id = "client_id",
                 name = "Spotify Client ID",
-                desc = "From your Spotify Developer app. See /apps/spotify/README.md for setup instructions.",
+                desc = "From your Spotify Developer app. See https://github.com/tronbyt/apps/blob/main/apps/spotify/README.md for setup instructions.",
                 icon = "key",
             ),
             schema.Text(
                 id = "client_secret",
                 name = "Spotify Client Secret",
-                desc = "From your Spotify Developer app. See /apps/spotify/README.md for setup instructions.",
+                desc = "From your Spotify Developer app. See https://github.com/tronbyt/apps/blob/main/apps/spotify/README.md for setup instructions.",
                 icon = "lock",
             ),
             schema.Text(
                 id = "refresh_token",
                 name = "Refresh Token",
-                desc = "Required before use. See /apps/spotify/README.md for setup instructions to generate this token.",
+                desc = "Required before use. See https://github.com/tronbyt/apps/blob/main/apps/spotify/README.md for setup instructions to generate this token.",
                 icon = "rotate",
             ),
 
