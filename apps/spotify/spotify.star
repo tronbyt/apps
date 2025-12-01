@@ -1112,14 +1112,10 @@ def render_idle(config, recent_state = None):
     # Show recent track if available
     if recent_state:
         # Render with dimmed colors to indicate not current
-        # Create a simple wrapper that returns dimmed colors
         dimmed_config = {
-            "display_mode": config.get("display_mode", MODE_FULL),
             "scroll_speed": config.get("scroll_speed", "50"),
-            "show_time": config.get("show_time", "true"),
             "track_color": LIGHT_GRAY,
             "artist_color": DARK_GRAY,
-            "progress_color": DARK_GRAY,
         }
 
         # Add "Last played" indicator somehow
