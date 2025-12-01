@@ -22,7 +22,7 @@ load("images/sunnyish.png", SUNNYISH_ASSET = "file")
 load("images/thundery.png", THUNDERY_ASSET = "file")
 load("images/tornady.png", TORNADY_ASSET = "file")
 load("images/windy.png", WINDY_ASSET = "file")
-load("render.star", "render", "canvas")
+load("render.star", "canvas", "render")
 load("sample_forecast_response.json", SAMPLE_FORECAST_RESPONSE = "file")
 load("sample_station_response.json", SAMPLE_STATION_RESPONSE = "file")
 load("schema.star", "schema")
@@ -32,14 +32,15 @@ TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?tok
 TEMPEST_OBSERVATION_URL = "https://swd.weatherflow.com/swd/rest/observations/station/%s?token=%s"
 
 def main(config):
-    # Determine display dimensions
+    # Get display dimensions and scale factor (following TeslaMate pattern)
+    scale = 2 if canvas.is2x() else 1
     width = canvas.width()
     height = canvas.height()
     
-    # Detect wide display (128x32 S3 Wide) vs standard (64x32)
+    # Detect wide display: 128x32 S3 Wide or 128x64 2x display
     is_wide = width > 64
     
-    # Adjust delay for animation speed (faster on wide for marquee)
+    # Adjust delay for animation speed
     delay = 35 if is_wide else 50
 
     if not "station" in config or not "token" in config:
@@ -132,12 +133,13 @@ def main(config):
     elif secondary_temp_choice == "4":
         secondary_temp_text = high_temp + "/" + low_temp
 
-    # Choose layout based on display size
+    # Choose layout based on display width
     if is_wide:
         return render_wide_layout(
             delay = delay,
             width = width,
             height = height,
+            scale = scale,
             icon = icon,
             temp = temp,
             secondary_temp_text = secondary_temp_text,
@@ -255,43 +257,27 @@ def render_standard_layout(delay, icon, temp, secondary_temp_text, humidity, rai
         ),
     )
 
-def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, high_temp, low_temp, humidity, rain, rain_units, pressure, pressure_icon, wind_dir, wind_speed, wind_unit, wind, condition_text, show_labels, show_conditions, show_highlow):
+def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_text, high_temp, low_temp, humidity, rain, rain_units, pressure, pressure_icon, wind_dir, wind_speed, wind_unit, wind, condition_text, show_labels, show_conditions, show_highlow):
     """
-    Render layout for wide 128x32 S3 Wide display
+    Render layout for wide displays (128x32 S3 Wide or 128x64 2x)
+    Uses scale factor for proper sizing on 2x displays.
     
-    Layout with labels:
-    +------------------------------------------------------------------+
-    |      |        |       | H:78° |      |        |       |    NW    |
-    | Icon |  72°   | F:68° | L:55° |  45% | 0.1in  | 30.1↑ |  12mph   |
-    |      |        |       |       |      |        |       |          |
-    +------------------------------------------------------------------+
-    |              Partly Cloudy (scrolling if enabled)                |
-    +------------------------------------------------------------------+
-    
-    Fonts for 32px height:
-    - tb-8: Height 8, good for main values
-    - CG-pixel-3x5-mono: Height 5, perfect for labels
-    - 5x8: Height 8, alternative for values
+    Fonts (using scale for 2x support):
+    - tb-8 (height 8) or terminus-16 (height 16 for 2x): main values
+    - CG-pixel-3x5-mono (height 5) or tom-thumb (height 6): labels
     """
     
-    # Font choices optimized for 32px height
-    # tb-8: height 8, variable width, good legibility
-    # CG-pixel-3x5-mono: height 5, very compact for labels
-    font_value = "tb-8"           # Height 8 - main values
-    font_label = "CG-pixel-3x5-mono"  # Height 5 - labels
+    # Font selection based on scale (following TeslaMate pattern)
+    font_std = "terminus-16" if scale == 2 else "tb-8"
+    font_small = "terminus-12" if scale == 2 else "CG-pixel-3x5-mono"
 
-    # Calculate available height for main content
-    # If showing conditions, reserve 6px at bottom (5px font + 1px padding)
-    main_height = height - 7 if show_conditions and condition_text else height - 2
-
-    # Build each data column
+    # Build columns for wide layout
     columns = []
     
-    # Column 1: Weather Icon (centered vertically)
+    # Column 1: Weather Icon
     columns.append(
         render.Box(
-            width = 18,
-            height = main_height,
+            width = 18 * scale,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -301,11 +287,10 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
         ),
     )
     
-    # Column 2: Current Temperature (large, prominent)
+    # Column 2: Current Temperature (large, green)
     columns.append(
         render.Box(
-            width = 22,
-            height = main_height,
+            width = 20 * scale,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -314,7 +299,7 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
                     render.Text(
                         content = temp,
                         color = "#22DD22",
-                        font = font_value,
+                        font = font_std,
                     ),
                 ],
             ),
@@ -325,8 +310,7 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
     if secondary_temp_text:
         columns.append(
             render.Box(
-                width = 20,
-                height = main_height,
+                width = 18 * scale,
                 child = render.Column(
                     expanded = True,
                     main_align = "center",
@@ -335,7 +319,7 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
                         render.Text(
                             content = secondary_temp_text,
                             color = "#FFFF00",
-                            font = font_value,
+                            font = font_std,
                         ),
                     ],
                 ),
@@ -347,33 +331,30 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
         highlow_children = []
         if show_labels:
             highlow_children.append(
-                render.Row(
-                    children = [
-                        render.Text(content = "H:", color = "#FF6644", font = font_label),
-                        render.Text(content = high_temp, color = "#FF6644", font = font_label),
-                    ],
+                render.Text(
+                    content = "H:" + high_temp,
+                    color = "#FF6644",
+                    font = font_small,
                 ),
             )
             highlow_children.append(
-                render.Row(
-                    children = [
-                        render.Text(content = "L:", color = "#44AAFF", font = font_label),
-                        render.Text(content = low_temp, color = "#44AAFF", font = font_label),
-                    ],
+                render.Text(
+                    content = "L:" + low_temp,
+                    color = "#44AAFF",
+                    font = font_small,
                 ),
             )
         else:
             highlow_children.append(
-                render.Text(content = high_temp, color = "#FF6644", font = font_label),
+                render.Text(content = high_temp, color = "#FF6644", font = font_small),
             )
             highlow_children.append(
-                render.Text(content = low_temp, color = "#44AAFF", font = font_label),
+                render.Text(content = low_temp, color = "#44AAFF", font = font_small),
             )
         
         columns.append(
             render.Box(
-                width = 18,
-                height = main_height,
+                width = 16 * scale,
                 child = render.Column(
                     expanded = True,
                     main_align = "center",
@@ -386,13 +367,12 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
     # Column 5: Humidity
     hum_children = []
     if show_labels:
-        hum_children.append(render.Text(content = "HUM", color = "#4444AA", font = font_label))
-    hum_children.append(render.Text(content = humidity, color = "#6666FF", font = font_value))
+        hum_children.append(render.Text(content = "HUM", color = "#4444AA", font = font_small))
+    hum_children.append(render.Text(content = humidity, color = "#6666FF", font = font_std))
     
     columns.append(
         render.Box(
-            width = 18,
-            height = main_height,
+            width = 16 * scale,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -405,13 +385,12 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
     # Column 6: Rain
     rain_children = []
     if show_labels:
-        rain_children.append(render.Text(content = "RAIN", color = "#666666", font = font_label))
-    rain_children.append(render.Text(content = rain + rain_units, color = "#888888", font = font_label))
+        rain_children.append(render.Text(content = "RAIN", color = "#666666", font = font_small))
+    rain_children.append(render.Text(content = rain + rain_units, color = "#888888", font = font_small))
     
     columns.append(
         render.Box(
-            width = 18,
-            height = main_height,
+            width = 16 * scale,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -424,13 +403,12 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
     # Column 7: Pressure
     pres_children = []
     if show_labels:
-        pres_children.append(render.Text(content = "PRES", color = "#666666", font = font_label))
-    pres_children.append(render.Text(content = pressure + pressure_icon, color = "#FFFFFF", font = font_label))
+        pres_children.append(render.Text(content = "PRES", color = "#666666", font = font_small))
+    pres_children.append(render.Text(content = pressure + pressure_icon, color = "#FFFFFF", font = font_small))
     
     columns.append(
         render.Box(
-            width = 22,
-            height = main_height,
+            width = 18 * scale,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -443,14 +421,13 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
     # Column 8: Wind
     wind_children = []
     if show_labels:
-        wind_children.append(render.Text(content = wind_dir, color = "#66AA66", font = font_label))
-        wind_children.append(render.Text(content = wind_speed + wind_unit, color = "#88FF88", font = font_label))
+        wind_children.append(render.Text(content = wind_dir, color = "#66AA66", font = font_small))
+        wind_children.append(render.Text(content = wind_speed + wind_unit, color = "#88FF88", font = font_small))
     else:
-        wind_children.append(render.Text(content = wind, color = "#88FF88", font = font_label))
+        wind_children.append(render.Text(content = wind, color = "#88FF88", font = font_small))
     
     columns.append(
         render.Box(
-            height = main_height,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -468,20 +445,25 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
         children = columns,
     )
 
-    # Build final layout
+    # Build final layout with optional conditions row
     if show_conditions and condition_text:
+        # Reserve space for conditions at bottom
         display_content = render.Column(
+            expanded = True,
+            main_align = "space_between",
             children = [
-                main_row,
-                render.Box(height = 1),  # Spacer
+                render.Box(
+                    height = height - (6 * scale),
+                    child = main_row,
+                ),
                 render.Marquee(
-                    width = width - 2,
+                    width = width - (2 * scale),
                     offset_start = width,
                     offset_end = width,
                     child = render.Text(
                         content = condition_text,
                         color = "#AAAAAA",
-                        font = font_label,
+                        font = font_small,
                     ),
                 ),
             ],
@@ -492,7 +474,7 @@ def render_wide_layout(delay, width, height, icon, temp, secondary_temp_text, hi
     return render.Root(
         delay = delay,
         child = render.Box(
-            padding = 1,
+            padding = 1 * scale,
             child = display_content,
         ),
     )
