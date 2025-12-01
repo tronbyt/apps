@@ -82,9 +82,9 @@ def main(config):
 
     # Get config options (with backward compatibility for old Feels_Dew key)
     secondary_temp_choice = config.get("secondary_temp", config.get("Feels_Dew", "1"))
-    show_labels = config.get("show_labels", "true") == "true"
-    show_conditions = config.get("show_conditions", "false") == "true"
-    show_highlow = config.get("show_highlow", "true") == "true"
+    show_labels = config.bool("show_labels", True)
+    show_conditions = config.bool("show_conditions", False)
+    show_highlow = config.bool("show_highlow", True)
 
     conditions = forecast_res["current_conditions"]
     
