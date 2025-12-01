@@ -1,0 +1,6 @@
+---
+id: teslamate-driving
+name: Teslamate Driving
+summary: Route Info about your Tesla
+desc: See where your Tesla is going and when it will get there. See readme for additional HA setup.
+author: Brombomb
