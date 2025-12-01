@@ -12,9 +12,20 @@ load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 
-def fetch_ha_data(ha_url, ha_token, name_entity, tesla_state_entity, route_dest_entity, route_dist_entity,
-        route_time_entity, traffic_delay_entity, trip_total_entity, trip_progress_entity, cache_duration):
+def fetch_ha_data(
+        ha_url,
+        ha_token,
+        name_entity,
+        tesla_state_entity,
+        route_dest_entity,
+        route_dist_entity,
+        route_time_entity,
+        traffic_delay_entity,
+        trip_total_entity,
+        trip_progress_entity,
+        cache_duration):
     """Fetch Tesla data from Home Assistant REST API using template endpoint for efficiency"""
+
     def pretty_json(value, indent = "  ", level = 0):
         value_type = type(value)
         if value_type == "dict":
@@ -28,7 +39,7 @@ def fetch_ha_data(ha_url, ha_token, name_entity, tesla_state_entity, route_dest_
                         indent * (level + 1),
                         json.encode(key),
                         pretty_json(value[key], indent, level + 1),
-                    )
+                    ),
                 )
             return "{\n%s\n%s}" % ("\n".join(rendered), indent * level)
         if value_type == "list":
@@ -57,7 +68,14 @@ def fetch_ha_data(ha_url, ha_token, name_entity, tesla_state_entity, route_dest_
 
     if not ha_url or not ha_token:
         return (
-            "Tesla", "Unknown", "Unknown", 0.0, 0.0, "Unknown", 0.0, 0.0
+            "Tesla",
+            "Unknown",
+            "Unknown",
+            0.0,
+            0.0,
+            "Unknown",
+            0.0,
+            0.0,
         )
 
     headers = {
@@ -82,9 +100,15 @@ def fetch_ha_data(ha_url, ha_token, name_entity, tesla_state_entity, route_dest_
     "trip_progress": "{{ states('%s') | float(0) }}"
 }
 """.strip() % (
-            name_entity, tesla_state_entity, route_dest_entity, route_dist_entity,
-            route_time_entity, traffic_delay_entity, trip_total_entity, trip_progress_entity
-        )
+        name_entity,
+        tesla_state_entity,
+        route_dest_entity,
+        route_dist_entity,
+        route_time_entity,
+        traffic_delay_entity,
+        trip_total_entity,
+        trip_progress_entity,
+    )
 
     # Make single request to template endpoint
     template_url = base_url + "/api/template"
@@ -117,15 +141,16 @@ def fetch_ha_data(ha_url, ha_token, name_entity, tesla_state_entity, route_dest_
                 normalized["trip_total"],
                 normalized["trip_progress"],
             )
+
     # Return defaults if request failed or parsing failed
     return ("Tesla", "Unknown", "Unknown", 0.0, 0.0, "Unknown", 0.0, 0.0)
 
 def main(config):
-
     ha_url = config.str("ha_url")
     ha_token = config.str("ha_token")
     name_entity = config.str("name_entity")
     tesla_state_entity = config.str("tesla_state_entity")
+
     # Align config keys with schema and HA entity names
     route_dest_entity = config.str("active_route_destination_entity")
     route_time_entity = config.str("active_route_minutes_entity")
@@ -141,10 +166,26 @@ def main(config):
 
     # Fetch all data
     (
-        name, tesla_state, route_dest, route_dist, route_time, traffic_delay, trip_total, trip_progress
+        name,
+        tesla_state,
+        route_dest,
+        route_dist,
+        route_time,
+        traffic_delay,
+        trip_total,
+        trip_progress,
     ) = fetch_ha_data(
-        ha_url, ha_token, name_entity, tesla_state_entity, route_dest_entity, route_dist_entity,
-        route_time_entity, traffic_delay_entity, trip_total_entity, trip_progress_entity, cache_duration
+        ha_url,
+        ha_token,
+        name_entity,
+        tesla_state_entity,
+        route_dest_entity,
+        route_dist_entity,
+        route_time_entity,
+        traffic_delay_entity,
+        trip_total_entity,
+        trip_progress_entity,
+        cache_duration,
     )
 
     # Skip render if not driving
@@ -155,7 +196,7 @@ def main(config):
     dest_str = route_dest
 
     # Defensive: ensure all values are strings and not None
-    def safe_str(val, default="Unknown"):
+    def safe_str(val, default = "Unknown"):
         if val == None:
             return default
         return str(val)
@@ -200,7 +241,7 @@ def main(config):
             return "#FBBC04C0"  # orange
         if val < 30:
             return "#EA4335C0"  # red
-        return "#A92727C0"     # dark red
+        return "#A92727C0"  # dark red
 
     # Full-width bar (62px fill + 2px border = 64px total)
     bar_width = 62
@@ -235,7 +276,7 @@ def main(config):
     for pos in range(0, bar_width + shimmer_w, 2):
         left_gap = 1
         visible_w = 0
-        if(pos < shimmer_w):
+        if (pos < shimmer_w):
             left_gap = 1
             visible_w = pos  # grow from 0 -> shimmer_w
         else:
@@ -255,7 +296,7 @@ def main(config):
                             cross_align = "start",
                         ),
                     ],
-                )
+                ),
             )
         else:
             shimmer_frames.append(bar_container)
@@ -291,14 +332,14 @@ def main(config):
     header_row = render.Row(
         children = [
             render.Emoji(emoji = "📍", height = 8),
-            render.Text(content = " %s" % safe_str(dest_str) , color = dest_color ),
+            render.Text(content = " %s" % safe_str(dest_str), color = dest_color),
         ],
     )
 
     info_row = render.Row(
         children = [
             render.Emoji(emoji = "🕒", height = 8),
-            render.Text(content = format_minutes(route_time), color = time_color ),
+            render.Text(content = format_minutes(route_time), color = time_color),
         ],
     )
 
@@ -308,7 +349,7 @@ def main(config):
                 header_row,
                 bar_with_car,
                 info_row,
-                render.Text(content = name, color = car_color ),
+                render.Text(content = name, color = car_color),
             ],
         ),
     )
@@ -359,11 +400,11 @@ def get_schema():
                 default = "sensor.tesla_active_route_distance",
             ),
             schema.Text(
-                id="active_route_total_distance_entity",
-                name="Active Route Total Distance",
-                desc="Entity for active route total distance",
-                icon="rulerCombined",
-                default="sensor.tesla_active_route_total_distance",
+                id = "active_route_total_distance_entity",
+                name = "Active Route Total Distance",
+                desc = "Entity for active route total distance",
+                icon = "rulerCombined",
+                default = "sensor.tesla_active_route_total_distance",
             ),
             schema.Text(
                 id = "active_route_minutes_entity",
