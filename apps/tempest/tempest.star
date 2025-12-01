@@ -125,11 +125,14 @@ def main(config):
     # Build secondary temperature display
     secondary_temp_text = None
     if secondary_temp_choice == "1":
-        secondary_temp_text = ("F:" if show_labels else "") + feels
+        secondary_temp_text = ("F:" if is_wide and show_labels else "") + feels
     elif secondary_temp_choice == "2":
-        secondary_temp_text = ("D:" if show_labels else "") + dew_pt
+        secondary_temp_text = ("D:" if is_wide and show_labels else "") + dew_pt
     elif secondary_temp_choice == "4":
-        secondary_temp_text = high_temp + "/" + low_temp
+        # On wide displays, the dedicated H/L column is controlled by `show_highlow`.
+        # This option provides H/L for standard displays, or as a fallback for wide displays if the dedicated column is off.
+        if not (is_wide and show_highlow):
+            secondary_temp_text = high_temp + "/" + low_temp
 
     # Choose layout based on display width
     if is_wide:
