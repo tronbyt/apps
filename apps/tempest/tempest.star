@@ -36,15 +36,9 @@ def main(config):
     width = canvas.width()
     height = canvas.height()
     
-    # Determine scale factor
-    # S3 Wide is 128x32 - should use scale=1
-    # True 2x is 128x64 - should use scale=2
-    # Standard is 64x32 - should use scale=1
-    # Force scale=1 for any 32px height display
-    if height > 32 and canvas.is2x():
-        scale = 2
-    else:
-        scale = 1
+    # S3 Wide is 128x64 - canvas.is2x() returns true
+    # Standard Tidbyt is 64x32 - canvas.is2x() returns false
+    scale = 2 if canvas.is2x() else 1
     
     # Detect wide display based on width
     is_wide = width > 64
@@ -271,25 +265,28 @@ def render_standard_layout(delay, icon, temp, secondary_temp_text, humidity, rai
 
 def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_text, high_temp, low_temp, humidity, rain, rain_units, pressure, pressure_icon, wind_dir, wind_speed, wind_unit, wind, condition_text, show_labels, show_conditions, show_highlow):
     """
-    Render layout for wide displays (128x32 S3 Wide or 128x64 2x)
-    Uses scale factor for proper sizing on 2x displays.
+    Render layout for wide displays (128x64 S3 Wide / 2x display)
     
-    Fonts (using scale for 2x support):
-    - tb-8 (height 8) or terminus-16 (height 16 for 2x): main values
-    - CG-pixel-3x5-mono (height 5) or tom-thumb (height 6): labels
+    For 128x64:
+    - Use larger fonts (terminus-16, terminus-12)
+    - Column widths should sum to ~126 (leaving 2px for padding)
     """
     
-    # Font selection based on scale (following TeslaMate pattern)
+    # Font selection for 2x display
     font_std = "terminus-16" if scale == 2 else "tb-8"
     font_small = "terminus-12" if scale == 2 else "CG-pixel-3x5-mono"
 
+    # Calculate column widths to fit in 128px width
+    # Don't multiply by scale - widths are absolute pixels
+    # 8 columns need to fit in ~126px (128 - 2 for padding)
+    
     # Build columns for wide layout
     columns = []
     
-    # Column 1: Weather Icon
+    # Column 1: Weather Icon (~20px)
     columns.append(
         render.Box(
-            width = 18 * scale,
+            width = 20,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -299,10 +296,10 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
         ),
     )
     
-    # Column 2: Current Temperature (large, green)
+    # Column 2: Current Temperature (~22px)
     columns.append(
         render.Box(
-            width = 20 * scale,
+            width = 22,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -318,11 +315,11 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
         ),
     )
     
-    # Column 3: Secondary temp (feels like / dew point)
+    # Column 3: Secondary temp (~18px) - only if set
     if secondary_temp_text:
         columns.append(
             render.Box(
-                width = 18 * scale,
+                width = 18,
                 child = render.Column(
                     expanded = True,
                     main_align = "center",
@@ -338,7 +335,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
             ),
         )
     
-    # Column 4: High/Low temps (stacked)
+    # Column 4: High/Low temps (~18px)
     if show_highlow:
         highlow_children = []
         if show_labels:
@@ -366,7 +363,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
         
         columns.append(
             render.Box(
-                width = 16 * scale,
+                width = 18,
                 child = render.Column(
                     expanded = True,
                     main_align = "center",
@@ -376,7 +373,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
             ),
         )
     
-    # Column 5: Humidity
+    # Column 5: Humidity (~14px)
     hum_children = []
     if show_labels:
         hum_children.append(render.Text(content = "HUM", color = "#4444AA", font = font_small))
@@ -384,7 +381,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
     
     columns.append(
         render.Box(
-            width = 16 * scale,
+            width = 14,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -394,7 +391,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
         ),
     )
     
-    # Column 6: Rain
+    # Column 6: Rain (~14px)
     rain_children = []
     if show_labels:
         rain_children.append(render.Text(content = "RAIN", color = "#666666", font = font_small))
@@ -402,7 +399,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
     
     columns.append(
         render.Box(
-            width = 16 * scale,
+            width = 14,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -412,7 +409,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
         ),
     )
     
-    # Column 7: Pressure
+    # Column 7: Pressure (~16px)
     pres_children = []
     if show_labels:
         pres_children.append(render.Text(content = "PRES", color = "#666666", font = font_small))
@@ -420,7 +417,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
     
     columns.append(
         render.Box(
-            width = 18 * scale,
+            width = 16,
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -430,7 +427,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
         ),
     )
     
-    # Column 8: Wind
+    # Column 8: Wind (remaining space)
     wind_children = []
     if show_labels:
         wind_children.append(render.Text(content = wind_dir, color = "#66AA66", font = font_small))
@@ -459,17 +456,17 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
 
     # Build final layout with optional conditions row
     if show_conditions and condition_text:
-        # Reserve space for conditions at bottom
+        # Reserve space for conditions at bottom (~12px for terminus-12)
         display_content = render.Column(
             expanded = True,
             main_align = "space_between",
             children = [
                 render.Box(
-                    height = height - (6 * scale),
+                    height = height - 14,
                     child = main_row,
                 ),
                 render.Marquee(
-                    width = width - (2 * scale),
+                    width = width - 4,
                     offset_start = width,
                     offset_end = width,
                     child = render.Text(
@@ -486,7 +483,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
     return render.Root(
         delay = delay,
         child = render.Box(
-            padding = 1 * scale,
+            padding = 1,
             child = display_content,
         ),
     )
