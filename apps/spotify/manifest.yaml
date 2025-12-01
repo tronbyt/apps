@@ -1,14 +1,7 @@
----
-# Spotify Now Playing - Ultimate Edition
-# For Tronbyt / Tidbyt displays
-
-id: spotify-now-playing
+id: spotify
 name: Spotify
-summary: Display playing track
-
+summary: Current track
+desc: Display your currently playing Spotify track with album art, progress bar, and playback info. Requires a one-time OAuth setup to obtain a refresh token - see instructions in spotify.star.
 author: gshepperd
-version: 2.0.0
-
-# App source file
-source: spotify.star
-
+fileName: spotify.star
+packageName: spotify
