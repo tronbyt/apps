@@ -326,7 +326,6 @@ def pixel_scatter_frames(primary, secondary):
     frames.append(full_frame(primary))
     return frames
 
-
 def cylon_eye_frames(primary, secondary):
     width = canvas.width()
     height = canvas.height()
