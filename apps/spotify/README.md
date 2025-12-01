@@ -33,8 +33,8 @@ A feature-rich Spotify display app that shows your currently playing music with 
 │ ┌──────────────┐                                               │
 │ │              │  Bohemian Rhapsody                            │
 │ │  Album Art   │  Queen                                        │
-│ │   32x32      │  ▶ ████████░░░░░░                             │
-│ │              │                    -2:45                       │
+│ │   32x32      │  > ████████░░░░░░                             │
+│ │              │              -2:45                            │
 │ └──────────────┘                                               │
 └────────────────────────────────────────────────────────────────┘
 
@@ -49,14 +49,13 @@ A feature-rich Spotify display app that shows your currently playing music with 
 
 ┌────────────────────────────────────────────────────────────────┐
 │ ART FOCUS MODE                                                 │
-│                                                                │
 │               ┌────────────────────┐                           │
 │               │                    │                           │
 │               │    Large Album     │                           │
-│               │       Art          │                           │
+│               │        Art         │                           │
 │               │                    │                           │
 │               │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                           │
-│               │ Bohemian Rhapsod..│                           │
+│               │ Bohemian Rhapsod.. │                           │
 │               └────────────────────┘                           │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -179,10 +178,10 @@ Tronbyt doesn't have Tidbyt's cloud OAuth infrastructure. This app works around 
 │   You                   Browser              Spotify        │
 │    │                       │                    │           │
 │    │  Run script           │                    │           │
-│    │──────────────────────>│  Authorize        │           │
+│    │──────────────────────>│  Authorize         │           │
 │    │                       │───────────────────>│           │
 │    │                       │<───────────────────│           │
-│    │<──────────────────────│  Auth code        │           │
+│    │<──────────────────────│  Auth code         │           │
 │    │                                            │           │
 │    │  Exchange code for tokens                  │           │
 │    │───────────────────────────────────────────>│           │
@@ -198,13 +197,13 @@ Tronbyt doesn't have Tidbyt's cloud OAuth infrastructure. This app works around 
 │      │                      │                      │        │
 │      │  Render app          │                      │        │
 │      │─────────────────────>│                      │        │
-│      │                      │  Refresh token      │        │
+│      │                      │  Refresh token       │        │
 │      │                      │─────────────────────>│        │
 │      │                      │<─────────────────────│        │
 │      │                      │  Access token        │        │
 │      │                      │  (cached 45min)      │        │
 │      │                      │                      │        │
-│      │                      │  Get now playing    │        │
+│      │                      │  Get now playing     │        │
 │      │                      │─────────────────────>│        │
 │      │                      │<─────────────────────│        │
 │      │<─────────────────────│                      │        │
