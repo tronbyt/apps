@@ -7,3 +7,4 @@ author: jordan-p
 fileName: dense_time_temp.star
 packageName: densetimetemp
 recommendedInterval: 5
+broken: true
