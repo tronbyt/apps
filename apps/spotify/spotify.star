@@ -1,17 +1,150 @@
 """
-Spotify Now Playing - Ultimate Edition for Tronbyt
+Spotify Now Playing - Ultimate Edition for Tronbyt/Tidbyt
 =========================================================
 
 Author: gshepperd
 Version: 2.0.0
+
+================================================================================
+                            INSTALLATION INSTRUCTIONS
+================================================================================
+
+STEP 1: CREATE A SPOTIFY DEVELOPER APP
+--------------------------------------
+1. Go to: https://developer.spotify.com/dashboard
+2. Log in with your Spotify account
+3. Click "Create App"
+4. Fill in the form:
+   - App name: "Tronbyt Now Playing" (or whatever you like)
+   - App description: "Display currently playing on Tronbyt"
+   - Website: (leave blank or enter any URL)
+   - Redirect URI: http://127.0.0.1:8888/callback   <-- IMPORTANT!
+     (Click "Add" after entering the URI)
+   - Which API/SDKs are you planning to use?
+     [x] Web API   <-- CHECK THIS ONE
+     [ ] Web Playback SDK (not needed)
+     [ ] Android (not needed)
+     [ ] iOS (not needed)
+5. Check the Terms of Service box and click "Save"
+6. Click "Settings" on your new app
+7. Copy your "Client ID" and "Client Secret" (click "View client secret")
+
+STEP 2: GET YOUR REFRESH TOKEN
+------------------------------
+Run the included Python script on the SAME MACHINE as your web browser:
+
+    python3 get_refresh_token.py
+
+The script will:
+1. Ask for your Client ID and Client Secret
+2. Open your browser to authorize with Spotify
+3. Display your refresh token when complete
+
+Save all three values:
+- Client ID
+- Client Secret  
+- Refresh Token
+
+ALTERNATIVE: MANUAL METHOD (if script doesn't work)
+---------------------------------------------------
+If you can't run the Python script on the same machine as your browser
+(e.g., you're SSH'd into a remote server), use this manual method:
+
+1. Open this URL in your browser (replace YOUR_CLIENT_ID):
+
+   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http://127.0.0.1:8888/callback&scope=user-read-currently-playing%20user-read-playback-state%20user-read-recently-played&show_dialog=true
+
+2. After authorizing, the page won't load (that's expected). Copy the 
+   "code=" value from the URL bar. It will look like:
+   
+   http://127.0.0.1:8888/callback?code=AQCxxxVERYLONGSTRINGxxx
+
+3. Run this curl command (replace YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, 
+   and YOUR_CODE_HERE):
+
+   curl -X POST "https://accounts.spotify.com/api/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "grant_type=authorization_code" \
+     -d "code=YOUR_CODE_HERE" \
+     -d "redirect_uri=http://127.0.0.1:8888/callback" \
+     -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET"
+
+4. Copy the "refresh_token" value from the JSON response.
+
+NOTE: The code expires in ~10 minutes, so run curl quickly after step 2.
+
+STEP 3: CONFIGURE IN TRONBYT
+----------------------------
+1. Open your Tronbyt web interface (usually http://your-server:8000)
+2. Add this app (upload spotify.star or add as custom app)
+3. Configure these fields:
+   - Spotify Client ID:     [paste your Client ID]
+   - Spotify Client Secret: [paste your Client Secret]
+   - Refresh Token:         [paste your Refresh Token]
+4. Optionally configure display mode, colors, etc.
+5. Save and enjoy!
+
+STEP 4: PLAY MUSIC
+------------------
+Start playing something on Spotify. Within 30-60 seconds (depending on
+your Tronbyt refresh rate), you'll see it on your display!
+
+================================================================================
+                                 TROUBLESHOOTING
+================================================================================
+
+"Setup needed" error:
+  -> Your credentials aren't configured. Add them in app settings.
+
+"Auth Error: Token revoked" error:
+  -> Run get_refresh_token.py again to get a new token.
+  -> This happens if you revoked access or deleted your Spotify app.
+
+"Auth Error: Bad credentials" error:
+  -> Double-check your Client ID and Client Secret.
+
+Nothing displays / black screen:
+  -> Make sure Spotify is actually playing (not paused).
+  -> Some private sessions don't report to the API.
+  -> Check that "Show When Idle" is enabled in settings.
+
+Album art not showing:
+  -> Local files don't have artwork.
+  -> Try a different display mode.
+
+================================================================================
+                                    FEATURES
+================================================================================
+
+Display Modes:
+- Full:      Album art + track + artist + progress bar + time remaining
+- Compact:   Album art + track + artist (no progress bar)
+- Art Focus: Large album art with text overlay at bottom
+- Text Only: No art, full width for text + progress bar
+- Minimal:   Just track and artist, centered
+
+Content Support:
+- Music tracks with full metadata
+- Podcast episodes (show name, episode title)
+- Paused playback detection
+- Recently played fallback (optional)
+- Graceful handling of Spotify ads
+
+Robustness:
+- Exponential backoff on rate limits
+- Pre-emptive token refresh (at 45 min, expires at 60)
+- Multi-layer caching (tokens 45min, album art 24hr)
+- Graceful degradation (shows text if art fails)
+- Actionable error messages
+
+================================================================================
 """
 
-load("render.star", "render")
-load("http.star", "http")
-load("encoding/base64.star", "base64")
 load("cache.star", "cache")
+load("encoding/base64.star", "base64")
+load("http.star", "http")
+load("render.star", "render")
 load("schema.star", "schema")
-load("time.star", "time")
 
 # =============================================================================
 # CONSTANTS
@@ -118,6 +251,7 @@ def text_width_estimate(text, font):
     Estimate pixel width of text.
     This is approximate since we don't have actual font metrics.
     """
+
     # Rough character widths for common fonts
     widths = {
         "tb-8": 6,
@@ -141,7 +275,7 @@ def get_error_backoff():
 
 def set_error_backoff(seconds):
     """Set error backoff time."""
-    cache.set(cache_key("error_backoff"), str(seconds), ttl_seconds=seconds + 10)
+    cache.set(cache_key("error_backoff"), str(seconds), ttl_seconds = seconds + 10)
 
 def increase_error_backoff():
     """Increase error backoff exponentially."""
@@ -155,7 +289,7 @@ def increase_error_backoff():
 
 def clear_error_backoff():
     """Clear error backoff on success."""
-    cache.set(cache_key("error_backoff"), "", ttl_seconds=1)
+    cache.set(cache_key("error_backoff"), "", ttl_seconds = 1)
 
 def hash_string(s):
     """Simple string hash for cache keys."""
@@ -179,6 +313,7 @@ def get_access_token(client_id, client_secret, refresh_token):
     Get a valid access token, refreshing if necessary.
     Implements caching and pre-emptive refresh.
     """
+
     # Check if we're in error backoff
     backoff = get_error_backoff()
     if backoff > 0:
@@ -199,13 +334,13 @@ def get_access_token(client_id, client_secret, refresh_token):
 
     # Make token request
     resp = http.post(
-        url=TOKEN_URL,
-        headers={
+        url = TOKEN_URL,
+        headers = {
             "Authorization": auth_header,
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        body=body,
-        ttl_seconds=30,  # Don't cache this request
+        body = body,
+        ttl_seconds = 30,  # Don't cache this request
     )
 
     # Handle response
@@ -214,7 +349,7 @@ def get_access_token(client_id, client_secret, refresh_token):
         token = data.get("access_token")
         if token:
             # Cache token
-            cache.set(cache_key("access_token"), token, ttl_seconds=TOKEN_CACHE_TTL)
+            cache.set(cache_key("access_token"), token, ttl_seconds = TOKEN_CACHE_TTL)
             clear_error_backoff()
             return token, None
         return None, "No token in response"
@@ -232,7 +367,7 @@ def get_access_token(client_id, client_secret, refresh_token):
 
     if resp.status_code == 429:
         # Rate limited
-        increase_error_backoff()
+        backoff = increase_error_backoff()
         return None, "Rate limited"
 
     # Other errors - implement backoff
@@ -249,9 +384,9 @@ def fetch_player_state(access_token):
     Returns dict with player info or None.
     """
     resp = http.get(
-        url=PLAYER_URL,
-        headers={"Authorization": "Bearer " + access_token},
-        ttl_seconds=5,  # Short cache for real-time data
+        url = PLAYER_URL,
+        headers = {"Authorization": "Bearer " + access_token},
+        ttl_seconds = 5,  # Short cache for real-time data
     )
 
     if resp.status_code == 204:
@@ -259,7 +394,7 @@ def fetch_player_state(access_token):
 
     if resp.status_code == 401:
         # Token expired - clear cache
-        cache.set(cache_key("access_token"), "", ttl_seconds=1)
+        cache.set(cache_key("access_token"), "", ttl_seconds = 1)
         return None
 
     if resp.status_code != 200:
@@ -272,20 +407,21 @@ def fetch_currently_playing(access_token):
     Fetch currently playing track/episode.
     Returns dict with track info or None.
     """
+
     # Include additional_types to get podcast episodes
     url = NOW_PLAYING_URL + "?additional_types=track,episode"
 
     resp = http.get(
-        url=url,
-        headers={"Authorization": "Bearer " + access_token},
-        ttl_seconds=5,
+        url = url,
+        headers = {"Authorization": "Bearer " + access_token},
+        ttl_seconds = 5,
     )
 
     if resp.status_code == 204:
         return None
 
     if resp.status_code == 401:
-        cache.set(cache_key("access_token"), "", ttl_seconds=1)
+        cache.set(cache_key("access_token"), "", ttl_seconds = 1)
         return None
 
     if resp.status_code != 200:
@@ -298,9 +434,9 @@ def fetch_recently_played(access_token):
     url = RECENTLY_PLAYED_URL + "?limit=1"
 
     resp = http.get(
-        url=url,
-        headers={"Authorization": "Bearer " + access_token},
-        ttl_seconds=60,  # Cache recent tracks longer
+        url = url,
+        headers = {"Authorization": "Bearer " + access_token},
+        ttl_seconds = 60,  # Cache recent tracks longer
     )
 
     if resp.status_code != 200:
@@ -329,13 +465,13 @@ def fetch_album_art(url):
     if cached:
         return cached
 
-    resp = http.get(url, ttl_seconds=ART_CACHE_TTL)
+    resp = http.get(url, ttl_seconds = ART_CACHE_TTL)
 
     if resp.status_code != 200:
         return None
 
     art_data = resp.body()
-    cache.set(art_cache_key, art_data, ttl_seconds=ART_CACHE_TTL)
+    cache.set(art_cache_key, art_data, ttl_seconds = ART_CACHE_TTL)
 
     return art_data
 
@@ -416,7 +552,7 @@ def parse_episode(item):
         "explicit": explicit,
     }
 
-def parse_playback_state(data, player_data=None):
+def parse_playback_state(data, player_data = None):
     """
     Parse full playback state from API responses.
     Combines currently playing and player state data.
@@ -474,6 +610,7 @@ def get_playback_info(access_token, include_recent):
     Get current playback info, optionally falling back to recent.
     Returns (playback_dict, is_current, error_string)
     """
+
     # Try currently playing
     now_playing = fetch_currently_playing(access_token)
 
@@ -527,18 +664,18 @@ def render_progress_bar(progress_ms, duration_ms, width, color, bg_color):
         filled_width = 1
 
     return render.Stack(
-        children=[
+        children = [
             # Background
             render.Box(
-                width=width,
-                height=2,
-                color=bg_color,
+                width = width,
+                height = 2,
+                color = bg_color,
             ),
             # Filled portion
             render.Box(
-                width=filled_width,
-                height=2,
-                color=color,
+                width = filled_width,
+                height = 2,
+                color = color,
             ),
         ],
     )
@@ -549,55 +686,55 @@ def render_time_display(progress_ms, duration_ms, color):
     total = format_duration(duration_ms)
 
     return render.Text(
-        content=elapsed + "/" + total,
-        font=FONT_TIME,
-        color=color,
+        content = elapsed + "/" + total,
+        font = FONT_TIME,
+        color = color,
     )
 
 def render_playback_icon(is_playing, color):
     """Render play/pause indicator."""
     if is_playing:
         # Play triangle (approximated with text)
-        return render.Text(content="▶", font=FONT_SMALL, color=color)
+        return render.Text(content = "▶", font = FONT_SMALL, color = color)
     else:
         # Pause bars
-        return render.Text(content="❚❚", font=FONT_SMALL, color=color)
+        return render.Text(content = "❚❚", font = FONT_SMALL, color = color)
 
 def render_status_icons(state, color):
     """Render shuffle/repeat status icons."""
     icons = []
 
     if state.get("shuffle"):
-        icons.append(render.Text(content="⤮", font=FONT_SMALL, color=color))
+        icons.append(render.Text(content = "⤮", font = FONT_SMALL, color = color))
 
     repeat = state.get("repeat", "off")
     if repeat == "track":
-        icons.append(render.Text(content="↺1", font=FONT_SMALL, color=color))
+        icons.append(render.Text(content = "↺1", font = FONT_SMALL, color = color))
     elif repeat == "context":
-        icons.append(render.Text(content="↺", font=FONT_SMALL, color=color))
+        icons.append(render.Text(content = "↺", font = FONT_SMALL, color = color))
 
     if not icons:
         return None
 
     return render.Row(
-        children=icons,
-        main_align="end",
+        children = icons,
+        main_align = "end",
     )
 
-def render_text_smart(text, width, font, color, scroll_speed):
+def render_text_smart(text, width, font, color):
     """
     Render text, using marquee only if needed.
     This reduces visual noise for short text.
     """
     if needs_scroll(text, width, font):
         return render.Marquee(
-            width=width,
-            child=render.Text(content=text, font=font, color=color),
-            offset_start=width,
-            offset_end=width,
+            width = width,
+            child = render.Text(content = text, font = font, color = color),
+            offset_start = width,
+            offset_end = width,
         )
     else:
-        return render.Text(content=text, font=font, color=color)
+        return render.Text(content = text, font = font, color = color)
 
 def render_album_art(art_url, size, fallback_color):
     """
@@ -608,24 +745,24 @@ def render_album_art(art_url, size, fallback_color):
         art_data = fetch_album_art(art_url)
         if art_data:
             return render.Image(
-                src=art_data,
-                width=size,
-                height=size,
+                src = art_data,
+                width = size,
+                height = size,
             )
 
     # Fallback: colored box with music note
     return render.Stack(
-        children=[
-            render.Box(width=size, height=size, color=fallback_color),
+        children = [
+            render.Box(width = size, height = size, color = fallback_color),
             render.Box(
-                width=size,
-                height=size,
-                child=render.Column(
-                    expanded=True,
-                    main_align="center",
-                    cross_align="center",
-                    children=[
-                        render.Text(content="♪", font=FONT_LARGE, color=WHITE),
+                width = size,
+                height = size,
+                child = render.Column(
+                    expanded = True,
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        render.Text(content = "♪", font = FONT_LARGE, color = WHITE),
                     ],
                 ),
             ),
@@ -658,12 +795,12 @@ def render_full_mode(state, config):
 
     # Track name
     text_children.append(
-        render_text_smart(state["name"], text_width, FONT_TRACK, track_color, scroll_speed),
+        render_text_smart(state["name"], text_width, FONT_TRACK, track_color),
     )
 
     # Artist
     text_children.append(
-        render_text_smart(state["artist"], text_width, FONT_ARTIST, artist_color, scroll_speed),
+        render_text_smart(state["artist"], text_width, FONT_ARTIST, artist_color),
     )
 
     # Progress bar row
@@ -678,8 +815,8 @@ def render_full_mode(state, config):
     bar_width = text_width - 12 if show_time else text_width - 6
     progress_row_children.append(
         render.Padding(
-            pad=(1, 0, 1, 0),
-            child=render_progress_bar(
+            pad = (1, 0, 1, 0),
+            child = render_progress_bar(
                 state["progress_ms"],
                 state["duration_ms"],
                 bar_width,
@@ -691,8 +828,8 @@ def render_full_mode(state, config):
 
     text_children.append(
         render.Row(
-            children=progress_row_children,
-            cross_align="center",
+            children = progress_row_children,
+            cross_align = "center",
         ),
     )
 
@@ -702,30 +839,30 @@ def render_full_mode(state, config):
         time_str = "-" + format_duration(remaining)
         text_children.append(
             render.Row(
-                expanded=True,
-                main_align="end",
-                children=[
-                    render.Text(content=time_str, font=FONT_TIME, color=DARK_GRAY),
+                expanded = True,
+                main_align = "end",
+                children = [
+                    render.Text(content = time_str, font = FONT_TIME, color = DARK_GRAY),
                 ],
             ),
         )
 
     text_column = render.Column(
-        expanded=True,
-        main_align="space_evenly",
-        cross_align="start",
-        children=text_children,
+        expanded = True,
+        main_align = "space_evenly",
+        cross_align = "start",
+        children = text_children,
     )
 
     return render.Root(
-        delay=scroll_speed,
-        child=render.Row(
-            expanded=True,
-            children=[
+        delay = scroll_speed,
+        child = render.Row(
+            expanded = True,
+            children = [
                 art,
                 render.Padding(
-                    pad=(1, 0, 0, 0),
-                    child=text_column,
+                    pad = (1, 0, 0, 0),
+                    child = text_column,
                 ),
             ],
         ),
@@ -745,8 +882,8 @@ def render_compact_mode(state, config):
 
     # Art with small padding
     art = render.Padding(
-        pad=(1, 1, 1, 1),
-        child=render_album_art(state["art_url"], art_size, DARK_GRAY),
+        pad = (1, 1, 1, 1),
+        child = render_album_art(state["art_url"], art_size, DARK_GRAY),
     )
 
     # Playback indicator
@@ -755,22 +892,22 @@ def render_compact_mode(state, config):
         indicator = "❚❚ "
 
     text_column = render.Column(
-        expanded=True,
-        main_align="center",
-        cross_align="start",
-        children=[
-            render_text_smart(state["name"], text_width, FONT_TRACK, track_color, scroll_speed),
-            render.Box(height=1),
-            render_text_smart(indicator + state["artist"], text_width, FONT_ARTIST, artist_color, scroll_speed),
+        expanded = True,
+        main_align = "center",
+        cross_align = "start",
+        children = [
+            render_text_smart(state["name"], text_width, FONT_TRACK, track_color),
+            render.Box(height = 1),
+            render_text_smart(indicator + state["artist"], text_width, FONT_ARTIST, artist_color),
         ],
     )
 
     return render.Root(
-        delay=scroll_speed,
-        child=render.Row(
-            expanded=True,
-            cross_align="center",
-            children=[art, text_column],
+        delay = scroll_speed,
+        child = render.Row(
+            expanded = True,
+            cross_align = "center",
+            children = [art, text_column],
         ),
     )
 
@@ -791,21 +928,21 @@ def render_art_focus_mode(state, config):
         overlay_text = "❚❚ " + overlay_text
 
     text_overlay = render.Column(
-        expanded=True,
-        main_align="end",
-        children=[
+        expanded = True,
+        main_align = "end",
+        children = [
             render.Box(
-                width=DISPLAY_WIDTH,
-                height=10,
-                color="#00000099",  # Semi-transparent black
-                child=render.Padding(
-                    pad=(1, 1, 1, 1),
-                    child=render.Marquee(
-                        width=DISPLAY_WIDTH - 2,
-                        child=render.Text(
-                            content=overlay_text,
-                            font=FONT_ARTIST,
-                            color=track_color,
+                width = DISPLAY_WIDTH,
+                height = 10,
+                color = "#00000099",  # Semi-transparent black
+                child = render.Padding(
+                    pad = (1, 1, 1, 1),
+                    child = render.Marquee(
+                        width = DISPLAY_WIDTH - 2,
+                        child = render.Text(
+                            content = overlay_text,
+                            font = FONT_ARTIST,
+                            color = track_color,
                         ),
                     ),
                 ),
@@ -814,13 +951,13 @@ def render_art_focus_mode(state, config):
     )
 
     return render.Root(
-        delay=scroll_speed,
-        child=render.Stack(
-            children=[
+        delay = scroll_speed,
+        child = render.Stack(
+            children = [
                 render.Row(
-                    expanded=True,
-                    main_align="center",
-                    children=[art],
+                    expanded = True,
+                    main_align = "center",
+                    children = [art],
                 ),
                 text_overlay,
             ],
@@ -843,22 +980,22 @@ def render_text_only_mode(state, config):
 
     # Track with play/pause
     track_row = render.Row(
-        children=[
+        children = [
             render_playback_icon(state["is_playing"], LIGHT_GRAY),
-            render.Box(width=2),
-            render_text_smart(state["name"], text_width - 8, FONT_TRACK, track_color, scroll_speed),
+            render.Box(width = 2),
+            render_text_smart(state["name"], text_width - 8, FONT_TRACK, track_color),
         ],
-        cross_align="center",
+        cross_align = "center",
     )
     children.append(track_row)
 
     # Artist
     children.append(
-        render_text_smart(state["artist"], text_width, FONT_ARTIST, artist_color, scroll_speed),
+        render_text_smart(state["artist"], text_width, FONT_ARTIST, artist_color),
     )
 
     # Progress bar spanning full width
-    children.append(render.Box(height=2))
+    children.append(render.Box(height = 2))
     children.append(
         render_progress_bar(
             state["progress_ms"],
@@ -874,23 +1011,23 @@ def render_text_only_mode(state, config):
     total = format_duration(state["duration_ms"])
     children.append(
         render.Row(
-            expanded=True,
-            main_align="space_between",
-            children=[
-                render.Text(content=elapsed, font=FONT_TIME, color=DARK_GRAY),
-                render.Text(content=total, font=FONT_TIME, color=DARK_GRAY),
+            expanded = True,
+            main_align = "space_between",
+            children = [
+                render.Text(content = elapsed, font = FONT_TIME, color = DARK_GRAY),
+                render.Text(content = total, font = FONT_TIME, color = DARK_GRAY),
             ],
         ),
     )
 
     return render.Root(
-        delay=scroll_speed,
-        child=render.Padding(
-            pad=(2, 2, 2, 2),
-            child=render.Column(
-                expanded=True,
-                main_align="space_evenly",
-                children=children,
+        delay = scroll_speed,
+        child = render.Padding(
+            pad = (2, 2, 2, 2),
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = children,
             ),
         ),
     )
@@ -910,29 +1047,29 @@ def render_minimal_mode(state, config):
         track_text = "❚❚ " + track_text
 
     return render.Root(
-        delay=scroll_speed,
-        child=render.Column(
-            expanded=True,
-            main_align="center",
-            cross_align="center",
-            children=[
+        delay = scroll_speed,
+        child = render.Column(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children = [
                 render.Marquee(
-                    width=DISPLAY_WIDTH - 4,
-                    align="center",
-                    child=render.Text(
-                        content=track_text,
-                        font=FONT_TRACK,
-                        color=track_color,
+                    width = DISPLAY_WIDTH - 4,
+                    align = "center",
+                    child = render.Text(
+                        content = track_text,
+                        font = FONT_TRACK,
+                        color = track_color,
                     ),
                 ),
-                render.Box(height=2),
+                render.Box(height = 2),
                 render.Marquee(
-                    width=DISPLAY_WIDTH - 4,
-                    align="center",
-                    child=render.Text(
-                        content=state["artist"],
-                        font=FONT_ARTIST,
-                        color=artist_color,
+                    width = DISPLAY_WIDTH - 4,
+                    align = "center",
+                    child = render.Text(
+                        content = state["artist"],
+                        font = FONT_ARTIST,
+                        color = artist_color,
                     ),
                 ),
             ],
@@ -954,7 +1091,7 @@ def render_playback(state, config):
     else:
         return render_full_mode(state, config)
 
-def render_idle(config, recent_state=None):
+def render_idle(config, recent_state = None):
     """
     Render idle state when nothing is playing.
     Can show recently played if available and configured.
@@ -965,10 +1102,10 @@ def render_idle(config, recent_state=None):
     if not show_when_idle:
         # Return blank/black screen
         return render.Root(
-            child=render.Box(
-                width=DISPLAY_WIDTH,
-                height=DISPLAY_HEIGHT,
-                color="#000000",
+            child = render.Box(
+                width = DISPLAY_WIDTH,
+                height = DISPLAY_HEIGHT,
+                color = "#000000",
             ),
         )
 
@@ -985,66 +1122,66 @@ def render_idle(config, recent_state=None):
 
     # Default idle screen
     return render.Root(
-        child=render.Column(
-            expanded=True,
-            main_align="center",
-            cross_align="center",
-            children=[
+        child = render.Column(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children = [
                 render.Text(
-                    content=idle_message,
-                    font=FONT_LARGE,
-                    color=SPOTIFY_GREEN,
+                    content = idle_message,
+                    font = FONT_LARGE,
+                    color = SPOTIFY_GREEN,
                 ),
-                render.Box(height=4),
+                render.Box(height = 4),
                 render.Text(
-                    content="Not Playing",
-                    font=FONT_ARTIST,
-                    color=DARK_GRAY,
+                    content = "Not Playing",
+                    font = FONT_ARTIST,
+                    color = DARK_GRAY,
                 ),
             ],
         ),
     )
 
-def render_error(title, message, hint=None):
+def render_error(title, message, hint = None):
     """
     Render error state with helpful information.
     """
     children = [
         render.Text(
-            content=title,
-            font=FONT_TRACK,
-            color=ERROR_RED,
+            content = title,
+            font = FONT_TRACK,
+            color = ERROR_RED,
         ),
-        render.Box(height=2),
+        render.Box(height = 2),
         render.WrappedText(
-            content=message,
-            font=FONT_ARTIST,
-            color=LIGHT_GRAY,
-            width=DISPLAY_WIDTH - 4,
-            align="center",
+            content = message,
+            font = FONT_ARTIST,
+            color = LIGHT_GRAY,
+            width = DISPLAY_WIDTH - 4,
+            align = "center",
         ),
     ]
 
     if hint:
-        children.append(render.Box(height=2))
+        children.append(render.Box(height = 2))
         children.append(
             render.WrappedText(
-                content=hint,
-                font=FONT_SMALL,
-                color=DARK_GRAY,
-                width=DISPLAY_WIDTH - 4,
-                align="center",
+                content = hint,
+                font = FONT_SMALL,
+                color = DARK_GRAY,
+                width = DISPLAY_WIDTH - 4,
+                align = "center",
             ),
         )
 
     return render.Root(
-        child=render.Padding(
-            pad=(2, 4, 2, 4),
-            child=render.Column(
-                expanded=True,
-                main_align="center",
-                cross_align="center",
-                children=children,
+        child = render.Padding(
+            pad = (2, 4, 2, 4),
+            child = render.Column(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = children,
             ),
         ),
     )
@@ -1052,31 +1189,31 @@ def render_error(title, message, hint=None):
 def render_setup_needed():
     """Render first-run / configuration needed screen."""
     return render.Root(
-        child=render.Column(
-            expanded=True,
-            main_align="center",
-            cross_align="center",
-            children=[
+        child = render.Column(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children = [
                 render.Text(
-                    content="Spotify",
-                    font=FONT_LARGE,
-                    color=SPOTIFY_GREEN,
+                    content = "Spotify",
+                    font = FONT_LARGE,
+                    color = SPOTIFY_GREEN,
                 ),
-                render.Box(height=4),
+                render.Box(height = 4),
                 render.WrappedText(
-                    content="Setup needed",
-                    font=FONT_ARTIST,
-                    color=WHITE,
-                    width=DISPLAY_WIDTH - 4,
-                    align="center",
+                    content = "Setup needed",
+                    font = FONT_ARTIST,
+                    color = WHITE,
+                    width = DISPLAY_WIDTH - 4,
+                    align = "center",
                 ),
-                render.Box(height=2),
+                render.Box(height = 2),
                 render.WrappedText(
-                    content="Add credentials in app config",
-                    font=FONT_SMALL,
-                    color=DARK_GRAY,
-                    width=DISPLAY_WIDTH - 4,
-                    align="center",
+                    content = "Add credentials in app config",
+                    font = FONT_SMALL,
+                    color = DARK_GRAY,
+                    width = DISPLAY_WIDTH - 4,
+                    align = "center",
                 ),
             ],
         ),
@@ -1127,7 +1264,7 @@ def main(config):
             return render_playback(state, config)
         else:
             # Showing recently played
-            return render_idle(config, recent_state=state)
+            return render_idle(config, recent_state = state)
     else:
         # Nothing to show
         return render_idle(config)
@@ -1139,106 +1276,105 @@ def main(config):
 def get_schema():
     """Configuration schema for Tronbyt UI."""
     return schema.Schema(
-        version="1",
-        fields=[
+        version = "1",
+        fields = [
             # Credentials
             schema.Text(
-                id="client_id",
-                name="Spotify Client ID",
-                desc="From developer.spotify.com - your app's Client ID",
-                icon="key",
+                id = "client_id",
+                name = "Spotify Client ID",
+                desc = "From developer.spotify.com - your app's Client ID",
+                icon = "key",
             ),
             schema.Text(
-                id="client_secret",
-                name="Spotify Client Secret",
-                desc="From developer.spotify.com - your app's Client Secret",
-                icon="lock",
+                id = "client_secret",
+                name = "Spotify Client Secret",
+                desc = "From developer.spotify.com - your app's Client Secret",
+                icon = "lock",
             ),
             schema.Text(
-                id="refresh_token",
-                name="Refresh Token",
-                desc="Generated by the setup script (get_refresh_token.py)",
-                icon="rotate",
+                id = "refresh_token",
+                name = "Refresh Token",
+                desc = "Generated by the setup script (get_refresh_token.py)",
+                icon = "rotate",
             ),
 
             # Display options
-
             schema.Dropdown(
-                id="display_mode",
-                name="Display Mode",
-                desc="Layout style for now playing display",
-                icon="display",
-                default=MODE_FULL,
-                options=[
-                    schema.Option(display="Full (art + text + progress)", value=MODE_FULL),
-                    schema.Option(display="Compact (art + text)", value=MODE_COMPACT),
-                    schema.Option(display="Art Focus (large art + overlay)", value=MODE_ART_FOCUS),
-                    schema.Option(display="Text Only (no art)", value=MODE_TEXT_ONLY),
-                    schema.Option(display="Minimal (centered text)", value=MODE_MINIMAL),
+                id = "display_mode",
+                name = "Display Mode",
+                desc = "Layout style for now playing display",
+                icon = "display",
+                default = MODE_FULL,
+                options = [
+                    schema.Option(display = "Full (art + text + progress)", value = MODE_FULL),
+                    schema.Option(display = "Compact (art + text)", value = MODE_COMPACT),
+                    schema.Option(display = "Art Focus (large art + overlay)", value = MODE_ART_FOCUS),
+                    schema.Option(display = "Text Only (no art)", value = MODE_TEXT_ONLY),
+                    schema.Option(display = "Minimal (centered text)", value = MODE_MINIMAL),
                 ],
             ),
             schema.Dropdown(
-                id="scroll_speed",
-                name="Scroll Speed",
-                desc="Speed of text scrolling animation",
-                icon="gaugeHigh",
-                default="50",
-                options=[
-                    schema.Option(display="Slow", value="80"),
-                    schema.Option(display="Normal", value="50"),
-                    schema.Option(display="Fast", value="30"),
+                id = "scroll_speed",
+                name = "Scroll Speed",
+                desc = "Speed of text scrolling animation",
+                icon = "gaugeHigh",
+                default = "50",
+                options = [
+                    schema.Option(display = "Slow", value = "80"),
+                    schema.Option(display = "Normal", value = "50"),
+                    schema.Option(display = "Fast", value = "30"),
                 ],
             ),
             schema.Toggle(
-                id="show_time",
-                name="Show Time Remaining",
-                desc="Display remaining time on track (full mode only)",
-                icon="clock",
-                default=True,
+                id = "show_time",
+                name = "Show Time Remaining",
+                desc = "Display remaining time on track (full mode only)",
+                icon = "clock",
+                default = True,
             ),
             schema.Toggle(
-                id="show_recently_played",
-                name="Show Recently Played",
-                desc="When nothing playing, show last played track",
-                icon="clockRotateLeft",
-                default=False,
+                id = "show_recently_played",
+                name = "Show Recently Played",
+                desc = "When nothing playing, show last played track",
+                icon = "clockRotateLeft",
+                default = False,
             ),
             schema.Toggle(
-                id="show_when_idle",
-                name="Show When Idle",
-                desc="Display Spotify branding when nothing playing",
-                icon="eye",
-                default=True,
+                id = "show_when_idle",
+                name = "Show When Idle",
+                desc = "Display Spotify branding when nothing playing",
+                icon = "eye",
+                default = True,
             ),
             schema.Text(
-                id="idle_message",
-                name="Idle Message",
-                desc="Text shown when nothing is playing",
-                icon="comment",
-                default="Spotify",
+                id = "idle_message",
+                name = "Idle Message",
+                desc = "Text shown when nothing is playing",
+                icon = "comment",
+                default = "Spotify",
             ),
 
             # Colors
             schema.Color(
-                id="track_color",
-                name="Track Name Color",
-                desc="Color for the song/episode title",
-                icon="palette",
-                default=WHITE,
+                id = "track_color",
+                name = "Track Name Color",
+                desc = "Color for the song/episode title",
+                icon = "palette",
+                default = WHITE,
             ),
             schema.Color(
-                id="artist_color",
-                name="Artist/Show Color",
-                desc="Color for artist or podcast name",
-                icon="palette",
-                default=SPOTIFY_GREEN,
+                id = "artist_color",
+                name = "Artist/Show Color",
+                desc = "Color for artist or podcast name",
+                icon = "palette",
+                default = SPOTIFY_GREEN,
             ),
             schema.Color(
-                id="progress_color",
-                name="Progress Bar Color",
-                desc="Color for the progress bar fill",
-                icon="palette",
-                default=SPOTIFY_GREEN,
+                id = "progress_color",
+                name = "Progress Bar Color",
+                desc = "Color for the progress bar fill",
+                icon = "palette",
+                default = SPOTIFY_GREEN,
             ),
         ],
     )
