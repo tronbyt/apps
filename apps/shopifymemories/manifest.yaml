@@ -7,3 +7,4 @@ author: Shopify
 fileName: shopify_memories.star
 packageName: shopifymemories
 recommendedInterval: 5
+broken: true

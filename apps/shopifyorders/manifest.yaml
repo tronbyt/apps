@@ -7,3 +7,4 @@ author: Shopify
 fileName: shopify_orders.star
 packageName: shopifyorders
 recommendedInterval: 5
+broken: true

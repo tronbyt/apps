@@ -7,3 +7,4 @@ author: Shopify
 fileName: sales_trends.star
 packageName: salestrends
 recommendedInterval: 5
+broken: true
