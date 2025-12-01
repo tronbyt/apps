@@ -89,7 +89,7 @@ def main(config):
     conditions = forecast_res["current_conditions"]
 
     # Get forecast data for high/low temps
-    forecast_daily = forecast_res.get("forecast", {}).get("daily", [])
+    forecast_daily = (forecast_res.get("forecast") or {}).get("daily", [])
     if len(forecast_daily) > 0:
         today_forecast = forecast_daily[0]
         high_temp = "%d°" % today_forecast.get("air_temp_high", 0)
