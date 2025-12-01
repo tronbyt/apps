@@ -10,7 +10,37 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")  # Added to parse JSON responses
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("images/default_icon_6585b711.png", DEFAULT_ICON_6585b711_ASSET = "file")
+load("images/balloons.png", BALLOONS_ASSET = "file")
+load("images/bubbly.png", BUBBLY_ASSET = "file")
+load("images/checkmark.png", CHECKMARK_ASSET = "file")
+load("images/confetti.png", CONFETTI_ASSET = "file")
+load("images/default_x_logo.png", DEFAULT_X_LOGO_ASSET = "file")
+load("images/fire.png", FIRE_ASSET = "file")
+load("images/green_box.png", GREEN_BOX_ASSET = "file")
+load("images/hands_finger_gun.png", HANDS_FINGER_GUN_ASSET = "file")
+load("images/hands_peace.png", HANDS_PEACE_ASSET = "file")
+load("images/hands_pray.png", HANDS_PRAY_ASSET = "file")
+load("images/hands_shaka.png", HANDS_SHAKA_ASSET = "file")
+load("images/heart.png", HEART_ASSET = "file")
+load("images/lightbulb.png", LIGHTBULB_ASSET = "file")
+load("images/lightning.png", LIGHTNING_ASSET = "file")
+load("images/logo_bluesky.png", LOGO_BLUESKY_ASSET = "file")
+load("images/logo_chartmogul.png", LOGO_CHARTMOGUL_ASSET = "file")
+load("images/logo_ghost.png", LOGO_GHOST_ASSET = "file")
+load("images/logo_gumroad.png", LOGO_GUMROAD_ASSET = "file")
+load("images/logo_instagram.png", LOGO_INSTAGRAM_ASSET = "file")
+load("images/logo_paddle.png", LOGO_PADDLE_ASSET = "file")
+load("images/logo_twitter_bird.png", LOGO_TWITTER_BIRD_ASSET = "file")
+load("images/logo_x.png", LOGO_X_ASSET = "file")
+load("images/logo_x_verified.png", LOGO_X_VERIFIED_ASSET = "file")
+load("images/logo_youtube.png", LOGO_YOUTUBE_ASSET = "file")
+load("images/megaphone.png", MEGAPHONE_ASSET = "file")
+load("images/money.png", MONEY_ASSET = "file")
+load("images/plant.png", PLANT_ASSET = "file")
+load("images/potted_plant.png", POTTED_PLANT_ASSET = "file")
+load("images/storefront.png", STOREFRONT_ASSET = "file")
+load("images/the_letter_p.png", THE_LETTER_P_ASSET = "file")
+load("images/usd.png", USD_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
@@ -21,7 +51,41 @@ DEFAULT_LAYOUT = "Number"
 DEFAULT_FONT = "tb-8"
 DEFAULT_BANNER = "Followers"
 DEFAULT_FORMAT = "Full"
-DEFAULT_ICON = DEFAULT_ICON_6585b711_ASSET.readall()
+DEFAULT_ICON = "DEFAULT_X_LOGO"
+
+ICON_ASSETS = {
+    "DEFAULT_X_LOGO": DEFAULT_X_LOGO_ASSET,
+    "LOGO_X": LOGO_X_ASSET,
+    "LOGO_X_VERIFIED": LOGO_X_VERIFIED_ASSET,
+    "LOGO_BLUESKY": LOGO_BLUESKY_ASSET,
+    "LOGO_INSTAGRAM": LOGO_INSTAGRAM_ASSET,
+    "LOGO_YOUTUBE": LOGO_YOUTUBE_ASSET,
+    "LOGO_GHOST": LOGO_GHOST_ASSET,
+    "LOGO_PADDLE": LOGO_PADDLE_ASSET,
+    "LOGO_GUMROAD": LOGO_GUMROAD_ASSET,
+    "LOGO_CHARTMOGUL": LOGO_CHARTMOGUL_ASSET,
+    "LOGO_TWITTER_BIRD": LOGO_TWITTER_BIRD_ASSET,
+    "FIRE": FIRE_ASSET,
+    "LIGHTNING": LIGHTNING_ASSET,
+    "CHECKMARK": CHECKMARK_ASSET,
+    "LIGHTBULB": LIGHTBULB_ASSET,
+    "MONEY": MONEY_ASSET,
+    "USD": USD_ASSET,
+    "PLANT": PLANT_ASSET,
+    "POTTED_PLANT": POTTED_PLANT_ASSET,
+    "BUBBLY": BUBBLY_ASSET,
+    "CONFETTI": CONFETTI_ASSET,
+    "BALLOONS": BALLOONS_ASSET,
+    "HEART": HEART_ASSET,
+    "STOREFRONT": STOREFRONT_ASSET,
+    "MEGAPHONE": MEGAPHONE_ASSET,
+    "GREEN_BOX": GREEN_BOX_ASSET,
+    "THE_LETTER_P": THE_LETTER_P_ASSET,
+    "HANDS_FINGER_GUN": HANDS_FINGER_GUN_ASSET,
+    "HANDS_PRAY": HANDS_PRAY_ASSET,
+    "HANDS_PEACE": HANDS_PEACE_ASSET,
+    "HANDS_SHAKA": HANDS_SHAKA_ASSET,
+}
 DEFAULT_MULTIPLY_BY_12 = False
 DEFAULT_ADD_DOLLAR_SIGN = False
 DEFAULT_SHOW_COMMA = True
@@ -30,6 +94,12 @@ def render_error():
     return render.Root(
         render.WrappedText("Something went wrong!"),
     )
+
+def get_icon_data(icon_id):
+    asset = ICON_ASSETS.get(icon_id)
+    if asset:
+        return base64.encode(asset.readall())
+    return base64.encode(DEFAULT_X_LOGO_ASSET.readall())
 
 def main(config):
     # Load the Counter ID from the config
@@ -49,7 +119,8 @@ def main(config):
     code = config.str("code", DEFAULT_CODE)
     banner = config.str("banner", DEFAULT_BANNER)
     font = config.str("font", DEFAULT_FONT)
-    icon = base64.decode(config.get("icon", DEFAULT_ICON))
+    icon_id = config.str("icon", DEFAULT_ICON)
+    icon = get_icon_data(icon_id)
     multiply_by_12 = config.str("multiply_by_12", "false") == "true"
     add_dollar_sign = config.str("add_dollar_sign", "false") == "true"  # New toggle for dollar sign
     show_comma = config.str("show_comma", "true") == "true"  # New toggle for commas
@@ -190,36 +261,36 @@ def get_schema():
         schema.Option(display = "Slime Orange", value = "#FE4D00"),
     ]
     icons = [
-        schema.Option(display = "Logo - X", value = LOGO_X_ASSET.readall()),
-        schema.Option(display = "Logo - X Verified", value = LOGO_X_VERIFIED_ASSET.readall()),
-        schema.Option(display = "Logo - BlueSky", value = LOGO_BLUESKY_ASSET.readall()),
-        schema.Option(display = "Logo - Instagram", value = LOGO_INSTAGRAM_ASSET.readall()),
-        schema.Option(display = "Logo - YouTube", value = LOGO_YOUTUBE_ASSET.readall()),
-        schema.Option(display = "Logo - Ghost", value = LOGO_GHOST_ASSET.readall()),
-        schema.Option(display = "Logo - Paddle", value = LOGO_PADDLE_ASSET.readall()),
-        schema.Option(display = "Logo - Gumroad", value = LOGO_GUMROAD_ASSET.readall()),
-        schema.Option(display = "Logo - ChartMogul", value = LOGO_CHARTMOGUL_ASSET.readall()),
-        schema.Option(display = "Logo - Twitter Bird", value = LOGO_TWITTER_BIRD_ASSET.readall()),
-        schema.Option(display = "Fire", value = FIRE_ASSET.readall()),
-        schema.Option(display = "Lightning", value = LIGHTNING_ASSET.readall()),
-        schema.Option(display = "Checkmark", value = CHECKMARK_ASSET.readall()),
-        schema.Option(display = "Lightbulb", value = LIGHTBULB_ASSET.readall()),
-        schema.Option(display = "Money", value = MONEY_ASSET.readall()),
-        schema.Option(display = "USD", value = USD_ASSET.readall()),
-        schema.Option(display = "Plant", value = PLANT_ASSET.readall()),
-        schema.Option(display = "Potted Plant", value = POTTED_PLANT_ASSET.readall()),
-        schema.Option(display = "Bubbly", value = BUBBLY_ASSET.readall()),
-        schema.Option(display = "Confetti", value = CONFETTI_ASSET.readall()),
-        schema.Option(display = "Balloons", value = BALLOONS_ASSET.readall()),
-        schema.Option(display = "Heart", value = HEART_ASSET.readall()),
-        schema.Option(display = "Storefront", value = STOREFRONT_ASSET.readall()),
-        schema.Option(display = "Megaphone", value = MEGAPHONE_ASSET.readall()),
-        schema.Option(display = "Green Box", value = GREEN_BOX_ASSET.readall()),
-        schema.Option(display = "The Letter P", value = THE_LETTER_P_ASSET.readall()),
-        schema.Option(display = "Hands - Finger Gun", value = HANDS_FINGER_GUN_ASSET.readall()),
-        schema.Option(display = "Hands - Pray", value = HANDS_PRAY_ASSET.readall()),
-        schema.Option(display = "Hands - Peace", value = HANDS_PEACE_ASSET.readall()),
-        schema.Option(display = "Hands - Shaka", value = HANDS_SHAKA_ASSET.readall()),
+        schema.Option(display = "Logo - X", value = "LOGO_X"),
+        schema.Option(display = "Logo - X Verified", value = "LOGO_X_VERIFIED"),
+        schema.Option(display = "Logo - BlueSky", value = "LOGO_BLUESKY"),
+        schema.Option(display = "Logo - Instagram", value = "LOGO_INSTAGRAM"),
+        schema.Option(display = "Logo - YouTube", value = "LOGO_YOUTUBE"),
+        schema.Option(display = "Logo - Ghost", value = "LOGO_GHOST"),
+        schema.Option(display = "Logo - Paddle", value = "LOGO_PADDLE"),
+        schema.Option(display = "Logo - Gumroad", value = "LOGO_GUMROAD"),
+        schema.Option(display = "Logo - ChartMogul", value = "LOGO_CHARTMOGUL"),
+        schema.Option(display = "Logo - Twitter Bird", value = "LOGO_TWITTER_BIRD"),
+        schema.Option(display = "Fire", value = "FIRE"),
+        schema.Option(display = "Lightning", value = "LIGHTNING"),
+        schema.Option(display = "Checkmark", value = "CHECKMARK"),
+        schema.Option(display = "Lightbulb", value = "LIGHTBULB"),
+        schema.Option(display = "Money", value = "MONEY"),
+        schema.Option(display = "USD", value = "USD"),
+        schema.Option(display = "Plant", value = "PLANT"),
+        schema.Option(display = "Potted Plant", value = "POTTED_PLANT"),
+        schema.Option(display = "Bubbly", value = "BUBBLY"),
+        schema.Option(display = "Confetti", value = "CONFETTI"),
+        schema.Option(display = "Balloons", value = "BALLOONS"),
+        schema.Option(display = "Heart", value = "HEART"),
+        schema.Option(display = "Storefront", value = "STOREFRONT"),
+        schema.Option(display = "Megaphone", value = "MEGAPHONE"),
+        schema.Option(display = "Green Box", value = "GREEN_BOX"),
+        schema.Option(display = "The Letter P", value = "THE_LETTER_P"),
+        schema.Option(display = "Hands - Finger Gun", value = "HANDS_FINGER_GUN"),
+        schema.Option(display = "Hands - Pray", value = "HANDS_PRAY"),
+        schema.Option(display = "Hands - Peace", value = "HANDS_PEACE"),
+        schema.Option(display = "Hands - Shaka", value = "HANDS_SHAKA"),
     ]
     layouts = [
         schema.Option(display = "Top and Bottom (With Banner and Divider)", value = "Top"),

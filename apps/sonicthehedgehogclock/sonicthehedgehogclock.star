@@ -5,7 +5,6 @@ Description: A customizable clock featuring characters from Sonic the Hedgehog
 Author: RichardALeon
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/angel_island_zone_l1_f1_0972fd3a.png", ANGEL_ISLAND_ZONE_L1_F1_0972fd3a_ASSET = "file")
 load("images/carnival_night_zone_l1_f1_dcbbd781.png", CARNIVAL_NIGHT_ZONE_L1_F1_dcbbd781_ASSET = "file")
@@ -59,7 +58,7 @@ def animate(layerSpecs):
         for animationSpec in layerSpec:
             for _x in range(animationSpec["loops"]):
                 for frameSpec in animationSpec["frames"]:
-                    src = base64.decode(frameSpec["src"])
+                    src = frameSpec["src"]
                     for _y in range(frameSpec["duration"]):
                         frames.append(
                             render.Image(

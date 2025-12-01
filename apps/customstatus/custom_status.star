@@ -6,6 +6,7 @@ Author: Brian Bell
 """
 
 load("animation.star", "animation")
+load("encoding/base64.star", "base64")
 load("images/icon_check.png", ICON_CHECK_ASSET = "file")
 load("images/icon_clock.png", ICON_CLOCK_ASSET = "file")
 load("images/icon_do_not_enter.png", ICON_DO_NOT_ENTER_ASSET = "file")
@@ -33,7 +34,7 @@ def main(config):
     message = config.get("message", DEFAULT_MESSAGE)
     animations = config.bool("animation", False)
 
-    icon = base.decode(icon_setting) if icon_setting != None else DEFAULT_ICON
+    icon = base64.decode(icon_setting) if icon_setting != None else DEFAULT_ICON
 
     if config.bool("hide_app", False):  ## hide app
         return []

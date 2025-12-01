@@ -184,7 +184,7 @@ def main(config):
             children = [
                 render.Padding(
                     pad = (0, 0, 2, 0) if align == "start" else 0,
-                    child = render.Image(src = base64.decode(phaseImage)),
+                    child = render.Image(src = phaseImage),
                 ),
                 render.Column(
                     expanded = True,

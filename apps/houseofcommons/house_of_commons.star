@@ -112,7 +112,10 @@ FONT = "tom-thumb"
 SIX_HOURS = 60 * 60 * 6
 
 def extract_int(s):
-    return int("".join([c for c in s.elems() if c.isdigit()]))
+    digits = "".join([c for c in s.elems() if c.isdigit()])
+    if not digits:
+        return 0
+    return int(digits)
 
 def extract_percentage(s):
     return float(s.strip().removesuffix("%").strip()) / 100.0

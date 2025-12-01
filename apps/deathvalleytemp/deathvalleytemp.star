@@ -6,7 +6,6 @@ Author: Kyle Stark @kaisle51
 Thanks: Dubhouze-Tāvis/tavdog for general help and FtoC, Chad Milburn for dark mode logic, wshue0 for API stuff
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/celcius.png", CELCIUS_ASSET = "file")
 load("images/celcius_white.png", CELCIUS_WHITE_ASSET = "file")
@@ -106,7 +105,7 @@ def main(config):
             )
         else:
             return render.Image(
-                src = base64.decode(getTempDigit(tempFarray[i])),
+                src = getTempDigit(tempFarray[i]),
                 width = 9,
                 height = 15,
             )
@@ -147,7 +146,7 @@ def main(config):
             )
         else:
             return render.Image(
-                src = base64.decode(getTempDigit(tempCarray[i])),
+                src = getTempDigit(tempCarray[i]),
                 width = 9,
                 height = 15,
             )

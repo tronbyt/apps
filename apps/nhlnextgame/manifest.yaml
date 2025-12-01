@@ -7,3 +7,5 @@ author: AKKanMan
 fileName: nhl_next_game.star
 packageName: nhlnextgame
 recommendedInterval: 5
+broken: true
+brokenReason: "statsapi.web.nhl.com: no such host"

@@ -5,7 +5,6 @@ Description: Shows a cuneiform sign and its Sumerian transliterations.
 Author: dinosaursrarr
 """
 
-load("encoding/base64.star", "base64")
 load("hash.star", "hash")
 load("images/sign_a.png", SIGN_A_ASSET = "file")
 load("images/sign_a2.png", SIGN_A2_ASSET = "file")
@@ -456,7 +455,7 @@ def main():
     index = int(h, 16) % len(SIGNS)
     sign = SIGNS[index]
 
-    img = render.Image(base64.decode(sign["src"]))
+    img = render.Image(sign["src"])
     width, _ = img.size()
 
     return render.Root(

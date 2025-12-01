@@ -5,7 +5,6 @@ Description: Displays state flags.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")  #Used to read encoded image
 load("images/flag_ak.png", FLAG_AK_ASSET = "file")
 load("images/flag_al.png", FLAG_AL_ASSET = "file")
 load("images/flag_ar.png", FLAG_AR_ASSET = "file")
@@ -502,11 +501,11 @@ def main(config):
         else:
             state = get_random_state()
 
-        frames.append(render.Image(src = base64.decode(state["flag"]), height = 32, width = 64))
+        frames.append(render.Image(src = state["flag"], height = 32, width = 64))
 
         if show_hints:
             frames.append(render.Column(get_hint_screen(state)))
-            frames.append(render.Image(src = base64.decode(state["flag"]), height = 32, width = 64))
+            frames.append(render.Image(src = state["flag"], height = 32, width = 64))
 
         if show_answer:
             frames.append(render.Column(get_state_info_screen(state), main_align = "center"))

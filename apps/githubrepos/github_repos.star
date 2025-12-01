@@ -7,12 +7,12 @@ Author: Cavallando
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("images/github_failed.png", GITHUB_FAILED_ICON = "file")
-load("images/github_fault.png", GITHUB_FAULT_ICON = "file")
-load("images/github_loading.png", GITHUB_LOADING_ICON = "file")
+load("images/github_failed.png", GITHUB_FAILED_ICON_ASSET = "file")
+load("images/github_fault.png", GITHUB_FAULT_ICON_ASSET = "file")
+load("images/github_loading.png", GITHUB_LOADING_ICON_ASSET = "file")
 load("images/github_logo.png", GITHUB_LOGO_ASSET = "file")
-load("images/github_neutral.png", GITHUB_NEUTRAL_ICON = "file")
-load("images/github_success.png", GITHUB_SUCCESS_ICON = "file")
+load("images/github_neutral.png", GITHUB_NEUTRAL_ICON_ASSET = "file")
+load("images/github_success.png", GITHUB_SUCCESS_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -31,11 +31,11 @@ TEST_RUN = """{
 }"""
 
 GITHUB_LOGO = GITHUB_LOGO_ASSET.readall()
-GITHUB_FAILED_ICON = GITHUB_FAILED_ICON.readall()
-GITHUB_SUCCESS_ICON = GITHUB_SUCCESS_ICON.readall()
-GITHUB_NEUTRAL_ICON = GITHUB_NEUTRAL_ICON.readall()
-GITHUB_FAULT_ICON = GITHUB_FAULT_ICON.readall()
-GITHUB_LOADING_ICON = GITHUB_LOADING_ICON.readall()
+GITHUB_FAILED_ICON = GITHUB_FAILED_ICON_ASSET.readall()
+GITHUB_SUCCESS_ICON = GITHUB_SUCCESS_ICON_ASSET.readall()
+GITHUB_NEUTRAL_ICON = GITHUB_NEUTRAL_ICON_ASSET.readall()
+GITHUB_FAULT_ICON = GITHUB_FAULT_ICON_ASSET.readall()
+GITHUB_LOADING_ICON = GITHUB_LOADING_ICON_ASSET.readall()
 
 def should_show_jobs(repos, dwell_time):
     now = time.now()
@@ -183,7 +183,7 @@ def render_status_badge(status, repos):
                             font = "tom-thumb",
                         ),
                     ),
-                    render.Image(src = get_status_icon(status)),
+                    render.Image(src = get_status_icon(status, "failure")),
                 ],
             ),
         )

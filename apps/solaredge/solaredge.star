@@ -64,6 +64,10 @@ YELLOW_ANIM = YELLOW_ANIM_ASSET.readall()
 URL = "https://monitoringapi.solaredge.com/site/{}/currentPowerFlow"
 URL_AUT = "https://monitoringapi.solaredge.com/site/{}/energyDetails"
 
+# SolarEdge API limit is 300 requests per day, which is about
+# one per 5 minutes
+CACHE_TTL = 300
+
 DUMMY_DATA = {
     "siteCurrentPowerFlow": {
         "updateRefreshRate": 3,

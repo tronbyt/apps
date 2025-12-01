@@ -146,7 +146,7 @@ def main(config):
     custom_status_end_time = time.parse_time(config.get("custom_status_end_time", DEFAULT_CUSTOM_STATUS_END_TIME))
     custom_status = config.get("custom_status", DEFAULT_CUSTOM_STATUS)
     custom_status_color = config.get("custom_status_color", DEFAULT_CUSTOM_STATUS_COLOR)
-    custom_status_icon = config.get("custom_status_icon", DEFAULT_CUSTOM_STATUS_ICON)
+    custom_status_icon = config.get("custom_status_icon")
     custom_status_message = config.get("custom_status_message", DEFAULT_CUSTOM_STATUS_MESSAGE)
 
     if (
@@ -162,7 +162,7 @@ def main(config):
     ):
         status = custom_status
         color = custom_status_color
-        icon = base64.decode(custom_status_icon)
+        icon = base64.decode(custom_status_icon) if custom_status_icon != None else DEFAULT_CUSTOM_STATUS_ICON
         schedule = custom_status_message
     else:
         # Retrieve MSFT API access token, returns None if user is not logged in
@@ -182,7 +182,7 @@ def main(config):
         availability = get_availability(calendar_app_status, messaging_app_status)
         status = STATUS_MAP[availability["status"]]["status_label"].upper()
         color = STATUS_MAP[availability["status"]]["color"]
-        icon = base64.decode(STATUS_MAP[availability["status"]]["icon"])
+        icon = STATUS_MAP[availability["status"]]["icon"]
         schedule = get_schedule(availability, timezone)
 
     if not animations:

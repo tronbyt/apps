@@ -6,7 +6,6 @@ Author: Kyle Stark @kaisle51
 Thanks: Code usage: Steve Otteson. Sprite source: https://www.youtube.com/watch?v=RCL1iwIU57k
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/backflip_1_a83ad8d8.png", BACKFLIP_1_a83ad8d8_ASSET = "file")
 load("images/backflip_2_d49d16e9.png", BACKFLIP_2_d49d16e9_ASSET = "file")
@@ -258,7 +257,7 @@ def main(config):
                         render.Box(
                             width = animationName[1],
                             height = animationName[2],
-                            child = render.Image(base64.decode(animationName[0][i]), width = animationName[1], height = animationName[2]),
+                            child = render.Image(animationName[0][i], width = animationName[1], height = animationName[2]),
                         ),
                     ],
                 ),

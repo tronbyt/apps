@@ -5,7 +5,6 @@ Description: A gif with Mario and Yoshi with text saying "It's a me, Mario".
 Author: BriHen
 """
 
-load("encoding/base64.star", "base64")
 load("images/frame_0.png", FRAME_0_ASSET = "file")
 load("images/frame_1.png", FRAME_1_ASSET = "file")
 load("images/frame_2.png", FRAME_2_ASSET = "file")
@@ -28,6 +27,6 @@ FRAMES = [
 def main():
     return render.Root(
         child = render.Animation(
-            children = [render.Image(src = base64.decode(f)) for f in FRAMES],
+            children = [render.Image(src = f) for f in FRAMES],
         ),
     )

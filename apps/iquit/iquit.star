@@ -5,7 +5,6 @@ Description: Based on the HAIM band's I Quit album cover
 Author: Kyle Stark @kaisle51
 """
 
-load("encoding/base64.star", "base64")
 load("images/frame_1_ca5f1a79.png", FRAME_1_ca5f1a79_ASSET = "file")
 load("images/frame_2_b469aea7.png", FRAME_2_b469aea7_ASSET = "file")
 load("images/frame_3_84d79be5.png", FRAME_3_84d79be5_ASSET = "file")
@@ -27,7 +26,7 @@ def main():
                         render.Box(
                             width = animationName[1],
                             height = animationName[2],
-                            child = render.Image(base64.decode(animationName[0][i]), width = animationName[1], height = animationName[2]),
+                            child = render.Image(animationName[0][i], width = animationName[1], height = animationName[2]),
                         ),
                     ],
                 ),

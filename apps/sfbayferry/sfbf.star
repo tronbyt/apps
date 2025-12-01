@@ -5,7 +5,6 @@ Description: Display next departure times for SF Bay Ferry routes.
 Author: nyergler
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/csv.star", "csv")
 load("images/sfbf_icon.png", SFBF_ICON_ASSET = "file")
 load("render.star", "render")
@@ -950,6 +949,4 @@ t_5582562_b_80277_tn_0,20:55:00,20:55:00,7211,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,
 t_5582562_b_80277_tn_0,21:30:00,21:30:00,72012,2,,0,0,16121.04430654,1,,,,,1,1,,,,,,,,,,,
 """
 
-ICON = base64.decode(
-    SFBF_ICON_ASSET.readall(),
-)
+ICON = SFBF_ICON_ASSET.readall()

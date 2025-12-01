@@ -5,6 +5,11 @@ Description: A collection of Spectro Cloud images with a clock.
 Author: karl-cardenas-coding
 """
 
+load("images/spectro_cloud_1.png", SPECTRO_CLOUD_1_ASSET = "file")
+load("images/spectro_cloud_2.png", SPECTRO_CLOUD_2_ASSET = "file")
+load("images/spectro_cloud_3.png", SPECTRO_CLOUD_3_ASSET = "file")
+load("images/spectro_cloud_4.png", SPECTRO_CLOUD_4_ASSET = "file")
+load("images/spectro_cloud_5.png", SPECTRO_CLOUD_5_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -14,11 +19,11 @@ SPECTRO_FONT_COLOR_BLUE = "#3575CF"
 PALETTE_FONT_COLOR_PURPLE = "#6a5d9d"
 
 IMAGES = [
-    SPECTRO_CLOUD_1_ASSET.readall(),
-    SPECTRO_CLOUD_2_ASSET.readall(),
-    SPECTRO_CLOUD_3_ASSET.readall(),
-    SPECTRO_CLOUD_4_ASSET.readall(),
-    SPECTRO_CLOUD_5_ASSET.readall(),
+    SPECTRO_CLOUD_1_ASSET,
+    SPECTRO_CLOUD_2_ASSET,
+    SPECTRO_CLOUD_3_ASSET,
+    SPECTRO_CLOUD_4_ASSET,
+    SPECTRO_CLOUD_5_ASSET,
 ]
 
 def main(config):
@@ -61,7 +66,7 @@ def get_schema():
 # The seed is by default updated every 15 seconds
 def getRandomImage(images):
     num = random.number(0, len(images) - 1)
-    return render.Image(src = images[num])
+    return render.Image(src = images[num].readall())
 
 # This function returns the display based on the clock value
 # If clock is true, it will display the clock

@@ -5,3 +5,5 @@ summary: Track Madison Buses
 desc: Check arrivals for a given stop in Madison.
 author: Corey Johnsen
 recommendedInterval: 5
+broken: true
+brokenReason: "api.smsmybus.com: no such host"

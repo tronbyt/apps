@@ -102,8 +102,8 @@ def get_secrets(config):
     Returns:
         Dictionary containing `profile_id` and `api_key` secrets
     """
-    profile_id = config.get("profile_id").strip()
-    api_key = config.get("api_key").strip()
+    profile_id = config.get("profile_id", "").strip()
+    api_key = config.get("api_key", "").strip()
 
     if profile_id == "" or api_key == "":
         fail("Missing NextDNS profile id or api key value: please restart app with both values supplied")
