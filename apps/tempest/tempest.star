@@ -1,7 +1,7 @@
 """
 Applet: Tempest
 Summary: Display your Tempest Weather data
-Description: Overview of your Tempest Weather Station. Supports standard (64x32) and wide (128x32) displays.
+Description: Overview of your Tempest Weather Station. Supports standard (64x32) and wide (128x64) displays.
 Author: epifinygirl
 Adapted for Tronbyt: tavdog
 Enhanced with wide display support and additional options
@@ -34,18 +34,10 @@ TEMPEST_OBSERVATION_URL = "https://swd.weatherflow.com/swd/rest/observations/sta
 def main(config):
     # Get display dimensions
     width = canvas.width()
-    height = canvas.height()
-    
-    # S3 Wide is 128x64 - canvas.is2x() returns true
-    # Standard Tidbyt is 64x32 - canvas.is2x() returns false
-    scale = 2 if canvas.is2x() else 1
-    
-    # Detect wide display based on width
+
+    # Detect wide display based on width (S3 Wide is 128x64)
     is_wide = width > 64
-    
-    # Debug - print dimensions
-    print("Canvas: %dx%d, is2x=%s, scale=%d, is_wide=%s" % (width, height, canvas.is2x(), scale, is_wide))
-    
+
     # Adjust delay for animation speed
     delay = 35 if is_wide else 50
 
@@ -58,7 +50,7 @@ def main(config):
         token = config["token"]
         if "." in station_id:
             station_id = station_id.split(".")[0]
-        
+
         res = http.get(
             url = TEMPEST_OBSERVATION_URL % (station_id, token),
         )
@@ -95,7 +87,7 @@ def main(config):
     show_highlow = config.bool("show_highlow", True)
 
     conditions = forecast_res["current_conditions"]
-    
+
     # Get forecast data for high/low temps
     forecast_daily = forecast_res.get("forecast", {}).get("daily", [])
     if len(forecast_daily) > 0:
@@ -143,9 +135,6 @@ def main(config):
     if is_wide:
         return render_wide_layout(
             delay = delay,
-            width = width,
-            height = height,
-            scale = scale,
             icon = icon,
             temp = temp,
             secondary_temp_text = secondary_temp_text,
@@ -159,7 +148,6 @@ def main(config):
             wind_dir = wind_dir,
             wind_speed = wind_speed,
             wind_unit = wind_unit,
-            wind = wind,
             condition_text = condition_text,
             show_labels = show_labels,
             show_conditions = show_conditions,
@@ -183,7 +171,7 @@ def main(config):
 
 def render_standard_layout(delay, icon, temp, secondary_temp_text, humidity, rain, rain_units, pressure, pressure_icon, wind, condition_text, show_conditions):
     """Render layout for standard 64x32 display"""
-    
+
     # Build left column children
     left_children = [
         render.Text(
@@ -216,7 +204,7 @@ def render_standard_layout(delay, icon, temp, secondary_temp_text, humidity, rai
             content = pressure + " " + pressure_icon,
         ),
     ]
-    
+
     if show_conditions and condition_text:
         right_children.append(
             render.Marquee(
@@ -263,38 +251,38 @@ def render_standard_layout(delay, icon, temp, secondary_temp_text, humidity, rai
         ),
     )
 
-def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_text, high_temp, low_temp, humidity, rain, rain_units, pressure, pressure_icon, wind_dir, wind_speed, wind_unit, wind, condition_text, show_labels, show_conditions, show_highlow):
+def render_wide_layout(delay, icon, temp, secondary_temp_text, high_temp, low_temp, humidity, rain, rain_units, pressure, pressure_icon, wind_dir, wind_speed, wind_unit, condition_text, show_labels, show_conditions, show_highlow):
     """
     Render layout for wide 128x64 display (S3 Wide)
-    
+
     With labels (3 rows):
     Row 1: Icon | Temp | Feels | H:xx L:xx
     Row 2: HUM xx% | Rain: x.xx in | Pres: xx.x
     Row 3: Wind: DIR xxmph | [Conditions if enabled]
-    
+
     Without labels (2 rows):
     Row 1: Icon | Temp | Feels | H:xx L:xx | xx% | DIR xxmph
     Row 2: Rain: x.xx in | Pres: xx.x | [Conditions]
     """
-    
+
     # Larger fonts for 128x64 display
-    font_large = "10x20"     # For main temp - height 20
-    font_med = "6x13"        # For secondary values - height 13
-    font_small = "6x10"      # For labels - height 10
+    font_large = "10x20"  # For main temp - height 20
+    font_med = "6x13"  # For secondary values - height 13
+    font_small = "6x10"  # For labels - height 10
 
     if show_labels:
         # === 3-ROW LAYOUT (with labels) ===
-        
+
         # ROW 1: Icon, Temp, Feels, High/Low
         row1_children = []
-        
+
         row1_children.append(
             render.Padding(
                 pad = (2, 0, 4, 0),
                 child = render.Image(icon),
             ),
         )
-        
+
         row1_children.append(
             render.Text(
                 content = temp,
@@ -302,7 +290,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 font = font_large,
             ),
         )
-        
+
         if secondary_temp_text:
             row1_children.append(
                 render.Padding(
@@ -314,7 +302,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                     ),
                 ),
             )
-        
+
         if show_highlow:
             row1_children.append(
                 render.Padding(
@@ -328,17 +316,17 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                     ),
                 ),
             )
-        
+
         row1 = render.Row(
             expanded = True,
             main_align = "start",
             cross_align = "center",
             children = row1_children,
         )
-        
+
         # ROW 2: Humidity, Rain, Pressure
         row2_children = []
-        
+
         row2_children.append(
             render.Row(
                 cross_align = "center",
@@ -348,7 +336,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ],
             ),
         )
-        
+
         row2_children.append(
             render.Padding(
                 pad = (8, 0, 0, 0),
@@ -361,7 +349,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ),
             ),
         )
-        
+
         row2_children.append(
             render.Padding(
                 pad = (8, 0, 0, 0),
@@ -374,17 +362,17 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ),
             ),
         )
-        
+
         row2 = render.Row(
             expanded = True,
             main_align = "start",
             cross_align = "center",
             children = row2_children,
         )
-        
+
         # ROW 3: Wind and Conditions
         row3_children = []
-        
+
         row3_children.append(
             render.Row(
                 cross_align = "center",
@@ -394,7 +382,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ],
             ),
         )
-        
+
         if show_conditions and condition_text:
             row3_children.append(
                 render.Padding(
@@ -411,34 +399,34 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                     ),
                 ),
             )
-        
+
         row3 = render.Row(
             expanded = True,
             main_align = "start",
             cross_align = "center",
             children = row3_children,
         )
-        
+
         display_content = render.Column(
             expanded = True,
             main_align = "space_evenly",
             cross_align = "start",
             children = [row1, row2, row3],
         )
-    
+
     else:
         # === 2-ROW LAYOUT (without labels) ===
-        
+
         # ROW 1: Icon, Temp, Feels, High/Low, Humidity, Wind
         row1_children = []
-        
+
         row1_children.append(
             render.Padding(
                 pad = (2, 0, 4, 0),
                 child = render.Image(icon),
             ),
         )
-        
+
         row1_children.append(
             render.Text(
                 content = temp,
@@ -446,7 +434,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 font = font_large,
             ),
         )
-        
+
         if secondary_temp_text:
             row1_children.append(
                 render.Padding(
@@ -458,7 +446,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                     ),
                 ),
             )
-        
+
         if show_highlow:
             row1_children.append(
                 render.Padding(
@@ -472,7 +460,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                     ),
                 ),
             )
-        
+
         row1_children.append(
             render.Padding(
                 pad = (4, 0, 0, 0),
@@ -483,7 +471,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ),
             ),
         )
-        
+
         row1_children.append(
             render.Padding(
                 pad = (4, 0, 0, 0),
@@ -496,17 +484,17 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ),
             ),
         )
-        
+
         row1 = render.Row(
             expanded = True,
             main_align = "start",
             cross_align = "center",
             children = row1_children,
         )
-        
+
         # ROW 2: Rain, Pressure, Conditions
         row2_children = []
-        
+
         row2_children.append(
             render.Row(
                 cross_align = "center",
@@ -515,7 +503,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ],
             ),
         )
-        
+
         row2_children.append(
             render.Padding(
                 pad = (8, 0, 0, 0),
@@ -526,7 +514,7 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                 ),
             ),
         )
-        
+
         if show_conditions and condition_text:
             row2_children.append(
                 render.Padding(
@@ -543,14 +531,14 @@ def render_wide_layout(delay, width, height, scale, icon, temp, secondary_temp_t
                     ),
                 ),
             )
-        
+
         row2 = render.Row(
             expanded = True,
             main_align = "start",
             cross_align = "center",
             children = row2_children,
         )
-        
+
         display_content = render.Column(
             expanded = True,
             main_align = "space_evenly",
