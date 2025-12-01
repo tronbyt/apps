@@ -2,7 +2,7 @@
 # Spotify Now Playing - Ultimate Edition
 # For Tronbyt / Tidbyt displays
 
-id: spotify_now_playing
+id: spotify-now-playing
 name: Spotify Now Playing
 summary: Display currently playing Spotify track with album art
 desc: |
