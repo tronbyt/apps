@@ -3,7 +3,7 @@
 # For Tronbyt / Tidbyt displays
 
 id: spotify-now-playing
-name: Spotify Now Playing
+name: Spotify
 summary: Display currently playing Spotify track with album art
 desc: |
   A comprehensive Spotify display featuring:
