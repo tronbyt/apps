@@ -32,11 +32,8 @@ TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?tok
 TEMPEST_OBSERVATION_URL = "https://swd.weatherflow.com/swd/rest/observations/station/%s?token=%s"
 
 def main(config):
-    # Get display dimensions
-    width = canvas.width()
-
-    # Detect wide display based on width (S3 Wide is 128x64)
-    is_wide = width > 64
+    # Detect wide display (S3 Wide is 128x64)
+    is_wide = canvas.is2x()
 
     # Adjust delay for animation speed
     delay = 35 if is_wide else 50
@@ -89,7 +86,7 @@ def main(config):
     conditions = forecast_res["current_conditions"]
 
     # Get forecast data for high/low temps
-    forecast_daily = (forecast_res.get("forecast") or {}).get("daily", [])
+    forecast_daily = forecast_res.get("forecast", {}).get("daily", [])
     if len(forecast_daily) > 0:
         today_forecast = forecast_daily[0]
         high_temp = "%d°" % today_forecast.get("air_temp_high", 0)
@@ -125,14 +122,11 @@ def main(config):
     # Build secondary temperature display
     secondary_temp_text = None
     if secondary_temp_choice == "1":
-        secondary_temp_text = ("F:" if is_wide and show_labels else "") + feels
+        secondary_temp_text = ("F:" if show_labels else "") + feels
     elif secondary_temp_choice == "2":
-        secondary_temp_text = ("D:" if is_wide and show_labels else "") + dew_pt
+        secondary_temp_text = ("D:" if show_labels else "") + dew_pt
     elif secondary_temp_choice == "4":
-        # On wide displays, the dedicated H/L column is controlled by `show_highlow`.
-        # This option provides H/L for standard displays, or as a fallback for wide displays if the dedicated column is off.
-        if not (is_wide and show_highlow):
-            secondary_temp_text = high_temp + "/" + low_temp
+        secondary_temp_text = high_temp + "/" + low_temp
 
     # Choose layout based on display width
     if is_wide:
@@ -273,208 +267,20 @@ def render_wide_layout(delay, icon, temp, secondary_temp_text, high_temp, low_te
     font_med = "6x13"  # For secondary values - height 13
     font_small = "6x10"  # For labels - height 10
 
-    if show_labels:
-        # === 3-ROW LAYOUT (with labels) ===
+    # Build row 1 (common elements: icon, temp, secondary temp, high/low)
+    row1_children = _build_main_row(
+        icon, temp, secondary_temp_text, high_temp, low_temp,
+        show_labels, show_highlow, font_large, font_med, font_small,
+    )
 
-        # ROW 1: Icon, Temp, Feels, High/Low
-        row1_children = []
-
-        row1_children.append(
-            render.Padding(
-                pad = (2, 0, 4, 0),
-                child = render.Image(icon),
-            ),
-        )
-
-        row1_children.append(
-            render.Text(
-                content = temp,
-                color = "#22DD22",
-                font = font_large,
-            ),
-        )
-
-        if secondary_temp_text:
-            row1_children.append(
-                render.Padding(
-                    pad = (6, 0, 0, 0),
-                    child = render.Text(
-                        content = secondary_temp_text,
-                        color = "#FFFF00",
-                        font = font_med,
-                    ),
-                ),
-            )
-
-        if show_highlow:
-            row1_children.append(
-                render.Padding(
-                    pad = (6, 0, 0, 0),
-                    child = render.Column(
-                        cross_align = "start",
-                        children = [
-                            render.Text(content = "H:" + high_temp, color = "#FF6644", font = font_small),
-                            render.Text(content = "L:" + low_temp, color = "#44AAFF", font = font_small),
-                        ],
-                    ),
-                ),
-            )
-
-        row1 = render.Row(
-            expanded = True,
-            main_align = "start",
-            cross_align = "center",
-            children = row1_children,
-        )
-
-        # ROW 2: Humidity, Rain, Pressure
-        row2_children = []
-
-        row2_children.append(
-            render.Row(
-                cross_align = "center",
-                children = [
-                    render.Text(content = "HUM ", color = "#4444AA", font = font_small),
-                    render.Text(content = humidity, color = "#6666FF", font = font_med),
-                ],
-            ),
-        )
-
-        row2_children.append(
-            render.Padding(
-                pad = (8, 0, 0, 0),
-                child = render.Row(
-                    cross_align = "center",
-                    children = [
-                        render.Text(content = "Rain: ", color = "#666666", font = font_small),
-                        render.Text(content = rain + " " + rain_units, color = "#888888", font = font_med),
-                    ],
-                ),
-            ),
-        )
-
-        row2_children.append(
-            render.Padding(
-                pad = (8, 0, 0, 0),
-                child = render.Row(
-                    cross_align = "center",
-                    children = [
-                        render.Text(content = "Pres: ", color = "#666666", font = font_small),
-                        render.Text(content = pressure + pressure_icon, color = "#FFFFFF", font = font_med),
-                    ],
-                ),
-            ),
-        )
-
-        row2 = render.Row(
-            expanded = True,
-            main_align = "start",
-            cross_align = "center",
-            children = row2_children,
-        )
-
-        # ROW 3: Wind and Conditions
-        row3_children = []
-
-        row3_children.append(
-            render.Row(
-                cross_align = "center",
-                children = [
-                    render.Text(content = "Wind: ", color = "#446644", font = font_small),
-                    render.Text(content = wind_dir + " " + wind_speed + wind_unit, color = "#88FF88", font = font_med),
-                ],
-            ),
-        )
-
-        if show_conditions and condition_text:
-            row3_children.append(
-                render.Padding(
-                    pad = (8, 0, 0, 0),
-                    child = render.Marquee(
-                        width = 60,
-                        offset_start = 30,
-                        offset_end = 30,
-                        child = render.Text(
-                            content = condition_text,
-                            color = "#AAAAAA",
-                            font = font_med,
-                        ),
-                    ),
-                ),
-            )
-
-        row3 = render.Row(
-            expanded = True,
-            main_align = "start",
-            cross_align = "center",
-            children = row3_children,
-        )
-
-        display_content = render.Column(
-            expanded = True,
-            main_align = "space_evenly",
-            cross_align = "start",
-            children = [row1, row2, row3],
-        )
-
-    else:
-        # === 2-ROW LAYOUT (without labels) ===
-
-        # ROW 1: Icon, Temp, Feels, High/Low, Humidity, Wind
-        row1_children = []
-
-        row1_children.append(
-            render.Padding(
-                pad = (2, 0, 4, 0),
-                child = render.Image(icon),
-            ),
-        )
-
-        row1_children.append(
-            render.Text(
-                content = temp,
-                color = "#22DD22",
-                font = font_large,
-            ),
-        )
-
-        if secondary_temp_text:
-            row1_children.append(
-                render.Padding(
-                    pad = (4, 0, 0, 0),
-                    child = render.Text(
-                        content = secondary_temp_text,
-                        color = "#FFFF00",
-                        font = font_med,
-                    ),
-                ),
-            )
-
-        if show_highlow:
-            row1_children.append(
-                render.Padding(
-                    pad = (4, 0, 0, 0),
-                    child = render.Column(
-                        cross_align = "start",
-                        children = [
-                            render.Text(content = high_temp, color = "#FF6644", font = font_small),
-                            render.Text(content = low_temp, color = "#44AAFF", font = font_small),
-                        ],
-                    ),
-                ),
-            )
-
+    # Add humidity and wind to row 1 if no labels (2-row layout)
+    if not show_labels:
         row1_children.append(
             render.Padding(
                 pad = (4, 0, 0, 0),
-                child = render.Text(
-                    content = humidity,
-                    color = "#6666FF",
-                    font = font_med,
-                ),
+                child = render.Text(content = humidity, color = "#6666FF", font = font_med),
             ),
         )
-
         row1_children.append(
             render.Padding(
                 pad = (4, 0, 0, 0),
@@ -488,73 +294,171 @@ def render_wide_layout(delay, icon, temp, secondary_temp_text, high_temp, low_te
             ),
         )
 
-        row1 = render.Row(
-            expanded = True,
-            main_align = "start",
-            cross_align = "center",
-            children = row1_children,
-        )
+    row1 = render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = row1_children,
+    )
 
-        # ROW 2: Rain, Pressure, Conditions
-        row2_children = []
-
-        row2_children.append(
-            render.Row(
-                cross_align = "center",
-                children = [
-                    render.Text(content = rain + " " + rain_units, color = "#888888", font = font_med),
-                ],
-            ),
-        )
-
-        row2_children.append(
-            render.Padding(
-                pad = (8, 0, 0, 0),
-                child = render.Text(
-                    content = pressure + " " + pressure_icon,
-                    color = "#FFFFFF",
-                    font = font_med,
-                ),
-            ),
-        )
-
-        if show_conditions and condition_text:
-            row2_children.append(
-                render.Padding(
-                    pad = (8, 0, 0, 0),
-                    child = render.Marquee(
-                        width = 50,
-                        offset_start = 25,
-                        offset_end = 25,
-                        child = render.Text(
-                            content = condition_text,
-                            color = "#AAAAAA",
-                            font = font_med,
-                        ),
-                    ),
-                ),
-            )
-
-        row2 = render.Row(
-            expanded = True,
-            main_align = "start",
-            cross_align = "center",
-            children = row2_children,
-        )
-
-        display_content = render.Column(
-            expanded = True,
-            main_align = "space_evenly",
-            cross_align = "start",
-            children = [row1, row2],
-        )
+    if show_labels:
+        # 3-row layout
+        row2 = _build_stats_row(humidity, rain, rain_units, pressure, pressure_icon, font_med, font_small)
+        row3 = _build_wind_row(wind_dir, wind_speed, wind_unit, condition_text, show_conditions, font_med, font_small)
+        rows = [row1, row2, row3]
+    else:
+        # 2-row layout
+        row2 = _build_secondary_row(rain, rain_units, pressure, pressure_icon, condition_text, show_conditions, font_med)
+        rows = [row1, row2]
 
     return render.Root(
         delay = delay,
         child = render.Padding(
             pad = 2,
-            child = display_content,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "start",
+                children = rows,
+            ),
         ),
+    )
+
+def _build_main_row(icon, temp, secondary_temp_text, high_temp, low_temp, show_labels, show_highlow, font_large, font_med, font_small):
+    """Build the main row with icon, temp, secondary temp, and high/low."""
+    children = [
+        render.Padding(
+            pad = (2, 0, 4, 0),
+            child = render.Image(icon),
+        ),
+        render.Text(content = temp, color = "#22DD22", font = font_large),
+    ]
+
+    if secondary_temp_text:
+        pad_left = 6 if show_labels else 4
+        children.append(
+            render.Padding(
+                pad = (pad_left, 0, 0, 0),
+                child = render.Text(content = secondary_temp_text, color = "#FFFF00", font = font_med),
+            ),
+        )
+
+    if show_highlow:
+        pad_left = 6 if show_labels else 4
+        high_text = ("H:" + high_temp) if show_labels else high_temp
+        low_text = ("L:" + low_temp) if show_labels else low_temp
+        children.append(
+            render.Padding(
+                pad = (pad_left, 0, 0, 0),
+                child = render.Column(
+                    cross_align = "start",
+                    children = [
+                        render.Text(content = high_text, color = "#FF6644", font = font_small),
+                        render.Text(content = low_text, color = "#44AAFF", font = font_small),
+                    ],
+                ),
+            ),
+        )
+
+    return children
+
+def _build_stats_row(humidity, rain, rain_units, pressure, pressure_icon, font_med, font_small):
+    """Build the stats row with humidity, rain, and pressure (3-row layout)."""
+    return render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = [
+            render.Row(
+                cross_align = "center",
+                children = [
+                    render.Text(content = "HUM ", color = "#4444AA", font = font_small),
+                    render.Text(content = humidity, color = "#6666FF", font = font_med),
+                ],
+            ),
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Row(
+                    cross_align = "center",
+                    children = [
+                        render.Text(content = "Rain: ", color = "#666666", font = font_small),
+                        render.Text(content = rain + " " + rain_units, color = "#888888", font = font_med),
+                    ],
+                ),
+            ),
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Row(
+                    cross_align = "center",
+                    children = [
+                        render.Text(content = "Pres: ", color = "#666666", font = font_small),
+                        render.Text(content = pressure + pressure_icon, color = "#FFFFFF", font = font_med),
+                    ],
+                ),
+            ),
+        ],
+    )
+
+def _build_wind_row(wind_dir, wind_speed, wind_unit, condition_text, show_conditions, font_med, font_small):
+    """Build the wind row with optional conditions (3-row layout)."""
+    children = [
+        render.Row(
+            cross_align = "center",
+            children = [
+                render.Text(content = "Wind: ", color = "#446644", font = font_small),
+                render.Text(content = wind_dir + " " + wind_speed + wind_unit, color = "#88FF88", font = font_med),
+            ],
+        ),
+    ]
+
+    if show_conditions and condition_text:
+        children.append(
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Marquee(
+                    width = 60,
+                    offset_start = 30,
+                    offset_end = 30,
+                    child = render.Text(content = condition_text, color = "#AAAAAA", font = font_med),
+                ),
+            ),
+        )
+
+    return render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = children,
+    )
+
+def _build_secondary_row(rain, rain_units, pressure, pressure_icon, condition_text, show_conditions, font_med):
+    """Build the secondary row with rain, pressure, and conditions (2-row layout)."""
+    children = [
+        render.Text(content = rain + " " + rain_units, color = "#888888", font = font_med),
+        render.Padding(
+            pad = (8, 0, 0, 0),
+            child = render.Text(content = pressure + " " + pressure_icon, color = "#FFFFFF", font = font_med),
+        ),
+    ]
+
+    if show_conditions and condition_text:
+        children.append(
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Marquee(
+                    width = 50,
+                    offset_start = 25,
+                    offset_end = 25,
+                    child = render.Text(content = condition_text, color = "#AAAAAA", font = font_med),
+                ),
+            ),
+        )
+
+    return render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = children,
     )
 
 def get_schema():
