@@ -163,7 +163,7 @@ def make_request(
             
             try:
                 json_data = json.loads(body.decode('utf-8'))
-            except:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 json_data = None
             
             return status, json_data, body
@@ -539,7 +539,7 @@ REFRESH_TOKEN={refresh_token}
         # Set restrictive permissions on Unix
         try:
             os.chmod(filepath, 0o600)
-        except:
+        except OSError:
             pass
         
         return None
@@ -615,7 +615,7 @@ def run_authorization_flow(client_id: str, client_secret: str) -> Tuple[Optional
     # Open browser
     try:
         webbrowser.open(auth_url)
-    except:
+    except Exception:
         print_warning("Could not open browser automatically")
     
     print_info(f"Waiting for authorization (timeout: {CALLBACK_TIMEOUT}s)...")
