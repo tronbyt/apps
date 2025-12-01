@@ -104,7 +104,7 @@ your Tronbyt refresh rate), you'll see it on your display!
   -> Double-check your Client ID and Client Secret.
 
 Nothing displays / black screen:
-  -> Make sure Spotify is actually playing (not paused).
+  -> Check that a track is active (playing or paused) on one of your devices.
   -> Some private sessions don't report to the API.
   -> Check that "Show When Idle" is enabled in settings.
 
@@ -367,7 +367,7 @@ def get_access_token(client_id, client_secret, refresh_token):
 
     if resp.status_code == 429:
         # Rate limited
-        backoff = increase_error_backoff()
+        increase_error_backoff()
         return None, "Rate limited"
 
     # Other errors - implement backoff
