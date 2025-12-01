@@ -31,8 +31,7 @@ Author: Henry So, Jr.
 # See comments in the code for further attribution
 
 load("encoding/json.star", "json")
-load("images/map.png", MAP_ASSET = "file")
-load("images/pixel.png", PIXEL_ASSET = "file")
+load("images/am.png", AM_ASSET = "file")
 load("images/char_0.png", CHAR_0_ASSET = "file")
 load("images/char_1.png", CHAR_1_ASSET = "file")
 load("images/char_2.png", CHAR_2_ASSET = "file")
@@ -44,9 +43,9 @@ load("images/char_7.png", CHAR_7_ASSET = "file")
 load("images/char_8.png", CHAR_8_ASSET = "file")
 load("images/char_9.png", CHAR_9_ASSET = "file")
 load("images/colon.png", COLON_ASSET = "file")
-load("images/am.png", AM_ASSET = "file")
+load("images/map.png", MAP_ASSET = "file")
+load("images/pixel.png", PIXEL_ASSET = "file")
 load("images/pm.png", PM_ASSET = "file")
-
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
