@@ -1,5 +1,5 @@
 """
-Spotify Now Playing - Ultimate Edition for Tronbyt/Tidbyt
+Spotify Now Playing - Ultimate Edition for Tronbyt
 =========================================================
 
 Author: gshepperd
@@ -12,7 +12,6 @@ load("encoding/base64.star", "base64")
 load("cache.star", "cache")
 load("schema.star", "schema")
 load("time.star", "time")
-load("math.star", "math")
 
 # =============================================================================
 # CONSTANTS
@@ -233,7 +232,7 @@ def get_access_token(client_id, client_secret, refresh_token):
 
     if resp.status_code == 429:
         # Rate limited
-        backoff = increase_error_backoff()
+        increase_error_backoff()
         return None, "Rate limited"
 
     # Other errors - implement backoff
