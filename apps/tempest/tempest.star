@@ -32,13 +32,25 @@ TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?tok
 TEMPEST_OBSERVATION_URL = "https://swd.weatherflow.com/swd/rest/observations/station/%s?token=%s"
 
 def main(config):
-    # Get display dimensions and scale factor (following TeslaMate pattern)
-    scale = 2 if canvas.is2x() else 1
+    # Get display dimensions
     width = canvas.width()
     height = canvas.height()
     
-    # Detect wide display: 128x32 S3 Wide or 128x64 2x display
+    # Determine scale factor
+    # S3 Wide is 128x32 - should use scale=1
+    # True 2x is 128x64 - should use scale=2
+    # Standard is 64x32 - should use scale=1
+    # Force scale=1 for any 32px height display
+    if height > 32 and canvas.is2x():
+        scale = 2
+    else:
+        scale = 1
+    
+    # Detect wide display based on width
     is_wide = width > 64
+    
+    # Debug - print dimensions
+    print("Canvas: %dx%d, is2x=%s, scale=%d, is_wide=%s" % (width, height, canvas.is2x(), scale, is_wide))
     
     # Adjust delay for animation speed
     delay = 35 if is_wide else 50
