@@ -2,7 +2,6 @@
 
 import subprocess
 import shutil
-import sys
 import argparse
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -90,13 +89,14 @@ def format_bytes(size: int) -> str:
     if size == 0:
         return "0 bytes"
     power = 2**10
-    n = size
+    n = float(size)
     power_labels = {0: 'bytes', 1: 'KB', 2: 'MB', 3: 'GB', 4: 'TB'}
     loop = 0
     while n >= power and loop < len(power_labels) - 1:
         n /= power
         loop += 1
-    return f"{n:.2f} {power_labels[loop]}"
+    format_spec = ".0f" if loop == 0 else ".2f"
+    return f"{n:{format_spec}} {power_labels[loop]}"
 
 def optimize_file(file_path: Path, dry_run: bool = False):
     """
@@ -178,46 +178,25 @@ def optimize_file(file_path: Path, dry_run: bool = False):
         return (2, original_size, 0, file_path.name, str(e))
 
 def main():
-
     parser = argparse.ArgumentParser(description="Optimize images (WebP, PNG, GIF, SVG) recursively.")
-
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory).")
-
     parser.add_argument("--dry-run", action="store_true", help="Simulate optimization without modifying files.")
-
     parser.add_argument("--workers", type=int, default=4, help="Number of concurrent workers (default: 4).")
 
     args = parser.parse_args()
 
-
-
     check_prerequisites()
 
-
-
     extensions = {".webp", ".png", ".gif", ".svg"}
-
     files_to_process = []
-
     root_dir = Path(args.directory).resolve()
 
-
-
     if not root_dir.exists() or not root_dir.is_dir():
-
         print(f"Error: Invalid directory '{root_dir}'")
-
         return
 
-
-
     print(f"Scanning {root_dir} for image files ({', '.join(extensions)})...")
-
-
     
-    # Modern pathlib walk
-    # Note: 'walk' is available in Python 3.12+. If older, use rglob or os.walk.
-    # The environment seems to have Python 3.
     try:
         walker = root_dir.walk()
     except AttributeError:
