@@ -1,9 +1,10 @@
 """
 Applet: Tempest
 Summary: Display your Tempest Weather data
-Description: Overview of your Tempest Weather Station, including current temperature, wind chill, pressure, inches of rain, and wind.
+Description: Overview of your Tempest Weather Station. Supports standard (64x32) and wide (128x64) displays.
 Author: epifinygirl
 Adapted for Tronbyt: tavdog
+Enhanced with wide display support and additional options
 """
 
 load("encoding/json.star", "json")
@@ -21,32 +22,32 @@ load("images/sunnyish.png", SUNNYISH_ASSET = "file")
 load("images/thundery.png", THUNDERY_ASSET = "file")
 load("images/tornady.png", TORNADY_ASSET = "file")
 load("images/windy.png", WINDY_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("sample_forecast_response.json", SAMPLE_FORECAST_RESPONSE = "file")
 load("sample_station_response.json", SAMPLE_STATION_RESPONSE = "file")
 load("schema.star", "schema")
 
 TEMPEST_STATIONS_URL = "https://swd.weatherflow.com/swd/rest/stations?token=%s"
-
 TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?token=%s"
-
 TEMPEST_OBSERVATION_URL = "https://swd.weatherflow.com/swd/rest/observations/station/%s?token=%s"
 
 def main(config):
+    # Detect wide display (S3 Wide is 128x64)
+    is_wide = canvas.is2x()
+
+    # Adjust delay for animation speed
+    delay = 35 if is_wide else 50
+
     if not "station" in config or not "token" in config:
         station_res = json.decode(SAMPLE_STATION_RESPONSE.readall())
         forecast_res = json.decode(SAMPLE_FORECAST_RESPONSE.readall())
         units = station_res["station_units"]
-        token = "blah"
     else:
-        # ensure we have the station ID in the correct format
         station_id = config["station"]
         token = config["token"]
         if "." in station_id:
             station_id = station_id.split(".")[0]
-        print("station id in main : " + str(station_id))
-        url = TEMPEST_OBSERVATION_URL % (station_id, token)
-        print(url)
+
         res = http.get(
             url = TEMPEST_OBSERVATION_URL % (station_id, token),
         )
@@ -73,98 +74,403 @@ def main(config):
 
         forecast_res = res.json()
 
-    # If we can't get an observation, we should just skip it in the rotation.
     if len(station_res["obs"]) == 0:
         return []
-    feel_dew_choice = config.get("Feels_Dew", "1")
+
+    # Get config options (with backward compatibility for old Feels_Dew key)
+    secondary_temp_choice = config.get("secondary_temp", config.get("Feels_Dew", "1"))
+    show_labels = config.bool("show_labels", True)
+    show_conditions = config.bool("show_conditions", False)
+    show_highlow = config.bool("show_highlow", True)
+
     conditions = forecast_res["current_conditions"]
 
+    # Get forecast data for high/low temps
+    forecast_daily = forecast_res.get("forecast", {}).get("daily", [])
+    if len(forecast_daily) > 0:
+        today_forecast = forecast_daily[0]
+        high_temp = "%d°" % today_forecast.get("air_temp_high", 0)
+        low_temp = "%d°" % today_forecast.get("air_temp_low", 0)
+    else:
+        high_temp = "--"
+        low_temp = "--"
+
+    # Extract all weather data
     temp = "%d°" % conditions["air_temperature"]
     humidity = "%d%%" % conditions["relative_humidity"]
-    wind = "%s %d %s" % (
-        conditions["wind_direction_cardinal"],
-        conditions["wind_avg"],
-        units["units_wind"],
-    )
+    wind_speed = "%d" % conditions["wind_avg"]
+    wind_dir = conditions["wind_direction_cardinal"]
+    wind_unit = units["units_wind"]
+    wind = "%s %d%s" % (wind_dir, conditions["wind_avg"], wind_unit)
     pressure = "%g" % conditions["sea_level_pressure"]
     rain = "%g" % conditions.get("precip_accum_local_day", 0.0)
     feels = "%d°" % conditions["feels_like"]
     dew_pt = "%d°" % conditions["dew_point"]
     pressure_trend = conditions["pressure_trend"]
     icon = ICON_MAP.get(conditions["icon"], ICON_MAP["cloudy"])
-    if feel_dew_choice == "1":
-        updated_temp = (feels)
-    elif feel_dew_choice == "2":
-        updated_temp = (dew_pt)
-    else:
-        updated_temp = (" ")
-
-    if pressure_trend == "falling":
-        pressure_icon = ("↓")
-
-    elif pressure_trend == "rising":
-        pressure_icon = ("↑")
-
-    else:
-        pressure_icon = ("→")
+    condition_text = conditions.get("conditions", "")
     rain_units = units["units_precip"]
 
+    # Pressure trend icon
+    if pressure_trend == "falling":
+        pressure_icon = "↓"
+    elif pressure_trend == "rising":
+        pressure_icon = "↑"
+    else:
+        pressure_icon = "→"
+
+    # Build secondary temperature display
+    secondary_temp_text = None
+    if secondary_temp_choice == "1":
+        secondary_temp_text = ("F:" if show_labels else "") + feels
+    elif secondary_temp_choice == "2":
+        secondary_temp_text = ("D:" if show_labels else "") + dew_pt
+    elif secondary_temp_choice == "4":
+        secondary_temp_text = high_temp + "/" + low_temp
+
+    # Choose layout based on display width
+    if is_wide:
+        return render_wide_layout(
+            delay = delay,
+            icon = icon,
+            temp = temp,
+            secondary_temp_text = secondary_temp_text,
+            high_temp = high_temp,
+            low_temp = low_temp,
+            humidity = humidity,
+            rain = rain,
+            rain_units = rain_units,
+            pressure = pressure,
+            pressure_icon = pressure_icon,
+            wind_dir = wind_dir,
+            wind_speed = wind_speed,
+            wind_unit = wind_unit,
+            condition_text = condition_text,
+            show_labels = show_labels,
+            show_conditions = show_conditions,
+            show_highlow = show_highlow,
+        )
+    else:
+        return render_standard_layout(
+            delay = delay,
+            icon = icon,
+            temp = temp,
+            secondary_temp_text = secondary_temp_text,
+            humidity = humidity,
+            rain = rain,
+            rain_units = rain_units,
+            pressure = pressure,
+            pressure_icon = pressure_icon,
+            wind = wind,
+            condition_text = condition_text,
+            show_conditions = show_conditions,
+        )
+
+def render_standard_layout(delay, icon, temp, secondary_temp_text, humidity, rain, rain_units, pressure, pressure_icon, wind, condition_text, show_conditions):
+    """Render layout for standard 64x32 display"""
+
+    # Build left column children
+    left_children = [
+        render.Text(
+            content = temp,
+            color = "#22AA22",
+        ),
+    ]
+
+    if secondary_temp_text:
+        left_children.append(
+            render.Text(
+                content = secondary_temp_text,
+                color = "#FFFF00",
+            ),
+        )
+
+    left_children.append(render.Image(icon))
+
+    # Build right column children
+    right_children = [
+        render.Text(
+            content = humidity,
+            color = "#6666FF",
+        ),
+        render.Text(
+            content = rain + " " + rain_units,
+            color = "#808080",
+        ),
+        render.Text(
+            content = pressure + " " + pressure_icon,
+        ),
+    ]
+
+    if show_conditions and condition_text:
+        right_children.append(
+            render.Marquee(
+                width = 32,
+                offset_start = 16,
+                offset_end = 16,
+                child = render.Text(
+                    content = condition_text,
+                    color = "#AAAAAA",
+                    font = "CG-pixel-3x5-mono",
+                ),
+            ),
+        )
+    else:
+        right_children.append(
+            render.Text(
+                content = wind,
+                font = "CG-pixel-3x5-mono",
+            ),
+        )
+
+    main_content = render.Row(
+        expanded = True,
+        main_align = "space_evenly",
+        children = [
+            render.Column(
+                cross_align = "start",
+                children = left_children,
+            ),
+            render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "end",
+                children = right_children,
+            ),
+        ],
+    )
+
     return render.Root(
-        delay = 500,
+        delay = delay,
         child = render.Box(
             padding = 1,
+            child = main_content,
+        ),
+    )
+
+def render_wide_layout(delay, icon, temp, secondary_temp_text, high_temp, low_temp, humidity, rain, rain_units, pressure, pressure_icon, wind_dir, wind_speed, wind_unit, condition_text, show_labels, show_conditions, show_highlow):
+    """
+    Render layout for wide 128x64 display (S3 Wide)
+
+    With labels (3 rows):
+    Row 1: Icon | Temp | Feels | H:xx L:xx
+    Row 2: HUM xx% | Rain: x.xx in | Pres: xx.x
+    Row 3: Wind: DIR xxmph | [Conditions if enabled]
+
+    Without labels (2 rows):
+    Row 1: Icon | Temp | Feels | H:xx L:xx | xx% | DIR xxmph
+    Row 2: Rain: x.xx in | Pres: xx.x | [Conditions]
+    """
+
+    # Larger fonts for 128x64 display
+    font_large = "10x20"  # For main temp - height 20
+    font_med = "6x13"  # For secondary values - height 13
+    font_small = "6x10"  # For labels - height 10
+
+    # Build row 1 (common elements: icon, temp, secondary temp, high/low)
+    row1_children = _build_main_row(
+        icon,
+        temp,
+        secondary_temp_text,
+        high_temp,
+        low_temp,
+        show_labels,
+        show_highlow,
+        font_large,
+        font_med,
+        font_small,
+    )
+
+    # Add humidity and wind to row 1 if no labels (2-row layout)
+    if not show_labels:
+        row1_children.append(
+            render.Padding(
+                pad = (4, 0, 0, 0),
+                child = render.Text(content = humidity, color = "#6666FF", font = font_med),
+            ),
+        )
+        row1_children.append(
+            render.Padding(
+                pad = (4, 0, 0, 0),
+                child = render.Column(
+                    cross_align = "center",
+                    children = [
+                        render.Text(content = wind_dir, color = "#66AA66", font = font_small),
+                        render.Text(content = wind_speed + wind_unit, color = "#88FF88", font = font_small),
+                    ],
+                ),
+            ),
+        )
+
+    row1 = render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = row1_children,
+    )
+
+    if show_labels:
+        # 3-row layout
+        row2 = _build_stats_row(humidity, rain, rain_units, pressure, pressure_icon, font_med, font_small)
+        row3 = _build_wind_row(wind_dir, wind_speed, wind_unit, condition_text, show_conditions, font_med, font_small)
+        rows = [row1, row2, row3]
+    else:
+        # 2-row layout
+        row2 = _build_secondary_row(rain, rain_units, pressure, pressure_icon, condition_text, show_conditions, font_med)
+        rows = [row1, row2]
+
+    return render.Root(
+        delay = delay,
+        child = render.Padding(
+            pad = 2,
             child = render.Column(
-                children = [
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_evenly",
-                        children = [
-                            render.Column(
-                                cross_align = "start",
-                                children = [
-                                    render.Text(
-                                        content = temp,
-                                        color = "#2a2",
-                                    ),
-                                    render.Text(
-                                        content = updated_temp,
-                                        color = "#FFFF00",
-                                    ),
-                                    render.Image(icon),
-                                    render.Box(width = 2, height = 1),
-                                ],
-                            ),
-                            render.Column(
-                                expanded = True,
-                                main_align = "space_evenly",
-                                cross_align = "end",
-                                children = [
-                                    render.Text(
-                                        content = humidity,
-                                        color = "#66f",
-                                    ),
-                                    render.Text(
-                                        content = rain + " " + rain_units,
-                                        color = "#808080",
-                                    ),
-                                    render.Text(
-                                        content = pressure + " " + pressure_icon,
-                                    ),
-                                    render.Text(
-                                        content = wind,
-                                        font = "CG-pixel-3x5-mono",
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
-                ],
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "start",
+                children = rows,
             ),
         ),
     )
 
+def _build_main_row(icon, temp, secondary_temp_text, high_temp, low_temp, show_labels, show_highlow, font_large, font_med, font_small):
+    """Build the main row with icon, temp, secondary temp, and high/low."""
+    children = [
+        render.Padding(
+            pad = (2, 0, 4, 0),
+            child = render.Image(icon),
+        ),
+        render.Text(content = temp, color = "#22DD22", font = font_large),
+    ]
+
+    if secondary_temp_text:
+        pad_left = 6 if show_labels else 4
+        children.append(
+            render.Padding(
+                pad = (pad_left, 0, 0, 0),
+                child = render.Text(content = secondary_temp_text, color = "#FFFF00", font = font_med),
+            ),
+        )
+
+    if show_highlow:
+        pad_left = 6 if show_labels else 4
+        high_text = ("H:" + high_temp) if show_labels else high_temp
+        low_text = ("L:" + low_temp) if show_labels else low_temp
+        children.append(
+            render.Padding(
+                pad = (pad_left, 0, 0, 0),
+                child = render.Column(
+                    cross_align = "start",
+                    children = [
+                        render.Text(content = high_text, color = "#FF6644", font = font_small),
+                        render.Text(content = low_text, color = "#44AAFF", font = font_small),
+                    ],
+                ),
+            ),
+        )
+
+    return children
+
+def _build_stats_row(humidity, rain, rain_units, pressure, pressure_icon, font_med, font_small):
+    """Build the stats row with humidity, rain, and pressure (3-row layout)."""
+    return render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = [
+            render.Row(
+                cross_align = "center",
+                children = [
+                    render.Text(content = "HUM ", color = "#4444AA", font = font_small),
+                    render.Text(content = humidity, color = "#6666FF", font = font_med),
+                ],
+            ),
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Row(
+                    cross_align = "center",
+                    children = [
+                        render.Text(content = "Rain: ", color = "#666666", font = font_small),
+                        render.Text(content = rain + " " + rain_units, color = "#888888", font = font_med),
+                    ],
+                ),
+            ),
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Row(
+                    cross_align = "center",
+                    children = [
+                        render.Text(content = "Pres: ", color = "#666666", font = font_small),
+                        render.Text(content = pressure + pressure_icon, color = "#FFFFFF", font = font_med),
+                    ],
+                ),
+            ),
+        ],
+    )
+
+def _build_wind_row(wind_dir, wind_speed, wind_unit, condition_text, show_conditions, font_med, font_small):
+    """Build the wind row with optional conditions (3-row layout)."""
+    children = [
+        render.Row(
+            cross_align = "center",
+            children = [
+                render.Text(content = "Wind: ", color = "#446644", font = font_small),
+                render.Text(content = wind_dir + " " + wind_speed + wind_unit, color = "#88FF88", font = font_med),
+            ],
+        ),
+    ]
+
+    if show_conditions and condition_text:
+        children.append(
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Marquee(
+                    width = 60,
+                    offset_start = 30,
+                    offset_end = 30,
+                    child = render.Text(content = condition_text, color = "#AAAAAA", font = font_med),
+                ),
+            ),
+        )
+
+    return render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = children,
+    )
+
+def _build_secondary_row(rain, rain_units, pressure, pressure_icon, condition_text, show_conditions, font_med):
+    """Build the secondary row with rain, pressure, and conditions (2-row layout)."""
+    children = [
+        render.Text(content = rain + " " + rain_units, color = "#888888", font = font_med),
+        render.Padding(
+            pad = (8, 0, 0, 0),
+            child = render.Text(content = pressure + " " + pressure_icon, color = "#FFFFFF", font = font_med),
+        ),
+    ]
+
+    if show_conditions and condition_text:
+        children.append(
+            render.Padding(
+                pad = (8, 0, 0, 0),
+                child = render.Marquee(
+                    width = 50,
+                    offset_start = 25,
+                    offset_end = 25,
+                    child = render.Text(content = condition_text, color = "#AAAAAA", font = font_med),
+                ),
+            ),
+        )
+
+    return render.Row(
+        expanded = True,
+        main_align = "start",
+        cross_align = "center",
+        children = children,
+    )
+
 def get_schema():
-    options = [
+    secondary_temp_options = [
         schema.Option(
             display = "Feels Like",
             value = "1",
@@ -174,10 +480,15 @@ def get_schema():
             value = "2",
         ),
         schema.Option(
-            display = "None",
+            display = "None (hide)",
             value = "3",
         ),
+        schema.Option(
+            display = "High/Low",
+            value = "4",
+        ),
     ]
+
     return [
         {
             "id": "token",
@@ -193,11 +504,33 @@ def get_schema():
             "handler": "get_stations",
         },
         {
-            "id": "Feels_Dew",
-            "name": "Feels Like or Dew Point Temperature",
+            "id": "secondary_temp",
+            "name": "Secondary Temperature",
+            "description": "Show Feels Like, Dew Point, or High/Low next to current temp",
             "type": "dropdown",
-            "options": options,
+            "options": secondary_temp_options,
             "default": "1",
+        },
+        {
+            "id": "show_labels",
+            "name": "Show Labels (Wide only)",
+            "description": "Show labels like H:/L:, HUM, RAIN, PRES on wide displays",
+            "type": "onoff",
+            "default": "true",
+        },
+        {
+            "id": "show_highlow",
+            "name": "Show High/Low (Wide only)",
+            "description": "Show today's forecast high and low on wide displays",
+            "type": "onoff",
+            "default": "true",
+        },
+        {
+            "id": "show_conditions",
+            "name": "Show Conditions",
+            "description": "Show scrolling weather condition text (replaces wind on standard display)",
+            "type": "onoff",
+            "default": "false",
         },
     ]
 
@@ -229,31 +562,6 @@ def get_stations(token):
             default = options[0].value if options else "",
         ),
     ]
-
-# def oauth_handler(params):
-#     # deserialize oauth2 parameters
-#     params = json.decode(params)
-
-#     # exchange parameters and client secret for an access token
-#     res = http.post(
-#         url = TEMPEST_TOKEN_URL,
-#         headers = {
-#             "Accept": "application/json",
-#         },
-#         form_body = dict(
-#             params,
-#             client_secret = OAUTH2_CLIENT_SECRET,
-#         ),
-#         form_encoding = "application/x-www-form-urlencoded",
-#     )
-#     if res.status_code != 200:
-#         fail("token request failed with status code: %d - %s" %
-#              (res.status_code, res.body()))
-
-#     token_params = res.json()
-#     access_token = token_params["access_token"]
-
-#     return access_token
 
 # Home made weather icons
 HOMEMADE_ICON = {
@@ -287,41 +595,3 @@ ICON_MAP = {
     "thunderstorm": HOMEMADE_ICON["thundery.png"],
     "windy": HOMEMADE_ICON["windy.png"],
 }
-
-def wind_direction(heading):
-    if heading <= 360 and heading >= 348.75:
-        return "N"
-    elif heading >= 0 and heading <= 11.25:
-        return "N"
-    elif heading >= 11.25 and heading <= 33.75:
-        return "NNE"
-    elif heading >= 33.75 and heading <= 56.25:
-        return "NE"
-    elif heading >= 56.25 and heading <= 78.75:
-        return "ENE"
-    elif heading >= 78.75 and heading <= 101.25:
-        return "E"
-    elif heading >= 101.25 and heading <= 123.75:
-        return "ESE"
-    elif heading >= 123.75 and heading <= 146.25:
-        return "SE"
-    elif heading >= 146.25 and heading <= 168.75:
-        return "SSE"
-    elif heading >= 168.75 and heading <= 191.25:
-        return "S"
-    elif heading >= 191.25 and heading <= 213.75:
-        return "SSW"
-    elif heading >= 213.75 and heading <= 236.25:
-        return "SW"
-    elif heading >= 236.25 and heading <= 258.75:
-        return "WSW"
-    elif heading >= 258.75 and heading <= 281.25:
-        return "W"
-    elif heading >= 281.25 and heading <= 303.75:
-        return "WNW"
-    elif heading >= 303.75 and heading <= 326.25:
-        return "NW"
-    elif heading >= 326.25 and heading <= 348.74:
-        return "NNW"
-
-    return "-"
