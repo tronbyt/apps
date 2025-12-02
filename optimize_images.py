@@ -24,6 +24,17 @@ GIFSICLE_ARGS = ["-O3", "--no-warnings"]
 # Default plugins are usually good, maybe ensure it's quiet
 SVGO_ARGS = ["--quiet"]
 
+# Magick for Animated WebP
+# -coalesce is CRITICAL to prevent corruption (see ImageMagick issue #7386)
+# -define webp:lossless=true -define webp:method=6 -quality 100 -loop 0
+MAGICK_ANIM_ARGS = [
+    "-coalesce",
+    "-define", "webp:lossless=true",
+    "-define", "webp:method=6",
+    "-quality", "100",
+    "-loop", "0"
+]
+
 TOOLS = {}
 
 def check_prerequisites():
@@ -34,18 +45,21 @@ def check_prerequisites():
     TOOLS["oxipng"] = shutil.which("oxipng")
     TOOLS["gifsicle"] = shutil.which("gifsicle")
     TOOLS["svgo"] = shutil.which("svgo")
+    TOOLS["magick"] = shutil.which("magick")
 
     missing = []
     if not TOOLS["cwebp"]: missing.append("cwebp (for .webp)")
     if not TOOLS["oxipng"]: missing.append("oxipng (for .png)")
     if not TOOLS["gifsicle"]: missing.append("gifsicle (for .gif)")
     if not TOOLS["svgo"]: missing.append("svgo (for .svg)")
+    # magick is optional but needed for animated webp
+    if not TOOLS["magick"]: missing.append("magick (for animated .webp)")
     
     if missing:
         print("\033[93mWarning: Some optimization tools are missing. Corresponding file types will be skipped.\033[0m")
         for tool in missing:
             print(f"  - {tool}")
-        print("To install all: brew install webp oxipng gifsicle svgo\n")
+        print("To install all: brew install webp oxipng gifsicle svgo imagemagick\n")
 
 def is_webp_animated(file_path: Path) -> bool:
     """
@@ -98,11 +112,15 @@ def optimize_file(file_path: Path, dry_run: bool = False):
     
     # Select Tool and Command
     if ext == ".webp":
-        if not TOOLS["cwebp"]:
-            return (0, original_size, 0, file_path.name, "Tool 'cwebp' missing")
         if is_webp_animated(file_path):
-            return (0, original_size, 0, file_path.name, "Skipped (Animated WebP)")
-        cmd = ["cwebp", str(file_path)] + CWEBP_ARGS + ["-o", str(temp_path)]
+            if not TOOLS["magick"]:
+                 return (0, original_size, 0, file_path.name, "Skipped (Animated WebP, need magick)")
+            # Use magick for animated WebP
+            cmd = ["magick", str(file_path)] + MAGICK_ANIM_ARGS + [str(temp_path)]
+        else:
+            if not TOOLS["cwebp"]:
+                return (0, original_size, 0, file_path.name, "Tool 'cwebp' missing")
+            cmd = ["cwebp", str(file_path)] + CWEBP_ARGS + ["-o", str(temp_path)]
         
     elif ext == ".png":
         if not TOOLS["oxipng"]:
@@ -160,18 +178,42 @@ def optimize_file(file_path: Path, dry_run: bool = False):
         return (2, original_size, 0, file_path.name, str(e))
 
 def main():
+
     parser = argparse.ArgumentParser(description="Optimize images (WebP, PNG, GIF, SVG) recursively.")
+
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory).")
+
     parser.add_argument("--dry-run", action="store_true", help="Simulate optimization without modifying files.")
+
     parser.add_argument("--workers", type=int, default=4, help="Number of concurrent workers (default: 4).")
+
     args = parser.parse_args()
+
+
 
     check_prerequisites()
 
-    extensions = { ".webp", ".png", ".gif", ".svg"}
+
+
+    extensions = {".webp", ".png", ".gif", ".svg"}
+
     files_to_process = []
-    root_dir = Path.cwd()
+
+    root_dir = Path(args.directory).resolve()
+
+
+
+    if not root_dir.exists() or not root_dir.is_dir():
+
+        print(f"Error: Invalid directory '{root_dir}'")
+
+        return
+
+
 
     print(f"Scanning {root_dir} for image files ({', '.join(extensions)})...")
+
+
     
     # Modern pathlib walk
     # Note: 'walk' is available in Python 3.12+. If older, use rglob or os.walk.
