@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import subprocess
-import struct
+
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import shutil
@@ -9,24 +9,6 @@ import sys
 import argparse
 
 # Configuration
-FFMPEG_ARGS = [
-    "-c:v", "libwebp",
-    "-lossless", "1",
-    "-compression_level", "6",
-    "-q:v", "100",
-    "-loop", "0",
-    "-y"
-]
-
-# Magick equivalent: -define webp:lossless=true -define webp:method=6 -quality 100 -loop 0
-MAGICK_ARGS = [
-    "-define", "webp:lossless=true",
-    "-define", "webp:method=6",
-    "-quality", "100",
-    "-loop", "0"
-]
-
-# cwebp -z 9 is the specific shortcut for: Lossless + Quality 100 + Method 6 (Best)
 CWEBP_ARGS = ["-z", "9", "-quiet"] 
 
 TOOLS = {}
@@ -35,88 +17,34 @@ def check_prerequisites():
     """Checks if required tools are available in the system PATH."""
     global TOOLS
     
-    TOOLS["ffmpeg"] = shutil.which("ffmpeg")
-    TOOLS["magick"] = shutil.which("magick")
     TOOLS["cwebp"] = shutil.which("cwebp")
 
     missing = []
     if not TOOLS["cwebp"]:
         missing.append("cwebp")
     
-    # We need ffmpeg for animations
-    if not TOOLS["ffmpeg"]:
-        missing.append("ffmpeg")
-    
     if missing:
         print("\033[91mError: Missing required dependencies:\033[0m")
         for tool in missing:
             print(f"  - {tool}")
         print("\nPlease install them and try again.")
-        print("  macOS: brew install ffmpeg webp")
-        print("  Debian/Ubuntu: apt-get install ffmpeg webp")
+        print("  macOS: brew install webp")
+        print("  Debian/Ubuntu: apt-get install webp")
         sys.exit(1)
-
-def is_animated(file_path: Path) -> bool:
-    """
-    Reads the WebP header to check for the Animation flag.
-    Efficient binary check avoiding external dependencies.
-    """
-    try:
-        with file_path.open('rb') as f:
-            riff = f.read(12)
-            if not riff.startswith(b'RIFF') or riff[8:12] != b'WEBP':
-                return False
-            
-            chunk_header = f.read(8)
-            chunk_tag = chunk_header[0:4]
-            
-            # The 'VP8X' chunk contains the extended flags
-            if chunk_tag == b'VP8X':
-                flags = f.read(4)
-                # The Animation bit is the 2nd bit (0x02) of the first byte of flags
-                return (flags[0] & 0x02) != 0
-    except Exception:
-        return False
-    return False
-
-def get_size(path: Path) -> int:
-    return path.stat().st_size
-
-def format_bytes(size: int) -> str:
-    if size == 0:
-        return "0 bytes"
-    power = 2**10
-    n = size
-    power_labels = {0: 'bytes', 1: 'KB', 2: 'MB', 3: 'GB', 4: 'TB'}
-    loop = 0
-    while n >= power and loop < len(power_labels) - 1:
-        n /= power
-        loop += 1
-    return f"{n:.2f} {power_labels[loop]}"
 
 def process_file(file_path: Path, dry_run: bool = False):
     """
-    Optimizes a single file using the appropriate tool.
+    Optimizes a single file using cwebp.
     Returns: (status_code, original_size, saved_bytes, path_str, error_msg)
     """
     # 0=Skipped, 1=Optimized, 2=Error
     original_size = get_size(file_path)
     temp_path = file_path.with_suffix(file_path.suffix + ".temp.webp")
     
-    animated = is_animated(file_path)
-    
     try:
-        if animated:
-            # Use FFmpeg for Animations (Magick can cause corruption)
-            if TOOLS["ffmpeg"]:
-                cmd = ["ffmpeg", "-i", str(file_path)] + FFMPEG_ARGS + [str(temp_path)]
-                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            else:
-                return (2, original_size, 0, file_path.name, "No suitable tool found for animation (need ffmpeg)")
-        else:
-            # Use cwebp for Stills (most efficient)
-            cmd = ["cwebp", str(file_path)] + CWEBP_ARGS + ["-o", str(temp_path)]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # Use cwebp for all WebP files
+        cmd = ["cwebp", str(file_path)] + CWEBP_ARGS + ["-o", str(temp_path)]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         # Check results
         if not temp_path.exists():
