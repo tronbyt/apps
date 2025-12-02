@@ -43,17 +43,17 @@ def check_prerequisites():
     if not TOOLS["cwebp"]:
         missing.append("cwebp")
     
-    # We need either ffmpeg or magick for animations
-    if not TOOLS["ffmpeg"] and not TOOLS["magick"]:
-        missing.append("ffmpeg OR magick")
+    # We need ffmpeg for animations
+    if not TOOLS["ffmpeg"]:
+        missing.append("ffmpeg")
     
     if missing:
         print("\033[91mError: Missing required dependencies:\033[0m")
         for tool in missing:
             print(f"  - {tool}")
         print("\nPlease install them and try again.")
-        print("  macOS: brew install ffmpeg webp imagemagick")
-        print("  Debian/Ubuntu: apt-get install ffmpeg webp imagemagick")
+        print("  macOS: brew install ffmpeg webp")
+        print("  Debian/Ubuntu: apt-get install ffmpeg webp")
         sys.exit(1)
 
 def is_animated(file_path: Path) -> bool:
@@ -107,16 +107,12 @@ def process_file(file_path: Path, dry_run: bool = False):
     
     try:
         if animated:
-            # Prioritize ImageMagick (magick) for animations as it handles WebP chunks better than some ffmpeg builds
-            if TOOLS["magick"]:
-                cmd = ["magick", str(file_path)] + MAGICK_ARGS + [str(temp_path)]
-                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            elif TOOLS["ffmpeg"]:
-                # Use FFmpeg for Animations if magick is missing
+            # Use FFmpeg for Animations (Magick can cause corruption)
+            if TOOLS["ffmpeg"]:
                 cmd = ["ffmpeg", "-i", str(file_path)] + FFMPEG_ARGS + [str(temp_path)]
                 result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             else:
-                return (2, original_size, 0, file_path.name, "No suitable tool found for animation (need magick or ffmpeg)")
+                return (2, original_size, 0, file_path.name, "No suitable tool found for animation (need ffmpeg)")
         else:
             # Use cwebp for Stills (most efficient)
             cmd = ["cwebp", str(file_path)] + CWEBP_ARGS + ["-o", str(temp_path)]
