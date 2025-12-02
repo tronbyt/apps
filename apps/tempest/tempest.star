@@ -269,8 +269,16 @@ def render_wide_layout(delay, icon, temp, secondary_temp_text, high_temp, low_te
 
     # Build row 1 (common elements: icon, temp, secondary temp, high/low)
     row1_children = _build_main_row(
-        icon, temp, secondary_temp_text, high_temp, low_temp,
-        show_labels, show_highlow, font_large, font_med, font_small,
+        icon,
+        temp,
+        secondary_temp_text,
+        high_temp,
+        low_temp,
+        show_labels,
+        show_highlow,
+        font_large,
+        font_med,
+        font_small,
     )
 
     # Add humidity and wind to row 1 if no labels (2-row layout)
