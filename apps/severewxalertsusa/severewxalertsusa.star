@@ -73,7 +73,7 @@ def get_schema():
             ),
             schema.Text(
                 id = "display_name",
-                name = "Display Nmae",
+                name = "Display Name",
                 desc = "A custom display name",
                 icon = "quoteRight",
             ),
