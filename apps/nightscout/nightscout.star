@@ -1319,13 +1319,16 @@ def get_schema():
         ],
     )
 
+def get_proto_host(url):
+    proto = "http" if url.startswith("http://") else "https"
+    host = url.removeprefix(proto + "://")
+    host = host.split("/")[0]
+    return proto, host
+
 # This method returns a tuple of a nightscout_data and a status_code.
 def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_unit):
-    nightscout_url = nightscout_url.replace("https://", "")
-    nightscout_url = nightscout_url.replace("http://", "")
-    nightscout_url = nightscout_url.split("/")[0]
-
-    json_url = "https://" + nightscout_url + "/api/v2/properties/bgnow,iob,delta,direction,cob"
+    proto, host = get_proto_host(nightscout_url)
+    json_url = proto + "://" + host + "/api/v2/properties/bgnow,iob,delta,direction,cob"
     headers = {}
     if nightscout_token != "":
         headers["Api-Secret"] = hash.sha1(nightscout_token)
@@ -1402,11 +1405,9 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
 
 # Used with v2, just to get the history
 def get_nightscout_history(nightscout_url, nightscout_token):
-    nightscout_url = nightscout_url.replace("https://", "")
-    nightscout_url = nightscout_url.replace("http://", "")
-    nightscout_url = nightscout_url.split("/")[0]
+    proto, host = get_proto_host(nightscout_url)
     oldest_reading = str((time.now() - time.parse_duration("240m")).unix)
-    json_url = "https://" + nightscout_url + "/api/v2/entries.json?count=200&find[date][$gte]=" + oldest_reading
+    json_url = proto + "://" + host + "/api/v2/entries.json?count=200&find[date][$gte]=" + oldest_reading
     headers = {}
     if nightscout_token != "":
         headers["Api-Secret"] = hash.sha1(nightscout_token)
@@ -1429,11 +1430,9 @@ def get_nightscout_history(nightscout_url, nightscout_token):
 
 # Fall back function for v1 API
 def get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit):
-    nightscout_url = nightscout_url.replace("https://", "")
-    nightscout_url = nightscout_url.replace("http://", "")
-    nightscout_url = nightscout_url.split("/")[0]
+    proto, host = get_proto_host(nightscout_url)
     oldest_reading = str((time.now() - time.parse_duration("240m")).unix)
-    json_url = "https://" + nightscout_url + "/api/v1/entries.json?count=200&find[date][$gte]=" + oldest_reading
+    json_url = proto + "://" + host + "/api/v1/entries.json?count=200&find[date][$gte]=" + oldest_reading
     headers = {}
     if nightscout_token != "":
         headers["Api-Secret"] = hash.sha1(nightscout_token)
