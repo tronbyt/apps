@@ -28,6 +28,16 @@ DEFAULT_DIRECTION = "ltr"
 DEFAULT_PRIMARY = "#4af2a1"
 DEFAULT_SECONDARY = "#050505"
 
+BLINK_CYCLES = 7
+PIXEL_SCATTER_PARTICLES = 24
+PIXEL_SCATTER_LIFE_MIN = 5
+PIXEL_SCATTER_LIFE_MAX = 12
+PIXEL_SCATTER_SPEED_MIN = 1
+PIXEL_SCATTER_SPEED_MAX = 3
+PIXEL_FLOOD_BATCH_DIVISOR = 50
+CHECKER_STRIPE_SIZE = 4
+CHECKER_STEP_DIVISOR = 18
+
 ALL_EFFECTS = [
     EFFECT_HORIZONTAL,
     EFFECT_VERTICAL,
@@ -41,6 +51,20 @@ ALL_EFFECTS = [
     EFFECT_FADE,
     EFFECT_CYLON,
 ]
+
+EFFECT_HANDLERS = {
+    EFFECT_BLINK: lambda pc, sc, d: (blink_frames(pc, sc), 180),
+    EFFECT_VERTICAL: lambda pc, sc, d: (vertical_wipe_frames(pc, sc, "btt" if d == "btt" else "ttb"), 80),
+    EFFECT_DIAGONAL: lambda pc, sc, d: (diagonal_wipe_frames(pc, sc, "brtl" if d == "brtl" else "tlbr"), 80),
+    EFFECT_CHECKER: lambda pc, sc, d: (diagonal_checker_frames(pc, sc), 80),
+    EFFECT_PIXEL_FLOOD: lambda pc, sc, d: (pixel_flood_frames(pc, sc), 50),
+    EFFECT_SCATTER: lambda pc, sc, d: (pixel_scatter_frames(pc, sc), 90),
+    EFFECT_CYLON: lambda pc, sc, d: (cylon_eye_frames(pc, sc), 60),
+    EFFECT_STAR: lambda pc, sc, d: (star_frames(pc, sc), 90),
+    EFFECT_DOOM: lambda pc, sc, d: (doom_wipe_frames(pc, sc, d), 90),
+    EFFECT_FADE: lambda pc, sc, d: (fade_frames(pc, sc), 120),
+    EFFECT_HORIZONTAL: lambda pc, sc, d: (horizontal_wipe_frames(pc, sc, d), 80),
+}
 
 def get_schema():
     return schema.Schema(
@@ -112,44 +136,8 @@ def main(config):
         dir_options = ["ltr", "rtl", "ttb", "btt", "tlbr", "brtl"]
         chosen_direction = dir_options[random.number(0, len(dir_options) - 1)]
 
-    frames = []
-    delay = 100
-
-    if chosen_effect == EFFECT_BLINK:
-        frames = blink_frames(primary_color, secondary_color)
-        delay = 180
-    elif chosen_effect == EFFECT_VERTICAL:
-        vertical_direction = chosen_direction if chosen_direction == "btt" else "ttb"
-        frames = vertical_wipe_frames(primary_color, secondary_color, vertical_direction)
-        delay = 80
-    elif chosen_effect == EFFECT_DIAGONAL:
-        diagonal_direction = chosen_direction if chosen_direction == "brtl" else "tlbr"
-        frames = diagonal_wipe_frames(primary_color, secondary_color, diagonal_direction)
-        delay = 80
-    elif chosen_effect == EFFECT_CHECKER:
-        frames = diagonal_checker_frames(primary_color, secondary_color)
-        delay = 80
-    elif chosen_effect == EFFECT_PIXEL_FLOOD:
-        frames = pixel_flood_frames(primary_color)
-        delay = 50
-    elif chosen_effect == EFFECT_SCATTER:
-        frames = pixel_scatter_frames(primary_color, secondary_color)
-        delay = 90
-    elif chosen_effect == EFFECT_CYLON:
-        frames = cylon_eye_frames(primary_color, secondary_color)
-        delay = 60
-    elif chosen_effect == EFFECT_STAR:
-        frames = star_frames(primary_color, secondary_color)
-        delay = 90
-    elif chosen_effect == EFFECT_DOOM:
-        frames = doom_wipe_frames(primary_color, secondary_color, chosen_direction)
-        delay = 90
-    elif chosen_effect == EFFECT_FADE:
-        frames = fade_frames(primary_color, secondary_color)
-        delay = 120
-    else:
-        frames = horizontal_wipe_frames(primary_color, secondary_color, chosen_direction)
-        delay = 80
+    handler = EFFECT_HANDLERS.get(chosen_effect, EFFECT_HANDLERS[EFFECT_HORIZONTAL])
+    frames, delay = handler(primary_color, secondary_color, chosen_direction)
 
     return render.Root(
         child = render.Animation(children = frames),
@@ -165,8 +153,7 @@ def full_frame(color):
 
 def blink_frames(primary, secondary):
     frames = []
-    cycles = 7
-    for i in range(cycles):
+    for i in range(BLINK_CYCLES):
         frames.append(full_frame(primary if i % 2 == 0 else secondary))
 
     frames.append(full_frame(primary))
@@ -235,12 +222,12 @@ def diagonal_checker_frames(primary, secondary):
     width = canvas.width()
     height = canvas.height()
     span = width + height
-    stripe = 4
-    step = max(2, span // 18)
-    frames = []
+    stripe = CHECKER_STRIPE_SIZE
+    step = max(2, span // CHECKER_STEP_DIVISOR)
+    frames = [full_frame(secondary)]
 
     for progress in range(0, span + step, step):
-        children = [full_frame(secondary)]
+        children = [frames[-1]]
         for y in range(height):
             max_x = min(width, progress - y + 1)
             if max_x <= 0:
@@ -262,7 +249,7 @@ def diagonal_checker_frames(primary, secondary):
     frames.append(full_frame(primary))
     return frames
 
-def pixel_flood_frames(primary):
+def pixel_flood_frames(primary, secondary):
     width = canvas.width()
     height = canvas.height()
     coords = []
@@ -275,8 +262,8 @@ def pixel_flood_frames(primary):
         j = random.number(0, i)
         coords[i], coords[j] = coords[j], coords[i]
 
-    batch_size = max(10, (width * height) // 50)
-    frames = [full_frame("#000000")]
+    batch_size = max(10, (width * height) // PIXEL_FLOOD_BATCH_DIVISOR)
+    frames = [full_frame(secondary)]
 
     for idx in range(0, len(coords), batch_size):
         children = [frames[-1]]
@@ -298,7 +285,7 @@ def pixel_flood_frames(primary):
 def pixel_scatter_frames(primary, secondary):
     width = canvas.width()
     height = canvas.height()
-    particles = 24
+    particles = PIXEL_SCATTER_PARTICLES
     start_x, start_y = random_origin(width, height)
     vectors = [random_vector() for _ in range(particles)]
     steps = max([v["life"] for v in vectors])
@@ -306,7 +293,7 @@ def pixel_scatter_frames(primary, secondary):
     frames = [full_frame(secondary)]
 
     for step_idx in range(steps):
-        children = [full_frame(secondary)]
+        children = [frames[-1]]
         for v in vectors:
             if step_idx > v["life"]:
                 continue
@@ -368,8 +355,8 @@ def cylon_eye_frames(primary, secondary):
 
 def random_vector():
     angle_deg = random.number(0, 359)
-    speed = random.number(1, 3)
-    life = random.number(5, 12)
+    speed = random.number(PIXEL_SCATTER_SPEED_MIN, PIXEL_SCATTER_SPEED_MAX)
+    life = random.number(PIXEL_SCATTER_LIFE_MIN, PIXEL_SCATTER_LIFE_MAX)
     rad = angle_deg * math.pi / 180
     return {
         "dx": math.cos(rad) * speed,
