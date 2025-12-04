@@ -6,7 +6,7 @@ Author: craigerskine
 """
 
 load("encoding/base64.star", "base64")
-load("images/img_at.png", AT_ASSET = "file")
+load("images/at.png", AT_ASSET = "file")
 load("images/font_lg_char_0.png", FONT_LG_CHAR_0_ASSET = "file")
 load("images/font_lg_char_1.png", FONT_LG_CHAR_1_ASSET = "file")
 load("images/font_lg_char_2.png", FONT_LG_CHAR_2_ASSET = "file")
@@ -88,7 +88,7 @@ def render_digits(value, width, font = FONT_SM, color = COLOR_MEDIUM, spacing = 
 def render_digit(digit, font, color):
     return render.Stack(children = [
         render.Box(width = 5 if font == FONT_LG else (2 if digit == "1" else 3), height = 10 if font == FONT_LG else 5, color = color),
-        render.Image(src = base64.decode(font[int(digit)])),
+        render.Image(src = font[int(digit)]),
     ])
 
 def main(config):

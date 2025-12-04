@@ -5,7 +5,6 @@ Description: Select the states you have been to and show them off on your Tidbyt
 Author: sloanesturz
 """
 
-load("encoding/base64.star", "base64")
 load("images/map_al.png", MAP_AL_ASSET = "file")
 load("images/map_ar.png", MAP_AR_ASSET = "file")
 load("images/map_az.png", MAP_AZ_ASSET = "file")
@@ -13,9 +12,11 @@ load("images/map_ca.png", MAP_CA_ASSET = "file")
 load("images/map_co.png", MAP_CO_ASSET = "file")
 load("images/map_ct.png", MAP_CT_ASSET = "file")
 load("images/map_de.png", MAP_DE_ASSET = "file")
+load("images/map_fl.png", MAP_FL_ASSET = "file")
 load("images/map_ga.png", MAP_GA_ASSET = "file")
 load("images/map_ia.png", MAP_IA_ASSET = "file")
 load("images/map_id.png", MAP_ID_ASSET = "file")
+load("images/map_il.png", MAP_IL_ASSET = "file")
 load("images/map_in.png", MAP_IN_ASSET = "file")
 load("images/map_ks.png", MAP_KS_ASSET = "file")
 load("images/map_ky.png", MAP_KY_ASSET = "file")
@@ -41,6 +42,7 @@ load("images/map_ok.png", MAP_OK_ASSET = "file")
 load("images/map_or.png", MAP_OR_ASSET = "file")
 load("images/map_pa.png", MAP_PA_ASSET = "file")
 load("images/map_ri.png", MAP_RI_ASSET = "file")
+load("images/map_sc.png", MAP_SC_ASSET = "file")
 load("images/map_sd.png", MAP_SD_ASSET = "file")
 load("images/map_tn.png", MAP_TN_ASSET = "file")
 load("images/map_tx.png", MAP_TX_ASSET = "file")
@@ -162,7 +164,7 @@ def main(config):
     return render.Root(
         render.Stack(
             [
-                render.Image(base64.decode(STATES[state]), 64)
+                render.Image(STATES[state], 64)
                 for state in STATES
                 if config.get(state) and config.get(state) != "false"
             ],

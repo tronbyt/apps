@@ -30,7 +30,6 @@ Author: Alan Fleming
 # See comments in the code for further attribution
 #
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/sunriseimage.png", SUNRISEIMAGE_ASSET = "file")
 load("images/sunsetimage.png", SUNSETIMAGE_ASSET = "file")
@@ -146,7 +145,7 @@ def main(config):
             main_align = "start",
             cross_align = "center",
             children = [
-                render.Image(src = base64.decode(image)),
+                render.Image(src = image),
                 render.Text(text),
             ],
         )

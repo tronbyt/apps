@@ -5,8 +5,6 @@ Description: Shows the user a random positive quote.
 Author: Brian Bell
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("render.star", "render")
 
@@ -14,7 +12,7 @@ TTL_SECONDS = 30
 
 def main():
     affirmation = get_affirmation()
-    image = base64.decode(get_affirmation_image())
+    image = get_affirmation_image()
 
     return render.Root(
         delay = 150,
@@ -43,25 +41,13 @@ def main():
     )
 
 def get_affirmation():
-    affirmation = cache.get("affirmation")
-    if not affirmation:
-        response = http.get("https://www.affirmations.dev")
-        if response.status_code != 200:
-            fail("Failed to retrieve affirmation: %d - %s" % (response.status_code, response.body()))
-        affirmation = response.json()["affirmation"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("affirmation", affirmation, ttl_seconds = TTL_SECONDS)
-    return affirmation
+    response = http.get("https://www.affirmations.dev", ttl_seconds = TTL_SECONDS)
+    if response.status_code != 200:
+        fail("Failed to retrieve affirmation: %d - %s" % (response.status_code, response.body()))
+    return response.json()["affirmation"]
 
 def get_affirmation_image():
-    image = cache.get("affirmation_image")
-    if not image:
-        response = http.get("https://random.imagecdn.app/500/250")
-        if response.status_code != 200:
-            fail("Failed to retrieve image: %d - %s" % (response.status_code, response.body()))
-        image = base64.encode(response.body())
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("affirmation_image", image, ttl_seconds = TTL_SECONDS)
-    return image
+    response = http.get("https://random.imagecdn.app/500/250", ttl_seconds = TTL_SECONDS)
+    if response.status_code != 200:
+        fail("Failed to retrieve image: %d - %s" % (response.status_code, response.body()))
+    return response.body()

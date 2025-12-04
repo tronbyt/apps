@@ -6,7 +6,6 @@ Author: Jack Sherbal
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -19,26 +18,16 @@ JSERVICE = "http://jservice.io/api/random?count=%d" % NUM_QUESTIONS
 CACHE_TTL_SECONDS = 15 * NUM_QUESTIONS
 
 def get_data():
-    questions = cache.get("questions")
+    question_index = int(cache.get("question_index") or "0")
 
-    if questions != None:
-        body = base64.decode(questions)
-        question_index = int(cache.get("question_index")) + 1
-    else:
-        rep = http.get(JSERVICE)
-        if rep.status_code != 200:
-            fail("Jservice (Trivia) request failed with status %d", rep.status_code)
+    rep = http.get(JSERVICE, ttl_seconds = CACHE_TTL_SECONDS)
+    if rep.status_code != 200:
+        fail("Jservice (Trivia) request failed with status %d", rep.status_code)
 
-        body = rep.body()
-        question_index = 0
+    cache.set("question_index", str(question_index+1), ttl_seconds = CACHE_TTL_SECONDS)
+    questions = json.decode(rep.body())
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("questions", base64.encode(body), ttl_seconds = CACHE_TTL_SECONDS)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("question_index", str(question_index), ttl_seconds = CACHE_TTL_SECONDS)
-
-    return json.decode(body)[question_index % NUM_QUESTIONS]
+    return questions[question_index % NUM_QUESTIONS]
 
 def remove_chars(strr):
     return re.compile(r"<[^>]+>").sub("", strr)

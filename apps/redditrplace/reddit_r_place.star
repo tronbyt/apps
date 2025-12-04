@@ -6,8 +6,6 @@ Author: funkfinger
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
@@ -171,14 +169,5 @@ def get_image(url):
     Returns:
         the rendered image
     """
-    image = cache.get(url)
-
-    if image != None:
-        return render.Image(base64.decode(image))
-
-    image = http.get(url).body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(url, base64.encode(image), ttl_seconds = CACHE_TTL_SECONDS)
-
+    image = http.get(url, ttl_seconds = CACHE_TTL_SECONDS).body()
     return render.Image(image)

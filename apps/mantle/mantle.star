@@ -425,7 +425,7 @@ def render_digest(config, access_token, app_id, current_start_date, compare_prev
         print("[digest] app")
         print(app)
         if app.get("faviconData"):
-            logo = app["faviconData"]
+            logo = base64.decode(app["faviconData"])
         else:
             logo = MANTLE_LOGO
 
@@ -583,7 +583,7 @@ def render_digest(config, access_token, app_id, current_start_date, compare_prev
                     cross_align = "center",
                     children = [
                         render.Image(
-                            src = base64.decode(logo),
+                            src = logo,
                             width = 16,
                             height = 16,
                         ),
