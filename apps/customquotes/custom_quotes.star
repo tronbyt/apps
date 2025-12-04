@@ -5,7 +5,6 @@ Description: Display quotes from a Google sheet with a quote and author column
 Author: vipulchhajer
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/black_background.png", BLACK_BACKGROUND_ASSET = "file")
 load("render.star", "render")
@@ -72,7 +71,7 @@ def main(config):
         if (author != ""):
             author = "-" + author
 
-    image = base64.decode(get_image())
+    image = get_image()
 
     return render.Root(
         show_full_animation = True,

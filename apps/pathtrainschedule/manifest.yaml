@@ -7,3 +7,5 @@ author: Todd Greenberg
 fileName: path_train_schedule.star
 packageName: pathtrainschedule
 recommendedInterval: 5
+broken: true
+brokenReason: "path.api.razza.dev: no such host"

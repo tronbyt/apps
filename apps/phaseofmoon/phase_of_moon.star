@@ -30,7 +30,6 @@ Author: Alan Fleming
 # See comments in the code for further attribution
 #
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/phase_first_quarter.png", PHASE_FIRST_QUARTER_ASSET = "file")
 load("images/phase_first_quarter_zh.png", PHASE_FIRST_QUARTER_ZH_ASSET = "file")
@@ -159,7 +158,7 @@ def main(config):
         phaseText = render.WrappedText("")
     elif displayText == "zh":
         phaseText = render.Image(
-            src = base64.decode(moonPhase),
+            src = moonPhase,
         )
     else:
         phaseText = render.WrappedText(
@@ -184,7 +183,7 @@ def main(config):
             children = [
                 render.Padding(
                     pad = (0, 0, 2, 0) if align == "start" else 0,
-                    child = render.Image(src = base64.decode(phaseImage)),
+                    child = render.Image(src = phaseImage),
                 ),
                 render.Column(
                     expanded = True,

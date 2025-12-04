@@ -5,7 +5,6 @@ Description: More accurate realtime New York City Subway arrival times for a sel
 Author: blahblahblah-
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/diamond_green.png", DIAMOND_GREEN_ASSET = "file")
@@ -200,7 +199,7 @@ def main(config):
                     bullet = render.Stack(
                         children = [
                             render.Image(
-                                src = base64.decode(DIAMONDS[route_color]),
+                                src = DIAMONDS[route_color],
                             ),
                             render.Padding(
                                 pad = (4, 2, 0, 0),

@@ -5,7 +5,6 @@ Description: Displays Egyptian Hieroglyphs from Gardiner's Sign List plus detail
 Author: dinosaursrarr
 """
 
-load("encoding/base64.star", "base64")
 load("hash.star", "hash")
 load("images/glyph_A1.png", GLYPH_A1_ASSET = "file")
 load("images/glyph_A10.png", GLYPH_A10_ASSET = "file")
@@ -839,7 +838,7 @@ def main():
                                 cross_align = "center",
                                 expanded = True,
                                 children = [
-                                    render.Image(base64.decode(glyph["src"])),
+                                    render.Image(glyph["src"]),
                                 ],
                             ),
                         ],

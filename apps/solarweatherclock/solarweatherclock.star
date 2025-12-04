@@ -6,13 +6,23 @@ Author: shmauk
 """
 
 load("http.star", "http")
+load("images/clear_night.png", CLEAR_NIGHT_ASSET = "file")
+load("images/cloudy.png", CLOUDY_ASSET = "file")
+load("images/exceptional.png", EXCEPTIONAL_ASSET = "file")
 load("images/export.png", EXPORT_ASSET = "file")
-load("images/img_82d9eb1d.bin", WINDY_VARIANT_ASSET = "file")
+load("images/fog.png", FOG_ASSET = "file")
+load("images/hail.png", HAIL_ASSET = "file")
 load("images/import.png", IMPORT_ASSET = "file")
-load("images/solarweatherclock_generic_1.png", SOLARWEATHERCLOCK_GENERIC_1_ASSET = "file")
-load("images/solarweatherclock_generic_2.png", SOLARWEATHERCLOCK_GENERIC_2_ASSET = "file")
-load("images/solarweatherclock_generic_3.png", SOLARWEATHERCLOCK_GENERIC_3_ASSET = "file")
-load("images/solarweatherclock_generic_4.png", SOLARWEATHERCLOCK_GENERIC_4_ASSET = "file")
+load("images/lightning.png", LIGHTNING_ASSET = "file")
+load("images/lightning_rainy.png", LIGHTNING_RAINY_ASSET = "file")
+load("images/partlycloudy.png", PARTLYCLOUDY_ASSET = "file")
+load("images/pouring.png", POURING_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/snowy_rainy.png", SNOWY_RAINY_ASSET = "file")
+load("images/sunny_default.png", SUNNY_DEFAULT_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
+load("images/windy_variant.png", WINDY_VARIANT_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -162,7 +172,7 @@ def get_schema():
 
 def getImage(weather):
     if weather == "clear-night":
-        return SOLARWEATHERCLOCK_GENERIC_3_ASSET.readall()
+        return CLEAR_NIGHT_ASSET.readall()
     elif weather == "cloudy":
         return CLOUDY_ASSET.readall()
     elif weather == "fog":
@@ -184,12 +194,12 @@ def getImage(weather):
     elif weather == "snowy-rainy":
         return SNOWY_RAINY_ASSET.readall()
     elif weather == "sunny":
-        return SOLARWEATHERCLOCK_GENERIC_1_ASSET.readall()
+        return SUNNY_DEFAULT_ASSET.readall()
     elif weather == "windy":
-        return SOLARWEATHERCLOCK_GENERIC_4_ASSET.readall()
+        return WINDY_ASSET.readall()
     elif weather == "windy-variant":
-        return WINDY_VARIANT_ASSET.readall()()
+        return WINDY_VARIANT_ASSET.readall()
     elif weather == "exceptional":
-        return SOLARWEATHERCLOCK_GENERIC_2_ASSET.readall()
+        return EXCEPTIONAL_ASSET.readall()
     else:
-        return SOLARWEATHERCLOCK_GENERIC_1_ASSET.readall()
+        return SUNNY_DEFAULT_ASSET.readall()

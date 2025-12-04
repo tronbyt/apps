@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: spotthestation.star
 packageName: spotthestation
 recommendedInterval: 5
+broken: true

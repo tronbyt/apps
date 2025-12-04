@@ -11,10 +11,16 @@ Author: Robert Ison
 # Pulls down the expected evening sky during the day -- when it is sunny, there are no 'visible planets' so we'll display what you can expect in the evening.
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")  #to encode/decode json data going to and from cache
 load("encoding/json.star", "json")  #Used to figure out timezone
 load("http.star", "http")  #for calling to astronomyapi.com
 load("humanize.star", "humanize")  #for easy reading numbers and times
+load("images/jupiter.png", JUPITER_ASSET = "file")
+load("images/mars.png", MARS_ASSET = "file")
+load("images/mercury.png", MERCURY_ASSET = "file")
+load("images/neptune.png", NEPTUNE_ASSET = "file")
+load("images/saturn.png", SATURN_ASSET = "file")
+load("images/uranus.png", URANUS_ASSET = "file")
+load("images/venus.png", VENUS_ASSET = "file")
 load("math.star", "math")  #for calculating distance to planets
 load("render.star", "render")
 load("schema.star", "schema")
@@ -140,7 +146,7 @@ def main(config):
             visibility_disclaimer = "after sunset at %s" % sunset_time.format(time_display_format)
 
         # planet image of the selected planet
-        image = base64.decode(planet_images[planet])
+        image = planet_images[planet]
 
         # initialize row 1 and row 2 display data
         row1 = ""

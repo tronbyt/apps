@@ -6,7 +6,6 @@ Author: AKKanMan
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -48,39 +47,39 @@ load("time.star", "time")
 
 def getTeamIconFromID(teamID):
     if teamID == 2:  #NYI
-        return (NYI_ICON.readall())
+        return NYI_ICON.readall()
     elif teamID == 24:  #ANA
-        return (ANA_ICON.readall())
+        return ANA_ICON.readall()
     elif teamID == 53:  #ARI
-        return (ARI_ICON.readall())
+        return ARI_ICON.readall()
     elif teamID == 6:  #BOS
-        return (BOS_ICON.readall())
+        return BOS_ICON.readall()
     elif teamID == 7:  #BUF
-        return (BUF_ICON.readall())
+        return BUF_ICON.readall()
     elif teamID == 20:  #CGY
-        return (CGY_ICON.readall())
+        return CGY_ICON.readall()
     elif teamID == 12:  #CAR
-        return (CAR_ICON.readall())
+        return CAR_ICON.readall()
     elif teamID == 16:  #CHI
-        return (CHI_ICON.readall())
+        return CHI_ICON.readall()
     elif teamID == 21:  #COL
-        return (COL_ICON.readall())
+        return COL_ICON.readall()
     elif teamID == 29:  #CBJ
-        return (CBJ_ICON.readall())
+        return CBJ_ICON.readall()
     elif teamID == 25:  #DAL
-        return (DAL_ICON.readall())
+        return DAL_ICON.readall()
     elif teamID == 17:  #DET
-        return (DET_ICON.readall())
+        return DET_ICON.readall()
     elif teamID == 22:  #EDM
-        return (EDM_ICON.readall())
+        return EDM_ICON.readall()
     elif teamID == 13:  #FLA
-        return (FLA_ICON.readall())
+        return FLA_ICON.readall()
     elif teamID == 26:  #LAK
-        return (LAK_ICON.readall())
+        return LAK_ICON.readall()
     elif teamID == 30:  #MIN
-        return (MIN_ICON.readall())
+        return MIN_ICON.readall()
     elif teamID == 8:  #MTL
-        return (MTL_ICON.readall())
+        return MTL_ICON.readall()
     elif teamID == 18:  #NSH
         return NSH_ICON.readall()
     elif teamID == 1:  #NJD
@@ -116,39 +115,39 @@ def getTeamIconFromID(teamID):
 
 def getTeamAbbFromID(teamID):
     if teamID == 2:  #NYI
-        return ("NYI")
+        return "NYI"
     elif teamID == 24:  #ANA
-        return ("ANA")
+        return "ANA"
     elif teamID == 53:  #ARI
-        return ("ARI")
+        return "ARI"
     elif teamID == 6:  #BOS
-        return ("BOS")
+        return "BOS"
     elif teamID == 7:  #BUF
-        return ("BUF")
+        return "BUF"
     elif teamID == 20:  #CGY
-        return ("CGY")
+        return "CGY"
     elif teamID == 12:  #CAR
-        return ("CAR")
+        return "CAR"
     elif teamID == 16:  #CHI
-        return ("CHI")
+        return "CHI"
     elif teamID == 21:  #COL
-        return ("COL")
+        return "COL"
     elif teamID == 29:  #CBJ
-        return ("CBJ")
+        return "CBJ"
     elif teamID == 25:  #DAL
-        return ("DAL")
+        return "DAL"
     elif teamID == 17:  #DET
-        return ("DET")
+        return "DET"
     elif teamID == 22:  #EDM
-        return ("EDM")
+        return "EDM"
     elif teamID == 13:  #FLA
-        return ("FLA")
+        return "FLA"
     elif teamID == 26:  #LAK
-        return ("LAK")
+        return "LAK"
     elif teamID == 30:  #MIN
-        return ("MIN")
+        return "MIN"
     elif teamID == 8:  #MTL
-        return ("MTL")
+        return "MTL"
     elif teamID == 18:  #NSH
         return "NSH"
     elif teamID == 1:  #NJD
@@ -206,8 +205,8 @@ def main(config):
     awayTeamID = nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["team"]["id"]
     homeTeamRecord = str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["wins"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["losses"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["ot"]))
     awayTeamRecord = str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["leagueRecord"]["wins"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["leagueRecord"]["losses"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["leagueRecord"]["ot"]))
-    homeTeamIcon = base64.decode(getTeamIconFromID(homeTeamID))
-    awayTeamIcon = base64.decode(getTeamIconFromID(awayTeamID))
+    homeTeamIcon = getTeamIconFromID(homeTeamID)
+    awayTeamIcon = getTeamIconFromID(awayTeamID)
     homeTeamAbb = getTeamAbbFromID(homeTeamID)
     awayTeamAbb = getTeamAbbFromID(awayTeamID)
 

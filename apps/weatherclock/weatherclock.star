@@ -5,7 +5,6 @@ Description: Display current time and weather.
 Author: J. Keybl
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/broken_clouds_day.png", BROKEN_CLOUDS_DAY_ICON = "file")
@@ -187,8 +186,7 @@ def main(config):
                     if DEBUG:
                         print("Night")
 
-        icon_str = get_icon(wID, dn)
-        icon = base64.decode(icon_str)
+        icon = get_icon(wID, dn)
 
     if ss >= nightModeSec or ss < dayModeSec:
         # NIGHT MODE

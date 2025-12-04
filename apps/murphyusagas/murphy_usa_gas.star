@@ -158,9 +158,9 @@ def get_stations(location):
         ]
 
 def get_station_details(url):
-    http_data = http.get(url)
+    http_data = http.get(url, ttl_seconds = API_STATION_DETAILS_TTL)
     if http_data.status_code != 200:
-        fail("HTTP request failed with status {} for URL {}".format(http_data.status_code, url), ttl_seconds = API_STATION_DETAILS_TTL)
+        fail("HTTP request failed with status {} for URL {}".format(http_data.status_code, url))
     station_details = http_data.body()
 
     return json.decode(station_details)["data"]

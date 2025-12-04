@@ -6,7 +6,27 @@ Author: craigerskine
 """
 
 load("encoding/base64.star", "base64")
-load("images/img_at.png", AT_ASSET = "file")
+load("images/at.png", AT_ASSET = "file")
+load("images/font_lg_char_0.png", FONT_LG_CHAR_0_ASSET = "file")
+load("images/font_lg_char_1.png", FONT_LG_CHAR_1_ASSET = "file")
+load("images/font_lg_char_2.png", FONT_LG_CHAR_2_ASSET = "file")
+load("images/font_lg_char_3.png", FONT_LG_CHAR_3_ASSET = "file")
+load("images/font_lg_char_4.png", FONT_LG_CHAR_4_ASSET = "file")
+load("images/font_lg_char_5.png", FONT_LG_CHAR_5_ASSET = "file")
+load("images/font_lg_char_6.png", FONT_LG_CHAR_6_ASSET = "file")
+load("images/font_lg_char_7.png", FONT_LG_CHAR_7_ASSET = "file")
+load("images/font_lg_char_8.png", FONT_LG_CHAR_8_ASSET = "file")
+load("images/font_lg_char_9.png", FONT_LG_CHAR_9_ASSET = "file")
+load("images/font_sm_char_0.png", FONT_SM_CHAR_0_ASSET = "file")
+load("images/font_sm_char_1.png", FONT_SM_CHAR_1_ASSET = "file")
+load("images/font_sm_char_2.png", FONT_SM_CHAR_2_ASSET = "file")
+load("images/font_sm_char_3.png", FONT_SM_CHAR_3_ASSET = "file")
+load("images/font_sm_char_4.png", FONT_SM_CHAR_4_ASSET = "file")
+load("images/font_sm_char_5.png", FONT_SM_CHAR_5_ASSET = "file")
+load("images/font_sm_char_6.png", FONT_SM_CHAR_6_ASSET = "file")
+load("images/font_sm_char_7.png", FONT_SM_CHAR_7_ASSET = "file")
+load("images/font_sm_char_8.png", FONT_SM_CHAR_8_ASSET = "file")
+load("images/font_sm_char_9.png", FONT_SM_CHAR_9_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -68,7 +88,7 @@ def render_digits(value, width, font = FONT_SM, color = COLOR_MEDIUM, spacing = 
 def render_digit(digit, font, color):
     return render.Stack(children = [
         render.Box(width = 5 if font == FONT_LG else (2 if digit == "1" else 3), height = 10 if font == FONT_LG else 5, color = color),
-        render.Image(src = base64.decode(font[int(digit)])),
+        render.Image(src = font[int(digit)]),
     ])
 
 def main(config):

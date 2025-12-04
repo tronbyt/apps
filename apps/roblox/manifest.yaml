@@ -7,3 +7,5 @@ author: Chad Milburn / CODESTRONG
 fileName: roblox.star
 packageName: roblox
 recommendedInterval: 5
+broken: true
+brokenReason: "api.roblox.com: no such host"

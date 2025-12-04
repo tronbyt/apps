@@ -15,13 +15,13 @@ load("images/battery_0_25_main_screen.png", BATTERY_0_TO_25_MAIN_SCREEN = "file"
 load("images/battery_25_50_main_screen.png", BATTERY_25_TO_50_MAIN_SCREEN = "file")
 load("images/battery_50_75_main_screen.png", BATTERY_50_TO_75_MAIN_SCREEN = "file")
 load("images/battery_75_100_main_screen.png", BATTERY_75_TO_100_MAIN_SCREEN = "file")
-load("images/battery_charge_animation.png", BATTERY_CHARGE_ANIMATION_10x10 = "file")
-load("images/battery_charge_status_0_25.png", BATTERY_CHARGE_STATUS_0_25_10x10 = "file")
-load("images/battery_charge_status_25_50.png", BATTERY_CHARGE_STATUS_25_50_10x10 = "file")
-load("images/battery_charge_status_50_75.png", BATTERY_CHARGE_STATUS_50_75_10x10 = "file")
-load("images/battery_charge_status_75_100.png", BATTERY_CHARGE_STATUS_75_100_10x10 = "file")
-load("images/battery_discharge_animation.png", BATTERY_DISCHARGE_ANIMATION_10x10 = "file")
-load("images/battery_noflow_animation.png", BATTERY_NOFLOW_ANIMATION_10x10 = "file")
+load("images/battery_charge_animation.gif", BATTERY_CHARGE_ANIMATION_10x10 = "file")
+load("images/battery_charge_status_0_25.gif", BATTERY_CHARGE_STATUS_0_25_10x10 = "file")
+load("images/battery_charge_status_25_50.gif", BATTERY_CHARGE_STATUS_25_50_10x10 = "file")
+load("images/battery_charge_status_50_75.gif", BATTERY_CHARGE_STATUS_50_75_10x10 = "file")
+load("images/battery_charge_status_75_100.gif", BATTERY_CHARGE_STATUS_75_100_10x10 = "file")
+load("images/battery_discharge_animation.gif", BATTERY_DISCHARGE_ANIMATION_10x10 = "file")
+load("images/battery_noflow_animation.gif", BATTERY_NOFLOW_ANIMATION_10x10 = "file")
 load("images/bmw_logo.png", BMW_LOGO_18x18 = "file")
 load("images/cupra_logo.png", CUPRA_LOGO_18x18 = "file")
 
@@ -31,7 +31,7 @@ load("images/ev_charging.png", EV_CHARGING_16x16 = "file")
 load("images/fiat_logo.png", FIAT_LOGO_18x18 = "file")
 
 # 7x16
-load("images/green_anim.png", GREEN_ANIM = "file")
+load("images/green_anim.gif", GREEN_ANIM = "file")
 
 # 12x16
 load("images/grid.png", GRID = "file")
@@ -42,11 +42,11 @@ load("images/hyundai_logo.png", HYUNDAI_LOGO_24x12 = "file")
 load("images/opel_logo.png", OPEL_LOGO_23x18 = "file")
 
 # 16x16
-load("images/plug.png", PLUG = "file")
+load("images/plug.gif", PLUG = "file")
 
 # 10x10
-load("images/plug_sum.png", PLUG_SUM = "file")
-load("images/red_anim.png", RED_ANIM = "file")
+load("images/plug_sum.gif", PLUG_SUM = "file")
+load("images/red_anim.gif", RED_ANIM = "file")
 load("images/renault_logo.png", RENAULT_LOGO_18x18 = "file")
 load("images/seat_logo.png", SEAT_LOGO_18x16 = "file")
 load("images/skoda_logo.png", SKODA_LOGO_18x18 = "file")
@@ -55,13 +55,13 @@ load("images/skoda_logo.png", SKODA_LOGO_18x18 = "file")
 load("images/solar.png", SOLAR = "file")
 
 # 16x16
-load("images/sun.png", SUN = "file")
+load("images/sun.gif", SUN = "file")
 
 # 10x10
 load("images/sun_sum.png", SUN_SUM = "file")
 load("images/tesla_logo.png", TESLA_LOGO_18x18 = "file")
 load("images/vw_logo.png", VW_LOGO_18x18 = "file")
-load("images/yellow_anim.png", YELLOW_ANIM = "file")
+load("images/yellow_anim.gif", YELLOW_ANIM = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 

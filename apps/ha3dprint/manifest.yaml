@@ -1,6 +1,6 @@
 ---
 id: ha3dprint
-name: ha3dprint
+name: HA 3D Print
 summary: View HA 3D printer status
 desc: Display current print's status and time remaining. All information comes from Home Assistant.
 author: brombomb

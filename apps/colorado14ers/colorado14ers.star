@@ -5,16 +5,17 @@ Description: Track your Colorado 14ers.
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")
 load("humanize.star", "humanize")
 load("images/blanca_peak.png", BLANCA_PEAK_ASSET = "file")
 load("images/capitol_peak.png", CAPITOL_PEAK_ASSET = "file")
 load("images/castle_peak.png", CASTLE_PEAK_ASSET = "file")
 load("images/challenger_point.png", CHALLENGER_POINT_ASSET = "file")
 load("images/crestone_needle.png", CRESTONE_NEEDLE_ASSET = "file")
+load("images/crestone_peak.png", CRESTONE_PEAK_ASSET = "file")
 load("images/culebra_peak.png", CULEBRA_PEAK_ASSET = "file")
 load("images/ellingwood_point.png", ELLINGWOOD_POINT_ASSET = "file")
 load("images/grays_peak.png", GRAYS_PEAK_ASSET = "file")
+load("images/handies_peak.png", HANDIES_PEAK_ASSET = "file")
 load("images/humboldt_peak.png", HUMBOLDT_PEAK_ASSET = "file")
 load("images/huron_peak.png", HURON_PEAK_ASSET = "file")
 load("images/kit_carson_peak.png", KIT_CARSON_PEAK_ASSET = "file")
@@ -25,6 +26,7 @@ load("images/maroon_peak.png", MAROON_PEAK_ASSET = "file")
 load("images/missouri_mountain.png", MISSOURI_MOUNTAIN_ASSET = "file")
 load("images/mt_antero.png", MT_ANTERO_ASSET = "file")
 load("images/mt_belford.png", MT_BELFORD_ASSET = "file")
+load("images/mt_bierstadt.png", MT_BIERSTADT_ASSET = "file")
 load("images/mt_blue_sky.png", MT_BLUE_SKY_ASSET = "file")
 load("images/mt_bross.png", MT_BROSS_ASSET = "file")
 load("images/mt_columbia.png", MT_COLUMBIA_ASSET = "file")
@@ -240,7 +242,7 @@ MOUNTAIN_DATA = [
         "Hiking Distance": 9.3,
         "Hiking Elevation Gain": 762,
         "Class": "1",
-        "Outline": GRAYS_PEAK_ASSET.readall(),
+        "Outline": HANDIES_PEAK_ASSET.readall(),
         "Description": "From American Basin, a steady climb reveals views of the Grenadier, La Garita, and Needle Mountains, plus the Mt. Sneffels Wilderness.",
     },
     {
@@ -1091,7 +1093,7 @@ def show_instructions_screen():
     )
 
 def get_mountain_outline(mountain):
-    image = base64.decode(mountain["Outline"])
+    image = mountain["Outline"]
     IMG_WIDTH = 64
     IMG_HEIGHT = 32
     frames = []

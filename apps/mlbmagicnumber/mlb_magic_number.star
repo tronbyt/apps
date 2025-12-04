@@ -5,7 +5,6 @@ Description: Displays the magic number or the elimination number of your favorit
 Author: Jake Manske
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/ari_logo.png", ARI_LOGO_ASSET = "file")
 load("images/ath_logo.png", ATH_LOGO_ASSET = "file")
@@ -490,9 +489,7 @@ def http_get_number(team_id):
         has_data = False
     return struct(Number = number, Magic = magic, Clinched = clinched, DivisionRank = division_rank, Eliminated = eliminated, Wins = wins, Losses = losses, Success = True, ResponseCode = response.status_code, HasData = has_data)
 
-CHECKMARK = base64.decode(
-    CHECKMARK_ASSET.readall(),
-)
+CHECKMARK = CHECKMARK_ASSET.readall()
 
 #################
 ## TEAM CONFIG ##

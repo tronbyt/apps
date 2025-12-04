@@ -11,19 +11,6 @@ def is_breaking(newsEntry):
     #     return True
     return False
 
-def format_text(original_text, chars_per_line):
-    lines = []
-    for line in original_text.split("\n"):
-        new_line_words = []
-        for word in line.split(" "):
-            if len(word) <= chars_per_line:
-                new_line_words.append(word)
-            else:
-                for i in range(0, len(word), chars_per_line):
-                    new_line_words.append(word[i:i + chars_per_line])
-        lines.append(" ".join(new_line_words))
-    return "\n".join(lines)
-
 def format_time(original_time):
     if "T" in original_time:
         time_part = original_time.split("T")[1].split(":")
@@ -51,8 +38,9 @@ def main(config):
 
     # Layout constants
     HEADING_HEIGHT = 12 * scale
-    TEXT_HEIGHT = canvas.height() - HEADING_HEIGHT - (4 * scale)
-    chars_per_line = 13 if scale == 1 else 16
+    TEXT_TOP_OFFSET = HEADING_HEIGHT + 3 * scale  # Offset where scrollable text starts
+    TEXT_HEIGHT = canvas.height() - TEXT_TOP_OFFSET - scale  # Available height for scrollable text
+    TEXT_DRAW_WIDTH = canvas.width() - (2 * scale)  # Width available for wrapped text
 
     # Fonts
     font_small = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12"
@@ -62,7 +50,6 @@ def main(config):
     if not headline:
         return render.Root(render.Text(
             "Cannot refresh news",
-            # font family
             font = font_small,
         ))
     title = headline["title"]
@@ -71,62 +58,82 @@ def main(config):
     formatted_date = format_time(date) if date else "No time available"
     news_is_urgent = is_breaking(headline)
 
-    if config and not news_is_urgent and config.bool("hide_if_not_urgent"):
+    if config and not news_is_urgent and config.bool("hide_if_not_urgent", False):
         return []
+
+    text_color = "#FFFF00" if news_is_urgent else "#FFFFFF"
+    text_content = render.Column(children = [
+        render.WrappedText(
+            content = ("+++ " if news_is_urgent else "") + topline + ":",
+            color = text_color,
+            font = font_normal,
+            width = TEXT_DRAW_WIDTH,
+            wordbreak = True,
+        ),
+        render.Padding(
+            render.WrappedText(
+                content = title + (" +++" if news_is_urgent else ""),
+                color = text_color,
+                font = font_normal,
+                width = TEXT_DRAW_WIDTH,
+                wordbreak = True,
+            ),
+            pad = (0, 2 * scale, 0, 0),
+        ),
+    ])
 
     return render.Root(
         render.Stack([
+            # 1. Background
             render.Box(
                 color = "#1e283f",
                 width = canvas.width(),
                 height = canvas.height(),
             ),
-            render.Padding(pad = scale, child =
-                                            render.Column(
-                                                expanded = True,
-                                                children = [
-                                                    render.Padding(
-                                                        child =
-                                                            render.Row(
-                                                                expanded = True,
-                                                                main_align = "space_between",
-                                                                children = [
-                                                                    render.Image(height = HEADING_HEIGHT, src = ARD_LOGO_WHITE.readall()),
-                                                                    render.Text(
-                                                                        formatted_date,
-                                                                        # font family
-                                                                        font = font_small,
-                                                                    ),
-                                                                ],
-                                                                cross_align = "center",
-                                                            ),
-                                                        pad = scale,
-                                                    ),
-                                                    render.Marquee(
-                                                        height = TEXT_HEIGHT,
-                                                        scroll_direction = "vertical",
-                                                        delay = 20,
-                                                        child = render.Column(children = [
-                                                            render.WrappedText(
-                                                                content = ("+++ " if news_is_urgent else "") + format_text(topline, chars_per_line) + ":",
-                                                                color = "#FFFF00" if news_is_urgent else "#FFFFFF",
-                                                                font = font_normal,
-                                                            ),
-                                                            render.Padding(
-                                                                render.WrappedText(
-                                                                    content = format_text(title, chars_per_line) + (" +++" if news_is_urgent else ""),
-                                                                    color = "#FFFF00" if news_is_urgent else "#FFFFFF",
-                                                                    font = font_normal,
-                                                                ),
-                                                                pad = (0, 2 * scale, 0, 0),
-                                                            ),
-                                                        ]),
-                                                    ),
-                                                ],
-                                            )),
+
+            # 2. Scrolling Text Layer
+            render.Padding(
+                pad = (scale, TEXT_TOP_OFFSET, scale, scale),
+                child = render.Box(
+                    width = TEXT_DRAW_WIDTH,
+                    height = TEXT_HEIGHT,
+                    child = render.Marquee(
+                        height = TEXT_HEIGHT,
+                        scroll_direction = "vertical",
+                        offset_start = 0,
+                        offset_end = 16 * scale,
+                        delay = 40,
+                        child = text_content,
+                    ),
+                ),
+            ),
+
+            # 3. Header Layer
+            render.Padding(
+                pad = scale,
+                child = render.Box(
+                    color = "#1e283f",
+                    width = TEXT_DRAW_WIDTH,
+                    height = HEADING_HEIGHT + 2 * scale,
+                    child = render.Padding(
+                        pad = scale,
+                        child = render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                render.Image(height = HEADING_HEIGHT, src = ARD_LOGO_WHITE.readall()),
+                                render.Text(
+                                    formatted_date,
+                                    font = font_small,
+                                ),
+                            ],
+                            cross_align = "center",
+                        ),
+                    ),
+                ),
+            ),
         ]),
         delay = 100 // scale,
-        show_full_animation = True,
     )
 
 def get_schema():

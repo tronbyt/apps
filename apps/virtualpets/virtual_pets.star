@@ -6,7 +6,6 @@ Author: frame-shift
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -183,7 +182,7 @@ def render_bg(season, period):
     if period == "night":
         bg = INSIDE
 
-    return render.Image(src = base64.decode(bg))
+    return render.Image(src = bg)
 
 def render_action(pet):
     # Determine pet actions based on random numbers

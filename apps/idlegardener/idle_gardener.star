@@ -6,7 +6,6 @@ Author: yonodactyl
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/tree_chopped_c3e9b02b.png", TREE_CHOPPED_c3e9b02b_ASSET = "file")
 load("images/tree_growing_6ea9c186.png", TREE_GROWING_6ea9c186_ASSET = "file")
@@ -81,7 +80,7 @@ def return_trees(tree_list):
         children = [
             render.Row(
                 children = [
-                    render.Image(src = base64.decode(tree["sprite"]))
+                    render.Image(src = tree["sprite"])
                     for tree in column
                 ],
             )

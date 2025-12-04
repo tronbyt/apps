@@ -5,7 +5,6 @@ Description: Shows a countdown to the start or end of astronomical summer in you
 Author: Andrew Knotts
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("images/days_to_autumn.png", DAYS_TO_AUTUMN_ASSET = "file")
 load("images/days_to_summer.png", DAYS_TO_SUMMER_ASSET = "file")
@@ -289,9 +288,7 @@ def draw_sunflower(flower):
         render.Padding(
             pad = (flower["col"] - 3, flower["roots_row"] - flower["stem_length"] - 4, 0, 0),
             child = render.Image(
-                src = base64.decode(
-                    FLOWER_STAGES_PNG[int(flower["bloom_stage"])],
-                ),
+                src = FLOWER_STAGES_PNG[int(flower["bloom_stage"])],
             ),
         ),
     )
@@ -453,7 +450,7 @@ def render_all_frames(frame_count, config):
                     ),
                     render.Padding(
                         pad = msg_pad,
-                        child = render.Image(src = base64.decode(countdown_png)),
+                        child = render.Image(src = countdown_png),
                     ),
                 ]),
             )

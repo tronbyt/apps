@@ -1,5 +1,3 @@
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
@@ -146,14 +144,8 @@ def render_header(feed, colors, header_height, logo_width):
     )
 
 def render_logo(colors, width, height):
-    cached_logo = cache.get(NPR_LOGO_URL)
-
-    if cached_logo != None:
-        return render.Image(src = base64.decode(cached_logo), width = width, height = height)
-
-    res = http.get(NPR_LOGO_URL)
+    res = http.get(NPR_LOGO_URL, ttl_seconds = CACHE_TTL_SECONDS)
     if res.status_code == 200:
-        cache.set(NPR_LOGO_URL, base64.encode(res.body()), ttl_seconds = CACHE_TTL_SECONDS)
         return render.Image(src = res.body(), width = width, height = height)
 
     return render.Text("NPR", font = "tom-thumb", color = colors["background"])

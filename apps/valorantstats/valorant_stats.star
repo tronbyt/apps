@@ -5,7 +5,6 @@ Description: Pulls live VALORANT rank stats using henrikdev's Valorant API based
 Author: ohdxnte
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
@@ -82,22 +81,10 @@ def main(config):
 
 # caching!
 def getAPIDataCacheOrHTTP(val_tag_api_link, data, ttl_seconds):
-    user_cache = cache.get(data)
-    if user_cache != None:
-        print("Displaying cached user data")
-        rep = json.decode(user_cache)
-        data = rep.json()
-        print(data)
-    else:
-        print("No cached data. Hitting API")
-        rep = http.get(val_tag_api_link)
-        if rep.status_code != 200:
-            fail("VALORANT API request failed with status %d", rep.status_code)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(val_tag_api_link, json.encode(rep.json()), ttl_seconds = ttl_seconds)
-        data = rep.json()
-        print("Hit API and cached data")
+    rep = http.get(val_tag_api_link, ttl_seconds = ttl_seconds)
+    if rep.status_code != 200:
+        fail("VALORANT API request failed with status %d", rep.status_code)
+    data = rep.json()
     return data
 
 # get image from predefined json image url from stats api
@@ -105,19 +92,9 @@ def getImage(url, ttl_seconds = 3600):
     if not url:
         fail("No API string provided")
 
-    key = base64.encode(url)
-
-    data = cache.get(key)
-    if data != None:
-        return base64.decode(data)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
         return DEFAULT_EMBLEM_ASSET.readall()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = ttl_seconds)
-
     return res.body()
 
 def checkRank1(lb_data, provided_val_tag_name):

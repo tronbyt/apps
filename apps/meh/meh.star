@@ -5,16 +5,11 @@ Description: Current deal on meh.com.
 Author: hoop33
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/no_deal.png", NO_DEAL_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-MEH_CACHE = "meh"
-MEH_IMAGE_CACHE = "meh-image"
 MEH_URL = "https://meh.com/api/1/current.json?apikey="
 TTL_SECONDS = 600
 
@@ -38,7 +33,7 @@ def main(config):
     api_key = config.get("meh_api_key")
 
     deal = get_deal(api_key)
-    image = base64.decode(get_image(deal))
+    image = get_image(deal)
 
     return render.Root(
         delay = 150,
@@ -84,34 +79,21 @@ def main(config):
 def get_deal(api_key):
     deal = {"title": "No Deal", "items": [{"price": 0}]}
 
-    deal_cached = cache.get(MEH_CACHE)
-    if deal_cached != None:
-        deal = json.decode(deal_cached)
-    elif api_key != None:
-        response = http.get(MEH_URL + api_key)
+    if api_key != None:
+        response = http.get(MEH_URL + api_key, ttl_seconds = TTL_SECONDS)
         if response.status_code == 200:
             deal = response.json()["deal"]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(MEH_CACHE, json.encode(deal), ttl_seconds = TTL_SECONDS)
 
     return deal
 
 def get_image(deal):
     image = NO_DEAL_IMAGE
 
-    image_cached = cache.get(MEH_IMAGE_CACHE)
-    if image_cached != None:
-        image = image_cached
-    else:
-        item = deal["items"][0]
-        if "photo" in item.keys():
-            photo_url = item["photo"]
-            response = http.get(photo_url)
-            if response.status_code == 200:
-                image = base64.encode(response.body())
-
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                cache.set(MEH_IMAGE_CACHE, image, ttl_seconds = TTL_SECONDS)
+    item = deal["items"][0]
+    if "photo" in item.keys():
+        photo_url = item["photo"]
+        response = http.get(photo_url, ttl_seconds = TTL_SECONDS)
+        if response.status_code == 200:
+            image = response.body()
 
     return image

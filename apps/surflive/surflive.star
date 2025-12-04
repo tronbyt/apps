@@ -19,7 +19,19 @@ load("time.star", "time")
 
 WAVE_ICON = WAVE_ICON_ASSET.readall()
 WIND_ICON = WIND_ICON_ASSET.readall()
-WAVE_ICON_WIDTH = 12
+WAVE_ICON_WIDTH = 10
+
+# FORECAST API
+SURFLINE_FORECASTS_URL = "https://services.surfline.com/kbyg/spots/forecasts"
+SEARCH_URL = "https://services.surfline.com/onboarding/spots?query={query}&limit=12&offset=0&camsOnly=false"
+
+# 15 minutes
+ENABLE_CACHE = True
+CACHE_TTL_SECONDS = 60 * 15
+
+# DEFAULTS
+DEFAULT_SPOT_NAME = "Pacific Beach"
+DEFAULT_SPOT_ID = "5842041f4e65fad6a7708841"
 
 def main(config):
     if config.get("spot"):

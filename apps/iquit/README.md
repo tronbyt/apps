@@ -2,4 +2,4 @@
 
 Based off the [*I Quit* album cover](https://kylephx.com/h/iquit.jpg) by the band HAIM.
 
-![HAIM I Quit Applet for Tidbyt](iquit.png)
+![HAIM I Quit Applet for Tidbyt](iquit.jpg)

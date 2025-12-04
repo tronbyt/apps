@@ -1678,7 +1678,7 @@
     "description": "Shows the next two arriving CTA \"L\" Trains for a selected station.",
     "author": "samshapiro13",
     "recommendedInterval": 5,
-    "image": "ctaltracker/cta_l_tracker.png",
+    "image": "ctaltracker/cta_l_tracker.gif",
     "md": "ctaltracker/README.md",
     "starFile": "cta_l_tracker.star"
   },
@@ -1865,7 +1865,7 @@
     "description": "By default displays any monitors that are in the status alert but allows for customizing the query yourself based on DataDog's syntax.",
     "author": "Cavallando",
     "recommendedInterval": 5,
-    "image": "datadogmonitors/screenshot.png",
+    "image": "datadogmonitors/screenshot.gif",
     "md": "datadogmonitors/README.md",
     "starFile": "datadog_monitors.star"
   },
@@ -1931,7 +1931,7 @@
     "description": "Display a countdown of days left til Christmas Day.",
     "author": "Godfrey Systems Web Development",
     "recommendedInterval": 60,
-    "image": "daystoxmas/screenshot.png",
+    "image": "daystoxmas/screenshot.gif",
     "md": "daystoxmas/README.md",
     "starFile": "days_to_xmas.star"
   },
@@ -2349,7 +2349,7 @@
     "description": "Daily, weekly, monthly, annual and lifetime energy production and consumption monitor for your Enphase solar panels.",
     "author": "ckyr",
     "recommendedInterval": 5,
-    "image": "enphasesummary/screenshot.png",
+    "image": "enphasesummary/screenshot.webp",
     "md": "enphasesummary/readme.md",
     "starFile": "enphasesummary.star"
   },
@@ -3372,7 +3372,7 @@
     "description": "Displays the daily count of different bird species recorded and identified by the Haikubox.",
     "author": "jachansky",
     "recommendedInterval": 5,
-    "image": "haikuboxlinker/haikuboxlinker.gif",
+    "image": "haikuboxlinker/haikuboxlinker.webp",
     "md": null,
     "starFile": "haikuboxlinker.star"
   },
@@ -3834,7 +3834,7 @@
     "description": "Based on the HAIM band's I Quit album cover.",
     "author": "kaisle51",
     "recommendedInterval": null,
-    "image": "iquit/iquit.png",
+    "image": "iquit/iquit.jpg",
     "md": "iquit/README.md",
     "starFile": "iquit.star"
   },
@@ -6331,7 +6331,7 @@
     "description": "Shows a specific or random pixel art piece of characters from the Peanuts comics series.",
     "author": "michaelalbinson",
     "recommendedInterval": 5,
-    "image": "peanutspictures/screenshot.png",
+    "image": "peanutspictures/screenshot.gif",
     "md": "peanutspictures/README.md",
     "starFile": "peanuts_pictures.star"
   },
@@ -6584,7 +6584,7 @@
     "description": " Displays up-to-date statistics (currently POKT/USD price and latest block height) about the Pocket Networks blockchain for monitoring.",
     "author": "al-bargsys",
     "recommendedInterval": 5,
-    "image": "poktstats/screenshot.png",
+    "image": "poktstats/screenshot.gif",
     "md": "poktstats/README.md",
     "starFile": "poktstats.star"
   },
@@ -6650,7 +6650,7 @@
     "description": "Displays the prayer times for today's date and also shows the remaining time till the next prayer based on the user's location.",
     "author": "EslamMoh",
     "recommendedInterval": 5,
-    "image": "prayer_times/prayer_times.png",
+    "image": "prayer_times/prayer_times.gif",
     "md": "prayer_times/README.md",
     "starFile": "prayer_times.star"
   },
@@ -7882,7 +7882,7 @@
     "description": "Daily, monthly, annual and lifetime energy production and consumption monitor for your SolarEdge solar panels.",
     "author": "ckyr (credit to Ingmar Stein)",
     "recommendedInterval": 30,
-    "image": "solaredgesummary/screenshot.png",
+    "image": "solaredgesummary/screenshot.webp",
     "md": "solaredgesummary/README.md",
     "starFile": "solaredgesummary.star"
   },

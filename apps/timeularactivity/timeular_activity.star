@@ -5,15 +5,13 @@ Description: Tracks the ammount of time spent on the current Timeular activity.
 Author: tommylin1212
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/timeular_logo.svg", TIMEULAR_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-TIMEULAR_LOGO = """
-PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDE3Ny40IDM5LjgiPjxkZWZzPjxzdHlsZT4uY2xzLTEsLmNscy0ye2ZpbGw6I2ZmZjtzdHJva2Utd2lkdGg6MH0uY2xzLTJ7ZmlsbDojODVmfTwvc3R5bGU+PC9kZWZzPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTAgMTkuMUMwIDEyLjQgMCA5IDEuMyA2LjVjMS4yLTIuMyAzLTQuMSA1LjItNS4yQzkuMSAwIDEyLjQgMCAxOS4xIDBoMS42YzYuNyAwIDEwLjEgMCAxMi42IDEuMyAyLjMgMS4yIDQuMSAzIDUuMiA1LjIgMS4zIDIuNiAxLjMgNS45IDEuMyAxMi42djEuNmMwIDYuNyAwIDEwLjEtMS4zIDEyLjYtMS4yIDIuMy0zIDQuMS01LjIgNS4yLTIuNiAxLjMtNS45IDEuMy0xMi42IDEuM2gtMS42Yy02LjcgMC0xMC4xIDAtMTIuNi0xLjMtMi4zLTEuMi00LjEtMy01LjItNS4yQzAgMzAuNyAwIDI3LjQgMCAyMC43di0xLjZaIi8+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTMuNCAzMi40Yy0uMiAwLS40IDAtLjYtLjItLjQtLjItLjYtLjYtLjYtMVY4LjVjMC0uNC4yLS44LjYtMSAuNC0uMi44LS4yIDEuMiAwbDE5LjkgMTEuNGMuNC4yLjYuNi42IDFzLS4yLjgtLjYgMUwxNCAzMi4zYy0uMiAwLS40LjItLjYuMlptLjQtMjMuMXYyMS4ybDE4LjYtMTAuNkwxMy44IDkuM1oiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yNS42IDMzLjJIMTQuNGMtMS4zIDAtMi41LS43LTMuMi0xLjhsLTUuNi05LjZjLS43LTEuMS0uNy0yLjYgMC0zLjdzNS42LTkuNiA1LjYtOS42Yy43LTEuMSAxLjktMS44IDMuMi0xLjhoMTEuMmMxLjMgMCAyLjUuNyAzLjIgMS44bDUuNiA5LjZjLjcgMS4xLjcgMi42IDAgMy43bC01LjYgOS42Yy0uNyAxLjEtMS45IDEuOC0zLjIgMS44Wk03LjggMTkuM2MtLjIuMy0uMi44IDAgMS4xbDUuNiA5LjZjLjIuMy42LjUuOS41aDExLjJjLjQgMCAuOC0uMiAxLS41bDUuNi05LjZjLjItLjMuMi0uOCAwLTEuMWwtNS42LTkuNmMtLjItLjMtLjYtLjUtMS0uNUgxNC4zYy0uNCAwLS44LjItLjkuNWwtNS42IDkuNloiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNC40IDMyLjJjLS41IDAtLjkgMC0xLjQtLjQtLjgtLjUtMS4zLTEuNC0xLjMtMi4zVjEwLjNjMC0xIC41LTEuOCAxLjMtMi4zczEuOS0uNSAyLjcgMGwxNi44IDkuNmMuOS41IDEuNCAxLjQgMS40IDIuM3MtLjUgMS45LTEuNCAyLjNsLTE2LjggOS42Yy0uNC4yLS45LjQtMS4zLjRabTAtMjJ2MTkuM2guMWwxNi44LTkuNi0xNi44LTkuN2gtLjFaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTYgMjkuMmMtLjcgMC0xLjMtLjYtMS4zLTEuM1YxMy4ySDUwYy0uNyAwLTEuMy0uNi0xLjMtMS4zcy42LTEuMyAxLjMtMS4zaDEyYy43IDAgMS4zLjYgMS4zIDEuM3MtLjYgMS4zLTEuMyAxLjNoLTQuN3YxNC43YzAgLjctLjYgMS4zLTEuMyAxLjNabTEyIDBjLS43IDAtMS4zLS42LTEuMy0xLjN2LTE2YzAtLjcuNi0xLjMgMS4zLTEuM3MxLjMuNiAxLjMgMS4zdjE2YzAgLjctLjYgMS4zLTEuMyAxLjNabTIyIDBjLS43IDAtMS4zLS42LTEuMy0xLjNWMTcuNGwtNC41IDljMCAuMy0uMy41LS42LjctLjIgMC0uNC4xLS42LjFzLS40IDAtLjYtLjFjLS4zLS4yLS41LS40LS42LS43bC00LjUtOXYxMC41YzAgLjctLjYgMS4zLTEuMyAxLjNzLTEuMy0uNi0xLjMtMS4zdi0xNmMwLS42LjQtMS4xIDEtMS4zLjYtLjEgMS4yLjEgMS41LjdMODMgMjNsNS44LTExLjdjLjItLjUuNy0uNyAxLjItLjdzMS4yLjYgMS4yIDEuM3YxNmMwIC43LS42IDEuMy0xLjMgMS4zaC4xWm0xNy0uMkg5NmMtLjcgMC0xLjMtLjYtMS4zLTEuM3MuNi0xLjMgMS4zLTEuM2gxMWMuNyAwIDEuMy42IDEuMyAxLjNzLS42IDEuMy0xLjMgMS4zWm0tMi03LjhoLTljLS43IDAtMS4zLS42LTEuMy0xLjNzLjYtMS4zIDEuMy0xLjNoOWMuNyAwIDEuMy42IDEuMyAxLjNzLS42IDEuMy0xLjMgMS4zWm0yLTcuOEg5NmMtLjcgMC0xLjMtLjYtMS4zLTEuM3MuNi0xLjMgMS4zLTEuM2gxMWMuNyAwIDEuMy42IDEuMyAxLjNzLS42IDEuMy0xLjMgMS4zWm0xMiAxNi44Yy00IDAtNy4zLTMuMy03LjMtNy4zdi0xMWMwLS43LjYtMS4zIDEuMy0xLjNzMS4zLjYgMS4zIDEuM3YxMWMwIDIuNiAyLjEgNC43IDQuNyA0LjdzNC43LTIuMSA0LjctNC43di0xMWMwLS43LjYtMS4zIDEuMy0xLjNzMS4zLjYgMS4zIDEuM3YxMWMwIDQtMy4zIDcuMy03LjMgNy4zWm0yMS0xaC04Yy0uNyAwLTEuMy0uNi0xLjMtMS4zdi0xNmMwLS43LjYtMS4zIDEuMy0xLjNzMS4zLjYgMS4zIDEuM3YxNC43aDYuN2MuNyAwIDEuMy42IDEuMyAxLjNzLS42IDEuMy0xLjMgMS4zWm0xOSAwYy0uNSAwLTEtLjMtMS4yLS44TDE1MiAxNS4xbC01LjggMTMuM2MtLjMuNy0xLjEgMS0xLjcuNy0uNy0uMy0xLTEuMS0uNy0xLjdsNi45LTE1LjljLjEtLjMuNC0uNi43LS44LjIgMCAuNCAwIC41LS4xLjIgMCAuNCAwIC41LjEuNC4yLjYuNC43LjhsNi45IDE1LjljLjMuNyAwIDEuNC0uNyAxLjctLjIgMC0uMy4xLS41LjFoLjJabTE3IDBjLS41IDAtMS4xLS4zLTEuMi0uOWwtMS43LTVjLS4xLS40LS40LS45LS43LTEuMi0uNi0uNi0xLjMtLjktMi4yLS45aC00Ljl2Ni43YzAgLjctLjYgMS4zLTEuMyAxLjNzLTEuMy0uNi0xLjMtMS4zdi0xNmMwLS43LjYtMS4zIDEuMy0xLjNoOGMyLjkgMCA1LjMgMi40IDUuMyA1LjNzLTEuMSAzLjgtMi44IDQuN2MuNS42LjggMS4yIDEuMSAxLjlsMS43IDVjLjIuNy0uMSAxLjQtLjggMS42aC0uNVptLTUuOC0xMC42aDEuOGMxLjUgMCAyLjctMS4yIDIuNy0yLjdzLTEuMi0yLjctMi43LTIuN2gtNi43djUuNGg0LjlaIi8+PC9zdmc+
-"""
+TIMEULAR_LOGO = TIMEULAR_LOGO_ASSET.readall()
 TIMEULAR_LOGIN_URL = "https://api.timeular.com/api/v3/developer/sign-in"
 TIMEULAR_ACTIVITIES_URL = "https://api.timeular.com/api/v3/tracking"
 TIMEULAR_LIST_ALL_ACTIVITIES_URL = "https://api.timeular.com/api/v3/activities"
@@ -116,7 +114,7 @@ def render_text_no_activity(config):
                         render.Padding(
                             pad = (0, 0, 0, 3),
                             child = render.Image(
-                                src = base64.decode(TIMEULAR_LOGO),
+                                src = TIMEULAR_LOGO,
                                 width = 45,
                             ),
                         ) if config.bool("display_logo", False) else None,
@@ -187,7 +185,7 @@ def render_text_activity(config, activity_name, activity_color, parsed_time):
                     render.Padding(
                         pad = (0, 0, 0, 2),
                         child = render.Image(
-                            src = base64.decode(TIMEULAR_LOGO),
+                            src = TIMEULAR_LOGO,
                             width = 45,
                         ),
                     ) if config.bool("display_logo", False) else None,

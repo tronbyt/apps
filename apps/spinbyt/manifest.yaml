@@ -6,3 +6,4 @@ desc: App that shows the nearest Spin scooter, its battery level, and number of 
 author: zachlucas
 fileName: spinbyt.star
 packageName: spinbyt
+broken: true

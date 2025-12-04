@@ -7,3 +7,5 @@ author: Shopify
 fileName: shopify_sales.star
 packageName: shopifysales
 recommendedInterval: 5
+broken: true
+brokenReason: "www.shopcounter.app: no such host"
