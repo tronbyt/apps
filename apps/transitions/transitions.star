@@ -36,6 +36,7 @@ DIRECTION_CHOICES = [
     ("tlbr", "Top-Left to Bottom-Right"),
     ("brtl", "Bottom-Right to Top-Left"),
 ]
+DIRECTION_VALUES = [value for value, _ in DIRECTION_CHOICES]
 
 BLINK_CYCLES = 7
 PIXEL_SCATTER_PARTICLES = 24
@@ -47,35 +48,76 @@ PIXEL_FLOOD_BATCH_DIVISOR = 50
 CHECKER_STRIPE_SIZE = 4
 CHECKER_STEP_DIVISOR = 18
 
-ALL_EFFECTS = [
-    EFFECT_BLINK,
-    EFFECT_CHECKER,
-    EFFECT_CYLON,
-    EFFECT_DIAGONAL,
-    EFFECT_DOOM,
-    EFFECT_FADE,
-    EFFECT_HORIZONTAL,
-    EFFECT_PIXEL_FLOOD,
-    EFFECT_SCATTER,
-    EFFECT_STAR,
-    EFFECT_VERTICAL,
+def diagonal_wipe_direction(direction):
+    return "brtl" if direction == "brtl" else "tlbr"
+
+def vertical_wipe_direction(direction):
+    return "btt" if direction == "btt" else "ttb"
+
+def handle_blink(pc, sc, _d):
+    return blink_frames(pc, sc), 180
+
+def handle_checker(pc, sc, _d):
+    return diagonal_checker_frames(pc, sc), 80
+
+def handle_cylon(pc, sc, _d):
+    return cylon_eye_frames(pc, sc), 60
+
+def handle_diagonal(pc, sc, d):
+    return diagonal_wipe_frames(pc, sc, diagonal_wipe_direction(d)), 80
+
+def handle_doom(pc, sc, d):
+    return doom_wipe_frames(pc, sc, d), 90
+
+def handle_fade(pc, sc, _d):
+    return fade_frames(pc, sc), 120
+
+def handle_horizontal(pc, sc, d):
+    return horizontal_wipe_frames(pc, sc, d), 80
+
+def handle_pixel_flood(pc, sc, _d):
+    return pixel_flood_frames(pc, sc), 50
+
+def handle_scatter(pc, sc, _d):
+    return pixel_scatter_frames(pc, sc), 90
+
+def handle_star(pc, sc, _d):
+    return star_frames(pc, sc), 90
+
+def handle_vertical(pc, sc, d):
+    return vertical_wipe_frames(pc, sc, vertical_wipe_direction(d)), 80
+
+EFFECTS = [
+    {"display": "Blinking Color", "value": EFFECT_BLINK},
+    {"display": "Cylon Eye", "value": EFFECT_CYLON},
+    {"display": "Diagonal Checker", "value": EFFECT_CHECKER},
+    {"display": "Diagonal Wipe", "value": EFFECT_DIAGONAL},
+    {"display": "Doom Wipe", "value": EFFECT_DOOM},
+    {"display": "Fade", "value": EFFECT_FADE},
+    {"display": "Horizontal Wipe", "value": EFFECT_HORIZONTAL},
+    {"display": "Pixel Flood", "value": EFFECT_PIXEL_FLOOD},
+    {"display": "Pixel Scatter", "value": EFFECT_SCATTER},
+    {"display": "Star Burst", "value": EFFECT_STAR},
+    {"display": "Vertical Wipe", "value": EFFECT_VERTICAL},
 ]
+
+ALL_EFFECTS = [effect["value"] for effect in EFFECTS]
 
 # pc - primary color
 # sc - secondary color
 # d - direction
 EFFECT_HANDLERS = {
-    EFFECT_BLINK: lambda pc, sc, d: (blink_frames(pc, sc), 180),
-    EFFECT_CHECKER: lambda pc, sc, d: (diagonal_checker_frames(pc, sc), 80),
-    EFFECT_CYLON: lambda pc, sc, d: (cylon_eye_frames(pc, sc), 60),
-    EFFECT_DIAGONAL: lambda pc, sc, d: (diagonal_wipe_frames(pc, sc, "brtl" if d == "brtl" else "tlbr"), 80),
-    EFFECT_DOOM: lambda pc, sc, d: (doom_wipe_frames(pc, sc, d), 90),
-    EFFECT_FADE: lambda pc, sc, d: (fade_frames(pc, sc), 120),
-    EFFECT_HORIZONTAL: lambda pc, sc, d: (horizontal_wipe_frames(pc, sc, d), 80),
-    EFFECT_PIXEL_FLOOD: lambda pc, sc, d: (pixel_flood_frames(pc, sc), 50),
-    EFFECT_SCATTER: lambda pc, sc, d: (pixel_scatter_frames(pc, sc), 90),
-    EFFECT_STAR: lambda pc, sc, d: (star_frames(pc, sc), 90),
-    EFFECT_VERTICAL: lambda pc, sc, d: (vertical_wipe_frames(pc, sc, "btt" if d == "btt" else "ttb"), 80),
+    EFFECT_BLINK: handle_blink,
+    EFFECT_CHECKER: handle_checker,
+    EFFECT_CYLON: handle_cylon,
+    EFFECT_DIAGONAL: handle_diagonal,
+    EFFECT_DOOM: handle_doom,
+    EFFECT_FADE: handle_fade,
+    EFFECT_HORIZONTAL: handle_horizontal,
+    EFFECT_PIXEL_FLOOD: handle_pixel_flood,
+    EFFECT_SCATTER: handle_scatter,
+    EFFECT_STAR: handle_star,
+    EFFECT_VERTICAL: handle_vertical,
 }
 
 def get_schema():
@@ -90,17 +132,9 @@ def get_schema():
                 default = DEFAULT_EFFECT,
                 options = [
                     schema.Option(display = "Random", value = EFFECT_RANDOM_PICK),
-                    schema.Option(display = "Blinking Color", value = EFFECT_BLINK),
-                    schema.Option(display = "Cylon Eye", value = EFFECT_CYLON),
-                    schema.Option(display = "Diagonal Checker", value = EFFECT_CHECKER),
-                    schema.Option(display = "Diagonal Wipe", value = EFFECT_DIAGONAL),
-                    schema.Option(display = "Doom Wipe", value = EFFECT_DOOM),
-                    schema.Option(display = "Fade", value = EFFECT_FADE),
-                    schema.Option(display = "Horizontal Wipe", value = EFFECT_HORIZONTAL),
-                    schema.Option(display = "Pixel Flood", value = EFFECT_PIXEL_FLOOD),
-                    schema.Option(display = "Pixel Scatter", value = EFFECT_SCATTER),
-                    schema.Option(display = "Star Burst", value = EFFECT_STAR),
-                    schema.Option(display = "Vertical Wipe", value = EFFECT_VERTICAL),
+                ] + [
+                    schema.Option(display = effect["display"], value = effect["value"])
+                    for effect in EFFECTS
                 ],
             ),
             schema.Dropdown(
@@ -141,8 +175,7 @@ def main(config):
     chosen_direction = direction
     if effect == EFFECT_RANDOM_PICK:
         chosen_effect = ALL_EFFECTS[random.number(0, len(ALL_EFFECTS) - 1)]
-        dir_options = [value for value, _ in DIRECTION_CHOICES]
-        chosen_direction = dir_options[random.number(0, len(dir_options) - 1)]
+        chosen_direction = DIRECTION_VALUES[random.number(0, len(DIRECTION_VALUES) - 1)]
 
     handler = EFFECT_HANDLERS[chosen_effect]
     frames, delay = handler(primary_color, secondary_color, chosen_direction)
@@ -234,9 +267,10 @@ def diagonal_checker_frames(primary, secondary):
     step = max(2, span // CHECKER_STEP_DIVISOR)
     frames = [full_frame(secondary)]
     row_progress = [0] * height
+    pixel_widgets = []
 
     for progress in range(0, span + step, step):
-        children = [frames[-1]]
+        new_widgets = []
         for y in range(height):
             row_fill = progress - y
             if row_fill <= row_progress[y] or row_fill <= 0:
@@ -248,7 +282,7 @@ def diagonal_checker_frames(primary, secondary):
                 if ((x + y) // stripe) % 2 == 0:
                     right = width - x - 1
                     bottom = height - y - 1
-                    children.append(
+                    new_widgets.append(
                         render.Padding(
                             pad = (x, y, right, bottom),
                             child = render.Box(width = 1, height = 1, color = primary),
@@ -256,7 +290,8 @@ def diagonal_checker_frames(primary, secondary):
                     )
             row_progress[y] = row_fill
 
-        frames.append(render.Stack(children = children))
+        pixel_widgets.extend(new_widgets)
+        frames.append(render.Stack(children = [full_frame(secondary)] + pixel_widgets))
 
     frames.append(full_frame(primary))
     return frames
@@ -276,20 +311,22 @@ def pixel_flood_frames(primary, secondary):
 
     batch_size = max(10, (width * height) // PIXEL_FLOOD_BATCH_DIVISOR)
     frames = [full_frame(secondary)]
+    pixel_widgets = []
 
     for idx in range(0, len(coords), batch_size):
-        children = [frames[-1]]
+        new_widgets = []
         for x, y in coords[idx:idx + batch_size]:
             right = width - x - 1
             bottom = height - y - 1
-            children.append(
+            new_widgets.append(
                 render.Padding(
                     pad = (x, y, right, bottom),
                     child = render.Box(width = 1, height = 1, color = primary),
                 ),
             )
 
-        frames.append(render.Stack(children = children))
+        pixel_widgets.extend(new_widgets)
+        frames.append(render.Stack(children = [full_frame(secondary)] + pixel_widgets))
 
     frames.append(full_frame(primary))
     return frames
@@ -303,9 +340,10 @@ def pixel_scatter_frames(primary, secondary):
     steps = max([v["life"] for v in vectors])
 
     frames = [full_frame(secondary)]
+    pixel_widgets = []
 
     for step_idx in range(steps):
-        children = [frames[-1]]
+        new_widgets = []
         for v in vectors:
             if step_idx > v["life"]:
                 continue
@@ -313,14 +351,15 @@ def pixel_scatter_frames(primary, secondary):
             y = int(clamp(math.round(start_y + v["dy"] * step_idx), 0, height - 1))
             right = width - x - 1
             bottom = height - y - 1
-            children.append(
+            new_widgets.append(
                 render.Padding(
                     pad = (x, y, right, bottom),
                     child = render.Box(width = 1, height = 1, color = primary),
                 ),
             )
 
-        frames.append(render.Stack(children = children))
+        pixel_widgets.extend(new_widgets)
+        frames.append(render.Stack(children = [full_frame(secondary)] + pixel_widgets))
 
     frames.append(full_frame(primary))
     return frames
