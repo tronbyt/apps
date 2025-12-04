@@ -61,9 +61,9 @@ ALL_EFFECTS = [
     EFFECT_VERTICAL,
 ]
 
-// pc - primary color
-// sc - secondary color
-// d - direction
+# pc - primary color
+# sc - secondary color
+# d - direction
 EFFECT_HANDLERS = {
     EFFECT_BLINK: lambda pc, sc, d: (blink_frames(pc, sc), 180),
     EFFECT_CHECKER: lambda pc, sc, d: (diagonal_checker_frames(pc, sc), 80),
