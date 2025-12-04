@@ -5,8 +5,6 @@ Description: Real time bus departures for your preferred stop.
 Author: samandmoore
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
@@ -255,18 +253,12 @@ def build_journey(raw_journey, api_key):
     }
 
 def get_line_info(stop_id, line_ref, api_key):
-    cache_key = "line-info-%s-%s" % (stop_id, line_ref)
-    route = cache.get(cache_key)
-    if route != None:
-        return json.decode(base64.decode(route))
-
-    print("Miss! No line info in cache, calling MTA API.")
-
     res = http.get(
         BUSTIME_STOP_INFO_URL % stop_id,
         params = {
             "key": api_key,
         },
+        ttl_seconds = 3600,
     )
     if res.status_code != 200:
         fail("MTA BusTime request failed with status %d", res.status_code)
@@ -276,8 +268,5 @@ def get_line_info(stop_id, line_ref, api_key):
     result = {
         "color": route["color"],
     }
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, base64.encode(json.encode(result)), ttl_seconds = 3600)
 
     return result

@@ -5,8 +5,6 @@ Description: Gaze upon glorious marine life.
 Author: vlauffer
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/fail_image.png", FAIL_IMAGE_ASSET = "file")
@@ -107,38 +105,18 @@ def main():
     )
 
 def get_fish_pic(url):
-    key = base64.encode(url)
-    fish_pic_cache = cache.get(key)
-
-    if fish_pic_cache != None:
-        # print("Caught one!")
-        return base64.decode(fish_pic_cache)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = CACHE_TTL_SECONDS)
     if res.status_code != 200:
         fail("No fish here! Request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
-    # print("Let's catch this fish!")
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = CACHE_TTL_SECONDS)
     return res.body()
 
 def get_fish_barrel():
-    fish_barrel_cached = cache.get("fish_barrel")
-    fish_barrel = []
-    if fish_barrel_cached != None:
-        # print("My barrel is full of fish!")
-        fish_barrel = json.decode(fish_barrel_cached)
-
-    else:
-        # print("Let's go fishing!")
-        rep = http.get(FISH_WATCH_URL)
-        if rep.status_code != 200:
-            fail("FishWatch request failed with status %d", rep.status_code)
-        fish_barrel = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("fish_barrel", json.encode(fish_barrel), ttl_seconds = CACHE_TTL_SECONDS)
+    # print("Let's go fishing!")
+    rep = http.get(FISH_WATCH_URL, ttl_seconds = CACHE_TTL_SECONDS)
+    if rep.status_code != 200:
+        fail("FishWatch request failed with status %d", rep.status_code)
+    fish_barrel = rep.json()
 
     return fish_barrel
 
