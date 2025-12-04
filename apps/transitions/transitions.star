@@ -10,23 +10,32 @@ load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-EFFECT_HORIZONTAL = "horizontal_wipe"
-EFFECT_VERTICAL = "vertical_wipe"
-EFFECT_DIAGONAL = "diagonal_wipe"
-EFFECT_CHECKER = "diagonal_checker"
-EFFECT_PIXEL_FLOOD = "pixel_flood"
-EFFECT_SCATTER = "pixel_scatter"
 EFFECT_BLINK = "blink"
-EFFECT_STAR = "star_burst"
+EFFECT_CHECKER = "diagonal_checker"
+EFFECT_CYLON = "cylon_eye"
+EFFECT_DIAGONAL = "diagonal_wipe"
 EFFECT_DOOM = "doom_wipe"
 EFFECT_FADE = "fade"
-EFFECT_CYLON = "cylon_eye"
+EFFECT_HORIZONTAL = "horizontal_wipe"
+EFFECT_PIXEL_FLOOD = "pixel_flood"
 EFFECT_RANDOM_PICK = "random"
+EFFECT_SCATTER = "pixel_scatter"
+EFFECT_STAR = "star_burst"
+EFFECT_VERTICAL = "vertical_wipe"
 
 DEFAULT_EFFECT = "random"
 DEFAULT_DIRECTION = "ltr"
 DEFAULT_PRIMARY = "#4af2a1"
 DEFAULT_SECONDARY = "#050505"
+
+DIRECTION_CHOICES = [
+    ("ltr", "Left to Right"),
+    ("rtl", "Right to Left"),
+    ("ttb", "Top to Bottom"),
+    ("btt", "Bottom to Top"),
+    ("tlbr", "Top-Left to Bottom-Right"),
+    ("brtl", "Bottom-Right to Top-Left"),
+]
 
 BLINK_CYCLES = 7
 PIXEL_SCATTER_PARTICLES = 24
@@ -39,31 +48,34 @@ CHECKER_STRIPE_SIZE = 4
 CHECKER_STEP_DIVISOR = 18
 
 ALL_EFFECTS = [
-    EFFECT_HORIZONTAL,
-    EFFECT_VERTICAL,
-    EFFECT_DIAGONAL,
-    EFFECT_CHECKER,
-    EFFECT_PIXEL_FLOOD,
-    EFFECT_SCATTER,
     EFFECT_BLINK,
-    EFFECT_STAR,
+    EFFECT_CHECKER,
+    EFFECT_CYLON,
+    EFFECT_DIAGONAL,
     EFFECT_DOOM,
     EFFECT_FADE,
-    EFFECT_CYLON,
+    EFFECT_HORIZONTAL,
+    EFFECT_PIXEL_FLOOD,
+    EFFECT_SCATTER,
+    EFFECT_STAR,
+    EFFECT_VERTICAL,
 ]
 
+// pc - primary color
+// sc - secondary color
+// d - direction
 EFFECT_HANDLERS = {
     EFFECT_BLINK: lambda pc, sc, d: (blink_frames(pc, sc), 180),
-    EFFECT_VERTICAL: lambda pc, sc, d: (vertical_wipe_frames(pc, sc, "btt" if d == "btt" else "ttb"), 80),
-    EFFECT_DIAGONAL: lambda pc, sc, d: (diagonal_wipe_frames(pc, sc, "brtl" if d == "brtl" else "tlbr"), 80),
     EFFECT_CHECKER: lambda pc, sc, d: (diagonal_checker_frames(pc, sc), 80),
-    EFFECT_PIXEL_FLOOD: lambda pc, sc, d: (pixel_flood_frames(pc, sc), 50),
-    EFFECT_SCATTER: lambda pc, sc, d: (pixel_scatter_frames(pc, sc), 90),
     EFFECT_CYLON: lambda pc, sc, d: (cylon_eye_frames(pc, sc), 60),
-    EFFECT_STAR: lambda pc, sc, d: (star_frames(pc, sc), 90),
+    EFFECT_DIAGONAL: lambda pc, sc, d: (diagonal_wipe_frames(pc, sc, "brtl" if d == "brtl" else "tlbr"), 80),
     EFFECT_DOOM: lambda pc, sc, d: (doom_wipe_frames(pc, sc, d), 90),
     EFFECT_FADE: lambda pc, sc, d: (fade_frames(pc, sc), 120),
     EFFECT_HORIZONTAL: lambda pc, sc, d: (horizontal_wipe_frames(pc, sc, d), 80),
+    EFFECT_PIXEL_FLOOD: lambda pc, sc, d: (pixel_flood_frames(pc, sc), 50),
+    EFFECT_SCATTER: lambda pc, sc, d: (pixel_scatter_frames(pc, sc), 90),
+    EFFECT_STAR: lambda pc, sc, d: (star_frames(pc, sc), 90),
+    EFFECT_VERTICAL: lambda pc, sc, d: (vertical_wipe_frames(pc, sc, "btt" if d == "btt" else "ttb"), 80),
 }
 
 def get_schema():
@@ -73,7 +85,7 @@ def get_schema():
             schema.Dropdown(
                 id = "effect",
                 name = "Effect",
-                desc = "Pick the transition or notifier to play.",
+                desc = "Pick the transition to play.",
                 icon = "wandMagicSparkles",
                 default = DEFAULT_EFFECT,
                 options = [
@@ -94,16 +106,12 @@ def get_schema():
             schema.Dropdown(
                 id = "direction",
                 name = "Direction",
-                desc = "Used by wipes to decide which way the fill moves.",
+                desc = "Used by wipes to decide which way the fill moves. All options do not apply to all effects.",
                 icon = "arrowsLeftRight",
                 default = DEFAULT_DIRECTION,
                 options = [
-                    schema.Option(display = "Left to Right", value = "ltr"),
-                    schema.Option(display = "Right to Left", value = "rtl"),
-                    schema.Option(display = "Top to Bottom", value = "ttb"),
-                    schema.Option(display = "Bottom to Top", value = "btt"),
-                    schema.Option(display = "Top-Left to Bottom-Right", value = "tlbr"),
-                    schema.Option(display = "Bottom-Right to Top-Left", value = "brtl"),
+                    schema.Option(display = display, value = value)
+                    for value, display in DIRECTION_CHOICES
                 ],
             ),
             schema.Color(
@@ -133,10 +141,10 @@ def main(config):
     chosen_direction = direction
     if effect == EFFECT_RANDOM_PICK:
         chosen_effect = ALL_EFFECTS[random.number(0, len(ALL_EFFECTS) - 1)]
-        dir_options = ["ltr", "rtl", "ttb", "btt", "tlbr", "brtl"]
+        dir_options = [value for value, _ in DIRECTION_CHOICES]
         chosen_direction = dir_options[random.number(0, len(dir_options) - 1)]
 
-    handler = EFFECT_HANDLERS.get(chosen_effect, EFFECT_HANDLERS[EFFECT_HORIZONTAL])
+    handler = EFFECT_HANDLERS[chosen_effect]
     frames, delay = handler(primary_color, secondary_color, chosen_direction)
 
     return render.Root(
@@ -326,8 +334,8 @@ def cylon_eye_frames(primary, secondary):
     def add_strip(children, start, strip_w, color):
         if strip_w <= 0:
             return
-        start_int = int(start)
-        end_int = int(start + strip_w)
+        start_int = start
+        end_int = start + strip_w
         if end_int <= 0 or start_int >= width:
             return
         left = clamp(start_int, 0, width - 1)
@@ -471,7 +479,7 @@ def doom_wipe_frames(primary, secondary, direction):
     width = canvas.width()
     height = canvas.height()
     strips = 8
-    strip_width = int(math.ceil(float(width) / strips))
+    strip_width = int(math.ceil(width / strips))
     start_offsets = [random.number(0, 4) for _ in range(strips)]
     step = max(2, height // 8)
     total_frames = max(start_offsets) + math.ceil(height / step) + 2
@@ -512,7 +520,7 @@ def fade_frames(primary, secondary):
     frames = []
 
     for i in range(0, steps + 1):
-        factor = float(i) / float(steps)
+        factor = i / steps
         frames.append(full_frame(interpolate_color(secondary, primary, factor)))
 
     frames.append(full_frame(primary))
