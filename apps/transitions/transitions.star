@@ -233,24 +233,28 @@ def diagonal_checker_frames(primary, secondary):
     stripe = CHECKER_STRIPE_SIZE
     step = max(2, span // CHECKER_STEP_DIVISOR)
     frames = [full_frame(secondary)]
+    row_progress = [0] * height
 
     for progress in range(0, span + step, step):
         children = [frames[-1]]
         for y in range(height):
-            max_x = min(width, progress - y + 1)
-            if max_x <= 0:
+            row_fill = progress - y
+            if row_fill <= row_progress[y] or row_fill <= 0:
                 continue
-            for x in range(max_x):
-                if ((x + y) // stripe) % 2 != 0:
-                    continue
-                right = width - x - 1
-                bottom = height - y - 1
-                children.append(
-                    render.Padding(
-                        pad = (x, y, right, bottom),
-                        child = render.Box(width = 1, height = 1, color = primary),
-                    ),
-                )
+            row_fill = min(width, row_fill)
+            start_x = row_progress[y]
+            end_x = min(width, row_fill)
+            for x in range(start_x, end_x):
+                if ((x + y) // stripe) % 2 == 0:
+                    right = width - x - 1
+                    bottom = height - y - 1
+                    children.append(
+                        render.Padding(
+                            pad = (x, y, right, bottom),
+                            child = render.Box(width = 1, height = 1, color = primary),
+                        ),
+                    )
+            row_progress[y] = row_fill
 
         frames.append(render.Stack(children = children))
 
