@@ -5,7 +5,6 @@ Description: Display the #1 post of a subreddit.
 Author: Petros Fytilis
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/reddit_icon.png", REDDIT_ICON_ASSET = "file")
@@ -121,24 +120,16 @@ def _render_post_title(subreddit):
     )
 
 def _fetch_post_title(subreddit):
-    post_title_cached = cache.get(subreddit)
-    if post_title_cached != None:
-        print("Hit! Displaying cached data for <{}>.".format(subreddit))
-        return post_title_cached
-    else:
-        print("Miss! Calling Reddit API for <{}>.".format(subreddit))
-        rep = http.get(
-            REDDIT_API_URL_TEMPLATE.format(subreddit),
-            headers = {"User-agent": "PostmanRuntime/7.28.4"},
-        )
-        if rep.status_code != STATUS_OK:
-            print("Reddit request failed with status {}.".format(rep.status_code))
-            return "Could not retrieve Reddit data"
-        post_title = _parse_post_title(rep.json())
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(subreddit, post_title, ttl_seconds = CACHE_TTL_SECONDS)
-        return post_title
+    print("Calling Reddit API for <{}>.".format(subreddit))
+    rep = http.get(
+        REDDIT_API_URL_TEMPLATE.format(subreddit),
+        headers = {"User-agent": "PostmanRuntime/7.28.4"},
+        ttl_seconds = CACHE_TTL_SECONDS,
+    )
+    if rep.status_code != STATUS_OK:
+        print("Reddit request failed with status {}.".format(rep.status_code))
+        return "Could not retrieve Reddit data"
+    return _parse_post_title(rep.json())
 
 def _parse_post_title(json):
     if json["data"] and json["data"]["children"] and len(json["data"]["children"]) > 0:

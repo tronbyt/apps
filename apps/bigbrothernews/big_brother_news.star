@@ -17,6 +17,9 @@ def main(config):
     fontsize = config.get("fontsize", "tb-8")
     articles = get_cacheable_data("https://bigblagger.co.uk/feed", 1)
 
+    if articles == None:
+        return connectionError(config)
+
     if fontsize == "tb-8":
         return render.Root(
             delay = 50,
@@ -117,7 +120,7 @@ def get_cacheable_data(url, articlecount):
 
     res = http.get("https://bigblagger.co.uk/feed".format(url), ttl_seconds = 900)
     if res.status_code != 200:
-        return connectionError()
+        return None
     data = res.body()
 
     data_xml = xpath.loads(data)

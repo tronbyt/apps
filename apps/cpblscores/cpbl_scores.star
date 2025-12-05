@@ -33,12 +33,12 @@ lastFiveteenByleague = "https://www.thesportsdb.com/api/v1/json/key/eventspastle
 
 TEAM_LOGO = """
 {
-    "144302": "https://www.thesportsdb.com/images/media/team/badge/ljv5o51655923122.png",
-    "144300": "https://www.thesportsdb.com/images/media/team/badge/kk0rch1655923103.png",
-    "144301": "https://www.thesportsdb.com/images/media/team/badge/kehxfy1655923111.png",
-    "144298": "https://www.thesportsdb.com/images/media/team/badge/nbtugc1655923087.png",
-    "144299": "https://www.thesportsdb.com/images/media/team/badge/aj83wn1655923095.png",
-    "147333": "https://www.thesportsdb.com/images/media/team/badge/gx1dgl1680852780.png"
+    "144302": "https://r2.thesportsdb.com/images/media/team/badge/ljv5o51655923122.png",
+    "144300": "https://r2.thesportsdb.com/images/media/team/badge/kk0rch1655923103.png",
+    "144301": "https://r2.thesportsdb.com/images/media/team/badge/kehxfy1655923111.png",
+    "144298": "https://r2.thesportsdb.com/images/media/team/badge/nbtugc1655923087.png",
+    "144299": "https://r2.thesportsdb.com/images/media/team/badge/aj83wn1655923095.png",
+    "147333": "https://r2.thesportsdb.com/images/media/team/badge/gx1dgl1680852780.png"
 }
 """
 

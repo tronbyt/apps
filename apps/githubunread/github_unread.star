@@ -5,8 +5,6 @@ Description: Displays the count of unread GitHub notifications.
 Author: ElliottAYoung
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/github_image.png", GITHUB_IMAGE_ASSET = "file")
 load("render.star", "render")
@@ -18,6 +16,7 @@ def fetch_notifications(access_token):
     return http.get(
         "https://api.github.com/notifications",
         headers = {"Accept": "application/vnd.github+json", "Authorization": "Bearer {}".format(access_token), "X-GitHub-Api-Version": "2022-11-28"},
+        ttl_seconds = 60,
     )
 
 def get_count(response):
@@ -98,23 +97,14 @@ def main(config):
         A Root view to render to the app
     """
     access_token = config.get("access_token") or None
-    CACHE_KEY = "github_notifications/{}".format(access_token)
-
-    cache_results = cache.get(CACHE_KEY)
 
     if access_token:
-        if cache_results:
-            count = json.decode(cache_results)
-        else:
-            response = fetch_notifications(access_token)
+        response = fetch_notifications(access_token)
 
-            if response.status_code != 200:
-                return render_error("Error with Access Token.")
+        if response.status_code != 200:
+            return render_error("Error with Access Token.")
 
-            count = get_count(response.json())
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(CACHE_KEY, json.encode(count), ttl_seconds = 60)
+        count = get_count(response.json())
 
         return render_notifications(count)
     else:

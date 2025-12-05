@@ -127,7 +127,6 @@ def validator_statuses(config):
 
     slot_statuses = all_slot_statuses[slot_status_drop_count:] if slot_status_drop_count > 0 else all_slot_statuses
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(cache_key, json.encode(slot_statuses), ttl_seconds = 600)
 
     empty_status_length = status_limit - len(slot_statuses)
@@ -216,19 +215,12 @@ def status_score(status):
         return 3
 
 def api_response(url):
-    json_response = cache.get(url)
-    if json_response == None:
-        print("No response cached, reloading from API")
-        response = http.get(url, headers = {
-            "accept": "application/json",
-        })
-        json_response = response.json()
+    print("Reloading from API")
+    response = http.get(url, headers = {
+        "accept": "application/json",
+    }, ttl_seconds = 60)
+    json_response = response.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, json.encode(json_response), ttl_seconds = 60)
-    else:
-        print("Found cached response, using that")
-        json_response = json.decode(json_response)
     return json_response
 
 def status_circle(status):

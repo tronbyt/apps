@@ -5,8 +5,6 @@ Description: Displays movie showtimes for American Cinematheque theaters in Los 
 Author: Platt Thompson & Jim Cummings
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/camera_icon.png", CAMERA_ICON_ASSET = "file")
 load("render.star", "render")
@@ -136,18 +134,10 @@ def main(config):
         end_time = str(end_of_current_day_unix),
     )
 
-    all_locations_movie_list = cache.get("showtimes_data")
-
-    if all_locations_movie_list == None:
-        res = http.get(showtimes_url)
-        if res.status_code != 200:
-            return show_error_fetching_data()
-        all_locations_movie_list = res.json()["hits"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("showtimes_data", json.encode(all_locations_movie_list), ttl_seconds = HOUR_IN_SECONDS)
-    else:
-        all_locations_movie_list = json.decode(all_locations_movie_list)
+    res = http.get(showtimes_url, ttl_seconds = HOUR_IN_SECONDS)
+    if res.status_code != 200:
+        return show_error_fetching_data()
+    all_locations_movie_list = res.json()["hits"]
 
     # Exclude showtimes from other AC theaters as well as those with incomplete data
     single_location_movie_list = [movie for movie in all_locations_movie_list if local_theater_code in movie["event_location"]]

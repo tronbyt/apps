@@ -38,7 +38,7 @@ QUIET_MAX = 0.4
 BUSY_MAX = 0.7
 
 def app_key(config):
-    return config.get("tfl_app_key")
+    return config.get("tfl_app_key") or ""
 
 # Get list of stations near a given location, or look up from cache if available.
 def fetch_stations(loc, config):

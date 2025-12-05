@@ -5,7 +5,6 @@ Description: An abstract weather display that communicates feeling in a natural 
 Author: eanplatter
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
@@ -53,26 +52,20 @@ def main(config):
         )
 
     url = "https://api.openweathermap.org/data/2.5/weather?lat={LAT}&lon={LON}&units=imperial&appid={API_KEY}".format(LAT = loc["lat"], LON = loc["lng"], API_KEY = API_KEY)
-    weather_cached = cache.get("feels_like_weather_cache_{}_{}_{}".format(API_KEY, loc["lat"], loc["lng"]))
-    if weather_cached != None:
-        temp, precipitation, wind = [int(i) for i in weather_cached.split(",")]
-    else:
-        weather = http.get(url)
-        if weather.status_code != 200:
-            return render.Root(
-                child = render_rows([MAX_COLOR_VALUE, MAX_COLOR_VALUE, MAX_COLOR_VALUE], size, shape, speed, 0, orientation),
-            )
-        weather_json = weather.json()
-        temp = weather_json["main"]["feels_like"]
-        wind = math.floor(weather_json["wind"]["speed"])
-        precipitation = weather_json["rain"]["1h"] if "rain" in weather_json and "1h" in weather_json["rain"] else 0
-        if wind < 3:
-            speed = 3
-        else:
-            speed = wind
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("feels_like_weather_cache_{}_{}_{}".format(API_KEY, loc["lat"], loc["lng"]), "{},{},{}".format(int(temp), int(precipitation), int(wind)), ttl_seconds = 3600)
+    weather = http.get(url, ttl_seconds = 3600)
+    if weather.status_code != 200:
+        return render.Root(
+            child = render_rows([MAX_COLOR_VALUE, MAX_COLOR_VALUE, MAX_COLOR_VALUE], size, shape, speed, 0, orientation),
+        )
+    weather_json = weather.json()
+    temp = weather_json["main"]["feels_like"]
+    wind = math.floor(weather_json["wind"]["speed"])
+    precipitation = weather_json["rain"]["1h"] if "rain" in weather_json and "1h" in weather_json["rain"] else 0
+    if wind < 3:
+        speed = 3
+    else:
+        speed = wind
 
     return render.Root(
         child = render_rows(set_colors(math.floor(temp)), size, shape, speed, precipitation, orientation),

@@ -88,7 +88,10 @@ def main(config):
     rep = http.get(AWDEVICES_API_URL, headers = {"Authorization": autho, "Accept": "application/json", "aw-tenant-code": tenantcode})
     if rep.status_code != 200:
         print("URL %s" % AWDEVICES_API_URL)
-        fail("The request failed with status %d", rep.status_code)
+        print("The request failed with status %d" % rep.status_code)
+        return render.Root(
+            child = render.WrappedText("API Error: %d" % rep.status_code, color = "#ff0000"),
+        )
 
     totalog = rep.json()["Total"]
     rootog = rep.json()["LocationGroups"][0]["LocationGroupName"]

@@ -7,3 +7,5 @@ author: PalmettoBling
 fileName: xboxplaydates.star
 packageName: xboxplaydates
 recommendedInterval: 5
+broken: true
+brokenReason: "API endpoint returns 403 Site Disabled"

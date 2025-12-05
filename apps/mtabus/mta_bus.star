@@ -31,7 +31,7 @@ def main(config):
     bus_name = "Bus"
     response_was_error = False
     api_key = config.get("key")
-    stop = config.str("stop")
+    stop = config.str("stop") or ""
     cache_key = VISITS_KEY_PREFIX + stop
 
     visits = get_visits_from_cache(cache_key)

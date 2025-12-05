@@ -5,7 +5,6 @@ Description: Shows the number of tasks you have due today.
 Author: zephyern
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -33,29 +32,23 @@ def main(config):
         filter_name = "%s" % (config.get("name") or DEFAULT_NAME)
         filter = config.get("filter") or DEFAULT_FILTER
 
-        cache_key = "%s/%s" % (token, filter)
-        content = cache.get(cache_key)
-        if not content:
-            print("Querying for tasks.")
-            rep = http.get(TODOIST_URL, headers = {"Authorization": "Bearer %s" % token}, params = {"filter": filter})
+        print("Querying for tasks.")
+        rep = http.get(TODOIST_URL, headers = {"Authorization": "Bearer %s" % token}, params = {"filter": filter}, ttl_seconds = 60)
 
-            if rep.status_code == 200:
-                tasks = rep.json()
-                num_tasks = len(tasks)
-            elif rep.status_code == 204:
-                num_tasks = 0
-            else:
-                num_tasks = -1
+        if rep.status_code == 200:
+            tasks = rep.json()
+            num_tasks = len(tasks)
+        elif rep.status_code == 204:
+            num_tasks = 0
+        else:
+            num_tasks = -1
 
-            if num_tasks == -1:
-                content = "Error"
-            elif num_tasks == 0:
-                content = NO_TASKS_CONTENT
-            else:
-                content = humanize.plural(int(num_tasks), "Task")
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, content, ttl_seconds = 60)
+        if num_tasks == -1:
+            content = "Error"
+        elif num_tasks == 0:
+            content = NO_TASKS_CONTENT
+        else:
+            content = humanize.plural(int(num_tasks), "Task")
 
         if (content == NO_TASKS_CONTENT and not config.bool("show")):
             # Don't display the app in the user's rotation

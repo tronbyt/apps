@@ -5,8 +5,6 @@ Description: Takes stats from SSBM replays uploaded to chartslp.com and shows yo
 Author: trbarron
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/bowser_0.webp", BOWSER_0 = "file")
@@ -343,38 +341,26 @@ def get_schema():
 def main(config):
     code = config.str("code", DEFAULT_CODE)
     code = code.replace("#", "-")
-    dataCached = cache.get(code)
-    data = None
 
-    if dataCached != None:
-        print("Hit! Displaying cached data.")
-        data = json.decode(dataCached)
+    print("Miss! Calling SLP API.")
+    GET_URL = CHART_SLP_SERVER_URL + code
 
-        totalTime = dataCached
+    rep = http.get(GET_URL, ttl_seconds = 43200)
+    if rep.status_code != 200:
+        fail("Chart SLP Request Failed with code")
+    totalTime = rep.json()["totalTime"]
+    totalTime = totalTime.split(":")
+    totalTime = humanize.comma(int(totalTime[0])) + " hrs"
+    totalGames = str(humanize.comma(int(rep.json()["totalMatches"]))) + "gs"
+    winrate = str(int(rep.json()["winrate"])) + "% wr"
+    iconName = str(int(rep.json()["main"])) + "_" + str(int(rep.json()["mainColor"]))
 
-    else:
-        print("Miss! Calling SLP API.")
-        GET_URL = CHART_SLP_SERVER_URL + code
-
-        rep = http.get(GET_URL)
-        if rep.status_code != 200:
-            fail("Chart SLP Request Failed with code")
-        totalTime = rep.json()["totalTime"]
-        totalTime = totalTime.split(":")
-        totalTime = humanize.comma(int(totalTime[0])) + " hrs"
-        totalGames = str(humanize.comma(int(rep.json()["totalMatches"]))) + "gs"
-        winrate = str(int(rep.json()["winrate"])) + "% wr"
-        iconName = str(int(rep.json()["main"])) + "_" + str(int(rep.json()["mainColor"]))
-
-        data = {
-            "totalTime": totalTime,
-            "totalGames": totalGames,
-            "winrate": winrate,
-            "iconName": iconName,
-        }
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(code, json.encode(data), ttl_seconds = 43200)
+    data = {
+        "totalTime": totalTime,
+        "totalGames": totalGames,
+        "winrate": winrate,
+        "iconName": iconName,
+    }
     localIconName = data["iconName"]
     charIcon = icons[localIconName]
 

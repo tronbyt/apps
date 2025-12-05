@@ -65,7 +65,6 @@ def get_raw_day_data(day_name):
             print("Wikipedia request failed with status ", page.status_code)
             error_data = [(x, "*", "There was an error fetching event data") for x in ["Births", "Deaths", "Events"]]
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(cache_key, json.encode(error_data), ttl_seconds = 30)
             return error_data
 
@@ -77,7 +76,6 @@ def get_raw_day_data(day_name):
 
         # If we are good here, this data is good for at least half a day in the cache (this is daily data after all, but maybe
         # it will get updated during the day)
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(cache_key, json.encode(data), ttl_seconds = TTL)
     else:
         data = json.decode(data)

@@ -1,12 +1,9 @@
-"""
-Applet: Step Counter
+"""Applet: Step Counter
 Author: Matt-Pesce
 Summary: Tracks Daily Step Progress
 Description: Fetches your Step Data from Google Fit, Reports progress versus
-    daily goal.
-"""
+    daily goal."""
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
@@ -106,37 +103,26 @@ def main(config):
                 ],
             ),
         )
-    else:
-        GOOGLEFIT_OAUTH_TOKEN = cache.get(GOOGLEFIT_REFRESH_TOKEN)
 
-    # Get New Access token if Cache expired
-    if not GOOGLEFIT_OAUTH_TOKEN:
-        print("Fetching Access Token")
+    print("Fetching Access Token")
 
-        # This is the JSON format for supplying an OAUTH refresh token to receive a new Authorization Token
+    # This is the JSON format for supplying an OAUTH refresh token to receive a new Authorization Token
 
-        GOOGLE_OAUTH_TOKEN_REFRESH_BODY = {
-            "client_secret": client_secret,
-            "grant_type": "refresh_token",
-            "refresh_token": GOOGLEFIT_REFRESH_TOKEN,
-            "client_id": client_id,
-        }
+    GOOGLE_OAUTH_TOKEN_REFRESH_BODY = {
+        "client_secret": client_secret,
+        "grant_type": "refresh_token",
+        "refresh_token": GOOGLEFIT_REFRESH_TOKEN,
+        "client_id": client_id,
+    }
 
-        # Make the Google Oauth API call - POST - to exchange Refresh token for Auth Token
-        # For some reason this works just fine without the JSON command header (is that header really needed for any of the calls?)
+    # Make the Google Oauth API call - POST - to exchange Refresh token for Auth Token
+    # For some reason this works just fine without the JSON format in header (is that header really needed for any of the calls?)
+    refresh = http.post(GOOGLE_OAUTH_TOKEN_REFRESH_URL, json_body = GOOGLE_OAUTH_TOKEN_REFRESH_BODY, ttl_seconds = 30)
+    if refresh.status_code != 200:
+        fail("Google OAUTH TOKEN API request failed with status:", refresh.json())
 
-        refresh = http.post(GOOGLE_OAUTH_TOKEN_REFRESH_URL, json_body = GOOGLE_OAUTH_TOKEN_REFRESH_BODY)
-        if refresh.status_code != 200:
-            fail("Google OAUTH TOKEN API request failed with status:", refresh.json())
-
-        # Grab new Oauthtoken from the Google Token service, format for Data Aggregation API call.
-        GOOGLEFIT_OAUTH_TOKEN = "Bearer {}".format(refresh.json()["access_token"])
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(GOOGLEFIT_REFRESH_TOKEN, GOOGLEFIT_OAUTH_TOKEN, ttl_seconds = int(refresh.json()["expires_in"] - 30))
-
-    else:
-        GOOGLEFIT_OAUTH_TOKEN = cache.get(GOOGLEFIT_REFRESH_TOKEN)
+    # Grab new Oauthtoken from the Google Token service, format for Data Aggregation API call.
+    GOOGLEFIT_OAUTH_TOKEN = "Bearer {}".format(refresh.json()["access_token"])
 
     # Header to Specify JSON format for the FIT API Data Aggregation
     GOOGLEFIT_POST_HEADERS = {
@@ -383,9 +369,6 @@ def oauth_handler(params):
     refresh_token = token_params["refresh_token"]
 
     print(token_params["expires_in"])
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, "Bearer " + token_params["access_token"], ttl_seconds = int(token_params["expires_in"] - 30))
 
     return refresh_token
 

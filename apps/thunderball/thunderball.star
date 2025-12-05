@@ -29,15 +29,22 @@ def seconds_until_next_draw(latest_result):
     # Draws happen at 8pm on Tuesday and Friday and 8.15pm on Wednesday and Saturday so cache until then.
     last_draw = parse_time(latest_result[0])
     last_draw_weekday = humanize.day_of_week(last_draw)
-    if last_draw_weekday in [2, 5]:  # Tuesday or Friday
-        next_draw = last_draw + ((24 + 20) * time.hour) + (15 * time.minute)
-        return (next_draw - time.now()) // time.second
-    if last_draw_weekday == 3:  # Wednesday
-        next_draw = last_draw + (((2 * 24) + 20) * time.hour)
-        return (next_draw - time.now()) // time.second
     if last_draw_weekday == 6:
         next_draw = last_draw + (((3 * 24) + 20) * time.hour)
-        return (next_draw - time.now()) // time.second
+        ttl = (next_draw - time.now()) // time.second
+        return ttl if ttl > 0 else 3600
+
+    # Recalculate for other cases (copying logic to apply check)
+    if last_draw_weekday in [2, 5]:  # Tuesday or Friday
+        next_draw = last_draw + ((24 + 20) * time.hour) + (15 * time.minute)
+        ttl = (next_draw - time.now()) // time.second
+        return ttl if ttl > 0 else 3600
+
+    if last_draw_weekday == 3:  # Wednesday
+        next_draw = last_draw + (((2 * 24) + 20) * time.hour)
+        ttl = (next_draw - time.now()) // time.second
+        return ttl if ttl > 0 else 3600
+
     return time.hour // time.second
 
 def fetch_latest_result():
@@ -49,7 +56,6 @@ def fetch_latest_result():
         return None
     results = csv.read_all(resp.body())
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(RESULTS_URL, resp.body(), ttl_seconds = seconds_until_next_draw(results[1]))
     return results[1]
 

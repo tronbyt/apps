@@ -3,7 +3,8 @@ id: powerball
 name: PowerBall
 summary: Shows Powerball Numbers
 desc: Shows up to date powerball numbers and next drawing.
-author: AmillionAir
+author: kylejohnson
 fileName: powerball.star
 packageName: powerball
+broken: true
 recommendedInterval: 5

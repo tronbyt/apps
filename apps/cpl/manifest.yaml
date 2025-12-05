@@ -6,3 +6,6 @@ desc: Shows scores for the Caribbean Premier League cricket tournament..
 author: M0ntyP
 fileName: cpl.star
 packageName: cpl
+recommendedInterval: 5
+broken: true
+brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).

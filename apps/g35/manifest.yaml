@@ -3,5 +3,9 @@ id: g35
 name: G35
 summary: Clinton-Washington G
 desc: Train arrival times for the Clinton-Washington station of NYC's G train.
-author: samdotdesign
+author: tav
+fileName: g35.star
+packageName: g35
 recommendedInterval: 5
+broken: true
+brokenReason: The API endpoint mta-api-ochre.vercel.app is timed out/unreachable.

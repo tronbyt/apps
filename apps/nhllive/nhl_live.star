@@ -573,32 +573,21 @@ def get_team(config):
     return teamId, team_abbr
 
 def get_team_logo(teamId):
-    # check cache for logo
-    cache_key = "logo_" + str(int(teamId))
-    logo = cache.get(cache_key)
-
-    if logo == None:
-        print("  - CACHE: No Logo found for teamid %s" % str(int(teamId)))
-
-        # janky abbrevations fix
-        if "abbr_fix" in TEAMS_LIST[teamId]:
-            abbr = TEAMS_LIST[teamId]["abbr_fix"]
-        else:
-            abbr = TEAMS_LIST[teamId]["abbreviation"]
-
-        url = BASE_IMAGE_URL.format(abbr)
-        print("  - HTTP.GET: %s" % url)
-        response = http.get(url)
-
-        if response.status_code != 200:
-            logo = NHL_LOGO
-        else:
-            logo = response.body()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, logo, ttl_seconds = CACHE_LOGO_SECONDS)
+    # janky abbrevations fix
+    if "abbr_fix" in TEAMS_LIST[teamId]:
+        abbr = TEAMS_LIST[teamId]["abbr_fix"]
     else:
-        print("  - CACHE: Logo found for teamid %s" % str(int(teamId)))
+        abbr = TEAMS_LIST[teamId]["abbreviation"]
+
+    url = BASE_IMAGE_URL.format(abbr)
+    print("  - HTTP.GET: %s" % url)
+    response = http.get(url, ttl_seconds = CACHE_LOGO_SECONDS)
+
+    if response.status_code != 200:
+        logo = NHL_LOGO
+    else:
+        logo = response.body()
+
     return logo
 
 # Check what color to use for team abbreviation based on pp or empty net

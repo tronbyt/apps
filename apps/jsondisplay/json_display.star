@@ -11,8 +11,8 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 def main(config):
-    feed_url = config.get("feed_url")
-    feed_refresh = config.get("feed_refresh")
+    feed_url = config.get("feed_url") or "https://tidbyt-json-display.s3.eu-west-1.amazonaws.com/example.json"
+    feed_refresh = config.get("feed_refresh") or "120"
     feed_refresh = int(feed_refresh)
 
     #Load the json file

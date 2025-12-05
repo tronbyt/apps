@@ -14,43 +14,52 @@ CACHE_DURATION = 14400
 def main():
     TODAY = time.now().format("2006/01/02")
     YESTERDAY = (time.now() - time.parse_duration("24h")).format("2006/01/02")
-    CURRENT_IMAGE_UNAVAILABLE = False
-    PREVIOUS_IMAGE_UNAVAILABLE = False
     image = ""
+    error_message = None
 
-    # Call the API
-    json_dict = call_api(TODAY)
+    # Call the API for today's image
+    json_dict_today = call_api(TODAY)
 
-    # Check that the API response contains the image information
-    if has_image_information(json_dict):
-        image = retrieve_image(json_dict)
+    if "error" in json_dict_today:
+        error_message = json_dict_today["error"]
     else:
-        CURRENT_IMAGE_UNAVAILABLE = True
-
-    # If today's image cannot be retrieved, try to retrieve yesterday's image instead
-    if CURRENT_IMAGE_UNAVAILABLE:
-        json_dict = call_api(YESTERDAY)
-
         # Check that the API response contains the image information
-        if has_image_information(json_dict):
-            image = retrieve_image(json_dict)
+        if has_image_information(json_dict_today):
+            image = retrieve_image(json_dict_today)
         else:
-            PREVIOUS_IMAGE_UNAVAILABLE = True
+            # If today's image cannot be retrieved, try to retrieve yesterday's image instead
+            json_dict_yesterday = call_api(YESTERDAY)
+            if "error" in json_dict_yesterday:
+                error_message = json_dict_yesterday["error"]
+            else:
+                # Check that the API response contains the image information
+                if has_image_information(json_dict_yesterday):
+                    image = retrieve_image(json_dict_yesterday)
+                else:
+                    error_message = "Featured image is currently unavailable"
 
-    # If neither today's nor yesterday's image can be retrieved, throw an error
-    if CURRENT_IMAGE_UNAVAILABLE and PREVIOUS_IMAGE_UNAVAILABLE:
-        fail("Featured image is currently unavailable")
-        # Otherwise, display the image
-
-    else:
+    # If there's an error message, display it
+    if error_message:
         return render.Root(
-            # Render the image to fit the Tidbyt's 64x32 resolution
-            child = render.Image(
-                src = image,
-                width = 64,
-                height = 32,
+            child = render.Box(
+                child = render.WrappedText(
+                    content = error_message,
+                    width = 64,
+                    align = "center",
+                    color = "#f66",
+                ),
             ),
         )
+
+    # Otherwise, display the image
+    return render.Root(
+        # Render the image to fit the Tidbyt's 64x32 resolution
+        child = render.Image(
+            src = image,
+            width = 64,
+            height = 32,
+        ),
+    )
 
 def call_api(date):
     """
@@ -62,11 +71,11 @@ def call_api(date):
     api_url = "https://api.wikimedia.org/feed/v1/wikipedia/en/featured/%s" % date
 
     # Call the API and cache the results for 4 hours
-    resp = http.get(api_url, ttl_seconds = CACHE_DURATION)
+    resp = http.get(api_url, ttl_seconds = CACHE_DURATION, headers = {"User-Agent": "TidbytApp/1.0"})
 
     # Ensure we get a 200 status response
     if resp.status_code != 200:
-        fail("Wikipedia API request failed with status %d", resp.status_code)
+        return {"error": "Wikipedia API request failed with status %d" % resp.status_code}
 
     return resp.json()
 

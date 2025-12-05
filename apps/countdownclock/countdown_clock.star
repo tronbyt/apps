@@ -44,7 +44,14 @@ colorOpt = [
 def main(config):
     timezone = time.tz()  # Utilize special timezone variable
 
-    future = time.parse_time(config.str("event_time"))
+    event_time_str = config.str("event_time")
+    if not event_time_str:
+        # Default to January 1st of the next year if no event time is set
+        now = time.now().in_location(timezone)
+        next_year = now.year + 1
+        event_time_str = "{}-01-01T00:00:00Z".format(next_year)
+
+    future = time.parse_time(event_time_str)
     dateDiff = future - time.now().in_location(timezone)
     days = math.floor(dateDiff.hours / 24)
     hours = math.floor(dateDiff.hours - days * 24)

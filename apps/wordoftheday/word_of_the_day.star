@@ -5,8 +5,6 @@ Description: Displays the Merriam-Webster Word Of The Day.
 Author: greg-n
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("render.star", "render")
@@ -24,41 +22,25 @@ def render_error():
 def main():
     print("Starting")
 
-    cached_wotd_dict = cache.get(CACHE_KEY)
+    print("Cache miss")
 
-    if cached_wotd_dict != None:
-        print("Cache hit")
+    wotd_page_response = http.get(WOTD_CALENDAR_URL, ttl_seconds = CACHE_TTL)
 
-        wotd_dict = json.decode(cached_wotd_dict)
-        word = wotd_dict["word"]
-        definition = wotd_dict["definition"]
-    else:
-        print("Cache miss")
+    if wotd_page_response.status_code != 200:
+        print("Got code '%s' from page response" % wotd_page_response.status_code)
+        return render_error()
 
-        wotd_page_response = http.get(WOTD_CALENDAR_URL)
+    selector = html(wotd_page_response.body())
+    word_parsed = selector.find(".wod-l-hover").first().text()
+    definition_parsed = selector.find(".definition-block").first().children().first().text()
 
-        if wotd_page_response.status_code != 200:
-            print("Got code '%s' from page response" % wotd_page_response.status_code)
-            return render_error()
+    if word_parsed == "" or definition_parsed == "":
+        print("Failed to find word or definition from page")
+        return render_error()
 
-        selector = html(wotd_page_response.body())
-        word_parsed = selector.find(".wod-l-hover").first().text()
-        definition_parsed = selector.find(".definition-block").first().children().first().text()
-
-        if word_parsed == "" or definition_parsed == "":
-            print("Failed to find word or definition from page")
-            return render_error()
-
-        # Values begin with lower cased letters on the calendar note cards
-        word = word_parsed[0].upper() + word_parsed[1:] + ":"
-        definition = definition_parsed[0].upper() + definition_parsed[1:] + "."
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            CACHE_KEY,
-            json.encode({"word": word, "definition": definition}),
-            CACHE_TTL,
-        )
+    # Values begin with lower cased letters on the calendar note cards
+    word = word_parsed[0].upper() + word_parsed[1:] + ":"
+    definition = definition_parsed[0].upper() + definition_parsed[1:] + "."
 
     return render.Root(
         show_full_animation = True,

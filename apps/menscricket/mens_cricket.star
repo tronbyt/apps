@@ -702,7 +702,7 @@ def _get_cached_match_ids(url, span_id):
             result_span = span
             break
     if not result_span:
-        return None
+        return []
     links = result_span.find_all("a")
     match_ids = []
     for link in links:

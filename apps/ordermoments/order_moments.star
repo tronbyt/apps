@@ -192,17 +192,12 @@ def get_latest_celebration(store_name, api_token):
         # Nothing was cached, so fetch it now
         url = REST_ENDPOINT.format(store_name, METAFIELD_ENDPOINT)
         headers = {"Content-Type": "application/json", "X-Shopify-Access-Token": api_token}
-        response = http.get(url = url, params = {"owner-resource": METAFIELD_OWNER}, headers = headers)
+        response = http.get(url = url, params = {"owner-resource": METAFIELD_OWNER}, headers = headers, ttl_seconds = CACHE_TTL)
 
         if response.status_code != 200:
             print("get_latest_celebration Error ❌: Status code %d, URL %s, Body %s" % (response.status_code, response.url, response.body()))
             return {"error": response.status_code}
 
-        # Store the new value in cache
-        print("Cache 💾: Storing value for key %s" % cache_key)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, response.body(), ttl_seconds = CACHE_TTL)
         metafields = response.json()
 
     else:
@@ -284,18 +279,13 @@ def get_order_count(store_name, api_token):
         # Nothing was in the cache, so fetch our orders now
         url = REST_ENDPOINT.format(store_name, COUNT_ENDPOINT)
         headers = {"Content-Type": "application/json", "X-Shopify-Access-Token": api_token}
-        response = http.get(url = url, params = {"status": "any"}, headers = headers)
+        response = http.get(url = url, params = {"status": "any"}, headers = headers, ttl_seconds = CACHE_TTL)
 
         # If there was any error, return -1
         if response.status_code != 200:
             print("get_order_count Error ❌: Status code %d, URL %s, Body %s" % (response.status_code, response.url, response.body()))
             return -1
 
-        # Store the new value in cache
-        print("Cache 💾: Storing value for key %s" % cache_key)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, response.body(), ttl_seconds = CACHE_TTL)
         order_count = response.json()
 
     else:

@@ -60,7 +60,7 @@ def get_system_id(api_key, unique_suffix):
         "key": api_key,
     }
 
-    response = http.get(ENDPOINT_SYSTEMS, params = params, headers = headers)
+    response = http.get(ENDPOINT_SYSTEMS, params = params, headers = headers, ttl_seconds = TTL_SECONDS)
 
     status, result = check_response(response)
 
@@ -90,7 +90,7 @@ def get_system_stats(api_key, unique_suffix, system_id):
         "key": api_key,
     }
 
-    response = http.get(ENDPOINT_SUMMARY.format(system_id), params = params, headers = headers)
+    response = http.get(ENDPOINT_SUMMARY.format(system_id), params = params, headers = headers, ttl_seconds = TTL_SECONDS)
     status, result = check_response(response)
     if status == 200 and result:
         return 200, str(result["energy_today"])
@@ -117,14 +117,12 @@ def request_refresh_token(refresh_token_code, client_id, client_secret):
     if response.status_code == 200:
         print("Refresh token successfully.")
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             ACCESS_TOKEN_KEY.format(unique_suffix),
             response.json()["access_token"],
             ttl_seconds = int(response.json()["expires_in"]),
         )
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             REFRESH_TOKEN_KEY.format(unique_suffix),
             response.json()["refresh_token"],
@@ -231,51 +229,30 @@ def main(config):
         cache.set(INIT_KEY.format(unique_suffix), "1")
 
     # Get "system_id"
-    system_id_cached = cache.get(SYSTEM_ID_KEY.format(unique_suffix))
-    if system_id_cached == None:
-        status, system_id = _api_call_with_retry(
-            lambda: get_system_id(api_key, unique_suffix),
-            client_id,
-            client_secret,
-            unique_suffix,
-        )
+    status, system_id = _api_call_with_retry(
+        lambda: get_system_id(api_key, unique_suffix),
+        client_id,
+        client_secret,
+        unique_suffix,
+    )
 
-        if status == 403:
-            return render_msg(system_id)
-        elif status == 200:
-            cache.set(
-                SYSTEM_ID_KEY.format(unique_suffix),
-                system_id,
-                ttl_seconds = TTL_SECONDS,
-            )
-        else:
-            return render_msg("Unable to get system id, status code: {}".format(status))
-    else:
-        system_id = system_id_cached
+    if status == 403:
+        return render_msg(system_id)
+    elif status != 200:
+        return render_msg("Unable to get system id, status code: {}".format(status))
 
     # Get "energy_today"
-    engery_cached = cache.get(ENERGY_TODAY_KEY.format(unique_suffix))
-    if engery_cached == None:
-        status, energy_today = _api_call_with_retry(
-            lambda: get_system_stats(api_key, unique_suffix, system_id),
-            client_id,
-            client_secret,
-            unique_suffix,
-        )
+    status, energy_today = _api_call_with_retry(
+        lambda: get_system_stats(api_key, unique_suffix, system_id),
+        client_id,
+        client_secret,
+        unique_suffix,
+    )
 
-        if status == 403:
-            return render_msg(energy_today)
-        elif status == 200:
-            cache.set(
-                ENERGY_TODAY_KEY.format(unique_suffix),
-                energy_today,
-                ttl_seconds = TTL_SECONDS,
-            )
-        else:
-            return render_msg("Unable to get system stats, status code: {}".format(status))
-    else:
-        print("Hit! Displaying cached data.")
-        energy_today = engery_cached
+    if status == 403:
+        return render_msg(energy_today)
+    elif status != 200:
+        return render_msg("Unable to get system stats, status code: {}".format(status))
 
     msg = "{} kWh energy generated today".format(humanize.float("#.##", float(energy_today) / 1000))
     return render_msg(msg)

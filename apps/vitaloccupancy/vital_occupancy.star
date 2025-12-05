@@ -5,43 +5,18 @@ Description: The Current Occupancy of Vital Climbing's Brooklyn, NY location.
 Author: flip-z
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
+load("images/logo.png", LOGO_ASSET = "file")
 load("render.star", "render")
 
 GYM_URL = "https://display.safespace.io/value/live/a7796f34"
 
-# Pixel Art version of Vital Logo
-LOGO_URL = "https://i.imgur.com/6RBuVuM.png"
-
 def main():
-    # Cache Current Occupancy
-    cached_currocc = cache.get("currocc")
-    if cached_currocc != None:
-        print("Hit! Displaying cached data.")
-        currocc = cached_currocc
-    else:
-        print("Miss! Grabbing count from GYM_URL")
-        req = http.get(GYM_URL)
-        if req.status_code != 200:
-            fail("Gym Request failed with status %d", req.status_code)
+    req = http.get(GYM_URL, ttl_seconds = 60)
+    if req.status_code != 200:
+        fail("Gym Request failed with status %d", req.status_code)
 
-        currocc = req.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("curocc", currocc, ttl_seconds = 60)
-
-    # Cache Logo Image
-    cached_logo = cache.get("logo")
-    if cached_logo != None:
-        print("Hit! Displaying cached data.")
-        logo = cached_logo
-    else:
-        print("Miss! Grabbing logo image from LOGO_URL")
-        logo = http.get(LOGO_URL).body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("logo", logo, ttl_seconds = 3600)
+    currocc = req.body()
 
     color = "#cd0800"  # red
     if int(currocc) < 120:
@@ -69,7 +44,7 @@ def main():
                 cross_align = "center",
                 children = [
                     currocc_child,
-                    render.Image(src = logo),
+                    render.Image(src = LOGO_ASSET.readall()),
                 ],
             ),
         ),

@@ -5,8 +5,6 @@ Description: Fetches and shows the current Splatoon 3 map rotations. Data provid
 Author: MarkGamed7794
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/salmon_stage_bonerattle_arena.png", SALMON_STAGE_BONERATTLE_ARENA_ASSET = "file")
 load("images/salmon_stage_gone_fission_hydroplant.png", SALMON_STAGE_GONE_FISSION_HYDROPLANT_ASSET = "file")
@@ -400,22 +398,15 @@ def getDurationString(duration):
     return "%dm" % minutes
 
 def main(config):
-    stage_cache = cache.get("stages")
     stages = None
     failed = None
-    if (stage_cache != None):
-        # Data is cached, just use that
-        stages = json.decode(stage_cache)
-    else:
-        # Oh, we need new data
-        rep = http.get(STAGE_URL)
-        if (rep.status_code != 200):
-            failed = rep.status_code or -1
-        else:
-            stages = rep.json()  # Will it just let me do this?
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("stages", json.encode(stages), 3600 * 2)
+    # Oh, we need new data
+    rep = http.get(STAGE_URL, ttl_seconds = 3600 * 2)
+    if (rep.status_code != 200):
+        failed = rep.status_code or -1
+    else:
+        stages = rep.json()  # Will it just let me do this?
 
     if (failed):
         return generateErrorFrame("API error!\nError code %d" % (failed or -1))

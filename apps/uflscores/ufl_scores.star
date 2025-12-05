@@ -850,6 +850,9 @@ def get_shortened_display(text):
 def get_cachable_data(url, ttl_seconds = CACHE_TTL_SECONDS):
     res = http.get(url = url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
+        print("request to %s failed with status code: %d" % (url, res.status_code))
+        if "Icon" in url or "image" in url:
+            return http.get("https://i.ibb.co/5LMp8T1/transparent.png").body()
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
     return res.body()

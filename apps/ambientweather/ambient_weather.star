@@ -5,7 +5,6 @@ Description: Show readings from your Ambient weather station.
 Author: Jon Maddox
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
@@ -285,28 +284,20 @@ def get_stations(config):
     if is_string_blank(applicationKey) or is_string_blank(apiKey):
         return []
 
-    cachedStations = cache.get("ambient-weather-%s" % applicationKey)
+    print("Fetching stations...")
+    res = http.get(
+        url = AMBIENT_DEVICES_URL,
+        params = {
+            "applicationKey": applicationKey,
+            "apiKey": apiKey,
+        },
+        ttl_seconds = 30,
+    )
+    if res.status_code != 200:
+        fail("station request failed with status code: %d - %s" %
+             (res.status_code, res.body()))
 
-    if cachedStations != None:
-        print("Using cached stations")
-        stations = json.decode(cachedStations)
-    else:
-        print("Fetching stations...")
-        res = http.get(
-            url = AMBIENT_DEVICES_URL,
-            params = {
-                "applicationKey": applicationKey,
-                "apiKey": apiKey,
-            },
-        )
-        if res.status_code != 200:
-            fail("station request failed with status code: %d - %s" %
-                 (res.status_code, res.body()))
-
-        stations = res.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("ambient-weather-%s" % applicationKey, json.encode(stations), ttl_seconds = 30)
+    stations = res.json()
 
     return stations
 

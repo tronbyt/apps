@@ -281,7 +281,7 @@ def get_img_data(img_path):
     return http.get(endpoint, headers = {"User-Agent": "pixlet"}, ttl_seconds = ONE_HOUR_IN_SECONDS).body()
 
 def main(config):
-    if auth_params()["y"] == "":
+    if auth_params(config)["y"] == "":
         return []
 
     console = str(config.str("console", "6"))

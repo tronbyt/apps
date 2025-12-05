@@ -1,7 +1,4 @@
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("hmac.star", "hmac")
 load("http.star", "http")
 load("images/heart_image.png", HEART_IMAGE_ASSET = "file")
@@ -353,38 +350,22 @@ def getUsername(entryObject, marqueeOffsetStart):
         ),
     )
 
-def check_cache(url, type = "body", lid = "", timeout = 300):
+def check_cache(url, type = "body", timeout = 300):
     if type == "json":
         # the URL can't be used as a key here because each request has a UUID
-        key = "%s%s" % (lid, "json")
-        data = cache.get(key)
-        if data != None:
-            return json.decode(data)
-
-        res = http.get(url = url)
+        res = http.get(url = url, ttl_seconds = timeout)
         if res.status_code != 200:
             fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(key, json.encode(res.json()), ttl_seconds = timeout)
         return res.json()
 
-    key = base64.encode(url)
-    data = cache.get(key)
-    if data != None:
-        return base64.decode(data)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = timeout)
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
     if type == "identifier":
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(key, base64.encode(res.headers["X-Letterboxd-Identifier"]), ttl_seconds = timeout)
         return res.headers["X-Letterboxd-Identifier"]
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = timeout)
     return res.body()
 
 def get_schema():

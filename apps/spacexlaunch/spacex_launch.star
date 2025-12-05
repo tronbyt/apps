@@ -5,8 +5,6 @@ Description: Displays information about an upcoming SpaceX rocket launch.
 Author: rytrose
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/error_image.png", ERROR_IMAGE_ASSET = "file")
 load("render.star", "render")
@@ -138,15 +136,6 @@ def get_upcoming_launch(config):
     """
     skip_cache = config.get(SKIP_CACHE_CONFIG_KEY) or False
 
-    # Check the cache
-    launch = cache.get(UPCOMING_LAUNCH_CACHE_KEY)
-    if launch and not skip_cache:
-        return json.decode(launch)
-    else:
-        # Invalidate image cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(UPCOMING_LAUNCH_IMAGE_CACHE_KEY, "", ttl_seconds = 0)
-
     # Determine which API to hit, the real API has a 15 req/hr rate limit.
     # The dev API has no rate limit, but stale data.
     is_dev = config.get(DEV_CONFIG_KEY)
@@ -167,7 +156,7 @@ def get_upcoming_launch(config):
     if api_key:
         headers["Authorization"] = "Token {}".format(api_key)
 
-    response = http.get(url_template.format(search, headers = headers))
+    response = http.get(url_template.format(search, headers = headers), ttl_seconds = CACHE_TTL_SECONDS if not skip_cache else 0)
     if response.status_code != 200:
         return None
 
@@ -181,9 +170,6 @@ def get_upcoming_launch(config):
 
     launch = results[0]
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(UPCOMING_LAUNCH_CACHE_KEY, json.encode(launch), ttl_seconds = CACHE_TTL_SECONDS)
-
     return launch
 
 def get_launch_image(launch):
@@ -196,23 +182,16 @@ def get_launch_image(launch):
         str: A string of binary image data.
     """
 
-    image = cache.get(UPCOMING_LAUNCH_IMAGE_CACHE_KEY)
-    if image:
-        return image
-
     image_url = launch.get("image")
 
     if not image_url or type(image_url) != "string":
         return None
 
-    response = http.get(image_url)
+    response = http.get(image_url, ttl_seconds = CACHE_TTL_SECONDS)
     if response.status_code != 200:
         return None
 
     image = response.body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(UPCOMING_LAUNCH_IMAGE_CACHE_KEY, image, ttl_seconds = CACHE_TTL_SECONDS)
 
     return image
 

@@ -14,7 +14,6 @@ Author: btjones
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
@@ -80,7 +79,6 @@ def get_slackmoji_url(query):
 
     # set cached url
     if USE_CACHE and url != None:
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(cache_name, url, ttl_seconds = CACHE_SECONDS_URL)
 
     return url
@@ -88,23 +86,10 @@ def get_slackmoji_url(query):
 # downloads an image from the provided url
 def get_image(url):
     if url:
-        cache_name = "slackmoji_image_" + url
-
-        # return cached image if available
-        if USE_CACHE:
-            cached_image = cache.get(cache_name)
-            if cached_image != None:
-                return base64.decode(cached_image)
-
         # no cache, fetch new image
-        response = http.get(url)
+        response = http.get(url, ttl_seconds = CACHE_SECONDS_IMAGE)
         if response and response.status_code == 200:
-            file = response.body()
-            if file:
-                if USE_CACHE:
-                    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                    cache.set(cache_name, base64.encode(file), ttl_seconds = CACHE_SECONDS_IMAGE)
-                return file
+            return response.body()
 
     # something went wrong, return the fail image
     return FAIL_IMAGE

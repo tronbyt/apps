@@ -7,3 +7,5 @@ author: M0ntyP
 fileName: psl_cricket.star
 packageName: pslcricket
 recommendedInterval: 5
+broken: true
+brokenReason: "API access blocked (403 Forbidden)"

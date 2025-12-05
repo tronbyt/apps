@@ -5,7 +5,6 @@ Description: Displays the real time location of new subway cars in Boston's MBTA
 Author: joshspicer
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/img.png", IMG_ASSET = "file")
@@ -78,15 +77,14 @@ CACHE_TTL_SECONDS = 3600 * 24  # 1 day in seconds.
 # ]
 
 def fetchStationNames(useCache):
-    cachedStations = cache.get("stations")
-    if cachedStations == None or useCache == False:
+    if useCache:
+        res = http.get(STATION_NAMES_URL, ttl_seconds = CACHE_TTL_SECONDS)
+    else:
         res = http.get(STATION_NAMES_URL)
-        if res.status_code != 200:
-            fail("stations request failed with status %d", res.status_code)
-        cachedStations = res.body()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("stations", cachedStations, ttl_seconds = CACHE_TTL_SECONDS)
+    if res.status_code != 200:
+        fail("stations request failed with status %d", res.status_code)
+    cachedStations = res.body()
 
     stations = json.decode(cachedStations)
     map = {}
@@ -249,7 +247,9 @@ def displayDigest(apiResult, config):
 def main(config):
     res = http.get(TRAIN_LOCATION_URL)
     if res.status_code != 200:
-        fail("location request failed with status %d", res.status_code)
+        return render.Root(
+            child = render.WrappedText("Location request failed with status %d" % res.status_code),
+        )
 
     apiResult = res.json()
 

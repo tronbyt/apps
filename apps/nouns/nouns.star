@@ -43,7 +43,7 @@ def render_screen():
         ttl_seconds = 60,
     )
     if rep.status_code != 200:
-        fail("nouns request failed with status %d", rep.status_code)
+        return render.WrappedText("API Error: %d" % rep.status_code, color = "#ff0000")
     auction = rep.json()["data"]["auctions"][0]
 
     img_data = http.get("https://noun.pics/{}.jpg".format(auction["noun"]["id"]), ttl_seconds = 3600 * 6).body()

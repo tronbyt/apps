@@ -71,7 +71,6 @@ def get_issues(accesstoken, domain):
         return "You have %d open issues!" % open_issues
 
 def set_cache(name, open_issues):
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(name, open_issues, ttl_seconds = 3600)
 
 def get_schema():

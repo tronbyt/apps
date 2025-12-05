@@ -1,4 +1,3 @@
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/canvas_logo.png", CANVAS_LOGO_ASSET = "file")
 load("random.star", "random")
@@ -39,53 +38,32 @@ def makeError(type):
     )
 
 def getcourse(api_token):
-    class_cache = cache.get("class_data-" + api_token)
+    api_url = "https://canvas.instructure.com/api/v1/courses?per_page=30&access_token=" + api_token
+    response = http.get(api_url, ttl_seconds = 3000)
+    if response.status_code != 200:
+        return [], "Can not Connect to Canvas"
+    classes = []
 
-    if class_cache != None:
-        print("Using Cached Courses")
-        classes = class_cache.split(",")
-        return classes, 0
-    else:
-        api_url = "https://canvas.instructure.com/api/v1/courses?per_page=30&access_token=" + api_token
-        response = http.get(api_url)
-        if response.status_code != 200:
-            return [], "Can not Connect to Canvas"
-        classes = []
+    data = str(response.body()).split('"id"')
+    if "Invalid access token." in data:
+        return [], "Invalid access token."
+    for course in data:
+        if "created_at" in course:
+            if len(course) >= 18:
+                index = course.find("created_at")
+                time_stamp = course[index + 13:index + 33]
+                dur = time.now() - time.parse_time(time_stamp)
+                if 8760 > dur.hours:
+                    classes.append(course[1:course.index(",")])
 
-        data = str(response.body()).split('"id"')
-        if "Invalid access token." in data:
-            return [], "Invalid access token."
-        for course in data:
-            if "created_at" in course:
-                if len(course) >= 18:
-                    index = course.find("created_at")
-                    time_stamp = course[index + 13:index + 33]
-                    dur = time.now() - time.parse_time(time_stamp)
-                    if 8760 > dur.hours:
-                        classes.append(course[1:course.index(",")])
-
-        #cache for one day
-        cache_data = ",".join(classes)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("class_data-" + api_token, cache_data, ttl_seconds = 3000)
-        return classes, 0
-
-def get_cached_assignments(course_id, api_token):
-    cache_string = cache.get(str(course_id) + "-" + api_token)
-    if cache_string != None:
-        first_split = cache_string.split(";")
-        if "" in first_split:
-            first_split.remove("")
-        return [a.split(",") for a in first_split]
-    return None
+    return classes, 0
 
 def get_remote_assignments(api_token, course_id):
     api_url = "https://canvas.instructure.com/api/v1/courses/" + str(
         course_id,
     ) + "/assignments?bucket=upcoming&access_token=" + api_token
     print(api_url)
-    rep = http.get(api_url)
+    rep = http.get(api_url, ttl_seconds = 300)
     if rep.status_code != 200:
         return [], "Can not Connect to Canvas"
     data = rep.json()
@@ -97,18 +75,8 @@ def get_remote_assignments(api_token, course_id):
            (time.parse_time(assignment["due_at"]) - time.now()).hours < 200
     ]
 
-def cache_assignments(course_id, assignments, api_token):
-    cache_string = ";".join([a[0] + "," + a[1] for a in assignments])
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(str(course_id) + "-" + api_token, cache_string, ttl_seconds = 300)
-
 def get_events(api_token, course_id):
-    assignment_data = get_cached_assignments(course_id, api_token)
-    if assignment_data == None:
-        print("Not Using Cached Classes for" + str(course_id))
-        assignment_data = get_remote_assignments(api_token, course_id)
-        cache_assignments(course_id, assignment_data, api_token)
+    assignment_data = get_remote_assignments(api_token, course_id)
     return assignment_data, 0
 
 def fake_events():

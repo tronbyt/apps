@@ -5,7 +5,6 @@ Description: Get your current weather from your Netatmo weather station.
 Author: danmcclain
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/down_deg.png", DOWN_DEG_ASSET = "file")
@@ -29,10 +28,7 @@ def main(config):
     fahrenheit = config.bool("fahrenheit")
 
     if refresh_token:
-        access_token = cache.get(refresh_token)
-
-        if access_token == None:
-            access_token = get_access_token(refresh_token)
+        access_token = get_access_token(refresh_token)
 
         res = http.get(
             url = "https://api.netatmo.com/api/getstationsdata",
@@ -157,9 +153,6 @@ def oauth_handler(params):
     token_params = res.json()
     refresh_token = token_params["refresh_token"]
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, token_params["access_token"], ttl_seconds = int(token_params["expires_in"] - 30))
-
     return refresh_token
 
 def get_access_token(refresh_token):
@@ -175,6 +168,7 @@ def get_access_token(refresh_token):
             client_id = CLIENT_ID,
         ),
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 10500,  # roughly 3h (expires_in is usually 10800)
     )
     if res.status_code != 200:
         fail("token request failed with status code: %d - %s" %
@@ -183,9 +177,6 @@ def get_access_token(refresh_token):
     token_params = res.json()
     refresh_token = token_params["refresh_token"]
     access_token = token_params["access_token"]
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
 
     return access_token
 

@@ -7,8 +7,6 @@ Author: dan0
 
 # buildifier: disable=<category_name>
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -109,21 +107,13 @@ def main(config):
 def fetch_bus_info(stop_id):
     # Construct the URL using the provided stop_id
     url = "https://tfeapp.com/api/website/stop_times.php?stop_id=" + str(stop_id)
-    bus_info_cached = cache.get("bus_stop_response")
 
-    if bus_info_cached != None:
-        # Grabbing json data from cache
-        bus_info = json.decode(bus_info_cached)
-    else:
-        # Dang, no cached data.  Writing json to cache as string, 30 second TTL (it's live bus times...)
-        response = http.get(url)
-        if response.status_code != 200:
-            # We need to fail, we have no cached data and no API response
-            fail("API request failed with status %d", response.status_code)
-        bus_info = response.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("bus_stop_response", json.encode(bus_info), ttl_seconds = 30)
+    # Dang, no cached data.  Writing json to cache as string, 30 second TTL (it's live bus times...)
+    response = http.get(url, ttl_seconds = 30)
+    if response.status_code != 200:
+        # We need to fail, we have no cached data and no API response
+        fail("API request failed with status %d", response.status_code)
+    bus_info = response.json()
 
     return bus_info
 

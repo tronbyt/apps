@@ -5,8 +5,6 @@ Description: Track your ELO from Chess.com from a variety of game types.
 Author: UnBurn
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/blitz_icon.png", BLITZ_ICON_ASSET = "file")
 load("images/bullet_icon.png", BULLET_ICON_ASSET = "file")
@@ -82,31 +80,17 @@ def get_diff_string(score):
 def get_stats(username):
     endpoint = "%s/%s" % (CHESS_COM_STATS_ENDPOINT, username)
 
-    cache_key = "stats=%s" % endpoint
-    cached_values = cache.get(cache_key)
-    if cached_values == None:
-        resp = http.get(endpoint).json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(resp), ttl_seconds = ONE_HOUR_IN_SECONDS)
-        return resp["stats"]
-    else:
-        return json.decode(cached_values)["stats"]
+    resp = http.get(endpoint, ttl_seconds = ONE_HOUR_IN_SECONDS).json()
+    return resp["stats"]
 
 def get_profile_image(username):
     endpoint = "%s/%s" % (CHESS_COM_PROFILE_ENDPOINT, username)
 
-    cache_key = "profile=%s" % endpoint
-    img = cache.get(cache_key)
-    if img == None:
-        resp = http.get(endpoint).json()
-        if "avatar" in resp.keys():
-            img = http.get(resp["avatar"]).body()
-        else:
-            img = NO_PROFILE_ICON
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, img, ttl_seconds = ONE_HOUR_IN_SECONDS)
+    resp = http.get(endpoint, ttl_seconds = ONE_HOUR_IN_SECONDS).json()
+    if "avatar" in resp.keys():
+        img = http.get(resp["avatar"], ttl_seconds = ONE_HOUR_IN_SECONDS).body()
+    else:
+        img = NO_PROFILE_ICON
 
     return img
 

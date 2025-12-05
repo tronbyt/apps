@@ -7,3 +7,5 @@ author: Josiah Winslow
 fileName: mcts_tracker.star
 packageName: mctstracker
 recommendedInterval: 5
+broken: true
+brokenReason: The MCTS Real-Time API endpoint used by this app is no longer responsive or accessible, resulting in connection timeouts.

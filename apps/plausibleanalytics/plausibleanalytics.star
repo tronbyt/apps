@@ -5,9 +5,6 @@ Description: Display you website's analytics from your Plausible Analytics accou
 Author: brettohland
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/globe_image.png", GLOBE_IMAGE_ASSET = "file")
@@ -176,10 +173,6 @@ def main(config):
     # Convert the value into an integer
     stat = int(stat_string)
 
-    # At this point, we know the data is correct. Cache it.
-    cache_id = make_cache_id(REQUEST_CACHE_ID, ["aggregate", token, domain, time_period, metric])
-    cache_value(cache_id, json.encode(stats_dict), REQUEST_CACHE_TTL)
-
     # Bounce rate and visit duration need special suffixes, otherwise run the compact_number
     # method on the value to get a string that fits into 6 digits.
     formatted_stat = ""
@@ -192,9 +185,9 @@ def main(config):
 
     # Get the favicon based on if the user wants to set a custom favicon or not
     if custom_favicon_path != None:
-        favicon = get_favicon(domain, custom_favicon_path, token)
+        favicon = get_favicon(domain, custom_favicon_path)
     else:
-        favicon = get_favicon(domain, None, token)
+        favicon = get_favicon(domain, None)
 
     # Determine if the user wants to show the historical chart or not.
     # If yes, fetch the data from Plausible.io's API and convert it to the format render.Plot needs
@@ -221,8 +214,6 @@ def main(config):
         largest_value = plot_data[1]
         rendered_stats = render.Text(formatted_stat, font = "6x13")
         rendered_plot = render_plot(plot_data[0], number_of_data_points, largest_value)
-        cache_id = make_cache_id(REQUEST_CACHE_ID, ["timeseries", token, domain, time_period, metric])
-        cache_value(cache_id, json.encode(results), REQUEST_CACHE_TTL)
     else:
         rendered_stats = render.Padding(
             pad = (0, 3, 0, 0),
@@ -414,23 +405,10 @@ def sanitize_domain(domain):
     print("Sanitized domain: %s" % final_url)
     return final_url
 
-def make_cache_id(key, list):
-    merged_properties = "_".join(list)
-    cache_id = key + "_" + hash.sha1(merged_properties)
-
-    # print("Cache ID: %s" % cache_id)
-    return cache_id
-
 # Makes a request to the domain, and will attempt to return the site's favicon
 # icon by assuming the three most common favicon filenames.
 # Defaults to GLOBE_IMAGE if it fails.
-def get_favicon(domain, favicon_path, token):
-    favicon_cache_id = make_cache_id(FAVICON_CACHE_ID, [domain, token, (favicon_path or "")])
-    cached_favicon = cached_value(favicon_cache_id)
-
-    if cached_favicon != None:
-        return cached_favicon
-
+def get_favicon(domain, favicon_path):
     favicon_url = "http://" + domain + "/"
 
     if favicon_path != None:
@@ -441,11 +419,10 @@ def get_favicon(domain, favicon_path, token):
 
     for f in FAVICON_FILENAMES:
         final_url = favicon_url + f
-        response = http.get(final_url)
+        response = http.get(final_url, ttl_seconds = FAVICON_CACHE_TTL)
         if response.status_code != 200:
             continue
         favicon = response.body()
-        cache_value(favicon_cache_id, favicon, FAVICON_CACHE_TTL)
         return favicon
 
     return GLOBE_IMAGE
@@ -458,11 +435,6 @@ def get_favicon(domain, favicon_path, token):
 #    metric: The metric value to return
 def get_plausible_data(endpoint, token, domain, time_period, metric):
     print("Getting data from Plausible:  %s" % ",".join([domain, time_period, metric]))
-    request_cache_id = make_cache_id(REQUEST_CACHE_ID, [token, endpoint, domain, time_period, metric])
-    cached_request = cached_value(request_cache_id)
-    if cached_request != None:
-        print("Cached data found")
-        return (json.decode(cached_request), 200)
 
     site_id_param = "?site_id=" + domain
     time_period_param = "&period=" + time_period
@@ -480,6 +452,7 @@ def get_plausible_data(endpoint, token, domain, time_period, metric):
         headers = {
             "Authorization": "Bearer " + token,
         },
+        ttl_seconds = REQUEST_CACHE_TTL,
     )
 
     # We return the status code in the event of an error because Plausible uses
@@ -510,22 +483,6 @@ def convert_result_for_plot(results, metric):
         if safe_value > largest_value:
             largest_value = safe_value
     return (final_data, largest_value)
-
-def cache_value(key, value, ttl):
-    if DISABLE_CACHE:
-        print("Cache disabled, won't set")
-        return
-    print("Cacheing: %s" % key)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, value, ttl_seconds = ttl)
-
-def cached_value(key):
-    print("Checking cache for key: %s" % key)
-    if DISABLE_CACHE:
-        print("Cache disabled, won't get")
-        return None
-    return cache.get(key)
 
 # Render the screen using the provided values
 def render_screen(favicon, rendered_stats, rendered_plot, marquee_text):

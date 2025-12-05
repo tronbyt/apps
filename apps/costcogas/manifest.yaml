@@ -7,3 +7,4 @@ author: Dan Adam
 fileName: costco_gas.star
 packageName: costcogas
 recommendedInterval: 5
+broken: true

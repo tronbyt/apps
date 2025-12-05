@@ -7,3 +7,5 @@ author: UnBurn
 fileName: wiki_page_today.star
 packageName: wikipagetoday
 recommendedInterval: 5
+broken: true
+brokenReason: The API is returning invalid/non-JSON data (possibly an HTML error page), causing JSON parsing errors.

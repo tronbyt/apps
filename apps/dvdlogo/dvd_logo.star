@@ -5,7 +5,6 @@ Description: A screensaver from before the streaming era. Will it hit the corner
 Author: Mack Ward
 """
 
-load("encoding/base64.star", "base64")
 load("images/image_2x_410ac6ff.png", IMAGE_2X_410ac6ff_ASSET = "file")
 load("images/image_7634e782.png", IMAGE_7634e782_ASSET = "file")
 load("math.star", "math")
@@ -39,9 +38,7 @@ def main(config):
     frames_per_second = time.second / delay
 
     image = render.Image(
-        base64.decode(
-            config.get("image", IMAGE_2X if is2x else IMAGE),
-        ),
+        src = config.get("image", IMAGE_2X if is2x else IMAGE),
     )
 
     now = time.now().unix_nano / (1000 * 1000 * 1000)

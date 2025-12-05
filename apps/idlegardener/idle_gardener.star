@@ -52,21 +52,18 @@ def return_tree_states(id):
 
     # No cache exist - set to zero
     if chopped_count == None:
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("{id}-chopped_count".format(id = id), "0", ttl_seconds = 86400)
 
     # No cache exist - generate a new list of trees
     if cached_trees == None:
         encoded_list = generate_tree_list()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("{id}-tree_list".format(id = id), encoded_list, ttl_seconds = 86400)
         return encoded_list
 
     # Found a cache and will use this data.
     updated_tree_list = update_tree_states(cached_trees, id)
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set("{id}-tree_list".format(id = id), updated_tree_list, ttl_seconds = 86400)
     return updated_tree_list
 
@@ -128,7 +125,6 @@ def increment_chopped_count(garden_id):
         temp_count = int(chopped_count)
         temp_count += 1
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("{id}-chopped_count".format(id = garden_id), str(temp_count), ttl_seconds = 86400)
 
 # Tree Growth Methods

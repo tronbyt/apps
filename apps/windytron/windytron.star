@@ -152,7 +152,7 @@ def get_schema():
             schema.Text(
                 id = "custom_label",
                 name = "Custom Label",
-                icon = "edit",
+                icon = "pencil",
                 desc = "Override the display label (optional)",
                 default = "",
             ),
@@ -166,14 +166,14 @@ def get_schema():
             schema.Text(
                 id = "avg_condition",
                 name = "Wind range to show",
-                icon = "edit",
+                icon = "pencil",
                 desc = "Syntax is min-max eg. '10-15'",
                 default = "0-50",
             ),
             schema.Text(
                 id = "dir_condition",
                 name = "Direction range to show",
-                icon = "edit",
+                icon = "pencil",
                 desc = "Syntax is min-max eg. '30-180'",
                 default = "0-360",
             ),

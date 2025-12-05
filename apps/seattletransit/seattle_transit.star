@@ -70,7 +70,11 @@ def main(config):
         print("Miss! Calling OBA API.")
         rep = http.get(stop_url)
         if rep.status_code != 200:
-            fail("OBA request failed with status %d", rep.status_code)
+            return render.Root(
+                child = render.Box(
+                    child = render.Text("API Error: %d" % rep.status_code, color = "#FF0000", font = "CG-pixel-3x5-mono"),
+                ),
+            )
 
         trip_count = len(rep.json()["data"]["entry"]["arrivalsAndDepartures"])
         print(trip_count)

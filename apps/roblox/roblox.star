@@ -5,7 +5,6 @@ Description: Real time views of your Roblox experiences.
 Author: Chad Milburn / CODESTRONG
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/roblox_dark_logo.png", ROBLOX_DARK_LOGO_ASSET = "file")
@@ -53,14 +52,12 @@ def main(config):
         userRobloxId = str(user_id_cached)
     else:
         getUserId = "https://users.roblox.com/v1/users/search?keyword=%s&limit=10" % username
-        repGetUserId = http.get(getUserId)
+        repGetUserId = http.get(getUserId, ttl_seconds = TTL_SECONDS)
         if repGetUserId.status_code == 200:
             print("Fetching user id")
             userId = "%d" % repGetUserId.json()["data"][0]["id"] if len(repGetUserId.json()["data"]) > 0 else ""
             userRobloxId = "%s" % userId
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("user_id_%s" % username, str(userRobloxId), ttl_seconds = TTL_SECONDS)
         else:
             userRobloxId = ""
 
@@ -122,11 +119,7 @@ def main(config):
             profilePhotoImg = ""
         else:
             profilePhotoUrl = repGetProfilePhoto.json()["data"][0]["imageUrl"]
-            profilePhotoImg = http.get(profilePhotoUrl).body()
-
-        ### Caching profilePhotoImg value from fetched logic
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("user_avatar_%s" % username, str(profilePhotoImg), ttl_seconds = TTL_SECONDS)
+            profilePhotoImg = http.get(profilePhotoUrl, ttl_seconds = TTL_SECONDS).body()
 
     ### GET ONLINE STYLE
     user_online_status_cached = cache.get("user_online_status_%s" % username)
@@ -136,16 +129,12 @@ def main(config):
     else:
         print("Fetching user online status")
         getUserOnlineStatus = "https://api.roblox.com/users/%s/onlinestatus/" % userRobloxId
-        repGetUserOnlineStatus = http.get(getUserOnlineStatus)
+        repGetUserOnlineStatus = http.get(getUserOnlineStatus, ttl_seconds = TTL_SECONDS)
         if repGetUserOnlineStatus.status_code != 200:
             print("Fetching user online status failed with status %d" % repGetUserOnlineStatus.status_code)
             isOnline = False
         else:
             isOnline = repGetUserOnlineStatus.json()["IsOnline"]
-
-        ### Caching isOnline value from fetched logic
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("user_online_status_%s" % username, json.encode(isOnline), ttl_seconds = TTL_SECONDS)
 
     ### FRIEND MODE
     if view_mode == VIEW_FRIENDS:
@@ -157,16 +146,12 @@ def main(config):
         else:
             print("Fetching user friend list")
             getUsersFriends = "https://friends.roblox.com/v1/users/%s/friends?userSort=StatusFrequents" % userRobloxId
-            repGetUsersFriends = http.get(getUsersFriends)
+            repGetUsersFriends = http.get(getUsersFriends, ttl_seconds = TTL_SECONDS)
             if repGetUsersFriends.status_code != 200:
                 print("Fetching user friend list failed with status %d" % repGetUsersFriends.status_code)
                 userFriends = []
             else:
                 userFriends = repGetUsersFriends.json()["data"]
-
-            ### Caching userFriends value from fetched logic
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("user_friend_list_%s" % username, json.encode(userFriends), ttl_seconds = TTL_SECONDS)
 
         ### POPULATE FRIENDS LIST
         friendsList = []
@@ -192,12 +177,7 @@ def main(config):
                 friendAvatar = ""
                 if len(userFriends) != 0 and friend < len(userFriends):
                     friendAvatarUrl = friendsList[friend]["avatarUrl"]
-                    friendAvatar = http.get(friendAvatarUrl).body()
-
-                ### Caching friendAvatar value from fetched logic
-                if friend < len(userFriends):
-                    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                    cache.set("user_avatar_%s" % friendsList[friend]["username"], str(friendAvatar), ttl_seconds = TTL_SECONDS)
+                    friendAvatar = http.get(friendAvatarUrl, ttl_seconds = TTL_SECONDS).body()
 
             renderFriend.append(
                 render.Padding(
@@ -235,16 +215,12 @@ def main(config):
         else:
             print("Fetching user favorite game list")
             getUsersFavoriteGames = "https://games.roblox.com/v2/users/%s/favorite/games?accessFilter=Public&sortOrder=Desc&limit=10" % userRobloxId
-            repGetUsersFavoriteGames = http.get(getUsersFavoriteGames)
+            repGetUsersFavoriteGames = http.get(getUsersFavoriteGames, ttl_seconds = TTL_SECONDS)
             if repGetUsersFavoriteGames.status_code != 200:
                 print("Fetching user favorite game list failed with status %d" % repGetUsersFavoriteGames.status_code)
                 userFavoriteGames = []
             else:
                 userFavoriteGames = repGetUsersFavoriteGames.json()["data"]
-
-            ### Caching userFavoriteGames value from fetched logic
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("user_favorite_games_list_%s" % username, json.encode(userFavoriteGames), ttl_seconds = TTL_SECONDS)
 
         ### POPULATE FAVORITE GAMES RENDER LIST
         favoriteGamesList = []
@@ -267,12 +243,7 @@ def main(config):
                 gameAvatar = ""
                 if len(userFavoriteGames) != 0 and game < len(userFavoriteGames):
                     gameAvatarUrl = favoriteGamesList[game]["avatarUrl"]
-                    gameAvatar = http.get(gameAvatarUrl).body()
-
-                ### Caching gameAvatar value from fetched logic
-                if game < len(userFavoriteGames):
-                    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                    cache.set("game_avatar_%s" % favoriteGamesList[game]["gameId"], str(gameAvatar), ttl_seconds = TTL_SECONDS)
+                    gameAvatar = http.get(gameAvatarUrl, ttl_seconds = TTL_SECONDS).body()
 
             renderGame.append(
                 render.Padding(

@@ -6,7 +6,8 @@ Author: funkfinger
 """
 
 load("animation.star", "animation")
-load("http.star", "http")
+load("images/2yz7Go2.png", IMAGE_2017_ASSET = "file")
+load("images/rzUhL4w.png", IMAGE_2022_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -18,13 +19,15 @@ CACHE_TTL_SECONDS = 3600 * 24 * 30  # 30 days in seconds.
 
 place_image = {
     "2022": {
-        "url": "https://i.imgur.com/rzUhL4w.png",
+        "image": IMAGE_2022_ASSET.readall(),
+        # "url": "https://i.imgur.com/rzUhL4w.png",
         "width": 2000,
         "height": 2000,
     },
     "2017": {
+        "image": IMAGE_2017_ASSET.readall(),
         # "url": "https://i.imgur.com/2Jq2ina.png",
-        "url": "https://i.imgur.com/2yz7Go2.png",  # this is the cleaned version...
+        # "url": "https://i.imgur.com/2yz7Go2.png",  # this is the cleaned version...
         "width": 1000,
         "height": 1000,
     },
@@ -65,7 +68,7 @@ def main(config):
 
     # create the animation
     ani = animation.Transformation(
-        child = get_image(image["url"]),
+        child = render.Image(image["image"]),
         duration = 100,
         delay = 10,
         direction = "alternate",
@@ -159,15 +162,3 @@ def get_schema():
             ),
         ],
     )
-
-def get_image(url):
-    """ get the final r/place image
-
-    Parameters:
-        url - URL of image to display
-
-    Returns:
-        the rendered image
-    """
-    image = http.get(url, ttl_seconds = CACHE_TTL_SECONDS).body()
-    return render.Image(image)

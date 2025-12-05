@@ -21,12 +21,8 @@ SCROLL_DISABLED = "disabled"
 DEFAULT_SCROLL = SCROLL_TOGETHER
 
 def get_entity_status(ha_server, entity_id, token):
-    if not ha_server:
-        fail("Home Assistant server not configured")
-    if not entity_id:
-        fail("Entity ID not configured")
-    if not token:
-        fail("Bearer token not configured")
+    if not ha_server or not entity_id or not token:
+        return None
 
     rep = http.get("%s/api/states/%s" % (ha_server, entity_id), headers = {
         "Authorization": "Bearer %s" % token,
@@ -110,7 +106,9 @@ def main(config):
     entity_status = get_entity_status(ha_server, entity_id, token)
 
     if not entity_status:
-        return []
+        return render.Root(
+            child = render.WrappedText("Config missing or API error", color = "#ff0000"),
+        )
 
     status = entity_status.get("state")
     attributes = entity_status.get("attributes", dict())

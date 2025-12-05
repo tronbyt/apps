@@ -7,3 +7,5 @@ author: M0ntyP
 fileName: sa20_cricket.star
 packageName: sa20cricket
 recommendedInterval: 5
+broken: true
+brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).

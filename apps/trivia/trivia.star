@@ -24,7 +24,7 @@ def get_data():
     if rep.status_code != 200:
         fail("Jservice (Trivia) request failed with status %d", rep.status_code)
 
-    cache.set("question_index", str(question_index+1), ttl_seconds = CACHE_TTL_SECONDS)
+    cache.set("question_index", str(question_index + 1), ttl_seconds = CACHE_TTL_SECONDS)
     questions = json.decode(rep.body())
 
     return questions[question_index % NUM_QUESTIONS]

@@ -41,7 +41,6 @@ Author: Chris Silverberg (csilv)
 # SOFTWARE.
 
 load("animation.star", "animation")
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -222,13 +221,6 @@ def get_scroll_frames(item, next_item):
 
 def fetch_earthquakes(lat, lng, radius, magnitude, start_time):
     # For global earthquakes, the cache_key will just be the magnitude.
-    cache_key = magnitude
-    if radius != "0":
-        cache_key = "%s_%s_%s_%s_%s" % (lat, lng, radius, magnitude, start_time)
-    cache_data = cache.get(cache_key)
-    if cache_data:
-        return json.decode(cache_data)
-
     params = {
         "format": "geojson",
         "minmagnitude": magnitude,
@@ -243,7 +235,7 @@ def fetch_earthquakes(lat, lng, radius, magnitude, start_time):
         }
         params.update(geo_params)
 
-    resp = http.get(BASE_URL, params = params)
+    resp = http.get(BASE_URL, params = params, ttl_seconds = CACHE_TTL)
 
     if resp.status_code != 200:
         # buildifier: disable=print
@@ -252,8 +244,6 @@ def fetch_earthquakes(lat, lng, radius, magnitude, start_time):
 
     features = resp.json().get("features")
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(features), CACHE_TTL)
     return features
 
 def color_from_magnitude(magnitude):

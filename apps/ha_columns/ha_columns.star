@@ -300,7 +300,7 @@ def get_schema():
                 id = "ha_url",
                 name = "Home Assistant URL",
                 desc = "Full URL to your Home Assistant instance (e.g., http://homeassistant.local:8123)",
-                icon = "home",
+                icon = "house",
             ),
             schema.Text(
                 id = "ha_token",

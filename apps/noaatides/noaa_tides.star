@@ -211,12 +211,6 @@ def main(config):
     #     debug_print("pulling fresh tide data")
     tides_hilo = get_tides_hilo(station_id)
     tides_graph = get_tides_graph(station_id)
-    # if tides_hilo != None:
-    #     # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    #     cache.set(cache_key_hilo, json.encode(tides_hilo), ttl_seconds = 14400)  # 4 hours
-
-    #     # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    #     cache.set(cache_key_graph, json.encode(tides_graph), ttl_seconds = 14400)  # 4 hours
 
     debug_print("Tides HILO : " + str(tides_hilo))
     debug_print("Tides GRAPH: " + str(tides_graph))

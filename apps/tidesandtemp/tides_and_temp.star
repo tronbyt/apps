@@ -47,7 +47,16 @@ def main(config):
     if resp.status_code != 200:
         fail("NOAA tides request failed with status", resp.status_code)
 
-    resp_predictions = resp.json()["predictions"]
+    resp_json = resp.json()
+    if "predictions" not in resp_json:
+        print("NOAA tides response missing predictions")
+        return render.Root(
+            child = render.Box(
+                child = render.Text("No Data", color = "#FF0000"),
+            ),
+        )
+
+    resp_predictions = resp_json["predictions"]
     data_predictions = []
     prev_tide = {}
     curr_tide_pct = None

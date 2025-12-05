@@ -372,18 +372,13 @@ IMPORTANCE_ICONS = {
 }
 
 def flag_api(country_name):
-    cache_prefix = "%s/%s/%s/" % ("finevent", "econ", "flags")
-    flag = cache.get(cache_prefix + country_name)
-    if not flag:
-        print("Getting %s flag from the flag CDN, ISO3166 code: %s" % (country_name, ISO3166.get(country_name)))
-        flag_resp = http.get("https://flagcdn.com/w20/%s.png" % ISO3166.get(country_name))
-        if flag_resp.status_code != 200:
-            flag = ISO3166.get(country_name)
-        else:
-            flag = flag_resp.body()
+    print("Getting %s flag from the flag CDN, ISO3166 code: %s" % (country_name, ISO3166.get(country_name)))
+    flag_resp = http.get("https://flagcdn.com/w20/%s.png" % ISO3166.get(country_name), ttl_seconds = 60 * 60 * 24 * 30)
+    if flag_resp.status_code != 200:
+        flag = ISO3166.get(country_name)
+    else:
+        flag = flag_resp.body()
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_prefix + country_name, flag, ttl_seconds = 60 * 60 * 24 * 30)  # keep for a month
     return flag
 
 def random(max):
@@ -438,12 +433,10 @@ def main(config):
                 next_release = abs(max(future_times))
                 print("Caching %s results as %s until next release in %s seconds" % (len(filtered_events), cache_id, next_release))
 
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set(cache_id, json.encode(filtered_events), ttl_seconds = next_release)
             else:
                 print("No future events found, caching for 1 hour")
 
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set(cache_id, json.encode(filtered_events), ttl_seconds = 3600)
     else:
         print("Displaying cached data from %s" % cache_id)

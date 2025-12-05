@@ -5,7 +5,6 @@ Description: Fido is a pixel pal that will sit, walk, and feast inside your Tidb
 Author: yonodactyl
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/fence.png", FENCE_ASSET = "file")
 load("images/grass.png", GRASS_ASSET = "file")
@@ -235,14 +234,7 @@ def get_schema():
 # HELPER
 def get_cached(url, ttl_seconds = TTL):
     # Attempt to grab the cache
-    data = cache.get(url)
-
-    if data:
-        # Cache exist - returning this data
-        return data
-
-    # No cache - continuing to the web
-    res = http.get(url)
+    res = http.get(url, ttl_seconds = ttl_seconds)
 
     # An error occured
     if res.status_code != 200:
@@ -251,10 +243,6 @@ def get_cached(url, ttl_seconds = TTL):
 
     # Grab responses body
     data = res.body()
-
-    # Set cache and dont try again until the next day
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(url, data, ttl_seconds = ttl_seconds)
 
     # Return the data we got from the web
     return data

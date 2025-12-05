@@ -5,7 +5,6 @@ Description: Connects to your ESPN fantasy football league and randomly displays
 Author: jack_markle
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
@@ -348,10 +347,4 @@ def convert_logo(logo_url):
     if response.status_code != 200:
         fail("Failed to load image")
 
-    image_data = response.body()
-
-    base64_image = base64.encode(image_data)
-
-    decoded_image = base64.decode(base64_image)
-
-    return decoded_image
+    return response.body()

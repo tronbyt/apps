@@ -6,9 +6,7 @@ Author: Brian Bell
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/nasa_logo.png", NASA_LOGO_ASSET = "file")
 load("render.star", "render")
@@ -25,15 +23,11 @@ TTL_SECONDS = 3600
 
 def main(config):
     display_info = config.bool("display_info")
-    apod = cache.get("astro_pic_of_day")
-    if apod:
-        apod = json.decode(apod)
-    else:
-        apod = get_apod(
-            APOD_URL,
-            DEVELOPER_API_KEY,
-            TTL_SECONDS,
-        )
+    apod = get_apod(
+        APOD_URL,
+        DEVELOPER_API_KEY,
+        TTL_SECONDS,
+    )
     title = apod["title"]
     image_src = base64.decode(apod["image_src"])
 
@@ -109,19 +103,17 @@ def main(config):
 def get_apod(url, api_key, ttl_seconds):
     # Return astronomy picture of the day
     params = {"api_key": api_key, "thumbs": "True"}
-    response = http.get(url = url, params = params)
+    response = http.get(url = url, params = params, ttl_seconds = ttl_seconds)
     if response.status_code != 200:
         fail("status %d from %s: %s" % (response.status_code, url, response.body()))
     apod = response.json()
-    apod["image_src"] = base64.encode(get_image_src(apod["url"]))
+    apod["image_src"] = base64.encode(get_image_src(apod["url"], ttl_seconds))
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("astro_pic_of_day", json.encode(apod), ttl_seconds = ttl_seconds)
     return apod
 
-def get_image_src(url):
+def get_image_src(url, ttl_seconds):
     # Return and cache image data from url provided
-    response = http.get(url)
+    response = http.get(url, ttl_seconds = ttl_seconds)
     if response.status_code != 200:
         fail("status %d from %s: %s" % (response.status_code, url, response.body()))
     image_src = response.body()

@@ -1,5 +1,3 @@
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/logo.png", LOGO_ASSET = "file")
@@ -78,6 +76,7 @@ def get_data(tag, token, playlist, since):
         API_ENDPOINT,
         headers = {"Authorization": token},
         params = params,
+        ttl_seconds = TWELVE_HOURS,
     )
 
     if res.status_code != 200:
@@ -221,18 +220,7 @@ def main(config):
         print("error: tag or token is not set")
         return render_data(EMPTY_DATA)
 
-    # Cache by config options.
-    key = json.encode((tag, playlist, since))
-    data_cached = cache.get(key)
-
-    if data_cached == None:
-        print("cache miss")
-        data = get_data(tag, token, playlist, since)
-        cache.set(key, json.encode(data), ttl_seconds = TWELVE_HOURS)
-    else:
-        print("cache hit")
-        data = json.decode(data_cached)
-
+    data = get_data(tag, token, playlist, since)
     print(data)
 
     return render_data(data)

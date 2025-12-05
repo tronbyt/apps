@@ -8,7 +8,6 @@ Author: Dan Adam
 # Thanks: Portions of the code were adapted from the sf_next_muni applet written by Martin Strauss
 # Attribution: Gas Icon from "https://www.iconfinder.com/icons/111078/gas_icon", Costco Icon from "https://play-lh.googleusercontent.com/gqOziTbVWioRJtHh7OvfOq07NCTcAHKWBYPQKJOZqNcczpOz5hdrnQNY7i2OatJxmuY=w240-h480-rw"
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -196,18 +195,10 @@ def get_schema():
     )
 
 def get_cached_data(url, ttl):
-    cached_data = cache.get(url)
-
-    if cached_data != None:
-        response_data = json.decode(cached_data)
-    else:
-        http_data = http.get(url, headers = API_HEADERS)
-        if http_data.status_code != 200:
-            fail("HTTP request failed with status {} for URL {}".format(http_data.status_code, url))
-        response_data = [x for x in http_data.json() if type(x) == "dict"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, json.encode(response_data), ttl_seconds = ttl)
+    http_data = http.get(url, headers = API_HEADERS, ttl_seconds = ttl)
+    if http_data.status_code != 200:
+        fail("HTTP request failed with status {} for URL {}".format(http_data.status_code, url))
+    response_data = [x for x in http_data.json() if type(x) == "dict"]
 
     return response_data
 

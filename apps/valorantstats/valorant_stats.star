@@ -5,7 +5,6 @@ Description: Pulls live VALORANT rank stats using henrikdev's Valorant API based
 Author: ohdxnte
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/default_emblem.png", DEFAULT_EMBLEM_ASSET = "file")
@@ -51,29 +50,28 @@ def main(config):
     # call get api data function (check if have cache or make fresh api call) w/ ttl of 300 to not rate limit api
     user_stat_data = getAPIDataCacheOrHTTP(val_tag_api_link, data, ttl_seconds = 300)
 
+    #call user stats function passing in API JSON data and provided_val_tag_name
+    if user_stat_data == None:
+        return render.Root(
+            child = render.WrappedText("API Error / No Data", color = "#FF0000"),
+        )
+
     # encode json data for parsing later
     user_stat_data = json.encode(user_stat_data)
 
-    #call user stats function passing in API JSON data and provided_val_tag_name
-    if user_stat_data == None:
-        print("yo u aint got NO data my boy das not good")
-        # draft fail render screen here
-        # it wont reach this point as if it has no data it will either 404/error from api HTTP req OR it will default to #1 leaderboard spot
+    print("You have data, proceeding")
 
-    else:
-        print("You have data, proceeding")
+    # set data variables from cached/parsed json
+    rank = json.decode(user_stat_data)["data"]["current_data"]["currenttierpatched"]
+    json_image = json.decode(user_stat_data)["data"]["current_data"]["images"]["small"]
 
-        # set data variables from cached/parsed json
-        rank = json.decode(user_stat_data)["data"]["current_data"]["currenttierpatched"]
-        json_image = json.decode(user_stat_data)["data"]["current_data"]["images"]["small"]
+    # exception case if rank is set to none set text/image to unranked so it can still pass data
+    if rank == None:
+        rank = "Unranked"
+        json_image = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/0.png"
 
-        # exception case if rank is set to none set text/image to unranked so it can still pass data
-        if rank == None:
-            rank = "Unranked"
-            json_image = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/0.png"
-
-        # get base64 image from json png url
-        rank_image = getImage(json_image)
+    # get base64 image from json png url
+    rank_image = getImage(json_image)
 
     # render data
     print(provided_val_tag_name + ", " + rank)
@@ -83,7 +81,8 @@ def main(config):
 def getAPIDataCacheOrHTTP(val_tag_api_link, data, ttl_seconds):
     rep = http.get(val_tag_api_link, ttl_seconds = ttl_seconds)
     if rep.status_code != 200:
-        fail("VALORANT API request failed with status %d", rep.status_code)
+        print("VALORANT API request failed with status %d" % rep.status_code)
+        return None
     data = rep.json()
     return data
 

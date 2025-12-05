@@ -336,7 +336,6 @@ def refresh_msft_access_token(config):
 
         response_json = response.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             response_json["refresh_token"],
             response_json["access_token"],
@@ -372,7 +371,6 @@ def oauth_handler(params):
 
     response_json = response.json()
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(
         response_json["refresh_token"],
         response_json["access_token"],

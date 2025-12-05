@@ -5,7 +5,6 @@ Description: Energy production and consumption monitor for your SolarEdge solar 
 Author: marcusb
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -51,15 +50,10 @@ def main(config):
 
     if api_key and site_id:
         url = URL.format(site_id)
-        data = cache.get(url)
-        if not data:
-            rep = http.get(url, params = {"api_key": api_key})
-            if rep.status_code != 200:
-                fail("SolarEdge API request failed with status {}".format(rep.status_code))
-            data = rep.body()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(url, data, ttl_seconds = CACHE_TTL)
+        rep = http.get(url, params = {"api_key": api_key}, ttl_seconds = CACHE_TTL)
+        if rep.status_code != 200:
+            fail("SolarEdge API request failed with status {}".format(rep.status_code))
+        data = rep.body()
         o = json.decode(data)
     else:
         o = DUMMY_DATA

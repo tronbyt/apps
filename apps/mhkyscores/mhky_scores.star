@@ -153,9 +153,18 @@ def main(config):
     dateFuture = now + time.parse_duration("%dh" % 6 * 24)
     league = {LEAGUE: API + "?limit=300" + (selectedTeam == "all" and " " or "&dates=" + datePast.format("20060102") + "-" + dateFuture.format("20060102"))}
     scores = get_scores(league, selectedTeam)
+    if len(scores) == 0:
+        return render.Root(
+            child = render.Box(
+                child = render.Text("No Games", color = "#F00"),
+            ),
+        )
+
     if len(scores) > 0:
         for i, s in enumerate(scores):
             gameStatus = s["status"]["type"]["state"]
+            if len(s["competitions"]) == 0:
+                continue
             competition = s["competitions"][0]
             home = competition["competitors"][0]["team"]["abbreviation"]
             away = competition["competitors"][1]["team"]["abbreviation"]
@@ -1050,7 +1059,13 @@ def get_scores(urls, team):
     gameCount = 0
     for i, s in urls.items():
         data = get_cachable_data(s)
+        if not data:
+            print("Failed to retrieve data for %s" % s)
+            continue
         decodedata = json.decode(data)
+        if "events" not in decodedata or not decodedata["events"]:
+            print("No events found in data for %s" % s)
+            continue
         allscores.extend(decodedata["events"])
         if team != "all" and team != "":
             newScores = []
@@ -1123,7 +1138,7 @@ def get_background_color(team, displayType, color):
         color = altcolors[team]
     else:
         color = "#" + color
-    if color == "#ffffff" or color == "#000000":
+    if color == "#ffffff" or color == "#000000" or color == "#NULL":
         color = "#222"
     return color
 
@@ -1227,6 +1242,7 @@ def get_logo_column(showRanking, team, Logo, LogoSize, Rank, ScoreColor, textFon
 def get_cachable_data(url, ttl_seconds = CACHE_TTL_SECONDS):
     res = http.get(url = url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
-        fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
+        print("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
+        return None
 
     return res.body()

@@ -25,6 +25,7 @@ ICON_RIGHT = ICON_RIGHT_ASSET.readall()
 
 yellow = "#ffcc66"
 blue = "#3399ff"
+default_username = ""
 
 #
 
@@ -40,6 +41,11 @@ def float_to_string_without_trailing_decimal(f):
 
 def main(config):
     decrypted_key = config.get("fortnite_api_key")
+    if not decrypted_key:
+        return render.Root(
+            child = render.WrappedText("API Key not set", color = "#ff0000"),
+        )
+
     headers = {
         "Authorization": decrypted_key,
     }

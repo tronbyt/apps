@@ -407,7 +407,6 @@ def refresh_msft_access_token(config):
 
         response_json = response.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             response_json["refresh_token"],
             response_json["access_token"],
@@ -447,7 +446,7 @@ def get_msft_events(msft_access_token, timezone):
 
         # Handling MSFT api paging
         for _ in range(NUMBER_OF_MSFT_FETCH_ITERATIONS):
-            response = http.get(url = url, headers = headers, params = params)
+            response = http.get(url = url, headers = headers, params = params, ttl_seconds = TTL_SECONDS)
             if response.status_code != 200:
                 fail("MSFT request failed with status:%d - %s" % (response.status_code, response.body()))
 
@@ -457,12 +456,6 @@ def get_msft_events(msft_access_token, timezone):
             if not url:
                 break
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            msft_access_token + "_msft_events_cached",
-            json.encode(msft_events),
-            ttl_seconds = TTL_SECONDS,
-        )
         return msft_events
 
 def get_msft_current_events(msft_events, timezone):
@@ -623,7 +616,6 @@ def refresh_webex_access_token(config):
 
         response_json = response.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(
             response_json["refresh_token"],
             response_json["access_token"],
@@ -645,11 +637,10 @@ def get_webex_details(webex_access_token):
         headers = {
             "Authorization": "Bearer " + webex_access_token,
         }
-        response = http.get(WEBEX_PERSONAL_DETAILS_URL, headers = headers)
+        response = http.get(WEBEX_PERSONAL_DETAILS_URL, headers = headers, ttl_seconds = TTL_SECONDS)
 
         # Set a cache key if API response that there have been too many requests
         if response.status_code == 429:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(
                 webex_access_token + "_webex_too_many_requests",
                 True,
@@ -661,12 +652,6 @@ def get_webex_details(webex_access_token):
 
         response_json = response.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            webex_access_token + "_webex_details_cached",
-            json.encode(response_json),
-            ttl_seconds = TTL_SECONDS,
-        )
         return response_json
 
 def get_webex_status(webex_access_token):
@@ -819,7 +804,6 @@ def msft_oauth_handler(params):
 
     response_json = response.json()
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(
         response_json["refresh_token"],
         response_json["access_token"],
@@ -849,7 +833,6 @@ def webex_oauth_handler(params):
 
     response_json = response.json()
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(
         response_json["refresh_token"],
         response_json["access_token"],

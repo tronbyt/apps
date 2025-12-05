@@ -5,9 +5,7 @@ Description: Displays your current Coinbase holdings and balances.
 Author: harrywynn
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/coinbase_logo.png", COINBASE_LOGO_ASSET = "file")
@@ -29,47 +27,29 @@ def main(config):
     AUTH_TOKEN = config.get("token")
 
     # load exchange rates
-    rates = cache.get("coinbase.price.cache.%s" % hash.md5(AUTH_TOKEN))
+    # get current exchange rates
+    res = http.get("https://api.coinbase.com/v2/exchange-rates", ttl_seconds = 900)
 
-    if rates != None:
-        # cached rates
-        rates = json.decode(rates)
+    if res.status_code != 200:
+        return render.Root(
+            child = render.Text("Rates unavailable!"),
+        )
     else:
-        # get current exchange rates
-        res = http.get("https://api.coinbase.com/v2/exchange-rates")
+        # cache for 15 minutes
+        rates = res.json()["data"]["rates"]
 
-        if res.status_code != 200:
-            return render.Root(
-                child = render.Text("Rates unavailable!"),
-            )
-        else:
-            # cache for 15 minutes
-            rates = res.json()["data"]["rates"]
+    # load account balances
+    res = http.get("https://coinbase.com/api/v3/brokerage/accounts?limit=250", headers = {
+        "Authorization": "Bearer " + AUTH_TOKEN,
+    }, ttl_seconds = 900)
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("coinbase.price.cache.%s" % hash.md5(AUTH_TOKEN), json.encode(rates), ttl_seconds = 900)
-
-    accounts = cache.get("coinbase.accounts.cache.%s" % hash.md5(AUTH_TOKEN))
-
-    if accounts != None:
-        # cached accounts
-        accounts = json.decode(accounts)
+    if res.status_code != 200:
+        return render.Root(
+            child = render.Text("Accounts unavailable!"),
+        )
     else:
-        # load account balances
-        res = http.get("https://coinbase.com/api/v3/brokerage/accounts?limit=250", headers = {
-            "Authorization": "Bearer " + AUTH_TOKEN,
-        })
-
-        if res.status_code != 200:
-            return render.Root(
-                child = render.Text("Accounts unavailable!"),
-            )
-        else:
-            # cache for 15 minutes
-            accounts = res.json()["accounts"]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("coinbase.accounts.cache.%s" % hash.md5(AUTH_TOKEN), json.encode(accounts), ttl_seconds = 900)
+        # cache for 15 minutes
+        accounts = res.json()["accounts"]
 
     if accounts == None:
         return render.Root(

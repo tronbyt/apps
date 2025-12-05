@@ -34,30 +34,22 @@ CACHE_KEY_TAGLINE_BACKUP = "verge-dot-com-tagline-backup"
 SELECTOR_TAGLINE = ".duet--recirculation--storystream-header"
 
 def main():
-    tagline = cache.get(CACHE_KEY_TAGLINE)
     tagline_backup = cache.get(CACHE_KEY_TAGLINE_BACKUP)
 
-    if tagline == None:
-        resp = http.get(SITE)
-        resp_body = html(resp.body())
-        tagline = get_tagline(resp_body)
-        if tagline == None or tagline == "":
-            if tagline_backup == None:
-                tagline = PLACEHOLDER_TEXT
-                display = PLACEHOLDER_TEXT
-            else:
-                tagline = tagline_backup
-                display = "* " + tagline_backup
+    resp = http.get(SITE, ttl_seconds = 900)
+    resp_body = html(resp.body())
+    tagline = get_tagline(resp_body)
+    if tagline == None or tagline == "":
+        if tagline_backup == None:
+            tagline = PLACEHOLDER_TEXT
+            display = PLACEHOLDER_TEXT
         else:
-            display = tagline
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(CACHE_KEY_TAGLINE, tagline, ttl_seconds = 900)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(CACHE_KEY_TAGLINE_BACKUP, tagline, ttl_seconds = 1200)
+            tagline = tagline_backup
+            display = "* " + tagline_backup
     else:
         display = tagline
+
+    cache.set(CACHE_KEY_TAGLINE_BACKUP, tagline, ttl_seconds = 1200)
 
     return render.Root(
         child = render.Column(

@@ -5,8 +5,6 @@ Description: Displays the name, speed, distance, and arrival of the next near Ea
 Author: noahcolvin
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/image.png", IMAGE_ASSET = "file")
 load("render.star", "render")
@@ -128,23 +126,15 @@ def get_soonest_neo():
     return next
 
 def get_data():
-    neos_cached = cache.get(CACHE_KEY)
-    if neos_cached != None:
-        print("using cache")
-        return json.decode(neos_cached)
-
     url = URL.format(format_date_padded(time.now()))
     print("fetching {}".format(url))
-    resp = http.get(url)
+    resp = http.get(url, ttl_seconds = 43200)
 
     if resp.status_code != 200:
         print("request failed with status {}".format(resp.status_code))
         return None
     print("success")
     data = resp.json()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(CACHE_KEY, json.encode(data), ttl_seconds = 43200)
 
     return data
 

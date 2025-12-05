@@ -78,8 +78,8 @@ def extract_station(station):
         print(station)
     return result
 
-def extract_stations(page, index):
-    raw = page["modules"]["data"][index]["data"]
+def extract_stations(module):
+    raw = module["data"]
     stations = [extract_station(s) for s in raw if s]
     return {s["id"]: s for s in stations if s}
 
@@ -87,13 +87,19 @@ def load_stations():
     resp = http.get(
         url = STATIONS_URL,
         headers = {
-            "User-Agent": "USER_AGENT",
+            "User-Agent": USER_AGENT,
         },
         ttl_seconds = 60,
     )
     page = html(resp.body())
-    raw = json.decode(page.find("div#main > script").text()[len(JSON_PREFIX):-2])
-    return extract_stations(raw, 0), extract_stations(raw, 1)
+    script = page.find("script#__NEXT_DATA__")
+    if not script:
+        fail("Could not find __NEXT_DATA__ script")
+
+    raw = json.decode(script.text())
+    modules = raw["props"]["pageProps"]["dehydratedState"]["queries"][0]["state"]["data"]["data"]
+
+    return extract_stations(modules[0]), extract_stations(modules[1])
 
 def render_station(station):
     return render.Padding(

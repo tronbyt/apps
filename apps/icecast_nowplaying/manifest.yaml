@@ -1,6 +1,6 @@
 ---
 name: Icecast Now Playing
-summary: Now playing on your Icecast stream
+summary: Now playing on Icecast
 desc: Display the currently playing track from any Icecast streaming server. Configure your Icecast status-json.xsl URL and optionally customize the stream name.
 author: tavdog
 fileName: icecast-nowplaying.star

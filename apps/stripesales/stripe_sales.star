@@ -1,5 +1,3 @@
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
@@ -55,7 +53,7 @@ def stripe_api(endpoint, params, api_key):
 
     headers = {"Content-Type": "application/json", "Authorization": "Bearer {}".format(api_key)}
 
-    response = http.get(url = url, headers = headers, params = params)
+    response = http.get(url = url, headers = headers, params = params, ttl_seconds = 300)
 
     return response.json()
 
@@ -80,18 +78,7 @@ def get_sales(api_key):
     return {"error": res["error"]["message"]}
 
 def get_content(api_key):
-    content = cache.get(api_key)
-
-    if content == None:
-        response = get_sales(api_key)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(api_key, json.encode(response), ttl_seconds = 300)
-        content = response
-    else:
-        content = json.decode(content)
-
-    return content
+    return get_sales(api_key)
 
 def main(config):
     api_key = config.get(API_KEY)

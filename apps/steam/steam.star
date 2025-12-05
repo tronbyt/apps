@@ -5,8 +5,6 @@ Description: Displays the game that the specified user is currently playing, or 
 Author: Jeremy Tavener
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/steam_icon.png", STEAM_ICON_ASSET = "file")
@@ -47,30 +45,20 @@ def main(config):
         game_string = "Now Playing: " + resp.json()["response"]["players"][0]["gameextrainfo"]
         current_game_id = resp.json()["response"]["players"][0]["gameid"]
 
-        key = steam_id + "_" + current_game_id
-        steam_game_icon_cached = cache.get(key)
+        # Grab the game Icon - this is groooooosss
+        json_blob = json.encode({"steamid": steam_id, "include_appinfo": True, "appids_filter": [current_game_id]})
 
-        if steam_game_icon_cached != None:
-            main_icon = base64.decode(steam_game_icon_cached)
+        resp = http.get(API_OWNED_GAMES, params = {"key": api_key, "input_json": str(json_blob)}, ttl_seconds = CACHE_TTL_SECONDS)
+
+        if resp.status_code != 200:
+            return display_failure("Failed to get the current game icon with code {}".format(resp.status_code))
+
+        if resp.json()["response"]["game_count"] == 1:
+            game_icon_hash = resp.json()["response"]["games"][0]["img_icon_url"]
+            game_icon_url = "http://media.steampowered.com/steamcommunity/public/images/apps/" + str(current_game_id) + "/" + game_icon_hash + ".jpg"
+            main_icon = http.get(game_icon_url, ttl_seconds = CACHE_TTL_SECONDS).body()
         else:
-            # Grab the game Icon - this is groooooosss
-            json_blob = json.encode({"steamid": steam_id, "include_appinfo": True, "appids_filter": [current_game_id]})
-
-            resp = http.get(API_OWNED_GAMES, params = {"key": api_key, "input_json": str(json_blob)})
-
-            if resp.status_code != 200:
-                return display_failure("Failed to get the current game icon with code {}".format(resp.status_code))
-
-            if resp.json()["response"]["game_count"] == 1:
-                game_icon_hash = resp.json()["response"]["games"][0]["img_icon_url"]
-                game_icon_url = "http://media.steampowered.com/steamcommunity/public/images/apps/" + str(current_game_id) + "/" + game_icon_hash + ".jpg"
-                main_icon = http.get(game_icon_url).body()
-                icon_encoded = base64.encode(main_icon)
-
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                cache.set(key, icon_encoded, ttl_seconds = CACHE_TTL_SECONDS)
-            else:
-                main_icon = STEAM_ICON
+            main_icon = STEAM_ICON
 
     else:
         # There's no current game - get a list of previously played to display.

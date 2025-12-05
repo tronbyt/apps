@@ -6,4 +6,5 @@ desc: Display real-time MARTA train locations and optionaly show station arrival
 author: InTheDaylight14
 fileName: marta_map.star
 packageName: martamap
+broken: true
 recommendedInterval: 5

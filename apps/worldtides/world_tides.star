@@ -5,7 +5,6 @@ Description: Display global tide predictions in list format.
 Author: tavdog
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
@@ -39,7 +38,7 @@ def get_tides_hilo(api_key, lat, lon, start, end, datum):
     url = API_URL_HILO % (lat, lon, start, end, datum)
     debug_print("HILO Url : " + url)
     if not debug:
-        resp = http.get(url, headers = {"Authorization": api_key}, ttl_seconds = 0)  # cache for 4 hours (tides don't change much)
+        resp = http.get(url, headers = {"Authorization": api_key}, ttl_seconds = 86400)  # cache for 24 hours (tides don't change much)
 
         # we don't check for http 200 here because an error will have an "errors" key in the json and so we check for that later
         tides = json.decode(resp.body())
@@ -53,7 +52,7 @@ def get_tides_graph(api_key, lat, lon, start, end, datum):
     url = API_URL_GRAPH % ((lat, lon, start, end, datum))
     debug_print("Graph Url : " + url)
     if not debug:
-        resp = http.get(url, headers = {"Authorization": api_key}, ttl_seconds = 0)  # cache for 4 hours (tides don't change much)
+        resp = http.get(url, headers = {"Authorization": api_key}, ttl_seconds = 86400)  # cache for 24 hours (tides don't change much)
 
         # print(resp.headers.get("Tidbyt-Cache-Status"))
         # we don't check for http 200 here because an error will have an "errors" key in the json and so we check for that later
@@ -134,24 +133,7 @@ def main(config):
 
     ################################ CACHINE CODE
     tides_hilo = {}
-
-    #load HILO cache
-    cache_key_hilo = "world_tides_%s_%s" % (lat + lon, start)
-    cache_str_hilo = cache.get(cache_key_hilo)  #  not actually a json object yet, just a string
-
-    #load GRAPH cache
-    cache_key_graph = "world_tides_graph_%s_%s" % (lat + lon, start)
-    cache_str_graph = cache.get(cache_key_graph)
-    debug_print("cache keys : %s , %s" % (cache_key_hilo, cache_key_graph))
-
     tides_graph = {}
-
-    if cache_str_hilo != None:
-        debug_print("loading cached hilo data")
-        tides_hilo = json.decode(cache_str_hilo)
-    if cache_str_graph != None:
-        debug_print("loading cached graph data")
-        tides_graph = json.decode(cache_str_graph)
 
     if len(tides_hilo) == 0:  # len(None) is 0 too
         debug_print("pulling fresh tide data")
@@ -159,20 +141,14 @@ def main(config):
         tides_hilo = get_tides_hilo(api_key, lat, lon, start, end, DATUM)
         if "errors" in tides_hilo:
             return error(tides_hilo["errors"].values()[0])
-        if tides_hilo != None:
-            cache.set(cache_key_hilo, json.encode(tides_hilo), ttl_seconds = 86400)  # 24 hours
 
         tides_graph = get_tides_graph(api_key, lat, lon, start, end, DATUM)
-        if tides_graph != None:
-            cache.set(cache_key_graph, json.encode(tides_graph), ttl_seconds = 86400)  # 24 hours
 
     # debug_print(tides_hilo)
     # debug_print(tides_graph)
     # if tides_hilo != None:
-    #     # TODO: Determine if this cache call can be converted to the new HTTP cache.
     #     cache.set(cache_key_hilo, json.encode(tides_hilo), ttl_seconds = 14400)  # 4 hours
 
-    #     # TODO: Determine if this cache call can be converted to the new HTTP cache.
     #     cache.set(cache_key_graph, json.encode(tides_graph), ttl_seconds = 14400)  # 4 hours
 
     # debug_print("Tides HILO : " + str(tides_hilo))

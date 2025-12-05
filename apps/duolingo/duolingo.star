@@ -7,7 +7,6 @@ Thanks: @drudge @whyamIhere @AmillionAir
 """
 
 load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/crown_icon.png", CROWN_ICON_ASSET = "file")
 load("images/duolingo_icon_angry.webp", DUOLINGO_ICON_ANGRY_ASSET = "file")
@@ -280,17 +279,11 @@ def main(config):
     # Setup user cache keys
     duolingo_cache_key_username = "duolingo_%s" % duolingo_username
 
-    duolingo_cache_key_userid = "%s_userid" % duolingo_cache_key_username
-    duolingo_cache_key_xpsummary_json = "%s_xpsummary_json" % duolingo_cache_key_username
     duolingo_cache_key_saveddate = "%s_saveddate" % duolingo_cache_key_username
     duolingo_cache_key_totalxp_daystart = "%s_totalxp_daystart" % duolingo_cache_key_username
     duolingo_cache_key_streak_daystart = "%s_streak_daystart" % duolingo_cache_key_username
-    duolingo_cache_key_xp_query_time = "%s_xp_query_time" % duolingo_cache_key_username
 
     # Get Cache variables
-    duolingo_userid_cached = cache.get(duolingo_cache_key_userid)
-    duolingo_xpsummary_json_cached = cache.get(duolingo_cache_key_xpsummary_json)
-    duolingo_xp_query_time_cached = cache.get(duolingo_cache_key_xp_query_time)
     duolingo_saveddate_cached = cache.get(duolingo_cache_key_saveddate)
     duolingo_totalxp_daystart_cached = cache.get(duolingo_cache_key_totalxp_daystart)
     duolingo_streak_daystart_cached = cache.get(duolingo_cache_key_streak_daystart)
@@ -319,18 +312,7 @@ def main(config):
 
     # Check a username has been provided (i.e. field is not blank)
     if duolingo_username != None:
-        # Check if the userId is already known, otherwise perform a query to look it up
-        if duolingo_userid_cached == None:
-            do_duolingo_main_query = True
-        else:
-            do_duolingo_main_query = False
-            duolingo_userid = duolingo_userid_cached
-            print("Cached userId for username " + duolingo_username + ": " + duolingo_userid)
-
-            # update userid cache timer
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(duolingo_cache_key_userid, duolingo_userid, ttl_seconds = 604800)
-            display_error_msg = False
+        do_duolingo_main_query = True
 
     # Lookup userId from supplied username (if not already found in cache)
     if do_duolingo_main_query == True:
@@ -352,7 +334,7 @@ def main(config):
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
         }
 
-        duolingo_main_query = http.get(duolingo_main_query_url, headers = headers)
+        duolingo_main_query = http.get(duolingo_main_query_url, headers = headers, ttl_seconds = 604800)
 
         if duolingo_main_query.status_code != 200:
             if duolingo_main_query.status_code == 422:
@@ -380,9 +362,6 @@ def main(config):
                 duolingo_userid = int(duolingo_main_json["users"][0]["id"])
                 if duolingo_userid != None:
                     print("Success! userId for username \"" + str(duolingo_username) + "\": " + str(duolingo_userid))
-
-                    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                    cache.set(duolingo_cache_key_userid, str(duolingo_userid), ttl_seconds = 604800)
                     display_error_msg = False
                 else:
                     # Show error if username not found
@@ -423,41 +402,22 @@ def main(config):
 
         DUOLINGO_XP_QUERY_URL = duolingo_xpsummary_query_1 + str(duolingo_userid) + duolingo_xpsummary_query_2 + startDate + duolingo_xpsummary_query_3 + endDate + duolingo_xpsummary_query_4 + timezone
 
-        if duolingo_xpsummary_json_cached != None:
-            duolingo_xpsummary_json = json.decode(duolingo_xpsummary_json_cached)
-
-            # Convert xp_query_time string back in to time.time
-            xp_query_time = time.parse_time(duolingo_xp_query_time_cached, "Mon, 02 Jan 2006 15:04:05 -0700")
-
-            print("XP summary data retrieved from cache.")
-            live_xp_data = False
+        print("Querying duolingo.com for XP summary data.")
+        xpsummary_query = http.get(DUOLINGO_XP_QUERY_URL, ttl_seconds = 900)
+        if xpsummary_query.status_code != 200:
+            print("XP summary query failed with status %d", xpsummary_query.status_code)
+            display_error_msg = True
+            error_message_1 = "check"
+            error_message_2 = "connection"
+            live_xp_data = None
         else:
-            print("Querying duolingo.com for XP summary data.")
-            xpsummary_query = http.get(DUOLINGO_XP_QUERY_URL)
-            if xpsummary_query.status_code != 200:
-                print("XP summary query failed with status %d", xpsummary_query.status_code)
-                display_error_msg = True
-                error_message_1 = "check"
-                error_message_2 = "connection"
-                live_xp_data = None
-            else:
-                display_error_msg = False
-                duolingo_xpsummary_json = xpsummary_query.json()
-                xp_query_time = now
-                live_xp_data = True
+            display_error_msg = False
+            duolingo_xpsummary_json = xpsummary_query.json()
+            xp_query_time = now
+            live_xp_data = True
 
-                # Show error if username was not recognised
-                print("XP summary data retrieved from duolingo.com")
-
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                cache.set(duolingo_cache_key_xpsummary_json, json.encode(duolingo_xpsummary_json), ttl_seconds = 900)
-
-                # Format current time into string
-                time_now_formatted = now.format("Mon, 02 Jan 2006 15:04:05 -0700")
-                print("Time Now (Formatted for cache): " + str(time_now_formatted))
-
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                cache.set(duolingo_cache_key_xp_query_time, str(time_now_formatted), ttl_seconds = 900)
+            # Show error if username was not recognised
+            print("XP summary data retrieved from duolingo.com")
 
         # Setup dummy data for use on days with no data available
         dummy_data = {"gainedXp": 0, "streakExtended": False, "frozen": False, "repaired": False, "dummyData": True}
@@ -609,7 +569,6 @@ def main(config):
                 print("XP Count at Start of Day: " + str(duolingo_totalxp_daystart))
 
                 # Store start-of-day XP count in cache (for 24hrs)
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set(duolingo_cache_key_totalxp_daystart, str(duolingo_totalxp_daystart), ttl_seconds = 86400)
 
                 # Now we cache the Streak at the start of the day, and store it in the cache
@@ -621,11 +580,9 @@ def main(config):
                 print("Streak at Start of Day: " + str(duolingo_streak_daystart))
 
                 # Store start-of-day XP count in cache (for 24hrs)
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set(duolingo_cache_key_streak_daystart, str(duolingo_streak_daystart), ttl_seconds = 86400)
 
                 # Finally update the cache with the new date so this won't run again until tomorrow (stored for 24 hours)
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set(duolingo_cache_key_saveddate, str(date_now), ttl_seconds = 86400)
 
             # Set variables for current state

@@ -4,7 +4,6 @@ Summary: Display WoW Token Price
 Description: Displays the current price of the World of Warcraft token in various regions. Data provided by wowtoken.app.
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/gold_icon.jpg", GOLD_ICON_ASSET = "file")
@@ -41,26 +40,15 @@ def get_schema():
 def main(config):
     region = config.get("region", "us")
 
-    cache_id = "wowtoken_{}".format(region)
-    token_price = cache.get(cache_id)
+    print("Cache miss")
 
-    if token_price != None:
-        print("Cached price " + str(token_price))
-        token_price = float(token_price)
-        data_available = True
+    query = http.get(WOW_TOKEN_URL, ttl_seconds = 600)
+    if query.status_code != 200:
+        fail("API request failed with status %d", query.status_code)
     else:
-        print("Cache miss")
-
-        query = http.get(WOW_TOKEN_URL)
-        if query.status_code != 200:
-            fail("API request failed with status %d", query.status_code)
-        else:
-            token_price = float(query.json()[region][1])
-            print("Got price " + str(token_price))
-            data_available = True
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, str(token_price), ttl_seconds = 600)
+        token_price = float(query.json()[region][1])
+        print("Got price " + str(token_price))
+        data_available = True
 
     display = []
 

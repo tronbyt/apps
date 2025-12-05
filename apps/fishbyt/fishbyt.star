@@ -5,7 +5,6 @@ Description: Gaze upon glorious marine life.
 Author: vlauffer
 """
 
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/fail_image.png", FAIL_IMAGE_ASSET = "file")
 load("re.star", "re")
@@ -105,7 +104,7 @@ def main():
     )
 
 def get_fish_pic(url):
-    res = http.get(url = url, ttl_seconds = CACHE_TTL_SECONDS)
+    res = http.get(url = url, ttl_seconds = CACHE_TTL_SECONDS, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
     if res.status_code != 200:
         fail("No fish here! Request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
@@ -113,7 +112,7 @@ def get_fish_pic(url):
 
 def get_fish_barrel():
     # print("Let's go fishing!")
-    rep = http.get(FISH_WATCH_URL, ttl_seconds = CACHE_TTL_SECONDS)
+    rep = http.get(FISH_WATCH_URL, ttl_seconds = CACHE_TTL_SECONDS, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
     if rep.status_code != 200:
         fail("FishWatch request failed with status %d", rep.status_code)
     fish_barrel = rep.json()

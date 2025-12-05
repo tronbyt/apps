@@ -29,7 +29,6 @@ Author: github.com/danrods
 #
 #
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bible_icon.png", BIBLE_ICON_ASSET = "file")
@@ -63,27 +62,19 @@ def main():
     print("~~~~~~~~~Starting App! ~~~~~~~~~~")
 
     bible_votd = None
-    cached_verse = cache.get("bible_votd")
-    if cached_verse != None:
-        bible_votd = json.decode(cached_verse)
-        print("Hit! Displaying cached verse.")
-    else:
-        print("Miss! Calling VOTD API.")
-        rep = http.get(VOTD_URL)
-        if rep.status_code != 200:
-            fail("API request failed with status %d", rep.status_code)
+    print("Calling VOTD API.")
+    rep = http.get(VOTD_URL, ttl_seconds = 86400)
+    if rep.status_code != 200:
+        fail("API request failed with status %d", rep.status_code)
 
-        print("Got response: %s" % rep.json())
+    print("Got response: %s" % rep.json())
 
-        verseDetails = rep.json()["verse"]["details"]
-        verse = verseDetails["text"]
+    verseDetails = rep.json()["verse"]["details"]
+    verse = verseDetails["text"]
 
-        ref = getFormattedVerseRef(verseDetails["reference"])
+    ref = getFormattedVerseRef(verseDetails["reference"])
 
-        bible_votd = {"ref": ref, "verse": verse}
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("bible_votd", json.encode(bible_votd), ttl_seconds = 86400)
+    bible_votd = {"ref": ref, "verse": verse}
 
     verse_text = bible_votd["verse"]
     ref_label = bible_votd["ref"]

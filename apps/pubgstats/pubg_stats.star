@@ -6,8 +6,6 @@ Author: joes-io
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/pubg_logo.png", PUBG_LOGO_ASSET = "file")
@@ -94,74 +92,38 @@ def main(config):
     display_label = ""
     display_unit = ""
 
-    # Create player cache key
-    player_cache_key = player_name + "_" + platform
-
     # Get the player id from the player name and platform
-    # Check cache for id of entered player name on selected platform
-    player_id_cached = cache.get(player_cache_key)
+    # URL to request player data
+    url = "https://api.pubg.com/shards/{}/players?filter[playerNames]={}".format(platform, player_name)
 
-    # Use cached data if available
-    if player_id_cached != None:
-        player_id = player_id_cached
+    # Request player data
+    resp = http.get(url, headers = header, ttl_seconds = ttl_player_id)
 
-        # Otherwise make new API call
-    else:
-        # URL to request player data
-        url = "https://api.pubg.com/shards/{}/players?filter[playerNames]={}".format(platform, player_name)
+    # Check for API errors
+    if resp.status_code != 200:
+        # Display error on Tidbyt and end
+        return pretty_error(resp)
 
-        # Request player data
-        resp = http.get(url, headers = header)
+    # Get player id from API response
+    player_id = resp.json()["data"][0]["id"]
 
-        # Check for API errors
-        if resp.status_code != 200:
-            # Display error on Tidbyt and end
-            return pretty_error(resp)
+    # URL to request lifetime stats for player
+    url = "https://api.pubg.com/shards/{}/players/{}/seasons/lifetime".format(platform, player_id)
 
-        # Get player id from API response
-        player_id = resp.json()["data"][0]["id"]
+    # Add gamepad filter to Stadia API requests
+    if platform == "stadia":
+        url = url + "?filter[gamepad]=true"
 
-        # Set player id in cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(player_cache_key, str(player_id), ttl_seconds = ttl_player_id)
+    # Request lifetime stats for player
+    resp = http.get(url, headers = header, ttl_seconds = ttl_lifetime_stats)
 
-    # Get lifetime stats for that player id
-    # Create lifetime stats cache key
-    lifetime_stats_cache_key = player_id + "_" + platform
+    # Check for API errors
+    if resp.status_code != 200:
+        # Display error on Tidbyt and end
+        return pretty_error(resp)
 
-    # Check cache for lifetime stats for that player id on selected platform
-    lifetime_stats_cached = cache.get(lifetime_stats_cache_key)
-
-    # Use cached data if available
-    if lifetime_stats_cached != None:
-        lifetime_stats = lifetime_stats_cached
-
-        # Otherwise make new API call
-    else:
-        # URL to request lifetime stats for player
-        url = "https://api.pubg.com/shards/{}/players/{}/seasons/lifetime".format(platform, player_id)
-
-        # Add gamepad filter to Stadia API requests
-        if platform == "stadia":
-            url = url + "?filter[gamepad]=true"
-
-        # Request lifetime stats for player
-        resp = http.get(url, headers = header)
-
-        # Check for API errors
-        if resp.status_code != 200:
-            # Display error on Tidbyt and end
-            return pretty_error(resp)
-
-        # Encode JSON data to be stored in cache
-        lifetime_stats = json.encode(resp.json())
-
-        # Set cache with JSON object from lifetime_stats serialized to string
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(lifetime_stats_cache_key, str(lifetime_stats), ttl_seconds = ttl_lifetime_stats)
-
-    # Decode string back to JSON object to be read
-    lifetime_stats = json.decode(lifetime_stats)
+    # Encode JSON data to be stored in cache
+    lifetime_stats = resp.json()
 
     # Find label and unit type to display for selected stat
     for i in stat_details:

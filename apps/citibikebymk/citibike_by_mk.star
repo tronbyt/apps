@@ -1,4 +1,3 @@
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/img_bike_src.jpg", IMG_BIKE_SRC_ASSET = "file")
@@ -12,36 +11,22 @@ IMG_PARK_SRC = IMG_PARK_SRC_ASSET.readall()
 ttls = 60
 
 def get_resp_stations():
-    data = cache.get("data_stations")
-    if not data:
-        print("Stations data not cached")
-        url = "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_information.json"
-        resp = http.get(url)
-        data = resp.json()["data"]
-        print("Response Stations: ", resp.status_code)
+    print("Stations data not cached")
+    url = "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_information.json"
+    resp = http.get(url, ttl_seconds = ttls)
+    data = resp.json()["data"]
+    print("Response Stations: ", resp.status_code)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("data_stations", json.encode(data), ttl_seconds = ttls)
-    else:
-        print("Station data cached")
-        data = json.decode(data)
     print("Stations Data returning as", type(data))
     return data
 
 def get_resp_bikes():
-    data = cache.get("data_bikes")
-    if not data:
-        print("Bike Data not cached")
-        url_bikes = "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json"
-        resp = http.get(url_bikes)
-        data = resp.json()["data"]["stations"]
-        print("Response Availability: ", resp.status_code)
+    print("Bike Data not cached")
+    url_bikes = "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json"
+    resp = http.get(url_bikes, ttl_seconds = ttls)
+    data = resp.json()["data"]["stations"]
+    print("Response Availability: ", resp.status_code)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("data_bikes", json.encode(data), ttl_seconds = ttls)
-    else:
-        print("Bikes data cached")
-        data = json.decode(data)
     print("Bikes Data returning as", type(data))
     return data
 

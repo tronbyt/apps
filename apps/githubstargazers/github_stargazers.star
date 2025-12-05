@@ -5,7 +5,6 @@ Description: Display the GitHub stargazer count for a repo.
 Author: fulghum
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -38,6 +37,7 @@ def send_github_request(url, query_params, config):
     res = http.get(
         url = url % humanize.url_encode(query_params),
         headers = headers,
+        ttl_seconds = 300,
     )
     if res.status_code != 200:
         print("GitHub API request failed: %s - %s " % (res.status_code, res.body()))
@@ -50,14 +50,7 @@ def main(config):
     repo_name = config.get("repo_name", "apps")
 
     print("Fetching GitHub stargazer count...")
-    cache_key = "repo_stargazers_%s/%s" % (org_name, repo_name)
-    stargazers_count = cache.get(cache_key)
-
-    if stargazers_count == None:
-        stargazers_count = get_stargazers_count(org_name, repo_name, config)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, str(stargazers_count), ttl_seconds = 300)
+    stargazers_count = get_stargazers_count(org_name, repo_name, config)
 
     image_size = 16
     msg = "%s stars" % humanize.comma(stargazers_count)

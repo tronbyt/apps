@@ -35,12 +35,10 @@ def get_schema():
                 icon = "key",
                 secret = True,
             ),
-            schema.Dropdown(
+            schema.Generated(
                 id = "route",
-                name = "Bus Route",
-                desc = "The CTA Bus Route to get departure schedule for.",
-                icon = "bus",
-                options = get_bus_route_options,
+                source = "api_key",
+                handler = get_bus_route_options,
             ),
             schema.Location(
                 id = "location",
@@ -127,9 +125,7 @@ def main(config):
 ######################
 # Build Config options
 ######################
-def get_bus_route_options(config):
-    api_key = config.get("api_key")
-
+def get_bus_route_options(api_key):
     if not api_key:
         return [
             schema.Option(
@@ -147,7 +143,13 @@ def get_bus_route_options(config):
         )
         for route in routes
     ]
-    return options
+    return schema.Dropdown(
+        id = "route",
+        name = "Bus Route",
+        desc = "The CTA Bus Route to get departure schedule for.",
+        icon = "bus",
+        options = options,
+    )
 
 ######################
 # Utility methods

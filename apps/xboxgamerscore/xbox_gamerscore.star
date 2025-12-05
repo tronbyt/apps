@@ -154,9 +154,6 @@ def AnimatedScore(score = None, text_size = DEFAULT_TEXT_SIZE):
 ## Helpers
 
 def get_access_token(refresh_token):
-    access_token = cache.get(refresh_token)
-    if access_token:
-        return access_token
     res = http.post(
         url = "https://login.live.com/oauth20_token.srf",
         form_body = {
@@ -167,6 +164,7 @@ def get_access_token(refresh_token):
             "redirect_uri": cache.get("redirect_uri") or "https://pixlet.penr.ee/oauth-callback",
         },
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 1200,
     )
 
     if res.status_code != 200:
@@ -175,10 +173,7 @@ def get_access_token(refresh_token):
 
     token_params = res.json()
     access_token = token_params["access_token"]
-    ttl = int(token_params["expires_in"]) - 30
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = ttl)
     return access_token
 
 def get_profile(config):
@@ -187,19 +182,10 @@ def get_profile(config):
     if not refresh_token:
         return PREVIEW_PROFILE
 
-    access_token = cache.get(refresh_token)
-
-    if not access_token:
-        access_token = get_access_token(refresh_token)
+    access_token = get_access_token(refresh_token)
 
     if not access_token:
         return None
-
-    cached_profile = cache.get("%s|profile" % access_token)
-
-    if cached_profile:
-        profile = json.decode(cached_profile)
-        return profile
 
     user_token = exchange_access_token_for_user_token(access_token)
 
@@ -212,10 +198,6 @@ def get_profile(config):
         return None
 
     profile = get_xbox_live_profile(xsts)
-
-    if profile:
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("%s|profile" % access_token, json.encode(profile), ttl_seconds = 300)
 
     return profile
 
@@ -237,6 +219,7 @@ def exchange_access_token_for_user_token(access_token):
             "RelyingParty": "http://auth.xboxlive.com",
             "TokenType": "JWT",
         },
+        ttl_seconds = 300,
     )
 
     if res.status_code != 200:
@@ -263,6 +246,7 @@ def exchange_user_token_for_xsts_token(user_token, sandbox_id = "RETAIL"):
                 "SandboxId": sandbox_id,
             },
         },
+        ttl_seconds = 300,
     )
 
     if res.status_code != 200:
@@ -312,6 +296,7 @@ def get_xbox_live_profile(xsts):
                 "Gamertag",
             ],
         },
+        ttl_seconds = 300,
     )
 
     if res.status_code != 200:
@@ -342,7 +327,6 @@ def oauth_handler(params):
 
     # Caching this here to use in the refresh token request
     if params["redirect_uri"]:
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("redirect_uri", params["redirect_uri"])
 
     if res.status_code != 200:
@@ -350,12 +334,8 @@ def oauth_handler(params):
              (res.status_code, res.body()))
 
     token_params = res.json()
-    access_token = token_params["access_token"]
     refresh_token = token_params["refresh_token"]
-    ttl = int(token_params["expires_in"]) - 30
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl)
     return refresh_token
 
 ## Applet

@@ -7,3 +7,5 @@ author: jvivona
 fileName: mayo_clinic_news.star
 packageName: mayoclinicnews
 recommendedInterval: 10
+broken: true
+brokenReason: The source XML feed is invalid (malformed XML).

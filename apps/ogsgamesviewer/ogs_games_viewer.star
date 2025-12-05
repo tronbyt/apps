@@ -5,8 +5,6 @@ Description: Shows a visualization of currently active Go games on OGS (Online G
 Author: Neal Wright
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -61,6 +59,7 @@ def get_player_id_by_username(username):
     PLAYER_ID_URL = "https://online-go.com/api/v1/players?username={}".format(username)
     req = http.get(
         url = PLAYER_ID_URL,
+        ttl_seconds = 3600,
     )
 
     if req.status_code != 200:
@@ -78,6 +77,7 @@ def get_player_games(player_id):
     games_url = "https://online-go.com/api/v1/players/{}/games?ended__isnull=true&ordering=-ended&page_size={}".format(player_id, NUM_OF_GAMES)
     req = http.get(
         url = games_url,
+        ttl_seconds = 240,
     )
     if req.status_code != 200:
         fail("OGS request failed with status %d", req.status_code)
@@ -88,6 +88,7 @@ def get_game_state(game_id):
     state_url = "https://online-go.com/termination-api/game/{}/state".format(game_id)
     state_req = http.get(
         url = state_url,
+        ttl_seconds = 240,
     )
     if state_req.status_code != 200:
         fail("OGS request failed with status %d", state_req.status_code)
@@ -99,55 +100,39 @@ def get_game_info(game):
     game_url = "https://online-go.com{}".format(detail)
     game_req = http.get(
         url = game_url,
+        ttl_seconds = 240,
     )
     if game_req.status_code != 200:
         fail("OGS request failed with status %d", game_req.status_code)
     return game_req.json()
 
-def check_games_cache(games_cache, games_cache_key, player_id):
-    # If there is an existing games cache, pull info from the cache
-    # otherwise, pull in new games and cache them
-    if games_cache != None:
-        games = json.decode(games_cache)
-    else:
-        games = get_player_games(player_id)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(games_cache_key, json.encode(games), ttl_seconds = 240)
-    return games
-
 # Get the details for each of a player's games
-def check_games_info_cache(games_info_cache, games_info_cache_key, games, player_id):
-    if games_info_cache != None:
-        games_info = json.decode(games_info_cache)
-    else:
-        games_info = []
-        for game in games:
-            game_json = get_game_info(game)
-            game_id = int(game["id"])
-            board_state = get_game_state(game_id)
-            width = int(game_json["width"])
-            height = int(game_json["height"])
-            if (width != height and
-                width not in SIZES):
-                continue
-            if int(game_json["players"]["black"]["id"]) == player_id:
-                opponent = game_json["players"]["white"]["username"]
-                opp_color = "w"
-            else:
-                opponent = game_json["players"]["black"]["username"]
-                opp_color = "b"
-            games_info.append({
-                "moves": game_json["gamedata"]["moves"],
-                "opponent": opponent,
-                "opp_color": opp_color,
-                "state": board_state,
-                "width": width,
-                "height": height,
-            })
+def get_games_details(games, player_id):
+    games_info = []
+    for game in games:
+        game_json = get_game_info(game)
+        game_id = int(game["id"])
+        board_state = get_game_state(game_id)
+        width = int(game_json["width"])
+        height = int(game_json["height"])
+        if (width != height and
+            width not in SIZES):
+            continue
+        if int(game_json["players"]["black"]["id"]) == player_id:
+            opponent = game_json["players"]["white"]["username"]
+            opp_color = "w"
+        else:
+            opponent = game_json["players"]["black"]["username"]
+            opp_color = "b"
+        games_info.append({
+            "moves": game_json["gamedata"]["moves"],
+            "opponent": opponent,
+            "opp_color": opp_color,
+            "state": board_state,
+            "width": width,
+            "height": height,
+        })
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(games_info_cache_key, json.encode(games_info), ttl_seconds = 240)
     return games_info
 
 ### Drawing Functions ###
@@ -339,37 +324,16 @@ def main(config):
     if username == "":
         games_info = FAMOUS_GAMES
     else:
-        # Set cache keys based on username and get the current cache
-        user_cache_key = "username_{}".format(username)
-        player_id_cache_key = "player_id_{}".format(username)
-        games_cache_key = "games_{}".format(username)
-        games_info_cache_key = "games_info_{}".format(username)
-        cached_user = cache.get(user_cache_key)
-
-        # If a new Username has been set in the options, reset the games cache
-        # and pull a new player_id
-        if cached_user == None:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(user_cache_key, "True", ttl_seconds = 3600)
-            player_id = get_player_id_by_username(username)
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(player_id_cache_key, str(player_id), ttl_seconds = 3600)
-            games_cache = None
-            games_info_cache = None
-        else:
-            player_id = int(cache.get(player_id_cache_key))
-            games_cache = cache.get(games_cache_key)
-            games_info_cache = cache.get(games_info_cache_key)
-
         # Get the player ID and game details from the API
         # If the API didn't return a player ID, show a message
+        player_id = get_player_id_by_username(username)
+
         if player_id == False:
             games_info = FAMOUS_GAMES
         else:
             # Get a list of games and game details from the API
-            games = check_games_cache(games_cache, games_cache_key, player_id)
-            games_info = check_games_info_cache(games_info_cache, games_info_cache_key, games, player_id)
+            games = get_player_games(player_id)
+            games_info = get_games_details(games, player_id)
 
     # Show a message if there are no active games found
     if len(games_info) == 0:

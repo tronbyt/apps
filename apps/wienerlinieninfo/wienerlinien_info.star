@@ -10813,7 +10813,7 @@ def getInfo(externalDiva):
     infostr = cache.get("WLDIVAINFO%s" % diva)
     if infostr == None:
         #print("Asking information to Wiener Linien...")
-        jsonreceived = http.get(QUERY_URL)
+        jsonreceived = http.get(QUERY_URL, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
         if jsonreceived.status_code != 200:
             fail("Server unavailable. Received code %d", jsonreceived.status_code)
         if jsonreceived.json()["message"]["messageCode"] == 1:

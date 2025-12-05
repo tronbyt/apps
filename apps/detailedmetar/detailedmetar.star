@@ -37,16 +37,12 @@ def main(config):
     else:
         print("No cached metar data found for " + cacheName)
 
-        rep = http.get(apiURL % airport)
+        rep = http.get(apiURL % airport, ttl_seconds = 120)
 
         if rep.status_code != 200:
             fail("API Error: Failure")
 
         metarData = rep.json()
-
-        # Set cache to be alive for 120 seconds.
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cacheName, json.encode(metarData), ttl_seconds = 120)
 
     # Setup array
     decodedMetar = metarData[0]
@@ -76,14 +72,11 @@ def main(config):
         logoBase64 = base64.decode(logo, encoding = "standard")
         print("Found cached image! " + cacheName)
     else:
-        image = http.get("http://samuelsagarino.me/images/metar/" + getFlightCategory(decodedMetar) + "/" + str(getWindDirection_value(decodedMetar)) + ".png").body()
+        image = http.get("http://samuelsagarino.me/images/metar/" + getFlightCategory(decodedMetar) + "/" + str(getWindDirection_value(decodedMetar)) + ".png", ttl_seconds = 86400).body()
         print("No cached image! " + cacheName)
 
         logoBase64Encoded = base64.encode(image, encoding = "standard")
         logoBase64 = base64.decode(logoBase64Encoded, encoding = "standard")
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cacheName, json.encode(logoBase64Encoded), ttl_seconds = 86400)
 
     # Primary display
     return render.Root(

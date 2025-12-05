@@ -122,39 +122,22 @@ def main(config):
         dgb_price_usd = float(dgb_price_usd_cached)
     else:
         print("Miss! Calling CoinGecko API.")
-        dgbquery = http.get(DIGIBYTE_PRICE_URL)
+        dgbquery = http.get(DIGIBYTE_PRICE_URL, ttl_seconds = 600)
         if dgbquery.status_code != 200:
-            fail("Coingecko request failed with status %d", dgbquery.status_code)
-
-        dgb_price_aud = dgbquery.json()["digibyte"]["aud"]
-        dgb_price_cad = dgbquery.json()["digibyte"]["cad"]
-        dgb_price_eur = dgbquery.json()["digibyte"]["eur"]
-        dgb_price_gbp = dgbquery.json()["digibyte"]["gbp"]
-        dgb_price_sats = dgbquery.json()["digibyte"]["sats"]
-        dgb_price_usd = dgbquery.json()["digibyte"]["usd"]
-
-        # Store prices in cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_aud", str(dgb_price_aud), ttl_seconds = 600)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_cad", str(dgb_price_cad), ttl_seconds = 600)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_eur", str(dgb_price_eur), ttl_seconds = 600)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_gbp", str(dgb_price_gbp), ttl_seconds = 600)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_sats", str(dgb_price_sats), ttl_seconds = 600)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_usd", str(dgb_price_usd), ttl_seconds = 600)
-
-    # Format SATS price
-    dgb_price_sats = str(int(math.round(dgb_price_sats * 100)))
-    dgb_price_sats = (dgb_price_sats[0:-2] + "." + dgb_price_sats[-2:])
+            print("Coingecko request failed with status %d" % dgbquery.status_code)
+            dgb_price_aud = None
+            dgb_price_cad = None
+            dgb_price_eur = None
+            dgb_price_gbp = None
+            dgb_price_sats = None
+            dgb_price_usd = None
+        else:
+            dgb_price_aud = dgbquery.json()["digibyte"]["aud"]
+            dgb_price_cad = dgbquery.json()["digibyte"]["cad"]
+            dgb_price_eur = dgbquery.json()["digibyte"]["eur"]
+            dgb_price_gbp = dgbquery.json()["digibyte"]["gbp"]
+            dgb_price_sats = dgbquery.json()["digibyte"]["sats"]
+            dgb_price_usd = dgbquery.json()["digibyte"]["usd"]
 
     #Setup price display variable
     display_vec = []
@@ -162,6 +145,11 @@ def main(config):
     # Check for catastrophic data failure (i.e. failed to get data from CoinGecko and no cache data is available to fall back on)
     if dgb_price_usd != None:
         data_available = True
+
+        # Format SATS price if data is available
+        if dgb_price_sats != None:
+            dgb_price_sats = str(int(math.round(dgb_price_sats * 100)))
+            dgb_price_sats = (dgb_price_sats[0:-2] + "." + dgb_price_sats[-2:])
     else:
         data_available = False
         display_error = render.Row(

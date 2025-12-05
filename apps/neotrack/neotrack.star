@@ -5,8 +5,6 @@ Description: Shows the closest object on approach to Earth today according to NA
 Author: brettohland
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/asteroid.gif", ASTEROID_ASSET = "file")
@@ -22,14 +20,15 @@ def main(config):
     # NASA's API requires that the date be in a specific format
     today = humanize.time_format("yyyy-MM-dd", time.now())
 
-    # Check the cace for data before proceeding. The cache is set with a TTL of 1 day (in seconds)
-    cached_response = cache.get(CACHE_KEY)
-    if cached_response != None:
-        print("Returning cached data")
-        data = json.decode(cached_response)
-    else:
-        print("Fetching data")
-        data = fetch_and_cache_neos(today, config)
+    print("Fetching data")
+    data = fetch_and_cache_neos(today, config)
+
+    if not data:
+        return render.Root(
+            child = render.Box(
+                child = render.Text("NASA API Error", color = "#FF0000"),
+            ),
+        )
 
     neos = data["near_earth_objects"][today]
 
@@ -112,13 +111,12 @@ def fetch_and_cache_neos(today_string, config):
     today = today_string
     api_key = config.get("api_key") or "DEMO_KEY"  # NASA's demo key has a 50 req/hr limit.
     final_url = base_url + "?start_date=" + today + "&end_date=" + today + "&api_key=" + api_key
-    response = http.get(final_url)
+    response = http.get(final_url, ttl_seconds = 86400)
     if response.status_code != 200:
-        fail("Call to NASA API failed", base_url)
+        print("Call to NASA API failed")
+        return None
     data = response.json()
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(CACHE_KEY, json.encode(data), ttl_seconds = 86400)
     return data
 
 # Creates the data display component with the prefix (fixed) and the data (scrolling)

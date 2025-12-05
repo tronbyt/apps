@@ -512,7 +512,6 @@ def get_access_token(refresh_token):
         return_dict = {"access_token": body["access_token"], "new_refresh_token": body["refresh_token"], "response_status_code": str(response.status_code), "response_body": response.body()}
         print("    Caching access token")
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(refresh_token + "_access_token", json.encode(return_dict), ttl_seconds = ACCESS_TOKEN_CACHE_TTL)
         return return_dict
 
@@ -532,12 +531,9 @@ def get_league_name(access_token, GAME_KEY, league_id):
             "Accept": "application/json",
             "Content-Type": "application/json",
         }
-        league_name_response = http.get(url, headers = headers)
+        league_name_response = http.get(url, headers = headers, ttl_seconds = LEAGUE_NAME_CACHE_TTL)
 
         league_name = xpath.loads(league_name_response.body()).query("/fantasy_content/league/name")
-        if league_name != None:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(access_token + "_league_name", league_name, ttl_seconds = LEAGUE_NAME_CACHE_TTL)
 
     return league_name
 
@@ -559,7 +555,7 @@ def get_standings_and_records(access_token, GAME_KEY, league_id):
             "Accept": "application/json",
             "Content-Type": "application/json",
         }
-        standings_response = http.get(url, headers = headers)
+        standings_response = http.get(url, headers = headers, ttl_seconds = STANDINGS_CACHE_TTL)
 
         total_teams = int(xpath.loads(standings_response.body()).query("/fantasy_content/league/standings/teams/@count"))
         team_names = xpath.loads(standings_response.body()).query_all("/fantasy_content/league/standings/teams/team/name")
@@ -572,8 +568,6 @@ def get_standings_and_records(access_token, GAME_KEY, league_id):
         for team_number in range(total_teams):
             allstandings.append({"Name": team_names[team_number], "Standings": team_standings[team_number], "Wins": team_wins[team_number], "Losses": team_losses[team_number], "Ties": team_ties[team_number]})
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(access_token + "_standings", json.encode(allstandings), ttl_seconds = STANDINGS_CACHE_TTL)
     else:
         # If league ID matches and standings are cached, then call the cache
         print("    Cache Hit! Using cached standings!")

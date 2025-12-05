@@ -5,8 +5,6 @@ Description: Current city/country/ocean the ISS is flying over.
 Author: carmineguida
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -16,6 +14,8 @@ GEO_URL = "http://api.geonames.org/findNearbyPlaceNameJSON?username="
 OCEAN_URL = "http://api.geonames.org/oceanJSON?username="
 FONT = "tom-thumb"
 LOC_FONT = "tb-8"
+
+TTL_SECONDS = 180
 
 ################################################################################
 
@@ -42,7 +42,7 @@ def get_geo_info(geonames):
 ################################################################################
 
 def get_lat_lon():
-    rep = http.get(API_URL)
+    rep = http.get(API_URL, ttl_seconds = TTL_SECONDS)
     if (rep.status_code != 200):
         fail("API failed wiht status %d", rep.status_code)
     lat = rep.json()["iss_position"]["latitude"]
@@ -60,7 +60,7 @@ def get_lat_lon():
 def get_ocean(api_key, lat, lon):
     temp_url = OCEAN_URL + api_key + "&lat=" + lat + "&lng=" + lon
     country = ""
-    rep = http.get(temp_url)
+    rep = http.get(temp_url, ttl_seconds = TTL_SECONDS)
     if (rep.status_code != 200):
         fail("API failed wiht status %d", rep.status_code)
 
@@ -77,14 +77,10 @@ def get_ocean(api_key, lat, lon):
 ################################################################################
 
 def get_iss_dict(api_key):
-    cached = cache.get("iss_dict")
-    if cached != None:
-        return json.decode(cached)
-
     (lat, lon) = get_lat_lon()
 
     temp_url = GEO_URL + api_key + "&lat=" + lat + "&lng=" + lon
-    rep = http.get(temp_url)
+    rep = http.get(temp_url, ttl_seconds = TTL_SECONDS)
     if (rep.status_code != 200):
         fail("API failed with status %d", rep.status_code)
 
@@ -97,9 +93,6 @@ def get_iss_dict(api_key):
         color = "#E29315"
 
     iss_dict = {"lat": lat, "lon": lon, "city": city, "country": country, "color": color}
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("iss_dict", str(iss_dict), ttl_seconds = 180)
     return iss_dict
 
 ################################################################################

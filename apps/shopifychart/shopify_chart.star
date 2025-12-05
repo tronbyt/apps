@@ -5,9 +5,7 @@ Description: Display daily Shopify metrics and charts for revenue, orders, or un
 Author: kcharwood
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
 load("images/shopify_icon_data.png", SHOPIFY_ICON_DATA_ASSET = "file")
 load("re.star", "re")
@@ -429,29 +427,6 @@ def should_line_item_be_excluded(line_item, excluded_skus):
 
     return False
 
-def cache_orders(orders, start_time, store_name, api_token):
-    cache_key = get_cache_key(start_time, store_name, api_token)
-    print("💾 caching orders with key {}".format(cache_key))
-    json_orders = json.encode(orders)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json_orders, ttl_seconds = 300)
-
-def get_cached_orders(start_time, store_name, api_token):
-    cache_key = get_cache_key(start_time, store_name, api_token)
-    print("💾 Checking cache key {}".format(cache_key))
-    raw_orders = cache.get(cache_key)
-    if raw_orders:
-        print("💾 Returning fetched orders from cache using key {}".format(cache_key))
-        orders = json.decode(raw_orders)
-        return orders
-    else:
-        return None
-
-def get_cache_key(start_time, store_name, api_token):
-    cache_key = "shopify_daily_chart_%s" % hash.sha1(start_time + store_name + api_token)
-    return cache_key
-
 def get_total_orders_count(store_name, api_token, start_time, since_id):
     parameters = {"limit": "250", "created_at_min": "{}Z".format(start_time), "status": "any"}
     if since_id:
@@ -468,9 +443,6 @@ def get_total_orders_count(store_name, api_token, start_time, since_id):
         return count
 
 def get_orders(store_name, api_token, start_time, since_id):
-    orders = get_cached_orders(start_time, store_name, api_token)
-    if orders:
-        return orders
     print("Getting orders since {}".format(start_time))
     orders = []
     order_count = get_total_orders_count(store_name, api_token, start_time, since_id)
@@ -495,8 +467,6 @@ def get_orders(store_name, api_token, start_time, since_id):
 
     orders = [o for o in orders if o["financial_status"] not in ["refunded", "voided"]]
     print("Fetched {} orders".format(len(orders)))
-    if orders:
-        cache_orders(orders, start_time, store_name, api_token)
     return orders
 
 def get_chunk_of_orders(store_name, api_token, start_time, since_id):
@@ -520,7 +490,7 @@ def flatten(xss):
 def make_shopify_request(store_name, api_token, endpoint, parameters):
     url = "https://{}.myshopify.com/admin/api/2022-04/{}.json".format(store_name, endpoint)
     headers = {"Content-Type": "application/json", "X-Shopify-Access-Token": api_token}
-    response = http.get(url = url, params = parameters, headers = headers)
+    response = http.get(url = url, params = parameters, headers = headers, ttl_seconds = 300)
     if response.status_code == 404:
         return ERROR_404
     elif response.status_code == 429:
