@@ -18,7 +18,13 @@ def main(config):
     location_code = config.str("location", DEFAULT_LOCATION)
     location_url = SLIVER_URL.format(location_code)
 
-    rep = http.get(location_url, ttl_seconds = 3600)
+    rep = http.get(
+        location_url,
+        ttl_seconds = 3600,
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+    )
     if rep.status_code != 200:
         fail("Failed to fetch pizza of the day: status %d", rep.status_code)
 

@@ -5,7 +5,6 @@ Description: App that shows the nearest Spin scooter, its battery level, and num
 Author: zachlucas
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/scooter_image.png", SCOOTER_IMAGE_ASSET = "file")
@@ -43,21 +42,12 @@ def main(config):
 
     # Network Request to get the local scooter information
     # Uses the GBFS standard: https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
-    # First, let's check if we have cached response json:
-    scooter_info_cached = cache.get("scooter_information")
-    if scooter_info_cached != None:
-        print("Cache hit, displaying cached scooter data.")
-        rep = json.decode(scooter_info_cached)
-    else:
-        # Make the GET request
-        print("Cache miss, calling Spin API.")
-        rep = http.get(url)
-        if rep.status_code != 200:
-            fail("Spin request failed with status %d", rep.status_code)
-        rep = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("scooter_information", json.encode(rep), ttl_seconds = 240)
+    # Make the GET request
+    print("Calling Spin API.")
+    rep = http.get(url, ttl_seconds = 240)
+    if rep.status_code != 200:
+        fail("Spin request failed with status %d", rep.status_code)
+    rep = rep.json()
 
     # Start with a super-far distance and no closest bike
     closest_distance = 100000

@@ -5,8 +5,6 @@ Description: Gets info on preferred NHL teams next game.
 Author: AKKanMan
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/ana.png", ANA_ICON = "file")
@@ -189,18 +187,12 @@ def main(config):
 
     TEAM_NEXT_GAME_JSON = "https://statsapi.web.nhl.com/api/v1/teams/" + str(main_team_id) + "?expand=team.schedule.next"
 
-    nhldata_cached = cache.get("nhl_data/%s" % main_team_id)
-    if nhldata_cached != None:
-        nhldata = json.decode(nhldata_cached)
-    else:
-        print("Miss! Calling NHL API.")
-        rep = http.get(TEAM_NEXT_GAME_JSON)
-        if rep.status_code != 200:
-            fail("NHL API request failed with status %d", rep.status_code)
-        nhldata = rep.json()
+    print("Miss! Calling NHL API.")
+    rep = http.get(TEAM_NEXT_GAME_JSON, ttl_seconds = 3600)
+    if rep.status_code != 200:
+        fail("NHL API request failed with status %d", rep.status_code)
+    nhldata = rep.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("nhl_data/%s" % main_team_id, json.encode(nhldata), ttl_seconds = 3600)
     homeTeamID = nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["team"]["id"]
     awayTeamID = nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["team"]["id"]
     homeTeamRecord = str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["wins"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["losses"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["ot"]))

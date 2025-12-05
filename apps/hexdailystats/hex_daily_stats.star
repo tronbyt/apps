@@ -6,8 +6,6 @@ Author: kmphua
 Thanks: aschober, bretep, codeakk
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/hex_icon_sm.png", HEX_ICON_SM_ASSET = "file")
 load("math.star", "math")
@@ -19,12 +17,7 @@ COINGECKO_PRICE_URL = "https://api.coingecko.com/api/v3/coins/{}?localization=fa
 
 NO_DATA = "---------- "
 
-HEX_SUBGRAPH_URL = "https://api.thegraph.com/subgraphs/name/codeakk/hex"
-POST_HEADERS = {
-    "Content-Type": "application/json",
-}
-DAILY_DATA_UPDATES_QUERY = "{\"query\": \"{ dailyDataUpdates(orderBy: timestamp orderDirection: desc first: 1) { payoutPerTShare } }\" }"
-GLOBAL_INFOS_QUERY = "{\"query\": \"{ globalInfos(orderBy: timestamp orderDirection: desc first: 1)  { hexDay, shareRate } }\" }"
+HEX_LIVE_DATA_URL = "https://hexdailystats.com/livedata"
 
 def main():
     # Get coin data for selected coin from CoinGecko
@@ -51,21 +44,28 @@ def main():
 
     hex_price = str("$%f" % float(coin_data["market_data"]["current_price"]["usd"]))
 
-    # Get HEX daily data updates
-    daily_data_updates_data = post_json_from_cache_or_http(HEX_SUBGRAPH_URL, body = DAILY_DATA_UPDATES_QUERY, headers = POST_HEADERS, cache_name = "dailyDataUpdates", ttl_seconds = 28800)
+    # Get HEX live data
+    live_data = get_json_from_cache_or_http(HEX_LIVE_DATA_URL, ttl_seconds = 600)
 
     payout_per_tshare = NO_DATA
-
-    if daily_data_updates_data != None:
-        payout_per_tshare = str("%g" % float(daily_data_updates_data["data"]["dailyDataUpdates"][0]["payoutPerTShare"]))
-
-    # Get HEX global infos
-    global_infos_data = post_json_from_cache_or_http(HEX_SUBGRAPH_URL, body = GLOBAL_INFOS_QUERY, headers = POST_HEADERS, cache_name = "globalInfos", ttl_seconds = 28800)
-
     share_rate = NO_DATA
 
-    if global_infos_data != None:
-        share_rate = str(int(global_infos_data["data"]["globalInfos"][0]["shareRate"]) / 10)
+    if live_data != None:
+        # Payout
+        payout = live_data.get("payoutPerTshare")
+        if payout == None:
+            payout = live_data.get("payoutPerTshare_Pulsechain")
+
+        if payout != None:
+            payout_per_tshare = str("%g" % float(payout))
+
+        # Share Rate
+        rate = live_data.get("tshareRateHEX")
+        if rate == None:
+            rate = live_data.get("tshareRateHEX_Pulsechain")
+
+        if rate != None:
+            share_rate = str(rate)
 
     # Setup display rows
     displayRows = []
@@ -89,7 +89,7 @@ def main():
             cross_align = "center",
             children = [
                 render.Text("Payout"),
-                render.Text(format_float_string(float(payout_per_tshare))),
+                render.Text(format_float_string(float(payout_per_tshare)) if payout_per_tshare != NO_DATA else NO_DATA),
             ],
         ),
     )
@@ -120,47 +120,15 @@ def main():
     )
 
 def get_json_from_cache_or_http(url, ttl_seconds):
-    cached_response = cache.get(url)
+    print("HTTP JSON Request: {}".format(url))
+    http_response = http.get(url, ttl_seconds = ttl_seconds)
+    if http_response.status_code != 200:
+        print("HTTP Request failed with status: {}".format(http_response.status_code))
+        return None
 
-    if cached_response != None:
-        print("Cache hit: {}".format(url))
-        data = json.decode(cached_response)
-    else:
-        print("HTTP JSON Request: {}".format(url))
-        http_response = http.get(url)
-        if http_response.status_code != 200:
-            fail("HTTP Request failed with status: {}".format(http_response.status_code))
-
-        # Store http response in cache keyed off URL
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, json.encode(http_response.json()), ttl_seconds = ttl_seconds)
-        data = http_response.json()
+    data = http_response.json()
 
     return data
-
-def post_json_from_cache_or_http(url, body, headers, cache_name, ttl_seconds):
-    # Make cached url key unique by appending body query
-    cached_response = cache.get(cache_name)
-
-    if cached_response != None:
-        print("Cache hit: {}".format(url))
-        data = json.decode(cached_response)
-    else:
-        print("HTTP JSON Request: {}".format(url))
-        http_response = http.post(url, body = body, headers = headers)
-
-        if http_response.status_code != 200:
-            fail("HTTP Request failed with status: {}".format(http_response.status_code))
-
-        # Store http response in cache keyed off URL
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_name, json.encode(http_response.json()), ttl_seconds = ttl_seconds)
-        data = http_response.json()
-
-    return data
-
-def hasData(json):
-    return "data" in json
 
 def format_float_string(float_value):
     # Round price to nearest whole number (used to decide how many decimal places to leave)

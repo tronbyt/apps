@@ -28,11 +28,15 @@ BOX_SIZE_HEIGHT = 27
 def get_mempool_data(url, ttl_seconds = 30):
     response = http.get(url = url, ttl_seconds = ttl_seconds)
     if response.status_code != 200:
-        fail("Mempool.space request failed with status %d @ %s", response.status_code, url)
+        print("Mempool.space request failed with status %d @ %s" % (response.status_code, url))
+        return None
     return response
 
 def create_orange_block():
-    fees = get_mempool_data(URL_FEES).json()
+    resp = get_mempool_data(URL_FEES)
+    if not resp:
+        return render.Box(width = BOX_SIZE_WIDTH, height = BOX_SIZE_HEIGHT, color = "#333")
+    fees = resp.json()
 
     return render.Stack(
         children = [
@@ -74,7 +78,10 @@ def create_orange_block():
     )
 
 def create_purple_block(block_tip_height = 1):
-    block_details = get_mempool_data("{}/{}".format(URL_BLOCK_DETAILS, block_tip_height)).json()[0]
+    resp = get_mempool_data("{}/{}".format(URL_BLOCK_DETAILS, block_tip_height))
+    if not resp:
+        return render.Box(width = BOX_SIZE_WIDTH, height = BOX_SIZE_HEIGHT, color = "#333")
+    block_details = resp.json()[0]
 
     return render.Stack(
         children = [
@@ -119,7 +126,14 @@ def create_purple_block(block_tip_height = 1):
     )
 
 def main():
-    block_tip_height = int(get_mempool_data(URL_BLOCK_TIP_HEIGHT).body())
+    resp = get_mempool_data(URL_BLOCK_TIP_HEIGHT)
+    if not resp:
+        return render.Root(
+            child = render.Box(
+                child = render.Text("API Error", color = "#F00"),
+            ),
+        )
+    block_tip_height = int(resp.body())
 
     box_orange = create_orange_block()
     box_purple = create_purple_block(block_tip_height)

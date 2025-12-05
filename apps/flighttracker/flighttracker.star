@@ -5,9 +5,7 @@ Description: Tracks flights via given Flight Number or airport code.
 Author: samuelsagarino
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
@@ -105,21 +103,12 @@ def main(config):
         else:
             cacheName = displayMode + "/" + airportCode
 
-        flightawareData_cached = cache.get(cacheName)
+        print("Calling FA API / " + cacheName)
+        rep = http.get(apiURL, headers = {"x-apikey": faAPIKey}, ttl_seconds = 120)
 
-        if flightawareData_cached != None:
-            flightawareData = json.decode(flightawareData_cached)
-            print("Found cached data! Not calling FA API / " + cacheName)
-        else:
-            print("No cached data; calling FA API / " + cacheName)
-            rep = http.get(apiURL, headers = {"x-apikey": faAPIKey})
-
-            if rep.status_code != 200:
-                fail("FA API failed with status %d", rep.status_code)
-            flightawareData = rep.json()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cacheName, json.encode(flightawareData), ttl_seconds = 120)
+        if rep.status_code != 200:
+            fail("FA API failed with status %d", rep.status_code)
+        flightawareData = rep.json()
 
         # Determine how to read data based upon above selection.
         # Default flights
@@ -259,23 +248,11 @@ def main(config):
         #######
 
         logo_cacheName = operator + "-logo"
-        logo_cached = cache.get(logo_cacheName)
+        print("Calling FA API for logo / " + logo_cacheName)
+        logo = http.get("https://flightaware.com/images/airline_logos/90p/" + operator + ".png", ttl_seconds = 86400).body()
 
-        if logo_cached != None:
-            logo = json.decode(logo_cached)
-            logoBase64 = base64.decode(logo, encoding = "standard")
-            print("Found cached data! Not calling FA API for logo / " + logo_cacheName)
-
-            base64.encode(logo, encoding = "standard")
-        else:
-            print("No cached data; calling FA API for logo / " + logo_cacheName)
-            logo = http.get("https://flightaware.com/images/airline_logos/90p/" + operator + ".png").body()
-
-            logoBase64Encoded = base64.encode(logo, encoding = "standard")
-            logoBase64 = base64.decode(logoBase64Encoded, encoding = "standard")
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(logo_cacheName, json.encode(logoBase64Encoded), ttl_seconds = 86400)
+        logoBase64Encoded = base64.encode(logo, encoding = "standard")
+        logoBase64 = base64.decode(logoBase64Encoded, encoding = "standard")
 
         #logo = http.get("https://flightaware.com/images/airline_logos/90p/" + operator + ".png").body()  # Get logo to display
 

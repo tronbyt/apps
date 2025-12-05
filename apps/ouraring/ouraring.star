@@ -5,8 +5,6 @@ Description: Displays the three scores from your Oura Ring along with a historic
 Author: Aiden Vigue
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/activity_icon.png", ACTIVITY_ICON_ASSET = "file")
 load("images/readiness_icon.png", READINESS_ICON_ASSET = "file")
@@ -106,44 +104,20 @@ def main(config):
         from_date = (now - time.parse_duration(str(int(days) * 24) + "h")).format("2006-01-02")
         to_date = now.format("2006-01-02")
 
-        sleep_data = None
-        sleep_dto = cache.get("oura_sleep_data_" + apikey)
-        if sleep_dto != None:
-            sleep_data = json.decode(sleep_dto)
-        else:
-            rep = http.get("https://api.ouraring.com/v2/usercollection/daily_sleep?start_date=" + from_date + "&" + "end_date=" + to_date, headers = {"Authorization": "Bearer " + apikey})
-            if rep.status_code != 200:
-                return errorView("API error")
-            sleep_data = rep.json()
+        rep = http.get("https://api.ouraring.com/v2/usercollection/daily_sleep?start_date=" + from_date + "&" + "end_date=" + to_date, headers = {"Authorization": "Bearer " + apikey}, ttl_seconds = 1800)
+        if rep.status_code != 200:
+            return errorView("API error")
+        sleep_data = rep.json()
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("oura_sleep_data_" + apikey, json.encode(sleep_data), ttl_seconds = 1800)
+        rep = http.get("https://api.ouraring.com/v2/usercollection/daily_activity?start_date=" + from_date + "&" + "end_date=" + to_date, headers = {"Authorization": "Bearer " + apikey}, ttl_seconds = 1800)
+        if rep.status_code != 200:
+            return errorView("API error")
+        activity_data = rep.json()
 
-        activity_data = None
-        activity_dto = cache.get("oura_activity_data_" + apikey)
-        if activity_dto != None:
-            activity_data = json.decode(activity_dto)
-        else:
-            rep = http.get("https://api.ouraring.com/v2/usercollection/daily_activity?start_date=" + from_date + "&" + "end_date=" + to_date, headers = {"Authorization": "Bearer " + apikey})
-            if rep.status_code != 200:
-                return errorView("API error")
-            activity_data = rep.json()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("oura_activity_data_" + apikey, json.encode(activity_data), ttl_seconds = 1800)
-
-        readiness_data = None
-        readiness_dto = cache.get("oura_readiness_data_" + apikey)
-        if readiness_dto != None:
-            readiness_data = json.decode(readiness_dto)
-        else:
-            rep = http.get("https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=" + from_date + "&" + "end_date=" + to_date, headers = {"Authorization": "Bearer " + apikey})
-            if rep.status_code != 200:
-                return errorView("API error")
-            readiness_data = rep.json()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("oura_readiness_data_" + apikey, json.encode(readiness_data), ttl_seconds = 1800)
+        rep = http.get("https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=" + from_date + "&" + "end_date=" + to_date, headers = {"Authorization": "Bearer " + apikey}, ttl_seconds = 1800)
+        if rep.status_code != 200:
+            return errorView("API error")
+        readiness_data = rep.json()
 
         #Populate array of last 7 scores.
         for day in sleep_data["data"]:

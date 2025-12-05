@@ -5,7 +5,6 @@ Description: Display the price of PLS, PLSX, and HEX. Choose between testnet and
 Author: bretep
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/hex_icon_sm.png", HEX_ICON_SM_ASSET = "file")
@@ -28,89 +27,61 @@ def hasData(json):
     return "data" in json
 
 def main(config):
-    PULSE_URL = config.get("pulse_url")
-    PULSE_TESTNET_URL = config.get("pulse_testnet_url")
-    PULSE_QUERY = config.get("pulse_query")
+    PULSE_URL = config.str("pulse_url", "https://api.thegraph.com/subgraphs/name/pulsechaincom/pulsechain-main")
+    PULSE_TESTNET_URL = config.str("pulse_testnet_url", "https://api.thegraph.com/subgraphs/name/pulsechaincom/pulsechain-testnet-v4")
+    PULSE_QUERY = config.str("pulse_query", """{"query":"{\n  pls: bundle(id: \"1\") {\n    derivedUSD\n  }\n  plsx: token(id: \"0x07890c29ed6dcf8cc59a686b24a317924d63a923\") {\n    derivedUSD\n  }\n}","variables":null}""")
     ETH_MAINNET_URL = "https://api.thegraph.com/subgraphs/name/toihoang12/uniswapv3"
     ETH_MAINNET_HEX_QUERY_ENC = "eyJxdWVyeSI6IntcbiAgZXRoOiBidW5kbGUoaWQ6IFwiMVwiKSB7ICAgIFxuICAgIGV0aFByaWNlVVNEXG4gIGh1eDogdG9rZW4oaWQ6IFwiMHgyYjU5MWU5OWFmZTlmMzJlYWE2MjE0ZjdiNzYyOTc2OGM0MGVlYjM5XCIpIHtcbiAgICBzeW1ib2xcbiAgICBkZXJpdmVkRVRIXG4gIFxuICB9XG4gIH0iLCJ2YXJpYWJsZXMiOm51bGx9Cg=="
     ETH_MAINNET_HEX_QUERY = base64.decode(ETH_MAINNET_HEX_QUERY_ENC)
 
-    cached_pls = cache.get("pls_price")
-    cached_plsx = cache.get("plsx_price")
-    cached_eth_hex = cache.get("eth_hex_price")
-    cached_testnet_pls = cache.get("pls_testnet_price")
-    cached_testnet_plsx = cache.get("plsx_testnet_price")
+    print("Cache miss, updating price...")
 
-    if cached_pls != None:
-        print("Using cached data.")
-        if config.bool("testnet"):
-            display_pls_price = cached_testnet_pls
-            display_plsx_price = cached_testnet_plsx
-            display_eth_hex_price = cached_eth_hex
-        else:
-            display_pls_price = cached_pls
-            display_plsx_price = cached_plsx
-            display_eth_hex_price = cached_eth_hex
+    mainnetResponse = http.post(PULSE_URL, body = PULSE_QUERY, headers = POST_HEADERS, ttl_seconds = 30)
+    if mainnetResponse.status_code != 200:
+        fail("Mainnet request failed with status %d", mainnetResponse.status_code)
+
+    testnetResponse = http.post(PULSE_TESTNET_URL, body = PULSE_QUERY, headers = POST_HEADERS, ttl_seconds = 30)
+    if testnetResponse.status_code != 200:
+        fail("Testnet request failed with status %d", testnetResponse.status_code)
+
+    ethMainnetResponse = http.post(ETH_MAINNET_URL, body = ETH_MAINNET_HEX_QUERY, headers = POST_HEADERS, ttl_seconds = 30)
+    if ethMainnetResponse.status_code != 200:
+        fail("Eth Mainnet request failed with status %d", ethMainnetResponse.status_code)
+
+    if hasData(mainnetResponse.json()):
+        PLS = mainnetResponse.json()["data"]["pls"]["derivedUSD"]
+        PLSX = mainnetResponse.json()["data"]["plsx"]["derivedUSD"]
+        mainnet_pls = str("$%f" % float(PLS))
+        mainnet_plsx = str("$%f" % float(PLSX))
     else:
-        print("Cache miss, updating price...")
+        mainnet_pls = NO_PRICE
+        mainnet_plsx = NO_PRICE
 
-        mainnetResponse = http.post(PULSE_URL, body = PULSE_QUERY, headers = POST_HEADERS)
-        if mainnetResponse.status_code != 200:
-            fail("Mainnet request failed with status %d", mainnetResponse.status_code)
+    if hasData(ethMainnetResponse.json()):
+        ETH_HEX_DERIVED_ETH = ethMainnetResponse.json()["data"]["hex"]["derivedETH"]
+        ETH_HEX_ETH_PRICE_USD = ethMainnetResponse.json()["data"]["eth"]["ethPriceUSD"]
+        ETH_HEX_DERIVED_PRICE = float(ETH_HEX_DERIVED_ETH) * float(ETH_HEX_ETH_PRICE_USD)
+        eth_hex = str("$%f" % ETH_HEX_DERIVED_PRICE)
+    else:
+        eth_hex = NO_PRICE
 
-        testnetResponse = http.post(PULSE_TESTNET_URL, body = PULSE_QUERY, headers = POST_HEADERS)
-        if testnetResponse.status_code != 200:
-            fail("Testnet request failed with status %d", testnetResponse.status_code)
-
-        ethMainnetResponse = http.post(ETH_MAINNET_URL, body = ETH_MAINNET_HEX_QUERY, headers = POST_HEADERS)
-        if testnetResponse.status_code != 200:
-            fail("Eth Mainnet request failed with status %d", ethMainnetResponse.status_code)
-
-        if hasData(mainnetResponse.json()):
-            PLS = mainnetResponse.json()["data"]["pls"]["derivedUSD"]
-            PLSX = mainnetResponse.json()["data"]["plsx"]["derivedUSD"]
-            mainnet_pls = str("$%f" % float(PLS))
-            mainnet_plsx = str("$%f" % float(PLSX))
-        else:
-            mainnet_pls = NO_PRICE
-            mainnet_plsx = NO_PRICE
-
-        if hasData(ethMainnetResponse.json()):
-            ETH_HEX_DERIVED_ETH = ethMainnetResponse.json()["data"]["hex"]["derivedETH"]
-            ETH_HEX_ETH_PRICE_USD = ethMainnetResponse.json()["data"]["eth"]["ethPriceUSD"]
-            ETH_HEX_DERIVED_PRICE = float(ETH_HEX_DERIVED_ETH) * float(ETH_HEX_ETH_PRICE_USD)
-            eth_hex = str("$%f" % ETH_HEX_DERIVED_PRICE)
-        else:
-            eth_hex = NO_PRICE
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("pls_price", mainnet_pls, ttl_seconds = 30)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("plsx_price", mainnet_plsx, ttl_seconds = 30)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("eth_hex_price", eth_hex, ttl_seconds = 30)
-
+    if hasData(testnetResponse.json()):
         PLS_TESTNET = testnetResponse.json()["data"]["pls"]["derivedUSD"]
         PLSX_TESTNET = testnetResponse.json()["data"]["plsx"]["derivedUSD"]
         testnet_pls = str("$%f" % float(PLS_TESTNET))
         testnet_plsx = str("$%f" % float(PLSX_TESTNET))
+    else:
+        testnet_pls = NO_PRICE
+        testnet_plsx = NO_PRICE
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("pls_testnet_price", testnet_pls, ttl_seconds = 30)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("plsx_testnet_price", testnet_plsx, ttl_seconds = 30)
-
-        if config.bool("testnet"):
-            display_pls_price = testnet_pls
-            display_plsx_price = testnet_plsx
-            display_eth_hex_price = eth_hex
-        else:
-            display_pls_price = mainnet_pls
-            display_plsx_price = mainnet_plsx
-            display_eth_hex_price = eth_hex
+    if config.bool("testnet"):
+        display_pls_price = testnet_pls
+        display_plsx_price = testnet_plsx
+        display_eth_hex_price = eth_hex
+    else:
+        display_pls_price = mainnet_pls
+        display_plsx_price = mainnet_plsx
+        display_eth_hex_price = eth_hex
 
     defaultDisplayRows = [
         render.Row(

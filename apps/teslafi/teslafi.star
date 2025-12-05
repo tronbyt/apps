@@ -6,8 +6,6 @@ To grab the API key to go TeslaFi -> Settings -> Account -> Advanced -> TeslaFi 
 Author: mrrobot245
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bolt_animated.gif", BOLT_ANIMATED = "file")
 load("images/bolt_green.png", BOLT_GREEN = "file")
@@ -110,19 +108,11 @@ def main(config):
         )
     else:
         api = config.str("api")
-        rep_cache = cache.get("teslafi-" + api)
-        if rep_cache != None:
-            print("Hit! Displaying cached data.")
-            rep = json.decode(rep_cache)
-        else:
-            print("Miss! Calling TeslaFI API.")
-            rep = http.get("https://www.teslafi.com/feed.php?token=" + api)
-            if rep.status_code != 200:
-                fail("TeslaFi request failed with status:", rep.status_code)
-            rep = rep.json()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("teslafi-" + api, json.encode(rep), ttl_seconds = 60)
+        print("Calling TeslaFI API.")
+        rep = http.get("https://www.teslafi.com/feed.php?token=" + api, ttl_seconds = 60)
+        if rep.status_code != 200:
+            fail("TeslaFi request failed with status:", rep.status_code)
+        rep = rep.json()
 
         name = rep["display_name"]
         rangemi = rep["est_battery_range"]

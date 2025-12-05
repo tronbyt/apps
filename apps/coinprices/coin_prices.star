@@ -6,8 +6,6 @@ Author: alan-oliv
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
@@ -68,25 +66,12 @@ def main(config):
         days = DAYS,
     )
 
-    cache_key = "price_response_{from_coin}_{to_coin}".format(
-        from_coin = from_coin,
-        to_coin = to_coin,
-    )
-
     # Get data from cache or API
-    cached_price_response = cache.get(cache_key)
-    if cached_price_response != None:
-        # Cache Hit: Displays cached data
-        json_response = json.decode(cached_price_response)
-    else:
-        # Cache Miss: Request api and set cache
-        price_response = http.get(api_price_url)
-        if price_response.status_code != 200:
-            fail("Request failed with status %d", price_response.status_code)
-        json_response = price_response.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(json_response), ttl_seconds = CACHE_TTL)
+    # Cache Miss: Request api and set cache
+    price_response = http.get(api_price_url, ttl_seconds = CACHE_TTL)
+    if price_response.status_code != 200:
+        fail("Request failed with status %d", price_response.status_code)
+    json_response = price_response.json()
 
     prices = []
 

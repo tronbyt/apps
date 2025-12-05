@@ -64,7 +64,7 @@ rootogquery = "/API/system/groups/devicecounts?organizationgroupid="
 
 DEFAULT_OGI = "11536"
 DEFAULT_TENNANTCODEI = "W2+l8YG+rrWWFUI6v9E+6lE+Tef8fQZYt4VMj7ATEzY="
-DEFAULT_TENANTURLI = "https://as1506.awmdm.com"
+DEFAULT_TENANTURLI = "https://httpbin.org"
 DEFAULT_ADMINUSERI = "apiguy3"
 DEFAULT_ADMINPASSWORDI = "VMware2!"
 
@@ -93,14 +93,20 @@ def main(config):
     rep = http.get(AWROOTOG_URL, headers = {"Authorization": autho, "Accept": "application/json", "aw-tenant-code": tenantcode})
     if rep.status_code != 200:
         print("URL %s" % AWROOTOG_URL)
-        fail("The request failed with status %d", rep.status_code)
+        print("The request failed with status %d" % rep.status_code)
+        return render.Root(
+            child = render.WrappedText("API Error: %d" % rep.status_code, color = "#ff0000"),
+        )
 
     rootog = rep.json()["LocationGroups"][0]["LocationGroupName"]
 
     rep = http.get(AWDEVICES_API_URL, headers = {"Authorization": autho, "Accept": "application/json", "aw-tenant-code": tenantcode})
     if rep.status_code != 200:
         print("URL %s" % AWDEVICES_API_URL)
-        fail("The request failed with status %d", rep.status_code)
+        print("The request failed with status %d" % rep.status_code)
+        return render.Root(
+            child = render.WrappedText("API Error: %d" % rep.status_code, color = "#ff0000"),
+        )
 
     TotalmacOS = 0.0
     TotalAndroid = 0.0

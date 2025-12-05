@@ -16,8 +16,16 @@ load("schema.star", "schema")
 
 TTL_ICONS = 216000
 
-DEMO_PAGE = '[{"text":"create","colortext":"#FFFFFF","subtext":"","colorsubtext":"#FFFFFF","icon":"new","order":0,"name":"create"},{"text":"restdb.io","colortext":"#777777","subtext":"","colorsubtext":"#000000","icon":"restdb","order":1,"name":"restdb"},{"text":"database","colortext":"#FFFFFF","subtext":"","colorsubtext":"#FFFFFF","icon":"new","order":2,"name":"database"}]'
-DEMO_ICONS = '[{"name":"new","data":' + base64.encode(ICON_NEW_ASSET.readall()) + '},{"name":"restdb","data":' + base64.encode(ICON_RESTDB_ASSET.readall()) + "}]"
+DEMO_PAGE = json.encode([
+    {"text": "create", "colortext": "#FFFFFF", "subtext": "", "colorsubtext": "#FFFFFF", "icon": "new", "order": 0, "name": "create"},
+    {"text": "restdb.io", "colortext": "#777777", "subtext": "", "colorsubtext": "#000000", "icon": "restdb", "order": 1, "name": "restdb"},
+    {"text": "database", "colortext": "#FFFFFF", "subtext": "", "colorsubtext": "#FFFFFF", "icon": "new", "order": 2, "name": "database"},
+])
+
+DEMO_ICONS = json.encode([
+    {"name": "new", "data": base64.encode(ICON_NEW_ASSET.readall())},
+    {"name": "restdb", "data": base64.encode(ICON_RESTDB_ASSET.readall())},
+])
 
 def render_fail(rep):
     return render.Root(render.Box(render.WrappedText("%s" % rep.status_code), color = "#AA0000"))
@@ -64,7 +72,7 @@ def main(config):
 
     use_offline_data = False
 
-    if not db_name:
+    if not db_name or db_name == "offline":
         use_offline_data = True
         db_name = "offline"
         print("using offline data")
@@ -93,7 +101,12 @@ def main(config):
                 return render_fail(rep)
             body = rep.body()
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
+            if not body.startswith("{") and not body.startswith("["):
+                print("Response is not JSON: " + body[:100])
+                return render.Root(
+                    child = render.WrappedText("Invalid API Response", color = "#FF0000"),
+                )
+
             cache.set(data_cache_key, body, ttl_seconds = data_cache_time)
 
         items = json.decode(body)
@@ -121,7 +134,6 @@ def main(config):
         for name in icons:
             icon_cache_key = "{}-icon-{}".format(db_name, name)
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(icon_cache_key, icons[name], ttl_seconds = TTL_ICONS)
 
     if len(items) == 0:
@@ -171,7 +183,6 @@ def reset_icon_cache(db_name, api_key):
     for icon in json.decode(rep.body()):
         icon_cache_key = "{}-icon-{}".format(db_name, icon["name"])
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(icon_cache_key, "", ttl_seconds = TTL_ICONS)
 
     return render.Root(render.Box(render.WrappedText("icon cache reset"), color = "#FFA500"))

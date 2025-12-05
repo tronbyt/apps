@@ -35,7 +35,10 @@ def seconds_until_next_draw(latest_result):
     else:
         return time.hour // time.second
     next_draw = last_draw + (((next_draw_days * 24) + 20) * time.hour) + (45 * time.minute)
-    return (next_draw - time.now()) // time.second
+    seconds = (next_draw - time.now()) // time.second
+    if seconds < 60:
+        return 60
+    return seconds
 
 def fetch_latest_result():
     cached = cache.get(RESULTS_URL)
@@ -46,7 +49,6 @@ def fetch_latest_result():
         return None
     results = csv.read_all(resp.body())
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(RESULTS_URL, resp.body(), ttl_seconds = seconds_until_next_draw(results[1]))
     return results[1]
 

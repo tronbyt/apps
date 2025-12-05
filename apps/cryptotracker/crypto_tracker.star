@@ -133,28 +133,48 @@ def main(config):
         r = json.decode(cached_data)
     else:
         print("Miss! Calling Alphavantage API.")
-        rep = http.get(API_URL)
+        rep = http.get(API_URL, ttl_seconds = 60 * 15)
         r = rep.json()
 
         if rep.status_code != 200:
-            print("Using cached data")
-            r = json.decode(cached_data)
-            print("Alphavantage API request failed with status %d, using cached data", rep.status_code)
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                fail("Alphavantage API request failed with status %d", rep.status_code)
 
-        if list(r.keys()) == ["Note"]:
-            print("Using cached data")
-            r = json.decode(cached_data)
-            print("Alphavantage API request failed with note %d, using cached data", r["Note"])
+        if "Note" in r:
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                print("Alphavantage API request failed with note %s" % r["Note"])
+                return render.Root(
+                    child = render.WrappedText("API Limit Reached", color = "#FF0000"),
+                )
 
-        if list(r.keys()) == ["Error Message"]:
-            print("Using cached data")
-            r = json.decode(cached_data)
-            print("Alphavantage API request failed with error message %d, using cached data", r["Error Message"])
+        if "Error Message" in r:
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                fail("Alphavantage API request failed with error message %s" % r["Error Message"])
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_name, json.encode(r), ttl_seconds = 60 * 15)
+        if "Information" in r:
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                print("Alphavantage API request failed with information %s" % r["Information"])
+                return render.Root(
+                    child = render.WrappedText("API Info: %s" % r["Information"], color = "#FF0000"),
+                )
 
-    timeseries = r["Time Series Crypto (15min)"]
+    timeseries = r.get("Time Series Crypto (15min)")
+    if not timeseries:
+        return render.Root(
+            child = render.WrappedText("No Data Available", color = "#FF0000"),
+        )
 
     dates = [val for val in timeseries.keys()]
 

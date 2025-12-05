@@ -23,7 +23,7 @@ def fetchDealImage(page):
     resp = http.get(
         url = imageUrl,
         headers = {
-            "User-Agent": "Tidbyt App: Daily Pick",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         },
         ttl_seconds = CACHE_TTL,
     )
@@ -56,7 +56,7 @@ def getDailyPick():
     resp = http.get(
         url = "https://www.guitarcenter.com/Daily-Pick.gc",
         headers = {
-            "User-Agent": "Tidbyt App: Daily Pick",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         },
         ttl_seconds = CACHE_TTL,
     )

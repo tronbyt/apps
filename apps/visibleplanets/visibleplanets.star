@@ -10,7 +10,6 @@ Author: Robert Ison
 # Pulls down data every hour starting 30 minutes after sunset until 30 minutes befor sunrise
 # Pulls down the expected evening sky during the day -- when it is sunny, there are no 'visible planets' so we'll display what you can expect in the evening.
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")  #Used to figure out timezone
 load("http.star", "http")  #for calling to astronomyapi.com
 load("humanize.star", "humanize")  #for easy reading numbers and times
@@ -213,23 +212,11 @@ def get_all_planet_information(location, check_offset, cache_ttl_seconds):
     Returns:
         JSON data of planet from perspective of given location and time
     """
-    position_json = None
-
-    # Cache Name based on planet and location
-    cache_name = "AllPlanets_%s_%s" % (location["lng"], location["lat"])
-    cache_contents = cache.get(cache_name)
 
     # Check now or include an offset
     check_time = get_local_time(location, check_offset)
 
-    if cache_contents == None:
-        position_json = get_all_body_positions(location, check_time)
-        #print(position_json)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_name, json.encode(position_json), ttl_seconds = cache_ttl_seconds)
-    else:
-        position_json = json.decode(cache_contents)
+    position_json = get_all_body_positions(location, check_time, cache_ttl_seconds)
 
     return position_json
 
@@ -611,7 +598,7 @@ def get_readable_large_number(number):
 
     return returnval
 
-def get_all_body_positions(location, check_time):
+def get_all_body_positions(location, check_time, ttl_seconds = 3600):
     """ Gets the JSon Data from astronomyapi
 
     Args:
@@ -642,6 +629,7 @@ def get_all_body_positions(location, check_time):
         headers = {
             "Authorization": "Basic %s" % app_hash,
         },
+        ttl_seconds = int(ttl_seconds),
     )
 
     if res.status_code == 200:

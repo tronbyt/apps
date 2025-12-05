@@ -5,7 +5,6 @@ Description: Displays the latest information from NHC on the nearest tropical it
 Author: Robert Ison
 """
 
-load("cache.star", "cache")  #Caching
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")  #HTTP Client
@@ -80,7 +79,7 @@ def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
 
     #Get XML from cache
-    basin_xml = cache.get(basin)
+    basin_xml = None
 
     #TEST DATA These lines should be commented out before release
     if DEBUG_MODE == True and rss_example != None:
@@ -89,12 +88,9 @@ def main(config):
     #If nothing from cache, then we go to nhc and download new data
     if basin_xml == None:
         rss_feed_for_selected_basin = BASIN_URLS[basin]
-        res = http.get(url = rss_feed_for_selected_basin)
+        res = http.get(url = rss_feed_for_selected_basin, ttl_seconds = CACHE_TTL)
         if res.status_code == 200:
             basin_xml = res.body()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(basin, basin_xml, ttl_seconds = CACHE_TTL)
 
     #load up the xml
     xml = xpath.loads(basin_xml)

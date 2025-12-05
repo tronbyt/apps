@@ -4,6 +4,8 @@ name: Madison Metro Bus
 summary: Track Madison Buses
 desc: Check arrivals for a given stop in Madison.
 author: Corey Johnsen
+fileName: madison_metro_bus.star
+packageName: madisonmetrobus
 recommendedInterval: 5
 broken: true
 brokenReason: "api.smsmybus.com: no such host"

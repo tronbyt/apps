@@ -5,9 +5,6 @@ Description: Updown.io checks your website's status by periodically sending an H
 Author: jcarbaugh
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
 load("images/logo_down_img.gif", LOGO_DOWN_IMG_ASSET = "file")
 load("images/logo_up_img.gif", LOGO_UP_IMG_ASSET = "file")
@@ -33,23 +30,9 @@ def main(config):
         }
         return render_up_screen(mock_data)
 
-    # Some notes about cache_key:
-    # 1. We combine api_key and check_token to prevent people from fetching other people's checks.
-    # 2. We hash the cache_key so the api_key and check_token aren't stored in plaintext in the cache.
-    # 3. We add a secret salt just for the fun of it.
-    salt = config.str("salt") or ""
-    cache_key = "check-{}".format(hash.sha256(salt + api_key + check_token))
-
-    data = cache.get(cache_key)
-    if data:
-        data = json.decode(data)
-    else:
-        headers = {"X-API-KEY": api_key}
-        resp = http.get("https://updown.io/api/checks/" + check_token + "?metrics=1", headers = headers)
-        data = resp.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(data), 60 * 5)
+    headers = {"X-API-KEY": api_key}
+    resp = http.get("https://updown.io/api/checks/" + check_token + "?metrics=1", headers = headers, ttl_seconds = 300)
+    data = resp.json()
 
     if data["down"]:
         return render_down_screen(data)

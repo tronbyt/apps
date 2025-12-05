@@ -5,16 +5,12 @@ Description: Monitor your Vercel deployments and view important information.
 Author: Chase Roossin
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 BASE_DEPLOYMENT_URL = "https://api.vercel.com/v6/deployments"
-CACHE_KEY = "vercel-cache-{}"
 SPACE = "   "
 
 # Config
@@ -33,38 +29,27 @@ def main(config):
             child = twoLine("No API", "Key Found"),
         )
 
-    formattedCacheKey = CACHE_KEY.format(hash.sha1(apikey))
-    cached_data = cache.get(formattedCacheKey)
+    print("Calling Vercel")
 
-    # Check for cached data
-    if cached_data != None:
-        print("Hit! Displaying cached data.")
-        data = json.decode(cached_data)
+    # TeamId is required for Team API Calls
+    # https://vercel.com/guides/how-do-i-use-a-vercel-api-access-token
+    if teamId:
+        url = BASE_DEPLOYMENT_URL + "?teamId=" + teamId
     else:
-        print("Miss cache! Calling Vercel")
+        url = BASE_DEPLOYMENT_URL
+    rep = http.get(
+        url,
+        headers = {"Authorization": "Bearer " + apikey, "Accept": "application/json"},
+        ttl_seconds = 240,
+    )
 
-        # TeamId is required for Team API Calls
-        # https://vercel.com/guides/how-do-i-use-a-vercel-api-access-token
-        if teamId:
-            url = BASE_DEPLOYMENT_URL + "?teamId=" + teamId
-        else:
-            url = BASE_DEPLOYMENT_URL
-        rep = http.get(
-            url,
-            headers = {"Authorization": "Bearer " + apikey, "Accept": "application/json"},
+    # Ensure valid response
+    if rep.status_code != 200:
+        return render.Root(
+            child = twoLine("Vercel Error", "Status: " + str(rep.status_code)),
         )
 
-        # Ensure valid response
-        if rep.status_code != 200:
-            return render.Root(
-                child = twoLine("Vercel Error", "Status: " + str(rep.status_code)),
-            )
-
-        data = rep.json()
-
-        # Update cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(formattedCacheKey, json.encode(data), ttl_seconds = 240)
+    data = rep.json()
 
     # Grab latest deployment
     deployment = data["deployments"][0]

@@ -248,6 +248,7 @@ def main(config):
             FLIGHT_RADAR_URL,
             params = {"bl_lat": boundingBox[0], "bl_lng": boundingBox[1], "tr_lat": boundingBox[2], "tr_lng": boundingBox[3], "altitude": "1000,60000"},
             headers = {"X-RapidAPI-Key": api_key, "X-RapidAPI-Host": "flight-radar1.p.rapidapi.com"},
+            ttl_seconds = DEFAULT_CACHE,
         )
         if rep.status_code != 200:
             fail("Failed to fetch flights with status code:", rep.status_code)
@@ -261,9 +262,6 @@ def main(config):
                 flight = flights[0]
         else:
             flight = []
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(flight), ttl_seconds = DEFAULT_CACHE)
 
     if flight:
         origin = flight[12]

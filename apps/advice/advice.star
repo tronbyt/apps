@@ -5,27 +5,17 @@ Description: Shows random advice from AdviceSlip.com.
 Author: mrrobot245
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
 def main(config):
     SCROLL_SPEED = config.str("scroll_speed", "60")
-    rep_cache = cache.get("adviceapp")
-    if rep_cache != None:
-        print("Hit! Displaying cached data.")
-        rep = json.decode(rep_cache)
-    else:
-        print("Miss! Calling Advice API.")
-        rep = http.get("https://api.adviceslip.com/advice")
-        if rep.status_code != 200:
-            fail("Advice request failed with status:", rep.status_code)
-        rep = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("adviceapp", json.encode(rep), ttl_seconds = 120)
+    print("Calling Advice API.")
+    rep = http.get("https://api.adviceslip.com/advice", ttl_seconds = 120)
+    if rep.status_code != 200:
+        fail("Advice request failed with status:", rep.status_code)
+    rep = rep.json()
 
     return render.Root(
         delay = int(SCROLL_SPEED),

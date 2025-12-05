@@ -6,7 +6,6 @@ Description: Shows a timetable for a station in the Swiss Public Transport
     network.
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/error_icon.png", ERROR_ICON_ASSET = "file")
@@ -89,24 +88,15 @@ def main(config):
     if skiptime < 0:
         skiptime = 0
 
-    # Check if we have the requested data in the cache
-    resp_cached = cache.get("sbb_%s" % station)
-    if resp_cached != None:
-        # Get the cached response
-        print("Hit! Displaying cached data.")
-        resp = json.decode(resp_cached)
-    else:
-        # Get a new reponse
-        print("Miss! Calling API.")
-        sbb_dict = {"stop": station}  # Provide the station with a dict, as this will be encoded
-        resp = http.get(SBB_URL, params = sbb_dict)
-        if resp.status_code != 200:
-            # Show an error message
-            return (display_error("API Error occured"))
+    # Get a new reponse
+    print("Miss! Calling API.")
+    sbb_dict = {"stop": station}  # Provide the station with a dict, as this will be encoded
+    resp = http.get(SBB_URL, params = sbb_dict, ttl_seconds = 120)
+    if resp.status_code != 200:
+        # Show an error message
+        return (display_error("API Error occured"))
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("sbb_%s" % station, resp.body(), ttl_seconds = 120)
-        resp = json.decode(resp.body())
+    resp = json.decode(resp.body())
 
     # Check if we got a valid response
     if "connections" not in resp:
@@ -294,29 +284,20 @@ def main(config):
     )
 
 def search_station(pattern):
-    # Check if we have the requested data in the cache
-    resp_cached = cache.get("sbb_pattern_%s" % pattern)
-    if resp_cached != None:
-        # Get the cached response
-        print("Pattern Hit! Displaying cached data.")
-        resp = json.decode(resp_cached)
-    else:
-        # Get a new reponse
-        print("Pattern Miss! Calling API.")
-        sbb_dict = {"term": pattern}  # Provide the pattern with a dict, as this will be encoded
-        resp = http.get(SBB_URL_COMPLETION, params = sbb_dict)
-        if resp.status_code != 200:
-            # Return an error message
-            return [
-                schema.Option(
-                    display = "API Error",
-                    value = "API Error",
-                ),
-            ]
+    # Get a new reponse
+    print("Pattern Miss! Calling API.")
+    sbb_dict = {"term": pattern}  # Provide the pattern with a dict, as this will be encoded
+    resp = http.get(SBB_URL_COMPLETION, params = sbb_dict, ttl_seconds = 604800)
+    if resp.status_code != 200:
+        # Return an error message
+        return [
+            schema.Option(
+                display = "API Error",
+                value = "API Error",
+            ),
+        ]
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("sbb_pattern_%s" % pattern, resp.body(), ttl_seconds = 604800)
-        resp = json.decode(resp.body())
+    resp = json.decode(resp.body())
 
     # Check if the response is empty
     if len(resp) == 0:

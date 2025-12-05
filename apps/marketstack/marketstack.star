@@ -5,8 +5,6 @@ Description: Allows you to track the value of a stock that you currently own his
 Author: kanroot
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/marketstack_data.jpg", MARKETSTACK_DATA_ASSET = "file")
 load("math.star", "math")
@@ -37,17 +35,12 @@ def main(config):
     if missing_parameter:
         data_raw = None
         return error_view(missing_parameter)
-    data_raw = cache.get("marketstack_rate")
-    if data_raw != None:
-        data_raw = json.decode(data_raw)
-    else:
-        data_raw = make_marketstack_request(type_query_to_make, api_token, company_name)
-        is_error = is_response_error(data_raw)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("marketstack_rate", json.encode(data_raw), ttl_seconds = int(query_timer))
-        if is_error == True:
-            return error_view(data_raw)
+    data_raw = make_marketstack_request(type_query_to_make, api_token, company_name, int(query_timer))
+    is_error = is_response_error(data_raw)
+
+    if is_error == True:
+        return error_view(data_raw)
     return get_data_select_period(data_raw, color_profit, select_period, company_name)
 
 def check_inputs(api_token, company_name):
@@ -332,9 +325,9 @@ def get_preferences(config):
     colors.append(chart_color_loss)
     return colors
 
-def make_marketstack_request(type_query, api_token, company):
+def make_marketstack_request(type_query, api_token, company, ttl_seconds):
     url = MARKETSTACK_PRICE_URL + type_query + MARKETSTACK_PRICE_URL_KEY + api_token + "&symbols=" + company
-    response = http.get(url)
+    response = http.get(url, ttl_seconds = ttl_seconds)
     if response.status_code == 404:
         return ERROR_404
     elif response.status_code == 429:

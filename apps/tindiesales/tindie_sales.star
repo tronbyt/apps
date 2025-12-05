@@ -73,7 +73,6 @@ def main(config):
             if done:
                 break
         if not error:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(cache_key, json.encode(products), ttl_seconds = 1800)  # cache for a half hour
 
     if error:

@@ -1,7 +1,7 @@
 ---
-id: ha_columns
+id: ha-columns
 name: HA Columns
-summary: Multi-column Home Assistant sensor display
+summary: Multi-Column HA Display
 desc: Displays Home Assistant sensors in configurable columns (2-4 columns supported).
 author: Mitchell Scott
 fileName: ha_columns.star

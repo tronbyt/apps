@@ -5,7 +5,6 @@ Description: Random movie quote from AFI top 100 movie quotes.
 Author: Austin Fonacier
 """
 
-load("cache.star", "cache")
 load("encoding/csv.star", "csv")
 load("http.star", "http")
 load("random.star", "random")
@@ -77,14 +76,9 @@ def get_random_quote():
     return quotes[random_num]
 
 def get_all_quotes():
-    movie_csv_str = cache.get("movie_csv_str")
+    movie_csv_raw = http.get("https://raw.githubusercontent.com/wcmbishop/time-travel-movie-club/master/data-raw/afi-top-100-quotes.csv", ttl_seconds = 604800)
+    movie_csv_str = movie_csv_raw.body()
 
-    if movie_csv_str == None:
-        movie_csv_raw = http.get("https://raw.githubusercontent.com/wcmbishop/time-travel-movie-club/master/data-raw/afi-top-100-quotes.csv")
-        movie_csv_str = movie_csv_raw.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("movie_csv_str", movie_csv_str, ttl_seconds = 604800)
     quotes = csv.read_all(movie_csv_str, skip = 1)
     return quotes
 

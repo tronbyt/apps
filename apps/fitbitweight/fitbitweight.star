@@ -5,7 +5,6 @@ Description: Displays your Fitbit recent weigh-ins.
 Author: Robert Ison
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -63,10 +62,7 @@ def main(config):
         fat_json = json.decode(EXAMPLE_DATA_FAT)
         bmi_json = json.decode(EXAMPLE_DATA_BMI)
     else:
-        access_token = cache.get(refresh_token)
-
-        if not access_token:
-            access_token = get_access_token(refresh_token)
+        access_token = get_access_token(refresh_token)
 
         #Now we have an access token, either from cache or using refresh_token
         #so let's get  data from cache, then if it's not there
@@ -76,18 +72,7 @@ def main(config):
 
         # For weight, fat % and bmi, let's get the data from cache, and if it doesn't exist, get it from fitbit
         for item in FITBIT_DATA_KEYS:
-            cache_item_name = "%s_%s" % (refresh_token, item)
-            fitbit_json_items[i] = cache.get(cache_item_name)
-
-            if fitbit_json_items[i] == None:
-                #nothing in cache, so we'll load it from Fitbit, then cache it
-                fitbit_json_items[i] = get_data_from_fitbit(access_token, (FITBIT_DATA_URL % (item)))
-
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                cache.set(cache_item_name, json.encode(fitbit_json_items[i]), ttl_seconds = CACHE_TTL)
-            else:
-                fitbit_json_items[i] = json.decode(fitbit_json_items[i])
-
+            fitbit_json_items[i] = get_data_from_fitbit(access_token, (FITBIT_DATA_URL % (item)))
             i = i + 1
 
         # Ugh, fix to actually put data into what I'm checking
@@ -350,6 +335,7 @@ def get_data_from_fitbit(access_token, data_url):
         headers = {
             "Authorization": "Bearer %s" % access_token,
         },
+        ttl_seconds = CACHE_TTL,
     )
 
     if res.status_code == 200:
@@ -383,15 +369,6 @@ def get_refresh_token(authorization_code):
 
     token_params = res.json()
     refresh_token = token_params["refresh_token"]
-    access_token = token_params["access_token"]
-    user_id = token_params["user_id"]
-    expires_in = token_params["expires_in"]
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = int(expires_in - 30))
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(get_cache_user_identifier(refresh_token), str(user_id), ttl_seconds = CACHE_TTL)
 
     return refresh_token
 
@@ -422,6 +399,7 @@ def get_access_token(refresh_token):
         url = FITBIT_TOKEN_URL,
         headers = headers,
         form_body = form_body,
+        ttl_seconds = 1800,
     )
 
     if res.status_code != 200:
@@ -431,9 +409,6 @@ def get_access_token(refresh_token):
 
     token_params = res.json()
     access_token = token_params["access_token"]
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
 
     return access_token
 

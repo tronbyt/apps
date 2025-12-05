@@ -127,28 +127,27 @@ def build_last_play(config, last_play_date, last_play_game):
     return children
 
 def render_main(config, game_image, last_play_date, last_play_game):
+    children = []
+    if game_image:
+        children.append(render.Image(height = 35, width = 35, src = game_image))
+
+    children.append(render.Box(
+        color = "#00FF0000",
+        child = render.Padding(
+            pad = (0, 0, 0, 0),
+            color = "#FF000000",
+            child = render.Column(
+                cross_align = "end",
+                main_align = "start",
+                expanded = False,
+                children = build_last_play(config, last_play_date, last_play_game),
+            ),
+        ),
+    ))
+
     return render.Root(
         child = render.Stack(
-            children = [
-                render.Image(
-                    height = 35,
-                    width = 35,
-                    src = game_image,
-                ),
-                render.Box(
-                    color = "#00FF0000",
-                    child = render.Padding(
-                        pad = (0, 0, 0, 0),
-                        color = "#FF000000",
-                        child = render.Column(
-                            cross_align = "end",
-                            main_align = "start",
-                            expanded = False,
-                            children = build_last_play(config, last_play_date, last_play_game),
-                        ),
-                    ),
-                ),
-            ],
+            children = children,
         ),
     )
 

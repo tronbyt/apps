@@ -36,24 +36,23 @@ def main(config):
         random_kanji = get_random_kanji(KANJI_IMAGE_LIST)
 
         #use the api to get the meaning, and the two readings (onyomi and kunyomi)
-        if (kanji_alive_key == None):
-            kanji_data = json.decode(KANJI_SAMPLE_DATA)
-        else:
+        if kanji_alive_key:
             kanji_data = get_kanji_information(random_kanji, kanji_alive_key)
 
+        if kanji_data and "kanji" in kanji_data:
             #we really don't need but one section of this, so we'll just use and store this part in cache
             #hey why not do something if its a little more efficient, even if it will never be noticed by anyone
             kanji_data = kanji_data["kanji"]
+        else:
+            kanji_data = json.decode(KANJI_SAMPLE_DATA)
 
         #Create Image for the selected Kanji
         kanji_image_url = KANJI_IMAGE_LOOKUP_URL + base64.encode(kanji_data["character"])
         kanji_image_src = http.get(kanji_image_url).body()
 
         #lets cache this so there is only one call per TTL across all tidbyt's
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(CACHED_KANJI_NAME, json.encode(kanji_data), ttl_seconds = KANJI_TTL)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(CACHED_KANJI_CHARACTER, kanji_image_src, ttl_seconds = KANJI_TTL)
     else:
         #We have the data in cache, let's use it

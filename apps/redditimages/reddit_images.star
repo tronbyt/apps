@@ -5,8 +5,6 @@ Description: Show a random image post from a custom list of subreddits (up to 10
 Author: Nicole Brooks
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/error_img.png", ERROR_IMG_ASSET = "file")
 load("random.star", "random")
@@ -121,33 +119,14 @@ def buildSubPrefix(name):
 # Gets either the cached posts or runs an API call to reddit for more.
 def getPosts(subname, config):
     print("Pulling posts for subreddit " + subname)
-    cacheName = "reddit-image-posts-" + subname
-    cachedPosts = cache.get(cacheName)
-
-    # Check the cache and return a random post from the stored posts if able.
-    if cachedPosts != None:
-        print("Cache hit")
-        cachedPosts = json.decode(cachedPosts)
-        return setRandomPost(cachedPosts, subname)
 
     print("Cache miss, refreshing posts")
 
     # Pull access token from cache. If expired, get a new one.
-    accessToken = cache.get("reddit-image-posts-access-token")
-    if accessToken == None:
-        print("Access token expired, getting new one")
-        newTokenRes = getNewAccessToken(config)
-        if "error" in newTokenRes.keys() or newTokenRes["access_token"] == None:
-            return handleApiError(newTokenRes)
-        accessToken = newTokenRes["access_token"]
-
-        # Store in cache again
-        print("Caching new access token for 24 hours: " + accessToken)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("reddit-image-posts-access-token", accessToken, 24 * 60 * 60)
-    else:
-        print("Access token still good!")
+    newTokenRes = getNewAccessToken(config)
+    if "error" in newTokenRes.keys() or newTokenRes["access_token"] == None:
+        return handleApiError(newTokenRes)
+    accessToken = newTokenRes["access_token"]
 
     # In lieu of the cache, pull a new set of posts from the API.
     apiUrl = "https://oauth.reddit.com/r/" + subname + "/hot.json?limit=30"
@@ -158,6 +137,7 @@ def getPosts(subname, config):
             "User-Agent": "Tidbyt App: Reddit Image Shuffler",
             "Authorization": auth,
         },
+        ttl_seconds = 2 * 60 * 60,
     )
     if "application/json" not in rep.headers.get("Content-Type"):
         return handleApiError()
@@ -174,11 +154,6 @@ def getPosts(subname, config):
                 if posts[i]["data"]["url"].endswith(APPROVED_FILETYPES[j]):
                     allImagePosts.append(posts[i]["data"])
 
-        # Cache the posts for 2 hours
-        print("Caching " + subname + " posts")
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cacheName, json.encode(allImagePosts), 2 * 60 * 60)
         return setRandomPost(allImagePosts, subname)
 
 # Build an error display for users. Log error.
@@ -238,6 +213,7 @@ def getNewAccessToken(config):
         auth = auth,
         form_body = body,
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 24 * 60 * 60,
     )
     data = res.json()
     return data

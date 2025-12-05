@@ -1,23 +1,16 @@
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 
 def get_question():
-    if cache.get("jeopardy_question") != None:
-        return json.decode(cache.get("jeopardy_question"))
-
-    res = http.get("https://raw.githubusercontent.com/abochnak/tidbyt-jeopardy/main/data/questions.json")
+    res = http.get("https://raw.githubusercontent.com/abochnak/tidbyt-jeopardy/main/data/questions.json", ttl_seconds = 900)
     if res.status_code != 200:
         fail("Failed with status_code %d" % res.status_code)
 
     questions = res.json()
     question = questions[random.number(0, len(questions))]
-    cache.set("jeopardy_question", json.encode(question), ttl_seconds = 900)
-
     return question
 
 def display_for(duration, child):

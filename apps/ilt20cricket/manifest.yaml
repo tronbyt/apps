@@ -7,3 +7,5 @@ author: M0ntyP
 fileName: ilt20_cricket.star
 packageName: ilt20cricket
 recommendedInterval: 5
+broken: true
+brokenReason: The ESPNCricinfo API endpoint used by this app is returning a 403 Forbidden error, likely due to API access restrictions or bot protection.

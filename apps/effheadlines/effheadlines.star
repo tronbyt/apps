@@ -7,7 +7,6 @@ Description: Get the latest headlines from the Electronic Frontier Foundation.
 
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("qrcode.star", "qrcode")
 load("random.star", "random")
@@ -20,37 +19,18 @@ def main():
     clean_titles = []
     clean_guids = []
 
-    json_titles = cache.get("titles")
-    json_guids = cache.get("guids")
+    rep = http.get(EFF_XML_URL, ttl_seconds = 3600)
+    if rep.status_code != 200:
+        fail("EFF XML request failed with status %d", rep.status_code)
+    body = rep.body()
 
-    if json_titles == None or json_guids == None:
-        rep = http.get(EFF_XML_URL)
-        if rep.status_code != 200:
-            fail("EFF XML request failed with status %d", rep.status_code)
-        body = rep.body()
+    dirty_titles = re.findall("<title>.+</title>", body)
+    for title in dirty_titles[1:11]:
+        clean_titles.append(title.replace("<title>", "").replace("</title>", ""))
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("body", body, ttl_seconds = 3600)
-
-        dirty_titles = re.findall("<title>.+</title>", body)
-        for title in dirty_titles[1:11]:
-            clean_titles.append(title.replace("<title>", "").replace("</title>", ""))
-
-        dirty_guids = re.findall("<guid isPermaLink=\"false\">.+ at https://www\\.eff\\.org</guid>", body)
-        for guid in dirty_guids[:10]:
-            clean_guids.append(guid.replace("<guid isPermaLink=\"false\">", "").replace(" at https://www.eff.org</guid>", ""))
-
-        json_titles = json.encode(clean_titles)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("titles", json_titles, ttl_seconds = 3600)
-        json_guids = json.encode(clean_guids)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("guids", json_guids, ttl_seconds = 3600)
-    else:
-        clean_titles = json.decode(json_titles)
-        clean_guids = json.decode(json_guids)
+    dirty_guids = re.findall("<guid isPermaLink=\"false\">.+ at https://www\\.eff\\.org</guid>", body)
+    for guid in dirty_guids[:10]:
+        clean_guids.append(guid.replace("<guid isPermaLink=\"false\">", "").replace(" at https://www.eff.org</guid>", ""))
 
     index = random.number(0, 9)
 
@@ -66,7 +46,6 @@ def main():
             background = "#000",
         )
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(url, base64.encode(code), ttl_seconds = 3600)
     else:
         code = base64.decode(data)

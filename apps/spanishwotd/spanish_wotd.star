@@ -5,7 +5,6 @@ Description: Displays the spanish word of the day including definition and trans
 Author: logancornelius
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("re.star", "re")
@@ -22,7 +21,7 @@ def render_error():
     )
 
 def fetch_word_of_the_day():
-    wotd_resp = http.get(SPANISH_DICT_WOTD_URL)
+    wotd_resp = http.get(SPANISH_DICT_WOTD_URL, ttl_seconds = CACHE_TTL)
 
     if wotd_resp.status_code != 200:
         return False
@@ -51,27 +50,13 @@ def fetch_word_of_the_day():
 def main():
     print("Starting")
 
-    cached_wotd_dict = cache.get(CACHE_KEY)
+    wotd_dict = fetch_word_of_the_day()
 
-    if cached_wotd_dict != None:
-        print("Cache hit")
+    if not wotd_dict:
+        return render_error
 
-        wotd_dict = json.decode(cached_wotd_dict)
-        word = wotd_dict["word"]
-        definition = wotd_dict["definition"]
-    else:
-        print("Cache miss")
-
-        wotd_dict = fetch_word_of_the_day()
-
-        if not wotd_dict:
-            return render_error
-
-        word = wotd_dict["word"]
-        definition = wotd_dict["definition"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(CACHE_KEY, json.encode(wotd_dict), CACHE_TTL)
+    word = wotd_dict["word"]
+    definition = wotd_dict["definition"]
 
     return render.Root(
         child = render.Column(

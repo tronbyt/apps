@@ -173,7 +173,6 @@ def main(config):
         # Grab new Oauthtoken from the Google Token service, format for Data Aggregation API call.
         OUTLOOK_ACCESS_TOKEN = "Bearer {}".format(refresh.json()["access_token"])
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(outlook_refresh_token, OUTLOOK_ACCESS_TOKEN, ttl_seconds = int(refresh.json()["expires_in"] - 30))
 
         # HM, is this ELSE path ever taken or leftover prior to inserting the else condition of the refresh token check?
@@ -346,7 +345,6 @@ def oauth_handler(params):
     token_params = res.json()
     refresh_token = token_params["refresh_token"]
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(refresh_token, "Bearer " + token_params["access_token"], ttl_seconds = int(token_params["expires_in"] - 30))
 
     return refresh_token
@@ -421,7 +419,7 @@ def get_outlook_event_list(start_window, end_window, auth_token, todays_date):
         # Also, MSFT generated "Focus Time" shows as 1 attendee, where as MF + Rachel entered morning prep, coding/training shows up as 0 attendees.   Hm.....may need to specifically filter on "Focus Time", dont count as a meeting.
         # Same for "meetings" with Zero attendees.
 
-        CalendarQuery = http.get(next_graph_event_link, headers = OUTLOOK_EVENT_HEADERS)
+        CalendarQuery = http.get(next_graph_event_link, headers = OUTLOOK_EVENT_HEADERS, ttl_seconds = 60)
         if CalendarQuery.status_code != 200:
             cal_failure_code = str(CalendarQuery.status_code)
             cal_failure_error_description = CalendarQuery.json()["error_description"]

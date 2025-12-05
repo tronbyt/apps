@@ -7,3 +7,5 @@ author: Buzz Andersen
 fileName: vidiots_calendar.star
 packageName: vidiotscalendar
 recommendedInterval: 60
+broken: true
+brokenReason: "Website structure changed or API endpoint removed"

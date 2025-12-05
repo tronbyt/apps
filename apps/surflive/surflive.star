@@ -5,7 +5,6 @@ Description: Shows the current surf conditions for a surf spot.
 Author: rcarton
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/wave.png", WAVE_ICON_ASSET = "file")
@@ -143,13 +142,6 @@ def get_cache_name(key):
     return "SURFLIVE_{key}".format(key = key)
 
 def get_conditions(spot_id):
-    cache_key = get_cache_name("conditions_{spot_id}".format(spot_id = spot_id))
-    cached_conditions = cache.get(cache_key)
-
-    if ENABLE_CACHE and cached_conditions != None:
-        print("Using cached conditions, key={cache_key}".format(cache_key = cache_key))
-        return json.decode(cached_conditions)
-
     wave = get_wave_forecast(spot_id)
     wind = get_wind_forecast(spot_id)
 
@@ -161,8 +153,6 @@ def get_conditions(spot_id):
         "wind": get_wind_forecast(spot_id),
     }
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(conditions), ttl_seconds = CACHE_TTL_SECONDS)
     return conditions
 
 def get_wave_forecast(spot_id):
@@ -248,7 +238,7 @@ def get_forecast(f_type, spot_id):
         f_type = f_type,
         spot_id = spot_id,
     )
-    r = http.get(url)
+    r = http.get(url, ttl_seconds = CACHE_TTL_SECONDS)
 
     if r.status_code != 200:
         print("Error fetching {f_type} forecast for spot_id={spot_id}".format(f_type = f_type, spot_id = spot_id))
@@ -287,7 +277,7 @@ def search_spots(query):
         query = query,
     )
 
-    r = http.get(url)
+    r = http.get(url, ttl_seconds = CACHE_TTL_SECONDS)
 
     if r.status_code != 200:
         fail("Error fetching spots, query={query}".format(query = query))

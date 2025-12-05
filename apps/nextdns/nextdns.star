@@ -106,7 +106,12 @@ def get_secrets(config):
     api_key = config.get("api_key", "").strip()
 
     if profile_id == "" or api_key == "":
-        fail("Missing NextDNS profile id or api key value: please restart app with both values supplied")
+        return render.Root(
+            child = render.WrappedText(
+                "Missing NextDNS profile id or api key value: please configure and restart app",
+                color = "#ff0000",
+            ),
+        )
 
     return {
         "profile_id": profile_id,
@@ -124,6 +129,8 @@ def main(config):
         Rendered pixlet
     """
     secrets = get_secrets(config)
+    if type(secrets) == "Root":
+        return secrets
 
     # get stats
     analytics = query_nextdns(secrets["api_key"], secrets["profile_id"], ANALYTICS_STATUS_ENDPOINT)

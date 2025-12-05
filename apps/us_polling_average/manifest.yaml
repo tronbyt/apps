@@ -4,4 +4,8 @@ name: US PollingAverage
 summary: Election polls from 538
 desc: Shows current polling averages from FiveThirtyEight.
 author: jwoglom
+fileName: us_polling_average.star
+packageName: us_polling_average
 recommendedInterval: 5
+broken: true
+brokenReason: The data source (FiveThirtyEight) has changed and the JSON endpoint now redirects to an HTML page.

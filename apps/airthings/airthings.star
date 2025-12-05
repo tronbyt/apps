@@ -27,8 +27,6 @@ Author: joshspicer
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -79,28 +77,13 @@ def main(config):
             ),
         )
 
-    # Key unique to the user to fetch cached access_token
-    ACCESS_TOKEN_CACHE_KEY = "%s-%s-%s" % (clientId, serialNumber, clientSecret)
-    SAMPLES_CACHE_KEY = "samples-%s-%s" % (clientId, serialNumber)
+    print("[+] Refreshing Token...")
+    access_token = client_credentials_grant_flow(config)
 
-    access_token = cache.get(ACCESS_TOKEN_CACHE_KEY)
-    if access_token == None or access_token == "":
-        print("[+] Refreshing Token...")
-        access_token = client_credentials_grant_flow(config, ACCESS_TOKEN_CACHE_KEY)
-    else:
-        print("[+] Using Cached Token...")
+    print("[+] Fetching Samples...")
 
-    # Read samples from cache if available
-    samplesString = cache.get(SAMPLES_CACHE_KEY)
-
-    if samplesString == None or samplesString == "":
-        print("[+] Fetching Samples...")
-
-        # https://developer.airthings.com/consumer-api-docs/#operation/Device%20samples%20latest-values
-        samples = get_samples(config, access_token, SAMPLES_CACHE_KEY)
-    else:
-        print("[+] Using Cached Samples...")
-        samples = json.decode(samplesString)
+    # https://developer.airthings.com/consumer-api-docs/#operation/Device%20samples%20latest-values
+    samples = get_samples(config, access_token)
 
     print(samples)
 
@@ -271,7 +254,7 @@ def main(config):
             ),
         )
 
-def get_samples(config, access_token, SAMPLES_CACHE_KEY):
+def get_samples(config, access_token):
     serial_number = config["serialNumber"]
     if serial_number == None:
         fail("serial_number is required")
@@ -280,7 +263,7 @@ def get_samples(config, access_token, SAMPLES_CACHE_KEY):
     headers = {
         "Authorization": "Bearer " + access_token,
     }
-    res = http.get(url, headers = headers)
+    res = http.get(url, headers = headers, ttl_seconds = 300)
 
     if res.status_code != 200:
         print("Error fetching samples: %s" % (res.body()))
@@ -288,13 +271,9 @@ def get_samples(config, access_token, SAMPLES_CACHE_KEY):
 
     status = res.json()
 
-    # Cache samples for 5 minutes
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(SAMPLES_CACHE_KEY, res.body(), 60 * 5)
-
     return status
 
-def client_credentials_grant_flow(config, access_token_cache_key):
+def client_credentials_grant_flow(config):
     clientSecret = config.str("clientSecret")
     clientId = config.str("clientId")
 
@@ -312,22 +291,17 @@ def client_credentials_grant_flow(config, access_token_cache_key):
             "Accept": "*/*",
         },
         form_body = form_body,
+        ttl_seconds = 3000,
     )
 
     if res.status_code == 200:
         print("Success")
     else:
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(access_token_cache_key, "")
         print("Error Fetching access_token: %s" % (res.body()))
         fail("token request failed with status code: %d - %s" % (res.status_code, res.body()))
 
     token_params = res.json()
     access_token = token_params["access_token"]
-    expires_in = token_params["expires_in"]
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(access_token_cache_key, access_token, ttl_seconds = int(expires_in) - 30)
     return access_token
 
 def get_schema():

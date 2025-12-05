@@ -5,8 +5,6 @@ Description: Display real-time departure times for trains, buses and ferries in 
 Author: fxb (Felix Bruns)
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/image_akn.png", IMAGE_AKN_ASSET = "file")
@@ -354,25 +352,15 @@ def fetch_departures(station_id, extra_params = {}, duration_minutes = 1440, max
     # Add additional request parameters.
     params.update(extra_params)
 
-    # Construct a unique cache key.
-    cache_key = base64.encode(url + json.encode(params))
-    cache_data = cache.get(cache_key)
+    response = http.get(url = url, params = params, ttl_seconds = CACHE_TTL_SECONDS)
 
-    if cache_data != None:
-        return json.decode(cache_data)
-    else:
-        response = http.get(url = url, params = params)
+    if response.status_code != 200:
+        print("API request failed with status %d" % response.status_code)
+        return None
 
-        if response.status_code != 200:
-            print("API request failed with status %d" % response.status_code)
-            return None
+    data = response.json()
 
-        data = response.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(data), ttl_seconds = CACHE_TTL_SECONDS)
-
-        return data
+    return data
 
 def get_config_option_value(config, key, default = None):
     """Get the value of a 'schema.Option' from the applet configuration.

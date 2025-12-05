@@ -280,8 +280,8 @@ def new_statesman_predictions():
     predictions = {}
     for card in j[CARDS]:
         predictions[card[CATEGORY]] = {
-            SEATS: extract_int(card[TEXT][2]),
-            VOTE_SHARE: extract_percentage(card[TEXT][0]),
+            SEATS: extract_int(card[TEXT][3]),
+            VOTE_SHARE: extract_percentage(card[TEXT][1]),
         }
     return predictions
 

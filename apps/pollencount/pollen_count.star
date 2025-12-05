@@ -5,7 +5,6 @@ Description: Displays a pollen count for your area. Enter your location for upda
 Author: Nicole Brooks
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/ground_bare.png", GROUND_BARE_ASSET = "file")
@@ -56,15 +55,10 @@ def main(config):
     dev_key = config.str("dev_key", "1234")
 
     #Check cache for pollen for this lat/long
-    cache = checkLatLngCache(latLngStr, dev_key)
-    if cache != None:
-        print("Cache hit")
-        todaysCount = cache
-    else:
-        print("Cache miss, calling API")
+    print("calling API")
 
-        #If not, make API call and cache result
-        todaysCount = getTodaysCount(latLngStr, dev_key, timezone)
+    #If not, make API call and cache result
+    todaysCount = getTodaysCount(latLngStr, dev_key, timezone)
 
     firstMixin = None
     secondMixin = None
@@ -210,17 +204,13 @@ def roundToHalf(floatNum):
 def getTodaysCount(latLng, dev_key, timezone):
     print("Getting API for: " + latLng + " for " + str(3600 * 12) + " seconds")
     FULL_URL = API_URL_BASE + latLng + "&apikey=" + dev_key + "&timezone=" + timezone
-    rep = http.get(FULL_URL)
+    rep = http.get(FULL_URL, ttl_seconds = 3600 * 12)
     data = rep.json()
 
     if "code" in data:
         return data
 
     pollenData = data["data"]["timelines"][0]["intervals"][0]["values"]
-
-    # save in cache for 12 hours
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(dev_key, json.encode(pollenData), 3600 * 12)
 
     return pollenData
 

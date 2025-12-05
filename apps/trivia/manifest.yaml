@@ -6,3 +6,5 @@ desc: Displays a random trivia question with category and difficulty.
 author: Jack Sherbal
 fileName: trivia.star
 packageName: trivia
+broken: true
+brokenReason: "Jservice API (http://jservice.io) is blocking requests (403 Forbidden)."

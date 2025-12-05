@@ -5,7 +5,6 @@ Description: Display count and contents of Severe Weather Alerts issued by the U
 Author: aschechter88
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/exclamationpoint_img.png", EXCLAMATIONPOINT_IMG_ASSET = "file")
@@ -96,39 +95,20 @@ def get_alerts(lat, long):
     ## master list
     alerts = []
 
-    ## check cache, 5 minutes TTL
-    cachekey = "lawnchairs.severewxalertsusa." + truncatedLat + "." + truncatedLong  ##cache key is for a lat/long pair
+    ## Get the alerts for the lat/long point and append them to the alerts dictionary.
 
-    if (cache.get(cachekey) != None):
-        ## cache hit
-        alerts = json.decode(cache.get(cachekey))
-        return alerts
+    pointAlertsResponse = http.get("https://api.weather.gov/alerts/active?point=" + truncatedLat + "," + truncatedLong, ttl_seconds = 300)
 
-    else:
-        ## cache miss
+    if "features" not in pointAlertsResponse.json():
+        return []
+    for item in pointAlertsResponse.json()["features"]:
+        ## filter out test alerts
+        if (item["properties"]["status"] == "Test"):
+            continue
+        else:
+            alerts.append(item)
 
-        ## Get the alerts for the lat/long point and append them to the alerts dictionary.
-
-        pointAlertsResponse = http.get("https://api.weather.gov/alerts/active?point=" + truncatedLat + "," + truncatedLong)
-
-        if "features" not in pointAlertsResponse.json():
-            return []
-        for item in pointAlertsResponse.json()["features"]:
-            ## filter out test alerts
-            if (item["properties"]["status"] == "Test"):
-                continue
-            else:
-                alerts.append(item)
-
-        # set cache. cast object to jsonstring
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            key = cachekey,
-            value = json.encode(alerts),
-            ttl_seconds = 300,
-        )
-
-        return alerts
+    return alerts
 
 ## Render the alert frame
 def render_alert(alert, alertIndex, totalAlerts, scale = 1):

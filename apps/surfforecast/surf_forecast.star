@@ -5,8 +5,6 @@ Description: Daily surf forecast for any spot on Surfline.
 Author: smith-kyle
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/icon_e.png", ICON_E_ASSET = "file")
 load("images/icon_n.png", ICON_N_ASSET = "file")
@@ -468,34 +466,26 @@ def render_flashing_bar(data):
         ],
     )
 
-def get(url):
-    rep = http.get(url)
+def get(url, ttl_seconds):
+    rep = http.get(url, ttl_seconds = ttl_seconds)
     if rep.status_code != 200:
         fail("Surfline request failed with status %d", rep.status_code)
     return rep.json()
 
-def get_response(url, cache_key, ttl_seconds):
-    response_cached = cache.get(cache_key)
-    if response_cached != None:
-        return json.decode(response_cached)
-
-    response = get(url)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(response), ttl_seconds = ttl_seconds)
-    return response
+def get_response(url, ttl_seconds):
+    return get(url, ttl_seconds)
 
 def get_wave_response(config):
     spot_id = get_spot_id_from_config(config)
-    return get_response(SURFLINE_WAVE_URL.format(spot_id = spot_id), "wave_response" + spot_id, SHORT_CACHE_TTL)
+    return get_response(SURFLINE_WAVE_URL.format(spot_id = spot_id), SHORT_CACHE_TTL)
 
 def get_rating_response(config):
     spot_id = get_spot_id_from_config(config)
-    return get_response(SURFLINE_RATING_URL.format(spot_id = spot_id), "rating_response" + spot_id, LONG_CACHE_TTL)
+    return get_response(SURFLINE_RATING_URL.format(spot_id = spot_id), LONG_CACHE_TTL)
 
 def get_wind_response(config):
     spot_id = get_spot_id_from_config(config)
-    return get_response(SURFLINE_WIND_URL.format(spot_id = spot_id), "wind_response" + spot_id, SHORT_CACHE_TTL)
+    return get_response(SURFLINE_WIND_URL.format(spot_id = spot_id), SHORT_CACHE_TTL)
 
 def get_animation_percentages():
     showing = [1 for _ in range(4)]

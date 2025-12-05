@@ -5,8 +5,6 @@ Description: Displays departure times for SEPTA regional rail trains.
 Author: radiocolin
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -187,19 +185,9 @@ DEFAULT_STATION = "Wayne Junction"
 DEFAULT_DIRECTION = "S"
 
 def call_schedule_api(direction, station):
-    cache_string = cache.get(direction + "_" + station + "_" + "schedule_api_response")
-    schedule = None
-    if cache_string != None:
-        schedule = json.decode(cache_string)
-    if schedule == None:
-        r = http.get(API_SCHEDULE, params = {"station": station, "direction": direction, "results": "4"})
-        schedule_raw = r.json()
-        schedule = schedule_raw.values()[0][0].values()[0]
-        parsed_time = time.parse_time(schedule[0]["sched_time"], "2006-01-02 15:04:05.000", "America/New_York")
-        expiry = int((parsed_time - time.now()).seconds)
-        if expiry < 0:  #this is because septa's API returns tomorrow's times with today's date if the last departure for the day has already happened
-            expiry = 30
-        cache.set(direction + "_" + station + "_" + "schedule_api_response", json.encode(schedule), ttl_seconds = expiry)
+    r = http.get(API_SCHEDULE, params = {"station": station, "direction": direction, "results": "4"}, ttl_seconds = 30)
+    schedule_raw = r.json()
+    schedule = schedule_raw.values()[0][0].values()[0]
     return schedule
 
 def get_schedule(direction, station):

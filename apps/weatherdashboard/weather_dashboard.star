@@ -1,5 +1,3 @@
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -80,38 +78,31 @@ def get_schema():
 def get_weather_data(config):
     api_key = config.get("api_key", None)
     application_key = config.get("application_key", None)
-    cached_data = cache.get("weather_data-{0}".format(api_key))
-    if cached_data != None:
-        print("Using existing weather data")
-        cache_res = json.decode(cached_data)
-        return cache_res
 
-    else:
-        if api_key == None:
-            print("Missing api_key")
-            return SAMPLE_STATION_RESPONSE
-        if application_key == None:
-            print("Missing application_key")
-            return SAMPLE_STATION_RESPONSE
+    if api_key == None:
+        print("Missing api_key")
+        return SAMPLE_STATION_RESPONSE
+    if application_key == None:
+        print("Missing application_key")
+        return SAMPLE_STATION_RESPONSE
 
-        print("Getting new weather data")
-        res = http.get(
-            url = AMBIENT_WEATHER_URL,
-            params = {
-                "applicationKey": config.get("application_key"),
-                "apiKey": config.get("api_key"),
-            },
-        )
-        if res.status_code != 200:
-            print("Ambient Weather request failed with status %d", res.status_code)
-            return SAMPLE_STATION_RESPONSE
+    print("Getting new weather data")
+    res = http.get(
+        url = AMBIENT_WEATHER_URL,
+        params = {
+            "applicationKey": config.get("application_key"),
+            "apiKey": config.get("api_key"),
+        },
+        ttl_seconds = 60,
+    )
+    if res.status_code != 200:
+        print("Ambient Weather request failed with status %d", res.status_code)
+        return SAMPLE_STATION_RESPONSE
 
-        current_data = res.json()[0]["lastData"]
-        print("{0}".format(current_data))
+    current_data = res.json()[0]["lastData"]
+    print("{0}".format(current_data))
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("weather_data-{0}".format(api_key), json.encode(current_data), ttl_seconds = 60)
-        return current_data
+    return current_data
 
 SAMPLE_STATION_RESPONSE = {
     "dateutc": 1679845380000,

@@ -5,8 +5,6 @@ Description: Shows the tide height throughout the day of the ocean based on the 
 Author: k.wajdowicz
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -224,20 +222,12 @@ def get_schema():
 def get_tide_data(stationId, date, interval):
     url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=%s&end_date=%s&station=%s&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=%s&units=english&application=DataAPI_Sample&format=json" % (date, date, stationId, interval)
 
-    data = cache.get("%s-%s" % (stationId, date))
-    if data != None:
-        data = json.decode(data)
-        print("Hit! Displaying cached data.")
-    else:
-        print("Miss! Calling tide API: %s" % url)
-        response = http.get(url)
-        if response.status_code != 200 or "error" in response.json():
-            print("tide request failed with status %d" % response.status_code)
-            return None
-        data = response.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("%s-%s" % (stationId, date), response.body(), ttl_seconds = 86400)
+    print("Calling tide API: %s" % url)
+    response = http.get(url, ttl_seconds = 86400)
+    if response.status_code != 200 or "error" in response.json():
+        print("tide request failed with status %d" % response.status_code)
+        return None
+    data = response.json()
 
     return data
 
@@ -281,27 +271,18 @@ def calculate_hours(timestamp):
 
 def get_station_timezone(id):
     url = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/%s.json" % id
-    zone = cache.get(id)
-    if zone != None:
-        print("Hit! Displaying cached data.")
-        return zone
-    else:
-        print("Miss! Calling station API: %s" % url)
-        response = http.get(url)
-        if response.status_code != 200:
-            print("station request failed with status %d" % response.status_code)
-            return None
-        zone = response.json()["stations"][0]["timezone"]
-        if zone in TIMEZONE_MAP:
-            tz = TIMEZONE_MAP[zone]
+    print("Calling station API: %s" % url)
+    response = http.get(url, ttl_seconds = 86400)
+    if response.status_code != 200:
+        print("station request failed with status %d" % response.status_code)
+        return None
+    zone = response.json()["stations"][0]["timezone"]
+    if zone in TIMEZONE_MAP:
+        tz = TIMEZONE_MAP[zone]
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(id, str(tz), ttl_seconds = 86400)
-            return tz
-        else:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(id, str("unsupported_timezone:%s" % zone), ttl_seconds = 86400)
-            return "unsupported_timezone:%s" % zone
+        return tz
+    else:
+        return "unsupported_timezone:%s" % zone
 
 def station_not_found(stationId):
     return render.Root(

@@ -115,7 +115,7 @@ def get_events(config):
     now = time.now().in_location(timezone)
     end_of_day = time.time(year = now.year, month = now.month, day = now.day, hour = 23, minute = 59, second = 59, location = timezone)
     time_left_in_day = end_of_day - now
-    rep = http.get(url, ttl_seconds = min(3600, time_left_in_day.seconds))  # cache until midnight or an hour, whichever is first
+    rep = http.get(url, ttl_seconds = int(min(3600, time_left_in_day.seconds)))  # cache until midnight or an hour, whichever is first
     if rep.status_code != 200:
         return [{"name": "Error loading holidays...", "id": ""}]
 

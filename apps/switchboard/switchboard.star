@@ -5,7 +5,6 @@ Description: Displays data from Switchboard on your Tidbyt.
 Author: bguggs
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/sb_icon.png", SB_ICON_ASSET = "file")
@@ -102,23 +101,13 @@ def main(config):
         return render_failure("API TOKEN REQUIRED", current_time_str)
 
     # Load layout data
-    sb_cached_json = cache.get("sb_cached_json")
+    res = http.get(BASE_API_URL, auth = ("Switchboard", sb_api_token), ttl_seconds = 60)
+    if res.status_code != 200:
+        # Something went wrong with the API request
+        return render_failure("REQUEST FAILED: " + str(res.status_code), current_time_str)
 
-    if sb_cached_json != None:
-        # Cache hit, use stored data
-        res_json = json.decode(sb_cached_json)
-    else:
-        # Cache miss, re-retrieve from API
-        res = http.get(BASE_API_URL, auth = ("Switchboard", sb_api_token))
-        if res.status_code != 200:
-            # Something went wrong with the API request
-            return render_failure("REQUEST FAILED: " + str(res.status_code), current_time_str)
-
-        # Store the retrieved data in cache
-        res_json = res.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("sb_cached_json", json.encode(res_json), ttl_seconds = 60)
+    # Store the retrieved data in cache
+    res_json = res.json()
 
     # Retrieve values from json blob
     marquee_text = res_json.get("marquee_text")

@@ -230,6 +230,7 @@ def main(config):
                 "X-Authentication-Token": zenhub_rest_api_key,
                 "Content-Type": "application/json",
             },
+            ttl_seconds = 120,
         )
 
         if board_res.status_code != 200:
@@ -247,9 +248,6 @@ def main(config):
             pipeline_id = pipeline_id.pop()
         else:
             return render_error("Pipeline not found")
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("zenhubapp_pipeline_%s" % hash.md5(zenhub_gql_api_key), str(pipeline_id), ttl_seconds = 120)
 
     if issues_cache != None:
         print("[ZENHUB APP] Issues cache hit")
@@ -285,15 +283,13 @@ def main(config):
                     }
                 """,
             },
+            ttl_seconds = 120,
         )
 
         if issues_res.status_code != 200:
             return render_error("Invalid Zenhub config")
 
         issues = issues_res.json()["data"]["searchIssuesByPipeline"]["nodes"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("zenhubapp_issues_%s" % hash.md5(zenhub_gql_api_key), str(issues), ttl_seconds = 120)
 
     issue_rows = []
 

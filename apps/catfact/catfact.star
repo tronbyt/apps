@@ -5,7 +5,6 @@ Description: Calls an external API and retrieves a random cat fact and renders i
 Author: broepke
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/cat_icon.png", CAT_ICON_ASSET = "file")
 load("render.star", "render")
@@ -23,23 +22,13 @@ def main():
         render.Root: The rendering for the Tidbyt applet.
     """
 
-    fact_cached = cache.get("cat_fact_cached")
-    if fact_cached != None:
-        print("Hit! Displaying cached data.")
-        print(fact_cached)
-        response = fact_cached
-    else:
-        print("Miss! Calling Cat Fact API.")
-        rep = http.get(CAT_URL)
+    print("Calling Cat Fact API.")
+    rep = http.get(CAT_URL, ttl_seconds = 240)
 
-        if rep.status_code != 200:
-            fail("Request failed with status %d", rep.status_code)
+    if rep.status_code != 200:
+        fail("Request failed with status %d", rep.status_code)
 
-        print(fact_cached)
-        response = rep.json()["fact"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("cat_fact_cached", response, ttl_seconds = 240)
+    response = rep.json()["fact"]
 
     return render.Root(
         show_full_animation = True,

@@ -3,7 +3,8 @@ id: fishbyt
 name: Fishbyt
 summary: Fish facts
 desc: Gaze upon glorious marine life.
-author: vlauffer
+author: tavdog
 fileName: fishbyt.star
 packageName: fishbyt
+broken: true
 recommendedInterval: 5

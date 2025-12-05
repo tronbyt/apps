@@ -45,7 +45,7 @@ def main(config):
     )
 
     if (ics.status_code != 200):
-        fail("Failed to fetch ICS file")
+        return render.Root(child = render.WrappedText("Failed to fetch ICS file", color = "#ff0000"))
 
     event = ics.json()["data"]
 

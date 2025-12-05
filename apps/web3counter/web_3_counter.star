@@ -5,7 +5,6 @@ Descrtion: Displays the total dollar value of lost assets due to crypto scams an
 Author: Nick Kuzmik (github.com/kuzmik)
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
@@ -51,17 +50,10 @@ def main():
     )
 
 def get_total():
-    total_cached = cache.get("total_lost")
-    if total_cached != None:
-        total_lost = str(total_cached)
-    else:
-        resp = http.get(W3IGG_API)
-        if resp.status_code != 200:
-            fail("API request failed with status %d", resp.status_code)
-        total_lost = resp.json()["total"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("total_lost", str(total_lost), ttl_seconds = 900)  # 15 minutes
+    resp = http.get(W3IGG_API, ttl_seconds = 900)
+    if resp.status_code != 200:
+        fail("API request failed with status %d", resp.status_code)
+    total_lost = resp.json()["total"]
 
     return humanize.comma(float(total_lost))
 

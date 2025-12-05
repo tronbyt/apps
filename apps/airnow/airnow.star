@@ -41,7 +41,7 @@ def get_alert_colors(category_num):
         return ("#7e0023", "#FFF")
 
 def get_current_observation_url(api_key, lat, lng):
-    return "https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude={lat}&longitude={lng}&api_key={api_key}".format(
+    return "https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude={lat}&longitude={lng}&api_key={api_key}".format(
         lat = lat,
         lng = lng,
         api_key = api_key,
@@ -50,7 +50,7 @@ def get_current_observation_url(api_key, lat, lng):
 def get_current_observation(api_key, lat, lng):
     response = http.get(url = get_current_observation_url(api_key, lat, lng), ttl_seconds = 30 * 60)
     if response.status_code != 200:
-        fail("HTTP request failed with status %d" % response.status_code)
+        return {"error": response.status_code}
 
     data = response.json()
 
@@ -126,6 +126,22 @@ def main(config):
     lng = humanize.float(ACCURACY, float(location["lng"]))
 
     observation = get_current_observation(api_key, lat, lng)
+
+    if observation and "error" in observation:
+        msg = "AirNow API Error: %d" % observation["error"]
+        if observation["error"] == 429:
+            msg = "Rate limit exceeded. Please configure your own API Key."
+        return render.Root(
+            child = render.Box(
+                child = render.WrappedText(
+                    content = msg,
+                    width = canvas.width(),
+                    align = "center",
+                    color = "#f66",
+                ),
+            ),
+        )
+
     if not observation:
         return render.Root(
             child = render.Box(

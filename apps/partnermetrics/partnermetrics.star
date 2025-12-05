@@ -6,9 +6,6 @@ Author: Rishabh Tayal
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/animated_shopify_bag.gif", IMAGE_ANIMATED_SHOPIFY_BAG_ASSET = "file")
 load("images/image_alien_error.gif", IMAGE_ALIEN_ERROR_ASSET = "file")
@@ -60,25 +57,15 @@ TRENDS_ANIMATED_BACKGROUND = TRENDS_ANIMATED_ASSET.readall()
 APP_ID = "shopify_sales"
 
 def api_fetch(partnermetricsCookie, request_config):
-    cache_key = "{}/{}/{}".format(APP_ID, partnermetricsCookie, base64.encode(json.encode(request_config)))
     now = request_config["now"]
-    cached_value = cache.get(cache_key)
-    if cached_value != None:
-        print("Hit! Displaying cached data.")
-        api_response = json.decode(cached_value)
-        return api_response
-    else:
-        print("Miss! Calling Counter API.")
-        url = "{}{}&period=30".format(SHOPIFY_COUNTER_API_HOST, now)
-        rep = http.get(url, headers = {"Cookie": "_PartnerMetrics_session={}".format(partnermetricsCookie)})
-        if rep.status_code != 200:
-            print("Counter API request failed with status {}".format(rep))
-            return None
-        api_response = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(api_response), ttl_seconds = CACHE_TTL)
-        return api_response
+    print("Calling Counter API.")
+    url = "{}{}&period=30".format(SHOPIFY_COUNTER_API_HOST, now)
+    rep = http.get(url, headers = {"Cookie": "_PartnerMetrics_session={}".format(partnermetricsCookie)}, ttl_seconds = CACHE_TTL)
+    if rep.status_code != 200:
+        print("Counter API request failed with status {}".format(rep))
+        return None
+    api_response = rep.json()
+    return api_response
 
 # Error View
 # Renders an error message

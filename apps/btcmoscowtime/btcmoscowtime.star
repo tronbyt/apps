@@ -18,12 +18,15 @@ def get_data(ttl_seconds = 60 * 5):
     url = "https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=sats"
     response = http.get(url = url, ttl_seconds = ttl_seconds)
     if response.status_code != 200:
-        fail("Coingecko request failed with status %d", response.status_code)
+        print("Coingecko request failed with status %d" % response.status_code)
+        return None
     json = response.json()
     return json["tether"]["sats"]
 
 def print_moscowtime(show_msat = DEFAULT_SHOW_MSAT):
     data = get_data()
+    if data == None:
+        return [render.Text("Error")]
     sats = str(int(data // 1))
     msat = str(int((data % 1) * 100)) if show_msat else 0
 

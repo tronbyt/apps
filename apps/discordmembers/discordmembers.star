@@ -5,7 +5,6 @@ Description: Display the approximate member count for a given Discord server (vi
 Author: Dennis Zoma (https://zoma.dev)
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/twitter_icon.png", TWITTER_ICON_ASSET = "file")
@@ -19,33 +18,20 @@ DISCORD_API_URL = "https://discord.com/api/v9/invites/%s?with_counts=true"
 def main(config):
     invite_id = config.get("invite_id", "r45MXG4kZc")
 
-    cache_key_members_count = "discord_members_%s" % invite_id
-    formatted_members_count = cache.get(cache_key_members_count)
+    url = DISCORD_API_URL % invite_id
+    response = http.get(url, ttl_seconds = 240)
 
-    cache_key_server_name = "discord_server_%s" % invite_id
-    server_name = cache.get(cache_key_server_name)
+    if response.status_code != 200:
+        fail("Discord request failed with status %d", response.status_code)
 
-    if formatted_members_count == None or server_name == None:
-        url = DISCORD_API_URL % invite_id
-        response = http.get(url)
+    body = response.json()
 
-        if response.status_code != 200:
-            fail("Discord request failed with status %d", response.status_code)
-
-        body = response.json()
-
-        if body == None or len(body) == 0 or body["guild"] == None or len(body["guild"]) == 0:
-            formatted_members_count = "Not Found"
-            server_name = "Check your invite ID"
-        else:
-            formatted_members_count = "%s members" % humanize.comma(int(body["approximate_member_count"]))
-            server_name = body["guild"]["name"]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key_members_count, formatted_members_count, ttl_seconds = 240)
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key_server_name, server_name, ttl_seconds = 240)
+    if body == None or len(body) == 0 or body["guild"] == None or len(body["guild"]) == 0:
+        formatted_members_count = "Not Found"
+        server_name = "Check your invite ID"
+    else:
+        formatted_members_count = "%s members" % humanize.comma(int(body["approximate_member_count"]))
+        server_name = body["guild"]["name"]
 
     return render.Root(
         child = render.Box(

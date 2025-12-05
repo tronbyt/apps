@@ -5,7 +5,6 @@ Description: Displays messages from overhead signs on Ohio highways.
 Author: noahcolvin
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
@@ -90,18 +89,9 @@ def get_signs(location, config):
     loc = json.decode(location)
     url = "{}&radius={},{},{}".format(URL, loc["lat"], loc["lng"], SEARCH_RADIUS)
 
-    signs = cache.get(url)
-
-    if signs == None:
-        print("schema locations not cached")
-        places = http.get(url, headers = headers(config.get("api_key")))
-        signs = places.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, json.encode(signs), ttl_seconds = 300)
-    else:
-        print("using schema cache")
-        signs = json.decode(signs)
+    print("schema locations not cached")
+    places = http.get(url, headers = headers(config.get("api_key")), ttl_seconds = 300)
+    signs = places.json()
 
     options = []
 
@@ -251,22 +241,15 @@ def headers(api_key):
     return {"Authorization": "APIKEY {}".format(api_key)}
 
 def load_signs(api_key):
-    signs_cached = cache.get(CACHE_KEY)
-    if signs_cached != None:
-        print("using cache")
-        return json.decode(signs_cached)
     print("No data cached")
 
-    resp = http.get(URL, headers = headers(api_key))
+    resp = http.get(URL, headers = headers(api_key), ttl_seconds = 300)
 
     if resp.status_code != 200:
         print("request failed with status {}".format(resp.status_code))
         return None
     print("http success")
     data = resp.json()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(CACHE_KEY, json.encode(data["results"]), ttl_seconds = 300)
 
     return data["results"]
 

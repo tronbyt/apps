@@ -5,7 +5,6 @@ Description: Weather and Trail status for Mountains that are part of the Epic Pa
 Author: Colin Morrisseau
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -100,10 +99,7 @@ def Getweather_data(resort):
     """
 
     url = RESORT_URLS[resort] + WEATHER_URL_STUB
-    if (cache.get(url) != None):
-        cached_string = cache.get(url)
-        return json.decode(cached_string)
-    r = http.get(url)
+    r = http.get(url, ttl_seconds = 600)
     response = r.body()
     temperature = None
     snowfall = None
@@ -117,7 +113,7 @@ def Getweather_data(resort):
             snowfall = json.decode(trimToJSON(line))["TwentyFourHourSnowfall"]["Inches"]
     if temperature == None:
         url = RESORT_URLS[resort] + WEATHER_URL_STUB_ALT
-        r = http.get(url)
+        r = http.get(url, ttl_seconds = 600)
         response = r.body()
         for line in response.splitlines():
             if line.startswith("    FR.forecasts = "):
@@ -130,10 +126,6 @@ def Getweather_data(resort):
         return None
 
     results = dict(temperature = temperature, snowfall = snowfall, description = weather_description)
-    url = RESORT_URLS[resort] + WEATHER_URL_STUB
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(url, json.encode(results), 600)
     return results
 
 def getTerrain(resort):
@@ -147,12 +139,8 @@ def getTerrain(resort):
     """
     url = RESORT_URLS[resort] + TERRAIN_URL_STUB
 
-    #Check the Cache
-    if cache.get(url) != None:
-        return json.decode(cache.get(url))
-
     # Pull an HTML response of the lift status page
-    r = http.get(url)
+    r = http.get(url, ttl_seconds = 600)
     response = r.body()
 
     # filter out to just the JSON Object. It's a little wierd so it requires some string manipulation
@@ -163,7 +151,7 @@ def getTerrain(resort):
             break
     if terrain_status_js_command == None:
         url = RESORT_URLS[resort] + TERRAIN_URL_STUB_ALT
-        r = http.get(url)
+        r = http.get(url, ttl_seconds = 600)
         response = r.body()
         for line in response.splitlines():
             if line.startswith("    FR.TerrainStatusFeed = "):
@@ -210,10 +198,6 @@ def getTerrain(resort):
     for x in summary.keys():
         for y in summary[x].keys():
             summary[x][y] = repr(summary[x][y])
-    url = RESORT_URLS[resort] + TERRAIN_URL_STUB
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(url, json.encode(summary), 600)
     return summary
 
 def titleRow(resort):

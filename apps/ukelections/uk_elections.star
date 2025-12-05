@@ -14,7 +14,7 @@ POSTCODE_API = "https://api.electoralcommission.org.uk/api/v1/postcode/%s/"
 ADDRESS_API = "https://api.electoralcommission.org.uk/api/v1/address/%s/"
 
 def get_api_key(config):
-    return config.get("api_key")
+    return config.get("api_key") or ""
 
 FONT = "tom-thumb"
 PURPLE = "#373151"  # Parliamentary branding for neutrality https://www.parliament.uk/globalassets/documents/foi/181321bg.pdf

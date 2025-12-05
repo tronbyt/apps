@@ -477,18 +477,13 @@ def fetch_stations_from_website():
     """
     result = []
 
-    nj_dv_page_response_body = cache.get(DEPARTURES_CACHE_KEY)
-    if nj_dv_page_response_body == None:
-        nj_dv_page_response = http.get(NJ_TRANSIT_STATIONS_URL)
+    nj_dv_page_response = http.get(NJ_TRANSIT_STATIONS_URL, ttl_seconds = DEPARTURES_CACHE_TTL)
 
-        if nj_dv_page_response.status_code != 200:
-            print("Got code '%s' from page response" % nj_dv_page_response.status_code)
-            return result
+    if nj_dv_page_response.status_code != 200:
+        print("Got code '%s' from page response" % nj_dv_page_response.status_code)
+        return result
 
-        nj_dv_page_response_body = nj_dv_page_response.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(DEPARTURES_CACHE_KEY, nj_dv_page_response.body(), DEPARTURES_CACHE_TTL)
+    nj_dv_page_response_body = nj_dv_page_response.body()
 
     # Parse the HTML to find the __NUXT_DATA__ script tag
     selector = html(nj_dv_page_response_body)
@@ -546,7 +541,6 @@ def getStationListOptions():
     if stations == None:
         stations = fetch_stations_from_website()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(STATION_CACHE_KEY, json.encode(stations), STATION_CACHE_TTL)
 
     for station in stations:

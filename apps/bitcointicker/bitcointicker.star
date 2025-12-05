@@ -121,17 +121,24 @@ def get_percentage(value):
 
 def get_market_data():
     url = "https://api.coingecko.com/api/v3/coins/bitcoin?developer_data=false&community_data=false&tickers=false&localization=false"
-    return get_data(url)["market_data"]
+    data = get_data(url)
+    if data == None:
+        return None
+    return data["market_data"]
 
 def get_market_chart(currency, period):
     days = convert_period_to_days(period)
     url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency={}&days={}&precision=0".format(currency, days)
-    return get_data(url)["prices"]
+    data = get_data(url)
+    if data == None:
+        return None
+    return data["prices"]
 
 def get_data(url, ttl_seconds = 60 * 5):
     response = http.get(url = url, ttl_seconds = ttl_seconds)
     if response.status_code != 200:
-        fail("Coingecko request failed with status %d", response.status_code)
+        print("Coingecko request failed with status %d" % response.status_code)
+        return None
     return response.json()
 
 def convert_period_to_days(period):
@@ -166,6 +173,11 @@ def main(config):
 
     market_data = get_market_data()
     market_chart = get_market_chart(currency, period)
+
+    if market_data == None or market_chart == None:
+        return render.Root(
+            child = render.WrappedText("Error fetching data"),
+        )
 
     start_price = get_start_price(currency, period, market_data)
 

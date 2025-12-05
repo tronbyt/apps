@@ -5,8 +5,6 @@ Description: Shows two hundred and sixty-five different XScreenSaver animations,
 Author: Greg Knauss and XScreenSaver
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
@@ -20,7 +18,6 @@ FONT_ASCDES = 5 + 0
 FONT_WIDTH = 4
 GROUP_DEFAULT = "Default"
 CACHE_SECONDS = 60
-SECRET_ENCRYPTED = "AV6+xWcErarteHoMW1Ra85ucHYVzivFmMkqs8z/bLpwnLVWK66mPAY0FWu5bhkuLDQEBu5DckTDKeYHXTBTdBHqHU+B5d/rxzg0ArIA1wpoQjRi6lBMXwHYwC6wxxuyBvxPY5g8n/WzxfYz+huMqMtbn+lmVbOPzFRQ5L4gP6PvwBVF58RcbirV54oPdr9khhAKCisB3q+vj/wrmRdF2SvsRGK0iug=="
 HACKS = [
     ["abstractile", "Abstractile", "Abstractile", "Mosaic patterns of interlocking tiles. Written by Steve Sundstrom; 2004.", True, ["Default", "Colorful", "All"]],
     ["anemone", "Anemone", "Anemone", "Wiggling tentacles.  Written by Gabriel Finch; 2002.", True, ["Default", "Jarring", "Weird", "All"]],
@@ -336,46 +333,37 @@ def main(config):
     if (config.get("hack") or config.get("hackname")):
         print("Hack %s: %s" % (hack, hacks[hack]))
 
-    # Check to see if the animation is cached (we cache by name because the number means something different depending on what's enabled)
-    gif = cache.get("gif_%s" % (hacks[hack][0]))
-    if gif != None:
-        # If so, decode and use it
-        gif = base64.decode(gif)
+    # Pull the GIF from the remote source
+    headers = {
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "DNT": "1",
+        "Pragma": "no-cache",
+        "Referer": "https://xscreensaver.eod.com/",
+        "Sec-Fetch-Dest": "image",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    }
+    response = http.get(
+        "https://xscreensaver.eod.com/" + config.get("hackfile", hacks[hack][0]) + ".gif",
+        headers = headers,
+        ttl_seconds = CACHE_SECONDS,
+    )
 
-    else:
-        # If not, pull the GIF from the remote source
-        headers = {
-            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "DNT": "1",
-            "Pragma": "no-cache",
-            "Referer": "https://xscreensaver.eod.com/",
-            "Sec-Fetch-Dest": "image",
-            "Sec-Fetch-Mode": "no-cors",
-            "Sec-Fetch-Site": "same-origin",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        }
-        response = http.get(
-            "https://xscreensaver.eod.com/" + config.get("hackfile", hacks[hack][0]) + ".gif",
-            headers = headers,
+    # If something went wrong, show an error
+    if response.status_code != 200:
+        return render.Root(
+            child = render.WrappedText(
+                content = "XScreenSaver: %d for %s. That's bad." % (response.status_code, hacks[hack][2]),
+                align = "left",
+            ),
         )
 
-        # If something went wrong, show an error
-        if response.status_code != 200:
-            return render.Root(
-                child = render.WrappedText(
-                    content = "XScreenSaver: %d for %s. That's bad." % (response.status_code, hacks[hack][2]),
-                    align = "left",
-                ),
-            )
-
-        # Otherwise, cache the result
-        gif = response.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("gif_%s" % (hacks[hack][0]), base64.encode(gif), ttl_seconds = CACHE_SECONDS)
+    # Otherwise, use the result
+    gif = response.body()
 
     # Render the GIF
     children = [

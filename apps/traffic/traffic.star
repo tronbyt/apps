@@ -151,7 +151,7 @@ def bing_reverse_geo(coordinates, key):
         req_url = "%s/Locations/%s?key=%s" % (BING_URL, location, key)
         print("Requesting address from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["location"])
         response = request.json()
 
         if request.status_code != 200 or response.get("statusCode", False) != 200:
@@ -172,9 +172,6 @@ def bing_reverse_geo(coordinates, key):
             # We'll return address parts in a tuple and match the parts between origin/destination; we can then only
             # display the more broad information if parts don't match (i.e. traveling between cities or countries)
             address_parts = [first["address"].get(item, None) for item in ["addressLine", "locality", "adminDistrict", "countryRegion"]]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(address_parts), ttl_seconds = CACHE_TTL["location"])
 
     return address_parts
 
@@ -202,7 +199,7 @@ def mq_reverse_geo(coordinates, key):
         req_url = "%s/search/v2/radius?key=%s&origin=%s" % (MQ_URL, key, location)
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["location"])
         response = request.json()
 
         if request.status_code != 200 or response.get("info", {}).get("statusCode", False) != 0:
@@ -220,9 +217,6 @@ def mq_reverse_geo(coordinates, key):
             # We'll return address parts in a tuple and match the parts between origin/destination; we can then only
             # display the more broad information if parts don't match (i.e. traveling between cities or countries)
             address_parts = [first["fields"].get(item, None) for item in ["address", "city", "state", "country"]]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(address_parts), ttl_seconds = CACHE_TTL["location"])
 
     return address_parts
 
@@ -249,7 +243,7 @@ def ors_reverse_geo(coordinates, key):
         req_url = "%s/geocode/reverse?api_key=%s&point.lat=%s&point.lon=%s" % (ORS_URL, key, lat, lon)
         print("Requesting data from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["location"])
         response = request.json()
 
         if request.status_code != 200:
@@ -267,9 +261,6 @@ def ors_reverse_geo(coordinates, key):
             # We'll return address parts in a tuple and match the parts between origin/destination; we can then only
             # display the more broad information if parts don't match (i.e. traveling between cities or countries)
             address_parts = [first["properties"].get(item, None) for item in ["name", "locality", "region", "country_a"]]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(address_parts), ttl_seconds = CACHE_TTL["location"])
 
     return address_parts
 
@@ -307,7 +298,7 @@ def ors_directions(origin, destination, mode, key, **kwargs):
         req_url = "%s/v2/directions/%s?api_key=%s&start=%s&end=%s" % (ORS_URL, mode, key, start, end)
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["directions"])
         response = request.json()
 
         if request.status_code != 200:
@@ -329,9 +320,6 @@ def ors_directions(origin, destination, mode, key, **kwargs):
 
         else:
             data = response
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(response), ttl_seconds = CACHE_TTL["directions"])
 
     features = data.get("features", [{}])[0]
     properties = features.get("properties", {})
@@ -387,7 +375,7 @@ def mq_directions(origin, destination, mode, key, **kwargs):
 
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["directions"])
         response = request.json()
 
         if request.status_code != 200 or response.get("info", {}).get("statuscode", False) != 0:
@@ -396,9 +384,6 @@ def mq_directions(origin, destination, mode, key, **kwargs):
             return msg, None
         else:
             data = response
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(response), ttl_seconds = CACHE_TTL["directions"])
 
     travel_time = int(data.get("route", {}).get("time", None))
     travel_time_with_traffic = int(data.get("route", {}).get("realTime", None))
@@ -450,7 +435,7 @@ def bing_directions(origin, destination, mode, key, **kwargs):
 
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["bing"])
         response = request.json()
 
         if request.status_code != 200 or response.get("statusCode", False) != 200:
@@ -459,9 +444,6 @@ def bing_directions(origin, destination, mode, key, **kwargs):
             return msg, None
         else:
             data = response
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(response), ttl_seconds = CACHE_TTL["bing"])
 
     resources = []
     resource_sets = data.get("resourceSets", [])

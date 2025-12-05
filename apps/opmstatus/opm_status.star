@@ -8,7 +8,6 @@ Reference: https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/c
 
 # -------------------------
 
-load("cache.star", "cache")
 load("http.star", "http")
 
 # load some modules
@@ -57,84 +56,21 @@ def format_opm_url_data(opm_status_summary, opm_applies_to_date):
 def main():
     print("-- opm_status_v1.star::main() START")
 
-    # get the data cached flag value from the cache
-    data = cache.get(OPM_JSON_URL + ".dataischached")
+    # query the JSON url to get the opm status data
+    url_response = http.get(OPM_JSON_URL, ttl_seconds = EXPIRE_URL_DATA)
 
-    # check if data has been cached already
-    if data == None:
-        # if not already cached, fetch the data
-        print("no cache, fetching JSON data")
+    # if the request failed, write out error
+    if url_response.status_code != 200:
+        fail("OPM Status request failed with status %d", url_response.status_code)
 
-        # query the JSON url to get the opm status data
-        url_response = http.get(OPM_JSON_URL)
+    # grab relevant parts from the JSON dict
+    statussummary_val = url_response.json()["StatusSummary"]
+    appliesto_val = url_response.json()["AppliesTo"]
+    statustype_val = url_response.json()["Icon"]
 
-        # if the request failed, write out error
-        if url_response.status_code != 200:
-            fail("OPM Status request failed with status %d", url_response.status_code)
-
-        # grab relevant parts from the JSON dict
-        statussummary_val = url_response.json()["StatusSummary"]
-        appliesto_val = url_response.json()["AppliesTo"]
-        statustype_val = url_response.json()["Icon"]
-
-        # format the parts using function
-        statussummary_val, appliesto_val = format_opm_url_data(statussummary_val, appliesto_val)
-
-        # set the data is cached value to note for future occurences
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            OPM_JSON_URL + ".dataischached",
-            "YES",
-            ttl_seconds = EXPIRE_URL_DATA,
-        )
-
-        # store the opm status and applies to date
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            OPM_JSON_URL + ".status",
-            statussummary_val,
-            ttl_seconds = EXPIRE_URL_DATA,
-        )
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            OPM_JSON_URL + ".appliesto",
-            appliesto_val,
-            ttl_seconds = EXPIRE_URL_DATA,
-        )
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            OPM_JSON_URL + ".type",
-            statustype_val,
-            ttl_seconds = EXPIRE_URL_DATA,
-        )
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            OPM_JSON_URL + ".cachecount",
-            "1",
-            ttl_seconds = EXPIRE_URL_DATA,
-        )
-
-    else:
-        # if cached, update the cache count
-        cache_count_str = cache.get(OPM_JSON_URL + ".cachecount")
-        print("already cached, cache count = " + cache_count_str)
-        cache_count_int = int(cache_count_str)
-        cache_count_str = str(cache_count_int + 1)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(
-            OPM_JSON_URL + ".cachecount",
-            cache_count_str,
-            ttl_seconds = EXPIRE_URL_DATA,
-        )
-
-    # get the summary and applies to date from the cache
-    opm_status_summary = cache.get(OPM_JSON_URL + ".status")
-    opm_applies_to_date = cache.get(OPM_JSON_URL + ".appliesto")
-    opm_status_type = cache.get(OPM_JSON_URL + ".type")
+    # format the parts using function
+    opm_status_summary, opm_applies_to_date = format_opm_url_data(statussummary_val, appliesto_val)
+    opm_status_type = statustype_val
 
     # assume color is green for "Open", otherwise set color accordingly
     status_color = DARK_GREEN

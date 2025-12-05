@@ -68,14 +68,7 @@ orderings = [
 API = "https://backoffice-service-t57o3dxfca-nn.a.run.app/api/"
 
 def get(path, ttl):
-    data = cache.get(path)
-    if data:
-        return json.decode(data)
-
-    data = http.get(API + path).body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(path, data, ttl_seconds = ttl)
+    data = http.get(API + path, ttl_seconds = ttl).body()
     return json.decode(data)
 
 def username_to_id(user):
@@ -180,7 +173,6 @@ def main(config):
     indexkey = user + mode + order + cutoff_str
     index = int(cache.get(indexkey) or 0)
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(indexkey, str(index + 1), 600)  # Keep position in list for 10m
 
     if order == "random":

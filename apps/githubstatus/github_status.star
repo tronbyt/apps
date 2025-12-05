@@ -5,7 +5,6 @@ Description: Periodically call the GitHub status page and display any outages th
 Author: hross
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/github_icon.png", GITHUB_ICON_ASSET = "file")
@@ -22,17 +21,12 @@ GITHUB_ICON_YELLOW = GITHUB_ICON_YELLOW_ASSET.readall()
 GITHUB_INCIDENTS_JSON = "https://kctbh9vrtdwd.statuspage.io/api/v2/components.json"
 
 def main():
-    body = cache.get("status_body")
-
     # make an API request if cache is empty
-    if body == None:
-        rep = http.get(GITHUB_INCIDENTS_JSON)
-        if rep.status_code != 200:
-            fail("GitHub Status failed with status %d", rep.status_code)
+    rep = http.get(GITHUB_INCIDENTS_JSON, ttl_seconds = 240)
+    if rep.status_code != 200:
+        fail("GitHub Status failed with status %d", rep.status_code)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("status_body", rep.body(), ttl_seconds = 240)
-        body = rep.body()
+    body = rep.body()
 
     statusJson = json.decode(body)
 

@@ -6,8 +6,6 @@ Author: Steven Pressnall
 Version: 2.0 - Add option to show bus route details (Show Details)
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -22,6 +20,14 @@ def main(config):
     iMinutes = [0, 0, 0, 0, 0, 0, 0, 0]
 
     apiKey = config.get("apiKey")
+
+    if not apiKey:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Please configure API Key",
+                color = "#f00",
+            ),
+        )
 
     Bus = [render.Row(
         children = [
@@ -484,16 +490,10 @@ def main(config):
         )
 
 def GetTimes1(stopID, apiKey):
-    cached = cache.get(stopID)
-    if cached:
-        return json.decode(cached)
-
-    rep = http.get(NEXTBUS_URL, params = {"StopID": stopID}, headers = {"api_key": apiKey})
+    rep = http.get(NEXTBUS_URL, params = {"StopID": stopID}, headers = {"api_key": apiKey}, ttl_seconds = 20)
     if rep.status_code != 200:
         fail("NextBus request failed with status ", rep.status_code)
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(stopID, rep.body(), ttl_seconds = 20)
     return rep.json()
 
 def get_schema():

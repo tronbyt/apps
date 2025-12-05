@@ -375,7 +375,10 @@ def main(config):
             check_response_headers(provider, provider_response, provider_ttl_seconds)
 
             if provider_response.status_code != 200:
-                fail("%s" % provider_response)
+                print_log("Provider request failed with status %d" % provider_response.status_code)
+                return render.Root(
+                    child = render.WrappedText("Provider API Error: %d" % provider_response.status_code),
+                )
 
             provider_json = validate_json(provider_response)
 

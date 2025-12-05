@@ -811,13 +811,20 @@ def main(config):
     if exchange_data_encoded_json == None:
         exchange_data_decoded_json = get_currency_information(exchange_rate_url)
 
-        # calculate 5 minutes past the stated next update date to make sure it it'll be updated next time we call
-        cache_time = int(exchange_data_decoded_json["time_next_update_unix"]) - int(time.now().in_location("UTC").unix) + 300
+        if exchange_data_decoded_json:
+            # calculate 5 minutes past the stated next update date to make sure it it'll be updated next time we call
+            cache_time = int(exchange_data_decoded_json["time_next_update_unix"]) - int(time.now().in_location("UTC").unix) + 300
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(exchange_rate_url, json.encode(exchange_data_decoded_json), ttl_seconds = cache_time)
+            cache.set(exchange_rate_url, json.encode(exchange_data_decoded_json), ttl_seconds = cache_time)
     else:
         exchange_data_decoded_json = json.decode(exchange_data_encoded_json)
+
+    if not exchange_data_decoded_json or "conversion_rates" not in exchange_data_decoded_json:
+        return render.Root(
+            child = render.Box(
+                child = render.WrappedText("Error: Check API Key", width = 64, align = "center", color = "#ff0000"),
+            ),
+        )
 
     foreign_currency_cost_in_local = float(exchange_data_decoded_json["conversion_rates"][foreign_currency.upper()])
     local_currency_cost_in_foreign = float(math.pow(foreign_currency_cost_in_local, -1))

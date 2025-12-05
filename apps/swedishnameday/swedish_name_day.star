@@ -5,8 +5,6 @@ Description: The app shows today's nameday names in Sweden.
 Author: y34752
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -21,23 +19,14 @@ def getlistasstring(listin):
 
 def main(config):
     SCROLL_SPEED = config.str("scroll_speed", "60")
-    rep_cache = cache.get("todaysnames")
-    if rep_cache != None:
-        print("Hit! Displaying cached data.")
-        rep = json.decode(rep_cache)
-        namelist = rep["dagar"][0]["namnsdag"]
-        names = getlistasstring(namelist)
-    else:
-        print("Miss! Calling todays name API.")
-        rep = http.get("https://sholiday.faboul.se/dagar/v2.1/")
-        if rep.status_code != 200:
-            fail("Todays name request failed with status:", rep.status_code)
-        rep = rep.json()
+    print("Miss! Calling todays name API.")
+    rep = http.get("https://sholiday.faboul.se/dagar/v2.1/", ttl_seconds = 120)
+    if rep.status_code != 200:
+        fail("Todays name request failed with status:", rep.status_code)
+    rep = rep.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("todaysnames", json.encode(rep), ttl_seconds = 120)
-        namelist = rep["dagar"][0]["namnsdag"]
-        names = getlistasstring(namelist)
+    namelist = rep["dagar"][0]["namnsdag"]
+    names = getlistasstring(namelist)
     return render.Root(
         delay = int(SCROLL_SPEED),
         child = render.Column(

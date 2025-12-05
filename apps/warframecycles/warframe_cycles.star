@@ -5,7 +5,6 @@ Description: Tells you the cycle that's active in each of the Warframe open area
 Author: grantmatheny
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -35,30 +34,6 @@ def main(config):
 
     _wf_status_url = "https://api.warframestat.us/%s" % platform
 
-    REFRESH_CACHE = True
-
-    cetus_active_cache_key = "wf_%s_cetus_active_cached" % platform
-    cetus_active_cached = cache.get(cetus_active_cache_key)
-    earth_active_cache_key = "wf_%s_earth_active_cached" % platform
-    earth_active_cached = cache.get(earth_active_cache_key)
-    cambion_active_cache_key = "wf_%s_cambion_active_cached" % platform
-    cambion_active_cached = cache.get(cambion_active_cache_key)
-    vallis_active_cache_key = "wf_%s_vallis_active_cached" % platform
-    vallis_active_cached = cache.get(vallis_active_cache_key)
-    zariman_active_cache_key = "wf_%s_zariman_active_cached" % platform
-    zariman_active_cached = cache.get(zariman_active_cache_key)
-
-    cetus_remaining_cache_key = "wf_%s_cetus_remaining_cached" % platform
-    cetus_remaining_cached = cache.get(cetus_remaining_cache_key)
-    earth_remaining_cache_key = "wf_%s_earth_remaining_cached" % platform
-    earth_remaining_cached = cache.get(earth_remaining_cache_key)
-    cambion_remaining_cache_key = "wf_%s_cambion_remaining_cached" % platform
-    cambion_remaining_cached = cache.get(cambion_remaining_cache_key)
-    vallis_remaining_cache_key = "wf_%s_vallis_remaining_cached" % platform
-    vallis_remaining_cached = cache.get(vallis_remaining_cache_key)
-    zariman_remaining_cache_key = "wf_%s_zariman_remaining_cached" % platform
-    zariman_remaining_cached = cache.get(zariman_remaining_cache_key)
-
     cetuscolor = ""
     earthcolor = ""
     cambioncolor = ""
@@ -75,95 +50,29 @@ def main(config):
     zarimanremaining = None
     zarimanactive = None
 
-    if cetus_active_cached != None and cetus_remaining_cached != None:
-        print("Hit! Displaying cached data.")
-        cetusactive = cetus_active_cached
-        cetusremaining = cetus_remaining_cached
+    rep = http.get(_wf_status_url, ttl_seconds = 60)
+    if rep.status_code != 200:
+        fail("Warframe request failed with status %d", rep.status_code)
+    cetusactive = rep.json()["cetusCycle"]["state"].title()
+    cetusremaining = rep.json()["cetusCycle"]["timeLeft"].split()
+
+    earthactive = rep.json()["earthCycle"]["state"].title()
+    earthremaining = rep.json()["earthCycle"]["timeLeft"].split()
+
+    cambionactive = rep.json()["cambionCycle"]["active"].title()
+    cambionremaining = rep.json()["cambionCycle"]["timeLeft"].split()
+
+    vallisactive = rep.json()["vallisCycle"]["state"].title()
+    vallisremaining = rep.json()["vallisCycle"]["timeLeft"].split()
+
+    zariman_toggle = config.bool("warframe_cycles_zariman_enabled", False)
+
+    if zariman_toggle:
+        zarimanactive = rep.json()["zarimanCycle"]["state"].title()
+        zarimanremaining = rep.json()["zarimanCycle"]["timeLeft"].split()
     else:
-        REFRESH_CACHE = True
-
-    if earth_active_cached != None and earth_remaining_cached != None:
-        print("Hit! Displaying cached data.")
-        earthactive = earth_active_cached
-        earthremaining = earth_remaining_cached
-    else:
-        REFRESH_CACHE = True
-
-    if cambion_active_cached != None and cambion_remaining_cached != None:
-        print("Hit! Displaying cached data.")
-        cambionactive = cambion_active_cached
-        cambionremaining = cambion_remaining_cached
-    else:
-        REFRESH_CACHE = True
-
-    if vallis_active_cached != None and vallis_remaining_cached != None:
-        print("Hit! Displaying cached data.")
-        vallisactive = vallis_active_cached
-        vallisremaining = vallis_remaining_cached
-    else:
-        REFRESH_CACHE = True
-
-    if zariman_active_cached != None and zariman_remaining_cached != None:
-        print("Hit! Displaying cached data.")
-        zarimanactive = zariman_active_cached
-        zarimanremaining = zariman_remaining_cached
-    else:
-        REFRESH_CACHE = True
-
-    if REFRESH_CACHE == True:
-        rep = http.get(_wf_status_url)
-        if rep.status_code != 200:
-            fail("Warframe request failed with status %d", rep.status_code)
-        cetusactive = rep.json()["cetusCycle"]["state"].title()
-        cetusremaining = rep.json()["cetusCycle"]["timeLeft"].split()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cetus_active_cache_key, str(cetusactive), ttl_seconds = 60)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cetus_remaining_cache_key, str(cetusremaining), ttl_seconds = 60)
-
-        earthactive = rep.json()["earthCycle"]["state"].title()
-        earthremaining = rep.json()["earthCycle"]["timeLeft"].split()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(earth_active_cache_key, str(earthactive), ttl_seconds = 60)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(earth_remaining_cache_key, str(earthremaining), ttl_seconds = 60)
-
-        cambionactive = rep.json()["cambionCycle"]["active"].title()
-        cambionremaining = rep.json()["cambionCycle"]["timeLeft"].split()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cambion_active_cache_key, str(cambionactive), ttl_seconds = 60)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cambion_remaining_cache_key, str(cambionremaining), ttl_seconds = 60)
-
-        vallisactive = rep.json()["vallisCycle"]["state"].title()
-        vallisremaining = rep.json()["vallisCycle"]["timeLeft"].split()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(vallis_active_cache_key, str(vallisactive), ttl_seconds = 60)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(vallis_remaining_cache_key, str(vallisremaining), ttl_seconds = 60)
-
-        zariman_toggle = config.bool("warframe_cycles_zariman_enabled", False)
-
-        if zariman_toggle:
-            zarimanactive = rep.json()["zarimanCycle"]["state"].title()
-            zarimanremaining = rep.json()["zarimanCycle"]["timeLeft"].split()
-        else:
-            zarimanactive = "Corpus"
-            zarimanremaining = ["4h", "53m", "38s"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(zariman_active_cache_key, str(zarimanactive), ttl_seconds = 60)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(zariman_remaining_cache_key, str(zarimanremaining), ttl_seconds = 60)
+        zarimanactive = "Corpus"
+        zarimanremaining = ["4h", "53m", "38s"]
 
     cetustime = {}
     for part in cetusremaining:

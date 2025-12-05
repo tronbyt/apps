@@ -5,7 +5,6 @@ Description: Display info for a Twitch username.
 Author: drudge
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -29,30 +28,23 @@ def get_from_twitch_api(path, params, access_token, use_cache = True):
     if not access_token:
         return fail("No access token")
 
-    cache_key = "%s|%s|%s" % (access_token, path, params)
-    cached_res = cache.get(cache_key) if use_cache else None
+    # print("Fetching %s" % cache_key)
+    res = http.get(
+        url = "https://api.twitch.tv/helix%s" % path,
+        params = params,
+        headers = {
+            "Authorization": "Bearer %s" % access_token,
+            "Client-Id": TWITCH_CLIENT_ID,
+        },
+        ttl_seconds = DEFAULT_CACHE_TTL if use_cache else 0,
+    )
 
-    if not cached_res:
-        # print("Fetching %s" % cache_key)
-        res = http.get(
-            url = "https://api.twitch.tv/helix%s" % path,
-            params = params,
-            headers = {
-                "Authorization": "Bearer %s" % access_token,
-                "Client-Id": TWITCH_CLIENT_ID,
-            },
-        )
+    cached_res = res.body()
 
-        cached_res = res.body()
-
-        if res.status_code != 200:
-            # buildifier: disable=print
-            print("get_from_twitch_api failed: %s - %s " % (res.status_code, cached_res))
-            return None
-
-        if use_cache:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, cached_res, DEFAULT_CACHE_TTL)
+    if res.status_code != 200:
+        # buildifier: disable=print
+        print("get_from_twitch_api failed: %s - %s " % (res.status_code, cached_res))
+        return None
 
     # else:
     #    print("Using cached %s" % cache_key)
@@ -208,12 +200,6 @@ def main(config):
 def get_token(params = None, refresh_token = None):
     has_refresh_token = (refresh_token != None)
 
-    # if we have a refresh token try to get a cached access token and return quickly
-    if has_refresh_token:
-        access_token = cache.get(refresh_token)
-        if access_token != None:
-            return access_token
-
     # if params is a string, assume it is json and decode it
     if type(params) == "string":
         params = json.decode(params)
@@ -235,6 +221,7 @@ def get_token(params = None, refresh_token = None):
             client_secret = TWITCH_CLIENT_SECRET,
         ),
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 600,
     )
 
     if res.status_code != 200:
@@ -246,10 +233,6 @@ def get_token(params = None, refresh_token = None):
 
     if not has_refresh_token:
         refresh_token = token_params["refresh_token"]
-
-    # cache the access token so it can be reteived using the refresh token
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
 
     return access_token if has_refresh_token else refresh_token
 

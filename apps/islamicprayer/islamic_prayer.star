@@ -5,7 +5,6 @@ Description: Shows the daily Islamic prayer times for a given location.
 Author: Austin Fonacier
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -178,21 +177,12 @@ def prayer_timings_filter(pre_filtered_timings, show_sunrise):
     return filtered_prayer_times
 
 def fetch_prayer_times(latitude, longitude, month, year, prayer_calc_option):
-    cache_key = "prayer_{}/{}".format(month, year)
+    # API docs: https://aladhan.com/prayer-times-api#GetCalendar
+    api_url = "http://api.aladhan.com/v1/calendar?latitude={}&longitude={}&month={}&year={}&method={}".format(latitude, longitude, month, year, prayer_calc_option)
+    prayer_month_raw = http.get(api_url, ttl_seconds = ONE_MONTH)
+    prayer_month_body = prayer_month_raw.body()
 
-    cached_data = cache.get(cache_key)
-
-    if cached_data == None:
-        # API docs: https://aladhan.com/prayer-times-api#GetCalendar
-        api_url = "http://api.aladhan.com/v1/calendar?latitude={}&longitude={}&month={}&year={}&method={}".format(latitude, longitude, month, year, prayer_calc_option)
-        prayer_month_raw = http.get(api_url)
-        prayer_month_body = prayer_month_raw.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, prayer_month_body, ttl_seconds = ONE_MONTH)
-        cached_data = prayer_month_body
-
-    return json.decode(cached_data)
+    return json.decode(prayer_month_body)
 
 # Helper function for: 4 -> 04
 def day_to_str(day):

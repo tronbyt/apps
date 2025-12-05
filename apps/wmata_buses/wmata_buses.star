@@ -18,6 +18,12 @@ def main(config):
     northbound = config.str("busStopN", defaultN)
     southbound = config.str("busStopS", defaultS)
 
+    # Trim whitespace to avoid 400 Bad Request
+    if type(northbound) == "string":
+        northbound = northbound.strip()
+    if type(southbound) == "string":
+        southbound = southbound.strip()
+
     if northbound == southbound:
         oneStop = True
 
@@ -27,10 +33,16 @@ def main(config):
     headers = {"api_key": api_key, "Accept": "application/json"}
     WMATA_data1 = http.get(wmata_urlN, headers = headers, ttl_seconds = 60)  # cache for 1 minute
     WMATA_data2 = http.get(wmata_urlS, headers = headers, ttl_seconds = 60)  # cache for 1 minute
+
     if WMATA_data1.status_code != 200:
-        fail("WMATA request failed with status {}".format(WMATA_data1.status_code))
+        return render.Root(
+            child = render.WrappedText("Error N: {}".format(WMATA_data1.status_code)),
+        )
     if WMATA_data2.status_code != 200:
-        fail("WMATA request failed with status {}".format(WMATA_data2.status_code))
+        return render.Root(
+            child = render.WrappedText("Error S: {}".format(WMATA_data2.status_code)),
+        )
+
     predictions1 = WMATA_data1.json()["Predictions"]
     predictions2 = WMATA_data2.json()["Predictions"]
 

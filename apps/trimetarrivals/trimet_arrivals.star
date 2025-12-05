@@ -1,4 +1,3 @@
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
@@ -27,19 +26,11 @@ def main(config):
 
     print("stop: %s" % stop)
 
-    stop_cached = cache.get("stop")
-    if stop_cached != None:
-        print("Hit! Displaying cached data.")
-        rep = json.decode(stop_cached)
-    else:
-        print("Miss! Calling TriMet API with")
-        response = http.get(URL.format(stop, api_key))
-        if response.status_code != 200:
-            fail("request failed with status %d", response.status_code)
-        rep = response.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("stop", json.encode(rep), ttl_seconds = 30)
+    print("Miss! Calling TriMet API with")
+    response = http.get(URL.format(stop, api_key), ttl_seconds = 30)
+    if response.status_code != 200:
+        fail("request failed with status %d", response.status_code)
+    rep = response.json()
 
     # print(rep["resultSet"])
     # arrival_data = rep["resultSet"]["arrival"][0]["fullSign"]

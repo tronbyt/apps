@@ -5,8 +5,6 @@ Description: Displays historical event that happened on this day
 Author: Andrew Hefele
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
@@ -104,27 +102,19 @@ def get_event_description(eventJson, index):
 
 # get the event JSON from cache, if that fails hit the API endpoint
 def get_eventJson():
-    eventJson = cache.get("on_this_day_events")
-    if eventJson:
-        eventJson = json.decode(eventJson)
-    else:
-        eventJson = call_otd_api(OTD_URL)
-
+    eventJson = call_otd_api(OTD_URL)
     return eventJson
 
 # make the API call to fetch the events for today, store in cache
 def call_otd_api(url):
     # Return events of the day JSON
     now = time.now()
-    response = http.get(url = OTD_URL.format(now.month, now.day))
+    response = http.get(url = OTD_URL.format(now.month, now.day), ttl_seconds = CACHE_TIMEOUT)
 
     if response.status_code != 200:
         fail("status %d from %s: %s" % (response.status_code, url, response.body()))
 
     eventJson = response.json()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("on_this_day_events", json.encode(eventJson), ttl_seconds = CACHE_TIMEOUT)
 
     return eventJson
 

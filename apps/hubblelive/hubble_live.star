@@ -102,6 +102,10 @@ def get_hst_live():
 
         obs = json.decode(obsjson_raw)
 
+        # Ensure 'state' key exists
+        if "state" not in obs:
+            obs["state"] = "Unknown"
+
         if obs.get("what_am_i_looking_at", None) == "Hubble is acquiring a new target":
             obs["state"] = "Acquiring New Target"
             obs["target_name"] = ""
@@ -134,7 +138,6 @@ def get_hst_live():
         else:
             cache_timeout = DEFAULT_CACHE_TIMEOUT
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("cached_observation", json.encode(obs), ttl_seconds = cache_timeout)
 
     return obs

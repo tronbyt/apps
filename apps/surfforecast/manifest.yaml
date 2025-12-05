@@ -6,4 +6,5 @@ desc: Daily surf forecast for any spot on Surfline.
 author: smith-kyle
 fileName: surf_forecast.star
 packageName: surfforecast
+broken: true
 recommendedInterval: 5

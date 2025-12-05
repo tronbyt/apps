@@ -5,7 +5,6 @@ Description: This is a simple stock ticker app, that will display a stock ticker
 Author: hollowmatt
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/symbol_b64.png", SYMBOL_B64_ASSET = "file")
 load("render.star", "render")
@@ -30,21 +29,14 @@ def main(config):
         else:
             SYMBOLS = ["GOOGL", "AMZN", "WFC"]
 
-        rate_cached = cache.get("sym_rate")
-        if rate_cached != None:
-            msg = int(rate_cached)
-        else:
-            msg = ""
-            for a in SYMBOLS:
-                full_url = STOCK_QUOTE_URL + a + ALPHA_KEY
-                rep = http.get(full_url)
-                if rep.status_code != 200:
-                    fail("API request failed with status %d", rep.status_code)
-                rate = rep.json()["Global Quote"]["05. price"]
-                msg = msg + a + ": $" + str(rate[:-2]) + " ... "
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("sym_rate", msg, ttl_seconds = 240)
+        msg = ""
+        for a in SYMBOLS:
+            full_url = STOCK_QUOTE_URL + a + ALPHA_KEY
+            rep = http.get(full_url, ttl_seconds = 240)
+            if rep.status_code != 200:
+                fail("API request failed with status %d", rep.status_code)
+            rate = rep.json()["Global Quote"]["05. price"]
+            msg = msg + a + ": $" + str(rate[:-2]) + " ... "
     else:
         # output error
         msg = "%s API key is required"

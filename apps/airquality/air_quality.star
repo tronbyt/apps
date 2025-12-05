@@ -5,7 +5,6 @@ Description: Monitor your local air quality with the OpenWeather Air Pollution A
 Author: Daniel Sitnik
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -88,15 +87,8 @@ def main(config):
         )
 
     # try to load from cache
-    cache_key = "%s#%s" % (location["lat"], location["lng"])
-    data = cache.get(cache_key)
-
-    if data == None:
-        dprint("Data not found in cache")
-        data = get_data(location, apikey)
-    else:
-        dprint("Data loaded from cache")
-        data = json.decode(data)
+    dprint("Data not found in cache")
+    data = get_data(location, apikey)
 
     # use locality from selected place
     locality = location["locality"]
@@ -321,7 +313,7 @@ def get_data(location, apikey):
         "appid": apikey,
         "lat": str(lat),
         "lon": str(lon),
-    })
+    }, ttl_seconds = DEFAULT_CACHE)
 
     # check response code
     if res.status_code != 200:
@@ -354,13 +346,6 @@ def get_data(location, apikey):
     # remove excessive forecast data to alleviate cache
     for _ in range(0, len(data["list"]) - 13):
         data["list"].pop()
-
-    # cache results using lat#lon as the key
-    cache_key = "%s#%s" % (location["lat"], location["lng"])
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(data), ttl_seconds = DEFAULT_CACHE)
-    dprint("Data cached for %d seconds" % DEFAULT_CACHE)
 
     return data
 

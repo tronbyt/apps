@@ -382,16 +382,16 @@ def transform_mana_cost(mana_cost):
         return mana_symbols_svgs
 
     response_data = response.json()["data"]
+    symbol_map = {obj["symbol"]: obj["svg_uri"] for obj in response_data}
 
-    for symbol_object in response_data:
-        for symbol in mana_symbols:
-            if symbol == symbol_object["symbol"]:
-                svg_response = http.get(symbol_object["svg_uri"], ttl_seconds = ONE_DAY_TTL)
+    for symbol in mana_symbols:
+        if symbol in symbol_map:
+            svg_response = http.get(symbol_map[symbol], ttl_seconds = ONE_DAY_TTL)
 
-                if svg_response.status_code != 200:
-                    return mana_symbols_svgs
+            if svg_response.status_code != 200:
+                return mana_symbols_svgs
 
-                mana_symbols_svgs.append(svg_response.body())
+            mana_symbols_svgs.append(svg_response.body())
 
     return mana_symbols_svgs
 

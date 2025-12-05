@@ -5,7 +5,6 @@ Description: Displays progress towards your Goodreads yearly goal, navigate to y
 Author: panderson54
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/five_book_icon.png", FIVE_BOOK_ICON_ASSET = "file")
 load("images/one_closed_book_icon.png", ONE_CLOSED_BOOK_ICON_ASSET = "file")
@@ -102,33 +101,20 @@ def gen_book_image(progress):
 def main(config):
     CHALLENGE_ID = config.str("user_challenge_id", "38950148")
 
-    progress_cached = cache.get("".join(["progress", CHALLENGE_ID]))
-    goal_cached = cache.get("".join(["goal", CHALLENGE_ID]))
+    challenge_page = http.get(GOODREADS_PROGRESS_URL + CHALLENGE_ID, ttl_seconds = 86400)
 
-    if progress_cached != None and goal_cached != None:
-        progress = progress_cached
-        goal = goal_cached
-    else:
-        challenge_page = http.get(GOODREADS_PROGRESS_URL + CHALLENGE_ID)
+    if challenge_page.status_code != 200:
+        fail("Request failed with status %d", challenge_page.status_code)
 
-        if challenge_page.status_code != 200:
-            fail("Request failed with status %d", challenge_page.status_code)
+    body = challenge_page.body()
+    progress_div = re.findall(r"<div class='progressText'>([\s\S]*?)</div>", body)
 
-        body = challenge_page.body()
-        progress_div = re.findall(r"<div class='progressText'>([\s\S]*?)</div>", body)
+    if not progress_div:
+        fail("No challenge found at {}".format(config.str("user_challenge_id", CHALLENGE_ID)))
 
-        if not progress_div:
-            fail("No challenge found at {}".format(config.str("user_challenge_id", CHALLENGE_ID)))
-
-        progress_nums = re.findall(r"\d+", progress_div[0])
-        progress = progress_nums[0]
-        goal = progress_nums[1]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("".join(["progress", CHALLENGE_ID]), str(progress), ttl_seconds = 86400)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("".join(["goal", CHALLENGE_ID]), str(goal), ttl_seconds = 86400)
+    progress_nums = re.findall(r"\d+", progress_div[0])
+    progress = progress_nums[0]
+    goal = progress_nums[1]
 
     progress_text = " ".join(["Read:", str(progress), "books."])
     goal_text = " ".join(["Goal:", str(goal), "books."])

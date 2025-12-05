@@ -5,8 +5,6 @@ Description: Gets the emblem, race, class, and light level of your most recently
 Author: brandontod97
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/error.png", ERROR_IMAGE = "file")
 load("render.star", "render")
@@ -26,65 +24,56 @@ def main(config):
 
     api_key = config.get("api_key")
 
-    character_cached = cache.get("character" + display_name + display_name_code)
+    print("No cached data. Hitting API")
 
-    if character_cached != None:
-        print("Displaying cached character data")
-        displayed_character = json.decode(character_cached)
+    bungie_membership_id = ""
+    bungie_membership_type = ""
 
+    if api_key == None or display_name == None or display_name_code == None:
+        api_key = "null value"
+        display_name = "null value"
+        display_name_code = "null value"
+
+    apiResponse = http.post(
+        API_SEARCH_BUNGIE_ID_NAME,
+        headers = {"X-API-Key": api_key},
+        json_body = {"displayName": display_name, "displayNameCode": display_name_code},
+    )
+
+    if apiResponse.json()["ErrorStatus"] == "ApiInvalidOrExpiredKey" or len(apiResponse.json()["Response"]) == 0:
+        return render.Root(
+            child = render.Column(
+                main_align = "center",
+                expanded = True,
+                children = [
+                    render.Box(
+                        height = 8,
+                        child = render.Text("Invalid API"),
+                    ),
+                    render.Box(
+                        height = 8,
+                        child = render.Text("or"),
+                    ),
+                    render.Box(
+                        height = 8,
+                        child = render.Text("Invalid ID"),
+                    ),
+                ],
+            ),
+        )
     else:
-        print("No cached data. Hitting API")
+        print("Recieved valid response")
+        bungie_membership_id = apiResponse.json()["Response"][0]["membershipId"]
+        bungie_membership_type = apiResponse.json()["Response"][0]["membershipType"]
 
-        bungie_membership_id = ""
-        bungie_membership_type = ""
-
-        if api_key == None or display_name == None or display_name_code == None:
-            api_key = "null value"
-            display_name = "null value"
-            display_name_code = "null value"
-
-        apiResponse = http.post(
-            API_SEARCH_BUNGIE_ID_NAME,
+        apiMembershipInfo = http.get(
+            API_BASE_URL + "/Destiny2/" + str(int(bungie_membership_type)) + "/Profile/" + bungie_membership_id + "/",
+            params = {"components": "Characters"},
             headers = {"X-API-Key": api_key},
-            json_body = {"displayName": display_name, "displayNameCode": display_name_code},
+            ttl_seconds = 300,
         )
 
-        if apiResponse.json()["ErrorStatus"] == "ApiInvalidOrExpiredKey" or len(apiResponse.json()["Response"]) == 0:
-            return render.Root(
-                child = render.Column(
-                    main_align = "center",
-                    expanded = True,
-                    children = [
-                        render.Box(
-                            height = 8,
-                            child = render.Text("Invalid API"),
-                        ),
-                        render.Box(
-                            height = 8,
-                            child = render.Text("or"),
-                        ),
-                        render.Box(
-                            height = 8,
-                            child = render.Text("Invalid ID"),
-                        ),
-                    ],
-                ),
-            )
-        else:
-            print("Recieved valid response")
-            bungie_membership_id = apiResponse.json()["Response"][0]["membershipId"]
-            bungie_membership_type = apiResponse.json()["Response"][0]["membershipType"]
-
-            apiMembershipInfo = http.get(
-                API_BASE_URL + "/Destiny2/" + str(int(bungie_membership_type)) + "/Profile/" + bungie_membership_id + "/",
-                params = {"components": "Characters"},
-                headers = {"X-API-Key": api_key},
-            )
-
-            displayed_character = apiMembershipInfo.json()["Response"]["characters"]["data"][get_last_played_character(apiMembershipInfo.json()["Response"]["characters"]["data"])]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("character" + display_name + display_name_code, json.encode(displayed_character), ttl_seconds = 300)
+        displayed_character = apiMembershipInfo.json()["Response"]["characters"]["data"][get_last_played_character(apiMembershipInfo.json()["Response"]["characters"]["data"])]
 
     image = get_image("https://www.bungie.net" + displayed_character["emblemPath"])
 

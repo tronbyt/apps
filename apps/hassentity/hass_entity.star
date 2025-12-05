@@ -5,8 +5,6 @@ Description: Display an externally accessible Home Assistant entity state or att
 Author: InTheDaylight14
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -151,12 +149,6 @@ def get_entity_states(config):
     if is_string_blank(token) or is_string_blank(entity_name) or is_string_blank(nabu_casa_url_key):
         return []
 
-    chached_states = cache.get(token)
-
-    if chached_states != None:
-        print("Using cached state")
-        return json.decode(chached_states)
-
     full_token = "Bearer " + token
     full_url = "https://" + nabu_casa_url_key + ".ui.nabu.casa" + STATIC_ENDPOINT + entity_name
     headers = {
@@ -167,6 +159,7 @@ def get_entity_states(config):
     res = http.get(
         url = full_url,
         headers = headers,
+        ttl_seconds = 6,
     )
 
     if res.status_code != 200:
@@ -174,9 +167,6 @@ def get_entity_states(config):
              (res.status_code, res.body()))
 
     states = res.json()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(token, json.encode(states), ttl_seconds = 6)
 
     return states
 

@@ -9,7 +9,6 @@ Author: hloeding
 # ###### App module loading ######
 # ################################
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/ferry_icon.png", FERRY_ICON_ASSET = "file")
 load("math.star", "math")
@@ -81,73 +80,6 @@ FERRY_QUERY_URL = \
     "&tram=false" + \
     "&taxi=false"
 
-# ##############################################
-# ###### Functions for caching ferry data ######
-# ##############################################
-
-# Get cached ferry departure data
-# for given ferry stop and direction
-def getCachedFerryData(
-        ferryStopID,
-        ferryDirectionID):
-    return cache.get(
-        FERRY_CACHE_DATA_KEY % (
-            ferryStopID,
-            ferryDirectionID,
-        ),
-    )
-
-# Cache ferry departure data for
-# given ferry stop and direction
-def setCachedFerryData(
-        ferryStopID,
-        ferryDirectionID,
-        ferryData):
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(
-        FERRY_CACHE_DATA_KEY % (
-            ferryStopID,
-            ferryDirectionID,
-        ),
-        ferryData,
-        FERRY_CACHE_TTL,
-    )
-
-# Get cached API query status code
-# (avoid spamming API with bad requests)
-def getCachedFerryStatusCode(
-        ferryStopID,
-        ferryDirectionID):
-    ret = cache.get(
-        FERRY_CACHE_STATUS_CODE % (
-            ferryStopID,
-            ferryDirectionID,
-        ),
-    )
-    if ret != None:
-        ret = int(ret)
-    return ret
-
-# Cache API query status code
-# (avoid spamming API with bad requests)
-def setCachedFerryStatusCode(
-        ferryStopID,
-        ferryDirectionID,
-        value):
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(
-        FERRY_CACHE_STATUS_CODE % (
-            ferryStopID,
-            ferryDirectionID,
-        ),
-        str(value),
-        FERRY_CACHE_TTL,
-    )
-
-# ####################################################
-# ###### Function for retrieving API ferry data ######
-# ####################################################
-
 # Function to retrieve next ferry data.
 # Returns a tripple of
 # - validity: Indicates if data is usable
@@ -155,59 +87,34 @@ def setCachedFerryStatusCode(
 # - status code: Status code of last query
 
 def getNextFerry(ferryStopID, ferryDirectionID):
-    nextFerry = getCachedFerryData(
+    query = FERRY_QUERY_URL % (
         ferryStopID,
         ferryDirectionID,
+        FERRY_MAX_LOOKAHEAD_MIN,
     )
-    queryStatusCode = getCachedFerryStatusCode(
-        ferryStopID,
-        ferryDirectionID,
-    )
+    response = http.get(query, ttl_seconds = FERRY_CACHE_TTL)
 
-    # Check if cached data has expired
-    if nextFerry == None or queryStatusCode == None:
-        query = FERRY_QUERY_URL % (
-            ferryStopID,
-            ferryDirectionID,
-            FERRY_MAX_LOOKAHEAD_MIN,
-        )
-        response = http.get(query)
+    # Set query status code.
+    queryStatusCode = response.status_code
 
-        # Set query status code.
-        queryStatusCode = response.status_code
+    # Set next ferry according to response,
+    # or to an empty string to denote
+    # no scheduled ferry departure in cache
+    # (can't cache None).
+    if queryStatusCode == 200:
+        response = response.json()
 
-        # Set next ferry according to response,
-        # or to an empty string to denote
-        # no scheduled ferry departure in cache
-        # (can't cache None).
-        if queryStatusCode == 200:
-            response = response.json()
-
-            # Check if there is a next ferry
-            # scheduled. If so, extract the
-            # ferry departure time.
-            # If not, set empty string to denote
-            # no ferry departure data in cache
-            if "departures" in response and len(response["departures"]) > 0:
-                nextFerry = response["departures"][0]["when"]
-            else:
-                nextFerry = ""
+        # Check if there is a next ferry
+        # scheduled. If so, extract the
+        # ferry departure time.
+        # If not, set empty string to denote
+        # no ferry departure data in cache
+        if "departures" in response and len(response["departures"]) > 0:
+            nextFerry = response["departures"][0]["when"]
         else:
             nextFerry = ""
-
-        # Update cached ferry departure data
-        setCachedFerryData(
-            ferryStopID,
-            ferryDirectionID,
-            nextFerry,
-        )
-
-        # Update cached query status code
-        setCachedFerryStatusCode(
-            ferryStopID,
-            ferryDirectionID,
-            queryStatusCode,
-        )
+    else:
+        nextFerry = ""
 
     # Return (a) validity of data (status code 200),
     # (b) next ferry departure data or None,

@@ -5,7 +5,6 @@ Description: Custom clock with time, binary, beats, and date; all with a custom 
 Author: craigerskine
 """
 
-load("encoding/base64.star", "base64")
 load("images/at.png", AT_ASSET = "file")
 load("images/font_lg_char_0.png", FONT_LG_CHAR_0_ASSET = "file")
 load("images/font_lg_char_1.png", FONT_LG_CHAR_1_ASSET = "file")
@@ -31,7 +30,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-IMG_AT = AT_ASSET.readall()()
+IMG_AT = AT_ASSET.readall()
 
 # contants
 COLOR_LIGHT = "#FFF"

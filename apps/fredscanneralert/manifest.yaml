@@ -6,4 +6,5 @@ desc: This app displays the latest fire call for Frederick, MD. USA.
 author: WaveJam
 fileName: fredscanner_alert.star
 packageName: fredscanneralert
+broken: true
 recommendedInterval: 5

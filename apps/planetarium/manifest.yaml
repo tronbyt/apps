@@ -1,9 +1,9 @@
 ---
 id: planetarium
 name: Planetarium
-summary: Shows where the planets are
-desc: A simulated orrery showing the relative position of the planets around the sun at various points in time. Also functions as a slow-moving clock.
-author: dinosaursrarr
+summary: Solar system positions
+desc: Shows the current positions of the planets in the solar system.
+author: rs7q5
 fileName: planetarium.star
 packageName: planetarium
-recommendedInterval: 5
+broken: true

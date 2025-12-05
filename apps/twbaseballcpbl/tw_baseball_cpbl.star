@@ -24,8 +24,15 @@ def main(config):
     target_team_id = config.str("target_team_id", DEFAULT_TEAM_ID)
     game_info = get_game_info(request_verification_token)
 
-    if game_info["GameADetailJson"] == None:
-        fail("Can't get games")
+    if game_info == None:
+        return render.Root(
+            child = render.WrappedText("Error fetching game info", color = "#ff0000"),
+        )
+
+    if game_info.get("GameADetailJson") == None:
+        return render.Root(
+            child = render.WrappedText("Can't get games", color = "#ff0000"),
+        )
 
     games = json.decode(game_info["GameADetailJson"])
 
@@ -178,7 +185,8 @@ def get_game_info(request_verification_token):
 
     res = http.post(url = GAME_INFO_URL, form_body = form_body, ttl_seconds = GAME_INFO_CACHE_TTL_SECONDS)
     if res.status_code != 200:
-        fail("request to %s failed with status code: %d - %s" % (GAME_INFO_URL, res.status_code, res.body()))
+        print("request to %s failed with status code: %d" % (GAME_INFO_URL, res.status_code))
+        return None
     return res.json()
 
 def get_game_detail(request_verification_token, game_id):

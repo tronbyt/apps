@@ -32,8 +32,31 @@ def main(config):
     if rep.status_code != 200:
         fail("Backend request failed with status %d", rep.status_code)
 
-    today_completed = rep.json()["today_completed"]
-    days_to_approval = rep.json()["days_to_approval"]["value"]
+    today_completed_data = rep.json().get("today_completed")
+    days_to_approval_data = rep.json().get("days_to_approval")
+
+    if today_completed_data and "error" in today_completed_data:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Error: {}".format(today_completed_data["error"]),
+                width = 64,
+                align = "center",
+                color = "#ff0000",
+            ),
+        )
+
+    if days_to_approval_data and "error" in days_to_approval_data:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Error: {}".format(days_to_approval_data["error"]),
+                width = 64,
+                align = "center",
+                color = "#ff0000",
+            ),
+        )
+
+    today_completed = today_completed_data
+    days_to_approval = days_to_approval_data["value"]
 
     calculated_dates = calculate_dates(days_to_approval, application_date)
 

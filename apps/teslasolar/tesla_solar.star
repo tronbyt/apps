@@ -5,7 +5,6 @@ Description: Energy production and consumption monitor for your Tesla solar pane
 Author: jweier & marcusb
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -46,32 +45,21 @@ DUMMY_DATA = {
     },
 }
 
-def get_access_token(refresh_token, site_id):
-    #Try to load access token from cache
-    access_token_cached = cache.get(site_id)
+def get_access_token(refresh_token):
+    print("Getting access token from Tesla API.")
+    auth_rep = http.post(TESLA_AUTH_URL, json_body = {
+        "grant_type": "refresh_token",
+        "client_id": "ownerapi",
+        "refresh_token": refresh_token,
+        "scope": "openid email offline_access",
+    }, ttl_seconds = CACHE_TTL)
 
-    if access_token_cached != None:
-        print("Hit! Using cached access token " + access_token_cached)
-        return {"status_code": "Cached", "access_token": str(access_token_cached)}
+    #Check the HTTP response code
+    if auth_rep.status_code != 200:
+        return {"status_code": str(auth_rep.status_code), "access_token": "None"}
     else:
-        print("Miss! Getting new access token from Tesla API.")
-
-        auth_rep = http.post(TESLA_AUTH_URL, json_body = {
-            "grant_type": "refresh_token",
-            "client_id": "ownerapi",
-            "refresh_token": refresh_token,
-            "scope": "openid email offline_access",
-        })
-
-        #Check the HTTP response code
-        if auth_rep.status_code != 200:
-            return {"status_code": str(auth_rep.status_code), "access_token": "None"}
-        else:
-            access_token = auth_rep.json()["access_token"]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(site_id, access_token, ttl_seconds = CACHE_TTL)
-            return {"status_code": str(auth_rep.status_code), "access_token": str(access_token)}
+        access_token = auth_rep.json()["access_token"]
+        return {"status_code": str(auth_rep.status_code), "access_token": str(access_token)}
 
 def main(config):
     print("-------Starting new update-------")
@@ -91,7 +79,7 @@ def main(config):
         print("Tesla Data URL: " + url)
 
         #Generate a new access token from the refresh token
-        access_token = get_access_token(refresh_token, site_id)
+        access_token = get_access_token(refresh_token)
 
         if access_token["access_token"] == "None":
             error_details = {"error_section": "refresh_token", "error": "HTTP error " + str(access_token["status_code"])}

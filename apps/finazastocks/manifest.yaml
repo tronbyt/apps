@@ -7,3 +7,5 @@ author: Sunil Taneja
 fileName: finaza_stocks.star
 packageName: finazastocks
 recommendedInterval: 1
+broken: true
+brokenReason: "API endpoint is no longer available"

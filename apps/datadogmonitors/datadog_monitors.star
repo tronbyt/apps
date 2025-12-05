@@ -7,8 +7,6 @@ Author: Cavallando
 # I'm new to starlark, sorry if this looks bad :)
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/alert_icon.png", ALERT_ICON_ASSET = "file")
 load("images/check_icon.png", CHECK_ICON_ASSET = "file")
@@ -18,7 +16,6 @@ load("schema.star", "schema")
 ALERT_ICON = ALERT_ICON_ASSET.readall()
 CHECK_ICON = CHECK_ICON_ASSET.readall()
 
-CACHE_KEY_PREFIX = "monitors_cached"
 DEFAULT_QUERY = "status:alert"
 DEFAULT_APP_KEY = None
 DEFAULT_API_KEY = None
@@ -29,22 +26,16 @@ def main(config):
     DD_API_KEY = config.get("api_key") or DEFAULT_API_KEY
     DD_APP_KEY = config.get("app_key") or DEFAULT_APP_KEY
 
-    CACHE_KEY = "{}-{}-{}".format(CACHE_KEY_PREFIX, DD_API_KEY, DD_APP_KEY)
     monitors_query = config.str("custom_query", DEFAULT_QUERY)
 
-    monitors_cached = cache.get(CACHE_KEY)
-
-    if monitors_cached != None:
-        data = json.decode(monitors_cached)
-    elif DD_API_KEY != None and DD_APP_KEY != None:
+    if DD_API_KEY != None and DD_APP_KEY != None:
         data = http.get(
             "{}/monitor/search".format(DD_API_URL),
             params = {"query": monitors_query},
             headers = {"DD-API-KEY": DD_API_KEY, "DD-APPLICATION-KEY": DD_APP_KEY, "Accept": "application/json"},
+            ttl_seconds = 240,
         ).json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(CACHE_KEY, json.encode(data), ttl_seconds = 240)
     else:
         data = {"monitors": []}
 

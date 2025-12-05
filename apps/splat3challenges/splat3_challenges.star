@@ -22,10 +22,10 @@ load("images/num_3.png", NUM_3_ASSET = "file")
 load("images/num_4.png", NUM_4_ASSET = "file")
 load("images/num_5.png", NUM_5_ASSET = "file")
 load("images/num_6.png", NUM_6_ASSET = "file")
-load("images/stage_crableg_capital.png", STAGE_CRABLEG_CAPITAL_ASSET = "file")
 load("images/stage_barnacle_dime.png", STAGE_BARNACLE_DIME_ASSET = "file")
 load("images/stage_bluefin_depot.png", STAGE_BLUEFIN_DEPOT_ASSET = "file")
 load("images/stage_brinewater_springs.png", STAGE_BRINEWATER_SPRINGS_ASSET = "file")
+load("images/stage_crableg_capital.png", STAGE_CRABLEG_CAPITAL_ASSET = "file")
 load("images/stage_eeltail_alley.png", STAGE_EELTAIL_ALLEY_ASSET = "file")
 load("images/stage_flounder_heights.png", STAGE_FLOUNDER_HEIGHTS_ASSET = "file")
 load("images/stage_hagglefish_market.png", STAGE_HAGGLEFISH_MARKET_ASSET = "file")
@@ -174,15 +174,12 @@ def main(config):
         challenges = challenge_cache
     else:
         # Oh, we need new data
-        rep = http.get(STAGE_URL)
+        rep = http.get(STAGE_URL, ttl_seconds = 3600 * 2)
         if (rep.status_code != 200):
             failed = rep.status_code or -1
         else:
             stages = rep.json()  # Will it just let me do this?
             challenges = stages["data"]["eventSchedules"]["nodes"]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("stages", json.encode(challenges), 3600 * 2)
 
     if (failed):
         return generateErrorFrame("API error!\nError code %d" % (failed or -1))

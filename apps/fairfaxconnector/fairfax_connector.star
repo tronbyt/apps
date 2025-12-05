@@ -21,43 +21,26 @@ BASE_URL = "https://www.fairfaxcounty.gov/bustime/api/v3"
 DEFAULT_STOP = "6484"
 
 def getAllRoutes(config):
-    routes = cache.get("ROUTES")
-    if routes == None:
-        routesUrl = BASE_URL + "/getroutes?key=" + config.get("fairfax_connector_api_key") + "&format=json"
-        routes = http.get(routesUrl).body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("ROUTES", routes, ONE_DAY)
+    routesUrl = BASE_URL + "/getroutes?key=" + config.get("fairfax_connector_api_key") + "&format=json"
+    routes = http.get(routesUrl, ttl_seconds = ONE_DAY).body()
 
     routes = json.decode(routes).get("bustime-response").get("routes")
     return routes
 
 def getRouteDirections(route, config):
-    cacheKey = "DIRECTIONS-" + route.get("rt")
-    directions = cache.get(cacheKey)
-    if directions == None:
-        dirUrl = BASE_URL + "/getdirections?key=" + config.get("fairfax_connector_api_key") + "&rt=" + route.get("rt") + "&format=json"
-        directions = http.get(dirUrl).body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cacheKey, directions, ONE_DAY)
+    dirUrl = BASE_URL + "/getdirections?key=" + config.get("fairfax_connector_api_key") + "&rt=" + route.get("rt") + "&format=json"
+    directions = http.get(dirUrl, ttl_seconds = ONE_DAY).body()
 
     directions = json.decode(directions).get("bustime-response").get("directions")
     return directions
 
 def getStops(route, direction, config):
-    cacheKey = "STOPS-" + route.get("rt") + "-" + direction.get("id")
-    stops = cache.get(cacheKey)
-    if stops == None:
-        stopsUrl = BASE_URL + "/getstops?key=" + config.get("fairfax_connector_api_key") + "&rt=" + route.get("rt") + "&dir=" + direction.get("id") + "&format=json"
+    stopsUrl = BASE_URL + "/getstops?key=" + config.get("fairfax_connector_api_key") + "&rt=" + route.get("rt") + "&dir=" + direction.get("id") + "&format=json"
 
-        # Some of the directions have spaces in their IDs. Why this is allowed, I have no clue. I can't seem to find a starlark lib
-        # for URL encoding, so I'm doing this one-off here where it's needed.
-        stopsUrl = stopsUrl.replace(" ", "%20")
-        stops = http.get(stopsUrl).body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cacheKey, stops, ONE_DAY)
+    # Some of the directions have spaces in their IDs. Why this is allowed, I have no clue. I can't seem to find a starlark lib
+    # for URL encoding, so I'm doing this one-off here where it's needed.
+    stopsUrl = stopsUrl.replace(" ", "%20")
+    stops = http.get(stopsUrl, ttl_seconds = ONE_DAY).body()
 
     stops = json.decode(stops).get("bustime-response").get("stops")
     return stops
@@ -88,20 +71,18 @@ def getRouteColor(routeId, config):
             if route["rt"] == routeId:
                 routeColor = route["rtclr"]
 
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
                 cache.set("COLOR-" + routeId, routeColor, ONE_WEEK)
                 break
     return routeColor or "#ffffff"
 
 # Gets the list of predicted bus times for an individual bus stop
 def getPredictions(stopId, config):
-    stopPredictions = cache.get(stopId)
-    if stopPredictions == None:
-        predictionUrl = BASE_URL + "/getpredictions?key=" + config.get("fairfax_connector_api_key") + "&stpid=" + stopId + "&format=json"
-        stopPredictions = http.get(predictionUrl).body()
+    api_key = config.get("fairfax_connector_api_key")
+    if not api_key:
+        return None
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(stopId, stopPredictions, ONE_MINUTE)
+    predictionUrl = BASE_URL + "/getpredictions?key=" + api_key + "&stpid=" + stopId + "&format=json"
+    stopPredictions = http.get(predictionUrl, ttl_seconds = ONE_MINUTE).body()
 
     stopPredictions = json.decode(stopPredictions).get("bustime-response")
     if (stopPredictions.get("error") != None):
