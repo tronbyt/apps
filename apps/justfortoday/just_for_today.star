@@ -5,7 +5,6 @@ Description: Show today's N.A. "Just for Today".
 Author: elliotstoner
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/jft_header.png", JFT_HEADER_ASSET = "file")
 load("render.star", "render")
@@ -25,22 +24,21 @@ def getCurrentDate(config):
 
 def getJftText(config):
     curr_date = getCurrentDate(config)
-    jft_text = cache.get(curr_date)
-    if jft_text == None:
-        root_url = config.get("JFT_DATA_ROOT_URL")
-        if root_url == None:
-            return DEFAULT_TEXT
-        req_url = "%s/%s/%s%s" % (
-            root_url,
-            JFT_SOURCE,
-            curr_date,
-            FILE_TYPE,
-        )
-        request = http.get(req_url)
-        if (request.status_code != 200):
-            return DEFAULT_TEXT
-        jft_text = request.body()
-        cache.set(curr_date, jft_text, ttl_seconds = 86400)
+
+    root_url = config.get("JFT_DATA_ROOT_URL")
+    if root_url == None:
+        return DEFAULT_TEXT
+    req_url = "%s/%s/%s%s" % (
+        root_url,
+        JFT_SOURCE,
+        curr_date,
+        FILE_TYPE,
+    )
+    request = http.get(req_url, ttl_seconds = 86400)
+    if (request.status_code != 200):
+        return DEFAULT_TEXT
+    jft_text = request.body()
+
     return jft_text
 
 def get_schema():

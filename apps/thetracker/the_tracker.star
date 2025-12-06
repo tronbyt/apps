@@ -5,7 +5,6 @@ Description: Flexible counter to display your numbers via ilo.so: X, YouTube, Ti
 Author: Steve Rybka
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")  # Added to parse JSON responses
 load("http.star", "http")
@@ -125,49 +124,40 @@ def main(config):
     add_dollar_sign = config.str("add_dollar_sign", "false") == "true"  # New toggle for dollar sign
     show_comma = config.str("show_comma", "true") == "true"  # New toggle for commas
 
-    # Cache checker
-    cache_key = code + "_multiplier_" + str(multiply_by_12) + str(add_dollar_sign) + "_comma_" + str(show_comma)  # Create a unique cache key based on multiplier
-    cached_data = cache.get(cache_key)
+    # Get data from ilo.so API with user's counter ID
+    ILO_URL = "https://api.ilo.so/v2/counters/" + code + "/"
+    response = http.get(ILO_URL, ttl_seconds = CACHE_TTL)
 
-    if cached_data != None:
-        print("Cache hit!")
-        body_content = cached_data
+    # Attempt to parse JSON response
+    if response.status_code != 200:
+        data = {}
     else:
-        print("Cache miss! Getting Data...")
-
-        # Get data from ilo.so API with user's counter ID
-        ILO_URL = "https://api.ilo.so/v2/counters/" + code + "/"
-        response = http.get(ILO_URL)
-
-        # Attempt to parse JSON response
         data = json.decode(response.body())
 
-        if "count" in data:
-            # Extract the count value as an integer
-            count_value = int(data["count"])
+    if "count" in data:
+        # Extract the count value as an integer
+        count_value = int(data["count"])
 
-            # Apply the multiplier if enabled
-            if multiply_by_12:
-                count_value *= 12
+        # Apply the multiplier if enabled
+        if multiply_by_12:
+            count_value *= 12
 
-            # Format the count with or without commas based on the toggle
-            if show_comma:
-                formatted_count = humanize.comma(count_value)
-            else:
-                formatted_count = str(count_value)
-
-            # Prepend the dollar sign if the toggle is enabled
-            if add_dollar_sign:
-                formatted_count = "$" + formatted_count
-
-            # Use the formatted count as the body content
-            body_content = formatted_count
-
-            # Cache the result with a unique key
-            cache.set(cache_key, body_content, CACHE_TTL)
+        # Format the count with or without commas based on the toggle
+        if show_comma:
+            formatted_count = humanize.comma(count_value)
         else:
-            print("Error: 'count' key missing in API response")
-            body_content = "Error"
+            formatted_count = str(count_value)
+
+        # Prepend the dollar sign if the toggle is enabled
+        if add_dollar_sign:
+            formatted_count = "$" + formatted_count
+
+        # Use the formatted count as the body content
+        body_content = formatted_count
+
+    else:
+        print("Error: 'count' key missing in API response")
+        body_content = "Error"
 
     # Use the final content
     final_content = body_content

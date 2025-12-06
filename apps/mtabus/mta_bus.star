@@ -8,8 +8,6 @@ Author: Kevin Eder
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bus_image_base_64.png", BUS_IMAGE_BASE_64_ASSET = "file")
 load("math.star", "math")
@@ -19,7 +17,6 @@ load("time.star", "time")
 
 BUS_IMAGE_BASE_64 = BUS_IMAGE_BASE_64_ASSET.readall()
 
-VISITS_KEY_PREFIX = "mta_bus_visits_"
 CACHE_TTL_SECONDS = 60
 BUSTIME_URL = "https://bustime.mta.info/api/siri/stop-monitoring.json?key={key}&OperatorRef=MTA&MonitoringRef={stop}"
 
@@ -32,12 +29,8 @@ def main(config):
     response_was_error = False
     api_key = config.get("key")
     stop = config.str("stop") or ""
-    cache_key = VISITS_KEY_PREFIX + stop
 
-    visits = get_visits_from_cache(cache_key)
-
-    if not visits:
-        visits, response_was_error = get_visits_from_api(api_key, stop, cache_key)
+    visits, response_was_error = get_visits(api_key, stop)
 
     # Try to determine bus line name.
     if len(visits) > 0:
@@ -86,8 +79,8 @@ def main(config):
         ),
     )
 
-def get_visits_from_api(api_key, stop, cache_key):
-    response = http.get(get_url(api_key, stop))
+def get_visits(api_key, stop):
+    response = http.get(get_url(api_key, stop), ttl_seconds = CACHE_TTL_SECONDS)
     response_was_error = response.status_code != 200
     delivery = dict()
 
@@ -96,18 +89,7 @@ def get_visits_from_api(api_key, stop, cache_key):
 
     visits = delivery["MonitoredStopVisit"] if "MonitoredStopVisit" in delivery else []
 
-    encoded_visits = json.encode(visits)
-    cache.set(cache_key, encoded_visits, ttl_seconds = CACHE_TTL_SECONDS)
-
     return visits, response_was_error
-
-def get_visits_from_cache(cache_key):
-    cached_val = cache.get(cache_key)
-
-    if cached_val:
-        return json.decode(cached_val)
-
-    return None
 
 def get_url(key, stop):
     return BUSTIME_URL.format(key = key, stop = stop)

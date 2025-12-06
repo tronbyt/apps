@@ -2,8 +2,6 @@
 Dance Wave - A Tidbyt app showing the currently playing song from Dance Wave Online Radio
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/dw_logo.gif", DW_LOGO_ASSET = "file")
 load("render.star", "render")
@@ -114,12 +112,7 @@ def fetch_current_track():
         "Referer": "https://dancewave.online/tracklist/",
     }
 
-    # Cache the API response for 30 seconds
-    cached = cache.get("current_track")
-    if cached != None:
-        return json.decode(cached)
-
-    resp = http.get(url, headers = headers)
+    resp = http.get(url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
 
     if resp.status_code == 200:
         data = resp.json()
@@ -132,7 +125,6 @@ def fetch_current_track():
                 "artist": current.get("artist", "Unknown Artist"),
                 "title": current.get("title", "Unknown Title"),
             }
-            cache.set("current_track", json.encode(track_data), ttl_seconds = CACHE_TTL_SECONDS)
             return track_data
         else:
             print("No playlist data found")

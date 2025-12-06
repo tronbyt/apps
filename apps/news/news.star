@@ -5,7 +5,6 @@ Description: Select an RSS feed and receive the latest headlines in return.
 Author: JeffLac (Recreation of Tidbyt Original)
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("images/bbc.png", BBC_LOGO_ASSET = "file")
 load("images/la_times_logo.png", LA_TIMES_LOGO_ASSET = "file")
@@ -205,20 +204,6 @@ def main(config):
 def get_headlines(feed_url):
     """Fetch and parse headlines from an RSS feed using xpath."""
 
-    # Try to get cached data
-    cached = cache.get("headlines_%s" % feed_url)
-    if cached != None:
-        cached_data = []
-
-        # Parse the cached data
-        items = cached.split("||||")
-        for i in range(0, len(items) - 1, 2):
-            cached_data.append({
-                "title": items[i],
-                "description": items[i + 1],
-            })
-        return cached_data
-
     # Fetch the RSS feed
     resp = http.get(feed_url, ttl_seconds = CACHE_TTL)
     if resp.status_code != 200:
@@ -248,15 +233,6 @@ def get_headlines(feed_url):
                 "title": title,
                 "description": description,
             })
-
-    # Cache the results as pipe-delimited string
-    if len(items) > 0:
-        cache_parts = []
-        for item in items:
-            cache_parts.append(item["title"])
-            cache_parts.append(item["description"])
-        cache_content = "||||".join(cache_parts)
-        cache.set("headlines_%s" % feed_url, cache_content, ttl_seconds = CACHE_TTL)
 
     return items
 
