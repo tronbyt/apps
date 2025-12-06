@@ -15,17 +15,13 @@ load("images/cave.png", CAVE_ASSET = "file")
 load("images/cave2.png", CAVE2_ASSET = "file")
 load("images/colusseum.png", COLUSSEUM_ASSET = "file")
 load("images/dragon.png", DRAGON_ASSET = "file")
-load("images/dragonborn.png", DRAGONBORN_ASSET = "file")
 load("images/dungeon.png", DUNGEON_ASSET = "file")
 load("images/dungeon2.png", DUNGEON2_ASSET = "file")
 load("images/dungeon3.png", DUNGEON3_ASSET = "file")
-load("images/dwarf.png", DWARF_ASSET = "file")
 load("images/forest2.png", FOREST2_ASSET = "file")
 load("images/forest3.png", FOREST3_ASSET = "file")
 load("images/forest4.png", FOREST4_ASSET = "file")
 load("images/forest5.png", FOREST5_ASSET = "file")
-load("images/gnome.png", GNOME_ASSET = "file")
-load("images/half_elf.png", HALF_ELF_ASSET = "file")
 load("images/magma.png", MAGMA_ASSET = "file")
 load("images/market.png", MARKET_ASSET = "file")
 load("images/market2.png", MARKET2_ASSET = "file")
@@ -41,53 +37,30 @@ load("images/temple.png", TEMPLE_ASSET = "file")
 load("images/village.png", VILLAGE_ASSET = "file")
 load("images/volcano.png", VOLCANO_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-BRIDGE = BRIDGE_ASSET.readall()
-COLUSSEUM = COLUSSEUM_ASSET.readall()
-DUNGEON3 = DUNGEON3_ASSET.readall()
-FOREST2 = FOREST2_ASSET.readall()
-FOREST5 = FOREST5_ASSET.readall()
-SWAMP2 = SWAMP2_ASSET.readall()
-TAVERN3 = TAVERN3_ASSET.readall()
-TEMPLE = TEMPLE_ASSET.readall()
-VILLAGE = VILLAGE_ASSET.readall()
-VOLCANO = VOLCANO_ASSET.readall()
-
-CAMPFIRE = CAMPFIRE_ASSET.readall()
-CASTLE = CASTLE_ASSET.readall()
-CASTLE2 = CASTLE2_ASSET.readall()
-CASTLE3 = CASTLE3_ASSET.readall()
-CASTLE4 = CASTLE4_ASSET.readall()
-CAVE = CAVE_ASSET.readall()
-CAVE2 = CAVE2_ASSET.readall()
-DRAGON = DRAGON_ASSET.readall()
-DUNGEON = DUNGEON_ASSET.readall()
-DUNGEON2 = DUNGEON2_ASSET.readall()
-FOREST3 = FOREST3_ASSET.readall()
-FOREST4 = FOREST4_ASSET.readall()
-MAGMA = MAGMA_ASSET.readall()
-MARKET = MARKET_ASSET.readall()
-MARKET2 = MARKET2_ASSET.readall()
-MARKET3 = MARKET3_ASSET.readall()
-STATUE = STATUE_ASSET.readall()
-STATUE2 = STATUE2_ASSET.readall()
-SWAMP = SWAMP_ASSET.readall()
-TAVERN = TAVERN_ASSET.readall()
-TAVERN2 = TAVERN2_ASSET.readall()
-
-DWARF_ICON = DWARF_ASSET.readall()
-DRAGONBORN_ICON = DRAGONBORN_ASSET.readall()
-GNOME_ICON = GNOME_ASSET.readall()
-HALF_ELF_ICON = HALF_ELF_ASSET.readall()
-
-IMG_2 = 2
-IMG_3 = 3
-IMG_4 = 4
-IMG_5 = 5
-
 DEFAULT_RACE = "all"
+
+RACE_LOOKUP = {
+    "all": -1,
+    "lizardfolk": 0,
+    "elf": 1,
+    "dwarf": 2,
+    "dragonborn": 3,
+    "gnome": 4,
+    "halfelf": 5,
+    "halforc": 6,
+    "halfling": 7,
+    "human": 8,
+    "tabaxi": 9,
+    "tiefling": 10,
+    "firbolg": 11,
+}
+
+SURNAME_TYPE_COUNT = 2
+GENDER_COUNT = 2
+HUMAN_NAME_TYPES = 4
 
 options = [
     schema.Option(
@@ -145,10 +118,42 @@ options = [
 ]
 
 def main(config):
-    images = [CAVE, DUNGEON, DUNGEON2, DUNGEON3, FOREST2, TAVERN, TAVERN2, TAVERN3, CAMPFIRE, DRAGON, MAGMA, VOLCANO, BRIDGE, CASTLE, CASTLE2, CASTLE3, CASTLE4, COLUSSEUM, MARKET, MARKET2, MARKET3, STATUE, STATUE2, SWAMP, SWAMP2, TEMPLE, VILLAGE, FOREST3, FOREST4, FOREST5]
+    images = [
+        BRIDGE_ASSET,
+        CAMPFIRE_ASSET,
+        CASTLE_ASSET,
+        CASTLE2_ASSET,
+        CASTLE3_ASSET,
+        CASTLE4_ASSET,
+        CAVE_ASSET,
+        CAVE2_ASSET,
+        COLUSSEUM_ASSET,
+        DRAGON_ASSET,
+        DUNGEON_ASSET,
+        DUNGEON2_ASSET,
+        DUNGEON3_ASSET,
+        FOREST2_ASSET,
+        FOREST3_ASSET,
+        FOREST4_ASSET,
+        FOREST5_ASSET,
+        MAGMA_ASSET,
+        MARKET_ASSET,
+        MARKET2_ASSET,
+        MARKET3_ASSET,
+        STATUE_ASSET,
+        STATUE2_ASSET,
+        SWAMP_ASSET,
+        SWAMP2_ASSET,
+        TAVERN_ASSET,
+        TAVERN2_ASSET,
+        TAVERN3_ASSET,
+        TEMPLE_ASSET,
+        VILLAGE_ASSET,
+        VOLCANO_ASSET,
+    ]
     img = randnum(0, len(images))
 
-    BACKGROUNDIMAGE = images[img]
+    BACKGROUNDIMAGE = images[img].readall()
     fontcolor = "#fff"
 
     THENAME = ""
@@ -167,16 +172,16 @@ def main(config):
     elif selection == 1:
         THENAME = elf()
         THERACE = "Elf"
-    elif selection == IMG_2:
+    elif selection == 2:
         THENAME = dwarf()
         THERACE = "Dwarf"
-    elif selection == IMG_3:
+    elif selection == 3:
         THENAME = dragonborn()
         THERACE = "Dragonborn"
-    elif selection == IMG_4:
+    elif selection == 4:
         THENAME = gnome()
         THERACE = "Gnome"
-    elif selection == IMG_5:
+    elif selection == 5:
         THENAME = halfelf()
         THERACE = "Half-Elf"
     elif selection == 6:
@@ -202,14 +207,14 @@ def main(config):
         return render.Root(
             child = render.Stack(
                 children = [
-                    render.Box(width = 64, height = 32, child = render.Image(src = BACKGROUNDIMAGE)),
+                    render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(src = BACKGROUNDIMAGE)),
                     render.Column(
                         main_align = "start",
                         expanded = True,
                         children = [
-                            render.Box(width = 64, height = 11, child = render.Text(content = THERACE, color = fontcolor)),
-                            render.Box(width = 64, height = 10, child = render.Text(content = THECLASS, color = fontcolor)),
-                            render.Box(width = 64, height = 11, child = render.Marquee(width = 64, height = 11, offset_start = 48, align = "center", child = render.Text(content = THENAME, color = fontcolor))),
+                            render.Box(width = canvas.width(), height = 11, child = render.Text(content = THERACE, color = fontcolor)),
+                            render.Box(width = canvas.width(), height = 10, child = render.Text(content = THECLASS, color = fontcolor)),
+                            render.Box(width = canvas.width(), height = 11, child = render.Marquee(width = canvas.width(), height = 11, offset_start = 48, align = "center", child = render.Text(content = THENAME, color = fontcolor))),
                         ],
                     ),
                 ],
@@ -219,14 +224,14 @@ def main(config):
         return render.Root(
             child = render.Stack(
                 children = [
-                    render.Box(width = 64, height = 32, child = render.Image(src = BACKGROUNDIMAGE)),
+                    render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(src = BACKGROUNDIMAGE)),
                     render.Column(
                         main_align = "start",
                         expanded = True,
                         children = [
-                            render.Box(width = 64, height = 11, child = render.Text(content = THERACE, color = fontcolor)),
-                            render.Box(width = 64, height = 10, child = render.Text(content = THECLASS, color = fontcolor)),
-                            render.Box(width = 64, height = 11, child = render.Text(content = THENAME, color = fontcolor)),
+                            render.Box(width = canvas.width(), height = 11, child = render.Text(content = THERACE, color = fontcolor)),
+                            render.Box(width = canvas.width(), height = 10, child = render.Text(content = THECLASS, color = fontcolor)),
+                            render.Box(width = canvas.width(), height = 11, child = render.Text(content = THENAME, color = fontcolor)),
                         ],
                     ),
                 ],
@@ -255,8 +260,8 @@ def elf():
     nm12 = ["alder", "amber", "ash", "aspen", "autumn", "azure", "beech", "birch", "blue", "bold", "bronze", "cedar", "crimson", "dawn", "dew", "diamond", "dusk", "eager", "elder", "elm", "ember", "even", "fall", "far", "feather", "fir", "flower", "fog", "forest", "gem", "gold", "green", "hazel", "light", "lunar", "mist", "moon", "moss", "night", "oak", "oaken", "ocean", "poplar", "rain", "rapid", "raven", "sage", "shadow", "silent", "silver", "spark", "spirit", "spring", "star", "still", "stone", "summer", "sun", "swift", "wild", "willow", "wind", "winter", "wood"]
     nm13 = ["beam", "bell", "birth", "blossom", "breath", "breeze", "brook", "cloud", "crown", "dew", "dream", "dreamer", "fall", "fate", "flight", "flow", "flower", "fond", "gaze", "gazer", "gift", "gleam", "grove", "guard", "heart", "heel", "hold", "kind", "light", "mane", "might", "mind", "moon", "path", "petal", "pride", "rest", "river", "seeker", "sense", "shadow", "shard", "shine", "singer", "smile", "song", "spark", "spell", "spirit", "star", "vale", "walker", "watcher", "whisper", "wish"]
 
-    rndSur = randnum(0, IMG_2)
-    rndTp = randnum(0, IMG_2)
+    rndSur = randnum(0, SURNAME_TYPE_COUNT)
+    rndTp = randnum(0, GENDER_COUNT)
 
     if rndTp == 0:
         # Male
@@ -294,7 +299,7 @@ def elf():
         surName = nm12[rnd] + nm13[rnd2]
     else:
         # Rando Surname
-        nTp = randnum(0, IMG_4)
+        nTp = randnum(0, 4)
         rnd = randnum(0, len(nm5))
         rnd2 = randnum(0, len(nm6))
         rnd3 = randnum(0, len(nm7))
@@ -336,7 +341,7 @@ def elf():
                     else:
                         break
 
-                if nTp == IMG_2:
+                if nTp == 2:
                     surName = nm5[rnd] + nm6[rnd2] + nm7[rnd3] + nm8[rnd6] + nm9[rnd7] + nm8[rnd8] + nm9[rnd9] + nm10[rnd4] + nm11[rnd5]
                 else:
                     surName = nm5[rnd] + nm6[rnd2] + nm9[rnd7] + nm8[rnd8] + nm7[rnd3] + nm8[rnd6] + nm9[rnd9] + nm10[rnd4] + nm11[rnd5]
@@ -354,13 +359,13 @@ def lizardfolk():
     nm5 = ["c", "g", "gr", "gn", "k", "kh", "kr", "r", "rr", "s", "ss", "sr", "st", "str", "t", "th", "tr"]
     nm6 = ["", "", "", "", "", "", "", "ch", "k", "n", "nd", "nk", "nt", "r", "rd", "rk", "rt", "rth", "s", "ss", "sh", "sj", "sk", "t", "th", "v", "x"]
 
-    namernd = randnum(0, IMG_3)
+    namernd = randnum(0, 3)
     rnd = randnum(0, len(nm1))
     rnd2 = randnum(0, len(nm2))
     rnd3 = randnum(0, len(nm6))
     if namernd == 0:
         # Short Name
-        if rnd < IMG_5:
+        if rnd < 5:
             for _ in range(10000):
                 if nm6[rnd3] == nm1[rnd]:
                     rnd3 = randnum(0, len(nm6))
@@ -400,7 +405,7 @@ def halfelf():
     nm3 = ["Alu", "Aly", "Ar", "Bren", "Byn", "Car", "Co", "Dar", "Del", "El", "Eli", "Fae", "Fha", "Gal", "Gif", "Haly", "Ho", "Ile", "Iro", "Jen", "Jil", "Kri", "Kys", "Les", "Lora", "Ma", "Mar", "Mare", "Neri", "Nor", "Ol", "Ophi", "Phaye", "Pri", "Qi", "Que", "Rel", "Res", "Sael", "Saf", "Syl", "Ther", "Tyl", "Una", "Uri", "Ven", "Vyl", "Win", "Wol", "Xil", "Xyr", "Yes", "Yll", "Zel", "Zin"]
     nm4 = ["aerys", "anys", "bellis", "bwynn", "cerys", "charis", "diane", "dove", "elor", "enyphe", "faen", "fine", "galyn", "gwynn", "hana", "hophe", "kaen", "kilia", "lahne", "lynn", "mae", "malis", "mythe", "nalore", "noa", "nys", "ona", "phira", "pisys", "qarin", "qwyn", "rila", "rora", "seris", "stine", "sys", "thana", "theris", "tihne", "trana", "viel", "vyre", "walyn", "waris", "xaris", "xipha", "yaries", "yra", "zenya", "zira"]
 
-    rndTp = randnum(0, IMG_2)
+    rndTp = randnum(0, GENDER_COUNT)
     if rndTp == 0:
         # Male
         for _ in range(10000):
@@ -434,7 +439,7 @@ def halforc():
     nm5 = ["a", "a", "o", "o", "e", "i", "i", "u"]
     nm6 = ["d", "da", "dar", "dur", "g", "gar", "gh", "gri", "gu", "sh", "sha", "shi", "gum", "gume", "gur", "ki", "mar", "mi", "mira", "me", "mur", "ne", "ner", "nir", "nar", "nchu", "ni", "nur", "ral", "rel", "ri", "rook", "ti", "tah", "tir", "tar", "tur", "war", "z", "zar", "zara", "zi", "zur", "zura", "zira"]
 
-    rndTp = randnum(0, IMG_2)
+    rndTp = randnum(0, GENDER_COUNT)
     if rndTp == 0:
         # Male
         for _ in range(10000):
@@ -471,7 +476,7 @@ def halfling():
     nm12 = ["amber", "apple", "autumn", "barley", "big", "boulder", "bramble", "bright", "bronze", "brush", "cherry", "cinder", "clear", "cloud", "common", "copper", "deep", "dust", "earth", "elder", "ember", "fast", "fat", "fern", "flint", "fog", "fore", "free", "glen", "glow", "gold", "good", "grand", "grass", "great", "green", "haven", "heart", "high", "hill", "hog", "humble", "keen", "laughing", "lea", "leaf", "light", "little", "lone", "long", "lunar", "marble", "mild", "mist", "moon", "moss", "night", "nimble", "proud", "quick", "raven", "reed", "river", "rose", "rumble", "shadow", "silent", "silver", "smooth", "soft", "spring", "still", "stone", "stout", "strong", "summer", "sun", "swift", "tall", "tea", "ten", "thistle", "thorn", "toss", "true", "twilight", "under", "warm", "whisper", "wild", "wise"]
     nm13 = ["ace", "barrel", "beam", "belly", "berry", "bloom", "blossom", "bluff", "bottle", "bough", "brace", "braid", "branch", "brand", "BRIDGE", "brook", "brush", "cheeks", "cloak", "cobble", "creek", "crest", "dance", "dancer", "dew", "dream", "earth", "eye", "eyes", "feet", "fellow", "finger", "fingers", "flow", "flower", "foot", "found", "gather", "glide", "grove", "hand", "hands", "hare", "heart", "hill", "hollow", "kettle", "lade", "leaf", "man", "mane", "mantle", "meadow", "moon", "mouse", "pot", "rabbit", "seeker", "shadow", "shine", "sky", "song", "spark", "spell", "spirit", "step", "stride", "sun", "surge", "top", "topple", "vale", "water", "whistle", "willow", "wind", "wood", "woods"]
 
-    rndTp = randnum(0, IMG_2)
+    rndTp = randnum(0, GENDER_COUNT)
     if rndTp == 0:
         # Male
         for _ in range(10000):
@@ -7749,7 +7754,7 @@ def human():
         "Zurie",
     ]
 
-    rndTp = randnum(0, IMG_4)
+    rndTp = randnum(0, HUMAN_NAME_TYPES)
     rndSur = randnum(0, 11)
 
     # Surname
@@ -7772,18 +7777,18 @@ def human():
                     else:
                         break
                 surName = nm21[rnd] + nm22[rnd2]
-            elif rndSur < IMG_4:
+            elif rndSur < 4:
                 rnd = randnum(0, len(nm30))
                 rnd2 = randnum(0, len(nm31))
                 rnd5 = randnum(0, len(nm33))
-                if rndSur == IMG_2:
+                if rndSur == 2:
                     surName = nm30[rnd] + nm31[rnd2] + nm33[rnd5]
                 else:
-                    # rndSur == IMG_3
+                    # rndSur == 3
                     rnd3 = randnum(0, len(nm32))
                     rnd4 = randnum(0, len(nm31))
                     surName = nm30[rnd] + nm31[rnd2] + nm32[rnd3] + nm31[rnd4] + nm33[rnd5]
-            elif rndSur == IMG_4:
+            elif rndSur == 4:
                 rnd = randnum(0, len(nm21))
                 rnd2 = randnum(0, len(nm22))
                 for _ in range(10000):
@@ -7799,7 +7804,7 @@ def human():
                 rnd3 = randnum(0, len(nm52))
                 rnd4 = randnum(0, len(nm51))
                 rnd5 = randnum(0, len(nm53))
-                if rndSur == IMG_5:
+                if rndSur == 5:
                     rnd6 = randnum(0, len(nm52))
                     rnd7 = randnum(0, len(nm51))
                     surName = nm50[rnd] + nm51[rnd2] + nm52[rnd3] + nm51[rnd4] + nm52[rnd6] + nm51[rnd7] + nm53[rnd5]
@@ -7821,9 +7826,9 @@ def human():
                 rnd = randnum(0, len(nm70))
                 rnd2 = randnum(0, len(nm71))
                 rnd3 = randnum(0, len(nm72))
-                if rnd3 < IMG_3:
+                if rnd3 < 3:
                     for _ in range(10000):
-                        if rnd < IMG_3:
+                        if rnd < 3:
                             rnd = randnum(0, len(nm70))
                             continue
                         else:
@@ -7862,7 +7867,7 @@ def human():
                     rnd3 = randnum(0, len(nm15))
                     rnd4 = randnum(0, len(nm14))
                     rnd5 = randnum(0, len(nm16))
-                    if rnd5 < IMG_3:
+                    if rnd5 < 3:
                         rnd3 = 0
                     else:
                         for _ in range(10000):
@@ -7872,27 +7877,27 @@ def human():
                             else:
                                 break
                     humanName = nm13[rnd] + nm14[rnd2] + nm15[rnd3] + nm14[rnd4] + nm16[rnd5]
-                elif rndMas < IMG_4:
+                elif rndMas < 4:
                     rnd = randnum(0, len(nm23))
                     rnd2 = randnum(0, len(nm24))
                     rnd5 = randnum(0, len(nm26))
-                    if rndMas == IMG_2:
+                    if rndMas == 2:
                         rnd3 = randnum(0, len(nm25))
                         rnd4 = randnum(0, len(nm24))
                         humanName = nm23[rnd] + nm24[rnd2] + nm25[rnd3] + nm24[rnd4] + nm26[rnd5]
                     else:
-                        # rndMas == IMG_3
+                        # rndMas == 3
                         humanName = nm23[rnd] + nm24[rnd2] + nm26[rnd5]
                 elif rndMas < 6:
                     rnd = randnum(0, len(nm34))
                     rnd2 = randnum(0, len(nm35))
                     rnd5 = randnum(0, len(nm37))
-                    if rndMas == IMG_4:
+                    if rndMas == 4:
                         rnd3 = randnum(0, len(nm36))
                         rnd4 = randnum(0, len(nm35))
                         humanName = nm34[rnd] + nm35[rnd2] + nm36[rnd3] + nm35[rnd4] + nm37[rnd5]
                     else:
-                        # rndMas == IMG_5
+                        # rndMas == 5
                         humanName = nm34[rnd] + nm35[rnd2] + nm37[rnd5]
                 elif rndMas < 8:
                     rnd = randnum(0, len(nm43))
@@ -7924,9 +7929,9 @@ def human():
                     rnd = randnum(0, len(nm65))
                     rnd2 = randnum(0, len(nm66))
                     rnd3 = randnum(0, len(nm67))
-                    if rnd3 < IMG_3:
+                    if rnd3 < 3:
                         for _ in range(10000):
-                            if rnd < IMG_2:
+                            if rnd < 2:
                                 rnd = randnum(0, len(nm65))
                                 continue
                             else:
@@ -7955,7 +7960,7 @@ def human():
         rndFem = randnum(0, 15)
         for _ in range(10000):
             if humanName == "":
-                if rndFem < IMG_2:
+                if rndFem < 2:
                     rnd = randnum(0, len(nm5))
                     rnd2 = randnum(0, len(nm6))
                     rnd3 = randnum(0, len(nm7))
@@ -7968,29 +7973,29 @@ def human():
                     else:
                         # rndFem == 1
                         humanName = nm5[rnd] + nm6[rnd2] + nm7[rnd3] + nm6[rnd4] + nm8[rnd5]
-                elif rndFem < IMG_4:
+                elif rndFem < 4:
                     rnd = randnum(0, len(nm17))
                     rnd2 = randnum(0, len(nm18))
                     rnd3 = randnum(0, len(nm19))
                     rnd4 = randnum(0, len(nm18))
                     rnd5 = randnum(0, len(nm20))
-                    if rndFem == IMG_2:
+                    if rndFem == 2:
                         rnd6 = randnum(0, len(nm19))
                         rnd7 = randnum(0, len(nm18))
                         humanName = nm17[rnd] + nm18[rnd2] + nm19[rnd3] + nm18[rnd4] + nm19[rnd6] + nm18[rnd7] + nm20[rnd5]
                     else:
-                        # rndFem == IMG_3
+                        # rndFem == 3
                         humanName = nm17[rnd] + nm18[rnd2] + nm19[rnd3] + nm18[rnd4] + nm20[rnd5]
                 elif rndFem < 6:
                     rnd = randnum(0, len(nm27))
                     rnd2 = randnum(0, len(nm24))
                     rnd5 = randnum(0, len(nm29))
-                    if rndFem == IMG_4:
+                    if rndFem == 4:
                         rnd3 = randnum(0, len(nm28))
                         rnd4 = randnum(0, len(nm24))
                         humanName = nm27[rnd] + nm24[rnd2] + nm28[rnd3] + nm24[rnd4] + nm29[rnd5]
                     else:
-                        # rndFem == IMG_5
+                        # rndFem == 5
                         humanName = nm27[rnd] + nm24[rnd2] + nm29[rnd5]
                 elif rndFem < 8:
                     rnd = randnum(0, len(nm38))
@@ -8052,7 +8057,7 @@ def human():
             else:
                 break
         humanName = humanName.capitalize() + " " + surName.capitalize()
-    elif rndTp == IMG_2:
+    elif rndTp == 2:
         rnd = randnum(0, len(nm83))
         humanName = nm83[rnd].capitalize() + " " + surName.capitalize()
     else:
@@ -8077,8 +8082,8 @@ def dwarf():
     nm12 = ["battle", "big", "black", "blood", "bold", "boulder", "brave", "brawn", "bright", "broad", "bronze", "brood", "burrow", "cold", "dark", "deep", "drunk", "even", "ever", "fire", "first", "flint", "frost", "frozen", "giant", "goblin", "gold", "golden", "gray", "great", "half", "hammer", "hard", "iron", "keen", "kind", "last", "light", "loud", "mad", "marble", "might", "molten", "mountain", "silver", "smug", "stark", "steel", "stern", "stone", "storm", "stout", "strong", "thunder", "troll", "true", "wild"]
     nm13 = ["ale", "anvil", "axe", "back", "bane", "beard", "belch", "belt", "blade", "bleeder", "blood", "boot", "boots", "bottom", "braid", "branch", "breaker", "breath", "brow", "buster", "delver", "eye", "eyes", "fall", "feast", "finder", "fist", "fists", "flight", "force", "forge", "found", "front", "fury", "gift", "grace", "grip", "guard", "hammer", "hand", "handle", "head", "heart", "helm", "hold", "horn", "kin", "kind", "kith", "mane", "mantle", "mask", "might", "pass", "past", "pride", "reach", "rest", "roar", "rock", "shaper", "shield", "song", "stand", "stone", "storm", "strike", "tale", "tankard", "ward"]
 
-    rndSur = randnum(0, IMG_2)
-    rndTp = randnum(0, IMG_2)
+    rndSur = randnum(0, SURNAME_TYPE_COUNT)
+    rndTp = randnum(0, GENDER_COUNT)
 
     if rndTp == 0:
         # Male
@@ -8116,7 +8121,7 @@ def dwarf():
         surName = nm12[rnd] + nm13[rnd2]
     else:
         # Rando Surname
-        nTp = randnum(0, IMG_2)
+        nTp = randnum(0, 2)
         rnd = randnum(0, len(nm5))
         rnd2 = randnum(0, len(nm6))
         rnd3 = randnum(0, len(nm7))
@@ -8163,8 +8168,8 @@ def gnome():
     nm13 = ["babble", "baffle", "bellow", "belly", "berry", "billow", "bold", "boon", "brass", "brisk", "broad", "bronze", "cobble", "copper", "dapple", "dark", "dazzle", "deep", "fapple", "fiddle", "fine", "fizzle", "flicker", "fluke", "glitter", "gobble", "gold", "iron", "kind", "last", "light", "long", "loud", "lucky", "marble", "pale", "pebble", "puddle", "quick", "quiet", "quill", "shadow", "short", "silver", "single", "sparkle", "spring", "squiggle", "stark", "stout", "strong", "swift", "thistle", "thunder", "tinker", "toggle", "tossle", "true", "twin", "twist", "waggle", "whistle", "wiggle", "wild", "wobble"]
     nm14 = ["back", "badge", "belch", "bell", "belt", "bit", "bloc", "bonk", "boot", "boots", "bottom", "braid", "branch", "brand", "case", "cheek", "cloak", "collar", "cord", "craft", "crag", "diggles", "drop", "dust", "dwadle", "fall", "feast", "fen", "fern", "field", "firn", "flight", "flow", "front", "gem", "gift", "grace", "guard", "hand", "heart", "helm", "hide", "hold", "kind", "ligt", "lob", "mane", "mantle", "mask", "patch", "peak", "pitch", "pocket", "reach", "rest", "river", "rock", "shield", "song", "span", "spark", "spell", "spring", "stamp", "stand", "stitch", "stone", "thread", "top", "trick", "twist", "wander"]
 
-    rndSur = randnum(0, IMG_2)
-    rndTp = randnum(0, IMG_2)
+    rndSur = randnum(0, SURNAME_TYPE_COUNT)
+    rndTp = randnum(0, GENDER_COUNT)
 
     if rndTp == 0:
         # Male
@@ -8202,7 +8207,7 @@ def gnome():
         surName = nm13[rnd] + nm14[rnd2]
     else:
         # Rando Surname
-        nTp = randnum(0, IMG_4)
+        nTp = randnum(0, 4)
         if nTp == 0:
             rnd = randnum(0, len(nm5))
             rnd2 = randnum(0, len(nm10))
@@ -8246,7 +8251,7 @@ def gnome():
                         continue
                     else:
                         break
-                if nTp == IMG_2:
+                if nTp == 2:
                     surName = nm5[rnd] + nm6[rnd2] + nm7[rnd3] + nm8[rnd4] + nm9[rnd6] + nm10[rnd7] + nm11[rnd5]
                 else:
                     rnd8 = randnum(0, len(nm9))
@@ -8277,7 +8282,7 @@ def dragonborn():
     nm9 = ["d", "j", "l", "ll", "m", "n", "nd", "rg", "r", "rr", "rd"]
     nm10 = ["c", "d", "k", "l", "n", "r", "s", "sh", "th"]
 
-    rndTp = randnum(0, IMG_2)
+    rndTp = randnum(0, 2)
 
     if rndTp == 0:
         # Male
@@ -8303,7 +8308,7 @@ def dragonborn():
                 break
 
     # Rando Surname
-    nTp = randnum(0, IMG_3)
+    nTp = randnum(0, 3)
     rnd = randnum(0, len(nm5))
     rnd2 = randnum(0, len(nm6))
     rnd3 = randnum(0, len(nm7))
@@ -8350,14 +8355,14 @@ def tabaxi():
     nm2 = ["Active", "Agile", "Amused", "Amusing", "Ancient", "Angelic", "Arctic", "Austere", "Bizarre", "Bold", "Brash", "Brave", "Bright", "Bronze", "Cheeky", "Clever", "Curious", "Defiant", "Dynamic", "Eager", "Elegant", "Elite", "Emerald", "Ethereal", "Faint", "Fine", "Five", "Flawless", "Four", "Fragile", "Fragrant", "Free", "Fresh", "Gentle", "Gold", "Golden", "Grand", "Half", "Happy", "Hearty", "Hidden", "Humble", "Hushed", "Icy", "Jade", "Jolly", "Kind", "Lazy", "Light", "Little", "Lone", "Lost", "Lucky", "Magic", "Mellow", "Merry", "Misty", "Mystery", "Nimble", "Odd", "Opal", "Prime", "Proud", "Pure", "Quick", "Quiet", "Quirky", "Radiant", "Rare", "Ruby", "Sapphire", "Secret", "Serene", "Seven", "Shady", "Silent", "Single", "Six", "Smooth", "Stout", "Subtle", "Sweet", "Swift", "Three", "Tranquil", "True", "Twin", "Two", "Velvet", "Vibrant", "Violet", "Wild"]
     nm3 = ["Animal", "Aspect", "Bat", "Beach", "Bear", "Beast", "Beauty", "Beetle", "Bell", "Berry", "Bird", "Bit", "Bite", "Block", "Board", "Boat", "Book", "Boot", "Bottle", "Brain", "Branch", "Breath", "Brush", "Bubble", "Bush", "Button", "Cable", "Cake", "Candle", "Candy", "Cannon", "Canvas", "Card", "Carriage", "Cart", "Chain", "Chains", "Chalk", "Chance", "Child", "Clock", "Cloud", "Clover", "Coil", "Deer", "Device", "Dream", "Drop", "Dust", "Edge", "Fang", "Feather", "Fire", "Fish", "Flame", "Flower", "Frog", "Game", "Garden", "Gate", "Gift", "Glove", "Grass", "Guest", "Guide", "Hen", "Hide", "Honey", "Ice", "Ink", "Jewel", "Kite", "Knot", "Lace", "Leaf", "Light", "Lightning", "Link", "Lock", "Locket", "Love", "Luck", "Marble", "Mark", "Mask", "Mirror", "Needle", "Night", "Owl", "Page", "Patch", "Path", "Peak", "Piece", "Plume", "Poem", "Quill", "Quilt", "Rain", "Riddle", "River", "Robin", "Rock", "Scale", "Scarf", "Scratch", "Sea", "Shadow", "Shoe", "Shore", "Silk", "Smoke", "Snow", "Snowflake", "Song", "Spark", "Sparkle", "Spell", "Star", "Stitch", "Stone", "Storm", "Straw", "Stream", "String", "Stripe", "Tale", "Thing", "Thrill", "Thunder", "Timber", "Time", "Tome", "Trail", "Tree", "Trick", "Veil", "Wave", "Wind", "Wing", "Wish", "Wonder"]
 
-    rndTp = randnum(0, IMG_2)
+    rndTp = randnum(0, 2)
     if rndTp == 0:
         rnd = randnum(0, len(nm1))
         tName = nm1[rnd]
     else:
         rnd = randnum(0, len(nm2))
         rnd2 = randnum(0, len(nm3))
-        nTp = randnum(0, IMG_2)
+        nTp = randnum(0, 2)
         if nTp == 0:
             tName = nm2[rnd] + " " + nm3[rnd2] + " (" + nm2[rnd] + ")"
         else:
@@ -8371,7 +8376,7 @@ def tiefling():
     nm4 = ["Af", "Agne", "Ani", "Ara", "Ari", "Aria", "Bel", "Bri", "Cre", "Da", "Di", "Dim", "Dor", "Ea", "Fri", "Gri", "His", "In", "Ini", "Kal", "Le", "Lev", "Lil", "Ma", "Mar", "Mis", "Mith", "Na", "Nat", "Ne", "Neth", "Nith", "Ori", "Pes", "Phe", "Qu", "Ri", "Ro", "Sa", "Sar", "Seiri", "Sha", "Val", "Vel", "Ya", "Yora", "Yu", "Za", "Zai", "Ze"]
     nm5 = ["bis", "borys", "cria", "cyra", "dani", "doris", "faris", "firith", "goria", "grea", "hala", "hiri", "karia", "ki", "laia", "lia", "lies", "lista", "lith", "loth", "lypsis", "lyvia", "maia", "meia", "mine", "narei", "nirith", "nise", "phi", "pione", "punith", "qine", "rali", "rissa", "seis", "solis", "spira", "tari", "tish", "uphis", "vari", "vine", "wala", "wure", "xibis", "xori", "yis", "yola", "za", "zes"]
 
-    rndTp = randnum(0, IMG_2)
+    rndTp = randnum(0, GENDER_COUNT)
     if rndTp == 0:
         # Male
         for _ in range(10000):
@@ -8408,33 +8413,7 @@ def randnum(mn, mx):
     return random.number(mn, mx - 1)
 
 def racelkup(race):
-    if race == "all":
-        return -1
-    if race == "dragonborn":
-        return IMG_3
-    if race == "dwarf":
-        return IMG_2
-    if race == "elf":
-        return 1
-    if race == "firbolg":
-        return 11
-    if race == "gnome":
-        return IMG_4
-    if race == "halfelf":
-        return IMG_5
-    if race == "halforc":
-        return 6
-    if race == "halfling":
-        return 7
-    if race == "human":
-        return 8
-    if race == "lizardfolk":
-        return 0
-    if race == "tabaxi":
-        return 9
-    if race == "tiefling":
-        return 10
-    return -1
+    return RACE_LOOKUP.get(race, -1)
 
 def get_schema():
     return schema.Schema(
