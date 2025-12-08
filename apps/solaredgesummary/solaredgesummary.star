@@ -42,66 +42,23 @@ def get_time_zone(site_id, api_key):
 
     return default_tz
 
-def get_energy_for_period(site_id, api_key, tz, time_unit):
-    """Get production and consumption energy for a time period."""
-    now = time.now().in_location(tz)
-
-    # Format dates differently based on time unit
-    if time_unit == "DAY":
-        # For daily, use current date at midnight
-        start_time = time.time(
-            year = now.year,
-            month = now.month,
-            day = now.day,
-            hour = 0,
-            minute = 0,
-            second = 0,
-            location = tz,
-        )
-    elif time_unit == "MONTH":
-        # For monthly, use first day of current month at midnight
-        start_time = time.time(
-            year = now.year,
-            month = now.month,
-            day = 1,
-            hour = 0,
-            minute = 0,
-            second = 0,
-            location = tz,
-        )
-    elif time_unit == "YEAR":
-        # For yearly, use first day of current year at midnight
-        start_time = time.time(
-            year = now.year,
-            month = 1,
-            day = 1,
-            hour = 0,
-            minute = 0,
-            second = 0,
-            location = tz,
-        )
-    else:
-        return None, None, "Invalid time unit"
-
-    # Format dates as YYYY-MM-DD HH:MM:SS
-    start_string = start_time.format("2006-01-02 15:04:05")
-    now_string = now.format("2006-01-02 15:04:05")
-
-    print("Requesting {} data from {} to {}".format(time_unit, start_string, now_string))
+def _fetch_and_process_energy(site_id, api_key, start_string, end_string, time_unit, log_prefix):
+    """Helper to fetch and process energy data."""
+    print("Requesting {} data from {} to {}".format(log_prefix, start_string, end_string))
 
     rep = http.get(
         URL_ENERGY.format(site_id),
         params = {
             "api_key": api_key,
             "startTime": start_string,
-            "endTime": now_string,
+            "endTime": end_string,
             "timeUnit": time_unit,
         },
         ttl_seconds = CACHE_TTL,
     )
 
     if rep.status_code != 200:
-        error_msg = "API error {}: {}".format(rep.status_code, rep.body())
+        error_msg = "{} API error {}: {}".format(log_prefix, rep.status_code, rep.body())
         print(error_msg)
         return None, None, error_msg
 
@@ -121,12 +78,43 @@ def get_energy_for_period(site_id, api_key, tz, time_unit):
 
     return production, consumption, None
 
+def get_energy_for_period(site_id, api_key, tz, time_unit):
+    """Get production and consumption energy for a time period."""
+    now = time.now().in_location(tz)
+
+    day, month = now.day, now.month
+    if time_unit == "DAY":
+        pass
+    elif time_unit == "MONTH":
+        day = 1
+    elif time_unit == "YEAR":
+        day = 1
+        month = 1
+    else:
+        return None, None, "Invalid time unit"
+
+    start_time = time.time(
+        year = now.year,
+        month = month,
+        day = day,
+        hour = 0,
+        minute = 0,
+        second = 0,
+        location = tz,
+    )
+
+    # Format dates as YYYY-MM-DD HH:MM:SS
+    start_string = start_time.format("2006-01-02 15:04:05")
+    now_string = now.format("2006-01-02 15:04:05")
+
+    return _fetch_and_process_energy(site_id, api_key, start_string, now_string, time_unit, time_unit)
+
 def get_weekly_energy(site_id, api_key, tz):
     """Get production and consumption energy for the last 7 days."""
     now = time.now().in_location(tz)
 
     # Calculate 7 days ago
-    seven_days_ago = now - time.parse_duration("168h")
+    seven_days_ago = now - time.parse_duration("144h")
 
     # Start at midnight 7 days ago
     start_time = time.time(
@@ -143,40 +131,7 @@ def get_weekly_energy(site_id, api_key, tz):
     start_string = start_time.format("2006-01-02 15:04:05")
     now_string = now.format("2006-01-02 15:04:05")
 
-    print("Requesting WEEK data from {} to {}".format(start_string, now_string))
-
-    rep = http.get(
-        URL_ENERGY.format(site_id),
-        params = {
-            "api_key": api_key,
-            "startTime": start_string,
-            "endTime": now_string,
-            "timeUnit": "DAY",
-        },
-        ttl_seconds = CACHE_TTL,
-    )
-
-    if rep.status_code != 200:
-        error_msg = "Week API error {}: {}".format(rep.status_code, rep.body())
-        print(error_msg)
-        return None, None, error_msg
-
-    data = rep.json()["energyDetails"]
-    consumption = 0
-    production = 0
-
-    # Sum all days
-    for meter in data["meters"]:
-        if meter["type"] == "Consumption":
-            for value in meter["values"]:
-                if value.get("value"):
-                    consumption += value["value"]
-        elif meter["type"] == "Production":
-            for value in meter["values"]:
-                if value.get("value"):
-                    production += value["value"]
-
-    return production, consumption, None
+    return _fetch_and_process_energy(site_id, api_key, start_string, now_string, "DAY", "WEEK")
 
 def get_lifetime_energy(site_id, api_key, tz):
     """Get lifetime production energy using energyDetails API."""
@@ -196,40 +151,7 @@ def get_lifetime_energy(site_id, api_key, tz):
     start_string = start_time.format("2006-01-02 15:04:05")
     now_string = now.format("2006-01-02 15:04:05")
 
-    print("Requesting LIFETIME data from {} to {}".format(start_string, now_string))
-
-    rep = http.get(
-        URL_ENERGY.format(site_id),
-        params = {
-            "api_key": api_key,
-            "startTime": start_string,
-            "endTime": now_string,
-            "timeUnit": "YEAR",
-        },
-        ttl_seconds = CACHE_TTL,
-    )
-
-    if rep.status_code != 200:
-        error_msg = "Lifetime API error {}: {}".format(rep.status_code, rep.body())
-        print(error_msg)
-        return None, None, error_msg
-
-    data = rep.json()["energyDetails"]
-    consumption = 0
-    production = 0
-
-    # Sum all years
-    for meter in data["meters"]:
-        if meter["type"] == "Consumption":
-            for value in meter["values"]:
-                if value.get("value"):
-                    consumption += value["value"]
-        elif meter["type"] == "Production":
-            for value in meter["values"]:
-                if value.get("value"):
-                    production += value["value"]
-
-    return production, consumption, None
+    return _fetch_and_process_energy(site_id, api_key, start_string, now_string, "YEAR", "LIFETIME")
 
 def format_energy(wh):
     """Format energy value with appropriate unit (kWh, MWh, or GWh)."""
@@ -304,6 +226,15 @@ def create_error_frame(message):
         ),
     )
 
+def _add_energy_frame(frames, label, title, get_energy_func, site_id, api_key, tz, *args):
+    """Fetches energy data and adds the appropriate frame (summary or error)."""
+    prod, cons, err = get_energy_func(site_id, api_key, tz, *args)
+    if err:
+        print("{} error: {}".format(label, err))
+        frames.append(create_error_frame("{} Error".format(label)))
+    else:
+        frames.append(create_summary_frame(title, prod, cons))
+
 def main(config):
     api_key = config.str("api_key")
     site_id = config.str("site_id", "")
@@ -314,44 +245,11 @@ def main(config):
     if api_key and site_id:
         tz = get_time_zone(site_id, api_key)
 
-        # Day
-        day_prod, day_cons, day_err = get_energy_for_period(site_id, api_key, tz, "DAY")
-        if day_err:
-            return render.Root(create_error_frame("Day: " + day_err))
-        frames.append(create_summary_frame("Energy Today", day_prod, day_cons))
-
-        # Week (last 7 days)
-        week_prod, week_cons, week_err = get_weekly_energy(site_id, api_key, tz)
-        if week_err:
-            print("Week error: " + week_err)
-            frames.append(create_error_frame("Week Error"))
-        else:
-            frames.append(create_summary_frame("Energy Week", week_prod, week_cons))
-
-        # Month
-        month_prod, month_cons, month_err = get_energy_for_period(site_id, api_key, tz, "MONTH")
-        if month_err:
-            print("Month error: " + month_err)
-
-            # Still add a frame showing the error
-            frames.append(create_error_frame("Month Error"))
-        else:
-            frames.append(create_summary_frame("Energy Month", month_prod, month_cons))
-
-        # Year
-        year_prod, year_cons, year_err = get_energy_for_period(site_id, api_key, tz, "YEAR")
-        if year_err:
-            print("Year error: " + year_err)
-            frames.append(create_error_frame("Year Error"))
-        else:
-            frames.append(create_summary_frame("Energy Year", year_prod, year_cons))
-
-        # Lifetime (sum all years)
-        lifetime_prod, lifetime_cons, lifetime_err = get_lifetime_energy(site_id, api_key, tz)
-        if lifetime_err:
-            print("Lifetime error: " + lifetime_err)
-        else:
-            frames.append(create_summary_frame("Energy Life", lifetime_prod, lifetime_cons))
+        _add_energy_frame(frames, "Day", "Energy Today", get_energy_for_period, site_id, api_key, tz, "DAY")
+        _add_energy_frame(frames, "Week", "Energy Week", get_weekly_energy, site_id, api_key, tz)
+        _add_energy_frame(frames, "Month", "Energy Month", get_energy_for_period, site_id, api_key, tz, "MONTH")
+        _add_energy_frame(frames, "Year", "Energy Year", get_energy_for_period, site_id, api_key, tz, "YEAR")
+        _add_energy_frame(frames, "Lifetime", "Energy Life", get_lifetime_energy, site_id, api_key, tz)
     else:
         # Demo data if no credentials
         frames.append(create_summary_frame("Energy Today", 6282, 3141))
