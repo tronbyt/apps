@@ -247,7 +247,7 @@ def get_feeders(token):
         return []
 
     if "data" in feeders_response:
-        me_data = feeders_response.get("data", {}).get("me", {})
+        me_data = (feeders_response.get("data") or {}).get("me") or {}
         if me_data:
             feeders_data = me_data.get("feeders", [])
             return feeders_data
