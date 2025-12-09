@@ -1,6 +1,6 @@
 # SolarEdge Energy Production and Consumption Summary Applet for Tidbyt
 
-Daily, monthly, annual and lifetime energy production and consumption for your SolarEdge solar system.
+Daily, weekly, monthly, annual and lifetime energy production and consumption for your SolarEdge solar system.
 
 Results are only refreshed every 30 minutes.
 
