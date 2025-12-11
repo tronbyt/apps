@@ -145,7 +145,7 @@ def main(config):
     scope_json = json.decode(json_extract)
 
     # Parse date that horoscope was written
-    date_extracted = scope_json["props"]["pageProps"]["dehydratedState"]["queries"][0]["state"]["data"]["horoscopesDaily"]["horoscopes"][0]["date"]
+    date_extracted = scope_json.get("props", {}).get("pageProps", {}).get("dehydratedState", {}).get("queries", [{}])[0].get("state", {}).get("data", {}).get("horoscopesDaily", {}).get("horoscopes", [{}])[0].get("date")
 
     if date_extracted == None:
         return render_error("Could not get date")
@@ -155,8 +155,8 @@ def main(config):
     date_d = humanize.time_format("d", date_parsed)
 
     # Parse horoscope
-    horoscope_extracted = scope_json["props"]["pageProps"]["dehydratedState"]["queries"][0]["state"]["data"]["horoscopesDaily"]["horoscopes"][0]["horoscope"]
-    horoscope_parsed = re.sub(".*\\n", "", horoscope_extracted)
+    horoscope_extracted = scope_json.get("props", {}).get("pageProps", {}).get("dehydratedState", {}).get("queries", [{}])[0].get("state", {}).get("data", {}).get("horoscopesDaily", {}).get("horoscopes", [{}])[0].get("horoscope")
+    horoscope_parsed = re.sub(".*\n", "", horoscope_extracted or "")
 
     if horoscope_parsed == "":
         return render_error("Could not get horoscope")
