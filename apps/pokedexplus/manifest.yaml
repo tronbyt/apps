@@ -8,3 +8,4 @@ fileName: pokedexplus.star
 packageName: pokedexplus
 recommendedInterval: 5
 supports2x: true
+minPixletVersion: v0.49.4
