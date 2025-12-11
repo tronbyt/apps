@@ -7,6 +7,7 @@ Author: frame-shift
 Version 1.1.1
 """
 
+load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -133,16 +134,18 @@ def main(config):
     sign_color = config.str("color_choice", DEFAULT_COLOR)
 
     # Fetch horoscope data
-    horoscope_url = "https://www.usatoday.com/horoscopes/daily/" + zodiac  # Updates daily at 09:00 UTC
+    horoscope_url = "https://play.usatoday.com/horoscopes/daily/" + zodiac  # Updates daily at 09:00 UTC
     scope_response = http.get(horoscope_url, ttl_seconds = TTL)
 
     if scope_response.status_code != 200:
         return render_error("Could not reach source")
 
     scope_html = html(scope_response.body())
+    json_extract = scope_html.find("script").filter("#__NEXT_DATA__").text()
+    scope_json = json.decode(json_extract)
 
     # Parse date that horoscope was written
-    date_extracted = scope_html.find("time").attr("datetime")
+    date_extracted = scope_json.get("props", {}).get("pageProps", {}).get("dehydratedState", {}).get("queries", [{}])[0].get("state", {}).get("data", {}).get("horoscopesDaily", {}).get("horoscopes", [{}])[0].get("date")
 
     if date_extracted == None:
         return render_error("Could not get date")
@@ -152,7 +155,8 @@ def main(config):
     date_d = humanize.time_format("d", date_parsed)
 
     # Parse horoscope
-    horoscope_parsed = scope_html.find("p").eq(1).text()
+    horoscope_extracted = scope_json.get("props", {}).get("pageProps", {}).get("dehydratedState", {}).get("queries", [{}])[0].get("state", {}).get("data", {}).get("horoscopesDaily", {}).get("horoscopes", [{}])[0].get("horoscope")
+    horoscope_parsed = re.sub(".*\n", "", horoscope_extracted or "")
 
     if horoscope_parsed == "":
         return render_error("Could not get horoscope")
