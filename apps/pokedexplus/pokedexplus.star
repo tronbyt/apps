@@ -102,10 +102,10 @@ def main(config):
         imageSize = 30 * scale
 
     pokemonSprite = get_cacheable_data(spriteURL)
-    pokemonImage = render.Image(src = pokemonSprite, width = imageSize, height = imageSize)
+    pokemonImage = render.Image(src = pokemonSprite, width = imageSize, height = imageSize, hold_frames = scale)
 
     return render.Root(
-        delay = 70,
+        delay = 70 // scale,
         child = render.Box(
             child = render.Stack(
                 children = [
