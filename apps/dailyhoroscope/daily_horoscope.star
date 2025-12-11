@@ -7,6 +7,7 @@ Author: frame-shift
 Version 1.1.1
 """
 
+load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -34,7 +35,6 @@ load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("encoding/json.star", "json")
 
 # Set default values
 DEFAULT_SIGN = "aries"
