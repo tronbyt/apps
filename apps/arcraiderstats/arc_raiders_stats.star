@@ -1,6 +1,6 @@
 """
 Applet: Arc Raiders Stats
-Summary: Arc Raiders player stats and events
+Summary: Arc Raiders stats
 Description: Shows current Arc Raiders player count and active event timers with map information.
 Author: Chris Nourse
 """
@@ -143,8 +143,10 @@ def get_player_count():
     if data and data.get("response") and data["response"].get("player_count") != None:
         player_count = data["response"]["player_count"]
         print("[ARC RAIDERS] Successfully fetched player count: {}".format(player_count))
+
         # Store as string in cache
         cache.set("arc_raiders_players", str(player_count), ttl_seconds = PLAYER_CACHE_TTL)
+
         # Return as int
         return int(player_count)
 
@@ -185,9 +187,6 @@ def get_current_events(timezone):
     now_utc = time.now()
     current_hour = now_utc.hour
     current_minute = now_utc.minute
-
-    # Also get current time in user's timezone for conversion
-    now_local = time.now().in_location(timezone)
 
     # Filter for events happening now
     active_events = []
@@ -264,6 +263,7 @@ def convert_utc_time_to_local(utc_hour, utc_minute, timezone, is_tomorrow = Fals
     Returns:
         Dict with "hour" and "minute" in local timezone
     """
+
     # Get current time in UTC to use the correct date
     now_utc = time.now()  # This returns time in UTC by default
 
@@ -271,15 +271,6 @@ def convert_utc_time_to_local(utc_hour, utc_minute, timezone, is_tomorrow = Fals
     # Starlark doesn't have timedelta, so we'll add 24 hours worth of seconds
     if is_tomorrow:
         # Add 24 hours (86400 seconds) to current time, then use that date
-        tomorrow_utc = time.time(
-            year = now_utc.year,
-            month = now_utc.month,
-            day = now_utc.day,
-            hour = now_utc.hour,
-            minute = now_utc.minute,
-            second = now_utc.second,
-            location = "UTC",
-        )
         # Add 86400 seconds (24 hours) using parse_duration
         # Actually, Starlark time doesn't support adding durations easily
         # Let's use a simpler approach: just increment the day
@@ -340,7 +331,7 @@ def generate_event_animation(events, header_height):
     full_height = 32  # Events use full screen height (32px)
     event_content_height = 18  # Height of event content
 
-    for i, event in enumerate(events):
+    for _, event in enumerate(events):
         # Scroll in: create frames that slide the event into view from bottom
         for step in range(ANIMATION_SCROLL_STEPS + 1):
             # Start completely below screen (full_height + event_content_height), end at header_height
@@ -390,6 +381,7 @@ def generate_event_animation(events, header_height):
 
 def render_event(event):
     """Render a single event with all text left-aligned within a globally centered group"""
+
     # Wrap the column in a Box to globally center it while keeping text left-aligned within
     return render.Box(
         width = 64,
@@ -429,8 +421,10 @@ def format_number(num):
 
     if num >= 1000:
         thousands = num / 1000.0
+
         # Format with 1 decimal place
         formatted = str(int(thousands * 10) / 10.0)
+
         # Remove unnecessary .0
         if formatted.endswith(".0"):
             formatted = formatted[:-2]
@@ -440,6 +434,7 @@ def format_number(num):
 
 def render_display(player_count, current_events, show_player_count, show_events, scroll_speed, events_error = False):
     """Render the display based on what data is available"""
+
     # Calculate header height (logo + optional player count)
     header_height = 8  # Logo height
     if show_player_count:

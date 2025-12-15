@@ -1,7 +1,9 @@
 ---
 id: arc-raiders-stats
 name: Arc Raiders Stats
-summary: Player count and event timers
+summary: Stats and events
 desc: Shows current Arc Raiders player count from Steam and active event timers with map information from MetaForge.
 author: Chris Nourse
-recommendedInterval: 5
+fileName: arc_raiders_stats.star
+packageName: arcraiderstats
+recommendedInterval: 10
