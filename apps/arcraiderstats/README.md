@@ -1,13 +1,12 @@
 # Arc Raiders Stats
 
-Display current Arc Raiders player count and active event timers on your Tronbyt.
+Display current Arc Raiders player count and active event timers on your Tidbyt.
 
 ## Features
 
 - **Real-time Player Count**: Shows the current number of active players from Steam
 - **Event Timers**: Displays currently active in-game events with their map locations
 - **Auto-refresh**: Updates events every 5 minutes and player count every 10 minutes
-- **Timezone-aware**: Shows events based on your local timezone
 
 ## Configuration
 
@@ -16,7 +15,6 @@ Display current Arc Raiders player count and active event timers on your Tronbyt
 - **Show Player Count** (toggle): Display the current player count from Steam
 - **Show Events** (toggle): Display currently active event timers
 - **Scroll Speed** (dropdown): Control the speed of event scrolling animation (Slow/Medium/Fast)
-- **Location**: Set your location for proper timezone detection
 
 ## Data Sources
 
@@ -54,4 +52,4 @@ The app shows:
 - Player count data from Steam Web API
 
 ## Author
-Chris Nourse with help from Claude
+Chris Nourse
