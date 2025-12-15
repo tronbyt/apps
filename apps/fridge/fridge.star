@@ -4,11 +4,19 @@ load("images/open.png", ICON_FRIDGE_OPEN = "file")
 load("render.star", "canvas", "render")
 
 def main():
-    font = "terminus-18" if canvas.is2x() else "tb-8"
-    image_size = 40 if canvas.is2x() else 20
+    scale = 2 if canvas.is2x() else 1
+    image_size = 20 * scale
+
+    open_img = ICON_FRIDGE_OPEN.readall()
+    closed_img = ICON_FRIDGE_CLOSED.readall()
+
+    # Alternate between open and closed fridge images every second
+    open_frame = render.Image(src = open_img, width = image_size)
+    closed_frame = render.Image(src = closed_img, width = image_size)
+    frames = [open_frame] * (10 * scale) + [closed_frame] * (10 * scale)
 
     return render.Root(
-        delay = 1000,
+        delay = 100 // scale,
         child = render.Box(
             child = render.Row(
                 expanded = True,
@@ -16,12 +24,12 @@ def main():
                 cross_align = "center",
                 children = [
                     render.Animation(
-                        children = [
-                            render.Image(src = ICON_FRIDGE_OPEN.readall(), width = image_size),
-                            render.Image(src = ICON_FRIDGE_CLOSED.readall(), width = image_size),
-                        ],
+                        children = frames,
                     ),
-                    render.WrappedText(tr("Close the fridge!"), font = font),
+                    render.Marquee(
+                        width = canvas.width() - image_size,
+                        child = render.Text(tr("Close the fridge!")),
+                    ),
                 ],
             ),
         ),
