@@ -33,7 +33,7 @@ Author: Alan Fleming
 load("encoding/json.star", "json")
 load("images/sunriseimage.png", SUNRISEIMAGE_ASSET = "file")
 load("images/sunsetimage.png", SUNSETIMAGE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -57,6 +57,8 @@ DEFAULT_ITEMS_TO_DISPLAY = "both"
 # Images
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
+
     # Get longditude and latitude from location
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     lat = float(location["lat"])
@@ -89,20 +91,24 @@ def main(config):
 
     if itemsToDisplay == "both":
         top = render.Padding(
-            pad = (0, 2, 0, 0),
+            pad = (0, 2 * scale, 0, 0),
             child = render.Row(
                 expanded = True,
                 main_align = "start",
                 cross_align = "center",
                 children = [
-                    render.Image(src = SUNRISEIMAGE),
+                    render.Image(
+                        src = SUNRISEIMAGE,
+                        width = 29 * scale,
+                        height = 14 * scale,
+                    ),
                     render.Text(sunriseText),
                 ],
             ),
         )
         middle = render.Box(
-            width = 64,
-            height = 1,
+            width = canvas.width(),
+            height = 1 * scale,
             color = "#a00",
         )
 
@@ -111,7 +117,11 @@ def main(config):
             main_align = "start",
             cross_align = "center",
             children = [
-                render.Image(src = SUNSETIMAGE),
+                render.Image(
+                    src = SUNSETIMAGE,
+                    width = 29 * scale,
+                    height = 14 * scale,
+                ),
                 render.Text(sunsetText),
             ],
         )
@@ -128,7 +138,7 @@ def main(config):
             image = SUNSETIMAGE
 
         top = render.Padding(
-            pad = (0, 2, 0, 4),
+            pad = (0, 2 * scale, 0, 4 * scale),
             child = render.Row(
                 expanded = True,
                 main_align = "center",
