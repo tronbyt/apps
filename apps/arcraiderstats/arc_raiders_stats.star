@@ -35,6 +35,7 @@ EVENTS_CACHE_TTL = 300  # 5 minutes
 # Animation constants
 ANIMATION_SCROLL_STEPS = 10  # Number of frames for scroll in/out animation
 ANIMATION_PAUSE_FRAMES = 30  # Frames to pause (at 100ms = 3 seconds)
+EVENT_CONTENT_HEIGHT = 18  # Height of event content (3 lines of text)
 
 # Scroll speed mapping (in milliseconds)
 SCROLL_SPEED_MAP = {
@@ -76,8 +77,8 @@ def get_player_count():
     """Fetch current player count from Steam API"""
     cached_data = cache.get("arc_raiders_players")
     if cached_data != None:
-        # Cache stores as string, convert via float to handle decimal strings
-        return int(float(cached_data))
+        # Cache stores as string, convert to int
+        return int(cached_data)
 
     response = http.get(STEAM_API_URL, ttl_seconds = PLAYER_CACHE_TTL)
     if response.status_code != 200:
@@ -86,14 +87,13 @@ def get_player_count():
 
     data = response.json()
     if data and data.get("response") and data["response"].get("player_count") != None:
-        player_count = data["response"]["player_count"]
+        player_count = int(data["response"]["player_count"])
         print("[ARC RAIDERS] Successfully fetched player count: {}".format(player_count))
 
         # Store as string in cache
         cache.set("arc_raiders_players", str(player_count), ttl_seconds = PLAYER_CACHE_TTL)
 
-        # Return as int
-        return int(player_count)
+        return player_count
 
     return None
 
@@ -172,17 +172,12 @@ def get_current_events():
                     remaining_minutes = int(remaining_seconds / 60)
 
                     # Format the time remaining string
-                    if remaining_minutes < 0:
-                        time_str = "0min"
-                    elif remaining_minutes > 1440:  # More than 24 hours
-                        time_str = "24h+"
+                    hours = remaining_minutes // 60
+                    minutes = remaining_minutes % 60
+                    if hours > 0:
+                        time_str = "{}hr".format(hours)
                     else:
-                        hours = remaining_minutes // 60
-                        minutes = remaining_minutes % 60
-                        if hours > 0:
-                            time_str = "{}hr".format(hours)
-                        else:
-                            time_str = "{}min".format(minutes)
+                        time_str = "{}min".format(minutes)
 
                     # Store event with pre-calculated time remaining
                     active_events.append({
@@ -242,13 +237,12 @@ def generate_event_animation(events, header_height):
     """
     frames = []
     full_height = 32  # Events use full screen height (32px)
-    event_content_height = 18  # Height of event content
 
     for _, event in enumerate(events):
         # Scroll in: create frames that slide the event into view from bottom
         for step in range(ANIMATION_SCROLL_STEPS + 1):
-            # Start completely below screen (full_height + event_content_height), end at header_height
-            start_offset = full_height + event_content_height
+            # Start completely below screen (full_height + EVENT_CONTENT_HEIGHT), end at header_height
+            start_offset = full_height + EVENT_CONTENT_HEIGHT
             offset = start_offset + (header_height - start_offset) * step // ANIMATION_SCROLL_STEPS
             frames.append(
                 render.Box(
@@ -278,7 +272,7 @@ def generate_event_animation(events, header_height):
         # Scroll out: slide event out of view upward
         for step in range(1, ANIMATION_SCROLL_STEPS + 1):
             # Move from header_height up to negative (off screen top)
-            offset = header_height - (header_height + 18) * step // ANIMATION_SCROLL_STEPS
+            offset = header_height - (header_height + EVENT_CONTENT_HEIGHT) * step // ANIMATION_SCROLL_STEPS
             frames.append(
                 render.Box(
                     width = 64,
@@ -298,7 +292,7 @@ def render_event(event):
     # Wrap the column in a Box to globally center it while keeping text left-aligned within
     return render.Box(
         width = 64,
-        height = 18,  # Height of event content (3 lines of text)
+        height = EVENT_CONTENT_HEIGHT,
         child = render.Row(
             main_align = "center",
             expanded = True,
@@ -404,7 +398,7 @@ def render_display(player_count, current_events, show_player_count, show_events,
                 width = 64,
                 height = 32,
                 child = render.Padding(
-                    pad = (2, header_height, 0, 0),
+                    pad = (header_height + 2, 0, 0, 0),
                     child = render.WrappedText(
                         content = message,
                         font = FONT_TOM_THUMB,
