@@ -476,7 +476,7 @@ def main(config):
     frame1.append(
         render.Row(
             children = [
-                render.Image(SRC = flag),
+                render.Image(src = flag),
                 render.Box(
                     height = 12,
                     width = 45,
@@ -529,7 +529,7 @@ def main(config):
     frame2.append(
         render.Row(
             children = [
-                render.Image(SRC = aircraft_icon, height = 18),
+                render.Image(src = aircraft_icon, height = 18),
                 render.Box(
                     height = 18,
                     padding = 1,

@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def fetch_ha_data(
@@ -67,15 +67,16 @@ def fetch_ha_data(
         return value
 
     if not ha_url or not ha_token:
+        # Dummy data for preview
         return (
             "Tesla",
-            "Unknown",
-            "Unknown",
-            0.0,
-            0.0,
-            "Unknown",
-            0.0,
-            0.0,
+            "driving",
+            "Home",
+            12.5,
+            15.0,
+            5.0,
+            20.0,
+            62.5,
         )
 
     headers = {
@@ -93,11 +94,11 @@ def fetch_ha_data(
     "name": "{{ states('%s') | default('Tesla') }}",
     "tesla_state": "{{ states('%s') | default('Unknown') }}",
     "route_dest": "{{ states('%s') | default('Unknown') }}",
-    "route_dist": "{{ states('%s') | float(0) }}",
-    "route_time": "{{ states('%s') | float(0) }}",
-    "traffic_delay": "{{ states('%s') | default('Unknown') }}",
-    "trip_total": "{{ states('%s') | float(0) }}",
-    "trip_progress": "{{ states('%s') | float(0) }}"
+    "route_dist": {{ states('%s') | float(0) }},
+    "route_time": {{ states('%s') | float(0) }},
+    "traffic_delay": {{ states('%s') | float(0) }},
+    "trip_total": {{ states('%s') | float(0) }},
+    "trip_progress": {{ states('%s') | float(0) }}
 }
 """.strip() % (
         name_entity,
@@ -127,7 +128,7 @@ def fetch_ha_data(
                 "route_dest": normalize(data.get("route_dest"), "Unknown"),
                 "route_dist": normalize(data.get("route_dist"), 0.0),
                 "route_time": normalize(data.get("route_time"), 0.0),
-                "traffic_delay": normalize(data.get("traffic_delay"), "Unknown"),
+                "traffic_delay": normalize(data.get("traffic_delay"), 0.0),
                 "trip_total": normalize(data.get("trip_total"), 0.0),
                 "trip_progress": normalize(data.get("trip_progress"), 0.0),
             }
@@ -143,9 +144,12 @@ def fetch_ha_data(
             )
 
     # Return defaults if request failed or parsing failed
-    return ("Tesla", "Unknown", "Unknown", 0.0, 0.0, "Unknown", 0.0, 0.0)
+    return ("Tesla", "Unknown", "Unknown", 0.0, 0.0, 0.0, 0.0, 0.0)
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
+    font = "terminus-16" if scale == 2 else "tb-8"
+
     ha_url = config.str("ha_url")
     ha_token = config.str("ha_token")
     name_entity = config.str("name_entity")
@@ -244,8 +248,8 @@ def main(config):
         return "#A92727C0"  # dark red
 
     # Full-width bar (62px fill + 2px border = 64px total)
-    bar_width = 62
-    bar_height = 7
+    bar_width = 62 * scale
+    bar_height = 7 * scale
     complete_width = int(bar_width * progress)
     remaining_width = max(bar_width - complete_width, 0)
 
@@ -258,8 +262,8 @@ def main(config):
     )
 
     bar_container = render.Box(
-        width = bar_width + 2,
-        height = bar_height + 2,
+        width = bar_width + 2 * scale,
+        height = bar_height + 2 * scale,
         color = "#FFFFFF",  # white border
         child = render.Box(
             width = bar_width,
@@ -270,17 +274,16 @@ def main(config):
     )
 
     shimmer_frames = []
-    shimmer_w = 12
+    shimmer_w = 12 * scale
 
     # Sweep highlight left to right; grow in and shrink out to avoid pops
-    for pos in range(0, bar_width + shimmer_w, 2):
-        left_gap = 1
+    for pos in range(0, bar_width + shimmer_w, 2 * scale):
+        left_gap = 1 * scale
         visible_w = 0
-        if (pos < shimmer_w):
-            left_gap = 1
+        if pos < shimmer_w:
             visible_w = pos  # grow from 0 -> shimmer_w
         else:
-            left_gap = max(1, pos - shimmer_w)
+            left_gap = max(1 * scale, pos - shimmer_w)
             visible_w = shimmer_w
 
         if visible_w > 0:
@@ -290,8 +293,8 @@ def main(config):
                         bar_container,
                         render.Row(
                             children = [
-                                render.Box(width = left_gap, height = bar_height + 2),
-                                render.Box(width = visible_w, height = bar_height + 2, color = "#FFFFFF30"),
+                                render.Box(width = left_gap, height = bar_height + 2 * scale),
+                                render.Box(width = visible_w, height = bar_height + 2 * scale, color = "#FFFFFF30"),
                             ],
                             cross_align = "start",
                         ),
@@ -307,23 +310,22 @@ def main(config):
 
     shimmer = render.Animation(children = shimmer_frames)
 
-    car_offset = max(0, min(bar_width - 2, int(progress * (bar_width - 2))))
+    car_offset = max(0, min(bar_width - 2 * scale, int(progress * (bar_width - 2 * scale))))
     bar_with_car = render.Box(
-        height = bar_height + 2,
+        height = bar_height + 2 * scale,
         child = render.Stack(
             children = [
                 bar_container,
                 shimmer,
                 render.Row(
                     children = [
-                        render.Box(width = max(0, car_offset - 6), height = bar_height + 2),
-                        render.Column(
-                            children = [
-                                render.Text(content = "🚙", offset = 2),
-                            ],
+                        render.Box(width = max(0, car_offset - 6 * scale), height = bar_height + 2 * scale),
+                        render.Padding(
+                            pad = (0, 0, 0, 3 * scale),
+                            child = render.Emoji(emoji = "🚙", height = 10 * scale),
                         ),
                     ],
-                    cross_align = "start",
+                    cross_align = "center",
                 ),
             ],
         ),
@@ -331,16 +333,18 @@ def main(config):
 
     header_row = render.Row(
         children = [
-            render.Emoji(emoji = "📍", height = 8),
-            render.Text(content = " %s" % safe_str(dest_str), color = dest_color),
+            render.Emoji(emoji = "📍", height = 8 * scale),
+            render.Text(content = " %s" % safe_str(dest_str), color = dest_color, font = font),
         ],
+        cross_align = "center",
     )
 
     info_row = render.Row(
         children = [
-            render.Emoji(emoji = "🕒", height = 8),
-            render.Text(content = format_minutes(route_time), color = time_color),
+            render.Emoji(emoji = "🕒", height = 8 * scale),
+            render.Text(content = format_minutes(route_time), color = time_color, font = font),
         ],
+        cross_align = "center",
     )
 
     return render.Root(
@@ -349,7 +353,7 @@ def main(config):
                 header_row,
                 bar_with_car,
                 info_row,
-                render.Text(content = name, color = car_color),
+                render.Text(content = name, color = car_color, font = font),
             ],
         ),
     )
