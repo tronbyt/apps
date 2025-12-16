@@ -289,29 +289,12 @@ def get_route_filter_typeahead(pattern, config):
     if DEBUG:
         print("[DEBUG] Route filter typeahead - stop_code: %s" % stop_code)
 
-    # Handle backward compatibility - decode old JSON format
-    actual_stop_id = None
-    if stop_code:
-        if stop_code.startswith("{"):
-            # Old format: JSON-encoded object
-            stop = json.decode(stop_code)
-            actual_stop_id = stop.get("value", "")
-
-            # Handle double-nested encoding
-            if type(actual_stop_id) == "string" and actual_stop_id.startswith("{"):
-                nested = json.decode(actual_stop_id)
-                if type(nested) == "dict" and "value" in nested:
-                    actual_stop_id = nested["value"]
-        else:
-            # New format: plain stop ID
-            actual_stop_id = stop_code
-
-    if actual_stop_id and actual_stop_id != "0":
+    if stop_code and stop_code != "0":
         if DEBUG:
-            print("[DEBUG] Route filter - fetching predictions for stop: %s" % actual_stop_id)
+            print("[DEBUG] Route filter - fetching predictions for stop: %s" % stop_code)
 
         # Fetch predictions for the selected stop to see which routes serve it
-        data = fetch_cached(PREDICTIONS_URL % (api_key, actual_stop_id), 240)
+        data = fetch_cached(PREDICTIONS_URL % (api_key, stop_code), 240)
         if type(data) != "string":
             service_delivery = data.get("ServiceDelivery", {})
             stop_monitoring = service_delivery.get("StopMonitoringDelivery", {})
@@ -457,22 +440,9 @@ def main(config):
         if DEBUG:
             print("[DEBUG] Using default stop")
     else:
-        # Handle both old (JSON-encoded) and new (plain stop ID) formats for backward compatibility
-        if stop_code.startswith("{"):
-            # Old format: JSON-encoded object
-            stop = json.decode(stop_code)
-            stopId = stop.get("value", "")
-
-            # Handle double-nested encoding
-            if type(stopId) == "string" and stopId.startswith("{"):
-                nested = json.decode(stopId)
-                if type(nested) == "dict" and "value" in nested:
-                    stopId = nested["value"]
-            stopTitle = stop.get("display", None)
-        else:
-            # New format: plain stop ID
-            stopId = stop_code
-            stopTitle = None  # Will be looked up from API
+        # Use the stop ID directly (plain format)
+        stopId = stop_code
+        stopTitle = None  # Will be looked up from API
 
     # Handle invalid/placeholder stop IDs
     if not stopId or stopId == "0":
@@ -509,12 +479,6 @@ def getPredictions(api_key, config, stopId, stopTitle):
     route_filter = config.get("route_filter", DEFAULT_CONFIG["route_filter"])
     if not route_filter:
         route_filter = "all-routes"
-
-    # Handle old JSON-encoded route_filter for backward compatibility
-    if type(route_filter) == "string" and route_filter.startswith("{"):
-        filter_obj = json.decode(route_filter)
-        if type(filter_obj) == "dict" and "value" in filter_obj:
-            route_filter = filter_obj["value"]
 
     if DEBUG:
         print("[DEBUG] Route filter: %s | Minimum time: %s min" % (route_filter, config.str("minimum_time", "0")))
