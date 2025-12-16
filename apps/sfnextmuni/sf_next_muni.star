@@ -432,7 +432,7 @@ def main(config):
         if DEBUG:
             print("[ERROR] No 511.org API Key provided")
         return render.Root(
-            child = render.Text("No 511.org API Key provided.", font = "tom-thumb"),
+            child = render.WrappedText("No 511.org API Key provided.", font = "tom-thumb"),
         )
 
     # Get the stop configuration
