@@ -34,7 +34,7 @@ ALERTS_URL = "https://api.511.org/transit/servicealerts?format=json&api_key=%s&a
 API_KEY = None
 
 # Set to True to enable debug logging
-DEBUG = True
+DEBUG = False
 
 # Maximum number of results to return in typeahead searches
 MAX_TYPEAHEAD_RESULTS = 100
@@ -286,8 +286,13 @@ def get_route_filter_typeahead(pattern, config):
     # Check if a stop is selected - if so, filter to only routes serving that stop
     stop_code = config.get("stop_code")
     routes_at_stop = None
-    if DEBUG:
-        print("[DEBUG] Route filter typeahead - stop_code: %s" % stop_code)
+
+    # Extract stop ID from Typeahead JSON format
+    if stop_code and stop_code.startswith("{"):
+        stop_obj = json.decode(stop_code)
+        stop_code = stop_obj.get("value", stop_code)
+        if DEBUG:
+            print("[DEBUG] Route filter typeahead - extracted stop_code: %s" % stop_code)
 
     if stop_code and stop_code != "0":
         if DEBUG:
@@ -431,6 +436,7 @@ def main(config):
         )
 
     # Get the stop configuration
+    # Note: Typeahead fields return JSON-encoded objects with display/text/value fields
     stop_code = config.get("stop_code")
     if not stop_code:
         # If no stop is selected, use the default stop
@@ -440,9 +446,12 @@ def main(config):
         if DEBUG:
             print("[DEBUG] Using default stop")
     else:
-        # Use the stop ID directly (plain format)
-        stopId = stop_code
+        # Typeahead returns JSON: {"display":"...", "text":"...", "value":"..."}
+        stop_obj = json.decode(stop_code)
+        stopId = stop_obj.get("value")
         stopTitle = None  # Will be looked up from API
+        if DEBUG:
+            print("[DEBUG] Parsed stop from typeahead - stopId=%s" % stopId)
 
     # Handle invalid/placeholder stop IDs
     if not stopId or stopId == "0":
@@ -479,6 +488,10 @@ def getPredictions(api_key, config, stopId, stopTitle):
     route_filter = config.get("route_filter", DEFAULT_CONFIG["route_filter"])
     if not route_filter:
         route_filter = "all-routes"
+    elif route_filter.startswith("{"):
+        # Typeahead returns JSON: {"display":"...", "text":"...", "value":"..."}
+        filter_obj = json.decode(route_filter)
+        route_filter = filter_obj.get("value", route_filter)
 
     if DEBUG:
         print("[DEBUG] Route filter: %s | Minimum time: %s min" % (route_filter, config.str("minimum_time", "0")))
