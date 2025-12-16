@@ -145,14 +145,14 @@ def get_schema():
             schema.Typeahead(
                 id = "stop_code",
                 name = "Bus Stop",
-                desc = "Select a SF Muni stop.",
+                desc = "Search by stop name (e.g., 'Powell', 'Castro') or stop ID (e.g., '16995').",
                 icon = "bus",
                 handler = get_stops,
             ),
             schema.Typeahead(
                 id = "route_filter",
                 name = "Route Filter",
-                desc = "Filter to only display one route",
+                desc = "Search by route number (e.g., '38', 'N', 'KT') or route name (e.g., 'Geary').",
                 icon = "route",
                 handler = get_route_filter_typeahead,
             ),
