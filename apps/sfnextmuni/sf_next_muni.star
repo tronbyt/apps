@@ -135,6 +135,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "511_api_key",
+                name = "511.org API Key",
+                desc = "A 511.org API key to access the 511.org API.",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "stop_code",
                 name = "Bus Stop",
@@ -208,39 +215,32 @@ def get_schema():
                 icon = "clock",
                 default = "0",
             ),
-            schema.Text(
-                id = "511_api_key",
-                name = "511.org API Key",
-                desc = "A 511.org API key to access the 511.org API.",
-                icon = "key",
-                secret = True,
-            ),
         ],
     )
 
 def fetch_stops(api_key):
     stops = {}
 
-    raw_stops = fetch_cached(STOPS_URL % api_key, 86400)
+    raw_stops = fetch_cached(STOPS_URL % api_key, 3600)
 
     if type(raw_stops) != "string" and "Contents" in raw_stops:
         stops.update([(stop["id"], stop) for stop in raw_stops["Contents"]["dataObjects"]["ScheduledStopPoint"]])
 
     return stops
 
-def get_stops(location):
-    if not API_KEY:
-        return []
+def get_stops(_location, config):
+    api_key = config.get("511_api_key")
+    if not api_key:
+        return [schema.Option(display = "API key not set", value = "")]
 
-    loc = json.decode(location)
-    stops = fetch_stops(API_KEY)
+    stops = fetch_stops(api_key)
 
     return [
         schema.Option(
             display = "%s (#%s)" % (stop["Name"], stop["id"]),
             value = stop["id"],
         )
-        for stop in sorted(stops.values(), key = lambda stop: square_distance(loc["lat"], loc["lng"], stop["Location"]["Latitude"], stop["Location"]["Longitude"]))
+        for stop in sorted(stops.values(), key = lambda stop: stop["Name"])
     ]
 
 # Function to get the available route list for route filter selection. Additionally adds 'all-routes' option to the beginning of the list
@@ -253,7 +253,7 @@ def get_route_list():
             ),
         ]
 
-    routes = fetch_cached(ROUTES_URL % API_KEY, 86400)
+    routes = fetch_cached(ROUTES_URL % API_KEY, 3600)
     if type(routes) == "string":
         return []
 
@@ -294,7 +294,7 @@ def higher_priority_than(pri, threshold):
     return threshold == "Low" or pri == "High" or threshold == pri
 
 def main(config):
-    default_stops = get_stops(DEFAULT_LOCATION)
+    default_stops = get_stops(DEFAULT_LOCATION, config)
     default_stop = json.encode(default_stops[0]) if default_stops else DEFAULT_STOP
     stop = json.decode(config.get("stop_code", default_stop))
     stopId = stop["value"]
@@ -312,15 +312,12 @@ def main(config):
     messages = getMessages(api_key, config, routes, stopId)
 
     ## Render the title, predictions and messages
-    if not stopTitle and not predictions and not messages:
-        return []
-
     return renderOutput(stopTitle, predictions, messages, config)
 
 def getPredictions(api_key, config, stop):
     stopId = stop["value"]
     stopTitle = stop["display"]
-    data = fetch_cached(PREDICTIONS_URL % api_key, 240)
+    data = fetch_cached(PREDICTIONS_URL % api_key, 60)
     if type(data) == "string":
         return (data, [], [])
 
@@ -403,7 +400,7 @@ def getPredictions(api_key, config, stop):
     return (stopTitle, routes, output)
 
 def getMessages(api_key, config, routes, stopId):
-    data = fetch_cached(ALERTS_URL % api_key, 240)
+    data = fetch_cached(ALERTS_URL % api_key, 60)
     if type(data) == "string":
         return [data]
 
@@ -476,6 +473,17 @@ def renderOutput(stopTitle, output, messages, config):
         predictionLines = shortPredictions(output, lines)
     else:
         predictionLines = longRows(output[:lines], config)
+
+    # If no predictions, show a message instead of a blank screen
+    if not predictionLines:
+        predictionLines = [
+            render.Box(
+                child = render.WrappedText(
+                    content = "No arrivals",
+                    font = "tom-thumb",
+                ),
+            ),
+        ]
 
     rows.append(
         render.Box(
