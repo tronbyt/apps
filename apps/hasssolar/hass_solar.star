@@ -10,58 +10,93 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("i18n.star", "tr")
 load("images/audi_logo.png", AUDI_LOGO_24x9 = "file")
+load("images/audi_logo@2x.png", AUDI_LOGO_24x9_2X = "file")
 load("images/autarky.png", AUTARKY_16x16 = "file")
+load("images/autarky@2x.png", AUTARKY_16x16_2X = "file")
 load("images/battery_0_25_main_screen.png", BATTERY_0_TO_25_MAIN_SCREEN = "file")
+load("images/battery_0_25_main_screen@2x.png", BATTERY_0_TO_25_MAIN_SCREEN_2X = "file")
 load("images/battery_25_50_main_screen.png", BATTERY_25_TO_50_MAIN_SCREEN = "file")
+load("images/battery_25_50_main_screen@2x.png", BATTERY_25_TO_50_MAIN_SCREEN_2X = "file")
 load("images/battery_50_75_main_screen.png", BATTERY_50_TO_75_MAIN_SCREEN = "file")
+load("images/battery_50_75_main_screen@2x.png", BATTERY_50_TO_75_MAIN_SCREEN_2X = "file")
 load("images/battery_75_100_main_screen.png", BATTERY_75_TO_100_MAIN_SCREEN = "file")
+load("images/battery_75_100_main_screen@2x.png", BATTERY_75_TO_100_MAIN_SCREEN_2X = "file")
 load("images/battery_charge_animation.gif", BATTERY_CHARGE_ANIMATION_10x10 = "file")
+load("images/battery_charge_animation@2x.gif", BATTERY_CHARGE_ANIMATION_10x10_2X = "file")
 load("images/battery_charge_status_0_25.gif", BATTERY_CHARGE_STATUS_0_25_10x10 = "file")
+load("images/battery_charge_status_0_25@2x.gif", BATTERY_CHARGE_STATUS_0_25_10x10_2X = "file")
 load("images/battery_charge_status_25_50.gif", BATTERY_CHARGE_STATUS_25_50_10x10 = "file")
+load("images/battery_charge_status_25_50@2x.gif", BATTERY_CHARGE_STATUS_25_50_10x10_2X = "file")
 load("images/battery_charge_status_50_75.gif", BATTERY_CHARGE_STATUS_50_75_10x10 = "file")
+load("images/battery_charge_status_50_75@2x.gif", BATTERY_CHARGE_STATUS_50_75_10x10_2X = "file")
 load("images/battery_charge_status_75_100.gif", BATTERY_CHARGE_STATUS_75_100_10x10 = "file")
+load("images/battery_charge_status_75_100@2x.gif", BATTERY_CHARGE_STATUS_75_100_10x10_2X = "file")
 load("images/battery_discharge_animation.gif", BATTERY_DISCHARGE_ANIMATION_10x10 = "file")
+load("images/battery_discharge_animation@2x.gif", BATTERY_DISCHARGE_ANIMATION_10x10_2X = "file")
 load("images/battery_noflow_animation.gif", BATTERY_NOFLOW_ANIMATION_10x10 = "file")
+load("images/battery_noflow_animation@2x.gif", BATTERY_NOFLOW_ANIMATION_10x10_2X = "file")
 load("images/bmw_logo.png", BMW_LOGO_18x18 = "file")
+load("images/bmw_logo@2x.png", BMW_LOGO_18x18_2X = "file")
 load("images/cupra_logo.png", CUPRA_LOGO_18x18 = "file")
+load("images/cupra_logo@2x.png", CUPRA_LOGO_18x18_2X = "file")
 
 # 7x16
 load("images/empty.png", EMPTY = "file")
+load("images/empty@2x.png", EMPTY_2X = "file")
 load("images/ev_charging.png", EV_CHARGING_16x16 = "file")
+load("images/ev_charging@2x.png", EV_CHARGING_16x16_2X = "file")
 load("images/fiat_logo.png", FIAT_LOGO_18x18 = "file")
+load("images/fiat_logo@2x.png", FIAT_LOGO_18x18_2X = "file")
 
 # 7x16
 load("images/green_anim.gif", GREEN_ANIM = "file")
+load("images/green_anim@2x.gif", GREEN_ANIM_2X = "file")
 
 # 12x16
 load("images/grid.png", GRID = "file")
+load("images/grid@2x.png", GRID_2X = "file")
 
 # 16x16
 load("images/house.png", HOUSE = "file")
+load("images/house@2x.png", HOUSE_2X = "file")
 load("images/hyundai_logo.png", HYUNDAI_LOGO_24x12 = "file")
+load("images/hyundai_logo@2x.png", HYUNDAI_LOGO_24x12_2X = "file")
 load("images/opel_logo.png", OPEL_LOGO_23x18 = "file")
+load("images/opel_logo@2x.png", OPEL_LOGO_23x18_2X = "file")
 
 # 16x16
 load("images/plug.gif", PLUG = "file")
+load("images/plug@2x.gif", PLUG_2X = "file")
 
 # 10x10
 load("images/plug_sum.gif", PLUG_SUM = "file")
+load("images/plug_sum@2x.gif", PLUG_SUM_2X = "file")
 load("images/red_anim.gif", RED_ANIM = "file")
+load("images/red_anim@2x.gif", RED_ANIM_2X = "file")
 load("images/renault_logo.png", RENAULT_LOGO_18x18 = "file")
+load("images/renault_logo@2x.png", RENAULT_LOGO_18x18_2X = "file")
 load("images/seat_logo.png", SEAT_LOGO_18x16 = "file")
+load("images/seat_logo@2x.png", SEAT_LOGO_18x16_2X = "file")
 load("images/skoda_logo.png", SKODA_LOGO_18x18 = "file")
+load("images/skoda_logo@2x.png", SKODA_LOGO_18x18_2X = "file")
 
 # 16x16
 load("images/solar.png", SOLAR = "file")
+load("images/solar@2x.png", SOLAR_2X = "file")
 
 # 16x16
 load("images/sun.gif", SUN = "file")
+load("images/sun@2x.gif", SUN_2X = "file")
 
 # 10x10
 load("images/sun_sum.png", SUN_SUM = "file")
+load("images/sun_sum@2x.png", SUN_SUM_2X = "file")
 load("images/tesla_logo.png", TESLA_LOGO_18x18 = "file")
+load("images/tesla_logo@2x.png", TESLA_LOGO_18x18_2X = "file")
 load("images/vw_logo.png", VW_LOGO_18x18 = "file")
+load("images/vw_logo@2x.png", VW_LOGO_18x18_2X = "file")
 load("images/yellow_anim.gif", YELLOW_ANIM = "file")
+load("images/yellow_anim@2x.gif", YELLOW_ANIM_2X = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
@@ -100,6 +135,9 @@ WHITE = "#FFFFFF"
 battery_level_icons = [BATTERY_CHARGE_STATUS_0_25_10x10, BATTERY_CHARGE_STATUS_25_50_10x10, BATTERY_CHARGE_STATUS_50_75_10x10, BATTERY_CHARGE_STATUS_75_100_10x10, BATTERY_CHARGE_STATUS_75_100_10x10]
 battery_level_mains = [BATTERY_0_TO_25_MAIN_SCREEN, BATTERY_25_TO_50_MAIN_SCREEN, BATTERY_50_TO_75_MAIN_SCREEN, BATTERY_75_TO_100_MAIN_SCREEN, BATTERY_75_TO_100_MAIN_SCREEN]
 soc_color = [RED, ORANGE, YELLOW, GREEN, GREEN]
+
+battery_level_icons_2x = [BATTERY_CHARGE_STATUS_0_25_10x10_2X, BATTERY_CHARGE_STATUS_25_50_10x10_2X, BATTERY_CHARGE_STATUS_50_75_10x10_2X, BATTERY_CHARGE_STATUS_75_100_10x10_2X, BATTERY_CHARGE_STATUS_75_100_10x10_2X]
+battery_level_mains_2x = [BATTERY_0_TO_25_MAIN_SCREEN_2X, BATTERY_25_TO_50_MAIN_SCREEN_2X, BATTERY_50_TO_75_MAIN_SCREEN_2X, BATTERY_75_TO_100_MAIN_SCREEN_2X, BATTERY_75_TO_100_MAIN_SCREEN_2X]
 
 def render_fail(rep):
     content = json.decode(rep.body())
@@ -216,15 +254,51 @@ def render_entity(entity, absolute_value = False, convert_to_kw = False, with_un
 def main(config):
     scale = 2 if canvas.is2x() else 1
 
-    # Scaled fonts
+    # Scaled fonts and images
     if scale == 2:
         font_default = "terminus-16"
         font_medium = "terminus-16"
         font_small = "terminus-12"
+        autarky_img = AUTARKY_16x16_2X
+        battery_charge_anim = BATTERY_CHARGE_ANIMATION_10x10_2X
+        battery_discharge_anim = BATTERY_DISCHARGE_ANIMATION_10x10_2X
+        battery_noflow_anim = BATTERY_NOFLOW_ANIMATION_10x10_2X
+        empty_anim = EMPTY_2X
+        ev_charging_img = EV_CHARGING_16x16_2X
+        green_anim_img = GREEN_ANIM_2X
+        grid_img = GRID_2X
+        house_img = HOUSE_2X
+        plug_img = PLUG_2X
+        plug_sum_img = PLUG_SUM_2X
+        red_anim_img = RED_ANIM_2X
+        solar_img = SOLAR_2X
+        sun_img = SUN_2X
+        sun_sum_img = SUN_SUM_2X
+        yellow_anim_img = YELLOW_ANIM_2X
+        battery_icons_list = battery_level_icons_2x
+        battery_mains_list = battery_level_mains_2x
     else:
         font_default = "tb-8"
         font_medium = "5x8"
         font_small = "tom-thumb"  # 4x6
+        autarky_img = AUTARKY_16x16
+        battery_charge_anim = BATTERY_CHARGE_ANIMATION_10x10
+        battery_discharge_anim = BATTERY_DISCHARGE_ANIMATION_10x10
+        battery_noflow_anim = BATTERY_NOFLOW_ANIMATION_10x10
+        empty_anim = EMPTY
+        ev_charging_img = EV_CHARGING_16x16
+        green_anim_img = GREEN_ANIM
+        grid_img = GRID
+        house_img = HOUSE
+        plug_img = PLUG
+        plug_sum_img = PLUG_SUM
+        red_anim_img = RED_ANIM
+        solar_img = SOLAR
+        sun_img = SUN
+        sun_sum_img = SUN_SUM
+        yellow_anim_img = YELLOW_ANIM
+        battery_icons_list = battery_level_icons
+        battery_mains_list = battery_level_mains
 
     # fetch data from HA
     energy_consumption = fetch_entity(ENTITY_ENERGY_CONSUMPTION, config, "kWh")
@@ -246,37 +320,37 @@ def main(config):
     frames = []
 
     if power_solar and float(power_solar["state"]) > 0:
-        solar_anim = GREEN_ANIM
-        solar_icon = SOLAR
+        solar_anim = green_anim_img
+        solar_icon = solar_img
         solar_value = power_solar
         solar_color = GREEN
     elif soc_battery:  # only do this if we have battery data
         # change to battery data even though it's still called solar
-        solar_icon = battery_level_mains[int(float(soc_battery["state"]) / 25)]  # will be integer 0 - 3
+        solar_icon = battery_mains_list[int(float(soc_battery["state"]) / 25)]  # will be integer 0 - 3
         solar_value = power_battery
         if int(float(solar_value["state"])) == 0:
-            solar_anim = EMPTY
+            solar_anim = empty_anim
             solar_color = GRAY
         elif float(solar_value["state"]) > 0:
-            solar_anim = RED_ANIM
+            solar_anim = red_anim_img
             solar_color = WHITE
         else:
-            solar_anim = YELLOW_ANIM
+            solar_anim = yellow_anim_img
             solar_color = WHITE
     else:
-        solar_anim = EMPTY
-        solar_icon = SOLAR
+        solar_anim = empty_anim
+        solar_icon = solar_img
         solar_value = power_solar  # should be zero
         solar_color = GRAY
 
     if power_grid and float(power_grid["state"]) > 9:
-        grid_anim = GREEN_ANIM
+        grid_anim = green_anim_img
         grid_color = GREEN
     elif power_grid and float(power_grid["state"]) < -9:
-        grid_anim = RED_ANIM
+        grid_anim = red_anim_img
         grid_color = RED
     else:
-        grid_anim = EMPTY
+        grid_anim = empty_anim
         grid_color = GRAY
 
     # MAIN FRAME
@@ -325,7 +399,7 @@ def main(config):
                     cross_align = "center",
                     main_align = "space_evenly",
                     children = [
-                        render.Image(src = HOUSE.readall(), width = 16 * scale, height = 16 * scale),
+                        render.Image(src = house_img.readall(), width = 16 * scale, height = 16 * scale),
                         render.Padding(
                             pad = (0, 0, 0, 0),
                             child = render.Column(
@@ -359,7 +433,7 @@ def main(config):
                     cross_align = "center",
                     main_align = "space_evenly",
                     children = [
-                        render.Image(src = GRID.readall(), width = 12 * scale, height = 16 * scale),
+                        render.Image(src = grid_img.readall(), width = 12 * scale, height = 16 * scale),
                         render.Padding(
                             pad = (0, 0, 0, 0),
                             child = render.Column(
@@ -386,13 +460,13 @@ def main(config):
     #########################################################
     if config.bool("show_char", False) and power_battery and soc_battery:
         if float(power_battery["state"]) < 0:
-            BATTERY_FLOW_ICON = BATTERY_DISCHARGE_ANIMATION_10x10
+            BATTERY_FLOW_ICON = battery_discharge_anim
             flow_color = RED
         elif float(power_battery["state"]) > 0:
-            BATTERY_FLOW_ICON = BATTERY_CHARGE_ANIMATION_10x10
+            BATTERY_FLOW_ICON = battery_charge_anim
             flow_color = GREEN
         else:
-            BATTERY_FLOW_ICON = BATTERY_NOFLOW_ANIMATION_10x10
+            BATTERY_FLOW_ICON = battery_noflow_anim
             flow_color = GRAY
 
         charge_frame = render.Stack(
@@ -418,7 +492,7 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = battery_level_icons[int(float(soc_battery["state"]) / 25)].readall()),
+                                        render.Image(src = battery_icons_list[int(float(soc_battery["state"]) / 25)].readall()),
                                         render.Image(src = BATTERY_FLOW_ICON.readall()),
                                     ],
                                 ),
@@ -458,7 +532,7 @@ def main(config):
                 cross_align = "center",
                 main_align = "space_evenly",
                 children = [
-                    render.Image(src = SUN.readall(), width = 16 * scale, height = 16 * scale),
+                    render.Image(src = sun_img.readall(), width = 16 * scale, height = 16 * scale),
                     render.Text(
                         content = render_entity(power_solar),
                         font = font_medium,
@@ -477,7 +551,7 @@ def main(config):
                 cross_align = "center",
                 main_align = "space_evenly",
                 children = [
-                    render.Image(src = PLUG.readall(), width = 16 * scale, height = 16 * scale),
+                    render.Image(src = plug_img.readall(), width = 16 * scale, height = 16 * scale),
                     render.Text(
                         content = render_entity(power_load),
                         #font = "6x13",
@@ -515,8 +589,8 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = SUN_SUM.readall(), width = 10 * scale, height = 10 * scale),
-                                        render.Image(src = PLUG_SUM.readall(), width = 10 * scale, height = 10 * scale),
+                                        render.Image(src = sun_sum_img.readall(), width = 10 * scale, height = 10 * scale),
+                                        render.Image(src = plug_sum_img.readall(), width = 10 * scale, height = 10 * scale),
                                     ],
                                 ),
                                 render.Column(
@@ -551,7 +625,7 @@ def main(config):
                 render.Box(
                     height = canvas.height(),
                     width = canvas.width(),
-                    child = render.Image(src = AUTARKY_16x16.readall(), width = 16 * scale, height = 16 * scale),
+                    child = render.Image(src = autarky_img.readall(), width = 16 * scale, height = 16 * scale),
                 ),
                 render.Column(
                     # column for the top
@@ -629,7 +703,7 @@ def main(config):
                                     main_align = "center",
                                     #cross_align = "center",
                                     children = [
-                                        render.Image(src = EV_CHARGING_16x16.readall(), width = 16 * scale, height = 16 * scale),
+                                        render.Image(src = ev_charging_img.readall(), width = 16 * scale, height = 16 * scale),
                                     ],
                                 ),
                                 render.Column(
@@ -734,7 +808,7 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = ev_logo["logo"].readall(), width = ev_logo["width"] * scale, height = ev_logo["height"] * scale),
+                                        render.Image(src = (ev_logo["logo_2x"] if scale == 2 else ev_logo["logo"]).readall(), width = ev_logo["width"] * scale, height = ev_logo["height"] * scale),
                                         # render.Image(src = PLUG_SUM.readall()),
                                     ],
                                 ),
@@ -772,56 +846,67 @@ def main(config):
 EV_LOGOS = {
     "TESLA": {
         "logo": TESLA_LOGO_18x18,
+        "logo_2x": TESLA_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
     "AUDI": {
         "logo": AUDI_LOGO_24x9,
+        "logo_2x": AUDI_LOGO_24x9_2X,
         "width": 24,
         "height": 9,
     },
     "VW": {
         "logo": VW_LOGO_18x18,
+        "logo_2x": VW_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
     "BMW": {
         "logo": BMW_LOGO_18x18,
+        "logo_2x": BMW_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
     "SEAT": {
         "logo": SEAT_LOGO_18x16,
+        "logo_2x": SEAT_LOGO_18x16_2X,
         "width": 18,
         "height": 16,
     },
     "SKODA": {
         "logo": SKODA_LOGO_18x18,
+        "logo_2x": SKODA_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
     "OPEL": {
         "logo": OPEL_LOGO_23x18,
+        "logo_2x": OPEL_LOGO_23x18_2X,
         "width": 23,
         "height": 18,
     },
     "RENAULT": {
         "logo": RENAULT_LOGO_18x18,
+        "logo_2x": RENAULT_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
     "HYUNDAI": {
         "logo": HYUNDAI_LOGO_24x12,
+        "logo_2x": HYUNDAI_LOGO_24x12_2X,
         "width": 24,
         "height": 12,
     },
     "CUPRA": {
         "logo": CUPRA_LOGO_18x18,
+        "logo_2x": CUPRA_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
     "FIAT": {
         "logo": FIAT_LOGO_18x18,
+        "logo_2x": FIAT_LOGO_18x18_2X,
         "width": 18,
         "height": 18,
     },
