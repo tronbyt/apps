@@ -5,7 +5,7 @@ Description: Displays Florida Lighhouse locations.
 Author: Robert Ison
 """
 
-load("images/lighthouse_gif.gif", LIGHTHOUSE_GIF_ASSET = "file")
+load("images/lighthouse.gif", LIGHTHOUSE_GIF_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -153,6 +153,7 @@ def append_items_to_render(children, points, color):
 
 def get_lighthouses(type):
     # default
+    print(type)
     items = sorted(FLORIDA_LIGHTHOUSES, key = lambda x: x[0])
     icon = "towerCell"
 
@@ -163,6 +164,7 @@ def get_lighthouses(type):
         ]
     else:
         return []
+
 
 def get_schema():
     return schema.Schema(
@@ -184,14 +186,14 @@ def get_schema():
             ),
             schema.Toggle(
                 id = "pickVisits",
-                name = "Highlight Visited?",
-                desc = "Highlight the lighthouses you've visted?",
+                name = "Highlight?",
+                desc = "Highlight selected lighthouses?",
                 icon = "highlighter",  #, towerCell, towerObservation, toggleOff, towerBroadcast
-                default = False,
+                default = True
             ),
             schema.Generated(
                 id = "lighthouseList",
-                source = "pickVisits",
+                source = "pickVisits", 
                 handler = get_lighthouses,
             ),
         ],
