@@ -235,7 +235,7 @@ def fetch_all_entities(config):
         entity_id = config.get(key)
         if entity_id:
             active_keys.append(key)
-            part = '"%s": {"state": states("%s"), "attributes": {"unit_of_measurement": state_attr("%s", "unit_of_measurement") }}' % (key, entity_id, entity_id)
+            part = '"%s": {"state": {{ states("%s") | tojson }}, "attributes": {"unit_of_measurement": {{ state_attr("%s", "unit_of_measurement") | tojson }} }}' % (key, entity_id, entity_id)
             template_parts.append(part)
 
     if not active_keys:
@@ -264,10 +264,7 @@ def fetch_all_entities(config):
 
     results = {}
     for key in entity_keys:
-        if key in data:
-            results[key] = data[key]
-        else:
-            results[key] = None
+        results[key] = data.get(key)
 
     return results
 
