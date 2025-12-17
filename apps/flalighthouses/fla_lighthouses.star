@@ -164,7 +164,6 @@ def get_lighthouses(type):
     else:
         return []
 
-
 def get_schema():
     return schema.Schema(
         version = "1",
@@ -188,11 +187,11 @@ def get_schema():
                 name = "Highlight?",
                 desc = "Highlight selected lighthouses?",
                 icon = "highlighter",  #, towerCell, towerObservation, toggleOff, towerBroadcast
-                default = True
+                default = True,
             ),
             schema.Generated(
                 id = "lighthouseList",
-                source = "pickVisits", 
+                source = "pickVisits",
                 handler = get_lighthouses,
             ),
         ],
