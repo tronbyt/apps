@@ -124,6 +124,24 @@ ENTITY_AUTARKY_WEEK = "entity_autarky_week"
 ENTITY_AUTARKY_MONTH = "entity_autarky_month"
 ENTITY_AUTARKY_YEAR = "entity_autarky_year"
 
+ENTITY_UNITS = {
+    ENTITY_ENERGY_CONSUMPTION: "kWh",
+    ENTITY_ENERGY_PRODUCTION: "kWh",
+    ENTITY_ENERGY_EV_DAY: "kWh",
+    ENTITY_ENERGY_EV_WEEK: "kWh",
+    ENTITY_ENERGY_EV_MONTH: "kWh",
+    ENTITY_POWER_SOLAR: "W",
+    ENTITY_POWER_GRID: "W",
+    ENTITY_POWER_LOAD: "W",
+    ENTITY_POWER_BATTERY: "W",
+    ENTITY_SOC_BATTERY: "%",
+    ENTITY_SOC_EV: "%",
+    ENTITY_AUTARKY_DAY: "%",
+    ENTITY_AUTARKY_WEEK: "%",
+    ENTITY_AUTARKY_MONTH: "%",
+    ENTITY_AUTARKY_YEAR: "%",
+}
+
 GRAY = "#777777"
 RED = "#AA0000"  # very bright at FF, dim a little to AA
 GREEN = "#00FF00"
@@ -185,27 +203,76 @@ def dummy_entity(entity_id):
             },
         }
 
-def fetch_entity(entity_key, config, default_unit):
+def fetch_all_entities(config):
+    entity_keys = ENTITY_UNITS.keys()
     raw_values = config.bool("raw_values", False)
-    if DEBUG or (config.get(HA_URL) == None and not raw_values):
-        return dummy_entity(entity_key)
 
-    entity_id = config.get(entity_key)
-    if entity_id:
-        if raw_values:
-            return {
-                "state": "{}".format(entity_id),
-                "attributes": {
-                    "unit_of_measurement": default_unit,
-                },
-            }
-        rep = http.get(config.get(HA_URL) + "/api/states/" + entity_id, ttl_seconds = 10, headers = {
+    if DEBUG or (config.get(HA_URL) == None and not raw_values):
+        results = {}
+        for key in entity_keys:
+            if config.get(key):
+                results[key] = dummy_entity(key)
+            else:
+                results[key] = None
+        return results
+
+    if raw_values:
+        results = {}
+        for key in entity_keys:
+            entity_id = config.get(key)
+            if entity_id:
+                results[key] = {
+                    "state": "{}".format(entity_id),
+                    "attributes": {
+                        "unit_of_measurement": ENTITY_UNITS.get(key),
+                    },
+                }
+            else:
+                results[key] = None
+        return results
+
+    template_parts = []
+    active_keys = []
+
+    for key in entity_keys:
+        entity_id = config.get(key)
+        if entity_id:
+            active_keys.append(key)
+            part = '"%s": {"state": states("%s"), "attributes": {"unit_of_measurement": state_attr("%s", "unit_of_measurement") }}' % (key, entity_id, entity_id)
+            template_parts.append(part)
+
+    if not active_keys:
+        return {}
+
+    template = "{%s}" % ",".join(template_parts)
+
+    url = config.get(HA_URL)
+    if url.endswith("/"):
+        url = url[:-1]
+
+    rep = http.post(
+        url + "/api/template",
+        headers = {
             "Authorization": "Bearer " + config.get(HA_TOKEN),
-        })
-        if rep.status_code != 200:
-            fail("%s request failed with status %d: %s" % (entity_id, rep.status_code, rep.body()))
-        return rep.json()
-    return None
+            "Content-Type": "application/json",
+        },
+        json_body = {"template": template},
+        ttl_seconds = CACHE_TTL,
+    )
+
+    if rep.status_code != 200:
+        fail("Template request failed with status %d: %s" % (rep.status_code, rep.body()))
+
+    data = rep.json()
+
+    results = {}
+    for key in entity_keys:
+        if key in data:
+            results[key] = data[key]
+        else:
+            results[key] = None
+
+    return results
 
 def unit_for_entity(entity):
     if "attributes" in entity and "unit_of_measurement" in entity["attributes"]:
@@ -301,21 +368,23 @@ def main(config):
         battery_mains_list = battery_level_mains
 
     # fetch data from HA
-    energy_consumption = fetch_entity(ENTITY_ENERGY_CONSUMPTION, config, "kWh")
-    energy_production = fetch_entity(ENTITY_ENERGY_PRODUCTION, config, "kWh")
-    energy_ev_day = fetch_entity(ENTITY_ENERGY_EV_DAY, config, "kWh")
-    energy_ev_week = fetch_entity(ENTITY_ENERGY_EV_WEEK, config, "kWh")
-    energy_ev_month = fetch_entity(ENTITY_ENERGY_EV_MONTH, config, "kWh")
-    power_solar = fetch_entity(ENTITY_POWER_SOLAR, config, "W")
-    power_grid = fetch_entity(ENTITY_POWER_GRID, config, "W")
-    power_load = fetch_entity(ENTITY_POWER_LOAD, config, "W")
-    power_battery = fetch_entity(ENTITY_POWER_BATTERY, config, "W")
-    soc_battery = fetch_entity(ENTITY_SOC_BATTERY, config, "%")
-    soc_ev = fetch_entity(ENTITY_SOC_EV, config, "%")
-    autarky_day = fetch_entity(ENTITY_AUTARKY_DAY, config, "%")
-    autarky_week = fetch_entity(ENTITY_AUTARKY_WEEK, config, "%")
-    autarky_month = fetch_entity(ENTITY_AUTARKY_MONTH, config, "%")
-    autarky_year = fetch_entity(ENTITY_AUTARKY_YEAR, config, "%")
+    entities = fetch_all_entities(config)
+
+    energy_consumption = entities.get(ENTITY_ENERGY_CONSUMPTION)
+    energy_production = entities.get(ENTITY_ENERGY_PRODUCTION)
+    energy_ev_day = entities.get(ENTITY_ENERGY_EV_DAY)
+    energy_ev_week = entities.get(ENTITY_ENERGY_EV_WEEK)
+    energy_ev_month = entities.get(ENTITY_ENERGY_EV_MONTH)
+    power_solar = entities.get(ENTITY_POWER_SOLAR)
+    power_grid = entities.get(ENTITY_POWER_GRID)
+    power_load = entities.get(ENTITY_POWER_LOAD)
+    power_battery = entities.get(ENTITY_POWER_BATTERY)
+    soc_battery = entities.get(ENTITY_SOC_BATTERY)
+    soc_ev = entities.get(ENTITY_SOC_EV)
+    autarky_day = entities.get(ENTITY_AUTARKY_DAY)
+    autarky_week = entities.get(ENTITY_AUTARKY_WEEK)
+    autarky_month = entities.get(ENTITY_AUTARKY_MONTH)
+    autarky_year = entities.get(ENTITY_AUTARKY_YEAR)
 
     frames = []
 
