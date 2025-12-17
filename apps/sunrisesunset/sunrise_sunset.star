@@ -32,14 +32,13 @@ Author: Alan Fleming
 
 load("encoding/json.star", "json")
 load("images/sunriseimage.png", SUNRISEIMAGE_ASSET = "file")
+load("images/sunriseimage@2x.png", SUNRISEIMAGE_2X_ASSET = "file")
 load("images/sunsetimage.png", SUNSETIMAGE_ASSET = "file")
+load("images/sunsetimage@2x.png", SUNSETIMAGE_2X_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
-
-SUNRISEIMAGE = SUNRISEIMAGE_ASSET.readall()
-SUNSETIMAGE = SUNSETIMAGE_ASSET.readall()
 
 # Defaults
 DEFAULT_LOCATION = """
@@ -98,7 +97,7 @@ def main(config):
                 cross_align = "center",
                 children = [
                     render.Image(
-                        src = SUNRISEIMAGE,
+                        src = (SUNRISEIMAGE_2X_ASSET if scale == 2 else SUNRISEIMAGE_ASSET).readall(),
                         width = 29 * scale,
                         height = 14 * scale,
                     ),
@@ -118,7 +117,7 @@ def main(config):
             cross_align = "center",
             children = [
                 render.Image(
-                    src = SUNSETIMAGE,
+                    src = (SUNSETIMAGE_2X_ASSET if scale == 2 else SUNSETIMAGE_ASSET).readall(),
                     width = 29 * scale,
                     height = 14 * scale,
                 ),
@@ -130,12 +129,12 @@ def main(config):
         if itemsToDisplay == "sunrise":
             title = "Sunrise"
             text = sunriseText
-            image = SUNRISEIMAGE
+            image = (SUNRISEIMAGE_2X_ASSET if scale == 2 else SUNRISEIMAGE_ASSET).readall()
 
         else:
             title = "Sunset"
             text = sunsetText
-            image = SUNSETIMAGE
+            image = (SUNSETIMAGE_2X_ASSET if scale == 2 else SUNSETIMAGE_ASSET).readall()
 
         top = render.Padding(
             pad = (0, 2 * scale, 0, 4 * scale),
