@@ -210,10 +210,7 @@ def fetch_all_entities(config):
     if DEBUG or (config.get(HA_URL) == None and not raw_values):
         results = {}
         for key in entity_keys:
-            if config.get(key):
-                results[key] = dummy_entity(key)
-            else:
-                results[key] = None
+            results[key] = dummy_entity(key)
         return results
 
     if raw_values:
