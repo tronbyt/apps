@@ -173,7 +173,7 @@ def get_schema():
                 name = "Display Background Image?",
                 desc = "Display Background Image?",
                 icon = "photoFilm",
-                default = True,
+                default = False,
             ),
             schema.Toggle(
                 id = "displayMajorCities",
@@ -187,7 +187,7 @@ def get_schema():
                 name = "Highlight?",
                 desc = "Highlight selected lighthouses?",
                 icon = "highlighter",  #, towerCell, towerObservation, toggleOff, towerBroadcast
-                default = True,
+                default = False,
             ),
             schema.Generated(
                 id = "lighthouseList",
