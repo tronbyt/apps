@@ -153,7 +153,6 @@ def append_items_to_render(children, points, color):
 
 def get_lighthouses(type):
     # default
-    print(type)
     items = sorted(FLORIDA_LIGHTHOUSES, key = lambda x: x[0])
     icon = "towerCell"
 
