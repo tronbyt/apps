@@ -372,9 +372,9 @@ def main(config):
     card_max = int(config.str("choice_max", DEFAULT_MAX))  # Returns Major Arcana cards or all cards
     card_draw = config.str("choice_draw", DEFAULT_DRAW)  # Returns single card or three-card spread
     card_freq = config.str("choice_freq", DEFAULT_FREQ)  # Returns how often to draw new cards
-    card_draw = "spread"  # For testing
-    card_freq = "once"  # For testing
-    card_max = 21  #  For testing
+    # card_draw = "spread"  # For testing
+    # card_freq = "once"  # For testing
+    # card_max = 21  #  For testing
 
     # Calculates which function to run depending on single card or three-card spread
     if card_draw == "single":
@@ -408,7 +408,7 @@ def draw_single(back, color, maxdraw, freq):
 
         if res.status_code != 200:
             print("Request to %s failed with status code: %d - %s" % (URL_DRAWS, res.status_code, res.body()))
-            return render_error("Could not reach range_x.json\n:(")
+            return render_error("Could not reach draws.json\n:(")
 
         draw_from = res.json()
         # print(draw_from)  # For testing
@@ -769,7 +769,7 @@ def draw_spread(back, color, maxdraw, freq):
 
         if res.status_code != 200:
             print("Request to %s failed with status code: %d - %s" % (URL_DRAWS, res.status_code, res.body()))
-            return render_error("Could not reach range_x.json\n:(")
+            return render_error("Could not reach draws.json\n:(")
 
         draw_from = res.json()
         # print(draw_from)  # For testing
