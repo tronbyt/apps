@@ -374,7 +374,7 @@ def main(config):
     card_freq = config.str("choice_freq", DEFAULT_FREQ)  # Returns how often to draw new cards
     card_draw = "spread"  # For testing
     card_freq = "once"  # For testing
-    card_max = 21 #  For testing
+    card_max = 21  #  For testing
 
     # Calculates which function to run depending on single card or three-card spread
     if card_draw == "single":
@@ -402,14 +402,14 @@ def draw_single(back, color, maxdraw, freq):
         card_num = random.number(0, card_max)  # Generate a random number for the card draw
         # print("SINGLE - THROUGHOUT\n")  # For testing
 
-    # For only once per day:
+        # For only once per day:
     else:
         res = http.get(URL_DRAWN, ttl_seconds = CACHE_TTL)
 
         if res.status_code != 200:
             print("Request to %s failed with status code: %d - %s" % (URL_DRAWN, res.status_code, res.body()))
             return render_error("Could not reach range_x.json\n:(")
-        
+
         draw_from = res.json()
         print(draw_from)  # For testing
 
@@ -418,7 +418,7 @@ def draw_single(back, color, maxdraw, freq):
         else:  # Major Arcana only
             card_num = int(draw_from["major"]["single"])
         print(card_num)  # For testing
-        
+
     # Define card properties
     card_name = list(CARD_NAMES.values())[card_num]  # Gets card name (string)
     card_keywords = list(CARD_WORDS.values())[card_num]  # Gets card keywords (list)
@@ -762,14 +762,14 @@ def draw_spread(back, color, maxdraw, freq):
         card_3 = draw_pile[random.number(0, len(draw_pile)) - 1]  # Draws third card
         # print("SPREAD - THROUGHOUT\n")  # For testing
 
-    # For only once per day:
+        # For only once per day:
     else:
         res = http.get(URL_DRAWN, ttl_seconds = CACHE_TTL)
 
         if res.status_code != 200:
             print("Request to %s failed with status code: %d - %s" % (URL_DRAWN, res.status_code, res.body()))
             return render_error("Could not reach range_x.json\n:(")
-        
+
         draw_from = res.json()
         print(draw_from)  # For testing
 
