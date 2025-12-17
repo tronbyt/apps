@@ -51,7 +51,11 @@ def get_entity_data(config):
     return (data, None) if data else ({}, None)
 
 def get_image(url, config):
-    url = config.str("ha_instance") + url
+    if not url:
+        return None, None
+    elif not url.startswith("http"):
+        url = config.str("ha_instance") + url
+
     headers = {
         "Authorization": "Bearer " + config.str("ha_token"),
         "Content-Type": "application/json",
