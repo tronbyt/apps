@@ -1,6 +1,6 @@
 # Arc Raiders Stats
 
-Display current Arc Raiders player count and active event timers on your Tidbyt.
+Display current Arc Raiders player count and active event timers on your Tronbyt.
 
 ## Features
 
