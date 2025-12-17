@@ -12,12 +12,19 @@ Licensed under the Apache License, Version 2.0
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bolt.png", BOLT = "file")
+load("images/bolt@2x.png", BOLT_2X = "file")
 load("images/bolt_animated.gif", BOLT_ANIMATED = "file")
+load("images/bolt_animated@2x.gif", BOLT_ANIMATED_2X = "file")
 load("images/bolt_green.png", BOLT_GREEN = "file")
+load("images/bolt_green@2x.png", BOLT_GREEN_2X = "file")
 load("images/bolt_grey.png", BOLT_GREY = "file")
+load("images/bolt_grey@2x.png", BOLT_GREY_2X = "file")
 load("images/plug_blue.webp", PLUG_BLUE = "file")
+load("images/plug_blue@2x.webp", PLUG_BLUE_2X = "file")
 load("images/plug_red.webp", PLUG_RED = "file")
+load("images/plug_red@2x.webp", PLUG_RED_2X = "file")
 load("images/tesla.png", TESLA = "file")
+load("images/tesla@2x.png", TESLA_2X = "file")
 load("math.star", "math")
 load("re.star", "re")
 load("render.star", "canvas", "render")
@@ -267,13 +274,18 @@ def main(config):
     is_plugged = str(plugged_in).lower() in plugged_states
 
     if charger_power > 0:
-        image = BOLT_ANIMATED
+        image = BOLT_ANIMATED_2X if scale == 2 else BOLT_ANIMATED
     elif battery_val >= limit_val and is_plugged:
-        image = BOLT_GREEN
+        image = BOLT_GREEN_2X if scale == 2 else BOLT_GREEN
     elif is_plugged:
-        image = BOLT
+        image = BOLT_2X if scale == 2 else BOLT
     else:
-        image = BOLT_GREY
+        image = BOLT_GREY_2X if scale == 2 else BOLT_GREY
+
+    if is_plugged:
+        state_image = PLUG_BLUE_2X if scale == 2 else PLUG_BLUE
+    else:
+        state_image = PLUG_RED_2X if scale == 2 else PLUG_RED
 
     battery_level = int(batterylevel)
     state = {
@@ -283,8 +295,8 @@ def main(config):
         "range_value": int(float(range_value)),
         "unit": unit,
         "image": image.readall(),
-        "logo": TESLA.readall(),
-        "state_image": PLUG_BLUE.readall() if is_plugged else PLUG_RED.readall(),
+        "logo": TESLA_2X.readall() if scale == 2 else TESLA.readall(),
+        "state_image": state_image.readall(),
         "plugged_in_debug": plugged_in,  # For debugging
     }
 
