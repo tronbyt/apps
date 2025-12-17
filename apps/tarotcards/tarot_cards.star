@@ -111,7 +111,7 @@ DEFAULT_DRAW = "single"
 DEFAULT_FREQ = "throughout"
 
 # Set URL for once-daily draws
-URL_DRAWN = "https://raw.githubusercontent.com/frame-shift/tarot/main/draws.json"
+URL_DRAWS = "https://raw.githubusercontent.com/frame-shift/tarot/main/draws.json"
 CACHE_TTL = 3600  # 1 hour
 
 # Set card backs and fronts (19x32 images, see attribution above), names, and keywords
@@ -404,20 +404,21 @@ def draw_single(back, color, maxdraw, freq):
 
         # For only once per day:
     else:
-        res = http.get(URL_DRAWN, ttl_seconds = CACHE_TTL)
+        res = http.get(URL_DRAWS, ttl_seconds = CACHE_TTL)
 
         if res.status_code != 200:
-            print("Request to %s failed with status code: %d - %s" % (URL_DRAWN, res.status_code, res.body()))
+            print("Request to %s failed with status code: %d - %s" % (URL_DRAWS, res.status_code, res.body()))
             return render_error("Could not reach range_x.json\n:(")
 
         draw_from = res.json()
-        print(draw_from)  # For testing
+        # print(draw_from)  # For testing
 
         if card_max == 77:  # All cards
             card_num = int(draw_from["all"]["single"])
         else:  # Major Arcana only
             card_num = int(draw_from["major"]["single"])
-        print(card_num)  # For testing
+
+        # print(card_num)  # For testing
 
     # Define card properties
     card_name = list(CARD_NAMES.values())[card_num]  # Gets card name (string)
@@ -764,14 +765,14 @@ def draw_spread(back, color, maxdraw, freq):
 
         # For only once per day:
     else:
-        res = http.get(URL_DRAWN, ttl_seconds = CACHE_TTL)
+        res = http.get(URL_DRAWS, ttl_seconds = CACHE_TTL)
 
         if res.status_code != 200:
-            print("Request to %s failed with status code: %d - %s" % (URL_DRAWN, res.status_code, res.body()))
+            print("Request to %s failed with status code: %d - %s" % (URL_DRAWS, res.status_code, res.body()))
             return render_error("Could not reach range_x.json\n:(")
 
         draw_from = res.json()
-        print(draw_from)  # For testing
+        # print(draw_from)  # For testing
 
         if card_max == 77:  # All cards
             card_1 = int(draw_from["all"]["spread"]["card1"])
@@ -781,7 +782,8 @@ def draw_spread(back, color, maxdraw, freq):
             card_1 = int(draw_from["major"]["spread"]["card1"])
             card_2 = int(draw_from["major"]["spread"]["card2"])
             card_3 = int(draw_from["major"]["spread"]["card3"])
-        print(card_1, card_2, card_3)  # For testing
+
+        # print(card_1, card_2, card_3)  # For testing
 
     #Define each card
     card_name1 = list(CARD_NAMES.values())[card_1]  # Gets card name (str)
