@@ -156,7 +156,7 @@ def get_lighthouses(type):
     items = sorted(FLORIDA_LIGHTHOUSES, key = lambda x: x[0])
     icon = "towerCell"
 
-    if type == "true":
+    if type == True or type == "true":
         return [
             schema.Toggle(id = CONFIG_PATTERN_LIGHTHOUSES % (item[3], item[4]), name = item[0], desc = "%s" % item[5], icon = icon, default = False)
             for item in items
