@@ -5,20 +5,18 @@ Description: Shows current Arc Raiders player count and active event timers with
 Author: Chris Nourse
 """
 
+load("ArcRaidersTitle.webp", ARC_RAIDERS_LOGO_ASSET = "file")
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+ARC_RAIDERS_LOGO = ARC_RAIDERS_LOGO_ASSET.readall()
+
 STEAM_API_URL = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=1808500"
 METAFORGE_API_URL = "https://metaforge.app/api/arc-raiders/event-timers"
-
-# Embedded ARC Raiders title logo (64x8 WebP)
-ARC_RAIDERS_LOGO_BASE64 = "UklGRo4AAABXRUJQVlA4TIIAAAAvP8ABAC+gEAACJIMw8jcI7DTIBCy2/JKI6EImYLEKiy+gDj7zH4D/cbKjVBpwFUmSVGVz/Pc4QAISkIB/PbxTQUT/FSZtwCQdv/jd6z4PIBNjBgjAtq8LNGmF0FfeXpIUfZmqvDmVUUSnJkn6GI+beUxU2kpEsLGvS0lqeO0k9QcB"
-ARC_RAIDERS_LOGO = base64.decode(ARC_RAIDERS_LOGO_BASE64)
 
 # Brand colors
 COLOR_RED = "#F10E12"
