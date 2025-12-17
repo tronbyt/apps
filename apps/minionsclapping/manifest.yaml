@@ -5,3 +5,5 @@ summary: Animation of minions
 desc: A fun animation showing minions clapping enthusiastically.
 author: mal5z
 recommendedInterval: 5
+fileName: minions_clapping.star
+packageName: minionsclapping

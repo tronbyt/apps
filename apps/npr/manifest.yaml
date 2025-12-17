@@ -5,3 +5,5 @@ summary: NPR RSS Reader
 desc: NDisplays NPR News with a wide range of customizable options!
 author: W00tock
 recommendedInterval: 10
+fileName: npr_news.star
+packageName: npr

@@ -5,3 +5,5 @@ summary: Display Military News
 desc: Displays Military News from Military.com.
 author: Robert Ison
 recommendedInterval: 10
+fileName: military_news.star
+packageName: militarynews

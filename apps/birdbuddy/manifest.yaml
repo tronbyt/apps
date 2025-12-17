@@ -4,3 +4,5 @@ name: Bird Buddy
 summary: Who's visiting your feeder
 desc: See your latest Bird Buddy feeder visitors. Must use username/password for auth.
 author: Brombomb
+fileName: bird_buddy.star
+packageName: birdbuddy

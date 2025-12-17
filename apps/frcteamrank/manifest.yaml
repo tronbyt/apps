@@ -5,3 +5,5 @@ summary: Display FRC event ranking
 desc: Displays the ranking of an FRC team at the team's active event.
 author: dragid10
 recommendedInterval: 5
+fileName: frc_team_rank.star
+packageName: frcteamrank

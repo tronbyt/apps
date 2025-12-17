@@ -5,3 +5,5 @@ summary: Days since last bgg play
 desc: Counts up the number of days since the last time the user has recorded a game play on Board Game Geek.
 author: DanDobrick
 recommendedInterval: 5
+fileName: bgg_last_play.star
+packageName: bgglastplay

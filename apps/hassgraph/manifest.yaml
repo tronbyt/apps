@@ -5,3 +5,5 @@ summary: Graph for HA entity
 desc: Shows a graph and stats for a Home Assistant entity (e.g. temperature).
 author: vincentezw
 recommendedInterval: 5
+fileName: hass_graph.star
+packageName: hassgraph

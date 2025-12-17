@@ -5,3 +5,5 @@ summary: AZ highway sign messages
 desc: Displays the current message from any AZ highway sign.
 author: CJ Sturgess
 recommendedInterval: 5
+fileName: az_highway_signs.star
+packageName: azhighwaysigns
