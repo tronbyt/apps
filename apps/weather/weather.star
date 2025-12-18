@@ -10,28 +10,51 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("i18n.star", "tr")
 load("images/clear.png", CLEAR_IMAGE = "file")
+load("images/clear@2x.png", CLEAR_IMAGE_2X = "file")
 load("images/clear_full.png", CLEAR_FULL_IMAGE = "file")
+load("images/clear_full@2x.png", CLEAR_FULL_IMAGE_2X = "file")
 load("images/clouds.png", CLOUDS_IMAGE = "file")
+load("images/clouds@2x.png", CLOUDS_IMAGE_2X = "file")
 load("images/clouds_full.png", CLOUDS_FULL_IMAGE = "file")
+load("images/clouds_full@2x.png", CLOUDS_FULL_IMAGE_2X = "file")
 load("images/drizzle.png", DRIZZLE_IMAGE = "file")
+load("images/drizzle@2x.png", DRIZZLE_IMAGE_2X = "file")
 load("images/drizzle_full.png", DRIZZLE_FULL_IMAGE = "file")
+load("images/drizzle_full@2x.png", DRIZZLE_FULL_IMAGE_2X = "file")
 load("images/fog.png", FOG_IMAGE = "file")
+load("images/fog@2x.png", FOG_IMAGE_2X = "file")
 load("images/hail.png", HAIL_IMAGE = "file")
+load("images/hail@2x.png", HAIL_IMAGE_2X = "file")
 load("images/mist.png", MIST_IMAGE = "file")
+load("images/mist@2x.png", MIST_IMAGE_2X = "file")
 load("images/mist_full.png", MIST_FULL_IMAGE = "file")
+load("images/mist_full@2x.png", MIST_FULL_IMAGE_2X = "file")
 load("images/moon.png", MOON_IMAGE = "file")
+load("images/moon@2x.png", MOON_IMAGE_2X = "file")
 load("images/moonish.png", MOONISH_IMAGE = "file")
+load("images/moonish@2x.png", MOONISH_IMAGE_2X = "file")
 load("images/partly_sun.png", PARTLY_SUN_IMAGE = "file")
+load("images/partly_sun@2x.png", PARTLY_SUN_IMAGE_2X = "file")
 load("images/partly_sun_full.png", PARTLY_SUN_FULL_IMAGE = "file")
+load("images/partly_sun_full@2x.png", PARTLY_SUN_FULL_IMAGE_2X = "file")
 load("images/rain.png", RAIN_IMAGE = "file")
+load("images/rain@2x.png", RAIN_IMAGE_2X = "file")
 load("images/rain_full.png", RAIN_FULL_IMAGE = "file")
+load("images/rain_full@2x.png", RAIN_FULL_IMAGE_2X = "file")
 load("images/sleet.png", SLEET_IMAGE = "file")
+load("images/sleet@2x.png", SLEET_IMAGE_2X = "file")
 load("images/snow.png", SNOW_IMAGE = "file")
+load("images/snow@2x.png", SNOW_IMAGE_2X = "file")
 load("images/snow_full.png", SNOW_FULL_IMAGE = "file")
+load("images/snow_full@2x.png", SNOW_FULL_IMAGE_2X = "file")
 load("images/squall.png", SQUALL_IMAGE = "file")
+load("images/squall@2x.png", SQUALL_IMAGE_2X = "file")
 load("images/thunderstorm.png", THUNDERSTORM_IMAGE = "file")
+load("images/thunderstorm@2x.png", THUNDERSTORM_IMAGE_2X = "file")
 load("images/thunderstorm_full.png", THUNDERSTORM_FULL_IMAGE = "file")
+load("images/thunderstorm_full@2x.png", THUNDERSTORM_FULL_IMAGE_2X = "file")
 load("images/tornado.png", TORNADO_IMAGE = "file")
+load("images/tornado@2x.png", TORNADO_IMAGE_2X = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -58,6 +81,17 @@ WEATHER_FULL_IMAGE = {
     "Mist": MIST_FULL_IMAGE,
     "Drizzle": DRIZZLE_FULL_IMAGE,
     "Rain": RAIN_FULL_IMAGE,
+}
+
+WEATHER_FULL_IMAGE_2X = {
+    "Thunderstorm": THUNDERSTORM_FULL_IMAGE_2X,
+    "Clear": CLEAR_FULL_IMAGE_2X,
+    "Clouds": CLOUDS_FULL_IMAGE_2X,
+    "Snow": SNOW_FULL_IMAGE_2X,
+    "Partly_Sun": PARTLY_SUN_FULL_IMAGE_2X,
+    "Mist": MIST_FULL_IMAGE_2X,
+    "Drizzle": DRIZZLE_FULL_IMAGE_2X,
+    "Rain": RAIN_FULL_IMAGE_2X,
 }
 
 def main(config):
@@ -253,8 +287,12 @@ def _get_day_abbr(date):
     abbr = date.format("Mon")[:3].upper()
     return tr(abbr)
 
-def get_weather_image(forecast):
-    image = WEATHER_FULL_IMAGE.get(forecast)
+def get_weather_image(forecast, scale = 1):
+    image = None
+    if scale == 2:
+        image = WEATHER_FULL_IMAGE_2X.get(forecast)
+    if not image:
+        image = WEATHER_FULL_IMAGE.get(forecast)
     return image.readall() if image else ""
 
 def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_abbr, day_top = False, scale = 1):
@@ -265,7 +303,7 @@ def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_
             render.Padding(
                 pad = (-slide_distance, 0, 0, 0),  # Final negative padding (background fully slid left)
                 child = render.Image(
-                    src = get_weather_image(day["weather"]),
+                    src = get_weather_image(day["weather"], scale),
                     width = 64 * scale,
                     height = 32 * scale,
                 ),
@@ -614,8 +652,30 @@ WEATHER_ICONS = {
     "Tornado": TORNADO_IMAGE,
 }
 
-def get_weather_icon(forecast):
-    icon = WEATHER_ICONS.get(forecast)
+WEATHER_ICONS_2X = {
+    "Clear": CLEAR_IMAGE_2X,
+    "Clouds": CLOUDS_IMAGE_2X,
+    "Drizzle": DRIZZLE_IMAGE_2X,
+    "Fog": FOG_IMAGE_2X,
+    "Hail": HAIL_IMAGE_2X,
+    "Mist": MIST_IMAGE_2X,
+    "Moon": MOON_IMAGE_2X,
+    "Moonish": MOONISH_IMAGE_2X,
+    "Partly_Sun": PARTLY_SUN_IMAGE_2X,
+    "Rain": RAIN_IMAGE_2X,
+    "Sleet": SLEET_IMAGE_2X,
+    "Snow": SNOW_IMAGE_2X,
+    "Squall": SQUALL_IMAGE_2X,
+    "Thunderstorm": THUNDERSTORM_IMAGE_2X,
+    "Tornado": TORNADO_IMAGE_2X,
+}
+
+def get_weather_icon(forecast, scale = 1):
+    icon = None
+    if scale == 2:
+        icon = WEATHER_ICONS_2X.get(forecast)
+    if not icon:
+        icon = WEATHER_ICONS.get(forecast)
     return icon.readall() if icon else ""
 
 def render_weather(daily_data, scale = 1):
@@ -643,7 +703,7 @@ def render_weather(daily_data, scale = 1):
             children = [
                 # Weather icon
                 render.Image(
-                    src = get_weather_icon(day["weather"]),
+                    src = get_weather_icon(day["weather"], scale),
                     width = 12 * scale,
                     height = 12 * scale,
                 ),
