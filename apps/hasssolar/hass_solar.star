@@ -387,8 +387,9 @@ def main(config):
         solar_icon = solar_img
         solar_value = power_solar
         solar_color = GREEN
-    elif soc_battery:  # only do this if we have battery data
-        # change to battery data even though it's still called solar
+
+    elif soc_battery and soc_battery["state"] != "unknown" and soc_battery["state"] != "unavailable":
+        # only do this if we have battery data
         solar_icon = battery_mains_list[int(float(soc_battery["state"]) / 25)]  # will be integer 0 - 3
         solar_value = power_battery
         if int(float(solar_value["state"])) == 0:
@@ -522,15 +523,20 @@ def main(config):
     # CHARGE FRAME shows charge/discharge rate and state of charge percent
     #########################################################
     if config.bool("show_char", False) and power_battery and soc_battery:
-        if float(power_battery["state"]) < 0:
-            BATTERY_FLOW_ICON = battery_discharge_anim
-            flow_color = RED
-        elif float(power_battery["state"]) > 0:
-            BATTERY_FLOW_ICON = battery_charge_anim
-            flow_color = GREEN
-        else:
+        battery_icon_index = 0
+        if soc_battery["state"] != "unknown" and soc_battery["state"] != "unavailable":
+            battery_icon_index = int(float(soc_battery["state"]) / 25)
+
+        power_state = power_battery["state"]
+        if power_state == "unknown" or power_state == "unavailable" or float(power_state) == 0:
             BATTERY_FLOW_ICON = battery_noflow_anim
             flow_color = GRAY
+        elif float(power_state) < 0:
+            BATTERY_FLOW_ICON = battery_discharge_anim
+            flow_color = RED
+        else:
+            BATTERY_FLOW_ICON = battery_charge_anim
+            flow_color = GREEN
 
         charge_frame = render.Stack(
             children = [
@@ -555,7 +561,7 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = battery_icons_list[int(float(soc_battery["state"]) / 25)].readall()),
+                                        render.Image(src = battery_icons_list[battery_icon_index].readall()),
                                         render.Image(src = BATTERY_FLOW_ICON.readall()),
                                     ],
                                 ),
@@ -568,7 +574,7 @@ def main(config):
                                             content = " " + render_entity(soc_battery, dec = 0),
                                             font = font_medium,
                                             #font = "6x13",
-                                            color = soc_color[int(float(soc_battery["state"]) / 25)],
+                                            color = soc_color[battery_icon_index],
                                         ),
                                         render.Text(
                                             content = " " + render_entity(power_battery, dec = 0),
