@@ -5,4 +5,4 @@ summary: Display CPBL scores
 desc: Display CPBL game status and final scores.
 author: yuping917
 fileName: cpbl_scoreboard.star
-packageName: cpblscoreboard
+packageName: cpblscores-betsapi

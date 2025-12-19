@@ -5,5 +5,5 @@ summary: Next bin collection
 desc: Show the next bin collection color (recycle vs garbage) and date.
 author: Tubo Shi
 fileName: christchurch_bins.star
-packageName: christchurchbins
+packageName: chchbins
 recommendedInterval: 5

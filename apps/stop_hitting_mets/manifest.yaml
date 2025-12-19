@@ -5,4 +5,4 @@ summary: Dashboard for Mets HBP
 desc: Answers "Can we please stop hitting the Mets?" using canweplease.stophittingthemets.info data.
 author: ahedberg
 fileName: stop_hitting_mets.star
-packageName: stophittingmets
+packageName: stop_hitting_mets

@@ -5,5 +5,5 @@ summary: Octopus Agile Rates
 desc: Gets the latest Agile Rates for Octopus and shows the current price.
 author: sandeepb1
 fileName: octopus_agile.star
-packageName: octopusagile
+packageName: octopus_agile
 recommendedInterval: 5

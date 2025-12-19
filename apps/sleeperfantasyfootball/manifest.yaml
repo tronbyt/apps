@@ -5,5 +5,5 @@ summary: Fantasy Standings & Scores
 desc: Display standings or scores for a Sleeper Fantasy Football league (NFL).
 author: jweier
 fileName: sleeperfantasynfl.star
-packageName: sleeperfantasynfl
+packageName: sleeperfantasyfootball
 recommendedInterval: 5

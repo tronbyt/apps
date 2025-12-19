@@ -5,6 +5,6 @@ summary: Time, temp, wind, sun
 desc: Displays time, temperature, wind, sunrise, and sunset on one page.
 author: jordan-p
 fileName: dense_time_temp.star
-packageName: densetimetemp
+packageName: dense_time_temp
 recommendedInterval: 5
 broken: true

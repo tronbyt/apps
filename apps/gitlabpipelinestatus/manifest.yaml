@@ -5,5 +5,5 @@ summary: Shows Pipeline status
 desc: Shows the status of the most recent pipeline in a selected Gitlab project.
 author: Sven Ringger
 fileName: gitlab_pipeline.star
-packageName: gitlabpipeline
+packageName: gitlabpipelinestatus
 recommendedInterval: 5

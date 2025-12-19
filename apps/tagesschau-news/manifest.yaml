@@ -5,7 +5,7 @@ summary: News of Tagesschau
 desc: Fetches and displays only the headline of the german Tagesschau.
 author: dev-manuel
 fileName: tagesschau_news.star
-packageName: tagesschau_news
+packageName: tagesschau-news
 recommendedInterval: 10
 supports2x: true
 minPixletVersion: v0.49.3

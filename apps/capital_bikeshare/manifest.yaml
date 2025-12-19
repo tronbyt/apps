@@ -5,5 +5,5 @@ summary: Bikeshare status in DC
 desc: Reports the number of eBikes and normal bikes available at a given dock in DC.
 author: abrahamrowe
 fileName: capital_bikeshare.star
-packageName: capitalbikeshare
+packageName: capital_bikeshare
 recommendedInterval: 5

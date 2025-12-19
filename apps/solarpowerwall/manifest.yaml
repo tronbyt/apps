@@ -5,6 +5,6 @@ summary: Tesla Solar Powerwall Mon
 desc: Display the whole energy flow for solar panels, powerwall, grid and house.
 author: lcervo
 filename: solar-powerwall.star
-packageName: solar-powerwall
+packageName: solarpowerwall
 recommendedInterval: 5
 fileName: solar_powerwall.star

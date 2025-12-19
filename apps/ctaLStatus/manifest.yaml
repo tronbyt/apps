@@ -5,5 +5,5 @@ summary: Status of the CTA 'L'
 desc: View the latest status of CTA 'L' Trains and any alerts associated with that line.
 author: sgomez72
 fileName: ctaLStatus.star
-packageName: ctalstatus
+packageName: ctaLStatus
 recommendedInterval: 5

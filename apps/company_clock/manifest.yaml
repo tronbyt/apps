@@ -5,5 +5,5 @@ summary: Clock from Lethal Company
 desc: Displays a rendition of the clock from the game "Lethal Company".
 author: qqvq-d
 fileName: company_clock.star
-packageName: companyclock
+packageName: company_clock
 recommendedInterval: 0

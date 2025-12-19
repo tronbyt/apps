@@ -5,5 +5,5 @@ summary: Islamic Prayer Time Display
 desc: Displays the prayer times for today's date and also shows the remaining time till the next prayer based on the user's location.
 author: EslamMoh
 fileName: prayer_times.star
-packageName: prayertimes
+packageName: prayer_times
 recommendedInterval: 5
