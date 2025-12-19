@@ -7,12 +7,10 @@ Author: Robert Ison
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("images/billboard_icon.png", BILLBOARD_ICON_ASSET = "file")
+load("images/billboard_icon.png", BILLBOARD_ICON = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-
-BILLBOARD_ICON = BILLBOARD_ICON_ASSET.readall()
 
 BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100", "date": "1983-05-14", "source": "Billboard-API"}, "content": {"1": {"rank": "1", "title": "Beat It", "artist": "Michael Jackson", "weeks at no.1": "3", "last week": "1", "peak position": "1", "weeks on chart": "12", "detail": "same"}, "2": {"rank": "2", "title": "Let's Dance", "artist": "David Bowie", "last week": "3", "peak position": "2", "weeks on chart": "8", "detail": "up"}, "3": {"rank": "3", "title": "Jeopardy", "artist": "Greg Kihn Band", "last week": "2", "peak position": "2", "weeks on chart": "16", "detail": "down"}, "4": {"rank": "4", "title": "Overkill", "artist": "Men At Work", "last week": "6", "peak position": "4", "weeks on chart": "6", "detail": "up"}, "5": {"rank": "5", "title": "She Blinded Me With Science", "artist": "Thomas Dolby", "last week": "7", "peak position": "5", "weeks on chart": "13", "detail": "up"}, "6": {"rank": "6", "title": "Come On Eileen", "artist": "Dexy's Midnight Runners", "last week": "4", "peak position": "1", "weeks on chart": "17", "detail": "down"}, "7": {"rank": "7", "title": "Flashdance...What A Feeling", "artist": "Irene Cara", "last week": "13", "peak position": "7", "weeks on chart": "7", "detail": "up"}, "8": {"rank": "8", "title": "Little Red Corvette", "artist": "Prince", "last week": "9", "peak position": "8", "weeks on chart": "12", "detail": "up"}, "9": {"rank": "9", "title": "Solitaire", "artist": "Laura Branigan", "last week": "11", "peak position": "9", "weeks on chart": "9", "detail": "up"}, "10": {"rank": "10", "title": "Der Kommissar", "artist": "After The Fire", "last week": "5", "peak position": "5", "weeks on chart": "14", "detail": "down"}}}"""
 
@@ -23,7 +21,7 @@ CACHE_TTL_SECONDS = 259200
 
 list_options = [
     schema.Option(
-        display = "U.S. Songs",
+        display = "U.S. Hot 100",
         value = "hot-100",
     ),
     schema.Option(
@@ -37,6 +35,7 @@ def main(config):
     selected_list = config.get("list", list_options[0].value)
 
     api_key = config.get("api_key")
+    sample_data = True
 
     if not api_key:
         #this should only be called for demos that Tidbyt displays on their websites
@@ -44,7 +43,12 @@ def main(config):
     else:
         top10_data = get_top10_information(api_key, selected_list)
 
-    top10_data["DateFetched"] = time.now().format("2006-01-02T15:04:05Z07:00")
+    if top10_data == None:
+        print("Failed to get data from the api")
+        top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
+    else:
+        sample_data = False
+        top10_data["DateFetched"] = time.now().format("2006-01-02T15:04:05Z07:00")
 
     fetched_time = None
     if ("DateFetched" in top10_data):
@@ -64,13 +68,15 @@ def main(config):
 
     if fetched_time != None:
         row4 = "%s -- %s" % (row4, fetched_time.format("Mon Jan 2 2006 15:04"))
+    elif sample_data:
+        row4 = "%s -- %s" % (row4, "Sample Data")
 
     return render.Root(
         render.Column(
             children = [
                 render.Row(
                     children = [
-                        render.Image(src = BILLBOARD_ICON),
+                        render.Image(src = BILLBOARD_ICON.readall()),
                         render.Box(width = 1, height = 6, color = "#000000"),
                         render.Marquee(
                             width = 57,
@@ -131,6 +137,7 @@ def get_top10_information(top10_alive_key, list):
     if res.status_code == 200:
         return res.json()
     else:
+        print(res.status_code)
         return None
 
 def getMovementIndicator(this, last):
@@ -294,7 +301,7 @@ def get_schema():
             ),
             schema.Dropdown(
                 id = "list",
-                name = "Billboard List",
+                name = "Billboard Listing",
                 desc = "",
                 icon = "list",
                 default = list_options[0].value,
