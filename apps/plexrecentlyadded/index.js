@@ -13,10 +13,11 @@ const server = http.createServer(async (req, res) => {
         return;
     }
     if (req.method === "GET") {
+        const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+        const pathname = requestUrl.pathname;
+
         // `/status/sessions` is included for future plex tidbyt app idea (currently watching, you can remove if you'd like)
-        if (req.url.includes("/library/recentlyAdded") || req.url.includes("/status/sessions") || req.url.includes("/library/metadata")) {
-            const requestUrl = new URL(req.url, `http://${req.headers.host}`);
-            const pathname = requestUrl.pathname;
+        if (pathname.includes("/library/recentlyAdded") || pathname.includes("/status/sessions") || pathname.includes("/library/metadata")) {
             const _type = pathname.includes("/library/metadata") ? 'image/jpeg' : 'application/json';
 
             try {
