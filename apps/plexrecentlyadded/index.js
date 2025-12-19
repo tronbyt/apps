@@ -1,5 +1,5 @@
 var http = require('http');
-var request = require('request');
+const axios = require('axios');
 const host = '0.0.0.0';
 const port = '6969';
 const plexServerHost = 'localhost';
@@ -16,22 +16,25 @@ const server = http.createServer(async (req, res) => {
         // `/status/sessions` is included for future plex tidbyt app idea (currently watching, you can remove if you'd like)
         if (req.url.includes("/library/recentlyAdded") || req.url.includes("/status/sessions") || req.url.includes("/library/metadata")) {
             const _type = req.url.includes("/library/metadata") ? 'image/jpeg' : 'application/json';
-            var options = {
-                'method': 'GET',
-                'url': `http://${plexServerHost}:${plexServerPort}${req.url}?X-Plex-Token=${req.headers['x-plex-token']}`,
-                'headers': {
-                    'accept': _type
-                },
-                encoding: null
-              };
-              request(options, function (error, response) {
-                  if (error) throw new Error(error);
-                  response.setEncoding('base64')
-                  res.writeHead(200, {'Content-Type': _type});
-                  res.write(response.body);
-                  res.end();
-                  console.log(`requested plex at ${Date()}`);
-              });
+            try {
+                const response = await axios({
+                    method: 'GET',
+                    url: `http://${plexServerHost}:${plexServerPort}${req.url}?X-Plex-Token=${req.headers['x-plex-token']}`,
+                    headers: {
+                        'accept': _type
+                    },
+                    responseType: 'arraybuffer'
+                });
+
+                res.writeHead(200, { 'Content-Type': _type });
+                res.write(response.data);
+                res.end();
+                console.log(`requested plex at ${Date()}`);
+            } catch (error) {
+                console.error(error);
+                res.writeHead(500);
+                res.end();
+            }
         }
     } else {
         res.writeHead(404);
