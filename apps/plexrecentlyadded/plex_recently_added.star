@@ -14,8 +14,6 @@ load("images/sample3.jpg", SAMPLE3_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-PLEX_ICON = PLEX_ICON_ASSET.readall()
-
 REFRESH_TIME = 86400  # twice a day
 
 SAMPLE_DATA = {
@@ -39,9 +37,9 @@ SAMPLE_DATA = {
 }
 
 SAMPLE_IMAGES = [
-    SAMPLE1_ASSET.readall(),
-    SAMPLE2_ASSET.readall(),
-    SAMPLE3_ASSET.readall(),
+    SAMPLE1_ASSET,
+    SAMPLE2_ASSET,
+    SAMPLE3_ASSET,
 ]
 
 def requestStatus(serverIP, serverPort, plexToken, apiKey):
@@ -94,7 +92,7 @@ def main(config):
         for i in range(0, 3):
             newData["MediaContainer"]["Metadata"].append({})
             newData["MediaContainer"]["Metadata"][i]["title"] = SAMPLE_DATA["MediaContainer"]["Metadata"][i]["title"]
-            newData["MediaContainer"]["Metadata"][i]["thumb"] = SAMPLE_IMAGES[i]
+            newData["MediaContainer"]["Metadata"][i]["thumb"] = SAMPLE_IMAGES[i].readall()
             title = newData["MediaContainer"]["Metadata"][i]["title"]
         data = newData
     else:
@@ -103,23 +101,23 @@ def main(config):
 
     recentlyAdded = []
 
-    #only show last 3
-    for i in range(0, 3):
-        entry = data["MediaContainer"]["Metadata"][i]
-        if entry.get("parentThumb"):
-            thumbnailURL = entry["parentThumb"]
-        else:
-            thumbnailURL = entry["thumb"]
+    # Only show up to 3 of the most recently added items.
+    # Each item adds 2 elements to `recentlyAdded`, so we break when the length is 6.
+    metadata = data.get("MediaContainer", {}).get("Metadata", [])
+    for entry in metadata:
+        if len(recentlyAdded) >= 6:
+            break
 
-        if entry.get("parentTitle"):
-            title = entry["parentTitle"]
-        else:
-            title = entry["title"]
+        thumbnailURL = entry.get("parentThumb") or entry.get("thumb") or entry.get("grandparentThumb") or entry.get("art")
+        if not thumbnailURL:
+            continue
+
+        title = entry.get("parentTitle") or entry.get("title", "Unknown")
 
         if not usingSampleData:
             thumbnail = requestThumb(serverIP, serverPort, plexToken, apiKey, thumbnailURL)
         else:
-            thumbnail = entry["thumb"]
+            thumbnail = thumbnailURL
 
         recentlyAdded.append(
             render.Column(
@@ -153,7 +151,7 @@ def main(config):
                                         cross_align = "center",
                                         expanded = True,
                                         children = [
-                                            render.Image(src = PLEX_ICON),
+                                            render.Image(src = PLEX_ICON_ASSET.readall()),
                                             render.Box(width = 2),
                                             render.WrappedText("Recently Added", align = "center"),
                                         ],
