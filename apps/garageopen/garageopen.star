@@ -1,5 +1,6 @@
 load("i18n.star", "tr")
 load("images/open.png", ICON_OPEN = "file")
+load("images/open@2x.png", ICON_OPEN_2X = "file")
 load("render.star", "canvas", "render")
 
 def main():
@@ -13,7 +14,7 @@ def main():
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Image(src = ICON_OPEN.readall(), width = image_size),
+                    render.Image(src = ICON_OPEN_2X.readall() if canvas.is2x() else ICON_OPEN.readall(), width = image_size),
                     render.Text(tr("Open"), font = font),
                 ],
             ),
