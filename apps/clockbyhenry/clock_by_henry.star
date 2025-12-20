@@ -94,7 +94,7 @@ def main(config):
         (float(location["lat"]), float(location["lng"])) if location.get("lat") and location.get("lng") else None
     )
 
-    day_start = config.bool(P_DAY_START) or DEFAULT_DAY_START
+    day_start = config.get(P_DAY_START, DEFAULT_DAY_START)
     if day_start == "sunrise" and coords:
         day_start = sunrise.sunrise(coords[0], coords[1], now)
         if day_start == None:
@@ -107,7 +107,7 @@ def main(config):
     elif not re.match(r"^\d\d:\d\d$", day_start):
         day_start = DEFAULT_DAY_START
 
-    night_start = config.bool(P_NIGHT_START) or DEFAULT_NIGHT_START
+    night_start = config.get(P_NIGHT_START, DEFAULT_NIGHT_START)
     if night_start == "sunset" and coords:
         night_start = sunrise.sunset(coords[0], coords[1], now)
         if night_start == None:
