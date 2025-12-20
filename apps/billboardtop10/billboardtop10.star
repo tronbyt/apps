@@ -20,37 +20,17 @@ BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100"
 DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
 
 #cache Time 3 Days x 24 hours x 60 minutes x 60 seconds = 259200 seconds
-CACHE_TTL_SECONDS = 259200
-
-list_options = [
-    schema.Option(
-        display = "U.S. Hot 100",
-        value = "hot-100",
-    ),
-    schema.Option(
-        display = "Global Songs",
-        value = "billboard-global-200",
-    ),
-]
-
-def main(config):
-    # US, Global,
-    selected_list = config.get("list", list_options[0].value)
-
-    api_key = config.get("api_key")
-    sample_data = True
-
-    if not api_key:
-        #this should only be called for demos that Tidbyt displays on their websites
-        top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
-    else:
+    top10_data = None
+    if api_key:
         top10_data = get_top10_information(api_key, selected_list)
 
-    if top10_data == None:
-        print("Failed to get data from the api")
+    sample_data = top10_data == None
+    if sample_data:
+        if api_key:
+            print("Failed to get data from the api")
+        # Use sample data if no API key or if API call fails
         top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
     else:
-        sample_data = False
         top10_data["DateFetched"] = time.now().format("2006-01-02T15:04:05Z07:00")
 
     fetched_time = None
