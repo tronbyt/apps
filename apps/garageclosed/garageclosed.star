@@ -1,5 +1,6 @@
 load("i18n.star", "tr")
 load("images/closed.png", ICON_CLOSED = "file")
+load("images/closed@2x.png", ICON_CLOSED_2X = "file")
 load("render.star", "canvas", "render")
 
 def main():
@@ -13,7 +14,7 @@ def main():
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Image(src = ICON_CLOSED.readall(), width = image_size),
+                    render.Image(src = ICON_CLOSED_2X.readall() if canvas.is2x() else ICON_CLOSED.readall(), width = image_size),
                     render.Text(tr("Closed"), font = font),
                 ],
             ),
