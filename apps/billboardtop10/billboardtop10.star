@@ -102,10 +102,7 @@ DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
     )
 
 def get_top10_information(top10_alive_key, list):
-    print("get_top10_information")
-    print(list)
     thetime = most_recent_saturday(time.now())
-    print(thetime)
     url = "https://billboard-api2.p.rapidapi.com/%s" % list
     res = http.get(
         url = url,
