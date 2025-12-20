@@ -5,20 +5,16 @@ Description: Displays the next time the International Space Station will appear.
 Author: Robert Ison
 """
 
-load("cache.star", "cache")  #Caching
-load("encoding/json.star", "json")  #Used to figure out timezone
+load("encoding/json.star", "json")
 load("http.star", "http")  #HTTP Client
 load("images/iss_icon.png", ISS_ICON_ASSET = "file")
 load("images/iss_icon2.png", ISS_ICON2_ASSET = "file")
 load("images/iss_icon3.png", ISS_ICON3_ASSET = "file")
 load("images/iss_icon4.png", ISS_ICON4_ASSET = "file")
 load("images/iss_icon5.png", ISS_ICON5_ASSET = "file")
-load("math.star", "math")  #Used to calculate duration between timestamps
-load("re.star", "re")  #Used for Regular Expressions
 load("render.star", "render")
 load("schema.star", "schema")
-load("time.star", "time")  #Used to display time and calcuate lenght of TTL cache
-load("xpath.star", "xpath")  #XPath Expressions to read XML RSS Feed
+load("time.star", "time")
 
 ISS_ICON = ISS_ICON_ASSET.readall()
 ISS_ICON2 = ISS_ICON2_ASSET.readall()
@@ -26,20 +22,12 @@ ISS_ICON3 = ISS_ICON3_ASSET.readall()
 ISS_ICON4 = ISS_ICON4_ASSET.readall()
 ISS_ICON5 = ISS_ICON5_ASSET.readall()
 
-#Requires the RSS feed for your location from spotthestation.nasa.gov
-#Use the map tool to find the nearest location, click the blue marker then the "View sighting opportunities"
-#From this page click "RSS" to get the needed XML Feed for your location
-#Pass that into this app to have the next approach to your location listed on  your Tidbyt
+CACHE_DURATION = 1 * 86400  # 432,000 seconds = 1 days
 
-#Note on Timezones: The data from NASA on upcoming flyovers is in localtime but without timezone information.
-#To know when that time has past, we need to know the tidbyts location.
+SPACE_STATION_ID = 25544
+STATION_LOCATION_API = "https://api.n2yo.com/rest/v1/satellite/visualpasses/{space_station_id}/{latitude}/{longitude}/0/10/60/&apiKey={api_key}"
 
-#We can calculate how long we can cache the XML, but let's set a minimum cache of 5 minutes just to be sure we aren't taxing servers
-#and a maximum of one week in case of bad data
-MINIMUM_CACHE_TIME_IN_SECONDS = 300
-MAXIMUM_CACHE_TIME_IN_SECONDS = 600000
-
-# Load icon from base64 encoded data
+SAMPLE_DATA = """{"info":{"satid":25544,"satname":"SPACE STATION","transactionscount":2,"passescount":1},"passes":[{"startAz":332.18,"startAzCompass":"NNW","startEl":2.54,"startUTC":1767095020,"maxAz":40.05,"maxAzCompass":"NE","maxEl":19.95,"maxUTC":1767095320,"endAz":107.07,"endAzCompass":"ESE","endEl":0.3,"endUTC":1767095615,"mag":-0.4,"duration":555,"startVisibility":1767095060}]}"""
 
 DEFAULT_LOCATION = """
 {
@@ -51,6 +39,76 @@ DEFAULT_LOCATION = """
 	"timezone": "America/New_York"
 }
 """
+
+def magnitude_description(mag):
+    if mag < -3:
+        return "extremely bright, like Venus"
+    elif mag < -1:
+        return "very bright, brighter than any star"
+    elif mag < 0:
+        return "bright and easy to spot"
+    elif mag < 2:
+        return "clearly visible to the naked eye"
+    elif mag < 4:
+        return "visible in dark skies"
+    elif mag < 6:
+        return "faint but observable"
+    else:
+        return "very faint (binoculars recommended)"
+
+def is_within_notice_period(startUTC, endUTC, current_time, hours):
+    notice_seconds = hours * 3600
+    if (startUTC >= current_time and startUTC <= current_time + notice_seconds) or \
+       (startUTC <= current_time and endUTC >= current_time):
+        return True
+    else:
+        return False
+
+def format_duration_display(seconds):
+    total_secs = int(seconds)
+    hours = total_secs // 3600
+    minutes = (total_secs % 3600) // 60
+    secs = total_secs % 60
+
+    if hours > 0:
+        return str(hours) + " hours, " + str(minutes) + " minutes, " + str(secs) + " seconds"
+    elif minutes > 0:
+        if secs > 0:
+            return str(minutes) + " minutes and " + str(secs) + " seconds"
+        else:
+            return str(minutes) + " minutes"
+    else:
+        return str(secs) + " seconds"
+
+def time_until_pass(startUTC, current_time):
+    """
+    Returns a human-readable string for how soon a pass starts.
+    Shows days if > 24 hours, hours if > 59 minutes, else just minutes.
+    """
+
+    # Calculate difference in seconds
+    delta = startUTC - current_time
+
+    if delta <= 0:
+        return "Now or past"
+
+    # Compute days, hours, minutes
+    days = delta // 86400  # 24*60*60
+    remainder = delta % 86400
+    hours = remainder // 3600
+    remainder = remainder % 3600
+    minutes = remainder // 60
+
+    # Build string based on magnitude
+    parts = []
+    if days > 0:
+        parts.append(str(days) + " day" + ("s" if days != 1 else ""))
+    if hours > 0 or days > 0:  # show hours if > 0 or if days are shown
+        parts.append(str(hours) + " hour" + ("s" if hours != 1 else ""))
+    if minutes > 0 or (days == 0 and hours == 0):
+        parts.append(str(minutes) + " minute" + ("s" if minutes != 1 else ""))
+
+    return " ".join(parts)
 
 def two_character_time_date_part(number):
     if len(str(number)) == 1:
@@ -81,49 +139,6 @@ def get_local_time(config):
     local_time = time.now().in_location(timezone)
     return local_time
 
-def get_local_offset(config):
-    """ Get Local Offset
-
-    Args:
-        config: Configuration Items to control how the app is displayed
-    Returns:
-        The the local offset based on your location
-    """
-    timezone = json.decode(config.get("location", DEFAULT_LOCATION))["timezone"]
-    local_time = time.now().in_location(timezone)
-    offset = str(local_time).split(" ")
-
-    if (offset[2][0:1] == "+"):
-        the_sign = "-"
-    else:
-        the_sign = "+"
-
-    if (len(offset) == 4):
-        return time.parse_duration(the_sign + str(int("04")) + "h")
-    else:
-        return time.parse_duration("+0h")
-
-def get_timestamp_from_item(item):
-    """ Get Timestamp from item
-
-    Args:
-        item: The item from the XML that has a timestamp
-    Returns:
-        an actual timestamp
-    """
-    description = item.replace("\n", "").replace("\t", "").split("<br/>")
-    item_date = description[0].replace("Date: ", "").split(" ")
-    item_time = description[1].replace("Time: ", "").split(" ")
-    timestamp = item_date[3] + "-" + two_character_numeric_month_from_month_string(item_date[1]) + "-" + two_character_time_date_part(item_date[2].replace(",", "")) + "T" + get_timestamp_time(item_time[0], item_time[1]) + ":00Z"  # + get_local_offset(config)
-    return timestamp
-
-def get_timestamp_time(time, meridiem):
-    time = time.split(":")
-    if meridiem == "PM":
-        time[0] = int(time[0]) + 12
-
-    return str(time[0]) + ":" + time[1]
-
 def main(config):
     """ Main
 
@@ -133,168 +148,103 @@ def main(config):
         The display inforamtion for the Tidbyt
     """
 
+    # Display Instructions and end if that's the setting
     show_instructions = config.bool("instructions", False)
     if show_instructions:
         return display_instructions()
 
-    #Defaults
-    current_local_time = get_local_time(config)
-    found_sighting_to_display = False
-    number_of_listed_sightings = 0
-    item_number_to_display = 0
-    time_of_next_sighting = None
-    time_of_furthest_known_sighting = None
-    location = "Invalid Location Data. You should have entered an RSS feed URL that looks like this: https://spotthestation.nasa.gov/sightings/xml_files/United_States_Florida_Orlando.xml"
-    row1 = ""
-    row2 = ""
-    row3 = ""
+    # Get Configuration Environment Data
+    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    current_time = time.now().unix  # get current UTC time
 
-    #Get Station Selected By User
-    ISS_FLYBY_XML_URL = config.get("SpotTheStationRSS") or "https://spotthestation.nasa.gov/sightings/xml_files/United_States_Florida_Orlando.xml"
+    # Get Configuration Items
+    api_key = config.get("api_key", None)
+    minimum_duration = int(config.get("minimum_duration", 0))
+    notice_hours = int(config.get("notice_period", 0))
+    minimum_maxEl = int(config.get("minimum_elevation", 10))
 
-    #cache is saved to the tidbyt server, not locally, so we need a unique key per location which so we can use the XML Url to distinguish
-    iss_xml_body = cache.get(ISS_FLYBY_XML_URL)
-    set_cache = False
-    if iss_xml_body == None:
-        iss_xml = http.get(ISS_FLYBY_XML_URL)
+    # Set Defaults
+    sighting_to_display = None
+    is_sample_data = True
+    station_data = json.decode(SAMPLE_DATA)
 
-        #print("Going to spotthestation.nasa.gov to get XML")
-        if iss_xml.status_code == 200:
-            iss_xml_body = iss_xml.body()
+    # If we have an API key, let's get real data
+    if api_key != None:
+        resp = http.get(STATION_LOCATION_API.format(space_station_id = SPACE_STATION_ID, latitude = location["lat"], longitude = location["lng"], api_key = api_key), ttl_seconds = CACHE_DURATION)
+        if resp.status_code == 200:
+            is_sample_data = False
+            station_data = resp.json()
 
-            #This XML Feed can have many sightings listed, both past and future
-            #So Let's find the first future sighting and display that
-            number_of_listed_sightings = iss_xml_body.count("<item>")
-            set_cache = True
-    else:
-        #print("Using cached XML")
-        number_of_listed_sightings = iss_xml_body.count("<item>")
+    if station_data and "passes" in station_data:
+        passes = station_data["passes"]
+        if passes and len(passes) > 0:
+            for p in passes:
+                # 1️⃣ Check duration
+                if "duration" in p and int(p["duration"]) >= minimum_duration:
+                    # 2️⃣ Check notice window
+                    if notice_hours == 0 or is_within_notice_period(p["startUTC"], p["endUTC"], current_time, notice_hours):
+                        # 3️⃣ Check max elevation
+                        if "maxEl" in p and p["maxEl"] >= minimum_maxEl:
+                            # This pass meets all criteria
+                            sighting_to_display = p
+                            break  # stop at first qualifying pass
 
-    if iss_xml_body == None:
-        row1 = "Invalid Data from spotthestation.nasa.gov. You should have entered an RSS feed URL that looks like this: https://spotthestation.nasa.gov/sightings/xml_files/United_States_Florida_Orlando.xml"
-        description = None
-    elif number_of_listed_sightings == 0:
-        row1 = "The station will not appear overhead for at least several days"
-        description = ""
-        location = xpath.loads(iss_xml_body).query("/rss/channel/description").replace("Satellite Sightings Information for ", "")
-    else:
-        #Find the next pass, but skip past times
-        for i in range(1, number_of_listed_sightings + 1):
-            current_query = "//item[" + str(i) + "]/description"
-            current_description = xpath.loads(iss_xml_body).query(current_query)
-            current_time_stamp = get_timestamp_from_item(current_description)
-            timezone = json.decode(config.get("location", DEFAULT_LOCATION))["timezone"]
-            current_item_time = time.parse_time(current_time_stamp).in_location(timezone) + get_local_offset(config)
-
-            # We should add the duration of the sighting to the cutoff so the current sighting displays on the tidbyt
-            # Sound strange? I looked at the app when the ISS was overhead and it was on to the next sighting! Doh!
-
-            duration_pattern = "Duration: (.+?) minute"
-            duration_match = re.match(duration_pattern, current_description)
-            duration_in_minutes = 0
-            if duration_match:
-                duration_string = duration_match[0][1]
-                if duration_string.isdigit():
-                    duration_in_minutes = int(duration_string)
-
-            duration = time.parse_duration("%sm" % duration_in_minutes)
-
-            if current_item_time + duration > current_local_time:
-                item_number_to_display = i
-                time_of_next_sighting = current_time_stamp
-
-                # This is the next sighting, let's check to see if they want it displayed based on settings
-                hours_notice = int(config.get("notice_period", 0))
-                hours_until_sighting = (current_item_time - current_local_time).hours
-
-                minimum_duration = int(config.get("minimum_duration", 0))
-                if ((hours_notice == 0 or hours_notice > hours_until_sighting) and duration_in_minutes >= minimum_duration):
-                    found_sighting_to_display = True
-                    break
-                else:
-                    found_sighting_to_display = False
-
-        #Only past events are in the XML, so we'll need to give an appropriate message
-        if (item_number_to_display == 0):
-            description = "The station will not appear overhead for at least several days"
-        else:
-            description = xpath.loads(iss_xml_body).query("/rss/channel/item[" + str(item_number_to_display) + "]/description")
-
-        location = xpath.loads(iss_xml_body).query("/rss/channel/description").replace("Satellite Sightings Information for ", "")
-
-    if (set_cache == True):
-        #The current XML is valid until the last known future listing
-        #So let's use that to figure our cache ttl
-        if (number_of_listed_sightings > item_number_to_display):
-            #Since there are more future sightings in the current XML
-            #Let's cache this XML as long as we have good data
-            current_query = "//item[" + str(number_of_listed_sightings) + "]/description"
-            current_description = xpath.loads(iss_xml_body).query(current_query)
-            current_time_stamp = get_timestamp_from_item(current_description)
-            time_of_furthest_known_sighting = current_time_stamp
-            date_diff = time.parse_time(time_of_furthest_known_sighting) - get_local_time(config)
-        elif (time_of_next_sighting == None):
-            date_diff = time.now() - time.now()
-        else:
-            date_diff = get_local_time(config) - get_local_time(config)  # time.parse_time(time_of_next_sighting) - get_local_time(config)
-
-        days = math.floor(date_diff.hours // 24)
-        hours = math.floor(date_diff.hours - days * 24)
-        minutes = math.floor(date_diff.minutes - (days * 24 * 60 + hours * 60))
-        seconds_xml_valid_for = minutes * 60 + hours * 60 * 60 + days * 24 * 60 * 60
-
-        #We have calculated the time this XML is good for, but to be cautious, we'll make sure it is within by setting max and min values
-        if seconds_xml_valid_for < MINIMUM_CACHE_TIME_IN_SECONDS:
-            seconds_xml_valid_for = MINIMUM_CACHE_TIME_IN_SECONDS
-        elif seconds_xml_valid_for > MAXIMUM_CACHE_TIME_IN_SECONDS:
-            seconds_xml_valid_for = MAXIMUM_CACHE_TIME_IN_SECONDS
-
-        cache.set(ISS_FLYBY_XML_URL, iss_xml_body, ttl_seconds = seconds_xml_valid_for)
-
-    if description == None:
-        description = "None"
-        row1 = "Error getting Data from spotTheStation.nasa.gov"
-    else:
-        i = 0
-        for item in description.split("<br/>"):
-            i += 1
-            item = item.replace("\n", "").replace("\t", "")
-
-            if (i < 2):
-                row2 += item.replace("Date: ", "").replace("Monday", "Mon").replace("Tuesday", "Tue").replace("Wednesday", "Wed").replace("Thursday", "Thu").replace("Friday", "Fri").replace("Saturday", "Sat").replace("Sunday", "Sun").replace(", 20", " '")
-            elif (i < 3):
-                row1 += item.replace("Time: ", "")
-            else:
-                row3 += item.replace("Duration: ", "For ").replace("Maximum Elevation:", "Max").replace("Approach:", "from").replace("Departure:", "to").replace("minute", "min")
-
-    if (found_sighting_to_display):
-        return get_display(location, row1, row2, row3, config)
-    else:
+    if sighting_to_display == None:
         return []
+    else:
+        event_start_time = time.from_timestamp(int(sighting_to_display["startUTC"]), 0).in_location(time.tz())
+
+        display_text = "%sIn %s starting %s %s: ISS appears %s from %s, peaks %s° in %s, visible %s" % (
+            ("Sample: " if is_sample_data else ""),
+            format_locality(location["locality"], 10),
+            event_start_time.format("3:04p"),
+            event_start_time.format("Jan 2"),
+            magnitude_description(sighting_to_display["mag"]),
+            sighting_to_display["startAzCompass"],
+            int(sighting_to_display["maxEl"]),
+            sighting_to_display["maxAzCompass"],
+            format_duration_display(sighting_to_display["duration"]),
+        )
+
+        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, config)
+
+def format_locality(locality, idealLength):
+    """Format locality: full string if <= idealLength, else town name before first comma."""
+    if len(locality) <= idealLength:
+        return locality
+
+    # No commas? Return full string
+    if "," not in locality:
+        return locality
+
+    # Return everything before first comma (town name)
+    return locality.split(",")[0].strip()
 
 def display_instructions():
     ##############################################################################################################################################################################################################################
-    instructions_1 = "Go to SpotTheStation.NASA.gov, zoom in on the map to find your location. Click on the blue map marker closest to your location, then click 'View sighting opportunities'."
-    instructions_2 = "Next, click the RSS icon listed under the location name. This will give you a page full of XML. No need to look at any of that, just copy the URL."
-    instructions_3 = "Enter that URL in the 'Spot the Station RSS' setting for this application. You're all set to be made aware of ISS passings! "
+    title = "Spot the Station"
+    instructions_1 = "Goto N2yo.com and create a free account. Then go to 'More Stuff', then 'Edit/change your location'."
+    instructions_2 = "Create your API key here and use it in your configuration as your N2YO.com API Key"
+    instructions_3 = "You can adjust settings to be made aware of the passes you can see, and how early you're made aware of them."
     return render.Root(
         render.Column(
             children = [
                 render.Marquee(
                     width = 64,
-                    child = render.Text("Spot the Station", color = "#65d0e6", font = "5x8"),
+                    child = render.Text(title, color = "#65d0e6", font = "5x8"),
                 ),
                 render.Marquee(
+                    offset_start = len(title) * 5,
                     width = 64,
                     child = render.Text(instructions_1, color = "#f4a306"),
                 ),
                 render.Marquee(
-                    offset_start = len(instructions_1) * 5,
+                    offset_start = (len(title) + len(instructions_1)) * 5,
                     width = 64,
                     child = render.Text(instructions_2, color = "#f4a306"),
                 ),
                 render.Marquee(
-                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
+                    offset_start = (len(title) + len(instructions_2) + len(instructions_1)) * 5,
                     width = 64,
                     child = render.Text(instructions_3, color = "#f4a306"),
                 ),
@@ -379,7 +329,7 @@ def get_display(location, row1, row2, row3, config):
     )
 
 def get_schema():
-    period_options = [
+    notice_period_options = [
         schema.Option(value = "1", display = "1 hour"),
         schema.Option(value = "2", display = "2 hours"),
         schema.Option(value = "3", display = "3 hours"),
@@ -394,17 +344,24 @@ def get_schema():
     ]
 
     minimum_duration_options = [
-        schema.Option(value = "1", display = "1 minute"),
-        schema.Option(value = "2", display = "2 minutes"),
-        schema.Option(value = "3", display = "3 minutes"),
-        schema.Option(value = "4", display = "4 minutes"),
-        schema.Option(value = "5", display = "5 minutes"),
-        schema.Option(value = "6", display = "6 minutes"),
-        schema.Option(value = "7", display = "7 minutes"),
-        schema.Option(value = "8", display = "8 minutes"),
-        schema.Option(value = "9", display = "9 minutes"),
-        schema.Option(value = "10", display = "10 minutes"),
+        schema.Option(value = "60", display = "1 minute"),
+        schema.Option(value = "120", display = "2 minutes"),
+        schema.Option(value = "180", display = "3 minutes"),
+        schema.Option(value = "240", display = "4 minutes"),
+        schema.Option(value = "300", display = "5 minutes"),
+        schema.Option(value = "360", display = "6 minutes"),
+        schema.Option(value = "420", display = "7 minutes"),
+        schema.Option(value = "480", display = "8 minutes"),
+        schema.Option(value = "540", display = "9 minutes"),
+        schema.Option(value = "600", display = "10 minutes"),
         schema.Option(value = "0", display = "Display regardless of duration"),
+    ]
+
+    minimum_degrees_above_horizon = [
+        schema.Option(value = "5", display = "Very low passes near horizon or higher"),
+        schema.Option(value = "20", display = "Moderate elevation or higher"),
+        schema.Option(value = "40", display = "High passes, easily visible"),
+        schema.Option(value = "60", display = "Very high passes, right overhead"),
     ]
 
     scroll_speed_options = [
@@ -426,15 +383,15 @@ def get_schema():
         version = "1",
         fields = [
             schema.Text(
-                id = "SpotTheStationRSS",
-                name = "Spot the Station RSS",
+                id = "api_key",
+                name = "N2YO.com API Key",
                 icon = "locationArrow",
-                desc = "Go to spotthestation.nasa.gov Use the map tool to find the nearest location, click the blue marker then 'View sighting opportunities' then get the RSS feed URL.",
+                desc = "Get a free N2YO.com account. Go to More Stuff, then Edit Location. Create your API key here.",
             ),
             schema.Location(
                 id = "location",
                 name = "Location",
-                desc = "Location needed to calculate local time.",
+                desc = "Location needed to calculate local time and get pass information for your location.",
                 icon = "locationDot",
             ),
             schema.Dropdown(
@@ -442,8 +399,8 @@ def get_schema():
                 name = "Notice Period",
                 desc = "Display when sighting is within...",
                 icon = "userClock",
-                options = period_options,
-                default = period_options[len(period_options) - 1].value,
+                options = notice_period_options,
+                default = notice_period_options[len(notice_period_options) - 1].value,
             ),
             schema.Dropdown(
                 id = "minimum_duration",
@@ -452,6 +409,14 @@ def get_schema():
                 icon = "stopwatch",
                 options = minimum_duration_options,
                 default = minimum_duration_options[len(minimum_duration_options) - 1].value,
+            ),
+            schema.Dropdown(
+                id = "minimum_elevation",
+                name = "Types of Passes",
+                desc = "What types of passes do you want to be notified of?",
+                icon = "mountainSun",
+                options = minimum_degrees_above_horizon,
+                default = minimum_degrees_above_horizon[0].value,
             ),
             schema.Dropdown(
                 id = "scroll",
