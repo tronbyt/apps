@@ -22,7 +22,7 @@ ISS_ICON3 = ISS_ICON3_ASSET.readall()
 ISS_ICON4 = ISS_ICON4_ASSET.readall()
 ISS_ICON5 = ISS_ICON5_ASSET.readall()
 
-CACHE_DURATION = 1 * 86400  # 432,000 seconds = 1 days
+CACHE_DURATION = 1 * 86400  # 86400 seconds = 1 days
 
 SPACE_STATION_ID = 25544
 STATION_LOCATION_API = "https://api.n2yo.com/rest/v1/satellite/visualpasses/{space_station_id}/{latitude}/{longitude}/0/10/60/&apiKey={api_key}"
@@ -58,11 +58,8 @@ def magnitude_description(mag):
 
 def is_within_notice_period(startUTC, endUTC, current_time, hours):
     notice_seconds = hours * 3600
-    if (startUTC >= current_time and startUTC <= current_time + notice_seconds) or \
-       (startUTC <= current_time and endUTC >= current_time):
-        return True
-    else:
-        return False
+    return (startUTC >= current_time and startUTC <= current_time + notice_seconds) or \
+           (startUTC <= current_time and endUTC >= current_time)
 
 def format_duration_display(seconds):
     total_secs = int(seconds)
@@ -169,7 +166,7 @@ def main(config):
     station_data = json.decode(SAMPLE_DATA)
 
     # If we have an API key, let's get real data
-    if api_key != None:
+    if api_key:
         resp = http.get(STATION_LOCATION_API.format(space_station_id = SPACE_STATION_ID, latitude = location["lat"], longitude = location["lng"], api_key = api_key), ttl_seconds = CACHE_DURATION)
         if resp.status_code == 200:
             is_sample_data = False
@@ -194,7 +191,7 @@ def main(config):
     else:
         event_start_time = time.from_timestamp(int(sighting_to_display["startUTC"]), 0).in_location(time.tz())
 
-        display_text = "%sIn %s starting %s %s: ISS appears %s from %s, peaks %s° in %s, visible %s" % (
+        display_text = "{}In {} starting {} {}: ISS appears {} from {}, peaks {}° in {}, visible {}".format(
             ("Sample: " if is_sample_data else ""),
             format_locality(location["locality"], 10),
             event_start_time.format("3:04p"),
@@ -244,7 +241,7 @@ def display_instructions():
                     child = render.Text(instructions_2, color = "#f4a306"),
                 ),
                 render.Marquee(
-                    offset_start = (len(title) + len(instructions_2) + len(instructions_1)) * 5,
+                    offset_start = (len(title) + len(instructions_1) + len(instructions_2)) * 5,
                     width = 64,
                     child = render.Text(instructions_3, color = "#f4a306"),
                 ),
@@ -387,6 +384,7 @@ def get_schema():
                 name = "N2YO.com API Key",
                 icon = "locationArrow",
                 desc = "Get a free N2YO.com account. Go to More Stuff, then Edit Location. Create your API key here.",
+                secret = True,
             ),
             schema.Location(
                 id = "location",
