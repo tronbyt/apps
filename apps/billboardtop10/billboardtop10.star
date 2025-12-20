@@ -12,7 +12,6 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-#Updates By Rob 12/18/25
 BILLBOARD_ICON = BILLBOARD_ICON_ASSET.readall()
 
 BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100", "date": "1983-05-14", "source": "Billboard-API"}, "content": {"1": {"rank": "1", "title": "Beat It", "artist": "Michael Jackson", "weeks at no.1": "3", "last week": "1", "peak position": "1", "weeks on chart": "12", "detail": "same"}, "2": {"rank": "2", "title": "Let's Dance", "artist": "David Bowie", "last week": "3", "peak position": "2", "weeks on chart": "8", "detail": "up"}, "3": {"rank": "3", "title": "Jeopardy", "artist": "Greg Kihn Band", "last week": "2", "peak position": "2", "weeks on chart": "16", "detail": "down"}, "4": {"rank": "4", "title": "Overkill", "artist": "Men At Work", "last week": "6", "peak position": "4", "weeks on chart": "6", "detail": "up"}, "5": {"rank": "5", "title": "She Blinded Me With Science", "artist": "Thomas Dolby", "last week": "7", "peak position": "5", "weeks on chart": "13", "detail": "up"}, "6": {"rank": "6", "title": "Come On Eileen", "artist": "Dexy's Midnight Runners", "last week": "4", "peak position": "1", "weeks on chart": "17", "detail": "down"}, "7": {"rank": "7", "title": "Flashdance...What A Feeling", "artist": "Irene Cara", "last week": "13", "peak position": "7", "weeks on chart": "7", "detail": "up"}, "8": {"rank": "8", "title": "Little Red Corvette", "artist": "Prince", "last week": "9", "peak position": "8", "weeks on chart": "12", "detail": "up"}, "9": {"rank": "9", "title": "Solitaire", "artist": "Laura Branigan", "last week": "11", "peak position": "9", "weeks on chart": "9", "detail": "up"}, "10": {"rank": "10", "title": "Der Kommissar", "artist": "After The Fire", "last week": "5", "peak position": "5", "weeks on chart": "14", "detail": "down"}}}"""
@@ -55,7 +54,9 @@ def main(config):
     if ("DateFetched" in top10_data):
         fetched_time = time.parse_time(top10_data["DateFetched"])
 
-    display_count = config.get("count", 10)
+    display_count = int(config.get("count", 10))
+    if display_count not in [5,10]:
+        display_count = 10
 
     row1 = "%s - Top %s" % (getListDisplayFromListValue(selected_list), display_count)
     row2 = getDisplayInfo(top10_data["content"]["1"])
@@ -99,7 +100,7 @@ def main(config):
                     children = [
                         render.Marquee(
                             width = 64,
-                            offset_start = len(row2) * 5,
+                            offset_start = len(row2) * 5,# Assumes 5px/char
                             child = render.Text(row3, font = "5x8", color = config.get("color_3", DEFAULT_COLORS[2])),
                         ),
                     ],
@@ -108,7 +109,7 @@ def main(config):
                     children = [
                         render.Marquee(
                             width = 64,
-                            offset_start = (len(row2) + len(row3)) * 5,
+                            offset_start = (len(row2) + len(row3)) * 5,# Assumes 5px/char
                             child = render.Text(row4, font = "5x8", color = config.get("color_4", DEFAULT_COLORS[3])),
                         ),
                     ],
@@ -167,17 +168,21 @@ def getDisplayInfo(item):
     return display
 
 def getDisplayInfoMulti(items, start, end):
-    display = ""
-    divider = " * "
-    for i in range(10):
-        if i + 1 >= start and i + 1 <= end:
-            key = "%s" % (i + 1)
-            item = items[key]
-            current = int(item["rank"])
-            lastweek = "" if item["last week"] == "None" else int(item["last week"])
-            if i + 1 == end:
-                divider = ""
-            display = display + "%s by %s is #%s%s%s" % (item["title"], item["artist"], item["rank"], getMovementIndicator(current, lastweek), divider)
+    display = ""  # Initialize before starting the loop
+    for i in range(start - 1, end):  # Only loop the needed range
+        key = str(i + 1)
+        item = items[key]
+        current = int(item["rank"])
+        lastweek = "" if item["last week"] == "None" else int(item["last week"])
+
+        divider = "" if i + 1 == end else " * "
+        display += "%s by %s is #%s%s%s" % (
+            item["title"],
+            item["artist"],
+            item["rank"],
+            getMovementIndicator(current, lastweek),
+            divider,
+        )
 
     return display
 
