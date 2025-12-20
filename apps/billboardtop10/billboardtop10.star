@@ -55,7 +55,7 @@ def main(config):
         fetched_time = time.parse_time(top10_data["DateFetched"])
 
     display_count = int(config.get("count", 10))
-    if display_count not in [5,10]:
+    if display_count not in [5, 10]:
         display_count = 10
 
     row1 = "%s - Top %s" % (getListDisplayFromListValue(selected_list), display_count)
@@ -100,7 +100,7 @@ def main(config):
                     children = [
                         render.Marquee(
                             width = 64,
-                            offset_start = len(row2) * 5,# Assumes 5px/char
+                            offset_start = len(row2) * 5,  # Assumes 5px/char
                             child = render.Text(row3, font = "5x8", color = config.get("color_3", DEFAULT_COLORS[2])),
                         ),
                     ],
@@ -109,7 +109,7 @@ def main(config):
                     children = [
                         render.Marquee(
                             width = 64,
-                            offset_start = (len(row2) + len(row3)) * 5,# Assumes 5px/char
+                            offset_start = (len(row2) + len(row3)) * 5,  # Assumes 5px/char
                             child = render.Text(row4, font = "5x8", color = config.get("color_4", DEFAULT_COLORS[3])),
                         ),
                     ],
