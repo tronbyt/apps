@@ -5,5 +5,5 @@ summary: Weather forecast from NWS
 desc: ' National Weather Service data showing the current temperature and weather forecast for today and tomorrow.'
 author: czarandy
 fileName: nws_live_forecast.star
-packageName: nwsliveforecast
+packageName: nws_live_forecast
 recommendedInterval: 5

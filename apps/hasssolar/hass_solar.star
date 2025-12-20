@@ -268,19 +268,24 @@ def fetch_all_entities(config):
 
     return results
 
+def is_available(entity):
+    if not entity:
+        return False
+    state = entity.get("state")
+    if not state or state in ("unknown", "unavailable"):
+        return False
+    return True
+
 def unit_for_entity(entity):
     if "attributes" in entity and "unit_of_measurement" in entity["attributes"]:
         return entity["attributes"]["unit_of_measurement"]
     return None
 
 def render_entity(entity, absolute_value = False, convert_to_kw = False, with_unit = True, dec = None):
-    if not entity:
+    if not is_available(entity):
         return ""
 
     state = entity["state"]
-    if not state or state == "unknown" or state == "unavailable":
-        return ""
-
     value = float(state)
 
     unit = unit_for_entity(entity)
@@ -382,19 +387,20 @@ def main(config):
 
     frames = []
 
-    if power_solar and float(power_solar["state"]) > 0:
+    if is_available(power_solar) and float(power_solar["state"]) > 0:
         solar_anim = green_anim_img
         solar_icon = solar_img
         solar_value = power_solar
         solar_color = GREEN
-    elif soc_battery:  # only do this if we have battery data
-        # change to battery data even though it's still called solar
+
+    elif is_available(soc_battery):
+        # only do this if we have battery data
         solar_icon = battery_mains_list[int(float(soc_battery["state"]) / 25)]  # will be integer 0 - 3
         solar_value = power_battery
-        if int(float(solar_value["state"])) == 0:
+        if is_available(solar_value) and int(float(solar_value["state"])) == 0:
             solar_anim = empty_anim
             solar_color = GRAY
-        elif float(solar_value["state"]) > 0:
+        elif is_available(solar_value) and float(solar_value["state"]) > 0:
             solar_anim = red_anim_img
             solar_color = WHITE
         else:
@@ -406,10 +412,10 @@ def main(config):
         solar_value = power_solar  # should be zero
         solar_color = GRAY
 
-    if power_grid and float(power_grid["state"]) > 9:
+    if is_available(power_grid) and float(power_grid["state"]) > 9:
         grid_anim = green_anim_img
         grid_color = GREEN
-    elif power_grid and float(power_grid["state"]) < -9:
+    elif is_available(power_grid) and float(power_grid["state"]) < -9:
         grid_anim = red_anim_img
         grid_color = RED
     else:
@@ -521,16 +527,20 @@ def main(config):
 
     # CHARGE FRAME shows charge/discharge rate and state of charge percent
     #########################################################
-    if config.bool("show_char", False) and power_battery and soc_battery:
-        if float(power_battery["state"]) < 0:
-            BATTERY_FLOW_ICON = battery_discharge_anim
-            flow_color = RED
-        elif float(power_battery["state"]) > 0:
-            BATTERY_FLOW_ICON = battery_charge_anim
-            flow_color = GREEN
-        else:
+    if config.bool("show_char", False) and (is_available(power_battery) or is_available(soc_battery)):
+        battery_icon_index = 0
+        if is_available(soc_battery):
+            battery_icon_index = int(float(soc_battery["state"]) / 25)
+
+        if not is_available(power_battery) or float(power_battery["state"]) == 0:
             BATTERY_FLOW_ICON = battery_noflow_anim
             flow_color = GRAY
+        elif float(power_battery["state"]) < 0:
+            BATTERY_FLOW_ICON = battery_discharge_anim
+            flow_color = RED
+        else:
+            BATTERY_FLOW_ICON = battery_charge_anim
+            flow_color = GREEN
 
         charge_frame = render.Stack(
             children = [
@@ -555,7 +565,7 @@ def main(config):
                                     main_align = "space_around",
                                     cross_align = "center",
                                     children = [
-                                        render.Image(src = battery_icons_list[int(float(soc_battery["state"]) / 25)].readall()),
+                                        render.Image(src = battery_icons_list[battery_icon_index].readall()),
                                         render.Image(src = BATTERY_FLOW_ICON.readall()),
                                     ],
                                 ),
@@ -568,7 +578,7 @@ def main(config):
                                             content = " " + render_entity(soc_battery, dec = 0),
                                             font = font_medium,
                                             #font = "6x13",
-                                            color = soc_color[int(float(soc_battery["state"]) / 25)],
+                                            color = soc_color[battery_icon_index],
                                         ),
                                         render.Text(
                                             content = " " + render_entity(power_battery, dec = 0),
@@ -626,7 +636,7 @@ def main(config):
         )
         frames.append(consumption_frame)
 
-    if energy_production and energy_consumption:
+    if is_available(energy_production) and is_available(energy_consumption):
         # summary page for daily accumulated generation and consumption
         ###############################################
         summary_frame = render.Stack(
@@ -682,7 +692,7 @@ def main(config):
         frames.append(summary_frame)
 
     # AUTARKY FRAME
-    if autarky_day and autarky_week and autarky_month and autarky_year:
+    if is_available(autarky_day) and is_available(autarky_week) and is_available(autarky_month) and is_available(autarky_year):
         autarky_frame = render.Stack(
             children = [
                 render.Box(
@@ -748,7 +758,7 @@ def main(config):
         frames.append(autarky_frame)
 
     # EV CHARGING FRAME
-    if energy_ev_day and energy_ev_week and energy_ev_month:
+    if is_available(energy_ev_day) and is_available(energy_ev_week) and is_available(energy_ev_month):
         ev_energy_frame = render.Stack(
             children = [
                 render.Column(
@@ -845,7 +855,7 @@ def main(config):
 
     # EV battery soc frame
     ###############################################
-    if soc_ev:
+    if is_available(soc_ev):
         ev_brand = config.get("ev_icon", "TESLA")
         ev_logo = EV_LOGOS.get(ev_brand, EV_LOGOS["TESLA"])
         ev_frame = render.Stack(

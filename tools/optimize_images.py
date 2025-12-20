@@ -17,7 +17,7 @@ OXIPNG_ARGS = ["-o", "4", "--strip", "safe", "--quiet"]
 
 # GIF: gifsicle (Lossless-ish optimization)
 # -O3: Optimize heavily
-GIFSICLE_ARGS = ["-O3", "--no-warnings"]
+GIFSICLE_ARGS = ["-O3", "-Okeep-empty", "--no-warnings"]
 
 # SVG: svgo
 # Default plugins are usually good, maybe ensure it's quiet

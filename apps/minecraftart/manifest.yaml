@@ -5,3 +5,5 @@ summary: Display Minecraft Paintings
 desc: Cycles through all 4x2 Minecraft paintings like an art gallery.
 author: Michael Maxwell
 recommendedInterval: 5
+fileName: minecraft_art.star
+packageName: minecraftart

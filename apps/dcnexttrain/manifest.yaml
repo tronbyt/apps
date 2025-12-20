@@ -5,3 +5,5 @@ summary: Displays WMATA Next Train
 desc: Displays Washington DC Metro train status with filtering options.
 author: cbromano
 recommendedInterval: 5
+fileName: dc_next_train.star
+packageName: dcnexttrain

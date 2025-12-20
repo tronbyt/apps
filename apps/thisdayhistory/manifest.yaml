@@ -5,3 +5,5 @@ summary: Historical events today
 desc: Display 1 random historical event, 1 random person born and 1 random person who dies (if you select those options) today.  Uses Wikipedia information. / Muestra eventos históricos de hoy, incluyendo nacimientos y defunciones (si se selecciona). Usa información de Wikipedia.
 author: jvivona
 recommendedInterval: 5
+fileName: this_day_history.star
+packageName: thisdayhistory

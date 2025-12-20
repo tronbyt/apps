@@ -5,3 +5,5 @@ summary: Display Steam Top Sellers
 desc: A simple app intended to render a random selection from Steam's Top Seller list.
 author: John Kalbac (@johnkalbac)
 recommendedInterval: 5
+fileName: steam_top_sellers.star
+packageName: steamtopsellers

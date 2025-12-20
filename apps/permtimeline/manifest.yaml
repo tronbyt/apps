@@ -5,3 +5,5 @@ summary: Track PERM progress
 desc: PERM Timeline offers a comprehensive view of the processing journey for PERM applications. Discover how many applications were completed today, calculate how long it's been since your submission, and get an estimate of how much time remains before your application is approved. The tool also provides an approximate approval date to help you plan ahead with confidence.
 author: Ihor Burenko
 recommendedInterval: 5
+fileName: perm_timeline.star
+packageName: permtimeline

@@ -5,3 +5,5 @@ summary: Fantasy Football Standings
 desc: Displays the ordered standings with team name and team record.
 author: gmatthews1182
 recommendedInterval: 5
+fileName: espn_ff_standings.star
+packageName: espnffstandings
