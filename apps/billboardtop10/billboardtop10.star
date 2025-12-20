@@ -19,8 +19,7 @@ BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100"
 
 DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
 
-#cache Time 3 Days x 24 hours x 60 minutes x 60 seconds = 259200 seconds
-CACHE_TTL_SECONDS = 259200
+CACHE_TTL_SECONDS = 3 * 24 * 60 * 60  # 3 days in seconds
 
 list_options = [
     schema.Option(
