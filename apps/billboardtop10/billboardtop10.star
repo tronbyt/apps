@@ -7,7 +7,7 @@ Author: Robert Ison
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("images/billboard_icon.png", BILLBOARD_ICON = "file")
+load("images/billboard_icon.png", BILLBOARD_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -20,7 +20,25 @@ BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100"
 DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
 
 #cache Time 3 Days x 24 hours x 60 minutes x 60 seconds = 259200 seconds
+CACHE_TTL_SECONDS = 259200
+
+list_options = [
+    schema.Option(
+        display = "U.S. Songs",
+        value = "hot-100",
+    ),
+    schema.Option(
+        display = "Global Songs",
+        value = "billboard-global-200",
+    ),
+]
+
+def main(config):
+    #cache Time 3 Days x 24 hours x 60 minutes x 60 seconds = 259200 seconds
     top10_data = None
+    api_key = config.get("api_key")
+    selected_list = config.get("list")
+
     if api_key:
         top10_data = get_top10_information(api_key, selected_list)
 
@@ -28,6 +46,7 @@ DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
     if sample_data:
         if api_key:
             print("Failed to get data from the api")
+
         # Use sample data if no API key or if API call fails
         top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
     else:
@@ -59,7 +78,7 @@ DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
             children = [
                 render.Row(
                     children = [
-                        render.Image(src = BILLBOARD_ICON.readall()),
+                        render.Image(src = BILLBOARD_ICON),
                         render.Box(width = 1, height = 6, color = "#000000"),
                         render.Marquee(
                             width = 57,
