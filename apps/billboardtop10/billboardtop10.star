@@ -134,21 +134,31 @@ def get_top10_information(top10_alive_key, list):
         ttl_seconds = CACHE_TTL_SECONDS,
     )
 
-    # Try to decode JSON safely
-    data = res.json()
-
-    # API-level error even with 200
-    if res.status_code == 200 and "error" not in data:
+    if res.status_code != 200:
         return {
-            "ok": True,
-            "data": data,
+            "ok": False,
+            "status": res.status_code,
+            "error": "HTTP error {}".format(res.status_code),
         }
 
-    # Failure case
+    data = res.json()
+    if not data:
+        return {
+            "ok": False,
+            "status": res.status_code,
+            "error": "Empty or invalid JSON response",
+        }
+
+    if "error" in data:
+        return {
+            "ok": False,
+            "status": res.status_code,
+            "error": data.get("error", "Unknown API error"),
+        }
+
     return {
-        "ok": False,
-        "status": res.status_code,
-        "error": data.get("error", "Unknown API error"),
+        "ok": True,
+        "data": data,
     }
 
 def getMovementIndicator(this, last):
@@ -185,7 +195,8 @@ def getDisplayInfoMulti(items, start, end):
         key = str(i + 1)
         item = items[key]
         current = int(item["rank"])
-        lastweek = 0 if item.get("last week", "0") in ["", "None", None] else int(item["last week"])
+        raw_lastweek = item.get("last week")
+        lastweek = 0 if raw_lastweek in (None, "None", "") else int(raw_lastweek)
 
         divider = "" if i + 1 == end else " * "
         display += "{} by {} is #{}{}{}".format(
