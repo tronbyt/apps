@@ -182,6 +182,7 @@ MOUNTAIN_DATA = [
         "Longitude Degrees": -105.5855,
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1737.36,
+        "Class": "3",
         "Outline": CRESTONE_PEAK_ASSET.readall(),
         "Description": "Often called \"The Peak,\" this remote mountain is the second highest summit in the Sangre de Cristo Range. It has two summits, with the western one being 34 ft. higher.",
     },
