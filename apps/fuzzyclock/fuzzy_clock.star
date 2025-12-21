@@ -9,13 +9,6 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DEFAULT_LOCATION = {
-    "lat": 40.7,
-    "lng": -74.0,
-    "locality": "Brooklyn",
-}
-DEFAULT_TIMEZONE = "US/Eastern"
-
 numbersPerLang = {
     "nl-NL": {
         1: "ÉÉN",
