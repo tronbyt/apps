@@ -13,12 +13,10 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 BILLBOARD_ICON = BILLBOARD_ICON_ASSET.readall()
-
 BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100", "date": "1983-05-14", "source": "Billboard-API"}, "content": {"1": {"rank": "1", "title": "Beat It", "artist": "Michael Jackson", "weeks at no.1": "3", "last week": "1", "peak position": "1", "weeks on chart": "12", "detail": "same"}, "2": {"rank": "2", "title": "Let's Dance", "artist": "David Bowie", "last week": "3", "peak position": "2", "weeks on chart": "8", "detail": "up"}, "3": {"rank": "3", "title": "Jeopardy", "artist": "Greg Kihn Band", "last week": "2", "peak position": "2", "weeks on chart": "16", "detail": "down"}, "4": {"rank": "4", "title": "Overkill", "artist": "Men At Work", "last week": "6", "peak position": "4", "weeks on chart": "6", "detail": "up"}, "5": {"rank": "5", "title": "She Blinded Me With Science", "artist": "Thomas Dolby", "last week": "7", "peak position": "5", "weeks on chart": "13", "detail": "up"}, "6": {"rank": "6", "title": "Come On Eileen", "artist": "Dexy's Midnight Runners", "last week": "4", "peak position": "1", "weeks on chart": "17", "detail": "down"}, "7": {"rank": "7", "title": "Flashdance...What A Feeling", "artist": "Irene Cara", "last week": "13", "peak position": "7", "weeks on chart": "7", "detail": "up"}, "8": {"rank": "8", "title": "Little Red Corvette", "artist": "Prince", "last week": "9", "peak position": "8", "weeks on chart": "12", "detail": "up"}, "9": {"rank": "9", "title": "Solitaire", "artist": "Laura Branigan", "last week": "11", "peak position": "9", "weeks on chart": "9", "detail": "up"}, "10": {"rank": "10", "title": "Der Kommissar", "artist": "After The Fire", "last week": "5", "peak position": "5", "weeks on chart": "14", "detail": "down"}}}"""
-
 DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
-
 CACHE_TTL_SECONDS = 3 * 24 * 60 * 60  # 3 days in seconds
+DEFAULT_SCREEN_WIDTH = 64
 
 list_options = [
     schema.Option(
@@ -32,33 +30,37 @@ list_options = [
 ]
 
 def main(config):
-    #cache Time 3 Days x 24 hours x 60 minutes x 60 seconds = 259200 seconds
-    top10_data = None
+    top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
     api_key = config.get("api_key")
-    selected_list = config.get("list")
+    selected_list = config.get("list", list_options[0].value)
+    screen_width = int(config.get("screen_width", DEFAULT_SCREEN_WIDTH))
+
+    is_sample_data = True
 
     if api_key:
-        top10_data = get_top10_information(api_key, selected_list)
+        result = get_top10_information(api_key, selected_list)
 
-    sample_data = top10_data == None
-    if sample_data:
-        if api_key:
-            print("Failed to get data from the api")
+        if result["ok"]:
+            top10_data = result["data"]
+            is_sample_data = False
+        else:
+            error_msg = result["error"]
+            status = result["status"]
 
-        # Use sample data if no API key or if API call fails
-        top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
-    else:
-        top10_data["DateFetched"] = time.now().format("2006-01-02T15:04:05Z07:00")
+            return render.Root(
+                child = render.Marquee(
+                    width = screen_width,
+                    child = render.Text("API error: {} {}".format(error_msg, status)),
+                ),
+            )
 
-    fetched_time = None
-    if ("DateFetched" in top10_data):
-        fetched_time = time.parse_time(top10_data["DateFetched"])
+    # if we make it here, we have either display data or real data
 
     display_count = int(config.get("count", 10))
     if display_count not in [5, 10]:
         display_count = 10
 
-    row1 = "%s - Top %s" % (getListDisplayFromListValue(selected_list), display_count)
+    row1 = "{} - Top {}".format(getListDisplayFromListValue(selected_list), display_count)
     row2 = getDisplayInfo(top10_data["content"]["1"])
 
     if (display_count == 10):
@@ -68,10 +70,8 @@ def main(config):
         row3 = getDisplayInfoMulti(top10_data["content"], 2, 3)
         row4 = getDisplayInfoMulti(top10_data["content"], 4, 5)
 
-    if fetched_time != None:
-        row4 = "%s -- %s" % (row4, fetched_time.format("Mon Jan 2 2006 15:04"))
-    elif sample_data:
-        row4 = "%s -- %s" % (row4, "Sample Data")
+    if is_sample_data:
+        row4 = "{} - Sample Data".format(row4)
 
     return render.Root(
         render.Column(
@@ -81,7 +81,7 @@ def main(config):
                         render.Image(src = BILLBOARD_ICON),
                         render.Box(width = 1, height = 6, color = "#000000"),
                         render.Marquee(
-                            width = 57,
+                            width = screen_width - 7,  # Width less icon width
                             height = 8,
                             child = render.Text(row1, font = "tb-8", color = config.get("color_1", DEFAULT_COLORS[0])),
                         ),
@@ -90,7 +90,7 @@ def main(config):
                 render.Row(
                     children = [
                         render.Marquee(
-                            width = 64,
+                            width = screen_width,
                             offset_start = 15,
                             child = render.Text(row2, font = "5x8", color = config.get("color_2", DEFAULT_COLORS[1])),
                         ),
@@ -99,7 +99,7 @@ def main(config):
                 render.Row(
                     children = [
                         render.Marquee(
-                            width = 64,
+                            width = screen_width,
                             offset_start = len(row2) * 5,  # Assumes 5px/char
                             child = render.Text(row3, font = "5x8", color = config.get("color_3", DEFAULT_COLORS[2])),
                         ),
@@ -108,7 +108,7 @@ def main(config):
                 render.Row(
                     children = [
                         render.Marquee(
-                            width = 64,
+                            width = screen_width,
                             offset_start = (len(row2) + len(row3)) * 5,  # Assumes 5px/char
                             child = render.Text(row4, font = "5x8", color = config.get("color_4", DEFAULT_COLORS[3])),
                         ),
@@ -122,7 +122,8 @@ def main(config):
 
 def get_top10_information(top10_alive_key, list):
     thetime = most_recent_saturday(time.now())
-    url = "https://billboard-api2.p.rapidapi.com/%s" % list
+    url = "https://billboard-api2.p.rapidapi.com/{}".format(list)
+
     res = http.get(
         url = url,
         params = {"date": thetime, "range": "1-10"},
@@ -133,19 +134,30 @@ def get_top10_information(top10_alive_key, list):
         ttl_seconds = CACHE_TTL_SECONDS,
     )
 
-    if res.status_code == 200:
-        return res.json()
-    else:
-        print(res.status_code)
-        return None
+    # Try to decode JSON safely
+    data = res.json()
+
+    # API-level error even with 200
+    if res.status_code == 200 and "error" not in data:
+        return {
+            "ok": True,
+            "data": data,
+        }
+
+    # Failure case
+    return {
+        "ok": False,
+        "status": res.status_code,
+        "error": data.get("error", "Unknown API error"),
+    }
 
 def getMovementIndicator(this, last):
     movementIndicator = ""
     if (last != "" and last > 0):
         if this < last:
-            movementIndicator = " (↑%s)" % (last - this)
+            movementIndicator = " (↑{})".format(last - this)
         elif last < this:
-            movementIndicator = " (↓%s)" % (this - last)
+            movementIndicator = " (↓{})".format(this - last)
 
     return movementIndicator
 
@@ -164,7 +176,7 @@ def getDisplayInfo(item):
     else:
         lastweek = int(lastweek)
 
-    display = "%s by %s #%s%s %s weeks on charts" % (item["title"], item["artist"], item["rank"], getMovementIndicator(current, lastweek), item["weeks on chart"])
+    display = "{} by {} #{}{} {} weeks on charts".format(item["title"], item["artist"], item["rank"], getMovementIndicator(current, lastweek), item["weeks on chart"])
     return display
 
 def getDisplayInfoMulti(items, start, end):
@@ -173,10 +185,10 @@ def getDisplayInfoMulti(items, start, end):
         key = str(i + 1)
         item = items[key]
         current = int(item["rank"])
-        lastweek = "" if item["last week"] == "None" else int(item["last week"])
+        lastweek = 0 if item.get("last week", "0") in ["", "None", None] else int(item["last week"])
 
         divider = "" if i + 1 == end else " * "
-        display += "%s by %s is #%s%s%s" % (
+        display += "{} by {} is #{}{}{}".format(
             item["title"],
             item["artist"],
             item["rank"],
@@ -353,6 +365,17 @@ def get_schema():
                 desc = "Line 4 Color",
                 icon = "brush",
                 default = DEFAULT_COLORS[3],
+            ),
+            schema.Dropdown(
+                id = "screen_width",
+                name = "Screen Width",
+                desc = "Device Width",
+                default = "64",
+                icon = "textWidth",
+                options = [
+                    schema.Option(display = "Tidbyt or Tronbyt 64x32", value = "64"),
+                    schema.Option(display = "Tronbyt 128x32", value = "128"),
+                ],
             ),
         ],
     )
