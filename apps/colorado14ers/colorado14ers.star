@@ -903,7 +903,8 @@ def main(config):
         return show_instructions_screen()
 
     show_mountain_outline = config.bool("outline", True)
-    is_metric_system = config.bool("measurement", True)
+
+    is_metric_system = config.get("measurement", MEASUREMENT_OPTIONS[0].value) == MEASUREMENT_OPTIONS[0].value
 
     display_candidates = []
     display_type = config.get("display", DISPLAY_OPTIONS[0].value)
