@@ -77,36 +77,6 @@ def format_duration_display(seconds):
     else:
         return str(secs) + " seconds"
 
-def time_until_pass(startUTC, current_time):
-    """
-    Returns a human-readable string for how soon a pass starts.
-    Shows days if > 24 hours, hours if > 59 minutes, else just minutes.
-    """
-
-    # Calculate difference in seconds
-    delta = startUTC - current_time
-
-    if delta <= 0:
-        return "Now or past"
-
-    # Compute days, hours, minutes
-    days = delta // 86400  # 24*60*60
-    remainder = delta % 86400
-    hours = remainder // 3600
-    remainder = remainder % 3600
-    minutes = remainder // 60
-
-    # Build string based on magnitude
-    parts = []
-    if days > 0:
-        parts.append(str(days) + " day" + ("s" if days != 1 else ""))
-    if hours > 0 or days > 0:  # show hours if > 0 or if days are shown
-        parts.append(str(hours) + " hour" + ("s" if hours != 1 else ""))
-    if minutes > 0 or (days == 0 and hours == 0):
-        parts.append(str(minutes) + " minute" + ("s" if minutes != 1 else ""))
-
-    return " ".join(parts)
-
 def two_character_time_date_part(number):
     if len(str(number)) == 1:
         return "0" + str(number)
@@ -168,9 +138,20 @@ def main(config):
     # If we have an API key, let's get real data
     if api_key:
         resp = http.get(STATION_LOCATION_API.format(space_station_id = SPACE_STATION_ID, latitude = location["lat"], longitude = location["lng"], api_key = api_key), ttl_seconds = CACHE_DURATION)
-        if resp.status_code == 200:
+
+        resp_json = resp.json()
+        if resp.status_code == 200 and "error" not in resp_json:
             is_sample_data = False
-            station_data = resp.json()
+            station_data = resp_json
+        else:
+            # Notify that their API failed
+            error_msg = resp_json.get("error", resp.status_code)
+            return render.Root(
+                child=render.Marquee(
+                    width=64,
+                    child=render.Text("API request failed: {}".format(error_msg))
+                )
+            )
 
     if station_data and "passes" in station_data:
         passes = station_data["passes"]
@@ -191,17 +172,17 @@ def main(config):
     else:
         event_start_time = time.from_timestamp(int(sighting_to_display["startUTC"]), 0).in_location(time.tz())
 
-        display_text = "{}In {} starting {} {}: ISS appears {} from {}, peaks {}° in {}, visible {}".format(
-            ("Sample: " if is_sample_data else ""),
-            format_locality(location["locality"], 10),
-            event_start_time.format("3:04p"),
-            event_start_time.format("Jan 2"),
-            magnitude_description(sighting_to_display["mag"]),
+        details_text = "ISS appears from the {}, peaks at {}° in the {} for {} and disappears in the {}, {}.".format(
             sighting_to_display["startAzCompass"],
             int(sighting_to_display["maxEl"]),
             sighting_to_display["maxAzCompass"],
             format_duration_display(sighting_to_display["duration"]),
+            sighting_to_display["endAzCompass"],
+            magnitude_description(sighting_to_display["mag"]),
         )
+        display_text = ("Sample: " if is_sample_data else "") + details_text
+
+        print(display_text)
 
         return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, config)
 
