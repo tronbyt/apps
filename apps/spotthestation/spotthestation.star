@@ -180,9 +180,8 @@ def main(config):
             sighting_to_display["endAzCompass"],
             magnitude_description(sighting_to_display["mag"]),
         )
+        
         display_text = ("Sample: " if is_sample_data else "") + details_text
-
-        print(display_text)
 
         return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, config)
 
