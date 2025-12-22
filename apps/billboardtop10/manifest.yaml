@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: billboardtop10.star
 packageName: billboardtop10
 recommendedInterval: 5
+supports2x: true
