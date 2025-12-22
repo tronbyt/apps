@@ -218,7 +218,11 @@ def main(config):
         info_bar = [add_padding_to_child_element(render.Text(msg, color = "#666", font = FONT), SCREEN_WIDTH - (len(msg) * FONT_WIDTH), SCREEN_HEIGHT - FONT_HEIGHT)]
 
     all_elements = [render.Animation(children = animation_frames), render.Stack(children = info_bar)]
-    return render.Root(child = render.Stack(children = all_elements), show_full_animation = True, delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)))
+    return get_render_root(all_elements, int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)))
+    #return render.Root(child = render.Stack(children = all_elements), show_full_animation = True, delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)))
+
+def get_render_root(children, delay):
+    return render.Root(child = render.Stack(children = children), show_full_animation = True, delay = delay)
 
 def get_schema():
     scroll_speed_options = [schema.Option(display = d, value = v) for d, v in [("Slow Scroll", "60"), ("Medium Scroll", "45"), ("Fast Scroll", "30")]]
