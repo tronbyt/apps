@@ -7,3 +7,4 @@ author: Jeremy Harnden
 fileName: archerdog.star
 packageName: archerdog
 recommendedInterval: 5
+supports2x: true
