@@ -98,8 +98,12 @@ def get_cpi_data(api_key):
         return json.encode({"status": "ERROR", "message": "HTTP %d" % response.status_code})
 
     data = response.json()
+
     if data.get("status") != "REQUEST_SUCCEEDED":
-        return json.encode({"status": "ERROR", "message": data.get("message", "API error")})
+        message = data.get("message", "API error")
+        if type(message) == list:
+            message = message[0] if message else "API error"
+        return json.encode({"status": "ERROR", "message": str(message)})
 
     return json.encode(data)
 
@@ -163,7 +167,10 @@ def main(config):
     api_key = config.get("api_key", "")
     if api_key != "":
         data_json = get_cpi_data(api_key)
+
     parsed_data = json.decode(data_json)
+    if parsed_data.get("status") == "ERROR":
+        return []
 
     # Determine series to display
     series_data_sets = [SELECTED_SERIES_DATA[0][0]] if config.get("display_type") == "CPI" else [item[0] for item in SELECTED_SERIES_DATA if config.bool(item[0], False)]
