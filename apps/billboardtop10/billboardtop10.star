@@ -8,15 +8,21 @@ Author: Robert Ison
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/billboard_icon.png", BILLBOARD_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 BILLBOARD_ICON = BILLBOARD_ICON_ASSET.readall()
+
 BILLBOARD_SAMPLE_DATA = """{"info": {"category": "Billboard", "chart": "HOT 100", "date": "1983-05-14", "source": "Billboard-API"}, "content": {"1": {"rank": "1", "title": "Beat It", "artist": "Michael Jackson", "weeks at no.1": "3", "last week": "1", "peak position": "1", "weeks on chart": "12", "detail": "same"}, "2": {"rank": "2", "title": "Let's Dance", "artist": "David Bowie", "last week": "3", "peak position": "2", "weeks on chart": "8", "detail": "up"}, "3": {"rank": "3", "title": "Jeopardy", "artist": "Greg Kihn Band", "last week": "2", "peak position": "2", "weeks on chart": "16", "detail": "down"}, "4": {"rank": "4", "title": "Overkill", "artist": "Men At Work", "last week": "6", "peak position": "4", "weeks on chart": "6", "detail": "up"}, "5": {"rank": "5", "title": "She Blinded Me With Science", "artist": "Thomas Dolby", "last week": "7", "peak position": "5", "weeks on chart": "13", "detail": "up"}, "6": {"rank": "6", "title": "Come On Eileen", "artist": "Dexy's Midnight Runners", "last week": "4", "peak position": "1", "weeks on chart": "17", "detail": "down"}, "7": {"rank": "7", "title": "Flashdance...What A Feeling", "artist": "Irene Cara", "last week": "13", "peak position": "7", "weeks on chart": "7", "detail": "up"}, "8": {"rank": "8", "title": "Little Red Corvette", "artist": "Prince", "last week": "9", "peak position": "8", "weeks on chart": "12", "detail": "up"}, "9": {"rank": "9", "title": "Solitaire", "artist": "Laura Branigan", "last week": "11", "peak position": "9", "weeks on chart": "9", "detail": "up"}, "10": {"rank": "10", "title": "Der Kommissar", "artist": "After The Fire", "last week": "5", "peak position": "5", "weeks on chart": "14", "detail": "down"}}}"""
+
 DEFAULT_COLORS = ["#FFF", "#f41b1c", "#ffe400", "#00b5f8"]
-CACHE_TTL_SECONDS = 3 * 24 * 60 * 60  # 3 days in seconds
-DEFAULT_SCREEN_WIDTH = 64
+
+#cache Time 3 Days x 24 hours x 60 minutes x 60 seconds = 259200 seconds
+CACHE_TTL_SECONDS = 259200
+
+SCREEN_WIDTH = canvas.width()
+ICON_WIDTH = 7
 
 list_options = [
     schema.Option(
@@ -30,35 +36,29 @@ list_options = [
 ]
 
 def main(config):
-    top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
-    api_key = config.get("api_key")
-    selected_list = config.get("list", list_options[0].value)
-    screen_width = int(config.get("screen_width", DEFAULT_SCREEN_WIDTH))
+    # US, Global,
 
-    is_sample_data = True
+    font_type = "5x8"
+    if canvas.is2x():
+        font_type = "terminus-16"
+
+    selected_list = config.get("list", list_options[0].value)
+
+    api_key = config.get("api_key")
 
     if api_key:
-        result = get_top10_information(api_key, selected_list)
-
-        if result["ok"]:
-            top10_data = result["data"]
-            is_sample_data = False
-        else:
-            error_msg = result["error"]
-            status = result["status"]
-
+        top10_data = get_top10_information(api_key, selected_list)
+        if top10_data == None or "content" not in top10_data:
             return render.Root(
                 child = render.Marquee(
-                    width = screen_width,
-                    child = render.Text("API error: {} {}".format(error_msg, status)),
+                    width = SCREEN_WIDTH,
+                    child = render.Text("Billboard API error"),
                 ),
             )
-
-    # if we make it here, we have either display data or real data
+    else:
+        top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
 
     display_count = int(config.get("count", 10))
-    if display_count not in [5, 10]:
-        display_count = 10
 
     row1 = "{} - Top {}".format(getListDisplayFromListValue(selected_list), display_count)
     row2 = getDisplayInfo(top10_data["content"]["1"])
@@ -70,8 +70,7 @@ def main(config):
         row3 = getDisplayInfoMulti(top10_data["content"], 2, 3)
         row4 = getDisplayInfoMulti(top10_data["content"], 4, 5)
 
-    if is_sample_data:
-        row4 = "{} - Sample Data".format(row4)
+    row4 += " (Sample Data)" if not api_key else ""
 
     return render.Root(
         render.Column(
@@ -81,43 +80,43 @@ def main(config):
                         render.Image(src = BILLBOARD_ICON),
                         render.Box(width = 1, height = 6, color = "#000000"),
                         render.Marquee(
-                            width = screen_width - 7,  # Width less icon width
+                            width = SCREEN_WIDTH - ICON_WIDTH,
                             height = 8,
-                            child = render.Text(row1, font = "tb-8", color = config.get("color_1", DEFAULT_COLORS[0])),
+                            child = render.Text(row1, font = font_type, color = config.get("color_1", DEFAULT_COLORS[0])),
                         ),
                     ],
                 ),
                 render.Row(
                     children = [
                         render.Marquee(
-                            width = screen_width,
+                            width = SCREEN_WIDTH,
                             offset_start = 15,
-                            child = render.Text(row2, font = "5x8", color = config.get("color_2", DEFAULT_COLORS[1])),
+                            child = render.Text(row2, font = font_type, color = config.get("color_2", DEFAULT_COLORS[1])),
                         ),
                     ],
                 ),
                 render.Row(
                     children = [
                         render.Marquee(
-                            width = screen_width,
-                            offset_start = len(row2) * 5,  # Assumes 5px/char
-                            child = render.Text(row3, font = "5x8", color = config.get("color_3", DEFAULT_COLORS[2])),
+                            width = SCREEN_WIDTH,
+                            offset_start = len(row2) * 5,
+                            child = render.Text(row3, font = font_type, color = config.get("color_3", DEFAULT_COLORS[2])),
                         ),
                     ],
                 ),
                 render.Row(
                     children = [
                         render.Marquee(
-                            width = screen_width,
-                            offset_start = (len(row2) + len(row3)) * 5,  # Assumes 5px/char
-                            child = render.Text(row4, font = "5x8", color = config.get("color_4", DEFAULT_COLORS[3])),
+                            width = SCREEN_WIDTH,
+                            offset_start = (len(row2) + len(row3)) * 5,
+                            child = render.Text(row4, font = font_type, color = config.get("color_4", DEFAULT_COLORS[3])),
                         ),
                     ],
                 ),
             ],
         ),
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
+        delay = int(int(config.get("scroll", 45)) / 2) if canvas.is2x() else int(config.get("scroll", 45)),
     )
 
 def get_top10_information(top10_alive_key, list):
@@ -135,31 +134,16 @@ def get_top10_information(top10_alive_key, list):
     )
 
     if res.status_code != 200:
-        return {
-            "ok": False,
-            "status": res.status_code,
-            "error": "HTTP error {}".format(res.status_code),
-        }
+        return None
 
     data = res.json()
-    if not data:
-        return {
-            "ok": False,
-            "status": res.status_code,
-            "error": "Empty or invalid JSON response",
-        }
+    if not data or "content" not in data:
+        return None
 
     if "error" in data:
-        return {
-            "ok": False,
-            "status": res.status_code,
-            "error": data.get("error", "Unknown API error"),
-        }
+        return None
 
-    return {
-        "ok": True,
-        "data": data,
-    }
+    return data
 
 def getMovementIndicator(this, last):
     movementIndicator = ""
@@ -190,23 +174,23 @@ def getDisplayInfo(item):
     return display
 
 def getDisplayInfoMulti(items, start, end):
-    display = ""  # Initialize before starting the loop
-    for i in range(start - 1, end):  # Only loop the needed range
+    display = ""
+    divider = " * "
+    for i in range(start - 1, end):
         key = str(i + 1)
         item = items[key]
         current = int(item["rank"])
-        raw_lastweek = item.get("last week")
-        lastweek = 0 if raw_lastweek in (None, "None", "") else int(raw_lastweek)
-
-        divider = "" if i + 1 == end else " * "
-        display += "{} by {} is #{}{}{}".format(
+        lw = item.get("last week", "0")
+        lastweek = 0 if lw in ["", "None", None] else int(lw)
+        if i + 1 == end:
+            divider = ""
+        display = display + "{} by {} is #{}{}{}".format(
             item["title"],
             item["artist"],
             item["rank"],
             getMovementIndicator(current, lastweek),
             divider,
         )
-
     return display
 
 def _is_leap_year(y):
@@ -327,7 +311,7 @@ def get_schema():
             ),
             schema.Dropdown(
                 id = "list",
-                name = "Billboard Listing",
+                name = "Billboard List",
                 desc = "",
                 icon = "list",
                 default = list_options[0].value,
@@ -376,17 +360,6 @@ def get_schema():
                 desc = "Line 4 Color",
                 icon = "brush",
                 default = DEFAULT_COLORS[3],
-            ),
-            schema.Dropdown(
-                id = "screen_width",
-                name = "Screen Width",
-                desc = "Device Width",
-                default = "64",
-                icon = "textWidth",
-                options = [
-                    schema.Option(display = "Tidbyt or Tronbyt 64x32", value = "64"),
-                    schema.Option(display = "Tronbyt 128x32", value = "128"),
-                ],
             ),
         ],
     )
