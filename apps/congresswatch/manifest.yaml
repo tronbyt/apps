@@ -7,3 +7,4 @@ author: Robert Ison
 recommendedInterval: 5
 fileName: congress_watch.star
 packageName: congresswatch
+supports2x: true
