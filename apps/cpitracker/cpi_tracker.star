@@ -49,8 +49,6 @@ display_time_period = [
     schema.Option(display = "5 Years", value = "60"),
 ]
 
-# ------------------------- Helpers -------------------------
-
 def get_category_options(display_type):
     if display_type != "Categories":
         return []
@@ -79,8 +77,6 @@ def get_series_color_name(series_id):
 
 def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
     return render.Padding(pad = (left, top, right, bottom), child = element)
-
-# ------------------------- Data Fetching -------------------------
 
 def get_cpi_data(api_key):
     url = "https://api.bls.gov/publicAPI/v2/timeseries/data/"
@@ -152,8 +148,6 @@ def plot_cpi_data(values, color, show_info_bar):
     height = SCREEN_HEIGHT - 7 if show_info_bar else SCREEN_HEIGHT
     return render.Plot(data = data, color = color, width = SCREEN_WIDTH, height = height)
 
-# ------------------------- Main -------------------------
-
 def main(config):
     show_instructions = config.bool("instructions", False)
     if show_instructions:
@@ -205,19 +199,19 @@ def main(config):
     else:
         first_item = series_data[0]
 
-    messages.append(render.Text("     %s months CPI data to %s %s " % (time_period, first_item["periodName"], first_item["year"]), color = "#fff"))
+    messages.append(render.Text("     {} months CPI data to {} {} ".format(time_period, first_item["periodName"], first_item["year"]), color = "#fff"))
 
     for s in series_data_sets:
-        messages.append(render.Text("%s in %s " % (get_series_name(s), get_series_color_name(s)), color = get_series_color(s)))
+        messages.append(render.Text("{} in {} ".format(get_series_name(s), get_series_color_name(s)), color = get_series_color(s)))
 
     if show_info_bar:
         info_bar = [add_padding_to_child_element(render.Marquee(width = SCREEN_WIDTH, child = render.Row(messages), offset_start = 0, offset_end = 0, align = "start"), 0, SCREEN_HEIGHT - FONT_HEIGHT)]
     else:
-        msg = "%s months" % time_period
+        msg = "{} months".format(time_period)
         info_bar = [add_padding_to_child_element(render.Text(msg, color = "#666", font = FONT), SCREEN_WIDTH - (len(msg) * FONT_WIDTH), SCREEN_HEIGHT - FONT_HEIGHT)]
 
     all_elements = [render.Animation(children = animation_frames), render.Stack(children = info_bar)]
-    return render.Root(child = render.Stack(children = all_elements), show_full_animation = True, delay = int(config.get("scroll", 45)))
+    return render.Root(child = render.Stack(children = all_elements), show_full_animation = True, delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)))
 
 def get_schema():
     scroll_speed_options = [schema.Option(display = d, value = v) for d, v in [("Slow Scroll", "60"), ("Medium Scroll", "45"), ("Fast Scroll", "30")]]
