@@ -94,8 +94,8 @@ def main(config):
         congress_number = congress_session_body["congress"]["number"]
     else:
         #Get the current congress
-        congress_session_url = "{}congress/current?api_key={}&format=json".format(CONGRESS_API_URL, api_key)
-        congress_session_res = http.get(url = congress_session_url, params = {"api_key": api_key})
+        congress_session_url = "{}congress/current".format(CONGRESS_API_URL)
+        congress_session_res = http.get(url = congress_session_url, params = {"api_key": api_key, "format": "json"})
         congress_session_body = json.decode(congress_session_res.body())
         if "congress" not in congress_session_body:
             fail("Invalid congress session data")
@@ -175,7 +175,7 @@ def main(config):
                     children = [
                         render.Marquee(
                             width = SCREEN_WIDTH,
-                            offset_start = len(row2) * 5,
+                            offset_start = len(row2) * (8 if canvas.is2x() else 5),
                             child = render.Text(row3, font = font_type, color = "#f4a306"),
                         ),
                     ],
@@ -192,10 +192,6 @@ def filter_bills(data, period, source):
         return []
 
     bills = data["bills"]
-
-    # Validate bills is list
-    if not bills or len(bills) == 0:
-        return []
 
     filtered_data = []
     period_days = int(period)
@@ -241,7 +237,6 @@ def randomize(min, max):
     return int(rand * (max - min) + min)
 
 def get_cachable_data(url, timeout):
-    #res = http.get(url = url, ttl_seconds = timeout, headers = {"API_KEY": config.get("congress_api_key")})
     res = http.get(url = url, ttl_seconds = timeout)
 
     if res.status_code != 200:
