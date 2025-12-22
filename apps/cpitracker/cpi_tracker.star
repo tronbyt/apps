@@ -14,7 +14,6 @@ load("time.star", "time")
 SAMPLE_DATA = """{"Results":{"series":[{"seriesID":"CUUR0000SA0","data":[{"period":"M03","periodName":"March","value":"319.799","year":"2025"},{"period":"M02","periodName":"February","value":"319.082","year":"2025"},{"period":"M01","periodName":"January","value":"317.671","year":"2025"},{"period":"M12","periodName":"December","value":"315.605","year":"2024"},{"period":"M11","periodName":"November","value":"315.493","year":"2024"},{"period":"M10","periodName":"October","value":"315.664","year":"2024"}]}]}}"""
 
 TIME_OUT_IN_SECONDS = 172800
-CPI_DATA_SET_KEY_NAME = "cpi_tracker_CPIDataSetKeyName"
 CPI_CON_COLORS = ["#B31942", "#FFFFFF", "#0A3161", "#B31942", "#FFFFFF"]
 
 SELECTED_SERIES_DATA = [
@@ -31,6 +30,9 @@ SELECTED_SERIES_DATA = [
 
 SCREEN_HEIGHT = canvas.height()
 SCREEN_WIDTH = canvas.width()
+FONT = "terminus-16" if canvas.is2x() else "5x8"
+FONT_HEIGHT = 16 if canvas.is2x() else 8
+FONT_WIDTH = 9 if canvas.is2x() else 5
 
 display_type = [
     schema.Option(display = "Display The Main CPI Index", value = "CPI"),
@@ -126,8 +128,6 @@ def extract_filtered_data(parsed_data, series_name, months):
             formatted.append(float(value))
     return formatted
 
-# ------------------------- Rendering -------------------------
-
 def display_instructions(config):
     title = "Consumer Price Index (CPI) Data"
     instructions = [
@@ -137,10 +137,10 @@ def display_instructions(config):
     ]
     return render.Root(
         render.Column(children = [
-            render.Marquee(width = SCREEN_WIDTH, child = render.Text(title, color = CPI_CON_COLORS[0], font = "5x8")),
-            render.Marquee(width = SCREEN_WIDTH, child = render.Text(instructions[0], color = CPI_CON_COLORS[1]), offset_start = len(title) * 5),
-            render.Marquee(width = SCREEN_WIDTH, child = render.Text(instructions[1], color = CPI_CON_COLORS[2]), offset_start = (len(title) + len(instructions[0])) * 5),
-            render.Marquee(width = SCREEN_WIDTH, child = render.Text(instructions[2], color = CPI_CON_COLORS[3]), offset_start = (len(title) + len(instructions[0]) + len(instructions[1])) * 5),
+            render.Marquee(width = SCREEN_WIDTH, child = render.Text(title, color = CPI_CON_COLORS[0], font = FONT)),
+            render.Marquee(width = SCREEN_WIDTH, child = render.Text(instructions[0], color = CPI_CON_COLORS[1]), offset_start = len(title) * FONT_WIDTH),
+            render.Marquee(width = SCREEN_WIDTH, child = render.Text(instructions[1], color = CPI_CON_COLORS[2]), offset_start = (len(title) + len(instructions[0])) * FONT_WIDTH),
+            render.Marquee(width = SCREEN_WIDTH, child = render.Text(instructions[2], color = CPI_CON_COLORS[3]), offset_start = (len(title) + len(instructions[0]) + len(instructions[1])) * FONT_WIDTH),
         ]),
         show_full_animation = True,
         delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)),
@@ -199,21 +199,25 @@ def main(config):
     # Build info bar / messages
     first_series = series_data_sets[0]
     series_data = get_series_data_by_name(parsed_data, first_series)
-    first_item = series_data[0]
+
+    if not series_data:
+        first_item = {"periodName": "Latest", "year": str(time.now().year)}
+    else:
+        first_item = series_data[0]
+
     messages.append(render.Text("     %s months CPI data to %s %s " % (time_period, first_item["periodName"], first_item["year"]), color = "#fff"))
+
     for s in series_data_sets:
         messages.append(render.Text("%s in %s " % (get_series_name(s), get_series_color_name(s)), color = get_series_color(s)))
 
     if show_info_bar:
-        children = [add_padding_to_child_element(render.Marquee(width = SCREEN_WIDTH, child = render.Row(messages), offset_start = 0, offset_end = 0, align = "start"), 0, 25)]
+        info_bar = [add_padding_to_child_element(render.Marquee(width = SCREEN_WIDTH, child = render.Row(messages), offset_start = 0, offset_end = 0, align = "start"), 0, SCREEN_HEIGHT-FONT_HEIGHT)]
     else:
         msg = "%s months" % time_period
-        children = [add_padding_to_child_element(render.Text(msg, color = "#666", font = "CG-pixel-3x5-mono"), SCREEN_WIDTH - (len(msg) * 4), SCREEN_HEIGHT - 5)]
+        info_bar = [add_padding_to_child_element(render.Text(msg, color = "#666", font = FONT), SCREEN_WIDTH - (len(msg) * FONT_WIDTH), SCREEN_HEIGHT - FONT_HEIGHT)]
 
-    all_elements = [render.Animation(children = animation_frames), render.Stack(children = children)]
+    all_elements = [render.Animation(children = animation_frames), render.Stack(children = info_bar)]
     return render.Root(child = render.Stack(children = all_elements), show_full_animation = True, delay = int(config.get("scroll", 45)))
-
-# ------------------------- Schema -------------------------
 
 def get_schema():
     scroll_speed_options = [schema.Option(display = d, value = v) for d, v in [("Slow Scroll", "60"), ("Medium Scroll", "45"), ("Fast Scroll", "30")]]
