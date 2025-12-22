@@ -211,7 +211,7 @@ def main(config):
         messages.append(render.Text("%s in %s " % (get_series_name(s), get_series_color_name(s)), color = get_series_color(s)))
 
     if show_info_bar:
-        info_bar = [add_padding_to_child_element(render.Marquee(width = SCREEN_WIDTH, child = render.Row(messages), offset_start = 0, offset_end = 0, align = "start"), 0, SCREEN_HEIGHT-FONT_HEIGHT)]
+        info_bar = [add_padding_to_child_element(render.Marquee(width = SCREEN_WIDTH, child = render.Row(messages), offset_start = 0, offset_end = 0, align = "start"), 0, SCREEN_HEIGHT - FONT_HEIGHT)]
     else:
         msg = "%s months" % time_period
         info_bar = [add_padding_to_child_element(render.Text(msg, color = "#666", font = FONT), SCREEN_WIDTH - (len(msg) * FONT_WIDTH), SCREEN_HEIGHT - FONT_HEIGHT)]
