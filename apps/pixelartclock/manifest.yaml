@@ -7,3 +7,4 @@ author: JavierM42
 recommendedInterval: 0
 fileName: pixel_art_clock.star
 packageName: pixelartclock
+supports2x: true
