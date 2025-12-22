@@ -1,7 +1,7 @@
 ---
 id: on-the-air
 name: On The Air
-summary: Notify others you're on [the] air
+summary: Notify of "On [The] Air" status
 desc: 'Displays "On [The] Air" sign that can be updated to let others know you''re not available.'
 author: Jake Harvey
 recommendedInterval: 5
