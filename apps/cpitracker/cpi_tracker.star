@@ -53,7 +53,7 @@ def get_category_options(display_type):
     if display_type != "Categories":
         return []
     return [
-        schema.Toggle(id = item[0], name = item[1], desc = "%s  (in %s)" % (item[1], item[3]), icon = "check", default = False)
+        schema.Toggle(id = item[0], name = item[1], desc = "{}  (in {})".format(item[1], item[3]), icon = "check", default = False)
         for item in SELECTED_SERIES_DATA
     ]
 
@@ -146,11 +146,27 @@ def display_instructions(config):
         delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)),
     )
 
-def plot_cpi_data(values, color, show_info_bar):
-    months = list(range(len(values), 0, -1))
-    data = [(m, v) for m, v in zip(months, values)]
+def plot_cpi_data(formatted_data, color, show_info_bar):
+    months = []
+    for i in range(len(formatted_data), 0, -1):
+        months.append(i)
+
+    # Example CPI data for the past 6 months (replace with actual data from your API response)
+    cpi_values = formatted_data
+
+    # Combine months and values into a list of data points
+    data = [(month, value) for month, value in zip(months, cpi_values)]
+
     height = SCREEN_HEIGHT - 7 if show_info_bar else SCREEN_HEIGHT
-    return render.Plot(data = data, color = color, width = SCREEN_WIDTH, height = height)
+
+    # Use render.plot to create a line graph
+    return render.Plot(
+        data = data,
+        color = color,
+        width = SCREEN_WIDTH,
+        height = height,
+        fill = False,
+    )
 
 def main(config):
     show_instructions = config.bool("instructions", False)
@@ -184,6 +200,7 @@ def main(config):
         children.append(plot_cpi_data(values, get_series_color(series_id), show_info_bar))
 
     chart_children = list(children)
+
     current_scene = render.Box(color = "#000", width = SCREEN_WIDTH, height = SCREEN_HEIGHT)
     HOLD_FRAMES = 25
 
@@ -219,7 +236,6 @@ def main(config):
 
     all_elements = [render.Animation(children = animation_frames), render.Stack(children = info_bar)]
     return get_render_root(all_elements, int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)))
-    #return render.Root(child = render.Stack(children = all_elements), show_full_animation = True, delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)))
 
 def get_render_root(children, delay):
     return render.Root(child = render.Stack(children = children), show_full_animation = True, delay = delay)
