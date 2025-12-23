@@ -56,6 +56,7 @@ def main(config):
         display_items.append(add_padding_to_child_element(render.Text("ON", font = "10x20", color = text_color), 5, 7))
         display_items.append(add_padding_to_child_element(render.Text("AIR", font = "10x20", color = text_color), 28, 7))
     elif display_text == "custom":
+        # Insert some custom text into the space
         custom_text = config.get("display_text_custom", "")
         custom_text_length = len(custom_text)
         custom_text_align = config.get("custom_text_align", opt_custom_text_align[0].value)
@@ -66,26 +67,34 @@ def main(config):
             typeface = "CG-pixel-3x5-mono"
 
         #if custom_text_length <= 6:
-            #typeface = "10x20"
+        #    typeface = "10x20"
         #elif custom_text_length > 6:
-            #typeface = "6x13"
+        #    typeface = "6x13"
         #elif custom_text_length > 18:
-            #typeface = "tb-8"
+        #    typeface = "tb-8"
         #elif custom_text_length > 30:
-            #typeface = "CG-pixel-3x5-mono"
+        #    typeface = "CG-pixel-3x5-mono"
 
         display_items.append(
             add_padding_to_child_element(
-                render.Box(
-                    width = 62,
-                    height = 30,
-                    color = background_color,
-                    child = render.WrappedText(
-                        content = custom_text,
-                        font = typeface,
-                        align = custom_text_align,
-                        linespacing = 1,
-                    ),
+                render.Row(
+                    main_align = custom_text_align,
+                    cross_align = "center",
+                    children = [
+                        render.Box(
+                            width = 62,
+                            height = 30,
+                            color = background_color,
+                            child = render.WrappedText(
+                                content = custom_text,
+                                font = typeface,
+                                color = text_color,
+                                align = custom_text_align,
+                                linespacing = 1,
+                                width = 61,
+                            ),
+                        ),
+                    ],
                 ),
                 1,
                 1,
