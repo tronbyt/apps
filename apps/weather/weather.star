@@ -104,7 +104,7 @@ def main(config):
     # locality = loc["locality"]
     lat = loc["lat"]
     lng = loc["lng"]
-    timezone = loc.get("timezone", "America/New_York")
+    timezone = loc.get("timezone", time.tz())
     units = config.get("units", "imperial")
     showthreeday = config.bool("showthreeday", False)  # Add new config option
 
