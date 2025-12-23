@@ -55,6 +55,42 @@ def main(config):
         display_items.append(add_padding_to_child_element(render.Box(width = 62, height = 30, color = background_color), 1, 1))
         display_items.append(add_padding_to_child_element(render.Text("ON", font = "10x20", color = text_color), 5, 7))
         display_items.append(add_padding_to_child_element(render.Text("AIR", font = "10x20", color = text_color), 28, 7))
+    elif display_text == "custom":
+        custom_text = config.get("display_text_custom", "")
+        custom_text_length = len(custom_text)
+        custom_text_align = config.get("custom_text_align", opt_custom_text_align[0].value)
+
+        typeface = "tb-8"
+
+        if custom_text_length > 30:
+            typeface = "CG-pixel-3x5-mono"
+
+        #if custom_text_length <= 6:
+            #typeface = "10x20"
+        #elif custom_text_length > 6:
+            #typeface = "6x13"
+        #elif custom_text_length > 18:
+            #typeface = "tb-8"
+        #elif custom_text_length > 30:
+            #typeface = "CG-pixel-3x5-mono"
+
+        display_items.append(
+            add_padding_to_child_element(
+                render.Box(
+                    width = 62,
+                    height = 30,
+                    color = background_color,
+                    child = render.WrappedText(
+                        content = custom_text,
+                        font = typeface,
+                        align = custom_text_align,
+                        linespacing = 1,
+                    ),
+                ),
+                1,
+                1,
+            ),
+        )
 
     return render.Root(
         render.Stack(
@@ -99,6 +135,53 @@ opt_display_status = [
     ),
 ]
 
+opt_custom_text_align = [
+    schema.Option(
+        display = "Center",
+        value = "center",
+    ),
+    schema.Option(
+        display = "Left",
+        value = "left",
+    ),
+    schema.Option(
+        display = "Right",
+        value = "right",
+    ),
+]
+
+def more_options(display_text):
+    if display_text == "custom":
+        return [
+            schema.Text(
+                id = "display_text_custom",
+                name = "Custom Text",
+                desc = "Enter your own text. Try to keep it short.",
+                icon = "gear",
+                default = "RECORDING...",
+            ),
+            schema.Dropdown(
+                id = "custom_text_align",
+                name = "Custom Text Alignment",
+                desc = "Choose the alignment for your custom text.",
+                icon = "gear",
+                options = opt_custom_text_align,
+                default = opt_custom_text_align[0].value,
+            ),
+        ]
+    elif display_text == "cat":
+        return [
+            schema.Toggle(
+                id = "litter-box",
+                name = "Litter Box",
+                desc = "A toggle to enable a litter box.",
+                icon = "gear",
+                default = False,
+            ),
+        ]
+    else:
+        return []
+
 def get_schema():
     return schema.Schema(
         version = "1",
@@ -118,6 +201,11 @@ def get_schema():
                 icon = "font",
                 options = opt_display_text,
                 default = opt_display_text[0].value,
+            ),
+            schema.Generated(
+                id = "generated",
+                source = "display_text",
+                handler = more_options,
             ),
         ],
     )
