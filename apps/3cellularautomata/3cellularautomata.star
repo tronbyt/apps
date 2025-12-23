@@ -7,12 +7,12 @@ Author: dinosaursrarr
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 REFRESH_MILLISECONDS = 200
 CHOOSE_RANDOM = "-"
 SINGLE_CELL = "+"
