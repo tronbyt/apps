@@ -5,3 +5,5 @@ summary: RSS Feed Reader
 desc: Displays entries from an RSS feed URL.
 author: Daniel Sitnik
 recommendedInterval: 10
+fileName: rss_reader.star
+packageName: rssreader

@@ -5,3 +5,5 @@ summary: Met Eireann weather
 desc: Forecast from Met Eireann.
 author: vincentezw
 recommendedInterval: 5
+fileName: met_eireann.star
+packageName: meteireann

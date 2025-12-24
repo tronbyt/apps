@@ -5,3 +5,5 @@ summary: Tidbyt messaging
 desc: Send messages and pictures to your Tidbyt, share with family and friends.
 author: harrisonpage
 recommendedInterval: 5
+fileName: stupid_chat.star
+packageName: stupidchat

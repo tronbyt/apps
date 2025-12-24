@@ -5,3 +5,5 @@ summary: Show your sober day count
 desc: Show how many days you've been sober from any addiction.
 author: elliotstoner
 recommendedInterval: 60
+fileName: sobriety_counter.star
+packageName: sobrietycounter

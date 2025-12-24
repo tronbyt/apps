@@ -5,3 +5,5 @@ summary: Track visted sports venues
 desc: Track MLB, NFL and NBA venues visted.
 author: Robert Ison
 recommendedInterval: 5
+fileName: stadium_tracker.star
+packageName: stadiumtracker

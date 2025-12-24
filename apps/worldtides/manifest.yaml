@@ -5,3 +5,5 @@ summary: Display global tides
 desc: Display global tide predictions in list format.
 author: tavdog
 recommendedInterval: 5
+fileName: world_tides.star
+packageName: worldtides

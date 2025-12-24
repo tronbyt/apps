@@ -1,5 +1,6 @@
 load("i18n.star", "tr")
 load("images/open.png", ICON_TRASH_OPEN = "file")
+load("images/open@2x.png", ICON_TRASH_OPEN_2X = "file")
 load("render.star", "canvas", "render")
 
 def main():
@@ -13,7 +14,7 @@ def main():
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Image(src = ICON_TRASH_OPEN.readall(), width = image_size),
+                    render.Image(src = (ICON_TRASH_OPEN_2X if canvas.is2x() else ICON_TRASH_OPEN).readall(), width = image_size),
                     render.WrappedText(tr("Bins are out!"), font = font),
                 ],
             ),

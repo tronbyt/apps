@@ -5,3 +5,5 @@ summary: Get a random recipe idea
 desc: Display a random recipe from themealdb.com.
 author: noahpodgurski
 recommendedInterval: 5
+fileName: random_recipe.star
+packageName: randomrecipe

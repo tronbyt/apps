@@ -7,3 +7,4 @@ author: dinosaursrarr
 fileName: 3cellularautomata.star
 packageName: 3cellularautomata
 recommendedInterval: 5
+supports2x: true

@@ -5,3 +5,5 @@ summary: A sidereal time clock
 desc: A clock that shows the current sidereal time and (optionally) the local time.
 author: Daniel Sitnik
 recommendedInterval: 0
+fileName: sidereal_time.star
+packageName: siderealtimeclock

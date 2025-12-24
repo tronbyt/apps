@@ -12,8 +12,6 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-VERSION = 25072
-
 # ############################
 # Mods - jvivona - 2023-02-04
 # - temp override URLs to bypass blacklist on API (will go back to original API after they unblock us )

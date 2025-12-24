@@ -1,5 +1,6 @@
 load("i18n.star", "tr")
 load("images/icon.png", ICON = "file")
+load("images/icon@2x.png", ICON_2X = "file")
 load("render.star", "canvas", "render")
 
 def main():
@@ -16,7 +17,7 @@ def main():
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Image(src = ICON.readall(), width = image_size),
+                    render.Image(src = (ICON_2X if is2x else ICON).readall(), width = image_size),
                     render.Marquee(
                         width = marquee_width,
                         offset_start = marquee_width,

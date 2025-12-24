@@ -110,9 +110,8 @@ DEFAULT_COLOR = "#cd90f9"
 DEFAULT_DRAW = "single"
 DEFAULT_FREQ = "throughout"
 
-# Set URLs for once-daily draws
-URL_ALL = "https://raw.githubusercontent.com/frame-shift/tarot/main/range_all.json"
-URL_MAJOR = "https://raw.githubusercontent.com/frame-shift/tarot/main/range_major.json"
+# Set URL for once-daily draws
+URL_DRAWS = "https://raw.githubusercontent.com/frame-shift/tarot/main/draws.json"
 CACHE_TTL = 3600  # 1 hour
 
 # Set card backs and fronts (19x32 images, see attribution above), names, and keywords
@@ -373,8 +372,9 @@ def main(config):
     card_max = int(config.str("choice_max", DEFAULT_MAX))  # Returns Major Arcana cards or all cards
     card_draw = config.str("choice_draw", DEFAULT_DRAW)  # Returns single card or three-card spread
     card_freq = config.str("choice_freq", DEFAULT_FREQ)  # Returns how often to draw new cards
-    # card_freq = "once" # For testing
-    # card_max = 21 # For testing
+    # card_draw = "spread"  # For testing
+    # card_freq = "once"  # For testing
+    # card_max = 21  #  For testing
 
     # Calculates which function to run depending on single card or three-card spread
     if card_draw == "single":
@@ -404,20 +404,21 @@ def draw_single(back, color, maxdraw, freq):
 
         # For only once per day:
     else:
-        if card_max == 77:  # All cards
-            url_draw = URL_ALL
-        else:  # Major Arcana only
-            url_draw = URL_MAJOR
-
-        res = http.get(url_draw, ttl_seconds = CACHE_TTL)
+        res = http.get(URL_DRAWS, ttl_seconds = CACHE_TTL)
 
         if res.status_code != 200:
-            print("Request to %s failed with status code: %d - %s" % (url_draw, res.status_code, res.body()))
-            return render_error("Could not reach range_x.json\n:(")
+            print("Request to %s failed with status code: %d - %s" % (URL_DRAWS, res.status_code, res.body()))
+            return render_error("Could not reach draws.json\n:(")
 
         draw_from = res.json()
-        card_num = int(draw_from["single"])  # Set the day's card number
-        # print("SINGLE - ONCE A DAY\n")  # For testing
+        # print(draw_from)  # For testing
+
+        if card_max == 77:  # All cards
+            card_num = int(draw_from["all"]["single"])
+        else:  # Major Arcana only
+            card_num = int(draw_from["major"]["single"])
+
+        # print(card_num)  # For testing
 
     # Define card properties
     card_name = list(CARD_NAMES.values())[card_num]  # Gets card name (string)
@@ -764,22 +765,25 @@ def draw_spread(back, color, maxdraw, freq):
 
         # For only once per day:
     else:
-        if card_max == 77:  # All cards
-            url_draw = URL_ALL
-        else:  # Major Arcana only
-            url_draw = URL_MAJOR
-
-        res = http.get(url_draw, ttl_seconds = CACHE_TTL)
+        res = http.get(URL_DRAWS, ttl_seconds = CACHE_TTL)
 
         if res.status_code != 200:
-            print("Request to %s failed with status code: %d - %s" % (url_draw, res.status_code, res.body()))
-            return render_error("Could not reach range_x.json\n:(")
+            print("Request to %s failed with status code: %d - %s" % (URL_DRAWS, res.status_code, res.body()))
+            return render_error("Could not reach draws.json\n:(")
 
         draw_from = res.json()
-        card_1 = int(draw_from["spread"]["card1"])
-        card_2 = int(draw_from["spread"]["card2"])
-        card_3 = int(draw_from["spread"]["card3"])
-        # print("SPREAD - ONCE A DAY\n")  # For testing
+        # print(draw_from)  # For testing
+
+        if card_max == 77:  # All cards
+            card_1 = int(draw_from["all"]["spread"]["card1"])
+            card_2 = int(draw_from["all"]["spread"]["card2"])
+            card_3 = int(draw_from["all"]["spread"]["card3"])
+        else:  # Major Arcana only
+            card_1 = int(draw_from["major"]["spread"]["card1"])
+            card_2 = int(draw_from["major"]["spread"]["card2"])
+            card_3 = int(draw_from["major"]["spread"]["card3"])
+
+        # print(card_1, card_2, card_3)  # For testing
 
     #Define each card
     card_name1 = list(CARD_NAMES.values())[card_1]  # Gets card name (str)

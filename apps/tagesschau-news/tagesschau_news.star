@@ -1,5 +1,5 @@
 load("http.star", "http")
-load("images/ard_logo_white.png", ARD_LOGO_WHITE = "file")
+load("images/ard_logo_white.svg", ARD_LOGO_WHITE = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 

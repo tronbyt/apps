@@ -5,3 +5,5 @@ summary: ATIS runway information
 desc: Display FAA ATIS information (runways in use) for a given airport.
 author: Connick Shields
 recommendedInterval: 5
+fileName: faa_atis.star
+packageName: faaatis

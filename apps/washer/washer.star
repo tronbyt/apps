@@ -1,5 +1,6 @@
 load("i18n.star", "tr")
 load("images/washer.png", ICON_WASHER = "file")
+load("images/washer@2x.png", ICON_WASHER_2X = "file")
 load("render.star", "canvas", "render")
 
 def main():
@@ -16,7 +17,7 @@ def main():
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Image(src = ICON_WASHER.readall(), width = image_size),
+                    render.Image(src = (ICON_WASHER_2X if is2x else ICON_WASHER).readall(), width = image_size),
                     render.Marquee(
                         width = marquee_width,
                         offset_start = marquee_width,

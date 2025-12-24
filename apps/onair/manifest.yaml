@@ -5,3 +5,5 @@ summary: Displays On Air Sign
 desc: ' Displays ''On Air'' Sign that you turn on or off.'
 author: Robert Ison
 recommendedInterval: 5
+fileName: on_air.star
+packageName: onair

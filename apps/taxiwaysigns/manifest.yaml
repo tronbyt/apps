@@ -5,3 +5,5 @@ summary: Display taxiway signs
 desc: Displays taxiway signs.
 author: Robert Ison
 recommendedInterval: 5
+fileName: taxiway_signs.star
+packageName: taxiwaysigns

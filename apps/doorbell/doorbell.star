@@ -1,13 +1,22 @@
 load("i18n.star", "tr")
 load("images/press1.png", ICON_PRESS1 = "file")
+load("images/press1@2x.png", ICON_PRESS1_2X = "file")
 load("images/press2.png", ICON_PRESS2 = "file")
+load("images/press2@2x.png", ICON_PRESS2_2X = "file")
 load("images/press3.png", ICON_PRESS3 = "file")
+load("images/press3@2x.png", ICON_PRESS3_2X = "file")
 load("render.star", "canvas", "render")
 
 def main():
     is2x = canvas.is2x()
     font = "terminus-18" if is2x else "tb-8"
     image_size = 40 if is2x else 20
+
+    images = [
+        (ICON_PRESS1_2X if is2x else ICON_PRESS1).readall(),
+        (ICON_PRESS2_2X if is2x else ICON_PRESS2).readall(),
+        (ICON_PRESS3_2X if is2x else ICON_PRESS3).readall(),
+    ]
 
     return render.Root(
         delay = 500,
@@ -19,7 +28,7 @@ def main():
                         main_align = "space_evenly",
                         cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS1.readall(), width = image_size),
+                            render.Image(src = images[0], width = image_size),
                         ],
                     ),
                     render.Row(
@@ -27,7 +36,7 @@ def main():
                         main_align = "space_evenly",
                         cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS2.readall(), width = image_size),
+                            render.Image(src = images[1], width = image_size),
                         ],
                     ),
                     render.Row(
@@ -35,7 +44,7 @@ def main():
                         main_align = "space_evenly",
                         cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS3.readall(), width = image_size),
+                            render.Image(src = images[2], width = image_size),
                             render.Column(
                                 expanded = True,
                                 main_align = "center",
@@ -51,7 +60,7 @@ def main():
                         main_align = "space_evenly",
                         cross_align = "center",
                         children = [
-                            render.Image(src = ICON_PRESS3.readall(), width = image_size),
+                            render.Image(src = images[2], width = image_size),
                             render.Column(
                                 expanded = True,
                                 main_align = "center",
