@@ -9,6 +9,15 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 def main(config):
+    """This is the main function of the Starlark script.
+
+    Args:
+        config: The configuration of tha app.
+    
+    Returns:
+        The rendered image.
+
+    """
     display_status = config.get("display_state", opt_display_status[0].value)
     display_text = config.get("display_text", opt_display_text[0].value)
     outline_color = "#fff"
@@ -160,6 +169,16 @@ opt_custom_text_align = [
 ]
 
 def more_options(display_text):
+    """Function to dynamically add more options to the settings page.
+
+    Args:
+        display_text: Value of the `opt_display_text` dropdown. 
+            Ignored unless "custom" is passed.
+    
+    Returns:
+        More schema items to be displayed as options.
+
+    """
     if display_text == "custom":
         return [
             schema.Text(
@@ -176,16 +195,6 @@ def more_options(display_text):
                 icon = "gear",
                 options = opt_custom_text_align,
                 default = opt_custom_text_align[0].value,
-            ),
-        ]
-    elif display_text == "cat":
-        return [
-            schema.Toggle(
-                id = "litter-box",
-                name = "Litter Box",
-                desc = "A toggle to enable a litter box.",
-                icon = "gear",
-                default = False,
             ),
         ]
     else:
