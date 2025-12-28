@@ -214,7 +214,7 @@ def get_schema():
             schema.Text(
                 id = "api_key",
                 name = "API Key",
-                desc = "RapidAPI key for KanjiAlive (optional)",
+                desc = "Create a RapidApi account and go to https://rapidapi.com/KanjiAlive/api/learn-to-read-and-write-japanese-kanji/playground for key",
                 icon = "code",
                 default = "",
                 secret = True,
