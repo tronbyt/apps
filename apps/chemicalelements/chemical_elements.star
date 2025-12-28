@@ -14,7 +14,7 @@ load("time.star", "time")
 
 DEFAULT_TIMEZONE = "America/New_York"
 
-elements = [
+ELEMENTS = [
     {
         "AtomicNumber": 1,
         "Symbol": "H",
@@ -1551,7 +1551,7 @@ elements = [
     },
 ]
 
-def getMainCommentary(element):
+def get_main_commentary(element):
     """ getMainCommentary
 
     Args:
@@ -1563,7 +1563,7 @@ def getMainCommentary(element):
     display_text = "Atomic number {}, {} is in group {} and period {}.".format(element["AtomicNumber"], element["Name"], element["Group"].lower(), element["Period"])
     return display_text
 
-def getSecondaryCommentary(element):
+def get_secondary_commentary(element):
     """ getSecondaryCommentary
 
     Args:
@@ -1580,7 +1580,7 @@ def getSecondaryCommentary(element):
     display_text = "With an atomic weight of {}u, {} is {} {} and has {} protons, {} neutrons and {} electrons.".format(element["Mass"], element["Name"], article, element["Type"].lower(), element["AtomicNumber"], int(math.floor(element["Mass"] - element["AtomicNumber"])), element["AtomicNumber"])
     return display_text
 
-def getTertiaryCommentary(element):
+def get_tertiary_commentary(element):
     """ getTertiaryCommentary
 
     Args:
@@ -1611,8 +1611,8 @@ def day_of_year(date, timezone):
     Returns:
         The day of the year, an integer between 1 and 366
     """
-    firstdayofyear = time.time(year = date.year, month = 1, day = 1, hour = 0, minute = 0, second = 0, location = timezone)
-    doy = int((date - firstdayofyear).hours / 24) + 1
+    first_day_of_year = time.time(year = date.year, month = 1, day = 1, hour = 0, minute = 0, second = 0, location = timezone)
+    doy = int((date - first_day_of_year).hours / 24) + 1
     return doy
 
 def main(config):
@@ -1624,42 +1624,42 @@ def main(config):
         The display information for the Tidbyt
     """
 
-    IS_DOUBLE_SIZED = canvas.is2x()
-    SCREEN_WIDTH = canvas.width()
+    is_double_sized = canvas.is2x()
+    screen_width = canvas.width()
 
-    if IS_DOUBLE_SIZED:
-        SMALL_FONT = "5x8"
-        LARGE_FONT = "terminus-16"
-        BOX_WIDTH = 53
-        SPACER = 4
-        ADJUSTMENT = 1
+    if is_double_sized:
+        small_font = "5x8"
+        large_font = "terminus-16"
+        box_width = 53
+        spacer_size = 4
+        adjustment = 1
     else:
-        SMALL_FONT = "CG-pixel-3x5-mono"
-        LARGE_FONT = "5x8"
-        BOX_WIDTH = 32
-        SPACER = 2
-        ADJUSTMENT = 0
+        small_font = "CG-pixel-3x5-mono"
+        large_font = "5x8"
+        box_width = 32
+        spacer_size = 2
+        adjustment = 0
 
     #instead can choose one element per day based on day of year..
     #it'll cycle through a new element each day and restart on the 119th day
-    if (config.get("display", element_display_options[0].value) == element_display_options[0].value):
+    if (config.get("display", ELEMENT_DISPLAY_OPTIONS[0].value) == ELEMENT_DISPLAY_OPTIONS[0].value):
         now = config.get("time")
         now = (time.parse_time(now) if now else time.now())
-        current_element = elements[(day_of_year(now, DEFAULT_TIMEZONE) - 1) % len(elements)]
+        current_element = ELEMENTS[(day_of_year(now, DEFAULT_TIMEZONE) - 1) % len(ELEMENTS)]
     else:
         #default is random element
         # seed the RNG with a new value every minute to improve
         # cross-user caching while still appearing random.
         random.seed(time.now().unix // 60)
-        current_element = elements[int(random.number(0, len(elements)))]
+        current_element = ELEMENTS[int(random.number(0, len(ELEMENTS)))]
 
     row1 = current_element["Name"]
-    row2 = getMainCommentary(current_element)
-    row3 = getSecondaryCommentary(current_element)
-    row4 = getTertiaryCommentary(current_element)
+    row2 = get_main_commentary(current_element)
+    row3 = get_secondary_commentary(current_element)
+    row4 = get_tertiary_commentary(current_element)
 
     delay = int(config.get("scroll", 45))
-    delay = int(delay / 2) if IS_DOUBLE_SIZED else delay
+    delay = int(delay / 2) if is_double_sized else delay
 
     return render.Root(
         render.Column(
@@ -1668,54 +1668,54 @@ def main(config):
                     children = [
                         render.Column(
                             children = [
-                                render.Box(width = 1, height = BOX_WIDTH, color = current_element["Color"]),
+                                render.Box(width = 1, height = box_width, color = current_element["Color"]),
                             ],
                         ),
                         render.Column(
                             children = [
-                                render.Box(width = BOX_WIDTH, height = 1, color = current_element["Color"]),
-                                render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
-                                render.Text(" {}".format(current_element["AtomicNumber"]), color = "fff", font = SMALL_FONT),
-                                render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
-                                render.Text(" {}".format(current_element["Symbol"]), color = "fff", font = SMALL_FONT),
-                                render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
+                                render.Box(width = box_width, height = 1, color = current_element["Color"]),
+                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
+                                render.Text(" {}".format(current_element["AtomicNumber"]), color = "fff", font = small_font),
+                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
+                                render.Text(" {}".format(current_element["Symbol"]), color = "fff", font = small_font),
+                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
                                 render.Marquee(
-                                    width = BOX_WIDTH - 2,
-                                    child = render.Text(" {}".format(current_element["Name"]), color = "fff", font = SMALL_FONT),
+                                    width = box_width - 2,
+                                    child = render.Text(" {}".format(current_element["Name"]), color = "fff", font = small_font),
                                 ),
-                                render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
-                                render.Text(" {}".format(current_element["Mass"]), color = "fff", font = SMALL_FONT),
-                                render.Box(width = BOX_WIDTH, height = SPACER - ADJUSTMENT, color = "#000000"),
-                                render.Box(width = BOX_WIDTH, height = 1, color = current_element["Color"]),
+                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
+                                render.Text(" {}".format(current_element["Mass"]), color = "fff", font = small_font),
+                                render.Box(width = box_width, height = spacer_size - adjustment, color = "#000000"),
+                                render.Box(width = box_width, height = 1, color = current_element["Color"]),
                             ],
                         ),
                         render.Column(
                             children = [
-                                render.Box(width = 1, height = BOX_WIDTH, color = current_element["Color"]),
+                                render.Box(width = 1, height = box_width, color = current_element["Color"]),
                             ],
                         ),
                         render.Column(
                             children = [
-                                render.Box(width = 1, height = BOX_WIDTH, color = "#000000"),
+                                render.Box(width = 1, height = box_width, color = "#000000"),
                             ],
                         ),
                         render.Column(
                             children = [
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
-                                    child = render.Text(row1, color = "#ffd700", font = LARGE_FONT),
+                                    width = screen_width - box_width - 3,
+                                    child = render.Text(row1, color = "#ffd700", font = large_font),
                                 ),
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
-                                    child = render.Text(row2, color = "#ffd700", font = LARGE_FONT),
+                                    width = screen_width - box_width - 3,
+                                    child = render.Text(row2, color = "#ffd700", font = large_font),
                                 ),
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
-                                    child = render.Text(row3, color = "#ffd700", font = LARGE_FONT),
+                                    width = screen_width - box_width - 3,
+                                    child = render.Text(row3, color = "#ffd700", font = large_font),
                                 ),
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
-                                    child = render.Text(row4, color = "#ffd700", font = LARGE_FONT),
+                                    width = screen_width - box_width - 3,
+                                    child = render.Text(row4, color = "#ffd700", font = large_font),
                                 ),
                             ],
                             main_align = "space_evenly",
@@ -1728,7 +1728,7 @@ def main(config):
         delay = delay,
     )
 
-scroll_speed_options = [
+SCROLL_SPEED_OPTIONS = [
     schema.Option(
         display = "Slow Scroll",
         value = "60",
@@ -1743,7 +1743,7 @@ scroll_speed_options = [
     ),
 ]
 
-element_display_options = [
+ELEMENT_DISPLAY_OPTIONS = [
     schema.Option(
         display = "One Element Per Day",
         value = "OncePerDay",
@@ -1763,16 +1763,16 @@ def get_schema():
                 name = "Scroll",
                 desc = "Scroll Speed",
                 icon = "stopwatch",
-                options = scroll_speed_options,
-                default = scroll_speed_options[0].value,
+                options = SCROLL_SPEED_OPTIONS,
+                default = SCROLL_SPEED_OPTIONS[0].value,
             ),
             schema.Dropdown(
                 id = "display",
                 name = "Display",
                 desc = "Display Choice",
                 icon = "display",
-                options = element_display_options,
-                default = element_display_options[0].value,
+                options = ELEMENT_DISPLAY_OPTIONS,
+                default = ELEMENT_DISPLAY_OPTIONS[0].value,
             ),
         ],
     )
