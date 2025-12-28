@@ -1230,7 +1230,6 @@ def main(config):
     myBranch = config.get("branch", "Army")
 
     if (myBranch == "random"):
-        random.seed(time.now().unix)
         myBranch = BRANCH_OPTIONS[random.number(1, 6)].value
         rankInfo = get_random_rank(myBranch).split("|")
     else:
