@@ -4,11 +4,10 @@ Summary: Display cricket scores
 Description: For a selected team, this app shows the scorecard for a current match. If no match in progress, it will display scorecard for a recently completed match. If none of these, it will display the next match details in user's local timezone.
 Author: adilansari
 
-v 1.0 - Intial version with T20/ODI match support
+v 1.0 - Initial version with T20/ODI match support
 v 1.1 - Using CricBuzz API for match data and adding Test match support
 """
 
-load("bsoup.star", "bsoup")
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
@@ -20,10 +19,8 @@ load("time.star", "time")
 # API
 TEAM_SCHEDULE_URL = "https://www.cricbuzz.com/cricket-team/{team_name}/{team_id}/schedule"
 TEAM_RESULTS_URL = "https://www.cricbuzz.com/cricket-team/{team_name}/{team_id}/results"
-MATCH_FULL_COMM_URL = "https://www.cricbuzz.com/api/cricket-match/{match_id}/full-commentary/0"
+MATCH_PAGE_URL = "https://www.cricbuzz.com/live-cricket-scores/{match_id}"
 
-# FALLBACK_MATCH_COMM_URL = "https://www.cricbuzz.com/api/cricket-match/commentary/{match_id}"
-LIVE_SCORE_URL = "https://www.cricbuzz.com/api/cricket-match/commentary/{match_id}"
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
 
 # Timings
@@ -37,7 +34,6 @@ DEFAULT_SCREEN = render.Root(
 )
 
 # Config
-DEFAULT_TIMEZONE = "America/New_York"
 DEFAULT_TEAM_ID = "2"
 DEFAULT_PAST_RESULT_DAYS = 3
 ALWAYS_SHOW_FIXTURES_SCHEMA_KEY = "Always"
@@ -49,72 +45,22 @@ BLACK_COLOR = "#222222"
 WHITE_COLOR = "#FFFFFF"
 CHARCOAL_COLOR = "#36454F"
 
-def main(config):
-    tz = time.tz()
-    team_id = config.get("team", DEFAULT_TEAM_ID)
-    fixture_days = config.get("days_forward", ALWAYS_SHOW_FIXTURES_SCHEMA_KEY)
-    result_days = int(config.get("days_back", DEFAULT_PAST_RESULT_DAYS))
-    now = time.now().in_location(tz)
-    team_settings = team_settings_by_id[team_id]
-    if not team_settings:
-        return DEFAULT_SCREEN
-    result_match_ids = get_cached_past_match_ids(team_settings.id, team_settings.name)
-    scheduled_match_ids = get_cached_scheduled_match_ids(team_settings.id, team_settings.name)
-    current_match, past_match, next_match = None, None, None
-    for match_id in result_match_ids:
-        match_api_resp = fetch_match_comm(match_id)
-        if not match_api_resp or "matchHeader" not in match_api_resp:
-            continue
-        if str(match_api_resp["matchHeader"]["team1"]["id"]) not in team_settings_by_id:
-            continue
-        if str(match_api_resp["matchHeader"]["team2"]["id"]) not in team_settings_by_id:
-            continue
-        past_match = match_api_resp
-        break
-    for match_id in scheduled_match_ids:
-        match_api_resp = fetch_match_comm(match_id)
-        if not match_api_resp:
-            continue
-        if "matchHeader" not in match_api_resp:
-            continue
-        if str(match_api_resp["matchHeader"]["team1"]["id"]) not in team_settings_by_id:
-            continue
-        if str(match_api_resp["matchHeader"]["team2"]["id"]) not in team_settings_by_id:
-            continue
-        next_match = match_api_resp
-        break
-
-    if next_match:
-        live_inning = next_match.get("miniscore", {}).get("inningsId", 0)
-        if live_inning > 0:
-            current_match = next_match
-
-    match_to_render, render_fn = None, None
-    if current_match:
-        match_to_render, render_fn = current_match, render_current_match
-    if past_match and not match_to_render:
-        match_time = time.from_timestamp(int(past_match["matchHeader"]["matchCompleteTimestamp"] / 1000)).in_location(tz)
-        result_days_duration = time.parse_duration("{}h".format(result_days * 24))
-        if now <= match_time + result_days_duration:
-            match_to_render, render_fn = past_match, render_past_match
-    if next_match and not match_to_render:
-        if fixture_days == ALWAYS_SHOW_FIXTURES_SCHEMA_KEY:
-            match_to_render, render_fn = next_match, render_next_match
-        else:
-            match_time = time.from_timestamp(int(next_match["matchHeader"]["matchStartTimestamp"] / 1000)).in_location(tz)
-            fixture_days_duration = time.parse_duration("{}h".format(int(fixture_days) * 24))
-            if now > match_time - fixture_days_duration:
-                match_to_render, render_fn = next_match, render_next_match
-
-    if not match_to_render:
-        return []
-    print("rendering match id {} at {} with state {}".format(match_to_render["matchHeader"]["matchId"], now, match_to_render["matchHeader"]["state"]))
-    return render_fn(match_to_render, tz)
-
 def render_current_match(match, tz):
-    print(tz)
     match_data = fetch_live_score(match["matchHeader"]["matchId"])
-    details, scorecard = match_data["matchHeader"], match_data["miniscore"]
+
+    # If fetch failed or returned empty data, check if we can use the passed match object
+    if not match_data or "matchHeader" not in match_data:
+        if "matchHeader" in match:
+            match_data = match
+        else:
+            return render_next_match(match, tz)
+
+    details = match_data.get("matchHeader", {})
+    scorecard = match_data.get("miniscore", {})
+
+    if not details:
+        return render_next_match(match, tz)
+
     is_test_match = details["matchFormat"].lower() == "test"
     team_scores = [
         {
@@ -171,9 +117,9 @@ def render_current_match(match, tz):
 
     for k, m in [("batsmanStriker", "player_row_1"), ("batsmanNonStriker", "player_row_2")]:
         if scorecard.get(k, {}):
-            name = scorecard[k]["batName"]
-            runs = scorecard[k]["batRuns"]
-            balls = scorecard[k]["batBalls"]
+            name = scorecard[k].get("name", scorecard[k].get("batName", ""))
+            runs = scorecard[k].get("runs", scorecard[k].get("batRuns", ""))
+            balls = scorecard[k].get("balls", scorecard[k].get("batBalls", ""))
             if not name:
                 name = " ".join(scorecard.get("lastWicket", "Wicket Out").split(" ")[:2])
                 runs = "out"
@@ -187,16 +133,18 @@ def render_current_match(match, tz):
     if is_test_match:
         day_number, match_state = details.get("dayNumber", 0), details["state"].lower()
         default_match_status = "Day {} {}".format(day_number, match_state)
-        overs_rem = scorecard.get("oversRem", 0)
+        overs_rem = _safe_float(scorecard.get("oversRem", 0))
         if overs_rem > 0:
             statuses[2] = "Overs rem - {}".format(humanize.float("#.#", float(overs_rem)))
         else:
             statuses[2] = "{} Innings".format(humanize.ordinal(int(live_inning)))
-        need_runs = scorecard.get("remRunsToWin", 0)
-        if need_runs == 0 and scorecard.get("target", 0) > 0:
-            need_runs = scorecard.get("target", 0) - scorecard["batTeam"]["teamScore"]
+        need_runs = _safe_float(scorecard.get("remRunsToWin", 0))
+        target = _safe_float(scorecard.get("target", 0))
+        team_score = _safe_float(scorecard["batTeam"]["teamScore"])
+        if need_runs == 0 and target > 0:
+            need_runs = target - team_score
         if need_runs > 0:
-            statuses[0] = "{} runs to win".format(need_runs)
+            statuses[0] = "{} runs to win".format(int(need_runs))
     else:
         recent_balls = scorecard["recentOvsStats"].split(" ")
         last_6_balls = []
@@ -210,8 +158,8 @@ def render_current_match(match, tz):
         current_run_rate = "Run Rate: {}".format(humanize.float("#.#", float(scorecard["currentRunRate"])))
         statuses[1] = current_run_rate
         if live_inning == 2:
-            need_runs = scorecard["remRunsToWin"]
-            statuses[0] = "{} runs to win".format(need_runs)
+            need_runs = _safe_float(scorecard["remRunsToWin"])
+            statuses[0] = "{} runs to win".format(int(need_runs))
             reqd_run_rate = "Reqd Rate: {}".format(humanize.float("#.#", float(scorecard["requiredRunRate"])))
             statuses[2] = reqd_run_rate
 
@@ -238,7 +186,7 @@ def render_current_match(match, tz):
 
 def render_next_match(match_data, tz):
     details = match_data["matchHeader"]
-    match_start_time = time.from_timestamp(int(details["matchStartTimestamp"] / 1000)).in_location(tz)
+    match_start_time = time.from_timestamp(details["matchStartTimestamp"] // 1000).in_location(tz)
     match_time_status = match_start_time.format("Jan 2 - 3:04 PM")
     time_to_start = match_start_time - time.now().in_location(tz)
     if time_to_start < time.parse_duration("48h"):
@@ -278,7 +226,7 @@ def render_next_match(match_data, tz):
     match_state_status = match_time_status if match_state in ["preview", "upcoming"] else match_state
     match_state_status_row = render_status_row(match_state_status)
     return render.Root(
-        delay = int(4000),
+        delay = 4000,
         child = render.Animation(
             children = [
                 render.Column(
@@ -320,7 +268,7 @@ def render_next_match(match_data, tz):
 def render_past_match(match, tz):
     details, scorecard = match["matchHeader"], match["miniscore"]
     is_test_match = details["matchFormat"].lower() == "test"
-    match_start = time.from_timestamp(int(details["matchStartTimestamp"] / 1000)).in_location(tz)
+    match_start = time.from_timestamp(details["matchStartTimestamp"] // 1000).in_location(tz)
     match_dt_status = match_start.format("Jan 2 2006")
 
     team_scores = [
@@ -364,17 +312,17 @@ def render_past_match(match, tz):
 
     # find last innings batsman and bowler
     if len(scorecard.get("bowlerStriker", {})) > 0:
-        name = scorecard["bowlerStriker"]["bowlName"]
-        ovs = scorecard["bowlerStriker"]["bowlOvs"]
-        runs = scorecard["bowlerStriker"]["bowlRuns"]
-        wkts = scorecard["bowlerStriker"]["bowlWkts"]
+        name = scorecard["bowlerStriker"].get("name", scorecard["bowlerStriker"].get("bowlName", ""))
+        ovs = scorecard["bowlerStriker"].get("overs", scorecard["bowlerStriker"].get("bowlOvs", 0))
+        runs = scorecard["bowlerStriker"].get("runs", scorecard["bowlerStriker"].get("bowlRuns", 0))
+        wkts = scorecard["bowlerStriker"].get("wickets", scorecard["bowlerStriker"].get("bowlWkts", 0))
         ts = team_scores[0] if scorecard["batTeam"]["teamId"] != team_scores[0]["id"] else team_scores[1]
         ts["player_row"] = render_bowler_row(name, ovs, runs, wkts, ts["team_settings"].fg_color)
 
     if len(scorecard.get("batsmanStriker", {})) > 0:
-        name = scorecard["batsmanStriker"]["batName"]
-        runs = scorecard["batsmanStriker"]["batRuns"]
-        balls = scorecard["batsmanStriker"]["batBalls"]
+        name = scorecard["batsmanStriker"].get("name", scorecard["batsmanStriker"].get("batName", ""))
+        runs = scorecard["batsmanStriker"].get("runs", scorecard["batsmanStriker"].get("batRuns", 0))
+        balls = scorecard["batsmanStriker"].get("balls", scorecard["batsmanStriker"].get("batBalls", 0))
         ts = team_scores[0] if scorecard["batTeam"]["teamId"] == team_scores[0]["id"] else team_scores[1]
         ts["player_row"] = render_batsmen_row(name, runs, balls, ts["team_settings"].fg_color)
 
@@ -618,6 +566,14 @@ past_results_day_options = [
         display = "7",
         value = "7",
     ),
+    schema.Option(
+        display = "30",
+        value = "30",
+    ),
+    schema.Option(
+        display = "90",
+        value = "90",
+    ),
 ]
 upcoming_fixtures_day_options = [
     schema.Option(
@@ -677,63 +633,141 @@ def get_schema():
         ],
     )
 
-def get_cached_past_match_ids(team_id, team_name):
+def get_cached_past_matches(team_id, team_name):
     team_name = team_name.lower().replace(" ", "-")
-    res = _get_cached_match_ids(TEAM_RESULTS_URL.format(team_name = team_name, team_id = team_id), "teams-results")
-    return res
+    return _get_cached_matches(TEAM_RESULTS_URL.format(team_name = team_name, team_id = team_id))
 
-def get_cached_scheduled_match_ids(team_id, team_name):
+def get_cached_scheduled_matches(team_id, team_name):
     team_name = team_name.lower().replace(" ", "-")
-    res = _get_cached_match_ids(TEAM_SCHEDULE_URL.format(team_name = team_name, team_id = team_id), "teams-schedule")
-    return res
+    return _get_cached_matches(TEAM_SCHEDULE_URL.format(team_name = team_name, team_id = team_id))
 
-def _get_cached_match_ids(url, span_id):
+def _get_cached_matches(url):
     cached_data = cache.get(url)
     if cached_data:
         print("---HIT for {}".format(url))
         return json.decode(cached_data)
     print("--MISS for {}".format(url))
     res = fetch_url(url)
-    page = bsoup.parseHtml(res)
-    spans = page.find_all("span")
-    result_span = None
-    for span in spans:
-        if span_id in str(span):
-            result_span = span
-            break
-    if not result_span:
-        return []
-    links = result_span.find_all("a")
-    match_ids = []
-    for link in links:
-        href = link.attrs().get("href", "")
-        if "cricket-scores" in href:
-            url_split = href.strip().split("/")
-            if len(url_split) > 2:
-                if url_split[2] not in match_ids:
-                    match_ids.append(url_split[2])
 
-    # cache the upcoming/past fixtures for 1 hour as this data is not expected to change frequently
-    cache.set(url, json.encode(match_ids), ONE_HOUR)
-    return match_ids
+    matches = []
+
+    if "teamMatchesData" in res:
+        # We process the JSON text manually to extract match objects
+        # Strategy: find "matchInfo" keys, then parse the object
+        # Also look for "matchScore"
+
+        # Check if the keys are escaped
+        mi_marker = '"matchInfo":'
+        if '\\"matchInfo\\":' in res:
+            mi_marker = '\\"matchInfo\\":'
+
+        search_idx = res.find("teamMatchesData")
+        if search_idx == -1:
+            search_idx = 0
+
+        for _ in range(50):  # Safety limit to avoid infinite loops
+            mi_start = res.find(mi_marker, search_idx)
+            if mi_start == -1:
+                break
+
+            mi_obj_str = _extract_json_object(res, mi_start + len(mi_marker), mi_marker.startswith("\\"))
+            if not mi_obj_str:
+                search_idx = mi_start + len(mi_marker)
+                continue
+
+            # Handle potential escaping for json.decode
+            if mi_marker.startswith("\\"):
+                # It's escaped, try to unescape
+                unescaped = mi_obj_str.replace('\\"', '"').replace("\\\\", "\\")
+                mi_data = json.decode(unescaped)
+            else:
+                mi_data = json.decode(mi_obj_str)
+
+            if not mi_data:
+                search_idx = mi_start + len(mi_marker) + len(mi_obj_str)
+                continue
+
+            # Map matchInfo to matchHeader format
+            match_header = {
+                "matchId": str(mi_data.get("matchId", "")),
+                "matchDescription": mi_data.get("matchDesc", ""),
+                "matchFormat": mi_data.get("matchFormat", ""),
+                "matchType": mi_data.get("matchType", ""),
+                "matchStartTimestamp": int(mi_data.get("startDate", 0)),
+                "matchCompleteTimestamp": int(mi_data.get("endDate", mi_data.get("startDate", 0))),
+                "state": mi_data.get("state", ""),
+                "status": mi_data.get("status", ""),
+                "team1": {
+                    "id": str(mi_data.get("team1", {}).get("teamId", "")),
+                    "name": mi_data.get("team1", {}).get("teamName", ""),
+                },
+                "team2": {
+                    "id": str(mi_data.get("team2", {}).get("teamId", "")),
+                    "name": mi_data.get("team2", {}).get("teamName", ""),
+                },
+                "venue": {
+                    "city": mi_data.get("venueInfo", {}).get("city", ""),
+                    "country": "",
+                    "name": mi_data.get("venueInfo", {}).get("ground", ""),
+                },
+            }
+
+            # Look for matchScore
+            miniscore = {}
+            ms_marker = '"matchScore":'
+            if mi_marker.startswith("\\"):
+                ms_marker = '\\"matchScore\\":'
+
+            mi_end_idx = mi_start + len(mi_marker) + len(mi_obj_str)
+            next_chunk = res[mi_end_idx:mi_end_idx + 1000]
+            ms_local_idx = next_chunk.find(ms_marker)
+
+            if ms_local_idx != -1:
+                ms_start = mi_end_idx + ms_local_idx
+                ms_obj_str = _extract_json_object(res, ms_start + len(ms_marker), ms_marker.startswith("\\"))
+                if ms_obj_str:
+                    if ms_marker.startswith("\\"):
+                        unescaped_ms = ms_obj_str.replace('\\"', '"').replace("\\\\", "\\")
+                        miniscore = json.decode(unescaped_ms)
+                    else:
+                        miniscore = json.decode(ms_obj_str)
+
+            # Simple miniscore mapping for inningsId
+            if "team1Score" in miniscore and "inngs1" in miniscore["team1Score"]:
+                if "inningsId" not in miniscore:
+                    miniscore["inningsId"] = miniscore["team1Score"]["inngs1"].get("inningsId", 0)
+
+            matches.append({
+                "matchHeader": match_header,
+                "miniscore": miniscore,
+            })
+
+            search_idx = mi_start + len(mi_marker) + len(mi_obj_str)
+
+    if matches:
+        print("Extracted {} matches from schedule/results".format(len(matches)))
+        cache.set(url, json.encode(matches), ONE_HOUR)
+        return matches
+
+    return []
 
 def fetch_match_comm(match_id):
-    url = MATCH_FULL_COMM_URL.format(match_id = match_id)
-    json_resp = {}
+    url = MATCH_PAGE_URL.format(match_id = match_id)
     cached_data = cache.get(url)
     if cached_data:
         print("---HIT for {}".format(url))
-        json_resp = json.decode(cached_data)
-        return json_resp.get("matchDetails")
+        return json.decode(cached_data)
 
     print("--MISS for {}".format(url))
-    json_resp = json.decode(fetch_url(url))
-    if not json_resp:
+    html = fetch_url(url)
+    match_data = _scrape_match_data(html)
+
+    if not match_data or "matchHeader" not in match_data:
         print("NULL match details for {}".format(url))
         return {}
 
     cache_ttl = 5 * ONE_MINUTE
-    match_state = json_resp.get("matchDetails", {}).get("matchHeader", {}).get("state", "Preview").lower()
+    match_state = match_data.get("matchHeader", {}).get("state", "Preview").lower()
     if match_state in ["complete", "abandon", "upcoming"]:
         # completed/way in future matches can be cached for longer as they are less likely to change now
         cache_ttl = 4 * ONE_HOUR
@@ -741,19 +775,26 @@ def fetch_match_comm(match_id):
         # matches about to start within next 1 day
         cache_ttl = ONE_HOUR
 
-    cache.set(url, json.encode(json_resp), cache_ttl)
-    return json_resp.get("matchDetails")
+    cache.set(url, json.encode(match_data), cache_ttl)
+    return match_data
 
 def fetch_live_score(match_id):
-    url = LIVE_SCORE_URL.format(match_id = match_id)
+    url = MATCH_PAGE_URL.format(match_id = match_id)
     cached_data = cache.get(url)
     if cached_data:
-        print("---HIT for {}".format(url))
-        return json.decode(cached_data)
+        decoded = json.decode(cached_data)
+        if decoded and "matchHeader" in decoded:
+            print("---HIT for {}".format(url))
+            return decoded
+
     print("--MISS for {}".format(url))
-    json_resp = json.decode(fetch_url(url))
-    cache.set(url, json.encode(json_resp), ONE_MINUTE)
-    return json_resp
+    html = fetch_url(url)
+    match_data = _scrape_match_data(html)
+
+    if match_data and "matchHeader" in match_data:
+        cache.set(url, json.encode(match_data), ONE_MINUTE)
+
+    return match_data
 
 def fetch_url(url):
     res = http.get(url = url, headers = {"User-Agent": USER_AGENT})
@@ -764,3 +805,237 @@ def fetch_url(url):
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
     return res.body()
+
+def _scrape_match_data(html):
+    data = {}
+
+    # Detect escaped mode
+    escaped = False
+    mh_marker = '"matchHeader":'
+    ms_marker = '"miniscore":'
+    v_marker = '"venue":'
+
+    if '\\"matchHeader\\":' in html:
+        escaped = True
+        mh_marker = '\\"matchHeader\\":'
+        ms_marker = '\\"miniscore\\":'
+        v_marker = '\\"venue\\":'
+
+    # matchHeader
+    mh_start = html.find(mh_marker)
+    if mh_start != -1:
+        mh_obj_str = _extract_json_object(html, mh_start + len(mh_marker), escaped)
+        if mh_obj_str:
+            if escaped:
+                unescaped = mh_obj_str.replace('\\"', '"').replace("\\\\", "\\")
+                data["matchHeader"] = json.decode(unescaped)
+            else:
+                data["matchHeader"] = json.decode(mh_obj_str)
+
+    # miniscore
+    ms_start = html.find(ms_marker)
+    if ms_start != -1:
+        ms_obj_str = _extract_json_object(html, ms_start + len(ms_marker), escaped)
+        if ms_obj_str:
+            if escaped:
+                unescaped = ms_obj_str.replace('\\"', '"').replace("\\\\", "\\")
+                data["miniscore"] = json.decode(unescaped)
+            else:
+                data["miniscore"] = json.decode(ms_obj_str)
+
+    # venue (inject into matchHeader if found and not present)
+    if "matchHeader" in data and "venue" not in data["matchHeader"]:
+        v_start = html.find(v_marker, mh_start)  # Search after matchHeader
+        if v_start != -1:
+            v_obj_str = _extract_json_object(html, v_start + len(v_marker), escaped)
+            if v_obj_str:
+                if escaped:
+                    unescaped = v_obj_str.replace('\\"', '"').replace("\\\\", "\\")
+                    data["matchHeader"]["venue"] = json.decode(unescaped)
+                else:
+                    data["matchHeader"]["venue"] = json.decode(v_obj_str)
+
+    return data
+
+def _extract_json_object(text, start_index, escaped = False):
+    # Skip whitespace
+    i = start_index
+    for _ in range(len(text) - start_index):
+        if i >= len(text):
+            return None
+        if text[i] not in [" ", "\t", "\n", "\r"]:
+            break
+        i += 1
+
+    if text[i] != "{":
+        return None
+
+    balance = 0
+    in_string = False
+
+    # For escaped mode logic
+    backslashes = 0
+
+    start_capture = i
+
+    for j in range(i, len(text)):
+        char = text[j]
+
+        if char == "\\":
+            backslashes += 1
+            continue
+
+        if char == '"':
+            # Determine if this is a string delimiter or a literal quote
+            is_delimiter = False
+
+            if escaped:
+                # In escaped mode:
+                # \" (odd backslashes) is delimiter
+                if backslashes % 2 != 0:
+                    effective_slashes = (backslashes + 1) // 2
+                    if effective_slashes % 2 != 0:
+                        is_delimiter = True
+            else:
+                # Standard mode
+                # Even backslashes (0, 2...) -> Delimiter
+                if backslashes % 2 == 0:
+                    is_delimiter = True
+
+            if is_delimiter:
+                in_string = not in_string
+
+        backslashes = 0
+
+        if not in_string:
+            if char == "{":
+                balance += 1
+            elif char == "}":
+                balance -= 1
+                if balance == 0:
+                    return text[start_capture:j + 1]
+
+    return None
+
+def _safe_float(val):
+    if type(val) == "string":
+        if val == "$undefined":
+            return 0.0
+        return float(val)
+    return float(val)
+
+def main(config):
+    tz = time.tz()
+    team_id = config.get("team", DEFAULT_TEAM_ID)
+    fixture_days = config.get("days_forward", ALWAYS_SHOW_FIXTURES_SCHEMA_KEY)
+    result_days = int(config.get("days_back", DEFAULT_PAST_RESULT_DAYS))
+    now = time.now().in_location(tz)
+    team_settings = team_settings_by_id[team_id]
+    if not team_settings:
+        return DEFAULT_SCREEN
+
+    # These now return lists of match objects (dictionaries), not just IDs
+    result_matches = get_cached_past_matches(team_settings.id, team_settings.name)
+    scheduled_matches = get_cached_scheduled_matches(team_settings.id, team_settings.name)
+
+    current_match, past_match, next_match = None, None, None
+
+    # Process past matches
+    for match_data in result_matches:
+        if type(match_data) == "string":
+            # Old cache format (ID only)
+            full_match_data = fetch_match_comm(match_data)
+            if full_match_data and "matchHeader" in full_match_data:
+                # Check teams for legacy flow
+                if str(full_match_data["matchHeader"]["team1"]["id"]) not in team_settings_by_id:
+                    continue
+                if str(full_match_data["matchHeader"]["team2"]["id"]) not in team_settings_by_id:
+                    continue
+                past_match = full_match_data
+                break
+            continue
+
+        m_team1_id = str(match_data["matchHeader"]["team1"]["id"])
+        m_team2_id = str(match_data["matchHeader"]["team2"]["id"])
+
+        if m_team1_id not in team_settings_by_id or m_team2_id not in team_settings_by_id:
+            continue
+
+        if team_id not in [m_team1_id, m_team2_id]:
+            continue
+
+        # Try to fetch full details for the *selected* match to get scorecard
+        full_match_data = fetch_match_comm(match_data["matchHeader"]["matchId"])
+        if full_match_data and "matchHeader" in full_match_data:
+            past_match = full_match_data
+            break
+
+    # Process scheduled matches
+    for match_data in scheduled_matches:
+        if type(match_data) == "string":
+            # Old cache format (ID only) - for schedule, fetch might fail if it's future
+            # But we can try. If it fails, we skip.
+            # Actually, if it's future, fetch_match_comm uses scraping now, so it might work
+            # IF the individual match page exists and has data.
+            # But we know it often doesn't for far future matches.
+            # So this might fail to show anything until cache clears.
+            # But it's better than crashing.
+            full_match_data = fetch_match_comm(match_data)
+            if full_match_data and "matchHeader" in full_match_data:
+                if str(full_match_data["matchHeader"]["team1"]["id"]) not in team_settings_by_id:
+                    continue
+                if str(full_match_data["matchHeader"]["team2"]["id"]) not in team_settings_by_id:
+                    continue
+                if team_id not in [str(full_match_data["matchHeader"]["team1"]["id"]), str(full_match_data["matchHeader"]["team2"]["id"])]:
+                    continue
+                next_match = full_match_data
+                break
+            continue
+
+        m_team1_id = str(match_data["matchHeader"]["team1"]["id"])
+        m_team2_id = str(match_data["matchHeader"]["team2"]["id"])
+
+        if m_team1_id not in team_settings_by_id or m_team2_id not in team_settings_by_id:
+            continue
+
+        if team_id not in [m_team1_id, m_team2_id]:
+            continue
+
+        next_match = match_data
+        break
+
+    if next_match:
+        # Check if it's actually live
+        state = next_match["matchHeader"]["state"].lower()
+        if state in ["in progress", "live"] or next_match.get("miniscore", {}).get("inningsId", 0) > 0:
+            # It's live! Try to fetch live details
+            live_data = fetch_live_score(next_match["matchHeader"]["matchId"])
+            if live_data and "matchHeader" in live_data:
+                current_match = live_data
+            else:
+                current_match = next_match  # Fallback to schedule data
+
+    match_to_render, render_fn = None, None
+    if current_match:
+        match_to_render, render_fn = current_match, render_current_match
+    if past_match and not match_to_render:
+        complete_ts = past_match["matchHeader"].get("matchCompleteTimestamp")
+        if not complete_ts:
+            complete_ts = past_match["matchHeader"].get("matchStartTimestamp", 0)
+
+        match_time = time.from_timestamp(complete_ts // 1000).in_location(tz)
+        result_days_duration = time.parse_duration("{}h".format(result_days * 24))
+        if now <= match_time + result_days_duration:
+            match_to_render, render_fn = past_match, render_past_match
+    if next_match and not match_to_render:
+        if fixture_days == ALWAYS_SHOW_FIXTURES_SCHEMA_KEY:
+            match_to_render, render_fn = next_match, render_next_match
+        else:
+            match_time = time.from_timestamp(next_match["matchHeader"]["matchStartTimestamp"] // 1000).in_location(tz)
+            fixture_days_duration = time.parse_duration("{}h".format(int(fixture_days) * 24))
+            if now > match_time - fixture_days_duration:
+                match_to_render, render_fn = next_match, render_next_match
+
+    if not match_to_render:
+        return []
+    return render_fn(match_to_render, tz)
