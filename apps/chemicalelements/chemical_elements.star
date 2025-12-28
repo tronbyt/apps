@@ -1590,14 +1590,14 @@ def getTertiaryCommentary(element):
         The display text for the third commentary line.
     """
     display_text = element["Name"]
-    if (len(str(element["StateRoomTemp"])) > 0):
+    if element["StateRoomTemp"]:
         display_text += " is {} at room temperature ".format((element["StateRoomTemp"]).lower())
-    if (len(str(element["MeltingPoint"])) > 0):
+    if element["MeltingPoint"]:
         #display_text += "with melting point of %s%sC " % (element["MeltingPoint"], chr(176))
         display_text += "with melting point of {}{}C ".format(humanize.float("#,###.", float(element["MeltingPoint"])), chr(176))
         #humanize.float("#,###.", accident_free_days)
 
-    if (len(str(element["BoilingPoint"])) > 0):
+    if element["BoilingPoint"]:
         display_text += "and boiling point of {}{}C ".format(humanize.float("#,###.", float(element["BoilingPoint"])), chr(176))
     return display_text
 
@@ -1612,7 +1612,7 @@ def day_of_year(date, timezone):
         The day of the year, an integer between 1 and 366
     """
     firstdayofyear = time.time(year = date.year, month = 1, day = 1, hour = 0, minute = 0, second = 0, location = timezone)
-    day_of_year = math.ceil(time.parse_duration(date - firstdayofyear).seconds / 86400)
+    day_of_year = int(math.ceil((date - firstdayofyear).hours / 24))
     return (day_of_year)
 
 def main(config):
@@ -1621,7 +1621,7 @@ def main(config):
     Args:
         config: Configuration Items to control how the app is displayed
     Returns:
-        The display inforamtion for the Tidbyt
+        The display information for the Tidbyt
     """
 
     IS_DOUBLE_SIZED = canvas.is2x()
@@ -1633,7 +1633,7 @@ def main(config):
     if IS_DOUBLE_SIZED:
         SMALL_FONT = "5x8"
         LARGE_FONT = "terminus-16"
-        BOX_WIDTH = 46
+        BOX_WIDTH = 53
         SPACER = 4
         ADJUSTMENT = 1
     else:
@@ -1648,10 +1648,13 @@ def main(config):
     if (config.get("display", "OncePerDay") == "OncePerDay"):
         now = config.get("time")
         now = (time.parse_time(now) if now else time.now())
-        current_element = elements[(day_of_year(now, DEFAULT_TIMEZONE) - 1) % (len(elements) - 1)]
+        current_element = elements[(day_of_year(now, DEFAULT_TIMEZONE) - 1) % len(elements)]
     else:
         #default is random element
-        current_element = elements[random.number(0, len(elements) - 1)]
+        # seed the RNG with a new value every minute to improve
+        # cross-user caching while still appearing random.
+        random.seed(time.now().unix // 60)
+        current_element = elements[int(random.number(0, len(elements)))]
 
     row1 = current_element["Name"]
     row2 = getMainCommentary(current_element)
@@ -1677,12 +1680,13 @@ def main(config):
                                 render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
                                 render.Text(" {}".format(current_element["AtomicNumber"]), color = "fff", font = SMALL_FONT),
                                 render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
-                                render.Text(" {}".format(current_element["Symbol"]), color = "fff", font = "5x8"),
+                                render.Text(" {}".format(current_element["Symbol"]), color = "fff", font = SMALL_FONT),
+                                render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
                                 render.Marquee(
                                     width = BOX_WIDTH - 2,
                                     child = render.Text(" {}".format(current_element["Name"]), color = "fff", font = SMALL_FONT),
                                 ),
-                                render.Box(width = BOX_WIDTH, height = 1, color = "#000000"),
+                                render.Box(width = BOX_WIDTH, height = SPACER, color = "#000000"),
                                 render.Text(" {}".format(current_element["Mass"]), color = "fff", font = SMALL_FONT),
                                 render.Box(width = BOX_WIDTH, height = SPACER - ADJUSTMENT, color = "#000000"),
                                 render.Box(width = BOX_WIDTH, height = 1, color = current_element["Color"]),
@@ -1701,26 +1705,23 @@ def main(config):
                         render.Column(
                             children = [
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH,
-                                    offset_start = 30,
+                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
                                     child = render.Text(row1, color = "#ffd700", font = LARGE_FONT),
                                 ),
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH,
-                                    offset_start = len(row1) * 5,
+                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
                                     child = render.Text(row2, color = "#ffd700", font = LARGE_FONT),
                                 ),
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH,
-                                    offset_start = len(row1 + row2) * 5,
+                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
                                     child = render.Text(row3, color = "#ffd700", font = LARGE_FONT),
                                 ),
                                 render.Marquee(
-                                    width = SCREEN_WIDTH - BOX_WIDTH,
-                                    offset_start = len(row1 + row2 + row3) * 5,
+                                    width = SCREEN_WIDTH - BOX_WIDTH - 3,
                                     child = render.Text(row4, color = "#ffd700", font = LARGE_FONT),
                                 ),
                             ],
+                            main_align = "space_evenly",
                         ),
                     ],
                 ),
