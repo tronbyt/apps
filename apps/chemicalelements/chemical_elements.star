@@ -1625,10 +1625,7 @@ def main(config):
     """
 
     IS_DOUBLE_SIZED = canvas.is2x()
-    SCREEN_HEIGHT = canvas.height()
     SCREEN_WIDTH = canvas.width()
-
-    print("Screen Size: %sx%s" % (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     if IS_DOUBLE_SIZED:
         SMALL_FONT = "5x8"
@@ -1645,7 +1642,7 @@ def main(config):
 
     #instead can choose one element per day based on day of year..
     #it'll cycle through a new element each day and restart on the 119th day
-    if (config.get("display", "OncePerDay") == "OncePerDay"):
+    if (config.get("display", element_display_options[0].value) == element_display_options[0].value):
         now = config.get("time")
         now = (time.parse_time(now) if now else time.now())
         current_element = elements[(day_of_year(now, DEFAULT_TIMEZONE) - 1) % len(elements)]
