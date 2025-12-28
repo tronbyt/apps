@@ -6,3 +6,4 @@ desc: Animated characters & items from the 1992 Super Mario Kart game.
 author: Kevin Connell
 fileName: super_mario_kart.star
 packageName: supermariokart
+supports2x: true
