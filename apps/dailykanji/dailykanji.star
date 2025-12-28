@@ -112,8 +112,8 @@ def main(config):
         FONT_HEIGHT = 8
         V_SPACING = 2
 
-    api_key = config.str("api_key", "")
-    selected_level = config.str("max_level", "beginner")
+    api_key = config.get("api_key", "")
+    selected_level = config.get("max_level", "beginner")
     max_jlpt = LEVEL_TO_JLPT.get(selected_level, 5)
 
     # Cache keys per level
@@ -198,10 +198,11 @@ def main(config):
             top = top_margin + i * (FONT_HEIGHT + V_SPACING),
         ))
 
+    scroll_delay = int(config.get("scroll", "45"))
     return render.Root(
         render.Stack(children = display_items),
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)),
+        delay = scroll_delay // 2 if canvas.is2x() else scroll_delay,
     )
 
 def get_schema():
