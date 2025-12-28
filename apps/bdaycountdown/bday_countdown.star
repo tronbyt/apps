@@ -5,67 +5,84 @@ Description: Create a bday countdown!
 Author: Jared Brockmyre
 """
 
-load("images/cake_frame1.png", CAKE_FRAME1_ASSET = "file")
-load("images/cake_frame2.png", CAKE_FRAME2_ASSET = "file")
+load("humanize.star", "humanize")
+load("i18n.star", "tr")
+load("images/cake_frame1.png", CAKE_FRAME1 = "file")
+load("images/cake_frame1@2x.png", CAKE_FRAME1_2X = "file")
+load("images/cake_frame2.png", CAKE_FRAME2 = "file")
+load("images/cake_frame2@2x.png", CAKE_FRAME2_2X = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-
-CAKE_FRAME1 = CAKE_FRAME1_ASSET.readall()
-CAKE_FRAME2 = CAKE_FRAME2_ASSET.readall()
 
 def main(config):
     timezone = time.tz()
     now = time.now().in_location(timezone)
-    bday = time.time(year = now.year, month = int(config.get("birthMonth", "1"), 10), day = int(config.get("birthDay", "1"), 10), location = timezone)
-    name = config.str("name", "Name")
+    birth_month = int(config.get("birthMonth", "1"), 10)
+    birth_day = int(config.get("birthDay", "1"), 10)
+    bday = time.time(year = now.year, month = birth_month, day = birth_day, location = timezone)
+    name = config.str("name")
     days_until = bday - now
     days = math.ceil(days_until.hours / 24)
 
-    if (days < 0):
-        days = (365 - (days * -1))
+    if days < 0:
+        bday = time.time(year = now.year + 1, month = birth_month, day = birth_day, location = timezone)
+        days_until = bday - now
+        days = math.ceil(days_until.hours / 24)
+
+    scale = 2 if canvas.is2x() else 1
+    if scale == 2:
+        text_font = "terminus-14-light"
+    else:
+        text_font = "tom-thumb"
 
     c = config.get("nameColor", "#0000ff")
 
-    if (days == 0):
-        row1Text = "Happy"
-        row2Text = "Birthday"
-        row3Text = str(name) + "!"
+    if days == 0:
+        row1Text = tr("Happy")
+        row2Text = tr("Birthday")
+        row3Text = name + "!" if name else ""
         row4Text = ""
     else:
-        row1Text = str(days) + " days"
-        row2Text = "until"
-        row3Text = str(name) + "'s"
-        row4Text = "birthday!"
+        row1Text = humanize.plural(days, tr("day"), tr("days"))
+        row2Text = tr("until")
+        row3Text = name + tr("'s") if name else tr("Your")
+        row4Text = tr("birthday")
 
-    displayChildren = [
-        render.Text(content = row1Text, font = "tom-thumb"),
-        render.Text(content = row2Text, font = "tom-thumb"),
-        render.Text(content = row3Text, font = "tom-thumb", color = c),
-        render.Text(content = row4Text, font = "tom-thumb"),
+    textRows = [
+        render.Text(content = row1Text, font = text_font),
+        render.Text(content = row2Text, font = text_font),
+        render.Text(content = row3Text, font = text_font, color = c),
+        render.Text(content = row4Text, font = text_font),
     ]
 
     displayChildren = [
         render.Row(
             children = [
-                render.Image(src = CAKE_FRAME1, width = 24, height = 24),
-                render.Column(
-                    cross_align = "center",
-                    main_align = "center",
-                    expanded = True,
-                    children = displayChildren,
+                render.Image(src = (CAKE_FRAME1_2X if scale == 2 else CAKE_FRAME1).readall(), width = 24 * scale, height = 24 * scale),
+                render.Box(
+                    width = canvas.width() - 24 * scale,
+                    height = canvas.height(),
+                    child = render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = textRows,
+                    ),
                 ),
             ],
         ),
         render.Row(
             children = [
-                render.Image(src = CAKE_FRAME2, width = 24, height = 24),
-                render.Column(
-                    cross_align = "center",
-                    main_align = "center",
-                    expanded = True,
-                    children = displayChildren,
+                render.Image(src = (CAKE_FRAME2_2X if scale == 2 else CAKE_FRAME2).readall(), width = 24 * scale, height = 24 * scale),
+                render.Box(
+                    width = canvas.width() - 24 * scale,
+                    height = canvas.height(),
+                    child = render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = textRows,
+                    ),
                 ),
             ],
         ),
@@ -261,7 +278,7 @@ def get_schema():
                 name = "Birthday Person's Name",
                 desc = "Birthday Person's Name (Max 9 characters)",
                 icon = "gear",
-                default = "Your",
+                default = "",
             ),
             schema.Color(
                 id = "nameColor",
