@@ -1612,8 +1612,8 @@ def day_of_year(date, timezone):
         The day of the year, an integer between 1 and 366
     """
     firstdayofyear = time.time(year = date.year, month = 1, day = 1, hour = 0, minute = 0, second = 0, location = timezone)
-    day_of_year = int(math.ceil((date - firstdayofyear).hours / 24))
-    return (day_of_year)
+    doy = int((date - firstdayofyear).hours / 24) + 1
+    return doy
 
 def main(config):
     """ Main
