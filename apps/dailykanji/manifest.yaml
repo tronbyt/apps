@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: dailykanji.star
 packageName: dailykanji
 recommendedInterval: 5
+supports2x: true
