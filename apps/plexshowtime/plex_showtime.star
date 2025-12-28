@@ -23,8 +23,6 @@ MAX_TEXT_LENGTH = 1000
 GET_TOP = 15
 
 def main(config):
-    random.seed(time.now().unix)
-
     plex_server_url = config.str("plex_server_url", "")
     plex_token = config.str("plex_token", "")
     show_heading = config.bool("show_heading", True)

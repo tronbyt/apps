@@ -692,7 +692,7 @@ def main(config):
 
     speed = int(config.str("speed", DEFAULT_SPEED))
     if speed < 0:
-        speed = rand(MIN_SPEED + MAX_SPEED + 1) + MAX_SPEED
+        speed = random.number(0, MIN_SPEED + MAX_SPEED) + MAX_SPEED
 
     speed = speed * 5
     delay = speed * time.millisecond
@@ -820,8 +820,6 @@ def get_bg_image(selected_game, level_number, t, is_24_hour_format = True, has_l
         ],
     )
 
-def rand(ceiling):
-    return random.number(0, ceiling - 1)
 
 def sprite_get_frames(selected_game, level_number, time_box):
     """Gets an array of sprite animation frames

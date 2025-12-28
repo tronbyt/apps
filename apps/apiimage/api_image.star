@@ -17,8 +17,6 @@ load("xpath.star", "xpath")
 BG_IMAGE = BG_IMAGE_ASSET.readall()
 
 def main(config):
-    random.seed(time.now().unix)
-
     api_url = config.str("api_url", "")
     response_path = config.get("response_path", "")
     request_headers = config.get("request_headers", "")

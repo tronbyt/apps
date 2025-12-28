@@ -50,7 +50,6 @@ FACTS = [
 ]
 
 def main():
-    random.seed(time.now().unix)
 
     idx = random.number(0, len(FACTS) - 1)
     current_fact = FACTS[idx]
