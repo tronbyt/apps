@@ -36,8 +36,7 @@ SCROLL_SPEED_OPTIONS = [
 ]
 
 def display_instructions(config, is_double_size):
-    delay = int(config.get("scroll", 45))
-    delay = int(delay / 2) if is_double_size else delay
+    delay = _get_delay(config, canvas.is2x())
 
     font = "5x8" if not is_double_size else "terminus-14"
 
@@ -86,7 +85,7 @@ def get_app_from_files(commit_details):
     return apps
 
 def get_manifest_info(app_folder, tree_sha, headers, cache_ttl):
-    tree_url = "https://api.github.com/repos/tronbyt/apps/git/trees/{}?recursive=1".format(tree_sha)
+    tree_url = "https://api.github.com/repos/{}/git/trees/{}?recursive=1".format(repo, tree_sha)
     resp = http.get(url = tree_url, headers = headers, ttl_seconds = cache_ttl)
     if resp.status_code != 200:
         return None
@@ -131,6 +130,8 @@ def get_manifest_info(app_folder, tree_sha, headers, cache_ttl):
                 manifest["author"] = value
             elif key in ["desc", "description", "summary"]:
                 manifest["description"] = value
+            elif key == "broken":
+                manifest["broken"] = value.lower() in ["true", "yes", "1"]
 
     if manifest.get("broken", False):
         return None
@@ -220,6 +221,7 @@ def get_schema():
                 desc = "GitHub Personal Access Token for higher rate limits (30min cache). Get from: Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic) → Select 'repo' scope → Copy token. Leave empty for 4hr cache (unauthenticated).",
                 default = "",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "scroll",
@@ -238,6 +240,10 @@ def get_schema():
             ),
         ],
     )
+
+def _get_delay(config, is_double_size):
+    delay = int(config.get("scroll", 45))
+    return int(delay / 2) if is_double_size else delay
 
 def main(config):
     show_instructions = config.bool("instructions", False)
@@ -270,7 +276,7 @@ def main(config):
     else:
         # Pick random index instead
         random.seed(int(time.now().unix))
-        random_index = int(random.number(0, len(items)))
+        random_index = int(random.number(0, len(items) - 1))
         selected_item = items[random_index]
 
         # Get other app names (comma delimited with "and")
@@ -302,7 +308,7 @@ def main(config):
             small_font = "5x8"
             large_font = "5x8"
             small_font_width = 6
-            large_font_width = 8
+            large_font_width = 6
 
         row1 = "{} by {}".format(selected_item["app_name"], selected_item["author"])
         row2 = "{} - Changes: {}".format(selected_item["app_description"], selected_item["change"])
@@ -319,8 +325,7 @@ def main(config):
             ],
         )
 
-    delay = int(config.get("scroll", 45))
-    delay = int(delay / 2) if canvas.is2x() else delay
+    delay = _get_delay(config, canvas.is2x())
 
     return render.Root(
         child = body,
