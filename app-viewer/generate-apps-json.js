@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
-import { join, extname, dirname } from 'path';
+import { join, extname, dirname, basename } from 'path';
 import { load } from 'js-yaml';
 import { fileURLToPath } from 'url';
 
@@ -112,7 +112,7 @@ function scanApps() {
     // Try to find the corresponding @2x image if the app supports it
     if (supports2x && image) {
         const ext = extname(image);
-        const base = image.slice(0, -ext.length);
+        const base = basename(image, ext);
         const candidate2x = `${base}@2x${ext}`;
         if (files.includes(candidate2x)) {
             image2x = `${appName}/${candidate2x}`;
