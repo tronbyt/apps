@@ -1,7 +1,7 @@
 """
-Applet: TronByt Updates
-Summary:   Display new and updated Apps available on TronByt.
-Description: This app shows recently added or updated apps on TronByt by fetching data from a specified GitHub repository.
+Applet: Tronbyt Updates
+Summary:   Display new and updated Apps available on Tronbyt.
+Description: This app shows recently added or updated apps on Tronbyt by fetching data from a specified GitHub repository.
 Author: Robert Ison
 """
 
@@ -12,7 +12,7 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DEFAULT_REPO = "tronbyt/apps"
+DEFAULT_REPO = "Tronbyt/apps"
 DEFAULT_BRANCH = "main"
 MAX_COMMITS = 20
 MAX_ITEMS = 10
@@ -41,7 +41,7 @@ def display_instructions(config, is_double_size):
     font = "5x8" if not is_double_size else "terminus-14"
 
     ##############################################################################################################################################################################################################################
-    instructions_1 = "This app shows recently added or updated apps on TronByt from the tronbyt/apps GitHub repository, however you can change to another TronByt App repository."
+    instructions_1 = "This app shows recently added or updated apps on Tronbyt from the Tronbyt/apps GitHub repository, however you can change to another Tronbyt App repository."
     instructions_2 = "Enter GitHub Personal Access Token for more frequent updates. GitHub.com go to Settings → Developer settings → Personal access tokens → Tokens (classic) → "
     instructions_3 = "→ Generate new token (classic)  Select 'repo' scope → Copy token. Leave empty for less frequent updates."
     return render.Root(
@@ -49,7 +49,7 @@ def display_instructions(config, is_double_size):
             children = [
                 render.Marquee(
                     width = canvas.width(),
-                    child = render.Text("TronByt Updates", color = "#00FFFF", font = font),
+                    child = render.Text("Tronbyt Updates", color = "#00FFFF", font = font),
                 ),
                 render.Marquee(
                     width = canvas.width(),
@@ -204,7 +204,7 @@ def get_schema():
             schema.Text(
                 id = "repo",
                 name = "GitHub Repository",
-                desc = "GitHub repository (default: tronbyt/apps)",
+                desc = "GitHub repository (default: Tronbyt/apps)",
                 default = DEFAULT_REPO,
                 icon = "github",
             ),
