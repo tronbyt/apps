@@ -1,18 +1,22 @@
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { join, extname, dirname } from 'path';
+import { load } from 'js-yaml';
+import { fileURLToPath } from 'url';
 
-const APPS_DIR = path.join(__dirname, '../apps');
-const OUTPUT_FILE = path.join(__dirname, 'apps.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const APPS_DIR = join(__dirname, '../apps');
+const OUTPUT_FILE = join(__dirname, 'apps.json');
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
 function parseManifest(appPath) {
   try {
-    const manifestPath = path.join(appPath, 'manifest.yaml');
-    if (fs.existsSync(manifestPath)) {
-      const content = fs.readFileSync(manifestPath, 'utf8');
-      return yaml.load(content);
+    const manifestPath = join(appPath, 'manifest.yaml');
+    if (existsSync(manifestPath)) {
+      const content = readFileSync(manifestPath, 'utf8');
+      return load(content);
     }
   } catch (e) {
     console.error(`Error parsing manifest for ${appPath}:`, e);
@@ -20,8 +24,30 @@ function parseManifest(appPath) {
   return null;
 }
 
-function findFirstImage(files) {
-  return files.find(f => IMAGE_EXTS.includes(path.extname(f).toLowerCase()));
+function findPreview(files, appName, manifest, starFile) {
+  // 1. dirName + extension
+  for (const ext of IMAGE_EXTS) {
+    if (files.includes(appName + ext)) return appName + ext;
+  }
+
+  // 2. manifest.fileName + extension
+  if (manifest && manifest.fileName) {
+    const baseName = manifest.fileName.replace(/\.[^/.]+$/, "");
+    for (const ext of IMAGE_EXTS) {
+      if (files.includes(baseName + ext)) return baseName + ext;
+    }
+  }
+
+  // 3. starFile name + extension
+  if (starFile) {
+    const baseName = starFile.replace(/\.[^/.]+$/, "");
+    for (const ext of IMAGE_EXTS) {
+      if (files.includes(baseName + ext)) return baseName + ext;
+    }
+  }
+
+  // 4. Fallback: First image file
+  return files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase()));
 }
 
 function findMarkdown(files) {
@@ -30,8 +56,8 @@ function findMarkdown(files) {
 
 function getReadmeDescription(appPath, mdFile) {
   try {
-    const mdPath = path.join(appPath, mdFile);
-    const content = fs.readFileSync(mdPath, 'utf8');
+    const mdPath = join(appPath, mdFile);
+    const content = readFileSync(mdPath, 'utf8');
 
     // Simple cleanup: remove headers and get first line/paragraph
     const cleanText = content
@@ -51,24 +77,24 @@ function getReadmeDescription(appPath, mdFile) {
 
 function scanApps() {
   const apps = [];
-  const appDirs = fs.readdirSync(APPS_DIR, { withFileTypes: true })
+  const appDirs = readdirSync(APPS_DIR, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name);
 
   for (const appName of appDirs) {
-    const appPath = path.join(APPS_DIR, appName);
+    const appPath = join(APPS_DIR, appName);
     let files;
     try {
-      files = fs.readdirSync(appPath);
+      files = readdirSync(appPath);
     } catch (e) {
       console.error(`Failed to read directory ${appPath}:`, e);
       continue;
     }
-    const image = findFirstImage(files);
     const md = findMarkdown(files);
     const starFiles = files.filter(f => f.endsWith('.star'));
     const starFile = starFiles.length > 0 ? starFiles[0] : null; // Take the first .star file
     const manifest = parseManifest(appPath);
+    const image = findPreview(files, appName, manifest, starFile);
 
     // Get description from manifest first, then fallback to README
     let description = null;
@@ -76,6 +102,8 @@ function scanApps() {
     let displayName = appName;
     let author = null;
     let recommendedInterval = null;
+    let supports2x = false;
+    let image2x = null;
 
     if (manifest) {
       summary = manifest.summary || null;
@@ -83,6 +111,17 @@ function scanApps() {
       displayName = manifest.name || appName;
       author = manifest.author || null;
       recommendedInterval = manifest.recommendedInterval || null;
+      supports2x = Boolean(manifest.supports2x);
+    }
+
+    // Try to find the corresponding @2x image if the app supports it
+    if (supports2x && image) {
+        const ext = extname(image);
+        const base = image.slice(0, -ext.length);
+        const candidate2x = `${base}@2x${ext}`;
+        if (files.includes(candidate2x)) {
+            image2x = `${appName}/${candidate2x}`;
+        }
     }
 
     // Fallback to README if no manifest description
@@ -98,6 +137,8 @@ function scanApps() {
       author: author,
       recommendedInterval: recommendedInterval,
       image: image ? `${appName}/${image}` : null,
+      image2x: image2x,
+      supports2x: supports2x,
       md: md ? `${appName}/${md}` : null,
       starFile: starFile
     });
@@ -107,7 +148,7 @@ function scanApps() {
 
 function main() {
   const apps = scanApps();
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(apps, null, 2));
+  writeFileSync(OUTPUT_FILE, JSON.stringify(apps, null, 2));
   console.log(`Generated ${OUTPUT_FILE} with ${apps.length} apps.`);
 }
 
