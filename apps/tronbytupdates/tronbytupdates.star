@@ -14,8 +14,8 @@ load("time.star", "time")
 
 DEFAULT_REPO = "Tronbyt/apps"
 DEFAULT_BRANCH = "main"
-MAX_COMMITS = 20
-MAX_ITEMS = 10
+MAX_COMMITS = 10
+MAX_ITEMS = 6
 
 CACHE_TTL_UNAUTHENTICATED = 14400  # 4 hours
 CACHE_TTL_AUTHENTICATED = 1800  # 30 minutes
