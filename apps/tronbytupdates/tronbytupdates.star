@@ -84,7 +84,7 @@ def get_app_from_files(commit_details):
                     apps.append(app)
     return apps
 
-def get_manifest_info(app_folder, tree_sha, headers, cache_ttl):
+def get_manifest_info(app_folder, repo, tree_sha, headers, cache_ttl):
     tree_url = "https://api.github.com/repos/{}/git/trees/{}?recursive=1".format(repo, tree_sha)
     resp = http.get(url = tree_url, headers = headers, ttl_seconds = cache_ttl)
     if resp.status_code != 200:
@@ -145,7 +145,7 @@ def get_manifest_info(app_folder, tree_sha, headers, cache_ttl):
 
     return None
 
-def summarize_commit(commit_details, headers, cache_ttl):
+def summarize_commit(commit_details, repo, headers, cache_ttl):
     change = commit_details["commit"]["message"].split("\n")[0]
     commit_date = commit_details["commit"]["author"]["date"][:16]
     apps = get_app_from_files(commit_details)
@@ -156,7 +156,7 @@ def summarize_commit(commit_details, headers, cache_ttl):
     app_folder = apps[0]
     tree_sha = commit_details["commit"]["tree"]["sha"]
 
-    manifest_info = get_manifest_info(app_folder, tree_sha, headers, cache_ttl)
+    manifest_info = get_manifest_info(app_folder, repo, tree_sha, headers, cache_ttl)
     if manifest_info:
         return {
             "app_name": manifest_info["name"],
@@ -190,7 +190,7 @@ def find_recent_app_changes(repo, branch, headers, cache_ttl, max_commits, max_i
 
         details = details_resp.json()
         if details and details.get("files"):
-            summary = summarize_commit(details, headers, cache_ttl)
+            summary = summarize_commit(details, repo, headers, cache_ttl)
             if summary:
                 items.append(summary)
                 if len(items) >= max_items:
