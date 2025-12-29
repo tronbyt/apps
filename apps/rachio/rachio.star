@@ -8,15 +8,15 @@ Authors: Matt Fischer and Rob Ison
 load("http.star", "http")
 load("images/rachio_icon.png", RACHIO_ICON_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 RACHIO_ICON = RACHIO_ICON_ASSET.readall()
 
-RACHIO_BLUE = "#06a6e2"
-ORANGE = "#e27306"
-WHITE = "#fff"
+RACHIO_BLUE = "#0070D2"
+RACHIO_SECONDARY_COLOR = "#00A676"
+RACHIO_TEXT = "#FFD700"
 
 ACCURACY_IN_MINUTES = 3  #We'll round to the nearest 3 minutes when calling Rachio API
 LONG_TTL_SECONDS = 7200
@@ -33,12 +33,25 @@ ZONE_STARTED = "ZONE_STARTED"
 def main(config):
     tz = time.tz()
     now = time.now().in_location(tz)
-    api_key = config.str("api_key", "")
-    delay = int(config.get("scroll", 45))
+    api_key = config.str("api_key", "4edda71b-e284-4bb4-8c0e-d687fcb4eca9")
     skip_when_empty = config.bool("skipwhenempty", False)
+    screen_width = canvas.width()
+    icon_width = 16
+
+    delay = int(config.get("scroll", 45))
+    font = "5x8"
+    font_height = 8
+    font_width = 5
+
+    #Mods for 2x Display
+    if (canvas.is2x()):
+        delay = int(delay / 2)
+        font = "terminus-16"
+        font_height = 16
+        font_width = 8
 
     if (api_key.strip() == ""):
-        return display_error_screen(now, "Please enter your API Key", "It can be found in the Rachio App", delay)
+        return display_error_screen(now, "Please enter your API Key", "It can be found in the Rachio App", delay, screen_width, font_height, font)
 
     devices = get_devices(api_key)
     selected_device = config.str("device")
@@ -46,7 +59,7 @@ def main(config):
     if (devices == None or selected_device == None or selected_device == ""):
         if devices == None:
             # No device selected, and no device available from the list, send an error
-            return display_error_screen(now, "No devices found.", "Make sure you have entered the correct API key and selected your display device", delay)
+            return display_error_screen(now, "No devices found.", "Make sure you have entered the correct API key and selected your display device", delay, screen_width, font)
         else:
             selected_device = devices[0]["id"]
 
@@ -57,7 +70,7 @@ def main(config):
     # If we use the time to the millisecond, nothing will ever be cached and we'll hit our limit of rachio requests in a day
     # So we'll round off to the nearest X minutes (They provide enough calls to give you 1 per minutes.)
     # But in addition, let's go a few minutes into the future, no point in every making a call that could miss the most recent event.
-    now = time.now() + time.parse_duration("%sm" % str(ACCURACY_IN_MINUTES))
+    now = time.now() + time.parse_duration("{}m".format(str(ACCURACY_IN_MINUTES)))
     rounded_time = time.time(year = now.year, month = now.month, day = now.day, hour = now.hour, minute = round_to_nearest_X(now.minute, ACCURACY_IN_MINUTES), second = 0, location = tz)
 
     # The data they send is a little odd in that the there isn't a time stamp, but a time display.
@@ -74,7 +87,7 @@ def main(config):
     recent_events = get_selected_events(tz, all_events, False)
     current_events = get_selected_events(tz, all_events, True)
 
-    return render_rachio(tz, config, get_device_name(devices, selected_device), recent_events, current_events, now, delay, skip_when_empty)
+    return render_rachio(tz, config, get_device_name(devices, selected_device), recent_events, current_events, now, delay, skip_when_empty, screen_width, icon_width, font_height, font_width, font)
 
 def get_device_name(devices, selected_device):
     for device in devices:
@@ -94,7 +107,7 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
     return padded_element
 
-def display_error_screen(time, line_3, line_4 = "", delay = 45):
+def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 64, font_height = 8, font = "5x8"):
     return render.Root(
         render.Column(
             children = [
@@ -106,20 +119,20 @@ def display_error_screen(time, line_3, line_4 = "", delay = 45):
                         render.Box(width = 1, height = 1, color = "#000"),
                         render.Stack(
                             children = [
-                                render.Text(time.format("Jan 02"), color = RACHIO_BLUE),
-                                add_padding_to_child_element(render.Text(time.format("3:04 PM"), color = RACHIO_BLUE), 0, 8),
+                                render.Text(time.format("Jan 02"), font = font, color = RACHIO_BLUE),
+                                add_padding_to_child_element(render.Text(time.format("3:04 PM"), font = font, color = RACHIO_BLUE), 0, font_height),
                             ],
                         ),
                     ],
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(line_3, color = ORANGE),
+                    width = screen_width,
+                    child = render.Text(line_3, color = RACHIO_SECONDARY_COLOR, font = font),
                 ),
                 render.Marquee(
                     offset_start = len(line_3) * 5,
-                    width = 64,
-                    child = render.Text(line_4, color = ORANGE),
+                    width = screen_width,
+                    child = render.Text(line_4, color = RACHIO_SECONDARY_COLOR, font = font),
                 ),
             ],
         ),
@@ -127,7 +140,7 @@ def display_error_screen(time, line_3, line_4 = "", delay = 45):
         delay = delay,
     )
 
-def render_rachio(tz, config, device_name, recent_events, current_events, now, delay, skip_when_empty = True):
+def render_rachio(tz, config, device_name, recent_events, current_events, now, delay, skip_when_empty = True, screen_width = 64, icon_width = 16, font_height = 8, font_width = 5, font = "5x8"):
     show_device_name = config.bool("title_display", True)
 
     line_1 = "Rachio"
@@ -144,7 +157,7 @@ def render_rachio(tz, config, device_name, recent_events, current_events, now, d
         if skip_when_empty:
             return []
         else:
-            return display_error_screen(now, "No Events within a week.", "", delay)
+            return display_error_screen(now, "No Events within a week.", "", delay, screen_width, font_height)
 
     # whew, made it with at least one event to display
 
@@ -188,20 +201,20 @@ def render_rachio(tz, config, device_name, recent_events, current_events, now, d
                         render.Box(width = 1, height = 1, color = "#000"),
                         render.Stack(
                             children = [
-                                render.Marquee(width = 48, child = render.Text(line_1, color = RACHIO_BLUE)),
-                                add_padding_to_child_element(render.Marquee(offset_start = len(line_1) * 5, width = 48, child = render.Text(line_2, color = RACHIO_BLUE)), 0, 8),
+                                render.Marquee(width = screen_width - icon_width, child = render.Text(line_1, font = font, color = RACHIO_BLUE)),
+                                add_padding_to_child_element(render.Marquee(offset_start = len(line_1) * font_width, width = screen_width, child = render.Text(line_2, color = RACHIO_BLUE, font = font)), 0, font_height),
                             ],
                         ),
                     ],
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(line_3, color = ORANGE),
+                    width = screen_width,
+                    child = render.Text(line_3, color = RACHIO_SECONDARY_COLOR, font = font),
                 ),
                 render.Marquee(
-                    offset_start = len(line_3) * 5,
-                    width = 64,
-                    child = render.Text(line_4, color = ORANGE),
+                    offset_start = len(line_3) * font_width,
+                    width = screen_width,
+                    child = render.Text(line_4, color = RACHIO_SECONDARY_COLOR, font = font),
                 ),
             ],
         ),
