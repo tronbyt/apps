@@ -1,0 +1,11 @@
+---
+id: tronbytupdates
+name: TronByt Updates
+summary: New and updated Apps available
+desc: Display new and udpated apps available on TronByt.
+author: Robert Ison
+supports2x: true
+fileName: tronbyt_updates.star
+packageName: tronbytupdates
+broken: false
+
