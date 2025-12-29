@@ -25,29 +25,24 @@ function parseManifest(appPath) {
 }
 
 function findPreview(files, appName, manifest, starFile) {
-  // 1. dirName + extension
-  for (const ext of IMAGE_EXTS) {
-    if (files.includes(appName + ext)) return appName + ext;
-  }
+  const fileSet = new Set(files);
 
-  // 2. manifest.fileName + extension
-  if (manifest && manifest.fileName) {
-    const baseName = manifest.fileName.replace(/\.[^/.]+$/, "");
+  const check = (base, stripExt = false) => {
+    if (!base) return null;
+    const baseName = stripExt ? base.replace(/\.[^/.]+$/, "") : base;
     for (const ext of IMAGE_EXTS) {
-      if (files.includes(baseName + ext)) return baseName + ext;
+      const fileName = `${baseName}${ext}`;
+      if (fileSet.has(fileName)) {
+        return fileName;
+      }
     }
-  }
+    return null;
+  };
 
-  // 3. starFile name + extension
-  if (starFile) {
-    const baseName = starFile.replace(/\.[^/.]+$/, "");
-    for (const ext of IMAGE_EXTS) {
-      if (files.includes(baseName + ext)) return baseName + ext;
-    }
-  }
-
-  // 4. Fallback: First image file
-  return files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase()));
+  return check(appName) ||
+    check(manifest?.fileName, true) ||
+    check(starFile, true) ||
+    files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase()));
 }
 
 function findMarkdown(files) {
