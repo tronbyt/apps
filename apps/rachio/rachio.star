@@ -16,7 +16,6 @@ RACHIO_ICON = RACHIO_ICON_ASSET.readall()
 
 RACHIO_BLUE = "#0070D2"
 RACHIO_SECONDARY_COLOR = "#00A676"
-RACHIO_TEXT = "#FFD700"
 
 ACCURACY_IN_MINUTES = 3  #We'll round to the nearest 3 minutes when calling Rachio API
 LONG_TTL_SECONDS = 7200
@@ -33,7 +32,7 @@ ZONE_STARTED = "ZONE_STARTED"
 def main(config):
     tz = time.tz()
     now = time.now().in_location(tz)
-    api_key = config.str("api_key", "4edda71b-e284-4bb4-8c0e-d687fcb4eca9")
+    api_key = config.str("api_key", "")
     skip_when_empty = config.bool("skipwhenempty", False)
     screen_width = canvas.width()
     icon_width = 16
@@ -59,7 +58,7 @@ def main(config):
     if (devices == None or selected_device == None or selected_device == ""):
         if devices == None:
             # No device selected, and no device available from the list, send an error
-            return display_error_screen(now, "No devices found.", "Make sure you have entered the correct API key and selected your display device", delay, screen_width, font)
+            return display_error_screen(now, "No devices found.", "Make sure you have entered the correct API key and selected your display device", delay, screen_width, font_height, font, font_width, icon_width)
         else:
             selected_device = devices[0]["id"]
 
@@ -71,6 +70,7 @@ def main(config):
     # So we'll round off to the nearest X minutes (They provide enough calls to give you 1 per minutes.)
     # But in addition, let's go a few minutes into the future, no point in every making a call that could miss the most recent event.
     now = time.now() + time.parse_duration("{}m".format(str(ACCURACY_IN_MINUTES)))
+
     rounded_time = time.time(year = now.year, month = now.month, day = now.day, hour = now.hour, minute = round_to_nearest_X(now.minute, ACCURACY_IN_MINUTES), second = 0, location = tz)
 
     # The data they send is a little odd in that the there isn't a time stamp, but a time display.
@@ -107,7 +107,7 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
     return padded_element
 
-def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 64, font_height = 8, font = "5x8"):
+def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 64, font_height = 8, font = "5x8", font_width = 5):
     return render.Root(
         render.Column(
             children = [
@@ -130,7 +130,7 @@ def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 6
                     child = render.Text(line_3, color = RACHIO_SECONDARY_COLOR, font = font),
                 ),
                 render.Marquee(
-                    offset_start = len(line_3) * 5,
+                    offset_start = len(line_3) * font_width,
                     width = screen_width,
                     child = render.Text(line_4, color = RACHIO_SECONDARY_COLOR, font = font),
                 ),
@@ -157,7 +157,7 @@ def render_rachio(tz, config, device_name, recent_events, current_events, now, d
         if skip_when_empty:
             return []
         else:
-            return display_error_screen(now, "No Events within a week.", "", delay, screen_width, font_height)
+            return display_error_screen(now, "No Events within a week.", "", delay, screen_width, font_height, font, font_width, icon_width)
 
     # whew, made it with at least one event to display
 
