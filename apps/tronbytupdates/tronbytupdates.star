@@ -174,30 +174,28 @@ def summarize_commit(commit_details, repo, headers, cache_ttl):
         "change": change,
     }
 
-
 def find_recent_app_changes(repo, branch, headers, cache_ttl, max_commits, max_items):
     commits_url = "https://api.github.com/repos/{}/commits?sha={}&per_page={}".format(repo, branch, max_commits)
-    resp = http.get(url=commits_url, headers=headers, ttl_seconds=cache_ttl)
+    resp = http.get(url = commits_url, headers = headers, ttl_seconds = cache_ttl)
     if resp.status_code != 200:
         return []
 
     commits = resp.json()
     items = []
-    
+
     for c in commits:
-        details_resp = http.get(url=c["url"], headers=headers, ttl_seconds=cache_ttl*2)  # ↑ Longer cache
+        details_resp = http.get(url = c["url"], headers = headers, ttl_seconds = cache_ttl * 2)  # ↑ Longer cache
         if details_resp.status_code != 200:
             continue
-            
+
         details = details_resp.json()
         if details and details.get("files"):
-            summary = summarize_commit(details, repo, headers, cache_ttl) 
+            summary = summarize_commit(details, repo, headers, cache_ttl)
             if summary:
                 items.append(summary)
                 if len(items) >= max_items:
                     break
     return items
-
 
 def get_schema():
     return schema.Schema(
