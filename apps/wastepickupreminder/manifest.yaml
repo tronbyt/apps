@@ -1,7 +1,7 @@
 ---
-id: waste-pickup-reminder
+id: wastepickupreminder
 name: Waste Pickup Reminder
 summary: Garbage Recycling reminders
-desc: Garbase Recycling reminders.
+desc: Garbage Recycling reminders.
 author: Robert Ison
 supports2x: true

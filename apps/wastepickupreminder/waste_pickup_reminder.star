@@ -117,11 +117,11 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 def main(config):
     timezone = time.tz()
     now = time.now().in_location(timezone)
-    today = int(humanize.day_of_week(now))
+    today = humanize.day_of_week(now)
 
     one_day = time.parse_duration("24h")
-    tomorrow = now.in_location(timezone) + one_day
-    tomorrow_day = int(humanize.day_of_week(tomorrow))
+    tomorrow = now + one_day
+    tomorrow_day = humanize.day_of_week(tomorrow)
 
     pickups_today = []
     pickups_tomorrow = []
@@ -129,15 +129,20 @@ def main(config):
     nothing_to_display = True
 
     icons_only = config.bool("icons_only")
-    connector = " " if canvas.is2x() else "" if icons_only else ", "
 
-    for i in range(len(WASTE_TYPES)):
-        prefix = WASTE_TYPES[i]["name"].replace(" ", "_").lower()
+    if canvas.is2x():
+        connector = " "
+    elif icons_only:
+        connector = ""
+    else:
+        connector = ", "
 
+    for waste_type in WASTE_TYPES:
+        prefix = waste_type["name"].replace(" ", "_").lower()
         if icons_only:
-            label = WASTE_TYPES[i]["icon"]
+            label = waste_type["icon"]
         else:
-            label = WASTE_TYPES[i]["icon"] + " " + WASTE_TYPES[i]["name"]
+            label = waste_type["icon"] + " " + waste_type["name"]
 
         key = prefix + "_" + str(today)
 
@@ -177,7 +182,8 @@ def main(config):
         text_verticle_offset = 2
 
     calendar_box_size = int(screen_height / 2) - 2
-    delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45))
+    scroll_speed = int(config.get("scroll", 45))
+    delay = scroll_speed // 2 if canvas.is2x() else scroll_speed
 
     return render.Root(
         render.Stack(
