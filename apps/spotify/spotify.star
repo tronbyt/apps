@@ -1100,14 +1100,8 @@ def render_idle(config, recent_state = None):
     idle_message = config.get("idle_message", "Spotify")
 
     if not show_when_idle:
-        # Return blank/black screen
-        return render.Root(
-            child = render.Box(
-                width = DISPLAY_WIDTH,
-                height = DISPLAY_HEIGHT,
-                color = "#000000",
-            ),
-        )
+        # Mark app as "inactive" by returning an empty list
+        return []
 
     # Show recent track if available
     if recent_state:
