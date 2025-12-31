@@ -6,6 +6,7 @@ Author: adilansari
 
 v 1.0 - Initial version with T20/ODI match support
 v 1.1 - Using CricBuzz API for match data and adding Test match support
+v 1.2 - Add Big Bash League team support
 """
 
 load("cache.star", "cache")
@@ -541,6 +542,16 @@ team_settings_by_id = {
         struct(**_team_setting("59", "Royal Challengers Bangalore", "RCB", "#D1AB3E", "#EC1C24")),
         struct(**_team_setting("58", "Chennai Super Kings", "CSK", "#FFFF3C", "#2B5DA8")),
         struct(**_team_setting("64", "Rajasthan Royals", "RR", "#C3A11F", "#074EA2")),
+
+        # Big Bash League Teams
+        struct(**_team_setting("199", "Adelaide Strikers", "ADS", "#FFFFFF", "#0084D6")),
+        struct(**_team_setting("193", "Brisbane Heat", "BRH", "#FFFFFF", "#27A6B0")),
+        struct(**_team_setting("194", "Hobart Hurricanes", "HBH", "#FFFFFF", "#674398")),
+        struct(**_team_setting("195", "Melbourne Renegades", "MLR", "#FFFFFF", "#EE343F")),
+        struct(**_team_setting("196", "Melbourne Stars", "MLS", "#FFFFFF", "#287246")),
+        struct(**_team_setting("197", "Perth Scorchers", "PRS", "#FFFFFF", "#CC5A1E")),
+        struct(**_team_setting("198", "Sydney Sixers", "SYS", "#FFFFFF", "#EC2A90")),
+        struct(**_team_setting("192", "Sydney Thunder", "SYT", "#FFFFFF", "#7CB002")),
     ]
 }
 
