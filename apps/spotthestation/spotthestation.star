@@ -212,9 +212,9 @@ def display_instructions(is2x = False, canvas_width = 64, scroll_speed = 45):
     instructions_3 = "You can adjust settings to be made aware of the passes you can see, and how early you're made aware of them."
 
     if is2x:
-        font = "5x8"
+        font = "terminus-16"
     else:
-        font = "terminus_16"
+        font = "5x8"
 
     return render.Root(
         render.Column(
