@@ -117,7 +117,6 @@ def main(config):
 
     is2x = canvas.is2x()
     screen_width = canvas.width()
-    screen_height = canvas.height()
     scroll_speed = int(config.get("scroll", "45"))
 
     # Display Instructions and end if that's the setting
@@ -168,6 +167,7 @@ def main(config):
                     pass_start = int(p["startUTC"])
                     pass_end = int(p["endUTC"])
                     if (notice_hours == 0 and pass_end >= current_time) or is_within_notice_period(pass_start, pass_end, current_time, notice_hours):
+                        #if (notice_hours == 0 ) or is_within_notice_period(pass_start, pass_end, current_time, notice_hours):
                         # 3️⃣ Check max elevation
                         if "maxEl" in p and p["maxEl"] >= minimum_maxEl:
                             # This pass meets all criteria
@@ -190,7 +190,7 @@ def main(config):
 
         display_text = ("Sample: " if is_sample_data else "") + details_text
 
-        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, config, is2x, screen_width, scroll_speed)
+        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, is2x, screen_width, scroll_speed)
 
 def format_locality(locality, idealLength):
     """Format locality: full string if <= idealLength, else town name before first comma."""
@@ -244,11 +244,13 @@ def display_instructions(is2x = False, canvas_width = 64, scroll_speed = 45):
         show_full_animation = True,
     )
 
-def get_display(location, row1, row2, row3, config, is2x = False, canvas_width = 64, scroll_speed = 45):
-
+def get_display(location, row1, row2, row3, is2x = False, canvas_width = 64, scroll_speed = 45):
     image_width = 16
 
-    print(canvas_width)
+    if is2x:
+        font = "terminus-16"
+    else:
+        font = "5x8"
 
     return render.Root(
         show_full_animation = True,
@@ -300,11 +302,11 @@ def get_display(location, row1, row2, row3, config, is2x = False, canvas_width =
                                     children = [
                                         render.Marquee(
                                             width = canvas_width - image_width,
-                                            child = render.Text(location, color = "#0099FF"),
+                                            child = render.Text(location, color = "#0099FF", font = font),
                                         ),
                                         render.Marquee(
                                             width = canvas_width - image_width,
-                                            child = render.Text(row1, color = "#fff"),
+                                            child = render.Text(row1, color = "#fff", font = font),
                                         ),
                                     ],
                                 ),
@@ -314,11 +316,11 @@ def get_display(location, row1, row2, row3, config, is2x = False, canvas_width =
                 ),
                 render.Marquee(
                     width = canvas_width,
-                    child = render.Text(row2, color = "#fff"),
+                    child = render.Text(row2, color = "#fff", font = font),
                 ),
                 render.Marquee(
                     width = canvas_width,
-                    child = render.Text(row3, color = "#ff0"),
+                    child = render.Text(row3, color = "#ff0", font = font),
                 ),
             ],
         ),
