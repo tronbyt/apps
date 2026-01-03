@@ -17,33 +17,34 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+ICON_DATA = {
+    "clear": SUNNY_ASSET.readall(),
+    "partly": SUNNYISH_ASSET.readall(),
+    "cloudy": CLOUDY_ASSET.readall(),
+    "rain": RAINY_ASSET.readall(),
+    "snow": SNOWY_ASSET.readall(),
+    "sleet": SLEETY_ASSET.readall(),
+    "thunder": THUNDERY_ASSET.readall(),
+    "fog": FOGGY_ASSET.readall(),
+    "hail": HAILY_ASSET.readall(),
+    "wind": WINDY_ASSET.readall(),
+    "tornado": TORNADY_ASSET.readall(),
+}
+
 # --- CONFIGURATION ---
 TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?station_id={station_id}&token={token}"
 
+# --- HELPER FUNCTIONS ---
+def _convert_temp(temp_c, units):
+    if units == "F":
+        return (temp_c * 1.8) + 32
+    return temp_c
+
 def get_icon_asset(icon_text):
-    if "clear" in icon_text:
-        return SUNNY_ASSET.readall()
-    if "partly" in icon_text:
-        return SUNNYISH_ASSET.readall()
-    if "cloudy" in icon_text:
-        return CLOUDY_ASSET.readall()
-    if "rain" in icon_text:
-        return RAINY_ASSET.readall()
-    if "snow" in icon_text:
-        return SNOWY_ASSET.readall()
-    if "sleet" in icon_text:
-        return SLEETY_ASSET.readall()
-    if "thunder" in icon_text:
-        return THUNDERY_ASSET.readall()
-    if "fog" in icon_text:
-        return FOGGY_ASSET.readall()
-    if "hail" in icon_text:
-        return HAILY_ASSET.readall()
-    if "wind" in icon_text:
-        return WINDY_ASSET.readall()
-    if "tornado" in icon_text:
-        return TORNADY_ASSET.readall()
-    return SUNNY_ASSET.readall()
+    for key, data in ICON_DATA.items():
+        if key in icon_text:
+            return data
+    return ICON_DATA["clear"]
 
 def main(config):
     # --- TRONBYT DETECTION ---
@@ -95,8 +96,8 @@ def render_standard_layout(days_data, units):
         low = day_data.get("air_temp_low", 0)
 
         if units == "F":
-            high = (high * 1.8) + 32
-            low = (low * 1.8) + 32
+            high = _convert_temp(day_data.get("air_temp_high", 0), units)
+            low = _convert_temp(day_data.get("air_temp_low", 0), units)
 
         high_str = "H:%d" % int(math.round(high))
         low_str = "L:%d" % int(math.round(low))
@@ -140,8 +141,8 @@ def render_wide_layout(days_data, units):
         low = day_data.get("air_temp_low", 0)
 
         if units == "F":
-            high = (high * 1.8) + 32
-            low = (low * 1.8) + 32
+            high = _convert_temp(day_data.get("air_temp_high", 0), units)
+            low = _convert_temp(day_data.get("air_temp_low", 0), units)
 
         high_str = "H:%d" % int(math.round(high))
         low_str = "L:%d" % int(math.round(low))
@@ -190,7 +191,6 @@ def get_schema():
                 name = "Token",
                 desc = "Tempest API Token",
                 icon = "key",
-                secret = True,
             ),
             schema.Dropdown(
                 id = "units",
