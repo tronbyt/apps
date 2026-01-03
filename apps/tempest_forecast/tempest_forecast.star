@@ -187,7 +187,7 @@ def get_schema():
                 name = "Token",
                 desc = "Tempest API Token",
                 icon = "key",
-				secret = True,
+                secret = True,
             ),
             schema.Dropdown(
                 id = "units",
