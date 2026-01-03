@@ -18,17 +18,17 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 ICON_DATA = {
-    "clear": SUNNY_ASSET.readall(),
-    "partly": SUNNYISH_ASSET.readall(),
-    "cloudy": CLOUDY_ASSET.readall(),
-    "rain": RAINY_ASSET.readall(),
-    "snow": SNOWY_ASSET.readall(),
-    "sleet": SLEETY_ASSET.readall(),
-    "thunder": THUNDERY_ASSET.readall(),
-    "fog": FOGGY_ASSET.readall(),
-    "hail": HAILY_ASSET.readall(),
-    "wind": WINDY_ASSET.readall(),
-    "tornado": TORNADY_ASSET.readall(),
+    "clear": SUNNY_ASSET,
+    "partly": SUNNYISH_ASSET,
+    "cloudy": CLOUDY_ASSET,
+    "rain": RAINY_ASSET,
+    "snow": SNOWY_ASSET,
+    "sleet": SLEETY_ASSET,
+    "thunder": THUNDERY_ASSET,
+    "fog": FOGGY_ASSET,
+    "hail": HAILY_ASSET,
+    "wind": WINDY_ASSET,
+    "tornado": TORNADY_ASSET,
 }
 
 # --- CONFIGURATION ---
