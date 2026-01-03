@@ -204,14 +204,14 @@ def format_locality(locality, idealLength):
     # Return everything before first comma (town name)
     return locality.split(",")[0].strip()
 
-def display_instructions(is2x = False, canvas_width = 64, scroll_speed = 45):
+def display_instructions(scroll_speed = 45):
     ##############################################################################################################################################################################################################################
     title = "Spot the Station"
     instructions_1 = "Goto N2yo.com and create a free account. Then go to 'More Stuff', then 'Edit/change your location'."
     instructions_2 = "Create your API key here and use it in your configuration as your N2YO.com API Key"
     instructions_3 = "You can adjust settings to be made aware of the passes you can see, and how early you're made aware of them."
 
-    if is2x:
+    if canvas.is2x():
         font = "terminus-16"
     else:
         font = "5x8"
@@ -220,22 +220,22 @@ def display_instructions(is2x = False, canvas_width = 64, scroll_speed = 45):
         render.Column(
             children = [
                 render.Marquee(
-                    width = canvas_width,
+                    width = canvas.width(),
                     child = render.Text(title, color = "#65d0e6", font = font),
                 ),
                 render.Marquee(
                     offset_start = len(title) * 5,
-                    width = canvas_width,
+                    width = canvas.width(),
                     child = render.Text(instructions_1, color = "#f4a306", font = font),
                 ),
                 render.Marquee(
                     offset_start = (len(title) + len(instructions_1)) * 5,
-                    width = canvas_width,
+                    width = canvas.width(),
                     child = render.Text(instructions_2, color = "#f4a306", font = font),
                 ),
                 render.Marquee(
                     offset_start = (len(title) + len(instructions_1) + len(instructions_2)) * 5,
-                    width = canvas_width,
+                    width = canvas.width(),
                     child = render.Text(instructions_3, color = "#f4a306", font = font),
                 ),
             ],
@@ -244,10 +244,10 @@ def display_instructions(is2x = False, canvas_width = 64, scroll_speed = 45):
         show_full_animation = True,
     )
 
-def get_display(location, row1, row2, row3, is2x = False, canvas_width = 64, scroll_speed = 45):
+def get_display(location, row1, row2, row3, scroll_speed = 45):
     image_width = 16
 
-    if is2x:
+    if canvas.is2x():
         font = "terminus-16"
     else:
         font = "5x8"
@@ -301,11 +301,11 @@ def get_display(location, row1, row2, row3, is2x = False, canvas_width = 64, scr
                                 render.Column(
                                     children = [
                                         render.Marquee(
-                                            width = canvas_width - image_width,
+                                            width = canvas.width() - image_width,
                                             child = render.Text(location, color = "#0099FF", font = font),
                                         ),
                                         render.Marquee(
-                                            width = canvas_width - image_width,
+                                            width = canvas.width() - image_width,
                                             child = render.Text(row1, color = "#fff", font = font),
                                         ),
                                     ],
@@ -315,11 +315,11 @@ def get_display(location, row1, row2, row3, is2x = False, canvas_width = 64, scr
                     ],
                 ),
                 render.Marquee(
-                    width = canvas_width,
+                    width = canvas.width(),
                     child = render.Text(row2, color = "#fff", font = font),
                 ),
                 render.Marquee(
-                    width = canvas_width,
+                    width = canvas.width(),
                     child = render.Text(row3, color = "#ff0", font = font),
                 ),
             ],
