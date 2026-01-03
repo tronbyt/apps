@@ -92,12 +92,8 @@ def render_standard_layout(days_data, units):
         timestamp = day_data.get("day_start_local", 0)
         day_name = time.from_timestamp(int(timestamp)).format("Mon")
 
-        high = day_data.get("air_temp_high", 0)
-        low = day_data.get("air_temp_low", 0)
-
-        if units == "F":
-            high = _convert_temp(day_data.get("air_temp_high", 0), units)
-            low = _convert_temp(day_data.get("air_temp_low", 0), units)
+        high = _convert_temp(day_data.get("air_temp_high", 0), units)
+        low = _convert_temp(day_data.get("air_temp_low", 0), units)
 
         high_str = "H:%d" % int(math.round(high))
         low_str = "L:%d" % int(math.round(low))
