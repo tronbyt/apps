@@ -152,7 +152,7 @@ def render_wide_layout(days_data, units):
             # SCALED UP ICON: 26x26 (2x the original 13x13)
             render.Image(width = 26, height = 26, src = icon_asset),
 
-            # LARGER FONT: 
+            # LARGER FONT:
             render.Text(day_name, font = "5x8", color = "#ffffff"),
             render.Box(width = 1, height = 2),  # Padding
 
