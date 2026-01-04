@@ -13,7 +13,7 @@ def main(config):
 
     Args:
         config: The configuration of tha app.
-    
+
     Returns:
         The rendered image.
 
@@ -172,9 +172,9 @@ def more_options(display_text):
     """Function to dynamically add more options to the settings page.
 
     Args:
-        display_text: Value of the `opt_display_text` dropdown. 
+        display_text: Value of the `opt_display_text` dropdown.
             Ignored unless "custom" is passed.
-    
+
     Returns:
         More schema items to be displayed as options.
 
