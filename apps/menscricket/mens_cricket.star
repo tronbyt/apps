@@ -933,7 +933,8 @@ def _safe_float(val):
         if val == "$undefined":
             return 0.0
         return float(val)
-    return float(val)
+
+    return float(val) if val else 0.0
 
 def main(config):
     tz = time.tz()
