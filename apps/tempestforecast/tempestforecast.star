@@ -152,13 +152,13 @@ def render_wide_layout(days_data, units):
             # SCALED UP ICON: 26x26 (2x the original 13x13)
             render.Image(width = 26, height = 26, src = icon_asset),
 
-            # LARGER FONT: terminus-12
-            render.Text(day_name, font = "terminus-12", color = "#ffffff"),
+            # LARGER FONT:
+            render.Text(day_name, font = "5x8", color = "#ffffff"),
             render.Box(width = 1, height = 2),  # Padding
 
             # LARGER TEMPS
-            render.Text(high_str, font = "terminus-12", color = "#FA8072"),
-            render.Text(low_str, font = "terminus-12", color = "#0096FF"),
+            render.Text(high_str, font = "terminus-14", color = "#FA8072"),
+            render.Text(low_str, font = "terminus-14", color = "#0096FF"),
         ]
 
         forecast_columns.append(
