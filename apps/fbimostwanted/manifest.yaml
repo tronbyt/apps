@@ -4,7 +4,7 @@ name: FBI Most Wanted
 summary: Top 10 Most Wanted by FBI
 desc: Displays info on 10 most wanted criminals.
 author: Robert Ison
-fileName: fbi_most_wanted.star
+fileName: fbimostwanted.star
 packageName: fbimostwanted
 recommendedInterval: 60
 supports2x: true
