@@ -2,6 +2,7 @@
   "name": "tronbyt-apps-viewer",
   "version": "1.0.0",
   "description": "Static web viewer for Tronbyt apps with search and documentation",
+  "type": "module",
   "main": "generate-apps-json.js",
   "scripts": {
     "build": "node generate-apps-json.js",

@@ -75,11 +75,11 @@ SPEED_ADJUST = {
 def main(config):
     animation = config.str("animation", PACMAN_ANIMATION)
     if animation == RANDOM_ANIMATION:
-        animation = ANIMATION_LIST.values()[rand(len(ANIMATION_LIST) - 1)]
+        animation = ANIMATION_LIST.values()[random.number(0, len(ANIMATION_LIST) - 1)]
 
     speed = int(config.str("speed", DEFAULT_SPEED))
     if speed < 0:
-        speed = rand(MIN_SPEED + MAX_SPEED + 1) + MAX_SPEED
+        speed = random.number(MAX_SPEED, MIN_SPEED)
 
     speed = speed * SPEED_ADJUST[animation]
     delay = speed * time.millisecond
@@ -104,9 +104,6 @@ def main(config):
         delay = delay.milliseconds,
         child = render.Animation(allFrames),
     )
-
-def rand(ceiling):
-    return random.number(0, ceiling - 1)
 
 DEFAULT_SPEED = "30"
 
@@ -236,10 +233,10 @@ CHASED_GHOST = 4
 CHANCE_FOR_CHASED_GHOST = 2
 
 def pacman_get_frames():
-    yPos = rand(PM_NUM_Y_POSITIONS)
-    mspacman = rand(2) == 1
-    reverse = rand(2) == 1
-    whichGhost = rand(CHASING_GHOST_COUNT + CHANCE_FOR_CHASED_GHOST)
+    yPos = random.number(0, PM_NUM_Y_POSITIONS - 1)
+    mspacman = random.number(0, 1) == 1
+    reverse = random.number(0, 1) == 1
+    whichGhost = random.number(0, CHASING_GHOST_COUNT + CHANCE_FOR_CHASED_GHOST - 1)
     if whichGhost >= CHASING_GHOST_COUNT:
         whichGhost = CHASED_GHOST
 
@@ -417,7 +414,7 @@ def centipede_get_frames():
     mushroomSprite = create_mushroom_sprite(colorScheme)
     mushroomMap = create_mushroom_map(mushroomSprite)
 
-    xDir = rand(2)
+    xDir = random.number(0, 1)
     if xDir == 0:
         xDir = -1
         centStartX = FRAME_WIDTH
@@ -623,8 +620,8 @@ def get_segment_render_child(centSprites, segmentIndex, history):
     )
 
 def add_mushroom(mushroomMap, mushroomSprite):
-    col = rand(CENT_NUM_COLS)
-    row = rand(CENT_NUM_ROWS)
+    col = random.number(0, CENT_NUM_COLS - 1)
+    row = random.number(0, CENT_NUM_ROWS - 1)
 
     x = col * CENT_SPRITE_WIDTH
     y = row * CENT_SPRITE_WIDTH
@@ -709,10 +706,10 @@ def get_color_scheme():
         {CENT_ORIG_BODY_COLOR: CENT_GREEN, CENT_ORIG_EYE_COLOR: CENT_MAGENTA, CENT_ORIG_LEG_COLOR: CENT_RED},
     ]
 
-    return colorSchemes[rand(len(colorSchemes))]
+    return colorSchemes[random.number(0, len(colorSchemes) - 1)]
 
 def create_mushroom_map(mushroomSprite):
-    mushroomCount = rand(CENT_MAX_MUSHROOMS - CENT_MIN_MUSHROOMS + 1) + CENT_MIN_MUSHROOMS
+    mushroomCount = random.number(CENT_MIN_MUSHROOMS, CENT_MAX_MUSHROOMS)
     mushroomMap = {}
     for _ in range(mushroomCount):
         add_mushroom(mushroomMap, mushroomSprite)

@@ -3,7 +3,7 @@ Spotify Now Playing - Ultimate Edition for Tronbyt/Tidbyt
 =========================================================
 
 Author: gshepperd
-Version: 2.0.0
+Version: 2.1.0
 
 ================================================================================
                             INSTALLATION INSTRUCTIONS
@@ -1100,14 +1100,8 @@ def render_idle(config, recent_state = None):
     idle_message = config.get("idle_message", "Spotify")
 
     if not show_when_idle:
-        # Return blank/black screen
-        return render.Root(
-            child = render.Box(
-                width = DISPLAY_WIDTH,
-                height = DISPLAY_HEIGHT,
-                color = "#000000",
-            ),
-        )
+        # Mark app as "inactive" by returning an empty list
+        return []
 
     # Show recent track if available
     if recent_state:
@@ -1261,11 +1255,14 @@ def main(config):
         return render_error("API Error", fetch_error)
 
     if state:
-        if is_current or state["is_playing"]:
-            # Currently playing or paused
+        show_paused = config.bool("show_paused_tracks", True)
+        should_display = state["is_playing"] or (is_current and show_paused)
+
+        if should_display:
+            # Currently playing or paused (if enabled)
             return render_playback(state, config)
         else:
-            # Showing recently played
+            # Showing recently played or paused track (when disabled)
             return render_idle(config, recent_state = state)
     else:
         # Nothing to show
@@ -1340,6 +1337,13 @@ def get_schema():
                 desc = "When nothing playing, show last played track",
                 icon = "clockRotateLeft",
                 default = False,
+            ),
+            schema.Toggle(
+                id = "show_paused_tracks",
+                name = "Show Paused Tracks",
+                desc = "Display tracks when paused (if disabled, only shows actively playing tracks)",
+                icon = "pause",
+                default = True,
             ),
             schema.Toggle(
                 id = "show_when_idle",

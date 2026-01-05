@@ -20,8 +20,6 @@ BG_IMAGE = BG_IMAGE_ASSET.readall()
 MAX_TEXT_LENGTH = 1000
 
 def main(config):
-    random.seed(time.now().unix)
-
     api_url = config.str("api_url", "")
     heading_response_path = config.get("heading_response_path", "")
     body_response_path = config.get("body_response_path", "")

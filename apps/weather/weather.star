@@ -104,6 +104,7 @@ def main(config):
     # locality = loc["locality"]
     lat = loc["lat"]
     lng = loc["lng"]
+    timezone = loc.get("timezone", time.tz())
     units = config.get("units", "imperial")
     showthreeday = config.bool("showthreeday", False)  # Add new config option
 
@@ -128,7 +129,7 @@ def main(config):
         weather_data = json.decode(rep.body())
 
         # Process forecast data using One Call API 3.0 processing
-        daily_data = process_forecast_onecall(weather_data)
+        daily_data = process_forecast_onecall(weather_data, timezone)
     elif api_v2_key and api_v2_key != "":
         # Use Standard Forecast API 2.5
         url = "https://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v2_key)
@@ -141,7 +142,7 @@ def main(config):
         weather_data = json.decode(rep.body())
 
         # Process forecast data using Standard API 2.5 processing
-        daily_data = process_forecast(weather_data["list"])
+        daily_data = process_forecast(weather_data["list"], timezone)
     else:
         return error_display("No API Key Provided", scale)
 
@@ -528,7 +529,7 @@ def get_forecast_width(temp, is_today):
 def round_temp(temp):
     return (temp * 10 + 5) // 10
 
-def process_forecast_onecall(weather_data):
+def process_forecast_onecall(weather_data, timezone):
     """
     Process One Call API 3.0 response data.
     The One Call API provides daily forecasts directly.
@@ -538,7 +539,7 @@ def process_forecast_onecall(weather_data):
     # Get current weather for today
     if "current" in weather_data:
         current = weather_data["current"]
-        current_time = time.from_timestamp(current["dt"])
+        current_time = time.from_timestamp(current["dt"]).in_location(timezone)
 
         # Get main weather and icon code
         weather_main = current["weather"][0]["main"]
@@ -565,14 +566,19 @@ def process_forecast_onecall(weather_data):
             if i >= 3:  # Limit to 3 days total
                 break
 
+            day_time = time.from_timestamp(day["dt"]).in_location(timezone)
+
             # Skip today if we already added current weather
             if len(daily_forecasts) > 0 and i == 0:
-                # Update today's data with daily high/low
-                daily_forecasts[0]["high"] = day["temp"]["max"]
-                daily_forecasts[0]["low"] = day["temp"]["min"]
-                continue
+                # Check if this daily forecast is for the same day as current weather
+                current_day = daily_forecasts[0]["date"].format("2006-01-02")
+                forecast_day = day_time.format("2006-01-02")
 
-            day_time = time.from_timestamp(day["dt"])
+                if current_day == forecast_day:
+                    # Update today's data with daily high/low
+                    daily_forecasts[0]["high"] = day["temp"]["max"]
+                    daily_forecasts[0]["low"] = day["temp"]["min"]
+                    continue
 
             # Get main weather and icon code
             weather_main = day["weather"][0]["main"]
@@ -595,14 +601,14 @@ def process_forecast_onecall(weather_data):
 
     return daily_forecasts[:3]
 
-def process_forecast(forecast_list):
+def process_forecast(forecast_list, timezone):
     # Group forecasts by day and find high/low temps
     # This function processes Standard API 2.5 forecast data
     days = {}
 
     for item in forecast_list:
         # Convert timestamp to day
-        day_time = time.from_timestamp(item["dt"])
+        day_time = time.from_timestamp(item["dt"]).in_location(timezone)
         day_key = day_time.format("2006-01-02")
 
         temp = item["main"]["temp"]

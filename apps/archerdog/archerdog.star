@@ -6,22 +6,33 @@ Author: Jeremy Harnden
 """
 
 load("images/1.png", FRAME1 = "file")
+load("images/1@2x.png", FRAME1_2X = "file")
 load("images/2.png", FRAME2 = "file")
+load("images/2@2x.png", FRAME2_2X = "file")
 load("images/3.png", FRAME3 = "file")
+load("images/3@2x.png", FRAME3_2X = "file")
 load("images/4.png", FRAME4 = "file")
+load("images/4@2x.png", FRAME4_2X = "file")
 load("images/5.png", FRAME5 = "file")
+load("images/5@2x.png", FRAME5_2X = "file")
 load("images/6.png", FRAME6 = "file")
+load("images/6@2x.png", FRAME6_2X = "file")
 load("images/7.png", FRAME7 = "file")
+load("images/7@2x.png", FRAME7_2X = "file")
 load("images/8.png", FRAME8 = "file")
-load("render.star", "render")
+load("images/8@2x.png", FRAME8_2X = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-FRAMES = [f.readall() for f in [FRAME1, FRAME2, FRAME3, FRAME4, FRAME5, FRAME6, FRAME7, FRAME8]]
-
 def main():
+    if canvas.is2x():
+        frames = [f.readall() for f in [FRAME1_2X, FRAME2_2X, FRAME3_2X, FRAME4_2X, FRAME5_2X, FRAME6_2X, FRAME7_2X, FRAME8_2X]]
+    else:
+        frames = [f.readall() for f in [FRAME1, FRAME2, FRAME3, FRAME4, FRAME5, FRAME6, FRAME7, FRAME8]]
+
     return render.Root(
         child = render.Animation(
-            children = [render.Image(src = f) for f in FRAMES],
+            children = [render.Image(src = f) for f in frames],
         ),
     )
 

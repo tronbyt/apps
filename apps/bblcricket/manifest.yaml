@@ -7,3 +7,5 @@ author: M0ntyP
 fileName: bbl_cricket.star
 packageName: bblcricket
 recommendedInterval: 5
+broken: true
+brokenReason: "API 403 errors from ESPN are preventing this app from functioning."

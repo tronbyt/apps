@@ -193,7 +193,7 @@ def main(config):
     )
 
     # Skip render if not driving
-    if tesla_state != "driving":
+    if tesla_state != "driving" and tesla_state != "d":
         return []
 
     # Format destination with emoji

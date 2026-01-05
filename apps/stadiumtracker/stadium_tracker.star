@@ -197,7 +197,6 @@ def renderAnimation(frames, league):
     )
 
 def sort_ballParks(ballParks):
-    random.seed(time.now().unix)
     randomSortMethod = random.number(0, 5)
     if randomSortMethod == 0:
         #print("sort by y")
@@ -219,7 +218,6 @@ def sort_ballParks(ballParks):
         return sorted(ballParks, key = lambda x: x[1][0] + x[1][0])
 
 def sort_maps(coordinates):
-    random.seed(time.now().unix)
     randomSortMethod = random.number(0, 6)
     if randomSortMethod == 0:
         #print("sort by x")
