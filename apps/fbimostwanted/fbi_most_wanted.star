@@ -55,7 +55,7 @@ def get_top_ten_wanted():
 
     all_items = []
 
-    for page in range(1, 4):  # 7 pages
+    for page in range(1, 4):  # 4 pages
         url = "{}/?items=50&page={}".format(FBI_BASE_URL, page)
 
         resp = http.get(
