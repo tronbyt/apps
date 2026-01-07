@@ -34,12 +34,13 @@ def _get_default_fonts(column_count, scale):
     return label_font, value_font
 
 def _format_sensor_value(value, decimals):
-    if decimals == 0:
-        return humanize.float("0.", value)
-    elif decimals == 1:
-        return humanize.float("0.0", value)
-    else:
-        return humanize.float("0.00", value)
+    formats = {
+        0: "0.",
+        1: "0.0",
+        2: "0.00",
+    }
+    fmt = formats.get(decimals, "0.00")
+    return humanize.float(fmt, value)
 
 def main(config):
     scale = 2 if canvas.is2x() else 1
