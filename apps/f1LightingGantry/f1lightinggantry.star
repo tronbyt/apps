@@ -11,6 +11,30 @@ load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+def main():
+    animation = []
+    append_stacks(animation, [
+        create_light_frame(0),
+        create_light_frame(0),
+        create_light_frame(0),
+        create_light_frame(1),
+        create_light_frame(2),
+        create_light_frame(3),
+        create_light_frame(4),
+        create_light_frame(5),
+    ])
+
+    for _ in range(random.number(1, 5)):
+        append_stacks(animation, [create_light_frame(5)])
+
+    return render.Root(
+        delay = 1000 if canvas.is2x() else 650,
+        child = render.Animation(
+            children = animation,
+        ),
+        show_full_animation = True,
+    )
+
 def append_stacks(animation, stacks):
     for s in stacks:
         animation.append(s)
@@ -49,31 +73,6 @@ def get_light_row(step):
 
     return render.Row(
         children = children,
-    )
-
-
-def main():
-    animation = []
-    append_stacks(animation, [
-        create_light_frame(0),
-        create_light_frame(0),
-        create_light_frame(0),
-        create_light_frame(1),
-        create_light_frame(2),
-        create_light_frame(3),
-        create_light_frame(4),
-        create_light_frame(5),
-    ])
-
-    for _ in range(random.number(1, 5)):
-        append_stacks(animation, [create_light_frame(5)])
-
-    return render.Root(
-        delay = 1000 if canvas.is2x() else 650,
-        child = render.Animation(
-            children = animation,
-        ),
-        show_full_animation = True,
     )
 
 def get_schema():
