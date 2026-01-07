@@ -1,0 +1,10 @@
+---
+id: f1lightinggantry
+name: F1 Lighting Gantry
+summary: F1 Starting Lights
+desc: Displays starting light countdown to a race.
+author: Robert Ison
+fileName: f1LightingGantry.star
+packageName: f1LightingGantry
+recommendedInterval: 1
+supports2x: true
