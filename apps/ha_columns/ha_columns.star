@@ -6,6 +6,7 @@ Author: Mitchell Scott
 """
 
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
@@ -34,11 +35,11 @@ def _get_default_fonts(column_count, scale):
 
 def _format_sensor_value(value, decimals):
     if decimals == 0:
-        return "%.0f" % value
+        return humanize.float("0.", value)
     elif decimals == 1:
-        return "%.1f" % value
+        return humanize.float("0.0", value)
     else:
-        return "%.2f" % value
+        return humanize.float("0.00", value)
 
 def main(config):
     scale = 2 if canvas.is2x() else 1
