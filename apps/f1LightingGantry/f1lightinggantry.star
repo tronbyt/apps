@@ -42,24 +42,15 @@ def get_light_row(step):
         children.append(render.Box(width = width_spacer, height = image_pixel_width, color = "#000000"))
 
     else:
-        image_pixel_width = 13
+        image_pixel_width = 12
 
-    children.append(render.Image(width = image_pixel_width, src = RED_LIGHT_FILE.readall() if step >= 1 else BLACK_LIGHT_FILE.readall()))
-    children.append(render.Image(width = image_pixel_width, src = RED_LIGHT_FILE.readall() if step >= 2 else BLACK_LIGHT_FILE.readall()))
-    children.append(render.Image(width = image_pixel_width, src = RED_LIGHT_FILE.readall() if step >= 3 else BLACK_LIGHT_FILE.readall()))
-    children.append(render.Image(width = image_pixel_width, src = RED_LIGHT_FILE.readall() if step >= 4 else BLACK_LIGHT_FILE.readall()))
-    children.append(render.Image(width = image_pixel_width, src = RED_LIGHT_FILE.readall() if step >= 5 else BLACK_LIGHT_FILE.readall()))
+    for i in range(1, 6):
+        children.append(render.Image(width = image_pixel_width, src = RED_LIGHT_FILE.readall() if step >= i else BLACK_LIGHT_FILE.readall()))
+
     return render.Row(
         children = children,
     )
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
-        pad = (left, top, right, bottom),
-        child = element,
-    )
-
-    return padded_element
 
 def main():
     animation = []
