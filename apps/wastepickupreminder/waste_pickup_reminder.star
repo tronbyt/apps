@@ -157,7 +157,7 @@ def main(config):
             nothing_to_display = False
 
     if nothing_to_display and config.bool("hide_if_nothing_to_display"):
-        return None
+        return []
 
     if len(pickups_today) == 0:
         row1 = ""
