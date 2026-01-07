@@ -115,14 +115,12 @@ def main(config):
         The display inforamtion for the Tidbyt
     """
 
-    is2x = canvas.is2x()
-    screen_width = canvas.width()
     scroll_speed = int(config.get("scroll", "45"))
 
     # Display Instructions and end if that's the setting
     show_instructions = config.bool("instructions", False)
     if show_instructions:
-        return display_instructions(is2x, screen_width, scroll_speed)
+        return display_instructions(scroll_speed)
 
     # Get Configuration Environment Data
     location = json.decode(config.get("location", DEFAULT_LOCATION))
@@ -190,7 +188,7 @@ def main(config):
 
         display_text = ("Sample: " if is_sample_data else "") + details_text
 
-        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, is2x, screen_width, scroll_speed)
+        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, scroll_speed)
 
 def format_locality(locality, idealLength):
     """Format locality: full string if <= idealLength, else town name before first comma."""
