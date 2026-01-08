@@ -1,22 +1,18 @@
-load("render.star", "render")
-load("schema.star", "schema")
-load("time.star", "time")
 load("http.star", "http")
 load("random.star", "random")
-load("humanize.star", "humanize")
+load("render.star", "render")
+load("schema.star", "schema")
 
 def main(config):
-    timezone = config.get("timezone") or "America/New_York"
-    now = time.now().in_location(timezone)
-
     URL = config.get("immich_url", "https://example.com")
     API_KEY = config.get("immich_api_key", "")
-    SHOW_FAVORITES = config.get("show_favorites", False)
+
+    # SHOW_FAVORITES = config.bool("show_favorites", False)
     ALBUM = config.get("immich_album_id", "invalid")
     STATUS_URL = "%s/api/server/ping" % (URL)
     ALBUM_URL = "%s/api/albums/%s" % (URL, ALBUM)
-    SHOW_DATE = config.get("show_date")
-    SHOW_LOCATION = config.get("show_location")
+    SHOW_DATE = config.bool("show_date", True)
+    SHOW_LOCATION = config.bool("show_location", False)
 
     res = http.get(STATUS_URL)
 
@@ -36,12 +32,21 @@ def main(config):
             )
         assets = res.json()["assets"]
         assetCount = int(res.json()["assetCount"]) - 1
+        if assetCount < 0:
+            return render.Root(
+                child = render.WrappedText("Album is Empty"),
+            )
         randomCount = random.number(0, assetCount)
         assetID = assets[randomCount]["id"]
         IMG_URL = "%s/api/assets/%s" % (URL, assetID)
         print(IMG_URL)
         res_img = http.get("%s/thumbnail" % IMG_URL, headers = headers)
-        res_metadata = http.get(IMG_URL, headers = headers).json()
+        res_req_metadata = http.get(IMG_URL, headers = headers)
+        if (res_req_metadata.status_code != 200):
+            return render.Root(
+                child = render.WrappedText("Unable to retrieve image. Check API Perms"),
+            )
+        res_metadata = res_req_metadata.json()
         country = res_metadata["exifInfo"].get("country")
         state = res_metadata["exifInfo"].get("state")
         city = res_metadata["exifInfo"].get("city")
@@ -67,22 +72,17 @@ def main(config):
             ),
         )
 
-    # return render.Root(
-    #     delay = 500,
-    #     child =
-    # )
-
 def get_text(date, country, state, city, toggle_date, toggle_location):
     font = "CG-pixel-3x5-mono"
     bgcolor = "#00000078"
     strdate = parse_date(date)
     full_string = ""
 
-    if toggle_date == "true":
+    if toggle_date:
         full_string += "%s" % strdate
 
-    if toggle_location == "true" and country != None:
-        if toggle_date == "true":
+    if toggle_location and country != None:
+        if toggle_date:
             full_string += " | "
         full_string += "%s, %s, %s" % (city, state, country)
     if full_string == "":
