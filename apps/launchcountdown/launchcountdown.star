@@ -266,29 +266,29 @@ def normalize_whitespace(text):
 def replace_local_time_into_description(description, local_time, utc_time):
     if local_time == None or utc_time == None:
         return description
-    
+
     # Get timezone abbreviation like "EST" directly from local_time
     timezone_abbr = local_time.format("MST")
-    
+
     # Extract individual time components that work reliably
-    utc_hour_raw = utc_time.format("15")    # 18 (24hr)
-    utc_min_raw = utc_time.format("04")     # 03
-    utc_hour_12 = int(utc_hour_raw) % 12    # 6
+    utc_hour_raw = utc_time.format("15")  # 18 (24hr)
+    utc_min_raw = utc_time.format("04")  # 03
+    utc_hour_12 = int(utc_hour_raw) % 12  # 6
     if utc_hour_12 == 0:
         utc_hour_12 = 12
     utc_ampm = "PM" if int(utc_hour_raw) >= 12 else "AM"
-    
-    local_hour_raw = local_time.format("15")  # 13 (24hr)  
-    local_min_raw = local_time.format("04")   # 03
+
+    local_hour_raw = local_time.format("15")  # 13 (24hr)
+    local_min_raw = local_time.format("04")  # 03
     local_hour_12 = int(local_hour_raw) % 12  # 1
     if local_hour_12 == 0:
         local_hour_12 = 12
     local_ampm = "PM" if int(local_hour_raw) >= 12 else "AM"
-    
+
     # Build exact strings to match/replace
     utc_part = "%d:%s\u202f%s (UTC)" % (utc_hour_12, utc_min_raw, utc_ampm)
     local_part = "%d:%s %s (%s)" % (local_hour_12, local_min_raw, local_ampm, timezone_abbr)
-    
+
     return description.replace(utc_part, local_part)
 
 def main(config):
