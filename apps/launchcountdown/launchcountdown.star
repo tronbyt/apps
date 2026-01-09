@@ -240,29 +240,6 @@ def display_instructions(config):
         show_full_animation = True,
     )
 
-def normalize_whitespace(text):
-    # Replace all sneaky Unicode spaces with regular space
-    replacements = {
-        "\u00A0": " ",  # NO-BREAK SPACE
-        "\u202F": " ",  # NARROW NO-BREAK SPACE (your original issue)
-        "\u2009": " ",  # THIN SPACE
-        "\u200A": " ",  # HAIR SPACE
-        "\u2000": " ",  # EN QUAD
-        "\u2001": " ",  # EM QUAD
-        "\u2002": " ",  # EN SPACE
-        "\u2003": " ",  # EM SPACE
-        "\u2004": " ",  # THREE-PER-EM SPACE
-        "\u2005": " ",  # FOUR-PER-EM SPACE
-        "\u2006": " ",  # SIX-PER-EM SPACE
-        "\u2007": " ",  # FIGURE SPACE
-        "\u2008": " ",  # PUNCTUATION SPACE
-        "\u205F": " ",  # MEDIUM MATHEMATICAL SPACE
-        "\u3000": " ",  # IDEOGRAPHIC SPACE
-    }
-    for bad_space, good_space in replacements.items():
-        text = text.replace(bad_space, good_space)
-    return text
-
 def replace_local_time_into_description(description, local_time, utc_time):
     if local_time == None or utc_time == None:
         return description
@@ -347,7 +324,7 @@ def main(config):
             elif win_open != None:
                 utc_win_open = time.parse_time(win_open.replace("Z", ":00Z"))
                 utc_t0 = utc_win_open  # Use win_open as fallback UTC time
-                locallaunch = utc_t0.in_location(location.get("timezone", "UTC"))
+                locallaunch = utc_t0.in_location(location.get("timezone"))
             else:
                 locallaunch = None
 
