@@ -305,6 +305,12 @@ def main(config):
     if show_instructions:
         return display_instructions(config)
 
+    #Initialize row text variables
+    row1 = ""
+    row2 = ""
+    row3 = ""
+    row4 = ""
+
     location = json.decode(config.get("location", default_location))
 
     rocket_launch_data = get_rocket_launch_json()
