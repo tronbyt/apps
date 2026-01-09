@@ -1,7 +1,7 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("simulations.star", "ALL_SIMULATIONS")
 load("time.star", "time")
