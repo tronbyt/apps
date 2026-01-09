@@ -26,13 +26,13 @@ Going to this URL will post back to localhost and probably be an error page. But
 
 Open terminal/command prompt and run this curl command (replace YOUR_CLIENT_ID,  YOUR_CLIENT_SECRET and YOUR_AUTHORIZATION_CODE):
 
-text
+```bash
 curl -X POST "https://www.strava.com/api/v3/oauth/token" \
   -d client_id=YOUR_CLIENT_ID \
   -d client_secret=YOUR_CLIENT_SECRET \
   -d code=YOUR_AUTHORIZATION_CODE \
   -d grant_type=authorization_code
-
+  ```
 
 Response will include:
 
@@ -43,8 +43,6 @@ text
   "expires_at": 1736788800,
   "token_type": "Bearer"
 }
-Copy all four values.
-
 
 4. Configure the Tronbyt App
 
