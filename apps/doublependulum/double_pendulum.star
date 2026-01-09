@@ -46,6 +46,7 @@ def fetch_simulation(seed, generation_id = None):
     else:
         # Request a simulation with specific seed for reproducibility
         url = API_URL + "?mode=random&duration=20&step_size=0.033&seed=" + str(seed)
+
     # Fetch from API
     response = http.get(url, ttl_seconds = CACHE_TTL)
     if response.status_code != 200:
