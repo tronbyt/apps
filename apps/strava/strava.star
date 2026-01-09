@@ -100,13 +100,10 @@ def main(config):
         cache.set(STRAVA_EXPIRES_AT, str(expires_at), ttl_seconds = CACHE_TTL)
 
     if display_type in ("ytd", "all"):
-        print("YTD Stats")
         return athlete_stats(config, refresh_token, display_type, sport, units)
     elif display_type == "progress_chart":
-        print("Progress Chart")
         return progress_chart(config, refresh_token, sport, units)
     elif display_type == "last_activity":
-        print("Last Activity")
         return last_activity(config, refresh_token, sport, units)
     else:
         print("Display type %s was invalid, showing the %s screen instead." % (display_type, DEFAULT_SCREEN))
@@ -381,8 +378,6 @@ def progress_chart(config, refresh_token, sport, units):
     )
 
 def athlete_stats(config, refresh_token, period, sport, units):
-    print("Athlete Stats Display")
-    print("Period: %s, Sport: %s, Units: %s" % (period, sport, units))
     no_anim = config.bool("no_anim", False) or config.bool("$widget")
     timezone = config.get("timezone") or "America/New_York"
     year = time.now().in_location(timezone).year
@@ -577,8 +572,6 @@ def last_activity(config, refresh_token, sport, units):
         distance_conv = meters_to_mi
 
     activities = get_activities(config, refresh_token)
-
-    print(activities)
 
     filtered = [a for a in activities["current"] if a["type"].lower() == sport.lower()]
     if not len(filtered):
@@ -905,8 +898,6 @@ def last_activity(config, refresh_token, sport, units):
 def get_activities(config, refresh_token):
     max_activities = 200
 
-    print(refresh_token)
-
     timezone = config.get("timezone") or "America/New_York"
     now = time.now().in_location(timezone)
     beg_curr_month = time.time(year = now.year, month = now.month, day = 1)
@@ -1043,52 +1034,6 @@ def format_duration(d, resolution = "minutes"):
     else:
         # Should never get here.
         return ""
-
-def get_refresh_token(auth_code, client_secret):
-    # Build form body as JSON string (cache workaround)
-    params = {
-        "code": auth_code,
-        "client_secret": client_secret,
-        "grant_type": "authorization_code",
-        "client_id": CLIENT_ID,
-    }
-
-    # Convert params dict → JSON string → URL-encoded form
-    form_body = json.encode(params)
-
-    res = http.post(
-        url = "https://www.strava.com/api/v3/oauth/token",
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-        form_body = form_body,  # Use form_body (string) instead of params dict
-    )
-
-    if res.status_code != 200:
-        fail("token request failed with status code: %d - %s" %
-             (res.status_code, res.body()))
-
-    # Parse response
-    token_params = res.json()
-    refresh_token = token_params["refresh_token"]
-    access_token = token_params["access_token"]
-    athlete = int(float(token_params["athlete"]["id"]))
-
-    # Cache with JSON encoding (from earlier discussion)
-    cache.set(
-        refresh_token,
-        json.encode(access_token),
-        ttl_seconds = int(token_params["expires_in"] - 30),
-    )
-
-    cache.set(
-        "%s/athlete_id" % refresh_token,
-        json.encode(str(athlete)),
-        ttl_seconds = CACHE_TTL,
-    )
-
-    return refresh_token
 
 def display_failure(msg):
     return render.Root(
