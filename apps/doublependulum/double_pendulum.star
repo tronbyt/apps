@@ -1,7 +1,7 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "canvas", "render")
+load("render.star", "render")
 load("schema.star", "schema")
 load("simulations.star", "ALL_SIMULATIONS")
 load("time.star", "time")
@@ -20,35 +20,32 @@ LENGTH_2_MAX = 7.2
 # Use slightly smaller extent for better variety (allows some off-screen for large pendulums)
 MAX_EXTENT = 11.0  # More aggressive than actual max (13.2) for better visual variety
 
-def get_layout(width, height):
-    """Calculate layout parameters based on screen dimensions."""
-    origin_x = int(width / 2)
-    origin_y = int(height * 0.35)  # 35% down from top
+# Screen positioning
+ORIGIN_X = 32  # Horizontally centered
+ORIGIN_Y = 11  # 35% down from top (32 * 0.35 ≈ 11)
 
-    padding = 0
-    scale_y = (float(height) * 0.65 - padding) / MAX_EXTENT
-    scale = int(scale_y * 10) / 10.0
+# Calculate scale to fit pendulum on screen
+# Available space: left=32px, right=32px, up=11px, down=21px
+PADDING = 0
+SCALE_X = (32.0 - PADDING) / MAX_EXTENT  # Horizontal scale ≈ 2.9
+SCALE_Y = (21.0 - PADDING) / MAX_EXTENT  # Vertical scale ≈ 1.9
+SCALE = int(SCALE_Y * 10) / 10.0  # Use smaller scale, round to 1 decimal ≈ 1.9
 
-    return struct(
-        origin_x = origin_x,
-        origin_y = origin_y,
-        scale = scale,
-        width = width,
-        height = height,
-    )
-
-def fetch_simulation(seed, layout):
+def fetch_simulation(seed, generation_id = None):
     """Fetch a simulation from the API and transform coordinates to pixel space."""
-    cache_key = "sim_" + str(seed) + "_" + str(layout.width)
+    cache_key = "gen_" + str(generation_id) if generation_id else "sim_" + str(seed)
 
     # Try to get from cache first
     cached = cache.get(cache_key)
     if cached != None:
         return json.decode(cached)
 
-    # Build API URL with parameters
-    # Request a simulation with specific seed for reproducibility
-    url = API_URL + "?mode=random&duration=20&step_size=0.033&seed=" + str(seed)
+    # Build URL - either from specific generation or random API
+    if generation_id:
+        url = "https://wildc.net/dp/generations/" + str(generation_id) + ".json"
+    else:
+        # Request a simulation with specific seed for reproducibility
+        url = API_URL + "?mode=random&duration=20&step_size=0.033&seed=" + str(seed)
 
     # Fetch from API
     response = http.get(url, ttl_seconds = CACHE_TTL)
@@ -71,7 +68,7 @@ def fetch_simulation(seed, layout):
 
     # Determine optimal origin Y position based on energy level
     # If second bob never goes above origin (low energy), adjust origin upward
-    origin_y = layout.origin_y
+    origin_y = ORIGIN_Y
     if y2_max <= 0:
         # Low energy: all motion is below the fixed origin
         # Move origin to top of screen to maximize visible area
@@ -88,10 +85,10 @@ def fetch_simulation(seed, layout):
             # Map physics coordinates to pixels
             # Physics origin (0,0) maps to (ORIGIN_X, origin_y)
             # Note: Y-axis is inverted (physics +y is up, screen +y is down)
-            x1_pixel = layout.origin_x + int(point[0] * layout.scale)
-            y1_pixel = origin_y - int(point[1] * layout.scale)
-            x2_pixel = layout.origin_x + int(point[2] * layout.scale)
-            y2_pixel = origin_y - int(point[3] * layout.scale)
+            x1_pixel = ORIGIN_X + int(point[0] * SCALE)
+            y1_pixel = origin_y - int(point[1] * SCALE)
+            x2_pixel = ORIGIN_X + int(point[2] * SCALE)
+            y2_pixel = origin_y - int(point[3] * SCALE)
 
             pixel_frames.append([x1_pixel, y1_pixel, x2_pixel, y2_pixel])
 
@@ -103,15 +100,26 @@ def fetch_simulation(seed, layout):
     }
 
 def main(config):
-    width, height = canvas.width(), canvas.height()
-    layout = get_layout(width, height)
-
     # Get animation selection and speed from config
     animation = config.get("animation", "random")
     speed = config.get("speed", "fast")
 
+    # Handle "random from all sources" by randomly picking a source
+    if animation == "random_all":
+        # Randomly pick between: embedded (0), api random params (1), api random generation (2)
+        source = time.now().unix % 3
+        if source == 0:
+            # Use random embedded simulation (excluding the API sentinel)
+            animation = "random"
+        elif source == 1:
+            # Use API with random params
+            animation = "api"
+        else:
+            # Use random generation from API
+            animation = "api_random"
+
     # Determine which simulation to use
-    if animation == "api":
+    if animation == "api" or animation == "api_random":
         sim_idx = len(ALL_SIMULATIONS) - 1  # Use last index for API mode
     elif animation == "random" or animation == "":
         sim_idx = time.now().unix % len(ALL_SIMULATIONS)
@@ -126,10 +134,23 @@ def main(config):
 
     # Check if the selected simulation is the API sentinel (last simulation)
     if sim_idx == len(ALL_SIMULATIONS) - 1:
-        # Fetch from API
-        seed = time.now().unix  # Changes every second
-        print("Fetching simulation from API with seed: " + str(seed))
-        sim_data = fetch_simulation(seed, layout)
+        # Check if we should use a random generation from the collection
+        if animation == "api_random":
+            # Check if a specific generation ID was provided
+            generation_id = config.get("generation_id", "")
+            if generation_id and generation_id != "":
+                print("Fetching specific generation: " + generation_id)
+                sim_data = fetch_simulation(0, generation_id)
+            else:
+                # Randomly pick a generation from 1 to 1630
+                generation_id = str((time.now().unix % 1630) + 1)
+                print("Fetching random generation: " + generation_id)
+                sim_data = fetch_simulation(0, generation_id)
+        else:
+            # Fetch from API with random seed (ignore generation_id field)
+            seed = time.now().unix  # Changes every second
+            print("Fetching simulation from API with seed: " + str(seed))
+            sim_data = fetch_simulation(seed)
 
         # Handle fetch failure
         if sim_data == None:
@@ -141,7 +162,7 @@ def main(config):
             is_api_mode = False
         else:
             simulation = sim_data.get("frames", [])
-            api_origin_y = sim_data.get("origin_y", layout.origin_y)
+            api_origin_y = sim_data.get("origin_y", ORIGIN_Y)
             api_name = sim_data.get("name", "api")
 
             # Check if we have valid frames
@@ -175,9 +196,9 @@ def main(config):
     all_frames = []
     for frame_idx in range(len(simulation)):
         if is_api_mode:
-            all_frames.append(render_frame_simple(simulation, frame_idx, hsv_to_rgb, api_origin_y, api_name, config, layout))
+            all_frames.append(render_frame_simple(simulation, frame_idx, hsv_to_rgb, api_origin_y, api_name, config))
         else:
-            all_frames.append(render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout))
+            all_frames.append(render_frame(config, sim_idx, frame_idx, hsv_to_rgb))
 
     return render.Root(
         delay = delay,
@@ -230,30 +251,26 @@ def make_hsv_to_rgb():
 
     return hsv_to_rgb
 
-def draw_line(x0, y0, x1, y1, width, height):
-    """Draw a line using Bresenham's line algorithm"""
+def draw_line(x0, y0, x1, y1):
+    """Draw a line using simple linear interpolation"""
     points = []
     dx = abs(x1 - x0)
     dy = abs(y1 - y0)
-    sx = 1 if x0 < x1 else -1
-    sy = 1 if y0 < y1 else -1
-    err = dx - dy
 
-    # Starlark doesn't support while loops, so iterate max(dx, dy) times
-    for _ in range(max(dx, dy) + 1):
-        if x0 >= 0 and x0 < width and y0 >= 0 and y0 < height:
+    # If the line is just a point, return it
+    if dx == 0 and dy == 0:
+        if (x0 >= 0 and x0 < 64 and y0 >= 0 and y0 < 32):
             points.append((x0, y0))
+        return points
 
-        if x0 == x1 and y0 == y1:
-            break
-
-        e2 = 2 * err
-        if e2 > -dy:
-            err = err - dy
-            x0 = x0 + sx
-        if e2 < dx:
-            err = err + dx
-            y0 = y0 + sy
+    # Use simple linear interpolation for simplicity
+    steps = max(dx, dy)
+    for i in range(steps + 1):
+        t = i / float(steps)
+        x = int(x0 + t * (x1 - x0))
+        y = int(y0 + t * (y1 - y0))
+        if (x >= 0 and x < 64 and y >= 0 and y < 32):
+            points.append((x, y))
 
     return points
 
@@ -288,14 +305,14 @@ def fade_color(color, index, total_points, fade_power):
 
     return "#" + to_hex(r) + to_hex(g) + to_hex(b)
 
-def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, config, layout):
+def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, config):
     """Render frame for API-fetched simulation (displays simulation hash name)."""
     frame = simulation[frame_idx]
     x1, y1, x2, y2 = frame[0], frame[1], frame[2], frame[3]
 
     # Fixed origin (anchor point) - matches the physics origin (0,0)
     # Note: origin_y is passed in and matches what was used during coordinate transformation
-    origin_x = layout.origin_x
+    origin_x = ORIGIN_X
 
     # Calculate color based on time progression within THIS simulation
     # Cycle through full rainbow over the course of one simulation
@@ -339,8 +356,8 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
         children = [
             # Black background
             render.Box(
-                width = layout.width,
-                height = layout.height,
+                width = 64,
+                height = 32,
                 color = "#000",
             ),
 
@@ -369,7 +386,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                     render.Padding(
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = pt[2]),
-                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                    ) if (pt[0] >= 0 and pt[0] < 64 and pt[1] >= 0 and pt[1] < 32) else render.Box(width = 0, height = 0)
                     for pt in trail_points
                 ],
             ),
@@ -382,7 +399,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
                     )
-                    for pt in draw_line(origin_x, origin_y, x1, y1, layout.width, layout.height)
+                    for pt in draw_line(origin_x, origin_y, x1, y1)
                 ],
             ),
             # Line from first bob to second bob
@@ -392,7 +409,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
                     )
-                    for pt in draw_line(x1, y1, x2, y2, layout.width, layout.height)
+                    for pt in draw_line(x1, y1, x2, y2)
                 ],
             ),
 
@@ -403,7 +420,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                     color = "#00FFFF",
                     diameter = 2,
                 ),
-            ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
+            ) if (x1 >= 0 and x1 < 64 and y1 >= 0 and y1 < 32) else render.Box(width = 0, height = 0),
 
             # Second bob (color changes over time)
             render.Padding(
@@ -412,28 +429,19 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                     color = bob2_color,
                     diameter = 3,
                 ),
-            ) if (x2 >= 0 and x2 < layout.width and y2 >= 0 and y2 < layout.height) else render.Box(width = 0, height = 0),
+            ) if (x2 >= 0 and x2 < 64 and y2 >= 0 and y2 < 32) else render.Box(width = 0, height = 0),
         ],
     )
 
-def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
+def render_frame(config, sim_idx, frame_idx, hsv_to_rgb):
     """Render frame for embedded simulation (with simulation number displayed)."""
     simulation = ALL_SIMULATIONS[sim_idx]
     frame = simulation[frame_idx]
+    x1, y1, x2, y2 = frame[0], frame[1], frame[2], frame[3]
 
-    # Scale factor for embedded simulations (assuming 64x32 original)
-    scale_factor = layout.width / 64.0
-
-    # Scale coordinates
-    x1 = int(frame[0] * scale_factor)
-    y1 = int(frame[1] * scale_factor)
-    x2 = int(frame[2] * scale_factor)
-    y2 = int(frame[3] * scale_factor)
-
-    # Fixed origin (anchor point) - matches the physics origin (0,0) of embedded sims
-    # Embedded sims were recorded with origin at (32, 13)
-    origin_x = int(32 * scale_factor)
-    origin_y = int(13 * scale_factor)
+    # Fixed origin (anchor point) - matches the physics origin (0,0)
+    origin_x = 32
+    origin_y = 13
 
     # Calculate color based on time progression within THIS simulation
     # Cycle through full rainbow over the course of one simulation
@@ -469,7 +477,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                 # Too old, make it nearly invisible
                 trail_color = "#000000"
 
-        trail_points.append((int(f[2] * scale_factor), int(f[3] * scale_factor), trail_color))  # x2, y2, color
+        trail_points.append((f[2], f[3], trail_color))  # x2, y2, color
 
     label = "no." + str(sim_idx + 1) if config.bool("show_label", False) else ""
 
@@ -477,8 +485,8 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
         children = [
             # Black background
             render.Box(
-                width = layout.width,
-                height = layout.height,
+                width = 64,
+                height = 32,
                 color = "#000",
             ),
 
@@ -507,7 +515,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                     render.Padding(
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = pt[2]),
-                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                    ) if (pt[0] >= 0 and pt[0] < 64 and pt[1] >= 0 and pt[1] < 32) else render.Box(width = 0, height = 0)
                     for pt in trail_points
                 ],
             ),
@@ -520,7 +528,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
                     )
-                    for pt in draw_line(origin_x, origin_y, x1, y1, layout.width, layout.height)
+                    for pt in draw_line(origin_x, origin_y, x1, y1)
                 ],
             ),
             # Line from first bob to second bob
@@ -530,7 +538,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                         pad = (pt[0], pt[1], 0, 0),
                         child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
                     )
-                    for pt in draw_line(x1, y1, x2, y2, layout.width, layout.height)
+                    for pt in draw_line(x1, y1, x2, y2)
                 ],
             ),
 
@@ -541,7 +549,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                     color = "#00FFFF",
                     diameter = 2,
                 ),
-            ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
+            ) if (x1 >= 0 and x1 < 64 and y1 >= 0 and y1 < 32) else render.Box(width = 0, height = 0),
 
             # Second bob (color changes over time)
             render.Padding(
@@ -550,15 +558,17 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                     color = bob2_color,
                     diameter = 3,
                 ),
-            ) if (x2 >= 0 and x2 < layout.width and y2 >= 0 and y2 < layout.height) else render.Box(width = 0, height = 0),
+            ) if (x2 >= 0 and x2 < 64 and y2 >= 0 and y2 < 32) else render.Box(width = 0, height = 0),
         ],
     )
 
 def get_schema():
     # Build animation options dynamically
     animation_options = [
-        schema.Option(display = "Random", value = "random"),
-        schema.Option(display = "Random params from API", value = "api"),
+        schema.Option(display = "Random from all sources", value = "random_all"),
+        schema.Option(display = "Random from built in list", value = "random"),
+        schema.Option(display = "Random params from API (new generation)", value = "api"),
+        schema.Option(display = "Random generation from API (previously generated)", value = "api_random"),
     ]
     for i in range(1, len(ALL_SIMULATIONS) + 1):
         animation_options.append(
@@ -590,8 +600,15 @@ def get_schema():
                 name = "Animation",
                 desc = "Select which animation to display",
                 icon = "film",
-                default = "random",
+                default = "random_all",
                 options = animation_options,
+            ),
+            schema.Text(
+                id = "generation_id",
+                name = "Generation ID",
+                desc = "Enter a specific generation ID like 1588 (only used with 'Random generation from API' mode)",
+                icon = "hashtag",
+                default = "",
             ),
             schema.Toggle(
                 id = "show_full_animation",
