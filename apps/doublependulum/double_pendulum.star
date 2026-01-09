@@ -37,18 +37,21 @@ def get_layout(width, height):
         height = height,
     )
 
-def fetch_simulation(seed, layout):
+def fetch_simulation(seed, layout, generation_id = None):
     """Fetch a simulation from the API and transform coordinates to pixel space."""
-    cache_key = "sim_" + str(seed) + "_" + str(layout.width)
+    cache_key = ("gen_" + str(generation_id) if generation_id else "sim_" + str(seed)) + "_" + str(layout.width)
 
     # Try to get from cache first
     cached = cache.get(cache_key)
     if cached != None:
         return json.decode(cached)
 
-    # Build API URL with parameters
-    # Request a simulation with specific seed for reproducibility
-    url = API_URL + "?mode=random&duration=20&step_size=0.033&seed=" + str(seed)
+    # Build URL - either from specific generation or random API
+    if generation_id:
+        url = "https://wildc.net/dp/generations/" + str(generation_id) + ".json"
+    else:
+        # Request a simulation with specific seed for reproducibility
+        url = API_URL + "?mode=random&duration=20&step_size=0.033&seed=" + str(seed)
 
     # Fetch from API
     response = http.get(url, ttl_seconds = CACHE_TTL)
@@ -110,8 +113,22 @@ def main(config):
     animation = config.get("animation", "random")
     speed = config.get("speed", "fast")
 
+    # Handle "random from all sources" by randomly picking a source
+    if animation == "random_all":
+        # Randomly pick between: embedded (0), api random params (1), api random generation (2)
+        source = time.now().unix % 3
+        if source == 0:
+            # Use random embedded simulation (excluding the API sentinel)
+            animation = "random"
+        elif source == 1:
+            # Use API with random params
+            animation = "api"
+        else:
+            # Use random generation from API
+            animation = "api_random"
+
     # Determine which simulation to use
-    if animation == "api":
+    if animation == "api" or animation == "api_random":
         sim_idx = len(ALL_SIMULATIONS) - 1  # Use last index for API mode
     elif animation == "random" or animation == "":
         sim_idx = time.now().unix % len(ALL_SIMULATIONS)
@@ -126,10 +143,23 @@ def main(config):
 
     # Check if the selected simulation is the API sentinel (last simulation)
     if sim_idx == len(ALL_SIMULATIONS) - 1:
-        # Fetch from API
-        seed = time.now().unix  # Changes every second
-        print("Fetching simulation from API with seed: " + str(seed))
-        sim_data = fetch_simulation(seed, layout)
+        # Check if we should use a random generation from the collection
+        if animation == "api_random":
+            # Check if a specific generation ID was provided
+            generation_id = config.get("generation_id", "")
+            if generation_id and generation_id != "":
+                print("Fetching specific generation: " + generation_id)
+                sim_data = fetch_simulation(0, layout, generation_id)
+            else:
+                # Randomly pick a generation from 1 to 1630
+                generation_id = str((time.now().unix % 1630) + 1)
+                print("Fetching random generation: " + generation_id)
+                sim_data = fetch_simulation(0, layout, generation_id)
+        else:
+            # Fetch from API with random seed (ignore generation_id field)
+            seed = time.now().unix  # Changes every second
+            print("Fetching simulation from API with seed: " + str(seed))
+            sim_data = fetch_simulation(seed, layout)
 
         # Handle fetch failure
         if sim_data == None:
@@ -557,8 +587,10 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
 def get_schema():
     # Build animation options dynamically
     animation_options = [
-        schema.Option(display = "Random", value = "random"),
-        schema.Option(display = "Random params from API", value = "api"),
+        schema.Option(display = "Random from all sources", value = "random_all"),
+        schema.Option(display = "Random from built in list", value = "random"),
+        schema.Option(display = "Random params from API (new generation)", value = "api"),
+        schema.Option(display = "Random generation from API (previously generated)", value = "api_random"),
     ]
     for i in range(1, len(ALL_SIMULATIONS) + 1):
         animation_options.append(
@@ -590,8 +622,15 @@ def get_schema():
                 name = "Animation",
                 desc = "Select which animation to display",
                 icon = "film",
-                default = "random",
+                default = "random_all",
                 options = animation_options,
+            ),
+            schema.Text(
+                id = "generation_id",
+                name = "Generation ID",
+                desc = "Enter a specific generation ID like 1588 (only used with 'Random generation from API' mode)",
+                icon = "hashtag",
+                default = "",
             ),
             schema.Toggle(
                 id = "show_full_animation",
