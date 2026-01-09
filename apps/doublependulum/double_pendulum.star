@@ -565,9 +565,9 @@ def get_schema():
     # Build animation options dynamically
     animation_options = [
         schema.Option(display = "Random from all sources", value = "random_all"),
-        schema.Option(display = "Random", value = "random"),
-        schema.Option(display = "Random params from API", value = "api"),
-        schema.Option(display = "Random generation from API", value = "api_random"),
+        schema.Option(display = "Random from built in list", value = "random"),
+        schema.Option(display = "Random params from API (new generation)", value = "api"),
+        schema.Option(display = "Random generation from API (previously generated)", value = "api_random"),
     ]
     for i in range(1, len(ALL_SIMULATIONS) + 1):
         animation_options.append(
@@ -599,7 +599,7 @@ def get_schema():
                 name = "Animation",
                 desc = "Select which animation to display",
                 icon = "film",
-                default = "random",
+                default = "random_all",
                 options = animation_options,
             ),
             schema.Text(
