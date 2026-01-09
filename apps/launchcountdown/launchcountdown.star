@@ -122,10 +122,7 @@ def get_rocket_launch_json():
 
                         cache_time_seconds = seconds_this_json_is_valid_for
 
-                if (cache_time_seconds > MAXIMUM_CACHE_TIME_IN_SECONDS):
-                    cache_time_seconds = MAXIMUM_CACHE_TIME_IN_SECONDS
-                if (cache_time_seconds < MINIMUM_CACHE_TIME_IN_SECONDS):
-                    cache_time_seconds = MINIMUM_CACHE_TIME_IN_SECONDS
+                cache_time_seconds = max(MINIMUM_CACHE_TIME_IN_SECONDS, min(MAXIMUM_CACHE_TIME_IN_SECONDS, cache_time_seconds))
 
                 cache.set(ROCKET_LAUNCH_CACHE_NAME, json.encode(rocket_launch_data), ttl_seconds = cache_time_seconds)
                 # Filter out any providers in ignoredProviders
@@ -243,14 +240,56 @@ def display_instructions(config):
         show_full_animation = True,
     )
 
-def replace_local_time_into_description(description, locallaunch, utclaunch):
-    utc_time_display = ("%s at %s (%s)") % (utclaunch.format("January 2, 2006"), utclaunch.format("3:04 PM"), utclaunch.format("MST"))
-    local_time_display = ("%s at %s %s") % (locallaunch.format("January 2, 2006"), locallaunch.format("3:04 PM"), locallaunch.format("MST"))
+def normalize_whitespace(text):
+    # Replace all sneaky Unicode spaces with regular space
+    replacements = {
+        "\u00A0": " ",  # NO-BREAK SPACE
+        "\u202F": " ",  # NARROW NO-BREAK SPACE (your original issue)
+        "\u2009": " ",  # THIN SPACE
+        "\u200A": " ",  # HAIR SPACE
+        "\u2000": " ",  # EN QUAD
+        "\u2001": " ",  # EM QUAD
+        "\u2002": " ",  # EN SPACE
+        "\u2003": " ",  # EM SPACE
+        "\u2004": " ",  # THREE-PER-EM SPACE
+        "\u2005": " ",  # FOUR-PER-EM SPACE
+        "\u2006": " ",  # SIX-PER-EM SPACE
+        "\u2007": " ",  # FIGURE SPACE
+        "\u2008": " ",  # PUNCTUATION SPACE
+        "\u205F": " ",  # MEDIUM MATHEMATICAL SPACE
+        "\u3000": " ",  # IDEOGRAPHIC SPACE
+    }
+    for bad_space, good_space in replacements.items():
+        text = text.replace(bad_space, good_space)
+    return text
 
-    description = description.replace("\u202f", " ")
-    description = description.replace(utc_time_display, local_time_display)
-
-    return description
+def replace_local_time_into_description(description, local_time, utc_time):
+    if local_time == None or utc_time == None:
+        return description
+    
+    # Get timezone abbreviation like "EST" directly from local_time
+    timezone_abbr = local_time.format("MST")
+    
+    # Extract individual time components that work reliably
+    utc_hour_raw = utc_time.format("15")    # 18 (24hr)
+    utc_min_raw = utc_time.format("04")     # 03
+    utc_hour_12 = int(utc_hour_raw) % 12    # 6
+    if utc_hour_12 == 0:
+        utc_hour_12 = 12
+    utc_ampm = "PM" if int(utc_hour_raw) >= 12 else "AM"
+    
+    local_hour_raw = local_time.format("15")  # 13 (24hr)  
+    local_min_raw = local_time.format("04")   # 03
+    local_hour_12 = int(local_hour_raw) % 12  # 1
+    if local_hour_12 == 0:
+        local_hour_12 = 12
+    local_ampm = "PM" if int(local_hour_raw) >= 12 else "AM"
+    
+    # Build exact strings to match/replace
+    utc_part = "%d:%s\u202f%s (UTC)" % (utc_hour_12, utc_min_raw, utc_ampm)
+    local_part = "%d:%s %s (%s)" % (local_hour_12, local_min_raw, local_ampm, timezone_abbr)
+    
+    return description.replace(utc_part, local_part)
 
 def main(config):
     """ Main
@@ -260,7 +299,6 @@ def main(config):
     Returns:
         The tidbyt display
     """
-
     show_instructions = config.bool("instructions", False)
     hide_when_nothing_to_display = config.bool("hide", True)
 
@@ -280,11 +318,6 @@ def main(config):
     if hide_when_nothing_to_display and rocket_launch_count == 0:
         return []
 
-    row1 = ""
-    row2 = ""
-    row3 = ""
-    row4 = ""
-
     if rocket_launch_data == None:
         row1 = "Failed to get data from Rocketlaunch.live feed"
     elif rocket_launch_count == 0:
@@ -292,17 +325,31 @@ def main(config):
     else:
         rocket_launch_count = int(rocket_launch_count)
         for i in range(0, rocket_launch_count):
+            row1 = ""
+            row2 = ""
+            row3 = ""
+            row4 = ""
             localtime = time.now()
-            if rocket_launch_data["result"][i]["t0"] == None:
-                locallaunch = None
+
+            t0 = rocket_launch_data["result"][i]["t0"]
+            win_open = rocket_launch_data["result"][i]["win_open"]
+
+            utc_t0 = None
+            if t0 != None:
+                utc_t0 = time.parse_time(t0.replace("Z", ":00Z"))
+                locallaunch = utc_t0.in_location(location["timezone"])
+            elif win_open != None:
+                utc_win_open = time.parse_time(win_open.replace("Z", ":00Z"))
+                utc_t0 = utc_win_open  # Use win_open as fallback UTC time
+                locallaunch = utc_t0.in_location(location.get("timezone", "UTC"))
             else:
-                locallaunch = time.parse_time(rocket_launch_data["result"][i]["t0"].replace("Z", ":00Z")).in_location(location["timezone"])
+                locallaunch = None
 
             if locallaunch == None:
                 month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                 row1 = rocket_launch_data["result"][i]["vehicle"]["name"]
                 if rocket_launch_data["result"][i]["est_date"]["month"] == None or rocket_launch_data["result"][i]["est_date"]["day"] == None:
-                    row2 = row2
+                    row2 = ""
                 else:
                     row2 = "%s %s '%s" % (month_names[int(rocket_launch_data["result"][i]["est_date"]["month"]) - 1], rocket_launch_data["result"][i]["est_date"]["day"], str(rocket_launch_data["result"][i]["est_date"]["year"])[-2:])
                 row3 = get_launch_details(rocket_launch_data["result"][i], locallaunch).strip()
@@ -316,10 +363,10 @@ def main(config):
                     row1 = rocket_launch_data["result"][i]["vehicle"]["name"]
                     row2 = locallaunch.format("Jan 2 '06")
                     row3 = get_launch_details(rocket_launch_data["result"][i], locallaunch)
-                    row4 = replace_local_time_into_description(rocket_launch_data["result"][i]["launch_description"], locallaunch, time.parse_time(rocket_launch_data["result"][i]["t0"].replace("Z", ":00Z")))
-                else:
-                    return []
-                break
+                    row4 = replace_local_time_into_description(rocket_launch_data["result"][i]["launch_description"], locallaunch, utc_t0)
+            else:
+                return []
+            break
 
     return render.Root(
         show_full_animation = True,
