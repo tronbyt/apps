@@ -103,6 +103,20 @@ def main(config):
     animation = config.get("animation", "random")
     speed = config.get("speed", "fast")
 
+    # Handle "random from all sources" by randomly picking a source
+    if animation == "random_all":
+        # Randomly pick between: embedded (0), api random params (1), api random generation (2)
+        source = time.now().unix % 3
+        if source == 0:
+            # Use random embedded simulation (excluding the API sentinel)
+            animation = "random"
+        elif source == 1:
+            # Use API with random params
+            animation = "api"
+        else:
+            # Use random generation from API
+            animation = "api_random"
+
     # Determine which simulation to use
     if animation == "api" or animation == "api_random":
         sim_idx = len(ALL_SIMULATIONS) - 1  # Use last index for API mode
@@ -550,6 +564,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb):
 def get_schema():
     # Build animation options dynamically
     animation_options = [
+        schema.Option(display = "Random from all sources", value = "random_all"),
         schema.Option(display = "Random", value = "random"),
         schema.Option(display = "Random params from API", value = "api"),
         schema.Option(display = "Random generation from API", value = "api_random"),
