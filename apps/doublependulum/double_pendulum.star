@@ -135,21 +135,21 @@ def main(config):
     if sim_idx == len(ALL_SIMULATIONS) - 1:
         # Check if we should use a random generation from the collection
         if animation == "api_random":
-            # Randomly pick a generation from 1 to 1630
-            generation_id = str((time.now().unix % 1630) + 1)
-            print("Fetching random generation: " + generation_id)
-            sim_data = fetch_simulation(0, generation_id)
-        else:
             # Check if a specific generation ID was provided
             generation_id = config.get("generation_id", "")
             if generation_id and generation_id != "":
                 print("Fetching specific generation: " + generation_id)
                 sim_data = fetch_simulation(0, generation_id)
             else:
-                # Fetch from API with random seed
-                seed = time.now().unix  # Changes every second
-                print("Fetching simulation from API with seed: " + str(seed))
-                sim_data = fetch_simulation(seed)
+                # Randomly pick a generation from 1 to 1630
+                generation_id = str((time.now().unix % 1630) + 1)
+                print("Fetching random generation: " + generation_id)
+                sim_data = fetch_simulation(0, generation_id)
+        else:
+            # Fetch from API with random seed (ignore generation_id field)
+            seed = time.now().unix  # Changes every second
+            print("Fetching simulation from API with seed: " + str(seed))
+            sim_data = fetch_simulation(seed)
 
         # Handle fetch failure
         if sim_data == None:
@@ -605,7 +605,7 @@ def get_schema():
             schema.Text(
                 id = "generation_id",
                 name = "Generation ID",
-                desc = "Enter a specific generation ID like 1588 (only used with 'Random params from API' mode, ignored by 'Random generation from API')",
+                desc = "Enter a specific generation ID like 1588 (only used with 'Random generation from API' mode)",
                 icon = "hashtag",
                 default = "",
             ),
