@@ -762,7 +762,7 @@ def render_weather(daily_data, forecast_type = "daily"):
                     children = [
                         # High temp
                         render.Text(
-                            "%d°" % int(day["high"]),
+                            "%d" % int(day["high"]),
                             font = "CG-pixel-3x5-mono",
                             color = "#FFF",
                         ),
