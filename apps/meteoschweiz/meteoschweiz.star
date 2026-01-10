@@ -702,8 +702,10 @@ def render_weather(daily_data, forecast_type = "daily"):
             temp = int(day.get("temperature", 0))
             precip = day.get("precipitation", 0)
 
-            # Format precipitation as percentage - always show it
-            precip_str = "%d%%" % int(precip * 100)
+            # Format precipitation as accumulation/intensity in mm over the interval
+            # Starlark's % formatting does not support precision like %.1f.
+            # Use %s and show a space with unit.
+            precip_str = "%smm" % precip
 
             children = [
                 # Weather icon
