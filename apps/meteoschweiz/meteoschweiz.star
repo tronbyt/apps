@@ -581,10 +581,12 @@ def process_forecast(weather_data, station):
     tre_max = tre_max_all.get(station_point_id, [])
     symbols = symbols_all.get(station_point_id, [])
 
+    # Get current timestamp for date calculations
+    current_timestamp = time.now().unix
+
     # Process up to 3 days
     for i in range(min(3, len(tre_max))):
-        # Calculate day time using timestamp arithmetic
-        current_timestamp = time.now().unix
+        # Calculate day time using timestamp arithmetic        
         day_time = time.from_timestamp(current_timestamp + 86400 * i).in_location("Europe/Zurich")
 
         symbol_code = int(symbols[i]) if i < len(symbols) and symbols[i] else 1
@@ -899,7 +901,7 @@ def search_station(pattern):
         return [
             schema.Option(
                 display = "No stations found",
-                value = "No stations found",
+                value = "0",
             ),
         ]
 
