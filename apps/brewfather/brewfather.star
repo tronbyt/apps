@@ -1,283 +1,202 @@
-# ==============================================================================
-# Brewfather Tronbyt App
-# ==============================================================================
-# Displays live fermentation status from Brewfather API v2.
-# Features:
-# - Supports both Standard (Gen 1) and Wide (Gen 2) Tidbyt displays.
-# - Fetches live SG, Temp, ABV, and Attenuation.
-# - Calculates "Live ABV" manually to avoid "Recipe ABV" fallback.
-# - Renders a specific gravity trend graph.
-#
-# Development Disclosure:
-# This code was streamlined and optimized with the assistance of Gemini (Google AI).
-# ==============================================================================
-
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+
+# --- ASSET LOADING ---
+load("images/cloudy.png", CLOUDY_ASSET = "file")
+load("images/foggy.png", FOGGY_ASSET = "file")
+load("images/haily.png", HAILY_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/sleety.png", SLEETY_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/sunny.png", SUNNY_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_ASSET = "file")
+load("images/thundery.png", THUNDERY_ASSET = "file")
+load("images/tornady.png", TORNADY_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
+load("time.star", "time")
+
+ICON_DATA = {
+    "clear": SUNNY_ASSET.readall(),
+    "partly": SUNNYISH_ASSET.readall(),
+    "cloudy": CLOUDY_ASSET.readall(),
+    "rain": RAINY_ASSET.readall(),
+    "snow": SNOWY_ASSET.readall(),
+    "sleet": SLEETY_ASSET.readall(),
+    "thunder": THUNDERY_ASSET.readall(),
+    "fog": FOGGY_ASSET.readall(),
+    "hail": HAILY_ASSET.readall(),
+    "wind": WINDY_ASSET.readall(),
+    "tornado": TORNADY_ASSET.readall(),
+}
 
 # --- CONFIGURATION ---
-BATCH_LIST_URL = "https://api.brewfather.app/v2/batches?status=Fermenting"
-BATCH_DETAIL_URL = "https://api.brewfather.app/v2/batches/{batch_id}"
-READINGS_URL = "https://api.brewfather.app/v2/batches/{batch_id}/readings"
+TEMPEST_FORECAST_URL = "https://swd.weatherflow.com/swd/rest/better_forecast?station_id={station_id}&token={token}"
 
-def get_auth_headers(user_id, api_key):
-    auth_string = base64.encode(user_id + ":" + api_key)
-    return {"Authorization": "Basic " + auth_string}
-
-def convert_temp(c, units):
+# --- HELPER FUNCTIONS ---
+def _convert_temp(temp_c, units):
     if units == "F":
-        return (c * 1.8) + 32
-    return c
+        return (temp_c * 1.8) + 32
+    return temp_c
 
-def format_decimal(value, multiplier):
-    rounded = math.round(value * multiplier)
-    return str(rounded / multiplier)
-
-def calculate_abv(og, fg):
-    if og == 0 or fg == 0:
-        return 0.0
-    return (og - fg) * 131.25
-
-def calculate_att(og, fg):
-    if og <= 1.0:
-        return 0.0
-    return ((og - fg) / (og - 1.0)) * 100
+def get_icon_asset(icon_text):
+    for key, data in ICON_DATA.items():
+        if key in icon_text:
+            return data
+    return ICON_DATA["clear"]
 
 def main(config):
-    # --- DISPLAY DETECTION & ANIMATION SETTINGS ---
-    is_gen2 = False
-    if hasattr(canvas, "is2x"):
-        is_gen2 = canvas.is2x()
+    # --- TRONBYT DETECTION ---
+    # Automatically detects if the display is Wide (128x64)
+    is_wide = canvas.is2x()
 
-    # Gen 2 needs faster refresh (25ms) for smoothness, but Marquee needs delay (1)
-    # to prevent text from flying by too fast.
-    marquee_delay = 1 if is_gen2 else 0
-    root_delay = 25 if is_gen2 else 50
-    is_wide = is_gen2
-
-    user_id = config.get("user_id")
-    api_key = config.get("api_key")
+    station_id = config.get("station")
+    token = config.get("token")
     units = config.get("units", "F")
 
-    if not user_id or not api_key:
-        return render.Root(child = render.WrappedText("Setup API Key"))
-
-    headers = get_auth_headers(user_id, api_key)
-
-    # 1. FIND ACTIVE BATCH ID
-    list_rep = http.get(BATCH_LIST_URL, headers = headers, ttl_seconds = 300)
-    if list_rep.status_code != 200:
-        return render.Root(child = render.Text("List API: %d" % list_rep.status_code))
-
-    batches = list_rep.json()
-    if not batches:
-        return render.Root(child = render.Text("No Batch"))
-
-    batch_id = batches[0]["_id"]
-
-    # 2. FETCH FULL BATCH DETAILS
-    # We need the specific batch endpoint to get the "measuredOg" or "estimatedOg" fields.
-    detail_rep = http.get(BATCH_DETAIL_URL.format(batch_id = batch_id), headers = headers, ttl_seconds = 300)
-    if detail_rep.status_code != 200:
-        return render.Root(child = render.Text("Detail API: %d" % detail_rep.status_code))
-
-    batch = detail_rep.json()
-
-    recipe_name = batch.get("recipe", {}).get("name", "Unknown")
-    batch_status = batch.get("status", "Fermenting")
-
-    # 3. DETERMINE ORIGINAL GRAVITY (OG)
-    # Critical for calculating ABV. Priority: Measured > Estimated > Recipe
-    og = 0.0
-    if batch.get("measuredOg"):
-        og = float(batch["measuredOg"])
-    elif batch.get("estimatedOg"):
-        og = float(batch["estimatedOg"])
-    elif batch.get("recipe") and batch.get("recipe", {}).get("estimatedOg"):
-        og = float(batch["recipe"]["estimatedOg"])
-
-    # 4. FETCH READINGS (Tilt/Hydrometer Data)
-    readings_rep = http.get(READINGS_URL.format(batch_id = batch_id), headers = headers, ttl_seconds = 300)
-    readings = []
-    if readings_rep.status_code == 200:
-        readings = readings_rep.json()
-
-    # 5. PROCESS DATA
-    plot_data = []
-    latest_sg = 0.0
-    latest_temp = 0.0
-    abv = 0.0
-    att = 0.0
-
-    # Filter for readings that actually contain gravity data
-    valid_readings = [r for r in readings if "sg" in r]
-    if valid_readings:
-        last_reading = valid_readings[-1]
-        latest_sg = float(last_reading["sg"])
-        latest_temp = convert_temp(float(last_reading.get("temp", 0)), units)
-
-    # --- CALCULATE LIVE STATS ---
-    # We calculate manually to ensure we see "Current ABV" based on the latest reading,
-    # rather than the "Projected ABV" the API often returns for incomplete batches.
-    if og > 1.0 and latest_sg > 1.0:
-        abv = calculate_abv(og, latest_sg)
-        att = calculate_att(og, latest_sg)
-
-    # Fallback: Use API ABV if manual calculation failed (e.g. missing OG)
-    if abv == 0.0:
-        if batch.get("abv"):
-            abv = float(batch["abv"])
-        elif batch.get("recipe", {}).get("abv"):
-            abv = float(batch["recipe"]["abv"])
-
-    abv_text = format_decimal(abv, 10.0) + "%"
-
-    # Format Attenuation
-    att_text = "0%"
-    if att > 0:
-        att_text = str(int(math.round(att))) + "%"
-
-    # Visual warning if we have a reading but failed to calc ABV (implies missing OG)
-    if abv == 0.0 and latest_sg > 1.0:
-        abv_text = "?"
-
-    # Populate graph data points
-    for r in readings:
-        sg_val = r.get("sg")
-        time_val = r.get("time")
-        if sg_val != None and time_val != None:
-            plot_data.append((float(time_val), float(sg_val)))
-
-    return render_layout(is_wide, recipe_name, batch_status, plot_data, latest_sg, latest_temp, abv_text, att_text, units, marquee_delay, root_delay)
-
-def render_layout(is_wide, name, status, data, sg, temp, abv_text, att_text, units, m_delay, r_delay):
-    temp_str = str(int(math.round(temp))) + "°"
-    if is_wide:
-        temp_str += units
-    sg_str = format_decimal(sg, 1000.0)
-
-    # --- BREWFATHER COLOR THEME ---
-    bf_yellow = "#ffcd00"
-    bf_red = "#e74c3c"
-    bf_blue = "#3498db"
-    bf_green = "#2ecc71"
-    bf_white = "#ecf0f1"
-    bf_grey = "#95a5a6"
-
-    # Graph Colors
-    graph_line = "#c0392b"
-    graph_fill = "#581616"
-    c_bg = "#1a1a1a"
-
-    if is_wide:
-        # ==========================================
-        # LAYOUT: WIDE (128x64) - GEN 2
-        # ==========================================
+    if not station_id or not token:
         return render.Root(
-            delay = r_delay,
-            child = render.Column(
-                children = [
-                    # HEADER
-                    render.Box(width = 128, height = 16, color = c_bg, child = render.Marquee(width = 128, delay = m_delay, child = render.Text("Currently Brewing: " + name, font = "6x13", color = bf_yellow))),
-                    # BODY
-                    render.Row(
-                        expanded = True,
-                        children = [
-                            # STATS COLUMN
-                            render.Box(
-                                width = 68,
-                                height = 48,
-                                child = render.Padding(
-                                    pad = (1, 0, 1, 0),
-                                    child = render.Column(
-                                        main_align = "start",
-                                        children = [
-                                            render.Marquee(width = 66, delay = m_delay, child = render.Text(status, font = "6x13", color = bf_white)),
-                                            render.Box(width = 1, height = 3),  # Spacer to push stats down
-                                            render.Column(
-                                                children = [
-                                                    render.Row(expanded = True, main_align = "space_between", children = [render.Text("SG:", font = "tb-8", color = bf_grey), render.Text(sg_str, font = "tb-8", color = bf_red)]),
-                                                    render.Row(expanded = True, main_align = "space_between", children = [render.Text("Temp:", font = "tb-8", color = bf_grey), render.Text(temp_str, font = "tb-8", color = bf_blue)]),
-                                                    render.Row(expanded = True, main_align = "space_between", children = [render.Text("ABV:", font = "tb-8", color = bf_grey), render.Text(abv_text, font = "tb-8", color = bf_green)]),
-                                                    render.Row(expanded = True, main_align = "space_between", children = [render.Text("Att:", font = "tb-8", color = bf_grey), render.Text(att_text, font = "tb-8", color = bf_white)]),
-                                                ],
-                                            ),
-                                        ],
-                                    ),
-                                ),
-                            ),
-                            # GRAPH COLUMN
-                            render.Box(width = 60, height = 48, child = render.Plot(data = data, width = 60, height = 48, color = graph_line, fill = True, fill_color = graph_fill)),
-                        ],
-                    ),
-                ],
-            ),
+            child = render.WrappedText("Please configure Station ID and Token."),
         )
+
+    if "." in station_id:
+        station_id = station_id.split(".")[0]
+
+    # --- FETCH DATA ---
+    res = http.get(url = TEMPEST_FORECAST_URL.format(station_id = station_id, token = token), ttl_seconds = 300)
+    if res.status_code != 200:
+        return render.Root(child = render.WrappedText("Err: %d" % res.status_code))
+
+    data = res.json()
+    daily_forecast = data.get("forecast", {}).get("daily", [])
+
+    if len(daily_forecast) < 2:
+        return render.Root(child = render.Text("No Data"))
+
+    # Always show 3 days, regardless of screen size
+    next_days = daily_forecast[1:4]
+
+    # --- RENDER LOGIC ---
+    if is_wide:
+        return render_wide_layout(next_days, units)
     else:
-        # ==========================================
-        # LAYOUT: STANDARD (64x32) - GEN 1
-        # ==========================================
-        return render.Root(
-            delay = r_delay,
-            child = render.Column(
-                children = [
-                    # HEADER (Tom-Thumb for height efficiency)
-                    render.Box(
-                        width = 64,
-                        height = 8,
-                        color = c_bg,
-                        child = render.Marquee(
-                            width = 64,
-                            delay = m_delay,
-                            child = render.Row(
-                                children = [
-                                    render.Text("Brewing: " + name, font = "tb-8", color = bf_yellow),
-                                    render.Text(" (" + status + ")", font = "tb-8", color = bf_white),
-                                ],
-                            ),
-                        ),
-                    ),
-                    # BODY (Tight layout using TB-8)
-                    render.Row(
-                        expanded = True,
-                        children = [
-                            # TEXT COLUMN (Widened to 40px to fit TB-8)
-                            render.Box(
-                                width = 40,
-                                height = 24,
-                                child = render.Padding(
-                                    pad = (1, 0, 1, 0),
-                                    child = render.Column(
-                                        main_align = "space_between",  # Stacks rows top-to-bottom
-                                        children = [
-                                            render.Row(expanded = True, main_align = "space_between", children = [render.Text("SG:", font = "tb-8", color = bf_grey), render.Text(sg_str, font = "tb-8", color = bf_red)]),
-                                            render.Row(expanded = True, main_align = "space_between", children = [render.Text("TMP:", font = "tb-8", color = bf_grey), render.Text(temp_str, font = "tb-8", color = bf_blue)]),
-                                            render.Row(expanded = True, main_align = "space_between", children = [render.Text("ABV:", font = "tb-8", color = bf_grey), render.Text(abv_text, font = "tb-8", color = bf_green)]),
-                                        ],
-                                    ),
-                                ),
-                            ),
-                            # GRAPH COLUMN (Narrowed to 24px)
-                            render.Box(width = 24, height = 24, child = render.Plot(data = data, width = 24, height = 24, color = graph_line, fill = True, fill_color = graph_fill)),
-                        ],
-                    ),
-                ],
-            ),
+        return render_standard_layout(next_days, units)
+
+# --- LAYOUT: STANDARD (64x32) ---
+def render_standard_layout(days_data, units):
+    forecast_columns = []
+    divider = render.Column(children = [render.Box(width = 1, height = 32, color = "#5A5A5A")])
+
+    for i, day_data in enumerate(days_data):
+        timestamp = day_data.get("day_start_local", 0)
+        day_name = time.from_timestamp(int(timestamp)).format("Mon")
+
+        high = day_data.get("air_temp_high", 0)
+        low = day_data.get("air_temp_low", 0)
+
+        if units == "F":
+            high = _convert_temp(day_data.get("air_temp_high", 0), units)
+            low = _convert_temp(day_data.get("air_temp_low", 0), units)
+
+        high_str = "H:%d" % int(math.round(high))
+        low_str = "L:%d" % int(math.round(low))
+        icon_asset = get_icon_asset(day_data.get("icon", "clear-day"))
+
+        col_children = [
+            render.Image(width = 13, height = 13, src = icon_asset),
+            render.Text(day_name.upper(), font = "CG-pixel-3x5-mono", color = "#ffffff"),
+            render.Box(width = 1, height = 2),
+            render.Text(high_str, font = "tom-thumb", color = "#FA8072"),
+            render.Text(low_str, font = "tom-thumb", color = "#0096FF"),
+        ]
+
+        forecast_columns.append(
+            render.Column(children = col_children, main_align = "center", cross_align = "center"),
         )
+
+        if i < len(days_data) - 1:
+            forecast_columns.append(divider)
+
+    return render.Root(
+        child = render.Stack(
+            children = [
+                render.Row(children = forecast_columns, main_align = "space_evenly", expanded = True),
+            ],
+        ),
+    )
+
+# --- LAYOUT: WIDE (128x64) ---
+def render_wide_layout(days_data, units):
+    forecast_columns = []
+
+    # Divider is taller (64px) and thicker (optional, but keeping 1px is cleaner)
+    divider = render.Column(children = [render.Box(width = 1, height = 64, color = "#5A5A5A")])
+
+    for i, day_data in enumerate(days_data):
+        timestamp = day_data.get("day_start_local", 0)
+        day_name = time.from_timestamp(int(timestamp)).format("Monday")  # Full name fits better!
+
+        high = day_data.get("air_temp_high", 0)
+        low = day_data.get("air_temp_low", 0)
+
+        if units == "F":
+            high = _convert_temp(day_data.get("air_temp_high", 0), units)
+            low = _convert_temp(day_data.get("air_temp_low", 0), units)
+
+        high_str = "H:%d" % int(math.round(high))
+        low_str = "L:%d" % int(math.round(low))
+        icon_asset = get_icon_asset(day_data.get("icon", "clear-day"))
+
+        col_children = [
+            # SCALED UP ICON: 26x26 (2x the original 13x13)
+            render.Image(width = 26, height = 26, src = icon_asset),
+
+            # LARGER FONT:
+            render.Text(day_name, font = "5x8", color = "#ffffff"),
+            render.Box(width = 1, height = 2),  # Padding
+
+            # LARGER TEMPS
+            render.Text(high_str, font = "terminus-14", color = "#FA8072"),
+            render.Text(low_str, font = "terminus-14", color = "#0096FF"),
+        ]
+
+        forecast_columns.append(
+            render.Column(children = col_children, main_align = "center", cross_align = "center"),
+        )
+
+        if i < len(days_data) - 1:
+            forecast_columns.append(divider)
+
+    return render.Root(
+        child = render.Stack(
+            children = [
+                render.Row(children = forecast_columns, main_align = "space_evenly", expanded = True),
+            ],
+        ),
+    )
 
 def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(id = "user_id", name = "User ID", desc = "Brewfather User ID", icon = "user"),
-            schema.Text(id = "api_key", name = "API Key", desc = "Brewfather API Key", icon = "key", secret = True),
+            schema.Text(
+                id = "station",
+                name = "Station ID",
+                desc = "Tempest Station ID",
+                icon = "locationDot",
+            ),
+            schema.Text(
+                id = "token",
+                name = "Token",
+                desc = "Tempest API Token",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "units",
-                name = "Temperature Units",
-                desc = "Select display units",
+                name = "Units",
+                desc = "Temperature Unit",
                 icon = "ruler",
                 default = "F",
                 options = [
