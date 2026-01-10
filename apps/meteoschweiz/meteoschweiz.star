@@ -97,11 +97,13 @@ load("images/140.png", IMG_140 = "file")
 load("images/141.png", IMG_141 = "file")
 load("images/142.png", IMG_142 = "file")
 load("images/error_icon.png", IMG_ERROR = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 # Weather symbol images mapping
+# Note: @2x images need to be created for full 2x support
+# For now, 1x images will be used and scaled
 WEATHER_IMAGES = {
     1: IMG_001,
     2: IMG_002,
@@ -210,6 +212,9 @@ def main(config):
         Rendered display widget.
     """
 
+    # Get scale for 2x rendering
+    scale = 2 if canvas.is2x() else 1
+
     # Get configuration
     station_config = config.get("station", DEFAULT_STATION)
     station = json.decode(station_config)
@@ -217,30 +222,30 @@ def main(config):
 
     # Check for valid station
     if station.get("value", "0") == "0":
-        return error_display("No Station selected")
+        return error_display("No Station selected", scale)
 
     # Fetch and process data based on forecast type
     if forecast_type == "3hour":
         # Fetch 3-hour forecast data
         weather_data = fetch_3hour_data()
         if not weather_data:
-            return error_display("3hr API Error")
+            return error_display("3hr API Error", scale)
 
         # Process 3-hour forecast
         forecast_data = process_3hour_forecast(weather_data, station)
         if not forecast_data:
-            return error_display("3hr No Forecasts")
+            return error_display("3hr No Forecasts", scale)
     else:
         # Fetch daily weather data
         weather_data = fetch_weather_data()
         if not weather_data:
-            return error_display("Weather API Error")
+            return error_display("Weather API Error", scale)
 
         # Process daily forecast
         forecast_data = process_forecast(weather_data, station)
 
     # Render the display
-    return render_weather(forecast_data, forecast_type)
+    return render_weather(forecast_data, forecast_type, scale)
 
 def get_stations_list():
     """Get MeteoSwiss stations list.
@@ -680,21 +685,22 @@ def process_3hour_forecast(weather_data, station):
 
     return forecast_data
 
-def render_weather(daily_data, forecast_type = "daily"):
+def render_weather(daily_data, forecast_type, scale):
     """Render weather forecast display (3-day or 3-hour view).
 
     Args:
         daily_data: List of forecast dictionaries (daily or 3-hour).
         forecast_type: Type of forecast ("daily" or "3hour").
+        scale: Render scale (1 for standard, 2 for 2x).
 
     Returns:
         Rendered display root widget.
     """
     if not daily_data:
-        return error_display("No Data")
+        return error_display("No Data", scale)
 
-    DIVIDER_WIDTH = 1
-    HEIGHT = 32
+    DIVIDER_WIDTH = 1 * scale
+    HEIGHT = canvas.height()
 
     columns = []
     is_3hour = forecast_type == "3hour"
@@ -721,13 +727,13 @@ def render_weather(daily_data, forecast_type = "daily"):
                 # Weather icon
                 render.Image(
                     src = weather_icon_src,
-                    width = 12,
-                    height = 12,
+                    width = 12* scale,
+                    height = 12* scale,
                 ),
                 # Time
                 render.Text(
                     time_str,
-                    font = "CG-pixel-3x5-mono",
+                    font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                     color = "#FF0",
                 ),
                 # Temperature with custom degree symbol
@@ -735,11 +741,11 @@ def render_weather(daily_data, forecast_type = "daily"):
                     children = [
                         render.Text(
                             "%d" % temp,
-                            font = "CG-pixel-3x5-mono",
+                            font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                             color = "#FFF",
                         ),
                         render.Padding(
-                            pad = (0, 0, 0, 2),
+                            pad = (0, 2 * (scale - 1), 0, 0),
                             child = render.Circle(
                                 diameter = 2,
                                 color = "#FFF",
@@ -750,7 +756,7 @@ def render_weather(daily_data, forecast_type = "daily"):
                 # Precipitation percentage
                 render.Text(
                     precip_str,
-                    font = "CG-pixel-3x5-mono",
+                    font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                     color = "#08F",
                 ),
             ]
@@ -763,13 +769,13 @@ def render_weather(daily_data, forecast_type = "daily"):
                 # Weather icon
                 render.Image(
                     src = weather_icon_src,
-                    width = 12,
-                    height = 12,
+                    width = 12 * scale,
+                    height = 12 * scale,
                 ),
                 # Day abbreviation
                 render.Text(
                     day_abbr,
-                    font = "CG-pixel-3x5-mono",
+                    font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                     color = "#FF0",
                 ),
                 render.Row(
@@ -777,11 +783,11 @@ def render_weather(daily_data, forecast_type = "daily"):
                         # High temp
                         render.Text(
                             "%d" % int(day["high"]),
-                            font = "CG-pixel-3x5-mono",
+                            font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                             color = "#FFF",
                         ),
                         render.Padding(
-                            pad = (0, 0, 0, 2),
+                            pad = (0, 2 * (scale - 1), 0, 0),
                             child = render.Circle(
                                 diameter = 2,
                                 color = "#FFF",
@@ -794,11 +800,11 @@ def render_weather(daily_data, forecast_type = "daily"):
                     children = [
                         render.Text(
                             "%d" % int(day["low"]),
-                            font = "CG-pixel-3x5-mono",
+                            font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                             color = "#888",
                         ),
                         render.Padding(
-                            pad = (0, 0, 0, 2),
+                            pad = (0, 2 * (scale - 1), 0, 0),
                             child = render.Circle(
                                 diameter = 2,
                                 color = "#FFF",
@@ -833,7 +839,7 @@ def render_weather(daily_data, forecast_type = "daily"):
         child = render.Stack(
             children = [
                 render.Box(
-                    width = 64,
+                    width = canvas.width(),
                     height = HEIGHT,
                     color = "#000",
                 ),
@@ -846,11 +852,12 @@ def render_weather(daily_data, forecast_type = "daily"):
         ),
     )
 
-def error_display(message):
+def error_display(message, scale):
     """Display error message on screen.
 
     Args:
         message: Error message to display.
+        scale: Render scale (1 for standard, 2 for 2x).
 
     Returns:
         Rendered error display widget.
@@ -859,25 +866,24 @@ def error_display(message):
         child = render.Row(
             children = [
                 render.Box(
-                    width = 20,
-                    height = 32,
+                    width = 20 * scale,
+                    height = canvas.height(),
                     color = "#000",
                     child = render.Image(
                         src = IMG_ERROR.readall(),
-                        width = 16,
-                        height = 16,
+                        width = 16 * scale,
+                        height = 16 * scale,
                     ),
                 ),
                 render.Box(
                     padding = 0,
-                    width = 44,
-                    height = 32,
+                    width = canvas.width() - (20 * scale),
+                    height = canvas.height(),
                     child =
                         render.WrappedText(
                             content = message,
                             color = "#FFF",
-                            linespacing = 1,
-                            font = "CG-pixel-4x5-mono",
+                            font = "CG-pixel-4x5-mono" if scale == 1 else "terminus-12",
                         ),
                 ),
             ],
