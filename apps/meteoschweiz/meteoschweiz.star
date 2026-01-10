@@ -639,11 +639,21 @@ def process_3hour_forecast(weather_data, station):
             if hour % 3 == 0:
                 three_hour_indices.append(idx)
 
-    # Show next 3 forecast intervals from the 3-hour data
-    num_intervals = min(3, len(three_hour_indices))
-    for i in range(num_intervals):
-        idx = three_hour_indices[i]
+    # Show next 3 forecast intervals at/after current local time
+    now_str = time.now().in_location("Europe/Zurich").format("200601021504")
 
+    # Find the first index whose timestamp is at or after now
+    start_idx = 0
+    for pos, t_idx in enumerate(three_hour_indices):
+        ts = timestamps[t_idx]
+        if len(ts) >= 12 and ts >= now_str:
+            start_idx = pos
+            break
+
+    # Collect up to 3 intervals starting from start_idx
+    end_idx = start_idx + 3
+    selected_indices = three_hour_indices[start_idx:end_idx]
+    for idx in selected_indices:
         # Parse timestamp from CSV (format: YYYYMMDDHHMM)
         timestamp_str = timestamps[idx]
         if len(timestamp_str) >= 12:
