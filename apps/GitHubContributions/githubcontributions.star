@@ -14,7 +14,7 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
-CACHE_TTL = 3600*4  # 4 hours
+CACHE_TTL = 3600 * 4  # 4 hours
 CACHE_PREFIX = "github_contributions_"
 
 # Exact GitHub contribution colors (0-4 levels)
