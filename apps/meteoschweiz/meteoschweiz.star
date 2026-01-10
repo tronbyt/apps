@@ -530,8 +530,11 @@ def fetch_csv_data(url):
                     parts = leftover.split(CSV_DELIMITER)
                     if len(parts) >= 4:
                         point_id = parts[0]
+                        timestamp = parts[2]
                         val = parts[3]
                         if point_id:
+                            if timestamp and timestamp not in timestamps:
+                                timestamps.append(timestamp)
                             if point_id not in station_data:
                                 station_data[point_id] = []
                             station_data[point_id].append(float(val) if val and val != "-" else 0)
