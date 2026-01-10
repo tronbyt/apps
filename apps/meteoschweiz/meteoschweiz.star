@@ -586,7 +586,7 @@ def process_forecast(weather_data, station):
 
     # Process up to 3 days
     for i in range(min(3, len(tre_max))):
-        # Calculate day time using timestamp arithmetic        
+        # Calculate day time using timestamp arithmetic
         day_time = time.from_timestamp(current_timestamp + 86400 * i).in_location("Europe/Zurich")
 
         symbol_code = int(symbols[i]) if i < len(symbols) and symbols[i] else 1
