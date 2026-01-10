@@ -66,11 +66,6 @@ def get_contributions(username, token):
         "variables": {"username": username, "from": from_date, "to": to_date},
     })
 
-    body = json.encode({
-        "query": query,
-        "variables": {"username": username, "from": from_date, "to": to_date},
-    })
-
     req = http.post(GITHUB_GRAPHQL_URL, headers = headers, body = body)
 
     if req.status_code != 200:
@@ -91,17 +86,17 @@ def normalize_contributions(weeks_data):
     grid = [[0 for _ in weeks] for _ in range(7)]  # 7 days x N weeks
 
     for week_idx, week in enumerate(weeks):
-        if week_idx >= len(grid[0]):
-            break
         for day in week.get("contributionDays", []):
             weekday = int(day["weekday"])
             count = int(day["contributionCount"])
-            grid[weekday][week_idx] = min(count, 4)  # Cap at level 4
+            grid[weekday][week_idx] = (1 if count > 0 else 0) + (1 if count >= 3 else 0) + (1 if count >= 5 else 0) + (1 if count >= 10 else 0)
 
     return grid
 
 def render_contribution_graph(grid):
-    cols = len(grid[0])  # 10
+    if not grid or not grid[0]:
+        return render.Box()
+    cols = len(grid[0])
     cell_width = 8 if canvas.is2x() else 4  # Fixed 4px instead of dynamic ~5px
     weekday_height = 8 if canvas.is2x() else 4
     weekend_height = 8 if canvas.is2x() else 3
@@ -135,7 +130,7 @@ def render_contribution_graph(grid):
             children.append(render.Row(
                 expanded = True,
                 main_align = "start",
-                children = [render.Box(width = 51, height = 1, color = "#000")],
+                children = [render.Box(width = left_padding + cols * cell_width + (cols - 1), height = 1, color = "#000")],
             ))
 
     return render.Column(main_align = "start", children = children)
@@ -188,11 +183,13 @@ def get_schema():
             schema.Text(
                 id = "token",
                 name = "Personal Access Token",
-                desc = """Step 1: Github.com → Profile Picture  → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token
-Step 2:. Name: "Tronbyt Contributions" | Expiration: 90 days | Select Repositories | Permissions: Add 3 Items:
-Repositories: Metadata: Read Only → Account: Email Address: Read Only → Account: Profile: Read Only
-3. Copy the token (ghp_xxx...) and paste it here.""
-""",
+                desc = """Instructions to get a Personal Access Token:
+1. Go to `github.com` → Profile Picture → Settings → Developer settings → Personal access tokens → Fine-grained tokens → **Generate new token**.
+2. Use these settings:
+    - **Name**: `Tronbyt Contributions`
+    - **Expiration**: 90 days
+    - **Permissions**: Grant read-only access for `Metadata`, `Email Address`, and `Profile`.
+3. Copy the token (`ghp_...`) and paste it here. You won't see it again!""",
                 icon = "key",
                 secret = True,
             ),
