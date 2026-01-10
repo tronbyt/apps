@@ -213,21 +213,34 @@ def main(config):
     # Get configuration
     station_config = config.get("station", DEFAULT_STATION)
     station = json.decode(station_config)
+    forecast_type = config.get("forecast_type", "daily")
 
     # Check for valid station
     if station.get("value", "0") == "0":
         return error_display("No Station selected")
 
-    # Fetch weather data
-    weather_data = fetch_weather_data()
-    if not weather_data:
-        return error_display("Weather API Error")
+    # Fetch and process data based on forecast type
+    if forecast_type == "3hour":
+        # Fetch 3-hour forecast data
+        weather_data = fetch_3hour_data()
+        if not weather_data:
+            return error_display("3hr API Error")
 
-    # Process forecast data
-    daily_data = process_forecast(weather_data, station)
+        # Process 3-hour forecast
+        forecast_data = process_3hour_forecast(weather_data, station)
+        if not forecast_data:
+            return error_display("3hr No Forecasts")
+    else:
+        # Fetch daily weather data
+        weather_data = fetch_weather_data()
+        if not weather_data:
+            return error_display("Weather API Error")
+
+        # Process daily forecast
+        forecast_data = process_forecast(weather_data, station)
 
     # Render the display
-    return render_weather(daily_data)
+    return render_weather(forecast_data, forecast_type)
 
 def get_stations_list():
     """Get MeteoSwiss stations list.
@@ -345,18 +358,18 @@ def fetch_weather_data():
     tre_max_url = base_url + "vnut12.lssw.{}0000.tre200px.csv".format(date_part)
     symbol_url = base_url + "vnut12.lssw.{}0000.jp2000d0.csv".format(date_part)
 
-    tre_min = fetch_csv_data(tre_min_url)
-    tre_max = fetch_csv_data(tre_max_url)
-    symbols = fetch_csv_data(symbol_url)
+    tre_min_data = fetch_csv_data(tre_min_url)
+    tre_max_data = fetch_csv_data(tre_max_url)
+    symbols_data = fetch_csv_data(symbol_url)
 
-    # Ensure we have data
-    if not tre_min or not tre_max or not symbols:
+    # Ensure we have data and extract values
+    if not tre_min_data or not tre_max_data or not symbols_data:
         return None
 
     weather_data = {
-        "tre_min": tre_min,
-        "tre_max": tre_max,
-        "symbols": symbols,
+        "tre_min": tre_min_data.get("values", {}),
+        "tre_max": tre_max_data.get("values", {}),
+        "symbols": symbols_data.get("values", {}),
         "date": date_part,
     }
 
@@ -365,44 +378,178 @@ def fetch_weather_data():
 
     return weather_data
 
+def fetch_3hour_data():
+    """Fetch 3-hour forecast data from MeteoSwiss STAC API.
+
+    Returns:
+        Dictionary with temperature, symbol, and precipitation data for all stations, or None on error.
+    """
+
+    # Check cache first
+    cache_key = "meteoschweiz_3hour_all"
+    cached = cache.get(cache_key)
+
+    if cached:
+        cached_data = json.decode(cached)
+        cached_date = cached_data.get("date", "")
+
+        # Get current date in YYYYMMDD format
+        current_date = time.now().in_location("Europe/Zurich").format("20060102")
+
+        # Return cached data if date matches
+        if cached_date == current_date:
+            return cached_data
+
+    # First, get the list of available data
+    stac_url = "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-local-forecasting/items"
+
+    resp = http.get(stac_url, ttl_seconds = 3600)
+    if resp.status_code != 200:
+        return None
+
+    data = json.decode(resp.body())
+    items = data.get("features", [])
+
+    if not items:
+        return None
+
+    # Get the most recent item
+    latest_item = items[0]
+    date_str = latest_item.get("properties", {}).get("datetime", "")
+
+    # Extract date in format YYYYMMDD
+    if "T" in date_str:
+        date_part = date_str.split("T")[0].replace("-", "")
+    else:
+        date_part = date_str.replace("-", "")
+
+    # Construct base URL for data files
+    base_url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/{}-ch/".format(date_part)
+
+    # Fetch 3-hour data: temperature, weather symbol, and precipitation
+    tre_url = base_url + "vnut12.lssw.{}0000.tre200h0.csv".format(date_part)
+    symbol_url = base_url + "vnut12.lssw.{}0000.jww003i0.csv".format(date_part)
+    precip_url = base_url + "vnut12.lssw.{}0000.rre003i0.csv".format(date_part)
+
+    temperature_data = fetch_csv_data(tre_url)
+    symbols_data = fetch_csv_data(symbol_url)
+    precipitation_data = fetch_csv_data(precip_url)
+
+    # Ensure we have data with proper structure
+    if not temperature_data or not symbols_data or not precipitation_data:
+        return None
+
+    weather_data = {
+        "temperature": temperature_data.get("values", {}),
+        "symbols": symbols_data.get("values", {}),
+        "precipitation": precipitation_data.get("values", {}),
+        "timestamps": temperature_data.get("timestamps", []),
+        "date": date_part,
+    }
+
+    # Cache for 1 hour (3600 seconds) since 3-hour data updates more frequently
+    cache.set(cache_key, json.encode(weather_data), ttl_seconds = 3600)
+
+    return weather_data
+
 def fetch_csv_data(url):
-    """Fetch CSV data and extract values for all stations.
+    """Fetch large CSV data in chunks to avoid caching issues.
+
+    Downloads the file in 1MB chunks using HTTP Range requests, processing each
+    chunk immediately to extract station data without loading the entire file.
 
     Args:
         url: URL to CSV file.
 
     Returns:
-        Dictionary mapping point_id to list of values, or empty dict on error.
+        Dictionary with two keys:
+        - 'values': Dict mapping point_id to list of values
+        - 'timestamps': List of timestamp strings from the CSV (YYYYMMDDHHMM format)
     """
-    resp = http.get(url, ttl_seconds = 3600)
-    if resp.status_code != 200:
-        return {}
 
-    lines = resp.body().split("\n")
+    CHUNK_SIZE = 1024 * 1024  # 1MB chunks
+    MAX_CHUNKS = 40  # Support files up to ~40MB
     station_data = {}
+    timestamps = []
+    leftover = ""
 
-    # Parse all station rows
-    # CSV format: point_id;point_type_id;Date;data_value
-    for line in lines[1:]:
-        if not line.strip():
-            continue
+    # Download and process in chunks
+    for chunk_num in range(MAX_CHUNKS):
+        chunk_start = chunk_num * CHUNK_SIZE
+        chunk_end = chunk_start + CHUNK_SIZE - 1
 
-        # Parse CSV line (semicolon-delimited)
-        parts = line.split(CSV_DELIMITER)
+        # Request this chunk with Range header
+        headers = {"Range": "bytes={}-{}".format(chunk_start, chunk_end)}
+        resp = http.get(url, headers = headers, ttl_seconds = 1)
 
-        if len(parts) >= 4:
-            point_id = parts[0]
-            val = parts[3]
+        # Check response - 206 is Partial Content
+        if resp.status_code == 206:
+            # Partial content received - process it
+            chunk_data = resp.body()
 
-            if point_id:
-                # Initialize list for this station if not exists
-                if point_id not in station_data:
-                    station_data[point_id] = []
+            # Combine with leftover from previous chunk
+            data = leftover + chunk_data
 
-                # Append value
-                station_data[point_id].append(float(val) if val and val != "-" else 0)
+            # Split into lines
+            lines = data.split("\n")
 
-    return station_data
+            # Save the last incomplete line for next chunk
+            leftover = lines[-1]
+            lines = lines[:-1]
+
+            # On first chunk, extract and skip header
+            if chunk_num == 0 and len(lines) > 0:
+                # Skip header line
+                lines = lines[1:]
+
+            # Process lines in this chunk
+            for line in lines:
+                if not line.strip():
+                    continue
+
+                parts = line.split(CSV_DELIMITER)
+                if len(parts) >= 4:
+                    point_id = parts[0]
+                    timestamp = parts[2]  # Date column in YYYYMMDDHHMM format
+                    val = parts[3]
+
+                    if point_id:
+                        # Track unique timestamps across all stations
+                        if timestamp and timestamp not in timestamps:
+                            timestamps.append(timestamp)
+
+                        # Store data for this station
+                        if point_id not in station_data:
+                            station_data[point_id] = []
+                        station_data[point_id].append(float(val) if val and val != "-" else 0)
+
+            # Check if we got less than requested (end of file)
+            if len(chunk_data) < CHUNK_SIZE:
+                # Process any remaining leftover
+                if leftover.strip():
+                    parts = leftover.split(CSV_DELIMITER)
+                    if len(parts) >= 4:
+                        point_id = parts[0]
+                        val = parts[3]
+                        if point_id:
+                            if point_id not in station_data:
+                                station_data[point_id] = []
+                            station_data[point_id].append(float(val) if val and val != "-" else 0)
+                break
+        elif resp.status_code == 416:
+            # Range not satisfiable - we've read past the end
+            break
+        else:
+            # Some other error
+            if chunk_num == 0:
+                return {}
+            else:
+                # We got some data, return what we have
+                break
+
+    # Sort timestamps to ensure chronological order
+    timestamps = sorted(timestamps)
+    return {"values": station_data, "timestamps": timestamps}
 
 def process_forecast(weather_data, station):
     """Process MeteoSwiss forecast data into daily forecasts.
@@ -448,11 +595,82 @@ def process_forecast(weather_data, station):
 
     return daily_data
 
-def render_weather(daily_data):
-    """Render weather forecast display (3-day view).
+def process_3hour_forecast(weather_data, station):
+    """Process MeteoSwiss 3-hour forecast data.
 
     Args:
-        daily_data: List of daily forecast dictionaries.
+        weather_data: Dictionary with temperature, symbol, and precipitation data for all stations.
+        station: Station dictionary with metadata.
+
+    Returns:
+        List of 3-hour forecast dictionaries (3 intervals).
+    """
+    forecast_data = []
+
+    # Get station point_id
+    station_point_id = station.get("value", "")
+    if not station_point_id:
+        return forecast_data
+
+    # Extract data for all stations
+    temperature_all = weather_data.get("temperature", {})
+    symbols_all = weather_data.get("symbols", {})
+    precipitation_all = weather_data.get("precipitation", {})
+
+    # Filter for the specific station
+    temperatures = temperature_all.get(station_point_id, [])
+    symbols = symbols_all.get(station_point_id, [])
+    precipitation = precipitation_all.get(station_point_id, [])
+    timestamps = weather_data.get("timestamps", [])
+
+    # Filter timestamps to 3-hour intervals (00, 03, 06, 09, 12, 15, 18, 21)
+    # The data is hourly, so we need to select only 3-hour intervals
+    three_hour_indices = []
+    for idx, ts in enumerate(timestamps):
+        if len(ts) >= 12:
+            hour = int(ts[8:10])
+
+            # Include timestamps at 3-hour intervals
+            if hour % 3 == 0:
+                three_hour_indices.append(idx)
+
+    # Show next 3 forecast intervals from the 3-hour data
+    num_intervals = min(3, len(three_hour_indices))
+    for i in range(num_intervals):
+        idx = three_hour_indices[i]
+
+        # Parse timestamp from CSV (format: YYYYMMDDHHMM)
+        timestamp_str = timestamps[idx]
+        if len(timestamp_str) >= 12:
+            year = int(timestamp_str[0:4])
+            month = int(timestamp_str[4:6])
+            day = int(timestamp_str[6:8])
+            hour = int(timestamp_str[8:10])
+            minute = int(timestamp_str[10:12])
+
+            # Create time object from CSV timestamp
+            forecast_time = time.time(year = year, month = month, day = day, hour = hour, minute = minute, location = "Europe/Zurich")
+
+            symbol_code = int(symbols[idx]) if idx < len(symbols) else 1
+            temp = temperatures[idx] if idx < len(temperatures) else 0
+            precip = precipitation[idx] if idx < len(precipitation) else 0
+
+            forecast_data.append({
+                "temperature": temp,
+                "symbol": symbol_code,
+                "precipitation": precip,
+                "time": forecast_time,
+                "is_3hour": True,
+            })
+
+    return forecast_data
+
+def render_weather(daily_data, forecast_type = "daily"):
+    """Render weather forecast display (3-day or 3-hour view).
+
+    Args:
+        daily_data: List of forecast dictionaries (daily or 3-hour).
+        forecast_type: Type of forecast ("daily" or "3hour").
 
     Returns:
         Rendered display root widget.
@@ -464,22 +682,66 @@ def render_weather(daily_data):
     HEIGHT = 32
 
     columns = []
+    is_3hour = forecast_type == "3hour"
 
     for i, day in enumerate(daily_data):
-        # Get day abbreviation
-        day_abbr = day["date"].format("Mon")[:3].upper()
-        day_abbr = tr(day_abbr)
-
         # Get weather icon using symbol code directly
         symbol_code = day.get("symbol", 1)
         weather_image = WEATHER_IMAGES.get(symbol_code, IMG_ERROR)
         weather_icon_src = weather_image.readall()
 
-        # Create day column
-        day_column = render.Column(
-            expanded = True,
-            main_align = "space_around",
-            cross_align = "center",
+        # Build column children based on forecast type
+        if is_3hour:
+            # 3-hour forecast: show time and temperature
+            time_str = day["time"].format("15:04")
+            temp = int(day.get("temperature", 0))
+            precip = day.get("precipitation", 0)
+
+            # Format precipitation as percentage - always show it
+            precip_str = "%d%%" % int(precip * 100)
+
+            children = [
+                # Weather icon
+                render.Image(
+                    src = weather_icon_src,
+                    width = 12,
+                    height = 12,
+                ),
+                # Time
+                render.Text(
+                    time_str,
+                    font = "CG-pixel-3x5-mono",
+                    color = "#FF0",
+                ),
+                # Temperature with custom degree symbol
+                render.Row(
+                    children = [
+                        render.Text(
+                            "%d" % temp,
+                            font = "CG-pixel-3x5-mono",
+                            color = "#FFF",
+                        ),
+                        render.Padding(
+                            pad = (0, 0, 0, 2),
+                            child = render.Circle(
+                                diameter = 2,
+                                color = "#FFF",
+                            ),
+                        ),
+                    ],
+                ),
+                # Precipitation percentage
+                render.Text(
+                    precip_str,
+                    font = "CG-pixel-3x5-mono",
+                    color = "#08F",
+                ),
+            ]
+        else:
+            # Daily forecast: show day abbreviation and high/low temps
+            day_abbr = day["date"].format("Mon")[:3].upper()
+            day_abbr = tr(day_abbr)
+
             children = [
                 # Weather icon
                 render.Image(
@@ -490,22 +752,51 @@ def render_weather(daily_data):
                 # Day abbreviation
                 render.Text(
                     day_abbr,
-                    font = "CG-pixel-4x5-mono",
+                    font = "CG-pixel-3x5-mono",
                     color = "#FF0",
                 ),
-                # High temp
-                render.Text(
-                    "%d°" % int(day["high"]),
-                    font = "CG-pixel-4x5-mono",
-                    color = "#FFF",
+                render.Row(
+                    children = [
+                        # High temp
+                        render.Text(
+                            "%d°" % int(day["high"]),
+                            font = "CG-pixel-3x5-mono",
+                            color = "#FFF",
+                        ),
+                        render.Padding(
+                            pad = (0, 0, 0, 2),
+                            child = render.Circle(
+                                diameter = 2,
+                                color = "#FFF",
+                            ),
+                        ),
+                    ],
                 ),
                 # Low temp
-                render.Text(
-                    "%d°" % int(day["low"]),
-                    font = "CG-pixel-4x5-mono",
-                    color = "#888",
+                render.Row(
+                    children = [
+                        render.Text(
+                            "%d°" % int(day["low"]),
+                            font = "CG-pixel-3x5-mono",
+                            color = "#888",
+                        ),
+                        render.Padding(
+                            pad = (0, 0, 0, 2),
+                            child = render.Circle(
+                                diameter = 2,
+                                color = "#FFF",
+                            ),
+                        ),
+                    ],
                 ),
-            ],
+            ]
+
+        # Create column
+        day_column = render.Column(
+            expanded = True,
+            main_align = "space_around",
+            cross_align = "center",
+            children = children,
         )
 
         columns.append(day_column)
@@ -586,11 +877,6 @@ def search_station(pattern):
         List of `schema.Option` entries for the typeahead handler. If none are
         found, returns a single option indicating no stations were found.
     """
-
-    # Basic guard to avoid returning too many entries
-    if not pattern or len(pattern) < 1:
-        return []
-
     stations_list = get_stations_list()
     pattern_l = pattern.lower()
 
@@ -631,6 +917,23 @@ def get_schema():
                 desc = "MeteoSwiss location for which to display the weather forecast.",
                 icon = "locationDot",
                 handler = search_station,
+            ),
+            schema.Dropdown(
+                id = "forecast_type",
+                name = "Forecast Type",
+                desc = "Choose between daily forecast (3 days) or 3-hour intervals (9 hours)",
+                icon = "clock",
+                default = "daily",
+                options = [
+                    schema.Option(
+                        display = "Daily (3 days)",
+                        value = "daily",
+                    ),
+                    schema.Option(
+                        display = "3-Hour Intervals (9 hours)",
+                        value = "3hour",
+                    ),
+                ],
             ),
         ],
     )

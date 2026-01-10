@@ -3,6 +3,6 @@ id: meteoschweiz
 name: MeteoSwiss
 summary: MeteoSwiss Weather Forecast
 desc: Weather forecasts from MeteoSwiss for Swiss locations.
-author: Community
+author: LukiLeu
 recommendedInterval: 60
-supports2x: false
+packageName: meteoschweiz
