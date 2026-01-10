@@ -727,8 +727,8 @@ def render_weather(daily_data, forecast_type, scale):
                 # Weather icon
                 render.Image(
                     src = weather_icon_src,
-                    width = 12* scale,
-                    height = 12* scale,
+                    width = 12 * scale,
+                    height = 12 * scale,
                 ),
                 # Time
                 render.Text(
