@@ -1,0 +1,10 @@
+---
+id: githubcontributions
+name: GitHub Contributions
+summary: Displays GitHub Contributions
+desc: Displays your GitHub contributions.
+author: Robert Ison
+fileName: githubcontributions.star
+packageName: githubcontributions
+recommendedInterval: 60
+supports2x: true
