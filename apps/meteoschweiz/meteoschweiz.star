@@ -575,7 +575,7 @@ def fetch_csv_data(url, ttl_seconds = 21600):
     if cached:
         print("Using cached CSV data for URL: {}".format(url))
         return json.decode(cached)
-    
+
     print("Fetching CSV data from URL: {}".format(url))
 
     CHUNK_SIZE = 1024 * 1024  # 1MB chunks
@@ -657,7 +657,7 @@ def fetch_csv_data(url, ttl_seconds = 21600):
             # Some other error
             if chunk_num == 0:
                 return {}
-    
+
     # Cache the result
     cache.set(cache_key, json.encode(station_data), ttl_seconds = ttl_seconds)
     return station_data
@@ -693,12 +693,12 @@ def process_forecast(weather_data, station):
     # Process up to 3 days using timestamps
     for i in range(min(3, len(timestamps))):
         timestamp_key = timestamps[i]
-        
+
         # Get values for this timestamp
         high_val = tre_max.get(timestamp_key, 0)
         low_val = tre_min.get(timestamp_key, 0)
         symbol_code = int(symbols.get(timestamp_key, 1))
-        
+
         # Parse timestamp to create date
         if len(timestamp_key) >= 8:
             year = int(timestamp_key[0:4])
