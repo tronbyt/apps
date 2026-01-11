@@ -446,9 +446,9 @@ def fetch_weather_data():
     tre_max_url = base_url + "vnut12.lssw.{}0000.tre200px.csv".format(date_part)
     symbol_url = base_url + "vnut12.lssw.{}0000.jp2000d0.csv".format(date_part)
 
-    tre_min_data = fetch_csv_data(tre_min_url)
-    tre_max_data = fetch_csv_data(tre_max_url)
-    symbols_data = fetch_csv_data(symbol_url)
+    tre_min_data = fetch_csv_data(tre_min_url, ttl_seconds = 3600)
+    tre_max_data = fetch_csv_data(tre_max_url, ttl_seconds = 3600)
+    symbols_data = fetch_csv_data(symbol_url, ttl_seconds = 3600)
 
     # Ensure we have data and extract values
     if not tre_min_data or not tre_max_data or not symbols_data:
@@ -526,9 +526,9 @@ def fetch_3hour_data():
     symbol_url = base_url + "vnut12.lssw.{}0000.jww003i0.csv".format(date_part)
     precip_url = base_url + "vnut12.lssw.{}0000.rre003i0.csv".format(date_part)
 
-    temperature_data = fetch_csv_data(tre_url)
-    symbols_data = fetch_csv_data(symbol_url)
-    precipitation_data = fetch_csv_data(precip_url)
+    temperature_data = fetch_csv_data(tre_url, ttl_seconds = 600)
+    symbols_data = fetch_csv_data(symbol_url, ttl_seconds = 600)
+    precipitation_data = fetch_csv_data(precip_url, ttl_seconds = 600)
 
     # Ensure we have data with proper structure
     if not temperature_data or not symbols_data or not precipitation_data:
@@ -553,7 +553,7 @@ def fetch_3hour_data():
 
     return weather_data
 
-def fetch_csv_data(url):
+def fetch_csv_data(url, ttl_seconds = 21600):
     """Fetch large CSV data in chunks to avoid caching issues.
 
     Downloads the file in 1MB chunks using HTTP Range requests, processing each
@@ -561,12 +561,22 @@ def fetch_csv_data(url):
 
     Args:
         url: URL to CSV file.
+        ttl_seconds: Cache time-to-live in seconds (default 6 hours).
 
     Returns:
         Dictionary with two keys:
         - 'values': Dict mapping point_id to dict of {timestamp: value} pairs
         - 'timestamps': List of timestamp strings from the CSV (YYYYMMDDHHMM format)
     """
+
+    # Check cache first
+    cache_key = "meteoschweiz_csv_{}".format(url)
+    cached = cache.get(cache_key)
+    if cached:
+        print("Using cached CSV data for URL: {}".format(url))
+        return json.decode(cached)
+    
+    print("Fetching CSV data from URL: {}".format(url))
 
     CHUNK_SIZE = 1024 * 1024  # 1MB chunks
     MAX_CHUNKS = 40  # Support files up to ~40MB
@@ -581,7 +591,7 @@ def fetch_csv_data(url):
 
         # Request this chunk with Range header
         headers = {"Range": "bytes={}-{}".format(chunk_start, chunk_end)}
-        resp = http.get(url, headers = headers, ttl_seconds = 3600)
+        resp = http.get(url, headers = headers, ttl_seconds = 600)
 
         # Check response - 206 is Partial Content
         if resp.status_code == 206:
@@ -647,6 +657,9 @@ def fetch_csv_data(url):
             # Some other error
             if chunk_num == 0:
                 return {}
+    
+    # Cache the result
+    cache.set(cache_key, json.encode(station_data), ttl_seconds = ttl_seconds)
     return station_data
 
 def process_forecast(weather_data, station):
