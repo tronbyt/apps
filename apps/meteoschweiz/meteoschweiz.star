@@ -357,7 +357,7 @@ def get_stations_list():
     # Skip header and parse stations
     # CSV format: point_id;point_type_id;station_abbr;postal_code;point_name;...
     for line in lines[1:]:
-        if not line.strip():
+        if not line:
             continue
 
         # Parse CSV line (semicolon-delimited)
@@ -454,10 +454,17 @@ def fetch_weather_data():
     if not tre_min_data or not tre_max_data or not symbols_data:
         return None
 
+    # Extract unique timestamps from any station data (all should have same timestamps)
+    timestamps = []
+    for station_id in tre_max_data:
+        timestamps = sorted(list(tre_max_data[station_id].keys()))
+        break
+
     weather_data = {
-        "tre_min": tre_min_data.get("values", {}),
-        "tre_max": tre_max_data.get("values", {}),
-        "symbols": symbols_data.get("values", {}),
+        "tre_min": tre_min_data,
+        "tre_max": tre_max_data,
+        "symbols": symbols_data,
+        "timestamps": timestamps,
         "date": date_part,
     }
 
@@ -527,11 +534,17 @@ def fetch_3hour_data():
     if not temperature_data or not symbols_data or not precipitation_data:
         return None
 
+    # Extract unique timestamps from any station data (all should have same timestamps)
+    timestamps = []
+    for station_id in temperature_data:
+        timestamps = sorted(list(temperature_data[station_id].keys()))
+        break
+
     weather_data = {
-        "temperature": temperature_data.get("values", {}),
-        "symbols": symbols_data.get("values", {}),
-        "precipitation": precipitation_data.get("values", {}),
-        "timestamps": temperature_data.get("timestamps", []),
+        "temperature": temperature_data,
+        "symbols": symbols_data,
+        "precipitation": precipitation_data,
+        "timestamps": timestamps,
         "date": date_part,
     }
 
@@ -551,14 +564,14 @@ def fetch_csv_data(url):
 
     Returns:
         Dictionary with two keys:
-        - 'values': Dict mapping point_id to list of values
+        - 'values': Dict mapping point_id to dict of {timestamp: value} pairs
         - 'timestamps': List of timestamp strings from the CSV (YYYYMMDDHHMM format)
     """
 
     CHUNK_SIZE = 1024 * 1024  # 1MB chunks
     MAX_CHUNKS = 40  # Support files up to ~40MB
     station_data = {}
-    timestamps = []
+    timestamps_data = []
     leftover = ""
 
     # Download and process in chunks
@@ -568,7 +581,7 @@ def fetch_csv_data(url):
 
         # Request this chunk with Range header
         headers = {"Range": "bytes={}-{}".format(chunk_start, chunk_end)}
-        resp = http.get(url, headers = headers, ttl_seconds = 1)
+        resp = http.get(url, headers = headers, ttl_seconds = 3600)
 
         # Check response - 206 is Partial Content
         if resp.status_code == 206:
@@ -592,7 +605,7 @@ def fetch_csv_data(url):
 
             # Process lines in this chunk
             for line in lines:
-                if not line.strip():
+                if not line:
                     continue
 
                 parts = line.split(CSV_DELIMITER)
@@ -603,13 +616,13 @@ def fetch_csv_data(url):
 
                     if point_id:
                         # Track unique timestamps across all stations
-                        if timestamp and timestamp not in timestamps:
-                            timestamps.append(timestamp)
+                        if timestamp:
+                            timestamps_data.append(timestamp)
 
-                        # Store data for this station
+                        # Store data for this station with timestamp as key
                         if point_id not in station_data:
-                            station_data[point_id] = []
-                        station_data[point_id].append(float(val) if val and val != "-" else 0)
+                            station_data[point_id] = {}
+                        station_data[point_id][timestamp] = float(val) if val and val != "-" else 0
 
             # Check if we got less than requested (end of file)
             if len(chunk_data) < CHUNK_SIZE:
@@ -621,11 +634,11 @@ def fetch_csv_data(url):
                         timestamp = parts[2]
                         val = parts[3]
                         if point_id:
-                            if timestamp and timestamp not in timestamps:
-                                timestamps.append(timestamp)
+                            if timestamp:
+                                timestamps_data.append(timestamp)
                             if point_id not in station_data:
-                                station_data[point_id] = []
-                            station_data[point_id].append(float(val) if val and val != "-" else 0)
+                                station_data[point_id] = {}
+                            station_data[point_id][timestamp] = float(val) if val and val != "-" else 0
                 break
         elif resp.status_code == 416:
             # Range not satisfiable - we've read past the end
@@ -634,13 +647,7 @@ def fetch_csv_data(url):
             # Some other error
             if chunk_num == 0:
                 return {}
-            else:
-                # We got some data, return what we have
-                break
-
-    # Sort timestamps to ensure chronological order
-    timestamps = sorted(timestamps)
-    return {"values": station_data, "timestamps": timestamps}
+    return station_data
 
 def process_forecast(weather_data, station):
     """Process MeteoSwiss forecast data into daily forecasts.
@@ -663,25 +670,34 @@ def process_forecast(weather_data, station):
     tre_min_all = weather_data.get("tre_min", {})
     tre_max_all = weather_data.get("tre_max", {})
     symbols_all = weather_data.get("symbols", {})
+    timestamps = weather_data.get("timestamps", [])
 
     # Filter for the specific station
-    tre_min = tre_min_all.get(station_point_id, [])
-    tre_max = tre_max_all.get(station_point_id, [])
-    symbols = symbols_all.get(station_point_id, [])
+    tre_min = tre_min_all.get(station_point_id, {})
+    tre_max = tre_max_all.get(station_point_id, {})
+    symbols = symbols_all.get(station_point_id, {})
 
-    # Get current timestamp for date calculations
-    current_timestamp = time.now().unix
-
-    # Process up to 3 days
-    for i in range(min(3, len(tre_max))):
-        # Calculate day time using timestamp arithmetic
-        day_time = time.from_timestamp(current_timestamp + 86400 * i).in_location("Europe/Zurich")
-
-        symbol_code = int(symbols[i]) if i < len(symbols) and symbols[i] else 1
+    # Process up to 3 days using timestamps
+    for i in range(min(3, len(timestamps))):
+        timestamp_key = timestamps[i]
+        
+        # Get values for this timestamp
+        high_val = tre_max.get(timestamp_key, 0)
+        low_val = tre_min.get(timestamp_key, 0)
+        symbol_code = int(symbols.get(timestamp_key, 1))
+        
+        # Parse timestamp to create date
+        if len(timestamp_key) >= 8:
+            year = int(timestamp_key[0:4])
+            month = int(timestamp_key[4:6])
+            day = int(timestamp_key[6:8])
+            day_time = time.time(year = year, month = month, day = day, location = "Europe/Zurich")
+        else:
+            day_time = time.now().in_location("Europe/Zurich")
 
         daily_data.append({
-            "high": tre_max[i] if i < len(tre_max) else 0,
-            "low": tre_min[i] if i < len(tre_min) else 0,
+            "high": high_val,
+            "low": low_val,
             "symbol": symbol_code,
             "date": day_time,
         })
@@ -709,41 +725,38 @@ def process_3hour_forecast(weather_data, station):
     temperature_all = weather_data.get("temperature", {})
     symbols_all = weather_data.get("symbols", {})
     precipitation_all = weather_data.get("precipitation", {})
+    timestamps = weather_data.get("timestamps", [])
 
     # Filter for the specific station
-    temperatures = temperature_all.get(station_point_id, [])
-    symbols = symbols_all.get(station_point_id, [])
-    precipitation = precipitation_all.get(station_point_id, [])
-    timestamps = weather_data.get("timestamps", [])
+    temperatures = temperature_all.get(station_point_id, {})
+    symbols = symbols_all.get(station_point_id, {})
+    precipitation = precipitation_all.get(station_point_id, {})
 
     # Filter timestamps to 3-hour intervals (00, 03, 06, 09, 12, 15, 18, 21)
     # The data is hourly, so we need to select only 3-hour intervals
-    three_hour_indices = []
-    for idx, ts in enumerate(timestamps):
+    three_hour_timestamps = []
+    for ts in timestamps:
         if len(ts) >= 12:
             hour = int(ts[8:10])
 
             # Include timestamps at 3-hour intervals
             if hour % 3 == 0:
-                three_hour_indices.append(idx)
+                three_hour_timestamps.append(ts)
 
     # Show next 3 forecast intervals at/after current local time
     now_str = time.now().in_location("Europe/Zurich").format("200601021504")
 
-    # Find the first index whose timestamp is at or after now
-    start_idx = 0
-    for pos, t_idx in enumerate(three_hour_indices):
-        ts = timestamps[t_idx]
+    # Find the first timestamp that is at or after now
+    start_pos = 0
+    for pos, ts in enumerate(three_hour_timestamps):
         if len(ts) >= 12 and ts >= now_str:
-            start_idx = pos
+            start_pos = pos
             break
 
-    # Collect up to 3 intervals starting from start_idx
-    end_idx = start_idx + 3
-    selected_indices = three_hour_indices[start_idx:end_idx]
-    for idx in selected_indices:
+    # Collect up to 3 intervals starting from start_pos
+    selected_timestamps = three_hour_timestamps[start_pos:start_pos + 3]
+    for timestamp_str in selected_timestamps:
         # Parse timestamp from CSV (format: YYYYMMDDHHMM)
-        timestamp_str = timestamps[idx]
         if len(timestamp_str) >= 12:
             year = int(timestamp_str[0:4])
             month = int(timestamp_str[4:6])
@@ -754,9 +767,9 @@ def process_3hour_forecast(weather_data, station):
             # Create time object from CSV timestamp
             forecast_time = time.time(year = year, month = month, day = day, hour = hour, minute = minute, location = "Europe/Zurich")
 
-            symbol_code = int(symbols[idx]) if idx < len(symbols) else 1
-            temp = temperatures[idx] if idx < len(temperatures) else 0
-            precip = precipitation[idx] if idx < len(precipitation) else 0
+            symbol_code = int(symbols.get(timestamp_str, 1))
+            temp = temperatures.get(timestamp_str, 0)
+            precip = precipitation.get(timestamp_str, 0)
 
             forecast_data.append({
                 "temperature": temp,
