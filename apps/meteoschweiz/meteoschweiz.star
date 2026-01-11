@@ -564,9 +564,7 @@ def fetch_csv_data(url, ttl_seconds = 21600):
         ttl_seconds: Cache time-to-live in seconds (default 6 hours).
 
     Returns:
-        Dictionary mapping point_id to dict of {timestamp: value} pairs
-    """
-
+        A dictionary mapping point_id to a dictionary of {timestamp: value} pairs.
     # Check cache first
     cache_key = "meteoschweiz_csv_{}".format(url)
     cached = cache.get(cache_key)
