@@ -564,9 +564,7 @@ def fetch_csv_data(url, ttl_seconds = 21600):
         ttl_seconds: Cache time-to-live in seconds (default 6 hours).
 
     Returns:
-        Dictionary with two keys:
-        - 'values': Dict mapping point_id to dict of {timestamp: value} pairs
-        - 'timestamps': List of timestamp strings from the CSV (YYYYMMDDHHMM format)
+        Dictionary mapping point_id to dict of {timestamp: value} pairs
     """
 
     # Check cache first
