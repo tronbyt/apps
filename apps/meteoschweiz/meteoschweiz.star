@@ -579,7 +579,6 @@ def fetch_csv_data(url, ttl_seconds = 21600):
     CHUNK_SIZE = 1024 * 1024  # 1MB chunks
     MAX_CHUNKS = 40  # Support files up to ~40MB
     station_data = {}
-    timestamps_data = []
     leftover = ""
 
     # Download and process in chunks
@@ -623,10 +622,6 @@ def fetch_csv_data(url, ttl_seconds = 21600):
                     val = parts[3]
 
                     if point_id:
-                        # Track unique timestamps across all stations
-                        if timestamp:
-                            timestamps_data.append(timestamp)
-
                         # Store data for this station with timestamp as key
                         if point_id not in station_data:
                             station_data[point_id] = {}
@@ -642,8 +637,6 @@ def fetch_csv_data(url, ttl_seconds = 21600):
                         timestamp = parts[2]
                         val = parts[3]
                         if point_id:
-                            if timestamp:
-                                timestamps_data.append(timestamp)
                             if point_id not in station_data:
                                 station_data[point_id] = {}
                             station_data[point_id][timestamp] = float(val) if val and val != "-" else 0
