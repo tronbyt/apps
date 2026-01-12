@@ -14,8 +14,8 @@ load("random.star", "random")
 load("re.star", "re")
 load("render.star", "render")
 
+# length in nucleotides of each chromosome
 CHROMO_LEN = {
-    # length in nucleotides of each chromosome
     "X": 23542271,
     "Y": 3667352,
     "2L": 23513712,
@@ -84,7 +84,7 @@ def render_animation():
     Notes:
         - The animation is split into two halves: the 'gene' part and the 'go' part.
         - The 'gene' half displays the gene names and its locus.
-        - The 'go' half displays the GO term.
+        - The 'GO' half displays the GO term.
     """
 
     short, long, chromosome, locus, go, go_lines = get_gene()
@@ -101,7 +101,7 @@ def render_animation():
 
     go_window_h = DISPLAY_H - HEADER.size()[1] - spacer_h  # height of GO display area
 
-    # Create frames for 'gene' part of the animation
+    # --- gene frames ---
     gene_frame = render.Column(
         main_align = "center",
         cross_align = "center",
@@ -138,14 +138,14 @@ def render_animation():
 
     gene_frames = [gene_frame for x in range(gene_total_frames)]  # assemble 'gene' frames
 
-    # Create frames for 'go' part of the animation
+    # --- GO frames ---
     go_h = go_lines * 6  # height of GO text; 6 = height in pixels of tom-thumb
     go_total_frames = 90 if go_lines == 2 else 105  # GO scrolls at >= 4 lines; this sets default duration values
 
     go_content = go_txt
 
     if go_h > go_window_h:  # if GO text extends past its display area, then animate scrolling
-        go_total_frames = (25 * go_lines)  # 25 = aribitrary number to control scroll speed
+        go_total_frames = (25 * go_lines)  # 25 = arbitrary number to control scroll speed
         offset_start = 15  # allows first row in GO ("involved in") to already be displayed before scrolling up
         go_content = animation.Transformation(
             child = go_txt,
@@ -285,38 +285,38 @@ def format_go(gene_go):
     special_chars = r"\'|\(|\[|\,|\)|\+|\]|\-|\/|\.|\:"  # all non-word chars in all GO terms
     first_pass = []
 
-    for word in gene_go.split():  # break up the GO name word for word
-        if len(word) <= 16:  # 16 = max number of chars per line; if it's short, just add it to the list
+    for word in gene_go.split():  # break up the GO name by word and process each
+        if len(word) <= 16:
             first_pass.append(word)
 
-        elif not re.match(special_chars, word):  # if it's long but doesn't have a special character...
-            first_pass.append(add_hyphens(word))  # ...then send it off to be hyphenated
+        elif not re.match(special_chars, word):
+            first_pass.append(add_hyphens(word))
 
-        else:  # if it's long and with special characters, try and line break at last special character in word
-            split_up = list(word.elems())  # break up word to each char
+        else:  # if word is long and has special characters, try and line break at last special character in word
+            split_up = list(word.elems())
             break_search = []
             idx = -1
 
             for c in split_up:
                 idx += 1
-                if re.match(special_chars, c):  # if there is a special char...
-                    break_search.append(idx)  # ...then record its position in the word
+                if re.match(special_chars, c):
+                    break_search.append(idx)
 
-            group_16 = [p for p in break_search if p >= 0 and p < 16]  # special char locations in first 16 chars
-            group_32 = [p for p in break_search if p >= 16 and p < 32]  # ...in next 16 chars
-            group_48 = [p for p in break_search if p >= 32]  # ...in final 16 chars (no word > 48 chars)
+            group_16 = [p for p in break_search if p >= 0 and p < 16]  # divide by groups of 16
+            group_32 = [p for p in break_search if p >= 16 and p < 32]
+            group_48 = [p for p in break_search if p >= 32]
 
             break_at = []
 
             if group_16:
                 break_at.append(max(group_16) + 1)  # in first 16 chars, find last position of special char
             if group_32:
-                break_at.append(max(group_32) + 1)  # ...in next 16
+                break_at.append(max(group_32) + 1)
             if group_48:
-                break_at.append(max(group_48) + 1)  # ...in final 16
+                break_at.append(max(group_48) + 1)
 
             for i in range(len(break_at)):
-                split_up.insert(break_at[i] + i, "\n")  # insert line break after each determined special char
+                split_up.insert(break_at[i] + i, "\n")
 
             first_pass.append("".join(split_up))  # reassemble word with inserted line breaks
 
@@ -326,41 +326,41 @@ def format_go(gene_go):
     final_text = "involved in\n" + " ".join(second_pass)  # assemble final GO text
 
     # Calculate number of lines GO text will render
-    word_lens = [len(w) for w in second_pass]  # length of each word
-    word_count = len(second_pass)  # how many words
+    word_lens = [len(w) for w in second_pass]
+    word_count = len(second_pass)
     line = []
     i = 0
-    line_count = 1  # start with 1 because each GO always starts w/ "involved in\n"
+    line_count = 1  # start with 1 because each GO always starts with "involved in\n"
 
     for n in word_lens:  # go through each word in GO and get its char length
         if i < word_count - 1:
-            if not line:  # simulate each rendered line
-                line.append(n)  # if we have a new empty line, add length of current word
+            if not line:
+                line.append(n)
             line_len = 0
             for x in line:
-                line_len += x  # get char length of current line
+                line_len += x
             next_word_len = 1 + word_lens[i + 1]  # determine how long next word will be, + 1 for adding space b/w words
-            new_line_len = line_len + next_word_len  # determine length in chars of proposed new line
-            long_new_line = new_line_len > 16  # if it would go off the screen, then the line is too long
+            new_line_len = line_len + next_word_len
+            long_new_line = new_line_len > 16  # if it would go off screen, then the line is too long
 
-            if i + 2 != word_count:  # if word is not final one in GO...
+            if i + 2 != word_count:  # if word is not the last one in GO name
                 i += 1
-                if long_new_line:  # if line is too long, then that line is "done" so increase count and start new line
+                if long_new_line:
                     line_count += 1
                     line.clear()
 
                 else:
-                    line.append(next_word_len)  # if line not too long, go back try adding next word
+                    line.append(next_word_len)
 
-            else:  # if final word in GO...
+            else:  # if final word in GO name
                 i += 1
                 if long_new_line:
-                    line_count += 2  # if line is too long, then adding final word will create 2 new lines
+                    line_count += 2
                 else:
-                    line_count += 1  # otherwise, adding final word will create just 1 new line
+                    line_count += 1
 
-    line_total = max(2, line_count)  # will be at least 2 lines ("invovled in\n" and the single line GO term)
-    
+    line_total = max(2, line_count)  # will be at least 2 lines ("involved in\n" and a single line GO term)
+
     return final_text, line_total
 
 def add_hyphens(word):
@@ -382,16 +382,15 @@ def add_hyphens(word):
 
     return "".join(chars)
 
-# Library of filtered genes.
+# Library of curated genes. CC BY 4.0 frame-shift. See README.md
 #
-# short = short gene name
-# long = full gene name
-# locus = chromosome and nucleotide start position
-# fbgn = FlyBase ID
-# uniprot = best UniProt accession for gene
-# go_id = GO id of top GO term
-# go_name = GO name of top GO term
-
+# short: short gene name
+# long: full gene name
+# locus: chromosome-nucleotide start position
+# fbgn: FlyBase ID
+# uniprot: best UniProt accession for gene
+# go_id: GO ID of top GO term
+# go_name: GO name of top GO term
 GENE_LIBRARY = [
     {"short": "a", "long": "arc", "locus": "2R-22136968", "fbgn": "FBgn0000008", "uniprot": "Q9W283", "go_id": "GO:0048749", "go_name": "compound eye development"},
     {"short": "abd-A", "long": "abdominal A", "locus": "3R-16807214", "fbgn": "FBgn0000014", "uniprot": "P29555", "go_id": "GO:0035053", "go_name": "dorsal vessel heart proper cell fate commitment"},
