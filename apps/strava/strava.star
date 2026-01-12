@@ -26,7 +26,6 @@ load("images/watts_icon.png", WATTS_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 ACHIEVEMENT_ICON = ACHIEVEMENT_ICON_ASSET.readall()
@@ -46,13 +45,23 @@ WATTS_ICON = WATTS_ICON_ASSET.readall()
 
 STRAVA_BASE = "https://www.strava.com/api/v3"
 CLIENT_ID = "79662"
-OAUTH2_CLIENT_SECRET = secret.decrypt("AV6+xWcE+oJPK08TUWRIoZPgneZiZsTciGafVUjbKA7elXuSDBS9h4koiu0kak1WthqS5W/HvXQtBM5kF7k8BMSgyIPNTBNEgep8BwAph7naog0GdcWLGKo2/eoQlXUSSVYtnBGc9EoxSp7soyw6BdMTOQgrnzOips7RKsI92CcSt4wzfQj/QTkSp6IyeA==")
 DEFAULT_UNITS = "imperial"
 DEFAULT_SPORT = "ride"
 DEFAULT_SCREEN = "all"
 
+# Strava Info
+STRAVA_CLIENT_ID = "strava_client_id"
+STRAVA_CLIENT_SECRET = "strava_client_secret"
+STRAVA_REFRESH_TOKEN = "strava_refresh_token"
+STRAVA_ACCESS_TOKEN = "strava_access_token"
+STRAVA_EXPIRES_AT = "strava_expires_at"
+
 RATE_LIMIT_DEFAULT_BACKOFF_SECONDS = 15 * 60
 RATE_LIMIT_CACHE_KEY = "rate-limit-backoff"
+
+CACHE_VERSION = "v2"  # bump if Strava semantics ever change
+
+STAT_KEYS = ["count", "distance", "moving_time", "elapsed_time", "elevation_gain"]
 
 PREVIEW_DATA = {
     "count": 1408,
@@ -65,15 +74,30 @@ PREVIEW_DATA = {
 CACHE_TTL = 60 * 60 * 18  # updates once every 36 hours
 
 def main(config):
-    refresh_token = config.get("auth")
+    client_id = config.get(STRAVA_CLIENT_ID)
+    client_secret = config.get(STRAVA_CLIENT_SECRET)
+    refresh_token = config.get(STRAVA_REFRESH_TOKEN)
+    access_token = cache.get(STRAVA_ACCESS_TOKEN)
+    expires_at = cache.get(STRAVA_EXPIRES_AT)
+
     sport = config.get("sport", DEFAULT_SPORT)
     units = config.get("units", DEFAULT_UNITS)
     display_type = config.get("display_type", DEFAULT_SCREEN)
 
-    if refresh_token and is_rate_limited():
-        # logged-in user but we have been rate-limited by Strava. can't render anything
-        # until the backoff expires.
-        return []
+    now = time.now().unix
+    if not access_token or not expires_at or now >= int(float(expires_at)):
+        if not client_id or not client_secret or not refresh_token:
+            return display_failure("Strava tokens not configured.")
+
+        print("Access token missing or expired, refreshing...")
+        tokens = refresh_strava_token(client_id, client_secret, refresh_token)
+        access_token = tokens.get("access_token")
+        refresh_token = tokens.get("refresh_token")
+        expires_at = tokens.get("expires_at")
+
+        cache.set(STRAVA_ACCESS_TOKEN, access_token, ttl_seconds = CACHE_TTL)
+        cache.set(STRAVA_REFRESH_TOKEN, refresh_token, ttl_seconds = CACHE_TTL)
+        cache.set(STRAVA_EXPIRES_AT, str(expires_at), ttl_seconds = CACHE_TTL)
 
     if display_type in ("ytd", "all"):
         return athlete_stats(config, refresh_token, display_type, sport, units)
@@ -84,6 +108,33 @@ def main(config):
     else:
         print("Display type %s was invalid, showing the %s screen instead." % (display_type, DEFAULT_SCREEN))
         return athlete_stats(config, refresh_token, DEFAULT_SCREEN, sport, units)
+
+def refresh_strava_token(client_id, client_secret, refresh_token):
+    """
+    Refresh Strava access token using refresh_token + client_id + client_secret
+    Returns dict with access_token, refresh_token, expires_at
+    """
+    payload = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+
+    rep = http.post(
+        "https://www.strava.com/api/v3/oauth/token",
+        headers = {
+            "Accept": "application/json",
+        },
+        form_body = payload,  # Pass dict directly
+    )
+
+    if rep.status_code != 200:
+        fail("Token refresh failed: %d - %s" % (rep.status_code, rep.body()))
+
+    tokens = rep.json()
+
+    return tokens
 
 def progress_chart(config, refresh_token, sport, units):
     show_logo = config.bool("show_logo", True)
@@ -124,7 +175,6 @@ def progress_chart(config, refresh_token, sport, units):
                 for k in stat_keys
             })
             included_current_activities.append(activity_stats)
-            print(activity_stats)
         else:
             print("Found non-%s activity (%s), skipping" % (sport, item["type"]))
 
@@ -143,7 +193,6 @@ def progress_chart(config, refresh_token, sport, units):
                 for k in stat_keys
             })
             included_previous_activities.append(activity_stats)
-            print(activity_stats)
         else:
             print("Found non-%s activity (%s), skipping" % (sport, item["type"]))
 
@@ -334,57 +383,51 @@ def athlete_stats(config, refresh_token, period, sport, units):
     year = time.now().in_location(timezone).year
 
     if not refresh_token:
-        stats = ["count", "distance", "moving_time", "elapsed_time", "elevation_gain"]
-        stats = {k: PREVIEW_DATA[k] for k in stats}
+        stats = {k: PREVIEW_DATA[k] for k in STAT_KEYS}
     else:
-        access_token = cache.get(refresh_token)
+        cached_token = cache.get(refresh_token)
+        access_token = json.decode(cached_token) if cached_token else None
+
         if not access_token:
-            print("Generating new access token")
-            access_token = get_access_token(refresh_token)
+            access_token = get_access_token(
+                refresh_token,
+                config.get(STRAVA_CLIENT_ID),
+                config.get(STRAVA_CLIENT_SECRET),
+            )
 
         headers = {
             "Authorization": "Bearer %s" % access_token,
         }
 
-        cache_prefix = "%s/%s/%s/" % (refresh_token, sport, period)
+        cached_athlete = cache.get("%s/athlete_id" % refresh_token)
+        athlete = int(float(json.decode(cached_athlete))) if cached_athlete else None
 
-        # Get logged in athlete
-        athlete = cache.get("%s/athlete_id" % refresh_token)
         if not athlete:
-            print("Getting athlete ID from API, access_token was cached.")
             url = "%s/athlete" % STRAVA_BASE
             response = http_get(url, headers = headers)
-
             if response.status_code != 200:
-                text = "code %d, %s" % (response.status_code, json.decode(response.body()).get("message", ""))
-                return display_failure("Strava API failed, %s" % text)
+                return display_failure("Strava API failed")
 
-            data = response.json()
-            athlete = int(float(data["id"]))
+            athlete = int(float(response.json()["id"]))
+            cache.set(
+                "%s/athlete_id" % refresh_token,
+                json.encode(str(athlete)),
+                ttl_seconds = CACHE_TTL,
+            )
 
-            cache.set("%s/athlete_id" % refresh_token, str(athlete), ttl_seconds = CACHE_TTL)
+        stats = fetch_athlete_stats(
+            refresh_token,
+            headers,
+            athlete,
+            sport,
+            period,
+        )
 
-        stats = ["count", "distance", "moving_time", "elapsed_time", "elevation_gain"]
-        stats = {k: cache.get(cache_prefix + k) for k in stats}
+        if not stats:
+            return display_failure("Failed to load athlete stats")
 
-        if None not in stats.values():
-            print("Displaying cached data.")
-        else:
-            url = "%s/athletes/%s/stats" % (STRAVA_BASE, athlete)
-            print("Calling Strava API: " + url)
-            response = http_get(url, headers = headers, ttl_seconds = CACHE_TTL)
-
-            if response.status_code != 200:
-                text = "code %d, %s" % (response.status_code, json.decode(response.body()).get("message", ""))
-                return display_failure("Strava API failed, %s" % text)
-
-            data = response.json()
-
-            for per in ("ytd", "all"):
-                for sport_code in ("ride", "run", "swim"):
-                    for item in stats.keys():
-                        if sport_code == sport:
-                            stats[item] = data["%s_%s_totals" % (per, sport_code)][item]
+    if not stats:
+        return display_failure("Failed to load athlete stats")
 
     # Configure the display to the user's preferences
     elevu = "m"
@@ -397,11 +440,13 @@ def athlete_stats(config, refresh_token, period, sport, units):
             distu = "mi"
             elevu = "ft"
         stats["elevation_gain"] = round(meters_to_ft(float(stats["elevation_gain"])), 0)
-    elif sport != "swim":
-        stats["distance"] = round(meters_to_km(float(stats["distance"])), 0)
-        distu = "km"
-    else:
-        distu = "m"
+    else:  # metric
+        if sport != "swim":
+            stats["distance"] = round(meters_to_km(float(stats["distance"])), 1)  # keep 1 decimal for km
+        else:
+            stats["distance"] = round(float(stats["distance"]), 0)
+        distu = "km" if sport != "swim" else "m"
+        stats["elevation_gain"] = round(float(stats.get("elevation_gain", 0)), 0)  # round meters
 
     if sport == "all":
         if int(float(stats["count"])) != 1:
@@ -867,9 +912,11 @@ def get_activities(config, refresh_token):
         }
     else:
         access_token = cache.get(refresh_token)
+        access_token = json.decode(access_token) if access_token else None
+
         if not access_token:
             print("Generating new access token")
-            access_token = get_access_token(refresh_token)
+            access_token = get_access_token(refresh_token, config.get(STRAVA_CLIENT_ID), config.get(STRAVA_CLIENT_SECRET))
 
         headers = {
             "Authorization": "Bearer %s" % access_token,
@@ -955,14 +1002,14 @@ def decode_polyline(polyline_str):
 def kj_to_calories(kj):
     return float(kj) / 4.184
 
-def meters_to_mi(m):
-    return m * 0.00062137
+def meters_to_mi(m, precision = 2):
+    return round(m * 0.00062137, precision)
 
-def meters_to_km(m):
-    return m // 1000
+def meters_to_ft(m, precision = 0):
+    return round(m * 3.280839895, precision)
 
-def meters_to_ft(m):
-    return m * 3.280839895
+def meters_to_km(m, precision = 2):
+    return round(m / 1000.0, precision)
 
 def round(num, precision):
     return math.round(num * math.pow(10, precision)) / math.pow(10, precision)
@@ -987,69 +1034,6 @@ def format_duration(d, resolution = "minutes"):
     else:
         # Should never get here.
         return ""
-
-def oauth_handler(params):
-    params = json.decode(params)
-    auth_code = params.get("code")
-    return get_refresh_token(auth_code)
-
-def get_refresh_token(auth_code):
-    params = dict(
-        code = auth_code,
-        client_secret = OAUTH2_CLIENT_SECRET,
-        grant_type = "authorization_code",
-        client_id = CLIENT_ID,
-    )
-
-    res = http.post(
-        url = "https://www.strava.com/api/v3/oauth/token",
-        headers = {
-            "Accept": "application/json",
-        },
-        params = params,
-        form_encoding = "application/x-www-form-urlencoded",
-    )
-    if res.status_code != 200:
-        fail("token request failed with status code: %d - %s" %
-             (res.status_code, res.body()))
-
-    token_params = res.json()
-    refresh_token = token_params["refresh_token"]
-    access_token = token_params["access_token"]
-    athlete = int(float(token_params["athlete"]["id"]))
-
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
-
-    cache.set("%s/athlete_id" % refresh_token, str(athlete), ttl_seconds = CACHE_TTL)
-
-    return refresh_token
-
-def get_access_token(refresh_token):
-    params = dict(
-        refresh_token = refresh_token,
-        client_secret = OAUTH2_CLIENT_SECRET,
-        grant_type = "refresh_token",
-        client_id = CLIENT_ID,
-    )
-
-    res = http.post(
-        url = "https://www.strava.com/api/v3/oauth/token",
-        headers = {
-            "Accept": "application/json",
-        },
-        params = params,
-        form_encoding = "application/x-www-form-urlencoded",
-    )
-    if res.status_code != 200:
-        fail("token request failed with status code: %d - %s" %
-             (res.status_code, res.body()))
-
-    token_params = res.json()
-    access_token = token_params["access_token"]
-
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
-
-    return access_token
 
 def display_failure(msg):
     return render.Root(
@@ -1084,6 +1068,81 @@ def http_get(url, headers = None, ttl_seconds = 0):
 
     return res
 
+def fetch_athlete_stats(refresh_token, headers, athlete, sport, period):
+    cache_prefix = "{}/{}/{}/{}/".format(
+        CACHE_VERSION,
+        refresh_token,
+        sport,
+        period,
+    )
+
+    stats = {}
+    missing = False
+
+    for k in STAT_KEYS:
+        v = cache.get(cache_prefix + k)
+        if v == None:
+            missing = True
+            break
+        stats[k] = json.decode(v)
+
+    if not missing:
+        return stats
+
+    resp = http_get(
+        "%s/athletes/%s/stats" % (STRAVA_BASE, athlete),
+        headers = headers,
+        ttl_seconds = CACHE_TTL,
+    )
+
+    if resp.status_code != 200:
+        return None
+
+    data = resp.json()
+    totals_key = "%s_%s_totals" % (
+        "ytd" if period == "ytd" else "all",
+        sport,
+    )
+
+    for k in STAT_KEYS:
+        value = data[totals_key][k]
+        stats[k] = value
+        cache.set(
+            cache_prefix + k,
+            json.encode(value),
+            ttl_seconds = CACHE_TTL,
+        )
+
+    return stats
+
+def get_access_token(refresh_token, client_id, client_secret):
+    params = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+
+    res = http.post(
+        url = "https://www.strava.com/api/v3/oauth/token",
+        headers = {"Accept": "application/json"},
+        form_body = params,  # dict, not string
+    )
+
+    if res.status_code != 200:
+        fail("Token refresh failed: %d - %s" % (res.status_code, res.body()))
+
+    token_data = res.json()
+    new_access_token = token_data["access_token"]
+
+    cache.set(
+        refresh_token,
+        json.encode(new_access_token),
+        ttl_seconds = int(token_data["expires_in"] - 30),
+    )
+
+    return new_access_token
+
 def get_schema():
     units_options = [
         schema.Option(value = "imperial", display = "Imperial (US)"),
@@ -1106,17 +1165,29 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.OAuth2(
-                id = "auth",
-                name = "Strava Login",
+            schema.Text(
+                id = "strava_refresh_token",
+                name = "Strava Refresh Token",
                 desc = "Connect to your Strava account",
                 icon = "user",
-                client_id = str(CLIENT_ID),
-                handler = oauth_handler,
-                authorization_endpoint = "https://www.strava.com/oauth/authorize",
-                scopes = [
-                    "read,activity:read",
-                ],
+                secret = True,
+                default = "",
+            ),
+            schema.Text(
+                id = "strava_client_id",
+                name = "Strava Client ID",
+                desc = "Connect to your Strava account",
+                icon = "user",
+                secret = True,
+                default = "",
+            ),
+            schema.Text(
+                id = "strava_client_secret",
+                name = "Strava Client Secret",
+                desc = "Connect to your Strava account",
+                icon = "user",
+                secret = True,
+                default = "",
             ),
             schema.Dropdown(
                 id = "sport",

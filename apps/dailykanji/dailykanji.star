@@ -9,156 +9,237 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+# Sample fallback kanji data
 KANJI_SAMPLE_DATA = """
-{"character": "辛", "meaning": {"english": "pungent, hard, spicy"}, "strokes": {"count": 7.0, "timings": [0.0, 0.533333, 2.0, 2.733333, 3.533333, 5.066667, 5.933333, 8.466667], "images": ["https://media.kanjialive.com/kanji_strokes/kara(i)_1.svg", "https://media.kanjialive.com/kanji_strokes/kara(i)_2.svg", "https://media.kanjialive.com/kanji_strokes/kara(i)_3.svg", "https://media.kanjialive.com/kanji_strokes/kara(i)_4.svg", "https://media.kanjialive.com/kanji_strokes/kara(i)_5.svg", "https://media.kanjialive.com/kanji_strokes/kara(i)_6.svg", "https://media.kanjialive.com/kanji_strokes/kara(i)_7.svg"]}, "onyomi": {"romaji": "shin", "katakana": "シン"}, "kunyomi": {"romaji": "kara, karai, karasa", "hiragana": "から"}, "video": {"webm": "https://media.kanjialive.com/kanji_animations/kanji_webm/kara(i)_00.webm", "poster": "https://media.kanjialive.com/kanji_strokes/kara(i)_7.svg", "mp4": "https://media.kanjialive.com/kanji_animations/kanji_mp4/kara(i)_00.mp4"}}
+{"character": "辛", "meaning": {"english": "pungent, hard, spicy"}, "onyomi": {"romaji": "shin"}, "kunyomi": {"romaji": "kara, karai, karasa"}}
 """
+
+# URLs
 KANJI_IMAGE_LOOKUP_URL = "https://assets.imgix.net/~text?w=150&h=150&txt-size=75&txt-color=ff0&txt-align=left&txt-font=Arial&txt64="
-KANJI_API_URL = "https://kanjiapi.dev/v1/kanji/%s"
-KANJI_ALIVE_URL = "https://kanjialive-api.p.rapidapi.com/api/public/kanji/%s"
-CACHED_KANJI_NAME = "DailyKanji_Cached_Item12"
-CACHED_KANJI_CHARACTER = "DailyKanji_Cached_Image12"
-KANJI_TTL = 60 * 60 * 2  # updates every 2 hours
-KANJI_IMAGE_LIST = "国 日 事 人 一 見 本 子 出 年 大 言 学 分 中 記 会 新 月 時 行 気 報 思 上 語 自 者 生 文 明 情 朝 用 書 私 手 間 小 合 方 社 検 目 前 入 関 作 特 何 女 今 体 動 集 発 最 内 投 下 知 地 場 別 話 部 化 告 法 広 来 田 理 物 開 全 説 聞 表 連 無 対 的 高 教 感 心 以 成 名 業 長 家 定 実 山 近 現 後 金 覧 男 画 性 度 数 立 彼 問 二 意 能 個 僕 通 面 回 代 木 利 経 使 車 編 同 平 音 読 少 食 道 世 結 力 楽 真 品 考 公 野 込 所 不 当 取 在 電 愛 外 返 仕 版 際 変 示 親 治 政 島 権 解 他 先 川 三 口 機 風 東 市 付 持 式 加 界 要 信 多 更 活 選 題 屋 論 済 有 身 線 味 著 顔 売 空 続 第 様 海 始 校 英 勝 母 次 点 正 科 京 術 転 録 初 葉 相 約 終 育 住 白 等 声 字 決 登 北 案 天 産 切 都 格 主 県 資 十 元 戦 想 原 指 円 店 死 容 流 過 保 町 足 介 料 安 着 健 調 芸 違 研 古 参 番 館 受 歩 値 歴 笑 引 形 村 然 果 和 究 重 西 議 直 確 強 注 組 良 辞 好 試 可 水 必 送 万 止 帰 典 再 門 写 神 供 紹 運 設 宮 色 推 期 員 映 球 技 落 放 紀 計 予 達 図 支 追 張 去 応 康 夜 民 光 父 工 頭 配 進 験 号 段 囲 宇 由 企 米 細 商 太 置 待 早 右 念 友 断 半 害 帯 像 票 提 覚 件 得 展 悪 室 福 起 乗 制 交 病 各 質 千 構 限 優 残 院 週 詩 星 横 基 規 完 伝 募 総 宙 氏 職 詳 旅 買 位 史 青 将 条 博 単 順 存 突 毎 夫 歌 五 飛 深 誰 座 談 務 婚 演 頼 価 戸 消 評 例 義 常 板 視 左 医 統 坂 団 台 静 申 素 香 域 四 観 陽 首 局 石 戻 認 識 興 呼 類 速 状 製 係 馬 共 護 並 降 君 路 雨 省 求 沢 百 側 土 離 反 曜 種 紙 象 助 頃 飲 望 散 財 判 難 秋 曲 姿 舞 師 疑 境 探 満 純 谷 了 清 程 花 答 火 南 背 駅 器 補 夢 材 差 標 園 両 命 障 禁 黒 建 営 森 根 協 冷 走 折 量 端 居 任 若 造 負 松 橋 区 型 依 街 故 管 抜 司 士 態 押 印 幸 改 独 系 整 息 衛 宅 習 移 犬 株 訳 殺 犯 兄 急 寄 収 休 堂 割 志 兵 忘 赤 打 影 州 階 樹 修 六 客 察 夏 雑 歳 処 緒 絡 罪 照 浮 軽 窓 含 弱 換 準 異 賞 嫌 希 苦 酒 査 刊 欲 池 般 宗 失 未 渡 役 景 列 草 破 針 周 接 城 林 八 販 寝 熱 我 便 証 導 角 具 願 至 遠 片 老 末 責 途 挙 族 専 絵 響 波 絶 茶 暮 盗 授 貴 悩 遊 効 普 杯 王 策 簡 焼 宝 遅 療 鉄 乳 与 算 玉 逃 府 創 働 増 復 余 児 競 抱 装 恋 央 越 久 賀 九 暗 謝 里 眠 非 似 冬 激 極 替 春 薬 痛 留 警 血 巨 払 比 席 備 防 章 脳 費 刷 誤 災 複 触 辺 幅 薄 猫 税 低 布 争 精 誌 髪 節 勢 許 昨 庫 銀 涼 傷 徳 鹿 億 御 除 筋 胸 倒 裁 洋 講 源 領 倉 鳥 札 群 採 妻 裏 刻 派 険 夕 怪 閉 娘 適 互 岩 震 積 占 富 亡 眼 皆 雪 壊 武 捕 模 帳 守 掛 仲 枚 困 避 耳 労 隣 七 測 陸 勉 煙 砂 慣 奥 肉 述 概 勤 恐 射 吹 宿 況 服 課 午 短 鳴 殿 聖 舎 昔 借 従 籍 孝 密 率 築 束 庭 温 担 祭 驚 則 混 昼 超 略 遺 己 矢 腕 婦 牧 巻 届 飯 劇 幕 底 華 衆 竹 哲 伸 脱 泣 趣 腹 筆 昇 敗 候 減 悟 怖 乱 晴 軍 額 就 迷 船 諸 肩 騒 疲 悲 級 港 賃 吸 床 律 永 丸 包 納 爆 党 退 否 羽 植 燃 骨 河 刺 牛 雲 仁 令 描 魚 徒 輪 喜 功 盛 迎 豊 庁 卒 弾 姉 層 固 礼 官 委 寒 腰 怒 毛 紅 操 涙 因 桜 快 給 袋 坊 弁 革 虫 衣 染 荒 幾 童 幼 敵 充 詰 曇 跡 皮 捨 訪 逆 荷 液 練 織 勇 臨 蔵 攻 承 停 農 礎 属 討 抗 弟 季 叫 績 才 沈 券 免 湯 鼻 泉 厚 厳 救 欠 圧 油 看 幹 輸 勧 範 誕 秘 危 漢 易 灯 埋 鏡 句 邪 靴 善 丁 洗 患 汗 泊 枝 倍 署 到 貨 傾 益 箱 黄 寺 栄 頂 欧 仏 仮 狭 均 副 肌 昭 踊 干 喫 奏 齢 詞 宣 閣 損 濃 雇 隊 暇 辛 拡 浴 冗 郵 養 柱 甘 銭 狂 恥 乾 緊 較 汚 臓 歯 郡 誠 菜 冊 岸 旧 晩 航 郷 延 控 凍 憲 暴 緑 焦 柔 祈 机 暖 隅 暑 捜 豆 双 咲 祖 縮 貸 祝 漁 努 賢 贈 舌 塗 浅 卓 抑 缶 湾 序 湖 偶 穴 招 忙 抵 貯 批 即 皇 翌 羊 毒 臣 堅 脈 械 潮 姓 妹 酸 匹 墓 秒 粒 駐 敬 灰 潔 皿 揮 忠 預 珍 沿 畳 憎 奮 唱 輩 挟 畑 縦 渉 拝 賛 糖 伏 奨 訓 貿 芝 湿 貧 刀 俳 硬 飼 氷 糸 棒 鋭 弓 拾 飽 軒 軟 粉 往 塔 封 掃 炭 冒 泳 零 磁 鈍 泥 盟 誇 磨 鉱 胃 偉 兆 掘 朗 垂 絹 偏 筒 旗 菓 稲 征 乏 蒸 脂 尊 溶 膚 枯 沸 帽 恩 寮 符 寸 郊 肥 孫 豚 塩 燥 濯 肺 熟 辱 滴 伺 卵 梅 舟 麦 芽 敢 巣 穫 銅 班"
+KANJI_ALIVE_URL = "https://kanjialive-api.p.rapidapi.com/api/public/kanji/{}"
 
-def main(config):
-    kanji_data = cache.get(CACHED_KANJI_NAME)
-    kanji_image_src = cache.get(CACHED_KANJI_CHARACTER)
-    kanji_alive_key = config.str("api_key", "")
+# Cache
+CACHE_PREFIX = "DailyKanji:v1:"
+KANJI_TTL = 60 * 60 * 2  # 2 hours
 
-    # The dev_api_key will return a valid key for the automated checks, even if it doesn't work locally.
+# Kanji grouped by JLPT level (expandable)
+KANJI_BY_LEVEL = {
+    5: ["国", "日", "事", "人", "一", "見", "本", "子", "出", "年", "大", "言", "学", "分", "中", "記", "会", "新", "月", "時", "力", "気", "上", "下", "私", "二", "三", "四", "五", "六", "七", "八", "九", "十"],
+    4: ["朝", "用", "書", "手", "間", "合", "方", "社", "検", "目", "関", "作", "特", "何", "体", "動", "集", "発", "最", "内", "法", "広", "来", "田", "理", "物", "開"],
+    3: ["意", "能", "個", "僕", "通", "面", "回", "代", "利", "経", "使", "車", "編", "同", "平", "音", "読", "少", "食", "道", "世", "結", "真", "考", "公", "野"],
+    2: ["信", "多", "更", "活", "選", "題", "屋", "論", "済", "有", "身", "線", "味", "著", "顔", "売", "空", "続", "第", "様", "海", "始", "校", "英", "勝"],
+    1: ["想", "原", "指", "円", "店", "死", "容", "流", "過", "保", "町", "足", "介", "料", "安", "着", "健", "調", "芸", "違", "研", "古", "参", "番", "館"],
+}
 
-    if kanji_data == None:
-        #pick a random kanji from our data of kanji and image data
-        random_kanji = get_random_kanji(KANJI_IMAGE_LIST)
+# Map dropdown values to JLPT numbers
+LEVEL_TO_JLPT = {
+    "beginner": 5,
+    "elementary": 4,
+    "intermediate": 3,
+    "advanced": 2,
+    "expert": 1,
+}
 
-        #use the api to get the meaning, and the two readings (onyomi and kunyomi)
-        if kanji_alive_key:
-            kanji_data = get_kanji_information(random_kanji, kanji_alive_key)
+def get_allowed_kanji(max_jlpt_level):
+    """
+    Return all kanji for selected level and easier levels.
+    """
+    allowed = []
+    for level, kanji_list in KANJI_BY_LEVEL.items():
+        if level >= max_jlpt_level:
+            allowed.extend(kanji_list)
+    return allowed
 
-        if kanji_data and "kanji" in kanji_data:
-            #we really don't need but one section of this, so we'll just use and store this part in cache
-            #hey why not do something if its a little more efficient, even if it will never be noticed by anyone
-            kanji_data = kanji_data["kanji"]
-        else:
-            kanji_data = json.decode(KANJI_SAMPLE_DATA)
+def get_random_kanji(allowed_kanji, max_jlpt_level):
+    """
+    Get a pseudo-random kanji based on the date. This ensures the same
+    kanji is shown for the entire day for all users with the same settings,
+    which is ideal for caching.
+    """
+    if not allowed_kanji:
+        return "日"
 
-        #Create Image for the selected Kanji
-        kanji_image_url = KANJI_IMAGE_LOOKUP_URL + base64.encode(kanji_data["character"])
-        kanji_image_src = http.get(kanji_image_url).body()
-
-        #lets cache this so there is only one call per TTL across all tidbyt's
-        cache.set(CACHED_KANJI_NAME, json.encode(kanji_data), ttl_seconds = KANJI_TTL)
-
-        cache.set(CACHED_KANJI_CHARACTER, kanji_image_src, ttl_seconds = KANJI_TTL)
-    else:
-        #We have the data in cache, let's use it
-        print("Getting from cache")
-        kanji_data = json.decode(kanji_data)
-        kanji_image_src = kanji_image_src
-
-    #Display 3 rows of Text
-    #row1 will store the meaning of the character in English
-    row1 = kanji_data["meaning"]["english"]
-
-    #Japanese language was originally spoken only, the Chinese introduced written characters
-    #So Japanese learned these characters and pronounced them like the Chinese did
-    #But they also would associate these chinese written words with the Japanese spoken language
-
-    #row2 will store the onyomi or native Chinese pronunciation if it's used for this kanji
-    row2 = kanji_data["onyomi"]["romaji"]
-    if row2 == "n/a":
-        row2 = ""
-
-    #row3 will store the kunyomi or Japanese pronunciation it it's used for this kanji
-    row3 = kanji_data["kunyomi"]["romaji"]
-    if row3 == "n/a":
-        row3 = ""
-
-    display_items = []
-    display_items.append(add_padding_to_child_element(render.Image(height = 65, width = 65, src = kanji_image_src), -5, -13))
-    display_items.append(add_padding_to_child_element(render.Marquee(width = 32, child = render.Text(row1, color = "#65d0e6", font = "6x13")), 32, -2))
-    display_items.append(add_padding_to_child_element(render.Marquee(width = 32, child = render.Text(row2, color = "#f4a306", font = "6x13")), 32, 9))
-    display_items.append(add_padding_to_child_element(render.Marquee(width = 32, child = render.Text(row3, color = "#e77c05", font = "6x13")), 32, 19))
-
-    return render.Root(
-        render.Stack(
-            children = display_items,
-        ),
-        show_full_animation = True,
-    )
-
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
-        pad = (left, top, right, bottom),
-        child = element,
-    )
-    return padded_element
-
-def get_random_kanji(KANJI_IMAGE_LIST):
-    kanji_images = KANJI_IMAGE_LIST.split(" ")
-    random_number = random(0, len(kanji_images))
-    i = 0
-    for item in kanji_images:
-        if random_number == i:
-            return item
-        i = i + 1
-
-    # Should never get here.
-    return kanji_images[0]
-
-def random(min, max):
     now = time.now()
-    rand = int(str(now.nanosecond)[-6:-3]) / 1000
-    return int(rand * (max - min) + min)
+    y = now.year
+    m = now.month
+    d = now.day
+    seed = y * 10000 + m * 100 + d + max_jlpt_level
 
-def display_kanji_with_image_url(individual_kanji, kanji_alive_key):
-    i = 0
-    for kanjicharacter in individual_kanji:
-        i = i + 1
-        url = KANJI_API_URL % kanjicharacter
-        kanji_http = http.get(url)
-        kanji_data = kanji_http.json()
-        print(i)
-        kanji_image_json = get_kanji_information(kanji_data["kanji"], kanji_alive_key)
-        if "kanji" not in kanji_image_json:
-            print("%s %s" % (kanjicharacter, i))
+    # Lightweight integer hash (xorshift-style) to create a pseudo-random number
+    x = seed
+    x ^= x << 13
+    x ^= x >> 17
+    x ^= x << 5
 
-#unused for now, but if we want to refactor later and get the image
-#and convert, we could do that instead of storing all that base64 stuff in the file here
-def get_kanji_image(image_url):
-    return http.get(image_url).body()
+    # Use the hash to pick an index within the bounds of the allowed_kanji list
+    idx = x % len(allowed_kanji)
+    return allowed_kanji[idx]
 
-#Using the kanjialive api to get information on a particular kanji character
-def get_kanji_information(selected_kanji, kanji_alive_key):
+def get_kanji_information(selected_kanji, api_key):
+    """
+    Fetch kanji info from KanjiAlive API. Returns None if fails.
+    """
     res = http.get(
-        url = KANJI_ALIVE_URL % selected_kanji,
+        url = KANJI_ALIVE_URL.format(selected_kanji),
         headers = {
             "X-RapidAPI-Host": "kanjialive-api.p.rapidapi.com",
-            "X-RapidAPI-Key": kanji_alive_key,
+            "X-RapidAPI-Key": api_key,
         },
     )
-
-    if res.status_code == 200:
-        return res.json()
-    else:
-        print("Error")
+    if res.status_code != 200:
         return None
+    data = res.json()
+    if not data or "kanji" not in data:
+        return None
+    return data["kanji"]
+
+def add_padding(element, left = 0, top = 0, right = 0, bottom = 0):
+    return render.Padding(pad = (left, top, right, bottom), child = element)
+
+def main(config):
+    SCREEN_WIDTH = canvas.width()
+
+    if canvas.is2x():
+        FONT = "6x10-rounded"
+        FONT_HEIGHT = 10
+        V_SPACING = 1
+    else:
+        FONT = "5x8"
+        FONT_HEIGHT = 8
+        V_SPACING = 2
+
+    api_key = config.get("api_key", "")
+    selected_level = config.get("max_level", "beginner")
+    max_jlpt = LEVEL_TO_JLPT.get(selected_level, 5)
+
+    # Cache keys per level
+    cache_key_data = CACHE_PREFIX + "data:" + str(max_jlpt)
+    cache_key_image = CACHE_PREFIX + "image:" + str(max_jlpt)
+
+    # Load cache
+    kanji_data_obj = None
+    kanji_image_src = cache.get(cache_key_image)
+    cached_data = cache.get(cache_key_data)
+    if cached_data:
+        kanji_data_obj = json.decode(cached_data)
+
+    if kanji_data_obj == None:
+        # Pick kanji from allowed levels
+        allowed_kanji = get_allowed_kanji(max_jlpt)
+        kanji_char = get_random_kanji(allowed_kanji, max_jlpt)
+
+        # Try KanjiAlive API
+        api_data = None
+        if api_key != "":
+            api_data = get_kanji_information(kanji_char, api_key)
+        if api_data:
+            kanji_data_obj = api_data
+        else:
+            # fallback
+            # On failure, fall back to the complete static sample data.
+            # This ensures the character, meaning, and readings are consistent.
+            kanji_data_obj = json.decode(KANJI_SAMPLE_DATA)
+
+        # Create image
+        kanji_image_url = KANJI_IMAGE_LOOKUP_URL + base64.encode(kanji_data_obj["character"])
+        kanji_image_src = http.get(kanji_image_url).body()
+
+        # Cache results
+        cache.set(cache_key_data, json.encode(kanji_data_obj), ttl_seconds = KANJI_TTL)
+        cache.set(cache_key_image, kanji_image_src, ttl_seconds = KANJI_TTL)
+
+    # Prepare rows
+    meaning = kanji_data_obj.get("meaning", {}).get("english", "")
+    onyomi = kanji_data_obj.get("onyomi", {}).get("romaji", "")
+    kunyomi = kanji_data_obj.get("kunyomi", {}).get("romaji", "")
+
+    if meaning == "n/a":
+        meaning = ""
+    if onyomi == "n/a":
+        onyomi = ""
+    if kunyomi == "n/a":
+        kunyomi = ""
+
+    rows = [meaning, onyomi, kunyomi]
+
+    text_colors = ["#65d0e6", "#f4a306", "#e77c05"]
+
+    display_items = []
+    image_width = int(SCREEN_WIDTH + 1)
+
+    # Vertically center the text block
+    num_rows = len(rows)
+    total_text_height = (num_rows * FONT_HEIGHT) + ((num_rows - 1) * V_SPACING)
+    top_margin = (32 - total_text_height) // 2
+
+    # Kanji image
+    if canvas.is2x():
+        display_items.append(add_padding(render.Image(
+            height = image_width,
+            width = image_width,
+            src = kanji_image_src,
+        ), -11, -27))
+    else:
+        display_items.append(add_padding(render.Image(
+            height = image_width,
+            width = image_width,
+            src = kanji_image_src,
+        ), -6, -13))
+
+    # Meaning / On / Kun
+    for i, row_text in enumerate(rows):
+        display_items.append(add_padding(
+            render.Marquee(width = int(SCREEN_WIDTH / 2), child = render.Text(row_text, color = text_colors[i], font = FONT)),
+            left = int(SCREEN_WIDTH / 2),
+            top = top_margin + i * (FONT_HEIGHT + V_SPACING),
+        ))
+
+    scroll_delay = int(config.get("scroll", "45"))
+    return render.Root(
+        render.Stack(children = display_items),
+        show_full_animation = True,
+        delay = scroll_delay // 2 if canvas.is2x() else scroll_delay,
+    )
 
 def get_schema():
+    scroll_speed_options = [schema.Option(display = d, value = v) for d, v in [("Slow Scroll", "60"), ("Medium Scroll", "45"), ("Fast Scroll", "30")]]
+
     return schema.Schema(
         version = "1",
         fields = [
             schema.Text(
                 id = "api_key",
                 name = "API Key",
-                desc = "Create a rapidapi account and go to https://rapidapi.com/KanjiAlive/api/learn-to-read-and-write-japanese-kanji/playground for key",
+                desc = "Create a RapidApi account and go to https://rapidapi.com/KanjiAlive/api/learn-to-read-and-write-japanese-kanji/playground for key",
                 icon = "code",
                 default = "",
                 secret = True,
+            ),
+            schema.Dropdown(
+                id = "max_level",
+                name = "Difficulty Level",
+                desc = "Show kanji up to this difficulty",
+                icon = "graduationCap",
+                options = [
+                    schema.Option("Beginner", "beginner"),
+                    schema.Option("Elementary", "elementary"),
+                    schema.Option("Intermediate", "intermediate"),
+                    schema.Option("Advanced", "advanced"),
+                    schema.Option("Expert", "expert"),
+                ],
+                default = "beginner",
+            ),
+            schema.Dropdown(
+                id = "scroll",
+                name = "Scroll Speed",
+                desc = "Speed of the scrolling text",
+                icon = "scroll",
+                options = scroll_speed_options,
+                default = "45",
             ),
         ],
     )

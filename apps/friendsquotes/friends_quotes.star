@@ -164,7 +164,6 @@ QUOTES = {
 }
 
 def main(config):
-    random.seed(time.now().unix)
     animation_style = config.get("animationStyle", "style1")
     font_style = config.get("fontStyle", "tb-8")
     quotes_list, delay_speed, root = [], 40, ""

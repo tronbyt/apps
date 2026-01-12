@@ -112,6 +112,33 @@ function renderAppsList(apps, brokenApps = []) {
     // Create image container with clickable link
     const imageContainer = document.createElement('div');
     imageContainer.className = 'position-relative';
+    if (app.supports2x) {
+      imageContainer.classList.add('app-2x');
+    }
+
+    // Create badge container
+    const badgeContainer = document.createElement('div');
+    badgeContainer.className = 'badge-container';
+    
+    // Add broken badge if needed
+    if (isBroken) {
+      const brokenBadge = document.createElement('div');
+      brokenBadge.className = 'app-badge badge-broken';
+      brokenBadge.title = 'This app is marked as broken';
+      brokenBadge.setAttribute('data-bs-toggle', 'tooltip');
+      brokenBadge.textContent = '⚠️';
+      badgeContainer.appendChild(brokenBadge);
+    }
+
+    // Add 2x badge if needed
+    if (app.supports2x) {
+      const badge2x = document.createElement('div');
+      badge2x.className = 'app-badge badge-2x';
+      badge2x.title = 'Supports 2x resolution';
+      badge2x.setAttribute('data-bs-toggle', 'tooltip');
+      badge2x.textContent = '2X';
+      badgeContainer.appendChild(badge2x);
+    }
 
     // Wrap image in a link
     const imageLink = document.createElement('a');
@@ -120,7 +147,12 @@ function renderAppsList(apps, brokenApps = []) {
 
     // Create image element
     let imageElement;
-    if (app.image) {
+    if (app.supports2x && app.image2x) {
+      imageElement = document.createElement('img');
+      imageElement.src = `${APPS_DIR}/${app.image2x}`;
+      imageElement.className = 'card-img-top';
+      imageElement.alt = app.name;
+    } else if (app.image) {
       imageElement = document.createElement('img');
       imageElement.src = `${APPS_DIR}/${app.image}`;
       imageElement.className = 'card-img-top';
@@ -132,16 +164,7 @@ function renderAppsList(apps, brokenApps = []) {
     }
     imageLink.appendChild(imageElement);
     imageContainer.appendChild(imageLink);
-
-    // Add broken badge if needed
-    if (isBroken) {
-      const brokenBadge = document.createElement('div');
-      brokenBadge.className = 'broken-badge';
-      brokenBadge.title = 'This app is marked as broken';
-      brokenBadge.setAttribute('data-bs-toggle', 'tooltip');
-      brokenBadge.textContent = '⚠️';
-      imageContainer.appendChild(brokenBadge);
-    }
+    imageContainer.appendChild(badgeContainer);
 
     // Create card body
     const cardBody = document.createElement('div');

@@ -12,7 +12,7 @@ load("images/iss_icon2.png", ISS_ICON2_ASSET = "file")
 load("images/iss_icon3.png", ISS_ICON3_ASSET = "file")
 load("images/iss_icon4.png", ISS_ICON4_ASSET = "file")
 load("images/iss_icon5.png", ISS_ICON5_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -115,10 +115,12 @@ def main(config):
         The display inforamtion for the Tidbyt
     """
 
+    scroll_speed = int(config.get("scroll", "45"))
+
     # Display Instructions and end if that's the setting
     show_instructions = config.bool("instructions", False)
     if show_instructions:
-        return display_instructions()
+        return display_instructions(scroll_speed)
 
     # Get Configuration Environment Data
     location = json.decode(config.get("location", DEFAULT_LOCATION))
@@ -160,7 +162,10 @@ def main(config):
                 # 1️⃣ Check duration
                 if "duration" in p and int(p["duration"]) >= minimum_duration:
                     # 2️⃣ Check notice window
-                    if notice_hours == 0 or is_within_notice_period(p["startUTC"], p["endUTC"], current_time, notice_hours):
+                    pass_start = int(p["startUTC"])
+                    pass_end = int(p["endUTC"])
+                    if (notice_hours == 0 and pass_end >= current_time) or is_within_notice_period(pass_start, pass_end, current_time, notice_hours):
+                        #if (notice_hours == 0 ) or is_within_notice_period(pass_start, pass_end, current_time, notice_hours):
                         # 3️⃣ Check max elevation
                         if "maxEl" in p and p["maxEl"] >= minimum_maxEl:
                             # This pass meets all criteria
@@ -183,7 +188,7 @@ def main(config):
 
         display_text = ("Sample: " if is_sample_data else "") + details_text
 
-        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, config)
+        return get_display(format_locality(location["locality"], 10) if "locality" in location else "Unknown", event_start_time.format("3:04 PM"), event_start_time.format("Jan 2, 2006"), display_text, scroll_speed)
 
 def format_locality(locality, idealLength):
     """Format locality: full string if <= idealLength, else town name before first comma."""
@@ -197,43 +202,57 @@ def format_locality(locality, idealLength):
     # Return everything before first comma (town name)
     return locality.split(",")[0].strip()
 
-def display_instructions():
+def display_instructions(scroll_speed = 45):
     ##############################################################################################################################################################################################################################
     title = "Spot the Station"
     instructions_1 = "Goto N2yo.com and create a free account. Then go to 'More Stuff', then 'Edit/change your location'."
     instructions_2 = "Create your API key here and use it in your configuration as your N2YO.com API Key"
     instructions_3 = "You can adjust settings to be made aware of the passes you can see, and how early you're made aware of them."
+
+    if canvas.is2x():
+        font = "terminus-16"
+    else:
+        font = "5x8"
+
     return render.Root(
         render.Column(
             children = [
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(title, color = "#65d0e6", font = "5x8"),
+                    width = canvas.width(),
+                    child = render.Text(title, color = "#65d0e6", font = font),
                 ),
                 render.Marquee(
                     offset_start = len(title) * 5,
-                    width = 64,
-                    child = render.Text(instructions_1, color = "#f4a306"),
+                    width = canvas.width(),
+                    child = render.Text(instructions_1, color = "#f4a306", font = font),
                 ),
                 render.Marquee(
                     offset_start = (len(title) + len(instructions_1)) * 5,
-                    width = 64,
-                    child = render.Text(instructions_2, color = "#f4a306"),
+                    width = canvas.width(),
+                    child = render.Text(instructions_2, color = "#f4a306", font = font),
                 ),
                 render.Marquee(
                     offset_start = (len(title) + len(instructions_1) + len(instructions_2)) * 5,
-                    width = 64,
-                    child = render.Text(instructions_3, color = "#f4a306"),
+                    width = canvas.width(),
+                    child = render.Text(instructions_3, color = "#f4a306", font = font),
                 ),
             ],
         ),
+        delay = scroll_speed,
         show_full_animation = True,
     )
 
-def get_display(location, row1, row2, row3, config):
+def get_display(location, row1, row2, row3, scroll_speed = 45):
+    image_width = 16
+
+    if canvas.is2x():
+        font = "terminus-16"
+    else:
+        font = "5x8"
+
     return render.Root(
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
+        delay = scroll_speed,
         child = render.Column(
             children = [
                 render.Column(
@@ -280,12 +299,12 @@ def get_display(location, row1, row2, row3, config):
                                 render.Column(
                                     children = [
                                         render.Marquee(
-                                            width = 48,
-                                            child = render.Text(location, color = "#0099FF"),
+                                            width = canvas.width() - image_width,
+                                            child = render.Text(location, color = "#0099FF", font = font),
                                         ),
                                         render.Marquee(
-                                            width = 35,
-                                            child = render.Text(row1, color = "#fff"),
+                                            width = canvas.width() - image_width,
+                                            child = render.Text(row1, color = "#fff", font = font),
                                         ),
                                     ],
                                 ),
@@ -294,12 +313,12 @@ def get_display(location, row1, row2, row3, config):
                     ],
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(row2, color = "#fff"),
+                    width = canvas.width(),
+                    child = render.Text(row2, color = "#fff", font = font),
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(row3, color = "#ff0"),
+                    width = canvas.width(),
+                    child = render.Text(row3, color = "#ff0", font = font),
                 ),
             ],
         ),

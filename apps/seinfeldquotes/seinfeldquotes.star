@@ -129,7 +129,6 @@ QUOTES = [
 ]
 
 def main():
-    random.seed(time.now().unix)
     idx = random.number(0, len(QUOTES) - 1)
     print(random)
     current_fact = QUOTES[idx]
