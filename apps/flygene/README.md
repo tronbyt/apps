@@ -6,11 +6,11 @@ Displays a random gene from the fruit fly *Drosophila melanogaster*. Each gene s
 ## About *Drosophila* genes
 In *Drosophila*, some [13,900 genes](https://doi.org/10.1093/genetics/iyad187) that encode proteins reside on just four pairs of chromosomes. For comparison, humans have just under [20,000 genes](https://doi.org/10.1126/science.abj6987) across 23 pairs of chromosomes. Many genes share similar functions between the two.
 
-Scientists who discover *Drosophila* genes often come up with clever names for them depending on what that gene does when it's mutated.
+Scientists who discover *Drosophila* genes often come up with clever names for them depending on what the gene does when it's mutated.
 
 For example, one mutated *Drosophila* gene prevents the heart from forming during development. The researcher who [found this gene](https://doi.org/10.1242/dev.118.3.719) named it *tinman* (or *tin*, for short), because the Tin Man in *The Wizard of Oz* also lacks a heart!
 
-Another mutated gene causes flies to live twice as long as normal flies. The researchers [named the gene](https://doi.org/10.1126/science.290.5499.2137) *Indy*, short for *I'm not dead yet*.
+Another mutated gene causes flies to live twice as long as normal. The researchers [named the gene](https://doi.org/10.1126/science.290.5499.2137) *Indy*, short for *I'm not dead yet*.
 
 Not every gene name is clever. Some can be boring or straightforward...but there are many funny, witty gems that exist throughout the fruit fly genome.
 
@@ -37,8 +37,8 @@ Curation of the library occurred as follows (all [downloads](https://wiki.flybas
     - `current_symbol` did not match to RNA coding genes; and
     - `sequence_loc` was not empty.
 2. To obtain UniProt accessions, `fbgn_NAseq_Uniprot_*.tsv` was used to select for genes from step 1 where `UniprotKB/Swiss-Prot/TrEMBL_accession` was not empty.
-3. Some genes (3,675) from step 2 had more than one UniProt accession. To find the most annotated one, the UniProt accession associated with an AlphaFold DB entry on FlyBase was used. To accomplish this, `chado_FBgn_xml.zip` was searched for these multi-UniProt genes, and the UniProt accession listed under the AlphaFold DB reference for each gene was extracted. This allowed for one UniProt accession to be assigned to each gene from step 2.
-4. Next, the top GO term for each UniProt accession from step 3 was determined. The following additional files were used: `goa_uniprot_all.gaf.gz` (release 229; [from EMBL-EBI](https://www.ebi.ac.uk/GOA/downloads)); and `go-basic.obo` (release 2025-10-10; [from GOC](https://zenodo.org/records/17382285)). `goa_uniprot_all.gaf` was searched for each UniProt accession found in step 3. The most frequent GO term where `Aspect` = `P` (i.e., the GO was a biological process) was preferred. If there was a tie, the "narrowest" GO term (i.e., the term with the fewest children as defined in `go-basic.obo`) was used. If no `P` GO terms were found, this process was repeated for `Aspect` = `F` (molecular function). Lastly, the name of the GO term was extracted from `go-basic.obo`. Genes where the GO was `GO:0008150` ("biological process") or `GO:0003674` ("molecular function") were excluded (180 genes in total), as these were deemed overly broad GO terms.
+3. Some genes (n = 3,675) from step 2 had more than one UniProt accession. To find the most annotated one, the UniProt accession associated with an AlphaFold DB entry on FlyBase was used. To accomplish this, `chado_FBgn_xml.zip` was searched for these multi-UniProt genes, and the UniProt accession listed under the AlphaFold DB reference for each gene was extracted. This allowed for one UniProt accession to be assigned to each gene from step 2.
+4. Next, the top GO ID for each UniProt accession from step 3 was determined. The following additional files were used: `goa_uniprot_all.gaf.gz` (release 229; [from EMBL-EBI](https://www.ebi.ac.uk/GOA/downloads)); and `go-basic.obo` (release 2025-10-10; [from GOC](https://zenodo.org/records/17382285)). `goa_uniprot_all.gaf` was searched for each UniProt accession found in step 3. The most frequent GO ID where `Aspect` = `P` (i.e., the GO was a biological process) was preferred. If there was a tie, the "narrowest" GO ID (i.e., the term with the fewest children as defined in `go-basic.obo`) was used. If no `P` GO IDs were found, this process was repeated for `Aspect` = `F` (molecular function). Lastly, the name of the GO ID was extracted from `go-basic.obo`. Genes where the GO ID was `GO:0008150` ("biological process") or `GO:0003674` ("molecular function") were excluded (n = 180 genes in total), as these were deemed overly broad GO terms.
 5. To obtain the full name of the gene, `fb_synonym_*.tsv` was used to match each FBgn ID derived from step 3 to its short and full name.
 6. The final gene library was assembled by compiling each selected gene's short name, full name, sequence location, FBgn ID, UniProt ID, GO ID, and GO name. 
 
@@ -64,13 +64,13 @@ Rogina, B., Reenan, R.A., Nilsen, S.P., and Helfand, S.L. (2000). Extended Life-
 ## Attributions
 [FlyBase](https://flybase.org) data from the FB2025_05 release is made available under the terms of the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
-[Gene Ontology](https://geneontology.org/) data from the 2025-10-10 release ([DOI:10.5281/zenodo.10536401](https://doi.org/10.5281/zenodo.17382285)) is made available under the terms of the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+[Gene Ontology](https://geneontology.org/) data from the 2025-10-10 release ([DOI:10.5281/zenodo.17382285](https://doi.org/10.5281/zenodo.17382285)) is made available under the terms of the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
 [UniProt](https://www.uniprot.org) data from the 2025_03 release is made available under the terms of the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
 [UniProt GOA](https://www.ebi.ac.uk/GOA/) data from the 229 release is made available under the terms of the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
-The `header.png` image was created using [emojis](https://emoji.serenityos.org/) by [Gegga Thor](https://github.com/Xexxa/) for [SerenityOS](https://serenityos.org/) and is made available under the terms of the [BSD 2-Clause License](https://opensource.org/license/bsd-2-clause).
+The `images/header.png` image was created using [emojis](https://emoji.serenityos.org/) by [Gegga Thor](https://github.com/Xexxa/) for [SerenityOS](https://serenityos.org/) and is made available under the terms of the [BSD 2-Clause License](https://opensource.org/license/bsd-2-clause).
 
 ## License 
-The curated gene library in this repository is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); if you reuse or redistribute it (including modified versions), you must attribute it to frame-shift and clearly indicate any changes.
+The curated gene library in this repository is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); if you reuse or redistribute it (including modified versions), you must attribute it to [frame-shift](https://github.com/frame-shift) and indicate any changes that were made.
