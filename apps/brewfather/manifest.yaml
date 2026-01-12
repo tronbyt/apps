@@ -1,0 +1,8 @@
+---
+id: brewfather
+name: Brewfather App
+summary: Live status from Brewfather
+desc: Supports both Standard (Gen 1) and Wide (Gen 2) Tidbyt displays. Fetches live SG, Temp, ABV, and Attenuation. Calculates "Live ABV" manually to avoid "Recipe ABV" fallback. Renders a specific gravity trend graph.
+author: Nick Enslinger
+filename: brewfather.star
+supports2x: true

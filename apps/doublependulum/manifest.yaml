@@ -7,3 +7,4 @@ fileName: double_pendulum.star
 packageName: doublependulum
 id: double-pendulum
 recommendedInterval: 5
+supports2x: true

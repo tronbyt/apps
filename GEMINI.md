@@ -57,6 +57,7 @@ pixlet check apps/<app_name>/<app_name>.star
 *   If an app supports 2x rendering, it should have a separate 2x preview image with an `@2x.webp` suffix. It can be produced with a command like `pixlet render -2 -z 9`.
 *   The code should be formatted according to the Starlark style guide (use `pixlet format`).
 *   The code should pass the `pixlet lint` checks.
+*   If an app intentionally doesn't produce output (e.g. an app which monitors a music service when nothing is playing), it must return `[]` from `main`, NOT `None`.
 
 ### Manifest Example
 

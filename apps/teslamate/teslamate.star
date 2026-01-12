@@ -23,8 +23,12 @@ load("images/plug_blue.webp", PLUG_BLUE = "file")
 load("images/plug_blue@2x.webp", PLUG_BLUE_2X = "file")
 load("images/plug_red.webp", PLUG_RED = "file")
 load("images/plug_red@2x.webp", PLUG_RED_2X = "file")
-load("images/tesla.png", TESLA = "file")
-load("images/tesla@2x.png", TESLA_2X = "file")
+load("images/tesla_blue.png", TESLA_BLUE = "file")
+load("images/tesla_blue@2x.png", TESLA_BLUE_2X = "file")
+load("images/tesla_red.png", TESLA_RED = "file")
+load("images/tesla_red@2x.png", TESLA_RED_2X = "file")
+load("images/tesla_white.png", TESLA_WHITE = "file")
+load("images/tesla_white@2x.png", TESLA_WHITE_2X = "file")
 load("math.star", "math")
 load("re.star", "re")
 load("render.star", "canvas", "render")
@@ -287,6 +291,14 @@ def main(config):
     else:
         state_image = PLUG_RED_2X if scale == 2 else PLUG_RED
 
+    car_color = config.get("car_color", "white")
+    if car_color == "red":
+        logo = TESLA_RED_2X if scale == 2 else TESLA_RED
+    elif car_color == "blue":
+        logo = TESLA_BLUE_2X if scale == 2 else TESLA_BLUE
+    else:
+        logo = TESLA_WHITE_2X if scale == 2 else TESLA_WHITE
+
     battery_level = int(batterylevel)
     state = {
         "batterylevel": battery_level,
@@ -295,7 +307,7 @@ def main(config):
         "range_value": int(float(range_value)),
         "unit": unit,
         "image": image.readall(),
-        "logo": TESLA_2X.readall() if scale == 2 else TESLA.readall(),
+        "logo": logo.readall(),
         "state_image": state_image.readall(),
         "plugged_in_debug": plugged_in,  # For debugging
     }
@@ -560,6 +572,27 @@ def get_schema():
                 desc = "Show car image",
                 icon = "car",
                 default = True,
+            ),
+            schema.Dropdown(
+                id = "car_color",
+                name = "Car Color",
+                desc = "The color of the car to display.",
+                icon = "palette",
+                default = "white",
+                options = [
+                    schema.Option(
+                        display = "White",
+                        value = "white",
+                    ),
+                    schema.Option(
+                        display = "Red",
+                        value = "red",
+                    ),
+                    schema.Option(
+                        display = "Blue",
+                        value = "blue",
+                    ),
+                ],
             ),
             schema.Text(
                 id = "cache_duration",

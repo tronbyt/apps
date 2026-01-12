@@ -23,6 +23,46 @@ display_options = [
     schema.Option(value = "0", display = "Actual DEFCON Level"),
 ]
 
+def trim_left(text):
+    """Remove leading whitespace recursively."""
+    if not text or text[0] != " ":
+        return text
+    return trim_left(text[1:])
+
+def trim_right(text):
+    """Remove trailing whitespace recursively."""
+    if not text or text[-1] != " ":
+        return text
+    return trim_right(text[:-1])
+
+def extract_defcon_level(html):
+    """Extract DEFCON number (int) from badge-number span."""
+    if not html:
+        return 0
+
+    start_marker = '<span class="badge-number">'
+    start_pos = html.find(start_marker)
+    if start_pos == -1:
+        return 0
+
+    content_start = start_pos + len(start_marker)
+    end_tag_pos = html.find("</span>", content_start)
+    if end_tag_pos == -1:
+        return 0
+
+    # Extract raw content
+    defcon_text = html[content_start:end_tag_pos]
+    defcon_text = trim_left(defcon_text)
+    defcon_text = trim_right(defcon_text)
+
+    # Extract just the number after "DEFCON "
+    if defcon_text.startswith("DEFCON "):
+        number_str = defcon_text[6:]  # Skip "DEFCON "
+    else:
+        number_str = defcon_text
+
+    return int(number_str.strip())
+
 def main(config):
     show_instructions = config.bool("instructions", False)
     if show_instructions:
@@ -35,13 +75,7 @@ def main(config):
         if res.status_code != 200:
             fail("request to %s failed with status code: %d - %s" % (DEF_CON_URL, res.status_code, res.body()))
 
-        text_to_find = "OSINT Defcon Level: "
-        position = res.body().find(text_to_find) + len(text_to_find)
-        position = res.body()[position:position + 1]
-        if position.isdigit():
-            position = int(position)
-    else:
-        position = int(position)
+        position = extract_defcon_level(res.body())
 
     return render.Root(
         render.Column(
@@ -77,6 +111,8 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
 def get_defcon_display(position):
     children = []
+
+    position = int(position)
 
     #add grey outlines of the 5 conditions
     temp_group_of_children = []
