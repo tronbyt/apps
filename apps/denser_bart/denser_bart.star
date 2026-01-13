@@ -25,7 +25,7 @@ def main(config):
         abbr = DEFAULT_ABBR
     elif abbr.startswith("{"):
         # schema.Typeahead returns a JSON string with value field
-        abbr = json.decode(abbr).get("value", DEFAULT_ABBR)
+        abbr = json.decode(abbr).get("value", abbr)
 
     viz = config.bool("long_abbr")
 
