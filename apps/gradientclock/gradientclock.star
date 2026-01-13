@@ -8,7 +8,6 @@ APP_DURATION_MILLISECONDS = 1000
 REFRESH_MILLISECONDS = 500
 
 P_LOCATION = "location"
-DEFAULT_TIMEZONE = "Europe/London"
 
 def main(config):
     location = config.get(P_LOCATION)
@@ -47,53 +46,51 @@ def main(config):
         for x in range(canvas.width()):
             board[y][x] = get_hex(rates[9] + rates[0] * x + rates[1] * y, rates[10] + rates[3] * x + rates[4] * y, rates[11] + rates[6] * x + rates[7] * y)
     for i in range(0, APP_DURATION_MILLISECONDS, REFRESH_MILLISECONDS):
-        frames.append(render.Stack(children =
-                                       [
-                                           render_frame(board),
-                                           render.Column(
-                                               expanded = True,
-                                               main_align = "center",
-                                               cross_align = "center",
-                                               children =
-                                                   [
-                                                       render.Box(
-                                                           height = time_box_height,
-                                                           child = render.Row(
-                                                               main_align = "center",
-                                                               cross_align = "center",
-                                                               children = [
-                                                                   render.Text(
-                                                                       content = now.format("3" if use_12h else "15"),
-                                                                       font = time_font,
-                                                                       color = "#000000",
-                                                                   ),
-                                                                   render.Padding(
-                                                                       pad = (-2 * scale, 0, -2 * scale, 0),  # Adjust horizontal padding
-                                                                       child = render.Text(
-                                                                           content = ":" if i % 1000 < 500 else " ",
-                                                                           font = time_font,
-                                                                           color = "#000000",
-                                                                       ),
-                                                                   ),
-                                                                   render.Text(
-                                                                       content = now.format("04"),
-                                                                       font = time_font,
-                                                                       color = "#000000",
-                                                                   ),
-                                                               ],
-                                                           ),
-                                                       ),
-                                                       render.Box(
-                                                           height = date_box_height,
-                                                           child = render.Text(
-                                                               content = now_date,
-                                                               color = "#000000",
-                                                               font = date_font,
-                                                           ),
-                                                       ),
-                                                   ],
-                                           ),
-                                       ]))
+        text_column = render.Column(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children =
+                [
+                    render.Box(
+                        height = time_box_height,
+                        child = render.Row(
+                            main_align = "center",
+                            cross_align = "center",
+                            children = [
+                                render.Text(
+                                    content = now.format("3" if use_12h else "15"),
+                                    font = time_font,
+                                    color = "#000000",
+                                ),
+                                render.Padding(
+                                    pad = (-2 * scale, 0, -2 * scale, 0),  # Adjust horizontal padding
+                                    child = render.Text(
+                                        content = ":" if i % 1000 < 500 else " ",
+                                        font = time_font,
+                                        color = "#000000",
+                                    ),
+                                ),
+                                render.Text(
+                                    content = now.format("04"),
+                                    font = time_font,
+                                    color = "#000000",
+                                ),
+                            ],
+                        ),
+                    ),
+                    render.Box(
+                        height = date_box_height,
+                        child = render.Text(
+                            content = now_date,
+                            color = "#000000",
+                            font = date_font,
+                        ),
+                    ),
+                ],
+        )
+
+        frames.append(render.Stack(children = [render_frame(board), text_column]))
     return render.Root(render.Animation(children = frames), delay = REFRESH_MILLISECONDS)
 
 def render_frame(board, text = None):

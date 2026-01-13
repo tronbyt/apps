@@ -5,6 +5,7 @@ Description: Clock displayed over animated, colorful gradient background.
 Author: tpatel12
 """
 
+load("i18n.star", "tr")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -64,11 +65,15 @@ def render_overlay(now, show_date, scale, use_24h, blinking_separator, frame_num
     children = [time_child]
 
     if show_date:
+        date_str = tr("date_pattern").format(
+            day = now.format("2"),
+            month = tr(now.format("Jan")),
+        )
         children.append(
             render.Box(
                 height = date_box_height,
                 child = render.Text(
-                    content = now.format("2 Jan"),
+                    content = date_str,
                     font = date_font,
                     color = "#FFFFFF",
                 ),

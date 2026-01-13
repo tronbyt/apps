@@ -278,6 +278,7 @@ load("images/char_fb54771d.png", CHAR_fb54771d_ASSET = "file")
 load("images/char_fbdf5393.png", CHAR_fbdf5393_ASSET = "file")
 load("images/char_fecbbfb6.png", CHAR_fecbbfb6_ASSET = "file")
 load("images/char_ffc4a49a.png", CHAR_ffc4a49a_ASSET = "file")
+load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -343,14 +344,13 @@ def main(config):
 
     #print("seed = %d" % seed)
 
-    # rand can't assign seed directly, so need to make this a mutable thing
-    seed = [seed]
+    random.seed(seed)
 
     # get the color; do it this way so that setting the color from the
     # config doesn't spoil the pseudo-random number sequence
     color_options = (
         [i for i in range(COLOR_COUNT)] +
-        [rand(seed, COLOR_COUNT + 1) - 1, rand(seed, COLOR_COUNT)]
+        [random.number(0, COLOR_COUNT) - 1, random.number(0, COLOR_COUNT - 1)]
     )
     color_number = COLOR_NAMES.get(config.get("color"), COLOR_NAMES["random"])
     if color_number >= 0:
@@ -360,17 +360,17 @@ def main(config):
 
     # initialize the columns
     columns = [
-        generate_column(seed, char_size, color_number)
+        generate_column(char_size, color_number)
         for i in range(char_size["columns"])
     ]
 
     # occasionally blow a column away
-    if rand(seed, 25) == 0 and char_size["columns"] > 2:
-        columns[rand(seed, char_size["columns"] - 2) + 1] = None
+    if random.number(0, 24) == 0 and char_size["columns"] > 2:
+        columns[random.number(0, char_size["columns"] - 3) + 1] = None
 
     # vary the x-offset and y-offset for more interesting variety
-    xoffset = -rand(seed, max(char_size["w"], 2))
-    yoffset = -rand(seed, max(char_size["h"], 2))
+    xoffset = -random.number(0, max(char_size["w"], 2) - 1)
+    yoffset = -random.number(0, max(char_size["h"], 2) - 1)
     #print("offset = %d, %d" % (xoffset, yoffset))
 
     # create the widget for the app
@@ -382,7 +382,7 @@ def main(config):
             child = render.Padding(
                 pad = (xoffset, yoffset, 0, 0),
                 child = render.Animation([
-                    generate_frame(seed, char_size, columns, f)
+                    generate_frame(char_size, columns, f)
                     for f in range(72)
                 ]),
             ),
@@ -418,39 +418,31 @@ def get_schema():
         ],
     )
 
-# Gets a pseudo-random number whose value is between 0 and max - 1
-# seed - the random number seed container
-# max - the (exclusive) max value desired
-def rand(seed, max):
-    seed[0] = (seed[0] * 1103515245 + 12345) & 0xffffffff
-    return (seed[0] >> 16) % max
-
 # Generates the initial state of a column
-# seed - the random number seed container
 # char_size - the character size structure
 # color_number - the color number
-def generate_column(seed, char_size, color_number):
-    style = COLUMN_STYLES[rand(seed, COLUMN_STYLE_COUNT)]
+def generate_column(char_size, color_number):
+    style = COLUMN_STYLES[random.number(0, COLUMN_STYLE_COUNT - 1)]
     speed = style["speed"]
-    drop_size = style["drop_min"] + rand(seed, style["drop_variance"])
+    drop_size = style["drop_min"] + random.number(0, style["drop_variance"] - 1)
     size = FRAMES // speed
-    offset = rand(seed, size)
-    colors = colors_of(seed, color_number)
+    offset = random.number(0, size - 1)
+    colors = colors_of(color_number)
 
     second_drop = {
-        "chars": [rand(seed, CHAR_COUNT) for i in range(char_size["rows"])],
+        "chars": [random.number(0, CHAR_COUNT - 1) for i in range(char_size["rows"])],
         "mutations": [0 for i in range(char_size["rows"])],
         "offset": offset + ((size - SECOND_DROP_VARIANCE) // 2) +
-                  rand(seed, SECOND_DROP_VARIANCE),
-        "drop_size": style["drop_min"] + rand(seed, style["drop_variance"]),
-        "colors": colors_of(seed, color_number),
-    } if speed == 1 and rand(seed, 7) < 2 else None
+                  random.number(0, SECOND_DROP_VARIANCE - 1),
+        "drop_size": style["drop_min"] + random.number(0, style["drop_variance"] - 1),
+        "colors": colors_of(color_number),
+    } if speed == 1 and random.number(0, 6) < 2 else None
 
     return {
         "speed": speed,
-        "frame_offset": rand(seed, speed),
+        "frame_offset": random.number(0, speed - 1),
         "size": size,
-        "chars": [rand(seed, CHAR_COUNT) for i in range(char_size["rows"])],
+        "chars": [random.number(0, CHAR_COUNT - 1) for i in range(char_size["rows"])],
         "mutations": [0 for i in range(char_size["rows"])],
         "offset": offset,
         "drop_size": drop_size,
@@ -459,21 +451,18 @@ def generate_column(seed, char_size, color_number):
     }
 
 # Returns the colors structure to use for the given the color_number
-# seed - the random number seed container
 # color_number - the color_number
-def colors_of(seed, color_number):
-    # always call rand to try to preserve the seed sequence
-    color = rand(seed, COLOR_COUNT)
+def colors_of(color_number):
+    color = random.number(0, COLOR_COUNT - 1)
     if color_number >= 0:
         color = color_number
     return COLORS[color]
 
 # Generates a given frame of the animation
-# seed - the random number seed container
 # char_size - the character size structure
 # columns - the list of column structures
 # f - the frame number
-def generate_frame(seed, char_size, columns, f):
+def generate_frame(char_size, columns, f):
     frame_chars = [
         [None for c in range(char_size["columns"])]
         for r in range(char_size["rows"])
@@ -483,7 +472,7 @@ def generate_frame(seed, char_size, columns, f):
         for r in range(char_size["rows"])
     ]
     for c in range(char_size["columns"]):
-        for column in compute_column(seed, char_size, columns[c], f):
+        for column in compute_column(char_size, columns[c], f):
             chars = column["chars"]
             drop_size = column["drop_size"]
             colors = column["colors"]
@@ -513,11 +502,10 @@ def generate_frame(seed, char_size, columns, f):
     ])
 
 # Computes a particular column (some columns have two drops)
-# seed - the random number seed container
 # char_size - the character size structure
 # column - the column structure
 # f - the frame number
-def compute_column(seed, char_size, column, f):
+def compute_column(char_size, column, f):
     if column:
         speed = column["speed"]
         f += column["frame_offset"]
@@ -525,7 +513,6 @@ def compute_column(seed, char_size, column, f):
         do_mutate = (f % speed) == 0
 
         first_drop_column = compute_drop(
-            seed,
             char_size,
             speed,
             size,
@@ -537,7 +524,6 @@ def compute_column(seed, char_size, column, f):
         second_drop = column["second_drop"]
         if second_drop:
             second_drop_column = compute_drop(
-                seed,
                 char_size,
                 speed,
                 size,
@@ -552,14 +538,13 @@ def compute_column(seed, char_size, column, f):
         return []
 
 # Computes a particular "drop" of a given column
-# seed - the random number seed container
 # char_size - the character size structure
 # speed - the speed of the column
 # size - the size of the column
 # drop - the drop structure
 # f - the frame number
 # do_mutate - whether to perform a mutation
-def compute_drop(seed, char_size, speed, size, drop, f, do_mutate):
+def compute_drop(char_size, speed, size, drop, f, do_mutate):
     drop_size = drop["drop_size"]
     chars = drop["chars"]
     mutations = drop["mutations"]
@@ -570,7 +555,7 @@ def compute_drop(seed, char_size, speed, size, drop, f, do_mutate):
     # flip-flops of visible characters when the animation loops
 
     if do_mutate and offset > drop_size:
-        mutate_chars(seed, char_size, chars, mutations, pos, size, drop_size)
+        mutate_chars(char_size, chars, mutations, pos, size, drop_size)
 
     return {
         "chars": chars_of(char_size, chars, pos, size, drop_size),
@@ -580,17 +565,15 @@ def compute_drop(seed, char_size, speed, size, drop, f, do_mutate):
     }
 
 # Mutates the visible characters randomly
-# seed - the random number seed container
 # char_size - the character size structure
 # chars - the character array of the drop
 # mutations - the mutation tracking array of the drop
 # pos - the virtual position of the drop
 # size - the size of the column
 # drop_size - the size of the drop
-def mutate_chars(seed, char_size, chars, mutations, pos, size, drop_size):
+def mutate_chars(char_size, chars, mutations, pos, size, drop_size):
     for i in range(1, 6):
         mutate_char(
-            seed,
             char_size,
             chars,
             mutations,
@@ -601,10 +584,9 @@ def mutate_chars(seed, char_size, chars, mutations, pos, size, drop_size):
             30,
         )
     for n in range(1, drop_size - 5):
-        mutate_char(seed, char_size, chars, mutations, -pos, size, n, 1, 50)
+        mutate_char(char_size, chars, mutations, -pos, size, n, 1, 50)
 
 # Mutates a single character
-# seed - the random number seed container
 # char_size - the character size structure
 # chars - the character array of the drop
 # mutations - the mutation tracking array of the drop
@@ -614,7 +596,6 @@ def mutate_chars(seed, char_size, chars, mutations, pos, size, drop_size):
 # numerator - the chance of mutation numerator
 # denominator - the chance of mutation denominator
 def mutate_char(
-        seed,
         char_size,
         chars,
         mutations,
@@ -625,8 +606,8 @@ def mutate_char(
         denominator):
     index = (pos + n) % size
     if (index < char_size["rows"] and
-        rand(seed, denominator) < (numerator - mutations[index])):
-        chars[index] = rand(seed, CHAR_COUNT)
+        random.number(0, denominator - 1) < (numerator - mutations[index])):
+        chars[index] = random.number(0, CHAR_COUNT - 1)
         mutations[index] += 1
 
 # Returns the on-screen characters
