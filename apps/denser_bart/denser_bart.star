@@ -5,6 +5,7 @@ Description: Like the official BART applet but shows up to 8 routes for a statio
 Author: scoobmx
 """
 
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -22,6 +23,9 @@ def main(config):
     abbr = config.get("abbr")
     if abbr == None:
         abbr = DEFAULT_ABBR
+    elif abbr.startswith("{"):
+        # schema.Typeahead returns a JSON string with value field
+        abbr = json.decode(abbr).get("value", abbr)
 
     viz = config.bool("long_abbr")
 
