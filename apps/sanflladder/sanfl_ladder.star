@@ -8,7 +8,11 @@ v1.0
 First version!
 
 v1.1
-Updated API URL and reduced cache
+Updated API URL and reduced cache for the weekends
+
+v1.2
+Updated for 2026 season
+Updated timezone check
 """
 
 load("encoding/json.star", "json")
@@ -17,7 +21,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-LADDER_URL = "https://api3.sanflstats.com/ladder/2025/sanfl"
+LADDER_URL = "https://api3.sanflstats.com/ladder/2026/sanfl"
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 
 def main(config):
