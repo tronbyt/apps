@@ -136,11 +136,9 @@ def main(config):
 
             # check if we are between the start & end date of the tournament
             if diffTournStart.hours < 0 and diffTournEnd.hours > 0:
-                # Sometimes results for both ATP & WTA will be listed, so check if the first "groupings" is Mens Singles
+                # Sometimes results for both ATP & WTA will be listed, so check if the first "groupings" is Mens Singles or Womens Doubles
                 # and if so, Womens Singles will be next (GroupingsID = 1)
-                if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] == "mens-singles":
-                    GroupingsID = 1
-                if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] == "womens-doubles":
+                if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "women-doubles"):
                     GroupingsID = 1
                 TotalMatches = len(WTA_JSON["events"][x]["groupings"][GroupingsID]["competitions"])
 
@@ -271,9 +269,7 @@ def main(config):
 
                 # check if we are between the start & end date of the tournament
                 if diffTournStart.hours < 0 and diffTournEnd.hours > 0:
-                    if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] == "mens-singles":
-                        GroupingsID = 1
-                    if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] == "womens-doubles":
+                    if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "women-doubles"):
                         GroupingsID = 1
                     for y in range(0, len(WTA_PREFIX), 1):
                         # if the match is scheduled ("pre") and the start time of the match is scheduled for next 12 hrs, add it to the list of scheduled matches
@@ -381,11 +377,9 @@ def getLiveScores(SelectedTourneyID, EventIndex, InProgressMatchList, JSON):
             Player1NameColor = "#fff"
             Player2NameColor = "#fff"
 
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] == "mens-singles":
+            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "womens-doubles"):
                 GroupingsID = 1
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] == "womens-doubles":
-                GroupingsID = 1
-
+            
             # pop the index from the list and go straight to that match
             x = InProgressMatchList.pop()
 
@@ -637,11 +631,9 @@ def getCompletedMatches(SelectedTourneyID, EventIndex, CompletedMatchList, JSON)
             # pop the index from the list and go straight to that match
             x = CompletedMatchList.pop()
 
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] == "mens-singles":
+            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "womens-doubles"):
                 GroupingsID = 1
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] == "womens-doubles":
-                GroupingsID = 1
-
+           
             Player1_Name = JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][0]["athlete"]["shortName"]
             Player2_Name = JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][1]["athlete"]["shortName"]
 
