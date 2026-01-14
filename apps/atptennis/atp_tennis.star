@@ -85,6 +85,9 @@ Noted that ESPN data feed not indicating a winner, so adding logic to work it ou
 
 v1.16
 If the next scheduled match is the final, then look ahead 48hrs instead of the normal 12hrs to make the final appear sooner
+
+v1.17
+Updated for 2026 season
 """
 
 load("encoding/json.star", "json")
@@ -94,15 +97,15 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-SLAM_LIST = ["154-2025", "188-2025", "172-2025", "189-2025"]
-MASTERS_LIST = ["411-2025", "713-2025", "42-2025", "413-2025", "421-2025", "414-2025", "718-2025", "421-2025", "13-2025", "315-2025"]
+SLAM_LIST = ["154-2026", "188-2026", "172-2026", "189-2026"]
+MASTERS_LIST = ["411-2026", "713-2026", "42-2026", "413-2026", "421-2026", "414-2026", "718-2026", "421-2026", "13-2026", "315-2026"]
 
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 ATP_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard"
 
 def main(config):
     now = time.now()
-    timezone = time.tz()
+    timezone = config.get("$tz", DEFAULT_TIMEZONE)
     RotationSpeed = config.get("speed", "3")
 
     # hold 1 min cache for live scores
@@ -118,7 +121,7 @@ def main(config):
     diffTournStart = 0
     GroupingsID = 0
 
-    TestID = "421-2025"
+    TestID = "421-2026"
     SelectedTourneyID = config.get("TournamentList", TestID)
     ShowCompleted = config.get("CompletedOn", "true")
     ShowScheduled = config.get("ScheduledOn", "false")
@@ -1238,13 +1241,13 @@ def get_schema():
     )
 
 def titleBar(SelectedTourneyID):
-    if SelectedTourneyID == "154-2025":  # AO
+    if SelectedTourneyID == "154-2026":  # AO
         titleColor = "#0091d2"
-    elif SelectedTourneyID == "188-2025":  # Wimbledon
+    elif SelectedTourneyID == "188-2026":  # Wimbledon
         titleColor = "#006633"
-    elif SelectedTourneyID == "172-2025":  # French Open
+    elif SelectedTourneyID == "172-2026":  # French Open
         titleColor = "#c84e1e"
-    elif SelectedTourneyID == "189-2025":  # US Open
+    elif SelectedTourneyID == "189-2026":  # US Open
         titleColor = "#022686"
     else:
         titleColor = "#203764"
