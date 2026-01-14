@@ -96,7 +96,7 @@ WTA_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/wta/score
 
 def main(config):
     now = time.now()
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     RotationSpeed = config.get("speed", "3")
 
     # hold 1 min cache for live scores
