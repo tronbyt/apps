@@ -98,7 +98,7 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 SLAM_LIST = ["154-2026", "188-2026", "172-2026", "189-2026"]
-MASTERS_LIST = ["411-2026", "713-2026", "42-2026", "413-2026", "421-2026", "414-2026", "718-2026", "421-2026", "13-2026", "315-2026"]
+MASTERS_LIST = ["411-2026", "713-2026", "42-2026", "413-2026", "421-2026", "414-2026", "718-2026", "13-2026", "315-2026"]
 
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 ATP_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard"
