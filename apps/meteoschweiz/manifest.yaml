@@ -1,0 +1,9 @@
+---
+id: meteoschweiz
+name: MeteoSwiss
+summary: MeteoSwiss Weather Forecast
+desc: Weather forecasts from MeteoSwiss for Swiss locations.
+author: LukiLeu
+recommendedInterval: 60
+packageName: meteoschweiz
+supports2x: true
