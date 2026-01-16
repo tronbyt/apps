@@ -117,6 +117,8 @@ def build_frames(word):
             # Scroll if needed
             shift = 0
             max_px = 0
+
+            visible_dots = []
             for d in drawn:
                 if d[0] > max_px:
                     max_px = d[0]
