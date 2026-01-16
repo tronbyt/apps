@@ -5,9 +5,9 @@ Description: Displays user-defined text in cursive handwriting style.
 Author: Robert Ison
 """
 
+load("cursive_letters.star", "CURSIVE_LETTERS")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("cursive_letters.star", "CURSIVE_LETTERS")
 
 # ============================================================
 # CURSIVE LETTER DATA
