@@ -27,22 +27,14 @@ def main():
 
     # --- generate color boxes ---
     color_count = len(hex_codes)
-    box_width = DISPLAY_W / color_count
+    box_width = math.floor(DISPLAY_W / color_count)
     remainder = DISPLAY_W % color_count
     color_boxes = []
 
-    if remainder == 0:  # if all boxes can fit display with equal width
-        for c in hex_codes:
-            box = render.Box(color = c, width = int(box_width))
-            color_boxes.append(box)
-
-    else:  # if boxes need differing widths to fill display
-        box_width = math.floor(DISPLAY_W / color_count)
-
-        for c in range(color_count):
-            box_add = 1 if c in range(remainder) else 0
-            box = render.Box(color = hex_codes[c], width = box_width + box_add)
-            color_boxes.append(box)
+    for c in range(color_count):
+        box_add = 1 if c in range(remainder) else 0
+        box = render.Box(color = hex_codes[c], width = box_width + box_add)
+        color_boxes.append(box)
 
     # --- render for display ---
     return render.Root(
@@ -79,13 +71,19 @@ def get_codes():
     post_id = re.match(r"post\/(\d{4,})\/", page.url)[0][1]
 
     # --- extract caption ---
-    caption_search = soup.find(id = post_id).find_all("p")
+    caption_search = soup.find(id = post_id)
 
     if not caption_search:
+        print("Caption search returned None - generating random monochromatic palette...")
+        return generate_palette()
+
+    caption_p = caption_search.find_all("p")
+
+    if not caption_p:
         print("Caption not found - generating random monochromatic palette...")
         return generate_palette()
 
-    caption_str = " ".join([str(r) for r in caption_search])
+    caption_str = " ".join([str(r) for r in caption_p])
     caption = re.sub(r"<.+?>", "", caption_str)
 
     # --- extract hex codes ---

@@ -6,4 +6,4 @@ desc: Shows random user-submitted color palettes from Colourpod (www.colourpod.c
 author: frame-shift
 fileName: colorpalettes.star
 packageName: colorpalettes
-recommendedInterval: 5
+recommendedInterval: 30
