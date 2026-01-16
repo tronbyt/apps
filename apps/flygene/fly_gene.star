@@ -1,6 +1,6 @@
 """
 Applet: Fly Gene
-Summary: Fly gene
+Summary: Show random fruit fly genes
 Description: Displays a random gene from the fruit fly Drosophila melanogaster.
 Author: frame-shift
 
