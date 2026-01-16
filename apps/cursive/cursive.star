@@ -95,6 +95,9 @@ def build_frames(word):
 
     cursor_x = 0  # absolute x-coordinate
 
+    # Visible dots
+    visible_dots = []
+
     for i in range(len(word)):
         ch = word[i]
         if ch not in CURSIVE_LETTERS:
@@ -120,8 +123,6 @@ def build_frames(word):
             if max_px >= SCREEN_WIDTH:
                 shift = max_px - (SCREEN_WIDTH - 1)
 
-            # Visible dots
-            visible_dots = []
             for d in drawn:
                 vx = d[0] - shift
                 vy = d[1]
