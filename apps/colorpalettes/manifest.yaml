@@ -1,0 +1,9 @@
+---
+id: colorpalettes
+name: Color Palettes
+summary: User made color palettes
+desc: Shows random user-submitted color palettes from Colourpod (www.colourpod.com).
+author: frame-shift
+fileName: colorpalettes.star
+packageName: colorpalettes
+recommendedInterval: 5
