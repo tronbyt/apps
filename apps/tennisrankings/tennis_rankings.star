@@ -15,11 +15,13 @@ Reduced cache TTL from 6hrs to 1hr as it was taking too long to update
 
 v1.2.2
 Updated color for WTA
+
+v1.3
+Updated humanize.ftoa to use int instead, as it was inserting a comma into the number 
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -256,7 +258,7 @@ def get_screenPoints(x, RankingJSON, Selection):
         if i + x < 20:
             Name = RankingJSON["rankings"][0]["ranks"][i + x]["athlete"]["lastName"]
             Rank = RankingJSON["rankings"][0]["ranks"][i + x]["current"]
-            Points = humanize.ftoa(RankingJSON["rankings"][0]["ranks"][i + x]["points"])
+            Points = str(int(RankingJSON["rankings"][0]["ranks"][i + x]["points"]))
 
             Player = render.Row(
                 expanded = True,

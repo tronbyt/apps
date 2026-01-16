@@ -18,7 +18,11 @@ Reduced match cache time for the weekend. We need check more often when the game
 Added leading zero for when seconds on game clock is <10
 
 v1.3
-Updated for finals
+Updated for Finals
+
+v1.4
+Updated for 2026 season
+Updated timezone check
 """
 
 load("encoding/json.star", "json")
@@ -29,13 +33,13 @@ load("time.star", "time")
 
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 
-MATCHES_URL = "https://api3.sanflstats.com/fixtures/2025/sanfl"
-LADDER_URL = "https://api3.sanflstats.com/ladder/2025/sanfl"
+MATCHES_URL = "https://api3.sanflstats.com/fixtures/2026/sanfl"
+LADDER_URL = "https://api3.sanflstats.com/ladder/2026/sanfl"
 
 LIVE_CACHE = 30
 LADDER_CACHE = 86400  #24 hours
 
-def main():
+def main(config):
     # Lets initialize!
     renderDisplay = []
 
@@ -55,11 +59,12 @@ def main():
     DayofWeek = now.format("Mon")
 
     # if its the weekend, lets reduce the cache and check for updates more often
-    # And there is 1 Thursday game this year, 24th April
+    # And there is 1 Thursday game this year, Good Friday Eve - 2nd April
     if DayofWeek == "Fri" or DayofWeek == "Sat" or DayofWeek == "Sun":
         MATCH_CACHE = 120
-    if now.month == 4 and now.day == 24:
+    if now.month == 4 and now.day == 2:
         MATCH_CACHE = 120
+    
 
     MatchData = get_cachable_data(MATCHES_URL, MATCH_CACHE)
     MatchesJSON = json.decode(MatchData)

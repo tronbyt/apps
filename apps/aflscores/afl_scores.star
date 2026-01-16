@@ -46,6 +46,13 @@ Updated for 2025 season
 
 v2.5.1
 Handling for Western Bulldogs being referred to as original name of Footscray for their 100th anniversary
+
+v2.5.2
+Handling for Indigenous team names
+
+v2.6
+Updated for 2026 season
+Updated timezone check
 """
 
 load("encoding/json.star", "json")
@@ -57,15 +64,15 @@ load("time.star", "time")
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 DEFAULT_TEAM = "10"  # Geelong #gocats
 
-MATCHES_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=73"
-LADDER_URL = "https://aflapi.afl.com.au/afl/v2/compseasons/73/ladders"
-ROUND_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=73&roundNumber="
+MATCHES_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=85"
+LADDER_URL = "https://aflapi.afl.com.au/afl/v2/compseasons/85/ladders"
+ROUND_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=85&roundNumber="
 TEAM_SUFFIX = "&teamId="
 
 SQUIGGLE_PREFIX = "https://api.squiggle.com.au/?q=games;round="
 INCOMPLETE_SUFFIX = ";complete=!100"
 COMPLETE_SUFFIX = ";complete=100"
-YEAR_SUFFIX = ";year=2025"
+YEAR_SUFFIX = ";year=2026"
 
 MATCH_CACHE = 21600
 LADDER_CACHE = 86400
@@ -913,6 +920,7 @@ def MoreOptions(View):
         return None
 
 def get_cachable_data(url, timeout):
+    #SOMETHING IN HERE TO HANDLE OFFLINE FEED
     res = http.get(url = url, ttl_seconds = timeout)
 
     if res.status_code != 200:

@@ -59,7 +59,7 @@ def main(config):
     # Get feeder data
     feeders = get_feeders(token)
     if not feeders:
-        return render_error("No feeders found")
+        return []
 
     # Get the latest bird sighting
     latest_sighting = get_latest_sighting(token, feeders)
