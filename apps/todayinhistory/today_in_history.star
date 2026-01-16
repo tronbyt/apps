@@ -9,6 +9,9 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&titles={}&redirects=true"
+API_HEADERS = {
+    "User-Agent": "Tronbyt / github.com/tronbyt",
+}
 TTL = 12 * 60 * 60  # 12 hours for general day cache stuff
 ITEMS = 5
 SHOW_BIRTHS = True
@@ -59,7 +62,7 @@ def get_raw_day_data(day_name):
     cache_key = "DAY_{}".format(day_name)
     data = cache.get(cache_key)
     if not data:
-        page = http.get(WIKIPEDIA_API.format(day_name))
+        page = http.get(WIKIPEDIA_API.format(day_name), headers = API_HEADERS)
         if page.status_code != 200:
             # Fake a set of entries to inform the user, and back off for at least 30 seconds
             print("Wikipedia request failed with status ", page.status_code)
@@ -121,14 +124,14 @@ def parse_wiki_page(data):
             everything.insert(random.number(0, len(everything)), (current_part, current_section, fix_entry(matches[0][1])))
 
         # This matches a classification/section (Births, Deaths, Events)
-        pattern = r"<h2><span id=\"\S+\">([0-9A-Za-z\s–]+)</span>+</h2>"
+        pattern = r"<h2.*?>([0-9A-Za-z\s–]+)</h2>"
         matches = re.match(pattern, line)
         if len(matches) > 0:
             current_part = matches[0][1]
             current_section = None
 
         # This matches a sub-area, usually time based.
-        pattern = r"<span id=\"\S+\">([0-9A-Za-z\-–]*)</span></h3>$"
+        pattern = r"<h3.*?>([0-9A-Za-z\-–]*)</h3>$"
         matches = re.match(pattern, line)
         if matches:
             current_section = matches[0][1]
