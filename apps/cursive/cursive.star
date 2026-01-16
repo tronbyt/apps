@@ -134,21 +134,10 @@ def build_frames(word):
         cursor_x = cursor_x + letter[-1][0] - 1
 
     # Hold final frame for visibility
-    for _ in range(40):
-        shift = 0
-        max_px = 0
-        for d in drawn:
-            if d[0] > max_px:
-                max_px = d[0]
-        if max_px >= SCREEN_WIDTH:
-            shift = max_px - (SCREEN_WIDTH - 1)
-
-        visible_dots = []
-        for d in drawn:
-            vx = d[0] - shift
-            vy = d[1]
-            if vx >= 0 and vx < SCREEN_WIDTH and vy >= 0 and vy < SCREEN_HEIGHT:
-                visible_dots.append(dot(vx, vy))
+    if frames:
+        final_frame = frames[-1]
+        for _ in range(40):
+            frames.append(final_frame)
 
         frames.append(render.Stack(children = visible_dots))
 
