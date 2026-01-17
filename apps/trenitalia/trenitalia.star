@@ -65,12 +65,8 @@ def main(config):
         station_id = station_id_raw.get("value", "S01700")
     elif station_id_raw.startswith("{"):
         # E' una stringa JSON, prova a parsarla
-        station_id = "S01700"  # fallback
-        if "S0" in station_id_raw:
-            # Estrai il codice stazione dalla stringa
-            import_idx = station_id_raw.find("S0")
-            if import_idx >= 0:
-                station_id = station_id_raw[import_idx:import_idx + 6]
+        parsed = json.decode(station_id_raw)
+        station_id = parsed.get("value", "S01700") if type(parsed) == "dict" else "S01700"
     else:
         station_id = station_id_raw
 
@@ -130,12 +126,6 @@ def main(config):
 
     # Prendi i treni richiesti
     trains_to_show = departures[:num_trains]
-
-    # TEST: Simula primo treno cancellato e secondo con ritardo (RIMUOVERE DOPO TEST)
-    # if len(trains_to_show) > 0:
-    #     trains_to_show[0]["provvedimento"] = 1  # CANCELLATO
-    # if len(trains_to_show) > 1:
-    #     trains_to_show[1]["ritardo"] = 25  # 25 min ritardo
 
     # Costruisci la UI
     train_rows = []
@@ -239,7 +229,7 @@ def render_train_row(train):
     if is_cancelled:
         ritardo_text = "CANC"
         ritardo_color = COLOR_RED
-    elif ritardo and ritardo > 0:
+    elif ritardo > 0:
         ritardo_text = "+%d'" % ritardo
         if ritardo >= 30:
             ritardo_color = COLOR_RED
@@ -247,7 +237,7 @@ def render_train_row(train):
             ritardo_color = COLOR_ORANGE
         else:
             ritardo_color = COLOR_YELLOW
-    elif ritardo and ritardo < 0:
+    elif ritardo < 0:
         ritardo_text = "%d'" % ritardo  # anticipo
         ritardo_color = COLOR_GREEN
     else:
@@ -299,27 +289,25 @@ def get_departures(station_id):
     if cached:
         return json.decode(cached)
 
-    # Giorni e mesi in inglese per il formato API
-    days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    # Usa timezone Europe/Rome per gestire ora legale/solare
+    now = time.now(location = "Europe/Rome")
 
-    now = time.now()
+    # Formatta giorno e mese abbreviati in inglese
+    day_name = now.format("Mon")
+    month_name = now.format("Jan")
 
-    weekday_str = now.format("Monday")
-    day_idx = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}.get(weekday_str, 0)
-    day_name = days[day_idx]
-
-    month_str = now.format("January")
-    month_idx = {"January": 0, "February": 1, "March": 2, "April": 3, "May": 4, "June": 5, "July": 6, "August": 7, "September": 8, "October": 9, "November": 10, "December": 11}.get(month_str, 0)
-    month_name = months[month_idx]
+    # Determina offset timezone (CET +0100 o CEST +0200)
+    tz_offset = now.format("-0700")  # formato: +0100 o +0200
+    tz_str = "GMT" + tz_offset[:3] + tz_offset[3:]  # GMT+0100 o GMT+0200
 
     # Una sola chiamata API per velocità
-    date_str = "%s %s %s %s %s GMT+0100" % (
+    date_str = "%s %s %s %s %s %s" % (
         day_name,
         month_name,
         now.format("02"),
         now.format("2006"),
         now.format("15:04:05"),
+        tz_str,
     )
 
     url = "%s/partenze/%s/%s" % (VIAGGIATRENO_BASE, station_id, date_str)
@@ -328,7 +316,7 @@ def get_departures(station_id):
     departures = []
     if resp.status_code == 200:
         body = resp.body()
-        if body and body != "":
+        if body:
             trains = resp.json()
             if trains:
                 departures = trains
