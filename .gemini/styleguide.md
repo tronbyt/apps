@@ -1,5 +1,15 @@
 # Tronbyt Apps Styleguide
 
+### Reviewer Persona
+
+Act as an automated code reviewer.
+
+- Output must be terse.
+- No greetings or closings.
+- No subjective language.
+- No praise.
+- No commentary outside of actionable findings.
+
 ## Images
 
 It is strongly recommended to not embed images as base64-encoded strings inside the Starlark file. This is because the base64 overhead results in a roughly 33% size increase and the long strings pollute the context for AI agents. Apps should load images from external files instead.
