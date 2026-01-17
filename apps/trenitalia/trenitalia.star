@@ -13,7 +13,10 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 # API Base URL
-VIAGGIATRENO_BASE = "http://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno"
+VIAGGIATRENO_BASE = "https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno"
+
+# Animation
+FRAMES_PER_SECOND = 20
 
 # Colori
 COLOR_RED = "#FF0000"
@@ -63,7 +66,7 @@ def main(config):
     station_id_raw = config.get("station_id", "S01700")
     if type(station_id_raw) == "dict":
         station_id = station_id_raw.get("value", "S01700")
-    elif station_id_raw.startswith("{"):
+    elif type(station_id_raw) == "string" and station_id_raw.startswith("{") and station_id_raw.endswith("}"):
         # E' una stringa JSON, prova a parsarla
         parsed = json.decode(station_id_raw)
         station_id = parsed.get("value", "S01700") if type(parsed) == "dict" else "S01700"
@@ -73,14 +76,13 @@ def main(config):
     station_name = config.get("station_name", "Milano Centrale")
     destination_filter = config.get("destination_filter", "").upper().strip()
     train_number_filter = config.get("train_number", "").strip()
-    num_trains = min(int(config.get("num_trains", "3")), 9)  # max 9 treni
-    page_duration = int(config.get("page_duration", "3"))
+    num_trains_str = config.get("num_trains", "3")
+    num_trains = min(int(num_trains_str) if num_trains_str.isdigit() else 3, 9)
+    page_duration_str = config.get("page_duration", "3")
+    page_duration = int(page_duration_str) if page_duration_str.isdigit() else 3
 
     # Ottieni le partenze
     departures = get_departures(station_id)
-
-    if departures == None:
-        return render_error("Errore API")
 
     if len(departures) == 0:
         return render_error("Nessun treno")
@@ -145,8 +147,8 @@ def main(config):
                 page_rows.append(render.Box(width = 64, height = 8))
             pages.append(render.Column(children = page_rows))
 
-        # Crea frame ripetuti per ogni pagina (20 frame = ~1 sec)
-        frames_per_page = page_duration * 20
+        # Crea frame ripetuti per ogni pagina
+        frames_per_page = page_duration * FRAMES_PER_SECOND
         frames = []
         for page in pages:
             for _ in range(frames_per_page):
@@ -292,42 +294,29 @@ def get_departures(station_id):
     # Usa timezone Europe/Rome per gestire ora legale/solare
     now = time.now(location = "Europe/Rome")
 
-    # Formatta giorno e mese abbreviati in inglese
-    day_name = now.format("Mon")
-    month_name = now.format("Jan")
-
     # Determina offset timezone (CET +0100 o CEST +0200)
     tz_offset = now.format("-0700")  # formato: +0100 o +0200
     tz_str = "GMT" + tz_offset[:3] + tz_offset[3:]  # GMT+0100 o GMT+0200
 
     # Una sola chiamata API per velocità
-    date_str = "%s %s %s %s %s %s" % (
-        day_name,
-        month_name,
-        now.format("02"),
-        now.format("2006"),
-        now.format("15:04:05"),
-        tz_str,
-    )
+    date_str = "%s %s" % (now.format("Mon Jan 02 2006 15:04:05"), tz_str)
 
     url = "%s/partenze/%s/%s" % (VIAGGIATRENO_BASE, station_id, date_str)
     resp = http.get(url, ttl_seconds = 30)
 
     departures = []
     if resp.status_code == 200:
-        body = resp.body()
-        if body:
-            trains = resp.json()
-            if trains:
-                departures = trains
+        trains = resp.json()
+        if trains:
+            departures = trains
 
     # Ordina per orario di partenza
     departures = sorted(departures, key = lambda x: x.get("orarioPartenza", 0))
 
-    if departures and len(departures) > 0:
-        cache.set(cache_key, json.encode(departures), ttl_seconds = 30)
+    # Cache anche risultati vuoti per evitare richieste ripetute
+    cache.set(cache_key, json.encode(departures), ttl_seconds = 30)
 
-    return departures if departures else []
+    return departures
 
 def abbreviate_station(name):
     """Abbrevia il nome della stazione per adattarlo al display."""
@@ -366,20 +355,19 @@ def abbreviate_station(name):
 
 def search_stations(pattern):
     """Cerca stazioni per nome."""
+    default_options = [
+        schema.Option(display = station[0], value = station[1])
+        for station in DEFAULT_STATIONS
+    ]
+
     if not pattern or len(pattern) < 2:
-        return [
-            schema.Option(display = station[0], value = station[1])
-            for station in DEFAULT_STATIONS
-        ]
+        return default_options
 
     url = "%s/autocompletaStazione/%s" % (VIAGGIATRENO_BASE, pattern.upper())
     resp = http.get(url, ttl_seconds = 300)
 
     if resp.status_code != 200:
-        return [
-            schema.Option(display = station[0], value = station[1])
-            for station in DEFAULT_STATIONS
-        ]
+        return default_options
 
     body = resp.body()
     if not body:
