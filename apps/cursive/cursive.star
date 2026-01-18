@@ -25,7 +25,7 @@ SCREEN_HEIGHT = canvas.height()
 # RENDER HELPERS
 # ============================================================
 
-def dot(x, y, color = "#ff0"):
+def dot(x, y, color = "#fff000"):
     return render.Padding(
         pad = (int(x), int(y), 0, 0),
         child = render.Box(width = 1, height = 1, color = color),
@@ -35,7 +35,7 @@ def dot(x, y, color = "#ff0"):
 # BUILD ANIMATION FRAMES WITH SCROLLING
 # ============================================================
 
-def build_frames(word):
+def build_frames(word, pen_color = "#fff000"):
     frames = []
     drawn = []
 
@@ -75,7 +75,7 @@ def build_frames(word):
                 vx = d[0] - shift
                 vy = d[1]
                 if vx >= 0 and vx < SCREEN_WIDTH and vy >= 0 and vy < SCREEN_HEIGHT:
-                    visible_dots.append(dot(vx, vy))
+                    visible_dots.append(dot(vx, vy, pen_color))
 
             frames.append(render.Stack(children = visible_dots))
 
@@ -96,7 +96,7 @@ def main(config):
     return render.Root(
         delay = int(config.get("scroll", 45)),
         child = render.Animation(
-            children = build_frames(config.get("displaytext", "What a Great App")),
+            children = build_frames(config.get("displaytext", "What a Great App"), config.get("pen_color", "#fff000")),
         ),
         show_full_animation = True,
     )
@@ -126,6 +126,13 @@ def get_schema():
                 desc = "What text to display in cursive.",
                 default = "What a Great App",
                 icon = "envelopeOpenText",
+            ),
+            schema.Color(
+                id = "pen_color",
+                name = "Color",
+                desc = "Pen color for drawing the text.",
+                icon = "brush",
+                default = "#fff000",
             ),
             schema.Dropdown(
                 id = "scroll",
