@@ -6,9 +6,9 @@ Author: frame-shift
 """
 
 load("math.star", "math")
+load("palettes.star", "PALETTES")
 load("random.star", "random")
 load("render.star", "render")
-load("palettes.star", "PALETTES")
 
 HEX_VALUES = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f")
 DISPLAY_W = 64
@@ -38,5 +38,3 @@ def main():
     return render.Root(
         child = render.Row(children = color_boxes),
     )
-
-
