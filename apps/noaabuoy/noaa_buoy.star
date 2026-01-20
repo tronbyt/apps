@@ -73,10 +73,6 @@ HEX_CHARS = "0123456789abcdef"
 
 def to_hex(val):
     """Convert 0-255 int to two-char hex string"""
-    if val < 0:
-        val = 0
-    if val > 255:
-        val = 255
     return HEX_CHARS[val // 16] + HEX_CHARS[val % 16]
 
 def period_to_color(period, min_period = 10.0, max_period = 20.0):
@@ -115,7 +111,7 @@ def period_to_color(period, min_period = 10.0, max_period = 20.0):
 
     return "#" + to_hex(r) + to_hex(g) + to_hex(b)
 
-def fetch_spec_data(buoy_id, use_wind_swell = False):
+def fetch_spec_data(buoy_id, use_wind_swell = False, days = 5):
     """Fetch spectral data from NOAA for swell graph"""
     url = "https://www.ndbc.noaa.gov/data/realtime2/%s.spec" % buoy_id.upper()
     debug_print("Fetching spec data from: " + url)
@@ -128,8 +124,11 @@ def fetch_spec_data(buoy_id, use_wind_swell = False):
     lines = resp.body().split("\n")
     data_points = []
 
-    # Get current time for filtering last 5 days
+    # Get current time for filtering
     now = time.now()
+
+    # Calculate max age in seconds based on days parameter
+    max_age_seconds = days * 24 * 60 * 60
 
     for line in lines:
         # Skip comment lines
@@ -171,9 +170,9 @@ def fetch_spec_data(buoy_id, use_wind_swell = False):
         if ts == None:
             continue
 
-        # Filter to last 5 days (5 * 24 * 60 * 60 = 432000 seconds)
+        # Filter based on configured days
         age_seconds = (now - ts).seconds
-        if age_seconds > 432000:
+        if age_seconds > max_age_seconds:
             continue
 
         # Convert height to feet for display
@@ -190,7 +189,7 @@ def fetch_spec_data(buoy_id, use_wind_swell = False):
     # Data comes newest first, so reverse
     data_points = list(reversed(data_points))
 
-    debug_print("Parsed %d spec data points" % len(data_points))
+    debug_print("Parsed %d spec data points for %d days" % (len(data_points), days))
     return data_points
 
 def render_swell_graph(data_points, buoy_name, h_unit_pref, t_unit_pref, data, use_wind_swell = False):
@@ -678,8 +677,18 @@ def main(config):
         # Check if wind swell mode is enabled
         use_wind_swell = config.bool("wind_swell", False)
 
+        # Get graph duration in days (default 5, clamp to 1-40)
+        graph_days_str = config.get("graph_days", "5")
+        graph_days = 5
+        if graph_days_str.isdigit():
+            graph_days = int(graph_days_str)
+            if graph_days < 1:
+                graph_days = 1
+            elif graph_days > 40:
+                graph_days = 40
+
         # Fetch spectral data for graph
-        spec_data = fetch_spec_data(buoy_id, use_wind_swell)
+        spec_data = fetch_spec_data(buoy_id, use_wind_swell, graph_days)
         if spec_data and len(spec_data) >= 2:
             graph_result = render_swell_graph(spec_data, buoy_name if buoy_name else buoy_id, h_unit_pref, t_unit_pref, data, use_wind_swell)
             if graph_result:
@@ -1228,6 +1237,14 @@ def get_schema():
                 icon = "monument",
                 desc = "",
             ),
+            schema.Text(
+                id = "buoy_name",
+                name = "Custom Display Name",
+                icon = "user",
+                desc = "Leave blank to use NOAA defined name",
+                default = "",
+            ),
+
             schema.Toggle(
                 id = "display_swell",
                 name = "Display Swell",
@@ -1245,9 +1262,16 @@ def get_schema():
             schema.Toggle(
                 id = "display_graph",
                 name = "Display Swell Graph",
-                desc = "Show 5-day swell height graph with period coloring (blue=short, red=long)",
+                desc = "Show swell height graph with period coloring (blue=short, red=long)",
                 icon = "chartLine",
                 default = False,
+            ),
+            schema.Text(
+                id = "graph_days",
+                name = "Graph Duration (days)",
+                desc = "Number of days to display (1-40)",
+                icon = "calendar",
+                default = "5",
             ),
             schema.Toggle(
                 id = "display_wind",
@@ -1291,13 +1315,6 @@ def get_schema():
                 name = "Minimum Swell Size",
                 icon = "water",
                 desc = "Only display if swell is above minimum size",
-                default = "",
-            ),
-            schema.Text(
-                id = "buoy_name",
-                name = "Custom Display Name",
-                icon = "user",
-                desc = "Leave blank to use NOAA defined name",
                 default = "",
             ),
         ],
