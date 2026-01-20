@@ -176,24 +176,57 @@ def main(config):
 
     # Screen 2: Graph
     # Normalize graph data for height 20 (leaving space for title)
-    graph_height = 22
+    graph_height = 20
     max_val = 0.1 # avoid div by zero
     for v in sums["graph_data"]:
         if v > max_val:
             max_val = v
 
-    bars = []
-    for v in sums["graph_data"]:
-        h = int((v / max_val) * graph_height)
-        if h < 1 and v > 0: h = 1 # ensure some visibility if snow
-        bars.append(
-            render.Column(
-                main_align = "end",
-                children = [
-                    render.Box(width=8, height=h, color=SNOW_COLOR),
-                ]
+    # Bars and Labels
+    bars_children = []
+
+    dates = data["daily"]["time"] # Full list
+
+    for i, v in enumerate(sums["graph_data"]):
+        # Date index: 14 + i
+        date_str = dates[14+i]
+        date_obj = time.parse_time(date_str, "2006-01-02")
+        day_label = date_obj.format("Mon")[0] # First letter
+
+        # Vertical Budget (32px total):
+        # Header (6) + Padding (2) = 8 used. 24 remaining.
+        # Graph Block:
+        # Bar (Max 16)
+        # Spacer (1)
+        # Axis (6)
+        # Total Graph Block: ~23px
+
+        avail_bar_h = 16
+
+        h = int((v / max_val) * avail_bar_h)
+        if h < 1 and v > 0: h = 1
+
+        bars_children.append(
+            render.Box(
+                width = 9,
+                child = render.Column(
+                    main_align = "end",
+                    cross_align = "center",
+                    children = [
+                        render.Box(width=5, height=h, color="#0ff"), # Cyan Bar
+                        render.Box(height=1), # Spacer between bar and axis
+                        render.Text(day_label, font="tom-thumb", color="#888"), # Axis Label
+                    ]
+                )
             )
         )
+
+    bars_row = render.Row(
+        expanded = True,
+        main_align = "space_evenly",
+        cross_align = "end",
+        children = bars_children,
+    )
 
     screen2 = render.Padding(
         pad = 1,
@@ -201,12 +234,7 @@ def main(config):
             children = [
                 render.Text("Next 7 Days", color = TITLE_COLOR),
                 render.Box(height=1),
-                render.Row(
-                    expanded = True,
-                    main_align = "space_evenly",
-                    cross_align = "end",
-                    children = bars,
-                )
+                bars_row,
             ]
         )
     )
