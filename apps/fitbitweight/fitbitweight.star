@@ -169,12 +169,12 @@ def main(config):
     rows.append(render.Box(height = 1))  # 1 pixel horizontal separator
 
     if secondary_display == "bmi":
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, 26))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT-6))
     elif secondary_display == "bodyfat":
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR))
-        rows.append(get_plot_display_from_plot(fat_plot, FAT_COLOR))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR,int((SCREEN_HEIGHT-6)/2)))
+        rows.append(get_plot_display_from_plot(fat_plot, FAT_COLOR,int((SCREEN_HEIGHT-6)/2)))
     else:
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, 26))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT-6))
 
     return render.Root(
         child = render.Column(
@@ -280,35 +280,36 @@ def get_days_between(day1, day2):
     return days
 
 def get_plot_from_data(json_data, period):
-    plot = [(0, 0)]
-    if json_data == None:
-        return plot
+    if not json_data:
+        return [(0, 0)]
 
-    oldest_date = None
-    starting_value = None
+    points_in_period = []
     number_of_days = int(period)
 
     for i in json_data:
         for item in json_data[i]:
             current_date = get_timestamp_from_date(item["dateTime"])
-            current_value = float(item["value"])
-            days = get_days_between(time.now(), current_date)
-
-            if number_of_days == 0 or days < number_of_days:
-                if starting_value == None:
-                    starting_value = current_value
-                if oldest_date == None or current_date < oldest_date:
-                    oldest_date = current_date
-
-    plot = [(0, starting_value or 0)]
-    for i in json_data:
-        for item in json_data[i]:
-            current_date = get_timestamp_from_date(item["dateTime"])
-            current_value = float(item["value"])
             days = get_days_between(time.now(), current_date)
             if number_of_days == 0 or days < number_of_days:
-                x_val = get_days_between(current_date, oldest_date)
-                plot.append((x_val, current_value))
+                points_in_period.append({
+                    "date": current_date,
+                    "value": float(item["value"])
+                })
+    
+    if not points_in_period:
+        return [(0, 0)]
+
+    # Find oldest date
+    oldest_date = points_in_period[0]["date"]
+    for p in points_in_period[1:]:
+        if p["date"] < oldest_date:
+            oldest_date = p["date"]
+    
+    # Build plot
+    plot = []
+    for p in points_in_period:
+        x_val = get_days_between(p["date"], oldest_date)
+        plot.append((x_val, p["value"]))
 
     return plot
 
