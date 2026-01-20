@@ -13,11 +13,11 @@ Click Register an App
 
 Fill out the form:
 
-Application Name: TronbyT Weight Tracker (or anything)
+Application Name: Tidbyt Weight Tracker (or anything)
 
-Description: Displays Fitbit weight data on TronbyT
+Description: Displays Fitbit weight data on Tidbyt
 
-Application Website: https://tronbyt.com (or any URL)
+Application Website: https://tidbyt.com (or any URL)
 
 Organization: Your name
 
