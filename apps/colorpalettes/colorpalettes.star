@@ -12,7 +12,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 HEX_VALUES = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f")
-COLORS = ["red", "orange", "yellow", "green", "blue", "purple", "pink", "brown"]
+COLORS = ("red", "orange", "yellow", "green", "blue", "purple", "pink", "brown")
 DISPLAY_W = 64
 
 def main(config):
@@ -27,18 +27,15 @@ def main(config):
     """
 
     # --- gather list of colors user wants to see ---
-    allowed_colors = []
-    for c in COLORS:
-        if config.bool(c):
-            allowed_colors.append(c)
+    allowed_colors = [c for c in COLORS if config.bool(c)]
 
     if not allowed_colors:  # if every color is toggled off, then fallback to all colors
         allowed_colors = COLORS
 
-    # --- fetch palette info ---
-    palette_id, hex_codes, palette_colors = get_index(allowed_colors)
+    # --- fetch palette info; print results ---
+    palette_id, hex_codes, palette_colors = get_palette_info(tuple(allowed_colors))
 
-    print("FILTER PALETTES FOR: " + ", ".join(allowed_colors))
+    print("FIND PALETTES WITH ONE OF: " + ", ".join(allowed_colors))
     print("URL: https://www.colourpod.com/post/" + palette_id)
     print("HEX CODES: " + ", ".join(hex_codes))
     print("COLORS: " + ", ".join(palette_colors))
@@ -59,58 +56,45 @@ def main(config):
         child = render.Row(children = color_boxes),
     )
 
-def get_index(allowed_colors):
+def get_palette_info(allowed_colors):
     """
-    Generate a random index number (int) for PALETTES.
+    Selects a random palette that contains at least one of the allowed colors.
 
     Args:
-        allowed_colors (list of str): A list of strings of allowed colors. Accepted values are in COLORS.
+        allowed_colors (list of str): A list of strings of allowed colors.
 
     Returns:
-        get_palette(index, allowed_colors) : Fetches the palette.
+        tuple: (palette_id, hex_codes, palette_colors) for a matching palette.
     """
 
-    index = random.number(0, len(PALETTES) - 1)
-    return get_palette(index, allowed_colors)
+    # --- compile palettes that match allowed_colors ---
+    matching_palettes = []
 
-def get_palette(index, allowed_colors):
-    """
-    Filter for palettes that contain at least one the allowed colors.
-
-    Args:
-        index (int): Index number of PALETTES.
-        allowed_colors (list of str): A list of strings of allowed colors. Accepted values are in COLORS.
-
-    Returns:
-        If the palette has one of the colors in allowed_colors:
-            palette_id (str): The ID of the palette that matches the URL for Colourpod.
-            hex_codes (list of str): A list of hex codes that make up the palette, formatted as '#a1b2c3'
-            palette_colors (list of str): A list of colors found in the palette. Values are found in COLORS.
-        If the palette does not have one of the colors in allowed_colors:
-            get_index(allowed_colors): Retry for another palette by getting a new index number.
-    """
-
-    palette_id = PALETTES[index]["id"]
-    hex_codes = PALETTES[index]["codes"]
-    palette_colors = PALETTES[index]["colors"]
-
-    # --- check if the palette has one of the allowed_colors ---
-    good_colors = []
-    for c in allowed_colors:
-        if c in palette_colors:
-            good_colors.append(c)
-
-    if len(good_colors) > 0:
-        return palette_id, hex_codes, palette_colors
+    if allowed_colors == COLORS:  # if all colors selected, then skip compiling
+        search_list = PALETTES
     else:
-        return get_index(allowed_colors)
+        compiled_ids = []
+        for palette in PALETTES:
+            for color in palette["colors"]:
+                if color in allowed_colors and palette["id"] not in compiled_ids:
+                    matching_palettes.append(palette)
+                    compiled_ids.append(palette["id"])
+        search_list = matching_palettes
+
+    if not matching_palettes:  # fallback to all palettes if no color match
+        search_list = PALETTES
+
+    # --- select and return palette ---
+    idx = random.number(0, len(search_list) - 1)
+    selected_palette = search_list[idx]
+
+    return selected_palette["id"], selected_palette["codes"], selected_palette["colors"]
 
 def get_schema():
     """
-    User options.
-
-    Defaults all colors to True.
+    User options. Defaults every color to True.
     """
+
     return schema.Schema(
         version = "1",
         fields = [
