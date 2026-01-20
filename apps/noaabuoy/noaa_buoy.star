@@ -8,7 +8,6 @@ Author: tavdog
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -82,6 +81,7 @@ def to_hex(val):
 
 def period_to_color(period, min_period = 10.0, max_period = 20.0):
     """Map swell period to color: blue (short period) -> red (long period)"""
+
     # Clamp period to range
     if period < min_period:
         period = min_period
@@ -273,13 +273,12 @@ def render_swell_graph(data_points, buoy_name, h_unit_pref, t_unit_pref, data, u
     if latest:
         swh = latest["swh"]
         swp = latest["swp"]
+    elif use_wind_swell:
+        swh = float(data.get("WIND_WVHT", "0") or "0")
+        swp = float(data.get("WIND_DPD", "0") or "0")
     else:
-        if use_wind_swell:
-            swh = float(data.get("WIND_WVHT", "0") or "0")
-            swp = float(data.get("WIND_DPD", "0") or "0")
-        else:
-            swh = float(data.get("WVHT", "0") or "0")
-            swp = float(data.get("DPD", "0") or "0")
+        swh = float(data.get("WVHT", "0") or "0")
+        swp = float(data.get("DPD", "0") or "0")
 
     # Determine swell color based on height
     if swh < 2:
@@ -675,7 +674,6 @@ def main(config):
             ),
         )
 
-    # SWELL GRAPH #################################################
     elif config.bool("display_graph", False):
         # Check if wind swell mode is enabled
         use_wind_swell = config.bool("wind_swell", False)
