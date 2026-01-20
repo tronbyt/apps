@@ -169,12 +169,12 @@ def main(config):
     rows.append(render.Box(height = 1))  # 1 pixel horizontal separator
 
     if secondary_display == "bmi":
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT-6))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT - 6))
     elif secondary_display == "bodyfat":
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR,int((SCREEN_HEIGHT-6)/2)))
-        rows.append(get_plot_display_from_plot(fat_plot, FAT_COLOR,int((SCREEN_HEIGHT-6)/2)))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, int((SCREEN_HEIGHT - 6) / 2)))
+        rows.append(get_plot_display_from_plot(fat_plot, FAT_COLOR, int((SCREEN_HEIGHT - 6) / 2)))
     else:
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT-6))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT - 6))
 
     return render.Root(
         child = render.Column(
@@ -293,9 +293,9 @@ def get_plot_from_data(json_data, period):
             if number_of_days == 0 or days < number_of_days:
                 points_in_period.append({
                     "date": current_date,
-                    "value": float(item["value"])
+                    "value": float(item["value"]),
                 })
-    
+
     if not points_in_period:
         return [(0, 0)]
 
@@ -304,7 +304,7 @@ def get_plot_from_data(json_data, period):
     for p in points_in_period[1:]:
         if p["date"] < oldest_date:
             oldest_date = p["date"]
-    
+
     # Build plot
     plot = []
     for p in points_in_period:
