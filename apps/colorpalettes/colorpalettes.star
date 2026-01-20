@@ -73,12 +73,12 @@ def get_palette_info(allowed_colors):
     if allowed_colors == COLORS:  # if all colors selected, then skip compiling
         search_list = PALETTES
     else:
-        compiled_ids = []
+        allowed_colors_set = set(allowed_colors)
+        seen_ids = set()
         for palette in PALETTES:
-            for color in palette["colors"]:
-                if color in allowed_colors and palette["id"] not in compiled_ids:
-                    matching_palettes.append(palette)
-                    compiled_ids.append(palette["id"])
+            if set(palette["colors"]).intersection(allowed_colors_set) and palette["id"] not in seen_ids:
+                matching_palettes.append(palette)
+                seen_ids.add(palette["id"])
         search_list = matching_palettes
 
     if not matching_palettes:  # fallback to all palettes if no color match
