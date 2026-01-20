@@ -1244,7 +1244,6 @@ def get_schema():
                 desc = "Leave blank to use NOAA defined name",
                 default = "",
             ),
-
             schema.Toggle(
                 id = "display_swell",
                 name = "Display Swell",
