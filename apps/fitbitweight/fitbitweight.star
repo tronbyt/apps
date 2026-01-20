@@ -5,181 +5,176 @@ Description: Displays your Fitbit recent weigh-ins.
 Author: Robert Ison
 """
 
-load("encoding/json.star", "json")
+load("cache.star", "cache")
+load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("images/fitbit_logo.png", FITBIT_LOGO_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-#App Settings
+# App Settings
 CACHE_TTL = 60 * 60 * 24  # updates once daily
-
-#OAuth Information
-FITBIT_CLIENT_ID = "238FC5"
-OAUTH2_CLIENT_SECRET = secret.decrypt("AV6+xWcE74PvLnAK9o2UbKXs4mvqPOtEMJzu/AvYJQzd9Ngjvk/N5Ee2G3YD4+EF5TMJyWSs85/MoOk2VZWddwZh7+Zld7+ySKsF49sF+4tFGEQjOqVOebCiKpL1YpwFcBmC0em2bLFO890zJRjVUHDDLfXXkasbIftnKofwR49Kpga5oAY=")
-FITBIT_SECRET = "MjM4RkM1OjEzYzEwMzhjZGQ0MzRmZWJjODYzMThjZDQzMjJiNDg5"  # secret.decrypt("AV6+xWcEqLZ1+KzoRlbZYXgEWLJLeCrHXA6fcqjagRi/gRlH7Wmj8QWepc+JB5HCy40CzovjbZM1zV3VFuVvATRXmtLsalSRWwwwc6Wrh00dfUGD/xK7eZLyA3Oua2rvnzD1QguqODgWr57RguybEGXEfaPc6McM0L10raV3xJS8cGJgGlT3lR67z1EeyybGYMMlAwDnopGKBQ==")
-FITBIT_REDIRECT_URI = "https://appauth.tidbyt.com/fitbitweight"  #https://localhost:8080/ or https://appauth.tidbyt.com/fitbitweight
-FITBIT_BASE = "https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=238FC5&redirect_uri=https%3A%2F%2Fappauth.tidbyt.com%2FFitbitWeight&scope=profile%20weight&expires_in=604800"
-FITBIT_SCOPES = "profile weight activity"
 FITBIT_TOKEN_URL = "https://api.fitbit.com/oauth2/token"
 FITBIT_DATA_URL = "https://api.fitbit.com/1/user/-/body/%s/date/today/max.json"
 FITBIT_DATA_KEYS = ("weight", "fat", "bmi")
 
-#Fitbit Data Display
+# Fitbit Data Display
 DISPLAY_FONT = "CG-pixel-3x5-mono"
 FAT_COLOR = "#b9d9eb"
-FITBIT_LOGO = FITBIT_LOGO_ASSET.readall()
-KILOGRAMS_TO_POUNDS_MULTIPLIER = float(2.2)
+KILOGRAMS_TO_POUNDS_MULTIPLIER = 2.2
 WEIGHT_COLOR = "#00B0B9"
 WHITE_COLOR = "#FFF"
 
-# buildifier: disable=function-docstring
-def main(config):
-    #get user settings
-    #authorization_code = config.get("code")
+# Canvas
+SCREEN_WIDTH = canvas.width()
+SCREEN_HEIGHT = canvas.height()
 
-    #As part of getting "Auth", this will also run oauth_handler
-    #which in turn sets some cached items, so this line
-    #is deceptive in that it does mo"re than just get the refresh token
-    refresh_token = config.get("auth")  # or "putvalidrefresh_tokenhere"
+def main(config):
+    refresh_token = cache.get("fitbit_refresh_token")
+    auth_code = config.get("auth_code")  # one-time Fitbit authorization code
+    client_id = config.get("client_id")
+    client_secret = config.get("client_secret")
+
+    if not client_id or not client_secret:
+        return []
+
+    access_token = None
+
+    # If we don't have a refresh token yet but we *do* have an auth code,
+    # first exchange the code for access+refresh tokens.
+    if not refresh_token and auth_code:
+        print("Using auth_code flow")
+        access_token, refresh_token = exchange_code_for_tokens(auth_code, client_id, client_secret)
+
+        # Cache refresh token for future runs (30 days TTL)
+        cache.set("fitbit_refresh_token", refresh_token, ttl_seconds = 30 * 24 * 3600)
+    elif not refresh_token:
+        # No refresh token and no auth code: nothing we can do
+        print("No auth_code or refresh_token; exiting")
+        return []
+
+    # If we didn't just get an access_token from the code exchange,
+    # do the normal refresh flow.
+    if access_token == None:
+        access_token, new_refresh_token = get_access_token(refresh_token, client_id, client_secret)
+
+        # Store new refresh token in cache for future runs (30 days TTL)
+        cache.set("fitbit_refresh_token", new_refresh_token, ttl_seconds = 30 * 24 * 3600)
 
     period = config.get("period") or "0"
     system = config.get("system") or "imperial"
     secondary_display = config.get("second") or "none"
 
-    weight_json = None
-    fat_json = None
-    bmi_json = None
+    # Fetch data
+    weight_json = get_data_from_fitbit(access_token, FITBIT_DATA_URL % "weight")
+    fat_json = get_data_from_fitbit(access_token, FITBIT_DATA_URL % "fat")
+    bmi_json = get_data_from_fitbit(access_token, FITBIT_DATA_URL % "bmi")
 
-    fitbit_json_items = [weight_json, fat_json, bmi_json]
-
-    if not refresh_token:
-        weight_json = json.decode(EXAMPLE_DATA)
-        fat_json = json.decode(EXAMPLE_DATA_FAT)
-        bmi_json = json.decode(EXAMPLE_DATA_BMI)
-    else:
-        access_token = get_access_token(refresh_token)
-
-        #Now we have an access token, either from cache or using refresh_token
-        #so let's get  data from cache, then if it's not there
-        #We'll go reload it with our access_token
-        #We need data for weight, bmi and body fat %
-        i = 0
-
-        # For weight, fat % and bmi, let's get the data from cache, and if it doesn't exist, get it from fitbit
-        for item in FITBIT_DATA_KEYS:
-            fitbit_json_items[i] = get_data_from_fitbit(access_token, (FITBIT_DATA_URL % (item)))
-            i = i + 1
-
-        # Ugh, fix to actually put data into what I'm checking
-        weight_json = fitbit_json_items[0]
-        fat_json = fitbit_json_items[1]
-        bmi_json = fitbit_json_items[2]
-
-    #Defalt Values
+    # Default values
     current_weight = 0
     first_weight = 0
     current_fat = 0
     current_bmi = 0
     first_weight_date = None
 
-    #Process Data
-    if weight_json != None:
-        if len(weight_json["body-weight"]) > 0:
-            current_weight = float(weight_json["body-weight"][-1]["value"])
-            first_weight = float((get_starting_value(weight_json, period, "value")))
-            if first_weight < 0:
-                first_weight = 0
-            first_weight_date = get_starting_value(weight_json, period, "dateTime")
+    # Process data
+    if weight_json != None and len(weight_json["body-weight"]) > 0:
+        current_weight = float(weight_json["body-weight"][-1]["value"])
+        first_weight = float(get_starting_value(weight_json, period, "value"))
+        if first_weight < 0:
+            first_weight = 0
+        first_weight_date = get_starting_value(weight_json, period, "dateTime")
 
-    if (fat_json != None):
-        if len(fat_json["body-fat"]) > 0:
-            current_fat = float(fat_json["body-fat"][-1]["value"])
+    if fat_json != None and len(fat_json["body-fat"]) > 0:
+        current_fat = float(fat_json["body-fat"][-1]["value"])
 
-    if (bmi_json != None):
-        if len(bmi_json["body-bmi"]) > 0:
-            current_bmi = float(bmi_json["body-bmi"][-1]["value"])
+    if bmi_json != None and len(bmi_json["body-bmi"]) > 0:
+        current_bmi = float(bmi_json["body-bmi"][-1]["value"])
 
-    #convert to imperial if need be
+    # Convert to imperial if needed
     if system == "metric":
         display_units = "KGs"
     else:
         display_units = "LBs"
-        current_weight = float(current_weight) * KILOGRAMS_TO_POUNDS_MULTIPLIER
-        first_weight = float(first_weight) * KILOGRAMS_TO_POUNDS_MULTIPLIER
+        current_weight *= KILOGRAMS_TO_POUNDS_MULTIPLIER
+        first_weight *= KILOGRAMS_TO_POUNDS_MULTIPLIER
 
     weight_change = current_weight - first_weight
-
-    # The - sign is part of the number, but I want a "+" sign if there is a gain
-    sign = ""
-    if weight_change > 0:
-        sign = "+"
+    sign = "+" if weight_change > 0 else ""
 
     weight_plot = get_plot_from_data(weight_json, period)
     fat_plot = get_plot_from_data(fat_json, period)
-    # Unless your height is changing, the weight_plot and bmi_plot is identical, and looks stupid
-    # So let's just show the weight with current BMI info added, but not the second plot
-    #bmi_plot = get_plot_from_data(bmi_json, period)
 
-    display_weight = "%s%s " % ((humanize.comma(int(current_weight * 100) // 100.0)), display_units)
+    display_weight = "%s%s " % (humanize.comma(int(current_weight * 100) // 100.0), display_units)
+
+    # Build numbers row
     if secondary_display == "bodyfat" and current_fat > 0:
         numbers_row = render.Row(
             main_align = "left",
             children = [
                 render.Text(display_weight, color = WEIGHT_COLOR, font = DISPLAY_FONT),
                 render.Marquee(
-                    width = 32,
-                    child =
-                        render.Text(("%s%% body fat" % (humanize.comma(int(current_fat * 100) // 100.0))), color = FAT_COLOR, font = DISPLAY_FONT),
+                    width = int(SCREEN_WIDTH / 2),
+                    child = render.Text(
+                        "%s%% body fat" % (humanize.comma(int(current_fat * 100) // 100.0)),
+                        color = FAT_COLOR,
+                        font = DISPLAY_FONT,
+                    ),
                 ),
             ],
         )
     elif secondary_display == "bmi" and current_bmi > 0:
         display_color = get_bmi_display(current_bmi)
-
         numbers_row = render.Row(
             main_align = "left",
             children = [
                 render.Text(display_weight, color = WEIGHT_COLOR, font = DISPLAY_FONT),
                 render.Marquee(
-                    width = 32,
-                    child = render.Text(("BMI: %s %s" % (humanize.comma(int(current_bmi * 100) // 100.0), display_color[0])), color = display_color[1], font = DISPLAY_FONT),
+                    width = int(SCREEN_WIDTH / 2),
+                    child = render.Text(
+                        "BMI: %s %s" % (humanize.comma(int(current_bmi * 100) // 100.0), display_color[0]),
+                        color = display_color[1],
+                        font = DISPLAY_FONT,
+                    ),
                 ),
             ],
         )
     else:
-        if first_weight_date == -1:
-            first_weight_display = ""
-        else:
-            first_weight_display = "since %s " % first_weight_date
-
+        first_weight_display = "" if first_weight_date == -1 else "since %s " % first_weight_date
         numbers_row = render.Row(
             main_align = "left",
             children = [
                 render.Text(display_weight, color = WHITE_COLOR, font = DISPLAY_FONT),
                 render.Marquee(
-                    width = 32,
-                    child = render.Text("%s%s %s %s" % (sign, humanize.comma(int(weight_change * 100) // 100.0), display_units, first_weight_display), color = WEIGHT_COLOR, font = DISPLAY_FONT),
+                    width = int(SCREEN_WIDTH / 2),
+                    child = render.Text(
+                        "%s%s %s %s" %
+                        (
+                            sign,
+                            humanize.comma(int(weight_change * 100) // 100.0),
+                            display_units,
+                            first_weight_display,
+                        ),
+                        color = WEIGHT_COLOR,
+                        font = DISPLAY_FONT,
+                    ),
                 ),
             ],
         )
 
-    #Build the display in rows
+    # Build display rows
     rows = [numbers_row]
+    rows.append(render.Box(height = 1))  # 1 pixel horizontal separator
 
-    #1 pixel tall horizontal separator
-    rows.append(render.Box(height = 1))
     if secondary_display == "bmi":
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, 26))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT - 6))
     elif secondary_display == "bodyfat":
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR))
-        rows.append(get_plot_display_from_plot(fat_plot, FAT_COLOR))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, int((SCREEN_HEIGHT - 6) / 2)))
+        rows.append(get_plot_display_from_plot(fat_plot, FAT_COLOR, int((SCREEN_HEIGHT - 6) / 2)))
     else:
-        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, 26))
+        rows.append(get_plot_display_from_plot(weight_plot, WEIGHT_COLOR, SCREEN_HEIGHT - 6))
 
     return render.Root(
         child = render.Column(
@@ -188,131 +183,92 @@ def main(config):
         ),
     )
 
-# buildifier: disable=function-docstring
+def exchange_code_for_tokens(auth_code, client_id, client_secret):
+    # Build Basic auth header
+    auth_raw = client_id + ":" + client_secret
+    auth_b64 = base64.encode(auth_raw)
+
+    headers = {
+        "Authorization": "Basic " + auth_b64,
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    # MUST match your Fitbit app redirect URI exactly
+    redirect_uri = "http://localhost/"  # e.g. "https://example.com/fitbit/callback"
+
+    form_body = {
+        "grant_type": "authorization_code",
+        "code": auth_code,
+        "redirect_uri": redirect_uri,
+    }
+
+    res = http.post(
+        url = FITBIT_TOKEN_URL,
+        headers = headers,
+        form_body = form_body,
+        ttl_seconds = 1800,
+    )
+
+    if res.status_code != 200:
+        fail("Fitbit code exchange failed: %d - %s" % (res.status_code, res.body()))
+
+    token_params = res.json()
+
+    # Returns both tokens; caller should cache the refresh_token
+    return token_params["access_token"], token_params["refresh_token"]
+
+def get_access_token(refresh_token, client_id, client_secret):
+    print("get_access_token using refresh_token:", refresh_token)
+
+    auth_raw = client_id + ":" + client_secret
+    auth_b64 = base64.encode(auth_raw)
+
+    headers = {
+        "Authorization": "Basic " + auth_b64,
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    form_body = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+
+    res = http.post(
+        url = FITBIT_TOKEN_URL,
+        headers = headers,
+        form_body = form_body,
+        ttl_seconds = 1800,
+    )
+
+    if res.status_code != 200:
+        fail("Fitbit token refresh failed: %d - %s" % (res.status_code, res.body()))
+
+    token_params = res.json()
+
+    # Fitbit returns a new refresh_token; you must store it
+    return token_params["access_token"], token_params["refresh_token"]
+
+def get_data_from_fitbit(access_token, data_url):
+    res = http.get(
+        url = data_url,
+        headers = {"Authorization": "Bearer %s" % access_token},
+        ttl_seconds = CACHE_TTL,
+    )
+    if res.status_code == 200:
+        return res.json()
+    else:
+        return None
+
 def get_starting_value(json_data, period, itemName = "value"):
     for i in json_data:
         for item in json_data[i]:
             current_date = get_timestamp_from_date(item["dateTime"])
-
             date_diff = time.now() - current_date
             days = math.floor(date_diff.hours // 24)
-
             number_of_days = int(period)
-
             if number_of_days == 0 or days < number_of_days:
                 return item[itemName]
     return -1
-
-def get_bmi_display(bmi):
-    """ Gets BMI Display
-
-    Args:
-        bmi: bmi data
-    Returns:
-        Bmi status (underweight, overweight etc.)
-    """
-    if bmi < 19:
-        #Underweight
-        return ("Underweight", "#01b0f1")
-    elif bmi < 25:
-        #Healthy
-        return ("Healthy", "#5fa910")
-    elif bmi < 30:
-        #Overweight
-        return ("Overweight", "#ff0")
-    elif bmi < 40:
-        #obese
-        return ("Obese", "#e77a22")
-    else:
-        #Extremely Obese
-        return ("Extremely Obese", "#f00")
-
-def get_plot_display_from_plot(plot, color = WHITE_COLOR, height = 13):
-    # x_lim and y_lim not required. The render.plot is smart enough to figure out the limits based on the data provided in plot
-    return render.Plot(
-        data = plot,
-        width = 64,
-        height = height,
-        color = color,
-        fill = True,
-    )
-
-def get_plot_from_data(json_data, period):
-    """ Gets the plot from the json_data for the given period
-
-    Args:
-        json_data: from FitBit
-        period: to determine what date range to display
-    Returns:
-        Plot
-    """
-
-    #initialize
-    oldest_date = None
-    newest_date = None
-    smallest = None
-    largest = None
-    starting_value = None
-    item_count = 0
-    number_of_days = int(period)
-
-    # initialize -- reinitialize if we find we have data to present
-    plot = [(0, 0)]
-
-    if json_data != None:
-        # loop through data, find the bounds needed to plot the points
-        for i in json_data:
-            for item in json_data[i]:
-                current_date = get_timestamp_from_date(item["dateTime"])
-                current_value = float(item["value"])
-                date_diff = time.now() - current_date
-                days = math.floor(date_diff.hours // 24)
-
-                if number_of_days == 0 or days < number_of_days:
-                    item_count = item_count + 1
-
-                    #get starting value
-                    if starting_value == None:
-                        starting_value = current_value
-
-                    #get the oldest date
-                    if oldest_date == None:
-                        oldest_date = current_date
-                    elif current_date < oldest_date:
-                        oldest_date = current_date
-
-                    #get the newest date
-                    if newest_date == None:
-                        newest_date = current_date
-                    elif current_date > newest_date:
-                        newest_date = current_date
-
-                    #get smallest
-                    if smallest == None:
-                        smallest = current_value
-                    elif current_value < smallest:
-                        smallest = current_value
-
-                    #get largest
-                    if largest == None:
-                        largest = current_value
-                    elif current_value > largest:
-                        largest = current_value
-
-            # initialize graph
-            plot = [(0, starting_value)]
-            for item in json_data[i]:
-                item_count = item_count + 1
-                current_date = get_timestamp_from_date(item["dateTime"])
-                current_value = float(item["value"])
-                days = get_days_between(time.now(), current_date)
-
-                if number_of_days == 0 or days < number_of_days:
-                    y_val = current_value
-                    x_val = get_days_between(current_date, oldest_date)
-                    plot.append((x_val, y_val))
-
-    return plot
 
 def get_timestamp_from_date(date_string):
     date_parts = str(date_string).split("-")
@@ -323,95 +279,64 @@ def get_days_between(day1, day2):
     days = math.floor(date_diff.hours // 24)
     return days
 
-def oauth_handler(params):
-    params = json.decode(params)
-    authorization_code = params.get("code")
-    return get_refresh_token(authorization_code)
+def get_plot_from_data(json_data, period):
+    if not json_data:
+        return [(0, 0)]
 
-# buildifier: disable=function-docstring
-def get_data_from_fitbit(access_token, data_url):
-    res = http.get(
-        url = data_url,
-        headers = {
-            "Authorization": "Bearer %s" % access_token,
-        },
-        ttl_seconds = CACHE_TTL,
+    points_in_period = []
+    number_of_days = int(period)
+
+    for i in json_data:
+        for item in json_data[i]:
+            current_date = get_timestamp_from_date(item["dateTime"])
+            days = get_days_between(time.now(), current_date)
+            if number_of_days == 0 or days < number_of_days:
+                points_in_period.append({
+                    "date": current_date,
+                    "value": float(item["value"]),
+                })
+
+    if not points_in_period:
+        return [(0, 0)]
+
+    # Find oldest date
+    oldest_date = points_in_period[0]["date"]
+    for p in points_in_period[1:]:
+        if p["date"] < oldest_date:
+            oldest_date = p["date"]
+
+    # Build plot
+    plot = []
+    for p in points_in_period:
+        x_val = get_days_between(p["date"], oldest_date)
+        plot.append((x_val, p["value"]))
+
+    return plot
+
+def get_plot_display_from_plot(plot, color = WHITE_COLOR, height = 13):
+    return render.Plot(
+        data = plot,
+        width = SCREEN_WIDTH,
+        height = height,
+        color = color,
+        fill = True,
     )
 
-    if res.status_code == 200:
-        return res.json()
+def get_bmi_display(bmi):
+    if bmi < 19:
+        return ("Underweight", "#01b0f1")
+    elif bmi < 25:
+        return ("Healthy", "#5fa910")
+    elif bmi < 30:
+        return ("Overweight", "#ff0")
+    elif bmi < 40:
+        return ("Obese", "#e77a22")
     else:
-        return None
+        return ("Extremely Obese", "#f00")
 
-# buildifier: disable=function-docstring
-def get_refresh_token(authorization_code):
-    form_body = dict(
-        clientId = FITBIT_CLIENT_ID,
-        grant_type = "authorization_code",
-        redirect_uri = FITBIT_REDIRECT_URI,
-        code = authorization_code,
-    )
-
-    headers = dict(
-        Authorization = "Basic %s" % FITBIT_SECRET,
-        ContentType = "application/x-www-form-urlencoded",
-    )
-
-    res = http.post(
-        url = FITBIT_TOKEN_URL,
-        headers = headers,
-        form_body = form_body,
-    )
-
-    if res.status_code != 200:
-        fail("token request failed with status code: %d - %s" %
-             (res.status_code, res.body()))
-
-    token_params = res.json()
-    refresh_token = token_params["refresh_token"]
-
-    return refresh_token
-
-def get_cache_user_identifier(refresh_token):
-    return "%s/user_id" % refresh_token
-
-def get_access_token(refresh_token):
-    """ Gets the access token
-
-    Args:
-        refresh_token: refersh token that was saved off earlier
-
-    Returns:
-        access token
-    """
-
-    headers = dict(
-        Authorization = "Basic %s" % FITBIT_SECRET,
-        ContentType = "application/x-www-form-urlencoded",
-    )
-
-    form_body = dict(
-        grant_type = "refresh_token",
-        refresh_token = refresh_token,
-    )
-
-    res = http.post(
-        url = FITBIT_TOKEN_URL,
-        headers = headers,
-        form_body = form_body,
-        ttl_seconds = 1800,
-    )
-
-    if res.status_code != 200:
-        #print("Error Calling Fitbit Token: %s" % (res.body()))
-        fail("token request failed with status code: %d - %s" %
-             (res.status_code, res.body()))
-
-    token_params = res.json()
-    access_token = token_params["access_token"]
-
-    return access_token
-
+#------------------------
+# Schema
+#------------------------
 def get_schema():
     period_options = [
         schema.Option(value = "7", display = "7 Days"),
@@ -439,23 +364,32 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.OAuth2(
-                id = "auth",
+            schema.Text(
+                id = "client_id",
+                name = "Fitbit Client ID",
+                desc = "Your Fitbit app client ID.",
                 icon = "user",
-                name = "Fitbit",
-                desc = "Connect to your Fitbit account.",
-                handler = oauth_handler,
-                client_id = str(FITBIT_CLIENT_ID),
-                authorization_endpoint = "https://www.fitbit.com/oauth2/authorize",
-                scopes = [
-                    FITBIT_SCOPES,
-                ],
+                secret = True,
+            ),
+            schema.Text(
+                id = "client_secret",
+                name = "Fitbit Client Secret",
+                desc = "Your Fitbit app client secret.",
+                icon = "user",
+                secret = True,
+            ),
+            schema.Text(
+                id = "auth_code",
+                name = "Fitbit Auth Code",
+                desc = "Your Fitbit authorization code.",
+                icon = "user",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "period",
                 name = "Period",
                 desc = "The length of time to chart.",
-                icon = "stopwatch",  #"calendarCheck",
+                icon = "stopwatch",
                 options = period_options,
                 default = period_options[0].value,
             ),
@@ -477,55 +411,3 @@ def get_schema():
             ),
         ],
     )
-
-EXAMPLE_DATA_FAT = """
-{
-    "body-fat": [{
-        "dateTime": "2022-09-02",
-        "value": "32.423999786376953"
-    }, {
-        "dateTime": "2022-09-04",
-        "value": "31.444000244140625"
-    }, {
-        "dateTime": "2022-09-06",
-        "value": "30.30500030517578"
-    }, {
-        "dateTime": "2022-09-08",
-        "value": "27.204999923706055"
-    }]
-}
-"""
-EXAMPLE_DATA_BMI = """
-{
-    "body-bmi": [{
-        "dateTime": "2022-09-02",
-        "value": "40.607765197753906"
-    }, {
-        "dateTime": "2022-09-04",
-        "value": "30.561622619628906"
-    }, {
-        "dateTime": "2022-09-06",
-        "value": "20.626222610473633"
-    }, {
-        "dateTime": "2022-09-08",
-        "value": "20.592384338378906"
-    }]
-}
-"""
-EXAMPLE_DATA = """
-{
-    "body-weight": [{
-        "dateTime": "2022-09-02",
-        "value": "150"
-    }, {
-        "dateTime": "2022-09-04",
-        "value": "110"
-    }, {
-        "dateTime": "2022-09-06",
-        "value": "100"
-    }, {
-        "dateTime": "2022-09-08",
-        "value": "90"
-    }]
-}
-"""
