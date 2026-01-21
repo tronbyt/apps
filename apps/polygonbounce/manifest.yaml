@@ -7,3 +7,4 @@ author: Brombomb
 fileName: polygon_bounce.star
 packageName: polygonbounce
 supports2x: true
+minPixletVersion: 'v0.50.0'

@@ -145,7 +145,7 @@ def main(config):
         children = []
 
         # Draw trails and current frame
-        for _, poly_points in enumerate(history):
+        for poly_points in history:
             # Draw lines connecting vertices
             for i in range(len(poly_points)):
                 p1 = poly_points[i]
@@ -204,13 +204,18 @@ def get_schema():
         schema.Option(display = "Plaid", value = "Plaid"),
     ]
 
+    history_options = [
+        schema.Option(display = str(i), value = str(i))
+        for i in range(1, 11)
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
             schema.Dropdown(
                 id = "side_count",
                 name = "Number of Sides",
-                desc = "How many vertices the polygon has.",
+                desc = "How many edges the polygon has.",
                 icon = "shapes",
                 default = DEFAULT_SIDES,
                 options = side_options,
@@ -233,12 +238,13 @@ def get_schema():
                 icon = "brush",
                 default = DEFAULT_COLOR,
             ),
-            schema.Text(
+            schema.Dropdown(
                 id = "history_length",
                 name = "History Length",
                 desc = "Length of the trail (1-10)",
                 icon = "clock",
                 default = DEFAULT_HISTORY,
+                options = history_options,
             ),
             schema.Dropdown(
                 id = "speed",
