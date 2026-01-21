@@ -690,6 +690,18 @@ def main(config):
         # Fetch spectral data for graph
         spec_data = fetch_spec_data(buoy_id, use_wind_swell, graph_days)
         if spec_data and len(spec_data) >= 2:
+            # Check size threshold against latest data point
+            latest_swh = spec_data[-1]["swh"]  # Already in feet
+            if h_unit_pref == "meters":
+                latest_swh_display = latest_swh / 3.281
+            else:
+                latest_swh_display = latest_swh
+
+            # Apply minimum size threshold
+            if min_size != "0" and float(min_size) > 0:
+                if latest_swh_display < float(min_size):
+                    return []
+
             graph_result = render_swell_graph(spec_data, buoy_name if buoy_name else buoy_id, h_unit_pref, t_unit_pref, data, use_wind_swell)
             if graph_result:
                 return graph_result
