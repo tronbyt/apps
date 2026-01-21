@@ -29,7 +29,6 @@ WHITE_COLOR = "#FFF"
 
 FITBIT_REFRESH_TOKEN_CACHE_NAME = "fitbit_refresh_token"
 
-
 # Canvas
 SCREEN_WIDTH = canvas.width()
 SCREEN_HEIGHT = canvas.height()
@@ -188,8 +187,13 @@ def main(config):
 
 def exchange_code_for_tokens(auth_code, client_id, client_secret):
     # Build Basic auth header
+    print("CLIENT_ID:", client_id)
+    print("CLIENT_SECRET length:", len(client_secret or ""))
     auth_raw = client_id + ":" + client_secret
+    print("AUTH_RAW:", auth_raw)
+
     auth_b64 = base64.encode(auth_raw)
+    print("AUTH_HEADER:", "Basic " + auth_b64)
 
     headers = {
         "Authorization": "Basic " + auth_b64,
