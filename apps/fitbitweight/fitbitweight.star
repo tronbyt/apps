@@ -27,12 +27,14 @@ KILOGRAMS_TO_POUNDS_MULTIPLIER = 2.2
 WEIGHT_COLOR = "#00B0B9"
 WHITE_COLOR = "#FFF"
 
+FITBIT_REFRESH_TOKEN_CACHE_NAME = "fitbit_refresh_token"
+
 # Canvas
 SCREEN_WIDTH = canvas.width()
 SCREEN_HEIGHT = canvas.height()
 
 def main(config):
-    refresh_token = cache.get("fitbit_refresh_token")
+    refresh_token = cache.get(FITBIT_REFRESH_TOKEN_CACHE_NAME)
     auth_code = config.get("auth_code")  # one-time Fitbit authorization code
     client_id = config.get("client_id")
     client_secret = config.get("client_secret")
@@ -49,7 +51,7 @@ def main(config):
         access_token, refresh_token = exchange_code_for_tokens(auth_code, client_id, client_secret)
 
         # Cache refresh token for future runs (30 days TTL)
-        cache.set("fitbit_refresh_token", refresh_token, ttl_seconds = 30 * 24 * 3600)
+        cache.set(FITBIT_REFRESH_TOKEN_CACHE_NAME, refresh_token, ttl_seconds = 30 * 24 * 3600)
     elif not refresh_token:
         # No refresh token and no auth code: nothing we can do
         print("No auth_code or refresh_token; exiting")
@@ -61,7 +63,7 @@ def main(config):
         access_token, new_refresh_token = get_access_token(refresh_token, client_id, client_secret)
 
         # Store new refresh token in cache for future runs (30 days TTL)
-        cache.set("fitbit_refresh_token", new_refresh_token, ttl_seconds = 30 * 24 * 3600)
+        cache.set(FITBIT_REFRESH_TOKEN_CACHE_NAME, new_refresh_token, ttl_seconds = 30 * 24 * 3600)
 
     period = config.get("period") or "0"
     system = config.get("system") or "imperial"
@@ -185,8 +187,13 @@ def main(config):
 
 def exchange_code_for_tokens(auth_code, client_id, client_secret):
     # Build Basic auth header
+    print("CLIENT_ID:", client_id)
+    print("CLIENT_SECRET length:", len(client_secret or ""))
     auth_raw = client_id + ":" + client_secret
+    print("AUTH_RAW:", auth_raw)
+
     auth_b64 = base64.encode(auth_raw)
+    print("AUTH_HEADER:", "Basic " + auth_b64)
 
     headers = {
         "Authorization": "Basic " + auth_b64,
