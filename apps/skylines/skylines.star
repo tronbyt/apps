@@ -5,13 +5,19 @@ Description: Displays city skylines.
 Author: Robert Ison
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("skylines_data.star", "CITIES")
 load("time.star", "time")
 
-SCREEN_WIDTH = 64
-SCREEN_HEIGHT = 32
+SCREEN_WIDTH = canvas.width()
+SCREEN_HEIGHT = canvas.height()
+
+BASE_WIDTH = 64
+BASE_HEIGHT = 32
+
+SCALE = SCREEN_HEIGHT // BASE_HEIGHT
+
 DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]  #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
 NUMBER_OF_STARS = 5
 
@@ -42,9 +48,10 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
 def create_dot(x, y, color = "#fff"):
     return render.Padding(
-        pad = (x, y, 0, 0),
-        child = render.Circle(
-            diameter = 1,
+        pad = (x * SCALE, y * SCALE, 0, 0),
+        child = render.Box(
+            width = SCALE,
+            height = SCALE,
             color = color,
         ),
     )
@@ -135,7 +142,7 @@ def draw_skyline(data, show_stars, colors):
                 if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
                     potential_star_locations.append((i, randomize(0, visible_sky[i] - 1)))
 
-        potential_star_location = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4)
+        potential_star_location = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
 
         for star in potential_star_location:
             color_number = 4 if star[0] % 2 else 5
@@ -217,11 +224,30 @@ def main(config):
     animation_frames = draw_skyline(selected_city_dataset, show_stars, [skyline_color, DEFAULT_COLORS[1], DEFAULT_COLORS[2]])
 
     if (len(text_to_display) > 0):
+        if SCALE == 2:
+            font = "terminus-16"
+        else:
+            font = "5x8"
+
+        text_w = 5 * len(text_to_display) * SCALE
+        text_h = 8 * SCALE
+
         final_frame_plus_text = render.Stack(
             children = [
                 animation_frames[len(animation_frames) - 1],
-                add_padding_to_child_element(render.Box(width = 5 * len(text_to_display), height = 8, color = "#000"), SCREEN_WIDTH - (5 * len(text_to_display)), SCREEN_HEIGHT - 8),
-                add_padding_to_child_element(render.Marquee(width = 64, child = render.Text(text_to_display, font = "5x8", color = text_color)), SCREEN_WIDTH - 5 * len(text_to_display), SCREEN_HEIGHT - 8),
+                add_padding_to_child_element(
+                    render.Box(width = text_w, height = text_h, color = "#000"),
+                    SCREEN_WIDTH - text_w,
+                    SCREEN_HEIGHT - text_h,
+                ),
+                add_padding_to_child_element(
+                    render.Marquee(
+                        width = BASE_WIDTH * SCALE,
+                        child = render.Text(text_to_display, font = font, color = text_color),
+                    ),
+                    SCREEN_WIDTH - text_w,
+                    SCREEN_HEIGHT - text_h,
+                ),
             ],
         )
 
