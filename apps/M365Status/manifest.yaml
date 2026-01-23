@@ -3,4 +3,4 @@ id: m365-status
 name: M365 Status
 summary: Shows current status of M365
 desc: Simple app that looks at the Microsoft Admin Center Status RSS feed and shows the latest status and time of the last update. Visit https://status.cloud.microsoft for more info!
-author: 'Author: M0ntyP'
+author: 'M0ntyP'

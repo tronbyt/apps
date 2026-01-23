@@ -14,7 +14,6 @@ load("time.star", "time")
 load("xpath.star", "xpath")
 
 RSS_URL = "https://status.cloud.microsoft/api/feed/mac"
-DEFAULT_TIMEZONE = time.tz()
 CACHE_TIMEOUT = 15 * 60  # 15 mins
 
 def main():
@@ -27,31 +26,42 @@ def main():
     itemcolor = "#59d657"
 
     # time formatting
-    lastupdate = lastupdate[5:]
-    MyTime = time.parse_time(lastupdate, format = "02 Jan 2006 15:04:05 Z").in_location(timezone)
+    MyTime = time.parse_time(lastupdate, format = "Mon, 02 Jan 2006 15:04:05 Z").in_location(timezone)
     Time = MyTime.format("15:04")
     Date = MyTime.format("Jan 2")
 
     item = channel.query("/item/status")
 
-    if item == "ServiceInterruption":
-        itemcolor = "#f00"
-        item = "Service Interruption"
+    status_map = {
+        "ServiceInterruption": {"color": "#f00", "text": "Service Interruption"},
+        "Advisory": {"color": "#f3c650", "text": "Advisory               "},
+        "Investigation": {"color": "#fff", "text": "Investigation        "},
+        "ServiceDegradation": {"color": "#fd874a", "text": "Service Degradation"},
+        "Available": {"color": "#59d657", "text": "No issues reported"},
+    }
 
-    if item == "Advisory":
-        itemcolor = "#f3c650"
-        item = "Advisory           "
+    status_info = status_map.get(item, {"color": itemcolor, "text": item})
+    itemcolor = status_info["color"]
+    item = status_info["text"]
 
-    if item == "Investigation":
-        itemcolor = "#fff"
-        item = "Investigation      "
+    # if item == "ServiceInterruption":
+    #     itemcolor = "#f00"
+    #     item = "Service Interruption"
 
-    if item == "ServiceDegradation":
-        itemcolor = "#fd874a"
-        item = "Service Degradation"
+    # if item == "Advisory":
+    #     itemcolor = "#f3c650"
+    #     item = "Advisory           "
 
-    if item == "Available":
-        item = "No issues reported"
+    # if item == "Investigation":
+    #     itemcolor = "#fff"
+    #     item = "Investigation      "
+
+    # if item == "ServiceDegradation":
+    #     itemcolor = "#fd874a"
+    #     item = "Service Degradation"
+
+    # if item == "Available":
+    #     item = "No issues reported"
 
     return render.Root(
         show_full_animation = True,
