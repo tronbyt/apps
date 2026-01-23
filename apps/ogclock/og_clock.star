@@ -361,6 +361,8 @@ def main(config):
             icon_ref = "snowy2.png"
         elif icon_num == 731:
             icon_ref = "windy.png"
+        elif icon_num >= 701 and icon_num < 800:
+            icon_ref = "foggy.png"
         elif icon_num == 800 and "n" in icon_code:
             icon_ref = "moony.png"
         elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
@@ -394,6 +396,8 @@ def main(config):
             icon_ref = "snowy2.png"
         elif icon_num == 731:
             icon_ref = "windy.png"
+        elif icon_num >= 701 and icon_num < 800:
+            icon_ref = "foggy.png"
         elif icon_num == 800 and "n" in icon_code:
             icon_ref = "moony.png"
         elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:

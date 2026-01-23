@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: fitbitweight.star
 packageName: fitbitweight
 recommendedInterval: 5
+supports2x: true

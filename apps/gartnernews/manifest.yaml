@@ -7,3 +7,4 @@ author: Robert Ison
 fileName: gartner_news.star
 packageName: gartnernews
 recommendedInterval: 5
+broken: true

@@ -1,0 +1,7 @@
+id: trenitalia
+name: Trenitalia
+summary: Italian train departures
+desc: Display upcoming train departures from any Italian Trenitalia station with real-time delays and cancellations. Perfect for commuters.
+author: Mattia Colombo
+fileName: trenitalia.star
+packageName: trenitalia

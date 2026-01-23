@@ -8,3 +8,4 @@ fileName: teslamate.star
 packageName: teslamate
 recommendedInterval: 30
 supports2x: true
+minPixletVersion: v0.49.9

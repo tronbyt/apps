@@ -260,32 +260,30 @@ def make_hsv_to_rgb():
 
     return hsv_to_rgb
 
-def draw_line(x0, y0, x1, y1, width, height):
-    """Draw a line using Bresenham's line algorithm"""
-    points = []
-    dx = abs(x1 - x0)
-    dy = abs(y1 - y0)
-    sx = 1 if x0 < x1 else -1
-    sy = 1 if y0 < y1 else -1
-    err = dx - dy
+def draw_line(x1, y1, x2, y2, color):
+    """Draws a line using absolute coordinates by wrapping render.Line in Padding."""
 
-    # Starlark doesn't support while loops, so iterate max(dx, dy) times
-    for _ in range(max(dx, dy) + 1):
-        if x0 >= 0 and x0 < width and y0 >= 0 and y0 < height:
-            points.append((x0, y0))
+    # Determine bounding box
+    min_x = min(x1, x2)
+    min_y = min(y1, y2)
 
-        if x0 == x1 and y0 == y1:
-            break
+    # Normalize coordinates to be relative to the bounding box
+    lx1 = x1 - min_x
+    ly1 = y1 - min_y
+    lx2 = x2 - min_x
+    ly2 = y2 - min_y
 
-        e2 = 2 * err
-        if e2 > -dy:
-            err = err - dy
-            x0 = x0 + sx
-        if e2 < dx:
-            err = err + dx
-            y0 = y0 + sy
-
-    return points
+    return render.Padding(
+        pad = (min_x, min_y, 0, 0),
+        child = render.Line(
+            x1 = lx1,
+            y1 = ly1,
+            x2 = lx2,
+            y2 = ly2,
+            width = 1,
+            color = color,
+        ),
+    )
 
 def to_hex(value):
     """Convert integer to 2-digit lowercase hex string"""
@@ -406,25 +404,9 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
 
             # Lines connecting origin -> bob1 -> bob2
             # Line from origin to first bob
-            render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
-                    )
-                    for pt in draw_line(origin_x, origin_y, x1, y1, layout.width, layout.height)
-                ],
-            ),
+            draw_line(origin_x, origin_y, x1, y1, "#FFFFFF"),
             # Line from first bob to second bob
-            render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
-                    )
-                    for pt in draw_line(x1, y1, x2, y2, layout.width, layout.height)
-                ],
-            ),
+            draw_line(x1, y1, x2, y2, "#FFFFFF"),
 
             # First bob (cyan)
             render.Padding(
@@ -544,25 +526,9 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
 
             # Lines connecting origin -> bob1 -> bob2
             # Line from origin to first bob
-            render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
-                    )
-                    for pt in draw_line(origin_x, origin_y, x1, y1, layout.width, layout.height)
-                ],
-            ),
+            draw_line(origin_x, origin_y, x1, y1, "#FFFFFF"),
             # Line from first bob to second bob
-            render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = "#FFFFFF"),
-                    )
-                    for pt in draw_line(x1, y1, x2, y2, layout.width, layout.height)
-                ],
-            ),
+            draw_line(x1, y1, x2, y2, "#FFFFFF"),
 
             # First bob (cyan)
             render.Padding(

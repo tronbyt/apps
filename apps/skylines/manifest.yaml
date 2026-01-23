@@ -4,3 +4,7 @@ name: Skylines
 summary: City Skylines
 desc: Displays city skylines.
 author: Robert Ison
+packageName: skylines
+fileName: skylines.star
+recommendedInterval: 5
+supports2x: true

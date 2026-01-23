@@ -6,7 +6,9 @@
 # Features:
 # - Multi-Device Support: Adapts layout for Standard (64x32) and Wide (128x64).
 # - Batch Selection: User selects specific batch index via settings.
-# - Smart Hiding: Toggle to hide app if no batches are active (Defaults to ON).
+# - Smart Hiding:
+#     - If no batches exist at all -> Hide (if enabled).
+#     - If specific batch selected doesn't exist -> Hide (if enabled).
 # - Performance Graphing: Downsamples data to ~60 points for smooth Filled Area Graphs.
 # - Crash Protection: Filters null/invalid sensor data (SG < 0.9).
 # - Glitch Fix: Sorts graph data by time to prevent diagonal artifacts.
@@ -144,15 +146,20 @@ def main(config):
             unique_batches.append(b)
             seen_ids[b["_id"]] = True
 
-    # 4. Handle Empty State
+    # 4. Handle Case: No Batches Exist At All
     if not unique_batches:
         if hide_if_empty:
             return []  # Returns nothing, removing app from rotation
 
         return render_message("There is nothing brewing here, go drink some beer!", is_wide)
 
-    # 5. Select Target Batch
+    # 5. Select Target Batch (NEW LOGIC HERE)
     if target_index >= len(unique_batches):
+        # If the specific batch requested doesn't exist...
+        if hide_if_empty:
+            return []  # ...and user wants to hide empty states, DISABLE APP.
+
+        # Otherwise show the message
         msg = "Batch #%d: There is nothing brewing here, go drink some beer!" % (target_index + 1)
         return render_message(msg, is_wide)
 
