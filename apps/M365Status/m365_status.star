@@ -14,7 +14,7 @@ load("time.star", "time")
 load("xpath.star", "xpath")
 
 RSS_URL = "https://status.cloud.microsoft/api/feed/mac"
-DEFAULT_TIMEZONE = "Australia/Adelaide"
+DEFAULT_TIMEZONE = time.tz()
 CACHE_TIMEOUT = 15 * 60  # 15 mins
 
 def main():
