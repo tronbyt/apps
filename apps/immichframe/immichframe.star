@@ -1,7 +1,9 @@
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+BORDER_SIZE = 2 if canvas.is2x() else 1
 
 def main(config):
     URL = config.get("immich_url", "https://example.com")
@@ -55,12 +57,12 @@ def main(config):
             child = render.Stack(
                 children = [
                     render.Box(
-                        padding = 1,
+                        padding = BORDER_SIZE,
                         color = "#fff",
                         child = render.Image(
                             src = res_img.body(),
-                            width = 62,
-                            height = 30,
+                            width = canvas.width() - BORDER_SIZE,
+                            height = canvas.height() - BORDER_SIZE,
                         ),
                     ),
                     render.Column(
@@ -74,6 +76,8 @@ def main(config):
 
 def get_text(date, country, state, city, toggle_date, toggle_location):
     font = "CG-pixel-3x5-mono"
+    if canvas.is2x():
+        font = "terminus-12"
     bgcolor = "#00000078"
     strdate = parse_date(date)
     full_string = ""
@@ -88,18 +92,20 @@ def get_text(date, country, state, city, toggle_date, toggle_location):
     if full_string == "":
         return []
     else:
+        text = render.Text(
+            content = full_string,
+            font = font,
+        )
+        _, textHeight = text.size()
+
         return [
             render.Padding(
                 child = render.Marquee(
-                    child = render.Text(
-                        content = full_string,
-                        font = font,
-                        height = 5,
-                    ),
-                    width = 62,
-                    height = 5,
+                    child = text,
+                    width = canvas.width() - BORDER_SIZE,
+                    height = textHeight,
                 ),
-                pad = (1, 1, 1, 1),
+                pad = BORDER_SIZE,
                 color = bgcolor,
             ),
         ]
