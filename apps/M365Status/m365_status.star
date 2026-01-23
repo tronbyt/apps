@@ -2,7 +2,7 @@
 Applet: M365 Status
 Summary: Shows current status of M365
 Description: Simple app that looks at the Microsoft Admin Center Status RSS feed and shows the latest status and time of the last update. Visit https://status.cloud.microsoft for more info!
-Author: Author: M0ntyP
+Author: M0ntyP
 
 v1.0
 First edition!
