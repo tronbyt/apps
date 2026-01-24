@@ -7,3 +7,4 @@ author: motoridersd
 fileName: flightsnearby_ha.star
 packageName: flightsnearby_ha
 recommendedInterval: 5
+supports2x: true
