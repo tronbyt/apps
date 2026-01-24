@@ -1,0 +1,9 @@
+---
+id: flights-nearby-ha
+name: Flights Nearby HA
+summary: Flights nearby
+desc: Find the closest flight to your location. Using the FlightRadar24 Home Assistant integration. See the readme.md for more information.
+author: motoridersd
+fileName: flightsnearby_ha.star
+packageName: flightsnearby_ha
+recommendedInterval: 5
