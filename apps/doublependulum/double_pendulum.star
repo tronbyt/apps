@@ -676,11 +676,7 @@ def generate_fade_out_frames(simulation, is_api_mode, config, layout, hsv_to_rgb
 
 def generate_freeze_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name):
     """Generate freeze frames that show only the trace from the last frame for a configurable duration."""
-    freeze_frame_enabled = config.bool("enable_freeze_frame", False)
-    if not freeze_frame_enabled:
-        return []
-
-    freeze_duration = int(config.get("freeze_duration", "2"))
+    freeze_duration = int(config.get("freeze_duration", "0"))
     if freeze_duration == 0:
         return []
 
@@ -957,19 +953,12 @@ def get_schema():
                 icon = "wandSparkles",
                 default = False,
             ),
-            schema.Toggle(
-                id = "enable_freeze_frame",
-                name = "Enable Ending Freeze Frame",
-                desc = "Show a freeze frame at the end before fade out",
-                icon = "pause",
-                default = False,
-            ),
             schema.Dropdown(
                 id = "freeze_duration",
                 name = "Freeze Duration",
                 desc = "How long to freeze on the last frame (0 = disabled)",
                 icon = "clock",
-                default = "2",
+                default = "0",
                 options = [
                     schema.Option(display = "Disabled (0s)", value = "0"),
                     schema.Option(display = "1 second", value = "1"),
