@@ -260,7 +260,34 @@ def make_hsv_to_rgb():
 
     return hsv_to_rgb
 
-def draw_line(x1, y1, x2, y2, color):
+def draw_line_bresenham(x0, y0, x1, y1, width, height):
+    """Draw a line using Bresenham's line algorithm, returns list of (x, y) points."""
+    points = []
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    err = dx - dy
+
+    # Starlark doesn't support while loops, so iterate max(dx, dy) times
+    for _ in range(max(dx, dy) + 1):
+        if x0 >= 0 and x0 < width and y0 >= 0 and y0 < height:
+            points.append((x0, y0))
+
+        if x0 == x1 and y0 == y1:
+            break
+
+        e2 = 2 * err
+        if e2 > -dy:
+            err = err - dy
+            x0 = x0 + sx
+        if e2 < dx:
+            err = err + dx
+            y0 = y0 + sy
+
+    return points
+
+def draw_line_widget(x1, y1, x2, y2, color):
     """Draws a line using absolute coordinates by wrapping render.Line in Padding."""
 
     # Determine bounding box
@@ -284,6 +311,42 @@ def draw_line(x1, y1, x2, y2, color):
             color = color,
         ),
     )
+
+def render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, color, layout):
+    """Render the pendulum arm lines based on the selected style."""
+    if line_style == "none":
+        # No lines
+        return []
+    elif line_style == "bresenham":
+        # Classic Bresenham algorithm - render as 1x1 boxes
+        line1_points = draw_line_bresenham(origin_x, origin_y, x1, y1, layout.width, layout.height)
+        line2_points = draw_line_bresenham(x1, y1, x2, y2, layout.width, layout.height)
+        return [
+            render.Stack(
+                children = [
+                    render.Padding(
+                        pad = (pt[0], pt[1], 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color),
+                    )
+                    for pt in line1_points
+                ],
+            ),
+            render.Stack(
+                children = [
+                    render.Padding(
+                        pad = (pt[0], pt[1], 0, 0),
+                        child = render.Box(width = 1, height = 1, color = color),
+                    )
+                    for pt in line2_points
+                ],
+            ),
+        ]
+    else:
+        # Default: widget (render.Line)
+        return [
+            draw_line_widget(origin_x, origin_y, x1, y1, color),
+            draw_line_widget(x1, y1, x2, y2, color),
+        ]
 
 def to_hex(value):
     """Convert integer to 2-digit lowercase hex string"""
@@ -362,71 +425,74 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
         trail_points.append((f[2], f[3], trail_color))  # x2, y2, color
 
     label = sim_name if config.bool("show_label", False) else ""
+    line_style = config.get("line_style", "widget")
 
-    return render.Stack(
-        children = [
-            # Black background
-            render.Box(
-                width = layout.width,
-                height = layout.height,
-                color = "#000",
+    # Build the children list dynamically based on line style
+    children = [
+        # Black background
+        render.Box(
+            width = layout.width,
+            height = layout.height,
+            color = "#000",
+        ),
+
+        # Display simulation hash name in top left corner
+        render.Padding(
+            pad = (1, 1, 0, 0),
+            child = render.Text(
+                content = label,
+                color = "#888",
+                font = "tom-thumb",
             ),
+        ),
 
-            # Display simulation hash name in top left corner
-            render.Padding(
-                pad = (1, 1, 0, 0),
-                child = render.Text(
-                    content = label,
-                    color = "#888",
-                    font = "tom-thumb",
-                ),
+        # Fixed origin point (white dot)
+        render.Padding(
+            pad = (origin_x - 1, origin_y - 1, 0, 0),
+            child = render.Circle(
+                color = "#FFFFFF",
+                diameter = 2,
             ),
+        ),
 
-            # Fixed origin point (white dot)
-            render.Padding(
-                pad = (origin_x - 1, origin_y - 1, 0, 0),
-                child = render.Circle(
-                    color = "#FFFFFF",
-                    diameter = 2,
-                ),
+        # Trail dots for second bob (with color gradient)
+        render.Stack(
+            children = [
+                render.Padding(
+                    pad = (pt[0], pt[1], 0, 0),
+                    child = render.Box(width = 1, height = 1, color = pt[2]),
+                ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                for pt in trail_points
+            ],
+        ),
+    ]
+
+    # Add lines based on selected style
+    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, "#FFFFFF", layout))
+
+    # Add bobs
+    children.append(
+        # First bob (cyan)
+        render.Padding(
+            pad = (x1 - 1, y1 - 1, 0, 0),
+            child = render.Circle(
+                color = "#00FFFF",
+                diameter = 2,
             ),
-
-            # Trail dots for second bob (with color gradient)
-            render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = pt[2]),
-                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
-                    for pt in trail_points
-                ],
-            ),
-
-            # Lines connecting origin -> bob1 -> bob2
-            # Line from origin to first bob
-            draw_line(origin_x, origin_y, x1, y1, "#FFFFFF"),
-            # Line from first bob to second bob
-            draw_line(x1, y1, x2, y2, "#FFFFFF"),
-
-            # First bob (cyan)
-            render.Padding(
-                pad = (x1 - 1, y1 - 1, 0, 0),
-                child = render.Circle(
-                    color = "#00FFFF",
-                    diameter = 2,
-                ),
-            ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
-
-            # Second bob (color changes over time)
-            render.Padding(
-                pad = (x2 - 1, y2 - 1, 0, 0),
-                child = render.Circle(
-                    color = bob2_color,
-                    diameter = 3,
-                ),
-            ) if (x2 >= 0 and x2 < layout.width and y2 >= 0 and y2 < layout.height) else render.Box(width = 0, height = 0),
-        ],
+        ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
     )
+    children.append(
+        # Second bob (color changes over time)
+        render.Padding(
+            pad = (x2 - 1, y2 - 1, 0, 0),
+            child = render.Circle(
+                color = bob2_color,
+                diameter = 3,
+            ),
+        ) if (x2 >= 0 and x2 < layout.width and y2 >= 0 and y2 < layout.height) else render.Box(width = 0, height = 0),
+    )
+
+    return render.Stack(children = children)
 
 def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
     """Render frame for embedded simulation (with simulation number displayed)."""
@@ -484,71 +550,74 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
         trail_points.append((int(f[2] * scale_factor), int(f[3] * scale_factor), trail_color))  # x2, y2, color
 
     label = "no." + str(sim_idx + 1) if config.bool("show_label", False) else ""
+    line_style = config.get("line_style", "widget")
 
-    return render.Stack(
-        children = [
-            # Black background
-            render.Box(
-                width = layout.width,
-                height = layout.height,
-                color = "#000",
+    # Build the children list dynamically based on line style
+    children = [
+        # Black background
+        render.Box(
+            width = layout.width,
+            height = layout.height,
+            color = "#000",
+        ),
+
+        # Display simulation number in top left corner
+        render.Padding(
+            pad = (1, 1, 0, 0),
+            child = render.Text(
+                content = label,
+                color = "#888",
+                font = "tom-thumb",
             ),
+        ),
 
-            # Display simulation number in top left corner
-            render.Padding(
-                pad = (1, 1, 0, 0),
-                child = render.Text(
-                    content = label,
-                    color = "#888",
-                    font = "tom-thumb",
-                ),
+        # Fixed origin point (white dot)
+        render.Padding(
+            pad = (origin_x - 1, origin_y - 1, 0, 0),
+            child = render.Circle(
+                color = "#FFFFFF",
+                diameter = 2,
             ),
+        ),
 
-            # Fixed origin point (white dot)
-            render.Padding(
-                pad = (origin_x - 1, origin_y - 1, 0, 0),
-                child = render.Circle(
-                    color = "#FFFFFF",
-                    diameter = 2,
-                ),
+        # Trail dots for second bob (with color gradient)
+        render.Stack(
+            children = [
+                render.Padding(
+                    pad = (pt[0], pt[1], 0, 0),
+                    child = render.Box(width = 1, height = 1, color = pt[2]),
+                ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                for pt in trail_points
+            ],
+        ),
+    ]
+
+    # Add lines based on selected style
+    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, "#FFFFFF", layout))
+
+    # Add bobs
+    children.append(
+        # First bob (cyan)
+        render.Padding(
+            pad = (x1 - 1, y1 - 1, 0, 0),
+            child = render.Circle(
+                color = "#00FFFF",
+                diameter = 2,
             ),
-
-            # Trail dots for second bob (with color gradient)
-            render.Stack(
-                children = [
-                    render.Padding(
-                        pad = (pt[0], pt[1], 0, 0),
-                        child = render.Box(width = 1, height = 1, color = pt[2]),
-                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
-                    for pt in trail_points
-                ],
-            ),
-
-            # Lines connecting origin -> bob1 -> bob2
-            # Line from origin to first bob
-            draw_line(origin_x, origin_y, x1, y1, "#FFFFFF"),
-            # Line from first bob to second bob
-            draw_line(x1, y1, x2, y2, "#FFFFFF"),
-
-            # First bob (cyan)
-            render.Padding(
-                pad = (x1 - 1, y1 - 1, 0, 0),
-                child = render.Circle(
-                    color = "#00FFFF",
-                    diameter = 2,
-                ),
-            ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
-
-            # Second bob (color changes over time)
-            render.Padding(
-                pad = (x2 - 1, y2 - 1, 0, 0),
-                child = render.Circle(
-                    color = bob2_color,
-                    diameter = 3,
-                ),
-            ) if (x2 >= 0 and x2 < layout.width and y2 >= 0 and y2 < layout.height) else render.Box(width = 0, height = 0),
-        ],
+        ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
     )
+    children.append(
+        # Second bob (color changes over time)
+        render.Padding(
+            pad = (x2 - 1, y2 - 1, 0, 0),
+            child = render.Circle(
+                color = bob2_color,
+                diameter = 3,
+            ),
+        ) if (x2 >= 0 and x2 < layout.width and y2 >= 0 and y2 < layout.height) else render.Box(width = 0, height = 0),
+    )
+
+    return render.Stack(children = children)
 
 def get_schema():
     # Build animation options dynamically
@@ -594,7 +663,7 @@ def get_schema():
             schema.Text(
                 id = "generation_id",
                 name = "Generation ID",
-                desc = "Enter a specific generation ID like 1588 (only used with 'Random generation from API' mode)",
+                desc = "Enter a specific generation ID between 1 and 4664 (only used with 'Random generation from API' mode)",
                 icon = "hashtag",
                 default = "",
             ),
@@ -630,6 +699,18 @@ def get_schema():
                     schema.Option(display = "Fast", value = "3"),
                     schema.Option(display = "Medium", value = "2"),
                     schema.Option(display = "Slow", value = "1"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "line_style",
+                name = "Line Style",
+                desc = "How to draw the pendulum arm lines",
+                icon = "penNib",
+                default = "widget",
+                options = [
+                    schema.Option(display = "Pixlet render.Line", value = "widget"),
+                    schema.Option(display = "Classic (Bresenham)", value = "bresenham"),
+                    schema.Option(display = "No lines", value = "none"),
                 ],
             ),
         ],
