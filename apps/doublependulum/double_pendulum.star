@@ -210,6 +210,10 @@ def main(config):
         else:
             all_frames.append(render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout))
 
+    # Add fade-out frames if enabled
+    fade_out_frames = generate_fade_out_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name)
+    all_frames.extend(fade_out_frames)
+
     return render.Root(
         delay = delay,
         show_full_animation = config.bool("show_full_animation", True),
@@ -636,6 +640,115 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
 
     return render.Stack(children = children)
 
+def generate_fade_out_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name):
+    """Generate fade-out frames that freeze the last frame and fade to black over 2-3 seconds."""
+    fade_out_enabled = config.bool("enable_fade_out", False)
+    if not fade_out_enabled:
+        return []
+
+    # Calculate number of fade frames (2-3 seconds at current delay)
+    delay = 16 if config.get("speed", "slow") == "fast" else 33
+    fade_duration_ms = 2500  # 2.5 seconds
+    num_fade_frames = int(fade_duration_ms / delay)
+
+    # Get the simulation name for label (positions not needed for fade-out)
+    if is_api_mode:
+        sim_name = api_name
+    else:
+        sim_name = "no." + str(sim_idx + 1)
+
+    fade_frames = []
+    for i in range(num_fade_frames):
+        # Calculate opacity (1.0 to 0.0)
+        opacity = 1.0 - (float(i) / float(num_fade_frames))
+
+        # Create fade frame (only need sim_name for label, not positions)
+        fade_frame = render_fade_frame(sim_name, config, layout, opacity, is_api_mode, simulation, hsv_to_rgb)
+        fade_frames.append(fade_frame)
+
+    return fade_frames
+
+def render_fade_frame(sim_name, config, layout, opacity, is_api_mode, simulation, hsv_to_rgb):
+    """Render a single fade-out frame with only the trace fading, legs and joints hidden."""
+
+    # Get configuration values
+    label = sim_name if config.bool("show_label", False) else ""
+
+    # Apply opacity to colors (only for trace)
+    def apply_opacity(color, opacity):
+        if not color or not color.startswith("#"):
+            return color
+
+        color = color[1:]
+        if len(color) < 6:
+            return color
+
+        r = int(color[0:2], 16)
+        g = int(color[2:4], 16)
+        b = int(color[4:6], 16)
+
+        # Apply opacity by blending with black
+        r = int(r * opacity)
+        g = int(g * opacity)
+        b = int(b * opacity)
+
+        return "#" + to_hex(r) + to_hex(g) + to_hex(b)
+
+    # Build the children list - only background and fading trace
+    children = [
+        # Black background
+        render.Box(
+            width = layout.width,
+            height = layout.height,
+            color = "#000",
+        ),
+
+        # Display label if enabled (fades with trace)
+        render.Padding(
+            pad = (1, 1, 0, 0),
+            child = render.Text(
+                content = label,
+                color = apply_opacity("#888", opacity),
+                font = "tom-thumb",
+            ),
+        ),
+    ]
+
+    # Add only the fading trails (no legs, no joints)
+    # Always show the full trace during fade-out if we have simulation data
+    if len(simulation) > 0:
+        trail_points = []
+
+        # Show ALL trail points during fade-out for complete pattern
+        for i in range(len(simulation)):
+            if is_api_mode:
+                f = simulation[i]
+                tx, ty = f[2], f[3]
+            else:
+                scale_factor = layout.width / 64.0
+                f = simulation[i]
+                tx = int(f[2] * scale_factor)
+                ty = int(f[3] * scale_factor)
+
+            trail_hue = (i * 360.0 / len(simulation)) % 360
+            trail_color = hsv_to_rgb(trail_hue, 1.0, 0.5)
+            faded_trail_color = apply_opacity(trail_color, opacity)
+            trail_points.append((tx, ty, faded_trail_color))
+
+        children.append(
+            render.Stack(
+                children = [
+                    render.Padding(
+                        pad = (pt[0], pt[1], 0, 0),
+                        child = render.Box(width = 1, height = 1, color = pt[2]),
+                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                    for pt in trail_points
+                ],
+            ),
+        )
+
+    return render.Stack(children = children)
+
 def get_schema():
     # Build animation options dynamically
     animation_options = [
@@ -743,6 +856,13 @@ def get_schema():
                 desc = "Show the origin point and leg joint (first bob)",
                 icon = "circleDot",
                 default = True,
+            ),
+            schema.Toggle(
+                id = "enable_fade_out",
+                name = "Enable Fade Out",
+                desc = "Freeze and fade away the animation at the end",
+                icon = "sparkles",
+                default = False,
             ),
         ],
     )
