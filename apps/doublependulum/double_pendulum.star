@@ -11,7 +11,7 @@ API_URL = "https://wildc.net/dp/api.py"
 
 # Cache TTL in seconds
 CACHE_TTL = 15
-MAX_GENERATION_ID = 4665 # api stopped saving files after this number
+MAX_GENERATION_ID = 4665  # api stopped saving files after this number
 
 # Display constants (matching generate_pixlet.py)
 # Pendulum length constraints (matching API defaults)
