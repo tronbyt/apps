@@ -427,6 +427,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
 
     label = sim_name if config.bool("show_label", False) else ""
     line_style = config.get("line_style", "widget")
+    line_color = config.get("line_color", "#FFFFFF")
 
     # Build the children list dynamically based on line style
     children = [
@@ -469,7 +470,7 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
     ]
 
     # Add lines based on selected style
-    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, "#FFFFFF", layout))
+    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, line_color, layout))
 
     # Add bobs
     children.append(
@@ -552,6 +553,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
 
     label = "no." + str(sim_idx + 1) if config.bool("show_label", False) else ""
     line_style = config.get("line_style", "widget")
+    line_color = config.get("line_color", "#FFFFFF")
 
     # Build the children list dynamically based on line style
     children = [
@@ -594,7 +596,7 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
     ]
 
     # Add lines based on selected style
-    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, "#FFFFFF", layout))
+    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, line_color, layout))
 
     # Add bobs
     children.append(
@@ -713,6 +715,13 @@ def get_schema():
                     schema.Option(display = "Classic (Bresenham)", value = "bresenham"),
                     schema.Option(display = "No lines", value = "none"),
                 ],
+            ),
+            schema.Color(
+                id = "line_color",
+                name = "Line Color",
+                desc = "Color of the pendulum arm lines",
+                icon = "palette",
+                default = "#FFFFFF",
             ),
         ],
     )
