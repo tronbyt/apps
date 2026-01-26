@@ -11,6 +11,7 @@ API_URL = "https://wildc.net/dp/api.py"
 
 # Cache TTL in seconds
 CACHE_TTL = 15
+MAX_GENERATION_ID = 4665 # api stopped saving files after this number
 
 # Display constants (matching generate_pixlet.py)
 # Pendulum length constraints (matching API defaults)
@@ -152,7 +153,7 @@ def main(config):
                 sim_data = fetch_simulation(0, layout, generation_id)
             else:
                 # Randomly pick a generation from 1 to 1630
-                generation_id = str((time.now().unix % 1630) + 1)
+                generation_id = str((time.now().unix % MAX_GENERATION_ID) + 1)
                 print("Fetching random generation: " + generation_id)
                 sim_data = fetch_simulation(0, layout, generation_id)
         else:
@@ -663,7 +664,7 @@ def get_schema():
             schema.Text(
                 id = "generation_id",
                 name = "Generation ID",
-                desc = "Enter a specific generation ID between 1 and 4664 (only used with 'Random generation from API' mode)",
+                desc = "Enter a specific generation ID between 1 and 4665 (only used with 'Random generation from API' mode)",
                 icon = "hashtag",
                 default = "",
             ),
