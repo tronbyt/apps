@@ -427,6 +427,8 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
 
     label = sim_name if config.bool("show_label", False) else ""
     line_style = config.get("line_style", "widget")
+    line_color = config.get("line_color", "#FFFFFF")
+    show_joints = config.bool("show_joints", True)
 
     # Build the children list dynamically based on line style
     children = [
@@ -446,17 +448,22 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                 font = "tom-thumb",
             ),
         ),
+    ]
 
-        # Fixed origin point (white dot)
-        render.Padding(
-            pad = (origin_x - 1, origin_y - 1, 0, 0),
-            child = render.Circle(
-                color = "#FFFFFF",
-                diameter = 2,
+    # Fixed origin point (white dot) - only if show_joints is enabled
+    if show_joints:
+        children.append(
+            render.Padding(
+                pad = (origin_x - 1, origin_y - 1, 0, 0),
+                child = render.Circle(
+                    color = "#FFFFFF",
+                    diameter = 2,
+                ),
             ),
-        ),
+        )
 
-        # Trail dots for second bob (with color gradient)
+    # Trail dots for second bob (with color gradient)
+    children.append(
         render.Stack(
             children = [
                 render.Padding(
@@ -466,24 +473,25 @@ def render_frame_simple(simulation, frame_idx, hsv_to_rgb, origin_y, sim_name, c
                 for pt in trail_points
             ],
         ),
-    ]
+    )
 
     # Add lines based on selected style
-    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, "#FFFFFF", layout))
+    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, line_color, layout))
 
-    # Add bobs
+    # Add first bob (cyan) - only if show_joints is enabled
+    if show_joints:
+        children.append(
+            render.Padding(
+                pad = (x1 - 1, y1 - 1, 0, 0),
+                child = render.Circle(
+                    color = "#00FFFF",
+                    diameter = 2,
+                ),
+            ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
+        )
+
+    # Add second bob (color changes over time)
     children.append(
-        # First bob (cyan)
-        render.Padding(
-            pad = (x1 - 1, y1 - 1, 0, 0),
-            child = render.Circle(
-                color = "#00FFFF",
-                diameter = 2,
-            ),
-        ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
-    )
-    children.append(
-        # Second bob (color changes over time)
         render.Padding(
             pad = (x2 - 1, y2 - 1, 0, 0),
             child = render.Circle(
@@ -552,6 +560,8 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
 
     label = "no." + str(sim_idx + 1) if config.bool("show_label", False) else ""
     line_style = config.get("line_style", "widget")
+    line_color = config.get("line_color", "#FFFFFF")
+    show_joints = config.bool("show_joints", True)
 
     # Build the children list dynamically based on line style
     children = [
@@ -571,17 +581,22 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                 font = "tom-thumb",
             ),
         ),
+    ]
 
-        # Fixed origin point (white dot)
-        render.Padding(
-            pad = (origin_x - 1, origin_y - 1, 0, 0),
-            child = render.Circle(
-                color = "#FFFFFF",
-                diameter = 2,
+    # Fixed origin point (white dot) - only if show_joints is enabled
+    if show_joints:
+        children.append(
+            render.Padding(
+                pad = (origin_x - 1, origin_y - 1, 0, 0),
+                child = render.Circle(
+                    color = "#FFFFFF",
+                    diameter = 2,
+                ),
             ),
-        ),
+        )
 
-        # Trail dots for second bob (with color gradient)
+    # Trail dots for second bob (with color gradient)
+    children.append(
         render.Stack(
             children = [
                 render.Padding(
@@ -591,24 +606,25 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
                 for pt in trail_points
             ],
         ),
-    ]
+    )
 
     # Add lines based on selected style
-    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, "#FFFFFF", layout))
+    children.extend(render_lines(line_style, origin_x, origin_y, x1, y1, x2, y2, line_color, layout))
 
-    # Add bobs
+    # Add first bob (cyan) - only if show_joints is enabled
+    if show_joints:
+        children.append(
+            render.Padding(
+                pad = (x1 - 1, y1 - 1, 0, 0),
+                child = render.Circle(
+                    color = "#00FFFF",
+                    diameter = 2,
+                ),
+            ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
+        )
+
+    # Add second bob (color changes over time)
     children.append(
-        # First bob (cyan)
-        render.Padding(
-            pad = (x1 - 1, y1 - 1, 0, 0),
-            child = render.Circle(
-                color = "#00FFFF",
-                diameter = 2,
-            ),
-        ) if (x1 >= 0 and x1 < layout.width and y1 >= 0 and y1 < layout.height) else render.Box(width = 0, height = 0),
-    )
-    children.append(
-        # Second bob (color changes over time)
         render.Padding(
             pad = (x2 - 1, y2 - 1, 0, 0),
             child = render.Circle(
@@ -713,6 +729,20 @@ def get_schema():
                     schema.Option(display = "Classic (Bresenham)", value = "bresenham"),
                     schema.Option(display = "No lines", value = "none"),
                 ],
+            ),
+            schema.Color(
+                id = "line_color",
+                name = "Line Color",
+                desc = "Color of the pendulum arm lines",
+                icon = "palette",
+                default = "#FFFFFF",
+            ),
+            schema.Toggle(
+                id = "show_joints",
+                name = "Show Joints",
+                desc = "Show the origin point and leg joint (first bob)",
+                icon = "circleDot",
+                default = True,
             ),
         ],
     )
