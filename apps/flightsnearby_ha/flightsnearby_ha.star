@@ -341,6 +341,7 @@ CATEGORY_ICONS = {
 }
 
 def get_airplane_shape(flight):
+    print(flight)
     if "aircraft_code" in flight:
         type_designator = flight["aircraft_code"]
     else:
@@ -360,22 +361,15 @@ def get_airplane_shape(flight):
         if wtc != None and len(wtc) == 1:
             type_description_with_wtc = type_description + "-" + wtc
             if type_description_with_wtc in TYPE_DESCRIPTION_ICONS:
-                print(
-                    "found type description with wtc",
-                    TYPE_DESCRIPTION_ICONS[type_description_with_wtc],
-                )
                 return SHAPES[TYPE_DESCRIPTION_ICONS[type_description_with_wtc]]
 
         if type_description in TYPE_DESCRIPTION_ICONS:
-            print("found type description", TYPE_DESCRIPTION_ICONS[type_description])
             return SHAPES[TYPE_DESCRIPTION_ICONS[type_description]]
 
         basic_type = type_description[0]
         if basic_type in TYPE_DESCRIPTION_ICONS:
-            print("found basic type", TYPE_DESCRIPTION_ICONS[basic_type])
             return SHAPES[TYPE_DESCRIPTION_ICONS[basic_type]]
 
-    print("found unknown")
     return SHAPES["unknown"]
 
 def get_entity_status(ha_server, entity_id, token):
@@ -401,7 +395,6 @@ def get_entity_status(ha_server, entity_id, token):
             "Authorization": "Bearer %s" % token,
         })
         if rep.status_code != 200:
-            print("HTTP request failed with status %d", rep.status_code)
             return None
 
         state_res = rep.json()
@@ -437,8 +430,11 @@ def calculate_radar_position(home_lat, home_lon, plane_lat, plane_lon, angle_off
         # Based on analysis: Point (1,0) [East] with Offset 90 should define East as Up (0,1).
         # (1,0) -> (0,1) is +90 deg rotation.
 
-        rx = rel_x * math.cos(angle_rad) - rel_y * math.sin(angle_rad)
-        ry = rel_x * math.sin(angle_rad) + rel_y * math.cos(angle_rad)
+        cos_a = math.cos(angle_rad)
+        sin_a = math.sin(angle_rad)
+
+        rx = rel_x * cos_a - rel_y * sin_a
+        ry = rel_x * sin_a + rel_y * cos_a
         rel_x = rx
         rel_y = ry
 
@@ -592,7 +588,6 @@ def main(config):
         entity_status = get_entity_status(ha_server, entity_id, token)
         extracted_attributes = entity_status["attributes"] if entity_status and "attributes" in entity_status else dict()
         flights = extracted_attributes["flights"] if "flights" in extracted_attributes else dict()
-        print("flights", flights)
         matches_filters = [flight for flight in flights if filter_flight(flight, show_all_aircraft)]
         sorted_matches = sorted(
             matches_filters,
@@ -610,15 +605,11 @@ def main(config):
     if media_image == None:
         if "airline_icao" in sorted_matches[0] and sorted_matches[0]["airline_icao"]:
             res = http.get("%s%s%s" % (airhex_url1, sorted_matches[0]["airline_icao"], airhex_url2), ttl_seconds = 86400)
-            print(("%s%s%s" % (airhex_url1, sorted_matches[0]["airline_icao"], airhex_url2)))
             media_image = res.body()
         else:
             # Use small icon as fallback for non-commercial
             airplane_shape = get_airplane_shape(sorted_matches[0])
             media_image = airplane_shape["2x"].readall() if canvas.is2x() else airplane_shape["1x"].readall()
-
-        # ico = base64.encode(media_image)
-        #cache.set(attributes["entity_picture"], media_image, ttl_seconds=600)
 
     airplane_shape = get_airplane_shape(sorted_matches[0])
 
@@ -647,9 +638,6 @@ def main(config):
             ],
         )
         lines.append(line)
-
-    if sorted_matches[0]["aircraft_code"] == sorted_matches[0]["flight_number"]:
-        pass
 
     if "aircraft_code" in sorted_matches[0] and sorted_matches[0]["aircraft_code"] != None and tiny_ico:
         line = render.Row(
@@ -748,7 +736,7 @@ def get_schema():
                 id = "radar_degree_offset",
                 name = "Radar Degree Offset",
                 icon = "compass",
-                desc = "Rotate the radar view by this many degrees (e.g., 180 for due South).  Allows you to algin the radar with the view out your window.",
+                desc = "Rotate the radar view by this many degrees (e.g., 180 for due South).  Allows you to align the radar with the view out your window.",
                 default = "0",
             ),
             schema.Color(
