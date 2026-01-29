@@ -689,7 +689,7 @@ def main(config):
 
     if radar:
         return render.Root(
-            delay = 3000,
+            delay = 7500,
             child = render.Animation(
                 children = [display, radar],
             ),
@@ -721,22 +721,37 @@ def get_schema():
                 icon = "server",
             ),
             schema.Text(
-                id = "homeassistant_entity_id",
-                name = "Entity ID",
-                icon = "play",
-                desc = "Entity ID of the media player entity in Home Assistant",
-            ),
-            schema.Text(
                 id = "homeassistant_token",
                 name = "Bearer Token",
                 icon = "key",
                 desc = "Long-lived access token for Home Assistant",
             ),
             schema.Text(
+                id = "homeassistant_entity_id",
+                name = "Entity ID",
+                icon = "play",
+                desc = "Entity ID of the media player entity in Home Assistant",
+            ),
+            schema.Dropdown(
+                id = "airhex_tail_direction",
+                name = "Tail Direction",
+                icon = "plane",
+                desc = "Choose which tail logo you would like to use",
+                default = airhex_logo_option[1].value,
+                options = airhex_logo_option,
+            ),
+            schema.Toggle(
+                id = "show_all_aircraft",
+                name = "Show All Aircraft",
+                desc = "Show all aircraft, not just commercial ones",
+                icon = "plane",
+                default = False,
+            ),
+            schema.Text(
                 id = "radar_degree_offset",
                 name = "Radar Degree Offset",
                 icon = "compass",
-                desc = "Rotate the radar view by this many degrees (e.g., 180 for due South).  Allows you to align the radar with the view out your window.",
+                desc = "Rotate the radar view by this many degrees (e.g., 180 for due South).",
                 default = "0",
             ),
             schema.Color(
@@ -780,21 +795,6 @@ def get_schema():
                 desc = "Color of the speed text",
                 icon = "brush",
                 default = "#ffff00",
-            ),
-            schema.Dropdown(
-                id = "airhex_tail_direction",
-                name = "Tail Direction",
-                icon = "plane",
-                desc = "Choose which tail logo you would like to use",
-                default = airhex_logo_option[1].value,
-                options = airhex_logo_option,
-            ),
-            schema.Toggle(
-                id = "show_all_aircraft",
-                name = "Show All Aircraft",
-                desc = "Show all aircraft, not just commercial ones",
-                icon = "plane",
-                default = False,
             ),
         ],
     )
