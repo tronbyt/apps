@@ -151,12 +151,12 @@ def visible_constellations(t, lat_deg, lon_deg, threshold_deg=10.0):
     visible = sorted(visible, key=lambda x: -x["altitude"])
     return visible
 def get_constellation_center(constellation_stars, t, lat_deg, lon_deg):
-    """Calculate center from visible stars - SINGLE source of truth"""
     lst_deg = local_sidereal_time(t, lon_deg)
-    total_alt, total_az = 0, 0
-    count = 0
+
     visible_stars_raw = []
-    
+    total_alt = 0.0
+    total_az = 0.0
+
     for star in constellation_stars:
         alt = altitude_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
         az = azimuth_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
@@ -164,15 +164,14 @@ def get_constellation_center(constellation_stars, t, lat_deg, lon_deg):
             visible_stars_raw.append((alt, az, star))
             total_alt += alt
             total_az += az
-            count += 1
-    
+
+    count = len(visible_stars_raw)
     if count == 0:
         return None, None, []
-    
+
     center_alt = total_alt / count
     center_az = total_az / count
     return center_alt, center_az, visible_stars_raw
-
 
 
 
