@@ -196,6 +196,8 @@ def main(config):
     # Set delay based on speed (slow = 33ms, fast = 16ms)
     if speed == "fast":
         delay = 16  # Fast: twice as fast (~60fps)
+    elif speed == "extra_fast":
+        delay = 11  # ~90fps
     else:
         delay = 33  # Slow: normal speed (~30fps)
 
@@ -209,6 +211,14 @@ def main(config):
             all_frames.append(render_frame_simple(simulation, frame_idx, hsv_to_rgb, api_origin_y, api_name, config, layout))
         else:
             all_frames.append(render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout))
+
+    # Add freeze frames if enabled (before fade-out)
+    freeze_frames = generate_freeze_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name)
+    all_frames.extend(freeze_frames)
+
+    # Add fade-out frames if enabled
+    fade_out_frames = generate_fade_out_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name)
+    all_frames.extend(fade_out_frames)
 
     return render.Root(
         delay = delay,
@@ -636,6 +646,194 @@ def render_frame(config, sim_idx, frame_idx, hsv_to_rgb, layout):
 
     return render.Stack(children = children)
 
+def generate_fade_out_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name):
+    """Generate fade-out frames that freeze the last frame and fade to black over 2-3 seconds."""
+    fade_out_enabled = config.bool("enable_fade_out", False)
+    if not fade_out_enabled:
+        return []
+
+    # Calculate number of fade frames (2-3 seconds at current delay)
+    delay = 16 if config.get("speed", "slow") == "fast" else 33
+    fade_duration_ms = 2500  # 2.5 seconds
+    num_fade_frames = int(fade_duration_ms / delay)
+
+    # Get the simulation name for label (positions not needed for fade-out)
+    if is_api_mode:
+        sim_name = api_name
+    else:
+        sim_name = "no." + str(sim_idx + 1)
+
+    fade_frames = []
+    for i in range(num_fade_frames):
+        # Calculate opacity (1.0 to 0.0)
+        opacity = 1.0 - (float(i) / float(num_fade_frames))
+
+        # Create fade frame (only need sim_name for label, not positions)
+        fade_frame = render_fade_frame(sim_name, config, layout, opacity, is_api_mode, simulation, hsv_to_rgb)
+        fade_frames.append(fade_frame)
+
+    return fade_frames
+
+def generate_freeze_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name):
+    """Generate freeze frames that show only the trace from the last frame for a configurable duration."""
+    freeze_duration = int(config.get("freeze_duration", "0"))
+    if freeze_duration == 0:
+        return []
+
+    # Calculate number of freeze frames based on delay
+    delay = 16 if config.get("speed", "slow") == "fast" else 33
+    freeze_duration_ms = freeze_duration * 1000  # Convert to milliseconds
+    num_freeze_frames = int(freeze_duration_ms / delay)
+
+    # Create identical freeze frames (all showing only the trace from the last animation frame)
+    freeze_frames = []
+    for _ in range(num_freeze_frames):
+        freeze_frame = render_freeze_frame(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name)
+        freeze_frames.append(freeze_frame)
+
+    return freeze_frames
+
+def render_freeze_frame(simulation, is_api_mode, config, layout, hsv_to_rgb, sim_idx, api_name):
+    """Render a freeze frame showing only the trace from the complete animation (no legs/joints)."""
+
+    # Get configuration values
+    label = api_name if is_api_mode else "no." + str(sim_idx + 1)
+    show_label = config.bool("show_label", False)
+
+    # Build the children list - only background and full trace
+    children = [
+        # Black background
+        render.Box(
+            width = layout.width,
+            height = layout.height,
+            color = "#000",
+        ),
+
+        # Display label if enabled
+        render.Padding(
+            pad = (1, 1, 0, 0),
+            child = render.Text(
+                content = label if show_label else "",
+                color = "#888",
+                font = "tom-thumb",
+            ),
+        ),
+    ]
+
+    # Add the full trace (all points from the entire simulation)
+    if len(simulation) > 0:
+        trail_points = []
+
+        # Show all trail points from the complete animation
+        for i in range(len(simulation)):
+            if is_api_mode:
+                f = simulation[i]
+                tx, ty = f[2], f[3]
+            else:
+                scale_factor = layout.width / 64.0
+                f = simulation[i]
+                tx = int(f[2] * scale_factor)
+                ty = int(f[3] * scale_factor)
+
+            trail_hue = (i * 360.0 / len(simulation)) % 360
+            trail_color = hsv_to_rgb(trail_hue, 1.0, 0.5)
+            trail_points.append((tx, ty, trail_color))
+
+        children.append(
+            render.Stack(
+                children = [
+                    render.Padding(
+                        pad = (pt[0], pt[1], 0, 0),
+                        child = render.Box(width = 1, height = 1, color = pt[2]),
+                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                    for pt in trail_points
+                ],
+            ),
+        )
+
+    return render.Stack(children = children)
+
+def render_fade_frame(sim_name, config, layout, opacity, is_api_mode, simulation, hsv_to_rgb):
+    """Render a single fade-out frame with only the trace fading, legs and joints hidden."""
+
+    # Get configuration values
+    label = sim_name if config.bool("show_label", False) else ""
+
+    # Apply opacity to colors (only for trace)
+    def apply_opacity(color, opacity):
+        if not color or not color.startswith("#"):
+            return color
+
+        color = color[1:]
+        if len(color) < 6:
+            return color
+
+        r = int(color[0:2], 16)
+        g = int(color[2:4], 16)
+        b = int(color[4:6], 16)
+
+        # Apply opacity by blending with black
+        r = int(r * opacity)
+        g = int(g * opacity)
+        b = int(b * opacity)
+
+        return "#" + to_hex(r) + to_hex(g) + to_hex(b)
+
+    # Build the children list - only background and fading trace
+    children = [
+        # Black background
+        render.Box(
+            width = layout.width,
+            height = layout.height,
+            color = "#000",
+        ),
+
+        # Display label if enabled (fades with trace)
+        render.Padding(
+            pad = (1, 1, 0, 0),
+            child = render.Text(
+                content = label,
+                color = apply_opacity("#888", opacity),
+                font = "tom-thumb",
+            ),
+        ),
+    ]
+
+    # Add only the fading trails (no legs, no joints)
+    # Always show the full trace during fade-out if we have simulation data
+    if len(simulation) > 0:
+        trail_points = []
+
+        # Show ALL trail points during fade-out for complete pattern
+        for i in range(len(simulation)):
+            if is_api_mode:
+                f = simulation[i]
+                tx, ty = f[2], f[3]
+            else:
+                scale_factor = layout.width / 64.0
+                f = simulation[i]
+                tx = int(f[2] * scale_factor)
+                ty = int(f[3] * scale_factor)
+
+            trail_hue = (i * 360.0 / len(simulation)) % 360
+            trail_color = hsv_to_rgb(trail_hue, 1.0, 0.5)
+            faded_trail_color = apply_opacity(trail_color, opacity)
+            trail_points.append((tx, ty, faded_trail_color))
+
+        children.append(
+            render.Stack(
+                children = [
+                    render.Padding(
+                        pad = (pt[0], pt[1], 0, 0),
+                        child = render.Box(width = 1, height = 1, color = pt[2]),
+                    ) if (pt[0] >= 0 and pt[0] < layout.width and pt[1] >= 0 and pt[1] < layout.height) else render.Box(width = 0, height = 0)
+                    for pt in trail_points
+                ],
+            ),
+        )
+
+    return render.Stack(children = children)
+
 def get_schema():
     # Build animation options dynamically
     animation_options = [
@@ -662,6 +860,10 @@ def get_schema():
                     schema.Option(
                         display = "Fast (2x speed)",
                         value = "fast",
+                    ),
+                    schema.Option(
+                        display = "Extra Fast (3x speed)",
+                        value = "extra_fast",
                     ),
                     schema.Option(
                         display = "Slow (normal)",
@@ -721,7 +923,7 @@ def get_schema():
             schema.Dropdown(
                 id = "line_style",
                 name = "Line Style",
-                desc = "How to draw the pendulum arm lines",
+                desc = "How to draw the pendulum leg lines",
                 icon = "penNib",
                 default = "widget",
                 options = [
@@ -732,8 +934,8 @@ def get_schema():
             ),
             schema.Color(
                 id = "line_color",
-                name = "Line Color",
-                desc = "Color of the pendulum arm lines",
+                name = "Leg Color",
+                desc = "Color of the pendulum leg lines",
                 icon = "palette",
                 default = "#FFFFFF",
             ),
@@ -743,6 +945,28 @@ def get_schema():
                 desc = "Show the origin point and leg joint (first bob)",
                 icon = "circleDot",
                 default = True,
+            ),
+            schema.Toggle(
+                id = "enable_fade_out",
+                name = "Enable Fade Out",
+                desc = "Freeze and fade away the animation at the end",
+                icon = "wandSparkles",
+                default = False,
+            ),
+            schema.Dropdown(
+                id = "freeze_duration",
+                name = "Freeze Duration",
+                desc = "How long to freeze on the last frame (0 = disabled)",
+                icon = "clock",
+                default = "0",
+                options = [
+                    schema.Option(display = "Disabled (0s)", value = "0"),
+                    schema.Option(display = "1 second", value = "1"),
+                    schema.Option(display = "2 seconds", value = "2"),
+                    schema.Option(display = "3 seconds", value = "3"),
+                    schema.Option(display = "4 seconds", value = "4"),
+                    schema.Option(display = "5 seconds", value = "5"),
+                ],
             ),
         ],
     )

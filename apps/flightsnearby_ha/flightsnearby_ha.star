@@ -689,7 +689,7 @@ def main(config):
 
     if radar:
         return render.Root(
-            delay = 5000,
+            delay = 7500,
             child = render.Animation(
                 children = [display, radar],
             ),
@@ -751,7 +751,7 @@ def get_schema():
                 id = "radar_degree_offset",
                 name = "Radar Degree Offset",
                 icon = "compass",
-                desc = "Rotate the radar view by this many degrees (e.g., 180 for due South).  Allows you to align the radar with the view out your window.",
+                desc = "Rotate the radar view by this many degrees (e.g., 180 for due South).",
                 default = "0",
             ),
             schema.Color(
