@@ -33,6 +33,41 @@ brightness_colors = [
     "#AAAAAA",  # 4: Faintest (mag > 3.5)
 ]
 
+def display_instructions(config):
+    ##############################################################################################################################################################################################################################
+    instructions_1 = "Displays constellations you can currently unless it is daytime, it'll show you what you can see at sundown."
+    instructions_2 = "Dot on the far left in green indicates how high in the sky you need to look. "
+    instructions_3 = "Green text indicates direction you must look. Constellation name displayed in blue."
+    app_title = "Constellations"
+
+    return render.Root(
+        render.Column(
+            children = [
+                render.Marquee(
+                    width = canvas.width(),
+                    child = render.Text(app_title, color = "#65d0e6", font = "5x8"),
+                ),
+                render.Marquee(
+                    width = canvas.width(),
+                    offset_start = len(app_title) * 5,
+                    child = render.Text(instructions_1, color = "#f4a306", font = "5x8"),
+                ),
+                render.Marquee(
+                    offset_start = len(instructions_1) * 5,
+                    width = canvas.width(),
+                    child = render.Text(instructions_2, color = "#f4a306", font = "5x8"),
+                ),
+                render.Marquee(
+                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
+                    width = canvas.width(),
+                    child = render.Text(instructions_3, color = "#f4a306", font = "5x8"),
+                ),
+            ],
+        ),
+        delay = int(config.get("scroll", 45)),
+        show_full_animation = True,
+    )
+
 def deg_to_rad(deg):
     return deg * math.pi / 180.0
 
@@ -42,23 +77,27 @@ def rad_to_deg(rad):
 def get_constellation_bounds(stars_raw):
     if not stars_raw:
         return 0, 0, 0, 0
-    
+
     # FIX: Use the first star as an anchor to handle the 0/360 degree wrap
     anchor_az = stars_raw[0][1]
-    
+
     min_x, max_x = 1000.0, -1000.0
     min_y, max_y = 1000.0, -1000.0
-    
-    for alt, az, star in stars_raw:
+
+    for alt, az, _ in stars_raw:
         # Calculate relative distance from anchor (-180 to +180)
         diff = (az - anchor_az + 180) % 360 - 180
         adjusted_az = anchor_az + diff
-        
-        if adjusted_az < min_x: min_x = adjusted_az
-        if adjusted_az > max_x: max_x = adjusted_az
-        if alt < min_y: min_y = alt
-        if alt > max_y: max_y = alt
-        
+
+        if adjusted_az < min_x:
+            min_x = adjusted_az
+        if adjusted_az > max_x:
+            max_x = adjusted_az
+        if alt < min_y:
+            min_y = alt
+        if alt > max_y:
+            max_y = alt
+
     return min_x, max_x, min_y, max_y
 
 def julian_date(t):
@@ -215,12 +254,12 @@ def get_constellation_center(constellation_stars, t, lat_deg, lon_deg):
 def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
     return render.Padding(pad = (left, top, right, bottom), child = element)
 
-def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg):
+def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, show_altitude_indicator):
     # ... (Sidereal time and visibility check remains the same) ...
     lst_deg = local_sidereal_time(t, lon_deg)
     constellation_stars = selected_constellation["stars"]
     W, H = canvas.width(), canvas.height()
-    star_area_h = H - 8 # Increased slightly for better text clearance
+    star_area_h = H - 8  # Increased slightly for better text clearance
 
     visible_stars_raw = []
     for star in constellation_stars:
@@ -230,7 +269,7 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg):
             visible_stars_raw.append((alt, az, star))
 
     if not visible_stars_raw:
-        return render.Root(child=render.Box(child=render.Text("Below Horizon")))
+        return render.Root(child = render.Box(child = render.Text("Below Horizon")))
 
     official_alt = altitude_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     official_az = azimuth_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
@@ -241,60 +280,67 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg):
     span_az, span_alt = max(5.0, max_az - min_az), max(5.0, max_alt - min_alt)
     anchor_az = visible_stars_raw[0][1]
 
-    layers = [render.Box(width=W, height=H, color="#000011")]
+    layers = [render.Box(width = W, height = H, color = "#000000")]
 
     # Render Stars with wrap-around correction
     for i, (alt, az, star) in enumerate(visible_stars_raw):
         diff = (az - anchor_az + 180) % 360 - 180
         adj_az = anchor_az + diff
-        
+
         rel_x = int(3 + ((adj_az - min_az) / span_az) * (W - 10))
         rel_y = int(1 + (1.0 - (alt - min_alt) / span_alt) * (star_area_h - 2))
-        
+
         layers.append(render.Padding(
-            pad=(rel_x, rel_y, 0, 0),
-            child=render.Box(width=1, height=1, color=brightness_colors[min(i, 4)])
+            pad = (rel_x, rel_y, 0, 0),
+            child = render.Box(width = 1, height = 1, color = brightness_colors[min(i, 4)]),
         ))
 
     # Altitude Dot (Column 0)
-    dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
-    layers.append(render.Padding(pad=(0, dot_y, 0, 0), child=render.Box(width=1, height=1, color="#00FF88")))
+    if show_altitude_indicator:
+        dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
+        layers.append(render.Padding(pad = (0, dot_y, 0, 0), child = render.Box(width = 1, height = 1, color = "#00FF88")))
 
     # Bottom Overlay with Pixel-Perfect Alignment
     layers.append(render.Padding(
-        pad=(0, H-7, 0, 0),
-        child=render.Row(
-            expanded=True,
-            main_align="start", 
-            cross_align="center",  # FIX: Aligns the vertical centers of both text blocks
-            children=[
+        pad = (0, H - 7, 0, 0),
+        child = render.Row(
+            expanded = True,
+            main_align = "start",
+            cross_align = "center",  # FIX: Aligns the vertical centers of both text blocks
+            children = [
                 render.Padding(
-                    pad=(1, 0, 3, 0), 
-                    child=render.Text(
-                        dir_letter, 
-                        color="#00FF44", 
-                        font="CG-pixel-4x5-mono"
-                    )
+                    pad = (1, 0, 3, 0),
+                    child = render.Text(
+                        dir_letter,
+                        color = "#00FF44",
+                        font = "CG-pixel-4x5-mono",
+                    ),
                 ),
                 render.Box(
                     width = W - 18,
-                    height = 7, # Explicit height helps stabilize the row
+                    height = 7,  # Explicit height helps stabilize the row
                     child = render.Marquee(
                         width = W - 18,
                         child = render.Text(
-                            selected_constellation["name"], 
-                            color="#66AAFF", 
-                            font="CG-pixel-4x5-mono"
-                        )
-                    )
+                            selected_constellation["name"],
+                            color = "#66AAFF",
+                            font = "CG-pixel-4x5-mono",
+                        ),
+                    ),
                 ),
-            ]
-        )
+            ],
+        ),
     ))
 
-    return render.Root(child=render.Stack(children=layers))
-    
+    return render.Root(child = render.Stack(children = layers))
+
 def main(config):
+    show_instructions = config.bool("instructions", False)
+    show_altitude_indicator = config.bool("alt_indicator", True)
+
+    if show_instructions:
+        return display_instructions(config)
+
     now = time.now()
     location = json.decode(config.get("location", default_location))
     lat = float(location["lat"])
@@ -307,12 +353,11 @@ def main(config):
 
     if now > s_rise and now < s_set:
         effective_time = s_set
-        display_mode = "Tonight"
+        #display_mode = "Tonight"
+
     else:
         effective_time = now
-        display_mode = "Now"
-
-    print(display_mode + ": " + str(effective_time))
+        #display_mode = "Now"
 
     # 2. Filter constellations > 30 degrees
     # We use your visible_constellations function but with a 30.0 threshold
@@ -343,9 +388,24 @@ def main(config):
     if not featured:
         featured = CONSTELLATIONS[0]
 
-    return render_constellation_screen(featured, effective_time, lat, lon)
+    return render_constellation_screen(featured, effective_time, lat, lon, show_altitude_indicator)
 
 def get_schema():
+    scroll_speed_options = [
+        schema.Option(
+            display = "Slow Scroll",
+            value = "60",
+        ),
+        schema.Option(
+            display = "Medium Scroll",
+            value = "45",
+        ),
+        schema.Option(
+            display = "Fast Scroll",
+            value = "30",
+        ),
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -354,6 +414,28 @@ def get_schema():
                 name = "Location",
                 desc = "Your location to determine if the selected planet is visible.",
                 icon = "locationDot",
+            ),
+            schema.Toggle(
+                id = "alt_indicator",
+                name = "Display Altitude Indicator",
+                desc = "Show colored dot on left most column to indicate how high to look",
+                icon = "angleLeft",  #"info",
+                default = True,
+            ),
+            schema.Dropdown(
+                id = "scroll",
+                name = "Scroll",
+                desc = "Scroll Speed",
+                icon = "stopwatch",
+                options = scroll_speed_options,
+                default = scroll_speed_options[0].value,
+            ),
+            schema.Toggle(
+                id = "instructions",
+                name = "Display Instructions",
+                desc = "",
+                icon = "book",  #"info",
+                default = False,
             ),
         ],
     )
