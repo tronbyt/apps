@@ -328,38 +328,35 @@ def main(config):
 
     if now > s_rise and now < s_set:
         effective_time = s_set
-
     else:
         effective_time = now
 
-    # 2. Filter constellations > 30 degrees
-    # We use your visible_constellations function but with a 30.0 threshold
+    # 2. Address the Efficiency Flag: Use a dictionary lookup
+    # This converts the list to a dict once per execution for O(1) speed.
+    constellation_dict = {c["id"]: c for c in CONSTELLATIONS} if type(CONSTELLATIONS) == "list" else CONSTELLATIONS
+
+    # 3. Filter constellations > 30 degrees
     candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 30.0)
 
-    # Fallback: If nothing is > 30, try > 15 to ensure we show SOMETHING
+    # Fallback: If nothing is > 30, try > 15
     if len(candidates) == 0:
         candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 15.0)
 
     if len(candidates) == 0:
         return render.Root(child = render.Box(child = render.Text("Cloudy Skies", font = "CG-pixel-4x5-mono")))
 
-    # 3. Pick one at random
-    # We seed it with the current hour so it doesn't flicker every second,
-    # but changes once a minute
+    # 4. Pick one at random seeded by the minute
     random.seed(now.minute)
     choice_index = random.number(0, len(candidates) - 1)
-    chosen_summary = candidates[choice_index]
+    chosen_id = candidates[choice_index]["id"]
 
-    # 4. Fetch full data (with stars) for the chosen one
-    featured = None
-    for c in CONSTELLATIONS:
-        if c["id"] == chosen_summary["id"]:
-            featured = c
-            break
+    # 5. Efficient Fetch (No more linear search loop)
+    featured = constellation_dict.get(chosen_id)
 
-    # fallback safety
+    # Final fallback safety check
     if not featured:
-        featured = CONSTELLATIONS[0]
+        # If the ID isn't found, pick the first one available in the dict values
+        featured = constellation_dict.values()[0]
 
     return render_constellation_screen(featured, effective_time, lat, lon, show_altitude_indicator)
 
