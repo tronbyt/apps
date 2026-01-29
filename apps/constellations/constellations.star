@@ -8,8 +8,10 @@ Author: Robert Ison
 load("constellations_data.star", "CONSTELLATIONS")
 load("encoding/json.star", "json")
 load("math.star", "math")
+load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
+load("sunrise.star", "sunrise")  #to calcuate day/night and when planets will be visible
 load("time.star", "time")
 
 default_location = """
@@ -36,15 +38,24 @@ def deg_to_rad(deg):
 
 def rad_to_deg(rad):
     return rad * 180.0 / math.pi
+
 def get_constellation_bounds(stars_raw):
-    """Calculates the min/max coordinates to auto-zoom perfectly."""
+    if not stars_raw:
+        return 0, 0, 0, 0
+    
+    # FIX: Use the first star as an anchor to handle the 0/360 degree wrap
+    anchor_az = stars_raw[0][1]
+    
     min_x, max_x = 1000.0, -1000.0
     min_y, max_y = 1000.0, -1000.0
     
     for alt, az, star in stars_raw:
-        # Simple projection: Azimuth as X, Altitude as Y
-        if az < min_x: min_x = az
-        if az > max_x: max_x = az
+        # Calculate relative distance from anchor (-180 to +180)
+        diff = (az - anchor_az + 180) % 360 - 180
+        adjusted_az = anchor_az + diff
+        
+        if adjusted_az < min_x: min_x = adjusted_az
+        if adjusted_az > max_x: max_x = adjusted_az
         if alt < min_y: min_y = alt
         if alt > max_y: max_y = alt
         
@@ -205,13 +216,12 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
     return render.Padding(pad = (left, top, right, bottom), child = element)
 
 def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg):
+    # ... (Sidereal time and visibility check remains the same) ...
     lst_deg = local_sidereal_time(t, lon_deg)
     constellation_stars = selected_constellation["stars"]
+    W, H = canvas.width(), canvas.height()
+    star_area_h = H - 8 # Increased slightly for better text clearance
 
-    W = canvas.width()
-    H = canvas.height()
-    star_area_h = H - 7 
-    
     visible_stars_raw = []
     for star in constellation_stars:
         alt = altitude_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
@@ -220,91 +230,120 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg):
             visible_stars_raw.append((alt, az, star))
 
     if not visible_stars_raw:
-        return render.Root(child=render.Box(child=render.Text("Below Horizon", font="CG-pixel-4x5-mono")))
+        return render.Root(child=render.Box(child=render.Text("Below Horizon")))
 
-    # FIX 1: Use the OFFICIAL center for the direction and altitude indicator
-    # This ensures the screen label matches your debug print exactly.
     official_alt = altitude_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     official_az = azimuth_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     dir_letter = get_cardinal_direction(official_az)
 
-    # Calculate dynamic bounds for the stars themselves (auto-zoom)
+    # Use the fixed bounds logic
     min_az, max_az, min_alt, max_alt = get_constellation_bounds(visible_stars_raw)
-    span_az = max(5.0, max_az - min_az)
-    span_alt = max(5.0, max_alt - min_alt)
+    span_az, span_alt = max(5.0, max_az - min_az), max(5.0, max_alt - min_alt)
+    anchor_az = visible_stars_raw[0][1]
 
     layers = [render.Box(width=W, height=H, color="#000011")]
 
-    # Render Stars
+    # Render Stars with wrap-around correction
     for i, (alt, az, star) in enumerate(visible_stars_raw):
-        rel_x = int(2 + ((az - min_az) / span_az) * (W - 8))
+        diff = (az - anchor_az + 180) % 360 - 180
+        adj_az = anchor_az + diff
+        
+        rel_x = int(3 + ((adj_az - min_az) / span_az) * (W - 10))
         rel_y = int(1 + (1.0 - (alt - min_alt) / span_alt) * (star_area_h - 2))
         
-        star_color = brightness_colors[min(i, 4)]
         layers.append(render.Padding(
             pad=(rel_x, rel_y, 0, 0),
-            child=render.Box(width=1, height=1, color=star_color)
+            child=render.Box(width=1, height=1, color=brightness_colors[min(i, 4)])
         ))
 
-    # FIX 2: Height=1 for a single crisp dot
+    # Altitude Dot (Column 0)
     dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
-    alt_color = "#00FF88" if official_alt > 60 else "#FFAA00" if official_alt > 30 else "#FF4400"
-    
-    layers.append(render.Padding(
-        pad=(0, dot_y, 0, 0),
-        child=render.Box(width=1, height=1, color=alt_color) 
-    ))
+    layers.append(render.Padding(pad=(0, dot_y, 0, 0), child=render.Box(width=1, height=1, color="#00FF88")))
 
-    # Bottom Overlay
+    # Bottom Overlay with Pixel-Perfect Alignment
     layers.append(render.Padding(
         pad=(0, H-7, 0, 0),
-        child=render.Box(
-            width=W,
-            child=render.Row(
-                expanded=True,
-                main_align="space_around",
-                children=[
-                    render.Text(dir_letter, color="#00FF44", font="CG-pixel-4x5-mono"),
-                    render.Text(selected_constellation["name"][:12], color="#66AAFF", font="CG-pixel-4x5-mono"),
-                ]
-            )
+        child=render.Row(
+            expanded=True,
+            main_align="start", 
+            cross_align="center",  # FIX: Aligns the vertical centers of both text blocks
+            children=[
+                render.Padding(
+                    pad=(1, 0, 3, 0), 
+                    child=render.Text(
+                        dir_letter, 
+                        color="#00FF44", 
+                        font="CG-pixel-4x5-mono"
+                    )
+                ),
+                render.Box(
+                    width = W - 18,
+                    height = 7, # Explicit height helps stabilize the row
+                    child = render.Marquee(
+                        width = W - 18,
+                        child = render.Text(
+                            selected_constellation["name"], 
+                            color="#66AAFF", 
+                            font="CG-pixel-4x5-mono"
+                        )
+                    )
+                ),
+            ]
         )
     ))
 
     return render.Root(child=render.Stack(children=layers))
-
-
-
-
+    
 def main(config):
     now = time.now()
-
     location = json.decode(config.get("location", default_location))
     lat = float(location["lat"])
     lon = float(location["lng"])
+    tz = location["timezone"]
 
-    visible = visible_constellations(now, lat, lon)
+    # 1. Daytime logic (as we built before)
+    s_rise = sunrise.sunrise(lat, lon, now).in_location(tz)
+    s_set = sunrise.sunset(lat, lon, now).in_location(tz)
 
-    print("Visible constellations (top 5):")
+    if now > s_rise and now < s_set:
+        effective_time = s_set
+        display_mode = "Tonight"
+    else:
+        effective_time = now
+        display_mode = "Now"
 
-    #for i, c in enumerate(visible[:5]):
-    for i, c in enumerate(visible):
-        print("%s: %s (alt: %s°, dir: %s)" % (i + 1, c["name"], c["altitude"], c["direction"]))
+    print(display_mode + ": " + str(effective_time))
 
-    if len(visible) == 0:
-        return render.Text("Clear skies!\nNo bright\npatterns visible", color = "#88AAFF")
+    # 2. Filter constellations > 30 degrees
+    # We use your visible_constellations function but with a 30.0 threshold
+    candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 30.0)
 
-    # Find full constellation data (with stars) matching top visible
+    # Fallback: If nothing is > 30, try > 15 to ensure we show SOMETHING
+    if len(candidates) == 0:
+        candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 15.0)
+
+    if len(candidates) == 0:
+        return render.Root(child = render.Box(child = render.Text("Cloudy Skies", font = "CG-pixel-4x5-mono")))
+
+    # 3. Pick one at random
+    # We seed it with the current hour so it doesn't flicker every second,
+    # but changes once a minute
+    random.seed(now.minute)
+    choice_index = random.number(0, len(candidates) - 1)
+    chosen_summary = candidates[choice_index]
+
+    # 4. Fetch full data (with stars) for the chosen one
     featured = None
     for c in CONSTELLATIONS:
-        if c["id"] == visible[0]["id"]:
+        if c["id"] == chosen_summary["id"]:
             featured = c
             break
 
-    if featured == None:
-        featured = CONSTELLATIONS[0]  # Fallback
+    # fallback safety
+    if not featured:
+        featured = CONSTELLATIONS[0]
 
-    return render_constellation_screen(featured, now, lat, lon)
+    return render_constellation_screen(featured, effective_time, lat, lon)
 
 def get_schema():
     return schema.Schema(
