@@ -1,0 +1,10 @@
+---
+id: constellations
+name: Constellations
+summary: Constellations are overhead
+desc: See what constellations are overhead tonight!
+author: Robert Ison
+recommendedInterval: 1
+fileName: constellations.star
+packageName: constellations
+supports2x: true
