@@ -189,21 +189,6 @@ CONSTELLATIONS = [
     {
         "id": "CMi",
         "name": "Canis Minor",
-        "raHours": 7.50,
-        "decDeg": 5.0,
-        "stars": [
-            {"name": "Procyon", "raHours": 7.65, "decDeg": 5.23},
-            {"name": "Gomeisa", "raHours": 7.64, "decDeg": 8.30},
-            {"name": "Gamma CMi", "raHours": 7.60, "decDeg": 4.90},
-            {"name": "Delta CMi", "raHours": 7.62, "decDeg": 3.50},
-            {"name": "Epsilon CMi", "raHours": 7.67, "decDeg": 2.80},
-            {"name": "Zeta CMi", "raHours": 7.63, "decDeg": 6.10},
-            {"name": "Eta CMi", "raHours": 7.61, "decDeg": 5.70},
-        ],
-    },
-    {
-        "id": "CMi",
-        "name": "Canis Minor",
         "raHours": 7.5,
         "decDeg": 5.0,
         "stars": [
@@ -1229,22 +1214,6 @@ CONSTELLATIONS = [
             {"name": "Vindemiatrix", "raHours": 13.23, "decDeg": 10.01},
             {"name": "Heze", "raHours": 12.81, "decDeg": -1.95},
             {"name": "Syrma", "raHours": 12.90, "decDeg": -1.42},
-        ],
-    },
-    {
-        "id": "Vul",
-        "name": "Vulpecula",
-        "raHours": 19.75,
-        "decDeg": 25.0,
-        "stars": [
-            {"name": "Anser", "raHours": 19.48, "decDeg": 20.52},
-            {"name": "23 Vulpeculae", "raHours": 19.77, "decDeg": 27.45},
-            {"name": "31 Vulpeculae", "raHours": 20.02, "decDeg": 25.78},
-            {"name": "13 Vulpeculae", "raHours": 19.95, "decDeg": 29.12},
-            {"name": "15 Vulpeculae", "raHours": 20.12, "decDeg": 28.67},
-            {"name": "1 Vulpeculae", "raHours": 19.35, "decDeg": 23.45},
-            {"name": "12 Vulpeculae", "raHours": 19.88, "decDeg": 22.34},
-            {"name": "30 Vulpeculae", "raHours": 20.25, "decDeg": 24.89},
         ],
     },
     {
