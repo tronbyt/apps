@@ -1147,7 +1147,7 @@ def get_schema():
                         value = "AUDI",
                     ),
                     schema.Option(
-                        display = "Rivan",
+                        display = "Rivian",
                         value = "RIVIAN",
                     ),
                     schema.Option(
