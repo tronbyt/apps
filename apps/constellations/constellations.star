@@ -228,32 +228,6 @@ def visible_constellations(t, lat_deg, lon_deg, threshold_deg = 10.0):
     visible = sorted(visible, key = lambda x: -x["altitude"])
     return visible
 
-def get_constellation_center(constellation_stars, t, lat_deg, lon_deg):
-    lst_deg = local_sidereal_time(t, lon_deg)
-
-    visible_stars_raw = []
-    total_alt = 0.0
-    total_az = 0.0
-
-    for star in constellation_stars:
-        alt = altitude_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
-        az = azimuth_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
-        if alt > 0.0:
-            visible_stars_raw.append((alt, az, star))
-            total_alt += alt
-            total_az += az
-
-    count = len(visible_stars_raw)
-    if count == 0:
-        return None, None, []
-
-    center_alt = total_alt / count
-    center_az = total_az / count
-    return center_alt, center_az, visible_stars_raw
-
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    return render.Padding(pad = (left, top, right, bottom), child = element)
-
 def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, show_altitude_indicator):
     # ... (Sidereal time and visibility check remains the same) ...
     lst_deg = local_sidereal_time(t, lon_deg)
@@ -433,7 +407,7 @@ def get_schema():
             schema.Toggle(
                 id = "instructions",
                 name = "Display Instructions",
-                desc = "",
+                desc = "Displays application instructions.",
                 icon = "book",  #"info",
                 default = False,
             ),
