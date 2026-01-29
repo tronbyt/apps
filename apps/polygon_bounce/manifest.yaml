@@ -1,0 +1,10 @@
+---
+id: polygon-bounce
+name: Polygon Bounce
+summary: A colorful bouncing polygon
+desc: Nostalgia screensaver of a bouncing polygon with trails.
+author: Brombomb
+fileName: polygon_bounce.star
+packageName: polygonbounce
+supports2x: true
+minPixletVersion: 'v0.50.0'

@@ -86,6 +86,9 @@ Updated PLAYER_MAPPING
 v2.10
 Updated Tournament IDs for 2026 Season
 Updated timezone check
+
+v2.10.1
+Updated PLAYER_MAPPING
 """
 
 load("encoding/json.star", "json")
@@ -118,7 +121,16 @@ PLAYER_MAPPING = """
     "4382434": "Norgaard",
     "4404992": "B.Griffin",
     "5962": "L.Griffin",
-    "686": "Z.Johnson"
+    "686": "Z.Johnson",
+    "9506": "J.Smith",
+    "5211425": "B.Brown",
+    "1407": "D.Brown",
+    "4877953": "S.T.Lee",
+    "5076011": "Dumont DC",
+    "4355673": "B.Wu",
+    "4423323": "D.Wu",
+    "9127": "A.Svensson",
+    "4699329": "J.Svensson"
 }
 """
 
@@ -440,7 +452,6 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
     LeaderTeeTimeFormat = time.parse_time(LeaderTeeTime, format = "2006-01-02T15:04Z").in_location(timezone)
     TimeDiff = LeaderTeeTimeFormat - time.now()
 
-    #print(TimeDiff)
     if TimeDiff.hours < 12:
         ShowTeeTimes = True
 
