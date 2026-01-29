@@ -34,6 +34,7 @@ brightness_colors = [
 ]
 
 def display_instructions(config):
+    # Use the following line to guage how much text you can enter per line. If you go beyond this line it likely wont' get displayed.
     ##############################################################################################################################################################################################################################
     instructions_1 = "Displays constellations you can currently unless it is daytime, it'll show you what you can see at sundown."
     instructions_2 = "Dot on the far left in green indicates how high in the sky you need to look. "
@@ -229,11 +230,11 @@ def visible_constellations(t, lat_deg, lon_deg, threshold_deg = 10.0):
     return visible
 
 def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, show_altitude_indicator):
-    # ... (Sidereal time and visibility check remains the same) ...
+    # idereal time and visibility check
     lst_deg = local_sidereal_time(t, lon_deg)
     constellation_stars = selected_constellation["stars"]
     W, H = canvas.width(), canvas.height()
-    star_area_h = H - 8  # Increased slightly for better text clearance
+    star_area_h = H - 8
 
     visible_stars_raw = []
     for star in constellation_stars:
@@ -269,7 +270,7 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
             child = render.Box(width = 1, height = 1, color = brightness_colors[min(i, 4)]),
         ))
 
-    # Altitude Dot (Column 0)
+    # Altitude Dot
     if show_altitude_indicator:
         dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
         layers.append(render.Padding(pad = (0, dot_y, 0, 0), child = render.Box(width = 1, height = 1, color = "#00FF88")))
@@ -321,17 +322,15 @@ def main(config):
     lon = float(location["lng"])
     tz = location["timezone"]
 
-    # 1. Daytime logic (as we built before)
+    # 1. Daytime logic
     s_rise = sunrise.sunrise(lat, lon, now).in_location(tz)
     s_set = sunrise.sunset(lat, lon, now).in_location(tz)
 
     if now > s_rise and now < s_set:
         effective_time = s_set
-        #display_mode = "Tonight"
 
     else:
         effective_time = now
-        #display_mode = "Now"
 
     # 2. Filter constellations > 30 degrees
     # We use your visible_constellations function but with a 30.0 threshold
@@ -393,7 +392,7 @@ def get_schema():
                 id = "alt_indicator",
                 name = "Display Altitude Indicator",
                 desc = "Show colored dot on left most column to indicate how high to look",
-                icon = "angleLeft",  #"info",
+                icon = "angleLeft",
                 default = True,
             ),
             schema.Dropdown(
@@ -408,7 +407,7 @@ def get_schema():
                 id = "instructions",
                 name = "Display Instructions",
                 desc = "Displays application instructions.",
-                icon = "book",  #"info",
+                icon = "book",
                 default = False,
             ),
         ],
