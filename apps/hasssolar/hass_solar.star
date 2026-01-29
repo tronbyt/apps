@@ -93,6 +93,8 @@ load("images/sun_sum.png", SUN_SUM = "file")
 load("images/sun_sum@2x.png", SUN_SUM_2X = "file")
 load("images/tesla_logo.png", TESLA_LOGO_18x18 = "file")
 load("images/tesla_logo@2x.png", TESLA_LOGO_18x18_2X = "file")
+load("images/rivian_logo.png", TESLA_LOGO_18x18 = "file")
+load("images/rivian_logo@2x.png", TESLA_LOGO_18x18_2X = "file")
 load("images/vw_logo.png", VW_LOGO_18x18 = "file")
 load("images/vw_logo@2x.png", VW_LOGO_18x18_2X = "file")
 load("images/yellow_anim.gif", YELLOW_ANIM = "file")
@@ -923,6 +925,12 @@ EV_LOGOS = {
         "width": 18,
         "height": 18,
     },
+    "RIVIAN": {
+        "logo": RIVIAN_LOGO_18x18,
+        "logo_2x": RIVIAN_LOGO_18x18_2X,
+        "width": 18,
+        "height": 18,
+    },
     "AUDI": {
         "logo": AUDI_LOGO_24x9,
         "logo_2x": AUDI_LOGO_24x9_2X,
@@ -1137,6 +1145,10 @@ def get_schema():
                     schema.Option(
                         display = "Audi",
                         value = "AUDI",
+                    ),
+                    schema.Option(
+                        display = "Rivan",
+                        value = "RIVIAN",
                     ),
                     schema.Option(
                         display = "BMW",
