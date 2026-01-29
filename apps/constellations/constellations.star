@@ -36,6 +36,19 @@ def deg_to_rad(deg):
 
 def rad_to_deg(rad):
     return rad * 180.0 / math.pi
+def get_constellation_bounds(stars_raw):
+    """Calculates the min/max coordinates to auto-zoom perfectly."""
+    min_x, max_x = 1000.0, -1000.0
+    min_y, max_y = 1000.0, -1000.0
+    
+    for alt, az, star in stars_raw:
+        # Simple projection: Azimuth as X, Altitude as Y
+        if az < min_x: min_x = az
+        if az > max_x: max_x = az
+        if alt < min_y: min_y = alt
+        if alt > max_y: max_y = alt
+        
+    return min_x, max_x, min_y, max_y
 
 def julian_date(t):
     """Julian Date from time object"""
@@ -195,118 +208,73 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg):
     lst_deg = local_sidereal_time(t, lon_deg)
     constellation_stars = selected_constellation["stars"]
 
-    screen_width = canvas.width()
-    screen_height = canvas.height()
-
-    brightness_colors = ["#FFFFFF", "#FFEEBB", "#DDDDDD", "#BBBBBB", "#AAAAAA"]
-
-    # Calculate center from visible stars
-    total_alt = 0.0
-    total_az = 0.0
-    count = 0
+    W = canvas.width()
+    H = canvas.height()
+    star_area_h = H - 7 
+    
     visible_stars_raw = []
-
     for star in constellation_stars:
         alt = altitude_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
         az = azimuth_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
         if alt > 0.0:
             visible_stars_raw.append((alt, az, star))
-            total_alt += alt
-            total_az += az
-            count += 1
 
-    if count == 0:
-        return render.Text("Below\nhorizon", color = "#FFFFFF", font = "CG-pixel-4x5-mono")
+    if not visible_stars_raw:
+        return render.Root(child=render.Box(child=render.Text("Below Horizon", font="CG-pixel-4x5-mono")))
 
-    center_alt = total_alt / count
-    center_az = total_az / count
+    # FIX 1: Use the OFFICIAL center for the direction and altitude indicator
+    # This ensures the screen label matches your debug print exactly.
+    official_alt = altitude_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
+    official_az = azimuth_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
+    dir_letter = get_cardinal_direction(official_az)
 
-    # Calculate center from selected constellation
-    #center_alt = #altitude_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
-    #center_az = #azimuth_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
+    # Calculate dynamic bounds for the stars themselves (auto-zoom)
+    min_az, max_az, min_alt, max_alt = get_constellation_bounds(visible_stars_raw)
+    span_az = max(5.0, max_az - min_az)
+    span_alt = max(5.0, max_alt - min_alt)
 
-    # YOUR REQUESTED DIMENSIONS
-    star_cols = screen_width - 1  # 63px for stars (col 0 = height indicator)
-    star_rows = screen_height - 5  # 27px for stars (5px bottom text space)
+    layers = [render.Box(width=W, height=H, color="#000011")]
 
-    # **SIMPLE AUTO-ZOOM: Fill 90% of available space**
-    visible_stars_raw_pos = []
-    for i, (star_alt, star_az, star) in enumerate(visible_stars_raw):
-        # X: azimuth relative to center (-180° to +180° → 0.0 to 1.0)
-        rel_az = ((star_az - center_az + 180) % 360) - 180
-        x_raw = (rel_az + 180) / 360.0
+    # Render Stars
+    for i, (alt, az, star) in enumerate(visible_stars_raw):
+        rel_x = int(2 + ((az - min_az) / span_az) * (W - 8))
+        rel_y = int(1 + (1.0 - (alt - min_alt) / span_alt) * (star_area_h - 2))
+        
+        star_color = brightness_colors[min(i, 4)]
+        layers.append(render.Padding(
+            pad=(rel_x, rel_y, 0, 0),
+            child=render.Box(width=1, height=1, color=star_color)
+        ))
 
-        # Y: altitude + Dec spread (prevents bunching)
-        base_y = (90.0 - star_alt) / 90.0  # 0=zenith, 1=horizon
-        dec_spread = (star["decDeg"] - 10.0) / 40.0  # Hercules 10-36° Dec
-        y_raw = base_y - dec_spread * 0.3  # Spread vertically
+    # FIX 2: Height=1 for a single crisp dot
+    dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
+    alt_color = "#00FF88" if official_alt > 60 else "#FFAA00" if official_alt > 30 else "#FF4400"
+    
+    layers.append(render.Padding(
+        pad=(0, dot_y, 0, 0),
+        child=render.Box(width=1, height=1, color=alt_color) 
+    ))
 
-        visible_stars_raw_pos.append((x_raw, y_raw, i, star))
+    # Bottom Overlay
+    layers.append(render.Padding(
+        pad=(0, H-7, 0, 0),
+        child=render.Box(
+            width=W,
+            child=render.Row(
+                expanded=True,
+                main_align="space_around",
+                children=[
+                    render.Text(dir_letter, color="#00FF44", font="CG-pixel-4x5-mono"),
+                    render.Text(selected_constellation["name"][:12], color="#66AAFF", font="CG-pixel-4x5-mono"),
+                ]
+            )
+        )
+    ))
 
-    # Find bounds and map to YOUR screen dimensions
-    min_x, max_x = 1.0, 0.0
-    min_y, max_y = 1.0, 0.0
-    for x_raw, y_raw, i, star in visible_stars_raw_pos:
-        min_x = min(min_x, x_raw)
-        max_x = max(max_x, x_raw)
-        min_y = min(min_y, y_raw)
-        max_y = max(max_y, y_raw)
+    return render.Root(child=render.Stack(children=layers))
 
-    span_x = max(0.1, max_x - min_x)
-    span_y = max(0.1, max_y - min_y)
 
-    visible_stars = []
-    for x_raw, y_raw, i, star in visible_stars_raw_pos:
-        screen_x = int(1 + (x_raw - min_x) / span_x * star_cols * 0.9)
-        screen_y = int(1 + (y_raw - min_y) / span_y * star_rows * 0.9)
-        screen_x = max(1, min(star_cols, screen_x))
-        screen_y = max(1, min(star_rows - 1, screen_y))
-        visible_stars.append((screen_x, screen_y, i))
 
-    dir_letter = get_cardinal_direction(center_az)
-
-    # Build starfield using YOUR dimensions
-    starfield_rows = []
-    for row in range(star_rows):
-        row_pixels = []
-
-        # Height indicator (column 0)
-        dot_row = int((90.0 - center_alt) / 90.0 * star_rows)
-        if row == dot_row:
-            alt_color = "#00FF88" if center_alt > 60 else "#FFAA00" if center_alt > 30 else "#FF4400"
-            row_pixels.append(render.Box(width = 1, height = 1, color = alt_color))
-        else:
-            row_pixels.append(render.Box(width = 1, height = 1, color = "#000011"))
-
-        # Stars (columns 1-63)
-        for col in range(1, screen_width):
-            color = "#000011"
-            for star_x, star_y, star_idx in visible_stars:
-                if col == star_x and row == star_y:
-                    level = min(star_idx, 4)
-                    color = brightness_colors[level]
-                    break
-            row_pixels.append(render.Box(width = 1, height = 1, color = color))
-
-        starfield_rows.append(render.Row(children = row_pixels))
-
-    # Fill bottom 5 rows with black
-    for i in range(5):
-        filler = render.Row([render.Box(width = screen_width, height = 1, color = "#000011")])
-        starfield_rows.append(filler)
-
-    starfield = render.Column(children = starfield_rows)
-
-    # Direction overlay
-    screen_center_x = int(star_cols / 2 + 1)
-    dir_y = screen_height - 5
-    direction_pos = add_padding_to_child_element(
-        render.Text(dir_letter, color = "#00FF44", font = "CG-pixel-4x5-mono"),
-        left = screen_center_x,
-        top = dir_y,
-    )
-
-    return render.Root(render.Stack(children = [starfield, direction_pos]))
 
 def main(config):
     now = time.now()
