@@ -270,6 +270,9 @@ def render_geo(planets, show_pluto, width, height, scale, rotation_offset = 0):
         # We need to add Sun to list of things to draw.
 
         size = 2 * scale
+        if p["name"] == "Jupiter" or p["name"] == "Saturn":
+            size = 4 * scale
+
         children.append(render.Padding(
             pad = (int(px - size / 2), int(py - size / 2), 0, 0),
             child = render.Circle(diameter = size, color = p["color"]),
