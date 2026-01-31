@@ -7,7 +7,7 @@ Author: Brombomb
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -24,7 +24,7 @@ COLORS = {
     "Pluto": "#556B2F",  # DarkOliveGreen (Moss green-ish)
 }
 
-EMOJIS = ["🚀", "👽", "👾", "🛸"]
+EMOJIS = ["🚀", "👾", "🛸", "🌠"]
 
 # Orbital Elements (Approximate J2000)
 # Period in days, L0 (Mean Longitude at J2000) in degrees, a (Semi-major axis) in AU
@@ -73,15 +73,25 @@ def get_planet_pos_helio(planet, days):
 
 # --- Rendering ---
 
-def render_stars():
+def render_stars(width, height):
     # Random starfield
     random.seed(int(time.now().unix))
 
     stars = []
-    stars = []
-    for _ in range(10):  # 10 stars (Reduced from 20)
-        x = random.number(0, 63)
-        y = random.number(0, 31)
+
+    # Density: ~10 stars for 64x32. Scale roughly with area?
+    # Area ratio = (w*h) / (64*32).
+    # num_stars = 10 * area_ratio ?
+    # Let's keep it simple: 10 stars is sparse.
+    # Maybe 10 is enough? Let's bump it slightly for larger screens.
+    area = width * height
+    count = int(10 * (area / 2048.0))  # 2048 = 64*32
+    if count < 10:
+        count = 10
+
+    for _ in range(count):
+        x = random.number(0, width - 1)
+        y = random.number(0, height - 1)
         stars.append(render.Padding(
             pad = (int(x), int(y), 0, 0),
             child = render.Box(width = 1, height = 1, color = "#555"),  # Dim white/gray
@@ -118,15 +128,16 @@ def render_clock(now, is_24h, flash_colon):
         ],
     )
 
-def render_helio(planets, show_pluto, rotation_offset = 0):
+def render_helio(planets, show_pluto, width, height, scale, rotation_offset = 0):
     children = []
 
     # Sun in center
+    sun_diam = 6 * scale
     children.append(render.Padding(
-        pad = (30, 14, 0, 0),  # Center 32,16 - radius 2 = 30,14
+        pad = (int(width / 2 - sun_diam / 2), int(height / 2 - sun_diam / 2), 0, 0),
         child = render.Circle(
             color = COLORS["Sun"],
-            diameter = 6,
+            diameter = sun_diam,
         ),
     ))
 
@@ -143,12 +154,19 @@ def render_helio(planets, show_pluto, rotation_offset = 0):
     if not show_pluto:
         num_planets -= 1
 
-    start_r = 4
-    max_r = 15
-    step = (max_r - start_r) / max(num_planets, 1) if num_planets > 0 else 1
+    start_r = 4 * scale
 
-    center_x = 32
-    center_y = 16
+    # Scale max_r based on available space
+    # min(height/2, width/4) ensures it fits both vertically and horizontally (since x is scaled by 2)
+    max_val = height / 2
+    if (width / 4) < max_val:
+        max_val = width / 4
+    max_r = int(max_val - 1)
+
+    step = (max_r - start_r) / max(num_planets - 1, 1) if num_planets > 0 else 1
+
+    center_x = width / 2
+    center_y = height / 2
 
     for i, p in enumerate(planets):
         if p["name"] == "Pluto" and not show_pluto:
@@ -169,9 +187,9 @@ def render_helio(planets, show_pluto, rotation_offset = 0):
         py = center_y - ry * math.sin(angle_rad)
 
         # Draw Planet
-        size = 2
+        size = 2 * scale
         if p["name"] == "Jupiter" or p["name"] == "Saturn":
-            size = 4
+            size = 4 * scale
 
         children.append(render.Padding(
             pad = (int(px - size / 2), int(py - size / 2), 0, 0),
@@ -183,7 +201,7 @@ def render_helio(planets, show_pluto, rotation_offset = 0):
 
     return render.Stack(children = children)
 
-def render_geo(planets, show_pluto, rotation_offset = 0):
+def render_geo(planets, show_pluto, width, height, scale, rotation_offset = 0):
     # Geocentric: Earth is center.
     # We need relative positions.
     # Earth pos:
@@ -198,13 +216,14 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
 
     children = []
 
-    center_x = 32
-    center_y = 16
+    center_x = width / 2
+    center_y = height / 2
 
     # Earth in Center
+    earth_diam = 4 * scale
     children.append(render.Padding(
-        pad = (30, 14, 0, 0),
-        child = render.Circle(diameter = 4, color = COLORS["Earth"]),
+        pad = (int(width / 2 - earth_diam / 2), int(height / 2 - earth_diam / 2), 0, 0),
+        child = render.Circle(diameter = earth_diam, color = COLORS["Earth"]),
     ))
 
     # Project others
@@ -213,7 +232,9 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
     # We only care about Angle of this vector.
     # Then we place them at fixed radius R_draw.
 
-    r_draw = 12
+    # Scale r_draw
+    min_dim = width if width < height else height
+    r_draw = int((min_dim / 2) * 0.9)
 
     for p in planets:
         if p["name"] == "Earth":
@@ -248,7 +269,7 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
         # Vector Earth -> Sun = (0 - Ex, 0 - Ey) = (-Ex, -Ey).
         # We need to add Sun to list of things to draw.
 
-        size = 2
+        size = 2 * scale
         children.append(render.Padding(
             pad = (int(px - size / 2), int(py - size / 2), 0, 0),
             child = render.Circle(diameter = size, color = p["color"]),
@@ -261,9 +282,10 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
     sx = center_x + r_draw * math.cos(angle_sun)
     sy = center_y - r_draw * math.sin(angle_sun)
 
+    sun_diam = 6 * scale
     children.append(render.Padding(
-        pad = (int(sx - 3), int(sy - 3), 0, 0),  # Sun radius 3 -> width 6
-        child = render.Circle(diameter = 6, color = COLORS["Sun"]),
+        pad = (int(sx - sun_diam / 2), int(sy - sun_diam / 2), 0, 0),
+        child = render.Circle(diameter = sun_diam, color = COLORS["Sun"]),
     ))
 
     return render.Stack(children = children)
@@ -277,6 +299,14 @@ def main(config):
     show_clock_flash = config.bool("clock_flash", False)
 
     now = time.now()
+
+    width = canvas.width()
+    height = canvas.height()
+
+    scale = int(width / 64)
+    if scale < 1:
+        scale = 1
+
     days = get_days_since_j2000(now)
 
     # Calculate all positions with configurable colors
@@ -309,15 +339,17 @@ def main(config):
     elif animation_speed == "Fast":
         rotation_duration = 5000
 
+    enable_pause = config.bool("enable_pause", True)
+
     rotation_frames = int(rotation_duration / frame_delay)
-    pause_frames = int(5000 / frame_delay)  # 5s pause
+    pause_frames = int(5000 / frame_delay) if enable_pause else 0
 
     total_frames = rotation_frames + pause_frames
 
     frames = []
 
     # Pre-calculate starfield once (static background)
-    starfield = render_stars() if show_stars else None
+    starfield = render_stars(width, height) if show_stars else None
 
     # Easter Egg Calculation
 
@@ -331,13 +363,41 @@ def main(config):
             show_egg = True
 
     egg_emoji = ""
+    egg_start_x = 0
     egg_start_y = 0
+    egg_end_x = 0
     egg_end_y = 0
 
     if show_egg:
         egg_emoji = EMOJIS[random.number(0, len(EMOJIS) - 1)]
-        egg_start_y = random.number(0, 24)  # Keep somewhat visible
-        egg_end_y = random.number(0, 24)
+
+        # Randomize Direction: 0=L->R, 1=R->L, 2=T->B, 3=B->T
+        direction = random.number(0, 3)
+
+        # Helper margins
+        off_x = 12  # Width of emoji roughly
+        off_y = 12
+
+        if direction == 0:  # Left -> Right
+            egg_start_x = -off_x
+            egg_end_x = width + off_x
+            egg_start_y = random.number(0, height + off_y) - off_y
+            egg_end_y = random.number(0, height + off_y) - off_y
+        elif direction == 1:  # Right -> Left
+            egg_start_x = width + off_x
+            egg_end_x = -off_x
+            egg_start_y = random.number(0, height + off_y) - off_y
+            egg_end_y = random.number(0, height + off_y) - off_y
+        elif direction == 2:  # Top -> Bottom
+            egg_start_x = random.number(0, width + off_x) - off_x
+            egg_end_x = random.number(0, width + off_x) - off_x
+            egg_start_y = -off_y
+            egg_end_y = height + off_y
+        else:  # Bottom -> Top
+            egg_start_x = random.number(0, width + off_x) - off_x
+            egg_end_x = random.number(0, width + off_x) - off_x
+            egg_start_y = height + off_y
+            egg_end_y = -off_y
 
     for i in range(total_frames):
         # Calculate rotation progress
@@ -368,17 +428,15 @@ def main(config):
 
         # 3. Planets
         if view_mode == "Heliocentric":
-            frame_children.append(render_helio(calculated_planets, show_pluto, rotation_offset))
+            frame_children.append(render_helio(calculated_planets, show_pluto, width, height, scale, rotation_offset))
         else:
-            frame_children.append(render_geo(calculated_planets, show_pluto, rotation_offset))
+            frame_children.append(render_geo(calculated_planets, show_pluto, width, height, scale, rotation_offset))
 
         # 4. Easter Egg
         if show_egg and i < rotation_frames:
             # Linear interpolation of position
-            # x: -10 to 74 (64 + 10 margin)
-            start_x = -10.0
-            end_x = 74.0
-            curr_x = int(start_x + (end_x - start_x) * progress)
+            # We already calculated start/end x/y in main logic block
+            curr_x = int(egg_start_x + (egg_end_x - egg_start_x) * progress)
             curr_y = int(egg_start_y + (egg_end_y - egg_start_y) * progress)
 
             frame_children.append(render.Padding(
@@ -447,6 +505,13 @@ def get_schema():
                     schema.Option(display = "Medium (10s)", value = "Medium"),
                     schema.Option(display = "Fast (5s)", value = "Fast"),
                 ],
+            ),
+            schema.Toggle(
+                id = "enable_pause",
+                name = "Pause Animation",
+                desc = "Pause after each rotation",
+                icon = "pause",
+                default = True,
             ),
             schema.Color(
                 id = "color_mercury",
