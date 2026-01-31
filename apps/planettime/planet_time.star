@@ -42,6 +42,14 @@ PLANETS = [
 
 J2000_EPOCH = time.time(year = 2000, month = 1, day = 1, hour = 12)
 
+VIEW_MODE_HELIO = "Heliocentric"
+VIEW_MODE_GEO = "Geocentric"
+
+# Layout Constants
+EGG_OFF_X = 12
+EGG_OFF_Y = 12
+STAR_DENSITY_AREA = 2048.0
+
 # --- Math Helpers ---
 
 def get_days_since_j2000(now):
@@ -71,6 +79,52 @@ def get_planet_pos_helio(planet, days):
 
     return {"x": x, "y": y, "angle": L_norm, "color": planet["color"], "name": planet["name"]}
 
+def apply_planet_config(config, planets):
+    """Applies user configuration to planet colors."""
+    calculated_planets = []
+    days = get_days_since_j2000(time.now())
+
+    for p in planets:
+        # Override color if configured
+        color_id = "color_" + p["name"].lower()
+        new_color = config.get(color_id, p["color"])
+
+        # Create a copy with new color
+        p_mod = dict(p)
+        p_mod["color"] = new_color
+
+        calculated_planets.append(get_planet_pos_helio(p_mod, days))
+    return calculated_planets
+
+def calculate_easter_egg_params(width, height):
+    """Calculates start and end positions for the easter egg animation."""
+    egg_emoji = EMOJIS[random.number(0, len(EMOJIS) - 1)]
+
+    # Randomize Direction: 0=L->R, 1=R->L, 2=T->B, 3=B->T
+    direction = random.number(0, 3)
+    is_horizontal = direction <= 1
+
+    if is_horizontal:
+        egg_start_y = random.number(0, height + EGG_OFF_Y) - EGG_OFF_Y
+        egg_end_y = random.number(0, height + EGG_OFF_Y) - EGG_OFF_Y
+        if direction == 0:  # Left -> Right
+            egg_start_x, egg_end_x = -EGG_OFF_X, width + EGG_OFF_X
+        else:  # Right -> Left
+            egg_start_x, egg_end_x = width + EGG_OFF_X, -EGG_OFF_X
+    else:  # Vertical
+        egg_start_x = random.number(0, width + EGG_OFF_X) - EGG_OFF_X
+        egg_end_x = random.number(0, width + EGG_OFF_X) - EGG_OFF_X
+        if direction == 2:  # Top -> Bottom
+            egg_start_y, egg_end_y = -EGG_OFF_Y, height + EGG_OFF_Y
+        else:  # Bottom -> Top
+            egg_start_y, egg_end_y = height + EGG_OFF_Y, -EGG_OFF_Y
+
+    return {
+        "emoji": egg_emoji,
+        "start": (egg_start_x, egg_start_y),
+        "end": (egg_end_x, egg_end_y),
+    }
+
 # --- Rendering ---
 
 def render_stars(width, height):
@@ -79,13 +133,9 @@ def render_stars(width, height):
 
     stars = []
 
-    # Density: ~10 stars for 64x32. Scale roughly with area?
-    # Area ratio = (w*h) / (64*32).
-    # num_stars = 10 * area_ratio ?
-    # Let's keep it simple: 10 stars is sparse.
-    # Maybe 10 is enough? Let's bump it slightly for larger screens.
+    # Density: ~10 stars for 64x32. Scale roughly with area.
     area = width * height
-    count = int(10 * (area / 2048.0))  # 2048 = 64*32
+    count = int(10 * (area / STAR_DENSITY_AREA))
     if count < 10:
         count = 10
 
@@ -247,16 +297,7 @@ def render_geo(planets, show_pluto, width, height, scale, rotation_offset = 0):
         dy = p["y"] - earth["y"]
 
         # Angle with animation offset
-        # For Geocentric, does the rotation affect the projection?
-        # "They should stay on their orbits" -> Implying visual rotation of the system.
-        # But Geocentric is relative to Earth. If everything rotates, Earth rotates too?
-        # Or do only planets move?
-        # "Animate the planets one rotation... they should stay on their orbits".
-        # In Helio, simple rotation of all planets by offset is visual rotation of the system (or planets moving along orbit).
-        # In Geo, planets move along their projected path?
-        # If we just add offset to the 'angle' derived from atan2(dy, dx), that rotates the visual representation around Earth at center.
-        # This seems consistent with "visual rotation".
-
+        # For Geocentric, visual rotation implies rotating the system around Earth
         angle = math.atan2(dy, dx) + deg_to_rad(rotation_offset)
 
         # Position on screen
@@ -295,7 +336,7 @@ def render_geo(planets, show_pluto, width, height, scale, rotation_offset = 0):
 
 def main(config):
     show_pluto = config.bool("show_pluto", False)
-    view_mode = config.str("view_mode", "Heliocentric")
+    view_mode = config.str("view_mode", VIEW_MODE_HELIO)
     show_stars = config.bool("show_stars", True)
     show_clock = config.bool("show_clock", True)
     show_clock_24h = config.bool("clock_24h", True)
@@ -310,30 +351,13 @@ def main(config):
     if scale < 1:
         scale = 1
 
-    days = get_days_since_j2000(now)
-
     # Calculate all positions with configurable colors
-    calculated_planets = []
-    for p in PLANETS:
-        # Override color if configured
-        # config ID format: "color_<lowercase_name>"
-        color_id = "color_" + p["name"].lower()
-        new_color = config.get(color_id, p["color"])
-
-        # Create a copy with new color (shallow copy of dict is fine)
-        p_mod = dict(p)
-        p_mod["color"] = new_color
-
-        calculated_planets.append(get_planet_pos_helio(p_mod, days))
+    calculated_planets = apply_planet_config(config, PLANETS)
 
     animation_speed = config.str("animation_speed", "Medium")
 
     # Determine frame count and delay
     # We want 1 full rotation (360 degrees).
-    # Then 5s pause.
-    # Pixlet animation frames have delay.
-    # Let's say 50ms per frame for smooth animation? Or 100ms.
-    # 100ms = 10fps.
     frame_delay = 100  # ms
 
     rotation_duration = 10000  # Default Medium 10s
@@ -355,48 +379,17 @@ def main(config):
     starfield = render_stars(width, height) if show_stars else None
 
     # Easter Egg Calculation
-
     egg_chance_str = config.str("egg_chance", "0%")
     egg_chance = int(egg_chance_str.replace("%", ""))
 
     show_egg = False
     if egg_chance > 0:
-        # Seed logic is already time based
         if random.number(0, 100) < egg_chance:
             show_egg = True
 
-    egg_emoji = ""
-    egg_start_x = 0
-    egg_start_y = 0
-    egg_end_x = 0
-    egg_end_y = 0
-
+    egg_params = None
     if show_egg:
-        egg_emoji = EMOJIS[random.number(0, len(EMOJIS) - 1)]
-
-        # Randomize Direction: 0=L->R, 1=R->L, 2=T->B, 3=B->T
-        direction = random.number(0, 3)
-
-        # Helper margins
-        off_x = 12  # Width of emoji roughly
-        off_y = 12
-
-        is_horizontal = direction <= 1
-
-        if is_horizontal:
-            egg_start_y = random.number(0, height + off_y) - off_y
-            egg_end_y = random.number(0, height + off_y) - off_y
-            if direction == 0:  # Left -> Right
-                egg_start_x, egg_end_x = -off_x, width + off_x
-            else:  # Right -> Left
-                egg_start_x, egg_end_x = width + off_x, -off_x
-        else:  # Vertical
-            egg_start_x = random.number(0, width + off_x) - off_x
-            egg_end_x = random.number(0, width + off_x) - off_x
-            if direction == 2:  # Top -> Bottom
-                egg_start_y, egg_end_y = -off_y, height + off_y
-            else:  # Bottom -> Top
-                egg_start_y, egg_end_y = height + off_y, -off_y
+        egg_params = calculate_easter_egg_params(width, height)
 
     for i in range(total_frames):
         # Calculate rotation progress
@@ -426,21 +419,24 @@ def main(config):
             frame_children.append(render_clock(frame_time, show_clock_24h, show_clock_flash))
 
         # 3. Planets
-        if view_mode == "Heliocentric":
+        if view_mode == VIEW_MODE_HELIO:
             frame_children.append(render_helio(calculated_planets, show_pluto, width, height, scale, rotation_offset))
         else:
             frame_children.append(render_geo(calculated_planets, show_pluto, width, height, scale, rotation_offset))
 
         # 4. Easter Egg
-        if show_egg and i < rotation_frames:
+        if show_egg and i < rotation_frames and egg_params:
             # Linear interpolation of position
             # We already calculated start/end x/y in main logic block
-            curr_x = int(egg_start_x + (egg_end_x - egg_start_x) * progress)
-            curr_y = int(egg_start_y + (egg_end_y - egg_start_y) * progress)
+            start_x, start_y = egg_params["start"]
+            end_x, end_y = egg_params["end"]
+
+            curr_x = int(start_x + (end_x - start_x) * progress)
+            curr_y = int(start_y + (end_y - start_y) * progress)
 
             frame_children.append(render.Padding(
                 pad = (curr_x, curr_y, 0, 0),
-                child = render.Text(content = egg_emoji),
+                child = render.Text(content = egg_params["emoji"]),
             ))
 
         frames.append(render.Stack(children = frame_children))
@@ -459,10 +455,10 @@ def get_schema():
                 name = "View Mode",
                 desc = "Choose the perspective",
                 icon = "eye",
-                default = "Heliocentric",
+                default = VIEW_MODE_HELIO,
                 options = [
-                    schema.Option(display = "Heliocentric", value = "Heliocentric"),
-                    schema.Option(display = "Geocentric", value = "Geocentric"),
+                    schema.Option(display = VIEW_MODE_HELIO, value = VIEW_MODE_HELIO),
+                    schema.Option(display = VIEW_MODE_GEO, value = VIEW_MODE_GEO),
                 ],
             ),
             schema.Toggle(
