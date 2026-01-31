@@ -7,7 +7,7 @@ Author: Brombomb
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -24,7 +24,7 @@ COLORS = {
     "Pluto": "#556B2F",  # DarkOliveGreen (Moss green-ish)
 }
 
-EMOJIS = ["🚀", "👽", "👾", "🛸"]
+EMOJIS = ["🚀", "👾", "🛸", "🌠"]
 
 # Orbital Elements (Approximate J2000)
 # Period in days, L0 (Mean Longitude at J2000) in degrees, a (Semi-major axis) in AU
@@ -41,6 +41,14 @@ PLANETS = [
 ]
 
 J2000_EPOCH = time.time(year = 2000, month = 1, day = 1, hour = 12)
+
+VIEW_MODE_HELIO = "Heliocentric"
+VIEW_MODE_GEO = "Geocentric"
+
+# Layout Constants
+EGG_OFF_X = 12
+EGG_OFF_Y = 12
+STAR_DENSITY_AREA = 2048.0
 
 # --- Math Helpers ---
 
@@ -71,17 +79,69 @@ def get_planet_pos_helio(planet, days):
 
     return {"x": x, "y": y, "angle": L_norm, "color": planet["color"], "name": planet["name"]}
 
+def apply_planet_config(config, planets):
+    """Applies user configuration to planet colors."""
+    calculated_planets = []
+    days = get_days_since_j2000(time.now())
+
+    for p in planets:
+        # Override color if configured
+        color_id = "color_" + p["name"].lower()
+        new_color = config.get(color_id, p["color"])
+
+        # Create a copy with new color
+        p_mod = dict(p)
+        p_mod["color"] = new_color
+
+        calculated_planets.append(get_planet_pos_helio(p_mod, days))
+    return calculated_planets
+
+def calculate_easter_egg_params(width, height):
+    """Calculates start and end positions for the easter egg animation."""
+    egg_emoji = EMOJIS[random.number(0, len(EMOJIS) - 1)]
+
+    # Randomize Direction: 0=L->R, 1=R->L, 2=T->B, 3=B->T
+    direction = random.number(0, 3)
+    is_horizontal = direction <= 1
+
+    if is_horizontal:
+        egg_start_y = random.number(0, height + EGG_OFF_Y) - EGG_OFF_Y
+        egg_end_y = random.number(0, height + EGG_OFF_Y) - EGG_OFF_Y
+        if direction == 0:  # Left -> Right
+            egg_start_x, egg_end_x = -EGG_OFF_X, width + EGG_OFF_X
+        else:  # Right -> Left
+            egg_start_x, egg_end_x = width + EGG_OFF_X, -EGG_OFF_X
+    else:  # Vertical
+        egg_start_x = random.number(0, width + EGG_OFF_X) - EGG_OFF_X
+        egg_end_x = random.number(0, width + EGG_OFF_X) - EGG_OFF_X
+        if direction == 2:  # Top -> Bottom
+            egg_start_y, egg_end_y = -EGG_OFF_Y, height + EGG_OFF_Y
+        else:  # Bottom -> Top
+            egg_start_y, egg_end_y = height + EGG_OFF_Y, -EGG_OFF_Y
+
+    return {
+        "emoji": egg_emoji,
+        "start": (egg_start_x, egg_start_y),
+        "end": (egg_end_x, egg_end_y),
+    }
+
 # --- Rendering ---
 
-def render_stars():
+def render_stars(width, height):
     # Random starfield
     random.seed(int(time.now().unix))
 
     stars = []
-    stars = []
-    for _ in range(10):  # 10 stars (Reduced from 20)
-        x = random.number(0, 63)
-        y = random.number(0, 31)
+
+    # Density: ~10 stars for 64x32. Scale roughly with area.
+    area = width * height
+    count = int(10 * (area / STAR_DENSITY_AREA))
+    if count < 10:
+        count = 10
+
+    for _ in range(count):
+        x = random.number(0, width - 1)
+        y = random.number(0, height - 1)
         stars.append(render.Padding(
             pad = (int(x), int(y), 0, 0),
             child = render.Box(width = 1, height = 1, color = "#555"),  # Dim white/gray
@@ -118,15 +178,16 @@ def render_clock(now, is_24h, flash_colon):
         ],
     )
 
-def render_helio(planets, show_pluto, rotation_offset = 0):
+def render_helio(planets, show_pluto, width, height, scale, rotation_offset = 0):
     children = []
 
     # Sun in center
+    sun_diam = 6 * scale
     children.append(render.Padding(
-        pad = (30, 14, 0, 0),  # Center 32,16 - radius 2 = 30,14
+        pad = (int(width / 2 - sun_diam / 2), int(height / 2 - sun_diam / 2), 0, 0),
         child = render.Circle(
             color = COLORS["Sun"],
-            diameter = 6,
+            diameter = sun_diam,
         ),
     ))
 
@@ -143,12 +204,19 @@ def render_helio(planets, show_pluto, rotation_offset = 0):
     if not show_pluto:
         num_planets -= 1
 
-    start_r = 4
-    max_r = 15
-    step = (max_r - start_r) / max(num_planets, 1) if num_planets > 0 else 1
+    start_r = 4 * scale
 
-    center_x = 32
-    center_y = 16
+    # Scale max_r based on available space
+    # min(height/2, width/4) ensures it fits both vertically and horizontally (since x is scaled by 2)
+    max_val = height / 2
+    if (width / 4) < max_val:
+        max_val = width / 4
+    max_r = int(max_val - 1)
+
+    step = (max_r - start_r) / max(num_planets - 1, 1) if num_planets > 0 else 1
+
+    center_x = width / 2
+    center_y = height / 2
 
     for i, p in enumerate(planets):
         if p["name"] == "Pluto" and not show_pluto:
@@ -169,9 +237,9 @@ def render_helio(planets, show_pluto, rotation_offset = 0):
         py = center_y - ry * math.sin(angle_rad)
 
         # Draw Planet
-        size = 2
+        size = 2 * scale
         if p["name"] == "Jupiter" or p["name"] == "Saturn":
-            size = 4
+            size = 4 * scale
 
         children.append(render.Padding(
             pad = (int(px - size / 2), int(py - size / 2), 0, 0),
@@ -183,7 +251,7 @@ def render_helio(planets, show_pluto, rotation_offset = 0):
 
     return render.Stack(children = children)
 
-def render_geo(planets, show_pluto, rotation_offset = 0):
+def render_geo(planets, show_pluto, width, height, scale, rotation_offset = 0):
     # Geocentric: Earth is center.
     # We need relative positions.
     # Earth pos:
@@ -198,13 +266,14 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
 
     children = []
 
-    center_x = 32
-    center_y = 16
+    center_x = width / 2
+    center_y = height / 2
 
     # Earth in Center
+    earth_diam = 4 * scale
     children.append(render.Padding(
-        pad = (30, 14, 0, 0),
-        child = render.Circle(diameter = 4, color = COLORS["Earth"]),
+        pad = (int(width / 2 - earth_diam / 2), int(height / 2 - earth_diam / 2), 0, 0),
+        child = render.Circle(diameter = earth_diam, color = COLORS["Earth"]),
     ))
 
     # Project others
@@ -213,7 +282,9 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
     # We only care about Angle of this vector.
     # Then we place them at fixed radius R_draw.
 
-    r_draw = 12
+    # Scale r_draw
+    min_dim = width if width < height else height
+    r_draw = int((min_dim / 2) * 0.9)
 
     for p in planets:
         if p["name"] == "Earth":
@@ -226,16 +297,7 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
         dy = p["y"] - earth["y"]
 
         # Angle with animation offset
-        # For Geocentric, does the rotation affect the projection?
-        # "They should stay on their orbits" -> Implying visual rotation of the system.
-        # But Geocentric is relative to Earth. If everything rotates, Earth rotates too?
-        # Or do only planets move?
-        # "Animate the planets one rotation... they should stay on their orbits".
-        # In Helio, simple rotation of all planets by offset is visual rotation of the system (or planets moving along orbit).
-        # In Geo, planets move along their projected path?
-        # If we just add offset to the 'angle' derived from atan2(dy, dx), that rotates the visual representation around Earth at center.
-        # This seems consistent with "visual rotation".
-
+        # For Geocentric, visual rotation implies rotating the system around Earth
         angle = math.atan2(dy, dx) + deg_to_rad(rotation_offset)
 
         # Position on screen
@@ -248,7 +310,10 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
         # Vector Earth -> Sun = (0 - Ex, 0 - Ey) = (-Ex, -Ey).
         # We need to add Sun to list of things to draw.
 
-        size = 2
+        size = 2 * scale
+        if p["name"] == "Jupiter" or p["name"] == "Saturn":
+            size = 4 * scale
+
         children.append(render.Padding(
             pad = (int(px - size / 2), int(py - size / 2), 0, 0),
             child = render.Circle(diameter = size, color = p["color"]),
@@ -261,46 +326,38 @@ def render_geo(planets, show_pluto, rotation_offset = 0):
     sx = center_x + r_draw * math.cos(angle_sun)
     sy = center_y - r_draw * math.sin(angle_sun)
 
+    sun_diam = 6 * scale
     children.append(render.Padding(
-        pad = (int(sx - 3), int(sy - 3), 0, 0),  # Sun radius 3 -> width 6
-        child = render.Circle(diameter = 6, color = COLORS["Sun"]),
+        pad = (int(sx - sun_diam / 2), int(sy - sun_diam / 2), 0, 0),
+        child = render.Circle(diameter = sun_diam, color = COLORS["Sun"]),
     ))
 
     return render.Stack(children = children)
 
 def main(config):
     show_pluto = config.bool("show_pluto", False)
-    view_mode = config.str("view_mode", "Heliocentric")
+    view_mode = config.str("view_mode", VIEW_MODE_HELIO)
     show_stars = config.bool("show_stars", True)
     show_clock = config.bool("show_clock", True)
     show_clock_24h = config.bool("clock_24h", True)
     show_clock_flash = config.bool("clock_flash", False)
 
     now = time.now()
-    days = get_days_since_j2000(now)
+
+    width = canvas.width()
+    height = canvas.height()
+
+    scale = int(width / 64)
+    if scale < 1:
+        scale = 1
 
     # Calculate all positions with configurable colors
-    calculated_planets = []
-    for p in PLANETS:
-        # Override color if configured
-        # config ID format: "color_<lowercase_name>"
-        color_id = "color_" + p["name"].lower()
-        new_color = config.get(color_id, p["color"])
-
-        # Create a copy with new color (shallow copy of dict is fine)
-        p_mod = dict(p)
-        p_mod["color"] = new_color
-
-        calculated_planets.append(get_planet_pos_helio(p_mod, days))
+    calculated_planets = apply_planet_config(config, PLANETS)
 
     animation_speed = config.str("animation_speed", "Medium")
 
     # Determine frame count and delay
     # We want 1 full rotation (360 degrees).
-    # Then 5s pause.
-    # Pixlet animation frames have delay.
-    # Let's say 50ms per frame for smooth animation? Or 100ms.
-    # 100ms = 10fps.
     frame_delay = 100  # ms
 
     rotation_duration = 10000  # Default Medium 10s
@@ -309,35 +366,30 @@ def main(config):
     elif animation_speed == "Fast":
         rotation_duration = 5000
 
+    enable_pause = config.bool("enable_pause", True)
+
     rotation_frames = int(rotation_duration / frame_delay)
-    pause_frames = int(5000 / frame_delay)  # 5s pause
+    pause_frames = int(5000 / frame_delay) if enable_pause else 0
 
     total_frames = rotation_frames + pause_frames
 
     frames = []
 
     # Pre-calculate starfield once (static background)
-    starfield = render_stars() if show_stars else None
+    starfield = render_stars(width, height) if show_stars else None
 
     # Easter Egg Calculation
-
     egg_chance_str = config.str("egg_chance", "0%")
     egg_chance = int(egg_chance_str.replace("%", ""))
 
     show_egg = False
     if egg_chance > 0:
-        # Seed logic is already time based
         if random.number(0, 100) < egg_chance:
             show_egg = True
 
-    egg_emoji = ""
-    egg_start_y = 0
-    egg_end_y = 0
-
+    egg_params = None
     if show_egg:
-        egg_emoji = EMOJIS[random.number(0, len(EMOJIS) - 1)]
-        egg_start_y = random.number(0, 24)  # Keep somewhat visible
-        egg_end_y = random.number(0, 24)
+        egg_params = calculate_easter_egg_params(width, height)
 
     for i in range(total_frames):
         # Calculate rotation progress
@@ -367,23 +419,24 @@ def main(config):
             frame_children.append(render_clock(frame_time, show_clock_24h, show_clock_flash))
 
         # 3. Planets
-        if view_mode == "Heliocentric":
-            frame_children.append(render_helio(calculated_planets, show_pluto, rotation_offset))
+        if view_mode == VIEW_MODE_HELIO:
+            frame_children.append(render_helio(calculated_planets, show_pluto, width, height, scale, rotation_offset))
         else:
-            frame_children.append(render_geo(calculated_planets, show_pluto, rotation_offset))
+            frame_children.append(render_geo(calculated_planets, show_pluto, width, height, scale, rotation_offset))
 
         # 4. Easter Egg
-        if show_egg and i < rotation_frames:
+        if show_egg and i < rotation_frames and egg_params:
             # Linear interpolation of position
-            # x: -10 to 74 (64 + 10 margin)
-            start_x = -10.0
-            end_x = 74.0
+            # We already calculated start/end x/y in main logic block
+            start_x, start_y = egg_params["start"]
+            end_x, end_y = egg_params["end"]
+
             curr_x = int(start_x + (end_x - start_x) * progress)
-            curr_y = int(egg_start_y + (egg_end_y - egg_start_y) * progress)
+            curr_y = int(start_y + (end_y - start_y) * progress)
 
             frame_children.append(render.Padding(
                 pad = (curr_x, curr_y, 0, 0),
-                child = render.Text(content = egg_emoji),
+                child = render.Text(content = egg_params["emoji"]),
             ))
 
         frames.append(render.Stack(children = frame_children))
@@ -402,10 +455,10 @@ def get_schema():
                 name = "View Mode",
                 desc = "Choose the perspective",
                 icon = "eye",
-                default = "Heliocentric",
+                default = VIEW_MODE_HELIO,
                 options = [
-                    schema.Option(display = "Heliocentric", value = "Heliocentric"),
-                    schema.Option(display = "Geocentric", value = "Geocentric"),
+                    schema.Option(display = VIEW_MODE_HELIO, value = VIEW_MODE_HELIO),
+                    schema.Option(display = VIEW_MODE_GEO, value = VIEW_MODE_GEO),
                 ],
             ),
             schema.Toggle(
@@ -447,6 +500,13 @@ def get_schema():
                     schema.Option(display = "Medium (10s)", value = "Medium"),
                     schema.Option(display = "Fast (5s)", value = "Fast"),
                 ],
+            ),
+            schema.Toggle(
+                id = "enable_pause",
+                name = "Pause Animation",
+                desc = "Pause after each rotation",
+                icon = "pause",
+                default = True,
             ),
             schema.Color(
                 id = "color_mercury",
