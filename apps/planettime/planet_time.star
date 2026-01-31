@@ -381,26 +381,22 @@ def main(config):
         off_x = 12  # Width of emoji roughly
         off_y = 12
 
-        if direction == 0:  # Left -> Right
-            egg_start_x = -off_x
-            egg_end_x = width + off_x
+        is_horizontal = direction <= 1
+
+        if is_horizontal:
             egg_start_y = random.number(0, height + off_y) - off_y
             egg_end_y = random.number(0, height + off_y) - off_y
-        elif direction == 1:  # Right -> Left
-            egg_start_x = width + off_x
-            egg_end_x = -off_x
-            egg_start_y = random.number(0, height + off_y) - off_y
-            egg_end_y = random.number(0, height + off_y) - off_y
-        elif direction == 2:  # Top -> Bottom
+            if direction == 0:  # Left -> Right
+                egg_start_x, egg_end_x = -off_x, width + off_x
+            else:  # Right -> Left
+                egg_start_x, egg_end_x = width + off_x, -off_x
+        else:  # Vertical
             egg_start_x = random.number(0, width + off_x) - off_x
             egg_end_x = random.number(0, width + off_x) - off_x
-            egg_start_y = -off_y
-            egg_end_y = height + off_y
-        else:  # Bottom -> Top
-            egg_start_x = random.number(0, width + off_x) - off_x
-            egg_end_x = random.number(0, width + off_x) - off_x
-            egg_start_y = height + off_y
-            egg_end_y = -off_y
+            if direction == 2:  # Top -> Bottom
+                egg_start_y, egg_end_y = -off_y, height + off_y
+            else:  # Bottom -> Top
+                egg_start_y, egg_end_y = height + off_y, -off_y
 
     for i in range(total_frames):
         # Calculate rotation progress
