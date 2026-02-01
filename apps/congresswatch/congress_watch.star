@@ -93,7 +93,7 @@ def main(config):
     else:
         #Get the current congress
         congress_session_url = "{}congress/current".format(CONGRESS_API_URL)
-        congress_session_res = http.get(url = congress_session_url, params = {"api_key": api_key, "format": "json"}, ttl_seconds = 21600) # Cache for 6 hours
+        congress_session_res = http.get(url = congress_session_url, params = {"api_key": api_key, "format": "json"}, ttl_seconds = 21600)  # Cache for 6 hours
         congress_session_body = json.decode(congress_session_res.body())
         if "congress" not in congress_session_body:
             fail("Invalid congress session data")
@@ -244,8 +244,7 @@ def randomize(min, max):
     rand = int(str(now.nanosecond)[-6:-3]) / 1000
     return int(rand * (max - min) + min)
 
-def get_cachable_data(url, ttl, params={}):
-    # Pass the params dict directly into the http call
+def get_cachable_data(url, ttl, params = {}):  # Add the params argument here
     res = http.get(url = url, params = params, ttl_seconds = ttl)
     if res.status_code != 200:
         fail("Request failed with status %d" % res.status_code)
