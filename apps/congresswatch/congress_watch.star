@@ -95,7 +95,7 @@ def main(config):
     else:
         #Get the current congress
         congress_session_url = "{}congress/current".format(CONGRESS_API_URL)
-        congress_session_res = http.get(url = congress_session_url, params = {"api_key": api_key, "format": "json"})
+        congress_session_res = http.get(url = congress_session_url, params = {"api_key": api_key, "format": "json"}, ttl_seconds = 21600) # Cache for 6 hours
         congress_session_body = json.decode(congress_session_res.body())
         if "congress" not in congress_session_body:
             fail("Invalid congress session data")
