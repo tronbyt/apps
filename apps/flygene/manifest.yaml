@@ -1,0 +1,9 @@
+---
+id: fly-gene
+name: Fly Gene
+summary: Show random fruit fly genes
+desc: Displays a random gene from the fruit fly Drosophila melanogaster.
+author: frame-shift
+fileName: fly_gene.star
+packageName: flygene
+recommendedInterval: 5

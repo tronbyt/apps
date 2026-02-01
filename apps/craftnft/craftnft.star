@@ -84,7 +84,9 @@ def fetch_random_nft(address):
         if v != None:
             image_dict[k] = v
 
-    random.seed(time.now().unix)  # // 15)
+    # seed random number generator
+    # random.seed(time.now().unix) // 15)
+
     key_list = image_dict.keys()
     cur_url = ""
     for i in range(len(key_list)):

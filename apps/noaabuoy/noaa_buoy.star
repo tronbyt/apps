@@ -11,6 +11,7 @@ load("http.star", "http")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 load("xpath.star", "xpath")
 
 print_debug = True
@@ -67,6 +68,286 @@ def FtoC(F):  # returns rounded to 1 decimal
     c = (float(F) - 32) * 0.55
     c = int(c * 10)
     return c / 10.0
+
+HEX_CHARS = "0123456789abcdef"
+
+def to_hex(val):
+    """Convert 0-255 int to two-char hex string"""
+    return HEX_CHARS[val // 16] + HEX_CHARS[val % 16]
+
+def period_to_color(period, min_period = 10.0, max_period = 20.0):
+    """Map swell period to color: blue (short period) -> red (long period)"""
+
+    # Clamp period to range
+    if period < min_period:
+        period = min_period
+    if period > max_period:
+        period = max_period
+
+    # Normalize to 0-1 range
+    t = (period - min_period) / (max_period - min_period)
+
+    # Blue (0,0,255) -> Cyan (0,255,255) -> Green (0,255,0) -> Yellow (255,255,0) -> Red (255,0,0)
+    if t < 0.25:
+        # Blue to Cyan
+        r = 0
+        g = int(255 * (t / 0.25))
+        b = 255
+    elif t < 0.5:
+        # Cyan to Green
+        r = 0
+        g = 255
+        b = int(255 * (1 - (t - 0.25) / 0.25))
+    elif t < 0.75:
+        # Green to Yellow
+        r = int(255 * ((t - 0.5) / 0.25))
+        g = 255
+        b = 0
+    else:
+        # Yellow to Red
+        r = 255
+        g = int(255 * (1 - (t - 0.75) / 0.25))
+        b = 0
+
+    return "#" + to_hex(r) + to_hex(g) + to_hex(b)
+
+def fetch_spec_data(buoy_id, use_wind_swell = False, days = 5):
+    """Fetch spectral data from NOAA for swell graph"""
+    url = "https://www.ndbc.noaa.gov/data/realtime2/%s.spec" % buoy_id.upper()
+    debug_print("Fetching spec data from: " + url)
+
+    resp = http.get(url, ttl_seconds = 1800)  # 30 min cache
+    if resp.status_code != 200:
+        debug_print("Failed to fetch spec data: " + str(resp.status_code))
+        return None
+
+    lines = resp.body().split("\n")
+    data_points = []
+
+    # Get current time for filtering
+    now = time.now()
+
+    # Calculate max age in seconds based on days parameter
+    max_age_seconds = days * 24 * 60 * 60
+
+    for line in lines:
+        # Skip comment lines
+        if line.startswith("#") or line.strip() == "":
+            continue
+
+        parts = line.split()
+        if len(parts) < 10:
+            continue
+
+        # Parse: YY MM DD hh mm WVHT SwH SwP WWH WWP ...
+        # Columns: 0=YY 1=MM 2=DD 3=hh 4=mm 5=WVHT 6=SwH 7=SwP 8=WWH 9=WWP
+        year = parts[0]
+        month = parts[1]
+        day = parts[2]
+        hour = parts[3]
+        minute = parts[4]
+
+        if use_wind_swell:
+            # Use wind wave data (WWH, WWP)
+            swh_str = parts[8]  # Wind Wave Height in meters
+            swp_str = parts[9]  # Wind Wave Period in seconds
+        else:
+            # Use swell data (SwH, SwP)
+            swh_str = parts[6]  # Swell Height in meters
+            swp_str = parts[7]  # Swell Period in seconds
+
+        # Skip MM (missing) values
+        if swh_str == "MM" or swp_str == "MM":
+            continue
+
+        swh = float(swh_str)
+        swp = float(swp_str)
+
+        # Parse timestamp
+        timestamp_str = "%s-%s-%sT%s:%s:00Z" % (year, month, day, hour, minute)
+        ts = time.parse_time(timestamp_str, "2006-01-02T15:04:05Z")
+
+        if ts == None:
+            continue
+
+        # Filter based on configured days
+        age_seconds = (now - ts).seconds
+        if age_seconds > max_age_seconds:
+            continue
+
+        # Convert height to feet for display
+        swh_feet = swh * 3.281
+
+        data_points.append({
+            "ts": ts,
+            "age_hours": age_seconds / 3600.0,
+            "swh": swh_feet,
+            "swp": swp,
+        })
+
+    # Sort by timestamp (oldest first for plotting)
+    # Data comes newest first, so reverse
+    data_points = list(reversed(data_points))
+
+    debug_print("Parsed %d spec data points for %d days" % (len(data_points), days))
+    return data_points
+
+def render_swell_graph(data_points, buoy_name, h_unit_pref, t_unit_pref, data, use_wind_swell = False):
+    """Render a swell height graph as background with text overlay"""
+    if not data_points or len(data_points) < 2:
+        return None
+
+    # Display dimensions
+    width = 64
+    height = 32
+
+    # Find min/max for scaling
+    max_swh = 0.0
+    for dp in data_points:
+        if dp["swh"] > max_swh:
+            max_swh = dp["swh"]
+
+    # Add some padding to max
+    max_swh = max_swh * 1.1
+    if max_swh < 1.0:
+        max_swh = 1.0
+    min_swh = 0.0
+
+    # Get time range
+    max_age = data_points[0]["age_hours"] if data_points else 120.0
+    min_age = data_points[-1]["age_hours"] if data_points else 0.0
+    time_range = max_age - min_age
+    if time_range < 1:
+        time_range = 1
+
+    # Create canvas for graph (full 32 height)
+    canvas = []
+    for _ in range(height):
+        row = []
+        for _ in range(width):
+            row.append("#000000")
+        canvas.append(row)
+
+    # Plot each data point
+    for dp in data_points:
+        # X position (time - oldest on left, newest on right)
+        x = int((max_age - dp["age_hours"]) / time_range * (width - 1))
+        if x < 0:
+            x = 0
+        if x >= width:
+            x = width - 1
+
+        # Y position (height - higher values at top)
+        y_norm = (dp["swh"] - min_swh) / (max_swh - min_swh)
+        y = height - 1 - int(y_norm * (height - 1))
+        if y < 0:
+            y = 0
+        if y >= height:
+            y = height - 1
+
+        # Color based on period (dimmed for background)
+        color = period_to_color(dp["swp"])
+
+        # Draw point (and fill below for area effect)
+        for fill_y in range(y, height):
+            # Fade color as we go down, also dim overall for background
+            fade = (1.0 - (fill_y - y) / (height - y + 1) * 0.7) * 0.4
+            r = int(int(color[1:3], 16) * fade)
+            g = int(int(color[3:5], 16) * fade)
+            b = int(int(color[5:7], 16) * fade)
+            canvas[fill_y][x] = "#" + to_hex(r) + to_hex(g) + to_hex(b)
+
+    # Build graph rows
+    graph_rows = []
+    for row in canvas:
+        pixels = []
+        for hex_color in row:
+            pixels.append(render.Box(width = 1, height = 1, color = hex_color))
+        graph_rows.append(render.Row(children = pixels))
+
+    graph_widget = render.Column(children = graph_rows)
+
+    # Get latest swell data for text overlay
+    latest = data_points[-1] if data_points else None
+    if latest:
+        swh = latest["swh"]
+        swp = latest["swp"]
+    elif use_wind_swell:
+        swh = float(data.get("WIND_WVHT", "0") or "0")
+        swp = float(data.get("WIND_DPD", "0") or "0")
+    else:
+        swh = float(data.get("WVHT", "0") or "0")
+        swp = float(data.get("DPD", "0") or "0")
+
+    # Determine swell color based on height
+    if swh < 2:
+        swell_color = "#00AAFF"
+    elif swh < 5:
+        swell_color = "#AAEEDD"
+    elif swh < 12:
+        swell_color = "#00FF00"
+    else:
+        swell_color = "#FF0000"
+
+    # Format height display
+    unit_display = "f"
+    if h_unit_pref == "meters":
+        unit_display = "m"
+        swh = swh / 3.281
+
+    height_str = str(int(swh * 10) / 10.0)
+    period_str = str(int(swp + 0.5))
+
+    # Get direction (use wind wave direction if wind swell mode)
+    if use_wind_swell:
+        mwd = data.get("WIND_MWD", "--") or "--"
+    else:
+        mwd = data.get("MWD", "--") or "--"
+
+    # Get water temp if available
+    wtemp = ""
+    if data.get("WTMP"):
+        wt = data["WTMP"]
+        if t_unit_pref == "C":
+            wt = FtoC(wt)
+        wt = int(float(wt) + 0.5)
+        wtemp = " %s%s" % (str(wt), t_unit_pref)
+
+    # Create text overlay (same as normal swell display)
+    text_overlay = render.Box(
+        width = 64,
+        height = 32,
+        child = render.Column(
+            cross_align = "center",
+            main_align = "center",
+            expanded = True,
+            children = [
+                render.Text(
+                    content = buoy_name,
+                    font = "tb-8",
+                    color = swell_color,
+                ),
+                render.Text(
+                    content = "%s%s %ss" % (height_str, unit_display, period_str),
+                    font = "6x13",
+                    color = swell_color,
+                ),
+                render.Text(
+                    content = "%s°%s" % (mwd, wtemp),
+                    color = "#FFAA00",
+                ),
+            ],
+        ),
+    )
+
+    return render.Root(
+        child = render.Stack(
+            children = [
+                graph_widget,
+                text_overlay,
+            ],
+        ),
+    )
 
 def fetch_data(buoy_id, last_data):
     debug_print("fetching....")
@@ -385,6 +666,61 @@ def main(config):
                         ),
                         render.Text(
                             content = data["error"],
+                            color = "#FF0000",
+                        ),
+                    ],
+                ),
+            ),
+        )
+
+    elif config.bool("display_graph", False):
+        # Check if wind swell mode is enabled
+        use_wind_swell = config.bool("wind_swell", False)
+
+        # Get graph duration in days (default 5, clamp to 1-40)
+        graph_days_str = config.get("graph_days", "5")
+        graph_days = 5
+        if graph_days_str.isdigit():
+            graph_days = int(graph_days_str)
+            if graph_days < 1:
+                graph_days = 1
+            elif graph_days > 40:
+                graph_days = 40
+
+        # Fetch spectral data for graph
+        spec_data = fetch_spec_data(buoy_id, use_wind_swell, graph_days)
+        if spec_data and len(spec_data) >= 2:
+            # Check size threshold against latest data point
+            latest_swh = spec_data[-1]["swh"]  # Already in feet
+            if h_unit_pref == "meters":
+                latest_swh_display = latest_swh / 3.281
+            else:
+                latest_swh_display = latest_swh
+
+            # Apply minimum size threshold
+            if min_size != "0" and float(min_size) > 0:
+                if latest_swh_display < float(min_size):
+                    return []
+
+            graph_result = render_swell_graph(spec_data, buoy_name if buoy_name else buoy_id, h_unit_pref, t_unit_pref, data, use_wind_swell)
+            if graph_result:
+                return graph_result
+
+        # Fallback if no spec data available
+        return render.Root(
+            child = render.Box(
+                render.Column(
+                    cross_align = "center",
+                    main_align = "center",
+                    children = [
+                        render.Text(
+                            content = buoy_name if buoy_name else buoy_id,
+                            font = "tb-8",
+                            color = "#AAEEDD",
+                        ),
+                        render.Text(
+                            content = "No Graph Data",
+                            font = "tb-8",
                             color = "#FF0000",
                         ),
                     ],
@@ -913,6 +1249,13 @@ def get_schema():
                 icon = "monument",
                 desc = "",
             ),
+            schema.Text(
+                id = "buoy_name",
+                name = "Custom Display Name",
+                icon = "user",
+                desc = "Leave blank to use NOAA defined name",
+                default = "",
+            ),
             schema.Toggle(
                 id = "display_swell",
                 name = "Display Swell",
@@ -926,6 +1269,20 @@ def get_schema():
                 desc = "instead of ground swell.",
                 icon = "gear",
                 default = False,
+            ),
+            schema.Toggle(
+                id = "display_graph",
+                name = "Display Swell Graph",
+                desc = "Show swell height graph with period coloring (blue=short, red=long)",
+                icon = "chartLine",
+                default = False,
+            ),
+            schema.Text(
+                id = "graph_days",
+                name = "Graph Duration (days)",
+                desc = "Number of days to display (1-40)",
+                icon = "calendar",
+                default = "5",
             ),
             schema.Toggle(
                 id = "display_wind",
@@ -969,13 +1326,6 @@ def get_schema():
                 name = "Minimum Swell Size",
                 icon = "water",
                 desc = "Only display if swell is above minimum size",
-                default = "",
-            ),
-            schema.Text(
-                id = "buoy_name",
-                name = "Custom Display Name",
-                icon = "user",
-                desc = "Leave blank to use NOAA defined name",
                 default = "",
             ),
         ],

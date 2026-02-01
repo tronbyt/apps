@@ -60,7 +60,7 @@ def main(config):
     location = json.decode(config.get("location") or DEFAULT_LOCATION)
     units = config.get("units") or DEFAULT_UNITS
 
-    response = http.get(WEATHER_URL + location["lat"] + "," + location["lng"], ttl_seconds = 300)
+    response = http.get(WEATHER_URL + str(location["lat"]) + "," + str(location["lng"]), ttl_seconds = 300)
     if response.status_code != 200:
         fail("failed to fetch weather %d", response.status_code)
 

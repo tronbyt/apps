@@ -7,3 +7,4 @@ author: Robert Ison
 recommendedInterval: 1
 fileName: cpi_tracker.star
 packageName: cpitracker
+supports2x: true

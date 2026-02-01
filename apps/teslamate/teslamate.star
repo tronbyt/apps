@@ -10,6 +10,7 @@ Licensed under the Apache License, Version 2.0
 """
 
 load("encoding/json.star", "json")
+load("filter.star", "filter")
 load("http.star", "http")
 load("images/bolt.png", BOLT = "file")
 load("images/bolt@2x.png", BOLT_2X = "file")
@@ -23,8 +24,10 @@ load("images/plug_blue.webp", PLUG_BLUE = "file")
 load("images/plug_blue@2x.webp", PLUG_BLUE_2X = "file")
 load("images/plug_red.webp", PLUG_RED = "file")
 load("images/plug_red@2x.webp", PLUG_RED_2X = "file")
-load("images/tesla.png", TESLA = "file")
-load("images/tesla@2x.png", TESLA_2X = "file")
+load("images/tesla_red.png", TESLA_RED = "file")
+load("images/tesla_red@2x.png", TESLA_RED_2X = "file")
+load("images/tesla_white.png", TESLA_WHITE = "file")
+load("images/tesla_white@2x.png", TESLA_WHITE_2X = "file")
 load("math.star", "math")
 load("re.star", "re")
 load("render.star", "canvas", "render")
@@ -287,6 +290,25 @@ def main(config):
     else:
         state_image = PLUG_RED_2X if scale == 2 else PLUG_RED
 
+    car_tint = config.str("car_tint", "#FFFFFF")
+
+    # Basic backwards compatibility attempt
+    legacy_color = config.str("car_color")
+    if legacy_color == "red" and car_tint == "#FFFFFF":
+        car_tint = "#FF0000"
+    elif legacy_color == "blue" and car_tint == "#FFFFFF":
+        car_tint = "#0000FF"
+
+    car_r, car_g, car_b = hex_to_rgb(car_tint)
+    car_h, car_s, _ = rgb_to_hsl(car_r, car_g, car_b)
+
+    use_white_car = car_s < 0.1
+
+    if use_white_car:
+        logo = TESLA_WHITE_2X if scale == 2 else TESLA_WHITE
+    else:
+        logo = TESLA_RED_2X if scale == 2 else TESLA_RED
+
     battery_level = int(batterylevel)
     state = {
         "batterylevel": battery_level,
@@ -295,9 +317,11 @@ def main(config):
         "range_value": int(float(range_value)),
         "unit": unit,
         "image": image.readall(),
-        "logo": TESLA_2X.readall() if scale == 2 else TESLA.readall(),
+        "logo": logo.readall(),
         "state_image": state_image.readall(),
         "plugged_in_debug": plugged_in,  # For debugging
+        "use_white_car": use_white_car,
+        "hue_change": float(car_h),
     }
 
     return render.Root(
@@ -421,13 +445,24 @@ def get_frame(state, fr, config, animprogress, scale):
     delay = 0
     color = state["color"]
     if config.bool("carimg", True):
+        car_img = render.Image(src = state["logo"], width = 20 * scale, height = 15 * scale)
+        if not state["use_white_car"]:
+            car_img = render.Box(
+                width = 20 * scale,
+                height = 15 * scale,
+                child = filter.Hue(
+                    child = car_img,
+                    change = state["hue_change"],
+                ),
+            )
+
         children.append(
             render.Row(
                 expanded = True,
                 main_align = "space_around",
                 cross_align = "center",
                 children = [
-                    render.Image(src = state["logo"], width = 20 * scale, height = 15 * scale),
+                    car_img,
                     render.Marquee(
                         width = 40 * scale,
                         child = render.Text("%s" % state["name"], font = font_std),
@@ -560,6 +595,13 @@ def get_schema():
                 desc = "Show car image",
                 icon = "car",
                 default = True,
+            ),
+            schema.Color(
+                id = "car_tint",
+                name = "Car Color",
+                desc = "The color of the car to display. Light/White colors will use the default white car.",
+                icon = "palette",
+                default = "#FFFFFF",
             ),
             schema.Text(
                 id = "cache_duration",

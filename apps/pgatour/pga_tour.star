@@ -82,6 +82,13 @@ Updated PLAYER_MAPPING
 
 v2.9.4
 Updated PLAYER_MAPPING
+
+v2.10
+Updated Tournament IDs for 2026 Season
+Updated timezone check
+
+v2.10.1
+Updated PLAYER_MAPPING
 """
 
 load("encoding/json.star", "json")
@@ -95,7 +102,7 @@ API2 = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
 
 CACHE_TTL_SECS = 60
 DEFAULT_TIMEZONE = "Australia/Adelaide"
-THE_EXCEPTIONS = ["401703489", "401703521"]  # The Sentry and The Open
+THE_EXCEPTIONS = ["401811957"]  # The Open
 
 # List will be a work in progress
 PLAYER_MAPPING = """
@@ -114,48 +121,55 @@ PLAYER_MAPPING = """
     "4382434": "Norgaard",
     "4404992": "B.Griffin",
     "5962": "L.Griffin",
-    "686": "Z.Johnson"
+    "686": "Z.Johnson",
+    "9506": "J.Smith",
+    "5211425": "B.Brown",
+    "1407": "D.Brown",
+    "4877953": "S.T.Lee",
+    "5076011": "Dumont DC",
+    "4355673": "B.Wu",
+    "4423323": "D.Wu",
+    "9127": "A.Svensson",
+    "4699329": "J.Svensson"
 }
 """
 
 TOURNAMENT_MAPPING = """
 {
-    "401703491": "The AmEx",
-    "401703492": "Farmers Ins",
-    "401703493": "AT&T Pro-Am",
-    "401703495": "Genesis Inv",
-    "401703498": "Arnold Palm",
-    "401703500": "The Players",
-    "401703507": "Zurich Clas",
-    "401703506": "Puntacana",
-    "401703508": "The CJ Cup",
-    "401703501": "Valspar",
-    "401703502": "Houston Opn",
-    "401703503": "Texas Open",
-    "401703504": "The Masters",
-    "401703505": "Heritage",
-    "401703514": "Canadian Op",
-    "401703513": "Memorial",
-    "401703511": "PGA Champ",
+    "401811929": "The AmEx",
+    "401811930": "Farmers Ins",
+    "401811932": "AT&T Pro-Am",
+    "401811933": "Genesis Inv",
+    "401811935": "Arnold Palm",
+    "401811937": "The Players",
+    "401811943": "Zurich Clas",
+    "401811958": "Puntacana",
+    "401811948": "The CJ Cup",
+    "401811938": "Valspar",
+    "401811939": "Houston Opn",
+    "401811940": "Texas Open",
+    "401811941": "The Masters",
+    "401811942": "Heritage",
+    "401811951": "Canadian Op",
+    "401811950": "Memorial",
+    "401811947": "PGA Champ",
     "401465538": "Barbasol",
-    "401703519": "Scottish",
-    "401703524": "Wyndham",
-    "401703525": "FedEx St.J",
-    "401703530": "BMW Champ",
-    "401558309": "Q-School",
-    "401703520": "ISCO Champ",
-    "401703522": "Barracuda",
-    "401703531": "TOUR CHAMP"
+    "401811955": "Scottish",
+    "401811961": "Wyndham",
+    "401811962": "FedEx St.J",
+    "401811963": "BMW Champ",
+    "401811964": "TOUR CHAMP",
+    "401811956": "ISCO Champ"
 }
 """
 
 MAJOR_MAPPING = """
 {
-    "401703500": "#003360",
-    "401703504": "#006747",
-    "401703511": "#00205B",
-    "401703515": "#003865",
-    "401703521": "#1A1C3C"
+    "401811937": "#003360",
+    "401811941": "#006747",
+    "401811947": "#00205B",
+    "401811952": "#003865",
+    "401811957": "#1A1C3C"
 }
 """
 
@@ -438,7 +452,6 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
     LeaderTeeTimeFormat = time.parse_time(LeaderTeeTime, format = "2006-01-02T15:04Z").in_location(timezone)
     TimeDiff = LeaderTeeTimeFormat - time.now()
 
-    #print(TimeDiff)
     if TimeDiff.hours < 12:
         ShowTeeTimes = True
 
@@ -588,11 +601,11 @@ def getPlayerFontColor(HolesCompleted, ColorGradient):
 def OppositeFieldCheck(ID):
     # check the ID of the event, and if its a tournament with an opposite field go to the second event in the API
     i = 0
-    if ID == "401703509":  # Truist -> Myrtle Beach
+    if ID == "401811945":  # Truist -> Myrtle Beach
         i = 1
-    elif ID == "401703521":  # The Open -> Barracuda
+    elif ID == "401811957":  # The Open -> Barracuda
         i = 1
-    elif ID == "401703519":  # Scottish Open -> ISCO Champ
+    elif ID == "401811955":  # Scottish Open -> ISCO Champ
         i = 1
     else:
         i = 0
