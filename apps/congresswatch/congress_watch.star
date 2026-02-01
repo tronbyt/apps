@@ -137,7 +137,7 @@ def main(config):
 
     #We have either live or test data, now display it.
 
-    filtered_congress_data = filter_bills(congress_data, config.get("period", period_options[len(period_options) - 1].value), config.get("source", source[-1].value))
+    filtered_congress_data = filter_bills(congress_data, config.get("period", period_options[len(period_options) - 1].value), config.get("source", source[0].value))
     number_filtered_items = len(filtered_congress_data)
 
     if number_filtered_items == 0:
