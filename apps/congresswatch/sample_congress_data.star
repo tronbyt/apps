@@ -1,0 +1,53 @@
+SAMPLE_CONGRESS_DATA = {
+    "bills": [
+        {
+            "congress": 119,
+            "latestAction": "None",
+            "number": "8",
+            "originChamber": "House",
+            "originChamberCode": "H",
+            "title": "Reserved for the Speaker.",
+            "type": "HR",
+            "updateDate": "2025-12-18",
+            "updateDateIncludingText": "2025-12-18",
+            "url": "https://api.congress.gov/v3/bill/119/hr/8?format=json",
+        },
+        {
+            "congress": 119,
+            "latestAction": {
+                "actionDate": "2025-12-19",
+                "text": "Referred to the House Committee on Ways and Means.",
+            },
+            "number": "6912",
+            "originChamber": "House",
+            "originChamberCode": "H",
+            "title": "To amend the Internal Revenue Code of 1986 to exclude certain combat zone compensation of certain servicemembers relating to remotely piloted aircraft from gross income.",
+            "type": "HR",
+            "updateDate": "2025-12-20",
+            "updateDateIncludingText": "2025-12-20",
+            "url": "https://api.congress.gov/v3/bill/119/hr/6912?format=json",
+        },
+        {
+            "congress": 119,
+            "latestAction": {
+                "actionDate": "2025-12-19",
+                "actionTime": "14:40:35",
+                "text": "Held at the desk.",
+            },
+            "number": "1383",
+            "originChamber": "Senate",
+            "originChamberCode": "S",
+            "title": "Veterans Accessibility Advisory Committee Act of 2025",
+            "type": "S",
+            "updateDate": "2025-12-20",
+            "updateDateIncludingText": "2025-12-20",
+            "url": "https://api.congress.gov/v3/bill/119/s/1383?format=json",
+        },
+    ],
+    "pagination": {"count": 1974},
+    "request": {
+        "congress": "119",
+        "contentType": "application/json",
+        "format": "json",
+    },
+}

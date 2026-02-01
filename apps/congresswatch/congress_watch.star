@@ -9,6 +9,8 @@ load("encoding/json.star", "json")  #JSON Data from congress.gov API site
 load("http.star", "http")  #HTTP Client
 load("images/congress_icon.png", CONGRESS_ICON_ASSET = "file")
 load("render.star", "canvas", "render")  #Render the display for Tidbyt
+load("sample_congress_body.star", "SAMPLE_CONGRESS_BODY")
+load("sample_congress_data.star", "SAMPLE_CONGRESS_DATA")
 load("schema.star", "schema")  #Keep Track of Settings
 load("time.star", "time")  #Ensure Timely display of congressional actions
 
@@ -18,8 +20,6 @@ CONGRESS_SESSION_LENGTH_IN_DAYS = 720  #730, but we'll shorten it some to make s
 CONGRESS_BILL_TTL = 12 * 60 * 60  #12 hours * 60 mins/hour * 60 seconds/min
 MAX_ITEMS = 50
 SCREEN_WIDTH = canvas.width()
-SAMPLE_CONGRESS_BODY = """{"congress": {"endYear": "2026", "name": "119th Congress", "number": 119, "sessions": [{"chamber": "Senate", "number": 1, "startDate": "2025-01-03", "type": "R"}, {"chamber": "House of Representatives", "number": 1, "startDate": "2025-01-03", "type": "R"}], "startYear": "2025", "updateDate": "2025-01-03T18:29:19Z", "url": "https://api.congress.gov/v3/congress/119?format=json"}, "request": {"contentType": "application/json", "format": "json"}}"""
-SAMPLE_CONGRESS_DATA = """{"bills":[{"congress":119,"latestAction":null,"number":"8","originChamber":"House","originChamberCode":"H","title":"Reserved for the Speaker.","type":"HR","updateDate":"2025-12-18","updateDateIncludingText":"2025-12-18","url":"https://api.congress.gov/v3/bill/119/hr/8?format=json"},{"congress":119,"latestAction":{"actionDate":"2025-12-19","text":"Referred to the House Committee on Ways and Means."},"number":"6912","originChamber":"House","originChamberCode":"H","title":"To amend the Internal Revenue Code of 1986 to exclude certain combat zone compensation of certain servicemembers relating to remotely piloted aircraft from gross income.","type":"HR","updateDate":"2025-12-20","updateDateIncludingText":"2025-12-20","url":"https://api.congress.gov/v3/bill/119/hr/6912?format=json"},{"congress":119,"latestAction":{"actionDate":"2025-12-19","actionTime":"14:40:35","text":"Held at the desk."},"number":"1383","originChamber":"Senate","originChamberCode":"S","title":"Veterans Accessibility Advisory Committee Act of 2025","type":"S","updateDate":"2025-12-20","updateDateIncludingText":"2025-12-20","url":"https://api.congress.gov/v3/bill/119/s/1383?format=json"}],"pagination":{"count":1974},"request":{"congress":"119","contentType":"application/json","format":"json"}}"""
 
 period_options = [
     schema.Option(
@@ -83,12 +83,10 @@ def main(config):
     congress_number = ""
 
     if not api_key:
-        print("Error: Missing Congress API Key")
 
         #test environment or app preview
-        congress_session_body = json.decode(SAMPLE_CONGRESS_BODY)
-
-        congress_data = json.decode(SAMPLE_CONGRESS_DATA)
+        congress_session_body = SAMPLE_CONGRESS_BODY
+        congress_data = SAMPLE_CONGRESS_DATA
 
         #Congress Session Info
         congress_number = congress_session_body["congress"]["number"]
@@ -122,10 +120,19 @@ def main(config):
 
         bill_data_from_date = time.now() - time.parse_duration("%dh" % (period_days * 24))
 
-        congress_bill_url = "{}bill/{}?limit={}&api_key={}&format=json&fromDateTime={}".format(CONGRESS_API_URL, congress_number, MAX_ITEMS, api_key, bill_data_from_date.format("2006-01-02") + "T00:00:00Z")
+        # 1. Define the parameters as a dictionary (Replaces the long string formatting)
+        query_params = {
+            "limit": str(MAX_ITEMS),
+            "api_key": api_key,
+            "format": "json",
+            "fromDateTime": bill_data_from_date.format("2006-01-02") + "T00:00:00Z",
+        }
 
-        congress_data = get_cachable_data(congress_bill_url, cache_ttl)
-        congress_data = json.decode(congress_data)
+        # 2. Define the Base URL (without the '?' or any query params)
+        base_url = "{}/bill/{}".format(CONGRESS_API_URL, congress_number)
+
+        # 3. Pass the params dictionary into your helper function
+        congress_data = get_cachable_data(base_url, cache_ttl, params = query_params)
 
     #We have either live or test data, now display it.
 
@@ -236,14 +243,11 @@ def randomize(min, max):
     rand = int(str(now.nanosecond)[-6:-3]) / 1000
     return int(rand * (max - min) + min)
 
-def get_cachable_data(url, timeout):
-    res = http.get(url = url, ttl_seconds = timeout)
-
+def get_cachable_data(url, ttl, params={}):
+    # Pass the params dict directly into the http call
+    res = http.get(url = url, params = params, ttl_seconds = ttl)
     if res.status_code != 200:
-        print(res.status_code)
-        print(res.body() if res.body() else "No response body")
-        fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
-
+        fail("Request failed with status %d" % res.status_code)
     return res.body()
 
 def get_schema():
@@ -271,7 +275,7 @@ def get_schema():
                 desc = "Chamber",
                 icon = "landmarkDome",
                 options = source,
-                default = source[0].value,
+                default = source[-1].value,
             ),
             schema.Dropdown(
                 id = "scroll",
