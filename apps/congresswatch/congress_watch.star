@@ -42,16 +42,16 @@ period_options = [
 
 source = [
     schema.Option(
+        display = "House and Senate",
+        value = "Both",
+    ),
+    schema.Option(
         display = "House of Representatives",
         value = "House",
     ),
     schema.Option(
         display = "Senate",
         value = "Senate",
-    ),
-    schema.Option(
-        display = "House and Senate",
-        value = "Both",
     ),
 ]
 
@@ -72,7 +72,7 @@ scroll_speed_options = [
 
 def main(config):
     api_key = config.get("congress_api_key")
-    source_house = config.get("source", source[-1].value)
+    source_house = config.get("source", source[0].value)
 
     font_type = "5x8"
     if canvas.is2x():
@@ -275,7 +275,7 @@ def get_schema():
                 desc = "Chamber",
                 icon = "landmarkDome",
                 options = source,
-                default = source[-1].value,
+                default = source[0].value,
             ),
             schema.Dropdown(
                 id = "scroll",
