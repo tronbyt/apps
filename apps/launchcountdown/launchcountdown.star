@@ -348,7 +348,7 @@ def main(config):
 
         # Lookup the display name for the notice period
         selected_val = config.get("notice_period", period_options[-1].value)
-        display_name = period_options[-1].display # Default
+        display_name = period_options[-1].display  # Default
         for opt in period_options:
             if opt.value == selected_val:
                 display_name = opt.display
