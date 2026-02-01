@@ -72,6 +72,7 @@ scroll_speed_options = [
 
 def main(config):
     api_key = config.get("congress_api_key")
+    source_house = config.get("source", source[-1].value)
 
     font_type = "5x8"
     if canvas.is2x():
@@ -83,7 +84,6 @@ def main(config):
     congress_number = ""
 
     if not api_key:
-
         #test environment or app preview
         congress_session_body = SAMPLE_CONGRESS_BODY
         congress_data = SAMPLE_CONGRESS_DATA
@@ -132,7 +132,8 @@ def main(config):
         base_url = "{}/bill/{}".format(CONGRESS_API_URL, congress_number)
 
         # 3. Pass the params dictionary into your helper function
-        congress_data = get_cachable_data(base_url, cache_ttl, params = query_params)
+        congress_raw = get_cachable_data(base_url, cache_ttl, params = query_params)
+        congress_data = json.decode(congress_raw)
 
     #We have either live or test data, now display it.
 
@@ -140,20 +141,20 @@ def main(config):
     number_filtered_items = len(filtered_congress_data)
 
     if number_filtered_items == 0:
-        return render.Root(
-            render.Marquee(width = SCREEN_WIDTH, child = render.Text("No recent bills", font = font_type)),
-        )
-
-    #let's diplay a random bill from the filtered list
-    random_number = randomize(0, number_filtered_items)
-
-    row1 = filtered_congress_data[random_number]["originChamber"]
-    row2 = "%s%s %s" % (filtered_congress_data[random_number]["type"], filtered_congress_data[random_number]["number"], filtered_congress_data[random_number]["title"])
-    bill = filtered_congress_data[random_number]
-    if bill["latestAction"] != None and "text" in bill["latestAction"]:
-        row3 = bill["latestAction"]["text"]
+        row1 = "Congress" if source_house == "Both" else source_house
+        row2 = "No recent action"
+        row3 = ""
     else:
-        row3 = "No recent action"
+        #let's diplay a random bill from the filtered list
+        random_number = randomize(0, number_filtered_items)
+
+        row1 = filtered_congress_data[random_number]["originChamber"]
+        row2 = "%s%s %s" % (filtered_congress_data[random_number]["type"], filtered_congress_data[random_number]["number"], filtered_congress_data[random_number]["title"])
+        bill = filtered_congress_data[random_number]
+        if bill["latestAction"] != None and "text" in bill["latestAction"]:
+            row3 = bill["latestAction"]["text"]
+        else:
+            row3 = "No recent action"
 
     return render.Root(
         render.Column(
