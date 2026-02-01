@@ -7,3 +7,5 @@ author: Robert Ison
 fileName: launchcountdown.star
 packageName: launchcountdown
 recommendedInterval: 5
+supports2x: true
+---

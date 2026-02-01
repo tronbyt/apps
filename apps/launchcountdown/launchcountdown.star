@@ -16,7 +16,7 @@ load("images/rocket_icon_e.png", ROCKET_ICON_E_ASSET = "file")
 load("images/rocket_icon_f.png", ROCKET_ICON_F_ASSET = "file")
 load("images/rocket_icon_g.png", ROCKET_ICON_G_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -314,7 +314,7 @@ def main(config):
                 locallaunch = utc_t0.in_location(location["timezone"])
 
                 # Notice Period Logic
-                hours_notice = int(config.get("notice_period", "1"))  # Default to 1 hour
+                hours_notice = int(config.get("notice_period", period_options[-1].value))  # Default to 1 hour
                 hours_until = (locallaunch - localtime).hours
 
                 if (hours_notice == 0 or hours_notice > hours_until):
@@ -351,6 +351,11 @@ def main(config):
         row2 = "within %s" % display_name
 
     # 5. Render (Keep your existing render.Root code here)
+
+    delay = int(config.get("scroll", 45))
+    if canvas.is2x:
+        delay = int(delay / 2)
+
     return render.Root(
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
@@ -362,8 +367,8 @@ def main(config):
                             children = [
                                 render.Column(
                                     children = [
-                                        render.Marquee(width = 48, child = render.Text(row1, color = "#65d0e6")),
-                                        render.Marquee(width = 48, child = render.Text(row2, color = "#FFFFFF")),
+                                        render.Marquee(width = canvas.width() - 16, child = render.Text(row1, color = "#65d0e6")),
+                                        render.Marquee(width = canvas.width() - 16, child = render.Text(row2, color = "#FFFFFF")),
                                     ],
                                 ),
                                 render.Animation(
@@ -373,8 +378,8 @@ def main(config):
                         ),
                     ],
                 ),
-                render.Marquee(width = 64, child = render.Text(row3, color = "#fff")),
-                render.Marquee(width = 64, child = render.Text(row4, color = "#ff0")),
+                render.Marquee(width = canvas.width(), child = render.Text(row3, color = "#fff")),
+                render.Marquee(width = canvas.width(), child = render.Text(row4, color = "#ff0")),
             ],
         ),
     )
@@ -395,7 +400,7 @@ def get_schema():
                 desc = "Display when launch is within...",
                 icon = "userClock",
                 options = period_options,
-                default = period_options[0].value,
+                default = period_options[-1].value,
             ),
             schema.Dropdown(
                 id = "scroll",
