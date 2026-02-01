@@ -269,88 +269,88 @@ def replace_local_time_into_description(description, local_time, utc_time):
     return description.replace(utc_part, local_part)
 
 def main(config):
-    """ Main
-
-    Args:
-        config: Configuration Items to control how the app is displayed
-    Returns:
-        The tidbyt display
-    """
     show_instructions = config.bool("instructions", False)
     hide_when_nothing_to_display = config.bool("hide", True)
 
     if show_instructions:
         return display_instructions(config)
 
-    #Initialize row text variables
+    # 1. Initialize variables
     row1 = ""
     row2 = ""
     row3 = ""
     row4 = ""
 
     location = json.decode(config.get("location", default_location))
-
     rocket_launch_data = get_rocket_launch_json()
 
-    initial_count = len(rocket_launch_data["result"]) if rocket_launch_data else 0
-
+    # 2. Filter data
     rocket_launch_data = filter_rocket_launches(rocket_launch_data, config.get("filter_for_providers", ""), config.get("filter_for_countries", ""))
-
     rocket_launch_count = len(rocket_launch_data["result"]) if rocket_launch_data else 0
 
-    if hide_when_nothing_to_display and rocket_launch_count == 0:
-        return []
-
     if rocket_launch_data == None:
-        row1 = "Failed to get data from Rocketlaunch.live feed"
+        row1 = "Error"
+        row2 = "API Feed Failed"
     elif rocket_launch_count == 0:
-        row1 = "All launches filtered.." if initial_count > 0 else "No upcoming launches.."
+        row1 = "No Launches"
+        row2 = "Filtered or None"
     else:
-        rocket_launch_count = int(rocket_launch_count)
+        # 3. Process the first available launch
         for i in range(0, rocket_launch_count):
-            row1 = ""
-            row2 = ""
-            row3 = ""
-            row4 = ""
-            localtime = time.now()
+            localtime = time.now().in_location(location["timezone"])
+            launch_item = rocket_launch_data["result"][i]
 
-            t0 = rocket_launch_data["result"][i]["t0"]
-            win_open = rocket_launch_data["result"][i]["win_open"]
-
+            t0 = launch_item.get("t0")
+            win_open = launch_item.get("win_open")
             utc_t0 = None
+
+            # Handle time parsing safely
             if t0 != None:
                 utc_t0 = time.parse_time(t0.replace("Z", ":00Z"))
-                locallaunch = utc_t0.in_location(location["timezone"])
             elif win_open != None:
-                utc_win_open = time.parse_time(win_open.replace("Z", ":00Z"))
-                utc_t0 = utc_win_open  # Use win_open as fallback UTC time
-                locallaunch = utc_t0.in_location(location.get("timezone"))
-            else:
-                locallaunch = None
+                utc_t0 = time.parse_time(win_open.replace("Z", ":00Z"))
 
-            if locallaunch == None:
-                month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                row1 = rocket_launch_data["result"][i]["vehicle"]["name"]
-                if rocket_launch_data["result"][i]["est_date"]["month"] == None or rocket_launch_data["result"][i]["est_date"]["day"] == None:
-                    row2 = ""
-                else:
-                    row2 = "%s %s '%s" % (month_names[int(rocket_launch_data["result"][i]["est_date"]["month"]) - 1], rocket_launch_data["result"][i]["est_date"]["day"], str(rocket_launch_data["result"][i]["est_date"]["year"])[-2:])
-                row3 = get_launch_details(rocket_launch_data["result"][i], locallaunch).strip()
+            if utc_t0 != None:
+                locallaunch = utc_t0.in_location(location["timezone"])
 
-                row4 = rocket_launch_data["result"][i]["launch_description"].strip()
-            elif locallaunch > localtime.in_location(location["timezone"]):
-                hours_notice = int(config.get("notice_period", 0))
-                hours_until_sighting = (locallaunch - localtime.in_location(location["timezone"])).hours
+                # Notice Period Logic
+                hours_notice = int(config.get("notice_period", "1"))  # Default to 1 hour
+                hours_until = (locallaunch - localtime).hours
 
-                if (hours_notice == 0 or hours_notice > hours_until_sighting):
-                    row1 = rocket_launch_data["result"][i]["vehicle"]["name"]
+                if (hours_notice == 0 or hours_notice > hours_until):
+                    row1 = launch_item["vehicle"]["name"]
                     row2 = locallaunch.format("Jan 2 '06")
-                    row3 = get_launch_details(rocket_launch_data["result"][i], locallaunch)
-                    row4 = replace_local_time_into_description(rocket_launch_data["result"][i]["launch_description"], locallaunch, utc_t0)
+                    row3 = get_launch_details(launch_item, locallaunch)
+                    row4 = replace_local_time_into_description(launch_item["launch_description"], locallaunch, utc_t0)
+                    break  # Found a valid launch to show
             else:
-                return []
-            break
+                # Fallback for launches with no specific time (Estimated dates)
+                month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                row1 = launch_item["vehicle"]["name"]
+                est = launch_item["est_date"]
+                if est["month"] != None and est["day"] != None:
+                    row2 = "%s %s '%s" % (month_names[int(est["month"]) - 1], est["day"], str(est["year"])[-2:])
+                row3 = get_launch_details(launch_item, None).strip()
+                row4 = launch_item["launch_description"].strip()
+                break
 
+    # 4. Final Blank Screen Guard & Notice Period Message
+    if row1 == "":
+        if hide_when_nothing_to_display:
+            return []
+
+        # Lookup the display name for the notice period
+        selected_val = config.get("notice_period", "1")
+        display_name = "1 hour"  # Default
+        for opt in period_options:
+            if opt.value == selected_val:
+                display_name = opt.display
+                break
+
+        row1 = "No launches found"
+        row2 = "within %s" % display_name
+
+    # 5. Render (Keep your existing render.Root code here)
     return render.Root(
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
@@ -362,65 +362,19 @@ def main(config):
                             children = [
                                 render.Column(
                                     children = [
-                                        render.Marquee(
-                                            width = 48,
-                                            child = render.Text(row1, color = "#65d0e6"),
-                                        ),
-                                        render.Marquee(
-                                            width = 48,
-                                            child = render.Text(row2, color = "#FFFFFF"),
-                                        ),
+                                        render.Marquee(width = 48, child = render.Text(row1, color = "#65d0e6")),
+                                        render.Marquee(width = 48, child = render.Text(row2, color = "#FFFFFF")),
                                     ],
                                 ),
                                 render.Animation(
-                                    children = [
-                                        render.Image(src = ROCKET_ICON),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_D),
-                                        render.Image(src = ROCKET_ICON_E),
-                                        render.Image(src = ROCKET_ICON_F),
-                                        render.Image(src = ROCKET_ICON_G),
-                                        render.Image(src = ROCKET_ICON_F),
-                                        render.Image(src = ROCKET_ICON_D),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_D),
-                                        render.Image(src = ROCKET_ICON_E),
-                                        render.Image(src = ROCKET_ICON_D),
-                                        render.Image(src = ROCKET_ICON_C),
-                                        render.Image(src = ROCKET_ICON_B),
-                                        render.Image(src = ROCKET_ICON),
-                                        render.Image(src = ROCKET_ICON),
-                                    ],
+                                    children = [render.Image(src = ROCKET_ICON), render.Image(src = ROCKET_ICON_B), render.Image(src = ROCKET_ICON_C), render.Image(src = ROCKET_ICON_D), render.Image(src = ROCKET_ICON_E), render.Image(src = ROCKET_ICON_F), render.Image(src = ROCKET_ICON_G)],
                                 ),
                             ],
                         ),
                     ],
                 ),
-                render.Marquee(
-                    width = 64,
-                    offset_start = len(row1) * 5,
-                    child = render.Text(row3, color = "#fff"),
-                ),
-                render.Marquee(
-                    width = 64,
-                    offset_start = len(row3) * 5,
-                    child = render.Text(row4, color = "#ff0"),
-                ),
+                render.Marquee(width = 64, child = render.Text(row3, color = "#fff")),
+                render.Marquee(width = 64, child = render.Text(row4, color = "#ff0")),
             ],
         ),
     )
