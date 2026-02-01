@@ -269,6 +269,13 @@ def replace_local_time_into_description(description, local_time, utc_time):
     return description.replace(utc_part, local_part)
 
 def main(config):
+    """ Main
+    Args:
+        config: Configuration Items to control how the app is displayed
+    Returns:
+        The tidbyt display
+    """
+
     show_instructions = config.bool("instructions", False)
     hide_when_nothing_to_display = config.bool("hide", True)
 
@@ -340,8 +347,8 @@ def main(config):
             return []
 
         # Lookup the display name for the notice period
-        selected_val = config.get("notice_period", "1")
-        display_name = "1 hour"  # Default
+        selected_val = config.get("notice_period", period_options[-1].value)
+        display_name = period_options[-1].display # Default
         for opt in period_options:
             if opt.value == selected_val:
                 display_name = opt.display
@@ -358,7 +365,7 @@ def main(config):
 
     return render.Root(
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
+        delay = delay,
         child = render.Column(
             children = [
                 render.Column(
