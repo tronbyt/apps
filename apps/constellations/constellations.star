@@ -27,10 +27,10 @@ default_location = """
 
 brightness_colors = [
     "#FFFFFF",  # 0: Brightest (mag < 2.0) - Sirius level
-    "#FFEEBB",  # 1: Bright (mag 2.0-2.5) - Altair level
-    "#DDDDDD",  # 2: Medium (mag 2.5-3.0) - average
-    "#BBBBBB",  # 3: Faint (mag 3.0-3.5)
-    "#AAAAAA",  # 4: Faintest (mag > 3.5)
+    "#FFF4D6",  # 1: Bright (mag 2.0-2.5) - Altair level
+    "#C0C0C0",  # 2: Medium (mag 2.5-3.0) - average
+    "#808080",  # 3: Faint (mag 3.0-3.5)
+    "#555555",  # 4: Faintest (mag > 3.5)
 ]
 
 def display_instructions(config):
@@ -40,6 +40,10 @@ def display_instructions(config):
     instructions_2 = "Dot on the far left in green indicates how high in the sky you need to look. "
     instructions_3 = "Green text indicates direction you must look. Constellation name displayed in blue."
     app_title = "Constellations"
+
+    delay = int(config.get("scroll", 45))
+    if canvas.is2x():
+        delay = int(delay / 2)
 
     return render.Root(
         render.Column(
@@ -65,7 +69,7 @@ def display_instructions(config):
                 ),
             ],
         ),
-        delay = int(config.get("scroll", 45)),
+        delay = delay,
         show_full_animation = True,
     )
 
@@ -184,24 +188,7 @@ def altitude_deg(ra_hours, dec_deg, lat_deg, lst_deg):
     return rad_to_deg(alt_rad)
 
 def get_cardinal_direction(az_deg):
-    directions = [
-        "N",
-        "NNE",
-        "NE",
-        "ENE",
-        "E",
-        "ESE",
-        "SE",
-        "SSE",
-        "S",
-        "SSW",
-        "SW",
-        "WSW",
-        "W",
-        "WNW",
-        "NW",
-        "NNW",
-    ]
+    directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
 
     # Force proper rounding for Starlark
     index = int((az_deg + 11.25) / 22.5 + 0.0001) % 16  # +0.0001 fixes float truncation
@@ -230,7 +217,7 @@ def visible_constellations(t, lat_deg, lon_deg, threshold_deg = 10.0):
     return visible
 
 def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, show_altitude_indicator):
-    # idereal time and visibility check
+    # 1. SETUP & CALCULATIONS
     lst_deg = local_sidereal_time(t, lon_deg)
     constellation_stars = selected_constellation["stars"]
     W, H = canvas.width(), canvas.height()
@@ -246,42 +233,71 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
     if not visible_stars_raw:
         return render.Root(child = render.Box(child = render.Text("Below Horizon")))
 
+    # Official position for the UI labels
     official_alt = altitude_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     official_az = azimuth_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     dir_letter = get_cardinal_direction(official_az)
 
-    # Use the fixed bounds logic
+    # Fixed bounds logic
     min_az, max_az, min_alt, max_alt = get_constellation_bounds(visible_stars_raw)
     span_az, span_alt = max(5.0, max_az - min_az), max(5.0, max_alt - min_alt)
     anchor_az = visible_stars_raw[0][1]
 
-    layers = [render.Box(width = W, height = H, color = "#000000")]
+    # 2. DEFINE TWINKLE MAP
+    twinkle_map = {
+        "#FFFFFF": "#E0F2FF",
+        "#FFF4D6": "#FFE082",
+        "#C0C0C0": "#FFFFFF",
+        "#808080": "#BDBDBD",
+        "#555555": "#888888",
+    }
 
-    # Render Stars with wrap-around correction
-    for i, (alt, az, star) in enumerate(visible_stars_raw):
-        diff = (az - anchor_az + 180) % 360 - 180
-        adj_az = anchor_az + diff
+    # 3. GENERATE ANIMATED STAR BACKGROUND
+    animation_frames = []
+    for frame_idx in range(8):
+        # Background for this frame
+        frame_layers = [render.Box(width = W, height = H, color = "#000000")]
 
-        rel_x = int(3 + ((adj_az - min_az) / span_az) * (W - 10))
-        rel_y = int(1 + (1.0 - (alt - min_alt) / span_alt) * (star_area_h - 2))
+        for i, (alt, az, star) in enumerate(visible_stars_raw):
+            # Coordinate mapping
+            diff = (az - anchor_az + 180) % 360 - 180
+            adj_az = anchor_az + diff
 
-        layers.append(render.Padding(
-            pad = (rel_x, rel_y, 0, 0),
-            child = render.Box(width = 1, height = 1, color = brightness_colors[min(i, 4)]),
-        ))
+            rel_x = int(3 + ((adj_az - min_az) / span_az) * (W - 10))
+            rel_y = int(1 + (1.0 - (alt - min_alt) / span_alt) * (star_area_h - 2))
 
-    # Altitude Dot
+            # Twinkle logic
+            base_color = brightness_colors[min(i, 4)]
+            flicker_seed = (i * 7 + frame_idx * 3) % 10
+            display_color = base_color
+            if flicker_seed == 1:
+                display_color = twinkle_map.get(base_color, base_color)
+
+            frame_layers.append(render.Padding(
+                pad = (rel_x, rel_y, 0, 0),
+                child = render.Box(width = 1, height = 1, color = display_color),
+            ))
+
+        animation_frames.append(render.Stack(children = frame_layers))
+
+    # 4. DEFINE STATIC OVERLAYS (Independent of Star Animation)
+
+    # Altitude Indicator Dot
+    altitude_dot = render.Box()
     if show_altitude_indicator:
         dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
-        layers.append(render.Padding(pad = (0, dot_y, 0, 0), child = render.Box(width = 1, height = 1, color = "#00FF88")))
+        altitude_dot = render.Padding(
+            pad = (0, dot_y, 0, 0),
+            child = render.Box(width = 1, height = 1, color = "#00FF88"),
+        )
 
-    # Bottom Overlay with Pixel-Perfect Alignment
-    layers.append(render.Padding(
+    # Bottom UI Bar (Direction + Marquee Name)
+    ui_bar = render.Padding(
         pad = (0, H - 7, 0, 0),
         child = render.Row(
             expanded = True,
             main_align = "start",
-            cross_align = "center",  # FIX: Aligns the vertical centers of both text blocks
+            cross_align = "center",
             children = [
                 render.Padding(
                     pad = (1, 0, 3, 0),
@@ -293,7 +309,7 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
                 ),
                 render.Box(
                     width = W - 18,
-                    height = 7,  # Explicit height helps stabilize the row
+                    height = 7,
                     child = render.Marquee(
                         width = W - 18,
                         child = render.Text(
@@ -305,9 +321,19 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
                 ),
             ],
         ),
-    ))
+    )
 
-    return render.Root(child = render.Stack(children = layers))
+    # 5. ASSEMBLE FINAL ROOT
+    return render.Root(
+        delay = 150,
+        child = render.Stack(
+            children = [
+                render.Animation(children = animation_frames),
+                altitude_dot,
+                ui_bar,
+            ],
+        ),
+    )
 
 def main(config):
     show_instructions = config.bool("instructions", False)
