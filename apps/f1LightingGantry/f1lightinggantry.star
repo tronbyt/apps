@@ -15,22 +15,15 @@ def main():
     animation = []
 
     # 1. Initial Pause (All Black)
-    for _ in range(3):
-        animation.append(create_light_frame(0))
-
+    animation.extend([create_light_frame(0) for _ in range(3)])
     # 2. Sequential Lighting (1 to 5)
-    for i in range(1, 6):
-        animation.append(create_light_frame(i))
-
+    animation.extend([create_light_frame(i) for i in range(1, 6)])
     # 3. The Random Hold (Keep 5 lights on)
-    for _ in range(random.number(2, 6)):
-        animation.append(create_light_frame(5))
-
+    animation.extend([create_light_frame(5) for _ in range(random.number(2, 6))])
     # 4. LIGHTS OUT (Race Start)
     # Adding multiple frames of '0' at the end ensures the
     # screen stays black for a moment before the loop restarts.
-    for _ in range(5):
-        animation.append(create_light_frame(0))
+    animation.extend([create_light_frame(0) for _ in range(5)])
 
     return render.Root(
         delay = 1000 if canvas.is2x() else 650,
@@ -63,9 +56,12 @@ def get_light_row(step):
     else:
         image_pixel_width = 12
 
+    red_light_data = RED_LIGHT_FILE.readall()
+    black_light_data = BLACK_LIGHT_FILE.readall()
+
     # Just build the list of 5 images first
     for i in range(1, 6):
-        img_data = RED_LIGHT_FILE.readall() if step >= i else BLACK_LIGHT_FILE.readall()
+        img_data = red_light_data if step >= i else black_light_data
         light_images.append(render.Image(width = image_pixel_width, src = img_data))
 
     # Wrap the images in a Row with 'center' alignment,
