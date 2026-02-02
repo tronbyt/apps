@@ -360,7 +360,7 @@ def main(config):
     # 5. Render (Keep your existing render.Root code here)
 
     delay = int(config.get("scroll", 45))
-    if canvas.is2x:
+    if canvas.is2x():
         delay = int(delay / 2)
 
     return render.Root(
@@ -379,7 +379,39 @@ def main(config):
                                     ],
                                 ),
                                 render.Animation(
-                                    children = [render.Image(src = ROCKET_ICON), render.Image(src = ROCKET_ICON_B), render.Image(src = ROCKET_ICON_C), render.Image(src = ROCKET_ICON_D), render.Image(src = ROCKET_ICON_E), render.Image(src = ROCKET_ICON_F), render.Image(src = ROCKET_ICON_G)],
+                                    children = [
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_E),
+                                        render.Image(src = ROCKET_ICON_F),
+                                        render.Image(src = ROCKET_ICON_G),
+                                        render.Image(src = ROCKET_ICON_F),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_E),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON),
+                                    ],
                                 ),
                             ],
                         ),
