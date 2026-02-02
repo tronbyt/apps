@@ -730,7 +730,8 @@ def get_schema():
                 id = "homeassistant_entity_id",
                 name = "Entity ID",
                 icon = "play",
-                desc = "Entity ID of the media player entity in Home Assistant",
+                desc = "Entity ID of the Flight Radar entity in Home Assistant",
+                default = "sensor.flightradar24_current_in_area",
             ),
             schema.Dropdown(
                 id = "airhex_tail_direction",
