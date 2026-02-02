@@ -16,10 +16,13 @@ def main():
 
     # 1. Initial Pause (All Black)
     animation.extend([create_light_frame(0) for _ in range(3)])
+
     # 2. Sequential Lighting (1 to 5)
     animation.extend([create_light_frame(i) for i in range(1, 6)])
+
     # 3. The Random Hold (Keep 5 lights on)
     animation.extend([create_light_frame(5) for _ in range(random.number(2, 6))])
+
     # 4. LIGHTS OUT (Race Start)
     # Adding multiple frames of '0' at the end ensures the
     # screen stays black for a moment before the loop restarts.
