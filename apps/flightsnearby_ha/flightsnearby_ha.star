@@ -725,6 +725,7 @@ def get_schema():
                 name = "Bearer Token",
                 icon = "key",
                 desc = "Long-lived access token for Home Assistant",
+                secret = True,
             ),
             schema.Text(
                 id = "homeassistant_entity_id",
