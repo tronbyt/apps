@@ -50,7 +50,7 @@ def display_instructions(config):
 
     delay = int(config.get("scroll", 45))
     if canvas.is2x():
-        delay = int(delay / 2)
+        delay = delay // 2
 
     return render.Root(
         render.Column(
