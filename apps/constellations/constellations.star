@@ -25,12 +25,21 @@ default_location = """
 }
 """
 
+# Maintainable color indexing
 brightness_colors = [
-    "#FFFFFF",  # 0: Brightest (mag < 2.0)
-    "#FFF4D6",  # 1: Bright (mag 2.0-2.5)
-    "#C0C0C0",  # 2: Medium (mag 2.5-3.0)
-    "#808080",  # 3: Faint (mag 3.0-3.5)
-    "#555555",  # 4: Faintest (mag > 3.5)
+    "#FFFFFF",  # 0: Sirius
+    "#FFF4D6",  # 1: Altair
+    "#C0C0C0",  # 2: Medium
+    "#808080",  # 3: Faint
+    "#555555",  # 4: Faintest
+]
+
+twinkle_colors = [
+    "#E0F2FF",  # 0: Cool blue shift
+    "#FFE082",  # 1: Warm gold shift
+    "#FFFFFF",  # 2: Flash to white
+    "#BDBDBD",  # 3: Brighten
+    "#888888",  # 4: Brighten
 ]
 
 def display_instructions(config):
@@ -131,7 +140,6 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
     W, H = canvas.width(), canvas.height()
     star_area_h = H - 8
 
-    # 1. Filter visible stars and calculate raw visibility
     visible_stars_raw = []
     for star in selected_constellation["stars"]:
         alt = altitude_deg(star["raHours"], star["decDeg"], lat_deg, lst_deg)
@@ -142,7 +150,6 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
     if not visible_stars_raw:
         return render.Root(child = render.Box(child = render.Text("Below Horizon")))
 
-    # 2. Pre-calculate UI data and bounds
     official_alt = altitude_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     official_az = azimuth_deg(selected_constellation["raHours"], selected_constellation["decDeg"], lat_deg, lst_deg)
     dir_letter = get_cardinal_direction(official_az)
@@ -151,8 +158,7 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
     span_az, span_alt = max(5.0, max_az - min_az), max(5.0, max_alt - min_alt)
     anchor_az = visible_stars_raw[0][1]
 
-    # 3. PRE-CALCULATE STAR COORDINATES (Efficiency fix)
-    # Store as (rel_x, rel_y, color_index)
+    # Pre-calculate positions and color indices
     star_positions = []
     for i, (alt, az, _) in enumerate(visible_stars_raw):
         diff = (az - anchor_az + 180) % 360 - 180
@@ -161,17 +167,16 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
         rel_y = int(1 + (1.0 - (alt - min_alt) / span_alt) * (star_area_h - 2))
         star_positions.append((rel_x, rel_y, min(i, 4)))
 
-    twinkle_map = {"#FFFFFF": "#E0F2FF", "#FFF4D6": "#FFE082", "#C0C0C0": "#FFFFFF", "#808080": "#BDBDBD", "#555555": "#888888"}
-
-    # 4. Generate Animation Frames
+    # Frame generation with index-based twinkle lookup
     animation_frames = []
     for frame_idx in range(8):
         frame_layers = [render.Box(width = W, height = H, color = "#000000")]
         for i, (x, y, color_idx) in enumerate(star_positions):
-            base_color = brightness_colors[color_idx]
-            display_color = base_color
+            # Select color based on index, not string matching
             if (i * 7 + frame_idx * 3) % 10 == 1:
-                display_color = twinkle_map.get(base_color, base_color)
+                display_color = twinkle_colors[color_idx]
+            else:
+                display_color = brightness_colors[color_idx]
 
             frame_layers.append(render.Padding(
                 pad = (x, y, 0, 0),
@@ -179,7 +184,6 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
             ))
         animation_frames.append(render.Stack(children = frame_layers))
 
-    # 5. UI Layers
     altitude_dot = render.Box()
     if show_altitude_indicator:
         dot_y = int((1.0 - (official_alt / 90.0)) * (star_area_h - 1))
@@ -224,13 +228,11 @@ def main(config):
     return render_constellation_screen(featured, effective_time, lat, lon, show_altitude_indicator)
 
 def get_schema():
-    scroll_speed_options = [schema.Option(display = "Slow Scroll", value = "60"), schema.Option(display = "Medium Scroll", value = "45"), schema.Option(display = "Fast Scroll", value = "30")]
     return schema.Schema(
         version = "1",
         fields = [
             schema.Location(id = "location", name = "Location", desc = "Your location.", icon = "locationDot"),
             schema.Toggle(id = "alt_indicator", name = "Display Altitude Indicator", desc = "Show height dot", icon = "angleLeft", default = True),
-            schema.Dropdown(id = "scroll", name = "Scroll", desc = "Scroll Speed", icon = "stopwatch", options = scroll_speed_options, default = "45"),
             schema.Toggle(id = "instructions", name = "Display Instructions", desc = "Show help", icon = "book", default = False),
         ],
     )
