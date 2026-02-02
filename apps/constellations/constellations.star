@@ -65,26 +65,36 @@ def display_instructions(config):
         show_full_animation = True,
     )
 
-def deg_to_rad(deg): return deg * math.pi / 180.0
-def rad_to_deg(rad): return rad * 180.0 / math.pi
+def deg_to_rad(deg):
+    return deg * math.pi / 180.0
+
+def rad_to_deg(rad):
+    return rad * 180.0 / math.pi
 
 def get_constellation_bounds(stars_raw):
-    if not stars_raw: return 0, 0, 0, 0
+    if not stars_raw:
+        return 0, 0, 0, 0
     anchor_az = stars_raw[0][1]
     min_x, max_x, min_y, max_y = 1000.0, -1000.0, 1000.0, -1000.0
     for alt, az, _ in stars_raw:
         diff = (az - anchor_az + 180) % 360 - 180
         adj = anchor_az + diff
-        if adj < min_x: min_x = adj
-        if adj > max_x: max_x = adj
-        if alt < min_y: min_y = alt
-        if alt > max_y: max_y = alt
+        if adj < min_x:
+            min_x = adj
+        if adj > max_x:
+            max_x = adj
+        if alt < min_y:
+            min_y = alt
+        if alt > max_y:
+            max_y = alt
     return min_x, max_x, min_y, max_y
 
 def julian_date(t):
     y, m = t.year, t.month
     day = t.day + t.hour / 24.0 + t.minute / 1440.0 + t.second / 86400.0
-    if m <= 2: y -= 1; m += 12
+    if m <= 2:
+        y -= 1
+        m += 12
     A = math.floor(y / 100)
     B = 2 - A + math.floor(A / 4)
     return math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + day + B - 1524.5
@@ -98,7 +108,8 @@ def local_sidereal_time(t, longitude_deg):
 def azimuth_deg(ra_hours, dec_deg, lat_deg, lst_deg):
     ra_deg = ra_hours * 15.0
     ha_deg = (lst_deg - ra_deg + 360) % 360
-    if ha_deg > 180: ha_deg -= 360
+    if ha_deg > 180:
+        ha_deg -= 360
     ha_rad, dec_rad, lat_rad = deg_to_rad(ha_deg), deg_to_rad(dec_deg), deg_to_rad(lat_deg)
     sin_alt = math.sin(dec_rad) * math.sin(lat_rad) + math.cos(dec_rad) * math.cos(lat_rad) * math.cos(ha_rad)
     sin_alt = max(-1.0, min(1.0, sin_alt))
@@ -112,7 +123,8 @@ def azimuth_deg(ra_hours, dec_deg, lat_deg, lst_deg):
 def altitude_deg(ra_hours, dec_deg, lat_deg, lst_deg):
     ra_deg = ra_hours * 15.0
     ha_deg = (lst_deg - ra_deg + 360) % 360
-    if ha_deg > 180: ha_deg -= 360
+    if ha_deg > 180:
+        ha_deg -= 360
     ha_rad, dec_rad, lat_rad = deg_to_rad(ha_deg), deg_to_rad(dec_deg), deg_to_rad(lat_deg)
     sin_alt = math.sin(dec_rad) * math.sin(lat_rad) + math.cos(dec_rad) * math.cos(lat_rad) * math.cos(ha_rad)
     return rad_to_deg(math.asin(max(-1.0, min(1.0, sin_alt))))
@@ -129,9 +141,13 @@ def visible_constellations(t, lat_deg, lon_deg, threshold_deg = 10.0):
         if alt > threshold_deg:
             az = azimuth_deg(c["raHours"], c["decDeg"], lat_deg, lst_deg)
             visible.append({
-                "id": c["id"], "name": c["name"], "altitude": math.floor(alt * 10) / 10.0,
-                "azimuth": math.floor(az), "direction": get_cardinal_direction(az),
-                "raHours": c["raHours"], "decDeg": c["decDeg"],
+                "id": c["id"],
+                "name": c["name"],
+                "altitude": math.floor(alt * 10) / 10.0,
+                "azimuth": math.floor(az),
+                "direction": get_cardinal_direction(az),
+                "raHours": c["raHours"],
+                "decDeg": c["decDeg"],
             })
     return sorted(visible, key = lambda x: -x["altitude"])
 
@@ -192,7 +208,9 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
     ui_bar = render.Padding(
         pad = (0, H - 7, 0, 0),
         child = render.Row(
-            expanded = True, main_align = "start", cross_align = "center",
+            expanded = True,
+            main_align = "start",
+            cross_align = "center",
             children = [
                 render.Padding(pad = (1, 0, 3, 0), child = render.Text(dir_letter, color = "#00FF44", font = "CG-pixel-4x5-mono")),
                 render.Box(width = W - 18, height = 7, child = render.Marquee(width = W - 18, child = render.Text(selected_constellation["name"], color = "#66AAFF", font = "CG-pixel-4x5-mono"))),
@@ -208,7 +226,8 @@ def render_constellation_screen(selected_constellation, t, lat_deg, lon_deg, sho
 def main(config):
     show_instructions = config.bool("instructions", False)
     show_altitude_indicator = config.bool("alt_indicator", True)
-    if show_instructions: return display_instructions(config)
+    if show_instructions:
+        return display_instructions(config)
 
     now = time.now()
     location = json.decode(config.get("location", default_location))
@@ -219,8 +238,10 @@ def main(config):
 
     constellation_dict = {c["id"]: c for c in CONSTELLATIONS} if type(CONSTELLATIONS) == "list" else CONSTELLATIONS
     candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 30.0)
-    if not candidates: candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 15.0)
-    if not candidates: return render.Root(child = render.Box(child = render.Text("Cloudy Skies", font = "CG-pixel-4x5-mono")))
+    if not candidates:
+        candidates = visible_constellations(effective_time, lat, lon, threshold_deg = 15.0)
+    if not candidates:
+        return render.Root(child = render.Box(child = render.Text("Cloudy Skies", font = "CG-pixel-4x5-mono")))
 
     random.seed(now.minute)
     featured = constellation_dict.get(candidates[random.number(0, len(candidates) - 1)]["id"]) or constellation_dict.values()[0]
