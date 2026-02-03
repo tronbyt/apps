@@ -308,7 +308,7 @@ def get_schema():
                 id = "include_diver",
                 name = "Include Diver",
                 desc = "Include a diver in the aquarium?",
-                icon = "person-swimming",
+                icon = "personSwimming",
                 default = True,
             ),
         ],
