@@ -5,3 +5,4 @@ summary: Digital Aquarium
 desc: A digital aquarium.
 author: Robert Ison
 recommendedInterval: 5
+supports2x: true

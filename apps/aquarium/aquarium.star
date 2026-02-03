@@ -22,11 +22,8 @@ load("images/shark.png", SHARK_ASSET = "file")
 load("images/shipwreck.png", SHIPWRECK_ASSET = "file")
 load("images/treasure.png", TREASURE_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-
-SCREEN_WIDTH = 64
-SCREEN_HEIGHT = 32
 
 sealife = [
     {
@@ -77,13 +74,6 @@ sealife = [
         "height": 14,
         "width": 30,
         "image": CUTTLEFISH_ASSET.readall(),
-    },
-    {
-        "direction": "right",
-        "name": "Diver",
-        "height": 15,
-        "width": 25,
-        "image": DIVER_ASSET.readall(),
     },
 ]
 
@@ -141,15 +131,15 @@ ocean_floor = [
 water = [
     {
         "name": "Aqua",
-        "html": "#54cee3",
+        "html": "#33b5cc",
     },
     {
         "name": "Deep Sky Blue",
-        "html": "#00BFFF",
+        "html": "#0099cc",
     },
     {
         "name": "Aquamarine",
-        "html": "#7fffd4",
+        "html": "#40d6a5",
     },
     {
         "name": "Light Blue",
@@ -157,7 +147,7 @@ water = [
     },
     {
         "name": "Very Dark Blue",
-        "html": "#08056d",
+        "html": "#04034d",
     },
     {
         "name": "Dark Turquoise",
@@ -165,55 +155,94 @@ water = [
     },
     {
         "name": "Turquoise",
-        "html": "#40E0D0",
+        "html": "#30c2b3",
     },
 ]
 
 def main(config):
     water_color = config.str("color", "")
 
+    # 1. Create a local, modifiable copy of the frozen global list
+    active_sealife = list(sealife)
+
+    # 2. Check your condition
+    show_diver = config.bool("include_diver", False)
+
+    if show_diver:
+        # 3. Create the new item
+        diver_item = {
+            "direction": "right",
+            "name": "Diver",
+            "height": 15,
+            "width": 25,
+            "image": DIVER_ASSET.readall(),
+        }
+
+        # 4. Use append (for one item) or extend (for a list of items)
+        # This works now because 'active_sealife' is not frozen!
+        active_sealife.append(diver_item)
+
+    SCREEN_WIDTH = canvas.width()
+    SCREEN_HEIGHT = canvas.height()
+
     return render.Root(
-        get_frames(water_color),
+        get_frames(active_sealife, water_color, SCREEN_WIDTH, SCREEN_HEIGHT),
         show_full_animation = True,
         delay = 120,
     )
 
-def get_frames(water_color):
+def get_frames(sealife, water_color, width, height):
     sand_color = "#C2B280"
-    random_sealife = sorted(sealife, key = lambda x: random.number(0, 10))
+
+    # Create a local list to work with
+    random_sealife = []
+    temp_list = list(sealife)
+
+    # Pick 3 random fish one by one
+    for _ in range(min(3, len(temp_list))):
+        idx = random.number(0, len(temp_list) - 1)
+        random_sealife.append(temp_list.pop(idx))
+
     random_ocean_floor = sorted(ocean_floor, key = lambda x: random.number(0, 10))
 
     if water_color == "Random" or water_color == "":
         water_color = water[random.number(0, len(water) - 1)]["html"]
 
     number_of_fish_to_display = min(3, len(random_sealife))
-    widest_fish_length = max(random_sealife, key = lambda x: x["width"])["width"]
 
-    first_offset = random.number(0, 32 - random_ocean_floor[0]["width"])
-    second_offset = random.number(32, 64 - random_ocean_floor[1]["width"])
-    third_offset = random.number(0, 64 - random_ocean_floor[2]["width"])
+    widest_fish_length = 0
+
+    for fish in random_sealife:
+        # We convert the width to an integer just in case it's stored as text
+        current_width = int(fish["width"])
+
+        if current_width > widest_fish_length:
+            widest_fish_length = current_width
+
+    first_offset = random.number(0, height - random_ocean_floor[0]["width"])
+    second_offset = random.number(height, width - random_ocean_floor[1]["width"])
+    third_offset = random.number(0, width - random_ocean_floor[2]["width"])
 
     # store each frame of the animation in this list of frame
     frames = []
 
-    for i in range(SCREEN_WIDTH + (widest_fish_length * 2)):
+    for i in range(width + (widest_fish_length * 2)):
         children = []
 
         #water
-        children.append(render.Box(color = water_color, width = SCREEN_WIDTH, height = SCREEN_HEIGHT))
+        children.append(render.Box(color = water_color, width = width, height = height))
 
         #base sand layer -
-        children.append(add_padding_to_child_element(render.Box(color = sand_color, width = SCREEN_WIDTH, height = 1), 0, SCREEN_HEIGHT - 2))
-        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[1]["image"]), second_offset, SCREEN_HEIGHT - random_ocean_floor[1]["height"]))
-
+        children.append(add_padding_to_child_element(render.Box(color = sand_color, width = width, height = 1), 0, height - 2))
+        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[1]["image"]), second_offset, height - random_ocean_floor[1]["height"]))
         for f in range(number_of_fish_to_display):
-            children.append(get_fish_frame(random_sealife[f], i, f))
+            children.append(get_fish_frame(random_sealife[f], i, f, width, height))
 
-        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[0]["image"]), first_offset, SCREEN_HEIGHT - random_ocean_floor[0]["height"]))
-        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[2]["image"]), third_offset, SCREEN_HEIGHT - random_ocean_floor[2]["height"]))
+        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[0]["image"]), first_offset, height - random_ocean_floor[0]["height"]))
+        children.append(add_padding_to_child_element(render.Image(src = random_ocean_floor[2]["image"]), third_offset, height - random_ocean_floor[2]["height"]))
 
         #base sand layer
-        children.append(add_padding_to_child_element(render.Box(color = sand_color, width = SCREEN_WIDTH, height = 1), 0, SCREEN_HEIGHT - 1))
+        children.append(add_padding_to_child_element(render.Box(color = sand_color, width = width, height = 1), 0, height - 1))
 
         frame = render.Stack(
             children = children,
@@ -225,10 +254,12 @@ def get_frames(water_color):
         children = [frame for frame in frames],
     )
 
-def get_fish_frame(fish, frame, fish_number):
+def get_fish_frame(fish, frame, fish_number, width, height):
     increment = 1 if fish_number == 1 else 2
-    left_offset = -fish["width"] - (10 * fish_number) * fish_number + (frame * increment) if fish["direction"] == "right" else SCREEN_WIDTH - (frame * increment)
-    top_offset = fish_number * 9 - 2
+    left_offset = -fish["width"] - (10 * fish_number) * fish_number + (frame * increment) if fish["direction"] == "right" else width - (frame * increment)
+
+    # Spreads fish across the vertical space (e.g., 20%, 50%, 80%)
+    top_offset = int((height / (3 + 1)) * (fish_number + 1)) - (fish["height"] // 2)
     return add_padding_to_child_element(render.Image(src = fish["image"], width = fish["width"] + random.number(0, 1), height = fish["height"]), left_offset, top_offset)
 
 def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
@@ -272,6 +303,13 @@ def get_schema():
                 icon = "water",  #"palette","paintbrush"
                 options = color_options,
                 default = color_options[len(color_options) - 1].value,
+            ),
+            schema.Toggle(
+                id = "include_diver",
+                name = "Include Diver",
+                desc = "Include a diver in the aquarium?",
+                icon = "person-swimming",
+                default = True,
             ),
         ],
     )
