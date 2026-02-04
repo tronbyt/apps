@@ -20,7 +20,7 @@ def get_best_corner(highway_name, width, height):
     top_right_highways = ["I-15", "I-4", "I-91"]
     
     # 3: Bottom Left (For Northern / West coast highways like I-90, I-94, I-5)
-    bottom_left_highways = ["I-90", "I-94", "I-5", "I-84"]
+    bottom_left_highways = ["I-20", "I-90", "I-94", "I-84"]
     
     # 4: Bottom Right (For South Eastern or Central North highways like I-4)
     bottom_right_highways = ["I-80", "I-70", "I-5", "I-87"]
@@ -48,6 +48,8 @@ def get_interstate_sign(number):
         text_top = 5# 8px tall font sits higher
 
     left_padding = (15 - text_width) // 2
+
+    left_padding = left_padding + 1 if number > 300 else left_padding
 
     return render.Stack(
         children = [
@@ -168,8 +170,13 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
     return padded_element
 
 def main(config):
-    # 1. Setup & Config
-    mode = config.get("mode", "single")
+    # 1. Setup & Config (Colors)
+    map_color = config.get("map_color", "#0f0")
+    highlight_color = config.get("highlight_color", "#f00")
+    system_color = config.get("system_color", "#444")
+    show_sign = config.bool("show_sign", True)
+
+    mode = config.get("mode", "all")
     selection = config.get("highway_selection", "random")
     highway_keys = all_highways.keys()
 
@@ -186,38 +193,56 @@ def main(config):
     width, height = canvas.width(), canvas.height()
     map_w, map_h, off_x, off_y = width - 3, height - 4, 4, -2
     
-    # 2. Prepare Layers
     layers = []
 
-    # Draw USA Map Outline (Green)
+    # 2. USA Map Outline
     map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
-    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color="#0f0"), off_x, off_y))
+    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color=map_color), off_x, off_y))
 
-    # 3. Draw Highways
+    # 3. Background Highways
     if mode == "all":
-        # Draw background highways first (White)
         for h_name in highway_keys:
             if h_name != highway_name:
                 h_coords = all_highways[h_name]
                 h_grid = normalize_coordinates(h_coords, mainland_bounds, map_w, map_h)
-                layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color="#fff"), off_x, off_y))
-        
-        # Highlighted highway (Red)
-        active_coords = all_highways[highway_name]
-        active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
-        layers.append(add_padding_to_child_element(get_plot(active_grid, width, height, color="#f00"), off_x, off_y))
-    else:
-        # Single mode: focus highway (White)
-        active_coords = all_highways[highway_name]
-        active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
-        layers.append(add_padding_to_child_element(get_plot(active_grid, width, height, color="#fff"), off_x, off_y))
+                layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color=system_color), off_x, off_y))
 
-    # 4. Sign Placement using Manual Override List
-    chosen_pos = get_best_corner(highway_name, width, height)
-    layers.append(add_padding_to_child_element(get_interstate_sign(highway_number), chosen_pos[0], chosen_pos[1]))
-
-    return render.Root(child = render.Stack(children = layers))
+    # 4. Animated Highlighted Highway
+    active_coords = all_highways[highway_name]
+    active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
     
+    animation_frames = []
+    
+    # Drawing Phase
+    for i in range(1, len(active_grid) + 1):
+        partial_grid = active_grid[:i]
+        frame = add_padding_to_child_element(
+            get_plot(partial_grid, width, height, color=highlight_color),
+            off_x, off_y
+        )
+        animation_frames.append(frame)
+
+    # Rest Phase: Add the full highway for ~30 more frames 
+    # At a 100ms delay, 30 frames = 3 seconds of "rest"
+    full_highway_frame = animation_frames[-1]
+    for _ in range(30):
+        animation_frames.append(full_highway_frame)
+
+    # delay=100 makes the drawing visible and deliberate
+    animated_highway = render.Animation(
+        children = animation_frames,
+    )
+    layers.append(animated_highway)
+
+    # 5. Sign
+    if show_sign:
+        sign_pos = get_best_corner(highway_name, width, height)
+        layers.append(add_padding_to_child_element(get_interstate_sign(highway_number), sign_pos[0], sign_pos[1]))
+
+    delay = 25 if canvas.is2x() else 50
+
+    return render.Root(child = render.Stack(children = layers), delay = 100)
+
 def get_schema():
     highway_options = [schema.Option(display="Random", value="random")]
     for h in sorted(all_highways.keys(), key=lambda x: int(x.split("-")[1])):
@@ -231,7 +256,7 @@ def get_schema():
                 name = "Display Mode",
                 desc = "How to show the interstates.",
                 icon = "gear",
-                default = "single",
+                default = "all",
                 options = [
                     schema.Option(display = "Single Highway", value = "single"),
                     schema.Option(display = "Highlight in System", value = "all"),
@@ -244,6 +269,34 @@ def get_schema():
                 icon = "road",
                 default = "random",
                 options = highway_options,
+            ),
+            schema.Toggle(
+                id = "show_sign",
+                name = "Show Sign",
+                desc = "Show the interstate sign in the corner.",
+                icon = "signpost",
+                default = True,
+            ),
+            schema.Color(
+                id = "map_color",
+                name = "Map Color",
+                desc = "Color of the USA outline.",
+                icon = "map",
+                default = "#0f0",
+            ),
+            schema.Color(
+                id = "highlight_color",
+                name = "Highlight Color",
+                desc = "Color of the selected highway.",
+                icon = "brush",
+                default = "#f00",
+            ),
+            schema.Color(
+                id = "system_color",
+                name = "Other Highways",
+                desc = "Color of the background highways.",
+                icon = "circleNodes",
+                default = "#444",
             ),
         ],
     )
