@@ -12,39 +12,27 @@ load("time.star", "time")
 load("usa_map_data.star", "usa_map_data")
 load("highways.star", "all_highways")
 
-def get_best_corner(active_highway_points, width, height):
-    # We are going to be more aggressive with the "Top" boxes 
-    # to catch I-90 and I-94 which run very close to the top edge.
-    
-    # bw = box width, bh = box height
-    bw, bh = 22, 20 
-    
-    corners = [
-        # 1. Top Left
-        {"pos": (1, 1), "x": (0, bw), "y": (0, bh)},
-        # 2. Top Right
-        {"pos": (width - 16, 1), "x": (width - bw, width), "y": (0, bh)},
-        # 3. Bottom Left
-        {"pos": (1, height - 17), "x": (0, bw), "y": (height - bh, height)},
-        # 4. Bottom Right
-        {"pos": (width - 16, height - 17), "x": (width - bw, width), "y": (height - bh, height)},
-    ]
+def get_best_corner(highway_name, width, height):
+    # Default position (Quadrant 1: Top Left)
+    default_pos = (1, 1)
 
-    for corner in corners:
-        collision = False
-        for px, py in active_highway_points:
-            # If the red highway is ANYWHERE in this corner's box, we reject the corner.
-            if (px >= corner["x"][0] and px <= corner["x"][1] and 
-                py >= corner["y"][0] and py <= corner["y"][1]):
-                collision = True
-                break
-        
-        if not collision:
-            return corner["pos"]
+    # 2: Top Right (For North East / East coast highways)
+    top_right_highways = ["I-15", "I-4", "I-91"]
+    
+    # 3: Bottom Left (For Northern / West coast highways like I-90, I-94, I-5)
+    bottom_left_highways = ["I-90", "I-94", "I-5", "I-84"]
+    
+    # 4: Bottom Right (For South Eastern or Central North highways like I-4)
+    bottom_right_highways = ["I-80", "I-70", "I-5", "I-87"]
 
-    # If the highway is literally everywhere, default to Bottom Left 
-    # (usually the emptiest spot on a US map)
-    return (1, height - 17)
+    if highway_name in top_right_highways:
+        return (width - 16, 1)
+    if highway_name in bottom_left_highways:
+        return (1, height - 17)
+    if highway_name in bottom_right_highways:
+        return (width - 16, height - 17)
+    
+    return default_pos
     
 def get_interstate_sign(number):
     num_str = str(number)
@@ -53,11 +41,11 @@ def get_interstate_sign(number):
     if is_three_digits:
         font = "CG-pixel-4x5-mono"
         text_width = len(num_str) * 4 + (len(num_str) - 1)
-        text_top = 5 # 5px tall font needs to be lowered to center in the blue
+        text_top = 6 # 5px tall font needs to be lowered to center in the blue
     else:
         font = "5x8"
         text_width = len(num_str) * 4 + (len(num_str) - 1)
-        text_top = 4# 8px tall font sits higher
+        text_top = 5# 8px tall font sits higher
 
     left_padding = (15 - text_width) // 2
 
@@ -68,23 +56,19 @@ def get_interstate_sign(number):
             add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=0, top=0),
             add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=6, top=0),
             add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=12, top=0),
-            add_padding_to_child_element(render.Box(width=15, height=8, color="#fff"), left=0, top=1),
-            add_padding_to_child_element(render.Box(width=13, height=2, color="#fff"), left=1, top=9),
-            add_padding_to_child_element(render.Box(width=11, height=2, color="#fff"), left=2, top=10),
-            add_padding_to_child_element(render.Box(width=9, height=2, color="#fff"), left=3, top=12),
-            add_padding_to_child_element(render.Box(width=7, height=1, color="#fff"), left=4, top=14),
-            add_padding_to_child_element(render.Box(width=5, height=1, color="#fff"), left=5, top=15),
-            add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=7, top=16),
+            add_padding_to_child_element(render.Box(width=15, height=12, color="#fff"), left=0, top=1),
+            add_padding_to_child_element(render.Box(width=13, height=2, color="#fff"), left=1, top=13),
+            add_padding_to_child_element(render.Box(width=11, height=1, color="#fff"), left=2, top=15),
+            add_padding_to_child_element(render.Box(width=9, height=1, color="#fff"), left=3, top=16),
+            #add_padding_to_child_element(render.Box(width=7, height=1, color="#fff"), left=4, top=16),
 
             # # --- RED TOP BAR ---
             add_padding_to_child_element(render.Box(width=13, height=2, color="#cc0000"), left=1, top=2),
 
             # # --- BLUE BODY ---
-            add_padding_to_child_element(render.Box(width=13, height=5, color="#003399"), left=1, top=4),
-            add_padding_to_child_element(render.Box(width=11, height=2, color="#003399"), left=2, top=9),
-            add_padding_to_child_element(render.Box(width=9, height=1, color="#003399"), left=3, top=11),
-            add_padding_to_child_element(render.Box(width=7, height=2, color="#003399"), left=4, top=12),
-            add_padding_to_child_element(render.Box(width=5, height=1, color="#003399"), left=5, top=14),
+            add_padding_to_child_element(render.Box(width=13, height=9, color="#003399"), left=1, top=4),
+            add_padding_to_child_element(render.Box(width=11, height=2, color="#003399"), left=2, top=13),
+            add_padding_to_child_element(render.Box(width=9, height=1, color="#003399"), left=3, top=15),
 
             # --- THE NUMBER ---
             add_padding_to_child_element(
@@ -184,11 +168,11 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
     return padded_element
 
 def main(config):
+    # 1. Setup & Config
     mode = config.get("mode", "single")
     selection = config.get("highway_selection", "random")
     highway_keys = all_highways.keys()
 
-    # Highway Selection Logic
     if selection == "random":
         random_index = int(time.now().unix // 15) % len(highway_keys)
         highway_name = highway_keys[random_index]
@@ -202,39 +186,35 @@ def main(config):
     width, height = canvas.width(), canvas.height()
     map_w, map_h, off_x, off_y = width - 3, height - 4, 4, -2
     
-    # 1. Base Map (Green)
-    map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
-    layers = [add_padding_to_child_element(get_plot(map_grid, width, height, color="#0f0"), off_x, off_y)]
+    # 2. Prepare Layers
+    layers = []
 
-    # 2. Highway Rendering & Collision Point Gathering
-    active_points_on_screen = []
-    
+    # Draw USA Map Outline (Green)
+    map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
+    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color="#0f0"), off_x, off_y))
+
+    # 3. Draw Highways
     if mode == "all":
-        # Draw all background highways first (White)
+        # Draw background highways first (White)
         for h_name in highway_keys:
             if h_name != highway_name:
                 h_coords = all_highways[h_name]
                 h_grid = normalize_coordinates(h_coords, mainland_bounds, map_w, map_h)
                 layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color="#fff"), off_x, off_y))
         
-        # Draw the focused highway on top (Red)
+        # Highlighted highway (Red)
         active_coords = all_highways[highway_name]
         active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
-        for pt in active_grid:
-            active_points_on_screen.append((pt[0] + off_x, pt[1] + off_y))
         layers.append(add_padding_to_child_element(get_plot(active_grid, width, height, color="#f00"), off_x, off_y))
-
     else:
-        # Single mode: just the one highway (White)
+        # Single mode: focus highway (White)
         active_coords = all_highways[highway_name]
         active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
-        for pt in active_grid:
-            active_points_on_screen.append((pt[0] + off_x, pt[1] + off_y))
         layers.append(add_padding_to_child_element(get_plot(active_grid, width, height, color="#fff"), off_x, off_y))
 
-    # 3. Position Sign (Checks only against the active_points_on_screen)
-    sign_pos = get_best_corner(active_points_on_screen, width, height)
-    layers.append(add_padding_to_child_element(get_interstate_sign(highway_number), sign_pos[0], sign_pos[1]))
+    # 4. Sign Placement using Manual Override List
+    chosen_pos = get_best_corner(highway_name, width, height)
+    layers.append(add_padding_to_child_element(get_interstate_sign(highway_number), chosen_pos[0], chosen_pos[1]))
 
     return render.Root(child = render.Stack(children = layers))
     
