@@ -5,12 +5,12 @@ Description: Displays different Interstate highways.
 Author: Robert Ison
 """
 
+load("highways.star", "all_highways")
 load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("usa_map_data.star", "usa_map_data")
-load("highways.star", "all_highways")
 
 def get_best_corner(highway_name, width, height):
     default_pos = (1, 1)
@@ -35,11 +35,11 @@ def get_interstate_sign(number):
     if is_three_digits:
         font = "CG-pixel-4x5-mono"
         text_width = len(num_str) * 4 + (len(num_str) - 1)
-        text_top = 6 # 5px tall font needs to be lowered to center in the blue
+        text_top = 6 
     else:
         font = "5x8"
         text_width = len(num_str) * 4 + (len(num_str) - 1)
-        text_top = 5# 8px tall font sits higher
+        text_top = 5
 
     left_padding = (15 - text_width) // 2
 
