@@ -161,15 +161,10 @@ water = [
 
 def main(config):
     water_color = config.str("color", "")
-
-    # 1. Create a local, modifiable copy of the frozen global list
     active_sealife = list(sealife)
-
-    # 2. Check your condition
-    show_diver = config.bool("include_diver", False)
+    show_diver = config.bool("include_diver", True)
 
     if show_diver:
-        # 3. Create the new item
         diver_item = {
             "direction": "right",
             "name": "Diver",
@@ -178,8 +173,6 @@ def main(config):
             "image": DIVER_ASSET.readall(),
         }
 
-        # 4. Use append (for one item) or extend (for a list of items)
-        # This works now because 'active_sealife' is not frozen!
         active_sealife.append(diver_item)
 
     SCREEN_WIDTH = canvas.width()
@@ -210,17 +203,9 @@ def get_frames(sealife, water_color, width, height):
 
     number_of_fish_to_display = min(3, len(random_sealife))
 
-    widest_fish_length = 0
-
-    for fish in random_sealife:
-        # We convert the width to an integer just in case it's stored as text
-        current_width = int(fish["width"])
-
-        if current_width > widest_fish_length:
-            widest_fish_length = current_width
-
-    first_offset = random.number(0, height - random_ocean_floor[0]["width"])
-    second_offset = random.number(height, width - random_ocean_floor[1]["width"])
+    widest_fish_length = max(random_sealife, key = lambda x: x["width"])["width"]
+    first_offset = random.number(0, width // 2 - random_ocean_floor[0]["width"])
+    second_offset = random.number(width // 2, width - random_ocean_floor[1]["width"])
     third_offset = random.number(0, width - random_ocean_floor[2]["width"])
 
     # store each frame of the animation in this list of frame
