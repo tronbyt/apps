@@ -25,9 +25,9 @@ def get_best_corner(highway_name, width, height):
         return (1, height - 17)
     if highway_name in bottom_right_highways:
         return (width - 16, height - 17)
-    
+
     return default_pos
-    
+
 def get_interstate_sign(number):
     num_str = str(number)
     is_three_digits = len(num_str) > 2
@@ -35,7 +35,7 @@ def get_interstate_sign(number):
     if is_three_digits:
         font = "CG-pixel-4x5-mono"
         text_width = len(num_str) * 4 + (len(num_str) - 1)
-        text_top = 6 
+        text_top = 6
     else:
         font = "5x8"
         text_width = len(num_str) * 4 + (len(num_str) - 1)
@@ -49,32 +49,32 @@ def get_interstate_sign(number):
         children = [
             # --- WHITE OUTLINE ---
             #add_padding_to_child_element(render.Box(width=13, height=1, color="#fff"), left=1, top=0),
-            add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=0, top=0),
-            add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=6, top=0),
-            add_padding_to_child_element(render.Box(width=3, height=1, color="#fff"), left=12, top=0),
-            add_padding_to_child_element(render.Box(width=15, height=12, color="#fff"), left=0, top=1),
-            add_padding_to_child_element(render.Box(width=13, height=2, color="#fff"), left=1, top=13),
-            add_padding_to_child_element(render.Box(width=11, height=1, color="#fff"), left=2, top=15),
-            add_padding_to_child_element(render.Box(width=9, height=1, color="#fff"), left=3, top=16),
+            add_padding_to_child_element(render.Box(width = 3, height = 1, color = "#fff"), left = 0, top = 0),
+            add_padding_to_child_element(render.Box(width = 3, height = 1, color = "#fff"), left = 6, top = 0),
+            add_padding_to_child_element(render.Box(width = 3, height = 1, color = "#fff"), left = 12, top = 0),
+            add_padding_to_child_element(render.Box(width = 15, height = 12, color = "#fff"), left = 0, top = 1),
+            add_padding_to_child_element(render.Box(width = 13, height = 2, color = "#fff"), left = 1, top = 13),
+            add_padding_to_child_element(render.Box(width = 11, height = 1, color = "#fff"), left = 2, top = 15),
+            add_padding_to_child_element(render.Box(width = 9, height = 1, color = "#fff"), left = 3, top = 16),
             #add_padding_to_child_element(render.Box(width=7, height=1, color="#fff"), left=4, top=16),
 
             # # --- RED TOP BAR ---
-            add_padding_to_child_element(render.Box(width=13, height=2, color="#cc0000"), left=1, top=2),
+            add_padding_to_child_element(render.Box(width = 13, height = 2, color = "#cc0000"), left = 1, top = 2),
 
             # # --- BLUE BODY ---
-            add_padding_to_child_element(render.Box(width=13, height=9, color="#003399"), left=1, top=4),
-            add_padding_to_child_element(render.Box(width=11, height=2, color="#003399"), left=2, top=13),
-            add_padding_to_child_element(render.Box(width=9, height=1, color="#003399"), left=3, top=15),
+            add_padding_to_child_element(render.Box(width = 13, height = 9, color = "#003399"), left = 1, top = 4),
+            add_padding_to_child_element(render.Box(width = 11, height = 2, color = "#003399"), left = 2, top = 13),
+            add_padding_to_child_element(render.Box(width = 9, height = 1, color = "#003399"), left = 3, top = 15),
 
             # --- THE NUMBER ---
             add_padding_to_child_element(
-                render.Text(content=num_str, font=font, color="#fff"),
-                left=left_padding, 
-                top=text_top
+                render.Text(content = num_str, font = font, color = "#fff"),
+                left = left_padding,
+                top = text_top,
             ),
-        ]
+        ],
     )
-    
+
 def get_bounds(coordinates):
     """
     Looks through the coordinates and determins the min and max x and y coordinates
@@ -180,17 +180,17 @@ def main(config):
         highway_name = selection
 
     highway_number = int(highway_name.split("-")[1])
-    mainland_coords = usa_map_data["coordinates"][0][0] 
+    mainland_coords = usa_map_data["coordinates"][0][0]
     mainland_bounds = get_bounds(mainland_coords)
-    
+
     width, height = canvas.width(), canvas.height()
     map_w, map_h, off_x, off_y = width - 3, height - 4, 4, -2
-    
+
     layers = []
 
     # 2. USA Map Outline
     map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
-    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color=map_color), off_x, off_y))
+    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color = map_color), off_x, off_y))
 
     # 3. Background Highways
     if mode == "all":
@@ -198,24 +198,25 @@ def main(config):
             if h_name != highway_name:
                 h_coords = all_highways[h_name]
                 h_grid = normalize_coordinates(h_coords, mainland_bounds, map_w, map_h)
-                layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color=system_color), off_x, off_y))
+                layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color = system_color), off_x, off_y))
 
     # 4. Animated Highlighted Highway
     active_coords = all_highways[highway_name]
     active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
-    
+
     animation_frames = []
-    
+
     # Drawing Phase
     for i in range(1, len(active_grid) + 1):
         partial_grid = active_grid[:i]
         frame = add_padding_to_child_element(
-            get_plot(partial_grid, width, height, color=highlight_color),
-            off_x, off_y
+            get_plot(partial_grid, width, height, color = highlight_color),
+            off_x,
+            off_y,
         )
         animation_frames.append(frame)
 
-    # Rest Phase: Add the full highway for ~30 more frames 
+    # Rest Phase: Add the full highway for ~30 more frames
     # At a 100ms delay, 30 frames = 3 seconds of "rest"
     full_highway_frame = animation_frames[-1]
     for _ in range(30):
@@ -235,9 +236,9 @@ def main(config):
     return render.Root(child = render.Stack(children = layers), delay = delay)
 
 def get_schema():
-    highway_options = [schema.Option(display="Random", value="random")]
-    for h in sorted(all_highways.keys(), key=lambda x: int(x.split("-")[1])):
-        highway_options.append(schema.Option(display=h, value=h))
+    highway_options = [schema.Option(display = "Random", value = "random")]
+    for h in sorted(all_highways.keys(), key = lambda x: int(x.split("-")[1])):
+        highway_options.append(schema.Option(display = h, value = h))
 
     return schema.Schema(
         version = "1",
