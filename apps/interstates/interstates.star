@@ -46,8 +46,6 @@ def get_interstate_sign(number):
 
     return render.Stack(
         children = [
-            # --- WHITE OUTLINE ---
-            #add_padding_to_child_element(render.Box(width=13, height=1, color="#fff"), left=1, top=0),
             add_padding_to_child_element(render.Box(width = 3, height = 1, color = "#fff"), left = 0, top = 0),
             add_padding_to_child_element(render.Box(width = 3, height = 1, color = "#fff"), left = 6, top = 0),
             add_padding_to_child_element(render.Box(width = 3, height = 1, color = "#fff"), left = 12, top = 0),
@@ -55,17 +53,13 @@ def get_interstate_sign(number):
             add_padding_to_child_element(render.Box(width = 13, height = 2, color = "#fff"), left = 1, top = 13),
             add_padding_to_child_element(render.Box(width = 11, height = 1, color = "#fff"), left = 2, top = 15),
             add_padding_to_child_element(render.Box(width = 9, height = 1, color = "#fff"), left = 3, top = 16),
-            #add_padding_to_child_element(render.Box(width=7, height=1, color="#fff"), left=4, top=16),
 
-            # # --- RED TOP BAR ---
             add_padding_to_child_element(render.Box(width = 13, height = 2, color = "#cc0000"), left = 1, top = 2),
 
-            # # --- BLUE BODY ---
             add_padding_to_child_element(render.Box(width = 13, height = 9, color = "#003399"), left = 1, top = 4),
             add_padding_to_child_element(render.Box(width = 11, height = 2, color = "#003399"), left = 2, top = 13),
             add_padding_to_child_element(render.Box(width = 9, height = 1, color = "#003399"), left = 3, top = 15),
 
-            # --- THE NUMBER ---
             add_padding_to_child_element(
                 render.Text(content = num_str, font = font, color = "#fff"),
                 left = left_padding,
@@ -104,8 +98,6 @@ def get_bounds(coordinates):
         if y > max_y:
             max_y = y
 
-    #print("min_x: %s max_x:  %s , : min_y, %s: max_y: %s" % (min_x, max_x, min_y,max_y))
-
     return {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
 
 def normalize_coordinates(coords, bounds, grid_width, grid_height):
@@ -133,7 +125,6 @@ def normalize_coordinates(coords, bounds, grid_width, grid_height):
         grid_x = scale(x, min_x, max_x, 0, grid_width - 1)
         grid_y = scale(y, min_y, max_y, 0, grid_height - 1)
         grid_points.append((grid_x, grid_y))  # Allow duplicates
-        #print("X: %s Y: %s" % (grid_x, grid_y))
 
     return grid_points  # Return as a list with duplicates allowed
 
@@ -170,7 +161,8 @@ def main(config):
 
     mode = config.get("mode", "all")
     selection = config.get("highway_selection", "random")
-    highway_keys = all_highways.keys()
+    highway_keys = sorted(all_highways.keys(), key = lambda x: int(x.split("-")[1]))
+
 
     if selection == "random":
         random_index = int(time.now().unix // 15) % len(highway_keys)
