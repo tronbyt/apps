@@ -6,7 +6,6 @@ Author: Robert Ison
 """
 
 load("highways.star", "all_highways")
-load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
