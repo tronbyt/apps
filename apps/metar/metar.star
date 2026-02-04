@@ -11,7 +11,7 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
-ADDS_URL = "https://aviationweather.gov/api/data/metar?ids=%s&format=json"
+ADDS_URL = "https://aviationweather.gov/api/data/metar?ids=%s&format=json&hoursBeforeNow=2"
 DEFAULT_AIRPORT = "KJFK, KLGA, KBOS, KDCA"
 
 # encryption, schema
