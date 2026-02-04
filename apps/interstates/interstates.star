@@ -13,16 +13,10 @@ load("usa_map_data.star", "usa_map_data")
 load("highways.star", "all_highways")
 
 def get_best_corner(highway_name, width, height):
-    # Default position (Quadrant 1: Top Left)
     default_pos = (1, 1)
 
-    # 2: Top Right (For North East / East coast highways)
     top_right_highways = ["I-15", "I-4", "I-91"]
-    
-    # 3: Bottom Left (For Northern / West coast highways like I-90, I-94, I-5)
     bottom_left_highways = ["I-20", "I-90", "I-94", "I-84"]
-    
-    # 4: Bottom Right (For South Eastern or Central North highways like I-4)
     bottom_right_highways = ["I-80", "I-70", "I-5", "I-87"]
 
     if highway_name in top_right_highways:
@@ -170,7 +164,6 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
     return padded_element
 
 def main(config):
-    # 1. Setup & Config (Colors)
     map_color = config.get("map_color", "#0f0")
     highlight_color = config.get("highlight_color", "#f00")
     system_color = config.get("system_color", "#444")
@@ -228,20 +221,18 @@ def main(config):
     for _ in range(30):
         animation_frames.append(full_highway_frame)
 
-    # delay=100 makes the drawing visible and deliberate
     animated_highway = render.Animation(
         children = animation_frames,
     )
     layers.append(animated_highway)
 
-    # 5. Sign
     if show_sign:
         sign_pos = get_best_corner(highway_name, width, height)
         layers.append(add_padding_to_child_element(get_interstate_sign(highway_number), sign_pos[0], sign_pos[1]))
 
-    delay = 25 if canvas.is2x() else 50
+    delay = 50 if canvas.is2x() else 100
 
-    return render.Root(child = render.Stack(children = layers), delay = 100)
+    return render.Root(child = render.Stack(children = layers), delay = delay)
 
 def get_schema():
     highway_options = [schema.Option(display="Random", value="random")]
@@ -255,11 +246,11 @@ def get_schema():
                 id = "mode",
                 name = "Display Mode",
                 desc = "How to show the interstates.",
-                icon = "gear",
+                icon = "display",
                 default = "all",
                 options = [
                     schema.Option(display = "Single Highway", value = "single"),
-                    schema.Option(display = "Highlight in System", value = "all"),
+                    schema.Option(display = "Highlight one but show all", value = "all"),
                 ],
             ),
             schema.Dropdown(
@@ -274,7 +265,7 @@ def get_schema():
                 id = "show_sign",
                 name = "Show Sign",
                 desc = "Show the interstate sign in the corner.",
-                icon = "signpost",
+                icon = "shield",
                 default = True,
             ),
             schema.Color(
