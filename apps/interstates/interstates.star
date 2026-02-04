@@ -53,13 +53,10 @@ def get_interstate_sign(number):
             add_padding_to_child_element(render.Box(width = 13, height = 2, color = "#fff"), left = 1, top = 13),
             add_padding_to_child_element(render.Box(width = 11, height = 1, color = "#fff"), left = 2, top = 15),
             add_padding_to_child_element(render.Box(width = 9, height = 1, color = "#fff"), left = 3, top = 16),
-
             add_padding_to_child_element(render.Box(width = 13, height = 2, color = "#cc0000"), left = 1, top = 2),
-
             add_padding_to_child_element(render.Box(width = 13, height = 9, color = "#003399"), left = 1, top = 4),
             add_padding_to_child_element(render.Box(width = 11, height = 2, color = "#003399"), left = 2, top = 13),
             add_padding_to_child_element(render.Box(width = 9, height = 1, color = "#003399"), left = 3, top = 15),
-
             add_padding_to_child_element(
                 render.Text(content = num_str, font = font, color = "#fff"),
                 left = left_padding,
@@ -162,7 +159,6 @@ def main(config):
     mode = config.get("mode", "all")
     selection = config.get("highway_selection", "random")
     highway_keys = sorted(all_highways.keys(), key = lambda x: int(x.split("-")[1]))
-
 
     if selection == "random":
         random_index = int(time.now().unix // 15) % len(highway_keys)
