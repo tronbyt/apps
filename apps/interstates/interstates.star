@@ -155,7 +155,6 @@ def main(config):
     highlight_color = config.get("highlight_color", "#f00")
     system_color = config.get("system_color", "#444")
     show_sign = config.bool("show_sign", True)
-
     mode = config.get("mode", "all")
     selection = config.get("highway_selection", "random")
     highway_keys = sorted(all_highways.keys(), key = lambda x: int(x.split("-")[1]))
@@ -169,17 +168,12 @@ def main(config):
     highway_number = int(highway_name.split("-")[1])
     mainland_coords = usa_map_data["coordinates"][0][0]
     mainland_bounds = get_bounds(mainland_coords)
-
     width, height = canvas.width(), canvas.height()
     map_w, map_h, off_x, off_y = width - 3, height - 4, 4, -2
 
     layers = []
 
-    # 2. USA Map Outline
-    map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
-    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color = map_color), off_x, off_y))
-
-    # 3. Background Highways
+    # Background Highways
     if mode == "all":
         for h_name in highway_keys:
             if h_name != highway_name:
@@ -187,7 +181,11 @@ def main(config):
                 h_grid = normalize_coordinates(h_coords, mainland_bounds, map_w, map_h)
                 layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color = system_color), off_x, off_y))
 
-    # 4. Animated Highlighted Highway
+    # USA Map Outline
+    map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
+    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color = map_color), off_x, off_y))
+
+    # Animated Highlighted Highway
     active_coords = all_highways[highway_name]
     active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
 
