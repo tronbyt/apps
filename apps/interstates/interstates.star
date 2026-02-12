@@ -172,6 +172,7 @@ def main(config):
     map_w, map_h, off_x, off_y = width - 3, height - 4, 4, -2
 
     layers = []
+
     # Background Highways
     if mode == "all":
         for h_name in highway_keys:
@@ -183,11 +184,13 @@ def main(config):
     # USA Map Outline
     map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
     layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color = map_color), off_x, off_y))
+
     # Animated Highlighted Highway
     active_coords = all_highways[highway_name]
     active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
 
     animation_frames = []
+
     # Drawing Phase
     for i in range(1, len(active_grid) + 1):
         partial_grid = active_grid[:i]
