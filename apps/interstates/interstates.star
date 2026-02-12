@@ -175,11 +175,8 @@ def main(config):
 
     layers = []
 
-    # 2. USA Map Outline
-    map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
-    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color = map_color), off_x, off_y))
 
-    # 3. Background Highways
+    # Background Highways
     if mode == "all":
         for h_name in highway_keys:
             if h_name != highway_name:
@@ -187,7 +184,12 @@ def main(config):
                 h_grid = normalize_coordinates(h_coords, mainland_bounds, map_w, map_h)
                 layers.append(add_padding_to_child_element(get_plot(h_grid, width, height, color = system_color), off_x, off_y))
 
-    # 4. Animated Highlighted Highway
+    # USA Map Outline
+    map_grid = normalize_coordinates(mainland_coords, mainland_bounds, map_w, map_h)
+    layers.append(add_padding_to_child_element(get_plot(map_grid, width, height, color = map_color), off_x, off_y))
+
+
+    # Animated Highlighted Highway
     active_coords = all_highways[highway_name]
     active_grid = normalize_coordinates(active_coords, mainland_bounds, map_w, map_h)
 
