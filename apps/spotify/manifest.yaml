@@ -5,3 +5,4 @@ desc: Display your currently playing Spotify track with album art, progress bar,
 author: gshepperd
 fileName: spotify.star
 packageName: spotify
+supports2x: true
