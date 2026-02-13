@@ -7,6 +7,7 @@ Author: M0ntyP
 v1.1 - Added BSE and NIFTY indices
 v1.2 - Added toggle for showing % change or pts change
 v1.3 - Added NIKKEI, Europe 350, Global 100, Global 1200, NZX50 indices; support null indicator values in chart
+v1.4 - Added DAX, CAC 40, Hang Seng, S&P/TSX, SSE, STI to the list of indices 
 """
 
 load("animation.star", "animation")
@@ -16,40 +17,45 @@ load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 
-COLOR_BITCOIN = "#ffa500"
+COLOR_TITLE = "#ffa500"
 COLOR_RED = "#f00"
 COLOR_GREEN = "#0f0"
 COLOR_DIMMED = "#fff9"
 
 FONT = "tom-thumb"
 
-INDEX_PREFIX = "https://query1.finance.yahoo.com/v8/finance/chart/%5E"
+INDEX_PREFIX = "https://query1.finance.yahoo.com/v8/finance/chart/"
 INDEX_SUFFIX = "?metrics=high?&interval="
 
 INDEX_MAP = {
-    "axjo": "ASX 200",
-    "dji": "Dow Jones",
-    "speup": "Europe 350",
-    "spg100": "Global 100",
-    "spg1200": "Global 1200",
-    "ixic": "NASDAQ",
-    "n225": "NIKKEI",
-    "nz50": "NZX 50",
-    "ftse": "FTSE",
-    "gspc": "S&P 500",
-    "BSESN": "BSE",
-    "NSEI": "NIFTY",
+    "%5Eaxjo": "ASX 200",
+    "%5EBSESN": "BSE",
+    "%5Efchi": "CAC 40",
+    "%5EGDAXI": "DAX",
+    "%5Edji": "Dow Jones",
+    "%5Espeup": "Europe 350",
+    "%5Eftse": "FTSE",
+    "%5Espg100": "Global 100",
+    "%5Espg1200": "Global 1200",
+    "%5EHSI": "Hang Seng",
+    "%5Eixic": "NASDAQ",
+    "%5ENSEI": "NIFTY",
+    "%5En225": "NIKKEI",
+    "%5Enz50": "NZX 50",
+    "%5Egspc": "S&P 500",
+    "%5Egsptse": "S&P/TSX",
+    "000001.SS": "SSE",
+    "%5ESTI": "STI",
 }
 
 def main(config):
-    IndexSelection = config.get("Index", "axjo")
+    IndexSelection = config.get("Index", "%5Eaxjo")
     RangeSelection = config.get("Range", "5m&range=1d")
     DisplaySelection = config.get("DiffDisplay", "true")
     Interval = "1D"
 
-    #print(IndexSelection)
     INDEX_URL = INDEX_PREFIX + IndexSelection + INDEX_SUFFIX + RangeSelection
-    # print(INDEX_URL)
+    #print(INDEX_URL)
 
     CacheData = get_cachable_data(INDEX_URL, 60)
     INDEX_JSON = json.decode(CacheData)
@@ -172,7 +178,7 @@ def print_market(Current, DisplayDiff, DiffColor, IndexSelection, Interval):
                     render.Text(
                         content = Title,
                         font = FONT,
-                        color = COLOR_BITCOIN,
+                        color = COLOR_TITLE,
                     ),
                     render.Text(
                         content = Interval,
