@@ -1,149 +1,149 @@
-"""
-Spotify Now Playing - Ultimate Edition for Tronbyt/Tidbyt
-=========================================================
-
-Author: gshepperd
-Version: 2.1.0
-
-================================================================================
-                            INSTALLATION INSTRUCTIONS
-================================================================================
-
-STEP 1: CREATE A SPOTIFY DEVELOPER APP
---------------------------------------
-1. Go to: https://developer.spotify.com/dashboard
-2. Log in with your Spotify account
-3. Click "Create App"
-4. Fill in the form:
-   - App name: "Tronbyt Now Playing" (or whatever you like)
-   - App description: "Display currently playing on Tronbyt"
-   - Website: (leave blank or enter any URL)
-   - Redirect URI: http://127.0.0.1:8888/callback   <-- IMPORTANT!
-     (Click "Add" after entering the URI)
-   - Which API/SDKs are you planning to use?
-     [x] Web API   <-- CHECK THIS ONE
-     [ ] Web Playback SDK (not needed)
-     [ ] Android (not needed)
-     [ ] iOS (not needed)
-5. Check the Terms of Service box and click "Save"
-6. Click "Settings" on your new app
-7. Copy your "Client ID" and "Client Secret" (click "View client secret")
-
-STEP 2: GET YOUR REFRESH TOKEN
-------------------------------
-Run the included Python script on the SAME MACHINE as your web browser:
-
-    python3 get_refresh_token.py
-
-The script will:
-1. Ask for your Client ID and Client Secret
-2. Open your browser to authorize with Spotify
-3. Display your refresh token when complete
-
-Save all three values:
-- Client ID
-- Client Secret  
-- Refresh Token
-
-ALTERNATIVE: MANUAL METHOD (if script doesn't work)
----------------------------------------------------
-If you can't run the Python script on the same machine as your browser
-(e.g., you're SSH'd into a remote server), use this manual method:
-
-1. Open this URL in your browser (replace YOUR_CLIENT_ID):
-
-   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http://127.0.0.1:8888/callback&scope=user-read-currently-playing%20user-read-playback-state%20user-read-recently-played&show_dialog=true
-
-2. After authorizing, the page won't load (that's expected). Copy the 
-   "code=" value from the URL bar. It will look like:
-   
-   http://127.0.0.1:8888/callback?code=AQCxxxVERYLONGSTRINGxxx
-
-3. Run this curl command (replace YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, 
-   and YOUR_CODE_HERE):
-
-   curl -X POST "https://accounts.spotify.com/api/token" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "grant_type=authorization_code" \
-     -d "code=YOUR_CODE_HERE" \
-     -d "redirect_uri=http://127.0.0.1:8888/callback" \
-     -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET"
-
-4. Copy the "refresh_token" value from the JSON response.
-
-NOTE: The code expires in ~10 minutes, so run curl quickly after step 2.
-
-STEP 3: CONFIGURE IN TRONBYT
-----------------------------
-1. Open your Tronbyt web interface (usually http://your-server:8000)
-2. Add this app (upload spotify.star or add as custom app)
-3. Configure these fields:
-   - Spotify Client ID:     [paste your Client ID]
-   - Spotify Client Secret: [paste your Client Secret]
-   - Refresh Token:         [paste your Refresh Token]
-4. Optionally configure display mode, colors, etc.
-5. Save and enjoy!
-
-STEP 4: PLAY MUSIC
-------------------
-Start playing something on Spotify. Within 30-60 seconds (depending on
-your Tronbyt refresh rate), you'll see it on your display!
-
-================================================================================
-                                 TROUBLESHOOTING
-================================================================================
-
-"Setup needed" error:
-  -> Your credentials aren't configured. Add them in app settings.
-
-"Auth Error: Token revoked" error:
-  -> Run get_refresh_token.py again to get a new token.
-  -> This happens if you revoked access or deleted your Spotify app.
-
-"Auth Error: Bad credentials" error:
-  -> Double-check your Client ID and Client Secret.
-
-Nothing displays / black screen:
-  -> Check that a track is active (playing or paused) on one of your devices.
-  -> Some private sessions don't report to the API.
-  -> Check that "Show When Idle" is enabled in settings.
-
-Album art not showing:
-  -> Local files don't have artwork.
-  -> Try a different display mode.
-
-================================================================================
-                                    FEATURES
-================================================================================
-
-Display Modes:
-- Full:      Album art + track + artist + progress bar + time remaining
-- Compact:   Album art + track + artist (no progress bar)
-- Art Focus: Large album art with text overlay at bottom
-- Text Only: No art, full width for text + progress bar
-- Minimal:   Just track and artist, centered
-
-Content Support:
-- Music tracks with full metadata
-- Podcast episodes (show name, episode title)
-- Paused playback detection
-- Recently played fallback (optional)
-- Graceful handling of Spotify ads
-
-Robustness:
-- Exponential backoff on rate limits
-- Pre-emptive token refresh (at 45 min, expires at 60)
-- Multi-layer caching (tokens 45min, album art 24hr)
-- Graceful degradation (shows text if art fails)
-- Actionable error messages
-
-================================================================================
+"""\r
+Spotify Now Playing - Ultimate Edition for Tronbyt/Tidbyt\r
+=========================================================\r
+\r
+Author: gshepperd\r
+Version: 2.1.0\r
+\r
+================================================================================\r
+                            INSTALLATION INSTRUCTIONS\r
+================================================================================\r
+\r
+STEP 1: CREATE A SPOTIFY DEVELOPER APP\r
+--------------------------------------\r
+1. Go to: https://developer.spotify.com/dashboard\r
+2. Log in with your Spotify account\r
+3. Click "Create App"\r
+4. Fill in the form:\r
+   - App name: "Tronbyt Now Playing" (or whatever you like)\r
+   - App description: "Display currently playing on Tronbyt"\r
+   - Website: (leave blank or enter any URL)\r
+   - Redirect URI: http://127.0.0.1:8888/callback   <-- IMPORTANT!\r
+     (Click "Add" after entering the URI)\r
+   - Which API/SDKs are you planning to use?\r
+     [x] Web API   <-- CHECK THIS ONE\r
+     [ ] Web Playback SDK (not needed)\r
+     [ ] Android (not needed)\r
+     [ ] iOS (not needed)\r
+5. Check the Terms of Service box and click "Save"\r
+6. Click "Settings" on your new app\r
+7. Copy your "Client ID" and "Client Secret" (click "View client secret")\r
+\r
+STEP 2: GET YOUR REFRESH TOKEN\r
+------------------------------\r
+Run the included Python script on the SAME MACHINE as your web browser:\r
+\r
+    python3 get_refresh_token.py\r
+\r
+The script will:\r
+1. Ask for your Client ID and Client Secret\r
+2. Open your browser to authorize with Spotify\r
+3. Display your refresh token when complete\r
+\r
+Save all three values:\r
+- Client ID\r
+- Client Secret  \r
+- Refresh Token\r
+\r
+ALTERNATIVE: MANUAL METHOD (if script doesn't work)\r
+---------------------------------------------------\r
+If you can't run the Python script on the same machine as your browser\r
+(e.g., you're SSH'd into a remote server), use this manual method:\r
+\r
+1. Open this URL in your browser (replace YOUR_CLIENT_ID):\r
+\r
+   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http://127.0.0.1:8888/callback&scope=user-read-currently-playing%20user-read-playback-state%20user-read-recently-played&show_dialog=true\r
+\r
+2. After authorizing, the page won't load (that's expected). Copy the \r
+   "code=" value from the URL bar. It will look like:\r
+   \r
+   http://127.0.0.1:8888/callback?code=AQCxxxVERYLONGSTRINGxxx\r
+\r
+3. Run this curl command (replace YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, \r
+   and YOUR_CODE_HERE):\r
+\r
+   curl -X POST "https://accounts.spotify.com/api/token" \\\r
+     -H "Content-Type: application/x-www-form-urlencoded" \\\r
+     -d "grant_type=authorization_code" \\\r
+     -d "code=YOUR_CODE_HERE" \\\r
+     -d "redirect_uri=http://127.0.0.1:8888/callback" \\\r
+     -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET"\r
+\r
+4. Copy the "refresh_token" value from the JSON response.\r
+\r
+NOTE: The code expires in ~10 minutes, so run curl quickly after step 2.\r
+\r
+STEP 3: CONFIGURE IN TRONBYT\r
+----------------------------\r
+1. Open your Tronbyt web interface (usually http://your-server:8000)\r
+2. Add this app (upload spotify.star or add as custom app)\r
+3. Configure these fields:\r
+   - Spotify Client ID:     [paste your Client ID]\r
+   - Spotify Client Secret: [paste your Client Secret]\r
+   - Refresh Token:         [paste your Refresh Token]\r
+4. Optionally configure display mode, colors, etc.\r
+5. Save and enjoy!\r
+\r
+STEP 4: PLAY MUSIC\r
+------------------\r
+Start playing something on Spotify. Within 30-60 seconds (depending on\r
+your Tronbyt refresh rate), you'll see it on your display!\r
+\r
+================================================================================\r
+                                 TROUBLESHOOTING\r
+================================================================================\r
+\r
+"Setup needed" error:\r
+  -> Your credentials aren't configured. Add them in app settings.\r
+\r
+"Auth Error: Token revoked" error:\r
+  -> Run get_refresh_token.py again to get a new token.\r
+  -> This happens if you revoked access or deleted your Spotify app.\r
+\r
+"Auth Error: Bad credentials" error:\r
+  -> Double-check your Client ID and Client Secret.\r
+\r
+Nothing displays / black screen:\r
+  -> Check that a track is active (playing or paused) on one of your devices.\r
+  -> Some private sessions don't report to the API.\r
+  -> Check that "Show When Idle" is enabled in settings.\r
+\r
+Album art not showing:\r
+  -> Local files don't have artwork.\r
+  -> Try a different display mode.\r
+\r
+================================================================================\r
+                                    FEATURES\r
+================================================================================\r
+\r
+Display Modes:\r
+- Full:      Album art + track + artist + progress bar + time remaining\r
+- Compact:   Album art + track + artist (no progress bar)\r
+- Art Focus: Large album art with text overlay at bottom\r
+- Text Only: No art, full width for text + progress bar\r
+- Minimal:   Just track and artist, centered\r
+\r
+Content Support:\r
+- Music tracks with full metadata\r
+- Podcast episodes (show name, episode title)\r
+- Paused playback detection\r
+- Recently played fallback (optional)\r
+- Graceful handling of Spotify ads\r
+\r
+Robustness:\r
+- Exponential backoff on rate limits\r
+- Pre-emptive token refresh (at 45 min, expires at 60)\r
+- Multi-layer caching (tokens 45min, album art 24hr)\r
+- Graceful degradation (shows text if art fails)\r
+- Actionable error messages\r
+\r
+================================================================================\r
 """
 
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # =============================================================================
@@ -163,10 +163,6 @@ ART_CACHE_TTL = 86400  # 24 hours (album art URLs are stable)
 ERROR_CACHE_TTL = 30  # 30 sec backoff on errors
 MAX_ERROR_BACKOFF = 300  # Max 5 min backoff
 
-# Display Dimensions
-DISPLAY_WIDTH = 64
-DISPLAY_HEIGHT = 32
-
 # Display Modes
 MODE_FULL = "full"  # Art + text + progress bar
 MODE_COMPACT = "compact"  # Art + text, no progress
@@ -184,12 +180,19 @@ ERROR_RED = "#E74C3C"
 WARNING_YELLOW = "#F39C12"
 PROGRESS_BG = "#404040"
 
-# Fonts
-FONT_TRACK = "tb-8"  # Track name
-FONT_ARTIST = "tom-thumb"  # Artist name (smaller)
-FONT_TIME = "tom-thumb"  # Time display
-FONT_LARGE = "6x13"  # Large text for idle/errors
-FONT_SMALL = "CG-pixel-3x5-mono"  # Tiny text
+# Fonts - 1x resolution
+FONT_TRACK_1X = "tb-8"
+FONT_ARTIST_1X = "tom-thumb"
+FONT_TIME_1X = "tom-thumb"
+FONT_LARGE_1X = "6x13"
+FONT_SMALL_1X = "CG-pixel-3x5-mono"
+
+# Fonts - 2x resolution
+FONT_TRACK_2X = "terminus-16"
+FONT_ARTIST_2X = "tb-8"
+FONT_TIME_2X = "tb-8"
+FONT_LARGE_2X = "terminus-16"
+FONT_SMALL_2X = "tom-thumb"
 
 # Device type icons (simple representations)
 DEVICE_ICONS = {
@@ -199,6 +202,63 @@ DEVICE_ICONS = {
     "TV": "📺",
     "default": "🎵",
 }
+
+# =============================================================================
+# 2X RESOLUTION HELPERS
+# =============================================================================
+
+def s(val):
+    """Scale a dimension value for 2x rendering."""
+    return val * 2 if canvas.is2x() else val
+
+def font_track():
+    """Get track name font for current resolution."""
+    return FONT_TRACK_2X if canvas.is2x() else FONT_TRACK_1X
+
+def font_artist():
+    """Get artist name font for current resolution."""
+    return FONT_ARTIST_2X if canvas.is2x() else FONT_ARTIST_1X
+
+def font_time():
+    """Get time display font for current resolution."""
+    return FONT_TIME_2X if canvas.is2x() else FONT_TIME_1X
+
+def font_large():
+    """Get large text font for current resolution."""
+    return FONT_LARGE_2X if canvas.is2x() else FONT_LARGE_1X
+
+def font_small():
+    """Get small text font for current resolution."""
+    return FONT_SMALL_2X if canvas.is2x() else FONT_SMALL_1X
+
+def scale_delay(delay):
+    """Halve animation delay at 2x to maintain perceived scroll speed."""
+    if canvas.is2x():
+        return max(delay // 2, 1)
+    return delay
+
+def select_best_image(images):
+    """Select the best image URL based on display resolution."""
+    if not images:
+        return None
+    if canvas.is2x():
+        # For 2x, prefer a larger image for better quality
+        for img in reversed(images):
+            url = img.get("url")
+            w = img.get("width", 0)
+            if url and w >= 128:
+                return url
+
+        # Fallback to largest available
+        for img in images:
+            if img.get("url"):
+                return img["url"]
+    else:
+        # For 1x, prefer smallest image
+        for img in reversed(images):
+            if img.get("url"):
+                return img["url"]
+    return None
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -258,6 +318,8 @@ def text_width_estimate(text, font):
         "tom-thumb": 4,
         "6x13": 6,
         "CG-pixel-3x5-mono": 4,
+        "terminus-16": 8,
+        "10x20": 10,
     }
     char_width = widths.get(font, 5)
     return len(text) * char_width
@@ -495,13 +557,9 @@ def parse_track(item):
     album = item.get("album", {})
     album_name = album.get("name", "")
 
-    # Get best album art URL (prefer smaller sizes)
+    # Get best album art URL for current resolution
     images = album.get("images", [])
-    art_url = None
-    for img in reversed(images):  # Smallest last
-        if img.get("url"):
-            art_url = img["url"]
-            break
+    art_url = select_best_image(images)
 
     # Duration
     duration_ms = item.get("duration_ms", 0)
@@ -533,11 +591,7 @@ def parse_episode(item):
 
     # Images - episode or show
     images = item.get("images", []) or show.get("images", [])
-    art_url = None
-    for img in reversed(images):
-        if img.get("url"):
-            art_url = img["url"]
-            break
+    art_url = select_best_image(images)
 
     duration_ms = item.get("duration_ms", 0)
     explicit = item.get("explicit", False)
@@ -663,18 +717,20 @@ def render_progress_bar(progress_ms, duration_ms, width, color, bg_color):
     if filled_width < 1 and progress_pct > 0:
         filled_width = 1
 
+    bar_height = s(2)
+
     return render.Stack(
         children = [
             # Background
             render.Box(
                 width = width,
-                height = 2,
+                height = bar_height,
                 color = bg_color,
             ),
             # Filled portion
             render.Box(
                 width = filled_width,
-                height = 2,
+                height = bar_height,
                 color = color,
             ),
         ],
@@ -687,7 +743,7 @@ def render_time_display(progress_ms, duration_ms, color):
 
     return render.Text(
         content = elapsed + "/" + total,
-        font = FONT_TIME,
+        font = font_time(),
         color = color,
     )
 
@@ -695,23 +751,23 @@ def render_playback_icon(is_playing, color):
     """Render play/pause indicator."""
     if is_playing:
         # Play triangle (approximated with text)
-        return render.Text(content = "▶", font = FONT_SMALL, color = color)
+        return render.Text(content = "▶", font = font_small(), color = color)
     else:
         # Pause bars
-        return render.Text(content = "❚❚", font = FONT_SMALL, color = color)
+        return render.Text(content = "❚❚", font = font_small(), color = color)
 
 def render_status_icons(state, color):
     """Render shuffle/repeat status icons."""
     icons = []
 
     if state.get("shuffle"):
-        icons.append(render.Text(content = "⤮", font = FONT_SMALL, color = color))
+        icons.append(render.Text(content = "⤮", font = font_small(), color = color))
 
     repeat = state.get("repeat", "off")
     if repeat == "track":
-        icons.append(render.Text(content = "↺1", font = FONT_SMALL, color = color))
+        icons.append(render.Text(content = "↺1", font = font_small(), color = color))
     elif repeat == "context":
-        icons.append(render.Text(content = "↺", font = FONT_SMALL, color = color))
+        icons.append(render.Text(content = "↺", font = font_small(), color = color))
 
     if not icons:
         return None
@@ -762,7 +818,7 @@ def render_album_art(art_url, size, fallback_color):
                     main_align = "center",
                     cross_align = "center",
                     children = [
-                        render.Text(content = "♪", font = FONT_LARGE, color = WHITE),
+                        render.Text(content = "♪", font = font_large(), color = WHITE),
                     ],
                 ),
             ),
@@ -775,12 +831,12 @@ def render_album_art(art_url, size, fallback_color):
 
 def render_full_mode(state, config):
     """
-    Full mode: Album art (32x32) + track/artist + progress bar with time.
+    Full mode: Album art + track/artist + progress bar with time.
     Most information-dense layout.
     """
-    art_size = 32
-    text_width = DISPLAY_WIDTH - art_size - 1
-    scroll_speed = int(config.get("scroll_speed", "50"))
+    art_size = canvas.height()
+    text_width = canvas.width() - art_size - s(1)
+    scroll_speed = scale_delay(int(config.get("scroll_speed", "50")))
 
     track_color = config.get("track_color", WHITE)
     artist_color = config.get("artist_color", SPOTIFY_GREEN)
@@ -795,12 +851,12 @@ def render_full_mode(state, config):
 
     # Track name
     text_children.append(
-        render_text_smart(state["name"], text_width, FONT_TRACK, track_color),
+        render_text_smart(state["name"], text_width, font_track(), track_color),
     )
 
     # Artist
     text_children.append(
-        render_text_smart(state["artist"], text_width, FONT_ARTIST, artist_color),
+        render_text_smart(state["artist"], text_width, font_artist(), artist_color),
     )
 
     # Progress bar row
@@ -812,10 +868,10 @@ def render_full_mode(state, config):
     )
 
     # Progress bar
-    bar_width = text_width - 12 if show_time else text_width - 6
+    bar_width = text_width - s(12) if show_time else text_width - s(6)
     progress_row_children.append(
         render.Padding(
-            pad = (1, 0, 1, 0),
+            pad = (s(1), 0, s(1), 0),
             child = render_progress_bar(
                 state["progress_ms"],
                 state["duration_ms"],
@@ -842,7 +898,7 @@ def render_full_mode(state, config):
                 expanded = True,
                 main_align = "end",
                 children = [
-                    render.Text(content = time_str, font = FONT_TIME, color = DARK_GRAY),
+                    render.Text(content = time_str, font = font_time(), color = DARK_GRAY),
                 ],
             ),
         )
@@ -861,7 +917,7 @@ def render_full_mode(state, config):
             children = [
                 art,
                 render.Padding(
-                    pad = (1, 0, 0, 0),
+                    pad = (s(1), 0, 0, 0),
                     child = text_column,
                 ),
             ],
@@ -873,16 +929,17 @@ def render_compact_mode(state, config):
     Compact mode: Album art + track/artist, no progress bar.
     Clean and simple.
     """
-    art_size = 30
-    text_width = DISPLAY_WIDTH - art_size - 2
-    scroll_speed = int(config.get("scroll_speed", "50"))
+    art_size = s(30)
+    art_pad = s(1)
+    text_width = canvas.width() - art_size - art_pad * 2
+    scroll_speed = scale_delay(int(config.get("scroll_speed", "50")))
 
     track_color = config.get("track_color", WHITE)
     artist_color = config.get("artist_color", SPOTIFY_GREEN)
 
     # Art with small padding
     art = render.Padding(
-        pad = (1, 1, 1, 1),
+        pad = (art_pad, art_pad, art_pad, art_pad),
         child = render_album_art(state["art_url"], art_size, DARK_GRAY),
     )
 
@@ -896,9 +953,9 @@ def render_compact_mode(state, config):
         main_align = "center",
         cross_align = "start",
         children = [
-            render_text_smart(state["name"], text_width, FONT_TRACK, track_color),
-            render.Box(height = 1),
-            render_text_smart(indicator + state["artist"], text_width, FONT_ARTIST, artist_color),
+            render_text_smart(state["name"], text_width, font_track(), track_color),
+            render.Box(height = s(1)),
+            render_text_smart(indicator + state["artist"], text_width, font_artist(), artist_color),
         ],
     )
 
@@ -916,34 +973,57 @@ def render_art_focus_mode(state, config):
     Art focus mode: Large album art with text overlay at bottom.
     Visually striking.
     """
-    scroll_speed = int(config.get("scroll_speed", "50"))
+    scroll_speed = scale_delay(int(config.get("scroll_speed", "50")))
     track_color = config.get("track_color", WHITE)
+    artist_color = config.get("artist_color", SPOTIFY_GREEN)
 
     # Full-size art as background
-    art = render_album_art(state["art_url"], DISPLAY_HEIGHT, DARK_GRAY)
+    art = render_album_art(state["art_url"], canvas.height(), DARK_GRAY)
 
     # Text overlay at bottom
     overlay_text = state["name"]
     if not state["is_playing"]:
         overlay_text = "❚❚ " + overlay_text
 
+    overlay_pad = s(1)
+    overlay_height = s(10)
+    overlay_text_width = canvas.width() - overlay_pad * 2
+
+    # At 2x, show both track and artist in the overlay
+    overlay_children = [
+        render.Marquee(
+            width = overlay_text_width,
+            child = render.Text(
+                content = overlay_text,
+                font = font_artist(),
+                color = track_color,
+            ),
+        ),
+    ]
+    if canvas.is2x():
+        overlay_children.append(
+            render.Marquee(
+                width = overlay_text_width,
+                child = render.Text(
+                    content = state["artist"],
+                    font = font_small(),
+                    color = artist_color,
+                ),
+            ),
+        )
+
     text_overlay = render.Column(
         expanded = True,
         main_align = "end",
         children = [
             render.Box(
-                width = DISPLAY_WIDTH,
-                height = 10,
+                width = canvas.width(),
+                height = overlay_height,
                 color = "#00000099",  # Semi-transparent black
                 child = render.Padding(
-                    pad = (1, 1, 1, 1),
-                    child = render.Marquee(
-                        width = DISPLAY_WIDTH - 2,
-                        child = render.Text(
-                            content = overlay_text,
-                            font = FONT_ARTIST,
-                            color = track_color,
-                        ),
+                    pad = (overlay_pad, overlay_pad, overlay_pad, overlay_pad),
+                    child = render.Column(
+                        children = overlay_children,
                     ),
                 ),
             ),
@@ -969,21 +1049,23 @@ def render_text_only_mode(state, config):
     Text only mode: No art, full width for text.
     Maximum readability.
     """
-    scroll_speed = int(config.get("scroll_speed", "50"))
+    scroll_speed = scale_delay(int(config.get("scroll_speed", "50")))
     track_color = config.get("track_color", WHITE)
     artist_color = config.get("artist_color", SPOTIFY_GREEN)
     progress_color = config.get("progress_color", SPOTIFY_GREEN)
 
-    text_width = DISPLAY_WIDTH - 4  # Small margins
+    margin = s(2)
+    text_width = canvas.width() - margin * 2
 
     children = []
 
     # Track with play/pause
+    icon_space = s(8)
     track_row = render.Row(
         children = [
             render_playback_icon(state["is_playing"], LIGHT_GRAY),
-            render.Box(width = 2),
-            render_text_smart(state["name"], text_width - 8, FONT_TRACK, track_color),
+            render.Box(width = s(2)),
+            render_text_smart(state["name"], text_width - icon_space, font_track(), track_color),
         ],
         cross_align = "center",
     )
@@ -991,11 +1073,11 @@ def render_text_only_mode(state, config):
 
     # Artist
     children.append(
-        render_text_smart(state["artist"], text_width, FONT_ARTIST, artist_color),
+        render_text_smart(state["artist"], text_width, font_artist(), artist_color),
     )
 
     # Progress bar spanning full width
-    children.append(render.Box(height = 2))
+    children.append(render.Box(height = s(2)))
     children.append(
         render_progress_bar(
             state["progress_ms"],
@@ -1014,8 +1096,8 @@ def render_text_only_mode(state, config):
             expanded = True,
             main_align = "space_between",
             children = [
-                render.Text(content = elapsed, font = FONT_TIME, color = DARK_GRAY),
-                render.Text(content = total, font = FONT_TIME, color = DARK_GRAY),
+                render.Text(content = elapsed, font = font_time(), color = DARK_GRAY),
+                render.Text(content = total, font = font_time(), color = DARK_GRAY),
             ],
         ),
     )
@@ -1023,7 +1105,7 @@ def render_text_only_mode(state, config):
     return render.Root(
         delay = scroll_speed,
         child = render.Padding(
-            pad = (2, 2, 2, 2),
+            pad = (margin, margin, margin, margin),
             child = render.Column(
                 expanded = True,
                 main_align = "space_evenly",
@@ -1037,9 +1119,11 @@ def render_minimal_mode(state, config):
     Minimal mode: Just the essentials.
     Track name only, centered.
     """
-    scroll_speed = int(config.get("scroll_speed", "50"))
+    scroll_speed = scale_delay(int(config.get("scroll_speed", "50")))
     track_color = config.get("track_color", WHITE)
     artist_color = config.get("artist_color", SPOTIFY_GREEN)
+
+    marquee_width = canvas.width() - s(4)
 
     # Icon + track centered
     track_text = state["name"]
@@ -1054,21 +1138,21 @@ def render_minimal_mode(state, config):
             cross_align = "center",
             children = [
                 render.Marquee(
-                    width = DISPLAY_WIDTH - 4,
+                    width = marquee_width,
                     align = "center",
                     child = render.Text(
                         content = track_text,
-                        font = FONT_TRACK,
+                        font = font_track(),
                         color = track_color,
                     ),
                 ),
-                render.Box(height = 2),
+                render.Box(height = s(2)),
                 render.Marquee(
-                    width = DISPLAY_WIDTH - 4,
+                    width = marquee_width,
                     align = "center",
                     child = render.Text(
                         content = state["artist"],
-                        font = FONT_ARTIST,
+                        font = font_artist(),
                         color = artist_color,
                     ),
                 ),
@@ -1125,13 +1209,13 @@ def render_idle(config, recent_state = None):
             children = [
                 render.Text(
                     content = idle_message,
-                    font = FONT_LARGE,
+                    font = font_large(),
                     color = SPOTIFY_GREEN,
                 ),
-                render.Box(height = 4),
+                render.Box(height = s(4)),
                 render.Text(
                     content = "Not Playing",
-                    font = FONT_ARTIST,
+                    font = font_artist(),
                     color = DARK_GRAY,
                 ),
             ],
@@ -1142,37 +1226,38 @@ def render_error(title, message, hint = None):
     """
     Render error state with helpful information.
     """
+    text_width = canvas.width() - s(4)
     children = [
         render.Text(
             content = title,
-            font = FONT_TRACK,
+            font = font_track(),
             color = ERROR_RED,
         ),
-        render.Box(height = 2),
+        render.Box(height = s(2)),
         render.WrappedText(
             content = message,
-            font = FONT_ARTIST,
+            font = font_artist(),
             color = LIGHT_GRAY,
-            width = DISPLAY_WIDTH - 4,
+            width = text_width,
             align = "center",
         ),
     ]
 
     if hint:
-        children.append(render.Box(height = 2))
+        children.append(render.Box(height = s(2)))
         children.append(
             render.WrappedText(
                 content = hint,
-                font = FONT_SMALL,
+                font = font_small(),
                 color = DARK_GRAY,
-                width = DISPLAY_WIDTH - 4,
+                width = text_width,
                 align = "center",
             ),
         )
 
     return render.Root(
         child = render.Padding(
-            pad = (2, 4, 2, 4),
+            pad = (s(2), s(4), s(2), s(4)),
             child = render.Column(
                 expanded = True,
                 main_align = "center",
@@ -1184,6 +1269,7 @@ def render_error(title, message, hint = None):
 
 def render_setup_needed():
     """Render first-run / configuration needed screen."""
+    text_width = canvas.width() - s(4)
     return render.Root(
         child = render.Column(
             expanded = True,
@@ -1192,23 +1278,23 @@ def render_setup_needed():
             children = [
                 render.Text(
                     content = "Spotify",
-                    font = FONT_LARGE,
+                    font = font_large(),
                     color = SPOTIFY_GREEN,
                 ),
-                render.Box(height = 4),
+                render.Box(height = s(4)),
                 render.WrappedText(
                     content = "Setup needed",
-                    font = FONT_ARTIST,
+                    font = font_artist(),
                     color = WHITE,
-                    width = DISPLAY_WIDTH - 4,
+                    width = text_width,
                     align = "center",
                 ),
-                render.Box(height = 2),
+                render.Box(height = s(2)),
                 render.WrappedText(
                     content = "Add credentials in app config",
-                    font = FONT_SMALL,
+                    font = font_small(),
                     color = DARK_GRAY,
-                    width = DISPLAY_WIDTH - 4,
+                    width = text_width,
                     align = "center",
                 ),
             ],
