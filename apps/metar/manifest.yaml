@@ -6,5 +6,4 @@ desc: Show METAR (aviation weather) text for one airport or flight category (VFR
 author: all3fox
 fileName: metar.star
 packageName: metar
-broken: true
 recommendedInterval: 5
