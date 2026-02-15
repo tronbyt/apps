@@ -7,6 +7,7 @@ Author: adilansari
 v 1.0 - Initial version with T20/ODI match support
 v 1.1 - Using CricBuzz API for match data and adding Test match support
 v 1.2 - Add Big Bash League team support
+v 1.3 - Add team support for womens' teams
 """
 
 load("cache.star", "cache")
@@ -517,11 +518,14 @@ def _team_setting(id, name, abbr, fg_color, bg_color):
 team_settings_by_id = {
     ts.id: ts
     for ts in [
+        # International Teams
         struct(**_team_setting("96", "Afghanistan", "AFG", "#D32011", BLACK_COLOR)),
         struct(**_team_setting("4", "Australia", "AUS", "#FFCE00", "#006A4A")),
+        struct(**_team_setting("100", "Australia Women", "AUSW", "#FFCE00", "006A4A")),
         struct(**_team_setting("6", "Bangladesh", "BAN", "#F42A41", "#006A4E")),
         struct(**_team_setting("9", "England", "ENG", "#FFFFFF", "#CE1124")),
         struct(**_team_setting("2", "India", "IND", "#FFAC1C", "#050CEB")),
+        struct(**_team_setting("97", "India Women", "INDW", "FFAC1C", "#050CEB")),
         struct(**_team_setting("27", "Ireland", "IRE", "#169B62", "#FF883E")),
         struct(**_team_setting("24", "Netherlands", "NED", "#FFFFFF", "#FF4F00")),
         struct(**_team_setting("13", "New Zealand", "NZ", "#FFFFFF", "#008080")),
@@ -532,6 +536,8 @@ team_settings_by_id = {
         struct(**_team_setting("15", "United States", "USA", "#B31942", "#003087")),
         struct(**_team_setting("10", "West Indies", "WI", "#f2b10e", "#660000")),
         struct(**_team_setting("12", "Zimbabwe", "ZIM", "#FCE300", "#EF3340")),
+
+        # Indian Premier League Teams
         struct(**_team_setting("63", "Kolkata Knight Riders", "KKR", "#F7D54E", "#3A225D")),
         struct(**_team_setting("65", "Punjab Kings", "PK", "#D3D3D3", "#DD1F2D")),
         struct(**_team_setting("62", "Mumbai Indians", "MI", "#E9530D", "#004B8D")),
@@ -543,7 +549,7 @@ team_settings_by_id = {
         struct(**_team_setting("58", "Chennai Super Kings", "CSK", "#FFFF3C", "#2B5DA8")),
         struct(**_team_setting("64", "Rajasthan Royals", "RR", "#C3A11F", "#074EA2")),
 
-        # Big Bash League Teams
+        # Austraian Big Bash League Teams
         struct(**_team_setting("199", "Adelaide Strikers", "ADS", "#FFFFFF", "#0084D6")),
         struct(**_team_setting("193", "Brisbane Heat", "BRH", "#FFFFFF", "#27A6B0")),
         struct(**_team_setting("194", "Hobart Hurricanes", "HBH", "#FFFFFF", "#674398")),
