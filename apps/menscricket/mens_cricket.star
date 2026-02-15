@@ -1,5 +1,5 @@
 """
-Applet: Mens Cricket
+Applet: Cricket Scoreboard (formerly Mens Cricket)
 Summary: Display cricket scores
 Description: For a selected team, this app shows the scorecard for a current match. If no match in progress, it will display scorecard for a recently completed match. If none of these, it will display the next match details in user's local timezone.
 Author: adilansari
@@ -7,7 +7,7 @@ Author: adilansari
 v 1.0 - Initial version with T20/ODI match support
 v 1.1 - Using CricBuzz API for match data and adding Test match support
 v 1.2 - Add Big Bash League team support
-v 1.3 - Add team support for womens' teams
+v 1.3 - Add support for womens' teams where listed in CricBuzz
 """
 
 load("cache.star", "cache")
