@@ -7,3 +7,5 @@ author: flynnt
 fileName: marvel_of_the_day.star
 packageName: marveloftheday
 recommendedInterval: 5
+broken: true
+brokenReason: "API access closed"
