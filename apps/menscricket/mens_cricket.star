@@ -521,7 +521,7 @@ team_settings_by_id = {
         # International Teams
         struct(**_team_setting("96", "Afghanistan", "AFG", "#D32011", BLACK_COLOR)),
         struct(**_team_setting("4", "Australia", "AUS", "#FFCE00", "#006A4A")),
-        struct(**_team_setting("100", "Australia Women", "AUSW", "#FFCE00", "006A4A")),
+        struct(**_team_setting("100", "Australia Women", "AUSW", "#FFCE00", "#006A4A")),
         struct(**_team_setting("6", "Bangladesh", "BAN", "#F42A41", "#006A4E")),
         struct(**_team_setting("329", "Bangladesh Women", "BANW", "#F42A41", "#006A4E")),
         struct(**_team_setting("9", "England", "ENG", "#FFFFFF", "#CE1124")),
