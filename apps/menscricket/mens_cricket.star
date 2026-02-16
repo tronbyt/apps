@@ -527,7 +527,7 @@ team_settings_by_id = {
         struct(**_team_setting("9", "England", "ENG", "#FFFFFF", "#CE1124")),
         struct(**_team_setting("99", "England Women", "ENGW", "#FFFFFF", "#CE1124")),
         struct(**_team_setting("2", "India", "IND", "#FFAC1C", "#050CEB")),
-        struct(**_team_setting("97", "India Women", "INDW", "FFAC1C", "#050CEB")),
+        struct(**_team_setting("97", "India Women", "INDW", "#FFAC1C", "#050CEB")),
         struct(**_team_setting("27", "Ireland", "IRE", "#169B62", "#FF883E")),
         struct(**_team_setting("189", "Ireland Women", "IREW", "#169B62", "#FF883E")),
         struct(**_team_setting("24", "Netherlands", "NED", "#FFFFFF", "#FF4F00")),
