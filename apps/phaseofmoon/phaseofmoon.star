@@ -80,23 +80,16 @@ FIRSTMOON = 947182440  # Saturday, 6 January 2000 18:14:00 in unix epoch time
 
 # Moon Images
 # Rendered to 30x30 from NASA images at https://spaceplace.nasa.gov/oreo-moon/en/
-PHASE_1_IMAGE = PHASE_1_IMAGE_1X
-PHASE_2_IMAGE = PHASE_2_IMAGE_1X
-PHASE_3_IMAGE = PHASE_3_IMAGE_1X
-PHASE_4_IMAGE = PHASE_4_IMAGE_1X
-PHASE_5_IMAGE = PHASE_5_IMAGE_1X
-PHASE_6_IMAGE = PHASE_6_IMAGE_1X
-PHASE_7_IMAGE = PHASE_7_IMAGE_1X
-PHASE_8_IMAGE = PHASE_8_IMAGE_1X
 PHASE_IMAGES = [
-    PHASE_1_IMAGE,
-    PHASE_2_IMAGE,
-    PHASE_3_IMAGE,
-    PHASE_4_IMAGE,
-    PHASE_5_IMAGE,
-    PHASE_6_IMAGE,
-    PHASE_7_IMAGE,
-    PHASE_8_IMAGE,
+    PHASE_1_IMAGE_1X,
+    PHASE_2_IMAGE_1X,
+    PHASE_3_IMAGE_1X,
+    PHASE_4_IMAGE_1X,
+    PHASE_5_IMAGE_1X,
+    PHASE_6_IMAGE_1X,
+    PHASE_7_IMAGE_1X,
+    PHASE_8_IMAGE_1X,
+    PHASE_1_IMAGE_1X,
 ]
 
 # Phase of the moon data.
@@ -109,23 +102,16 @@ MOON_PHASES = {
 PHASE_CHANGES = [0, 1, 6.38264692644, 8.38264692644, 13.76529385288, 15.76529385288, 21.14794077932, 23.14794077932, 28.53058770576, 29.53058770576]
 
 # Moon phases in Chinese (simplified).
-ZH_1_IMAGE = ZH_1_IMAGE_1X
-ZH_2_IMAGE = ZH_2_IMAGE_1X
-ZH_3_IMAGE = ZH_3_IMAGE_1X
-ZH_4_IMAGE = ZH_4_IMAGE_1X
-ZH_5_IMAGE = ZH_5_IMAGE_1X
-ZH_6_IMAGE = ZH_6_IMAGE_1X
-ZH_7_IMAGE = ZH_7_IMAGE_1X
-ZH_8_IMAGE = ZH_8_IMAGE_1X
 MOON_PHASES_ZH = [
-    ZH_1_IMAGE,
-    ZH_2_IMAGE,
-    ZH_3_IMAGE,
-    ZH_4_IMAGE,
-    ZH_5_IMAGE,
-    ZH_6_IMAGE,
-    ZH_7_IMAGE,
-    ZH_8_IMAGE,
+    ZH_1_IMAGE_1X,
+    ZH_2_IMAGE_1X,
+    ZH_3_IMAGE_1X,
+    ZH_4_IMAGE_1X,
+    ZH_5_IMAGE_1X,
+    ZH_6_IMAGE_1X,
+    ZH_7_IMAGE_1X,
+    ZH_8_IMAGE_1X,
+    ZH_1_IMAGE_1X,
 ]
 
 def scaled_pad(left, top, right, bottom, scale):
@@ -158,10 +144,11 @@ def main(config):
 
     for x in range(0, NUM_PHASES):
         if currentday > PHASE_CHANGES[x] and currentday <= PHASE_CHANGES[x + 1]:
-            moonPhase = (MOON_PHASES[displayText][x] if displayText != "zh" else MOON_PHASES_ZH[x]) if displayText != "none" else ""
-            phaseImage = PHASE_IMAGES[x]
+            phase_idx = x
             if hemisphere == 0:
-                phaseImage = PHASE_IMAGES[NUM_PHASES - x]
+                phase_idx = NUM_PHASES - x
+            moonPhase = (MOON_PHASES[displayText][phase_idx] if displayText != "zh" else MOON_PHASES_ZH[phase_idx]) if displayText != "none" else ""
+            phaseImage = PHASE_IMAGES[phase_idx]
 
     time_format = TIME_FORMATS.get(config.get("time_format", "No clock"))
     clock_position = config.get("clock_position", "Center")
@@ -332,7 +319,7 @@ def main(config):
                                                 ),
                                             ],
                                         ),
-                                    ) if blink_time and clock_has_shadow == True else None,
+                                    ) if blink_time and clock_has_shadow else None,
 
                                     # optional clock blink
                                     render.Padding(
@@ -342,7 +329,7 @@ def main(config):
                                             font = clockFont,
                                             color = "#fff",
                                         ),
-                                    ) if blink_time and clock_has_shadow != True else None,
+                                    ) if blink_time and not clock_has_shadow else None,
                                 ],
                             ) if time_format else None,
                         ],
