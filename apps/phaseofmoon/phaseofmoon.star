@@ -38,8 +38,6 @@ load("images/phase_full_moon_zh.png", ZH_5_IMAGE_1X = "file")
 load("images/phase_last_quarter.png", PHASE_7_IMAGE_1X = "file")
 load("images/phase_last_quarter_zh.png", ZH_7_IMAGE_1X = "file")
 load("images/phase_new_moon.png", PHASE_1_IMAGE_1X = "file")
-
-# load("images/phase_9.png", PHASE_9_IMAGE_1X = "file")
 load("images/phase_new_moon_zh.png", ZH_1_IMAGE_1X = "file")
 load("images/phase_waning_crescent.png", PHASE_8_IMAGE_1X = "file")
 load("images/phase_waning_crescent_zh.png", ZH_8_IMAGE_1X = "file")
@@ -90,9 +88,6 @@ PHASE_5_IMAGE = PHASE_5_IMAGE_1X
 PHASE_6_IMAGE = PHASE_6_IMAGE_1X
 PHASE_7_IMAGE = PHASE_7_IMAGE_1X
 PHASE_8_IMAGE = PHASE_8_IMAGE_1X
-
-# PHASE_9_IMAGE = PHASE_9_IMAGE_1X
-PHASE_9_IMAGE = PHASE_1_IMAGE_1X
 PHASE_IMAGES = [
     PHASE_1_IMAGE,
     PHASE_2_IMAGE,
@@ -102,7 +97,6 @@ PHASE_IMAGES = [
     PHASE_6_IMAGE,
     PHASE_7_IMAGE,
     PHASE_8_IMAGE,
-    PHASE_9_IMAGE,
 ]
 
 # Phase of the moon data.
