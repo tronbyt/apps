@@ -1,9 +1,10 @@
 ---
 id: phase-of-moon
-name: Phase Of Moon
+name: Phase of Moon
 summary: Shows the phase of the moon
 desc: Shows the current phase of the moon.
 author: Alan Fleming
-fileName: phase_of_moon.star
+fileName: phaseofmoon.star
 packageName: phaseofmoon
 recommendedInterval: 5
+supports2x: true
