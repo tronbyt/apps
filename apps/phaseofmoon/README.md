@@ -1,8 +1,8 @@
-# Phase of Moon - Tidbyt/Tronbyt App
+# Phase Of Moon - Tidbyt/Tronbyt App
 
 Show the current moon phase for your location on a Tidbyt or Tronbyt display, with optional phase text and clock.
 
-![Phase of Moon screenshot](phaseofmoon.webp)
+![Phase of Moon screenshot](phase_of_moon.webp)
 
 ## Features
 
