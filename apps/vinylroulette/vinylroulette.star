@@ -507,14 +507,58 @@ def hold(frame, n):
         n = 1
     return [frame] * n
 
+def get_target_display_frames(config, root_delay_ms):
+    """
+    Returns the app's target frame budget based on display_time_seconds.
+    Keep this aligned with Tronbyt's per-app Display Time Seconds.
+    """
+    total_ms = 15000  # 15s default
+    display_time_raw = config.str("display_time_seconds", "15").strip()
+    if display_time_raw.isdigit():
+        parsed_seconds = int(display_time_raw)
+        if parsed_seconds > 0:
+            total_ms = parsed_seconds * 1000
+
+    if total_ms < root_delay_ms:
+        total_ms = root_delay_ms
+
+    total_frames = total_ms // root_delay_ms
+    if total_frames < 1:
+        total_frames = 1
+
+    return total_frames
+
+def repeat_child_to_cover_frames(child, min_frames):
+    """
+    Repeat child as full animation cycles until at least min_frames are covered.
+    This keeps marquee/animated widgets moving instead of freezing on their last frame.
+    """
+    if min_frames < 1:
+        min_frames = 1
+
+    cycle_frames = child.frame_count()
+    if cycle_frames < 1:
+        cycle_frames = 1
+
+    loops = (min_frames + cycle_frames - 1) // cycle_frames
+    if loops < 1:
+        loops = 1
+
+    if loops == 1:
+        return child
+
+    return render.Sequence(children = [child] * loops)
+
 def render_with_optional_logo_intro(config, main_child, root_delay_ms):
     """Wrap main content with an optional centered intro logo screen."""
     scale = 2 if canvas.is2x() else 1
+    target_display_frames = get_target_display_frames(config, root_delay_ms)
+    repeated_main_child = repeat_child_to_cover_frames(main_child, target_display_frames)
 
     if not config.bool("show_logo_intro", True):
         return render.Root(
             delay = root_delay_ms,
-            child = main_child,
+            child = repeated_main_child,
         )
 
     intro_duration_ms = 500
@@ -527,6 +571,14 @@ def render_with_optional_logo_intro(config, main_child, root_delay_ms):
     intro_frames = intro_duration_ms // root_delay_ms
     if intro_frames < 1:
         intro_frames = 1
+    if intro_frames >= target_display_frames and target_display_frames > 1:
+        # Reserve at least one frame for main content.
+        intro_frames = target_display_frames - 1
+
+    main_frames = target_display_frames - intro_frames
+    if main_frames < 1:
+        main_frames = 1
+    repeated_main_child = repeat_child_to_cover_frames(main_child, main_frames)
 
     intro_screen = render.Column(
         expanded = True,
@@ -548,7 +600,7 @@ def render_with_optional_logo_intro(config, main_child, root_delay_ms):
         child = render.Sequence(
             children = [
                 render.Animation(children = hold(intro_screen, intro_frames)),
-                main_child,
+                repeated_main_child,
             ],
         ),
     )
@@ -805,10 +857,17 @@ def stats_options_handler(show_stats):
 def logo_intro_options_handler(show_logo_intro):
     """
     Handler called when show_logo_intro changes.
-    Returns intro-duration options only when show_logo_intro is "true".
+    Returns logo-intro related options only when show_logo_intro is "true".
     """
     if show_logo_intro == "true":
         return [
+            schema.Text(
+                id = "display_time_seconds",
+                name = "Display Time Seconds",
+                desc = "Match Tronbyt's per-app Display Time Seconds (whole seconds) so the intro shows once and the rest fills the remaining time.",
+                icon = "clock",
+                default = "15",
+            ),
             schema.Dropdown(
                 id = "logo_intro_duration_ms",
                 name = "Logo Intro Duration",
