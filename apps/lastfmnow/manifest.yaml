@@ -2,6 +2,6 @@
 id: lastfmnow
 name: Last.fm Now
 summary: Now scrobbling on Last.fm
-desc: Turn your Tidbyt into a little “what’s playing” sign. This app connects to Last.fm and displays the track you’re listening to right now (based on your scrobbles), updating automatically as your music changes.
+desc: Turn your Tidbyt into a little "what's playing" sign. This app connects to Last.fm and displays the track you’re listening to right now (based on your scrobbles), updating automatically as your music changes.
 author: kaffolder7
 supports2x: true

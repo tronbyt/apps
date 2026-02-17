@@ -111,6 +111,8 @@ def _download_cover_art(cover_art_url):
     if _is_default_last_fm_image(cover_art_url):
         return ""
 
+    if not cover_art_url.startswith("https://"):
+        return ""
     response = http.get(cover_art_url)
     if response.status_code != 200:
         return ""
@@ -201,14 +203,7 @@ def _cover_art_src(coverart, has_album_art):
         return coverart
     return LAST_FM_ICON.readall()
 
-def _render_layout_preset1(
-        username,
-        track,
-        artist,
-        song_title_color,
-        artist_name_color,
-        show_clock,
-        clock_text):
+def _render_layout_preset1(ctx):
     return render.Padding(
         pad = _spad(1),
         child = render.Column(
@@ -220,16 +215,16 @@ def _render_layout_preset1(
                             child = render.Image(src = MUSIC_ICON.readall(), width = 24 if canvas.is2x() else 16),
                         ),
                         render.Marquee(
-                            width = _s(44) if not show_clock else 0,
+                            width = _s(44) if not ctx["show_clock"] else 0,
                             child = render.Text(
-                                content = username if not show_clock else "",
+                                content = ctx["username"] if not ctx["show_clock"] else "",
                                 font = "tb-8" if canvas.is2x() else "tom-thumb",
                                 color = "#c0c0c0",
                             ),
                         ),
                         render.Padding(
                             pad = _spad((2, 0, 0, 4)),
-                            child = _clock_wrapped_text(clock_text, 44) if canvas.is2x() else _clock_wrapped_text(clock_text, 43),
+                            child = _clock_wrapped_text(ctx["clock_text"], 44) if canvas.is2x() else _clock_wrapped_text(ctx["clock_text"], 43),
                         ),
                     ],
                     main_align = "center",
@@ -239,8 +234,8 @@ def _render_layout_preset1(
                     child = render.Marquee(
                         width = _s(64),
                         child = render.Text(
-                            content = track,
-                            color = song_title_color or "#ffffff",
+                            content = ctx["track"],
+                            color = ctx["song_title_color"] or "#ffffff",
                             font = "terminus-18" if canvas.is2x() else "6x10",
                         ),
                     ),
@@ -249,8 +244,8 @@ def _render_layout_preset1(
                 render.Marquee(
                     width = _s(64),
                     child = render.Text(
-                        content = artist,
-                        color = artist_name_color,
+                        content = ctx["artist"],
+                        color = ctx["artist_name_color"],
                         font = "6x13" if canvas.is2x() else "tom-thumb",
                     ),
                 ),
@@ -258,30 +253,13 @@ def _render_layout_preset1(
         ),
     )
 
-def _render_layout_preset2(
-        artist,
-        song_title_color,
-        artist_name_color,
-        clock_text,
-        track_upper,
-        has_album_art,
-        coverart_img):
+def _render_layout_preset2(ctx):
     return render.Stack(
         children = [
-            # render.Padding(
-            #     pad = _spad((33, 2, 0, 0)),
-            #     child = render.WrappedText(
-            #         content = clock_text,
-            #         font = "terminus-12" if canvas.is2x() else "tom-thumb",
-            #         width = _s(32),
-            #         color = "#777",
-            #         align = "center",
-            #     ),
-            # ),
             render.Padding(
                 pad = _spad((31, 2, 0, 0)),
                 child = render.WrappedText(
-                    content = clock_text,
+                    content = ctx["clock_text"],
                     font = "tb-8" if canvas.is2x() else "tom-thumb",
                     width = _s(32),
                     color = "#777",
@@ -289,13 +267,12 @@ def _render_layout_preset2(
                 ),
             ),
             render.Padding(
-                pad = _spad((0, 0, 0, 0)) if has_album_art else _spad(2),
-                child = render.Image(coverart_img, width = _s(32)),
+                pad = _spad((0, 0, 0, 0)) if ctx["has_album_art"] else _spad(2),
+                child = render.Image(ctx["coverart_img"], width = _s(32)),
             ),
             render.Box(
-                color = "#00FF0000",
                 child = render.Padding(
-                    pad = _spad((0, 0, 1, 1)) if has_album_art else _spad((0, 0, 0, 1)),
+                    pad = _spad((0, 0, 1, 1)) if ctx["has_album_art"] else _spad((0, 0, 0, 1)),
                     color = "#FF000000",
                     child = render.Column(
                         cross_align = "end",
@@ -303,7 +280,6 @@ def _render_layout_preset2(
                         expanded = False,
                         children = [
                             render.Box(
-                                color = "#0000FF00",
                                 height = _s(10),
                             ),
                             render.Padding(
@@ -311,11 +287,11 @@ def _render_layout_preset2(
                                 color = "#111111A1",
                                 child = render.Marquee(
                                     child = render.Text(
-                                        content = track_upper,
+                                        content = ctx["track_upper"],
                                         font = "terminus-14" if canvas.is2x() else "tb-8",
-                                        color = song_title_color or "#ffffff",
+                                        color = ctx["song_title_color"] or "#ffffff",
                                     ),
-                                    width = _s(58) if has_album_art else _s(62),
+                                    width = _s(58) if ctx["has_album_art"] else _s(62),
                                     scroll_direction = "horizontal",
                                     align = "end",
                                     delay = MARQUEE_START_DELAY,
@@ -326,11 +302,11 @@ def _render_layout_preset2(
                                 color = "#111111A1",
                                 child = render.Marquee(
                                     child = render.Text(
-                                        content = artist,
+                                        content = ctx["artist"],
                                         font = "terminus-12" if canvas.is2x() else "tom-thumb",
-                                        color = artist_name_color,
+                                        color = ctx["artist_name_color"],
                                     ),
-                                    width = _s(52) if has_album_art else _s(62),
+                                    width = _s(52) if ctx["has_album_art"] else _s(62),
                                     scroll_direction = "horizontal",
                                     align = "end",
                                 ),
@@ -342,28 +318,20 @@ def _render_layout_preset2(
         ],
     )
 
-def _render_layout_preset3(
-        song_title_color,
-        artist_name_color,
-        clock_text,
-        track_upper,
-        artist_upper,
-        album_text,
-        album_name_color,
-        coverart_img):
+def _render_layout_preset3(ctx):
     return render.Stack(
         children = [
             render.Padding(
                 pad = _spad((2, 12, 0, 0)),
-                child = render.Image(coverart_img, width = _s(18), height = _s(18)),
+                child = render.Image(ctx["coverart_img"], width = _s(18), height = _s(18)),
             ),
             render.Padding(
                 pad = _spad((2, 2, 2, 1)),
                 child = render.Marquee(
                     child = render.Text(
-                        content = track_upper,
+                        content = ctx["track_upper"],
                         font = "terminus-20" if canvas.is2x() else "6x10",
-                        color = song_title_color or "#B90000",
+                        color = ctx["song_title_color"] or "#B90000",
                     ),
                     width = _s(60),
                     offset_start = _s(2),
@@ -376,9 +344,9 @@ def _render_layout_preset3(
                 pad = _spad((22, 12, 0, 0)),
                 child = render.Marquee(
                     child = render.Text(
-                        content = artist_upper,
+                        content = ctx["artist_upper"],
                         font = "terminus-12" if canvas.is2x() else "tb-8",
-                        color = artist_name_color,
+                        color = ctx["artist_name_color"],
                     ),
                     width = _s(40),
                     scroll_direction = "horizontal",
@@ -389,9 +357,9 @@ def _render_layout_preset3(
                 pad = _spad((22, 24, 0, 0)),
                 child = render.Marquee(
                     child = render.Text(
-                        content = album_text,
+                        content = ctx["album_text"],
                         font = "tb-8" if canvas.is2x() else "tom-thumb",
-                        color = album_name_color,
+                        color = ctx["album_name_color"],
                     ),
                     width = _s(40),
                     scroll_direction = "horizontal",
@@ -400,29 +368,21 @@ def _render_layout_preset3(
             ),
             render.Padding(
                 pad = _spad((42, 25, 0, 0)),
-                child = _clock_wrapped_text(clock_text, 20),
+                child = _clock_wrapped_text(ctx["clock_text"], 20),
             ),
         ],
     )
 
-def _render_layout_preset4(
-        track,
-        song_title_color,
-        artist_name_color,
-        clock_text,
-        artist_upper,
-        album_text,
-        album_name_color,
-        coverart_img):
+def _render_layout_preset4(ctx):
     return render.Stack(
         children = [
             render.Padding(
                 pad = _spad((2, 1, 2, 1)) if canvas.is2x() else _spad((2, 0, 2, 1)),
                 child = render.Marquee(
                     child = render.Text(
-                        content = track,
+                        content = ctx["track"],
                         font = "terminus-22" if canvas.is2x() else "6x13",
-                        color = song_title_color or "#B90000",
+                        color = ctx["song_title_color"] or "#B90000",
                     ),
                     width = _s(60),
                     offset_start = _s(2),
@@ -433,15 +393,15 @@ def _render_layout_preset4(
             ),
             render.Padding(
                 pad = _spad((2, 14, 0, 0)),
-                child = render.Image(coverart_img, width = _s(16), height = _s(16)),
+                child = render.Image(ctx["coverart_img"], width = _s(16), height = _s(16)),
             ),
             render.Padding(
                 pad = _spad((21, 14, 0, 0)),
                 child = render.Marquee(
                     child = render.Text(
-                        content = artist_upper,
+                        content = ctx["artist_upper"],
                         font = "terminus-14-light" if canvas.is2x() else "tb-8",
-                        color = artist_name_color,
+                        color = ctx["artist_name_color"],
                     ),
                     width = _s(41),
                     offset_start = _s(4),
@@ -453,9 +413,9 @@ def _render_layout_preset4(
                 pad = _spad((21, 24, 0, 0)),
                 child = render.Marquee(
                     child = render.Text(
-                        content = album_text,
+                        content = ctx["album_text"],
                         font = "6x10" if canvas.is2x() else "tom-thumb",
-                        color = album_name_color,
+                        color = ctx["album_name_color"],
                     ),
                     width = _s(41),
                     offset_start = _s(4),
@@ -465,7 +425,7 @@ def _render_layout_preset4(
             ),
             render.Padding(
                 pad = _spad((42, 25, 0, 0)),
-                child = _clock_wrapped_text(clock_text, 20),
+                child = _clock_wrapped_text(ctx["clock_text"], 20),
             ),
         ],
     )
@@ -593,25 +553,26 @@ def now_playing(config, username, track, artist, album, coverarturl, coverart, s
 
     has_album_art = coverart != None and coverart != "" and not _is_default_last_fm_image(coverarturl)
     coverart_img = _cover_art_src(coverart, has_album_art)
+    layout_ctx = {
+        "username": username,
+        "track": track,
+        "artist": artist,
+        "song_title_color": song_title_color,
+        "artist_name_color": artist_name_color,
+        "show_clock": show_clock,
+        "clock_text": clock_text,
+        "track_upper": track_upper,
+        "artist_upper": artist_upper,
+        "album_text": album_text,
+        "album_name_color": album_name_color,
+        "has_album_art": has_album_art,
+        "coverart_img": coverart_img,
+    }
 
     layout_renderer = LAYOUT_RENDERERS.get(config.get("layout"))
     layout = render.Text("")
     if layout_renderer != None:
-        layout = layout_renderer(
-            username = username,
-            track = track,
-            artist = artist,
-            song_title_color = song_title_color,
-            artist_name_color = artist_name_color,
-            show_clock = show_clock,
-            clock_text = clock_text,
-            track_upper = track_upper,
-            artist_upper = artist_upper,
-            album_text = album_text,
-            album_name_color = album_name_color,
-            has_album_art = has_album_art,
-            coverart_img = coverart_img,
-        )
+        layout = layout_renderer(layout_ctx)
 
     if is_stale:
         layout = render.Stack(
@@ -713,7 +674,7 @@ def main(config):
         song_title = _as_text(info.get("name"))
         artist_name = _as_text(info.get("artist").get("#text"))
         album_name = _as_text(info.get("album").get("#text"))
-        is_now_playing = info.get("is_now_playing") == True
+        is_now_playing = info.get("is_now_playing")
         is_stale = False
 
         cover_art_url = ""
