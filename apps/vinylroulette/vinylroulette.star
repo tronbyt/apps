@@ -513,7 +513,7 @@ def get_target_display_frames(config, root_delay_ms):
     Keep this aligned with Tronbyt's per-app Display Time Seconds.
     """
     total_ms = 15000  # 15s default
-    display_time_raw = ("%s" % config.str("display_time_seconds", "15")).strip()
+    display_time_raw = config.str("display_time_seconds", "15").strip()
     if display_time_raw.isdigit():
         parsed_seconds = int(display_time_raw)
         if parsed_seconds > 0:
@@ -547,7 +547,7 @@ def repeat_child_to_cover_frames(child, min_frames):
     if loops == 1:
         return child
 
-    return render.Sequence(children = hold(child, loops))
+    return render.Sequence(children = [child] * loops)
 
 def render_with_optional_logo_intro(config, main_child, root_delay_ms):
     """Wrap main content with an optional centered intro logo screen."""
