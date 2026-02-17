@@ -203,6 +203,7 @@ def rgb_to_hex(r, g, b):
     def to_hex(n):
         hex_str = "%x" % n
         return "0" + hex_str if len(hex_str) == 1 else hex_str
+
     return to_hex(r) + to_hex(g) + to_hex(b)
 
 def hex_to_rgb(hex_color):
