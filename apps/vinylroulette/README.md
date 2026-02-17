@@ -11,6 +11,7 @@ Display a random vinyl from your Discogs collection on your Tidbyt device!
 - 🖼️ Displays album artwork (thumbnail)
 - 📝 Shows artist name and album title (with marquee scrolling for long names)
 - 🔢 Optional stats line with year, track count, and total album duration
+- ⏲️ Optional `display_time_seconds` control to match Tronbyt's per-app display slot and prevent intro replay
 - 📂 Filters by Discogs folder IDs using `filter_by_folder` (comma-separated IDs; use `0` or leave blank for all folders)
 - 🚫 Supports exclusion filters for folder IDs and artist IDs
 - ⏱️ Caches data to minimize API calls (collection metadata 6h, release details 24h, folder names 24h)
@@ -55,6 +56,7 @@ pixlet serve -2 vinylroulette.star
 - `filter_by_folder` (optional): One or more folder IDs separated by commas (example: `12345,67890`). Use `0` or leave blank for all folders.
 - `excluded_folders` (optional): One or more folder IDs to exclude
 - `excluded_artists` (optional): One or more artist IDs to exclude
+- `display_time_seconds` (optional, shown when `show_logo_intro` is enabled): Whole seconds for this app's frame budget. Set this to the same value as Tronbyt's per-app **Display Time Seconds**.
 
 ## How It Works
 
