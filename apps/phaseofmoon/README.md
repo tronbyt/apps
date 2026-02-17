@@ -39,9 +39,9 @@ The app schema exposes these settings:
 From this app directory:
 
 ```bash
-pixlet check phaseofmoon.star
-pixlet render phaseofmoon.star
-pixlet serve phaseofmoon.star
+pixlet check phase_of_moon.star
+pixlet render phase_of_moon.star
+pixlet serve phase_of_moon.star
 ```
 
 For 2x testing:
