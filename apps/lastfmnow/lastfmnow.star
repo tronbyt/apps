@@ -111,6 +111,8 @@ def _download_cover_art(cover_art_url):
     if _is_default_last_fm_image(cover_art_url):
         return ""
 
+    if not cover_art_url.startswith("https://"):
+        return ""
     response = http.get(cover_art_url)
     if response.status_code != 200:
         return ""
@@ -269,7 +271,6 @@ def _render_layout_preset2(ctx):
                 child = render.Image(ctx["coverart_img"], width = _s(32)),
             ),
             render.Box(
-                color = "#00FF0000",
                 child = render.Padding(
                     pad = _spad((0, 0, 1, 1)) if ctx["has_album_art"] else _spad((0, 0, 0, 1)),
                     color = "#FF000000",
@@ -279,7 +280,6 @@ def _render_layout_preset2(ctx):
                         expanded = False,
                         children = [
                             render.Box(
-                                color = "#0000FF00",
                                 height = _s(10),
                             ),
                             render.Padding(
@@ -674,7 +674,7 @@ def main(config):
         song_title = _as_text(info.get("name"))
         artist_name = _as_text(info.get("artist").get("#text"))
         album_name = _as_text(info.get("album").get("#text"))
-        is_now_playing = info.get("is_now_playing") == True
+        is_now_playing = info.get("is_now_playing")
         is_stale = False
 
         cover_art_url = ""
