@@ -128,7 +128,7 @@ def main(config):
                 if p < pulse_duration_fraction:
                     # Map p (0..0.3) to 0..PI
                     # sin(0)..sin(PI) -> 0..1..0
-                    val = math.sin((p / pulse_duration_fraction) * 3.14159)
+                    val = math.sin((p / pulse_duration_fraction) * math.pi)
 
                     # Dip brightness to 0.4 then back to 1.0
                     factor = 1.0 - (0.6 * val)
@@ -200,14 +200,7 @@ def main(config):
         )
 
 def rgb_to_hex(r, g, b):
-    return "%x%x%x%x%x%x" % (
-        r // 16,
-        r % 16,
-        g // 16,
-        g % 16,
-        b // 16,
-        b % 16,
-    )
+    return "%02x%02x%02x" % (r, g, b)
 
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip("#")
@@ -318,12 +311,21 @@ def get_schema():
                 icon = "palette",
                 default = "#008080",
             ),
-            schema.Text(
+            schema.Dropdown(
                 id = "breath_duration",
                 name = "Breath Duration",
                 desc = "Cycle duration (sec) & dot count",
                 icon = "clock",
                 default = "4",
+                options = [
+                    schema.Option(display = "2 seconds", value = "2"),
+                    schema.Option(display = "3 seconds", value = "3"),
+                    schema.Option(display = "4 seconds", value = "4"),
+                    schema.Option(display = "5 seconds", value = "5"),
+                    schema.Option(display = "6 seconds", value = "6"),
+                    schema.Option(display = "7 seconds", value = "7"),
+                    schema.Option(display = "8 seconds", value = "8"),
+                ],
             ),
         ],
     )
