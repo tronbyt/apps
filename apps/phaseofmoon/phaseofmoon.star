@@ -31,22 +31,22 @@ Author: Alan Fleming
 #
 
 load("encoding/json.star", "json")
-load("images/phase_first_quarter.png", PHASE_3_IMAGE_1X = "file")
-load("images/phase_first_quarter_zh.png", ZH_3_IMAGE_1X = "file")
-load("images/phase_full_moon.png", PHASE_5_IMAGE_1X = "file")
-load("images/phase_full_moon_zh.png", ZH_5_IMAGE_1X = "file")
-load("images/phase_last_quarter.png", PHASE_7_IMAGE_1X = "file")
-load("images/phase_last_quarter_zh.png", ZH_7_IMAGE_1X = "file")
-load("images/phase_new_moon.png", PHASE_1_IMAGE_1X = "file")
-load("images/phase_new_moon_zh.png", ZH_1_IMAGE_1X = "file")
-load("images/phase_waning_crescent.png", PHASE_8_IMAGE_1X = "file")
-load("images/phase_waning_crescent_zh.png", ZH_8_IMAGE_1X = "file")
-load("images/phase_waning_gibbous.png", PHASE_6_IMAGE_1X = "file")
-load("images/phase_waning_gibbous_zh.png", ZH_6_IMAGE_1X = "file")
-load("images/phase_waxing_crescent.png", PHASE_2_IMAGE_1X = "file")
-load("images/phase_waxing_crescent_zh.png", ZH_2_IMAGE_1X = "file")
-load("images/phase_waxing_gibbous.png", PHASE_4_IMAGE_1X = "file")
-load("images/phase_waxing_gibbous_zh.png", ZH_4_IMAGE_1X = "file")
+load("images/phase_first_quarter.png", PHASE_FIRST_QUARTER_ASSET_1X = "file")
+load("images/phase_first_quarter_zh.png", PHASE_FIRST_QUARTER_ZH_ASSET_1X = "file")
+load("images/phase_full_moon.png", PHASE_FULL_MOON_ASSET_1X = "file")
+load("images/phase_full_moon_zh.png", PHASE_FULL_MOON_ZH_ASSET_1X = "file")
+load("images/phase_last_quarter.png", PHASE_LAST_QUARTER_ASSET_1X = "file")
+load("images/phase_last_quarter_zh.png", PHASE_LAST_QUARTER_ZH_ASSET_1X = "file")
+load("images/phase_new_moon.png", PHASE_NEW_MOON_ASSET_1X = "file")
+load("images/phase_new_moon_zh.png", PHASE_NEW_MOON_ZH_ASSET_1X = "file")
+load("images/phase_waning_crescent.png", PHASE_WANING_CRESCENT_ASSET_1X = "file")
+load("images/phase_waning_crescent_zh.png", PHASE_WANING_CRESCENT_ZH_ASSET_1X = "file")
+load("images/phase_waning_gibbous.png", PHASE_WANING_GIBBOUS_ASSET_1X = "file")
+load("images/phase_waning_gibbous_zh.png", PHASE_WANING_GIBBOUS_ZH_ASSET_1X = "file")
+load("images/phase_waxing_crescent.png", PHASE_WAXING_CRESCENT_ASSET_1X = "file")
+load("images/phase_waxing_crescent_zh.png", PHASE_WAXING_CRESCENT_ZH_ASSET_1X = "file")
+load("images/phase_waxing_gibbous.png", PHASE_WAXING_GIBBOUS_ASSET_1X = "file")
+load("images/phase_waxing_gibbous_zh.png", PHASE_WAXING_GIBBOUS_ZH_ASSET_1X = "file")
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -81,15 +81,15 @@ FIRSTMOON = 947182440  # Saturday, 6 January 2000 18:14:00 in unix epoch time
 # Moon Images
 # Rendered to 30x30 from NASA images at https://spaceplace.nasa.gov/oreo-moon/en/
 PHASE_IMAGES = [
-    PHASE_1_IMAGE_1X,
-    PHASE_2_IMAGE_1X,
-    PHASE_3_IMAGE_1X,
-    PHASE_4_IMAGE_1X,
-    PHASE_5_IMAGE_1X,
-    PHASE_6_IMAGE_1X,
-    PHASE_7_IMAGE_1X,
-    PHASE_8_IMAGE_1X,
-    PHASE_1_IMAGE_1X,
+    PHASE_NEW_MOON_ASSET_1X,
+    PHASE_WAXING_CRESCENT_ASSET_1X,
+    PHASE_FIRST_QUARTER_ASSET_1X,
+    PHASE_WAXING_GIBBOUS_ASSET_1X,
+    PHASE_FULL_MOON_ASSET_1X,
+    PHASE_WANING_GIBBOUS_ASSET_1X,
+    PHASE_LAST_QUARTER_ASSET_1X,
+    PHASE_WANING_CRESCENT_ASSET_1X,
+    PHASE_NEW_MOON_ASSET_1X,
 ]
 
 # Phase of the moon data.
@@ -103,15 +103,15 @@ PHASE_CHANGES = [0, 1, 6.38264692644, 8.38264692644, 13.76529385288, 15.76529385
 
 # Moon phases in Chinese (simplified).
 MOON_PHASES_ZH = [
-    ZH_1_IMAGE_1X,
-    ZH_2_IMAGE_1X,
-    ZH_3_IMAGE_1X,
-    ZH_4_IMAGE_1X,
-    ZH_5_IMAGE_1X,
-    ZH_6_IMAGE_1X,
-    ZH_7_IMAGE_1X,
-    ZH_8_IMAGE_1X,
-    ZH_1_IMAGE_1X,
+    PHASE_NEW_MOON_ZH_ASSET_1X,
+    PHASE_WAXING_CRESCENT_ZH_ASSET_1X,
+    PHASE_FIRST_QUARTER_ZH_ASSET_1X,
+    PHASE_WAXING_GIBBOUS_ZH_ASSET_1X,
+    PHASE_FULL_MOON_ZH_ASSET_1X,
+    PHASE_WANING_GIBBOUS_ZH_ASSET_1X,
+    PHASE_LAST_QUARTER_ZH_ASSET_1X,
+    PHASE_WANING_CRESCENT_ZH_ASSET_1X,
+    PHASE_NEW_MOON_ZH_ASSET_1X,
 ]
 
 def scaled_pad(left, top, right, bottom, scale):
