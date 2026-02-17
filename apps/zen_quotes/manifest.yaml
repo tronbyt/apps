@@ -3,7 +3,7 @@ id: zen-quotes
 name: Zen Quotes
 summary: Daily Zen quotes
 desc: Display the Zen Quote of the Day and a Zen breathing exercise.
-author: brombomb
+author: Brombomb
 fileName: zen_quotes.star
 packageName: zenquotes
 recommendedInterval: 1440
