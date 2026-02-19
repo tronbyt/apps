@@ -156,7 +156,6 @@ def main(config):
             )
             render_element_networth = render.Row(
                 children = [
-                    # render.Text("  " + currency_string(networth, currency_format), color = "#ffffe0" if networth < 0 else "#90EE90", font = "tom-thumb"),
                     render.Text(" " + currency_string(networth, currency_format), color = "#eb3a23" if networth < 0 else "#90EE90", font = "tom-thumb"),
                 ],
                 main_align = "center",
@@ -171,22 +170,30 @@ def main(config):
                 ),
             )
 
-        else:
-            displayed_items.append(
-                render.Row(
-                    children = [
-                        render.Box(
-                            color = "#0000",
-                            child = render.WrappedText("No YNAB API Key"),
-                        ),
-                    ],
-                ),
-            )
+    else:
+        displayed_items.append(
+            render.Row(
+                children = [
+                    render.Box(
+                        color = "#0000",
+                        child = render.WrappedText("No YNAB API Key"),
+                    ),
+                ],
+            ),
+        )
 
     # Create animation frames of the category balances
     animation_children = []
     frames = []
     if len(displayed_items) == 0:
+        if display_mode == 'transaction':
+            wrapped_text = "No YNAB Transactions"
+        elif display_mode == 'category':
+            wrapped_text = "No YNAB Categories"
+        elif display_mode == 'net':
+            wrapped_text = "No YNAB Accounts"
+        else:
+            wrapped_text = "Invalid Display Mode"
         frames.append(
             render.Stack(
                 children = [
@@ -194,7 +201,7 @@ def main(config):
                         children = [
                             render.Box(
                                 color = "#0000",
-                                child = render.WrappedText("No YNAB Transactions" if display_mode == "transaction" else "No YNAB Categories"),
+                                child = render.WrappedText(wrapped_text),
                             ),
                         ],
                     ),
@@ -258,7 +265,8 @@ def currency_string(full_number, currency_format):
     if decimal_separator != ".":
         formatted_number = formatted_number.replace(".", decimal_separator)
 
-    return currency_symbol + humanize.comma(int(formatted_number.split(decimal_separator)[0])) + decimal_separator + formatted_number.split(decimal_separator)[1]
+    decimal_split_num = formatted_number.split(decimal_separator)
+    return currency_symbol + humanize.comma(int(decimal_split_num[0])) + decimal_separator + decimal_split_num[1]
 
 def get_schema():
     mode_options = [
@@ -309,8 +317,8 @@ def get_schema():
             ),
             schema.Text(
                 id = "delay",
-                name = "Page delay for mult-page displays",
-                desc = "Number in miliseconds to show each page when multiple pages are rendered",
+                name = "Page delay for multi-page displays",
+                desc = "Number in milliseconds to show each page when multiple pages are rendered",
                 icon = "clock",
                 default = "100",
             ),
