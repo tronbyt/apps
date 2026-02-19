@@ -186,11 +186,11 @@ def main(config):
     animation_children = []
     frames = []
     if len(displayed_items) == 0:
-        if display_mode == 'transaction':
+        if display_mode == "transaction":
             wrapped_text = "No YNAB Transactions"
-        elif display_mode == 'category':
+        elif display_mode == "category":
             wrapped_text = "No YNAB Categories"
-        elif display_mode == 'net':
+        elif display_mode == "net":
             wrapped_text = "No YNAB Accounts"
         else:
             wrapped_text = "Invalid Display Mode"
