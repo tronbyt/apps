@@ -1,5 +1,6 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
@@ -10,13 +11,18 @@ DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 def main(config):
     access_token = config.get("access_token", None)
-    transactions_mode = config.get("transactions", None)
+    display_mode = config.get("display_mode", None)
+    delay = config.get("delay", "100")
+    if delay.isdigit():
+        delay = int(delay)
+    else:
+        delay = 100
     displayed_items = []
     if access_token:
         budget_endpoint = "https://api.ynab.com/v1/budgets/last-used/settings"
         response = http.get(budget_endpoint, headers = {"Authorization": "Bearer " + access_token}, ttl_seconds = 60000).body()
         currency_format = json.decode(response)["data"]["settings"]["currency_format"]
-        if transactions_mode:
+        if display_mode == "transaction":
             month_first_date_format = config.get("transaction_date_format", True)
             transaction_endpoint = "https://api.ynab.com/v1/budgets/last-used/transactions"
             response = http.get(transaction_endpoint, headers = {"Authorization": "Bearer " + access_token}, ttl_seconds = 60).body()
@@ -32,7 +38,7 @@ def main(config):
                 render_element_title = render.Padding(
                     render.Row(
                         children = [
-                            render.Text(("YNAB " + date_string) if transactions_mode else "YNAB Categories", color = "#ADD8E6", font = "tom-thumb"),
+                            render.Text(("YNAB " + date_string) if transaction_date else "YNAB Categories", color = "#ADD8E6", font = "tom-thumb"),
                         ],
                         main_align = "center",
                         cross_align = "center",
@@ -84,7 +90,7 @@ def main(config):
                         ],
                     ),
                 )
-        else:
+        elif display_mode == "category":
             month_endpoint = "https://api.ynab.com/v1/budgets/last-used/months/current"
             response = http.get(month_endpoint, headers = {"Authorization": "Bearer " + access_token}, ttl_seconds = 60).body()
             categories = json.decode(response)["data"]["month"]["categories"]
@@ -132,17 +138,50 @@ def main(config):
                         ),
                     )
 
-    else:
-        displayed_items.append(
-            render.Row(
+        elif display_mode == "net":
+            accounts_endpoint = "https://api.ynab.com/v1/budgets/last-used/accounts"
+            response = http.get(accounts_endpoint, headers = {"Authorization": "Bearer " + access_token}, ttl_seconds = 60).body()
+            accounts = json.decode(response)["data"]["accounts"]
+
+            networth = 0
+            for account in accounts:
+                networth += account["balance"]
+
+            render_element = render.Row(
                 children = [
-                    render.Box(
-                        color = "#0000",
-                        child = render.WrappedText("No YNAB API Key"),
-                    ),
+                    render.Text("NET WORTH", color = "#ADD8E6", font = "tom-thumb"),
                 ],
-            ),
-        )
+                main_align = "center",
+                cross_align = "center",
+            )
+            render_element_networth = render.Row(
+                children = [
+                    # render.Text("  " + currency_string(networth, currency_format), color = "#ffffe0" if networth < 0 else "#90EE90", font = "tom-thumb"),
+                    render.Text(" " + currency_string(networth, currency_format), color = "#eb3a23" if networth < 0 else "#90EE90", font = "tom-thumb"),
+                ],
+                main_align = "center",
+                cross_align = "center",
+            )
+            displayed_items.append(
+                render.Column(
+                    children = [
+                        render_element,
+                        render_element_networth,
+                    ],
+                ),
+            )
+
+        else:
+            displayed_items.append(
+                render.Row(
+                    children = [
+                        render.Box(
+                            color = "#0000",
+                            child = render.WrappedText("No YNAB API Key"),
+                        ),
+                    ],
+                ),
+            )
 
     # Create animation frames of the category balances
     animation_children = []
@@ -155,7 +194,7 @@ def main(config):
                         children = [
                             render.Box(
                                 color = "#0000",
-                                child = render.WrappedText("No YNAB Transactions" if transactions_mode else "No YNAB Categories"),
+                                child = render.WrappedText("No YNAB Transactions" if display_mode == "transaction" else "No YNAB Categories"),
                             ),
                         ],
                     ),
@@ -187,6 +226,7 @@ def main(config):
         animation_children.append(frames[math.floor(i / split)])
 
     return render.Root(
+        delay = delay,
         child = render.Column(
             children = [
                 render.Sequence(
@@ -208,9 +248,33 @@ def currency_string(full_number, currency_format):
     # YNAB pads the number with an extra decimal place
     full_number = full_number / 10
     decimal_number = full_number / (math.pow(10, decimal_digits))
-    return currency_symbol + str(decimal_number).replace(".", decimal_separator) + ("0" if full_number % 10 == 0 else "")
+
+    # Create the pattern: e.g., "#.##" for 2 digits
+    # This prevents exponential notation and forces fixed precision
+    pattern = "#." + ("#" * decimal_digits)
+    formatted_number = humanize.float(pattern, decimal_number)
+
+    # Replace standard dot with your local separator if needed
+    if decimal_separator != ".":
+        formatted_number = formatted_number.replace(".", decimal_separator)
+
+    return currency_symbol + humanize.comma(int(formatted_number.split(decimal_separator)[0])) + decimal_separator + formatted_number.split(decimal_separator)[1]
 
 def get_schema():
+    mode_options = [
+        schema.Option(
+            display = "Category Mode",
+            value = "category",
+        ),
+        schema.Option(
+            display = "Transaction Mode",
+            value = "transaction",
+        ),
+        schema.Option(
+            display = "Net Worth Mode",
+            value = "net",
+        ),
+    ]
     return schema.Schema(
         version = "1",
         fields = [
@@ -221,12 +285,13 @@ def get_schema():
                 icon = "key",
                 secret = True,
             ),
-            schema.Toggle(
-                id = "transactions",
-                name = "Transaction Mode",
-                desc = "Show recent transactions",
+            schema.Dropdown(
+                id = "display_mode",
+                name = "Display Mode",
+                desc = "Determine which mode to display",
                 icon = "creditCard",
-                default = True,
+                default = mode_options[1].value,
+                options = mode_options,
             ),
             schema.Toggle(
                 id = "transaction_date_format",
@@ -241,6 +306,13 @@ def get_schema():
                 desc = "Toggle partially spent categories",
                 icon = "dollarSign",
                 default = True,
+            ),
+            schema.Text(
+                id = "delay",
+                name = "Page delay for mult-page displays",
+                desc = "Number in miliseconds to show each page when multiple pages are rendered",
+                icon = "clock",
+                default = "100",
             ),
         ],
     )
