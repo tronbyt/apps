@@ -86,6 +86,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Your Todoist API token. Find it in Todoist Settings > Integrations > Developer.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "name",
