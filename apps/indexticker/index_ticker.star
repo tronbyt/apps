@@ -225,7 +225,7 @@ def print_market(Current, DisplayDiff, DiffColor, IndexSelection, Interval):
 def getTitle(IndexSelection):
     title = INDEX_MAP.get(IndexSelection, "")
     if title == "":
-        title = IndexSelection.replace("%5E", "^").upper()
+        title = IndexSelection.replace("%5E", "^")
     return title
 
 def get_schema():
