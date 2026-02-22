@@ -7,7 +7,8 @@ Author: M0ntyP
 v1.1 - Added BSE and NIFTY indices
 v1.2 - Added toggle for showing % change or pts change
 v1.3 - Added NIKKEI, Europe 350, Global 100, Global 1200, NZX50 indices; support null indicator values in chart
-v1.4 - Added DAX, CAC 40, Hang Seng, S&P/TSX, SSE, STI to the list of indices 
+v1.4 - Added DAX, CAC 40, Hang Seng, S&P/TSX, SSE, STI to the list of indices
+v1.5 - Added Custom ticker option for manually entering any Yahoo Finance ticker symbol
 """
 
 load("animation.star", "animation")
@@ -48,11 +49,28 @@ INDEX_MAP = {
     "%5ESTI": "STI",
 }
 
+CUSTOM_OPTION = "__custom__"
+
 def main(config):
     IndexSelection = config.get("Index", "%5Eaxjo")
     RangeSelection = config.get("Range", "5m&range=1d")
     DisplaySelection = config.get("DiffDisplay", "true")
     Interval = "1D"
+
+    if IndexSelection == CUSTOM_OPTION:
+        CustomTicker = config.get("CustomTicker", "").strip()
+        if CustomTicker == "":
+            return render.Root(
+                child = render.Box(
+                    render.WrappedText(
+                        content = "Enter a custom ticker symbol",
+                        font = FONT,
+                        color = COLOR_TITLE,
+                        align = "center",
+                    ),
+                ),
+            )
+        IndexSelection = CustomTicker
 
     INDEX_URL = INDEX_PREFIX + IndexSelection + INDEX_SUFFIX + RangeSelection
     #print(INDEX_URL)
@@ -205,7 +223,10 @@ def print_market(Current, DisplayDiff, DiffColor, IndexSelection, Interval):
     )
 
 def getTitle(IndexSelection):
-    return INDEX_MAP.get(IndexSelection, "")
+    title = INDEX_MAP.get(IndexSelection, "")
+    if title == "":
+        title = IndexSelection.replace("%5E", "^").upper()
+    return title
 
 def get_schema():
     return schema.Schema(
@@ -218,6 +239,13 @@ def get_schema():
                 icon = "dollarSign",
                 default = IndexOptions[0].value,
                 options = IndexOptions,
+            ),
+            schema.Text(
+                id = "CustomTicker",
+                name = "Custom Ticker",
+                desc = "Enter a custom ticker symbol (used when 'Custom' is selected above)",
+                icon = "pencil",
+                default = "",
             ),
             schema.Dropdown(
                 id = "Range",
@@ -240,6 +268,8 @@ def get_schema():
 IndexOptions = [
     schema.Option(display = title, value = value)
     for value, title in INDEX_MAP.items()
+] + [
+    schema.Option(display = "Custom", value = CUSTOM_OPTION),
 ]
 
 RangeOptions = [
