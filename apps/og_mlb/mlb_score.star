@@ -634,7 +634,7 @@ def count_tile(inning, top_half, balls, strikes, outs, status_text):
                 render.Row(
                     children = [
                         render.Column(
-                            children = [spacer_h(1), tiny_arrow(top_half)],
+                            children = [spacer_h(3), tiny_arrow(top_half)],
                             main_align = "start",
                             cross_align = "start",
                         ),
@@ -714,7 +714,7 @@ def team_tile(bg, code3, score, logo_url):
             ),
             spacer_h(2),
             render.Row(
-                children = [render.Text(str(score), font = "6x10-rounded", color = fg)],
+                children = [render.Text(str(score), font = "5x8", color = fg)],
                 main_align = "start",
                 cross_align = "center",
             ),
@@ -732,7 +732,7 @@ def left_panel(away, home, ascore, hscore, away_bg, home_bg, away_logo_url, home
     away_tile = team_tile(away_bg, away, ascore, away_logo_url)
     home_tile = team_tile(home_bg, home, hscore, home_logo_url)
     return render.Box(
-        width = 35,
+        width = 36,
         child = render.Column(
             children = [away_tile, home_tile],
             main_align = "start",
@@ -746,7 +746,7 @@ def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final,
         top = bases_tile(False, False, False)
         bot = count_tile(inning, top_half, balls, strikes, outs, status_text)
         return render.Box(
-            width = 29,
+            width = 28,
             child = render.Column(
                 children = [top, bot],
                 main_align = "start",
@@ -770,20 +770,12 @@ def get_game_data(config):
     d = default_game()
     espn_teams = get_espn_team_map()
 
-    team_id = 134
-    v = config.get("team_id")
-    if type(v) == "int":
-        team_id = v
-    elif type(v) == "string":
-        team_id = int_from_digits(v, team_id)
+    team_id = 111
     team_code = as_str(config.get("team"), "")
     if team_code in TEAM_ID_BY_CODE:
         team_id = TEAM_ID_BY_CODE[team_code]
 
-    date = as_str(config.get("date"), "")
     schedule_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=" + str(team_id) + "&hydrate=linescore"
-    if date != "":
-        schedule_url = schedule_url + "&date=" + date
 
     resp = http.get(url = schedule_url, ttl_seconds = 120)
     if resp.status_code != 200:
@@ -933,12 +925,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(
+            schema.Dropdown(
                 id = "team",
-                name = "Team Code",
-                desc = "MLB team code (e.g. BOS, NYY, TB).",
-                icon = "number",
-                default = "BOS",
+                name = "Team Focus",
+                desc = "Only show scores for selected team.",
+                icon = "gear",
+                default = teamOptions[0].value,
+                options = teamOptions,
             ),
             schema.Toggle(
                 id = "gameday_only",
@@ -949,3 +942,126 @@ def get_schema():
             ),
         ],
     )
+
+teamOptions = [
+    schema.Option(
+        display = "Arizona Diamondbacks",
+        value = "ARI",
+    ),
+    schema.Option(
+        display = "Athletics",
+        value = "ATH",
+    ),
+    schema.Option(
+        display = "Atlanta Braves",
+        value = "ATL",
+    ),
+    schema.Option(
+        display = "Baltimore Orioles",
+        value = "BAL",
+    ),
+    schema.Option(
+        display = "Boston Red Sox",
+        value = "BOS",
+    ),
+    schema.Option(
+        display = "Chicago Cubs",
+        value = "CHC",
+    ),
+    schema.Option(
+        display = "Chicago White Sox",
+        value = "CHW",
+    ),
+    schema.Option(
+        display = "Cincinnati Reds",
+        value = "CIN",
+    ),
+    schema.Option(
+        display = "Cleveland Guardians",
+        value = "CLE",
+    ),
+    schema.Option(
+        display = "Colorado Rockies",
+        value = "COL",
+    ),
+    schema.Option(
+        display = "Detroit Tigers",
+        value = "DET",
+    ),
+    schema.Option(
+        display = "Houston Astros",
+        value = "HOU",
+    ),
+    schema.Option(
+        display = "Kansas City Royals",
+        value = "KC",
+    ),
+    schema.Option(
+        display = "Los Angeles Angels",
+        value = "LAA",
+    ),
+    schema.Option(
+        display = "Los Angeles Dodgers",
+        value = "LAD",
+    ),
+    schema.Option(
+        display = "Miami Marlins",
+        value = "MIA",
+    ),
+    schema.Option(
+        display = "Milwaukee Brewers",
+        value = "MIL",
+    ),
+    schema.Option(
+        display = "Minnesota Twins",
+        value = "MIN",
+    ),
+    schema.Option(
+        display = "New York Mets",
+        value = "NYM",
+    ),
+    schema.Option(
+        display = "New York Yankees",
+        value = "NYY",
+    ),
+    schema.Option(
+        display = "Philadelphia Phillies",
+        value = "PHI",
+    ),
+    schema.Option(
+        display = "Pittsburgh Pirates",
+        value = "PIT",
+    ),
+    schema.Option(
+        display = "San Diego Padres",
+        value = "SD",
+    ),
+    schema.Option(
+        display = "San Francisco Giants",
+        value = "SF",
+    ),
+    schema.Option(
+        display = "Seattle Mariners",
+        value = "SEA",
+    ),
+    schema.Option(
+        display = "St. Louis Cardinals",
+        value = "STL",
+    ),
+    schema.Option(
+        display = "Tampa Bay Rays",
+        value = "TB",
+    ),
+    schema.Option(
+        display = "Texas Rangers",
+        value = "TEX",
+    ),
+    schema.Option(
+        display = "Toronto Blue Jays",
+        value = "TOR",
+    ),
+    schema.Option(
+        display = "Washington Nationals",
+        value = "WSH",
+    ),
+]
