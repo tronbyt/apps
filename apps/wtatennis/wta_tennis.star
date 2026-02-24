@@ -80,6 +80,10 @@ Bug fix - allowed for situations where "Womens Doubles" is first listed event fo
 
 v1.15
 Updated for 2026 season
+
+v1.16
+Updated method of finding "Womens Singles" event when its not 1st event of the tournament
+Updated some other logic
 """
 
 load("encoding/json.star", "json")
@@ -100,7 +104,7 @@ def main(config):
     RotationSpeed = config.get("speed", "3")
 
     # hold 1 min cache for live scores
-    CacheData = get_cachable_data(WTA_SCORES_URL, 60)
+    CacheData = get_cachable_data(WTA_SCORES_URL, 120)
     WTA_JSON = json.decode(CacheData)
 
     Display1 = []
@@ -138,8 +142,13 @@ def main(config):
             if diffTournStart.hours < 0 and diffTournEnd.hours > 0:
                 # Sometimes results for both ATP & WTA will be listed, so check if the first "groupings" is Mens Singles or Womens Doubles
                 # and if so, Womens Singles will be next (GroupingsID = 1)
-                if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "women-doubles"):
-                    GroupingsID = 1
+                if WTA_JSON["events"][x]["groupings"][GroupingsID]["grouping"]["slug"] != "womens-singles":
+                    for q in range(0, len(WTA_JSON["events"][x]["groupings"]), 1):
+                        if WTA_JSON["events"][x]["groupings"][q]["grouping"]["slug"] == "womens-singles":
+                            GroupingsID = q
+                            break
+                        else:
+                            continue
                 TotalMatches = len(WTA_JSON["events"][x]["groupings"][GroupingsID]["competitions"])
 
                 for y in range(0, TotalMatches, 1):
@@ -219,15 +228,9 @@ def main(config):
 
                 # check if we are between the start & end date of the tournament
                 if diffTournStart.hours < 0 and diffTournEnd.hours > 0:
-                    if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] == "mens-singles":
-                        GroupingsID = 1
-                    if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] == "womens-doubles":
-                        GroupingsID = 1
                     for y in range(0, len(WTA_JSON["events"][x]["groupings"][GroupingsID]["competitions"]), 1):
-                        MatchState = WTA_JSON["events"][x]["groupings"][GroupingsID]["competitions"][y]["status"]["type"]["description"]
-
                         # if the match is completed and the start time of the match was < 24 hrs ago, lets add it to the list of completed matches
-                        if MatchState == "Final" or MatchState == "Retired" or MatchState == "Walkover":
+                        if WTA_JSON["events"][x]["groupings"][GroupingsID]["competitions"][y]["status"]["type"]["completed"]:
                             MatchTime = WTA_JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][y]["date"]
                             MatchTime = time.parse_time(MatchTime, format = "2006-01-02T15:04Z")
                             diff = MatchTime - now
@@ -269,8 +272,8 @@ def main(config):
 
                 # check if we are between the start & end date of the tournament
                 if diffTournStart.hours < 0 and diffTournEnd.hours > 0:
-                    if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "women-doubles"):
-                        GroupingsID = 1
+                    #if WTA_JSON["events"][x]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "women-doubles"):
+                    #    GroupingsID = 1
                     for y in range(0, len(WTA_PREFIX), 1):
                         # if the match is scheduled ("pre") and the start time of the match is scheduled for next 12 hrs, add it to the list of scheduled matches
                         if WTA_PREFIX[y]["status"]["type"]["state"] == "pre":
@@ -377,9 +380,14 @@ def getLiveScores(SelectedTourneyID, EventIndex, InProgressMatchList, JSON):
             Player1NameColor = "#fff"
             Player2NameColor = "#fff"
 
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "womens-doubles"):
-                GroupingsID = 1
-            
+            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "womens-singles":
+                for q in range(0, len(JSON["events"][EventIndex]["groupings"]), 1):
+                    if JSON["events"][EventIndex]["groupings"][q]["grouping"]["slug"] == "womens-singles":
+                        GroupingsID = q
+                        break
+                    else:
+                        continue
+
             # pop the index from the list and go straight to that match
             x = InProgressMatchList.pop()
 
@@ -631,9 +639,14 @@ def getCompletedMatches(SelectedTourneyID, EventIndex, CompletedMatchList, JSON)
             # pop the index from the list and go straight to that match
             x = CompletedMatchList.pop()
 
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] in ("mens-singles", "womens-doubles"):
-                GroupingsID = 1
-           
+            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "womens-singles":
+                for q in range(0, len(JSON["events"][EventIndex]["groupings"]), 1):
+                    if JSON["events"][EventIndex]["groupings"][q]["grouping"]["slug"] == "womens-singles":
+                        GroupingsID = q
+                        break
+                    else:
+                        continue
+
             Player1_Name = JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][0]["athlete"]["shortName"]
             Player2_Name = JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][1]["athlete"]["shortName"]
 
@@ -966,10 +979,13 @@ def getScheduledMatches(SelectedTourneyID, EventIndex, ScheduledMatchList, JSON,
             # pop the index from the list and go straight to that match
             x = ScheduledMatchList.pop()
 
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] == "mens-singles":
-                GroupingsID = 1
-            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] == "womens-doubles":
-                GroupingsID = 1
+            if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "womens-singles":
+                for q in range(0, len(JSON["events"][EventIndex]["groupings"]), 1):
+                    if JSON["events"][EventIndex]["groupings"][q]["grouping"]["slug"] == "womens-singles":
+                        GroupingsID = q
+                        break
+                    else:
+                        continue
 
             # check that we have players before displaying them or display blank line
             if "athlete" in JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][0]:
