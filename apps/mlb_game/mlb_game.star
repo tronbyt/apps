@@ -970,7 +970,7 @@ teamOptions = [
     ),
     schema.Option(
         display = "Chicago White Sox",
-        value = "CHW",
+        value = "CWS",
     ),
     schema.Option(
         display = "Cincinnati Reds",
