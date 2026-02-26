@@ -7,3 +7,4 @@ author: Henry So, Jr.
 fileName: digital_rain.star
 packageName: digitalrain
 recommendedInterval: 5
+supports2x: true
