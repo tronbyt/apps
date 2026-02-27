@@ -11,7 +11,8 @@ load("random.star", "random")
 load("render.star", "render")
 load("time.star", "time")
 
-VERSION = 24314
+VERSION = 26057
+# 20260226 - fix data source - national day has changed their RSS feeds.  use same method we use for TRMNL.
 
 TEXT_COLOR = "#fff"
 TITLE_TEXT_COLOR = "#fff"
@@ -36,7 +37,7 @@ def main(config):
     rc, data = getData()
 
     if rc == 0:
-        json_data = data["national_day"][0][now_unformatted.format("January-2-2006").lower()]
+        json_data = data["today"]
     else:
         json_data = data
 
