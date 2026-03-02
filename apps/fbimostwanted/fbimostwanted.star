@@ -53,17 +53,17 @@ def get_top_ten_wanted():
     if cached != None:
         return json.decode(cached)
 
-    # Simplified URL: 'pageSize' is the correct key. 
+    # Simplified URL: 'pageSize' is the correct key.
     # Since there are only ever 10, one page is plenty.
     url = "{}?poster_classification=ten".format(FBI_BASE_URL)
 
     resp = http.get(
         url = url,
         headers = {
-            "Accept": "application/json", 
-            "User-Agent": "TidbytApp/1.0"
+            "Accept": "application/json",
+            "User-Agent": "TidbytApp/1.0",
         },
-        ttl_seconds = 0, 
+        ttl_seconds = 0,
     )
 
     if resp.status_code != 200:
@@ -91,9 +91,9 @@ def get_top_ten_wanted():
 
     if top_ten:
         cache.set(FBI_CACHE_NAME, json.encode(top_ten), FBI_CACHE_TTL)
-    
+
     return top_ten
-    
+
 def main(config):
     top_ten = get_top_ten_wanted()
 
