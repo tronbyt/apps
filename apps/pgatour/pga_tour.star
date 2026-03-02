@@ -89,6 +89,9 @@ Updated timezone check
 
 v2.10.1
 Updated PLAYER_MAPPING
+
+v2.11
+Fixed bug that was showing 3rd round score as final round score
 """
 
 load("encoding/json.star", "json")
@@ -126,7 +129,7 @@ PLAYER_MAPPING = """
     "5211425": "B.Brown",
     "1407": "D.Brown",
     "4877953": "S.T.Lee",
-    "5076011": "Dumont DC",
+    "5076011": "Dumont De",
     "4355673": "B.Wu",
     "4423323": "D.Wu",
     "9127": "A.Svensson",
@@ -460,6 +463,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
         if i + x < len(s):
             playerState = s[i + x]["status"]["state"]
             playerID = s[i + x]["id"]
+            period = s[i + x]["status"]["period"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
@@ -481,6 +485,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             # if the player hasn't started their round, show their tee time in your local time
             # also check its not a playoff
             # Only show tee times if its less than 12hrs until the leader tees off
+
             if playerState == "pre":
                 if s[i + x]["status"]["playoff"] != True:
                     if ShowTeeTimes == True:
@@ -510,8 +515,10 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             if playerState == "post":
                 for i in range(0, len(t), 1):
                     if playerID == t[i]["id"]:
-                        CompletedRound = len(t[i]["linescores"]) - 2
-
+                        if period == 4:
+                            CompletedRound = 3
+                        else:
+                            CompletedRound = len(t[i]["linescores"]) - 2
                         RoundScore = t[i]["linescores"][CompletedRound]["value"]
                         ProgressStr = str(int(RoundScore))
 
