@@ -13,7 +13,7 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FBI_BASE_URL = "https://api.fbi.gov/wanted/v1/list"
-FBI_CACHE_NAME = "fbi_top_ten"
+FBI_CACHE_NAME = "fbi_top_ten_most_wanted"
 FBI_CACHE_TTL = 6 * 60 * 60  # 6 hours
 
 FBI_BLUE = "#0033A0"  # Justice/loyalty (blue field)
@@ -53,51 +53,47 @@ def get_top_ten_wanted():
     if cached != None:
         return json.decode(cached)
 
-    all_items = []
+    # Simplified URL: 'pageSize' is the correct key. 
+    # Since there are only ever 10, one page is plenty.
+    url = "{}?poster_classification=ten".format(FBI_BASE_URL)
 
-    for page in range(1, 4):  # 4 pages
-        url = "{}/?items=50&page={}".format(FBI_BASE_URL, page)
+    resp = http.get(
+        url = url,
+        headers = {
+            "Accept": "application/json", 
+            "User-Agent": "TidbytApp/1.0"
+        },
+        ttl_seconds = 0, 
+    )
 
-        resp = http.get(
-            url = url,
-            headers = {"Accept": "application/json", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
-            ttl_seconds = 0,  # We want fresh data after the cach expires, we don't want to cache the HTTP response
-        )
+    if resp.status_code != 200:
+        return []
 
-        if resp.status_code != 200:
-            print("Page {} failed: {}".format(page, resp.status_code))
-            continue
-
-        data = resp.json()
-        if "items" in data:
-            all_items.extend(data["items"])
-
-    # Filter ONLY Ten Most Wanted
+    data = resp.json()
+    items = data.get("items", [])
     top_ten = []
-    for item in all_items:
-        if "Ten Most Wanted Fugitives" in item.get("subjects", []):
+
+    for item in items:
+        # Extra safety check: ensure it's actually a Top 10 fugitive
+        subjects = item.get("subjects", [])
+        if "Ten Most Wanted Fugitives" in subjects:
             images = item.get("images", [])
             thumb = images[0].get("thumb", "") if len(images) > 0 else ""
 
-            profile = {
+            top_ten.append({
                 "title": safe_get(item, ["title"]),
                 "reward_text": safe_get(item, ["reward_text"]),
                 "thumbnail": thumb,
-                "subjects": "; ".join(item.get("subjects", [])),
-                "place_of_birth": safe_get(item, ["place_of_birth"]),
                 "remarks": cleanup_text(clean_html(safe_get(item, ["remarks"]))),
+                "place_of_birth": safe_get(item, ["place_of_birth"]),
                 "uid": safe_get(item, ["uid"]),
-            }
+            })
 
-            top_ten.append(profile)
-
-            if len(top_ten) >= 10:
-                break  # Stop at 10
-
-    # Cache refined Top 10 list
-    cache.set(FBI_CACHE_NAME, json.encode(top_ten), FBI_CACHE_TTL)
+    if top_ten:
+        cache.set(FBI_CACHE_NAME, json.encode(top_ten), FBI_CACHE_TTL)
+    
     return top_ten
-
+    
 def main(config):
     top_ten = get_top_ten_wanted()
 
