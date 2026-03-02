@@ -179,6 +179,7 @@ def get_schema():
                 desc = "Find 'jwt_token' in your browser cookies for duolingo.com and enter it here. This is required to retrieve your XP data. The token is valid for 30 days and will be cached, but you will need to update it here each time it expires.",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "xp_target",
@@ -411,7 +412,6 @@ def main(config):
             timezone,
         )
 
-        print(DUOLINGO_XP_QUERY_URL)
         xpsummary_query = http.get(DUOLINGO_XP_QUERY_URL, headers = headers, ttl_seconds = 900)
         if xpsummary_query.status_code != 200:
             print("XP summary query failed with status %d", xpsummary_query.status_code)
