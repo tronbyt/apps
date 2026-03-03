@@ -1174,7 +1174,7 @@ def get_schema():
                 id = "include_exhibition_opponents",
                 name = "Include non-MLB opponents",
                 desc = "Show exhibitions against international, national, or other non-MLB teams.",
-                icon = "visibility",
+                icon = "gear",
                 default = False,
             ),
         ],
