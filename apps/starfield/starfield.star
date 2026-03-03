@@ -8,20 +8,21 @@ Author: gabe565
 load("math.star", "math")
 load("random.star", "random")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-WIDTH = 64
-HEIGHT = 32
-DELAY = 50
-FRAMES = 300
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
+SCALE = 2 if canvas.is2x() else 1
+DELAY = 35 if canvas.is2x() else 50
+FRAMES = 450 if canvas.is2x() else 300
 
 CENTER_X = int(WIDTH / 2)
 CENTER_Y = int(HEIGHT / 2)
 
-MIN_RADIUS = 4
-MAX_RADIUS = 38.5
+MIN_RADIUS = 4 * SCALE
+MAX_RADIUS = 38.5 * SCALE
 
 DETERMINISTIC_WINDOW_SEC = 30
 
@@ -105,14 +106,14 @@ STAR_COLORS = [
 DEFAULT_USE_CUSTOM_STAR_COLORS = False
 DEFAULT_CUSTOM_STAR_COLORS = ""
 
-DEFAULT_STAR_COUNT = 1
+DEFAULT_STAR_COUNT = 2 if canvas.is2x() else 1
 STAR_COUNTS = [
     schema.Option(
         display = "10",
         value = "10",
     ),
     schema.Option(
-        display = "25 (Default)",
+        display = "25",
         value = "25",
     ),
     schema.Option(
@@ -130,6 +131,7 @@ STAR_COUNTS = [
 ]
 
 DEFAULT_TAIL_LENGTH = 2
+MOVE_INCR_TAIL_AMOUNT = 0.14 if canvas.is2x() else 0.1
 TAIL_LENGTHS = [
     schema.Option(
         display = "Disabled",
@@ -153,23 +155,23 @@ DEFAULT_SPEED = 2
 SPEEDS = [
     schema.Option(
         display = "Slowest",
-        value = "0.2",
+        value = "0.3" if canvas.is2x() else "0.2",
     ),
     schema.Option(
         display = "Slower",
-        value = "0.5",
+        value = "0.7" if canvas.is2x() else "0.5",
     ),
     schema.Option(
         display = "Regular",
-        value = "1",
+        value = "1.4" if canvas.is2x() else "1",
     ),
     schema.Option(
         display = "Faster",
-        value = "1.3",
+        value = "1.8" if canvas.is2x() else "1.3",
     ),
     schema.Option(
         display = "Fastest",
-        value = "2",
+        value = "2.8" if canvas.is2x() else "2",
     ),
 ]
 
@@ -239,7 +241,7 @@ def make_stars(config, palette):
 
 def render_frame(config, stars):
     """Iterates over every star, moving each one then rendering a frame."""
-    streak_length = float(config.get("star_tail_length", DEFAULT_TAIL_LENGTH))
+    streak_length = float(config.get("star_tail_length", DEFAULT_TAIL_LENGTH)) / SCALE
 
     children = []
     for star in stars:
@@ -298,7 +300,7 @@ def reset_star(config, star):
     star["speed"] = random_speed(config)
 
 def move_star(star):
-    star["speed"] += 0.1
+    star["speed"] += MOVE_INCR_TAIL_AMOUNT
     star["radius"] += star["speed"]
 
 def get_alpha(radius):
