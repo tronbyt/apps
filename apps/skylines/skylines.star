@@ -19,7 +19,7 @@ BASE_HEIGHT = 32
 SCALE = SCREEN_HEIGHT // BASE_HEIGHT
 
 #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
-DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]  
+DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
 NUMBER_OF_STARS = 5
 
 display_type = [
