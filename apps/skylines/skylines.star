@@ -102,8 +102,8 @@ def get_column_bounds(screen, x, height):
 def draw_skyline(data, show_stars, colors):
     animation_frames = []
     stacked_dots = []
-    star_locations = [] 
-    
+    star_locations = []
+
     width = len(data[0])
     height = len(data)
     current_pen_y = height
@@ -145,23 +145,23 @@ def draw_skyline(data, show_stars, colors):
     for frame_idx in range(100):
         # Start with the full city
         this_frame_layers = list(stacked_dots)
-        
+
         if show_stars:
             for i, star in enumerate(star_locations):
                 # TWINKLE SPEED CONTROL:
                 # Changing // 6 to // 12 makes it twice as slow.
                 # If it's still too fast, try // 20.
                 if ((frame_idx // 12) + i) % 2 == 0:
-                    c = DEFAULT_COLORS[4] # Light Blue/White
+                    c = DEFAULT_COLORS[4]  # Light Blue/White
                 else:
-                    c = DEFAULT_COLORS[5] # Champagne/Warm White
-                
+                    c = DEFAULT_COLORS[5]  # Champagne/Warm White
+
                 this_frame_layers.append(create_dot(star[0], star[1], c))
-        
+
         animation_frames.append(render.Stack(children = this_frame_layers))
 
     return animation_frames
-    
+
 # attach as (key, coord), sort by key, and return coords in that order.
 def pseudo_shuffle(coords, seed):
     items = []
