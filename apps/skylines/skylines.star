@@ -141,9 +141,11 @@ def draw_skyline(data, show_stars, colors):
         # Start with the full city
         this_frame_layers = list(stacked_dots)
 
+        twinkle_frame_spacing = 12  # how many frames between star twinkles
+
         if show_stars:
             for i, star in enumerate(star_locations):
-                if ((frame_idx // 12) + i) % 2 == 0:
+                if ((frame_idx // twinkle_frame_spacing) + i) % 2 == 0:
                     c = DEFAULT_COLORS[4]  # Light Blue/White
                 else:
                     c = DEFAULT_COLORS[5]  # Champagne/Warm White
