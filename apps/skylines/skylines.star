@@ -98,24 +98,22 @@ def get_column_bounds(screen, x, height):
 
     return (y_top, y_bottom)
 
+# 1. Change this line back to 3 arguments
 def draw_skyline(data, show_stars, colors):
     animation_frames = []
     stacked_dots = []
+    star_locations = [] 
+    
     width = len(data[0])
     height = len(data)
     current_pen_y = height
     pixels = []
     visible_sky = []
 
+    # 1. TRACE THE CITY
     for x in range(width):
-        #to determine if the line should be written from the top or bottom,
-        #it depends on where we left off last time, and if we're closer to the top or bottom
-
         bounds = get_column_bounds(data, x, height)
-
-        # keep track of pixels of sky for each column with a 3 pixel buffer
         visible_sky.append(bounds[0] - 3)
-
         if start_from_top(bounds[0], bounds[1], current_pen_y):
             for y in range(height):
                 if data[y][x] > 0:
@@ -127,35 +125,43 @@ def draw_skyline(data, show_stars, colors):
                     pixels.append((x, y, colors[data[y][x] - 1]))
                     current_pen_y = y
 
-    for pixel in pixels:
-        x, y, color = pixel
-        stacked_dots.append(create_dot(x, y, color))
-        animation_frames.append(render.Stack(children = stacked_dots))
-
-    # add stars
+    # 2. CALCULATE STAR LOCATIONS
     if show_stars:
         potential_star_locations = []
         for i in range(len(visible_sky)):
             if (i > 0 and i < len(visible_sky) - 1):
-                # let's avoid putting a star right on a building, it's a design choice, not based on reality, but dots aren't exactly clear enough to distinguish a star from part of a building
-
                 if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
                     potential_star_locations.append((i, randomize(0, visible_sky[i] - 1)))
+        star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
 
-        potential_star_location = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
+    # 3. PHASE 1: DRAW THE CITY (Dot by Dot)
+    for pixel in pixels:
+        x, y, color = pixel
+        stacked_dots.append(create_dot(x, y, color))
+        animation_frames.append(render.Stack(children = list(stacked_dots)))
 
-        for star in potential_star_location:
-            color_number = 4 if star[0] % 2 else 5
-            stacked_dots.append(create_dot(star[0], star[1], DEFAULT_COLORS[color_number]))
-            animation_frames.append(render.Stack(children = stacked_dots))
-
-    # Add some Frames to hold the finished product
-    for _ in range(40):
-        animation_frames.append(render.Stack(children = stacked_dots))
+    # 4. PHASE 2: SLOW TWINKLE HOLD
+    # We increase the range to 100 so the "hold" lasts longer
+    for frame_idx in range(100):
+        # Start with the full city
+        this_frame_layers = list(stacked_dots)
+        
+        if show_stars:
+            for i, star in enumerate(star_locations):
+                # TWINKLE SPEED CONTROL:
+                # Changing // 6 to // 12 makes it twice as slow.
+                # If it's still too fast, try // 20.
+                if ((frame_idx // 12) + i) % 2 == 0:
+                    c = DEFAULT_COLORS[4] # Light Blue/White
+                else:
+                    c = DEFAULT_COLORS[5] # Champagne/Warm White
+                
+                this_frame_layers.append(create_dot(star[0], star[1], c))
+        
+        animation_frames.append(render.Stack(children = this_frame_layers))
 
     return animation_frames
-
-# Pseudo-shuffle: compute a deterministic "random" key from x,y and seed,
+    
 # attach as (key, coord), sort by key, and return coords in that order.
 def pseudo_shuffle(coords, seed):
     items = []
