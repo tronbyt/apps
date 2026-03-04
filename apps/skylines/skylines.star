@@ -18,7 +18,8 @@ BASE_HEIGHT = 32
 
 SCALE = SCREEN_HEIGHT // BASE_HEIGHT
 
-DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]  #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
+#1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
+DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
 NUMBER_OF_STARS = 5
 
 display_type = [
@@ -101,6 +102,8 @@ def get_column_bounds(screen, x, height):
 def draw_skyline(data, show_stars, colors):
     animation_frames = []
     stacked_dots = []
+    star_locations = []
+
     width = len(data[0])
     height = len(data)
     current_pen_y = height
@@ -108,14 +111,8 @@ def draw_skyline(data, show_stars, colors):
     visible_sky = []
 
     for x in range(width):
-        #to determine if the line should be written from the top or bottom,
-        #it depends on where we left off last time, and if we're closer to the top or bottom
-
         bounds = get_column_bounds(data, x, height)
-
-        # keep track of pixels of sky for each column with a 3 pixel buffer
         visible_sky.append(bounds[0] - 3)
-
         if start_from_top(bounds[0], bounds[1], current_pen_y):
             for y in range(height):
                 if data[y][x] > 0:
@@ -127,36 +124,38 @@ def draw_skyline(data, show_stars, colors):
                     pixels.append((x, y, colors[data[y][x] - 1]))
                     current_pen_y = y
 
-    for pixel in pixels:
-        x, y, color = pixel
-        stacked_dots.append(create_dot(x, y, color))
-        animation_frames.append(render.Stack(children = stacked_dots))
-
-    # add stars
     if show_stars:
         potential_star_locations = []
         for i in range(len(visible_sky)):
             if (i > 0 and i < len(visible_sky) - 1):
-                # let's avoid putting a star right on a building, it's a design choice, not based on reality, but dots aren't exactly clear enough to distinguish a star from part of a building
-
                 if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
                     potential_star_locations.append((i, randomize(0, visible_sky[i] - 1)))
+        star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
+    for pixel in pixels:
+        x, y, color = pixel
+        stacked_dots.append(create_dot(x, y, color))
+        animation_frames.append(render.Stack(children = list(stacked_dots)))
 
-        potential_star_location = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
+    # We increase the range to 100 so the "hold" lasts longer
+    for frame_idx in range(100):
+        # Start with the full city
+        this_frame_layers = list(stacked_dots)
 
-        for star in potential_star_location:
-            color_number = 4 if star[0] % 2 else 5
-            stacked_dots.append(create_dot(star[0], star[1], DEFAULT_COLORS[color_number]))
-            animation_frames.append(render.Stack(children = stacked_dots))
+        twinkle_frame_spacing = 12  # how many frames between star twinkles
 
-    # Add some Frames to hold the finished product
-    for _ in range(40):
-        animation_frames.append(render.Stack(children = stacked_dots))
+        if show_stars:
+            for i, star in enumerate(star_locations):
+                if ((frame_idx // twinkle_frame_spacing) + i) % 2 == 0:
+                    c = DEFAULT_COLORS[4]  # Light Blue/White
+                else:
+                    c = DEFAULT_COLORS[5]  # Champagne/Warm White
+
+                this_frame_layers.append(create_dot(star[0], star[1], c))
+
+        animation_frames.append(render.Stack(children = this_frame_layers))
 
     return animation_frames
 
-# Pseudo-shuffle: compute a deterministic "random" key from x,y and seed,
-# attach as (key, coord), sort by key, and return coords in that order.
 def pseudo_shuffle(coords, seed):
     items = []
     for c in coords:
@@ -172,8 +171,6 @@ def pseudo_shuffle(coords, seed):
         out.append(it[1])
     return out
 
-# Choose up to num_stars from potential coords (already shuffled by pseudo_shuffle),
-# enforcing a minimum spacing (chebyshev / box distance) so stars spread out.
 def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
     shuffled = pseudo_shuffle(coords, seed)
     chosen = []
@@ -194,7 +191,6 @@ def main(config):
     CITIES_BY_NAME = {city["name"]: city for city in CITIES}
     city_names = CITIES_BY_NAME.keys()
 
-    #configuration settings
     skyline_color = config.get("skyline_outline_color", DEFAULT_COLORS[0])
     display = config.get("display_type", display_type[0].value)
     custom_text = config.get("custom_text")
