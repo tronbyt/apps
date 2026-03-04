@@ -18,7 +18,8 @@ BASE_HEIGHT = 32
 
 SCALE = SCREEN_HEIGHT // BASE_HEIGHT
 
-DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]  #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
+#1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
+DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]  
 NUMBER_OF_STARS = 5
 
 display_type = [
@@ -98,7 +99,6 @@ def get_column_bounds(screen, x, height):
 
     return (y_top, y_bottom)
 
-# 1. Change this line back to 3 arguments
 def draw_skyline(data, show_stars, colors):
     animation_frames = []
     stacked_dots = []
@@ -110,7 +110,6 @@ def draw_skyline(data, show_stars, colors):
     pixels = []
     visible_sky = []
 
-    # 1. TRACE THE CITY
     for x in range(width):
         bounds = get_column_bounds(data, x, height)
         visible_sky.append(bounds[0] - 3)
@@ -125,7 +124,6 @@ def draw_skyline(data, show_stars, colors):
                     pixels.append((x, y, colors[data[y][x] - 1]))
                     current_pen_y = y
 
-    # 2. CALCULATE STAR LOCATIONS
     if show_stars:
         potential_star_locations = []
         for i in range(len(visible_sky)):
@@ -133,14 +131,11 @@ def draw_skyline(data, show_stars, colors):
                 if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
                     potential_star_locations.append((i, randomize(0, visible_sky[i] - 1)))
         star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
-
-    # 3. PHASE 1: DRAW THE CITY (Dot by Dot)
     for pixel in pixels:
         x, y, color = pixel
         stacked_dots.append(create_dot(x, y, color))
         animation_frames.append(render.Stack(children = list(stacked_dots)))
 
-    # 4. PHASE 2: SLOW TWINKLE HOLD
     # We increase the range to 100 so the "hold" lasts longer
     for frame_idx in range(100):
         # Start with the full city
@@ -148,9 +143,6 @@ def draw_skyline(data, show_stars, colors):
 
         if show_stars:
             for i, star in enumerate(star_locations):
-                # TWINKLE SPEED CONTROL:
-                # Changing // 6 to // 12 makes it twice as slow.
-                # If it's still too fast, try // 20.
                 if ((frame_idx // 12) + i) % 2 == 0:
                     c = DEFAULT_COLORS[4]  # Light Blue/White
                 else:
@@ -162,7 +154,6 @@ def draw_skyline(data, show_stars, colors):
 
     return animation_frames
 
-# attach as (key, coord), sort by key, and return coords in that order.
 def pseudo_shuffle(coords, seed):
     items = []
     for c in coords:
@@ -178,8 +169,6 @@ def pseudo_shuffle(coords, seed):
         out.append(it[1])
     return out
 
-# Choose up to num_stars from potential coords (already shuffled by pseudo_shuffle),
-# enforcing a minimum spacing (chebyshev / box distance) so stars spread out.
 def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
     shuffled = pseudo_shuffle(coords, seed)
     chosen = []
@@ -200,7 +189,6 @@ def main(config):
     CITIES_BY_NAME = {city["name"]: city for city in CITIES}
     city_names = CITIES_BY_NAME.keys()
 
-    #configuration settings
     skyline_color = config.get("skyline_outline_color", DEFAULT_COLORS[0])
     display = config.get("display_type", display_type[0].value)
     custom_text = config.get("custom_text")
