@@ -92,6 +92,12 @@ Updated PLAYER_MAPPING
 
 v2.11
 Fixed bug that was showing 3rd round score as final round score
+
+v2.12
+Added different colour title bar for Playoff events, using "FedEx" purple
+Added different colour title bar for Signature events, using an orange colour
+Added opposite field event for the AP Inv...might be too late!
+Added more entries for Tournament renaming map
 """
 
 load("encoding/json.star", "json")
@@ -146,10 +152,11 @@ TOURNAMENT_MAPPING = """
     "401811935": "Arnold Palm",
     "401811937": "The Players",
     "401811943": "Zurich Clas",
+    "401811944": "Cadillac Ch",
     "401811958": "Puntacana",
     "401811948": "The CJ Cup",
     "401811938": "Valspar",
-    "401811939": "Houston Opn",
+    "401811939": "Houston Op",
     "401811940": "Texas Open",
     "401811941": "The Masters",
     "401811942": "Heritage",
@@ -157,22 +164,34 @@ TOURNAMENT_MAPPING = """
     "401811950": "Memorial",
     "401811947": "PGA Champ",
     "401465538": "Barbasol",
-    "401811955": "Scottish",
+    "401811955": "Scottish Op",
     "401811961": "Wyndham",
     "401811962": "FedEx St.J",
     "401811963": "BMW Champ",
     "401811964": "TOUR CHAMP",
-    "401811956": "ISCO Champ"
+    "401811956": "ISCO Champ",
+    "401811945": "Truist Ch",
+    "401811946": "Myrtle Be",
+    "401811953": "Travelers"
 }
 """
 
 MAJOR_MAPPING = """
 {
-    "401811937": "#003360",
+    "401811937": "#003360", 
     "401811941": "#006747",
     "401811947": "#00205B",
     "401811952": "#003865",
-    "401811957": "#1A1C3C"
+    "401811957": "#1A1C3C",
+    "401811962": "#4d148c",
+    "401811963": "#4d148c",
+    "401811964": "#4d148c",
+    "401811935": "#965115",
+    "401811942": "#965115",
+    "401811944": "#965115",
+    "401811945": "#965115",
+    "401811950": "#965115",
+    "401811953": "#965115"
 }
 """
 
@@ -613,6 +632,8 @@ def OppositeFieldCheck(ID):
     elif ID == "401811957":  # The Open -> Barracuda
         i = 1
     elif ID == "401811955":  # Scottish Open -> ISCO Champ
+        i = 1
+    elif ID == "401811935":  # AP Inv -> Puerto Rico
         i = 1
     else:
         i = 0
