@@ -129,10 +129,8 @@ def draw_skyline(data, show_stars, colors):
         for i in range(len(visible_sky)):
             if (i > 0 and i < len(visible_sky) - 1):
                 if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
-                    sky = max(0, visible_sky[i] - 1)
-                    potential_star_locations.append((i, randomize(0, sky)))
+                    potential_star_locations.append((i, randomize(0, visible_sky[i] - 1)))
         star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
-
     for pixel in pixels:
         x, y, color = pixel
         stacked_dots.append(create_dot(x, y, color))
@@ -172,9 +170,6 @@ def pseudo_shuffle(coords, seed):
     for it in items:
         out.append(it[1])
     return out
-
-def get_safe_name(name):
-    return name.lower().replace(" ", "_").replace(".", "")
 
 def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
     shuffled = pseudo_shuffle(coords, seed)
