@@ -24,7 +24,7 @@ NUMBER_OF_STARS = 5
 
 display_type = [
     schema.Option(display = "Display a Random City", value = "Random"),
-    schema.Option(display = "Select a City", value = "Pick"),
+    schema.Option(display = "Pick from Selected", value = "List"),
 ]
 
 text_display_choices = [
@@ -35,7 +35,7 @@ text_display_choices = [
 
 def randomize(min, max):
     now = time.now()
-    base = now.unix * 1000000000 + now.nanosecond
+    base = now.unix * 1000000000 + now.nanosecond + canvas.width() * canvas.height()
     rand = ((base ^ (base >> 11)) % 1000) / 1000.0
     return int(rand * (max + 1 - min) + min)
 
@@ -129,8 +129,10 @@ def draw_skyline(data, show_stars, colors):
         for i in range(len(visible_sky)):
             if (i > 0 and i < len(visible_sky) - 1):
                 if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
-                    potential_star_locations.append((i, randomize(0, visible_sky[i] - 1)))
+                    sky = max(0, visible_sky[i] - 1)
+                    potential_star_locations.append((i, randomize(0, sky)))
         star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
+
     for pixel in pixels:
         x, y, color = pixel
         stacked_dots.append(create_dot(x, y, color))
@@ -171,6 +173,9 @@ def pseudo_shuffle(coords, seed):
         out.append(it[1])
     return out
 
+def get_safe_name(name):
+    return name.lower().replace(" ", "_").replace(".", "")
+
 def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
     shuffled = pseudo_shuffle(coords, seed)
     chosen = []
@@ -189,7 +194,7 @@ def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
 
 def main(config):
     CITIES_BY_NAME = {city["name"]: city for city in CITIES}
-    city_names = CITIES_BY_NAME.keys()
+    city_names = list(CITIES_BY_NAME.keys())
 
     skyline_color = config.get("skyline_outline_color", DEFAULT_COLORS[0])
     display = config.get("display_type", display_type[0].value)
@@ -197,15 +202,27 @@ def main(config):
     text_display = config.get("text_display", text_display_choices[0].value)
     text_color = config.get("text_color", DEFAULT_COLORS[3])
 
-    selected_city_dataset = None  #Cheap default
-    selected_city = None  #Cheap default
+    selected_city_dataset = None
+    selected_city = None
 
-    if (display == display_type[0].value):
+    if display == "Random":
         selected_city = city_names[randomize(0, len(city_names) - 1)]
-        selected_city_dataset = CITIES_BY_NAME[selected_city]["dataset"]
+
     else:
-        selected_city = config.get("city", city_names[1])
-        selected_city_dataset = CITIES_BY_NAME[selected_city]["dataset"]
+        chosen = []
+
+        for city in CITIES:
+            safe_name = get_safe_name(city["name"])
+            if config.bool("city_" + safe_name, False):
+                chosen.append(city["name"])
+
+        if len(chosen) == 0:
+            # fallback if nothing selected
+            selected_city = city_names[randomize(0, len(city_names) - 1)]
+        else:
+            selected_city = chosen[randomize(0, len(chosen) - 1)]
+
+    selected_city_dataset = CITIES_BY_NAME[selected_city]["dataset"]
 
     text_to_display = ""
     if (text_display == "City"):
@@ -218,6 +235,7 @@ def main(config):
 
     show_stars = config.bool("stars", True)
     animation_frames = draw_skyline(selected_city_dataset, show_stars, [skyline_color, DEFAULT_COLORS[1], DEFAULT_COLORS[2]])
+    last_frame = animation_frames[-1]
 
     if (len(text_to_display) > 0):
         if SCALE == 2:
@@ -230,7 +248,7 @@ def main(config):
 
         final_frame_plus_text = render.Stack(
             children = [
-                animation_frames[len(animation_frames) - 1],
+                last_frame,
                 add_padding_to_child_element(
                     render.Box(width = text_w, height = text_h, color = "#000"),
                     SCREEN_WIDTH - text_w,
@@ -252,7 +270,7 @@ def main(config):
     else:
         # we were going to hold the text for 60 frames, but we skipped the text display, so let's just add 60 frames of the last frame from before
         for _ in range(80):
-            animation_frames.append(animation_frames[len(animation_frames) - 1])
+            animation_frames.append(last_frame)
 
     return render.Root(
         delay = int(config.get("scroll", 45)),
@@ -268,23 +286,23 @@ def main(config):
 def get_city_options(type):
     display_data = sorted(CITIES, key = lambda m: m["name"], reverse = False)
 
-    # Loop through each item and print the values
-    if (type == "Pick"):
-        choice_cities = []
+    if (type == "List"):
+        city_checkboxes = []
 
         for city in display_data:
-            choice_cities.append(schema.Option(display = "%s - %s" % (city["name"], city["description"]), value = city["name"]))
+            safe_name = get_safe_name(city["name"])
+            city_checkboxes.append(
+                schema.Toggle(
+                    id = "city_" + safe_name,
+                    name = city["name"],
+                    desc = city["description"],
+                    default = True,
+                    icon = "city",
+                ),
+            )
 
-        return [
-            schema.Dropdown(
-                id = "city",
-                name = "City",
-                desc = "Select City to Display",
-                icon = "city",
-                options = choice_cities,
-                default = choice_cities[0].value,
-            ),
-        ]
+        return city_checkboxes
+
     else:
         return []
 
