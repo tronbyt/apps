@@ -30,7 +30,7 @@ def main(config):
     else:
         return render_data(api_key, location)
 
-# Location and electicity API key are required settings.
+# Location and electricity API key are required settings.
 def get_schema():
     return schema.Schema(
         version = "1",
