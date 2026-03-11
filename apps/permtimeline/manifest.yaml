@@ -7,3 +7,11 @@ author: Ihor Burenko
 recommendedInterval: 5
 fileName: perm_timeline.star
 packageName: permtimeline
+
+category: utilities
+tags:
+  - perm
+  - work
+  - approval
+  - timeline
+  - utility

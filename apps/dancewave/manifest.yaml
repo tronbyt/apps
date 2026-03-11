@@ -6,3 +6,10 @@ author: Brombomb
 fileName: dancewave.star
 packageName: dancewave
 id: dance-wave
+category: entertainment
+tags:
+  - music
+  - radio
+  - live
+  - artists
+  - streaming

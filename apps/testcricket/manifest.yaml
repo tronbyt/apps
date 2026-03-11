@@ -8,3 +8,11 @@ fileName: test_cricket.star
 packageName: testcricket
 broken: true
 recommendedInterval: 5
+
+category: sports
+tags:
+  - cricket
+  - sports
+  - scoreboard
+  - live
+  - match

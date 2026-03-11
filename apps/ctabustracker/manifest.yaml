@@ -7,3 +7,9 @@ author: John Sylvain
 fileName: cta_bus_tracker.star
 packageName: ctabustracker
 recommendedInterval: 5
+category: utilities
+tags:
+  - public transport
+  - transit
+  - bus
+  - real-time

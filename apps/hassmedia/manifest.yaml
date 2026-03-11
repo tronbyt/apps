@@ -5,3 +5,9 @@ summary: HA media player entity
 desc: Now Playing for a media player entity, e.g. Spotify.
 author: vincentezw
 recommendedInterval: 5
+category: utilities
+tags:
+  - media
+  - spotify
+  - home-automation
+  - audio

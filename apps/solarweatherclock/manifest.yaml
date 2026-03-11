@@ -5,3 +5,11 @@ summary: Grid power, weather & time
 desc: Retrieves the output or input to the grid obtained from home assistant and displays this along with a weather icon and the time.
 author: shmauk
 recommendedInterval: 0
+
+category: utilities
+tags:
+  - home automation
+  - weather clock
+  - grid display
+  - time
+  - weather

@@ -7,3 +7,10 @@ author: sumara523
 fileName: drawbridge_status.star
 packageName: drawbridgestatus
 recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - transport
+  - local
+  - bridge
+  - status

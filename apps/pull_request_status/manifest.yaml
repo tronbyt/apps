@@ -7,3 +7,10 @@ author: dev-manuel
 fileName: pull_request_status.star
 packageName: pull_request_status
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - github
+  - code
+  - devtools
+  - status

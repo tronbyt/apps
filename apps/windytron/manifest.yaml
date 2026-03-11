@@ -7,3 +7,11 @@ author: tavdog
 fileName: windytron.star
 packageName: windytron
 recommendedInterval: 1
+
+category: utilities
+tags:
+  - weather
+  - display
+  - forecast
+  - outdoor
+  - station

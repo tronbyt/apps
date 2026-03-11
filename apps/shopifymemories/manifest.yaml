@@ -9,3 +9,10 @@ packageName: shopifymemories
 recommendedInterval: 5
 broken: true
 brokenReason: "www.shopcounter.app: no such host"
+
+category: utilities
+tags:
+  - shopify
+  - retro
+  - business
+  - memorials

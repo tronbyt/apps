@@ -7,3 +7,9 @@ author: hainish
 fileName: effheadlines.star
 packageName: effheadlines
 recommendedInterval: 5
+category: news
+tags:
+  - news
+  - activism
+  - tech
+  - civil liberties

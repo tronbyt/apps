@@ -7,3 +7,9 @@ author: maxa010
 fileName: seattle_transit.star
 packageName: seattletransit
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - public transport
+  - real-time transit
+  - local transit

@@ -7,3 +7,10 @@ author: PMK (@pmk)
 fileName: bitcointicker.star
 packageName: bitcointicker
 recommendedInterval: 1
+category: finance
+tags:
+  - crypto
+  - finance
+  - price
+  - currency
+  - bitcoin

@@ -6,3 +6,11 @@ author: Greg Knauss and XScreenSaver
 fileName: xscreensaver.star
 packageName: xscreensaver
 recommendedInterval: 5
+
+category: art
+tags:
+  - animation
+  - visual
+  - screen
+  - decorative
+  - display

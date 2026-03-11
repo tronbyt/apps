@@ -6,3 +6,9 @@ desc: Show value or graph of Grafana metrics.
 author: tavdog
 fileName: grafana.star
 packageName: grafana
+category: utilities
+tags:
+  - metrics
+  - data
+  - visualization
+  - analytics

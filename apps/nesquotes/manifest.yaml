@@ -7,3 +7,10 @@ author: Mark McIntyre
 fileName: nes_quotes.star
 packageName: nesquotes
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - retro
+  - gaming
+  - fun
+  - nostalgia

@@ -7,3 +7,10 @@ author: Jake Manske
 fileName: mlbdivstandings.star
 packageName: mlbdivstandings
 recommendedInterval: 5
+
+category: sports
+tags:
+  - sports
+  - baseball
+  - standings
+  - real-time

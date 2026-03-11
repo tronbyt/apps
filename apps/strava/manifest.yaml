@@ -6,3 +6,11 @@ desc: Displays your YTD or all-time athlete stats recorded on Strava.
 author: Rob Kimball
 fileName: strava.star
 packageName: strava
+
+category: sports
+tags:
+  - fitness
+  - stats
+  - sport
+  - activity
+  - performance

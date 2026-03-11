@@ -8,3 +8,12 @@ fileName: unsplash.star
 packageName: unsplash
 recommendedInterval: 5
 supports2x: true
+
+category: entertainment
+tags:
+  - wallpaper
+  - visual
+  - random
+  - photo
+  - art
+  - wide 2x support

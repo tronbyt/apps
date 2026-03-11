@@ -6,3 +6,10 @@ desc: Weather forecasts for your location.
 author: JeffLac & RichardD012
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - weather
+  - forecast
+  - utility
+  - wide 2x support

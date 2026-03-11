@@ -7,3 +7,9 @@ author: kinson
 fileName: flight_radar_feed.star
 packageName: flightradarfeed
 recommendedInterval: 5
+category: utilities
+tags:
+  - flight tracking
+  - aviation
+  - real-time
+  - weather radar

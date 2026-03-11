@@ -6,3 +6,12 @@ desc: Displays a notification that the washing machine is done.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - home
+  - utility
+  - household
+  - smart
+  - notification
+  - wide 2x support

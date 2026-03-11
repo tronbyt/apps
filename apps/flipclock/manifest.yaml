@@ -7,3 +7,9 @@ author: rs7q5
 fileName: flipclock.star
 packageName: flipclock
 broken: true
+category: utilities
+tags:
+  - time
+  - flip
+  - animation
+  - utility

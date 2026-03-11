@@ -7,3 +7,9 @@ author: derekllaw
 fileName: campark.star
 packageName: campark
 recommendedInterval: 5
+category: utilities
+tags:
+  - parking
+  - utilities
+  - real-time
+  - location-based

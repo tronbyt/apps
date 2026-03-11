@@ -6,3 +6,12 @@ author: gshepperd
 fileName: spotify.star
 packageName: spotify
 supports2x: true
+
+category: entertainment
+tags:
+  - music
+  - spotify
+  - player
+  - progress
+  - visual
+  - wide 2x support

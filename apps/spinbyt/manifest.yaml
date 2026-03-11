@@ -7,3 +7,9 @@ author: zachlucas
 fileName: spinbyt.star
 packageName: spinbyt
 broken: true
+
+category: utilities
+tags:
+  - scooters
+  - transport
+  - utility

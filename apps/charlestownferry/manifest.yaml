@@ -7,3 +7,9 @@ author: jblaker
 fileName: charlestownferry.star
 packageName: charlestownferry
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - maritime
+  - utility
+  - local transit

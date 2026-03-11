@@ -6,3 +6,9 @@ desc: Displays a configuration that a coffee is ready.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: lifestyle
+tags:
+  - coffee
+  - utility
+  - reminder
+  - wide 2x support

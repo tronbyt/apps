@@ -7,3 +7,10 @@ author: '@ledif'
 fileName: wow_token.star
 packageName: wowtoken
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - crypto
+  - gaming
+  - utility
+  - led

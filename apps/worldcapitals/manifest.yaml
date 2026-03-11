@@ -8,3 +8,12 @@ fileName: worldcapitals.star
 packageName: worldcapitals
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - world capitals
+  - geography
+  - daily
+  - education
+  - reference
+  - wide 2x support

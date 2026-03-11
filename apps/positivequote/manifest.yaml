@@ -7,3 +7,11 @@ author: Brian Bell
 fileName: positive_quote.star
 packageName: positivequote
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - motivation
+  - inspiration
+  - short
+  - positive
+  - utility

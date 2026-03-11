@@ -7,3 +7,9 @@ author: M0ntyP
 fileName: adelaide_metro.star
 packageName: adelaidemetro
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - public transport
+  - real-time
+  - utilities

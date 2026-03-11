@@ -7,3 +7,10 @@ author: Robert Ison
 fileName: hurricanetracker.star
 packageName: hurricanetracker
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - hurricane
+  - tracker
+  - storm
+  - forecast

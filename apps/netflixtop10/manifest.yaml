@@ -9,3 +9,11 @@ packageName: netflixtop10
 broken: true
 recommendedInterval: 5
 supports2x: true
+
+category: entertainment
+tags:
+  - netflix
+  - tv
+  - shows
+  - top_ten
+  - wide 2x support

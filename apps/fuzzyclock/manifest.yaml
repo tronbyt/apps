@@ -8,3 +8,9 @@ fileName: fuzzy_clock.star
 packageName: fuzzyclock
 recommendedInterval: 1
 supports2x: true
+category: time
+tags:
+  - time
+  - display
+  - human-readable
+  - wide 2x support

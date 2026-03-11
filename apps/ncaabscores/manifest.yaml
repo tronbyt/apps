@@ -7,3 +7,11 @@ author: LunchBox8484
 fileName: ncaab_scores.star
 packageName: ncaabscores
 recommendedInterval: 5
+
+category: sports
+tags:
+  - sports
+  - baseball
+  - ncaa
+  - live
+  - scores

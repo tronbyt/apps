@@ -7,3 +7,9 @@ author: fulghum
 fileName: github_stargazers.star
 packageName: githubstargazers
 recommendedInterval: 5
+category: utilities
+tags:
+  - github
+  - stats
+  - repo
+  - utility

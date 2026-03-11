@@ -7,3 +7,8 @@ author: samshapiro13
 fileName: cta_l_tracker.star
 packageName: ctaltracker
 recommendedInterval: 5
+category: utilities
+tags:
+  - train
+  - public transit
+  - transportation

@@ -4,3 +4,10 @@ name: MLB Game
 summary: MLB game with bases
 desc: This is a recreation of the original MLB app with bases and count.
 author: ckelley-1992
+
+category: games
+tags:
+  - baseball
+  - game
+  - sports
+  - recreation

@@ -7,3 +7,9 @@ author: PMK (@pmk)
 fileName: hashrate.star
 packageName: hashrate
 recommendedInterval: 1
+category: utilities
+tags:
+  - bitcoin
+  - crypto
+  - data
+  - utility

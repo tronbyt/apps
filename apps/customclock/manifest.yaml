@@ -7,3 +7,9 @@ author: rs7q5
 fileName: custom_clock.star
 packageName: customclock
 recommendedInterval: 0
+category: time
+tags:
+  - customizable
+  - digital
+  - time
+  - utility

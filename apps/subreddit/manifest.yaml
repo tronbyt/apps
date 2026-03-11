@@ -7,3 +7,10 @@ author: Petros Fytilis
 fileName: subreddit.star
 packageName: subreddit
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - news
+  - social
+  - toppost
+  - feed

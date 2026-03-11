@@ -7,3 +7,10 @@ author: dinosaursrarr
 fileName: tube.star
 packageName: tube
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transport
+  - public transit
+  - train
+  - real-time

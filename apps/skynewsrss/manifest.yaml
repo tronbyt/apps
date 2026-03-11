@@ -7,3 +7,10 @@ author: jvivona
 fileName: sky_news_rss.star
 packageName: skynewsrss
 recommendedInterval: 10
+
+category: news
+tags:
+  - news
+  - feed
+  - rss
+  - breaking

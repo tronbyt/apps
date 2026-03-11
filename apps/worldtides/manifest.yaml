@@ -7,3 +7,10 @@ author: tavdog
 recommendedInterval: 5
 fileName: world_tides.star
 packageName: worldtides
+
+category: utilities
+tags:
+  - ocean
+  - weather
+  - utility
+  - marine

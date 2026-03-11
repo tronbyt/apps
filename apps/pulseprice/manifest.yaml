@@ -7,3 +7,10 @@ author: kmphua
 fileName: pulseprice.star
 packageName: pulseprice
 recommendedInterval: 5
+
+category: finance
+tags:
+  - crypto
+  - finance
+  - token
+  - pulsechain

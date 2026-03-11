@@ -8,3 +8,11 @@ fileName: archerdog.star
 packageName: archerdog
 recommendedInterval: 5
 supports2x: true
+category: entertainment
+tags:
+  - pet
+  - animation
+  - fun
+  - home
+  - decor
+  - wide 2x support

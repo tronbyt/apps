@@ -7,3 +7,9 @@ author: Cameron Battagler
 fileName: tar1090_ads_b.star
 packageName: tar1090adsb
 recommendedInterval: 5
+
+category: science
+tags:
+  - aviation
+  - flight tracking
+  - real-time data

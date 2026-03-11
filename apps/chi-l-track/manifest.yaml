@@ -7,3 +7,10 @@ author: FabioCZ
 fileName: chi_l_track.star
 packageName: chiltrack
 recommendedInterval: 5
+category: utilities
+tags:
+  - cta
+  - rapid transit
+  - train tracking
+  - public transport
+  - utilities

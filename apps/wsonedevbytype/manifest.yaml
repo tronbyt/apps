@@ -8,3 +8,11 @@ fileName: wsonedevbytypep.star
 packageName: wsonedevbytypep
 recommendedInterval: 5
 broken: true
+
+category: utilities
+tags:
+  - devices
+  - management
+  - uec
+  - workspace
+  - utilities

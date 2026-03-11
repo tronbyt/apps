@@ -7,3 +7,10 @@ author: kstardesigns
 fileName: deathvalleytemp.star
 packageName: deathvalleytemp
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - desert
+  - temperature
+  - utility
+  - local

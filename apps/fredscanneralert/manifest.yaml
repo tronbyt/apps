@@ -8,3 +8,8 @@ fileName: fredscanner_alert.star
 packageName: fredscanneralert
 broken: true
 recommendedInterval: 5
+category: utilities
+tags:
+  - emergency
+  - fire
+  - local alerts

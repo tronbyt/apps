@@ -8,3 +8,12 @@ fileName: phase_of_moon.star
 packageName: phaseofmoon
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - astronomy
+  - nature
+  - clock
+  - sky
+  - weather
+  - wide 2x support

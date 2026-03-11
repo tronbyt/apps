@@ -8,3 +8,11 @@ fileName: wnba_scores.star
 packageName: wnbascores
 broken: true
 recommendedInterval: 5
+
+category: sports
+tags:
+  - sports
+  - basketball
+  - scores
+  - live
+  - display

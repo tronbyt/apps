@@ -7,3 +7,11 @@ author: thiagobrez
 fileName: zenhub.star
 packageName: zenhub
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - task
+  - project
+  - devtools
+  - api
+  - workflow

@@ -7,3 +7,10 @@ author: dinosaursrarr
 fileName: shabbat.star
 packageName: shabbat
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - religious
+  - jewish
+  - timekeeping
+  - calendar

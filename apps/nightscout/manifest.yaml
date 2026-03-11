@@ -8,3 +8,12 @@ fileName: nightscout.star
 packageName: nightscout
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - health
+  - cgm
+  - monitoring
+  - clock
+  - utility
+  - wide 2x support

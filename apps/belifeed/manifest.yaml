@@ -7,3 +7,9 @@ author: leoadberg
 fileName: beli_feed.star
 packageName: belifeed
 recommendedInterval: 5
+category: social
+tags:
+  - social
+  - activity
+  - feed
+  - real-time

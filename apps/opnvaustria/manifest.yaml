@@ -7,3 +7,11 @@ author: Thomas Hutterer, ThHutterer
 fileName: opnv_austria.star
 packageName: opnvaustria
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transport
+  - public transit
+  - austria
+  - schedule
+  - utility

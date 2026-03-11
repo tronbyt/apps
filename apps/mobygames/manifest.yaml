@@ -6,3 +6,10 @@ desc: Display information about random games from the extensive MobyGames databa
 author: pandincus
 fileName: moby_games.star
 packageName: mobygames
+
+category: entertainment
+tags:
+  - games
+  - database
+  - info
+  - retro

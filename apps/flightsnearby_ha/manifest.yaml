@@ -8,3 +8,11 @@ fileName: flightsnearby_ha.star
 packageName: flightsnearby_ha
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - flight tracking
+  - air travel
+  - real-time
+  - utility
+  - location-based
+  - wide 2x support

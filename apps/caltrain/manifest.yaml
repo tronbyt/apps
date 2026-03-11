@@ -7,3 +7,10 @@ author: quacksire
 fileName: caltrain.star
 packageName: caltrain
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - travel
+  - public transport
+  - commute
+  - real-time

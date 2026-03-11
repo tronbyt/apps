@@ -8,3 +8,9 @@ fileName: influxdb.star
 packageName: influxdb
 recommendedInterval: 60
 supports2x: true
+category: utilities
+tags:
+  - data
+  - visualization
+  - analytics
+  - wide 2x support

@@ -7,3 +7,9 @@ author: Robert Ison
 fileName: currencyconverter.star
 packageName: currencyconverter
 recommendedInterval: 5
+category: finance
+tags:
+  - currency
+  - exchange
+  - finance
+  - utility

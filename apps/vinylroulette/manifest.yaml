@@ -5,3 +5,12 @@ summary: Random vinyl from Discogs
 desc: Display a random vinyl from your Discogs collection on your Tidbyt device!
 author: kaffolder7
 supports2x: true
+
+category: entertainment
+tags:
+  - vinyl
+  - music
+  - randomizer
+  - discogs
+  - home
+  - wide 2x support

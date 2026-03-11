@@ -7,3 +7,10 @@ author: flambeauRiverTours
 recommendedInterval: 5
 fileName: berlin_transit.star
 packageName: berlintransit
+category: utilities
+tags:
+  - transit
+  - public transport
+  - berlin
+  - real-time
+  - utilities

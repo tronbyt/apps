@@ -7,3 +7,8 @@ author: M0ntyP
 fileName: afl_scores.star
 packageName: aflscores
 recommendedInterval: 5
+category: sports
+tags:
+  - sports
+  - football
+  - live_scores

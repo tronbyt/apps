@@ -7,3 +7,10 @@ author: Nick Comer
 recommendedInterval: 10
 fileName: hacker_news.star
 packageName: hackernews
+category: news
+tags:
+  - news
+  - tech
+  - hacker
+  - updates
+  - social

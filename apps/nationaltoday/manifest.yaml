@@ -7,3 +7,10 @@ author: rs7q5
 fileName: nationaltoday.star
 packageName: nationaltoday
 recommendedInterval: 5
+
+category: lifestyle
+tags:
+  - holiday
+  - calendar
+  - public
+  - event

@@ -7,3 +7,8 @@ author: vincentezw
 recommendedInterval: 5
 fileName: hass_graph.star
 packageName: hassgraph
+category: utilities
+tags:
+  - homeautomation
+  - stats
+  - visualization

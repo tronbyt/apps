@@ -7,3 +7,9 @@ author: Matt Broussard
 fileName: faa_delays.star
 packageName: faadelays
 recommendedInterval: 5
+category: utilities
+tags:
+  - traffic
+  - airport
+  - delay
+  - utilities

@@ -6,3 +6,10 @@ desc: Clock using fully binary time. First divide the day into two 12 hour parts
 author: dinosaursrarr
 fileName: fullybinarytime.star
 packageName: fullybinarytime
+category: utilities
+tags:
+  - clock
+  - binary
+  - precision
+  - utility
+  - retro

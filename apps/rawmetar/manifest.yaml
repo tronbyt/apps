@@ -7,3 +7,10 @@ author: tabrindle
 fileName: raw_metar.star
 packageName: rawmetar
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - weather
+  - aviation
+  - pilot
+  - forecast

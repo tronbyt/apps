@@ -8,3 +8,12 @@ fileName: spotthestation.star
 packageName: spotthestation
 recommendedInterval: 5
 supports2x: true
+
+category: science
+tags:
+  - space
+  - astronomy
+  - real-time
+  - sky
+  - location-based
+  - wide 2x support

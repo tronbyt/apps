@@ -7,3 +7,9 @@ author: DanielJRutledge
 fileName: houstonmetro.star
 packageName: houstonmetro
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - public transport
+  - subway
+  - ride tracking

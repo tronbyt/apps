@@ -7,3 +7,11 @@ author: Alisdair/Akeslo/oleksii-ivanov
 fileName: todoist_next.star
 packageName: todoistnext
 recommendedInterval: 60
+
+category: utilities
+tags:
+  - todo
+  - task
+  - reminder
+  - productivity
+  - utility

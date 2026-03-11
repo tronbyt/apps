@@ -7,3 +7,10 @@ author: radiocolin
 fileName: relay_fm_live.star
 packageName: relayfmlive
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - podcast
+  - live
+  - audio
+  - news

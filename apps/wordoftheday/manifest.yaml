@@ -7,3 +7,10 @@ author: greg-n
 fileName: word_of_the_day.star
 packageName: wordoftheday
 recommendedInterval: 5
+
+category: education
+tags:
+  - vocabulary
+  - learning
+  - daily
+  - reference

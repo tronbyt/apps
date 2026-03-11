@@ -7,3 +7,9 @@ author: thickey256
 fileName: json_display.star
 packageName: jsondisplay
 recommendedInterval: 5
+category: utilities
+tags:
+  - data
+  - display
+  - utility
+  - json

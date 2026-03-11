@@ -7,3 +7,9 @@ author: LukiLeu
 fileName: binary_clock.star
 packageName: binaryclock
 recommendedInterval: 0
+category: utilities
+tags:
+  - binary
+  - time
+  - utility
+  - clock

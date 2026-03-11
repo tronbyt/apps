@@ -7,3 +7,11 @@ author: mrrobot245
 fileName: teslafi.star
 packageName: teslafi
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - tesla
+  - battery
+  - utility
+  - car
+  - display

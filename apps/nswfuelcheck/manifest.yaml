@@ -7,3 +7,11 @@ author: M0ntyP
 fileName: nsw_fuel_check.star
 packageName: nswfuelcheck
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - gas
+  - utility
+  - local
+  - price
+  - transport

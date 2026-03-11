@@ -7,3 +7,10 @@ author: tidbyt
 fileName: better_on_call.star
 packageName: betteroncall
 recommendedInterval: 5
+category: utilities
+tags:
+  - shift
+  - healthcare
+  - alerts
+  - medical
+  - utility

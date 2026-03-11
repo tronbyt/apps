@@ -8,3 +8,12 @@ recommendedInterval: 5
 supports2x: true
 fileName: rachio.star
 packageName: rachio
+
+category: utilities
+tags:
+  - smart home
+  - automation
+  - watering
+  - home tech
+  - iot
+  - wide 2x support

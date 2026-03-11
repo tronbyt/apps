@@ -7,3 +7,10 @@ author: joshspicer
 fileName: airthings.star
 packageName: airthings
 recommendedInterval: 5
+category: utilities
+tags:
+  - sensors
+  - environment
+  - api
+  - iot
+  - data

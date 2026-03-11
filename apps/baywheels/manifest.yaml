@@ -7,3 +7,9 @@ author: Martin Strauss
 fileName: bay_wheels.star
 packageName: baywheels
 recommendedInterval: 5
+category: utilities
+tags:
+  - bike
+  - transit
+  - utility
+  - real-time

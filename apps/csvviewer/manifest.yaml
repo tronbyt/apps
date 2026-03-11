@@ -7,3 +7,10 @@ author: Teo Fleming @mokolodi1
 fileName: csvviewer.star
 packageName: csvviewer
 recommendedInterval: 5
+category: utilities
+tags:
+  - data
+  - table
+  - utility
+  - export
+  - analysis

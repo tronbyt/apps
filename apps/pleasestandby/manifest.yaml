@@ -8,3 +8,10 @@ fileName: please_stand_by.star
 packageName: pleasestandby
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - message
+  - waiting
+  - utility
+  - wide 2x support

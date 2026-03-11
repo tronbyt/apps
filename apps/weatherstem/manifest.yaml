@@ -7,3 +7,11 @@ author: jflood937
 fileName: weatherstem.star
 packageName: weatherstem
 recommendedInterval: 5
+
+category: weather
+tags:
+  - weather
+  - forecast
+  - display
+  - api
+  - real-time

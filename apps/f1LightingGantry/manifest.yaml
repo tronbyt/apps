@@ -8,3 +8,10 @@ fileName: f1LightingGantry.star
 packageName: f1LightingGantry
 recommendedInterval: 1
 supports2x: true
+category: sports
+tags:
+  - racing
+  - countdown
+  - sport
+  - timeline
+  - wide 2x support

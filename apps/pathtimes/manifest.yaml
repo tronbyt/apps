@@ -7,3 +7,9 @@ author: DavidGoldman
 fileName: path_times.star
 packageName: pathtimes
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transit
+  - trains
+  - public transport

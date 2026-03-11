@@ -7,3 +7,10 @@ author: dinosaursrarr
 fileName: london_bus_stop.star
 packageName: londonbusstop
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transit
+  - public transport
+  - real-time
+  - utilities

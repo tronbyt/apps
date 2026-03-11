@@ -7,3 +7,11 @@ author: M0ntyP
 fileName: milb_scores.star
 packageName: milbscores
 recommendedInterval: 5
+
+category: sports
+tags:
+  - baseball
+  - sports
+  - scores
+  - minors
+  - live

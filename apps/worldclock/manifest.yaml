@@ -7,3 +7,10 @@ author: Elliot Bentley
 fileName: world_clock.star
 packageName: worldclock
 recommendedInterval: 0
+
+category: utilities
+tags:
+  - multi-timezone
+  - world-clock
+  - utility
+  - time-tracking

@@ -7,3 +7,10 @@ author: devfle
 fileName: loan_payment.star
 packageName: loanPayment
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - loan
+  - finance
+  - repay
+  - utility

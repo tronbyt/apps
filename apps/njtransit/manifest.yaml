@@ -7,3 +7,10 @@ author: Jason-J-Hunt
 fileName: nj_transit.star
 packageName: njtransit
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - public transport
+  - train
+  - real-time
+  - utilities

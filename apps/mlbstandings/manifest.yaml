@@ -7,3 +7,10 @@ author: LunchBox8484
 fileName: mlb_standings.star
 packageName: mlbstandings
 recommendedInterval: 5
+
+category: sports
+tags:
+  - baseball
+  - sports
+  - standings
+  - team

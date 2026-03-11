@@ -8,3 +8,10 @@ fileName: dvd_logo.star
 packageName: dvdlogo
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - retro
+  - logo
+  - animation
+  - utility
+  - wide 2x support

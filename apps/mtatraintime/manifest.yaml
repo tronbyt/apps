@@ -7,3 +7,10 @@ author: rai
 fileName: mtatraintime.star
 packageName: mtatraintime
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - trains
+  - railroad
+  - transit
+  - public transport

@@ -7,3 +7,10 @@ author: Becky Sweger
 fileName: birdbyt.star
 packageName: birdbyt
 recommendedInterval: 5
+category: utilities
+tags:
+  - nature
+  - ornithology
+  - api
+  - local
+  - wildlife

@@ -6,3 +6,9 @@ desc: Show value or graph of various Adafruit IO Feeds.
 author: tavdog
 fileName: adafruitio.star
 packageName: adafruitio
+category: utilities
+tags:
+  - iot
+  - data
+  - visualization
+  - feed

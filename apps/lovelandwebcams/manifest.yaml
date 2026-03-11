@@ -7,3 +7,11 @@ author: John Sprunger
 fileName: loveland_webcams.star
 packageName: lovelandwebcams
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - outdoor
+  - weather
+  - skiing
+  - live
+  - nature

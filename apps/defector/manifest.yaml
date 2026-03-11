@@ -7,3 +7,9 @@ author: Rory Sawyer
 fileName: defector.star
 packageName: defector
 recommendedInterval: 10
+category: news
+tags:
+  - news
+  - tech
+  - headlines
+  - digital

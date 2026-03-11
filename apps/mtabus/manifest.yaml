@@ -12,3 +12,11 @@ author: Kevin Eder
 fileName: mta_bus.star
 packageName: mtabus
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transit
+  - public transport
+  - utility
+  - mta
+  - real-time

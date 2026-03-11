@@ -8,3 +8,10 @@ fileName: pokedex.star
 packageName: pokedex
 recommendedInterval: 5
 supports2x: true
+
+category: games
+tags:
+  - pokemon
+  - gaming
+  - fun
+  - wide 2x support

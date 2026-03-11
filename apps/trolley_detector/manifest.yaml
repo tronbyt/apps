@@ -7,3 +7,10 @@ author: radiocolin
 fileName: trolley_detector.star
 packageName: trolleydetector
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - public transport
+  - transit
+  - travel
+  - local transit

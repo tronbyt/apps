@@ -7,3 +7,10 @@ author: Brian Bell
 fileName: office_status.star
 packageName: officestatus
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - status
+  - remote
+  - productivity
+  - office

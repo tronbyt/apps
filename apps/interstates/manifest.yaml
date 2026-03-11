@@ -5,3 +5,10 @@ summary: Displays Interstate Maps
 desc: Displays different Interstate highways.
 author: Robert Ison
 supports2x: true
+category: utilities
+tags:
+  - road
+  - travel
+  - maps
+  - utility
+  - wide 2x support

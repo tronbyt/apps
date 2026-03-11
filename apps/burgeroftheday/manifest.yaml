@@ -7,3 +7,10 @@ author: Kyle Stark
 fileName: burgerotd.star
 packageName: burgeroftheday
 recommendedInterval: 5
+category: entertainment
+tags:
+  - food
+  - fun
+  - customizable
+  - burrito
+  - display

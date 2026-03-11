@@ -7,3 +7,10 @@ author: dinosaursrarr
 fileName: set_for_life.star
 packageName: setforlife
 recommendedInterval: 5
+
+category: games
+tags:
+  - lottery
+  - numbers
+  - game
+  - utility

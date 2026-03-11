@@ -6,3 +6,10 @@ desc: This app shows your Letterboxd movie watching progress. It gets your Lette
 author: caropinzonsilva
 fileName: movie_challenge.star
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - movies
+  - rating
+  - progress
+  - letterboxd

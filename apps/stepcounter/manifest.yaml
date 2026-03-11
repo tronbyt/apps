@@ -7,3 +7,10 @@ author: Matt-Pesce
 fileName: stepcounter.star
 packageName: stepcounter
 recommendedInterval: 5
+
+category: health
+tags:
+  - fitness
+  - activity
+  - health
+  - tracking

@@ -7,3 +7,10 @@ author: Daniel Sitnik
 fileName: lifx_lights.star
 packageName: lifxlights
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - lighting
+  - smart home
+  - status
+  - color control

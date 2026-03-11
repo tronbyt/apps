@@ -7,3 +7,8 @@ author: bmdelaune
 fileName: dw_headline.star
 packageName: dwheadline
 recommendedInterval: 5
+category: news
+tags:
+  - news
+  - politics
+  - current events

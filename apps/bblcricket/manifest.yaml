@@ -9,3 +9,9 @@ packageName: bblcricket
 recommendedInterval: 5
 broken: true
 brokenReason: "API 403 errors from ESPN are preventing this app from functioning."
+category: sports
+tags:
+  - sports
+  - cricket
+  - live_scores
+  - bbl

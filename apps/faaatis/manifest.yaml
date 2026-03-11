@@ -7,3 +7,9 @@ author: Connick Shields
 recommendedInterval: 5
 fileName: faa_atis.star
 packageName: faaatis
+category: utilities
+tags:
+  - aviation
+  - airport
+  - weather
+  - utility

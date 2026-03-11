@@ -7,3 +7,9 @@ author: scottwainstock
 fileName: trimet_stops.star
 packageName: trimetstops
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - public transport
+  - transit
+  - real-time

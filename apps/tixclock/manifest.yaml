@@ -7,3 +7,11 @@ author: pawliger
 fileName: tix_clock.star
 packageName: tixclock
 recommendedInterval: 0
+
+category: time
+tags:
+  - time
+  - clock
+  - visual
+  - digital
+  - retro

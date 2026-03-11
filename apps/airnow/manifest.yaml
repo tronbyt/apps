@@ -8,3 +8,9 @@ fileName: airnow.star
 packageName: airnow
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - air quality
+  - health
+  - environmental
+  - wide 2x support

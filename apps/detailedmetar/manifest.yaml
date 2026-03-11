@@ -7,3 +7,10 @@ author: SamuelSagarino
 fileName: detailedmetar.star
 packageName: detailedmetar
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - aviation
+  - forecast
+  - decoded
+  - utility

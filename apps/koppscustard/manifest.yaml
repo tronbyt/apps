@@ -7,3 +7,9 @@ author: Josiah Winslow
 fileName: kopps_custard.star
 packageName: koppscustard
 recommendedInterval: 5
+category: food
+tags:
+  - food
+  - dessert
+  - local
+  - ice cream

@@ -7,3 +7,10 @@ author: ColinCampbell
 fileName: ethstaker.star
 packageName: ethstaker
 recommendedInterval: 5
+category: utilities
+tags:
+  - ethereum
+  - blockchain
+  - validator
+  - status
+  - crypto

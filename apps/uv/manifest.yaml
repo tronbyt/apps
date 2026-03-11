@@ -7,3 +7,10 @@ author: j-esse
 fileName: uv.star
 packageName: uv
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - weather
+  - health
+  - utility
+  - environment

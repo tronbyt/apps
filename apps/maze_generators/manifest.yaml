@@ -5,3 +5,11 @@ summary: Generates mazes
 desc: Generates mazes using different maze generation algorithms. Currently supported are Hilbert, Binary Tree, Depth-First Search, Aldous-Broder, Recursive Division, and Fractal Tesselation.
 author: SwinkyWorks
 recommendedInterval: 5
+
+category: games
+tags:
+  - maze
+  - generation
+  - algorithm
+  - puzzle
+  - fun

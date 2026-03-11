@@ -7,3 +7,10 @@ author: Alan Moore
 fileName: today_in_history.star
 packageName: todayinhistory
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - history
+  - events
+  - random
+  - curiosity

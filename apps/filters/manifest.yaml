@@ -6,3 +6,9 @@ desc: Displays a notification that filters need to be replaced.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - maintenance
+  - utility
+  - reminder
+  - wide 2x support

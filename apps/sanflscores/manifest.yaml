@@ -7,3 +7,11 @@ author: M0ntyP
 recommendedInterval: 5
 fileName: sanfl_scores.star
 packageName: sanflscores
+
+category: sports
+tags:
+  - football
+  - sports
+  - league
+  - scores
+  - display

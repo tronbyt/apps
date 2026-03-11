@@ -7,3 +7,11 @@ author: Max Timkovich
 fileName: rocketleaguestats.star
 packageName: rocketleaguestats
 recommendedInterval: 5
+
+category: games
+tags:
+  - gaming
+  - sports
+  - stats
+  - esports
+  - utility

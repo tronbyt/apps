@@ -7,3 +7,8 @@ author: Robert Ison
 recommendedInterval: 5
 fileName: greek_letters.star
 packageName: greekletters
+category: education
+tags:
+  - alphabet
+  - language
+  - education

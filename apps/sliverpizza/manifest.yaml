@@ -8,3 +8,10 @@ fileName: sliver_pizza.star
 packageName: sliverpizza
 recommendedInterval: 5
 broken: true
+
+category: food
+tags:
+  - food
+  - daily
+  - local
+  - delivery

@@ -7,3 +7,9 @@ author: imcnaugh
 fileName: cta_train_tracker.star
 packageName: ctatraintracker
 recommendedInterval: 5
+category: utilities
+tags:
+  - trains
+  - cta
+  - public transit
+  - utilities

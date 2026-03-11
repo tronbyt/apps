@@ -6,3 +6,10 @@ desc: Displays a reminder to take out the recycle bins.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+
+category: utilities
+tags:
+  - reminder
+  - eco
+  - utility
+  - wide 2x support

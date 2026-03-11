@@ -5,3 +5,10 @@ summary: Today's Culver's flavor
 desc: Get today's flavor at Culver's Frozen Custard.
 author: Josiah Winslow
 recommendedInterval: 5
+category: food
+tags:
+  - food
+  - ice cream
+  - local
+  - cuisine
+  - flavor

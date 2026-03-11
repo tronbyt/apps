@@ -7,3 +7,11 @@ author: jvivona
 fileName: theguardiannews.star
 packageName: theguardiannews
 recommendedInterval: 10
+
+category: news
+tags:
+  - news
+  - headlines
+  - guardian
+  - article
+  - display

@@ -7,3 +7,10 @@ author: M0ntyP
 fileName: nrl_ladder.star
 packageName: nrlladder
 recommendedInterval: 5
+
+category: sports
+tags:
+  - sports
+  - nrl
+  - football
+  - live_scores

@@ -7,3 +7,11 @@ author: noahcolvin
 fileName: near_earth_objs.star
 packageName: nearearthobjs
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - space
+  - astronomy
+  - celestial
+  - utility
+  - science

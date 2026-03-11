@@ -8,3 +8,10 @@ recommendedInterval: 1
 fileName: constellations.star
 packageName: constellations
 supports2x: true
+category: science
+tags:
+  - astronomy
+  - space
+  - night sky
+  - stargazing
+  - wide 2x support

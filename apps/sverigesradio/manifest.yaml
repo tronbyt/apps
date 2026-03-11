@@ -7,3 +7,11 @@ author: Sebastian Ekström
 fileName: sveriges_radio.star
 packageName: sverigesradio
 recommendedInterval: 10
+
+category: entertainment
+tags:
+  - live
+  - music
+  - radio
+  - news
+  - streaming

@@ -7,3 +7,11 @@ author: J. Keybl
 fileName: local_tides.star
 packageName: localtides
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - tide
+  - ocean
+  - weather
+  - utility
+  - local

@@ -7,3 +7,9 @@ author: Reed Arneson
 fileName: nhl_live.star
 packageName: nhllive
 recommendedInterval: 5
+
+category: sports
+tags:
+  - nhl
+  - sports
+  - live stats

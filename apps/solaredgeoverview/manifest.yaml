@@ -7,3 +7,10 @@ author: markazali
 recommendedInterval: 5
 fileName: solaredge.star
 packageName: solaredgeoverview
+
+category: utilities
+tags:
+  - energy
+  - solar
+  - monitoring
+  - home

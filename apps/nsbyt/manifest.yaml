@@ -7,3 +7,10 @@ author: tim.hanssen
 fileName: nsbyt.star
 packageName: nsbyt
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - rail
+  - travel
+  - public_transit
+  - dutch_rail

@@ -8,3 +8,10 @@ fileName: dailykanji.star
 packageName: dailykanji
 recommendedInterval: 5
 supports2x: true
+category: education
+tags:
+  - language
+  - culture
+  - education
+  - learning
+  - wide 2x support

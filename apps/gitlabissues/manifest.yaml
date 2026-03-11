@@ -7,3 +7,9 @@ author: Sven Ringger
 fileName: gitlab_issues.star
 packageName: gitlabissues
 recommendedInterval: 5
+category: utilities
+tags:
+  - gitlab
+  - devtools
+  - code
+  - tracker

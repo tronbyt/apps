@@ -7,3 +7,10 @@ author: daltonclaybrook
 fileName: live_on_twitch.star
 packageName: liveontwitch
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - live
+  - streaming
+  - social
+  - twitch

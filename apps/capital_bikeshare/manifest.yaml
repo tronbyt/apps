@@ -7,3 +7,10 @@ author: abrahamrowe
 fileName: capital_bikeshare.star
 packageName: capitalbikeshare
 recommendedInterval: 5
+category: utilities
+tags:
+  - transport
+  - utility
+  - real-time
+  - docking
+  - bike

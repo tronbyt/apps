@@ -7,3 +7,10 @@ author: Daniel Sitnik
 fileName: air_quality.star
 packageName: airquality
 recommendedInterval: 5
+category: utilities
+tags:
+  - pollution
+  - health
+  - utility
+  - api
+  - monitoring

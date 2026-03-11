@@ -7,3 +7,9 @@ author: tabrindle, flavorjones
 fileName: awair.star
 packageName: awair
 recommendedInterval: 5
+category: utilities
+tags:
+  - air
+  - quality
+  - monitoring
+  - home

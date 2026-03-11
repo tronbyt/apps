@@ -7,3 +7,8 @@ author: hross
 fileName: github_status.star
 packageName: githubstatus
 recommendedInterval: 5
+category: utilities
+tags:
+  - monitoring
+  - outage
+  - tech support

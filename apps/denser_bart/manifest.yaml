@@ -5,3 +5,10 @@ summary: Shows more BART routes
 desc: Like the official BART applet but shows up to 8 routes for a station.
 author: scoobmx
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - public transport
+  - trains
+  - commute
+  - utilities

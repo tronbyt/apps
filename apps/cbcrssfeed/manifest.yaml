@@ -7,3 +7,9 @@ author: jvivona
 fileName: cbc_rss_feed.star
 packageName: cbcrssfeed
 recommendedInterval: 5
+category: news
+tags:
+  - news
+  - rss
+  - headlines
+  - cbc

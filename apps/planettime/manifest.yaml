@@ -8,3 +8,12 @@ fileName: planet_time.star
 packageName: planettime
 minPixletVersion: 'v0.30.0'
 supports2x: true
+
+category: science
+tags:
+  - space
+  - astronomy
+  - visual
+  - orbit
+  - planet
+  - wide 2x support

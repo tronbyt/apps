@@ -7,3 +7,10 @@ author: Jeffrey Lancaster
 fileName: word_clock.star
 packageName: wordclock
 recommendedInterval: 0
+
+category: utilities
+tags:
+  - time
+  - utility
+  - clock
+  - display

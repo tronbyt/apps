@@ -7,3 +7,10 @@ author: UnBurn
 fileName: tidbyt_app_track.star
 packageName: tidbytapptrack
 recommendedInterval: 60
+
+category: utilities
+tags:
+  - tidbyt
+  - tracking
+  - app
+  - monitoring

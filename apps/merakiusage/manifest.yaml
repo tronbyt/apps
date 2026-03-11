@@ -7,3 +7,10 @@ author: UnBurn
 fileName: meraki_usage.star
 packageName: merakiusage
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - network
+  - monitoring
+  - iot
+  - utility

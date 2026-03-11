@@ -7,3 +7,10 @@ author: Jed Schmidt
 fileName: airbnb_calendar.star
 packageName: airbnbcalendar
 recommendedInterval: 60
+category: utilities
+tags:
+  - hosting
+  - rental
+  - booking
+  - utilities
+  - planner

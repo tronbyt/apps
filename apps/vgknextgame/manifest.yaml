@@ -6,3 +6,11 @@ desc: Shows the date of the next Vegas Golden Knights game.
 author: theimpossibleleap
 fileName: vgk_next_game.star
 packageName: vgknextgame
+
+category: sports
+tags:
+  - sports
+  - nhl
+  - hockey
+  - live
+  - game

@@ -7,3 +7,10 @@ author: kevwoods
 fileName: hilbert_clock.star
 packageName: hilbertclock
 recommendedInterval: 0
+category: entertainment
+tags:
+  - art
+  - math
+  - visual
+  - fractal
+  - clock

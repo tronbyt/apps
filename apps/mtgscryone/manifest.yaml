@@ -6,3 +6,10 @@ desc: 'Scry a random card from Magic: The Gathering and displays its information
 author: UnBurn
 fileName: mtg_scry_one.star
 packageName: mtgscryone
+
+category: games
+tags:
+  - mtg
+  - card game
+  - randomizer
+  - trading cards

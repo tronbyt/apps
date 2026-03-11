@@ -7,3 +7,11 @@ author: Andrew Knotts
 fileName: summer_countdown.star
 packageName: summercountdown
 recommendedInterval: 60
+
+category: utilities
+tags:
+  - astronomy
+  - seasonal
+  - weather
+  - clock
+  - nature

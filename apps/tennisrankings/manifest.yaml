@@ -7,3 +7,11 @@ author: M0ntyP
 fileName: tennis_rankings.star
 packageName: tennisrankings
 recommendedInterval: 5
+
+category: sports
+tags:
+  - sports
+  - tennis
+  - ranking
+  - points
+  - real-time

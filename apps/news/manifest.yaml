@@ -5,3 +5,10 @@ summary: News feed display
 desc: Select an RSS feed and receive the latest headlines in return.
 author: JeffLac
 recommendedInterval: 10
+
+category: news
+tags:
+  - news
+  - rss
+  - headlines
+  - feed

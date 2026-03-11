@@ -7,3 +7,11 @@ author: J. Alex Cooney
 fileName: thanksgiving_day.star
 packageName: thanksgivingday
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - holiday
+  - countdown
+  - thanksgiving
+  - time
+  - utility

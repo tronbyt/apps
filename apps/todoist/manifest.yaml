@@ -7,3 +7,10 @@ author: zephyern/oleksii-ivanov
 fileName: todoist.star
 packageName: todoist
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - task
+  - todo
+  - reminder
+  - productivity

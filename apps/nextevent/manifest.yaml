@@ -7,3 +7,11 @@ author: mattcaruso <Matt Caruso>
 fileName: next_event.star
 packageName: nextevent
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - calendar
+  - reminder
+  - utility
+  - ics
+  - event

@@ -7,3 +7,8 @@ author: Daniel Segel
 fileName: clockwithseconds.star
 packageName: clockwithseconds
 recommendedInterval: 0
+category: utilities
+tags:
+  - clock
+  - time
+  - utility

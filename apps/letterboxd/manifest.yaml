@@ -7,3 +7,10 @@ author: protolexus
 fileName: letterboxd.star
 packageName: letterboxd
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - movies
+  - reviews
+  - activity
+  - entertainment

@@ -7,3 +7,10 @@ author: Allen Schober (@aschober)
 fileName: coingecko_price.star
 packageName: coingeckoprice
 recommendedInterval: 1
+category: utilities
+tags:
+  - crypto
+  - finance
+  - price-tracker
+  - utility
+  - real-time

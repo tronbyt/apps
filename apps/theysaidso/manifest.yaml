@@ -7,3 +7,10 @@ author: Henry So, Jr.
 fileName: they_said_so.star
 packageName: theysaidso
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - quotes
+  - inspiration
+  - daily
+  - motivation

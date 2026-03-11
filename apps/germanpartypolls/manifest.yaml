@@ -7,3 +7,9 @@ author: dev-manuel
 fileName: germanpartypolls.star
 packageName: germanpartypolls
 recommendedInterval: 5
+category: news
+tags:
+  - politics
+  - election
+  - news
+  - germany

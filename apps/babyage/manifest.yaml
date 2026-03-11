@@ -7,3 +7,9 @@ author: helmc2
 fileName: baby_age.star
 packageName: babyage
 recommendedInterval: 5
+category: utilities
+tags:
+  - baby
+  - time tracker
+  - parenting
+  - utility

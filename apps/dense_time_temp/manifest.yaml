@@ -8,3 +8,10 @@ fileName: dense_time_temp.star
 packageName: densetimetemp
 recommendedInterval: 5
 broken: true
+category: utilities
+tags:
+  - weather
+  - clock
+  - utility
+  - display
+  - weather-data

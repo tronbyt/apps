@@ -7,3 +7,9 @@ author: Nick Penree
 fileName: pagerduty.star
 packageName: pagerduty
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - incident
+  - status
+  - monitoring

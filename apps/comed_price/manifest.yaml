@@ -7,3 +7,10 @@ author: Andrew Hill
 fileName: comed_price.star
 packageName: comedprice
 recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - electricity
+  - energy
+  - real-time
+  - monitoring

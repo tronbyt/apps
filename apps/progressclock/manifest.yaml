@@ -7,3 +7,9 @@ author: Jeffery Bennett
 fileName: progressclock.star
 packageName: progressclock
 recommendedInterval: 0
+
+category: utilities
+tags:
+  - time tracking
+  - progress visual
+  - day tracker

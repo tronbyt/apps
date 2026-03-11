@@ -7,3 +7,9 @@ author: jvivona
 fileName: countupclock.star
 packageName: countupclock
 recommendedInterval: 0
+category: utilities
+tags:
+  - countdown
+  - timer
+  - utility
+  - time-tracking

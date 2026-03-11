@@ -7,3 +7,8 @@ author: Cavallando
 fileName: flyio.star
 packageName: flyio
 recommendedInterval: 5
+category: utilities
+tags:
+  - monitoring
+  - cloud
+  - utility

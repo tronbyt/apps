@@ -7,3 +7,10 @@ author: Chris Jones (@IPv6Freely)
 fileName: iss_tracker.star
 packageName: isstracker
 recommendedInterval: 5
+category: science
+tags:
+  - space
+  - astronomy
+  - real-time
+  - navigation
+  - utility

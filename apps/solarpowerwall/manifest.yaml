@@ -8,3 +8,11 @@ filename: solar-powerwall.star
 packageName: solar-powerwall
 recommendedInterval: 5
 fileName: solar_powerwall.star
+
+category: utilities
+tags:
+  - energy
+  - solar
+  - home
+  - utility
+  - real-time

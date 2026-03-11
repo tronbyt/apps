@@ -7,3 +7,10 @@ author: Emmett Myers
 recommendedInterval: 5
 fileName: nba_stats.star
 packageName: nbastats
+
+category: sports
+tags:
+  - sports
+  - stats
+  - leaders
+  - basketball

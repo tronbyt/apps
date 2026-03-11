@@ -9,3 +9,10 @@ packageName: hasssolar
 recommendedInterval: 5
 supports2x: true
 minPixletVersion: v0.49.0
+category: utilities
+tags:
+  - home
+  - energy
+  - monitoring
+  - utility
+  - wide 2x support

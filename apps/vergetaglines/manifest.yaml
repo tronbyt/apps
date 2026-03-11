@@ -7,3 +7,10 @@ author: '@joevgreathead'
 fileName: verge_taglines.star
 packageName: vergetaglines
 recommendedInterval: 10
+
+category: news
+tags:
+  - news
+  - tech
+  - headlines
+  - verge

@@ -5,3 +5,9 @@ summary: Timer
 desc: Counts down the inputted time.
 author: rwong2888
 recommendedInterval: 1
+
+category: utilities
+tags:
+  - countdown
+  - utility
+  - timer

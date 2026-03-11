@@ -7,3 +7,10 @@ author: Joey Hoer
 fileName: big_clock.star
 packageName: bigclock
 recommendedInterval: 0
+category: time
+tags:
+  - retro
+  - time
+  - clock
+  - adaptive
+  - weather-based

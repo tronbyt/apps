@@ -7,3 +7,11 @@ author: Jake Manske
 fileName: ncaa_softball.star
 packageName: ncaasoftball
 recommendedInterval: 5
+
+category: sports
+tags:
+  - sports
+  - ncaa
+  - scores
+  - softball
+  - live

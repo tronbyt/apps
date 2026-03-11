@@ -9,3 +9,9 @@ packageName: carenewables
 recommendedInterval: 5
 broken: true
 brokenReason: "API endpoint is no longer available"
+category: utilities
+tags:
+  - energy
+  - grid
+  - real-time
+  - utility

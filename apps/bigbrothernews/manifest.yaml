@@ -7,3 +7,8 @@ author: meejle
 fileName: big_brother_news.star
 packageName: bigbrothernews
 recommendedInterval: 10
+category: news
+tags:
+  - news
+  - ticker
+  - current affairs

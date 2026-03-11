@@ -9,3 +9,12 @@ packageName: pokedexplus
 recommendedInterval: 5
 supports2x: true
 minPixletVersion: v0.49.4
+
+category: entertainment
+tags:
+  - pokemon
+  - gaming
+  - fun
+  - utility
+  - customizable
+  - wide 2x support

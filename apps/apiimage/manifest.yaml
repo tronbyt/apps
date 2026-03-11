@@ -7,3 +7,9 @@ author: MichaelYagi
 recommendedInterval: 5
 fileName: api_image.star
 packageName: apiimage
+category: utilities
+tags:
+  - api
+  - dynamic
+  - image
+  - customizable

@@ -6,3 +6,11 @@ desc: My index tracking pizza prices near the pentagon! Powered by BestTime http
 author: eSoLu
 fileName: pentagon_pizza_ix.star
 packageName: pentagonpizzaix
+
+category: utilities
+tags:
+  - food
+  - local
+  - price-tracking
+  - utility
+  - real-time

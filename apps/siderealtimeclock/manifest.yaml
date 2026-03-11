@@ -7,3 +7,10 @@ author: Daniel Sitnik
 recommendedInterval: 0
 fileName: sidereal_time.star
 packageName: siderealtimeclock
+
+category: utilities
+tags:
+  - astronomy
+  - timekeeping
+  - space
+  - utility

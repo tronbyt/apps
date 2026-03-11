@@ -7,3 +7,11 @@ author: PMK (@pmk)
 fileName: mempool.star
 packageName: mempool
 recommendedInterval: 1
+
+category: finance
+tags:
+  - bitcoin
+  - crypto
+  - fee
+  - transaction
+  - blockchain

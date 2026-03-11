@@ -9,3 +9,10 @@ packageName: roblox
 recommendedInterval: 5
 broken: true
 brokenReason: "api.roblox.com: no such host"
+
+category: entertainment
+tags:
+  - social
+  - gaming
+  - online
+  - community

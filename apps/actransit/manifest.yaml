@@ -7,3 +7,8 @@ author: wshue0
 fileName: ac_transit.star
 packageName: actransit
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - public transport
+  - bus schedule

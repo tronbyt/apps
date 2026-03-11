@@ -7,3 +7,11 @@ author: jvivona
 fileName: soccer_single.star
 packageName: soccersingle
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - soccer
+  - leagues
+  - football
+  - team tracking
+  - live scores

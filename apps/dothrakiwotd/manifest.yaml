@@ -7,3 +7,9 @@ author: tavdog
 fileName: dothraki_wotd.star
 packageName: dothrakiwotd
 recommendedInterval: 5
+category: education
+tags:
+  - language
+  - culture
+  - random
+  - learning

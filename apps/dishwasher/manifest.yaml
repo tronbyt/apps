@@ -6,3 +6,9 @@ desc: Displays a notification that a dishwasher is done.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - home
+  - utility
+  - smart home
+  - wide 2x support

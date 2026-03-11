@@ -7,3 +7,10 @@ author: PMK (@pmk)
 fileName: knmialert.star
 packageName: knmialert
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - netherlands
+  - alerts
+  - local
+  - utility

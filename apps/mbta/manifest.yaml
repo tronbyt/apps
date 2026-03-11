@@ -7,3 +7,10 @@ author: Marcus Better & Eric Pierce
 fileName: mbta.star
 packageName: mbta
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transit
+  - public transport
+  - rail
+  - bus

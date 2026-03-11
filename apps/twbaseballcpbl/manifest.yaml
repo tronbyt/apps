@@ -7,3 +7,10 @@ author: Mark Chu
 recommendedInterval: 5
 fileName: tw_baseball_cpbl.star
 packageName: twbaseballcpbl
+
+category: sports
+tags:
+  - sports
+  - baseball
+  - chinese_pro_l
+  - scores

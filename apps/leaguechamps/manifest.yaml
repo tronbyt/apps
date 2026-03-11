@@ -7,3 +7,10 @@ author: xl0lli
 fileName: league_champs.star
 packageName: leaguechamps
 recommendedInterval: 5
+
+category: games
+tags:
+  - lol
+  - champions
+  - gaming
+  - utility

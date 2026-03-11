@@ -6,3 +6,9 @@ desc: Displays a notification that a doorbell is ringing.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - notifications
+  - utility
+  - home
+  - wide 2x support

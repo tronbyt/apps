@@ -7,3 +7,10 @@ author: noahpodgurski
 fileName: octoprint.star
 packageName: octoprint
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - 3d
+  - printer
+  - status
+  - monitoring

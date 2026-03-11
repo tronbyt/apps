@@ -8,3 +8,11 @@ fileName: cursive.star
 packageName: cursive
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - typing
+  - writing
+  - text
+  - artistic
+  - display
+  - wide 2x support

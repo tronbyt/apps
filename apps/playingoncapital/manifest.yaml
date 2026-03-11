@@ -5,3 +5,10 @@ summary: Now Playing on Capital 604
 desc: Shows the current song playing on Capital Radio 604.
 author: Craig James Johnston
 recommendedInterval: 5
+
+category: entertainment
+tags:
+  - radio
+  - music
+  - live
+  - streaming

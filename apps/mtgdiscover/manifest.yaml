@@ -6,3 +6,11 @@ desc: "Cycles through and displays information about random Magic: The Gathering
 author: Staghouse
 fileName: mtg_discover.star
 packageName: mtgdiscover
+
+category: games
+tags:
+  - mtg
+  - card
+  - trivia
+  - game
+  - utility

@@ -8,3 +8,11 @@ fileName: satoshiradio.star
 packageName: satoshiradio
 recommendedInterval: 5
 
+
+category: utilities
+tags:
+  - mining
+  - poolstats
+  - crypto
+  - led
+  - real-time

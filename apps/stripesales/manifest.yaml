@@ -7,3 +7,11 @@ author: Jon Bilous
 fileName: stripe_sales.star
 packageName: stripesales
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - stripe
+  - finance
+  - transactions
+  - utility
+  - real-time

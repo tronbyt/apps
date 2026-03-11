@@ -7,3 +7,9 @@ author: bendiep
 fileName: melbourne_buses.star
 packageName: melbournebuses
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - transit
+  - public transport
+  - real-time

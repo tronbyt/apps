@@ -6,3 +6,10 @@ desc: Ability to view watch market performance over multiple time durations. Add
 author: Chase Roossin
 fileName: chrono24.star
 packageName: chrono24
+category: finance
+tags:
+  - watch
+  - market
+  - performance
+  - time-series
+  - finance

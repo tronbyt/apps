@@ -7,3 +7,9 @@ author: Austin Pearce
 fileName: fairfax_connector.star
 packageName: fairfaxconnector
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - public transport
+  - bus
+  - real-time

@@ -7,3 +7,10 @@ author: ckyr
 fileName: enphasesummary.star
 packageName: enphasesummary
 recommendedInterval: 5
+category: utilities
+tags:
+  - energy
+  - solar
+  - monitoring
+  - home
+  - utility

@@ -7,3 +7,10 @@ author: wilcot
 fileName: chicago_divvy.star
 packageName: chicagodivvy
 recommendedInterval: 5
+category: utilities
+tags:
+  - bike
+  - transport
+  - utilities
+  - city
+  - ride

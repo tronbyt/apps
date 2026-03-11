@@ -8,3 +8,10 @@ fileName: powerball.star
 packageName: powerball
 broken: true
 recommendedInterval: 5
+
+category: games
+tags:
+  - lottery
+  - numbers
+  - game
+  - utility

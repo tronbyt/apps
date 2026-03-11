@@ -7,3 +7,10 @@ author: Gabe Ochoa
 fileName: datadog_charts.star
 packageName: datadogcharts
 recommendedInterval: 5
+category: utilities
+tags:
+  - datadog
+  - dashboard
+  - visualization
+  - analytics
+  - monitoring

@@ -9,3 +9,9 @@ packageName: finazastocks
 recommendedInterval: 1
 broken: true
 brokenReason: "API endpoint is no longer available"
+category: finance
+tags:
+  - stock
+  - ticker
+  - finance
+  - utility

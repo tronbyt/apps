@@ -7,3 +7,10 @@ author: PMK (@pmk)
 fileName: btcdifficulty.star
 packageName: btcdifficulty
 recommendedInterval: 1
+category: utilities
+tags:
+  - crypto
+  - blockchain
+  - finance
+  - utility
+  - real-time

@@ -7,3 +7,10 @@ author: gstark
 fileName: maze.star
 packageName: maze
 recommendedInterval: 5
+
+category: games
+tags:
+  - puzzle
+  - gameplay
+  - visual
+  - algorithm

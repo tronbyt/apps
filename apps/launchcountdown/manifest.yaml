@@ -8,4 +8,12 @@ fileName: launchcountdown.star
 packageName: launchcountdown
 recommendedInterval: 5
 supports2x: true
----
+
+category: utilities
+tags:
+  - space
+  - astronomy
+  - real-time
+  - science
+  - utility
+  - wide 2x support

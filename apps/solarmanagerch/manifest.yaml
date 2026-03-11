@@ -7,3 +7,10 @@ author: tavdog
 fileName: solar_manager_ch.star
 packageName: solarmanagerch
 recommendedInterval: 5
+
+category: utilities
+tags:
+  - solar
+  - energy
+  - api
+  - utility

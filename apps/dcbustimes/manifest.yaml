@@ -7,3 +7,9 @@ author: JetgirlDC
 fileName: dc_bus_times.star
 packageName: dcbustimes
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - public transport
+  - bus times
+  - utilities

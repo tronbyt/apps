@@ -7,3 +7,9 @@ author: MichaelYagi
 recommendedInterval: 5
 fileName: api_text.star
 packageName: apitext
+category: utilities
+tags:
+  - api
+  - text
+  - dynamic
+  - utility

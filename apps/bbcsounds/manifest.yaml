@@ -7,3 +7,9 @@ author: Andrew Westling
 recommendedInterval: 10
 fileName: bbc_sounds.star
 packageName: bbcsounds
+category: entertainment
+tags:
+  - radio
+  - live
+  - audio
+  - news

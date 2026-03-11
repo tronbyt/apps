@@ -17,3 +17,11 @@ requires:
 exampleConfig:
   zip_code: "11367"
   speed: "30"
+
+category: utilities
+tags:
+  - religion
+  - prayer
+  - time
+  - utility
+  - jewish

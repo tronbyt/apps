@@ -8,3 +8,11 @@ fileName: bday_countdown.star
 packageName: bdaycountdown
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - birthday
+  - countdown
+  - personal
+  - time
+  - utility
+  - wide 2x support

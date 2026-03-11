@@ -7,3 +7,10 @@ author: Drew Tschetter
 recommendedInterval: 60
 fileName: days_since.star
 packageName: dayssince
+category: utilities
+tags:
+  - countdown
+  - calculator
+  - retro
+  - fun
+  - utility

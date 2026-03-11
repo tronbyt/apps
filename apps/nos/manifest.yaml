@@ -7,3 +7,9 @@ author: PMK (@pmk)
 fileName: nos.star
 packageName: nos
 recommendedInterval: 5
+
+category: news
+tags:
+  - news
+  - current
+  - local

@@ -8,3 +8,10 @@ fileName: ha_columns.star
 packageName: ha_columns
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - homeautomation
+  - sensor
+  - display
+  - configurable
+  - wide 2x support

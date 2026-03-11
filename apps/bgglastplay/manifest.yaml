@@ -7,3 +7,8 @@ author: DanDobrick
 recommendedInterval: 5
 fileName: bgg_last_play.star
 packageName: bgglastplay
+category: games
+tags:
+  - board games
+  - gaming stats
+  - game tracker

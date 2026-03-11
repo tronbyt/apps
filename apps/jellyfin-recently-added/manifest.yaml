@@ -7,3 +7,9 @@ author: noahpodgurski
 fileName: jellyfin_recently_added.star
 packageName: jellyfinrecentlyadded
 recommendedInterval: 720
+category: utilities
+tags:
+  - media
+  - jellyfin
+  - streaming
+  - library

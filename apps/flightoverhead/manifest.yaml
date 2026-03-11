@@ -8,3 +8,9 @@ fileName: flight_overhead.star
 packageName: flightoverhead
 broken: true
 recommendedInterval: 5
+category: utilities
+tags:
+  - flight tracking
+  - air travel
+  - real-time
+  - aviation

@@ -6,3 +6,9 @@ desc: See your latest Bird Buddy feeder visitors. Must use username/password for
 author: Brombomb
 fileName: bird_buddy.star
 packageName: birdbuddy
+category: utilities
+tags:
+  - feeder
+  - birdwatching
+  - animal
+  - utility
