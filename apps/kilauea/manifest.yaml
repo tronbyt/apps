@@ -1,0 +1,8 @@
+---
+id: kilauea
+name: Kilauea Volcano
+summary: Kilauea volcano alert level
+desc: Displays the current USGS alert level for Kilauea volcano in Hawaii.
+author: Tavis
+recommendedInterval: 60
+supports2x: true
