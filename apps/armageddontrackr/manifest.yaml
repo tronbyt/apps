@@ -9,8 +9,8 @@ packageName: armageddontrackr
 recommendedInterval: 5
 category: science
 tags:
+  - asteroids
   - space
-  - astronomy
-  - threat
   - planetary
+  - risk
   - science

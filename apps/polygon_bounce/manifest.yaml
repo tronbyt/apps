@@ -7,12 +7,12 @@ author: Brombomb
 fileName: polygon_bounce.star
 packageName: polygonbounce
 supports2x: true
-minPixletVersion: 'v0.50.0'
-
+minPixletVersion: v0.50.0
 category: entertainment
 tags:
   - retro
-  - visuals
   - fun
+  - visuals
   - gaming
+  - clock
   - wide 2x support

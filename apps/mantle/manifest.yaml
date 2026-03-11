@@ -7,10 +7,10 @@ author: Mantle Rev Ops
 fileName: mantle.star
 packageName: mantle
 recommendedInterval: 5
-
 category: finance
 tags:
-  - business
   - saa
+  - billing
+  - business
   - metrics
-  - revenue
+  - finance

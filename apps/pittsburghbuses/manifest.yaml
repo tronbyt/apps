@@ -7,10 +7,10 @@ author: ckingsford
 fileName: pittsburgh_buses.star
 packageName: pittsburghbuses
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - bus
   - transit
-  - public transport
-  - real-time
-  - utilities
+  - pittsburgh
+  - public-transport
+  - utility

@@ -7,10 +7,7 @@ author: Robert Ison
 fileName: state_flags.star
 packageName: stateflags
 recommendedInterval: 5
-
 category: utilities
 tags:
   - flags
-  - us
-  - geography
   - utility

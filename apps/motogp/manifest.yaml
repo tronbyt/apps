@@ -5,10 +5,10 @@ summary: Display MotoGP schedule
 desc: Display MotoGP racing schedule and standings.
 author: adilansari
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
+  - moto
   - racing
-  - motocross
-  - live updates
+  - sports
+  - standings
+  - schedule

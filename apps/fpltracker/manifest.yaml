@@ -9,8 +9,7 @@ fileName: fpl_tracker.star
 packageName: fpltracker
 category: sports
 tags:
-  - fantasy
-  - sports
+  - fpl
+  - fantasy-soccer
+  - standings
   - scores
-  - league
-  - tracking

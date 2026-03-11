@@ -6,9 +6,9 @@ desc: Displays trophies for Clash of Clans.
 author: Brandon Marks
 fileName: clashclanstrophy.star
 packageName: clashclanstrophy
-category: games
+category: gaming
 tags:
-  - clashofclans
+  - clash-of-clans
   - trophies
-  - game
-  - utility
+  - game-tracker
+  - mobile-gaming

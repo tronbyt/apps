@@ -6,10 +6,10 @@ desc: Answers "Can we please stop hitting the Mets?" using canweplease.stophitti
 author: ahedberg
 fileName: stop_hitting_mets.star
 packageName: stophittingmets
-
 category: entertainment
 tags:
   - sports
-  - humor
-  - fan
   - baseball
+  - nba
+  - funny
+  - humor

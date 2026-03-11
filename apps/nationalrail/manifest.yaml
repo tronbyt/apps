@@ -7,11 +7,10 @@ author: dinosaursrarr
 fileName: national_rail.star
 packageName: nationalrail
 recommendedInterval: 5
-
 category: utilities
 tags:
   - trains
   - transit
-  - real-time
   - uk
-  - public transport
+  - departure
+  - real-time

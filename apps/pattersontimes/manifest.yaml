@@ -7,10 +7,10 @@ author: Aiden Mitchell
 fileName: patterson_times.star
 packageName: pattersontimes
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - train
   - transit
-  - skyrail
-  - public transport
-  - utilities
+  - sky-train
+  - vancouver
+  - utility

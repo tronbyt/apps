@@ -7,11 +7,9 @@ author: thiagobrez
 fileName: zenhub.star
 packageName: zenhub
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - task
-  - project
-  - devtools
-  - api
-  - workflow
+  - task-tracking
+  - dev-tools
+  - api-integration
+  - project-mgmt

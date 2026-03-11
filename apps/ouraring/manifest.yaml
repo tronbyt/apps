@@ -7,11 +7,10 @@ author: Aiden Vigue
 fileName: ouraring.star
 packageName: ouraring
 recommendedInterval: 5
-
-category: utilities
+category: health
 tags:
-  - health
   - fitness
+  - health
+  - activity
   - tracking
   - wellness
-  - data

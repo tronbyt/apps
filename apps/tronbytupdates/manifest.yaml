@@ -7,11 +7,8 @@ author: Robert Ison
 supports2x: true
 fileName: tronbytupdates.star
 packageName: tronbytupdates
-
 category: utilities
 tags:
-  - app updates
-  - software
   - utility
-  - display
+  - app-updates
   - wide 2x support

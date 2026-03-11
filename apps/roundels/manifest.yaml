@@ -4,11 +4,9 @@ name: Roundels
 summary: See air force roundels
 desc: Display Air Force roundels of world.
 author: Robert Ison
-
 category: art
 tags:
-  - aviation
+  - flags
   - military
+  - aerospace
   - visuals
-  - display
-  - design

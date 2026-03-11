@@ -10,6 +10,7 @@ recommendedInterval: 5
 category: utilities
 tags:
   - transit
+  - subway
+  - cta
   - trains
-  - public transport
-  - alerts
+  - public-transit

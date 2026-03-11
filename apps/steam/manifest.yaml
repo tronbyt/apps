@@ -7,11 +7,10 @@ author: Jeremy Tavener
 fileName: steam.star
 packageName: steam
 recommendedInterval: 5
-
 category: utilities
 tags:
   - gaming
   - retro
-  - display
   - steam
-  - game
+  - game-tracker
+  - utility

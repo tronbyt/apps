@@ -7,11 +7,10 @@ author: LunchBox8484
 fileName: ncaam_standings.star
 packageName: ncaamstandings
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
+  - ncaa
   - basketball
-  - college
   - conference
+  - sports
   - standings

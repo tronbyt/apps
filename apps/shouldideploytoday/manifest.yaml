@@ -6,11 +6,10 @@ desc: Fun responses to the developers dilemma, powered by shouldideploy.today.
 author: Austin Daviscourt
 fileName: shouldideploy.star
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - devtools
+  - jokes
   - fun
-  - decision
-  - code
-  - utility
+  - dev
+  - dilemma
+  - quick

@@ -7,11 +7,10 @@ author: gshipley
 fileName: stock_value.star
 packageName: stockvalue
 recommendedInterval: 1
-
 category: finance
 tags:
   - stock
   - finance
   - portfolio
-  - api
   - tracking
+  - alpha-vantage

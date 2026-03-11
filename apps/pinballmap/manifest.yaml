@@ -7,10 +7,10 @@ author: scottwainstock
 fileName: pinball_map.star
 packageName: pinballmap
 recommendedInterval: 5
-
 category: entertainment
 tags:
-  - arcade
-  - local
   - gaming
-  - neighborhood
+  - retro
+  - arcade
+  - localization
+  - fun

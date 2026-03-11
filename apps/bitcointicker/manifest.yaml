@@ -9,8 +9,8 @@ packageName: bitcointicker
 recommendedInterval: 1
 category: finance
 tags:
-  - crypto
-  - finance
-  - price
-  - currency
   - bitcoin
+  - crypto
+  - price-tracker
+  - forex
+  - currency

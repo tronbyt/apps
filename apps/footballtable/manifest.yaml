@@ -9,8 +9,7 @@ packageName: footballtable
 recommendedInterval: 5
 category: sports
 tags:
-  - football
   - sports
+  - football
   - standings
-  - live
-  - scoreboard
+  - scores

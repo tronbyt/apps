@@ -7,11 +7,9 @@ author: ndlybarger
 fileName: seinfeldquotes.star
 packageName: seinfeldquotes
 recommendedInterval: 5
-
 category: entertainment
 tags:
   - fun
-  - humor
   - comedy
-  - quote
-  - display
+  - quotes
+  - seinfeld

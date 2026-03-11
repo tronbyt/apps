@@ -7,9 +7,9 @@ author: Harry Samuels
 fileName: tcat_bus_arrivals.star
 packageName: tcatbusarrivals
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - transport
-  - public transit
-  - local transport
+  - transit
+  - public-transport
+  - bus
+  - stop-tracker

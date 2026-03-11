@@ -6,10 +6,10 @@ desc: Displays Calendar from iCal (.ics) files.
 author: quesurifn <Kyle C. R. Fahey>
 fileName: universal_ical.star
 packageName: universalical
-
 category: utilities
 tags:
   - calendar
   - ics
-  - sync
+  - reminder
   - utility
+  - event

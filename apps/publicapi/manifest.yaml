@@ -7,10 +7,10 @@ author: noahpodgurski
 fileName: publicapi.star
 packageName: publicapi
 recommendedInterval: 5
-
 category: utilities
 tags:
   - random
   - api
   - utility
+  - public
   - data

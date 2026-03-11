@@ -9,7 +9,8 @@ packageName: jellyfinrecentlyadded
 recommendedInterval: 720
 category: utilities
 tags:
-  - media
   - jellyfin
-  - streaming
-  - library
+  - media
+  - utility
+  - server
+  - display

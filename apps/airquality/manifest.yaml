@@ -9,8 +9,6 @@ packageName: airquality
 recommendedInterval: 5
 category: utilities
 tags:
-  - pollution
-  - health
+  - air-quality
+  - weather
   - utility
-  - api
-  - monitoring

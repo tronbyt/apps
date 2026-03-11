@@ -9,6 +9,5 @@ packageName: grafana
 category: utilities
 tags:
   - metrics
-  - data
-  - visualization
-  - analytics
+  - data-visual
+  - utility-app

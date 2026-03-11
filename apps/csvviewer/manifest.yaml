@@ -9,8 +9,8 @@ packageName: csvviewer
 recommendedInterval: 5
 category: utilities
 tags:
-  - data
+  - csv
+  - data-viewer
   - table
   - utility
   - export
-  - analysis

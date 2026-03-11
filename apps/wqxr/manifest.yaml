@@ -7,11 +7,9 @@ author: Andrew Westling
 fileName: wqxr.star
 packageName: wqxr
 recommendedInterval: 5
-
 category: entertainment
 tags:
   - music
   - classical
   - radio
-  - live
-  - streaming
+  - live-stream

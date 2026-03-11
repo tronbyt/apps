@@ -9,7 +9,8 @@ packageName: dailyhoroscope
 recommendedInterval: 5
 category: entertainment
 tags:
-  - astrology
   - horoscope
-  - personal
-  - weather-inspired
+  - astrology
+  - news
+  - fun
+  - weather

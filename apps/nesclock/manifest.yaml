@@ -7,11 +7,10 @@ author: hx009
 fileName: nes_clock.star
 packageName: nesclock
 recommendedInterval: 0
-
-category: utilities
+category: clocks
 tags:
   - retro
   - clock
   - gaming
-  - nintendo
   - fun
+  - utility

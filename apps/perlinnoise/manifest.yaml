@@ -6,12 +6,10 @@ desc: Set the vibe with beautiful, complex, colorful animated noise produced wit
 author: rektdeckard
 fileName: perlin_noise.star
 packageName: perlinnoise
-
-
-category: art
+category: entertainment
 tags:
+  - art
   - visual
   - math
-  - art
-  - aesthetic
-  - dynamic
+  - colorful
+  - noise

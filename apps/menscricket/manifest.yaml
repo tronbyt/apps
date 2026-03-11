@@ -6,11 +6,10 @@ desc: For a selected team, this app shows the scorecard for a current match. If 
 author: adilansari
 fileName: mens_cricket.star
 packageName: menscricket
-
 category: sports
 tags:
-  - sports
   - cricket
-  - scoreboard
+  - scores
+  - standings
+  - sports
   - live
-  - match

@@ -7,9 +7,8 @@ author: meejle
 fileName: skynews.star
 packageName: skynews
 recommendedInterval: 10
-
 category: news
 tags:
   - news
-  - current
   - headlines
+  - breaking

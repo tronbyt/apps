@@ -7,10 +7,10 @@ author: M0ntyP
 fileName: nrl_scores.star
 packageName: nrlscores
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
-  - rugby league
-  - live scores
+  - rugby
   - nrl
+  - sports
+  - scores
+  - live

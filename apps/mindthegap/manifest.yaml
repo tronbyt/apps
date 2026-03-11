@@ -7,10 +7,10 @@ author: dinosaursrarr
 fileName: mind_the_gap.star
 packageName: mindthegap
 recommendedInterval: 5
-
-category: utilities
+category: transit
 tags:
   - transport
-  - public transit
-  - london
+  - subway
+  - public-transit
+  - utilities
   - utility

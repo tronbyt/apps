@@ -7,10 +7,10 @@ author: markazali
 recommendedInterval: 5
 fileName: solaredge.star
 packageName: solaredgeoverview
-
-category: utilities
+category: smart-home
 tags:
   - energy
+  - home-automation
+  - power-monitoring
   - solar
-  - monitoring
-  - home
+  - utility

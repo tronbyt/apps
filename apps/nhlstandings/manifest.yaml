@@ -7,10 +7,10 @@ author: LunchBox8484
 fileName: nhl_standings.star
 packageName: nhlstandings
 recommendedInterval: 5
-
 category: sports
 tags:
+  - nhl
   - sports
-  - hockey
   - standings
-  - real-time
+  - scores
+  - hockey

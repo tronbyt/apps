@@ -7,11 +7,10 @@ author: '@theredwillow'
 fileName: mondrianclock.star
 packageName: mondrianclock
 recommendedInterval: 0
-
-category: utilities
+category: clocks
 tags:
   - art
   - clock
+  - de-stijl
   - visual
-  - abstract
-  - decorative
+  - utility

@@ -7,10 +7,10 @@ author: rs7q5
 fileName: shuffle_images.star
 packageName: shuffleimages
 recommendedInterval: 5
-
 category: utilities
 tags:
   - image
-  - shuffle
-  - display
+  - randomizer
+  - utility
   - visual
+  - display

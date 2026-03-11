@@ -7,9 +7,8 @@ author: hainish
 fileName: effheadlines.star
 packageName: effheadlines
 recommendedInterval: 5
-category: news
+category: entertainment
 tags:
   - news
-  - activism
-  - tech
-  - civil liberties
+  - tech-activism
+  - digital-rights

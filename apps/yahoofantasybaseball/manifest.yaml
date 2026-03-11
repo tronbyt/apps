@@ -7,10 +7,9 @@ author: jweier
 fileName: yahoofantasymlb.star
 packageName: yahoofantasymlb
 recommendedInterval: 5
-
 category: sports
 tags:
   - fantasy
   - baseball
-  - scores
   - standings
+  - scores

@@ -7,11 +7,9 @@ author: brettohland
 fileName: plausibleanalytics.star
 packageName: plausibleanalytics
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - traffic
   - stats
+  - traffic
   - analytics
   - website
-  - utility

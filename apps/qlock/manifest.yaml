@@ -4,10 +4,10 @@ name: Qlock
 summary: Advanced clock
 desc: Custom clock with time, binary, beats, and date; all with a custom font.
 author: craigerskine
-
-category: time
+category: clocks
 tags:
   - clock
   - custom
-  - time
+  - binary
+  - beats
   - font

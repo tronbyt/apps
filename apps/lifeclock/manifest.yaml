@@ -7,11 +7,10 @@ author: kevwoods
 fileName: life_clock.star
 packageName: lifeclock
 recommendedInterval: 0
-
-category: utilities
+category: clocks
 tags:
-  - conway
+  - game-of-life
   - clock
+  - utility
   - visual
-  - math
-  - art
+  - interactive

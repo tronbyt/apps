@@ -7,11 +7,10 @@ author: brettohland
 fileName: neotrack.star
 packageName: neotrack
 recommendedInterval: 5
-
 category: science
 tags:
   - space
-  - astronomy
-  - celestial
-  - real-time
+  - asteroid
+  - neow
+  - planetary
   - science

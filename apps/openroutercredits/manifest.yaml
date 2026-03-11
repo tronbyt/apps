@@ -7,10 +7,9 @@ author: tavdog
 fileName: openrouter_credits.star
 packageName: openroutercredits
 recommendedInterval: 300
-
 category: utilities
 tags:
   - api
   - utility
+  - credits
   - monitoring
-  - developer

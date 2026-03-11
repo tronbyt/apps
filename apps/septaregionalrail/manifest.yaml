@@ -7,11 +7,10 @@ author: radiocolin
 fileName: septaregionalrail.star
 packageName: septarr
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - transport
-  - public transit
-  - commute
+  - transit
   - train
-  - local
+  - subway
+  - commute
+  - public-transport

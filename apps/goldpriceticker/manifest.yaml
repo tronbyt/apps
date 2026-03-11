@@ -9,8 +9,8 @@ packageName: goldpriceticker
 recommendedInterval: 5
 category: finance
 tags:
-  - crypto
+  - gold
   - metals
+  - crypto
   - finance
   - ticker
-  - real-time

@@ -7,10 +7,10 @@ author: M0ntyP
 fileName: random_colors.star
 packageName: randomcolors
 recommendedInterval: 5
-
 category: utilities
 tags:
   - color
   - hex
-  - visual
   - utility
+  - random
+  - art

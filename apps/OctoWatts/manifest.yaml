@@ -10,7 +10,7 @@ packageName: OctoWatts
 category: utilities
 tags:
   - energy
+  - smart-home
+  - home-assistant
   - utility
-  - monitoring
-  - home
-  - smart
+  - monitor

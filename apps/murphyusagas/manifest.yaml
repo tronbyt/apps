@@ -8,10 +8,9 @@ fileName: murphy_usa_gas.star
 packageName: murphyusagas
 recommendedInterval: 5
 broken: true
-brokenReason: "API blocked by Incapsula WAF"
-
+brokenReason: API blocked by Incapsula WAF
 category: utilities
 tags:
-  - gas
+  - gas-prices
   - utility
   - real-time

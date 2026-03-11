@@ -6,10 +6,10 @@ desc: Displays a reminder to take out the trash.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
-
-category: utilities
+category: lifestyle
 tags:
   - reminder
   - household
   - utility
+  - home
   - wide 2x support

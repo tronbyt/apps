@@ -7,11 +7,10 @@ author: jvivona
 fileName: rss_misc_feeds.star
 packageName: rssmiscfeeds
 recommendedInterval: 10
-
 category: utilities
 tags:
   - rss
   - news
-  - curated
   - feed
-  - display
+  - utility
+  - custom

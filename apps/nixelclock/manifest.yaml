@@ -7,11 +7,10 @@ author: Olly Stedall @saltedlolly
 fileName: nixel_clock.star
 packageName: nixelclock
 recommendedInterval: 0
-
-category: art
+category: clocks
 tags:
-  - pixel
-  - nixie
-  - digital
   - art
-  - clock
+  - pixel-art
+  - nixie-tube
+  - digital-clock
+  - retro

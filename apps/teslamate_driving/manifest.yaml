@@ -5,12 +5,10 @@ summary: Route Info about your Tesla
 desc: See where your Tesla is going and when it will get there. See readme for additional HA setup.
 author: Brombomb
 supports2x: true
-
 category: utilities
 tags:
   - tesla
-  - tracking
-  - route
+  - driving
+  - smart-home
   - utility
-  - vehicle
   - wide 2x support

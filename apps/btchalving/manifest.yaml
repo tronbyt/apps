@@ -7,10 +7,10 @@ author: PMK (@pmk)
 fileName: btchalving.star
 packageName: btchalving
 recommendedInterval: 1
-category: finance
+category: technology
 tags:
   - bitcoin
   - crypto
+  - mining
   - finance
-  - utility
-  - real-time
+  - blockchain

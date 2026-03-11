@@ -9,7 +9,8 @@ fileName: faa_atis.star
 packageName: faaatis
 category: utilities
 tags:
+  - atis
   - aviation
-  - airport
+  - runway
   - weather
   - utility

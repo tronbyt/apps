@@ -7,10 +7,8 @@ author: Matt-Pesce
 fileName: outlook_calendar.star
 packageName: outlookcalendar
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - outlook
+  - calendar
   - meeting
-  - time
-  - utility
+  - outlook

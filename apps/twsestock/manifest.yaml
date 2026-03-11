@@ -7,11 +7,8 @@ author: Mark Chu
 recommendedInterval: 5
 fileName: twse_stock.star
 packageName: twsestock
-
-category: utilities
+category: finance
 tags:
-  - stock
+  - stocks
   - finance
-  - market
-  - ticker
   - utility

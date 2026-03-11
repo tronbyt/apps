@@ -7,11 +7,9 @@ author: Marcus Better
 fileName: solaredge_monitor.star
 packageName: solaredgemonitor
 recommendedInterval: 5
-
 category: utilities
 tags:
   - energy
   - solar
-  - monitor
-  - utility
-  - home
+  - monitoring
+  - home-automation

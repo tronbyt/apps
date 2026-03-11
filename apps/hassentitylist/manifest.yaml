@@ -8,11 +8,10 @@ fileName: hassentitylist.star
 packageName: hassentitylist
 recommendedInterval: 5
 supports2x: true
-category: utilities
+category: smart-home
 tags:
-  - homeautomation
-  - stepcounter
-  - iot
+  - home-assistant
+  - fitness-tracker
+  - step-count
   - utility
-  - health
   - wide 2x support

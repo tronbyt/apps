@@ -7,9 +7,10 @@ author: imcnaugh
 fileName: cta_train_tracker.star
 packageName: ctatraintracker
 recommendedInterval: 5
-category: utilities
+category: weather
 tags:
-  - trains
+  - train
   - cta
-  - public transit
-  - utilities
+  - transit
+  - subway
+  - schedule

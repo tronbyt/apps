@@ -7,11 +7,10 @@ author: dev-manuel
 fileName: tankerkoenig.star
 packageName: tankerkoenig
 recommendedInterval: 5
-
 category: utilities
 tags:
   - gas
-  - utilities
-  - local
   - fuel
-  - navigation
+  - utility
+  - location-based
+  - tank

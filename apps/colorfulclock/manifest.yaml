@@ -7,10 +7,10 @@ author: LukiLeu
 fileName: colorful_clock.star
 packageName: colorfulclock
 recommendedInterval: 0
-category: utilities
+category: clocks
 tags:
+  - clock
   - retro
-  - time
   - wall
   - visual
   - utility

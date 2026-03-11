@@ -7,11 +7,10 @@ author: Woolycoin437420
 fileName: skordle_bb_fem.star
 packageName: skordlebbfem
 recommendedInterval: 5
-
-category: utilities
+category: sports
 tags:
   - sports
   - basketball
-  - game
-  - display
-  - utility
+  - game-data
+  - displays
+  - utilities

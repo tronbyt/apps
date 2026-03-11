@@ -7,11 +7,10 @@ author: noahpodgurski
 fileName: roomba.star
 packageName: roomba
 recommendedInterval: 5
-
-category: utilities
+category: smart-home
 tags:
-  - robot
-  - cleaning
-  - iot
+  - robot-vacuum
+  - smart-home
+  - home-automation
   - utility
-  - home
+  - cleaning

@@ -7,11 +7,10 @@ author: M0ntyP
 recommendedInterval: 5
 fileName: sanfl_ladder.star
 packageName: sanflladder
-
 category: sports
 tags:
-  - sports
+  - soccer
+  - standings
   - football
   - ladder
-  - league
-  - display
+  - scores

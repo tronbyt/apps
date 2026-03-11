@@ -7,9 +7,8 @@ author: AmillionAir
 fileName: abstract_clock.star
 packageName: abstractclock
 recommendedInterval: 0
-category: utilities
+category: clocks
 tags:
-  - time
-  - display
-  - utility
+  - time-display
+  - digital-clock
   - pixel-art

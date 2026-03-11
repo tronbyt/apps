@@ -7,8 +7,9 @@ author: Lucas Farah
 fileName: brawlstars_maps.star
 packageName: brawlstarsmaps
 recommendedInterval: 5
-category: games
+category: gaming
 tags:
-  - brawl stars
-  - game maps
+  - brawl-stars
+  - game-maps
   - utility
+  - randomizer

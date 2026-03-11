@@ -9,7 +9,6 @@ packageName: customstatus
 recommendedInterval: 5
 category: utilities
 tags:
+  - status
   - communication
-  - productivity
-  - office
   - utility

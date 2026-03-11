@@ -7,11 +7,8 @@ author: Stephen So
 recommendedInterval: 5
 fileName: next_ufc.star
 packageName: nextufc
-
 category: sports
 tags:
+  - ufc
   - sports
-  - mma
-  - event
-  - live
-  - upcoming
+  - events

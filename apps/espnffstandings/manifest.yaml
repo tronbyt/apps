@@ -9,7 +9,6 @@ fileName: espn_ff_standings.star
 packageName: espnffstandings
 category: sports
 tags:
-  - fantasy
-  - football
+  - fantasy-football
+  - scores
   - standings
-  - scoreboard

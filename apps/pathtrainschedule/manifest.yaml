@@ -8,12 +8,10 @@ fileName: path_train_schedule.star
 packageName: pathtrainschedule
 recommendedInterval: 5
 broken: true
-brokenReason: "path.api.razza.dev: no such host"
-
-category: utilities
+brokenReason: 'path.api.razza.dev: no such host'
+category: weather
 tags:
+  - train
   - transit
-  - trains
-  - public transport
   - schedule
-  - utilities
+  - commute

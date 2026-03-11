@@ -7,10 +7,10 @@ author: ndhotsky
 fileName: nextdns.star
 packageName: nextdns
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - security
+  - nextdns
   - network
   - analytics
-  - privacy
+  - utility
+  - stats

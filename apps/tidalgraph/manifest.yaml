@@ -7,11 +7,10 @@ author: k.wajdwoicz
 fileName: tidalgraph.star
 packageName: tidalgraph
 recommendedInterval: 5
-
-category: weather
+category: utilities
 tags:
+  - tides
   - ocean
-  - tide
+  - water-level
+  - marine
   - weather
-  - water
-  - forecast

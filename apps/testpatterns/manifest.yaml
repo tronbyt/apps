@@ -7,10 +7,10 @@ author: harrisonpage
 fileName: test_patterns.star
 packageName: testpatterns
 recommendedInterval: 5
-
-category: art
+category: entertainment
 tags:
+  - tv
+  - art
   - visual
-  - artistic
-  - display
   - retro
+  - display

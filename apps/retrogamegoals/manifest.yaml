@@ -7,8 +7,7 @@ author: UnBurn
 fileName: retro_game_goals.star
 packageName: retrogamegoals
 recommendedInterval: 5
-
-category: games
+category: gaming
 tags:
   - retro
   - achievements

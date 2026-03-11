@@ -7,11 +7,10 @@ author: jeffbean
 fileName: visualizercoffee.star
 packageName: visualizercoffee
 recommendedInterval: 5
-
 category: entertainment
 tags:
   - sports
-  - visual
-  - shot
+  - visualizer
   - gaming
   - fun
+  - scores

@@ -7,11 +7,10 @@ author: Alysha Kwok
 fileName: literature_clock.star
 packageName: literatureclock
 recommendedInterval: 1
-
-category: time
+category: clocks
 tags:
-  - literary
   - time
-  - quote
+  - literary
+  - quotes
   - clock
   - poetry

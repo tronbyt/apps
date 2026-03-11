@@ -7,11 +7,9 @@ author: rs7q5
 fileName: tv_quotes.star
 packageName: tvquotes
 recommendedInterval: 5
-
 category: entertainment
 tags:
   - tv
   - quotes
-  - text
-  - display
   - fun
+  - entertainment

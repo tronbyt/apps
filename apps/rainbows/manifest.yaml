@@ -7,10 +7,10 @@ desc: Relax with soothing rainbow wave animations. Choose from Rainbow Magic, Ra
 icon: water
 packageName: rainbows
 fileName: rainbows.star
-
-category: entertainment
+category: weather
 tags:
+  - rainbow
   - visual
-  - colorful
   - animation
-  - relaxation
+  - decorative
+  - display

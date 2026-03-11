@@ -7,11 +7,9 @@ author: Woolycoin437420
 fileName: skordlesoftball.star
 packageName: skordlesoftball
 recommendedInterval: 5
-
-category: utilities
+category: sports
 tags:
   - skordle
-  - sports
   - softball
+  - game-data
   - display
-  - utility

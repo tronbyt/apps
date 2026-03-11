@@ -7,11 +7,10 @@ author: Adam Henson
 fileName: mars_clock.star
 packageName: marsclock
 recommendedInterval: 0
-
-category: science
+category: clocks
 tags:
-  - astronomy
   - space
-  - time
+  - astronomy
+  - time-travel
   - planetary
-  - clock
+  - solar

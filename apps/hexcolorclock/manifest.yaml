@@ -7,10 +7,10 @@ author: gabe565
 fileName: hex_color_clock.star
 packageName: hexcolorclock
 recommendedInterval: 0
-category: time
+category: clocks
 tags:
   - clock
   - hex
   - visual
-  - color
-  - utility
+  - dynamic
+  - aesthetic

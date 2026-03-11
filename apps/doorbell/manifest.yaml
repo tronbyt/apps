@@ -8,7 +8,9 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - notifications
+  - smart-home
+  - home-alert
+  - notification
+  - doorbell
   - utility
-  - home
   - wide 2x support

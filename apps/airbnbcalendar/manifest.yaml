@@ -9,8 +9,8 @@ packageName: airbnbcalendar
 recommendedInterval: 60
 category: utilities
 tags:
-  - hosting
+  - airbnb
   - rental
   - booking
   - utilities
-  - planner
+  - schedule

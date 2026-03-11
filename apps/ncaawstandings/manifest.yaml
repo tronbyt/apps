@@ -7,11 +7,10 @@ author: LunchBox8484
 fileName: ncaaw_standings.star
 packageName: ncaawstandings
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
+  - ncaa
+  - women's
   - basketball
   - conference
-  - women's
-  - standings
+  - sports

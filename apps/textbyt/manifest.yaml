@@ -7,11 +7,10 @@ author: Josh Reed
 fileName: textbyt.star
 packageName: textbyt
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - sms
   - tidbyt
   - iot
-  - utility
   - messaging
+  - smart-home
+  - utility

@@ -7,10 +7,10 @@ author: BestDistress
 fileName: multicountdown.star
 packageName: multicountdown
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - countdown
-  - time
+  - clock
   - utility
+  - countdown
   - reminder
+  - time

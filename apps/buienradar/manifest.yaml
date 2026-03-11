@@ -7,10 +7,10 @@ author: PMK (@pmk)
 fileName: buienradar.star
 packageName: buienradar
 recommendedInterval: 5
-category: weather
+category: utilities
 tags:
   - weather
-  - radar
+  - rain
   - forecast
-  - local
-  - meteorology
+  - belgium
+  - netherlands

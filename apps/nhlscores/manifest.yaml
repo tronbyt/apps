@@ -7,11 +7,9 @@ author: LunchBox8484
 fileName: nhl_scores.star
 packageName: nhlscores
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - nhl
   - sports
-  - hockey
   - scores
-  - live
   - utility

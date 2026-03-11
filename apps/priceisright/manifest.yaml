@@ -7,11 +7,9 @@ author: Blkhwks19
 fileName: price_is_right.star
 packageName: priceisright
 recommendedInterval: 5
-
 category: entertainment
 tags:
+  - contest
   - bid
-  - game
+  - game-show
   - costume
-  - fun
-  - display

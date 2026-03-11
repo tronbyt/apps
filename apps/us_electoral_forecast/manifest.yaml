@@ -8,10 +8,8 @@ fileName: us_electoral_forecast.star
 packageName: us_electoral_forecast
 recommendedInterval: 5
 broken: true
-
-category: news
+category: weather
 tags:
   - politics
   - election
   - forecast
-  - news

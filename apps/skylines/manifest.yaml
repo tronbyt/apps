@@ -8,11 +8,11 @@ packageName: skylines
 fileName: skylines.star
 recommendedInterval: 5
 supports2x: true
-
 category: art
 tags:
-  - cityscapes
+  - city
+  - skyline
+  - art
   - visual
-  - aesthetic
   - display
   - wide 2x support

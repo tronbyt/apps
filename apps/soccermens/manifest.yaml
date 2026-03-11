@@ -7,11 +7,9 @@ author: jvivona
 fileName: soccermens.star
 packageName: soccermens
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
-  - scoreboard
-  - live
-  - football
-  - league
+  - soccer
+  - scores
+  - standings
+  - live-updates

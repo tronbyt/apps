@@ -9,8 +9,6 @@ packageName: duolingo
 recommendedInterval: 5
 category: education
 tags:
-  - study
-  - language
-  - productivity
-  - learning
-  - utility
+  - duolingo
+  - language-learning
+  - study-tracker

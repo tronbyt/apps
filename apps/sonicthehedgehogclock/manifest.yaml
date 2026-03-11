@@ -7,10 +7,10 @@ author: RichardALeon
 fileName: sonicthehedgehogclock.star
 packageName: sonicthehedgehogclock
 recommendedInterval: 0
-
-category: games
+category: clocks
 tags:
   - sonic
+  - clock
   - retro
-  - time
   - fun
+  - gaming

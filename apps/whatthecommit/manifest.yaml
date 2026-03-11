@@ -7,11 +7,9 @@ author: dev-manuel
 fileName: whatthecommit.star
 packageName: whatthecommit
 recommendedInterval: 5
-
 category: entertainment
 tags:
-  - humor
+  - jokes
   - funny
   - code
-  - dev
-  - random
+  - humor

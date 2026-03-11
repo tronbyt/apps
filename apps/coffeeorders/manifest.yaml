@@ -8,6 +8,5 @@ recommendedInterval: 5
 category: utilities
 tags:
   - coffee
-  - order
-  - display
   - utility
+  - order-tracking

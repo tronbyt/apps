@@ -7,10 +7,10 @@ author: joshspicer
 fileName: mbta_new_trains.star
 packageName: mbtanewtrains
 recommendedInterval: 5
-
-category: utilities
+category: weather
 tags:
-  - transit
-  - public transport
-  - real-time
   - subway
+  - transit
+  - public-transport
+  - real-time
+  - commute

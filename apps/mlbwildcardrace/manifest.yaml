@@ -7,10 +7,9 @@ author: Jake Manske
 fileName: mlb_wildcard_race.star
 packageName: mlbwildcardrace
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
   - mlb
   - standings
-  - game tracking
+  - scores
+  - sports

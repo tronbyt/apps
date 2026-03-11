@@ -9,8 +9,8 @@ packageName: flythel
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - mlb
-  - game
-  - live updates
-  - utility
+  - sports
+  - scores
+  - live-updates
+  - team-tracking

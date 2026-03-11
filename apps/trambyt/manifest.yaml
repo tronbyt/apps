@@ -7,10 +7,10 @@ author: protocol7
 fileName: trambyt.star
 packageName: trambyt
 recommendedInterval: 5
-
-category: utilities
+category: transit
 tags:
   - tram
-  - public transit
+  - public-transit
+  - bus
+  - subway
   - travel
-  - utility

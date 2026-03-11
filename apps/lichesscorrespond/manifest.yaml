@@ -7,11 +7,10 @@ author: Denton-L
 fileName: lichesscorrespond.star
 packageName: lichesscorrespond
 recommendedInterval: 5
-
-category: games
+category: gaming
 tags:
-  - gaming
   - chess
-  - correspondence
   - game
-  - utility
+  - lichess
+  - correspondence
+  - puzzle

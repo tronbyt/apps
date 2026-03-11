@@ -7,7 +7,6 @@ author: Kyle Bolstad
 fileName: random_numbers.star
 packageName: randomnumbers
 recommendedInterval: 5
-
 category: utilities
 tags:
   - utility

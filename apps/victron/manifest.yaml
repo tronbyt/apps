@@ -5,11 +5,10 @@ summary: Show energy stats
 desc: This app uses the Victron VRM API to get SOC, Solar Watts and DC Watts.
 author: jduncc
 recommendedInterval: 5
-
 category: utilities
 tags:
   - energy
   - power
   - solar
   - utility
-  - monitor
+  - monitoring

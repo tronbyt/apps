@@ -7,11 +7,10 @@ author: thiagoss
 recommendedInterval: 5
 fileName: lol_stats.star
 packageName: lolstats
-
-category: games
+category: sports
 tags:
+  - lol
+  - chess
+  - ranking
   - gaming
   - esports
-  - league of legends
-  - stats
-  - utility

@@ -7,9 +7,10 @@ author: Henry So, Jr.
 fileName: clock_by_henry.star
 packageName: clockbyhenry
 recommendedInterval: 0
-category: utilities
+category: clocks
 tags:
-  - time display
-  - date
+  - clock
   - utility
-  - large font
+  - date
+  - large-display
+  - time

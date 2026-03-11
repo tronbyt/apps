@@ -7,10 +7,10 @@ author: Daniel Sitnik
 recommendedInterval: 10
 fileName: rss_reader.star
 packageName: rssreader
-
 category: utilities
 tags:
   - news
+  - rss
   - feed
-  - updates
-  - content
+  - utility
+  - clock

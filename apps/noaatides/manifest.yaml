@@ -7,11 +7,9 @@ author: tavdog
 fileName: noaa_tides.star
 packageName: noaatides
 recommendedInterval: 60
-
-category: utilities
+category: weather
 tags:
-  - tide
+  - tides
+  - water
   - weather
-  - ocean
-  - forecast
   - utility

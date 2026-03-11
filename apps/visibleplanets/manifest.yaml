@@ -7,11 +7,10 @@ author: Robert Ison
 fileName: visibleplanets.star
 packageName: visibleplanets
 recommendedInterval: 5
-
 category: science
 tags:
   - space
   - astronomy
   - sky
-  - visual
-  - celestial
+  - night
+  - science

@@ -7,10 +7,7 @@ author: Alex Karp
 fileName: skybyt.star
 packageName: skybyt
 recommendedInterval: 5
-
 category: utilities
 tags:
   - social
-  - follower
-  - stats
-  - networking
+  - follower-count

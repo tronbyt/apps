@@ -6,10 +6,11 @@ desc: Clock displayed over animated, colorful gradient background.
 author: tpatel12
 supports2x: true
 recommendedInterval: 0
-category: entertainment
+category: clocks
 tags:
-  - time
+  - clock
   - visual
-  - dynamic
+  - art
   - colorful
+  - dynamic
   - wide 2x support

@@ -7,10 +7,10 @@ author: Nick Penree
 fileName: xbox_gamerscore.star
 packageName: xboxgamerscore
 recommendedInterval: 5
-
 category: utilities
 tags:
   - xbox
-  - score
-  - display
+  - scoreboard
   - utility
+  - gaming
+  - display

@@ -9,6 +9,7 @@ packageName: actransit
 recommendedInterval: 5
 category: utilities
 tags:
+  - bus
   - transit
-  - public transport
-  - bus schedule
+  - public
+  - real-time

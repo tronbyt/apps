@@ -8,7 +8,6 @@ fileName: bird_buddy.star
 packageName: birdbuddy
 category: utilities
 tags:
-  - feeder
-  - birdwatching
-  - animal
-  - utility
+  - feeders
+  - bird-watching
+  - utility-app

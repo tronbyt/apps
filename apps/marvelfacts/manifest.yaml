@@ -7,10 +7,9 @@ author: Kaitlyn Musial
 fileName: marvel_facts.star
 packageName: marvelfacts
 recommendedInterval: 5
-
 category: entertainment
 tags:
   - comics
-  - fiction
-  - reference
   - marvel
+  - fandom
+  - entertainment

@@ -7,10 +7,10 @@ author: hklim1
 fileName: national_parks.star
 packageName: nationalparks
 recommendedInterval: 5
-
 category: entertainment
 tags:
+  - national parks
   - nature
+  - art
   - travel
-  - scenery
-  - education
+  - fun

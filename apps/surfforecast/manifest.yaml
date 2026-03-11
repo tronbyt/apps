@@ -8,11 +8,10 @@ fileName: surf_forecast.star
 packageName: surfforecast
 broken: true
 recommendedInterval: 5
-
 category: weather
 tags:
   - surf
   - ocean
   - weather
-  - beach
+  - coastal
   - forecast

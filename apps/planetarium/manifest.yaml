@@ -7,9 +7,8 @@ author: rs7q5
 fileName: planetarium.star
 packageName: planetarium
 broken: true
-
 category: science
 tags:
   - space
   - astronomy
-  - science
+  - planets

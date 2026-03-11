@@ -7,10 +7,8 @@ author: jvivona
 fileName: wsj_news.star
 packageName: wsjnews
 recommendedInterval: 10
-
 category: news
 tags:
   - news
-  - headlines
   - finance
-  - display
+  - headlines

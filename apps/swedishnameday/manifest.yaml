@@ -6,9 +6,9 @@ desc: Shows today's name day names in Sweden.
 author: y34752
 fileName: swedish_name_day.star
 packageName: swedishnameday
-
 category: lifestyle
 tags:
-  - swedish
+  - sweden
   - holiday
-  - customary
+  - customs
+  - culture

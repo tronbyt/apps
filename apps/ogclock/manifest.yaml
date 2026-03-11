@@ -7,11 +7,10 @@ author: g3rmanaviator
 fileName: og_clock.star
 packageName: ogclock
 recommendedInterval: 1
-
-category: utilities
+category: clocks
 tags:
   - weather
-  - time
   - utility
   - clock
-  - display
+  - nws
+  - openweathermap

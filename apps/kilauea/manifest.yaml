@@ -6,9 +6,11 @@ desc: Displays the current USGS alert level and webcam for Kilauea volcano.
 author: Tavis
 recommendedInterval: 10
 supports2x: true
-category: weather
+category: science
 tags:
   - volcano
-  - USGS
-  - emergency
-  
+  - earthquake
+  - geology
+  - nature
+  - alert
+  - wide 2x support

@@ -7,11 +7,9 @@ author: LunchBox8484
 fileName: ncaaw_scores.star
 packageName: ncaawscores
 recommendedInterval: 5
-
 category: sports
 tags:
+  - nba
+  - women's basketball
   - sports
-  - basketball
-  - ncaa
-  - live scores
-  - team stats
+  - standings

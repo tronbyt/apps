@@ -7,10 +7,9 @@ author: InTheDaylight14
 fileName: hass_entity.star
 packageName: hassentity
 recommendedInterval: 5
-category: utilities
+category: smart-home
 tags:
   - home-assistant
-  - state-display
-  - iot
   - utility
-  - real-time
+  - iot
+  - state-display

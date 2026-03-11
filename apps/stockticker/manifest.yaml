@@ -7,11 +7,9 @@ author: Matt Holloway
 fileName: stock_ticker.star
 packageName: stockticker
 recommendedInterval: 1
-
 category: utilities
 tags:
   - stocks
   - finance
-  - real-time
+  - ticker
   - utility
-  - market

@@ -7,11 +7,8 @@ author: danceforheaven
 recommendedInterval: 5
 fileName: life_counter.star
 packageName: lifecounter
-
-category: utilities
+category: lifestyle
 tags:
-  - age tracker
-  - life progress
-  - personalization
-  - utility
-  - visual
+  - age-tracker
+  - calendar
+  - life-progress

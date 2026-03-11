@@ -11,6 +11,7 @@ broken: true
 brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).
 category: sports
 tags:
-  - sports
+  - ipl
   - cricket
-  - live_scores
+  - sports
+  - standings

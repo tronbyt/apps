@@ -6,9 +6,9 @@ desc: View the top 3 countries (or a specific country) in the Olympics medal sta
 author: Daniel Sitnik
 recommendedInterval: 5
 broken: true
-
 category: sports
 tags:
-  - sports
   - olympics
   - medals
+  - standings
+  - sports

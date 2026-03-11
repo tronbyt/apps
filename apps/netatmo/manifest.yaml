@@ -7,11 +7,8 @@ author: danmcclain
 fileName: netatmo.star
 packageName: netatmo
 recommendedInterval: 5
-
 category: utilities
 tags:
   - weather
-  - homeautomation
-  - smarthome
-  - local
-  - forecast
+  - home-assistant
+  - smart-home

@@ -7,10 +7,10 @@ author: gstark
 fileName: maze.star
 packageName: maze
 recommendedInterval: 5
-
-category: games
+category: entertainment
 tags:
+  - maze
   - puzzle
-  - gameplay
-  - visual
-  - algorithm
+  - gaming
+  - fun
+  - retro

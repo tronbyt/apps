@@ -7,11 +7,10 @@ author: skola28
 fileName: wordlebyt.star
 packageName: wordlebyt
 recommendedInterval: 5
-
 category: utilities
 tags:
   - wordle
   - utility
-  - score
   - text
-  - display
+  - scoreboard
+  - fun

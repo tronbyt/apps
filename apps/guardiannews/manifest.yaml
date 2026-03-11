@@ -9,7 +9,7 @@ packageName: guardiannews
 recommendedInterval: 10
 category: news
 tags:
-  - news
   - guardian
+  - news
   - edition
-  - breaking
+  - top-story

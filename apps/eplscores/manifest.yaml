@@ -9,7 +9,8 @@ packageName: eplscores
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
-  - football
-  - european
-  - live_scores
+  - epl
+  - soccer
+  - standings
+  - scores
+  - live

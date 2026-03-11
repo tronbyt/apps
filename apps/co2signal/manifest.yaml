@@ -9,8 +9,8 @@ packageName: co2signal
 recommendedInterval: 5
 category: utilities
 tags:
-  - eco
   - energy
-  - climate
+  - environment
+  - carbon-footprint
   - utility
-  - pollution
+  - eco

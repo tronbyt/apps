@@ -7,10 +7,10 @@ author: Kyle Bolstad
 fileName: package_tracker.star
 packageName: packagetracker
 recommendedInterval: 5
-
 category: utilities
 tags:
   - tracking
-  - shipping
+  - delivery
   - logistics
+  - shipment
   - utility

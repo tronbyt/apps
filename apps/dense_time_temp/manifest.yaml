@@ -8,10 +8,9 @@ fileName: dense_time_temp.star
 packageName: densetimetemp
 recommendedInterval: 5
 broken: true
-category: utilities
+category: weather
 tags:
-  - weather
   - clock
-  - utility
-  - display
-  - weather-data
+  - weather
+  - temp
+  - sunrise-sunset

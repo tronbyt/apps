@@ -7,11 +7,10 @@ author: dinosaursrarr
 fileName: life.star
 packageName: life
 recommendedInterval: 5
-
 category: entertainment
 tags:
   - conway
-  - cellular
-  - automata
+  - game-of-life
+  - celestial
   - visual
   - simulation

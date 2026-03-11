@@ -7,10 +7,10 @@ author: ghensley
 fileName: sports_scoreboard.star
 packageName: sportsscoreboard
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
+  - mlb
+  - nba
+  - nhl
+  - nfl
   - scores
-  - live
-  - leagues

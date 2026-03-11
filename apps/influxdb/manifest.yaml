@@ -10,7 +10,8 @@ recommendedInterval: 60
 supports2x: true
 category: utilities
 tags:
-  - data
-  - visualization
+  - data-visual
+  - influxdb
   - analytics
+  - utility
   - wide 2x support

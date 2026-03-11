@@ -7,11 +7,10 @@ author: Martin Strauss
 fileName: sf_next_muni.star
 packageName: sfnextmuni
 recommendedInterval: 5
-
 category: utilities
 tags:
   - transit
-  - public transport
   - muni
-  - real-time
-  - utilities
+  - public-transport
+  - bus
+  - sf

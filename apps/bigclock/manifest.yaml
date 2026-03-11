@@ -7,10 +7,9 @@ author: Joey Hoer
 fileName: big_clock.star
 packageName: bigclock
 recommendedInterval: 0
-category: time
+category: clocks
 tags:
   - retro
-  - time
   - clock
-  - adaptive
-  - weather-based
+  - sunrise-sunset
+  - time-display

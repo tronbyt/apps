@@ -8,11 +8,9 @@ fileName: slippirank.star
 packageName: slippirank
 broken: true
 recommendedInterval: 5
-
-category: games
+category: entertainment
 tags:
+  - slippi
   - gaming
   - ranking
-  - slippi
-  - niche
-  - utility
+  - esports

@@ -7,11 +7,10 @@ author: Woolycoin437420
 fileName: skordlesbaseball.star
 packageName: skordlesbaseball
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - baseball
   - sports
+  - baseball
+  - game-data
+  - utility
   - display
-  - game
-  - clock

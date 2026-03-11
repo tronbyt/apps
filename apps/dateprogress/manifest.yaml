@@ -7,10 +7,9 @@ author: possan
 fileName: date_progress.star
 packageName: dateprogress
 recommendedInterval: 5
-category: time
+category: utilities
 tags:
   - date
-  - visual
-  - progressive
   - clock
+  - visual
   - utility

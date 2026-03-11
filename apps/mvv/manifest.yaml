@@ -7,11 +7,10 @@ author: Robin Sommer
 fileName: mvv.star
 packageName: mvv
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - public transport
-  - munich
   - transit
-  - real-time
-  - utility
+  - train
+  - subway
+  - munich
+  - public-transport

@@ -9,8 +9,8 @@ packageName: birdbyt
 recommendedInterval: 5
 category: utilities
 tags:
+  - birds
   - nature
-  - ornithology
-  - api
+  - weather
   - local
-  - wildlife
+  - ornithology

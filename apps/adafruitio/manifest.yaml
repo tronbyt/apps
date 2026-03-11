@@ -8,7 +8,7 @@ fileName: adafruitio.star
 packageName: adafruitio
 category: utilities
 tags:
+  - adafruit
   - iot
-  - data
-  - visualization
-  - feed
+  - data-graph
+  - utility

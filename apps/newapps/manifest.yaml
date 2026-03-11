@@ -7,9 +7,8 @@ author: rs7q5
 fileName: new_apps.star
 packageName: newapps
 recommendedInterval: 60
-
 category: utilities
 tags:
   - tidbyt
-  - discovery
-  - app_listing
+  - utility
+  - app-lister

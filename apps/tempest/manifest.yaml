@@ -6,11 +6,11 @@ desc: Overview of your Tempest Weather Station, including current temperature, w
 author: epifinygirl
 recommendedInterval: 5
 supports2x: true
-
-category: utilities
+category: weather
 tags:
   - weather
-  - forecast
-  - environmental
+  - temp
+  - wind-chill
+  - rain
   - utility
   - wide 2x support

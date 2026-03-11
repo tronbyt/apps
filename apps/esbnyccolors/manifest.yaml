@@ -9,7 +9,8 @@ packageName: esbnyccolors
 recommendedInterval: 5
 category: utilities
 tags:
-  - empire state
-  - color display
-  - art
-  - weather
+  - empire-state
+  - color-picker
+  - city-view
+  - utility
+  - weather-inspired

@@ -7,11 +7,10 @@ author: Billy_McSkintos
 recommendedInterval: 5
 fileName: solaredge_prod.star
 packageName: solaredgeprod
-
 category: utilities
 tags:
-  - energy
   - solar
-  - monitoring
+  - energy
   - utility
-  - data
+  - monitoring
+  - home

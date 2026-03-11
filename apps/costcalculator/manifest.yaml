@@ -9,8 +9,7 @@ packageName: costcalculator
 recommendedInterval: 5
 category: utilities
 tags:
-  - time
+  - time-tracker
+  - cost-monitor
   - utility
-  - cost
-  - rate
-  - clock
+  - rate-based

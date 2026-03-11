@@ -7,10 +7,8 @@ author: Michael Blades
 fileName: minecraft_server.star
 packageName: minecraftserver
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - gaming
-  - status
-  - playercount
   - minecraft
+  - game-status
+  - player-count

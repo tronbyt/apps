@@ -7,11 +7,10 @@ author: Woolycoin437420
 fileName: skordlevolleyball.star
 packageName: skordlevolleyball
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - sports
   - volleyball
-  - game
+  - sports
   - display
   - utility
+  - game

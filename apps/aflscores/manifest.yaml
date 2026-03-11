@@ -10,5 +10,6 @@ recommendedInterval: 5
 category: sports
 tags:
   - sports
-  - football
-  - live_scores
+  - afl
+  - standings
+  - scores

@@ -9,10 +9,9 @@ packageName: us_polling_average
 recommendedInterval: 5
 broken: true
 brokenReason: The data source (FiveThirtyEight) has changed and the JSON endpoint now redirects to an HTML page.
-
 category: news
 tags:
   - election
-  - polling
   - news
+  - polling
   - politics

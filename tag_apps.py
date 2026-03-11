@@ -30,12 +30,24 @@ Rules:
 - Return between 1 and {MAX_TAGS} lowercase tags
 - Tags should be short (1-2 words max)
 - Choose tags that describe the app's content and purpose
-- Good tag examples: finance, weather, sports, news, art, clock, crypto, transit,
-  fun, utility, productivity, nature, music, gaming, retro, health, space, food, politics
-- Do NOT include the app name as a tag
-- Category must be one of: news, weather, time, sports, finance, entertainment,
-  health, lifestyle, technology, science, utilities, games, art, music, food, travel,
-  shopping, social, education, reference
+
+Good tag examples (use these as primary suggestions):
+  finance, crypto, weather, sports, news, art, clock, transit, fun, utility,
+  productivity, nature, music, gaming, retro, health, space, food, travel,
+  driving, smart-home, fitness, calendar, world, calendar, stocks, tides, surf,
+  skiing, bike, bus, subway, train, flight, airline, tv, movies, anime,
+  pokemon, steam, chess, twitch, anime, horoscope, flags, history, sunrise-sunset,
+  moon-phase, iss, earthquakes, air-quality, uv, pollen, temperature, thermostat,
+  home-assistant, plex, tesla, wifi, qr-code, pets, jokes, nfl, nba, nhl, mlb,
+  soccer, football, baseball, basketball, hockey, formula-1, tennis, golf,
+  nascar, cricket, rugby, mls, epl, espn, standings, scores
+
+Category must be one of (use these as primary suggestions):
+  news, weather, clocks, sports, finance, entertainment, health, lifestyle,
+  technology, science, utilities, gaming, art, music, food, travel, shopping,
+  social, education, reference, transit, driving, smart-home, community
+
+Do NOT include the app name as a tag
 - Do NOT wrap output in markdown fences
 """
 
@@ -96,19 +108,33 @@ def load_manifest(path: str) -> dict:
         return yaml.safe_load(f) or {}
 
 
-def save_manifest(path: str, tags: list, category: str) -> None:
-    with open(path, "r+", encoding="utf-8") as f:
-        f.seek(0, 2)
-        if f.tell() > 0:
-            f.seek(f.tell() - 1)
-            if f.read(1) != "\n":
-                f.write("\n")
-        f.write("\n")
-        if category:
-            f.write(f"category: {category}\n")
-        f.write(f"tags:\n")
-        for tag in tags:
-            f.write(f"  - {tag}\n")
+def save_manifest(path: str, manifest: dict, tags: list, category: str) -> None:
+    # Remove existing tags/category keys if present
+    manifest_copy = {k: v for k, v in manifest.items() if k not in ("tags", "category")}
+
+    # Add new tags and category
+    if category:
+        manifest_copy["category"] = category
+    manifest_copy["tags"] = tags
+
+    class NoWrapDumper(yaml.SafeDumper):
+        def write_line_break(self, data=None):
+            return super().write_line_break(data)
+
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("---\n")
+        yaml.dump(
+            manifest_copy,
+            f,
+            Dumper=NoWrapDumper,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=float("inf"),
+        )
 
 
 # ── Main loop ──────────────────────────────────────────────────────────────────
@@ -151,8 +177,8 @@ def process_apps(root_dir: str, overwrite: bool, dry_run: bool) -> None:
 
         manifest = load_manifest(manifest_path)
 
-        # Skip if tags key already exists in manifest
-        if "tags" in manifest:
+        # Skip if tags key already exists in manifest (unless --overwrite is set)
+        if "tags" in manifest and not overwrite:
             existing_tags = manifest.get("tags", [])
             print(f"  → skipping (already has tags: {existing_tags})")
             skip_count += 1
@@ -166,6 +192,38 @@ def process_apps(root_dir: str, overwrite: bool, dry_run: bool) -> None:
 
         tags, category = query_lm_studio(manifest_text)
 
+        # Override category to "clocks" if app is a clock
+        app_name_lower = app_name.lower()
+        if (
+            "clock" in app_name_lower
+            or app_name_lower.endswith("time")
+            or "world clock" in app_name_lower
+        ):
+            category = "clocks"
+
+        # Override category to "weather" if app is weather-related
+        weather_keywords = [
+            "weather",
+            "temperature",
+            "temp",
+            "forecast",
+            "rain",
+            "sun",
+            "snow",
+            "storm",
+            "wind",
+            "humidity",
+            "uv",
+            "pollen",
+            "air quality",
+            "tide",
+            "surf",
+            "ski",
+            "snow",
+        ]
+        if any(kw in app_name_lower for kw in weather_keywords):
+            category = "weather"
+
         if not tags:
             print("  ✗ No tags returned — skipping")
             fail_count += 1
@@ -177,7 +235,7 @@ def process_apps(root_dir: str, overwrite: bool, dry_run: bool) -> None:
         print(f"  ✓ category: {category}, tags: {tags}")
 
         if not dry_run:
-            save_manifest(manifest_path, tags, category)
+            save_manifest(manifest_path, manifest, tags, category)
 
         ok_count += 1
 

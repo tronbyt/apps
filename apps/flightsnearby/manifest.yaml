@@ -9,8 +9,8 @@ packageName: flightsnearby
 recommendedInterval: 5
 category: utilities
 tags:
-  - air travel
-  - real-time updates
-  - aviation
-  - utilities
-  - location-based
+  - flights
+  - airline
+  - transit
+  - travel
+  - utility

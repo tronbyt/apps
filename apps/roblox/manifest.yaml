@@ -8,11 +8,10 @@ fileName: roblox.star
 packageName: roblox
 recommendedInterval: 5
 broken: true
-brokenReason: "api.roblox.com: no such host"
-
+brokenReason: 'api.roblox.com: no such host'
 category: entertainment
 tags:
-  - social
+  - roblox
   - gaming
-  - online
-  - community
+  - social
+  - live-streaming

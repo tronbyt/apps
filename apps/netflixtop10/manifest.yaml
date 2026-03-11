@@ -9,11 +9,11 @@ packageName: netflixtop10
 broken: true
 recommendedInterval: 5
 supports2x: true
-
 category: entertainment
 tags:
   - netflix
+  - movies
   - tv
-  - shows
-  - top_ten
+  - charts
+  - entertainment
   - wide 2x support

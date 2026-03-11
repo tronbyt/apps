@@ -7,11 +7,9 @@ author: Noste
 fileName: todoisttasks.star
 packageName: todoisttasks
 recommendedInterval: 60
-
 category: utilities
 tags:
   - todo
   - productivity
   - task
-  - reminder
-  - workflow
+  - smart-home

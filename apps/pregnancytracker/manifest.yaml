@@ -7,11 +7,9 @@ author: William Cougan
 recommendedInterval: 5
 fileName: pregnancy_tracker.star
 packageName: pregnancytracker
-
-category: lifestyle
+category: health
 tags:
   - pregnancy
+  - baby
   - growth
-  - fruits
-  - vegetables
-  - size tracker
+  - fruits-vegetables

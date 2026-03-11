@@ -7,11 +7,9 @@ author: bendiep
 fileName: melbourne_trams.star
 packageName: melbournetrams
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - transit
-  - public transport
-  - real-time
   - tram
-  - melbourne
+  - transport
+  - transit
+  - public-transport

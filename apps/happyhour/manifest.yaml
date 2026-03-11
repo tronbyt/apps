@@ -7,10 +7,10 @@ author: Nicole Brooks
 fileName: happy_hour.star
 packageName: happyhour
 recommendedInterval: 5
-category: entertainment
+category: lifestyle
 tags:
-  - alcohol
+  - cocktails
   - drinks
+  - entertainment
   - fun
-  - utility
-  - time-based
+  - clock

@@ -7,9 +7,8 @@ author: '@Mad-Chemist'
 fileName: rantinglynews.star
 packageName: rantinglynews
 recommendedInterval: 10
-
 category: news
 tags:
   - news
-  - headlines
-  - real-time
+  - ranting
+  - top-stories

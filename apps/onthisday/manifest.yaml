@@ -7,9 +7,9 @@ author: Andrew Hefele
 fileName: onthisday.star
 packageName: onthisday
 recommendedInterval: 5
-
 category: reference
 tags:
   - history
   - events
-  - timeline
+  - dates
+  - reference

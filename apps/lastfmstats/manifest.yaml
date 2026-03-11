@@ -10,6 +10,7 @@ recommendedInterval: 5
 category: entertainment
 tags:
   - music
-  - artist
-  - track
+  - artist-track
+  - lastfm
+  - audiophile
   - analytics

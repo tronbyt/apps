@@ -10,6 +10,7 @@ recommendedInterval: 5
 category: utilities
 tags:
   - transit
-  - public transport
-  - stop info
+  - bus
+  - public-transport
   - real-time
+  - utility

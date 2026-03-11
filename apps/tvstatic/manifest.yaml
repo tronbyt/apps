@@ -7,11 +7,10 @@ author: Snuckey
 fileName: tv_static.star
 packageName: tvstatic
 recommendedInterval: 5
-
 category: art
 tags:
   - retro
-  - visual
-  - static
-  - display
-  - aesthetic
+  - tv
+  - art
+  - visual-noise
+  - old-tech

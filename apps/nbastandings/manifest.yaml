@@ -7,10 +7,8 @@ author: LunchBox8484
 fileName: nba_standings.star
 packageName: nbastandings
 recommendedInterval: 5
-
 category: sports
 tags:
+  - nba
   - sports
-  - basketball
-  - league
   - standings

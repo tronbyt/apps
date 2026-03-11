@@ -7,11 +7,10 @@ author: sullivan1337
 fileName: us_mortgage_rates.star
 packageName: usmortgagerates
 recommendedInterval: 5
-
 category: finance
 tags:
+  - mortgage
   - finance
-  - real estate
   - rates
   - economic
-  - utility
+  - home-loan

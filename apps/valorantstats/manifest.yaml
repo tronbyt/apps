@@ -7,10 +7,9 @@ author: ohdxnte
 fileName: valorant_stats.star
 packageName: valorantstats
 recommendedInterval: 5
-
-category: games
+category: sports
 tags:
   - valorant
-  - ranking
   - gaming
-  - live
+  - ranking
+  - live-data

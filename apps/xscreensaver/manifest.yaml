@@ -1,3 +1,4 @@
+---
 id: xscreensaver
 name: XScreenSaver
 summary: Hundreds of animations
@@ -6,11 +7,10 @@ author: Greg Knauss and XScreenSaver
 fileName: xscreensaver.star
 packageName: xscreensaver
 recommendedInterval: 5
-
 category: art
 tags:
-  - animation
+  - animations
+  - retro
   - visual
-  - screen
-  - decorative
+  - wallpaper
   - display

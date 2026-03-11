@@ -8,7 +8,8 @@ fileName: emoji-text.star
 packageName: emojitext
 category: utilities
 tags:
+  - text-scroller
   - emoji
-  - text
-  - scrollable
+  - utility
+  - customizable
   - display

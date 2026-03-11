@@ -11,6 +11,6 @@ recommendedInterval: 5
 category: utilities
 tags:
   - transit
-  - public transport
-  - real-time
-  - utilities
+  - public-transport
+  - bus
+  - train

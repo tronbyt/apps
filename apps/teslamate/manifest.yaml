@@ -9,12 +9,11 @@ packageName: teslamate
 recommendedInterval: 30
 supports2x: true
 minPixletVersion: v0.49.9
-
 category: utilities
 tags:
-  - car
-  - battery
-  - energy
-  - home
-  - automation
+  - tesla
+  - home-assistant
+  - utility
+  - car-info
+  - smart-home
   - wide 2x support

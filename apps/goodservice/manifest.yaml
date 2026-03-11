@@ -7,10 +7,10 @@ author: Sunny Ng
 fileName: goodservice.star
 packageName: goodservice
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - subway
+  - transit
   - nyc
-  - public transport
+  - public-transport
   - utilities

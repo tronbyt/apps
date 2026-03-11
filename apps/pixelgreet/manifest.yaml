@@ -7,11 +7,9 @@ author: Justin Gerber
 fileName: pixelgreet.star
 packageName: pixelgreet
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - guest-welcome
   - personalization
   - hosting
-  - guest experience
-  - customizable
-  - welcome
+  - display-greeting

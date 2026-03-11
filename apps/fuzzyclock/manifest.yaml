@@ -8,9 +8,10 @@ fileName: fuzzy_clock.star
 packageName: fuzzyclock
 recommendedInterval: 1
 supports2x: true
-category: time
+category: clocks
 tags:
   - time
-  - display
-  - human-readable
+  - clock
+  - fun
+  - retro
   - wide 2x support

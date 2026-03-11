@@ -7,11 +7,9 @@ author: jcarbaugh
 fileName: updownio.star
 packageName: updownio
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - website
   - monitoring
   - utility
-  - network
-  - status
-  - check
+  - tech-support

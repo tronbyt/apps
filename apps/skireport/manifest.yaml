@@ -7,11 +7,10 @@ author: Colin Morrisseau
 fileName: ski_report.star
 packageName: skireport
 recommendedInterval: 5
-
-category: utilities
+category: weather
 tags:
   - ski
   - trail
   - weather
+  - epic-pass
   - outdoors
-  - resort

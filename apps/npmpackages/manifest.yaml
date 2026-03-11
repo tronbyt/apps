@@ -7,10 +7,10 @@ author: Daniel Sitnik
 fileName: npm_packages.star
 packageName: npmpackages
 recommendedInterval: 5
-
 category: utilities
 tags:
   - npm
   - downloads
   - stats
   - utility
+  - code

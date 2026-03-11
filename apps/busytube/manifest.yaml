@@ -9,8 +9,8 @@ packageName: busytube
 recommendedInterval: 5
 category: utilities
 tags:
+  - tube
   - transport
-  - utilities
-  - real-time
+  - transit
   - crowd
-  - public_transit
+  - london

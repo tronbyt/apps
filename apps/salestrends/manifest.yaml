@@ -8,12 +8,11 @@ fileName: sales_trends.star
 packageName: salestrends
 recommendedInterval: 5
 broken: true
-brokenReason: "www.shopcounter.app: no such host"
-
+brokenReason: 'www.shopcounter.app: no such host'
 category: utilities
 tags:
   - sales
   - analytics
-  - business
   - retail
-  - dashboard
+  - business
+  - utility

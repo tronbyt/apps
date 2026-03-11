@@ -7,11 +7,9 @@ author: Jake Manske
 fileName: leetcodestats.star
 packageName: leetcodestats
 recommendedInterval: 5
-
 category: utilities
 tags:
   - coding
-  - stats
   - leetcode
-  - performance
+  - stats
   - utility

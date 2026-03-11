@@ -7,10 +7,9 @@ author: Tidbyt
 fileName: zapier.star
 packageName: zapier
 recommendedInterval: 5
-
 category: utilities
 tags:
   - zapier
   - automation
   - iot
-  - smarthome
+  - smart-home

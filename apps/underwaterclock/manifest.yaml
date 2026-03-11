@@ -7,11 +7,10 @@ author: asea-aranion
 fileName: underwater_clock.star
 packageName: underwaterclock
 recommendedInterval: 0
-
-category: art
+category: clocks
 tags:
   - time
-  - aesthetic
+  - art
   - underwater
-  - visual
+  - aesthetic
   - clock

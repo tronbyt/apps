@@ -7,10 +7,10 @@ author: rs7q5
 fileName: tidbyt_clocks.star
 packageName: tidbytclocks
 recommendedInterval: 60
-
-category: utilities
+category: clocks
 tags:
-  - clock
-  - utility
-  - display
   - tidbyt
+  - clock
+  - background
+  - display
+  - utility

@@ -7,10 +7,10 @@ author: zachtempel3
 fileName: die_scoreboard_gt.star
 packageName: diescoreboardgt
 recommendedInterval: 5
-category: games
+category: entertainment
 tags:
-  - scoreboard
   - beer
+  - scoreboard
   - gaming
+  - brewing
   - customizable
-  - retro

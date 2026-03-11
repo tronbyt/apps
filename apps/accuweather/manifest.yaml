@@ -7,10 +7,9 @@ author: sudeepban
 fileName: accuweather.star
 packageName: accuweather
 recommendedInterval: 5
-category: utilities
+category: weather
 tags:
   - weather
   - forecast
+  - three-day
   - location-based
-  - api
-  - utility

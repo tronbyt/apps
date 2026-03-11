@@ -8,10 +8,8 @@ fileName: gradientclock.star
 packageName: gradientclock
 recommendedInterval: 0
 supports2x: true
-category: utilities
+category: clocks
 tags:
-  - time
-  - visual
+  - clock
   - gradient
-  - utility
   - wide 2x support

@@ -7,10 +7,9 @@ author: Rishabh Tayal
 fileName: partnermetrics.star
 packageName: partnermetrics
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - analytics
   - metrics
-  - dashboard
-  - data
+  - analytics
+  - stats
+  - utility

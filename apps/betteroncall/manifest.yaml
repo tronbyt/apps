@@ -9,8 +9,8 @@ packageName: betteroncall
 recommendedInterval: 5
 category: utilities
 tags:
+  - on-call
   - shift
-  - healthcare
-  - alerts
-  - medical
+  - team
   - utility
+  - productivity

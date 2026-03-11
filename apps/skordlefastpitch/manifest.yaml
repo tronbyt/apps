@@ -7,11 +7,9 @@ author: Woolycoin437420
 fileName: skordlefastpitch.star
 packageName: skordlefastpitch
 recommendedInterval: 5
-
 category: utilities
 tags:
   - skordle
-  - fast pitch
-  - game display
-  - tidbyt
-  - utility
+  - game-display
+  - utility-app
+  - fast-pitch

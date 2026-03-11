@@ -7,11 +7,10 @@ author: kcharwood
 fileName: shopify_chart.star
 packageName: shopifychart
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - shopify
   - ecommerce
   - analytics
-  - shopping
-  - metrics
+  - finance
   - dashboard

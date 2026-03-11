@@ -7,11 +7,10 @@ author: LunchBox8484
 fileName: mls_scores.star
 packageName: mlsscores
 recommendedInterval: 5
-
 category: sports
 tags:
-  - sports
+  - mls
   - scores
   - live
-  - football
-  - display
+  - soccer
+  - standings

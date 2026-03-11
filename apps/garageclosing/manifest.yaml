@@ -9,6 +9,7 @@ supports2x: true
 category: utilities
 tags:
   - home
-  - utility
-  - smart home
+  - smart-home
+  - notifications
+  - garage
   - wide 2x support

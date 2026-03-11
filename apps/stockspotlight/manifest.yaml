@@ -7,10 +7,10 @@ author: Seth Cottle
 recommendedInterval: 1
 fileName: stock-spotlight.star
 packageName: stockspotlight
-
 category: finance
 tags:
   - stocks
   - finance
-  - market
-  - utility
+  - personalized
+  - api
+  - investing

@@ -5,11 +5,10 @@ summary: Ship scene w time/weather
 desc: Clock with ship on the ocean scene that changes with weather.
 author: Peter Uth
 recommendedInterval: 0
-
-category: utilities
+category: weather
 tags:
   - ocean
-  - time
-  - weather
   - ship
-  - scenery
+  - weather-clock
+  - utility
+  - visual

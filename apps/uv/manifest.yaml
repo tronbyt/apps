@@ -7,10 +7,9 @@ author: j-esse
 fileName: uv.star
 packageName: uv
 recommendedInterval: 5
-
-category: utilities
+category: weather
 tags:
+  - uv
   - weather
   - health
-  - utility
-  - environment
+  - pollens

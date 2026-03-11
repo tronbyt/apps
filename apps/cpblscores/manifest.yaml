@@ -10,6 +10,6 @@ broken: true
 category: sports
 tags:
   - sports
-  - scoreboard
-  - schedule
   - baseball
+  - standings
+  - scores

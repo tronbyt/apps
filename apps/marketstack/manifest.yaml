@@ -7,11 +7,10 @@ author: kanroot
 fileName: marketstack.star
 packageName: marketstack
 recommendedInterval: 1
-
 category: finance
 tags:
-  - stock
+  - stocks
   - finance
-  - chart
-  - investing
-  - market
+  - tracking
+  - intraday
+  - historical

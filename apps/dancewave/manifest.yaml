@@ -8,8 +8,8 @@ packageName: dancewave
 id: dance-wave
 category: entertainment
 tags:
-  - music
   - radio
-  - live
-  - artists
-  - streaming
+  - music
+  - live-streaming
+  - dance
+  - online

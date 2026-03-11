@@ -9,8 +9,7 @@ packageName: langtonsant
 recommendedInterval: 5
 category: art
 tags:
-  - cellular
-  - emergent
+  - art
+  - cellular-automata
   - visual
-  - maths
-  - simulation
+  - emergent-behavior

@@ -7,9 +7,10 @@ author: Matt Jones
 fileName: gvbyt.star
 packageName: gvbyt
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
-  - public transport
-  - amsterdam
+  - tram
+  - public-transit
+  - transport
+  - utility
   - real-time

@@ -7,11 +7,9 @@ author: M0ntyP
 recommendedInterval: 5
 fileName: sanfl_scores.star
 packageName: sanflscores
-
 category: sports
 tags:
+  - soccer
   - football
-  - sports
-  - league
-  - scores
-  - display
+  - standings
+  - nfl-like

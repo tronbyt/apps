@@ -7,11 +7,10 @@ author: Jordan Fitzpatrick
 recommendedInterval: 5
 fileName: neo_tracker.star
 packageName: neotracker
-
 category: science
 tags:
   - space
-  - astronomy
+  - asteroids
+  - celestial
   - science
-  - utility
   - planetary

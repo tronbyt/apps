@@ -7,11 +7,10 @@ author: Woolycoin437420
 fileName: skordlefbaseball.star
 packageName: skordlefbaseball
 recommendedInterval: 5
-
 category: utilities
 tags:
-  - sports
   - baseball
-  - game
-  - display
+  - sports
+  - game-data
+  - tidbyt
   - utility

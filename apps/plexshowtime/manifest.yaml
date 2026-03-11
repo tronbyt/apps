@@ -7,11 +7,8 @@ author: MichaelYagi
 recommendedInterval: 5
 fileName: plex_showtime.star
 packageName: plexshowtime
-
-category: utilities
+category: clocks
 tags:
-  - media
-  - library
   - plex
-  - entertainment
-  - fun
+  - media-library
+  - library-viewer

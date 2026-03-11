@@ -9,7 +9,8 @@ packageName: flightradarfeed
 recommendedInterval: 5
 category: utilities
 tags:
-  - flight tracking
-  - aviation
-  - real-time
-  - weather radar
+  - flight
+  - airline
+  - transit
+  - radar
+  - utility

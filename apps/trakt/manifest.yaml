@@ -7,11 +7,10 @@ author: cbattlegear
 fileName: trakt.star
 packageName: trakt
 recommendedInterval: 5
-
 category: utilities
 tags:
   - trakt
   - tv
-  - watching
-  - stats
-  - display
+  - shows
+  - tidbyt
+  - utility

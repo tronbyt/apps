@@ -7,11 +7,9 @@ author: jweier
 fileName: yahoofantasynfl.star
 packageName: yahoofantasynfl
 recommendedInterval: 5
-
 category: sports
 tags:
-  - fantasy
-  - nfl
-  - sports
-  - scores
+  - fantasy-football
+  - nfl-scores
   - standings
+  - league-tracker

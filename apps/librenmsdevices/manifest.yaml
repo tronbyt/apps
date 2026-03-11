@@ -7,10 +7,9 @@ author: '@jtinel'
 fileName: librenms_devices.star
 packageName: librenmsdevices
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - nms
   - network
   - monitoring
-  - infrastructure
-  - status
+  - device-tracker

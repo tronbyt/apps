@@ -10,6 +10,7 @@ recommendedInterval: 5
 category: entertainment
 tags:
   - music
-  - scrobble
+  - lastfm
+  - scrobbled
   - artwork
-  - last.fm
+  - display

@@ -7,10 +7,10 @@ author: Robert Ison
 fileName: atc_radar.star
 packageName: atcradar
 recommendedInterval: 5
-category: utilities
+category: technology
 tags:
+  - air-traffic
+  - flight-tracking
   - aviation
-  - traffic
-  - flight
-  - utility
+  - transit
   - real-time

@@ -7,10 +7,10 @@ author: thedriver
 fileName: trimet_arrivals.star
 packageName: trimetarrivals
 recommendedInterval: 5
-
 category: utilities
 tags:
+  - bus
   - transit
-  - public transport
+  - public-transport
   - real-time
-  - utilities
+  - utility

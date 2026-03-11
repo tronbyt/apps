@@ -8,10 +8,10 @@ fileName: marta_map.star
 packageName: martamap
 broken: true
 recommendedInterval: 5
-
-category: utilities
+category: transit
 tags:
-  - transport
-  - public transit
+  - marta
   - train
+  - transit
+  - subway
   - utilities

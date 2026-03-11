@@ -7,10 +7,9 @@ author: Doug Ewell
 fileName: maya_calendar.star
 packageName: mayacalendar
 recommendedInterval: 5
-
 category: utilities
 tags:
   - calendar
-  - mystical
+  - maya
   - indigenous
   - timekeeping

@@ -5,10 +5,10 @@ summary: National Day Calendar
 desc: Show what national day celebrations are today.
 author: jvivona
 recommendedInterval: 5
-
 category: lifestyle
 tags:
-  - holiday
-  - celebration
   - national
-  - calendar
+  - celebrations
+  - holiday
+  - culture
+  - events

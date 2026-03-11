@@ -7,9 +7,8 @@ author: Robert Ison
 fileName: military_ranks.star
 packageName: militaryranks
 recommendedInterval: 5
-
 category: utilities
 tags:
   - military
-  - ranking
+  - rank
   - reference

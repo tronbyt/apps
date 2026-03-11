@@ -7,11 +7,10 @@ author: sch0lars
 fileName: wiki_feat_image.star
 packageName: wikifeatimage
 broken: true
-
 category: art
 tags:
+  - art
   - wikipedia
   - visual
-  - art
   - daily
   - display

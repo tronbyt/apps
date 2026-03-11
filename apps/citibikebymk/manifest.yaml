@@ -8,7 +8,7 @@ fileName: citibike_by_mk.star
 packageName: citibikebymk
 category: utilities
 tags:
-  - transport
-  - utility
-  - real-time
-  - public transit
+  - transit
+  - biking
+  - docking
+  - utilities

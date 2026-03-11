@@ -7,11 +7,10 @@ author: mattmcquinn
 fileName: random_dogs.star
 packageName: randomdogs
 recommendedInterval: 5
-
 category: entertainment
 tags:
-  - animals
-  - pets
   - dog
-  - funny
-  - visual
+  - pets
+  - fun
+  - random
+  - art

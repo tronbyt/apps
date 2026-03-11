@@ -7,11 +7,10 @@ author: '@parsnbl'
 fileName: obliquestrategies.star
 packageName: obliquestrategies
 recommendedInterval: 5
-
 category: entertainment
 tags:
-  - philosophy
-  - random
-  - inspiration
+  - daily
   - creative
-  - prompt
+  - inspiration
+  - random
+  - philosophy

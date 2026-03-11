@@ -2,16 +2,15 @@
 id: windytron
 name: Windytron
 summary: Show Windytron Stations
-desc: 'Display windytron Stations.'
+desc: Display windytron Stations.
 author: tavdog
 fileName: windytron.star
 packageName: windytron
 recommendedInterval: 1
-
-category: utilities
+category: weather
 tags:
   - weather
-  - display
+  - stations
+  - utility
   - forecast
-  - outdoor
-  - station
+  - display

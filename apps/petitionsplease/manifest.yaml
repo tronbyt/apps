@@ -7,11 +7,10 @@ author: dinosaursrarr
 fileName: petitions_please.star
 packageName: petitionsplease
 recommendedInterval: 5
-
-category: social
+category: utilities
 tags:
+  - petitions
   - activism
-  - politics
-  - qrcode
-  - signpetition
-  - public
+  - govt
+  - signing
+  - qr

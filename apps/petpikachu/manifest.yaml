@@ -7,11 +7,10 @@ author: Kyle Stark
 fileName: petpikachu.star
 packageName: petpikachu
 recommendedInterval: 5
-
-category: games
+category: entertainment
 tags:
-  - virtual pet
-  - nintendo
   - retro
+  - virtual-pet
+  - pokemon
   - fun
   - gaming

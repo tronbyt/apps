@@ -7,7 +7,6 @@ author: Robert Ison
 recommendedInterval: 5
 fileName: stadium_tracker.star
 packageName: stadiumtracker
-
 category: utilities
 tags:
   - sports

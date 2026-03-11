@@ -7,10 +7,9 @@ author: Oliver
 fileName: canvas.star
 packageName: canvas
 recommendedInterval: 5
-category: reference
+category: smart-home
 tags:
+  - canvas
   - education
-  - school
-  - learning
-  - homework
-  - display
+  - home-assistant
+  - assignment-tracking

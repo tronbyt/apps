@@ -7,11 +7,10 @@ author: nataliemakhijani
 recommendedInterval: 5
 fileName: mta_railroad_sign.star
 packageName: mtarailroadsign
-
 category: utilities
 tags:
   - transit
-  - travel
-  - public transport
-  - railroad
-  - utilities
+  - train
+  - metro-north
+  - lirr
+  - smart-home

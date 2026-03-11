@@ -7,10 +7,10 @@ author: Taylor White
 fileName: quote_of_the_day.star
 packageName: quoteoftheday
 recommendedInterval: 5
-
 category: lifestyle
 tags:
-  - motivational
-  - humor
+  - quotes
   - inspiration
+  - humor
   - daily
+  - motivation

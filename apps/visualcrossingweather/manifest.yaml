@@ -6,10 +6,9 @@ desc: Display current temperature, humidity, and conditions for a user-specified
 author: ryan-doucette
 fileName: visualcrossing_weather.star
 packageName: visualcrossingweather
-
-category: utilities
+category: weather
 tags:
   - weather
+  - temp
+  - humidity
   - location-based
-  - forecast
-  - utility

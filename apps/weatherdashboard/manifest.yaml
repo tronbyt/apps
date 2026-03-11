@@ -6,11 +6,10 @@ desc: Displays weather information from a local Ambient Weather station. Require
 author: ckelley-1992
 fileName: weather_dashboard.star
 packageName: weatherdashboard
-
-category: utilities
+category: weather
 tags:
   - weather
   - local
   - dash
-  - forecast
-  - api
+  - utility
+  - ambient

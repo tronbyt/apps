@@ -7,11 +7,10 @@ author: tidbytdev
 recommendedInterval: 5
 fileName: retrograde_planet.star
 packageName: retrogradeplanet
-
 category: science
 tags:
-  - astronomy
   - space
+  - astronomy
   - retrograde
-  - planetary
-  - utility
+  - celestial
+  - clock

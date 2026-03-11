@@ -7,11 +7,8 @@ author: humbertogontijo
 fileName: should_i_deploy.star
 packageName: shouldideploy
 recommendedInterval: 5
-
 category: utilities
 tags:
   - decision
   - business
-  - toolkit
-  - utility
   - productivity

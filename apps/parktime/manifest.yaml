@@ -7,10 +7,9 @@ author: beyondutility
 fileName: park_time.star
 packageName: parktime
 recommendedInterval: 5
-
-category: utilities
+category: clocks
 tags:
-  - theme_parks
-  - wait_times
+  - theme-parks
+  - wait-times
   - attractions
-  - live_updates
+  - live-data

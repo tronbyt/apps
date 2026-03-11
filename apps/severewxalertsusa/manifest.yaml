@@ -8,11 +8,10 @@ fileName: severewxalertsusa.star
 packageName: severewxalertsusa
 recommendedInterval: 5
 supports2x: true
-
 category: weather
 tags:
   - weather
-  - severe alerts
-  - national weather
-  - us alerts
+  - severe-alerts
+  - us-nws
+  - local-forecast
   - wide 2x support

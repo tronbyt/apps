@@ -9,8 +9,7 @@ packageName: comedprice
 recommendedInterval: 5
 category: utilities
 tags:
+  - energy
   - utility
   - electricity
-  - energy
-  - real-time
-  - monitoring
+  - cost-tracking

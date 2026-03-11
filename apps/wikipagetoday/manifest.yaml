@@ -9,9 +9,9 @@ packageName: wikipagetoday
 recommendedInterval: 5
 broken: true
 brokenReason: The API is returning invalid/non-JSON data (possibly an HTML error page), causing JSON parsing errors.
-
 category: utilities
 tags:
   - wikipedia
   - news
+  - clocks
   - reference

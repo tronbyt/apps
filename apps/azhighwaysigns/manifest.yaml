@@ -9,7 +9,8 @@ fileName: az_highway_signs.star
 packageName: azhighwaysigns
 category: utilities
 tags:
-  - traffic
-  - road
-  - utility
   - transit
+  - driving
+  - utility
+  - road
+  - traffic

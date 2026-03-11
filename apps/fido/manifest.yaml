@@ -7,10 +7,9 @@ author: yonodactyl
 fileName: fido.star
 packageName: fido
 recommendedInterval: 5
-category: art
+category: technology
 tags:
-  - pixel art
-  - tidbyt accessory
-  - decorative
-  - interactive
-  - home
+  - smart-home
+  - pet-simulator
+  - tidbyt
+  - pixel-art

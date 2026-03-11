@@ -7,10 +7,10 @@ author: abrahamrowe
 fileName: wmata_buses.star
 packageName: wmatabuses
 recommendedInterval: 5
-
 category: utilities
 tags:
   - transit
-  - public transport
-  - real-time
+  - subway
+  - bus
+  - public-transit
   - commute

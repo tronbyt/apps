@@ -7,10 +7,8 @@ author: J. Keybl
 fileName: weatherclock.star
 packageName: weatherclock
 recommendedInterval: 0
-
-category: utilities
+category: weather
 tags:
   - weather
-  - time
+  - clock
   - utility
-  - display

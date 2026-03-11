@@ -8,9 +8,10 @@ fileName: womens_t20_wc.star
 packageName: womenst20wc
 recommendedInterval: 5
 broken: true
-
 category: sports
 tags:
   - cricket
+  - women's cricket
+  - t20
   - sports
-  - live_scores
+  - live-scores

@@ -7,10 +7,10 @@ author: Rob Kimball
 fileName: finevent.star
 packageName: finevent
 recommendedInterval: 5
-category: news
+category: finance
 tags:
   - economy
   - finance
-  - data
+  - stocks
   - market
   - news

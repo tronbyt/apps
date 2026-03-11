@@ -7,11 +7,10 @@ author: Steve Rybka
 recommendedInterval: 5
 fileName: the_tracker.star
 packageName: thetracker
-
 category: utilities
 tags:
   - counter
   - stats
-  - social media
-  - analytics
-  - display
+  - web
+  - utility
+  - tracking

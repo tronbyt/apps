@@ -7,11 +7,10 @@ author: tabrindle
 fileName: powerwall.star
 packageName: powerwall
 recommendedInterval: 5
-
-category: utilities
+category: smart-home
 tags:
-  - energy
-  - utility
-  - home
   - battery
-  - power
+  - energy
+  - home-automation
+  - smart-home
+  - utility

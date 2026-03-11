@@ -7,12 +7,11 @@ author: LukiLeu
 recommendedInterval: 60
 packageName: meteoschweiz
 supports2x: true
-
 category: weather
 tags:
   - weather
   - switzerland
-  - forecasts
+  - forecast
   - local
   - meteorology
   - wide 2x support

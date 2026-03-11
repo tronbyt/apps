@@ -7,11 +7,9 @@ author: dinosaursrarr
 fileName: thunderball.star
 packageName: thunderball
 recommendedInterval: 5
-
 category: utilities
 tags:
   - lottery
   - numbers
   - game
-  - luck
   - utility

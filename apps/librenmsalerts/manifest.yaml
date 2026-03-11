@@ -7,10 +7,10 @@ author: '@jtinel'
 fileName: librenms_alerts.star
 packageName: librenmsalerts
 recommendedInterval: 5
-
 category: utilities
 tags:
   - nms
   - monitoring
   - alerts
+  - network
   - system

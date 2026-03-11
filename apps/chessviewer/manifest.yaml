@@ -7,10 +7,10 @@ author: Neal Wright
 fileName: chess_viewer.star
 packageName: chessviewer
 recommendedInterval: 5
-category: games
+category: sports
 tags:
   - chess
-  - game
-  - live
-  - visual
-  - activity
+  - gaming
+  - live-updates
+  - board
+  - real-time

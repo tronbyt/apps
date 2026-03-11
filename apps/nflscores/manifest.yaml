@@ -7,11 +7,9 @@ author: LunchBox8484
 fileName: nfl_scores.star
 packageName: nflscores
 recommendedInterval: 5
-
 category: sports
 tags:
-  - football
-  - sports
-  - live
-  - scores
   - nfl
+  - sports
+  - scores
+  - live-updates

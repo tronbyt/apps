@@ -10,7 +10,7 @@ recommendedInterval: 5
 category: utilities
 tags:
   - utility
-  - transport
+  - traffic
+  - transit
   - local
-  - bridge
-  - status
+  - monitoring

@@ -9,7 +9,5 @@ packageName: discordmembers
 category: utilities
 tags:
   - discord
-  - member
-  - count
   - utility
-  - server
+  - member-count

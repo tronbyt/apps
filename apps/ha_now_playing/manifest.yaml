@@ -9,7 +9,8 @@ recommendedInterval: 0
 category: utilities
 tags:
   - home-assistant
-  - media
-  - artwork
-  - display
+  - media-player
+  - now-playing
+  - utility
+  - smart-home
   - wide 2x support

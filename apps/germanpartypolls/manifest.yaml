@@ -9,7 +9,7 @@ packageName: germanpartypolls
 recommendedInterval: 5
 category: news
 tags:
-  - politics
+  - polls
   - election
-  - news
   - germany
+  - politics

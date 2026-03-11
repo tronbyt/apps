@@ -7,11 +7,9 @@ author: PMK (@pmk)
 fileName: usdebtclock.star
 packageName: usdebtclock
 recommendedInterval: 60
-
-category: utilities
+category: clocks
 tags:
-  - us
   - finance
   - clock
-  - economic
   - utility
+  - national-debt

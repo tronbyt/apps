@@ -8,8 +8,7 @@ fileName: chrono24.star
 packageName: chrono24
 category: finance
 tags:
-  - watch
-  - market
-  - performance
-  - time-series
+  - watches
   - finance
+  - watch-stocks
+  - market-analysis

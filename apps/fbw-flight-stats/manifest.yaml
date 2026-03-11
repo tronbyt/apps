@@ -9,8 +9,8 @@ fileName: flybywire_flights.star
 packageName: fbw-flight-stats
 category: utilities
 tags:
-  - flight
-  - stats
+  - flight-tracker
   - aviation
+  - stats
   - utility
-  - data
+  - simulation

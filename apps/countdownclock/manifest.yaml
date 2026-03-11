@@ -7,9 +7,9 @@ author: CubsAaron
 fileName: countdown_clock.star
 packageName: countdownclock
 recommendedInterval: 0
-category: utilities
+category: clocks
 tags:
   - countdown
-  - timekeeping
+  - timer
   - utility
-  - reminder
+  - time-tracking

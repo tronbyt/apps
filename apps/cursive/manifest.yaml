@@ -10,9 +10,8 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - typing
-  - writing
-  - text
-  - artistic
+  - text-to-cursive
+  - typing-assist
+  - utility
   - display
   - wide 2x support

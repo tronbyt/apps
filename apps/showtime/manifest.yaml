@@ -5,10 +5,8 @@ summary: Displays shows in your area
 desc: Displays shows coming to your area.
 author: Robert Ison
 recommendedInterval: 720
-
-category: entertainment
+category: clocks
 tags:
-  - entertainment
-  - theater
-  - live events
-  - local shows
+  - tv
+  - movies
+  - local-shows

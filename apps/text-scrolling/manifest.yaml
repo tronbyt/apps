@@ -6,11 +6,11 @@ desc: Displays a scrolling text.
 author: savedagod, gabe565
 recommendedInterval: 5
 supports2x: true
-
 category: utilities
 tags:
   - scrolling
   - text
-  - display
   - utility
+  - display
+  - fun
   - wide 2x support
