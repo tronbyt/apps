@@ -1,8 +1,14 @@
 ---
 id: kilauea
-name: Kilauea Volcano
-summary: Kilauea volcano alert level
-desc: Displays the current USGS alert level for Kilauea volcano in Hawaii.
+name: Kilauea
+summary: USGS volcano status
+desc: Displays the current USGS alert level and webcam for volcanoes.
 author: Tavis
 recommendedInterval: 60
 supports2x: true
+category: weather
+tags:
+  - volcano
+  - USGS
+  - emergency
+  

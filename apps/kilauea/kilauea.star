@@ -1,12 +1,12 @@
 """
 Applet: Kilauea
-Summary: Kilauea volcano status
-Description: Displays the current USGS alert level and color code for Kilauea volcano in Hawaii.
+Summary: USGS volcano status
+Description: Displays the current USGS alert level and webcam for Kilauea volcano.
 Author: Tavis
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 URL = "https://volcanoes.usgs.gov/rss/vhpcaprss.xml"
@@ -18,9 +18,36 @@ COLOR_MAP = {
     "red": "#ff0000",
 }
 
-CAM_URL = "https://volcanoes.usgs.gov/cams/V3cam/images/M.jpg"
+CAM_URLS = {
+    "v3cam": "https://volcanoes.usgs.gov/cams/V3cam/images/M.jpg",
+    "v1cam": "https://volcanoes.usgs.gov/cams/V1cam/images/M.jpg",
+    "v2cam": "https://volcanoes.usgs.gov/cams/V2cam/images/M.jpg",
+}
 
-def main(_config):
+LEVEL_ORDER = {
+    "normal": 0,
+    "advisory": 1,
+    "watch": 2,
+    "warning": 3,
+}
+
+LEVELS = [
+    schema.Option(display = "Normal", value = "normal"),
+    schema.Option(display = "Advisory", value = "advisory"),
+    schema.Option(display = "Watch", value = "watch"),
+    schema.Option(display = "Warning", value = "warning"),
+]
+
+def main(config):
+    is_wide = hasattr(canvas, "is2x") and canvas.is2x()
+    width = 128 if is_wide else 64
+    height = 64 if is_wide else 32
+    text_y = 48 if is_wide else 24
+
+    cam_id = config.get("cam", "v3cam")
+    cam_url = CAM_URLS.get(cam_id, CAM_URLS["v3cam"])
+    min_level = config.get("min_level", "normal")
+
     rep = http.get(URL, ttl_seconds = 300)
     if rep.status_code != 200:
         return render_error(str(rep.status_code))
@@ -31,9 +58,14 @@ def main(_config):
     if not alert_level:
         return render_error("No data")
 
+    current_level = LEVEL_ORDER.get(alert_level.lower(), 0)
+    threshold = LEVEL_ORDER.get(min_level, 0)
+    if current_level < threshold:
+        return []
+
     color_hex = COLOR_MAP.get(color_code.lower(), "#ffffff")
 
-    cam_rep = http.get(CAM_URL, ttl_seconds = 60, headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://volcanoes.usgs.gov/"})
+    cam_rep = http.get(cam_url, ttl_seconds = 60, headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://volcanoes.usgs.gov/"})
     if cam_rep.status_code != 200:
         return render_error("Img: %d" % cam_rep.status_code)
 
@@ -42,9 +74,9 @@ def main(_config):
     return render.Root(
         child = render.Stack(
             children = [
-                render.Image(image, width = 64, height = 32),
+                render.Image(image, width = width, height = height),
                 render.Padding(
-                    pad = (0, 24, 0, 0),
+                    pad = (0, text_y, 0, 0),
                     child = render.Text("Kilauea", font = "tb-8", color = color_hex),
                 ),
             ],
@@ -85,5 +117,26 @@ def render_error(msg):
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Dropdown(
+                id = "cam",
+                name = "Webcam",
+                desc = "Select a webcam view",
+                icon = "camera",
+                options = [
+                    schema.Option(display = "South (V3cam)", value = "v3cam"),
+                    schema.Option(display = "West (V1cam)", value = "v1cam"),
+                    schema.Option(display = "East (V2cam)", value = "v2cam"),
+                ],
+                default = "v3cam",
+            ),
+            schema.Dropdown(
+                id = "min_level",
+                name = "Min Alert Level",
+                desc = "Only show if alert level is at or above this",
+                icon = "alert",
+                options = LEVELS,
+                default = "normal",
+            ),
+        ],
     )
