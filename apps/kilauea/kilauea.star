@@ -134,7 +134,7 @@ def get_schema():
                 id = "min_level",
                 name = "Min Alert Level",
                 desc = "Only show if alert level is at or above this",
-                icon = "alert",
+                icon = "volcano",
                 options = LEVELS,
                 default = "normal",
             ),
