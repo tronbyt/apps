@@ -375,16 +375,15 @@ def get_raid_progress(progress):
                 for instance in expansion["instances"]:
                     if instance["modes"]:
                         mode = instance["modes"][-1]
-                        if RAID_LEVELS[mode["difficulty"]["name"]] > raid_level:
-                            raid_level = RAID_LEVELS[mode["difficulty"]["name"]]
-                            completed = mode["progress"]["completed_count"]
-                            total += mode["progress"]["total_count"]
+                        total += mode["progress"]["total_count"]
+                        current_difficulty_level = RAID_LEVELS[mode["difficulty"]["name"]]
+
+                        if current_difficulty_level > raid_level:
+                            raid_level = current_difficulty_level
                             difficulty = mode["difficulty"]["name"]
-                        elif RAID_LEVELS[mode["difficulty"]["name"]] == raid_level:
+                            completed = mode["progress"]["completed_count"]
+                        elif current_difficulty_level == raid_level:
                             completed += mode["progress"]["completed_count"]
-                            total += mode["progress"]["total_count"]
-                        else:
-                            total += mode["progress"]["total_count"]
 
     if difficulty != "":
         status = "%d/%d %s" % (completed, total, difficulty[:1])
