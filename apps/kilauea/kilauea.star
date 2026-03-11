@@ -40,9 +40,8 @@ LEVELS = [
 
 def main(config):
     is_wide = hasattr(canvas, "is2x") and canvas.is2x()
-    width = 128 if is_wide else 64
     height = 64 if is_wide else 32
-    text_y = 48 if is_wide else 24
+    text_y = 56 if is_wide else 24
 
     cam_id = config.get("cam", "v3cam")
     cam_url = CAM_URLS.get(cam_id, CAM_URLS["v3cam"])
@@ -65,6 +64,12 @@ def main(config):
 
     color_hex = COLOR_MAP.get(color_code.lower(), "#ffffff")
 
+    # Crop by scaling image larger than canvas and offset to center
+    scale = 2 if is_wide else 1
+    img_width = 70 * scale
+    img_height = 36 * scale
+    img_offset_y = (img_height - height) // 2
+
     cam_rep = http.get(cam_url, ttl_seconds = 60, headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://volcanoes.usgs.gov/"})
     if cam_rep.status_code != 200:
         return render_error("Img: %d" % cam_rep.status_code)
@@ -74,7 +79,10 @@ def main(config):
     return render.Root(
         child = render.Stack(
             children = [
-                render.Image(image, width = width, height = height),
+                render.Padding(
+                    pad = (0, -img_offset_y, 0, 0),
+                    child = render.Image(image, width = img_width, height = img_height),
+                ),
                 render.Padding(
                     pad = (0, text_y, 0, 0),
                     child = render.Text("Kilauea", font = "tb-8", color = color_hex),
