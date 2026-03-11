@@ -7,9 +7,8 @@ author: scottwainstock
 fileName: pinball_map.star
 packageName: pinballmap
 recommendedInterval: 5
-category: entertainment
+category: gaming
 tags:
-  - gaming
   - retro
   - arcade
   - localization

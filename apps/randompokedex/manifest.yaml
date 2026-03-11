@@ -8,9 +8,8 @@ fileName: random_pokedex.star
 packageName: randompokedex
 recommendedInterval: 5
 supports2x: true
-category: entertainment
+category: gaming
 tags:
   - pokemon
-  - gaming
   - retro
   - wide 2x support

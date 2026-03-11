@@ -7,10 +7,9 @@ author: Kevin Connell
 fileName: super_mario_kart.star
 packageName: supermariokart
 supports2x: true
-category: entertainment
+category: gaming
 tags:
   - retro
-  - gaming
   - mario
   - cartoon
   - animation

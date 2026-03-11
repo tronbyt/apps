@@ -9,9 +9,8 @@ packageName: roblox
 recommendedInterval: 5
 broken: true
 brokenReason: 'api.roblox.com: no such host'
-category: entertainment
+category: gaming
 tags:
   - roblox
-  - gaming
   - social
   - live-streaming

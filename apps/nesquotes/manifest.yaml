@@ -7,10 +7,9 @@ author: Mark McIntyre
 fileName: nes_quotes.star
 packageName: nesquotes
 recommendedInterval: 5
-category: entertainment
+category: gaming
 tags:
   - retro
-  - gaming
   - quotes
   - nintendo
   - fun

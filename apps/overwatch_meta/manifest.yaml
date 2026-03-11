@@ -5,10 +5,9 @@ summary: Overatch 2 Meta Statistics
 desc: This app polls the Overwatch 2 Meta information from Overbuff.
 author: GeoffBarrett
 recommendedInterval: 5
-category: entertainment
+category: gaming
 tags:
   - overwatch
-  - gaming
   - stats
   - meta
   - esports
