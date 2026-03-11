@@ -4,5 +4,5 @@ name: Dad Jokes
 summary: Random dad jokes
 desc: Displays random dad jokes fetched from icanhazdadjoke.com with scrolling text.
 author: kbromberger
-fileName: dad_jokes.star
+fileName: dadjokes.star
 packageName: dadjokes
