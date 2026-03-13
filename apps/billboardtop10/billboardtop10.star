@@ -151,7 +151,7 @@ def get_top10_information(top10_alive_key, list):
     return data
 
 def getMovementIndicator(this, last):
-    if not last or last == 0:
+    if not last:
         return ""
     if this < last:
         return " (↑{})".format(last - this)
