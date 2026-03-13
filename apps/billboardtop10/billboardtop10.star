@@ -142,7 +142,7 @@ def get_top10_information(top10_alive_key, list):
         else:
             data = None
 
-    if data == None or not data or "content" not in data:
+    if not data or "content" not in data:
         return None
 
     if "error" in data:
