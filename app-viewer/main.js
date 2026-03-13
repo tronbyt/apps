@@ -227,26 +227,63 @@ function renderAppsList(apps, brokenApps = []) {
 function setupSearch(apps, brokenApps) {
   const search = document.getElementById('search');
   const clearButton = document.getElementById('clear-search');
+  const categoryFilter = document.getElementById('category-filter');
+  const tagFilter = document.getElementById('tag-filter');
+
+  // Extract and populate categories
+  const categories = [...new Set(apps.map(app => app.category).filter(Boolean))].sort();
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    categoryFilter.appendChild(option);
+  });
+
+  // Extract and populate tags
+  const allTags = apps.flatMap(app => app.tags || []).filter(Boolean);
+  const uniqueTags = [...new Set(allTags)].sort();
+  uniqueTags.forEach(tag => {
+    const option = document.createElement('option');
+    option.value = tag;
+    option.textContent = tag;
+    tagFilter.appendChild(option);
+  });
+
+  function filterApps() {
+    const searchVal = search.value.toLowerCase();
+    const categoryVal = categoryFilter.value;
+    const tagVal = tagFilter.value;
+
+    renderAppsList(apps.filter(app => {
+      const matchesSearch = !searchVal ||
+        app.name.toLowerCase().includes(searchVal) ||
+        (app.displayName && app.displayName.toLowerCase().includes(searchVal)) ||
+        (app.summary && app.summary.toLowerCase().includes(searchVal));
+      const matchesCategory = !categoryVal || app.category === categoryVal;
+      const matchesTag = !tagVal || (app.tags && app.tags.includes(tagVal));
+      return matchesSearch && matchesCategory && matchesTag;
+    }), brokenApps);
+
+    // Show/hide clear button based on any filters being active
+    const hasFilters = searchVal || categoryVal || tagVal;
+    clearButton.style.display = hasFilters ? 'block' : 'none';
+  }
 
   // Handle search input
-  search.addEventListener('input', () => {
-    const val = search.value.toLowerCase();
-    renderAppsList(apps.filter(app =>
-      app.name.toLowerCase().includes(val) ||
-      (app.displayName && app.displayName.toLowerCase().includes(val)) ||
-      (app.summary && app.summary.toLowerCase().includes(val))
-    ), brokenApps);
+  search.addEventListener('input', filterApps);
 
-    // Show/hide clear button based on input
-    clearButton.style.display = val ? 'block' : 'none';
-  });
+  // Handle filter changes
+  categoryFilter.addEventListener('change', filterApps);
+  tagFilter.addEventListener('change', filterApps);
 
   // Handle clear button click
   clearButton.addEventListener('click', () => {
     search.value = '';
+    categoryFilter.value = '';
+    tagFilter.value = '';
     renderAppsList(apps, brokenApps);
     clearButton.style.display = 'none';
-    search.focus(); // Return focus to search input
+    search.focus();
   });
 
   // Initially hide clear button
