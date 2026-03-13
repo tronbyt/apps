@@ -5,9 +5,9 @@ Description: Displays top 10 songs from Billboard.
 Author: Robert Ison
 """
 
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("cache.star", "cache")
 load("images/billboard_icon.png", BILLBOARD_ICON_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -34,7 +34,6 @@ list_options = [
 ]
 
 def main(config):
-
     font_type = "5x8"
     if canvas.is2x():
         font_type = "terminus-16"
@@ -46,7 +45,6 @@ def main(config):
     if api_key:
         top10_data = get_top10_information(api_key, selected_list)
         if top10_data == None or "content" not in top10_data:
-
             if config.get("hide_if_api_limit_reached", False):
                 return []
             else:
@@ -136,7 +134,7 @@ def get_top10_information(top10_alive_key, list):
 
     if res.status_code == 200:
         data = res.json()
-        cache.set("billboardtop10-{}".format(list), json.encode(data), ttl_seconds = CACHE_TTL_SECONDS*2)
+        cache.set("billboardtop10-{}".format(list), json.encode(data), ttl_seconds = CACHE_TTL_SECONDS * 2)
     else:
         data = cache.get("billboardtop10-{}".format(list))
         if data:
@@ -335,7 +333,7 @@ def get_schema():
                 id = "hide_if_api_limit_reached",
                 name = "Hide If API Limit Reached",
                 desc = "Hide the app if the API limit is reached and no cached data is available.",
-                icon = "eyeOff",
+                icon = "eye",
                 default = True,
             ),
             schema.Dropdown(
