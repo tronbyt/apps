@@ -45,7 +45,7 @@ def main(config):
     if api_key:
         top10_data = get_top10_information(api_key, selected_list)
         if top10_data == None or "content" not in top10_data:
-            if config.get("hide_if_api_limit_reached", False):
+            if config.bool("hide_if_api_limit_reached", True):
                 return []
             else:
                 return render.Root(
