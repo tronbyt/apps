@@ -8,7 +8,7 @@ fileName: digital_rain.star
 packageName: digitalrain
 recommendedInterval: 5
 supports2x: true
-category: weather
+category: art
 tags:
   - digital
   - code

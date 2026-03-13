@@ -7,10 +7,8 @@ author: quacksire
 fileName: caltrain.star
 packageName: caltrain
 recommendedInterval: 5
-category: weather
+category: transit
 tags:
-  - transit
   - subway
   - travel
   - commute
-  - public-transit
