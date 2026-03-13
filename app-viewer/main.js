@@ -258,7 +258,9 @@ function setupSearch(apps, brokenApps) {
       const matchesSearch = !searchVal ||
         app.name.toLowerCase().includes(searchVal) ||
         (app.displayName && app.displayName.toLowerCase().includes(searchVal)) ||
-        (app.summary && app.summary.toLowerCase().includes(searchVal));
+        (app.summary && app.summary.toLowerCase().includes(searchVal)) ||
+        (app.category && app.category.toLowerCase().includes(searchVal)) ||
+        (app.tags && app.tags.some(t => t.toLowerCase().includes(searchVal)));
       const matchesCategory = !categoryVal || app.category === categoryVal;
       const matchesTag = !tagVal || (app.tags && app.tags.includes(tagVal));
       return matchesSearch && matchesCategory && matchesTag;
