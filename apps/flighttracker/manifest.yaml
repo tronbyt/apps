@@ -7,3 +7,10 @@ author: samuelsagarino
 fileName: flighttracker.star
 packageName: flighttracker
 recommendedInterval: 5
+category: utilities
+tags:
+  - flight-tracking
+  - airline
+  - transit
+  - utility
+  - travel

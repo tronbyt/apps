@@ -6,3 +6,10 @@ desc: Displays a reminder that the trash bins are out.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - trash
+  - reminder
+  - household
+  - utility
+  - wide 2x support

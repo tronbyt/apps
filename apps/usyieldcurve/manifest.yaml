@@ -8,3 +8,10 @@ fileName: us_yield_curve.star
 packageName: usyieldcurve
 broken: true
 recommendedInterval: 1
+category: finance
+tags:
+  - treasury
+  - finance
+  - rates
+  - bond
+  - economy

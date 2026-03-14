@@ -5,3 +5,9 @@ summary: Show your FFXIV Character
 desc: Shows the latest details about your Final Fantasy XIV character from the lodestone.
 author: mrburrito
 recommendedInterval: 5
+category: gaming
+tags:
+  - ffxiv
+  - game-tracker
+  - lfg
+  - character-info

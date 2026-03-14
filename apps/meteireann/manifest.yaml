@@ -7,3 +7,9 @@ author: vincentezw
 recommendedInterval: 5
 fileName: met_eireann.star
 packageName: meteireann
+category: weather
+tags:
+  - weather
+  - forecast
+  - met
+  - ireland

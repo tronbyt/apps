@@ -5,3 +5,9 @@ summary: Weird localized time
 desc: Stylish and localized way to tell the time.
 author: vzsky
 recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - localized
+  - stylish
+  - time-display

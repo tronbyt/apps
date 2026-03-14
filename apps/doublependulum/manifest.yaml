@@ -9,3 +9,11 @@ id: double-pendulum
 recommendedInterval: 5
 supports2x: true
 minPixletVersion: v0.50.0
+category: entertainment
+tags:
+  - chaos
+  - physics
+  - animation
+  - math
+  - visual
+  - wide 2x support

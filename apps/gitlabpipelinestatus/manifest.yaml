@@ -7,3 +7,9 @@ author: Sven Ringger
 fileName: gitlab_pipeline.star
 packageName: gitlabpipeline
 recommendedInterval: 5
+category: utilities
+tags:
+  - gitlab
+  - devops
+  - status
+  - utility

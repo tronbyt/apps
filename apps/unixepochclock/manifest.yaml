@@ -7,3 +7,9 @@ author: paultyng
 fileName: unix_epoch_clock.star
 packageName: unixepochclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - utility
+  - clock
+  - countdown

@@ -6,3 +6,9 @@ desc: Check your favorite stop in real time, anywhere in Norway.
 author: Mats Grosvik
 fileName: norway_transit.star
 packageName: norwaytransit
+category: utilities
+tags:
+  - transit
+  - norway
+  - public transport
+  - real-time

@@ -5,3 +5,8 @@ summary: Display nautical flags
 desc: Displays nautical flags.
 author: Robert Ison
 recommendedInterval: 5
+category: utilities
+tags:
+  - flags
+  - navigation
+  - utility

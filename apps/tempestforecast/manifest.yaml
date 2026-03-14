@@ -6,3 +6,11 @@ desc: Displays a 3-day forecast using your Tempest weather station data. Require
 author: Nick Enslinger
 filename: tempestforecast.star
 supports2x: true
+category: weather
+tags:
+  - weather
+  - tempest
+  - station
+  - forecast
+  - utility
+  - wide 2x support

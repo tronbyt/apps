@@ -7,3 +7,8 @@ author: LunchBox8484
 fileName: nfl_standings.star
 packageName: nflstandings
 recommendedInterval: 5
+category: sports
+tags:
+  - nfl
+  - sports
+  - standings

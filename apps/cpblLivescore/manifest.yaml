@@ -6,3 +6,10 @@ desc: Display CPBL live scores & upcoming games. (Require BetsAPI token).
 author: yuping917
 fileName: cpbl_live_score.star
 packageName: cpbllivescore
+category: sports
+tags:
+  - sports
+  - scores
+  - cpbl
+  - live
+  - game

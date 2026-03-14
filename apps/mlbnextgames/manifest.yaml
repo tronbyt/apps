@@ -7,3 +7,9 @@ author: Anthony Rocchio
 fileName: mlb_next_games.star
 packageName: mlbnextgames
 recommendedInterval: 5
+category: sports
+tags:
+  - mlb
+  - sports
+  - scores
+  - standings

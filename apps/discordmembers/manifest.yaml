@@ -6,3 +6,8 @@ desc: Display the approximate member count for a given Discord server (via Invit
 author: Dennis Zoma (https://zoma.dev)
 fileName: discordmembers.star
 packageName: discordmembers
+category: utilities
+tags:
+  - discord
+  - utility
+  - member-count

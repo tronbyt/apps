@@ -7,3 +7,10 @@ author: jondklley
 fileName: stockfagi.star
 packageName: stockfagi
 recommendedInterval: 1
+category: finance
+tags:
+  - finance
+  - stocks
+  - market
+  - index
+  - news

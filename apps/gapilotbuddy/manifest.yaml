@@ -7,3 +7,8 @@ author: icdevin
 fileName: ga_pilot_buddy.star
 packageName: gapilotbuddy
 recommendedInterval: 5
+category: utilities
+tags:
+  - aviation
+  - weather
+  - flight-rules

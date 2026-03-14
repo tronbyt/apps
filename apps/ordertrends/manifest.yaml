@@ -8,4 +8,10 @@ fileName: order_trends.star
 packageName: ordertrends
 recommendedInterval: 5
 broken: true
-brokenReason: "www.shopcounter.app: no such host"
+brokenReason: 'www.shopcounter.app: no such host'
+category: utilities
+tags:
+  - shopping
+  - order-tracking
+  - finance
+  - analytics

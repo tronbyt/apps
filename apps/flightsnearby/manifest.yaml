@@ -7,3 +7,10 @@ author: eddichen
 fileName: flights_nearby.star
 packageName: flightsnearby
 recommendedInterval: 5
+category: utilities
+tags:
+  - flights
+  - airline
+  - transit
+  - travel
+  - utility

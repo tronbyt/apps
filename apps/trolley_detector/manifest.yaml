@@ -7,3 +7,8 @@ author: radiocolin
 fileName: trolley_detector.star
 packageName: trolleydetector
 recommendedInterval: 5
+category: transit
+tags:
+  - subway
+  - public-transit
+  - commuter

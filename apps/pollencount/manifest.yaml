@@ -8,3 +8,9 @@ fileName: pollen_count.star
 packageName: pollencount
 recommendedInterval: 5
 broken: true
+category: weather
+tags:
+  - pollen
+  - weather
+  - health
+  - utility

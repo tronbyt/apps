@@ -7,4 +7,10 @@ author: redboer
 fileName: satoshiradio.star
 packageName: satoshiradio
 recommendedInterval: 5
-
+category: utilities
+tags:
+  - mining
+  - pool-stats
+  - crypto
+  - utility
+  - stats

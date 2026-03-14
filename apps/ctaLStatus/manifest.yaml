@@ -7,3 +7,10 @@ author: sgomez72
 fileName: ctaLStatus.star
 packageName: ctalstatus
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - subway
+  - cta
+  - trains
+  - public-transit

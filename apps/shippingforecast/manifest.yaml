@@ -5,3 +5,10 @@ summary: Bespoke shipping forecasts
 desc: Provides the weather for a location in a nice, pleasant, calming, shipping forecast style. All the vibes without the shortwave static. Displays wind, conditions, and visability.
 author: lumberbarons
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - shipping
+  - utility
+  - maritime
+  - forecast

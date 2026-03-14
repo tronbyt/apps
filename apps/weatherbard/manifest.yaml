@@ -1,3 +1,4 @@
+---
 id: weatherbard
 name: Weatherbard
 summary: Poetic weather display
@@ -12,3 +13,10 @@ secrets:
   - name: openweather_key
     value: ENC[AV6+xWcEyGZAXJz6fIH2xJDhQ8MparbbAKoATMOWWwXDzXhcUnLkMH6GckSJ70dfic09fJtFicDThu5qnhA4dwLTtYqBfSAMkJ9ccPq9mPvOUdD27DZQ5lJQ0xe4/H4amEvUl/01ev993RUQO6Qbew76RzHUe39ZyQd+4jrsWsNNbDOYZz0=]
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - poetry
+  - art
+  - utility
+  - voice

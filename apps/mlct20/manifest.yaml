@@ -8,3 +8,8 @@ fileName: mlc_t20.star
 packageName: mlct20
 recommendedInterval: 5
 broken: true
+category: sports
+tags:
+  - cricket
+  - scores
+  - sports

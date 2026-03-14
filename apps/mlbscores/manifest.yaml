@@ -7,3 +7,10 @@ author: LunchBox8484
 fileName: mlb_scores.star
 packageName: mlbscores
 recommendedInterval: 5
+category: sports
+tags:
+  - mlb
+  - baseball
+  - scores
+  - sports
+  - live

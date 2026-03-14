@@ -7,3 +7,10 @@ author: Aaron Brace
 fileName: goldpriceticker.star
 packageName: goldpriceticker
 recommendedInterval: 5
+category: finance
+tags:
+  - gold
+  - metals
+  - crypto
+  - finance
+  - ticker

@@ -7,3 +7,9 @@ author: rs7q5
 fileName: sports_scores.star
 packageName: sportsscores
 recommendedInterval: 5
+category: sports
+tags:
+  - scores
+  - sports
+  - live-updates
+  - standings

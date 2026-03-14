@@ -7,3 +7,10 @@ author: Daniel Sitnik
 fileName: solar_time_clock.star
 packageName: solartimeclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - solar
+  - time
+  - utility
+  - clock
+  - astronomy

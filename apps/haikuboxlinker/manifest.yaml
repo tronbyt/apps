@@ -5,3 +5,8 @@ summary: Displays haikubox bird data
 desc: Displays the daily count of different bird species recorded and identified by the Haikubox.
 author: jachansky
 recommendedInterval: 5
+category: utilities
+tags:
+  - bird-count
+  - nature-data
+  - eco-tracking

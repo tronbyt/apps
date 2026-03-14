@@ -7,3 +7,10 @@ author: blakekwehrle
 fileName: runescape.star
 packageName: runescape
 recommendedInterval: 5
+category: gaming
+tags:
+  - rpg
+  - game
+  - inventory
+  - osrs
+  - api

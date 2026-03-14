@@ -7,3 +7,9 @@ author: Jonathan Damico
 fileName: hrbfc.star
 packageName: hrbfc
 recommendedInterval: 5
+category: sports
+tags:
+  - football
+  - soccer
+  - standings
+  - scores

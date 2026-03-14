@@ -7,3 +7,10 @@ author: Jon Bilous
 fileName: stripe_sales.star
 packageName: stripesales
 recommendedInterval: 5
+category: finance
+tags:
+  - stripe
+  - finance
+  - sales
+  - utility
+  - transaction

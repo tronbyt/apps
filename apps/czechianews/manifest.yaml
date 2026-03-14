@@ -5,3 +5,8 @@ summary: Headline news from Czechia
 desc: Dispaly only the news title from Czechia.
 author: solarisle
 recommendedInterval: 10
+category: news
+tags:
+  - news
+  - czech
+  - headlines

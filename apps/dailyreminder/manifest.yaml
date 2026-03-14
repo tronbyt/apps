@@ -7,3 +7,9 @@ author: sepowitz
 fileName: daily_reminder.star
 packageName: dailyreminder
 recommendedInterval: 5
+category: utilities
+tags:
+  - calendar
+  - daily
+  - reminders
+  - utility

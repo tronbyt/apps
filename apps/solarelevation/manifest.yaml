@@ -7,3 +7,10 @@ author: dinosaursrarr
 fileName: solar_elevation.star
 packageName: solarelevation
 recommendedInterval: 5
+category: utilities
+tags:
+  - sun
+  - horizon
+  - clock
+  - utility
+  - elevation

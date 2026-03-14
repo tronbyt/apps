@@ -7,3 +7,9 @@ author: chrisbateman
 fileName: year_progress.star
 packageName: yearprogress
 recommendedInterval: 60
+category: utilities
+tags:
+  - progress
+  - milestone
+  - utility
+  - time-tracking

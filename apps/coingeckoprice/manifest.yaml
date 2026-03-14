@@ -7,3 +7,9 @@ author: Allen Schober (@aschober)
 fileName: coingecko_price.star
 packageName: coingeckoprice
 recommendedInterval: 1
+category: finance
+tags:
+  - crypto
+  - finance
+  - quotes
+  - price-tracker

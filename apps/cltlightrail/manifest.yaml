@@ -7,3 +7,10 @@ author: Kevin Connell
 fileName: clt_lightrail.star
 packageName: cltlightrail
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - train
+  - subway
+  - schedule
+  - real-time

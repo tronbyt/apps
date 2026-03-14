@@ -7,3 +7,10 @@ author: sklose
 fileName: esb_nyc_colors.star
 packageName: esbnyccolors
 recommendedInterval: 5
+category: utilities
+tags:
+  - empire-state
+  - color-picker
+  - city-view
+  - utility
+  - weather-inspired

@@ -7,3 +7,10 @@ author: Chris Wyman
 fileName: moon_phase.star
 packageName: moonphase
 recommendedInterval: 5
+category: utilities
+tags:
+  - moon
+  - astronomy
+  - weather
+  - utility
+  - location-based

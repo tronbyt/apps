@@ -7,3 +7,9 @@ author: radiocolin
 fileName: indego.star
 packageName: indego
 recommendedInterval: 5
+category: utilities
+tags:
+  - bike-share
+  - dock-tracking
+  - transit
+  - utility

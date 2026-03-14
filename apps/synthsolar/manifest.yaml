@@ -7,3 +7,10 @@ author: Synth Solar
 recommendedInterval: 5
 fileName: synth_solar.star
 packageName: synthsolar
+category: utilities
+tags:
+  - sun-dial
+  - home-assistant
+  - smart-home
+  - weather
+  - utility

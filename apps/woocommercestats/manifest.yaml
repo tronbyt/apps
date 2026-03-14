@@ -7,3 +7,10 @@ author: Jeremy Launder
 fileName: woocommerce_stats.star
 packageName: woocommercestats
 recommendedInterval: 5
+category: utilities
+tags:
+  - stats
+  - ecommerce
+  - sales
+  - utility
+  - business

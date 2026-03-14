@@ -2,7 +2,14 @@
 id: mtg-discover
 name: MTG Discover
 summary: Discover random MTG cards
-desc: "Cycles through and displays information about random Magic: The Gathering cards."
+desc: 'Cycles through and displays information about random Magic: The Gathering cards.'
 author: Staghouse
 fileName: mtg_discover.star
 packageName: mtgdiscover
+category: entertainment
+tags:
+  - mtg
+  - cards
+  - trivia
+  - fun
+  - collectible

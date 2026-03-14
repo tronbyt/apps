@@ -8,3 +8,10 @@ fileName: viepubltransp.star
 packageName: viepubltransp
 recommendedInterval: 5
 broken: true
+category: utilities
+tags:
+  - public-transit
+  - vienna
+  - transport
+  - utility
+  - bus

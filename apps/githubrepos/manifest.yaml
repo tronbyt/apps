@@ -7,3 +7,10 @@ author: tavdog
 recommendedInterval: 5
 fileName: github_repos.star
 packageName: githubrepos
+category: utilities
+tags:
+  - workflow
+  - status
+  - devtools
+  - utility
+  - code

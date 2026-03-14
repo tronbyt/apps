@@ -8,3 +8,8 @@ fileName: hvv_departures.star
 packageName: hvvdepartures
 broken: true
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - bus
+  - train

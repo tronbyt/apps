@@ -6,3 +6,10 @@ desc: Be sure to read the README.md which will walk you through the setup proces
 author: bsbishop
 fileName: mongodb_notify.star
 packageName: mongodbnotify
+category: smart-home
+tags:
+  - mongodb
+  - home-assistant
+  - notifications
+  - iot
+  - utility

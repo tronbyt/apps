@@ -8,3 +8,8 @@ fileName: phase_of_moon.star
 packageName: phaseofmoon
 recommendedInterval: 5
 supports2x: true
+category: science
+tags:
+  - moon-phase
+  - astronomy
+  - wide 2x support

@@ -7,3 +7,8 @@ author: Henry So, Jr.
 fileName: day_night_map.star
 packageName: daynightmap
 recommendedInterval: 5
+category: science
+tags:
+  - earth
+  - sunrise-sunset
+  - moon-phase

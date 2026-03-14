@@ -7,3 +7,9 @@ author: rs7q5
 fileName: cost_calculator.star
 packageName: costcalculator
 recommendedInterval: 5
+category: utilities
+tags:
+  - time-tracker
+  - cost-monitor
+  - utility
+  - rate-based

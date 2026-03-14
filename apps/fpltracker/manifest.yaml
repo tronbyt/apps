@@ -7,3 +7,9 @@ author: DoubleGremlin181
 recommendedInterval: 5
 fileName: fpl_tracker.star
 packageName: fpltracker
+category: sports
+tags:
+  - fpl
+  - fantasy-soccer
+  - standings
+  - scores

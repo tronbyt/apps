@@ -7,3 +7,9 @@ author: Neal Wright
 fileName: ogs_games_viewer.star
 packageName: ogsgamesviewer
 recommendedInterval: 5
+category: utilities
+tags:
+  - go
+  - board-game
+  - real-time
+  - utility

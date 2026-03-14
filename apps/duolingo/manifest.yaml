@@ -7,3 +7,8 @@ author: Olly Stedall @saltedlolly
 fileName: duolingo.star
 packageName: duolingo
 recommendedInterval: 5
+category: education
+tags:
+  - duolingo
+  - language-learning
+  - study-tracker

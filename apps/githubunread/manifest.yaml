@@ -7,3 +7,10 @@ author: ElliottAYoung
 fileName: github_unread.star
 packageName: githubunread
 recommendedInterval: 5
+category: utilities
+tags:
+  - github
+  - notifications
+  - status
+  - utility
+  - count

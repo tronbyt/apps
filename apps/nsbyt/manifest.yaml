@@ -7,3 +7,9 @@ author: tim.hanssen
 fileName: nsbyt.star
 packageName: nsbyt
 recommendedInterval: 5
+category: transit
+tags:
+  - train
+  - transit
+  - dutchrailway
+  - timetable

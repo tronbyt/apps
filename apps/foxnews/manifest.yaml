@@ -7,3 +7,8 @@ author: jvivona
 fileName: fox_news.star
 packageName: foxnews
 recommendedInterval: 10
+category: news
+tags:
+  - fox
+  - news
+  - headlines

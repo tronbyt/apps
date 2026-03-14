@@ -6,3 +6,11 @@ desc: Displays a notification that a garage door is open.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - smart-home
+  - home-security
+  - alerts
+  - notification
+  - utility
+  - wide 2x support

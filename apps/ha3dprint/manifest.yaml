@@ -7,3 +7,9 @@ author: brombomb
 fileName: ha3dprint.star
 packageName: ha3dprint
 recommendedInterval: 5
+category: smart-home
+tags:
+  - home-assistant
+  - printer
+  - status
+  - utility
