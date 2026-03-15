@@ -447,8 +447,13 @@ def main(config):
             print("[DEBUG] Using default stop")
     else:
         # Typeahead returns JSON: {"display":"...", "text":"...", "value":"..."}
-        stop_obj = json.decode(stop_code)
-        stopId = stop_obj.get("value")
+        if stop_code.startswith("{"):
+            # Typeahead returns JSON: {"display":"...", "text":"...", "value":"..."}
+            stop_obj = json.decode(stop_code)
+            stopId = stop_obj.get("value")
+        else:
+            # Value is not in JSON format, use it directly
+            stopId = stop_code
         stopTitle = None  # Will be looked up from API
         if DEBUG:
             print("[DEBUG] Parsed stop from typeahead - stopId=%s" % stopId)
