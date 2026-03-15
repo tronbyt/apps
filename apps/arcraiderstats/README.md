@@ -1,20 +1,19 @@
 # Arc Raiders Stats
 
-Display current Arc Raiders player count and active event timers on your Tronbyt.
+Display current Arc Raiders player count and active event timers with live countdowns on your Tronbyt.
 
 ## Features
 
 - **Real-time Player Count**: Shows the current number of active players from Steam
-- **Event Timers**: Displays currently active in-game events with their map locations
-- **Auto-refresh**: Updates events every 5 minutes and player count every 10 minutes
+- **Live Event Countdowns**: Displays currently active in-game events with real-time countdown timers
+- **Dynamic Animations**: Smooth scroll-in, pause, and scroll-out transitions that adapt to the number of events
+- **Adaptive Time Formatting**: Countdown displays automatically adjust format based on remaining time (days/hours, hours/minutes, or minutes/seconds)
+- **Horizontal Scrolling**: Long event names and map names scroll horizontally to fit the display
+- **Auto-refresh**: Updates events every 12 hours and player count every 10 minutes
 
 ## Configuration
 
-### Settings
-
-- **Show Player Count** (toggle): Display the current player count from Steam
-- **Show Events** (toggle): Display currently active event timers
-- **Scroll Speed** (dropdown): Control the speed of event scrolling animation (Slow/Medium/Fast)
+This app has no user-configurable settings. Animation timing automatically adapts to your device's display time settings configured on the Tidbyt server.
 
 ## Data Sources
 
@@ -23,32 +22,36 @@ Display current Arc Raiders player count and active event timers on your Tronbyt
 - **App ID**: 1808500 (Arc Raiders)
 - **Cache**: 10 minutes
 
-### MetaForge API
-- **Endpoint**: `https://metaforge.app/api/arc-raiders/event-timers`
-- **Data**: Event schedules with times and map locations
-- **Cache**: 5 minutes
-- **Attribution**: Data provided by [metaforge.app/arc-raiders](https://metaforge.app/arc-raiders)
+### ARCRaidersHub API
+- **Endpoint**: `https://arcraidershub.com/data/events.json`
+- **Data**: Hourly event schedules with map locations for all game maps
+- **Cache**: 12 hours
+- **Attribution**: Data provided by [arcraidershub.com](https://arcraidershub.com)
 
 ## Display
 
 The app shows:
-1. **Title bar**: Pixelated ARC RAIDERS 
-2. **Player count**: Current active players (if enabled)
-3. **Active events**: Scrolling list of events currently happening with their map locations
+1. **Title bar**: Pixelated ARC RAIDERS logo
+2. **Player count**: Current active players with formatted numbers (e.g., "286.2K")
+3. **Active events**: Animated list of events with:
+   - Map name (white text)
+   - Event name (yellow text)
+   - Live countdown timer (red text) showing time remaining until event ends
 
 ## Technical Details
 
 - **Language**: Starlark
 - **Refresh Rate**: Recommended 10-second interval
 - **Cache Strategy**:
-  - Event data cached for 5 minutes
+  - Event data cached for 12 hours
   - Player count cached for 10 minutes
+- **Countdown Updates**: Event timers count down in real-time during the entire animation sequence
 - **Error Handling**: Gracefully handles API failures with fallback messages
 
 ## Attribution
 
 - Arc Raiders is a game by Embark Studios
-- Event timer data provided by [MetaForge](https://metaforge.app/arc-raiders)
+- Event timer data provided by [ARCRaidersHub](https://arcraidershub.com)
 - Player count data from Steam Web API
 
 ## Author
