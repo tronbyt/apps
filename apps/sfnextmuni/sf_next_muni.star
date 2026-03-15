@@ -33,9 +33,6 @@ ALERTS_URL = "https://api.511.org/transit/servicealerts?format=json&api_key=%s&a
 
 API_KEY = None
 
-# Set to True to enable debug logging
-DEBUG = False
-
 # Maximum number of results to return in typeahead searches
 MAX_TYPEAHEAD_RESULTS = 100
 
@@ -220,19 +217,26 @@ def get_schema():
                 icon = "clock",
                 default = "0",
             ),
+            schema.Toggle(
+                id = "debug",
+                name = "Enable debug logging",
+                desc = "Show verbose logs for troubleshooting. For developers only.",
+                icon = "bug",
+                default = False,
+            ),
         ],
     )
 
-def fetch_stops(api_key):
+def fetch_stops(api_key, debug = False):
     stops = {}
 
-    raw_stops = fetch_cached(STOPS_URL % api_key, 86400)
+    raw_stops = fetch_cached(STOPS_URL % api_key, 86400, debug)
 
     if type(raw_stops) != "string" and "Contents" in raw_stops:
         stops.update([(stop["id"], stop) for stop in raw_stops["Contents"]["dataObjects"]["ScheduledStopPoint"]])
-        if DEBUG:
+        if debug:
             print("[DEBUG] Loaded %d stop(s) from API" % len(stops))
-    elif DEBUG:
+    elif debug:
         print("[ERROR] Failed to load stops from API")
 
     return stops
@@ -242,7 +246,8 @@ def get_stops(pattern, config):
     if not api_key:
         return [schema.Option(display = "API key not set", value = "0")]
 
-    stops = fetch_stops(api_key)
+    debug = config.bool("debug", False)
+    stops = fetch_stops(api_key, debug)
     if not stops:
         return [schema.Option(display = "No stops found", value = "0")]
 
@@ -283,6 +288,8 @@ def get_route_filter_typeahead(pattern, config):
     if not api_key:
         return [schema.Option(display = "All Routes (API key not set)", value = "all-routes")]
 
+    debug = config.bool("debug", False)
+
     # Check if a stop is selected - if so, filter to only routes serving that stop
     stop_code = config.get("stop_code")
     routes_at_stop = None
@@ -291,21 +298,21 @@ def get_route_filter_typeahead(pattern, config):
     if stop_code and stop_code.startswith("{"):
         stop_obj = json.decode(stop_code)
         stop_code = stop_obj.get("value", stop_code)
-        if DEBUG:
+        if debug:
             print("[DEBUG] Route filter typeahead - extracted stop_code: %s" % stop_code)
 
     if stop_code and stop_code != "0":
-        if DEBUG:
+        if debug:
             print("[DEBUG] Route filter - fetching predictions for stop: %s" % stop_code)
 
         # Fetch predictions for the selected stop to see which routes serve it
-        data = fetch_cached(PREDICTIONS_URL % (api_key, stop_code), 240)
+        data = fetch_cached(PREDICTIONS_URL % (api_key, stop_code), 240, debug)
         if type(data) != "string":
             service_delivery = data.get("ServiceDelivery", {})
             stop_monitoring = service_delivery.get("StopMonitoringDelivery", {})
             monitored_stops = stop_monitoring.get("MonitoredStopVisit", [])
 
-            if DEBUG:
+            if debug:
                 print("[DEBUG] Route filter - found %d monitored stops" % len(monitored_stops))
 
             # Extract unique routes serving this stop
@@ -316,12 +323,12 @@ def get_route_filter_typeahead(pattern, config):
                 if route_id:
                     routes_at_stop[route_id] = True
 
-            if DEBUG:
+            if debug:
                 print("[DEBUG] Route filter - routes at stop: %s" % ", ".join(routes_at_stop.keys()) if routes_at_stop else "none")
-        elif DEBUG:
+        elif debug:
             print("[DEBUG] Route filter - failed to fetch predictions (got string response)")
 
-    routes = fetch_cached(ROUTES_URL % api_key, 86400)
+    routes = fetch_cached(ROUTES_URL % api_key, 86400, debug)
     if type(routes) == "string" or not routes:
         return [schema.Option(display = "All Routes", value = "all-routes")]
 
@@ -342,17 +349,17 @@ def get_route_filter_typeahead(pattern, config):
             if (search_pattern.lower() in route["Id"].lower() or search_pattern.lower() in route["Name"].lower()) and
                (routes_at_stop == None or route["Id"] in routes_at_stop)
         ]
-        if DEBUG:
+        if debug:
             print("[DEBUG] Route filter - search pattern '%s', filtered to %d routes" % (search_pattern, len(filtered_routes)))
     else:
         # Filter by routes at stop if a stop is selected
         if routes_at_stop != None:
             filtered_routes = [route for route in routes if route["Id"] in routes_at_stop]
-            if DEBUG:
+            if debug:
                 print("[DEBUG] Route filter - filtered by stop, %d routes match" % len(filtered_routes))
         else:
             filtered_routes = routes
-            if DEBUG:
+            if debug:
                 print("[DEBUG] Route filter - no filtering applied, showing all %d routes" % len(filtered_routes))
 
     # Sort routes by ID (treats numeric and alpha routes better)
@@ -379,7 +386,7 @@ def get_route_list(api_key = None):
             ),
         ]
 
-    routes = fetch_cached(ROUTES_URL % api_key, 86400)
+    routes = fetch_cached(ROUTES_URL % api_key, 86400, False)
     if type(routes) == "string":
         # Return default option on error instead of empty list
         return [
@@ -408,10 +415,10 @@ def get_route_list(api_key = None):
     )
     return route_list
 
-def fetch_cached(url, ttl):
+def fetch_cached(url, ttl, debug = False):
     res = http.get(url, ttl_seconds = ttl)
     if res.status_code != 200:
-        if DEBUG:
+        if debug:
             print("[ERROR] 511.org API request failed - URL: %s | Status: %d" % (sanitize(url), res.status_code))
         return res.body().lstrip("\ufeff")
 
@@ -425,11 +432,12 @@ def higher_priority_than(pri, threshold):
     return threshold == "Low" or pri == "High" or threshold == pri
 
 def main(config):
-    if DEBUG:
+    debug = config.bool("debug", False)
+    if debug:
         print("[INFO] ========== SF Next Muni App Starting ==========")
     api_key = config.get("511_api_key")
     if not api_key:
-        if DEBUG:
+        if debug:
             print("[ERROR] No 511.org API Key provided")
         return render.Root(
             child = render.WrappedText("No 511.org API Key provided.", font = "tom-thumb"),
@@ -443,10 +451,9 @@ def main(config):
         stop = json.decode(DEFAULT_STOP)
         stopId = stop["value"]
         stopTitle = stop["display"]
-        if DEBUG:
+        if debug:
             print("[DEBUG] Using default stop")
     else:
-        # Typeahead returns JSON: {"display":"...", "text":"...", "value":"..."}
         if stop_code.startswith("{"):
             # Typeahead returns JSON: {"display":"...", "text":"...", "value":"..."}
             stop_obj = json.decode(stop_code)
@@ -455,12 +462,12 @@ def main(config):
             # Value is not in JSON format, use it directly
             stopId = stop_code
         stopTitle = None  # Will be looked up from API
-        if DEBUG:
+        if debug:
             print("[DEBUG] Parsed stop from typeahead - stopId=%s" % stopId)
 
     # Handle invalid/placeholder stop IDs
     if not stopId or stopId == "0":
-        if DEBUG:
+        if debug:
             print("[ERROR] No valid stop selected")
         return render.Root(
             child = render.Text("Please select a stop.", font = "tom-thumb"),
@@ -473,20 +480,22 @@ def main(config):
     messages = getMessages(api_key, config, routes, stopId)
 
     ## Render the title, predictions and messages
-    if DEBUG:
+    if debug:
         print("[INFO] Rendering output with %d prediction(s) and %d message(s)" % (len(predictions), len(messages)))
         print("[INFO] ========== SF Next Muni App Finished ==========")
     return renderOutput(stopTitle, predictions, messages, config)
 
 def getPredictions(api_key, config, stopId, stopTitle):
+    debug = config.bool("debug", False)
+
     # If stopTitle wasn't provided, we'll look it up from the API
     if not stopTitle:
         stopTitle = "Stop #" + stopId
-    if DEBUG:
+    if debug:
         print("[DEBUG] Fetching predictions for stop: %s (ID: %s)" % (stopTitle, stopId))
-    data = fetch_cached(PREDICTIONS_URL % (api_key, stopId), 240)
+    data = fetch_cached(PREDICTIONS_URL % (api_key, stopId), 240, debug)
     if type(data) == "string":
-        if DEBUG:
+        if debug:
             print("[ERROR] Failed to fetch predictions - API returned error: %s" % data)
         return (data, [], [])
 
@@ -498,33 +507,33 @@ def getPredictions(api_key, config, stopId, stopTitle):
         filter_obj = json.decode(route_filter)
         route_filter = filter_obj.get("value", route_filter)
 
-    if DEBUG:
+    if debug:
         print("[DEBUG] Route filter: %s | Minimum time: %s min" % (route_filter, config.str("minimum_time", "0")))
 
     minimum_time_string = config.str("minimum_time", "0")
     minimum_time = int(minimum_time_string) if minimum_time_string.isdigit() else 0
     prediction_map = {}
     routes = []
-    stops = fetch_stops(api_key)
+    stops = fetch_stops(api_key, debug)
     if stopId in stops:
         stopTitle = stops[stopId]["Name"]
 
     # Parse Stop Monitoring API response
     service_delivery = data.get("ServiceDelivery", {})
     if not service_delivery:
-        if DEBUG:
+        if debug:
             print("[WARNING] No ServiceDelivery found in API response for stop: %s" % stopId)
         return (stopTitle, [], [])
 
     stop_monitoring = service_delivery.get("StopMonitoringDelivery", {})
     if not stop_monitoring:
-        if DEBUG:
+        if debug:
             print("[WARNING] No StopMonitoringDelivery found in API response for stop: %s" % stopId)
         return (stopTitle, [], [])
 
     monitored_stops = stop_monitoring.get("MonitoredStopVisit", [])
     if not monitored_stops:
-        if DEBUG:
+        if debug:
             print("[WARNING] No MonitoredStopVisit entries found for stop: %s" % stopId)
         return (stopTitle, [], [])
 
@@ -574,13 +583,13 @@ def getPredictions(api_key, config, stopId, stopTitle):
         # Parse ISO 8601 timestamp and calculate minutes until arrival
         # Validate that expected_arrival is a non-empty string before parsing
         if type(expected_arrival) != "string" or len(expected_arrival) == 0:
-            if DEBUG:
+            if debug:
                 print("[ERROR] Invalid arrival time format: %s" % expected_arrival)
             continue
 
         arrival_time = time.parse_time(expected_arrival)
         if not arrival_time:
-            if DEBUG:
+            if debug:
                 print("[ERROR] Failed to parse arrival time: %s" % expected_arrival)
             continue
 
@@ -603,7 +612,7 @@ def getPredictions(api_key, config, stopId, stopTitle):
 
     output = sorted(output_map.items(), key = lambda kv: int(min(kv[1], key = int))) if output_map.items() else []
 
-    if DEBUG:
+    if debug:
         if not output:
             print("[WARNING] No predictions found for stop: %s | Route filter: %s | Routes found: %s" % (stopId, route_filter, ", ".join(routes) if routes else "none"))
         else:
@@ -612,11 +621,12 @@ def getPredictions(api_key, config, stopId, stopTitle):
     return (stopTitle, routes, output)
 
 def getMessages(api_key, config, routes, stopId):
-    if DEBUG:
+    debug = config.bool("debug", False)
+    if debug:
         print("[DEBUG] Fetching service alerts for stop: %s" % stopId)
-    data = fetch_cached(ALERTS_URL % api_key, 240)
+    data = fetch_cached(ALERTS_URL % api_key, 240, debug)
     if type(data) == "string":
-        if DEBUG:
+        if debug:
             print("[ERROR] Failed to fetch alerts - API returned error: %s" % data)
         return [data]
 
@@ -626,7 +636,7 @@ def getMessages(api_key, config, routes, stopId):
     messages = []
 
     if not entities:
-        if DEBUG:
+        if debug:
             print("[DEBUG] No alert entities found")
         return messages
 
@@ -650,7 +660,7 @@ def getMessages(api_key, config, routes, stopId):
             (config.bool("stop_alerts") and stopId in informedStops)):
             messages.extend(translations)
 
-    if DEBUG:
+    if debug:
         print("[DEBUG] Found %d service alert(s)" % len(messages))
     return messages
 
