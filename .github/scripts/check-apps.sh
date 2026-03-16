@@ -21,6 +21,7 @@ runtime_exceptions["apps/nflstandings"]="5s"
 runtime_exceptions["apps/nhlstandings"]="5s"
 runtime_exceptions["apps/acfilmshowtimes"]="5s"
 runtime_exceptions["apps/perlinnoise"]="5s"
+runtime_exceptions["apps/arcraiderstats"]="3s"
 
 
 if [ -z "${TARGETS}" ]; then

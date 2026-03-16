@@ -5,13 +5,14 @@ Description: Shows current Arc Raiders player count and active event timers with
 Author: Chris Nourse
 """
 
-load("ArcRaidersTitle.webp", ARC_RAIDERS_LOGO_ASSET = "file")
+load("ArcRaidersTitle.webp", ARC_RAIDERS_LOGO_1X = "file")
+load("ArcRaidersTitle@2x.webp", ARC_RAIDERS_LOGO_2X = "file")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-ARC_RAIDERS_LOGO = ARC_RAIDERS_LOGO_ASSET.readall()
+ARC_RAIDERS_LOGO = ARC_RAIDERS_LOGO_2X.readall() if canvas.is2x() else ARC_RAIDERS_LOGO_1X.readall()
 
 # API URLs
 STEAM_API_URL = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=1808500"
@@ -29,16 +30,17 @@ COLOR_WHITE = "#FFFFFF"
 PLAYER_CACHE_TTL = 600  # 10 minutes (http.get cache)
 EVENTS_TABLE_CACHE_TTL = 43200  # 12 hours (cache full event table)
 
-# Screen constants
-SCREEN_WIDTH = 64  # Display width in pixels
-SCREEN_HEIGHT = 32  # Display height in pixels
-PLAYER_COUNT_HEIGHT = 6  # Height of player count display in pixels
-EVENT_CONTENT_HEIGHT = 18  # Height of event content (3 lines of text)
-CHAR_WIDTH = 4  # Character width in pixels for tom-thumb and CG-pixel-3x5-mono fonts
+# Screen constants (resolution-aware)
+SCALE = 2 if canvas.is2x() else 1
+SCREEN_WIDTH = canvas.width()
+SCREEN_HEIGHT = canvas.height()
+PLAYER_COUNT_HEIGHT = 6 * SCALE
+EVENT_CONTENT_HEIGHT = 36 if canvas.is2x() else 18
+CHAR_WIDTH = 6 if canvas.is2x() else 4  # Width of FONT_EVENT characters
 
-# Font names
-FONT_TOM_THUMB = "tom-thumb"
-FONT_CG_PIXEL_3X5 = "CG-pixel-3x5-mono"
+# Fonts (resolution-aware)
+FONT_HEADER = "6x10" if canvas.is2x() else "tom-thumb"
+FONT_EVENT = "terminus-12" if canvas.is2x() else "CG-pixel-3x5-mono"
 
 # Animation constants - Percentage-based values
 PERCENT_PAUSE = 0.75  # % of each event's time spent paused
@@ -347,13 +349,13 @@ def format_time_adaptive(remaining_seconds):
 
     Returns:
         Formatted string like:
-        - "ends in 02d 14h" for >= 100 hours
-        - "ends in 12h 34m" for >= 100 minutes
-        - "ends in 45m 23s" for < 100 minutes
+        - "Ends In 02d 14h" for >= 100 hours
+        - "Ends In 12h 34m" for >= 100 minutes
+        - "Ends In 45m 23s" for < 100 minutes
         - "ended" for <= 0 seconds
     """
     if remaining_seconds <= 0:
-        return "ended"
+        return "Ended"
 
     total_minutes = remaining_seconds // 60
     seconds = remaining_seconds % 60
@@ -366,15 +368,15 @@ def format_time_adaptive(remaining_seconds):
     if total_hours >= 100:  # >= 100 hours, use days and hours
         d_str = ("0" + str(days)) if days < 10 else str(days)
         h_str = ("0" + str(hours)) if hours < 10 else str(hours)
-        return "ends in %sd %sh" % (d_str, h_str)
+        return "Ends In %sd %sh" % (d_str, h_str)
     elif total_minutes >= 100:  # >= 100 minutes, use hours and minutes
         h_str = ("0" + str(total_hours)) if total_hours < 10 else str(total_hours)
         m_str = ("0" + str(minutes)) if minutes < 10 else str(minutes)
-        return "ends in %sh %sm" % (h_str, m_str)
+        return "Ends In %sh %sm" % (h_str, m_str)
     else:  # < 100 minutes, use minutes and seconds
         m_str = ("0" + str(total_minutes)) if total_minutes < 10 else str(total_minutes)
         s_str = ("0" + str(seconds)) if seconds < 10 else str(seconds)
-        return "ends in %sm %ss" % (m_str, s_str)
+        return "Ends In %sm %ss" % (m_str, s_str)
 
 def get_event_row_text(event, row_index, frame, animation_start_time, scroll_in_start, horizontal_scroll_speed):
     """Generate text content for an event row at a specific frame.
@@ -414,7 +416,7 @@ def get_event_row_text(event, row_index, frame, animation_start_time, scroll_in_
     viewport_chars = SCREEN_WIDTH // CHAR_WIDTH
 
     # Check if text needs scrolling (accounting for padding)
-    usable_width = SCREEN_WIDTH - 4  # 2px padding on each side
+    usable_width = SCREEN_WIDTH - (4 * SCALE)  # 2px padding on each side (scaled)
     text_width = len(base_text) * CHAR_WIDTH
     if text_width > usable_width:
         frames_since_event_start = frame - scroll_in_start
@@ -488,7 +490,7 @@ def get_vertical_position(timeline_entry, frame, header_height):
 
         # Smoothly move from header_height to fully off-screen (negative Y)
         # Add extra pixels to ensure content is completely offscreen
-        distance_to_travel = header_height + EVENT_CONTENT_HEIGHT + 2
+        distance_to_travel = header_height + EVENT_CONTENT_HEIGHT + (2 * SCALE)
         return int(header_height - (progress * distance_to_travel))
 
 def get_current_event(timeline, frame):
@@ -526,26 +528,26 @@ def render_event_content(event, frame, timeline_entry, animation_start_time, ver
     """
 
     # Generate text for each row
-    row_height = 6  # Height for each text row
-    row_x = 2  # Left padding
+    row_height = 12 if canvas.is2x() else 6  # Height for each text row
+    row_x = 2 * SCALE  # Left padding
 
     # Build content children with absolute positioning from base Y
     content_children = []
 
-    # Row 0: Map name (white, tom-thumb)
+    # Row 0: Map name (white)
     map_text = get_event_row_text(event, 0, frame, animation_start_time, timeline_entry["scroll_in_start"], horizontal_scroll_speed)
     row_y = vertical_y + 0
-    content_children.append(render_positioned_text(map_text, row_x, row_y, FONT_TOM_THUMB, COLOR_WHITE))
+    content_children.append(render_positioned_text(map_text, row_x, row_y, FONT_EVENT, COLOR_WHITE))
 
-    # Row 1: Event name (yellow, CG-pixel-3x5)
+    # Row 1: Event name (yellow)
     event_text = get_event_row_text(event, 1, frame, animation_start_time, timeline_entry["scroll_in_start"], horizontal_scroll_speed)
     row_y = vertical_y + row_height
-    content_children.append(render_positioned_text(event_text, row_x, row_y, FONT_CG_PIXEL_3X5, COLOR_YELLOW))
+    content_children.append(render_positioned_text(event_text, row_x, row_y, FONT_EVENT, COLOR_YELLOW))
 
-    # Row 2: Countdown (red, CG-pixel-3x5)
+    # Row 2: Countdown (red)
     time_text = get_event_row_text(event, 2, frame, animation_start_time, timeline_entry["scroll_in_start"], horizontal_scroll_speed)
     row_y = vertical_y + (row_height * 2)
-    content_children.append(render_positioned_text(time_text, row_x, row_y, FONT_CG_PIXEL_3X5, COLOR_RED))
+    content_children.append(render_positioned_text(time_text, row_x, row_y, FONT_EVENT, COLOR_RED))
 
     # Return list of positioned children (no wrapping Box!)
     return content_children
@@ -645,19 +647,19 @@ def build_header(player_count, show_player_count):
                 width = SCREEN_WIDTH,
                 height = PLAYER_COUNT_HEIGHT,
                 child = render.Padding(
-                    pad = (1, 0, 0, 0),
+                    pad = (SCALE, 0, 0, 0),
                     child = render.Row(
                         main_align = "center",
                         cross_align = "center",
                         children = [
                             render.Text(
                                 content = "Players:",
-                                font = FONT_TOM_THUMB,
+                                font = FONT_HEADER,
                                 color = COLOR_CYAN,
                             ),
                             render.Text(
                                 content = player_text,
-                                font = FONT_TOM_THUMB,
+                                font = FONT_HEADER,
                                 color = COLOR_GREEN,
                             ),
                         ],
@@ -684,7 +686,7 @@ def render_display(player_count, events, show_player_count, show_events, display
     """
 
     # Calculate header height
-    header_height = 8  # Logo height
+    header_height = 8 * SCALE  # Logo height
     if show_player_count:
         header_height += PLAYER_COUNT_HEIGHT
 
@@ -693,7 +695,7 @@ def render_display(player_count, events, show_player_count, show_events, display
 
     # Calculate dynamic timing based on display time and number of events
     timing = calculate_animation_timing(display_time_seconds, len(events))
-    delay = timing["frame_delay_ms"]
+    delay = timing["frame_delay_ms"] // 2 if canvas.is2x() else timing["frame_delay_ms"]
 
     # Create display based on events state
     if show_events:
@@ -735,10 +737,10 @@ def render_display(player_count, events, show_player_count, show_events, display
                         width = SCREEN_WIDTH,
                         height = SCREEN_HEIGHT,
                         child = render.Padding(
-                            pad = (2, header_height + 2, 2, 0),
+                            pad = (2 * SCALE, header_height + 2 * SCALE, 2 * SCALE, 0),
                             child = render.WrappedText(
                                 content = message,
-                                font = FONT_TOM_THUMB,
+                                font = FONT_HEADER,
                                 color = message_color,
                             ),
                         ),
