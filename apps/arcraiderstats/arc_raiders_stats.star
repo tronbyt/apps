@@ -534,17 +534,17 @@ def render_event_content(event, frame, timeline_entry, animation_start_time, ver
     # Build content children with absolute positioning from base Y
     content_children = []
 
-    # Row 0: Map name (white, tom-thumb)
+    # Row 0: Map name (white)
     map_text = get_event_row_text(event, 0, frame, animation_start_time, timeline_entry["scroll_in_start"], horizontal_scroll_speed)
     row_y = vertical_y + 0
     content_children.append(render_positioned_text(map_text, row_x, row_y, FONT_EVENT, COLOR_WHITE))
 
-    # Row 1: Event name (yellow, CG-pixel-3x5)
+    # Row 1: Event name (yellow)
     event_text = get_event_row_text(event, 1, frame, animation_start_time, timeline_entry["scroll_in_start"], horizontal_scroll_speed)
     row_y = vertical_y + row_height
     content_children.append(render_positioned_text(event_text, row_x, row_y, FONT_EVENT, COLOR_YELLOW))
 
-    # Row 2: Countdown (red, CG-pixel-3x5)
+    # Row 2: Countdown (red)
     time_text = get_event_row_text(event, 2, frame, animation_start_time, timeline_entry["scroll_in_start"], horizontal_scroll_speed)
     row_y = vertical_y + (row_height * 2)
     content_children.append(render_positioned_text(time_text, row_x, row_y, FONT_EVENT, COLOR_RED))
