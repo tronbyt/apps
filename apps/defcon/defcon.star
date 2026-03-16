@@ -5,6 +5,7 @@ Description: Displays the estimated DefCon (Defense Condition) alert level for t
 Author: Robert Ison
 """
 
+load("html.star", "html")
 load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -24,45 +25,23 @@ display_options = [
     schema.Option(value = "0", display = "Actual DEFCON Level"),
 ]
 
-def trim_left(text):
-    """Remove leading whitespace recursively."""
-    if not text or text[0] != " ":
-        return text
-    return trim_left(text[1:])
+def get_defcon_level():
+    """Fetch URL and extract DEFCON number (int) from badge-number span."""
+    res = http.get(
+        url = DEF_CON_URL,
+        ttl_seconds = CACHE_TTL_SECONDS,
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "Accept": "text/html",
+        },
+    )
+    if res.status_code != 200:
+        fail("request to %s failed with status code: %d - %s" % (DEF_CON_URL, res.status_code, res.body()))
 
-def trim_right(text):
-    """Remove trailing whitespace recursively."""
-    if not text or text[-1] != " ":
-        return text
-    return trim_right(text[:-1])
-
-def extract_defcon_level(html):
-    """Extract DEFCON number (int) from badge-number span."""
-    if not html:
-        return 0
-
-    start_marker = '<span class="badge-number">'
-    start_pos = html.find(start_marker)
-    if start_pos == -1:
-        return 0
-
-    content_start = start_pos + len(start_marker)
-    end_tag_pos = html.find("</span>", content_start)
-    if end_tag_pos == -1:
-        return 0
-
-    # Extract raw content
-    defcon_text = html[content_start:end_tag_pos]
-    defcon_text = trim_left(defcon_text)
-    defcon_text = trim_right(defcon_text)
-
-    # Extract just the number after "DEFCON "
-    if defcon_text.startswith("DEFCON "):
-        number_str = defcon_text[6:]  # Skip "DEFCON "
-    else:
-        number_str = defcon_text
-
-    return int(number_str.strip())
+    page = html(res.body())
+    defcon_text = page.find("span.badge-number").text()
+    defcon_text = defcon_text.removeprefix("DEFCON ").strip(" ")
+    return int(defcon_text)
 
 def main(config):
     show_instructions = config.bool("instructions", False)
@@ -72,11 +51,7 @@ def main(config):
     position = config.get("list", display_options[0].value)
 
     if position == "0":
-        res = http.get(url = DEF_CON_URL, ttl_seconds = CACHE_TTL_SECONDS, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "Accept": "text/html"})
-        if res.status_code != 200:
-            fail("request to %s failed with status code: %d - %s" % (DEF_CON_URL, res.status_code, res.body()))
-
-        position = extract_defcon_level(res.body())
+        position = get_defcon_level()
 
     width, height = canvas.size()
     defcon_height = height // 2 - 1
