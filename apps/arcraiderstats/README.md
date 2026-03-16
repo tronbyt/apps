@@ -41,7 +41,7 @@ The app shows:
 ## Technical Details
 
 - **Language**: Starlark
-- **Refresh Rate**: Recommended 10-second interval
+- **Refresh Rate**: Recommended 10-minute interval
 - **Cache Strategy**:
   - Event data cached for 12 hours
   - Player count cached for 10 minutes
