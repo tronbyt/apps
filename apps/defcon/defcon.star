@@ -78,72 +78,92 @@ def main(config):
         position = extract_defcon_level(res.body())
 
     return render.Root(
-        render.Column(
+        delay = 1000,
+        child = render.Column(
+            expanded = True,
+            main_align = "space_between",
             children = [
-                render.Row(
-                    children = [
-                        render.Box(width = 64, height = 15, color = "#fff", child = render.Box(width = 64 - 2, height = 15 - 2, color = "#000", child = render.Text("DEFCON", color = "#fff", font = FONT))),
-                    ],
-                ),
-                render.Row(
-                    children = [
-                        render.Box(width = 64, height = 1, color = "#000"),
-                    ],
+                render.Box(
+                    width = 64,
+                    height = 15,
+                    color = "#fff",
+                    child = render.Box(
+                        width = 64 - 2,
+                        height = 15 - 2,
+                        color = "#000",
+                        child = render.Text("DEFCON", color = "#fff", font = FONT),
+                    ),
                 ),
                 render_defcon_display(config.bool("animate", True), position),
             ],
         ),
-        delay = 1000,
     )
 
 def render_defcon_display(animate, position):
     if animate:
         return render.Animation(children = get_defcon_display(position))
     else:
-        return render.Stack(children = get_defcon_display(position))
+        children = get_defcon_display(position)
+        return children.pop()
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
-        pad = (left, top, right, bottom),
-        child = element,
+def render_box(i, width, height, color):
+    return render.Box(
+        width = width,
+        height = height,
+        color = color,
+        child = render.Box(
+            width = width - 2,
+            height = height - 2,
+            color = "#000",
+            child = render.Padding(
+                pad = (1, 0, 0, 0),
+                child = render.Text(str(i), color = color, font = FONT),
+            ),
+        ),
     )
-    return padded_element
 
 def get_defcon_display(position):
     children = []
-
     position = int(position)
+    width, height = 12, 16
 
-    #add grey outlines of the 5 conditions
-    temp_group_of_children = []
+    # Render grey outlines
+    grey_children = []
     for i in range(5):
-        color = "#333"
-        temp_group_of_children.insert(len(children), add_padding_to_child_element(render.Box(width = 12, height = 16, color = color, child = render.Box(width = 12 - 2, height = 16 - 2, color = "#000", child = add_padding_to_child_element(render.Text(str(i + 1), color = color, font = FONT), 1))), i * 13))
+        grey_children.append(render_box(i + 1, width, height, "#333"))
 
-    grey_box = render.Stack(temp_group_of_children)
-    children.insert(len(children), grey_box)
+    grey_box = render.Row(
+        expanded = True,
+        main_align = "space_between",
+        children = grey_children,
+    )
+    children.append(grey_box)
 
+    # Render colored boxes
     color_box = None
+    for i in range(4, position - 2, -1):
+        color_children = []
+        for j in range(5):
+            if i == j and j >= position - 1:
+                color_children.append(render_box(j + 1, width, height, DEF_CON_COLORS[j]))
+            else:
+                color_children.append(grey_children[j])
 
-    # Flash each condition until the current condition
-    for i in range(4, -1, -1):
-        temp_group_of_children = []
-        color = "#333"
-        if (i + 1 >= position):
-            color = DEF_CON_COLORS[i]
-            temp_group_of_children.insert(len(children), grey_box)
-            temp_group_of_children.insert(len(children), add_padding_to_child_element(render.Box(width = 12, height = 16, color = color, child = render.Box(width = 12 - 2, height = 16 - 2, color = "#000", child = add_padding_to_child_element(render.Text(str(i + 1), color = color, font = FONT), 1))), i * 13))
-            color_box = render.Stack(temp_group_of_children)
-            children.insert(len(children), color_box)
+        color_box = render.Row(
+            expanded = True,
+            main_align = "space_between",
+            children = color_children,
+        )
+        children.append(color_box)
 
-    # flash current
+    # Flash current
     for _ in range(3):
-        children.insert(len(children), grey_box)
-        children.insert(len(children), color_box)
+        children.append(grey_box)
+        children.append(color_box)
 
-    # hold on current a while longer
+    # Hold current for a while longer
     for _ in range(3):
-        children.insert(len(children), color_box)
+        children.append(color_box)
 
     return children
 
