@@ -6,12 +6,13 @@ Author: Robert Ison
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEF_CON_URL = "https://www.defconlevel.com/current-level"
 CACHE_TTL_SECONDS = 3 * 24 * 60 * 60
-FONT = "6x13"
+SCALE = 2 if canvas.is2x() else 1
+FONT = "terminus-32-light" if canvas.is2x() else "6x13"
 DEF_CON_COLORS = ["#fff", "#ff0000", "#ffff00", "#00ff00", "#0000ff"]
 
 display_options = [
@@ -77,6 +78,9 @@ def main(config):
 
         position = extract_defcon_level(res.body())
 
+    width, height = canvas.size()
+    defcon_height = height // 2 - 1
+
     return render.Root(
         delay = 1000,
         child = render.Column(
@@ -84,12 +88,12 @@ def main(config):
             main_align = "space_between",
             children = [
                 render.Box(
-                    width = 64,
-                    height = 15,
+                    width = width,
+                    height = defcon_height,
                     color = "#fff",
                     child = render.Box(
-                        width = 64 - 2,
-                        height = 15 - 2,
+                        width = width - 2 * SCALE,
+                        height = defcon_height - 2 * SCALE,
                         color = "#000",
                         child = render.Text("DEFCON", color = "#fff", font = FONT),
                     ),
@@ -112,11 +116,11 @@ def render_box(i, width, height, color):
         height = height,
         color = color,
         child = render.Box(
-            width = width - 2,
-            height = height - 2,
+            width = width - 2 * SCALE,
+            height = height - 2 * SCALE,
             color = "#000",
             child = render.Padding(
-                pad = (1, 0, 0, 0),
+                pad = (0 if canvas.is2x() else 1, 0, 0, 0),
                 child = render.Text(str(i), color = color, font = FONT),
             ),
         ),
@@ -125,7 +129,8 @@ def render_box(i, width, height, color):
 def get_defcon_display(position):
     children = []
     position = int(position)
-    width, height = 12, 16
+    width = (canvas.width() // 5) - (1 if canvas.is2x() else 0)
+    height = canvas.height() // 2
 
     # Render grey outlines
     grey_children = []
@@ -168,7 +173,8 @@ def get_defcon_display(position):
     return children
 
 def display_instructions():
-    ##############################################################################################################################################################################################################################
+    width = canvas.width()
+    font = "terminus-16" if canvas.is2x() else "5x8"
     instructions_1 = "For security reasons, the U.S. military does not release the current DEFCON level. "
     instructions_2 = "The source for this app is defconlevel.com which uses Open Source Intelligence to estimate the DEFCON level.  Default is to use the actual estimated DefCon level, but you can pick a level if you want. "
     instructions_3 = "Defcon level 5 is the lowest alert level. The highest level reached was level 2 during the Cuban Missle Crisis. This display is based on the movie War Games (1983)."
@@ -176,27 +182,27 @@ def display_instructions():
         render.Column(
             children = [
                 render.Marquee(
-                    width = 64,
-                    child = render.Text("DEFCON", color = DEF_CON_COLORS[0], font = "5x8"),
+                    width = width,
+                    child = render.Text("DEFCON", color = DEF_CON_COLORS[0], font = font),
                 ),
                 render.Marquee(
-                    width = 64,
+                    width = width,
                     child = render.Text(instructions_1, color = DEF_CON_COLORS[1]),
                 ),
                 render.Marquee(
                     offset_start = len(instructions_1) * 5,
-                    width = 64,
+                    width = width,
                     child = render.Text(instructions_2, color = DEF_CON_COLORS[2]),
                 ),
                 render.Marquee(
                     offset_start = (len(instructions_2) + len(instructions_1)) * 5,
-                    width = 64,
+                    width = width,
                     child = render.Text(instructions_3, color = DEF_CON_COLORS[3]),
                 ),
             ],
         ),
         show_full_animation = True,
-        delay = 45,
+        delay = 25 if canvas.is2x() else 45,
     )
 
 def get_schema():
