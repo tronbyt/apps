@@ -10,7 +10,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 DEF_CON_URL = "https://www.defconlevel.com/current-level"
-CACHE_TTL_SECONDS = 259200
+CACHE_TTL_SECONDS = 3 * 24 * 60 * 60
 FONT = "6x13"
 DEF_CON_COLORS = ["#fff", "#ff0000", "#ffff00", "#00ff00", "#0000ff"]
 
