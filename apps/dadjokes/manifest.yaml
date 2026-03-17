@@ -6,3 +6,8 @@ desc: Displays random dad jokes fetched from icanhazdadjoke.com with scrolling t
 author: kbromberger
 fileName: dadjokes.star
 packageName: dadjokes
+category: entertainment
+tags:
+  - jokes
+  - humor
+  - fun
