@@ -60,6 +60,9 @@ DEFAULT_REALM = "firetree"
 DEFAULT_REGION = "us"
 DEFAULT_AUTH_TTL = 86399
 
+CURRENT_EXPANSION = "Midnight"
+CURRENT_INSTANCE = "The Voidspire"
+
 def main(config):
     character_name = config.get("character", DEFAULT_CHARACTER).lower()
     realm_name = config.get("realm", DEFAULT_REALM).replace(" ", "-").lower()
