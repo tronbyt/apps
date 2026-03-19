@@ -7,3 +7,9 @@ author: Rob Kimball
 fileName: traffic.star
 packageName: traffic
 recommendedInterval: 5
+category: utilities
+tags:
+  - traffic
+  - transit
+  - estimates
+  - maps

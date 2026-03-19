@@ -5,6 +5,7 @@ Description: Displays top 10 songs from Billboard.
 Author: Robert Ison
 """
 
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/billboard_icon.png", BILLBOARD_ICON_ASSET = "file")
@@ -33,8 +34,6 @@ list_options = [
 ]
 
 def main(config):
-    # US, Global,
-
     font_type = "5x8"
     if canvas.is2x():
         font_type = "terminus-16"
@@ -46,12 +45,15 @@ def main(config):
     if api_key:
         top10_data = get_top10_information(api_key, selected_list)
         if top10_data == None or "content" not in top10_data:
-            return render.Root(
-                child = render.Marquee(
-                    width = SCREEN_WIDTH,
-                    child = render.Text("Billboard API error"),
-                ),
-            )
+            if config.bool("hide_if_api_limit_reached", True):
+                return []
+            else:
+                return render.Root(
+                    child = render.Marquee(
+                        width = SCREEN_WIDTH,
+                        child = render.Text("Billboard API error"),
+                    ),
+                )
     else:
         top10_data = json.decode(BILLBOARD_SAMPLE_DATA)
 
@@ -130,10 +132,16 @@ def get_top10_information(top10_alive_key, list):
         ttl_seconds = CACHE_TTL_SECONDS,
     )
 
-    if res.status_code != 200:
-        return None
+    if res.status_code == 200:
+        data = res.json()
+        cache.set("billboardtop10-{}".format(list), json.encode(data), ttl_seconds = CACHE_TTL_SECONDS * 2)
+    else:
+        data = cache.get("billboardtop10-{}".format(list))
+        if data:
+            data = json.decode(data)
+        else:
+            data = None
 
-    data = res.json()
     if not data or "content" not in data:
         return None
 
@@ -143,14 +151,13 @@ def get_top10_information(top10_alive_key, list):
     return data
 
 def getMovementIndicator(this, last):
-    movementIndicator = ""
-    if (last != "" and last > 0):
-        if this < last:
-            movementIndicator = " (↑{})".format(last - this)
-        elif last < this:
-            movementIndicator = " (↓{})".format(this - last)
-
-    return movementIndicator
+    if not last:
+        return ""
+    if this < last:
+        return " (↑{})".format(last - this)
+    if this > last:
+        return " (↓{})".format(this - last)
+    return ""
 
 def getListDisplayFromListValue(listValue):
     for item in list_options:
@@ -321,6 +328,13 @@ def get_schema():
                 icon = "plusMinus",
                 default = song_count_options[len(song_count_options) - 1].value,
                 options = song_count_options,
+            ),
+            schema.Toggle(
+                id = "hide_if_api_limit_reached",
+                name = "Hide If API Limit Reached",
+                desc = "Hide the app if the API limit is reached and no cached data is available.",
+                icon = "eye",
+                default = True,
             ),
             schema.Dropdown(
                 id = "scroll",

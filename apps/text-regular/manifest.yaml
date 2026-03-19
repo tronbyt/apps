@@ -6,3 +6,9 @@ desc: Displays a text.
 author: savdagod, gabe565
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - text-display
+  - utility
+  - clock-style
+  - wide 2x support

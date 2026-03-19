@@ -7,3 +7,10 @@ author: broepke
 fileName: catfact.star
 packageName: catfact
 recommendedInterval: 5
+category: entertainment
+tags:
+  - cats
+  - fun
+  - animals
+  - random
+  - facts

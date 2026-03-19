@@ -7,3 +7,10 @@ author: sethvargo
 fileName: kickstarter.star
 packageName: kickstarter
 recommendedInterval: 5
+category: utilities
+tags:
+  - kickstarter
+  - finance
+  - crowdfunding
+  - stats
+  - utility

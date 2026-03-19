@@ -7,3 +7,10 @@ author: Marijn-de-Mul
 fileName: vatsimapp.star
 packageName: vatsimapp
 recommendedInterval: 5
+category: utilities
+tags:
+  - airport
+  - flight-tracking
+  - aviation
+  - transit
+  - utility

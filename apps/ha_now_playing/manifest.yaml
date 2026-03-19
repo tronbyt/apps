@@ -6,3 +6,11 @@ desc: Display track details and artwork from any Home Assistant media_player ent
 author: drudge, gabe565
 supports2x: true
 recommendedInterval: 0
+category: utilities
+tags:
+  - home-assistant
+  - media-player
+  - now-playing
+  - utility
+  - smart-home
+  - wide 2x support

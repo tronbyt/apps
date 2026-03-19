@@ -279,7 +279,7 @@ load("images/char_fbdf5393.png", CHAR_fbdf5393_ASSET = "file")
 load("images/char_fecbbfb6.png", CHAR_fecbbfb6_ASSET = "file")
 load("images/char_ffc4a49a.png", CHAR_ffc4a49a_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -324,8 +324,8 @@ COLUMN_STYLE_COUNT = len(COLUMN_STYLES)
 # relative to both drops being equidistant
 SECOND_DROP_VARIANCE = 8
 
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 
 FRAMES = 72
 

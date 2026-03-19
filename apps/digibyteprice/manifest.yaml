@@ -7,3 +7,9 @@ author: Olly Stedall @saltedlolly
 fileName: digibyte_price.star
 packageName: digibyteprice
 recommendedInterval: 1
+category: finance
+tags:
+  - crypto
+  - finance
+  - currency
+  - price-tracker

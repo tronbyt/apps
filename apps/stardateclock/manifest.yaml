@@ -7,3 +7,10 @@ author: Christian Dannie Storgaard (Cybolic)
 recommendedInterval: 1
 fileName: stardate.star
 packageName: stardateclock
+category: clocks
+tags:
+  - clock
+  - space
+  - tng
+  - stardate
+  - utility

@@ -7,3 +7,9 @@ author: misusage
 fileName: wifi_qr_code.star
 packageName: wifiqrcode
 recommendedInterval: 5
+category: utilities
+tags:
+  - wifi
+  - qr-code
+  - utility
+  - connectivity

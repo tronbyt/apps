@@ -7,3 +7,7 @@ author: tabrindle, flavorjones
 fileName: awair.star
 packageName: awair
 recommendedInterval: 5
+category: smart-home
+tags:
+  - air-quality
+  - home-assistant

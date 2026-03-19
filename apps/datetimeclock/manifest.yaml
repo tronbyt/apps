@@ -7,3 +7,7 @@ author: Alex Miller/AmillionAir
 fileName: date_time_clock.star
 packageName: datetimeclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - utility

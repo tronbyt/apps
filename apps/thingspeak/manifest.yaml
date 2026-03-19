@@ -7,3 +7,10 @@ author: Bennett Schoonerman
 fileName: thingspeak.star
 packageName: thingspeak
 recommendedInterval: 5
+category: utilities
+tags:
+  - data
+  - iot
+  - sensor
+  - utility
+  - weather

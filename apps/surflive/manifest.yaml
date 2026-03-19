@@ -7,3 +7,10 @@ author: Rémi Carton
 fileName: surflive.star
 packageName: surflive
 recommendedInterval: 5
+category: weather
+tags:
+  - surf
+  - ocean
+  - weather
+  - utility
+  - live

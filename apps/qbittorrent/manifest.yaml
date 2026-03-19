@@ -7,3 +7,9 @@ author: DoubleGremlin181
 fileName: qbittorrent.star
 packageName: qbittorrent
 recommendedInterval: 5
+category: utilities
+tags:
+  - torrent
+  - monitoring
+  - utility
+  - speed-tracker

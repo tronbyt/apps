@@ -7,3 +7,10 @@ author: Matt Broussard
 fileName: sf_fog_today.star
 packageName: sffogtoday
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - satellite
+  - fog
+  - sf
+  - utility

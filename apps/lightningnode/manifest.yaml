@@ -7,3 +7,10 @@ author: PMK (@pmk)
 fileName: lightningnode.star
 packageName: lightningnode
 recommendedInterval: 5
+category: finance
+tags:
+  - lightning
+  - crypto
+  - blockchain
+  - bitcoin
+  - wallet

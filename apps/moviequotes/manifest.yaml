@@ -7,3 +7,9 @@ author: Austin Fonacier
 fileName: movie_quotes.star
 packageName: moviequotes
 recommendedInterval: 5
+category: entertainment
+tags:
+  - movies
+  - quotes
+  - fun
+  - cinema

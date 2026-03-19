@@ -7,3 +7,10 @@ author: Bardiches
 fileName: wanikani_reminder.star
 packageName: wanikanireminder
 recommendedInterval: 5
+category: education
+tags:
+  - kanji
+  - language
+  - study
+  - flashcards
+  - learning

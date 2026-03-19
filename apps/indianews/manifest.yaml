@@ -7,3 +7,8 @@ author: vipulchhajer
 fileName: india_news.star
 packageName: indianews
 recommendedInterval: 10
+category: news
+tags:
+  - india
+  - news
+  - headlines

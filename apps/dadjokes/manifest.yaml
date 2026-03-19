@@ -1,0 +1,13 @@
+---
+id: dad-jokes
+name: Dad Jokes
+summary: Random dad jokes
+desc: Displays random dad jokes fetched from icanhazdadjoke.com with scrolling text.
+author: kbromberger
+fileName: dadjokes.star
+packageName: dadjokes
+category: entertainment
+tags:
+  - jokes
+  - humor
+  - fun

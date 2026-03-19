@@ -7,3 +7,8 @@ author: M0ntyP
 fileName: index_ticker.star
 packageName: indexticker
 recommendedInterval: 1
+category: finance
+tags:
+  - stocks
+  - indices
+  - finance

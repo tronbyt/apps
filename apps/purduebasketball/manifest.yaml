@@ -7,3 +7,9 @@ author: Griffinov22
 fileName: purdue_basketball.star
 packageName: purduebasketball
 recommendedInterval: 5
+category: sports
+tags:
+  - basketball
+  - ncaa
+  - sports-data
+  - standings

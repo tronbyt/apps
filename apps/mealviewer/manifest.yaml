@@ -7,3 +7,10 @@ author: Jed Schmidt
 fileName: mealviewer.star
 packageName: mealviewer
 recommendedInterval: 5
+category: utilities
+tags:
+  - school
+  - food
+  - lunch
+  - meal
+  - utility

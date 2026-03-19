@@ -7,3 +7,9 @@ author: Ethan Fuerst (@ethanfuerst)
 fileName: crypto_tracker.star
 packageName: cryptotracker
 recommendedInterval: 1
+category: utilities
+tags:
+  - crypto
+  - finance
+  - utility
+  - price-tracking

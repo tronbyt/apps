@@ -8,4 +8,9 @@ fileName: warframe_cycles.star
 packageName: warframecycles
 recommendedInterval: 5
 broken: true
-brokenReason: "API endpoint (api.warframestat.us/pc) returns 404/Redirect loop."
+brokenReason: API endpoint (api.warframestat.us/pc) returns 404/Redirect loop.
+category: games
+tags:
+  - warframe
+  - gaming
+  - cycle-tracker

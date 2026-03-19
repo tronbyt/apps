@@ -8,3 +8,9 @@ fileName: whosthatpokemon.star
 packageName: whosthatpokemon
 recommendedInterval: 5
 supports2x: true
+category: gaming
+tags:
+  - pokemon
+  - quiz
+  - retro
+  - wide 2x support

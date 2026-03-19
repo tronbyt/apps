@@ -6,3 +6,11 @@ desc: Displays a notification that a garage door was closed.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - home
+  - smart-home
+  - automation
+  - security
+  - utility
+  - wide 2x support

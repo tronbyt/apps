@@ -7,3 +7,8 @@ author: Jake Manske
 fileName: nfldivstandings.star
 packageName: nfldivstandings
 recommendedInterval: 5
+category: sports
+tags:
+  - nfl
+  - sports
+  - standings

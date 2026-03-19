@@ -7,3 +7,9 @@ author: alewando
 fileName: langtons_ant.star
 packageName: langtonsant
 recommendedInterval: 5
+category: art
+tags:
+  - art
+  - cellular-automata
+  - visual
+  - emergent-behavior

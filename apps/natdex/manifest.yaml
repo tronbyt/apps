@@ -8,3 +8,9 @@ fileName: natdex.star
 packageName: natdex
 recommendedInterval: 5
 supports2x: true
+category: gaming
+tags:
+  - pokemon
+  - random
+  - retro
+  - wide 2x support

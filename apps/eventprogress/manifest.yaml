@@ -7,3 +7,8 @@ author: Mike Toscano
 fileName: eventprogress.star
 packageName: eventprogress
 recommendedInterval: 5
+category: utilities
+tags:
+  - event-tracker
+  - segmented-progress
+  - utility-app

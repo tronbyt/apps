@@ -7,3 +7,8 @@ author: noahpodgurski
 fileName: octoprint.star
 packageName: octoprint
 recommendedInterval: 5
+category: smart-home
+tags:
+  - 3d-printing
+  - printer-status
+  - smart-home

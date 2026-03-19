@@ -7,3 +7,9 @@ author: PMK (@pmk)
 fileName: btcdifficulty.star
 packageName: btcdifficulty
 recommendedInterval: 1
+category: utilities
+tags:
+  - bitcoin
+  - crypto
+  - difficulty
+  - blockchain

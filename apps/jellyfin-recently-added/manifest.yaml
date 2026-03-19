@@ -7,3 +7,10 @@ author: noahpodgurski
 fileName: jellyfin_recently_added.star
 packageName: jellyfinrecentlyadded
 recommendedInterval: 720
+category: utilities
+tags:
+  - jellyfin
+  - media
+  - utility
+  - server
+  - display

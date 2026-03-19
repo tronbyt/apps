@@ -7,3 +7,9 @@ author: KDubs
 fileName: wowcharacterstats.star
 packageName: wowcharacterstats
 recommendedInterval: 5
+category: gaming
+tags:
+  - wow
+  - raid
+  - stats
+  - game-tracker

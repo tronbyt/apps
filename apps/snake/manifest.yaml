@@ -7,3 +7,9 @@ author: noahpodgurski
 fileName: snake.star
 packageName: snake
 recommendedInterval: 5
+category: gaming
+tags:
+  - snake
+  - retro
+  - fun
+  - gaming

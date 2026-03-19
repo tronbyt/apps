@@ -6,3 +6,9 @@ desc: Displays a notification that a fridge door was left open.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: smart-home
+tags:
+  - home
+  - smart-home
+  - utility
+  - wide 2x support

@@ -8,3 +8,9 @@ fileName: fitbitweight.star
 packageName: fitbitweight
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - health
+  - fitness
+  - weight-tracking
+  - wide 2x support

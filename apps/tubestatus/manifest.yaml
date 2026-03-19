@@ -7,3 +7,9 @@ author: dinosaursrarr
 fileName: tube_status.star
 packageName: tubestatus
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - subway
+  - trains
+  - public-transit

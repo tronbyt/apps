@@ -8,3 +8,11 @@ fileName: nightscout.star
 packageName: nightscout
 recommendedInterval: 5
 supports2x: true
+category: health
+tags:
+  - cgm
+  - health
+  - glucose
+  - monitoring
+  - utility
+  - wide 2x support

@@ -7,3 +7,10 @@ author: Chuck
 fileName: last_fm.star
 packageName: lastfm
 recommendedInterval: 5
+category: entertainment
+tags:
+  - music
+  - lastfm
+  - scrobbled
+  - artwork
+  - display

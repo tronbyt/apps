@@ -7,3 +7,10 @@ author: Chris Jones (@IPv6Freely)
 fileName: analog_clock.star
 packageName: analogclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - time
+  - analog
+  - display
+  - utility

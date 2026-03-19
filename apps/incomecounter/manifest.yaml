@@ -7,3 +7,10 @@ author: Thomas R. Novak
 fileName: income_counter.star
 packageName: incomecounter
 recommendedInterval: 5
+category: utilities
+tags:
+  - finance
+  - salary
+  - productivity
+  - utility
+  - earnings

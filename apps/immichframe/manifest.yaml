@@ -7,3 +7,11 @@ author: sfn-git
 fileName: immichframe.star
 packageName: immichframe
 supports2x: true
+category: utilities
+tags:
+  - photo
+  - gallery
+  - location
+  - date
+  - selfie
+  - wide 2x support

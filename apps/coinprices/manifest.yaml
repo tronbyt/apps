@@ -7,3 +7,9 @@ author: alan-oliv
 fileName: coin_prices.star
 packageName: coinprices
 recommendedInterval: 1
+category: utilities
+tags:
+  - crypto
+  - finance
+  - exchange-rates
+  - utility

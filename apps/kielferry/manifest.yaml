@@ -8,3 +8,10 @@ fileName: kiel_ferry.star
 packageName: kielferry
 broken: true
 recommendedInterval: 5
+category: utilities
+tags:
+  - transit
+  - ferry
+  - kiel
+  - harbor
+  - travel

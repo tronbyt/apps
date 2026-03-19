@@ -1,3 +1,4 @@
+---
 id: trenitalia
 name: Trenitalia
 summary: Italian train departures
@@ -5,3 +6,10 @@ desc: Display upcoming train departures from any Italian Trenitalia station with
 author: Mattia Colombo
 fileName: trenitalia.star
 packageName: trenitalia
+category: utilities
+tags:
+  - train
+  - transit
+  - commute
+  - real-time
+  - travel

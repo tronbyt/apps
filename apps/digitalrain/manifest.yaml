@@ -7,3 +7,12 @@ author: Henry So, Jr.
 fileName: digital_rain.star
 packageName: digitalrain
 recommendedInterval: 5
+supports2x: true
+category: entertainment
+tags:
+  - digital
+  - code
+  - matrix
+  - animation
+  - visual
+  - wide 2x support

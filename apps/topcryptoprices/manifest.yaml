@@ -7,3 +7,8 @@ author: playak
 fileName: top_crypto_prices.star
 packageName: topcryptoprices
 recommendedInterval: 1
+category: finance
+tags:
+  - crypto
+  - finance
+  - stocks

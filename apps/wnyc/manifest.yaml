@@ -6,3 +6,9 @@ desc: Shows what's currently playing on WNYC, New York's flagship public radio s
 author: Andrew Westling
 fileName: wnyc.star
 packageName: wnyc
+category: entertainment
+tags:
+  - radio
+  - live-streaming
+  - news
+  - music

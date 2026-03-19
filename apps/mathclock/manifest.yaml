@@ -7,3 +7,10 @@ author: rs7q5
 fileName: math_clock.star
 packageName: mathclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - math
+  - time
+  - utility
+  - fun
+  - clock

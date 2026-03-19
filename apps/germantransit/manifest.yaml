@@ -7,3 +7,10 @@ author: kmartinez834
 recommendedInterval: 5
 fileName: german_transit.star
 packageName: germantransit
+category: utilities
+tags:
+  - transit
+  - trains
+  - buses
+  - germany
+  - public

@@ -8,3 +8,10 @@ fileName: fbimostwanted.star
 packageName: fbimostwanted
 recommendedInterval: 60
 supports2x: true
+category: news
+tags:
+  - crime
+  - fbi
+  - wanted
+  - public-safety
+  - wide 2x support

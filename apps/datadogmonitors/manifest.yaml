@@ -7,3 +7,9 @@ author: Cavallando
 fileName: datadog_monitors.star
 packageName: datadogmonitors
 recommendedInterval: 5
+category: utilities
+tags:
+  - monitoring
+  - system
+  - alerts
+  - data-dog

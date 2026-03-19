@@ -7,3 +7,10 @@ author: pawliger
 fileName: tix_clock.star
 packageName: tixclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - clock
+  - visual
+  - tidybit
+  - display

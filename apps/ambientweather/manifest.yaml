@@ -7,3 +7,8 @@ author: Jon Maddox
 fileName: ambient_weather.star
 packageName: ambientweather
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - ambient
+  - home-automation

@@ -7,3 +7,10 @@ author: Felix Bruns
 fileName: weather_map.star
 packageName: weathermap
 recommendedInterval: 5
+category: weather
+tags:
+  - radar
+  - precipitation
+  - weather
+  - visual
+  - api

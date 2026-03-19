@@ -7,3 +7,9 @@ author: JeffLac (Recreation of Tidbyt Original)
 recommendedInterval: 60
 fileName: time_until.star
 packageName: timeuntil
+category: utilities
+tags:
+  - events
+  - reminders
+  - countdown
+  - utility

@@ -7,3 +7,10 @@ author: frame-shift
 fileName: daily_horoscope.star
 packageName: dailyhoroscope
 recommendedInterval: 5
+category: entertainment
+tags:
+  - horoscope
+  - astrology
+  - news
+  - fun
+  - weather

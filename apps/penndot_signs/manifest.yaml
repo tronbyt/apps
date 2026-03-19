@@ -4,3 +4,10 @@ name: PennDOT Signs
 summary: Display PennDOT DMS signs
 desc: Display messages from PennDOT DMS signage on PA highways.
 author: radiocolin
+category: utilities
+tags:
+  - traffic
+  - highway
+  - utility
+  - dms
+  - road

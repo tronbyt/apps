@@ -7,3 +7,9 @@ author: jweier
 fileName: sleeperfantasynfl.star
 packageName: sleeperfantasynfl
 recommendedInterval: 5
+category: sports
+tags:
+  - fantasy
+  - nfl
+  - standings
+  - scores
