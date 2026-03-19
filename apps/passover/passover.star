@@ -76,7 +76,7 @@ def render_during_passover(passover, now, timezone):
         "Eighth Day",
     ]
     
-    day_name = day_names[day_of_passover - 1] if day_of_passover <= 8 else "Day " + str(day_of_passover)
+    day_name = day_names[day_of_passover - 1]
     
     return render.Root(
         child = render.Box(
@@ -144,7 +144,7 @@ def render_during_passover(passover, now, timezone):
 
 def render_countdown(passover, now, timezone):
     """Render countdown to next Passover"""
-    start_time = time.parse_time(passover["start"] + "T00:00:00Z").in_location(time.tz())
+    start_time = time.parse_time(passover["start"] + "T00:00:00Z").in_location(timezone)
     
     # Calculate time until Passover
     time_until = start_time - now
