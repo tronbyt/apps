@@ -7,3 +7,8 @@ author: Woolycoin437420
 fileName: skordle_scores.star
 packageName: skordlescores
 recommendedInterval: 5
+category: sports
+tags:
+  - football
+  - scores
+  - game-tracker

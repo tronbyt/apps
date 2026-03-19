@@ -7,3 +7,10 @@ author: mharlach
 fileName: skicolorado.star
 packageName: skicolorado
 recommendedInterval: 5
+category: weather
+tags:
+  - ski
+  - weather
+  - resort
+  - outdoors
+  - sports

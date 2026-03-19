@@ -6,3 +6,10 @@ desc: Displays a text and a title.
 author: savdagod, gabe565
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - display
+  - text
+  - title
+  - utility
+  - wide 2x support

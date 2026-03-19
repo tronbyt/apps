@@ -7,3 +7,9 @@ author: doconno@gmail.com
 fileName: transsee.star
 packageName: transsee
 recommendedInterval: 5
+category: transit
+tags:
+  - transit
+  - public-transit
+  - predictions
+  - utilities

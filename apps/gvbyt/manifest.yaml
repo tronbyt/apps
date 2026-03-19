@@ -7,3 +7,10 @@ author: Matt Jones
 fileName: gvbyt.star
 packageName: gvbyt
 recommendedInterval: 5
+category: transit
+tags:
+  - tram
+  - public-transit
+  - transport
+  - utility
+  - real-time

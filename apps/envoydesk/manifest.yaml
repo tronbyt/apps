@@ -7,3 +7,10 @@ author: skalum@envoy.com
 fileName: envoy_desk.star
 packageName: envoydesk
 recommendedInterval: 5
+category: utilities
+tags:
+  - status
+  - utility
+  - home-assistant
+  - smart-home
+  - display

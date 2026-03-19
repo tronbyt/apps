@@ -7,3 +7,9 @@ author: Karl Cardenas
 fileName: spectro_cloud.star
 packageName: spectrocloudclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - weather
+  - art
+  - utility

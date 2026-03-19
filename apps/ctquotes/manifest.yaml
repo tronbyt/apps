@@ -6,3 +6,10 @@ desc: Displays random quotes and animations from the classic RPG Chrono Trigger.
 author: Jessica Chappell
 fileName: ct_quotes.star
 packageName: ctquotes
+category: entertainment
+tags:
+  - chrono-trigger
+  - quotes
+  - retro
+  - gaming
+  - fun

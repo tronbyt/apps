@@ -9,6 +9,10 @@ packageName: tagesschau_news
 recommendedInterval: 10
 supports2x: true
 minPixletVersion: v0.49.3
+category: news
 tags:
+  - german
   - news
-  - germany
+  - politics
+  - headlines
+  - wide 2x support

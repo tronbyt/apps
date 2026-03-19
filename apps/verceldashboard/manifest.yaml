@@ -7,3 +7,10 @@ author: Chase Roossin
 fileName: vercel_dashboard.star
 packageName: verceldashboard
 recommendedInterval: 5
+category: utilities
+tags:
+  - vercel
+  - devops
+  - monitoring
+  - cloud
+  - utility

@@ -6,3 +6,9 @@ desc: Displays a notification that a garage door is opening.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - home
+  - smart-home
+  - automation
+  - wide 2x support

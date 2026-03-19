@@ -5,3 +5,10 @@ summary: Weather Data for Cyclists
 desc: Displays weather data important for cyclists.
 author: Robert Ison
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - cycling
+  - outdoor
+  - utility
+  - forecast

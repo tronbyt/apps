@@ -7,3 +7,10 @@ author: Remy Blok
 fileName: dutch_fuzzy_clock.star
 packageName: dutchfuzzyclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - dutch
+  - utility
+  - clock
+  - language

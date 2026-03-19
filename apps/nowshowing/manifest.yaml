@@ -5,3 +5,9 @@ summary: Current movies in theaters
 desc: Displays current movies in theaters.
 author: Robert Ison
 recommendedInterval: 5
+category: entertainment
+tags:
+  - movies
+  - theaters
+  - entertainment
+  - cinema

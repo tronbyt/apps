@@ -7,3 +7,9 @@ author: shhhmuck
 fileName: top_10_books.star
 packageName: top10books
 recommendedInterval: 5
+category: entertainment
+tags:
+  - books
+  - literature
+  - reading
+  - bn-top-100

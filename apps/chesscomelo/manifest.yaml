@@ -7,3 +7,10 @@ author: UnBurn
 fileName: chesscom_elo.star
 packageName: chesscomelo
 recommendedInterval: 5
+category: sports
+tags:
+  - chess
+  - rating
+  - gaming
+  - esports
+  - elo

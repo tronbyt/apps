@@ -7,3 +7,9 @@ author: Daniel Sitnik
 recommendedInterval: 5
 fileName: bluesky_users.star
 packageName: blueskyusers
+category: utilities
+tags:
+  - social
+  - stats
+  - network
+  - analytics

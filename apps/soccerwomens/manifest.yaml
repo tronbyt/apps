@@ -7,3 +7,9 @@ author: jvivona
 fileName: soccerwomens.star
 packageName: soccerwomens
 recommendedInterval: 5
+category: sports
+tags:
+  - soccer
+  - scores
+  - standings
+  - live-updates

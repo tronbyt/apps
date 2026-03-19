@@ -7,3 +7,9 @@ author: W00tock
 recommendedInterval: 10
 fileName: npr_news.star
 packageName: npr
+category: entertainment
+tags:
+  - news
+  - rss
+  - customizable
+  - podcast

@@ -6,3 +6,10 @@ desc: 'Shows the time on an analog style clock. Enter custom colors in #rgb, #rr
 author: rs7q5
 fileName: analog_time.star
 packageName: analogtime
+category: clocks
+tags:
+  - clock
+  - customizable
+  - analog
+  - display
+  - time

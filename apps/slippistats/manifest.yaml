@@ -8,4 +8,10 @@ fileName: slippistats.star
 packageName: slippistats
 recommendedInterval: 5
 broken: true
-brokenReason: "Backend server (chart-slp-server.herokuapp.com) is down (404)"
+brokenReason: Backend server (chart-slp-server.herokuapp.com) is down (404)
+category: gaming
+tags:
+  - ssbm
+  - retro
+  - stats
+  - game-analysis

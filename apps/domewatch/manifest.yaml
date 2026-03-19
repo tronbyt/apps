@@ -7,3 +7,9 @@ author: Shaun Brown
 fileName: dome_watch.star
 packageName: domewatch
 recommendedInterval: 5
+category: news
+tags:
+  - politics
+  - voting
+  - real-time
+  - legislature

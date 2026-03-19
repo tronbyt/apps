@@ -7,3 +7,10 @@ author: Phildo
 fileName: tidclock.star
 packageName: tidclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - time-tracker
+  - moon-phase
+  - seasons
+  - calendar
+  - utility

@@ -7,3 +7,9 @@ author: ckyr (credit to Ingmar Stein)
 fileName: solaredgesummary.star
 packageName: solaredgesummary
 recommendedInterval: 30
+category: utilities
+tags:
+  - solar
+  - energy
+  - monitoring
+  - home-automation

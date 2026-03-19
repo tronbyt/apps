@@ -7,3 +7,10 @@ author: Ariel Tian
 fileName: weather_snapshot.star
 packageName: weathersnapshot
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - aqi
+  - temperature
+  - humidity
+  - utility

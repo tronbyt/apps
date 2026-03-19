@@ -7,3 +7,10 @@ author: rai
 fileName: mtatraintime.star
 packageName: mtatraintime
 recommendedInterval: 5
+category: weather
+tags:
+  - train
+  - transit
+  - subway
+  - railroad
+  - public-transit

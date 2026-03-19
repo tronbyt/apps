@@ -8,4 +8,11 @@ fileName: psl_cricket.star
 packageName: pslcricket
 recommendedInterval: 5
 broken: true
-brokenReason: "API access blocked (403 Forbidden)"
+brokenReason: API access blocked (403 Forbidden)
+category: sports
+tags:
+  - psl
+  - cricket
+  - sports
+  - scores
+  - live

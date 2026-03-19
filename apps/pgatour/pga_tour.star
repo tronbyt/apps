@@ -89,6 +89,15 @@ Updated timezone check
 
 v2.10.1
 Updated PLAYER_MAPPING
+
+v2.11
+Fixed bug that was showing 3rd round score as final round score
+
+v2.12
+Added different colour title bar for Playoff events, using "FedEx" purple
+Added different colour title bar for Signature events, using an orange colour
+Added opposite field event for the AP Inv...might be too late!
+Added more entries for Tournament renaming map
 """
 
 load("encoding/json.star", "json")
@@ -126,7 +135,7 @@ PLAYER_MAPPING = """
     "5211425": "B.Brown",
     "1407": "D.Brown",
     "4877953": "S.T.Lee",
-    "5076011": "Dumont DC",
+    "5076011": "Dumont De",
     "4355673": "B.Wu",
     "4423323": "D.Wu",
     "9127": "A.Svensson",
@@ -143,10 +152,11 @@ TOURNAMENT_MAPPING = """
     "401811935": "Arnold Palm",
     "401811937": "The Players",
     "401811943": "Zurich Clas",
+    "401811944": "Cadillac Ch",
     "401811958": "Puntacana",
     "401811948": "The CJ Cup",
     "401811938": "Valspar",
-    "401811939": "Houston Opn",
+    "401811939": "Houston Op",
     "401811940": "Texas Open",
     "401811941": "The Masters",
     "401811942": "Heritage",
@@ -154,22 +164,34 @@ TOURNAMENT_MAPPING = """
     "401811950": "Memorial",
     "401811947": "PGA Champ",
     "401465538": "Barbasol",
-    "401811955": "Scottish",
+    "401811955": "Scottish Op",
     "401811961": "Wyndham",
     "401811962": "FedEx St.J",
     "401811963": "BMW Champ",
     "401811964": "TOUR CHAMP",
-    "401811956": "ISCO Champ"
+    "401811956": "ISCO Champ",
+    "401811945": "Truist Ch",
+    "401811946": "Myrtle Be",
+    "401811953": "Travelers"
 }
 """
 
 MAJOR_MAPPING = """
 {
-    "401811937": "#003360",
+    "401811937": "#003360", 
     "401811941": "#006747",
     "401811947": "#00205B",
     "401811952": "#003865",
-    "401811957": "#1A1C3C"
+    "401811957": "#1A1C3C",
+    "401811962": "#4d148c",
+    "401811963": "#4d148c",
+    "401811964": "#4d148c",
+    "401811935": "#965115",
+    "401811942": "#965115",
+    "401811944": "#965115",
+    "401811945": "#965115",
+    "401811950": "#965115",
+    "401811953": "#965115"
 }
 """
 
@@ -460,6 +482,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
         if i + x < len(s):
             playerState = s[i + x]["status"]["state"]
             playerID = s[i + x]["id"]
+            period = s[i + x]["status"]["period"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
@@ -481,6 +504,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             # if the player hasn't started their round, show their tee time in your local time
             # also check its not a playoff
             # Only show tee times if its less than 12hrs until the leader tees off
+
             if playerState == "pre":
                 if s[i + x]["status"]["playoff"] != True:
                     if ShowTeeTimes == True:
@@ -510,8 +534,10 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             if playerState == "post":
                 for i in range(0, len(t), 1):
                     if playerID == t[i]["id"]:
-                        CompletedRound = len(t[i]["linescores"]) - 2
-
+                        if period == 4:
+                            CompletedRound = 3
+                        else:
+                            CompletedRound = len(t[i]["linescores"]) - 2
                         RoundScore = t[i]["linescores"][CompletedRound]["value"]
                         ProgressStr = str(int(RoundScore))
 
@@ -606,6 +632,8 @@ def OppositeFieldCheck(ID):
     elif ID == "401811957":  # The Open -> Barracuda
         i = 1
     elif ID == "401811955":  # Scottish Open -> ISCO Champ
+        i = 1
+    elif ID == "401811935":  # AP Inv -> Puerto Rico
         i = 1
     else:
         i = 0

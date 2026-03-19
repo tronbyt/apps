@@ -7,3 +7,10 @@ author: sudeepban
 fileName: tides_and_temp.star
 packageName: tidesandtemp
 recommendedInterval: 5
+category: weather
+tags:
+  - tides
+  - water-temperature
+  - ndbc
+  - noaa
+  - ocean

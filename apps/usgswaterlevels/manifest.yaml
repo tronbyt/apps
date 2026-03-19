@@ -6,3 +6,9 @@ desc: This app shows data from the USGS sensor network, allowing you to display 
 author: nalanbar
 fileName: usgs_water_levels.star
 packageName: usgswaterlevels
+category: utilities
+tags:
+  - water
+  - environment
+  - data
+  - monitoring

@@ -7,3 +7,9 @@ author: DanielJRutledge
 fileName: ynab.star
 packageName: ynab
 recommendedInterval: 5
+category: finance
+tags:
+  - budget
+  - finance
+  - personal-finance
+  - money-tracking

@@ -7,3 +7,9 @@ author: John Kalbac (@johnkalbac)
 recommendedInterval: 5
 fileName: steam_top_sellers.star
 packageName: steamtopsellers
+category: gaming
+tags:
+  - steam
+  - top-sellers
+  - random
+  - game-list

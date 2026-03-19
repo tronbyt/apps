@@ -6,3 +6,9 @@ desc: Displays a notification that a dryer is done.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - home
+  - smart-home
+  - utility
+  - wide 2x support

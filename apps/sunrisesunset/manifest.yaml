@@ -8,3 +8,10 @@ fileName: sunrise_sunset.star
 packageName: sunrisesunset
 recommendedInterval: 5
 supports2x: true
+category: weather
+tags:
+  - sunrise
+  - sunset
+  - weather
+  - clock
+  - wide 2x support

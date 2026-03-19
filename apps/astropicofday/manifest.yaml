@@ -7,3 +7,10 @@ author: Brian Bell
 fileName: astro_pic_of_day.star
 packageName: astropicofday
 recommendedInterval: 5
+category: science
+tags:
+  - space
+  - astronomy
+  - nasa
+  - science
+  - visual

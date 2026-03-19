@@ -7,3 +7,9 @@ author: scottwainstock
 fileName: pinball_map.star
 packageName: pinballmap
 recommendedInterval: 5
+category: gaming
+tags:
+  - retro
+  - arcade
+  - localization
+  - fun

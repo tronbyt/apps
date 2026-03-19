@@ -7,3 +7,9 @@ author: Mark Chu
 recommendedInterval: 5
 fileName: tw_baseball_cpbl.star
 packageName: twbaseballcpbl
+category: sports
+tags:
+  - baseball
+  - sports
+  - scores
+  - cpbl

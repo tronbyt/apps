@@ -7,3 +7,9 @@ author: tronbyt
 fileName: custom_animation.star
 packageName: customanimation
 recommendedInterval: 10000
+category: utilities
+tags:
+  - display
+  - gifs
+  - image
+  - utility

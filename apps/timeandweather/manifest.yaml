@@ -7,3 +7,10 @@ author: sudeepban
 fileName: time_and_weather.star
 packageName: timeandweather
 recommendedInterval: 5
+category: weather
+tags:
+  - clock
+  - weather
+  - time-display
+  - utility
+  - smart-home

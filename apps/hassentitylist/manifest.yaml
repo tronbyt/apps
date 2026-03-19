@@ -8,3 +8,10 @@ fileName: hassentitylist.star
 packageName: hassentitylist
 recommendedInterval: 5
 supports2x: true
+category: smart-home
+tags:
+  - home-assistant
+  - fitness-tracker
+  - step-count
+  - utility
+  - wide 2x support

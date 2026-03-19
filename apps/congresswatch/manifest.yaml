@@ -8,3 +8,9 @@ recommendedInterval: 5
 fileName: congress_watch.star
 packageName: congresswatch
 supports2x: true
+category: news
+tags:
+  - politics
+  - legislation
+  - news
+  - wide 2x support

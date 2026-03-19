@@ -7,3 +7,10 @@ author: '@objectivelabs'
 recommendedInterval: 5
 fileName: northern_lights.star
 packageName: northernlights
+category: science
+tags:
+  - space-weather
+  - aurora
+  - noaa
+  - science
+  - north-lights

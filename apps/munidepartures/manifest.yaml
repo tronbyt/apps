@@ -6,3 +6,10 @@ desc: Displays real-time arrival info for selected Muni routes and stops in San 
 author: Bobby Schimm
 fileName: muni_departures.star
 packageName: munidepartures
+category: utilities
+tags:
+  - muni
+  - transit
+  - public-transit
+  - real-time
+  - bus

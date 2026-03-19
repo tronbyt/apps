@@ -32,6 +32,7 @@ def default_game():
         "is_final": False,
         "is_preview": False,
         "start_text": "",
+        "game_label": "",
         "has_game": False,
         "fetch_ok": False,
     }
@@ -392,6 +393,30 @@ def get_espn_team_map():
             }
     return out
 
+def get_mlb_team_ids():
+    out = {}
+    url = "https://statsapi.mlb.com/api/v1/teams?sportId=1&activeStatus=Y"
+    resp = http.get(url = url, ttl_seconds = 86400)
+    if resp.status_code == 200:
+        body = resp.body()
+        if body != None and len(body) > 0 and body[0] == "{":
+            parsed = json.decode(body)
+            if type(parsed) == "dict":
+                teams = parsed.get("teams")
+                if type(teams) == "list":
+                    for team in teams:
+                        if type(team) != "dict":
+                            continue
+                        team_id = as_int(team.get("id"), 0)
+                        if team_id > 0:
+                            out[team_id] = True
+    if len(out) > 0:
+        return out
+
+    for team_id in TEAM_BY_ID:
+        out[team_id] = True
+    return out
+
 def hex_byte(s, start):
     if type(s) != "string" or len(s) < start + 2:
         return 0
@@ -520,22 +545,189 @@ def has_runner(offense, key):
         return False
     return type(offense.get(key)) == "dict"
 
-def select_game(games):
+def is_public_facing_game(game):
+    if type(game) != "dict":
+        return False
+    public_facing = game.get("publicFacing")
+    if public_facing == None:
+        return True
+    if type(public_facing) == "bool":
+        return public_facing
+    if type(public_facing) == "string":
+        return public_facing == "True"
+    return True
+
+def has_tracked_linescore(game):
+    if type(game) != "dict":
+        return False
+    linescore = game.get("linescore")
+    if type(linescore) != "dict":
+        return False
+    innings = linescore.get("innings")
+    if type(innings) == "list" and len(innings) > 0:
+        return True
+
+    if linescore.get("currentInning") != None:
+        return True
+
+    teams = linescore.get("teams")
+    if type(teams) == "dict":
+        home = teams.get("home")
+        away = teams.get("away")
+        if type(home) == "dict" and len(home) > 0:
+            return True
+        if type(away) == "dict" and len(away) > 0:
+            return True
+
+    offense = linescore.get("offense")
+    if type(offense) == "dict":
+        if type(offense.get("batter")) == "dict" or type(offense.get("onDeck")) == "dict" or type(offense.get("inHole")) == "dict":
+            return True
+
+    defense = linescore.get("defense")
+    if type(defense) == "dict":
+        if type(defense.get("pitcher")) == "dict" or type(defense.get("catcher")) == "dict":
+            return True
+
+    return False
+
+def is_mlb_team(team, mlb_team_ids):
+    if type(team) != "dict":
+        return False
+    team_id = as_int(team.get("id"), 0)
+    if team_id in mlb_team_ids:
+        return True
+    team_code = lookup_team_code(team)
+    if team_code in TEAM_ID_BY_CODE:
+        return True
+    return team_code in TEAM_BG
+
+def has_only_mlb_opponents(game, mlb_team_ids):
+    if type(game) != "dict":
+        return False
+    teams = game.get("teams")
+    if type(teams) != "dict":
+        return False
+    away_info = teams.get("away")
+    home_info = teams.get("home")
+    if type(away_info) != "dict" or type(home_info) != "dict":
+        return False
+    away_team = away_info.get("team")
+    home_team = home_info.get("team")
+    return is_mlb_team(away_team, mlb_team_ids) and is_mlb_team(home_team, mlb_team_ids)
+
+def game_has_team_code(game, team_code):
+    if type(game) != "dict":
+        return False
+    code = as_str(team_code, "")
+    if code == "":
+        return True
+    teams = game.get("teams")
+    if type(teams) != "dict":
+        return False
+    away_info = teams.get("away")
+    home_info = teams.get("home")
+    away_team = away_info.get("team") if type(away_info) == "dict" else None
+    home_team = home_info.get("team") if type(home_info) == "dict" else None
+    return lookup_team_code(away_team) == code or lookup_team_code(home_team) == code
+
+def game_sort_key(game):
+    if type(game) != "dict":
+        return 999
+    num = as_int(game.get("gameNumber"), 0)
+    if num > 0:
+        return num
+    game_date = as_str(game.get("gameDate"), "")
+    if len(game_date) >= 16:
+        hh = int_from_digits(game_date[11:13], 0)
+        mm = int_from_digits(game_date[14:16], 0)
+        return hh * 60 + mm
+    return 999
+
+def game_rank(game):
+    if type(game) != "dict":
+        return -1
+    status = game.get("status")
+    if type(status) != "dict":
+        return 0
+    state = as_str(status.get("abstractGameState"), "")
+    detailed = as_str(status.get("detailedState"), "")
+    if state == "Live":
+        return 4
+    if state == "Preview" or detailed == "Scheduled" or detailed == "Pre-Game":
+        return 3
+    if detailed == "Delayed Start" or detailed == "Postponed" or detailed == "Suspended":
+        return 2
+    if state == "Final":
+        return 1
+    return 0
+
+def is_better_game(candidate, best):
+    if type(candidate) != "dict":
+        return False
+    if type(best) != "dict":
+        return True
+    c_rank = game_rank(candidate)
+    b_rank = game_rank(best)
+    if c_rank != b_rank:
+        return c_rank > b_rank
+    c_key = game_sort_key(candidate)
+    b_key = game_sort_key(best)
+    if c_rank <= 1:
+        return c_key > b_key
+    return c_key < b_key
+
+def select_game_info(games, include_exhibition_opponents, mlb_team_ids, selected_team_code):
     if type(games) != "list" or len(games) == 0:
         return None
-    fallback = games[0]
+
+    ordered = []
     for g in games:
         if type(g) != "dict":
             continue
-        status = g.get("status")
-        if type(status) != "dict":
+        if not is_public_facing_game(g):
             continue
-        state = as_str(status.get("abstractGameState"), "")
-        if state == "Live":
-            return g
-        if state == "Preview":
-            fallback = g
-    return fallback
+        if not has_tracked_linescore(g):
+            continue
+        if not include_exhibition_opponents and not has_only_mlb_opponents(g, mlb_team_ids):
+            continue
+        if not game_has_team_code(g, selected_team_code):
+            continue
+        insert_at = len(ordered)
+        g_key = game_sort_key(g)
+        for i in range(len(ordered)):
+            if g_key < game_sort_key(ordered[i]):
+                insert_at = i
+                break
+        ordered.insert(insert_at, g)
+
+    if len(ordered) == 0:
+        return None
+
+    first_game = ordered[0]
+    season_type = as_str(first_game.get("gameType"), "")
+    if season_type != "R":
+        return {
+            "game": first_game,
+            "game_label": "",
+        }
+
+    best = ordered[0]
+    best_index = 1
+    for i in range(len(ordered)):
+        g = ordered[i]
+        if is_better_game(g, best):
+            best = g
+            best_index = i + 1
+
+    label = ""
+    if len(ordered) > 1:
+        label = "G" + str(best_index)
+
+    return {
+        "game": best,
+        "game_label": label,
+    }
 
 # ----------------------- Bases (right-top tile) -------------------------------
 def base_diamond(filled):
@@ -587,7 +779,7 @@ def tiny_arrow(top_half):
     rows = ["..w..", ".www.", "wwwww"] if top_half else ["wwwww", ".www.", "..w.."]
     return render.Box(width = 5, height = 3, child = sprite_palette(rows, {"w": "#ffffff"}))
 
-def count_tile(inning, top_half, balls, strikes, outs, status_text):
+def count_tile(inning, top_half, balls, strikes, outs, status_text, game_label):
     if status_text != "":
         status_child = render.Text(status_text, font = "6x10-rounded")
         if len(status_text) > 5:
@@ -625,12 +817,22 @@ def count_tile(inning, top_half, balls, strikes, outs, status_text):
             ),
         )
 
+    left_children = [spacer_h(4)]
+    if game_label != "":
+        left_children = [
+            spacer_h(1),
+            render.Row(
+                children = [render.Text(game_label, font = "CG-pixel-3x5-mono")],
+                main_align = "start",
+                cross_align = "center",
+            ),
+            spacer_h(1),
+        ]
     left_col = render.Box(
         width = 10,
         height = 16,
         child = render.Column(
-            children = [
-                spacer_h(4),
+            children = left_children + [
                 render.Row(
                     children = [
                         render.Column(
@@ -740,11 +942,30 @@ def left_panel(away, home, ascore, hscore, away_bg, home_bg, away_logo_url, home
         ),
     )
 
-def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final, is_preview, start_text):
+def game_label_tile(game_label):
+    if game_label == "":
+        return bases_tile(False, False, False)
+    return render.Box(
+        height = 16,
+        child = render.Column(
+            children = [
+                spacer_h(4),
+                render.Row(
+                    children = [render.Text(game_label, font = "CG-pixel-3x5-mono")],
+                    main_align = "center",
+                    cross_align = "center",
+                ),
+            ],
+            main_align = "start",
+            cross_align = "center",
+        ),
+    )
+
+def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final, is_preview, start_text, game_label):
     if is_final or is_preview:
         status_text = "Final" if is_final else start_text
-        top = bases_tile(False, False, False)
-        bot = count_tile(inning, top_half, balls, strikes, outs, status_text)
+        top = game_label_tile(game_label)
+        bot = count_tile(inning, top_half, balls, strikes, outs, status_text, "")
         return render.Box(
             width = 28,
             child = render.Column(
@@ -755,7 +976,7 @@ def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final,
         )
 
     top = bases_tile(on1, on2, on3)
-    bot = count_tile(inning, top_half, balls, strikes, outs, "")
+    bot = count_tile(inning, top_half, balls, strikes, outs, "", game_label)
     return render.Box(
         width = 29,
         child = render.Column(
@@ -769,6 +990,8 @@ def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final,
 def get_game_data(config):
     d = default_game()
     espn_teams = get_espn_team_map()
+    mlb_team_ids = get_mlb_team_ids()
+    include_exhibition_opponents = config.bool("include_exhibition_opponents", False)
 
     team_id = 111
     team_code = as_str(config.get("team"), "")
@@ -802,10 +1025,16 @@ def get_game_data(config):
     if type(day0) != "dict":
         return d
 
-    game = select_game(day0.get("games"))
+    game_info = select_game_info(day0.get("games"), include_exhibition_opponents, mlb_team_ids, team_code)
+    if type(game_info) != "dict":
+        return d
+
+    game = game_info.get("game")
     if type(game) != "dict":
         return d
+
     d["has_game"] = True
+    d["game_label"] = as_str(game_info.get("game_label"), "")
 
     status = game.get("status")
     if type(status) == "dict":
@@ -842,8 +1071,8 @@ def get_game_data(config):
             d["home"] = home_code
             d["away_mark"] = mark_for(away_code)
             d["home_mark"] = mark_for(home_code)
-            d["ascore"] = as_int(away_info.get("score"), d["ascore"])
-            d["hscore"] = as_int(home_info.get("score"), d["hscore"])
+            d["ascore"] = as_int(away_info.get("score"), 0)
+            d["hscore"] = as_int(home_info.get("score"), 0)
             d["away_bg"] = team_bg_for(away_code, away_color)
             d["home_bg"] = team_bg_for(home_code, home_color)
             d["away_logo_url"] = away_logo_url
@@ -851,8 +1080,8 @@ def get_game_data(config):
 
     linescore = game.get("linescore")
     if type(linescore) == "dict":
-        d["inning"] = as_text(linescore.get("currentInning"), d["inning"])
-        d["top"] = as_bool(linescore.get("isTopInning"), d["top"])
+        d["inning"] = as_text(linescore.get("currentInning"), 1)
+        d["top"] = as_bool(linescore.get("isTopInning"), True)
         d["balls"] = clamp(as_int(linescore.get("balls"), 0), 0, 3)
         d["strikes"] = clamp(as_int(linescore.get("strikes"), 0), 0, 2)
         d["outs"] = clamp(as_int(linescore.get("outs"), 0), 0, 2)
@@ -913,6 +1142,7 @@ def main(config):
                         d["is_final"],
                         d["is_preview"],
                         d["start_text"],
+                        d["game_label"],
                     ),
                 ],
                 main_align = "start",
@@ -938,6 +1168,13 @@ def get_schema():
                 name = "Show only on game day",
                 desc = "Hide app from rotation when no game is scheduled for selected team/date.",
                 icon = "calendar",
+                default = False,
+            ),
+            schema.Toggle(
+                id = "include_exhibition_opponents",
+                name = "Include non-MLB opponents",
+                desc = "Show exhibitions against international, national, or other non-MLB teams.",
+                icon = "gear",
                 default = False,
             ),
         ],

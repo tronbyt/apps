@@ -5,3 +5,10 @@ summary: Tram departures in Potsdam
 desc: Shows departures of public transportation service in Potsdam, Germany.
 author: ChaosKid42
 recommendedInterval: 5
+category: transit
+tags:
+  - public-transit
+  - tram
+  - pottsdam
+  - schedule
+  - utility

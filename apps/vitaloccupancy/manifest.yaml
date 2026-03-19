@@ -7,3 +7,10 @@ author: flip_z
 fileName: vital_occupancy.star
 packageName: vitaloccupancy
 recommendedInterval: 5
+category: utilities
+tags:
+  - gym
+  - fitness
+  - occupancy
+  - real-time
+  - utilities

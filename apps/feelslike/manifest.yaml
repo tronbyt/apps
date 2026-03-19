@@ -7,3 +7,10 @@ author: eanplatter
 fileName: feels_like.star
 packageName: feelslike
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - utility
+  - nature
+  - display
+  - art

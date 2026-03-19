@@ -7,3 +7,9 @@ author: tomzorz
 recommendedInterval: 5
 fileName: bkk_schedule.star
 packageName: bkkschedule
+category: utilities
+tags:
+  - transit
+  - bus
+  - schedule
+  - budapest

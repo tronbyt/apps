@@ -7,3 +7,9 @@ author: Austin Pearce
 fileName: fairfax_connector.star
 packageName: fairfaxconnector
 recommendedInterval: 5
+category: transit
+tags:
+  - bus
+  - transit
+  - public-transit
+  - stop-info

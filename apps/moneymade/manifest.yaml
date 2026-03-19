@@ -6,3 +6,9 @@ desc: Calculates how much you've madee today based on your paycheck.
 author: klar
 fileName: money_made.star
 packageName: moneymade
+category: finance
+tags:
+  - earnings
+  - paycheck
+  - finance
+  - productivity

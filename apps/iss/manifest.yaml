@@ -7,3 +7,10 @@ author: Diogo Ribeiro Machado @ diogodh
 fileName: iss.star
 packageName: iss
 recommendedInterval: 5
+category: utilities
+tags:
+  - space
+  - astronomy
+  - iss
+  - pass
+  - utility

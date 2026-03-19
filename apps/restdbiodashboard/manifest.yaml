@@ -7,3 +7,10 @@ author: romerod
 fileName: restdbiodashboard.star
 packageName: restdbiodashboard
 recommendedInterval: 5
+category: utilities
+tags:
+  - dashboard
+  - restdb
+  - utility
+  - data-display
+  - api

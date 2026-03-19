@@ -7,3 +7,9 @@ author: Daniel Sitnik
 recommendedInterval: 5
 fileName: product_hunt.star
 packageName: producthunt
+category: entertainment
+tags:
+  - tech
+  - product-hunt
+  - reviews
+  - startups

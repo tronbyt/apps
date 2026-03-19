@@ -7,3 +7,9 @@ author: Platt Thompson & Jim Cummings
 fileName: ac_film_showtimes.star
 packageName: acfilmshowtimes
 recommendedInterval: 5
+category: entertainment
+tags:
+  - movies
+  - showtimes
+  - cinema
+  - theaters

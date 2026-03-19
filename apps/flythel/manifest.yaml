@@ -7,3 +7,10 @@ author: Jake Manske
 fileName: flythel.star
 packageName: flythel
 recommendedInterval: 5
+category: sports
+tags:
+  - mlb
+  - sports
+  - scores
+  - live-updates
+  - team-tracking

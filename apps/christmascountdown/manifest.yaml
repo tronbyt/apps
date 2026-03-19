@@ -9,3 +9,11 @@ packageName: christmascountdown
 recommendedInterval: 60
 supports2x: true
 minPixletVersion: v0.49.0
+category: utilities
+tags:
+  - holiday
+  - tree
+  - countdown
+  - december
+  - fun
+  - wide 2x support

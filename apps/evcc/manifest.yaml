@@ -5,3 +5,10 @@ summary: EVCC metrics for your EV
 desc: EVCC is an energy management system with a focus on electromobility. This app to display the most essential data.
 author: cruschke
 recommendedInterval: 5
+category: utilities
+tags:
+  - ev
+  - energy
+  - smart-home
+  - utility
+  - home-assistant

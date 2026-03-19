@@ -7,3 +7,10 @@ author: Robert Ison
 fileName: accidentfreedays.star
 packageName: accidentfreedays
 recommendedInterval: 240
+category: utilities
+tags:
+  - safety
+  - utility
+  - accidents
+  - countdown
+  - driving

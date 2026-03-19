@@ -47,14 +47,18 @@ RAID_COLORS = {
     "Heroic": "#a335ee",
     "Mythic": "#ff8000",
 }
+RAID_LEVELS = {
+    "none": 0,
+    "Raid Finder": 1,
+    "Normal": 2,
+    "Heroic": 3,
+    "Mythic": 4,
+}
 
 DEFAULT_CHARACTER = "chinpokodin"
 DEFAULT_REALM = "firetree"
 DEFAULT_REGION = "us"
 DEFAULT_AUTH_TTL = 86399
-
-CURRENT_EXPANSION = "The War Within"
-CURRENT_INSTANCE = "Manaforge Omega"
 
 def main(config):
     character_name = config.get("character", DEFAULT_CHARACTER).lower()
@@ -360,31 +364,37 @@ def pad_hex(i):
         return i
 
 def get_raid_progress(progress):
-    status = "N/A raid"
-    raid_level = "none"
+    raid_level = RAID_LEVELS["none"]
+    completed = 0
+    total = 0
+    difficulty = ""
 
     if "expansions" in progress:
         for expansion in progress["expansions"]:
-            if expansion["expansion"]["name"] == CURRENT_EXPANSION:
+            if expansion["expansion"]["name"] == "Current Season":
                 for instance in expansion["instances"]:
-                    if instance["instance"]["name"] == CURRENT_INSTANCE:
-                        for mode in instance["modes"]:
-                            status = "%d/%d %s" % (
-                                mode["progress"]["completed_count"],
-                                mode["progress"]["total_count"],
-                                mode["difficulty"]["type"][:1],
-                            )
-                            raid_level = mode["difficulty"]["name"]
+                    if instance["modes"]:
+                        mode = instance["modes"][-1]
+                        total += mode["progress"]["total_count"]
+                        current_difficulty_level = RAID_LEVELS[mode["difficulty"]["name"]]
 
-    if raid_level != "none":
+                        if current_difficulty_level > raid_level:
+                            raid_level = current_difficulty_level
+                            difficulty = mode["difficulty"]["name"]
+                            completed = mode["progress"]["completed_count"]
+                        elif current_difficulty_level == raid_level:
+                            completed += mode["progress"]["completed_count"]
+
+    if difficulty != "":
+        status = "%d/%d %s" % (completed, total, difficulty[:1])
         return render.Text(
             content = status,
             font = "tom-thumb",
-            color = RAID_COLORS[raid_level],
+            color = RAID_COLORS[difficulty],
         )
     else:
         return render.Text(
-            content = status,
+            content = "N/A raid",
             font = "tom-thumb",
         )
 

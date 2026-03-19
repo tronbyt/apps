@@ -7,3 +7,8 @@ author: Nick Penree
 fileName: twitch.star
 packageName: twitch
 recommendedInterval: 5
+category: gaming
+tags:
+  - twitch
+  - live-streaming
+  - social

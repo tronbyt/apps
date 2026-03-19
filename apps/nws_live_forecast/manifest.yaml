@@ -7,3 +7,10 @@ author: czarandy
 fileName: nws_live_forecast.star
 packageName: nws_live_forecast
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - forecast
+  - nws
+  - live
+  - temperature

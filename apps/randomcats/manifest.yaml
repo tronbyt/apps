@@ -8,3 +8,11 @@ fileName: random_cats.star
 packageName: randomcats
 recommendedInterval: 5
 supports2x: true
+category: entertainment
+tags:
+  - animals
+  - fun
+  - cat
+  - gifs
+  - random
+  - wide 2x support
