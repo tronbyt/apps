@@ -2,6 +2,6 @@
 id: passover
 name: PassoverCountdown
 summary: Passover Countdown / In Progress
-desc: track days until Passover show current when it is in progress.
+desc: Track days until Passover show current when it is in progress.
 author: jvivona
 recommendedInterval: 5
