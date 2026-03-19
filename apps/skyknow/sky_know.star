@@ -1,7 +1,12 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/icon_rain_heavy.png", ICON_RAIN_HEAVY_ASSET = "file")
+load("images/icon_rain_light.png", ICON_RAIN_LIGHT_ASSET = "file")
+load("images/icon_rain_medium.png", ICON_RAIN_MEDIUM_ASSET = "file")
+load("images/icon_snow_heavy.png", ICON_SNOW_HEAVY_ASSET = "file")
+load("images/icon_snow_light.png", ICON_SNOW_LIGHT_ASSET = "file")
+load("images/icon_snow_medium.png", ICON_SNOW_MEDIUM_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -75,19 +80,13 @@ INTERVAL_OPTIONS = {
     "168": 7,
 }
 
-# ─── Pixel art icons (8x8 base64-encoded PNGs) ───
-
-ICON_SNOW_LIGHT = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGklEQVR4nGNgQAL/gYABF/iPBPAqwik5mAEA2w4T7X2e/9EAAAAASUVORK5CYII="""
-
-ICON_SNOW_MEDIUM = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJklEQVR4nGNgQAL/gYABF/iPBPAqwimJF6DrROGj243VLXhNIAQAAqw7xYlDpPsAAAAASUVORK5CYII="""
-
-ICON_SNOW_HEAVY = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKklEQVR4nGNggIJp06b9R8YMyABdEkURLkmsJuEE/4GAEBu7AC5BkhQCAMFiUXPU/Pu7AAAAAElFTkSuQmCC"""
-
-ICON_RAIN_LIGHT = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAIklEQVR4nGNgQAIpq/7/Z8AFQJIuHf//41REUAFBKwYQAACc3Bfd0qQO/gAAAABJRU5ErkJggg=="""
-
-ICON_RAIN_MEDIUM = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJUlEQVR4nGNgQAIuHf//M+ACIEkYxqmIaIBiCrqRGFZRz15cAABYzx6vpJUFKQAAAABJRU5ErkJggg=="""
-
-ICON_RAIN_HEAVY = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKUlEQVR4nGNggIJp06b9R8YMyABdEkURLkmsJuEELh3//2OjiVdAkSkApxZTC1LzE2gAAAAASUVORK5CYII="""
+# ─── Pixel art icons (8x8 PNGs) ───
+ICON_SNOW_LIGHT = ICON_SNOW_LIGHT_ASSET.readall()
+ICON_SNOW_MEDIUM = ICON_SNOW_MEDIUM_ASSET.readall()
+ICON_SNOW_HEAVY = ICON_SNOW_HEAVY_ASSET.readall()
+ICON_RAIN_LIGHT = ICON_RAIN_LIGHT_ASSET.readall()
+ICON_RAIN_MEDIUM = ICON_RAIN_MEDIUM_ASSET.readall()
+ICON_RAIN_HEAVY = ICON_RAIN_HEAVY_ASSET.readall()
 
 # ─── Frog sprite (13x11 pixels) for All Clear screen ───
 
@@ -164,8 +163,9 @@ def main(config):
         return render_no_location()
 
     # Parse forecast interval
-    interval_hours = int(config.get("interval", "48"))
-    forecast_days = INTERVAL_OPTIONS.get(str(interval_hours), 2)
+    interval_str = config.get("interval", "48")
+    interval_hours = int(interval_str)
+    forecast_days = INTERVAL_OPTIONS.get(interval_str, 2)
 
     forecast = get_forecast(lat, lng, tz, forecast_days)
     if not forecast:
@@ -612,7 +612,7 @@ def render_event_text(event):
                 main_align = "center",
                 cross_align = "center",
                 children = [
-                    render.Image(src = base64.decode(icon), width = 8, height = 8),
+                    render.Image(src = icon, width = 8, height = 8),
                     render.Box(width = 2, height = 1),
                     render.Text("%s %s" % (label, duration), color = header_color, font = "tom-thumb"),
                 ],
@@ -829,23 +829,6 @@ def format_day_label(start_str, end_str, duration):
     else:
         # 2+ days out, use day abbreviation
         return start.format("Mon")
-
-def format_time_window(start_str, end_str):
-    start_parts = start_str.split("T")
-    end_parts = end_str.split("T")
-
-    start_date = start_parts[0]
-    start_hour = int(start_parts[1].split(":")[0])
-    end_date = end_parts[0]
-    end_hour = int(end_parts[1].split(":")[0])
-
-    start_day = get_day_abbr(start_date)
-    end_day = get_day_abbr(end_date)
-
-    start_fmt = "%s %s" % (start_day, format_hour(start_hour))
-    end_fmt = "%s %s" % (end_day, format_hour(end_hour))
-
-    return "%s-%s" % (start_fmt, end_fmt)
 
 def format_hour(h):
     if h == 0:
