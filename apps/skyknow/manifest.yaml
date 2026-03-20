@@ -1,0 +1,15 @@
+---
+id: sky-know
+name: SkyKnow
+summary: Rain & snow alert display
+desc: Monitors weather forecasts and displays alerts for incoming rain or snow with estimated timing, probability, and accumulation. Scrolls through multiple events chronologically.
+author: wurtz
+fileName: sky_know.star
+packageName: skyknow
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - precipitation
+  - snow
+  - rain
