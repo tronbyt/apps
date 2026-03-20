@@ -23,6 +23,9 @@ Using different API lookup to check race calendar. This is to see how long since
 Back to one API lookup now
 Added handling for when not all 20 drivers start the race, eg Stroll in Spain 2025
 Removed hard coding of Perez's name, not a driver anymore
+
+1.6
+Updated for 2026 season
 """
 
 load("encoding/json.star", "json")
@@ -30,6 +33,8 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+DEFAULT_TIMEZONE = "Australia/Adelaide"
 
 # Alternate URL thanks to @jvivona for the hosting :)
 F1_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/refs/heads/main/formula1/"
@@ -49,21 +54,21 @@ def main(config):
     MyRaceTime = ""
 
     timezone = time.tz()
-    now = time.now().in_location(timezone)
+    now = time.now()
     Year = now.format("2006")
 
     RACELIST_URL = F1_URL + "races.json"
     GetLast = get_cachable_data(RACELIST_URL, 86400)
     F1_LAST_JSON = json.decode(GetLast)
+    TotalRaces = len(F1_LAST_JSON["MRData"]["RaceTable"]["Races"])
 
     # iterate through the race calendar
-    for x in range(0, len(F1_LAST_JSON["MRData"]["RaceTable"]["Races"]), 1):
+    for x in range(0, TotalRaces, 1):
         LocalRaceDate = F1_LAST_JSON["MRData"]["RaceTable"]["Races"][x]["date"]
         LocalRaceTime = F1_LAST_JSON["MRData"]["RaceTable"]["Races"][x]["time"]
         RaceDate_Time = LocalRaceDate + " " + LocalRaceTime
         FormatRTime = time.parse_time(RaceDate_Time, format = "2006-01-02 15:04:00Z").in_location(timezone)
         RTimeDiff = FormatRTime - now
-        #print(RTimeDiff.hours)
 
         # if we're more than 2hrs but less than 48hrs after the last race start get the race results, and break
         # or if time next race is more than 0hrs, lets look ahead, and break when we find something
@@ -174,7 +179,7 @@ def main(config):
     if Session == "R":
         if ShowGap == True:
             if ShowGrid == True:
-                for z in range(0, 20, 4):
+                for z in range(0, 22, 4):
                     renderCategory.extend([
                         render.Column(
                             expanded = True,
@@ -198,7 +203,7 @@ def main(config):
                         ),
                     ])
             elif ShowGrid == False:
-                for z in range(0, 20, 4):
+                for z in range(0, 22, 4):
                     renderCategory.extend([
                         render.Column(
                             expanded = True,
@@ -214,7 +219,7 @@ def main(config):
 
         elif ShowGap == False:
             if ShowGrid == True:
-                for z in range(0, 20, 4):
+                for z in range(0, 22, 4):
                     renderCategory.extend([
                         render.Column(
                             expanded = True,
@@ -228,7 +233,7 @@ def main(config):
                         ),
                     ])
             elif ShowGrid == False:
-                for z in range(0, 20, 4):
+                for z in range(0, 22, 4):
                     renderCategory.extend([
                         render.Column(
                             expanded = True,
@@ -243,7 +248,7 @@ def main(config):
                     ])
 
     if Session == "Q":
-        for z in range(0, 20, 4):
+        for z in range(0, 22, 4):
             renderCategory.extend([
                 render.Column(
                     expanded = True,
@@ -305,16 +310,18 @@ def getDriver(z, F1_JSON, Session):
     output.extend(TitleRow)
 
     for i in range(0, 4):
-        if i + z < len(F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"]):
+        if i + z < len(F1_JSON["MRData"]["RaceTable"]["Races"][0][SessionCode]):
             DriverFont = "#fff"
             Pos = F1_JSON["MRData"]["RaceTable"]["Races"][0][SessionCode][i + z]["position"]
+            DriverID = F1_JSON["MRData"]["RaceTable"]["Races"][0][SessionCode][i + z]["Driver"]["driverId"]
 
-            Driver = F1_JSON["MRData"]["RaceTable"]["Races"][0][SessionCode][i + z]["Driver"]["familyName"]
+            if DriverID == "perez":
+                Driver = "Perez"
+            elif DriverID == "hulkenberg":
+                Driver = "Hulkenberg"
+            else:
+                Driver = F1_JSON["MRData"]["RaceTable"]["Races"][0][SessionCode][i + z]["Driver"]["familyName"]
             ConstructorID = F1_JSON["MRData"]["RaceTable"]["Races"][0][SessionCode][i + z]["Constructor"]["constructorId"]
-
-            # If its a Haas, use black color
-            if ConstructorID == "haas" or ConstructorID == "sauber":
-                DriverFont = "#000"
 
             TeamColor = Team_Color(ConstructorID)
 
@@ -371,7 +378,7 @@ def getDriverGaps(z, F1_JSON, Session):
     output.extend(TitleRow)
 
     for i in range(0, 4):
-        if i + z < 20:
+        if i + z < 22:
             DriverFont = "#fff"
             Pos = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["position"]
             DriverCode = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["Driver"]["code"]
@@ -382,6 +389,10 @@ def getDriverGaps(z, F1_JSON, Session):
                     Time = "DNF"
                 elif F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["positionText"] == "D":
                     Time = "DQ"
+                elif F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["positionText"] == "W":
+                    Time = "DNS"
+                elif F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["status"] == "Lapped":
+                    Time = "LAP"
                 else:
                     Time = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["status"]
                     Time = Time[:4]
@@ -396,10 +407,6 @@ def getDriverGaps(z, F1_JSON, Session):
             if i + z == 0:
                 Time = ""
             ConstructorID = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["Constructor"]["constructorId"]
-
-            # If its a Haas, use black color
-            if ConstructorID == "haas":
-                DriverFont = "#000"
 
             TeamColor = Team_Color(ConstructorID)
 
@@ -471,7 +478,7 @@ def getDriverGrid(z, F1_JSON, Session):
     output.extend(TitleRow)
 
     for i in range(0, 4):
-        if i + z < 20:
+        if i + z < 22:
             DriverFont = "#fff"
             Pos = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["position"]
             DriverCode = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["Driver"]["code"]
@@ -488,10 +495,6 @@ def getDriverGrid(z, F1_JSON, Session):
                 PosDiffStr = "-"
 
             ConstructorID = F1_JSON["MRData"]["RaceTable"]["Races"][0]["Results"][i + z]["Constructor"]["constructorId"]
-
-            # If its a Haas, use black color
-            if ConstructorID == "haas":
-                DriverFont = "#000"
 
             TeamColor = Team_Color(ConstructorID)
 
@@ -556,16 +559,18 @@ def Team_Color(ConstructorID):
         return ("#0f1c2c")
     if ConstructorID == "mclaren":
         return ("#fd8000")
-    if ConstructorID == "sauber":
-        return ("#00df00")
+    if ConstructorID == "audi":
+        return ("#901900")
     if ConstructorID == "aston_martin":
         return ("#015850")
     if ConstructorID == "haas":
-        return ("#f7f7f7")
+        return ("#818b8e")
     if ConstructorID == "rb":
         return ("#022948")
     if ConstructorID == "williams":
         return ("#041e41")
+    if ConstructorID == "cadillac":
+        return ("#4a4a4c")
     else:
         return ("#fff")
 
