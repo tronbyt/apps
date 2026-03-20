@@ -157,19 +157,23 @@ def get_team_ranking(team_number, event_key, tba_api_key):
         team_ranking_error = MSG_TEAM_RANKING_ERROR % team_number
         fail("%s - Status code: %s" % (team_ranking_error, team_ranking_resp.status_code))
 
-    # Parse the team ranking data
+    # Parse the team ranking data using intermediate variables.
     # TBA returns qual/ranking/rank as nested objects, but any level can be
     # None (not just missing) when the event hasn't started matches yet.
     ranking_data = team_ranking_resp.json()
-    if "qual" not in ranking_data or ranking_data["qual"] == None:
+    qual_data = ranking_data.get("qual")
+    if not qual_data:
         return -1, 999
-    if "ranking" not in ranking_data["qual"] or ranking_data["qual"]["ranking"] == None:
-        return -1, 999
-    if "rank" not in ranking_data["qual"]["ranking"] or ranking_data["qual"]["ranking"]["rank"] == None:
-        return -1, 999
-    team_ranking = ranking_data["qual"]["ranking"]["rank"]
-    total_teams = ranking_data["qual"]["num_teams"]
 
+    ranking_info = qual_data.get("ranking")
+    if not ranking_info:
+        return -1, 999
+
+    team_ranking = ranking_info.get("rank")
+    if team_ranking == None:
+        return -1, 999
+
+    total_teams = ranking_info.get("num_teams", 999)
     return team_ranking, total_teams
 
 def build_avatar_url(team_number):
