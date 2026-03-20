@@ -39,8 +39,10 @@ Below is the dictionary the applet uses when displaying the current moon phase a
 | VIR          | Virgo       |
 
 ## Version history
+**Version 1.2** 
+- Fixed moon phase and sign calculations on major moon phase days
 
-**Version 1.1.1** *(Current)*
+**Version 1.1.1**
 - Fixed long words being cut off by hyphenating them at their final syllable
 - Fixed certain apostrophes not showing in horoscope text
 

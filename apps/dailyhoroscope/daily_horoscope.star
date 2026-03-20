@@ -4,7 +4,7 @@ Summary: See your daily horoscope
 Description: Displays the daily horoscope for a specific sign from USA Today.
 Author: frame-shift
 
-Version 1.1.1
+Version 1.2
 """
 
 load("encoding/json.star", "json")
@@ -31,6 +31,7 @@ load("images/waning_crescent.webp", WANING_CRESCENT_ICON_ASSET = "file")
 load("images/waning_gibbous.webp", WANING_GIBBOUS_ICON_ASSET = "file")
 load("images/waxing_crescent.webp", WAXING_CRESCENT_ICON_ASSET = "file")
 load("images/waxing_gibbous.webp", WAXING_GIBBOUS_ICON_ASSET = "file")
+load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -365,13 +366,214 @@ def get_moon_info(date):
     raw_phase = moon_html.find("table").eq(0).find("td").eq(5).text().strip().lower()  # moon phase e.g. 'waxing gibbous'
     raw_sign = moon_html.find("table").eq(0).find("td").eq(6).text().strip().lower()  # moon sign e.g. 'libra'
 
-    # Remove superfluous time string if phase is New Moon / Full Moon
+    # When "at " is present, astro-seek sign is for the event moment, *not* the calendar day like it should be
+    has_event_time = re.findall(r"at\s", raw_phase)
+
+    # Remove superfluous time string
     edit_phase = re.sub(r"at.*", "", raw_phase)
 
     moon_phase = MPHASES[edit_phase]
-    moon_sign = MSIGNS[raw_sign]
+
+    if has_event_time:
+        # Parse the event time (astro-seek uses UT/GMT) and compare to
+        # noon UTC to determine actual phase at the reference time
+        noon_utc = time.parse_time(
+            date.format("2006-01-02") + "T12:00:00Z",
+            format = "2006-01-02T15:04:05Z",
+        )
+
+        # Extract "HH:MM" from e.g. "new moon at 01:23"
+        event_hm = re.findall(r"\d+:\d+", raw_phase)
+        if event_hm:
+            event_time = time.parse_time(
+                date.format("2006-01-02") + "T" + event_hm[0] + ":00Z",
+                format = "2006-01-02T15:04:05Z",
+            )
+            noon_after_event = noon_utc.unix > event_time.unix
+        else:
+            # If cannot parse time, then assume event already passed by noon
+            noon_after_event = True
+
+        # The minor phase that follows or precedes each major phase event
+        phase_after = {
+            "new moon": "waxing crescent",
+            "first quarter": "waxing gibbous",
+            "full moon": "waning gibbous",
+            "last quarter": "waning crescent",
+        }
+        phase_before = {
+            "new moon": "waning crescent",
+            "first quarter": "waxing crescent",
+            "full moon": "waxing gibbous",
+            "last quarter": "waning gibbous",
+        }
+
+        if noon_after_event:
+            moon_phase = MPHASES[phase_after.get(edit_phase, edit_phase)]
+        else:
+            moon_phase = MPHASES[phase_before.get(edit_phase, edit_phase)]
+
+        moon_sign = MSIGNS[_meeus_moon_sign(noon_utc)]
+    else:
+        moon_sign = MSIGNS[raw_sign]
 
     return moon_phase, moon_sign
+
+# --- Helpers that use Meeus lunar longitude algorithms (Ch 47) ---
+_DEG2RAD = math.pi / 180.0
+
+_ZODIAC_SIGNS = [
+    "aries",
+    "taurus",
+    "gemini",
+    "cancer",
+    "leo",
+    "virgo",
+    "libra",
+    "scorpio",
+    "sagittarius",
+    "capricorn",
+    "aquarius",
+    "pisces",
+]
+
+# Periodic terms for the moon longitude (Sigma-l) (Meeus Table 47.A)
+# Each row: [D, M, M', F, coefficient (millionths of a degree)]
+_MOON_LON_TERMS = [
+    [0, 0, 1, 0, 6288774],
+    [2, 0, -1, 0, 1274027],
+    [2, 0, 0, 0, 658314],
+    [0, 0, 2, 0, 213618],
+    [0, 1, 0, 0, -185116],
+    [0, 0, 0, 2, -114332],
+    [2, 0, -2, 0, 58793],
+    [2, -1, -1, 0, 57066],
+    [2, 0, 1, 0, 53322],
+    [2, -1, 0, 0, 45758],
+    [0, 1, -1, 0, -40923],
+    [1, 0, 0, 0, -34720],
+    [0, 1, 1, 0, -30383],
+    [2, 0, 0, -2, 15327],
+    [0, 0, 1, 2, -12528],
+    [0, 0, 1, -2, 10980],
+    [4, 0, -1, 0, 10675],
+    [0, 0, 3, 0, 10034],
+    [4, 0, -2, 0, 8548],
+    [2, 1, -1, 0, -7888],
+    [2, 1, 0, 0, -6766],
+    [1, 0, -1, 0, -5163],
+    [1, 1, 0, 0, 4987],
+    [2, -1, 1, 0, 4036],
+    [2, 0, 2, 0, 3994],
+    [4, 0, 0, 0, 3861],
+    [2, 0, -3, 0, 3665],
+    [0, 1, -2, 0, -2689],
+    [2, 0, -1, 2, -2602],
+    [2, -1, -2, 0, 2390],
+    [1, 0, 1, 0, -2348],
+    [2, -2, 0, 0, 2236],
+    [0, 1, 2, 0, -2120],
+    [0, 2, 0, 0, -2069],
+    [2, -2, -1, 0, 2048],
+    [2, 0, 1, -2, -1773],
+    [2, 0, 0, 2, -1595],
+    [4, -1, -1, 0, 1215],
+    [0, 0, 2, 2, -1110],
+    [3, 0, -1, 0, -892],
+    [2, 1, 1, 0, -810],
+    [4, -1, -2, 0, 759],
+    [0, 2, -1, 0, -713],
+    [2, 2, -1, 0, -700],
+    [2, 1, -2, 0, 691],
+    [2, -1, 0, -2, 596],
+    [4, 0, 1, 0, 549],
+    [0, 0, 4, 0, 537],
+    [4, -1, 0, 0, 520],
+    [1, 0, -2, 0, -487],
+    [2, 1, 0, -2, -399],
+    [0, 0, 2, -2, -381],
+    [1, 1, 1, 0, 351],
+    [3, 0, -2, 0, -340],
+    [4, 0, -3, 0, 330],
+    [2, -1, 2, 0, 327],
+    [0, 2, 1, 0, -323],
+    [1, 1, -1, 0, 299],
+    [2, 0, 3, 0, 294],
+]
+
+def _normalize_deg(d):
+    # Reduce an angle to [0, 360)
+    d = d % 360.0
+    if d < 0:
+        d = d + 360.0
+    return d
+
+def _julian_day(year, month, day, hour, minute, second):
+    # Compute Julian Day Number from Gregorian calendar date (Meeus Ch 7)
+    y = year
+    m = month
+    if m <= 2:
+        y = y - 1
+        m = m + 12
+    a = int(y // 100)
+    b = 2 - a + int(a // 4)
+    day_frac = day + (hour + minute / 60.0 + second / 3600.0) / 24.0
+    return int(365.25 * (y + 4716)) + int(30.6001 * (m + 1)) + day_frac + b - 1524.5
+
+def _meeus_moon_sign(t):
+    # Return zodiac sign moon is in at time t (Meeus Ch 47)
+    year = int(t.format("2006"))
+    month = int(t.format("1"))
+    day = int(t.format("2"))
+    hour = int(t.format("15"))
+    minute = int(t.format("4"))
+    second = int(t.format("5"))
+
+    jd = _julian_day(year, month, day, hour, minute, second)
+    T = (jd - 2451545.0) / 36525.0
+    T2 = T * T
+    T3 = T2 * T
+    T4 = T3 * T
+
+    LP = _normalize_deg(218.3164477 + 481267.88123421 * T - 0.0015786 * T2 + T3 / 538841.0 - T4 / 65194000.0)
+    D = _normalize_deg(297.8501921 + 445267.1114034 * T - 0.0018819 * T2 + T3 / 545868.0 - T4 / 113065000.0)
+    M = _normalize_deg(357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000.0)
+    MP = _normalize_deg(134.9633964 + 477198.8675055 * T + 0.0087414 * T2 + T3 / 69699.0 - T4 / 14712000.0)
+    F = _normalize_deg(93.2720950 + 483202.0175233 * T - 0.0036539 * T2 - T3 / 3526000.0 + T4 / 863310000.0)
+
+    A1 = _normalize_deg(119.75 + 131.849 * T)
+    A2 = _normalize_deg(53.09 + 479264.290 * T)
+
+    E = 1.0 - 0.002516 * T - 0.0000074 * T2
+    E2 = E * E
+
+    sigma_l = 0.0
+    for row in _MOON_LON_TERMS:
+        d_c = row[0]
+        m_c = row[1]
+        mp_c = row[2]
+        f_c = row[3]
+        coeff = row[4]
+        arg = (d_c * D + m_c * M + mp_c * MP + f_c * F) * _DEG2RAD
+        term = coeff * math.sin(arg)
+        m_abs = m_c
+        if m_abs < 0:
+            m_abs = -m_abs
+        if m_abs == 1:
+            term = term * E
+        elif m_abs == 2:
+            term = term * E2
+        sigma_l = sigma_l + term
+
+    sigma_l = sigma_l + 3958.0 * math.sin(A1 * _DEG2RAD)
+    sigma_l = sigma_l + 1962.0 * math.sin((LP - F) * _DEG2RAD)
+    sigma_l = sigma_l + 318.0 * math.sin(A2 * _DEG2RAD)
+
+    lon = _normalize_deg(LP + sigma_l / 1000000.0)
+    sign_index = int(lon / 30.0)
+    if sign_index > 11:
+        sign_index = 0
+    return _ZODIAC_SIGNS[sign_index]
 
 def get_schema():
     # Options menu
