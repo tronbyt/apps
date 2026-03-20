@@ -158,12 +158,14 @@ def get_team_ranking(team_number, event_key, tba_api_key):
         fail("%s - Status code: %s" % (team_ranking_error, team_ranking_resp.status_code))
 
     # Parse the team ranking data
+    # TBA returns qual/ranking/rank as nested objects, but any level can be
+    # None (not just missing) when the event hasn't started matches yet.
     ranking_data = team_ranking_resp.json()
-    if "qual" not in ranking_data:
+    if "qual" not in ranking_data or ranking_data["qual"] == None:
         return -1, 999
-    if "ranking" not in ranking_data["qual"]:
+    if "ranking" not in ranking_data["qual"] or ranking_data["qual"]["ranking"] == None:
         return -1, 999
-    if "rank" not in ranking_data["qual"]["ranking"]:
+    if "rank" not in ranking_data["qual"]["ranking"] or ranking_data["qual"]["ranking"]["rank"] == None:
         return -1, 999
     team_ranking = ranking_data["qual"]["ranking"]["rank"]
     total_teams = ranking_data["qual"]["num_teams"]
