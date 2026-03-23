@@ -14,8 +14,10 @@ load("time.star", "time")
 
 DEFAULT_REPO = "Tronbyt/apps"
 DEFAULT_BRANCH = "main"
-MAX_COMMITS = 5
-MAX_ITEMS = 4
+MAX_COMMITS = 20
+MAX_ITEMS = 6
+
+TRONBYT_PALLETTE = ["#00FFFF", "#FFAA00", "#00FF00", "#0000FF", "#FFFF00", "#FF0000"]
 
 CACHE_TTL_UNAUTHENTICATED = 28800  # 8 hours
 CACHE_TTL_AUTHENTICATED = 3600  # 60 minutes
@@ -223,6 +225,13 @@ def get_schema():
                 icon = "key",
                 secret = True,
             ),
+            schema.Toggle(
+                id = "hide_on_error",
+                name = "Hide if no updates or errors.",
+                desc = "Don't show the app if no recent updates are found or if there are errors.",
+                icon = "eye",
+                default = True,
+            ),
             schema.Dropdown(
                 id = "scroll",
                 name = "Scroll",
@@ -245,8 +254,35 @@ def _get_delay(config, is_double_size):
     delay = int(config.get("scroll", 45))
     return int(delay / 2) if is_double_size else delay
 
+def display_error(config, msg):
+    """Displays a formatted error message to the screen."""
+    delay = _get_delay(config, canvas.is2x())
+
+    # Use a smaller font if the message is long to ensure it fits/scrolls well
+    font = "CG-pixel-3x5-mono" if len(msg) > 20 else "5x8"
+    if canvas.is2x():
+        font = "terminus-14"
+
+    return render.Root(
+        delay = delay,
+        child = render.Column(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                render.Text("ERROR", color = "#FF0000", font = "tb-8"),
+                render.Marquee(
+                    width = canvas.width(),
+                    child = render.Text(content = msg, color = "#FFAA00", font = font),
+                ),
+            ],
+        ),
+    )
+
 def main(config):
     show_instructions = config.bool("instructions", False)
+    hide_on_error = config.bool("hide_on_error", True)
+
     if show_instructions:
         return display_instructions(config, canvas.is2x())
 
@@ -272,18 +308,25 @@ def main(config):
     )
 
     if not items:
-        return []
+        if hide_on_error:
+            return []
+        else:
+            display_msg = "No recent updates found." if not github_token else "No recent updates or error fetching data."
+            return display_error(config, display_msg)
     else:
         # Pick random index instead
         random.seed(int(time.now().unix))
         random_index = int(random.number(0, len(items) - 1))
         selected_item = items[random_index]
-
-        # Get other app names (comma delimited with "and")
+        selected_name = selected_item["app_name"]
         other_app_names = []
-        for idx, item in enumerate(items):
-            if idx != random_index:
-                other_app_names.append(item["app_name"])
+
+        for item in items:
+            name = item["app_name"]
+
+            # Check if it's the main app OR if we've already added it to the 'also updated' list
+            if name != selected_name and name not in other_app_names:
+                other_app_names.append(name)
 
         # Fancy comma list with "and"
         if len(other_app_names) == 0:
@@ -301,8 +344,8 @@ def main(config):
         if canvas.is2x():
             small_font = "terminus-16"
             large_font = "terminus-18"
-            small_font_width = 16
-            large_font_width = 18
+            small_font_width = 8
+            large_font_width = 9
 
         else:
             small_font = "5x8"
@@ -312,17 +355,22 @@ def main(config):
 
         row1 = "{} by {}".format(selected_item["app_name"], selected_item["author"])
         row2 = "{} - Changes: {}".format(selected_item["app_description"], selected_item["change"])
-        row3 = "Also updated: {}".format(other_list_text)
-
         row2_offset = large_font_width * len(row1) // 2
-        row3_offset = row2_offset + ((small_font_width * len(row2)) // 2)
+
+        render_children = [
+            render.Marquee(render.Text(row1, font = large_font, color = TRONBYT_PALLETTE[0]), width = screen_width),
+            render.Marquee(render.Text(row2, font = small_font, color = TRONBYT_PALLETTE[1]), width = screen_width, offset_start = row2_offset),
+        ]
+
+        if other_list_text:
+            row3 = "Also updated: {}".format(other_list_text)
+            row3_offset = row2_offset + ((small_font_width * len(row2)) // 2)
+            render_children.append(
+                render.Marquee(render.Text(row3, font = small_font, color = TRONBYT_PALLETTE[2]), width = screen_width, offset_start = row3_offset),
+            )
 
         body = render.Column(
-            children = [
-                render.Marquee(render.Text(row1, font = large_font, color = "#00FFFF"), width = screen_width),
-                render.Marquee(render.Text(row2, font = small_font, color = "#FFAA00"), width = screen_width, offset_start = row2_offset),
-                render.Marquee(render.Text(row3, font = small_font, color = "#00FF00"), width = screen_width, offset_start = row3_offset),
-            ],
+            children = render_children,
         )
 
     delay = _get_delay(config, canvas.is2x())
