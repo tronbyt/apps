@@ -17,7 +17,7 @@ DEFAULT_BRANCH = "main"
 MAX_COMMITS = 20
 MAX_ITEMS = 6
 
-TRONBYT_PALLETTE = ["#00FFFF", "#FFAA00", "#00FF00", "#0000FF", "#FFFF00", "#FF0000"]
+TRONBYT_PALETTE = ["#00FFFF", "#FFAA00", "#00FF00", "#0000FF", "#FFFF00", "#FF0000"]
 
 CACHE_TTL_UNAUTHENTICATED = 28800  # 8 hours
 CACHE_TTL_AUTHENTICATED = 3600  # 60 minutes
@@ -270,10 +270,10 @@ def display_error(config, msg):
             main_align = "center",
             cross_align = "center",
             children = [
-                render.Text("ERROR", color = "#FF0000", font = "tb-8"),
+                render.Text("ERROR", color = TRONBYT_PALETTE[5], font = "tb-8"),
                 render.Marquee(
                     width = canvas.width(),
-                    child = render.Text(content = msg, color = "#FFAA00", font = font),
+                    child = render.Text(content = msg, color = TRONBYT_PALETTE[1], font = font),
                 ),
             ],
         ),
@@ -358,15 +358,15 @@ def main(config):
         row2_offset = large_font_width * len(row1) // 2
 
         render_children = [
-            render.Marquee(render.Text(row1, font = large_font, color = TRONBYT_PALLETTE[0]), width = screen_width),
-            render.Marquee(render.Text(row2, font = small_font, color = TRONBYT_PALLETTE[1]), width = screen_width, offset_start = row2_offset),
+            render.Marquee(render.Text(row1, font = large_font, color = TRONBYT_PALETTE[0]), width = screen_width),
+            render.Marquee(render.Text(row2, font = small_font, color = TRONBYT_PALETTE[1]), width = screen_width, offset_start = row2_offset),
         ]
 
         if other_list_text:
             row3 = "Also updated: {}".format(other_list_text)
             row3_offset = row2_offset + ((small_font_width * len(row2)) // 2)
             render_children.append(
-                render.Marquee(render.Text(row3, font = small_font, color = TRONBYT_PALLETTE[2]), width = screen_width, offset_start = row3_offset),
+                render.Marquee(render.Text(row3, font = small_font, color = TRONBYT_PALETTE[2]), width = screen_width, offset_start = row3_offset),
             )
 
         body = render.Column(
