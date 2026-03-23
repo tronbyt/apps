@@ -52,7 +52,7 @@ def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time
     "name": "{{ states('%s') | default('Printer') }}",
     "progress": "{{ states('%s') | default('0') }}",
     "remaining_time": "{{ states('%s') | default('0') }}",
-    "end_time": "{{ states('%s') | default('0') }}",
+    "end_time": "{{ as_timestamp(states('%s'), 0) }}",
     "status": "{{ states('%s') | default('Unknown') }}"
 }
 """ % (
@@ -242,36 +242,49 @@ def main(config):
         print("Printer is offline, skipping render")
 
     # Check end_time using Starlark's time.parse_time and duration
-    if not skip_render and end_time != None and str(end_time) != "":
-        # Convert 'YYYY-MM-DD HH:MM:SS' to ISO 8601 'YYYY-MM-DDTHH:MM:SSZ'
+    if not skip_render and end_time != None and str(end_time) != "" and str(end_time) != "0" and str(end_time) != "0.0":
         end_time_str = str(end_time)
         if end_time_str == C_DEFAULT_END_TIME or end_time_str.strip() == "":
-            skip_render = True
-            print("Invalid end_time, skipping render")
+            pass  # Ignore default end time
         else:
-            # Replace space with 'T' if not present
-            if "T" not in end_time_str:
-                end_time_str = end_time_str.replace(" ", "T")
+            end_dt = None
 
-            # Accept both with and without 'Z' at the end
-            valid_iso = len(end_time_str) == 19 and end_time_str[10] == "T"
-            valid_iso_z = len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z")
-            if valid_iso:
-                # Add 'Z' for parsing if not present
-                end_time_str_z = end_time_str + "Z"
-            elif valid_iso_z:
-                end_time_str_z = end_time_str
-            else:
-                skip_render = True
-                print("Failed to parse end_time, skipping render")
-                end_time_str_z = None
-            if not skip_render and end_time_str_z:
-                end_dt = time.parse_time(end_time_str_z)
+            # Try parsing as timestamp first (returned by as_timestamp in templated HA request)
+            if end_time_str.replace(".", "", 1).isdigit():
+                ts = int(float(end_time_str))
+                if ts > 0:
+                    end_dt = time.from_timestamp(ts)
+
+            # Fallback to ISO string parsing if not a numeric timestamp
+            if not end_dt:
+                # Replace space with 'T' if not present
+                if "T" not in end_time_str:
+                    end_time_str = end_time_str.replace(" ", "T")
+
+                # Accept both with and without 'Z' at the end
+                valid_iso = len(end_time_str) == 19 and end_time_str[10] == "T"
+                valid_iso_z = len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z")
+
+                if valid_iso:
+                    # Add 'Z' for parsing if not present
+                    end_time_str_z = end_time_str + "Z"
+                    end_dt = time.parse_time(end_time_str_z)
+                elif valid_iso_z:
+                    end_time_str_z = end_time_str
+                    end_dt = time.parse_time(end_time_str_z)
+
+            if end_dt:
                 now_dt = time.now()
                 diff = end_dt - now_dt
-                if diff.seconds < -max_print_age_seconds:
+
+                # Only skip if the print is NOT running and it finished too long ago
+                if str(status).lower() != "running" and diff.seconds < -max_print_age_seconds:
                     skip_render = True
                     print("Print finished more than {} hours ago, skipping render".format(max_print_age_hours))
+            elif end_time_str != "0" and end_time_str != "0.0":
+                # We only skip on parse failure if it wasn't a "0" (which means no data)
+                skip_render = True
+                print("Failed to parse end_time ('{}'), skipping render".format(end_time_str))
 
     if skip_render:
         return []
