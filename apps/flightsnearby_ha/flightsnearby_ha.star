@@ -553,7 +553,7 @@ def main(config):
     radar_offset = int(radar_offset_str) if radar_offset_str.isdigit() else 0
     show_all_aircraft = config.bool("show_all_aircraft")
     logostream_api_key = config.get("logostream_api_key")
-    flip_logo = config.bool("flip_logo")
+    tail_direction = config.get("tail_direction", "flipped")
 
     scale = 2 if canvas.is2x() else 1
 
@@ -676,10 +676,9 @@ def main(config):
             render.Box(
                 width = 28 * scale,
                 #child = render.Image(ico),
-                child = filter.Flip(
+                child = filter.FlipHorizontal(
                     child = render.Image(src = media_image, height = 30 * scale, width = 30 * scale),
-                    horizontal = True,
-                ) if flip_logo else render.Image(src = media_image, height = 30 * scale, width = 30 * scale),
+                ) if tail_direction == "flipped" else render.Image(src = media_image, height = 30 * scale, width = 30 * scale),
             ),
             render.Box(
                 child = render.Column(
@@ -716,6 +715,17 @@ def main(config):
     )
 
 def get_schema():
+    tail_direction_options = [
+        schema.Option(
+            display = "Regular",
+            value = "regular",
+        ),
+        schema.Option(
+            display = "Flipped",
+            value = "flipped",
+        ),
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -746,12 +756,13 @@ def get_schema():
                 desc = "API Key from logostream.dev to fetch airline tail logos. Get one at https://airline.logostream.dev/pricing",
                 secret = True,
             ),
-            schema.Toggle(
-                id = "flip_logo",
-                name = "Flip Logo",
-                desc = "Flip the airline tail logo horizontally",
-                icon = "shuffle",
-                default = False,
+            schema.Dropdown(
+                id = "tail_direction",
+                name = "Tail Direction",
+                icon = "plane",
+                desc = "Choose which tail logo you would like to use",
+                default = tail_direction_options[1].value,
+                options = tail_direction_options,
             ),
             schema.Toggle(
                 id = "show_all_aircraft",
