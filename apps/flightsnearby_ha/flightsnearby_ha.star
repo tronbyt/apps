@@ -743,7 +743,7 @@ def get_schema():
                 id = "logostream_api_key",
                 name = "Logostream API Key",
                 icon = "key",
-                desc = "API Key from logostream.dev to fetch airline tail logos",
+                desc = "API Key from logostream.dev to fetch airline tail logos. Get one at https://airline.logostream.dev/pricing",
                 secret = True,
             ),
             schema.Toggle(
