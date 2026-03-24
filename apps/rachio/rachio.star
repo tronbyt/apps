@@ -57,7 +57,7 @@ def main(config):
     if (not devices or selected_device == None or selected_device == ""):
         if not devices:
             # No device selected, and no device available from the list, send an error
-            return display_error_screen(now, "No devices found.", "Check API key and device selection", delay, screen_width, font_height, font, font_width, icon_width)
+            return display_error_screen(now, "No devices found.", "Check API key and device selection", delay, screen_width, font_height, font, font_width)
         else:
             selected_device = devices[0]["id"]
 
