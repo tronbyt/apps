@@ -42,6 +42,8 @@ load("images/twin_small.png", TWIN_SMALL_ASSET = "file")
 load("images/twin_small@2x.png", TWIN_SMALL_ASSET_2X = "file")
 load("images/unknown.png", UNKNOWN_ASSET = "file")
 load("images/unknown@2x.png", UNKNOWN_ASSET_2X = "file")
+load("images/unknown_tail.png", UNKNOWN_TAIL_ASSET = "file")
+load("images/unknown_tail@2x.png", UNKNOWN_TAIL_ASSET_2X = "file")
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -550,11 +552,8 @@ def main(config):
     radar_offset_str = config.get("radar_degree_offset", "0")
     radar_offset = int(radar_offset_str) if radar_offset_str.isdigit() else 0
     show_all_aircraft = config.bool("show_all_aircraft")
-
-    airhex_url2 = config.get("airhex_tail_direction", "_30_30_f.png")
-    if canvas.is2x():
-        airhex_url2 = airhex_url2.replace("30_30", "60_60")
-    airhex_url1 = "https://content.airhex.com/content/logos/airlines_"
+    logostream_api_key = config.get("logostream_api_key")
+    flip_logo = config.bool("flip_logo")
 
     scale = 2 if canvas.is2x() else 1
 
@@ -603,13 +602,27 @@ def main(config):
         return skip_execution()
 
     if media_image == None:
-        if "airline_icao" in sorted_matches[0] and sorted_matches[0]["airline_icao"]:
-            res = http.get("%s%s%s" % (airhex_url1, sorted_matches[0]["airline_icao"], airhex_url2), ttl_seconds = 86400)
-            media_image = res.body()
-        else:
-            # Use small icon as fallback for non-commercial
-            airplane_shape = get_airplane_shape(sorted_matches[0])
-            media_image = airplane_shape["2x"].readall() if canvas.is2x() else airplane_shape["1x"].readall()
+        icao = sorted_matches[0].get("airline_icao")
+        iata = sorted_matches[0].get("airline_iata") or (sorted_matches[0].get("flight_number")[:2] if sorted_matches[0].get("flight_number") else None)
+
+        if (icao or iata) and logostream_api_key:
+            # Try ICAO first
+            if icao:
+                logostream_url = "https://airlines-api.logostream.dev/airlines/icao/%s?key=%s&variant=tail" % (icao, logostream_api_key)
+                res = http.get(logostream_url, ttl_seconds = 86400)
+                if res.status_code == 200:
+                    media_image = res.body()
+
+            # Fallback to IATA if ICAO fails or is missing
+            if media_image == None and iata:
+                logostream_url = "https://airlines-api.logostream.dev/airlines/iata/%s?key=%s&variant=tail" % (iata, logostream_api_key)
+                res = http.get(logostream_url, ttl_seconds = 86400)
+                if res.status_code == 200:
+                    media_image = res.body()
+
+        if media_image == None:
+            # Final fallback to generic "unknown tail" image
+            media_image = UNKNOWN_TAIL_ASSET_2X.readall() if canvas.is2x() else UNKNOWN_TAIL_ASSET.readall()
 
     airplane_shape = get_airplane_shape(sorted_matches[0])
 
@@ -663,7 +676,10 @@ def main(config):
             render.Box(
                 width = 28 * scale,
                 #child = render.Image(ico),
-                child = render.Image(src = media_image, height = 30 * scale, width = 30 * scale),
+                child = filter.Flip(
+                    child = render.Image(src = media_image, height = 30 * scale, width = 30 * scale),
+                    horizontal = True,
+                ) if flip_logo else render.Image(src = media_image, height = 30 * scale, width = 30 * scale),
             ),
             render.Box(
                 child = render.Column(
@@ -700,17 +716,6 @@ def main(config):
     )
 
 def get_schema():
-    airhex_logo_option = [
-        schema.Option(
-            display = "Regular",
-            value = "_30_30_t.png",
-        ),
-        schema.Option(
-            display = "Flipped",
-            value = "_30_30_f.png",
-        ),
-    ]
-
     return schema.Schema(
         version = "1",
         fields = [
@@ -734,13 +739,19 @@ def get_schema():
                 desc = "Entity ID of the Flight Radar entity in Home Assistant",
                 default = "sensor.flightradar24_current_in_area",
             ),
-            schema.Dropdown(
-                id = "airhex_tail_direction",
-                name = "Tail Direction",
-                icon = "plane",
-                desc = "Choose which tail logo you would like to use",
-                default = airhex_logo_option[1].value,
-                options = airhex_logo_option,
+            schema.Text(
+                id = "logostream_api_key",
+                name = "Logostream API Key",
+                icon = "key",
+                desc = "API Key from logostream.dev to fetch airline tail logos",
+                secret = True,
+            ),
+            schema.Toggle(
+                id = "flip_logo",
+                name = "Flip Logo",
+                desc = "Flip the airline tail logo horizontally",
+                icon = "shuffle",
+                default = False,
             ),
             schema.Toggle(
                 id = "show_all_aircraft",
