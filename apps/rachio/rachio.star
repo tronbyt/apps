@@ -147,7 +147,7 @@ def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 6
 
 def render_rachio(tz, config, device_name, recent_events, current_events, now, delay, skip_when_empty = True, screen_width = 64, icon_width = 16, font_height = 8, font_width = 5, font = "5x8"):
     show_device_name = config.bool("title_display", True)
-    
+
     # 1. Check if we even have events
     show_recent_events = recent_events != None and len(recent_events) > 0
     if not show_recent_events:
@@ -158,22 +158,22 @@ def render_rachio(tz, config, device_name, recent_events, current_events, now, d
     # 2. Get our main event data
     latest_event = recent_events[len(recent_events) - 1]
     readable_date = time.from_timestamp(int(int(latest_event["eventDate"]) / 1000.0)).in_location(tz)
-    
+
     # 3. Handle the "Stale" logic (Stop showing 'Current' if it's been > 3 hours)
     time_since_event = now - readable_date
     is_stale = time_since_event > time.parse_duration("3h")
-    
+
     show_current_events = current_events != None and len(current_events) > 0
     if is_stale or (latest_event["type"] == SCHED_STOP):
         show_current_events = False
 
     # 4. Handle "Today" vs Date logic
-    is_today = (readable_date.year == now.year and 
-                readable_date.month == now.month and 
+    is_today = (readable_date.year == now.year and
+                readable_date.month == now.month and
                 readable_date.day == now.day)
-    
+
     preface = "Current" if show_current_events else "Last"
-    
+
     line_1 = device_name if show_device_name else "Rachio"
     line_2 = readable_date.format("Today at 3:04 PM") if is_today else readable_date.format("Mon, Jan 2 at 3:04 PM")
     line_3 = "%s: %s (%s)" % (preface, latest_event["display_type"], readable_date.format("3:04 PM"))
