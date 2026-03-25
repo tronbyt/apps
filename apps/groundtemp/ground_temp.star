@@ -32,8 +32,6 @@ SOIL_VAR_BY_DEPTH = {
     "18cm": "soil_temperature_18cm",
 }
 
-DIGITS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
 def main(config):
     location = json.decode(config.get("location") or DEFAULT_LOCATION)
     units = config.get("units") or DEFAULT_UNITS
@@ -42,6 +40,7 @@ def main(config):
     temperature_unit = "fahrenheit" if units == "F" else "celsius"
     precipitation_unit = "inch" if units == "F" else "mm"
     degree_unit = "F" if units == "F" else "C"
+    precip_unit_symbol = "\"" if units == "F" else ""
 
     soil_var = SOIL_VAR_BY_DEPTH.get(soil_depth) or "soil_temperature_0cm"
 
@@ -116,15 +115,15 @@ def main(config):
             child = render.Stack(children = [
                 render.Padding(
                     pad = (1, 0, 0, 0),
-                    child = rain_column("6H", rain_6h_value),
+                    child = rain_column("6H", rain_6h_value, precip_unit_symbol),
                 ),
                 render.Padding(
                     pad = (23, 0, 0, 0),
-                    child = rain_column("12H", rain_12h_value),
+                    child = rain_column("12H", rain_12h_value, precip_unit_symbol),
                 ),
                 render.Padding(
                     pad = (45, 0, 0, 0),
-                    child = rain_column("24H", rain_24h_value),
+                    child = rain_column("24H", rain_24h_value, precip_unit_symbol),
                 ),
                 render.Padding(
                     pad = (21, 0, 0, 0),
@@ -308,19 +307,6 @@ def get_hourly_value(hourly_data, key, index):
 
     return values[i]
 
-def get_daily_value(daily_data, key, index):
-    values = daily_data.get(key) or []
-    if len(values) == 0:
-        return 0
-
-    i = index
-    if i < 0:
-        i = 0
-    if i >= len(values):
-        i = len(values) - 1
-
-    return values[i]
-
 def sum_hours(values, start_index, count):
     if len(values) == 0:
         return 0
@@ -341,28 +327,14 @@ def sum_hours(values, start_index, count):
 
     return total
 
-def sum_days(values, count):
-    if len(values) == 0:
-        return 0
-
-    end = count
-    if end > len(values):
-        end = len(values)
-
-    total = 0.0
-    for i in range(0, end):
-        total += values[i]
-
-    return total
-
-def rain_column(label, value):
+def rain_column(label, value, unit_symbol):
     return render.Column(
         main_align = "space_between",
         cross_align = "center",
         children = [
             render.Text(label, color = "#8dd5af", font = "CG-pixel-3x5-mono"),
             render.Box(width = 1, height = 1, color = "#123325"),
-            render.Text(value + "\"", color = "#93f7c5", font = "CG-pixel-3x5-mono"),
+            render.Text(value + unit_symbol, color = "#93f7c5", font = "CG-pixel-3x5-mono"),
         ],
     )
 
@@ -373,18 +345,6 @@ def format_rain_short(value):
     if frac < 10:
         return "%d.0%d" % (whole, frac)
     return "%d.%d" % (whole, frac)
-
-def format_rain(value):
-    if value >= 10:
-        return "%d" % int(math.round(value))
-    if value >= 1:
-        rounded = int(math.round(value * 10))
-        return "%d.%d" % (int(rounded / 10), rounded % 10)
-
-    hundredths = int(math.round(value * 100))
-    if hundredths < 10:
-        return "0.0%d" % hundredths
-    return "0.%d" % hundredths
 
 def get_schema():
     return schema.Schema(
