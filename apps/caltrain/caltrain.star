@@ -11,6 +11,7 @@ Author: quacksire
 #
 # Caltrain stop ids are 5 digits long, however there's two ids for each stop, XXXX1 for northbound and XXXX2 for southbound
 
+load("caltrain_logo.webp", CT_LOGO_FILE = "file")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -96,7 +97,7 @@ def get_caltrain_departures(stop_id, key):
             if (humanize.time(time.parse_time(stop["MonitoredCall"]["AimedDepartureTime"]))).find("from") != -1:
                 FUTURE_ETAS.append(visit)
 
-        FUTURE_ETAS = manual_sort(FUTURE_ETAS, compare_stops)
+        FUTURE_ETAS = manual_sort(FUTURE_ETAS, compare_departures)
 
     if (len(stop_id) == 5):
         url = "http://api.511.org/transit/StopMonitoring?api_key=%s&agency=CT&stopCode=%s&format=json" % (key, stop_id)
@@ -118,10 +119,10 @@ def get_caltrain_departures(stop_id, key):
     return FUTURE_ETAS
 
 # Render a single departure row for the default view
-def render_departure_row(visit, color_train):
+def render_departure_row(visit, color_train, color_scheme = "classic"):
     journey = visit["MonitoredVehicleJourney"]
     train_num = journey["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"]
-    train_color = get_train_color(train_num) if color_train else "#fff"
+    train_color = get_train_color(train_num, color_scheme) if color_train else "#fff"
     return render.Row(
         expanded = True,
         cross_align = "center",
@@ -135,12 +136,12 @@ def render_departure_row(visit, color_train):
     )
 
 # Render default view: up to 3 departure rows
-def render_default(departures, color_train):
+def render_default(departures, color_train, color_scheme = "classic"):
     rows = []
     for i in range(len(departures)):
         if i >= 3:
             break
-        rows.append(render_departure_row(departures[i], color_train))
+        rows.append(render_departure_row(departures[i], color_train, color_scheme))
 
     # Pad to 3 rows
     for _ in range(3 - len(rows)):
@@ -158,7 +159,7 @@ def render_default(departures, color_train):
     return rows
 
 # Render "Times by type" view: group departures by train type, show comma-separated times
-def render_times_by_type(departures):
+def render_times_by_type(departures, color_scheme = "classic"):
     # Collect times per type, preserving insertion order via a list of type keys
     type_order = []
     type_times = {}
@@ -178,17 +179,17 @@ def render_times_by_type(departures):
             break
         color = "#fff"
         if t == "LCL":
-            color = get_train_color("1XX")
+            color = get_train_color("1XX", color_scheme)
         elif t == "LTD":
-            color = get_train_color("4XX")
+            color = get_train_color("4XX", color_scheme)
         elif t == "EXP":
-            color = get_train_color("5XX")
+            color = get_train_color("5XX", color_scheme)
         elif t == "WKD":
-            color = get_train_color("6XX")
+            color = get_train_color("6XX", color_scheme)
         elif t == "SCC":
-            color = get_train_color("8XX")
+            color = get_train_color("8XX", color_scheme)
         elif t == "OTH":
-            color = get_train_color("9XX")
+            color = get_train_color("9XX", color_scheme)
         times_str = ", ".join(type_times[t])
         rows.append(
             render.Row(
@@ -214,9 +215,11 @@ def manual_sort(lst, compare_func):
                 lst[i], lst[j] = lst[j], lst[i]
     return lst
 
-# Comparison function for sorting
-def compare_stops(a, b):
-    return int(a["id"]) - int(b["id"])
+# Comparison function for sorting departures by time
+def compare_departures(a, b):
+    time_a = a["MonitoredVehicleJourney"]["MonitoredCall"]["AimedDepartureTime"]
+    time_b = b["MonitoredVehicleJourney"]["MonitoredCall"]["AimedDepartureTime"]
+    return time_a < time_b
 
 # Function to clean the response by removing unwanted characters
 def clean_response(content):
@@ -281,20 +284,31 @@ def get_train_type(train_number):
         return "SCC"
     return "OTH"
 
+# Original color scheme for train numbers
+CLASSIC_COLORS = {
+    "1": "#888",
+    "4": "#0ff",
+    "5": "#f00",
+    "6": "#888",
+    "8": "#ff0",
+    "9": "#f0f",
+}
+
+# Updated color scheme with more distinct, accessible colors
+UPDATED_COLORS = {
+    "1": "#888",
+    "4": "#0ff",
+    "5": "#c23b22",
+    "6": "#aaa",
+    "8": "#f0d68c",
+    "9": "#f0f",
+}
+
 # function to get color of train number, according to the caltrain website
-def get_train_color(train_number):
+def get_train_color(train_number, color_scheme = "classic"):
     prefix = train_number[0]
-    if prefix == "1":
-        return "#888"
-    if prefix == "4":
-        return "#0ff"
-    if prefix == "5":
-        return "#c23b22"
-    if prefix == "6":
-        return "#aaa"
-    if prefix == "8":
-        return "#f0d68c"
-    return "#f0f"
+    colors = UPDATED_COLORS if color_scheme == "updated" else CLASSIC_COLORS
+    return colors.get(prefix, "#f0f")
 
 # Function to convert time duration string to simplified format
 def simplify_time_duration(duration_string):
@@ -334,110 +348,52 @@ def simplify_time_duration(duration_string):
     # If the input string doesn't match the expected format, return the original string
     return duration_string
 
+# Build a fake visit object matching the API structure for demo/preview
+def _demo_visit(train_num, destination, departure_time):
+    return {
+        "MonitoredVehicleJourney": {
+            "FramedVehicleJourneyRef": {
+                "DatedVehicleJourneyRef": train_num,
+            },
+            "DestinationName": destination,
+            "MonitoredCall": {
+                "AimedDepartureTime": departure_time.format("2006-01-02T15:04:05Z07:00"),
+            },
+        },
+    }
+
 def main(config):
     stationID = config.get("stop", STATIC_STATIONS[11]["id"])
     direction = config.get("direction", "south")
     api_key = config.get("apiKey", "")
     display_format = config.get("display_format", "default")
-    color_train = config.bool("color_train", True)
+    color_train = config.bool("color_train", False)
+    color_scheme = config.get("color_scheme", "classic")
     minimum_time_string = config.get("minimum_time", "0")
     minimum_time = int(minimum_time_string) if minimum_time_string.isdigit() else 0
+    demo_mode = config.bool("demo_mode", False)
+    logo_style = config.get("logo_style", "classic")
 
-    # Caltrain Logo
-    CT_LOGO_RQ = http.get("https://agency-logos.sfbatransit.community/caltrain-circle.png")
-    CT_LOGO = CT_LOGO_RQ.body()
+    if logo_style == "updated":
+        CT_LOGO = CT_LOGO_FILE.readall()
+    else:
+        CT_LOGO_RQ = http.get("https://agency-logos.sfbatransit.community/caltrain-circle.png")
+        CT_LOGO = CT_LOGO_RQ.body()
 
-    # Demo mode, for render preview
-    #
-    #return render.Root(
-    #    child=render.Column(
-    #        expanded=True,
-    #        children=[
-    #            render.Row(
-    #                expanded=True,
-    #                main_align="left",
-    #                children=[
-    #                    render.Image(
-    #                        src=CT_LOGO,
-    #                        width=10,
-    #                        height=10,
-    #                    ),
-    #                    render.Text(content="San Francisco", offset=2, height=10, font="tom-thumb"),
-    #                ],
-    #            ),
-    #            render.Row(
-    #                expanded=True,
-    #                cross_align="center",
-    #                children=[
-    #                    render.Text(
-    #                        content="102",
-    #                        color=get_train_color("102"),
-    #                        font="tom-thumb",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="San Jose",
-    #                        font="tom-thumb",
-    #                        color="#F00",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="4",
-    #                        font="tom-thumb",
-    #                    ),
-    #                ],
-    #            ),
-    #            render.Row(
-    #                expanded=True,
-    #                cross_align="center",
-    #                children=[
-    #                    render.Text(
-    #                        content="512",
-    #                        color=get_train_color("512"),
-    #                        font="tom-thumb",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="Tamien  ",
-    #                        font="tom-thumb",
-    #                        color="#F00",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="13",
-    #                        font="tom-thumb",
-    #                    ),
-    #                ],
-    #            ),
-    #            render.Row(
-    #                expanded=True,
-    #                cross_align="center",
-    #                children=[
-    #                    render.Text(
-    #                        content="416",
-    #                        color=get_train_color("416"),
-    #                        font="tom-thumb",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="Gilroy  ",
-    #                        font="tom-thumb",
-    #                        color="#F00",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="18",
-    #                        font="tom-thumb",
-    #                    ),
-    #                ],
-    #            ),
-    #        ],
-    #    ),
-    #)
-    #"""
-
-    # If the API key is empty, fail
-    if api_key == "":
+    # Demo mode uses fake data for preview; otherwise require API key
+    if demo_mode:
+        now = time.now()
+        departures = [
+            _demo_visit("102", "San Jose", now + time.minute * 4),
+            _demo_visit("512", "Tamien", now + time.minute * 13),
+            _demo_visit("416", "Gilroy", now + time.minute * 18),
+            _demo_visit("148", "San Jose", now + time.minute * 25),
+            _demo_visit("802", "Gilroy", now + time.minute * 32),
+            _demo_visit("604", "San Jose", now + time.minute * 41),
+            _demo_visit("520", "Tamien", now + time.minute * 55),
+        ]
+        stop_name = "Hillsdale"
+    elif api_key == "":
         return render.Root(
             child = render.Column(
                 expanded = True,
@@ -466,16 +422,18 @@ def main(config):
                 ],
             ),
         )
-
-    # Caltrain stop ids are 5 digits long, however there's two ids for each stop, XXXX1 for northbound and XXXX2 for southbound
-    # We are provided the first 4 digits of the stop with `stationID`, and the direction "Northbound" or "Southbound" with `direction`
-    etaID = ""
-
-    if direction == "north":
-        etaID = stationID + "1"
-    if direction == "south":
-        etaID = stationID + "2"
-    departures = get_caltrain_departures(etaID, api_key)
+    else:
+        # Caltrain stop ids are 5 digits long, however there's two ids for each stop, XXXX1 for northbound and XXXX2 for southbound
+        etaID = ""
+        if direction == "north":
+            etaID = stationID + "1"
+        if direction == "south":
+            etaID = stationID + "2"
+        departures = get_caltrain_departures(etaID, api_key)
+        stop_name = ""
+        for stop in STATIC_STATIONS:
+            if stop["id"] == stationID:
+                stop_name = stop["Name"]
 
     # Filter out departures closer than minimum_time
     if minimum_time > 0:
@@ -487,23 +445,23 @@ def main(config):
                 filtered.append(visit)
         departures = filtered
 
-    # find the stop name
-    stop_name = ""
-    for stop in STATIC_STATIONS:
-        if stop["id"] == stationID:
-            stop_name = stop["Name"]
-
     children = [
         render.Row(
             expanded = True,
             main_align = "left",
             children = [
-                render.Image(
-                    src = CT_LOGO,
-                    width = 10,
-                    height = 10,
+                render.Padding(
+                    pad = (1, 1, 0, 1),
+                    child = render.Image(
+                        src = CT_LOGO,
+                        width = 8,
+                        height = 8,
+                    ),
                 ),
-                render.Text(content = stop_name, offset = 2, height = 10, font = "tom-thumb"),
+                render.Padding(
+                    pad = (1, 0, 0, 0),
+                    child = render.Text(content = stop_name, offset = 2, height = 10, font = "tom-thumb"),
+                ),
             ],
         ),
     ]
@@ -519,10 +477,10 @@ def main(config):
             ),
         )
     elif display_format == "times_by_type":
-        for row in render_times_by_type(departures):
+        for row in render_times_by_type(departures, color_scheme):
             children.append(row)
     else:
-        for row in render_default(departures, color_train):
+        for row in render_default(departures, color_train, color_scheme):
             children.append(row)
 
     return render.Root(
@@ -602,7 +560,41 @@ def get_schema():
                 name = "Color train type",
                 desc = "Color the train number by type",
                 icon = "palette",
-                default = True,
+                default = False,
+            ),
+            schema.Dropdown(
+                id = "color_scheme",
+                name = "Color scheme",
+                desc = "Classic uses original colors, Updated uses refined colors",
+                icon = "swatchbook",
+                default = "classic",
+                options = [
+                    schema.Option(
+                        display = "Classic",
+                        value = "classic",
+                    ),
+                    schema.Option(
+                        display = "Updated",
+                        value = "updated",
+                    ),
+                ],
+            ),
+            schema.Dropdown(
+                id = "logo_style",
+                name = "Logo style",
+                desc = "Classic uses the original remote logo, Updated uses a bundled logo",
+                icon = "image",
+                default = "classic",
+                options = [
+                    schema.Option(
+                        display = "Classic",
+                        value = "classic",
+                    ),
+                    schema.Option(
+                        display = "Updated",
+                        value = "updated",
+                    ),
+                ],
             ),
             schema.Text(
                 id = "minimum_time",
@@ -610,6 +602,13 @@ def get_schema():
                 desc = "Don't show departures nearer than this many minutes",
                 icon = "clock",
                 default = "0",
+            ),
+            schema.Toggle(
+                id = "demo_mode",
+                name = "Demo mode",
+                desc = "Show fake data for preview (no API key needed)",
+                icon = "flask",
+                default = False,
             ),
         ],
     )
