@@ -7,7 +7,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const APPS_DIR = join(__dirname, '../apps');
-const OUTPUT_FILE = join(__dirname, 'apps.json');
+
+// Allow --output <path> CLI argument to override the default output location
+const outputArgIdx = process.argv.indexOf('--output');
+const OUTPUT_FILE = outputArgIdx !== -1 && process.argv[outputArgIdx + 1]
+  ? process.argv[outputArgIdx + 1]
+  : join(__dirname, 'apps.json');
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
