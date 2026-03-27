@@ -53,13 +53,16 @@ def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time
     "progress": "{{ states('%s') | default('0') }}",
     "remaining_time": "{{ states('%s') | default('0') }}",
     "end_time": "{{ as_timestamp(states('%s'), 0) }}",
-    "status": "{{ states('%s') | default('Unknown') }}"
+    "status": "{{ states('%s') | default('Unknown') }}",
+    "last_changed": "{{ as_timestamp(states['%s'].last_changed | default(0)) if '%s' != '' else 0 }}"
 }
 """ % (
         name_entity,
         progress_entity,
         remaining_time_entity,
         end_time_entity,
+        status_entity,
+        status_entity,
         status_entity,
     )
 
@@ -85,8 +88,16 @@ def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time
                     data.get("remaining_time", defaults["remaining_time"]),
                     data.get("end_time", defaults["end_time"]),
                     data.get("status", defaults["status"]),
+                    data.get("last_changed", 0),
                 )
-    return defaults
+    return (
+        defaults["name"],
+        defaults["progress"],
+        defaults["remaining_time"],
+        defaults["end_time"],
+        defaults["status"],
+        0,
+    )
 
 # convert color specification from JSON to hex string
 def to_rgb(color, combine = None, combine_level = 0.5):
@@ -229,62 +240,60 @@ def main(config):
         status_entity,
         cache_duration,
     )
-    if result == None:
-        result = ("Printer", "0", "0", C_DEFAULT_END_TIME, "Unknown")
-    (name, progress, remaining_time, end_time, status) = result
+    if result == None or len(result) < 6:
+        result = ("Printer", "0", "0", C_DEFAULT_END_TIME, "Unknown", 0)
+    (name, progress, remaining_time, end_time, status, last_changed_ts) = result
 
     # Check if we should render anything
     skip_render = False
 
+    # Normalized status
+    st_norm = str(status).lower()
+
     # Check status
-    if str(status).lower() == "offline":
+    if st_norm in ["offline", "unavailable", "off", "none", "unknown"]:
         skip_render = True
-        print("Printer is offline, skipping render")
+        print("Printer is offline/off ({}), skipping render".format(st_norm))
 
     # Check end_time using Starlark's time.parse_time and duration
-    if not skip_render and end_time != None and str(end_time) != "" and str(end_time) != "0" and str(end_time) != "0.0":
+    if not skip_render:
+        end_dt = None
         end_time_str = str(end_time)
-        if end_time_str == C_DEFAULT_END_TIME or end_time_str.strip() == "":
-            pass  # Ignore default end time
-        else:
-            end_dt = None
 
-            # Try parsing as timestamp first (returned by as_timestamp in templated HA request)
+        # Try parsing end_time sensor first
+        if end_time_str != None and end_time_str != "" and end_time_str != "0" and end_time_str != "0.0" and end_time_str != C_DEFAULT_END_TIME:
+            # Try parsing as timestamp first
             if end_time_str.replace(".", "", 1).isdigit():
                 ts = int(float(end_time_str))
                 if ts > 0:
                     end_dt = time.from_timestamp(ts)
 
-            # Fallback to ISO string parsing if not a numeric timestamp
+            # Fallback to ISO string parsing
             if not end_dt:
-                # Replace space with 'T' if not present
                 if "T" not in end_time_str:
                     end_time_str = end_time_str.replace(" ", "T")
-
-                # Accept both with and without 'Z' at the end
                 valid_iso = len(end_time_str) == 19 and end_time_str[10] == "T"
                 valid_iso_z = len(end_time_str) == 20 and end_time_str[10] == "T" and end_time_str.endswith("Z")
-
                 if valid_iso:
-                    # Add 'Z' for parsing if not present
-                    end_time_str_z = end_time_str + "Z"
-                    end_dt = time.parse_time(end_time_str_z)
+                    end_dt = time.parse_time(end_time_str + "Z")
                 elif valid_iso_z:
-                    end_time_str_z = end_time_str
-                    end_dt = time.parse_time(end_time_str_z)
+                    end_dt = time.parse_time(end_time_str)
 
-            if end_dt:
-                now_dt = time.now()
-                diff = end_dt - now_dt
+        # Fallback to last_changed if print is not active
+        is_active = st_norm in ["printing", "running", "finishing", "heating", "calibrating", "busy", "pausing", "paused", "cancelling"]
+        if not end_dt or end_dt.unix == 0:
+            if not is_active:
+                if last_changed_ts and float(last_changed_ts) > 0:
+                    end_dt = time.from_timestamp(int(float(last_changed_ts)))
 
-                # Only skip if the print is NOT running and it finished too long ago
-                if str(status).lower() != "running" and diff.seconds < -max_print_age_seconds:
-                    skip_render = True
-                    print("Print finished more than {} hours ago, skipping render".format(max_print_age_hours))
-            elif end_time_str != "0" and end_time_str != "0.0":
-                # We only skip on parse failure if it wasn't a "0" (which means no data)
+        if end_dt:
+            now_dt = time.now()
+            diff_seconds = end_dt.unix - now_dt.unix
+
+            # Only skip if the print is NOT active and it finished too long ago
+            if not is_active and diff_seconds < -max_print_age_seconds:
                 skip_render = True
-                print("Failed to parse end_time ('{}'), skipping render".format(end_time_str))
+                print("Print finished {} hours ago (status={}), skipping render".format(max_print_age_hours, status))
 
     if skip_render:
         return []
