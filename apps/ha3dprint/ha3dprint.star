@@ -27,6 +27,19 @@ RED = "#FF0000"
 WHITE = "#FFFFFF"
 GREEN = "#00FF00"
 
+# Statuses considered as actively printing (used for hide logic)
+C_ACTIVE_STATUSES = [
+    "printing",
+    "running",
+    "finishing",
+    "heating",
+    "calibrating",
+    "busy",
+    "pausing",
+    "paused",
+    "cancelling",
+]
+
 def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time_entity, end_time_entity, status_entity, cache_duration):
     """Fetch printer data from Home Assistant REST API using template endpoint for efficiency"""
     headers = {
@@ -49,22 +62,20 @@ def fetch_ha_data(ha_url, ha_token, name_entity, progress_entity, remaining_time
     # Create a template that fetches all entities in a single request
     template = """
 {
-    "name": "{{ states('%s') | default('Printer') }}",
-    "progress": "{{ states('%s') | default('0') }}",
-    "remaining_time": "{{ states('%s') | default('0') }}",
-    "end_time": "{{ as_timestamp(states('%s'), 0) }}",
-    "status": "{{ states('%s') | default('Unknown') }}",
-    "last_changed": "{{ as_timestamp(states['%s'].last_changed | default(0)) if '%s' != '' else 0 }}"
+    "name": "{{ states('%(name)s') | default('Printer') }}",
+    "progress": "{{ states('%(progress)s') | default('0') }}",
+    "remaining_time": "{{ states('%(remaining_time)s') | default('0') }}",
+    "end_time": "{{ as_timestamp(states('%(end_time)s'), 0) }}",
+    "status": "{{ states('%(status)s') | default('Unknown') }}",
+    "last_changed": "{{ as_timestamp(states['%(status)s'].last_changed | default(0)) if '%(status)s' != '' else 0 }}"
 }
-""" % (
-        name_entity,
-        progress_entity,
-        remaining_time_entity,
-        end_time_entity,
-        status_entity,
-        status_entity,
-        status_entity,
-    )
+""" % {
+        "name": name_entity,
+        "progress": progress_entity,
+        "remaining_time": remaining_time_entity,
+        "end_time": end_time_entity,
+        "status": status_entity,
+    }
 
     # Only make API request if ha_token is not the default value
     if ha_token != "APIKEY":
@@ -261,7 +272,7 @@ def main(config):
         end_time_str = str(end_time)
 
         # Try parsing end_time sensor first
-        if end_time_str != None and end_time_str != "" and end_time_str != "0" and end_time_str != "0.0" and end_time_str != C_DEFAULT_END_TIME:
+        if end_time_str not in ("", "0", "0.0", C_DEFAULT_END_TIME):
             # Try parsing as timestamp first
             if end_time_str.replace(".", "", 1).isdigit():
                 ts = int(float(end_time_str))
@@ -280,7 +291,7 @@ def main(config):
                     end_dt = time.parse_time(end_time_str)
 
         # Fallback to last_changed if print is not active
-        is_active = st_norm in ["printing", "running", "finishing", "heating", "calibrating", "busy", "pausing", "paused", "cancelling"]
+        is_active = st_norm in C_ACTIVE_STATUSES
         if not end_dt or end_dt.unix == 0:
             if not is_active:
                 if last_changed_ts and float(last_changed_ts) > 0:
