@@ -1,7 +1,7 @@
 // --- CONFIG ---
-// Use GitHub Pages structure for both local and production
-const APPS_DIR = '../apps';
-const BROKEN_APPS_FILE = '../broken_apps.txt';
+// gh-pages layout: apps/ and viewer assets are at the same root level
+const APPS_DIR = 'apps';
+const BROKEN_APPS_FILE = 'broken_apps.txt';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
