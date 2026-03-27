@@ -1,0 +1,18 @@
+---
+id: ground-temp
+name: Ground Temp
+summary: Ground Temp and Rain Outlook
+desc: Shows soil temperature, air temperature, and near-term rain accumulation for lawn planning.
+author: ckelley-1992
+fileName: ground_temp.star
+packageName: groundtemp
+recommendedInterval: 15
+supports2x: true
+category: weather
+tags:
+  - weather
+  - lawn
+  - gardening
+  - precipitation
+  - temperature
+  - rainfall
