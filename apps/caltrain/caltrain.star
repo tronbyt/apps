@@ -129,10 +129,8 @@ def render_departure_row(visit, color_train, color_scheme = "classic"):
 # Render default view: up to 3 departure rows
 def render_default(departures, color_train, color_scheme = "classic"):
     rows = []
-    for i in range(len(departures)):
-        if i >= 3:
-            break
-        rows.append(render_departure_row(departures[i], color_train, color_scheme))
+    for departure in departures[:3]:
+        rows.append(render_departure_row(departure, color_train, color_scheme))
 
     # Pad to 3 rows
     for _ in range(3 - len(rows)):
@@ -157,9 +155,7 @@ def render_times_by_type(departures, color_scheme = "classic"):
         type_times[train_type].append(time_str)
 
     rows = []
-    for t in type_order:
-        if len(rows) >= 3:
-            break
+    for t in type_order[:3]:
         prefix = TYPE_COLOR_PREFIX.get(t, "9")
         color = get_train_color(prefix + "XX", color_scheme)
         times_str = ", ".join(type_times[t])
@@ -219,18 +215,15 @@ def truncate_pad(input_string, width):
 
 # Map train number prefix to type abbreviation
 def get_train_type(train_number):
+    train_type_map = {
+        "1": "LCL",
+        "4": "LTD",
+        "5": "EXP",
+        "6": "WKD",
+        "8": "SCC",
+    }
     prefix = train_number[0]
-    if prefix == "1":
-        return "LCL"
-    if prefix == "4":
-        return "LTD"
-    if prefix == "5":
-        return "EXP"
-    if prefix == "6":
-        return "WKD"
-    if prefix == "8":
-        return "SCC"
-    return "OTH"
+    return train_type_map.get(prefix, "OTH")
 
 # Original color scheme for train numbers
 CLASSIC_COLORS = {
