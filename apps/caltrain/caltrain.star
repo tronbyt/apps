@@ -91,14 +91,14 @@ def get_caltrain_departures(stop_id, key):
 
 # Column widths for departure rows at each resolution
 # tom-thumb is ~4px/char, terminus-12 is ~6px/char
-COL_TRAIN_1X = 13   # 3 chars + 1px
-COL_DEST_1X = 33    # 8 chars + 1px
-COL_TIME_1X = 14    # 3 chars + 2px
+COL_TRAIN_1X = 13  # 3 chars + 1px
+COL_DEST_1X = 33  # 8 chars + 1px
+COL_TIME_1X = 14  # 3 chars + 2px
 COL_DEST_CHARS_1X = 8
 
-COL_TRAIN_2X = 21   # 3 chars * 6 + 3px
-COL_DEST_2X = 78    # 12 chars * 6 + 6px
-COL_TIME_2X = 24    # 3 chars * 6 + 6px
+COL_TRAIN_2X = 21  # 3 chars * 6 + 3px
+COL_DEST_2X = 78  # 12 chars * 6 + 6px
+COL_TIME_2X = 24  # 3 chars * 6 + 6px
 COL_DEST_CHARS_2X = 12
 
 ROW_HEIGHT_1X = 6
