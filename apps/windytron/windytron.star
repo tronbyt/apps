@@ -30,7 +30,7 @@ station_lookup = {
     "maryhill.json": "Mary Hill",
     "loroc.json": "Loroc",
     "goudes.json": "Goudes",
-    # "pointe_rouge.json": "Pointe Rouge",
+    "pointe_rouge.json": "Pointe Rouge",
 }
 
 def fetch_data(station):
