@@ -53,6 +53,9 @@ Handling for Indigenous team names
 v2.6
 Updated for 2026 season
 Updated timezone check
+
+v2.6.1
+Squiggle API now requiring YEAR_SUFFIX to be added to all requests
 """
 
 load("encoding/json.star", "json")
@@ -120,7 +123,8 @@ def main(config):
     CurrentRoundJSON = json.decode(RoundData)
 
     # Use the Squiggle API for live games, cache data for 30 secs
-    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX
+    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX + YEAR_SUFFIX
+    #print(SQUIGGLE_URL)
 
     LiveData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
     LiveJSON = json.decode(LiveData)
