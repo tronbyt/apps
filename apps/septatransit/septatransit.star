@@ -13,18 +13,28 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 API_BASE = "http://www3.septa.org/api"
-API_ROUTES = API_BASE + "/Routes"
-API_STOPS = API_BASE + "/Stops"
-API_SCHEDULE = API_BASE + "/BusSchedules"
+API_ROUTES = API_BASE + "/Routes/"
+API_STOPS = API_BASE + "/Stops/"
+API_SCHEDULE = API_BASE + "/BusSchedules/index.php"
 DEFAULT_ROUTE = "17"
 DEFAULT_STOP = "10264"
 DEFAULT_BANNER = ""
 
 def call_routes_api():
-    r = http.get(API_ROUTES, ttl_seconds = 604800)
-    routes = r.json()
-    sorted_routes = sort_routes(routes)
-    return sorted_routes
+    cached = cache.get("routes")
+    if cached != None:
+        return sort_routes(json.decode(cached))
+    routes = []
+    for attempt in range(10):
+        if len(routes) > 0:
+            break
+        r = http.get(API_ROUTES, params = {"_": str(attempt)})
+        body = r.body()
+        if body != None and body.startswith("["):
+            routes = json.decode(body)
+    if len(routes) > 0:
+        cache.set("routes", json.encode(routes), ttl_seconds = 604800)
+    return sort_routes(routes)
 
 def sort_routes(routes):
     numerical_routes = []
@@ -87,18 +97,79 @@ def get_route_text_color(route):
             return i["route_text_color"]
     return "#fff"
 
+def fetch_stops(route):
+    cache_key = "stops_" + route
+    cached = cache.get(cache_key)
+    if cached != None:
+        return json.decode(cached)
+    stops = []
+    for attempt in range(10):
+        if len(stops) > 0:
+            break
+        r = http.get(API_STOPS, params = {"req1": route, "_": str(attempt)})
+        body = r.body()
+        if body != None and body.startswith("["):
+            stops = json.decode(body)
+    if len(stops) > 0:
+        cache.set(cache_key, json.encode(stops), ttl_seconds = 604800)
+    return stops
+
+def sort_stops_geographically(stops):
+    if len(stops) <= 1:
+        return stops
+    lats = [float(s["lat"]) for s in stops]
+    lngs = [float(s["lng"]) for s in stops]
+    if max(lngs) - min(lngs) > max(lats) - min(lats):
+        return sorted(stops, key = lambda s: float(s["lng"]))
+    else:
+        return sorted(stops, key = lambda s: float(s["lat"]))
+
+def stop_direction(dlat, dlng):
+    # In the US, buses stop on the right side of the road.
+    # A stop's position relative to the intersection center reveals travel direction:
+    #   East side (lng+) = NB,  West side (lng-) = SB
+    #   North side (lat+) = WB, South side (lat-) = EB
+    # Use whichever axis dominates to pick the label.
+    if abs(dlng) >= abs(dlat):
+        return "NB" if dlng > 0 else "SB"
+    else:
+        return "WB" if dlat > 0 else "EB"
+
+def direction_labels(stops):
+    name_groups = {}
+    for s in stops:
+        name = s["stopname"]
+        if name not in name_groups:
+            name_groups[name] = []
+        name_groups[name].append(s)
+    labels = {}
+    for name in name_groups:
+        group = name_groups[name]
+        if len(group) < 2:
+            continue
+        total_lat = 0.0
+        total_lng = 0.0
+        for s in group:
+            total_lat += float(s["lat"])
+            total_lng += float(s["lng"])
+        center_lat = total_lat / len(group)
+        center_lng = total_lng / len(group)
+        for s in group:
+            dlat = float(s["lat"]) - center_lat
+            dlng = float(s["lng"]) - center_lng
+            labels[s["stopid"]] = stop_direction(dlat, dlng)
+    return labels
+
 def get_stops(route):
-    r = http.get(API_STOPS, params = {"req1": route}, ttl_seconds = 604800)
-    stops = r.json()
-    list_of_stops = []
-    for i in stops:
-        list_of_stops.append(
-            schema.Option(
-                display = i["stopname"].replace("&amp;", "&") + " (" + i["stopid"] + ")",
-                value = i["stopid"],
-            ),
+    stops = sort_stops_geographically(fetch_stops(route))
+    labels = direction_labels(stops)
+    return [
+        schema.Option(
+            display = i["stopname"].replace("&amp;", "&") + " (" + (labels[i["stopid"]] + ", " if i["stopid"] in labels else "") + i["stopid"] + ")",
+            value = i["stopid"],
         )
-    return list_of_stops
+        for i in stops
+    ]
 
 def call_schedule_api(route, stopid):
     cache_string = cache.get(route + "_" + stopid + "_" + "schedule_api_response")
@@ -106,19 +177,36 @@ def call_schedule_api(route, stopid):
     if cache_string != None:
         schedule = json.decode(cache_string)
     if schedule == None:
-        r = http.get(API_SCHEDULE, params = {"stop_id": stopid, "route": route})
-        schedule = r.json()
-        parsed_time = time.parse_time(schedule.values()[0][0]["DateCalender"], "01/02/06 3:04 pm", "America/New_York")
-        expiry = int((parsed_time - time.now()).seconds)
-        if expiry < 0:  #this is because septa's API returns tomorrow's times with today's date if the last departure for the day has already happened
-            expiry = 30
+        best_schedule = None
+        best_expiry = None
+        for attempt in range(5):
+            r = http.get(API_SCHEDULE, params = {"stop_id": stopid, "_": str(attempt)})
+            body = r.body()
+            if body == None or body.startswith('{"error"') or not (body.startswith("{") or body.startswith("[")):
+                continue
+            candidate = json.decode(body)
+            if type(candidate) != "dict" or not candidate.get(route) or len(candidate.get(route)) == 0:
+                continue
+            parsed_time = time.parse_time(candidate[route][0]["DateCalender"], "01/02/06 3:04 pm", "America/New_York")
+            candidate_expiry = int((parsed_time - time.now()).seconds)
+            if candidate_expiry < 0:
+                continue
+            if best_expiry == None or candidate_expiry < best_expiry:
+                best_expiry = candidate_expiry
+                best_schedule = candidate
+            if best_expiry < 3600:
+                break
+        if best_schedule == None:
+            return {}
+        schedule = best_schedule
+        expiry = best_expiry if best_expiry > 0 else 30
         cache.set(route + "_" + stopid + "_" + "schedule_api_response", json.encode(schedule), ttl_seconds = expiry)
     return schedule
 
 def get_schedule(route, stopid, show_relative_times):
     schedule = call_schedule_api(route, stopid)
     list_of_departures = []
-    if schedule.get(route):
+    if type(schedule) == "dict" and schedule.get(route):
         for i in schedule.get(route):
             departure_time = None
             if len(list_of_departures) % 2 == 1:
@@ -179,14 +267,18 @@ def get_schedule(route, stopid, show_relative_times):
         return list_of_departures
 
 def select_stop(route):
+    stops_data = sort_stops_geographically(fetch_stops(route))
+    if len(stops_data) == 0:
+        return []
+    options = get_stops(route)
     return [
         schema.Dropdown(
             id = "stop",
             name = "Stop",
             desc = "Select a stop. If a single stop is served by two directions, the same name will be listed twice, with a different stop number for each direction.",
             icon = get_route_icon(route),
-            default = DEFAULT_STOP,
-            options = get_stops(route),
+            default = stops_data[0]["stopid"],
+            options = options,
         ),
     ]
 
