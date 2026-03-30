@@ -106,7 +106,7 @@ def call_schedule_api(route, stopid):
     if cache_string != None:
         schedule = json.decode(cache_string)
     if schedule == None:
-        r = http.get(API_SCHEDULE, params = {"req1": stopid, "req2": route})
+        r = http.get(API_SCHEDULE, params = {"stop_id": stopid, "route": route})
         schedule = r.json()
         parsed_time = time.parse_time(schedule.values()[0][0]["DateCalender"], "01/02/06 3:04 pm", "America/New_York")
         expiry = int((parsed_time - time.now()).seconds)
