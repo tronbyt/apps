@@ -13,9 +13,9 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 API_V2 = "https://www3.septa.org/api/v2"
+API_V1 = "https://www3.septa.org/api"
 API_FLAT = "https://flat-api.septa.org"
 
-API_ROUTES = API_V2 + "/routes/"
 DEFAULT_ROUTE = "17"
 DEFAULT_STOP = "10264"
 DEFAULT_BANNER = ""
@@ -25,8 +25,17 @@ def call_routes_api():
     if cached != None:
         return sort_routes(json.decode(cached))
 
-    r = http.get(API_ROUTES)
-    routes = r.json() if r.status_code == 200 else []
+    # Try v2 first
+    r = http.get(API_V2 + "/routes/")
+    routes = []
+    if r.status_code == 200:
+        routes = r.json()
+
+    # Fallback to v1 if v2 fails or is empty
+    if not routes:
+        r = http.get(API_V1 + "/Routes/")
+        if r.status_code == 200:
+            routes = r.json()
 
     if len(routes) > 0:
         cache.set("routes_v2", json.encode(routes), ttl_seconds = 604800)
@@ -184,15 +193,31 @@ def call_schedule_api(route, stopid):
         return []
 
     # Fetch live trips for real-time delays
-    trips_url = "%s/trips/?route_id=%s" % (API_V2, route)
-    r_trips = http.get(trips_url)
-    live_trips = r_trips.json() if r_trips.status_code == 200 else []
-
     live_data = {}
+
+    # Try v2 first
+    r_trips = http.get("%s/trips/?route_id=%s" % (API_V2, route))
+    if r_trips.status_code == 200:
+        for t in r_trips.json():
+            live_data[t["trip_id"]] = t
+
+    # Fallback to v1 if v2 yields nothing
+    if not live_data:
+        r_v1 = http.get("%s/TransitView/index.php" % API_V1, params = {"route": route})
+        if r_v1.status_code == 200:
+            v1_data = r_v1.json()
+            for b in v1_data.get("bus", []):
+                # Map v1 fields to v2 format for consistency
+                tid = b.get("trip")
+                if tid:
+                    live_data[tid] = {
+                        "trip_id": tid,
+                        "delay": b.get("late", 0),
+                        "next_stop_sequence": b.get("next_stop_sequence"),
+                        "status": "LATE" if int(b.get("late", 0)) > 2 else "ON-TIME",
+                    }
+
     service_id_counts = {}
-    for t in live_trips:
-        # Match by trip_id
-        live_data[t["trip_id"]] = t
 
     # Infer today's service_id from live trips
     for s in full_schedule:
