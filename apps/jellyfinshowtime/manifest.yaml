@@ -1,0 +1,14 @@
+---
+id: jellyfin-showtime
+name: Jellyfin Showtime
+summary: Explore your Jellyfin library
+desc: View recently added or played media, or your entire media library from your Jellyfin server. Forked from plexshowtime.
+author: radiocolin
+recommendedInterval: 5
+fileName: jellyfin_showtime.star
+packageName: jellyfinshowtime
+category: clocks
+tags:
+  - jellyfin
+  - media-library
+  - library-viewer
