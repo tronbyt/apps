@@ -179,7 +179,7 @@ def call_schedule_api(route, stopid):
     if schedule == None:
         best_schedule = None
         best_expiry = None
-        for attempt in range(5):
+        for attempt in range(8):
             r = http.get(API_SCHEDULE, params = {"stop_id": stopid, "_": str(attempt)})
             body = r.body()
             if body == None or body.startswith('{"error"') or not (body.startswith("{") or body.startswith("[")):
@@ -187,19 +187,44 @@ def call_schedule_api(route, stopid):
             candidate = json.decode(body)
             if type(candidate) != "dict" or not candidate.get(route) or len(candidate.get(route)) == 0:
                 continue
-            parsed_time = time.parse_time(candidate[route][0]["DateCalender"], "01/02/06 3:04 pm", "America/New_York")
-            candidate_expiry = int((parsed_time - time.now()).seconds)
-            if candidate_expiry < 0:
-                continue
+
+            # SEPTA API often returns stale data. We check if at least one trip is "recent".
+            # We allow trips up to 10 minutes in the past to account for late vehicles
+            # and slight clock skews.
+            now = time.now()
+            trips = candidate[route]
+            has_recent_trip = False
+            first_future_expiry = None
+
+            for t in trips:
+                t_time = time.parse_time(t["DateCalender"], "01/02/06 03:04 pm", "America/New_York")
+                diff = int((t_time - now).seconds)
+                if diff > -600:  # -10 minutes
+                    has_recent_trip = True
+                    if first_future_expiry == None or (diff > 0 and diff < first_future_expiry):
+                        first_future_expiry = diff
+
+            if not has_recent_trip:
+                continue  # All trips are too far in the past, likely stale data.
+
+            # If we don't have any future trips yet, but we have recent past ones,
+            # use a small expiry to check again soon.
+            candidate_expiry = first_future_expiry if first_future_expiry != None else 60
+
             if best_expiry == None or candidate_expiry < best_expiry:
                 best_expiry = candidate_expiry
                 best_schedule = candidate
-            if best_expiry < 3600:
+
+            # If we found a trip in the near future, we can stop retrying.
+            if best_expiry > 0 and best_expiry < 1800:
                 break
+
         if best_schedule == None:
             return {}
         schedule = best_schedule
-        expiry = best_expiry if best_expiry > 0 else 30
+        expiry = best_expiry if (best_expiry != None and best_expiry > 30) else 30
+        if expiry > 3600:
+            expiry = 3600
         cache.set(route + "_" + stopid + "_" + "schedule_api_response", json.encode(schedule), ttl_seconds = expiry)
     return schedule
 
@@ -207,8 +232,18 @@ def get_schedule(route, stopid, show_relative_times):
     schedule = call_schedule_api(route, stopid)
     list_of_departures = []
     if type(schedule) == "dict" and schedule.get(route):
+        now = time.now()
         for i in schedule.get(route):
             departure_time = None
+
+            # Parse time for filtering and relative display
+            departure = time.parse_time(i["DateCalender"], "01/02/06 03:04 pm", "America/New_York")
+            diff_seconds = int((departure - now).seconds)
+
+            # Filter out trips that are more than 10 minutes in the past
+            if diff_seconds < -600:
+                continue
+
             if len(list_of_departures) % 2 == 1:
                 background = "#222"
                 text = "#fff"
@@ -217,15 +252,14 @@ def get_schedule(route, stopid, show_relative_times):
                 text = "#ffc72c"
 
             if show_relative_times:
-                departure = time.parse_time(i["DateCalender"], "01/02/06 03:04 pm", "America/New_York")
-                departure_time = str(int((departure - time.now()).seconds / 60)) + "m"
+                departure_time = str(int(diff_seconds / 60)) + "m"
                 if len(departure_time) == 2:
                     departure_time = "0" + departure_time
-            if not show_relative_times:
-                if len(i["date"]) == 5:
-                    departure_time = " " + i["date"]
-                else:
-                    departure_time = i["date"]
+            elif len(i["date"]) == 5:
+                departure_time = " " + i["date"]
+            else:
+                departure_time = i["date"]
+
             item = render.Box(
                 height = 6,
                 width = 64,
@@ -257,11 +291,12 @@ def get_schedule(route, stopid, show_relative_times):
             list_of_departures.append(item)
 
     if len(list_of_departures) < 1:
+        msg = "No departures" if stopid else "Select a stop"
         return [render.Box(
             height = 6,
             width = 64,
             color = "#000",
-            child = render.Text("Select a stop"),
+            child = render.Text(msg, font = "tom-thumb"),
         )]
     else:
         return list_of_departures
