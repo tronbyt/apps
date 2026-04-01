@@ -7,7 +7,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const APPS_DIR = join(__dirname, '../apps');
-const OUTPUT_FILE = join(__dirname, 'apps.json');
+
+// Parse --output argument
+const args = process.argv.slice(2);
+let outputFile = join(__dirname, 'apps.json');
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--output' && i + 1 < args.length) {
+    outputFile = args[i + 1];
+  }
+}
+const outputDir = dirname(outputFile);
+const OUTPUT_FILE = outputFile;
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
@@ -148,7 +158,7 @@ function scanApps() {
 }
 
 function generateHtmlFiles(apps) {
-  const detailsDir = join(__dirname, 'details');
+  const detailsDir = join(outputDir, 'details');
   if (!existsSync(detailsDir)) {
     mkdirSync(detailsDir);
   }
@@ -165,7 +175,7 @@ function generateHtmlFiles(apps) {
     const title = app.displayName ? `${app.displayName} - Tronbyt App` : 'Tronbyt App';
     const description = app.summary || app.description || 'View details for this Tronbyt app.';
     const imageUrl = app.image ? `https://tronbyt.github.io/apps/apps/${app.image}` : `https://avatars.githubusercontent.com/u/200508996?s=400&v=4`;
-    const url = `https://tronbyt.github.io/apps/app-viewer/details/${encodeURIComponent(app.name)}.html`;
+    const url = `https://tronbyt.github.io/apps/details/${encodeURIComponent(app.name)}.html`;
 
     const metaTags = `<title>${title}</title>
         <meta name="description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">

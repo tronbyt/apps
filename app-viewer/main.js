@@ -2,8 +2,8 @@
 // Use GitHub Pages structure for both local and production
 const isDetailsPage = window.location.pathname.includes('/details/');
 const BASE_PATH = isDetailsPage ? '../' : '';
-const APPS_DIR = isDetailsPage ? '../../apps' : '../apps';
-const BROKEN_APPS_FILE = isDetailsPage ? '../../broken_apps.txt' : '../broken_apps.txt';
+const APPS_DIR = isDetailsPage ? '../apps' : 'apps';
+const BROKEN_APPS_FILE = isDetailsPage ? '../broken_apps.txt' : 'broken_apps.txt';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
