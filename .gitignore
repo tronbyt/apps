@@ -33,3 +33,4 @@ app-viewer/apps.json
 
 .claude/*
 .claude/settings.local.json
+/app-viewer/details/
