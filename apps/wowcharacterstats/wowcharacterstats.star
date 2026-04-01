@@ -59,6 +59,7 @@ DEFAULT_CHARACTER = "chinpokodin"
 DEFAULT_REALM = "firetree"
 DEFAULT_REGION = "us"
 DEFAULT_AUTH_TTL = 86399
+RAID_BLACKLIST = ["Manaforge Omega"]  # list of blacklisted raids that aren't part of the current season but returned in the API
 
 def main(config):
     character_name = config.get("character", DEFAULT_CHARACTER).lower()
@@ -373,17 +374,18 @@ def get_raid_progress(progress):
         for expansion in progress["expansions"]:
             if expansion["expansion"]["name"] == "Current Season":
                 for instance in expansion["instances"]:
-                    if instance["modes"]:
-                        mode = instance["modes"][-1]
-                        total += mode["progress"]["total_count"]
-                        current_difficulty_level = RAID_LEVELS[mode["difficulty"]["name"]]
+                    if instance["instance"]["name"] not in RAID_BLACKLIST:
+                        if instance["modes"]:
+                            mode = instance["modes"][-1]
+                            total += mode["progress"]["total_count"]
+                            current_difficulty_level = RAID_LEVELS[mode["difficulty"]["name"]]
 
-                        if current_difficulty_level > raid_level:
-                            raid_level = current_difficulty_level
-                            difficulty = mode["difficulty"]["name"]
-                            completed = mode["progress"]["completed_count"]
-                        elif current_difficulty_level == raid_level:
-                            completed += mode["progress"]["completed_count"]
+                            if current_difficulty_level > raid_level:
+                                raid_level = current_difficulty_level
+                                difficulty = mode["difficulty"]["name"]
+                                completed = mode["progress"]["completed_count"]
+                            elif current_difficulty_level == raid_level:
+                                completed += mode["progress"]["completed_count"]
 
     if difficulty != "":
         status = "%d/%d %s" % (completed, total, difficulty[:1])
