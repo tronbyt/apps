@@ -9,7 +9,6 @@ packageName: melbournebuses
 recommendedInterval: 5
 category: utilities
 tags:
-  - bus
   - transit
   - melbourne
   - real-time

@@ -9,8 +9,6 @@ packageName: ntsradio
 recommendedInterval: 5
 category: entertainment
 tags:
-  - radio
-  - live-streaming
   - music
-  - podcast
-  - entertainment
+  - real-time
+  - media

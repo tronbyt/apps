@@ -9,7 +9,7 @@ fileName: on_the_air.star
 packageName: ontheair
 category: utilities
 tags:
-  - status
+  - tracking
   - availability
   - utility
   - presence

@@ -9,8 +9,7 @@ packageName: tar1090adsb
 recommendedInterval: 5
 category: technology
 tags:
-  - aviation
-  - flight-tracking
+  - transport
+  - transit
   - real-time
-  - traffic
-  - sky
+  - weather

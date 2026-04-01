@@ -9,8 +9,7 @@ packageName: steamplus
 recommendedInterval: 5
 category: utilities
 tags:
-  - steam
   - gaming
   - profile
-  - status
+  - tracking
   - utility

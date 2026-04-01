@@ -9,7 +9,6 @@ packageName: spotifyfriends
 recommendedInterval: 5
 category: entertainment
 tags:
-  - spotify
   - music
-  - activity
-  - social
+  - lifestyle
+  - media

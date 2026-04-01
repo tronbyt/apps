@@ -9,7 +9,6 @@ packageName: abcradio
 recommendedInterval: 10
 category: entertainment
 tags:
-  - radio
   - music
-  - live-streaming
+  - real-time
   - australia

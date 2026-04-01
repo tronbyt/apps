@@ -8,8 +8,6 @@ fileName: trenitalia.star
 packageName: trenitalia
 category: utilities
 tags:
-  - train
   - transit
-  - commute
   - real-time
-  - travel
+  - utility

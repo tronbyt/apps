@@ -9,7 +9,7 @@ packageName: nycaspstatus
 recommendedInterval: 5
 category: utilities
 tags:
-  - parking
+  - transit
   - utility
   - street-cleaning
   - local-rules

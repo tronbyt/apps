@@ -11,8 +11,6 @@ broken: true
 brokenReason: The API endpoint mta-api-ochre.vercel.app is timed out/unreachable.
 category: utilities
 tags:
-  - train
-  - subway
-  - nyc
   - transit
+  - local
   - clock

@@ -9,6 +9,5 @@ packageName: melbournetrams
 recommendedInterval: 5
 category: utilities
 tags:
-  - tram
-  - transport
   - transit
+  - transport

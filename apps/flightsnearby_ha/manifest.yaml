@@ -10,9 +10,7 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - flight
   - transit
-  - airline
   - utility
-  - home-assistant
+  - smart-home
   - wide 2x support

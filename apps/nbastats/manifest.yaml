@@ -9,8 +9,5 @@ fileName: nba_stats.star
 packageName: nbastats
 category: sports
 tags:
-  - nba
-  - basketball
+  - sports
   - leaders
-  - scores
-  - stats

@@ -9,6 +9,4 @@ packageName: nfldivstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - nfl
   - sports
-  - standings

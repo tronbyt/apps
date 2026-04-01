@@ -10,7 +10,6 @@ packageName: githubrepos
 category: utilities
 tags:
   - workflow
-  - status
-  - devtools
+  - tracking
+  - tech
   - utility
-  - code

@@ -9,8 +9,5 @@ packageName: mlbscores
 recommendedInterval: 5
 category: sports
 tags:
-  - mlb
-  - baseball
-  - scores
   - sports
-  - live
+  - real-time

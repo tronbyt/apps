@@ -9,8 +9,6 @@ packageName: lirr
 recommendedInterval: 5
 category: utilities
 tags:
-  - train
   - transit
   - railroad
-  - commute
   - utility

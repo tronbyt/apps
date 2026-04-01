@@ -9,6 +9,5 @@ fileName: twse_stock.star
 packageName: twsestock
 category: finance
 tags:
-  - stocks
   - finance
   - utility

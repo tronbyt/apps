@@ -11,7 +11,5 @@ broken: true
 brokenReason: The MCTS Real-Time API endpoint used by this app is no longer responsive or accessible, resulting in connection timeouts.
 category: transit
 tags:
-  - bus
   - transit
-  - utilities
-  - public-transit
+  - utility

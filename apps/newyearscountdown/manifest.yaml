@@ -9,7 +9,6 @@ packageName: newyearscountdown
 recommendedInterval: 60
 category: entertainment
 tags:
-  - countdown
+  - time
   - fireworks
-  - holiday
   - new-year

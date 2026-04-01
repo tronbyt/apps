@@ -9,8 +9,7 @@ packageName: tankerkoenig
 recommendedInterval: 5
 category: utilities
 tags:
-  - gas
-  - fuel
   - utility
-  - location-based
+  - fuel
+  - local
   - tank

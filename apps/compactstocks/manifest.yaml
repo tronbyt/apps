@@ -9,8 +9,6 @@ packageName: compactstocks
 recommendedInterval: 5
 category: finance
 tags:
-  - stocks
   - finance
   - tickers
-  - market
   - real-time

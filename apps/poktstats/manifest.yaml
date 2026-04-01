@@ -10,8 +10,7 @@ broken: true
 recommendedInterval: 5
 category: utilities
 tags:
-  - blockchain
   - crypto
   - finance
   - utility
-  - monitoring
+  - tracking

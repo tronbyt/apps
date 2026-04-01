@@ -9,8 +9,7 @@ fileName: taxiway_signs.star
 packageName: taxiwaysigns
 category: utilities
 tags:
-  - aviation
-  - flight
-  - navigation
+  - transport
+  - transit
   - utility
   - airport

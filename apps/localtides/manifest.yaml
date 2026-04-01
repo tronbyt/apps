@@ -9,8 +9,7 @@ packageName: localtides
 recommendedInterval: 5
 category: weather
 tags:
-  - tides
+  - weather
   - water-level
   - oceanography
   - utility
-  - weather

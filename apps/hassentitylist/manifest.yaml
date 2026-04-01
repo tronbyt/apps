@@ -10,7 +10,7 @@ recommendedInterval: 5
 supports2x: true
 category: smart-home
 tags:
-  - home-assistant
+  - smart-home
   - fitness-tracker
   - step-count
   - utility

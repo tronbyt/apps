@@ -9,8 +9,6 @@ packageName: chiltrack
 recommendedInterval: 5
 category: transit
 tags:
-  - cta
+  - transit
   - rapid-transit
   - train-tracking
-  - subway
-  - public-transit

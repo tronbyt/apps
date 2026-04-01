@@ -9,6 +9,6 @@ packageName: letterboxd
 recommendedInterval: 5
 category: entertainment
 tags:
-  - movies
+  - media
   - reviews
-  - entertainment
+  - music

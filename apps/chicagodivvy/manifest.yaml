@@ -9,7 +9,6 @@ packageName: chicagodivvy
 recommendedInterval: 5
 category: transit
 tags:
-  - bike
   - transit
   - divvy
-  - utilities
+  - utility

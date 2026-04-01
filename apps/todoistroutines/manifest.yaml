@@ -9,8 +9,7 @@ packageName: todoistroutines
 recommendedInterval: 60
 category: utilities
 tags:
-  - todo
+  - productivity
   - adhd
   - routine
-  - productivity
   - dot-grid

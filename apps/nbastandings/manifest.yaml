@@ -9,6 +9,4 @@ packageName: nbastandings
 recommendedInterval: 5
 category: sports
 tags:
-  - nba
   - sports
-  - standings

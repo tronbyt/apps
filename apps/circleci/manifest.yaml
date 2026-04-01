@@ -9,6 +9,6 @@ packageName: circleci
 category: utilities
 tags:
   - circleci
-  - status
+  - tracking
   - build
-  - devops
+  - tech

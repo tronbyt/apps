@@ -9,8 +9,6 @@ packageName: chessviewer
 recommendedInterval: 5
 category: sports
 tags:
-  - chess
   - gaming
-  - live-updates
-  - board
   - real-time
+  - board

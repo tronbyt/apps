@@ -9,6 +9,6 @@ packageName: githubstatus
 recommendedInterval: 5
 category: utilities
 tags:
-  - monitoring
+  - tracking
   - outage
   - tech-support

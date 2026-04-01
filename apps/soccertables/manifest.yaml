@@ -9,7 +9,5 @@ packageName: soccertables
 recommendedInterval: 5
 category: sports
 tags:
-  - soccer
-  - standings
+  - sports
   - leagues
-  - football

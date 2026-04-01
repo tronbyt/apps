@@ -9,8 +9,7 @@ packageName: envoydesk
 recommendedInterval: 5
 category: utilities
 tags:
-  - status
+  - tracking
   - utility
-  - home-assistant
   - smart-home
-  - display
+  - art

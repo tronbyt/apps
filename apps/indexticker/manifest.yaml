@@ -9,6 +9,5 @@ packageName: indexticker
 recommendedInterval: 1
 category: finance
 tags:
-  - stocks
-  - indices
   - finance
+  - indices

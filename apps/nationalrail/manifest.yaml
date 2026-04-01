@@ -9,8 +9,7 @@ packageName: nationalrail
 recommendedInterval: 5
 category: utilities
 tags:
-  - trains
   - transit
-  - uk
+  - local
   - departure
   - real-time

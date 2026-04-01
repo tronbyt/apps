@@ -9,7 +9,6 @@ fileName: stripe-spotlight.star
 packageName: stripespotlight
 category: finance
 tags:
-  - sales
-  - stripe
   - finance
-  - analytics
+  - stripe
+  - tech

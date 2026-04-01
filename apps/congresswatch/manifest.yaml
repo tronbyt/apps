@@ -10,7 +10,6 @@ packageName: congresswatch
 supports2x: true
 category: news
 tags:
-  - politics
-  - legislation
   - news
+  - legislation
   - wide 2x support

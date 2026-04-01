@@ -9,8 +9,6 @@ packageName: ctaltracker
 recommendedInterval: 5
 category: transit
 tags:
-  - train
-  - subway
-  - cta
+  - transit
   - local
   - transport

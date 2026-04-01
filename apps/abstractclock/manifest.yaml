@@ -9,6 +9,6 @@ packageName: abstractclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - time-display
+  - time
   - digital-clock
-  - pixel-art
+  - art

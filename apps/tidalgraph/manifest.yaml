@@ -9,8 +9,7 @@ packageName: tidalgraph
 recommendedInterval: 5
 category: utilities
 tags:
-  - tides
-  - ocean
+  - weather
+  - nature
   - water-level
   - marine
-  - weather

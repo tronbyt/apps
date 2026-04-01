@@ -9,7 +9,6 @@ packageName: todayinhistory
 recommendedInterval: 5
 category: entertainment
 tags:
-  - history
+  - education
   - fun
-  - trivia
-  - events
+  - news

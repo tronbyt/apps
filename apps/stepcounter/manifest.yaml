@@ -9,8 +9,6 @@ packageName: stepcounter
 recommendedInterval: 5
 category: lifestyle
 tags:
-  - fitness
-  - health
+  - lifestyle
   - step-tracking
-  - activity
   - goal-monitoring

@@ -9,8 +9,6 @@ packageName: bestpicturepicker
 recommendedInterval: 5
 category: entertainment
 tags:
-  - movies
+  - media
   - awards
-  - cinema
-  - random
   - fun

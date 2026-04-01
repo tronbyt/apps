@@ -10,8 +10,5 @@ broken: true
 recommendedInterval: 5
 category: sports
 tags:
-  - cricket
   - sports
-  - standings
-  - scores
   - match-tracker

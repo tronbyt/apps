@@ -9,7 +9,5 @@ packageName: pull_request_status
 recommendedInterval: 5
 category: utilities
 tags:
-  - github
-  - code
-  - devtools
-  - status
+  - tech
+  - tracking

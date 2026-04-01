@@ -11,7 +11,5 @@ broken: true
 brokenReason: 'path.api.razza.dev: no such host'
 category: weather
 tags:
-  - train
   - transit
-  - schedule
-  - commute
+  - productivity

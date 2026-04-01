@@ -9,8 +9,4 @@ packageName: sportsscoreboard
 recommendedInterval: 5
 category: sports
 tags:
-  - mlb
-  - nba
-  - nhl
-  - nfl
-  - scores
+  - sports

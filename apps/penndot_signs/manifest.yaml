@@ -6,8 +6,7 @@ desc: Display messages from PennDOT DMS signage on PA highways.
 author: radiocolin
 category: utilities
 tags:
-  - traffic
+  - transit
   - highway
   - utility
   - dms
-  - road

@@ -9,8 +9,5 @@ packageName: btchalving
 recommendedInterval: 1
 category: technology
 tags:
-  - bitcoin
   - crypto
-  - mining
   - finance
-  - blockchain

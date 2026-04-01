@@ -9,8 +9,8 @@ packageName: metar
 recommendedInterval: 5
 category: utilities
 tags:
-  - aviation
+  - transport
   - weather
-  - flight
+  - transit
   - utility
   - metar

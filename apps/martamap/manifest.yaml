@@ -11,7 +11,5 @@ recommendedInterval: 5
 category: transit
 tags:
   - marta
-  - train
   - transit
-  - subway
-  - utilities
+  - utility

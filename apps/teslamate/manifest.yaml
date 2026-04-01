@@ -11,9 +11,8 @@ supports2x: true
 minPixletVersion: v0.49.9
 category: utilities
 tags:
-  - tesla
-  - home-assistant
+  - tech
+  - smart-home
   - utility
   - car-info
-  - smart-home
   - wide 2x support

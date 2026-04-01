@@ -9,8 +9,6 @@ packageName: pathtimes
 recommendedInterval: 5
 category: utilities
 tags:
-  - train
   - transit
   - nj-path
-  - subway
   - real-time

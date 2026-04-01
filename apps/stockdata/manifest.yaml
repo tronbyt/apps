@@ -10,7 +10,6 @@ recommendedInterval: 1
 supports2x: true
 category: finance
 tags:
-  - stocks
   - finance
   - intraday
   - wide 2x support

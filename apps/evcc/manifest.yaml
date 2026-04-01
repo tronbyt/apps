@@ -8,7 +8,5 @@ recommendedInterval: 5
 category: utilities
 tags:
   - ev
-  - energy
-  - smart-home
   - utility
-  - home-assistant
+  - smart-home

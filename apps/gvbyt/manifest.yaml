@@ -9,8 +9,7 @@ packageName: gvbyt
 recommendedInterval: 5
 category: transit
 tags:
-  - tram
-  - public-transit
+  - transit
   - transport
   - utility
   - real-time

@@ -9,8 +9,6 @@ packageName: solarmanagerch
 recommendedInterval: 5
 category: technology
 tags:
-  - solar
-  - energy
-  - smart-home
   - utility
-  - api
+  - smart-home
+  - tech

@@ -9,8 +9,6 @@ packageName: lichesscorrespond
 recommendedInterval: 5
 category: gaming
 tags:
-  - chess
-  - game
+  - gaming
   - lichess
   - correspondence
-  - puzzle

@@ -11,6 +11,6 @@ broken: true
 brokenReason: Website structure changed or API endpoint removed
 category: utilities
 tags:
-  - movies
+  - media
   - showtimes
-  - calendar
+  - productivity

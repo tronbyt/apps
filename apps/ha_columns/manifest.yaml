@@ -10,8 +10,8 @@ recommendedInterval: 5
 supports2x: true
 category: smart-home
 tags:
-  - home-assistant
-  - display
+  - smart-home
+  - art
   - utility
   - configurable
   - sensors

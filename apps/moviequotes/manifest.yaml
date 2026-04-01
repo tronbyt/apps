@@ -9,7 +9,6 @@ packageName: moviequotes
 recommendedInterval: 5
 category: entertainment
 tags:
-  - movies
-  - quotes
+  - media
+  - art
   - fun
-  - cinema

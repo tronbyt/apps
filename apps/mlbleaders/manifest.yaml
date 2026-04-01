@@ -9,7 +9,4 @@ packageName: mlbleaders
 recommendedInterval: 5
 category: sports
 tags:
-  - mlb
   - sports
-  - standings
-  - scores

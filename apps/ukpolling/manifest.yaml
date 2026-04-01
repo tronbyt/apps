@@ -9,7 +9,6 @@ fileName: uk_polling.star
 packageName: ukpolling
 category: news
 tags:
-  - uk
-  - politics
-  - polls
+  - local
   - news
+  - polls

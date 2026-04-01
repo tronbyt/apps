@@ -9,7 +9,6 @@ packageName: hassentity
 recommendedInterval: 5
 category: smart-home
 tags:
-  - home-assistant
+  - smart-home
   - utility
-  - iot
   - state-display

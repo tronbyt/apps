@@ -9,7 +9,6 @@ packageName: marketstack
 recommendedInterval: 1
 category: finance
 tags:
-  - stocks
   - finance
   - tracking
   - intraday

@@ -9,7 +9,5 @@ packageName: ctatraintracker
 recommendedInterval: 5
 category: transit
 tags:
-  - train
-  - cta
-  - subway
-  - schedule
+  - transit
+  - productivity

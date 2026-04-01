@@ -9,6 +9,5 @@ packageName: thanksgivingday
 recommendedInterval: 5
 category: utilities
 tags:
-  - countdown
-  - holiday
+  - time
   - thanksgiving

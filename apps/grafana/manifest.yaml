@@ -8,6 +8,6 @@ fileName: grafana.star
 packageName: grafana
 category: utilities
 tags:
-  - metrics
+  - tech
   - data-visual
-  - utility-app
+  - utility

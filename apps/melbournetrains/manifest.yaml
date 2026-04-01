@@ -9,8 +9,6 @@ packageName: melbournetrains
 recommendedInterval: 5
 category: weather
 tags:
-  - train
   - transit
   - melbourne
   - real-time
-  - subway

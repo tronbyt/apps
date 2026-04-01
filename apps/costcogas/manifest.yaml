@@ -10,7 +10,6 @@ recommendedInterval: 5
 broken: true
 category: utilities
 tags:
-  - gas
   - utility
   - transit
-  - price-tracker
+  - finance

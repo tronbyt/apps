@@ -9,8 +9,7 @@ packageName: teslasolar
 recommendedInterval: 5
 category: smart-home
 tags:
-  - tesla
-  - solar
-  - energy
+  - tech
+  - utility
   - monitor
-  - home-assistant
+  - smart-home

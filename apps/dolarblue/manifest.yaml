@@ -9,7 +9,6 @@ packageName: dolarblue
 recommendedInterval: 1
 category: finance
 tags:
-  - currency
+  - finance
   - exchange
   - argentine
-  - finance

@@ -10,8 +10,6 @@ broken: true
 recommendedInterval: 5
 category: utilities
 tags:
-  - flight
-  - aircraft
   - transit
-  - travel
+  - aircraft
   - utility

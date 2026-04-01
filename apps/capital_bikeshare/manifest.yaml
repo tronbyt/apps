@@ -9,7 +9,6 @@ packageName: capitalbikeshare
 recommendedInterval: 5
 category: utilities
 tags:
-  - bike
   - transit
   - docking
   - utility

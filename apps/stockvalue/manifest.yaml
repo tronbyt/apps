@@ -9,7 +9,6 @@ packageName: stockvalue
 recommendedInterval: 1
 category: finance
 tags:
-  - stock
   - finance
   - portfolio
   - tracking

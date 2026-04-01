@@ -9,6 +9,6 @@ entrypoint: main
 recommendedInterval: 5
 category: transit
 tags:
-  - bus
+  - transit
   - trondheim
   - utility

@@ -9,7 +9,5 @@ packageName: nflscores
 recommendedInterval: 5
 category: sports
 tags:
-  - nfl
   - sports
-  - scores
-  - live-updates
+  - real-time

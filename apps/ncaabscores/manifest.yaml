@@ -9,8 +9,6 @@ packageName: ncaabscores
 recommendedInterval: 5
 category: sports
 tags:
-  - nba
   - sports
-  - scores
-  - live-updates
+  - real-time
   - gaming

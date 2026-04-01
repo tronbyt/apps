@@ -9,8 +9,7 @@ packageName: satoshiradio
 recommendedInterval: 5
 category: utilities
 tags:
-  - mining
-  - pool-stats
   - crypto
+  - pool-stats
   - utility
-  - stats
+  - sports

@@ -9,6 +9,5 @@ packageName: skordlescores
 recommendedInterval: 5
 category: sports
 tags:
-  - football
-  - scores
-  - game-tracker
+  - sports
+  - gaming

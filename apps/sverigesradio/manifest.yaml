@@ -9,7 +9,6 @@ packageName: sverigesradio
 recommendedInterval: 10
 category: entertainment
 tags:
-  - live
+  - real-time
   - music
-  - radio
-  - streaming
+  - media

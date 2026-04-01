@@ -9,7 +9,6 @@ packageName: dailyreminder
 recommendedInterval: 5
 category: utilities
 tags:
-  - calendar
-  - daily
-  - reminders
+  - productivity
+  - time
   - utility

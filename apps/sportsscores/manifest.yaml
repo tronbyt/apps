@@ -9,7 +9,5 @@ packageName: sportsscores
 recommendedInterval: 5
 category: sports
 tags:
-  - scores
   - sports
-  - live-updates
-  - standings
+  - real-time

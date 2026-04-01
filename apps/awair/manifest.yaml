@@ -9,5 +9,5 @@ packageName: awair
 recommendedInterval: 5
 category: smart-home
 tags:
-  - air-quality
-  - home-assistant
+  - weather
+  - smart-home

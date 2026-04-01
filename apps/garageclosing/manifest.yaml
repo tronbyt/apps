@@ -8,8 +8,7 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - home
   - smart-home
-  - notifications
+  - notification
   - garage
   - wide 2x support

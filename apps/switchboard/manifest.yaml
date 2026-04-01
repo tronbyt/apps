@@ -8,8 +8,6 @@ fileName: switchboard.star
 packageName: switchboard
 category: utilities
 tags:
-  - iot
-  - home-assistant
+  - smart-home
   - data-display
   - weather-station
-  - smart-home

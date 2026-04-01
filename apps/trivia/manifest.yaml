@@ -10,6 +10,4 @@ broken: true
 brokenReason: Jservice API (http://jservice.io) is blocking requests (403 Forbidden).
 category: entertainment
 tags:
-  - quiz
   - fun
-  - trivia

@@ -9,7 +9,6 @@ packageName: wordoftheday
 recommendedInterval: 5
 category: education
 tags:
-  - vocabulary
+  - education
   - dictionary
-  - learning
-  - reference
+  - utility

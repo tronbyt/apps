@@ -9,8 +9,8 @@ packageName: tidclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - time-tracker
-  - moon-phase
+  - tracking
+  - weather
   - seasons
-  - calendar
+  - productivity
   - utility

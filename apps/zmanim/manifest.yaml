@@ -9,7 +9,7 @@ packageName: zmanim
 recommendedInterval: 60
 categories:
   - utility
-  - religious
+  - lifestyle
 requires:
   - http
 exampleConfig:
@@ -17,8 +17,7 @@ exampleConfig:
   speed: '30'
 category: utilities
 tags:
-  - religious
-  - prayer
+  - lifestyle
   - jewish
   - utility
   - clock

@@ -11,9 +11,8 @@ supports2x: true
 minPixletVersion: v0.49.0
 category: utilities
 tags:
-  - holiday
+  - time
   - tree
-  - countdown
   - december
   - fun
   - wide 2x support

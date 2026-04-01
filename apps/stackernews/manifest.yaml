@@ -9,7 +9,6 @@ packageName: stackernews
 recommendedInterval: 5
 category: entertainment
 tags:
-  - bitcoin
   - crypto
   - tech
   - news

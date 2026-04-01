@@ -9,8 +9,6 @@ packageName: tessie
 recommendedInterval: 5
 category: technology
 tags:
-  - tesla
+  - tech
   - smart-home
-  - home-assistant
-  - iot
   - car-tech

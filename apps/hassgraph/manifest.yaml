@@ -9,7 +9,7 @@ fileName: hass_graph.star
 packageName: hassgraph
 category: utilities
 tags:
-  - home-assistant
+  - smart-home
   - thermostat
-  - stats
+  - sports
   - utility

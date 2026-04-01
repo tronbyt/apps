@@ -9,8 +9,6 @@ packageName: hashrate
 recommendedInterval: 1
 category: utilities
 tags:
-  - bitcoin
   - crypto
   - utility
-  - data
-  - mining
+  - tech

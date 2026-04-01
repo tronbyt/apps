@@ -9,6 +9,5 @@ packageName: outlookcalendar
 recommendedInterval: 5
 category: utilities
 tags:
-  - calendar
+  - productivity
   - meeting
-  - outlook

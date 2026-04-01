@@ -9,6 +9,5 @@ packageName: visualcrossingweather
 category: weather
 tags:
   - weather
-  - temp
   - humidity
-  - location-based
+  - local

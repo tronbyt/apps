@@ -9,6 +9,5 @@ packageName: trolleydetector
 recommendedInterval: 5
 category: transit
 tags:
-  - subway
-  - public-transit
+  - transit
   - commuter

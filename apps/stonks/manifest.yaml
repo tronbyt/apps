@@ -9,7 +9,5 @@ packageName: stonks
 recommendedInterval: 1
 category: finance
 tags:
-  - stocks
   - finance
-  - market
-  - quotes
+  - art
