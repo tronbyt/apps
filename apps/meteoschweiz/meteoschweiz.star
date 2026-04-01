@@ -307,25 +307,27 @@ def main(config):
     if station.get("value", "0") == "0":
         return error_display("No Station selected", scale)
 
+    station_point_id = station.get("value", "0")
+
     # Fetch and process data based on forecast type
     if forecast_type == "3hour":
         # Fetch 3-hour forecast data
-        weather_data = fetch_3hour_data()
+        weather_data = fetch_3hour_data(station_point_id)
         if not weather_data:
             return error_display("3hr API Error", scale)
 
         # Process 3-hour forecast
-        forecast_data = process_3hour_forecast(weather_data, station)
+        forecast_data = process_3hour_forecast(weather_data)
         if not forecast_data:
             return error_display("3hr No Forecasts", scale)
     else:
         # Fetch daily weather data
-        weather_data = fetch_weather_data()
+        weather_data = fetch_weather_data(station_point_id)
         if not weather_data:
             return error_display("Weather API Error", scale)
 
         # Process daily forecast
-        forecast_data = process_forecast(weather_data, station)
+        forecast_data = process_forecast(weather_data)
 
     # Render the display
     return render_weather(forecast_data, forecast_type, scale)
@@ -393,15 +395,18 @@ def get_stations_list():
 
     return stations
 
-def fetch_weather_data():
-    """Fetch weather data from MeteoSwiss STAC API.
+def fetch_weather_data(station_point_id):
+    """Fetch weather data from MeteoSwiss STAC API for a single station.
+
+    Args:
+        station_point_id: The point ID of the station to fetch data for.
 
     Returns:
-        Dictionary with temperature and symbol data for all stations, or None on error.
+        Dictionary with temperature and symbol data for the station, or None on error.
     """
 
     # Check cache first
-    cache_key = "meteoschweiz_weather_all"
+    cache_key = "meteoschweiz_weather_{}".format(station_point_id)
     cached = cache.get(cache_key)
 
     if cached:
@@ -415,50 +420,29 @@ def fetch_weather_data():
         if cached_date == current_date:
             return cached_data
 
-    # First, get the list of available data
-    stac_url = "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-local-forecasting/items"
-
-    resp = http.get(stac_url, ttl_seconds = 3600)
-    if resp.status_code != 200:
+    # Get the latest forecast date
+    date_part = get_latest_forecast_date()
+    if not date_part:
         return None
-
-    data = json.decode(resp.body())
-    items = data.get("features", [])
-
-    if not items:
-        return None
-
-    # Get the most recent item
-    latest_item = items[0]
-    date_str = latest_item.get("properties", {}).get("datetime", "")
-
-    # Extract date in format YYYYMMDD
-    if "T" in date_str:
-        date_part = date_str.split("T")[0].replace("-", "")
-    else:
-        date_part = date_str.replace("-", "")
 
     # Construct base URL for data files
     base_url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/{}-ch/".format(date_part)
 
-    # Fetch temperature and weather symbol data for all stations
+    # Fetch temperature and weather symbol data for this station only
     tre_min_url = base_url + "vnut12.lssw.{}0000.tre200pn.csv".format(date_part)
     tre_max_url = base_url + "vnut12.lssw.{}0000.tre200px.csv".format(date_part)
     symbol_url = base_url + "vnut12.lssw.{}0000.jp2000d0.csv".format(date_part)
 
-    tre_min_data = fetch_csv_data(tre_min_url, ttl_seconds = 3600)
-    tre_max_data = fetch_csv_data(tre_max_url, ttl_seconds = 3600)
-    symbols_data = fetch_csv_data(symbol_url, ttl_seconds = 3600)
+    tre_min_data = fetch_csv_data(tre_min_url, station_point_id, ttl_seconds = 3600)
+    tre_max_data = fetch_csv_data(tre_max_url, station_point_id, ttl_seconds = 3600)
+    symbols_data = fetch_csv_data(symbol_url, station_point_id, ttl_seconds = 3600)
 
     # Ensure we have data and extract values
     if not tre_min_data or not tre_max_data or not symbols_data:
         return None
 
-    # Extract unique timestamps from any station data (all should have same timestamps)
-    timestamps = []
-    for station_id in tre_max_data:
-        timestamps = sorted(list(tre_max_data[station_id].keys()))
-        break
+    # Extract unique timestamps
+    timestamps = sorted(list(tre_max_data.keys()))
 
     weather_data = {
         "tre_min": tre_min_data,
@@ -473,50 +457,59 @@ def fetch_weather_data():
 
     return weather_data
 
-def fetch_3hour_data():
-    """Fetch 3-hour forecast data from MeteoSwiss STAC API.
+def compute_3hour_timestamps():
+    """Compute the next 3 forecast timestamps at 3-hour intervals from now.
 
     Returns:
-        Dictionary with temperature, symbol, and precipitation data for all stations, or None on error.
+        List of 3 timestamp strings in YYYYMMDDHHMM format.
+    """
+    now = time.now().in_location("Europe/Zurich")
+
+    # Round up to the next 3-hour boundary
+    hour = int(now.format("15"))
+    next_3h = hour + (3 - hour % 3) if hour % 3 != 0 else hour
+
+    # If rounding pushed to next day or current hour is exact, handle accordingly
+    year = int(now.format("2006"))
+    month = int(now.format("01"))
+    day = int(now.format("02"))
+
+    timestamps = []
+    for i in range(3):
+        h = next_3h + i * 3
+        d = day + h // 24
+        h = h % 24
+
+        # Use time.time to handle month/day overflow correctly
+        t = time.time(year = year, month = month, day = d, hour = h, location = "Europe/Zurich")
+        timestamps.append(t.format("200601021504"))
+
+    return timestamps
+
+def fetch_3hour_data(station_point_id):
+    """Fetch 3-hour forecast data from MeteoSwiss STAC API for a single station.
+
+    Args:
+        station_point_id: The point ID of the station to fetch data for.
+
+    Returns:
+        Dictionary with temperature, symbol, and precipitation data for the station, or None on error.
     """
 
+    # Compute which 3 timestamps we actually need
+    needed_timestamps = compute_3hour_timestamps()
+
     # Check cache first
-    cache_key = "meteoschweiz_3hour_all"
+    cache_key = "meteoschweiz_3hour_{}_{}".format(station_point_id, needed_timestamps[0])
     cached = cache.get(cache_key)
 
     if cached:
-        cached_data = json.decode(cached)
-        cached_date = cached_data.get("date", "")
+        return json.decode(cached)
 
-        # Get current date in YYYYMMDD format
-        current_date = time.now().in_location("Europe/Zurich").format("20060102")
-
-        # Return cached data if date matches
-        if cached_date == current_date:
-            return cached_data
-
-    # First, get the list of available data
-    stac_url = "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-local-forecasting/items"
-
-    resp = http.get(stac_url, ttl_seconds = 3600)
-    if resp.status_code != 200:
+    # Get the latest forecast date
+    date_part = get_latest_forecast_date()
+    if not date_part:
         return None
-
-    data = json.decode(resp.body())
-    items = data.get("features", [])
-
-    if not items:
-        return None
-
-    # Get the most recent item
-    latest_item = items[0]
-    date_str = latest_item.get("properties", {}).get("datetime", "")
-
-    # Extract date in format YYYYMMDD
-    if "T" in date_str:
-        date_part = date_str.split("T")[0].replace("-", "")
-    else:
-        date_part = date_str.replace("-", "")
 
     # Construct base URL for data files
     base_url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/{}-ch/".format(date_part)
@@ -526,62 +519,208 @@ def fetch_3hour_data():
     symbol_url = base_url + "vnut12.lssw.{}0000.jww003i0.csv".format(date_part)
     precip_url = base_url + "vnut12.lssw.{}0000.rre003i0.csv".format(date_part)
 
-    temperature_data = fetch_csv_data(tre_url, ttl_seconds = 600)
-    symbols_data = fetch_csv_data(symbol_url, ttl_seconds = 600)
-    precipitation_data = fetch_csv_data(precip_url, ttl_seconds = 600)
+    # Only fetch data for the 3 timestamps we need
+    temperature_data = fetch_csv_data(tre_url, station_point_id, ttl_seconds = 600, needed_timestamps = needed_timestamps)
+    symbols_data = fetch_csv_data(symbol_url, station_point_id, ttl_seconds = 600, needed_timestamps = needed_timestamps)
+    precipitation_data = fetch_csv_data(precip_url, station_point_id, ttl_seconds = 600, needed_timestamps = needed_timestamps)
 
     # Ensure we have data with proper structure
     if not temperature_data or not symbols_data or not precipitation_data:
         return None
 
-    # Extract unique timestamps from any station data (all should have same timestamps)
-    timestamps = []
-    for station_id in temperature_data:
-        timestamps = sorted(list(temperature_data[station_id].keys()))
-        break
-
     weather_data = {
         "temperature": temperature_data,
         "symbols": symbols_data,
         "precipitation": precipitation_data,
-        "timestamps": timestamps,
+        "timestamps": needed_timestamps,
         "date": date_part,
     }
 
-    # Cache for 1 hour (3600 seconds) since 3-hour data updates more frequently
-    cache.set(cache_key, json.encode(weather_data), ttl_seconds = 3600)
+    # Cache for 10 minutes to pick up forecast updates
+    cache.set(cache_key, json.encode(weather_data), ttl_seconds = 600)
 
     return weather_data
 
-def fetch_csv_data(url, ttl_seconds = 21600):
-    """Fetch large CSV data in chunks to avoid caching issues.
+def get_latest_forecast_date():
+    """Get the date string of the latest forecast from the STAC API.
 
-    Downloads the file in 1MB chunks using HTTP Range requests, processing each
-    chunk immediately to extract station data without loading the entire file.
+    Returns:
+        Date string in YYYYMMDD format, or None on error.
+    """
+    cache_key = "meteoschweiz_forecast_date"
+    cached = cache.get(cache_key)
+
+    if cached:
+        current_date = time.now().in_location("Europe/Zurich").format("20060102")
+        if cached == current_date:
+            return cached
+
+    stac_url = "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-local-forecasting/items"
+    resp = http.get(stac_url, ttl_seconds = 3600)
+    if resp.status_code != 200:
+        return None
+
+    data = json.decode(resp.body())
+    items = data.get("features", [])
+    if not items:
+        return None
+
+    latest_item = items[0]
+    date_str = latest_item.get("properties", {}).get("datetime", "")
+
+    if "T" in date_str:
+        date_part = date_str.split("T")[0].replace("-", "")
+    else:
+        date_part = date_str.replace("-", "")
+
+    cache.set(cache_key, date_part, ttl_seconds = 3600)
+    return date_part
+
+def measure_csv_block_size(url):
+    """Read the first chunk of a CSV file to measure the timestamp block size.
+
+    The hourly CSV files are organized as sequential blocks of station rows,
+    one block per timestamp. This reads the first 1MB to find the byte offset
+    where the second timestamp block starts, giving us the actual block size.
 
     Args:
         url: URL to CSV file.
-        ttl_seconds: Cache time-to-live in seconds (default 6 hours).
 
     Returns:
-        A dictionary mapping point_id to a dictionary of {timestamp: value} pairs.
+        Tuple of (first_timestamp, header_size, block_size) or None on error.
     """
-
-    # Check cache first
-    cache_key = "meteoschweiz_csv_{}".format(url)
+    cache_key = "meteoschweiz_blocksize_{}".format(url)
     cached = cache.get(cache_key)
     if cached:
-        print("Using cached CSV data for URL: {}".format(url))
+        parts = cached.split(CSV_DELIMITER)
+        return (parts[0], int(parts[1]), int(parts[2]))
+
+    headers = {"Range": "bytes=0-1048575"}
+    resp = http.get(url, headers = headers, ttl_seconds = 600)
+    if resp.status_code != 206:
+        return None
+
+    data = resp.body()
+
+    # Split into lines and find where the second timestamp block starts
+    lines = data.split("\n")
+    if len(lines) < 3:
+        return None
+
+    # First line is header, second line is first data row
+    header_size = len(lines[0]) + 1  # +1 for newline
+    first_ts = lines[1].split(CSV_DELIMITER)[2]
+
+    # Walk through lines to find where the timestamp changes
+    byte_offset = header_size
+    for i in range(1, len(lines)):
+        line = lines[i]
+        if not line:
+            byte_offset += 1  # empty line = just the newline
+            continue
+        parts = line.split(CSV_DELIMITER)
+        if len(parts) >= 3 and parts[2] != first_ts:
+            # Found the start of the second block
+            block_size = byte_offset - header_size
+            result = (first_ts, header_size, block_size)
+
+            # Cache block size for this URL (same as HTTP cache TTL)
+            cache.set(cache_key, "{};{};{}".format(first_ts, header_size, block_size), ttl_seconds = 600)
+            return result
+        byte_offset += len(line) + 1  # +1 for newline
+
+    return None
+
+def fetch_csv_data(url, station_point_id, ttl_seconds = 21600, needed_timestamps = None):
+    """Fetch CSV data and extract only the requested station's data.
+
+    When needed_timestamps is provided, reads the first chunk to measure the
+    actual block size, then makes small targeted range requests (~150KB each)
+    to jump directly to the blocks containing the needed timestamps. Falls
+    back to sequential 1MB chunk reading for daily CSVs or on error.
+
+    Args:
+        url: URL to CSV file.
+        station_point_id: The point ID to extract data for.
+        ttl_seconds: Cache time-to-live in seconds (default 6 hours).
+        needed_timestamps: Optional list of timestamp strings to filter for.
+
+    Returns:
+        A dictionary of {timestamp: value} pairs for the requested station.
+    """
+
+    # Check cache first (per station + URL + timestamps)
+    ts_suffix = needed_timestamps[0] if needed_timestamps else "all"
+    cache_key = "meteoschweiz_csv_{}_{}_{}".format(station_point_id, ts_suffix, url)
+    cached = cache.get(cache_key)
+    if cached:
         return json.decode(cached)
 
-    print("Fetching CSV data from URL: {}".format(url))
+    prefix = station_point_id + CSV_DELIMITER
+    station_data = {}
 
+    # Try targeted range requests when we know which timestamps we need
+    if needed_timestamps:
+        block_info = measure_csv_block_size(url)
+        if block_info:
+            first_ts, header_size, block_size = block_info
+
+            # Parse the first timestamp to compute hour offsets
+            first_year = int(first_ts[0:4])
+            first_month = int(first_ts[4:6])
+            first_day = int(first_ts[6:8])
+            first_hour = int(first_ts[8:10])
+            first_time = time.time(year = first_year, month = first_month, day = first_day, hour = first_hour, location = "Europe/Zurich")
+
+            # Add margin for block size variation across the file
+            margin = block_size // 20
+
+            for ts in needed_timestamps:
+                ts_year = int(ts[0:4])
+                ts_month = int(ts[4:6])
+                ts_day = int(ts[6:8])
+                ts_hour = int(ts[8:10])
+                target_time = time.time(year = ts_year, month = ts_month, day = ts_day, hour = ts_hour, location = "Europe/Zurich")
+
+                # Calculate the hour offset from the first timestamp
+                diff = target_time - first_time
+                hours = int(diff.hours)
+                if hours < 0:
+                    continue
+
+                # Jump to the estimated block position
+                start = header_size + hours * block_size - margin
+                if start < 0:
+                    start = 0
+                end = start + block_size + 2 * margin
+
+                headers = {"Range": "bytes={}-{}".format(start, end)}
+                resp = http.get(url, headers = headers, ttl_seconds = 600)
+                if resp.status_code != 206:
+                    continue
+
+                # Scan the block for our station + timestamp
+                for line in resp.body().split("\n"):
+                    if not line.startswith(prefix):
+                        continue
+                    parts = line.split(CSV_DELIMITER)
+                    if len(parts) >= 4 and parts[2] == ts:
+                        val = parts[3]
+                        station_data[ts] = float(val) if val and val != "-" else 0
+                        break
+
+            if station_data:
+                cache.set(cache_key, json.encode(station_data), ttl_seconds = ttl_seconds)
+                return station_data
+
+        # Fall through to sequential reading if targeted requests failed
+
+    # Sequential chunk reading for daily CSVs or as fallback
     CHUNK_SIZE = 1024 * 1024  # 1MB chunks
     MAX_CHUNKS = 40  # Support files up to ~40MB
-    station_data = {}
     leftover = ""
+    needed_count = len(needed_timestamps) if needed_timestamps else 0
 
-    # Download and process in chunks
     for chunk_num in range(MAX_CHUNKS):
         chunk_start = chunk_num * CHUNK_SIZE
         chunk_end = chunk_start + CHUNK_SIZE - 1
@@ -592,54 +731,58 @@ def fetch_csv_data(url, ttl_seconds = 21600):
 
         # Check response - 206 is Partial Content
         if resp.status_code == 206:
-            # Partial content received - process it
             chunk_data = resp.body()
 
-            # Combine with leftover from previous chunk
-            data = leftover + chunk_data
-
-            # Split into lines
-            lines = data.split("\n")
+            # Split into lines, prepending leftover to first line
+            lines = chunk_data.split("\n")
+            if leftover:
+                lines[0] = leftover + lines[0]
 
             # Save the last incomplete line for next chunk
             leftover = lines[-1]
             lines = lines[:-1]
 
-            # On first chunk, extract and skip header
+            # On first chunk, skip header
             if chunk_num == 0 and len(lines) > 0:
-                # Skip header line
                 lines = lines[1:]
 
-            # Process lines in this chunk
+            # Process lines - only keep matching station
             for line in lines:
                 if not line:
                     continue
 
+                # Quick prefix check before full split
+                if not line.startswith(prefix):
+                    continue
+
                 parts = line.split(CSV_DELIMITER)
                 if len(parts) >= 4:
-                    point_id = parts[0]
-                    timestamp = parts[2]  # Date column in YYYYMMDDHHMM format
-                    val = parts[3]
+                    timestamp = parts[2]
 
-                    if point_id:
-                        # Store data for this station with timestamp as key
-                        if point_id not in station_data:
-                            station_data[point_id] = {}
-                        station_data[point_id][timestamp] = float(val) if val and val != "-" else 0
+                    # Skip timestamps we don't need
+                    if needed_timestamps and timestamp not in needed_timestamps:
+                        continue
+
+                    val = parts[3]
+                    station_data[timestamp] = float(val) if val and val != "-" else 0
+
+                    # Stop early if we have all needed timestamps
+                    if needed_count and len(station_data) >= needed_count:
+                        break
+
+            # Stop downloading if we have all needed data
+            if needed_count and len(station_data) >= needed_count:
+                break
 
             # Check if we got less than requested (end of file)
             if len(chunk_data) < CHUNK_SIZE:
-                # Process any remaining leftover
-                if leftover.strip():
+                if leftover.strip() and leftover.startswith(prefix):
                     parts = leftover.split(CSV_DELIMITER)
                     if len(parts) >= 4:
-                        point_id = parts[0]
                         timestamp = parts[2]
-                        val = parts[3]
-                        if point_id:
-                            if point_id not in station_data:
-                                station_data[point_id] = {}
-                            station_data[point_id][timestamp] = float(val) if val and val != "-" else 0
+                        if not needed_timestamps or timestamp in needed_timestamps:
+                            val = parts[3]
+                            station_data[timestamp] = float(val) if val and val != "-" else 0
                 break
         elif resp.status_code == 416:
             # Range not satisfiable - we've read past the end
@@ -653,33 +796,21 @@ def fetch_csv_data(url, ttl_seconds = 21600):
     cache.set(cache_key, json.encode(station_data), ttl_seconds = ttl_seconds)
     return station_data
 
-def process_forecast(weather_data, station):
+def process_forecast(weather_data):
     """Process MeteoSwiss forecast data into daily forecasts.
 
     Args:
-        weather_data: Dictionary with temperature and symbol data for all stations.
-        station: Station dictionary with metadata.
+        weather_data: Dictionary with temperature and symbol data for a single station.
 
     Returns:
         List of daily forecast dictionaries.
     """
     daily_data = []
 
-    # Get station point_id
-    station_point_id = station.get("value", "")
-    if not station_point_id:
-        return daily_data
-
-    # Extract data for all stations
-    tre_min_all = weather_data.get("tre_min", {})
-    tre_max_all = weather_data.get("tre_max", {})
-    symbols_all = weather_data.get("symbols", {})
+    tre_min = weather_data.get("tre_min", {})
+    tre_max = weather_data.get("tre_max", {})
+    symbols = weather_data.get("symbols", {})
     timestamps = weather_data.get("timestamps", [])
-
-    # Filter for the specific station
-    tre_min = tre_min_all.get(station_point_id, {})
-    tre_max = tre_max_all.get(station_point_id, {})
-    symbols = symbols_all.get(station_point_id, {})
 
     # Process up to 3 days using timestamps
     for i in range(min(3, len(timestamps))):
@@ -708,58 +839,24 @@ def process_forecast(weather_data, station):
 
     return daily_data
 
-def process_3hour_forecast(weather_data, station):
+def process_3hour_forecast(weather_data):
     """Process MeteoSwiss 3-hour forecast data.
 
     Args:
-        weather_data: Dictionary with temperature, symbol, and precipitation data for all stations.
-        station: Station dictionary with metadata.
+        weather_data: Dictionary with temperature, symbol, and precipitation data for a single station.
+            Timestamps are already pre-filtered to the 3 needed 3-hour intervals.
 
     Returns:
         List of 3-hour forecast dictionaries (3 intervals).
     """
     forecast_data = []
 
-    # Get station point_id
-    station_point_id = station.get("value", "")
-    if not station_point_id:
-        return forecast_data
-
-    # Extract data for all stations
-    temperature_all = weather_data.get("temperature", {})
-    symbols_all = weather_data.get("symbols", {})
-    precipitation_all = weather_data.get("precipitation", {})
+    temperatures = weather_data.get("temperature", {})
+    symbols = weather_data.get("symbols", {})
+    precipitation = weather_data.get("precipitation", {})
     timestamps = weather_data.get("timestamps", [])
 
-    # Filter for the specific station
-    temperatures = temperature_all.get(station_point_id, {})
-    symbols = symbols_all.get(station_point_id, {})
-    precipitation = precipitation_all.get(station_point_id, {})
-
-    # Filter timestamps to 3-hour intervals (00, 03, 06, 09, 12, 15, 18, 21)
-    # The data is hourly, so we need to select only 3-hour intervals
-    three_hour_timestamps = []
-    for ts in timestamps:
-        if len(ts) >= 12:
-            hour = int(ts[8:10])
-
-            # Include timestamps at 3-hour intervals
-            if hour % 3 == 0:
-                three_hour_timestamps.append(ts)
-
-    # Show next 3 forecast intervals at/after current local time
-    now_str = time.now().in_location("Europe/Zurich").format("200601021504")
-
-    # Find the first timestamp that is at or after now
-    start_pos = 0
-    for pos, ts in enumerate(three_hour_timestamps):
-        if len(ts) >= 12 and ts >= now_str:
-            start_pos = pos
-            break
-
-    # Collect up to 3 intervals starting from start_pos
-    selected_timestamps = three_hour_timestamps[start_pos:start_pos + 3]
-    for timestamp_str in selected_timestamps:
+    for timestamp_str in timestamps:
         # Parse timestamp from CSV (format: YYYYMMDDHHMM)
         if len(timestamp_str) >= 12:
             year = int(timestamp_str[0:4])
@@ -804,13 +901,15 @@ def render_weather(daily_data, forecast_type, scale):
 
     columns = []
     is_3hour = forecast_type == "3hour"
+    icon_cache = {}
 
     for i, day in enumerate(daily_data):
-        # Get weather icon using symbol code directly
+        # Get weather icon using symbol code directly, caching readall() results
         symbol_code = day.get("symbol", 1)
-        weather_images = WEATHER_IMAGES.get(symbol_code, (IMG_ERROR, IMG_ERROR_2X))
-        weather_image = weather_images[scale - 1]
-        weather_icon_src = weather_image.readall()
+        if symbol_code not in icon_cache:
+            weather_images = WEATHER_IMAGES.get(symbol_code, (IMG_ERROR, IMG_ERROR_2X))
+            icon_cache[symbol_code] = weather_images[scale - 1].readall()
+        weather_icon_src = icon_cache[symbol_code]
 
         # Build column children based on forecast type
         if is_3hour:
