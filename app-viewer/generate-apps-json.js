@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs';
 import { join, extname, dirname, basename } from 'path';
 import { load } from 'js-yaml';
 import { fileURLToPath } from 'url';
@@ -8,11 +8,16 @@ const __dirname = dirname(__filename);
 
 const APPS_DIR = join(__dirname, '../apps');
 
-// Allow --output <path> CLI argument to override the default output location
-const outputArgIdx = process.argv.indexOf('--output');
-const OUTPUT_FILE = outputArgIdx !== -1 && process.argv[outputArgIdx + 1]
-  ? process.argv[outputArgIdx + 1]
-  : join(__dirname, 'apps.json');
+// Parse --output argument
+const args = process.argv.slice(2);
+let outputFile = join(__dirname, 'apps.json');
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--output' && i + 1 < args.length) {
+    outputFile = args[i + 1];
+  }
+}
+const outputDir = dirname(outputFile);
+const OUTPUT_FILE = outputFile;
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
@@ -152,10 +157,52 @@ function scanApps() {
   return apps;
 }
 
+function generateHtmlFiles(apps) {
+  const detailsDir = join(outputDir, 'details');
+  if (!existsSync(detailsDir)) {
+    mkdirSync(detailsDir);
+  }
+
+  const templatePath = join(__dirname, 'app.html');
+  let template = readFileSync(templatePath, 'utf8');
+
+  // Adjust relative paths in template
+  template = template.replace('href="style.css"', 'href="../style.css"');
+  template = template.replace('src="main.js"', 'src="../main.js"');
+  template = template.replace('href="index.html"', 'href="../index.html"');
+
+  for (const app of apps) {
+    const title = app.displayName ? `${app.displayName} - Tronbyt App` : 'Tronbyt App';
+    const description = app.summary || app.description || 'View details for this Tronbyt app.';
+    const imageUrl = app.image ? `https://tronbyt.github.io/apps/apps/${app.image}` : `https://avatars.githubusercontent.com/u/200508996?s=400&v=4`;
+    const url = `https://tronbyt.github.io/apps/details/${encodeURIComponent(app.name)}.html`;
+
+    const metaTags = `<title>${title}</title>
+        <meta name="description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">
+        <meta property="og:title" content="${title.replace(/"/g, '&quot;')}">
+        <meta property="og:description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">
+        <meta property="og:image" content="${imageUrl}">
+        <meta property="og:url" content="${url}">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="${title.replace(/"/g, '&quot;')}">
+        <meta name="twitter:description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">
+        <meta name="twitter:image" content="${imageUrl}">
+        <meta name="app-name" content="${app.name}">`;
+
+    const appHtml = template.replace('<title>App Details</title>', metaTags);
+    writeFileSync(join(detailsDir, `${app.name}.html`), appHtml);
+  }
+}
+
 function main() {
   const apps = scanApps();
   writeFileSync(OUTPUT_FILE, JSON.stringify(apps, null, 2));
   console.log(`Generated ${OUTPUT_FILE} with ${apps.length} apps.`);
+
+  // Generate static HTML pages with Open Graph tags
+  generateHtmlFiles(apps);
+  console.log(`Generated ${apps.length} static detail HTML pages with metadata.`);
 }
 
 main();

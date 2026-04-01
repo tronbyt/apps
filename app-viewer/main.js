@@ -1,7 +1,9 @@
 // --- CONFIG ---
-// gh-pages layout: apps/ and viewer assets are at the same root level
-const APPS_DIR = 'apps';
-const BROKEN_APPS_FILE = 'broken_apps.txt';
+// Use GitHub Pages structure for both local and production
+const isDetailsPage = window.location.pathname.includes('/details/');
+const BASE_PATH = isDetailsPage ? '../' : '';
+const APPS_DIR = isDetailsPage ? '../apps' : 'apps';
+const BROKEN_APPS_FILE = isDetailsPage ? '../broken_apps.txt' : 'broken_apps.txt';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
@@ -74,7 +76,7 @@ async function fetchAppsList() {
   console.log('🔄 Fetching apps list from server...');
   // Load the generated apps.json file
   try {
-    const res = await fetch('apps.json');
+    const res = await fetch(BASE_PATH + 'apps.json');
     if (res.ok) {
       const apps = await res.json();
 
@@ -140,9 +142,12 @@ function renderAppsList(apps, brokenApps = []) {
       badgeContainer.appendChild(badge2x);
     }
 
+    // URL for app details page
+    const detailUrl = BASE_PATH + `details/${encodeURIComponent(app.name)}.html`;
+
     // Wrap image in a link
     const imageLink = document.createElement('a');
-    imageLink.href = `app.html?app=${encodeURIComponent(app.name)}`;
+    imageLink.href = detailUrl;
     imageLink.className = 'text-decoration-none';
 
     // Create image element
@@ -172,7 +177,7 @@ function renderAppsList(apps, brokenApps = []) {
 
     // Create clickable title
     const titleLink = document.createElement('a');
-    titleLink.href = `app.html?app=${encodeURIComponent(app.name)}`;
+    titleLink.href = detailUrl;
     titleLink.className = 'text-decoration-none';
 
     const title = document.createElement('h5');
@@ -202,7 +207,7 @@ function renderAppsList(apps, brokenApps = []) {
 
     // Create button - all apps should have details from manifest
     const button = document.createElement('a');
-    button.href = `app.html?app=${encodeURIComponent(app.name)}`;
+    button.href = detailUrl;
     button.className = 'btn btn-primary mt-auto';
     button.textContent = '📄 View Details';
 
@@ -315,7 +320,21 @@ async function fetchAppMarkdown(appName) {
 
 function getAppNameFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('app');
+  const paramApp = params.get('app');
+  if (paramApp) return paramApp;
+
+  // Try parsing from meta tag if on nested details page
+  const metaApp = document.querySelector('meta[name="app-name"]');
+  if (metaApp) return metaApp.getAttribute('content');
+
+  // Fallback to filename
+  const pathname = window.location.pathname;
+  if (pathname.includes('/details/')) {
+    const match = pathname.match(/\/details\/([^/]+)\.html/);
+    if (match) return decodeURIComponent(match[1]);
+  }
+
+  return null;
 }
 
 async function renderAppDetail() {
@@ -502,7 +521,7 @@ async function renderAppDetail() {
 
   // Back to Apps button (left side)
   const backButton = document.createElement('a');
-  backButton.href = './';
+  backButton.href = isDetailsPage ? '../index.html' : 'index.html';
   backButton.className = 'btn btn-secondary';
   backButton.textContent = '← Back to Apps';
 
