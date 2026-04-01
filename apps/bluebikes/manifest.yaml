@@ -6,8 +6,6 @@ desc: Displays Boston Bluebike Station Status (Available Bikes, E-Bikes, Docks).
 author: eric-pierce
 category: utilities
 tags:
-  - biking
   - transit
   - utility
-  - station-status
   - real-time

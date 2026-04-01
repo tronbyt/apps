@@ -9,7 +9,6 @@ packageName: publicapi
 recommendedInterval: 5
 category: utilities
 tags:
-  - fun
   - tech
   - utility
   - transit

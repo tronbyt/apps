@@ -10,7 +10,4 @@ broken: true
 recommendedInterval: 1
 category: finance
 tags:
-  - treasury
   - finance
-  - bond
-  - economy

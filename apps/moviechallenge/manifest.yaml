@@ -8,8 +8,6 @@ fileName: movie_challenge.star
 recommendedInterval: 5
 category: entertainment
 tags:
-  - letterboxd
   - media
-  - watching
   - tracking
-  - rating
+  - sports

@@ -9,7 +9,6 @@ packageName: roomba
 recommendedInterval: 5
 category: smart-home
 tags:
-  - robot-vacuum
   - smart-home
   - utility
-  - cleaning
+  - lifestyle

@@ -9,7 +9,5 @@ packageName: priceisright
 recommendedInterval: 5
 category: entertainment
 tags:
-  - contest
-  - bid
-  - game-show
-  - costume
+  - finance
+  - gaming

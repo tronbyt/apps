@@ -9,7 +9,5 @@ packageName: wowcharacterstats
 recommendedInterval: 5
 category: gaming
 tags:
-  - wow
-  - raid
-  - sports
   - gaming
+  - sports

@@ -9,7 +9,6 @@ packageName: indegostations
 recommendedInterval: 5
 category: utilities
 tags:
-  - bike-share
   - transit
   - utility
   - real-time

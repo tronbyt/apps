@@ -9,7 +9,6 @@ packageName: azurestatus
 recommendedInterval: 10
 category: utilities
 tags:
-  - incidents
   - tracking
-  - cloud
+  - tech
   - notification

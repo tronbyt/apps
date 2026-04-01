@@ -10,6 +10,5 @@ recommendedInterval: 5
 category: weather
 tags:
   - weather
-  - aqi
   - humidity
   - utility

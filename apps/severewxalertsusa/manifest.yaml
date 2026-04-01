@@ -11,7 +11,4 @@ supports2x: true
 category: weather
 tags:
   - weather
-  - severe-alerts
-  - us-nws
-  - local-forecast
   - wide 2x support

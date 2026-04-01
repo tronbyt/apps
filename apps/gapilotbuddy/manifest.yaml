@@ -9,6 +9,5 @@ packageName: gapilotbuddy
 recommendedInterval: 5
 category: utilities
 tags:
-  - transport
+  - transit
   - weather
-  - flight-rules

@@ -9,7 +9,5 @@ packageName: biorhythm
 recommendedInterval: 5
 category: health
 tags:
-  - biorhythms
   - lifestyle
   - biology
-  - wellness

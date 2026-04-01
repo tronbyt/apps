@@ -9,6 +9,5 @@ packageName: gitlabissues
 recommendedInterval: 5
 category: utilities
 tags:
-  - gitlab
   - tech
-  - tracker
+  - tracking

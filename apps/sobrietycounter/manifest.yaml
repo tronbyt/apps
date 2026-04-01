@@ -9,6 +9,4 @@ fileName: sobriety_counter.star
 packageName: sobrietycounter
 category: health
 tags:
-  - sobriety
   - lifestyle
-  - habit-tracking

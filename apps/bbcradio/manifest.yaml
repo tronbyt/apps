@@ -9,8 +9,6 @@ packageName: bbcradio
 recommendedInterval: 10
 category: entertainment
 tags:
-  - bbc
+  - news
   - music
   - real-time
-  - news
-  - audio

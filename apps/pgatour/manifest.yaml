@@ -9,7 +9,5 @@ packageName: pgatour
 recommendedInterval: 5
 category: sports
 tags:
-  - golf
   - sports
   - leaderboards
-  - pga

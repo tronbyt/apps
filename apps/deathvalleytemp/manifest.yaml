@@ -9,7 +9,6 @@ packageName: deathvalleytemp
 recommendedInterval: 5
 category: weather
 tags:
-  - deathvalley
+  - local
   - weather
   - utility
-  - hot

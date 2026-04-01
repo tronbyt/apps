@@ -10,6 +10,4 @@ recommendedInterval: 5
 category: weather
 tags:
   - weather
-  - water-temperature
-  - ndbc
   - nature

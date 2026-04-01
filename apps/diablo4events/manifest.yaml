@@ -9,7 +9,6 @@ packageName: diablo4events
 recommendedInterval: 5
 category: gaming
 tags:
-  - diablo
   - gaming
   - time
-  - event-tracker
+  - tracking

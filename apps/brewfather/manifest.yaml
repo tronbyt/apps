@@ -8,9 +8,7 @@ filename: brewfather.star
 supports2x: true
 category: utilities
 tags:
-  - brewing
-  - homebrew
+  - lifestyle
+  - tech
   - real-time
-  - trend-graph
-  - abv-calculator
   - wide 2x support

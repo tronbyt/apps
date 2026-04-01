@@ -9,6 +9,4 @@ packageName: braemarscreen
 recommendedInterval: 5
 category: finance
 tags:
-  - futures
-  - trading
-  - market-data
+  - finance

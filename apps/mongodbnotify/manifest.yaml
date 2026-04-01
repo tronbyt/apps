@@ -8,7 +8,6 @@ fileName: mongodb_notify.star
 packageName: mongodbnotify
 category: smart-home
 tags:
-  - mongodb
   - smart-home
   - notification
   - utility

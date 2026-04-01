@@ -9,6 +9,5 @@ packageName: eventprogress
 recommendedInterval: 5
 category: utilities
 tags:
-  - event-tracker
-  - segmented-progress
+  - tracking
   - utility

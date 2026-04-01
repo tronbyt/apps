@@ -6,8 +6,5 @@ desc: Simple app that looks at the Microsoft Admin Center Status RSS feed and sh
 author: M0ntyP
 category: utilities
 tags:
-  - microsoft
-  - office-365
-  - status-check
   - utility
   - admin

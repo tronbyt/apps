@@ -9,7 +9,5 @@ packageName: hurricanetracker
 recommendedInterval: 5
 category: weather
 tags:
-  - hurricane
   - weather
-  - tracker
-  - storm
+  - tracking

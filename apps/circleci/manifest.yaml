@@ -8,7 +8,6 @@ fileName: circleci.star
 packageName: circleci
 category: utilities
 tags:
-  - circleci
-  - tracking
-  - build
   - tech
+  - tracking
+  - gaming

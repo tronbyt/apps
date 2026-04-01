@@ -10,9 +10,7 @@ recommendedInterval: 5
 supports2x: true
 category: health
 tags:
-  - cgm
   - lifestyle
-  - glucose
   - tracking
   - utility
   - wide 2x support

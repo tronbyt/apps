@@ -9,8 +9,6 @@ packageName: trakt
 recommendedInterval: 5
 category: utilities
 tags:
-  - trakt
   - media
-  - shows
   - tidbyt
   - utility

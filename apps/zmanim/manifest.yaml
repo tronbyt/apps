@@ -11,7 +11,7 @@ categories:
   - utility
   - lifestyle
 requires:
-  - http
+  - tech
 exampleConfig:
   zip_code: '11367'
   speed: '30'

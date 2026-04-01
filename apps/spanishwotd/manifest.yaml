@@ -9,6 +9,5 @@ packageName: spanishwotd
 recommendedInterval: 5
 category: education
 tags:
-  - spanish
   - education
   - language-learning

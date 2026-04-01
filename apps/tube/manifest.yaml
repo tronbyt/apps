@@ -9,7 +9,6 @@ packageName: tube
 recommendedInterval: 5
 category: utilities
 tags:
-  - tube
   - transit
   - time
   - utility

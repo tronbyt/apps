@@ -9,7 +9,6 @@ packageName: catfact
 recommendedInterval: 5
 category: entertainment
 tags:
-  - cats
-  - fun
+  - lifestyle
   - nature
-  - facts
+  - news

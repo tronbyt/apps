@@ -8,7 +8,6 @@ fileName: adafruitio.star
 packageName: adafruitio
 category: utilities
 tags:
-  - adafruit
+  - tech
   - smart-home
-  - data-graph
   - utility

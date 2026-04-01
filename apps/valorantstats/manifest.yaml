@@ -9,7 +9,6 @@ packageName: valorantstats
 recommendedInterval: 5
 category: sports
 tags:
-  - valorant
   - gaming
   - sports
   - real-time

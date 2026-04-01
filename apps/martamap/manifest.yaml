@@ -10,6 +10,5 @@ broken: true
 recommendedInterval: 5
 category: transit
 tags:
-  - marta
   - transit
   - utility

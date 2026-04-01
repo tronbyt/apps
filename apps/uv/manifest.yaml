@@ -9,7 +9,5 @@ packageName: uv
 recommendedInterval: 5
 category: weather
 tags:
-  - uv
   - weather
   - lifestyle
-  - pollens

@@ -9,7 +9,6 @@ fileName: synth_solar.star
 packageName: synthsolar
 category: utilities
 tags:
-  - sun-dial
   - smart-home
   - weather
   - utility

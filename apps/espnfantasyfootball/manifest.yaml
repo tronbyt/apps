@@ -9,7 +9,6 @@ packageName: espnfantasyfb
 recommendedInterval: 5
 category: sports
 tags:
-  - fantasy-football
-  - espn
   - sports
+  - news
   - utility

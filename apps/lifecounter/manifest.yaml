@@ -9,6 +9,5 @@ fileName: life_counter.star
 packageName: lifecounter
 category: lifestyle
 tags:
-  - age-tracker
+  - lifestyle
   - productivity
-  - life-progress

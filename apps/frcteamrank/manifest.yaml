@@ -9,7 +9,5 @@ fileName: frc_team_rank.star
 packageName: frcteamrank
 category: sports
 tags:
-  - frc
+  - tech
   - sports
-  - competition
-  - robotics

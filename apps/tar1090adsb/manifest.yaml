@@ -9,7 +9,6 @@ packageName: tar1090adsb
 recommendedInterval: 5
 category: technology
 tags:
-  - transport
   - transit
   - real-time
   - weather

@@ -10,9 +10,7 @@ packageName: cpitracker
 supports2x: true
 category: finance
 tags:
-  - cpi
-  - inflation
-  - economy
+  - finance
   - tech
   - utility
   - wide 2x support

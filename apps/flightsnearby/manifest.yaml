@@ -9,6 +9,5 @@ packageName: flightsnearby
 recommendedInterval: 5
 category: utilities
 tags:
-  - flights
   - transit
   - utility

@@ -11,6 +11,4 @@ broken: true
 brokenReason: API 403 errors from ESPN are preventing this app from functioning.
 category: sports
 tags:
-  - bbl
   - sports
-  - live-sports

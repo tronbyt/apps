@@ -9,7 +9,5 @@ packageName: top10books
 recommendedInterval: 5
 category: entertainment
 tags:
-  - books
-  - literature
   - education
-  - bn-top-100
+  - sports

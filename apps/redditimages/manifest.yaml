@@ -9,8 +9,6 @@ packageName: redditimages
 recommendedInterval: 5
 category: entertainment
 tags:
-  - subreddit
   - art
   - news
-  - fun
   - media

@@ -9,8 +9,5 @@ packageName: busytube
 recommendedInterval: 5
 category: utilities
 tags:
-  - tube
-  - transport
   - transit
-  - crowd
-  - london
+  - local

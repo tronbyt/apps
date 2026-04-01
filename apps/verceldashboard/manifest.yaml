@@ -9,8 +9,6 @@ packageName: verceldashboard
 recommendedInterval: 5
 category: utilities
 tags:
-  - vercel
   - tech
   - tracking
-  - cloud
   - utility

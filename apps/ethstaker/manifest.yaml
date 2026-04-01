@@ -9,7 +9,5 @@ packageName: ethstaker
 recommendedInterval: 5
 category: utilities
 tags:
-  - ethereum
   - crypto
-  - validator
   - utility
