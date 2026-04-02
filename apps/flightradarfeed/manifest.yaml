@@ -9,5 +9,4 @@ packageName: flightradarfeed
 recommendedInterval: 5
 category: transit
 tags:
-  - weather
   - utility
