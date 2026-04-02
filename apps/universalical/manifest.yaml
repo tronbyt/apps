@@ -8,8 +8,6 @@ fileName: universal_ical.star
 packageName: universalical
 category: utilities
 tags:
-  - calendar
-  - ics
-  - reminder
+  - productivity
   - utility
   - event

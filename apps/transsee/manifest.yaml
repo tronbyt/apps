@@ -9,7 +9,4 @@ packageName: transsee
 recommendedInterval: 5
 category: transit
 tags:
-  - transit
-  - public-transit
-  - predictions
-  - utilities
+  - utility

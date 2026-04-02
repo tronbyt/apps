@@ -9,8 +9,6 @@ packageName: meetingstats
 recommendedInterval: 5
 category: utilities
 tags:
-  - calendar
   - productivity
   - meeting
   - utility
-  - outlook

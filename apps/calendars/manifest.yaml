@@ -9,8 +9,7 @@ packageName: calendars
 recommendedInterval: 5
 category: utilities
 tags:
-  - calendars
-  - converter
+  - tech
   - utility
-  - date
-  - world
+  - time
+  - local

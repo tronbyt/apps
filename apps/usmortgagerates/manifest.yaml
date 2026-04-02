@@ -9,8 +9,4 @@ packageName: usmortgagerates
 recommendedInterval: 5
 category: finance
 tags:
-  - mortgage
   - finance
-  - rates
-  - economic
-  - home-loan

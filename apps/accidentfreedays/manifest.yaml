@@ -9,8 +9,6 @@ packageName: accidentfreedays
 recommendedInterval: 240
 category: utilities
 tags:
-  - safety
+  - lifestyle
   - utility
-  - accidents
-  - countdown
-  - driving
+  - tracking

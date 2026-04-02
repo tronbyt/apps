@@ -9,8 +9,6 @@ packageName: githubrepo
 recommendedInterval: 5
 category: utilities
 tags:
-  - github
-  - stats
-  - code
+  - tech
   - dev
   - utility

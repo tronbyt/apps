@@ -9,8 +9,6 @@ fileName: github_repos.star
 packageName: githubrepos
 category: utilities
 tags:
-  - workflow
-  - status
-  - devtools
+  - tech
+  - tracking
   - utility
-  - code

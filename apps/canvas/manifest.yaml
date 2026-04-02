@@ -9,7 +9,7 @@ packageName: canvas
 recommendedInterval: 5
 category: smart-home
 tags:
-  - canvas
+  - art
   - education
-  - home-assistant
-  - assignment-tracking
+  - smart-home
+  - tracking

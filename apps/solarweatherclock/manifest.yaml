@@ -7,7 +7,6 @@ author: shmauk
 recommendedInterval: 0
 category: weather
 tags:
-  - home-assistant
+  - smart-home
   - utility
-  - grid-power
   - weather-clock

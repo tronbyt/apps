@@ -9,7 +9,6 @@ fileName: on_air.star
 packageName: onair
 category: utilities
 tags:
-  - sign
   - utility
-  - status
+  - tracking
   - notification

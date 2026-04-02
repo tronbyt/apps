@@ -9,8 +9,5 @@ packageName: raafuelwatch
 recommendedInterval: 5
 category: utilities
 tags:
-  - fuel
-  - gas
-  - price-tracker
-  - sa
   - utility
+  - finance

@@ -10,7 +10,5 @@ recommendedInterval: 5
 category: weather
 tags:
   - weather
-  - forecast
   - nws
-  - live
-  - temperature
+  - real-time

@@ -9,8 +9,6 @@ packageName: airthings
 recommendedInterval: 5
 category: utilities
 tags:
-  - environment
-  - sensor
-  - api
-  - home-assistant
+  - nature
   - smart-home
+  - tech

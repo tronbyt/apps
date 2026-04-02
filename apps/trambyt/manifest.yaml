@@ -9,8 +9,4 @@ packageName: trambyt
 recommendedInterval: 5
 category: transit
 tags:
-  - tram
-  - public-transit
-  - bus
-  - subway
-  - travel
+  - utility

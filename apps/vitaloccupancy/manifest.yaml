@@ -9,8 +9,6 @@ packageName: vitaloccupancy
 recommendedInterval: 5
 category: utilities
 tags:
-  - gym
-  - fitness
-  - occupancy
+  - lifestyle
   - real-time
-  - utilities
+  - utility

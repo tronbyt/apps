@@ -9,8 +9,5 @@ packageName: atptennis
 recommendedInterval: 5
 category: sports
 tags:
-  - scores
-  - live
-  - sports
+  - real-time
   - tennis
-  - standings

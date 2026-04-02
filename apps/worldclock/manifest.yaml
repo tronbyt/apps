@@ -9,6 +9,4 @@ packageName: worldclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - multi-timezone
   - clock
-  - world-clock

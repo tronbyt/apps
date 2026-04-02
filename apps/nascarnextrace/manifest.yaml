@@ -9,8 +9,7 @@ packageName: nascarnextrace
 recommendedInterval: 5
 category: sports
 tags:
+  - clock
+  - local
   - nascar
   - racing
-  - sports
-  - clock
-  - location

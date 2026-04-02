@@ -6,11 +6,8 @@ desc: Map visited capitols, parks and sites.
 author: Robert Ison
 recommendedInterval: 5
 supports2x: true
-category: utilities
+category: transit
 tags:
-  - travel
-  - reference
-  - maps
-  - geography
   - utility
+  - science
   - wide 2x support

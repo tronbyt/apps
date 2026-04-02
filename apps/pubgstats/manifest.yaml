@@ -9,8 +9,6 @@ packageName: pubgstats
 recommendedInterval: 5
 category: gaming
 tags:
-  - pbg
-  - battlegrounds
-  - stats
   - gaming
+  - sports
   - utility

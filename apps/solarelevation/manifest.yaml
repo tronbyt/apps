@@ -9,8 +9,7 @@ packageName: solarelevation
 recommendedInterval: 5
 category: utilities
 tags:
-  - sun
-  - horizon
+  - weather
   - clock
   - utility
-  - elevation
+  - sports

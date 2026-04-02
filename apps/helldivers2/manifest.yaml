@@ -9,7 +9,6 @@ packageName: helldivers2
 recommendedInterval: 5
 category: entertainment
 tags:
-  - live
+  - real-time
   - gaming
-  - multiplayer
-  - countdown
+  - time

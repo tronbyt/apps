@@ -9,7 +9,5 @@ packageName: purduebasketball
 recommendedInterval: 5
 category: sports
 tags:
+  - nba
   - basketball
-  - ncaa
-  - sports-data
-  - standings

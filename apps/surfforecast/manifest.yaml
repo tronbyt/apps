@@ -10,8 +10,7 @@ broken: true
 recommendedInterval: 5
 category: weather
 tags:
-  - surf
-  - ocean
+  - sports
+  - nature
   - weather
-  - coastal
-  - forecast
+  - local

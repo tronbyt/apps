@@ -9,9 +9,7 @@ packageName: immichframe
 supports2x: true
 category: utilities
 tags:
-  - photo
-  - gallery
-  - location
-  - date
-  - selfie
+  - art
+  - local
+  - time
   - wide 2x support

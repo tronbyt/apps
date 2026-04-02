@@ -9,8 +9,5 @@ packageName: currencyconverter
 recommendedInterval: 5
 category: utilities
 tags:
-  - currency
   - finance
-  - rates
   - utility
-  - money

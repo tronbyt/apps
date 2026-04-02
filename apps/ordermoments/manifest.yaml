@@ -9,7 +9,6 @@ packageName: ordermoments
 recommendedInterval: 5
 category: utilities
 tags:
-  - shopping
-  - order-tracking
-  - notifications
-  - celebration
+  - utility
+  - tracking
+  - notification

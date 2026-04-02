@@ -10,6 +10,4 @@ recommendedInterval: 5
 category: weather
 tags:
   - weather
-  - forecast
-  - three-day
-  - location-based
+  - local

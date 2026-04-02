@@ -10,7 +10,5 @@ recommendedInterval: 5
 broken: true
 category: food
 tags:
-  - food
-  - pizza
-  - daily
-  - restaurant
+  - lifestyle
+  - time

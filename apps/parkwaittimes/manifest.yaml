@@ -7,10 +7,9 @@ author: hx009
 fileName: parkwaittimes.star
 packageName: parkwaittimes
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - rides
   - theme-parks
   - wait-times
-  - entertainment
+  - music
   - utility

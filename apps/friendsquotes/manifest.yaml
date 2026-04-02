@@ -9,8 +9,6 @@ packageName: friendsquotes
 recommendedInterval: 5
 category: entertainment
 tags:
-  - friends
+  - social
   - quote
-  - funny
-  - tv
-  - show
+  - media

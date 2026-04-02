@@ -9,7 +9,4 @@ packageName: todoistnext
 recommendedInterval: 60
 category: utilities
 tags:
-  - todoist
-  - task
   - productivity
-  - reminder

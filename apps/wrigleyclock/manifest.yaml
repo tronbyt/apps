@@ -9,7 +9,6 @@ packageName: wrigleyclock
 category: clocks
 tags:
   - retro
-  - scoreboard
-  - time-display
-  - utility
   - sports
+  - time
+  - utility

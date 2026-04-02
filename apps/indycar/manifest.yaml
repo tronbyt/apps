@@ -9,7 +9,5 @@ packageName: indycar
 recommendedInterval: 5
 category: sports
 tags:
-  - indy car
+  - indycar
   - racing
-  - standings
-  - scores

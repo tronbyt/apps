@@ -10,6 +10,4 @@ recommendedInterval: 5
 supports2x: true
 category: transit
 tags:
-  - subway
-  - travel
-  - commute
+  - utility

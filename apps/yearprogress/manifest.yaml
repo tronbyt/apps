@@ -9,7 +9,5 @@ packageName: yearprogress
 recommendedInterval: 60
 category: utilities
 tags:
-  - progress
-  - milestone
+  - tracking
   - utility
-  - time-tracking

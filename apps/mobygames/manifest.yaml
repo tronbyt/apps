@@ -8,8 +8,7 @@ fileName: moby_games.star
 packageName: mobygames
 category: gaming
 tags:
-  - games
+  - gaming
   - retro
-  - database
-  - info
-  - library
+  - tech
+  - education

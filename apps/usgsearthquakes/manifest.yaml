@@ -9,8 +9,7 @@ packageName: usgsearthquakes
 recommendedInterval: 5
 category: science
 tags:
-  - earthquake
-  - geology
-  - disaster
+  - science
+  - news
   - weather
   - utility

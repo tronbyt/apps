@@ -11,7 +11,5 @@ broken: true
 brokenReason: API endpoint is no longer available
 category: utilities
 tags:
-  - energy
-  - grid
   - utility
   - real-time

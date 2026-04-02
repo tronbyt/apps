@@ -8,8 +8,6 @@ packageName: deepmix
 id: deep-mix
 category: entertainment
 tags:
-  - radio
   - music
-  - live-stream
-  - artists
-  - streaming
+  - real-time
+  - media

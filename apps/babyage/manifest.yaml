@@ -9,7 +9,6 @@ packageName: babyage
 recommendedInterval: 5
 category: lifestyle
 tags:
-  - baby
-  - parenting
-  - time-tracker
+  - lifestyle
+  - tracking
   - utility

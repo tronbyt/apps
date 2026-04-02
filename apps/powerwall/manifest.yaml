@@ -9,8 +9,6 @@ packageName: powerwall
 recommendedInterval: 5
 category: smart-home
 tags:
-  - battery
-  - energy
-  - home-automation
-  - smart-home
+  - tech
   - utility
+  - smart-home

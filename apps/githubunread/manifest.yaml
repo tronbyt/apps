@@ -9,8 +9,8 @@ packageName: githubunread
 recommendedInterval: 5
 category: utilities
 tags:
-  - github
-  - notifications
-  - status
+  - tech
+  - notification
+  - tracking
   - utility
   - count

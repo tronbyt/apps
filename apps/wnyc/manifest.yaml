@@ -8,7 +8,6 @@ fileName: wnyc.star
 packageName: wnyc
 category: entertainment
 tags:
-  - radio
-  - live-streaming
-  - news
   - music
+  - real-time
+  - news

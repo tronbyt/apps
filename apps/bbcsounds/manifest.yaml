@@ -9,8 +9,6 @@ fileName: bbc_sounds.star
 packageName: bbcsounds
 category: entertainment
 tags:
-  - radio
   - music
-  - live-streaming
-  - bbc
-  - audio
+  - real-time
+  - news

@@ -9,8 +9,6 @@ packageName: opmstatus
 recommendedInterval: 5
 category: utilities
 tags:
-  - opm
-  - federal
+  - local
   - weather
-  - alerts
-  - government
+  - notification

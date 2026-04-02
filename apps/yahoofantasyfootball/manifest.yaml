@@ -9,7 +9,5 @@ packageName: yahoofantasynfl
 recommendedInterval: 5
 category: sports
 tags:
-  - fantasy-football
-  - nfl-scores
-  - standings
-  - league-tracker
+  - nfl
+  - football

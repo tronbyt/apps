@@ -9,7 +9,6 @@ supports2x: true
 category: weather
 tags:
   - weather
-  - forecast
   - utility
-  - location-based
+  - local
   - wide 2x support

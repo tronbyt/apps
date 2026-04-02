@@ -9,7 +9,5 @@ packageName: dothrakiwotd
 recommendedInterval: 5
 category: education
 tags:
-  - language
-  - culture
-  - vocabulary
-  - learning
+  - education
+  - news

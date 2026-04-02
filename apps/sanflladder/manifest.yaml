@@ -9,8 +9,6 @@ fileName: sanfl_ladder.star
 packageName: sanflladder
 category: sports
 tags:
-  - soccer
-  - standings
-  - football
   - ladder
-  - scores
+  - sanfl
+  - football

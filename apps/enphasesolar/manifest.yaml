@@ -9,8 +9,5 @@ packageName: enphasesolar
 recommendedInterval: 5
 category: technology
 tags:
-  - solar
-  - energy
-  - smart-home
-  - home-assistant
   - utility
+  - smart-home

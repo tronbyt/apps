@@ -9,8 +9,6 @@ fileName: octowatts.star
 packageName: OctoWatts
 category: utilities
 tags:
-  - energy
-  - smart-home
-  - home-assistant
   - utility
-  - monitor
+  - smart-home
+  - tech

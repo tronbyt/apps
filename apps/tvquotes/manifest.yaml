@@ -9,7 +9,6 @@ packageName: tvquotes
 recommendedInterval: 5
 category: entertainment
 tags:
-  - tv
-  - quotes
-  - fun
-  - entertainment
+  - media
+  - art
+  - music

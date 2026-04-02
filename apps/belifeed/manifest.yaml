@@ -9,7 +9,7 @@ packageName: belifeed
 recommendedInterval: 5
 category: social
 tags:
+  - media
+  - lifestyle
   - social
-  - activity
-  - friends
   - networking

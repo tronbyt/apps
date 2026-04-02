@@ -7,9 +7,6 @@ author: flambeauRiverTours
 recommendedInterval: 5
 fileName: berlin_transit.star
 packageName: berlintransit
-category: utilities
+category: transit
 tags:
-  - bus
-  - train
-  - berlin
-  - public-transit
+  - local

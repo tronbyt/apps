@@ -9,8 +9,5 @@ packageName: wtatennis
 recommendedInterval: 5
 category: sports
 tags:
-  - wta
-  - scores
-  - live
-  - sports
+  - real-time
   - tennis

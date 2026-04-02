@@ -9,8 +9,6 @@ packageName: runescape
 recommendedInterval: 5
 category: gaming
 tags:
-  - rpg
-  - game
+  - gaming
   - inventory
-  - osrs
-  - api
+  - tech

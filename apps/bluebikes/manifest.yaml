@@ -4,10 +4,7 @@ name: Bluebikes
 summary: Boston Bluebikes Status
 desc: Displays Boston Bluebike Station Status (Available Bikes, E-Bikes, Docks).
 author: eric-pierce
-category: utilities
+category: transit
 tags:
-  - biking
-  - transit
   - utility
-  - station-status
   - real-time

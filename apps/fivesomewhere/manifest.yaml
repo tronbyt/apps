@@ -9,6 +9,5 @@ packageName: fivesomewhere
 recommendedInterval: 5
 category: utilities
 tags:
-  - timezone
   - clock
   - utility

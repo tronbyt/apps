@@ -9,7 +9,4 @@ packageName: btcdifficulty
 recommendedInterval: 1
 category: utilities
 tags:
-  - bitcoin
   - crypto
-  - difficulty
-  - blockchain

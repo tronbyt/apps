@@ -10,8 +10,7 @@ recommendedInterval: 1
 supports2x: true
 category: sports
 tags:
+  - time
+  - wide 2x support
   - f1
   - racing
-  - countdown
-  - timeline
-  - wide 2x support

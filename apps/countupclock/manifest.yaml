@@ -9,7 +9,6 @@ packageName: countupclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - countdown
-  - timer
+  - time
   - utility
-  - time-tracker
+  - tracking

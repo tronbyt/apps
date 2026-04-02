@@ -9,7 +9,6 @@ packageName: noaatides
 recommendedInterval: 60
 category: weather
 tags:
-  - tides
-  - water
   - weather
+  - nature
   - utility

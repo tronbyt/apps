@@ -9,8 +9,6 @@ packageName: restdbiodashboard
 recommendedInterval: 5
 category: utilities
 tags:
-  - dashboard
-  - restdb
+  - tech
   - utility
   - data-display
-  - api

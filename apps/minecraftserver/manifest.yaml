@@ -9,6 +9,5 @@ packageName: minecraftserver
 recommendedInterval: 5
 category: utilities
 tags:
-  - minecraft
-  - game-status
-  - player-count
+  - gaming
+  - tracking

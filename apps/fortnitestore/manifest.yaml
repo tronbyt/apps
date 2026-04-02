@@ -9,7 +9,5 @@ packageName: fortnitestore
 recommendedInterval: 5
 category: entertainment
 tags:
-  - fortnite
-  - shopping
   - gaming
-  - epic-games
+  - utility

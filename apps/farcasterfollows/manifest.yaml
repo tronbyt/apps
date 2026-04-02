@@ -9,7 +9,7 @@ packageName: farcasterfollows
 recommendedInterval: 5
 category: utilities
 tags:
-  - social
+  - media
   - networking
-  - follow-count
-  - farcaster
+  - tracking
+  - social

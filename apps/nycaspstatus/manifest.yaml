@@ -7,9 +7,6 @@ author: Adam Wojciechowski
 fileName: nyc_asp_status.star
 packageName: nycaspstatus
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - parking
   - utility
-  - street-cleaning
-  - local-rules

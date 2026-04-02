@@ -9,8 +9,6 @@ fileName: solaredge_prod.star
 packageName: solaredgeprod
 category: utilities
 tags:
-  - solar
-  - energy
   - utility
-  - monitoring
-  - home
+  - tracking
+  - smart-home

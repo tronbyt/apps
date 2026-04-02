@@ -9,8 +9,7 @@ packageName: solartimeclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - solar
-  - time
   - utility
+  - time
   - clock
-  - astronomy
+  - science

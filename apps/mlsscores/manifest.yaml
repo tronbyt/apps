@@ -9,8 +9,5 @@ packageName: mlsscores
 recommendedInterval: 5
 category: sports
 tags:
-  - mls
-  - scores
-  - live
+  - real-time
   - soccer
-  - standings

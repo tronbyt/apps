@@ -9,8 +9,6 @@ packageName: flalighthouses
 recommendedInterval: 5
 category: utilities
 tags:
-  - lighthouses
-  - florida
+  - local
   - utility
-  - navigation
-  - beach
+  - nature

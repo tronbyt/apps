@@ -9,8 +9,6 @@ packageName: loterias
 recommendedInterval: 5
 category: utilities
 tags:
-  - lottery
   - gambling
-  - brasil
-  - prize
+  - local
   - utility

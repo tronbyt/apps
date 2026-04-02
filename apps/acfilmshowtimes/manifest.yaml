@@ -9,7 +9,5 @@ packageName: acfilmshowtimes
 recommendedInterval: 5
 category: entertainment
 tags:
-  - movies
-  - showtimes
-  - cinema
+  - media
   - theaters

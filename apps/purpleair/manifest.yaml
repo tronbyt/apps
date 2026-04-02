@@ -9,6 +9,6 @@ packageName: purpleair
 recommendedInterval: 5
 category: utilities
 tags:
-  - air-quality
-  - environmental
+  - weather
+  - nature
   - utility

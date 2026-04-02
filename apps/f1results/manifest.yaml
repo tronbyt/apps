@@ -7,9 +7,8 @@ author: M0ntyP
 fileName: f1_results.star
 packageName: f1results
 recommendedInterval: 5
-category: entertainment
+category: sports
 tags:
+  - real-time
   - f1
-  - sports
   - racing
-  - live-updates

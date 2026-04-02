@@ -9,8 +9,6 @@ packageName: nationalparks
 recommendedInterval: 5
 category: entertainment
 tags:
-  - national parks
   - nature
   - art
-  - travel
-  - fun
+  - utility

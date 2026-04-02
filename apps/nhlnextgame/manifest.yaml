@@ -12,6 +12,4 @@ brokenReason: 'statsapi.web.nhl.com: no such host'
 category: sports
 tags:
   - nhl
-  - sports
-  - standings
-  - scores
+  - hockey

@@ -9,7 +9,4 @@ packageName: hrbfc
 recommendedInterval: 5
 category: sports
 tags:
-  - football
-  - soccer
-  - standings
-  - scores
+  - rugby

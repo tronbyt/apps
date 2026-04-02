@@ -9,8 +9,5 @@ packageName: milbscores
 recommendedInterval: 5
 category: sports
 tags:
-  - baseball
   - mlb
-  - sports
-  - standings
-  - scores
+  - baseball

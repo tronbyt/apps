@@ -10,8 +10,6 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - world
-  - capital
-  - travel
-  - reference
+  - local
+  - utility
   - wide 2x support

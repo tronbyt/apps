@@ -9,8 +9,4 @@ packageName: wanikanireminder
 recommendedInterval: 5
 category: education
 tags:
-  - kanji
-  - language
-  - study
-  - flashcards
-  - learning
+  - education

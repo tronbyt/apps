@@ -9,7 +9,6 @@ packageName: cranimechecker
 recommendedInterval: 5
 category: entertainment
 tags:
-  - anime
-  - crunchyroll
-  - tv
+  - media
   - news
+  - anime

@@ -9,8 +9,4 @@ packageName: windytron
 recommendedInterval: 1
 category: weather
 tags:
-  - weather
-  - stations
   - utility
-  - forecast
-  - display

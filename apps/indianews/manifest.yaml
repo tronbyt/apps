@@ -9,6 +9,5 @@ packageName: indianews
 recommendedInterval: 10
 category: news
 tags:
-  - india
+  - local
   - news
-  - headlines

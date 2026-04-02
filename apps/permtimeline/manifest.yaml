@@ -9,8 +9,5 @@ fileName: perm_timeline.star
 packageName: permtimeline
 category: utilities
 tags:
-  - perm
-  - work-visa
-  - employment-tracker
-  - approval-time
-  - us-immigration
+  - tracking
+  - tech

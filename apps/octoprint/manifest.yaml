@@ -9,6 +9,5 @@ packageName: octoprint
 recommendedInterval: 5
 category: smart-home
 tags:
-  - 3d-printing
-  - printer-status
+  - tech
   - smart-home

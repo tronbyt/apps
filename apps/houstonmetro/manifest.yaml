@@ -9,7 +9,5 @@ packageName: houstonmetro
 recommendedInterval: 5
 category: transit
 tags:
-  - transit
-  - subway
-  - houston
-  - utilities
+  - local
+  - utility

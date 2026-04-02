@@ -9,7 +9,4 @@ packageName: bigbrothernews
 recommendedInterval: 10
 category: news
 tags:
-  - news
-  - ticker
-  - breaking
-  - local
+

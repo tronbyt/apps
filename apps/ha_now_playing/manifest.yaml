@@ -8,9 +8,7 @@ supports2x: true
 recommendedInterval: 0
 category: utilities
 tags:
-  - home-assistant
-  - media-player
-  - now-playing
-  - utility
   - smart-home
+  - media-player
+  - utility
   - wide 2x support

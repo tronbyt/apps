@@ -9,7 +9,6 @@ packageName: qbittorrent
 recommendedInterval: 5
 category: utilities
 tags:
-  - torrent
-  - monitoring
+  - tech
+  - tracking
   - utility
-  - speed-tracker

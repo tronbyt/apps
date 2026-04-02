@@ -9,8 +9,5 @@ packageName: mantle
 recommendedInterval: 5
 category: finance
 tags:
-  - saa
-  - billing
-  - business
-  - metrics
   - finance
+  - tech

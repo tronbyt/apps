@@ -9,8 +9,6 @@ packageName: skireport
 recommendedInterval: 5
 category: weather
 tags:
-  - ski
-  - trail
+  - sports
   - weather
-  - epic-pass
-  - outdoors
+  - nature

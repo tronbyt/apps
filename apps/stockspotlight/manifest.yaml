@@ -9,8 +9,5 @@ fileName: stock-spotlight.star
 packageName: stockspotlight
 category: finance
 tags:
-  - stocks
   - finance
-  - personalized
-  - api
-  - investing
+  - tech

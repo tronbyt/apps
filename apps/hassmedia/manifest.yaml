@@ -7,8 +7,7 @@ author: vincentezw
 recommendedInterval: 5
 category: smart-home
 tags:
-  - spotify
-  - media-player
-  - home-assistant
   - music
+  - media-player
+  - smart-home
   - utility

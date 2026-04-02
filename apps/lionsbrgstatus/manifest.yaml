@@ -7,10 +7,7 @@ author: Aiden Mitchell
 fileName: lions_gate_status.star
 packageName: lionsgatestatus
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - traffic
-  - transit
   - utility
-  - bridges
-  - driving
+  - local

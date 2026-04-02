@@ -7,10 +7,8 @@ author: Philippe Dellaert (pdellaert)
 recommendedInterval: 5
 fileName: flybywire_flights.star
 packageName: fbw-flight-stats
-category: utilities
+category: transit
 tags:
-  - flight-tracker
-  - aviation
-  - stats
+  - sports
   - utility
-  - simulation
+  - gaming

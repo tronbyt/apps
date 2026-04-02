@@ -9,6 +9,5 @@ packageName: nycairquality
 recommendedInterval: 5
 category: utilities
 tags:
-  - air-quality
   - weather
   - utility

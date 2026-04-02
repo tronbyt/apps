@@ -11,8 +11,7 @@ broken: true
 brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).
 category: sports
 tags:
-  - cricket
-  - sports
-  - caribbean
+  - local
   - tournament
-  - scores
+  - cpbl
+  - baseball

@@ -9,10 +9,7 @@ packageName: ohhighwaysigns
 recommendedInterval: 5
 broken: true
 brokenReason: 'publicapi.ohgo.com: no such host'
-category: utilities
+category: transit
 tags:
-  - ohio
-  - traffic
-  - transit
+  - local
   - utility
-  - road

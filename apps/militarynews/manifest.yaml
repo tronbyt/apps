@@ -9,7 +9,5 @@ fileName: military_news.star
 packageName: militarynews
 category: news
 tags:
-  - military
-  - defense
-  - war
+  - tech
   - news

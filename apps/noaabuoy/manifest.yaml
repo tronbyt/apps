@@ -9,8 +9,6 @@ packageName: noaabuoy
 recommendedInterval: 15
 category: utilities
 tags:
-  - ocean
+  - nature
   - weather
-  - tides
-  - noaa
-  - buoy
+  - science

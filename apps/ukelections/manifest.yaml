@@ -9,7 +9,5 @@ packageName: ukelections
 recommendedInterval: 5
 category: lifestyle
 tags:
-  - elections
-  - politics
-  - local
   - news
+  - local

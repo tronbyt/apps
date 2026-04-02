@@ -9,8 +9,6 @@ fileName: solaredge.star
 packageName: solaredgeoverview
 category: smart-home
 tags:
-  - energy
-  - home-automation
-  - power-monitoring
-  - solar
   - utility
+  - smart-home
+  - power-monitoring

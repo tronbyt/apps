@@ -9,7 +9,6 @@ packageName: solaredgesummary
 recommendedInterval: 30
 category: utilities
 tags:
-  - solar
-  - energy
-  - monitoring
-  - home-automation
+  - utility
+  - tracking
+  - smart-home

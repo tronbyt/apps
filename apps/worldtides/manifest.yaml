@@ -9,8 +9,6 @@ fileName: world_tides.star
 packageName: worldtides
 category: weather
 tags:
-  - tides
-  - ocean
-  - utility
   - weather
-  - forecast
+  - nature
+  - utility

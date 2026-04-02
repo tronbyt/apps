@@ -9,8 +9,6 @@ fileName: hacker_news.star
 packageName: hackernews
 category: news
 tags:
-  - hacker-news
   - tech
   - news
   - top-stories
-  - upvotes

@@ -7,10 +7,7 @@ author: Cameron Battagler
 fileName: tar1090_ads_b.star
 packageName: tar1090adsb
 recommendedInterval: 5
-category: technology
+category: transit
 tags:
-  - aviation
-  - flight-tracking
   - real-time
-  - traffic
-  - sky
+  - weather

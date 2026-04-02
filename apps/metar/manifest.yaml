@@ -9,8 +9,5 @@ packageName: metar
 recommendedInterval: 5
 category: utilities
 tags:
-  - aviation
   - weather
-  - flight
   - utility
-  - metar

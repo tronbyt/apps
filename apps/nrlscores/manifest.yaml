@@ -9,8 +9,6 @@ packageName: nrlscores
 recommendedInterval: 5
 category: sports
 tags:
-  - rugby
+  - real-time
   - nrl
-  - sports
-  - scores
-  - live
+  - rugby

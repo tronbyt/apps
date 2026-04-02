@@ -7,9 +7,7 @@ author: thedriver
 fileName: trimet_arrivals.star
 packageName: trimetarrivals
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - bus
-  - transit
   - real-time
   - utility

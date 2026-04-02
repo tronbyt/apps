@@ -8,8 +8,5 @@ fileName: mens_cricket.star
 packageName: menscricket
 category: sports
 tags:
+  - real-time
   - cricket
-  - scores
-  - standings
-  - sports
-  - live

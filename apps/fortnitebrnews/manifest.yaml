@@ -8,6 +8,5 @@ fileName: fortnite_br_news.star
 packageName: fortnitebrnews
 category: entertainment
 tags:
-  - fortnite
   - gaming
-  - live-updates
+  - real-time

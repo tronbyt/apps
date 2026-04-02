@@ -8,7 +8,6 @@ fileName: usgs_water_levels.star
 packageName: usgswaterlevels
 category: utilities
 tags:
-  - water
-  - environment
-  - data
-  - monitoring
+  - nature
+  - tech
+  - tracking

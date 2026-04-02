@@ -9,7 +9,6 @@ packageName: onthisday
 recommendedInterval: 5
 category: reference
 tags:
-  - history
-  - events
-  - dates
-  - reference
+  - education
+  - news
+  - utility

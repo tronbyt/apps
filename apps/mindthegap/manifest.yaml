@@ -9,8 +9,4 @@ packageName: mindthegap
 recommendedInterval: 5
 category: transit
 tags:
-  - transport
-  - subway
-  - public-transit
-  - utilities
   - utility

@@ -7,9 +7,6 @@ author: scottwainstock
 fileName: trimet_stops.star
 packageName: trimetstops
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
-  - bus
-  - train
-  - schedule
+  - productivity

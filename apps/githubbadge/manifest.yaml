@@ -9,7 +9,6 @@ packageName: githubbadge
 recommendedInterval: 5
 category: utilities
 tags:
-  - status
-  - devtools
-  - code
+  - tracking
+  - tech
   - utility

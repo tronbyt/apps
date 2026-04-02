@@ -7,8 +7,6 @@ author: dinosaursrarr
 fileName: boris_bikes.star
 packageName: borisbikes
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - bike
-  - transit
-  - docking
+  - tech

@@ -9,8 +9,6 @@ packageName: ncaawstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - ncaa
-  - women's
+  - news
+  - ncaaw
   - basketball
-  - conference
-  - sports

@@ -9,7 +9,5 @@ packageName: goodservice
 recommendedInterval: 5
 category: transit
 tags:
-  - subway
-  - transit
-  - nyc
-  - utilities
+  - local
+  - utility

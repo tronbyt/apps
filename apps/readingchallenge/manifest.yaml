@@ -9,7 +9,4 @@ packageName: readingchallenge
 recommendedInterval: 5
 category: lifestyle
 tags:
-  - reading
-  - books
-  - goal-tracking
-  - goodreads
+  - education

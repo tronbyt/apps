@@ -9,7 +9,6 @@ packageName: flyio
 recommendedInterval: 5
 category: utilities
 tags:
-  - monitoring
-  - cloud
-  - devops
+  - tracking
+  - tech
   - utility

@@ -8,6 +8,6 @@ fileName: discordmembers.star
 packageName: discordmembers
 category: utilities
 tags:
-  - discord
+  - tech
   - utility
-  - member-count
+  - tracking

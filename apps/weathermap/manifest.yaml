@@ -9,8 +9,6 @@ packageName: weathermap
 recommendedInterval: 5
 category: weather
 tags:
-  - radar
-  - precipitation
   - weather
-  - visual
-  - api
+  - art
+  - tech

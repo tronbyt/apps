@@ -9,8 +9,5 @@ supports2x: true
 category: weather
 tags:
   - weather
-  - temp
-  - wind-chill
-  - rain
   - utility
   - wide 2x support

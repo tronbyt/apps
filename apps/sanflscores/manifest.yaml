@@ -9,7 +9,5 @@ fileName: sanfl_scores.star
 packageName: sanflscores
 category: sports
 tags:
-  - soccer
+  - sanfl
   - football
-  - standings
-  - nfl-like

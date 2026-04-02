@@ -8,10 +8,7 @@ fileName: viepubltransp.star
 packageName: viepubltransp
 recommendedInterval: 5
 broken: true
-category: utilities
+category: transit
 tags:
-  - public-transit
-  - vienna
-  - transport
+  - local
   - utility
-  - bus

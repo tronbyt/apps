@@ -9,7 +9,5 @@ packageName: domewatch
 recommendedInterval: 5
 category: news
 tags:
-  - politics
-  - voting
+  - news
   - real-time
-  - legislature

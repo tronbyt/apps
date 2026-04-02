@@ -9,7 +9,6 @@ packageName: nrlladder
 recommendedInterval: 5
 category: sports
 tags:
-  - nrl
-  - sports
-  - standings
   - ladder
+  - nrl
+  - rugby

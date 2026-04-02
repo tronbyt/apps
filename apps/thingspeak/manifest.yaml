@@ -9,8 +9,7 @@ packageName: thingspeak
 recommendedInterval: 5
 category: utilities
 tags:
-  - data
-  - iot
-  - sensor
+  - tech
+  - smart-home
   - utility
   - weather

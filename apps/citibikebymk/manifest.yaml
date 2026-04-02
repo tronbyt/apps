@@ -6,9 +6,7 @@ desc: This app shows the availability of both bikes and docks at a given station
 author: Michael Kleban
 fileName: citibike_by_mk.star
 packageName: citibikebymk
-category: utilities
+category: transit
 tags:
-  - transit
-  - biking
-  - docking
-  - utilities
+  - tech
+  - utility

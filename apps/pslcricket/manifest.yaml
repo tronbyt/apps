@@ -11,8 +11,5 @@ broken: true
 brokenReason: API access blocked (403 Forbidden)
 category: sports
 tags:
-  - psl
+  - real-time
   - cricket
-  - sports
-  - scores
-  - live

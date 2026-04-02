@@ -9,8 +9,6 @@ packageName: earthquakemap
 recommendedInterval: 5
 category: science
 tags:
-  - earthquakes
-  - geology
+  - science
   - real-time
-  - seismic
-  - data
+  - tech

@@ -9,8 +9,7 @@ packageName: life
 recommendedInterval: 5
 category: entertainment
 tags:
-  - conway
+  - gaming
   - game-of-life
-  - celestial
-  - visual
-  - simulation
+  - space
+  - art

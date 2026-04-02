@@ -9,7 +9,5 @@ packageName: olympicmedals
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - olympics
   - medals
-  - countries

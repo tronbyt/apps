@@ -9,6 +9,4 @@ packageName: daystoxmas
 recommendedInterval: 60
 category: utilities
 tags:
-  - countdown
-  - holiday
-  - christmas
+  - time

@@ -9,8 +9,6 @@ packageName: lightningnode
 recommendedInterval: 5
 category: finance
 tags:
-  - lightning
+  - weather
   - crypto
-  - blockchain
-  - bitcoin
-  - wallet
+  - finance

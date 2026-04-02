@@ -11,7 +11,6 @@ broken: true
 brokenReason: API access closed
 category: entertainment
 tags:
-  - marvel
-  - comics
-  - daily
-  - entertainment
+  - media
+  - time
+  - music

@@ -9,8 +9,5 @@ packageName: finevent
 recommendedInterval: 5
 category: finance
 tags:
-  - economy
   - finance
-  - stocks
-  - market
   - news

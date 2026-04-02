@@ -10,8 +10,5 @@ supports2x: true
 category: weather
 tags:
   - weather
-  - switzerland
-  - forecast
   - local
-  - meteorology
   - wide 2x support

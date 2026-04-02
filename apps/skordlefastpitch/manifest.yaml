@@ -9,7 +9,6 @@ packageName: skordlefastpitch
 recommendedInterval: 5
 category: utilities
 tags:
-  - skordle
-  - game-display
-  - utility-app
-  - fast-pitch
+  - gaming
+  - utility
+  - sports

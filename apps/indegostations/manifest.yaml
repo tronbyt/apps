@@ -7,9 +7,7 @@ author: RayPatt
 fileName: indego_stations.star
 packageName: indegostations
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - bike-share
-  - transit
   - utility
   - real-time

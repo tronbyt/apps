@@ -9,8 +9,6 @@ packageName: nhllive
 recommendedInterval: 5
 category: sports
 tags:
+  - real-time
   - nhl
-  - sports
-  - scores
-  - live
-  - standings
+  - hockey

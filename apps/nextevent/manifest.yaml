@@ -9,8 +9,6 @@ packageName: nextevent
 recommendedInterval: 5
 category: utilities
 tags:
-  - calendar
+  - productivity
   - event
   - utility
-  - reminder
-  - ics

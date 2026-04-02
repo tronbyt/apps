@@ -9,8 +9,6 @@ packageName: rssmiscfeeds
 recommendedInterval: 10
 category: utilities
 tags:
-  - rss
   - news
-  - feed
   - utility
-  - custom
+  - art

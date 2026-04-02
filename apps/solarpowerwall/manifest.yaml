@@ -10,7 +10,6 @@ recommendedInterval: 5
 fileName: solar_powerwall.star
 category: utilities
 tags:
-  - energy
-  - home-assistant
+  - utility
   - smart-home
   - power-monitoring

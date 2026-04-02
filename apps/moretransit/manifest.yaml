@@ -7,9 +7,7 @@ author: gdcolella
 fileName: moretransit.star
 packageName: moretransit
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
-  - subway
-  - nyc
+  - local
   - utility

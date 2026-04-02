@@ -9,7 +9,5 @@ fileName: tw_baseball_cpbl.star
 packageName: twbaseballcpbl
 category: sports
 tags:
+  - mlb
   - baseball
-  - sports
-  - scores
-  - cpbl

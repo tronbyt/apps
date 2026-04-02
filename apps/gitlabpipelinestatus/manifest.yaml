@@ -9,7 +9,6 @@ packageName: gitlabpipeline
 recommendedInterval: 5
 category: utilities
 tags:
-  - gitlab
-  - devops
-  - status
+  - tech
+  - tracking
   - utility

@@ -9,7 +9,4 @@ packageName: sportsstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
-  - standings
-  - scores
-  - espn
+  - news

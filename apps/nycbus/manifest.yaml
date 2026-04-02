@@ -8,7 +8,5 @@ fileName: nyc_bus.star
 packageName: nycbus
 category: transit
 tags:
-  - transit
-  - subway
-  - nyc
-  - utilities
+  - local
+  - utility

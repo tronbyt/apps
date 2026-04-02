@@ -9,6 +9,3 @@ packageName: sbbtimetable
 recommendedInterval: 5
 category: transit
 tags:
-  - swiss
-  - public-transit
-  - train-schedule

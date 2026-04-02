@@ -9,6 +9,6 @@ fileName: next_ufc.star
 packageName: nextufc
 category: sports
 tags:
+  - news
   - ufc
-  - sports
-  - events
+  - mma

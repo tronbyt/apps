@@ -8,7 +8,6 @@ fileName: cpbl_scoreboard.star
 packageName: cpblscoreboard
 category: sports
 tags:
-  - sports
-  - scores
+  - gaming
   - cpbl
-  - game-tracker
+  - baseball

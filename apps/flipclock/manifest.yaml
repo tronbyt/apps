@@ -9,6 +9,6 @@ packageName: flipclock
 broken: true
 category: clocks
 tags:
-  - flip-clock
-  - time-display
+  - clock
+  - time
   - utility

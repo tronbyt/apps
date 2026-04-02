@@ -9,7 +9,7 @@ packageName: ha3dprint
 recommendedInterval: 5
 category: smart-home
 tags:
-  - home-assistant
-  - printer
-  - status
+  - smart-home
+  - tech
+  - tracking
   - utility

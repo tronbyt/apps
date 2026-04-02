@@ -9,7 +9,5 @@ packageName: stockticker
 recommendedInterval: 1
 category: utilities
 tags:
-  - stocks
   - finance
-  - ticker
   - utility
