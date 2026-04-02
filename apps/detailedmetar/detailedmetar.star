@@ -540,7 +540,7 @@ def getWindBadge(decodedMetar):
     )
 
 def getWindSector(direction, color):
-    if direction % 360 == 0:
+    if direction == 0:
         return render.Stack(children = [])
 
     direction = quantizeDirection(direction)
@@ -575,11 +575,12 @@ def getSectorPoints(directionDegrees):
             if shouldFillSectorAnglePixel(x, y, cx, cy, innerRadius, unitX, unitY, cosHalfAngleSq):
                 points.append([x, y])
 
-    # Hard-anchor the center pixel so the wedge always starts from center.
-    points.append([7, 7])
     return points
 
 def shouldFillSectorAnglePixel(x, y, centerX, centerY, radius, unitX, unitY, cosHalfAngleSq):
+    if x == 7 and y == 7:
+        return True
+
     sampleOffsets = [0.2, 0.5, 0.8]
     hits = 0
     for sy in sampleOffsets:
@@ -628,7 +629,7 @@ def getSectorColor(x, y, directionDegrees, baseColor):
     perpY = unitX
 
     forward = (dx * unitX) + (dy * unitY)
-    lateral = absFloat((dx * perpX) + (dy * perpY))
+    lateral = abs((dx * perpX) + (dy * perpY))
 
     gradient = getSectorGradient(baseColor)
     highlight = gradient["highlight"]
@@ -688,11 +689,6 @@ def getSectorGradient(baseColor):
         "mid": baseColor,
         "shadow": "#808080",
     }
-
-def absFloat(value):
-    if value < 0:
-        return -value
-    return value
 
 def pixel(x, y, color):
     return render.Padding(
