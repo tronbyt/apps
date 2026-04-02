@@ -516,7 +516,7 @@ def getWindDirection_value(decodedMetar):
     return str(int(decodedMetar.get("wdir", 0)))
 
 def getWindBadge(decodedMetar):
-    fillColor = "#db3d5d"
+    fillColor = getBackgroundColor(decodedMetar)
     direction = int(getWindDirection_value(decodedMetar))
     return render.Box(
         width = 15,
@@ -630,25 +630,64 @@ def getSectorColor(x, y, directionDegrees, baseColor):
     forward = (dx * unitX) + (dy * unitY)
     lateral = absFloat((dx * perpX) + (dy * perpY))
 
+    gradient = getSectorGradient(baseColor)
+    highlight = gradient["highlight"]
+    mid = gradient["mid"]
+    shadow = gradient["shadow"]
+
     if forward >= 5.0:
-        color = "#ff6d8d"
+        color = highlight
     elif forward >= 3.7:
-        color = "#f05778"
+        color = mid
     elif forward >= 2.4:
         color = baseColor
     else:
-        color = "#c93453"
+        color = shadow
 
     # Soften wedge shoulders for a more rounded visual.
     if lateral >= 1.9 and forward >= 2.0:
-        if color == "#ff6d8d":
-            color = "#f05778"
-        elif color == "#f05778":
+        if color == highlight:
+            color = mid
+        elif color == mid:
             color = baseColor
         elif color == baseColor:
-            color = "#c93453"
+            color = shadow
 
     return color
+
+def getSectorGradient(baseColor):
+    # Keep gradient tied to the active category color.
+    if baseColor == "#62f55f":  # VFR
+        return {
+            "highlight": "#9cff97",
+            "mid": "#7bf777",
+            "shadow": "#3bbd38",
+        }
+    if baseColor == "#8d87fa":  # MVFR
+        return {
+            "highlight": "#b5b0ff",
+            "mid": "#9f99ff",
+            "shadow": "#625dd0",
+        }
+    if baseColor == "#db3d5d":  # IFR
+        return {
+            "highlight": "#ff6d8d",
+            "mid": "#f05778",
+            "shadow": "#c93453",
+        }
+    if baseColor == "#f25ce3":  # LIFR
+        return {
+            "highlight": "#ff8ff4",
+            "mid": "#f777eb",
+            "shadow": "#cc36be",
+        }
+
+    # Fallback if palette changes in the future.
+    return {
+        "highlight": "#ffffff",
+        "mid": baseColor,
+        "shadow": "#808080",
+    }
 
 def absFloat(value):
     if value < 0:
@@ -732,39 +771,42 @@ def getFlightCategory(decodedMetar):
 
 # Returns primary text color based upon current flight category.
 def getTextColor(decodedMetar):
-    if getFlightCategory(decodedMetar) == "VFR":
+    category = getFlightCategory(decodedMetar)
+    if category == "VFR":
         return "#87fa8b"
-    elif getFlightCategory(decodedMetar) == "MVFR":
+    elif category == "MVFR":
         return "#73b8f5"
-    elif getFlightCategory(decodedMetar) == "IFR":
+    elif category == "IFR":
         return "#f5737c"
-    elif getFlightCategory(decodedMetar) == "LIFR":
+    elif category == "LIFR":
         return "#e88bf0"
     else:
         return "#f5737c"
 
 # Returns secondary text color based upon current flight category.
 def getSecondaryTextColor(decodedMetar):
-    if getFlightCategory(decodedMetar) == "VFR":
+    category = getFlightCategory(decodedMetar)
+    if category == "VFR":
         return "#8CADA7"
-    elif getFlightCategory(decodedMetar) == "MVFR":
+    elif category == "MVFR":
         return "#8CADA7"
-    elif getFlightCategory(decodedMetar) == "IFR":
+    elif category == "IFR":
         return "#8CADA7"
-    elif getFlightCategory(decodedMetar) == "LIFR":
+    elif category == "LIFR":
         return "#8CADA7"
     else:
         return "#8CADA7"
 
 # Returns current background color (shapes & lines) for current flight category.
 def getBackgroundColor(decodedMetar):
-    if getFlightCategory(decodedMetar) == "VFR":
+    category = getFlightCategory(decodedMetar)
+    if category == "VFR":
         return "#62f55f"
-    elif getFlightCategory(decodedMetar) == "MVFR":
+    elif category == "MVFR":
         return "#8d87fa"
-    elif getFlightCategory(decodedMetar) == "IFR":
+    elif category == "IFR":
         return "#db3d5d"
-    elif getFlightCategory(decodedMetar) == "LIFR":
+    elif category == "LIFR":
         return "#f25ce3"
     else:
         return "#f5737c"
