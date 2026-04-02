@@ -6,10 +6,10 @@ Author: SamuelSagarino
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -62,21 +62,6 @@ def main(config):
 
     # Create "humanized" readout. Ex; "5 minutes ago"
     humanizedTime = humanize.time(observationDate)
-
-    #Icon
-    cacheName = getFlightCategory(decodedMetar) + "/" + str(getWindDirection_value(decodedMetar))
-    cached = cache.get(cacheName)
-
-    if cached != None:
-        logo = json.decode(cached)
-        logoBase64 = base64.decode(logo, encoding = "standard")
-        print("Found cached image! " + cacheName)
-    else:
-        image = http.get("http://samuelsagarino.me/images/metar/" + getFlightCategory(decodedMetar) + "/" + str(getWindDirection_value(decodedMetar)) + ".png", ttl_seconds = 86400).body()
-        print("No cached image! " + cacheName)
-
-        logoBase64Encoded = base64.encode(image, encoding = "standard")
-        logoBase64 = base64.decode(logoBase64Encoded, encoding = "standard")
 
     # Primary display
     return render.Root(
@@ -132,12 +117,11 @@ def main(config):
                                     ),
                                     render.Box(
                                         width = 16,
-                                        height = 14,
-                                        #child = render.Circle(
-                                        #    color = getBackgroundColor(decodedMetar),
-                                        #    diameter = 12,
-                                        #),
-                                        child = render.Image(src = logoBase64, width = 13, height = 13),
+                                        height = 16,
+                                        child = render.Padding(
+                                            pad = (0, 1, 0, 0),
+                                            child = getWindBadge(decodedMetar),
+                                        ),
                                     ),
                                     render.Box(
                                         child = render.Column(
@@ -215,6 +199,11 @@ def main(config):
                                         width = 32,
                                         height = 16,
                                     ),
+                                ],
+                            ),
+                            render.Row(
+                                children = [
+                                    render.Box(height = 1),
                                 ],
                             ),
                         ],
@@ -525,6 +514,152 @@ def getWindDirection_value(decodedMetar):
     if (decodedMetar.get("wdir", 0) == "VRB"):
         return "0"
     return str(int(decodedMetar.get("wdir", 0)))
+
+def getWindBadge(decodedMetar):
+    fillColor = "#db3d5d"
+    direction = int(getWindDirection_value(decodedMetar))
+    return render.Box(
+        width = 15,
+        height = 15,
+        child = render.Stack(
+            children = [
+                render.Circle(
+                    diameter = 15,
+                    color = getBackgroundColor(decodedMetar),
+                ),
+                render.Padding(
+                    pad = (1, 1, 0, 0),
+                    child = render.Circle(
+                        diameter = 13,
+                        color = "#1a1a1a",
+                    ),
+                ),
+                getWindSector(direction, fillColor),
+            ],
+        ),
+    )
+
+def getWindSector(direction, color):
+    if direction % 360 == 0:
+        return render.Stack(children = [])
+
+    direction = quantizeDirection(direction)
+
+    points = getSectorPoints(direction)
+    return render.Stack(children = [pixel(p[0], p[1], getSectorColor(p[0], p[1], direction, color)) for p in points])
+
+def quantizeDirection(directionDegrees):
+    # Stabilize rendering and avoid tiny per-degree raster differences.
+    bucketSize = 30
+    normalized = directionDegrees % 360
+    return int((normalized + (bucketSize / 2)) / bucketSize) * bucketSize % 360
+
+def getSectorPoints(directionDegrees):
+    # True angular sector clipped to the inner circle (15x15 grid).
+    cx = 7.5
+    cy = 7.5
+    innerRadius = 7.5
+
+    # Tuned for 30-degree buckets so each step still reads like a slice.
+    halfAngleDegrees = 32
+
+    theta = (directionDegrees % 360) * math.pi / 180.0
+    unitX = math.sin(theta)
+    unitY = -math.cos(theta)
+    cosHalfAngle = math.cos((halfAngleDegrees * math.pi) / 180.0)
+    cosHalfAngleSq = cosHalfAngle * cosHalfAngle
+
+    points = []
+    for y in range(15):
+        for x in range(15):
+            if shouldFillSectorAnglePixel(x, y, cx, cy, innerRadius, unitX, unitY, cosHalfAngleSq):
+                points.append([x, y])
+
+    # Hard-anchor the center pixel so the wedge always starts from center.
+    points.append([7, 7])
+    return points
+
+def shouldFillSectorAnglePixel(x, y, centerX, centerY, radius, unitX, unitY, cosHalfAngleSq):
+    sampleOffsets = [0.2, 0.5, 0.8]
+    hits = 0
+    for sy in sampleOffsets:
+        for sx in sampleOffsets:
+            px = x + sx
+            py = y + sy
+            dx = px - centerX
+            dy = py - centerY
+            distanceSq = (dx * dx) + (dy * dy)
+            if distanceSq > (radius * radius):
+                continue
+
+            # # Always fill a tiny core so sectors stay anchored and don't "tuck in".
+            # if distanceSq <= 1.6:
+            #     hits = hits + 1
+            #     continue
+
+            dot = (dx * unitX) + (dy * unitY)
+            if dot < 0:
+                continue
+
+            # inside heading cone if angle-to-heading <= half angle
+            if (dot * dot) >= (distanceSq * cosHalfAngleSq):
+                hits = hits + 1
+
+    return hits >= 4
+
+def isInsideCircle(px, py, cx, cy, radius):
+    dx = px - cx
+    dy = py - cy
+    return (dx * dx) + (dy * dy) <= (radius * radius)
+
+def getSectorColor(x, y, directionDegrees, baseColor):
+    # Fill gradient: brighter toward the outer edge to emulate depth.
+    centerX = 7.5
+    centerY = 7.5
+    px = x + 0.5
+    py = y + 0.5
+    dx = px - centerX
+    dy = py - centerY
+
+    theta = (directionDegrees % 360) * math.pi / 180.0
+    unitX = math.sin(theta)
+    unitY = -math.cos(theta)
+    perpX = -unitY
+    perpY = unitX
+
+    forward = (dx * unitX) + (dy * unitY)
+    lateral = absFloat((dx * perpX) + (dy * perpY))
+
+    if forward >= 5.0:
+        color = "#ff6d8d"
+    elif forward >= 3.7:
+        color = "#f05778"
+    elif forward >= 2.4:
+        color = baseColor
+    else:
+        color = "#c93453"
+
+    # Soften wedge shoulders for a more rounded visual.
+    if lateral >= 1.9 and forward >= 2.0:
+        if color == "#ff6d8d":
+            color = "#f05778"
+        elif color == "#f05778":
+            color = baseColor
+        elif color == baseColor:
+            color = "#c93453"
+
+    return color
+
+def absFloat(value):
+    if value < 0:
+        return -value
+    return value
+
+def pixel(x, y, color):
+    return render.Padding(
+        pad = (x, y, 0, 0),
+        child = render.Box(width = 1, height = 1, color = color),
+    )
 
 # Returns current flight category.
 def getFlightCategory(decodedMetar):
