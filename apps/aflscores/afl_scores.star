@@ -53,6 +53,9 @@ Handling for Indigenous team names
 v2.6
 Updated for 2026 season
 Updated timezone check
+
+v2.6.1
+Squiggle API now requiring the current year to be added to all requests
 """
 
 load("encoding/json.star", "json")
@@ -72,7 +75,7 @@ TEAM_SUFFIX = "&teamId="
 SQUIGGLE_PREFIX = "https://api.squiggle.com.au/?q=games;round="
 INCOMPLETE_SUFFIX = ";complete=!100"
 COMPLETE_SUFFIX = ";complete=100"
-YEAR_SUFFIX = ";year=2026"
+YEAR_PREFIX = ";year="
 
 MATCH_CACHE = 21600
 LADDER_CACHE = 86400
@@ -109,6 +112,7 @@ def main(config):
 
     # Get the Current Round, according to the API
     CurrentRound = str(MatchesJSON["matches"][0]["compSeason"]["currentRoundNumber"])
+    YEAR = YEAR_PREFIX + str(MatchesJSON["matches"][0]["compSeason"]["name"])[0:4]
 
     if ViewSelection == "All" or ViewSelection == "Live":
         CURRENT_ROUND_URL = ROUND_URL + CurrentRound
@@ -120,7 +124,7 @@ def main(config):
     CurrentRoundJSON = json.decode(RoundData)
 
     # Use the Squiggle API for live games, cache data for 30 secs
-    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX
+    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX + YEAR
 
     LiveData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
     LiveJSON = json.decode(LiveData)
@@ -454,7 +458,7 @@ def main(config):
         ),
     )
 
-def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
+def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR):
     renderDisplay = []
 
     # get start time for the match in question
@@ -585,7 +589,7 @@ def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
     # So lets look at completed games for the round in Squiggle, match the team we're looking at and pass info to the showCompletedGame function
     if LiveMatch == False:
         CurrentRound = str(CurrentRoundJSON["matches"][0]["compSeason"]["currentRoundNumber"])
-        SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + COMPLETE_SUFFIX + YEAR_SUFFIX
+        SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + COMPLETE_SUFFIX + YEAR
         CompletedData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
         CompletedJSON = json.decode(CompletedData)
         CompletedMatches = len(CompletedJSON["games"])

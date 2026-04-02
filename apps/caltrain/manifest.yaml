@@ -7,6 +7,7 @@ author: quacksire
 fileName: caltrain.star
 packageName: caltrain
 recommendedInterval: 5
+supports2x: true
 category: transit
 tags:
   - subway
