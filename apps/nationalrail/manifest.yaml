@@ -7,8 +7,7 @@ author: dinosaursrarr
 fileName: national_rail.star
 packageName: nationalrail
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - local
   - real-time

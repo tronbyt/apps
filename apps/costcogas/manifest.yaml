@@ -8,8 +8,7 @@ fileName: costco_gas.star
 packageName: costcogas
 recommendedInterval: 5
 broken: true
-category: utilities
+category: transit
 tags:
   - utility
-  - transit
   - finance

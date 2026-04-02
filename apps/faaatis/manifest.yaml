@@ -7,8 +7,7 @@ author: Connick Shields
 recommendedInterval: 5
 fileName: faa_atis.star
 packageName: faaatis
-category: utilities
+category: transit
 tags:
-  - transit
   - weather
   - utility

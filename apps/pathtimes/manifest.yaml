@@ -7,7 +7,6 @@ author: DavidGoldman
 fileName: path_times.star
 packageName: pathtimes
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - real-time

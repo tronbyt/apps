@@ -9,6 +9,5 @@ packageName: madisonmetrobus
 recommendedInterval: 5
 broken: true
 brokenReason: 'api.smsmybus.com: no such host'
-category: utilities
+category: transit
 tags:
-  - transit

@@ -7,6 +7,5 @@ author: rai
 fileName: mtatraintime.star
 packageName: mtatraintime
 recommendedInterval: 5
-category: weather
+category: transit
 tags:
-  - transit

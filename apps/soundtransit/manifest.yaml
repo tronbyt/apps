@@ -7,8 +7,7 @@ author: Jon Janzen
 fileName: sound_transit.star
 packageName: soundtransit
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - local
   - utility

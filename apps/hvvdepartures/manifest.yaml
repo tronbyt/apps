@@ -8,6 +8,5 @@ fileName: hvv_departures.star
 packageName: hvvdepartures
 broken: true
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit

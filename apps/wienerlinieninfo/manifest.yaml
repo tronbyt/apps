@@ -7,7 +7,6 @@ author: David B.C.
 fileName: wienerlinien_info.star
 packageName: wienerlinieninfo
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - local

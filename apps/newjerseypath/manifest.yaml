@@ -7,7 +7,6 @@ author: karmeleon
 fileName: new_jersey_path.star
 packageName: newjerseypath
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - real-time

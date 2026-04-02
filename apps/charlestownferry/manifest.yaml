@@ -7,6 +7,5 @@ author: jblaker
 fileName: charlestownferry.star
 packageName: charlestownferry
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit

@@ -7,8 +7,7 @@ author: Aiden Mitchell
 fileName: lions_gate_status.star
 packageName: lionsgatestatus
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - utility
   - local

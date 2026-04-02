@@ -7,8 +7,7 @@ author: dinosaursrarr
 fileName: tube.star
 packageName: tube
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - time
   - utility

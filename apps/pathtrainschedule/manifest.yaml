@@ -9,7 +9,6 @@ packageName: pathtrainschedule
 recommendedInterval: 5
 broken: true
 brokenReason: 'path.api.razza.dev: no such host'
-category: weather
+category: transit
 tags:
-  - transit
   - productivity

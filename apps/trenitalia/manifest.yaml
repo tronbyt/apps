@@ -6,8 +6,7 @@ desc: Display upcoming train departures from any Italian Trenitalia station with
 author: Mattia Colombo
 fileName: trenitalia.star
 packageName: trenitalia
-category: utilities
+category: transit
 tags:
-  - transit
   - real-time
   - utility

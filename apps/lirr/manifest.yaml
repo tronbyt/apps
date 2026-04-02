@@ -7,7 +7,6 @@ author: bralax
 fileName: lirr.star
 packageName: lirr
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - utility

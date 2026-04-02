@@ -7,7 +7,6 @@ author: JetgirlDC
 fileName: dc_bus_times.star
 packageName: dcbustimes
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
   - real-time

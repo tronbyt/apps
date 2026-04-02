@@ -7,6 +7,5 @@ author: Harry Samuels
 fileName: tcat_bus_arrivals.star
 packageName: tcatbusarrivals
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit

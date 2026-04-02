@@ -7,6 +7,5 @@ author: radiocolin
 fileName: septatransit.star
 packageName: septatransit
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit

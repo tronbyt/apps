@@ -9,6 +9,5 @@ supports2x: true
 category: weather
 tags:
   - weather
-  - transit
   - utility
   - wide 2x support
