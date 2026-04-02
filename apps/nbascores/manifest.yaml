@@ -8,7 +8,7 @@ fileName: nba_scores.star
 packageName: nbascores
 recommendedInterval: 5
 supports2x: true
-category: utilities
+category: sports
 tags:
   - sports
   - utility
