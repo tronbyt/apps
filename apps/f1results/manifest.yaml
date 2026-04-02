@@ -9,5 +9,6 @@ packageName: f1results
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - real-time
+  - f1
+  - racing

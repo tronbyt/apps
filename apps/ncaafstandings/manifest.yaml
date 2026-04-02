@@ -9,5 +9,6 @@ packageName: ncaafstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - news
+  - ncaaf
+  - football

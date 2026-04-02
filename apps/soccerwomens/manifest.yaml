@@ -9,5 +9,5 @@ packageName: soccerwomens
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - real-time
+  - soccer

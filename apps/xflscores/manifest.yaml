@@ -9,5 +9,6 @@ packageName: xflscores
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - utility
+  - xfl
+  - football

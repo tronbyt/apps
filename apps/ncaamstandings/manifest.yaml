@@ -9,5 +9,6 @@ packageName: ncaamstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - news
+  - nba
+  - basketball

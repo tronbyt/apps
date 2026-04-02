@@ -9,4 +9,5 @@ packageName: mlbmagicnumber
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
+  - mlb
+  - baseball

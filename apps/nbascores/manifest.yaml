@@ -10,6 +10,7 @@ recommendedInterval: 5
 supports2x: true
 category: sports
 tags:
-  - sports
   - utility
   - clock
+  - nba
+  - basketball

@@ -9,5 +9,6 @@ packageName: nhllive
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - real-time
+  - nhl
+  - hockey

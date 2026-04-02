@@ -9,6 +9,7 @@ packageName: ncaamscores
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - real-time
   - art
+  - nba
+  - basketball

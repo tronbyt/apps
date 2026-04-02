@@ -9,4 +9,5 @@ packageName: cpblscores
 broken: true
 category: sports
 tags:
-  - sports
+  - cpbl
+  - baseball

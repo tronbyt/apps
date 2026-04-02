@@ -9,5 +9,5 @@ packageName: eplscores
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - real-time
+  - soccer

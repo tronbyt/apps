@@ -9,5 +9,6 @@ packageName: ncaafscores
 recommendedInterval: 5
 category: sports
 tags:
-  - sports
   - utility
+  - ncaaf
+  - football

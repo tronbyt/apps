@@ -11,5 +11,5 @@ broken: true
 brokenReason: API access blocked (403 Forbidden)
 category: sports
 tags:
-  - sports
   - real-time
+  - cricket

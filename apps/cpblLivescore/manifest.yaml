@@ -8,6 +8,7 @@ fileName: cpbl_live_score.star
 packageName: cpbllivescore
 category: sports
 tags:
-  - sports
   - real-time
   - gaming
+  - cpbl
+  - baseball
