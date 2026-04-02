@@ -170,7 +170,7 @@ def main(config):
                                             ],
                                         ),
                                         width = 32,
-                                        height = 16,
+                                        height = 15,
                                     ),
                                     render.Box(
                                         child = render.Column(
@@ -197,7 +197,7 @@ def main(config):
                                             ],
                                         ),
                                         width = 32,
-                                        height = 16,
+                                        height = 15,
                                     ),
                                 ],
                             ),
