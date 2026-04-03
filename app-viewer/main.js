@@ -446,13 +446,16 @@ async function renderAppDetail() {
     rightCol.className = 'col-md-4';
 
     const imageContainer = document.createElement('div');
-    imageContainer.className = 'text-center';
+    imageContainer.className = 'text-center position-relative';
+    if (app.supports2x) {
+      imageContainer.classList.add('app-2x');
+    }
 
     const image = document.createElement('img');
-    image.src = `${APPS_DIR}/${app.image}`;
+    const displayImage = (app.supports2x && app.image2x) ? app.image2x : app.image;
+    image.src = `${APPS_DIR}/${displayImage}`;
     image.alt = app.displayName || app.name;
     image.className = 'img-fluid rounded border';
-    image.style.maxHeight = '200px';
 
     imageContainer.appendChild(image);
     rightCol.appendChild(imageContainer);
