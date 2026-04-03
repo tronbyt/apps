@@ -16,8 +16,16 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main branch
         uses: actions/checkout@v6
+        with:
+          path: main
+
+      - name: Checkout app-viewer source
+        uses: actions/checkout@v6
+        with:
+          ref: app-viewer-source
+          path: app-viewer-source
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -26,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd app-viewer
+          cd app-viewer-source/app-viewer
           npm install
 
       - name: Build site into staging directory
@@ -34,21 +42,21 @@ jobs:
           mkdir -p _site
 
           # Copy app-viewer static assets to site root
-          cp app-viewer/index.html _site/
-          cp app-viewer/app.html _site/
-          cp app-viewer/main.js _site/
-          cp app-viewer/style.css _site/
-          cp app-viewer/dots.svg _site/
-          cp app-viewer/dots@2x.svg _site/
+          cp app-viewer-source/app-viewer/index.html _site/
+          cp app-viewer-source/app-viewer/app.html _site/
+          cp app-viewer-source/app-viewer/main.js _site/
+          cp app-viewer-source/app-viewer/style.css _site/
+          cp app-viewer-source/app-viewer/dots.svg _site/
+          cp app-viewer-source/app-viewer/dots@2x.svg _site/
 
-          # Generate apps.json directly into the site root
-          node app-viewer/generate-apps-json.js --output _site/apps.json
+          # Generate apps.json directly into the site root (using apps from main branch)
+          node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps
 
           # Copy the apps directory (images and other assets referenced by the viewer)
-          cp -r apps _site/apps
+          cp -r main/apps _site/apps
 
           # Copy broken_apps.txt if present
-          [ -f broken_apps.txt ] && cp broken_apps.txt _site/ || true
+          [ -f main/broken_apps.txt ] && cp main/broken_apps.txt _site/ || true
 
           # Disable Jekyll
           touch _site/.nojekyll
