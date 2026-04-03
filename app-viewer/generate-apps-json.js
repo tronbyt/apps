@@ -6,16 +6,18 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const APPS_DIR = join(__dirname, '../apps');
-
-// Parse --output argument
+// Parse arguments
 const args = process.argv.slice(2);
 let outputFile = join(__dirname, 'apps.json');
+let appsPath = join(__dirname, '../apps');
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--output' && i + 1 < args.length) {
     outputFile = args[i + 1];
+  } else if (args[i] === '--apps-path' && i + 1 < args.length) {
+    appsPath = args[i + 1];
   }
 }
+const APPS_DIR = appsPath;
 const outputDir = dirname(outputFile);
 const OUTPUT_FILE = outputFile;
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
