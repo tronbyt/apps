@@ -6,6 +6,7 @@ Author: Tavis
 """
 
 load("http.star", "http")
+load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
@@ -19,6 +20,7 @@ COLOR_MAP = {
 }
 
 CAM_URLS = {
+    "random": None,
     "v3cam": "https://volcanoes.usgs.gov/cams/V3cam/images/M.jpg",
     "v1cam": "https://volcanoes.usgs.gov/cams/V1cam/images/M.jpg",
     "v2cam": "https://volcanoes.usgs.gov/cams/V2cam/images/M.jpg",
@@ -43,7 +45,10 @@ def main(config):
     height = 64 if is_wide else 32
     text_y = 56 if is_wide else 24
 
-    cam_id = config.get("cam", "v3cam")
+    cam_id = config.get("cam", "random")
+    if cam_id == "random":
+        cam_keys = [k for k in CAM_URLS.keys() if k != "random"]
+        cam_id = cam_keys[random.number(0, len(cam_keys) - 1)]
     cam_url = CAM_URLS.get(cam_id, CAM_URLS["v3cam"])
     min_level = config.get("min_level", "normal")
     show_label = config.bool("show_label", True)
@@ -133,11 +138,12 @@ def get_schema():
                 desc = "Select a webcam view",
                 icon = "camera",
                 options = [
+                    schema.Option(display = "Random", value = "random"),
                     schema.Option(display = "South (V3cam)", value = "v3cam"),
                     schema.Option(display = "West (V1cam)", value = "v1cam"),
                     schema.Option(display = "East (V2cam)", value = "v2cam"),
                 ],
-                default = "v3cam",
+                default = "random",
             ),
             schema.Dropdown(
                 id = "min_level",
