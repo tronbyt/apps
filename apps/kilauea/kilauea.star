@@ -12,10 +12,10 @@ load("schema.star", "schema")
 URL = "https://volcanoes.usgs.gov/rss/vhpcaprss.xml"
 
 COLOR_MAP = {
-    "green": "#00ff00",
-    "yellow": "#ffff00",
-    "orange": "#ff8800",
-    "red": "#ff0000",
+    "green": "#00ff0078",
+    "yellow": "#ffff0084",
+    "orange": "#ff88009d",
+    "red": "#ff000080",
 }
 
 CAM_URLS = {
@@ -46,6 +46,7 @@ def main(config):
     cam_id = config.get("cam", "v3cam")
     cam_url = CAM_URLS.get(cam_id, CAM_URLS["v3cam"])
     min_level = config.get("min_level", "normal")
+    show_label = config.bool("show_label", True)
 
     rep = http.get(URL, ttl_seconds = 300)
     if rep.status_code != 200:
@@ -85,7 +86,7 @@ def main(config):
                 ),
                 render.Padding(
                     pad = (0, text_y, 0, 0),
-                    child = render.Text("Kilauea", font = "tb-8", color = color_hex),
+                    child = render.Text("Kilauea", font = "tb-8", color = color_hex) if show_label else render.Box(),
                 ),
             ],
         ),
@@ -145,6 +146,13 @@ def get_schema():
                 icon = "volcano",
                 options = LEVELS,
                 default = "normal",
+            ),
+            schema.Toggle(
+                id = "show_label",
+                name = "Show Label",
+                desc = "Display the 'Kilauea' label on the image",
+                icon = "eye",
+                default = True,
             ),
         ],
     )
