@@ -7,6 +7,7 @@ For support, join the Nightscout for Tidbyt Facebook group.
 Authors: Paul Murphy, Jason Hanson, Jeremy Tavener
 """
 
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
@@ -88,7 +89,8 @@ DEFAULT_SHOW_24_HOUR_TIME = False
 DEFAULT_NIGHT_MODE = False
 GRAPH_BOTTOM = 40
 
-CACHE_TTL_SECONDS = 10
+MIN_CACHE_TTL = 10 * time.second
+READING_AGE_THRESHOLD = 5 * time.minute + 30 * time.second
 
 DEFAULT_LOCATION = """
 {
@@ -147,7 +149,7 @@ def main(config):
     # Pull the data from the cache
     sgv_current_mgdl = int(nightscout_data["sgv_current"])
     sgv_delta = nightscout_data["sgv_delta"]
-    latest_reading_dt = nightscout_data["latest_reading_date_string"]
+    latest_reading_dt = nightscout_data["latest_reading_date"]
     direction = nightscout_data["direction"]
     nightscout_iob = nightscout_data["iob"]
     nightscout_cob = nightscout_data["cob"]
@@ -1292,30 +1294,33 @@ def get_schema():
         ],
     )
 
-def get_proto_host(url):
+def build_url(url, path):
     proto = "http" if url.startswith("http://") else "https"
     host = url.removeprefix(proto + "://")
     host = host.split("/")[0]
-    return proto, host
+    return proto + "://" + host + path
 
 # This method returns a tuple of a nightscout_data and a status_code.
 def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_unit):
-    proto, host = get_proto_host(nightscout_url)
-    json_url = proto + "://" + host + "/api/v2/properties/bgnow,iob,delta,direction,cob"
-    headers = {}
-    if nightscout_token != "":
-        headers["Api-Secret"] = hash.sha1(nightscout_token)
+    json_url = build_url(nightscout_url, "/api/v2/properties/bgnow,iob,delta,direction,cob")
+    encoded_token = hash.sha1(nightscout_token) if nightscout_token else ""
+    headers = {"API-Secret": encoded_token} if encoded_token else {}
+    cache_key = json_url + ":" + hash.sha1(encoded_token)
 
-    # Request latest properties from the Nightscout URL
-    resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
-    if resp.status_code != 200:
-        return None, resp.status_code
+    cached = cache.get(cache_key)
+    if cached:
+        ns_properties = json.decode(cached)
+    else:
+        # Request latest properties from the Nightscout URL
+        resp = http.get(json_url, headers = headers)
+        if resp.status_code != 200:
+            return None, resp.status_code
 
-    ns_properties = resp.json()
+        ns_properties = resp.json()
 
     sgv_current = ""
     sgv_delta = ""
-    latest_reading_date_string = ""
+    latest_reading_date = ""
     direction = ""
     iob = "n/a"
     cob = "n/a"
@@ -1325,8 +1330,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         if "last" in ns_properties["bgnow"]:
             sgv_current = str(int(ns_properties["bgnow"]["last"]))
         if "mills" in ns_properties["bgnow"]:
-            latest_reading_date_string = ns_properties["bgnow"]["mills"]
-            latest_reading_date_string = time.from_timestamp(int(int(latest_reading_date_string) / 1000))
+            latest_reading_date = time.from_timestamp(int(ns_properties["bgnow"]["mills"] / 1000))
     if "delta" in ns_properties:
         if "absolute" in ns_properties["delta"]:
             sgv_delta = ns_properties["delta"]["absolute"]
@@ -1343,33 +1347,42 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         if "display" in ns_properties["cob"]:
             cob = str(ns_properties["cob"]["display"]) + "g"
 
+    ttl_seconds = MIN_CACHE_TTL
+    if latest_reading_date:
+        reading_age = time.now() - latest_reading_date
+        ttl = max(READING_AGE_THRESHOLD - reading_age, MIN_CACHE_TTL)
+        ttl_seconds = int(ttl.seconds)
+
+    if not cached:
+        cache.set(cache_key, json.encode(ns_properties), ttl_seconds = ttl_seconds)
+
     if show_graph:
-        nightscout_history, status = get_nightscout_history(nightscout_url, nightscout_token)
+        nightscout_history, status = get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date, ttl_seconds)
         if status != 200:
             nightscout_history = []
 
-    nightscout_data = {
+    data = {
         "sgv_current": sgv_current,
         "sgv_delta": sgv_delta,
-        "latest_reading_date_string": latest_reading_date_string,
+        "latest_reading_date": latest_reading_date,
         "direction": direction,
         "iob": iob,
         "cob": cob,
         "history": nightscout_history,
     }
 
-    return nightscout_data, resp.status_code
+    return data, 200
 
-def get_nightscout_history(nightscout_url, nightscout_token):
-    proto, host = get_proto_host(nightscout_url)
-    oldest_reading = str((time.now() - time.parse_duration("240m")).unix)
-    json_url = proto + "://" + host + "/api/v2/entries.json?count=200&find[date][$gte]=" + oldest_reading
-    headers = {}
-    if nightscout_token != "":
-        headers["Api-Secret"] = hash.sha1(nightscout_token)
+def get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date, ttl_seconds):
+    if not latest_reading_date:
+        latest_reading_date = time.now()
+    oldest_reading = str((latest_reading_date - 4 * time.hour).unix)
+    json_url = build_url(nightscout_url, "/api/v2/entries.json?count=200&find[date][$gte]=" + oldest_reading)
+    encoded_token = hash.sha1(nightscout_token) if nightscout_token else None
+    headers = {"API-Secret": encoded_token} if encoded_token else {}
 
     # Request latest entries from the Nightscout URL
-    resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
+    resp = http.get(json_url, headers = headers, ttl_seconds = ttl_seconds)
     if resp.status_code != 200:
         return {}, resp.status_code
 
@@ -1415,7 +1428,7 @@ def get_sample_data(display_unit):
     return {
         "sgv_current": str(entries[-1]),
         "sgv_delta": delta if display_unit == "mgdl" else mgdl_to_mmol(delta),
-        "latest_reading_date_string": now - d3min,
+        "latest_reading_date": now - d3min,
         "direction": "Flat",
         "iob": "0.00u",
         "cob": "0.0g",
