@@ -106,6 +106,21 @@ DEFAULT_LOCATION = """
 DEFAULT_NSURL = ""
 DEFAULT_NSTOKEN = ""
 
+ARROWS = {
+    "None": "",
+    "NONE": "",
+    "DoubleDown": "↓↓",
+    "DoubleUp": "↑↑",
+    "Flat": "→",
+    "FortyFiveDown": "↘",
+    "FortyFiveUp": "↗",
+    "SingleDown": "↓",
+    "SingleUp": "↑",
+    "Error": "?",
+    "Dash": "-",
+    "NOT COMPUTABLE": "?",
+}
+
 def main(config):
     UTC_TIME_NOW = time.now().in_location("UTC")
     location = config.get("location", DEFAULT_LOCATION)
@@ -1437,18 +1452,3 @@ def get_sample_data(display_unit):
             for k, v in enumerate(entries)
         ],
     }
-
-ARROWS = {
-    "None": "",
-    "NONE": "",
-    "DoubleDown": "↓↓",
-    "DoubleUp": "↑↑",
-    "Flat": "→",
-    "FortyFiveDown": "↘",
-    "FortyFiveUp": "↗",
-    "SingleDown": "↓",
-    "SingleUp": "↑",
-    "Error": "?",
-    "Dash": "-",
-    "NOT COMPUTABLE": "?",
-}
