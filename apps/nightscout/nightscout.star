@@ -607,6 +607,11 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
     sm_clock_row = []
 
     if clock_option == "Clock":
+        formats = [
+            now.format("15:04" if show_24_hour_time else "3:04"),
+            now.format("15 04" if show_24_hour_time else "3 04"),
+        ]
+
         lg_clock_row = [
             render.Box(height = SCALE),
             render.Row(
@@ -617,15 +622,11 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
                     render.Animation(
                         children = [
                             render.Text(
-                                content = now.format("15:04" if show_24_hour_time else "3:04 PM"),
+                                content = content,
                                 font = FONT_MEDIUM,
                                 color = color_clock,
-                            ),
-                            render.Text(
-                                content = now.format("15 04" if show_24_hour_time else "3 04 PM"),
-                                font = FONT_MEDIUM,
-                                color = color_clock,
-                            ),
+                            )
+                            for content in formats
                         ],
                     ),
                 ],
@@ -634,21 +635,14 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
 
         sm_clock_row = [
             render.WrappedText(
-                content = now.format("15:04" if show_24_hour_time else "3:04"),
+                content = content,
                 font = FONT_TINY,
                 color = color_clock,
                 width = left_col_width,
                 align = "center",
                 height = 6 * SCALE,
-            ),
-            render.WrappedText(
-                content = now.format("15 04" if show_24_hour_time else "3 04"),
-                font = FONT_TINY,
-                color = color_clock,
-                width = left_col_width,
-                align = "center",
-                height = 6 * SCALE,
-            ),
+            )
+            for content in formats
         ]
 
     elif clock_option == "IOB" or clock_option == "COB":
