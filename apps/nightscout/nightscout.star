@@ -1392,13 +1392,13 @@ def get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date
     # Request latest entries from the Nightscout URL
     resp = http.get(json_url, headers = headers, ttl_seconds = ttl_seconds)
     if resp.status_code != 200:
-        return {}, resp.status_code
+        return [], resp.status_code
 
-    history = []
-
-    for x in resp.json():
-        if "sgv" in x:
-            history.append(tuple((int(int(x["date"]) / 1000), int(x["sgv"]))))
+    history = [
+        (int(int(x["date"]) / 1000), int(x["sgv"]))
+        for x in resp.json()
+        if "sgv" in x
+    ]
 
     return history, resp.status_code
 
