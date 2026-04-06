@@ -5,12 +5,13 @@
 #              Notify NYC / Everbridge RSS feed on your Tidbyt 64x32 display.
 
 load("cache.star", "cache")
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
 RSS_URL = "https://feeds.everbridge.net/feeds/453003085617722/rss/rss.xml"
-CACHE_KEY = "nycalerts_v1"
+CACHE_KEY = "nycalerts_v2"
 CACHE_TTL = 300  # 5 minutes — emergency data must be fresh
 
 BLACK = "#000000"
@@ -20,17 +21,15 @@ BLUE = "#0055CC"
 YELLOW = "#FFD700"
 ORANGE = "#FF8800"
 GREEN = "#00CC44"
-DKBLUE = "#001A44"
 DKRED = "#1A0000"
 
-# Category color coding
 CAT_COLORS = {
-    "Infra": ORANGE,  # Infrastructure (gas, water, power)
-    "Traffic": YELLOW,  # Traffic disruptions
-    "Transit": BLUE,  # MTA/transit
-    "Safety": RED,  # Emergency/safety
-    "Health": GREEN,  # Public health
-    "Weather": ORANGE,  # Weather
+    "Infra": ORANGE,
+    "Traffic": YELLOW,
+    "Transit": BLUE,
+    "Safety": RED,
+    "Health": GREEN,
+    "Weather": ORANGE,
 }
 
 def parse_feed(body, max_items):
@@ -39,7 +38,6 @@ def parse_feed(body, max_items):
     items = body.split("<item>")
 
     for item in items[1:]:
-        # Only grab English alerts (filter out multilingual duplicates)
         author_start = item.find("<author>")
         author_end = item.find("</author>")
         if author_start == -1:
@@ -48,7 +46,6 @@ def parse_feed(body, max_items):
         if "[English]" not in author:
             continue
 
-        # Title
         t_start = item.find("<title>")
         t_end = item.find("</title>")
         if t_start == -1:
@@ -57,27 +54,19 @@ def parse_feed(body, max_items):
         if title.startswith("Notify NYC - "):
             title = title[13:]
 
-        # Description
         d_start = item.find("<description>")
         d_end = item.find("</description>")
         desc = ""
         if d_start != -1:
             desc = item[d_start + 13:d_end].strip()
-
-            # Strip HTML entities
             desc = desc.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
-
-            # Strip "To view this message in..." suffix
             cut = desc.find("To view this message in")
             if cut != -1:
                 desc = desc[:cut].strip()
-
-            # Strip "Notification issued..." prefix
             cut2 = desc.find("\n\n")
             if cut2 != -1 and cut2 < 60:
                 desc = desc[cut2:].strip()
 
-        # Category
         c_start = item.find("<category>")
         c_end = item.find("</category>")
         category = "Safety"
@@ -98,19 +87,8 @@ def parse_feed(body, max_items):
 
 def get_alerts(max_items):
     cached = cache.get(CACHE_KEY)
-    if cached != None:
-        parts = cached.split("|||")
-        alerts = []
-        for p in parts:
-            if ":::" in p:
-                bits = p.split(":::")
-                if len(bits) >= 2:
-                    alerts.append({
-                        "title": bits[0],
-                        "desc": bits[1] if len(bits) > 1 else "",
-                        "category": bits[2] if len(bits) > 2 else "Safety",
-                    })
-        return alerts[:max_items]
+    if cached:
+        return json.decode(cached)[:max_items]
 
     resp = http.get(RSS_URL, ttl_seconds = CACHE_TTL, headers = {
         "User-Agent": "tidbyt-nycalerts/1.0",
@@ -124,11 +102,7 @@ def get_alerts(max_items):
     if not alerts:
         return [{"title": "No active NYC alerts", "desc": "", "category": "Safety"}]
 
-    cached_str = "|||".join([
-        a["title"] + ":::" + a["desc"] + ":::" + a["category"]
-        for a in alerts
-    ])
-    cache.set(CACHE_KEY, cached_str, ttl_seconds = CACHE_TTL)
+    cache.set(CACHE_KEY, json.encode(alerts), ttl_seconds = CACHE_TTL)
     return alerts
 
 def alert_color(category):
@@ -140,20 +114,14 @@ def main(config):
     total = len(alerts)
     no_alerts = total == 1 and "No active" in alerts[0]["title"]
 
-    # Build one screen per alert cycling through
     screens = []
-    for _, alert in enumerate(alerts):
+    for alert in alerts:
         color = GREEN if no_alerts else alert_color(alert.get("category", "Safety"))
         header_bg = "#003300" if no_alerts else DKRED
-
-        # Use description if available, otherwise title
-        ticker_text = alert["desc"] if alert["desc"] else alert["title"]
-        if not ticker_text:
-            ticker_text = alert["title"]
+        ticker_text = alert["desc"] or alert["title"]
 
         screen = render.Column(
             children = [
-                # ── Header ──────────────────────────────────
                 render.Box(
                     width = 64,
                     height = 11,
@@ -184,9 +152,7 @@ def main(config):
                         ],
                     ),
                 ),
-                # ── Divider ─────────────────────────────────
                 render.Box(width = 64, height = 1, color = color),
-                # ── Scrolling description ────────────────────
                 render.Box(
                     width = 64,
                     height = 20,
@@ -199,7 +165,6 @@ def main(config):
                             offset_end = 64,
                             child = render.Text(
                                 content = ticker_text,
-                                font = "tb-8",
                                 color = WHITE,
                             ),
                         ),
