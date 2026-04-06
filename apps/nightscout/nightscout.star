@@ -61,6 +61,7 @@ DEFAULT_URGENT_LOW = 70
 
 DEFAULT_SHOW_GRAPH = True
 DEFAULT_SHOW_GRAPH_HOUR_BARS = True
+DEFAULT_EXPAND_GRAPH_HEIGHT = True
 DEFAULT_GRAPH_HEIGHT = 300
 DEFAULT_CLOCK_OPTION = "Clock"
 DEFAULT_CLOCK_COLOR = COLOR_ORANGE
@@ -105,6 +106,7 @@ def main(config):
     nightscout_token = config.get("nightscout_token", DEFAULT_NSTOKEN)
     show_graph = config.bool("show_graph", DEFAULT_SHOW_GRAPH)
     show_graph_hour_bars = config.bool("show_graph_hour_bars", DEFAULT_SHOW_GRAPH_HOUR_BARS)
+    expand_graph_height = config.bool("expand_graph_height", DEFAULT_EXPAND_GRAPH_HEIGHT)
     scale = 2 if canvas.is2x() else 1
 
     # for backward compatibilty
@@ -887,12 +889,14 @@ def main(config):
                 if (min_time <= history_point[0] and history_point[0] <= max_time):
                     this_point = history_point[1]
 
-            #print(this_point)
             if this_point < GRAPH_BOTTOM and this_point > 0:
                 this_point = GRAPH_BOTTOM
 
             if this_point > graph_height:
-                this_point = graph_height
+                if expand_graph_height:
+                    graph_height = this_point
+                else:
+                    this_point = graph_height
 
             graph_point_color = color_graph_normal
 
@@ -1095,6 +1099,13 @@ def display_unit_options(display_unit):
             desc = "Height of Graph (in " + unit + ") (Default " + str(graph_height) + ")",
             icon = "rulerVertical",
             default = str(graph_height),
+        ),
+        schema.Toggle(
+            id = "expand_graph_height",
+            name = "Expand Graph Height",
+            desc = "When enabled, the graph height expands to fit the highest value shown.",
+            icon = "chartLine",
+            default = DEFAULT_EXPAND_GRAPH_HEIGHT,
         ),
         schema.Color(
             id = "in_range_color",
