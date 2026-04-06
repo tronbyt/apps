@@ -122,7 +122,6 @@ ARROWS = {
 }
 
 def main(config):
-    UTC_TIME_NOW = time.now().in_location("UTC")
     location = config.get("location", DEFAULT_LOCATION)
     loc = json.decode(location)
     now = time.now().in_location(loc["timezone"])
@@ -202,10 +201,8 @@ def main(config):
 
     left_col_width = 50 if IS_2X else 28
     graph_width = 74 if IS_2X else 34
-
-    OLDEST_READING_TARGET = UTC_TIME_NOW - graph_width * 5 * time.minute
-
-    reading_mins_ago = int((UTC_TIME_NOW - latest_reading_dt).minutes)
+    oldest_reading_target = now - graph_width * 5 * time.minute
+    reading_mins_ago = int((now - latest_reading_dt).minutes)
 
     if (reading_mins_ago < 1):
         human_reading_ago = "<1 min ago"
@@ -361,7 +358,7 @@ def main(config):
             color_graph_urgent_low,
             show_graph_hour_bars,
             hour_marker_color,
-            OLDEST_READING_TARGET,
+            oldest_reading_target,
         )
         output = build_two_column_output(
             left_column_string,
