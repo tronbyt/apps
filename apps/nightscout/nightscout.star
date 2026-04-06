@@ -885,6 +885,20 @@ def build_graph(history, graph_width, graph_height, expand_graph_height, normal_
     """Builds graph plot data and hour bar markers."""
     graph_plot = []
     graph_hour_bars = []
+
+    if expand_graph_height:
+        min_time = oldest_reading_target.unix
+        for point in range(graph_width):
+            max_time = min_time + 299
+            this_point = 0
+            for history_point in history:
+                if (min_time <= history_point[0] and history_point[0] <= max_time):
+                    this_point = history_point[1]
+                    break
+            if this_point > graph_height:
+                graph_height = this_point
+            min_time = max_time + 1
+
     min_time = oldest_reading_target.unix
 
     for point in range(graph_width):
@@ -898,10 +912,7 @@ def build_graph(history, graph_width, graph_height, expand_graph_height, normal_
             this_point = GRAPH_BOTTOM
 
         if this_point > graph_height:
-            if expand_graph_height:
-                graph_height = this_point
-            else:
-                this_point = graph_height
+            this_point = graph_height
 
         graph_point_color = color_graph_normal
 
