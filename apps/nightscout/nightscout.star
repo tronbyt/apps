@@ -12,6 +12,7 @@ load("hash.star", "hash")
 load("http.star", "http")
 load("math.star", "math")
 load("render.star", "canvas", "render")
+load("sample_entries.json", SAMPLE_DATA = "file")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -133,99 +134,15 @@ def main(config):
     night_mode = config.bool("night_mode", DEFAULT_NIGHT_MODE)
     nightscout_iob = "n/a"
     nightscout_cob = "n/a"
+    sample_data = False
 
-    if nightscout_url != "":
-        sample_data = False
-
+    if nightscout_url == "":
+        sample_data = True
+        nightscout_data = get_sample_data(display_unit)
+    else:
         nightscout_data, status_code = get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_unit)
-
         if status_code > 200:
             return display_failure("Nightscout Error: " + str(status_code) + " " + http.status_text(status_code))
-    else:
-        nightscout_data, status_code = {
-            "sgv_current": "92",
-            "sgv_delta": "+5" if display_unit == "mgdl" else float("+0.3"),
-            "latest_reading_date_string": (time.now() - time.parse_duration("3m10s")),
-            "direction": "Flat",
-            "iob": "0.00u",
-            "cob": "0.0g",
-            "history": [
-                ((time.now() - time.parse_duration("363m")).unix, 118),
-                ((time.now() - time.parse_duration("358m")).unix, 119),
-                ((time.now() - time.parse_duration("353m")).unix, 121),
-                ((time.now() - time.parse_duration("348m")).unix, 123),
-                ((time.now() - time.parse_duration("343m")).unix, 124),
-                ((time.now() - time.parse_duration("338m")).unix, 126),
-                ((time.now() - time.parse_duration("333m")).unix, 127),
-                ((time.now() - time.parse_duration("328m")).unix, 128),
-                ((time.now() - time.parse_duration("323m")).unix, 127),
-                ((time.now() - time.parse_duration("318m")).unix, 126),
-                ((time.now() - time.parse_duration("313m")).unix, 125),
-                ((time.now() - time.parse_duration("308m")).unix, 124),
-                ((time.now() - time.parse_duration("303m")).unix, 123),
-                ((time.now() - time.parse_duration("298m")).unix, 124),
-                ((time.now() - time.parse_duration("293m")).unix, 125),
-                ((time.now() - time.parse_duration("288m")).unix, 126),
-                ((time.now() - time.parse_duration("283m")).unix, 127),
-                ((time.now() - time.parse_duration("278m")).unix, 127),
-                ((time.now() - time.parse_duration("273m")).unix, 126),
-                ((time.now() - time.parse_duration("268m")).unix, 125),
-                ((time.now() - time.parse_duration("263m")).unix, 128),
-                ((time.now() - time.parse_duration("258m")).unix, 126),
-                ((time.now() - time.parse_duration("253m")).unix, 124),
-                ((time.now() - time.parse_duration("248m")).unix, 121),
-                ((time.now() - time.parse_duration("243m")).unix, 119),
-                ((time.now() - time.parse_duration("238m")).unix, 118),
-                ((time.now() - time.parse_duration("233m")).unix, 119),
-                ((time.now() - time.parse_duration("228m")).unix, 120),
-                ((time.now() - time.parse_duration("223m")).unix, 121),
-                ((time.now() - time.parse_duration("218m")).unix, 123),
-                ((time.now() - time.parse_duration("213m")).unix, 125),
-                ((time.now() - time.parse_duration("208m")).unix, 130),
-                ((time.now() - time.parse_duration("203m")).unix, 135),
-                ((time.now() - time.parse_duration("198m")).unix, 132),
-                ((time.now() - time.parse_duration("193m")).unix, 131),
-                ((time.now() - time.parse_duration("188m")).unix, 137),
-                ((time.now() - time.parse_duration("183m")).unix, 142),
-                ((time.now() - time.parse_duration("178m")).unix, 147),
-                ((time.now() - time.parse_duration("173m")).unix, 155),
-                ((time.now() - time.parse_duration("168m")).unix, 160),
-                ((time.now() - time.parse_duration("163m")).unix, 172),
-                ((time.now() - time.parse_duration("158m")).unix, 184),
-                ((time.now() - time.parse_duration("153m")).unix, 187),
-                ((time.now() - time.parse_duration("148m")).unix, 190),
-                ((time.now() - time.parse_duration("143m")).unix, 186),
-                ((time.now() - time.parse_duration("138m")).unix, 183),
-                ((time.now() - time.parse_duration("133m")).unix, 175),
-                ((time.now() - time.parse_duration("128m")).unix, 165),
-                ((time.now() - time.parse_duration("123m")).unix, 160),
-                ((time.now() - time.parse_duration("118m")).unix, 155),
-                ((time.now() - time.parse_duration("113m")).unix, 145),
-                ((time.now() - time.parse_duration("108m")).unix, 140),
-                ((time.now() - time.parse_duration("103m")).unix, 135),
-                ((time.now() - time.parse_duration("98m")).unix, 125),
-                ((time.now() - time.parse_duration("93m")).unix, 110),
-                ((time.now() - time.parse_duration("88m")).unix, 104),
-                ((time.now() - time.parse_duration("83m")).unix, 101),
-                ((time.now() - time.parse_duration("78m")).unix, 97),
-                ((time.now() - time.parse_duration("73m")).unix, 95),
-                ((time.now() - time.parse_duration("68m")).unix, 93),
-                ((time.now() - time.parse_duration("63m")).unix, 91),
-                ((time.now() - time.parse_duration("58m")).unix, 87),
-                ((time.now() - time.parse_duration("53m")).unix, 87),
-                ((time.now() - time.parse_duration("48m")).unix, 85),
-                ((time.now() - time.parse_duration("43m")).unix, 84),
-                ((time.now() - time.parse_duration("38m")).unix, 83),
-                ((time.now() - time.parse_duration("33m")).unix, 80),
-                ((time.now() - time.parse_duration("28m")).unix, 83),
-                ((time.now() - time.parse_duration("23m")).unix, 88),
-                ((time.now() - time.parse_duration("18m")).unix, 90),
-                ((time.now() - time.parse_duration("13m")).unix, 88),
-                ((time.now() - time.parse_duration("8m")).unix, 87),
-                ((time.now() - time.parse_duration("3m")).unix, 92),
-            ],
-        }, 0
-        sample_data = True
 
     # Pull the data from the cache
     sgv_current_mgdl = int(nightscout_data["sgv_current"])
@@ -1489,6 +1406,24 @@ def display_failure(msg):
             ),
         ),
     )
+
+def get_sample_data(display_unit):
+    entries = json.decode(SAMPLE_DATA.readall())
+    now = time.now()
+    d3min = 3 * time.minute - 10 * time.second
+    delta = entries[-1] - entries[-2]
+    return {
+        "sgv_current": str(entries[-1]),
+        "sgv_delta": delta if display_unit == "mgdl" else mgdl_to_mmol(delta),
+        "latest_reading_date_string": now - d3min,
+        "direction": "Flat",
+        "iob": "0.00u",
+        "cob": "0.0g",
+        "history": [
+            ((now - ((len(entries) - k) * 5 * time.minute - d3min)).unix, v)
+            for k, v in enumerate(entries)
+        ],
+    }
 
 ARROWS = {
     "None": "",
