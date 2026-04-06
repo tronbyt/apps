@@ -198,6 +198,8 @@ def main(config):
         elif (sgv_delta > 0):
             str_delta = "+" + str_delta
 
+    str_delta = str_delta.replace("0", "O")
+
     left_col_width = 50 if IS_2X else 28
     graph_width = 74 if IS_2X else 34
 
@@ -419,7 +421,7 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
                 expanded = True,
                 children = [
                     render.WrappedText(
-                        content = str_delta.replace("0", "O"),
+                        content = str_delta,
                         font = "terminus-20-light" if IS_2X else "5x8",
                         color = color_delta,
                         align = "center",
@@ -444,7 +446,7 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
                         height = SCALE,
                     ),
                     render.Text(
-                        content = str_delta.replace("0", "O"),
+                        content = str_delta,
                         font = "terminus-20-light" if IS_2X else "6x13",
                         color = color_delta,
                         offset = 0,
@@ -523,7 +525,7 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
     if (reading_mins_ago > 5):
         left_delta_row = [
             render.WrappedText(
-                content = str_delta.replace("0", "O"),
+                content = str_delta,
                 font = "10x13" if IS_2X else "CG-pixel-3x5-mono",
                 color = color_delta,
                 linespacing = 2 * SCALE,
@@ -535,7 +537,7 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
     else:
         left_delta_row = [
             render.Text(
-                content = str_delta.replace("0", "O"),
+                content = str_delta,
                 font = FONT_SMALL,
                 color = color_delta,
                 offset = 0,
@@ -702,7 +704,7 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
                         height = 18 * SCALE,
                     ),
                     render.WrappedText(
-                        content = str_delta.replace("0", "O"),
+                        content = str_delta,
                         font = "terminus-12" if IS_2X else "tom-thumb",
                         color = color_delta,
                         align = "center",
@@ -731,7 +733,7 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
                         color = color_reading,
                     ),
                     render.Text(
-                        content = " " + str_delta.replace("0", "O"),
+                        content = " " + str_delta,
                         font = FONT_SMALL,
                         color = color_delta,
                         offset = -SCALE,
@@ -800,7 +802,7 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
                 width = left_col_width,
                 height = 20 if IS_2X else 12,
                 child = render.WrappedText(
-                    content = str_delta.replace("0", "O"),
+                    content = str_delta,
                     font = "6x10" if IS_2X else "CG-pixel-3x5-mono",
                     color = color_delta,
                     linespacing = 0 if IS_2X else 1,
@@ -811,7 +813,7 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
     else:
         left_delta_row = [
             render.Text(
-                content = str_delta.replace("0", "O"),
+                content = str_delta,
                 font = FONT_SMALL,
                 color = color_delta,
                 offset = 0,
