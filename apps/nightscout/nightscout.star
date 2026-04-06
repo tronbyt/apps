@@ -108,18 +108,6 @@ def main(config):
     show_graph_hour_bars = config.bool("show_graph_hour_bars", DEFAULT_SHOW_GRAPH_HOUR_BARS)
     expand_graph_height = config.bool("expand_graph_height", DEFAULT_EXPAND_GRAPH_HEIGHT)
     scale = 2 if canvas.is2x() else 1
-
-    # for backward compatibilty
-    if (config.bool("show_clock") == True):
-        DEFAULT_CLOCK_OPTION = "Clock"
-    else:
-        DEFAULT_CLOCK_OPTION = "None"
-
-    if (config.bool("show_mgdl") == True):
-        DEFAULT_DISPLAY_UNIT = "mgdl"
-    else:
-        DEFAULT_DISPLAY_UNIT = "mmol"
-
     display_unit = config.get("display_unit", DEFAULT_DISPLAY_UNIT)
     clock_option = config.get("clock_option", DEFAULT_CLOCK_OPTION)
     clock_color = config.get("clock_color", DEFAULT_CLOCK_COLOR)
