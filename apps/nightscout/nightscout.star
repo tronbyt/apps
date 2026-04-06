@@ -147,7 +147,6 @@ def main(config):
             return display_failure("Nightscout Error: " + str(status_code) + " " + http.status_text(status_code), scale = scale)
     else:
         nightscout_data, status_code = {
-            "api_version": "n/a",
             "sgv_current": "92",
             "sgv_delta": "+5" if display_unit == "mgdl" else float("+0.3"),
             "latest_reading_date_string": (time.now() - time.parse_duration("3m10s")),
@@ -235,16 +234,11 @@ def main(config):
     # Pull the data from the cache
     sgv_current_mgdl = int(nightscout_data["sgv_current"])
     sgv_delta = nightscout_data["sgv_delta"]
-    if nightscout_data["api_version"] == "v1":
-        latest_reading_dt = time.parse_time(nightscout_data["latest_reading_date_string"])
-    else:
-        latest_reading_dt = nightscout_data["latest_reading_date_string"]
+    latest_reading_dt = nightscout_data["latest_reading_date_string"]
     direction = nightscout_data["direction"]
     nightscout_iob = nightscout_data["iob"]
     nightscout_cob = nightscout_data["cob"]
     history = nightscout_data["history"]
-    api_version = nightscout_data["api_version"]
-    print("api_version: ", api_version)
 
     #sgv_delta_mgdl = 25
     #sgv_current_mgdl = 420
@@ -1350,9 +1344,8 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
     print("resp.status_code:", resp.status_code)
     if resp.status_code != 200:
-        # Fall back to v1
-        print("v2:properties failed, falling back to v1")
-        return get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit)
+        return None, resp.status_code
+
     ns_properties = resp.json()
 
     sgv_current = ""
@@ -1392,7 +1385,6 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
             nightsout_history = []
 
     nightscout_data = {
-        "api_version": "v2",
         "sgv_current": sgv_current,
         "sgv_delta": sgv_delta,
         "latest_reading_date_string": latest_reading_date_string,
@@ -1402,19 +1394,8 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         "history": nightsout_history,
     }
 
-    # Check required fields, if they are blank fall back to v1
-    if nightscout_data["sgv_current"] == "" or nightscout_data["sgv_delta"] == "" or nightscout_data["latest_reading_date_string"] == "" or nightscout_data["direction"] == "":
-        # Fall back to v1
-        print("v2 fields missing, falling back to v1")
-        return get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit)
-    elif show_graph and nightscout_data["history"] == []:
-        # Fall back to v1
-        print("v2 history missing, falling back to v1")
-        return get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit)
-
     return nightscout_data, resp.status_code
 
-# Used with v2, just to get the history
 def get_nightscout_history(nightscout_url, nightscout_token):
     proto, host = get_proto_host(nightscout_url)
     oldest_reading = str((time.now() - time.parse_duration("240m")).unix)
@@ -1438,58 +1419,6 @@ def get_nightscout_history(nightscout_url, nightscout_token):
             history.append(tuple((int(int(x["date"]) / 1000), int(x["sgv"]))))
 
     return history, resp.status_code
-
-# Fall back function for v1 API
-def get_nightscout_data_v1(nightscout_url, nightscout_token, display_unit):
-    proto, host = get_proto_host(nightscout_url)
-    oldest_reading = str((time.now() - time.parse_duration("240m")).unix)
-    json_url = proto + "://" + host + "/api/v1/entries.json?count=200&find[date][$gte]=" + oldest_reading
-    headers = {}
-    if nightscout_token != "":
-        headers["Api-Secret"] = hash.sha1(nightscout_token)
-
-    print(json_url)
-
-    # Request latest entries from the Nightscout URL
-    resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
-    if resp.status_code != 200:
-        return {}, resp.status_code
-
-    latest_reading = resp.json()[0]
-    previous_reading = resp.json()[1]
-
-    latest_reading_date_string = latest_reading["dateString"]
-
-    # Current sgv value
-    sgv_current = latest_reading["sgv"]
-
-    # Delta between the current and previous
-    if display_unit == "mgdl":
-        sgv_delta = int(sgv_current - previous_reading["sgv"])
-    else:
-        sgv_delta = math.round((mgdl_to_mmol(int(sgv_current)) - mgdl_to_mmol(int(previous_reading["sgv"]))) * 10) / 10
-        print("sgv_delta:" + str(sgv_delta))
-
-    # Get the direction
-    direction = latest_reading["direction"] if "direction" in latest_reading else "None"
-    history = []
-
-    for x in resp.json():
-        if "sgv" in x:
-            history.append(tuple((int(int(x["date"]) / 1000), int(x["sgv"]))))
-
-    nightscout_data = {
-        "api_version": "v1",
-        "sgv_current": str(int(sgv_current)),
-        "sgv_delta": sgv_delta,
-        "latest_reading_date_string": latest_reading_date_string,
-        "direction": direction,
-        "history": history,
-        "iob": "n/a",
-        "cob": "n/a",
-    }
-
-    return nightscout_data, resp.status_code
 
 def mgdl_to_mmol(mgdl):
     mmol = float(math.round((mgdl / 18) * 10) / 10)
