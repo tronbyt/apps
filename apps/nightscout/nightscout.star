@@ -1354,7 +1354,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     direction = ""
     iob = "n/a"
     cob = "n/a"
-    nightsout_history = []
+    nightscout_history = []
 
     if "bgnow" in ns_properties:
         if "last" in ns_properties["bgnow"]:
@@ -1379,10 +1379,10 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
             cob = str(ns_properties["cob"]["display"]) + "g"
 
     if show_graph:
-        nightsout_history, status = get_nightscout_history(nightscout_url, nightscout_token)
+        nightscout_history, status = get_nightscout_history(nightscout_url, nightscout_token)
         if status != 200:
             print("v2:entries - History call failed")
-            nightsout_history = []
+            nightscout_history = []
 
     nightscout_data = {
         "sgv_current": sgv_current,
@@ -1391,7 +1391,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         "direction": direction,
         "iob": iob,
         "cob": cob,
-        "history": nightsout_history,
+        "history": nightscout_history,
     }
 
     return nightscout_data, resp.status_code
