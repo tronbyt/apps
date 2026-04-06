@@ -104,7 +104,6 @@ DEFAULT_NSURL = ""
 DEFAULT_NSTOKEN = ""
 
 def main(config):
-    print("---START---")
     UTC_TIME_NOW = time.now().in_location("UTC")
     location = config.get("location", DEFAULT_LOCATION)
     loc = json.decode(location)
@@ -237,9 +236,6 @@ def main(config):
     nightscout_cob = nightscout_data["cob"]
     history = nightscout_data["history"]
 
-    #sgv_delta_mgdl = 25
-    #sgv_current_mgdl = 420
-    print("display_unit:", display_unit)
     if display_unit == "mgdl":
         graph_height = int(str(config.get("mgdl_graph_height", DEFAULT_GRAPH_HEIGHT)))
         normal_high = int(str(config.get("mgdl_normal_high", DEFAULT_NORMAL_HIGH)))
@@ -250,10 +246,8 @@ def main(config):
 
         # Delta
         str_delta = str(int(sgv_delta))
-        print("int(sgv_delta): ", int(sgv_delta))
         if (int(sgv_delta) >= 0):
             str_delta = "+" + str_delta
-            print("str_delta: ", str_delta)
     else:
         graph_height = int(float(config.get("mmol_graph_height", mgdl_to_mmol(DEFAULT_GRAPH_HEIGHT))) * 18)
         normal_high = int(float(config.get("mmol_normal_high", mgdl_to_mmol(DEFAULT_NORMAL_HIGH))) * 18)
@@ -275,15 +269,8 @@ def main(config):
 
     OLDEST_READING_TARGET = UTC_TIME_NOW - time.parse_duration(str(5 * graph_width) + "m")
 
-    #for reading in history:
-    #graph_data.append(tuple((reading[0], reading[1] - urgent_low)))
     reading_mins_ago = int((UTC_TIME_NOW - latest_reading_dt).minutes)
-    print("time:", UTC_TIME_NOW)
-    print("latest_reading_dt:", latest_reading_dt)
-    print("oldest_reading_target:", OLDEST_READING_TARGET)
-    print("reading_mins_ago:", reading_mins_ago)
 
-    #reading_mins_ago = 5
     if (reading_mins_ago < 1):
         human_reading_ago = "<1 min ago"
     elif (reading_mins_ago == 1):
@@ -292,8 +279,6 @@ def main(config):
         hours_ago = str(int(reading_mins_ago / 60))
         mins_ago = int(math.mod(int(reading_mins_ago), 60))
         human_reading_ago = (hours_ago + ":" + ("0" + str(mins_ago) if mins_ago < 10 else str(mins_ago)) + " ago") if int(hours_ago) > 0 else str(mins_ago) + " mins ago"
-
-    print("human_reading_ago:", human_reading_ago)
 
     ago_dashes = "-" * reading_mins_ago
     full_ago_dashes = ago_dashes
@@ -351,7 +336,7 @@ def main(config):
         color_reading = urgent_low_color
         color_delta = urgent_low_color
         color_arrow = urgent_low_color
-    print("night_mode:", night_mode)
+
     if (night_mode and (now > sun_set or now < sun_rise)):
         color_reading = night_color
         color_delta = night_color
@@ -1404,11 +1389,8 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     if nightscout_token != "":
         headers["Api-Secret"] = hash.sha1(nightscout_token)
 
-    print(json_url)
-
     # Request latest properties from the Nightscout URL
     resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
-    print("resp.status_code:", resp.status_code)
     if resp.status_code != 200:
         return None, resp.status_code
 
@@ -1447,7 +1429,6 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     if show_graph:
         nightscout_history, status = get_nightscout_history(nightscout_url, nightscout_token)
         if status != 200:
-            print("v2:entries - History call failed")
             nightscout_history = []
 
     nightscout_data = {
@@ -1470,12 +1451,9 @@ def get_nightscout_history(nightscout_url, nightscout_token):
     if nightscout_token != "":
         headers["Api-Secret"] = hash.sha1(nightscout_token)
 
-    print(json_url)
-
     # Request latest entries from the Nightscout URL
     resp = http.get(json_url, headers = headers, ttl_seconds = CACHE_TTL_SECONDS)
     if resp.status_code != 200:
-        print("NS Error - Display Error")
         return {}, resp.status_code
 
     history = []
