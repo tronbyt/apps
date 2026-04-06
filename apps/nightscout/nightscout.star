@@ -885,47 +885,35 @@ def build_graph(history, graph_width, graph_height, expand_graph_height, normal_
     """Builds graph plot data and hour bar markers."""
     graph_plot = []
     graph_hour_bars = []
+    start_time = oldest_reading_target.unix
+
+    bucketed = {}
+    for hp in history:
+        slot = int((hp[0] - start_time) / 300)
+        if 0 <= slot and slot < graph_width:
+            bucketed[slot] = hp[1]
 
     if expand_graph_height:
-        min_time = oldest_reading_target.unix
-        for point in range(graph_width):
-            max_time = min_time + 299
-            this_point = 0
-            for history_point in history:
-                if (min_time <= history_point[0] and history_point[0] <= max_time):
-                    this_point = history_point[1]
-                    break
-            if this_point > graph_height:
-                graph_height = this_point
-            min_time = max_time + 1
-
-    min_time = oldest_reading_target.unix
+        for slot in range(graph_width):
+            graph_height = max(graph_height, bucketed.get(slot, 0))
 
     for point in range(graph_width):
+        min_time = start_time + point * 300
         max_time = min_time + 299
-        this_point = 0
-        for history_point in history:
-            if (min_time <= history_point[0] and history_point[0] <= max_time):
-                this_point = history_point[1]
+        this_point = bucketed.get(point, 0)
 
-        if this_point < GRAPH_BOTTOM and this_point > 0:
-            this_point = GRAPH_BOTTOM
-
-        if this_point > graph_height:
-            this_point = graph_height
+        if this_point > 0:
+            this_point = max(GRAPH_BOTTOM, min(this_point, graph_height))
 
         graph_point_color = color_graph_normal
 
         if this_point >= normal_high:
             graph_point_color = color_graph_high
-
-        if this_point >= urgent_high:
+        elif this_point >= urgent_high:
             graph_point_color = color_graph_urgent_high
-
-        if this_point <= normal_low:
+        elif this_point <= normal_low:
             graph_point_color = color_graph_low
-
-        if this_point <= urgent_low:
+        elif this_point <= urgent_low:
             graph_point_color = color_graph_urgent_low
 
         if show_graph_hour_bars:
@@ -959,8 +947,6 @@ def build_graph(history, graph_width, graph_height, expand_graph_height, normal_
                 y_lim = (GRAPH_BOTTOM, graph_height),
             ),
         )
-
-        min_time = max_time + 1
 
     return graph_plot, graph_hour_bars, graph_height
 
