@@ -1,0 +1,8 @@
+---
+id: rtd-denver
+name: RTD Denver
+summary: Live RTD transit times
+desc: Shows real-time bus and train arrival times for Denver RTD stops. Displays upcoming departures grouped by route with destination and color-coded urgency based on your walk time. Configure your stop ID in the app settings.
+author: wfmer
+fileName: rtd_denver.star
+packageName: rtddenver
