@@ -108,6 +108,7 @@ def main(config):
     timezone = loc.get("timezone", time.tz())
     units = config.get("units", "imperial")
     showthreeday = config.bool("showthreeday", False)  # Add new config option
+    image_scale = 1 if config.bool("force_1x_images") else scale
 
     # Get API keys - check for both V3 and V2.5
     api_v3_key = config.get("api_v3", "")
@@ -149,11 +150,11 @@ def main(config):
 
     # Create the display
     if showthreeday:
-        return render_weather(daily_data, scale)
+        return render_weather(daily_data, scale, image_scale)
     else:
-        return render_single_day(daily_data, scale)
+        return render_single_day(daily_data, scale, image_scale)
 
-def render_single_day(daily_data, scale = 1):
+def render_single_day(daily_data, scale = 1, image_scale = 1):
     if len(daily_data) < 2:  # If we don't have at least 2 days
         return error_display("Weather API Error")
 
@@ -284,7 +285,7 @@ def render_single_day(daily_data, scale = 1):
                 # Layer 1: Background image - slides left
                 animation.Transformation(
                     child = render.Image(
-                        src = get_weather_image(day["weather"], scale),
+                        src = get_weather_image(day["weather"], image_scale),
                         width = screen_width,
                         height = screen_height,
                     ),
@@ -720,7 +721,7 @@ def get_weather_icon(forecast, scale = 1):
         icon = WEATHER_ICONS.get(forecast)
     return icon.readall() if icon else ""
 
-def render_weather(daily_data, scale = 1):
+def render_weather(daily_data, scale = 1, icon_scale = 1):
     # Create weather icons mapping
 
     # Calculate dimensions
@@ -745,7 +746,7 @@ def render_weather(daily_data, scale = 1):
             children = [
                 # Weather icon
                 render.Image(
-                    src = get_weather_icon(day["weather"], scale),
+                    src = get_weather_icon(day["weather"], icon_scale),
                     width = 12 * scale,
                     height = 12 * scale,
                 ),
@@ -881,5 +882,12 @@ def get_schema():
                 icon = "clock",
                 default = str(DEFAULT_CACHE_MINS),
             ),
+            schema.Toggle(
+                id = "force_1x_images",
+                name = "Force 1x Images",
+                desc = "The two-day forecast images have been upscaled to 2x. Enable this if you prefer the crispier look of the 1x images.",
+                icon = "magnifyingGlass",
+                default = False,
+            ) if canvas.is2x() else None,
         ],
     )
