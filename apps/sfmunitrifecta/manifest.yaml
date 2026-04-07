@@ -1,0 +1,8 @@
+---
+id: sf-muni-trifecta
+name: SF Muni Trifecta
+summary: Three Muni stops at once
+desc: Monitor three SF Muni stops on a single screen. Set up your routes and stop codes to see upcoming arrivals for your daily travels. Get your free API key at 511.org/open-data/token.
+author: Tony
+fileName: sf_muni_trifecta.star
+packageName: sfmunitrifecta

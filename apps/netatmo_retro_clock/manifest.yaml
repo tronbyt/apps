@@ -1,0 +1,8 @@
+---
+id: netatmo-retro-clock
+name: Netatmo Clock
+summary: Netatmo clock & weather
+desc: Displays a clean clock with Netatmo indoor and outdoor temperatures and an OpenWeather weather icon.
+author: Arnaud
+fileName: netatmo_retro_clock.star
+packageName: netatmo_retro_clock

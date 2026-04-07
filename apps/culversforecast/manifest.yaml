@@ -1,0 +1,8 @@
+---
+id: culvers-forecast
+name: Custard Forecast
+summary: Custard 3-Day Forecast
+desc: See the next 3 days of Flavor of the Day with color-coded pixel-art cones. Supports Culver's, Kopp's, Gille's, Hefner's, Kraverz, and Oscar's with brand-specific header colors.
+author: Chris Kaschner
+fileName: culvers_forecast.star
+packageName: culversforecast

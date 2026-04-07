@@ -1,0 +1,8 @@
+---
+id: comed-hry-price
+name: ComEd Hry Price
+summary: Current ComEd Pricing
+desc: Pulls the current ComEd Hourly Pricing in cents per kWh.
+author: alubbert
+fileName: comed_hry_price.star
+packageName: comedhryprice

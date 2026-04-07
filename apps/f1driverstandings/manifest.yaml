@@ -1,0 +1,7 @@
+id: f1driverstandings
+name: F1_Driver_Scroll
+summary: F1 championship standings
+desc: Scrolls through the current Formula 1 World Driver Championship standings. Configurable number of drivers, scroll speed, and how soon standings refresh after a race weekend. Top 3 drivers are highlighted in gold, white, and bronze.
+author: Speedbird
+fileName: f1_driver_standings.star
+packageName: f1driverstandings
