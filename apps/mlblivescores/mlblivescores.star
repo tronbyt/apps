@@ -148,8 +148,11 @@ def fetch_todays_game(team_id):
     games = safe_get(dates, 0, "games")
     if games == None or len(games) == 0:
         return None
-    game_pk = str(safe_get(games, 0, "gamePk"))
-    if game_pk == "None" or game_pk == "":
+    gp = safe_get(games, 0, "gamePk")
+    if gp == None:
+        return None
+    game_pk = "%d" % gp
+    if game_pk == "0" or game_pk == "":
         return None
     cache.set(cache_key, game_pk, ttl_seconds = 3600)
     return game_pk
@@ -302,13 +305,13 @@ def render_live(g, my_color, is_home):
     away_color = my_color if not is_home else COLOR_WHITE
     home_color = my_color if is_home else COLOR_WHITE
     score_row = render.Row(children = [
-        render.Text(content = "%s %s" % (g["away_abbr"], str(g["away_score"])), color = away_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %d" % (g["away_abbr"], g["away_score"]), color = away_color, font = "CG-pixel-3x5-mono"),
         render.Text(content = "  ", color = COLOR_WHITE, font = "CG-pixel-3x5-mono"),
-        render.Text(content = "%s %s" % (g["home_abbr"], str(g["home_score"])), color = home_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %d" % (g["home_abbr"], g["home_score"]), color = home_color, font = "CG-pixel-3x5-mono"),
     ])
     arrow = "v" if g["inning_half"] == "Bottom" else "^"
     dly = " DLY" if g["is_delayed"] else ""
-    inning_row = render.Text(content = "%s %s%s" % (arrow, str(g["inning"]), dly), color = COLOR_CYAN, font = "CG-pixel-3x5-mono")
+    inning_row = render.Text(content = "%s %d%s" % (arrow, g["inning"], dly), color = COLOR_CYAN, font = "CG-pixel-3x5-mono")
     outs_vals = [1 if i < g["outs"] else 0 for i in range(3)]
     ob_row = render.Row(children = [
         dot_row(outs_vals, COLOR_WHITE),
@@ -346,14 +349,14 @@ def render_final(g, my_color, is_home):
     result_word = "W" if won else "L"
     header_row = render.Row(children = [
         render.Text(content = "FINAL ", color = COLOR_YELLOW, font = "CG-pixel-3x5-mono"),
-        render.Text(content = "%s %s" % (g["away_abbr"], str(g["away_score"])), color = away_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %d" % (g["away_abbr"], g["away_score"]), color = away_color, font = "CG-pixel-3x5-mono"),
         render.Text(content = "  ", color = COLOR_WHITE, font = "CG-pixel-3x5-mono"),
-        render.Text(content = "%s %s" % (g["home_abbr"], str(g["home_score"])), color = home_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %d" % (g["home_abbr"], g["home_score"]), color = home_color, font = "CG-pixel-3x5-mono"),
         render.Text(content = " " + result_word, color = result_color, font = "CG-pixel-3x5-mono"),
     ])
     rhe_label = render.Text(content = "    R  H  E", color = COLOR_GRAY, font = "CG-pixel-3x5-mono")
-    away_rhe = render.Text(content = "%s %s  %s  %s" % (pad_right(g["away_abbr"], 3), pad_right(str(g["away_score"]), 2), pad_right(str(g["away_hits"]), 2), str(g["away_err"])), color = away_color, font = "CG-pixel-3x5-mono")
-    home_rhe = render.Text(content = "%s %s  %s  %s" % (pad_right(g["home_abbr"], 3), pad_right(str(g["home_score"]), 2), pad_right(str(g["home_hits"]), 2), str(g["home_err"])), color = home_color, font = "CG-pixel-3x5-mono")
+    away_rhe = render.Text(content = "%s %-2d %-2d %d" % (pad_right(g["away_abbr"], 3), g["away_score"], g["away_hits"], g["away_err"]), color = away_color, font = "CG-pixel-3x5-mono")
+    home_rhe = render.Text(content = "%s %-2d %-2d %d" % (pad_right(g["home_abbr"], 3), g["home_score"], g["home_hits"], g["home_err"]), color = home_color, font = "CG-pixel-3x5-mono")
     parts = []
     if g["winner_pitcher"] != "":
         pitch_str = "W: " + g["winner_pitcher"] + "  L: " + g["loser_pitcher"]
