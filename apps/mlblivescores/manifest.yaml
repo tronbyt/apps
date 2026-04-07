@@ -7,3 +7,8 @@ author: dovimorris06-pixel
 fileName: mlblivescores.star
 packageName: mlblivescores
 recommendedInterval: 1
+category: sports
+tags:
+  - mlb
+  - baseball
+  - scores

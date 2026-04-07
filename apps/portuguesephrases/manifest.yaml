@@ -6,3 +6,8 @@ desc: Cycles through common European Portuguese (PT-PT) phrases with English tra
 author: Joey Spooner
 fileName: portuguese_phrases.star
 packageName: portuguesephrases
+category: education
+tags:
+  - education
+  - portuguese
+  - phrases

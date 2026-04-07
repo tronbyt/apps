@@ -6,3 +6,11 @@ desc: Real time bus tacker for CUMTD.
 author: Nol6n
 fileName: cumtd_bus.star
 packageName: cumtdbus
+category: transit
+tags:
+  - transportation
+  - real-time
+  - public-transport
+  - travel
+  - commute
+  - schedule

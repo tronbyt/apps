@@ -6,4 +6,8 @@ desc: Displays current water level data for Lake Sidney Lanier, including gage h
 author: jspeigner
 fileName: lanier_level.star
 packageName: lake-lanier-water-level
+category: weather
+tags:
+  - weather
+  - water level
 

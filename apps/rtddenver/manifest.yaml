@@ -6,3 +6,11 @@ desc: Shows real-time bus and train arrival times for Denver RTD stops. Displays
 author: wfmer
 fileName: rtd_denver.star
 packageName: rtddenver
+category: transit
+tags:
+  - transportation
+  - real-time
+  - public-transport
+  - travel
+  - commute
+  - schedule

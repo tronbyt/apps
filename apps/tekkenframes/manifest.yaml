@@ -6,3 +6,8 @@ desc: Displays random Tekken 8 move frame data as a study tool. Shows character,
 author: mek01
 fileName: tekken_frames.star
 packageName: tekkenframes
+category: gaming
+tags:
+  - gaming
+  - tekken
+  - frame data

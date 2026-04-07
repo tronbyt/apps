@@ -6,3 +6,8 @@ desc: Learn a Shakespeare sonnet one line at a time. One new line per day, 14 da
 author: Matt Milligan
 fileName: slow_shakespeare.star
 packageName: slowshakespeare
+category: education
+tags:
+  - education
+  - shakespeare
+  - poetry
