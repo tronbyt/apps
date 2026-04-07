@@ -1,9 +1,0 @@
----
-id: mlb-live-scores
-name: MLB Live Scores
-summary: Live scores for MLB teams
-desc: Display live scores, base runners, and highlights for your favorite MLB team.
-author: dovimorris06-pixel
-fileName: mlblivescores.star
-packageName: mlblivescores
-recommendedInterval: 1

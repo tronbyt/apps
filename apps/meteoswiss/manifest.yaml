@@ -1,8 +1,0 @@
----
-id: meteoswiss
-name: MeteoSwiss
-summary: MeteoSwiss Weather Forecast
-desc: Weather forecasts from MeteoSwiss for Swiss locations.
-author: richardgaren
-fileName: meteoswiss.star
-packageName: meteoswiss

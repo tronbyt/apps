@@ -1,8 +1,0 @@
----
-id: pentagonpizzaindex
-name: US Pizza Index
-summary: Live Pentagon Pizza Index
-desc: This app displays the Pentagon Pizza Index based on www.pizzint.watch.
-author: dev-manuel
-fileName: pentagonpizzaindex.star
-packageName: pentagonpizzaindex
