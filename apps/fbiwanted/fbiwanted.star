@@ -16,8 +16,7 @@ CACHE_TTL = 3600
 
 # FBI Blue palette
 NAVY = "#003087"  # deep FBI navy — header bg
-BLUE = "#0044CC"  # mid blue
-BLUE_LT = "#2266FF"  # lighter blue — divider
+NAVY_DARK = "#001155"  # darker navy for details
 
 # Gold palette — brightness by reward
 GOLD_DIM = "#887700"  # no reward
@@ -26,9 +25,6 @@ GOLD_MID = "#FFD700"  # $25K–$100K
 GOLD_HIGH = "#FFE84D"  # $100K–$500K
 GOLD_MAX = "#FFFFFF"  # $500K+ (white hot)
 
-WHITE = "#FFFFFF"
-BLACK = "#000000"
-SILVER = "#CCCCDD"
 RED = "#FF3333"  # armed & dangerous only
 
 def reward_color(reward_max):
@@ -44,7 +40,7 @@ def reward_color(reward_max):
     return GOLD_DIM
 
 def strip_html(text):
-    out = ""
+    out = []
     inside = False
     for c in text.elems():
         if c == "<":
@@ -52,8 +48,8 @@ def strip_html(text):
         elif c == ">":
             inside = False
         elif not inside:
-            out = out + c
-    return out.strip()
+            out.append(c)
+    return "".join(out).strip()
 
 def format_reward(reward_max):
     if reward_max >= 1000000:
@@ -64,11 +60,11 @@ def format_reward(reward_max):
         return "$%d" % reward_max
     return ""
 
-def get_wanted(max_items, category):
+def get_wanted(category):
     cache_key = CACHE_KEY + "_" + category
     cached = cache.get(cache_key)
     if cached:
-        return json.decode(cached)[:max_items]
+        return json.decode(cached)
 
     url = FBI_API
     if category != "all":
@@ -104,9 +100,6 @@ def get_wanted(max_items, category):
             "caution": caution[:120] if caution else charges,
         })
 
-        if len(wanted) >= max_items:
-            break
-
     if not wanted:
         return [{"name": "No results found", "charges": "", "reward_max": 0, "reward_str": "", "armed": False, "caution": ""}]
 
@@ -122,11 +115,8 @@ def person_screen(person):
     caution = person.get("caution", "") or charges
 
     gold = reward_color(reward_max)
-
-    # Name color: white if max reward, gold otherwise, red if armed
     name_color = RED if armed else gold
 
-    # Build scrolling ticker
     parts = []
     if charges:
         parts.append(charges)
@@ -140,14 +130,12 @@ def person_screen(person):
 
     return render.Column(
         children = [
-            # ── Header — FBI Navy ────────────────────
             render.Box(
                 width = 64,
                 height = 11,
                 color = NAVY,
                 child = render.Column(
                     children = [
-                        # "FBI MOST WANTED" in gold
                         render.Padding(
                             pad = (2, 1, 0, 0),
                             child = render.Text(
@@ -156,7 +144,6 @@ def person_screen(person):
                                 color = gold,
                             ),
                         ),
-                        # Name scrolling
                         render.Padding(
                             pad = (2, 1, 0, 0),
                             child = render.Marquee(
@@ -173,13 +160,11 @@ def person_screen(person):
                     ],
                 ),
             ),
-            # ── Gold divider ─────────────────────────
             render.Box(width = 64, height = 1, color = gold),
-            # ── Scrolling details on navy ─────────────
             render.Box(
                 width = 64,
                 height = 20,
-                color = "#001155",
+                color = NAVY_DARK,
                 child = render.Padding(
                     pad = (0, 4, 0, 0),
                     child = render.Marquee(
@@ -199,7 +184,7 @@ def person_screen(person):
 def main(config):
     max_items = int(config.get("max_items") or "5")
     category = config.get("category") or "all"
-    wanted = get_wanted(max_items, category)
+    wanted = get_wanted(category)[:max_items]
     screens = [person_screen(p) for p in wanted]
 
     return render.Root(
