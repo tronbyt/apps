@@ -194,7 +194,7 @@ def main(config):
     else:
         connector = ", "
 
-    row1 = connector.join(pickups_today) if len(pickups_today) > 0 else ""
+    row1 = connector.join(pickups_today)
 
     if show_next_pickup and next_pickup != None:
         row2 = connector.join(next_pickup["pickups"])
