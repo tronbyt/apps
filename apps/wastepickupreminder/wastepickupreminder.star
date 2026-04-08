@@ -218,7 +218,7 @@ def main(config):
         text_vertical_offset = 2
 
     calendar_box_size = int(screen_height / 2) - 2
-    scroll_speed = int(config.get("scroll", 45))
+    scroll_speed = int(config.get("scroll", "60"))
     delay = scroll_speed // 2 if canvas.is2x() else scroll_speed
 
     return render.Root(
