@@ -200,7 +200,7 @@ def main(config):
         row2 = connector.join(next_pickup["pickups"])
         second_date = next_pickup["time"].day
     else:
-        row2 = connector.join(pickups_tomorrow) if len(pickups_tomorrow) > 0 else ""
+        row2 = connector.join(pickups_tomorrow)
         second_date = tomorrow.day
 
     screen_height = canvas.height()
