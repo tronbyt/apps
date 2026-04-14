@@ -54,8 +54,11 @@ v2.6
 Updated for 2026 season
 Updated timezone check
 
-v2.6.1
+v2.7
 Squiggle API now requiring the current year to be added to all requests
+
+v2.7.1
+Bug fix: forgot to update the function calls for live games...
 """
 
 load("encoding/json.star", "json")
@@ -199,7 +202,7 @@ def main(config):
 
             # We have a live game!
             if status == "LIVE":
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
 
             # if the game is complete, show the status and get the scores
@@ -228,7 +231,7 @@ def main(config):
 
             #print(status)
             if status == "LIVE":
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
                 LiveCount = LiveCount + 1
 
@@ -438,7 +441,7 @@ def main(config):
             # We have a live game!
             if status == "LIVE":
                 #print("LIVE")
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
 
             # if the game is complete, show the status and get the scores

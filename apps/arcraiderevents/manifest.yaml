@@ -1,0 +1,13 @@
+---
+id: arc-raider-events
+name: ARC Raid Events
+summary: ARC Raiders event timers
+desc: Displays active and upcoming ARC Raiders in-game events with live countdown timers. Features official brand colors, logo-stripe accents, scrolling event names, and map locations. Filter by map with the configurable dropdown. Data sourced from MetaForge.app.
+author: jeffver
+fileName: arc_raiders_events.star
+packageName: arcraiderevents
+category: gaming
+tags:
+  - arc raiders
+  - gaming
+  - events
