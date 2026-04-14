@@ -152,7 +152,7 @@ def find_next_pickup(config, today_anchor, icons_only):
     # Today and tomorrow are already checked elsewhere, so begin with 2 days out.
     for offset in range(2, 8):
         candidate = today_anchor + time.parse_duration("{}h".format(offset * 24))
-        candidate_day = humanize.day_of_week(candidate)
+        candidate_day = config_day_of_week(candidate)
         candidate_pickups = get_pickups_for_day(config, candidate_day, icons_only)
 
         if len(candidate_pickups) > 0:
