@@ -5,13 +5,14 @@
 #              Each alert scrolls independently in its own row.
 
 load("cache.star", "cache")
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
 CISA_RSS = "https://www.cisa.gov/uscert/ncas/alerts.xml"
 CACHE_KEY = "cisa_alerts_v3"
-CACHE_TTL = 1800  # 30 minutes
+CACHE_TTL = 3600  # 60 minutes
 
 RED = "#CC0000"
 YELLOW = "#FFD700"
@@ -22,8 +23,8 @@ DIM = "#333333"
 
 def get_alerts(max_alerts):
     cached = cache.get(CACHE_KEY)
-    if cached != None:
-        return cached.split("|||")[:max_alerts]
+    if cached:
+        return json.decode(cached)[:max_alerts]
 
     resp = http.get(CISA_RSS, ttl_seconds = CACHE_TTL)
     if resp.status_code != 200:
@@ -52,7 +53,7 @@ def get_alerts(max_alerts):
     if not titles:
         return ["No CISA alerts found"]
 
-    cache.set(CACHE_KEY, "|||".join(titles), ttl_seconds = CACHE_TTL)
+    cache.set(CACHE_KEY, json.encode(titles), ttl_seconds = CACHE_TTL)
     return titles[:max_alerts]
 
 def alert_row(text, color):
