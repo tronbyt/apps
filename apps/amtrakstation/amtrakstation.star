@@ -118,14 +118,8 @@ def parse_trains(html_content, current_date):
                 sched_time = ar_match
 
             if name_str and sched_time:
-                date_match = None
-                if "/16" in block:
-                    date_match = "16"
-                elif "/15" in block:
-                    date_match = "15"
-                elif "/14" in block:
-                    date_match = "14"
-                if date_match == section_date:
+                date_str = "/" + section_date
+                if date_str in block:
                     trains.append({
                         "time": time_str,
                         "name": name_str,
@@ -205,7 +199,7 @@ def main(config):
             ),
         )
 
-    now = time.now().in_location("America/Los_Angeles")
+    now = time.now().in_location(time.tz())
     current_date = now.format("02")
 
     arriving, departing = parse_trains(html, current_date)
