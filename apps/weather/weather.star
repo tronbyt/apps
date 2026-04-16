@@ -747,8 +747,8 @@ def render_weather(daily_data, scale = 1, icon_scale = 1):
                 # Weather icon
                 render.Image(
                     src = get_weather_icon(day["weather"], icon_scale),
-                    width = 12 * scale,
-                    height = 12 * scale,
+                    width = 13 * scale,
+                    height = 13 * scale,
                 ),
                 # Day abbreviation
                 render.Text(
