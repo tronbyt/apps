@@ -18,16 +18,12 @@ STATIONS = {
     "SEA": "Seattle, WA",
     "LAX": "Los Angeles, CA",
     "CHI": "Chicago, IL",
-    "NYC": "New York, NY",
     "WAS": "Washington, DC",
-    "PHI": "Philadelphia, PA",
-    "SFO": "San Francisco, CA",
     "SAC": "Sacramento, CA",
     "EUG": "Eugene, OR",
     "SPK": "Spokane, WA",
     "BOS": "Boston, MA",
     "DEN": "Denver, CO",
-    "PTK": "Portland, OR",
     "VAC": "Vancouver, BC",
 }
 
@@ -94,13 +90,13 @@ def parse_trains(html_content):
             if name_start > 0 and name_end > 0:
                 name_str = block[name_start + 1:name_end]
 
-            route_str = ""
+            origin = ""
+            dest = ""
             sched_time = ""
             if "&rarr;" in block:
                 route_parts = block.split("&rarr;")
                 origin = route_parts[0].split("[")[-1].replace("]", "").strip()
                 dest = route_parts[1].split("[")[1].split("]")[0].strip()
-                route_str = origin + " → " + dest
 
             if "est." in block:
                 est_match = block.split("est.")[1]
@@ -123,7 +119,8 @@ def parse_trains(html_content):
                 trains.append({
                     "time": time_str,
                     "name": name_str,
-                    "route": route_str,
+                    "from": origin,
+                    "to": dest,
                     "sched_time": sched_time,
                 })
 
@@ -164,14 +161,16 @@ def render_train(train, section_type, mins_text):
             expanded = True,
             main_align = "center",
             children = [
-                render.Text(content = mins_text + " min", font = font(), color = "#888"),
+                render.Text(content = mins_text + (" min" if section_type == "arriving" else " min ago"), font = font(), color = "#888"),
             ],
         ),
         render.Row(
             expanded = True,
             main_align = "center",
             children = [
-                render.Text(content = train.get("route", ""), font = font(), color = "#aaa"),
+                render.Text(content = train.get("from", ""), font = font(), color = "#aaa"),
+                render.Text(content = " -> ", font = font(), color = "#888"),
+                render.Text(content = train.get("to", ""), font = font(), color = "#aaa"),
             ],
         ),
     ]
@@ -179,6 +178,9 @@ def render_train(train, section_type, mins_text):
 def main(config):
     station = config.get("station", "PDX")
     threshold = int(config.get("threshold", "60"))
+    manual_station = config.get("manual_station", "")
+    if manual_station:
+        station = manual_station
 
     html = fetch_station_data(station)
     if not html:
@@ -195,13 +197,6 @@ def main(config):
 
     arriving, departing = parse_trains(html)
 
-    print("Arriving: " + str(len(arriving)))
-    print("Departing: " + str(len(departing)))
-    if arriving:
-        print("Next arriving: " + str(arriving[0]))
-    if departing:
-        print("Last departed: " + str(departing[0]))
-
     now = time.now().in_location("America/Los_Angeles")
 
     def time_to_minutes(time_str):
@@ -214,50 +209,70 @@ def main(config):
             now_h = int(now.format("15"))
             now_m = int(now.format("04"))
             diff = (hours * 60 + mins) - (now_h * 60 + now_m)
-            if diff > 12 * 60:
-                diff -= 24 * 60
             if diff < -12 * 60:
                 diff += 24 * 60
+            if diff > 12 * 60:
+                diff -= 24 * 60
             return diff
         return None
 
-    best_train = None
-    best_minutes = None
-    best_type = None
+    best_arriving = None
+    best_arriving_mins = None
+    best_departing = None
+    best_departing_mins = None
 
     for train in arriving:
         mins = time_to_minutes(train.get("sched_time", ""))
-        print("arriving: " + train.get("sched_time", "") + " mins=" + str(mins))
         if mins != None and mins >= 0 and mins <= threshold:
-            if best_minutes == None or mins < best_minutes:
-                best_train = train
-                best_minutes = mins
-                best_type = "arriving"
+            if best_arriving_mins == None or mins < best_arriving_mins:
+                best_arriving = train
+                best_arriving_mins = mins
 
     for train in departing:
         mins = time_to_minutes(train.get("sched_time", ""))
-        if mins != None and mins >= -threshold and mins <= 0:
-            if best_minutes == None or mins > best_minutes:
-                best_train = train
-                best_minutes = mins
-                best_type = "departed"
+        if mins != None:
+            if mins > 0:
+                mins = -mins
+            if mins >= -threshold and mins <= 0:
+                if best_departing_mins == None or mins > best_departing_mins:
+                    best_departing = train
+                    best_departing_mins = mins
+
+    if not best_arriving and not best_departing:
+        return []
+
+    best_train = None
+    best_mins = None
+    best_type = None
+
+    if best_arriving and best_arriving_mins != None:
+        best_train = best_arriving
+        best_mins = best_arriving_mins
+        best_type = "arriving"
+
+    if best_departing and best_departing_mins != None:
+        abs_departing = abs(best_departing_mins)
+        if best_train == None or abs_departing < best_mins:
+            best_train = best_departing
+            best_mins = abs_departing
+            best_type = "departed"
 
     if not best_train:
         return []
-
-    mins_text = str(best_minutes) + "m" if best_minutes != None else ""
 
     children = [
         render.Row(
             expanded = True,
             main_align = "center",
             children = [
-                render.Text(content = "Am", font = font(), color = "#f00"),
-                render.Text(content = "trak", font = font(), color = "#00f"),
+                render.Text(content = "Am", font = font(), color = "#9a0303"),
+                render.Text(content = "trak", font = font(), color = "#02028c"),
+                render.Text(content = " " + station, font = font(), color = "#888"),
             ],
         ),
     ]
 
+    mins_text = str(best_mins) if best_mins != None else ""
     children.extend(render_train(best_train, best_type, mins_text))
 
     return render.Root(
@@ -290,6 +305,13 @@ def get_schema():
                 icon = "train",
                 default = "PDX",
                 options = station_options,
+            ),
+            schema.Text(
+                id = "manual_station",
+                name = "Manual Station ID",
+                desc = "Override station with a custom 3-letter station code",
+                icon = "pen",
+                default = "",
             ),
             schema.Dropdown(
                 id = "threshold",
