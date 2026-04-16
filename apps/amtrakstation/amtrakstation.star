@@ -2,7 +2,7 @@
 Applet: Amtrak
 Summary: Amtrak train arrivals
 Description: Shows arriving and departing Amtrak trains at a station using RailRat data.
-Author: tronbyt
+Author: tavdog
 """
 
 load("http.star", "http")
@@ -29,9 +29,6 @@ STATIONS = {
 
 def font():
     return FONT_2X if canvas.is2x() else FONT_1X
-
-def s(val):
-    return val * 2 if canvas.is2x() else val
 
 def fetch_station_data(station_code):
     url = "https://railrat.net/stations/" + station_code + "/"
