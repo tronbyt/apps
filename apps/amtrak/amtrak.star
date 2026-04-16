@@ -1,0 +1,294 @@
+"""
+Applet: Amtrak
+Summary: Amtrak train arrivals
+Description: Shows arriving and departing Amtrak trains at a station using RailRat data.
+Author: tronbyt
+"""
+
+load("http.star", "http")
+load("render.star", "canvas", "render")
+load("schema.star", "schema")
+load("time.star", "time")
+
+FONT_1X = "tom-thumb"
+FONT_2X = "terminus-12"
+
+STATIONS = {
+    "PDX": "Portland, OR",
+    "SEA": "Seattle, WA",
+    "LAX": "Los Angeles, CA",
+    "CHI": "Chicago, IL",
+    "NYC": "New York, NY",
+    "WAS": "Washington, DC",
+    "PHI": "Philadelphia, PA",
+    "SFO": "San Francisco, CA",
+    "SAC": "Sacramento, CA",
+    "EUG": "Eugene, OR",
+    "SPK": "Spokane, WA",
+    "BOS": "Boston, MA",
+    "DEN": "Denver, CO",
+    "PTK": "Portland, OR",
+    "VAC": "Vancouver, BC",
+}
+
+def font():
+    return FONT_2X if canvas.is2x() else FONT_1X
+
+def s(val):
+    return val * 2 if canvas.is2x() else val
+
+def fetch_station_data(station_code):
+    url = "https://railrat.net/stations/" + station_code + "/"
+    response = http.get(url, ttl_seconds = 60)
+    if response.status_code != 200:
+        return None
+    return response.body()
+
+def parse_trains(html_content):
+    arriving = []
+    departing = []
+
+    content = html_content
+
+    arriving_start = content.find("Arriving Trains")
+    departing_start = content.find("Departed Trains")
+
+    arriving_section = ""
+    departing_section = ""
+
+    if arriving_start > 0:
+        if departing_start > arriving_start:
+            arriving_section = content[arriving_start:departing_start]
+        else:
+            arriving_section = content[arriving_start:arriving_start + 5000]
+
+    if departing_start > 0:
+        end_marker = content.find("Connecting Services", departing_start)
+        if end_marker > 0:
+            departing_section = content[departing_start:end_marker]
+        else:
+            departing_section = content[departing_start:departing_start + 5000]
+
+    def extract_train(text):
+        trains = []
+
+        train_blocks = []
+        parts = text.split("<a href=\"/trains/")
+        for part in parts[1:]:
+            end_idx = part.find("</ul></div></li>")
+            if end_idx > 0:
+                block = "<a href=\"/trains/" + part[:end_idx]
+                train_blocks.append(block)
+
+        for block in train_blocks:
+            time_str = ""
+            time_match = block.split("<a")[0].strip().split("\n")[-1].strip()
+            if ":" in time_match and time_match[0].isdigit():
+                time_parts = time_match.split(":")
+                if len(time_parts) >= 2:
+                    time_str = time_parts[0] + ":" + time_parts[1].split(" ")[0]
+
+            name_str = ""
+            name_start = block.find(">", block.find("<a href=\"/trains/"))
+            name_end = block.find("</a>", name_start)
+            if name_start > 0 and name_end > 0:
+                name_str = block[name_start + 1:name_end]
+
+            route_str = ""
+            sched_time = ""
+            if "&rarr;" in block:
+                route_parts = block.split("&rarr;")
+                origin = route_parts[0].split("[")[-1].replace("]", "").strip()
+                dest = route_parts[1].split("[")[1].split("]")[0].strip()
+                route_str = origin + " → " + dest
+
+            if "est." in block:
+                est_match = block.split("est.")[1]
+                time_part = est_match.split(",")[0].split(" ")[1]
+                if ":" in time_part:
+                    sched_time = time_part
+            elif "act." in block:
+                act_match = block.split("act.")[1]
+                time_part = act_match.split(",")[0].split(" ")[1]
+                if ":" in time_part:
+                    sched_time = time_part
+            elif "Ar sch." in block:
+                ar_match = block.split("Ar sch.")[1].split(",")[0].split("<")[0].split(">")[-1].strip()
+                sched_time = ar_match
+            elif "Dp sch." in block:
+                ar_match = block.split("Dp sch.")[1].split(",")[0].split("<")[0].split(">")[-1].strip()
+                sched_time = ar_match
+
+            if name_str:
+                trains.append({
+                    "time": time_str,
+                    "name": name_str,
+                    "route": route_str,
+                    "sched_time": sched_time,
+                })
+
+        return trains
+
+    arriving = extract_train(arriving_section)
+    departing = extract_train(departing_section)
+
+    arriving = [arriving[len(arriving) - 1 - i] for i in range(len(arriving))]
+    departing = [departing[len(departing) - 1 - i] for i in range(len(departing))]
+
+    return arriving, departing
+
+def render_train(train, section_type):
+    color = "#0f0" if section_type == "arriving" else "#f80"
+    label = "ARRIVING" if section_type == "arriving" else "DEPARTED"
+    time_str = train.get("sched_time", "")
+    name_parts = train.get("name", "").split()
+    name = " ".join(name_parts[-2:]) if len(name_parts) >= 2 else train.get("name", "")
+
+    return [
+        render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(content = label, font = font(), color = color),
+                render.Text(content = " " + time_str, font = font(), color = "#fff"),
+            ],
+        ),
+        render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(content = name, font = font(), color = "#0af"),
+            ],
+        ),
+        render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(content = train.get("route", ""), font = font(), color = "#aaa"),
+            ],
+        ),
+    ]
+
+def main(config):
+    station = config.get("station", "PDX")
+    threshold = int(config.get("threshold", "60"))
+
+    html = fetch_station_data(station)
+    if not html:
+        return render.Root(
+            child = render.Column(
+                expanded = True,
+                main_align = "center",
+                children = [
+                    render.Text(content = "Failed to fetch data", font = font(), color = "#f00"),
+                    render.Text(content = "for " + station, font = font()),
+                ],
+            ),
+        )
+
+    arriving, departing = parse_trains(html)
+
+    print("Arriving: " + str(len(arriving)))
+    print("Departing: " + str(len(departing)))
+    if arriving:
+        print("Next arriving: " + str(arriving[0]))
+    if departing:
+        print("Last departed: " + str(departing[0]))
+
+    now = time.now().in_location("America/Los_Angeles")
+
+    def time_to_minutes(time_str):
+        if not time_str:
+            return None
+        parts = time_str.split(":")
+        if len(parts) >= 2:
+            hours = int(parts[0])
+            mins = int(parts[1])
+            now_h = int(now.format("15"))
+            now_m = int(now.format("04"))
+            diff = (hours * 60 + mins) - (now_h * 60 + now_m)
+            if diff > 12 * 60:
+                diff -= 24 * 60
+            if diff < -12 * 60:
+                diff += 24 * 60
+            return diff
+        return None
+
+    best_train = None
+    best_minutes = None
+    best_type = None
+
+    for train in arriving:
+        mins = time_to_minutes(train.get("sched_time", ""))
+        print("arriving: " + train.get("sched_time", "") + " mins=" + str(mins))
+        if mins != None and mins >= 0 and mins <= threshold:
+            if best_minutes == None or mins < best_minutes:
+                best_train = train
+                best_minutes = mins
+                best_type = "arriving"
+
+    for train in departing:
+        mins = time_to_minutes(train.get("sched_time", ""))
+        if mins != None and mins >= -threshold and mins <= 0:
+            if best_minutes == None or mins > best_minutes:
+                best_train = train
+                best_minutes = mins
+                best_type = "departed"
+
+    if not best_train:
+        return []
+
+    children = [
+        render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(content = "Am", font = font(), color = "#f00"),
+                render.Text(content = "trak", font = font(), color = "#00f"),
+            ],
+        ),
+    ]
+
+    children.extend(render_train(best_train, best_type))
+
+    return render.Root(
+        child = render.Column(
+            expanded = True,
+            children = children,
+        ),
+    )
+
+def get_schema():
+    station_options = [
+        schema.Option(display = name, value = code)
+        for code, name in STATIONS.items()
+    ]
+
+    threshold_options = [
+        schema.Option(display = "5 minutes", value = "5"),
+        schema.Option(display = "10 minutes", value = "10"),
+        schema.Option(display = "30 minutes", value = "30"),
+        schema.Option(display = "60 minutes", value = "60"),
+    ]
+
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Dropdown(
+                id = "station",
+                name = "Station",
+                desc = "Amtrak station code to display",
+                icon = "train",
+                default = "PDX",
+                options = station_options,
+            ),
+            schema.Dropdown(
+                id = "threshold",
+                name = "Time window",
+                desc = "Show trains arriving within this many minutes",
+                icon = "clock",
+                default = "60",
+                options = threshold_options,
+            ),
+        ],
+    )

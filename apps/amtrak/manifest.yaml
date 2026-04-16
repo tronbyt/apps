@@ -1,0 +1,13 @@
+---
+id: amtrak
+name: Amtrak
+summary: Amtrak train arrivals
+desc: Shows arriving and departing Amtrak trains at a station using RailRat data.
+author: tronbyt
+fileName: amtrak.star
+packageName: amtrak
+recommendedInterval: 5
+supports2x: true
+category: transit
+tags:
+  - utility
