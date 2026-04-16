@@ -40,7 +40,7 @@ def fetch_station_data(station_code):
         return None
     return response.body()
 
-def parse_trains(html_content):
+def parse_trains(html_content, current_date):
     arriving = []
     departing = []
 
@@ -65,7 +65,7 @@ def parse_trains(html_content):
         else:
             departing_section = content[departing_start:departing_start + 5000]
 
-    def extract_train(text):
+    def extract_train(text, section_date):
         trains = []
 
         train_blocks = []
@@ -100,14 +100,16 @@ def parse_trains(html_content):
 
             if "est." in block:
                 est_match = block.split("est.")[1]
-                time_part = est_match.split(",")[0].split(" ")[1]
-                if ":" in time_part:
-                    sched_time = time_part
+                parts = est_match.split(",")[0].split(" ")
+                for p in parts:
+                    if ":" in p:
+                        sched_time = p
             elif "act." in block:
                 act_match = block.split("act.")[1]
-                time_part = act_match.split(",")[0].split(" ")[1]
-                if ":" in time_part:
-                    sched_time = time_part
+                parts = act_match.split(",")[0].split(" ")
+                for p in parts:
+                    if ":" in p:
+                        sched_time = p
             elif "Ar sch." in block:
                 ar_match = block.split("Ar sch.")[1].split(",")[0].split("<")[0].split(">")[-1].strip()
                 sched_time = ar_match
@@ -115,19 +117,27 @@ def parse_trains(html_content):
                 ar_match = block.split("Dp sch.")[1].split(",")[0].split("<")[0].split(">")[-1].strip()
                 sched_time = ar_match
 
-            if name_str:
-                trains.append({
-                    "time": time_str,
-                    "name": name_str,
-                    "from": origin,
-                    "to": dest,
-                    "sched_time": sched_time,
-                })
+            if name_str and sched_time:
+                date_match = None
+                if "/16" in block:
+                    date_match = "16"
+                elif "/15" in block:
+                    date_match = "15"
+                elif "/14" in block:
+                    date_match = "14"
+                if date_match == section_date:
+                    trains.append({
+                        "time": time_str,
+                        "name": name_str,
+                        "from": origin,
+                        "to": dest,
+                        "sched_time": sched_time,
+                    })
 
         return trains
 
-    arriving = extract_train(arriving_section)
-    departing = extract_train(departing_section)
+    arriving = extract_train(arriving_section, current_date)
+    departing = extract_train(departing_section, current_date)
 
     arriving = [arriving[len(arriving) - 1 - i] for i in range(len(arriving))]
     departing = [departing[len(departing) - 1 - i] for i in range(len(departing))]
@@ -195,9 +205,10 @@ def main(config):
             ),
         )
 
-    arriving, departing = parse_trains(html)
-
     now = time.now().in_location("America/Los_Angeles")
+    current_date = now.format("02")
+
+    arriving, departing = parse_trains(html, current_date)
 
     def time_to_minutes(time_str):
         if not time_str:
