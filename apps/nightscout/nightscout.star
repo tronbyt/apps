@@ -1352,17 +1352,16 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         if "display" in ns_properties["cob"]:
             cob = str(ns_properties["cob"]["display"]) + "g"
 
-    ttl_seconds = MIN_CACHE_TTL
+    ttl = MIN_CACHE_TTL
     if latest_reading_date:
         reading_age = time.now() - latest_reading_date
         ttl = max(READING_AGE_THRESHOLD - reading_age, MIN_CACHE_TTL)
-        ttl_seconds = int(ttl.seconds)
 
     if not cached:
-        cache.set(cache_key, json.encode(ns_properties), ttl_seconds = ttl_seconds)
+        cache.set(cache_key, json.encode(ns_properties), ttl_seconds = int(ttl.seconds))
 
     if show_graph:
-        nightscout_history, status = get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date, ttl_seconds)
+        nightscout_history, status = get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date, ttl)
         if status != 200:
             nightscout_history = []
 
@@ -1378,7 +1377,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
 
     return data, 200
 
-def get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date, ttl_seconds):
+def get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date, ttl):
     if not latest_reading_date:
         latest_reading_date = time.now()
     oldest_reading = str((latest_reading_date - 4 * time.hour).unix)
@@ -1387,7 +1386,7 @@ def get_nightscout_history(nightscout_url, nightscout_token, latest_reading_date
     headers = {"API-Secret": encoded_token} if encoded_token else {}
 
     # Request latest entries from the Nightscout URL
-    resp = http.get(json_url, headers = headers, ttl_seconds = ttl_seconds)
+    resp = http.get(json_url, headers = headers, ttl_seconds = int(ttl.seconds))
     if resp.status_code != 200:
         return [], resp.status_code
 
