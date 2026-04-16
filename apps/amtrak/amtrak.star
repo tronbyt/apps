@@ -137,7 +137,7 @@ def parse_trains(html_content):
 
     return arriving, departing
 
-def render_train(train, section_type):
+def render_train(train, section_type, mins_text):
     color = "#0f0" if section_type == "arriving" else "#f80"
     label = "ARRIVING" if section_type == "arriving" else "DEPARTED"
     time_str = train.get("sched_time", "")
@@ -145,6 +145,13 @@ def render_train(train, section_type):
     name = " ".join(name_parts[-2:]) if len(name_parts) >= 2 else train.get("name", "")
 
     return [
+        render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(content = name, font = font(), color = "#0af"),
+            ],
+        ),
         render.Row(
             expanded = True,
             main_align = "center",
@@ -157,7 +164,7 @@ def render_train(train, section_type):
             expanded = True,
             main_align = "center",
             children = [
-                render.Text(content = name, font = font(), color = "#0af"),
+                render.Text(content = mins_text + " min", font = font(), color = "#888"),
             ],
         ),
         render.Row(
@@ -238,6 +245,8 @@ def main(config):
     if not best_train:
         return []
 
+    mins_text = str(best_minutes) + "m" if best_minutes != None else ""
+
     children = [
         render.Row(
             expanded = True,
@@ -249,7 +258,7 @@ def main(config):
         ),
     ]
 
-    children.extend(render_train(best_train, best_type))
+    children.extend(render_train(best_train, best_type, mins_text))
 
     return render.Root(
         child = render.Column(
