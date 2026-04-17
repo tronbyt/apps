@@ -208,8 +208,8 @@ def main(config):
         if len(parts) >= 2:
             hours = int(parts[0])
             mins = int(parts[1])
-            now_h = int(now.format("15"))
-            now_m = int(now.format("04"))
+            now_h = now.hour
+            now_m = now.minute
             diff = (hours * 60 + mins) - (now_h * 60 + now_m)
             if diff < -12 * 60:
                 diff += 24 * 60
