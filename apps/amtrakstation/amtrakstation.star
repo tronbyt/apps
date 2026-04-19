@@ -5,6 +5,7 @@ Description: Shows arriving and departing Amtrak trains at a station using RailR
 Author: tavdog
 """
 
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -12,6 +13,8 @@ load("time.star", "time")
 
 FONT_1X = "tom-thumb"
 FONT_2X = "terminus-12"
+
+API_URL = "https://api.amtraker.com/v3/all"
 
 STATIONS = {
     "PDX": "Portland, OR",
@@ -30,124 +33,114 @@ STATIONS = {
 def font():
     return FONT_2X if canvas.is2x() else FONT_1X
 
-def fetch_station_data(station_code):
-    url = "https://railrat.net/stations/" + station_code + "/"
-    response = http.get(url, ttl_seconds = 60)
+def fetch_train_data():
+    response = http.get(API_URL, ttl_seconds = 300)
     if response.status_code != 200:
         return None
-    return response.body()
+    body = response.body()
+    return json.decode(body)
 
-def parse_trains(html_content, current_date):
+def parse_trains(data, station_code):
+    if data == None:
+        return [], []
+
     arriving = []
     departing = []
 
-    content = html_content
+    trains = data.get("trains", {})
+    for train_list in trains.values():
+        for train in train_list:
+            stations = train.get("stations", [])
+            origin = stations[0].get("code") if stations else ""
+            dest = stations[-1].get("code") if stations else ""
 
-    arriving_start = content.find("Arriving Trains")
-    departing_start = content.find("Departed Trains")
+            for stop in stations:
+                if stop.get("code") != station_code:
+                    continue
 
-    arriving_section = ""
-    departing_section = ""
+                status = stop.get("status", "")
+                sch_arr = stop.get("schArr")
+                sch_dep = stop.get("schDep")
+                arr = stop.get("arr")
+                dep = stop.get("dep")
 
-    if arriving_start > 0:
-        if departing_start > arriving_start:
-            arriving_section = content[arriving_start:departing_start]
-        else:
-            arriving_section = content[arriving_start:arriving_start + 5000]
+                arriving.append({
+                    "train": train.get("trainNum"),
+                    "route": train.get("routeName"),
+                    "origin": origin,
+                    "destination": dest,
+                    "status": status,
+                    "sched_arr": sch_arr,
+                    "sched_dep": sch_dep,
+                    "actual_arr": arr,
+                    "actual_dep": dep,
+                })
+                departing.append({
+                    "train": train.get("trainNum"),
+                    "route": train.get("routeName"),
+                    "origin": origin,
+                    "destination": dest,
+                    "status": status,
+                    "sched_arr": sch_arr,
+                    "sched_dep": sch_dep,
+                    "actual_arr": arr,
+                    "actual_dep": dep,
+                })
 
-    if departing_start > 0:
-        end_marker = content.find("Connecting Services", departing_start)
-        if end_marker > 0:
-            departing_section = content[departing_start:end_marker]
-        else:
-            departing_section = content[departing_start:departing_start + 5000]
-
-    def extract_train(text, section_date):
-        trains = []
-
-        train_blocks = []
-        parts = text.split("<a href=\"/trains/")
-        for part in parts[1:]:
-            end_idx = part.find("</ul></div></li>")
-            if end_idx > 0:
-                block = "<a href=\"/trains/" + part[:end_idx]
-                train_blocks.append(block)
-
-        for block in train_blocks:
-            time_str = ""
-            time_match = block.split("<a")[0].strip().split("\n")[-1].strip()
-            if ":" in time_match and time_match[0].isdigit():
-                time_parts = time_match.split(":")
-                if len(time_parts) >= 2:
-                    time_str = time_parts[0] + ":" + time_parts[1].split(" ")[0]
-
-            name_str = ""
-            name_start = block.find(">", block.find("<a href=\"/trains/"))
-            name_end = block.find("</a>", name_start)
-            if name_start > 0 and name_end > 0:
-                name_str = block[name_start + 1:name_end]
-
-            origin = ""
-            dest = ""
-            sched_time = ""
-            if "&rarr;" in block:
-                route_parts = block.split("&rarr;")
-                origin = route_parts[0].split("[")[-1].replace("]", "").strip()
-                dest = route_parts[1].split("[")[1].split("]")[0].strip()
-
-            if "est." in block:
-                est_match = block.split("est.")[1]
-                parts = est_match.split(",")[0].split(" ")
-                for p in parts:
-                    if ":" in p:
-                        sched_time = p
-            elif "act." in block:
-                act_match = block.split("act.")[1]
-                parts = act_match.split(",")[0].split(" ")
-                for p in parts:
-                    if ":" in p:
-                        sched_time = p
-            elif "Ar sch." in block:
-                ar_match = block.split("Ar sch.")[1].split(",")[0].split("<")[0].split(">")[-1].strip()
-                sched_time = ar_match
-            elif "Dp sch." in block:
-                ar_match = block.split("Dp sch.")[1].split(",")[0].split("<")[0].split(">")[-1].strip()
-                sched_time = ar_match
-
-            if name_str and sched_time:
-                date_str = "/" + section_date
-                if date_str in block:
-                    trains.append({
-                        "time": time_str,
-                        "name": name_str,
-                        "from": origin,
-                        "to": dest,
-                        "sched_time": sched_time,
-                    })
-
-        return trains
-
-    arriving = extract_train(arriving_section, current_date)
-    departing = extract_train(departing_section, current_date)
-
-    arriving = [arriving[len(arriving) - 1 - i] for i in range(len(arriving))]
-    departing = [departing[len(departing) - 1 - i] for i in range(len(departing))]
+    arriving = sorted(arriving, key = lambda x: x["sched_arr"] or "9999-12-31")
+    departing = sorted(departing, key = lambda x: x["sched_dep"] or "9999-12-31")
 
     return arriving, departing
+
+def format_time(iso_str):
+    if not iso_str:
+        return "—"
+    dt = time.parse_time(iso_str, "2006-01-02T15:04:05-07:00", time.tz())
+    if dt:
+        h = dt.hour
+        m = dt.minute
+        hour_str = "0" + str(h) if h < 10 else str(h)
+        min_str = "0" + str(m) if m < 10 else str(m)
+        return hour_str + ":" + min_str
+    return "—"
+
+def variance_str(sched_iso, actual_iso):
+    if not sched_iso or not actual_iso:
+        return ""
+    sched = time.parse_time(sched_iso, "2006-01-02T15:04:05-07:00", time.tz())
+    actual = time.parse_time(actual_iso, "2006-01-02T15:04:05-07:00", time.tz())
+    if not sched or not actual:
+        return ""
+    diff = (actual.minute - sched.minute + (actual.hour - sched.hour) * 60)
+    if diff == 0:
+        return "on time"
+    elif diff < 0:
+        return str(abs(diff)) + "m early"
+    else:
+        return "+" + str(diff) + "m late"
 
 def render_train(train, section_type, mins_text):
     color = "#0f0" if section_type == "arriving" else "#f80"
     label = "ARRIVING" if section_type == "arriving" else "DEPARTED"
-    time_str = train.get("sched_time", "")
-    name_parts = train.get("name", "").split()
-    name = " ".join(name_parts[-2:]) if len(name_parts) >= 2 else train.get("name", "")
+    route = train.get("route", "")
+    route_last = route.split(" ")[-1] if route else ""
+    train_num = str(train.get("train", ""))
+
+    sched_arr = train.get("sched_arr", "")
+    actual_arr = train.get("actual_arr", "")
+    sched_dep = train.get("sched_dep", "")
+    actual_dep = train.get("actual_dep", "")
+
+    time_str = format_time(actual_arr) if section_type == "arriving" else format_time(actual_dep)
+    if time_str == "—":
+        time_str = format_time(sched_arr) if section_type == "arriving" else format_time(sched_dep)
 
     return [
         render.Row(
             expanded = True,
             main_align = "center",
             children = [
-                render.Text(content = name, font = font(), color = "#0af"),
+                render.Text(content = train_num + " " + route_last, font = font(), color = "#0af"),
             ],
         ),
         render.Row(
@@ -169,9 +162,9 @@ def render_train(train, section_type, mins_text):
             expanded = True,
             main_align = "center",
             children = [
-                render.Text(content = train.get("from", ""), font = font(), color = "#aaa"),
+                render.Text(content = train.get("origin", ""), font = font(), color = "#aaa"),
                 render.Text(content = " -> ", font = font(), color = "#888"),
-                render.Text(content = train.get("to", ""), font = font(), color = "#aaa"),
+                render.Text(content = train.get("destination", ""), font = font(), color = "#aaa"),
             ],
         ),
     ]
@@ -183,8 +176,8 @@ def main(config):
     if manual_station:
         station = manual_station
 
-    html = fetch_station_data(station)
-    if not html:
+    data = fetch_train_data()
+    if not data:
         return render.Root(
             child = render.Column(
                 expanded = True,
@@ -197,26 +190,21 @@ def main(config):
         )
 
     now = time.now().in_location(time.tz())
-    current_date = now.format("02")
 
-    arriving, departing = parse_trains(html, current_date)
+    arriving, departing = parse_trains(data, station)
 
-    def time_to_minutes(time_str):
-        if not time_str:
+    def time_to_minutes(iso_str):
+        if not iso_str:
             return None
-        parts = time_str.split(":")
-        if len(parts) >= 2:
-            hours = int(parts[0])
-            mins = int(parts[1])
-            now_h = now.hour
-            now_m = now.minute
-            diff = (hours * 60 + mins) - (now_h * 60 + now_m)
-            if diff < -12 * 60:
-                diff += 24 * 60
-            if diff > 12 * 60:
-                diff -= 24 * 60
-            return diff
-        return None
+        dt = time.parse_time(iso_str, "2006-01-02T15:04:05-07:00", time.tz())
+        if not dt:
+            return None
+        diff = (dt.hour * 60 + dt.minute) - (now.hour * 60 + now.minute)
+        if diff < -12 * 60:
+            diff += 24 * 60
+        if diff > 12 * 60:
+            diff -= 24 * 60
+        return diff
 
     best_arriving = None
     best_arriving_mins = None
@@ -224,14 +212,14 @@ def main(config):
     best_departing_mins = None
 
     for train in arriving:
-        mins = time_to_minutes(train.get("sched_time", ""))
+        mins = time_to_minutes(train.get("sched_arr"))
         if mins != None and mins >= 0 and mins <= threshold:
             if best_arriving_mins == None or mins < best_arriving_mins:
                 best_arriving = train
                 best_arriving_mins = mins
 
     for train in departing:
-        mins = time_to_minutes(train.get("sched_time", ""))
+        mins = time_to_minutes(train.get("sched_dep"))
         if mins != None:
             if mins > 0:
                 mins = -mins
