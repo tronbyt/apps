@@ -73,25 +73,20 @@ def get_schema():
         ),
     ]
 
-    def add_waste_type(name, icon):
-        for i in range(len(weekdays)):
-            value = weekdays[i][0]
-            day = weekdays[i][1]
+    for waste_type in WASTE_TYPES:
+        name = waste_type["name"]
+        icon_name = waste_type["icon_name"]
 
+        for value, day in weekdays:
             fields.append(
                 schema.Toggle(
                     id = name.replace(" ", "_").lower() + "_" + value,
                     name = day + " (" + name + ")",
                     desc = name + " Pickup on " + day,
-                    icon = icon,
+                    icon = icon_name,
                     default = False,
                 ),
             )
-
-    add_waste_type("Garbage", "trash")
-    add_waste_type("Recycling", "recycle")
-    add_waste_type("Yard Waste", "leaf")
-    add_waste_type("Bulk Waste", "truck")
 
     return schema.Schema(
         version = "1",
@@ -102,18 +97,22 @@ WASTE_TYPES = [
     {
         "name": "Garbage",
         "icon": "🗑️",
+        "icon_name": "trash",
     },
     {
         "name": "Recycling",
         "icon": "♻️",
+        "icon_name": "recycle",
     },
     {
         "name": "Yard Waste",
         "icon": "🌳",
+        "icon_name": "leaf",
     },
     {
         "name": "Bulk Waste",
         "icon": "🚛",
+        "icon_name": "truck",
     },
 ]
 
@@ -144,10 +143,16 @@ def get_pickups_for_day(config, day_number, icons_only):
 def get_local_noon_anchor(now):
     return now + time.parse_duration("{}h".format(12 - now.hour))
 
+def config_day_of_week(date):
+    # Convert 0=Sunday..6=Saturday to 1=Monday..7=Sunday
+    dow = humanize.day_of_week(date)
+    return 7 if dow == 0 else dow
+
 def find_next_pickup(config, today_anchor, icons_only):
+    # Today and tomorrow are already checked elsewhere, so begin with 2 days out.
     for offset in range(2, 8):
         candidate = today_anchor + time.parse_duration("{}h".format(offset * 24))
-        candidate_day = humanize.day_of_week(candidate)
+        candidate_day = config_day_of_week(candidate)
         candidate_pickups = get_pickups_for_day(config, candidate_day, icons_only)
 
         if len(candidate_pickups) > 0:
@@ -165,12 +170,12 @@ def main(config):
     icons_only = config.bool("icons_only")
     empty_behavior = config.get("empty_behavior", "skip")
 
-    today_day = humanize.day_of_week(now)
+    today_day = config_day_of_week(now)
 
     one_day = time.parse_duration("24h")
     today_anchor = get_local_noon_anchor(now)
     tomorrow = today_anchor + one_day
-    tomorrow_day = humanize.day_of_week(tomorrow)
+    tomorrow_day = config_day_of_week(tomorrow)
 
     pickups_today = get_pickups_for_day(config, today_day, icons_only)
     pickups_tomorrow = get_pickups_for_day(config, tomorrow_day, icons_only)
@@ -189,10 +194,8 @@ def main(config):
 
     if canvas.is2x():
         connector = "  "
-    elif icons_only:
-        connector = " "
     else:
-        connector = ", "
+        connector = " "
 
     row1 = connector.join(pickups_today)
 
@@ -208,7 +211,7 @@ def main(config):
 
     if canvas.is2x():
         date_font = "terminus-18"
-        pickup_font = "6x13"
+        pickup_font = "terminus-18"
         calendar_date_offset = 6
         text_vertical_offset = 3
     else:
@@ -282,7 +285,7 @@ def main(config):
                     render.Marquee(
                         width = screen_width - calendar_box_size,
                         child = render.Text(
-                            row1,
+                            "{} ".format(row1),
                             font = pickup_font,
                         ),
                     ),
@@ -293,7 +296,7 @@ def main(config):
                     render.Marquee(
                         width = screen_width - calendar_box_size,
                         child = render.Text(
-                            row2,
+                            "{} ".format(row2),
                             font = pickup_font,
                         ),
                     ),
