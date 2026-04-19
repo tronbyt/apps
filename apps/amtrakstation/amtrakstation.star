@@ -34,7 +34,7 @@ def font():
     return FONT_2X if canvas.is2x() else FONT_1X
 
 def fetch_train_data():
-    response = http.get(API_URL, ttl_seconds = 60)
+    response = http.get(API_URL, ttl_seconds = 300)
     if response.status_code != 200:
         return None
     body = response.body()
