@@ -121,7 +121,7 @@ def variance_str(sched_iso, actual_iso):
 
 def render_train(train, section_type, mins_text):
     color = "#0f0" if section_type == "arriving" else "#f80"
-    label = "ARRIVING" if section_type == "arriving" else "DEPARTING"
+    label = "ARRIVING" if section_type == "arriving" else "DEPARTED"
     route = train.get("route", "")
     route_last = route.split(" ")[-1] if route else ""
     train_num = str(train.get("train", ""))
