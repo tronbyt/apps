@@ -131,15 +131,9 @@ def render_train(train, section_type, mins_text):
     sched_dep = train.get("sched_dep", "")
     actual_dep = train.get("actual_dep", "")
 
-    time_str = format_time(sched_arr) if section_type == "arriving" else format_time(sched_dep)
-    arr_note = variance_str(sched_arr, actual_arr)
-    dep_note = variance_str(sched_dep, actual_dep)
-
-    display_time = time_str
-    if section_type == "arriving" and arr_note and arr_note != "on time":
-        display_time += " (" + arr_note + ")"
-    elif section_type == "departing" and dep_note and dep_note != "on time":
-        display_time += " (" + dep_note + ")"
+    time_str = format_time(actual_arr) if section_type == "arriving" else format_time(actual_dep)
+    if time_str == "—":
+        time_str = format_time(sched_arr) if section_type == "arriving" else format_time(sched_dep)
 
     return [
         render.Row(
@@ -154,7 +148,7 @@ def render_train(train, section_type, mins_text):
             main_align = "center",
             children = [
                 render.Text(content = label, font = font(), color = color),
-                render.Text(content = " " + display_time, font = font(), color = "#fff"),
+                render.Text(content = " " + time_str, font = font(), color = "#fff"),
             ],
         ),
         render.Row(
