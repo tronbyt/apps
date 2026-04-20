@@ -59,6 +59,9 @@ Squiggle API now requiring the current year to be added to all requests
 
 v2.7.1
 Bug fix: forgot to update the function calls for live games...
+
+v2.8
+Added User Agent info to API request as per new requirements from provider
 """
 
 load("encoding/json.star", "json")
@@ -229,7 +232,6 @@ def main(config):
         for x in range(0, GamesThisRound, 1):
             status = CurrentRoundJSON["matches"][x]["status"]
 
-            #print(status)
             if status == "LIVE":
                 LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
@@ -927,8 +929,9 @@ def MoreOptions(View):
         return None
 
 def get_cachable_data(url, timeout):
-    #SOMETHING IN HERE TO HANDLE OFFLINE FEED
-    res = http.get(url = url, ttl_seconds = timeout)
+    res = http.get(url = url, ttl_seconds = timeout, headers = {
+        "User-Agent": "Tronbyt Application (AFL Scores) - steve@schtev.com",
+    })
 
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
