@@ -8,21 +8,28 @@ Author: radiocolin (Forked from Michael Yagi's Plex Showtime)
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/jellyfin_banner.png", JELLYFIN_BANNER_ASSET = "file")
+load("images/jellyfin_banner@2x.png", JELLYFIN_BANNER_2X_ASSET = "file")
 load("images/jellyfin_banner_portrait.png", JELLYFIN_BANNER_PORTRAIT_ASSET = "file")
+load("images/jellyfin_banner_portrait@2x.png", JELLYFIN_BANNER_PORTRAIT_2X_ASSET = "file")
 load("images/jellyfin_icon.png", JELLYFIN_ICON_ASSET = "file")
+load("images/jellyfin_icon@2x.png", JELLYFIN_ICON_2X_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 JELLYFIN_BANNER = JELLYFIN_BANNER_ASSET.readall()
+JELLYFIN_BANNER_2X = JELLYFIN_BANNER_2X_ASSET.readall()
 JELLYFIN_BANNER_PORTRAIT = JELLYFIN_BANNER_PORTRAIT_ASSET.readall()
+JELLYFIN_BANNER_PORTRAIT_2X = JELLYFIN_BANNER_PORTRAIT_2X_ASSET.readall()
 JELLYFIN_ICON = JELLYFIN_ICON_ASSET.readall()
+JELLYFIN_ICON_2X = JELLYFIN_ICON_2X_ASSET.readall()
 
 MAX_TEXT_LENGTH = 1000
 GET_TOP = 15
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     jellyfin_server_url = config.str("jellyfin_server_url", "")
     jellyfin_api_key = config.str("jellyfin_api_key", "")
     show_heading = config.bool("show_heading", True)
@@ -76,17 +83,17 @@ def main(config):
         print("CONFIG - server: " + jellyfin_server_url)
         print("CONFIG - endpoint: " + str(endpoint_map))
 
-    return get_text(jellyfin_server_url, jellyfin_api_key, endpoint_map, debug_output, fit_screen, filter_movie, filter_tv, filter_music, show_heading, show_only_artwork, show_summary, heading_color, font_color, ttl_seconds, release_window, added_window)
+    return get_text(jellyfin_server_url, jellyfin_api_key, endpoint_map, debug_output, fit_screen, filter_movie, filter_tv, filter_music, show_heading, show_only_artwork, show_summary, heading_color, font_color, ttl_seconds, release_window, added_window, scale)
 
-def get_text(server_url, api_key, endpoint_map, debug_output, fit_screen, filter_movie, filter_tv, filter_music, show_heading, show_only_artwork, show_summary, heading_color, font_color, ttl_seconds, release_window, added_window):
+def get_text(server_url, api_key, endpoint_map, debug_output, fit_screen, filter_movie, filter_tv, filter_music, show_heading, show_only_artwork, show_summary, heading_color, font_color, ttl_seconds, release_window, added_window, scale):
     base_url = server_url
     if base_url.endswith("/"):
         base_url = base_url[0:len(base_url) - 1]
 
     if server_url == "" or api_key == "":
-        return display_message(debug_output, [{"message": "Jellyfin URL and API key required", "color": "#FF0000"}])
+        return display_message(debug_output, [{"message": "Jellyfin URL and API key required", "color": "#FF0000"}], False, scale)
     elif endpoint_map["id"] == 0:
-        return display_message(debug_output, [{"message": "Select library type in config", "color": "#FF0000"}])
+        return display_message(debug_output, [{"message": "Select library type in config", "color": "#FF0000"}], False, scale)
 
     headers = {"X-Emby-Token": api_key}
     items = []
@@ -165,7 +172,7 @@ def get_text(server_url, api_key, endpoint_map, debug_output, fit_screen, filter
                     items = json.decode(content).get("Items", [])
 
     if not items:
-        return display_message(debug_output, [{"message": "No results for " + endpoint_map["title"], "color": "#FF0000"}])
+        return display_message(debug_output, [{"message": "No results for " + endpoint_map["title"], "color": "#FF0000"}], False, scale)
 
     item = items[random.number(0, len(items) - 1)]
 
@@ -204,10 +211,10 @@ def get_text(server_url, api_key, endpoint_map, debug_output, fit_screen, filter
     using_portrait_banner = False
     if not img_data:
         if show_summary:
-            img_data = JELLYFIN_BANNER_PORTRAIT
+            img_data = JELLYFIN_BANNER_PORTRAIT if scale == 1 else JELLYFIN_BANNER_PORTRAIT_2X
             using_portrait_banner = True
         else:
-            img_data = JELLYFIN_BANNER
+            img_data = JELLYFIN_BANNER if scale == 1 else JELLYFIN_BANNER_2X
 
     if len(title_text) >= MAX_TEXT_LENGTH:
         title_text = title_text[0:MAX_TEXT_LENGTH] + "..."
@@ -215,44 +222,50 @@ def get_text(server_url, api_key, endpoint_map, debug_output, fit_screen, filter
         body_text = body_text[0:MAX_TEXT_LENGTH] + "..."
 
     if show_summary and not show_only_artwork:
-        rendered_image = render.Image(width = 22, src = img_data)
+        rendered_image = render.Image(width = 22 * scale, src = img_data)
         marquee_text_array = [
             {"type": "heading", "message": header_text, "color": "#FFFFFF"},
             {"type": "title", "message": title_text, "color": heading_color},
             {"type": "body", "message": body_text, "color": font_color},
         ]
     elif fit_screen and not show_only_artwork:
-        rendered_image = render.Image(width = 64, src = img_data)
+        rendered_image = render.Image(width = 64 * scale, src = img_data)
         marquee_text_array = [
             {"type": "heading", "message": header_text, "color": heading_color},
             {"type": "body", "message": body_text, "color": font_color},
         ]
     elif show_only_artwork:
         if fit_screen:
-            rendered_image = render.Image(height = 32, src = img_data)
+            rendered_image = render.Image(height = 32 * scale, src = img_data)
         else:
-            rendered_image = render.Image(width = 64, src = img_data)
+            rendered_image = render.Image(width = 64 * scale, src = img_data)
         marquee_text_array = []
     else:
-        rendered_image = render.Image(height = 25, src = img_data)
+        rendered_image = render.Image(height = 25 * scale, src = img_data)
         marquee_text_array = [
             {"type": "heading", "message": header_text, "color": heading_color},
             {"type": "body", "message": body_text, "color": font_color},
         ]
 
-    return render_marquee(show_only_artwork, marquee_text_array, rendered_image, show_summary, using_portrait_banner)
+    return render_marquee(show_only_artwork, marquee_text_array, rendered_image, show_summary, using_portrait_banner, scale)
 
-def display_message(debug_output, message_array = [], show_summary = False):
-    img = JELLYFIN_BANNER_PORTRAIT if show_summary else JELLYFIN_BANNER
+def display_message(debug_output, message_array = [], show_summary = False, scale = 1):
+    if show_summary:
+        img = JELLYFIN_BANNER_PORTRAIT if scale == 1 else JELLYFIN_BANNER_PORTRAIT_2X
+    else:
+        img = JELLYFIN_BANNER if scale == 1 else JELLYFIN_BANNER_2X
+
     if not debug_output:
-        return render.Root(child = render.Box(child = render.Image(src = img, width = 64)))
+        return render.Root(child = render.Box(child = render.Image(src = img, width = 64 * scale)))
 
-    rendered_image = render.Image(width = 64, src = img)
-    return render_marquee(False, message_array, rendered_image, show_summary)
+    rendered_image = render.Image(width = 64 * scale, src = img)
+    return render_marquee(False, message_array, rendered_image, show_summary, False, scale)
 
-def render_marquee(show_only_artwork, message_array, image, show_summary, using_portrait_banner = False):
-    icon_img = JELLYFIN_ICON
+def render_marquee(show_only_artwork, message_array, image, show_summary, using_portrait_banner = False, scale = 1):
+    icon_img = JELLYFIN_ICON if scale == 1 else JELLYFIN_ICON_2X
     text_array = []
+
+    text_font = "tom-thumb" if scale == 1 else "terminus-12"
 
     if show_only_artwork:
         return render.Root(child = render.Box(child = image))
@@ -260,23 +273,24 @@ def render_marquee(show_only_artwork, message_array, image, show_summary, using_
     for message in message_array:
         if not show_summary:
             msg = message["message"]
-            text_array.append(render.Text(msg, color = message["color"], font = "tom-thumb"))
+            text_array.append(render.Text(msg, color = message["color"], font = text_font))
         else:
-            wrapped = wrap(message["message"], 9)
-            text_array.append(render.WrappedText(content = wrapped, font = "tom-thumb", color = message["color"], width = 41))
+            wrap_len = 9 if scale == 1 else 16
+            wrapped = wrap(message["message"], wrap_len)
+            text_array.append(render.WrappedText(content = wrapped, font = text_font, color = message["color"], width = 41 * scale))
 
     if show_summary:
         return render.Root(
             delay = 90,
             child = render.Row(
                 children = [
-                    render.Stack(children = [image, render.Image(src = icon_img, width = 7, height = 7)] if not using_portrait_banner else [image]),
+                    render.Stack(children = [image, render.Image(src = icon_img, width = 7 * scale, height = 7 * scale)] if not using_portrait_banner else [image]),
                     render.Padding(
-                        pad = (1, 0, 0, 0),
+                        pad = (1 * scale, 0, 0, 0),
                         child = render.Marquee(
-                            height = 32,
+                            height = 32 * scale,
                             scroll_direction = "vertical",
-                            width = 41,
+                            width = 41 * scale,
                             child = render.Column(children = text_array),
                         ),
                     ),
@@ -288,16 +302,16 @@ def render_marquee(show_only_artwork, message_array, image, show_summary, using_
             child = render.Column(
                 children = [
                     render.Box(
-                        width = 64,
-                        height = 7,
+                        width = 64 * scale,
+                        height = 7 * scale,
                         child = render.Row(
                             children = [
-                                render.Image(src = icon_img, width = 7, height = 7),
-                                render.Marquee(width = 57, child = render.Row(children = text_array)),
+                                render.Image(src = icon_img, width = 7 * scale, height = 7 * scale),
+                                render.Marquee(width = 57 * scale, child = render.Row(children = text_array)),
                             ],
                         ),
                     ),
-                    render.Box(width = 64, height = 25, child = image),
+                    render.Box(width = 64 * scale, height = 25 * scale, child = image),
                 ],
             ),
         )
