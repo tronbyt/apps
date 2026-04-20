@@ -8,14 +8,14 @@ Author: Robert Ison
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("support_files/florida_map.star", "FLORIDA_MAP")
 load("support_files/florida_lighthouses.star", "FLORIDA_LIGHTHOUSES")
+load("support_files/florida_map.star", "FLORIDA_MAP")
 load("support_files/lighthouse_animation.gif", LIGHTHOUSE_GIF_ASSET = "file")
 load("support_files/lighthouse_animation_2x.gif", LIGHTHOUSE_GIF_2X_ASSET = "file")
 
 MAP_CITIES_COLOR = "#f00"
-VISITED_COLOR = "#ffff00"  
-UNVISITED_COLOR = "#565a06" 
+VISITED_COLOR = "#ffff00"
+UNVISITED_COLOR = "#565a06"
 BRIGHT_OUTLINE_COLOR = "#fff"
 DULL_OUTLINE_COLOR = "#111"
 
@@ -24,7 +24,7 @@ CONFIG_PATTERN_LIGHTHOUSES = "Item_%s_%s"
 def main(config):
     if canvas.is2x():
         LIGHTHOUSE_GIF = LIGHTHOUSE_GIF_2X_ASSET.readall()
-        MAP_PIXEL_SIZE = [90, 60]
+        MAP_PIXEL_SIZE = [80, 50]
     else:
         LIGHTHOUSE_GIF = LIGHTHOUSE_GIF_ASSET.readall()
         MAP_PIXEL_SIZE = [45, 30]
