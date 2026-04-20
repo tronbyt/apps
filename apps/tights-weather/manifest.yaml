@@ -4,7 +4,7 @@ name: Tights Weather
 summary: Is it tights weather
 desc: Tells you if it's too hot for tights, or if you need fleece-lined ones.
 author: radiocolin
-fileName: tights_weather.star
+fileName: tights-weather.star
 packageName: tightsweather
 recommendedInterval: 15
 supports2x: true

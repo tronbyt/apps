@@ -1,10 +1,14 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def main(config):
+    # Check for 2x mode
+    is_2x = canvas.is2x()
+    width, height = canvas.size()
+
     # Get location from schema or use default (San Francisco)
     location_json = config.get("location")
     if location_json:
@@ -79,9 +83,16 @@ def main(config):
         color = "#b185db"  # Purple-ish
         icon = "🧶"
 
+    # Fonts based on resolution
+    header_font = "tb-8" if is_2x else "CG-pixel-3x5-mono"
+    body_font = "terminus-18" if is_2x else "tb-8"
+    icon_font = "terminus-18" if is_2x else "tb-8"
+
     return render.Root(
         child = render.Box(
             color = "#000",
+            width = width,
+            height = height,
             child = render.Column(
                 expanded = True,
                 main_align = "space_evenly",
@@ -89,30 +100,30 @@ def main(config):
                 children = [
                     render.Box(
                         color = "#222",
-                        width = 64,
-                        height = 7,
-                        child = render.Text(content = "TIGHTS WEATHER?", color = "#ffcfd2", font = "CG-pixel-3x5-mono"),
+                        width = width,
+                        height = 14 if is_2x else 7,
+                        child = render.Text(content = "TIGHTS WEATHER?", color = "#ffcfd2", font = header_font),
                     ),
                     render.Row(
                         main_align = "center",
                         cross_align = "center",
                         children = [
-                            render.Text(content = icon),
+                            render.Text(content = icon, font = icon_font),
                             render.Padding(
-                                pad = (2, 0, 0, 0),
-                                child = render.Text(content = "%d°%s" % (temp, unit), font = "tb-8", color = "#ffffff"),
+                                pad = (4 if is_2x else 2, 0, 0, 0),
+                                child = render.Text(content = "%d°%s" % (temp, unit), font = body_font, color = "#ffffff"),
                             ),
                             render.Padding(
-                                pad = (4, 0, 0, 0),
-                                child = render.Text(content = wind, font = "tb-8", color = "#99f"),
+                                pad = (8 if is_2x else 4, 0, 0, 0),
+                                child = render.Text(content = wind, font = body_font, color = "#99f"),
                             ),
                         ],
                     ),
                     render.Padding(
-                        pad = (0, 0, 0, 1),
+                        pad = (0, 0, 0, 2 if is_2x else 1),
                         child = render.Marquee(
-                            width = 64,
-                            child = render.Text(content = msg, color = color, font = "tb-8"),
+                            width = width,
+                            child = render.Text(content = msg, color = color, font = body_font),
                         ),
                     ),
                 ],
