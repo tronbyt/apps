@@ -8,7 +8,7 @@ Author: radiocolin
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -308,7 +308,7 @@ def call_schedule_api(route, stopid):
     # Sort by ETA
     return sorted(results, key = lambda x: x["eta_secs"])[:10]
 
-def get_schedule(route, stopid, show_relative_times):
+def get_schedule(route, stopid, show_relative_times, scale):
     departures = call_schedule_api(route, stopid)
 
     # 1. Pre-process to find max width needed for the time column
@@ -338,9 +338,11 @@ def get_schedule(route, stopid, show_relative_times):
         processed_deps.append((dep, t_str))
 
     # tom-thumb font is roughly 4px wide per character (3px glyph + 1px spacing)
-    time_col_width = max_chars * 4 + 1
-    if time_col_width < 12:
-        time_col_width = 12
+    # terminus-12 is roughly 6px wide
+    char_width = 4 if scale == 1 else 6
+    time_col_width = max_chars * char_width + 1
+    if time_col_width < 12 * scale:
+        time_col_width = 12 * scale
 
     list_of_departures = []
     for i, (dep, t_str) in enumerate(processed_deps):
@@ -362,19 +364,22 @@ def get_schedule(route, stopid, show_relative_times):
             else:
                 headsign += " - %d stops away" % dep["stops_away"]
 
+        row_font = "tom-thumb" if scale == 1 else "terminus-12"
+        row_height = 6 * scale
+
         item = render.Box(
-            height = 6,
-            width = 64,
+            height = row_height,
+            width = 64 * scale,
             color = background,
             child = render.Row(
                 children = [
                     render.Box(
                         width = time_col_width,
                         child = render.Padding(
-                            pad = (0, 0, 1, 0),  # Small gap before marquee
+                            pad = (0, 0, 1 * scale, 0),  # Small gap before marquee
                             child = render.Text(
                                 content = t_str,
-                                font = "tom-thumb",
+                                font = row_font,
                                 color = time_color,
                             ),
                         ),
@@ -382,12 +387,12 @@ def get_schedule(route, stopid, show_relative_times):
                     render.Marquee(
                         child = render.Text(
                             headsign,
-                            font = "tom-thumb",
+                            font = row_font,
                             color = text,
                         ),
-                        width = 64 - time_col_width,
-                        offset_start = 40,
-                        offset_end = 40,
+                        width = 64 * scale - time_col_width,
+                        offset_start = 40 * scale,
+                        offset_end = 40 * scale,
                     ),
                 ],
             ),
@@ -397,10 +402,10 @@ def get_schedule(route, stopid, show_relative_times):
     if len(list_of_departures) < 1:
         msg = "No departures" if stopid else "Select a stop"
         return [render.Box(
-            height = 6,
-            width = 64,
+            height = 6 * scale,
+            width = 64 * scale,
             color = "#000",
-            child = render.Text(msg, font = "tom-thumb"),
+            child = render.Text(msg, font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
     else:
         return list_of_departures
@@ -421,14 +426,15 @@ def select_stop(route):
     ]
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     route = config.str("route", DEFAULT_ROUTE)
     stop = config.str("stop", DEFAULT_STOP)
     show_relative_times = config.bool("show_relative_times", False)
     user_text = config.str("banner", "")
-    schedule = get_schedule(route, stop, show_relative_times)
+    schedule = get_schedule(route, stop, show_relative_times, scale)
     timezone = config.get("timezone") or "America/New_York"
     now = time.now().in_location(timezone)
-    left_pad = 4
+    left_pad = 4 * scale
 
     route_info = get_route_info(route)
     if route_info:
@@ -448,6 +454,10 @@ def main(config):
     else:
         banner_text = user_text
 
+    banner_font = "tom-thumb" if scale == 1 else "terminus-14"
+    banner_height = 6 if scale == 1 else 14
+    bottom_pad = 2 if scale == 1 else 2
+
     if config.bool("show_time"):
         if int(now.format("15")) < 12:
             meridian = "a"
@@ -465,12 +475,12 @@ def main(config):
                 render.Column(
                     children = [
                         render.Stack(children = [
-                            render.Box(height = 6, width = 64, color = route_bg_color),
-                            render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = "tom-thumb", color = route_text_color)),
+                            render.Box(height = banner_height, width = 64 * scale, color = route_bg_color),
+                            render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = banner_font, color = route_text_color)),
                         ]),
                     ],
                 ),
-                render.Padding(pad = (0, 0, 0, 2), color = route_bg_color, child = render.Column(children = schedule)),
+                render.Padding(pad = (0, 0, 0, bottom_pad), color = route_bg_color, child = render.Column(children = schedule)),
             ],
         ),
     )

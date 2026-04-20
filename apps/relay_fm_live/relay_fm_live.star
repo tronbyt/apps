@@ -7,12 +7,14 @@ Author: radiocolin
 
 load("http.star", "http")
 load("images/relay_logo.png", RELAY_LOGO_ASSET = "file")
+load("images/relay_logo@2x.png", RELAY_LOGO_2X_ASSET = "file")
 load("qrcode.star", "qrcode")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 RELAY_LOGO = RELAY_LOGO_ASSET.readall()
+RELAY_LOGO_2X = RELAY_LOGO_2X_ASSET.readall()
 
 live_status_url = "https://www.relay.fm/live.json"
 live_page_url = "https://www.relay.fm/live"
@@ -20,14 +22,14 @@ live_broadcasts_url = "https://www.relay.fm/addtobroadcasts"
 live_discord_url = "https://discord.com/channels/620638957960691723/707667851745427666"
 live_m3u_url = "http://stream.relay.fm:8000/stream.m3u"
 
-def generate_qrcode(url):
+def generate_qrcode(url, scale):
     code = qrcode.generate(
         url = url,
-        size = "large",
+        size = "large" if scale == 1 else "xlarge",
         color = "#fff",
         background = "#000",
     )
-    return render.Image(src = code)
+    return render.Image(src = code, width = 29 * scale, height = 29 * scale)
 
 def check_live():
     r = http.get(live_status_url, ttl_seconds = 60)
@@ -35,26 +37,34 @@ def check_live():
         return True
     return False
 
-def get_next_recording(live, timezone):
+def get_next_recording(live, timezone, scale, api_key):
+    header_font = "tb-8" if scale == 1 else "terminus-14"
+    title_font = "tb-8" if scale == 1 else "terminus-14"
+    start_font = "tom-thumb" if scale == 1 else "terminus-12"
+
     if live:
         r = http.get(live_status_url, ttl_seconds = 60)
-        header = render.Text("Live:")
-        title = render.Text(r.json()["broadcast"]["title"])
-        start_text = render.Text("Relay", font = "tom-thumb")
-    else:
-        header = render.Text("Up next:")
+        header = render.Text("Live:", font = header_font)
+        title = render.Text(r.json()["broadcast"]["title"], font = title_font)
+        start_text = render.Text("Relay", font = start_font)
+    elif api_key:
+        header = render.Text("Up next:", font = header_font)
         calendar_minimum_time = time.now().in_location("UTC").format("2006-01-02T15:04:05.000Z")
-        calendar_url = "https://www.googleapis.com/calendar/v3/calendars/relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o%40group.calendar.google.com/events?key=AIzaSyAVhU0GdCZQidylxz7whIln82rWtZ4cIDQ&orderBy=startTime&singleEvents=true&timeMin=" + calendar_minimum_time
+        calendar_url = "https://www.googleapis.com/calendar/v3/calendars/relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o%40group.calendar.google.com/events?key=" + api_key + "&orderBy=startTime&singleEvents=true&timeMin=" + calendar_minimum_time
         r = http.get(calendar_url, ttl_seconds = 60)
-        if "items" in r.json():
+        if r.status_code == 200 and "items" in r.json() and len(r.json()["items"]) > 0:
             next = r.json()["items"][0]
-            title = render.Text(next["summary"])
+            title = render.Text(next["summary"], font = title_font)
             start = time.parse_time(next.get("start").get("dateTime"), "2006-01-02T15:04:05-07:00", next.get("start").get("timeZone"))
-            start_text = render.Text(start.in_location(timezone).format("Jan 2 3:04pm"), font = "tom-thumb")
+            start_text = render.Text(start.in_location(timezone).format("Jan 2 3:04pm"), font = start_font)
         else:
-            header = render.Text("")
-            title = render.Text("Check back soon for live streams")
-            start_text = render.Text("Relay", font = "tom-thumb")
+            header = render.Text("", font = header_font)
+            title = render.Text("Check back soon for live streams", font = title_font)
+            start_text = render.Text("Relay", font = start_font)
+    else:
+        header = render.Text("", font = header_font)
+        title = render.Text("Check back soon for live streams", font = title_font)
+        start_text = render.Text("Relay", font = start_font)
 
     return render.Box(
         child = render.Padding(
@@ -62,28 +72,31 @@ def get_next_recording(live, timezone):
                 children = [
                     header,
                     render.Marquee(
-                        width = 35,
+                        width = 35 * scale,
                         child = title,
-                        offset_start = 35,
-                        offset_end = 35,
+                        offset_start = 35 * scale,
+                        offset_end = 35 * scale,
                     ),
                     render.Marquee(
-                        width = 35,
+                        width = 35 * scale,
                         child = start_text,
-                        offset_start = 35,
-                        offset_end = 35,
+                        offset_start = 35 * scale,
+                        offset_end = 35 * scale,
                     ),
                 ],
             ),
-            pad = (1, 0, 0, 0),
+            pad = (1 * scale, 0, 0, 0),
         ),
-        height = 29,
+        height = 29 * scale,
         color = "#333F48",
     )
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     timezone = config.get("timezone") or "America/New_York"
-    img = render.Image(src = RELAY_LOGO)
+    api_key = config.get("api_key")
+    logo = RELAY_LOGO if scale == 1 else RELAY_LOGO_2X
+    img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     live = check_live()
     if not live and config.bool("live_only"):
         return []
@@ -92,12 +105,12 @@ def main(config):
         r = http.get(live_status_url, ttl_seconds = 60)
         img_url = r.json()["broadcast"]["show_art"]
         img_data = http.get(img_url, ttl_seconds = 60).body()
-        img = render.Image(src = img_data, width = 29, height = 29)
+        img = render.Image(src = img_data, width = 29 * scale, height = 29 * scale)
     elif live and art == "RELAY_LOGO":
-        img = render.Image(src = RELAY_LOGO)
+        img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     elif live:
-        img = generate_qrcode(art)
-    show = get_next_recording(live, timezone)
+        img = generate_qrcode(art, scale)
+    show = get_next_recording(live, timezone, scale, api_key)
     main_content = render.Row(
         children = [
             img,
@@ -108,9 +121,9 @@ def main(config):
     return render.Root(
         child = render.Column(
             children = [
-                render.Box(height = 2, color = "#34657F"),
+                render.Box(height = 2 * scale, color = "#34657F"),
                 main_content,
-                render.Box(height = 1, color = "#34657F"),
+                render.Box(height = 1 * scale, color = "#34657F"),
             ],
         ),
     )
@@ -142,6 +155,12 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Google Calendar API Key",
+                desc = "Required to show upcoming schedule.",
+                icon = "key",
+            ),
             schema.Dropdown(
                 id = "show_art",
                 name = "Artwork/QR code settings",

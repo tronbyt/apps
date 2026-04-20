@@ -6,7 +6,7 @@ Author: radiocolin
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -190,7 +190,7 @@ def call_schedule_api(direction, station):
     schedule = schedule_raw.values()[0][0].values()[0]
     return schedule
 
-def get_schedule(direction, station):
+def get_schedule(direction, station, scale):
     schedule = call_schedule_api(direction, station)
     list_of_departures = []
 
@@ -211,30 +211,36 @@ def get_schedule(direction, station):
             departure = " " + parsed_departure
         else:
             departure = parsed_departure
+
+        row_font = "tom-thumb" if scale == 1 else "terminus-12"
+        row_height = 6 * scale
+        time_width = 25 * scale
+        text_width = 39 * scale
+
         item = render.Box(
-            height = 6,
-            width = 64,
+            height = row_height,
+            width = 64 * scale,
             color = background,
             child = render.Row(
                 cross_align = "right",
                 children = [
                     render.Box(
-                        width = 25,
+                        width = time_width,
                         child = render.Text(
                             departure,
-                            font = "tom-thumb",
+                            font = row_font,
                             color = text,
                         ),
                     ),
                     render.Marquee(
                         child = render.Text(
                             i["train_id"] + " " + i["service_type"] + " to " + i["destination"] + " - " + i["status"],
-                            font = "tom-thumb",
+                            font = row_font,
                             color = text,
                         ),
-                        width = 39,
-                        offset_start = 40,
-                        offset_end = 40,
+                        width = text_width,
+                        offset_start = text_width + 1,
+                        offset_end = text_width + 1,
                     ),
                 ],
             ),
@@ -243,20 +249,21 @@ def get_schedule(direction, station):
 
     if len(list_of_departures) < 1:
         return [render.Box(
-            height = 6,
-            width = 64,
+            height = 6 * scale,
+            width = 64 * scale,
             color = "#000",
-            child = render.Text("Select a stop"),
+            child = render.Text("Select a stop", font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
     else:
         return list_of_departures
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     station = config.str("station", DEFAULT_STATION)
     direction = config.str("direction", DEFAULT_DIRECTION)
     user_text = config.str("banner", "")
-    schedule = get_schedule(direction, station)
-    left_pad = 1
+    schedule = get_schedule(direction, station, scale)
+    left_pad = 1 * scale
 
     if config.bool("use_custom_banner_color"):
         banner_bg_color = config.str("custom_banner_color")
@@ -273,6 +280,10 @@ def main(config):
     else:
         banner_text = user_text
 
+    banner_font = "tom-thumb" if scale == 1 else "terminus-14"
+    banner_height = 6 if scale == 1 else 14
+    bottom_pad = 2 if scale == 1 else 2
+
     return render.Root(
         delay = 100,
         show_full_animation = True,
@@ -281,12 +292,12 @@ def main(config):
                 render.Column(
                     children = [
                         render.Stack(children = [
-                            render.Box(height = 6, width = 64, color = banner_bg_color),
-                            render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = "tom-thumb", color = banner_text_color)),
+                            render.Box(height = banner_height, width = 64 * scale, color = banner_bg_color),
+                            render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = banner_font, color = banner_text_color)),
                         ]),
                     ],
                 ),
-                render.Padding(pad = (0, 0, 0, 2), color = banner_bg_color, child = render.Column(children = schedule)),
+                render.Padding(pad = (0, 0, 0, bottom_pad), color = banner_bg_color, child = render.Column(children = schedule)),
             ],
         ),
     )
