@@ -1,0 +1,15 @@
+---
+id: ha-calendar
+name: HA Calendar
+summary: Home Assistant Calendar
+desc: Shows events from Home Assistant Calendar entities.
+author: radiocolin
+supports2x: true
+fileName: ha_calendar.star
+packageName: hacalendar
+recommendedInterval: 5
+category: utilities
+tags:
+  - home-assistant
+  - calendar
+  - smart-home
