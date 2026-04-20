@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 API_URL = "https://www.511pa.com/List/GetData/MessageSigns?query=%7B%22columns%22%3A%5B%7B%22data%22%3Anull%2C%22name%22%3A%22%22%7D%2C%7B%22name%22%3A%22area%22%2C%22s%22%3Atrue%7D%2C%7B%22name%22%3A%22name%22%7D%2C%7B%22name%22%3A%22roadwayName%22%7D%2C%7B%22name%22%3A%22direction%22%7D%2C%7B%22data%22%3A%22phase1Image%22%2C%22name%22%3A%22message%22%7D%2C%7B%22data%22%3A%22phase2Image%22%2C%22name%22%3A%22message2%22%7D%2C%7B%22name%22%3A%22lastUpdated%22%7D%2C%7B%22data%22%3A8%2C%22name%22%3A%22%22%7D%5D%2C%22order%22%3A%5B%7B%22column%22%3A1%2C%22dir%22%3A%22asc%22%7D%5D%2C%22start%22%3A0%2C%22length%22%3A500%2C%22search%22%3A%7B%22value%22%3A%22%22%7D%7D&lang=en-US"
@@ -24,12 +24,13 @@ def main(config):
     Returns:
         Render tree displaying sign message and name.
     """
+    scale = 2 if canvas.is2x() else 1
     sign_id = config.str("sign_id")
     show_info_bar = config.bool("show_info_bar", True)
 
     if not sign_id:
         return render.Root(
-            child = render.Text("Select a sign", color = "#F09F00"),
+            child = render.Text("Select a sign", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
         )
 
     # Fetch sign data
@@ -54,7 +55,7 @@ def main(config):
 
     if not selected_sign:
         return render.Root(
-            child = render.Text("Sign not found", color = "#F09F00"),
+            child = render.Text("Sign not found", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
         )
 
     # Get message, images, and roadway name
@@ -101,14 +102,14 @@ def main(config):
         # Decode and create images
         img1 = render.Image(
             src = base64.decode(phase1_image),
-            width = 64,
-            height = 21,
+            width = 64 * scale,
+            height = 21 * scale,
         ) if phase1_image else None
 
         img2 = render.Image(
             src = base64.decode(phase2_image),
-            width = 64,
-            height = 21,
+            width = 64 * scale,
+            height = 21 * scale,
         ) if phase2_image else None
 
         # Create animation frames - hold each image for 3 seconds (90 frames at 30fps)
@@ -140,14 +141,15 @@ def main(config):
 
         # Build message display
         message_widgets = []
+        message_font = "tb-8" if scale == 1 else "terminus-14"
         for line in message_lines:
             message_widgets.append(
                 render.Marquee(
-                    width = 64,
+                    width = 64 * scale,
                     align = "center",
                     child = render.Text(
                         content = line,
-                        font = "tb-8",
+                        font = message_font,
                         color = "#F09F00",
                     ),
                 ),
@@ -160,13 +162,14 @@ def main(config):
 
     # Build display with or without info bar
     display_children = []
+    info_font = "tom-thumb" if scale == 1 else "terminus-12"
 
     if show_info_bar:
         # With info bar: 26px content + 6px bar = 32px
         display_children.append(
             render.Box(
-                width = 64,
-                height = 26,
+                width = 64 * scale,
+                height = 26 * scale,
                 child = content_widget,
             ),
         )
@@ -176,8 +179,8 @@ def main(config):
 
         # Create frames for roadway name (hold for 90 frames = 3 seconds)
         roadway_widget = render.Box(
-            width = 64,
-            height = 6,
+            width = 64 * scale,
+            height = 6 * scale,
             color = "#F09F00",
             child = render.Row(
                 expanded = True,
@@ -185,7 +188,7 @@ def main(config):
                 children = [
                     render.Text(
                         content = roadway_name,
-                        font = "tom-thumb",
+                        font = info_font,
                         color = "#000",
                     ),
                 ],
@@ -195,8 +198,8 @@ def main(config):
         # If we have a milepost, alternate between roadway and milepost
         if milepost:
             milepost_widget = render.Box(
-                width = 64,
-                height = 6,
+                width = 64 * scale,
+                height = 6 * scale,
                 color = "#F09F00",
                 child = render.Row(
                     expanded = True,
@@ -204,7 +207,7 @@ def main(config):
                     children = [
                         render.Text(
                             content = milepost.strip(),
-                            font = "tom-thumb",
+                            font = info_font,
                             color = "#000",
                         ),
                     ],
@@ -223,8 +226,8 @@ def main(config):
         # Without info bar: full 32px for content, centered
         display_children.append(
             render.Box(
-                width = 64,
-                height = 32,
+                width = 64 * scale,
+                height = 32 * scale,
                 child = render.Column(
                     main_align = "center",
                     cross_align = "center",
