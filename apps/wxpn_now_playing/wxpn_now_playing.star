@@ -8,7 +8,7 @@ Author: radiocolin
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/wxpn_logo_base64.png", WXPN_LOGO_BASE64_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 WXPN_LOGO_BASE64 = WXPN_LOGO_BASE64_ASSET.readall()
@@ -43,6 +43,7 @@ STATIONS = {
 }
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     station_key = config.str("station", "xpn")
     station = STATIONS.get(station_key, STATIONS["xpn"])
 
@@ -50,7 +51,7 @@ def main(config):
     now_playing = get_now_playing(station["url"])
     if not now_playing:
         return render.Root(
-            child = render.Text("Unable to load WXPN data"),
+            child = render.Text("Unable to load WXPN data", font = "tb-8" if scale == 1 else "terminus-14"),
         )
 
     # Parse track info
@@ -64,7 +65,7 @@ def main(config):
     # Create the display
     return render.Root(
         show_full_animation = True,
-        child = create_display(station, artist, title, album_art, station_key),
+        child = create_display(station, artist, title, album_art, station_key, scale),
     )
 
 def get_now_playing(url):
@@ -108,20 +109,20 @@ def get_album_art(artist, title):
 
     return None
 
-def create_display(station, artist, title, album_art_url, station_key):
+def create_display(station, artist, title, album_art_url, station_key, scale):
     """Create the main display layout"""
 
     # Top orange bar
     top_bar = render.Box(
-        width = 64,
-        height = 1,
+        width = 64 * scale,
+        height = 1 * scale,
         color = "#C17430",
     )
 
     # Bottom orange bar
     bottom_bar = render.Box(
-        width = 64,
-        height = 1,
+        width = 64 * scale,
+        height = 1 * scale,
         color = "#C17430",
     )
 
@@ -131,8 +132,8 @@ def create_display(station, artist, title, album_art_url, station_key):
         # Use the fetched image data directly
         album_art = render.Image(
             src = album_art_url,
-            width = 30,
-            height = 30,
+            width = 30 * scale,
+            height = 30 * scale,
         )
 
     # Fallback to WXPN logo if no album art
@@ -140,8 +141,8 @@ def create_display(station, artist, title, album_art_url, station_key):
         logo_data = WXPN_LOGO_BASE64
         album_art = render.Image(
             src = logo_data,
-            width = 30,
-            height = 30,
+            width = 30 * scale,
+            height = 30 * scale,
         )
 
     # Station indicator at top
@@ -149,28 +150,32 @@ def create_display(station, artist, title, album_art_url, station_key):
     if station_key == "kids":
         station_display_name = "XPN Kids"
 
+    station_font = "tom-thumb" if scale == 1 else "terminus-12"
+    title_font = "6x10" if scale == 1 else "terminus-18"
+    artist_font = "5x8" if scale == 1 else "terminus-14"
+
     station_text = render.Text(
         station_display_name,
-        font = "tom-thumb",
+        font = station_font,
         color = "#FFFFFF",
     )
 
     # Spacer to give station name breathing room
     spacer = render.Box(
-        width = 1,
-        height = 2,
+        width = 1 * scale,
+        height = 2 * scale,
     )
 
     # Text content (right side) with single marquee
     title_text = render.Text(
         title,
-        font = "6x10",
+        font = title_font,
         color = "#FFFFFF",
     )
 
     artist_text = render.Text(
         artist,
-        font = "5x8",
+        font = artist_font,
         color = "#808080",
     )
 
@@ -183,7 +188,7 @@ def create_display(station, artist, title, album_art_url, station_key):
 
     # Single marquee for both title and artist
     track_marquee = render.Marquee(
-        width = 34,
+        width = 34 * scale,
         child = track_info,
         scroll_direction = "horizontal",
         align = "start",
@@ -205,8 +210,8 @@ def create_display(station, artist, title, album_art_url, station_key):
 
     # Content area between bars (30 pixels high)
     content_area = render.Box(
-        width = 64,
-        height = 30,
+        width = 64 * scale,
+        height = 30 * scale,
         child = content_row,
     )
 

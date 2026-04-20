@@ -4,6 +4,7 @@ name: Trolley Detector
 summary: SEPTA PCC Trolley Detector
 desc: Shows the location of restored PCC trolleys running on SEPTA Route G1.
 author: radiocolin
+supports2x: true
 fileName: trolley_detector.star
 packageName: trolleydetector
 recommendedInterval: 5
