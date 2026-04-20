@@ -6,6 +6,7 @@ desc: Displays Florida Lighhouse locations.
 author: Robert Ison
 fileName: fla_lighthouses.star
 packageName: flalighthouses
+supports2x: true
 recommendedInterval: 5
 category: utilities
 tags:
