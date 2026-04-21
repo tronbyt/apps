@@ -1166,7 +1166,7 @@ def show_instructions_screen(config, layout):
                 render.Marquee(
                     width = layout["display_width"],
                     offset_start = 15,
-                    child = render.Text(header, color = "#65d0e6", font = "5x8"),
+                    child = render.Text(header, color = "#65d0e6"),
                 ),
                 render.Marquee(
                     width = layout["display_width"],
