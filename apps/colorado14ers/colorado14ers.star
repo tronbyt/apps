@@ -1063,7 +1063,7 @@ def main(config):
                     render.Marquee(
                         width = layout["display_width"],
                         offset_start = 15,
-                        child = render.Text(content = mountain_description, color = config.get("marquee_color", default_colors[2]), font = "tb-8", offset = 0),
+                        child = render.Text(content = mountain_description, color = config.get("marquee_color", default_colors[2]), offset = 0),
                     ),
             ),
         )
