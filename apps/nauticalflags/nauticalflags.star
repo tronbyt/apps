@@ -192,7 +192,7 @@ def main(config):
         display["screen_height"] = 64
         display["icon_width"] = 64
         display["icon_height"] = 64
-        speed = int(speed / 2)
+        speed = speed // 2
 
     display_text = "TIDBYT ROCKS"
 
