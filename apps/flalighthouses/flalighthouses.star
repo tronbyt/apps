@@ -24,11 +24,11 @@ CONFIG_PATTERN_LIGHTHOUSES = "Item_%s_%s"
 
 def main(config):
     if canvas.is2x():
-        LIGHTHOUSE_GIF = LIGHTHOUSE_GIF_2X_ASSET.readall()
-        MAP_PIXEL_SIZE = [80, 50]
+        lighthouse_animation = LIGHTHOUSE_GIF_2X_ASSET.readall()
+        map_pixel_size = [80, 50]
     else:
-        LIGHTHOUSE_GIF = LIGHTHOUSE_GIF_ASSET.readall()
-        MAP_PIXEL_SIZE = [45, 30]
+        lighthouse_animation = LIGHTHOUSE_GIF_ASSET.readall()
+        map_pixel_size = [45, 30]
 
     is_display_cities = config.bool("displayMajorCities")
     is_display_picks = config.bool("pickVisits")
@@ -36,7 +36,7 @@ def main(config):
 
     #Get the map area based on the points of the map
     map_area = define_map_area(FLORIDA_MAP)
-    #map_points = get_map_points(FLORIDA_MAP, map_area, MAP_PIXEL_SIZE)
+    #map_points = get_map_points(FLORIDA_MAP, map_area, map_pixel_size)
 
     # get just the coordinates from the Florida Lighthouses
     col_indexes = [3, 4]
@@ -49,25 +49,25 @@ def main(config):
 
     #Image Background
     if is_display_art:
-        map_items.append(render.Padding(render.Image(src = LIGHTHOUSE_GIF), (0, 0, 0, 0)))
+        map_items.append(render.Padding(render.Image(src = lighthouse_animation), (0, 0, 0, 0)))
 
     #Display Map
     map_outline_color = BRIGHT_OUTLINE_COLOR
     if is_display_art:
         map_outline_color = DULL_OUTLINE_COLOR
 
-    map_items = append_items_to_render(map_items, get_map_points(FLORIDA_MAP, map_area, MAP_PIXEL_SIZE), map_outline_color)
+    map_items = append_items_to_render(map_items, get_map_points(FLORIDA_MAP, map_area, map_pixel_size), map_outline_color)
 
     # Major Cities: Orlando, Tallahassee, Miami, Jacksonville, Tampa, Ft. Myers, Pensacola
     if is_display_cities:
-        map_items = append_items_to_render(map_items, get_map_points(FLORIDA_CITIES, map_area, MAP_PIXEL_SIZE), MAP_CITIES_COLOR)
+        map_items = append_items_to_render(map_items, get_map_points(FLORIDA_CITIES, map_area, map_pixel_size), MAP_CITIES_COLOR)
 
     #All Lighthouses
-    map_items = append_items_to_render(map_items, get_map_points(lighthouse_coordinates, map_area, MAP_PIXEL_SIZE), UNVISITED_COLOR)
+    map_items = append_items_to_render(map_items, get_map_points(lighthouse_coordinates, map_area, map_pixel_size), UNVISITED_COLOR)
 
     #Visited Lighthouses
     if is_display_picks:
-        map_items = append_items_to_render(map_items, get_map_points(lighthouse_coordinates, map_area, MAP_PIXEL_SIZE, config), VISITED_COLOR)
+        map_items = append_items_to_render(map_items, get_map_points(lighthouse_coordinates, map_area, map_pixel_size, config), VISITED_COLOR)
 
     return render.Root(
         render.Stack(
