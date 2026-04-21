@@ -169,6 +169,11 @@ speed_options = [
     schema.Option(value = "35", display = "Fast"),
 ]
 
+def get_char_width(ch, display):
+    if ch == " ":
+        return int(display["icon_width"] // 3)
+    return display["icon_width"]
+
 def get_display_config():
     return {
         "screen_width": display_defaults["screen_width"],
@@ -285,7 +290,7 @@ def make_flag_strip(text, display):
     for ch in chars:
         children.append(
             render.Image(
-                width = display["icon_width"] if ch != " " else int(display["icon_width"] // 3),
+                width = get_char_width(ch, display),
                 height = display["icon_height"],
                 src = flags[ch]["flag"],
             ),
@@ -295,7 +300,12 @@ def make_flag_strip(text, display):
 
 def get_strip_width(text, display):
     chars = normalize_text(text)
-    return len(chars) * display["icon_width"]
+    width = 0
+
+    for ch in chars:
+        width = width + get_char_width(ch, display)
+
+    return width
 
 def get_smooth_scroll(text, display):
     strip = make_flag_strip(text, display)
