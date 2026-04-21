@@ -60,9 +60,11 @@ load("images/wetterhorn_peak.png", WETTERHORN_PEAK_ASSET = "file")
 load("images/wilson_peak.png", WILSON_PEAK_ASSET = "file")
 load("images/windom_peak.png", WINDOM_PEAK_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star","canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("random.star", "random")
+
 
 DISPLAY_OPTIONS = [
     schema.Option(value = "random", display = "Random 14er"),
@@ -86,14 +88,15 @@ SORT_OPTIONS = [
 #Selected, Denver, Marquee Color, Visited, unvisitied
 DEFAULT_COLORS = ["#0000ff", "#ff0000", "#65d0e6", "#ffff00", "#aaaaaa"]
 
+KM_TO_MILES = 0.621371
+METERS_TO_FEET = 3.28084
+
 COLORADO = [
     [-109.05, 41],
     [-102.05158, 41],
     [-102.4207, 37],
     [-109.04516, 37],
 ]
-
-DENVER = [-104.88111, 39.7618]
 
 MOUNTAIN_DATA = [
     {
@@ -893,17 +896,21 @@ MOUNTAIN_DATA = [
     },
 ]
 
+DENVER = [-104.88111, 39.7618]
+
 def add_copies_of_frame_to_frames(frames, items, number_of_frames):
     for _ in range(number_of_frames):
         frames.append(render.Stack(children = list(items)))
 
 def main(config):
+    random.seed(time.now().unix // 15)
+
     show_instructions = config.bool("instructions", False)
 
     if show_instructions == True:
         return show_instructions_screen()
 
-    show_mountain_outline = config.bool("outline", True)
+    show_mountain_outline = config.bool("outline", False)
 
     is_metric_system = config.get("measurement", MEASUREMENT_OPTIONS[0].value) == MEASUREMENT_OPTIONS[0].value
 
@@ -917,11 +924,11 @@ def main(config):
             display_candidates.append(i)
         i = i + 1
 
-    random_mountain = MOUNTAIN_DATA[randomize(0, len(MOUNTAIN_DATA) - 1)]
+    random_mountain = MOUNTAIN_DATA[random.number(0, len(MOUNTAIN_DATA) - 1)]
 
     # we have a random one, but if we have a valid filtered group to choose from, we'll do that now
     if (len(display_candidates) > 0):
-        random_mountain = MOUNTAIN_DATA[display_candidates[randomize(0, len(display_candidates) - 1)]]
+        random_mountain = MOUNTAIN_DATA[display_candidates[random.number(0, len(display_candidates) - 1)]]
 
     random_mountain_position = [random_mountain["XCoord"], random_mountain["YCoord"]]
 
@@ -933,13 +940,13 @@ def main(config):
     distance_units = "km"
 
     if is_metric_system == False:
-        hiking_distance = math.round((hiking_distance / 1.6))
-        hiking_elevation = math.round(3.38 * hiking_elevation)
+        hiking_distance = math.round(hiking_distance * KM_TO_MILES)
+        hiking_elevation = math.round(hiking_elevation * METERS_TO_FEET)
         elevation_units = "feet"
-        distance_units = "mile"
+        distance_units = "mile" if hiking_distance == 1 else "miles"
 
     # Over Time let's display little different aspects of the mountains
-    if randomize(0, 1) == 1:
+    if random.number(0, 1) == 1:
         mountain_description = "%s in the %s - %s %s is a class %s mountain.             " % (random_mountain["Name"], random_mountain["Range"], random_mountain["Description"], random_mountain["Name"], random_mountain["Class"])
     else:
         mountain_description = "%s is a class %s mountain. Expect a %s %s hike that has an elevation gain of %s %s.           " % (random_mountain["Name"], random_mountain["Class"], humanize.float("#,###.", hiking_distance), distance_units, humanize.float("#,###.", hiking_elevation), elevation_units)
@@ -1004,7 +1011,7 @@ def main(config):
         render.Animation(children = animation_frames),
     ]
 
-    show_information_bar = config.bool("information_bar", True)
+    show_information_bar = config.bool("information_bar", False)
 
     if show_information_bar:
         all_elements.append(
@@ -1055,10 +1062,6 @@ def get_screen_coordinates_from_actual(map, location):
 
     return coords
 
-def randomize(min, max):
-    now = time.now()
-    rand = int(str(now.nanosecond)[-6:-3]) / 1000
-    return int(rand * (max + 1 - min) + min)
 
 def show_instructions_screen():
     ##############################################################################################################################################################################################################################
@@ -1184,7 +1187,6 @@ def get_visited(type):
 
     description_type = type
     description_info = ""
-    suffix = ""
 
     #Override in a couple cases
     if type == "Name":
@@ -1193,11 +1195,10 @@ def get_visited(type):
         description_info = "Class: "
     elif type == "Elevation":
         description_type = "Range"
-    elif type == "Hiking Distance":
-        suffix = " km"
+
 
     return [
-        schema.Toggle(id = "_%s" % (mountain["Name"]), name = mountain["Name"], desc = "%s%s%s" % (description_info, mountain[description_type], suffix), icon = "mountain")
+        schema.Toggle(id = "_%s" % (mountain["Name"]), name = mountain["Name"], desc = "%s%s" % (description_info, mountain[description_type]), icon = "mountain")
         for mountain in display_data
     ]
 
