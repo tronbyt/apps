@@ -224,7 +224,7 @@ def get_random_phrases():
         if i > 0:
             display_text = display_text + " "
         display_text = display_text + remaining_pairings[random_number]
-        remaining_pairings.remove(remaining_pairings[random_number])
+        remaining_pairings.pop(random_number)
 
     return display_text
 
