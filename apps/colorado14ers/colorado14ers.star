@@ -964,7 +964,7 @@ def main(config):
     i = 0
 
     for mountain in mountain_data:
-        if (display_type == "random" or (display_type == "visited" and config.get("_%s" % mountain["Name"]) == "true") or (display_type == "unvisited" and config.get("_%s" % mountain["Name"]) != "true")):
+        if (display_type == "random" or (display_type == "visited" and config.bool("_%s" % mountain["Name"])) or (display_type == "unvisited" and not config.bool("_%s" % mountain["Name"]))):
             display_candidates.append(i)
         i = i + 1
 
