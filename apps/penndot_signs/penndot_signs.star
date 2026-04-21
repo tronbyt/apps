@@ -5,15 +5,86 @@ Description: Display messages from PennDOT DMS signage on PA highways.
 Author: radiocolin
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-API_URL = "https://www.511pa.com/List/GetData/MessageSigns?query=%7B%22columns%22%3A%5B%7B%22data%22%3Anull%2C%22name%22%3A%22%22%7D%2C%7B%22name%22%3A%22area%22%2C%22s%22%3Atrue%7D%2C%7B%22name%22%3A%22name%22%7D%2C%7B%22name%22%3A%22roadwayName%22%7D%2C%7B%22name%22%3A%22direction%22%7D%2C%7B%22data%22%3A%22phase1Image%22%2C%22name%22%3A%22message%22%7D%2C%7B%22data%22%3A%22phase2Image%22%2C%22name%22%3A%22message2%22%7D%2C%7B%22name%22%3A%22lastUpdated%22%7D%2C%7B%22data%22%3A8%2C%22name%22%3A%22%22%7D%5D%2C%22order%22%3A%5B%7B%22column%22%3A1%2C%22dir%22%3A%22asc%22%7D%5D%2C%22start%22%3A0%2C%22length%22%3A500%2C%22search%22%3A%7B%22value%22%3A%22%22%7D%7D&lang=en-US"
+API_URL = "https://www.511pa.com/List/GetData/MessageSigns"
+FILTERS_URL = "https://www.511pa.com/List/UniqueColumnValuesForMessageSigns/MessageSigns"
 CACHE_TTL = 60
+
+def get_query(start = 0, length = 100, roadway = None, search = ""):
+    columns = [
+        {"data": None, "name": ""},
+        {"name": "area", "s": True},
+        {"name": "name"},
+        {"name": "roadwayName"},
+        {"name": "direction"},
+        {"data": "phase1Image", "name": "message"},
+        {"data": "phase2Image", "name": "message2"},
+        {"name": "lastUpdated"},
+        {"data": 8, "name": ""},
+    ]
+    if roadway:
+        columns[3]["search"] = {"value": roadway}
+
+    query = {
+        "columns": columns,
+        "order": [{"column": 1, "dir": "asc"}],
+        "start": start,
+        "length": length,
+        "search": {"value": search},
+    }
+    return json.encode(query)
+
+def fetch_signs(roadway = None, search = "", limit = 0):
+    signs = []
+    start = 0
+
+    # If limit is 0, we fetch all (with safety limit).
+    # If limit is > 0, we fetch up to that amount.
+    max_pages = 20 if limit == 0 else (limit + 99) // 100
+    for _ in range(max_pages):
+        query = get_query(start = start, length = 100, roadway = roadway, search = search)
+        params = {"query": query, "lang": "en-US"}
+        rep = http.get(API_URL, params = params, headers = {"X-Requested-With": "XMLHttpRequest"})
+        if rep.status_code != 200:
+            break
+        data = rep.json()
+        signs.extend(data.get("data", []))
+        if limit > 0 and len(signs) >= limit:
+            signs = signs[:limit]
+            break
+        if len(signs) >= data.get("recordsFiltered", 0) or len(data.get("data", [])) < 100:
+            break
+        start += 100
+    return signs
+
+def parse_milepost(sign):
+    # Check name and message fields for MP or MM
+    fields_to_check = [sign.get("name", ""), sign.get("message", "")]
+    for text in fields_to_check:
+        if not text:
+            continue
+        text_upper = text.upper().replace("<BR/>", " ")
+        for marker in ["MP", "MM"]:
+            if marker in text_upper:
+                parts = text_upper.split(marker)
+                if len(parts) > 1:
+                    after_marker = parts[1].strip()
+                    mp_value = ""
+                    for i in range(len(after_marker)):
+                        char = after_marker[i]
+                        if char.isdigit() or char == ".":
+                            mp_value += char
+                        elif mp_value:
+                            break
+                    if mp_value:
+                        # Normalize formatting
+                        return "MP {}".format(float(mp_value))
+    return ""
 
 def main(config):
     """Display the selected PennDOT sign message.
@@ -25,30 +96,36 @@ def main(config):
         Render tree displaying sign message and name.
     """
     scale = 2 if canvas.is2x() else 1
-    sign_id = config.str("sign_id")
+    full_id = config.str("sign_id")
     show_info_bar = config.bool("show_info_bar", True)
 
-    if not sign_id:
-        return render.Root(
-            child = render.Text("Select a sign", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
-        )
+    if not full_id:
+        # Sensible default: fetch the first available sign
+        signs = fetch_signs(limit = 1)
+        if signs:
+            full_id = "{}|{}".format(signs[0].get("roadwayName", "ALL"), signs[0].get("DT_RowId"))
+        else:
+            return render.Root(
+                child = render.Text("No signs available", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+            )
+
+    # Parse roadway and ID
+    parts = full_id.split("|")
+    if len(parts) == 2:
+        roadway = parts[0]
+        sign_id = parts[1]
+    else:
+        # Fallback for old configs
+        roadway = "ALL"
+        sign_id = full_id
 
     # Fetch sign data
-    cached = cache.get("penndot_signs_data")
-    if cached:
-        sign_data = json.decode(cached)
-    else:
-        rep = http.get(API_URL)
-        if rep.status_code != 200:
-            return render.Root(
-                child = render.Text("Error fetching data"),
-            )
-        sign_data = rep.json()
-        cache.set("penndot_signs_data", json.encode(sign_data), ttl_seconds = CACHE_TTL)
+    # We fetch only the relevant roadway to be efficient
+    fetch_roadway = roadway if roadway != "ALL" else None
+    signs = fetch_signs(roadway = fetch_roadway)
 
-    # Find the selected sign
     selected_sign = None
-    for sign in sign_data.get("data", []):
+    for sign in signs:
         if sign.get("DT_RowId") == sign_id:
             selected_sign = sign
             break
@@ -63,30 +140,9 @@ def main(config):
     phase1_image = selected_sign.get("phase1Image")
     phase2_image = selected_sign.get("phase2Image")
     roadway_name = selected_sign.get("roadwayName", "Unknown")
-    sign_name = selected_sign.get("name", "")
 
-    # Parse milepost from sign name (e.g., "MP 4.35" or "MP 045.8")
-    milepost = ""
-    if sign_name and "MP" in sign_name.upper():
-        # Find MP followed by a number
-        parts = sign_name.upper().split("MP")
-        if len(parts) > 1:
-            # Get the part after "MP" and extract the number
-            after_mp = parts[1].strip()
-
-            # Extract digits and decimal point
-            mp_value = ""
-            for i in range(len(after_mp)):
-                char = after_mp[i]
-                if char.isdigit() or char == ".":
-                    mp_value += char
-                elif mp_value:
-                    # Stop at first non-digit/non-decimal after we've started collecting
-                    break
-            if mp_value:
-                # Remove leading zeros but keep decimal values
-                mp_float = float(mp_value)
-                milepost = " MP {}".format(mp_float)
+    # Parse milepost
+    milepost = parse_milepost(selected_sign)
 
     # If no message and no image, return empty
     if (not message or message == "NO_MESSAGE") and not phase1_image and not phase2_image:
@@ -248,65 +304,34 @@ def get_schema():
     Returns:
         Schema with sign selection dropdown.
     """
-    sign_options = []
+    roadway_options = [schema.Option(display = "All Roads", value = "ALL")]
 
-    cached = cache.get("penndot_signs_data")
-    if cached:
-        sign_data = json.decode(cached)
-    else:
-        rep = http.get(API_URL)
-        if rep.status_code != 200:
-            # Return empty schema if API fails
-            return schema.Schema(
-                version = "1",
-                fields = [
-                    schema.Text(
-                        id = "error",
-                        name = "Error",
-                        desc = "Unable to fetch sign data",
-                        icon = "exclamationTriangle",
-                    ),
-                ],
-            )
-
-        sign_data = rep.json()
-        cache.set("penndot_signs_data", json.encode(sign_data), ttl_seconds = CACHE_TTL)
-
-    # Build dropdown options from sign data
-    signs_list = []
-    for sign in sign_data.get("data", []):
-        roadway = sign.get("roadwayName", "Unknown")
-        name = sign.get("name", "Unknown")
-        sign_id = sign.get("DT_RowId", "")
-
-        if sign_id:
-            signs_list.append({
-                "display": "{}: {}".format(roadway, name),
-                "value": sign_id,
-            })
-
-    # Sort signs by display name (roadway + name)
-    signs_list = sorted(signs_list, key = lambda s: s["display"])
-
-    # Convert to schema options
-    for sign in signs_list:
-        sign_options.append(
-            schema.Option(
-                display = sign["display"],
-                value = sign["value"],
-            ),
-        )
+    # Fetch unique roadways
+    query = get_query(length = 100)
+    params = {"query": query, "lang": "en-US"}
+    rep = http.get(FILTERS_URL, params = params, headers = {"X-Requested-With": "XMLHttpRequest"})
+    if rep.status_code == 200:
+        filter_data = rep.json()
+        roadways = filter_data.get("roadwayName", [])
+        for road in sorted(roadways):
+            if road:
+                roadway_options.append(schema.Option(display = road, value = road))
 
     return schema.Schema(
         version = "1",
         fields = [
             schema.Dropdown(
-                id = "sign_id",
-                name = "Select Sign",
-                desc = "Choose a PennDOT sign to display",
+                id = "roadway",
+                name = "Roadway",
+                desc = "Filter signs by roadway",
                 icon = "road",
-                default = sign_options[0].value if sign_options else "",
-                options = sign_options,
+                default = roadway_options[0].value,
+                options = roadway_options,
+            ),
+            schema.Generated(
+                id = "sign_id",
+                source = "roadway",
+                handler = get_signs,
             ),
             schema.Toggle(
                 id = "show_info_bar",
@@ -317,3 +342,51 @@ def get_schema():
             ),
         ],
     )
+
+def get_signs(roadway):
+    sign_options = []
+
+    # If roadway is 'ALL', we only fetch the first 100 to avoid schema handler timeout.
+    # Users can filter by roadway to see every sign on that road.
+    fetch_roadway = roadway if roadway and roadway != "ALL" else None
+    limit = 100 if roadway == "ALL" else 0
+    signs = fetch_signs(roadway = fetch_roadway, limit = limit)
+
+    signs_list = []
+    for sign in signs:
+        roadway_name = sign.get("roadwayName", "ALL")
+        name = sign.get("name", "Unknown")
+        sign_id = sign.get("DT_RowId", "")
+
+        if sign_id:
+            mp = parse_milepost(sign)
+            display_name = name
+            if mp:
+                display_name = "{} ({})".format(name, mp)
+
+            signs_list.append({
+                "display": "{}: {}".format(roadway_name, display_name),
+                "value": "{}|{}".format(roadway_name, sign_id),
+            })
+
+    # Sort signs by display name
+    signs_list = sorted(signs_list, key = lambda s: s["display"])
+
+    for sign in signs_list:
+        sign_options.append(
+            schema.Option(
+                display = sign["display"],
+                value = sign["value"],
+            ),
+        )
+
+    return [
+        schema.Dropdown(
+            id = "sign_id",
+            name = "Select Sign",
+            desc = "Choose a PennDOT sign to display",
+            icon = "road",
+            default = sign_options[0].value if sign_options else "",
+            options = sign_options,
+        ),
+    ]
