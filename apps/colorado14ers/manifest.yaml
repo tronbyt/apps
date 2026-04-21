@@ -4,7 +4,13 @@ name: Colorado14ers
 summary: Colorado 14ers Tracker
 desc: Track your Colorado 14ers.
 author: Robert Ison
-category: utilities
+category: travel
 tags:
   - lifestyle
   - nature
+  - sports
+  - hiking
+fileName: colorado14ers.star
+packageName: colorado14ers
+supports2x: true
+recommendedInterval: 5
