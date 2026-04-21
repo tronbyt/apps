@@ -32,7 +32,8 @@ load("images/whiskey.png", WHISKEY_FLAG = "file")
 load("images/xray.png", XRAY_FLAG = "file")
 load("images/yankee.png", YANKEE_FLAG = "file")
 load("images/zulu.png", ZULU_FLAG = "file")
-load("render.star", "render")
+load("random.star", "random")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -194,7 +195,7 @@ def get_random_phrases():
         remaining_pairings.append(item)
 
     for _ in range(0, 5):
-        random_number = randomize(0, len(remaining_pairings) - 1)
+        random_number = random.number(0, len(remaining_pairings) - 1)
         display_text = display_text + " " + remaining_pairings[random_number]
         remaining_pairings.remove(remaining_pairings[random_number])
 
@@ -210,7 +211,7 @@ def get_random_letters():
 
     display_text = " "
     for _ in range(0, 9):
-        random_item = randomize(0, len(remaining_letters) - 1)
+        random_item = random.number(0, len(remaining_letters) - 1)
         random_letter = remaining_letters[random_item]
         display_text = display_text + " " + random_letter
         remaining_letters.remove(random_letter)
@@ -221,7 +222,7 @@ def get_random_alphabetical_order_flags():
     lowest_letter = 97
     highest_letter = 122
 
-    starting_point = randomize(lowest_letter, highest_letter)
+    starting_point = random.number(lowest_letter, highest_letter)
 
     display_text = " "
     for _ in range(0, 9):
@@ -253,11 +254,6 @@ def get_word_in_flag(text, position):
             children.append(render.Image(width = 32, height = 32, src = flags[text[i]]["flag"]))
 
     return children
-
-def randomize(min, max):
-    now = time.now()
-    rand = int(str(now.nanosecond)[-6:-3]) / 1000
-    return int(rand * (max + 1 - min) + min)
 
 def get_custom(type):
     if (type == "custom"):
