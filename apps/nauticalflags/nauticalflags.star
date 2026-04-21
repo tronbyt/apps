@@ -171,7 +171,7 @@ speed_options = [
 
 def get_char_width(ch, display):
     if ch == " ":
-        return int(display["icon_width"] // 3)
+        return display["icon_width"] // 3
     return display["icon_width"]
 
 def get_display_config():
