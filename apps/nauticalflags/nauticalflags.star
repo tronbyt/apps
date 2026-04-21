@@ -194,7 +194,7 @@ def main(config):
         display["icon_height"] = 64
         speed = speed // 2
 
-    display_text = "TIDBYT ROCKS"
+    display_text = "TRONBYT ROCKS"
 
     if display_type == display_options[0].value:
         display_text = get_random_phrases()
@@ -213,11 +213,9 @@ def main(config):
     )
 
 def get_random_phrases():
-    remaining_pairings = []
     display_text = ""
 
-    for item in common_pairings:
-        remaining_pairings.append(item)
+    remaining_pairings = list(common_pairings)
 
     for i in range(0, 5):
         random_number = random.number(0, len(remaining_pairings) - 1)
@@ -232,9 +230,7 @@ def get_random_letters():
     lowest_letter = 97
     highest_letter = 122
 
-    remaining_letters = []
-    for i in range(lowest_letter, highest_letter + 1):
-        remaining_letters.append(chr(i))
+    remaining_letters = [chr(i) for i in range(lowest_letter, highest_letter + 1)]
 
     display_text = ""
     for i in range(0, 9):
@@ -272,7 +268,8 @@ def normalize_text(text):
     chars = []
     text = text.lower()
 
-    for char in text:
+    for i in range(0, len(text)):
+        char = text[i]
         if char in flags:
             chars.append(char)
 
