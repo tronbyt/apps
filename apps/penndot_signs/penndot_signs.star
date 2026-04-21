@@ -52,6 +52,11 @@ def fetch_signs(roadway = None, search = "", limit = 0):
         rep = http.get(API_URL, params = params, headers = {"X-Requested-With": "XMLHttpRequest"})
         if rep.status_code != 200:
             break
+
+        # Safety check: PennDOT sometimes returns HTML error pages with status 200
+        if not rep.body().strip().startswith("{"):
+            break
+
         data = rep.json()
         signs.extend(data.get("data", []))
         if limit > 0 and len(signs) >= limit:
@@ -101,15 +106,27 @@ def main(config):
     full_id = config.str("sign_id")
     show_info_bar = config.bool("show_info_bar", True)
 
-    if not full_id:
-        # Sensible default: fetch the first available sign
-        signs = fetch_signs(limit = 1)
-        if signs:
-            full_id = "{}|{}".format(signs[0].get("roadwayName") or "ALL", signs[0].get("DT_RowId"))
-        else:
-            return render.Root(
-                child = render.Text("No signs available", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
-            )
+    if not full_id or full_id == "none":
+        return render.Root(
+            child = render.Box(
+                width = 64 * scale,
+                height = 32 * scale,
+                child = render.Column(
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        render.Marquee(
+                            width = 64 * scale,
+                            child = render.Text("Select a sign", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+                        ),
+                        render.Marquee(
+                            width = 64 * scale,
+                            child = render.Text("in settings", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+                        ),
+                    ],
+                ),
+            ),
+        )
 
     # Parse roadway and ID
     parts = full_id.split("|")
@@ -146,7 +163,7 @@ def main(config):
     # Clean up and fallback for roadway name
     raw_roadway = selected_sign.get("roadwayName")
     area = selected_sign.get("area")
-    roadway_name = raw_roadway if (raw_roadway and raw_roadway != "N/A") else (area if (area and area != "N/A") else "PennDOT")
+    roadway_name = raw_roadway if (raw_roadway and raw_roadway != "N/A") else (area if (area and area != "N/A") else (roadway if roadway != "ALL" else "PennDOT"))
 
     # Remove internal numeric prefixes like "(1004) "
     if roadway_name.startswith("(") and ")" in roadway_name:
@@ -355,17 +372,22 @@ def get_schema():
     )
 
 def get_signs(roadway):
-    sign_options = []
+    # Ensure roadway is a string
+    roadway = str(roadway) if roadway != None else "ALL"
 
-    # If roadway is 'ALL', we only fetch the first 100 to avoid schema handler timeout.
-    # Users can filter by roadway to see every sign on that road.
+    sign_options = [schema.Option(display = "Select a sign", value = "none")]
+
+    # We always limit to 100 in the schema handler to avoid timeouts.
+    # Users can filter by roadway to find the specific sign they want.
     fetch_roadway = roadway if roadway and roadway != "ALL" else None
-    limit = 100 if roadway == "ALL" else 0
-    signs = fetch_signs(roadway = fetch_roadway, limit = limit)
+    signs = fetch_signs(roadway = fetch_roadway, limit = 100)
 
     signs_list = []
     for sign in signs:
-        roadway_name = sign.get("roadwayName", "ALL")
+        # Use provided roadway as fallback if roadwayName is missing or N/A
+        raw_roadway = sign.get("roadwayName")
+        roadway_name = raw_roadway if (raw_roadway and raw_roadway != "N/A") else (roadway if roadway != "ALL" else "ALL")
+
         name = sign.get("name", "Unknown")
         sign_id = sign.get("DT_RowId", "")
 
@@ -381,7 +403,8 @@ def get_signs(roadway):
             })
 
     # Sort signs by display name
-    signs_list = sorted(signs_list, key = lambda s: s["display"])
+    if signs_list:
+        signs_list = sorted(signs_list, key = lambda s: s["display"])
 
     for sign in signs_list:
         sign_options.append(
@@ -397,7 +420,7 @@ def get_signs(roadway):
             name = "Select Sign",
             desc = "Choose a PennDOT sign to display",
             icon = "road",
-            default = sign_options[0].value if sign_options else "",
+            default = "none",
             options = sign_options,
         ),
     ]
