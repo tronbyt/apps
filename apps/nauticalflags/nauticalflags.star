@@ -272,9 +272,9 @@ def normalize_text(text):
     chars = []
     text = text.lower()
 
-    for i in range(0, len(text)):
-        if text[i] in flags:
-            chars.append(text[i])
+    for char in text:
+        if char in flags:
+            chars.append(char)
 
     if len(chars) == 0:
         chars.append(" ")
