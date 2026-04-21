@@ -184,11 +184,9 @@ def get_display_config():
 
 def main(config):
     display = get_display_config()
-
     display_type = config.get("type", display_options[0].value)
     speed = int(config.get("speed", speed_options[1].value))
 
-    # Future 2x example:
     if canvas.is2x():
         display["screen_width"] = 128
         display["screen_height"] = 64
