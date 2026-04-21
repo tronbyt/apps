@@ -245,7 +245,7 @@ def get_random_letters():
             display_text = display_text + " "
         display_text = display_text + random_letter
 
-        remaining_letters.remove(random_letter)
+        remaining_letters.pop(random_item)
 
     return display_text
 
