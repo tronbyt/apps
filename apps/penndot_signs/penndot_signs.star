@@ -64,7 +64,7 @@ def fetch_signs(roadway = None, search = "", limit = 0):
 
 def parse_milepost(sign):
     # Check name and message fields for MP or MM
-    fields_to_check = [sign.get("name", ""), sign.get("message", "")]
+    fields_to_check = [sign.get("name"), sign.get("message")]
     for text in fields_to_check:
         if not text:
             continue
@@ -72,18 +72,20 @@ def parse_milepost(sign):
         for marker in ["MP", "MM"]:
             if marker in text_upper:
                 parts = text_upper.split(marker)
-                if len(parts) > 1:
-                    after_marker = parts[1].strip()
-                    mp_value = ""
-                    for i in range(len(after_marker)):
-                        char = after_marker[i]
-                        if char.isdigit() or char == ".":
-                            mp_value += char
-                        elif mp_value:
-                            break
-                    if mp_value:
-                        # Normalize formatting
-                        return "MP {}".format(float(mp_value))
+
+                # Skip the first part, look at what follows each marker occurrence
+                for i in range(1, len(parts)):
+                    after_marker = parts[i].strip()
+                    if after_marker and (after_marker[0].isdigit() or after_marker[0] == "."):
+                        mp_value = ""
+                        for j in range(len(after_marker)):
+                            char = after_marker[j]
+                            if char.isdigit() or char == ".":
+                                mp_value += char
+                            elif mp_value:
+                                break
+                        if mp_value:
+                            return "MP {}".format(float(mp_value))
     return ""
 
 def main(config):
@@ -103,7 +105,7 @@ def main(config):
         # Sensible default: fetch the first available sign
         signs = fetch_signs(limit = 1)
         if signs:
-            full_id = "{}|{}".format(signs[0].get("roadwayName", "ALL"), signs[0].get("DT_RowId"))
+            full_id = "{}|{}".format(signs[0].get("roadwayName") or "ALL", signs[0].get("DT_RowId"))
         else:
             return render.Root(
                 child = render.Text("No signs available", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
@@ -122,7 +124,8 @@ def main(config):
     # Fetch sign data
     # We fetch only the relevant roadway to be efficient
     fetch_roadway = roadway if roadway != "ALL" else None
-    signs = fetch_signs(roadway = fetch_roadway)
+    fetch_limit = 100 if roadway == "ALL" else 0
+    signs = fetch_signs(roadway = fetch_roadway, limit = fetch_limit)
 
     selected_sign = None
     for sign in signs:
@@ -139,7 +142,17 @@ def main(config):
     message = selected_sign.get("message", "")
     phase1_image = selected_sign.get("phase1Image")
     phase2_image = selected_sign.get("phase2Image")
-    roadway_name = selected_sign.get("roadwayName", "Unknown")
+
+    # Clean up and fallback for roadway name
+    raw_roadway = selected_sign.get("roadwayName")
+    area = selected_sign.get("area")
+    roadway_name = raw_roadway if (raw_roadway and raw_roadway != "N/A") else (area if (area and area != "N/A") else "PennDOT")
+
+    # Remove internal numeric prefixes like "(1004) "
+    if roadway_name.startswith("(") and ")" in roadway_name:
+        name_parts = roadway_name.split(")", 1)
+        if len(name_parts) > 1:
+            roadway_name = name_parts[1].strip()
 
     # Parse milepost
     milepost = parse_milepost(selected_sign)
@@ -233,21 +246,19 @@ def main(config):
         # Build info bar content - create frames that pause on each line
         info_frames = []
 
-        # Create frames for roadway name (hold for 90 frames = 3 seconds)
+        # Roadway name widget with Marquee and centering
         roadway_widget = render.Box(
             width = 64 * scale,
             height = 6 * scale,
             color = "#F09F00",
-            child = render.Row(
-                expanded = True,
-                main_align = "end",
-                children = [
-                    render.Text(
-                        content = roadway_name,
-                        font = info_font,
-                        color = "#000",
-                    ),
-                ],
+            child = render.Marquee(
+                width = 64 * scale,
+                align = "center",
+                child = render.Text(
+                    content = roadway_name,
+                    font = info_font,
+                    color = "#000",
+                ),
             ),
         )
 
@@ -259,7 +270,7 @@ def main(config):
                 color = "#F09F00",
                 child = render.Row(
                     expanded = True,
-                    main_align = "end",
+                    main_align = "center",
                     children = [
                         render.Text(
                             content = milepost.strip(),
