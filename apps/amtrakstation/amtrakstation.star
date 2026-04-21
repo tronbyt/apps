@@ -135,6 +135,8 @@ def render_train(train, section_type, mins_text):
     if time_str == "—":
         time_str = format_time(sched_arr) if section_type == "arriving" else format_time(sched_dep)
 
+    variance = variance_str(sched_arr if section_type == "arriving" else sched_dep, actual_arr if section_type == "arriving" else actual_dep)
+
     return [
         render.Row(
             expanded = True,
@@ -156,6 +158,13 @@ def render_train(train, section_type, mins_text):
             main_align = "center",
             children = [
                 render.Text(content = mins_text + (" min" if section_type == "arriving" else " min ago"), font = font(), color = "#888"),
+            ],
+        ),
+        render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(content = variance if variance else "", font = font(), color = "#080"),
             ],
         ),
         render.Row(
@@ -200,7 +209,9 @@ def main(config):
         if not dt:
             return None
         diff = (dt.hour * 60 + dt.minute) - (now.hour * 60 + now.minute)
-        if diff < -12 * 60:
+        if dt.year < now.year or (dt.year == now.year and dt.month < now.month) or (dt.year == now.year and dt.month == now.month and dt.day < now.day):
+            diff -= 24 * 60
+        elif diff < -12 * 60:
             diff += 24 * 60
         if diff > 12 * 60:
             diff -= 24 * 60
@@ -212,14 +223,18 @@ def main(config):
     best_departing_mins = None
 
     for train in arriving:
-        mins = time_to_minutes(train.get("sched_arr"))
+        arr = train.get("actual_arr") or train.get("sched_arr")
+        dep = train.get("actual_dep") or train.get("sched_dep")
+        mins = time_to_minutes(arr)
         if mins != None and mins >= 0 and mins <= threshold:
             if best_arriving_mins == None or mins < best_arriving_mins:
                 best_arriving = train
                 best_arriving_mins = mins
 
     for train in departing:
-        mins = time_to_minutes(train.get("sched_dep"))
+        arr = train.get("actual_arr") or train.get("sched_arr")
+        dep = train.get("actual_dep") or train.get("sched_dep")
+        mins = time_to_minutes(dep)
         if mins != None:
             if mins > 0:
                 mins = -mins
@@ -249,6 +264,16 @@ def main(config):
 
     if not best_train:
         return []
+
+    print("DEBUG: %s %s actual=%s/%s sched=%s/%s variance=%s" % (
+        best_train.get("train"),
+        best_type,
+        best_train.get("actual_arr") or "—",
+        best_train.get("actual_dep") or "—",
+        best_train.get("sched_arr") or "—",
+        best_train.get("sched_dep") or "—",
+        variance_str(best_train.get("sched_arr"), best_train.get("actual_arr")) if best_type == "arriving" else variance_str(best_train.get("sched_dep"), best_train.get("actual_dep")),
+    ))
 
     children = [
         render.Row(
