@@ -35,7 +35,13 @@ load("images/zulu.png", ZULU_FLAG = "file")
 load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("time.star", "time")
+
+display_defaults = {
+    "screen_width": 64,
+    "screen_height": 32,
+    "icon_width": 32,
+    "icon_height": 32,
+}
 
 flags = {
     " ": {
@@ -150,53 +156,71 @@ flags = {
 
 common_pairings = ["AC", "AD", "AN", "BR", "CD", "DV", "dx", "EF", "EL", "FA", "GM", "GN", "GW", "IT", "JA", "JL", "MAA", "MAB", "MAC", "MAD", "LO", "NC", "PD", "PP", "QD", "QT", "QQ", "QU", "QX", "UM", "UP"]
 
-DISPLAY_OPTIONS = [
+display_options = [
     schema.Option(value = "phrases", display = "Display Random Maritime Messages"),
     schema.Option(value = "letters", display = "Flags in Alphabetical Order"),
     schema.Option(value = "randomletters", display = "Flags in Random Order"),
     schema.Option(value = "custom", display = "Custom Phrase"),
 ]
 
-SPEED_OPTIONS = [
-    schema.Option(value = "2200", display = "Slow"),
-    schema.Option(value = "1600", display = "Medium"),
-    schema.Option(value = "1000", display = "Fast"),
+speed_options = [
+    schema.Option(value = "100", display = "Slow"),
+    schema.Option(value = "60", display = "Medium"),
+    schema.Option(value = "35", display = "Fast"),
 ]
 
-def main(config):
-    display_type = config.get("type", DISPLAY_OPTIONS[0])
-    speed = config.get("speed", 1000)
+def get_display_config():
+    return {
+        "screen_width": display_defaults["screen_width"],
+        "screen_height": display_defaults["screen_height"],
+        "icon_width": display_defaults["icon_width"],
+        "icon_height": display_defaults["icon_height"],
+    }
 
-    #default
+def main(config):
+    display = get_display_config()
+
+    display_type = config.get("type", display_options[0].value)
+    speed = int(config.get("speed", speed_options[1].value))
+
+    # Future 2x example:
+    if canvas.is2x():
+        display["screen_width"] = 128
+        display["screen_height"] = 64
+        display["icon_width"] = 64
+        display["icon_height"] = 64
+        speed = int(speed / 2)
+
     display_text = "TIDBYT ROCKS"
 
-    if (display_type == DISPLAY_OPTIONS[0].value):
+    if display_type == display_options[0].value:
         display_text = get_random_phrases()
-    elif (display_type == DISPLAY_OPTIONS[1].value):
+    elif display_type == display_options[1].value:
         display_text = get_random_alphabetical_order_flags()
-    elif (display_type == DISPLAY_OPTIONS[2].value):
+    elif display_type == display_options[2].value:
         display_text = get_random_letters()
-    elif (display_type == DISPLAY_OPTIONS[3].value):
+    elif display_type == display_options[3].value:
         custom_text = config.get("phrase")
-        if custom_text != None:
+        if custom_text != None and custom_text != "":
             display_text = custom_text
 
     return render.Root(
-        delay = int(speed),
-        child = render.Row(
-            children = get_animation_flags(display_text, 2),
-        ),
+        delay = speed,
+        child = get_smooth_scroll(display_text, display),
     )
 
 def get_random_phrases():
     remaining_pairings = []
     display_text = ""
+
     for item in common_pairings:
         remaining_pairings.append(item)
 
-    for _ in range(0, 5):
+    for i in range(0, 5):
         random_number = random.number(0, len(remaining_pairings) - 1)
-        display_text = display_text + " " + remaining_pairings[random_number]
+        if i > 0:
+            display_text = display_text + " "
+        display_text = display_text + remaining_pairings[random_number]
         remaining_pairings.remove(remaining_pairings[random_number])
 
     return display_text
@@ -206,14 +230,18 @@ def get_random_letters():
     highest_letter = 122
 
     remaining_letters = []
-    for i in range(lowest_letter, highest_letter):
+    for i in range(lowest_letter, highest_letter + 1):
         remaining_letters.append(chr(i))
 
-    display_text = " "
-    for _ in range(0, 9):
+    display_text = ""
+    for i in range(0, 9):
         random_item = random.number(0, len(remaining_letters) - 1)
         random_letter = remaining_letters[random_item]
-        display_text = display_text + " " + random_letter
+
+        if i > 0:
+            display_text = display_text + " "
+        display_text = display_text + random_letter
+
         remaining_letters.remove(random_letter)
 
     return display_text
@@ -224,39 +252,64 @@ def get_random_alphabetical_order_flags():
 
     starting_point = random.number(lowest_letter, highest_letter)
 
-    display_text = " "
-    for _ in range(0, 9):
-        display_text = display_text + " " + chr(starting_point)
-        starting_point = starting_point + 1
-        if starting_point > highest_letter:
+    display_text = ""
+    for i in range(0, 9):
+        if i > 0:
             display_text = display_text + " "
+
+        display_text = display_text + chr(starting_point)
+        starting_point = starting_point + 1
+
+        if starting_point > highest_letter:
             starting_point = lowest_letter
 
     return display_text
 
-def get_animation_flags(text, positions):
-    children = []
-
-    for i in range(0, positions):
-        children.append(render.Animation(get_word_in_flag(text, positions - i)))
-
-    return children
-
-def get_word_in_flag(text, position):
-    children = []
-
-    for i in range(0, position):
-        children.append(render.Image(width = 32, height = 32, src = flags[" "]["flag"]))
-
+def normalize_text(text):
+    chars = []
     text = text.lower()
+
     for i in range(0, len(text)):
         if text[i] in flags:
-            children.append(render.Image(width = 32, height = 32, src = flags[text[i]]["flag"]))
+            chars.append(text[i])
 
-    return children
+    if len(chars) == 0:
+        chars.append(" ")
+
+    return chars
+
+def make_flag_strip(text, display):
+    chars = normalize_text(text)
+    children = []
+
+    for ch in chars:
+        children.append(
+            render.Image(
+                width = display["icon_width"] if ch != " " else int(display["icon_width"] // 3),
+                height = display["icon_height"],
+                src = flags[ch]["flag"],
+            ),
+        )
+
+    return render.Row(children = children)
+
+def get_strip_width(text, display):
+    chars = normalize_text(text)
+    return len(chars) * display["icon_width"]
+
+def get_smooth_scroll(text, display):
+    strip = make_flag_strip(text, display)
+    strip_width = get_strip_width(text, display)
+
+    return render.Marquee(
+        width = display["screen_width"],
+        child = strip,
+        offset_start = display["screen_width"],
+        offset_end = -strip_width,
+    )
 
 def get_custom(type):
-    if (type == "custom"):
+    if type == "custom":
         return [
             schema.Text(
                 id = "phrase",
@@ -277,16 +330,16 @@ def get_schema():
                 name = "Display",
                 desc = "What to Display?",
                 icon = "flag",
-                options = DISPLAY_OPTIONS,
-                default = DISPLAY_OPTIONS[0].value,
+                options = display_options,
+                default = display_options[0].value,
             ),
             schema.Dropdown(
                 id = "speed",
                 name = "Speed",
-                desc = "Display speed?",
+                desc = "Scroll speed?",
                 icon = "forwardFast",
-                options = SPEED_OPTIONS,
-                default = SPEED_OPTIONS[0].value,
+                options = speed_options,
+                default = speed_options[1].value,
             ),
             schema.Generated(
                 id = "custom",
