@@ -1,0 +1,15 @@
+---
+id: shipfinder
+name: Ship Finder
+summary: Display ships in a bounding box
+desc: Shows vessel names within a geographic bounding box using VesselAPI.
+author: tavdog
+fileName: shipfinder.star
+packageName: shipfinder
+recommendedInterval: 1
+category: transit
+tags:
+  - utility
+  - local
+  - tracking
+  - maritime
