@@ -5,11 +5,12 @@ Description: Displays Florida Lighhouse locations.
 Author: Robert Ison
 """
 
+load("florida_cities.star", "FLORIDA_CITIES")
+load("florida_lighthouses.star", "FLORIDA_LIGHTHOUSES")
+load("florida_map.star", "FLORIDA_MAP")
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("support_files/florida_lighthouses.star", "FLORIDA_LIGHTHOUSES")
-load("support_files/florida_map.star", "FLORIDA_MAP")
 load("support_files/lighthouse_animation.gif", LIGHTHOUSE_GIF_ASSET = "file")
 load("support_files/lighthouse_animation_2x.gif", LIGHTHOUSE_GIF_2X_ASSET = "file")
 
@@ -59,7 +60,7 @@ def main(config):
 
     # Major Cities: Orlando, Tallahassee, Miami, Jacksonville, Tampa, Ft. Myers, Pensacola
     if is_display_cities:
-        map_items = append_items_to_render(map_items, get_map_points([[-81.29937, 28.4162], [-84.25342, 30.4551], [-80.20862, 25.7752], [-81.6616, 30.3369], [-82.4629, 28.1259], [-81.83182, 26.6196], [-87.1895, 30.4433]], map_area, MAP_PIXEL_SIZE), MAP_CITIES_COLOR)
+        map_items = append_items_to_render(map_items, get_map_points(FLORIDA_CITIES, map_area, MAP_PIXEL_SIZE), MAP_CITIES_COLOR)
 
     #All Lighthouses
     map_items = append_items_to_render(map_items, get_map_points(lighthouse_coordinates, map_area, MAP_PIXEL_SIZE), UNVISITED_COLOR)
