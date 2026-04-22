@@ -33,7 +33,10 @@ def generate_qrcode(url, scale):
 
 def check_live():
     r = http.get(live_status_url, ttl_seconds = 60)
-    if r.json().get("live") == True:
+    if r.status_code != 200:
+        return False
+    status = r.json()
+    if status and status.get("live") == True:
         return True
     return False
 
@@ -49,14 +52,34 @@ def get_next_recording(live, timezone, scale, api_key):
         start_text = render.Text("Relay", font = start_font)
     elif api_key:
         header = render.Text("Up next:", font = header_font)
-        calendar_minimum_time = time.now().in_location("UTC").format("2006-01-02T15:04:05.000Z")
+        # We use a 1h grace period in the past for current events
+        calendar_minimum_time = (time.now() - time.parse_duration("1h")).in_location("UTC").format("2006-01-02T15:04:05.000Z")
         calendar_url = "https://www.googleapis.com/calendar/v3/calendars/relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o%40group.calendar.google.com/events?key=" + api_key + "&orderBy=startTime&singleEvents=true&timeMin=" + calendar_minimum_time
         r = http.get(calendar_url, ttl_seconds = 60)
         if r.status_code == 200 and "items" in r.json() and len(r.json()["items"]) > 0:
             next = r.json()["items"][0]
             title = render.Text(next["summary"], font = title_font)
-            start = time.parse_time(next.get("start").get("dateTime"), "2006-01-02T15:04:05-07:00", next.get("start").get("timeZone"))
-            start_text = render.Text(start.in_location(timezone).format("Jan 2 3:04pm"), font = start_font)
+            
+            # Handle dateTime or date for all-day events
+            start_data = next.get("start", {})
+            start_str = start_data.get("dateTime") or start_data.get("date")
+            
+            if not start_str:
+                start_text = render.Text("Relay", font = start_font)
+            else:
+                # Robustly parse dateTime formats (with offset or Z)
+                # Google Calendar dateTime is typically RFC3339
+                # If it's just 'date', it's YYYY-MM-DD
+                if len(start_str) == 10: # YYYY-MM-DD
+                    start = time.parse_time(start_str, "2006-01-02", timezone)
+                elif "Z" in start_str:
+                    start = time.parse_time(start_str, "2006-01-02T15:04:05Z")
+                else:
+                    # Try with offset, though Go's parse_time is very strict on format
+                    # Most common from GCal is YYYY-MM-DDTHH:MM:SS-07:00
+                    start = time.parse_time(start_str, "2006-01-02T15:04:05-07:00")
+                
+                start_text = render.Text(start.in_location(timezone).format("Jan 2 3:04pm"), font = start_font)
         else:
             header = render.Text("", font = header_font)
             title = render.Text("Check back soon for live streams", font = title_font)
@@ -95,6 +118,9 @@ def main(config):
     scale = 2 if canvas.is2x() else 1
     timezone = config.get("timezone") or "America/New_York"
     api_key = config.get("api_key")
+    if api_key:
+        api_key = api_key.strip()
+        
     logo = RELAY_LOGO if scale == 1 else RELAY_LOGO_2X
     img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     live = check_live()
@@ -103,9 +129,14 @@ def main(config):
     art = config.get("show_art") or live_page_url
     if live and art == "show_art":
         r = http.get(live_status_url, ttl_seconds = 60)
-        img_url = r.json()["broadcast"]["show_art"]
-        img_data = http.get(img_url, ttl_seconds = 60).body()
-        img = render.Image(src = img_data, width = 29 * scale, height = 29 * scale)
+        if r.status_code == 200:
+            status = r.json()
+            if status and "broadcast" in status and "show_art" in status["broadcast"]:
+                img_url = status["broadcast"]["show_art"]
+                img_res = http.get(img_url, ttl_seconds = 60)
+                if img_res.status_code == 200:
+                    img_data = img_res.body()
+                    img = render.Image(src = img_data, width = 29 * scale, height = 29 * scale)
     elif live and art == "RELAY_LOGO":
         img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     elif live:
