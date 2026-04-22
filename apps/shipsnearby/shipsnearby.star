@@ -55,7 +55,7 @@ def get_schema():
             schema.Text(
                 id = "bbox",
                 name = "Bounding Box",
-                desc = "Format: long_min,lat_min,long_max,lat_max (e.g., 105,-7.5,107,-5)",
+                desc = "Format: long_min,lat_min,long_max,lat_max Try use https://boundingbox.klokantech.com/",
                 icon = "mapPin",
                 default = DEFAULT_BBOX,
             ),
