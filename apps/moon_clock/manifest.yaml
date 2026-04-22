@@ -1,0 +1,8 @@
+id: moon-clock
+name: Moon Clock
+summary: Moon phases and clock
+desc: A clock that displays the current moon phase, % illumination, and the next New/Full moon dates. Adapts colors for day and night based on local sunrise and sunset. 30 moon images embedded in BASE64 format.
+author: Mark Greinke
+category: Clocks
+fileName: moon_clock.star
+packageName: moonclock
