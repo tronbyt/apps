@@ -236,23 +236,23 @@ def render_view(vessels, line2_opt, line3_opt):
     if len(vessels) == 0:
         return []
 
-    # Find vessel with a name, or use mmsi as fallback
+    # Find vessel with a name, pick newest by ts
     v = None
     for vv in vessels:
         name = vv.get("name")
         if name:
-            v = vv
-            break
+            if v == None or vv.get("ts", "") > v.get("ts", ""):
+                v = vv
 
     if not v:
+        # Use newest by mmsi
         for vv in vessels:
             mmsi = vv.get("mmsi")
             if mmsi:
-                v = vv
-                break
-
-    if not v:
-        return []
+                if v == None or vv.get("ts", "") > v.get("ts", ""):
+                    v = vv
+        if not v:
+            return []
 
     name = v.get("name") or ""
     vtype = v.get("type") or ""
