@@ -52,6 +52,7 @@ def get_next_recording(live, timezone, scale, api_key):
         start_text = render.Text("Relay", font = start_font)
     elif api_key:
         header = render.Text("Up next:", font = header_font)
+
         # We use a 1h grace period in the past for current events
         calendar_minimum_time = (time.now() - time.parse_duration("1h")).in_location("UTC").format("2006-01-02T15:04:05.000Z")
         calendar_url = "https://www.googleapis.com/calendar/v3/calendars/relay.fm_t9pnsv6j91a3ra7o8l13cb9q3o%40group.calendar.google.com/events?key=" + api_key + "&orderBy=startTime&singleEvents=true&timeMin=" + calendar_minimum_time
@@ -59,18 +60,18 @@ def get_next_recording(live, timezone, scale, api_key):
         if r.status_code == 200 and "items" in r.json() and len(r.json()["items"]) > 0:
             next = r.json()["items"][0]
             title = render.Text(next["summary"], font = title_font)
-            
+
             # Handle dateTime or date for all-day events
             start_data = next.get("start", {})
             start_str = start_data.get("dateTime") or start_data.get("date")
-            
+
             if not start_str:
                 start_text = render.Text("Relay", font = start_font)
             else:
                 # Robustly parse dateTime formats (with offset or Z)
                 # Google Calendar dateTime is typically RFC3339
                 # If it's just 'date', it's YYYY-MM-DD
-                if len(start_str) == 10: # YYYY-MM-DD
+                if len(start_str) == 10:  # YYYY-MM-DD
                     start = time.parse_time(start_str, "2006-01-02", timezone)
                 elif "Z" in start_str:
                     start = time.parse_time(start_str, "2006-01-02T15:04:05Z")
@@ -78,7 +79,7 @@ def get_next_recording(live, timezone, scale, api_key):
                     # Try with offset, though Go's parse_time is very strict on format
                     # Most common from GCal is YYYY-MM-DDTHH:MM:SS-07:00
                     start = time.parse_time(start_str, "2006-01-02T15:04:05-07:00")
-                
+
                 start_text = render.Text(start.in_location(timezone).format("Jan 2 3:04pm"), font = start_font)
         else:
             header = render.Text("", font = header_font)
@@ -120,7 +121,7 @@ def main(config):
     api_key = config.get("api_key")
     if api_key:
         api_key = api_key.strip()
-        
+
     logo = RELAY_LOGO if scale == 1 else RELAY_LOGO_2X
     img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     live = check_live()
