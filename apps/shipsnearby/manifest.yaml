@@ -1,12 +1,12 @@
 ---
-id: shipfinder
-name: Ship Finder
+id: shipsnearby
+name: Ship Nearby
 summary: Display ships in a bounding box
 desc: Shows vessel names within a geographic bounding box using VesselAPI.
 author: tavdog
-fileName: shipfinder.star
-packageName: shipfinder
-recommendedInterval: 1
+fileName: shipsnearby.star
+packageName: shipsnearby
+recommendedInterval: 5
 category: transit
 tags:
   - utility
