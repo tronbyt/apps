@@ -2,11 +2,11 @@
 id: shipsnearby
 name: Ship Nearby
 summary: Display ships in a bounding box
-desc: Shows vessel names within a geographic bounding box using VesselAPI.
+desc: Shows vessel names within a geographic bounding box using Marinesia.com.
 author: tavdog
 fileName: shipsnearby.star
 packageName: shipsnearby
-recommendedInterval: 5
+recommendedInterval: 30
 category: transit
 tags:
   - utility
