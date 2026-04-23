@@ -410,7 +410,7 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
                 first = parts[0][:4]
                 second = parts[1][:4] if len(parts) > 1 else ""
                 playerName = first + "/" + second
-            
+
             score = s[i + x]["score"]
             displayScore = str(score)
 
@@ -512,7 +512,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
                 first = parts[0][:4]
                 second = parts[1][:4] if len(parts) > 1 else ""
                 playerName = first + "/" + second
-           
+
             # check if they've played at least 1 hole this round
             if (s[i + x]["status"]["thru"]) > 0:
                 HolesCompleted = s[i + x]["status"]["thru"]
