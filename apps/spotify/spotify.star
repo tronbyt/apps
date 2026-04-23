@@ -1405,6 +1405,7 @@ def get_schema():
                 icon = "gaugeHigh",
                 default = "50",
                 options = [
+                    schema.Option(display = "None", value = "0"),
                     schema.Option(display = "Slow", value = "80"),
                     schema.Option(display = "Normal", value = "50"),
                     schema.Option(display = "Fast", value = "30"),
