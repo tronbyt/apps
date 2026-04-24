@@ -232,6 +232,8 @@ def font_small():
     return FONT_SMALL_2X if canvas.is2x() else FONT_SMALL_1X
 
 def scale_delay(delay):
+    if delay == 0:
+        return 0
     """Halve animation delay at 2x to maintain perceived scroll speed."""
     if canvas.is2x():
         return max(delay // 2, 1)
@@ -324,8 +326,10 @@ def text_width_estimate(text, font):
     char_width = widths.get(font, 5)
     return len(text) * char_width
 
-def needs_scroll(text, available_width, font):
+def needs_scroll(text, available_width, font, scroll_speed):
     """Determine if text needs scrolling marquee."""
+    if scroll_speed == 0:
+      return False
     return text_width_estimate(text, font) > available_width
 
 def get_error_backoff():
@@ -777,12 +781,12 @@ def render_status_icons(state, color):
         main_align = "end",
     )
 
-def render_text_smart(text, width, font, color):
+def render_text_smart(text, width, font, color, scroll_speed):
     """
     Render text, using marquee only if needed.
     This reduces visual noise for short text.
     """
-    if needs_scroll(text, width, font):
+    if needs_scroll(text, width, font, scroll_speed):
         return render.Marquee(
             width = width,
             child = render.Text(content = text, font = font, color = color),
@@ -851,12 +855,12 @@ def render_full_mode(state, config):
 
     # Track name
     text_children.append(
-        render_text_smart(state["name"], text_width, font_track(), track_color),
+        render_text_smart(state["name"], text_width, font_track(), track_color, scroll_speed),
     )
 
     # Artist
     text_children.append(
-        render_text_smart(state["artist"], text_width, font_artist(), artist_color),
+        render_text_smart(state["artist"], text_width, font_artist(), artist_color, scroll_speed),
     )
 
     # Progress bar row
@@ -953,9 +957,9 @@ def render_compact_mode(state, config):
         main_align = "center",
         cross_align = "start",
         children = [
-            render_text_smart(state["name"], text_width, font_track(), track_color),
+            render_text_smart(state["name"], text_width, font_track(), track_color, scroll_speed),
             render.Box(height = s(1)),
-            render_text_smart(indicator + state["artist"], text_width, font_artist(), artist_color),
+            render_text_smart(indicator + state["artist"], text_width, font_artist(), artist_color, scroll_speed),
         ],
     )
 
@@ -991,25 +995,11 @@ def render_art_focus_mode(state, config):
 
     # At 2x, show both track and artist in the overlay
     overlay_children = [
-        render.Marquee(
-            width = overlay_text_width,
-            child = render.Text(
-                content = overlay_text,
-                font = font_artist(),
-                color = track_color,
-            ),
-        ),
+        render_text_smart(overlay_text, overlay_text_width, font_artist(), track_color, scroll_speed),
     ]
     if canvas.is2x():
         overlay_children.append(
-            render.Marquee(
-                width = overlay_text_width,
-                child = render.Text(
-                    content = state["artist"],
-                    font = font_small(),
-                    color = artist_color,
-                ),
-            ),
+            render_text_smart(state["artist"], overlay_text_width, font_small, artist_color, scroll_speed),
         )
 
     text_overlay = render.Column(
@@ -1065,7 +1055,7 @@ def render_text_only_mode(state, config):
         children = [
             render_playback_icon(state["is_playing"], LIGHT_GRAY),
             render.Box(width = s(2)),
-            render_text_smart(state["name"], text_width - icon_space, font_track(), track_color),
+            render_text_smart(state["name"], text_width - icon_space, font_track(), track_color, scroll_speed),
         ],
         cross_align = "center",
     )
@@ -1073,7 +1063,7 @@ def render_text_only_mode(state, config):
 
     # Artist
     children.append(
-        render_text_smart(state["artist"], text_width, font_artist(), artist_color),
+        render_text_smart(state["artist"], text_width, font_artist(), artist_color, scroll_speed),
     )
 
     # Progress bar spanning full width
@@ -1137,25 +1127,9 @@ def render_minimal_mode(state, config):
             main_align = "center",
             cross_align = "center",
             children = [
-                render.Marquee(
-                    width = marquee_width,
-                    align = "center",
-                    child = render.Text(
-                        content = track_text,
-                        font = font_track(),
-                        color = track_color,
-                    ),
-                ),
+                render_text_smart(track_text, marquee_width, font_track(), track_color, scroll_speed),
                 render.Box(height = s(2)),
-                render.Marquee(
-                    width = marquee_width,
-                    align = "center",
-                    child = render.Text(
-                        content = state["artist"],
-                        font = font_artist(),
-                        color = artist_color,
-                    ),
-                ),
+                render_text_smart(state["artist"], marquee_width, font_artist(), artist_color, scroll_speed),
             ],
         ),
     )
