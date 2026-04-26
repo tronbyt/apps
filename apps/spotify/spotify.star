@@ -232,9 +232,9 @@ def font_small():
     return FONT_SMALL_2X if canvas.is2x() else FONT_SMALL_1X
 
 def scale_delay(delay):
+    """Halve animation delay at 2x to maintain perceived scroll speed."""
     if delay == 0:
         return 0
-    """Halve animation delay at 2x to maintain perceived scroll speed."""
     if canvas.is2x():
         return max(delay // 2, 1)
     return delay
@@ -329,7 +329,7 @@ def text_width_estimate(text, font):
 def needs_scroll(text, available_width, font, scroll_speed):
     """Determine if text needs scrolling marquee."""
     if scroll_speed == 0:
-      return False
+        return False
     return text_width_estimate(text, font) > available_width
 
 def get_error_backoff():
