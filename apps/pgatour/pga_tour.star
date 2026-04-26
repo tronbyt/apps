@@ -98,6 +98,10 @@ Added different colour title bar for Playoff events, using "FedEx" purple
 Added different colour title bar for Signature events, using an orange colour
 Added opposite field event for the AP Inv...might be too late!
 Added more entries for Tournament renaming map
+
+v2.13 
+Changed winner font colour to gold, seems more fitting of a champion
+Handling for team events eg Zurich
 """
 
 load("encoding/json.star", "json")
@@ -178,7 +182,7 @@ TOURNAMENT_MAPPING = """
 
 MAJOR_MAPPING = """
 {
-    "401811937": "#003360", 
+    "401811937": "#003361",
     "401811941": "#006747",
     "401811947": "#00205B",
     "401811952": "#003865",
@@ -271,10 +275,10 @@ def main(config):
             stage = stage.replace("Round 3", "R3")
             stage = stage.replace("Round 4", "R4")
             stage = stage.replace("Playoff - Play Complete", "PO")
+            stage = stage.replace("Playoff - In Progress", "PO")
             stage = stage.replace(" - In Progress", "")
             stage = stage.replace(" - Suspended", "")
             stage = stage.replace(" - Play Complete", "")
-            stage = stage.replace(" - Playoff", "PO")
 
             if entries:
                 if stage != "F":
@@ -389,14 +393,23 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
 
     for i in range(0, 4):
         if i + x < len(s):
-            playerID = s[i + x]["id"]
+            item = s[i + x]
+            playerID = item["id"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
                 playerName = Mapping[playerID]
-
+            elif "lastName" in item:
+                playerName = item["lastName"][:12]
             else:
-                playerName = s[i + x]["lastName"][:12]
+                playerName = item["name"]
+
+            # if team event, split the names
+            if "/" in playerName:
+                parts = playerName.split("/", 1)  # only split into two parts
+                first = parts[0][:4]
+                second = parts[1][:4] if len(parts) > 1 else ""
+                playerName = first + "/" + second
 
             score = s[i + x]["score"]
             displayScore = str(score)
@@ -415,9 +428,9 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
             # Players who have completed their round are shown in white, in progress rounds are in yellow which slowly transitions to white as the round progresses.
             playerFontColor = getPlayerFontColor(HolesCompleted, ColorGradient)
 
-            # if tournament is over, show winner in blue
+            # if tournament is over, show winner in gold
             if (i + x) == 0 and stage == "F":
-                playerFontColor = "#68f"
+                playerFontColor = "#d1b358"
 
             player = render.Row(
                 expanded = True,
@@ -480,15 +493,25 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
     for i in range(0, 4):
         ProgressStr = ""
         if i + x < len(s):
-            playerState = s[i + x]["status"]["state"]
-            playerID = s[i + x]["id"]
-            period = s[i + x]["status"]["period"]
+            item = s[i + x]
+            playerState = item["status"]["state"]
+            playerID = item["id"]
+            period = item["status"]["period"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
                 playerName = Mapping[playerID]
+            elif "lastName" in item:
+                playerName = item["lastName"][:12]
             else:
-                playerName = s[i + x]["lastName"][:12]
+                playerName = item["name"]
+
+            # if team event, split the names
+            if "/" in playerName:
+                parts = playerName.split("/", 1)  # only split into two parts
+                first = parts[0][:4]
+                second = parts[1][:4] if len(parts) > 1 else ""
+                playerName = first + "/" + second
 
             # check if they've played at least 1 hole this round
             if (s[i + x]["status"]["thru"]) > 0:
