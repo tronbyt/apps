@@ -1,0 +1,10 @@
+---
+id: stern-leaderboard
+name: Stern Leaderboard
+summary: Scrolls Stern High Scores
+desc: Displays the high scores for your connected Stern Pinball machines by logging into Insider Connected.
+author: brombomb
+fileName: stern_leaderboard.star
+packageName: sternleaderboard
+recommendedInterval: 60
+supports2x: false
