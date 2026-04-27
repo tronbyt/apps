@@ -1,0 +1,12 @@
+---
+id: stern-high-scores
+name: Stern High Scores
+summary: Stern High Scores
+desc: Displays personal high scores for your Insider Connected Stern Pinball machines.
+author: brombomb
+fileName: stern_high_scores.star
+packageName: sternhighscores
+recommendedInterval: 360
+supports2x: true
+tags:
+ - pinball

@@ -1,7 +1,7 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def format_score(n):
@@ -99,21 +99,25 @@ def main(config):
     password = config.get("password")
     game_filter = config.get("game_filter", "")
 
+    SCALE = 2 if canvas.is2x() else 1
+    FONT = "terminus-16" if canvas.is2x() else "tb-8"
+    SMALL_FONT = "tb-8" if canvas.is2x() else "tom-thumb"
+
     if not username or not password:
         return render.Root(
-            child = render.WrappedText("Configure Stern username & password"),
+            child = render.WrappedText("Configure Stern username & password", font = FONT),
         )
 
     auth = login(username, password)
     if not auth:
         return render.Root(
-            child = render.WrappedText("Login failed. Check credentials."),
+            child = render.WrappedText("Login failed. Check credentials.", font = FONT),
         )
 
     machines = get_machines(auth)
     if not machines:
         return render.Root(
-            child = render.WrappedText("No machines found."),
+            child = render.WrappedText("No machines found.", font = FONT),
         )
 
     # filter machines
@@ -147,18 +151,10 @@ def main(config):
         if logo_url:
             logo_rep = http.get(logo_url)
             if logo_rep.status_code == 200:
-                banner_child = render.Box(
-                    width = 64,
-                    height = 26, # Force strict vertical bounds to prevent engine timeouts
-                    child = render.Image(src = logo_rep.body(), width = 64)
-                )
+                banner_child = render.Image(src = logo_rep.body(), width = canvas.width())
 
         if not banner_child:
-            banner_child = render.Box(
-                width = 64,
-                height = 8,
-                child = render.Text(machine_name, font = "tb-8", color = "#ff0"),
-            )
+            banner_child = render.Text(machine_name, font = FONT, color = "#ff0")
 
         print("Added machine banner for:", machine_name)
 
@@ -166,7 +162,7 @@ def main(config):
         all_content.append(banner_child)
 
         if not scores:
-            all_content.append(render.Text("No scores yet", font = "tom-thumb"))
+            all_content.append(render.Text("No scores yet", font = SMALL_FONT))
         else:
             for i, s in enumerate(scores):
                 user = s.get("user") or {}
@@ -188,20 +184,20 @@ def main(config):
                 all_content.append(
                     render.Row(
                         children = [
-                            render.Text("%s: " % rank, font = "tb-8", color = rank_color),
-                            render.Text(player[:10], font = "tb-8", color = "#fff"),
+                            render.Text("%s: " % rank, font = FONT, color = rank_color),
+                            render.Text(player[:10], font = FONT, color = "#fff"),
                         ],
                     ),
                 )
                 all_content.append(
                     render.Padding(
-                        pad = (4, 0, 0, 6),
-                        child = render.Text(format_score(score_val), font = "tb-8", color = "#0ff"),
+                        pad = (4 * SCALE, 0, 0, 6 * SCALE),
+                        child = render.Text(format_score(score_val), font = FONT, color = "#0ff"),
                     ),
                 )
 
         # Add spacing between machines
-        all_content.append(render.Box(width = 64, height = 6, color = "#000"))
+        all_content.append(render.Box(width = canvas.width(), height = 6 * SCALE, color = "#000"))
 
     # If no content, just skip
     if not all_content:
@@ -210,9 +206,9 @@ def main(config):
 
     print("Rendering total elements:", len(all_content))
     return render.Root(
-        delay = 80,
+        delay = 80 // SCALE,
         child = render.Marquee(
-            height = 32,
+            height = canvas.height(),
             scroll_direction = "vertical",
             child = render.Column(children = all_content),
         ),
