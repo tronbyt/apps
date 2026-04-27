@@ -5,7 +5,7 @@ summary: Scrolls Stern High Scores
 desc: Displays the high scores for Stern Pinball Machines you own.
 author: brombomb
 fileName: stern_home_leaderboard.star
-packageName: sternhomeleaderboard
+packageName: stern_home_leaderboard
 recommendedInterval: 360
 supports2x: true
 tags:

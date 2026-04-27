@@ -70,7 +70,7 @@ def get_personal_scores(auth):
         "Cookie": auth["cookies"],
         "RSC": "1",
     }
-    rep = http.get(url, headers = headers)
+    rep = http.get(url, headers = headers, ttl_seconds = 300)
     if rep.status_code != 200:
         return []
 
@@ -231,7 +231,7 @@ def main(config):
 
         banner_child = None
         if logo_url:
-            logo_rep = http.get(logo_url)
+            logo_rep = http.get(logo_url, ttl_seconds = 3600)
             if logo_rep.status_code == 200:
                 banner_child = render.Image(src = logo_rep.body(), width = canvas.width())
 

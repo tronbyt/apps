@@ -134,10 +134,6 @@ def main(config):
 
     all_content = []
 
-    # Limit to just the first machine for testing/displaying
-    if machines:
-        machines = machines[:1]
-
     # We will loop through the machines and append their high scores
     for m in machines:
         model_dict = m.get("model") or {}
@@ -149,7 +145,7 @@ def main(config):
 
         banner_child = None
         if logo_url:
-            logo_rep = http.get(logo_url)
+            logo_rep = http.get(logo_url, ttl_seconds = 3600)
             if logo_rep.status_code == 200:
                 banner_child = render.Image(src = logo_rep.body(), width = canvas.width())
 
@@ -202,7 +198,7 @@ def main(config):
     # If no content, just skip
     if not all_content:
         print("all_content is empty!")
-        return []
+        return None
 
     print("Rendering total elements:", len(all_content))
     return render.Root(
