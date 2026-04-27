@@ -269,9 +269,7 @@ def main(config):
 
     # If no content, just skip
     if not all_content:
-        print("all_content is empty!")
-        return []
-
+        return None
     print("Rendering total elements:", len(all_content))
     return render.Root(
         delay = 80,
