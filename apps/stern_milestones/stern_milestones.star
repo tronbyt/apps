@@ -1,3 +1,4 @@
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "canvas", "render")
@@ -26,8 +27,11 @@ def login(username, password):
 def extract_stats(body):
     stats = {}
 
-    # Use exact keys with escaped quotes to avoid partial matches
+    # Use both escaped and unescaped keys for compatibility
     keys = {
+        '"games_played"': "games",
+        '"consecutive_days_played"': "streak",
+        '"days_played"': "days",
         '\\"games_played\\"': "games",
         '\\"consecutive_days_played\\"': "streak",
         '\\"days_played\\"': "days",
@@ -92,24 +96,57 @@ def main(config):
             child = render.WrappedText("Configure Stern username & password"),
         )
 
-    cookies = login(username, password)
-    if not cookies:
-        return render.Root(
-            child = render.WrappedText("Login failed. Check credentials."),
-        )
+    # Check cache for stats and icon URLs first
+    cache_key = "stern_milestones_data_" + username
+    cached_data = cache.get(cache_key)
+    extracted_data = None
+    if cached_data:
+        extracted_data = json.decode(cached_data)
 
-    # Fetch dashboard (contains both stats and icon URLs)
-    url = "https://insider.sternpinball.com/insider"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Cookie": cookies,
-    }
-    rep = http.get(url, headers = headers, ttl_seconds = CACHE_TTL)
-    if rep.status_code != 200:
-        return render.Root(child = render.WrappedText("Failed to fetch dashboard."))
+    if not extracted_data:
+        cookies = login(username, password)
+        if not cookies:
+            return render.Root(
+                child = render.WrappedText("Login failed. Check credentials."),
+            )
 
-    body = rep.body()
-    stats = extract_stats(body)
+        # Fetch dashboard (contains both stats and icon URLs)
+        url = "https://insider.sternpinball.com/insider?_rsc=1"
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Cookie": cookies,
+            "RSC": "1",
+        }
+
+        # Fetch without ttl_seconds to avoid large body serialization issues
+        rep = http.get(url, headers = headers)
+        if rep.status_code != 200:
+            return render.Root(child = render.WrappedText("Failed to fetch dashboard."))
+
+        body = rep.body()
+        stats = extract_stats(body)
+
+        badge_cats = [
+            ("Games-Played-Badge", "Games", "games"),
+            ("Days-Played-Badge", "Days", "days"),
+            ("Game-Streak-Badge", "Streak", "streak"),
+        ]
+
+        extracted_data = {
+            "stats": stats,
+            "icons": {},
+        }
+
+        for pattern, _, stat_key in badge_cats:
+            icon_url = extract_icon(body, pattern)
+            if icon_url:
+                extracted_data["icons"][stat_key] = icon_url
+
+        # Cache only the small extracted data
+        cache.set(cache_key, json.encode(extracted_data), ttl_seconds = CACHE_TTL)
+
+    stats = extracted_data["stats"]
+    icon_urls = extracted_data["icons"]
 
     SCALE = 2 if canvas.is2x() else 1
 
@@ -121,8 +158,8 @@ def main(config):
 
     badge_widgets = []
 
-    for pattern, cat_short, stat_key in badge_cats:
-        icon_url = extract_icon(body, pattern)
+    for _, cat_short, stat_key in badge_cats:
+        icon_url = icon_urls.get(stat_key)
         display_val = stats.get(stat_key, "N/A")
 
         icon_widget = render.Box(width = 20 * SCALE, height = 20 * SCALE, color = "#333")

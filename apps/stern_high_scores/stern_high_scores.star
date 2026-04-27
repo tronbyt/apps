@@ -1,3 +1,4 @@
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
@@ -64,13 +65,18 @@ def login(username, password):
     return {"token": token, "cookies": cookies}
 
 def get_personal_scores(auth):
-    url = "https://insider.sternpinball.com/trophy-room/scores"
+    cache_key = "stern_personal_scores_" + auth["token"]
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return json.decode(cached_data)
+
+    url = "https://insider.sternpinball.com/trophy-room/scores?_rsc=1"
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Cookie": auth["cookies"],
         "RSC": "1",
     }
-    rep = http.get(url, headers = headers, ttl_seconds = 300)
+    rep = http.get(url, headers = headers)
     if rep.status_code != 200:
         return []
 
@@ -181,6 +187,7 @@ def get_personal_scores(auth):
 
         curr_pos = next_alt
 
+    cache.set(cache_key, json.encode(results), ttl_seconds = 300)
     return results
 
 def main(config):
@@ -296,17 +303,6 @@ def get_schema():
                 desc = "Your Stern Insider Connected password",
                 icon = "lock",
                 secret = True,
-            ),
-            schema.Dropdown(
-                id = "display_mode",
-                name = "Display Mode",
-                desc = "Show your machine's leaderboards or your personal top scores",
-                icon = "list",
-                default = "machine",
-                options = [
-                    schema.Option(display = "Machine Leaderboards", value = "machine"),
-                    schema.Option(display = "My Top Scores", value = "personal"),
-                ],
             ),
             schema.Toggle(
                 id = "highest_only",
