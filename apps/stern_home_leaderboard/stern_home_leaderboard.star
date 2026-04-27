@@ -48,11 +48,12 @@ def login(username, password):
     return {"token": token, "cookies": cookies}
 
 def get_machines(auth):
-    machines_url = "https://cms.prd.sternpinball.io/api/v1/portal/user_registered_machines/?group_type=home"
+    machines_url = "https://cms.prd.sternpinball.io/api/v1/portal/user_registered_machines/?group_type=home&_rsc=1"
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Authorization": "Bearer " + auth["token"],
         "Cookie": auth["cookies"],
+        "RSC": "1",
     }
     cache_key = "stern_machines_" + auth["token"]
     cached_data = cache.get(cache_key)
@@ -72,11 +73,12 @@ def get_machines(auth):
 
 def get_high_scores(auth, machine_id):
     clean_id = str(machine_id).split(".")[0]
-    url = "https://cms.prd.sternpinball.io/api/v1/portal/game_machine_high_scores/?machine_id=" + clean_id
+    url = "https://cms.prd.sternpinball.io/api/v1/portal/game_machine_high_scores/?machine_id=" + clean_id + "&_rsc=1"
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Authorization": "Bearer " + auth["token"],
         "Cookie": auth["cookies"],
+        "RSC": "1",
     }
     cache_key = "stern_scores_" + clean_id
     cached_data = cache.get(cache_key)
