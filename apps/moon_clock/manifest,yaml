@@ -1,8 +1,0 @@
----
-id: moon-clock
-name: Moon Clock
-summary: Clock with moon phase and next new/full moone
-desc: Displays the current moon phase %illuminated, time of day and next new/full moon
-author: Mark Greinke
-fileName: moon_clock.star
-packageName: moon_clock

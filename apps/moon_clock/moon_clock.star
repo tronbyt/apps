@@ -5,16 +5,18 @@ load("math.star", "math")
 load("schema.star", "schema")
 load("encoding/json.star", "json")
 load("sunrise.star", "sunrise")
+# Loading the modularized asset helper
 load("moon_assets.star", "get_moon_image")
 
 def get_dynamic_moon_data(now, timezone_str):
-    REFERENCE_NEW_MOON = 1768776720
+    # Fixed: Using a known past new moon (Jan 11, 2024)
+    REFERENCE_NEW_MOON = 1704974220 
     LUNAR_CYCLE = 2551442.877
     diff = now.unix - REFERENCE_NEW_MOON
     phase_float = (diff % LUNAR_CYCLE) / LUNAR_CYCLE
     phase_index = int(phase_float * 30)
     
-    # Use math.pi instead of hardcoded 3.14159
+    # Fixed: Using math.pi instead of hardcoded approximation
     illum_val = (1 - math.cos(phase_float * 2 * math.pi)) / 2
     illumination_pct = int(illum_val * 100)
     
@@ -23,7 +25,7 @@ def get_dynamic_moon_data(now, timezone_str):
     if cycles_to_full < 0:
         cycles_to_full += 1.0
     
-    # Removed unexplained -43200 subtraction
+    # Fixed: Removed the unexplained -43200 subtraction
     sec_to_new = (cycles_to_new * LUNAR_CYCLE)
     sec_to_full = (cycles_to_full * LUNAR_CYCLE)
     
@@ -41,7 +43,7 @@ def main(config):
     timezone = config.get("timezone") or "America/Los_Angeles"
     now = time.now().in_location(timezone)
     
-    # Default coordinates for Tigard, OR
+    # Default coordinates
     lat, lng = 45.42, -122.77 
     loc_str = config.get("location")
     if loc_str:
@@ -59,6 +61,8 @@ def main(config):
         c_time, illum_text_color, moon_overlay = "#00FF00", "#FFC107", "#00000033"
     
     data = get_dynamic_moon_data(now, timezone)
+    
+    # Fetching bytes via the helper file
     moon_image_bytes = get_moon_image(data["phase_index"])
 
     return render.Root(
