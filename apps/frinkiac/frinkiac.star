@@ -12,6 +12,7 @@ load("schema.star", "schema")
 
 IMAGE_URL_BASE = "https://frinkiac.com/img/%s/%d.jpg"
 FRAMES_URL_BASE = "https://frinkiac.com/api/frames/%s/%d/%d/%d"
+CAPTION_URL_BASE = "https://frinkiac.com/api/caption?e=%s&t=%d"
 
 # Episode counts for Seasons 1-17
 EPISODE_COUNTS = {
@@ -34,28 +35,30 @@ EPISODE_COUNTS = {
     17: 22,
 }
 
+# Cache for 24 hours (86400 seconds)
+CACHE_TTL = 86400
+
 def main(config):
     # 1. Configuration
-    min_s = int(config.str("min_season", "1"))
-    max_s = int(config.str("max_season", "17"))
+    min_s = int(config.get("min_season", "1"))
+    max_s = int(config.get("max_season", "17"))
     include_movie = config.bool("include_movie", True)
     animate = config.bool("animate", False)
 
-    actual_min = min_s if min_s >= 1 else 1
-    actual_max = max_s if max_s <= 17 else 17
-    if actual_min > actual_max:
-        actual_min, actual_max = actual_max, actual_min
+    # Range validation
+    if min_s > max_s:
+        min_s, max_s = max_s, min_s
 
     frame = None
 
     # 2. THE METHOD: Discovery via /api/frames
     for _ in range(15):
-        range_size = (actual_max - actual_min + 1)
+        range_size = (max_s - min_s + 1)
         if include_movie and random.number(1, range_size + 1) == 1:
             ep_code = "Movie"
             anchor_ts = random.number(60000, 5000000)
         else:
-            s_pick = random.number(actual_min, actual_max)
+            s_pick = random.number(min_s, max_s)
             e_max = EPISODE_COUNTS.get(s_pick, 22)
             e_pick = random.number(1, e_max)
             s_str = str(s_pick) if s_pick >= 10 else "0" + str(s_pick)
@@ -63,7 +66,7 @@ def main(config):
             ep_code = "S%sE%s" % (s_str, e_str)
             anchor_ts = random.number(60000, 1200000)
 
-        res = http.get(FRAMES_URL_BASE % (ep_code, anchor_ts, 30000, 30000))
+        res = http.get(FRAMES_URL_BASE % (ep_code, anchor_ts, 30000, 30000), ttl_seconds = CACHE_TTL)
         if res.status_code == 200:
             frames_in_window = res.json()
             if len(frames_in_window) > 0:
@@ -82,17 +85,15 @@ def main(config):
     height = canvas.height()
 
     if is_movie:
-        # Movie is 16:9, take up entire device
         img_w = width
         text_w = 0
     else:
-        # Episode is 4:3, use sidebar
         img_w = int((4.0 / 3.0) * height)
         text_w = width - img_w
 
     # 4. Animate Logic
     if animate:
-        frames_res = http.get(FRAMES_URL_BASE % (episode_code, timestamp, 0, 15000))
+        frames_res = http.get(FRAMES_URL_BASE % (episode_code, timestamp, 0, 15000), ttl_seconds = CACHE_TTL)
         if frames_res.status_code == 200:
             frames_data = frames_res.json()
             image_frames = []
@@ -108,7 +109,7 @@ def main(config):
                 if count >= limit:
                     break
                 f_item = frames_data[i]
-                f_img_res = http.get(IMAGE_URL_BASE % (f_item.get("Episode"), int(f_item.get("Timestamp"))))
+                f_img_res = http.get(IMAGE_URL_BASE % (f_item.get("Episode"), int(f_item.get("Timestamp"))), ttl_seconds = CACHE_TTL)
                 if f_img_res.status_code == 200:
                     image_frames.append(render.Image(src = f_img_res.body(), width = img_w, height = height))
                     count += 1
@@ -125,7 +126,7 @@ def main(config):
                 )
 
     # 5. Static Render
-    img_res = http.get(IMAGE_URL_BASE % (episode_code, timestamp))
+    img_res = http.get(IMAGE_URL_BASE % (episode_code, timestamp), ttl_seconds = CACHE_TTL)
     if img_res.status_code != 200:
         return []
 
@@ -164,11 +165,30 @@ def render_sidebar(ep_code, is_2x, width, height):
     )
 
 def get_schema():
+    season_options = [
+        schema.Option(display = str(s), value = str(s))
+        for s in range(1, 18)
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(id = "min_season", name = "Min Season", desc = "Min season (1-17)", icon = "arrowUp", default = "1"),
-            schema.Text(id = "max_season", name = "Max Season", desc = "Max season (1-17)", icon = "arrowDown", default = "17"),
+            schema.Dropdown(
+                id = "min_season",
+                name = "Min Season",
+                desc = "Minimum season to include.",
+                icon = "arrowUp",
+                default = season_options[0].value,
+                options = season_options,
+            ),
+            schema.Dropdown(
+                id = "max_season",
+                name = "Max Season",
+                desc = "Maximum season to include.",
+                icon = "arrowDown",
+                default = season_options[-1].value,
+                options = season_options,
+            ),
             schema.Toggle(id = "include_movie", name = "Include Movie", desc = "Include movie", icon = "film", default = True),
             schema.Toggle(id = "animate", name = "Animate", desc = "15s animation", icon = "video", default = False),
         ],
