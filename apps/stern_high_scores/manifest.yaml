@@ -5,7 +5,7 @@ summary: Stern High Scores
 desc: Displays personal high scores for your Insider Connected Stern Pinball machines.
 author: brombomb
 fileName: stern_high_scores.star
-packageName: sternhighscores
+packageName: stern_high_scores
 recommendedInterval: 360
 supports2x: true
 tags:
