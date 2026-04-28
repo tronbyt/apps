@@ -1,37 +1,37 @@
-load("render.star", "render")
-load("time.star", "time")
-load("http.star", "http")
-load("math.star", "math")
-load("schema.star", "schema")
 load("encoding/json.star", "json")
-load("sunrise.star", "sunrise")
+load("math.star", "math")
+
 # Loading the modularized asset helper
 load("moon_assets.star", "get_moon_image")
+load("render.star", "render")
+load("schema.star", "schema")
+load("sunrise.star", "sunrise")
+load("time.star", "time")
 
 def get_dynamic_moon_data(now, timezone_str):
     # Fixed: Using a known past new moon (Jan 11, 2024)
-    REFERENCE_NEW_MOON = 1704974220 
+    REFERENCE_NEW_MOON = 1704974220
     LUNAR_CYCLE = 2551442.877
     diff = now.unix - REFERENCE_NEW_MOON
     phase_float = (diff % LUNAR_CYCLE) / LUNAR_CYCLE
     phase_index = int(phase_float * 30)
-    
+
     # Fixed: Using math.pi instead of hardcoded approximation
     illum_val = (1 - math.cos(phase_float * 2 * math.pi)) / 2
     illumination_pct = int(illum_val * 100)
-    
+
     cycles_to_new = 1.0 - phase_float
     cycles_to_full = 0.5 - phase_float
     if cycles_to_full < 0:
         cycles_to_full += 1.0
-    
+
     # Fixed: Removed the unexplained -43200 subtraction
     sec_to_new = (cycles_to_new * LUNAR_CYCLE)
     sec_to_full = (cycles_to_full * LUNAR_CYCLE)
-    
+
     next_new_time = (now + time.parse_duration("%ds" % int(sec_to_new))).in_location(timezone_str)
     next_full_time = (now + time.parse_duration("%ds" % int(sec_to_full))).in_location(timezone_str)
-   
+
     return {
         "phase_index": phase_index,
         "illumination": illumination_pct,
@@ -42,26 +42,26 @@ def get_dynamic_moon_data(now, timezone_str):
 def main(config):
     timezone = config.get("timezone") or "America/Los_Angeles"
     now = time.now().in_location(timezone)
-    
+
     # Default coordinates
-    lat, lng = 45.42, -122.77 
+    lat, lng = 45.42, -122.77
     loc_str = config.get("location")
     if loc_str:
         loc_data = json.decode(loc_str)
         lat = float(loc_data.get("lat", lat))
         lng = float(loc_data.get("lng", lng))
-        
+
     s_rise = sunrise.sunrise(lat, lng, now)
     s_set = sunrise.sunset(lat, lng, now)
     is_night = now.unix < s_rise.unix or now.unix >= s_set.unix
-    
+
     if is_night:
         c_time, illum_text_color, moon_overlay = "#FF0000", "#FFC107", "#00000080"
     else:
         c_time, illum_text_color, moon_overlay = "#00FF00", "#FFC107", "#00000033"
-    
+
     data = get_dynamic_moon_data(now, timezone)
-    
+
     # Fetching bytes via the helper file
     moon_image_bytes = get_moon_image(data["phase_index"])
 
