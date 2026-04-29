@@ -1,0 +1,16 @@
+---
+id: hass-solar
+name: HASS Solar
+summary: Home Assistant PV monitor
+desc: Energy production and consumption monitor using Home Assistant.
+author: Ingmar Stein
+fileName: hass_solar.star
+packageName: hasssolar
+recommendedInterval: 5
+supports2x: true
+minPixletVersion: v0.49.0
+category: utilities
+tags:
+  - smart-home
+  - tracking
+  - wide 2x support

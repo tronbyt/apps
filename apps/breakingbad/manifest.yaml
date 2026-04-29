@@ -1,0 +1,13 @@
+---
+id: breakingbad
+name: BreakingBad
+summary: Breaking Bad Title Display
+desc: Display text in Breaking Bad TV show format.
+author: Robert Ison
+recommendedInterval: 5
+category: entertainment
+tags:
+  - media
+  - retro
+  - text-display
+  - gaming

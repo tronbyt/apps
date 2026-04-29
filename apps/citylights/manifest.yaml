@@ -1,0 +1,14 @@
+---
+id: city-lights
+name: City Lights
+summary: Nighttime cityscape
+desc: City Lights generates a random and mesmerizing nighttime cityscape.
+author: Nicholas Arent
+supports2X: true
+fileName: city_lights.star
+packageName: citylights
+category: entertainment
+tags:
+  - art
+  - time
+  - city

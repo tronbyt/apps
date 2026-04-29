@@ -1,0 +1,14 @@
+---
+id: garageopen
+name: Garage Open
+summary: 'Notification: garage open'
+desc: Displays a notification that a garage door is open.
+author: savdagod
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - smart-home
+  - notification
+  - utility
+  - wide 2x support

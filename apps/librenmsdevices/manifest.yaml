@@ -1,0 +1,15 @@
+---
+id: librenms-devices
+name: LibreNMS Devices
+summary: LibreNMS Device Summary
+desc: Displays a LibreNMS device availability map.
+author: '@jtinel'
+fileName: librenms_devices.star
+packageName: librenmsdevices
+recommendedInterval: 5
+category: utilities
+tags:
+  - nms
+  - tech
+  - tracking
+  - smart-home

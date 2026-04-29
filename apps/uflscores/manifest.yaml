@@ -1,0 +1,13 @@
+---
+id: ufl-scores
+name: UFL Scores
+summary: UFL football scores
+desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
+author: LunchBox8484
+fileName: ufl_scores.star
+packageName: uflscores
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time
+  - football

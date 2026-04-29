@@ -1,0 +1,14 @@
+---
+id: friends-quotes
+name: Friends Quotes
+summary: Displays Friends quotes
+desc: Displays a random quote from the hit TV sitcom, Friends.
+author: kaffolder7
+fileName: friends_quotes.star
+packageName: friendsquotes
+recommendedInterval: 5
+category: entertainment
+tags:
+  - social
+  - quote
+  - media

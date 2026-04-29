@@ -1,0 +1,13 @@
+---
+id: amtrak
+name: Amtrak Station
+summary: Amtrak station info
+desc: Shows arriving and departing Amtrak trains at a station using RailRat data.
+author: tavdog
+fileName: amtrakstation.star
+packageName: amtrakstation
+recommendedInterval: 5
+supports2x: true
+category: transit
+tags:
+  - utility

@@ -1,0 +1,13 @@
+---
+id: coffee
+name: Coffee
+summary: 'Notification: coffee ready'
+desc: Displays a configuration that a coffee is ready.
+author: savdagod
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - lifestyle
+  - smart-home
+  - wide 2x support

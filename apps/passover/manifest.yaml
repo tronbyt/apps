@@ -1,0 +1,11 @@
+---
+id: passover
+name: PassoverCountdown
+summary: Passover Countdown / In Progress
+desc: Track days until Passover show current when it is in progress.
+author: jvivona
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - time
+  - lifestyle

@@ -1,0 +1,16 @@
+---
+id: jacket
+name: Jacket
+summary: Do I need a jacket
+desc: Shows if you need a jacket. Uses OpenWeather API.
+author: noahpodgurski
+fileName: jacket.star
+packageName: jacket
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - nature
+  - outdoor
+  - utility
+  - tech

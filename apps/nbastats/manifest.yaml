@@ -1,0 +1,13 @@
+---
+id: nba-stats
+name: NBA Stats
+summary: NBA Stat Leaders
+desc: Displays the current NBA leaders in PPG, RPG, APG, BPG and SPG.
+author: Emmett Myers
+recommendedInterval: 5
+fileName: nba_stats.star
+packageName: nbastats
+category: sports
+tags:
+  - nba
+  - basketball

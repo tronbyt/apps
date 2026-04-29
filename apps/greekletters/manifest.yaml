@@ -1,0 +1,12 @@
+---
+id: greek-letters
+name: Greek Letters
+summary: Learn the Greek alphabet
+desc: Help with learning Greek alphabet.
+author: Robert Ison
+recommendedInterval: 5
+fileName: greek_letters.star
+packageName: greekletters
+category: education
+tags:
+  - education

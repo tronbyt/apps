@@ -1,0 +1,13 @@
+---
+id: instagram
+name: Instagram
+summary: Instagram Follows
+desc: Your Instagram followers count.
+author: Daniel Sitnik
+fileName: instagram.star
+packageName: instagram
+recommendedInterval: 5
+category: social
+tags:
+  - media
+  - follower-count

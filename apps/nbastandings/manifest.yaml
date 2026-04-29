@@ -1,0 +1,13 @@
+---
+id: nba-standings
+name: NBA Standings
+summary: NBA basketball standings
+desc: View NBA standings by division.
+author: LunchBox8484
+fileName: nba_standings.star
+packageName: nbastandings
+recommendedInterval: 5
+category: sports
+tags:
+  - nba
+  - basketball

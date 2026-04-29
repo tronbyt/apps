@@ -1,0 +1,13 @@
+---
+id: valorant-stats
+name: VALORANT Stats
+summary: Live VALORANT Rank Stats
+desc: Pulls live VALORANT rank stats using henrikdev's Valorant API based on provided Riot ID.
+author: ohdxnte
+fileName: valorant_stats.star
+packageName: valorantstats
+recommendedInterval: 5
+category: sports
+tags:
+  - gaming
+  - real-time

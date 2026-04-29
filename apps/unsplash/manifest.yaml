@@ -1,0 +1,14 @@
+---
+id: unsplash
+name: Unsplash
+summary: Shows random photos
+desc: Displays a random image from Unsplash.
+author: zephyern, gabe565
+fileName: unsplash.star
+packageName: unsplash
+recommendedInterval: 5
+supports2x: true
+category: entertainment
+tags:
+  - art
+  - wide 2x support

@@ -1,0 +1,13 @@
+---
+id: metar
+name: METAR
+summary: METAR aviation weather
+desc: Show METAR (aviation weather) text for one airport or flight category (VFR/IFR/etc.) for up to 15 airports. Separate airport identifiers by commas to display multiple airports.
+author: all3fox
+fileName: metar.star
+packageName: metar
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - utility

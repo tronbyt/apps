@@ -1,0 +1,12 @@
+---
+id: todoist
+name: Todoist
+summary: Integration with Todoist
+desc: Shows the number of tasks you have due today.
+author: zephyern/oleksii-ivanov
+fileName: todoist.star
+packageName: todoist
+recommendedInterval: 5
+category: utilities
+tags:
+  - productivity

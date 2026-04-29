@@ -1,0 +1,17 @@
+---
+id: nauticalflags
+name: NauticalFlags
+summary: Display nautical flags
+desc: Displays nautical flags.
+author: Robert Ison
+recommendedInterval: 5
+supports2x: true
+fileName: nauticalflags.star
+packageName: nauticalflags
+category: transit
+tags:
+  - art
+  - design
+  - utility
+  - nautical
+  - flags

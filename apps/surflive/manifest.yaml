@@ -1,0 +1,16 @@
+---
+id: surflive
+name: Surflive
+summary: Live surf conditions
+desc: Shows the current surf conditions for a surf spot.
+author: Rémi Carton
+fileName: surflive.star
+packageName: surflive
+recommendedInterval: 5
+category: weather
+tags:
+  - sports
+  - nature
+  - weather
+  - utility
+  - real-time

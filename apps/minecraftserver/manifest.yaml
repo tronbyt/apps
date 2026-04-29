@@ -1,0 +1,13 @@
+---
+id: minecraft-server
+name: Minecraft Server
+summary: Displays Server Status
+desc: Displays Minecraft Server Status. Number of players and server icon.
+author: Michael Blades
+fileName: minecraft_server.star
+packageName: minecraftserver
+recommendedInterval: 5
+category: utilities
+tags:
+  - gaming
+  - tracking

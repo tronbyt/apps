@@ -1,0 +1,16 @@
+---
+id: house-of-commons
+name: House of Commons
+summary: Predicted election results
+desc: Predicted seat and vote shares for the UK's House of Commons based on opinion polls.
+author: dinosaursrarr
+recommendedInterval: 5
+fileName: house_of_commons.star
+packageName: houseofcommons
+category: sports
+tags:
+  - news
+  - local
+  - weather
+  - afl
+  - football

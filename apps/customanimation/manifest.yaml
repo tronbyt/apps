@@ -1,0 +1,13 @@
+---
+id: custom-animation
+name: Custom Animation
+summary: Display custom GIFs and images
+desc: Display a single custom image with full support for animated GIFs and static images in PNG, JPG, and BMP formats.
+author: tronbyt
+fileName: custom_animation.star
+packageName: customanimation
+recommendedInterval: 10000
+category: utilities
+tags:
+  - art
+  - utility

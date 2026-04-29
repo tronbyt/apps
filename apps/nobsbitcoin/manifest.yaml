@@ -1,0 +1,14 @@
+---
+id: nobsbitcoin
+name: NoBsBitcoin
+summary: Latest from NoBsBitcoin
+desc: Shows the the latest news article from NoBsBitcoin.
+author: PMK (@pmk)
+fileName: nobsbitcoin.star
+packageName: nobsbitcoin
+recommendedInterval: 1
+category: finance
+tags:
+  - crypto
+  - finance
+  - news

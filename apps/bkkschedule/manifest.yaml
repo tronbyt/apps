@@ -1,0 +1,13 @@
+---
+id: bkk-schedule
+name: BKK Schedule
+summary: Budapest public transit
+desc: Public transit display for Budapest, show upcoming BKK departures for a stop.
+author: tomzorz
+recommendedInterval: 5
+fileName: bkk_schedule.star
+packageName: bkkschedule
+category: transit
+tags:
+  - productivity
+  - local

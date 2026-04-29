@@ -1,0 +1,14 @@
+---
+id: twitch
+name: Twitch
+summary: Display info from Twitch
+desc: Display info for a Twitch username.
+author: Nick Penree
+fileName: twitch.star
+packageName: twitch
+recommendedInterval: 5
+category: gaming
+tags:
+  - twitch
+  - real-time
+  - media

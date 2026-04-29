@@ -1,0 +1,12 @@
+---
+id: sports-scores
+name: Sports Scores
+summary: Get daily sports scores
+desc: Get daily scores or live updates of sports. Scores for the previous day are shown until 11am ET.
+author: rs7q5
+fileName: sports_scores.star
+packageName: sportsscores
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time

@@ -1,0 +1,16 @@
+---
+id: digital-rain
+name: Digital Rain
+summary: Digital Rain à la Matrix
+desc: Generates an animation loop of falling code similar to that from the Matrix movie. A new sequence every 30 minutes.
+author: Henry So, Jr.
+fileName: digital_rain.star
+packageName: digitalrain
+recommendedInterval: 5
+supports2x: true
+category: entertainment
+tags:
+  - tech
+  - science
+  - art
+  - wide 2x support

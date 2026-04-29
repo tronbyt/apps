@@ -1,0 +1,11 @@
+---
+id: pomodoro
+name: Pomodoro
+summary: Pomodoro Timer
+desc: A time management tool to break work into intervals.
+author: rwong2888
+recommendedInterval: 1
+category: lifestyle
+tags:
+  - focus
+  - productivity

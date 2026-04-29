@@ -1,0 +1,15 @@
+---
+id: life-clock
+name: Life Clock
+summary: Game of Life on a clock
+desc: Plays Conway's Game of Life using the pixels of a clock display as the starting point (clock stays visible at all times).
+author: kevwoods
+fileName: life_clock.star
+packageName: lifeclock
+recommendedInterval: 0
+category: clocks
+tags:
+  - game-of-life
+  - clock
+  - utility
+  - art

@@ -1,0 +1,14 @@
+---
+id: coin-prices
+name: Coin Prices
+summary: Show coin price
+desc: Show Current exchange rate for multiple coins.
+author: alan-oliv
+fileName: coin_prices.star
+packageName: coinprices
+recommendedInterval: 1
+category: utilities
+tags:
+  - crypto
+  - finance
+  - utility

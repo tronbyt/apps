@@ -1,0 +1,14 @@
+---
+id: birdbyt
+name: Birdbyt
+summary: Show nearby bird sightings
+desc: Displays a random bird sighting near a specific location (data via Cornell Lab of Ornithology's eBird API).
+author: Becky Sweger
+fileName: birdbyt.star
+packageName: birdbyt
+recommendedInterval: 5
+category: utilities
+tags:
+  - nature
+  - weather
+  - local

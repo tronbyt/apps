@@ -1,0 +1,13 @@
+---
+id: xscreensaver
+name: XScreenSaver
+summary: Hundreds of animations
+desc: Shows two hundred and sixty-five different XScreenSaver animations, all scaled (way) down for the Tidbyt.
+author: Greg Knauss and XScreenSaver
+fileName: xscreensaver.star
+packageName: xscreensaver
+recommendedInterval: 5
+category: art
+tags:
+  - art
+  - retro

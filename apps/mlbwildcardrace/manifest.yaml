@@ -1,0 +1,13 @@
+---
+id: mlb-wildcard-race
+name: MLB WildCard Race
+summary: Display wild card race
+desc: Displays the standings (in terms of games behind) for the MLB wild card in each league.
+author: Jake Manske
+fileName: mlb_wildcard_race.star
+packageName: mlbwildcardrace
+recommendedInterval: 5
+category: sports
+tags:
+  - mlb
+  - baseball

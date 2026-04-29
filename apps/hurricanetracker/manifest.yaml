@@ -1,0 +1,13 @@
+---
+id: hurricanetracker
+name: HurricaneTracker
+summary: NHC Hurricane Information
+desc: Display NHC Hurricane info.
+author: Robert Ison
+fileName: hurricanetracker.star
+packageName: hurricanetracker
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - tracking

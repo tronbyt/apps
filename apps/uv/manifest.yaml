@@ -1,0 +1,13 @@
+---
+id: uv
+name: UV
+summary: UV Index
+desc: UV index for your location.
+author: j-esse
+fileName: uv.star
+packageName: uv
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - lifestyle

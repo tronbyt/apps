@@ -1,0 +1,15 @@
+---
+id: park-wait-times
+name: ParkWaitTimes
+summary: Theme Park Wait Times
+desc: Displays theme park ride wait times at various theme parks.
+author: hx009
+fileName: parkwaittimes.star
+packageName: parkwaittimes
+recommendedInterval: 5
+category: transit
+tags:
+  - theme-parks
+  - wait-times
+  - music
+  - utility

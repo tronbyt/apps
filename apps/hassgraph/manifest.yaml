@@ -1,0 +1,14 @@
+---
+id: hass-graph
+name: HASS Graph
+summary: Graph for HA entity
+desc: Shows a graph and stats for a Home Assistant entity (e.g. temperature).
+author: vincentezw
+recommendedInterval: 5
+fileName: hass_graph.star
+packageName: hassgraph
+category: utilities
+tags:
+  - smart-home
+  - sports
+  - utility

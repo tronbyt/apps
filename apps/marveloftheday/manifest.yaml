@@ -1,0 +1,16 @@
+---
+id: marvel-of-the-day
+name: Marvel of the Day
+summary: A Marvel character a day
+desc: Shows the name and image of a Marvel Comics character using the Marvel API.
+author: flynnt
+fileName: marvel_of_the_day.star
+packageName: marveloftheday
+recommendedInterval: 5
+broken: true
+brokenReason: API access closed
+category: entertainment
+tags:
+  - media
+  - time
+  - music

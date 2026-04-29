@@ -1,0 +1,13 @@
+---
+id: spanish-wotd
+name: Spanish WotD
+summary: Spanish Word del Dia
+desc: Displays the Spanish Word of the Day from SpanishDict.com.
+author: logancornelius
+fileName: spanish_wotd.star
+packageName: spanishwotd
+recommendedInterval: 5
+category: education
+tags:
+  - education
+  - language-learning

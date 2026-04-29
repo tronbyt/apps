@@ -1,0 +1,13 @@
+---
+id: gen-con-countdown
+name: Gen Con Countdown
+summary: Counts down to Gen Con
+desc: Counts down the days until the next Gen Con.
+author: nikmd23
+fileName: gen_con_countdown.star
+packageName: genconcountdown
+recommendedInterval: 5
+category: gaming
+tags:
+  - fandom
+  - time

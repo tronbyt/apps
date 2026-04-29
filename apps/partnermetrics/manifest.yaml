@@ -1,0 +1,14 @@
+---
+id: partnermetrics
+name: Partnermetrics
+summary: Partnermetrics app chart
+desc: Show your Partnermetrics app stats. Data is fetched from Partnermetrics.io.
+author: Rishabh Tayal
+fileName: partnermetrics.star
+packageName: partnermetrics
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - sports
+  - utility

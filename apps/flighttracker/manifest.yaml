@@ -1,0 +1,12 @@
+---
+id: flighttracker
+name: FlightTracker
+summary: FlightAware API + Tidbyt
+desc: Tracks flights via given Flight Number or airport code.
+author: samuelsagarino
+fileName: flighttracker.star
+packageName: flighttracker
+recommendedInterval: 5
+category: transit
+tags:
+  - utility

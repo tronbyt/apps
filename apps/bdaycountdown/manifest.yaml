@@ -1,0 +1,16 @@
+---
+id: bday-countdown
+name: Bday Countdown
+summary: Create a bday countdown
+desc: Create a bday countdown!
+author: Jared Brockmyre
+fileName: bday_countdown.star
+packageName: bdaycountdown
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - lifestyle
+  - time
+  - utility
+  - wide 2x support

@@ -1,0 +1,14 @@
+---
+id: one-piece-bdays
+name: One Piece Bdays
+summary: Today's OP Character Bdays
+desc: Lists all One Piece characters celebrating their birthday today.
+author: raymbartlett
+fileName: one_piece_bdays.star
+packageName: onepiecebdays
+recommendedInterval: 5
+category: entertainment
+tags:
+  - lifestyle
+  - media
+  - anime

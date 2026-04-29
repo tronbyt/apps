@@ -1,0 +1,15 @@
+---
+id: dailykanji
+name: DailyKanji
+summary: Displays a random Kanji
+desc: Displays a random Kanji character with translation.
+author: Robert Ison
+fileName: dailykanji.star
+packageName: dailykanji
+recommendedInterval: 5
+supports2x: true
+category: education
+tags:
+  - education
+  - news
+  - wide 2x support

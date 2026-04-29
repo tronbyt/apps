@@ -1,0 +1,13 @@
+---
+id: wowcharacterstats
+name: WowCharacterStats
+summary: Show stats for a WoW toon
+desc: Show statistics for a World of Warcraft character. Stats shown include name, class, item level, Mythic+ rating, and raid progress.
+author: KDubs
+fileName: wowcharacterstats.star
+packageName: wowcharacterstats
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - sports

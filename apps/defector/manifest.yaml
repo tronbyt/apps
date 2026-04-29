@@ -1,0 +1,12 @@
+---
+id: defector
+name: Defector
+summary: Display a Defector headline
+desc: Displays a recent headline from Defector.com.
+author: Rory Sawyer
+fileName: defector.star
+packageName: defector
+recommendedInterval: 10
+category: entertainment
+tags:
+  - news

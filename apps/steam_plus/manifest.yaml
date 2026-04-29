@@ -1,0 +1,15 @@
+---
+id: steam-plus
+name: Steam Plus
+summary: Show Steam user status
+desc: Shows Steam user avatar, name, status, and currently playing.
+author: Mike Toscano
+fileName: steam_plus.star
+packageName: steamplus
+recommendedInterval: 5
+category: utilities
+tags:
+  - gaming
+  - tech
+  - tracking
+  - utility

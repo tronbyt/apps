@@ -1,0 +1,14 @@
+---
+id: knmialert
+name: KNMIalert
+summary: Weather alerts Netherlands
+desc: Only displays active live weather alerts by KNMI for The Netherlands.
+author: PMK (@pmk)
+fileName: knmialert.star
+packageName: knmialert
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - notification
+  - local

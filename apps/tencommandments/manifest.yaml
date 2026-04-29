@@ -1,0 +1,14 @@
+---
+id: ten-commandments
+name: Ten Commandments
+summary: Displays ten commandments
+desc: Displays the ten commandments.
+author: Robert Ison
+fileName: ten_commandments.star
+packageName: tencommandments
+recommendedInterval: 5
+category: art
+tags:
+  - lifestyle
+  - art
+  - tech

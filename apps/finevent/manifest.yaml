@@ -1,0 +1,13 @@
+---
+id: finevent
+name: Finevent
+summary: Economic Releases
+desc: Displays recent and upcoming economic releases.
+author: Rob Kimball
+fileName: finevent.star
+packageName: finevent
+recommendedInterval: 5
+category: finance
+tags:
+  - finance
+  - news

@@ -1,0 +1,15 @@
+---
+id: nationaltoday
+name: NationalToday
+summary: Get NationalToday holidays
+desc: Displays today's holidays from NationalToday.
+author: rs7q5
+fileName: nationaltoday.star
+packageName: nationaltoday
+recommendedInterval: 5
+category: utilities
+tags:
+  - time
+  - news
+  - productivity
+  - lifestyle

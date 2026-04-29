@@ -1,0 +1,14 @@
+---
+id: amazing
+name: Amazing
+summary: Draws lovely mazes
+desc: Draws mazes on the screen and animates progress as it goes.
+author: dinosaursrarr
+fileName: amazing.star
+packageName: amazing
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - art
+  - retro

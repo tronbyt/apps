@@ -1,0 +1,14 @@
+---
+id: gradientclocktwo
+name: Gradient Clock Anim
+summary: Animated Gradient Clock
+desc: Clock displayed over animated, colorful gradient background.
+author: tpatel12
+supports2x: true
+recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - art
+  - colorful
+  - wide 2x support

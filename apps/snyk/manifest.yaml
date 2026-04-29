@@ -1,0 +1,14 @@
+---
+id: snyk
+name: Snyk
+summary: Snyk project issue counts
+desc: Shows medium/high/critical issue counts for the configured Snyk project.
+author: Andrew Powell
+fileName: snyk.star
+packageName: snyk
+recommendedInterval: 5
+category: utilities
+tags:
+  - smart-home
+  - tracking
+  - tech

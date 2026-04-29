@@ -1,0 +1,10 @@
+---
+id: ddayclock
+name: DDayClock
+summary: Displays current DD Clock
+desc: Gets the current Doomsday Clock data from https://www.doomsdayclock.net/ daily.
+author: LLarry
+category: news
+tags:
+  - clock
+  - news

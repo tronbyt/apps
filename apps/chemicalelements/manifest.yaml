@@ -1,0 +1,16 @@
+---
+id: chemical-elements
+name: Chemical Elements
+summary: Chemical Element Details
+desc: Displays chemical element details.
+author: Robert Ison
+fileName: chemical_elements.star
+packageName: chemicalelements
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - tech
+  - science
+  - utility
+  - wide 2x support

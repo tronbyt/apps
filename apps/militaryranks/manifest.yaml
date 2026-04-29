@@ -1,0 +1,14 @@
+---
+id: military-ranks
+name: Military Ranks
+summary: Display military ranks
+desc: Displays military ranks.
+author: Robert Ison
+fileName: military_ranks.star
+packageName: militaryranks
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - sports
+  - utility

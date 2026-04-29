@@ -1,0 +1,13 @@
+---
+id: raw-metar
+name: Raw METAR
+summary: METAR text weather reports
+desc: METAR text weather reports for pilots.
+author: tabrindle
+fileName: raw_metar.star
+packageName: rawmetar
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - utility

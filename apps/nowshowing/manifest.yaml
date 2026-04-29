@@ -1,0 +1,12 @@
+---
+id: nowshowing
+name: NowShowing
+summary: Current movies in theaters
+desc: Displays current movies in theaters.
+author: Robert Ison
+recommendedInterval: 5
+category: entertainment
+tags:
+  - media
+  - theaters
+  - music

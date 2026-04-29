@@ -1,0 +1,13 @@
+---
+id: lichesscorrespond
+name: LichessCorrespond
+summary: Shows correspondence games
+desc: Shows active correspondence games currently waiting on you for a move.
+author: Denton-L
+fileName: lichesscorrespond.star
+packageName: lichesscorrespond
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - tech

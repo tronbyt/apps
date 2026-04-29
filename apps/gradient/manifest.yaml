@@ -1,0 +1,14 @@
+---
+id: gradient
+name: Gradient
+summary: Displays dynamic gradients
+desc: Customize gradient fills for your Tidbyt.
+author: Jeffrey Lancaster
+fileName: gradient.star
+packageName: gradient
+category: utilities
+tags:
+  - tidbyt
+  - customization
+  - art
+  - utility

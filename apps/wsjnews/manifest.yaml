@@ -1,0 +1,13 @@
+---
+id: wsj-news
+name: WSJ News
+summary: Wall Street Journal News
+desc: Display Wall Street Journal news headlines.
+author: jvivona
+fileName: wsj_news.star
+packageName: wsjnews
+recommendedInterval: 10
+category: news
+tags:
+  - news
+  - finance

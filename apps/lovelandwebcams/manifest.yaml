@@ -1,0 +1,15 @@
+---
+id: loveland-webcams
+name: Loveland Webcams
+summary: Loveland Ski Area Webcams
+desc: Displays random webcam images from Loveland Ski Area.
+author: John Sprunger
+fileName: loveland_webcams.star
+packageName: lovelandwebcams
+recommendedInterval: 5
+category: utilities
+tags:
+  - sports
+  - nature
+  - real-time
+  - weather

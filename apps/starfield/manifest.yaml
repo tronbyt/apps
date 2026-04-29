@@ -1,0 +1,15 @@
+---
+id: starfield
+name: Starfield
+summary: Fly through a starfield
+desc: This app simulates flying through a starfield.
+author: gabe565
+fileName: starfield.star
+packageName: starfield
+recommendedInterval: 5
+supports2x: true
+category: entertainment
+tags:
+  - space
+  - art
+  - wide 2x support

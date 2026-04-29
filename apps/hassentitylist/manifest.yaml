@@ -1,0 +1,16 @@
+---
+id: hassentitylist
+name: HASS Entity List
+summary: Show HomeAssistant entitys
+desc: Displays multiple HomeAssistant entities (e.g. step counts).
+author: James Woglom
+fileName: hassentitylist.star
+packageName: hassentitylist
+recommendedInterval: 5
+supports2x: true
+category: smart-home
+tags:
+  - smart-home
+  - lifestyle
+  - utility
+  - wide 2x support

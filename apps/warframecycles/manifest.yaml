@@ -1,0 +1,15 @@
+---
+id: warframe-cycles
+name: Warframe Cycles
+summary: Time in Warframe open areas
+desc: Tells you the cycle that's active in each of the Warframe open areas and in Earth missions.
+author: grantmatheny
+fileName: warframe_cycles.star
+packageName: warframecycles
+recommendedInterval: 5
+broken: true
+brokenReason: API endpoint (api.warframestat.us/pc) returns 404/Redirect loop.
+category: games
+tags:
+  - gaming
+  - tracking

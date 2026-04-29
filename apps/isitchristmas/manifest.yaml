@@ -1,0 +1,13 @@
+---
+id: is-it-christmas
+name: Is It Christmas
+summary: 'Is it christmas: yes/no'
+desc: 'Is it christmas: yes/no.'
+author: Austin Fonacier
+fileName: is_it_christmas.star
+packageName: isitchristmas
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - time
+  - utility

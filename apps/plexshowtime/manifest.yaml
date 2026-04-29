@@ -1,0 +1,14 @@
+---
+id: plex-showtime
+name: Plex Showtime
+summary: Explore your Plex library
+desc: View recently added or played media, or your entire media library.
+author: MichaelYagi
+recommendedInterval: 5
+fileName: plex_showtime.star
+packageName: plexshowtime
+category: clocks
+tags:
+  - plex
+  - media-library
+  - library-viewer

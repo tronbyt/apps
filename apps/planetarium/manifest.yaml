@@ -1,0 +1,14 @@
+---
+id: planetarium
+name: Planetarium
+summary: Solar system positions
+desc: Shows the current positions of the planets in the solar system.
+author: rs7q5
+fileName: planetarium.star
+packageName: planetarium
+broken: true
+category: science
+tags:
+  - space
+  - science
+  - planets

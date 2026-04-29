@@ -1,0 +1,16 @@
+---
+id: dutch-fuzzy-clock
+name: Dutch Fuzzy Clock
+summary: Dutch readable time
+desc: Display the time in Dutch, human-readable way.
+author: Remy Blok
+fileName: dutch_fuzzy_clock.star
+packageName: dutchfuzzyclock
+recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - dutch
+  - utility
+  - clock
+  - education

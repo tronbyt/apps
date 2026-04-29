@@ -1,0 +1,12 @@
+---
+id: league-champs
+name: League Champs
+summary: Display league characters
+desc: Shows league of legends champsions and info about them.
+author: xl0lli
+fileName: league_champs.star
+packageName: leaguechamps
+recommendedInterval: 5
+category: gaming
+tags:
+  - utility

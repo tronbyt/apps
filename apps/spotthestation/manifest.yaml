@@ -1,0 +1,16 @@
+---
+id: spotthestation
+name: SpotTheStation
+summary: Next ISS visit overhead
+desc: Goto N2yo.com and create an API Key to display the next ISS pass overhead for your location.
+author: Robert Ison
+fileName: spotthestation.star
+packageName: spotthestation
+recommendedInterval: 5
+supports2x: true
+category: science
+tags:
+  - space
+  - tech
+  - science
+  - wide 2x support

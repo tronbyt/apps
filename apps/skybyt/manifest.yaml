@@ -1,0 +1,13 @@
+---
+id: skybyt
+name: Skybyt
+summary: Bluesky follower count
+desc: Displays a Bluesky user's follower count.
+author: Alex Karp
+fileName: skybyt.star
+packageName: skybyt
+recommendedInterval: 5
+category: utilities
+tags:
+  - media
+  - follower-count

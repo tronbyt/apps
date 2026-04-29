@@ -1,0 +1,13 @@
+---
+id: washer
+name: Washer
+summary: 'Notification: washer'
+desc: Displays a notification that the washing machine is done.
+author: savdagod
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - smart-home
+  - utility
+  - wide 2x support

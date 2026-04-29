@@ -1,0 +1,14 @@
+---
+id: tronbytupdates
+name: Tronbyt Updates
+summary: New and updated Apps available
+desc: Display new and udpated apps available on Tronbyt.
+author: Robert Ison
+supports2x: true
+fileName: tronbytupdates.star
+packageName: tronbytupdates
+category: utilities
+tags:
+  - utility
+  - tech
+  - wide 2x support

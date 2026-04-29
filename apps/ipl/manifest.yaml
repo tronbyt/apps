@@ -1,0 +1,15 @@
+---
+id: ipl
+name: IPL
+summary: Indian Premier League
+desc: Shows scores for the Indian Premier League.
+author: M0ntyP
+fileName: ipl.star
+packageName: ipl
+recommendedInterval: 5
+broken: true
+brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).
+category: sports
+tags:
+  - ipl
+  - cricket

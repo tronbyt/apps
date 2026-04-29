@@ -1,0 +1,14 @@
+---
+id: sanfl-ladder
+name: SANFL Ladder
+summary: Shows the SANFL Ladder
+desc: Shows the SANFL Ladder.
+author: M0ntyP
+recommendedInterval: 5
+fileName: sanfl_ladder.star
+packageName: sanflladder
+category: sports
+tags:
+  - ladder
+  - sanfl
+  - football

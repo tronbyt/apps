@@ -1,0 +1,15 @@
+---
+id: psl-cricket
+name: PSL Cricket
+summary: Displays scores for PSL
+desc: Copy from the others.
+author: M0ntyP
+fileName: psl_cricket.star
+packageName: pslcricket
+recommendedInterval: 5
+broken: true
+brokenReason: API access blocked (403 Forbidden)
+category: sports
+tags:
+  - real-time
+  - cricket

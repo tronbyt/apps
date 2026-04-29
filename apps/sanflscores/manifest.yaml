@@ -1,0 +1,13 @@
+---
+id: sanfl-scores
+name: SANFL Scores
+summary: Shows SANFL Scores
+desc: Shows football scores for the SANFL.
+author: M0ntyP
+recommendedInterval: 5
+fileName: sanfl_scores.star
+packageName: sanflscores
+category: sports
+tags:
+  - sanfl
+  - football

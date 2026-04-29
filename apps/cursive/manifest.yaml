@@ -1,0 +1,15 @@
+---
+id: cursive
+name: Cursive
+summary: Writes cursive words
+desc: Writes your words in cursive on screen.
+author: Robert Ison
+fileName: cursive.star
+packageName: cursive
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - utility
+  - art
+  - wide 2x support

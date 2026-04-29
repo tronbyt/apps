@@ -1,0 +1,13 @@
+---
+id: ouraring
+name: Oura Ring
+summary: View your Oura Ring scores
+desc: Displays the three scores from your Oura Ring along with a historical chart over the past seven days.
+author: Aiden Vigue
+fileName: ouraring.star
+packageName: ouraring
+recommendedInterval: 5
+category: health
+tags:
+  - lifestyle
+  - tracking

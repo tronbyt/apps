@@ -1,0 +1,13 @@
+---
+id: mlb-magic-number
+name: MLB Magic Number
+summary: Display magic number
+desc: Displays the magic number or the elimination number of your favorite MLB team.
+author: Jake Manske
+fileName: mlb_magic_number.star
+packageName: mlbmagicnumber
+recommendedInterval: 5
+category: sports
+tags:
+  - mlb
+  - baseball

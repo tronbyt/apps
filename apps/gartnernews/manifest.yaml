@@ -1,0 +1,14 @@
+---
+id: gartner-news
+name: Gartner News
+summary: Gartner News Display
+desc: Display Gartner News Feed.
+author: Robert Ison
+fileName: gartner_news.star
+packageName: gartnernews
+recommendedInterval: 5
+broken: true
+category: news
+tags:
+  - news
+  - tech

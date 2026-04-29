@@ -1,0 +1,14 @@
+---
+id: cisaticker
+name: CISA Top Alerts
+summary: Live CISA alert ticker
+desc: Displays the top 3 CISA cybersecurity alert titles simultaneously on your Tidbyt, each scrolling in its own color-coded row. Data is pulled live from the official CISA RSS feed and refreshed every 30 minutes.
+author: Rosie Domenech
+fileName: cisaticker.star
+packageName: cisaticker
+category: news
+tags:
+  - news
+  - security
+  - cybersecurity
+  - alerts

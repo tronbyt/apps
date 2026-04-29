@@ -1,0 +1,14 @@
+---
+id: flipclock
+name: FlipClock
+summary: A simple flip clock
+desc: Displays the time with a flip clock animation.
+author: rs7q5
+fileName: flipclock.star
+packageName: flipclock
+broken: true
+category: clocks
+tags:
+  - clock
+  - time
+  - utility

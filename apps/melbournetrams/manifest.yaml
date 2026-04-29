@@ -1,0 +1,11 @@
+---
+id: melbourne-trams
+name: Melbourne Trams
+summary: Melbourne Tram Departures
+desc: Real time tram departures for your preferred stop in Melbourne, Australia.
+author: bendiep
+fileName: melbourne_trams.star
+packageName: melbournetrams
+recommendedInterval: 5
+category: transit
+tags:

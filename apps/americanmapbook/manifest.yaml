@@ -1,0 +1,13 @@
+---
+id: american-mapbook
+name: American Mapbook
+summary: Map capitols, parks & sites
+desc: Map visited capitols, parks and sites.
+author: Robert Ison
+recommendedInterval: 5
+supports2x: true
+category: transit
+tags:
+  - utility
+  - science
+  - wide 2x support

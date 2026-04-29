@@ -1,0 +1,14 @@
+---
+id: trash
+name: Trash
+summary: 'Notification: trash'
+desc: Displays a reminder to take out the trash.
+author: savdagod
+recommendedInterval: 5
+supports2x: true
+category: lifestyle
+tags:
+  - productivity
+  - utility
+  - smart-home
+  - wide 2x support

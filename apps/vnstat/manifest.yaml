@@ -1,0 +1,12 @@
+---
+id: vnstat
+name: VNStat Monitor
+summary: Network usage statistics
+desc: Display network usage statistics from VNStat via OPNsense API including total and monthly data transfer amounts.
+author: StarrLord
+recommendedInterval: 15
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility

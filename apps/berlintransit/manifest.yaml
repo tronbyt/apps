@@ -1,0 +1,12 @@
+---
+id: berlin-transit
+name: Berlin Transit
+summary: Trains/Bus in Berlin
+desc: Provides upcoming train and bus departures for a given Berlin station.
+author: flambeauRiverTours
+recommendedInterval: 5
+fileName: berlin_transit.star
+packageName: berlintransit
+category: transit
+tags:
+  - local

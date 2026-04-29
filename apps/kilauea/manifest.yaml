@@ -1,0 +1,14 @@
+---
+id: kilauea
+name: Kilauea
+summary: Kilauea volcano status and image
+desc: Displays the current USGS alert level and webcam for Kilauea volcano.
+author: Tavis
+recommendedInterval: 10
+supports2x: true
+category: science
+tags:
+  - science
+  - nature
+  - alert
+  - wide 2x support

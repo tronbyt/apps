@@ -1,0 +1,14 @@
+---
+id: shopify-animation
+name: Shoppy Pixels
+summary: Animated Shoppy app
+desc: Enjoy a retro animated experience with Shoppy, the entrepreneurs mascot.
+author: Shopify
+fileName: shopify_animation.star
+packageName: shopifyanimation
+recommendedInterval: 5
+category: entertainment
+tags:
+  - retro
+  - utility
+  - art

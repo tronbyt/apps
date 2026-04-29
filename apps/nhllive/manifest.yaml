@@ -1,0 +1,14 @@
+---
+id: nhl-live
+name: NHL Live
+summary: Live updates of NHL games
+desc: Displays live game stats or next scheduled NHL game information.
+author: Reed Arneson
+fileName: nhl_live.star
+packageName: nhllive
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time
+  - nhl
+  - hockey

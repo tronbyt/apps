@@ -1,0 +1,16 @@
+---
+id: fuzzy-clock
+name: Fuzzy Clock
+summary: Human readable time
+desc: Display the time in a groovy, human-readable way.
+author: Max Timkovich
+fileName: fuzzy_clock.star
+packageName: fuzzyclock
+recommendedInterval: 1
+supports2x: true
+category: clocks
+tags:
+  - time
+  - clock
+  - retro
+  - wide 2x support

@@ -1,0 +1,13 @@
+---
+id: advice
+name: Advice
+summary: Random advice API
+desc: Shows random advice from AdviceSlip.com.
+author: mrrobot245
+fileName: advice.star
+packageName: advice
+recommendedInterval: 5
+category: entertainment
+tags:
+  - motivational
+  - media

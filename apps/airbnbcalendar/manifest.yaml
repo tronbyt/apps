@@ -1,0 +1,15 @@
+---
+id: airbnbcalendar
+name: Airbnb Calendar
+summary: Calendar for Airbnb hosts
+desc: A calendar that shows the coming week of occupancy for multiple Airbnb listings.
+author: Jed Schmidt
+fileName: airbnb_calendar.star
+packageName: airbnbcalendar
+recommendedInterval: 60
+category: utilities
+tags:
+  - tech
+  - finance
+  - utility
+  - productivity

@@ -1,0 +1,13 @@
+---
+id: currencyconverter
+name: CurrencyConverter
+summary: Displays Currency Exchange
+desc: Displays current currency exchange rates.
+author: Robert Ison
+fileName: currencyconverter.star
+packageName: currencyconverter
+recommendedInterval: 5
+category: utilities
+tags:
+  - finance
+  - utility
