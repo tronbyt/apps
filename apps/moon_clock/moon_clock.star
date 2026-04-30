@@ -1,5 +1,5 @@
 load("encoding/json.star", "json")
-load("http.star", "http") # Needed for the IP lookup
+load("http.star", "http")  # Needed for the IP lookup
 load("math.star", "math")
 load("moon_assets.star", "get_moon_image")
 load("render.star", "render")
