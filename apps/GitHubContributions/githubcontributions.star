@@ -13,11 +13,9 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 CACHE_TTL = 3600 * 4
 CACHE_PREFIX = "github_contributions_"
-
 
 CONTRIBUTION_COLORS = [
     "#1a1a1a",
@@ -26,7 +24,6 @@ CONTRIBUTION_COLORS = [
     "#30a14e",
     "#216e39",
 ]
-
 
 def get_contributions(username, token):
     cache_key = "{}_{}".format(CACHE_PREFIX, username.lower())
@@ -73,7 +70,6 @@ def get_contributions(username, token):
     cache.set(cache_key, json.encode(data), ttl_seconds = CACHE_TTL)
     return data
 
-
 def normalize_contributions(weeks_data):
     if not weeks_data or not weeks_data.get("weeks"):
         return []
@@ -87,14 +83,13 @@ def normalize_contributions(weeks_data):
             weekday = int(day["weekday"])
             count = int(day["contributionCount"])
             grid[weekday][week_idx] = (
-                (1 if count > 0 else 0)
-                + (1 if count >= 3 else 0)
-                + (1 if count >= 5 else 0)
-                + (1 if count >= 10 else 0)
+                (1 if count > 0 else 0) +
+                (1 if count >= 3 else 0) +
+                (1 if count >= 5 else 0) +
+                (1 if count >= 10 else 0)
             )
 
     return grid
-
 
 def render_contribution_graph(grid):
     if not grid or not grid[0]:
@@ -133,18 +128,15 @@ def render_contribution_graph(grid):
 
     return render.Column(children = children)
 
-
 def get_graph_width(cols):
     cell_width = 8 if canvas.is2x() else 4
     gap = 1
     left_padding = 6 if canvas.is2x() else 2
     return left_padding + cols * cell_width + (cols - 1) * gap
 
-
 def ease_in_out(t):
     # Smooth step: starts slow, speeds up, slows down
     return t * t * (3 - 2 * t)
-
 
 def viewport_frame(graph, offset, screen_width):
     # offset: 0         = leftmost view
@@ -158,7 +150,6 @@ def viewport_frame(graph, offset, screen_width):
         offset_end = -offset,
     )
 
-
 def get_phased_graph(grid):
     graph = render_contribution_graph(grid)
 
@@ -168,45 +159,56 @@ def get_phased_graph(grid):
     cols = len(grid[0])
     graph_width = get_graph_width(cols)
     screen_width = 128 if canvas.is2x() else 64
-
-    # No scroll needed if graph fits
-    if graph_width <= screen_width:
-        return graph
-
-    # When offset == max_scroll, the last week is at the right edge
+    
+    # We want "half a screen" of black space at the start
+    leading_space = screen_width // 8
+    
+    # Total scrollable distance now includes that extra leading space
+    # We start at -leading_space and end at max_scroll
     max_scroll = graph_width - screen_width
 
-    hold_frames = 30      # 30 * 100ms ≈ 3 seconds
-    scroll_frames = 50    # tune for speed / smoothness
-
+    hold_frames = 15 
+    hold_frames_end = 100  
+    scroll_frames = 90 # Increased slightly because we're traveling further now
     children = []
 
-    start_frame = viewport_frame(graph, 0, screen_width)
-    end_frame = viewport_frame(graph, max_scroll, screen_width)
+    def make_frame(x_offset):
+        return render.Box(
+            width = screen_width,
+            height = 32 if not canvas.is2x() else 64,
+            child = render.Padding(
+                # Adding leading_space to the offset to push the start of the graph 
+                # into the middle of the screen initially.
+                pad = (int(leading_space - x_offset), 0, 0, 0),
+                child = graph,
+            )
+        )
 
-    # 1) Hold at LEFT
+    # 1) Start: Graph is pushed halfway into the screen, pause 3s
+    start_frame = make_frame(0)
     children.extend([start_frame] * hold_frames)
 
-    # 2) Scroll LEFT → RIGHT (0 → max_scroll)
-    for i in range(1, scroll_frames + 1):
+    # 2) Scroll: Move from the starting "half-black" view to the end
+    # We calculate the total distance to cover both the leading space AND the graph width
+    total_distance = max_scroll + leading_space
+    
+    for i in range(scroll_frames):
         t = float(i) / scroll_frames
         eased = ease_in_out(t)
-        x = int(eased * max_scroll)
-        children.append(viewport_frame(graph, x, screen_width))
+        # We scroll from 0 offset to the total distance
+        children.append(make_frame(eased * total_distance))
 
-    # 3) Hold at RIGHT
-    children.extend([end_frame] * hold_frames)
+    # 3) End: Current week is aligned to the right edge, pause 3s
+    # After this, the Tidbyt loop will restart the animation from the beginning.
+    end_frame = make_frame(total_distance)
+    children.extend([end_frame] * hold_frames_end)
 
-    # 4) Scroll RIGHT → LEFT (max_scroll → 0)
-    for i in range(1, scroll_frames + 1):
-        t = float(i) / scroll_frames
-        eased = ease_in_out(t)
-        x = int((1.0 - eased) * max_scroll)
-        children.append(viewport_frame(graph, x, screen_width))
+    # Fade to black/blank for 1 second before the loop restarts
+    blank_frame = render.Box(width = screen_width, height = 32 if not canvas.is2x() else 64, color = "#000")
+    children.extend([blank_frame] * 10)
 
     return render.Animation(children = children)
-
-
+    
 def main(config):
     username = config.str("username", "")
     token = config.str("token", "")
@@ -227,11 +229,10 @@ def main(config):
     grid = normalize_contributions(weeks_data)
 
     return render.Root(
-        delay = 100,                 # 100ms per frame
+        delay = 100,  # 100ms per frame
         show_full_animation = True,
         child = get_phased_graph(grid),
     )
-
 
 def get_schema():
     return schema.Schema(
