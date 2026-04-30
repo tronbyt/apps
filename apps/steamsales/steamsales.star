@@ -24,21 +24,21 @@ def main(config):
                 main_align = "space_around",
                 cross_align = "center",
                 children = [
-                    render.Text("set api key", color="#ffaa00", font="6x10"),
+                    render.Text("set api key", color = "#ffaa00", font = "6x10"),
                     render.Row(
                         children = [
-                            render.Text("Sales: ", color="#fff"),
-                            render.Text(str(0), color="#00ff00"),
-                        ]
+                            render.Text("Sales: ", color = "#fff"),
+                            render.Text(str(0), color = "#00ff00"),
+                        ],
                     ),
                     render.Row(
                         children = [
-                            render.Text("Wishlists: ", color="#fff"),
-                            render.Text(str(0), color="#00aaff"),
-                        ]
+                            render.Text("Wishlists: ", color = "#fff"),
+                            render.Text(str(0), color = "#00aaff"),
+                        ],
                     ),
                 ],
-            )
+            ),
         )
     if not app_id:
         return render.Root(
@@ -47,21 +47,21 @@ def main(config):
                 main_align = "space_around",
                 cross_align = "center",
                 children = [
-                    render.Text("set app id", color="#ffaa00", font="6x10"),
+                    render.Text("set app id", color = "#ffaa00", font = "6x10"),
                     render.Row(
                         children = [
-                            render.Text("0: ", color="#fff"),
-                            render.Text(str(sales), color="#00ff00"),
-                        ]
+                            render.Text("0: ", color = "#fff"),
+                            render.Text(str(0), color = "#00ff00"),
+                        ],
                     ),
                     render.Row(
                         children = [
-                            render.Text("Wishlists: ", color="#fff"),
-                            render.Text(str(0), color="#00aaff"),
-                        ]
+                            render.Text("Wishlists: ", color = "#fff"),
+                            render.Text(str(0), color = "#00aaff"),
+                        ],
                     ),
                 ],
-            )
+            ),
         )
 
     # get total sales
@@ -94,30 +94,30 @@ def main(config):
     #         print(data)
     #         for result in data["results"]:
     #             salesData.append(result)
-    
-    params={
+
+    params = {
         "key": api_key,
         "appid": app_id,
         "date": today,
         "highwatermark_id": "0",
     }
-    res = http.get(SALES_URL, params=params)
+    res = http.get(SALES_URL, params = params)
     if res.status_code == 200:
         data = res.json()["response"]
         for result in data.get("results", []):
             salesData.append(result)
-    
-    params={
+
+    params = {
         "key": api_key,
         "appid": app_id,
         "date": today,
     }
-    res = http.get(WISHLIST_URL, params=params)
+    res = http.get(WISHLIST_URL, params = params)
     if res.status_code == 200:
         data = res.json()["response"]
         for result in data.get("results", []):
             wishlistData.append(result)
-        
+
     sales = 0
     wishlistAdds = 0
     for sale in salesData:
@@ -133,21 +133,21 @@ def main(config):
             main_align = "space_around",
             cross_align = "center",
             children = [
-                render.Text(game_name, color="#ffaa00", font="6x10"),
+                render.Text(game_name, color = "#ffaa00", font = "6x10"),
                 render.Row(
                     children = [
-                        render.Text("Sales: ", color="#fff"),
-                        render.Text(str(sales), color="#00ff00"),
-                    ]
+                        render.Text("Sales: ", color = "#fff"),
+                        render.Text(str(sales), color = "#00ff00"),
+                    ],
                 ),
                 render.Row(
                     children = [
-                        render.Text("Wishlists: ", color="#fff"),
-                        render.Text(str(wishlistAdds), color="#00aaff"),
-                    ]
+                        render.Text("Wishlists: ", color = "#fff"),
+                        render.Text(str(wishlistAdds), color = "#00aaff"),
+                    ],
                 ),
             ],
-        )
+        ),
     )
 
 def get_schema():
@@ -171,6 +171,6 @@ def get_schema():
                 name = "Steam App ID",
                 desc = "The App ID of your game on Steam",
                 icon = "gamepad",
-            )
+            ),
         ],
     )
