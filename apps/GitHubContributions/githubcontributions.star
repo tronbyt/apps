@@ -13,9 +13,11 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 CACHE_TTL = 3600 * 4
 CACHE_PREFIX = "github_contributions_"
+
 
 CONTRIBUTION_COLORS = [
     "#1a1a1a",
@@ -24,6 +26,7 @@ CONTRIBUTION_COLORS = [
     "#30a14e",
     "#216e39",
 ]
+
 
 def get_contributions(username, token):
     cache_key = "{}_{}".format(CACHE_PREFIX, username.lower())
@@ -75,6 +78,7 @@ def normalize_contributions(weeks_data):
     if not weeks_data or not weeks_data.get("weeks"):
         return []
 
+    # Last 20 weeks
     weeks = weeks_data["weeks"][-20:]
     grid = [[0 for _ in weeks] for _ in range(7)]
 
@@ -108,6 +112,7 @@ def render_contribution_graph(grid):
         cell_height = weekend_height if row in (0, 6) else weekday_height
         row_children = []
 
+        # Left padding
         row_children.append(render.Box(width = left_padding, height = cell_height, color = "#000"))
 
         for col in range(cols):
@@ -115,11 +120,13 @@ def render_contribution_graph(grid):
             color = CONTRIBUTION_COLORS[level]
             row_children.append(render.Box(width = cell_width, height = cell_height, color = color))
             if col < cols - 1:
+                # 1px gap
                 row_children.append(render.Box(width = 1, height = cell_height, color = "#000"))
 
         children.append(render.Row(children = row_children))
 
         if row < 6:
+            # Horizontal gap between rows
             children.append(render.Row(
                 children = [render.Box(width = left_padding + cols * cell_width + (cols - 1), height = 1, color = "#000")],
             ))
@@ -134,7 +141,25 @@ def get_graph_width(cols):
     return left_padding + cols * cell_width + (cols - 1) * gap
 
 
-def get_scrolling_graph(grid):
+def ease_in_out(t):
+    # Smooth step: starts slow, speeds up, slows down
+    return t * t * (3 - 2 * t)
+
+
+def viewport_frame(graph, offset, screen_width):
+    # offset: 0         = leftmost view
+    # offset: max_scroll = last week at right edge
+    #
+    # We use Marquee as a fixed-position viewport by pinning start=end.
+    return render.Marquee(
+        width = screen_width,
+        child = graph,
+        offset_start = -offset,
+        offset_end = -offset,
+    )
+
+
+def get_phased_graph(grid):
     graph = render_contribution_graph(grid)
 
     if not grid or not grid[0]:
@@ -144,24 +169,43 @@ def get_scrolling_graph(grid):
     graph_width = get_graph_width(cols)
     screen_width = 128 if canvas.is2x() else 64
 
+    # No scroll needed if graph fits
     if graph_width <= screen_width:
         return graph
 
+    # When offset == max_scroll, the last week is at the right edge
     max_scroll = graph_width - screen_width
 
-    # We fake pauses by extending the path:
-    # 0 → 0 → -max_scroll → -max_scroll
-    # The longer this "distance", the longer the pauses feel
+    hold_frames = 30      # 30 * 100ms ≈ 3 seconds
+    scroll_frames = 50    # tune for speed / smoothness
 
-    hold_multiplier = 3  # increase = longer pauses
+    children = []
 
-    return render.Marquee(
-        width = screen_width,
-        child = graph,
-        offset_start = 0,
-        offset_end = -max_scroll,
-        # hidden trick: longer delay = slower movement = longer perceived holds
-    )
+    start_frame = viewport_frame(graph, 0, screen_width)
+    end_frame = viewport_frame(graph, max_scroll, screen_width)
+
+    # 1) Hold at LEFT
+    children.extend([start_frame] * hold_frames)
+
+    # 2) Scroll LEFT → RIGHT (0 → max_scroll)
+    for i in range(1, scroll_frames + 1):
+        t = float(i) / scroll_frames
+        eased = ease_in_out(t)
+        x = int(eased * max_scroll)
+        children.append(viewport_frame(graph, x, screen_width))
+
+    # 3) Hold at RIGHT
+    children.extend([end_frame] * hold_frames)
+
+    # 4) Scroll RIGHT → LEFT (max_scroll → 0)
+    for i in range(1, scroll_frames + 1):
+        t = float(i) / scroll_frames
+        eased = ease_in_out(t)
+        x = int((1.0 - eased) * max_scroll)
+        children.append(viewport_frame(graph, x, screen_width))
+
+    return render.Animation(children = children)
+
 
 def main(config):
     username = config.str("username", "")
@@ -183,75 +227,12 @@ def main(config):
     grid = normalize_contributions(weeks_data)
 
     return render.Root(
-        delay = 100,
+        delay = 100,                 # 100ms per frame
         show_full_animation = True,
         child = get_phased_graph(grid),
     )
 
-def viewport_frame(graph, offset, screen_width, screen_height):
-    # offset is 0 at left hold, negative when shifted left
-    # Padding moves the graph; Box clips it to the screen size
-    left_pad = offset if offset > 0 else 0
-    right_shift = -offset if offset < 0 else 0
 
-    shifted = render.Padding(
-        pad = (left_pad - right_shift, 0, 0, 0),
-        child = graph,
-    )
-
-    return render.Box(
-        width = screen_width,
-        height = screen_height,
-        color = "#000",
-        child = shifted,
-    )
-
-
-def get_phased_graph(grid):
-    graph = render_contribution_graph(grid)
-
-    if not grid or not grid[0]:
-        return graph
-
-    cols = len(grid[0])
-    graph_width = get_graph_width(cols)
-    screen_width = 128 if canvas.is2x() else 64
-    screen_height = 64 if canvas.is2x() else 32
-
-    if graph_width <= screen_width:
-        return graph
-
-    max_scroll = graph_width - screen_width
-
-    hold_frames = 30   # 30 * 100ms = 3 seconds
-    step = 1
-
-    children = []
-
-    start_frame = viewport_frame(graph, 0, screen_width, screen_height)
-    end_frame = viewport_frame(graph, -max_scroll, screen_width, screen_height)
-
-    blank_frames = 5  # 5 * 100ms = 0.5 seconds
-
-    blank = black_frame(screen_width, screen_height)
-
-    children.extend([start_frame] * hold_frames)
-
-    for x in range(0, max_scroll + 1, step):
-        children.append(viewport_frame(graph, -x, screen_width, screen_height))
-
-    children.extend([end_frame] * hold_frames)
-    children.extend([blank] * blank_frames)
-
-    return render.Animation(children = children)
-
-def black_frame(screen_width, screen_height):
-    return render.Box(
-        width = screen_width,
-        height = screen_height,
-        color = "#000",
-    )
-    
 def get_schema():
     return schema.Schema(
         version = "1",
