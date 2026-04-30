@@ -60,7 +60,6 @@ def main(config):
     # 4. Final Time Calculation
     now = time.now().in_location(timezone)
 
-    # ... [Rest of the rendering logic remains the same] ...
     s_rise = sunrise.sunrise(lat, lng, now)
     s_set = sunrise.sunset(lat, lng, now)
     is_night = now.unix < s_rise.unix or now.unix >= s_set.unix
