@@ -40,24 +40,22 @@ def main(config):
     lat, lng = 45.42, -122.77
     timezone = "America/Los_Angeles"
 
-    # 2. Try Automatic Identification via IP API
-    # We use ip-api.com (free, no key needed for basic usage)
-    res = http.get("http://ip-api.com/json/")
-    if res.status_code == 200:
-        ip_data = res.json()
-        if ip_data.get("status") == "success":
-            lat = ip_data.get("lat", lat)
-            lng = ip_data.get("lon", lng)
-            timezone = ip_data.get("timezone", timezone)
-
-    # 3. Manually Entered Address Override
-    # If the user has explicitly set an address, it overwrites the IP guess
     loc_str = config.get("location")
     if loc_str:
         loc_data = json.decode(loc_str)
         lat = float(loc_data.get("lat", lat))
         lng = float(loc_data.get("lng", lng))
         timezone = loc_data.get("timezone", timezone)
+    else:
+        # Try Automatic Identification via IP API as fallback
+        # We use ip-api.com (free, no key needed for basic usage)
+        res = http.get("http://ip-api.com/json/", ttl_seconds = 86400)
+        if res.status_code == 200:
+            ip_data = res.json()
+            if ip_data.get("status") == "success":
+                lat = ip_data.get("lat", lat)
+                lng = ip_data.get("lon", lng)
+                timezone = ip_data.get("timezone", timezone)
 
     # 4. Final Time Calculation
     now = time.now().in_location(timezone)
