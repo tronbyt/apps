@@ -70,7 +70,7 @@ def main(config):
         "date": today,
         "highwatermark_id": "0",
     }
-    res = http.get(SALES_URL, params = params, ttl_seconds=300)
+    res = http.get(SALES_URL, params = params, ttl_seconds = 300)
     if res.status_code == 200:
         data = res.json()["response"]
         for result in data.get("results", []):
@@ -81,7 +81,7 @@ def main(config):
         "appid": app_id,
         "date": today,
     }
-    res = http.get(WISHLIST_URL, params = params, ttl_seconds=300)
+    res = http.get(WISHLIST_URL, params = params, ttl_seconds = 300)
     if res.status_code == 200:
         data = res.json()["response"]
         for result in data.get("results", []):
