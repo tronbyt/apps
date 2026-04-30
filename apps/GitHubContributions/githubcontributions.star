@@ -14,20 +14,18 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
-CACHE_TTL = 3600 * 4  # 4 hours
+CACHE_TTL = 3600 * 4
 CACHE_PREFIX = "github_contributions_"
 
-# Exact GitHub contribution colors (0-4 levels)
 CONTRIBUTION_COLORS = [
-    "#1a1a1a",  # 0
-    "#9be9a8",  # 1-2
-    "#40c463",  # 3-4
-    "#30a14e",  # 5-9
-    "#216e39",  # 10+
+    "#1a1a1a",
+    "#9be9a8",
+    "#40c463",
+    "#30a14e",
+    "#216e39",
 ]
 
 def get_contributions(username, token):
-    """Fetch contribution calendar via GitHub GraphQL"""
     cache_key = "{}_{}".format(CACHE_PREFIX, username.lower())
     cached = cache.get(cache_key)
     if cached:
@@ -38,11 +36,8 @@ def get_contributions(username, token):
       user(login: $username) {
         contributionsCollection(from: $from, to: $to) {
           contributionCalendar {
-            totalContributions
             weeks {
-              firstDay
               contributionDays {
-                date
                 contributionCount
                 weekday
               }
@@ -58,7 +53,7 @@ def get_contributions(username, token):
         "Content-Type": "application/json",
     }
 
-    from_date = (time.now() - time.parse_duration("2130h")).format("2006-01-02T15:04:05Z")
+    from_date = (time.now() - time.parse_duration("3360h")).format("2006-01-02T15:04:05Z")
     to_date = time.now().format("2006-01-02T15:04:05Z")
 
     body = json.encode({
@@ -75,47 +70,46 @@ def get_contributions(username, token):
     cache.set(cache_key, json.encode(data), ttl_seconds = CACHE_TTL)
     return data
 
+
 def normalize_contributions(weeks_data):
-    """Convert weeks → 7xN grid [weekday][week]"""
     if not weeks_data or not weeks_data.get("weeks"):
         return []
 
-    number_weeks = 13 if canvas.is2x() else 12
-
-    weeks = weeks_data["weeks"][-number_weeks:]
-    grid = [[0 for _ in weeks] for _ in range(7)]  # 7 days x N weeks
+    weeks = weeks_data["weeks"][-20:]
+    grid = [[0 for _ in weeks] for _ in range(7)]
 
     for week_idx, week in enumerate(weeks):
         for day in week.get("contributionDays", []):
             weekday = int(day["weekday"])
             count = int(day["contributionCount"])
-            grid[weekday][week_idx] = (1 if count > 0 else 0) + (1 if count >= 3 else 0) + (1 if count >= 5 else 0) + (1 if count >= 10 else 0)
+            grid[weekday][week_idx] = (
+                (1 if count > 0 else 0)
+                + (1 if count >= 3 else 0)
+                + (1 if count >= 5 else 0)
+                + (1 if count >= 10 else 0)
+            )
 
     return grid
+
 
 def render_contribution_graph(grid):
     if not grid or not grid[0]:
         return render.Box()
+
     cols = len(grid[0])
-    cell_width = 8 if canvas.is2x() else 4  # Fixed 4px instead of dynamic ~5px
+    cell_width = 8 if canvas.is2x() else 4
     weekday_height = 8 if canvas.is2x() else 4
     weekend_height = 8 if canvas.is2x() else 3
     left_padding = 6 if canvas.is2x() else 2
 
     children = []
 
-    if canvas.is2x():
-        children.append(render.Box(width = left_padding + cols * cell_width + (cols - 1) * 1, height = 1, color = "#000"))
-
-    for row in range(7):  # Days (Sun-Sat): 0=Sun, 6=Sat
+    for row in range(7):
         cell_height = weekend_height if row in (0, 6) else weekday_height
-
         row_children = []
 
-        # left_padding px left padding
         row_children.append(render.Box(width = left_padding, height = cell_height, color = "#000"))
 
-        # Grid cells - now 4px wide
         for col in range(cols):
             level = grid[row][col]
             color = CONTRIBUTION_COLORS[level]
@@ -123,17 +117,51 @@ def render_contribution_graph(grid):
             if col < cols - 1:
                 row_children.append(render.Box(width = 1, height = cell_height, color = "#000"))
 
-        children.append(render.Row(expanded = True, main_align = "start", children = row_children))
+        children.append(render.Row(children = row_children))
 
-        # Separator matches new total width (2+40+9=51px)
         if row < 6:
             children.append(render.Row(
-                expanded = True,
-                main_align = "start",
                 children = [render.Box(width = left_padding + cols * cell_width + (cols - 1), height = 1, color = "#000")],
             ))
 
-    return render.Column(main_align = "start", children = children)
+    return render.Column(children = children)
+
+
+def get_graph_width(cols):
+    cell_width = 8 if canvas.is2x() else 4
+    gap = 1
+    left_padding = 6 if canvas.is2x() else 2
+    return left_padding + cols * cell_width + (cols - 1) * gap
+
+
+def get_scrolling_graph(grid):
+    graph = render_contribution_graph(grid)
+
+    if not grid or not grid[0]:
+        return graph
+
+    cols = len(grid[0])
+    graph_width = get_graph_width(cols)
+    screen_width = 128 if canvas.is2x() else 64
+
+    if graph_width <= screen_width:
+        return graph
+
+    max_scroll = graph_width - screen_width
+
+    # We fake pauses by extending the path:
+    # 0 → 0 → -max_scroll → -max_scroll
+    # The longer this "distance", the longer the pauses feel
+
+    hold_multiplier = 3  # increase = longer pauses
+
+    return render.Marquee(
+        width = screen_width,
+        child = graph,
+        offset_start = 0,
+        offset_end = -max_scroll,
+        # hidden trick: longer delay = slower movement = longer perceived holds
+    )
 
 def main(config):
     username = config.str("username", "")
@@ -141,35 +169,89 @@ def main(config):
 
     if not username or not token:
         return render.Root(
-            child = render.Marquee(
-                child = render.Text("Enter username & token", color = "#f00"),
-                width = 64,
-            ),
+            child = render.Text("Enter username & token"),
         )
 
     data = get_contributions(username, token)
 
     if not data or not data.get("data", {}).get("user"):
         return render.Root(
-            child = render.Marquee(
-                child = render.Text("No contributions", color = "#f80"),
-                width = 64,
-            ),
+            child = render.Text("No contributions"),
         )
 
     weeks_data = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]
     grid = normalize_contributions(weeks_data)
 
     return render.Root(
-        delay = 3000,
+        delay = 100,
         show_full_animation = True,
-        child = render.Column(
-            children = [
-                render_contribution_graph(grid),
-            ],
-        ),
+        child = get_phased_graph(grid),
     )
 
+def viewport_frame(graph, offset, screen_width, screen_height):
+    # offset is 0 at left hold, negative when shifted left
+    # Padding moves the graph; Box clips it to the screen size
+    left_pad = offset if offset > 0 else 0
+    right_shift = -offset if offset < 0 else 0
+
+    shifted = render.Padding(
+        pad = (left_pad - right_shift, 0, 0, 0),
+        child = graph,
+    )
+
+    return render.Box(
+        width = screen_width,
+        height = screen_height,
+        color = "#000",
+        child = shifted,
+    )
+
+
+def get_phased_graph(grid):
+    graph = render_contribution_graph(grid)
+
+    if not grid or not grid[0]:
+        return graph
+
+    cols = len(grid[0])
+    graph_width = get_graph_width(cols)
+    screen_width = 128 if canvas.is2x() else 64
+    screen_height = 64 if canvas.is2x() else 32
+
+    if graph_width <= screen_width:
+        return graph
+
+    max_scroll = graph_width - screen_width
+
+    hold_frames = 30   # 30 * 100ms = 3 seconds
+    step = 1
+
+    children = []
+
+    start_frame = viewport_frame(graph, 0, screen_width, screen_height)
+    end_frame = viewport_frame(graph, -max_scroll, screen_width, screen_height)
+
+    blank_frames = 5  # 5 * 100ms = 0.5 seconds
+
+    blank = black_frame(screen_width, screen_height)
+
+    children.extend([start_frame] * hold_frames)
+
+    for x in range(0, max_scroll + 1, step):
+        children.append(viewport_frame(graph, -x, screen_width, screen_height))
+
+    children.extend([end_frame] * hold_frames)
+    children.extend([blank] * blank_frames)
+
+    return render.Animation(children = children)
+
+def black_frame(screen_width, screen_height):
+    return render.Box(
+        width = screen_width,
+        height = screen_height,
+        color = "#000",
+    )
+    
 def get_schema():
     return schema.Schema(
         version = "1",
