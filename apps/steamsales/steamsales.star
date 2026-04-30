@@ -12,7 +12,7 @@ def main(config):
     salesData = []
     wishlistData = []
 
-    today = time.now().format("2000-01-01")
+    today = time.now().format("2006-01-02")
 
     game_name = config.get("game_name", "Your Game")
     api_key = config.get("api_key")
