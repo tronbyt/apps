@@ -3,7 +3,7 @@ id: steamsales
 name: Steam Sales
 summary: Displays current Steam sales
 desc: Shows your steam's app sales, and wishlists
-author: dinosaursrarr
+author: noahpodgurski
 fileName: steamsales.star
 packageName: steamsales
 recommended_interval: 5
