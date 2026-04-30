@@ -50,7 +50,7 @@ def main(config):
                     render.Text("set app id", color = "#ffaa00", font = "6x10"),
                     render.Row(
                         children = [
-                            render.Text("0: ", color = "#fff"),
+                            render.Text("Sales: ", color = "#fff"),
                             render.Text(str(0), color = "#00ff00"),
                         ],
                     ),
@@ -64,44 +64,13 @@ def main(config):
             ),
         )
 
-    # get total sales
-    # res = http.get(DATES_URL, params={"key": api_key, "highwatermark": "0"})
-    # if res.status_code != 200:
-    #     return render.Root(
-    #         child = render.WrappedText("Error fetching Steam data 1")
-    #     )
-
-    # data = res.json()["response"]
-    # available_dates = data["dates"] if "dates" in data else []
-    # if not available_dates:
-    #     return render.Root(
-    #         child = render.WrappedText("No available dates for sales data")
-    #     )
-
-    # for date in available_dates:
-    #     print("Available date:", date)
-
-    #     params={
-    #         "key": api_key,
-    #         "appid": app_id,
-    #         "date": date,
-    #         "highwatermark_id": "0",
-    #     }
-    #     print("sending", params)
-    #     res = http.get(SALES_URL, params=params)
-    #     if res.status_code == 200:
-    #         data = res.json()["response"]
-    #         print(data)
-    #         for result in data["results"]:
-    #             salesData.append(result)
-
     params = {
         "key": api_key,
         "appid": app_id,
         "date": today,
         "highwatermark_id": "0",
     }
-    res = http.get(SALES_URL, params = params)
+    res = http.get(SALES_URL, params = params, ttl_seconds=300)
     if res.status_code == 200:
         data = res.json()["response"]
         for result in data.get("results", []):
@@ -112,7 +81,7 @@ def main(config):
         "appid": app_id,
         "date": today,
     }
-    res = http.get(WISHLIST_URL, params = params)
+    res = http.get(WISHLIST_URL, params = params, ttl_seconds=300)
     if res.status_code == 200:
         data = res.json()["response"]
         for result in data.get("results", []):
@@ -121,10 +90,8 @@ def main(config):
     sales = 0
     wishlistAdds = 0
     for sale in salesData:
-        print("Sales data:", sale)
         sales += sale.get("gross_units_sold", 0)
     for wishlist in wishlistData:
-        print("Wishlist data:", wishlist)
         wishlistAdds += wishlist.get("wishlist_summary", {}).get("wishlist_adds", 0)
 
     return render.Root(
@@ -165,6 +132,7 @@ def get_schema():
                 name = "Steam Partner API Key",
                 desc = "Your IPartnerFinancialsService compatible key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "app_id",
