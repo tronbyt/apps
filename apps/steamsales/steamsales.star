@@ -98,11 +98,12 @@ def main(config):
     daily_wish = []
 
     # Loop 7 times to make 1 request per day
+    now = time.now()
     for i in range(6, -1, -1):
         # FIX: Use string concatenation to avoid interpolation errors
         # Convert i * 24 to a string followed by "h"
         hours_ago = str(i * 24) + "h"
-        target_date = (time.now() - time.parse_duration(hours_ago)).format("2006-01-02")
+        target_date = (now - time.parse_duration(hours_ago)).format("2006-01-02")
 
         # 1. Fetch Sales
         s_res = http.get(SALES_URL, params = {
@@ -114,7 +115,7 @@ def main(config):
 
         day_sales_sum = 0
         if s_res.status_code == 200:
-            res_list = s_res.json()["response"].get("results")
+            res_list = s_res.json().get("response", {}).get("results", [])
             if res_list:  # Ensure it's not None
                 for res in res_list:
                     day_sales_sum += res.get("gross_units_sold", 0)
@@ -129,7 +130,7 @@ def main(config):
 
         day_wish_sum = 0
         if w_res.status_code == 200:
-            res_list = w_res.json()["response"]
+            res_list = w_res.json().get("response", {})
             day_wish_sum += res_list.get("wishlist_summary", {}).get("wishlist_adds", 0)
         daily_wish.append(day_wish_sum)
 
@@ -195,7 +196,7 @@ def get_schema():
         version = "1",
         fields = [
             schema.Text(id = "game_name", name = "Game Name", desc = "Game Name", icon = "gamepad"),
-            schema.Text(id = "api_key", name = "API Key", desc = "Steam API Key", icon = "key"),
+            schema.Text(id = "api_key", name = "API Key", desc = "Steam API Key", icon = "key", secret = true),
             schema.Text(id = "app_id", name = "App ID", desc = "Steam App ID", icon = "gamepad"),
         ],
     )
