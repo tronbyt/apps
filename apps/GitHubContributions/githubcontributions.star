@@ -208,7 +208,10 @@ def main(config):
 
     if not username or not token:
         return render.Root(
-            child = render.Text("Enter username & token"),
+            child = render.Marquee(
+                width = 128 if canvas.is2x() else 64,
+                child = render.Text("Enter username & token"),
+            ),
         )
 
     data = get_contributions(username, token)
