@@ -167,7 +167,7 @@ def get_phased_graph(grid):
 
     # Corrected to ensure the graph starts with a little buffer, so you don't miss the first few weeks of contributions. The graph will scroll from -leading_space to max_scroll, giving a nice entrance effect.
     leading_space = screen_width // 8
-    max_scroll = graph_width - screen_width
+    max_scroll = max(0, graph_width - screen_width)
     total_distance = max_scroll + leading_space
 
     hold_frames_start = 15
