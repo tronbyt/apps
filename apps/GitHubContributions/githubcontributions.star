@@ -74,20 +74,37 @@ def normalize_contributions(weeks_data):
     if not weeks_data or not weeks_data.get("weeks"):
         return []
 
-    # Last 20 weeks
-    weeks = weeks_data["weeks"][-20:]
-    grid = [[0 for _ in weeks] for _ in range(7)]
+    # 1. Get the last 30 weeks of data
+    weeks = weeks_data["weeks"][-30:]
+
+    # 2. Dynamically calculate the number of weeks we actually got
+    num_weeks = len(weeks)
+
+    # 3. Create the grid based on that actual number (Prevents index errors)
+    grid = [[0 for _ in range(num_weeks)] for _ in range(7)]
 
     for week_idx, week in enumerate(weeks):
         for day in week.get("contributionDays", []):
             weekday = int(day["weekday"])
+
+            # Ensure the day index is valid (0-6)
+            if weekday < 0 or weekday > 6:
+                continue
+
             count = int(day["contributionCount"])
-            grid[weekday][week_idx] = (
-                (1 if count > 0 else 0) +
-                (1 if count >= 3 else 0) +
-                (1 if count >= 5 else 0) +
-                (1 if count >= 10 else 0)
-            )
+
+            # Calculate the color level (0-4)
+            level = 0
+            if count >= 10:
+                level = 4
+            elif count >= 5:
+                level = 3
+            elif count >= 3:
+                level = 2
+            elif count > 0:
+                level = 1
+
+            grid[weekday][week_idx] = level
 
     return grid
 
@@ -138,77 +155,53 @@ def ease_in_out(t):
     # Smooth step: starts slow, speeds up, slows down
     return t * t * (3 - 2 * t)
 
-def viewport_frame(graph, offset, screen_width):
-    # offset: 0         = leftmost view
-    # offset: max_scroll = last week at right edge
-    #
-    # We use Marquee as a fixed-position viewport by pinning start=end.
-    return render.Marquee(
-        width = screen_width,
-        child = graph,
-        offset_start = -offset,
-        offset_end = -offset,
-    )
-
 def get_phased_graph(grid):
     graph = render_contribution_graph(grid)
-
     if not grid or not grid[0]:
         return graph
 
     cols = len(grid[0])
     graph_width = get_graph_width(cols)
     screen_width = 128 if canvas.is2x() else 64
-    
-    # We want "half a screen" of black space at the start
-    leading_space = screen_width // 8
-    
-    # Total scrollable distance now includes that extra leading space
-    # We start at -leading_space and end at max_scroll
-    max_scroll = graph_width - screen_width
+    screen_height = 64 if canvas.is2x() else 32
 
-    hold_frames = 15 
-    hold_frames_end = 100  
-    scroll_frames = 90 # Increased slightly because we're traveling further now
+    # Corrected to ensure the graph starts with a little buffer, so you don't miss the first few weeks of contributions. The graph will scroll from -leading_space to max_scroll, giving a nice entrance effect.
+    leading_space = screen_width // 8
+    max_scroll = graph_width - screen_width
+    total_distance = max_scroll + leading_space
+
+    hold_frames_start = 15
+    hold_frames_end = 100
+    scroll_frames = 90
     children = []
 
     def make_frame(x_offset):
         return render.Box(
             width = screen_width,
-            height = 32 if not canvas.is2x() else 64,
+            height = screen_height,
             child = render.Padding(
-                # Adding leading_space to the offset to push the start of the graph 
-                # into the middle of the screen initially.
                 pad = (int(leading_space - x_offset), 0, 0, 0),
                 child = graph,
-            )
+            ),
         )
 
-    # 1) Start: Graph is pushed halfway into the screen, pause 3s
-    start_frame = make_frame(0)
-    children.extend([start_frame] * hold_frames)
+    # 1) Start Pause
+    children.extend([make_frame(0)] * hold_frames_start)
 
-    # 2) Scroll: Move from the starting "half-black" view to the end
-    # We calculate the total distance to cover both the leading space AND the graph width
-    total_distance = max_scroll + leading_space
-    
+    # 2) Smooth Scroll
     for i in range(scroll_frames):
         t = float(i) / scroll_frames
-        eased = ease_in_out(t)
-        # We scroll from 0 offset to the total distance
-        children.append(make_frame(eased * total_distance))
+        children.append(make_frame(ease_in_out(t) * total_distance))
 
-    # 3) End: Current week is aligned to the right edge, pause 3s
-    # After this, the Tidbyt loop will restart the animation from the beginning.
-    end_frame = make_frame(total_distance)
-    children.extend([end_frame] * hold_frames_end)
+    # 3) End Pause
+    children.extend([make_frame(total_distance)] * hold_frames_end)
 
-    # Fade to black/blank for 1 second before the loop restarts
-    blank_frame = render.Box(width = screen_width, height = 32 if not canvas.is2x() else 64, color = "#000")
+    # 4) Black Transition
+    blank_frame = render.Box(width = screen_width, height = screen_height, color = "#000")
     children.extend([blank_frame] * 10)
 
     return render.Animation(children = children)
-    
+
 def main(config):
     username = config.str("username", "")
     token = config.str("token", "")
