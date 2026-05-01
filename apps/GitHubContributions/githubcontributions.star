@@ -53,7 +53,7 @@ def get_contributions(username, token):
         "Content-Type": "application/json",
     }
 
-    from_date = (time.now() - time.parse_duration("3360h")).format("2006-01-02T15:04:05Z")
+    from_date = (time.now() - time.parse_duration("5040h")).format("2006-01-02T15:04:05Z")
     to_date = time.now().format("2006-01-02T15:04:05Z")
 
     body = json.encode({
