@@ -196,7 +196,7 @@ def get_schema():
         version = "1",
         fields = [
             schema.Text(id = "game_name", name = "Game Name", desc = "Game Name", icon = "gamepad"),
-            schema.Text(id = "api_key", name = "API Key", desc = "Steam API Key", icon = "key", secret = true),
+            schema.Text(id = "api_key", name = "API Key", desc = "Steam API Key", icon = "key", secret = True),
             schema.Text(id = "app_id", name = "App ID", desc = "Steam App ID", icon = "gamepad"),
         ],
     )
