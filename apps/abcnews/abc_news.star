@@ -23,7 +23,11 @@ def main(config):
 
     topic = rss.query_all("//rss/channel/title")
     title = rss.query_all("//rss/channel/item/title")
-    description = title[:5]
+    description = []
+
+    for i in range(0, 5, 1):
+        desc = title[i]
+        description.append(desc)
 
     return render.Root(
         delay = 90,
