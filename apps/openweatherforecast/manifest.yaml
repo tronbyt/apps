@@ -1,0 +1,6 @@
+---
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+name: OpenWeather Forecast
+summary: 3-Day Weather Forecast
+desc: V0.1 Display 3-day weather forecast using OpenWeather One Call API 3.0.
+author: colin_is
