@@ -45,15 +45,7 @@ NWS_HEADERS = {
     "Accept": "application/geo+json",
 }
 
-DEFAULT_LOCATION = """
-{
-  "lat": "37.27",
-  "lng": "-121.9272",
-  "timezone": "America/Los_Angeles"
-}
-"""
-
-DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
 WEATHER_ICONS = {
     "cloudy": CLOUDY_ASSET.readall(),
