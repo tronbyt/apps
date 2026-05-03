@@ -5,32 +5,10 @@ Description: Three day weather forecast from the National Weather Service, style
 Author: Glen Robertson
 """
 
+load("assets.star", "WEATHER_ICONS", "WIND_ICONS")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("images/cloudy.png", CLOUDY_ASSET = "file")
-load("images/foggy.png", FOGGY_ASSET = "file")
-load("images/haily.png", HAILY_ASSET = "file")
-load("images/moony.png", MOONY_ASSET = "file")
-load("images/moonyish.png", MOONYISH_ASSET = "file")
-load("images/rainy.png", RAINY_ASSET = "file")
-load("images/sleety.png", SLEETY_ASSET = "file")
-load("images/sleety2.png", SLEETY2_ASSET = "file")
-load("images/snowy.png", SNOWY_ASSET = "file")
-load("images/snowy2.png", SNOWY2_ASSET = "file")
-load("images/sunny.png", SUNNY_ASSET = "file")
-load("images/sunnyish.png", SUNNYISH_ASSET = "file")
-load("images/thundery.png", THUNDERY_ASSET = "file")
-load("images/tornady.png", TORNADY_ASSET = "file")
-load("images/wind_e.png", WIND_E_ASSET = "file")
-load("images/wind_n.png", WIND_N_ASSET = "file")
-load("images/wind_ne.png", WIND_NE_ASSET = "file")
-load("images/wind_nw.png", WIND_NW_ASSET = "file")
-load("images/wind_s.png", WIND_S_ASSET = "file")
-load("images/wind_se.png", WIND_SE_ASSET = "file")
-load("images/wind_sw.png", WIND_SW_ASSET = "file")
-load("images/wind_w.png", WIND_W_ASSET = "file")
-load("images/windy.png", WINDY_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -46,35 +24,6 @@ NWS_HEADERS = {
 }
 
 DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-
-WEATHER_ICONS = {
-    "cloudy": CLOUDY_ASSET.readall(),
-    "foggy": FOGGY_ASSET.readall(),
-    "haily": HAILY_ASSET.readall(),
-    "moony": MOONY_ASSET.readall(),
-    "moonyish": MOONYISH_ASSET.readall(),
-    "rainy": RAINY_ASSET.readall(),
-    "sleety": SLEETY_ASSET.readall(),
-    "sleety2": SLEETY2_ASSET.readall(),
-    "snowy": SNOWY_ASSET.readall(),
-    "snowy2": SNOWY2_ASSET.readall(),
-    "sunny": SUNNY_ASSET.readall(),
-    "sunnyish": SUNNYISH_ASSET.readall(),
-    "thundery": THUNDERY_ASSET.readall(),
-    "tornady": TORNADY_ASSET.readall(),
-    "windy": WINDY_ASSET.readall(),
-}
-
-WIND_ICONS = {
-    "E": WIND_E_ASSET.readall(),
-    "N": WIND_N_ASSET.readall(),
-    "NE": WIND_NE_ASSET.readall(),
-    "NW": WIND_NW_ASSET.readall(),
-    "S": WIND_S_ASSET.readall(),
-    "SE": WIND_SE_ASSET.readall(),
-    "SW": WIND_SW_ASSET.readall(),
-    "W": WIND_W_ASSET.readall(),
-}
 
 def f_to_c(f):
     return int(math.round((f - 32) / 1.8))
