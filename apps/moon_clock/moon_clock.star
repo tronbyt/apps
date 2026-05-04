@@ -61,7 +61,7 @@ def main(config):
     # 2. Preferences & Checks
     is_military = config.bool("military_time", False)
     day_first = config.bool("date_format_day_first", False)
-    time_format = "15:04" if is_military else "3:04"
+    time_format = "15:04" if is_military else "03:04"
 
     # 3. Final Time Calculation
     now = time.now().in_location(timezone)
