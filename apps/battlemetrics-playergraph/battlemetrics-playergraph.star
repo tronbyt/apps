@@ -173,8 +173,8 @@ def main(config):
         return render_missing_server_id()
 
     custom_title = config.get("custom_title") or ""
-    use_marquee = config.get("title_marquee") != "false"
-    show_v_lines = config.get("show_v_lines") == "true"
+    use_marquee = config.bool("title_marquee")
+    show_v_lines = config.bool("show_v_lines")
     v_lines_count = int(config.get("v_lines_count") or "2")
     h_lines_count = int(config.get("h_lines_count") or "3")
 
