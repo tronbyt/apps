@@ -133,7 +133,7 @@ def main(config):
     if not server_id:
         return render_missing_server_id()
 
-    use_marquee = config.get("title_marquee") != "false"
+    use_marquee = config.bool("title_marquee")
 
     custom_title = config.get("custom_title") or ""
 
