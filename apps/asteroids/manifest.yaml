@@ -1,8 +1,8 @@
 ---
-id: moon-clock
-name: Moon Clock
-summary: Moon phase and clock
-desc: Displays the current moon phase %illuminated, time of day and next new/full moon.
+id: asteroids
+name: Asteroids
+summary: Retro space arcade simulation
+desc: A vector-style animation featuring a ship navigating a hazardous asteroid field with realistic physics and explosive collisions.
 author: Mark Greinke
-fileName: moon_clock.star
-packageName: moon_clock
+fileName: asteroids.star
+packageName: asteroids
