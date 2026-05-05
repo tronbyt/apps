@@ -1,0 +1,12 @@
+---
+id: "battlemetrics"
+name: "BattleMetrics"
+summary: "BattleMetrics stats tracker"
+desc: "Show stats about servers on BattleMetrics."
+author: "beryxz"
+fileName: "battlemetrics.star"
+category: "gaming"
+tags:
+  - "gaming"
+  - "servers"
+  - "multiplayer"
