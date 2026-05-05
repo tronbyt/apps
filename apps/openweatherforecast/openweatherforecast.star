@@ -1,7 +1,7 @@
 """
 Applet: OpenWeaather Forecast
 Summary: 3-Day Weather Forecast
-Description: V0.3 Display 3-day weather forecast using OpenWeather One Call API 3.0.
+Description: Display 3-day weather forecast using OpenWeather One Call API 3.0. The number of API calls is well within the free tier. 
 Author: colin_is
 """
 
@@ -17,7 +17,7 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
-OW_GEO_URL = "http://api.openweathermap.org/geo/1.0/zip"
+OW_GEO_URL = "https://api.openweathermap.org/geo/1.0/zip"
 OW_FORECAST_URL = "https://api.openweathermap.org/data/3.0/onecall"
 OW_ICON_URL = "https://openweathermap.org/img/wn/%s.png"
 
@@ -217,6 +217,7 @@ def get_schema():
                 name = "OpenWeather API Key",
                 desc = "Your API key from https://home.openweathermap.org/api_keys",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "zip_code",
