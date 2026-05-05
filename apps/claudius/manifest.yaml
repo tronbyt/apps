@@ -1,0 +1,15 @@
+id: claudius
+name: Claudius
+summary: Live Claude usage stats
+desc: Companion display for Claudius, the macOS menu bar app that monitors Claude Code and Claude.ai usage. Install Claudius from github.com/NSLuke/Claudius and point it at your Tronbyt — it pushes live cost, token, session, and weekly usage frames to this app's installation. Without the Mac companion installed, this app shows a placeholder.
+author: NSLuke
+fileName: claudius.star
+packageName: claudius
+recommendedInterval: 300
+category: utilities
+tags:
+  - claude
+  - ai
+  - usage
+  - developer
+  - mac
