@@ -234,6 +234,7 @@ function setupSearch(apps, brokenApps) {
   const clearButton = document.getElementById('clear-search');
   const categoryFilter = document.getElementById('category-filter');
   const tagFilter = document.getElementById('tag-filter');
+  const sortOrder = document.getElementById('sort-order');
 
   // Extract and populate categories
   const categories = [...new Set(apps.map(app => app.category).filter(Boolean))].sort();
@@ -258,8 +259,9 @@ function setupSearch(apps, brokenApps) {
     const searchVal = search.value.toLowerCase();
     const categoryVal = categoryFilter.value;
     const tagVal = tagFilter.value;
+    const sortVal = sortOrder.value;
 
-    renderAppsList(apps.filter(app => {
+    let filtered = apps.filter(app => {
       const matchesSearch = !searchVal ||
         app.name.toLowerCase().includes(searchVal) ||
         (app.displayName && app.displayName.toLowerCase().includes(searchVal)) ||
@@ -269,10 +271,30 @@ function setupSearch(apps, brokenApps) {
       const matchesCategory = !categoryVal || app.category === categoryVal;
       const matchesTag = !tagVal || (app.tags && app.tags.includes(tagVal));
       return matchesSearch && matchesCategory && matchesTag;
-    }), brokenApps);
+    });
+
+    // Sort the filtered apps
+    filtered.sort((a, b) => {
+      if (sortVal === 'newest') {
+        const dateA = a.published ? new Date(a.published) : new Date(0);
+        const dateB = b.published ? new Date(b.published) : new Date(0);
+        return dateB - dateA;
+      } else if (sortVal === 'updated') {
+        const dateA = a.updated ? new Date(a.updated) : new Date(0);
+        const dateB = b.updated ? new Date(b.updated) : new Date(0);
+        return dateB - dateA;
+      } else {
+        // Alphabetical
+        const nameA = (a.displayName || a.name).toLowerCase();
+        const nameB = (b.displayName || b.name).toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
+    });
+
+    renderAppsList(filtered, brokenApps);
 
     // Show/hide clear button based on any filters being active
-    const hasFilters = searchVal || categoryVal || tagVal;
+    const hasFilters = searchVal || categoryVal || tagVal || sortVal !== 'alphabetical';
     clearButton.style.display = hasFilters ? 'block' : 'none';
   }
 
@@ -282,13 +304,15 @@ function setupSearch(apps, brokenApps) {
   // Handle filter changes
   categoryFilter.addEventListener('change', filterApps);
   tagFilter.addEventListener('change', filterApps);
+  sortOrder.addEventListener('change', filterApps);
 
   // Handle clear button click
   clearButton.addEventListener('click', () => {
     search.value = '';
     categoryFilter.value = '';
     tagFilter.value = '';
-    renderAppsList(apps, brokenApps);
+    sortOrder.value = 'alphabetical';
+    renderAppsList(apps.sort((a, b) => (a.displayName || a.name).toLowerCase().localeCompare((b.displayName || b.name).toLowerCase())), brokenApps);
     clearButton.style.display = 'none';
     search.focus();
   });
