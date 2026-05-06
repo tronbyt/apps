@@ -9,6 +9,6 @@ packageName: foxnews
 recommendedInterval: 10
 category: news
 tags:
-- news
+    - news
 published: '2023-03-23T12:33:10Z'
 updated: '2025-11-29T17:52:33Z'

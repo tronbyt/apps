@@ -8,8 +8,8 @@ fileName: wnyc.star
 packageName: wnyc
 category: entertainment
 tags:
-- music
-- real-time
-- news
+    - music
+    - real-time
+    - news
 published: '2023-07-27T14:35:46Z'
 updated: '2025-03-29T22:52:11Z'

@@ -9,8 +9,8 @@ fileName: days_since.star
 packageName: dayssince
 category: utilities
 tags:
-- clock
-- retro
-- utility
+    - clock
+    - retro
+    - utility
 published: '2024-09-20T15:00:43Z'
 updated: '2025-12-17T23:02:59Z'

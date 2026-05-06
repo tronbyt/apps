@@ -9,9 +9,9 @@ packageName: espnfantasyfb
 recommendedInterval: 5
 category: sports
 tags:
-- news
-- utility
-- nfl
-- football
+    - news
+    - utility
+    - nfl
+    - football
 published: '2024-09-20T14:58:47Z'
 updated: '2025-12-05T22:28:51Z'

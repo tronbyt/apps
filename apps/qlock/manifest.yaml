@@ -6,9 +6,9 @@ desc: Custom clock with time, binary, beats, and date; all with a custom font.
 author: craigerskine
 category: clocks
 tags:
-- clock
-- art
-- tech
-- music
+    - clock
+    - art
+    - tech
+    - music
 published: '2024-11-24T00:10:14Z'
 updated: '2025-12-05T22:28:51Z'

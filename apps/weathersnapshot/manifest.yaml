@@ -9,8 +9,8 @@ packageName: weathersnapshot
 recommendedInterval: 5
 category: weather
 tags:
-- weather
-- humidity
-- utility
+    - weather
+    - humidity
+    - utility
 published: '2024-02-08T18:10:27Z'
 updated: '2025-11-30T20:08:55Z'

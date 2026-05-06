@@ -9,7 +9,7 @@ packageName: javelexi
 recommendedInterval: 5
 category: entertainment
 tags:
-- art
-- gaming
+    - art
+    - gaming
 published: '2023-04-11T19:33:48Z'
 updated: '2025-12-02T19:30:22Z'

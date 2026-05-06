@@ -9,7 +9,7 @@ packageName: nws_daily_forecast
 recommendedInterval: 5
 category: weather
 tags:
-- weather
-- local
+    - weather
+    - local
 published: '2026-05-05T15:54:16Z'
 updated: '2026-05-05T15:54:16Z'

@@ -9,6 +9,6 @@ packageName: lifxlights
 recommendedInterval: 5
 category: utilities
 tags:
-- smart-home
+    - smart-home
 published: '2023-04-17T17:31:53Z'
 updated: '2025-12-02T19:30:22Z'

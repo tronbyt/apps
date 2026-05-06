@@ -2,6 +2,7 @@ import subprocess
 import os
 import yaml
 import glob
+import sys
 
 def get_git_dates(path):
     # Get all commit dates for the path
@@ -17,7 +18,7 @@ def get_git_dates(path):
             "Tag consolidation",
             "llm generated categories",
             "Fix Updates and script",
-            "Fix updated timestamps",
+            "Fix updated ts",
             "Implement sorting by newest and last updated in app viewer"
         ]
         ignore_regex = "|".join(ignore_patterns)
@@ -40,19 +41,23 @@ def get_git_dates(path):
             "--", path
         ]
         output_upd = subprocess.check_output(cmd_upd, env=env).decode("utf-8").strip()
-        
+
         # If no "real" update found, use published date
         updated = output_upd if output_upd else published
-        
+
         return published, updated
     except Exception as e:
         print(f"Error getting dates for {path}: {e}")
         return None, None
 
+class IndentDumper(yaml.SafeDumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super(IndentDumper, self).increase_indent(flow, False)
+
 def update_manifest(manifest_path):
     # Get the directory of the app
     app_dir = os.path.dirname(manifest_path)
-    
+
     published, updated = get_git_dates(app_dir)
     if not published:
         print(f"Skipping {manifest_path} (no git history)")
@@ -75,7 +80,7 @@ def update_manifest(manifest_path):
     if not data.get('published'):
         data['published'] = published
         changed = True
-    
+
     # Always update the 'updated' date to the latest commit
     if data.get('updated') != updated:
         data['updated'] = updated
@@ -87,9 +92,8 @@ def update_manifest(manifest_path):
     if changed:
         print(f"Updating {manifest_path}: published={published}, updated={updated}")
         with open(manifest_path, 'w', encoding='utf-8') as f:
-            yaml.dump(data, f, sort_keys=False, default_flow_style=False, explicit_start=True, allow_unicode=True, width=1000)
+            yaml.dump(data, f, Dumper=IndentDumper, sort_keys=False, default_flow_style=False, explicit_start=True, allow_unicode=True, width=1000, indent=4)
 
-import sys
 
 def main():
     if len(sys.argv) > 1:
@@ -105,7 +109,7 @@ def main():
     else:
         # Scan all apps
         manifests = glob.glob("apps/*/manifest.yaml")
-    
+
     print(f"Checking {len(manifests)} manifests.")
     for m in manifests:
         update_manifest(m)

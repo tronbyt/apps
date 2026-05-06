@@ -9,7 +9,7 @@ packageName: thingswifesays
 recommendedInterval: 5
 category: entertainment
 tags:
-- art
-- lifestyle
+    - art
+    - lifestyle
 published: '2023-09-21T16:36:27Z'
 updated: '2025-11-30T19:58:27Z'

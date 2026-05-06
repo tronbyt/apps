@@ -8,8 +8,8 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-- art
-- utility
-- wide 2x support
+    - art
+    - utility
+    - wide 2x support
 published: '2025-04-06T20:57:21Z'
 updated: '2025-11-29T17:52:33Z'

@@ -9,6 +9,6 @@ packageName: wantedposter
 recommendedInterval: 5
 category: art
 tags:
-- art
+    - art
 published: '2022-05-03T15:32:56Z'
 updated: '2025-11-29T23:55:39Z'

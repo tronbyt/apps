@@ -10,9 +10,9 @@ minPixletVersion: v0.30.0
 supports2x: true
 category: clocks
 tags:
-- space
-- tech
-- planets
-- wide 2x support
+    - space
+    - tech
+    - planets
+    - wide 2x support
 published: '2026-01-30T22:19:23Z'
 updated: '2026-01-31T04:11:54Z'

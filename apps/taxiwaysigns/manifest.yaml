@@ -9,6 +9,6 @@ fileName: taxiway_signs.star
 packageName: taxiwaysigns
 category: transit
 tags:
-- utility
+    - utility
 published: '2024-07-22T14:31:55Z'
 updated: '2025-12-17T23:02:59Z'

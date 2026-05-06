@@ -9,8 +9,8 @@ fileName: hacker_news.star
 packageName: hackernews
 category: news
 tags:
-- tech
-- news
-- top-stories
+    - tech
+    - news
+    - top-stories
 published: '2024-07-03T21:12:08Z'
 updated: '2025-12-17T23:02:59Z'

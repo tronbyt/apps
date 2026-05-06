@@ -8,8 +8,8 @@ fileName: inseason.star
 packageName: inseason
 category: lifestyle
 tags:
-- lifestyle
-- local
-- time
+    - lifestyle
+    - local
+    - time
 published: '2022-11-17T18:52:44Z'
 updated: '2025-12-01T21:50:01Z'

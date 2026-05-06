@@ -9,7 +9,7 @@ packageName: christchurchbins
 recommendedInterval: 5
 category: utilities
 tags:
-- utility
-- waste
+    - utility
+    - waste
 published: '2023-07-10T13:14:43Z'
 updated: '2025-12-02T19:30:22Z'

@@ -9,7 +9,7 @@ packageName: fineart
 recommendedInterval: 5
 category: art
 tags:
-- art
-- time
+    - art
+    - time
 published: '2024-02-01T22:57:26Z'
 updated: '2025-12-02T19:30:22Z'

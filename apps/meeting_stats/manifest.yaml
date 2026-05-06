@@ -9,8 +9,8 @@ packageName: meetingstats
 recommendedInterval: 5
 category: utilities
 tags:
-- productivity
-- meeting
-- utility
+    - productivity
+    - meeting
+    - utility
 published: '2023-10-19T19:50:59Z'
 updated: '2025-11-29T21:14:16Z'

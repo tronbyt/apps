@@ -9,8 +9,8 @@ packageName: lightningnode
 recommendedInterval: 5
 category: finance
 tags:
-- weather
-- crypto
-- finance
+    - weather
+    - crypto
+    - finance
 published: '2023-10-07T18:31:21Z'
 updated: '2025-12-02T19:30:22Z'

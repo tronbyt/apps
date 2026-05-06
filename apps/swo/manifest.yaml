@@ -6,7 +6,7 @@ desc: Displays the first three days of NOAA's Severe Weather Outlook Map.
 author: heffelfinger007
 category: weather
 tags:
-- weather
-- productivity
+    - weather
+    - productivity
 published: '2025-04-03T22:50:45Z'
 updated: '2025-12-02T19:30:22Z'

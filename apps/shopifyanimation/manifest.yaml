@@ -9,8 +9,8 @@ packageName: shopifyanimation
 recommendedInterval: 5
 category: entertainment
 tags:
-- retro
-- utility
-- art
+    - retro
+    - utility
+    - art
 published: '2022-11-30T23:34:00Z'
 updated: '2025-12-02T19:30:22Z'

@@ -9,8 +9,8 @@ packageName: openroutercredits
 recommendedInterval: 300
 category: utilities
 tags:
-- tech
-- utility
-- tracking
+    - tech
+    - utility
+    - tracking
 published: '2025-10-24T09:43:27Z'
 updated: '2025-11-30T19:58:27Z'

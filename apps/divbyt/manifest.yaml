@@ -9,7 +9,7 @@ packageName: divbyt
 recommendedInterval: 5
 category: entertainment
 tags:
-- art
-- clock
+    - art
+    - clock
 published: '2023-06-15T20:14:57Z'
 updated: '2025-12-02T19:30:22Z'

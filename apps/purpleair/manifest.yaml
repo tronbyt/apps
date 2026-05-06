@@ -9,8 +9,8 @@ packageName: purpleair
 recommendedInterval: 5
 category: utilities
 tags:
-- weather
-- nature
-- utility
+    - weather
+    - nature
+    - utility
 published: '2022-03-14T23:19:33Z'
 updated: '2025-11-29T23:55:39Z'

@@ -10,8 +10,8 @@ broken: true
 recommendedInterval: 5
 category: utilities
 tags:
-- music
-- utility
-- deals
+    - music
+    - utility
+    - deals
 published: '2024-01-06T16:33:46Z'
 updated: '2025-12-05T22:28:51Z'

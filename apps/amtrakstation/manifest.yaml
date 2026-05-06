@@ -10,6 +10,6 @@ recommendedInterval: 5
 supports2x: true
 category: transit
 tags:
-- utility
+    - utility
 published: '2026-04-17T17:15:09Z'
 updated: '2026-04-19T02:21:59Z'

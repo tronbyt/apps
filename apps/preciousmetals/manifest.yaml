@@ -9,7 +9,7 @@ packageName: preciousmetals
 recommendedInterval: 5
 category: finance
 tags:
-- gold
-- finance
+    - gold
+    - finance
 published: '2022-06-09T16:49:56Z'
 updated: '2025-11-30T19:58:27Z'

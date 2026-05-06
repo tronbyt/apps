@@ -9,8 +9,8 @@ packageName: deathvalleytemp
 recommendedInterval: 5
 category: weather
 tags:
-- local
-- weather
-- utility
+    - local
+    - weather
+    - utility
 published: '2023-04-17T17:35:56Z'
 updated: '2025-12-02T19:30:22Z'

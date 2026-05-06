@@ -9,8 +9,8 @@ packageName: verceldashboard
 recommendedInterval: 5
 category: utilities
 tags:
-- tech
-- tracking
-- utility
+    - tech
+    - tracking
+    - utility
 published: '2023-03-30T16:30:30Z'
 updated: '2025-12-05T22:28:51Z'

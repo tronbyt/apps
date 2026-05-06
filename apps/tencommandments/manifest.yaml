@@ -9,8 +9,8 @@ packageName: tencommandments
 recommendedInterval: 5
 category: art
 tags:
-- lifestyle
-- art
-- tech
+    - lifestyle
+    - art
+    - tech
 published: '2023-11-16T17:11:53Z'
 updated: '2025-12-01T21:50:01Z'

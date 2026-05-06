@@ -9,7 +9,7 @@ packageName: developerexcuse
 recommendedInterval: 5
 category: entertainment
 tags:
-- tech
-- nature
+    - tech
+    - nature
 published: '2023-08-23T14:11:35Z'
 updated: '2025-12-02T19:30:22Z'

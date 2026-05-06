@@ -9,7 +9,7 @@ packageName: armageddontrackr
 recommendedInterval: 5
 category: science
 tags:
-- asteroids
-- space
+    - asteroids
+    - space
 published: '2023-11-19T17:44:29Z'
 updated: '2025-11-29T23:55:39Z'

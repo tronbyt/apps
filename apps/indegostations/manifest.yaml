@@ -9,7 +9,7 @@ packageName: indegostations
 recommendedInterval: 5
 category: transit
 tags:
-- utility
-- real-time
+    - utility
+    - real-time
 published: '2022-06-10T17:38:40Z'
 updated: '2025-11-30T19:58:27Z'

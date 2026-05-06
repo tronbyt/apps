@@ -9,7 +9,7 @@ packageName: daynightmap
 recommendedInterval: 5
 category: science
 tags:
-- space
-- weather
+    - space
+    - weather
 published: '2022-01-17T18:36:32Z'
 updated: '2025-12-01T19:37:30Z'

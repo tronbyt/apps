@@ -9,8 +9,8 @@ packageName: nflscores
 recommendedInterval: 5
 category: sports
 tags:
-- real-time
-- nfl
-- football
+    - real-time
+    - nfl
+    - football
 published: '2022-04-27T14:37:57Z'
 updated: '2025-11-29T17:52:33Z'

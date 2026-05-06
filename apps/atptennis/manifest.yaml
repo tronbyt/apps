@@ -9,7 +9,7 @@ packageName: atptennis
 recommendedInterval: 5
 category: sports
 tags:
-- real-time
-- tennis
+    - real-time
+    - tennis
 published: '2023-03-30T16:39:33Z'
 updated: '2026-02-25T04:17:40Z'

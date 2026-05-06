@@ -10,9 +10,9 @@ recommendedInterval: 5
 supports2x: true
 category: health
 tags:
-- lifestyle
-- tracking
-- utility
-- wide 2x support
+    - lifestyle
+    - tracking
+    - utility
+    - wide 2x support
 published: '2022-01-19T18:18:31Z'
 updated: '2026-04-16T04:03:33Z'

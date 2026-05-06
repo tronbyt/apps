@@ -9,8 +9,8 @@ packageName: mlblivescores
 recommendedInterval: 1
 category: sports
 tags:
-- mlb
-- baseball
-- scores
+    - mlb
+    - baseball
+    - scores
 published: '2026-04-07T20:59:29Z'
 updated: '2026-04-07T21:43:31Z'

@@ -8,7 +8,7 @@ fileName: mens_cricket.star
 packageName: menscricket
 category: sports
 tags:
-- real-time
-- cricket
+    - real-time
+    - cricket
 published: '2024-09-25T14:46:07Z'
 updated: '2026-02-16T12:04:28Z'

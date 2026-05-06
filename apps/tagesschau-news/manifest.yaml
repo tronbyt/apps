@@ -11,7 +11,7 @@ supports2x: true
 minPixletVersion: v0.49.3
 category: news
 tags:
-- news
-- wide 2x support
+    - news
+    - wide 2x support
 published: '2024-09-18T17:35:10Z'
 updated: '2025-12-17T22:02:20Z'

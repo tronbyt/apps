@@ -9,9 +9,9 @@ packageName: librenmsdevices
 recommendedInterval: 5
 category: utilities
 tags:
-- nms
-- tech
-- tracking
-- smart-home
+    - nms
+    - tech
+    - tracking
+    - smart-home
 published: '2023-05-26T17:03:25Z'
 updated: '2025-12-02T19:30:22Z'

@@ -8,8 +8,8 @@ fileName: slow_shakespeare.star
 packageName: slowshakespeare
 category: education
 tags:
-- education
-- shakespeare
-- poetry
+    - education
+    - shakespeare
+    - poetry
 published: '2026-04-07T20:59:29Z'
 updated: '2026-04-07T21:43:31Z'

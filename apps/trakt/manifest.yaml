@@ -9,8 +9,8 @@ packageName: trakt
 recommendedInterval: 5
 category: utilities
 tags:
-- media
-- tidbyt
-- utility
+    - media
+    - tidbyt
+    - utility
 published: '2024-02-08T19:01:42Z'
 updated: '2025-12-23T13:24:18Z'

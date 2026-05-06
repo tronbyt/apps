@@ -9,10 +9,10 @@ packageName: claudius
 recommendedInterval: 300
 category: utilities
 tags:
-- claude
-- ai
-- usage
-- developer
-- mac
+    - claude
+    - ai
+    - usage
+    - developer
+    - mac
 published: '2026-05-05T16:00:24Z'
 updated: '2026-05-05T16:00:24Z'

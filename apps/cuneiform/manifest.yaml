@@ -9,8 +9,8 @@ packageName: cuneiform
 recommendedInterval: 5
 category: reference
 tags:
-- ancient
-- education
-- news
+    - ancient
+    - education
+    - news
 published: '2024-01-08T13:50:10Z'
 updated: '2025-12-02T19:30:22Z'

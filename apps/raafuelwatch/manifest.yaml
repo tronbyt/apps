@@ -9,7 +9,7 @@ packageName: raafuelwatch
 recommendedInterval: 5
 category: utilities
 tags:
-- utility
-- finance
+    - utility
+    - finance
 published: '2023-12-09T15:05:33Z'
 updated: '2025-12-02T19:30:22Z'

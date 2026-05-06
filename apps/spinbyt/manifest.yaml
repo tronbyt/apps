@@ -9,8 +9,8 @@ packageName: spinbyt
 broken: true
 category: transit
 tags:
-- utility
-- real-time
-- tech
+    - utility
+    - real-time
+    - tech
 published: '2022-11-17T18:45:37Z'
 updated: '2025-12-05T22:28:51Z'

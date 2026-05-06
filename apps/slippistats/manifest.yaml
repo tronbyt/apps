@@ -11,7 +11,7 @@ broken: true
 brokenReason: Backend server (chart-slp-server.herokuapp.com) is down (404)
 category: gaming
 tags:
-- retro
-- sports
+    - retro
+    - sports
 published: '2023-05-17T02:41:28Z'
 updated: '2025-12-05T22:28:51Z'

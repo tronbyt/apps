@@ -8,9 +8,9 @@ fileName: cisaticker.star
 packageName: cisaticker
 category: news
 tags:
-- news
-- security
-- cybersecurity
-- alerts
+    - news
+    - security
+    - cybersecurity
+    - alerts
 published: '2026-04-04T08:25:41Z'
 updated: '2026-04-14T21:24:42Z'

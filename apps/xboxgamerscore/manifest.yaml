@@ -9,9 +9,9 @@ packageName: xboxgamerscore
 recommendedInterval: 5
 category: utilities
 tags:
-- gaming
-- sports
-- utility
-- art
+    - gaming
+    - sports
+    - utility
+    - art
 published: '2023-02-01T21:23:02Z'
 updated: '2025-12-23T13:24:18Z'

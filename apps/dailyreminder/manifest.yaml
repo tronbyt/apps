@@ -9,8 +9,8 @@ packageName: dailyreminder
 recommendedInterval: 5
 category: utilities
 tags:
-- productivity
-- time
-- utility
+    - productivity
+    - time
+    - utility
 published: '2023-01-12T16:47:04Z'
 updated: '2025-11-29T17:52:33Z'

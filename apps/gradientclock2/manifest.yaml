@@ -8,9 +8,9 @@ supports2x: true
 recommendedInterval: 0
 category: clocks
 tags:
-- clock
-- art
-- colorful
-- wide 2x support
+    - clock
+    - art
+    - colorful
+    - wide 2x support
 published: '2024-06-06T20:35:05Z'
 updated: '2025-12-28T11:46:19Z'

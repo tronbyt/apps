@@ -9,7 +9,7 @@ packageName: mayacalendar
 recommendedInterval: 5
 category: utilities
 tags:
-- productivity
-- maya
+    - productivity
+    - maya
 published: '2023-06-28T04:21:19Z'
 updated: '2025-11-30T19:58:27Z'

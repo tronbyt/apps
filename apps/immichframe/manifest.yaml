@@ -9,9 +9,9 @@ packageName: immichframe
 supports2x: true
 category: utilities
 tags:
-- art
-- local
-- time
-- wide 2x support
+    - art
+    - local
+    - time
+    - wide 2x support
 published: '2026-01-08T22:40:59Z'
 updated: '2026-01-23T04:41:32Z'

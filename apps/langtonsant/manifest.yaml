@@ -9,8 +9,8 @@ packageName: langtonsant
 recommendedInterval: 5
 category: art
 tags:
-- art
-- gaming
-- science
+    - art
+    - gaming
+    - science
 published: '2023-03-23T11:21:16Z'
 updated: '2025-12-02T19:30:22Z'

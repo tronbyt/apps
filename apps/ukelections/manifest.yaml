@@ -9,7 +9,7 @@ packageName: ukelections
 recommendedInterval: 5
 category: lifestyle
 tags:
-- news
-- local
+    - news
+    - local
 published: '2023-06-27T19:00:46Z'
 updated: '2025-12-05T22:28:51Z'

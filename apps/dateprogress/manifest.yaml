@@ -9,9 +9,9 @@ packageName: dateprogress
 recommendedInterval: 5
 category: utilities
 tags:
-- time
-- clock
-- art
-- utility
+    - time
+    - clock
+    - art
+    - utility
 published: '2022-02-02T01:17:26Z'
 updated: '2025-12-02T19:30:22Z'

@@ -9,7 +9,7 @@ packageName: isitchristmas
 recommendedInterval: 5
 category: lifestyle
 tags:
-- time
-- utility
+    - time
+    - utility
 published: '2022-05-03T16:44:07Z'
 updated: '2025-11-30T19:58:27Z'

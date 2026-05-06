@@ -10,10 +10,10 @@ recommendedInterval: 5
 supports2x: true
 category: entertainment
 tags:
-- art
-- science
-- gaming
-- retro
-- wide 2x support
+    - art
+    - science
+    - gaming
+    - retro
+    - wide 2x support
 published: '2023-03-23T12:36:07Z'
 updated: '2025-12-23T12:55:56Z'

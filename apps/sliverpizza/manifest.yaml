@@ -10,7 +10,7 @@ recommendedInterval: 5
 broken: true
 category: food
 tags:
-- lifestyle
-- time
+    - lifestyle
+    - time
 published: '2023-09-29T15:02:29Z'
 updated: '2025-12-05T22:28:51Z'

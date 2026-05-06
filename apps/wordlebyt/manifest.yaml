@@ -9,9 +9,9 @@ packageName: wordlebyt
 recommendedInterval: 5
 category: utilities
 tags:
-- gaming
-- utility
-- art
-- sports
+    - gaming
+    - utility
+    - art
+    - sports
 published: '2022-07-19T14:38:57Z'
 updated: '2025-11-29T17:52:33Z'

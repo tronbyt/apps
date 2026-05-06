@@ -11,7 +11,7 @@ broken: true
 brokenReason: API endpoint is no longer available
 category: finance
 tags:
-- finance
-- tickers
+    - finance
+    - tickers
 published: '2023-06-12T18:47:09Z'
 updated: '2025-12-05T22:28:51Z'

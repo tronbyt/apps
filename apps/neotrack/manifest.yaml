@@ -9,7 +9,7 @@ packageName: neotrack
 recommendedInterval: 5
 category: science
 tags:
-- space
-- tech
+    - space
+    - tech
 published: '2022-09-29T20:29:33Z'
 updated: '2025-12-05T22:28:51Z'

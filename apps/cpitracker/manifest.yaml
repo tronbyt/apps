@@ -10,9 +10,9 @@ packageName: cpitracker
 supports2x: true
 category: finance
 tags:
-- finance
-- tech
-- utility
-- wide 2x support
+    - finance
+    - tech
+    - utility
+    - wide 2x support
 published: '2025-04-12T20:42:46Z'
 updated: '2025-12-22T15:41:28Z'

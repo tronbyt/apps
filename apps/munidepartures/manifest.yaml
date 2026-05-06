@@ -8,7 +8,7 @@ fileName: muni_departures.star
 packageName: munidepartures
 category: transit
 tags:
-- muni
-- real-time
+    - muni
+    - real-time
 published: '2025-08-08T21:01:17Z'
 updated: '2025-12-17T23:02:59Z'

@@ -9,6 +9,6 @@ packageName: tennisrankings
 recommendedInterval: 5
 category: sports
 tags:
-- tennis
+    - tennis
 published: '2023-05-04T17:03:17Z'
 updated: '2026-04-23T20:07:47Z'

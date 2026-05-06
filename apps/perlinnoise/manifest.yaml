@@ -8,8 +8,8 @@ fileName: perlin_noise.star
 packageName: perlinnoise
 category: entertainment
 tags:
-- art
-- science
-- colorful
+    - art
+    - science
+    - colorful
 published: '2026-02-17T19:44:39Z'
 updated: '2026-02-17T19:44:39Z'

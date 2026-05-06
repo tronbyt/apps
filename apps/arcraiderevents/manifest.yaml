@@ -8,8 +8,8 @@ fileName: arc_raiders_events.star
 packageName: arcraiderevents
 category: gaming
 tags:
-- arc raiders
-- gaming
-- events
+    - arc raiders
+    - gaming
+    - events
 published: '2026-04-07T20:59:29Z'
 updated: '2026-04-07T21:43:31Z'

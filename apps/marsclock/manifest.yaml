@@ -9,8 +9,8 @@ packageName: marsclock
 recommendedInterval: 0
 category: clocks
 tags:
-- space
-- science
-- utility
+    - space
+    - science
+    - utility
 published: '2023-06-09T15:43:14Z'
 updated: '2025-11-29T23:55:39Z'

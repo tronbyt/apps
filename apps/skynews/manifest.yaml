@@ -9,6 +9,6 @@ packageName: skynews
 recommendedInterval: 10
 category: news
 tags:
-- news
+    - news
 published: '2023-02-01T21:51:25Z'
 updated: '2025-12-02T19:30:22Z'

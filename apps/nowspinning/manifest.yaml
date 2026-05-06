@@ -9,7 +9,7 @@ fileName: now_spinning.star
 packageName: nowspinning
 category: entertainment
 tags:
-- music
-- art
+    - music
+    - art
 published: '2024-10-16T17:13:55Z'
 updated: '2025-12-17T23:02:59Z'

@@ -9,9 +9,9 @@ packageName: plexrecentlyadded
 recommendedInterval: 5
 category: utilities
 tags:
-- plex
-- media
-- utility
-- tech
+    - plex
+    - media
+    - utility
+    - tech
 published: '2023-09-29T14:57:09Z'
 updated: '2026-02-11T19:57:08Z'

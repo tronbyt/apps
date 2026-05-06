@@ -9,10 +9,10 @@ packageName: supermariokart
 supports2x: true
 category: gaming
 tags:
-- retro
-- gaming
-- media
-- art
-- wide 2x support
+    - retro
+    - gaming
+    - media
+    - art
+    - wide 2x support
 published: '2022-08-04T19:30:22Z'
 updated: '2025-12-28T23:07:17Z'

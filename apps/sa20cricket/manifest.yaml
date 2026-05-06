@@ -11,7 +11,7 @@ broken: true
 brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).
 category: sports
 tags:
-- real-time
-- cricket
+    - real-time
+    - cricket
 published: '2023-02-02T21:06:01Z'
 updated: '2025-12-05T22:28:51Z'

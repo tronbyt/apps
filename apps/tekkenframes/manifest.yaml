@@ -8,8 +8,8 @@ fileName: tekken_frames.star
 packageName: tekkenframes
 category: gaming
 tags:
-- gaming
-- tekken
-- frame data
+    - gaming
+    - tekken
+    - frame data
 published: '2026-04-07T20:59:29Z'
 updated: '2026-04-07T21:43:31Z'

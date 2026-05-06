@@ -9,8 +9,8 @@ packageName: planetarium
 broken: true
 category: science
 tags:
-- space
-- science
-- planets
+    - space
+    - science
+    - planets
 published: '2023-03-28T12:50:42Z'
 updated: '2025-12-05T22:28:51Z'

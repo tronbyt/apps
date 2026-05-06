@@ -11,9 +11,9 @@ supports2x: true
 minPixletVersion: v0.49.4
 category: gaming
 tags:
-- gaming
-- retro
-- art
-- wide 2x support
+    - gaming
+    - retro
+    - art
+    - wide 2x support
 published: '2023-09-06T15:28:25Z'
 updated: '2025-12-11T17:34:07Z'

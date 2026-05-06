@@ -7,9 +7,9 @@ author: Brombomb
 supports2x: true
 category: utilities
 tags:
-- tech
-- smart-home
-- utility
-- wide 2x support
+    - tech
+    - smart-home
+    - utility
+    - wide 2x support
 published: '2025-12-01T06:47:54Z'
 updated: '2025-12-24T08:21:26Z'

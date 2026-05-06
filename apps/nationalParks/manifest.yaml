@@ -9,8 +9,8 @@ packageName: nationalparks
 recommendedInterval: 5
 category: entertainment
 tags:
-- nature
-- art
-- utility
+    - nature
+    - art
+    - utility
 published: '2023-12-17T12:46:07Z'
 updated: '2025-11-29T17:52:33Z'

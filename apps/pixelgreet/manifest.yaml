@@ -9,7 +9,7 @@ packageName: pixelgreet
 recommendedInterval: 5
 category: utilities
 tags:
-- personalization
-- art
+    - personalization
+    - art
 published: '2023-04-27T13:15:04Z'
 updated: '2025-11-29T23:55:39Z'

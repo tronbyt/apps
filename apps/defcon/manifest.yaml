@@ -7,9 +7,9 @@ author: Robert Ison
 recommendedInterval: 5
 category: utilities
 tags:
-- notification
-- emergency
-- public-safety
+    - notification
+    - emergency
+    - public-safety
 supports2x: true
 published: '2024-08-20T15:27:45Z'
 updated: '2026-03-16T07:08:24Z'

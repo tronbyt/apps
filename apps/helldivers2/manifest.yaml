@@ -9,8 +9,8 @@ packageName: helldivers2
 recommendedInterval: 5
 category: entertainment
 tags:
-- real-time
-- gaming
-- time
+    - real-time
+    - gaming
+    - time
 published: '2024-03-18T15:46:27Z'
 updated: '2025-11-29T23:55:39Z'

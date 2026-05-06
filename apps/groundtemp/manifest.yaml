@@ -10,7 +10,7 @@ recommendedInterval: 15
 supports2x: true
 category: weather
 tags:
-- weather
-- lifestyle
+    - weather
+    - lifestyle
 published: '2026-03-26T04:43:08Z'
 updated: '2026-03-26T04:43:08Z'

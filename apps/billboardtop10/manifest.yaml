@@ -10,7 +10,7 @@ recommendedInterval: 5
 supports2x: true
 category: entertainment
 tags:
-- music
-- wide 2x support
+    - music
+    - wide 2x support
 published: '2024-02-08T18:17:06Z'
 updated: '2026-03-13T10:30:58Z'

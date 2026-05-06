@@ -9,7 +9,7 @@ packageName: lastfmstats
 recommendedInterval: 5
 category: entertainment
 tags:
-- music
-- tech
+    - music
+    - tech
 published: '2024-03-14T21:35:33Z'
 updated: '2025-12-23T13:24:18Z'

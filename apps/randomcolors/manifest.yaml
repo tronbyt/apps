@@ -9,7 +9,7 @@ packageName: randomcolors
 recommendedInterval: 5
 category: utilities
 tags:
-- art
-- utility
+    - art
+    - utility
 published: '2023-01-03T14:42:07Z'
 updated: '2025-11-30T19:58:27Z'

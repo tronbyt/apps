@@ -9,8 +9,8 @@ packageName: mealviewer
 recommendedInterval: 5
 category: utilities
 tags:
-- education
-- lifestyle
-- utility
+    - education
+    - lifestyle
+    - utility
 published: '2024-11-24T02:48:45Z'
 updated: '2025-12-05T22:28:51Z'

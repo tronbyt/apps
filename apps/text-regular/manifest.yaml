@@ -8,9 +8,9 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-- text-display
-- utility
-- clock
-- wide 2x support
+    - text-display
+    - utility
+    - clock
+    - wide 2x support
 published: '2025-04-06T20:57:21Z'
 updated: '2025-11-29T17:52:33Z'

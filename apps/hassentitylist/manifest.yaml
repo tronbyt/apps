@@ -10,9 +10,9 @@ recommendedInterval: 5
 supports2x: true
 category: smart-home
 tags:
-- smart-home
-- lifestyle
-- utility
-- wide 2x support
+    - smart-home
+    - lifestyle
+    - utility
+    - wide 2x support
 published: '2024-01-11T19:01:48Z'
 updated: '2025-11-29T17:52:33Z'

@@ -9,7 +9,7 @@ packageName: topcryptoprices
 recommendedInterval: 1
 category: finance
 tags:
-- crypto
-- finance
+    - crypto
+    - finance
 published: '2022-11-10T17:49:56Z'
 updated: '2025-12-05T22:28:51Z'

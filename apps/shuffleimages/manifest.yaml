@@ -9,7 +9,7 @@ packageName: shuffleimages
 recommendedInterval: 5
 category: utilities
 tags:
-- art
-- utility
+    - art
+    - utility
 published: '2022-07-18T20:40:44Z'
 updated: '2025-11-30T19:58:27Z'

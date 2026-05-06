@@ -9,7 +9,7 @@ packageName: melbournebuses
 recommendedInterval: 5
 category: transit
 tags:
-- local
-- real-time
+    - local
+    - real-time
 published: '2024-09-03T16:50:55Z'
 updated: '2025-11-29T17:52:33Z'

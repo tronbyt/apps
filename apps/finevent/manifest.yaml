@@ -9,7 +9,7 @@ packageName: finevent
 recommendedInterval: 5
 category: finance
 tags:
-- finance
-- news
+    - finance
+    - news
 published: '2022-04-05T12:37:31Z'
 updated: '2025-12-23T13:24:18Z'

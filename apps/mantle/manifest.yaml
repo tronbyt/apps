@@ -9,7 +9,7 @@ packageName: mantle
 recommendedInterval: 5
 category: finance
 tags:
-- finance
-- tech
+    - finance
+    - tech
 published: '2024-01-23T18:07:15Z'
 updated: '2025-12-23T13:24:18Z'

@@ -9,7 +9,7 @@ packageName: rules4life
 recommendedInterval: 5
 category: entertainment
 tags:
-- art
-- lifestyle
+    - art
+    - lifestyle
 published: '2022-10-13T17:42:55Z'
 updated: '2025-12-28T23:11:23Z'

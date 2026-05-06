@@ -9,9 +9,9 @@ packageName: lifeclock
 recommendedInterval: 0
 category: clocks
 tags:
-- game-of-life
-- clock
-- utility
-- art
+    - game-of-life
+    - clock
+    - utility
+    - art
 published: '2023-07-10T13:15:38Z'
 updated: '2025-12-02T19:30:22Z'

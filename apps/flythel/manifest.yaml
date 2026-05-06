@@ -9,7 +9,7 @@ packageName: flythel
 recommendedInterval: 5
 category: sports
 tags:
-- real-time
-- baseball
+    - real-time
+    - baseball
 published: '2024-03-23T12:58:20Z'
 updated: '2025-12-02T19:30:22Z'

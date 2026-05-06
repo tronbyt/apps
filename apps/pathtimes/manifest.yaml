@@ -9,6 +9,6 @@ packageName: pathtimes
 recommendedInterval: 5
 category: transit
 tags:
-- real-time
+    - real-time
 published: '2025-05-31T12:11:10Z'
 updated: '2025-11-29T17:52:33Z'

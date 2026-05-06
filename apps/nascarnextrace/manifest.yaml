@@ -9,9 +9,9 @@ packageName: nascarnextrace
 recommendedInterval: 5
 category: sports
 tags:
-- clock
-- local
-- nascar
-- racing
+    - clock
+    - local
+    - nascar
+    - racing
 published: '2022-09-22T16:13:09Z'
 updated: '2025-11-29T21:14:16Z'

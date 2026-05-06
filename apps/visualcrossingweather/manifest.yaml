@@ -8,8 +8,8 @@ fileName: visualcrossing_weather.star
 packageName: visualcrossingweather
 category: weather
 tags:
-- weather
-- humidity
-- local
+    - weather
+    - humidity
+    - local
 published: '2025-07-25T17:59:08Z'
 updated: '2025-12-17T23:02:59Z'

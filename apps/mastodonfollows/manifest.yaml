@@ -9,9 +9,9 @@ packageName: mastodonfollows
 recommendedInterval: 5
 category: utilities
 tags:
-- media
-- sports
-- utility
-- finance
+    - media
+    - sports
+    - utility
+    - finance
 published: '2023-01-23T18:40:24Z'
 updated: '2025-12-23T13:24:18Z'

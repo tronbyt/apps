@@ -10,8 +10,8 @@ recommendedInterval: 1
 supports2x: true
 category: finance
 tags:
-- finance
-- intraday
-- wide 2x support
+    - finance
+    - intraday
+    - wide 2x support
 published: '2024-10-07T16:16:38Z'
 updated: '2025-11-29T17:52:33Z'

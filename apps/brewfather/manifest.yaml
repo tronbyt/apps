@@ -8,9 +8,9 @@ filename: brewfather.star
 supports2x: true
 category: utilities
 tags:
-- lifestyle
-- tech
-- real-time
-- wide 2x support
+    - lifestyle
+    - tech
+    - real-time
+    - wide 2x support
 published: '2026-01-10T21:30:29Z'
 updated: '2026-01-16T20:12:24Z'

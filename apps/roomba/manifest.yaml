@@ -9,8 +9,8 @@ packageName: roomba
 recommendedInterval: 5
 category: smart-home
 tags:
-- smart-home
-- utility
-- lifestyle
+    - smart-home
+    - utility
+    - lifestyle
 published: '2023-06-15T20:11:05Z'
 updated: '2026-02-27T04:02:50Z'

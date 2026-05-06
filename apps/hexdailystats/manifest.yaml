@@ -9,8 +9,8 @@ packageName: hexdailystats
 recommendedInterval: 5
 category: finance
 tags:
-- crypto
-- finance
-- art
+    - crypto
+    - finance
+    - art
 published: '2022-09-22T15:46:29Z'
 updated: '2025-12-05T22:28:51Z'

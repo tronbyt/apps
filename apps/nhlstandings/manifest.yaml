@@ -9,7 +9,7 @@ packageName: nhlstandings
 recommendedInterval: 5
 category: sports
 tags:
-- nhl
-- hockey
+    - nhl
+    - hockey
 published: '2022-10-07T13:09:58Z'
 updated: '2025-11-29T17:52:33Z'

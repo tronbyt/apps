@@ -9,6 +9,6 @@ packageName: whatthecommit
 recommendedInterval: 5
 category: entertainment
 tags:
-- tech
+    - tech
 published: '2024-09-20T15:02:51Z'
 updated: '2025-12-02T19:30:22Z'

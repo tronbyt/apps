@@ -9,8 +9,8 @@ packageName: simplescoreboard
 recommendedInterval: 5
 category: utilities
 tags:
-- sports
-- utility
-- gaming
+    - sports
+    - utility
+    - gaming
 published: '2023-07-13T17:48:45Z'
 updated: '2025-11-30T19:58:27Z'

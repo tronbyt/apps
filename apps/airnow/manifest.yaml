@@ -10,8 +10,8 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-- weather
-- utility
-- wide 2x support
+    - weather
+    - utility
+    - wide 2x support
 published: '2023-06-15T20:34:58Z'
 updated: '2025-12-05T22:28:51Z'

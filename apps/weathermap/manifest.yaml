@@ -9,8 +9,8 @@ packageName: weathermap
 recommendedInterval: 5
 category: weather
 tags:
-- weather
-- art
-- tech
+    - weather
+    - art
+    - tech
 published: '2022-03-02T04:00:42Z'
 updated: '2025-12-02T19:30:22Z'

@@ -8,7 +8,7 @@ fileName: trenitalia.star
 packageName: trenitalia
 category: transit
 tags:
-- real-time
-- utility
+    - real-time
+    - utility
 published: '2026-01-20T06:19:38Z'
 updated: '2026-01-20T06:19:38Z'

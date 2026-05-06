@@ -11,8 +11,8 @@ broken: true
 brokenReason: API blocked by Incapsula WAF
 category: utilities
 tags:
-- gas-prices
-- utility
-- real-time
+    - gas-prices
+    - utility
+    - real-time
 published: '2023-02-08T18:12:33Z'
 updated: '2025-12-05T22:28:51Z'

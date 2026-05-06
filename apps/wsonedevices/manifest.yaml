@@ -9,10 +9,10 @@ packageName: wsonedevices
 recommendedInterval: 5
 category: utilities
 tags:
-- devices
-- uem
-- management
-- tracking
-- utility
+    - devices
+    - uem
+    - management
+    - tracking
+    - utility
 published: '2024-01-03T20:08:51Z'
 updated: '2025-12-05T22:28:51Z'

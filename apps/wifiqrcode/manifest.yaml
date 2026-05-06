@@ -9,7 +9,7 @@ packageName: wifiqrcode
 recommendedInterval: 5
 category: utilities
 tags:
-- tech
-- utility
+    - tech
+    - utility
 published: '2022-09-08T17:20:13Z'
 updated: '2025-11-30T19:58:27Z'

@@ -9,7 +9,7 @@ packageName: campark
 recommendedInterval: 5
 category: transit
 tags:
-- real-time
-- utility
+    - real-time
+    - utility
 published: '2024-02-08T17:34:44Z'
 updated: '2025-11-29T17:52:33Z'

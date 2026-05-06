@@ -9,8 +9,8 @@ packageName: sonicthehedgehogclock
 recommendedInterval: 0
 category: clocks
 tags:
-- clock
-- retro
-- gaming
+    - clock
+    - retro
+    - gaming
 published: '2024-01-03T20:10:26Z'
 updated: '2025-12-02T19:30:22Z'

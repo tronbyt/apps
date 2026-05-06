@@ -9,6 +9,6 @@ packageName: wbcscores
 recommendedInterval: 5
 category: sports
 tags:
-- baseball
+    - baseball
 published: '2023-02-02T21:02:51Z'
 updated: '2025-12-04T09:38:27Z'

@@ -9,9 +9,9 @@ packageName: isstracker
 recommendedInterval: 5
 category: science
 tags:
-- space
-- tech
-- real-time
-- science
+    - space
+    - tech
+    - real-time
+    - science
 published: '2022-02-25T16:41:02Z'
 updated: '2025-11-29T23:55:39Z'

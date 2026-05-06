@@ -9,8 +9,8 @@ packageName: diablo4events
 recommendedInterval: 5
 category: gaming
 tags:
-- gaming
-- time
-- tracking
+    - gaming
+    - time
+    - tracking
 published: '2023-11-19T17:42:13Z'
 updated: '2025-11-30T19:58:27Z'

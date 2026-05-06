@@ -9,8 +9,8 @@ packageName: abstractclock
 recommendedInterval: 0
 category: clocks
 tags:
-- time
-- digital-clock
-- art
+    - time
+    - digital-clock
+    - art
 published: '2022-04-04T15:46:29Z'
 updated: '2025-11-30T19:58:27Z'
