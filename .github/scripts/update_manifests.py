@@ -14,6 +14,10 @@ def get_git_dates(path):
             "Fix YAML formatting",
             "Update manifest metadata",
             "Merge branch",
+            "Tag consolidation",
+            "llm generated categories",
+            "Fix Updates and script",
+            "Fix updated timestamps",
             "Implement sorting by newest and last updated in app viewer"
         ]
         ignore_regex = "|".join(ignore_patterns)
