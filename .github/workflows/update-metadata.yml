@@ -1,0 +1,60 @@
+name: Update App Metadata
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-metadata:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'tronbyt' # Avoid running on forks by default
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for git log analysis
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install PyYAML
+
+      - name: Update manifest metadata
+        id: update
+        run: |
+          # Determine modified apps
+          if [[ "${{ github.event_before }}" == "0000000000000000000000000000000000000000" ]]; then
+            echo "Initial push or new branch, checking all apps..."
+            python3 .github/scripts/update_manifests.py
+          else
+            echo "Performing incremental update for push..."
+            TARGETS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/' | cut -d'/' -f1-2 | sort -u || true)
+            if [ -n "$TARGETS" ]; then
+              python3 .github/scripts/update_manifests.py $TARGETS
+            else
+              echo "No apps modified in this push."
+            fi
+          fi
+
+      - name: Commit and push changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Detected changes in app manifests. Committing updates..."
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add apps/*/manifest.yaml
+            git commit -m "chore: auto-update manifest metadata [skip ci]"
+            git push
+          else
+            echo "No metadata updates required."
+          fi

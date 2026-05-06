@@ -1,13 +1,15 @@
 ---
-id: "battlemetrics-playergraph"
-packageName: "battlemetrics-playergraph"
-name: "BattleMetrics PlayerGraph"
-summary: "Player count 1d graph"
-desc: "Show the last 1d graph of the player count for a server on BattleMetrics."
-author: "beryxz"
-fileName: "battlemetrics-playergraph.star"
-category: "gaming"
+id: battlemetrics-playergraph
+packageName: battlemetrics-playergraph
+name: BattleMetrics PlayerGraph
+summary: Player count 1d graph
+desc: Show the last 1d graph of the player count for a server on BattleMetrics.
+author: beryxz
+fileName: battlemetrics-playergraph.star
+category: gaming
 tags:
-  - "gaming"
-  - "servers"
-  - "multiplayer"
+  - gaming
+  - servers
+  - multiplayer
+published: '2026-05-05T16:05:35Z'
+updated: '2026-05-05T16:05:35Z'
