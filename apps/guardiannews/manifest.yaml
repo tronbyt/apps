@@ -9,6 +9,8 @@ packageName: guardiannews
 recommendedInterval: 10
 category: news
 tags:
-  - guardian
-  - news
-  - media
+- guardian
+- news
+- media
+published: '2023-02-02T23:28:56Z'
+updated: '2026-04-02T20:26:05Z'

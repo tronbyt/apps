@@ -9,5 +9,7 @@ packageName: nationalrail
 recommendedInterval: 5
 category: transit
 tags:
-  - local
-  - real-time
+- local
+- real-time
+published: '2022-10-06T15:25:31Z'
+updated: '2026-04-02T20:26:05Z'

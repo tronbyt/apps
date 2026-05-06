@@ -2,7 +2,8 @@
 id: stockdata
 name: StockData
 summary: Track stock price
-desc: Allows you to track stock prices (intraday, week, or month) using data from stockdata.org.
+desc: Allows you to track stock prices (intraday, week, or month) using data from
+  stockdata.org.
 author: ingmarstein
 fileName: stockdata.star
 packageName: stockdata
@@ -10,6 +11,8 @@ recommendedInterval: 1
 supports2x: true
 category: finance
 tags:
-  - finance
-  - intraday
-  - wide 2x support
+- finance
+- intraday
+- wide 2x support
+published: '2024-10-07T16:16:38Z'
+updated: '2026-04-02T20:26:05Z'

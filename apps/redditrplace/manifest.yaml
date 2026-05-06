@@ -9,6 +9,8 @@ packageName: redditrplace
 recommendedInterval: 5
 category: entertainment
 tags:
-  - news
-  - art
-  - community
+- news
+- art
+- community
+published: '2022-05-03T15:34:34Z'
+updated: '2026-04-02T20:26:05Z'

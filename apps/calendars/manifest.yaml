@@ -9,7 +9,9 @@ packageName: calendars
 recommendedInterval: 5
 category: utilities
 tags:
-  - tech
-  - utility
-  - time
-  - local
+- tech
+- utility
+- time
+- local
+published: '2024-03-15T16:12:27Z'
+updated: '2026-04-02T20:26:05Z'

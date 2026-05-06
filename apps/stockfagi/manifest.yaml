@@ -2,13 +2,16 @@
 id: stockfagi
 name: StockFAGI
 summary: Stock Fear And Greed Index
-desc: Shows the Fear And Greed Index from CNN Markets RapidAPI endpoint. Updates every 30 minutes.
+desc: Shows the Fear And Greed Index from CNN Markets RapidAPI endpoint. Updates every
+  30 minutes.
 author: jondklley
 fileName: stockfagi.star
 packageName: stockfagi
 recommendedInterval: 1
 category: finance
 tags:
-  - finance
-  - tech
-  - news
+- finance
+- tech
+- news
+published: '2023-11-03T17:17:15Z'
+updated: '2026-04-02T20:26:05Z'

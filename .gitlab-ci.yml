@@ -1,0 +1,37 @@
+stages:
+  - metadata
+
+update-app-metadata:
+  stage: metadata
+  image: python:3.11-slim
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  before_script:
+    - apt-get update && apt-get install -y git
+    - pip install PyYAML
+  script:
+    - |
+      if [[ "$CI_COMMIT_BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+        echo "New branch or initial push, checking all apps..."
+        python3 .github/scripts/update_manifests.py
+      else
+        echo "Performing incremental update..."
+        TARGETS=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '^apps/' | cut -d'/' -f1-2 | sort -u || true)
+        if [ -n "$TARGETS" ]; then
+          python3 .github/scripts/update_manifests.py $TARGETS
+        else
+          echo "No apps modified in this push."
+        fi
+      fi
+    - |
+      if [[ -n $(git status --porcelain) ]]; then
+        echo "Detected changes in app manifests. Committing updates..."
+        git config --global user.email "ci-bot@tronbyt-apps.community"
+        git config --global user.name "Tronbyt Metadata Bot"
+        git add apps/*/manifest.yaml
+        git commit -m "chore: auto-update manifest metadata [skip ci]"
+        # Requires GITLAB_TOKEN CI variable with write_repository scope
+        git push "https://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_REF_NAME}
+      else
+        echo "No metadata updates required."
+      fi

@@ -9,6 +9,8 @@ fileName: rss_reader.star
 packageName: rssreader
 category: utilities
 tags:
-  - news
-  - utility
-  - clock
+- news
+- utility
+- clock
+published: '2024-07-17T14:58:06Z'
+updated: '2026-04-02T20:26:05Z'

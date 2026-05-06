@@ -9,6 +9,8 @@ packageName: nswfuelcheck
 recommendedInterval: 5
 category: transit
 tags:
-  - utility
-  - gas-prices
-  - local
+- utility
+- gas-prices
+- local
+published: '2024-01-03T20:11:13Z'
+updated: '2026-04-02T20:26:05Z'

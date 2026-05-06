@@ -9,6 +9,8 @@ packageName: ncaawstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - news
-  - ncaaw
-  - basketball
+- news
+- ncaaw
+- basketball
+published: '2023-02-02T21:02:51Z'
+updated: '2026-04-02T20:26:05Z'

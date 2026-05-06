@@ -10,7 +10,9 @@ recommendedInterval: 1
 supports2x: true
 category: clocks
 tags:
-  - time
-  - clock
-  - retro
-  - wide 2x support
+- time
+- clock
+- retro
+- wide 2x support
+published: '2022-01-05T00:39:46Z'
+updated: '2026-04-02T20:26:05Z'

@@ -2,9 +2,12 @@
 id: lax-departures
 name: LAX Departures
 summary: LAX Departing Flights
-desc: Shows the next six flights departing from LAX, with their scheduled departure time, carrier, and destination.
+desc: Shows the next six flights departing from LAX, with their scheduled departure
+  time, carrier, and destination.
 author: Conor McLaughlin
 recommendedInterval: 5
 category: transit
 tags:
-  - utility
+- utility
+published: '2025-04-23T17:01:19Z'
+updated: '2026-04-02T20:26:05Z'

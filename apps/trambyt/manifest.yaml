@@ -1,12 +1,14 @@
 ---
 id: trambyt
 name: Trambyt
-summary: Departures for Västtrafik
-desc: Show departures for Västtrafik stops.
+summary: "Departures for V\xE4sttrafik"
+desc: "Show departures for V\xE4sttrafik stops."
 author: protocol7
 fileName: trambyt.star
 packageName: trambyt
 recommendedInterval: 5
 category: transit
 tags:
-  - utility
+- utility
+published: '2022-12-05T16:46:35Z'
+updated: '2026-04-02T20:26:05Z'

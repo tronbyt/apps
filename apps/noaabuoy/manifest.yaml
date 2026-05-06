@@ -2,13 +2,16 @@
 id: noaa-buoy
 name: NOAA Buoy
 summary: Show buoy swell info
-desc: 'Display swell data for user specified buoy. Find buoy_id''s here : https://www.ndbc.noaa.gov/obs.shtml Buoy must have height,period,direction to display correctly.'
+desc: 'Display swell data for user specified buoy. Find buoy_id''s here : https://www.ndbc.noaa.gov/obs.shtml
+  Buoy must have height,period,direction to display correctly.'
 author: tavdog
 fileName: noaa_buoy.star
 packageName: noaabuoy
 recommendedInterval: 15
 category: utilities
 tags:
-  - nature
-  - weather
-  - science
+- nature
+- weather
+- science
+published: '2022-02-01T21:31:54Z'
+updated: '2026-04-02T20:26:05Z'

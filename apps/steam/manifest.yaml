@@ -2,13 +2,16 @@
 id: steam
 name: Steam
 summary: Steam Now Playing
-desc: Displays current game or previous games. Use https://steamid.xyz/ to find your 17 digit Steam ID.
+desc: Displays current game or previous games. Use https://steamid.xyz/ to find your
+  17 digit Steam ID.
 author: Jeremy Tavener
 fileName: steam.star
 packageName: steam
 recommendedInterval: 5
 category: utilities
 tags:
-  - gaming
-  - retro
-  - utility
+- gaming
+- retro
+- utility
+published: '2022-02-04T17:16:20Z'
+updated: '2026-04-02T20:26:05Z'

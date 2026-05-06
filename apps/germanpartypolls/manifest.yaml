@@ -9,6 +9,8 @@ packageName: germanpartypolls
 recommendedInterval: 5
 category: news
 tags:
-  - polls
-  - news
-  - local
+- polls
+- news
+- local
+published: '2025-04-12T10:38:07Z'
+updated: '2026-04-02T20:26:05Z'

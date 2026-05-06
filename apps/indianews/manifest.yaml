@@ -9,5 +9,7 @@ packageName: indianews
 recommendedInterval: 10
 category: news
 tags:
-  - local
-  - news
+- local
+- news
+published: '2023-11-29T17:56:33Z'
+updated: '2026-04-02T20:26:05Z'

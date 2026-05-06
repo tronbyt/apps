@@ -2,14 +2,17 @@
 id: die-scoreboard-gt
 name: Die Scoreboard GT
 summary: Beer Die Scoreboard for GT
-desc: Beer Die scoreboard with dropdown menus to keep track of score. Customized with logos for Bizz (5) and Buzz (7) with a red solo cup and Georgia Tech's mascot Buzz.
+desc: Beer Die scoreboard with dropdown menus to keep track of score. Customized with
+  logos for Bizz (5) and Buzz (7) with a red solo cup and Georgia Tech's mascot Buzz.
 author: zachtempel3
 fileName: die_scoreboard_gt.star
 packageName: diescoreboardgt
 recommendedInterval: 5
 category: entertainment
 tags:
-  - lifestyle
-  - sports
-  - gaming
-  - art
+- lifestyle
+- sports
+- gaming
+- art
+published: '2024-02-08T17:34:16Z'
+updated: '2026-04-02T20:26:05Z'

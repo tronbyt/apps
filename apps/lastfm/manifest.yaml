@@ -2,12 +2,15 @@
 id: last-fm
 name: Last FM
 summary: Show Last.fm history
-desc: Show title, artist and album art from most recently scrobbled song in your Last.fm history.
+desc: Show title, artist and album art from most recently scrobbled song in your Last.fm
+  history.
 author: Chuck
 fileName: last_fm.star
 packageName: lastfm
 recommendedInterval: 5
 category: entertainment
 tags:
-  - music
-  - art
+- music
+- art
+published: '2023-01-24T16:52:01Z'
+updated: '2026-04-02T20:26:05Z'

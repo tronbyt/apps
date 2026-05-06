@@ -9,5 +9,7 @@ packageName: btcfagi
 recommendedInterval: 1
 category: finance
 tags:
-  - crypto
-  - finance
+- crypto
+- finance
+published: '2023-10-07T18:32:12Z'
+updated: '2026-04-02T20:26:05Z'

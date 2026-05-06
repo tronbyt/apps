@@ -2,11 +2,14 @@
 id: goose-fm
 name: Goose FM
 summary: Info on Goose.fm
-desc: Info for the music service Goose.fm. Supports station overview and individual station data.
+desc: Info for the music service Goose.fm. Supports station overview and individual
+  station data.
 author: jqr
 fileName: goose_fm.star
 packageName: goosefm
 recommendedInterval: 5
 category: transit
 tags:
-  - music
+- music
+published: '2023-12-17T12:51:05Z'
+updated: '2026-04-02T20:26:05Z'

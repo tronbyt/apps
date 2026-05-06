@@ -2,12 +2,15 @@
 id: hanukkah
 name: Hanukkah
 summary: A Tidbyt Hanukkah Menorah
-desc: Displays a Hanukkah Menorah during the holiday with the correct number of candles. Also displays a countdown to Hanukkah before the holiday!
+desc: Displays a Hanukkah Menorah during the holiday with the correct number of candles.
+  Also displays a countdown to Hanukkah before the holiday!
 author: Bryan Slavin
 fileName: hanukkah.star
 packageName: hanukkah
 recommendedInterval: 5
 category: lifestyle
 tags:
-  - time
-  - lifestyle
+- time
+- lifestyle
+published: '2023-12-06T17:24:17Z'
+updated: '2026-04-02T20:26:05Z'

@@ -1,13 +1,16 @@
 ---
 name: Deep Mix
 summary: Now playing on Deep Mix
-desc: Stay in the loop with the latest tracks from Deep Mix Online Radio. This app displays the currently playing song and artist information.
+desc: Stay in the loop with the latest tracks from Deep Mix Online Radio. This app
+  displays the currently playing song and artist information.
 author: Brombomb
 fileName: deepmix.star
 packageName: deepmix
 id: deep-mix
 category: entertainment
 tags:
-  - music
-  - real-time
-  - media
+- music
+- real-time
+- media
+published: '2025-11-05T21:07:17Z'
+updated: '2026-04-02T20:26:05Z'

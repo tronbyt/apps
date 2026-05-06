@@ -2,12 +2,15 @@
 id: stonks
 name: Stonks
 summary: Simple stock market app
-desc: Stonks is a simple stock market app that fetches end-of-day stock quotes using the Polygon.io API.
+desc: Stonks is a simple stock market app that fetches end-of-day stock quotes using
+  the Polygon.io API.
 author: harrisonpage
 fileName: stonks.star
 packageName: stonks
 recommendedInterval: 1
 category: finance
 tags:
-  - finance
-  - art
+- finance
+- art
+published: '2024-09-18T19:06:19Z'
+updated: '2026-04-02T20:26:05Z'

@@ -2,13 +2,16 @@
 id: purpleair
 name: PurpleAir
 summary: Displays local air quality
-desc: Displays the local air quality index from a nearby PurpleAir sensor. Choose a sensor close to you or provide a specific sensor id.
+desc: Displays the local air quality index from a nearby PurpleAir sensor. Choose
+  a sensor close to you or provide a specific sensor id.
 author: posburn
 fileName: purpleair.star
 packageName: purpleair
 recommendedInterval: 5
 category: utilities
 tags:
-  - weather
-  - nature
-  - utility
+- weather
+- nature
+- utility
+published: '2022-03-14T23:19:33Z'
+updated: '2026-04-02T20:26:05Z'

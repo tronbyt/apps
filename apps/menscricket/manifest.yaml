@@ -2,11 +2,15 @@
 id: mens-cricket
 name: Mens Cricket
 summary: Display cricket scores
-desc: For a selected team, this app shows the scorecard for a current match. If no match in progress, it will display scorecard for a recently completed match. If none of these, it will display the next match details in user's local timezone.
+desc: For a selected team, this app shows the scorecard for a current match. If no
+  match in progress, it will display scorecard for a recently completed match. If
+  none of these, it will display the next match details in user's local timezone.
 author: adilansari
 fileName: mens_cricket.star
 packageName: menscricket
 category: sports
 tags:
-  - real-time
-  - cricket
+- real-time
+- cricket
+published: '2024-09-25T14:46:07Z'
+updated: '2026-04-02T20:26:05Z'

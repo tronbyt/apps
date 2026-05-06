@@ -2,13 +2,16 @@
 id: moby-games
 name: MobyGames
 summary: Game info from MobyGames
-desc: Display information about random games from the extensive MobyGames database. Includes basic information such as a thumbnail, year of release, etc.
+desc: Display information about random games from the extensive MobyGames database.
+  Includes basic information such as a thumbnail, year of release, etc.
 author: pandincus
 fileName: moby_games.star
 packageName: mobygames
 category: gaming
 tags:
-  - gaming
-  - retro
-  - tech
-  - education
+- gaming
+- retro
+- tech
+- education
+published: '2023-11-07T14:44:32Z'
+updated: '2026-04-02T20:26:05Z'

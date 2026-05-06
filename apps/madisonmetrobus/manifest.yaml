@@ -10,4 +10,6 @@ recommendedInterval: 5
 broken: true
 brokenReason: 'api.smsmybus.com: no such host'
 category: transit
-tags:
+tags: null
+published: '2024-09-17T15:06:27Z'
+updated: '2026-04-02T20:26:05Z'

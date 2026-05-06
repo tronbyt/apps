@@ -2,14 +2,19 @@
 id: tidclock
 name: TidClock
 summary: Display Time as bars
-desc: Densely ground yourself in time with every concievable marker of its passage simultaneously referencable at a glance. Keep an eye on the phase of the moon, the passing of seasons, when each week will start, and your own progress through life. Also, it's a clock.
+desc: Densely ground yourself in time with every concievable marker of its passage
+  simultaneously referencable at a glance. Keep an eye on the phase of the moon, the
+  passing of seasons, when each week will start, and your own progress through life.
+  Also, it's a clock.
 author: Phildo
 fileName: tidclock.star
 packageName: tidclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - tracking
-  - weather
-  - productivity
-  - utility
+- tracking
+- weather
+- productivity
+- utility
+published: '2023-11-04T20:58:01Z'
+updated: '2026-04-02T20:26:05Z'

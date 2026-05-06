@@ -3,10 +3,14 @@ id: rainbows
 name: Rainbows
 author: AndersHeie
 summary: Rainbow color animations
-desc: Relax with soothing rainbow wave animations. Choose from Rainbow Magic, Rainbow Smoke, Rainbow Drops (water ripples), or Rainbow Farts. Multiple dynamic color patterns to brighten your display.
+desc: Relax with soothing rainbow wave animations. Choose from Rainbow Magic, Rainbow
+  Smoke, Rainbow Drops (water ripples), or Rainbow Farts. Multiple dynamic color patterns
+  to brighten your display.
 icon: water
 packageName: rainbows
 fileName: rainbows.star
 category: weather
 tags:
-  - art
+- art
+published: '2025-09-22T22:09:04Z'
+updated: '2026-04-02T20:26:05Z'

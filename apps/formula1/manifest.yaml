@@ -10,7 +10,9 @@ recommendedInterval: 5
 supports2x: true
 category: sports
 tags:
-  - real-time
-  - wide 2x support
-  - f1
-  - racing
+- real-time
+- wide 2x support
+- f1
+- racing
+published: '2022-05-03T15:03:09Z'
+updated: '2026-04-02T20:26:05Z'

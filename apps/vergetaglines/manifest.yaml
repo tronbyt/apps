@@ -2,12 +2,15 @@
 id: verge-taglines
 name: Verge Taglines
 summary: The Verge's latest tagline
-desc: Displays the latest tagline from the top of popular tech news site The Verge (dot com).
+desc: Displays the latest tagline from the top of popular tech news site The Verge
+  (dot com).
 author: '@joevgreathead'
 fileName: verge_taglines.star
 packageName: vergetaglines
 recommendedInterval: 10
 category: news
 tags:
-  - tech
-  - news
+- tech
+- news
+published: '2022-04-29T01:20:53Z'
+updated: '2026-04-02T20:26:05Z'

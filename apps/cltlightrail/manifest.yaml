@@ -2,12 +2,15 @@
 id: clt-lightrail
 name: CLT Lightrail
 summary: Tracks CLT Lightrail Trains
-desc: Displays in real-time when North & South lightrail trains will arrive in Charlotte's LYNX Lightrail System - All Stations available.
+desc: Displays in real-time when North & South lightrail trains will arrive in Charlotte's
+  LYNX Lightrail System - All Stations available.
 author: Kevin Connell
 fileName: clt_lightrail.star
 packageName: cltlightrail
 recommendedInterval: 5
 category: transit
 tags:
-  - productivity
-  - real-time
+- productivity
+- real-time
+published: '2022-08-04T19:44:46Z'
+updated: '2026-04-02T20:26:05Z'

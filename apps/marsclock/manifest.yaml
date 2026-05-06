@@ -2,13 +2,17 @@
 id: mars-clock
 name: Mars Clock
 summary: Mars Time at a Glance
-desc: See Mars time and (optional) Sol Date for your selected location on Mars. Mars Clock divides each Martian Sol, slightly longer than Earth's day, into 24 hours, highlighting the gradual shift in time between the two.
+desc: See Mars time and (optional) Sol Date for your selected location on Mars. Mars
+  Clock divides each Martian Sol, slightly longer than Earth's day, into 24 hours,
+  highlighting the gradual shift in time between the two.
 author: Adam Henson
 fileName: mars_clock.star
 packageName: marsclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - space
-  - science
-  - utility
+- space
+- science
+- utility
+published: '2023-06-09T15:43:14Z'
+updated: '2026-04-02T20:26:05Z'

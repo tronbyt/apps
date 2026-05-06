@@ -9,5 +9,7 @@ packageName: top10books
 recommendedInterval: 5
 category: entertainment
 tags:
-  - education
-  - sports
+- education
+- sports
+published: '2024-02-08T17:35:32Z'
+updated: '2026-04-02T20:26:05Z'

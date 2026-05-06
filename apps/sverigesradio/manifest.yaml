@@ -3,12 +3,14 @@ id: sveriges-radio
 name: Sveriges Radio
 summary: What's currently playing
 desc: See what's currently playing on any of the Sveriges Radio channels.
-author: Sebastian Ekström
+author: "Sebastian Ekstr\xF6m"
 fileName: sveriges_radio.star
 packageName: sverigesradio
 recommendedInterval: 10
 category: entertainment
 tags:
-  - real-time
-  - music
-  - media
+- real-time
+- music
+- media
+published: '2023-08-23T14:08:30Z'
+updated: '2026-04-02T20:26:05Z'

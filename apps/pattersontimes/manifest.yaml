@@ -2,12 +2,15 @@
 id: patterson-times
 name: Patterson Times
 summary: Patterson SkyTrain Times
-desc: Displays next train times for Patterson SkyTrain station in Vancouver. More stations coming soon.
+desc: Displays next train times for Patterson SkyTrain station in Vancouver. More
+  stations coming soon.
 author: Aiden Mitchell
 fileName: patterson_times.star
 packageName: pattersontimes
 recommendedInterval: 5
 category: transit
 tags:
-  - local
-  - utility
+- local
+- utility
+published: '2023-10-07T18:41:34Z'
+updated: '2026-04-02T20:26:05Z'

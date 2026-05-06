@@ -2,12 +2,15 @@
 id: soccerwomens
 name: Womens Soccer
 summary: Womens Soccer scores
-desc: Shows upcoming games, current score, date and time of game for selected league / tournament.
+desc: Shows upcoming games, current score, date and time of game for selected league
+  / tournament.
 author: jvivona
 fileName: soccerwomens.star
 packageName: soccerwomens
 recommendedInterval: 5
 category: sports
 tags:
-  - real-time
-  - soccer
+- real-time
+- soccer
+published: '2023-01-03T17:29:27Z'
+updated: '2026-04-02T20:26:05Z'

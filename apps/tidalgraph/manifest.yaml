@@ -2,13 +2,16 @@
 id: tidalgraph
 name: TidalGraph
 summary: Shows height of ocean tide
-desc: Shows the tide height throughout the day of the ocean based on the selected NOAA tide station.
+desc: Shows the tide height throughout the day of the ocean based on the selected
+  NOAA tide station.
 author: k.wajdwoicz
 fileName: tidalgraph.star
 packageName: tidalgraph
 recommendedInterval: 5
 category: utilities
 tags:
-  - weather
-  - nature
-  - water-level
+- weather
+- nature
+- water-level
+published: '2023-04-19T18:39:29Z'
+updated: '2026-04-02T20:26:05Z'

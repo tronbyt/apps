@@ -2,13 +2,16 @@
 id: nhl-scores
 name: NHL Scores
 summary: NHL hockey scores
-desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
+desc: Creating multiple app instances is no longer necessary. Just install once and
+  remove any other instances. You can set the rotation speed of scores in the settings.
 author: LunchBox8484
 fileName: nhl_scores.star
 packageName: nhlscores
 recommendedInterval: 5
 category: sports
 tags:
-  - utility
-  - nhl
-  - hockey
+- utility
+- nhl
+- hockey
+published: '2022-04-27T14:37:57Z'
+updated: '2026-04-02T20:26:05Z'

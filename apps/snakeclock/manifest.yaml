@@ -2,14 +2,17 @@
 id: snakeclock
 name: Snake Clock
 summary: Shows the time and a snake
-desc: Shows the time with a snake slithering around in the background. Every user will see the same snake.
+desc: Shows the time with a snake slithering around in the background. Every user
+  will see the same snake.
 author: paxos
 recommendedInterval: 0
 fileName: snake_clock.star
 packageName: snakeclock
 category: clocks
 tags:
-  - clock
-  - utility
-  - gaming
-  - art
+- clock
+- utility
+- gaming
+- art
+published: '2024-09-11T14:47:47Z'
+updated: '2026-04-02T20:26:05Z'

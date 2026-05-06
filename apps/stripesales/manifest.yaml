@@ -9,6 +9,8 @@ packageName: stripesales
 recommendedInterval: 5
 category: finance
 tags:
-  - stripe
-  - finance
-  - utility
+- stripe
+- finance
+- utility
+published: '2023-01-24T16:21:11Z'
+updated: '2026-04-02T20:26:05Z'

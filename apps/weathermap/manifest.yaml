@@ -2,13 +2,16 @@
 id: weather-map
 name: Weather Map
 summary: Weather Map
-desc: Display real-time precipitation radar for a location. Powered by the RainViewer API.
+desc: Display real-time precipitation radar for a location. Powered by the RainViewer
+  API.
 author: Felix Bruns
 fileName: weather_map.star
 packageName: weathermap
 recommendedInterval: 5
 category: weather
 tags:
-  - weather
-  - art
-  - tech
+- weather
+- art
+- tech
+published: '2022-03-02T04:00:42Z'
+updated: '2026-04-02T20:26:05Z'

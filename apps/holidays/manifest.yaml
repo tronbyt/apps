@@ -2,12 +2,15 @@
 id: holidays
 name: Holidays
 summary: Date + holidays/birthdays
-desc: Shows the current date along with icons for US national holidays and customizable birthdays.
+desc: Shows the current date along with icons for US national holidays and customizable
+  birthdays.
 author: czarandy
 recommendedInterval: 5
 category: utilities
 tags:
-  - time
-  - lifestyle
-  - productivity
-  - utility
+- time
+- lifestyle
+- productivity
+- utility
+published: '2024-07-09T14:54:03Z'
+updated: '2026-04-02T20:26:05Z'

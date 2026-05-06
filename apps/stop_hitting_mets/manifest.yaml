@@ -2,10 +2,13 @@
 id: stop-hitting-mets
 name: Stop Hitting Mets
 summary: Dashboard for Mets HBP
-desc: Answers "Can we please stop hitting the Mets?" using canweplease.stophittingthemets.info data.
+desc: Answers "Can we please stop hitting the Mets?" using canweplease.stophittingthemets.info
+  data.
 author: ahedberg
 fileName: stop_hitting_mets.star
 packageName: stophittingmets
 category: entertainment
 tags:
-  - sports
+- sports
+published: '2023-07-27T14:18:34Z'
+updated: '2026-04-02T20:26:05Z'

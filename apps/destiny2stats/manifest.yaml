@@ -2,14 +2,17 @@
 id: destiny-2-stats
 name: Destiny 2 Stats
 summary: Display Destiny stats
-desc: Gets the emblem, race, class, and light level of your most recently played Destiny 2 character.
+desc: Gets the emblem, race, class, and light level of your most recently played Destiny
+  2 character.
 author: brandontod97
 fileName: destiny_2_stats.star
 packageName: destiny2stats
 recommendedInterval: 5
 category: gaming
 tags:
-  - gaming
-  - retro
-  - sports
-  - utility
+- gaming
+- retro
+- sports
+- utility
+published: '2022-03-13T21:44:15Z'
+updated: '2026-04-02T20:26:05Z'

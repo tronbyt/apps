@@ -2,14 +2,17 @@
 id: literature-clock
 name: Literature Clock
 summary: Quotes containing the time
-desc: Displays the time using a quote from a piece of literature. Based on work and idea by Jaap Meijers and Jene Voldsen.
+desc: Displays the time using a quote from a piece of literature. Based on work and
+  idea by Jaap Meijers and Jene Voldsen.
 author: Alysha Kwok
 fileName: literature_clock.star
 packageName: literatureclock
 recommendedInterval: 1
 category: clocks
 tags:
-  - time
-  - art
-  - clock
-  - poetry
+- time
+- art
+- clock
+- poetry
+published: '2023-03-14T19:19:36Z'
+updated: '2026-04-02T20:26:05Z'

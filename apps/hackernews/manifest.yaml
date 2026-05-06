@@ -2,13 +2,16 @@
 id: hacker-news
 name: Hacker News
 summary: Hacker News Top Stories
-desc: See recent top stories submitted to Hacker News with info about upvotes and number of comments.
+desc: See recent top stories submitted to Hacker News with info about upvotes and
+  number of comments.
 author: Nick Comer
 recommendedInterval: 10
 fileName: hacker_news.star
 packageName: hackernews
 category: news
 tags:
-  - tech
-  - news
-  - top-stories
+- tech
+- news
+- top-stories
+published: '2024-07-03T21:12:08Z'
+updated: '2026-04-02T20:26:05Z'

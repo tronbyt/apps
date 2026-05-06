@@ -2,14 +2,18 @@
 id: spotify
 name: Spotify
 summary: Current track
-desc: Display your currently playing Spotify track with album art, progress bar, and playback info. Requires a one-time OAuth setup to obtain a refresh token - see instructions in spotify.star.
+desc: Display your currently playing Spotify track with album art, progress bar, and
+  playback info. Requires a one-time OAuth setup to obtain a refresh token - see instructions
+  in spotify.star.
 author: gshepperd
 fileName: spotify.star
 packageName: spotify
 supports2x: true
 category: entertainment
 tags:
-  - music
-  - art
-  - tracking
-  - wide 2x support
+- music
+- art
+- tracking
+- wide 2x support
+published: '2025-12-01T17:03:23Z'
+updated: '2026-04-26T15:19:56Z'

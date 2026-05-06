@@ -2,7 +2,8 @@
 id: christmascountdown
 name: Christmas Countdn
 summary: Christmas Countdown
-desc: Displays an animated tree and Merry Christmas and (optionally) the number of days until Dec. 25.
+desc: Displays an animated tree and Merry Christmas and (optionally) the number of
+  days until Dec. 25.
 author: Michael Creamer
 fileName: christmascountdown.star
 packageName: christmascountdown
@@ -11,6 +12,8 @@ supports2x: true
 minPixletVersion: v0.49.0
 category: utilities
 tags:
-  - time
-  - nature
-  - wide 2x support
+- time
+- nature
+- wide 2x support
+published: '2023-11-29T17:50:07Z'
+updated: '2026-04-02T20:26:05Z'

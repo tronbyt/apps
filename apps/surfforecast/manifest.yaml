@@ -10,7 +10,9 @@ broken: true
 recommendedInterval: 5
 category: weather
 tags:
-  - sports
-  - nature
-  - weather
-  - local
+- sports
+- nature
+- weather
+- local
+published: '2022-07-15T18:49:17Z'
+updated: '2026-04-02T20:26:05Z'

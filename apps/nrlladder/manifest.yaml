@@ -9,6 +9,8 @@ packageName: nrlladder
 recommendedInterval: 5
 category: sports
 tags:
-  - ladder
-  - nrl
-  - rugby
+- ladder
+- nrl
+- rugby
+published: '2023-06-27T15:24:06Z'
+updated: '2026-04-02T20:26:05Z'

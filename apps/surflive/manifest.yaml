@@ -3,14 +3,16 @@ id: surflive
 name: Surflive
 summary: Live surf conditions
 desc: Shows the current surf conditions for a surf spot.
-author: Rémi Carton
+author: "R\xE9mi Carton"
 fileName: surflive.star
 packageName: surflive
 recommendedInterval: 5
 category: weather
 tags:
-  - sports
-  - nature
-  - weather
-  - utility
-  - real-time
+- sports
+- nature
+- weather
+- utility
+- real-time
+published: '2022-04-05T12:48:18Z'
+updated: '2026-04-02T20:26:05Z'

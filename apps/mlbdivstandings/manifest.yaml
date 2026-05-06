@@ -9,5 +9,7 @@ packageName: mlbdivstandings
 recommendedInterval: 5
 category: sports
 tags:
-  - mlb
-  - baseball
+- mlb
+- baseball
+published: '2023-09-06T13:53:38Z'
+updated: '2026-04-02T20:26:05Z'

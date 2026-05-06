@@ -2,12 +2,15 @@
 id: lions-gate-status
 name: Lions Gate Status
 summary: Displays delays and lanes
-desc: Displays Vancouver's Lions Gate Bridge information, including the current estimated delay, and the status of the counterflow system.
+desc: Displays Vancouver's Lions Gate Bridge information, including the current estimated
+  delay, and the status of the counterflow system.
 author: Aiden Mitchell
 fileName: lions_gate_status.star
 packageName: lionsgatestatus
 recommendedInterval: 5
 category: transit
 tags:
-  - utility
-  - local
+- utility
+- local
+published: '2023-11-07T20:39:51Z'
+updated: '2026-04-02T20:26:05Z'

@@ -2,12 +2,15 @@
 id: neotrack
 name: NEOTrack
 summary: Near Earth Object Tracker
-desc: Shows the closest object on approach to Earth today according to NASA's NeoW API.
+desc: Shows the closest object on approach to Earth today according to NASA's NeoW
+  API.
 author: brettohland
 fileName: neotrack.star
 packageName: neotrack
 recommendedInterval: 5
 category: science
 tags:
-  - space
-  - tech
+- space
+- tech
+published: '2022-09-29T20:29:33Z'
+updated: '2026-04-02T20:26:05Z'

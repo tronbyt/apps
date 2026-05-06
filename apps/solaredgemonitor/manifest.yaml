@@ -9,6 +9,8 @@ packageName: solaredgemonitor
 recommendedInterval: 5
 category: utilities
 tags:
-  - utility
-  - tracking
-  - smart-home
+- utility
+- tracking
+- smart-home
+published: '2023-01-24T16:22:30Z'
+updated: '2026-04-02T20:26:05Z'

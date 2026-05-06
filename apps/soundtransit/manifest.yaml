@@ -2,12 +2,15 @@
 id: sound-transit
 name: Sound Transit
 summary: Seattle light rail times
-desc: Shows upcoming arrivals at up to 2 different stations in Sound Transit's Link light rail system in Seattle.
+desc: Shows upcoming arrivals at up to 2 different stations in Sound Transit's Link
+  light rail system in Seattle.
 author: Jon Janzen
 fileName: sound_transit.star
 packageName: soundtransit
 recommendedInterval: 5
 category: transit
 tags:
-  - local
-  - utility
+- local
+- utility
+published: '2022-07-11T14:07:15Z'
+updated: '2026-04-02T20:26:05Z'

@@ -9,7 +9,9 @@ packageName: astropicofday
 recommendedInterval: 5
 category: science
 tags:
-  - space
-  - science
-  - tech
-  - art
+- space
+- science
+- tech
+- art
+published: '2022-11-17T20:01:15Z'
+updated: '2026-04-02T20:26:05Z'

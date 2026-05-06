@@ -2,12 +2,15 @@
 id: raa-fuel-watch
 name: RAA Fuel Watch
 summary: Shows petrol prices in SA
-desc: Enter your location and fuel type, then find the cheapest fuel in a 5km radius in SA..
+desc: Enter your location and fuel type, then find the cheapest fuel in a 5km radius
+  in SA..
 author: M0ntyP
 fileName: raa_fuel_watch.star
 packageName: raafuelwatch
 recommendedInterval: 5
 category: utilities
 tags:
-  - utility
-  - finance
+- utility
+- finance
+published: '2023-12-09T15:05:33Z'
+updated: '2026-04-02T20:26:05Z'

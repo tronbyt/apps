@@ -2,12 +2,15 @@
 id: stock-value
 name: Stock Value
 summary: Portfolio value
-desc: This app will allow you track the value of your portfolio for a single stock. Get your API key for Alpha Vantage at https://www.alphavantage.co.
+desc: This app will allow you track the value of your portfolio for a single stock.
+  Get your API key for Alpha Vantage at https://www.alphavantage.co.
 author: gshipley
 fileName: stock_value.star
 packageName: stockvalue
 recommendedInterval: 1
 category: finance
 tags:
-  - finance
-  - tracking
+- finance
+- tracking
+published: '2023-01-19T16:09:54Z'
+updated: '2026-04-02T20:26:05Z'

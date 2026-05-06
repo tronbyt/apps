@@ -9,6 +9,8 @@ packageName: snyk
 recommendedInterval: 5
 category: utilities
 tags:
-  - smart-home
-  - tracking
-  - tech
+- smart-home
+- tracking
+- tech
+published: '2022-04-04T20:18:30Z'
+updated: '2026-04-02T20:26:05Z'

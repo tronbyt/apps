@@ -9,5 +9,7 @@ packageName: wsjnews
 recommendedInterval: 10
 category: news
 tags:
-  - news
-  - finance
+- news
+- finance
+published: '2023-03-23T12:06:16Z'
+updated: '2026-04-02T20:26:05Z'

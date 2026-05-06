@@ -9,7 +9,9 @@ packageName: life
 recommendedInterval: 5
 category: entertainment
 tags:
-  - gaming
-  - game-of-life
-  - space
-  - art
+- gaming
+- game-of-life
+- space
+- art
+published: '2022-06-09T16:47:04Z'
+updated: '2026-04-02T20:26:05Z'

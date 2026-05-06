@@ -2,13 +2,16 @@
 id: catfact
 name: Catfact
 summary: A random fact about a cat
-desc: Calls an external API and retrieves a random cat fact and renders it. Rotating every 4 minutes.
+desc: Calls an external API and retrieves a random cat fact and renders it. Rotating
+  every 4 minutes.
 author: broepke
 fileName: catfact.star
 packageName: catfact
 recommendedInterval: 5
 category: entertainment
 tags:
-  - lifestyle
-  - nature
-  - news
+- lifestyle
+- nature
+- news
+published: '2023-03-23T12:19:20Z'
+updated: '2026-04-02T20:26:05Z'

@@ -2,12 +2,14 @@
 id: petpikachu
 name: Pet Pikachu
 summary: Virtual pet Pikachu
-desc: Based on the Pokémon Pikachu virtual pet from the 90s.
+desc: "Based on the Pok\xE9mon Pikachu virtual pet from the 90s."
 author: Kyle Stark
 fileName: petpikachu.star
 packageName: petpikachu
 recommendedInterval: 5
 category: gaming
 tags:
-  - retro
-  - gaming
+- retro
+- gaming
+published: '2022-07-18T19:19:29Z'
+updated: '2026-04-02T20:26:05Z'

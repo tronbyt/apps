@@ -2,14 +2,17 @@
 id: tiddlysynth
 name: TiddlySynth
 summary: Pixel art synths
-desc: Adorn your Tidbyt with an array of animated retro synths. Most of the classics are here, plus an evolving selection of wacky fantasy music making devices.
+desc: Adorn your Tidbyt with an array of animated retro synths. Most of the classics
+  are here, plus an evolving selection of wacky fantasy music making devices.
 author: Owain Rich
 fileName: tiddlysynth.star
 packageName: tiddlysynth
 recommendedInterval: 5
 category: entertainment
 tags:
-  - retro
-  - music
-  - art
-  - smart-home
+- retro
+- music
+- art
+- smart-home
+published: '2023-06-27T19:27:36Z'
+updated: '2026-04-02T20:26:05Z'

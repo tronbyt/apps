@@ -9,6 +9,8 @@ packageName: marvelfacts
 recommendedInterval: 5
 category: entertainment
 tags:
-  - media
-  - fandom
-  - music
+- media
+- fandom
+- music
+published: '2022-11-10T15:02:16Z'
+updated: '2026-04-02T20:26:05Z'

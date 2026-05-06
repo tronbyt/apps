@@ -2,12 +2,15 @@
 id: lake-lanier-water-level
 name: Lake Lanier Level
 summary: Lake Lanier water levels
-desc: Displays current water level data for Lake Sidney Lanier, including gage height, feet above/below full pool with color-coded status, trend indicators, and optional 7-day historical chart view.
+desc: Displays current water level data for Lake Sidney Lanier, including gage height,
+  feet above/below full pool with color-coded status, trend indicators, and optional
+  7-day historical chart view.
 author: jspeigner
 fileName: lanier_level.star
 packageName: lake-lanier-water-level
 category: weather
 tags:
-  - weather
-  - water level
-
+- weather
+- water level
+published: '2026-04-07T20:59:29Z'
+updated: '2026-04-07T21:43:31Z'

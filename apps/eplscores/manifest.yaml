@@ -2,12 +2,15 @@
 id: eplscores
 name: EPLScores
 summary: Displays EPL scores
-desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
+desc: Creating multiple app instances is no longer necessary. Just install once and
+  remove any other instances. You can set the rotation speed of scores in the settings.
 author: mabroadfo1027
 fileName: eplscores.star
 packageName: eplscores
 recommendedInterval: 5
 category: sports
 tags:
-  - real-time
-  - soccer
+- real-time
+- soccer
+published: '2022-09-15T19:39:29Z'
+updated: '2026-04-02T20:26:05Z'

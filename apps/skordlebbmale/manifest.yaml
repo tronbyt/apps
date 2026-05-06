@@ -2,12 +2,15 @@
 id: skordle-bb-male
 name: Skordle BB Male
 summary: Displays Male BB Games
-desc: This app gets male basketball data from the Skordle website to display on the Tidbyt. A user can select the manually select which game to display.
+desc: This app gets male basketball data from the Skordle website to display on the
+  Tidbyt. A user can select the manually select which game to display.
 author: Woolycoin437420
 fileName: skordle_bb_male.star
 packageName: skordlebbmale
 recommendedInterval: 5
 category: utilities
 tags:
-  - sports
-  - gaming
+- sports
+- gaming
+published: '2023-11-07T14:45:58Z'
+updated: '2026-04-02T20:26:05Z'

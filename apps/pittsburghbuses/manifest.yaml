@@ -9,4 +9,6 @@ packageName: pittsburghbuses
 recommendedInterval: 5
 category: transit
 tags:
-  - utility
+- utility
+published: '2023-07-27T14:21:23Z'
+updated: '2026-04-02T20:26:05Z'

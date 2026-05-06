@@ -1,13 +1,16 @@
 ---
 name: Dance Wave
 summary: Now playing on Dance Wave
-desc: Stay in the loop with the latest tracks from Dance Wave Online Radio. This app displays the currently playing song and artist information.
+desc: Stay in the loop with the latest tracks from Dance Wave Online Radio. This app
+  displays the currently playing song and artist information.
 author: Brombomb
 fileName: dancewave.star
 packageName: dancewave
 id: dance-wave
 category: entertainment
 tags:
-  - music
-  - real-time
-  - dance
+- music
+- real-time
+- dance
+published: '2025-09-15T18:28:02Z'
+updated: '2026-04-02T20:26:05Z'

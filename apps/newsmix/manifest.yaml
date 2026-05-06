@@ -2,12 +2,16 @@
 id: news-mix
 name: News Mix
 summary: News from multiple sources
-desc: Display rotating headlines from your choice of major news sources. See up to 9 top stories from 3 different feeds. Customize colors and scroll speed for your perfect news reading experience.
+desc: Display rotating headlines from your choice of major news sources. See up to
+  9 top stories from 3 different feeds. Customize colors and scroll speed for your
+  perfect news reading experience.
 author: Weiqi Ma
 recommendedInterval: 10
 fileName: news_mix.star
 packageName: newsmix
 category: entertainment
 tags:
-  - news
-  - art
+- news
+- art
+published: '2025-03-04T16:36:45Z'
+updated: '2026-04-02T20:26:05Z'

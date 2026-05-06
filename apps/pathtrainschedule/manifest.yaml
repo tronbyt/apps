@@ -2,7 +2,8 @@
 id: path-train-schedule
 name: Path Schedule
 summary: Schedule for path train
-desc: Shows train arrivals for upcoming inbound and outbound trains at path train stations.
+desc: Shows train arrivals for upcoming inbound and outbound trains at path train
+  stations.
 author: Todd Greenberg
 fileName: path_train_schedule.star
 packageName: pathtrainschedule
@@ -11,4 +12,6 @@ broken: true
 brokenReason: 'path.api.razza.dev: no such host'
 category: transit
 tags:
-  - productivity
+- productivity
+published: '2022-03-02T23:52:07Z'
+updated: '2026-04-02T20:26:05Z'

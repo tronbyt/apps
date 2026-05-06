@@ -2,13 +2,16 @@
 id: nextdns
 name: NextDNS
 summary: NextDNS Account Stats
-desc: Displays NextDNS account total query & total blocked query counts + 7-day activity graph.
+desc: Displays NextDNS account total query & total blocked query counts + 7-day activity
+  graph.
 author: ndhotsky
 fileName: nextdns.star
 packageName: nextdns
 recommendedInterval: 5
 category: utilities
 tags:
-  - tech
-  - utility
-  - sports
+- tech
+- utility
+- sports
+published: '2023-05-22T15:45:49Z'
+updated: '2026-04-02T20:26:05Z'

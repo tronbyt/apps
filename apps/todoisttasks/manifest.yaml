@@ -2,12 +2,16 @@
 id: todoist-tasks
 name: Todoist Tasks
 summary: Integrates with Todoist
-desc: Shows up to 3 tasks on your To-Do list, sorted by priority. Use the filter option to further sort your tasks by using parameters such as 'today', tomorrow', 'overdue' etc.
+desc: Shows up to 3 tasks on your To-Do list, sorted by priority. Use the filter option
+  to further sort your tasks by using parameters such as 'today', tomorrow', 'overdue'
+  etc.
 author: Noste
 fileName: todoisttasks.star
 packageName: todoisttasks
 recommendedInterval: 60
 category: utilities
 tags:
-  - productivity
-  - smart-home
+- productivity
+- smart-home
+published: '2023-04-19T16:22:19Z'
+updated: '2026-04-02T20:26:05Z'

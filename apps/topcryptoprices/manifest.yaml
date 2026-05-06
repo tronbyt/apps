@@ -2,12 +2,15 @@
 id: top-crypto-prices
 name: Top Crypto Prices
 summary: Top Crypto Prices
-desc: This app shows price info for the top cryptocurrencies. Prices are provided once per minute through the free Coingecko API.
+desc: This app shows price info for the top cryptocurrencies. Prices are provided
+  once per minute through the free Coingecko API.
 author: playak
 fileName: top_crypto_prices.star
 packageName: topcryptoprices
 recommendedInterval: 1
 category: finance
 tags:
-  - crypto
-  - finance
+- crypto
+- finance
+published: '2022-11-10T17:49:56Z'
+updated: '2026-04-02T20:26:05Z'

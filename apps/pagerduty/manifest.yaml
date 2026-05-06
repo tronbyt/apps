@@ -9,4 +9,6 @@ packageName: pagerduty
 recommendedInterval: 5
 category: utilities
 tags:
-  - tracking
+- tracking
+published: '2022-02-09T22:56:28Z'
+updated: '2026-04-02T20:26:05Z'

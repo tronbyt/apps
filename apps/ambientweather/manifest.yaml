@@ -9,6 +9,8 @@ packageName: ambientweather
 recommendedInterval: 5
 category: weather
 tags:
-  - weather
-  - art
-  - smart-home
+- weather
+- art
+- smart-home
+published: '2022-05-02T16:59:50Z'
+updated: '2026-04-02T20:26:05Z'

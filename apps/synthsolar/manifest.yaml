@@ -2,13 +2,17 @@
 id: synth-solar
 name: Synth SunDial
 summary: Synth Solar SunDial monitor
-desc: Connect to your Synth Solar system by putting in the serial number of your inverter, which is in your Synth Handover Pack. For more information, please go to synth.solar/introduction-to-the-new-synth-sundial/ Any questions please contact max@synth.solar.
+desc: Connect to your Synth Solar system by putting in the serial number of your inverter,
+  which is in your Synth Handover Pack. For more information, please go to synth.solar/introduction-to-the-new-synth-sundial/
+  Any questions please contact max@synth.solar.
 author: Synth Solar
 recommendedInterval: 5
 fileName: synth_solar.star
 packageName: synthsolar
 category: utilities
 tags:
-  - smart-home
-  - weather
-  - utility
+- smart-home
+- weather
+- utility
+published: '2024-06-06T18:09:28Z'
+updated: '2026-04-02T20:26:05Z'

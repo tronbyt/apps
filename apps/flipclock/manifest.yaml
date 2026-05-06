@@ -9,6 +9,8 @@ packageName: flipclock
 broken: true
 category: clocks
 tags:
-  - clock
-  - time
-  - utility
+- clock
+- time
+- utility
+published: '2024-09-20T15:05:24Z'
+updated: '2026-04-02T20:26:05Z'

@@ -9,5 +9,7 @@ packageName: coinbase
 recommendedInterval: 1
 category: finance
 tags:
-  - crypto
-  - finance
+- crypto
+- finance
+published: '2023-04-25T14:31:21Z'
+updated: '2026-04-02T20:26:05Z'

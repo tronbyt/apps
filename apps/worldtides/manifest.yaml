@@ -9,6 +9,8 @@ fileName: world_tides.star
 packageName: worldtides
 category: weather
 tags:
-  - weather
-  - nature
-  - utility
+- weather
+- nature
+- utility
+published: '2024-10-01T19:25:05Z'
+updated: '2026-04-02T20:26:05Z'

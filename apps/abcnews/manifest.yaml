@@ -2,5 +2,8 @@
 id: abc-news
 name: ABC News
 summary: Displays ABC News Headlines
-desc: Displays headlines from ABC News Australia. Select the topic from the dropdown and it will display the last 5 headlines.
+desc: Displays headlines from ABC News Australia. Select the topic from the dropdown
+  and it will display the last 5 headlines.
 author: M0ntyP
+published: '2026-05-05T16:01:26Z'
+updated: '2026-05-05T16:01:26Z'

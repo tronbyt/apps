@@ -2,7 +2,8 @@
 id: flights-nearby-ha
 name: Flights Nearby HA
 summary: Flights nearby
-desc: Find the closest flight to your location. Using the FlightRadar24 Home Assistant integration. See the readme.md for more information.
+desc: Find the closest flight to your location. Using the FlightRadar24 Home Assistant
+  integration. See the readme.md for more information.
 author: motoridersd
 fileName: flightsnearby_ha.star
 packageName: flightsnearby_ha
@@ -10,6 +11,8 @@ recommendedInterval: 5
 supports2x: true
 category: transit
 tags:
-  - utility
-  - smart-home
-  - wide 2x support
+- utility
+- smart-home
+- wide 2x support
+published: '2026-01-24T06:57:02Z'
+updated: '2026-04-02T20:26:05Z'

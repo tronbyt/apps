@@ -2,11 +2,16 @@
 id: pdp11
 name: PDP11
 summary: PDP11 blinkenlights
-desc: PDP11/70 Visualizer with random blinking LEDs. Inspired by the PiDP11 kit, this shows what the front panel of a PDP11 would look like. The PDP11 was a groundbreaking 16-bit computer from the early 1970s made by Digital Equipment. The bottom row on a real system would be physical address and control switches.
+desc: PDP11/70 Visualizer with random blinking LEDs. Inspired by the PiDP11 kit, this
+  shows what the front panel of a PDP11 would look like. The PDP11 was a groundbreaking
+  16-bit computer from the early 1970s made by Digital Equipment. The bottom row on
+  a real system would be physical address and control switches.
 author: Matt Fischer
 recommendedInterval: 5
 category: technology
 tags:
-  - retro
-  - tech
-  - visualizer
+- retro
+- tech
+- visualizer
+published: '2024-09-25T14:52:32Z'
+updated: '2026-04-02T20:26:05Z'

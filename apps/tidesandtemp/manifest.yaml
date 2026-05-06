@@ -2,12 +2,17 @@
 id: tides-and-temp
 name: Tides & Temp
 summary: Display tides / water temp
-desc: Display predicted tides from NOAA tide stations and water temperature from NDBC buoy stations. See https://tidesandcurrents.noaa.gov/tide_predictions.html for NOAA tide station IDs. See https://www.ndbc.noaa.gov/obs.shtml for NDBC buoy station IDs.
+desc: Display predicted tides from NOAA tide stations and water temperature from NDBC
+  buoy stations. See https://tidesandcurrents.noaa.gov/tide_predictions.html for NOAA
+  tide station IDs. See https://www.ndbc.noaa.gov/obs.shtml for NDBC buoy station
+  IDs.
 author: sudeepban
 fileName: tides_and_temp.star
 packageName: tidesandtemp
 recommendedInterval: 5
 category: weather
 tags:
-  - weather
-  - nature
+- weather
+- nature
+published: '2023-07-10T13:12:51Z'
+updated: '2026-04-02T20:26:05Z'

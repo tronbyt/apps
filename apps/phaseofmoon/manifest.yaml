@@ -10,6 +10,8 @@ recommendedInterval: 5
 supports2x: true
 category: science
 tags:
-  - weather
-  - science
-  - wide 2x support
+- weather
+- science
+- wide 2x support
+published: '2022-01-28T17:02:27Z'
+updated: '2026-04-02T20:26:05Z'

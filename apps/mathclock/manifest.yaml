@@ -9,7 +9,9 @@ packageName: mathclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - science
-  - time
-  - utility
-  - clock
+- science
+- time
+- utility
+- clock
+published: '2023-02-01T02:20:21Z'
+updated: '2026-04-02T20:26:05Z'

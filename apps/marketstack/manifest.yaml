@@ -2,13 +2,16 @@
 id: marketstack
 name: Marketstack
 summary: Track stock price
-desc: Allows you to track the value of a stock that you currently own historical (week or months) or intraday price as a plot, this app include Stocks of various countries.
+desc: Allows you to track the value of a stock that you currently own historical (week
+  or months) or intraday price as a plot, this app include Stocks of various countries.
 author: kanroot
 fileName: marketstack.star
 packageName: marketstack
 recommendedInterval: 1
 category: finance
 tags:
-  - finance
-  - tracking
-  - intraday
+- finance
+- tracking
+- intraday
+published: '2023-02-21T19:22:27Z'
+updated: '2026-04-02T20:26:05Z'

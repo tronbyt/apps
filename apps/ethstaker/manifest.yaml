@@ -9,5 +9,7 @@ packageName: ethstaker
 recommendedInterval: 5
 category: utilities
 tags:
-  - crypto
-  - utility
+- crypto
+- utility
+published: '2022-08-18T18:58:26Z'
+updated: '2026-04-02T20:26:05Z'

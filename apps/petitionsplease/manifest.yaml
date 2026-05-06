@@ -2,12 +2,15 @@
 id: petitions-please
 name: Petitions Please
 summary: Tell MPs to do something
-desc: Shows currently popular petitions for the UK Parliament and HM Government with a QR link for signing.
+desc: Shows currently popular petitions for the UK Parliament and HM Government with
+  a QR link for signing.
 author: dinosaursrarr
 fileName: petitions_please.star
 packageName: petitionsplease
 recommendedInterval: 5
 category: utilities
 tags:
-  - news
-  - tech
+- news
+- tech
+published: '2023-06-27T19:00:27Z'
+updated: '2026-04-02T20:26:05Z'

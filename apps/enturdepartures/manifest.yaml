@@ -2,18 +2,20 @@
 id: entur-departures
 name: Entur Avganger
 summary: Viser kollektivavganger
-desc: Viser kollektivavganger i Norge basert på et API fra Entur.
+desc: "Viser kollektivavganger i Norge basert p\xE5 et API fra Entur."
 author: jakobbbbbbb
 fileName: entur_departures.star
 packageName: enturdepartures
 category: transit
 tags:
-  - transportation
-  - norway
-  - bus
-  - trains
-  - real-time
-  - public-transport
-  - travel
-  - commute
-  - schedule
+- transportation
+- norway
+- bus
+- trains
+- real-time
+- public-transport
+- travel
+- commute
+- schedule
+published: '2026-04-07T20:59:29Z'
+updated: '2026-04-07T21:43:31Z'

@@ -2,12 +2,15 @@
 id: progressclock
 name: Progress Clock
 summary: See today's progress
-desc: See the time displayed & how much of the day has passed, as represented by a graph.
+desc: See the time displayed & how much of the day has passed, as represented by a
+  graph.
 author: Jeffery Bennett
 fileName: progressclock.star
 packageName: progressclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - clock
-  - time
+- clock
+- time
+published: '2023-06-26T16:00:34Z'
+updated: '2026-04-02T20:26:05Z'

@@ -11,5 +11,7 @@ broken: true
 brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).
 category: sports
 tags:
-  - ipl
-  - cricket
+- ipl
+- cricket
+published: '2023-03-28T13:21:36Z'
+updated: '2026-04-02T20:26:05Z'

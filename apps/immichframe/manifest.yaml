@@ -2,14 +2,17 @@
 id: immichframe
 name: Immich Frame
 summary: Shows images from Immich
-desc: Displays pictures from your self host instance of Immich. Allows you to select an album and the option to display the date and location of the image.
+desc: Displays pictures from your self host instance of Immich. Allows you to select
+  an album and the option to display the date and location of the image.
 author: sfn-git
 fileName: immichframe.star
 packageName: immichframe
 supports2x: true
 category: utilities
 tags:
-  - art
-  - local
-  - time
-  - wide 2x support
+- art
+- local
+- time
+- wide 2x support
+published: '2026-01-08T22:40:59Z'
+updated: '2026-04-02T20:26:05Z'

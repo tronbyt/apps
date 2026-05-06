@@ -11,7 +11,9 @@ recommendedInterval: 5
 supports2x: true
 category: entertainment
 tags:
-  - media
-  - charts
-  - music
-  - wide 2x support
+- media
+- charts
+- music
+- wide 2x support
+published: '2023-02-08T17:42:51Z'
+updated: '2026-04-02T20:26:05Z'

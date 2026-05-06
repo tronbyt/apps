@@ -2,12 +2,15 @@
 id: mantle
 name: Mantle
 summary: Track SaaS revenue metrics
-desc: Track important revenue metrics. Manage plans and pricing. Improve customer relationships. Focus on growing your business.
+desc: Track important revenue metrics. Manage plans and pricing. Improve customer
+  relationships. Focus on growing your business.
 author: Mantle Rev Ops
 fileName: mantle.star
 packageName: mantle
 recommendedInterval: 5
 category: finance
 tags:
-  - finance
-  - tech
+- finance
+- tech
+published: '2024-01-23T18:07:15Z'
+updated: '2026-04-02T20:26:05Z'

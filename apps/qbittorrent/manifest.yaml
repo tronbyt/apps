@@ -2,13 +2,16 @@
 id: qbittorrent
 name: Qbittorrent
 summary: Monitor your torrent server
-desc: Displays server stats (speeds and active counts) along with the progress of your newest torrents.
+desc: Displays server stats (speeds and active counts) along with the progress of
+  your newest torrents.
 author: DoubleGremlin181
 fileName: qbittorrent.star
 packageName: qbittorrent
 recommendedInterval: 5
 category: utilities
 tags:
-  - tech
-  - tracking
-  - utility
+- tech
+- tracking
+- utility
+published: '2024-04-25T14:45:44Z'
+updated: '2026-04-02T20:26:05Z'

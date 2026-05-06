@@ -11,5 +11,7 @@ broken: true
 brokenReason: The source XML feed is invalid (malformed XML).
 category: news
 tags:
-  - news
-  - lifestyle
+- news
+- lifestyle
+published: '2023-09-29T15:04:21Z'
+updated: '2026-04-02T20:26:05Z'

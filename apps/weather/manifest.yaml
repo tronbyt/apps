@@ -8,7 +8,9 @@ recommendedInterval: 5
 supports2x: true
 category: weather
 tags:
-  - weather
-  - utility
-  - local
-  - wide 2x support
+- weather
+- utility
+- local
+- wide 2x support
+published: '2025-02-10T07:58:37Z'
+updated: '2026-04-16T04:25:36Z'

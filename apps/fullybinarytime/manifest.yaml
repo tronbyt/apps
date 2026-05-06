@@ -2,13 +2,17 @@
 id: fullybinarytime
 name: FullyBinaryTime
 summary: A clock for nerds
-desc: Clock using fully binary time. First divide the day into two 12 hour parts, then each of those into two 6 hour parts, then two 3 hour parts, and so on up to 16 bits of precision.
+desc: Clock using fully binary time. First divide the day into two 12 hour parts,
+  then each of those into two 6 hour parts, then two 3 hour parts, and so on up to
+  16 bits of precision.
 author: dinosaursrarr
 fileName: fullybinarytime.star
 packageName: fullybinarytime
 category: clocks
 tags:
-  - clock
-  - tech
-  - utility
-  - retro
+- clock
+- tech
+- utility
+- retro
+published: '2022-05-09T14:18:42Z'
+updated: '2026-04-02T20:26:05Z'

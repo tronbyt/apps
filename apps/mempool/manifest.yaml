@@ -2,12 +2,15 @@
 id: mempool
 name: Mempool
 summary: Mempool stats of Bitcoin
-desc: Showing details of the mempool of Bitcoin, such as the latest block and current fee rates.
+desc: Showing details of the mempool of Bitcoin, such as the latest block and current
+  fee rates.
 author: PMK (@pmk)
 fileName: mempool.star
 packageName: mempool
 recommendedInterval: 1
 category: finance
 tags:
-  - crypto
-  - finance
+- crypto
+- finance
+published: '2023-09-15T18:44:34Z'
+updated: '2026-04-02T20:26:05Z'

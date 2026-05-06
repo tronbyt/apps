@@ -2,13 +2,16 @@
 id: pentagon-pizza-ix
 name: Pentagon Pizza IX
 summary: Track Pentagon Pizza Index
-desc: My index tracking pizza prices near the pentagon! Powered by BestTime http://besttime.app !
+desc: My index tracking pizza prices near the pentagon! Powered by BestTime http://besttime.app
+  !
 author: eSoLu
 fileName: pentagon_pizza_ix.star
 packageName: pentagonpizzaix
 category: utilities
 tags:
-  - lifestyle
-  - utility
-  - local
-  - tracking
+- lifestyle
+- utility
+- local
+- tracking
+published: '2025-09-03T12:28:09Z'
+updated: '2026-04-02T20:26:05Z'

@@ -2,15 +2,18 @@
 id: jellyfin-recently-added
 name: JellyfinRecentlyAdded
 summary: Display Jellyfin recently added
-desc: Displays recently added on Jellyfin server. Recommended to run Tronbyt on same network that hosts Jellyfin.
+desc: Displays recently added on Jellyfin server. Recommended to run Tronbyt on same
+  network that hosts Jellyfin.
 author: noahpodgurski
 fileName: jellyfin_recently_added.star
 packageName: jellyfinrecentlyadded
 recommendedInterval: 720
 category: utilities
 tags:
-  - jellyfin
-  - media
-  - utility
-  - tech
-  - art
+- jellyfin
+- media
+- utility
+- tech
+- art
+published: '2025-11-06T05:55:19Z'
+updated: '2026-04-02T20:26:05Z'

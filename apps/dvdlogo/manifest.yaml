@@ -10,7 +10,9 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - retro
-  - clock
-  - utility
-  - wide 2x support
+- retro
+- clock
+- utility
+- wide 2x support
+published: '2022-01-17T18:26:24Z'
+updated: '2026-03-14T23:30:31Z'

@@ -2,12 +2,15 @@
 id: bluebomber
 name: BlueBomber
 summary: Shows a random Megaman boss
-desc: Randomly shows one of the 8-bit style Megaman bosses with a slick title card and subtle animation.
+desc: Randomly shows one of the 8-bit style Megaman bosses with a slick title card
+  and subtle animation.
 author: Greg Burkett
 fileName: bluebomber.star
 packageName: bluebomber
 recommendedInterval: 5
 category: entertainment
 tags:
-  - retro
-  - gaming
+- retro
+- gaming
+published: '2022-12-05T16:18:54Z'
+updated: '2026-04-02T20:26:05Z'

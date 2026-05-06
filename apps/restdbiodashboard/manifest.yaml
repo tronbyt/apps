@@ -2,13 +2,16 @@
 id: restdbiodashboard
 name: RestDbIoDashboard
 summary: Restdb.io dashboard
-desc: Generic dashboard based on a restdb.io database. Head to https://restdb.io/docs/quick-start and create a new database with this snapp key 17920b10cb9b7d23e59850c35e14d47d.
+desc: Generic dashboard based on a restdb.io database. Head to https://restdb.io/docs/quick-start
+  and create a new database with this snapp key 17920b10cb9b7d23e59850c35e14d47d.
 author: romerod
 fileName: restdbiodashboard.star
 packageName: restdbiodashboard
 recommendedInterval: 5
 category: utilities
 tags:
-  - tech
-  - utility
-  - data-display
+- tech
+- utility
+- data-display
+published: '2023-04-27T13:31:17Z'
+updated: '2026-04-02T20:26:05Z'

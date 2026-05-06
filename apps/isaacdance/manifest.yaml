@@ -2,13 +2,16 @@
 id: isaac-dance
 name: Isaac Dance
 summary: Isaac Specialist Dance
-desc: This app presents the character Isaac from the franchise The Binding of Isaac doing the popular specialist dance.
+desc: This app presents the character Isaac from the franchise The Binding of Isaac
+  doing the popular specialist dance.
 author: Dylan Nashawaty
 fileName: isaac_dance.star
 packageName: isaacdance
 recommendedInterval: 5
 category: entertainment
 tags:
-  - retro
-  - gaming
-  - art
+- retro
+- gaming
+- art
+published: '2024-03-07T21:34:27Z'
+updated: '2026-04-02T20:26:05Z'

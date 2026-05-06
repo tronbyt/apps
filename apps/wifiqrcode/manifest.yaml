@@ -2,12 +2,17 @@
 id: wifi-qr-code
 name: WiFi QR Code
 summary: Creates a WiFi QR code
-desc: This app creates a scannable WiFi QR code. It is not compatible with Enterprise networks. Since there are display limitations with the Tidbyt, not all networks will be able to be encoded. Simply scan the QR code and your phone will join the WiFi network.
+desc: This app creates a scannable WiFi QR code. It is not compatible with Enterprise
+  networks. Since there are display limitations with the Tidbyt, not all networks
+  will be able to be encoded. Simply scan the QR code and your phone will join the
+  WiFi network.
 author: misusage
 fileName: wifi_qr_code.star
 packageName: wifiqrcode
 recommendedInterval: 5
 category: utilities
 tags:
-  - tech
-  - utility
+- tech
+- utility
+published: '2022-09-08T17:20:13Z'
+updated: '2026-04-02T20:26:05Z'

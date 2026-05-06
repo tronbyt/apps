@@ -9,8 +9,10 @@ packageName: githubunread
 recommendedInterval: 5
 category: utilities
 tags:
-  - tech
-  - notification
-  - tracking
-  - utility
-  - count
+- tech
+- notification
+- tracking
+- utility
+- count
+published: '2023-02-03T21:34:31Z'
+updated: '2026-04-02T20:26:05Z'

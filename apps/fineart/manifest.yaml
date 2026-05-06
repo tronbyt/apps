@@ -2,12 +2,15 @@
 id: fine-art
 name: Fine Art
 summary: Paintings and Fine Art
-desc: The masterpieces of van Gogh, Picasso, Monet, and more. See a new work of art every day for over two months.
+desc: The masterpieces of van Gogh, Picasso, Monet, and more. See a new work of art
+  every day for over two months.
 author: chrisbateman
 fileName: fine_art.star
 packageName: fineart
 recommendedInterval: 5
 category: art
 tags:
-  - art
-  - time
+- art
+- time
+published: '2024-02-01T22:57:26Z'
+updated: '2026-04-02T20:26:05Z'

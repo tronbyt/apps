@@ -2,13 +2,16 @@
 id: tv-static
 name: TV Static
 summary: Show static on an old TV
-desc: Make your Tidbyt look like it is showing static on an old TV that is turned to Channel 3.
+desc: Make your Tidbyt look like it is showing static on an old TV that is turned
+  to Channel 3.
 author: Snuckey
 fileName: tv_static.star
 packageName: tvstatic
 recommendedInterval: 5
 category: art
 tags:
-  - retro
-  - media
-  - art
+- retro
+- media
+- art
+published: '2023-09-29T15:06:40Z'
+updated: '2026-04-02T20:26:05Z'

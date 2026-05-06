@@ -1,8 +1,9 @@
 ---
 id: digital-rain
 name: Digital Rain
-summary: Digital Rain à la Matrix
-desc: Generates an animation loop of falling code similar to that from the Matrix movie. A new sequence every 30 minutes.
+summary: "Digital Rain \xE0 la Matrix"
+desc: Generates an animation loop of falling code similar to that from the Matrix
+  movie. A new sequence every 30 minutes.
 author: Henry So, Jr.
 fileName: digital_rain.star
 packageName: digitalrain
@@ -10,7 +11,9 @@ recommendedInterval: 5
 supports2x: true
 category: entertainment
 tags:
-  - tech
-  - science
-  - art
-  - wide 2x support
+- tech
+- science
+- art
+- wide 2x support
+published: '2022-01-11T13:14:57Z'
+updated: '2026-04-02T20:26:05Z'

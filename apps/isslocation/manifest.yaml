@@ -9,7 +9,9 @@ packageName: isslocation
 recommendedInterval: 5
 category: science
 tags:
-  - space
-  - science
-  - local
-  - real-time
+- space
+- science
+- local
+- real-time
+published: '2023-05-12T16:16:30Z'
+updated: '2026-04-02T20:26:05Z'

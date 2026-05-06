@@ -9,5 +9,7 @@ packageName: tube
 recommendedInterval: 5
 category: transit
 tags:
-  - time
-  - utility
+- time
+- utility
+published: '2022-06-03T15:11:49Z'
+updated: '2026-04-02T20:26:05Z'

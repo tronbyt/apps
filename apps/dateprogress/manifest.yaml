@@ -2,14 +2,17 @@
 id: date-progress
 name: Date Progress
 summary: Shows date as percentages
-desc: Shows todays date as colorful progressbars, you can show the progress of the current day, month and year.
+desc: Shows todays date as colorful progressbars, you can show the progress of the
+  current day, month and year.
 author: possan
 fileName: date_progress.star
 packageName: dateprogress
 recommendedInterval: 5
 category: utilities
 tags:
-  - time
-  - clock
-  - art
-  - utility
+- time
+- clock
+- art
+- utility
+published: '2022-02-02T01:17:26Z'
+updated: '2026-04-02T20:26:05Z'

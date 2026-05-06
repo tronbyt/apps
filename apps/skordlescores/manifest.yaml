@@ -2,11 +2,14 @@
 id: skordle-scores
 name: Skordle Scores
 summary: Displays Skordle FB games
-desc: This app gets football data from the Skordle website to display on the Tidbyt. A user can select the class of game and manually select which game to display.
+desc: This app gets football data from the Skordle website to display on the Tidbyt.
+  A user can select the class of game and manually select which game to display.
 author: Woolycoin437420
 fileName: skordle_scores.star
 packageName: skordlescores
 recommendedInterval: 5
 category: sports
 tags:
-  - gaming
+- gaming
+published: '2023-10-12T16:20:34Z'
+updated: '2026-04-02T20:26:05Z'

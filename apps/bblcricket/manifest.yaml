@@ -2,7 +2,8 @@
 id: bbl-cricket
 name: BBL Cricket
 summary: Shows BBL scores
-desc: Choose your favorite Big Bash team and follow their progress through the season! The app shows live scores and scheduled matches.
+desc: Choose your favorite Big Bash team and follow their progress through the season!
+  The app shows live scores and scheduled matches.
 author: M0ntyP
 fileName: bbl_cricket.star
 packageName: bblcricket
@@ -11,4 +12,6 @@ broken: true
 brokenReason: API 403 errors from ESPN are preventing this app from functioning.
 category: sports
 tags:
-  - cricket
+- cricket
+published: '2023-01-24T15:59:10Z'
+updated: '2026-04-02T20:26:05Z'

@@ -10,7 +10,9 @@ recommendedInterval: 5
 supports2x: true
 category: utilities
 tags:
-  - utility
-  - tracking
-  - art
-  - wide 2x support
+- utility
+- tracking
+- art
+- wide 2x support
+published: '2023-01-03T15:49:27Z'
+updated: '2026-04-02T20:26:05Z'

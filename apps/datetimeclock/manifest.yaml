@@ -9,5 +9,7 @@ packageName: datetimeclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - clock
-  - utility
+- clock
+- utility
+published: '2022-01-19T16:32:04Z'
+updated: '2026-03-14T23:30:31Z'

@@ -9,6 +9,8 @@ packageName: movienight
 recommendedInterval: 5
 category: utilities
 tags:
-  - media
-  - time
-  - music
+- media
+- time
+- music
+published: '2023-01-03T16:04:27Z'
+updated: '2026-04-02T20:26:05Z'

@@ -9,5 +9,7 @@ fileName: twse_stock.star
 packageName: twsestock
 category: finance
 tags:
-  - finance
-  - utility
+- finance
+- utility
+published: '2024-09-17T15:09:17Z'
+updated: '2026-04-02T20:26:05Z'

@@ -9,6 +9,8 @@ packageName: usdebtclock
 recommendedInterval: 60
 category: clocks
 tags:
-  - finance
-  - clock
-  - utility
+- finance
+- clock
+- utility
+published: '2024-02-01T22:51:46Z'
+updated: '2026-04-02T20:26:05Z'

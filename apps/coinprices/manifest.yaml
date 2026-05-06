@@ -9,6 +9,8 @@ packageName: coinprices
 recommendedInterval: 1
 category: utilities
 tags:
-  - crypto
-  - finance
-  - utility
+- crypto
+- finance
+- utility
+published: '2022-10-13T19:55:22Z'
+updated: '2026-04-02T20:26:05Z'

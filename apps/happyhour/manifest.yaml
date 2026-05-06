@@ -2,13 +2,16 @@
 id: happy-hour
 name: Happy Hour
 summary: Hourly Cocktail Generator
-desc: Displays a new cocktail every hour, on the hour. Cheers to my mom for the color scheme, idea, AND name!
+desc: Displays a new cocktail every hour, on the hour. Cheers to my mom for the color
+  scheme, idea, AND name!
 author: Nicole Brooks
 fileName: happy_hour.star
 packageName: happyhour
 recommendedInterval: 5
 category: lifestyle
 tags:
-  - lifestyle
-  - music
-  - clock
+- lifestyle
+- music
+- clock
+published: '2022-04-04T16:30:37Z'
+updated: '2026-04-02T20:26:05Z'

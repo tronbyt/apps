@@ -9,6 +9,8 @@ packageName: vitaloccupancy
 recommendedInterval: 5
 category: utilities
 tags:
-  - lifestyle
-  - real-time
-  - utility
+- lifestyle
+- real-time
+- utility
+published: '2023-02-01T15:24:42Z'
+updated: '2026-04-02T20:26:05Z'

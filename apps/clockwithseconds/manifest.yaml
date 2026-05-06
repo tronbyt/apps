@@ -9,6 +9,8 @@ packageName: clockwithseconds
 recommendedInterval: 0
 category: clocks
 tags:
-  - clock
-  - utility
-  - time
+- clock
+- utility
+- time
+published: '2023-10-07T18:38:37Z'
+updated: '2026-04-02T20:26:05Z'

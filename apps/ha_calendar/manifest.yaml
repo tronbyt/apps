@@ -10,6 +10,8 @@ packageName: hacalendar
 recommendedInterval: 5
 category: utilities
 tags:
-  - home-assistant
-  - calendar
-  - smart-home
+- home-assistant
+- calendar
+- smart-home
+published: '2026-04-20T21:56:35Z'
+updated: '2026-04-20T21:59:03Z'

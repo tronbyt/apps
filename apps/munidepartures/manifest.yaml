@@ -2,11 +2,14 @@
 id: muni-departures
 name: Muni Departures
 summary: SF Muni Departures
-desc: Displays real-time arrival info for selected Muni routes and stops in San Francisco. Configure with your chosen stop IDs to see the next departures.
+desc: Displays real-time arrival info for selected Muni routes and stops in San Francisco.
+  Configure with your chosen stop IDs to see the next departures.
 author: Bobby Schimm
 fileName: muni_departures.star
 packageName: munidepartures
 category: transit
 tags:
-  - muni
-  - real-time
+- muni
+- real-time
+published: '2025-08-08T21:01:17Z'
+updated: '2026-04-02T20:26:05Z'

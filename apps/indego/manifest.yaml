@@ -10,5 +10,7 @@ packageName: indego
 recommendedInterval: 5
 category: transit
 tags:
-  - tracking
-  - utility
+- tracking
+- utility
+published: '2023-06-28T18:40:35Z'
+updated: '2026-04-20T21:25:08Z'

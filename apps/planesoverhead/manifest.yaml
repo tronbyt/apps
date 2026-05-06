@@ -2,12 +2,15 @@
 id: planes-overhead
 name: Planes Overhead
 summary: Show closest overhead plane
-desc: Fetch the closest plane flying overhead from the OpenSky API and display its typecode, altitude, speed, heading, and relative position.
+desc: Fetch the closest plane flying overhead from the OpenSky API and display its
+  typecode, altitude, speed, heading, and relative position.
 author: Conor McLaughlin
 fileName: planes_overhead.star
 packageName: planesoverhead
 recommendedInterval: 5
 category: transit
 tags:
-  - aircraft
-  - utility
+- aircraft
+- utility
+published: '2024-04-05T17:03:57Z'
+updated: '2026-04-02T20:26:05Z'

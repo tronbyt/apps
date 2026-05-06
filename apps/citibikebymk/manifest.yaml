@@ -2,11 +2,14 @@
 id: citibike-by-mk
 name: Citibike By MK
 summary: Available bikes and docks
-desc: This app shows the availability of both bikes and docks at a given station. This app does NOT show number of electric bikes separately.
+desc: This app shows the availability of both bikes and docks at a given station.
+  This app does NOT show number of electric bikes separately.
 author: Michael Kleban
 fileName: citibike_by_mk.star
 packageName: citibikebymk
 category: transit
 tags:
-  - tech
-  - utility
+- tech
+- utility
+published: '2023-02-17T15:38:21Z'
+updated: '2026-04-02T20:26:05Z'

@@ -2,13 +2,16 @@
 id: national-parks
 name: National Parks
 summary: National park info and pics
-desc: Displays interesting facts and pictures of various national parks in the United States.
+desc: Displays interesting facts and pictures of various national parks in the United
+  States.
 author: hklim1
 fileName: national_parks.star
 packageName: nationalparks
 recommendedInterval: 5
 category: entertainment
 tags:
-  - nature
-  - art
-  - utility
+- nature
+- art
+- utility
+published: '2023-12-17T12:46:07Z'
+updated: '2026-04-02T20:26:05Z'

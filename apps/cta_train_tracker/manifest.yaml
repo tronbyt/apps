@@ -2,11 +2,14 @@
 id: cta-train-tracker
 name: Cta Train Tracker
 summary: Tracks cta l trains
-desc: Displays the arrival times of the next 4 trains of any CTA 'L' station, can be configured to show only trains going in one direction, or both.
+desc: Displays the arrival times of the next 4 trains of any CTA 'L' station, can
+  be configured to show only trains going in one direction, or both.
 author: imcnaugh
 fileName: cta_train_tracker.star
 packageName: ctatraintracker
 recommendedInterval: 5
 category: transit
 tags:
-  - productivity
+- productivity
+published: '2024-02-09T19:59:01Z'
+updated: '2026-04-02T20:26:05Z'

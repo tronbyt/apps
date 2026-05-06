@@ -2,12 +2,15 @@
 id: year-progress
 name: Year Progress
 summary: Year progress bar
-desc: The only progress bar you wish was slower. The option for milestone days will only display the app every 3-4 days when we hit 1%, 2%, etc.
+desc: The only progress bar you wish was slower. The option for milestone days will
+  only display the app every 3-4 days when we hit 1%, 2%, etc.
 author: chrisbateman
 fileName: year_progress.star
 packageName: yearprogress
 recommendedInterval: 60
 category: utilities
 tags:
-  - tracking
-  - utility
+- tracking
+- utility
+published: '2024-01-09T20:00:54Z'
+updated: '2026-04-02T20:26:05Z'

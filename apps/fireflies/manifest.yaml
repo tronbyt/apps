@@ -2,14 +2,18 @@
 id: fireflies
 name: Fireflies
 summary: Endless fireflies w/ clock
-desc: Animated fireflies that move and glow, with an optional clock display. No stuttering if you pin the widget as the fireflies continue their path indefinitely. Firefly colors and speed are configurable.
+desc: Animated fireflies that move and glow, with an optional clock display. No stuttering
+  if you pin the widget as the fireflies continue their path indefinitely. Firefly
+  colors and speed are configurable.
 author: J. Keybl
 fileName: fireflies.star
 packageName: fireflies
 recommendedInterval: 5
 category: utilities
 tags:
-  - clock
-  - art
-  - time
-  - utility
+- clock
+- art
+- time
+- utility
+published: '2023-10-12T16:21:11Z'
+updated: '2026-04-02T20:26:05Z'

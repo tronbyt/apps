@@ -2,11 +2,14 @@
 id: mta-railroad-sign
 name: MTA Railroad Sign
 summary: Metro-North/LIRR next train
-desc: Adds a realtime next train sign for any Metro-North or Long Island Rail Road station to your Tidbyt.
+desc: Adds a realtime next train sign for any Metro-North or Long Island Rail Road
+  station to your Tidbyt.
 author: nataliemakhijani
 recommendedInterval: 5
 fileName: mta_railroad_sign.star
 packageName: mtarailroadsign
 category: transit
 tags:
-  - smart-home
+- smart-home
+published: '2025-04-23T16:54:31Z'
+updated: '2026-04-02T20:26:05Z'

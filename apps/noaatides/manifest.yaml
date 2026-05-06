@@ -9,6 +9,8 @@ packageName: noaatides
 recommendedInterval: 60
 category: weather
 tags:
-  - weather
-  - nature
-  - utility
+- weather
+- nature
+- utility
+published: '2022-09-02T13:55:52Z'
+updated: '2026-04-02T20:26:05Z'
