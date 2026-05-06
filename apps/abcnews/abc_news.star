@@ -3,6 +3,12 @@ Applet: ABC News
 Summary: Displays ABC News Headlines
 Description: Displays headlines from ABC News Australia. Select the topic from the dropdown and it will display the latest 5 headlines.
 Author: M0ntyP
+
+v1.0
+First release
+
+v1.1
+Added handling for when less than 5 stories in the feed
 """
 
 load("http.star", "http")
@@ -25,7 +31,10 @@ def main(config):
     title = rss.query_all("//rss/channel/item/title")
     description = []
 
-    for i in range(0, 5, 1):
+    # just in case less than 5 stories in the feed
+    feed_length = min(len(title), 5)
+
+    for i in range(0, feed_length, 1):
         desc = title[i]
         description.append(desc)
 
