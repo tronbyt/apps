@@ -9,7 +9,7 @@ packageName: stockvalue
 recommendedInterval: 1
 category: finance
 tags:
-    - finance
-    - tracking
+  - finance
+  - tracking
 published: '2023-01-19T16:09:54Z'
 updated: '2025-12-05T22:28:51Z'

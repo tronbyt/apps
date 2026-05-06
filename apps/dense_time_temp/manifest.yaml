@@ -10,7 +10,7 @@ recommendedInterval: 5
 broken: true
 category: weather
 tags:
-    - clock
-    - weather
+  - clock
+  - weather
 published: '2024-03-19T17:07:17Z'
 updated: '2025-12-02T19:30:22Z'

@@ -9,7 +9,7 @@ packageName: bikeshare
 recommendedInterval: 5
 category: transit
 tags:
-    - utility
-    - local
+  - utility
+  - local
 published: '2022-08-18T20:04:37Z'
 updated: '2025-12-05T22:28:51Z'

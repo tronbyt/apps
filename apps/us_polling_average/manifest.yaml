@@ -11,6 +11,6 @@ broken: true
 brokenReason: The data source (FiveThirtyEight) has changed and the JSON endpoint now redirects to an HTML page.
 category: news
 tags:
-    - news
+  - news
 published: '2024-09-18T17:07:21Z'
 updated: '2025-12-05T22:28:51Z'

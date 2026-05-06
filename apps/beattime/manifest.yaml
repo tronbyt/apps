@@ -8,9 +8,9 @@ fileName: beat_time.star
 packageName: beattime
 category: clocks
 tags:
-    - clock
-    - time
-    - utility
-    - retro
+  - clock
+  - time
+  - utility
+  - retro
 published: '2023-03-02T15:59:01Z'
 updated: '2025-12-02T19:30:22Z'

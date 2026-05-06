@@ -9,7 +9,7 @@ packageName: wordoftheday
 recommendedInterval: 5
 category: education
 tags:
-    - education
-    - utility
+  - education
+  - utility
 published: '2022-07-11T21:27:55Z'
 updated: '2025-12-05T22:28:51Z'

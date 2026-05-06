@@ -9,8 +9,8 @@ packageName: tetrisclock
 recommendedInterval: 0
 category: clocks
 tags:
-    - clock
-    - retro
-    - utility
+  - clock
+  - retro
+  - utility
 published: '2023-01-28T15:31:56Z'
 updated: '2025-12-02T19:30:22Z'

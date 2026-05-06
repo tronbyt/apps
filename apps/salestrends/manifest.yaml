@@ -11,8 +11,8 @@ broken: true
 brokenReason: 'www.shopcounter.app: no such host'
 category: utilities
 tags:
-    - finance
-    - tech
-    - utility
+  - finance
+  - tech
+  - utility
 published: '2022-11-30T17:31:36Z'
 updated: '2025-12-02T19:30:22Z'

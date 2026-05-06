@@ -9,8 +9,8 @@ packageName: noaabuoy
 recommendedInterval: 15
 category: utilities
 tags:
-    - nature
-    - weather
-    - science
+  - nature
+  - weather
+  - science
 published: '2022-02-01T21:31:54Z'
 updated: '2026-01-21T00:03:44Z'

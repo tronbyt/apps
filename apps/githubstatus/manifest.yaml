@@ -9,7 +9,7 @@ packageName: githubstatus
 recommendedInterval: 5
 category: utilities
 tags:
-    - tracking
-    - tech-support
+  - tracking
+  - tech-support
 published: '2023-05-04T17:04:30Z'
 updated: '2025-12-05T22:28:51Z'

@@ -9,7 +9,7 @@ fileName: met_eireann.star
 packageName: meteireann
 category: weather
 tags:
-    - weather
-    - local
+  - weather
+  - local
 published: '2024-07-03T21:02:45Z'
 updated: '2025-12-17T23:02:59Z'

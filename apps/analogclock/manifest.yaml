@@ -9,10 +9,10 @@ packageName: analogclock
 recommendedInterval: 0
 category: clocks
 tags:
-    - clock
-    - time
-    - analog
-    - art
-    - utility
+  - clock
+  - time
+  - analog
+  - art
+  - utility
 published: '2022-02-04T18:24:43Z'
 updated: '2025-12-02T19:30:22Z'

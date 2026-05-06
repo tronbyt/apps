@@ -9,8 +9,8 @@ packageName: powerwall
 recommendedInterval: 5
 category: smart-home
 tags:
-    - tech
-    - utility
-    - smart-home
+  - tech
+  - utility
+  - smart-home
 published: '2023-11-03T17:10:35Z'
 updated: '2025-12-05T22:28:51Z'

@@ -9,10 +9,10 @@ fileName: house_of_commons.star
 packageName: houseofcommons
 category: sports
 tags:
-    - news
-    - local
-    - weather
-    - afl
-    - football
+  - news
+  - local
+  - weather
+  - afl
+  - football
 published: '2024-06-06T20:40:05Z'
 updated: '2025-12-17T23:02:59Z'

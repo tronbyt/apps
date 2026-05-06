@@ -9,7 +9,7 @@ packageName: eventprogress
 recommendedInterval: 5
 category: utilities
 tags:
-    - tracking
-    - utility
+  - tracking
+  - utility
 published: '2023-07-10T13:46:11Z'
 updated: '2025-11-30T19:58:27Z'

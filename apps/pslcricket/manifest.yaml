@@ -11,7 +11,7 @@ broken: true
 brokenReason: API access blocked (403 Forbidden)
 category: sports
 tags:
-    - real-time
-    - cricket
+  - real-time
+  - cricket
 published: '2023-02-21T18:14:57Z'
 updated: '2025-12-05T22:28:51Z'

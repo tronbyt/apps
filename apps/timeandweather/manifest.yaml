@@ -9,10 +9,10 @@ packageName: timeandweather
 recommendedInterval: 5
 category: weather
 tags:
-    - clock
-    - weather
-    - time
-    - utility
-    - smart-home
+  - clock
+  - weather
+  - time
+  - utility
+  - smart-home
 published: '2024-05-22T18:33:42Z'
 updated: '2025-12-02T19:30:22Z'

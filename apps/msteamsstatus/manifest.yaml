@@ -9,9 +9,9 @@ packageName: msteamsstatus
 recommendedInterval: 5
 category: utilities
 tags:
-    - presence
-    - tracking
-    - smart-home
-    - utility
+  - presence
+  - tracking
+  - smart-home
+  - utility
 published: '2023-10-19T19:51:22Z'
 updated: '2025-12-05T22:28:51Z'

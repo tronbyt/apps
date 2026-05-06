@@ -9,9 +9,9 @@ packageName: spectrocloudclock
 recommendedInterval: 0
 category: clocks
 tags:
-    - clock
-    - weather
-    - art
-    - utility
+  - clock
+  - weather
+  - art
+  - utility
 published: '2024-09-18T17:07:13Z'
 updated: '2025-12-01T21:50:01Z'

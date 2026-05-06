@@ -9,6 +9,6 @@ packageName: nycaspstatus
 recommendedInterval: 5
 category: transit
 tags:
-    - utility
+  - utility
 published: '2025-03-21T16:22:27Z'
 updated: '2025-11-30T20:08:55Z'

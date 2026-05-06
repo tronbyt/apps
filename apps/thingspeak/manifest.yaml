@@ -9,9 +9,9 @@ packageName: thingspeak
 recommendedInterval: 5
 category: utilities
 tags:
-    - tech
-    - smart-home
-    - utility
-    - weather
+  - tech
+  - smart-home
+  - utility
+  - weather
 published: '2023-04-27T13:28:39Z'
 updated: '2025-12-05T22:28:51Z'

@@ -9,7 +9,7 @@ packageName: airquality
 recommendedInterval: 5
 category: utilities
 tags:
-    - weather
-    - utility
+  - weather
+  - utility
 published: '2023-04-27T13:40:02Z'
 updated: '2025-12-05T22:28:51Z'

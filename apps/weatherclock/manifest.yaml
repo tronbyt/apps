@@ -9,8 +9,8 @@ packageName: weatherclock
 recommendedInterval: 0
 category: weather
 tags:
-    - weather
-    - clock
-    - utility
+  - weather
+  - clock
+  - utility
 published: '2023-05-19T17:26:10Z'
 updated: '2025-12-02T19:30:22Z'

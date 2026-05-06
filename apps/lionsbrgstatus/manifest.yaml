@@ -9,7 +9,7 @@ packageName: lionsgatestatus
 recommendedInterval: 5
 category: transit
 tags:
-    - utility
-    - local
+  - utility
+  - local
 published: '2023-11-07T20:39:51Z'
 updated: '2025-11-29T23:55:39Z'

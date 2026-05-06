@@ -10,8 +10,8 @@ recommendedInterval: 60
 supports2x: true
 category: news
 tags:
-    - news
-    - public-safety
-    - wide 2x support
+  - news
+  - public-safety
+  - wide 2x support
 published: '2026-01-05T23:11:21Z'
 updated: '2026-03-02T20:21:40Z'

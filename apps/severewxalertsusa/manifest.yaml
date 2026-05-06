@@ -10,7 +10,7 @@ recommendedInterval: 5
 supports2x: true
 category: weather
 tags:
-    - weather
-    - wide 2x support
+  - weather
+  - wide 2x support
 published: '2022-08-09T21:15:07Z'
 updated: '2025-12-05T22:28:51Z'

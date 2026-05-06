@@ -9,7 +9,7 @@ packageName: opnvaustria
 recommendedInterval: 5
 category: transit
 tags:
-    - local
-    - real-time
+  - local
+  - real-time
 published: '2023-05-04T17:19:06Z'
 updated: '2025-12-02T19:30:22Z'

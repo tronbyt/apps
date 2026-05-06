@@ -9,8 +9,8 @@ packageName: faadelays
 recommendedInterval: 5
 category: transit
 tags:
-    - air-traffic
-    - utility
-    - real-time
+  - air-traffic
+  - utility
+  - real-time
 published: '2023-07-31T14:56:08Z'
 updated: '2025-11-29T17:52:33Z'

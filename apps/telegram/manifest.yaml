@@ -9,8 +9,8 @@ packageName: telegram
 recommendedInterval: 5
 category: utilities
 tags:
-    - tracking
-    - media
-    - utility
+  - tracking
+  - media
+  - utility
 published: '2024-03-19T16:55:06Z'
 updated: '2025-11-30T19:58:27Z'

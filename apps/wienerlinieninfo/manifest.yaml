@@ -9,6 +9,6 @@ packageName: wienerlinieninfo
 recommendedInterval: 5
 category: transit
 tags:
-    - local
+  - local
 published: '2023-03-23T11:59:23Z'
 updated: '2025-12-05T22:28:51Z'

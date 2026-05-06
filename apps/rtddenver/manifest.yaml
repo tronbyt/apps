@@ -8,11 +8,11 @@ fileName: rtd_denver.star
 packageName: rtddenver
 category: transit
 tags:
-    - transportation
-    - real-time
-    - public-transport
-    - travel
-    - commute
-    - schedule
+  - transportation
+  - real-time
+  - public-transport
+  - travel
+  - commute
+  - schedule
 published: '2026-04-07T20:59:29Z'
 updated: '2026-04-07T21:43:31Z'

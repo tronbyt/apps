@@ -6,10 +6,10 @@ desc: Track your Colorado 14ers.
 author: Robert Ison
 category: travel
 tags:
-    - lifestyle
-    - nature
-    - sports
-    - hiking
+  - lifestyle
+  - nature
+  - sports
+  - hiking
 fileName: colorado14ers.star
 packageName: colorado14ers
 supports2x: true

@@ -9,7 +9,7 @@ packageName: stockticker
 recommendedInterval: 1
 category: utilities
 tags:
-    - finance
-    - utility
+  - finance
+  - utility
 published: '2022-07-27T15:24:26Z'
 updated: '2025-12-05T22:28:51Z'

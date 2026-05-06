@@ -9,8 +9,8 @@ packageName: twitch
 recommendedInterval: 5
 category: gaming
 tags:
-    - twitch
-    - real-time
-    - media
+  - twitch
+  - real-time
+  - media
 published: '2022-08-04T16:50:44Z'
 updated: '2025-12-23T13:24:18Z'

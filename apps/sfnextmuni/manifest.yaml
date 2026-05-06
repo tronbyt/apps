@@ -9,7 +9,7 @@ packageName: sfnextmuni
 recommendedInterval: 5
 category: transit
 tags:
-    - muni
-    - sf
+  - muni
+  - sf
 published: '2022-05-02T16:57:04Z'
 updated: '2026-03-16T00:57:29Z'

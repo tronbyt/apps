@@ -9,7 +9,7 @@ packageName: awair
 recommendedInterval: 5
 category: smart-home
 tags:
-    - weather
-    - smart-home
+  - weather
+  - smart-home
 published: '2023-09-05T17:43:35Z'
 updated: '2025-12-02T19:30:22Z'

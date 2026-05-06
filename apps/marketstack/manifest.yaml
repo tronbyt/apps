@@ -9,8 +9,8 @@ packageName: marketstack
 recommendedInterval: 1
 category: finance
 tags:
-    - finance
-    - tracking
-    - intraday
+  - finance
+  - tracking
+  - intraday
 published: '2023-02-21T19:22:27Z'
 updated: '2025-12-05T22:28:51Z'

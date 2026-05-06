@@ -9,6 +9,6 @@ packageName: ctaltracker
 recommendedInterval: 5
 category: transit
 tags:
-    - local
+  - local
 published: '2023-01-12T16:52:19Z'
 updated: '2025-12-02T19:30:22Z'

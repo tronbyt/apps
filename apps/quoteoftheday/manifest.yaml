@@ -9,8 +9,8 @@ packageName: quoteoftheday
 recommendedInterval: 5
 category: lifestyle
 tags:
-    - art
-    - lifestyle
-    - time
+  - art
+  - lifestyle
+  - time
 published: '2024-01-23T18:08:58Z'
 updated: '2025-12-02T19:30:22Z'

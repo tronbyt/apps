@@ -10,7 +10,7 @@ recommendedInterval: 5
 broken: true
 category: weather
 tags:
-    - news
-    - weather
+  - news
+  - weather
 published: '2024-09-18T17:07:41Z'
 updated: '2025-12-05T22:28:51Z'

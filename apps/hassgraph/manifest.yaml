@@ -9,8 +9,8 @@ fileName: hass_graph.star
 packageName: hassgraph
 category: utilities
 tags:
-    - smart-home
-    - sports
-    - utility
+  - smart-home
+  - sports
+  - utility
 published: '2024-06-19T15:18:22Z'
 updated: '2025-12-17T23:02:59Z'

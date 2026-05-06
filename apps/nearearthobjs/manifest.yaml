@@ -9,9 +9,9 @@ packageName: nearearthobjs
 recommendedInterval: 5
 category: science
 tags:
-    - space
-    - science
-    - weather
-    - utility
+  - space
+  - science
+  - weather
+  - utility
 published: '2022-02-09T22:55:35Z'
 updated: '2025-12-05T22:28:51Z'

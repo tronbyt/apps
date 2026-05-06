@@ -11,7 +11,7 @@ broken: true
 brokenReason: API endpoint (api.warframestat.us/pc) returns 404/Redirect loop.
 category: games
 tags:
-    - gaming
-    - tracking
+  - gaming
+  - tracking
 published: '2022-03-04T18:15:09Z'
 updated: '2025-12-05T22:28:51Z'

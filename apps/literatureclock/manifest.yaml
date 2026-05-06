@@ -9,9 +9,9 @@ packageName: literatureclock
 recommendedInterval: 1
 category: clocks
 tags:
-    - time
-    - art
-    - clock
-    - poetry
+  - time
+  - art
+  - clock
+  - poetry
 published: '2023-03-14T19:19:36Z'
 updated: '2025-12-02T19:30:22Z'

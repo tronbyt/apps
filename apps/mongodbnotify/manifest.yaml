@@ -8,8 +8,8 @@ fileName: mongodb_notify.star
 packageName: mongodbnotify
 category: smart-home
 tags:
-    - smart-home
-    - notification
-    - utility
+  - smart-home
+  - notification
+  - utility
 published: '2024-07-03T21:06:56Z'
 updated: '2025-12-17T23:02:59Z'

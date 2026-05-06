@@ -9,8 +9,8 @@ packageName: abcradio
 recommendedInterval: 10
 category: entertainment
 tags:
-    - music
-    - real-time
-    - local
+  - music
+  - real-time
+  - local
 published: '2024-02-01T22:50:22Z'
 updated: '2025-11-30T19:58:27Z'

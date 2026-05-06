@@ -9,6 +9,6 @@ packageName: flighttracker
 recommendedInterval: 5
 category: transit
 tags:
-    - utility
+  - utility
 published: '2023-03-14T18:57:14Z'
 updated: '2025-12-05T22:28:51Z'

@@ -6,7 +6,7 @@ desc: Gets the current Doomsday Clock data from https://www.doomsdayclock.net/ d
 author: LLarry
 category: news
 tags:
-    - clock
-    - news
+  - clock
+  - news
 published: '2026-03-12T21:38:25Z'
 updated: '2026-03-17T09:45:52Z'

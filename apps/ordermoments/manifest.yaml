@@ -9,8 +9,8 @@ packageName: ordermoments
 recommendedInterval: 5
 category: utilities
 tags:
-    - utility
-    - tracking
-    - notification
+  - utility
+  - tracking
+  - notification
 published: '2022-11-30T23:34:00Z'
 updated: '2025-12-05T22:28:51Z'

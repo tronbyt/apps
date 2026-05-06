@@ -9,8 +9,8 @@ packageName: unixepochclock
 recommendedInterval: 0
 category: clocks
 tags:
-    - time
-    - utility
-    - clock
+  - time
+  - utility
+  - clock
 published: '2023-12-07T18:06:01Z'
 updated: '2025-12-02T19:30:22Z'

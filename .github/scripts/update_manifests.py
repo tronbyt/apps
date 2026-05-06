@@ -19,6 +19,7 @@ def get_git_dates(path):
             "llm generated categories",
             "Fix Updates and script",
             "Fix updated ts",
+            "Fix tags",
             "Implement sorting by newest and last updated in app viewer"
         ]
         ignore_regex = "|".join(ignore_patterns)
@@ -92,7 +93,7 @@ def update_manifest(manifest_path):
     if changed:
         print(f"Updating {manifest_path}: published={published}, updated={updated}")
         with open(manifest_path, 'w', encoding='utf-8') as f:
-            yaml.dump(data, f, Dumper=IndentDumper, sort_keys=False, default_flow_style=False, explicit_start=True, allow_unicode=True, width=1000, indent=4)
+            yaml.dump(data, f, Dumper=IndentDumper, sort_keys=False, default_flow_style=False, explicit_start=True, allow_unicode=True, width=1000, indent=2)
 
 
 def main():

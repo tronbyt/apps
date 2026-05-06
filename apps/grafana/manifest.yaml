@@ -8,8 +8,8 @@ fileName: grafana.star
 packageName: grafana
 category: utilities
 tags:
-    - tech
-    - data-visual
-    - utility
+  - tech
+  - data-visual
+  - utility
 published: '2025-11-21T09:42:57Z'
 updated: '2025-11-22T02:54:19Z'

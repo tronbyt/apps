@@ -10,9 +10,9 @@ supports2x: true
 minPixletVersion: v0.50.0
 category: entertainment
 tags:
-    - retro
-    - art
-    - clock
-    - wide 2x support
+  - retro
+  - art
+  - clock
+  - wide 2x support
 published: '2026-01-21T21:49:18Z'
 updated: '2026-01-21T21:49:18Z'
