@@ -2,13 +2,12 @@
 id: mtatraintime
 name: MTATrainTime
 summary: Displays next trains
-desc: Displays the next trains between two stations for Metro North or Long Island
-  Rail Road.
+desc: Displays the next trains between two stations for Metro North or Long Island Rail Road.
 author: rai
 fileName: mtatraintime.star
 packageName: mtatraintime
 recommendedInterval: 5
 category: transit
-tags: null
+tags: []
 published: '2023-03-23T11:56:10Z'
 updated: '2026-04-02T20:26:05Z'

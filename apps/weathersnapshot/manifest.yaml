@@ -2,8 +2,7 @@
 id: weather-snapshot
 name: Weather Snapshot
 summary: Temperature, humidity, AQI
-desc: Display the current temperature, humidity, and AQI, according to OpenWeather
-  APIs.
+desc: Display the current temperature, humidity, and AQI, according to OpenWeather APIs.
 author: Ariel Tian
 fileName: weather_snapshot.star
 packageName: weathersnapshot

@@ -2,8 +2,7 @@
 id: stackernews
 name: Stackernews
 summary: Shows top post Stacker.news
-desc: Shows the top post (or random of last 5 posts) on Stacker.news in category bitcoin,
-  nostr, tech, meta, jobs, or all categories.
+desc: Shows the top post (or random of last 5 posts) on Stacker.news in category bitcoin, nostr, tech, meta, jobs, or all categories.
 author: PMK (@pmk)
 fileName: stackernews.star
 packageName: stackernews

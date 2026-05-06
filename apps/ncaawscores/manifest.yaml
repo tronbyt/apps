@@ -2,8 +2,7 @@
 id: ncaaw-scores
 name: NCAAW Basketball
 summary: NCAA Women Basketball Score
-desc: Creating multiple app instances is no longer necessary. Just install once and
-  remove any other instances. You can set the rotation speed of scores in the settings.
+desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
 author: LunchBox8484
 fileName: ncaaw_scores.star
 packageName: ncaawscores

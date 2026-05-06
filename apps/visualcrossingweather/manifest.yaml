@@ -2,8 +2,7 @@
 id: visualcrossingweather
 name: Visualcrossing
 summary: Visualcrossing Weather
-desc: Display current temperature, humidity, and conditions for a user-specified location
-  based on visualcrossing data.
+desc: Display current temperature, humidity, and conditions for a user-specified location based on visualcrossing data.
 author: ryan-doucette
 fileName: visualcrossing_weather.star
 packageName: visualcrossingweather

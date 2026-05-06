@@ -2,8 +2,7 @@
 id: ncaam-scores
 name: NCAA Basketball
 summary: NCAA Mens Basketball Scores
-desc: Creating multiple app instances is no longer necessary. Just install once and
-  remove any other instances. You can set the rotation speed of scores in the settings.
+desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
 author: LunchBox8484
 fileName: ncaam_scores.star
 packageName: ncaamscores

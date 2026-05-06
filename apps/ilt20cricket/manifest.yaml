@@ -2,15 +2,13 @@
 id: ilt20-cricket
 name: ILT20 Cricket
 summary: Shows ILT20 scores
-desc: Choose your favorite team and follow their progress through the ILT20 season!
-  The app shows live scores and scheduled matches..
+desc: Choose your favorite team and follow their progress through the ILT20 season! The app shows live scores and scheduled matches..
 author: M0ntyP
 fileName: ilt20_cricket.star
 packageName: ilt20cricket
 recommendedInterval: 5
 broken: true
-brokenReason: The ESPNCricinfo API endpoint used by this app is returning a 403 Forbidden
-  error, likely due to API access restrictions or bot protection.
+brokenReason: The ESPNCricinfo API endpoint used by this app is returning a 403 Forbidden error, likely due to API access restrictions or bot protection.
 category: sports
 tags:
 - real-time

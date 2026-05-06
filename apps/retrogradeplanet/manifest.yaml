@@ -2,8 +2,7 @@
 id: retrograde-planet
 name: Retrograde Planet
 summary: Show Retrograde Planets
-desc: Display when planets change from retrograde to direct and viceversa and current
-  status.
+desc: Display when planets change from retrograde to direct and viceversa and current status.
 author: tidbytdev
 recommendedInterval: 5
 fileName: retrograde_planet.star

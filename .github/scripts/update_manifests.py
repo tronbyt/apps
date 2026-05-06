@@ -6,17 +6,40 @@ import glob
 def get_git_dates(path):
     # Get all commit dates for the path
     try:
+        # Define patterns for commits to ignore (automated metadata updates)
+        ignore_patterns = [
+            "Add timestamp metadata",
+            "Implement sorting by newest",
+            "Merge updated-apps",
+            "Fix YAML formatting",
+            "Update manifest metadata",
+            "Merge branch",
+            "Implement sorting by newest and last updated in app viewer"
+        ]
+        ignore_regex = "|".join(ignore_patterns)
+
         # Use TZ=UTC to get dates in UTC format.
-        # --date=iso-strict-local with TZ=UTC gives format like 2023-01-01T00:00:00Z
-        cmd = ["git", "log", "--date=iso-strict-local", "--format=%ad", "--", path]
         env = os.environ.copy()
         env["TZ"] = "UTC"
-        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, env=env).decode("utf-8").strip()
-        if not output:
+
+        # Get published (oldest)
+        cmd_pub = ["git", "log", "--reverse", "--date=iso-strict-local", "--format=%ad", "--", path]
+        output_pub = subprocess.check_output(cmd_pub, env=env).decode("utf-8").strip()
+        if not output_pub:
             return None, None
-        dates = output.splitlines()
-        published = dates[-1] # oldest
-        updated = dates[0]    # newest
+        published = output_pub.splitlines()[0]
+
+        # Get updated (newest, excluding automated commits)
+        cmd_upd = [
+            "git", "log", "-1", "--date=iso-strict-local", "--format=%ad",
+            "--invert-grep", f"--grep={ignore_regex}", "--extended-regexp",
+            "--", path
+        ]
+        output_upd = subprocess.check_output(cmd_upd, env=env).decode("utf-8").strip()
+        
+        # If no "real" update found, use published date
+        updated = output_upd if output_upd else published
+        
         return published, updated
     except Exception as e:
         print(f"Error getting dates for {path}: {e}")

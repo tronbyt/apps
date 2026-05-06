@@ -2,8 +2,7 @@
 id: meeting-stats
 name: Meeting Stats
 summary: Weekly Meeting Insights
-desc: Analyzes your Outlook calendar and provides a summary of your weekly meeting
-  load.
+desc: Analyzes your Outlook calendar and provides a summary of your weekly meeting load.
 author: Matt-Pesce
 fileName: meeting_stats.star
 packageName: meetingstats

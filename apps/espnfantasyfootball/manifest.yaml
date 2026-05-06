@@ -2,8 +2,7 @@
 id: espn-fantasy-fb
 name: ESPN Fantasy FB
 summary: Fantasy FB matchup scores
-desc: Connects to your ESPN fantasy football league and randomly displays the scoreboard
-  for a given matchup.
+desc: Connects to your ESPN fantasy football league and randomly displays the scoreboard for a given matchup.
 author: jack_markle
 fileName: espn_fantasy_fb.star
 packageName: espnfantasyfb

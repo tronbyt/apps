@@ -2,8 +2,7 @@
 id: the-tracker
 name: The Tracker
 summary: Show your internet stats
-desc: 'Flexible counter to display your numbers via ilo.so: X, YouTube, TikTok, Bluesky,
-  Ghost, Kit, and more!'
+desc: 'Flexible counter to display your numbers via ilo.so: X, YouTube, TikTok, Bluesky, Ghost, Kit, and more!'
 author: Steve Rybka
 recommendedInterval: 5
 fileName: the_tracker.star

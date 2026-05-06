@@ -8,6 +8,6 @@ fileName: tube_status.star
 packageName: tubestatus
 recommendedInterval: 5
 category: transit
-tags: null
+tags: []
 published: '2022-06-03T15:00:40Z'
 updated: '2026-04-02T20:26:05Z'

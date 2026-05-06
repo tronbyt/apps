@@ -2,8 +2,7 @@
 id: arc-raiders-stats
 name: Arc Raiders Stats
 summary: Stats and events
-desc: Shows current Arc Raiders player count from Steam and active event timers with
-  map information.
+desc: Shows current Arc Raiders player count from Steam and active event timers with map information.
 author: Chris Nourse
 fileName: arc_raiders_stats.star
 packageName: arcraiderstats

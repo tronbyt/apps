@@ -2,8 +2,7 @@
 id: telegram
 name: Telegram
 summary: Channel member count
-desc: View your channel's member count. Add the @tidbytbot to your channel to get
-  the Chat ID.
+desc: View your channel's member count. Add the @tidbytbot to your channel to get the Chat ID.
 author: Daniel Sitnik
 fileName: telegram.star
 packageName: telegram

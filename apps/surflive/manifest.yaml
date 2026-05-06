@@ -3,7 +3,7 @@ id: surflive
 name: Surflive
 summary: Live surf conditions
 desc: Shows the current surf conditions for a surf spot.
-author: "R\xE9mi Carton"
+author: Rémi Carton
 fileName: surflive.star
 packageName: surflive
 recommendedInterval: 5

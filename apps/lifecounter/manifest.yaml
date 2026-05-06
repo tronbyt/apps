@@ -2,8 +2,7 @@
 id: life-counter
 name: Life Counter
 summary: Lifespan elapsed/remaining
-desc: Visually represents the months elapsed since DOB and remaining before reaching
-  a user-selected age.
+desc: Visually represents the months elapsed since DOB and remaining before reaching a user-selected age.
 author: danceforheaven
 recommendedInterval: 5
 fileName: life_counter.star

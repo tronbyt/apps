@@ -2,8 +2,7 @@
 id: enphasesummary
 name: Enphase Summary
 summary: Enphase system summary
-desc: Daily, weekly, monthly, annual and lifetime energy production and consumption
-  monitor for your Enphase solar panels.
+desc: Daily, weekly, monthly, annual and lifetime energy production and consumption monitor for your Enphase solar panels.
 author: ckyr
 fileName: enphasesummary.star
 packageName: enphasesummary

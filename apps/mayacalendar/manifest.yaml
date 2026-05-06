@@ -2,8 +2,7 @@
 id: maya-calendar
 name: Maya Calendar
 summary: Current Maya calendar date
-desc: "Displays today\u2019s date in the Maya Long Count, Tzolk\u2019in, and Haab\u2019\
-  \ calendars."
+desc: Displays today’s date in the Maya Long Count, Tzolk’in, and Haab’ calendars.
 author: Doug Ewell
 fileName: maya_calendar.star
 packageName: mayacalendar

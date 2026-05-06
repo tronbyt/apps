@@ -2,11 +2,11 @@
 id: steamsales
 name: Steam Sales
 summary: Displays Steam sales
-desc: Shows your steam's app sales, and wishlists. Requires steam api key and app
-  id.
+desc: Shows your steam's app sales, and wishlists. Requires steam api key and app id.
 author: noahpodgurski
 fileName: steamsales.star
 packageName: steamsales
 recommended_interval: 5
 published: '2026-04-30T17:24:12Z'
 updated: '2026-05-01T17:05:23Z'
+tags: []

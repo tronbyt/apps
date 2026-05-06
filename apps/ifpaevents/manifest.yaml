@@ -2,8 +2,7 @@
 id: ifpaevents
 name: IFPAEvents
 summary: See Upcoming IFPA Events
-desc: Display a list of upcoming International Flipper Pinball Association (IFPA)
-  events based on location.
+desc: Display a list of upcoming International Flipper Pinball Association (IFPA) events based on location.
 author: coreyhulse
 recommendedInterval: 5
 category: sports

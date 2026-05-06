@@ -2,8 +2,7 @@
 id: shortsday
 name: ShortsDay
 summary: Is it a shorts day
-desc: Checks forecast high for a location and tells you if it will be warm enough
-  for shorts.
+desc: Checks forecast high for a location and tells you if it will be warm enough for shorts.
 author: riserperson
 fileName: shortsday.star
 packageName: shortsday

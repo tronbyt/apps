@@ -2,8 +2,7 @@
 id: time-until
 name: Time Until
 summary: Track important events
-desc: Got an important event coming up? Time Until keeps you on track! (Recreation
-  of Tidbyt default app).
+desc: Got an important event coming up? Time Until keeps you on track! (Recreation of Tidbyt default app).
 author: JeffLac (Recreation of Tidbyt Original)
 recommendedInterval: 60
 fileName: time_until.star

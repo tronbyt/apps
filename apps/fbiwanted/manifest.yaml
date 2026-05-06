@@ -2,9 +2,7 @@
 id: fbiwanted
 name: FBI Most Wanted
 summary: FBI wanted persons ticker
-desc: Scrolls live FBI Most Wanted persons using the official FBI public API. Classic
-  FBI blue and gold colors with reward amount driving gold brightness. Shows charges,
-  reward, and armed and dangerous warnings.
+desc: Scrolls live FBI Most Wanted persons using the official FBI public API. Classic FBI blue and gold colors with reward amount driving gold brightness. Shows charges, reward, and armed and dangerous warnings.
 author: Rosie Domenech
 fileName: fbiwanted.star
 packageName: fbiwanted

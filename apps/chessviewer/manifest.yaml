@@ -2,8 +2,7 @@
 id: chess-viewer
 name: Chess Viewer
 summary: Shows Active Chess Games
-desc: This app shows a visual representation of currently active chess games for a
-  given user on Chess.com.
+desc: This app shows a visual representation of currently active chess games for a given user on Chess.com.
 author: Neal Wright
 fileName: chess_viewer.star
 packageName: chessviewer
