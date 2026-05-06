@@ -1,0 +1,19 @@
+---
+id: 3cellularautomata
+name: 3CellularAutomata
+summary: Draws 1D cellular automata
+desc: Draws the evolution of one-dimensional, three-state cellular automata.
+author: dinosaursrarr
+fileName: 3cellularautomata.star
+packageName: 3cellularautomata
+recommendedInterval: 5
+supports2x: true
+category: entertainment
+tags:
+  - art
+  - science
+  - gaming
+  - retro
+  - wide 2x support
+published: '2023-03-23T12:36:07Z'
+updated: '2025-12-23T12:55:56Z'

@@ -1,0 +1,16 @@
+---
+id: todoist-routines
+name: Todoist Routines
+summary: Today's remaining tasks
+desc: Shows today's remaining tasks and subtasks as rows or columns of dots. Great for people with recurring routines of tasks with subtasks to see what's left to do today and whether they've forgotten something. Helps me manage my ADHD symptoms. Can you make the screen go blank?
+author: shannonmoeller
+fileName: todoist_routines.star
+packageName: todoistroutines
+recommendedInterval: 60
+category: utilities
+tags:
+  - productivity
+  - tech
+  - art
+published: '2023-09-06T16:37:13Z'
+updated: '2025-12-02T19:30:22Z'

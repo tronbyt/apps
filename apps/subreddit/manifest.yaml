@@ -1,0 +1,15 @@
+---
+id: subreddit
+name: Subreddit
+summary: Subreddit post
+desc: 'Display the #1 post of a subreddit.'
+author: Petros Fytilis
+fileName: subreddit.star
+packageName: subreddit
+recommendedInterval: 5
+category: entertainment
+tags:
+  - news
+  - media
+published: '2022-06-09T17:19:26Z'
+updated: '2025-12-05T22:28:51Z'

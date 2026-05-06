@@ -1,0 +1,14 @@
+---
+id: atb-bus-times
+name: ATB Bus
+author: Jakob Rude Øvstaas
+summary: Trondheim bus departures
+desc: Shows real-time bus departures from ATB stops in Trondheim. Displays line numbers and times for the next three departures.
+fileName: atb_bus_times.star
+entrypoint: main
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2025-04-12T10:39:02Z'
+updated: '2025-11-30T19:58:27Z'

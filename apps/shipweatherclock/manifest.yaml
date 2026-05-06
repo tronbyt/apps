@@ -1,0 +1,15 @@
+---
+id: shipweatherclock
+name: ShipWeatherClock
+summary: Ship scene w time/weather
+desc: Clock with ship on the ocean scene that changes with weather.
+author: Peter Uth
+recommendedInterval: 0
+category: weather
+tags:
+  - nature
+  - weather-clock
+  - utility
+  - art
+published: '2024-11-05T17:50:50Z'
+updated: '2025-11-30T20:08:55Z'

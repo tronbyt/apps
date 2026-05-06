@@ -1,0 +1,17 @@
+---
+id: kopps-custard
+name: Kopp's Custard
+summary: Today's Kopp's flavors
+desc: Get today's flavors at Kopp's Frozen Custard.
+author: Josiah Winslow
+fileName: kopps_custard.star
+packageName: koppscustard
+recommendedInterval: 5
+category: food
+tags:
+  - flavor
+  - dessert
+  - lifestyle
+  - local
+published: '2023-06-09T15:58:32Z'
+updated: '2025-12-02T19:30:22Z'

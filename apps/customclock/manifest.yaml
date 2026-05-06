@@ -1,0 +1,17 @@
+---
+id: custom-clock
+name: Custom Clock
+summary: Clock with display options
+desc: A clock that can be customized.
+author: rs7q5
+fileName: custom_clock.star
+packageName: customclock
+recommendedInterval: 0
+category: clocks
+tags:
+  - art
+  - tech
+  - time
+  - utility
+published: '2023-04-17T17:40:01Z'
+updated: '2025-12-02T19:30:22Z'

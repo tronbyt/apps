@@ -1,0 +1,15 @@
+---
+id: tempest
+name: Tempest Weather
+summary: Tempest Weather Station
+desc: Overview of your Tempest Weather Station, including current temperature, wind chill, pressure, inches of rain, and wind.
+author: epifinygirl
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - weather
+  - utility
+  - wide 2x support
+published: '2022-03-04T16:17:33Z'
+updated: '2025-12-23T13:24:18Z'

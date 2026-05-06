@@ -1,0 +1,16 @@
+---
+id: cellularautomata
+name: CellularAutomata
+summary: Draws 1D cellular automata
+desc: Draws the evolution of one-dimensional cellular automata.
+author: dinosaursrarr
+fileName: cellularautomata.star
+packageName: cellularautomata
+recommendedInterval: 5
+category: education
+tags:
+  - science
+  - gaming
+  - art
+published: '2023-03-23T12:36:07Z'
+updated: '2025-11-29T17:52:33Z'

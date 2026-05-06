@@ -1,0 +1,15 @@
+---
+id: caltrain
+name: Caltrain
+summary: Caltrain Departures
+desc: Check the departures for your nearest Caltrain stop, the one near your work, or anywhere in between.
+author: quacksire
+fileName: caltrain.star
+packageName: caltrain
+recommendedInterval: 5
+supports2x: true
+category: transit
+tags:
+  - utility
+published: '2024-01-11T18:04:02Z'
+updated: '2026-03-28T21:44:51Z'

@@ -1,0 +1,16 @@
+---
+id: bluesky-users
+name: Bluesky Users
+summary: Display Bluesky user count
+desc: Display the total number of users on the Bluesky social network. Data courtesy of https://bsky-users.theo.io.
+author: Daniel Sitnik
+recommendedInterval: 5
+fileName: bluesky_users.star
+packageName: blueskyusers
+category: utilities
+tags:
+  - media
+  - sports
+  - tech
+published: '2024-12-14T04:58:22Z'
+updated: '2025-12-17T23:02:59Z'

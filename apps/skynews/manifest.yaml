@@ -1,0 +1,14 @@
+---
+id: sky-news
+name: Sky News
+summary: Latest news
+desc: The current top story (and a short blurb) from SkyNews.com.
+author: meejle
+fileName: skynews.star
+packageName: skynews
+recommendedInterval: 10
+category: news
+tags:
+  - news
+published: '2023-02-01T21:51:25Z'
+updated: '2025-12-02T19:30:22Z'

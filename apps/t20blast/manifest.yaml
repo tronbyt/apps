@@ -1,0 +1,16 @@
+---
+id: t20-blast
+name: T20 Blast
+summary: T20 Blast
+desc: Shows scores for the T20 Blast cricket tournament.
+author: M0ntyP
+fileName: t20_blast.star
+packageName: t20blast
+recommendedInterval: 5
+broken: true
+category: sports
+tags:
+  - tournament
+  - cricket
+published: '2023-06-02T14:31:21Z'
+updated: '2025-12-05T22:28:51Z'

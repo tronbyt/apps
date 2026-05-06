@@ -1,0 +1,15 @@
+---
+id: aadailyreflect
+name: AA Daily Reflect
+summary: Daily reflection from AA
+desc: Shows todays daily reflection title, summary and reference from aa.org/daily-reflections.
+author: jvivona
+fileName: aadailyreflect.star
+packageName: aadailyreflect
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - lifestyle
+  - daily-reflection
+published: '2022-11-18T22:27:20Z'
+updated: '2025-12-02T19:30:22Z'

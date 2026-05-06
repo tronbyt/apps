@@ -1,0 +1,17 @@
+---
+id: shabbat
+name: Shabbat
+summary: Weekly shabbat times
+desc: Displays weekly shabbat times.
+author: dinosaursrarr
+fileName: shabbat.star
+packageName: shabbat
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - lifestyle
+  - time
+  - productivity
+  - jewish
+published: '2022-09-15T16:22:46Z'
+updated: '2025-11-29T17:52:33Z'

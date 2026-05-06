@@ -1,0 +1,16 @@
+---
+id: northern-lights
+name: Northern Lights
+summary: Northern Lights Data
+desc: Displays the current Northern Lights data from the NOAA including the KP index, wind speed, Bz, and a brieft summary of the most resent NOAA notifications. This data will show you the current space weather conditions for aurura level estimates.
+author: '@objectivelabs'
+recommendedInterval: 5
+fileName: northern_lights.star
+packageName: northernlights
+category: science
+tags:
+  - space
+  - weather
+  - tech
+published: '2024-05-22T18:34:31Z'
+updated: '2025-12-17T23:02:59Z'

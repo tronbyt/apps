@@ -1,0 +1,15 @@
+---
+id: sf-next-muni
+name: SF Next Muni
+summary: SF Muni arrival times
+desc: Shows the predicted arrival times from NextBus for a given SF Muni stop.
+author: Martin Strauss
+fileName: sf_next_muni.star
+packageName: sfnextmuni
+recommendedInterval: 5
+category: transit
+tags:
+  - muni
+  - sf
+published: '2022-05-02T16:57:04Z'
+updated: '2026-03-16T00:57:29Z'

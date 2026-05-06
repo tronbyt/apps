@@ -1,0 +1,13 @@
+---
+id: mlb-game
+name: MLB Game
+summary: MLB game with bases
+desc: This is a recreation of the original MLB app with bases and count.
+author: ckelley-1992
+category: sports
+tags:
+  - gaming
+  - mlb
+  - baseball
+published: '2026-02-24T20:56:27Z'
+updated: '2026-03-05T08:43:30Z'

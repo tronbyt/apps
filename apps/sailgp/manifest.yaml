@@ -1,0 +1,16 @@
+---
+id: sailgp
+name: SailGP
+summary: SailGP Race and Leaders
+desc: SailGP Next Race Info and Current Leaderboard.
+author: jvivona
+fileName: sailgp.star
+packageName: sailgp
+recommendedInterval: 5
+category: sports
+tags:
+  - leaderboards
+  - nature
+  - sailing
+published: '2023-06-27T21:00:11Z'
+updated: '2025-11-29T21:14:16Z'

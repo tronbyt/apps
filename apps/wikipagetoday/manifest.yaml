@@ -1,0 +1,18 @@
+---
+id: wiki-page-today
+name: Wiki Page Today
+summary: Wikipedia Featured Article
+desc: Display Wikipedia's Featured Article of the Day in a Tidbyt format.
+author: UnBurn
+fileName: wiki_page_today.star
+packageName: wikipagetoday
+recommendedInterval: 5
+broken: true
+brokenReason: The API is returning invalid/non-JSON data (possibly an HTML error page), causing JSON parsing errors.
+category: utilities
+tags:
+  - utility
+  - news
+  - clock
+published: '2023-11-29T17:50:44Z'
+updated: '2025-12-05T22:28:51Z'

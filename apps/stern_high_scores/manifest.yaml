@@ -1,0 +1,14 @@
+---
+id: stern-high-scores
+name: Stern High Scores
+summary: Stern High Scores
+desc: Displays personal high scores for your Insider Connected Stern Pinball machines.
+author: brombomb
+fileName: stern_high_scores.star
+packageName: stern_high_scores
+recommendedInterval: 360
+supports2x: true
+tags:
+  - pinball
+published: '2026-04-27T05:01:44Z'
+updated: '2026-04-27T18:26:29Z'

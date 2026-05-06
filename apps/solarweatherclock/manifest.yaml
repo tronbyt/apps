@@ -1,0 +1,14 @@
+---
+id: solarweatherclock
+name: SolarWeatherClock
+summary: Grid power, weather & time
+desc: Retrieves the output or input to the grid obtained from home assistant and displays this along with a weather icon and the time.
+author: shmauk
+recommendedInterval: 0
+category: weather
+tags:
+  - smart-home
+  - utility
+  - weather-clock
+published: '2024-09-20T15:00:24Z'
+updated: '2025-12-02T19:30:22Z'

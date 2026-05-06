@@ -1,0 +1,16 @@
+---
+id: analog-time
+name: Analog Time
+summary: Show time analog style
+desc: 'Shows the time on an analog style clock. Enter custom colors in #rgb, #rrggbb, #rgba, or #rrggbbaa format.'
+author: rs7q5
+fileName: analog_time.star
+packageName: analogtime
+category: clocks
+tags:
+  - clock
+  - art
+  - analog
+  - time
+published: '2022-02-15T20:18:11Z'
+updated: '2025-11-30T19:58:27Z'

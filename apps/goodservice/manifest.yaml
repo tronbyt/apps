@@ -1,0 +1,15 @@
+---
+id: goodservice
+name: Subway Now
+summary: Subway Now - NYC Subway
+desc: More accurate realtime New York City Subway arrival times for a selected station, as seen on Subway Now app. Shows actual train destinations including overnight and weekend service changes.
+author: Sunny Ng
+fileName: goodservice.star
+packageName: goodservice
+recommendedInterval: 5
+category: transit
+tags:
+  - local
+  - utility
+published: '2022-05-02T16:52:48Z'
+updated: '2025-12-04T09:38:27Z'

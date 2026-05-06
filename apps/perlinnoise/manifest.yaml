@@ -1,0 +1,15 @@
+---
+id: perlin-noise
+name: Perlin Noise
+summary: Perlin noise for your Tronbyt
+desc: Set the vibe with beautiful, complex, colorful animated noise produced with math!
+author: rektdeckard
+fileName: perlin_noise.star
+packageName: perlinnoise
+category: entertainment
+tags:
+  - art
+  - science
+  - colorful
+published: '2026-02-17T19:44:39Z'
+updated: '2026-02-17T19:44:39Z'

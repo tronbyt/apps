@@ -1,0 +1,25 @@
+---
+id: zmanim
+name: Zmanim
+summary: Jewish Prayer Times
+desc: Displays daily Jewish prayer times (zmanim) for your location. Shows dawn, sunrise, shema deadline, and other important daily times based on your ZIP code.
+author: Shimon Savitsky
+fileName: zmanim.star
+packageName: zmanim
+recommendedInterval: 60
+categories:
+  - utility
+  - lifestyle
+requires:
+  - tech
+exampleConfig:
+  zip_code: '11367'
+  speed: '30'
+category: utilities
+tags:
+  - lifestyle
+  - jewish
+  - utility
+  - clock
+published: '2024-10-29T16:12:30Z'
+updated: '2025-12-02T19:30:22Z'

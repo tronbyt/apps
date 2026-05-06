@@ -1,0 +1,14 @@
+---
+id: stern-milestones
+name: Stern Milestones
+summary: Stern Milestones
+desc: Displays your personal milestones for your Insider Connected Stern Pinball.
+author: brombomb
+fileName: stern_milestones.star
+packageName: sternmilestones
+recommendedInterval: 360
+supports2x: true
+tags:
+  - pinball
+published: '2026-04-27T05:01:44Z'
+updated: '2026-04-27T18:26:29Z'

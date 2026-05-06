@@ -1,0 +1,17 @@
+---
+id: mayo-clinic-news
+name: Mayo Clinic News
+summary: Display Mayo Clinic News
+desc: Display current Mayo Clinic news headlines from their newsroom RSS feed.
+author: jvivona
+fileName: mayo_clinic_news.star
+packageName: mayoclinicnews
+recommendedInterval: 10
+broken: true
+brokenReason: The source XML feed is invalid (malformed XML).
+category: news
+tags:
+  - news
+  - lifestyle
+published: '2023-09-29T15:04:21Z'
+updated: '2025-12-05T22:28:51Z'

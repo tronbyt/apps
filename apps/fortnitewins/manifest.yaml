@@ -1,0 +1,15 @@
+---
+id: fortnite-wins
+name: Fortnite Wins
+summary: Tracks Fortnite wins
+desc: Shows how many wins the user has in each main game mode (i.e., Solos, Duos, Trios, and Squads).
+author: Hunter Berry
+fileName: fortnite_wins.star
+packageName: fortnitewins
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - sports
+published: '2024-03-07T21:12:06Z'
+updated: '2025-12-23T13:24:18Z'

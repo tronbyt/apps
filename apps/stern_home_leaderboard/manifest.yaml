@@ -1,0 +1,14 @@
+---
+id: stern-home-leaderboard
+name: Stern Home Leaderboard
+summary: Scrolls Stern High Scores
+desc: Displays the high scores for Stern Pinball Machines you own.
+author: brombomb
+fileName: stern_home_leaderboard.star
+packageName: stern_home_leaderboard
+recommendedInterval: 360
+supports2x: true
+tags:
+  - pinball
+published: '2026-04-27T05:01:44Z'
+updated: '2026-04-27T18:26:29Z'

@@ -1,0 +1,16 @@
+---
+id: dense-time-temp
+name: Dense Time Temp
+summary: Time, temp, wind, sun
+desc: Displays time, temperature, wind, sunrise, and sunset on one page.
+author: jordan-p
+fileName: dense_time_temp.star
+packageName: densetimetemp
+recommendedInterval: 5
+broken: true
+category: weather
+tags:
+  - clock
+  - weather
+published: '2024-03-19T17:07:17Z'
+updated: '2025-12-02T19:30:22Z'

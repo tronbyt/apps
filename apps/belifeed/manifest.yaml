@@ -1,0 +1,17 @@
+---
+id: beli-feed
+name: Beli Feed
+summary: Displays activity from Beli
+desc: Displays activity from you and your friends on Beli (beliapp.com).
+author: leoadberg
+fileName: beli_feed.star
+packageName: belifeed
+recommendedInterval: 5
+category: social
+tags:
+  - media
+  - lifestyle
+  - social
+  - networking
+published: '2023-04-19T17:19:13Z'
+updated: '2025-12-05T22:28:51Z'

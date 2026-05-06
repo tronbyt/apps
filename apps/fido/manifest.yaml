@@ -1,0 +1,16 @@
+---
+id: fido
+name: Fido
+summary: A pixel pal
+desc: Fido is a pixel pal that will sit, walk, and feast inside your Tidbyt.
+author: yonodactyl
+fileName: fido.star
+packageName: fido
+recommendedInterval: 5
+category: technology
+tags:
+  - smart-home
+  - tidbyt
+  - art
+published: '2023-01-03T16:03:30Z'
+updated: '2025-12-05T22:28:51Z'

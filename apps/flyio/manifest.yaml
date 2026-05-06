@@ -1,0 +1,16 @@
+---
+id: flyio
+name: Fly.io
+summary: Monitor Fly.io Apps
+desc: View current status of your Fly.io App's machines.
+author: Cavallando
+fileName: flyio.star
+packageName: flyio
+recommendedInterval: 5
+category: utilities
+tags:
+  - tracking
+  - tech
+  - utility
+published: '2024-10-07T16:21:11Z'
+updated: '2025-11-29T23:55:39Z'

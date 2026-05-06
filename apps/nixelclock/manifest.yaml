@@ -1,0 +1,16 @@
+---
+id: nixel-clock
+name: Nixel Clock
+summary: A Pixel Nixie Clock
+desc: Nixie Tube Clock + Pixels = Nixel Clock!
+author: Olly Stedall @saltedlolly
+fileName: nixel_clock.star
+packageName: nixelclock
+recommendedInterval: 0
+category: clocks
+tags:
+  - art
+  - digital-clock
+  - retro
+published: '2022-03-04T02:03:31Z'
+updated: '2025-11-29T23:55:39Z'

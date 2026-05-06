@@ -1,0 +1,15 @@
+---
+id: nfldivstandings
+name: NflDivStandings
+summary: Show NFL division standings
+desc: Displays NFL division standings for your favorite division.
+author: Jake Manske
+fileName: nfldivstandings.star
+packageName: nfldivstandings
+recommendedInterval: 5
+category: sports
+tags:
+  - nfl
+  - football
+published: '2023-09-21T18:56:59Z'
+updated: '2025-12-02T19:30:22Z'

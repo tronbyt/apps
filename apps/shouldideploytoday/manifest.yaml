@@ -1,0 +1,13 @@
+---
+id: shouldideploy
+name: Should I Deploy?
+summary: The developers dilemma
+desc: Fun responses to the developers dilemma, powered by shouldideploy.today.
+author: Austin Daviscourt
+fileName: shouldideploy.star
+recommendedInterval: 5
+category: utilities
+tags:
+  - dev
+published: '2025-04-23T01:38:44Z'
+updated: '2025-12-06T09:07:16Z'

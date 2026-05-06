@@ -1,0 +1,14 @@
+---
+id: acnhvillager
+name: AC:NH Villager
+summary: Random AC:NH villager
+desc: See your favorite villagers from Animal Crossing New Horizons.
+author: colinscruggs
+fileName: acnhvillager.star
+packageName: acnhvillager
+recommendedInterval: 5
+category: entertainment
+tags:
+  - gaming
+published: '2023-02-21T18:22:33Z'
+updated: '2025-12-02T19:30:22Z'

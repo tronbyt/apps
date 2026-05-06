@@ -1,0 +1,13 @@
+---
+id: chartmogul-arr
+name: ChartMogul ARR
+summary: Displays ChartMogul ARR
+desc: Displays the user's ChartMogul monthly ARR value.
+author: Luke Hutchinson and Dakota Walker
+fileName: chartmogul_arr.star
+packageName: chartmogularr
+category: finance
+tags:
+  - finance
+published: '2023-09-06T14:41:14Z'
+updated: '2025-11-30T19:58:27Z'

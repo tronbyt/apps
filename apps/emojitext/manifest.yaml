@@ -1,0 +1,15 @@
+---
+id: emoji-text
+name: Emoji Text
+summary: Display an Emoji and Text
+desc: Displays a customizable emoji with two lines of text that can scroll if they are too long.
+author: brombomb
+fileName: emoji-text.star
+packageName: emojitext
+category: utilities
+tags:
+  - emoji
+  - utility
+  - art
+published: '2025-11-01T05:57:18Z'
+updated: '2025-12-17T23:02:59Z'

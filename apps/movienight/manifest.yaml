@@ -1,0 +1,16 @@
+---
+id: movie-night
+name: Movie Night
+summary: Marquee for a Movie Night
+desc: Displays a marquee for a movie title along with a countdown to the movie night.
+author: Piper Gillman
+fileName: movie_night.star
+packageName: movienight
+recommendedInterval: 5
+category: utilities
+tags:
+  - media
+  - time
+  - music
+published: '2023-01-03T16:04:27Z'
+updated: '2025-12-02T19:30:22Z'
