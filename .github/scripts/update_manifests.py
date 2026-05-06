@@ -54,10 +54,13 @@ def update_manifest(manifest_path):
         data['updated'] = updated
         changed = True
 
+    if data.get('tags') is None:
+        data['tags'] = []
+
     if changed:
         print(f"Updating {manifest_path}: published={published}, updated={updated}")
-        with open(manifest_path, 'w') as f:
-            yaml.dump(data, f, sort_keys=False, default_flow_style=False, explicit_start=True)
+        with open(manifest_path, 'w', encoding='utf-8') as f:
+            yaml.dump(data, f, sort_keys=False, default_flow_style=False, explicit_start=True, allow_unicode=True, width=1000)
 
 import sys
 
