@@ -1,4 +1,6 @@
 load("render.star", "render")
+load("random.star", "random")
+load("time.star", "time")
 
 # Precomputed Sine and Cosine (36 steps, 10 degrees each)
 COS = [1.0, 0.985, 0.94, 0.866, 0.766, 0.643, 0.5, 0.342, 0.174, 0.0, -0.174, -0.342, -0.5, -0.643, -0.766, -0.866, -0.94, -0.985, -1.0, -0.985, -0.94, -0.866, -0.766, -0.643, -0.5, -0.342, -0.174, -0.0, 0.174, 0.342, 0.5, 0.643, 0.766, 0.866, 0.94, 0.985]
@@ -64,6 +66,9 @@ def spawn_fragments(a, new_asteroids_list):
     new_asteroids_list.append({"x": a["x"] + vx2 * 4, "y": a["y"] + vy2 * 4, "vx": vx2, "vy": vy2, "points": a["points"], "scale": s, "angle": a["angle"] + 18, "spin": -a["spin"] * 2, "tier": t})
 
 def main():
+    # Seed the randomizer to ensure a unique starting orientation each time
+    random.seed(time.now().unix_nano)
+
     frames = []
     num_frames = 150
 
@@ -72,7 +77,9 @@ def main():
     ship_scale = 0.65
     ship_speed = 0.8
     ship_dead_timer = 0
-    ship_angle_idx = 0
+    
+    # Pick a random starting angle from the 36 available steps
+    ship_angle_idx = random.number(0, 35)
 
     ship_points = [(4, 0), (-3, -3), (-1, 0), (-3, 3)]
     ship_particles = []
@@ -110,7 +117,8 @@ def main():
             if ship_dead_timer == 0:
                 ship_x = 32.0
                 ship_y = 16.0
-                ship_angle_idx = 0
+                # When respawning after a crash, pick a new random orientation
+                ship_angle_idx = random.number(0, 35)
         else:
             danger = False
             turn_dir = 0
