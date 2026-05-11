@@ -195,6 +195,7 @@ def main(config):
     password = config.get("password")
     game_filter = config.get("game_filter", "all")
     highest_only = config.bool("highest_only")
+    max_games = int(config.get("max_games", "3"))
 
     if not username or not password:
         return render.Root(
@@ -223,6 +224,8 @@ def main(config):
         personal_games = filtered
     else:
         personal_games = shuffle(personal_games)
+
+    personal_games = personal_games[:max_games]
 
     for g in personal_games:
         logo_url = g["logo"]
@@ -352,6 +355,19 @@ def get_schema():
                     schema.Option(display = "The Uncanny X-Men", value = "The Uncanny X-Men"),
                     schema.Option(display = "The Walking Dead: Remastered", value = "The Walking Dead: Remastered"),
                     schema.Option(display = "Venom", value = "Venom"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "max_games",
+                name = "Max Games",
+                desc = "Maximum number of games to display",
+                icon = "list",
+                default = "3",
+                options = [
+                    schema.Option(display = "1", value = "1"),
+                    schema.Option(display = "2", value = "2"),
+                    schema.Option(display = "3", value = "3"),
+                    schema.Option(display = "5", value = "5"),
                 ],
             ),
         ],
