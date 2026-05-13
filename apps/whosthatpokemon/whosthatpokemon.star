@@ -18,6 +18,17 @@ POKEAPI_URL = "https://pokeapi.co/api/v2/pokemon/{}"
 IMGIX_URL = "https://pokesprites.imgix.net/{}.png?bri=-100"
 CACHE_TTL_SECONDS = 3600 * 24 * 7  # 7 days in seconds.
 
+LANGUAGE_OPTIONS = [
+    ("English", "en"),
+    ("Français", "fr"),
+    ("Deutsch", "de"),
+    ("Español", "es"),
+    ("Italiano", "it"),
+    ("Português (BR)", "pt-br"),
+    ("Čeština", "cs"),
+    ("Japanese (Romaji)", "ja-roma"),
+]
+
 def main(config):
     print("Let's play...WHO'S. THAT. POKEMON?!")
 
@@ -33,7 +44,8 @@ def main(config):
     sprite_url = pokemon["sprites"]["front_default"]
 
     # Variables that will be used by the render.
-    name = formatName(pokemon["name"])
+    language = config.get("language", "en")
+    name = getLocalizedName(pokemon, language)
     revealedImage = getImage(sprite_url)
     silhouette = getImage(IMGIX_URL.format(chosenId))
 
@@ -69,6 +81,35 @@ def getPokemon(id):
         return None
 
     return res.body()
+
+# Gets the species data from a species URL.
+def getSpecies(url):
+    res = http.get(url, ttl_seconds = CACHE_TTL_SECONDS)
+    if res.status_code != 200:
+        print("ERROR (species): " + str(res.status_code))
+        return None
+
+    return res.body()
+
+# Returns the Pokemon name in the requested language.
+# Falls back to the English name from the pokemon endpoint when the species
+# lookup fails or the requested language is missing.
+def getLocalizedName(pokemon, language):
+    englishName = formatName(pokemon["name"])
+    if language == "en":
+        return englishName
+
+    speciesUrl = pokemon["species"]["url"]
+    speciesBody = getSpecies(speciesUrl)
+    if speciesBody == None:
+        return englishName
+
+    species = json.decode(speciesBody)
+    for entry in species.get("names", []):
+        if entry["language"]["name"] == language:
+            return entry["name"]
+
+    return englishName
 
 # Formats all names. Removes all hyphens that don't belong for forms and spaces.
 # Also capitalizes appropriately.
@@ -192,6 +233,10 @@ def fullLayoutRevealed(image, width, text, scale):
     )
 
 def get_schema():
+    language_options = [
+        schema.Option(display = display, value = value)
+        for display, value in LANGUAGE_OPTIONS
+    ]
     return schema.Schema(
         version = "1",
         fields = [
@@ -201,6 +246,14 @@ def get_schema():
                 desc = "Only use Pokemon from generations 1-3. On by default.",
                 icon = "dragon",
                 default = True,
+            ),
+            schema.Dropdown(
+                id = "language",
+                name = "Language",
+                desc = "Language used for the Pokemon's name.",
+                icon = "language",
+                default = "en",
+                options = language_options,
             ),
             schema.Dropdown(
                 id = "speed",
