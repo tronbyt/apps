@@ -182,16 +182,18 @@ def main(config):
                 child = render.Text(
                     content = str(display_val),
                     color = "#fff",
+                    font = "tom-thumb" if not canvas.is2x() else "terminus-12",
                 ),
             ),
         ]
         if is_streak:
             stat_contents.append(
                 render.Padding(
-                    pad = (1 * SCALE, -1 * SCALE, 0, 0),
+                    pad = (1 * SCALE, 0, 0, 0),
                     child = render.Text(
                         content = str(stats.get("max_streak")),
                         color = "#f0f0f0",
+                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
                     ),
                 ),
             )
@@ -217,7 +219,11 @@ def main(config):
                             ),
                         ],
                     ),
-                    render.Text(content = cat_short, font = "tom-thumb", color = "#aaa"),
+                    render.Text(
+                        content = cat_short,
+                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
+                        color = "#aaa"
+                    ),
                 ],
             ),
         )
