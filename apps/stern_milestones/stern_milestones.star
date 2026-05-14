@@ -222,7 +222,7 @@ def main(config):
                     render.Text(
                         content = cat_short,
                         font = "tom-thumb" if not canvas.is2x() else "terminus-12",
-                        color = "#aaa"
+                        color = "#aaa",
                     ),
                 ],
             ),
