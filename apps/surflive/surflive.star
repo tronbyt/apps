@@ -22,7 +22,7 @@ WAVE_ICON_WIDTH = 10
 
 # FORECAST API
 SURFLINE_FORECASTS_URL = "https://services.surfline.com/kbyg/spots/forecasts"
-SEARCH_URL = "https://services.surfline.com/onboarding/spots?query={query}&limit=12&offset=0&camsOnly=false"
+SEARCH_URL = "https://services.surfline.com/search/site?q={query}&querySize=12"
 
 # 15 minutes
 ENABLE_CACHE = True
@@ -282,7 +282,9 @@ def search_spots(query):
     if r.status_code != 200:
         fail("Error fetching spots, query={query}".format(query = query))
 
-    return r.json()["spots"]
+    res_json = r.json()
+    hits = res_json[0].get("hits", {}).get("hits", []) if res_json else []
+    return [{"_id": h["_id"], "name": h["_source"]["name"]} for h in hits]
 
 def search_handler(query):
     spots = search_spots(query)
