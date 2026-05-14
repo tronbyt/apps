@@ -6,16 +6,26 @@ Author: UnBurn
 """
 
 load("http.star", "http")
-load("images/wikipedia_icon.png", WIKIPEDIA_ICON_ASSET = "file")
-load("images/wikipedia_thumbnail.png", WIKIPEDIA_THUMBNAIL_ASSET = "file")
+load("encoding/base64.star", "base64")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-WIKIPEDIA_ICON = WIKIPEDIA_ICON_ASSET.readall()
-WIKIPEDIA_THUMBNAIL = WIKIPEDIA_THUMBNAIL_ASSET.readall()
+WIKIPEDIA_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAQAAAClB0z9AAAAHUlEQVR42mNgYPgPB0AOkIBxQBhK
+4eIiGCAS1SgAimpBv3jp7u8AAAAASUVORK5CYII=""")
+WIKIPEDIA_THUMBNAIL = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAQAAADZc7J/AAABk0lEQVR42t3Vv2uTQRgH8CcRUdRB
+RNSioIjUQXRQBG2xk9BBJ1FwEooEF8lW/4FMNpNi/bk4mLFFQxdBQZwihTiIUMFBRUTQQVtM5W1z
+H0GylTTRdxG/tzzD3QfuhvtGhGIqpWbK6D8pS81UUozfx2v+MqmmGKkkR1IpUjMX0IwskyNZFnLm
+fwKqKp31DHc680Pc68xzvunsUV0JvHRRCHWf8cqQMOod3jhrrZoFSxpOKSibXQnw3WahDmgo2KmF
+5LBLAMac6f4GV4QRACeFG5ix3gfAVxvMdgc+WqfgBeCpsNtPQ8oAJozQHWBMOAdIjgkXbPQJsGyv
+6dWB14rWeAt4JIRxAHX7LK8OcFq4DGg7KDwAMOo6vYDnwiZfAMeFQ9pgzhbzPYHOzSvgsW0GhWlQ
+Nk5vgClhu5bkhKr7whHJvK3e9we0DQp3PTHgh8weYcZN5+kP4Law37BrYFI46oBG/0DLDmGXRdAy
+IAzTP0BFuAVgQpj6M2DBVUsAFk1q/7s/UsrkSMpyF0vuastfrnnr/RfBJHmDsmOptgAAAABJRU5E
+rkJggg==
+""")
 
 WIKIPEDIA_URL = "https://api.wikimedia.org/feed/v1/wikipedia/%s/featured/%s"
+WIKIPEDIA_HEADER = { "Accept": "application/json", "User-Agent": "WikiPageToday/Application" }
 
 TTL_TIME = 86400
 MARQUEE_DELAY = 150
@@ -26,7 +36,7 @@ DEFAULT_COLOR = "#FFFFFF"
 def get_featured_article_json(lang, date):
     url = WIKIPEDIA_URL % (lang, date)
 
-    article_json = http.get(url, ttl_seconds = TTL_TIME).json()
+    article_json = http.get(url, headers = WIKIPEDIA_HEADER, ttl_seconds = TTL_TIME).json()
     return article_json
 
 def extract_article_information(article_json):
@@ -35,7 +45,7 @@ def extract_article_information(article_json):
     extract = article["extract"]
     description = get_reduced_extract(extract)
     if "thumbnail" in article and "source" in article["thumbnail"]:
-        image = http.get(article["thumbnail"]["source"], ttl_seconds = TTL_TIME).body()
+        image = http.get(article["thumbnail"]["source"], headers = WIKIPEDIA_HEADER, ttl_seconds = TTL_TIME).body()
     else:
         image = WIKIPEDIA_THUMBNAIL
     return (title, description, image)
