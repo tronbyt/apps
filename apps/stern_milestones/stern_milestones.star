@@ -159,6 +159,8 @@ def main(config):
     ]
 
     badge_widgets = []
+    box_height = 20 * SCALE
+    top_stat_pad = 4 * SCALE
 
     for _, cat_short, stat_key in badge_cats:
         icon_url = icon_urls.get(stat_key)
@@ -173,39 +175,26 @@ def main(config):
         # For streak, stack current and max if available
         is_streak = stat_key == "streak" and stats.get("max_streak")
         stat_contents = []
-        box_height = 18 * SCALE
-        top_stat_pad = 4 * SCALE
 
-        if is_streak:
-            stat_contents = [
-                render.Padding(
-                    pad = (1 * SCALE, top_stat_pad, 0, 0),
-                    child = render.Text(
-                        content = str(display_val),
-                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
-                        color = "#fff",
-                    ),
+        stat_contents = [
+            render.Padding(
+                pad = (1 * SCALE, top_stat_pad, 0, 0),
+                child = render.Text(
+                    content = str(display_val),
+                    color = "#fff",
                 ),
+            ),
+        ]
+        if is_streak:
+            stat_contents.append(
                 render.Padding(
-                    pad = (1 * SCALE, 0, 0, 0),
+                    pad = (1 * SCALE, -1 * SCALE, 0, 0),
                     child = render.Text(
                         content = str(stats.get("max_streak")),
-                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
                         color = "#f0f0f0",
                     ),
                 ),
-            ]
-        else:
-            stat_contents = [
-                render.Padding(
-                    pad = (1 * SCALE, top_stat_pad, 0, 0),
-                    child = render.Text(
-                        content = str(display_val),
-                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
-                        color = "#fff",
-                    ),
-                ),
-            ]
+            )
 
         badge_widgets.append(
             render.Column(
