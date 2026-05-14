@@ -31,9 +31,11 @@ def extract_stats(body):
     keys = {
         '"games_played"': "games",
         '"consecutive_days_played"': "streak",
+        '"max_consecutive_days_played"': "max_streak",
         '"days_played"': "days",
         '\\"games_played\\"': "games",
         '\\"consecutive_days_played\\"': "streak",
+        '\\"max_consecutive_days_played\\"': "max_streak",
         '\\"days_played\\"': "days",
     }
 
@@ -168,6 +170,43 @@ def main(config):
             if img_rep.status_code == 200:
                 icon_widget = render.Image(src = img_rep.body(), width = 20 * SCALE, height = 20 * SCALE)
 
+        # For streak, stack current and max if available
+        is_streak = stat_key == "streak" and stats.get("max_streak")
+        stat_contents = []
+        box_height = 18 * SCALE
+        top_stat_pad = 4 * SCALE
+
+        if is_streak:
+            stat_contents = [
+                render.Padding(
+                    pad = (1 * SCALE, top_stat_pad, 0, 0),
+                    child = render.Text(
+                        content = str(display_val),
+                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
+                        color = "#fff",
+                    ),
+                ),
+                render.Padding(
+                    pad = (1 * SCALE, 0, 0, 0),
+                    child = render.Text(
+                        content = str(stats.get("max_streak")),
+                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
+                        color = "#f0f0f0",
+                    ),
+                ),
+            ]
+        else:
+            stat_contents = [
+                render.Padding(
+                    pad = (1 * SCALE, top_stat_pad, 0, 0),
+                    child = render.Text(
+                        content = str(display_val),
+                        font = "tom-thumb" if not canvas.is2x() else "terminus-12",
+                        color = "#fff",
+                    ),
+                ),
+            ]
+
         badge_widgets.append(
             render.Column(
                 expanded = True,
@@ -179,20 +218,12 @@ def main(config):
                             icon_widget,
                             render.Box(
                                 width = 20 * SCALE,
-                                height = 12 * SCALE,
+                                height = box_height,
                                 child = render.Column(
-                                    main_align = "center",
+                                    expanded = True,
+                                    main_align = "start",
                                     cross_align = "center",
-                                    children = [
-                                        render.Padding(
-                                            pad = (1 * SCALE, 1 * SCALE, 0, 0),  # Micro-adjust for hex center
-                                            child = render.Text(
-                                                content = str(display_val),
-                                                font = "tom-thumb" if not canvas.is2x() else "terminus-12",
-                                                color = "#fff",
-                                            ),
-                                        ),
-                                    ],
+                                    children = stat_contents,
                                 ),
                             ),
                         ],
@@ -204,7 +235,7 @@ def main(config):
 
     return render.Root(
         child = render.Padding(
-            pad = (2, 2 * SCALE, 0, 0),
+            pad = (2, SCALE, 0, 0),
             child = render.Row(
                 expanded = True,
                 main_align = "space_around",
