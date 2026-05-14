@@ -6,7 +6,6 @@ Author: Nicole Brooks
 """
 
 load("background.webp", BACKGROUND = "file")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "canvas", "render")
@@ -35,7 +34,7 @@ def main(config):
     scale = 2 if canvas.is2x() else 1
     allPokemon = howManyPokemon(config)
     chosenId = random.number(1, allPokemon)
-    pokemon = json.decode(getPokemon(chosenId))
+    pokemon = getPokemon(chosenId)
     speed = getSpeed(config)
 
     if pokemon == None:
@@ -80,7 +79,7 @@ def getPokemon(id):
         print("ERROR: " + str(res.status_code))
         return None
 
-    return res.body()
+    return res.json()
 
 # Gets the species data from a species URL.
 def getSpecies(url):
@@ -89,7 +88,7 @@ def getSpecies(url):
         print("ERROR (species): " + str(res.status_code))
         return None
 
-    return res.body()
+    return res.json()
 
 # Returns the Pokemon name in the requested language.
 # Falls back to the English name from the pokemon endpoint when the species
@@ -100,11 +99,10 @@ def getLocalizedName(pokemon, language):
         return englishName
 
     speciesUrl = pokemon["species"]["url"]
-    speciesBody = getSpecies(speciesUrl)
-    if speciesBody == None:
+    species = getSpecies(speciesUrl)
+    if species == None:
         return englishName
 
-    species = json.decode(speciesBody)
     for entry in species.get("names", []):
         if entry["language"]["name"] == language:
             return entry["name"]
