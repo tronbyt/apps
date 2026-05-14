@@ -31,14 +31,14 @@ def call_routes_api():
     if r.status_code == 200:
         routes = r.json()
 
-    # Fallback to v1 if v2 fails or is empty
-    if not routes:
-        r = http.get(API_V1 + "/Routes/")
-        if r.status_code == 200:
-            routes = r.json()
-
     if len(routes) > 0:
         cache.set("routes_v2", json.encode(routes), ttl_seconds = 604800)
+        return sort_routes(routes)
+
+    # Fallback to v1 if v2 fails or is empty — do not cache so v2 is retried next render
+    r = http.get(API_V1 + "/Routes/")
+    if r.status_code == 200:
+        routes = r.json()
     return sort_routes(routes)
 
 def sort_routes(routes):
@@ -221,7 +221,7 @@ def call_schedule_api(route, stopid):
 
     # Infer today's service_id from live trips
     for s in full_schedule:
-        if s["trip_id"] in live_data:
+        if str(s["trip_id"]) in live_data:
             svc_id = s["service_id"]
             service_id_counts[svc_id] = service_id_counts.get(svc_id, 0) + 1
 
@@ -258,7 +258,7 @@ def call_schedule_api(route, stopid):
         if s["service_id"] != today_service_id:
             continue
 
-        tid = s["trip_id"]
+        tid = str(s["trip_id"])
 
         # If we have multiple releases, the one with the higher release_name is likely newer
         if tid not in unique_trips or s.get("release_name", "") > unique_trips[tid].get("release_name", ""):
