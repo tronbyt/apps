@@ -188,7 +188,7 @@ def find_recent_app_changes(repo, branch, headers, cache_ttl, max_commits, max_i
 
     for c in commits:
         # Skip automated chore, build, and merge commits
-        message = c.get("commit", {}).get("message", "")
+        message = (c.get("commit") or {}).get("message", "")
         if re.match("(?i)^(chore|build|merge)", message):
             continue
 
