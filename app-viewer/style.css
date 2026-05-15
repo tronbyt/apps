@@ -130,6 +130,7 @@ body.dot-matrix-enabled .app-2x img {
   image-rendering: crisp-edges;
   border: 2px solid #333;
   background: #111;
+  width: 100%;
 }
 
 /* Only apply dot matrix to images when toggle is enabled */
