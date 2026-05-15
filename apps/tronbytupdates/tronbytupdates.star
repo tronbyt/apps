@@ -8,6 +8,7 @@ Author: Robert Ison
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
+load("re.star", "re")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -186,6 +187,11 @@ def find_recent_app_changes(repo, branch, headers, cache_ttl, max_commits, max_i
     items = []
 
     for c in commits:
+        # Skip automated chore, build, and merge commits
+        message = c.get("commit", {}).get("message", "")
+        if re.match("(?i)^(chore|build|merge)", message):
+            continue
+
         details_resp = http.get(url = c["url"], headers = headers, ttl_seconds = cache_ttl * 2)  # ↑ Longer cache
         if details_resp.status_code != 200:
             continue
