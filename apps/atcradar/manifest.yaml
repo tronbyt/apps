@@ -7,10 +7,9 @@ author: Robert Ison
 fileName: atc_radar.star
 packageName: atcradar
 recommendedInterval: 5
-category: technology
+category: transit
 tags:
   - air-traffic
-  - flight-tracking
-  - aviation
-  - transit
   - real-time
+published: '2023-11-16T17:16:35Z'
+updated: '2025-12-02T19:30:22Z'

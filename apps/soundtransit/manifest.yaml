@@ -7,10 +7,9 @@ author: Jon Janzen
 fileName: sound_transit.star
 packageName: soundtransit
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - public transit
-  - rail
-  - seattle
-  - travel
+  - local
   - utility
+published: '2022-07-11T14:07:15Z'
+updated: '2025-12-02T19:30:22Z'

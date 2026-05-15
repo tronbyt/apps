@@ -113,6 +113,8 @@ function scanApps() {
     let image2x = null;
     let category = null;
     let tags = [];
+    let published = null;
+    let updated = null;
 
     if (manifest) {
       summary = manifest.summary || null;
@@ -123,6 +125,8 @@ function scanApps() {
       supports2x = Boolean(manifest.supports2x);
       category = manifest.category || null;
       tags = manifest.tags || [];
+      published = manifest.published || null;
+      updated = manifest.updated || null;
     }
 
     // Try to find the corresponding @2x image if the app supports it
@@ -153,7 +157,9 @@ function scanApps() {
       md: md ? `${appName}/${md}` : null,
       starFile: starFile,
       category: category,
-      tags: tags
+      tags: tags,
+      published: published,
+      updated: updated
     });
   }
   return apps;

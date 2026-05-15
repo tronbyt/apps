@@ -17,11 +17,12 @@ CAMERA_ICON = CAMERA_ICON_ASSET.readall()
 #                                   CONSTANTS                                  #
 # ---------------------------------------------------------------------------- #
 
-CINEMATHEQUE_SHOWTIMES_URL = "https://www.americancinematheque.com/wp-json/wp/v2/algolia_get_events?environment=production&startDate={start_time}&endDate={end_time}"
+CINEMATHEQUE_SHOWTIMES_URL = "https://www.americancinematheque.com/wp-json/wp/v2/algolia_get_events?environment=production_2026&startDate={start_time}&endDate={end_time}"
 
 THEATER_CODES = {
     "los feliz 3": 102,
     "aero theatre": 54,
+    "egyption theatre": 55,
     "other": 68,
 }
 
@@ -66,7 +67,7 @@ PT_TO_GMT_TIME_DIFFERENCE_IN_SECONDS = 28800
 # ---------------------------------------------------------------------------- #
 
 def get_showtime_color(movie_start_time, current_time):
-    start_time_hour = time.parse_time(movie_start_time, "15:04:05").hour
+    start_time_hour = time.parse_time(movie_start_time, "3:04 PM").hour
     hours_until_movie = int(start_time_hour) - current_time.hour
 
     return SHOWTIME_COLORS.get(hours_until_movie, "#222222")
@@ -171,7 +172,8 @@ def main(config):
                             cross_align = "end",
                             children = [
                                 render.Text(
-                                    time.parse_time(movie["event_start_time"], "15:04:05").format("3:04"),
+                                    # time.parse_time(movie["event_start_time"], "15:04:05").format("3:04"),
+                                    time.parse_time(movie["event_start_time"], "3:04 PM").format("3:04"),
                                     font = "tom-thumb",
                                     color = get_showtime_color(movie["event_start_time"], current_time),
                                 )
@@ -210,6 +212,10 @@ def get_schema():
         schema.Option(
             display = "Aero Theatre",
             value = "Aero Theatre",
+        ),
+        schema.Option(
+            display = "Egyption Theatre",
+            value = "Egyption Theatre",
         ),
     ]
 

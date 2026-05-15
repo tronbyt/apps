@@ -7,10 +7,9 @@ author: derekllaw
 fileName: campark.star
 packageName: campark
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - car-parks
   - real-time
-  - transit
-  - parking
-  - utilities
+  - utility
+published: '2024-02-08T17:34:44Z'
+updated: '2025-11-29T17:52:33Z'

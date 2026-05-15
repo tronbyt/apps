@@ -5,8 +5,15 @@ summary: Display nautical flags
 desc: Displays nautical flags.
 author: Robert Ison
 recommendedInterval: 5
-category: utilities
+supports2x: true
+fileName: nauticalflags.star
+packageName: nauticalflags
+category: transit
 tags:
-  - flags
-  - navigation
+  - art
+  - design
   - utility
+  - nautical
+  - flags
+published: '2024-07-22T14:31:25Z'
+updated: '2026-04-21T18:41:42Z'

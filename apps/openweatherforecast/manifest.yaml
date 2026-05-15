@@ -1,0 +1,7 @@
+---
+id: 3b75c08f-e7ac-446c-8a01-2693fa3ed780
+name: OWForecast
+summary: 3-Day Weather Forecast
+desc: Display 3-day weather forecast using OpenWeather One Call API 3.0. The number of API calls is well within the free tier. 
+author: colin_is
+packageName: openweatherforecast

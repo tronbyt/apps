@@ -7,9 +7,8 @@ author: scottwainstock
 fileName: trimet_stops.star
 packageName: trimetstops
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
-  - bus
-  - train
-  - schedule
+  - productivity
+published: '2023-09-21T17:55:00Z'
+updated: '2025-11-29T23:55:39Z'

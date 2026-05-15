@@ -7,10 +7,10 @@ author: zachlucas
 fileName: spinbyt.star
 packageName: spinbyt
 broken: true
-category: utilities
+category: transit
 tags:
-  - scooters
-  - transport
   - utility
   - real-time
-  - battery
+  - tech
+published: '2022-11-17T18:45:37Z'
+updated: '2025-12-05T22:28:51Z'

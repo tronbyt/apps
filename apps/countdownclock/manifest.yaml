@@ -9,7 +9,8 @@ packageName: countdownclock
 recommendedInterval: 0
 category: clocks
 tags:
-  - countdown
-  - timer
+  - time
   - utility
-  - time-tracking
+  - tracking
+published: '2022-03-13T21:43:26Z'
+updated: '2025-12-05T22:28:51Z'

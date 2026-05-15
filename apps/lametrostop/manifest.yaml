@@ -7,9 +7,7 @@ author: connorwashere
 fileName: la_metro_stop.star
 packageName: lametrostop
 recommendedInterval: 5
-category: utilities
-tags:
-  - metro
-  - transit
-  - train
-  - subway
+category: transit
+tags: []
+published: '2023-06-09T15:44:00Z'
+updated: '2025-11-29T17:52:33Z'

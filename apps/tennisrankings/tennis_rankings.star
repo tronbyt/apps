@@ -18,6 +18,9 @@ Updated color for WTA
 
 v1.3
 Updated humanize.ftoa to use int instead, as it was inserting a comma into the number 
+
+v1.4
+Expanded rankings to top 30, 40 or 50 via selection
 """
 
 load("encoding/json.star", "json")
@@ -32,9 +35,12 @@ RANKING_CACHE = 14400  # 4hrs
 def main(config):
     RotationSpeed = config.get("speed", "3")
     Selection = config.get("league", "atp")
+    TotalPlayers = config.get("totalPlayers", "20")
     ShowPts = config.bool("ShowPtsToggle", True)
     ShowChange = config.bool("ShowChangeToggle", True)
     renderScreen = []
+
+    TotalPlayersInt = int(TotalPlayers)
 
     RANKING_URL = BASE_RANKING_URL + Selection + "/rankings"
     RankingData = get_cachable_data(RANKING_URL, RANKING_CACHE)
@@ -42,7 +48,7 @@ def main(config):
 
     if ShowPts == True:
         if ShowChange == True:
-            for x in range(0, 20, 4):
+            for x in range(0, TotalPlayersInt, 4):
                 renderScreen.extend(
                     [
                         render.Column(
@@ -51,7 +57,7 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screen(x, RankingJSON, Selection),
+                                    children = get_screen(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
@@ -61,7 +67,7 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screenPoints(x, RankingJSON, Selection),
+                                    children = get_screenPoints(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
@@ -71,14 +77,14 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screenTrend(x, RankingJSON, Selection),
+                                    children = get_screenTrend(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
                     ],
                 )
         elif ShowChange == False:
-            for x in range(0, 20, 4):
+            for x in range(0, TotalPlayersInt, 4):
                 renderScreen.extend(
                     [
                         render.Column(
@@ -87,7 +93,7 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screen(x, RankingJSON, Selection),
+                                    children = get_screen(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
@@ -97,7 +103,7 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screenPoints(x, RankingJSON, Selection),
+                                    children = get_screenPoints(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
@@ -105,7 +111,7 @@ def main(config):
                 )
     elif ShowPts == False:
         if ShowChange == True:
-            for x in range(0, 20, 4):
+            for x in range(0, TotalPlayersInt, 4):
                 renderScreen.extend(
                     [
                         render.Column(
@@ -114,7 +120,7 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screen(x, RankingJSON, Selection),
+                                    children = get_screen(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
@@ -124,14 +130,14 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screenTrend(x, RankingJSON, Selection),
+                                    children = get_screenTrend(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
                     ],
                 )
         elif ShowChange == False:
-            for x in range(0, 20, 4):
+            for x in range(0, TotalPlayersInt, 4):
                 renderScreen.extend(
                     [
                         render.Column(
@@ -140,7 +146,7 @@ def main(config):
                             cross_align = "start",
                             children = [
                                 render.Column(
-                                    children = get_screen(x, RankingJSON, Selection),
+                                    children = get_screen(x, RankingJSON, Selection, TotalPlayers),
                                 ),
                             ],
                         ),
@@ -155,7 +161,7 @@ def main(config):
         ),
     )
 
-def get_screen(x, RankingJSON, Selection):
+def get_screen(x, RankingJSON, Selection, TotalPlayers):
     output = []
 
     if Selection == "wta":
@@ -166,6 +172,7 @@ def get_screen(x, RankingJSON, Selection):
     UpdateDate = RankingJSON["rankings"][0]["update"]
     FormatDate = time.parse_time(UpdateDate, format = "2006-01-02T15:04Z")
     FormatDate = FormatDate.format("02/01")
+    TotalPlayersInt = int(TotalPlayers)
 
     heading = [
         render.Box(
@@ -180,7 +187,7 @@ def get_screen(x, RankingJSON, Selection):
                     render.Box(
                         width = 64,
                         height = 5,
-                        child = render.Text(content = Selection + " TOP 20 " + FormatDate, color = "#fff", font = "CG-pixel-3x5-mono"),
+                        child = render.Text(content = Selection + " TOP " + TotalPlayers + " " + FormatDate, color = "#fff", font = "CG-pixel-3x5-mono"),
                     ),
                 ],
             ),
@@ -190,7 +197,7 @@ def get_screen(x, RankingJSON, Selection):
     output.extend(heading)
 
     for i in range(0, 4):
-        if i + x < 20:
+        if i + x < TotalPlayersInt:
             Name = RankingJSON["rankings"][0]["ranks"][i + x]["athlete"]["lastName"]
             Rank = RankingJSON["rankings"][0]["ranks"][i + x]["current"]
 
@@ -220,7 +227,7 @@ def get_screen(x, RankingJSON, Selection):
 
     return output
 
-def get_screenPoints(x, RankingJSON, Selection):
+def get_screenPoints(x, RankingJSON, Selection, TotalPlayers):
     output = []
 
     if Selection == "wta":
@@ -231,6 +238,7 @@ def get_screenPoints(x, RankingJSON, Selection):
     UpdateDate = RankingJSON["rankings"][0]["update"]
     FormatDate = time.parse_time(UpdateDate, format = "2006-01-02T15:04Z")
     FormatDate = FormatDate.format("02/01")
+    TotalPlayersInt = int(TotalPlayers)
 
     heading = [
         render.Box(
@@ -245,7 +253,7 @@ def get_screenPoints(x, RankingJSON, Selection):
                     render.Box(
                         width = 64,
                         height = 5,
-                        child = render.Text(content = Selection + " TOP 20 " + FormatDate, color = "#fff", font = "CG-pixel-3x5-mono"),
+                        child = render.Text(content = Selection + " TOP " + TotalPlayers + " " + FormatDate, color = "#fff", font = "CG-pixel-3x5-mono"),
                     ),
                 ],
             ),
@@ -255,7 +263,7 @@ def get_screenPoints(x, RankingJSON, Selection):
     output.extend(heading)
 
     for i in range(0, 4):
-        if i + x < 20:
+        if i + x < TotalPlayersInt:
             Name = RankingJSON["rankings"][0]["ranks"][i + x]["athlete"]["lastName"]
             Rank = RankingJSON["rankings"][0]["ranks"][i + x]["current"]
             Points = str(int(RankingJSON["rankings"][0]["ranks"][i + x]["points"]))
@@ -299,7 +307,7 @@ def get_screenPoints(x, RankingJSON, Selection):
 
     return output
 
-def get_screenTrend(x, RankingJSON, Selection):
+def get_screenTrend(x, RankingJSON, Selection, TotalPlayers):
     #print(Selection)
     output = []
     if Selection == "wta":
@@ -312,6 +320,7 @@ def get_screenTrend(x, RankingJSON, Selection):
     UpdateDate = RankingJSON["rankings"][0]["update"]
     FormatDate = time.parse_time(UpdateDate, format = "2006-01-02T15:04Z")
     FormatDate = FormatDate.format("02/01")
+    TotalPlayersInt = int(TotalPlayers)
 
     heading = [
         render.Box(
@@ -326,7 +335,7 @@ def get_screenTrend(x, RankingJSON, Selection):
                     render.Box(
                         width = 64,
                         height = 5,
-                        child = render.Text(content = Selection + " TOP 20 " + FormatDate, color = "#fff", font = "CG-pixel-3x5-mono"),
+                        child = render.Text(content = Selection + " TOP " + TotalPlayers + " " + FormatDate, color = "#fff", font = "CG-pixel-3x5-mono"),
                     ),
                 ],
             ),
@@ -336,7 +345,7 @@ def get_screenTrend(x, RankingJSON, Selection):
     output.extend(heading)
 
     for i in range(0, 4):
-        if i + x < 20:
+        if i + x < TotalPlayersInt:
             Name = RankingJSON["rankings"][0]["ranks"][i + x]["athlete"]["lastName"]
             Rank = RankingJSON["rankings"][0]["ranks"][i + x]["current"]
 
@@ -409,6 +418,14 @@ def get_schema():
                 options = AssocationOptions,
             ),
             schema.Dropdown(
+                id = "totalPlayers",
+                name = "Top #",
+                desc = "How many players to show",
+                icon = "gear",
+                default = RankingOptions[0].value,
+                options = RankingOptions,
+            ),
+            schema.Dropdown(
                 id = "speed",
                 name = "Rotation Speed",
                 desc = "How many seconds each score is displayed",
@@ -460,5 +477,24 @@ RotationOptions = [
     schema.Option(
         display = "5 seconds",
         value = "5",
+    ),
+]
+
+RankingOptions = [
+    schema.Option(
+        display = "Top 20",
+        value = "20",
+    ),
+    schema.Option(
+        display = "Top 30",
+        value = "30",
+    ),
+    schema.Option(
+        display = "Top 40",
+        value = "40",
+    ),
+    schema.Option(
+        display = "Top 50",
+        value = "50",
     ),
 ]
