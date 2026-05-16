@@ -420,7 +420,7 @@ def main(config):
         )
 
         if show_latest_magnitude:
-            mag_str = humanize.float("#.#", last_event[1])
+            mag_str = humanize.float("0.0", last_event[1])
             mag_label = render.Text(mag_str, color = blink_on)
             mag_width = mag_label.size()[0]
             render_stack.append(
@@ -589,7 +589,7 @@ def get_schema():
                 id = "show_latest_magnitude",
                 name = "Show Latest Magnitude",
                 desc = "Display the magnitude of the most recent earthquake on screen.",
-                icon = "arrowUpWideShort",
+                icon = "signal",
                 default = DEFAULT_SHOW_LATEST_MAGNITUDE,
             ),
         ],
