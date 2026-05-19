@@ -142,13 +142,13 @@ def main(config):
 
     num_format = config.str("number_format", "none")
     if num_format != "none" and state_value != "ERR" and state_value != "CONFIG HA":
-        is_num = True
+        is_num = state_value != ""
         dots = 0
-        for c in state_value.elems():
+        for i, c in enumerate(state_value.elems()):
             if c == ".":
                 dots += 1
-            elif c == "-":
-                pass
+            elif c == "-" and i == 0:
+                continue
             elif c not in "0123456789":
                 is_num = False
                 break
