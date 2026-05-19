@@ -1,5 +1,6 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("math.star", "math")
 load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -139,9 +140,37 @@ def main(config):
 
     state_value = fetch_ha_state(ha_url, ha_token, entity, cache_duration)
 
+    num_format = config.str("number_format", "none")
+    if num_format != "none" and state_value != "ERR" and state_value != "CONFIG HA":
+        is_num = True
+        dots = 0
+        for c in state_value.elems():
+            if c == ".":
+                dots += 1
+            elif c == "-":
+                pass
+            elif c not in "0123456789":
+                is_num = False
+                break
+
+        if is_num and dots <= 1 and state_value != "." and state_value != "-" and state_value != "-.":
+            val = float(state_value)
+            if num_format == "round":
+                state_value = str(int(math.round(val)))
+            elif num_format == "floor":
+                state_value = str(int(math.floor(val)))
+            elif num_format == "ceil":
+                state_value = str(int(math.ceil(val)))
+            elif num_format == "truncate":
+                state_value = str(int(val))
+
+    before_text = config.str("before_text", "")
+    after_text = config.str("after_text", "")
+    full_text = before_text + state_value + after_text
+
     # replace unrenderable chars with spaces
     clean_val = ""
-    for c in state_value.upper().elems():
+    for c in full_text.upper().elems():
         if CHAR_SET.find(c) != -1:
             clean_val += c
         else:
@@ -242,6 +271,32 @@ def get_schema():
                 name = "Entity",
                 desc = "Entity ID to display (e.g. sensor.temperature)",
                 icon = "tag",
+            ),
+            schema.Text(
+                id = "before_text",
+                name = "Before Text",
+                desc = "Text to display before the value",
+                icon = "textWidth",
+            ),
+            schema.Text(
+                id = "after_text",
+                name = "After Text",
+                desc = "Text to display after the value",
+                icon = "textWidth",
+            ),
+            schema.Dropdown(
+                id = "number_format",
+                name = "Number Format",
+                desc = "Format the sensor value if it is a number.",
+                icon = "calculator",
+                default = "none",
+                options = [
+                    schema.Option(display = "None", value = "none"),
+                    schema.Option(display = "Round", value = "round"),
+                    schema.Option(display = "Floor", value = "floor"),
+                    schema.Option(display = "Ceiling", value = "ceil"),
+                    schema.Option(display = "Truncate", value = "truncate"),
+                ],
             ),
             schema.Text(
                 id = "cache_duration",
