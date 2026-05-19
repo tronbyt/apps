@@ -25,33 +25,76 @@ display_options = [
     schema.Option(value = "0", display = "Actual DEFCON Level"),
 ]
 
+VALID_LEVELS = ["1", "2", "3", "4", "5"]
+
+def fail_debug(step, message):
+    fail("DEFCON app error [" + step + "]: " + message)
+
+def normalize_level_text(text):
+    if text == None:
+        fail_debug("parse", "badge text was empty")
+
+    text = str(text).strip()
+
+    if text == "":
+        fail_debug("parse", "badge text was blank")
+
+    if text.startswith("DEFCON "):
+        text = text[len("DEFCON "):]
+
+    text = text.strip()
+
+    if text not in VALID_LEVELS:
+        fail_debug("parse", "unexpected badge text: " + text)
+
+    return int(text)
+
 def get_defcon_level():
-    """Fetch URL and extract DEFCON number (int) from badge-number span."""
     res = http.get(
         url = DEF_CON_URL,
         ttl_seconds = CACHE_TTL_SECONDS,
         headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (compatible; DefConTidbyt/1.0)",
             "Accept": "text/html",
         },
     )
-    if res.status_code != 200:
-        fail("request to %s failed with status code: %d - %s" % (DEF_CON_URL, res.status_code, res.body()))
 
-    page = html(res.body())
-    defcon_text = page.find("span.badge-number").text()
-    defcon_text = defcon_text.removeprefix("DEFCON ").strip(" ")
-    return int(defcon_text)
+    if res.status_code != 200:
+        fail_debug("http", "GET " + DEF_CON_URL + " returned status " + str(res.status_code))
+
+    body = res.body()
+    if body == None:
+        fail_debug("http", "response body was None")
+
+    body = str(body)
+    if body.strip() == "":
+        fail_debug("http", "response body was empty")
+
+    page = html(body)
+    badge = page.find("span.badge-number")
+    if not badge:
+        fail_debug("html", "selector span.badge-number not found")
+
+    badge_text = badge.text()
+    return normalize_level_text(badge_text)
+
+def get_selected_position(config):
+    position = config.get("list", display_options[0].value)
+
+    if position == "0":
+        return get_defcon_level()
+
+    if str(position) not in VALID_LEVELS:
+        fail_debug("config", "invalid selected level: " + str(position))
+
+    return int(position)
 
 def main(config):
     show_instructions = config.bool("instructions", False)
     if show_instructions:
         return display_instructions()
 
-    position = config.get("list", display_options[0].value)
-
-    if position == "0":
-        position = get_defcon_level()
+    position = get_selected_position(config)
 
     width, height = canvas.size()
     defcon_height = height // 2 - 1
@@ -79,11 +122,12 @@ def main(config):
     )
 
 def render_defcon_display(animate, position):
+    children = get_defcon_display(position)
+
     if animate:
-        return render.Animation(children = get_defcon_display(position))
-    else:
-        children = get_defcon_display(position)
-        return children.pop()
+        return render.Animation(children = children)
+
+    return children[-1]
 
 def render_box(i, width, height, color):
     return render.Box(
@@ -102,12 +146,14 @@ def render_box(i, width, height, color):
     )
 
 def get_defcon_display(position):
+    if str(position) not in VALID_LEVELS:
+        fail_debug("render", "invalid render position: " + str(position))
+
     children = []
     position = int(position)
     width = (canvas.width() // 5) - (1 if canvas.is2x() else 0)
     height = canvas.height() // 2
 
-    # Render grey outlines
     grey_children = []
     for i in range(5):
         grey_children.append(render_box(i + 1, width, height, "#333"))
@@ -119,8 +165,7 @@ def get_defcon_display(position):
     )
     children.append(grey_box)
 
-    # Render colored boxes
-    color_box = None
+    color_box = grey_box
     for i in range(4, position - 2, -1):
         color_children = []
         for j in range(5):
@@ -136,12 +181,10 @@ def get_defcon_display(position):
         )
         children.append(color_box)
 
-    # Flash current
     for _ in range(3):
         children.append(grey_box)
         children.append(color_box)
 
-    # Hold current for a while longer
     for _ in range(3):
         children.append(color_box)
 
@@ -151,8 +194,8 @@ def display_instructions():
     width = canvas.width()
     font = "terminus-16" if canvas.is2x() else "5x8"
     instructions_1 = "For security reasons, the U.S. military does not release the current DEFCON level. "
-    instructions_2 = "The source for this app is defconlevel.com which uses Open Source Intelligence to estimate the DEFCON level.  Default is to use the actual estimated DefCon level, but you can pick a level if you want. "
-    instructions_3 = "Defcon level 5 is the lowest alert level. The highest level reached was level 2 during the Cuban Missle Crisis. This display is based on the movie War Games (1983)."
+    instructions_2 = "The source for this app is defconlevel.com which uses Open Source Intelligence to estimate the DEFCON level. Default is to use the actual estimated DefCon level, but you can pick a level if you want. "
+    instructions_3 = "Defcon level 5 is the lowest alert level. The highest level reached was level 2 during the Cuban Missile Crisis. This display is based on the movie War Games (1983)."
     return render.Root(
         render.Column(
             children = [
@@ -196,14 +239,14 @@ def get_schema():
                 id = "animate",
                 name = "Animate Display",
                 desc = "Do you want to see the display go from 5 to the current level or simply have a static display of the current level?",
-                icon = "play",  #"info",
+                icon = "play",
                 default = True,
             ),
             schema.Toggle(
                 id = "instructions",
                 name = "Display Instructions",
                 desc = "",
-                icon = "book",  #"info",
+                icon = "book",
                 default = False,
             ),
         ],
