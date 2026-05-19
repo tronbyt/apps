@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'apps/**'
   workflow_dispatch:
 
 permissions:
