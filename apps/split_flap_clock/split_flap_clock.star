@@ -17,7 +17,7 @@ COLOR_MAP = {
     ">": "#FFFFFF",
 }
 COLS, ROWS = 7, 3
-TRANSITION_FRAMES, HOLD_FRAMES = 80, 100  # Longer hold for clock
+TRANSITION_FRAMES, HOLD_FRAMES = 150, 100  # Longer hold for clock, longer transition to prevent snapping
 CYCLE_FRAMES = TRANSITION_FRAMES + HOLD_FRAMES
 
 # --- UI Components ---
@@ -116,7 +116,7 @@ def main(config):
         min_flips = 15  # More flips for clock look
 
         flips = 0
-        for _ in range(250):
+        for _ in range(300):
             curr_idx = (curr_idx + 1) % len(CHAR_SET)
             flips += 1
             for _ in range(speed):
