@@ -40,6 +40,23 @@ def fetch_ha_state(ha_url, ha_token, entity, cache_duration):
         return str(data.get("state", "ERR"))
     return "ERR " + str(resp.status_code)
 
+def fetch_ha_template(ha_url, ha_token, template_str, cache_duration):
+    if not ha_url or not ha_token or not template_str:
+        return "CONFIG HA"
+
+    headers = {
+        "Authorization": "Bearer " + ha_token,
+        "Content-Type": "application/json",
+    }
+    base_url = ha_url.rstrip("/")
+    url = base_url + "/api/template"
+
+    body = json.encode({"template": template_str})
+    resp = http.post(url, headers = headers, body = body, ttl_seconds = cache_duration)
+    if resp.status_code == 200:
+        return str(resp.body()).strip()
+    return "ERR " + str(resp.status_code)
+
 # --- UI Components ---
 def render_flap(char, scale, width, height):
     font = "terminus-16" if scale == 2 else "tb-8"
@@ -68,6 +85,34 @@ def render_flap(char, scale, width, height):
     )
 
 # --- Logic Helpers ---
+def format_number(val_str, num_format):
+    if num_format == "none" or val_str == "ERR" or val_str == "CONFIG HA" or val_str.startswith("ERR "):
+        return val_str
+
+    is_num = True
+    dots = 0
+    for c in val_str.elems():
+        if c == ".":
+            dots += 1
+        elif c == "-":
+            pass
+        elif c not in "0123456789":
+            is_num = False
+            break
+
+    if is_num and dots <= 1 and val_str != "." and val_str != "-" and val_str != "-.":
+        val = float(val_str)
+        if num_format == "round":
+            return str(int(math.round(val)))
+        elif num_format == "floor":
+            return str(int(math.floor(val)))
+        elif num_format == "ceil":
+            return str(int(math.ceil(val)))
+        elif num_format == "truncate":
+            return str(int(val))
+
+    return val_str
+
 def center_text(text, width):
     text = text.strip()
     if not text:
@@ -78,51 +123,57 @@ def center_text(text, width):
     left = pad // 2
     return (" " * left + text + " " * (pad - left))[:width]
 
-def prepare_pages(input_text, config):
-    words = input_text.upper().split(" ")
-    lines, current_line = [], ""
+def prepare_pages(texts, config):
+    all_pages = []
+    for input_text in texts:
+        words = input_text.upper().split(" ")
+        lines, current_line = [], ""
 
-    # Word wrapping
-    for word in words:
-        if not word:
-            continue
-        if len(word) > COLS:
-            if current_line:
+        # Word wrapping
+        for word in words:
+            if not word:
+                continue
+            if len(word) > COLS:
+                if current_line:
+                    lines.append(current_line)
+                for i in range(0, len(word), COLS):
+                    lines.append(word[i:i + COLS])
+                current_line = ""
+                continue
+            if len(current_line) + len(word) + (1 if current_line else 0) <= COLS:
+                current_line = (current_line + " " if current_line else "") + word
+            else:
                 lines.append(current_line)
-            for i in range(0, len(word), COLS):
-                lines.append(word[i:i + COLS])
-            current_line = ""
-            continue
-        if len(current_line) + len(word) + (1 if current_line else 0) <= COLS:
-            current_line = (current_line + " " if current_line else "") + word
-        else:
+                current_line = word
+        if current_line:
             lines.append(current_line)
-            current_line = word
-    if current_line:
-        lines.append(current_line)
 
-    # Group into pages
-    pages = []
-    for i in range(0, min(len(lines), ROWS * 3), ROWS):
-        p_lines = lines[i:i + ROWS]
-        formatted = ""
-        for j in range(ROWS):
-            line = p_lines[j] if j < len(p_lines) else ""
-            if config.bool("center_text"):
-                line = center_text(line, COLS)
-            line = (line + " " * COLS)[:COLS]
+        # Group into pages
+        pages = []
+        for i in range(0, min(len(lines), ROWS * 3), ROWS):
+            p_lines = lines[i:i + ROWS]
+            formatted = ""
+            for j in range(ROWS):
+                line = p_lines[j] if j < len(p_lines) else ""
+                if config.bool("center_text"):
+                    line = center_text(line, COLS)
+                line = (line + " " * COLS)[:COLS]
 
-            # Color processing
-            if config.bool("random_colors"):
-                processed = ""
-                for c in line.elems():
-                    processed += COLOR_CHARS[random.number(0, 7)] if c == " " else c
-                line = processed
-            formatted += line
-        pages.append(formatted)
-    if not pages:
-        pages = [" " * (COLS * ROWS)]
-    return pages
+                # Color processing
+                if config.bool("random_colors"):
+                    processed = ""
+                    for c in line.elems():
+                        processed += COLOR_CHARS[random.number(0, 7)] if c == " " else c
+                    line = processed
+                formatted += line
+            pages.append(formatted)
+        if not pages:
+            pages = [" " * (COLS * ROWS)]
+        all_pages.extend(pages)
+
+    if not all_pages:
+        all_pages = [" " * (COLS * ROWS)]
+    return all_pages
 
 # --- Main Logic ---
 def main(config):
@@ -131,52 +182,43 @@ def main(config):
 
     ha_url = config.str("ha_url")
     ha_token = config.str("ha_token")
-    entity = config.str("entity")
+    entities_str = config.str("entity", "")
+    template_str = config.str("template", "")
 
     cache_duration_str = config.str("cache_duration", "300")
     cache_duration = 300
     if cache_duration_str.isdigit():
         cache_duration = int(cache_duration_str)
 
-    state_value = fetch_ha_state(ha_url, ha_token, entity, cache_duration)
-
-    num_format = config.str("number_format", "none")
-    if num_format != "none" and state_value != "ERR" and state_value != "CONFIG HA":
-        is_num = state_value != ""
-        dots = 0
-        for i, c in enumerate(state_value.elems()):
-            if c == ".":
-                dots += 1
-            elif c == "-" and i == 0:
-                continue
-            elif c not in "0123456789":
-                is_num = False
-                break
-
-        if is_num and dots <= 1 and state_value != "." and state_value != "-" and state_value != "-.":
-            val = float(state_value)
-            if num_format == "round":
-                state_value = str(int(math.round(val)))
-            elif num_format == "floor":
-                state_value = str(int(math.floor(val)))
-            elif num_format == "ceil":
-                state_value = str(int(math.ceil(val)))
-            elif num_format == "truncate":
-                state_value = str(int(val))
-
     before_text = config.str("before_text", "")
     after_text = config.str("after_text", "")
-    full_text = before_text + state_value + after_text
+    num_format = config.str("number_format", "none")
+
+    texts_to_render = []
+    if template_str:
+        val = fetch_ha_template(ha_url, ha_token, template_str, cache_duration)
+        texts_to_render.append(val)
+    elif entities_str:
+        entities = [e.strip() for e in entities_str.split(",") if e.strip()]
+        for e in entities:
+            val = fetch_ha_state(ha_url, ha_token, e, cache_duration)
+            val = format_number(val, num_format)
+            texts_to_render.append(before_text + val + after_text)
+    else:
+        texts_to_render.append("CONFIG HA")
 
     # replace unrenderable chars with spaces
-    clean_val = ""
-    for c in full_text.upper().elems():
-        if CHAR_SET.find(c) != -1:
-            clean_val += c
-        else:
-            clean_val += " "
+    clean_texts = []
+    for txt in texts_to_render:
+        clean_val = ""
+        for c in txt.upper().elems():
+            if CHAR_SET.find(c) != -1:
+                clean_val += c
+            else:
+                clean_val += " "
+        clean_texts.append(clean_val)
 
-    pages = prepare_pages(clean_val, config)
+    pages = prepare_pages(clean_texts, config)
 
     speed_map = {"fast": 1, "slow": 4, "medium": 2}
     speed = speed_map.get(config.get("flip_speed", "medium"), 2)
@@ -267,9 +309,15 @@ def get_schema():
                 secret = True,
             ),
             schema.Text(
+                id = "template",
+                name = "Jinja2 Template",
+                desc = "Optional Jinja2 template (bypasses entity).",
+                icon = "code",
+            ),
+            schema.Text(
                 id = "entity",
                 name = "Entity",
-                desc = "Entity ID to display (e.g. sensor.temperature)",
+                desc = "Entity ID(s) to display (e.g. sensor.temp, sensor.humidity)",
                 icon = "tag",
             ),
             schema.Text(

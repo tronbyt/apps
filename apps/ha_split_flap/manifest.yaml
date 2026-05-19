@@ -5,7 +5,7 @@ summary: Home Assistant Split Flap
 desc: Display a Home Assistant entity value on a split flap display.
 author: brombomb
 fileName: ha_split_flap.star
-packageName: hasplitflap
+packageName: ha_split_flap
 recommendedInterval: 60
 supports2x: true
 category: smart-home
