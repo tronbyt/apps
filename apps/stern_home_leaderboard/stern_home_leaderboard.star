@@ -122,7 +122,7 @@ def main(config):
             machines = filtered
 
     all_content = []
-    
+
     # Fetch global games list to extract logo URLs
     games_url = "https://insider.sternpinball.com/games?_rsc=1"
     games_cache_key = "stern_games_metadata_html"
@@ -138,22 +138,24 @@ def main(config):
         model_dict = m.get("model") or {}
         title_dict = model_dict.get("title") or {}
         machine_name = title_dict.get("name") or m.get("name") or "Unknown Game"
-        
+
         logo_url = ""
         if games_body:
             idx = games_body.find('\\"name\\":\\"' + machine_name + '\\"')
             if idx == -1:
                 idx = games_body.find('"name":"' + machine_name + '"')
-                
+
             if idx > -1:
-                s_idx = games_body.find('variable_width_logo', idx, idx + 5000)
+                s_idx = games_body.find("variable_width_logo", idx, idx + 5000)
                 if s_idx > -1:
-                    http_start = games_body.find('http', s_idx, s_idx + 100)
+                    http_start = games_body.find("http", s_idx, s_idx + 100)
                     if http_start > -1:
                         end1 = games_body.find('\\"', http_start)
                         end2 = games_body.find('"', http_start)
-                        if end1 == -1: end1 = 999999
-                        if end2 == -1: end2 = 999999
+                        if end1 == -1:
+                            end1 = 999999
+                        if end2 == -1:
+                            end2 = 999999
                         s_end = end1 if end1 < end2 else end2
                         if s_end < 999999:
                             logo_url = games_body[http_start:s_end]

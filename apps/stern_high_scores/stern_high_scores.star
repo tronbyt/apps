@@ -25,12 +25,26 @@ def shuffle(items):
 def mid_color(c1, c2):
     col1 = color.hex(c1)
     col2 = color.hex(c2)
-    
+
     r = (col1.r + col2.r) // 2
     g = (col1.g + col2.g) // 2
     b = (col1.b + col2.b) // 2
-    
+
     return color.rgb(r, g, b).hex()
+
+def clean_hex(h):
+    if not h or not h.startswith("#"):
+        return None
+    valid = "0123456789abcdefABCDEF"
+    res = "#"
+    for i in range(1, len(h)):
+        if h[i] in valid:
+            res += h[i]
+        else:
+            break
+    if len(res) == 4 or len(res) == 7 or len(res) == 9:
+        return res
+    return None
 
 def format_score(n):
     s = str(n)
@@ -99,7 +113,7 @@ def get_personal_scores(auth):
     results = []
     for t in titles:
         game_name = t.get("name", "")
-        
+
         logo_url = ""
         c1 = "#0aa"
         c2 = "#a0a"
@@ -107,45 +121,51 @@ def get_personal_scores(auth):
             idx = games_body.find('\\"name\\":\\"' + game_name + '\\"')
             if idx == -1:
                 idx = games_body.find('"name":"' + game_name + '"')
-                
-            if idx > -1:
-                g1_idx = games_body.find('gradient_start', idx, idx + 5000)
-                if g1_idx > -1:
-                    hex_start = games_body.find('#', g1_idx, g1_idx + 50)
-                    if hex_start > -1:
-                        c1 = games_body[hex_start:hex_start+7]
-                
-                g2_idx = games_body.find('gradient_stop', idx, idx + 5000)
-                if g2_idx > -1:
-                    hex_start = games_body.find('#', g2_idx, g2_idx + 50)
-                    if hex_start > -1:
-                        c2 = games_body[hex_start:hex_start+7]
 
-                s_idx = games_body.find('variable_width_logo', idx, idx + 5000)
+            if idx > -1:
+                g1_idx = games_body.find("gradient_start", idx, idx + 5000)
+                if g1_idx > -1:
+                    hex_start = games_body.find("#", g1_idx, g1_idx + 50)
+                    if hex_start > -1:
+                        c1_cand = clean_hex(games_body[hex_start:hex_start + 9])
+                        if c1_cand:
+                            c1 = c1_cand
+
+                g2_idx = games_body.find("gradient_stop", idx, idx + 5000)
+                if g2_idx > -1:
+                    hex_start = games_body.find("#", g2_idx, g2_idx + 50)
+                    if hex_start > -1:
+                        c2_cand = clean_hex(games_body[hex_start:hex_start + 9])
+                        if c2_cand:
+                            c2 = c2_cand
+
+                s_idx = games_body.find("variable_width_logo", idx, idx + 5000)
                 if s_idx > -1:
-                    http_start = games_body.find('http', s_idx, s_idx + 100)
+                    http_start = games_body.find("http", s_idx, s_idx + 100)
                     if http_start > -1:
                         end1 = games_body.find('\\"', http_start)
                         end2 = games_body.find('"', http_start)
-                        if end1 == -1: end1 = 999999
-                        if end2 == -1: end2 = 999999
+                        if end1 == -1:
+                            end1 = 999999
+                        if end2 == -1:
+                            end2 = 999999
                         s_end = end1 if end1 < end2 else end2
                         if s_end < 999999:
                             logo_url = games_body[http_start:s_end]
-        
+
         game_scores = []
         for s in t.get("high_scores_by_model", []):
             model_info = s.get("model", {})
             m_type = model_info.get("type", "unknown")
             score = s.get("high_score", 0)
-            
+
             if score > 0:
                 game_scores.append({
                     "model": m_type.lower(),
                     "score": int(score),
-                    "percent": "", # Not available in new API yet
+                    "percent": "",  # Not available in new API yet
                 })
-        
+
         if game_scores:
             # Sort scores: Pro, Premium, Limited
             ordered_scores = []
