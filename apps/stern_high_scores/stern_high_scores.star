@@ -34,133 +34,66 @@ def format_score(n):
     return res
 
 def login(username, password):
-    login_url = "https://insider.sternpinball.com/login"
+    login_url = "https://api.prd.sternpinball.io/api/v2/token/"
     headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0",
-        "Accept": "text/x-component",
-        "Next-Action": "9d2cf818afff9e2c69368771b521d93585a10433",
-        "Content-Type": "text/plain;charset=UTF-8",
-        "Origin": "https://insider.sternpinball.com",
+        "User-Agent": "Mozilla/5.0",
+        "Content-Type": "application/json",
     }
-    body = json.encode([username, password])
+    body = json.encode({"username": username, "password": password})
     rep = http.post(login_url, headers = headers, body = body)
 
     if rep.status_code != 200:
+        print("Login failed! Status Code: " + str(rep.status_code))
+        print("Response Body: " + rep.body())
         return None
 
-    cookies = rep.headers.get("Set-Cookie", "")
-    token = ""
-
-    # In Starlark, headers.get returns a single string.
-    # For multiple Set-Cookie headers, they might be comma separated or we might only get the first one.
-    # Pixlet's http library returns a single string for headers.get().
-    # It usually joins them with commas. Let's handle both commas and semicolons.
-    for part in cookies.replace(",", ";").split(";"):
-        if "spb-insider-token=" in part:
-            token = part.split("spb-insider-token=")[1]
+    data = rep.json()
+    token = data.get("access") or data.get("access_token")
 
     if not token:
         return None
 
-    return {"token": token, "cookies": cookies}
+    return {"token": token}
 
 def get_personal_scores(auth):
-    cache_key = "stern_personal_scores_" + auth["token"]
+    # Use a chunk of token as cache key suffix
+    cache_key = "stern_personal_scores_v3_" + auth["token"][:15]
     cached_data = cache.get(cache_key)
     if cached_data:
         return json.decode(cached_data)
 
-    url = "https://insider.sternpinball.com/trophy-room/scores?_rsc=1"
+    url = "https://api.prd.sternpinball.io/api/v1/portal/user_stats/"
     headers = {
         "User-Agent": "Mozilla/5.0",
-        "Cookie": auth["cookies"],
-        "RSC": "1",
+        "Authorization": "Bearer " + auth["token"],
     }
     rep = http.get(url, headers = headers)
     if rep.status_code != 200:
         return []
 
-    body = rep.body()
+    data = rep.json()
+    stats = data.get("stats", {})
+    titles = stats.get("titles", [])
+
     results = []
-    curr_pos = 0
-
-    # Max 50 games to avoid timeout
-    for _ in range(50):
-        idx = body.find('"alt":"', curr_pos)
-        if idx == -1:
-            break
-
-        # Extract game name
-        start = idx + len('"alt":"')
-        end = body.find('"', start)
-        game_name = body[start:end]
-
-        # Extract logo src (search backwards from idx for variable_width_logo or src)
-        # We limit search to avoid picking up previous games
-        search_start = idx - 500
-        if search_start < 0:
-            search_start = 0
-        src_idx = body.rfind('"variable_width_logo":"', search_start, idx)
-        if src_idx == -1:
-            src_idx = body.rfind('"src":"', search_start, idx)
-
+    for t in titles:
+        game_name = t.get("name", "")
+        # The new API does not currently supply logo URLs directly
         logo_url = ""
-        if src_idx != -1:
-            # Determine which key we found
-            key = '"variable_width_logo":"'
-            if body[src_idx:src_idx + len('"src":"')] == '"src":"':
-                key = '"src":"'
-
-            s_start = src_idx + len(key)
-            s_end = body.find('"', s_start)
-            logo_url = body[s_start:s_end]
-
-        # Extract scores in this block (until next alt)
-        next_alt = body.find('"alt":"', end)
-        if next_alt == -1:
-            next_alt = len(body)
-
+        
         game_scores = []
-        score_pos = end
-        for _ in range(5):  # Max 5 models per game
-            s_idx = body.find('"stats":', score_pos, next_alt)
-            if s_idx == -1:
-                break
-
-            # Find title
-            t_idx = body.rfind('"title":"', score_pos, s_idx)
-            title = "Score"
-            if t_idx != -1:
-                t_start = t_idx + len('"title":"')
-                t_end = body.find('"', t_start)
-                title = body[t_start:t_end]
-
-            # Find stats value
-            st_start = s_idx + len('"stats":')
-            st_end = body.find(",", st_start)
-            if st_end == -1 or st_end > body.find("}", st_start):
-                st_end = body.find("}", st_start)
-            stats_val = body[st_start:st_end]
-
-            # Find percentageStats
-            p_idx = body.find('"percentageStats":"', st_end, next_alt)
-            percent = ""
-            if p_idx != -1:
-                # Ensure percentageStats belongs to THIS score by checking it's before next stats
-                next_stats = body.find('"stats":', st_end, next_alt)
-                if next_stats == -1 or p_idx < next_stats:
-                    p_start = p_idx + len('"percentageStats":"')
-                    p_end = body.find('"', p_start)
-                    percent = body[p_start:p_end]
-
-            if stats_val.isdigit():
+        for s in t.get("high_scores_by_model", []):
+            model_info = s.get("model", {})
+            m_type = model_info.get("type", "unknown")
+            score = s.get("high_score", 0)
+            
+            if score > 0:
                 game_scores.append({
-                    "model": title,
-                    "score": int(stats_val),
-                    "percent": percent,
+                    "model": m_type.lower(),
+                    "score": int(score),
+                    "percent": "", # Not available in new API yet
                 })
-            score_pos = st_end
-
+        
         if game_scores:
             # Sort scores: Pro, Premium, Limited
             ordered_scores = []
@@ -184,8 +117,6 @@ def get_personal_scores(auth):
                 "logo": logo_url,
                 "scores": ordered_scores,
             })
-
-        curr_pos = next_alt
 
     cache.set(cache_key, json.encode(results), ttl_seconds = 300)
     return results
