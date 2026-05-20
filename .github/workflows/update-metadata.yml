@@ -31,7 +31,7 @@ jobs:
         id: update
         run: |
           # Determine modified apps
-          if [[ "${{ github.event_before }}" == "0000000000000000000000000000000000000000" ]]; then
+          if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
             echo "Initial push or new branch, checking all apps..."
             python3 .github/scripts/update_manifests.py
           else
