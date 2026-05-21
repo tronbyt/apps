@@ -46,6 +46,24 @@ def clean_hex(h):
         return res
     return None
 
+def extract_until_quote(games_body, start_idx):
+    end1 = games_body.find('\\"', start_idx)
+    end2 = games_body.find('"', start_idx)
+
+    valid_ends = []
+    if end1 != -1:
+        valid_ends.append(end1)
+    if end2 != -1:
+        valid_ends.append(end2)
+
+    if valid_ends:
+        s_end = valid_ends[0]
+        for e in valid_ends:
+            if e < s_end:
+                s_end = e
+        return games_body[start_idx:s_end]
+    return ""
+
 def format_score(n):
     s = str(n)
     res = ""
@@ -127,31 +145,25 @@ def get_personal_scores(auth):
                 if g1_idx > -1:
                     hex_start = games_body.find("#", g1_idx, g1_idx + 50)
                     if hex_start > -1:
-                        c1_cand = clean_hex(games_body[hex_start:hex_start + 9])
-                        if c1_cand:
-                            c1 = c1_cand
+                        c1_cand = extract_until_quote(games_body, hex_start)
+                        c1_clean = clean_hex(c1_cand)
+                        if c1_clean:
+                            c1 = c1_clean
 
                 g2_idx = games_body.find("gradient_stop", idx, idx + 5000)
                 if g2_idx > -1:
                     hex_start = games_body.find("#", g2_idx, g2_idx + 50)
                     if hex_start > -1:
-                        c2_cand = clean_hex(games_body[hex_start:hex_start + 9])
-                        if c2_cand:
-                            c2 = c2_cand
+                        c2_cand = extract_until_quote(games_body, hex_start)
+                        c2_clean = clean_hex(c2_cand)
+                        if c2_clean:
+                            c2 = c2_clean
 
                 s_idx = games_body.find("variable_width_logo", idx, idx + 5000)
                 if s_idx > -1:
                     http_start = games_body.find("http", s_idx, s_idx + 100)
                     if http_start > -1:
-                        end1 = games_body.find('\\"', http_start)
-                        end2 = games_body.find('"', http_start)
-                        if end1 == -1:
-                            end1 = 999999
-                        if end2 == -1:
-                            end2 = 999999
-                        s_end = end1 if end1 < end2 else end2
-                        if s_end < 999999:
-                            logo_url = games_body[http_start:s_end]
+                        logo_url = extract_until_quote(games_body, http_start)
 
         game_scores = []
         for s in t.get("high_scores_by_model", []):
@@ -190,6 +202,7 @@ def get_personal_scores(auth):
                 "scores": ordered_scores,
                 "c1": c1,
                 "c2": c2,
+                "mid_c": mid_color(c1, c2),
             })
 
     cache.set(cache_key, json.encode(results), ttl_seconds = 300)
@@ -265,12 +278,12 @@ def main(config):
 
         # Build personal score table
         score_rows = []
-        for s in g["scores"]:
+        for s in scores:
             model_color = "#666"
             if s["model"] == "pro":
                 model_color = g["c1"]
             elif s["model"] == "premium":
-                model_color = mid_color(g["c1"], g["c2"])
+                model_color = g.get("mid_c", "#666")
             elif s["model"] == "limited":
                 model_color = g["c2"]
 

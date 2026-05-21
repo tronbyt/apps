@@ -38,6 +38,24 @@ def login(username, password):
 
     return {"token": token}
 
+def extract_until_quote(games_body, start_idx):
+    end1 = games_body.find('\\"', start_idx)
+    end2 = games_body.find('"', start_idx)
+
+    valid_ends = []
+    if end1 != -1:
+        valid_ends.append(end1)
+    if end2 != -1:
+        valid_ends.append(end2)
+
+    if valid_ends:
+        s_end = valid_ends[0]
+        for e in valid_ends:
+            if e < s_end:
+                s_end = e
+        return games_body[start_idx:s_end]
+    return ""
+
 def get_machines(auth):
     machines_url = "https://api.prd.sternpinball.io/api/v1/portal/user_registered_machines/?group_type=home"
     headers = {
@@ -150,15 +168,7 @@ def main(config):
                 if s_idx > -1:
                     http_start = games_body.find("http", s_idx, s_idx + 100)
                     if http_start > -1:
-                        end1 = games_body.find('\\"', http_start)
-                        end2 = games_body.find('"', http_start)
-                        if end1 == -1:
-                            end1 = 999999
-                        if end2 == -1:
-                            end2 = 999999
-                        s_end = end1 if end1 < end2 else end2
-                        if s_end < 999999:
-                            logo_url = games_body[http_start:s_end]
+                        logo_url = extract_until_quote(games_body, http_start)
 
         scores = get_high_scores(auth, m["id"])
 
