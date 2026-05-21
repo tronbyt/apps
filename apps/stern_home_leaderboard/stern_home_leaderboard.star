@@ -38,6 +38,20 @@ def login(username, password):
 
     return {"token": token}
 
+def extract_until_quote(games_body, start_idx):
+    end1 = games_body.find('\\"', start_idx)
+    end2 = games_body.find('"', start_idx)
+
+    valid_ends = []
+    if end1 != -1:
+        valid_ends.append(end1)
+    if end2 != -1:
+        valid_ends.append(end2)
+
+    if valid_ends:
+        return games_body[start_idx:min(valid_ends)]
+    return ""
+
 def get_machines(auth):
     machines_url = "https://api.prd.sternpinball.io/api/v1/portal/user_registered_machines/?group_type=home"
     headers = {
@@ -123,12 +137,34 @@ def main(config):
 
     all_content = []
 
+    # Fetch global games list to extract logo URLs
+    games_url = "https://insider.sternpinball.com/games?_rsc=1"
+    games_cache_key = "stern_games_metadata_html"
+    games_body = cache.get(games_cache_key)
+    if not games_body:
+        g_rep = http.get(games_url, ttl_seconds = 86400)
+        if g_rep.status_code == 200:
+            games_body = g_rep.body()
+            cache.set(games_cache_key, games_body, ttl_seconds = 86400)
+
     # We will loop through the machines and append their high scores
     for m in machines:
         model_dict = m.get("model") or {}
         title_dict = model_dict.get("title") or {}
-        logo_url = title_dict.get("variable_width_logo")
         machine_name = title_dict.get("name") or m.get("name") or "Unknown Game"
+
+        logo_url = ""
+        if games_body:
+            idx = games_body.find('\\"name\\":\\"' + machine_name + '\\"')
+            if idx == -1:
+                idx = games_body.find('"name":"' + machine_name + '"')
+
+            if idx > -1:
+                s_idx = games_body.find("variable_width_logo", idx, idx + 5000)
+                if s_idx > -1:
+                    http_start = games_body.find("http", s_idx, s_idx + 100)
+                    if http_start > -1:
+                        logo_url = extract_until_quote(games_body, http_start)
 
         scores = get_high_scores(auth, m["id"])
 
