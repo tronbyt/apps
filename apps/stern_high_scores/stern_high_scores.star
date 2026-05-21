@@ -94,9 +94,27 @@ def login(username, password):
 
     return {"token": token}
 
+def normalize_game_name(name):
+    n = name.strip()
+    if "Pokemon" in n or "Pokémon" in n:
+        return "Pokémon"
+    if "Stranger Things" in n:
+        return "Stranger Things"
+    if "Batman" in n and "66" in n:
+        return "Batman '66"
+    if "Elvira" in n:
+        return "Elvira's House of Horrors"
+    if "007" in n and "60th" in n:
+        return "James Bond 007 60th Anniversary"
+    if "007" in n:
+        return "James Bond 007"
+    if "Dungeons" in n and "Dragons" in n:
+        return "Dungeons \\u0026 Dragons"
+    return n.replace("&", "\\u0026")
+
 def get_personal_scores(auth):
     # Use a chunk of token as cache key suffix
-    cache_key = "stern_personal_scores_v8_" + auth["token"][:15]
+    cache_key = "stern_personal_scores_v9_" + auth["token"][:15]
     cached_data = cache.get(cache_key)
     if cached_data:
         return json.decode(cached_data)
@@ -127,17 +145,18 @@ def get_personal_scores(auth):
     results = []
     for t in titles:
         game_name = t.get("name", "")
+        search_name = normalize_game_name(game_name)
 
         logo_url = ""
         c1 = "#0aa"
         c2 = "#a0a"
         if games_body:
-            idx = games_body.find('\\"name\\":\\"' + game_name + '\\"')
+            idx = games_body.find('\\"name\\":\\"' + search_name + '\\"')
             if idx == -1:
-                idx = games_body.find('"name":"' + game_name + '"')
+                idx = games_body.find('"name":"' + search_name + '"')
 
             if idx > -1:
-                g1_idx = games_body.find("gradient_start", idx, idx + 5000)
+                g1_idx = games_body.find("gradient_start", idx, idx + 10000)
                 if g1_idx > -1:
                     hex_start = games_body.find("#", g1_idx, g1_idx + 50)
                     if hex_start > -1:
@@ -146,7 +165,7 @@ def get_personal_scores(auth):
                         if c1_clean:
                             c1 = c1_clean
 
-                g2_idx = games_body.find("gradient_stop", idx, idx + 5000)
+                g2_idx = games_body.find("gradient_stop", idx, idx + 10000)
                 if g2_idx > -1:
                     hex_start = games_body.find("#", g2_idx, g2_idx + 50)
                     if hex_start > -1:
@@ -155,7 +174,7 @@ def get_personal_scores(auth):
                         if c2_clean:
                             c2 = c2_clean
 
-                s_idx = games_body.find("variable_width_logo", idx, idx + 5000)
+                s_idx = games_body.find("variable_width_logo", idx, idx + 10000)
                 if s_idx > -1:
                     http_start = games_body.find("http", s_idx, s_idx + 100)
                     if http_start > -1:
