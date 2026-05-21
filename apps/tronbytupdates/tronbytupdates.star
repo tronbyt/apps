@@ -13,7 +13,7 @@ load("time.star", "time")
 
 DEFAULT_REPO = "Tronbyt/apps"
 DEFAULT_BRANCH = "main"
-MAX_COMMITS = 50
+MAX_COMMITS = 30
 MAX_ITEMS = 6
 
 TRONBYT_PALETTE = ["#00FFFF", "#FFAA00", "#00FF00", "#0000FF", "#FFFF00", "#FF0000"]

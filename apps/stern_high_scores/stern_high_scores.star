@@ -57,11 +57,7 @@ def extract_until_quote(games_body, start_idx):
         valid_ends.append(end2)
 
     if valid_ends:
-        s_end = valid_ends[0]
-        for e in valid_ends:
-            if e < s_end:
-                s_end = e
-        return games_body[start_idx:s_end]
+        return games_body[start_idx:min(valid_ends)]
     return ""
 
 def format_score(n):
