@@ -3,7 +3,7 @@ id: split-flap
 name: Split Flap
 summary: Retro split-flap display
 desc: A pixel version of a split-flap display (like a Vesta board) that shuffles letters.
-author: Antigravity
+author: Brombomb
 fileName: split_flap.star
 packageName: splitflap
 recommendedInterval: 1

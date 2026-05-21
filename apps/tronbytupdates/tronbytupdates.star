@@ -5,17 +5,15 @@ Description: This app shows recently added or updated apps on Tronbyt by fetchin
 Author: Robert Ison
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
-load("re.star", "re")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 DEFAULT_REPO = "Tronbyt/apps"
 DEFAULT_BRANCH = "main"
-MAX_COMMITS = 20
+MAX_COMMITS = 30
 MAX_ITEMS = 6
 
 TRONBYT_PALETTE = ["#00FFFF", "#FFAA00", "#00FF00", "#0000FF", "#FFFF00", "#FF0000"]
@@ -88,31 +86,15 @@ def get_app_from_files(commit_details):
     return apps
 
 def get_manifest_info(app_folder, repo, tree_sha, headers, cache_ttl):
-    tree_url = "https://api.github.com/repos/{}/git/trees/{}?recursive=1".format(repo, tree_sha)
-    resp = http.get(url = tree_url, headers = headers, ttl_seconds = cache_ttl)
-    if resp.status_code != 200:
-        return None
-
-    tree = resp.json().get("tree", [])
-
-    manifest_url = None
-    for item in tree:
-        path = item.get("path", "")
-        if (path.startswith("apps/{}/".format(app_folder)) and
-            ("manifest" in path.lower()) and
-            item["type"] == "blob"):
-            manifest_url = item["url"]
-            break
-
-    if not manifest_url:
-        return None
-
+    manifest_url = "https://raw.githubusercontent.com/{}/{}/apps/{}/manifest.yaml".format(repo, tree_sha, app_folder)
     resp = http.get(url = manifest_url, headers = headers, ttl_seconds = cache_ttl)
     if resp.status_code != 200:
-        return None
+        manifest_url = "https://raw.githubusercontent.com/{}/{}/apps/{}/manifest.yml".format(repo, tree_sha, app_folder)
+        resp = http.get(url = manifest_url, headers = headers, ttl_seconds = cache_ttl)
+        if resp.status_code != 200:
+            return None
 
-    data = resp.json()
-    content = base64.decode(data.get("content", ""))
+    content = resp.body()
 
     if content.startswith("---"):
         end = content.find("\n---\n")
@@ -188,8 +170,8 @@ def find_recent_app_changes(repo, branch, headers, cache_ttl, max_commits, max_i
 
     for c in commits:
         # Skip automated chore, build, and merge commits
-        message = (c.get("commit") or {}).get("message", "")
-        if re.match("(?i)^(chore|build|merge)", message):
+        message = (c.get("commit") or {}).get("message", "").lower()
+        if message.startswith("chore") or message.startswith("build") or message.startswith("merge"):
             continue
 
         details_resp = http.get(url = c["url"], headers = headers, ttl_seconds = cache_ttl * 2)  # ↑ Longer cache
