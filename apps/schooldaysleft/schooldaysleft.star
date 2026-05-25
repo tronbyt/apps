@@ -11,132 +11,64 @@ load("time.star", "time")
 
 DEFAULT_TIMEZONE = "America/Los_Angeles"
 DEFAULT_ACCENT = "#7AB0FF"
-WHITESPACE = " \t\r\n"
-
-def is_digit(char):
-    return char in "0123456789"
-
-def trim(text):
-    text = str(text)
-    start = -1
-    end = -1
-    for i in range(len(text)):
-        if start == -1 and not (text[i] in WHITESPACE):
-            start = i
-    for i in range(len(text)):
-        pos = len(text) - i - 1
-        if end == -1 and not (text[pos] in WHITESPACE):
-            end = pos + 1
-    if start == -1:
-        return ""
-    return text[start:end]
-
-def days_in_month(year, month):
-    if month == 2:
-        if is_leap_year(year):
-            return 29
-        return 28
-    if month in [4, 6, 9, 11]:
-        return 30
-    if month in [1, 3, 5, 7, 8, 10, 12]:
-        return 31
-    return 0
-
-def is_leap_year(year):
-    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 def parse_date(value):
-    if value == None:
+    if not value:
+        return None
+    raw = str(value).strip()
+    if not raw:
         return None
 
-    raw = trim(value)
-    if len(raw) < 10:
-        return None
+    # Try parsing using time.parse_time
+    # Note: format "2006-01-02" is standard in Starlark time module
+    t = time.parse_time(raw, format = "2006-01-02")
+    if t == None:
+        # Try without time if only date provided
+        t = time.parse_time(raw.split("T")[0], format = "2006-01-02")
 
-    if raw[4:5] != "-" or raw[7:8] != "-":
-        return None
-
-    date_bits = raw[0:4] + raw[5:7] + raw[8:10]
-    for i in range(len(date_bits)):
-        if not is_digit(date_bits[i]):
-            return None
-
-    year = int(raw[0:4], 10)
-    month = int(raw[5:7], 10)
-    day = int(raw[8:10], 10)
-    if month < 1 or month > 12:
-        return None
-    if day < 1 or day > days_in_month(year, month):
-        return None
-
-    return [year, month, day]
-
-def pad2(value):
-    text = str(value)
-    if len(text) == 1:
-        return "0" + text
-    return text
-
-def date_key(date):
-    return str(date[0]) + "-" + pad2(date[1]) + "-" + pad2(date[2])
-
-def days_before_year(year):
-    prior_year = year - 1
-    return prior_year * 365 + prior_year // 4 - prior_year // 100 + prior_year // 400
-
-def date_to_ordinal(date):
-    days = days_before_year(date[0]) + date[2]
-    for month in range(1, date[1]):
-        days += days_in_month(date[0], month)
-    return days
-
-def is_weekend(date):
-    weekday = (date_to_ordinal(date) - 1) % 7
-    return weekday == 5 or weekday == 6
-
-def next_date(date):
-    year = date[0]
-    month = date[1]
-    day = date[2] + 1
-    if day > days_in_month(year, month):
-        day = 1
-        month += 1
-    if month > 12:
-        month = 1
-        year += 1
-    return [year, month, day]
+    return t
 
 def parse_days_off(days_off):
     dates = {}
-    if days_off == None:
+    if not days_off:
         return dates
 
     normalized = str(days_off).replace("\r", ",").replace("\n", ",").replace(";", ",")
     for item in normalized.split(","):
         parsed = parse_date(item)
         if parsed != None:
-            dates[date_key(parsed)] = True
+            dates[parsed.format("2006-01-02")] = True
     return dates
 
 def count_school_days(start_date, last_day, days_off):
     start = parse_date(start_date)
     end = parse_date(last_day)
-    if start == None or end == None:
+    if not start or not end:
         return -1
 
-    start_ord = date_to_ordinal(start)
-    end_ord = date_to_ordinal(end)
-    if start_ord > end_ord:
+    if start > end:
         return 0
 
     off_dates = parse_days_off(days_off)
     school_days = 0
     current = start
-    for _ in range(end_ord - start_ord + 1):
-        key = date_key(current)
-        if not is_weekend(current) and not (key in off_dates):
+
+    # Duration of one day
+    one_day = time.parse_duration("24h")
+
+    # Iterate from start to end (inclusive)
+    # Using a simple loop and comparison since start_ord/end_ord logic is replaced by time objects
+    for _ in range(366 * 2):  # Safety limit for ~2 years
+        if current > end:
+            break
+
+        day_str = current.format("2006-01-02")
+        is_weekend = current.format("Mon") in ("Sat", "Sun")
+
+        if not is_weekend and not (day_str in off_dates):
             school_days += 1
-        current = next_date(current)
+
+        current += one_day
 
     return school_days
 
@@ -217,19 +149,26 @@ def render_chalkboard(count, accent):
 
 def render_app(config):
     timezone = config.get("$tz", DEFAULT_TIMEZONE)
-    today = time.now().in_location(timezone).format("2006-01-02")
+    now = time.now().in_location(timezone)
+    today_str = now.format("2006-01-02")
     last_day = config.get("last_day")
-    if last_day == None or trim(last_day) == "":
+
+    if not last_day or not str(last_day).strip():
         return render_setup("set last day")
 
     accent = config.str("accent_color", DEFAULT_ACCENT)
     days_off = config.str("days_off", "")
-    count = count_school_days(today, last_day, days_off)
+    count = count_school_days(today_str, last_day, days_off)
 
     if count == -1:
         return render_setup("check date")
-    if count == 0 and date_to_ordinal(parse_date(today)) > date_to_ordinal(parse_date(last_day)):
+
+    start_t = parse_date(today_str)
+    end_t = parse_date(last_day)
+
+    if count == 0 and start_t > end_t:
         return render_done(accent)
+
     return render_chalkboard(count, accent)
 
 def get_app_schema():

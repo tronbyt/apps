@@ -174,7 +174,11 @@ def fetch_leaders(stat_key):
     if res.status_code != 200:
         return []
 
-    leaders_data = res.json()["leagueLeaders"][0]["leaders"]
+    data = res.json()
+    league_leaders = data.get("leagueLeaders")
+    if not league_leaders or len(league_leaders) == 0:
+        return []
+    leaders_data = league_leaders[0].get("leaders", [])
     leaders = []
 
     for l in leaders_data[:5]:

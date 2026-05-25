@@ -1,11 +1,11 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/deer.png", DEER_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-DEER = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAYAAAAvxDzwAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAARGVYSWZNTQAqAAAACAABh2kABAAAAAEAAAAaAAAAAAADoAEAAwAAAAEAAQAAoAIABAAAAAEAAAAUoAMABAAAAAEAAAAOAAAAAJiNf94AAAGdaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJYTVAgQ29yZSA2LjAuMCI+CiAgIDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+CiAgICAgIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiCiAgICAgICAgICAgIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIj4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjUxMjwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOlBpeGVsWURpbWVuc2lvbj41MTI8L2V4aWY6UGl4ZWxZRGltZW5zaW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KuC9IVwAAAYJJREFUOBHNUruKwlAQPYkRwQeIGkipQgQbbSysBBHsUohtOj/D3sI/yCdY22hhaWNlqVjZqIVioYXgY3buhdzNsrjLarMDlzvM48yZBwBQ8EWjUXJdl7LZ7Bd7MOYX/RMwl8vRYDCg2+1Gtm2/BKhzNSm6rqNeryOfzyMUCqHdbvuuP/0aRwsmSpLJJBaLBcQ/Go0wmUwwnU5xOBygaRrC4bDUBYFqtYpYLCZj9vu9wpCtZTIZqtVq1Gw2abPZUFDu9zudTic6n890uVxou93Sbrcjz/OoXC4TF1HjMdLpNBzHwXq9RjweR6lUwnA4lAx5MahUKhBshM8Xy7KkejwesVqtcL1efRe0VCpFpmliuVyi1WpJMF6KDDAMA8wAvCwkEgkIO18BOp2OLPR4PDAej9HtdjGfzxWoosszUjp7n+qiRZ4f9ft9ms1msnWeuR//PPEnUOGLRCLU6/WoWCwSsyTuQoC+DihyG42GXEqhUJCA385GVHhH1GG/AxLM/f+AH7yq7kUNe46+AAAAAElFTkSuQmCC")
+DEER = DEER_ASSET.readall()
 
 OTS_URL = "https://www.onthesnow.com/massachusetts/jiminy-peak/skireport"
 WEATHER_URL = (
@@ -58,13 +58,15 @@ def find_json_ld(body):
 
     # Walk forward to find the matching closing brace
     depth = 0
-    for i in range(start, len(body)):
-        if body[i] == "{":
+    count = 0
+    for char in body[start:].elems():
+        count += 1
+        if char == "{":
             depth += 1
-        elif body[i] == "}":
+        elif char == "}":
             depth -= 1
             if depth == 0:
-                return body[start:i + 1]
+                return body[start:start + count]
     return None
 
 def prop(data, name):
