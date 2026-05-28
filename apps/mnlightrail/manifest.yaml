@@ -7,10 +7,8 @@ author: Alex Miller
 fileName: mn_light_rail.star
 packageName: mnlightrail
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
-  - public transport
-  - train
-  - commute
   - utility
+published: '2022-03-02T18:30:39Z'
+updated: '2025-11-29T17:52:33Z'

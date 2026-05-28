@@ -10,7 +10,7 @@ recommendedInterval: 5
 category: weather
 tags:
   - weather
-  - forecast
   - nws
-  - live
-  - temperature
+  - real-time
+published: '2023-09-05T18:06:16Z'
+updated: '2025-12-26T18:50:18Z'

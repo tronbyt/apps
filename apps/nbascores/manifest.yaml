@@ -8,10 +8,11 @@ fileName: nba_scores.star
 packageName: nbascores
 recommendedInterval: 5
 supports2x: true
-category: utilities
+category: sports
 tags:
-  - nba
-  - scores
-  - sports
   - utility
   - clock
+  - nba
+  - basketball
+published: '2022-04-27T14:37:57Z'
+updated: '2026-03-16T07:45:43Z'

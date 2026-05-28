@@ -8,7 +8,7 @@ This app requires a functioning Home Assistant instance with the FlightRadar24 I
 
 The information can be hardcoded if running locally.
 
-This app will pull tail logos from Airhex using the three letter ICAO code. The filtering of what aircraft to display is done in Home Assistant through the FlightRadar24 integration. The direction of the tail logo can be changed by the user
+This app will pull tail logos from Logostream using the airline's ICAO or IATA code. This requires an API key which can be obtained at https://airline.logostream.dev/pricing. Airline logos provided by [Logostream](https://airline.logostream.dev/). The filtering of what aircraft to display is done in Home Assistant through the FlightRadar24 integration. The direction of the tail logo can be changed by the user in the app settings.
 
 ![image](https://github.com/motoridersd/HomeAssistant-Tidbyt/assets/5197858/5e502229-1701-466f-a03f-ceecb78afb21)
 

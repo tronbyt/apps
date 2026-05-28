@@ -8,10 +8,9 @@ fileName: flight_overhead.star
 packageName: flightoverhead
 broken: true
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - flight
   - aircraft
-  - transit
-  - travel
   - utility
+published: '2023-08-23T14:03:07Z'
+updated: '2025-12-05T22:28:51Z'

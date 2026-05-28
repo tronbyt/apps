@@ -8,9 +8,9 @@ fileName: costco_gas.star
 packageName: costcogas
 recommendedInterval: 5
 broken: true
-category: utilities
+category: transit
 tags:
-  - gas
   - utility
-  - transit
-  - price-tracker
+  - finance
+published: '2022-09-15T20:39:10Z'
+updated: '2025-12-05T22:28:51Z'

@@ -7,10 +7,9 @@ author: Martin Strauss
 fileName: bay_wheels.star
 packageName: baywheels
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - bike
-  - transit
   - utility
   - real-time
-  - commute
+published: '2022-05-03T15:08:33Z'
+updated: '2025-12-05T22:28:51Z'

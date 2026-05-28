@@ -2,10 +2,11 @@
 Applet: Weather
 Summary: Weather forecast
 Description: Weather forecasts for your location.
-Authors: JeffLac, RichardD012 (Recreation of Tidbyt Original)
+Authors: JeffLac, RichardD012, gabe565 (Recreation of Tidbyt Original)
 
 """
 
+load("animation.star", "animation")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("i18n.star", "tr")
@@ -107,6 +108,7 @@ def main(config):
     timezone = loc.get("timezone", time.tz())
     units = config.get("units", "imperial")
     showthreeday = config.bool("showthreeday", False)  # Add new config option
+    image_scale = 1 if config.bool("force_1x_images") else scale
 
     # Get API keys - check for both V3 and V2.5
     api_v3_key = config.get("api_v3", "")
@@ -148,11 +150,11 @@ def main(config):
 
     # Create the display
     if showthreeday:
-        return render_weather(daily_data, scale)
+        return render_weather(daily_data, scale, image_scale)
     else:
-        return render_single_day(daily_data, scale)
+        return render_single_day(daily_data, scale, image_scale)
 
-def render_single_day(daily_data, scale = 1):
+def render_single_day(daily_data, scale = 1, image_scale = 1):
     if len(daily_data) < 2:  # If we don't have at least 2 days
         return error_display("Weather API Error")
 
@@ -165,100 +167,211 @@ def render_single_day(daily_data, scale = 1):
     slide_percentage = get_slide_percentage(day["weather"])
     should_render_day_at_top = get_should_render_day_at_top(day["weather"])
 
-    # TIMING CALCULATIONS
-    slide_start_seconds = 2
-    delay_ms = int(100 / scale)
-    static_frames_before = int(slide_start_seconds * 1000 / delay_ms)
+    # Timing
+    delay_ms = 30
+    total_frames = int(15000 / delay_ms)
+    anim_frames = int(1500 / delay_ms)
+    static_frames_before = int(2000 / delay_ms)
+    bg_head_start = int(250 / delay_ms)
     slide_distance = int(64 * slide_percentage / 100) * scale
-    static_frames_after = 100 * scale
 
-    # Animation parameters
-    today_width_start = 63 * scale
-    today_width_end = 42 * scale
-    slide_distance_start = 0
-    slide_distance_end = slide_distance
+    # Each layer's duration spans to the end so the final frame is held
+    bg_delay = static_frames_before - bg_head_start
+    bg_duration = total_frames - bg_delay
+    bg_anim_pct = (anim_frames + bg_head_start) * 1.0 / bg_duration
 
-    # STUTTER ANIMATION PARAMETERS
-    stutter_distance = 3 * scale  # How far to move in first step
-    stutter_width_change = 3 * scale  # How much today_width shrinks in first step
-    stutter_frames = 3 * scale  # How many frames for the initial stutter movement
-    stutter_pause_frames = 6 * scale  # How long to pause after stutter (0.5 seconds)
-    finish_frames = 7 * scale  # How many frames to complete the rest
+    content_delay = static_frames_before
+    content_duration = total_frames - content_delay
+    content_anim_pct = anim_frames * 1.0 / content_duration
 
-    # BACKGROUND ANIMATION PARAMETERS (moves faster)
-    bg_stutter_frames = 2 * scale  # Background moves faster in stutter
-    bg_finish_frames = 5 * scale  # Background finishes faster
+    # Layout dimensions
+    today_width = 42 * scale
+    content_slide = 21 * scale
+    tomorrow_width = get_forecast_width(tomorrow["high"], False) * scale if scale == 2 else 16
+    day_offset = get_day_offset(day["high"]) * scale
+    screen_width = 64 * scale
+    screen_height = 32 * scale
+
+    # Static day abbreviation label (Layer 2)
+    if should_render_day_at_top:
+        day_label = render.Row(
+            main_align = "start",
+            cross_align = "start",
+            expanded = True,
+            children = [
+                render.Padding(
+                    pad = (-scale, 0, scale, 2 * scale),
+                    child = render.Box(
+                        width = 20 * scale,
+                        height = 8 * scale,
+                        color = "#00000000",
+                        child = render.Text(
+                            day_abbr,
+                            font = "5x8" if scale == 1 else "terminus-16",
+                            color = "#FFF",
+                        ),
+                    ),
+                ),
+            ],
+        )
+    else:
+        day_label = render.Row(
+            main_align = "start",
+            cross_align = "end",
+            expanded = True,
+            children = [
+                render.Padding(
+                    pad = (scale, 0, 0, 2 * scale),
+                    child = render.Box(
+                        width = 14 * scale,
+                        height = 8 * scale,
+                        color = "#000000CC",
+                        child = render.Text(
+                            day_abbr,
+                            font = "5x8" if scale == 1 else "terminus-16",
+                            color = "#FFF",
+                        ),
+                    ),
+                ),
+            ],
+        )
+
+    # Today temps column with invisible day label placeholder (for Layer 3)
+    if should_render_day_at_top:
+        today_temps = render.Column(
+            expanded = True,
+            main_align = "start",
+            cross_align = "start",
+            children = [
+                render.Row(
+                    children = [render.Box(width = 20 * scale, height = 13 * scale)],
+                ),
+                render.Row(
+                    children = [
+                        render.Box(
+                            width = today_width,
+                            height = 19 * scale,
+                            child = render_today_forecast(day, "", today_width - day_offset, "#00000000", scale),
+                        ),
+                    ],
+                ),
+            ],
+        )
+    else:
+        today_temps = render.Column(
+            expanded = True,
+            main_align = "start",
+            cross_align = "center",
+            children = [
+                render.Row(
+                    children = [render.Box(width = 1 * scale, height = 13 * scale)],
+                ),
+                render.Row(
+                    children = [
+                        render.Box(
+                            width = today_width,
+                            height = 19 * scale,
+                            child = render_today_forecast(day, "", today_width - day_offset, "#00000000", scale),
+                        ),
+                    ],
+                ),
+            ],
+        )
 
     return render.Root(
         delay = delay_ms,
-        child = render.Animation(
+        child = render.Stack(
             children = [
-                # PHASE 1: STATIC
-                render_frame(
-                    slide_distance_start,
-                    today_width_start,
-                    day,
-                    day_abbr,
-                    tomorrow,
-                    tomorrow_abbr,
-                    should_render_day_at_top,
-                    scale,
+                # Layer 1: Background image - slides left
+                animation.Transformation(
+                    child = render.Image(
+                        src = get_weather_image(day["weather"], image_scale),
+                        width = screen_width,
+                        height = screen_height,
+                    ),
+                    duration = bg_duration,
+                    delay = bg_delay,
+                    width = screen_width,
+                    height = screen_height,
+                    keyframes = make_keyframes(0, -slide_distance, bg_anim_pct),
                 ),
-            ] * static_frames_before + [
-                # PHASE 2A: STUTTER MOVEMENT
-                render_frame(
-                    # Background moves faster during stutter
-                    int((min(i + 1, bg_stutter_frames)) * stutter_distance / bg_stutter_frames),
-                    # Width changes at normal pace
-                    today_width_start - int((i + 1) * stutter_width_change / stutter_frames),
-                    day,
-                    day_abbr,
-                    tomorrow,
-                    tomorrow_abbr,
-                    should_render_day_at_top,
-                    scale,
-                )
-                for i in range(stutter_frames)
-            ] + [
-                # PHASE 2B: PAUSE on the stutter position
-                render_frame(
-                    stutter_distance,
-                    today_width_start - stutter_width_change,
-                    day,
-                    day_abbr,
-                    tomorrow,
-                    tomorrow_abbr,
-                    should_render_day_at_top,
-                    scale,
+                # Layer 2: Static day abbreviation (stays in place)
+                render.Box(
+                    width = screen_width,
+                    height = screen_height,
+                    child = render.Column(
+                        expanded = True,
+                        main_align = "end" if not should_render_day_at_top else "start",
+                        children = [day_label],
+                    ),
                 ),
-            ] * stutter_pause_frames + [
-                # PHASE 2C: COMPLETE the rest of the animation
-                render_frame(
-                    # Background finishes faster
-                    stutter_distance + int((min(i + 1, bg_finish_frames)) * (slide_distance_end - stutter_distance) / bg_finish_frames),
-                    # Width changes at normal pace
-                    (today_width_start - stutter_width_change) + int((i + 1) * ((today_width_end) - (today_width_start - stutter_width_change)) / finish_frames),
-                    day,
-                    day_abbr,
-                    tomorrow,
-                    tomorrow_abbr,
-                    should_render_day_at_top,
-                    scale,
-                )
-                for i in range(finish_frames)
-            ] + [
-                # PHASE 3: STATIC AFTER
-                render_frame(
-                    slide_distance_end,
-                    today_width_end,
-                    day,
-                    day_abbr,
-                    tomorrow,
-                    tomorrow_abbr,
-                    should_render_day_at_top,
-                    scale,
+                # Layer 3: Today temps + divider + tomorrow - all slide in together
+                animation.Transformation(
+                    child = render.Box(
+                        width = screen_width,
+                        height = screen_height,
+                        child = render.Row(
+                            main_align = "start",
+                            cross_align = "start",
+                            expanded = True,
+                            children = [
+                                today_temps,
+                                render.Row(
+                                    children = [
+                                        render.Padding(
+                                            pad = (scale, 3 * scale, scale, 3 * scale),
+                                            child = render.Box(
+                                                width = 1 * scale,
+                                                height = 26 * scale,
+                                                color = "#FFFFFF1A",
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                                render.Column(
+                                    main_align = "start",
+                                    cross_align = "start",
+                                    expanded = True,
+                                    children = [
+                                        render.Row(
+                                            main_align = "start",
+                                            cross_align = "start",
+                                            expanded = True,
+                                            children = [
+                                                render.Box(
+                                                    width = tomorrow_width,
+                                                    height = 13 * scale,
+                                                    child = render.Column(
+                                                        main_align = "start",
+                                                        cross_align = "center",
+                                                        expanded = True,
+                                                        children = [
+                                                            render.Padding(
+                                                                pad = (0, scale, 0, 0),
+                                                                child = render.Text(
+                                                                    tomorrow_abbr,
+                                                                    font = "5x8" if scale == 1 else "terminus-16",
+                                                                    color = "#FFF",
+                                                                ),
+                                                            ),
+                                                        ],
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        render_forecast(tomorrow, False, scale),
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ),
+                    duration = content_duration,
+                    delay = content_delay,
+                    width = screen_width,
+                    height = screen_height,
+                    keyframes = make_keyframes(content_slide, 0, content_anim_pct),
                 ),
-            ] * static_frames_after,
+            ],
         ),
     )
 
@@ -295,82 +408,6 @@ def get_weather_image(forecast, scale = 1):
     if not image:
         image = WEATHER_FULL_IMAGE.get(forecast)
     return image.readall() if image else ""
-
-def render_frame(slide_distance, today_width, day, day_abbr, tomorrow, tomorrow_abbr, day_top = False, scale = 1):
-    tomorrow_width = get_forecast_width(tomorrow["high"], False) * scale if scale == 2 else 16
-    return render.Stack(
-        children = [
-            # BACKGROUND IMAGE - In final slid position
-            render.Padding(
-                pad = (-slide_distance, 0, 0, 0),  # Final negative padding (background fully slid left)
-                child = render.Image(
-                    src = get_weather_image(day["weather"], scale),
-                    width = 64 * scale,
-                    height = 32 * scale,
-                ),
-            ),
-            # Primary Box
-            render.Box(
-                width = 64 * scale,
-                height = 32 * scale,
-                #PRIMARY ROW
-                child = render.Row(
-                    main_align = "start",
-                    cross_align = "start",
-                    expanded = True,
-                    children = [
-                        render_today_forecast_column(day, day_abbr, today_width, day_top, scale),  #end row
-                        render.Row(
-                            children = [
-                                render.Padding(
-                                    pad = (scale, 3 * scale, scale, 3 * scale),
-                                    child = render.Box(
-                                        width = 1 * scale,
-                                        height = 26 * scale,
-                                        color = "#FFFFFF1A",
-                                    ),
-                                ),
-                            ],
-                        ),
-                        render.Column(
-                            main_align = "start",
-                            cross_align = "start",
-                            expanded = True,
-                            children = [
-                                render.Row(
-                                    main_align = "start",
-                                    cross_align = "start",
-                                    expanded = True,
-                                    children = [
-                                        render.Box(
-                                            width = tomorrow_width,
-                                            height = 13 * scale,
-                                            child = render.Column(
-                                                main_align = "start",
-                                                cross_align = "center",
-                                                expanded = True,
-                                                children = [
-                                                    render.Padding(
-                                                        pad = (0, scale, 0, 0),
-                                                        child = render.Text(
-                                                            tomorrow_abbr,
-                                                            font = "5x8" if scale == 1 else "terminus-16",
-                                                            color = "#FFF",
-                                                        ),
-                                                    ),
-                                                ],
-                                            ),
-                                        ),
-                                    ],
-                                ),
-                                render_forecast(tomorrow, False, scale),
-                            ],
-                        ),
-                    ],
-                ),
-            ),
-        ],
-    )
 
 def render_today_forecast_column(day, day_abbr, today_width, day_top = False, scale = 1):
     day_offset = get_day_offset(day["high"]) * scale
@@ -684,7 +721,7 @@ def get_weather_icon(forecast, scale = 1):
         icon = WEATHER_ICONS.get(forecast)
     return icon.readall() if icon else ""
 
-def render_weather(daily_data, scale = 1):
+def render_weather(daily_data, scale = 1, icon_scale = 1):
     # Create weather icons mapping
 
     # Calculate dimensions
@@ -709,9 +746,9 @@ def render_weather(daily_data, scale = 1):
             children = [
                 # Weather icon
                 render.Image(
-                    src = get_weather_icon(day["weather"], scale),
-                    width = 12 * scale,
-                    height = 12 * scale,
+                    src = get_weather_icon(day["weather"], icon_scale),
+                    width = 13 * scale,
+                    height = 13 * scale,
                 ),
                 # Day abbreviation
                 render.Text(
@@ -771,6 +808,23 @@ def error_display(message, scale = 1):
         child = render.Text(message, font = "tb-8" if scale == 1 else "terminus-12"),
     )
 
+def make_keyframes(start_x, end_x, anim_pct = 1.0):
+    return [
+        animation.Keyframe(
+            percentage = 0.0,
+            transforms = [animation.Translate(start_x, 0)],
+            curve = "ease_in_out",
+        ),
+        animation.Keyframe(
+            percentage = anim_pct,
+            transforms = [animation.Translate(end_x, 0)],
+        ),
+        animation.Keyframe(
+            percentage = 1.0,
+            transforms = [animation.Translate(end_x, 0)],
+        ),
+    ]
+
 def get_schema():
     options = [
         schema.Option(
@@ -828,5 +882,12 @@ def get_schema():
                 icon = "clock",
                 default = str(DEFAULT_CACHE_MINS),
             ),
+            schema.Toggle(
+                id = "force_1x_images",
+                name = "Force 1x Images",
+                desc = "The two-day forecast images have been upscaled to 2x. Enable this if you prefer the crispier look of the 1x images.",
+                icon = "magnifyingGlass",
+                default = False,
+            ) if canvas.is2x() else None,
         ],
     )

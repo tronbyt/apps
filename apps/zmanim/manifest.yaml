@@ -9,16 +9,17 @@ packageName: zmanim
 recommendedInterval: 60
 categories:
   - utility
-  - religious
+  - lifestyle
 requires:
-  - http
+  - tech
 exampleConfig:
   zip_code: '11367'
   speed: '30'
 category: utilities
 tags:
-  - religious
-  - prayer
+  - lifestyle
   - jewish
   - utility
   - clock
+published: '2024-10-29T16:12:30Z'
+updated: '2025-12-02T19:30:22Z'

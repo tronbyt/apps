@@ -8,8 +8,7 @@ fileName: san_diego_trolley.star
 packageName: sandiegotrolley
 recommendedInterval: 5
 broken: true
-category: utilities
-tags:
-  - transit
-  - bus
-  - subway
+category: transit
+tags: []
+published: '2024-04-25T14:09:04Z'
+updated: '2025-12-05T22:28:51Z'

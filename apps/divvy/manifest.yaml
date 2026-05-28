@@ -7,9 +7,9 @@ author: Andy Day (@adayNU)
 fileName: divvy.star
 packageName: divvy
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - bike
-  - transit
   - utility
   - real-time
+published: '2023-09-05T17:44:18Z'
+updated: '2025-11-29T23:55:39Z'

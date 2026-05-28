@@ -7,10 +7,8 @@ author: karmeleon
 fileName: new_jersey_path.star
 packageName: newjerseypath
 recommendedInterval: 5
-category: utilities
+category: transit
 tags:
-  - transit
-  - subway
-  - njpath
   - real-time
-  - public-transit
+published: '2023-03-23T10:59:38Z'
+updated: '2025-11-29T17:52:33Z'

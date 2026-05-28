@@ -9,8 +9,7 @@ packageName: tidesandtemp
 recommendedInterval: 5
 category: weather
 tags:
-  - tides
-  - water-temperature
-  - ndbc
-  - noaa
-  - ocean
+  - weather
+  - nature
+published: '2023-07-10T13:12:51Z'
+updated: '2025-12-05T22:28:51Z'
