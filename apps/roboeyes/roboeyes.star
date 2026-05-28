@@ -90,18 +90,31 @@ def draw_triangle(x, y, w, h, slope_right, color):
     if w <= 0 or h <= 0:
         return []
     lines = []
-    for dx in range(w):
-        if slope_right:
-            dy = int(h * (dx + 1) / w)
+    prev_dy = -1
+    start_dx = 0
+    for dx in range(w + 1):
+        if dx < w:
+            if slope_right:
+                dy = int(h * (dx + 1) / w)
+            else:
+                dy = int(h * (w - dx) / w)
         else:
-            dy = int(h * (w - dx) / w)
-        if dy > 0:
-            lines.append(
-                render.Padding(
-                    pad = (x + dx, y, 0, 0),
-                    child = render.Box(width = 1, height = dy, color = color),
-                ),
-            )
+            dy = -1
+        if dx == 0:
+            prev_dy = dy
+            start_dx = 0
+            continue
+        if dy != prev_dy:
+            if prev_dy > 0:
+                run_width = dx - start_dx
+                lines.append(
+                    render.Padding(
+                        pad = (x + start_dx, y, 0, 0),
+                        child = render.Box(width = run_width, height = prev_dy, color = color),
+                    ),
+                )
+            prev_dy = dy
+            start_dx = dx
     return lines
 
 def main(config):
