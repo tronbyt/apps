@@ -58,7 +58,7 @@ EASE_IN_OUT = "ease_in_out"
 
 DISPLAY_VALUES = {
     "cup": ["cup", "#333333", "#fff", "NASCAR Cup"],
-    "xfinity": ["xfinity", "#4427ad", "#fff", "Xfinity Series"],
+    "xfinity": ["xfinity", "#4427ad", "#fff", "O'Reilly Series"],
     "trucks": ["trucks", "#990000", "#fff", "Craftsman Trucks"],
     "mfg": "MFG Pts / Wins",
     "own": "Ownr Pts / Wins",
@@ -319,7 +319,7 @@ def get_schema():
                         value = "cup",
                     ),
                     schema.Option(
-                        display = "NASCAR Xfinity Series",
+                        display = "NASCAR O'Reilly Auto Parts Series",
                         value = "xfinity",
                     ),
                     schema.Option(
