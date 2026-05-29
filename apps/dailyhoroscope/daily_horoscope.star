@@ -541,12 +541,12 @@ def _meeus_moon_sign(t):
 
 def _sun_longitude(t):
     # Apparent ecliptic longitude of the sun in degrees (Meeus Ch 25)
-    year = int(t.format("2006"))
-    month = int(t.format("1"))
-    day = int(t.format("2"))
-    hour = int(t.format("15"))
-    minute = int(t.format("4"))
-    second = int(t.format("5"))
+    year = t.year
+    month = t.month
+    day = t.day
+    hour = t.hour
+    minute = t.minute
+    second = t.second
 
     jd = _julian_day(year, month, day, hour, minute, second)
     tc = (jd - 2451545.0) / 36525.0
