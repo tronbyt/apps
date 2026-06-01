@@ -58,7 +58,7 @@ def main(config):
                                 children =
                                     displayItem(json_data),
                             ),
-                    ) if rc == 0 else error(json_data),
+                    ) if rc == 0 and len(json_data) > 0 else error(json_data if rc != 0 else "No national days today"),
                 ],
             ),
         )
@@ -68,7 +68,7 @@ def main(config):
                 children = [
                     title(now_unformatted),
                     render.Column(
-                        children = [render.WrappedText(json_data[getRandomItem(len(json_data))], font = ARTICLE_SUB_TITLE_FONT, color = ARTICLE_COLOR, align = "center", width = FULL_WIDTH) if rc == 0 else error(json_data)],
+                        children = [render.WrappedText(json_data[getRandomItem(len(json_data))], font = ARTICLE_SUB_TITLE_FONT, color = ARTICLE_COLOR, align = "center", width = FULL_WIDTH) if rc == 0 and len(json_data) > 0 else error(json_data if rc != 0 else "No national days today")],
                         main_align = "center",
                         cross_align = "center",
                         expanded = True,
