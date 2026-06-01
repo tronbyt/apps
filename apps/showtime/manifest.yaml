@@ -1,0 +1,12 @@
+---
+id: showtime
+name: ShowTime
+summary: Displays shows in your area
+desc: Displays shows coming to your area.
+author: Robert Ison
+recommendedInterval: 720
+category: clocks
+tags:
+  - media
+published: '2024-10-07T16:19:52Z'
+updated: '2025-11-29T17:52:33Z'

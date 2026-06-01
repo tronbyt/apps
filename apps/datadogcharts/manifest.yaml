@@ -1,0 +1,16 @@
+---
+id: datadog-charts
+name: Datadog Charts
+summary: Shows a dashboard chart
+desc: Shows the first chart of a Datadog dashboard!
+author: Gabe Ochoa
+fileName: datadog_charts.star
+packageName: datadogcharts
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - art
+  - tracking
+published: '2023-12-22T18:10:10Z'
+updated: '2025-11-30T19:58:27Z'

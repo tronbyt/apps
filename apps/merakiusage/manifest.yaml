@@ -1,0 +1,18 @@
+---
+id: meraki-usage
+name: Meraki Usage
+summary: Monitor Client Usage
+desc: Monitor client usages for your Meraki network.
+author: UnBurn
+fileName: meraki_usage.star
+packageName: merakiusage
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - tracking
+  - smart-home
+  - admin
+  - utility
+published: '2023-11-29T17:48:47Z'
+updated: '2025-11-29T23:55:39Z'

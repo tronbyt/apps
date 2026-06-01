@@ -1,0 +1,15 @@
+---
+id: snake
+name: Snake
+summary: Snake game animation
+desc: Shows random snake game animation.
+author: noahpodgurski
+fileName: snake.star
+packageName: snake
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - retro
+published: '2023-06-27T18:20:57Z'
+updated: '2025-12-02T19:30:22Z'

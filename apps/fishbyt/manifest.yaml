@@ -1,0 +1,16 @@
+---
+id: fishbyt
+name: Fishbyt
+summary: Fish facts
+desc: Gaze upon glorious marine life.
+author: tavdog
+fileName: fishbyt.star
+packageName: fishbyt
+broken: true
+recommendedInterval: 5
+category: entertainment
+tags:
+  - nature
+  - education
+published: '2022-02-16T21:35:37Z'
+updated: '2025-12-05T22:28:51Z'

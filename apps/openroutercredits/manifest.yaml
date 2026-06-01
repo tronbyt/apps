@@ -1,0 +1,16 @@
+---
+id: openrouter-credits
+name: OpenRouter Creds
+summary: OpenRouter Credits
+desc: Shows remaining credits available on OpenRouter API.
+author: tavdog
+fileName: openrouter_credits.star
+packageName: openroutercredits
+recommendedInterval: 300
+category: utilities
+tags:
+  - tech
+  - utility
+  - tracking
+published: '2025-10-24T09:43:27Z'
+updated: '2025-11-30T19:58:27Z'

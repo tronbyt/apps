@@ -1,0 +1,17 @@
+---
+id: states-visited
+name: States Visited
+summary: Show states you've visited
+desc: Select the states you have been to and show them off on your Tidbyt!
+author: sloanesturz
+fileName: states_visited.star
+packageName: statesvisited
+recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - science
+  - local
+  - smart-home
+published: '2022-11-10T14:40:52Z'
+updated: '2025-12-04T09:38:27Z'

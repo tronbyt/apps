@@ -1,0 +1,16 @@
+---
+id: aquarium
+name: Aquarium
+summary: Digital Aquarium
+desc: A digital aquarium.
+author: Robert Ison
+recommendedInterval: 5
+supports2x: true
+category: entertainment
+tags:
+  - tech
+  - nature
+  - art
+  - wide 2x support
+published: '2024-11-05T17:51:57Z'
+updated: '2026-02-04T00:13:36Z'

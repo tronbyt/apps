@@ -1,0 +1,16 @@
+---
+id: leetcodestats
+name: LeetCodeStats
+summary: Gets LeetCode stats
+desc: Displays your LeetCode stats in a nice way.
+author: Jake Manske
+fileName: leetcodestats.star
+packageName: leetcodestats
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - sports
+  - utility
+published: '2022-09-15T21:30:58Z'
+updated: '2025-11-29T23:55:39Z'

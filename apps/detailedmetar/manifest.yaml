@@ -1,0 +1,15 @@
+---
+id: detailedmetar
+name: DetailedMETAR
+summary: Display detailed METAR
+desc: Display detailed, decoded METAR information.
+author: SamuelSagarino
+fileName: detailedmetar.star
+packageName: detailedmetar
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - utility
+published: '2023-04-19T19:07:07Z'
+updated: '2026-04-03T03:40:05Z'

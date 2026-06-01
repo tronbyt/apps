@@ -1,0 +1,15 @@
+---
+id: ct-quotes
+name: CT Quotes
+summary: Quotes from Chrono Trigger
+desc: Displays random quotes and animations from the classic RPG Chrono Trigger.
+author: Jessica Chappell
+fileName: ct_quotes.star
+packageName: ctquotes
+category: entertainment
+tags:
+  - gaming
+  - art
+  - retro
+published: '2023-03-02T16:32:35Z'
+updated: '2025-12-04T09:38:27Z'

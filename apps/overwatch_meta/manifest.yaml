@@ -1,0 +1,13 @@
+---
+id: overwatch-meta
+name: Overwatch Meta
+summary: Overatch 2 Meta Statistics
+desc: This app polls the Overwatch 2 Meta information from Overbuff.
+author: GeoffBarrett
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - sports
+published: '2024-10-07T16:15:18Z'
+updated: '2025-12-02T19:30:22Z'

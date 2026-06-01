@@ -1,0 +1,15 @@
+---
+id: pinball-map
+name: Pinball Map
+summary: Pinball machines near you
+desc: This shows you the most recently added pinball machines near your location. It uses data from http://pinballmap.com.
+author: scottwainstock
+fileName: pinball_map.star
+packageName: pinballmap
+recommendedInterval: 5
+category: gaming
+tags:
+  - retro
+  - gaming
+published: '2023-11-01T18:26:46Z'
+updated: '2025-11-29T23:55:39Z'

@@ -1,0 +1,16 @@
+---
+id: letterboxd
+name: Letterboxd
+summary: Movie Reviews
+desc: Show 3 most recent movies in Recent Activity.
+author: protolexus
+fileName: letterboxd.star
+packageName: letterboxd
+recommendedInterval: 5
+category: entertainment
+tags:
+  - media
+  - news
+  - music
+published: '2023-04-27T13:14:24Z'
+updated: '2025-12-05T22:28:51Z'

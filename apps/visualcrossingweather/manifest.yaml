@@ -1,0 +1,15 @@
+---
+id: visualcrossingweather
+name: Visualcrossing
+summary: Visualcrossing Weather
+desc: Display current temperature, humidity, and conditions for a user-specified location based on visualcrossing data.
+author: ryan-doucette
+fileName: visualcrossing_weather.star
+packageName: visualcrossingweather
+category: weather
+tags:
+  - weather
+  - humidity
+  - local
+published: '2025-07-25T17:59:08Z'
+updated: '2025-12-17T23:02:59Z'

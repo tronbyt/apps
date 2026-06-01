@@ -1,0 +1,16 @@
+---
+id: tv-quotes
+name: TV Quotes
+summary: Display Television Quotes
+desc: Displays Television Quotes.
+author: rs7q5
+fileName: tv_quotes.star
+packageName: tvquotes
+recommendedInterval: 5
+category: entertainment
+tags:
+  - media
+  - art
+  - music
+published: '2022-06-09T17:04:03Z'
+updated: '2025-12-02T19:30:22Z'

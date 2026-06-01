@@ -1,0 +1,19 @@
+---
+id: shopify-memories
+name: Shopify Memories
+summary: Remember your journey
+desc: Showcase some of your store’s most significant memories like your first sale, anniversaries, and more.
+author: Shopify
+fileName: shopify_memories.star
+packageName: shopifymemories
+recommendedInterval: 5
+broken: true
+brokenReason: 'www.shopcounter.app: no such host'
+category: utilities
+tags:
+  - shopify
+  - retro
+  - utility
+  - productivity
+published: '2022-12-06T03:17:01Z'
+updated: '2025-12-05T22:28:51Z'

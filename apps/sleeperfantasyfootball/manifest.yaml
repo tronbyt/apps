@@ -1,0 +1,16 @@
+---
+id: sleeperfantasynfl
+name: SleeperFantasyNFL
+summary: Fantasy Standings & Scores
+desc: Display standings or scores for a Sleeper Fantasy Football league (NFL).
+author: jweier
+fileName: sleeperfantasynfl.star
+packageName: sleeperfantasynfl
+recommendedInterval: 5
+category: sports
+tags:
+  - media
+  - nfl
+  - football
+published: '2023-08-23T14:14:46Z'
+updated: '2025-11-29T17:52:33Z'

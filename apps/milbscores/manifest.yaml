@@ -1,0 +1,15 @@
+---
+id: milb-scores
+name: MiLB Scores
+summary: Minor League scores
+desc: Shows baseball scores for the Minor Leagues.
+author: M0ntyP
+fileName: milb_scores.star
+packageName: milbscores
+recommendedInterval: 5
+category: sports
+tags:
+  - mlb
+  - baseball
+published: '2023-08-23T14:16:14Z'
+updated: '2025-11-30T19:58:27Z'

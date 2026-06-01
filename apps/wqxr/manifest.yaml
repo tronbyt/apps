@@ -1,0 +1,16 @@
+---
+id: wqxr
+name: WQXR
+summary: WQXR What's On
+desc: Shows what's currently playing on WQXR, New York's Classical Music Radio Station.
+author: Andrew Westling
+fileName: wqxr.star
+packageName: wqxr
+recommendedInterval: 5
+category: entertainment
+tags:
+  - music
+  - classical
+  - real-time
+published: '2023-06-30T16:06:24Z'
+updated: '2025-12-02T19:30:22Z'

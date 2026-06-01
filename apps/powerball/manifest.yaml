@@ -1,0 +1,16 @@
+---
+id: powerball
+name: PowerBall
+summary: Shows Powerball Numbers
+desc: Shows up to date powerball numbers and next drawing.
+author: kylejohnson
+fileName: powerball.star
+packageName: powerball
+broken: true
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+  - gambling
+published: '2022-03-14T22:07:46Z'
+updated: '2025-12-05T22:28:51Z'

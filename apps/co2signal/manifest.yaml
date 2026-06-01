@@ -1,0 +1,16 @@
+---
+id: co2-signal
+name: CO2 Signal
+summary: Local power CO2 intensity
+desc: Shows the carbon intensity of your local electricity using the Electricity Maps API.
+author: Harper Trow
+fileName: co2_signal.star
+packageName: co2signal
+recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - nature
+  - finance
+published: '2023-06-15T20:38:07Z'
+updated: '2026-03-08T04:17:50Z'

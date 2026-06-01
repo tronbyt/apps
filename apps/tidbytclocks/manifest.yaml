@@ -1,0 +1,17 @@
+---
+id: tidbyt-clocks
+name: Tidbyt Clocks
+summary: Displays Tidbyt clock apps
+desc: Displays clock apps available on the Tidbyt. Apps that have "clock" in the app name or description are listed. A clock is also displayed in the background.
+author: rs7q5
+fileName: tidbyt_clocks.star
+packageName: tidbytclocks
+recommendedInterval: 60
+category: clocks
+tags:
+  - tidbyt
+  - clock
+  - art
+  - utility
+published: '2023-02-01T15:40:14Z'
+updated: '2025-12-02T19:30:22Z'

@@ -1,0 +1,14 @@
+---
+id: flights-nearby
+name: Flights Nearby
+summary: Flights nearby
+desc: Find the closest flight to your location. Requires a Flight Radar API key from Rapid API.
+author: eddichen
+fileName: flights_nearby.star
+packageName: flightsnearby
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2023-03-14T19:08:03Z'
+updated: '2025-12-05T22:28:51Z'

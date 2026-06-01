@@ -1,0 +1,17 @@
+---
+id: retrograde-planet
+name: Retrograde Planet
+summary: Show Retrograde Planets
+desc: Display when planets change from retrograde to direct and viceversa and current status.
+author: tidbytdev
+recommendedInterval: 5
+fileName: retrograde_planet.star
+packageName: retrogradeplanet
+category: science
+tags:
+  - space
+  - science
+  - retrograde
+  - clock
+published: '2025-05-14T19:49:23Z'
+updated: '2025-12-17T23:02:59Z'

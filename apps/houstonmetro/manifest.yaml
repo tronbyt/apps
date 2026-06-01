@@ -1,0 +1,15 @@
+---
+id: houstonmetro
+name: Houston Metro
+summary: Houston Metro arrivals
+desc: Houston Metro arrivals.
+author: DanielJRutledge
+fileName: houstonmetro.star
+packageName: houstonmetro
+recommendedInterval: 5
+category: transit
+tags:
+  - local
+  - utility
+published: '2023-03-30T16:38:36Z'
+updated: '2025-11-29T23:55:39Z'

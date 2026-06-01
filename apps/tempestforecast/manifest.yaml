@@ -1,0 +1,15 @@
+---
+id: tempestforecast
+name: Tempest Forecast
+summary: 3-Day Tempest Weather Forecast
+desc: Displays a 3-day forecast using your Tempest weather station data. Requires a Station ID and API Token.
+author: Nick Enslinger
+filename: tempestforecast.star
+supports2x: true
+category: weather
+tags:
+  - weather
+  - utility
+  - wide 2x support
+published: '2026-01-03T23:36:04Z'
+updated: '2026-01-04T19:01:16Z'

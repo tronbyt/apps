@@ -1,0 +1,16 @@
+---
+id: weather-clock
+name: Weather Clock
+summary: Time and weather
+desc: Display time and current weather.
+author: J. Keybl
+fileName: weatherclock.star
+packageName: weatherclock
+recommendedInterval: 0
+category: weather
+tags:
+  - weather
+  - clock
+  - utility
+published: '2023-05-19T17:26:10Z'
+updated: '2025-12-02T19:30:22Z'

@@ -1,0 +1,16 @@
+---
+id: stripe-sales
+name: Stripe Sales
+summary: Shows your Stripe sales
+desc: Shows the order count and total sum of sales you've made today on Stripe.
+author: Jon Bilous
+fileName: stripe_sales.star
+packageName: stripesales
+recommendedInterval: 5
+category: finance
+tags:
+  - stripe
+  - finance
+  - utility
+published: '2023-01-24T16:21:11Z'
+updated: '2025-12-05T22:28:51Z'

@@ -1,0 +1,14 @@
+---
+id: lifx-lights
+name: LIFX Lights
+summary: LIFX lights status
+desc: View the current status and color of your lights.
+author: Daniel Sitnik
+fileName: lifx_lights.star
+packageName: lifxlights
+recommendedInterval: 5
+category: utilities
+tags:
+  - smart-home
+published: '2023-04-17T17:31:53Z'
+updated: '2025-12-02T19:30:22Z'

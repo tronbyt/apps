@@ -1,0 +1,15 @@
+---
+id: skordlesoftball
+name: SkordleSoftBall
+summary: Displays Skordle SB Games
+desc: This app gets softball data from the Skordle website to display on the Tidbyt. A user can select the class of game and manually select which game to display.
+author: Woolycoin437420
+fileName: skordlesoftball.star
+packageName: skordlesoftball
+recommendedInterval: 5
+category: sports
+tags:
+  - gaming
+  - art
+published: '2023-11-07T14:45:58Z'
+updated: '2025-11-30T19:58:27Z'

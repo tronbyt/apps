@@ -1,0 +1,14 @@
+---
+id: index-ticker
+name: Index Ticker
+summary: Displays ticker for indices
+desc: Display ticker and stats for stock indices.
+author: M0ntyP
+fileName: index_ticker.star
+packageName: indexticker
+recommendedInterval: 1
+category: finance
+tags:
+  - finance
+published: '2023-12-17T12:50:41Z'
+updated: '2026-02-23T21:21:29Z'

@@ -1,0 +1,15 @@
+---
+id: afl-scores
+name: AFL Scores
+summary: Shows AFL Scores
+desc: Shows AFL (Australian Football League) scores.
+author: M0ntyP
+fileName: afl_scores.star
+packageName: aflscores
+recommendedInterval: 5
+category: sports
+tags:
+  - afl
+  - football
+published: '2023-03-23T12:24:44Z'
+updated: '2026-04-21T20:43:23Z'

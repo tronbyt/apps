@@ -1,0 +1,14 @@
+---
+id: dw-headline
+name: DW Headline
+summary: DailyWire Headlines
+desc: Shows the latest published headline on DailyWire.com.
+author: bmdelaune
+fileName: dw_headline.star
+packageName: dwheadline
+recommendedInterval: 5
+category: news
+tags:
+  - news
+published: '2022-04-04T16:09:05Z'
+updated: '2025-11-29T17:52:33Z'
