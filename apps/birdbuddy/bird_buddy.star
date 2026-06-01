@@ -39,41 +39,6 @@ VALID_BIRD_NODE_TYPES = [
     "FeedItemMysteryVisitorNotRecognized",
 ]
 
-def inspect_graphql_schema(token):
-    query = {
-        "query": """
-            query testCollectionSpecies {
-              collectionSpeciesList(first: 20) {
-                edges {
-                  node {
-                    id
-                    visitLastTime
-                    species {
-                      ... on SpeciesBird {
-                        id
-                        name
-                        iconUrl
-                      }
-                    }
-                  }
-                }
-              }
-            }
-        """,
-    }
-    headers = {
-        "Authorization": "Bearer {}".format(token),
-        "Content-Type": "application/json",
-    }
-    response = http.post(
-        url = BIRD_BUDDY_GRAPHQL_URL,
-        json_body = query,
-        headers = headers,
-        ttl_seconds = 0,
-    )
-    print("INSPECTION STATUS: {}".format(response.status_code))
-    print("INSPECTION BODY: {}".format(response.body()))
-
 def main(config):
     username = config.str("username", "")
     password = config.str("password", "")
@@ -109,6 +74,19 @@ def main(config):
     # Only render if there was a sighting
     timestamp = latest_sighting.get("timestamp")
     if not timestamp:
+        return []
+
+    clean_ts = clean_timestamp(timestamp)
+    if not clean_ts:
+        return []
+
+    sighting_time = time.parse_time(clean_ts, format = "2006-01-02T15:04:05Z")
+    if not sighting_time:
+        return []
+
+    now = time.now()
+    diff_seconds = now.unix - sighting_time.unix
+    if diff_seconds > 3600:  # older than 1 hour
         return []
 
     # Inject random bird icon for mystery visitors
@@ -656,7 +634,7 @@ def get_postcard_sighting(token, postcard_id):
             print("Postcard sighting error: {} (postcard may already be collected)".format(error.get("message", "Unknown error")))
         return None
 
-    data = sighting_response.get("data")
+    data = sighting_response.get("data") or {}
     if not data or "sightingCreateFromPostcard" not in data:
         return None
 
@@ -959,7 +937,7 @@ def get_random_collection_species(token):
 
     if bird_collections:
         # Get pseudo-random index based on current nanosecond
-        idx = time.now().unix_nano % len(bird_collections)
+        idx = time.now().unix % len(bird_collections)
         return bird_collections[idx].get("species") or {}
     return {}
 
