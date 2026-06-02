@@ -78,11 +78,34 @@ DELAY_MS = 90
 GROUND_Y = 26  # logical row where ground starts
 
 # --- Season palette / metadata ---
-SEASON = {
+# v1 Tidbyt panels run noticeably brighter than later hardware, so the full
+# broad sky/ground fills glare. BG_DIM scales those fills toward black; sprites
+# and text keep full brightness so they still pop against the calmer backdrop.
+BG_DIM = 0.1
+
+_HEXD = "0123456789abcdef"
+
+def _hex2(n):
+    n = 0 if n < 0 else (255 if n > 255 else n)
+    return _HEXD[n // 16] + _HEXD[n % 16]
+
+def dim_hex(hex_color, factor = BG_DIM):
+    # Scale an "#rrggbb" color's channels toward black by `factor` (0..1).
+    h = hex_color[1:]
+    r = int(int(h[0:2], 16) * factor)
+    g = int(int(h[2:4], 16) * factor)
+    b = int(int(h[4:6], 16) * factor)
+    return "#" + _hex2(r) + _hex2(g) + _hex2(b)
+
+_RAW_SEASON = {
     "spring": {"label": "SPRING", "sky": "#79c7e8", "ground": "#5aa72e"},
     "summer": {"label": "SUMMER", "sky": "#3fa9f5", "ground": "#36b6c7"},
     "autumn": {"label": "AUTUMN", "sky": "#e29a44", "ground": "#7c5a32"},
     "winter": {"label": "WINTER", "sky": "#2b4a72", "ground": "#e6eef8"},
+}
+SEASON = {
+    k: {"label": v["label"], "sky": dim_hex(v["sky"]), "ground": dim_hex(v["ground"])}
+    for k, v in _RAW_SEASON.items()
 }
 
 # Astronomical event -> season, by hemisphere.
