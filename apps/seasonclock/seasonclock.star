@@ -181,6 +181,10 @@ BOUNDARIES = [
     ("2036-12-21T07:12:42Z", "dec_solstice"),
 ]
 
+# Pre-parse the static boundary instants once at load so find_seasons doesn't
+# re-parse ~52 ISO strings on every render.
+PARSED_BOUNDARIES = [(time.parse_time(iso), event) for iso, event in BOUNDARIES]
+
 DEFAULT_LOCATION = """
 {
 	"lat": "40.6781784",
@@ -223,8 +227,7 @@ def find_seasons(now_unix):
     # Return (current_event, current_start_time, next_event, next_start_time) or None.
     current = None
     next = None
-    for iso, event in BOUNDARIES:
-        bt = time.parse_time(iso)
+    for bt, event in PARSED_BOUNDARIES:
         if bt.unix <= now_unix:
             current = (event, bt)
         elif next == None:
@@ -377,8 +380,8 @@ def notice(msg):
 
 def main(config):
     location = json.decode(config.get("location") or DEFAULT_LOCATION)
-    timezone = location.get("timezone", "America/New_York")
-    hemisphere = "southern" if float(location["lat"]) < 0 else "northern"
+    timezone = location.get("timezone", time.tz())
+    hemisphere = "southern" if float(location.get("lat", "0")) < 0 else "northern"
     mode = config.get("mode") or "countdown"
 
     # "dev_date" is a hidden test hook (not in the schema). When set to an
