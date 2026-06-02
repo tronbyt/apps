@@ -13,6 +13,12 @@ Author: jvivona
 #                    - moved data to github repo
 # 20231107 - jvivona - cleanup code in for loop
 # 20250326 - jvivona - 12 teams now - updated
+# 20260602 - jvivona - repoint to revived data feed (new wrapped schema):
+#                    - standings.json now wrapped: decode(...)["standings"], field teamAbbreviation -> team_code
+#                    - nri.json fields: startDateTime/endDateTime -> start/end, locationName -> location
+#                    - parse timestamps with seconds+millis (...:05.000-07:00)
+#                    - standings slides built dynamically (handles 13+ teams / odd counts)
+#                    - flags fetched once instead of per slide
 
 load("animation.star", "animation")
 load("encoding/base64.star", "base64")
@@ -22,7 +28,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-VERSION = 25085
+VERSION = 26153
 
 DEFAULTS = {
     "display": "nri",
@@ -46,15 +52,16 @@ DEFAULTS = {
 def main(config):
     displaytype = config.get("datadisplay", DEFAULTS["display"])
 
-    # we always need standings - so just go get it
-    standings = json.decode(get_cachable_data(DEFAULTS["api"].format("standings")))
+    # we always need standings - so just go get it.
+    # standings.json is the new wrapped schema: { ..., "standings": [ ... ] }
+    standings = json.decode(get_cachable_data(DEFAULTS["api"].format("standings")))["standings"]
 
     displayrow = []
 
     # if we're showing NRI go and get that data
     if displaytype == "nri":
         data = json.decode(get_cachable_data(DEFAULTS["api"].format(displaytype)))
-        if data.get("startDateTime", "") == "":
+        if data.get("start", "") == "":
             return []
         else:
             displayrow = nri(data, standings, config)
@@ -80,19 +87,19 @@ def nri(nri, standings, config):
     standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
     timezone = time.tz()  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
 
-    date_and_time_first = nri["startDateTime"]
-    date_and_time_second = nri["endDateTime"]
-    date_and_time_first_dt = time.parse_time(date_and_time_first, "2006-01-02T15:04-07:00").in_location(timezone)
-    date_and_time_second_dt = time.parse_time(date_and_time_second, "2006-01-02T15:04-07:00").in_location(timezone)
+    date_and_time_first = nri["start"]
+    date_and_time_second = nri["end"]
+    date_and_time_first_dt = time.parse_time(date_and_time_first, "2006-01-02T15:04:05.000-07:00").in_location(timezone)
+    date_and_time_second_dt = time.parse_time(date_and_time_second, "2006-01-02T15:04:05.000-07:00").in_location(timezone)
     date_time_format = date_and_time_first_dt.format("Jan 2-") + date_and_time_second_dt.format("2 2006") if config.bool("is_us_date_format", DEFAULTS["date_us"]) else date_and_time_first_dt.format("2-") + date_and_time_second_dt.format("2 Jan 2006")
 
     standing_text = ""
     for i in standings:
-        standing_text = standing_text + "{}. {} ({})  ".format(str(i["position"]), i["teamAbbreviation"], str(i["points"]))
+        standing_text = standing_text + "{}. {} ({})  ".format(str(i["position"]), i["team_code"], str(i["points"]))
 
     return [
         render.Box(width = 64, height = 1),
-        fade_child(nri["name"].replace("Sail Grand Prix", "GP"), nri["locationName"], text_color),
+        fade_child(nri["name"].replace("Sail Grand Prix", "GP"), nri["location"], text_color),
         render.WrappedText(content = date_time_format, font = DEFAULTS["regular_font"], color = text_color, align = "center", width = DEFAULTS["data_box_width"], height = 5),
         render.Box(width = 64, height = 1),
         render.Marquee(offset_start = 48, child = render.Text(height = 6, content = standing_text, font = DEFAULTS["regular_font"], color = standings_text_color), scroll_direction = "horizontal", width = 64),
@@ -100,41 +107,37 @@ def nri(nri, standings, config):
 
 def current_standings(standings, config):
     standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
-    return [render.Sequence(
-        children = [
-            current_standings_slide(standings[0], standings[1], standings_text_color),
-            current_standings_slide(standings[2], standings[3], standings_text_color),
-            current_standings_slide(standings[4], standings[5], standings_text_color),
-            current_standings_slide(standings[6], standings[7], standings_text_color),
-            current_standings_slide(standings[8], standings[9], standings_text_color),
-            current_standings_slide(standings[10], standings[11], standings_text_color),
-        ],
-    )]
 
-def current_standings_slide(standingsLeft, standingsRight, standings_text_color):
-    FLAGS = {}
-    FLAGS = json.decode(get_cachable_data(DEFAULTS["api"].format("flags")))
+    # Fetch flags once (not once per slide), then page through the standings two
+    # teams at a time. Built dynamically so any team count works (13 in 2026; an
+    # odd count renders a final single-team slide instead of dropping a team).
+    flags = json.decode(get_cachable_data(DEFAULTS["api"].format("flags")))
+
+    slides = []
+    for i in range(0, len(standings), 2):
+        left = standings[i]
+        right = standings[i + 1] if i + 1 < len(standings) else None
+        slides.append(current_standings_slide(left, right, standings_text_color, flags))
+    return [render.Sequence(children = slides)]
+
+def standings_team_column(standing, standings_text_color, flags):
+    return render.Column(
+        cross_align = "center",
+        children = [
+            render.Box(width = 32, height = 14, child = render.Image(base64.decode(flags[standing["team_code"]]), height = 14)),
+            render.Text("{} {}".format(str(standing["position"]), standing["team_code"]), font = DEFAULTS["regular_font"], color = standings_text_color),
+            render.Text("{} pts".format(str(standing["points"])), font = DEFAULTS["regular_font"], color = standings_text_color),
+        ],
+    )
+
+def current_standings_slide(standingsLeft, standingsRight, standings_text_color, flags):
+    columns = [standings_team_column(standingsLeft, standings_text_color, flags)]
+    if standingsRight != None:
+        columns.append(standings_team_column(standingsRight, standings_text_color, flags))
 
     return animation.Transformation(
         child =
-            render.Row(expanded = True, children = [
-                render.Column(
-                    cross_align = "center",
-                    children = [
-                        render.Box(width = 32, height = 14, child = render.Image(base64.decode(FLAGS[standingsLeft["teamAbbreviation"]]), height = 14)),
-                        render.Text("{} {}".format(str(standingsLeft["position"]), standingsLeft["teamAbbreviation"]), font = DEFAULTS["regular_font"], color = standings_text_color),
-                        render.Text("{} pts".format(str(standingsLeft["points"])), font = DEFAULTS["regular_font"], color = standings_text_color),
-                    ],
-                ),
-                render.Column(
-                    cross_align = "center",
-                    children = [
-                        render.Box(width = 32, height = 14, child = render.Image(base64.decode(FLAGS[standingsRight["teamAbbreviation"]]), height = 14)),
-                        render.Text("{} {}".format(str(standingsRight["position"]), standingsRight["teamAbbreviation"]), font = DEFAULTS["regular_font"], color = standings_text_color),
-                        render.Text("{} pts".format(str(standingsRight["points"])), font = DEFAULTS["regular_font"], color = standings_text_color),
-                    ],
-                ),
-            ]),
+            render.Row(expanded = True, main_align = "space_evenly", children = columns),
         duration = DEFAULTS["slide_duration"],
         delay = 0,
         origin = animation.Origin(0, 0),
