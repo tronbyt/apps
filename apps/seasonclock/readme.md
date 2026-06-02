@@ -33,17 +33,12 @@ minute against published values) — no network call, no external data feed.
 Outside that range the app shows an "update" notice; refresh the `BOUNDARIES`
 table to extend it.
 
-## Testing
+## Previewing any date
 
-`test_harness.py` renders the full matrix (2 hemispheres × 4 seasons × 2 modes ×
-1x/2x) deterministically using the hidden `dev_date` override, and independently
-re-computes the expected season and day count in Python to cross-check the
-rendered output. It parses the `BOUNDARIES` table out of `seasonclock.star` so
-there is a single source of truth.
+The `dev_date` config key (an RFC3339 instant, e.g. `2026-12-25T12:00:00Z`)
+overrides the current time so you can preview any season or day. It is a
+test-only hook and is intentionally not part of the published schema:
 
 ```sh
-PIXLET=/path/to/pixlet python3 apps/seasonclock/test_harness.py
+pixlet render seasonclock.star dev_date=2026-12-25T12:00:00Z
 ```
-
-The `dev_date` config key (an RFC3339 instant) is a test-only hook and is not
-part of the published schema.
