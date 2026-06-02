@@ -45,7 +45,6 @@ def main(config):
 
     #Get lat and long from schema.
     loc = json.decode(config.get("location", DEFAULT_LOCATION))
-    timezone = loc.get("timezone")  #use to make sure to get the correct day
 
     lat = float(loc.get("lat"))
     lng = float(loc.get("lng"))
@@ -64,6 +63,7 @@ def main(config):
 
         skySrc = images["skyLowPollen"]
         groundSrc = images["groundBare"]
+
         # Google API rate limit is HTTP 429
         if todaysCount.get("code") == 429:
             textOne = "RATE"
