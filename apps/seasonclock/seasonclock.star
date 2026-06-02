@@ -353,15 +353,15 @@ def notice(msg):
 # ---------- main ----------
 
 def main(config):
-    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    location = json.decode(config.get("location") or DEFAULT_LOCATION)
     timezone = location.get("timezone", "America/New_York")
     hemisphere = "southern" if float(location["lat"]) < 0 else "northern"
-    mode = config.get("mode", "countdown")
+    mode = config.get("mode") or "countdown"
 
     # "dev_date" is a hidden test hook (not in the schema). When set to an
     # RFC3339 instant it overrides "now", letting the test harness force any
     # season / hemisphere / day deterministically.
-    dev_date = config.get("dev_date", "")
+    dev_date = config.get("dev_date") or ""
     if dev_date != "":
         now = time.parse_time(dev_date)
     else:
