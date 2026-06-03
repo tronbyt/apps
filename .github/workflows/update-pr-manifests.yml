@@ -47,8 +47,10 @@ jobs:
 
       - name: Update manifest metadata
         if: steps.targets.outputs.targets != ''
+        env:
+          TARGETS: ${{ steps.targets.outputs.targets }}
         run: |
-          python3 /tmp/update_manifests.py ${{ steps.targets.outputs.targets }}
+          python3 /tmp/update_manifests.py "$TARGETS"
 
       - name: Commit and push manifest updates to PR branch
         if: steps.targets.outputs.targets != ''
