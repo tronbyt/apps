@@ -129,9 +129,13 @@ def get_location(config):
 def main(config):
     location = get_location(config)
 
-    weather = fetch_weather(location["lat"], location["lng"], location.get("timezone", ""))
-    current = weather.get("current")
-    if not current:
+    weather = fetch_weather(
+        location["lat"],
+        location["lng"],
+        location.get("timezone", ""),
+    )
+
+    if not weather or type(weather) != "dict":
         return render.Root(
             child = render.Box(
                 width = 64,
@@ -149,14 +153,32 @@ def main(config):
             ),
         )
 
+    current = weather.get("current")
+    if not current or type(current) != "dict":
+        return render.Root(
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Column(
+                    expanded = True,
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        render.Text("Weather"),
+                        render.Text("data"),
+                        render.Text("error"),
+                    ],
+                ),
+            ),
+        )
+
     temp_f = current.get("temperature_2m", 0.0)
     temp_c = (temp_f - 32) * 5 / 9
     night = int(current.get("is_day", 1)) == 0
     icon = weather_glyph(current.get("weather_code", 0), night)
 
-    # Prefer timezone returned by the forecast response when available
     location_timezone = location.get("timezone", "")
-    if weather != None and "timezone" in weather and weather.get("timezone", "") != "":
+    if weather and weather.get("timezone", ""):
         location_timezone = weather.get("timezone", location_timezone)
 
     time_str, date_str = get_time_strings(location_timezone)
