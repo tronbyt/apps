@@ -10,6 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # Container ship icon (32x10 pixels)
 CONTAINER_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACAAAAAKCAYAAADVTVykAAAAWElEQVR4nGNgoAO4c+fOfxCmh104LSfbESdsbP6DsE3KFgheEADGJ7bYQDAO+aHvAJiBMIvgFqNZSEg+ICAKBQ9+B6BroAXG7Wsbt//0wgPqCOLSAJ0sBgABdYfIAQVTYgAAAABJRU5ErkJggg==")
@@ -71,6 +72,13 @@ def get_schema():
                 name = "AIS Stream Data URL",
                 desc = "URL to a JSON format data source",
                 icon = "link",
+            ),
+            schema.Text(
+                id = "timeout",
+                name = "Display Timeout",
+                desc = "Hide ship if data is older than this many minutes (0 to disable)",
+                icon = "clock",
+                default = "60",
             ),
             schema.Dropdown(
                 id = "line2",
@@ -400,6 +408,7 @@ def render_error(err):
 
 def main(config):
     use_custom = config.bool("use_custom")
+    timeout_mins = int(config.get("timeout", "60"))
 
     if use_custom:
         data_url = config.get("data_url", "")
@@ -417,6 +426,35 @@ def main(config):
 
     if err:
         return render_error(err)
+
+    if len(vessels) > 0 and timeout_mins > 0:
+        # Find newest vessel
+        newest_v = None
+        for v in vessels:
+            if newest_v == None or v.get("ts", "") > newest_v.get("ts", ""):
+                newest_v = v
+
+        if newest_v and newest_v.get("ts"):
+            ts_str = newest_v.get("ts")
+            parsed_ts = None
+
+            # Try to handle common formats without crashing
+            if " +0000 UTC" in ts_str:
+                # Format: '2026-06-03 05:19:21.142948755 +0000 UTC'
+                parsed_ts = time.parse_time(ts_str, format = "2006-01-02 15:04:05.999999999 -0700 MST")
+            elif "T" in ts_str:
+                # Likely ISO8601/RFC3339
+                if "." in ts_str:
+                    parsed_ts = time.parse_time(ts_str, format = "2006-01-02T15:04:05.999999999Z07:00")
+                else:
+                    parsed_ts = time.parse_time(ts_str, format = "2006-01-02T15:04:05Z07:00")
+
+            if parsed_ts:
+                now = time.now()
+                diff = now - parsed_ts
+                if diff.minutes > timeout_mins:
+                    print("Ship data too old: " + str(diff.minutes) + " mins")
+                    return []
 
     line2_opt = config.get("line2", "speed_course")
     line3_opt = config.get("line3", "nav_status")
