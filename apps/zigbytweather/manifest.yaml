@@ -4,3 +4,8 @@ name: Zigbyt Weather
 summary: Displays date/time/weather
 desc: Displays time, date, temperature (F/C), and weather condition glyph. Weather data by Open-Meteo.
 author: ryan-doucette
+packageName: zigbytweather
+recommendedInterval: 30
+category: weather
+tags:
+  - open-meteo
