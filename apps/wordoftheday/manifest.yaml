@@ -6,7 +6,7 @@ desc: Displays the Merriam-Webster Word Of The Day.
 author: greg-n
 fileName: word_of_the_day.star
 packageName: wordoftheday
-recommendedInterval: 5
+recommendedInterval: 240
 category: education
 tags:
   - education
