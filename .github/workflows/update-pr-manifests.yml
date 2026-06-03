@@ -1,0 +1,66 @@
+name: Update PR Manifests
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Save trusted scripts
+        run: |
+          cp .github/scripts/update_manifests.py /tmp/update_manifests.py
+
+      - name: Fetch PR branch
+        run: |
+          git fetch origin refs/pull/${{ github.event.pull_request.number }}/head
+
+      - name: Checkout PR code
+        run: |
+          git checkout FETCH_HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install PyYAML
+
+      - name: Determine targets
+        id: targets
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          OLD_COMMIT=$(git merge-base ${BASE_SHA} ${HEAD_SHA})
+          TARGETS=$(git diff --name-only $OLD_COMMIT $HEAD_SHA | grep '^apps/' | cut -d'/' -f1-2 | sort -u)
+          echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+
+      - name: Update manifest metadata
+        if: steps.targets.outputs.targets != ''
+        run: |
+          python3 /tmp/update_manifests.py ${{ steps.targets.outputs.targets }}
+
+      - name: Commit and push manifest updates to PR branch
+        if: steps.targets.outputs.targets != ''
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          if [[ -n $(git status --porcelain apps/*/manifest.yaml) ]]; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add apps/*/manifest.yaml
+            git commit -m "chore: auto-update manifest metadata [skip ci]"
+            git remote add pr-remote https://x-access-token:${{ secrets.ACTIONS_PAT }}@github.com/${HEAD_REPO}.git
+            git push pr-remote HEAD:${HEAD_REF}
+          fi
