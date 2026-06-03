@@ -211,7 +211,7 @@ def main(config):
 
                                     # Temps (left aligned)
                                     render.Padding(
-                                        pad = (3, 0, 0, 1),
+                                        pad = (3, 1, 0, 1),
                                         child = render.Row(
                                             children = [
                                                 render.Text(str(int(temp_f)) + "F", color = "#FF7D7D"),
@@ -229,7 +229,7 @@ def main(config):
                                 main_align = "end",
                                 children = [
                                     render.Padding(
-                                        pad = (0, 2, 6, 0),
+                                        pad = (0, 3, 6, 0),
                                         child = render.Image(src = icon, width = 16, height = 16),
                                     ),
                                 ],
