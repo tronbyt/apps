@@ -55,14 +55,21 @@ def get_schema():
             schema.Text(
                 id = "bbox",
                 name = "Bounding Box",
-                desc = "Format: long_min,lat_min,long_max,lat_max (Ignored if Data URL is set)",
+                desc = "Format: long_min,lat_min,long_max,lat_max",
                 icon = "mapPin",
                 default = DEFAULT_BBOX,
+            ),
+            schema.Toggle(
+                id = "use_custom",
+                name = "Use Custom URL",
+                desc = "Whether to use a custom JSON URL instead of Marinesia API",
+                icon = "link",
+                default = False,
             ),
             schema.Text(
                 id = "data_url",
                 name = "AIS Stream Data URL",
-                desc = "URL to a AIS Stream format data source",
+                desc = "URL to a JSON format data source",
                 icon = "link",
             ),
             schema.Dropdown(
@@ -392,18 +399,21 @@ def render_error(err):
     )
 
 def main(config):
-    data_url = config.get("data_url", "")
-    api_key = config.get("api_key", "")
+    use_custom = config.bool("use_custom")
 
-    if data_url:
+    if use_custom:
+        data_url = config.get("data_url", "")
+        if not data_url:
+            return render_error("Data URL required")
         vessels, err = fetch_custom_data(data_url)
-    elif api_key:
+    else:
+        api_key = config.get("api_key", "")
+        if api_key == "":
+            return render_error("API key required")
         bbox = config.get("bbox", DEFAULT_BBOX)
         if bbox == "":
             bbox = DEFAULT_BBOX
         vessels, err = fetch_vessels(bbox, api_key)
-    else:
-        return render_error("API key or Data URL required")
 
     if err:
         return render_error(err)
