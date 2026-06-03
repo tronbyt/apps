@@ -190,7 +190,7 @@ def main(config):
                 children = [
                     # Top: Date (left aligned)
                     render.Padding(
-                        pad = (3, 1, 0, 0),
+                        pad = (3, 2, 0, 0),
                         child = render.Text(date_str),
                     ),
 
@@ -205,8 +205,8 @@ def main(config):
                                 children = [
                                     # Time (left aligned)
                                     render.Padding(
-                                        pad = (3, 3, 0, 3),
-                                        child = render.Text(time_str, font = "tb-8", color = "#A8FF9C"),
+                                        pad = (3, 2, 0, 1),
+                                        child = render.Text(time_str, font = "tb-8", color = "#C0FFB8"),
                                     ),
 
                                     # Temps (left aligned)
@@ -214,10 +214,10 @@ def main(config):
                                         pad = (3, 0, 0, 1),
                                         child = render.Row(
                                             children = [
-                                                render.Text(str(int(temp_f)) + "F", color = "#ff6b6b"),
+                                                render.Text(str(int(temp_f)) + "F", color = "#FF7D7D"),
                                                 render.Padding(
-                                                    pad = (1, 0, 0, 0),
-                                                    child = render.Text(str(int(temp_c)) + "C", color = "#4da6ff"),
+                                                    pad = (3, 0, 0, 0),
+                                                    child = render.Text(str(int(temp_c)) + "C", color = "#7FB8FF"),
                                                 ),
                                             ],
                                         ),
@@ -229,7 +229,7 @@ def main(config):
                                 main_align = "end",
                                 children = [
                                     render.Padding(
-                                        pad = (0, 4, 6, 0),
+                                        pad = (0, 2, 6, 0),
                                         child = render.Image(src = icon, width = 16, height = 16),
                                     ),
                                 ],
