@@ -24,7 +24,11 @@ def main():
 
     print("Cache miss")
 
-    wotd_page_response = http.get(WOTD_CALENDAR_URL, ttl_seconds = CACHE_TTL)
+    wotd_page_response = http.get(WOTD_CALENDAR_URL, ttl_seconds = CACHE_TTL, headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+    })
 
     if wotd_page_response.status_code != 200:
         print("Got code '%s' from page response" % wotd_page_response.status_code)
