@@ -105,48 +105,9 @@ def get_time_strings(timezone = None):
     else:
         now = time.now()
 
-    # ---- TIME ----
-    hour = now.hour
-    minute = now.minute
-
-    hour_12 = hour % 12
-    if hour_12 == 0:
-        hour_12 = 12
-
-    ampm = "AM"
-    if hour >= 12:
-        ampm = "PM"
-
-    time_str = str(hour_12) + ":" + (("0" + str(minute))[-2:]) + " " + ampm
-
-    # ---- DATE ----
-    month_names_full = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ]
-
-    month_full = month_names_full[now.month - 1]
-    month_str = month_full[:3] + "."
-
-    day = str(now.day)
-    year = str(now.year)
-
-    date_str = month_str + " " + day + ", " + year
-
-    return time_str, date_str
+    return now.format("3:04 PM"), now.format("Jan. 2, 2006")
 
 def get_location(config):
-    # Backward compatible with earlier schema.Location configs.
     saved_location = config.get("location")
     if saved_location:
         location = json.decode(saved_location)
@@ -157,9 +118,9 @@ def get_location(config):
         }
 
     return {
-        "lat": config.str("latitude", DEFAULT_LATITUDE),
-        "lng": config.str("longitude", DEFAULT_LONGITUDE),
-        "timezone": config.str("timezone", DEFAULT_TIMEZONE),
+        "lat": DEFAULT_LATITUDE,
+        "lng": DEFAULT_LONGITUDE,
+        "timezone": DEFAULT_TIMEZONE,
     }
 
 # -------------------------
@@ -169,7 +130,8 @@ def main(config):
     location = get_location(config)
 
     weather = fetch_weather(location["lat"], location["lng"], location.get("timezone", ""))
-    if weather == None:
+    current = weather.get("current")
+    if not current:
         return render.Root(
             child = render.Box(
                 width = 64,
@@ -187,11 +149,10 @@ def main(config):
             ),
         )
 
-    current = weather["current"]
-    temp_f = current["temperature_2m"]
+    temp_f = current.get("temperature_2m", 0.0)
     temp_c = (temp_f - 32) * 5 / 9
-    night = int(current["is_day"]) == 0
-    icon = weather_glyph(current["weather_code"], night)
+    night = int(current.get("is_day", 1)) == 0
+    icon = weather_glyph(current.get("weather_code", 0), night)
 
     # Prefer timezone returned by the forecast response when available
     location_timezone = location.get("timezone", "")
@@ -265,26 +226,11 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(
-                id = "latitude",
-                name = "Latitude",
-                desc = "Latitude for weather data.",
-                icon = "mapPin",
-                default = DEFAULT_LATITUDE,
-            ),
-            schema.Text(
-                id = "longitude",
-                name = "Longitude",
-                desc = "Longitude for weather data.",
-                icon = "mapPin",
-                default = DEFAULT_LONGITUDE,
-            ),
-            schema.Text(
-                id = "timezone",
-                name = "Timezone",
-                desc = "IANA timezone for local time.",
-                icon = "clock",
-                default = DEFAULT_TIMEZONE,
+            schema.Location(
+                id = "location",
+                name = "Location",
+                desc = "Location for weather and local time.",
+                icon = "locationDot",
             ),
         ],
     )
