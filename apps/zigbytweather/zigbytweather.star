@@ -151,7 +151,7 @@ def main(config):
     )
 
     location_timezone = location.get("timezone", "")
-    if weather and weather.get("timezone", ""):
+    if type(weather) == "dict" and weather.get("timezone", ""):
         location_timezone = weather.get("timezone", location_timezone)
 
     time_str, date_str = get_time_strings(location_timezone)
@@ -161,47 +161,47 @@ def main(config):
     # -------------------------
     if not weather or type(weather) != "dict":
         return render.Root(
-        child = render.Box(
-            child = render.Column(
-                expanded = True,
-                children = [
-                    # Top: Date (left aligned)
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_between",
-                        children = [
-                            render.Padding(
-                                pad = (3, 2, 0, 0),
-                                child = render.Text(date_str),
-                            ),
-                        ],
-                    ),
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_between",
-                        children = [
-                            # Time (left aligned)
-                            render.Padding(
-                                pad = (3, 2, 0, 1),
-                                child = render.Text(time_str, font = "tb-8", color = "#C0FFB8"),
-                            ),
-                        ],
-                    ),
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_between",
-                        children = [
-                            # Error message (left aligned)
-                            render.Padding(
-                                pad = (3, 1, 0, 1),
-                                child = render.Text(error_type, font = "tb-8", color = "#f8c76c"),
-                            ),
-                        ],
-                    ),
-                ],
+            child = render.Box(
+                child = render.Column(
+                    expanded = True,
+                    children = [
+                        # Top: Date (left aligned)
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                render.Padding(
+                                    pad = (3, 2, 0, 0),
+                                    child = render.Text(date_str),
+                                ),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                # Time (left aligned)
+                                render.Padding(
+                                    pad = (3, 2, 0, 1),
+                                    child = render.Text(time_str, color = "#C0FFB8"),
+                                ),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                # Error message (left aligned)
+                                render.Padding(
+                                    pad = (3, 1, 0, 1),
+                                    child = render.Text(error_type or "Error", color = "#f8c76c"),
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
             ),
-        ),
-    )
+        )
 
     current = weather.get("current")
     if not current or type(current) != "dict":
