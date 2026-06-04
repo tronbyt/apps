@@ -41,7 +41,8 @@ def main(config):
     display_date = now_unformatted.format("Jan 2")
     if rc == 0:
         json_data = data["today"]
-        day_str = data.get("metadata", {}).get("day", "")
+        metadata = data.get("metadata") or {}
+        day_str = metadata.get("day") or ""
         if day_str != "":
             display_date = format_day(day_str, display_date)
     else:
@@ -95,12 +96,13 @@ def title(display_date):
 
 def format_day(day_str, fallback):
     # metadata "day" looks like "June 3, 2026"; reformat to the compact
-    # "Jun 3" style the title used previously. Fall back to the device-clock
-    # date if the value can't be parsed.
-    parsed = time.parse_time(day_str, format = "January 2, 2006")
-    if parsed == None:
+    # "Jun 3" style the title used previously. Done with plain string ops
+    # because time.parse_time raises (uncatchable in Starlark) on bad input;
+    # fall back to the device-clock date if the value isn't shaped as expected.
+    parts = day_str.split(" ")
+    if len(parts) < 2:
         return fallback
-    return parsed.format("Jan 2")
+    return "{} {}".format(parts[0][:3], parts[1].replace(",", ""))
 
 def getRandomItem(length):
     return random.number(0, length - 1)
