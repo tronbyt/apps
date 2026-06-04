@@ -9,6 +9,7 @@ packageName: hassentity
 recommendedInterval: 5
 category: smart-home
 tags:
+  - ha
   - smart-home
   - utility
 published: '2023-01-23T18:44:44Z'

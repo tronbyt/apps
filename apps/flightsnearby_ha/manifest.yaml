@@ -8,8 +8,9 @@ fileName: flightsnearby_ha.star
 packageName: flightsnearby_ha
 recommendedInterval: 5
 supports2x: true
-category: transit
+category: smart-home
 tags:
+  - ha
   - utility
   - smart-home
   - wide 2x support

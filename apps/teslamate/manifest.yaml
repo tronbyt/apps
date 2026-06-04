@@ -11,6 +11,7 @@ supports2x: true
 minPixletVersion: v0.49.9
 category: smart-home
 tags:
+  - ha
   - tech
   - utility
   - wide 2x support

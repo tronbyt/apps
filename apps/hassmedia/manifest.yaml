@@ -7,6 +7,7 @@ author: vincentezw
 recommendedInterval: 5
 category: smart-home
 tags:
+  - ha
   - music
   - media-player
   - smart-home
