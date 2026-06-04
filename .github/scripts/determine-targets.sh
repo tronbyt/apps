@@ -17,4 +17,4 @@ echo "Modified targets: ${TARGETS}"
 TARGETS=$(echo $TARGETS | tr '\n' ' ')
 
 # Record output to GitHub variable.
-echo "targets=${TARGETS}" >> "${GITHUB_OUTPUT}"
+echo "targets=${TARGETS% }" >> "${GITHUB_OUTPUT}"
