@@ -28,15 +28,22 @@ ARTICLE_AREA_HEIGHT = 24
 SPACER_HEIGHT = 4
 
 DEFAULT_TIMEZONE = "America/New_York"
-CACHE_TTL_SECONDS = 43200
+CACHE_TTL_SECONDS = 3600
 
 def main(config):
     now_unformatted = time.now().in_location(config.get("$tz", DEFAULT_TIMEZONE))
     json_data = ""
     rc, data = getData()
 
+    # default the displayed date to the device clock; override with the
+    # date the data is actually for, sourced from the JSON metadata, so the
+    # header always matches the content shown below it
+    display_date = now_unformatted.format("Jan 2")
     if rc == 0:
         json_data = data["today"]
+        day_str = data.get("metadata", {}).get("day", "")
+        if day_str != "":
+            display_date = format_day(day_str, display_date)
     else:
         json_data = data
 
@@ -46,7 +53,7 @@ def main(config):
             show_full_animation = True,
             child = render.Column(
                 children = [
-                    title(now_unformatted),
+                    title(display_date),
                     render.Marquee(
                         height = ARTICLE_AREA_HEIGHT,
                         scroll_direction = "vertical",
@@ -66,7 +73,7 @@ def main(config):
         return render.Root(
             child = render.Column(
                 children = [
-                    title(now_unformatted),
+                    title(display_date),
                     render.Column(
                         children = [render.WrappedText(json_data[getRandomItem(len(json_data))], font = ARTICLE_SUB_TITLE_FONT, color = ARTICLE_COLOR, align = "center", width = FULL_WIDTH) if rc == 0 and len(json_data) > 0 else error(json_data if rc != 0 else "No national days today")],
                         main_align = "center",
@@ -77,14 +84,23 @@ def main(config):
             ),
         )
 
-def title(now_unformatted):
+def title(display_date):
     return render.Box(
         width = FULL_WIDTH,
         height = TITLE_HEIGHT,
         padding = 0,
         color = TITLE_BKG_COLOR,
-        child = render.Text("Nat'l Day {}".format(now_unformatted.format("Jan 2")), color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
+        child = render.Text("Nat'l Day {}".format(display_date), color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
     )
+
+def format_day(day_str, fallback):
+    # metadata "day" looks like "June 3, 2026"; reformat to the compact
+    # "Jun 3" style the title used previously. Fall back to the device-clock
+    # date if the value can't be parsed.
+    parsed = time.parse_time(day_str, format = "January 2, 2006")
+    if parsed == None:
+        return fallback
+    return parsed.format("Jan 2")
 
 def getRandomItem(length):
     return random.number(0, length - 1)
