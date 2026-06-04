@@ -7,9 +7,8 @@ desc: 'Displays pH, free chlorine, temperature, alkalinity, CYA, and calcium har
   '
 author: scottmay
 recommendedInterval: 300
-category: smart-home
+category: environment
 tags:
-  - ha
   - pool
   - chemistry
   - home assistant

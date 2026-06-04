@@ -9,9 +9,8 @@ packageName: hasssolar
 recommendedInterval: 5
 supports2x: true
 minPixletVersion: v0.49.0
-category: smart-home
+category: utilities
 tags:
-  - ha
   - smart-home
   - tracking
   - wide 2x support

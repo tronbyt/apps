@@ -10,7 +10,6 @@ recommendedInterval: 60
 supports2x: true
 category: smart-home
 tags:
-  - ha
   - retro
 published: '2026-05-19T04:03:00Z'
 updated: '2026-05-19T04:03:00Z'

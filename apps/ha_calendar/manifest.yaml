@@ -8,9 +8,8 @@ supports2x: true
 fileName: ha_calendar.star
 packageName: hacalendar
 recommendedInterval: 5
-category: smart-home
+category: utilities
 tags:
-  - ha
   - home-assistant
   - calendar
   - smart-home
