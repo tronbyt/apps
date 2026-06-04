@@ -194,7 +194,7 @@ def main(config):
                                 # Error message (left aligned)
                                 render.Padding(
                                     pad = (3, 2, 0, 0),
-                                    child = render.Text(error_type or "Unkown Error", color = "#f8c76c"),
+                                    child = render.Text(error_type or "Error", color = "#f8c76c"),
                                 ),
                             ],
                         ),
