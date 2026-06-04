@@ -191,7 +191,7 @@ def main(config):
                         expanded = True,
                         main_align = "space_between",
                         children = [
-                            # Erro message (left aligned)
+                            # Error message (left aligned)
                             render.Padding(
                                 pad = (3, 1, 0, 1),
                                 child = render.Text(error_type, font = "tb-8", color = "#f8c76c"),
