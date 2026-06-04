@@ -6,10 +6,10 @@ desc: Displays the Merriam-Webster Word Of The Day.
 author: greg-n
 fileName: word_of_the_day.star
 packageName: wordoftheday
-recommendedInterval: 5
+recommendedInterval: 240
 category: education
 tags:
   - education
   - utility
 published: '2022-07-11T21:27:55Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-06-03T20:50:37Z'
