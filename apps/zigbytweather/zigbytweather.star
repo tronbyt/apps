@@ -19,6 +19,9 @@ DEFAULT_TIMEZONE = "America/New_York"
 FORECAST_TTL_SECONDS = 2700  # 45 minutes
 COORDINATE_SCALE = 100
 
+# -------------------------
+# Icons
+# -------------------------
 SUNNY = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABBUlEQVR4AZRStXVtMRBc6Rb2f2yIzbmZKjBjMW7AkDxmbMLMJLLmJZdpzhEuzQIlwfT5OhblhRk6c34H7l8s1JCfmx79GykPnGm/1P2DDnQj6NJ/3WcXuIsGPxJV9iBb7Ef1+YcesBvrYBIy6ECX4iAaVP4tk1FdbvTAv2zkw5hiOQugiMi/JTKyw2AQuazuhNWdsed8OHqNnkSFoJiw2HWgOHzZVnoJ998KaVl3o8esV5+dGfJtrBwOXqDrsXMhqplSuEoq4n6GIo7HFhH4rVFx1MZeRBsHfJ9cxA+SavBdWaM71WLfdpDeQRuRkwYJo3yWY5T/1kUgFzLHoGcmXH6mODsDAPL7WsCj9djSAAAAAElFTkSuQmCC
 """)
@@ -90,11 +93,23 @@ def fetch_weather(lat, lng, timezone):
     )
 
     resp = http.get(url = url, ttl_seconds = FORECAST_TTL_SECONDS)
-    if resp.status_code != 200:
-        print("Open-Meteo request failed: %d" % resp.status_code)
-        return None
 
-    return json.decode(resp.body())
+    if not resp:
+        return None, "No response"
+
+    if resp.status_code != 200:
+        if resp.status_code == 502:
+            return None, "Bad gateway"
+        if resp.status_code == 429:
+            return None, "Rate limit"
+
+        return None, "Error: " + str(resp.status_code)
+
+    body = resp.body()
+    if not body:
+        return None, "Empty body"
+
+    return json.decode(body), None
 
 # -------------------------
 # Time helpers
@@ -129,25 +144,60 @@ def get_location(config):
 def main(config):
     location = get_location(config)
 
-    weather = fetch_weather(
+    weather, error_type = fetch_weather(
         location["lat"],
         location["lng"],
         location.get("timezone", ""),
     )
 
+    location_timezone = location.get("timezone", "")
+    if type(weather) == "dict" and weather.get("timezone", ""):
+        location_timezone = weather.get("timezone", location_timezone)
+
+    time_str, date_str = get_time_strings(location_timezone)
+
+    # -------------------------
+    # HARD ERROR
+    # -------------------------
     if not weather or type(weather) != "dict":
         return render.Root(
             child = render.Box(
-                width = 64,
-                height = 32,
                 child = render.Column(
                     expanded = True,
-                    main_align = "center",
-                    cross_align = "center",
                     children = [
-                        render.Text("Weather"),
-                        render.Text("load"),
-                        render.Text("error"),
+                        # Top: Date (left aligned)
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                render.Padding(
+                                    pad = (4, 3, 0, 0),
+                                    child = render.Text(date_str),
+                                ),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                # Time (left aligned)
+                                render.Padding(
+                                    pad = (4, 1, 0, 1),
+                                    child = render.Text(time_str, color = "#C0FFB8"),
+                                ),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                # Error message (left aligned)
+                                render.Padding(
+                                    pad = (4, 0, 0, 1),
+                                    child = render.Text(error_type or "Error", color = "#f8c76c"),
+                                ),
+                            ],
+                        ),
                     ],
                 ),
             ),
@@ -177,12 +227,9 @@ def main(config):
     night = int(current.get("is_day", 1)) == 0
     icon = weather_glyph(current.get("weather_code", 0), night)
 
-    location_timezone = location.get("timezone", "")
-    if weather and weather.get("timezone", ""):
-        location_timezone = weather.get("timezone", location_timezone)
-
-    time_str, date_str = get_time_strings(location_timezone)
-
+    # -------------------------
+    # SUCCESS UI
+    # -------------------------
     return render.Root(
         child = render.Box(
             child = render.Column(
@@ -190,7 +237,7 @@ def main(config):
                 children = [
                     # Top: Date (left aligned)
                     render.Padding(
-                        pad = (3, 2, 0, 0),
+                        pad = (4, 3, 0, 0),
                         child = render.Text(date_str),
                     ),
 
@@ -205,19 +252,19 @@ def main(config):
                                 children = [
                                     # Time (left aligned)
                                     render.Padding(
-                                        pad = (3, 2, 0, 1),
+                                        pad = (4, 1, 0, 1),
                                         child = render.Text(time_str, font = "tb-8", color = "#C0FFB8"),
                                     ),
 
                                     # Temps (left aligned)
                                     render.Padding(
-                                        pad = (3, 1, 0, 1),
+                                        pad = (4, 0, 0, 1),
                                         child = render.Row(
                                             children = [
                                                 render.Text(str(int(temp_f)) + "F", color = "#FF7D7D"),
                                                 render.Padding(
                                                     pad = (3, 0, 0, 0),
-                                                    child = render.Text(str(int(temp_c)) + "C", color = "#7FB8FF"),
+                                                    child = render.Text(str(int(temp_c)) + "C", color = "#9bc8ff"),
                                                 ),
                                             ],
                                         ),
@@ -229,7 +276,7 @@ def main(config):
                                 main_align = "end",
                                 children = [
                                     render.Padding(
-                                        pad = (0, 3, 6, 0),
+                                        pad = (0, 1, 6, 0),
                                         child = render.Image(src = icon, width = 16, height = 16),
                                     ),
                                 ],
