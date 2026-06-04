@@ -28,8 +28,8 @@ REFLECTION_LINESPACING = 0
 # daily reflection data is published as clean JSON, refreshed once per day
 DATA_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/refs/heads/main/aa/dailyreflection.json"
 
-#this only changes once per day so we can long term cache it
-CACHE_TTL_SECONDS = 86399
+#data changes once per day, but cache for 2 hours so updates are picked up sooner
+CACHE_TTL_SECONDS = 7200
 
 def main():
     return render.Root(
