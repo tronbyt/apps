@@ -5,14 +5,13 @@ Description: Displays the Merriam-Webster Word Of The Day.
 Author: greg-n
 """
 
-load("html.star", "html")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
 CACHE_KEY = "wotd"
 CACHE_TTL = 10800  # 3 hours
-WOTD_CALENDAR_URL = "https://www.merriam-webster.com/word-of-the-day/calendar"  # Most succinct wotd definition
+WOTD_API_URL = "https://wordoftheday.freeapi.me/"
 
 def render_error():
     return render.Root(
@@ -20,31 +19,25 @@ def render_error():
     )
 
 def main():
-    print("Starting")
+    wotd_response = http.get(WOTD_API_URL, ttl_seconds = CACHE_TTL)
 
-    print("Cache miss")
-
-    wotd_page_response = http.get(WOTD_CALENDAR_URL, ttl_seconds = CACHE_TTL, headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-    })
-
-    if wotd_page_response.status_code != 200:
-        print("Got code '%s' from page response" % wotd_page_response.status_code)
+    if wotd_response.status_code != 200:
+        print("Got code '%s' from API response" % wotd_response.status_code)
         return render_error()
 
-    selector = html(wotd_page_response.body())
-    word_parsed = selector.find(".wod-l-hover").first().text()
-    definition_parsed = selector.find(".definition-block").first().children().first().text()
+    data = wotd_response.json()
+    word_parsed = data.get("word", "")
+    definition_parsed = data.get("definition", "")
 
     if word_parsed == "" or definition_parsed == "":
-        print("Failed to find word or definition from page")
+        print("Failed to find word or definition from API")
         return render_error()
 
     # Values begin with lower cased letters on the calendar note cards
     word = word_parsed[0].upper() + word_parsed[1:] + ":"
-    definition = definition_parsed[0].upper() + definition_parsed[1:] + "."
+    definition = definition_parsed[0].upper() + definition_parsed[1:]
+    if not definition.endswith("."):
+        definition += "."
 
     return render.Root(
         show_full_animation = True,
