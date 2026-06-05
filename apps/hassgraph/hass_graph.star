@@ -90,6 +90,8 @@ def main(config):
         if len(parts) == 2:
             min_val = float(parts[0])
             max_val = float(parts[1])
+            if current_value == "unavailable" or current_value == "unknown":
+                return []
             val = float(current_value)
             if val < min_val or val > max_val:
                 return []
