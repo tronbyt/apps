@@ -171,7 +171,7 @@ def main(config):
                             main_align = "space_between",
                             children = [
                                 render.Padding(
-                                    pad = (4, 3, 0, 0),
+                                    pad = (3, 2, 0, 0),
                                     child = render.Text(date_str),
                                 ),
                             ],
@@ -182,7 +182,7 @@ def main(config):
                             children = [
                                 # Time (left aligned)
                                 render.Padding(
-                                    pad = (4, 1, 0, 1),
+                                    pad = (3, 2, 0, 0),
                                     child = render.Text(time_str, color = "#C0FFB8"),
                                 ),
                             ],
@@ -193,7 +193,7 @@ def main(config):
                             children = [
                                 # Error message (left aligned)
                                 render.Padding(
-                                    pad = (4, 0, 0, 1),
+                                    pad = (3, 2, 0, 0),
                                     child = render.Text(error_type or "Error", color = "#f8c76c"),
                                 ),
                             ],
@@ -237,7 +237,7 @@ def main(config):
                 children = [
                     # Top: Date (left aligned)
                     render.Padding(
-                        pad = (4, 3, 0, 0),
+                        pad = (3, 2, 0, 0),
                         child = render.Text(date_str),
                     ),
 
@@ -252,13 +252,13 @@ def main(config):
                                 children = [
                                     # Time (left aligned)
                                     render.Padding(
-                                        pad = (4, 1, 0, 1),
+                                        pad = (3, 2, 0, 0),
                                         child = render.Text(time_str, font = "tb-8", color = "#C0FFB8"),
                                     ),
 
                                     # Temps (left aligned)
                                     render.Padding(
-                                        pad = (4, 0, 0, 1),
+                                        pad = (3, 2, 0, 0),
                                         child = render.Row(
                                             children = [
                                                 render.Text(str(int(temp_f)) + "F", color = "#FF7D7D"),
@@ -276,7 +276,7 @@ def main(config):
                                 main_align = "end",
                                 children = [
                                     render.Padding(
-                                        pad = (0, 1, 6, 0),
+                                        pad = (0, 3, 6, 0),
                                         child = render.Image(src = icon, width = 16, height = 16),
                                     ),
                                 ],
