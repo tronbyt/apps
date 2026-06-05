@@ -43,19 +43,22 @@ MODES = {
 }
 DEFAULT_MODE = "day"
 
+# Keyed by the lowercased first three letters of the month name so the week
+# lookup is robust to casing and to full-name vs abbreviated feed values
+# ("June" / "june" / "Jun" / "JUN" all resolve via month_name[:3].lower()).
 MONTH_NUM = {
-    "January": "1",
-    "February": "2",
-    "March": "3",
-    "April": "4",
-    "May": "5",
-    "June": "6",
-    "July": "7",
-    "August": "8",
-    "September": "9",
-    "October": "10",
-    "November": "11",
-    "December": "12",
+    "jan": "1",
+    "feb": "2",
+    "mar": "3",
+    "apr": "4",
+    "may": "5",
+    "jun": "6",
+    "jul": "7",
+    "aug": "8",
+    "sep": "9",
+    "oct": "10",
+    "nov": "11",
+    "dec": "12",
 }
 
 def main(config):
@@ -140,7 +143,7 @@ def format_header_date(mode, day_str, fallback):
     month_name = parts[0]
     day_num = parts[1].replace(",", "")
     if mode == "week":
-        month_num = MONTH_NUM.get(month_name)
+        month_num = MONTH_NUM.get(month_name[:3].lower())
         if month_num == None:
             return fallback
         return "{}/{}".format(month_num, day_num)
