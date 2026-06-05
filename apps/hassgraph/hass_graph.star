@@ -81,14 +81,32 @@ def main(config):
         return render_error_message("No data available")
 
     unit = data[0]["attributes"].get("unit_of_measurement", "")
-    points = calculate_hourly_average(data)
+    points = calculate_hourly_average(config, data)
     current_value = data[-1]["state"]
+
+    range_str = config.str("display_range", "")
+    if range_str:
+        parts = range_str.split(",")
+        if len(parts) == 2:
+            min_val = float(parts[0])
+            max_val = float(parts[1])
+            val = float(current_value)
+            if val < min_val or val > max_val:
+                return []
     stats = calc_stats(timezone, data)
 
     label = config.str("custom_label", "")
     return render_app(config, current_value, points, stats, unit, label)
 
-def calculate_hourly_average(data):
+def calculate_hourly_average(config, data):
+    if config.bool("use_raw_data"):
+        points = []
+        for i, entry in enumerate(data):
+            if entry["state"] == "unavailable" or entry["state"] == "unknown":
+                continue
+            points.append((i, float(entry["state"])))
+        return points
+
     hourly_averages = {}
     current_hour = None
     hour_total = 0
@@ -355,6 +373,19 @@ def get_schema():
                 desc = "Show the highest, lowest and average values",
                 icon = "list",
                 default = True,
+            ),
+            schema.Toggle(
+                id = "use_raw_data",
+                name = "Use raw data",
+                desc = "Plot raw data points instead of hourly averages",
+                icon = "chartLine",
+                default = False,
+            ),
+            schema.Text(
+                id = "display_range",
+                desc = "Only display when value is within this range. Format: min,max (e.g. 5,1000). Leave empty to always show.",
+                icon = "filter",
+                name = "Display range",
             ),
             schema.Location(
                 id = "location",
