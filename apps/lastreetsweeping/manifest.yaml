@@ -10,5 +10,5 @@ desc: >-
   comes from the City of LA's public sweep-day calendars (holidays already
   excluded).
 author: Ryan Taylor (@ryantaylor16)
-fileName: la_street_sweeping.star
+fileName: lastreetsweeping.star
 packageName: lastreetsweeping
