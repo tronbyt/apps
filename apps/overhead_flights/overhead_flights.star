@@ -195,10 +195,12 @@ def main(config):
                             children = [
                                 render.Marquee(
                                     width = 48,
+                                    align = "end",
                                     child = render.Text(content = flight_num, color = "#FFFFFF", font = "tb-8"),
                                 ),
                                 render.Marquee(
                                     width = 48,
+                                    align = "end",
                                     child = render.Text(content = route, color = "#00CCFF", font = "tb-8"),
                                 ),
                             ],
