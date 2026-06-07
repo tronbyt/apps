@@ -185,8 +185,9 @@ def main(config):
             children = [
                 render.Row(
                     children = [
+                        render.Box(width = 2, height = 16),
                         logo_widget,
-                        render.Box(width = 12, height = 16),
+                        render.Box(width = 10, height = 16),
                         render.Column(
                             children = [
                                 render.Marquee(
