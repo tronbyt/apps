@@ -191,16 +191,15 @@ def main(config):
                 render.Row(
                     children = [
                         logo_widget,
+                        render.Box(width = 16, height = 16),
                         render.Column(
                             children = [
                                 render.Marquee(
-                                    width = 48,
-                                    align = "end",
+                                    width = 32,
                                     child = render.Text(content = flight_num, color = "#FFFFFF", font = "tb-8"),
                                 ),
                                 render.Marquee(
-                                    width = 48,
-                                    align = "end",
+                                    width = 32,
                                     child = render.Text(content = route, color = "#00CCFF", font = "tb-8"),
                                 ),
                             ],
