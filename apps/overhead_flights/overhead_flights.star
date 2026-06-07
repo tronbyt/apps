@@ -3,60 +3,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 FR24_BASE = "https://fr24api.flightradar24.com"
-
-AIRLINES = {
-    "UAL": "United",
-    "AAL": "American",
-    "DAL": "Delta",
-    "SWA": "Southwest",
-    "ASA": "Alaska",
-    "JBU": "JetBlue",
-    "FFT": "Frontier",
-    "NKS": "Spirit",
-    "HAL": "Hawaiian",
-    "SKW": "SkyWest",
-    "RPA": "Republic",
-    "ENY": "Envoy",
-    "PDT": "Piedmont",
-    "FDX": "FedEx",
-    "UPS": "UPS",
-    "GTI": "Atlas Air",
-    "BAW": "British",
-    "DLH": "Lufthansa",
-    "AFR": "Air France",
-    "KLM": "KLM",
-    "ACA": "Air Canada",
-    "ANA": "ANA",
-    "JAL": "JAL",
-    "CPA": "Cathay",
-    "SIA": "Singapore",
-    "QFA": "Qantas",
-    "UAE": "Emirates",
-    "THY": "Turkish",
-    "QTR": "Qatar",
-    "ETD": "Etihad",
-    "VIR": "Virgin Atl",
-    "EZY": "easyJet",
-    "RYR": "Ryanair",
-    "SAS": "SAS",
-    "FIN": "Finnair",
-    "NOZ": "Norwegian",
-    "EIN": "Aer Lingus",
-    "IBE": "Iberia",
-    "TAM": "LATAM",
-    "GLO": "Gol",
-    "AVA": "Avianca",
-    "AMX": "Aeromexico",
-    "CES": "China Eastern",
-    "CSN": "China Southern",
-    "CCA": "Air China",
-    "KAL": "Korean Air",
-    "AAR": "Asiana",
-    "THA": "Thai",
-    "MAS": "Malaysia",
-    "GIA": "Garuda",
-    "SVA": "Saudia",
-}
+LOGO_BASE = "https://pics.avs.io/32/32"
 
 def get_schema():
     return schema.Schema(
@@ -108,6 +55,22 @@ def fmt_alt(alt_ft):
             return "%d,%d00ft" % (k, r)
         return "%d,000ft" % k
     return "%dft" % alt_ft
+
+def iata_from_flight(flight_num):
+    code = ""
+    for c in flight_num.elems():
+        if c >= "0" and c <= "9":
+            break
+        code = code + c
+    return code
+
+def fetch_logo(iata_code):
+    if not iata_code:
+        return None
+    rep = http.get("%s/%s.png" % (LOGO_BASE, iata_code), ttl_seconds = 86400)
+    if rep.status_code != 200:
+        return None
+    return rep.body()
 
 def main(config):
     api_key = config.get("api_key") or ""
@@ -175,36 +138,47 @@ def main(config):
         return no_flights_screen()
 
     flight_num = best.get("flight") or best.get("callsign") or "???"
-    callsign = best.get("callsign") or ""
     aircraft_type = best.get("type") or "???"
     orig = best.get("orig_iata") or "???"
     dest = best.get("dest_iata") or "???"
     alt_ft = int(best.get("alt") or 0)
     gspeed = int(best.get("gspeed") or 0)
 
-    airline = ""
-    if len(callsign) >= 3:
-        airline = AIRLINES.get(callsign[:3]) or callsign[:3]
+    iata = iata_from_flight(flight_num)
+    logo_bytes = fetch_logo(iata)
 
     route = "%s>%s" % (orig, dest)
     alt_label = fmt_alt(alt_ft)
     speed_label = "%dkts" % gspeed
 
+    if logo_bytes:
+        logo_widget = render.Image(src = logo_bytes, width = 16, height = 16)
+    else:
+        logo_widget = render.Box(width = 16, height = 16)
+
     return render.Root(
         child = render.Column(
             children = [
                 render.Row(
-                    expanded = True,
-                    main_align = "space_between",
                     children = [
-                        render.Text(content = flight_num, color = "#FFFFFF", font = "tb-8"),
-                        render.Text(content = aircraft_type, color = "#6699FF", font = "tb-8"),
+                        logo_widget,
+                        render.Box(
+                            width = 47,
+                            child = render.Column(
+                                children = [
+                                    render.Row(
+                                        expanded = True,
+                                        main_align = "space_between",
+                                        children = [
+                                            render.Text(content = flight_num, color = "#FFFFFF", font = "tb-8"),
+                                            render.Text(content = aircraft_type, color = "#6699FF", font = "tb-8"),
+                                        ],
+                                    ),
+                                    render.Text(content = route, color = "#00CCFF", font = "tb-8"),
+                                ],
+                            ),
+                        ),
                     ],
-                ),
-                render.Text(content = airline, color = "#FFCC00", font = "tb-8"),
-                render.Marquee(
-                    width = 64,
-                    child = render.Text(content = route, color = "#00CCFF", font = "tb-8"),
                 ),
                 render.Row(
                     expanded = True,
