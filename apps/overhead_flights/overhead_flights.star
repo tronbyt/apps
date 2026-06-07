@@ -2,6 +2,32 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
+# Local logos: add a load() + entry in LOCAL_LOGOS for each airline.
+# Files go in images/<IATA>.png (16x16, icon only, no text).
+# Uncomment each line once you've added the image file.
+# load("images/AA.png", _AA = "file")
+# load("images/AS.png", _AS = "file")
+# load("images/B6.png", _B6 = "file")
+# load("images/DL.png", _DL = "file")
+# load("images/F9.png", _F9 = "file")
+# load("images/HA.png", _HA = "file")
+# load("images/NK.png", _NK = "file")
+# load("images/SW.png", _SW = "file")  # Southwest uses WN IATA code
+# load("images/UA.png", _UA = "file")
+# load("images/WN.png", _WN = "file")
+
+LOCAL_LOGOS = {
+    # "AA": _AA,
+    # "AS": _AS,
+    # "B6": _B6,
+    # "DL": _DL,
+    # "F9": _F9,
+    # "HA": _HA,
+    # "NK": _NK,
+    # "UA": _UA,
+    # "WN": _WN,
+}
+
 FR24_BASE = "https://fr24api.flightradar24.com"
 LOGO_BASE = "https://pics.avs.io/32/32"
 
@@ -67,6 +93,9 @@ def iata_from_flight(flight_num):
 def fetch_logo(iata_code):
     if not iata_code:
         return None
+    local = LOCAL_LOGOS.get(iata_code)
+    if local:
+        return local
     rep = http.get("%s/%s.png" % (LOGO_BASE, iata_code), ttl_seconds = 86400)
     if rep.status_code != 200:
         return None
