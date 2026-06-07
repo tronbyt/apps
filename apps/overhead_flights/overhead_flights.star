@@ -162,21 +162,17 @@ def main(config):
                 render.Row(
                     children = [
                         logo_widget,
-                        render.Box(
-                            width = 47,
-                            child = render.Column(
-                                children = [
-                                    render.Row(
-                                        expanded = True,
-                                        main_align = "space_between",
-                                        children = [
-                                            render.Text(content = flight_num, color = "#FFFFFF", font = "tb-8"),
-                                            render.Text(content = aircraft_type, color = "#6699FF", font = "tb-8"),
-                                        ],
-                                    ),
-                                    render.Text(content = route, color = "#00CCFF", font = "tb-8"),
-                                ],
-                            ),
+                        render.Column(
+                            children = [
+                                render.Marquee(
+                                    width = 48,
+                                    child = render.Text(content = flight_num, color = "#FFFFFF", font = "tb-8"),
+                                ),
+                                render.Marquee(
+                                    width = 48,
+                                    child = render.Text(content = route, color = "#00CCFF", font = "tb-8"),
+                                ),
+                            ],
                         ),
                     ],
                 ),
@@ -184,10 +180,11 @@ def main(config):
                     expanded = True,
                     main_align = "space_between",
                     children = [
-                        render.Text(content = alt_label, color = "#00FF88", font = "tb-8"),
+                        render.Text(content = aircraft_type, color = "#6699FF", font = "tb-8"),
                         render.Text(content = speed_label, color = "#FF8844", font = "tb-8"),
                     ],
                 ),
+                render.Text(content = alt_label, color = "#00FF88", font = "tb-8"),
             ],
         ),
     )
