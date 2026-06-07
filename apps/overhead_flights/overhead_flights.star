@@ -132,7 +132,7 @@ def main(config):
     flights = (data.get("data") or [])
 
     if not flights:
-        return no_flights_screen()
+        return []
 
     best = None
     best_dist = None
@@ -159,7 +159,7 @@ def main(config):
             best_has_route = has_route
 
     if not best:
-        return no_flights_screen()
+        return []
 
     flight_num = best.get("flight") or best.get("callsign") or "???"
     aircraft_type = best.get("type") or "???"
