@@ -1,0 +1,14 @@
+---
+id: ambient-weather
+name: Ambient Weather
+summary: Personal weather station
+desc: Shows temperature, humidity, dewpoint, and rain data from your Ambient Weather personal weather station.
+author: bwhite1772
+fileName: ambient_weather.star
+packageName: ambient_weather
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - ambient
+  - real-time

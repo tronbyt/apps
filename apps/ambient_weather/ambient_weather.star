@@ -1,10 +1,10 @@
-load("render.star", "render")
 load("http.star", "http")
+load("render.star", "render")
 load("schema.star", "schema")
 
 API_BASE = "https://rt.ambientweather.net/v1"
-LABEL_W = 24
-CHART_W = 40
+LABEL_W = 28
+CHART_W = 36
 ROW_H = 8
 
 TEMP_COLOR = "#FF6B35"
