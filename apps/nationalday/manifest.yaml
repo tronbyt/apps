@@ -1,8 +1,8 @@
 ---
 id: nationalday
-name: NationalDay
-summary: National Day Calendar
-desc: Show what national day celebrations are today.
+name: National Day/Week/Month
+summary: Day, Week & Month Calendar
+desc: Show national day, week, or month celebrations.
 author: jvivona
 fileName: nationalday.star
 packageName: nationalday
