@@ -1238,7 +1238,7 @@ def get_schema():
         fields = [
             schema.LocationBased(
                 id = "local_buoy_id",
-                name = "Local Buoy",
+                name = "Local Buoyz",
                 icon = "monument",
                 desc = "Location Based Buoys",
                 handler = get_stations,
