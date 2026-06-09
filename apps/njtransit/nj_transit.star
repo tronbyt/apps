@@ -45,6 +45,7 @@ load("http.star", "http")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 #URL TO NJ TRANSIT DEPARTURE VISION WEBSITE
 NJ_TRANSIT_DV_URL = "https://www.njtransit.com/dv-to"
@@ -452,22 +453,62 @@ def get_departures_for_station(station):
         return []
 
     departures_data = departure_screens.get("items", [])
+    now = time.now().in_location(TIMEZONE)
 
     # Convert GraphQL response to our departure struct format
     result = []
     for item in departures_data:
+        departure_date = item.get("departureDate", "")
+        status = item.get("status", "")
         departure_struct = struct(
-            departing_at = item.get("departureDate", ""),
+            departing_at = departure_date,
             destination = str(item.get("destination", "")).upper(),
             service_line = item.get("lineAbbreviation", "AMTK"),
             train_number = str(item.get("trainID", "")),
             track_number = item.get("track"),
-            departing_in = item.get("status", ""),
+            departing_in = get_departing_in(departure_date, now, status),
         )
         result.append(departure_struct)
 
     print("Found '%s' departures from GraphQL API" % len(result))
     return result
+
+def get_departing_in(departure_date, now, status):
+    """
+    Returns NJ Transit's status when present, otherwise a compact countdown.
+    NJ Transit provides times without a date, so use the current NY date and
+    roll forward when the next departure is after midnight.
+    """
+    if status != "":
+        return status
+
+    if departure_date == "":
+        return ""
+
+    departure_time = time.parse_time(
+        "{} {}".format(now.format("2006-01-02"), departure_date),
+        format = "2006-01-02 3:04 PM",
+        location = TIMEZONE,
+    )
+
+    if departure_time < now:
+        departure_time = departure_time + time.parse_duration("24h")
+
+    minutes_until_departure = (departure_time - now).minutes
+
+    if minutes_until_departure <= 1:
+        return "Sched now"
+
+    if minutes_until_departure < 60:
+        return "Sched in {}m".format(int(minutes_until_departure))
+
+    hours = int(minutes_until_departure / 60)
+    minutes = int(minutes_until_departure % 60)
+
+    if minutes == 0:
+        return "Sched in {}h".format(hours)
+
+    return "Sched in {}h {}m".format(hours, minutes)
 
 def fetch_stations_from_website():
     """
