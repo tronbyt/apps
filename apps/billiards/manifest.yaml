@@ -1,0 +1,7 @@
+id: billiards
+name: Billiards
+summary: Billiads break and 3 shots
+desc: A continuous 15-second simulation of a game of pool, featuring randomized break physics and 3 shots determined by a user-provided seed.
+author: Mark Greinke
+fileName: billiards.star
+packageName: billiards
