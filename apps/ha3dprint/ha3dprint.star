@@ -160,6 +160,11 @@ def renderProgress(label, progress_value, padding, bar_color):
     color = bar_color or "#64BFE5"
 
     if progress_value != None:
+        if progress_value > 100:
+            progress_value = 100
+        elif progress_value < 0:
+            progress_value = 0
+
         progress = progress_value / 100.0
         progress_percent = int(math.round(progress_value))
         if label != "":
@@ -334,19 +339,40 @@ def main(config):
         seconds = int(remaining_time * 3600)
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
-    min_str = str(minutes)
-    if minutes < 10:
-        min_str = "0" + min_str
     if seconds > 0:
-        time_left = "%dh %sm left" % (hours, min_str)
+        if hours > 0:
+            min_str = str(minutes)
+            if minutes < 10:
+                min_str = "0" + min_str
+            time_left = "%dh %sm left" % (hours, min_str)
+        else:
+            time_left = "%dm left" % minutes
 
     # Status color
     stateColor = WHITE
     status_upper = str(status).upper()
     if status_upper in ["FAILED", "ERROR", "CANCELLED"]:
         stateColor = RED
-    elif status_upper in ["RUNNING", "SUCCESS"]:
+    elif status_upper in ["RUNNING", "SUCCESS", "PRINTING", "COMPLETE", "COMPLETED"]:
         stateColor = GREEN
+
+    # Safely convert progress to int
+    progress_val = 0
+    p_str = str(progress).strip()
+    p_dot_count = 0
+    p_valid = len(p_str) > 0
+    for i in range(len(p_str)):
+        c = p_str[i]
+        if c == ".":
+            p_dot_count += 1
+            if p_dot_count > 1:
+                p_valid = False
+                break
+        elif c < "0" or c > "9":
+            p_valid = False
+            break
+    if p_valid:
+        progress_val = int(float(p_str))
 
     # Render UI
     return render.Root(
@@ -369,8 +395,7 @@ def main(config):
                         ) if len(str(name)) > 15 else render.Text(str(name), font = "tom-thumb"),
                         render.WrappedText(status_upper, color = stateColor),
                         render.Text(time_left),
-                        # Safely convert progress to int, default to 0 if not a number
-                        renderProgress("Completion", int(progress) if str(progress).isdigit() else 0, 1, "#64BFE5"),
+                        renderProgress("Completion", progress_val, 1, "#64BFE5"),
                     ],
                 ),
             ),

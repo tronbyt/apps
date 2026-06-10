@@ -85,11 +85,11 @@ def get_app_from_files(commit_details):
                     apps.append(app)
     return apps
 
-def get_manifest_info(app_folder, repo, tree_sha, headers, cache_ttl):
-    manifest_url = "https://raw.githubusercontent.com/{}/{}/apps/{}/manifest.yaml".format(repo, tree_sha, app_folder)
+def get_manifest_info(app_folder, repo, commit_sha, headers, cache_ttl):
+    manifest_url = "https://raw.githubusercontent.com/{}/{}/apps/{}/manifest.yaml".format(repo, commit_sha, app_folder)
     resp = http.get(url = manifest_url, headers = headers, ttl_seconds = cache_ttl)
     if resp.status_code != 200:
-        manifest_url = "https://raw.githubusercontent.com/{}/{}/apps/{}/manifest.yml".format(repo, tree_sha, app_folder)
+        manifest_url = "https://raw.githubusercontent.com/{}/{}/apps/{}/manifest.yml".format(repo, commit_sha, app_folder)
         resp = http.get(url = manifest_url, headers = headers, ttl_seconds = cache_ttl)
         if resp.status_code != 200:
             return None
@@ -139,9 +139,9 @@ def summarize_commit(commit_details, repo, headers, cache_ttl):
         return None
 
     app_folder = apps[0]
-    tree_sha = commit_details["commit"]["tree"]["sha"]
+    commit_sha = commit_details["sha"]
 
-    manifest_info = get_manifest_info(app_folder, repo, tree_sha, headers, cache_ttl)
+    manifest_info = get_manifest_info(app_folder, repo, commit_sha, headers, cache_ttl)
     if manifest_info:
         return {
             "app_name": manifest_info["name"],
@@ -149,6 +149,7 @@ def summarize_commit(commit_details, repo, headers, cache_ttl):
             "app_description": manifest_info["description"],
             "commit_date": commit_date,
             "change": change,
+            "commit_sha": commit_sha,
         }
 
     return {
@@ -157,6 +158,7 @@ def summarize_commit(commit_details, repo, headers, cache_ttl):
         "app_description": "",
         "commit_date": commit_date,
         "change": change,
+        "commit_sha": commit_sha,
     }
 
 def find_recent_app_changes(repo, branch, headers, cache_ttl, max_commits, max_items):
