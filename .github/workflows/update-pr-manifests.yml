@@ -42,8 +42,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           OLD_COMMIT=$(git merge-base ${BASE_SHA} ${HEAD_SHA})
-          TARGETS=$(git diff --name-only $OLD_COMMIT $HEAD_SHA | grep '^apps/' | cut -d'/' -f1-2 | sort -u)
-          TARGETS=$(echo ${TARGETS} | tr '\n' ' ')
+          TARGETS=$(git diff --name-only $OLD_COMMIT $HEAD_SHA | grep '^apps/' | cut -d'/' -f1-2 | sort -u | xargs)
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
 
       - name: Update manifest metadata
@@ -51,7 +50,7 @@ jobs:
         env:
           TARGETS: ${{ steps.targets.outputs.targets }}
         run: |
-          python3 /tmp/update_manifests.py "$TARGETS"
+          python3 /tmp/update_manifests.py $TARGETS
 
       - name: Commit and push manifest updates to PR branch
         if: steps.targets.outputs.targets != ''

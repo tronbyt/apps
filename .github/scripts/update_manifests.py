@@ -4,6 +4,7 @@ import yaml
 import glob
 import sys
 
+
 def get_git_dates(path):
     # Get all commit dates for the path
     try:
@@ -20,7 +21,7 @@ def get_git_dates(path):
             "Fix Updates and script",
             "Fix updated ts",
             "Fix tags",
-            "Implement sorting by newest and last updated in app viewer"
+            "Implement sorting by newest and last updated in app viewer",
         ]
         ignore_regex = "|".join(ignore_patterns)
 
@@ -29,7 +30,15 @@ def get_git_dates(path):
         env["TZ"] = "UTC"
 
         # Get published (oldest)
-        cmd_pub = ["git", "log", "--reverse", "--date=iso-strict-local", "--format=%ad", "--", path]
+        cmd_pub = [
+            "git",
+            "log",
+            "--reverse",
+            "--date=iso-strict-local",
+            "--format=%ad",
+            "--",
+            path,
+        ]
         output_pub = subprocess.check_output(cmd_pub, env=env).decode("utf-8").strip()
         if not output_pub:
             return None, None
@@ -37,9 +46,16 @@ def get_git_dates(path):
 
         # Get updated (newest, excluding automated commits)
         cmd_upd = [
-            "git", "log", "-1", "--date=iso-strict-local", "--format=%ad",
-            "--invert-grep", f"--grep={ignore_regex}", "--extended-regexp",
-            "--", path
+            "git",
+            "log",
+            "-1",
+            "--date=iso-strict-local",
+            "--format=%ad",
+            "--invert-grep",
+            f"--grep={ignore_regex}",
+            "--extended-regexp",
+            "--",
+            path,
         ]
         output_upd = subprocess.check_output(cmd_upd, env=env).decode("utf-8").strip()
 
@@ -51,9 +67,11 @@ def get_git_dates(path):
         print(f"Error getting dates for {path}: {e}")
         return None, None
 
+
 class IndentDumper(yaml.SafeDumper):
     def increase_indent(self, flow=False, indentless=False):
         return super(IndentDumper, self).increase_indent(flow, False)
+
 
 def update_manifest(manifest_path):
     # Get the directory of the app
@@ -65,7 +83,7 @@ def update_manifest(manifest_path):
         return
 
     # Check if we need to update
-    with open(manifest_path, 'r') as f:
+    with open(manifest_path, "r") as f:
         try:
             data = yaml.safe_load(f)
         except Exception as e:
@@ -78,29 +96,47 @@ def update_manifest(manifest_path):
     changed = False
     # Only set published if it's missing. This preserves historical dates
     # even when running in a shallow clone.
-    if not data.get('published'):
-        data['published'] = published
+    if not data.get("published"):
+        data["published"] = published
         changed = True
 
     # Always update the 'updated' date to the latest commit
-    if data.get('updated') != updated:
-        data['updated'] = updated
+    if data.get("updated") != updated:
+        data["updated"] = updated
         changed = True
 
-    if data.get('tags') is None:
-        data['tags'] = []
+    if data.get("tags") is None:
+        data["tags"] = []
 
     if changed:
         print(f"Updating {manifest_path}: published={published}, updated={updated}")
-        with open(manifest_path, 'w', encoding='utf-8') as f:
-            yaml.dump(data, f, Dumper=IndentDumper, sort_keys=False, default_flow_style=False, explicit_start=True, allow_unicode=True, width=1000, indent=2)
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            yaml.dump(
+                data,
+                f,
+                Dumper=IndentDumper,
+                sort_keys=False,
+                default_flow_style=False,
+                explicit_start=True,
+                allow_unicode=True,
+                width=1000,
+                indent=2,
+            )
 
 
 def main():
     if len(sys.argv) > 1:
         # Use provided arguments (files or directories)
         manifests = []
+        # Split arguments in case they are passed as a single quoted string
+        args = []
         for arg in sys.argv[1:]:
+            args.extend(arg.split())
+
+        for arg in args:
+            arg = arg.strip()
+            if not arg:
+                continue
             if arg.endswith("manifest.yaml"):
                 manifests.append(arg)
             elif os.path.isdir(arg):
@@ -114,6 +150,7 @@ def main():
     print(f"Checking {len(manifests)} manifests.")
     for m in manifests:
         update_manifest(m)
+
 
 if __name__ == "__main__":
     main()
