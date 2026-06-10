@@ -24,7 +24,7 @@ BASE_URL = "https://overwatch.blizzard.com"
 USER_AGENT = "Tidbyt"
 
 # content regex patterns
-PCT_PATTERN = "((100(?:\\.0+)?)|([0-9]?[0-9](?:\\.[0-9]+)?))$"
+PCT_PATTERN = "(?:100(?:\\.0+)?|[0-9]?[0-9](?:\\.[0-9]+)?)$"
 
 ALPHA_ALPHA_NUM_PATTERN = "([a-zA-Z]+\\d+\\.\\d+)"
 
