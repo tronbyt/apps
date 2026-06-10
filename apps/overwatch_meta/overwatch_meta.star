@@ -555,6 +555,9 @@ def render_statistics(
     # retrieve a map of hero name to hero icon
     hero_image_map = get_hero_image_map(heroes)
 
+    if statistic != STATISTICS_TYPES.win_rate and statistic != STATISTICS_TYPES.pick_rate:
+        return render_error("Received unsupported statistic: '{}'.".format(statistic))
+
     statistics_list = get_rates_list(meta_text, statistic)
 
     if len(statistics_list) == 0:
