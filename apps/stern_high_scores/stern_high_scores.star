@@ -1,4 +1,5 @@
 load("cache.star", "cache")
+load("color.star", "color")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
@@ -21,6 +22,44 @@ def shuffle(items):
         res[j] = tmp
     return res
 
+def mid_color(c1, c2):
+    col1 = color.hex(c1)
+    col2 = color.hex(c2)
+
+    r = (col1.r + col2.r) // 2
+    g = (col1.g + col2.g) // 2
+    b = (col1.b + col2.b) // 2
+
+    return color.rgb(r, g, b).hex()
+
+def clean_hex(h):
+    if not h or not h.startswith("#"):
+        return None
+    valid = "0123456789abcdefABCDEF"
+    res = "#"
+    for i in range(1, len(h)):
+        if h[i] in valid:
+            res += h[i]
+        else:
+            break
+    if len(res) == 4 or len(res) == 7 or len(res) == 9:
+        return res
+    return None
+
+def extract_until_quote(games_body, start_idx):
+    end1 = games_body.find('\\"', start_idx)
+    end2 = games_body.find('"', start_idx)
+
+    valid_ends = []
+    if end1 != -1:
+        valid_ends.append(end1)
+    if end2 != -1:
+        valid_ends.append(end2)
+
+    if valid_ends:
+        return games_body[start_idx:min(valid_ends)]
+    return ""
+
 def format_score(n):
     s = str(n)
     res = ""
@@ -34,132 +73,125 @@ def format_score(n):
     return res
 
 def login(username, password):
-    login_url = "https://insider.sternpinball.com/login"
+    login_url = "https://api.prd.sternpinball.io/api/v2/token/"
     headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0",
-        "Accept": "text/x-component",
-        "Next-Action": "9d2cf818afff9e2c69368771b521d93585a10433",
-        "Content-Type": "text/plain;charset=UTF-8",
-        "Origin": "https://insider.sternpinball.com",
+        "User-Agent": "Mozilla/5.0",
+        "Content-Type": "application/json",
     }
-    body = json.encode([username, password])
+    body = json.encode({"username": username, "password": password})
     rep = http.post(login_url, headers = headers, body = body)
 
     if rep.status_code != 200:
+        print("Login failed! Status Code: " + str(rep.status_code))
+        print("Response Body: " + rep.body())
         return None
 
-    cookies = rep.headers.get("Set-Cookie", "")
-    token = ""
-
-    # In Starlark, headers.get returns a single string.
-    # For multiple Set-Cookie headers, they might be comma separated or we might only get the first one.
-    # Pixlet's http library returns a single string for headers.get().
-    # It usually joins them with commas. Let's handle both commas and semicolons.
-    for part in cookies.replace(",", ";").split(";"):
-        if "spb-insider-token=" in part:
-            token = part.split("spb-insider-token=")[1]
+    data = rep.json()
+    token = data.get("access") or data.get("access_token")
 
     if not token:
         return None
 
-    return {"token": token, "cookies": cookies}
+    return {"token": token}
+
+def normalize_game_name(name):
+    n = name.strip()
+    if "Pokemon" in n or "Pokémon" in n:
+        return "Pokémon"
+    if "Stranger Things" in n:
+        return "Stranger Things"
+    if "Batman" in n and "66" in n:
+        return "Batman '66"
+    if "Elvira" in n:
+        return "Elvira's House of Horrors"
+    if "007" in n and "60th" in n:
+        return "James Bond 007 60th Anniversary"
+    if "007" in n:
+        return "James Bond 007"
+    if "Dungeons" in n and "Dragons" in n:
+        return "Dungeons \\u0026 Dragons"
+    return n.replace("&", "\\u0026")
 
 def get_personal_scores(auth):
-    cache_key = "stern_personal_scores_" + auth["token"]
+    # Use a chunk of token as cache key suffix
+    cache_key = "stern_personal_scores_v9_" + auth["token"][:15]
     cached_data = cache.get(cache_key)
     if cached_data:
         return json.decode(cached_data)
 
-    url = "https://insider.sternpinball.com/trophy-room/scores?_rsc=1"
+    url = "https://api.prd.sternpinball.io/api/v1/portal/user_stats/"
     headers = {
         "User-Agent": "Mozilla/5.0",
-        "Cookie": auth["cookies"],
-        "RSC": "1",
+        "Authorization": "Bearer " + auth["token"],
     }
     rep = http.get(url, headers = headers)
     if rep.status_code != 200:
         return []
 
-    body = rep.body()
+    data = rep.json()
+    stats = data.get("stats", {})
+    titles = stats.get("titles", [])
+
+    # Fetch global games list to extract logo URLs
+    games_url = "https://insider.sternpinball.com/games?_rsc=1"
+    games_cache_key = "stern_games_metadata_html"
+    games_body = cache.get(games_cache_key)
+    if not games_body:
+        g_rep = http.get(games_url, ttl_seconds = 86400)
+        if g_rep.status_code == 200:
+            games_body = g_rep.body()
+            cache.set(games_cache_key, games_body, ttl_seconds = 86400)
+
     results = []
-    curr_pos = 0
-
-    # Max 50 games to avoid timeout
-    for _ in range(50):
-        idx = body.find('"alt":"', curr_pos)
-        if idx == -1:
-            break
-
-        # Extract game name
-        start = idx + len('"alt":"')
-        end = body.find('"', start)
-        game_name = body[start:end]
-
-        # Extract logo src (search backwards from idx for variable_width_logo or src)
-        # We limit search to avoid picking up previous games
-        search_start = idx - 500
-        if search_start < 0:
-            search_start = 0
-        src_idx = body.rfind('"variable_width_logo":"', search_start, idx)
-        if src_idx == -1:
-            src_idx = body.rfind('"src":"', search_start, idx)
+    for t in titles:
+        game_name = t.get("name", "")
+        search_name = normalize_game_name(game_name)
 
         logo_url = ""
-        if src_idx != -1:
-            # Determine which key we found
-            key = '"variable_width_logo":"'
-            if body[src_idx:src_idx + len('"src":"')] == '"src":"':
-                key = '"src":"'
+        c1 = "#0aa"
+        c2 = "#a0a"
+        if games_body:
+            idx = games_body.find('\\"name\\":\\"' + search_name + '\\"')
+            if idx == -1:
+                idx = games_body.find('"name":"' + search_name + '"')
 
-            s_start = src_idx + len(key)
-            s_end = body.find('"', s_start)
-            logo_url = body[s_start:s_end]
+            if idx > -1:
+                g1_idx = games_body.find("gradient_start", idx, idx + 10000)
+                if g1_idx > -1:
+                    hex_start = games_body.find("#", g1_idx, g1_idx + 50)
+                    if hex_start > -1:
+                        c1_cand = extract_until_quote(games_body, hex_start)
+                        c1_clean = clean_hex(c1_cand)
+                        if c1_clean:
+                            c1 = c1_clean
 
-        # Extract scores in this block (until next alt)
-        next_alt = body.find('"alt":"', end)
-        if next_alt == -1:
-            next_alt = len(body)
+                g2_idx = games_body.find("gradient_stop", idx, idx + 10000)
+                if g2_idx > -1:
+                    hex_start = games_body.find("#", g2_idx, g2_idx + 50)
+                    if hex_start > -1:
+                        c2_cand = extract_until_quote(games_body, hex_start)
+                        c2_clean = clean_hex(c2_cand)
+                        if c2_clean:
+                            c2 = c2_clean
+
+                s_idx = games_body.find("variable_width_logo", idx, idx + 10000)
+                if s_idx > -1:
+                    http_start = games_body.find("http", s_idx, s_idx + 100)
+                    if http_start > -1:
+                        logo_url = extract_until_quote(games_body, http_start)
 
         game_scores = []
-        score_pos = end
-        for _ in range(5):  # Max 5 models per game
-            s_idx = body.find('"stats":', score_pos, next_alt)
-            if s_idx == -1:
-                break
+        for s in t.get("high_scores_by_model", []):
+            model_info = s.get("model", {})
+            m_type = model_info.get("type", "unknown")
+            score = s.get("high_score", 0)
 
-            # Find title
-            t_idx = body.rfind('"title":"', score_pos, s_idx)
-            title = "Score"
-            if t_idx != -1:
-                t_start = t_idx + len('"title":"')
-                t_end = body.find('"', t_start)
-                title = body[t_start:t_end]
-
-            # Find stats value
-            st_start = s_idx + len('"stats":')
-            st_end = body.find(",", st_start)
-            if st_end == -1 or st_end > body.find("}", st_start):
-                st_end = body.find("}", st_start)
-            stats_val = body[st_start:st_end]
-
-            # Find percentageStats
-            p_idx = body.find('"percentageStats":"', st_end, next_alt)
-            percent = ""
-            if p_idx != -1:
-                # Ensure percentageStats belongs to THIS score by checking it's before next stats
-                next_stats = body.find('"stats":', st_end, next_alt)
-                if next_stats == -1 or p_idx < next_stats:
-                    p_start = p_idx + len('"percentageStats":"')
-                    p_end = body.find('"', p_start)
-                    percent = body[p_start:p_end]
-
-            if stats_val.isdigit():
+            if score > 0:
                 game_scores.append({
-                    "model": title,
-                    "score": int(stats_val),
-                    "percent": percent,
+                    "model": m_type.lower(),
+                    "score": int(score),
+                    "percent": "",  # Not available in new API yet
                 })
-            score_pos = st_end
 
         if game_scores:
             # Sort scores: Pro, Premium, Limited
@@ -183,9 +215,10 @@ def get_personal_scores(auth):
                 "name": game_name,
                 "logo": logo_url,
                 "scores": ordered_scores,
+                "c1": c1,
+                "c2": c2,
+                "mid_c": mid_color(c1, c2),
             })
-
-        curr_pos = next_alt
 
     cache.set(cache_key, json.encode(results), ttl_seconds = 300)
     return results
@@ -195,6 +228,7 @@ def main(config):
     password = config.get("password")
     game_filter = config.get("game_filter", "all")
     highest_only = config.bool("highest_only")
+    max_games = int(config.get("max_games", "3"))
 
     if not username or not password:
         return render.Root(
@@ -223,6 +257,8 @@ def main(config):
         personal_games = filtered
     else:
         personal_games = shuffle(personal_games)
+
+    personal_games = personal_games[:max_games]
 
     for g in personal_games:
         logo_url = g["logo"]
@@ -258,8 +294,16 @@ def main(config):
         # Build personal score table
         score_rows = []
         for s in scores:
+            model_color = "#666"
+            if s["model"] == "pro":
+                model_color = g["c1"]
+            elif s["model"] == "premium":
+                model_color = g.get("mid_c", "#666")
+            elif s["model"] == "limited":
+                model_color = g["c2"]
+
             score_children = [
-                render.Text(content = s["model"].upper(), font = "tb-8", color = "#666"),
+                render.Text(content = s["model"].upper() + ": ", font = "tb-8", color = model_color),
                 render.Text(content = format_score(s["score"]), font = "tb-8", color = "#fff"),
             ]
             if s["percent"]:
@@ -352,6 +396,19 @@ def get_schema():
                     schema.Option(display = "The Uncanny X-Men", value = "The Uncanny X-Men"),
                     schema.Option(display = "The Walking Dead: Remastered", value = "The Walking Dead: Remastered"),
                     schema.Option(display = "Venom", value = "Venom"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "max_games",
+                name = "Max Games",
+                desc = "Maximum number of games to display",
+                icon = "list",
+                default = "3",
+                options = [
+                    schema.Option(display = "1", value = "1"),
+                    schema.Option(display = "2", value = "2"),
+                    schema.Option(display = "3", value = "3"),
+                    schema.Option(display = "5", value = "5"),
                 ],
             ),
         ],

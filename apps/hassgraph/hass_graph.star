@@ -80,14 +80,35 @@ def main(config):
     elif len(data) < 1:
         return render_error_message("No data available")
 
-    unit = data[0]["attributes"]["unit_of_measurement"]
-    points = calculate_hourly_average(data)
+    unit = data[0]["attributes"].get("unit_of_measurement", "")
+    points = calculate_hourly_average(config, data)
     current_value = data[-1]["state"]
+
+    range_str = config.str("display_range", "")
+    if range_str:
+        parts = range_str.split(",")
+        if len(parts) == 2:
+            min_val = float(parts[0])
+            max_val = float(parts[1])
+            if current_value == "unavailable" or current_value == "unknown":
+                return []
+            val = float(current_value)
+            if val < min_val or val > max_val:
+                return []
     stats = calc_stats(timezone, data)
 
-    return render_app(config, current_value, points, stats, unit)
+    label = config.str("custom_label", "")
+    return render_app(config, current_value, points, stats, unit, label)
 
-def calculate_hourly_average(data):
+def calculate_hourly_average(config, data):
+    if config.bool("use_raw_data"):
+        points = []
+        for i, entry in enumerate(data):
+            if entry["state"] == "unavailable" or entry["state"] == "unknown":
+                continue
+            points.append((i, float(entry["state"])))
+        return points
+
     hourly_averages = {}
     current_hour = None
     hour_total = 0
@@ -175,6 +196,8 @@ def get_entity_data(config, start_time):
 
 def get_icon(config):
     icon = config.str("icon")
+    if icon == "none":
+        return None
     return ICONS[icon] if icon in ICONS else ICONS["thermometer"]
 
 def get_time_period(input_str):
@@ -186,13 +209,13 @@ def get_time_period(input_str):
 
     return time_period
 
-def render_app(config, current_value, points, stats, unit):
+def render_app(config, current_value, points, stats, unit, label):
     if config.bool("show_history"):
         return render.Root(
             child = animation.Transformation(
                 child = render.Row(
                     children = [
-                        render_graph_column(config, current_value, points, unit),
+                        render_graph_column(config, current_value, points, unit, label),
                         render_stats_column(stats, unit),
                     ],
                 ),
@@ -208,25 +231,30 @@ def render_app(config, current_value, points, stats, unit):
         )
     else:
         return render.Root(
-            child = render_graph_column(config, current_value, points, unit),
+            child = render_graph_column(config, current_value, points, unit, label),
         )
 
-def render_graph_column(config, current_value, points, unit):
+def render_graph_column(config, current_value, points, unit, label):
+    icon = get_icon(config)
+    children = []
+    if label:
+        children.append(render.Text(content = label, font = "6x13", color = "#888888"))
+    if icon:
+        children.append(render.Box(
+            child = render.Image(src = icon, width = 10, height = 10),
+            width = 12,
+            height = 12,
+        ))
+    children.append(render.Text(content = current_value + unit, font = "6x13"))
+    align = "space_between" if label else "end"
     return render.Column(
         children = [
             render.Box(
                 child = render.Row(
-                    children = [
-                        render.Box(
-                            child = render.Image(src = get_icon(config), width = 10, height = 10),
-                            width = 12,
-                            height = 12,
-                        ),
-                        render.Text(content = current_value + unit, font = "6x13"),
-                    ],
+                    children = children,
                     expanded = True,
                     cross_align = "center",
-                    main_align = "end",
+                    main_align = align,
                 ),
                 width = 64,
                 height = 13,
@@ -287,6 +315,10 @@ def render_error_message(message):
 def get_schema():
     icons = [
         schema.Option(
+            display = "None",
+            value = "none",
+        ),
+        schema.Option(
             display = "Raindrop",
             value = "drop",
         ),
@@ -344,6 +376,19 @@ def get_schema():
                 icon = "list",
                 default = True,
             ),
+            schema.Toggle(
+                id = "use_raw_data",
+                name = "Use raw data",
+                desc = "Plot raw data points instead of hourly averages",
+                icon = "chartLine",
+                default = False,
+            ),
+            schema.Text(
+                id = "display_range",
+                desc = "Only display when value is within this range. Format: min,max (e.g. 5,1000). Leave empty to always show.",
+                icon = "filter",
+                name = "Display range",
+            ),
             schema.Location(
                 id = "location",
                 name = "Location",
@@ -357,6 +402,12 @@ def get_schema():
                 icon = "icons",
                 name = "Icon",
                 options = icons,
+            ),
+            schema.Text(
+                id = "custom_label",
+                desc = "Optional label displayed to the left of the icon.",
+                icon = "tag",
+                name = "Custom label",
             ),
             schema.Color(
                 id = "line_positive",

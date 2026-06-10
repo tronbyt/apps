@@ -1,0 +1,17 @@
+---
+id: season-clock
+name: Season Clock
+summary: Countdown to the next season
+desc: A lively seasonal scene with a countdown to the next astronomical season, or the current day of the season, for either hemisphere. Stack two instances to see both at once.
+author: Joe Vivona
+fileName: seasonclock.star
+packageName: seasonclock
+category: clocks
+tags:
+  - clock
+  - time
+  - science
+  - utility
+  - seasons
+published: '2026-06-02T18:19:23Z'
+updated: '2026-06-03T02:58:57Z'

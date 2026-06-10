@@ -7,6 +7,7 @@ Author: Brian McLaughlin (SpinStabilized)
 
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -40,6 +41,7 @@ DEFAULT_INCLUDE_QUARRY = True
 DEFAULT_INCLUDE_EXPLOSION = True
 DEFAULT_INCLUDE_OTHER = True
 DEFAULT_MAP_BRIGHTNESS = "0.25"
+DEFAULT_SHOW_LATEST_MAGNITUDE = False
 
 DISPLAY_X_SIZE = 64
 DISPLAY_Y_SIZE = 32
@@ -376,6 +378,7 @@ def main(config):
         "other": config.bool("include_other", DEFAULT_INCLUDE_OTHER),
     }
     map_brightness = float(config.get("map_brightness", DEFAULT_MAP_BRIGHTNESS))
+    show_latest_magnitude = config.bool("show_latest_magnitude", DEFAULT_SHOW_LATEST_MAGNITUDE)
 
     time_filter = duration_calc(time_filter_duration, time_filter_units)
 
@@ -415,6 +418,17 @@ def main(config):
         render_stack.append(
             blink_pixel(x, y, blink_on),
         )
+
+        if show_latest_magnitude:
+            mag_str = humanize.float("0.0", last_event[1])
+            mag_label = render.Text(mag_str, color = blink_on)
+            mag_width = mag_label.size()[0]
+            render_stack.append(
+                render.Padding(
+                    pad = ((DISPLAY_X_SIZE - mag_width) // 2, DISPLAY_Y_SIZE - 9, 0, 0),
+                    child = mag_label,
+                ),
+            )
 
         return render.Root(
             delay = 500,
@@ -570,6 +584,13 @@ def get_schema():
                 id = "location_option",
                 source = "map_center_id",
                 handler = schema_location,
+            ),
+            schema.Toggle(
+                id = "show_latest_magnitude",
+                name = "Show Latest Magnitude",
+                desc = "Display the magnitude of the most recent earthquake on screen.",
+                icon = "signal",
+                default = DEFAULT_SHOW_LATEST_MAGNITUDE,
             ),
         ],
     )

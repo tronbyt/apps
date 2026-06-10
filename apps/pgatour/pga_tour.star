@@ -102,6 +102,9 @@ Added more entries for Tournament renaming map
 v2.13 
 Changed winner font colour to gold, seems more fitting of a champion
 Handling for team events eg Zurich
+
+v2.14
+Updated PLAYER_MAPPING
 """
 
 load("encoding/json.star", "json")
@@ -143,7 +146,9 @@ PLAYER_MAPPING = """
     "4355673": "B.Wu",
     "4423323": "D.Wu",
     "9127": "A.Svensson",
-    "4699329": "J.Svensson"
+    "4699329": "J.Svensson",
+    "4364865": "A.Fitzpatrick",
+    "9037": "M.Fitzpatrick"
 }
 """
 

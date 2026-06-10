@@ -1,6 +1,6 @@
 """
 Applet: Ships Nearby
-Summary: Display ships near Indonesia
+Summary: Display ships from Marinesia API or other json data source.
 Description: Shows vessels near Indonesia using Marinesia API.
 Author: tavdog
 """
@@ -10,6 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # Container ship icon (32x10 pixels)
 CONTAINER_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACAAAAAKCAYAAADVTVykAAAAWElEQVR4nGNgoAO4c+fOfxCmh104LSfbESdsbP6DsE3KFgheEADGJ7bYQDAO+aHvAJiBMIvgFqNZSEg+ICAKBQ9+B6BroAXG7Wsbt//0wgPqCOLSAJ0sBgABdYfIAQVTYgAAAABJRU5ErkJggg==")
@@ -55,9 +56,29 @@ def get_schema():
             schema.Text(
                 id = "bbox",
                 name = "Bounding Box",
-                desc = "Format: long_min,lat_min,long_max,lat_max Try use https://boundingbox.klokantech.com/",
+                desc = "Use https://boundingbox.klokantech.com/",
                 icon = "mapPin",
                 default = DEFAULT_BBOX,
+            ),
+            schema.Toggle(
+                id = "use_custom",
+                name = "Use Custom URL",
+                desc = "Whether to use a custom JSON URL instead of Marinesia API",
+                icon = "link",
+                default = False,
+            ),
+            schema.Text(
+                id = "data_url",
+                name = "AIS Stream Data URL",
+                desc = "URL to a JSON format data source",
+                icon = "link",
+            ),
+            schema.Text(
+                id = "timeout",
+                name = "Display Timeout",
+                desc = "Hide ship if data is older than this many minutes (0 to disable)",
+                icon = "clock",
+                default = "60",
             ),
             schema.Dropdown(
                 id = "line2",
@@ -108,6 +129,58 @@ def fetch_vessels(bbox, api_key):
     vessels = data.get("data", [])
     print("vessels count: " + str(len(vessels)))
     return vessels, None
+
+def fetch_custom_data(url):
+    response = http.get(url, ttl_seconds = 30)
+    if response.status_code != 200:
+        return None, "Custom URL error: " + str(response.status_code)
+
+    body = response.body()
+
+    # The data source appears to be a Python-style dictionary string rather than strict JSON.
+    # We attempt to normalize it to valid JSON.
+    if body.startswith("{'") or body.startswith("['"):
+        body = body.replace("'", '"')
+        body = body.replace("True", "true")
+        body = body.replace("False", "false")
+        body = body.replace("None", "null")
+
+    data = json.decode(body)
+
+    vessels = []
+    if type(data) == "dict":
+        vessels = [data]
+    elif type(data) == "list":
+        vessels = data
+    else:
+        return None, "Invalid JSON format from custom URL"
+
+    normalized = []
+    for v in vessels:
+        normalized.append(normalize_vessel(v))
+
+    return normalized, None
+
+def normalize_vessel(v):
+    if "MetaData" in v and "Message" in v:
+        # Custom format mapping
+        meta = v.get("MetaData", {})
+        msg_outer = v.get("Message", {})
+        msg = msg_outer.get("PositionReport") or msg_outer.get("ShipStaticData") or {}
+
+        return {
+            "name": meta.get("ShipName") or meta.get("ShipName_String") or "",
+            "mmsi": meta.get("MMSI") or meta.get("MMSI_String") or "",
+            "lat": meta.get("latitude") or msg.get("Latitude") or 0.0,
+            "lng": meta.get("longitude") or msg.get("Longitude") or 0.0,
+            "sog": msg.get("Sog") if msg.get("Sog") != None else 0.0,
+            "cog": msg.get("Cog") if msg.get("Cog") != None else 0.0,
+            "hdt": msg.get("TrueHeading") if msg.get("TrueHeading") != None else 0,
+            "status": msg.get("NavigationalStatus") if msg.get("NavigationalStatus") != None else 15,
+            "ts": meta.get("time_utc") or "",
+            "type": v.get("MessageType", ""),
+        }
+    return v
 
 NAV_STATUS = {
     0: "Underway",
@@ -260,7 +333,10 @@ def render_view(vessels, line2_opt, line3_opt):
     name_line = name + (" (" + vtype + ")" if vtype else "")
 
     vtype_lower = vtype.lower() if vtype else ""
-    if vtype_lower == "tug":
+    is_cg = "CGC " in name or name.startswith("CGC")
+    if is_cg:
+        icon = CARGO_ICON  # Placeholder if we want to draw it
+    elif vtype_lower == "tug":
         icon = TUG_ICON
     elif vtype_lower == "container ship" or "container" in vtype_lower:
         icon = CONTAINER_ICON
@@ -278,6 +354,27 @@ def render_view(vessels, line2_opt, line3_opt):
     if line3_result:
         info_lines.append(render.Text(line3_result[0], font = "tom-thumb", color = "#aaa"))
 
+    icon_widget = render.Image(src = icon)
+    if is_cg:
+        # Sleeker Coast Guard Cutter: Pointed bow, angled racing stripe, mast and bridge details
+        # Scaled to be longer (approx 44 pixels)
+        icon_widget = render.Stack(
+            children = [
+                # Hull Layers (Pointed Bow on the Right)
+                render.Padding(pad = (0, 4, 0, 0), child = render.Box(width = 44, height = 2, color = "#fff")),  # Top deck
+                render.Padding(pad = (1, 6, 2, 0), child = render.Box(width = 41, height = 2, color = "#fff")),  # Mid hull
+                render.Padding(pad = (3, 8, 5, 0), child = render.Box(width = 36, height = 2, color = "#ddd")),  # Bottom hull
+                # Superstructure
+                render.Padding(pad = (10, 1, 0, 0), child = render.Box(width = 20, height = 3, color = "#fff")),
+                render.Padding(pad = (26, 2, 0, 0), child = render.Box(width = 4, height = 1, color = "#333")),  # Bridge windows
+                render.Padding(pad = (14, 0, 0, 0), child = render.Box(width = 1, height = 2, color = "#999")),  # Mast
+                # Racing Stripe (Angled)
+                render.Padding(pad = (38, 4, 0, 0), child = render.Box(width = 2, height = 2, color = "#f00")),
+                render.Padding(pad = (37, 6, 0, 0), child = render.Box(width = 2, height = 2, color = "#f00")),
+                render.Padding(pad = (36, 8, 0, 0), child = render.Box(width = 2, height = 2, color = "#f00")),
+            ],
+        )
+
     return render.Root(
         child = render.Column(
             children = [
@@ -287,7 +384,7 @@ def render_view(vessels, line2_opt, line3_opt):
                     children = [
                         render.Padding(
                             pad = (0, 1, 0, 1),
-                            child = render.Image(src = icon),
+                            child = icon_widget,
                         ),
                     ],
                 ),
@@ -310,15 +407,56 @@ def render_error(err):
     )
 
 def main(config):
-    api_key = config.get("api_key", "")
-    if api_key == "":
-        return render_error("API key required")
-    bbox = config.get("bbox", DEFAULT_BBOX)
-    if bbox == "":
-        bbox = DEFAULT_BBOX
-    line2_opt = config.get("line2", "speed_course")
-    line3_opt = config.get("line3", "nav_status")
-    vessels, err = fetch_vessels(bbox, api_key)
+    use_custom = config.bool("use_custom")
+    timeout_mins = int(config.get("timeout", "60"))
+
+    if use_custom:
+        data_url = config.get("data_url", "")
+        if not data_url:
+            return render_error("Data URL required")
+        vessels, err = fetch_custom_data(data_url)
+    else:
+        api_key = config.get("api_key", "")
+        if api_key == "":
+            return render_error("API key required")
+        bbox = config.get("bbox", DEFAULT_BBOX)
+        if bbox == "":
+            bbox = DEFAULT_BBOX
+        vessels, err = fetch_vessels(bbox, api_key)
+
     if err:
         return render_error(err)
+
+    if len(vessels) > 0 and timeout_mins > 0:
+        # Find newest vessel
+        newest_v = None
+        for v in vessels:
+            if newest_v == None or v.get("ts", "") > newest_v.get("ts", ""):
+                newest_v = v
+
+        if newest_v and newest_v.get("ts"):
+            ts_str = newest_v.get("ts")
+            parsed_ts = None
+
+            # Try to handle common formats without crashing
+            if " +0000 UTC" in ts_str:
+                # Format: '2026-06-03 05:19:21.142948755 +0000 UTC'
+                parsed_ts = time.parse_time(ts_str, format = "2006-01-02 15:04:05.999999999 -0700 MST")
+            elif "T" in ts_str:
+                # Likely ISO8601/RFC3339
+                if "." in ts_str:
+                    parsed_ts = time.parse_time(ts_str, format = "2006-01-02T15:04:05.999999999Z07:00")
+                else:
+                    parsed_ts = time.parse_time(ts_str, format = "2006-01-02T15:04:05Z07:00")
+
+            if parsed_ts:
+                now = time.now()
+                diff = now - parsed_ts
+                if diff.minutes > timeout_mins:
+                    print("Ship data too old: " + str(diff.minutes) + " mins")
+                    return []
+
+    line2_opt = config.get("line2", "speed_course")
+    line3_opt = config.get("line3", "nav_status")
+
     return render_view(vessels, line2_opt, line3_opt)

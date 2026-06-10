@@ -1,14 +1,13 @@
 """
 Applet: AA Daily Reflections
 Summary: Display the AA Daily Reflection
-Description: Display AA Daily Refelection from the AA.org website
+Description: Display AA Daily Refelection
 Author: jvivona
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
-load("time.star", "time")
 
 VERSION = 23132
 
@@ -26,23 +25,11 @@ REFLECTION_COLOR = "#00eeff"
 SPACER_COLOR = "#000"
 REFLECTION_LINESPACING = 0
 
-# need to append the 2 digit month and 2 digit day to the end of this, do a GET and data is returned as json
-API_STUB = "https://www.aa.org/api/reflections/"
+# daily reflection data is published as clean JSON, refreshed once per day
+DATA_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/refs/heads/main/aa/dailyreflection.json"
 
-#this only changes once per day so we can long term cache it
-CACHE_TTL_SECONDS = 86399
-
-TITLE_FINDER = "field--name-title field--type-string field--label-hidden"
-TITLE_FINDER_END = "</span>"
-TITLE_OFFSET = 2
-
-TEASER_FINDER = "field--name-field-teaser field--type-text-long field--label-hidden field__item"
-TEASER_FINDER_END = "</p>"
-TEASER_OFFSET = 5
-
-REFERENCE_FINDER = "<strong>"
-REFERENCE_FINDER_END = "</strong>"
-REFERENCE_OFFSET = 0
+#data changes once per day, but cache for 2 hours so updates are picked up sooner
+CACHE_TTL_SECONDS = 7200
 
 def main():
     return render.Root(
@@ -85,16 +72,11 @@ def get_cachable_data(url):
     return res.body()
 
 def render_text():
-    current_month_day = time.now().in_location(time.tz()).format("01/02/06")[:5]
-    daily_reflection = json.decode(get_cachable_data(API_STUB + current_month_day))["data"].replace("&quot;", "\"").replace("&nbsp;", " ")
+    daily_reflection = json.decode(get_cachable_data(DATA_URL))
 
-    title = extract_text(daily_reflection, TITLE_FINDER, TITLE_FINDER_END, TITLE_OFFSET).title()
-
-    # the structure is well known and consistent from day to day so split on the div tag and narrow the search
-    teaser = extract_text(daily_reflection.split("<div")[2], TEASER_FINDER, TEASER_FINDER_END, TEASER_OFFSET)
-
-    # same technique as above, but the reference is a <p> tag inside the div so use that to our advantage
-    reference = extract_text(daily_reflection.split("<div")[2].split("<p>")[-1], REFERENCE_FINDER, REFERENCE_FINDER_END, REFERENCE_OFFSET).title().replace("Pp.", "pp.").replace("P.", "p.")
+    title = daily_reflection.get("title", "").title()
+    teaser = daily_reflection.get("summary", "")
+    reference = daily_reflection.get("reference", "").title().replace("Pp.", "pp.").replace("P.", "p.")
 
     if len(title) == 0 or len(teaser) == 0:
         return error()
@@ -106,13 +88,6 @@ def render_text():
         render.Box(width = 64, height = 3, color = SPACER_COLOR),
         render.WrappedText(reference, font = REFLECTION_SUB_TITLE_FONT, color = REFLECTION_SUB_TITLE_COLOR, linespacing = REFLECTION_LINESPACING),
     ]
-
-def extract_text(content, start_string, end_string, offset):
-    text_start = content.find(start_string)
-    text_end = content.find(end_string, text_start)
-    if text_start == -1 or text_end == -1:
-        return ""
-    return content[text_start + len(start_string) + offset:text_end].replace("<strong>", "").replace("</strong>", "")
 
 def error():
     return [render.WrappedText("An error has occurred getting the daily reflection.", width = 64)]
