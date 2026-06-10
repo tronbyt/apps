@@ -101,7 +101,7 @@ def main(config):
     api_key = config.get("api_key") or ""
     lat_str = (config.get("lat") or "").strip()
     lon_str = (config.get("lon") or "").strip()
-    radius_str = (config.get("radius") or "50").strip()
+    radius_str = (config.get("radius") or "4").strip()
 
     if not api_key or not lat_str or not lon_str:
         return error_screen("setup needed")
@@ -122,14 +122,16 @@ def main(config):
             "Accept-Version": "v1",
             "Accept": "application/json",
         },
-        ttl_seconds = 60,
+        ttl_seconds = 20,
     )
 
     if rep.status_code != 200:
+        print("fr24 error: HTTP %d" % rep.status_code)
         return error_screen("HTTP %d" % rep.status_code)
 
     data = rep.json()
     flights = (data.get("data") or [])
+    print("fr24 ok: %d flights in bounds" % len(flights))
 
     if not flights:
         return []
@@ -159,6 +161,7 @@ def main(config):
             best_has_route = has_route
 
     if not best:
+        print("fr24: %d flights returned but all had null position" % len(flights))
         return []
 
     flight_num = best.get("flight") or best.get("callsign") or "???"
