@@ -1,3 +1,4 @@
+---
 id: billiards
 name: Billiards
 summary: Billiads break and 3 shots
@@ -5,3 +6,6 @@ desc: A continuous 15-second simulation of a game of pool, featuring randomized 
 author: Mark Greinke
 fileName: billiards.star
 packageName: billiards
+published: '2026-06-10T23:06:49Z'
+updated: '2026-06-10T23:06:49Z'
+tags: []
