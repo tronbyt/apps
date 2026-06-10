@@ -1,0 +1,8 @@
+---
+id: brownian
+name: Brownian
+summary: A physics simulation
+desc: Visualization of Brownian motion where smaller particles constantly bombard a larger central circle, demonstrating the transfer of momentum.
+author: Mark Greinke
+fileName: brownian.star
+packageName: brownian
