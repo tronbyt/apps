@@ -219,7 +219,9 @@ def get_rates_list(input_text, statistic):
             return render_error("Received unsupported statistic: '{}'.".format(statistic))
 
     # the values are not sorted... sort them.
-    sorted_rates = sorted(result_rates, key = lambda x: float(x[1]), reverse = True)
+    def _sort_key(x):
+        return float(x[1])
+    sorted_rates = sorted(result_rates, key = _sort_key, reverse = True)
 
     return sorted_rates
 
