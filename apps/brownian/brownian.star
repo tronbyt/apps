@@ -124,10 +124,10 @@ def main(config):
                 p[0] = cx + (cdx * (CIRCLE_R + 1)) // dist
                 p[1] = cy + (cdy * (CIRCLE_R + 1)) // dist
 
-                circle_state[2] += p[2] * 20
-                circle_state[3] += p[3] * 20
                 p[2] = -p[2]
                 p[3] = -p[3]
+                circle_state[2] += p[2] * 20
+                circle_state[3] += p[3] * 20
 
                 if p[0] < 0:
                     p[0] = 0
