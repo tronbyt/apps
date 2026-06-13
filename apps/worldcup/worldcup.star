@@ -187,6 +187,7 @@ def main(config):
 
     home_color = get_team_color(home_team.get("color", "NO"))
     away_color = get_team_color(away_team.get("color", "NO"))
+    away_alt_color = get_team_color(away_team.get("alternateColor", "NO"))
 
     # 4. Extract scores and records
     game_status = match_to_render.get("status", {}).get("type", {}).get("state", "pre")  # pre, in, post
@@ -225,10 +226,18 @@ def main(config):
         away_logo_url = away_info["logo_url"]
         away_color = away_info["color"]
         away_record = away_info["record"]
+        away_alt_color = away_info["away_alt_color"]
 
         # We can also assume the fallback upcoming event is during Group Stage
         # if the league default is Group Stage, or just default it
         is_group_stage = True
+
+    # Check for color clash
+    dist_primary = color_distance(home_color, away_color)
+    dist_alt = color_distance(home_color, away_alt_color)
+
+    if dist_primary < 8000 and dist_alt > dist_primary:
+        away_color = away_alt_color
 
     # 5. Format display values
     home_val = ""
@@ -315,21 +324,25 @@ def main(config):
         row1_abbr = away_abbr
         row1_is_followed = (away_id == followed_country)
         row1_val = away_val
+        row1_color = away_color
 
         row2_flag = home_flag
         row2_abbr = home_abbr
         row2_is_followed = (home_id == followed_country)
         row2_val = home_val
+        row2_color = home_color
     else:
         row1_flag = home_flag
         row1_abbr = home_abbr
         row1_is_followed = (home_id == followed_country)
         row1_val = home_val
+        row1_color = home_color
 
         row2_flag = away_flag
         row2_abbr = away_abbr
         row2_is_followed = (away_id == followed_country)
         row2_val = away_val
+        row2_color = away_color
 
     return render.Root(
         child = render.Column(
@@ -337,19 +350,23 @@ def main(config):
             main_align = "space_between",
             cross_align = "center",
             children = [
-                render_team_row(row1_flag, row1_abbr, row1_is_followed, row1_val, show_val, SCALE),
-                render_team_row(row2_flag, row2_abbr, row2_is_followed, row2_val, show_val, SCALE),
+                render_team_row(row1_flag, row1_abbr, row1_is_followed, row1_val, show_val, row1_color, SCALE),
+                render_team_row(row2_flag, row2_abbr, row2_is_followed, row2_val, show_val, row2_color, SCALE),
                 render_status_row(status_text, is_live, SCALE),
             ],
         ),
     )
 
-def render_team_row(flag_widget, abbr, is_followed, score_or_record, show_score_or_record, scale):
+def render_team_row(flag_widget, abbr, is_followed, score_or_record, show_score_or_record, team_color, scale):
     font_abbr = "terminus-16" if scale == 2 else "tb-8"
     font_val = "tb-8" if scale == 2 else "CG-pixel-3x5-mono"
 
-    abbr_color = "#FFE065" if is_followed else "#FFFFFF"
-    val_color = "#AAAAAA"
+    if is_light_color(team_color):
+        abbr_color = "#B8860B" if is_followed else "#000000"
+        val_color = "#000000"
+    else:
+        abbr_color = "#FFE065" if is_followed else "#FFFFFF"
+        val_color = "#FFFFFF"
 
     val_text = None
     if show_score_or_record:
@@ -357,11 +374,12 @@ def render_team_row(flag_widget, abbr, is_followed, score_or_record, show_score_
     else:
         val_text = render.Box(width = 1, height = 1)
 
-    return render.Padding(
-        pad = (2 * scale, 0, 2 * scale, 0),
-        child = render.Box(
-            width = 60 * scale,
-            height = 13 * scale,
+    return render.Box(
+        width = 64 * scale,
+        height = 13 * scale,
+        color = team_color,
+        child = render.Padding(
+            pad = (2 * scale, 0, 2 * scale, 0),
             child = render.Row(
                 expanded = True,
                 main_align = "space_between",
@@ -383,7 +401,7 @@ def render_team_row(flag_widget, abbr, is_followed, score_or_record, show_score_
 
 def render_status_row(status_text, is_live, scale):
     font_status = "tb-8" if scale == 2 else "CG-pixel-3x5-mono"
-    status_color = "#5bbd19" if is_live else "#888888"
+    status_color = "#5bbd19" if is_live else "#FFFFFF"
 
     return render.Box(
         width = 64 * scale,
@@ -432,6 +450,7 @@ def get_team_info(team_id, default_abbr, default_name, default_logo_url):
     name = default_name
     logo_url = default_logo_url
     color = "#222222"
+    away_alt_color = "#222222"
     record = "0-0-0"
 
     if team_data_str:
@@ -440,6 +459,8 @@ def get_team_info(team_id, default_abbr, default_name, default_logo_url):
         abbr = t.get("abbreviation", default_abbr)
         name = t.get("displayName", default_name)
         color = get_team_color(t.get("color", "NO"))
+        alt_c = get_team_color(t.get("alternateColor", "NO"))
+        away_alt_color = alt_c
 
         logos = t.get("logos", [])
         if len(logos) > 0:
@@ -450,13 +471,29 @@ def get_team_info(team_id, default_abbr, default_name, default_logo_url):
         if len(items) > 0:
             record = items[0].get("summary", "0-0-0")
 
-    return dict(abbr = abbr, name = name, color = color, logo_url = logo_url, record = record)
+    return dict(abbr = abbr, name = name, color = color, away_alt_color = away_alt_color, logo_url = logo_url, record = record)
 
 def get_cache_data(url, ttl_seconds):
     res = http.get(url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
         return None
     return res.body()
+
+def color_distance(c1, c2):
+    r1, g1, b1 = hex_to_rgb(c1)
+    r2, g2, b2 = hex_to_rgb(c2)
+    return (r1 - r2) * (r1 - r2) + (g1 - g2) * (g1 - g2) + (b1 - b2) * (b1 - b2)
+
+def hex_to_rgb(hex_str):
+    hex_str = hex_str.replace("#", "")
+    if len(hex_str) != 6:
+        return (0, 0, 0)
+    return (int(hex_str[0:2], 16), int(hex_str[2:4], 16), int(hex_str[4:6], 16))
+
+def is_light_color(hex_str):
+    r, g, b = hex_to_rgb(hex_str)
+    luminance = (212 * r + 715 * g + 72 * b) // 1000
+    return luminance > 128
 
 def get_schema():
     return schema.Schema(
