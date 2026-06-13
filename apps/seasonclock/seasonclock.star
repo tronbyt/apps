@@ -32,6 +32,10 @@ load("images/snow.png", SNOW_1X = "file")
 load("images/snow@2x.png", SNOW_2X = "file")
 
 # Sprites (1x + @2x). The matching set is chosen at render time via canvas.is2x().
+#
+# TODO(2x sprites): revisit the SUMMER (sun) and AUTUMN (tree/leaves) @2x art.
+# The current @2x assets are good enough to ship but should be redrawn at
+# native 128x64 detail for a crisper look -- coming back to this later.
 load("images/snowman.png", SNOWMAN_1X = "file")
 load("images/snowman@2x.png", SNOWMAN_2X = "file")
 load("images/sun.png", SUN_1X = "file")
@@ -199,7 +203,7 @@ DEFAULT_LOCATION = """
 NUM_FONT_BIG = "terminus-32" if IS2X else "10x20"
 NUM_FONT_SM = "terminus-22" if IS2X else "6x13"
 LBL_FONT = "6x13" if IS2X else "tom-thumb"
-NUM_ADVANCE = 16 if IS2X else 10  # px per digit, for placing the ordinal suffix
+NUM_ADVANCE = 8 if IS2X else 10  # logical px per digit (x SCALE -> physical), for placing the ordinal suffix
 
 COLOR_TEXT = "#ffffff"
 COLOR_SHADOW = "#00000099"
