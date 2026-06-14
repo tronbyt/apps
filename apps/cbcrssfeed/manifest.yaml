@@ -7,6 +7,7 @@ author: jvivona
 fileName: cbc_rss_feed.star
 packageName: cbcrssfeed
 recommendedInterval: 5
+supports2x: true
 category: news
 tags:
   - news
