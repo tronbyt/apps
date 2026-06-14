@@ -7,6 +7,7 @@ author: jvivona
 fileName: financial_times.star
 packageName: financialtimes
 recommendedInterval: 10
+supports2x: true
 category: news
 tags:
   - finance

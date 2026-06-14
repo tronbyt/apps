@@ -7,7 +7,7 @@ Description: Gets latest new articles from Financial Time and displays up to 3 a
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -41,6 +41,13 @@ def main(config):
     articlecount = int(config.get("articlecount", DEFAULT_ARTICLE_COUNT))
     articles = get_cacheable_data(edition.lower(), articlecount)
 
+    if canvas.is2x():
+        return render_2x(articles)
+    return render_1x(articles)
+
+def render_1x(articles):
+    # 64x32 layout (unchanged): "Financial Times" title bar over the scrolling
+    # headline + description body.
     return render.Root(
         delay = 100,
         show_full_animation = True,
@@ -67,6 +74,39 @@ def main(config):
         ),
     )
 
+def render_2x(articles):
+    # 128x64 layout: fixed "Financial Times" header, then each article as a
+    # white headline followed by its description in the roomier canvas.
+    body = []
+    for article in articles:
+        body.append(render.WrappedText(content = clean_text(article[0]), color = TEXT_COLOR, font = ARTICLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 2, color = SPACER_COLOR))
+        desc = clean_text(article[1])
+        if desc != "":
+            body.append(render.WrappedText(content = desc, color = ARTICLE_COLOR, font = ARTICLE_SUB_TITLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 9, color = SPACER_COLOR))
+
+    return render.Root(
+        delay = 100,
+        show_full_animation = True,
+        child = render.Column(
+            children = [
+                render.Box(
+                    width = 128,
+                    height = 9,
+                    color = TITLE_BKG_COLOR,
+                    child = render.Text("Financial Times", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                ),
+                render.Marquee(
+                    height = 55,
+                    scroll_direction = "vertical",
+                    offset_start = 55,
+                    child = render.Column(children = body),
+                ),
+            ],
+        ),
+    )
+
 def render_article(news):
     #formats color and font of text
     news_text = []
@@ -77,6 +117,13 @@ def render_article(news):
         news_text.append(render.Box(width = 64, height = 3, color = SPACER_COLOR))
 
     return (news_text)
+
+def clean_text(s):
+    # RSS text comes through with HTML entities (e.g. &apos; &quot;); unescape
+    # the common ones. &amp; is handled first so double-escaped entities resolve.
+    for entity, char in [("&amp;", "&"), ("&apos;", "'"), ("&#39;", "'"), ("&quot;", "\""), ("&#34;", "\""), ("&lt;", "<"), ("&gt;", ">"), ("&nbsp;", " ")]:
+        s = s.replace(entity, char)
+    return s.strip()
 
 def get_schema():
     return schema.Schema(
