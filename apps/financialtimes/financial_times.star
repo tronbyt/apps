@@ -35,6 +35,17 @@ ARTICLE_AREA_HEIGHT = 24
 
 RSS_STUB = "https://www.ft.com/{}?format=rss"
 
+# short section labels for the 2x header
+SECTION_TITLE = {
+    "home": "Home",
+    "world": "World",
+    "us": "US",
+    "companies": "Companies",
+    "technology": "Tech",
+    "markets": "Markets",
+    "opinion": "Opinion",
+}
+
 def main(config):
     edition = config.get("news_edition", DEFAULT_NEWS)
 
@@ -42,7 +53,7 @@ def main(config):
     articles = get_cacheable_data(edition.lower(), articlecount)
 
     if canvas.is2x():
-        return render_2x(articles)
+        return render_2x(articles, edition)
     return render_1x(articles)
 
 def render_1x(articles):
@@ -74,8 +85,8 @@ def render_1x(articles):
         ),
     )
 
-def render_2x(articles):
-    # 128x64 layout: fixed "Financial Times" header, then each article as a
+def render_2x(articles, edition):
+    # 128x64 layout: fixed "FT" + section header, then each article as a
     # white headline followed by its description in the roomier canvas.
     body = []
     for article in articles:
@@ -95,7 +106,14 @@ def render_2x(articles):
                     width = 128,
                     height = 9,
                     color = TITLE_BKG_COLOR,
-                    child = render.Text("Financial Times", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                    child = render.Row(
+                        cross_align = "center",
+                        children = [
+                            render.Text("FT", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                            render.Box(width = 6, height = 1),
+                            render.Text(SECTION_TITLE.get(edition, edition), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_FONT),
+                        ],
+                    ),
                 ),
                 render.Marquee(
                     height = 55,

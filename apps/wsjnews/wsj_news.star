@@ -37,6 +37,26 @@ ARTICLE_AREA_HEIGHT = 24
 
 RSS_STUB = "https://feeds.content.dowjones.io/public/rss/{}"
 
+# short section labels for the 2x header (the schema display names are too long
+# to fit beside the title at 128px)
+SECTION_TITLE = {
+    "RSSWorldNews": "World",
+    "RSSUSnews": "US News",
+    "WSJcomUSBusiness": "US Biz",
+    "RSSMarketsMain": "Markets",
+    "RSSOpinion": "Opinion",
+    "RSSWSJD": "Tech",
+    "RSSLifestyle": "Life",
+    "RSSStyle": "Style",
+    "RSSArtsCulture": "Arts",
+    "rsssportsfeed": "Sports",
+    "socialhealth": "Health",
+    "socialeconomyfeed": "Economy",
+    "socialpoliticsfeed": "Politics",
+    "RSSPersonalFinance": "Money",
+    "latestnewsrealestate": "Realty",
+}
+
 def main(config):
     edition = config.get("news_edition", DEFAULT_NEWS)
 
@@ -44,7 +64,7 @@ def main(config):
     articles = get_cacheable_data(edition, articlecount)
 
     if canvas.is2x():
-        return render_2x(articles)
+        return render_2x(articles, edition)
     return render_1x(articles)
 
 def render_1x(articles):
@@ -76,8 +96,8 @@ def render_1x(articles):
         ),
     )
 
-def render_2x(articles):
-    # 128x64 layout: fixed "Wall Street Jrnl" header, then each article as a
+def render_2x(articles, edition):
+    # 128x64 layout: fixed "WSJ" + section header, then each article as a
     # white headline followed by its description in the roomier canvas.
     body = []
     for article in articles:
@@ -97,7 +117,14 @@ def render_2x(articles):
                     width = 128,
                     height = 9,
                     color = TITLE_BKG_COLOR,
-                    child = render.Text("Wall Street Jrnl", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                    child = render.Row(
+                        cross_align = "center",
+                        children = [
+                            render.Text("WSJ", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                            render.Box(width = 6, height = 1),
+                            render.Text(SECTION_TITLE.get(edition, edition), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_FONT),
+                        ],
+                    ),
                 ),
                 render.Marquee(
                     height = 55,

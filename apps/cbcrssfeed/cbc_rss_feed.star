@@ -35,6 +35,51 @@ ARTICLE_AREA_HEIGHT = 24
 
 RSS_STUB = "https://www.cbc.ca/webfeed/rss/rss-{}"
 
+# short section labels for the 2x header (the schema display names like
+# "Region - Kitchener-Waterloo" are far too long to fit beside the title)
+SECTION_TITLE = {
+    "topstories": "Top",
+    "world": "World",
+    "canada": "Canada",
+    "politics": "Politics",
+    "business": "Business",
+    "health": "Health",
+    "arts": "Arts",
+    "technology": "Tech",
+    "Indigenous": "Indigenous",
+    "offbeat": "Offbeat",
+    "sports": "Sports",
+    "sports-cfl": "CFL",
+    "sports-curling": "Curling",
+    "sports-figureskating": "Skating",
+    "sports-mlb": "MLB",
+    "sports-nba": "NBA",
+    "sports-nfl": "NFL",
+    "sports-nhl": "NHL",
+    "sports-soccer": "Soccer",
+    "canada-britishcolumbia": "BC",
+    "canada-calgary": "Calgary",
+    "canada-edmonton": "Edmonton",
+    "canada-hamiltonnews": "Hamilton",
+    "canada-kamloops": "Kamloops",
+    "canada-kitchenerwaterloo": "Kitchener",
+    "canada-london": "London",
+    "canada-manitoba": "Manitoba",
+    "canada-montreal": "Montreal",
+    "canada-newbrunswick": "N.B.",
+    "canada-newfoundland": "Nfld",
+    "canada-north": "North",
+    "canada-novascotia": "N.S.",
+    "canada-ottawa": "Ottawa",
+    "canada-pei": "PEI",
+    "canada-saskatchewan": "Sask",
+    "canada-saskatoon": "Saskatoon",
+    "canada-sudbury": "Sudbury",
+    "canada-thunderbay": "Thunder Bay",
+    "canada-toronto": "Toronto",
+    "canada-windsor": "Windsor",
+}
+
 def main(config):
     edition = config.get("news_edition", DEFAULT_NEWS)
 
@@ -42,7 +87,7 @@ def main(config):
     articles = get_cacheable_data(edition.lower(), articlecount)
 
     if canvas.is2x():
-        return render_2x(articles)
+        return render_2x(articles, edition)
     return render_1x(articles)
 
 def render_1x(articles):
@@ -74,8 +119,8 @@ def render_1x(articles):
         ),
     )
 
-def render_2x(articles):
-    # 128x64 layout: fixed "CBC.ca News" header, then each article as a white
+def render_2x(articles, edition):
+    # 128x64 layout: fixed "CBC" + section header, then each article as a white
     # headline followed by its description in the roomier canvas.
     body = []
     for article in articles:
@@ -95,7 +140,14 @@ def render_2x(articles):
                     width = 128,
                     height = 9,
                     color = TITLE_BKG_COLOR,
-                    child = render.Text("CBC.ca News", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                    child = render.Row(
+                        cross_align = "center",
+                        children = [
+                            render.Text("CBC", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                            render.Box(width = 6, height = 1),
+                            render.Text(SECTION_TITLE.get(edition, edition), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_FONT),
+                        ],
+                    ),
                 ),
                 render.Marquee(
                     height = 55,
