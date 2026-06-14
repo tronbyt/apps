@@ -7,6 +7,7 @@ author: jvivona
 fileName: fox_news.star
 packageName: foxnews
 recommendedInterval: 10
+supports2x: true
 category: news
 tags:
   - news
