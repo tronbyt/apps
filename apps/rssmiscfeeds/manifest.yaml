@@ -7,6 +7,7 @@ author: jvivona
 fileName: rss_misc_feeds.star
 packageName: rssmiscfeeds
 recommendedInterval: 10
+supports2x: true
 category: utilities
 tags:
   - news
