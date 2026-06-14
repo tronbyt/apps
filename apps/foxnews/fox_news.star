@@ -112,7 +112,7 @@ def render_2x(articles, edition):
                         children = [
                             render.Text("FOX News", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
                             render.Box(width = 6, height = 1),
-                            render.Text(edition.upper(), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_SUB_TITLE_FONT),
+                            render.Text(edition.upper(), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_FONT),
                         ],
                     ),
                 ),
