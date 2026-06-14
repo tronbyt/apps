@@ -134,7 +134,7 @@ def get_schema():
                 name = "News Section",
                 desc = "Select which section to display",
                 icon = "newspaper",
-                default = "RSSWorldNews",
+                default = "mayo-clinic-minute-2",
                 options = [
                     schema.Option(
                         display = "Mayo Clinic Minute",
