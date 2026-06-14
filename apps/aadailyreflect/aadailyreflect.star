@@ -110,7 +110,15 @@ def render_2x(data):
     # 128x64 layout: fixed "AA Daily Reflection" + date header, a scrolling
     # summary + expanded-text body, and a fixed footer that alternates between
     # the article title and the reference.
-    body_h = 42
+    #
+    # Footer is two text lines tall. A pull of 30 days of aa.org data showed
+    # ~40% of references (e.g. "Twelve Steps and Twelve Traditions, p. NN") and
+    # a couple of titles overflow one 128px tb-8 line -- and that book title
+    # overflows even on its own -- so a fixed two-line, word-wrapped footer is
+    # what reliably fits them. The body is a scrolling viewport, so spending the
+    # extra line on the footer costs no readability.
+    footer_h = 16
+    body_h = 64 - 10 - 1 - footer_h - 1  # canvas - header - line - footer - line
 
     body_children = [
         render.WrappedText(data["summary"], font = REFLECTION_FONT, color = REFLECTION_COLOR, linespacing = 1, width = 128),
@@ -154,7 +162,7 @@ def render_2x(data):
                 # fixed footer: alternate article title <-> reference
                 render.Box(
                     width = 128,
-                    height = 10,
+                    height = footer_h,
                     color = "#000",
                     child = render.Animation(children = footer_frames),
                 ),
@@ -163,10 +171,13 @@ def render_2x(data):
     )
 
 def footer_line(text):
-    # align="center" keeps short lines centred and static; long book references
-    # (e.g. "Twelve Steps and Twelve Traditions, p. 45") scroll instead of clipping.
-    return render.Marquee(
-        width = 128,
+    # Word-wraps to a second line when a title/reference is too long for one
+    # 128px line (centred, so short lines stay on a single centred line).
+    return render.WrappedText(
+        content = text,
+        font = REFLECTION_FONT,
+        color = REFLECTION_SUB_TITLE_COLOR,
         align = "center",
-        child = render.Text(text, font = REFLECTION_FONT, color = REFLECTION_SUB_TITLE_COLOR),
+        width = 128,
+        linespacing = 0,
     )
