@@ -146,7 +146,7 @@ def render_2x(data):
                         cross_align = "center",
                         children = [
                             render.Text("AA Daily Reflection", font = REFLECTION_FONT, color = APPTITLE_TEXT_COLOR),
-                            render.Text(data["date"], font = REFLECTION_FONT, color = REFLECTION_SUB_TITLE_COLOR),
+                            render.Text(short_date(data["date"]), font = REFLECTION_FONT, color = REFLECTION_SUB_TITLE_COLOR),
                         ],
                     ),
                 ),
@@ -169,6 +169,15 @@ def render_2x(data):
             ],
         ),
     )
+
+def short_date(date):
+    # Abbreviate the month so the header fits next to "AA Daily Reflection":
+    # the full "September 30" (~58px) would collide with the 85px title on a
+    # 128px line, but "Sep 30" (~27px) leaves comfortable room.
+    parts = date.split(" ")
+    if len(parts) == 2:
+        return parts[0][:3] + " " + parts[1]
+    return date
 
 def footer_line(text):
     # Word-wraps to a second line when a title/reference is too long for one
