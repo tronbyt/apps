@@ -24,6 +24,16 @@ PALETTE = {
     "info": "58D1FF",
 }
 
+def _truncate(text, max_len):
+    if text == None:
+        return ""
+    s = str(text)
+    if len(s) <= max_len:
+        return s
+    if max_len <= 1:
+        return s[:max_len]
+    return s[:max_len - 1] + "…"
+
 def printer_field(status_url):
     if not status_url:
         return []
@@ -94,30 +104,11 @@ def get_schema():
     )
 
 def _status_url(config):
-    direct = config.get("status_url")
-    if direct:
-        return str(direct)
-
-    base = config.get("base_url")
-    if not base:
+    status_url = config.get("status_url")
+    if not status_url:
         return ""
 
-    base = str(base)
-    if base.endswith("/status.json"):
-        return base
-    if base.endswith("/"):
-        return base + "status.json"
-    return base + "/status.json"
-
-def _truncate(text, max_len):
-    if text == None:
-        return ""
-    s = str(text)
-    if len(s) <= max_len:
-        return s
-    if max_len <= 1:
-        return s[:max_len]
-    return s[:max_len - 1] + "…"
+    return str(status_url).strip()
 
 def _safe_get(map_obj, key, default = None):
     if map_obj == None:
