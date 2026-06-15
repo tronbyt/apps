@@ -128,6 +128,7 @@ def main(config):
                     color = TITLE_BKG_COLOR,
                     child = render.Marquee(
                         width = TITLE_WIDTH,
+                        align = "center",
                         child = render.Text(title, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
                     ),
                 ),
