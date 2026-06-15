@@ -315,7 +315,7 @@ def summer_scene(f):
     # humps (a base sand box covers the always-wet rows; only the crest band and
     # the foam cap are drawn per column). It also drifts in/out over time.
     base = 22 + math.sin(ph) * 1.5
-    edges = [int(base + math.sin(i * 0.28 + ph * 2) * 2.5 + math.sin(i * 0.08 + ph) * 1.0 + 0.5) for i in range(LW)]
+    edges = [int(base + math.sin(i * 0.28 + ph) * 2.0 + math.sin(i * 0.08 + ph) * 1.0 + 0.5) for i in range(LW)]
     mx = max(edges)
     w.append(box(0, mx, LW, LH - mx, SUMMER_SAND))
     for i in range(LW):
