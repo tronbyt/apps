@@ -8,25 +8,28 @@ Author: jvivona
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 VERSION = 24315
 
+# 2x (128x64) uses the wider canvas and a larger font; 1x is unchanged.
+IS2X = canvas.is2x()
+
 TEXT_COLOR = "#fff"
 TITLE_TEXT_COLOR = "#fff"
 TITLE_BKG_COLOR = "#6666ff88"
-TITLE_FONT = "tom-thumb"
-TITLE_HEIGHT = 7
-FULL_WIDTH = 64
+TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
+TITLE_HEIGHT = 10 if IS2X else 7
+FULL_WIDTH = 128 if IS2X else 64
 
-ARTICLE_SUB_TITLE_FONT = "tom-thumb"
+ARTICLE_SUB_TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
 ARTICLE_SUB_TITLE_COLOR = ["#ff8c00", "#00eeff"]
 ARTICLE_COLOR = "#00eeff"
 SPACER_COLOR = "#000"
-ARTICLE_AREA_HEIGHT = 24
-SPACER_HEIGHT = 4
+ARTICLE_AREA_HEIGHT = 54 if IS2X else 24
+SPACER_HEIGHT = 6 if IS2X else 4
 
 DEFAULT_TIMEZONE = "America/New_York"
 CACHE_TTL_SECONDS = 3600
