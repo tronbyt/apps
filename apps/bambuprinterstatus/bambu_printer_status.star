@@ -29,6 +29,8 @@ def printer_field(status_url):
         return []
 
     resp = http.get(str(status_url))
+    if resp.status_code != 200:
+        return []
     data = json.decode(resp.body())
     printers = data.get("printers", [])
 
