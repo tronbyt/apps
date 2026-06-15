@@ -39,10 +39,12 @@ BASE_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/refs/heads/mai
 # Each calendar mode: which feed file to pull, the header label, and the
 # device-clock format string used as a fallback when the feed's metadata date
 # is missing/malformed. All three feeds share the same JSON shape.
+# 2x has room for the full word; 1x keeps "Nat'l" so "<label> <date>" fits the
+# 64px title bar.
 MODES = {
-    "day": {"file": "nationalday.json", "label": "Nat'l Day", "fallback": "Jan 2"},
-    "week": {"file": "nationalweek.json", "label": "Nat'l Week", "fallback": "1/2"},
-    "month": {"file": "nationalmonth.json", "label": "Nat'l Month", "fallback": "Jan"},
+    "day": {"file": "nationalday.json", "label": "National Day" if IS2X else "Nat'l Day", "fallback": "Jan 2"},
+    "week": {"file": "nationalweek.json", "label": "National Week" if IS2X else "Nat'l Week", "fallback": "1/2"},
+    "month": {"file": "nationalmonth.json", "label": "National Month" if IS2X else "Nat'l Month", "fallback": "Jan"},
 }
 DEFAULT_MODE = "day"
 
