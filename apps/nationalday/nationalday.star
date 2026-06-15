@@ -21,14 +21,18 @@ TEXT_COLOR = "#fff"
 TITLE_TEXT_COLOR = "#fff"
 TITLE_BKG_COLOR = "#6666ff88"
 TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
-TITLE_HEIGHT = 10 if IS2X else 7
+TITLE_HEIGHT = 9 if IS2X else 7
 FULL_WIDTH = 128 if IS2X else 64
+
+# tb-8 centers cleanly with no offset (matches the news apps); tom-thumb at 1x
+# still wants the -1 nudge.
+TITLE_OFFSET = 0 if IS2X else -1
 
 ARTICLE_SUB_TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
 ARTICLE_SUB_TITLE_COLOR = ["#ff8c00", "#00eeff"]
 ARTICLE_COLOR = "#00eeff"
 SPACER_COLOR = "#000"
-ARTICLE_AREA_HEIGHT = 54 if IS2X else 24
+ARTICLE_AREA_HEIGHT = 55 if IS2X else 24
 SPACER_HEIGHT = 6 if IS2X else 4
 
 DEFAULT_TIMEZONE = "America/New_York"
@@ -134,7 +138,7 @@ def title(header):
         height = TITLE_HEIGHT,
         padding = 0,
         color = TITLE_BKG_COLOR,
-        child = render.Text(header, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
+        child = render.Text(header, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = TITLE_OFFSET),
     )
 
 def format_header_date(mode, day_str, fallback):
