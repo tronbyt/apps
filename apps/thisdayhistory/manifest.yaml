@@ -7,6 +7,7 @@ author: jvivona
 recommendedInterval: 5
 fileName: this_day_history.star
 packageName: thisdayhistory
+supports2x: true
 category: entertainment
 tags:
   - education
