@@ -310,15 +310,19 @@ def summer_scene(f):
     w.append(box(0, sea_top + 2 + int((math.sin(ph) + 1) * 1.5), LW, 1, SUMMER_SEAFOAM))
     w.append(box(0, sea_top + 6 + int((math.sin(ph + 2.1) + 1) * 1.5), LW, 1, SUMMER_SEAFOAM))
 
-    # the waterline washes in and out over the sand with an uneven foam edge:
-    # draw the sand in short segments whose top height varies across x (two
-    # offset sine waves) and drifts over time, so the shoreline isn't a straight line.
+    # the waterline washes in and out over the sand. Sample the foam edge per
+    # 1px column from two offset sine waves so the shoreline curves in rounded
+    # humps (a base sand box covers the always-wet rows; only the crest band and
+    # the foam cap are drawn per column). It also drifts in/out over time.
     base = 22 + math.sin(ph) * 1.5
-    seg = 4
-    for i in range(0, LW, seg):
-        ey = int(base + math.sin(i * 0.5 + ph * 2) * 1.5 + math.sin(i * 0.9 - ph) * 1.0)
-        w.append(box(i, ey, seg, LH - ey, SUMMER_SAND))
-        w.append(box(i, ey - 1, seg, 1, SUMMER_FOAM))
+    edges = [int(base + math.sin(i * 0.28 + ph * 2) * 2.5 + math.sin(i * 0.08 + ph) * 1.0 + 0.5) for i in range(LW)]
+    mx = max(edges)
+    w.append(box(0, mx, LW, LH - mx, SUMMER_SAND))
+    for i in range(LW):
+        ey = edges[i]
+        if ey < mx:
+            w.append(box(i, ey, 1, mx - ey, SUMMER_SAND))
+        w.append(box(i, ey - 1, 1, 1, SUMMER_FOAM))
 
     # sun bobbing (kept as-is)
     sun_y = 1 + int(math.sin(ph) * 1.5 + 1.5)
