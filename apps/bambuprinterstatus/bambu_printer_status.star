@@ -319,6 +319,14 @@ def main(config):
         )
 
     resp = http.get(status_url)
+    if resp.status_code != 200:
+        return render.Root(
+            child = render.Text(
+                content = "Error: HTTP %d" % resp.status_code,
+                font = text_font,
+                color = PALETTE["error"],
+            )
+        )
     data = json.decode(resp.body())
     printer = _first_printer(data, config.get("printer_id"))
 
