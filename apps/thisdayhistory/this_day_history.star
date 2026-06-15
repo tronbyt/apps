@@ -99,6 +99,10 @@ def main(config):
 
     if rc == 0:
         title = json_data[METADATA][LANGUAGE].get("title", LANG[language]["title"])
+
+        # drop the "(Wikipedia)" parenthetical from the feed title (language-agnostic,
+        # so localized titles keep working); attribution stays in the app description.
+        title = title.replace(" (Wikipedia)", "").replace("(Wikipedia)", "")
         body = render.Marquee(
             height = ARTICLE_AREA_HEIGHT,
             scroll_direction = "vertical",
@@ -148,10 +152,12 @@ def getItems(json_data, incl_births, incl_deaths):
     this_day = []
     cursor = 0
 
-    # primary event - the metadata ordering is reshuffled through the day, so position 0 is our semi-random pick
-    item, cursor = pickFromOrder(events, events_order, cursor)
-    if item != None:
-        this_day += displayItem(item, "")
+    # two primary events - the metadata ordering is reshuffled through the day,
+    # so the leading positions are our semi-random picks
+    for _ in range(2):
+        item, cursor = pickFromOrder(events, events_order, cursor)
+        if item != None:
+            this_day += displayItem(item, "")
 
     # birth - substitute another event when the language has no birth data
     if incl_births:
