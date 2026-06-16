@@ -14,7 +14,7 @@ load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-VERSION = 26151
+VERSION = 26167
 
 # 2x (128x64) uses the wider canvas and a larger font; 1x is unchanged.
 IS2X = canvas.is2x()
@@ -154,6 +154,12 @@ def getItems(json_data, incl_births, incl_deaths):
     births_order = meta.get(BIRTHS, [])
     deaths_order = meta.get(DEATHS, [])
 
+    # 2x has the vertical room for a richer feed: two births and two deaths.
+    # A disabled toggle or a language with no births/deaths (e.g. Italian) is
+    # back-filled with the same count of extra events so the layout stays full.
+    # 1x is unchanged: one pick per enabled section, nothing when a toggle is off.
+    per_section = 2 if IS2X else 1
+
     this_day = []
     cursor = 0
 
@@ -164,27 +170,47 @@ def getItems(json_data, incl_births, incl_deaths):
         if item != None:
             this_day += displayItem(item, "")
 
-    # birth - substitute another event when the language has no birth data
-    if incl_births:
-        birth = pickFirst(births, births_order)
-        if birth != None:
-            this_day += displayItem(birth, prefix_b)
-        else:
-            item, cursor = pickFromOrder(events, events_order, cursor)
-            if item != None:
-                this_day += displayItem(item, "")
+    # births then deaths - substituted events are drawn from the same shared
+    # cursor so nothing repeats across the layout
+    birth_items, cursor = sectionItems(incl_births, births, births_order, prefix_b, per_section, events, events_order, cursor)
+    this_day += birth_items
 
-    # death - substitute another event when the language has no death data
-    if incl_deaths:
-        death = pickFirst(deaths, deaths_order)
-        if death != None:
-            this_day += displayItem(death, prefix_d)
-        else:
-            item, cursor = pickFromOrder(events, events_order, cursor)
-            if item != None:
-                this_day += displayItem(item, "")
+    death_items, cursor = sectionItems(incl_deaths, deaths, deaths_order, prefix_d, per_section, events, events_order, cursor)
+    this_day += death_items
 
     return this_day
+
+def sectionItems(incl, items, order, prefix, per_section, events, events_order, cursor):
+    # Build the display rows for a births/deaths section, returning the rows and
+    # the advanced events cursor.
+    out = []
+
+    # A disabled section shows nothing at 1x (original behavior).  At 2x we keep
+    # the canvas full by substituting the section's worth of extra events.
+    if not incl:
+        if IS2X:
+            out, cursor = addEvents(out, events, events_order, cursor, per_section)
+        return out, cursor
+
+    # Enabled: take up to per_section picks from the section's shuffled order,
+    # back-filling any shortfall (missing or short data) with extra events.
+    sect_cursor = 0
+    for _ in range(per_section):
+        item, sect_cursor = pickFromOrder(items, order, sect_cursor)
+        if item != None:
+            out += displayItem(item, prefix)
+        else:
+            out, cursor = addEvents(out, events, events_order, cursor, 1)
+
+    return out, cursor
+
+def addEvents(out, events, events_order, cursor, count):
+    # Append `count` extra events to `out`, advancing the shared events cursor.
+    for _ in range(count):
+        item, cursor = pickFromOrder(events, events_order, cursor)
+        if item != None:
+            out += displayItem(item, "")
+    return out, cursor
 
 def displayItem(item, prefix):
     return [
@@ -192,17 +218,6 @@ def displayItem(item, prefix):
         render.WrappedText(item["text"], font = ARTICLE_SUB_TITLE_FONT, color = ARTICLE_COLOR),
         render.Box(width = TITLE_WIDTH, height = SPACER_HEIGHT, color = SPACER_COLOR),
     ]
-
-def pickFirst(items, order):
-    # take the first entry of the (pre-shuffled) ordering; fall back to the raw list, or None when empty
-    # JSON numbers decode as floats in Starlark, so coerce indices to int before indexing
-    if len(order) > 0:
-        idx = int(order[0])
-        if idx >= 0 and idx < len(items):
-            return items[idx]
-    if len(items) > 0:
-        return items[0]
-    return None
 
 def pickFromOrder(items, order, cursor):
     # walk the ordering from cursor, returning the item and the advanced cursor (for event substitution)
