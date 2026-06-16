@@ -34,6 +34,27 @@ def _truncate(text, max_len):
         return s[:max_len]
     return s[:max_len - 1] + "…"
 
+def _safe_get(map_obj, key, default = None):
+    if map_obj == None:
+        return default
+    return map_obj.get(key, default)
+
+def _status_url(config):
+    direct = config.get("status_url")
+    if direct:
+        return str(direct)
+
+    base = config.get("base_url")
+    if not base:
+        return DEFAULT_STATUS_URL
+
+    base = str(base)
+    if base.endswith("/status.json"):
+        return base
+    if base.endswith("/"):
+        return base + "status.json"
+    return base + "/status.json"
+
 def printer_field(status_url):
     if not status_url:
         return []
@@ -41,6 +62,7 @@ def printer_field(status_url):
     resp = http.get(str(status_url))
     if resp.status_code != 200:
         return []
+
     data = json.decode(resp.body())
     printers = data.get("printers", [])
 
@@ -95,6 +117,13 @@ def get_schema():
                 options = scroll_speed_options,
                 default = scroll_speed_options[0].value,
             ),
+            schema.Toggle(
+                id = "active_only",
+                name = "Only During Active Prints",
+                desc = "Show only while printing or paused; otherwise skip.",
+                icon = "play",
+                default = False,
+            ),
             schema.Generated(
                 id = "printer_picker",
                 source = "status_url",
@@ -102,18 +131,6 @@ def get_schema():
             ),
         ],
     )
-
-def _status_url(config):
-    status_url = config.get("status_url")
-    if not status_url:
-        return ""
-
-    return str(status_url).strip()
-
-def _safe_get(map_obj, key, default = None):
-    if map_obj == None:
-        return default
-    return map_obj.get(key, default)
 
 def _first_printer(data, selected_id = None):
     printers = _safe_get(data, "printers", [])
@@ -152,10 +169,10 @@ def _fmt_duration_from_seconds(total):
 
 def _fmt_idle_since(idle_since):
     if not idle_since:
-        return "?"
+        return None
     parsed = _parse_iso_utc(idle_since)
     if parsed == None:
-        return "?"
+        return None
     now = time.now()
     diff = now - parsed
     seconds = int(diff.seconds)
@@ -174,13 +191,15 @@ def _status_color(state):
         return PALETTE["info"]
     return PALETTE["text_primary"]
 
-def _job_display_name(printer, max_len):
-    parts = []
+def _is_active_state(state):
+    return state == "PRINTING" or state == "PAUSED"
 
+def _job_display_name(printer, max_len):
     job_name = _safe_get(printer, "job_name")
     plate_name = _safe_get(printer, "plate_name")
     job_objects = _safe_get(printer, "job_objects")
 
+    parts = []
     if job_name:
         parts.append(str(job_name))
     if plate_name:
@@ -193,195 +212,180 @@ def _job_display_name(printer, max_len):
 
     return "No active print"
 
+def _last_completed_name(printer, max_len):
+    last_objects = _safe_get(printer, "last_completed_job_objects")
+    last_name = _safe_get(printer, "last_completed_job_name")
+
+    parts = []
+    if last_name:
+        parts.append(str(last_name))
+    if last_objects and str(last_objects) != str(last_name):
+        parts.append(str(last_objects))
+
+    if len(parts) > 0:
+        return _truncate(" · ".join(parts), max_len)
+
+    return "No recent job"
+
 def _headline(printer):
     state = _safe_get(printer, "state", "UNKNOWN")
     progress = _safe_get(printer, "progress")
+
     if state == "PRINTING" and progress != None:
         return "Printing · " + str(progress) + "%"
+
     if state == "IDLE":
         idle = _fmt_idle_since(_safe_get(printer, "idle_since"))
-        return "Idle · " + idle
+        if idle:
+            return "Idle · " + idle
+
+        last_end = _fmt_idle_since(_safe_get(printer, "last_completed_end_time"))
+        if last_end:
+            return "Idle · " + last_end
+
+        return "Idle"
+
     if state == "PAUSED":
         return "Paused"
+
     if state == "OFFLINE":
         return "Offline"
+
     return str(state)
 
 def _subline(printer, max_len):
     state = _safe_get(printer, "state", "UNKNOWN")
 
     if state == "PRINTING":
-        left = _safe_get(printer, "time_left")
-        if left != None:
-            return _fmt_duration_from_seconds(left) + " left"
-        est = _safe_get(printer, "estimated_duration_text")
-        if est:
-            return "Est. " + str(est)
-        return "Printing"
-
-    if state == "IDLE":
-        last_name = _safe_get(printer, "last_completed_job_objects") or _safe_get(printer, "last_completed_job_name")
-        if last_name:
-            return _truncate("Last: " + str(last_name), max_len)
-        current_name = _job_display_name(printer, max_len)
-        if current_name:
-            return _truncate(current_name, max_len)
-        return "No recent job"
+        return _job_display_name(printer, max_len)
 
     if state == "PAUSED":
         return _job_display_name(printer, max_len)
 
-    return _truncate(_job_display_name(printer, max_len) or "Waiting", max_len)
+    if state == "IDLE":
+        return _last_completed_name(printer, max_len)
 
-def _footer(data, printer, max_len):
+    return _truncate(_safe_get(printer, "job_objects") or _safe_get(printer, "job_name") or "Waiting", max_len)
+
+def _footer(printer):
     state = _safe_get(printer, "state", "UNKNOWN")
+
     if state == "PRINTING":
-        return _job_display_name(printer, max_len)
+        left = _safe_get(printer, "time_left")
+        if left != None:
+            return _fmt_duration_from_seconds(left) + " left"
 
-    updated = _safe_get(data, "updated_at")
-    if updated and len(str(updated)) >= 16:
-        return "Updated " + str(updated)[11:16]
-    return "No timestamp"
+        est = _safe_get(printer, "estimated_duration_text")
+        if est:
+            return "Est. " + str(est)
 
-def _instruction_lines(is_2x):
-    if is_2x:
-        return [
-            "Bambu Status",
-            "Set Status URL",
-            "to your hosted",
-            "status.json",
-        ]
-    return [
-        "Bambu Status",
-        "Set Status URL",
-        "to status.json",
-        "in settings",
-    ]
+        return "Printing"
+
+    if state == "PAUSED":
+        return "Print paused"
+
+    if state == "IDLE":
+        last_duration_text = _safe_get(printer, "last_completed_duration_text")
+        if last_duration_text:
+            return "Last print: " + str(last_duration_text)
+
+        last_duration_seconds = _safe_get(printer, "last_completed_duration_seconds")
+        if last_duration_seconds != None:
+            return "Last print: " + _fmt_duration_from_seconds(last_duration_seconds)
+
+        return "No print history"
+
+    return "Waiting"
 
 def main(config):
     font = "tb-8"
-    text_font = font
     screen_width = 64
     delay = int(config.get("scroll", "45"))
+    font_width = 5
     max_text_length = 150
-    is_2x = canvas.is2x()
 
-    if is_2x:
+    if canvas.is2x():
         delay = int(delay / 2)
         font = "terminus-16"
-        text_font = font
         screen_width = 128
+        font_width = 8
         max_text_length = 300
 
     status_url = _status_url(config)
-
     if not status_url:
-        lines = _instruction_lines(is_2x)
-
         return render.Root(
-            child = render.Column(
-                expanded = True,
-                main_align = "space_evenly",
-                cross_align = "start",
+            render.Column(
                 children = [
-                    render.Text(
-                        content = lines[0],
-                        font = text_font,
-                        color = PALETTE["text_primary"],
-                    ),
-                    render.Text(
-                        content = lines[1],
-                        font = text_font,
-                        color = PALETTE["warning"],
-                    ),
-                    render.Text(
-                        content = lines[2],
-                        font = text_font,
-                        color = PALETTE["text_primary"],
-                    ),
-                    render.Text(
-                        content = lines[3],
-                        font = text_font,
-                        color = PALETTE["text_muted"],
-                    ),
+                    render.Text("Bambu Status", font = font, color = PALETTE["text_primary"]),
+                    render.Text("No status URL", font = font, color = PALETTE["warning"]),
+                    render.Text("Set status_url", font = font, color = PALETTE["text_secondary"]),
+                    render.Text("in config", font = font, color = PALETTE["text_muted"]),
                 ],
             ),
+            show_full_animation = True,
             delay = delay,
         )
 
     resp = http.get(status_url)
     if resp.status_code != 200:
         return render.Root(
-            child = render.Text(
-                content = "Error: HTTP %d" % resp.status_code,
-                font = text_font,
-                color = PALETTE["error"],
-            )
+            render.Column(
+                children = [
+                    render.Text("Bambu Status", font = font, color = PALETTE["text_primary"]),
+                    render.Text("HTTP error", font = font, color = PALETTE["error"]),
+                    render.Text(str(resp.status_code), font = font, color = PALETTE["warning"]),
+                    render.Text("Check URL", font = font, color = PALETTE["text_muted"]),
+                ],
+            ),
+            show_full_animation = True,
+            delay = delay,
         )
+
     data = json.decode(resp.body())
     printer = _first_printer(data, config.get("printer_id"))
 
     printer_name = _truncate(_safe_get(printer, "name", "Bambu Printer"), max_text_length)
     state = _safe_get(printer, "state", "UNKNOWN")
+    active_only = config.bool("active_only", False)
+
+    if active_only and not _is_active_state(state):
+        return []
+
     line2 = _headline(printer)
     line3 = _subline(printer, max_text_length)
-    line4 = _footer(data, printer, max_text_length)
-    color = _status_color(state)
-
-    text1 = render.Text(
-        content = printer_name,
-        font = text_font,
-        color = PALETTE["text_primary"],
-    )
-    marquee1 = render.Marquee(
-        width = screen_width,
-        delay = 0,
-        child = text1,
-    )
-
-    text2 = render.Text(
-        content = _truncate(line2, max_text_length),
-        font = text_font,
-        color = color,
-    )
-    marquee2 = render.Marquee(
-        width = screen_width,
-        delay = marquee1.frame_count(),
-        child = text2,
-    )
-
-    text3 = render.Text(
-        content = _truncate(line3, max_text_length),
-        font = text_font,
-        color = PALETTE["text_primary"],
-    )
-    marquee3 = render.Marquee(
-        width = screen_width,
-        delay = marquee1.frame_count() + marquee2.frame_count(),
-        child = text3,
-    )
-
-    text4 = render.Text(
-        content = _truncate(line4, max_text_length),
-        font = text_font,
-        color = PALETTE["text_muted"],
-    )
-    marquee4 = render.Marquee(
-        width = screen_width,
-        delay = marquee1.frame_count() + marquee2.frame_count() + marquee3.frame_count(),
-        child = text4,
-    )
+    line4 = _footer(printer)
+    status_color = _status_color(state)
 
     return render.Root(
-        child = render.Column(
-            expanded = True,
-            main_align = "space_evenly",
-            cross_align = "start",
+        render.Column(
             children = [
-                marquee1,
-                marquee2,
-                marquee3,
-                marquee4,
+                render.Text(
+                    content = printer_name,
+                    font = font,
+                    color = PALETTE["text_primary"],
+                ),
+                render.Text(
+                    content = line2,
+                    font = font,
+                    color = status_color,
+                ),
+                render.Marquee(
+                    width = screen_width,
+                    child = render.Text(
+                        content = line3,
+                        color = PALETTE["text_primary"],
+                        font = font,
+                    ),
+                ),
+                render.Marquee(
+                    offset_start = len(line3) * font_width,
+                    width = screen_width,
+                    child = render.Text(
+                        content = line4,
+                        color = PALETTE["text_muted"],
+                        font = font,
+                    ),
+                ),
             ],
         ),
         show_full_animation = True,
