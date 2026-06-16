@@ -497,16 +497,31 @@ def main(config):
                     ],
                 )
 
+        anim = render.Animation(children = renderCategory)
+
+        # `supports2x: true` makes the server hand every style a 128x64 canvas.
+        # The legacy 64x32 styles aren't responsive, so on a wide canvas pin them
+        # to a crisp, centered 64x32 island instead of rendering broken top-left.
+        # (Wide 3/6 are the native 2x styles and use the full canvas.)
+        if canvas.is2x() or canvas.width() > 64:
+            root_child = render.Box(
+                width = canvas.width(),
+                height = canvas.height(),
+                color = "#000000",
+                child = render.Column(
+                    expanded = True,
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [render.Box(width = 64, height = 32, child = anim)],
+                ),
+            )
+        else:
+            root_child = render.Column(children = [anim])
+
         return render.Root(
             delay = rotationSpeed,
             show_full_animation = True,
-            child = render.Column(
-                children = [
-                    render.Animation(
-                        children = renderCategory,
-                    ),
-                ],
-            ),
+            child = root_child,
         )
     else:
         return []
@@ -840,10 +855,11 @@ def get_cachable_data(url):
 # ============================================================================
 
 def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_url):
-    # These layouts are built for the native 128x64 (2x) canvas only. Detect 2x
-    # by actual canvas width (canvas.is2x() is unreliable here) so this works
-    # both in CLI testing (-w 128 -t 64) and on a real wide device.
-    if canvas.width() < W_W:
+    # These layouts need the native 128x64 (2x) canvas. The device signals 2x via
+    # canvas.is2x() (requires `supports2x: true` in manifest.yaml, or the server
+    # renders 1x); CLI `-w 128 -t 64` reports width 128 but not is2x. Accept
+    # either so it works on real wide hardware and in local render tests.
+    if not (canvas.is2x() or canvas.width() >= W_W):
         return wide_needs_2x()
 
     perPage = 3 if displayType == "wide3" else 6
