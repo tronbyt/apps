@@ -1,0 +1,20 @@
+---
+id: bambuprinterstatus
+name: Bambu Printer Status
+summary: Display Bambu printer info
+desc: Display Bambu printer info.
+author: Robert Ison
+fileName: bambuprinterstatus.star
+packageName: bambuprinterstatus
+supports2x: true
+recommendedInterval: 5
+category: hardware
+tags:
+  - 3d printer
+  - wide 2x support
+  - utility
+  - tech
+  - hardware
+  - automation
+published: '2026-06-13T12:00:00Z'
+updated: '2026-06-16T02:10:40Z'
