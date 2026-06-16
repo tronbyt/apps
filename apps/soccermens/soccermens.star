@@ -73,7 +73,7 @@ W_DASH = "#5b6470"  # score dash
 W_HDR_BG = "#11151f"  # header bg (a hair lighter than black)
 W_HDR_RULE = "#232a38"  # header bottom rule
 W_STEEL = "#444b57"  # fallback for near-black team colors
-W_OFF_BG = "#1a1d24"  # team band when colors toggle is OFF
+W_OFF_BG = "#000000"  # team band when colors toggle is OFF (flag carries identity)
 
 # Fonts (bitmap, real sizes). Hero numerals re-derived to fit the 18-LED row:
 # terminus-16 + an 8-LED status will not co-exist in one row, so the hero score
@@ -81,7 +81,7 @@ W_OFF_BG = "#1a1d24"  # team band when colors toggle is OFF
 W_FONT_HEADER = "tb-8"
 W_FONT_CODE = "tb-8"
 W_FONT_REC = "tb-8"
-W_FONT_SCORE = "6x13"  # hero score / kickoff in Wide 3
+W_FONT_SCORE = "6x10"  # hero score / kickoff in Wide 3 (was 6x13 — toned down)
 W3_STATUS_FONT = "CG-pixel-3x5-mono"  # Wide 3 status line (5 LED, fits under 6x13)
 W_FONT_STATUS = "tom-thumb"  # Wide 6 status chips / records
 W_FONT_CELL = "tb-8"  # code + score in Wide 6 cells
@@ -1245,10 +1245,20 @@ def wide6_cell(g, colors_on, w, h):
         wide6_line(g, left, lc, line_h, w),
         wide6_line(g, right, rc, h - line_h, w),
     ])
+
+    # Finished games are self-evident from their score + lack of a live pulse, so
+    # no chip (an "FT" on every cell is just noise in the grid). Only live and
+    # upcoming cells get a chip: upcoming sits right-centered in the empty score
+    # column; live tucks into the top-right corner so the green clock stands out.
+    if g["state"] == "post":
+        return stacked
+    valign = "center" if g["state"] == "pre" else "start"
     overlay = render.Box(
         width = w,
         height = h,
-        child = render.Column(expanded = True, main_align = "center", cross_align = "end", children = [wide6_chip(g)]),
+        child = render.Column(expanded = True, main_align = valign, children = [
+            render.Row(expanded = True, main_align = "end", children = [wide6_chip(g)]),
+        ]),
     )
     return render.Stack(children = [stacked, overlay])
 
@@ -1277,6 +1287,16 @@ def wide6_line(g, side, bg, lh, w):
     )
 
 def wide6_chip(g):
+    if g["state"] == "post":
+        return render.Box(width = 1, height = 1)
+
+    # Live: a small green pulse dot in the corner. The cell already shows both
+    # scores; the exact minute is detail that belongs in Wide 3, and a dot keeps
+    # the dense grid uncluttered (a clock chip here would cover the home score).
+    if g["is_live"]:
+        return render.Padding(pad = (0, 1, 1, 0), child = render.Circle(color = W_LIVE, diameter = 4))
+
+    # Upcoming kickoff, or half-time: a small text chip on a translucent pad.
     if g["state"] == "pre":
         txt = g["kickoff"]
         color = W_WHITE
@@ -1289,14 +1309,5 @@ def wide6_chip(g):
     # A bare render.Box (no width/height) expands to fill its parent, which would
     # wash the whole cell with the chip's translucent black. Give it an explicit
     # content-sized box so it stays a small corner chip.
-    if g["is_live"]:
-        cw = len(txt) * 5 + 11
-        inner = render.Row(cross_align = "center", children = [
-            render.Circle(color = W_LIVE, diameter = 3),
-            render.Box(width = 1, height = 1),
-            render.Text(content = txt, font = W_FONT_STATUS, color = W_LIVE),
-        ])
-    else:
-        cw = len(txt) * 5 + 5
-        inner = render.Text(content = txt, font = W_FONT_STATUS, color = color)
-    return render.Box(width = cw, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = inner))
+    cw = len(txt) * 5 + 5
+    return render.Box(width = cw, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = txt, font = W_FONT_STATUS, color = color)))
