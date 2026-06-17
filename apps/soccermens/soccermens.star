@@ -889,11 +889,7 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
         return []
 
     frames = []
-    total = len(pages)
-    for i in range(total):
-        pg = pages[i]
-        pg["overall_index"] = i
-        pg["overall_total"] = total
+    for pg in pages:
         if displayType == "wide3":
             frames.append(wide3_page(pg, comp_label, header_color, colors_on))
         elif displayType == "wide4":
@@ -1085,14 +1081,11 @@ def build_pages(games, perPage):
     pages = []
     for k in order:
         dgames = bucket[k]
-        n = len(dgames)
-        npages = (n + perPage - 1) // perPage
+        npages = (len(dgames) + perPage - 1) // perPage
         for p in range(npages):
             pages.append(dict(
                 date_text = dgames[0]["date_text"],
                 games = dgames[p * perPage:(p + 1) * perPage],
-                page_num = p + 1,
-                page_count = npages,
             ))
     return pages
 
@@ -1118,26 +1111,6 @@ def wide_header(comp_label, date_text, text_color):
         ),
         render.Box(width = W_W, height = 1, color = W_HDR_RULE),
     ])
-
-def with_page_dots(frame, pg):
-    # One dot per page across the whole rotation, centered along the bottom; the
-    # current page is lit white, the rest dim. Only shown when there's >1 page.
-    total = pg["overall_total"]
-    if total <= 1:
-        return frame
-    dots = []
-    for i in range(total):
-        if i > 0:
-            dots.append(render.Box(width = 2, height = 1))
-        dots.append(render.Circle(color = W_WHITE if i == pg["overall_index"] else "#3a3f4a", diameter = 2))
-    cw = total * 2 + (total - 1) * 2 + 4
-    chip = render.Box(width = cw, height = 5, color = "#000a", child = render.Padding(pad = (2, 1, 2, 1), child = render.Row(cross_align = "center", children = dots)))
-    overlay = render.Box(
-        width = W_W,
-        height = W_H,
-        child = render.Column(expanded = True, main_align = "end", cross_align = "center", children = [chip]),
-    )
-    return render.Stack(children = [frame, overlay])
 
 def wide_needs_2x():
     # 1x devices can't fit the wide layouts; explain rather than render garbage.
@@ -1174,8 +1147,7 @@ def wide3_page(pg, comp_label, header_color, colors_on):
         height = W_H - W_HEADER_H,
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
     )
-    frame = render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
-    return with_page_dots(frame, pg)
+    return render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
 
 def wide3_row(g, colors_on):
     left = g["left"]
@@ -1276,8 +1248,7 @@ def wide6_page(pg, comp_label, header_color, colors_on):
         height = body_h,
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = row_widgets),
     )
-    frame = render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
-    return with_page_dots(frame, pg)
+    return render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
 
 def wide6_cell(g, colors_on, w, h):
     left = g["left"]
@@ -1366,8 +1337,7 @@ def wide4_page(pg, comp_label, header_color, colors_on):
         height = body_h,
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = row_widgets),
     )
-    frame = render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
-    return with_page_dots(frame, pg)
+    return render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
 
 def wide4_cell(g, colors_on, w, h):
     left = g["left"]
