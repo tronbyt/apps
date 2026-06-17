@@ -907,11 +907,11 @@ def get_comp_label(scoreboard_url, leagueAbbr):
     # (leagues[0].abbreviation, e.g. "FIFA World Cup") for the header. Works for
     # every league/tournament the app offers; falls back to the short league code.
     data = json.decode(get_cachable_data(scoreboard_url))
-    leagues = data.get("leagues", [])
+    leagues = data.get("leagues") or []
     if len(leagues) > 0:
-        abbr = leagues[0].get("abbreviation", "")
-        if abbr != "":
-            return abbr
+        abbr = leagues[0].get("abbreviation")
+        if abbr:
+            return str(abbr)
     return leagueAbbr
 
 def parse_game_wide(s, config, timezone):
@@ -921,8 +921,8 @@ def parse_game_wide(s, config, timezone):
         return None
 
     state = s["status"]["type"]["state"]
-    type_name = s["status"]["type"].get("name", "")
-    short_detail = s["status"]["type"].get("shortDetail", "")
+    type_name = s["status"]["type"].get("name") or ""
+    short_detail = s["status"]["type"].get("shortDetail") or ""
 
     # local date for day grouping + header (short, no weekday)
     dt = time.parse_time(s["date"], format = "2006-01-02T15:04Z").in_location(timezone)
@@ -938,8 +938,8 @@ def parse_game_wide(s, config, timezone):
     # penalty shootout: scores present while pens are live AND after (FINAL_PEN).
     # The regulation score stays in the score slot; the tally goes in the status
     # ("PK 4-2" live / "FT 4-2" final) since 0(4)-0(2) won't fit the narrow center.
-    hp = competitors[0].get("shootoutScore", "0")
-    ap = competitors[1].get("shootoutScore", "0")
+    hp = competitors[0].get("shootoutScore") or "0"
+    ap = competitors[1].get("shootoutScore") or "0"
     pen_final = type_name == "STATUS_FINAL_PEN"
     pen_live = state == "in" and (hp != "0" or ap != "0")
 
@@ -1016,18 +1016,20 @@ def parse_game_wide(s, config, timezone):
     )
 
 def wide_side(competitor):
-    team = competitor["team"]
-    name = team.get("name", "")
-    code = team.get("abbreviation", name[0:3].upper() if name != "" else "?")
-    logo_url = team.get("logo", "") or MISSING_LOGO
-    score = competitor.get("score", "")
+    team = competitor.get("team") or {}
+    name = team.get("name") or ""
+    code = team.get("abbreviation") or (name[0:3].upper() if name else "?")
+    logo_url = team.get("logo") or MISSING_LOGO
+    score_val = competitor.get("score")
+    score = str(score_val) if score_val != None else ""
     record = ""
-    recs = competitor.get("records", None)
-    if recs != None and len(recs) > 0:
-        record = recs[0].get("summary", "")
+    recs = competitor.get("records")
+    if recs and len(recs) > 0:
+        summary = recs[0].get("summary")
+        record = str(summary) if summary != None else ""
     return dict(
         code = code[:3],
-        color = wide_team_color(team.get("color", "")),
+        color = wide_team_color(team.get("color")),
         logo = get_logoType(logo_url),
         score = score,
         record = record,
@@ -1060,6 +1062,8 @@ def wide_team_color(hexcolor):
     # Returned with an alpha suffix so the band softens against the black panel
     # (same idea as the legacy "colors" style's 77 alpha), keeping white/yellow
     # text readable.
+    if not hexcolor:
+        return W_STEEL + W_TEAM_ALPHA
     h = hexcolor.replace("#", "")
     if len(h) != 6:
         return W_STEEL + W_TEAM_ALPHA
