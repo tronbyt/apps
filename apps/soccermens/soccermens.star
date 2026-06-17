@@ -56,7 +56,7 @@ SHORTENED_WORDS = """
 """
 
 # ============================================================================
-# Wide 2x layouts (display options #5 "Wide 3" and #6 "Wide 6")
+# Wide 2x layouts (display options "Wide 3" and "Wide 4")
 # Designed for the native 128x64 canvas. See design handoff README.
 # All sizes are in LED units (the real grid), not the mock's px.
 # ============================================================================
@@ -87,8 +87,8 @@ W_FONT_CODE = "tb-8"
 W_FONT_REC = "tb-8"
 W_FONT_SCORE = "6x10"  # hero score / kickoff in Wide 3 (was 6x13 — toned down)
 W3_STATUS_FONT = "CG-pixel-3x5-mono"  # Wide 3 status line (5 LED, fits under 6x13)
-W_FONT_STATUS = "tom-thumb"  # Wide 6 status chips / records
-W_FONT_CELL = "tb-8"  # code + score in Wide 6 cells
+W_FONT_STATUS = "tom-thumb"  # Wide 3/4 status chips / records
+W_FONT_CELL = "tb-8"  # code + score in Wide 4 cells
 
 # Geometry (LED units)
 W_W = 128
@@ -100,7 +100,7 @@ W_HEADER_H = 8  # 7 bg + 1 rule (all-caps day header has no descenders)
 W3_CENTER_W = 26
 W3_ROW_H = 18  # 3 rows * 18 + 2 * 1 divider == 56 body, exact
 W3_FLAG = 16  # flag/crest in Wide 3 zone
-W6_FLAG = 9  # flag/crest in Wide 6 cell line
+W4_FLAG = 9  # flag/crest in Wide 4 cell line
 
 def main(config):
     LEAGUE_ABBR = json.decode(http.get(url = ABBR_URL, ttl_seconds = COMPS_TTL).body())
@@ -128,7 +128,7 @@ def main(config):
         displayType = config.get("displayType", "colors")
 
         # New 2x wide styles take a completely separate render path.
-        if displayType == "wide3" or displayType == "wide4" or displayType == "wide6":
+        if displayType == "wide3" or displayType == "wide4":
             return render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_url)
 
         #logoType = config.get("logoType", "primary")
@@ -509,7 +509,7 @@ def main(config):
         # `supports2x: true` makes the server hand every style a 128x64 canvas.
         # The legacy 64x32 styles aren't responsive, so on a wide canvas pin them
         # to a crisp, centered 64x32 island instead of rendering broken top-left.
-        # (Wide 3/6 are the native 2x styles and use the full canvas.)
+        # (Wide 3/4 are the native 2x styles and use the full canvas.)
         if canvas.is2x() or canvas.width() > 64:
             root_child = render.Box(
                 width = canvas.width(),
@@ -557,10 +557,6 @@ displayOptions = [
     schema.Option(
         display = "Wide · 4 Games (2x)",
         value = "wide4",
-    ),
-    schema.Option(
-        display = "Wide · 6 Games (2x)",
-        value = "wide6",
     ),
 ]
 
@@ -722,7 +718,7 @@ def get_schema():
 
 def show_wide_options(displayType):
     # Team-colors background toggle only applies to the wide 2x styles.
-    if displayType == "wide3" or displayType == "wide4" or displayType == "wide6":
+    if displayType == "wide3" or displayType == "wide4":
         return [
             schema.Toggle(
                 id = "wide_team_colors",
@@ -873,7 +869,7 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
     if not (canvas.is2x() or canvas.width() >= W_W):
         return wide_needs_2x()
 
-    perPage = {"wide3": 3, "wide4": 4, "wide6": 6}[displayType]
+    perPage = {"wide3": 3, "wide4": 4}[displayType]
     colors_on = config.bool("wide_team_colors", True)
     rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
     comp_label = get_comp_label(scoreboard_url, leagueAbbr)
@@ -895,10 +891,8 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
     for pg in pages:
         if displayType == "wide3":
             frames.append(wide3_page(pg, comp_label, header_color, colors_on))
-        elif displayType == "wide4":
-            frames.append(wide4_page(pg, comp_label, header_color, colors_on))
         else:
-            frames.append(wide6_page(pg, comp_label, header_color, colors_on))
+            frames.append(wide4_page(pg, comp_label, header_color, colors_on))
 
     # Each page is one static frame; the per-frame delay is the rotation timer,
     # so every page in the window shows at least once per loop.
@@ -1224,14 +1218,10 @@ def wide3_center(g):
             render.Box(width = 2, height = 1),
             render.Text(content = g["right"]["score"], font = W_FONT_SCORE, color = g["right"]["score_color"]),
         ])
-        if g["is_live"]:
-            status = render.Row(cross_align = "center", children = [
-                render.Circle(color = W_LIVE, diameter = 3),
-                render.Box(width = 2, height = 1),
-                render.Text(content = g["status_text"], font = W3_STATUS_FONT, color = W_LIVE),
-            ])
-        else:
-            status = render.Text(content = g["status_text"], font = W3_STATUS_FONT, color = g["status_color"])
+
+        # The time already renders green for a live match, so it carries the
+        # in-progress signal on its own — no separate pulse dot needed.
+        status = render.Text(content = g["status_text"], font = W3_STATUS_FONT, color = g["status_color"])
         kids = [score_row, status]
     return render.Box(
         width = W3_CENTER_W,
@@ -1240,101 +1230,9 @@ def wide3_center(g):
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = kids),
     )
 
-# ---- Wide 6 ----------------------------------------------------------------
-
-def wide6_page(pg, comp_label, header_color, colors_on):
-    games = pg["games"]
-    n = len(games)
-    cols = 3
-    grid_rows = [games[r:r + cols] for r in range(0, n, cols)]
-    cell_w = (W_W - (cols - 1)) // cols  # 42, black gridlines between cells
-    body_h = W_H - W_HEADER_H  # 56
-    cell_h = (body_h - 1) // 2  # 27
-
-    row_widgets = []
-    for ri in range(len(grid_rows)):
-        if ri > 0:
-            row_widgets.append(render.Box(width = W_W, height = 1, color = W_BG))
-        cells = []
-        for ci in range(len(grid_rows[ri])):
-            if ci > 0:
-                cells.append(render.Box(width = 1, height = cell_h, color = W_BG))
-            cells.append(wide6_cell(grid_rows[ri][ci], colors_on, cell_w, cell_h))
-        row_widgets.append(render.Row(main_align = "center", cross_align = "center", children = cells))
-
-    body = render.Box(
-        width = W_W,
-        height = body_h,
-        child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = row_widgets),
-    )
-    return render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
-
-def wide6_cell(g, colors_on, w, h):
-    left = g["left"]
-    right = g["right"]
-    lc = left["color"] if colors_on else W_OFF_BG
-    rc = right["color"] if colors_on else W_OFF_BG
-    line_h = h // 2
-    stacked = render.Column(children = [
-        wide6_line(g, left, lc, line_h, w),
-        wide6_line(g, right, rc, h - line_h, w),
-    ])
-
-    # Finished games are self-evident (score + no pulse) and upcoming games carry
-    # their W-D-L, so neither needs an overlay. Exceptions: live cells get a green
-    # pulse dot, and a finished shootout gets a small "P" so the yellow winner on
-    # a drawn score makes sense (no room for the tally in this dense grid).
-    if g["state"] == "in":
-        corner = wide6_chip(g)
-    elif g["has_pen"]:
-        corner = render.Box(width = 7, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = "P", font = W_FONT_STATUS, color = W_FINAL)))
-    else:
-        return stacked
-    overlay = render.Box(
-        width = w,
-        height = h,
-        child = render.Column(expanded = True, main_align = "start", children = [
-            render.Row(expanded = True, main_align = "end", children = [corner]),
-        ]),
-    )
-    return render.Stack(children = [stacked, overlay])
-
-def wide6_line(g, side, bg, lh, w):
-    if g["state"] == "pre":
-        # Upcoming: code (kept) on the left, form (W-D-L) on the right. The flag is
-        # dropped here (no room for flag + code + record in a 42px cell). tb-8 code
-        # for normal records; a two-digit league record ("20-8-10") needs the
-        # narrower tom-thumb code to keep both from clipping.
-        code_font = W_FONT_CELL if len(side["record"]) <= 6 else W_FONT_STATUS
-        left_group = render.Text(content = side["code"], font = code_font, color = side["code_color"])
-        rightval = render.Text(content = side["record"], font = W_FONT_STATUS, color = W_WHITE)
-    else:
-        code = render.Text(content = side["code"], font = W_FONT_CELL, color = side["code_color"])
-        flag = render.Image(src = side["logo"], width = W6_FLAG, height = W6_FLAG)
-        left_group = render.Row(cross_align = "center", children = [flag, render.Box(width = 3, height = 1), code])
-        rightval = render.Text(content = side["score"], font = W_FONT_CELL, color = side["score_color"])
-    return render.Box(
-        width = w,
-        height = lh,
-        color = bg,
-        child = render.Padding(pad = (1, 0, 1, 0), child = render.Row(
-            expanded = True,
-            main_align = "space_between",
-            cross_align = "center",
-            children = [left_group, rightval],
-        )),
-    )
-
-def wide6_chip(g):
-    # Only called for in-progress cells (live or half-time).
-    if g["is_live"]:
-        return render.Padding(pad = (0, 1, 1, 0), child = render.Circle(color = W_LIVE, diameter = 4))
-    cw = len(g["status_text"]) * 5 + 5
-    return render.Box(width = cw, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = g["status_text"], font = W_FONT_STATUS, color = g["status_color"])))
-
 # ---- Wide 4 ----------------------------------------------------------------
 # A 2x2 grid. The cells (~63 wide) are roomy enough to keep the flag, code,
-# score/record AND a status line (FT/HT/clock/kickoff) that Wide 6 had to drop.
+# score/record AND a status line (FT/HT/clock/kickoff) below each game.
 
 def wide4_page(pg, comp_label, header_color, colors_on):
     games = pg["games"]
@@ -1377,7 +1275,7 @@ def wide4_cell(g, colors_on, w, h):
     ])
 
 def wide4_line(g, side, bg, lh, w):
-    flag = render.Image(src = side["logo"], width = W6_FLAG, height = W6_FLAG)
+    flag = render.Image(src = side["logo"], width = W4_FLAG, height = W4_FLAG)
     code = render.Text(content = side["code"], font = W_FONT_CELL, color = side["code_color"])
     if g["state"] == "pre":
         rightval = render.Text(content = side["record"], font = W_FONT_STATUS, color = W_WHITE)
@@ -1400,15 +1298,10 @@ def wide4_line(g, side, bg, lh, w):
 
 def wide4_status(g, w, h):
     # Black status footer with the game time/state centered: kickoff (upcoming),
-    # green dot + clock (live), HT (amber) or FT (grey).
+    # clock (live, green), HT (amber) or FT (grey). A live match already reads as
+    # in-progress from the green clock, so there's no separate pulse dot.
     if g["state"] == "pre":
         kids = [render.Text(content = g["kickoff"], font = W_FONT_STATUS, color = W_WHITE)]
-    elif g["is_live"]:
-        kids = [
-            render.Circle(color = W_LIVE, diameter = 3),
-            render.Box(width = 2, height = 1),
-            render.Text(content = g["status_text"], font = W_FONT_STATUS, color = W_LIVE),
-        ]
     else:
         kids = [render.Text(content = g["status_text"], font = W_FONT_STATUS, color = g["status_color"])]
     return render.Box(
