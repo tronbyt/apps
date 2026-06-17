@@ -143,10 +143,11 @@ def get_schema():
     )
 
 def warning_frame(warning, scale):
-    icon_bytes = ICON_FOR_CODE.get(warning["code"])
+    code = warning.get("code", "")
+    icon_bytes = ICON_FOR_CODE.get(code)
     half_w = canvas.width() // 2
     full_h = 32 * scale
-    is_black_rain = warning["code"] == "WRAINB"
+    is_black_rain = code == "WRAINB"
 
     time_color = BLACK_RAIN_DIM if is_black_rain else DIM
     label_color = BLACK_RAIN_TEXT if is_black_rain else WHITE
@@ -166,13 +167,11 @@ def warning_frame(warning, scale):
             cross_align = "center",
             children = [
                 render.Text(
-                    content = issued_label(warning["issueTime"]),
-                    font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
+                    content = issued_label(warning.get("issueTime")),
                     color = time_color,
                 ),
                 render.WrappedText(
                     content = bottom_label(warning),
-                    font = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12",
                     color = label_color,
                     align = "center",
                     width = half_w,
@@ -199,9 +198,13 @@ def warning_frame(warning, scale):
     return row
 
 def bottom_label(warning):
-    return LABEL_FOR_CODE.get(warning["code"], warning["name"].split(" ")[0])
+    code = warning.get("code", "")
+    name = warning.get("name", "")
+    return LABEL_FOR_CODE.get(code, name.split(" ")[0] if name else "")
 
 def issued_label(issue_time):
+    if not issue_time:
+        return ""
     return time.parse_time(issue_time).format("15:04")
 
 def no_warnings_frame(scale):
