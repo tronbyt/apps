@@ -95,7 +95,14 @@ def main():
     resp = http.get(WARNSUM_URL, ttl_seconds = 120)
 
     if resp.status_code != 200:
-        return []
+        return render.Root(
+            child = render.Box(
+                child = render.Text(
+                    content = "Error loading data",
+                    color = "#f00",
+                ),
+            ),
+        )
 
     data = resp.json()
 
