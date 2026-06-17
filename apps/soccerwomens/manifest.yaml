@@ -7,6 +7,7 @@ author: jvivona
 fileName: soccerwomens.star
 packageName: soccerwomens
 recommendedInterval: 5
+supports2x: true
 category: sports
 tags:
   - real-time
