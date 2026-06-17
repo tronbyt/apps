@@ -39,7 +39,7 @@ CACHE_TTL_SECONDS = 7200
 def main():
     data = get_data()
     if not data["ok"]:
-        return render.Root(child = render.WrappedText("An error has occurred getting the daily reflection.", width = 64))
+        return render.Root(child = render.WrappedText("An error has occurred getting the daily reflection.", width = 128 if canvas.is2x() else 64))
     if canvas.is2x():
         return render_2x(data)
     return render_1x(data)

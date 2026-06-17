@@ -172,6 +172,9 @@ def render_article(news):
     return (news_text)
 
 def clean_text(s):
+    if not s:
+        return ""
+
     # CBC descriptions embed HTML (an <img> tag then a <p> summary); strip all
     # tags, unescape the common entities, then collapse whitespace so only the
     # summary prose remains. &amp; is first so double-escaped entities resolve.

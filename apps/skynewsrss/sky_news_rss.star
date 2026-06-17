@@ -138,6 +138,9 @@ def render_article(news):
     return (news_text)
 
 def clean_text(s):
+    if not s:
+        return ""
+
     # RSS text comes through with HTML entities (e.g. &apos; &quot;); unescape
     # the common ones. &amp; is handled first so double-escaped entities resolve.
     for entity, char in [("&amp;", "&"), ("&apos;", "'"), ("&#39;", "'"), ("&quot;", "\""), ("&#34;", "\""), ("&lt;", "<"), ("&gt;", ">"), ("&nbsp;", " ")]:
