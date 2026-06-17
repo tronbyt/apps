@@ -76,7 +76,7 @@ W_STEEL = "#444b57"  # fallback for near-black team colors
 
 # Game box when the colors toggle is OFF, so games read as separate boxes (split
 # by the black gridlines) instead of blending into one black field.
-W_OFF_BG = "#3b414c"
+W_OFF_BG = "#262b33"
 W_TEAM_ALPHA = "80"  # alpha on team-color bands so they read softer over black (~50%)
 
 # Fonts (bitmap, real sizes). Hero numerals re-derived to fit the 18-LED row:
