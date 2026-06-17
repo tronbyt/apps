@@ -124,8 +124,8 @@ def main(config):
     if len(scores) > 0:
         displayType = config.get("displayType", "colors")
 
-        # New 2x wide styles (#5/#6) take a completely separate render path.
-        if displayType == "wide3" or displayType == "wide6":
+        # New 2x wide styles take a completely separate render path.
+        if displayType == "wide3" or displayType == "wide4" or displayType == "wide6":
             return render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_url)
 
         #logoType = config.get("logoType", "primary")
@@ -552,6 +552,10 @@ displayOptions = [
         value = "wide3",
     ),
     schema.Option(
+        display = "Wide · 4 Games (2x)",
+        value = "wide4",
+    ),
+    schema.Option(
         display = "Wide · 6 Games (2x)",
         value = "wide6",
     ),
@@ -715,7 +719,7 @@ def get_schema():
 
 def show_wide_options(displayType):
     # Team-colors background toggle only applies to the wide 2x styles.
-    if displayType == "wide3" or displayType == "wide6":
+    if displayType == "wide3" or displayType == "wide4" or displayType == "wide6":
         return [
             schema.Toggle(
                 id = "wide_team_colors",
@@ -866,7 +870,7 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
     if not (canvas.is2x() or canvas.width() >= W_W):
         return wide_needs_2x()
 
-    perPage = 3 if displayType == "wide3" else 6
+    perPage = {"wide3": 3, "wide4": 4, "wide6": 6}[displayType]
     colors_on = config.bool("wide_team_colors", True)
     rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
     comp_label = get_comp_label(scoreboard_url, leagueAbbr)
@@ -892,6 +896,8 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
         pg["overall_total"] = total
         if displayType == "wide3":
             frames.append(wide3_page(pg, comp_label, header_color, colors_on))
+        elif displayType == "wide4":
+            frames.append(wide4_page(pg, comp_label, header_color, colors_on))
         else:
             frames.append(wide6_page(pg, comp_label, header_color, colors_on))
 
@@ -1330,3 +1336,90 @@ def wide6_chip(g):
         return render.Padding(pad = (0, 1, 1, 0), child = render.Circle(color = W_LIVE, diameter = 4))
     cw = len(g["status_text"]) * 5 + 5
     return render.Box(width = cw, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = g["status_text"], font = W_FONT_STATUS, color = g["status_color"])))
+
+# ---- Wide 4 ----------------------------------------------------------------
+# A 2x2 grid. The cells (~63 wide) are roomy enough to keep the flag, code,
+# score/record AND a status line (FT/HT/clock/kickoff) that Wide 6 had to drop.
+
+def wide4_page(pg, comp_label, header_color, colors_on):
+    games = pg["games"]
+    n = len(games)
+    cols = 2
+    grid_rows = [games[r:r + cols] for r in range(0, n, cols)]
+    cell_w = (W_W - (cols - 1)) // cols if colors_on else W_W // cols  # 63
+    body_h = W_H - W_HEADER_H  # 56
+    cell_h = (body_h - 1) // 2 if colors_on else body_h // 2  # 27
+
+    row_widgets = []
+    for ri in range(len(grid_rows)):
+        if ri > 0 and colors_on:
+            row_widgets.append(render.Box(width = W_W, height = 1, color = W_BG))
+        cells = []
+        for ci in range(len(grid_rows[ri])):
+            if ci > 0 and colors_on:
+                cells.append(render.Box(width = 1, height = cell_h, color = W_BG))
+            cells.append(wide4_cell(grid_rows[ri][ci], colors_on, cell_w, cell_h))
+        row_widgets.append(render.Row(main_align = "center", cross_align = "center", children = cells))
+
+    body = render.Box(
+        width = W_W,
+        height = body_h,
+        child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = row_widgets),
+    )
+    frame = render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
+    return with_page_dots(frame, pg)
+
+def wide4_cell(g, colors_on, w, h):
+    left = g["left"]
+    right = g["right"]
+    lc = left["color"] if colors_on else W_OFF_BG
+    rc = right["color"] if colors_on else W_OFF_BG
+    status_h = 7
+    line_h = (h - status_h) // 2
+    return render.Column(children = [
+        wide4_line(g, left, lc, line_h, w),
+        wide4_line(g, right, rc, h - status_h - line_h, w),
+        wide4_status(g, w, status_h),
+    ])
+
+def wide4_line(g, side, bg, lh, w):
+    flag = render.Image(src = side["logo"], width = W6_FLAG, height = W6_FLAG)
+    code = render.Text(content = side["code"], font = W_FONT_CELL, color = side["code_color"])
+    if g["state"] == "pre":
+        rightval = render.Text(content = side["record"], font = W_FONT_STATUS, color = W_WHITE)
+    else:
+        rightval = render.Text(content = side["score"], font = W_FONT_CELL, color = side["score_color"])
+    return render.Box(
+        width = w,
+        height = lh,
+        color = bg,
+        child = render.Padding(pad = (2, 0, 2, 0), child = render.Row(
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "center",
+            children = [
+                render.Row(cross_align = "center", children = [flag, render.Box(width = 3, height = 1), code]),
+                rightval,
+            ],
+        )),
+    )
+
+def wide4_status(g, w, h):
+    # Black status footer with the game time/state centered: kickoff (upcoming),
+    # green dot + clock (live), HT (amber) or FT (grey).
+    if g["state"] == "pre":
+        kids = [render.Text(content = g["kickoff"], font = W_FONT_STATUS, color = W_WHITE)]
+    elif g["is_live"]:
+        kids = [
+            render.Circle(color = W_LIVE, diameter = 3),
+            render.Box(width = 2, height = 1),
+            render.Text(content = g["status_text"], font = W_FONT_STATUS, color = W_LIVE),
+        ]
+    else:
+        kids = [render.Text(content = g["status_text"], font = W_FONT_STATUS, color = g["status_color"])]
+    return render.Box(
+        width = w,
+        height = h,
+        color = W_BG,
+        child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = kids),
+    )
