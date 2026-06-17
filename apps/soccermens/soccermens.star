@@ -74,6 +74,7 @@ W_HDR_BG = "#11151f"  # header bg (a hair lighter than black)
 W_HDR_RULE = "#232a38"  # header bottom rule
 W_STEEL = "#444b57"  # fallback for near-black team colors
 W_OFF_BG = "#000000"  # team band when colors toggle is OFF (flag carries identity)
+W_TEAM_ALPHA = "b4"  # alpha on team-color bands so they read softer over black (~70%)
 
 # Fonts (bitmap, real sizes). Hero numerals re-derived to fit the 18-LED row:
 # terminus-16 + an 8-LED status will not co-exist in one row, so the hero score
@@ -90,7 +91,10 @@ W_FONT_CELL = "tb-8"  # code + score in Wide 6 cells
 W_W = 128
 W_H = 64
 W_HEADER_H = 8  # 7 bg + 1 rule (all-caps day header has no descenders)
-W3_CENTER_W = 34  # fixed black score column in Wide 3
+
+# Narrow center score column in Wide 3, to widen the team zones so a two-digit
+# W-D-L record ("20-8-10") clears the center.
+W3_CENTER_W = 26
 W3_ROW_H = 18  # 3 rows * 18 + 2 * 1 divider == 56 body, exact
 W3_FLAG = 16  # flag/crest in Wide 3 zone
 W6_FLAG = 9  # flag/crest in Wide 6 cell line
@@ -865,7 +869,10 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
     perPage = 3 if displayType == "wide3" else 6
     colors_on = config.bool("wide_team_colors", True)
     rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
-    round_label = get_round_label(scoreboard_url, leagueAbbr)
+    comp_label = get_comp_label(scoreboard_url, leagueAbbr)
+
+    # Header (competition + date) color, so back-to-back apps can be tinted apart.
+    header_color = config.get("displayTimeColor", "#FFF")
 
     games = []
     for s in scores:
@@ -879,16 +886,10 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
 
     frames = []
     for pg in pages:
-        if pg["page_count"] > 1:
-            right = "PG %d/%d" % (pg["page_num"], pg["page_count"])
-            right_color = W_WHITE
-        else:
-            right = round_label
-            right_color = W_REC
         if displayType == "wide3":
-            frames.append(wide3_page(pg, right, right_color, colors_on))
+            frames.append(wide3_page(pg, comp_label, header_color, colors_on))
         else:
-            frames.append(wide6_page(pg, right, right_color, colors_on))
+            frames.append(wide6_page(pg, comp_label, header_color, colors_on))
 
     # Each page is one static frame; the per-frame delay is the rotation timer,
     # so every page in the window shows at least once per loop.
@@ -898,17 +899,17 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
         child = render.Column(children = [render.Animation(children = frames)]),
     )
 
-def get_round_label(scoreboard_url, leagueAbbr):
-    # Cache-hit reuse of the scoreboard fetch just to read the competition round
-    # name (e.g. "GROUP STAGE") for the header context slot. Works for every
-    # league/tournament the app offers; falls back to the short league code.
+def get_comp_label(scoreboard_url, leagueAbbr):
+    # Cache-hit reuse of the scoreboard fetch just to read the competition name
+    # (leagues[0].abbreviation, e.g. "FIFA World Cup") for the header. Works for
+    # every league/tournament the app offers; falls back to the short league code.
     data = json.decode(get_cachable_data(scoreboard_url))
     leagues = data.get("leagues", [])
     if len(leagues) > 0:
-        name = leagues[0].get("season", {}).get("type", {}).get("name", "")
-        if name != "":
-            return name.upper()
-    return leagueAbbr.upper()
+        abbr = leagues[0].get("abbreviation", "")
+        if abbr != "":
+            return abbr
+    return leagueAbbr
 
 def parse_game_wide(s, config, timezone):
     comp = s["competitions"][0]
@@ -920,10 +921,13 @@ def parse_game_wide(s, config, timezone):
     type_name = s["status"]["type"].get("name", "")
     short_detail = s["status"]["type"].get("shortDetail", "")
 
-    # local date for day grouping + header
+    # local date for day grouping + header (short, no weekday)
     dt = time.parse_time(s["date"], format = "2006-01-02T15:04Z").in_location(timezone)
     day_key = dt.format("20060102")
-    day_label = dt.format("Mon · 2 Jan").upper()  # e.g. "SAT · 14 JUN"
+    if config.bool("is_us_date_format", False):
+        date_text = dt.format("1/2")  # e.g. "6/17"
+    else:
+        date_text = dt.format("2 Jan")  # e.g. "17 Jun"
 
     home = wide_side(competitors[0])
     away = wide_side(competitors[1])
@@ -987,7 +991,7 @@ def parse_game_wide(s, config, timezone):
         status_color = status_color,
         kickoff = kickoff,
         day_key = day_key,
-        day_label = day_label,
+        date_text = date_text,
         left = left,
         right = right,
     )
@@ -1034,9 +1038,12 @@ def hex2(n):
     return HEX[n // 16] + HEX[n % 16]
 
 def wide_team_color(hexcolor):
+    # Returned with an alpha suffix so the band softens against the black panel
+    # (same idea as the legacy "colors" style's 77 alpha), keeping white/yellow
+    # text readable.
     h = hexcolor.replace("#", "")
     if len(h) != 6:
-        return W_STEEL
+        return W_STEEL + W_TEAM_ALPHA
     r = int(h[0:2], 16)
     g = int(h[2:4], 16)
     b = int(h[4:6], 16)
@@ -1044,14 +1051,14 @@ def wide_team_color(hexcolor):
 
     # near-black is invisible on a black panel -> steel
     if lum < 55:
-        return W_STEEL
+        return W_STEEL + W_TEAM_ALPHA
 
     # too light/bright kills white & yellow text -> scale down to a mid lum
     if lum > 125:
         r = (r * 125) // lum
         g = (g * 125) // lum
         b = (b * 125) // lum
-    return "#" + hex2(r) + hex2(g) + hex2(b)
+    return "#" + hex2(r) + hex2(g) + hex2(b) + W_TEAM_ALPHA
 
 def build_pages(games, perPage):
     # Group by local day in feed (kickoff) order, chunk each day into pages of
@@ -1072,7 +1079,7 @@ def build_pages(games, perPage):
         npages = (n + perPage - 1) // perPage
         for p in range(npages):
             pages.append(dict(
-                day_label = dgames[0]["day_label"],
+                date_text = dgames[0]["date_text"],
                 games = dgames[p * perPage:(p + 1) * perPage],
                 page_num = p + 1,
                 page_count = npages,
@@ -1081,7 +1088,9 @@ def build_pages(games, perPage):
 
 # ---- shared chrome ---------------------------------------------------------
 
-def wide_header(day_label, right_text, right_color):
+def wide_header(comp_label, date_text, text_color):
+    # Competition (what you're looking at) on the left, short date on the right.
+    # Both take the user's "Time Color" so back-to-back apps can be tinted apart.
     return render.Column(children = [
         render.Box(
             width = W_W,
@@ -1092,13 +1101,34 @@ def wide_header(day_label, right_text, right_color):
                 main_align = "space_between",
                 cross_align = "center",
                 children = [
-                    render.Padding(pad = (2, 0, 0, 0), child = render.Text(content = day_label, font = W_FONT_HEADER, color = W_WHITE)),
-                    render.Padding(pad = (0, 0, 2, 0), child = render.Text(content = right_text, font = W_FONT_HEADER, color = right_color)),
+                    render.Padding(pad = (2, 0, 0, 0), child = render.Text(content = comp_label, font = W_FONT_HEADER, color = text_color)),
+                    render.Padding(pad = (0, 0, 2, 0), child = render.Text(content = date_text, font = W_FONT_HEADER, color = text_color)),
                 ],
             ),
         ),
         render.Box(width = W_W, height = 1, color = W_HDR_RULE),
     ])
+
+def with_page_dots(frame, pg):
+    # One dot per page of the current day, bottom-right; the current page is lit
+    # white, the rest dim. Only shown when the day spans more than one page.
+    if pg["page_count"] <= 1:
+        return frame
+    dots = []
+    for i in range(pg["page_count"]):
+        if i > 0:
+            dots.append(render.Box(width = 2, height = 1))
+        dots.append(render.Circle(color = W_WHITE if i == pg["page_num"] - 1 else "#3a3f4a", diameter = 3))
+    cw = pg["page_count"] * 3 + (pg["page_count"] - 1) * 2 + 4
+    chip = render.Box(width = cw, height = 7, color = "#000a", child = render.Padding(pad = (2, 2, 2, 2), child = render.Row(cross_align = "center", children = dots)))
+    overlay = render.Box(
+        width = W_W,
+        height = W_H,
+        child = render.Column(expanded = True, main_align = "end", children = [
+            render.Row(expanded = True, main_align = "end", children = [chip]),
+        ]),
+    )
+    return render.Stack(children = [frame, overlay])
 
 def wide_needs_2x():
     # 1x devices can't fit the wide layouts; explain rather than render garbage.
@@ -1123,7 +1153,7 @@ def wide_needs_2x():
 
 # ---- Wide 3 ----------------------------------------------------------------
 
-def wide3_page(pg, right_text, right_color, colors_on):
+def wide3_page(pg, comp_label, header_color, colors_on):
     games = pg["games"]
     rows = []
     for i in range(len(games)):
@@ -1135,7 +1165,8 @@ def wide3_page(pg, right_text, right_color, colors_on):
         height = W_H - W_HEADER_H,
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
     )
-    return render.Column(children = [wide_header(pg["day_label"], right_text, right_color), body])
+    frame = render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
+    return with_page_dots(frame, pg)
 
 def wide3_row(g, colors_on):
     left = g["left"]
@@ -1181,13 +1212,15 @@ def wide3_zone(side, bg, side_name, state, w):
 
 def wide3_center(g):
     if g["state"] == "pre":
-        kids = [render.Text(content = g["kickoff"], font = W_FONT_SCORE, color = W_WHITE)]
+        # tb-8 (not the hero 6x10) so a 6-char kickoff like "12:00A" fits the
+        # narrow center column.
+        kids = [render.Text(content = g["kickoff"], font = W_FONT_HEADER, color = W_WHITE)]
     else:
         score_row = render.Row(cross_align = "center", children = [
             render.Text(content = g["left"]["score"], font = W_FONT_SCORE, color = g["left"]["score_color"]),
-            render.Box(width = 3, height = 1),
+            render.Box(width = 2, height = 1),
             render.Text(content = "-", font = W_FONT_SCORE, color = W_DASH),
-            render.Box(width = 3, height = 1),
+            render.Box(width = 2, height = 1),
             render.Text(content = g["right"]["score"], font = W_FONT_SCORE, color = g["right"]["score_color"]),
         ])
         if g["is_live"]:
@@ -1208,7 +1241,7 @@ def wide3_center(g):
 
 # ---- Wide 6 ----------------------------------------------------------------
 
-def wide6_page(pg, right_text, right_color, colors_on):
+def wide6_page(pg, comp_label, header_color, colors_on):
     games = pg["games"]
     n = len(games)
     cols = 3
@@ -1233,7 +1266,8 @@ def wide6_page(pg, right_text, right_color, colors_on):
         height = body_h,
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = row_widgets),
     )
-    return render.Column(children = [wide_header(pg["day_label"], right_text, right_color), body])
+    frame = render.Column(children = [wide_header(comp_label, pg["date_text"], header_color), body])
+    return with_page_dots(frame, pg)
 
 def wide6_cell(g, colors_on, w, h):
     left = g["left"]
@@ -1246,68 +1280,49 @@ def wide6_cell(g, colors_on, w, h):
         wide6_line(g, right, rc, h - line_h, w),
     ])
 
-    # Finished games are self-evident from their score + lack of a live pulse, so
-    # no chip (an "FT" on every cell is just noise in the grid). Only live and
-    # upcoming cells get a chip: upcoming sits right-centered in the empty score
-    # column; live tucks into the top-right corner so the green clock stands out.
-    if g["state"] == "post":
+    # Finished games are self-evident (score + no pulse) and upcoming games carry
+    # their W-D-L in the lines, so neither needs an overlay. Only live cells get
+    # one: a green pulse dot in the top-right corner.
+    if g["state"] != "in":
         return stacked
-    valign = "center" if g["state"] == "pre" else "start"
     overlay = render.Box(
         width = w,
         height = h,
-        child = render.Column(expanded = True, main_align = valign, children = [
+        child = render.Column(expanded = True, main_align = "start", children = [
             render.Row(expanded = True, main_align = "end", children = [wide6_chip(g)]),
         ]),
     )
     return render.Stack(children = [stacked, overlay])
 
 def wide6_line(g, side, bg, lh, w):
-    flag = render.Image(src = side["logo"], width = W6_FLAG, height = W6_FLAG)
-    code = render.Text(content = side["code"], font = W_FONT_CELL, color = side["code_color"])
     if g["state"] == "pre":
-        # Dense glance view: upcoming cells lead with the kickoff (center chip);
-        # detailed W-D-L lives in Wide 3 where there's room for it.
-        rightval = render.Box(width = 1, height = 1)
+        # Upcoming: code (kept) on the left, form (W-D-L) on the right. The flag is
+        # dropped here (no room for flag + code + record in a 42px cell). tb-8 code
+        # for normal records; a two-digit league record ("20-8-10") needs the
+        # narrower tom-thumb code to keep both from clipping.
+        code_font = W_FONT_CELL if len(side["record"]) <= 6 else W_FONT_STATUS
+        left_group = render.Text(content = side["code"], font = code_font, color = side["code_color"])
+        rightval = render.Text(content = side["record"], font = W_FONT_STATUS, color = W_REC)
     else:
+        code = render.Text(content = side["code"], font = W_FONT_CELL, color = side["code_color"])
+        flag = render.Image(src = side["logo"], width = W6_FLAG, height = W6_FLAG)
+        left_group = render.Row(cross_align = "center", children = [flag, render.Box(width = 3, height = 1), code])
         rightval = render.Text(content = side["score"], font = W_FONT_CELL, color = side["score_color"])
     return render.Box(
         width = w,
         height = lh,
         color = bg,
-        child = render.Padding(pad = (2, 0, 2, 0), child = render.Row(
+        child = render.Padding(pad = (1, 0, 1, 0), child = render.Row(
             expanded = True,
             main_align = "space_between",
             cross_align = "center",
-            children = [
-                render.Row(cross_align = "center", children = [flag, render.Box(width = 3, height = 1), code]),
-                rightval,
-            ],
+            children = [left_group, rightval],
         )),
     )
 
 def wide6_chip(g):
-    if g["state"] == "post":
-        return render.Box(width = 1, height = 1)
-
-    # Live: a small green pulse dot in the corner. The cell already shows both
-    # scores; the exact minute is detail that belongs in Wide 3, and a dot keeps
-    # the dense grid uncluttered (a clock chip here would cover the home score).
+    # Only called for in-progress cells (live or half-time).
     if g["is_live"]:
         return render.Padding(pad = (0, 1, 1, 0), child = render.Circle(color = W_LIVE, diameter = 4))
-
-    # Upcoming kickoff, or half-time: a small text chip on a translucent pad.
-    if g["state"] == "pre":
-        txt = g["kickoff"]
-        color = W_WHITE
-    else:
-        txt = g["status_text"]
-        color = g["status_color"]
-    if txt == "":
-        return render.Box(width = 1, height = 1)
-
-    # A bare render.Box (no width/height) expands to fill its parent, which would
-    # wash the whole cell with the chip's translucent black. Give it an explicit
-    # content-sized box so it stays a small corner chip.
-    cw = len(txt) * 5 + 5
-    return render.Box(width = cw, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = txt, font = W_FONT_STATUS, color = color)))
+    cw = len(g["status_text"]) * 5 + 5
+    return render.Box(width = cw, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = g["status_text"], font = W_FONT_STATUS, color = g["status_color"])))
