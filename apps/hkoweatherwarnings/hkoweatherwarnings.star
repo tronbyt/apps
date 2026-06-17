@@ -80,7 +80,7 @@ LABEL_FOR_CODE = {
     "TC9": "Storm Rising",
     "TC10": "Hurricane Force",
     "WTMW": "Tsunami Alert",
-    "WTS": "Lightning Risk",
+    "WTS": "Light- ning ",
 }
 
 WHITE = "#fff"
@@ -95,14 +95,7 @@ def main():
     resp = http.get(WARNSUM_URL, ttl_seconds = 120)
 
     if resp.status_code != 200:
-        return render.Root(
-            child = render.Box(
-                child = render.Text(
-                    content = "Error loading data",
-                    color = "#f00",
-                ),
-            ),
-        )
+        return []
 
     data = resp.json()
 
@@ -180,6 +173,7 @@ def warning_frame(warning, scale):
                 render.WrappedText(
                     content = bottom_label(warning),
                     color = label_color,
+                    font = "CG-pixel-3x5-mono",
                     align = "center",
                     width = half_w,
                     linespacing = 1,
