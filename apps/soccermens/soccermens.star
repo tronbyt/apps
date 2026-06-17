@@ -73,7 +73,10 @@ W_DASH = "#5b6470"  # score dash
 W_HDR_BG = "#11151f"  # header bg (a hair lighter than black)
 W_HDR_RULE = "#232a38"  # header bottom rule
 W_STEEL = "#444b57"  # fallback for near-black team colors
-W_OFF_BG = "#000000"  # team band when colors toggle is OFF (flag carries identity)
+
+# Game box when the colors toggle is OFF, so games read as separate boxes (split
+# by the black gridlines) instead of blending into one black field.
+W_OFF_BG = "#3b414c"
 W_TEAM_ALPHA = "80"  # alpha on team-color bands so they read softer over black (~50%)
 
 # Fonts (bitmap, real sizes). Hero numerals re-derived to fit the 18-LED row:
@@ -1139,7 +1142,7 @@ def wide3_page(pg, comp_label, header_color, colors_on):
     games = pg["games"]
     rows = []
     for i in range(len(games)):
-        if i > 0 and colors_on:
+        if i > 0:
             rows.append(render.Box(width = W_W, height = 1, color = W_BG))
         rows.append(wide3_row(games[i], colors_on))
     body = render.Box(
@@ -1228,17 +1231,17 @@ def wide6_page(pg, comp_label, header_color, colors_on):
     n = len(games)
     cols = 3
     grid_rows = [games[r:r + cols] for r in range(0, n, cols)]
-    cell_w = (W_W - (cols - 1)) // cols if colors_on else W_W // cols  # 42
+    cell_w = (W_W - (cols - 1)) // cols  # 42, black gridlines between cells
     body_h = W_H - W_HEADER_H  # 56
-    cell_h = (body_h - 1) // 2 if colors_on else body_h // 2  # 27
+    cell_h = (body_h - 1) // 2  # 27
 
     row_widgets = []
     for ri in range(len(grid_rows)):
-        if ri > 0 and colors_on:
+        if ri > 0:
             row_widgets.append(render.Box(width = W_W, height = 1, color = W_BG))
         cells = []
         for ci in range(len(grid_rows[ri])):
-            if ci > 0 and colors_on:
+            if ci > 0:
                 cells.append(render.Box(width = 1, height = cell_h, color = W_BG))
             cells.append(wide6_cell(grid_rows[ri][ci], colors_on, cell_w, cell_h))
         row_widgets.append(render.Row(main_align = "center", cross_align = "center", children = cells))
@@ -1317,17 +1320,17 @@ def wide4_page(pg, comp_label, header_color, colors_on):
     n = len(games)
     cols = 2
     grid_rows = [games[r:r + cols] for r in range(0, n, cols)]
-    cell_w = (W_W - (cols - 1)) // cols if colors_on else W_W // cols  # 63
+    cell_w = (W_W - (cols - 1)) // cols  # 63, black gridlines between cells
     body_h = W_H - W_HEADER_H  # 56
-    cell_h = (body_h - 1) // 2 if colors_on else body_h // 2  # 27
+    cell_h = (body_h - 1) // 2  # 27
 
     row_widgets = []
     for ri in range(len(grid_rows)):
-        if ri > 0 and colors_on:
+        if ri > 0:
             row_widgets.append(render.Box(width = W_W, height = 1, color = W_BG))
         cells = []
         for ci in range(len(grid_rows[ri])):
-            if ci > 0 and colors_on:
+            if ci > 0:
                 cells.append(render.Box(width = 1, height = cell_h, color = W_BG))
             cells.append(wide4_cell(grid_rows[ri][ci], colors_on, cell_w, cell_h))
         row_widgets.append(render.Row(main_align = "center", cross_align = "center", children = cells))
