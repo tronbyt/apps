@@ -941,16 +941,19 @@ def parse_game_wide(s, config, timezone):
     home = wide_side(competitors[0])
     away = wide_side(competitors[1])
 
+    # penalty shootout: scores present while pens are live AND after (FINAL_PEN).
+    # The regulation score stays in the score slot; the tally goes in the status
+    # ("PK 4-2" live / "FT 4-2" final) since 0(4)-0(2) won't fit the narrow center.
+    hp = competitors[0].get("shootoutScore", "0")
+    ap = competitors[1].get("shootoutScore", "0")
+    pen_final = type_name == "STATUS_FINAL_PEN"
+    pen_live = state == "in" and (hp != "0" or ap != "0")
+
     # winner (post only) — shown by yellow text, never a swapped background
     home_win = False
     away_win = False
     if state == "post" and type_name != "STATUS_POSTPONED":
-        if type_name == "STATUS_FINAL_PEN":
-            # Decided on penalties: keep the (drawn) regulation score clean in the
-            # glance views and signal the winner via yellow text. The shootout
-            # tally is too wide to fit the 34-LED center / mini cells.
-            hp = competitors[0].get("shootoutScore", "0")
-            ap = competitors[1].get("shootoutScore", "0")
+        if pen_final:
             home_win = int_or(hp) > int_or(ap)
             away_win = int_or(ap) > int_or(hp)
         else:
@@ -966,7 +969,11 @@ def parse_game_wide(s, config, timezone):
         status_color = W_FINAL
     elif state == "in":
         up = short_detail.upper()
-        if up.startswith("HT") or up.find("HALF") >= 0:
+        if pen_live:
+            status_text = "PENS"  # live shootout; a tally here would be stale, omit it
+            status_color = W_LIVE
+            is_live = True
+        elif up.startswith("HT") or up.find("HALF") >= 0:
             status_text = "HT"
             status_color = W_HALF
         else:
@@ -979,7 +986,7 @@ def parse_game_wide(s, config, timezone):
         home["score"] = ""
         away["score"] = ""
     else:  # post
-        status_text = "FT(p)" if type_name == "STATUS_FINAL_PEN" else "FT"
+        status_text = "FT"
         status_color = W_FINAL
 
     home["code_color"] = W_WIN if home_win else W_WHITE
@@ -990,8 +997,16 @@ def parse_game_wide(s, config, timezone):
     # team_sequence: which team sits on the left (home zone)
     if config.get("team_sequence", DEFAULT_TEAM_DISPLAY) == "home":
         left, right = home, away
+        lp, rp = hp, ap
     else:
         left, right = away, home
+        lp, rp = ap, hp
+
+    # final shootout: append the tally (display order) -> "FT 4-2". Live shootouts
+    # stay just "PENS" (the running tally would be stale between refreshes).
+    has_pen = pen_final
+    if pen_final:
+        status_text = status_text + " " + lp + "-" + rp
 
     return dict(
         state = state,
@@ -999,6 +1014,7 @@ def parse_game_wide(s, config, timezone):
         status_text = status_text,
         status_color = status_color,
         kickoff = kickoff,
+        has_pen = has_pen,
         day_key = day_key,
         date_text = date_text,
         left = left,
@@ -1265,15 +1281,20 @@ def wide6_cell(g, colors_on, w, h):
     ])
 
     # Finished games are self-evident (score + no pulse) and upcoming games carry
-    # their W-D-L in the lines, so neither needs an overlay. Only live cells get
-    # one: a green pulse dot in the top-right corner.
-    if g["state"] != "in":
+    # their W-D-L, so neither needs an overlay. Exceptions: live cells get a green
+    # pulse dot, and a finished shootout gets a small "P" so the yellow winner on
+    # a drawn score makes sense (no room for the tally in this dense grid).
+    if g["state"] == "in":
+        corner = wide6_chip(g)
+    elif g["has_pen"]:
+        corner = render.Box(width = 7, height = 7, color = "#000b", child = render.Padding(pad = (2, 1, 2, 1), child = render.Text(content = "P", font = W_FONT_STATUS, color = W_FINAL)))
+    else:
         return stacked
     overlay = render.Box(
         width = w,
         height = h,
         child = render.Column(expanded = True, main_align = "start", children = [
-            render.Row(expanded = True, main_align = "end", children = [wide6_chip(g)]),
+            render.Row(expanded = True, main_align = "end", children = [corner]),
         ]),
     )
     return render.Stack(children = [stacked, overlay])
