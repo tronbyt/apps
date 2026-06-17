@@ -1129,9 +1129,9 @@ def with_page_dots(frame, pg):
     for i in range(total):
         if i > 0:
             dots.append(render.Box(width = 2, height = 1))
-        dots.append(render.Circle(color = W_WHITE if i == pg["overall_index"] else "#3a3f4a", diameter = 3))
-    cw = total * 3 + (total - 1) * 2 + 4
-    chip = render.Box(width = cw, height = 6, color = "#000a", child = render.Padding(pad = (2, 1, 2, 1), child = render.Row(cross_align = "center", children = dots)))
+        dots.append(render.Circle(color = W_WHITE if i == pg["overall_index"] else "#3a3f4a", diameter = 2))
+    cw = total * 2 + (total - 1) * 2 + 4
+    chip = render.Box(width = cw, height = 5, color = "#000a", child = render.Padding(pad = (2, 1, 2, 1), child = render.Row(cross_align = "center", children = dots)))
     overlay = render.Box(
         width = W_W,
         height = W_H,
