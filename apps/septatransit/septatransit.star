@@ -174,6 +174,31 @@ def parse_time_to_seconds(t_str):
     s = int(parts[2])
     return h * 3600 + m * 60 + s
 
+def parse_release_date(release_name):
+    if len(release_name) != 8 or not release_name.isdigit():
+        return None
+    return release_name
+
+def select_schedule_release(full_schedule, now):
+    today = now.format("20060102")
+    dated_releases = []
+
+    for s in full_schedule:
+        release_name = parse_release_date(s.get("release_name", ""))
+        if release_name == None:
+            continue
+        if release_name not in dated_releases:
+            dated_releases.append(release_name)
+
+    if not dated_releases:
+        return None
+
+    eligible = [release_name for release_name in dated_releases if release_name <= today]
+    if eligible:
+        return max(eligible)
+
+    return max(dated_releases)
+
 def call_schedule_api(route, stopid):
     cache_key = "sched_v2_%s_%s" % (route, stopid)
 
@@ -217,10 +242,18 @@ def call_schedule_api(route, stopid):
                         "status": "LATE" if int(b.get("late", 0)) > 2 else "ON-TIME",
                     }
 
+    now = time.now().in_location("America/New_York")
+    now_secs = parse_time_to_seconds(now.format("15:04:05"))
+    selected_release = select_schedule_release(full_schedule, now)
+
+    filtered_schedule = full_schedule
+    if selected_release != None:
+        filtered_schedule = [s for s in full_schedule if s.get("release_name", "") == selected_release]
+
     service_id_counts = {}
 
     # Infer today's service_id from live trips
-    for s in full_schedule:
+    for s in filtered_schedule:
         if str(s["trip_id"]) in live_data:
             svc_id = s["service_id"]
             service_id_counts[svc_id] = service_id_counts.get(svc_id, 0) + 1
@@ -237,7 +270,7 @@ def call_schedule_api(route, stopid):
         # If we can't infer it from live data, we'll look for the most frequent
         # service_id in the schedule. This is safer than hardcoding 10/12/13.
         counts = {}
-        for s in full_schedule:
+        for s in filtered_schedule:
             sid = s["service_id"]
             counts[sid] = counts.get(sid, 0) + 1
 
@@ -249,23 +282,20 @@ def call_schedule_api(route, stopid):
                 best_sid = sid
         today_service_id = best_sid
 
-    now = time.now().in_location("America/New_York")
-    now_secs = parse_time_to_seconds(now.format("15:04:05"))
-
-    # Deduplicate by trip_id (sometimes the API returns multiple releases of the same trip)
     unique_trips = {}
-    for s in full_schedule:
+    for s in filtered_schedule:
         if s["service_id"] != today_service_id:
             continue
 
+        # A single release should already be canonical, but keep trip_id-based
+        # dedupe in case SEPTA repeats the same trip within that release.
         tid = str(s["trip_id"])
-
-        # If we have multiple releases, the one with the higher release_name is likely newer
-        if tid not in unique_trips or s.get("release_name", "") > unique_trips[tid].get("release_name", ""):
+        if tid not in unique_trips:
             unique_trips[tid] = s
 
     results = []
-    for trip_id, s in unique_trips.items():
+    for s in unique_trips.values():
+        trip_id = str(s["trip_id"])
         sched_secs = parse_time_to_seconds(s["arrival_time"])
         delay = 0
         is_live = False
