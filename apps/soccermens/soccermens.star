@@ -74,7 +74,7 @@ W_HDR_BG = "#11151f"  # header bg (a hair lighter than black)
 W_HDR_RULE = "#232a38"  # header bottom rule
 W_STEEL = "#444b57"  # fallback for near-black team colors
 W_OFF_BG = "#000000"  # team band when colors toggle is OFF (flag carries identity)
-W_TEAM_ALPHA = "b4"  # alpha on team-color bands so they read softer over black (~70%)
+W_TEAM_ALPHA = "80"  # alpha on team-color bands so they read softer over black (~50%)
 
 # Fonts (bitmap, real sizes). Hero numerals re-derived to fit the 18-LED row:
 # terminus-16 + an 8-LED status will not co-exist in one row, so the hero score
@@ -885,7 +885,11 @@ def render_wide(config, scores, displayType, timezone, leagueAbbr, scoreboard_ur
         return []
 
     frames = []
-    for pg in pages:
+    total = len(pages)
+    for i in range(total):
+        pg = pages[i]
+        pg["overall_index"] = i
+        pg["overall_total"] = total
         if displayType == "wide3":
             frames.append(wide3_page(pg, comp_label, header_color, colors_on))
         else:
@@ -1110,23 +1114,22 @@ def wide_header(comp_label, date_text, text_color):
     ])
 
 def with_page_dots(frame, pg):
-    # One dot per page of the current day, bottom-right; the current page is lit
-    # white, the rest dim. Only shown when the day spans more than one page.
-    if pg["page_count"] <= 1:
+    # One dot per page across the whole rotation, centered along the bottom; the
+    # current page is lit white, the rest dim. Only shown when there's >1 page.
+    total = pg["overall_total"]
+    if total <= 1:
         return frame
     dots = []
-    for i in range(pg["page_count"]):
+    for i in range(total):
         if i > 0:
             dots.append(render.Box(width = 2, height = 1))
-        dots.append(render.Circle(color = W_WHITE if i == pg["page_num"] - 1 else "#3a3f4a", diameter = 3))
-    cw = pg["page_count"] * 3 + (pg["page_count"] - 1) * 2 + 4
-    chip = render.Box(width = cw, height = 7, color = "#000a", child = render.Padding(pad = (2, 2, 2, 2), child = render.Row(cross_align = "center", children = dots)))
+        dots.append(render.Circle(color = W_WHITE if i == pg["overall_index"] else "#3a3f4a", diameter = 3))
+    cw = total * 3 + (total - 1) * 2 + 4
+    chip = render.Box(width = cw, height = 6, color = "#000a", child = render.Padding(pad = (2, 1, 2, 1), child = render.Row(cross_align = "center", children = dots)))
     overlay = render.Box(
         width = W_W,
         height = W_H,
-        child = render.Column(expanded = True, main_align = "end", children = [
-            render.Row(expanded = True, main_align = "end", children = [chip]),
-        ]),
+        child = render.Column(expanded = True, main_align = "end", cross_align = "center", children = [chip]),
     )
     return render.Stack(children = [frame, overlay])
 
@@ -1178,24 +1181,25 @@ def wide3_row(g, colors_on):
         expanded = True,
         cross_align = "center",
         children = [
-            wide3_zone(left, lcolor, "left", g["state"], zone_w),
+            wide3_zone(left, lcolor, "left", zone_w),
             wide3_center(g),
-            wide3_zone(right, rcolor, "right", g["state"], zone_w),
+            wide3_zone(right, rcolor, "right", zone_w),
         ],
     )
 
-def wide3_zone(side, bg, side_name, state, w):
+def wide3_zone(side, bg, side_name, w):
     flag = render.Image(src = side["logo"], width = W3_FLAG, height = W3_FLAG)
-    show_rec = state == "pre" and side["record"] != ""
+    show_rec = side["record"] != ""
 
-    # Pre-game: W-D-L record sits on its own line under the code (the 47-LED zone
-    # can't fit flag+code+record side by side). Post/live: just the code.
+    # W-D-L record sits on its own line under the code (the zone can't fit
+    # flag+code+record side by side). Shown for every state — the game's score or
+    # kickoff lives in the center column.
     if show_rec:
         idblock = render.Column(
             cross_align = "start" if side_name == "left" else "end",
             children = [
                 render.Text(content = side["code"], font = W_FONT_CODE, color = side["code_color"]),
-                render.Text(content = side["record"], font = W_FONT_STATUS, color = W_REC),
+                render.Text(content = side["record"], font = W_FONT_STATUS, color = W_WHITE),
             ],
         )
     else:
@@ -1302,7 +1306,7 @@ def wide6_line(g, side, bg, lh, w):
         # narrower tom-thumb code to keep both from clipping.
         code_font = W_FONT_CELL if len(side["record"]) <= 6 else W_FONT_STATUS
         left_group = render.Text(content = side["code"], font = code_font, color = side["code_color"])
-        rightval = render.Text(content = side["record"], font = W_FONT_STATUS, color = W_REC)
+        rightval = render.Text(content = side["record"], font = W_FONT_STATUS, color = W_WHITE)
     else:
         code = render.Text(content = side["code"], font = W_FONT_CELL, color = side["code_color"])
         flag = render.Image(src = side["logo"], width = W6_FLAG, height = W6_FLAG)
