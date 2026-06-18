@@ -345,7 +345,7 @@ def get_stations_list():
         return json.decode(cached)
 
     # Fetch stations CSV from MeteoSwiss OGD
-    url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/ogd-local-forcasting_meta_point.csv"
+    url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/ogd-local-forecasting_meta_point.csv"
 
     # Cache the raw CSV response for 24 hours to avoid frequent rebuilds
     resp = http.get(url, ttl_seconds = 86400)
@@ -420,18 +420,21 @@ def fetch_weather_data(station_point_id):
         if cached_date == current_date:
             return cached_data
 
-    # Get the latest forecast date
-    date_part = get_latest_forecast_date()
-    if not date_part:
+    # Get the latest forecast file timestamp (YYYMMDDHHMM)
+    file_ts = get_latest_forecast_date()
+    if not file_ts:
         return None
+
+    # Extract date part for the URL path
+    date_part = file_ts[:8]
 
     # Construct base URL for data files
     base_url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/{}-ch/".format(date_part)
 
     # Fetch temperature and weather symbol data for this station only
-    tre_min_url = base_url + "vnut12.lssw.{}0000.tre200pn.csv".format(date_part)
-    tre_max_url = base_url + "vnut12.lssw.{}0000.tre200px.csv".format(date_part)
-    symbol_url = base_url + "vnut12.lssw.{}0000.jp2000d0.csv".format(date_part)
+    tre_min_url = base_url + "vnut12.lssw.{}.tre200pn.csv".format(file_ts)
+    tre_max_url = base_url + "vnut12.lssw.{}.tre200px.csv".format(file_ts)
+    symbol_url = base_url + "vnut12.lssw.{}.jp2000d0.csv".format(file_ts)
 
     tre_min_data = fetch_csv_data(tre_min_url, station_point_id, ttl_seconds = 3600)
     tre_max_data = fetch_csv_data(tre_max_url, station_point_id, ttl_seconds = 3600)
@@ -506,18 +509,21 @@ def fetch_3hour_data(station_point_id):
     if cached:
         return json.decode(cached)
 
-    # Get the latest forecast date
-    date_part = get_latest_forecast_date()
-    if not date_part:
+    # Get the latest forecast file timestamp (YYYMMDDHHMM)
+    file_ts = get_latest_forecast_date()
+    if not file_ts:
         return None
+
+    # Extract date part for the URL path
+    date_part = file_ts[:8]
 
     # Construct base URL for data files
     base_url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/{}-ch/".format(date_part)
 
     # Fetch 3-hour data: temperature, weather symbol, and precipitation
-    tre_url = base_url + "vnut12.lssw.{}0000.tre200h0.csv".format(date_part)
-    symbol_url = base_url + "vnut12.lssw.{}0000.jww003i0.csv".format(date_part)
-    precip_url = base_url + "vnut12.lssw.{}0000.rre003i0.csv".format(date_part)
+    tre_url = base_url + "vnut12.lssw.{}.tre200h0.csv".format(file_ts)
+    symbol_url = base_url + "vnut12.lssw.{}.jww003i0.csv".format(file_ts)
+    precip_url = base_url + "vnut12.lssw.{}.rre003i0.csv".format(file_ts)
 
     # Only fetch data for the 3 timestamps we need
     temperature_data = fetch_csv_data(tre_url, station_point_id, ttl_seconds = 600, needed_timestamps = needed_timestamps)
@@ -542,17 +548,22 @@ def fetch_3hour_data(station_point_id):
     return weather_data
 
 def get_latest_forecast_date():
-    """Get the date string of the latest forecast from the STAC API.
+    """Get the filename timestamp of the latest forecast from the STAC API.
+
+    Examines asset filenames in STAC items to extract the correct
+    YYYYMMDDHHMM timestamp used in data file URLs.
 
     Returns:
-        Date string in YYYYMMDD format, or None on error.
+        Timestamp string in YYYYMMDDHHMM format, or None on error.
     """
     cache_key = "meteoschweiz_forecast_date"
     cached = cache.get(cache_key)
 
     if cached:
         current_date = time.now().in_location("Europe/Zurich").format("20060102")
-        if cached == current_date:
+
+        # Cached timestamp's date part (first 8 chars) should match today
+        if len(cached) >= 8 and cached[:8] == current_date:
             return cached
 
     stac_url = "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-local-forecasting/items"
@@ -565,16 +576,21 @@ def get_latest_forecast_date():
     if not items:
         return None
 
-    latest_item = items[0]
-    date_str = latest_item.get("properties", {}).get("datetime", "")
+    # Look through items for the first one with a tre200pn asset,
+    # then extract the correct YYYYMMDDHHMM timestamp from its key
+    for item in items:
+        assets = item.get("assets", {})
+        for key in assets:
+            if "tre200pn" in key:
+                # Key format: vnut12.lssw.YYYYMMDDHHMM.tre200pn.csv
+                parts = key.split(".")
+                if len(parts) >= 3:
+                    timestamp = parts[2]
+                    if len(timestamp) == 12 and timestamp.isdigit():
+                        cache.set(cache_key, timestamp, ttl_seconds = 3600)
+                        return timestamp
 
-    if "T" in date_str:
-        date_part = date_str.split("T")[0].replace("-", "")
-    else:
-        date_part = date_str.replace("-", "")
-
-    cache.set(cache_key, date_part, ttl_seconds = 3600)
-    return date_part
+    return None
 
 def measure_csv_block_size(url):
     """Read the first chunk of a CSV file to measure the timestamp block size.
