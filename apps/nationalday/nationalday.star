@@ -8,25 +8,32 @@ Author: jvivona
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 VERSION = 24315
 
+# 2x (128x64) uses the wider canvas and a larger font; 1x is unchanged.
+IS2X = canvas.is2x()
+
 TEXT_COLOR = "#fff"
 TITLE_TEXT_COLOR = "#fff"
 TITLE_BKG_COLOR = "#6666ff88"
-TITLE_FONT = "tom-thumb"
-TITLE_HEIGHT = 7
-FULL_WIDTH = 64
+TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
+TITLE_HEIGHT = 9 if IS2X else 7
+FULL_WIDTH = 128 if IS2X else 64
 
-ARTICLE_SUB_TITLE_FONT = "tom-thumb"
+# tb-8 centers cleanly with no offset (matches the news apps); tom-thumb at 1x
+# still wants the -1 nudge.
+TITLE_OFFSET = 0 if IS2X else -1
+
+ARTICLE_SUB_TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
 ARTICLE_SUB_TITLE_COLOR = ["#ff8c00", "#00eeff"]
 ARTICLE_COLOR = "#00eeff"
 SPACER_COLOR = "#000"
-ARTICLE_AREA_HEIGHT = 24
-SPACER_HEIGHT = 4
+ARTICLE_AREA_HEIGHT = 55 if IS2X else 24
+SPACER_HEIGHT = 6 if IS2X else 4
 
 DEFAULT_TIMEZONE = "America/New_York"
 CACHE_TTL_SECONDS = 3600
@@ -36,10 +43,12 @@ BASE_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/refs/heads/mai
 # Each calendar mode: which feed file to pull, the header label, and the
 # device-clock format string used as a fallback when the feed's metadata date
 # is missing/malformed. All three feeds share the same JSON shape.
+# 2x has room for the full word; 1x keeps "Nat'l" so "<label> <date>" fits the
+# 64px title bar.
 MODES = {
-    "day": {"file": "nationalday.json", "label": "Nat'l Day", "fallback": "Jan 2"},
-    "week": {"file": "nationalweek.json", "label": "Nat'l Week", "fallback": "1/2"},
-    "month": {"file": "nationalmonth.json", "label": "Nat'l Month", "fallback": "Jan"},
+    "day": {"file": "nationalday.json", "label": "National Day" if IS2X else "Nat'l Day", "fallback": "Jan 2"},
+    "week": {"file": "nationalweek.json", "label": "National Week" if IS2X else "Nat'l Week", "fallback": "1/2"},
+    "month": {"file": "nationalmonth.json", "label": "National Month" if IS2X else "Nat'l Month", "fallback": "Jan"},
 }
 DEFAULT_MODE = "day"
 
@@ -129,7 +138,7 @@ def title(header):
         height = TITLE_HEIGHT,
         padding = 0,
         color = TITLE_BKG_COLOR,
-        child = render.Text(header, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
+        child = render.Text(header, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = TITLE_OFFSET),
     )
 
 def format_header_date(mode, day_str, fallback):

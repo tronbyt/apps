@@ -7,8 +7,9 @@ author: jvivona
 fileName: fox_news.star
 packageName: foxnews
 recommendedInterval: 10
+supports2x: true
 category: news
 tags:
   - news
 published: '2023-03-23T12:33:10Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-06-17T20:47:04Z'

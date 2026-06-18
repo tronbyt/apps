@@ -11,23 +11,31 @@ Author: jvivona
 #               without an in-app RNG.  Languages that lack births/deaths get an extra event substituted in.
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-VERSION = 26151
+VERSION = 26167
+
+# 2x (128x64) uses the wider canvas and a larger font; 1x is unchanged.
+IS2X = canvas.is2x()
 
 TEXT_COLOR = "#fff"
 TITLE_TEXT_COLOR = "#fff"
 TITLE_BKG_COLOR = "#6666ff88"
-TITLE_FONT = "tom-thumb"
-TITLE_HEIGHT = 7
-TITLE_WIDTH = 64
+TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
+TITLE_HEIGHT = 9 if IS2X else 7
+TITLE_WIDTH = 128 if IS2X else 64
 
-ARTICLE_SUB_TITLE_FONT = "tom-thumb"
+# tb-8 centers cleanly with no offset (matches the news apps); tom-thumb at 1x
+# still wants the -1 nudge.
+TITLE_OFFSET = 0 if IS2X else -1
+
+ARTICLE_SUB_TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
 ARTICLE_SUB_TITLE_COLOR = "#ff8c00"
 ARTICLE_COLOR = "#00eeff"
 SPACER_COLOR = "#000"
-ARTICLE_AREA_HEIGHT = 24
+ARTICLE_AREA_HEIGHT = 55 if IS2X else 24
+SPACER_HEIGHT = 6 if IS2X else 3
 
 # data is regenerated through the day with a freshly shuffled item ordering - cache 1 hour so each refresh
 # surfaces a new "semi-random" selection while still saving network traffic.
@@ -95,10 +103,14 @@ def main(config):
 
     if rc == 0:
         title = json_data[METADATA][LANGUAGE].get("title", LANG[language]["title"])
+
+        # drop the "(Wikipedia)" parenthetical from the feed title (language-agnostic,
+        # so localized titles keep working); attribution stays in the app description.
+        title = title.replace(" (Wikipedia)", "").replace("(Wikipedia)", "")
         body = render.Marquee(
             height = ARTICLE_AREA_HEIGHT,
             scroll_direction = "vertical",
-            offset_start = 24,
+            offset_start = ARTICLE_AREA_HEIGHT,
             child = render.Column(
                 main_align = "space_between",
                 children = getItems(json_data, config.bool(OPTBIRTHS, True), config.bool(OPTDEATHS, True)),
@@ -120,7 +132,8 @@ def main(config):
                     color = TITLE_BKG_COLOR,
                     child = render.Marquee(
                         width = TITLE_WIDTH,
-                        child = render.Text(title, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
+                        align = "center",
+                        child = render.Text(title, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = TITLE_OFFSET),
                     ),
                 ),
                 body,
@@ -141,53 +154,70 @@ def getItems(json_data, incl_births, incl_deaths):
     births_order = meta.get(BIRTHS, [])
     deaths_order = meta.get(DEATHS, [])
 
+    # 2x has the vertical room for a richer feed: two births and two deaths.
+    # A disabled toggle or a language with no births/deaths (e.g. Italian) is
+    # back-filled with the same count of extra events so the layout stays full.
+    # 1x is unchanged: one pick per enabled section, nothing when a toggle is off.
+    per_section = 2 if IS2X else 1
+
     this_day = []
     cursor = 0
 
-    # primary event - the metadata ordering is reshuffled through the day, so position 0 is our semi-random pick
-    item, cursor = pickFromOrder(events, events_order, cursor)
-    if item != None:
-        this_day += displayItem(item, "")
+    # two primary events - the metadata ordering is reshuffled through the day,
+    # so the leading positions are our semi-random picks
+    for _ in range(2):
+        item, cursor = pickFromOrder(events, events_order, cursor)
+        if item != None:
+            this_day += displayItem(item, "")
 
-    # birth - substitute another event when the language has no birth data
-    if incl_births:
-        birth = pickFirst(births, births_order)
-        if birth != None:
-            this_day += displayItem(birth, prefix_b)
-        else:
-            item, cursor = pickFromOrder(events, events_order, cursor)
-            if item != None:
-                this_day += displayItem(item, "")
+    # births then deaths - substituted events are drawn from the same shared
+    # cursor so nothing repeats across the layout
+    birth_items, cursor = sectionItems(incl_births, births, births_order, prefix_b, per_section, events, events_order, cursor)
+    this_day += birth_items
 
-    # death - substitute another event when the language has no death data
-    if incl_deaths:
-        death = pickFirst(deaths, deaths_order)
-        if death != None:
-            this_day += displayItem(death, prefix_d)
-        else:
-            item, cursor = pickFromOrder(events, events_order, cursor)
-            if item != None:
-                this_day += displayItem(item, "")
+    death_items, cursor = sectionItems(incl_deaths, deaths, deaths_order, prefix_d, per_section, events, events_order, cursor)
+    this_day += death_items
 
     return this_day
+
+def sectionItems(incl, items, order, prefix, per_section, events, events_order, cursor):
+    # Build the display rows for a births/deaths section, returning the rows and
+    # the advanced events cursor.
+    out = []
+
+    # A disabled section shows nothing at 1x (original behavior).  At 2x we keep
+    # the canvas full by substituting the section's worth of extra events.
+    if not incl:
+        if IS2X:
+            out, cursor = addEvents(out, events, events_order, cursor, per_section)
+        return out, cursor
+
+    # Enabled: take up to per_section picks from the section's shuffled order,
+    # back-filling any shortfall (missing or short data) with extra events.
+    sect_cursor = 0
+    for _ in range(per_section):
+        item, sect_cursor = pickFromOrder(items, order, sect_cursor)
+        if item != None:
+            out += displayItem(item, prefix)
+        else:
+            out, cursor = addEvents(out, events, events_order, cursor, 1)
+
+    return out, cursor
+
+def addEvents(out, events, events_order, cursor, count):
+    # Append `count` extra events to `out`, advancing the shared events cursor.
+    for _ in range(count):
+        item, cursor = pickFromOrder(events, events_order, cursor)
+        if item != None:
+            out += displayItem(item, "")
+    return out, cursor
 
 def displayItem(item, prefix):
     return [
         render.Text("{}{}".format(prefix, int(item["year"])), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_SUB_TITLE_FONT),
         render.WrappedText(item["text"], font = ARTICLE_SUB_TITLE_FONT, color = ARTICLE_COLOR),
-        render.Box(width = 64, height = 3, color = SPACER_COLOR),
+        render.Box(width = TITLE_WIDTH, height = SPACER_HEIGHT, color = SPACER_COLOR),
     ]
-
-def pickFirst(items, order):
-    # take the first entry of the (pre-shuffled) ordering; fall back to the raw list, or None when empty
-    # JSON numbers decode as floats in Starlark, so coerce indices to int before indexing
-    if len(order) > 0:
-        idx = int(order[0])
-        if idx >= 0 and idx < len(items):
-            return items[idx]
-    if len(items) > 0:
-        return items[0]
-    return None
 
 def pickFromOrder(items, order, cursor):
     # walk the ordering from cursor, returning the item and the advanced cursor (for event substitution)

@@ -7,10 +7,11 @@ author: jvivona
 fileName: rss_misc_feeds.star
 packageName: rssmiscfeeds
 recommendedInterval: 10
+supports2x: true
 category: utilities
 tags:
   - news
   - utility
   - art
 published: '2023-11-05T13:34:53Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-06-17T20:47:04Z'

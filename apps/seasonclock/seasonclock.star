@@ -10,8 +10,6 @@ load("images/ball.png", BALL_1X = "file")
 load("images/ball@2x.png", BALL_2X = "file")
 load("images/bfly.png", BFLY_1X = "file")
 load("images/bfly@2x.png", BFLY_2X = "file")
-load("images/drop.png", DROP_1X = "file")
-load("images/drop@2x.png", DROP_2X = "file")
 load("images/flower0.png", FLOWER0_1X = "file")
 load("images/flower0@2x.png", FLOWER0_2X = "file")
 load("images/flower1.png", FLOWER1_1X = "file")
@@ -28,6 +26,8 @@ load("images/leaf_org.png", LEAF_ORG_1X = "file")
 load("images/leaf_org@2x.png", LEAF_ORG_2X = "file")
 load("images/leaf_red.png", LEAF_RED_1X = "file")
 load("images/leaf_red@2x.png", LEAF_RED_2X = "file")
+load("images/leafpile.png", LEAFPILE_1X = "file")
+load("images/leafpile@2x.png", LEAFPILE_2X = "file")
 load("images/snow.png", SNOW_1X = "file")
 load("images/snow@2x.png", SNOW_2X = "file")
 
@@ -56,12 +56,12 @@ SPR = {
     "snowman": pick(SNOWMAN_1X, SNOWMAN_2X),
     "snow": pick(SNOW_1X, SNOW_2X),
     "tree": pick(TREE_1X, TREE_2X),
+    "leafpile": pick(LEAFPILE_1X, LEAFPILE_2X),
     "leaf_red": pick(LEAF_RED_1X, LEAF_RED_2X),
     "leaf_org": pick(LEAF_ORG_1X, LEAF_ORG_2X),
     "leaf_gold": pick(LEAF_GOLD_1X, LEAF_GOLD_2X),
     "sun": pick(SUN_1X, SUN_2X),
     "ball": pick(BALL_1X, BALL_2X),
-    "drop": pick(DROP_1X, DROP_2X),
     "flower0": pick(FLOWER0_1X, FLOWER0_2X),
     "flower1": pick(FLOWER1_1X, FLOWER1_2X),
     "flower2": pick(FLOWER2_1X, FLOWER2_2X),
@@ -107,6 +107,14 @@ SEASON = {
     k: {"label": v["label"], "sky": dim_hex(v["sky"]), "ground": dim_hex(v["ground"])}
     for k, v in _RAW_SEASON.items()
 }
+
+# Summer beach palette. Kept brighter than the dimmed seasons so the sand/sea
+# actually read as a beach; the sun, ball, and text still pop on top.
+SUMMER_SKY = "#2d5a82"
+SUMMER_SEA = "#1f6f9c"
+SUMMER_SEAFOAM = "#5fb0d8"
+SUMMER_SAND = "#9c7f3e"
+SUMMER_FOAM = "#cdeeff"
 
 # Astronomical event -> season, by hemisphere.
 EVENT_SEASON = {
@@ -199,7 +207,7 @@ DEFAULT_LOCATION = """
 NUM_FONT_BIG = "terminus-32" if IS2X else "10x20"
 NUM_FONT_SM = "terminus-22" if IS2X else "6x13"
 LBL_FONT = "6x13" if IS2X else "tom-thumb"
-NUM_ADVANCE = 16 if IS2X else 10  # px per digit, for placing the ordinal suffix
+NUM_ADVANCE = 8 if IS2X else 10  # logical px per digit (x SCALE -> physical), for placing the ordinal suffix
 
 COLOR_TEXT = "#ffffff"
 COLOR_SHADOW = "#00000099"
@@ -286,30 +294,44 @@ def autumn_scene(f):
     w = [box(0, 0, LW, LH, SEASON["autumn"]["sky"])]
     w.append(box(0, GROUND_Y, LW, LH - GROUND_Y, SEASON["autumn"]["ground"]))
     w.append(place(SPR["tree"], 39, 31 - 24))
+    w.append(place(SPR["leafpile"], 41, GROUND_Y))  # raked pile at the trunk base
     w.extend(draw_falling(AUTUMN_LEAVES, f))
     return w
 
 def summer_scene(f):
-    w = [box(0, 0, LW, LH, SEASON["summer"]["sky"])]
+    ph = 2 * math.pi * f / FRAME_COUNT
+    w = [box(0, 0, LW, LH, SUMMER_SKY)]
 
-    # pool water
-    w.append(box(0, GROUND_Y - 1, LW, LH - GROUND_Y + 1, SEASON["summer"]["ground"]))
+    # sea below the horizon; the sand overdraws its lower part at the waterline
+    sea_top = 13
+    w.append(box(0, sea_top, LW, LH - sea_top, SUMMER_SEA))
 
-    # sun bobbing
-    sun_y = 1 + int(math.sin(2 * math.pi * f / FRAME_COUNT) * 1.5 + 1.5)
+    # lighter swells drifting down the sea for a touch of motion
+    w.append(box(0, sea_top + 2 + int((math.sin(ph) + 1) * 1.5), LW, 1, SUMMER_SEAFOAM))
+    w.append(box(0, sea_top + 6 + int((math.sin(ph + 2.1) + 1) * 1.5), LW, 1, SUMMER_SEAFOAM))
+
+    # the waterline washes in and out over the sand. Sample the foam edge per
+    # 1px column from two offset sine waves so the shoreline curves in rounded
+    # humps (a base sand box covers the always-wet rows; only the crest band and
+    # the foam cap are drawn per column). It also drifts in/out over time.
+    base = 22 + math.sin(ph) * 1.5
+    edges = [int(base + math.sin(i * 0.28 + ph) * 2.0 + math.sin(i * 0.08 + ph) * 1.0 + 0.5) for i in range(LW)]
+    mx = max(edges)
+    w.append(box(0, mx, LW, LH - mx, SUMMER_SAND))
+    for i in range(LW):
+        ey = edges[i]
+        if ey < mx:
+            w.append(box(i, ey, 1, mx - ey, SUMMER_SAND))
+        w.append(box(i, ey - 1, 1, 1, SUMMER_FOAM))
+
+    # sun bobbing (kept as-is)
+    sun_y = 1 + int(math.sin(ph) * 1.5 + 1.5)
     w.append(place(SPR["sun"], 46, sun_y))
 
-    # beach ball bobbing on water (kept clear of the text column on the left)
-    ball_y = GROUND_Y - 9 + int(math.sin(2 * math.pi * f / FRAME_COUNT + 1) * 1.0 + 1)
-    w.append(place(SPR["ball"], 50, ball_y))
-
-    # splash droplets arcing out of the pool
-    for d in SUMMER_DROPS:
-        t = ((f / FRAME_COUNT) + d["phase"]) % 1.0
-        jump = d["jump"] * 4 * t * (1 - t)
-        x = d["x"] + d["dir"] * d["spread"] * t
-        y = (GROUND_Y - 1) - jump
-        w.append(place(SPR["drop"], int(x), int(y)))
+    # beach ball rolling back and forth along the beach (clear of the left text)
+    ball_x = 32 + int((math.sin(ph + 1.5) * 0.5 + 0.5) * 20)
+    ball_y = 21 + int((math.sin(ph * 2) + 1) * 0.5)
+    w.append(place(SPR["ball"], ball_x, ball_y))
     return w
 
 def spring_scene(f):
@@ -440,17 +462,7 @@ def main(config):
 # Particle systems (seeded once per render for variety, stable within the render).
 random.seed(int(time.now().unix // 21600))
 WINTER_SNOW = make_falling([SPR["snow"]], 26, [1, 2], 2.0)
-AUTUMN_LEAVES = make_falling(LEAF_SPRITES, 16, [1, 2], 3.0)
-SUMMER_DROPS = [
-    {
-        "x": random.number(6, LW - 8),
-        "dir": 1 if random.number(0, 1) == 0 else -1,
-        "spread": random.number(3, 9),
-        "jump": random.number(8, 18),
-        "phase": random.number(0, 100) / 100.0,
-    }
-    for _ in range(12)
-]
+AUTUMN_LEAVES = make_falling(LEAF_SPRITES, 22, [1, 2], 3.0)
 SPRING_FLOWERS = [{"x": 2 + i * 12, "phase": random.number(0, 100) / 100.0} for i in range(5)]
 SPRING_BFLY = [
     {
