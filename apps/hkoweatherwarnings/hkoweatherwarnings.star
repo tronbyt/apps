@@ -89,8 +89,9 @@ GREEN = "#0c0"
 BLACK_RAIN_DIM = "#555"
 BLACK_RAIN_TEXT = "#000"
 
-def main():
+def main(config):
     scale = 2 if canvas.is2x() else 1
+    skip_when_clear = config.bool("skip_when_clear", False)
 
     resp = http.get(WARNSUM_URL, ttl_seconds = 120)
 
@@ -123,9 +124,11 @@ def main():
     #     "WTMW": {"name": "Tsunami Warning", "code": "WTMW", "actionCode": "ISSUE", "issueTime": "2026-06-16T08:00:00+08:00", "updateTime": "2026-06-16T08:00:00+08:00"},
     #     "WTS": {"name": "Thunderstorm Warning", "code": "WTS", "actionCode": "ISSUE", "issueTime": "2026-06-16T08:00:00+08:00", "updateTime": "2026-06-16T08:00:00+08:00"},
     # }
-    warnings = [w for w in data.values() if w.get("actionCode") != "CANCEL"]
+    warnings = [w for w in data.values() if w.get("actionCode") != "CANCEL" and config.bool(w.get("code", "").lower(), True)]
 
     if not warnings:
+        if skip_when_clear:
+            return []
         return render.Root(child = no_warnings_frame(scale))
 
     frames = [warning_frame(w, scale) for w in warnings]
@@ -139,7 +142,162 @@ def main():
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Toggle(
+                id = "skip_when_clear",
+                name = "Skip when no warnings",
+                desc = "Hide this app from the rotation when no warnings are active.",
+                icon = "circleXmark",
+                default = False,
+            ),
+            schema.Toggle(
+                id = "tc1",
+                name = "TC1 - Standby Signal",
+                desc = "Show Tropical Cyclone Signal No. 1.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc3",
+                name = "TC3 - Strong Wind Signal",
+                desc = "Show Tropical Cyclone Signal No. 3.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc8ne",
+                name = "TC8NE - Gale Signal (NE)",
+                desc = "Show Tropical Cyclone Signal No. 8 Northeast.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc8se",
+                name = "TC8SE - Gale Signal (SE)",
+                desc = "Show Tropical Cyclone Signal No. 8 Southeast.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc8sw",
+                name = "TC8SW - Gale Signal (SW)",
+                desc = "Show Tropical Cyclone Signal No. 8 Southwest.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc8nw",
+                name = "TC8NW - Gale Signal (NW)",
+                desc = "Show Tropical Cyclone Signal No. 8 Northwest.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc9",
+                name = "TC9 - Increasing Gales",
+                desc = "Show Tropical Cyclone Signal No. 9.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "tc10",
+                name = "TC10 - Hurricane Force",
+                desc = "Show Tropical Cyclone Signal No. 10.",
+                icon = "wind",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wraina",
+                name = "Amber Rainstorm Warning",
+                desc = "Show the Amber Rainstorm Warning Signal.",
+                icon = "cloudRain",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wrainr",
+                name = "Red Rainstorm Warning",
+                desc = "Show the Red Rainstorm Warning Signal.",
+                icon = "cloudRain",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wrainb",
+                name = "Black Rainstorm Warning",
+                desc = "Show the Black Rainstorm Warning Signal.",
+                icon = "cloudRain",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wfirey",
+                name = "Fire Danger Warning (Yellow)",
+                desc = "Show the Yellow Fire Danger Warning.",
+                icon = "fire",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wfirer",
+                name = "Fire Danger Warning (Red)",
+                desc = "Show the Red Fire Danger Warning.",
+                icon = "fire",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "whot",
+                name = "Hot Weather Warning",
+                desc = "Show the Very Hot Weather Warning.",
+                icon = "temperatureHigh",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wcold",
+                name = "Cold Weather Warning",
+                desc = "Show the Cold Weather Warning.",
+                icon = "temperatureLow",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wfrost",
+                name = "Frost Warning",
+                desc = "Show the Frost Warning.",
+                icon = "snowflake",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wmsgnl",
+                name = "Strong Monsoon Signal",
+                desc = "Show the Strong Monsoon Signal.",
+                icon = "tornado",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wfntsa",
+                name = "Flooding Warning (NT)",
+                desc = "Show the Flooding in the Northern New Territories warning.",
+                icon = "houseFloodWater",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wl",
+                name = "Landslip Warning",
+                desc = "Show the Landslip Warning.",
+                icon = "mountain",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wts",
+                name = "Thunderstorm Warning",
+                desc = "Show the Thunderstorm Warning.",
+                icon = "bolt",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "wtmw",
+                name = "Tsunami Warning",
+                desc = "Show the Tsunami Warning.",
+                icon = "water",
+                default = True,
+            ),
+        ],
     )
 
 def warning_frame(warning, scale):
