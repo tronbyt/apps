@@ -48,6 +48,7 @@ load("images/wind_nnw.png", WIND_NNW_ASSET = "file")
 load("images/wind_no.png", WIND_NO_ASSET = "file")
 load("images/wind_nw.png", WIND_NW_ASSET = "file")
 load("images/wind_o.png", WIND_O_ASSET = "file")
+load("images/wind_unknown.png", WIND_DEFAULT_ASSET = "file")
 load("images/wind_w.png", WIND_W_ASSET = "file")
 load("images/wind_z.png", WIND_Z_ASSET = "file")
 load("images/wind_zo.png", WIND_ZO_ASSET = "file")
@@ -219,7 +220,7 @@ def render_today(location):
                                                 color = "#00ffc0",
                                             ),
                                             render.Image(
-                                                src = get_wind_icon(today["winddirection"]),
+                                                src = get_wind_icon(today["winddirection"]).readall(),
                                                 width = 11,
                                                 height = 11,
                                             ),
@@ -437,7 +438,7 @@ def render_weather_column(data):
                 main_align = "center",
                 children = [
                     render.Image(
-                        src = get_icon(data["iconcode"].readall()),
+                        src = get_icon(data["iconcode"]).readall(),
                         width = 19,
                         height = 19,
                     ),
@@ -565,94 +566,95 @@ def get_schema():
     )
 
 def get_icon(icon_code):
-    if icon_code == "ww":
+    ic = icon_code.lower()
+    if ic == "ww":
         return WEATHER_WW_ASSET
-    if icon_code == "vv":
+    if ic == "vv":
         return WEATHER_VV_ASSET
-    if icon_code == "uu":
+    if ic == "uu":
         return WEATHER_UU_ASSET
-    if icon_code == "tt":
+    if ic == "tt":
         return WEATHER_TT_ASSET
-    if icon_code == "ss":
+    if ic == "ss":
         return WEATHER_SS_ASSET
-    if icon_code == "qq":
+    if ic == "qq":
         return WEATHER_LL_ASSET
-    if icon_code == "rr":
+    if ic == "rr":
         return WEATHER_RR_ASSET
-    if icon_code == "pp":
+    if ic == "pp":
         return WEATHER_LL_ASSET
-    if icon_code == "nn":
+    if ic == "nn":
         return WEATHER_NN_ASSET
-    if icon_code == "oo":
+    if ic == "oo":
         return WEATHER_BB_ASSET
-    if icon_code == "mm":
+    if ic == "mm":
         return WEATHER_M_ASSET
-    if icon_code == "ll":
+    if ic == "ll":
         return WEATHER_LL_ASSET
-    if icon_code == "kk":
+    if ic == "kk":
         return WEATHER_FF_ASSET
-    if icon_code == "jj":
+    if ic == "jj":
         return WEATHER_JJ_ASSET
-    if icon_code == "ii":
+    if ic == "ii":
         return WEATHER_II_ASSET
-    if icon_code == "hh":
+    if ic == "hh":
         return WEATHER_HH_ASSET
-    if icon_code == "gg":
+    if ic == "gg":
         return WEATHER_GG_ASSET
-    if icon_code == "ff":
+    if ic == "ff":
         return WEATHER_FF_ASSET
-    if icon_code == "dd":
+    if ic == "dd":
         return WEATHER_DD_ASSET
-    if icon_code == "cc":
+    if ic == "cc":
         return WEATHER_CC_ASSET
-    if icon_code == "bb":
+    if ic == "bb":
         return WEATHER_BB_ASSET
-    if icon_code == "aa":
+    if ic == "aa":
         return WEATHER_AA_ASSET
 
-    if icon_code == "w":
+    if ic == "w":
         return WEATHER_W_ASSET
-    if icon_code == "v":
+    if ic == "v":
         return WEATHER_V_ASSET
-    if icon_code == "u":
+    if ic == "u":
         return WEATHER_U_ASSET
-    if icon_code == "t":
+    if ic == "t":
         return WEATHER_T_ASSET
-    if icon_code == "s":
+    if ic == "s":
         return WEATHER_S_ASSET
-    if icon_code == "r":
+    if ic == "r":
         return WEATHER_R_ASSET
-    if icon_code == "q":
+    if ic == "q":
         return WEATHER_Q_ASSET
-    if icon_code == "p":
+    if ic == "p":
         return WEATHER_LL_ASSET
-    if icon_code == "o":
+    if ic == "o":
         return WEATHER_O_ASSET
-    if icon_code == "n":
+    if ic == "n":
         return WEATHER_N_ASSET
-    if icon_code == "m":
+    if ic == "m":
         return WEATHER_M_ASSET
-    if icon_code == "l":
+    if ic == "l":
         return WEATHER_LL_ASSET
-    if icon_code == "k":
+    if ic == "k":
         return WEATHER_F_ASSET
-    if icon_code == "j":
+    if ic == "j":
         return WEATHER_J_ASSET
-    if icon_code == "i":
+    if ic == "i":
         return WEATHER_II_ASSET
-    if icon_code == "h":
+    if ic == "h":
         return WEATHER_H_ASSET
-    if icon_code == "g":
+    if ic == "g":
         return WEATHER_G_ASSET
-    if icon_code == "f":
+    if ic == "f":
         return WEATHER_F_ASSET
-    if icon_code == "d":
+    if ic == "d":
         return WEATHER_DD_ASSET
-    if icon_code == "c":
+    if ic == "c":
         return WEATHER_CC_ASSET
-    if icon_code == "b":
+    if ic == "b":
         return WEATHER_BB_ASSET
-    if icon_code == "a":
+    if ic == "a":
         return WEATHER_A_ASSET
 
     return WEATHER_A_ASSET
@@ -684,4 +686,4 @@ def get_wind_icon(direction):
     if d == "NNW":
         return WIND_NNW_ASSET.readall()
 
-    return WIND_NNW_ASSET.readall()
+    return WIND_DEFAULT_ASSET.readall()
