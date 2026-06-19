@@ -662,28 +662,28 @@ def get_icon(icon_code):
 def get_wind_icon(direction):
     d = direction.upper()
     if d == "N":
-        return WIND_N_ASSET.readall()
+        return WIND_N_ASSET
     if d == "NO":
-        return WIND_NO_ASSET.readall()
+        return WIND_NO_ASSET
     if d == "NNO":
-        return WIND_NNO_ASSET.readall()
+        return WIND_NNO_ASSET
     if d == "O":
-        return WIND_O_ASSET.readall()
+        return WIND_O_ASSET
     if d == "Z":
-        return WIND_Z_ASSET.readall()
+        return WIND_Z_ASSET
     if d == "ZO":
-        return WIND_ZO_ASSET.readall()
+        return WIND_ZO_ASSET
     if d == "ZZO":
-        return WIND_ZZO_ASSET.readall()
+        return WIND_ZZO_ASSET
     if d == "W":
-        return WIND_W_ASSET.readall()
+        return WIND_W_ASSET
     if d == "ZW":
-        return WIND_ZW_ASSET.readall()
+        return WIND_ZW_ASSET
     if d == "ZZW":
-        return WIND_ZZW_ASSET.readall()
+        return WIND_ZZW_ASSET
     if d == "NW":
-        return WIND_NW_ASSET.readall()
+        return WIND_NW_ASSET
     if d == "NNW":
-        return WIND_NNW_ASSET.readall()
+        return WIND_NNW_ASSET
 
-    return WIND_DEFAULT_ASSET.readall()
+    return WIND_DEFAULT_ASSET
