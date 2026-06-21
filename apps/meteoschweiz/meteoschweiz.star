@@ -576,8 +576,10 @@ def get_latest_forecast_date():
     if not items:
         return None
 
-    # Look through items for the first one with a tre200pn asset,
-    # then extract the correct YYYYMMDDHHMM timestamp from its key
+    # Scan all items to find the newest forecast timestamp, since STAC items
+    # may span multiple dates and are not guaranteed to be sorted by forecast
+    # age. Collect timestamps from every tre200pn asset across all items.
+    latest_ts = ""
     for item in items:
         assets = item.get("assets", {})
         for key in assets:
@@ -587,8 +589,12 @@ def get_latest_forecast_date():
                 if len(parts) >= 3:
                     timestamp = parts[2]
                     if len(timestamp) == 12 and timestamp.isdigit():
-                        cache.set(cache_key, timestamp, ttl_seconds = 3600)
-                        return timestamp
+                        if timestamp > latest_ts:
+                            latest_ts = timestamp
+
+    if latest_ts:
+        cache.set(cache_key, latest_ts, ttl_seconds = 3600)
+        return latest_ts
 
     return None
 
@@ -828,9 +834,14 @@ def process_forecast(weather_data):
     symbols = weather_data.get("symbols", {})
     timestamps = weather_data.get("timestamps", [])
 
-    # Process up to 3 days using timestamps
-    for i in range(min(3, len(timestamps))):
-        timestamp_key = timestamps[i]
+    # Filter to only include today and future days, then take up to 3.
+    # The CSV forecast files contain data starting from the forecast issue
+    # date, which may be in the past (e.g., Friday's forecast on Sunday).
+    today_str = time.now().in_location("Europe/Zurich").format("20060102")
+    future_timestamps = [ts for ts in timestamps if ts[:8] >= today_str]
+
+    for i in range(min(3, len(future_timestamps))):
+        timestamp_key = future_timestamps[i]
 
         # Get values for this timestamp
         high_val = tre_max.get(timestamp_key, 0)
