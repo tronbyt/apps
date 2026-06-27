@@ -22,12 +22,12 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: main
 
       - name: Checkout app-viewer source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: app-viewer-source
           path: app-viewer-source
