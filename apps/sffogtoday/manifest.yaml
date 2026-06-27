@@ -1,0 +1,17 @@
+---
+id: sf-fog-today
+name: SF Fog Today
+summary: Satellite fog info for SF
+desc: Displays GOES-16 satellite fog image for San Francisco, from fog.today.
+author: Matt Broussard
+fileName: sf_fog_today.star
+packageName: sffogtoday
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - tech
+  - sf
+  - utility
+published: '2023-07-12T14:55:05Z'
+updated: '2025-11-30T19:58:27Z'

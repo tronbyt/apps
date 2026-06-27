@@ -1,0 +1,17 @@
+---
+id: oscars-custard
+name: Oscar's Custard
+summary: Today's Oscar's flavors
+desc: Get today's flavors at Oscar's Frozen Custard.
+author: Josiah Winslow
+fileName: oscars_custard.star
+packageName: oscarscustard
+recommendedInterval: 5
+category: food
+tags:
+  - lifestyle
+  - dessert
+  - flavor
+  - local
+published: '2025-05-27T09:47:24Z'
+updated: '2025-12-23T13:24:18Z'

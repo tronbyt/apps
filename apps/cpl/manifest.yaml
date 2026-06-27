@@ -1,0 +1,19 @@
+---
+id: cpl
+name: CPL
+summary: Caribbean Premier League
+desc: Shows scores for the Caribbean Premier League cricket tournament..
+author: M0ntyP
+fileName: cpl.star
+packageName: cpl
+recommendedInterval: 5
+broken: true
+brokenReason: The ESPNCricinfo API endpoint is blocking requests (403 Forbidden).
+category: sports
+tags:
+  - local
+  - tournament
+  - cpbl
+  - baseball
+published: '2023-07-27T14:15:37Z'
+updated: '2025-12-05T22:28:51Z'

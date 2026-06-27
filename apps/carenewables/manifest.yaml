@@ -1,0 +1,17 @@
+---
+id: ca-renewables
+name: CA Renewables
+summary: Track CA's power grid
+desc: See how California is using renewable energy in its power grid right now.
+author: sloanesturz
+fileName: ca_renewables.star
+packageName: carenewables
+recommendedInterval: 5
+broken: true
+brokenReason: API endpoint is no longer available
+category: utilities
+tags:
+  - utility
+  - real-time
+published: '2022-09-15T21:20:34Z'
+updated: '2025-12-05T22:28:51Z'

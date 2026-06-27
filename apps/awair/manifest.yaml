@@ -1,0 +1,15 @@
+---
+id: awair
+name: Awair
+summary: Awair air quality data
+desc: Display air quality data for an Awair device.
+author: tabrindle, flavorjones
+fileName: awair.star
+packageName: awair
+recommendedInterval: 5
+category: smart-home
+tags:
+  - weather
+  - smart-home
+published: '2023-09-05T17:43:35Z'
+updated: '2025-12-02T19:30:22Z'

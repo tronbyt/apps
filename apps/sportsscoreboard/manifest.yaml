@@ -1,0 +1,13 @@
+---
+id: sports-scoreboard
+name: Sports Scoreboard
+summary: MLB/NFL/NHL/NBA scores
+desc: Only the MLB, NFL, NHL, and NBA scores that you care about.
+author: ghensley
+fileName: sports_scoreboard.star
+packageName: sportsscoreboard
+recommendedInterval: 5
+category: sports
+tags: []
+published: '2023-09-05T17:56:17Z'
+updated: '2025-11-30T19:58:27Z'

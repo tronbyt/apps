@@ -1,0 +1,15 @@
+---
+id: tessie
+name: Tessie
+summary: Tessie API
+desc: Shows Tesla information from the Tessie API.
+author: inderpal
+fileName: tessie.star
+packageName: tessie
+recommendedInterval: 5
+category: technology
+tags:
+  - tech
+  - smart-home
+published: '2023-07-27T18:31:42Z'
+updated: '2025-11-29T23:55:39Z'

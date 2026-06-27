@@ -1,0 +1,18 @@
+---
+id: dvd-logo
+name: DVD Logo
+summary: Bouncing DVD Logo
+desc: A screensaver from before the streaming era. Will it hit the corner this time?
+author: Mack Ward
+fileName: dvd_logo.star
+packageName: dvdlogo
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - retro
+  - clock
+  - utility
+  - wide 2x support
+published: '2022-01-17T18:26:24Z'
+updated: '2025-12-05T22:28:51Z'

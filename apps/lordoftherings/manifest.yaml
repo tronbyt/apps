@@ -1,0 +1,16 @@
+---
+id: lordoftherings
+name: LordOfTheRings
+summary: Displays LOTR quotes
+desc: Displays random quotes from LOTR trilogy.
+author: Jake Manske
+fileName: lordoftherings.star
+packageName: lordoftherings
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+  - media
+  - education
+published: '2023-01-03T15:07:05Z'
+updated: '2025-11-30T20:08:55Z'

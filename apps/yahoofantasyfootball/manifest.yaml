@@ -1,0 +1,15 @@
+---
+id: yahoofantasynfl
+name: YahooFantasyNFL
+summary: Fantasy Standings & Scores
+desc: Display standings or scores for a Yahoo Fantasy Football league (NFL). The League ID can be found under your League Settings.
+author: jweier
+fileName: yahoofantasynfl.star
+packageName: yahoofantasynfl
+recommendedInterval: 5
+category: sports
+tags:
+  - nfl
+  - football
+published: '2023-04-20T20:42:24Z'
+updated: '2025-12-05T22:28:51Z'

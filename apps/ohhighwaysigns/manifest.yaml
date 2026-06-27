@@ -1,0 +1,17 @@
+---
+id: oh-highway-signs
+name: OH Highway Signs
+summary: Displays OH highway signs
+desc: Displays messages from overhead signs on Ohio highways.
+author: noahcolvin
+fileName: oh_highway_signs.star
+packageName: ohhighwaysigns
+recommendedInterval: 5
+broken: true
+brokenReason: 'publicapi.ohgo.com: no such host'
+category: transit
+tags:
+  - local
+  - utility
+published: '2022-03-02T04:00:59Z'
+updated: '2025-12-05T22:28:51Z'

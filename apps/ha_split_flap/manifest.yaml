@@ -1,0 +1,15 @@
+---
+id: ha-split-flap
+name: HA Split Flap
+summary: Home Assistant Split Flap
+desc: Display a Home Assistant entity value on a split flap display.
+author: brombomb
+fileName: ha_split_flap.star
+packageName: ha_split_flap
+recommendedInterval: 60
+supports2x: true
+category: smart-home
+tags:
+  - retro
+published: '2026-05-19T04:03:00Z'
+updated: '2026-05-19T04:03:00Z'

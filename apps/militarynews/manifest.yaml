@@ -1,0 +1,15 @@
+---
+id: military-news
+name: Military News
+summary: Display Military News
+desc: Displays Military News from Military.com.
+author: Robert Ison
+recommendedInterval: 10
+fileName: military_news.star
+packageName: militarynews
+category: news
+tags:
+  - tech
+  - news
+published: '2024-08-20T15:31:26Z'
+updated: '2025-12-17T23:02:59Z'

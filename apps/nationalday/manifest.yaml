@@ -1,0 +1,16 @@
+---
+id: nationalday
+name: National Day/Week/Month
+summary: Day, Week & Month Calendar
+desc: Show national day, week, or month celebrations.
+author: jvivona
+fileName: nationalday.star
+packageName: nationalday
+recommendedInterval: 30
+supports2x: true
+category: lifestyle
+tags:
+  - lifestyle
+  - holiday
+published: '2024-12-07T18:59:35Z'
+updated: '2026-06-17T20:47:04Z'

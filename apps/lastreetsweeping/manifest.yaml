@@ -1,0 +1,11 @@
+---
+id: la-street-sweeping
+name: LA Street Sweep
+summary: Next street sweep countdown
+desc: Counts down to your next Los Angeles street sweeping day with a cute side-view sweeper that closes in as the deadline nears. Set your weekday, week-pattern (1st & 3rd / 2nd & 4th / every week / non-posted) and time per side of the street. Find your days at streets.lacity.gov/services/street-sweeping. Data comes from the City of LA's public sweep-day calendars (holidays already excluded).
+author: Ryan Taylor (@ryantaylor16)
+fileName: lastreetsweeping.star
+packageName: lastreetsweeping
+published: '2026-06-09T05:12:39Z'
+updated: '2026-06-09T05:12:39Z'
+tags: []

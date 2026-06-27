@@ -1,0 +1,14 @@
+---
+id: seinfeld-quotes
+name: Seinfeld Quotes
+summary: Displays Seinfeld Quotes
+desc: Displays a random quote from the hit sitcom Seinfeld.
+author: ndlybarger
+fileName: seinfeldquotes.star
+packageName: seinfeldquotes
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+published: '2024-02-02T18:10:45Z'
+updated: '2025-12-28T23:11:23Z'

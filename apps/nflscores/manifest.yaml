@@ -1,0 +1,16 @@
+---
+id: nfl-scores
+name: NFL Scores
+summary: NFL football scores
+desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
+author: LunchBox8484
+fileName: nfl_scores.star
+packageName: nflscores
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time
+  - nfl
+  - football
+published: '2022-04-27T14:37:57Z'
+updated: '2025-11-29T17:52:33Z'

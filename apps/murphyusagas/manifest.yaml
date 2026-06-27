@@ -1,0 +1,18 @@
+---
+id: murphy-usa-gas
+name: Murphy USA Gas
+summary: Murphy USA Gas Prices
+desc: Display prices from selected Murphy USA station.
+author: jvivona
+fileName: murphy_usa_gas.star
+packageName: murphyusagas
+recommendedInterval: 5
+broken: true
+brokenReason: API blocked by Incapsula WAF
+category: utilities
+tags:
+  - gas-prices
+  - utility
+  - real-time
+published: '2023-02-08T18:12:33Z'
+updated: '2025-12-05T22:28:51Z'

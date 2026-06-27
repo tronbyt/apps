@@ -1,0 +1,11 @@
+---
+id: hebrew-calendar
+name: Hebrew Calendar
+summary: Shabbat times & parshah
+desc: Shows today's Hebrew date, the weekly Torah portion, and candle lighting and Havdalah times for the upcoming Shabbat (Jewish Sabbath) or Jewish holiday, for any location worldwide. Powered by the Hebcal REST API.
+author: betzmosk
+fileName: hebrewcalendar.star
+packageName: hebrewcalendar
+recommendedInterval: 60
+category: lifestyle
+---
