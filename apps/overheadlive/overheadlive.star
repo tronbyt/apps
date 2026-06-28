@@ -224,7 +224,7 @@ def _frame_message(title, sub, scale):
 def main(config):
     scale = 2 if canvas.is2x() else 1
 
-    loc = json.decode(config.get("location", DEFAULT_LOCATION))
+    loc = json.decode(config.get("location") or DEFAULT_LOCATION)
     if type(loc) != "dict":
         loc = {}
     lat = _to_float(loc.get("lat"), DEFAULT_LAT)
