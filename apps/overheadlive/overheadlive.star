@@ -233,8 +233,8 @@ def main(config):
     radius = _to_float(config.get("radius") or DEFAULT_RADIUS, 10.0)
     radius = int(math.round(max(1.0, min(250.0, radius))))
 
-    alt_unit = config.get("alt_units", "ft")
-    speed_unit = config.get("speed_units", "kt")
+    alt_unit = config.get("alt_units") or "ft"
+    speed_unit = config.get("speed_units") or "kt"
     only_airborne = config.bool("only_airborne", False)
     highlight_emergency = config.bool("highlight_emergency", True)
     skip_if_empty = config.bool("skip_if_empty", False)
