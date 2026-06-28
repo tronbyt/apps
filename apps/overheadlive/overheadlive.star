@@ -230,7 +230,7 @@ def main(config):
     lat = _to_float(loc.get("lat"), DEFAULT_LAT)
     lon = _to_float(loc.get("lng"), DEFAULT_LON)
 
-    radius = _to_float(config.get("radius", DEFAULT_RADIUS), 10.0)
+    radius = _to_float(config.get("radius") or DEFAULT_RADIUS, 10.0)
     radius = int(math.round(max(1.0, min(250.0, radius))))
 
     alt_unit = config.get("alt_units", "ft")
