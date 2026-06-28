@@ -171,7 +171,7 @@ def _select(aclist, lat, lon, only_airborne, highlight_emergency):
 
 def _line(text, font, color, scale):
     # Centered when it fits the display width, scrolls horizontally when it overflows.
-    return render.Marquee(width = 64 * scale, align = "center", child = render.Text(text, font = font, color = color))
+    return render.Marquee(width = 64 * scale, child = render.Text(text, font = font, color = color))
 
 def _render_aircraft(target, alt_unit, speed_unit, highlight_emergency, scale):
     dist, brg, ac = target
