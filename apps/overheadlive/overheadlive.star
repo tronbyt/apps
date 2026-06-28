@@ -54,7 +54,7 @@ def _isnum_str(s):
     if type(s) != "string" or not s:
         return False
     has_digit = False
-    for c in s.codepoints():
+    for c in s.elems():
         if c >= "0" and c <= "9":
             has_digit = True
         elif c != "." and c != "-":
