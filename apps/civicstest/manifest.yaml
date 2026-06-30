@@ -1,8 +1,11 @@
+---
 id: civics-test
 name: Civics Test
 summary: Daily civics test question
-desc: Displays a random question and answer from the 128 USCIS civics test questions.
-  Great for studying for the U.S. citizenship test.
+desc: Displays a random question and answer from the 128 USCIS civics test questions. Great for studying for the U.S. citizenship test.
 author: hachibu
 fileName: civicstest.star
 packageName: civicstest
+published: '2026-06-30T19:20:56Z'
+updated: '2026-06-30T19:26:08Z'
+tags: []
