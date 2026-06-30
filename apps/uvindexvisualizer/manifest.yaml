@@ -1,8 +1,9 @@
----
 id: uv-index-visualizer
 name: UV Visualizer
 summary: UV Index visuals
 desc: Selectable UV index visualizations - Driven by currentuvindex.com.
 author: Dylan Stout
-fileName: uv_index_visualizer.star
+fileName: uvindexvisualizer.star
 packageName: uvindexvisualizer
+
+supports2x: true

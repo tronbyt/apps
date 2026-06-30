@@ -1,10 +1,8 @@
----
 id: flightsnearby-adsb
-name: Flights Nearby
+name: Flights Nearby (ADS-B)
 summary: Displays flights nearby
-desc: Displays flights nearby using adsb.lol API. A fork of the original Flights
-  Nearby (flightsnearby) app, but with adsb.lol as a datasource, since it's
-  free.
+desc: Displays flights nearby using adsb.lol API. A fork of the original Flights Nearby
+  (flightsnearby) app, but with adsb.lol as a datasource, since it's free.
 author: vtsao
 fileName: flightsnearby_adsb.star
-packageName: flightsnearbyadsb
+packageName: flightsnearby_adsb
