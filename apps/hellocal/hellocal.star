@@ -117,7 +117,7 @@ def main(config):
     if not ical_url:
         return render_no_url()
 
-    alert_enabled = config.get("alert_enabled") != "false"
+    alert_enabled = config.bool("alert_enabled", True)
     alert_window_mins = int(config.get("alert_window") or "5")
 
     events = fetch_events(tz, ical_url, now)

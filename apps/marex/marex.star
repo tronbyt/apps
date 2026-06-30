@@ -23,6 +23,8 @@ def main(config):
     now = time.now().in_location(timezone)
 
     tide_data = get_tide_data(harbor_id, now)
+    if not tide_data:
+        return []
     harbor = tide_data["harbor"]
     day = tide_data["day"]
     tides = day["hours"]
@@ -322,19 +324,19 @@ def get_tide_data(harbor_id, now):
         rep = http.get(url)
 
         if rep.status_code != 200:
-            fail("Tide API request failed with status %d" % rep.status_code)
+            return None
 
         data = rep.json()
         cache.set(cache_key, json.encode(data), ttl_seconds = CACHE_TTL_SECONDS)
 
     if len(data["data"]) == 0:
-        fail("Tide API returned no data for %s" % cache_key)
+        return None
 
     station = data["data"][0]
     month_data = station["months"][0]
 
     if len(month_data["days"]) == 0:
-        fail("Tide API returned no days for %s" % cache_key)
+        return None
 
     return {
         "harbor": station["harbor_name"],

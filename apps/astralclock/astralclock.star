@@ -28,7 +28,7 @@ def main(config):
     # Config
     location = config.get("location")
     loc = json.decode(location) if location else None
-    timezone = loc["timezone"] if loc else config.get("$tz", "America/New_York")
+    timezone = (loc.get("timezone") if loc else None) or config.get("$tz", time.tz())
 
     is_24_hour = config.bool("is_24_hour", True)
 
