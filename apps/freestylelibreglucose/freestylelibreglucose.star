@@ -148,7 +148,7 @@ def llu_login(email, password, base_url):
     inner = data.get("data", {})
     ticket = inner.get("authTicket", {})
     token = ticket.get("token", "")
-    user_id = inner.get("user", {}).get("id", "")
+    user_id = (inner.get("user") or {}).get("id", "")
 
     # account-id = SHA-256(user.id) — requerido por la API LibreLinkUp
     account_id = hash.sha256(user_id)
@@ -159,7 +159,7 @@ def llu_login(email, password, base_url):
     return token, account_id, base_url, None
 
 def llu_connections(token, account_id, base_url):
-    rep = http.get(base_url + "/llu/connections", headers = auth_headers(token, account_id))
+    rep = http.get(base_url + "/llu/connections", headers = auth_headers(token, account_id), ttl_seconds = 300)
     if rep.status_code != 200:
         return None, "HTTP " + str(rep.status_code) + " " + rep.body()[:100]
     data = rep.json()
@@ -168,7 +168,7 @@ def llu_connections(token, account_id, base_url):
 
 def llu_graph(token, account_id, patient_id, base_url):
     url = base_url + "/llu/connections/" + patient_id + "/graph"
-    rep = http.get(url, headers = auth_headers(token, account_id))
+    rep = http.get(url, headers = auth_headers(token, account_id), ttl_seconds = 300)
     if rep.status_code != 200:
         return None, "HTTP " + str(rep.status_code)
     return rep.json().get("data", {}), None
@@ -218,7 +218,7 @@ def main(config):
 
     conn = conns[0]
     patient_id = conn.get("patientId", "")
-    glucose_m = conn.get("glucoseMeasurement", {})
+    glucose_m = conn.get("glucoseMeasurement") or {}
     current = int(glucose_m.get("Value", 0))
     trend_id = int(glucose_m.get("TrendArrow", 3))
     arrow = TREND_ARROWS.get(trend_id, "→")
@@ -228,17 +228,22 @@ def main(config):
     ts_str = glucose_m.get("FactoryTimestamp", "") or glucose_m.get("Timestamp", "")
     if ts_str != "":
         t = None
-        formats = [
-            "1/2/2006 3:04:05 PM",  # M/D/YYYY 12h (LibreLinkUp estándar)
-            "1/2/2006 15:04:05",  # M/D/YYYY 24h
-            "2006-01-02T15:04:05Z",  # ISO 8601 UTC
-            "2006-01-02T15:04:05",  # ISO 8601 sin Z
-        ]
-        for fmt in formats:
+        fmt = None
+        if "/" in ts_str:
+            if "AM" in ts_str or "PM" in ts_str:
+                fmt = "1/2/2006 3:04:05 PM"
+            else:
+                fmt = "1/2/2006 15:04:05"
+        elif "T" in ts_str:
+            if ts_str.endswith("Z"):
+                fmt = "2006-01-02T15:04:05Z"
+            else:
+                fmt = "2006-01-02T15:04:05"
+
+        if fmt:
             parsed = time.parse_time(ts_str, format = fmt, location = "UTC")
             if parsed != None and str(parsed) != "0001-01-01 00:00:00 +0000 UTC":
                 t = parsed
-                break
         if t != None:
             diff = time.now() - t
             n_dots = int(diff.seconds) // 60  # diff.minutes no funciona en Pixlet
