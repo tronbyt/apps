@@ -1,3 +1,4 @@
+---
 id: marex
 name: Marex
 summary: Brazilian tide times
@@ -6,3 +7,6 @@ author: flavioribeiro
 fileName: marex.star
 packageName: marex
 recommendedInterval: 30
+published: '2026-06-30T19:20:58Z'
+updated: '2026-06-30T19:26:08Z'
+tags: []
