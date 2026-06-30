@@ -1,0 +1,11 @@
+---
+id: age-tracker
+name: Age Tracker
+summary: Your life in months
+desc: A memento-mori life calendar. Draws one cell per month from birth to age 82; lived months are colored, the rest are white.
+author: Nate Hood
+fileName: agetracker.star
+packageName: agetracker
+published: '2026-06-30T19:20:53Z'
+updated: '2026-06-30T19:26:08Z'
+tags: []
