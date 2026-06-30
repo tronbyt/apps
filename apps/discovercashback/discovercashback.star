@@ -37,7 +37,8 @@ qgAAAAAAAAAAAAAAAAH///8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAxe12zqdHpWoAAAAASUVORK5CYII=
 """)
 
-def main():
+# buildifier: disable=unused-variable
+def main(config):
     res = http.get(URL, ttl_seconds = TTL_SECONDS)
     if res.status_code != 200:
         return []
