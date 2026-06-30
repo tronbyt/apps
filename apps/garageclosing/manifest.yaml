@@ -1,0 +1,15 @@
+---
+id: garageclosing
+name: Garage Closing
+summary: Notification garage closing
+desc: Displays a notification that a garage door is closing.
+author: savdagod
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - smart-home
+  - notification
+  - wide 2x support
+published: '2025-04-06T20:57:21Z'
+updated: '2025-12-20T12:05:53Z'

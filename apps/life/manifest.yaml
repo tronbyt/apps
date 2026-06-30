@@ -1,0 +1,17 @@
+---
+id: life
+name: Life
+summary: Conways Game of Life
+desc: Runs a famous cellular automaton and animates the state on screen.
+author: dinosaursrarr
+fileName: life.star
+packageName: life
+recommendedInterval: 5
+category: entertainment
+tags:
+  - gaming
+  - game-of-life
+  - space
+  - art
+published: '2022-06-09T16:47:04Z'
+updated: '2025-12-02T19:30:22Z'

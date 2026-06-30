@@ -1,0 +1,15 @@
+---
+id: pulsetracker
+name: Pulse Tracker
+summary: Pulse Price
+desc: Displays Pulsechain token prices and price changes in USD over the last 24 hours.
+author: kmphua
+fileName: pulsetracker.star
+packageName: pulsetracker
+recommendedInterval: 5
+category: finance
+tags:
+  - crypto
+  - finance
+published: '2024-01-23T18:09:35Z'
+updated: '2025-11-30T19:58:27Z'

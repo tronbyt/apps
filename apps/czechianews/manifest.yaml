@@ -1,0 +1,13 @@
+---
+id: czechianews
+name: Czechianews
+summary: Headline news from Czechia
+desc: Dispaly only the news title from Czechia.
+author: solarisle
+recommendedInterval: 10
+category: news
+tags:
+  - news
+  - local
+published: '2024-08-26T15:11:55Z'
+updated: '2025-12-02T19:30:22Z'

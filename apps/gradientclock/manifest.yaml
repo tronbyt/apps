@@ -1,0 +1,17 @@
+---
+id: gradient-clock
+name: Gradient Clock
+summary: Clock with gradient
+desc: Shows the time and date with a gradient in the background.
+author: Wilf
+fileName: gradientclock.star
+packageName: gradientclock
+recommendedInterval: 0
+supports2x: true
+category: clocks
+tags:
+  - clock
+  - art
+  - wide 2x support
+published: '2023-09-29T14:58:05Z'
+updated: '2025-12-28T11:46:19Z'

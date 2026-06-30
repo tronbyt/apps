@@ -1,0 +1,17 @@
+---
+id: pool-chemistry
+name: Pool Chemistry
+summary: Water Guru pool chemistry via Home Assistant
+desc: 'Displays pH, free chlorine, temperature, alkalinity, CYA, and calcium hardness from a Water Guru Pro pool sensor via Home Assistant. Color-coded: green = good, orange = borderline, red = needs attention. Cycles through an overview and six individual detail slides every 3 seconds.
+
+  '
+author: scottmay
+recommendedInterval: 300
+category: environment
+tags:
+  - pool
+  - chemistry
+  - home assistant
+  - water guru
+published: '2026-06-02T02:27:27Z'
+updated: '2026-06-02T02:27:27Z'

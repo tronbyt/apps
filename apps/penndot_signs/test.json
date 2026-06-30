@@ -1,0 +1,1681 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <link rel="shortcut icon" href="/Content/PA/images/favicon/favicon.ico?v=2026.04.08">
+    <link rel="icon" sizes="16x16 32x32 64x64" href="/Content/PA/images/favicon/favicon.ico?v=2026.04.08">
+    <link rel="icon" type="image/png" sizes="196x196" href="/Content/PA/images/favicon/favicon-192.png?v=2026.04.08">
+    <link rel="icon" type="image/png" sizes="160x160" href="/Content/PA/images/favicon/favicon-160.png?v=2026.04.08">
+    <link rel="icon" type="image/png" sizes="96x96" href="/Content/PA/images/favicon/favicon-96.png?v=2026.04.08">
+    <link rel="icon" type="image/png" sizes="64x64" href="/Content/PA/images/favicon/favicon-64.png?v=2026.04.08">
+    <link rel="icon" type="image/png" sizes="32x32" href="/Content/PA/images/favicon/favicon-32.png?v=2026.04.08">
+    <link rel="icon" type="image/png" sizes="16x16" href="/Content/PA/images/favicon/favicon-16.png?v=2026.04.08">
+    <link rel="apple-touch-icon" href="/Content/PA/images/favicon/favicon-57.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="114x114" href="/Content/PA/images/favicon/favicon-114.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="72x72" href="/Content/PA/images/favicon/favicon-72.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="144x144" href="/Content/PA/images/favicon/favicon-144.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="60x60" href="/Content/PA/images/favicon/favicon-60.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="120x120" href="/Content/PA/images/favicon/favicon-120.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="76x76" href="/Content/PA/images/favicon/favicon-76.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="152x152" href="/Content/PA/images/favicon/favicon-152.png?v=2026.04.08">
+    <link rel="apple-touch-icon" sizes="180x180" href="/Content/PA/images/favicon/favicon-180.png?v=2026.04.08">
+
+    <link rel="preload" as="font" href="/Content/fontawesome/webfonts/fa-regular-400.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/Content/fontawesome/webfonts/fa-brands-400.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/Content/fontawesome/webfonts/fa-solid-900.woff2" type="font/woff2" crossorigin />
+
+<link href='/Content/introjs?v=n-nFf0hL6YIrZxKf0YgF7V8CsnEErO252JiVetjutQY1' type='text/css' rel='stylesheet'/>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="/Content/PA/images/favicon/favicon-144.png?v=2026.04.08">
+    <meta name="msapplication-config" content="/Content/PA/images/favicon/browserconfig.xml">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="canonical" href="http://www.511pa.com/List/GetData/MessageSigns?query={&quot;columns&quot;%3A%5B{&quot;data&quot;%3Anull%2C&quot;name&quot;%3A&quot;&quot;}%2C{&quot;name&quot;%3A&quot;area&quot;%2C&quot;s&quot;%3Atrue}%2C{&quot;name&quot;%3A&quot;name&quot;}%2C{&quot;name&quot;%3A&quot;roadwayName&quot;}%2C{&quot;name&quot;%3A&quot;direction&quot;}%2C{&quot;data&quot;%3A&quot;phase1Image&quot;%2C&quot;name&quot;%3A&quot;message&quot;}%2C{&quot;data&quot;%3A&quot;phase2Image&quot;%2C&quot;name&quot;%3A&quot;message2&quot;}%2C{&quot;name&quot;%3A&quot;lastUpdated&quot;}%2C{&quot;data&quot;%3A8%2C&quot;name&quot;%3A&quot;&quot;}%5D%2C&quot;order&quot;%3A%5B{&quot;column&quot;%3A1%2C&quot;dir&quot;%3A&quot;asc&quot;}%5D%2C&quot;start&quot;%3A0%2C&quot;length&quot;%3A1%2C&quot;search&quot;%3A{&quot;value&quot;%3A&quot;93470&quot;}}&amp;lang=en-US" />
+
+
+
+        <meta property="og:url" content="511pa.com" />
+        <meta property="og:type" content="Website" />
+        <meta property="og:title" content="511PA" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="https://511pa.com/Content/PA/images/favicon/favicon-310.png?v=2026.04.08" />
+
+        <meta name="twitter:card" content="summary">
+
+
+    <title>
+        Pennsylvania Error | 511PA
+    </title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" media="print" onload="this.media='all'" />
+    <link href='/bundles/maincss?v=mxiLqqQ286Yc0MPdYgdZY9iNldkunFptjkY5QWasPnk1' type='text/css' rel='stylesheet'/>
+
+
+
+
+    
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3N4G61LZ3E"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-3N4G61LZ3E');        
+    </script>
+
+<script>
+    // Track event in Google Analytics 4
+    // Custom Parameter needs to be unique when you add to the GA4 (website) > Property settings > Data display > Custom definitions
+    // Dev defined - map_type_changed with event_label; map_layer_enabled with layer_id
+    const gaEventType = {
+        mapTypeChanged: 'map_type_changed',
+        mapLayerEnabled: 'map_layer_enabled'
+    };
+
+    const gaEventConfig = {
+        [gaEventType.mapTypeChanged]: {
+            customPara: 'event_label',
+            eventCategory: 'Map Interaction'
+        },
+        [gaEventType.mapLayerEnabled]: {
+            customPara: 'layer_id',
+            eventCategory: 'Map Legend Layer'
+        }
+    };
+
+    function setGATracking(event, customParameterValue) {
+        const config = gaEventConfig[event];
+        if (!config) {
+            console.warn(`Unknown event: ${event}`);
+            return; // Exit early if event not found
+        }
+
+        if (typeof gtag === 'function') {
+            gtag('event', event, {
+                event_category: config.eventCategory,
+                [config.customPara]: customParameterValue
+            });
+        }
+    }
+</script>
+
+
+
+    
+
+</head>
+<body class="mobileFirst">
+    <div id="page">
+        <div class="modal fade modal-vertical-centered" tabindex="-1" role="dialog" id="imageModal">
+    <div class="modal-dialog img-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h4 id="fullscreen-img-title">Loading...</h4>   
+                <p id="fullscreen-img-extra" style="display:none;"></p>
+                <p id="fullscreen-img-desc"></p>
+                <div class="fullscreen-camera-slider-for">
+                </div>
+                <div class="fullscreen-img-div-single">
+                    <img id="fullScreenImg" class="fullScreenImg" src=""  alt=""/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="close" data-close="true" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+        <div role="banner" class="topBanner">
+            <noscript>
+                <span class="label label-warning">JavaScript is disabled on your browser and this site won&#39;t work properly without JavaScript enabled!</span>
+            </noscript>
+            <a href="#content" class="sr-only sr-only-focusable" title="Content" style="color:#fff;" tabindex="1">Skip to main content</a>
+            <div class="printSiteHeader">511PA</div>
+
+            
+
+<div id="BannerAds" data-atisParent="true">
+        <div id="virtual-138" data-atis="true" class=""><style type="text/css">@media (min-width: 992px){
+		.tabletTop {
+			display: none;
+		}
+		
+		.mobileTop {
+			display: none;
+		}
+		
+		.desktopTop {
+			display: block;
+		}
+		
+	}
+	 @media (max-width: 991px) and (min-width: 730px){
+		.tabletTop {
+			display: block;
+		}
+		
+		.mobileTop {
+			display: none;
+		}
+		
+		.desktopTop {
+			display: none;
+		}
+	}
+	@media (max-width: 729px){
+		.tabletTop {
+			display: none;
+		}
+		
+		.mobileTop {
+			display: block;
+		}
+		
+		.desktopTop {
+			display: none;
+		}
+	}
+</style>
+<div class="row adsContainerTop" style="background-color: #231f20;"><button class="closeAds" title="Close Ads"><i class="far fa-times"></i></button><a aria-label="Be Safe PA" class="desktopTop" href="https://www.pa.gov/agencies/penndot/traveling-in-pa/safety" target="_blank"><img alt="Be Safe PA" class="img1" src="/cms/getfile?id=e9c6e9e3-9655-ef11-abd5-0639cd61a47b" /></a> <a aria-label="Be Safe PA" class="tabletTop" href="https://www.pa.gov/agencies/penndot/traveling-in-pa/safety" target="_blank"><img alt="Be Safe PA" class="img1" src="/cms/getfile?id=eac6e9e3-9655-ef11-abd5-0639cd61a47b" /></a> <a aria-label="Be Safe PA" class="mobileTop" href="https://www.pa.gov/agencies/penndot/traveling-in-pa/safety" target="_blank"><img alt="Be Safe PA" class="img1" src="/cms/getfile?id=ebc6e9e3-9655-ef11-abd5-0639cd61a47b" /></a></div>
+</div>
+</div>
+
+
+
+
+            <nav class="navbar navbar-inverse topBannerFixed" aria-label="menu">
+    <div class="container-fluid">
+        <div class="row navBar">
+            <div class="navbar-header">
+                
+                <!--Used by clients for Google translate dropdown in mobile (NE, PA)-->
+<div id="google_translate_element_mobile"></div>
+                <div class="navbar-toggle collapsed menuLogin">
+                    <ul class="nav navbar-nav">
+    <li class="dropdown menu-login" role="none">
+            <a href="#" class="dropdown-toggle" target="_self" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false" id="userProfileIcon" aria-label="User Account">
+                <i class="far fa-user-circle userIcon" aria-hidden="true"></i>
+            </a>
+            <ul class="dropdown-menu" role="menu">     
+
+                <li role="menuitem"><a href="/my511/register" id="mobileRegisterLink">Sign Up<span class='hideForAccessibility'> for an account.</span></a></li>
+                <li role="none"><a href="#" id="mobileLoginBtn" role="menuitem" data-toggle="modal" data-target="#loginModalDialog">Log In</a></li>
+            </ul>
+    </li>
+</ul>
+                </div>
+
+                <a class="navbar-toggle collapsed" href="#menu">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <a href="/" class="site-logo" aria-label="511PA"></a>
+<span class="headerText">
+    Travel Info To Go
+</span>
+
+
+<div id="Banner_Header" data-atisParent="true">
+        <div id="virtual-78" data-atis="true" class=""><style type="text/css">@media (min-width: 1500px){
+		.noDesk-top {
+			display: none;
+		}
+		
+		.Desk-top {
+			display: none;
+		}
+		
+		.bannerScreen {
+			display: block;
+			margin-top: -15px;
+		}
+	}
+	
+	@media (max-width: 1499px) and (min-width: 601px){
+		.Desk-top {
+			display: block;
+		}
+		
+		.noDesk-top,
+		.bannerScreen {
+			display: none;
+		}	
+	
+	}
+
+
+	@media (max-width: 767px) {
+		
+		.headerText {
+			display: none;
+		}	
+	
+	}
+	
+	
+@media (max-width: 600px){
+		.Desk-top {
+			display: none;
+		}
+		
+		.noDesk-top {
+  
+    position: relative;
+    margin-top: -2px;
+			display: block;
+		}
+		
+		.bannerScreen {
+			display: none;
+		}
+	}
+
+#Banner_Header {
+@media (min-width: 540px) and (max-width: 600px) {
+    left: 95px;
+}
+
+@media (max-width: 539px) {
+    left: 95px;
+}
+}
+</style>
+<div class="bannerScreen"><a href="/map/page/NFL"><img alt="NFL 2026" height="70" src="/cms/getfile?id=e834725d-652d-4b96-b69c-93227396dd51" width="240" /></a></div>
+
+<div class="Desk-top"><a href="/map/page/NFL"><img alt="NFL 2026" height="42" src="/cms/getfile?id=ee122c6d-9dd2-4d22-90da-75d2f0fe0014" width="240" /></a></div>
+
+<div class="noDesk-top"><a href="/map/page/NFL"><img alt="NFL 2026" height="45" src="/cms/getfile?id=3ba432a7-33b9-4d0e-b8f9-5e288b597c7c" width="47" /></a></div>
+</div>
+</div>
+
+
+
+            </div>
+            <div class="collapse navbar-collapse navbar-right">
+                
+                <ul class="nav navbar-nav navbarTop-right">
+                        <li>
+                            <div class="featuresTour Desktop">
+
+                                <a href="#" class="featureTourURL">
+                                    <span class="featuresNew">New</span><br />
+                                    Features
+                                    <span class="hideForAccessibility">Features</span><span class='hideForAccessibility'>Open Features Modal</span>
+                                </a>
+                            </div>
+                        </li>
+                    <li>
+                        <a href="/511PAConnect">511PA Connect</a>
+                    </li>
+                    
+
+<li class="regionRight">
+    <div id="region-list-label" class="hidden">Open list of regions</div>
+    <a id="currentRegionDropdownText" href="#" class="dropdown-toggle toggleButtonMenu" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false" aria-controls="regionList" aria-label="All Regions">
+        <span class="regionDisplayName" title="All Regions">All Regions</span><span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu" id="regionList" aria-labelledby="region-list-label">
+<li role="none">
+                        <a href="/region/All%20Regions" onclick="event.preventDefault(); submitRegionInfo('All Regions', 'ALL', ['41.1115303', '-78.9237541', '8']);" aria-label="Zoom in to All Regions" title="All Regions" role="menuitem">All Regions</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Altoona%20%2F%20Southern%20Alleghanies" onclick="event.preventDefault(); submitRegionInfo('Altoona / Southern Alleghanies', 'PA_Altoona', ['40.5096853', '-78.4439494', '12']);" aria-label="Zoom in to Altoona / Southern Alleghanies region" title="Altoona / Southern Alleghanies" role="menuitem">Altoona / Southern Alleghanies</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Capital%20Region%20%28Harrisburg%2FLancaster%2FYork%29" onclick="event.preventDefault(); submitRegionInfo('Capital Region (Harrisburg/Lancaster/York)', 'PA_Capital', ['40.1200672', '-76.7417181', '11']);" aria-label="Zoom in to Capital Region (Harrisburg/Lancaster/York) region" title="Capital Region (Harrisburg/Lancaster/York)" role="menuitem">Capital Region (Harrisburg/Lancaster/York)</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Lehigh%20Valley%20%2F%20Allentown%20%2F%20Bethlehem%20%2F%20Easton" onclick="event.preventDefault(); submitRegionInfo('Lehigh Valley / Allentown / Bethlehem / Easton', 'PA_Lehigh', ['40.6478311', '-75.5326719', '11']);" aria-label="Zoom in to Lehigh Valley / Allentown / Bethlehem / Easton region" title="Lehigh Valley / Allentown / Bethlehem / Easton" role="menuitem">Lehigh Valley / Allentown / Bethlehem / Easton</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Greater%20Philadelphia" onclick="event.preventDefault(); submitRegionInfo('Greater Philadelphia', 'PA_Philadelphia', ['39.9889659', '-75.835998', '9']);" aria-label="Zoom in to Greater Philadelphia region" title="Greater Philadelphia" role="menuitem">Greater Philadelphia</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Northwestern%20Region%20%28Erie%29" onclick="event.preventDefault(); submitRegionInfo('Northwestern Region (Erie)', 'PA_ErieRegion', ['41.87873', '-77.5473639', '8']);" aria-label="Zoom in to Northwestern Region (Erie) region" title="Northwestern Region (Erie)" role="menuitem">Northwestern Region (Erie)</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Scranton%20%2F%20Wilkes-Barre%20%2F%20Poconos" onclick="event.preventDefault(); submitRegionInfo('Scranton / Wilkes-Barre / Poconos', 'PA_Scranton', ['41.4138631', '-75.7130731', '12']);" aria-label="Zoom in to Scranton / Wilkes-Barre / Poconos region" title="Scranton / Wilkes-Barre / Poconos" role="menuitem">Scranton / Wilkes-Barre / Poconos</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Southwestern%20Region%20%28Pittsburgh%29" onclick="event.preventDefault(); submitRegionInfo('Southwestern Region (Pittsburgh)', 'PA_Pittsburgh', ['40.4314699', '-80.0629008', '12']);" aria-label="Zoom in to Southwestern Region (Pittsburgh) region" title="Southwestern Region (Pittsburgh)" role="menuitem">Southwestern Region (Pittsburgh)</a>
+                    </li>
+<li role="none">
+                        <a href="/region/State%20College%20%2F%20Northern%20Tier" onclick="event.preventDefault(); submitRegionInfo('State College / Northern Tier', 'PA_StateCollege', ['40.8056936', '-77.8566795', '13']);" aria-label="Zoom in to State College / Northern Tier region" title="State College / Northern Tier" role="menuitem">State College / Northern Tier</a>
+                    </li>
+    </ul>
+</li>
+                    <li><div id="google_translate_element"></div></li>
+                    <li class="loginSection desktop">    <ul class="nav navbar-nav" role="menu">
+        <li role="none"><a href="#" id="login-button" role="menuitem" data-toggle="modal" data-target="#loginModalDialog" aria-label="Log In">Log In</a></li>
+        <li role="none"><a href="/my511/register" id="registerLink">Sign Up<span class='hideForAccessibility'> for an account.</span></a></li>
+    </ul>
+</li>
+                </ul>
+
+                
+
+
+
+<div class="menu-width">
+    <ul class="nav navbar-nav main-menu" role="menubar">
+                        <li class="only511" role="none">
+                            <a id="menu-Map-Inde-Home" href="/map" target="_self" title="Home Menu" role="menuitem">Home</a>
+                        </li>
+                            <li class="dropdown " role="none">
+                                <a id="menu-List-Traf" href="/" class="dropdown-toggle" target="_self" title="Traffic Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    Traffic <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-List-AREL-WR" class="" href="/list/allrestrictioneventslist" target="_self" title="Traffic - Weather Restrictions" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Weather Restrictions</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-ET-TE" class="" href="/list/events/traffic" target="_self" title="Traffic - Possible Travel Delays" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Possible Travel Delays</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-RCI-RC" class="" href="/list/roadcondition" target="_self" title="Traffic - Road Conditions" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Road Conditions</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-Cctv-Came" class="" href="/cctv" target="_self" title="Traffic - Cameras" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Cameras</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-MS-MS" class="" href="/messagesigns" target="_self" title="Traffic - Message Signs" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Message Signs</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-WS-WS" class="" href="/list/weatherstations" target="_self" title="Traffic - Weather Stations" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Weather Stations</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-RA-RA" class="" href="/list/restareas" target="_self" title="Traffic - Rest Facilities" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Rest Facilities</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-Park-PAR" class="" href="/list/parking" target="_self" title="Traffic - Park &amp; Ride" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Park &amp; Ride</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-TP-TP" class="" href="/list/truckparking" target="_self" title="Traffic - Public Truck Parking" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Public Truck Parking</a>
+                </li>
+
+                                </ul>
+                            </li>
+                            <li class="dropdown only511" role="none">
+                                <a id="menu-My51-My51" href="/" class="dropdown-toggle" target="_self" title="My 511 Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    My 511 <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-My51-Inde-MRAA" class="" href="/my511" target="_self" title="My 511 - My Routes &amp; Notifications" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">My Routes &amp; Notifications</a>
+                </li>
+
+                                </ul>
+                            </li>
+                            <li class="dropdown only511 Links" role="none">
+                                <a id="menu-Link" href="/" class="dropdown-toggle" target="_self" title="Links Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    Links <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-EI" class="" href="/TravelLinks#EmergencyInfo" target="_self" title="Links - Emergency Information" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Emergency Information</a>
+                </li>
+                <li role="none">
+                    <a id="sub-HTP" class="" href="/TravelLinks/HumanTrafficking" target="_self" title="Links - Human Trafficking Prevention" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Human Trafficking Prevention</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Airp" class="" href="/TravelLinks#Airports" target="_self" title="Links - Airports" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Airports</a>
+                </li>
+                <li role="none">
+                    <a id="sub-NSTW" class="" href="/TravelLinks#NeighboringStates" target="_self" title="Links - Neighboring States&#39; Travel Websites" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Neighboring States&#39; Travel Websites</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Tour" class="" href="/TravelLinks#Tourism" target="_self" title="Links - Tourism" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Tourism</a>
+                </li>
+                <li role="none">
+                    <a id="sub-PTL" class="" href="/TravelLinks#PATravel" target="_self" title="Links - Pennsylvania Travel Links" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Pennsylvania Travel Links</a>
+                </li>
+                <li role="none">
+                    <a id="sub-PT" class="" href="https://www.paturnpike.com/" target="_blank" title="Links - Pennsylvania Turnpike" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Pennsylvania Turnpike</a>
+                </li>
+                <li role="none">
+                    <a id="sub-PDOT" class="" href="https://www.pa.gov/agencies/penndot/maps.html" target="_blank" title="Links - PennDOT maps" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PennDOT maps</a>
+                </li>
+                <li role="none">
+                    <a id="sub-PAT" class="" href="https://www.paturnpike.com/traveling/turnpike-maps" target="_blank" title="Links - PA Turnpike maps" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PA Turnpike maps</a>
+                </li>
+                <li role="none">
+                    <a id="sub-PATTC" class="" href="https://www.paturnpike.com/toll-calculator" target="_blank" title="Links - PA Turnpike Toll Calculator" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PA Turnpike Toll Calculator</a>
+                </li>
+
+                                </ul>
+                            </li>
+                            <li class="dropdown only511 Links" role="none">
+                                <a id="menu-Tran" href="/" class="dropdown-toggle" target="_self" title="Transit Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    Transit <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-PRM" class="" href="http://www.penndot.gov/TravelInPA/Ridesharing/Pages/Park-and-Ride-Map.aspx" target="_blank" title="Transit - Park &amp; Ride Map" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Park &amp; Ride Map</a>
+                </li>
+                <li role="none">
+                    <a id="sub-STTT" class="" href="/map/page/septa" target="_self" title="Transit - Selected Transit Travel Times" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Selected Transit Travel Times</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-TS-TS" class="" href="/list/trainstations" target="_self" title="Transit - SEPTA Regional Rail Stations" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">SEPTA Regional Rail Stations</a>
+                </li>
+                <li role="none">
+                    <a id="sub-SEPTAOS" class="" href="https://www.septa.org/" target="_blank" title="Transit - SEPTA Official Site" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">SEPTA Official Site</a>
+                </li>
+                <li role="none">
+                    <a id="sub-TO" class="" href="https://www.penndot.pa.gov/TravelInPA/Pages/default.aspx" target="_blank" title="Transit - Travel Options" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Travel Options</a>
+                </li>
+                <li role="none">
+                    <a id="sub-FMRPA" class="" href="/MyRidePA" target="_self" title="Transit - Find My Ride PA" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Find My Ride PA</a>
+                </li>
+                <li role="none">
+                    <a id="sub-AKS" class="" href="https://www.amtrak.com/home.html" target="_blank" title="Transit - Amtrak Keystone Service" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Amtrak Keystone Service</a>
+                </li>
+
+                                </ul>
+                            </li>
+                            <li class="dropdown only511 Links" role="none">
+                                <a id="menu-Proj" href="/" class="dropdown-toggle" target="_self" title="Projects Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    Projects <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-TCP" class="" href="https://www.paturnpike.com/traveling/design-construction" target="_blank" title="Projects - Turnpike Construction Projects" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Turnpike Construction Projects</a>
+                </li>
+                <li role="none">
+                    <a id="sub-IR" class="" href="https://95revive.com/" target="_blank" title="Projects - I-95 Revive" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">I-95 Revive</a>
+                </li>
+
+                                </ul>
+                            </li>
+                            <li class="dropdown only511 Links" role="none">
+                                <a id="menu-VR" href="/" class="dropdown-toggle" target="_self" title="Vehicle Restrictions Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    Vehicle Restrictions <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-VRM" class="" href="/map/page/vehiclerestriction" target="_self" title="Vehicle Restrictions - Vehicle Restrictions Map" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Vehicle Restrictions Map</a>
+                </li>
+                <li role="none">
+                    <a id="sub-List-AREL-VRL" class="" href="/list/allrestrictioneventslist" target="_self" title="Vehicle Restrictions - Vehicle Restrictions List" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Vehicle Restrictions List</a>
+                </li>
+                <li role="none">
+                    <a id="sub-DI" class="" href="/vehiclerestrictions/definitions" target="_self" title="Vehicle Restrictions - Definitions Infographic" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Definitions Infographic</a>
+                </li>
+                <li role="none">
+                    <a id="sub-TRBF" class="" href="/vehiclerestrictions/travelrestriction" target="_self" title="Vehicle Restrictions - Travel Restriction and Ban Framework" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Travel Restriction and Ban Framework</a>
+                </li>
+                <li role="none">
+                    <a id="sub-VRAS" class="" href="/my511/simplesignup" target="_self" title="Vehicle Restrictions - Vehicle Restriction Alerts Signup" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Vehicle Restriction Alerts Signup</a>
+                </li>
+
+                                </ul>
+                            </li>
+                            <li class="dropdown only511" role="none">
+                                <a id="menu-Abou" href="/" class="dropdown-toggle" target="_self" title="About Menu" data-toggle="dropdown" data-hover="dropdown" role="menuitem" aria-expanded="false">
+                                    About <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu" style="column-count: 1 ">
+                                                    <li role="none">
+                    <a id="sub-Help" class="" href="/about/help" target="_self" title="About - Help" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Help</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Abou" class="" href="/about/about" target="_self" title="About - About 511" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">About 511</a>
+                </li>
+                <li role="none">
+                    <a id="sub-FAQ" class="" href="/about/faq" target="_self" title="About - FAQ" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">FAQ</a>
+                </li>
+                <li role="none">
+                    <a id="sub-MA" class="" href="/about/mobileapp" target="_self" title="About - Mobile Apps" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Mobile Apps</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Acce" class="" href="/accessibility" target="_self" title="About - Accessibility" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Accessibility</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Priv" class="" href="/about/privacy" target="_self" title="About - Privacy" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Privacy</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Disc" class="" href="/about/disclaimer" target="_self" title="About - Disclaimer" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Disclaimer</a>
+                </li>
+                <li role="none">
+                    <a id="sub-Home-Cont-CU" class="" href="/contact" target="_self" title="About - Contact Us" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Contact Us</a>
+                </li>
+                <li role="none">
+                    <a id="sub-PAGOV" class="" href="https://www.pa.gov/" target="_blank" title="About - PA.GOV" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PA.GOV</a>
+                </li>
+
+                                </ul>
+                            </li>
+    </ul>
+</div>
+
+
+                
+                <div class="nonDesktop">
+                    <nav id="menu">
+                        <ul>
+                            
+
+                    <li class="only511" role="none">
+                        <a href="/map" target="_self" title="Home Menu" role="menuitem">Home</a>
+                    </li>
+                        <li class="" role="none">
+                            
+                            <span role="menuitem">Traffic</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="/list/allrestrictioneventslist" target="_self" title="Traffic - Weather Restrictions" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Weather Restrictions</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/events/traffic" target="_self" title="Traffic - Possible Travel Delays" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Possible Travel Delays</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/roadcondition" target="_self" title="Traffic - Road Conditions" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Road Conditions</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/cctv" target="_self" title="Traffic - Cameras" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Cameras</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/messagesigns" target="_self" title="Traffic - Message Signs" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Message Signs</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/weatherstations" target="_self" title="Traffic - Weather Stations" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Weather Stations</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/restareas" target="_self" title="Traffic - Rest Facilities" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Rest Facilities</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/parking" target="_self" title="Traffic - Park &amp; Ride" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Park &amp; Ride</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/truckparking" target="_self" title="Traffic - Public Truck Parking" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Public Truck Parking</a>
+                </li>
+
+                            </ul>
+                        </li>
+                        <li class="only511" role="none">
+                            
+                            <span role="menuitem">My 511</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="/my511" target="_self" title="My 511 - My Routes &amp; Notifications" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">My Routes &amp; Notifications</a>
+                </li>
+
+                            </ul>
+                        </li>
+                        <li class="only511 Links" role="none">
+                            
+                            <span role="menuitem">Links</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="/TravelLinks#EmergencyInfo" target="_self" title="Links - Emergency Information" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Emergency Information</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/TravelLinks/HumanTrafficking" target="_self" title="Links - Human Trafficking Prevention" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Human Trafficking Prevention</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/TravelLinks#Airports" target="_self" title="Links - Airports" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Airports</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/TravelLinks#NeighboringStates" target="_self" title="Links - Neighboring States&#39; Travel Websites" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Neighboring States&#39; Travel Websites</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/TravelLinks#Tourism" target="_self" title="Links - Tourism" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Tourism</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/TravelLinks#PATravel" target="_self" title="Links - Pennsylvania Travel Links" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Pennsylvania Travel Links</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.paturnpike.com/" target="_blank" title="Links - Pennsylvania Turnpike" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Pennsylvania Turnpike</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.pa.gov/agencies/penndot/maps.html" target="_blank" title="Links - PennDOT maps" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PennDOT maps</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.paturnpike.com/traveling/turnpike-maps" target="_blank" title="Links - PA Turnpike maps" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PA Turnpike maps</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.paturnpike.com/toll-calculator" target="_blank" title="Links - PA Turnpike Toll Calculator" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PA Turnpike Toll Calculator</a>
+                </li>
+
+                            </ul>
+                        </li>
+                        <li class="only511 Links" role="none">
+                            
+                            <span role="menuitem">Transit</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="http://www.penndot.gov/TravelInPA/Ridesharing/Pages/Park-and-Ride-Map.aspx" target="_blank" title="Transit - Park &amp; Ride Map" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Park &amp; Ride Map</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/map/page/septa" target="_self" title="Transit - Selected Transit Travel Times" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Selected Transit Travel Times</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/trainstations" target="_self" title="Transit - SEPTA Regional Rail Stations" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">SEPTA Regional Rail Stations</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.septa.org/" target="_blank" title="Transit - SEPTA Official Site" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">SEPTA Official Site</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.penndot.pa.gov/TravelInPA/Pages/default.aspx" target="_blank" title="Transit - Travel Options" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Travel Options</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/MyRidePA" target="_self" title="Transit - Find My Ride PA" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Find My Ride PA</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.amtrak.com/home.html" target="_blank" title="Transit - Amtrak Keystone Service" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Amtrak Keystone Service</a>
+                </li>
+
+                            </ul>
+                        </li>
+                        <li class="only511 Links" role="none">
+                            
+                            <span role="menuitem">Projects</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="https://www.paturnpike.com/traveling/design-construction" target="_blank" title="Projects - Turnpike Construction Projects" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Turnpike Construction Projects</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://95revive.com/" target="_blank" title="Projects - I-95 Revive" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">I-95 Revive</a>
+                </li>
+
+                            </ul>
+                        </li>
+                        <li class="only511 Links" role="none">
+                            
+                            <span role="menuitem">Vehicle Restrictions</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="/map/page/vehiclerestriction" target="_self" title="Vehicle Restrictions - Vehicle Restrictions Map" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Vehicle Restrictions Map</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/list/allrestrictioneventslist" target="_self" title="Vehicle Restrictions - Vehicle Restrictions List" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Vehicle Restrictions List</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/vehiclerestrictions/definitions" target="_self" title="Vehicle Restrictions - Definitions Infographic" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Definitions Infographic</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/vehiclerestrictions/travelrestriction" target="_self" title="Vehicle Restrictions - Travel Restriction and Ban Framework" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Travel Restriction and Ban Framework</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/my511/simplesignup" target="_self" title="Vehicle Restrictions - Vehicle Restriction Alerts Signup" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Vehicle Restriction Alerts Signup</a>
+                </li>
+
+                            </ul>
+                        </li>
+                        <li class="only511" role="none">
+                            
+                            <span role="menuitem">About</span>
+                            <ul role="menu">
+                                                <li role="none">
+                    <a class="" href="/about/help" target="_self" title="About - Help" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Help</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/about/about" target="_self" title="About - About 511" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">About 511</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/about/faq" target="_self" title="About - FAQ" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">FAQ</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/about/mobileapp" target="_self" title="About - Mobile Apps" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Mobile Apps</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/accessibility" target="_self" title="About - Accessibility" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Accessibility</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/about/privacy" target="_self" title="About - Privacy" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Privacy</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/about/disclaimer" target="_self" title="About - Disclaimer" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Disclaimer</a>
+                </li>
+                <li role="none">
+                    <a class="" href="/contact" target="_self" title="About - Contact Us" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">Contact Us</a>
+                </li>
+                <li role="none">
+                    <a class="" href="https://www.pa.gov/" target="_blank" title="About - PA.GOV" data-toggle="collapse" data-target=".navbar-collapse.in" role="menuitem">PA.GOV</a>
+                </li>
+
+                            </ul>
+                        </li>
+
+
+                            
+<li>
+    <span>All Regions</span>
+    <ul role="menu">
+<li role="none">
+                        <a href="/region/All%20Regions" onclick="submitRegionInfo('All Regions', 'ALL', ['41.1115303', '-78.9237541', '8'], true); " role="menuitem">All Regions</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Altoona%20%2F%20Southern%20Alleghanies" onclick="submitRegionInfo('Altoona / Southern Alleghanies', 'PA_Altoona', ['40.5096853', '-78.4439494', '12'], true); " role="menuitem">Altoona / Southern Alleghanies</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Capital%20Region%20%28Harrisburg%2FLancaster%2FYork%29" onclick="submitRegionInfo('Capital Region (Harrisburg/Lancaster/York)', 'PA_Capital', ['40.1200672', '-76.7417181', '11'], true); " role="menuitem">Capital Region (Harrisburg/Lancaster/York)</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Lehigh%20Valley%20%2F%20Allentown%20%2F%20Bethlehem%20%2F%20Easton" onclick="submitRegionInfo('Lehigh Valley / Allentown / Bethlehem / Easton', 'PA_Lehigh', ['40.6478311', '-75.5326719', '11'], true); " role="menuitem">Lehigh Valley / Allentown / Bethlehem / Easton</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Greater%20Philadelphia" onclick="submitRegionInfo('Greater Philadelphia', 'PA_Philadelphia', ['39.9889659', '-75.835998', '9'], true); " role="menuitem">Greater Philadelphia</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Northwestern%20Region%20%28Erie%29" onclick="submitRegionInfo('Northwestern Region (Erie)', 'PA_ErieRegion', ['41.87873', '-77.5473639', '8'], true); " role="menuitem">Northwestern Region (Erie)</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Scranton%20%2F%20Wilkes-Barre%20%2F%20Poconos" onclick="submitRegionInfo('Scranton / Wilkes-Barre / Poconos', 'PA_Scranton', ['41.4138631', '-75.7130731', '12'], true); " role="menuitem">Scranton / Wilkes-Barre / Poconos</a>
+                    </li>
+<li role="none">
+                        <a href="/region/Southwestern%20Region%20%28Pittsburgh%29" onclick="submitRegionInfo('Southwestern Region (Pittsburgh)', 'PA_Pittsburgh', ['40.4314699', '-80.0629008', '12'], true); " role="menuitem">Southwestern Region (Pittsburgh)</a>
+                    </li>
+<li role="none">
+                        <a href="/region/State%20College%20%2F%20Northern%20Tier" onclick="submitRegionInfo('State College / Northern Tier', 'PA_StateCollege', ['40.8056936', '-77.8566795', '13'], true); " role="menuitem">State College / Northern Tier</a>
+                    </li>
+    </ul>
+</li>                           
+                                <li>
+                                    <a href="#" class="featureTourURL">
+                                        New Features
+                                        <span class="hideForAccessibility">Features</span><span class='hideForAccessibility'>Open Features Modal</span>
+                                    </a>
+                                </li>
+                        </ul>
+                    </nav>
+                </div>
+<form action="/home/setculture" id="languageForm" method="post"><input id="culture" name="culture" type="hidden" value="" /><input id="returnUrl" name="returnUrl" type="hidden" value="/List/GetData/MessageSigns?query=%7B%22columns%22%3A%5B%7B%22data%22%3Anull%2C%22name%22%3A%22%22%7D%2C%7B%22name%22%3A%22area%22%2C%22s%22%3Atrue%7D%2C%7B%22name%22%3A%22name%22%7D%2C%7B%22name%22%3A%22roadwayName%22%7D%2C%7B%22name%22%3A%22direction%22%7D%2C%7B%22data%22%3A%22phase1Image%22%2C%22name%22%3A%22message%22%7D%2C%7B%22data%22%3A%22phase2Image%22%2C%22name%22%3A%22message2%22%7D%2C%7B%22name%22%3A%22lastUpdated%22%7D%2C%7B%22data%22%3A8%2C%22name%22%3A%22%22%7D%5D%2C%22order%22%3A%5B%7B%22column%22%3A1%2C%22dir%22%3A%22asc%22%7D%5D%2C%22start%22%3A0%2C%22length%22%3A1%2C%22search%22%3A%7B%22value%22%3A%2293470%22%7D%7D" /></form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="row scrollRow">
+    <div class="divider"></div>
+    <a class="alertHeader" href="/List/Alerts" aria-label="View list of advisories" title="View list of advisories"> <i class="far fa-exclamation-circle"></i>ADVISORIES </a>
+    <div id="alertWrapper">
+        <div class="socialSection">
+            <a href="/twitter" target="_self" title="X">
+                <img width="18" src="/Content/images/xLogo.svg" alt="Link to X page" />
+            </a>
+        </div>
+        <div id="alertsBox" class="scroller siteWideAlerts">
+            <ul><li id="emptyAlertLi">&nbsp;</li></ul>
+            <span class="tempAlert" hidden></span>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+        <div class="container-fluid mainContainer" role="main">
+            
+            <div class="messageContainer">
+                
+
+            </div>
+            <div id="content">
+
+<div class="modal fade modal-vertical-centered featureModal" tabindex="-1" role="dialog" id="featureModal">
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-close="true" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <div class="modal-title">Say hello to the transformed 511PA</div>
+        </div>
+        <div class="modal-body">
+            <div class="Desktop">
+                
+                <div class="tutorial step">
+                    
+
+<div id="featureSlide1" data-atisParent="true">
+        <div id="virtual-14" data-atis="true" class=""><style type="text/css">.firstTitle {
+font-size: 1.9rem;
+text-align: center;
+margin-top: 8px;
+margin-bottom: 8px;
+}
+</style>
+<img alt="Welcome to 511 PA" class="img-responsive" src="/cms/getfile?id=845391bf-8101-ef11-abd5-0639cd61a47b" />
+<div class="firstTitle">Welcome to 511 PA</div>
+
+<p align="center">Get started to discover new and exciting features!</p>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="btn btn-info pull-right next">Next</button>
+
+                    </div>
+                </div>
+                <div class="tutorial step">
+                    
+
+<div id="featureSlide2" data-atisParent="true">
+        <div id="virtual-16" data-atis="true" class=""><img alt="Sign up with 511PA" class="img-responsive" src="/cms/getfile?id=ad82c30a-8d7c-4dad-bf48-f7e16df9453d" />
+<div class="firstTitle">Signing up with 511PA</div>
+
+<ol>
+	<li>Creating an account is NOT mandatory on this website; however if you do, you&rsquo;ll be able to personalize your experience and receive traffic alerts.</li>
+	<li>Select &lsquo;Sign Up&rsquo; from the menu options in the top right corner</li>
+	<li>You can now sign up with either your email or phone number.</li>
+	<li>Enter your information and click Sign up button. Verify your account by clicking on the confirmation link that will be sent to your email or SMS.</li>
+</ol>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="pull-left previous previous">Previous</button>
+                        <button class="btn btn-info pull-right next">Next</button>
+
+                    </div>
+                </div>
+                <div class="tutorial step">
+                    
+
+<div id="featureSlide3" data-atisParent="true">
+        <div id="virtual-17" data-atis="true" class=""><img alt="Creating and saving customized route" class="img-responsive" src="/cms/getfile?id=f4753aee-592b-4ae5-bd52-19dba71ebe4a" />
+<div class="firstTitle">Creating &amp; Saving a Customized Route</div>
+
+<ol>
+	<li speechify-initial-font-size="14px" style="font-size: 14px;">Enter your start and end locations by typing the addresses into the address fields. Alternatively, you may also right click on the map. Once you have entered the route locations, click &lsquo;Drive&rsquo;<img alt="Drive Icon" height="36" speechify-initial-font-size="14px" src="/cms/getfile?id=22c86d32-8201-ef11-abd5-0639cd61a47b" style="font-size: 14px;" width="42" />.</li>
+	<li speechify-initial-font-size="14px" style="font-size: 14px;">Review the routes generated and select the one that suits you best.</li>
+	<li speechify-initial-font-size="14px" style="font-size: 14px;">When done, enter a name for your route and click &lsquo;Save&rsquo;.</li>
+</ol>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="pull-left previous previous">Previous</button>
+                        <button class="btn btn-info pull-right next">Next</button>
+                    </div>
+                </div>
+                    
+                <div class="tutorial step">
+                    
+
+<div id="featureSlide4" data-atisParent="true">
+        <div id="virtual-18" data-atis="true" class=""><img alt="Creating alert for your route" class="img-responsive" src="/cms/getfile?id=e9f65992-8201-ef11-abd5-0639cd61a47b" />
+<div class="firstTitle">Creating an Alert for your Route</div>
+
+<ol>
+	<li>Once your route is saved, you will be asked if you want to be notified of events on this route. Click &lsquo;Create Route Notification&rsquo;</li>
+	<li>You will be redirected to the alert creation page. Enter the required information for your route, select a delivery option (email or SMS), and click &lsquo;Save&rsquo;.</li>
+	<li>You will now be notified of any future events that affect your route.</li>
+</ol>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="btn btn-info pull-left previous">Previous</button>
+                        <button class="btn btn-info pull-right" data-close="true" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">Done</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="nonDesktop">
+                
+                <div class="tutorial step">
+                    
+
+<div id="featureSlideMobile1" data-atisParent="true">
+        <div id="virtual-22" data-atis="true" class=""><style type="text/css">.firstTitle {
+font-size: 1.9rem;
+text-align: center;
+margin-top: 8px;
+margin-bottom: 8px;
+}
+</style>
+<img alt="Welcome to 511PA" class="img-responsive" src="/cms/getfile?id=e7fddb5d-8401-ef11-abd5-0639cd61a47b" style="margin: 0 auto;" />
+<div class="firstTitle">Welcome to 511PA</div>
+
+<p align="center">Get started to discover new and exciting features!</p>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="btn btn-info pull-right next">Next</button>
+
+                    </div>
+                </div>
+                <div class="tutorial step">
+                    
+
+<div id="featureSlideMobile2" data-atisParent="true">
+        <div id="virtual-26" data-atis="true" class=""><img alt="Signing up with 511PA" class="img-responsive img-responsive image-slide" src="/cms/getfile?id=bc84c0a3-170b-f011-ad0b-066e4d7eb0b1" style="margin: 0 auto;" />
+<div class="firstTitle">Signing up with 511PA</div>
+
+<ol>
+	<li>Select &lsquo;Sign Up&rsquo; from the menu options in the top right corner</li>
+	<li>You can now sign up with either your email or phone number.</li>
+	<li>Enter your information and click Sign up button. Verify your account by clicking on the confirmation link that will be sent to your email or SMS.</li>
+</ol>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="pull-left previous previous">Previous</button>
+                        <button class="btn btn-info pull-right next">Next</button>
+
+                    </div>
+                </div>
+                <div class="tutorial step">
+                    
+
+<div id="featureSlideMobile3" data-atisParent="true">
+        <div id="virtual-27" data-atis="true" class=""><img alt="Creating &amp; Saving a Customized Route" class="img-responsive" src="/cms/getfile?id=3e7c18ca-8401-ef11-abd5-0639cd61a47b" style="margin: 0px auto; font-size: 14px;" />
+<div class="firstTitle">Creating &amp; Saving a Customized Route</div>
+
+<ol speechify-initial-font-size="14px" style="font-size: 14px;">
+	<li speechify-initial-font-size="14px" style="font-size: 14px;">Enter your start and end locations by typing the addresses into the address fields. Alternatively, you may also right click on the map, select a location from the available options, and select whether the location will be the start or end of your trip. Once you have entered the route locations, click &lsquo;Drive&rsquo;<img alt="Drive Icon" height="36" speechify-initial-font-size="14px" src="/cms/getfile?id=ef53fbed-8401-ef11-abd5-0639cd61a47b" style="font-size: 14px;" width="42" />.</li>
+	<li speechify-initial-font-size="14px" style="font-size: 14px;">Review the routes generated and select the one that suits you best.</li>
+	<li speechify-initial-font-size="14px" style="font-size: 14px;">When done, enter a name for your route and click &lsquo;Save&rsquo;.</li>
+</ol>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="pull-left previous previous">Previous</button>
+                        <button class="btn btn-info pull-right next">Next</button>
+                    </div>
+                </div>
+                <div class="tutorial step">
+                    
+
+<div id="featureSlideMobile4" data-atisParent="true">
+        <div id="virtual-28" data-atis="true" class=""><img alt="Creating an Alert for your Route" class="img-responsive" src="/cms/getfile?id=19081b34-8501-ef11-abd5-0639cd61a47b" style="margin: 0 auto;" />
+<div class="firstTitle">Creating an Alert for your Route</div>
+
+<ol>
+	<li>In the Manage My Routes table, find the route that you previously saved that you would like to create an alert for and click &lsquo;Create Alert&rsquo;.</li>
+	<li>You will be redirected to the alert creation page. Enter the required information for your route, select a delivery option (email or SMS), and click &lsquo;Save&rsquo;.</li>
+	<li>You will now be notified of any future events that affect your route.</li>
+</ol>
+</div>
+</div>
+
+
+
+                    <div class="tut_nav clearfix">
+                        <button class="btn btn-info pull-left previous">Previous</button>
+                        <button class="btn btn-info pull-right" data-close="true" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">Done</span></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+
+
+
+<div class="row row-centered non-list-page">
+    <div class="col-md-12">
+        <div class="form-group">
+            <h1>
+                <i class="fa fa-exclamation-triangle"></i>
+                Error
+            </h1>
+            <div>
+An unexpected error has occurred. Please refresh the page.            </div>
+        </div>
+    </div>
+</div>
+                <button class="btn emergencyPopupNotification" data-alert="" tabindex="0">
+                    <i style="padding-right: 5px;" class="far fa-exclamation-triangle"></i> <span class="hideEmergencyAlertText">EMERGENCY ALERT</span>
+                </button>
+            </div>
+            
+<footer class="row">
+    <div class="col-md-10">
+        
+<ul class="nav navbar-nav" role="menu">
+                <li role="none">
+                    <a id="f-Map-Inde-Home" href="/map" target="_self" title="Home Menu" role="menuitem">Home</a>
+                </li>
+                    <li class="" role="none">
+                        <button id="f-btn-List-Traf" data-toggle="collapse" data-target="#Traffic-footer" aria-expanded="false" role="menuitem">
+                            Traffic
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="Traffic-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-List-AREL-WR" href="/list/allrestrictioneventslist" target="_self" title="Traffic - Weather Restrictions" role="menuitem">Weather Restrictions</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-ET-TE" href="/list/events/traffic" target="_self" title="Traffic - Possible Travel Delays" role="menuitem">Possible Travel Delays</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-RCI-RC" href="/list/roadcondition" target="_self" title="Traffic - Road Conditions" role="menuitem">Road Conditions</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-Cctv-Came" href="/cctv" target="_self" title="Traffic - Cameras" role="menuitem">Cameras</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-MS-MS" href="/messagesigns" target="_self" title="Traffic - Message Signs" role="menuitem">Message Signs</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-WS-WS" href="/list/weatherstations" target="_self" title="Traffic - Weather Stations" role="menuitem">Weather Stations</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-RA-RA" href="/list/restareas" target="_self" title="Traffic - Rest Facilities" role="menuitem">Rest Facilities</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-Park-PAR" href="/list/parking" target="_self" title="Traffic - Park &amp; Ride" role="menuitem">Park &amp; Ride</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-TP-TP" href="/list/truckparking" target="_self" title="Traffic - Public Truck Parking" role="menuitem">Public Truck Parking</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-My51-My51" data-toggle="collapse" data-target="#My511-footer" aria-expanded="false" role="menuitem">
+                            My 511
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="My511-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-My51-Inde-MRAA" href="/my511" target="_self" title="My 511 - My Routes &amp; Notifications" role="menuitem">My Routes &amp; Notifications</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-Link" data-toggle="collapse" data-target="#Links-footer" aria-expanded="false" role="menuitem">
+                            Links
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="Links-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-EI" href="/TravelLinks#EmergencyInfo" target="_self" title="Links - Emergency Information" role="menuitem">Emergency Information</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-HTP" href="/TravelLinks/HumanTrafficking" target="_self" title="Links - Human Trafficking Prevention" role="menuitem">Human Trafficking Prevention</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Airp" href="/TravelLinks#Airports" target="_self" title="Links - Airports" role="menuitem">Airports</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-NSTW" href="/TravelLinks#NeighboringStates" target="_self" title="Links - Neighboring States&#39; Travel Websites" role="menuitem">Neighboring States&#39; Travel Websites</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Tour" href="/TravelLinks#Tourism" target="_self" title="Links - Tourism" role="menuitem">Tourism</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-PTL" href="/TravelLinks#PATravel" target="_self" title="Links - Pennsylvania Travel Links" role="menuitem">Pennsylvania Travel Links</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-PT" href="https://www.paturnpike.com/" target="_blank" title="Links - Pennsylvania Turnpike" role="menuitem">Pennsylvania Turnpike</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-PDOT" href="https://www.pa.gov/agencies/penndot/maps.html" target="_blank" title="Links - PennDOT maps" role="menuitem">PennDOT maps</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-PAT" href="https://www.paturnpike.com/traveling/turnpike-maps" target="_blank" title="Links - PA Turnpike maps" role="menuitem">PA Turnpike maps</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-PATTC" href="https://www.paturnpike.com/toll-calculator" target="_blank" title="Links - PA Turnpike Toll Calculator" role="menuitem">PA Turnpike Toll Calculator</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-Tran" data-toggle="collapse" data-target="#Transit-footer" aria-expanded="false" role="menuitem">
+                            Transit
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="Transit-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-PRM" href="http://www.penndot.gov/TravelInPA/Ridesharing/Pages/Park-and-Ride-Map.aspx" target="_blank" title="Transit - Park &amp; Ride Map" role="menuitem">Park &amp; Ride Map</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-STTT" href="/map/page/septa" target="_self" title="Transit - Selected Transit Travel Times" role="menuitem">Selected Transit Travel Times</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-TS-TS" href="/list/trainstations" target="_self" title="Transit - SEPTA Regional Rail Stations" role="menuitem">SEPTA Regional Rail Stations</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-SEPTAOS" href="https://www.septa.org/" target="_blank" title="Transit - SEPTA Official Site" role="menuitem">SEPTA Official Site</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-TO" href="https://www.penndot.pa.gov/TravelInPA/Pages/default.aspx" target="_blank" title="Transit - Travel Options" role="menuitem">Travel Options</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-FMRPA" href="/MyRidePA" target="_self" title="Transit - Find My Ride PA" role="menuitem">Find My Ride PA</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-AKS" href="https://www.amtrak.com/home.html" target="_blank" title="Transit - Amtrak Keystone Service" role="menuitem">Amtrak Keystone Service</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-Proj" data-toggle="collapse" data-target="#Projects-footer" aria-expanded="false" role="menuitem">
+                            Projects
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="Projects-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-TCP" href="https://www.paturnpike.com/traveling/design-construction" target="_blank" title="Projects - Turnpike Construction Projects" role="menuitem">Turnpike Construction Projects</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-IR" href="https://95revive.com/" target="_blank" title="Projects - I-95 Revive" role="menuitem">I-95 Revive</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-VR" data-toggle="collapse" data-target="#VehicleRestrictions-footer" aria-expanded="false" role="menuitem">
+                            Vehicle Restrictions
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="VehicleRestrictions-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-VRM" href="/map/page/vehiclerestriction" target="_self" title="Vehicle Restrictions - Vehicle Restrictions Map" role="menuitem">Vehicle Restrictions Map</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-List-AREL-VRL" href="/list/allrestrictioneventslist" target="_self" title="Vehicle Restrictions - Vehicle Restrictions List" role="menuitem">Vehicle Restrictions List</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-DI" href="/vehiclerestrictions/definitions" target="_self" title="Vehicle Restrictions - Definitions Infographic" role="menuitem">Definitions Infographic</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-TRBF" href="/vehiclerestrictions/travelrestriction" target="_self" title="Vehicle Restrictions - Travel Restriction and Ban Framework" role="menuitem">Travel Restriction and Ban Framework</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-VRAS" href="/my511/simplesignup" target="_self" title="Vehicle Restrictions - Vehicle Restriction Alerts Signup" role="menuitem">Vehicle Restriction Alerts Signup</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-Abou" data-toggle="collapse" data-target="#About-footer" aria-expanded="false" role="menuitem">
+                            About
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="About-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-Help" href="/about/help" target="_self" title="About - Help" role="menuitem">Help</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Abou" href="/about/about" target="_self" title="About - About 511" role="menuitem">About 511</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-FAQ" href="/about/faq" target="_self" title="About - FAQ" role="menuitem">FAQ</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-MA" href="/about/mobileapp" target="_self" title="About - Mobile Apps" role="menuitem">Mobile Apps</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Acce" href="/accessibility" target="_self" title="About - Accessibility" role="menuitem">Accessibility</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Priv" href="/about/privacy" target="_self" title="About - Privacy" role="menuitem">Privacy</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Disc" href="/about/disclaimer" target="_self" title="About - Disclaimer" role="menuitem">Disclaimer</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-Home-Cont-CU" href="/contact" target="_self" title="About - Contact Us" role="menuitem">Contact Us</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-PAGOV" href="https://www.pa.gov/" target="_blank" title="About - PA.GOV" role="menuitem">PA.GOV</a>
+                </li>
+
+                        </ul>
+                    </li>
+                    <li class="" role="none">
+                        <button id="f-btn-Deve-Deve" data-toggle="collapse" data-target="#Developers-footer" aria-expanded="false" role="menuitem">
+                            Developers
+                            <span class="caret"></span>
+                        </button>
+                        <ul id="Developers-footer" class="subMenu collapse" role="menu">
+                                            <li role="none">
+                    <a id="fSub-dev-data-feed" href="https://www.penndot.pa.gov/Doing-Business/OnlineServices/Pages/Developer-Resources.aspx" target="_blank" title="Developers - PennDOT Data Feeds" role="menuitem">PennDOT Data Feeds</a>
+                </li>
+                <li role="none">
+                    <a id="fSub-dev-turnpike-data-feed" href="https://www.paturnpike.com/help-center" target="_blank" title="Developers - PA Turnpike Data Feeds" role="menuitem">PA Turnpike Data Feeds</a>
+                </li>
+
+                        </ul>
+                    </li>
+</ul>
+    </div>
+    <div class="col-md-2">
+        <div class="footerLogo">
+            <a href="http://www.penndot.gov/Pages/default.aspx" target="_blank" aria-label="Official website of the Pennsylvania Transportion Government"></a>
+        </div>
+        <div class="footerLogoTurnpike">
+            <a href="https://www.paturnpike.com/" target="_blank" aria-label="Official website of the Penna Turnpike"></a>
+        </div>
+        <div class="govInfo lineHeight">
+            <a href="https://www.governor.pa.gov/" target="_blank">Josh Shapiro, Governor</a><br />
+            <a href="https://www.penndot.pa.gov/about-us/DepartmentExecutives/Pages/SecretaryofTransportation.aspx" target="_blank">Michael B. Carroll, Secretary of Transportation</a>
+        </div>
+    </div>
+</footer>
+        </div>
+    </div>
+
+<div id="loginModalDialog" class="modal fade modal-vertical-centered" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+                <span class="modal-title">Log In</span>
+            </div>
+            <div class="modal-body">
+                <form id="loginFormmodal" class="form-horizontal">
+                    <input name="__RequestVerificationToken" type="hidden" value="ND9Okaubml2cYHP-98lDfvt945wnyn8G0LGJ-hcgHEoN7ZdZwkgpHkmHyKv9hMZUDNlVbTF3SYw43YQxqQ94BSD3biM1" />
+                    <div id="validationSummarymodal" hidden="hidden" class="alert alert-danger">
+                        <ul><li></li></ul>
+                    </div>
+                    
+<div class="form-group">
+    <label class="col-md-12&#32;control-label" for="EmailOrPhonemodal">Email or phone</label>
+    <div class="col-md-12">
+        <input autocomplete="off" autofocus="autofocus" class="form-control" data-val="true" data-val-regex="Email&#32;or&#32;phone&#32;is&#32;required" data-val-regex-pattern="^(([^&lt;&gt;()[\]\\.,;:\s@&quot;]+(\.[^&lt;&gt;()[\]\\.,;:\s@&quot;]+)*)|(&quot;.+&quot;))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$|(^\(?([0-9]{3})\)?[-.&#32;]?([0-9]{3})[-.&#32;]?([0-9]{4}))" data-val-required="Email&#32;or&#32;phone&#32;is&#32;required" id="EmailOrPhonemodal" name="EmailOrPhone" title="Email&#32;or&#32;phone" type="text" value="" />
+        <span aria-atomic="true" aria-live="assertive" class="field-validation-valid&#32;text-danger" data-valmsg-for="EmailOrPhone" data-valmsg-replace="true" role="alert"></span>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-md-12&#32;control-label" for="Passwordmodal">Password</label>
+    <div class="col-md-12">
+        <input autocomplete="off" class="form-control" data-val="true" data-val-required="Password&#32;is&#32;required" id="Passwordmodal" name="Password" title="Password" type="password" />
+        <span aria-atomic="true" aria-live="assertive" class="field-validation-valid&#32;text-danger" data-valmsg-for="Password" data-valmsg-replace="true" role="alert"></span>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-12">
+        <div class="checkbox">
+            <input class="checkBoxVAlign" data-val="true" data-val-required="The&#32;Remember&#32;me&#32;field&#32;is&#32;required." id="RememberMemodal" name="RememberMe" title="RememberMe" type="checkbox" value="true" /><input name="RememberMe" type="hidden" value="false" />
+            <label class="rememberMePad" for="RememberMemodal">Remember me</label>
+        </div>
+    </div>
+</div>
+
+<input id="returnUrlmodal" name="returnUrl" type="hidden" value="/my511" />
+
+
+<div class="form-group">
+    <div class="col-md-12">
+        <input type="submit" id="logInButtonmodal" value="Log in" class="btn btn-info" />
+        <input type="button" id="resendConfirmationEmailmodal" style="display: none;" class="btn btn-info" value="Resend Confirmation" />
+    </div>
+</div>
+<div class="form-group lineHeight">
+    <div class="col-md-12">
+        <a href="/my511/register">Sign up as a new user</a>
+    </div>
+    <div class="col-md-12">
+        <a href="/my511/forgotpassword">Forgot password?</a>
+    </div>
+</div>
+
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>    
+
+    <script src="/bundles/jquery?v=XU1jbSWx9hrFOb1ucZIICKeDUk-n37FYGWpdiZtzbc41"></script>
+
+    <script src="/bundles/common?v=fhvHrQpdjJN8vkfy52dQtMy85sOCIOt--omktTDvW-g1"></script>
+
+    <script src="/bundles/bootstrap?v=APOw02wyVqp1P_s8bMjb5hZxqXyGzL7yLn4hojw2YjE1"></script>
+
+
+    <script>
+         window.user = {
+            id: '00000000-0000-0000-0000-000000000000'
+        }     
+    </script>
+
+    <script src="/scripts/jsresources/alerts?lang=en&v=2026.04.08"></script>
+<script>
+    var adsInterval;
+    $(function () {
+        var isFullScreen = false;        
+
+        if (window.innerWidth <= bp992) {
+            initMobileMenu(); // do not put into window.resize
+        }
+
+        var isErs = $(".ersLogo").length > 0;
+        if (isErs) {
+
+            $(document).on("FailedToLocateArea", function () {
+                $(".gMapFullscreenMessage").empty();
+                if (isFullScreen) {
+                    var msgBox = '<div class="message" name="message"><div class="alert alert-danger alert-dismissible" role="alert">';
+                    msgBox += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><i class="fal fa-times" aria-hidden="true"></i></button>';
+                    msgBox += '<div class="media"><div class="media-left"><span class="far fa-exclamation-circle"></span><span class="sr-only">Error</span></div>';
+                    msgBox += '<div class="media-body">Failed to locate area</div></div ></div></div>';
+                    $(".gMapFullscreenMessage").html(msgBox);
+                }
+            });
+
+        } else {
+            if ($("body").hasClass("ersMode")) {
+                $("body").removeClass("ersMode");
+            }
+
+            //adsInterval = setInterval(cycleAds, 6500);
+        }
+
+        layout.reSizeLogo(bp767);
+
+        if (sessionStorage.getItem('showAds') !== 'false') {
+            $("#BannerAds").show();
+        }
+
+        $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function () {
+            isFullScreen = document.fullScreen ||
+                document.mozFullScreen ||
+                document.webkitIsFullScreen ||
+                document.MSFullscreenChange;
+            var locationBox = $(".ersMode .locateLookupContainer");
+            if (!isFullScreen) {
+                $(".gMapFullscreenMessage").empty();
+                // remove old err msg
+                $(".form-group .message").remove();
+                if (locationBox.length > 0) {
+                    locationBox.css({ "left": "0" });
+                }
+            } else {             
+                if (window.innerWidth <= bp992 && locationBox.length > 0) {
+                        locationBox.css({ "top": "10%" });
+                } else {
+                    locationBox.css({ "top": "0" });
+                }                
+            }
+        });
+
+        layout.setWindowResizeEvent(bp767);
+    });
+
+    $(document).on("click", '#addCameraButton', function() {
+        window.AddMyCameraEvent();
+    });
+
+    function cycleAds() {
+        var $active = $('.adsContainerTop .active');
+        var $next = ($active.next().length > 0) ? $active.next() : $('.adsContainerTop div:first');
+        $next.css('z-index', 2);//move the next image up the pile
+        $active.fadeOut(1500, function () {//fade out the top image
+            $active.css('z-index', 1).show().removeClass('active');//reset the z-index and unhide the image
+            $next.css('z-index', 3).addClass('active');//make the next image the top one
+        });
+    }
+
+    $(".closeAds").on("click", function (e) {
+        clearInterval(adsInterval);
+        $(".adsContainerTop").hide();
+        var isMap = $(".mapColContainer").length > 0;
+        if (isMap) {
+            var newHeight = $(".mapColContainer").outerHeight() + $(".adsContainerTop").outerHeight();
+            $(".mainContainer, .mapColContainer, #map-canvas").css("height", newHeight + "px");
+            adjustLegendHeight(newHeight);
+            $(document).trigger("BeforeDisplayRoute");
+        }
+        e.stopPropagation();        
+        sessionStorage.setItem('showAds', 'false');       
+    });
+
+    function googleTranslateElementInit() {
+        var googleTranslateElement = window.innerWidth <= bp992 ? "google_translate_element_mobile" : "google_translate_element";
+        new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, googleTranslateElement);
+
+        function changeGoogleStyles() {
+            var iframe = $('iframe.skiptranslate').contents();
+            if (iframe.find('.VIpgJd-ZVi9od-vH1Gmf').length) {
+                iframe.find('.VIpgJd-ZVi9od-vH1Gmf').css({
+                    'max-width': '100%',
+                    'overflow-x': 'auto',
+                    'box-sizing': 'border-box',
+                    'padding': "5px 0 20px 0",
+                    'border': 0
+                });
+                iframe.find('.VIpgJd-ZVi9od-vH1Gmf td:last').css({
+                    'padding-right': "5px"
+                }); 
+                iframe.find('.VIpgJd-ZVi9od-vH1Gmf')[0].setAttribute('aria-label', 'Google Translate Widget');
+
+            } else {
+                setTimeout(changeGoogleStyles, 50);
+            }
+        }
+        changeGoogleStyles();
+    }
+
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    
+    <script src="/bundles/jqueryval?v=7PLq779JpfcVbtY5yyhkZ6hW9pPOG_5Buet9Z7unJL01"></script>
+<script src="/scripts/jsresources/loadBlocker?lang=en&v=2026.04.08"></script>
+<script src="/Scripts/loadBlocker.js?v=2026.04.08"></script>
+<script src="/Scripts/isUserLoggedIn.js?v=2026.04.08"></script>
+<script>
+    var hashAttached = false;
+        $(function () {
+            var loginType = 'modal';
+            $("#loginForm" + loginType).submit(function (e) {
+                e.preventDefault();
+                loadBlockerApi.showSpinner('loginForm');
+                //Add # to return url if needed
+                if (window.location.hash && !hashAttached) {
+                    var returnVal = $('#returnUrlmodal').val();
+                    $('#returnUrlmodal').val(returnVal + window.location.hash);
+                    hashAttached = true;
+                }
+
+                $.ajax('/My511/Login', {
+                    data: $("#loginForm" + loginType).serialize(),
+                    type: 'POST',
+                    //we are doing this so that if we are already logged in and get redirected to My511/Index, instead of thinking we received json, the ajax call fails and reloads the page
+                    dataType: 'json',
+                    beforeSend: function (event, xhr, settings, thrownError) {
+                        if (window.isUserLoggedIn(event.responseText)) {
+                            xhr.abort();
+                        }
+                    }
+                }).done(function (data) {
+                    if (!data.success) {
+                        if (data.mfa) {
+                            $(location).attr('href', '/my511/sendcode?returnUrl=' + encodeURIComponent(data.returnUrl) + '&rememberMe=' + data.rememberMe);
+                        }
+                        else {
+                            loadBlockerApi.hideSpinner('loginForm');
+                            $("#validationSummary" + loginType + " > ul > li").text(data.errors);
+                            $("#validationSummary" + loginType).show();
+                            if (data.unconfirmed) {
+                                $("#resendConfirmationEmail" + loginType).show();
+                            }
+                        }
+                    } else {
+                        $("#validationSummary" + loginType).hide();
+                        if (data.returnUrl && data.returnUrl[0] != '#' && data.returnUrl != window.location.pathname + window.location.hash) {
+                            $(location).attr('href', data.returnUrl);
+                        } else {
+                            location.reload();
+                        }
+                    }
+                }).fail(function (event, xhr, settings, thrownError) {
+                    location.reload();
+                });
+            });
+
+            // if already on login page, don't display login modal when clicking on login link
+            $('#loginModalDialog').on('show.bs.modal', function () {
+                var url = document.location.pathname;
+                var name = url.substring(url.lastIndexOf('/') + 1);
+                if (name.toLowerCase() === 'login') {
+                    return false;
+                }
+                return true;
+            });
+
+            $('#loginModalDialog').on('shown.bs.modal', function () {
+                $('#Email').focus();
+            });
+
+            $('#resendConfirmationEmail' + loginType).on('click', function (e) {
+                //prevent default action.
+                e.preventDefault();
+                //our custom ajax error handler for confirmation emails.
+                var ajaxFailConfirmation = new AjaxFail(window.resources['SorryUnkownErrorConfirmationCouldNotBeResent'], bootbox.alert);
+
+                var emailOrPhone = $('#EmailOrPhone'+loginType).val();
+
+                //this should never happen but just in case.
+                if (emailOrPhone) {
+                    $.ajax('/My511/ResendUserConfirmation', { data: { emailOrPhone: emailOrPhone }, type: 'POST' }).done(function(data) {
+                        if (data.errors) bootbox.alert('<i class="fa fa-check-circle" aria-hidden="true"></i> ' + data.errors);
+                        else bootbox.alert('<i class="fa fa-check-circle" aria-hidden="true"></i> The confirmation has been re-sent to {0}.'.replace('{0}', emailOrPhone));
+                    }).fail(ajaxFailConfirmation.ajaxFailPossibleErrorMessageFromServer);
+                }
+
+
+            });
+
+            function iOSversion() {
+                if (/iP(hone|od|ad)/.test(navigator.platform)) {
+                    // supports iOS 2.0 and later: <http://bit.ly/TJjs1V>
+                    var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+                    if (v != null && v.length > 0) {
+                        return [parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)];
+                    } else {
+                        return null;
+                    }
+                }
+            }
+
+            if (window.innerWidth <= bp767) {
+                var ver = iOSversion();
+                if (ver != null && ver[0] >= 11) {
+                    $("#loginModalDialog.modal").css("position", "absolute");
+                }
+            }
+        });
+</script>
+
+
+
+<script src="/bundles/alerts?v=CnoXFtxfI8uzuA4HdBDzM7EOhmgrW3tB6a5gTrkXww81"></script>
+
+    <script src="/bundles/ajaxCms?v=Vv9CNbS7YfSDNIdqHfgIuI8auMK9uX7l33d_RN9LyNo1"></script>
+<script src="/bundles/regionContentFilter?v=seEoj0YnNFlr4-WKzIBqH-yynCbPxNmi57Iy2e53IHU1"></script>
+<script src="/bundles/helpPopup?v=iHJafKSkl7O-afO8XRUy7syRIcHbp_VPMiFJFdZRqpk1"></script>
+
+    <script>
+    //Creating a global variable which will indicate whether the page is being unloaded or not.
+    var globalVars = { isBeingUnloaded: false, tickerInterval: 4000, dateFormat: 'M/D/YYYY h:mm A', timeFormat: 'h:mm A', canCreateEvents: '' };
+    //Attach the 'beforeunload' event handler on the window object.
+    $(window).bind('beforeunload', function() {
+        //Set the global variable to indicate that the page is being unloaded.
+        globalVars.isBeingUnloaded = true;
+    });
+
+    //For some reason we occasionally fail at parsing : decodeURIComponent(settings.data), return a blob if it doesn't work
+    function tryJsonParse(text) {
+        var result;
+        try {
+            result = JSON.parse('{"' +
+                text
+                .replace(/\+/g, ' ')
+                .replace(/"/g, '\\"')
+                .replace(/&/g, '","')
+                .replace(/=/g, '":"') +
+                '"}');
+        } catch (e) {
+            result = encodeURI(text);
+        }
+        return result;
+    }
+
+    //global ajax error handler.
+    $(document).ajaxError(function(event, xhr, settings, thrownError) {
+        //don't log an error if the page is being unloaded because a user closed the window or click another link.
+        if (globalVars.isBeingUnloaded || thrownError == 'timeout' || xhr.statusText === 'abort' || xhr.status == 0) {
+            return;
+        }
+        if (console) {
+            //sometimes these errors are swallowed and not seen on dev, make sure we show it
+            console.log(settings, thrownError);
+        }
+        var responseText = "html page not included";
+        if (!xhr.responseText) {
+            responseText = "no response";
+        }
+        if (xhr.responseText && xhr.responseText.substring(0, 15) != "<!DOCTYPE html>") responseText = xhr.responseText;
+    });
+
+    $(document).ready(function () {
+        // mobile first
+        var body = $("body");
+        if (window.innerWidth <= bp992 && true == true) {
+
+            if (!body.hasClass("mobileFirst")) {
+                body.addClass("mobileFirst")
+            }
+        } else {
+            if (body.hasClass("mobileFirst")) {
+                body.removeClass("mobileFirst")
+            }
+        }
+
+        // mapPage includes 511 and ERS map
+        var isMapPage = document.querySelector(".mapPage") != null;
+        if (isMapPage) {
+            // using onload so legend renders fully before we trigger normalLegendSet 
+            window.onload = () => {              
+                $(document).trigger("normalLegendSet");               
+            }
+        } else {
+            // needed for other help icon on RCR map, non map page
+            $(document).trigger("normalLegendSet");
+        }    
+    });
+    </script>
+    <script src="/scripts/jsresources/introJs/introJsGuide?lang=en&v=2026.04.08"></script>
+<script src="/bundles/introjs?v=9Yk3ow-vcAAwzXyL6gYcB0gClWF7mQ_ELwH1b1uCgoY1"></script>
+
+
+</body>
+</html>

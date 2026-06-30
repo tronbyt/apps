@@ -1,0 +1,16 @@
+---
+id: rss-reader
+name: RSS Reader
+summary: RSS Feed Reader
+desc: Displays entries from an RSS feed URL.
+author: Daniel Sitnik
+recommendedInterval: 10
+fileName: rss_reader.star
+packageName: rssreader
+category: utilities
+tags:
+  - news
+  - utility
+  - clock
+published: '2024-07-17T14:58:06Z'
+updated: '2025-12-17T23:02:59Z'

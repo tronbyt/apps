@@ -1,0 +1,15 @@
+---
+id: price-is-right
+name: Price Is Right
+summary: Turn the display into a bid
+desc: Use the display to show a contestant bid screen like on the show, for use as a standalone display or part of a costume.
+author: Blkhwks19
+fileName: price_is_right.star
+packageName: priceisright
+recommendedInterval: 5
+category: entertainment
+tags:
+  - finance
+  - gaming
+published: '2023-10-13T16:14:48Z'
+updated: '2025-11-30T19:58:27Z'

@@ -1,0 +1,15 @@
+---
+id: us-yield-curve
+name: US Yield Curve
+summary: Plots the US yield curve
+desc: Track changes to the yield curve over different US Treasury maturities.
+author: c00p
+fileName: us_yield_curve.star
+packageName: usyieldcurve
+broken: true
+recommendedInterval: 1
+category: finance
+tags:
+  - finance
+published: '2022-04-04T16:39:32Z'
+updated: '2025-12-05T22:28:51Z'

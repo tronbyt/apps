@@ -1,0 +1,15 @@
+---
+id: edinburgh-bus
+name: Edinburgh Bus
+summary: Shows the next 3 buses
+desc: Give it an Edinburgh stop ID and it will show the next 3 arrivals for the next 3 services at that stop.
+author: dan0
+fileName: edinburgh_bus.star
+packageName: edinburghbus
+recommendedInterval: 5
+category: transit
+tags:
+  - real-time
+  - utility
+published: '2023-04-27T13:21:54Z'
+updated: '2025-12-05T22:28:51Z'

@@ -1,0 +1,17 @@
+---
+id: nhl-next-game
+name: NHL Next Game
+summary: Gets Next Game Info
+desc: Gets info on preferred NHL teams next game.
+author: AKKanMan
+fileName: nhl_next_game.star
+packageName: nhlnextgame
+recommendedInterval: 5
+broken: true
+brokenReason: 'statsapi.web.nhl.com: no such host'
+category: sports
+tags:
+  - nhl
+  - hockey
+published: '2022-04-27T14:33:02Z'
+updated: '2025-12-05T22:28:51Z'

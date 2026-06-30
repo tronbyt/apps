@@ -1,0 +1,15 @@
+---
+id: shuffle-images
+name: Shuffle Images
+summary: Randomly display an image
+desc: Randomly displays an image from a user-specified list.
+author: rs7q5
+fileName: shuffle_images.star
+packageName: shuffleimages
+recommendedInterval: 5
+category: utilities
+tags:
+  - art
+  - utility
+published: '2022-07-18T20:40:44Z'
+updated: '2025-11-30T19:58:27Z'

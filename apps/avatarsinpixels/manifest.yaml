@@ -1,0 +1,14 @@
+---
+id: avatars-in-pixels
+name: Avatars In Pixels
+summary: Show a pixel art character
+desc: Displays a random pixel art character from https://www.avatarsinpixels.com/.
+author: Daniel Sitnik
+fileName: avatars_in_pixels.star
+packageName: avatarsinpixels
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+published: '2023-07-12T15:09:44Z'
+updated: '2025-12-02T19:30:22Z'

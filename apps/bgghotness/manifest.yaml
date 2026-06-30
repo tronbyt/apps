@@ -1,0 +1,15 @@
+---
+id: bgg-hotness
+name: Geeky Hotness
+summary: Geeky Hotness
+desc: Shows the top items from BoardGameGeek's Board Game Hotness list. Powered by BGG.
+author: Henry So, Jr.
+fileName: bgg_hotness.star
+packageName: bgghotness
+recommendedInterval: 5
+category: entertainment
+tags:
+  - gaming
+  - lifestyle
+published: '2022-01-28T17:07:45Z'
+updated: '2025-12-05T22:28:51Z'

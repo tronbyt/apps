@@ -1,0 +1,16 @@
+---
+id: xfl-scores
+name: XFL Scores
+summary: XFL football scores
+desc: Creating multiple app instances is no longer necessary. Just install once and remove any other instances. You can set the rotation speed of scores in the settings.
+author: LunchBox8484
+fileName: xfl_scores.star
+packageName: xflscores
+recommendedInterval: 5
+category: sports
+tags:
+  - utility
+  - xfl
+  - football
+published: '2023-02-02T21:02:51Z'
+updated: '2025-12-05T22:28:51Z'

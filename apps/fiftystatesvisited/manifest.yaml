@@ -1,0 +1,11 @@
+---
+id: fifty-states-visited
+name: 50 States Visited
+summary: Visited states map
+desc: Toggle visited states by abbreviation on a recognizable 64x32 U.S. LED map with Alaska and Hawaii insets.
+author: apollonyc
+fileName: fiftystatesvisited.star
+packageName: fiftystatesvisited
+recommendedInterval: 60
+category: travel
+---

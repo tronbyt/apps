@@ -1,0 +1,17 @@
+---
+id: tagesschau-news
+name: Tagesschau News
+summary: News of Tagesschau
+desc: Fetches and displays only the headline of the german Tagesschau.
+author: dev-manuel
+fileName: tagesschau_news.star
+packageName: tagesschau_news
+recommendedInterval: 10
+supports2x: true
+minPixletVersion: v0.49.3
+category: news
+tags:
+  - news
+  - wide 2x support
+published: '2024-09-18T17:35:10Z'
+updated: '2025-12-17T22:02:20Z'

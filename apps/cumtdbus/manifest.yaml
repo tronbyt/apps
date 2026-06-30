@@ -1,0 +1,18 @@
+---
+id: cumtd-bus
+name: CUMTD Bus
+summary: Bus Tracker
+desc: Real time bus tacker for CUMTD.
+author: Nol6n
+fileName: cumtd_bus.star
+packageName: cumtdbus
+category: transit
+tags:
+  - transportation
+  - real-time
+  - public-transport
+  - travel
+  - commute
+  - schedule
+published: '2026-04-07T20:59:29Z'
+updated: '2026-04-07T21:43:31Z'

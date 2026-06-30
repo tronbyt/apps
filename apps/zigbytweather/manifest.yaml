@@ -1,0 +1,13 @@
+---
+id: zigbytweather
+name: Zigbyt Weather
+summary: Displays date/time/weather
+desc: Displays time, date, temperature (F/C), and weather condition glyph. Weather data by Open-Meteo.
+author: ryan-doucette
+packageName: zigbytweather
+recommendedInterval: 0
+category: weather
+tags:
+  - open-meteo
+published: '2026-06-03T19:21:54Z'
+updated: '2026-06-04T16:40:34Z'

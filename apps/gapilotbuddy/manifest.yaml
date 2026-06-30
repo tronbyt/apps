@@ -1,0 +1,14 @@
+---
+id: ga-pilot-buddy
+name: GA Pilot Buddy
+summary: Local flight rules and wx
+desc: See local aerodrome flight rules and current abbreviated METAR information.
+author: icdevin
+fileName: ga_pilot_buddy.star
+packageName: gapilotbuddy
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+published: '2022-02-25T16:30:03Z'
+updated: '2025-12-23T13:24:18Z'

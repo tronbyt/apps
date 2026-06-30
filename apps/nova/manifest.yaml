@@ -1,0 +1,15 @@
+---
+id: nova
+name: Nova
+summary: Now playing for Nova FM
+desc: Shows the current song on Nova for various stations around Australia.
+author: M0ntyP
+fileName: nova.star
+packageName: nova
+recommendedInterval: 5
+category: entertainment
+tags:
+  - music
+  - local
+published: '2023-06-27T22:14:27Z'
+updated: '2025-11-30T19:58:27Z'
