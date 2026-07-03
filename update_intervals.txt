@@ -112,6 +112,7 @@ metar: 5
 noaabuoy: 15
 noaatides: 60
 northernlights: 5
+okmesonet: 5
 nws_live_forecast: 5
 phaseofmoon: 5
 pollencount: 5
