@@ -87,7 +87,7 @@ PALETTES = [
     (-3, ["#2b3a6e", "#6e4a7e", "#c95f63", "#e8975a"]),  # sunset/sunrise
     (-9, ["#141b3d", "#2a2a5e", "#54356b", "#7c4a63"]),  # civil twilight
     (-15, ["#0a0e24", "#13183b", "#1d1f4a", "#2a2750"]),  # nautical twilight
-    (-90, ["#04061a", "#070a23", "#0a0e2b", "#0e1233"]),  # night
+    (-90, ["#05071d", "#06081f", "#070a22", "#080b25"]),  # night (flattened: subtle panels turn a soft top-to-bottom shift into visible banding, so the deltas here are ~1/3 of what they were)
 ]
 
 # Fog/whiteout: the sky color is gone, so the whole background goes flat grey
@@ -102,11 +102,17 @@ FOG_NIGHT = ["#363b45", "#31363f", "#2c3139", "#282c34"]
 OVERCAST_DAY = ["#e6e9ed", "#dde0e5", "#d4d8de", "#cbd0d7"]
 OVERCAST_NIGHT = ["#1f222a", "#22252e", "#252934", "#282c37"]
 
-# Daytime snow (blizzard / heavy snow under a grey sky): the fog/overcast skies
-# are bright whiteouts, so white flakes would vanish. A darker steel-grey backdrop
-# gives the snow something to read against. (Night snow already shows on the dark
-# night/fog skies, so this is day-only.)
-SNOWSTORM_DAY = ["#8b95a6", "#838d9e", "#7b8595", "#737d8d"]
+# Daytime precip under a grey sky (overcast/storm/fog): the overcast/fog skies are
+# bright near-whiteouts, so falling rain/snow/ice/hail -- and the dark clouds --
+# wash out against them. A darker steel-grey backdrop gives every animation
+# something to read against. (Night skies are already dark, so this is day-only.)
+PRECIP_DAY = ["#9aa4b4", "#929cac", "#8a94a4", "#828c9c"]
+
+# Wildfire smoke / heavy haze: the sky is gone, replaced by an eerie orange-brown
+# murk (a warm cousin of the fog whiteout). Day is a hazy tan-orange; night a dark
+# smoky brown. The sun shows as a dim red ember through it (see sun_ember_widget).
+SMOKE_DAY = ["#a8693a", "#b3743f", "#bd8049", "#c69257"]
+SMOKE_NIGHT = ["#2c1f17", "#31241a", "#35281d", "#392b1f"]
 
 def pick_palette(elev):
     for min_elev, colors in PALETTES:
@@ -114,13 +120,15 @@ def pick_palette(elev):
             return colors
     return PALETTES[-1][1]
 
-def sky_palette(elev, is_day, fog, clouds, storm, precip):
-    """Choose the background palette: daytime-snow steel > fog whiteout > overcast
-    grey > the normal elevation-driven gradient. Overcast/storm flatten the blue
-    so a fully clouded sky reads grey rather than sunny; daytime snow gets a
-    darker backdrop so white flakes don't vanish into a bright whiteout."""
-    if is_day and precip == "snow" and (fog or clouds >= 4 or storm):
-        return SNOWSTORM_DAY
+def sky_palette(elev, is_day, fog, clouds, storm, precip, smoke):
+    """Choose the background palette: wildfire smoke orange > daytime-snow steel >
+    fog whiteout > overcast grey > the normal elevation-driven gradient. Smoke and
+    fog replace the sky color entirely; overcast/storm flatten the blue to grey;
+    daytime snow gets a darker backdrop so white flakes don't vanish."""
+    if smoke:
+        return SMOKE_DAY if is_day else SMOKE_NIGHT
+    if is_day and precip != None and (fog or clouds >= 4 or storm):
+        return PRECIP_DAY
     if fog:
         return FOG_DAY if is_day else FOG_NIGHT
     if clouds >= 4 or storm:
@@ -181,6 +189,58 @@ def star_layer(frame, brightness):
         return render.Box(width = 1, height = 1)
     return render.Stack(children = dots)
 
+# Aurora: translucent green curtains (8-digit RGBA so stars/sky show through).
+# A vertical fade -- bright green at the bottom, dissolving up through dim green
+# to faint purple at the wispy top -- pulsing as the curtains wave sideways.
+AURORA_GREEN = [
+    "#3cf0991c",
+    "#40f29a36",
+    "#48f49b50",
+    "#52f69d6a",
+    "#5cf89e86",
+    "#68fba6a2",
+    "#80ffb8c0",
+]
+AURORA_PURP = ["#9a64ff20", "#aa70ff3c"]
+
+def aurora_layer(frame):
+    """Shimmering night aurora: overlapping vertical curtains that wave sideways
+    and pulse, each fading from a bright green base up to faint purple wisps.
+    Translucent (RGBA) so stars twinkle through. Night-only (caller gates it)."""
+    step = 2.0 * math.pi / N_FRAMES
+    bands = []
+    x = 0
+    k = 0
+    for _i in range(20):
+        if x > WIDTH - 5:
+            break
+        phase = frame * step + k * 0.6
+        sway = _rnd(2.0 * math.sin(phase))
+        cx = x + sway
+        base_y = 17 + _rnd(2.0 * math.sin(phase * 1.3))  # ragged bottom edge
+        height = 9 + _rnd(3.0 * (1.0 + math.sin(phase * 1.1 + 1.0)))  # 9..15
+        pulse = 0.45 + 0.55 * (math.sin(phase * 0.8) + 1.0) * 0.5  # 0.45..1.0
+        for r in range(height):
+            y = base_y - r
+            if y < 0:
+                break
+            if cx < 0 or cx > WIDTH - 5:
+                continue
+            frac = r / float(height)  # 0 bottom -> ~1 top
+            if frac > 0.82:
+                col = AURORA_PURP[1] if pulse > 0.7 else AURORA_PURP[0]
+            else:
+                bright = (1.0 - frac) * pulse
+                idx = int(bright * (len(AURORA_GREEN) - 1) + 0.5)
+                idx = 0 if idx < 0 else (len(AURORA_GREEN) - 1 if idx > len(AURORA_GREEN) - 1 else idx)
+                col = AURORA_GREEN[idx]
+            bands.append(render.Padding(pad = (cx, y, 0, 0), child = render.Box(width = 5, height = 1, color = col)))
+        x += 4
+        k += 1
+    if len(bands) == 0:
+        return render.Box(width = 1, height = 1)
+    return render.Stack(children = bands)
+
 # ---------------------------------------------------------------------------
 # Sun and moon
 # ---------------------------------------------------------------------------
@@ -198,6 +258,17 @@ def sun_widget():
             render.Padding(pad = (0, 0, 0, 0), child = render.Circle(diameter = 7, color = "#ffdf80")),
             render.Padding(pad = (1, 1, 0, 0), child = render.Circle(diameter = 5, color = "#ffd23f")),
             render.Padding(pad = (2, 2, 0, 0), child = render.Circle(diameter = 3, color = "#fff3b0")),
+        ],
+    )
+
+def sun_ember_widget():
+    """A dim, hard sun disc seen through wildfire smoke: a deep blood-orange
+    circle with a muted red rim and no bright glow or rays -- the apocalyptic sun."""
+    return render.Stack(
+        children = [
+            render.Padding(pad = (0, 0, 0, 0), child = render.Circle(diameter = 7, color = "#9c3a18")),
+            render.Padding(pad = (1, 1, 0, 0), child = render.Circle(diameter = 5, color = "#c2552a")),
+            render.Padding(pad = (2, 2, 0, 0), child = render.Circle(diameter = 3, color = "#e0743a")),
         ],
     )
 
@@ -280,10 +351,15 @@ def sunrise_orb_widget(strength, big):
         return None
     return render.Stack(children = kids)
 
-def sky_body_kind(is_day, fog, clouds, precip):
+def sky_body_kind(is_day, fog, clouds, precip, smoke):
     """What to render for the celestial body: a crisp 'sun', a diffuse 'glow'
-    (sun behind fog), the 'moon', or 'none' (hidden by overcast/fog/heavy snow)."""
+    (sun behind fog), a dim red 'ember' (sun behind wildfire smoke), the 'moon',
+    or 'none' (hidden by overcast/fog/smoke/heavy snow)."""
     if is_day:
+        # wildfire smoke dims the sun to a hard red ember (overrides clouds/fog)
+        if smoke:
+            return "ember"
+
         # heavy daytime snow (blizzard / snowstorm) is a whiteout -- hide the sun
         if precip == "snow" and (fog or clouds >= 4):
             return "none"
@@ -292,7 +368,7 @@ def sky_body_kind(is_day, fog, clouds, precip):
         if clouds >= 4:
             return "none"
         return "sun"
-    if fog or clouds >= 4:
+    if smoke or fog or clouds >= 4:
         return "none"
     return "moon"
 
@@ -459,9 +535,43 @@ PRECIP_COLS = {
     3: [2, 8, 14, 20, 26, 32, 38, 44, 50, 56, 61],
 }
 
+ICE_CORE = "#ffffff"
+ICE_ARM = "#cdeeff"
+ICE_TIP = "#8fd2ec"
+
+def _ice_crystal(x, y, big, lit):
+    """A tiny faceted ice crystal: a white core with light-blue arms forming a
+    4-point star (3x3), with diagonal facet tips when `big` (5x5). `lit`
+    brightens the arms for a twinkle. All offsets >= 0 so Padding stays valid."""
+    arm = ICE_ARM if lit else ICE_TIP
+    if not big:
+        pts = [(1, 1, ICE_CORE), (1, 0, arm), (1, 2, arm), (0, 1, arm), (2, 1, arm)]
+    else:
+        pts = [
+            (2, 2, ICE_CORE),
+            (2, 0, arm),
+            (2, 1, ICE_CORE),
+            (2, 3, ICE_CORE),
+            (2, 4, arm),
+            (0, 2, arm),
+            (1, 2, ICE_CORE),
+            (3, 2, ICE_CORE),
+            (4, 2, arm),
+            (1, 1, ICE_TIP),
+            (3, 1, ICE_TIP),
+            (1, 3, ICE_TIP),
+            (3, 3, ICE_TIP),
+        ]
+    out = []
+    for dx, dy, c in pts:
+        out.append(render.Padding(pad = (x + dx, y + dy, 0, 0), child = render.Box(width = 1, height = 1, color = c)))
+    return out
+
 def precip_layer(frame, kind, level):
-    """Falling rain or snow, scaled by intensity `level` (1-3): higher = more
-    drops, faster, longer rain streaks."""
+    """Falling precipitation, scaled by intensity `level` (1-3): higher = more
+    drops, faster, longer streaks. Five kinds with distinct looks:
+    rain (blue streaks), snow (slow fat flakes), ice/freezing-rain (glassy cyan
+    streaks + glints), sleet (faceted ice crystals), hail (fat pellets that ricochet)."""
     if level < 1:
         return render.Box(width = 1, height = 1)
     if level > 3:
@@ -478,6 +588,50 @@ def precip_layer(frame, kind, level):
             off = (x * 7 + i * 13) % HEIGHT
             y = (frame * speed + off) % HEIGHT
             drops.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = flake, height = flake, color = color)))
+    elif kind == "ice":
+        # freezing rain / glaze: glassy cyan streaks with a bright glint head and
+        # a few sparkling crystals, so it reads as icy glaze rather than blue rain
+        speed = 2
+        length = level
+        color = "#d2f1ff" if level == 1 else "#a8e4f7"
+        for i, x in enumerate(cols):
+            y = (frame * speed + i * 7) % HEIGHT
+            drops.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 1, height = length, color = color)))
+
+            # a bright white glint sparkles at the head of every other streak
+            if i % 2 == 0:
+                drops.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 1, height = 1, color = ICE_CORE)))
+
+            # an occasional small crystal drifting among the streaks
+            if i % 4 == 1 and x < WIDTH - 3:
+                cy = (frame * speed + i * 19) % HEIGHT
+                drops.extend(_ice_crystal(x, cy, False, ((frame // 4 + i) % 2) == 0))
+    elif kind == "sleet":
+        # ice crystals: small faceted 4-point stars that twinkle as they fall
+        speed = 2
+        for i, x in enumerate(cols):
+            off = (x * 5 + i * 11) % HEIGHT
+            y = (frame * speed + off) % HEIGHT
+            big = level >= 2 and i % 3 == 0 and x < WIDTH - 5
+            lit = (frame // 3 + i) % 3 != 0
+            drops.extend(_ice_crystal(x, y, big, lit))
+    elif kind == "hail":
+        # hail: fat fast pellets that ricochet just above the ground bar
+        speed = 4
+        color = "#eef4ff"
+        gy = 24
+        for i, x in enumerate(cols):
+            off = (x * 7 + i * 13) % HEIGHT
+            y = (frame * speed + off) % HEIGHT
+            drops.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 2, height = 2, color = color)))
+
+            # ricochet: a pellet hops up off the ground on its own short arc
+            bphase = (frame * 2 + i * 5) % 16
+            if bphase < 4:
+                bx = x + (bphase if i % 2 == 0 else -bphase)
+                by = gy - bphase
+                if bx >= 0 and bx < WIDTH:
+                    drops.append(render.Padding(pad = (max(0, bx), by, 0, 0), child = render.Box(width = 1, height = 1, color = color)))
     else:
         speed = 2 if level < 3 else 3
         length = level  # 1px drizzle, 2px rain, 3px downpour streaks
@@ -486,6 +640,125 @@ def precip_layer(frame, kind, level):
             y = (frame * speed + i * 7) % HEIGHT
             drops.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 1, height = length, color = color)))
     return render.Stack(children = drops)
+
+# Condition badge: a tiny 7x6 glyph for the ground bar that names the weather --
+# intensity-aware, so drizzle != rain, snow != blizzard, ice != hail. "#" = pixel.
+_ICON_RAIN = [
+    "#  #  #",
+    "#  #  #",
+    "#  #  #",
+    "       ",
+    "#  #  #",
+    "#  #  #",
+]
+_ICON_DRIZZLE = [
+    "       ",
+    "#     #",
+    "       ",
+    "   #   ",
+    "       ",
+    "#     #",
+]
+_ICON_SNOW = [
+    " #   # ",
+    "   #   ",
+    "#   # #",
+    "   #   ",
+    " #   # ",
+    "#  #   ",
+]
+_ICON_BLIZZARD = [
+    "  #  ##",
+    " #  ## ",
+    "#  ##  ",
+    "  ##  #",
+    " ##  # ",
+    "##  #  ",
+]
+_ICON_ICE = [
+    " #   # ",
+    "#######",
+    " #   # ",
+    "#######",
+    " #   # ",
+    "#######",
+]
+_ICON_HAIL = [
+    "##  ## ",
+    "##  ## ",
+    "       ",
+    " ##  ##",
+    " ##  ##",
+    "       ",
+]
+_ICON_SLEET = [
+    "# # # #",
+    "       ",
+    " # # # ",
+    "       ",
+    "# # # #",
+    "       ",
+]
+_ICON_BOLT = [
+    "   ##  ",
+    "  ##   ",
+    " ####  ",
+    "  ###  ",
+    "   ##  ",
+    "  #    ",
+]
+_ICON_FOG = [
+    "       ",
+    " ##### ",
+    "       ",
+    "###### ",
+    "       ",
+    " ##### ",
+]
+_ICON_SMOKE = [
+    " ##### ",
+    "       ",
+    "###### ",
+    "       ",
+    " ##### ",
+    "       ",
+]
+
+def _draw_icon(rows, color, x0, y0):
+    """Render a "#"-bitmap as 1px boxes at (x0, y0)."""
+    out = []
+    for dy in range(len(rows)):
+        row = rows[dy]
+        for dx in range(len(row)):
+            if row[dx] != " ":
+                out.append(render.Padding(pad = (x0 + dx, y0 + dy, 0, 0), child = render.Box(width = 1, height = 1, color = color)))
+    return render.Stack(children = out)
+
+def condition_icon(wx, tier):
+    """Pick the ground-bar weather glyph as (rows, color), or None when there's
+    nothing notable. Intensity-aware: light rain -> drizzle, windy/foggy/heavy
+    snow -> blizzard. Hail and thunderstorm outrank plain precip."""
+    if wx.precip == "hail":
+        return _ICON_HAIL, "#ffffff"
+    if wx.storm and (wx.precip == "rain" or wx.precip == None):
+        return _ICON_BOLT, "#fdf6c8"
+    if wx.precip == "ice":
+        return _ICON_ICE, "#a8e4f7"
+    if wx.precip == "sleet":
+        return _ICON_SLEET, "#cdeeff"
+    if wx.precip == "snow":
+        if wx.fog or tier >= 2 or wx.precip_level >= 3:
+            return _ICON_BLIZZARD, "#eef4ff"
+        return _ICON_SNOW, "#eef4ff"
+    if wx.precip == "rain":
+        if wx.precip_level <= 1:
+            return _ICON_DRIZZLE, "#9fd1ff"
+        return _ICON_RAIN, "#6fb7ff"
+    if wx.smoke:
+        return _ICON_SMOKE, "#d99a5a"
+    if wx.fog:
+        return _ICON_FOG, "#c8cdd6"
+    return None
 
 def weather_kind(code):
     """Map WMO weather code -> sprite plan. `storm` adds the lightning layer."""
@@ -499,6 +772,8 @@ def weather_kind(code):
         return struct(clouds = 3, precip = None, fog = False, storm = False)
     if code in [45, 48]:
         return struct(clouds = 1, precip = None, fog = True, storm = False)
+    if code in [56, 57, 66, 67]:  # freezing drizzle / freezing rain -> ice/glaze
+        return struct(clouds = 3, precip = "ice", fog = False, storm = False)
     if code >= 51 and code <= 67:
         return struct(clouds = 2, precip = "rain", fog = False, storm = False)
     if code >= 71 and code <= 77:
@@ -507,6 +782,8 @@ def weather_kind(code):
         return struct(clouds = 3, precip = "rain", fog = False, storm = False)
     if code in [85, 86]:
         return struct(clouds = 3, precip = "snow", fog = False, storm = False)
+    if code in [96, 99]:  # thunderstorm with hail
+        return struct(clouds = 3, precip = "hail", fog = False, storm = True)
     if code >= 95:
         return struct(clouds = 3, precip = "rain", fog = False, storm = True)
     return struct(clouds = 1, precip = None, fog = False, storm = False)
@@ -558,9 +835,13 @@ def precip_level(precip, precip_mm, snow_mm, code):
 
 # NWS METAR cloud-cover codes -> 0-4 sprite count.
 _NWS_CLOUD_RANK = {"CLR": 0, "SKC": 0, "FEW": 2, "SCT": 2, "BKN": 3, "OVC": 4, "VV": 4}
-_NWS_SNOW = ["snow", "snow_showers", "snow_grains", "ice_pellets", "ice_crystals", "blowing_snow"]
-_NWS_RAIN = ["rain", "rain_showers", "drizzle", "freezing_rain", "freezing_drizzle", "hail"]
-_NWS_FOG = ["fog", "freezing_fog", "mist", "haze", "smoke", "dust", "sand"]
+_NWS_SNOW = ["snow", "snow_showers", "snow_grains", "ice_crystals", "blowing_snow"]
+_NWS_RAIN = ["rain", "rain_showers", "drizzle"]
+_NWS_ICE = ["freezing_rain", "freezing_drizzle"]
+_NWS_SLEET = ["ice_pellets"]
+_NWS_HAIL = ["hail", "small_hail"]
+_NWS_SMOKE = ["smoke", "haze"]
+_NWS_FOG = ["fog", "freezing_fog", "mist", "dust", "sand"]
 
 def _intensity_level(inten):
     """NWS presentWeather intensity string -> 1-3."""
@@ -582,6 +863,7 @@ def nws_scene(amounts, weathers):
     precip = None
     fog = False
     storm = False
+    smoke = False
     level = 0
     for w, inten in weathers:
         lv = 0
@@ -590,6 +872,18 @@ def nws_scene(amounts, weathers):
             if precip == None:
                 precip = "rain"
             lv = 3
+        elif w in _NWS_HAIL:
+            if precip == None:
+                precip = "hail"
+            lv = _intensity_level(inten)
+        elif w in _NWS_ICE:
+            if precip == None:
+                precip = "ice"
+            lv = 1 if w == "freezing_drizzle" else _intensity_level(inten)
+        elif w in _NWS_SLEET:
+            if precip == None:
+                precip = "sleet"
+            lv = _intensity_level(inten)
         elif w in _NWS_SNOW:
             if precip == None:
                 precip = "snow"
@@ -598,11 +892,13 @@ def nws_scene(amounts, weathers):
             if precip == None:
                 precip = "rain"
             lv = 1 if w == "drizzle" else _intensity_level(inten)
+        elif w in _NWS_SMOKE:
+            smoke = True
         elif w in _NWS_FOG:
             fog = True
         if lv > level:
             level = lv
-    return struct(clouds = clouds, precip = precip, fog = fog, storm = storm, level = level)
+    return struct(clouds = clouds, precip = precip, fog = fog, storm = storm, smoke = smoke, level = level)
 
 def _bolt():
     """A small jagged lightning bolt, drawn as stacked offset boxes."""
@@ -644,6 +940,366 @@ def lightning_layer(frame):
     children = [render.Box(width = WIDTH, height = HEIGHT, color = LIGHTNING_FLASHES[frame])]
     if frame in LIGHTNING_BOLTS:
         children.append(_bolt())
+    return render.Stack(children = children)
+
+# ---------------------------------------------------------------------------
+# Heat haze: wavy shimmer rising off hot ground on a bright, clear-enough day.
+# Real per-pixel distortion isn't possible with flat boxes, so it's faked with
+# faint warm horizontal streaks that wobble side to side at different heights
+# and speeds -- brightest low (near the "pavement"), fading out as they rise
+# through the lower-middle of the scene.
+# ---------------------------------------------------------------------------
+
+HEAT_HAZE_TEMP_F = 90.0  # Fahrenheit-equivalent trigger threshold
+
+def _heat_haze_auto(is_day, temp_f, clouds, fog, storm, smoke, precip):
+    """True when it's hot, bright daytime air -- heavy cloud/fog/smoke/storm/
+    precip all block the sun-baked-ground look a mirage needs."""
+    if not is_day or temp_f == None:
+        return False
+    return temp_f >= HEAT_HAZE_TEMP_F and clouds < 4 and not fog and not storm and not smoke and precip == None
+
+# (y, alpha hex) rows from low/near (brightest) to high/far (faintest).
+HEAT_HAZE_ROWS = [(23, "70"), (21, "58"), (19, "46"), (17, "36"), (15, "26")]
+
+def heat_haze_layer(frame):
+    """Shimmering heat-mirage lines. Each row's wobble uses an integer
+    harmonic of the loop length so it wraps seamlessly at frame N_FRAMES."""
+    step = 2.0 * math.pi / N_FRAMES
+    children = []
+    for i, (y, alpha) in enumerate(HEAT_HAZE_ROWS):
+        freq = 1 + i % 3
+        phase = frame * step * freq + i * 1.3
+        off = _rnd(2.0 * math.sin(phase))
+        col = "#fff2c0" + alpha
+        for seg in range(6):
+            x = 6 + off + seg * 13
+            if x < 0 or x >= WIDTH:
+                continue
+            w = min(5, WIDTH - x)
+            if w > 0:
+                children.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = w, height = 1, color = col)))
+    return render.Stack(children = children)
+
+# ---------------------------------------------------------------------------
+# Seasonal tree: an always-on scenery accent standing at the left edge of the
+# ground bar, showing the real meteorological season (or a demo override).
+# Spring/summer/fall share one leafy canopy shape recolored per season; winter
+# swaps in a bare, veiny branch silhouette with a static snow dusting that
+# never falls off. Fall and spring also keep a static scatter of fallen
+# leaves/petals at the trunk's base. Particles: in calm weather 1-2 leaves
+# (fall) / petals (spring) flutter from the canopy underside to the ground;
+# strong wind instead strips them off and streams them across the screen.
+# ---------------------------------------------------------------------------
+
+def season_from_month(month, southern):
+    """Meteorological season from a 1-12 month. Southern Hemisphere is offset
+    6 months from Northern (e.g. December is summer, not winter)."""
+    m = ((month - 1 + 6) % 12) + 1 if southern else month
+    if m == 12 or m <= 2:
+        return "winter"
+    if m <= 5:
+        return "spring"
+    if m <= 8:
+        return "summer"
+    return "fall"
+
+# sprite anchor: 10 wide x 16 tall, canopy rows 9..17, trunk 18..24, base
+# meeting the ground bar at y=25. All box/pixel tables below are tree-local
+# (col, row) with row 0 = screen y TREE_Y0.
+TREE_X0 = 0
+TREE_Y0 = 9
+TREE_TRUNK_COLOR = "#5b3a22"
+
+# trunk is two-toned to match the crown's light source (upper right): shadow
+# column on the left, lit column on the right, an asymmetric root flare
+# (wider on the left), and a couple of bare limb stubs poking out of the
+# crown's underside so the trunk visibly continues into the foliage.
+TREE_TRUNK_BOXES = [
+    (4, 9, 1, 6, "#4a2f1c"),  # shadow side
+    (5, 9, 1, 6, "#6f4a2a"),  # lit side
+    (2, 15, 5, 1, "#5b3a22"),  # root flare, wider left
+    (3, 9, 1, 1, "#5b3a22"),  # stub reaching into the crown's left underside
+    (6, 11, 1, 1, "#5b3a22"),  # low bare limb poking out to the right
+    (7, 10, 1, 1, "#5b3a22"),
+]
+
+# ground detail on the last row above the bar: a faint shadow strip under the
+# crown's spread (narrower for winter's bare tree) and a few grass-tuft
+# pixels flanking the trunk, tinted per season
+TREE_SHADOW_LEAFY = (0, 15, 10, 1)
+TREE_SHADOW_WINTER = (2, 15, 6, 1)
+TREE_SHADOW_COLOR = "#0d133040"
+TREE_GRASS_PX = [(1, 14), (1, 15), (8, 15)]
+TREE_GRASS_COLS = {
+    "spring": "#4a9a4a",
+    "summer": "#3f8f3f",
+    "fall": "#9a8a3a",
+    "winter": "#7a7568",
+}
+
+# leafy canopy (spring/summer/fall): one span (or two, where a notch or lump
+# breaks the outline) per row, deliberately asymmetric -- two top tufts, a
+# fuller left shoulder, a small low lump on the right -- so the crown reads
+# organic instead of a symmetric stacked dome.
+TREE_CANOPY_BOXES = [
+    (3, 0, 2, 1),
+    (6, 0, 1, 1),
+    (2, 1, 6, 1),
+    (1, 2, 8, 1),
+    (0, 3, 9, 1),
+    (0, 4, 10, 1),
+    (1, 5, 9, 1),
+    (1, 6, 8, 1),
+    (2, 7, 5, 1),
+    (8, 7, 1, 1),
+    (3, 8, 3, 1),
+]
+
+# directional shading, light from the upper right: shade boxes darken the
+# crown's lower-left underside, rim boxes brighten the top-right edge
+TREE_CANOPY_SHADE = [(0, 4, 1, 1), (1, 5, 1, 1), (1, 6, 2, 1), (2, 7, 2, 1), (3, 8, 3, 1)]
+TREE_CANOPY_RIM = [(6, 0, 1, 1), (6, 1, 2, 1), (7, 2, 2, 1), (8, 3, 1, 1), (8, 4, 2, 1), (9, 5, 1, 1)]
+
+# (shade, base, highlight) per season -- shade for the lower-left underside,
+# highlight for the sunlit top-right rim. Winter's trio colors the bare
+# branches instead: base wood plus lighter twig tips (shade unused).
+TREE_SEASON_COLORS = {
+    "spring": ("#d9a0bc", "#ffc9de", "#ffe0ee"),
+    "summer": ("#2e6b2e", "#3f8f3f", "#5aa85a"),
+    "fall": ("#a8551a", "#d97a26", "#e8a33d"),
+    "winter": ("#4a3c2e", "#5b4a3a", "#7a6a58"),
+}
+
+# fall only: mottled color patches (x, y, w, h, color) drawn over the base
+# canopy instead of the generic highlights -- golds, ambers, and deep reds so
+# the crown reads as mixed turning leaves, not one flat orange.
+TREE_FALL_PATCHES = [
+    (3, 0, 2, 1, "#f0c040"),
+    (2, 1, 2, 1, "#c8531f"),
+    (6, 1, 2, 1, "#f0c040"),
+    (1, 3, 2, 1, "#a83a28"),
+    (5, 2, 2, 1, "#e8a33d"),
+    (0, 4, 2, 1, "#f0c040"),
+    (4, 4, 2, 1, "#b5451f"),
+    (7, 5, 2, 1, "#e8a33d"),
+    (2, 6, 2, 1, "#c8531f"),
+    (5, 7, 2, 1, "#f0c040"),
+]
+
+# ground-scatter and airborne-leaf palettes (fall mixes the turning colors;
+# spring stays in the blossom pinks)
+TREE_LEAF_COLS = {
+    "fall": ["#e0742a", "#f0c040", "#b5451f", "#e8a33d"],
+    "spring": ["#ffc9de", "#ffe0ee"],
+}
+
+# winter: bare 1px branches -- a center leader and two arcing limbs forking
+# off the trunk top, with twigs, drawn pixel-by-pixel so the silhouette reads
+# veiny rather than blobby.
+TREE_BRANCH_PX = [
+    # left limb + twigs
+    (3, 8), (3, 7), (2, 6), (2, 5), (1, 4), (1, 3), (0, 2),
+    (3, 4), (3, 3), (2, 2),
+    # center leader (wiggles as it climbs)
+    (4, 8), (5, 8), (4, 7), (4, 6), (4, 5), (4, 4), (5, 3), (5, 2), (4, 1), (4, 0),
+    # right limb + twigs
+    (6, 8), (6, 7), (7, 6), (7, 5), (8, 4), (8, 3), (9, 2), (9, 1),
+    (6, 4), (6, 3), (7, 2),
+]
+TREE_BRANCH_TIPS = [(0, 2), (2, 2), (4, 0), (9, 1), (7, 2)]
+
+# static snow dusting resting on top of winter branches (it never falls off)
+TREE_SNOW_PX = [(1, 2), (3, 2), (5, 1), (8, 2), (2, 4), (7, 4)]
+
+# fallen leaves/petals scattered at the trunk base (fall + spring only), on
+# the last row above the ground bar, flanking the root flare
+TREE_SCATTER_PX = [(0, 15), (2, 15), (7, 15), (9, 15)]
+
+def _tree_box(x, y, w, h, col):
+    return render.Padding(pad = (TREE_X0 + x, TREE_Y0 + y, 0, 0), child = render.Box(width = w, height = h, color = col))
+
+def _tree_lean_box(x, y, w, h, col, lean):
+    """A crown box shifted `lean` px downwind, clipped at the left edge."""
+    nx = x + lean
+    if nx < 0:
+        w += nx
+        nx = 0
+    if w <= 0:
+        return None
+    return _tree_box(nx, y, w, h, col)
+
+def tree_widget(season, lean = 0, hide_tips = False):
+    """Static trunk + seasonal crown (built once; identical every frame).
+    `lean` shifts the crown (not the trunk) 1px downwind at windy tier+;
+    `hide_tips` omits winter's twig-tip pixels so tree_tip_sway_layer can
+    draw them animated instead."""
+    shade_col, main_col, hi_col = TREE_SEASON_COLORS[season]
+    shx, shy, shw, shh = TREE_SHADOW_WINTER if season == "winter" else TREE_SHADOW_LEAFY
+    children = [_tree_box(shx, shy, shw, shh, TREE_SHADOW_COLOR)]
+    for (x, y, w, h, col) in TREE_TRUNK_BOXES:
+        children.append(_tree_box(x, y, w, h, col))
+    for (x, y) in TREE_GRASS_PX:
+        children.append(_tree_box(x, y, 1, 1, TREE_GRASS_COLS[season]))
+    if season == "winter":
+        for (x, y) in TREE_BRANCH_PX:
+            is_tip = (x, y) in TREE_BRANCH_TIPS
+            if is_tip and hide_tips:
+                continue
+            b = _tree_lean_box(x, y, 1, 1, hi_col if is_tip else main_col, lean)
+            if b != None:
+                children.append(b)
+        for (x, y) in TREE_SNOW_PX:
+            b = _tree_lean_box(x, y, 1, 1, "#eef3fa", lean)
+            if b != None:
+                children.append(b)
+    else:
+        for (x, y, w, h) in TREE_CANOPY_BOXES:
+            b = _tree_lean_box(x, y, w, h, main_col, lean)
+            if b != None:
+                children.append(b)
+        for (x, y, w, h) in TREE_CANOPY_SHADE:
+            b = _tree_lean_box(x, y, w, h, shade_col, lean)
+            if b != None:
+                children.append(b)
+        if season == "fall":
+            for (x, y, w, h, col) in TREE_FALL_PATCHES:
+                b = _tree_lean_box(x, y, w, h, col, lean)
+                if b != None:
+                    children.append(b)
+        for (x, y, w, h) in TREE_CANOPY_RIM:
+            b = _tree_lean_box(x, y, w, h, hi_col, lean)
+            if b != None:
+                children.append(b)
+        if season != "summer":
+            cols = TREE_LEAF_COLS[season]
+            for i, (x, y) in enumerate(TREE_SCATTER_PX):
+                children.append(_tree_box(x, y, 1, 1, cols[i % len(cols)]))
+    return render.Stack(children = children)
+
+def tree_tip_sway_layer(frame, lean):
+    """Winter wind: the bare twig tips flick 1px side to side occasionally
+    (drawn here instead of in the static widget -- see hide_tips). Each tip
+    gates on its own integer-harmonic sin, so the rattle loops seamlessly."""
+    hi = TREE_SEASON_COLORS["winter"][2]
+    step = 2.0 * math.pi / N_FRAMES
+    children = []
+    for i, (x, y) in enumerate(TREE_BRANCH_TIPS):
+        s = math.sin(frame * step * (2 + i % 2) + i * 1.9)
+        flick = 1 if s > 0.55 else (-1 if s < -0.55 else 0)
+        nx = x + lean + flick
+        if nx < 0 or nx >= WIDTH:
+            continue
+        children.append(_tree_box(nx, y, 1, 1, hi))
+    if len(children) == 0:
+        return render.Box(width = 1, height = 1)
+    return render.Stack(children = children)
+
+# breeze rustle: a few crown pixels flicker to the highlight color once the
+# wind reaches breeze tier (1+), so the foliage reads alive without moving
+# the silhouette. Winter's bare branches never rustle.
+TREE_RUSTLE_PX = [(3, 1), (6, 2), (2, 4), (7, 4), (5, 6), (8, 5)]
+
+def tree_rustle_layer(frame, season, lean):
+    hi = TREE_SEASON_COLORS[season][2]
+    step = 2.0 * math.pi / N_FRAMES
+    children = []
+    for i, (x, y) in enumerate(TREE_RUSTLE_PX):
+        # integer-harmonic sin per pixel, so each flicker wraps seamlessly
+        if math.sin(frame * step * (2 + i % 3) + i * 2.1) < 0.35:
+            continue
+        col = "#f0c040" if season == "fall" and i % 2 == 0 else hi
+        nx = x + lean
+        if nx < 0 or nx >= WIDTH:
+            continue
+        children.append(_tree_box(nx, y, 1, 1, col))
+    if len(children) == 0:
+        return render.Box(width = 1, height = 1)
+    return render.Stack(children = children)
+
+# calm drop zone: canopy underside down to the ground bar edge. Each slot is
+# airborne only while its exact-wrap travel is inside the span (half its
+# cycle), so usually a single leaf/petal is falling at a time.
+TREE_DROP_Y0 = 18
+TREE_DROP_SPAN = 7  # rows 18..24
+TREE_DROP_SLOTS = [(3, 0), (6, 27)]  # (x0, frame phase)
+
+# blow-off launch rows: the canopy band the leaves tear away from; below
+# hurricane strength they sink as they cross, so they land lower than this
+TREE_BLOW_ROWS = [9, 12, 14, 10, 13, 15, 11]
+
+def tree_particle_layer(frame, season, tier, dx, drop_ok):
+    """Season + wind decide what leaves the tree: winter sheds nothing (snow
+    stays put); fall/spring drop 1-2 leaves/petals in calm air but stream them
+    across the screen at windy tier (2+); summer's green only lets go in a
+    gale (tier 3+). `drop_ok` is False when a low sun sits behind the tree --
+    a leaf fluttering through the sun disc and rays reads awkwardly, so the
+    calm drop is skipped (the fast screen-wide blow-off is unaffected)."""
+    if season == "winter":
+        return render.Box(width = 1, height = 1)
+    blow_tier = 3 if season == "summer" else 2
+    if tier >= blow_tier:
+        return _tree_blowoff_layer(frame, season, tier, dx)
+    if season == "summer" or not drop_ok:
+        return render.Box(width = 1, height = 1)
+    return _tree_calm_drop_layer(frame, season, dx)
+
+def _tree_calm_drop_layer(frame, season, dx):
+    """A leaf/petal detaches from the canopy underside and flutters the few
+    pixels down to the ground. Travel is `f*period // N_FRAMES` (exact-wrap,
+    like `_cloud_x`) over 2x the span; the second half is parked off-screen,
+    which is what keeps the drop sparse."""
+    cols = TREE_LEAF_COLS[season]
+    step = 2.0 * math.pi / N_FRAMES
+    period = TREE_DROP_SPAN * 2
+    children = []
+    for i, (x0, phase) in enumerate(TREE_DROP_SLOTS):
+        f = (frame + phase) % N_FRAMES
+        travel = f * period // N_FRAMES
+        if travel >= TREE_DROP_SPAN:
+            continue  # parked half of the cycle
+        y = TREE_DROP_Y0 + travel
+        wob = _rnd(1.0 * math.sin(f * step * 4 + i * 2))
+        lean = dx if travel > TREE_DROP_SPAN // 2 else 0
+        x = x0 + wob + lean
+        if x < 0 or x >= WIDTH or y < 0 or y >= HEIGHT:
+            continue
+        children.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 1, height = 1, color = cols[i % len(cols)])))
+    if len(children) == 0:
+        return render.Box(width = 1, height = 1)
+    return render.Stack(children = children)
+
+def _tree_blowoff_layer(frame, season, tier, dx):
+    """Wind strips leaves/petals off the tree and sends them streaming across
+    the whole screen (the canopy itself stays full -- the flyers sell it).
+    Horizontal travel is exact-wrap (`f*reps*period // N_FRAMES`) so the
+    stream loops seamlessly; vertical flutter uses integer-harmonic sin.
+    Below hurricane strength the leaves also sink as they cross -- steeper at
+    windy tier, flatter at gale -- so the flight reads as falling-and-drifting
+    rather than a flat horizontal streak; only tier 4 (55+ mph) pins them
+    straight across."""
+    if season == "summer":  # summer gale: green leaves torn loose
+        cols = ["#5aa85a", "#3f8f3f"]
+    else:
+        cols = TREE_LEAF_COLS[season]
+    n = 4 if tier == 2 else (5 if tier == 3 else 7)
+    reps = 2 + tier  # full screen crossings per loop
+    drop = 0 if tier >= 4 else (9 if tier == 2 else 5)  # sink over one crossing
+    period = WIDTH + 6
+    step = 2.0 * math.pi / N_FRAMES
+    children = []
+    for i in range(n):
+        f = (frame + i * 9) % N_FRAMES
+        travel = (f * reps * period // N_FRAMES) % period
+        x = travel - 3 if dx >= 0 else WIDTH + 2 - travel
+        sink = _rnd(drop * float(travel) / float(period))
+        y = TREE_BLOW_ROWS[i % len(TREE_BLOW_ROWS)] + sink + _rnd(1.2 * math.sin(f * step * 3 + i * 2))
+        if x < 0 or x >= WIDTH or y < 0 or y > 24:  # 25+ is behind the ground bar
+            continue
+        col = cols[i % len(cols)]
+        children.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 1, height = 1, color = col)))
+    if len(children) == 0:
+        return render.Box(width = 1, height = 1)
     return render.Stack(children = children)
 
 # ---------------------------------------------------------------------------
@@ -760,25 +1416,131 @@ def hurricane_spiral_layer(frame):
             children.append(render.Padding(pad = (x, y, 0, 0), child = render.Box(width = 1, height = 1, color = shade)))
     return render.Stack(children = children)
 
-def wind_flag(frame, tier, dx):
-    """Tiny flag on a pole for the ground bar. Flutters faster at higher tiers
-    and streams in the wind direction (dx). At calm the flag just droops."""
-    pole = render.Box(width = 1, height = 6, color = "#cfd6e8")
-    flag_col = "#ff6a5a"
+TORNADO_BODY = "#5b6373"
+TORNADO_DARK = "#3f4654"
+TORNADO_LITE = "#828b9c"
+
+def tornado_layer(frame, dx):
+    """A swaying, rotating funnel from the cloud base to the ground. Pivots at the
+    top (anchored to the clouds) and whips wider at the bottom, with a 1px bright
+    streak sliding across each row to suggest spin, plus dust kicking up at the base.
+    `dx` leans the funnel downwind."""
+    y_top = 3
+    y_bot = 24
+    wide = 9.0
+    narrow = 2.0
+    base_x = 30
+    step = 2.0 * math.pi / N_FRAMES
+    swing = 5.0 * math.sin(frame * step * 2.0)  # bottom whips back and forth
+    children = []
+    for y in range(y_top, y_bot + 1):
+        t = float(y - y_top) / float(y_bot - y_top)  # 0 top -> 1 bottom
+
+        # concave funnel: narrows quickly near the top, then tapers to the ground
+        w = _rnd(narrow + (wide - narrow) * (1.0 - t) * (1.0 - t))
+        if w < 1:
+            w = 1
+
+        # pivot at the top: horizontal sway + a curl grows toward the bottom,
+        # and the whole funnel leans downwind
+        off = swing * t + 2.0 * math.sin(frame * step + t * 3.5) * t + dx * 3.0 * t
+        x0 = base_x + _rnd(off) - w // 2
+        children.append(render.Padding(pad = (max(0, x0), y, 0, 0), child = render.Box(width = w, height = 1, color = TORNADO_BODY)))
+
+        # spin highlight: a bright pixel sliding across the funnel each frame
+        hx = x0 + (frame + y) % w
+        if hx >= 0 and hx < WIDTH:
+            children.append(render.Padding(pad = (max(0, hx), y, 0, 0), child = render.Box(width = 1, height = 1, color = TORNADO_LITE)))
+
+    # dust/debris kicking up around the base
+    for i in range(6):
+        ang = frame * 0.5 + i * 1.2
+        x = base_x + _rnd(swing) + _rnd(math.cos(ang) * (3 + i))
+        yb = y_bot - _rnd(abs(math.sin(ang)) * 2)
+        if x >= 0 and x < WIDTH and yb >= 0 and yb < HEIGHT:
+            children.append(render.Padding(pad = (x, yb, 0, 0), child = render.Box(width = 1, height = 1, color = TORNADO_DARK)))
+    return render.Stack(children = children)
+
+WINDSOCK_ORANGE = "#ff7a30"
+WINDSOCK_WHITE = "#e8ecf4"
+WINDSOCK_POLE = "#aab6d4"  # dimmer than the digits so the readout pops
+
+def wind_flag(frame, tier, dx, mph):
+    """Airport-style windsock for the ground bar, drawn as 1px-wide segments
+    (x, y, h, color) in a 7x6 local grid with the pole at x=0, mirrored for
+    leftward wind. The sock is a chunky tapered cone -- a 3px-tall mouth ring
+    thinning to a 1px tip -- in orange/white bands, and its lift angle maps
+    to the tier: hanging (calm), ~45 deg (breeze), near-horizontal with sag
+    (windy), taut and full-length with a whipping tip (gale/hurricane). A
+    sine bump travels out along the sock (integer-harmonic speed, so the
+    ripple loops seamlessly). The calm tier spans 0-12 mph, so it splits on
+    actual `mph`: dead-still air hangs limp with just a slow tip drift, but
+    light air (3+) swings the hanging sock like a pendulum -- bottom rows
+    swinging wider than the top, on two mixed integer harmonics so the
+    flutter reads as continuous, not a single flip per loop."""
+    step = 2.0 * math.pi / N_FRAMES
+    segs = [(0, 0, 6, WINDSOCK_POLE)]
     if tier <= 0:
-        # calm: the flag hangs straight down from the TOP of the pole.
-        # Row cross-aligns to the top, so a flag column placed beside the pole
-        # starts at the top and droops downward.
-        hang = render.Box(width = 1, height = 4, color = flag_col)
-        return render.Row(children = [pole, hang], cross_align = "start") if dx >= 0 else render.Row(children = [hang, pole], cross_align = "start")
-    step = max(1, 6 - tier)  # smaller step = faster flutter
-    ph = (frame // step) % 4
-    lens = [4, 3, 2, 3]
-    drop = [0, 1, 2, 1]
-    flag = render.Padding(pad = (0, drop[ph], 0, 0), child = render.Box(width = lens[ph], height = 2, color = flag_col))
-    if dx >= 0:
-        return render.Row(children = [pole, flag], cross_align = "start")
-    return render.Row(children = [flag, pole], cross_align = "start")
+        segs += [
+            (1, 0, 2, WINDSOCK_ORANGE),
+            (2, 0, 1, WINDSOCK_ORANGE),
+        ]
+        if mph >= 3:
+            # light air: a gentle pendulum swing traveling down the sock
+            s = 0.7 * math.sin(frame * step * 2) + 0.5 * math.sin(frame * step * 3)
+            segs += [
+                (1 + (1 if s > 0.5 else 0), 2, 1, WINDSOCK_WHITE),
+                (1 + (1 if s > 0.1 else 0), 3, 1, WINDSOCK_ORANGE),
+                (1 + (2 if s > 0.6 else (1 if s > -0.3 else 0)), 4, 1, WINDSOCK_WHITE),
+            ]
+        else:
+            # dead still: limp hang, tip drifting once across the loop
+            tip_x = 1 if math.sin(frame * step) >= 0 else 2
+            segs += [
+                (1, 2, 1, WINDSOCK_WHITE),
+                (1, 3, 1, WINDSOCK_ORANGE),
+                (tip_x, 4, 1, WINDSOCK_WHITE),
+            ]
+    else:
+        # traveling ripple: a bump moving out along the sock, faster per tier
+        speed = 1 + tier
+        r = []
+        for c in range(7):
+            r.append(1 if math.sin(frame * step * speed - c * 1.1) > 0.35 else 0)
+        if tier == 1:
+            # breeze: lifted ~45 deg, gently wiggling
+            segs += [
+                (1, 0, 3, WINDSOCK_ORANGE),
+                (2, 1 + r[2], 2, WINDSOCK_WHITE),
+                (3, 2 + r[3], 2, WINDSOCK_ORANGE),
+                (4, 4 + r[4], 1, WINDSOCK_WHITE),
+            ]
+        elif tier == 2:
+            # windy: streaming near-horizontal, sagging where the ripple runs
+            segs += [
+                (1, 0, 3, WINDSOCK_ORANGE),
+                (2, 0 + r[2], 2, WINDSOCK_WHITE),
+                (3, 1 + r[3], 2, WINDSOCK_ORANGE),
+                (4, 1 + r[4], 1, WINDSOCK_WHITE),
+                (5, 2 + r[5], 1, WINDSOCK_ORANGE),
+            ]
+        else:
+            # gale/hurricane: fully inflated and taut, tip whipping
+            whip = _rnd(1.0 + 1.4 * math.sin(frame * step * (3 + tier)))
+            whip = 0 if whip < 0 else (2 if whip > 2 else whip)
+            segs += [
+                (1, 0, 3, WINDSOCK_ORANGE),
+                (2, 0, 2, WINDSOCK_WHITE),
+                (3, 0 + r[3], 2, WINDSOCK_ORANGE),
+                (4, r[4], 1, WINDSOCK_WHITE),
+                (5, r[5], 1, WINDSOCK_ORANGE),
+                (6, whip, 1, WINDSOCK_WHITE),
+            ]
+    children = []
+    for (x, y, h, col) in segs:
+        nx = 6 - x if dx < 0 else x
+        children.append(render.Padding(pad = (nx, y, 0, 0), child = render.Box(width = 1, height = h, color = col)))
+    return render.Stack(children = children)
 
 # ---------------------------------------------------------------------------
 # Severe-weather alerts: a pulsing corner badge, color by level.
@@ -796,6 +1558,23 @@ def alert_level_from_severity(severities):
         if s == "Severe" and level < 2:
             level = 2
     return level
+
+def alert_from_features(features):
+    """NWS alert GeoJSON features -> (level, event headline). The headline is
+    the `event` field (e.g. "Tornado Warning") of the alert matching the
+    highest severity found; ("", 0) if nothing serious is active."""
+    sevs = []
+    for ft in features:
+        sevs.append(ft.get("properties", {}).get("severity", ""))
+    level = alert_level_from_severity(sevs)
+    if level == 0:
+        return 0, ""
+    want = "Extreme" if level == 3 else "Severe"
+    for ft in features:
+        props = ft.get("properties", {})
+        if props.get("severity", "") == want:
+            return level, props.get("event", "")
+    return level, ""
 
 def storm_incoming(codes):
     """True if any upcoming hourly WMO code is a thunderstorm (>= 95)."""
@@ -851,6 +1630,54 @@ def alert_badge(frame, level):
         render.Padding(pad = (3, 4, 0, 0), child = render.Box(width = 1, height = 1, color = "#2a1c00")),
     ])
     return render.Stack(children = [triangle, exclaim])
+
+# Last slice of the loop: the scene dims and the alert headline fades in on
+# top, so the pixels "fade away" to reveal what the advisory actually says,
+# then the loop wraps back to the normal live scene.
+ALERT_FADE_FRAMES = 30
+
+def alert_fade_progress(frame):
+    """0..1 ramp over the last ALERT_FADE_FRAMES frames of the loop; 0 before that."""
+    start = N_FRAMES - ALERT_FADE_FRAMES
+    if frame < start:
+        return 0.0
+    span = ALERT_FADE_FRAMES - 1
+    return (frame - start) / float(span) if span > 0 else 1.0
+
+def alert_reveal_layer(frame, alert_text):
+    """Dims the whole scene and fades in the alert headline, centered, near
+    the end of the loop. Both ramps finish early in the window (dim by 20%,
+    text by 35%) so the headline holds at full legibility for most of the
+    window instead of just flashing on the last frame or two.
+
+    Uses `render.WrappedText` in "tb-8" rather than hand-rolling a char-budget
+    wrap in "tom-thumb": tom-thumb draws N and M almost identically at this
+    pixel size (confirmed by rendering "NM MN" in it -- both read as "MM MM"),
+    which made headlines like "WARNING" misread as "WARMING". WrappedText
+    also wraps by actual glyph width instead of a guessed character count, so
+    it centers correctly even though tb-8 isn't monospace."""
+    t = alert_fade_progress(frame)
+    if t <= 0.0 or alert_text == "":
+        return render.Box(width = 1, height = 1)
+    dim_t = t / 0.2
+    dim_t = 1.0 if dim_t > 1.0 else dim_t
+    dim = _hex2(_rnd(dim_t * 210))
+    children = [render.Box(width = WIDTH, height = HEIGHT, color = "#000000" + dim)]
+    text_t = (t - 0.1) / 0.25
+    text_t = 0.0 if text_t < 0.0 else (1.0 if text_t > 1.0 else text_t)
+    if text_t > 0.0:
+        col = "#ffe28a" + _hex2(_rnd(text_t * 255))
+        children.append(render.Box(
+            width = WIDTH,
+            height = HEIGHT,
+            child = render.Column(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = [render.WrappedText(content = alert_text, font = "tb-8", color = col, width = WIDTH - 2, align = "center", linespacing = 1)],
+            ),
+        ))
+    return render.Stack(children = children)
 
 # ---------------------------------------------------------------------------
 # Main
@@ -909,9 +1736,16 @@ def _nws_val(obj):
         return None
     return obj.get("value")
 
+NWS_STATION_TRIES = 3  # nearby stations to try if the closest one's latest
+# reading is temporarily incomplete (common METAR gap between report cycles)
+
 def _fetch_nws_obs(lat, lng, units):
     """US station observation (real conditions). Crawl point -> station ->
-    latest. Returns a scene+temp+wind struct, or None to fall back."""
+    latest, trying up to NWS_STATION_TRIES nearby stations in case the
+    closest one's latest reading is missing its temperature (a station can
+    report on schedule with a null value between cycles -- not a network
+    failure, just an incomplete observation). Returns a scene+temp+wind
+    struct, or None to fall back."""
     pt = http.get(NWS_POINTS_URL % (_fmt4(lat), _fmt4(lng)), headers = NWS_HEADERS, ttl_seconds = 86400)
     if pt.status_code != 200:
         return None
@@ -924,44 +1758,49 @@ def _fetch_nws_obs(lat, lng, units):
     feats = st.json().get("features", [])
     if len(feats) == 0:
         return None
-    sid = feats[0].get("properties", {}).get("stationIdentifier")
-    if sid == None:
-        return None
-    ob = http.get(NWS_OBS_URL % sid, headers = NWS_HEADERS, ttl_seconds = 300)
-    if ob.status_code != 200:
-        return None
-    props = ob.json().get("properties")
-    if props == None:
-        return None
 
-    t = _nws_val(props.get("temperature"))
-    if t == None:
-        return None  # no usable observation -> fall back to Open-Meteo
-    temp = int(t * 9.0 / 5.0 + 32 + 0.5) if units == "fahrenheit" else int(t + 0.5)
+    for feat in feats[:NWS_STATION_TRIES]:
+        sid = feat.get("properties", {}).get("stationIdentifier")
+        if sid == None:
+            continue
+        ob = http.get(NWS_OBS_URL % sid, headers = NWS_HEADERS, ttl_seconds = 300)
+        if ob.status_code != 200:
+            continue
+        props = ob.json().get("properties")
+        if props == None:
+            continue
+        t = _nws_val(props.get("temperature"))
+        if t == None:
+            continue  # this station's latest reading is incomplete -- try the next
+        temp = int(t * 9.0 / 5.0 + 32 + 0.5) if units == "fahrenheit" else int(t + 0.5)
 
-    ws = _nws_val(props.get("windSpeed"))  # km/h
-    wind = 0.0
-    if ws != None:
-        wind = ws * 0.621371 if units == "fahrenheit" else ws
-    wd = _nws_val(props.get("windDirection"))
-    wind_dir = wd if wd != None else 0.0
+        ws = _nws_val(props.get("windSpeed"))  # km/h
+        wind = 0.0
+        if ws != None:
+            wind = ws * 0.621371 if units == "fahrenheit" else ws
+        wd = _nws_val(props.get("windDirection"))
+        wind_dir = wd if wd != None else 0.0
 
-    amounts = []
-    for cl in props.get("cloudLayers", []):
-        a = cl.get("amount")
-        if a != None:
-            amounts.append(a)
-    weathers = []
-    for pw in props.get("presentWeather", []):
-        w = pw.get("weather")
-        if w != None:
-            weathers.append((w, pw.get("intensity")))
-    sc = nws_scene(amounts, weathers)
-    return struct(clouds = sc.clouds, precip = sc.precip, fog = sc.fog, storm = sc.storm, level = sc.level, temp = temp, wind = wind, wind_dir = wind_dir)
+        amounts = []
+        for cl in props.get("cloudLayers", []):
+            a = cl.get("amount")
+            if a != None:
+                amounts.append(a)
+        weathers = []
+        for pw in props.get("presentWeather", []):
+            w = pw.get("weather")
+            if w != None:
+                weathers.append((w, pw.get("intensity")))
+        sc = nws_scene(amounts, weathers)
+        return struct(clouds = sc.clouds, precip = sc.precip, fog = sc.fog, storm = sc.storm, smoke = sc.smoke, level = sc.level, temp = temp, wind = wind, wind_dir = wind_dir)
+
+    return None  # none of the tried stations had a usable reading -> fall back
 
 def _live_inputs(config, units):
     """Real sky: sun math (local) + weather (network, fail-soft).
-    Source is NWS station obs in the US (Auto/NWS), else Open-Meteo.
+    Source is NWS station obs in the US (Auto/NWS), else Open-Meteo -- and
+    Open-Meteo is only fetched when NWS didn't cover it, so an Open-Meteo
+    outage can't take down a render NWS already handled.
     Returns (elev, frac, is_day, wx, temp, phase)."""
     loc = json.decode(config.get("location", DEFAULT_LOCATION))
     lat = float(loc["lat"])
@@ -992,25 +1831,38 @@ def _live_inputs(config, units):
     qlat = _snap(lat)
     qlng = _snap(lng)
 
-    # Open-Meteo always runs: it's the global fallback and the source of the
-    # hourly "storm approaching" peek (NWS observations don't forecast).
-    om = _fetch_open_meteo(qlat, qlng)
-
-    # official NWS alerts (US-only, fail-soft). Network errors -> no alert.
-    alert = 0
-    ar = http.get(NWS_ALERTS_URL % (_fmt4(qlat), _fmt4(qlng)), headers = NWS_HEADERS, ttl_seconds = 300)
-    if ar.status_code == 200:
-        sevs = []
-        for ft in ar.json().get("features", []):
-            sevs.append(ft.get("properties", {}).get("severity", ""))
-        alert = alert_level_from_severity(sevs)
-    if alert == 0 and om.incoming:
-        alert = 1  # softer "storm approaching" cue
-
     # Scene/temp/wind: prefer real US station obs (NWS), else Open-Meteo.
+    # Open-Meteo is only fetched when it's actually needed -- NWS failed (or
+    # covers nothing at this location), or the user explicitly picked it --
+    # NOT unconditionally like before. Starlark has no try/except: a hard
+    # network failure inside http.get (DNS, timeout, connection refused)
+    # aborts the whole script, status_code checks never get a chance to run.
+    # So the only real defense against a down endpoint is to not call it when
+    # its data isn't needed, which also means a healthy NWS path now survives
+    # an Open-Meteo outage instead of crashing on a fetch nothing uses.
     nws = None
     if source != "openmeteo":
         nws = _fetch_nws_obs(qlat, qlng, units)
+
+    om = None
+    if nws == None:
+        om = _fetch_open_meteo(qlat, qlng)
+        if not om.ok and source == "openmeteo":
+            # explicit Open-Meteo pick came back with a clean HTTP error (a
+            # hard network failure would have aborted above already) --
+            # failover to NWS rather than show nothing.
+            nws = _fetch_nws_obs(qlat, qlng, units)
+
+    # official NWS alerts (US-only, fail-soft). Network errors -> no alert.
+    alert = 0
+    alert_text = ""
+    ar = http.get(NWS_ALERTS_URL % (_fmt4(qlat), _fmt4(qlng)), headers = NWS_HEADERS, ttl_seconds = 300)
+    if ar.status_code == 200:
+        alert, alert_text = alert_from_features(ar.json().get("features", []))
+    if alert == 0 and om != None and om.incoming:
+        alert = 1  # softer "storm approaching" cue -- an Open-Meteo-only
+        # signal, so it's unavailable on the render passes where NWS already
+        # covered the scene and Open-Meteo was skipped entirely (see above).
 
     if nws != None:
         clouds = nws.clouds
@@ -1018,6 +1870,7 @@ def _live_inputs(config, units):
         plevel = nws.level
         fog = nws.fog
         storm = nws.storm
+        smoke = nws.smoke
         temp = nws.temp
         wind = nws.wind
         wind_dir = nws.wind_dir
@@ -1030,6 +1883,7 @@ def _live_inputs(config, units):
         plevel = precip_level(precip, om.precip_mm, om.snow_mm, om.code)
         fog = base.fog
         storm = base.storm
+        smoke = False  # Open-Meteo's weather code has no smoke category
 
         # convert canonical metric -> display units, rounding only after convert
         temp = None if om.temp == None else (int(om.temp * 9.0 / 5.0 + 32 + 0.5) if units == "fahrenheit" else int(om.temp + 0.5))
@@ -1038,7 +1892,16 @@ def _live_inputs(config, units):
 
     # seed for cloud arrangement; changes hourly so the sky isn't always identical
     cloud_seed = (now.month * 31 + now.day) * 24 + now.hour
-    wx = struct(clouds = clouds, precip = precip, precip_level = plevel, fog = fog, storm = storm, wind = wind, wind_dir = wind_dir, alert = alert, cloud_seed = cloud_seed)
+
+    # heat haze: hot, bright, clear-enough daytime air (Fahrenheit-equivalent
+    # regardless of display units, since the trigger threshold is fixed).
+    temp_f = None if temp == None else (float(temp) if units == "fahrenheit" else temp * 9.0 / 5.0 + 32)
+    heat_haze = _heat_haze_auto(is_day, temp_f, clouds, fog, storm, smoke, precip)
+
+    # seasonal tree: real meteorological season, hemisphere-aware from latitude
+    season = season_from_month(now.month, lat < 0)
+
+    wx = struct(clouds = clouds, precip = precip, precip_level = plevel, fog = fog, storm = storm, smoke = smoke, wind = wind, wind_dir = wind_dir, alert = alert, alert_text = alert_text, cloud_seed = cloud_seed, tornado = False, aurora = False, heat_haze = heat_haze, season = season)
     return elev, frac, is_day, wx, temp, phase
 
 def _num(config, key, default):
@@ -1068,22 +1931,45 @@ def _num(config, key, default):
 # Fields: elev (°), arc (0-100), phase (0-100), clouds (0-4),
 #         precip ("none"/"rain"/"snow"), precip_level (1 light/2 mod/3 heavy),
 #         fog, storm, temp (°F), wind (mph),
-#         alert (0 none / 1 approaching / 2 severe / 3 extreme).
+#         alert (0 none / 1 approaching / 2 severe / 3 extreme),
+#         season (optional: the season the tree implies while the Season dial
+#         is Auto; neutral presets omit it and leave season to the Month dial).
 PRESETS = {
-    "thunderstorm": struct(elev = 2, arc = 55, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 66, wind = 30, alert = 2),
-    "night_thunderstorm": struct(elev = -16, arc = 55, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 61, wind = 28, alert = 2),
-    "blizzard": struct(elev = 8, arc = 50, phase = 50, clouds = 4, precip = "snow", precip_level = 3, fog = True, storm = False, temp = 14, wind = 36, alert = 2),
-    "gentle_snow": struct(elev = -18, arc = 50, phase = 30, clouds = 2, precip = "snow", precip_level = 1, fog = False, storm = False, temp = 27, wind = 6, alert = 0),
+    "thunderstorm": struct(elev = 2, arc = 55, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 66, wind = 30, alert = 2, alert_text = "Severe Thunderstorm Warning"),
+    "night_thunderstorm": struct(elev = -16, arc = 55, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 61, wind = 28, alert = 2, alert_text = "Severe Thunderstorm Warning"),
+    "blizzard": struct(elev = 8, arc = 50, phase = 50, clouds = 4, precip = "snow", precip_level = 3, fog = True, storm = False, temp = 14, wind = 36, alert = 2, alert_text = "Winter Storm Warning", season = "winter"),
+    "gentle_snow": struct(elev = -18, arc = 50, phase = 30, clouds = 2, precip = "snow", precip_level = 1, fog = False, storm = False, temp = 27, wind = 6, alert = 0, season = "winter"),
     "overcast_drizzle": struct(elev = 14, arc = 45, phase = 50, clouds = 4, precip = "rain", precip_level = 1, fog = False, storm = False, temp = 54, wind = 16, alert = 0),
     "foggy_morning": struct(elev = 5, arc = 18, phase = 50, clouds = 2, precip = "none", precip_level = 0, fog = True, storm = False, temp = 47, wind = 3, alert = 0),
     "sunrise": struct(elev = 1, arc = 10, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 51, wind = 5, alert = 0),
     "golden_hour": struct(elev = 3, arc = 84, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 72, wind = 7, alert = 0),
-    "heatwave": struct(elev = 72, arc = 50, phase = 50, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 101, wind = 4, alert = 0),
+    "heatwave": struct(elev = 72, arc = 50, phase = 50, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 101, wind = 4, alert = 0, season = "summer"),
     "starry_night": struct(elev = -45, arc = 50, phase = 50, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 44, wind = 2, alert = 0),
     "crescent_moon": struct(elev = -30, arc = 68, phase = 10, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 49, wind = 3, alert = 0),
-    "harvest_moon": struct(elev = -6, arc = 88, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 58, wind = 5, alert = 0),
-    "hurricane": struct(elev = 6, arc = 50, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 79, wind = 90, alert = 3),
+    "harvest_moon": struct(elev = -6, arc = 88, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 58, wind = 5, alert = 0, season = "fall"),
+    "hurricane": struct(elev = 6, arc = 50, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 79, wind = 90, alert = 3, alert_text = "Hurricane Warning", season = "summer"),
+    "tornado": struct(elev = 7, arc = 50, phase = 50, clouds = 4, precip = "rain", precip_level = 2, fog = False, storm = True, temp = 74, wind = 46, alert = 3, tornado = True, alert_text = "Tornado Warning", season = "spring"),
+    "ice_storm": struct(elev = 10, arc = 45, phase = 50, clouds = 4, precip = "ice", precip_level = 3, fog = False, storm = False, temp = 30, wind = 18, alert = 2, alert_text = "Ice Storm Warning", season = "winter"),
+    "sleet": struct(elev = 12, arc = 50, phase = 50, clouds = 4, precip = "sleet", precip_level = 2, fog = False, storm = False, temp = 33, wind = 14, alert = 0, season = "winter"),
+    "hailstorm": struct(elev = 5, arc = 55, phase = 50, clouds = 4, precip = "hail", precip_level = 3, fog = False, storm = True, temp = 68, wind = 28, alert = 2, alert_text = "Severe Thunderstorm Warning"),
+    "wildfire": struct(elev = 18, arc = 60, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 96, wind = 8, alert = 1, smoke = True, season = "summer"),
+    "aurora": struct(elev = -30, arc = 50, phase = 8, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 18, wind = 4, alert = 0, aurora = True, season = "winter"),
 }
+
+def _demo_season(config, implied = None):
+    """Season dial: an explicit choice wins outright; on 'auto' a seasonal
+    preset's implied season (blizzard -> winter, heatwave -> summer, ...)
+    applies if one was given, else it derives from the Month dial (Southern
+    Hemisphere if a negative override latitude is set)."""
+    choice = config.get("demo_season", "auto")
+    if choice != "auto":
+        return choice
+    if implied != None:
+        return implied
+    month = int(_num(config, "demo_month", 6.0))
+    lat_s = config.get("demo_lat", "").strip()
+    southern = _num(config, "demo_lat", 0.0) < 0 if lat_s != "" else False
+    return season_from_month(month, southern)
 
 def _demo_inputs(config, units):
     """Simulator: deterministic, offline overrides for every render input.
@@ -1098,6 +1984,7 @@ def _demo_inputs(config, units):
     preset = config.get("demo_preset", "custom")
     if preset != "custom" and preset in PRESETS:
         p = PRESETS[preset]
+        season = _demo_season(config, getattr(p, "season", None))
         frac = min(1.0, max(0.0, p.arc / 100.0))
         phase = min(1.0, max(0.0, p.phase / 100.0))
         precip = None if p.precip == "none" else p.precip
@@ -1105,9 +1992,16 @@ def _demo_inputs(config, units):
         # preset wind is stored in mph; show it in the user's display unit
         wind_disp = p.wind if units == "fahrenheit" else p.wind / 0.621371
         plevel = p.precip_level if precip != None else 0
-        wx = struct(clouds = p.clouds, precip = precip, precip_level = plevel, fog = p.fog, storm = p.storm, wind = wind_disp, wind_dir = 270.0, alert = p.alert, cloud_seed = 0)
+
+        # heat haze: auto from the preset's own temp/sky, OR forced by the demo
+        # toggle (so you can preview the shimmer over any preset/dial combo).
+        temp_f = p.temp if units == "fahrenheit" else p.temp * 9.0 / 5.0 + 32
+        heat_haze = _heat_haze_auto(p.elev > 0, temp_f, p.clouds, p.fog, p.storm, getattr(p, "smoke", False), precip) or config.bool("demo_heat_haze", False)
+
+        wx = struct(clouds = p.clouds, precip = precip, precip_level = plevel, fog = p.fog, storm = p.storm, smoke = getattr(p, "smoke", False), wind = wind_disp, wind_dir = 270.0, alert = p.alert, alert_text = getattr(p, "alert_text", ""), cloud_seed = 0, tornado = getattr(p, "tornado", False), aurora = getattr(p, "aurora", False), heat_haze = heat_haze, season = season)
         return p.elev, frac, p.elev > 0, wx, p.temp, phase
 
+    season = _demo_season(config)
     lat_s = config.get("demo_lat", "").strip()
     lng_s = config.get("demo_lng", "").strip()
     if lat_s != "" and lng_s != "":
@@ -1134,12 +2028,21 @@ def _demo_inputs(config, units):
     plevel = int(_num(config, "demo_precip_level", 2.0)) if precip != None else 0
     fog = config.bool("demo_fog", False)
     storm = config.bool("demo_storm", False)
+    smoke = config.bool("demo_smoke", False)
+    tornado = config.bool("demo_tornado", False)
+    aurora = config.bool("demo_aurora", False)
     wind = _num(config, "demo_wind", 10.0)
     wind_dir = _num(config, "demo_wind_dir", 270.0)
     alert = int(_num(config, "demo_alert", 0.0))
+    alert_text = config.get("demo_alert_text", "").strip() if alert >= 2 else ""
     cloud_seed = int(_num(config, "demo_cloud_seed", 0.0))
-    wx = struct(clouds = clouds, precip = precip, precip_level = plevel, fog = fog, storm = storm, wind = wind, wind_dir = wind_dir, alert = alert, cloud_seed = cloud_seed)
     temp = int(_num(config, "demo_temp", 63.0))
+
+    # heat haze: auto from the dialed temp/sky, OR forced by the demo toggle.
+    temp_f = float(temp) if units == "fahrenheit" else temp * 9.0 / 5.0 + 32
+    heat_haze = _heat_haze_auto(is_day, temp_f, clouds, fog, storm, smoke, precip) or config.bool("demo_heat_haze", False)
+
+    wx = struct(clouds = clouds, precip = precip, precip_level = plevel, fog = fog, storm = storm, smoke = smoke, wind = wind, wind_dir = wind_dir, alert = alert, alert_text = alert_text, cloud_seed = cloud_seed, tornado = tornado, aurora = aurora, heat_haze = heat_haze, season = season)
     return elev, frac, is_day, wx, temp, phase
 
 def main(config):
@@ -1171,19 +2074,23 @@ def main(config):
     if elev < 0:
         star_bright = min(1.0, -elev / 12.0)
 
-    # hide stars under heavy cloud, fog, OR any falling precip -- otherwise white
-    # snow/rain at night reads as "falling stars" (you can't see stars through it)
-    if wx.clouds >= 3 or wx.fog or wx.precip != None:
+    # hide stars under heavy cloud, fog, smoke, OR any falling precip -- otherwise
+    # white snow/rain at night reads as "falling stars" (can't see stars through it)
+    if wx.clouds >= 3 or wx.fog or wx.smoke or wx.precip != None:
         star_bright = 0.0
 
-    palette = sky_palette(elev, is_day, wx.fog, wx.clouds, wx.storm, wx.precip)
+    palette = sky_palette(elev, is_day, wx.fog, wx.clouds, wx.storm, wx.precip, wx.smoke)
     cloud_color = "#e9edf2" if is_day else "#3c4258"
     cloud_hi = "#ffffff" if is_day else "#565e78"
 
     # Flat-grey-sky scenes (clouds >= 4 or storm -> see sky_palette): the sky is
     # light grey, so dark storm clouds with only a muted (non-white) highlight
     # read clearly without bright rims -- overcast/thunderstorm/blizzard/hurricane.
-    if wx.clouds >= 4 or wx.storm:
+    if wx.smoke:
+        # wildfire murk: clouds are smoke-stained brown-grey, not bright white
+        cloud_color = "#8a6a4e" if is_day else "#3a2c20"
+        cloud_hi = "#9c7a5a" if is_day else "#473628"
+    elif wx.clouds >= 4 or wx.storm:
         cloud_color = "#565d6b" if is_day else "#444b5a"
         cloud_hi = "#636b7a" if is_day else "#525a6b"
     elif wx.precip != None or wx.clouds >= 3:
@@ -1195,9 +2102,11 @@ def main(config):
     cx, cy = arc_position(frac)
     body = None
     bx, by = cx, cy
-    kind = sky_body_kind(is_day, wx.fog, wx.clouds, wx.precip)
+    kind = sky_body_kind(is_day, wx.fog, wx.clouds, wx.precip, wx.smoke)
     if kind == "sun":
         body = sun_widget()
+    elif kind == "ember":
+        body = sun_ember_widget()
     elif kind == "glow":
         body = sun_glow_widget()
         bx, by = max(0, cx - 2), max(0, cy - 2)  # center the wider glow on the sun
@@ -1219,9 +2128,11 @@ def main(config):
             render.Padding(pad = (0, 25, 0, 0), child = render.Box(width = WIDTH, height = 7, color = "#0d1330e6")),
             render.Padding(pad = (0, 25, 0, 0), child = render.Box(width = WIDTH, height = 1, color = "#48568a")),
         ]
+        temp_w = 0
         if have_temp:
             unit_mark = "F" if units == "fahrenheit" else "C"
             label = "%d°%s" % (temp, unit_mark)
+            temp_w = len(label)
             tf = temp if units == "fahrenheit" else temp * 9.0 / 5.0 + 32
             if tf >= 90:
                 tint = "#ff9e6b"
@@ -1234,15 +2145,31 @@ def main(config):
             else:
                 tint = "#9fd1ff"
             bar_kids.append(render.Padding(pad = (2, 26, 0, 0), child = render.Text(label, font = "tom-thumb", color = tint)))
+
+        # weather glyph just right of the temperature (or far left if temp hidden)
+        spec = condition_icon(wx, tier)
+        if spec != None:
+            irows, icol = spec
+            ix = 2 + temp_w * 4 + 1 if have_temp else 2
+            ix = 24 if ix > 24 else ix
+            bar_kids.append(_draw_icon(irows, icol, ix, 26))
         if have_wind:
+            # number first at a fixed x, sock after it with a constant 2px
+            # gap -- the sock streams into open space instead of crowding the
+            # digits (which it did when it sat between icon and number).
             wnum = str(int(wx.wind + 0.5))
-            bar_kids.append(render.Padding(pad = (39, 26, 0, 0), child = render.Text(wnum, font = "tom-thumb", color = "#bcd0ee")))
+            bar_kids.append(render.Padding(pad = (33, 26, 0, 0), child = render.Text(wnum, font = "tom-thumb", color = "#bcd0ee")))
+            sock_x = 33 + 4 * len(wnum) + 1
         bar_static = render.Stack(children = bar_kids)
 
     # Sun rays: only on the crisp daytime sun, scaled by elevation so a low
     # sunrise/sunset sun is a short soft orb and a high midday sun beams. The
     # Off/Subtle/Bold mode sets ray count, base reach, and shimmer breadth.
     draw_rays = rays_mode != "off" and kind == "sun"
+
+    # aurora is a night phenomenon: only paint it once the sun is down and the
+    # sky isn't washed out by cloud/fog/smoke/precip (same conditions as stars)
+    show_aurora = wx.aurora and not is_day and not (wx.clouds >= 3 or wx.fog or wx.smoke or wx.precip != None)
     ray_n, ray_base, ray_amp = 0, 0, 0
     orb = None
     orb_px, orb_py = 0, 0
@@ -1267,6 +2194,27 @@ def main(config):
             orb_px = max(0, bx + 3 - outer // 2)  # center the orb on the sun disc
             orb_py = max(0, by + 3 - outer // 2)
 
+    # severe alerts (level >= 2, i.e. an official NWS Severe/Extreme warning)
+    # carry a real headline for the end-of-loop reveal; WrappedText does its
+    # own wrapping, so just uppercase it (capped defensively -- it's an
+    # external API field -- though real NWS event names are always short).
+    alert_text = ""
+    if wx.alert >= 2 and wx.alert_text != "":
+        alert_text = wx.alert_text.upper()[:60]
+
+    # seasonal tree: static trunk+crown built once; particles animate per
+    # frame. At windy tier+ the crown leans 1px downwind; in winter wind the
+    # twig tips leave the static widget and rattle in tree_tip_sway_layer.
+    tree_lean = dx if tier >= 2 else 0
+    winter_sway = wx.season == "winter" and tier >= 1
+    tree = tree_widget(wx.season, tree_lean, winter_sway)
+
+    # a low sun (or its foggy/smoky stand-in) sitting behind the tree: skip the
+    # calm leaf drop -- a leaf fluttering through the disc and rays looks odd.
+    # The body is 7x7 at (bx, by); pad ~4px for the ray reach, then test overlap
+    # with the tree's airspace (x 0..9, y TREE_Y0..24).
+    drop_ok = not (kind in ("sun", "ember", "glow") and bx <= 13 and by + 10 >= TREE_Y0 and by <= 28)
+
     # --- build animation frames ---
     frames = []
     for f in range(N_FRAMES):
@@ -1274,6 +2222,8 @@ def main(config):
             sky_background(palette),
             star_layer(f, star_bright),
         ]
+        if show_aurora:
+            layers.append(aurora_layer(f))
         if orb != None:
             layers.append(render.Padding(pad = (orb_px, orb_py, 0, 0), child = orb))
         if draw_rays:
@@ -1284,20 +2234,32 @@ def main(config):
             layers.append(cloud_layer(f, cloud_plan, cloud_color, cloud_hi, cloud_wraps, lean, dx))
         if wx.precip != None:
             layers.append(precip_layer(f, wx.precip, wx.precip_level))
+        if wx.heat_haze:
+            layers.append(heat_haze_layer(f))
+        layers.append(tree)
+        if winter_sway:
+            layers.append(tree_tip_sway_layer(f, tree_lean))
+        elif tier >= 1:
+            layers.append(tree_rustle_layer(f, wx.season, tree_lean))
+        layers.append(tree_particle_layer(f, wx.season, tier, dx, drop_ok))
         if tier >= 2:
             layers.append(wind_streak_layer(f, tier, dx))
         if tier >= 3:
             layers.append(debris_layer(f, tier, dx))
         if tier >= 4:
             layers.append(hurricane_spiral_layer(f))
+        if wx.tornado:
+            layers.append(tornado_layer(f, dx))
         if wx.storm:
             layers.append(lightning_layer(f))
         if bar_static != None:
             layers.append(bar_static)
         if have_wind:
-            layers.append(render.Padding(pad = (33, 26, 0, 0), child = wind_flag(f, tier, dx)))
+            layers.append(render.Padding(pad = (sock_x, 26, 0, 0), child = wind_flag(f, tier, dx, wind_mph)))
         if wx.alert > 0:
             layers.append(render.Padding(pad = (WIDTH - 8, 26, 0, 0), child = alert_badge(f, wx.alert)))
+        if alert_text != "":
+            layers.append(alert_reveal_layer(f, alert_text))
         frames.append(render.Stack(children = layers))
 
     return render.Root(
@@ -1331,6 +2293,12 @@ def _demo_fields(demo_on):
                 schema.Option(display = "🌙 Crescent moon", value = "crescent_moon"),
                 schema.Option(display = "🌕 Harvest moon", value = "harvest_moon"),
                 schema.Option(display = "🌀 Hurricane", value = "hurricane"),
+                schema.Option(display = "🌪 Tornado", value = "tornado"),
+                schema.Option(display = "🧊 Ice storm", value = "ice_storm"),
+                schema.Option(display = "🌨 Sleet", value = "sleet"),
+                schema.Option(display = "🧊 Hail", value = "hailstorm"),
+                schema.Option(display = "🔥 Wildfire smoke", value = "wildfire"),
+                schema.Option(display = "🌌 Aurora", value = "aurora"),
             ],
         ),
         schema.Text(
@@ -1353,6 +2321,20 @@ def _demo_fields(demo_on):
             desc = "0 = new, 50 = full, 100 = new again. Visible when elevation is below 0.",
             icon = "moon",
             default = "50",
+        ),
+        schema.Dropdown(
+            id = "demo_season",
+            name = "Season (tree)",
+            desc = "Auto follows a seasonal preset's implied season (blizzard = winter, heatwave = summer, ...) or else the Month dial below (Southern Hemisphere if a negative override latitude is set); pick one directly to preview it regardless of preset or month.",
+            icon = "tree",
+            default = "auto",
+            options = [
+                schema.Option(display = "Auto (from month)", value = "auto"),
+                schema.Option(display = "🌸 Spring", value = "spring"),
+                schema.Option(display = "☀️ Summer", value = "summer"),
+                schema.Option(display = "🍂 Fall", value = "fall"),
+                schema.Option(display = "❄️ Winter", value = "winter"),
+            ],
         ),
         schema.Dropdown(
             id = "demo_clouds",
@@ -1378,13 +2360,16 @@ def _demo_fields(demo_on):
         schema.Dropdown(
             id = "demo_precip",
             name = "Precipitation",
-            desc = "Falling rain or snow.",
+            desc = "Falling rain, snow, ice (freezing rain), sleet, or hail.",
             icon = "cloudRain",
             default = "none",
             options = [
                 schema.Option(display = "None", value = "none"),
                 schema.Option(display = "Rain", value = "rain"),
                 schema.Option(display = "Snow", value = "snow"),
+                schema.Option(display = "Ice (freezing rain)", value = "ice"),
+                schema.Option(display = "Sleet (ice pellets)", value = "sleet"),
+                schema.Option(display = "Hail", value = "hail"),
             ],
         ),
         schema.Dropdown(
@@ -1407,10 +2392,38 @@ def _demo_fields(demo_on):
             default = False,
         ),
         schema.Toggle(
+            id = "demo_smoke",
+            name = "Wildfire smoke",
+            desc = "Eerie orange smoke haze with a dim red sun.",
+            icon = "fire",
+            default = False,
+        ),
+        schema.Toggle(
             id = "demo_storm",
             name = "Lightning",
             desc = "Overlay a flashing lightning bolt (thunderstorm).",
             icon = "boltLightning",
+            default = False,
+        ),
+        schema.Toggle(
+            id = "demo_tornado",
+            name = "Tornado",
+            desc = "Drop a swaying funnel cloud from the sky to the ground.",
+            icon = "tornado",
+            default = False,
+        ),
+        schema.Toggle(
+            id = "demo_aurora",
+            name = "Aurora (night)",
+            desc = "Shimmering green northern-lights curtains. Visible only at night with a clear sky.",
+            icon = "wandSparkles",
+            default = False,
+        ),
+        schema.Toggle(
+            id = "demo_heat_haze",
+            name = "Heat haze",
+            desc = "Force the shimmer on, even if the dialed temp/sky wouldn't trigger it (it fires on its own at 90°F+ on a clear-enough day).",
+            icon = "temperatureHigh",
             default = False,
         ),
         schema.Text(
@@ -1449,6 +2462,13 @@ def _demo_fields(demo_on):
                 schema.Option(display = "⚠ Severe", value = "2"),
                 schema.Option(display = "⚠ Extreme", value = "3"),
             ],
+        ),
+        schema.Text(
+            id = "demo_alert_text",
+            name = "Alert headline",
+            desc = "The advisory text revealed near the end of the loop when the alert is Severe or Extreme (mimics the real NWS event name).",
+            icon = "commentDots",
+            default = "Severe Thunderstorm Warning",
         ),
         schema.Text(
             id = "demo_temp",
