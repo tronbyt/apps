@@ -148,7 +148,8 @@ PLAYER_MAPPING = """
     "9127": "A.Svensson",
     "4699329": "J.Svensson",
     "4364865": "A.Fitzpatrick",
-    "9037": "M.Fitzpatrick"
+    "9037": "M.Fitzpatrick",
+    "5724": "C.Kim"
 }
 """
 
