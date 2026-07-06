@@ -85,14 +85,28 @@ def main(config):
             main_align = "space_between" if IS2X else "start",
             cross_align = "center" if IS2X else "start",
             expanded = IS2X,
+            children = [title_bar(displaytype)] + displayrow,
+        ),
+    )
+
+def title_bar(displaytype):
+    if not IS2X:
+        return render.Box(width = 64, height = 6, child = render.Text("Sail GP", font = "tom-thumb"), color = DEFAULTS["title_bkg_color"])
+
+    # 2x: brand on the left, current mode on the right.
+    label = "Next Race" if displaytype == "nri" else "Season Standings"
+    return render.Box(
+        width = 128,
+        height = 10,
+        color = DEFAULTS["title_bkg_color"],
+        child = render.Row(
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "center",
             children = [
-                render.Box(
-                    width = 128 if IS2X else 64,
-                    height = 10 if IS2X else 6,
-                    child = render.Text("SailGP" if IS2X else "Sail GP", font = "tb-8" if IS2X else "tom-thumb"),
-                    color = DEFAULTS["title_bkg_color"],
-                ),
-            ] + displayrow,
+                render.Padding(pad = (2, 0, 0, 0), child = render.Text("SailGP", font = "tb-8")),
+                render.Padding(pad = (0, 0, 3, 0), child = render.Text(label, font = "tom-thumb", color = ACCENT_COLOR)),
+            ],
         ),
     )
 
@@ -147,7 +161,7 @@ def paged_standings_2x(standings, color):
     # Page through the standings two rows of three at a time, sliding each page
     # in from the right (calmer than a continuous marquee).
     per_row = 3
-    per_page = per_row * 2
+    per_page = per_row * 3
     pages = []
     for i in range(0, len(standings), per_page):
         group = standings[i:i + per_page]
@@ -158,7 +172,7 @@ def paged_standings_2x(standings, color):
                 for t in group[r:r + per_row]
             ]
             rows.append(render.Box(width = 128, height = 6, child = render.Row(expanded = True, main_align = "space_evenly", children = cells)))
-        page = render.Box(width = 128, height = 15, child = render.Column(main_align = "space_evenly", children = rows))
+        page = render.Box(width = 128, height = 22, child = render.Column(main_align = "space_evenly", children = rows))
         pages.append(slide_page(page, DEFAULTS["nri_page_duration"], 128))
     return render.Sequence(children = pages)
 
