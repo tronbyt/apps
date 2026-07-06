@@ -5,6 +5,7 @@ load("images/img_2274bcef.bin", IMG_2274bcef_ASSET = "file")
 load("images/img_7b76fdf3.bin", IMG_7b76fdf3_ASSET = "file")
 load("images/img_adff806b.svg", IMG_adff806b_ASSET = "file")
 load("images/img_fbe29b76.svg", IMG_fbe29b76_ASSET = "file")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -234,6 +235,10 @@ def render_app(config, current_value, points, stats, unit, label):
             child = render_graph_column(config, current_value, points, unit, label),
         )
 
+def round(num, precision):
+    """Round a float to the specified number of significant digits"""
+    return math.round(num * math.pow(10, precision)) / math.pow(10, precision)
+
 def render_graph_column(config, current_value, points, unit, label):
     icon = get_icon(config)
     children = []
@@ -245,6 +250,10 @@ def render_graph_column(config, current_value, points, unit, label):
             width = 12,
             height = 12,
         ))
+    if (config.get("round_to", "none") != "none"):
+        decimal = int(config.get("round_to"))
+        val = round(float(current_value), decimal)
+        current_value = str(int(val)) if val == int(val) else str(val)
     children.append(render.Text(content = current_value + unit, font = "6x13"))
     align = "space_between" if label else "end"
     return render.Column(
@@ -388,6 +397,31 @@ def get_schema():
                 desc = "Only display when value is within this range. Format: min,max (e.g. 5,1000). Leave empty to always show.",
                 icon = "filter",
                 name = "Display range",
+            ),
+            schema.Dropdown(
+                id = "round_to",
+                desc = "Round to which decimal",
+                icon = "filter",
+                name = "Round To",
+                default = "none",
+                options = [
+                    schema.Option(
+                        display = "None",
+                        value = "none",
+                    ),
+                    schema.Option(
+                        display = "Ones",
+                        value = "0",
+                    ),
+                    schema.Option(
+                        display = "Tenths",
+                        value = "1",
+                    ),
+                    schema.Option(
+                        display = "Hundreths",
+                        value = "2",
+                    ),
+                ],
             ),
             schema.Location(
                 id = "location",
