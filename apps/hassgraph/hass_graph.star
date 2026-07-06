@@ -250,9 +250,8 @@ def render_graph_column(config, current_value, points, unit, label):
             width = 12,
             height = 12,
         ))
-    round_to = config.str("round_to", "none")
-    if round_to != "none" and current_value not in ("unavailable", "unknown"):
-        decimal = int(round_to)
+    if (config.str("round_to") in ["0", "1", "2"]):
+        decimal = int(config.get("round_to"))
         val = round(float(current_value), decimal)
         current_value = str(int(val)) if val == int(val) else str(val)
     children.append(render.Text(content = current_value + unit, font = "6x13"))
