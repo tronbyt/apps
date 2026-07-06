@@ -52,8 +52,8 @@ DEFAULTS = {
     "animation_frames": 30,
     "animation_hold_frames": 75,
     "title_bkg_color": "#0a2627",
-    "slide_duration": 75,
-    "nri_page_duration": 50,
+    "slide_duration": 100,
+    "nri_page_duration": 70,
 }
 
 def main(config):
@@ -127,7 +127,6 @@ def nri_2x(nri, standings, config):
     start_dt = time.parse_time(nri["start"], "2006-01-02T15:04:05.000-07:00").in_location(timezone)
     end_dt = time.parse_time(nri["end"], "2006-01-02T15:04:05.000-07:00").in_location(timezone)
     date_str = start_dt.format("Jan 2-") + end_dt.format("2 2006") if config.bool("is_us_date_format", DEFAULTS["date_us"]) else start_dt.format("2-") + end_dt.format("2 Jan 2006")
-    time_str = start_dt.format("3:04 PM")
     race_name = nri["name"].replace("Sail Grand Prix", "GP")
 
     schedule = render.Column(
@@ -138,7 +137,6 @@ def nri_2x(nri, standings, config):
             render.WrappedText(content = race_name, font = "tom-thumb", color = ACCENT_COLOR, align = "center", width = 124, height = 6),
             render.Box(width = 128, height = 3),
             render.Text(date_str, font = "tom-thumb", color = text_color),
-            render.Text("Starts {}".format(time_str), font = "tom-thumb", color = "#aaaaaa"),
         ],
     )
 
@@ -146,17 +144,22 @@ def nri_2x(nri, standings, config):
     return [schedule, paged_standings_2x(standings, standings_text_color)]
 
 def paged_standings_2x(standings, color):
-    # Page through the standings a few teams at a time, sliding each page in
-    # from the right (calmer than a continuous marquee).
-    per_page = 3
+    # Page through the standings two rows of three at a time, sliding each page
+    # in from the right (calmer than a continuous marquee).
+    per_row = 3
+    per_page = per_row * 2
     pages = []
     for i in range(0, len(standings), per_page):
-        cells = [
-            render.Text("{} {} {}".format(str(t["position"]), t["team_code"], str(t["points"])), font = "tom-thumb", color = color)
-            for t in standings[i:i + per_page]
-        ]
-        row = render.Box(width = 128, height = 6, child = render.Row(expanded = True, main_align = "space_evenly", children = cells))
-        pages.append(slide_page(row, DEFAULTS["nri_page_duration"], 128))
+        group = standings[i:i + per_page]
+        rows = []
+        for r in range(0, len(group), per_row):
+            cells = [
+                render.Text("{} {} {}".format(str(t["position"]), t["team_code"], str(t["points"])), font = "tom-thumb", color = color)
+                for t in group[r:r + per_row]
+            ]
+            rows.append(render.Box(width = 128, height = 6, child = render.Row(expanded = True, main_align = "space_evenly", children = cells)))
+        page = render.Box(width = 128, height = 15, child = render.Column(main_align = "space_evenly", children = rows))
+        pages.append(slide_page(page, DEFAULTS["nri_page_duration"], 128))
     return render.Sequence(children = pages)
 
 def slide_page(child, duration, width):
