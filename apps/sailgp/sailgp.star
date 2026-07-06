@@ -176,32 +176,32 @@ def slide_page(child, duration, width):
 def current_standings(standings, config):
     standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
 
-    # Fetch flags once (not once per slide), then page through the standings two
-    # teams at a time. Built dynamically so any team count works (13 in 2026; an
-    # odd count renders a final single-team slide instead of dropping a team).
-    flags = json.decode(get_cachable_data(DEFAULTS["api"].format("flags")))
+    # Fetch the chosen images once (flags or logos, not once per slide), then page
+    # through the standings two teams at a time. Built dynamically so any team
+    # count works (13 in 2026; an odd count renders a final single-team slide).
+    images = json.decode(get_cachable_data(DEFAULTS["api"].format(config.get("imagetype", "flags"))))
 
     slides = []
     for i in range(0, len(standings), 2):
         left = standings[i]
         right = standings[i + 1] if i + 1 < len(standings) else None
-        slides.append(current_standings_slide(left, right, standings_text_color, flags))
+        slides.append(current_standings_slide(left, right, standings_text_color, images))
     return [render.Sequence(children = slides)]
 
-def standings_team_column(standing, standings_text_color, flags):
+def standings_team_column(standing, standings_text_color, images):
     return render.Column(
         cross_align = "center",
         children = [
-            render.Box(width = 32, height = 14, child = render.Image(base64.decode(flags[standing["team_code"]]), height = 14)),
+            render.Box(width = 32, height = 14, child = render.Image(base64.decode(images[standing["team_code"]]), height = 14)),
             render.Text("{} {}".format(str(standing["position"]), standing["team_code"]), font = DEFAULTS["regular_font"], color = standings_text_color),
             render.Text("{} pts".format(str(standing["points"])), font = DEFAULTS["regular_font"], color = standings_text_color),
         ],
     )
 
-def current_standings_slide(standingsLeft, standingsRight, standings_text_color, flags):
-    columns = [standings_team_column(standingsLeft, standings_text_color, flags)]
+def current_standings_slide(standingsLeft, standingsRight, standings_text_color, images):
+    columns = [standings_team_column(standingsLeft, standings_text_color, images)]
     if standingsRight != None:
-        columns.append(standings_team_column(standingsRight, standings_text_color, flags))
+        columns.append(standings_team_column(standingsRight, standings_text_color, images))
 
     return animation.Transformation(
         child =
@@ -243,12 +243,12 @@ def driver_name(name):
 
 def current_standings_2x(standings, config):
     color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
-    flags = json.decode(get_cachable_data(DEFAULTS["api"].format("flags")))
+    images = json.decode(get_cachable_data(DEFAULTS["api"].format(config.get("imagetype", "flags"))))
 
     per_page = 4
     pages = []
     for i in range(0, len(standings), per_page):
-        rows = [standings_row_2x(t, color, flags) for t in standings[i:i + per_page]]
+        rows = [standings_row_2x(t, color, images) for t in standings[i:i + per_page]]
         page = render.Box(
             width = 128,
             height = 54,
@@ -257,21 +257,35 @@ def current_standings_2x(standings, config):
         pages.append(slide_page(page, DEFAULTS["slide_duration"], 128))
     return [render.Sequence(children = pages)]
 
-def standings_row_2x(standing, color, flags):
-    left = render.Row(
-        cross_align = "center",
+def standings_row_2x(standing, color, images):
+    # Two text lines beside the flag/logo: team name on top, driver + points below.
+    info = render.Column(
+        cross_align = "start",
         children = [
-            render.Box(width = 12, height = 12, child = render.Text(str(standing["position"]), font = DEFAULTS["regular_font"], color = color)),
-            render.Box(width = 22, height = 12, child = render.Image(base64.decode(flags[standing["team_code"]]), height = 11)),
-            render.Box(width = 4, height = 1),
-            render.Text(driver_name(standing["driver"]), font = DEFAULTS["regular_font"], color = color),
+            render.WrappedText(content = standing["team_name"], font = DEFAULTS["regular_font"], color = color, width = 90, height = 6),
+            render.Box(
+                width = 90,
+                height = 6,
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Text(driver_name(standing["driver"]), font = DEFAULTS["regular_font"], color = "#9fb9bb"),
+                        render.Text(str(standing["points"]), font = DEFAULTS["regular_font"], color = color),
+                    ],
+                ),
+            ),
         ],
     )
     return render.Row(
         expanded = True,
-        main_align = "space_between",
         cross_align = "center",
-        children = [left, render.Text(str(standing["points"]), font = DEFAULTS["regular_font"], color = color)],
+        children = [
+            render.Box(width = 11, height = 13, child = render.Text(str(standing["position"]), font = DEFAULTS["regular_font"], color = color)),
+            render.Box(width = 22, height = 13, child = render.Image(base64.decode(images[standing["team_code"]]), height = 12)),
+            render.Box(width = 3, height = 1),
+            info,
+        ],
     )
 
 def fade_child(race, location, text_color):
@@ -309,8 +323,20 @@ dispopt = [
         value = "nri",
     ),
     schema.Option(
-        display = "Standings Display with Flags",
+        display = "Standings Display",
         value = "standings",
+    ),
+]
+
+# Values match the data feed filenames (flags.json / logos.json).
+imgopt = [
+    schema.Option(
+        display = "Country Flag",
+        value = "flags",
+    ),
+    schema.Option(
+        display = "Team Logo",
+        value = "logos",
     ),
 ]
 
@@ -332,6 +358,14 @@ def get_schema():
                 desc = "The color for Standings.",
                 icon = "palette",
                 default = DEFAULTS["standings_text_color"],
+            ),
+            schema.Dropdown(
+                id = "imagetype",
+                name = "Team Image",
+                desc = "Show country flags or team logos in the standings.",
+                icon = "image",
+                default = "flags",
+                options = imgopt,
             ),
             schema.Generated(
                 id = "nri_generated",
