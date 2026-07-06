@@ -24,11 +24,17 @@ load("animation.star", "animation")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 VERSION = 26153
+
+# 2x (128x64): Next Race becomes a static schedule screen with the standings
+# paging along the bottom. 1x (64x32) is unchanged.
+IS2X = canvas.is2x()
+ACCENT_COLOR = "#7fd4d9"
+DRIVER_INITIAL = False  # False: "Slingsby" | True: "T. Slingsby"
 
 DEFAULTS = {
     "display": "nri",
@@ -47,6 +53,7 @@ DEFAULTS = {
     "animation_hold_frames": 75,
     "title_bkg_color": "#0a2627",
     "slide_duration": 75,
+    "nri_page_duration": 50,
 }
 
 def main(config):
@@ -63,19 +70,26 @@ def main(config):
         data = json.decode(get_cachable_data(DEFAULTS["api"].format(displaytype)))
         if data.get("start", "") == "":
             return []
+        elif IS2X:
+            displayrow = nri_2x(data, standings, config)
         else:
             displayrow = nri(data, standings, config)
+    elif IS2X:
+        displayrow = current_standings_2x(standings, config)
     else:
         displayrow = current_standings(standings, config)
 
     return render.Root(
         show_full_animation = True,
         child = render.Column(
+            main_align = "space_between" if IS2X else "start",
+            cross_align = "center" if IS2X else "start",
+            expanded = IS2X,
             children = [
                 render.Box(
-                    width = 64,
-                    height = 6,
-                    child = render.Text("Sail GP", font = "tom-thumb"),
+                    width = 128 if IS2X else 64,
+                    height = 10 if IS2X else 6,
+                    child = render.Text("SailGP" if IS2X else "Sail GP", font = "tb-8" if IS2X else "tom-thumb"),
                     color = DEFAULTS["title_bkg_color"],
                 ),
             ] + displayrow,
@@ -104,6 +118,60 @@ def nri(nri, standings, config):
         render.Box(width = 64, height = 1),
         render.Marquee(offset_start = 48, child = render.Text(height = 6, content = standing_text, font = DEFAULTS["regular_font"], color = standings_text_color), scroll_direction = "horizontal", width = 64),
     ]
+
+def nri_2x(nri, standings, config):
+    text_color = config.get("text_color", DEFAULTS["text_color"])
+    standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
+    timezone = time.tz()
+
+    start_dt = time.parse_time(nri["start"], "2006-01-02T15:04:05.000-07:00").in_location(timezone)
+    end_dt = time.parse_time(nri["end"], "2006-01-02T15:04:05.000-07:00").in_location(timezone)
+    date_str = start_dt.format("Jan 2-") + end_dt.format("2 2006") if config.bool("is_us_date_format", DEFAULTS["date_us"]) else start_dt.format("2-") + end_dt.format("2 Jan 2006")
+    time_str = start_dt.format("3:04 PM")
+    race_name = nri["name"].replace("Sail Grand Prix", "GP")
+
+    schedule = render.Column(
+        cross_align = "center",
+        children = [
+            render.Text("Round {}".format(nri["round"]), font = "tom-thumb", color = ACCENT_COLOR),
+            render.Text(nri["location"], font = "tb-8", color = text_color),
+            render.WrappedText(content = race_name, font = "tom-thumb", color = ACCENT_COLOR, align = "center", width = 124, height = 6),
+            render.Box(width = 128, height = 3),
+            render.Text(date_str, font = "tom-thumb", color = text_color),
+            render.Text("Starts {}".format(time_str), font = "tom-thumb", color = "#aaaaaa"),
+        ],
+    )
+
+    # title pins top, standings pins bottom, schedule floats centered between
+    return [schedule, paged_standings_2x(standings, standings_text_color)]
+
+def paged_standings_2x(standings, color):
+    # Page through the standings a few teams at a time, sliding each page in
+    # from the right (calmer than a continuous marquee).
+    per_page = 3
+    pages = []
+    for i in range(0, len(standings), per_page):
+        cells = [
+            render.Text("{} {} {}".format(str(t["position"]), t["team_code"], str(t["points"])), font = "tom-thumb", color = color)
+            for t in standings[i:i + per_page]
+        ]
+        row = render.Box(width = 128, height = 6, child = render.Row(expanded = True, main_align = "space_evenly", children = cells))
+        pages.append(slide_page(row, DEFAULTS["nri_page_duration"], 128))
+    return render.Sequence(children = pages)
+
+def slide_page(child, duration, width):
+    return animation.Transformation(
+        child = child,
+        duration = duration,
+        delay = 0,
+        origin = animation.Origin(0, 0),
+        keyframes = [
+            animation.Keyframe(percentage = 0.0, transforms = [animation.Translate(width, 0)], curve = DEFAULTS["ease_in_out"]),
+            animation.Keyframe(percentage = 0.12, transforms = [animation.Translate(0, 0)], curve = DEFAULTS["ease_in_out"]),
+            animation.Keyframe(percentage = 0.88, transforms = [animation.Translate(0, 0)], curve = DEFAULTS["ease_in_out"]),
+            animation.Keyframe(percentage = 1.0, transforms = [animation.Translate(-width, 0)], curve = DEFAULTS["ease_in_out"]),
+        ],
+    )
 
 def current_standings(standings, config):
     standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
@@ -163,6 +231,47 @@ def current_standings_slide(standingsLeft, standingsRight, standings_text_color,
                 curve = DEFAULTS["ease_in_out"],
             ),
         ],
+    )
+
+def driver_name(name):
+    # Last name only (e.g. "Tom Slingsby" -> "Slingsby"). Flip DRIVER_INITIAL to
+    # show a leading first initial instead ("T. Slingsby").
+    parts = name.split(" ")
+    if len(parts) < 2:
+        return name
+    return "{}. {}".format(parts[0][0], parts[-1]) if DRIVER_INITIAL else parts[-1]
+
+def current_standings_2x(standings, config):
+    color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
+    flags = json.decode(get_cachable_data(DEFAULTS["api"].format("flags")))
+
+    per_page = 4
+    pages = []
+    for i in range(0, len(standings), per_page):
+        rows = [standings_row_2x(t, color, flags) for t in standings[i:i + per_page]]
+        page = render.Box(
+            width = 128,
+            height = 54,
+            child = render.Column(main_align = "space_evenly", children = rows),
+        )
+        pages.append(slide_page(page, DEFAULTS["slide_duration"], 128))
+    return [render.Sequence(children = pages)]
+
+def standings_row_2x(standing, color, flags):
+    left = render.Row(
+        cross_align = "center",
+        children = [
+            render.Box(width = 12, height = 12, child = render.Text(str(standing["position"]), font = DEFAULTS["regular_font"], color = color)),
+            render.Box(width = 22, height = 12, child = render.Image(base64.decode(flags[standing["team_code"]]), height = 11)),
+            render.Box(width = 4, height = 1),
+            render.Text(driver_name(standing["driver"]), font = DEFAULTS["regular_font"], color = color),
+        ],
+    )
+    return render.Row(
+        expanded = True,
+        main_align = "space_between",
+        cross_align = "center",
+        children = [left, render.Text(str(standing["points"]), font = DEFAULTS["regular_font"], color = color)],
     )
 
 def fade_child(race, location, text_color):
