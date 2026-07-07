@@ -173,7 +173,7 @@ def nri_2x(nri, standings, config):
     return [schedule, paged_standings_2x(standings, standings_text_color, pts_color)]
 
 def paged_standings_2x(standings, code_color, pts_color):
-    # Page through the standings two rows of three at a time, sliding each page
+    # Page through the standings three rows of three at a time, sliding each page
     # in from the right (calmer than a continuous marquee).
     per_row = 3
     per_page = per_row * 3
@@ -272,10 +272,11 @@ def current_standings(standings, config):
     return [render.Sequence(children = slides)]
 
 def standings_team_column(standing, standings_text_color, images):
+    img = images.get(standing["team_code"])
     return render.Column(
         cross_align = "center",
         children = [
-            render.Box(width = 32, height = 14, child = render.Image(base64.decode(images[standing["team_code"]]), height = 14)),
+            render.Box(width = 32, height = 14, child = render.Image(base64.decode(img), height = 14) if img else None),
             render.Text("{} {}".format(str(standing["position"]), standing["team_code"]), font = DEFAULTS["regular_font"], color = standings_text_color),
             render.Text("{} pts".format(str(standing["points"])), font = DEFAULTS["regular_font"], color = standings_text_color),
         ],
@@ -319,6 +320,8 @@ def current_standings_slide(standingsLeft, standingsRight, standings_text_color,
 def driver_name(name):
     # Last name only (e.g. "Tom Slingsby" -> "Slingsby"). Flip DRIVER_INITIAL to
     # show a leading first initial instead ("T. Slingsby").
+    if not name:
+        return ""
     parts = name.split(" ")
     if len(parts) < 2:
         return name
@@ -341,6 +344,8 @@ def current_standings_2x(standings, config):
     return [render.Sequence(children = pages)]
 
 def standings_row_2x(standing, color, images):
+    img = images.get(standing["team_code"])
+
     # Two text lines beside the flag/logo: team name on top, driver + points below.
     info = render.Column(
         cross_align = "start",
@@ -365,7 +370,7 @@ def standings_row_2x(standing, color, images):
         cross_align = "center",
         children = [
             render.Box(width = 11, height = 13, child = render.Text(str(standing["position"]), font = DEFAULTS["regular_font"], color = color)),
-            render.Box(width = 22, height = 13, child = render.Image(base64.decode(images[standing["team_code"]]), height = 12)),
+            render.Box(width = 22, height = 13, child = render.Image(base64.decode(img), height = 12) if img else None),
             render.Box(width = 3, height = 1),
             info,
         ],
