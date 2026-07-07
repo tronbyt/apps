@@ -10,7 +10,7 @@ borrowed Fade In and Out technique and the math calculations from @CubsAaron cou
 # 20240802 - jvivona - added in code to handle widget mode and remove animations
 
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -23,6 +23,21 @@ HOURS_FONT = "tb-8"
 HOURS_COLOR = "#888888"
 
 WIDGET_MODE = False
+
+# 2x (128x64) has the vertical room to wrap the title across more lines and show
+# hours and minutes as their own static lines instead of the fading marquee.
+IS2X = canvas.is2x()
+TITLE_FONT_2X = "6x13"
+
+# Keep the title to 2 lines. We greedily word-wrap it into at most two 21-char
+# lines (6x13 is 6px wide, so 128px holds 21 chars) and render each as its own
+# Text line - shrink-wrapped and vertically centered in its half with tight
+# spacing (a fixed WrappedText height would top-align a single line instead).
+# Longer titles get an ellipsis.
+LINE_CHARS_2X = 21
+DAYS_FONT_2X = "terminus-16"
+HOURS_FONT_2X = "tb-8"
+HOURS_COLOR_2X = "#AAAAAA"
 
 coloropt = [
     schema.Option(
@@ -82,10 +97,10 @@ def main(config):
     )
 
 def get_render_children(config, widgetMode):
-    render_children = []
     displayhours = config.bool("display_hours", True)
     displayminutes = config.bool("display_minutes", True) if displayhours else False
     titlebelow = config.bool("title_below", False)
+    is2x = IS2X and not widgetMode
     current_time = time.now().in_location(time.tz())
 
     origin_time = time.parse_time(config.str("event_time", current_time.format("2006-01-02T15:04:05Z07:00")))
@@ -95,7 +110,12 @@ def get_render_children(config, widgetMode):
     days = math.floor(datediff.hours // 24)
     daystring = "{} {}".format(str(days), "Day" if days == 1 else "Days")
 
-    render_children.append(render.Text(content = daystring, font = DAYS_FONT if not (widgetMode and displayhours) else HOURS_FONT))
+    if is2x:
+        return get_2x_children(config, datediff, days, daystring, displayhours, displayminutes, titlebelow)
+
+    render_children = []
+    days_font = HOURS_FONT if (widgetMode and displayhours) else DAYS_FONT
+    render_children.append(render.Text(content = daystring, font = days_font))
 
     if displayhours:
         render_children.append(get_hours_minutes(datediff, days, displayminutes, widgetMode))
@@ -105,6 +125,67 @@ def get_render_children(config, widgetMode):
     render_children.insert(title_insert_index, get_title(config.str("event", ""), config.str("event_color", coloropt[3].value), displayhours, widgetMode))
 
     return render_children
+
+def title_lines_2x(text):
+    # Greedy word-wrap into at most two 21-char lines; ellipsis if it overflows.
+    lines = ["", ""]
+    li = 0
+    truncated = False
+    for w in text.split():
+        cand = w if lines[li] == "" else lines[li] + " " + w
+        if len(cand) <= LINE_CHARS_2X:
+            lines[li] = cand
+        elif li == 0:
+            li = 1
+            lines[1] = w
+        else:
+            truncated = True
+            break
+
+    # guard against a single word wider than a line
+    lines = [ln[:LINE_CHARS_2X] for ln in lines]
+    if truncated:
+        tail = lines[1]
+        if len(tail) >= LINE_CHARS_2X:
+            tail = tail[:LINE_CHARS_2X - 1]
+        lines[1] = tail + "…"
+
+    return [ln for ln in lines if ln != ""]
+
+def get_2x_children(config, datediff, days, daystring, displayhours, displayminutes, titlebelow):
+    # Split the 128x64 canvas into two equal 32px halves - the title in one and
+    # the day/hour/minute counts in the other - each vertically centered in its
+    # half (render.Box centers its child). The larger title is clamped to 2 lines.
+    titlecolor = config.str("event_color", coloropt[3].value)
+    title_box = render.Box(
+        width = 128,
+        height = 32,
+        child = render.Column(
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                render.Text(content = line, font = TITLE_FONT_2X, color = titlecolor)
+                for line in title_lines_2x(config.str("event", ""))
+            ],
+        ),
+    )
+
+    count_lines = [render.Text(content = daystring, font = DAYS_FONT_2X)]
+    if displayhours:
+        count_lines.extend(get_hours_minutes_2x(datediff, days, displayminutes))
+    count_box = render.Box(
+        width = 128,
+        height = 32,
+        child = render.Column(
+            main_align = "center",
+            cross_align = "center",
+            children = count_lines,
+        ),
+    )
+
+    if titlebelow:
+        return [count_box, title_box]
+    return [title_box, count_box]
 
 def get_title(eventtitle, titlecolor, displayhours, widgetMode):
     if displayhours and not widgetMode:
@@ -151,6 +232,25 @@ def get_hours_minutes(datediff, days, displayminutes, widgetMode):
             main_align = "center",
             expanded = True,
         )
+
+def get_hours_minutes_2x(datediff, days, displayminutes):
+    # 2x static lines: no fade animation - just stack hours (and minutes) below days
+    hours = math.floor(datediff.hours - days * 24)
+    lines = [
+        render.Text(
+            content = "{} {}".format(str(hours), "Hour" if hours == 1 else "Hours"),
+            font = HOURS_FONT_2X,
+            color = HOURS_COLOR_2X,
+        ),
+    ]
+    if displayminutes:
+        minutes = math.floor(datediff.minutes - (days * 24 * 60 + hours * 60))
+        lines.append(render.Text(
+            content = "{} {}".format(str(minutes), "Minute" if minutes == 1 else "Minutes"),
+            font = HOURS_FONT_2X,
+            color = HOURS_COLOR_2X,
+        ))
+    return lines
 
 def createfadelist(text, cycles):
     alpha_values = ["00", "33", "66", "99", "CC", "FF"]
