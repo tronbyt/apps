@@ -439,13 +439,18 @@ def get_schema():
                 default = "nri",
                 options = dispopt,
             ),
-            schema.Color(
-                id = "standings_text_color",
-                name = "Standings Color",
-                desc = "The color for Standings.",
-                icon = "palette",
-                default = DEFAULTS["standings_text_color"],
+            schema.Generated(
+                id = "display_generated",
+                source = "datadisplay",
+                handler = display_options,
             ),
+        ],
+    )
+
+def display_options(datadisplay):
+    # Only the full standings screen uses the team imagery and standings color.
+    if datadisplay == "standings":
+        return [
             schema.Dropdown(
                 id = "imagetype",
                 name = "Team Image",
@@ -454,34 +459,32 @@ def get_schema():
                 default = "flags",
                 options = imgopt,
             ),
-            schema.Generated(
-                id = "nri_generated",
-                source = "datadisplay",
-                handler = show_nri_options,
-            ),
-        ],
-    )
-
-def show_nri_options(datadisplay):
-    if datadisplay == "nri":
-        return [
             schema.Color(
-                id = "text_color",
-                name = "Race Info Color",
-                desc = "The color for Race Info and Date.",
+                id = "standings_text_color",
+                name = "Standings Color",
+                desc = "The color for Standings.",
                 icon = "palette",
-                default = DEFAULTS["text_color"],
-            ),
-            schema.Toggle(
-                id = "is_us_date_format",
-                name = "US Date format",
-                desc = "Display the date in US format.",
-                icon = "calendarDays",
-                default = DEFAULTS["date_us"],
+                default = DEFAULTS["standings_text_color"],
             ),
         ]
-    else:
-        return []
+
+    # Next Race screens (standard + extended) share the race info color and date format.
+    return [
+        schema.Color(
+            id = "text_color",
+            name = "Race Info Color",
+            desc = "The color for Race Info and Date.",
+            icon = "palette",
+            default = DEFAULTS["text_color"],
+        ),
+        schema.Toggle(
+            id = "is_us_date_format",
+            name = "US Date format",
+            desc = "Display the date in US format.",
+            icon = "calendarDays",
+            default = DEFAULTS["date_us"],
+        ),
+    ]
 
 # ##############################################
 #           General Funcitons
