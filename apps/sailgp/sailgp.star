@@ -34,6 +34,7 @@ VERSION = 26153
 # paging along the bottom. 1x (64x32) is unchanged.
 IS2X = canvas.is2x()
 ACCENT_COLOR = "#7fd4d9"
+NRI_PTS_COLOR = "#ffc94a"  # amber points on Next Race so they don't blend into the white
 DRIVER_INITIAL = False  # False: "Slingsby" | True: "T. Slingsby"
 
 DEFAULTS = {
@@ -52,8 +53,8 @@ DEFAULTS = {
     "animation_frames": 30,
     "animation_hold_frames": 75,
     "title_bkg_color": "#0a2627",
-    "slide_duration": 100,
-    "nri_page_duration": 70,
+    "slide_duration": 120,
+    "nri_page_duration": 95,
 }
 
 def main(config):
@@ -168,11 +169,14 @@ def paged_standings_2x(standings, color):
         rows = []
         for r in range(0, len(group), per_row):
             cells = [
-                render.Text("{} {} {}".format(str(t["position"]), t["team_code"], str(t["points"])), font = "tom-thumb", color = color)
+                render.Row(children = [
+                    render.Text("{} {} ".format(str(t["position"]), t["team_code"]), font = "tom-thumb", color = color),
+                    render.Text(str(t["points"]), font = "tom-thumb", color = NRI_PTS_COLOR),
+                ])
                 for t in group[r:r + per_row]
             ]
             rows.append(render.Box(width = 128, height = 6, child = render.Row(expanded = True, main_align = "space_evenly", children = cells)))
-        page = render.Box(width = 128, height = 22, child = render.Column(main_align = "space_evenly", children = rows))
+        page = render.Box(width = 128, height = 22, child = render.Column(main_align = "end", children = rows))
         pages.append(slide_page(page, DEFAULTS["nri_page_duration"], 128))
     return render.Sequence(children = pages)
 
