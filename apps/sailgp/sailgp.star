@@ -221,36 +221,15 @@ def nri_extended_2x(nri, standings, config):
     return [schedule, extended_standings_2x(standings, standings_text_color, pts_color)]
 
 def extended_standings_2x(standings, code_color, pts_color):
-    # One team per line: place, full team name (CODE), and points. Up to four
-    # teams a page, sliding to the next few.
-    slots = 4
+    # One team per line: place, full team name (CODE), and points. Four teams a
+    # page, sliding to the next four (same paging as the flag/logo standings).
+    per_page = 4
     pages = []
-    for group in balanced_chunks(standings, slots):
-        rows = [extended_row(t, code_color, pts_color) for t in group]
-
-        # pad to a full set of slots so row spacing is identical on every page
-        for _ in range(slots - len(group)):
-            rows.append(render.Box(width = 128, height = 6))
+    for i in range(0, len(standings), per_page):
+        rows = [extended_row(t, code_color, pts_color) for t in standings[i:i + per_page]]
         page = render.Box(width = 128, height = 28, child = render.Column(main_align = "space_evenly", children = rows))
         pages.append(slide_page(page, DEFAULTS["nri_page_duration"], 128))
     return render.Sequence(children = pages)
-
-def balanced_chunks(items, max_per):
-    # Split into as few pages as possible, then even them out so the last page
-    # isn't left with a single lonely row (13 -> 4,3,3,3 rather than 4,4,4,1).
-    n = len(items)
-    if n == 0:
-        return []
-    num_pages = (n + max_per - 1) // max_per
-    base = n // num_pages
-    extra = n % num_pages
-    chunks = []
-    idx = 0
-    for p in range(num_pages):
-        size = base + (1 if p < extra else 0)
-        chunks.append(items[idx:idx + size])
-        idx += size
-    return chunks
 
 def extended_row(t, code_color, pts_color):
     return render.Row(
