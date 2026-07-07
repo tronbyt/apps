@@ -448,7 +448,15 @@ def get_schema():
     )
 
 def display_options(datadisplay):
-    # Only the full standings screen uses the team imagery and standings color.
+    standings_color = schema.Color(
+        id = "standings_text_color",
+        name = "Standings Color",
+        desc = "The color for Standings.",
+        icon = "palette",
+        default = DEFAULTS["standings_text_color"],
+    )
+
+    # Team imagery (flags/logos) is only used by the full Standings screen.
     if datadisplay == "standings":
         return [
             schema.Dropdown(
@@ -459,16 +467,11 @@ def display_options(datadisplay):
                 default = "flags",
                 options = imgopt,
             ),
-            schema.Color(
-                id = "standings_text_color",
-                name = "Standings Color",
-                desc = "The color for Standings.",
-                icon = "palette",
-                default = DEFAULTS["standings_text_color"],
-            ),
+            standings_color,
         ]
 
-    # Next Race screens (standard + extended) share the race info color and date format.
+    # Next Race screens (standard + extended) also show standings, so they keep
+    # the standings color alongside the race info color and date format.
     return [
         schema.Color(
             id = "text_color",
@@ -477,6 +480,7 @@ def display_options(datadisplay):
             icon = "palette",
             default = DEFAULTS["text_color"],
         ),
+        standings_color,
         schema.Toggle(
             id = "is_us_date_format",
             name = "US Date format",
