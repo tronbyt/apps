@@ -66,15 +66,18 @@ def main(config):
 
     displayrow = []
 
-    # if we're showing NRI go and get that data
-    if displaytype == "nri":
-        data = json.decode(get_cachable_data(DEFAULTS["api"].format(displaytype)))
+    # if we're showing a Next Race variant, go and get that data
+    if displaytype == "nri" or displaytype == "nrix":
+        data = json.decode(get_cachable_data(DEFAULTS["api"].format("nri")))
         if data.get("start", "") == "":
             return []
-        elif IS2X:
-            displayrow = nri_2x(data, standings, config)
-        else:
+        elif not IS2X:
+            # extended standings is a 2x-only layout; fall back to the normal 1x view
             displayrow = nri(data, standings, config)
+        elif displaytype == "nrix":
+            displayrow = nri_extended_2x(data, standings, config)
+        else:
+            displayrow = nri_2x(data, standings, config)
     elif IS2X:
         displayrow = current_standings_2x(standings, config)
     else:
@@ -95,7 +98,7 @@ def title_bar(displaytype):
         return render.Box(width = 64, height = 6, child = render.Text("Sail GP", font = "tom-thumb"), color = DEFAULTS["title_bkg_color"])
 
     # 2x: brand on the left, current mode on the right.
-    label = "Next Race" if displaytype == "nri" else "Season Standings"
+    label = "Season Standings" if displaytype == "standings" else "Next Race"
     return render.Box(
         width = 128,
         height = 10,
@@ -190,6 +193,75 @@ def paged_standings_2x(standings, code_color, pts_color):
         page = render.Box(width = 128, height = 22, child = render.Column(main_align = "end", children = rows))
         pages.append(slide_page(page, DEFAULTS["nri_page_duration"], 128))
     return render.Sequence(children = pages)
+
+def nri_extended_2x(nri, standings, config):
+    text_color = config.get("text_color", DEFAULTS["text_color"])
+    standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
+    info_color = picked_or(config, "text_color", ACCENT_COLOR)
+    pts_color = picked_or(config, "standings_text_color", NRI_PTS_COLOR)
+
+    timezone = time.tz()
+    start_dt = time.parse_time(nri["start"], "2006-01-02T15:04:05.000-07:00").in_location(timezone)
+    end_dt = time.parse_time(nri["end"], "2006-01-02T15:04:05.000-07:00").in_location(timezone)
+    date_str = start_dt.format("Jan 2-") + end_dt.format("2 2006") if config.bool("is_us_date_format", DEFAULTS["date_us"]) else start_dt.format("2-") + end_dt.format("2 Jan 2006")
+    race_name = nri["name"].replace("Sail Grand Prix", "GP")
+
+    # Same schedule as the standard Next Race, but tightened up (the date sits a
+    # couple pixels higher) so a fourth standings line fits underneath.
+    schedule = render.Column(
+        cross_align = "center",
+        children = [
+            render.Text("Round {}".format(nri["round"]), font = "tom-thumb", color = info_color),
+            render.Text(nri["location"], font = "tb-8", color = text_color),
+            render.WrappedText(content = race_name, font = "tom-thumb", color = info_color, align = "center", width = 124, height = 6),
+            render.Text(date_str, font = "tom-thumb", color = text_color),
+        ],
+    )
+
+    return [schedule, extended_standings_2x(standings, standings_text_color, pts_color)]
+
+def extended_standings_2x(standings, code_color, pts_color):
+    # One team per line: place, full team name (CODE), and points. Up to four
+    # teams a page, sliding to the next few.
+    slots = 4
+    pages = []
+    for group in balanced_chunks(standings, slots):
+        rows = [extended_row(t, code_color, pts_color) for t in group]
+
+        # pad to a full set of slots so row spacing is identical on every page
+        for _ in range(slots - len(group)):
+            rows.append(render.Box(width = 128, height = 6))
+        page = render.Box(width = 128, height = 28, child = render.Column(main_align = "space_evenly", children = rows))
+        pages.append(slide_page(page, DEFAULTS["nri_page_duration"], 128))
+    return render.Sequence(children = pages)
+
+def balanced_chunks(items, max_per):
+    # Split into as few pages as possible, then even them out so the last page
+    # isn't left with a single lonely row (13 -> 4,3,3,3 rather than 4,4,4,1).
+    n = len(items)
+    if n == 0:
+        return []
+    num_pages = (n + max_per - 1) // max_per
+    base = n // num_pages
+    extra = n % num_pages
+    chunks = []
+    idx = 0
+    for p in range(num_pages):
+        size = base + (1 if p < extra else 0)
+        chunks.append(items[idx:idx + size])
+        idx += size
+    return chunks
+
+def extended_row(t, code_color, pts_color):
+    return render.Row(
+        expanded = True,
+        cross_align = "center",
+        children = [
+            render.Box(width = 12, height = 6, child = render.Text(str(t["position"]), font = "tom-thumb", color = code_color)),
+            render.Box(width = 94, height = 6, child = render.WrappedText(content = "{} ({})".format(t["team_name"], t["team_code"]), font = "tom-thumb", color = code_color, width = 94, height = 6)),
+            render.Box(width = 22, height = 6, child = render.Text(str(t["points"]), font = "tom-thumb", color = pts_color)),
+        ],
+    )
 
 def slide_page(child, duration, width):
     return animation.Transformation(
@@ -353,6 +425,10 @@ dispopt = [
     schema.Option(
         display = "Next Race",
         value = "nri",
+    ),
+    schema.Option(
+        display = "Next Race + Extended Standings",
+        value = "nrix",
     ),
     schema.Option(
         display = "Standings Display",
