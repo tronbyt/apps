@@ -134,6 +134,12 @@ def nri(nri, standings, config):
         render.Marquee(offset_start = 48, child = render.Text(height = 6, content = standing_text, font = DEFAULTS["regular_font"], color = standings_text_color), scroll_direction = "horizontal", width = 64),
     ]
 
+def picked_or(config, key, fallback):
+    # The schema color pickers default to white; treat white as "not set" and use
+    # our 2x design color, otherwise honor the color the user picked.
+    value = config.get(key, DEFAULTS[key])
+    return value if value.lower() != DEFAULTS[key].lower() else fallback
+
 def nri_2x(nri, standings, config):
     text_color = config.get("text_color", DEFAULTS["text_color"])
     standings_text_color = config.get("standings_text_color", DEFAULTS["standings_text_color"])
@@ -144,21 +150,26 @@ def nri_2x(nri, standings, config):
     date_str = start_dt.format("Jan 2-") + end_dt.format("2 2006") if config.bool("is_us_date_format", DEFAULTS["date_us"]) else start_dt.format("2-") + end_dt.format("2 Jan 2006")
     race_name = nri["name"].replace("Sail Grand Prix", "GP")
 
+    # Race Info Color picker overrides the round/race accent; Standings Color
+    # picker overrides the amber points. White (the picker default) = "not set".
+    info_color = picked_or(config, "text_color", ACCENT_COLOR)
+    pts_color = picked_or(config, "standings_text_color", NRI_PTS_COLOR)
+
     schedule = render.Column(
         cross_align = "center",
         children = [
-            render.Text("Round {}".format(nri["round"]), font = "tom-thumb", color = ACCENT_COLOR),
+            render.Text("Round {}".format(nri["round"]), font = "tom-thumb", color = info_color),
             render.Text(nri["location"], font = "tb-8", color = text_color),
-            render.WrappedText(content = race_name, font = "tom-thumb", color = ACCENT_COLOR, align = "center", width = 124, height = 6),
+            render.WrappedText(content = race_name, font = "tom-thumb", color = info_color, align = "center", width = 124, height = 6),
             render.Box(width = 128, height = 3),
             render.Text(date_str, font = "tom-thumb", color = text_color),
         ],
     )
 
     # title pins top, standings pins bottom, schedule floats centered between
-    return [schedule, paged_standings_2x(standings, standings_text_color)]
+    return [schedule, paged_standings_2x(standings, standings_text_color, pts_color)]
 
-def paged_standings_2x(standings, color):
+def paged_standings_2x(standings, code_color, pts_color):
     # Page through the standings two rows of three at a time, sliding each page
     # in from the right (calmer than a continuous marquee).
     per_row = 3
@@ -170,8 +181,8 @@ def paged_standings_2x(standings, color):
         for r in range(0, len(group), per_row):
             cells = [
                 render.Row(children = [
-                    render.Text("{} {} ".format(str(t["position"]), t["team_code"]), font = "tom-thumb", color = color),
-                    render.Text(str(t["points"]), font = "tom-thumb", color = NRI_PTS_COLOR),
+                    render.Text("{} {} ".format(str(t["position"]), t["team_code"]), font = "tom-thumb", color = code_color),
+                    render.Text(str(t["points"]), font = "tom-thumb", color = pts_color),
                 ])
                 for t in group[r:r + per_row]
             ]
