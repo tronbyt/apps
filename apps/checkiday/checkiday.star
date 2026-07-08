@@ -11,10 +11,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-CHECKIDAY_API_URL = "https://api.checkiday.com/tidbyt"
-DEFAULT_TIMEZONE = "America/Chicago"
-
-# from `pixlet encrypt checkiday keyname`
+CHECKIDAY_API_URL = "https://api.apilayer.com/checkiday/events"
 
 DEFAULT_COLORS = ["#777", "#FFF"]
 CUSTOM_COLORS_BY_DATE = {
@@ -82,7 +79,7 @@ def get_schema():
             schema.Text(
                 id = "api_key",
                 name = "Checkiday API Key",
-                desc = "Your Checkiday API Key.",
+                desc = "Free API key from apilayer.com/marketplace/checkiday-api.",
                 icon = "key",
                 secret = True,
             ),
@@ -108,14 +105,24 @@ def get_timezone(config):
     return loc.get("timezone", time.tz())
 
 def get_events(config):
-    timezone = get_timezone(config)
-    adult = config.get("adult", "false")
     api_key = config.get("api_key", "")
-    url = CHECKIDAY_API_URL + "?apikey=" + api_key + "&adult=" + adult + "&timezone=" + timezone
+    if not api_key:
+        return [{"name": "Add API key in settings", "id": ""}]
+
+    timezone = get_timezone(config)
+    adult = config.bool("adult")
     now = time.now().in_location(timezone)
     end_of_day = time.time(year = now.year, month = now.month, day = now.day, hour = 23, minute = 59, second = 59, location = timezone)
     time_left_in_day = end_of_day - now
-    rep = http.get(url, ttl_seconds = int(min(3600, time_left_in_day.seconds)))  # cache until midnight or an hour, whichever is first
+    rep = http.get(
+        CHECKIDAY_API_URL,
+        headers = {"apikey": api_key},
+        params = {
+            "adult": str(adult).lower(),
+            "timezone": timezone,
+        },
+        ttl_seconds = int(min(3600, time_left_in_day.seconds)),  # cache until midnight or an hour, whichever is first
+    )
     if rep.status_code != 200:
         return [{"name": "Error loading holidays...", "id": ""}]
 
