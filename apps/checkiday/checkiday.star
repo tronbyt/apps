@@ -84,6 +84,13 @@ def get_schema():
                 secret = True,
             ),
             schema.Toggle(
+                id = "free_plan",
+                name = "Free Plan",
+                desc = "Enable if using the free APILayer plan. Timezone is not supported on free plans.",
+                icon = "dollarSign",
+                default = True,
+            ),
+            schema.Toggle(
                 id = "adult",
                 name = "NSFW Mode",
                 desc = "A toggle to enable NSFW mode.",
@@ -114,13 +121,14 @@ def get_events(config):
     now = time.now().in_location(timezone)
     end_of_day = time.time(year = now.year, month = now.month, day = now.day, hour = 23, minute = 59, second = 59, location = timezone)
     time_left_in_day = end_of_day - now
+    params = {"adult": str(adult).lower()}
+    if not config.bool("free_plan"):
+        params["timezone"] = timezone
+
     rep = http.get(
         CHECKIDAY_API_URL,
         headers = {"apikey": api_key},
-        params = {
-            "adult": str(adult).lower(),
-            "timezone": timezone,
-        },
+        params = params,
         ttl_seconds = int(min(3600, time_left_in_day.seconds)),  # cache until midnight or an hour, whichever is first
     )
     if rep.status_code != 200:
