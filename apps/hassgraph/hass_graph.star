@@ -57,6 +57,24 @@ MAX_TIME_PERIOD = 24
 
 TIME_FORMAT = "2006-01-02T15:04:05Z"
 
+def parse_state_value(state):
+    if state == None or state in ("unavailable", "unknown", "none", ""):
+        return None
+    s = state.strip()
+    if not s:
+        return None
+    if s.startswith("-"):
+        s = s[1:]
+    if not s:
+        return None
+    parts = s.split(".")
+    if len(parts) not in [1, 2]:
+        return None
+    for part in parts:
+        if not part.isdigit():
+            return None
+    return float(state)
+
 def main(config):
     timezone = None
     location = config.get("location")
@@ -91,9 +109,9 @@ def main(config):
         if len(parts) == 2:
             min_val = float(parts[0])
             max_val = float(parts[1])
-            if current_value == "unavailable" or current_value == "unknown":
+            val = parse_state_value(current_value)
+            if val == None:
                 return []
-            val = float(current_value)
             if val < min_val or val > max_val:
                 return []
     stats = calc_stats(timezone, data)
@@ -105,9 +123,10 @@ def calculate_hourly_average(config, data):
     if config.bool("use_raw_data"):
         points = []
         for i, entry in enumerate(data):
-            if entry["state"] == "unavailable" or entry["state"] == "unknown":
+            value = parse_state_value(entry["state"])
+            if value == None:
                 continue
-            points.append((i, float(entry["state"])))
+            points.append((i, value))
         return points
 
     hourly_averages = {}
@@ -117,12 +136,12 @@ def calculate_hourly_average(config, data):
     index = 0
 
     for entry in data:
-        if entry["state"] == "unavailable" or entry["state"] == "unknown":
+        value = parse_state_value(entry["state"])
+        if value == None:
             continue
 
         timestamp = entry["last_changed"]
         hour = int(timestamp.split("T")[1].split(":")[0])
-        value = float(entry["state"])
 
         if hour != current_hour:
             if current_hour != None:
@@ -152,10 +171,9 @@ def calc_stats(timezone, data):
     count = 0
 
     for entry in data:
-        if entry["state"] == "unavailable" or entry["state"] == "unknown":
+        value = parse_state_value(entry["state"])
+        if value == None:
             continue
-
-        value = float(entry["state"])
         total_value += value
         count += 1
         if value < lowest_value:
@@ -252,7 +270,10 @@ def render_graph_column(config, current_value, points, unit, label):
         ))
     if (config.str("round_to") in ["0", "1", "2"]):
         decimal = int(config.get("round_to"))
-        val = round(float(current_value), decimal)
+        val = parse_state_value(current_value)
+        if val == None:
+            val = 0
+        val = round(val, decimal)
         current_value = str(int(val)) if val == int(val) else str(val)
     children.append(render.Text(content = current_value + unit, font = "6x13"))
     align = "space_between" if label else "end"
