@@ -58,7 +58,7 @@ MAX_TIME_PERIOD = 24
 TIME_FORMAT = "2006-01-02T15:04:05Z"
 
 def parse_state_value(state):
-    if state in ("unavailable", "unknown", "none", ""):
+    if state == None or state in ("unavailable", "unknown", "none", ""):
         return None
     s = state.strip()
     if not s:
