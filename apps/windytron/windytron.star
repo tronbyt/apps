@@ -21,6 +21,8 @@ station_lookup = {
     "hookipa.json": "Ho'okipa",
     "ukumehame.json": "Ukumehame",
     "kihei.json": "Kihei",
+    "molokai_airport.json": "Moloka'i Airport",
+    "kalaupapa.json": "Kalaupapa",
     "swell_city.json": "Swell City",
     "stevenson_light.json": "Stevenson",
     "viento.json": "Viento",
@@ -94,6 +96,11 @@ def main(config):
     # Use custom label if set, otherwise use display name from lookup
     label = custom_label if custom_label != "" else station_lookup.get(station, "Wind")
 
+    if wind_gust == 0:
+        wind_text = "%d %s" % (wind_avg, display_units)
+    else:
+        wind_text = "%dg%d %s" % (wind_avg, wind_gust, display_units)
+
     return render.Root(
         child = render.Box(
             render.Column(
@@ -106,7 +113,7 @@ def main(config):
                         color = label_color,
                     ),
                     render.Text(
-                        content = "%dg%d %s" % (wind_avg, wind_gust, display_units),
+                        content = wind_text,
                         font = "6x13",
                         color = wind_color,
                     ),
