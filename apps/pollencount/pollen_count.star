@@ -50,10 +50,14 @@ def main(config):
     lng = float(loc.get("lng"))
 
     dev_key = config.str("dev_key", "")
+    hide_when_low = config.bool("hide_when_low", False)
 
     # make API call and cache result
     print("calling API")
     todaysCount = getTodaysCount(lat, lng, dev_key)
+
+    if hide_when_low and allPollenVeryLow(todaysCount):
+        return []
 
     firstMixin = None
     secondMixin = None
@@ -215,6 +219,16 @@ def getTodaysCount(lat, lng, dev_key):
 
     return result
 
+def allPollenVeryLow(indexes):
+    if "message" in indexes:
+        return False
+
+    for indexName in ["treeIndex", "grassIndex", "weedIndex"]:
+        if indexName not in indexes or indexes[indexName] != 0:
+            return False
+
+    return True
+
 # Get total average of pollen indexes to two decimal points.
 def getAverage(indexes):
     total = 0
@@ -336,6 +350,13 @@ def get_schema():
                 desc = "API key from Google Maps Platform (Pollen API).",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Toggle(
+                id = "hide_when_low",
+                name = "Hide When All Very Low",
+                desc = "Skip this app when all pollen types are very low (0).",
+                icon = "eyeSlash",
+                default = False,
             ),
         ],
     )
