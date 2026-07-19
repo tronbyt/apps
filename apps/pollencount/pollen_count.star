@@ -39,6 +39,13 @@ COLORS = {
 }
 DEFAULT_TIMEZONE = "America/New_York"
 API_URL_BASE = "https://pollen.googleapis.com/v1/forecast:lookup?days=1&location.latitude="
+MIN_LEVEL_OPTIONS = [
+    schema.Option(display = "Always show", value = "0"),
+    schema.Option(display = "Low", value = "2"),
+    schema.Option(display = "Moderate", value = "3"),
+    schema.Option(display = "High", value = "4"),
+    schema.Option(display = "Very High", value = "5"),
+]
 
 def main(config):
     print("Initializing Pollen Count...")
@@ -50,13 +57,14 @@ def main(config):
     lng = float(loc.get("lng"))
 
     dev_key = config.str("dev_key", "")
-    hide_when_low = config.bool("hide_when_low", False)
+    min_level = int(config.get("min_level", "0"))
 
     # make API call and cache result
     print("calling API")
     todaysCount = getTodaysCount(lat, lng, dev_key)
 
-    if hide_when_low and allPollenVeryLow(todaysCount):
+    if shouldHideBelowMinLevel(todaysCount, min_level):
+        print("Hiding app: all pollen types below minimum level %d" % min_level)
         return []
 
     firstMixin = None
@@ -219,12 +227,16 @@ def getTodaysCount(lat, lng, dev_key):
 
     return result
 
-def allPollenVeryLow(indexes):
+def shouldHideBelowMinLevel(indexes, min_level):
+    if min_level <= 0:
+        return False
+
     if "message" in indexes:
         return False
 
+    # Missing types are out of season and count as 0.
     for indexName in ["treeIndex", "grassIndex", "weedIndex"]:
-        if indexName not in indexes or indexes[indexName] != 0:
+        if indexes.get(indexName, 0) >= min_level:
             return False
 
     return True
@@ -351,12 +363,13 @@ def get_schema():
                 icon = "key",
                 secret = True,
             ),
-            schema.Toggle(
-                id = "hide_when_low",
-                name = "Hide When All Very Low",
-                desc = "Skip this app when all pollen types are very low (0).",
+            schema.Dropdown(
+                id = "min_level",
+                name = "Minimum Level to Show",
+                desc = "Hide the app when all pollen types are below this level.",
                 icon = "eyeSlash",
-                default = False,
+                options = MIN_LEVEL_OPTIONS,
+                default = "0",
             ),
         ],
     )
