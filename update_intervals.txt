@@ -106,6 +106,7 @@ daynightmap: 5
 deathvalleytemp: 5
 detailedmetar: 5
 feelslike: 5
+kilaueaactivity: 5
 knmialert: 5
 meteireann: 5
 metar: 5
