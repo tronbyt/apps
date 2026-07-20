@@ -26,6 +26,15 @@ DEFAULT_LOCATION = """
 }
 """
 
+CATEGORY_NAME_TO_NUMBER = {
+    "Good": 1,
+    "Moderate": 2,
+    "Unhealthy for Sensitive Groups": 3,
+    "Unhealthy": 4,
+    "Very Unhealthy": 5,
+    "Hazardous": 6,
+}
+
 def get_alert_colors(category_num):
     if category_num == 1:
         return ("#009966", "#FFF")
@@ -41,11 +50,38 @@ def get_alert_colors(category_num):
         return ("#7e0023", "#FFF")
 
 def get_current_observation_url(api_key, lat, lng):
-    return "https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude={lat}&longitude={lng}&api_key={api_key}".format(
+    return "https://www.airnowapi.org/aq/observation/current/ziplatlong/?format=application/json&latitude={lat}&longitude={lng}&api_key={api_key}".format(
         lat = lat,
         lng = lng,
         api_key = api_key,
     )
+
+def normalize_observation(raw):
+    hour_raw = raw.get("hourObserved", 0)
+    if type(hour_raw) == "string":
+        hour = int(hour_raw.split(":")[0])
+    else:
+        hour = int(hour_raw)
+
+    category_name = raw.get("aqiCategoryName", "")
+    category_number = CATEGORY_NAME_TO_NUMBER.get(category_name, 0)
+
+    parameter_name = raw.get("parameterName", "")
+    if parameter_name == "OZONE":
+        parameter_name = "O3"
+
+    return {
+        "DateObserved": raw.get("dateObserved", ""),
+        "HourObserved": hour,
+        "LocalTimeZone": raw.get("localTimeZone", ""),
+        "ReportingArea": raw.get("reportingAreaName", ""),
+        "ParameterName": parameter_name,
+        "AQI": raw.get("nowcastAQI", raw.get("aqi", -1)),
+        "Category": {
+            "Number": category_number,
+            "Name": category_name,
+        },
+    }
 
 def get_current_observation(api_key, lat, lng):
     response = http.get(url = get_current_observation_url(api_key, lat, lng), ttl_seconds = 30 * 60)
@@ -54,9 +90,10 @@ def get_current_observation(api_key, lat, lng):
 
     data = response.json()
 
-    for obj in data:
-        if obj["ParameterName"] == "PM2.5":
-            return obj
+    for raw in data:
+        observation = normalize_observation(raw)
+        if observation["ParameterName"] == "PM2.5":
+            return observation
 
     return None
 
