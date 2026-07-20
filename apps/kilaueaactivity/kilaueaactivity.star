@@ -62,6 +62,20 @@ ALERT_DIM_COLORS = {
     "RED": "#421015",
 }
 
+LEVEL_ORDER = {
+    "normal": 0,
+    "advisory": 1,
+    "watch": 2,
+    "warning": 3,
+}
+
+LEVELS = [
+    schema.Option(display = "Normal", value = "normal"),
+    schema.Option(display = "Advisory", value = "advisory"),
+    schema.Option(display = "Watch", value = "watch"),
+    schema.Option(display = "Warning", value = "warning"),
+]
+
 MONTHS = [
     ("JANUARY", "JAN"),
     ("FEBRUARY", "FEB"),
@@ -146,6 +160,10 @@ def main(config):
         status = mock_status(mock_state)
     else:
         status = fetch_status()
+
+    min_level = config.get("min_level", "normal")
+    if not meets_min_level(status, min_level):
+        return []
 
     preview = config.get("preview")
     if preview == "scene":
@@ -602,8 +620,25 @@ def short_date(sent_utc):
 def alert_color(color_code):
     return ALERT_COLORS.get(color_code.upper(), COLOR_MUTED)
 
+def meets_min_level(status, min_level):
+    current_level = LEVEL_ORDER.get(status.get("alert_level", "").lower(), 0)
+    threshold = LEVEL_ORDER.get(min_level, 0)
+    return current_level >= threshold
+
 def get_schema():
-    return schema.Schema(version = "1", fields = [])
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Dropdown(
+                id = "min_level",
+                name = "Min Alert Level",
+                desc = "Only show if alert level is at or above this",
+                icon = "volcano",
+                options = LEVELS,
+                default = "normal",
+            ),
+        ],
+    )
 
 def rect(x, y, width, height, color):
     return render.Padding(
