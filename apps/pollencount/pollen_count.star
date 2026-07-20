@@ -39,6 +39,13 @@ COLORS = {
 }
 DEFAULT_TIMEZONE = "America/New_York"
 API_URL_BASE = "https://pollen.googleapis.com/v1/forecast:lookup?days=1&location.latitude="
+MIN_LEVEL_OPTIONS = [
+    schema.Option(display = "Always show", value = "0"),
+    schema.Option(display = "Low", value = "2"),
+    schema.Option(display = "Moderate", value = "3"),
+    schema.Option(display = "High", value = "4"),
+    schema.Option(display = "Very High", value = "5"),
+]
 
 def main(config):
     print("Initializing Pollen Count...")
@@ -50,10 +57,15 @@ def main(config):
     lng = float(loc.get("lng"))
 
     dev_key = config.str("dev_key", "")
+    min_level = int(config.get("min_level", "0"))
 
     # make API call and cache result
     print("calling API")
     todaysCount = getTodaysCount(lat, lng, dev_key)
+
+    if shouldHideBelowMinLevel(todaysCount, min_level):
+        print("Hiding app: all pollen types below minimum level %d" % min_level)
+        return []
 
     firstMixin = None
     secondMixin = None
@@ -215,6 +227,20 @@ def getTodaysCount(lat, lng, dev_key):
 
     return result
 
+def shouldHideBelowMinLevel(indexes, min_level):
+    if min_level <= 0:
+        return False
+
+    if "message" in indexes:
+        return False
+
+    # Missing types are out of season and count as 0.
+    for indexName in ["treeIndex", "grassIndex", "weedIndex"]:
+        if indexes.get(indexName, 0) >= min_level:
+            return False
+
+    return True
+
 # Get total average of pollen indexes to two decimal points.
 def getAverage(indexes):
     total = 0
@@ -336,6 +362,14 @@ def get_schema():
                 desc = "API key from Google Maps Platform (Pollen API).",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Dropdown(
+                id = "min_level",
+                name = "Minimum Level to Show",
+                desc = "Hide the app when all pollen types are below this level.",
+                icon = "eyeSlash",
+                options = MIN_LEVEL_OPTIONS,
+                default = "0",
             ),
         ],
     )
