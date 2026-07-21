@@ -64,7 +64,7 @@ def normalize_observation(raw):
         hour = int(hour_raw)
 
     category_name = raw.get("aqiCategoryName", "")
-    category_number = CATEGORY_NAME_TO_NUMBER.get(category_name, 0)
+    category_number = CATEGORY_NAME_TO_NUMBER.get(category_name, -1)
 
     parameter_name = raw.get("parameterName", "")
     if parameter_name == "OZONE":
@@ -195,6 +195,18 @@ def main(config):
     category_name = observation["Category"]["Name"]
     reporting_area = observation["ReportingArea"]
     aqi = observation["AQI"]
+
+    if category_num == -1:
+        return render.Root(
+            child = render.Box(
+                child = render.WrappedText(
+                    content = "Unknown AQI category",
+                    width = canvas.width(),
+                    align = "center",
+                    color = "#f66",
+                ),
+            ),
+        )
 
     if category_num < int(hide_below):
         return []
