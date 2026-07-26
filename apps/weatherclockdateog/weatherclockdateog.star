@@ -52,7 +52,7 @@ WEATHER_ICONS = {
 HUMIDITY_FONT = "5x8"
 TEMP_FONT = "5x8"
 TIME_FONT = "6x13"
-DAY_FONT = "tom-thumb"
+DAY_FONT = "CG-pixel-3x5-mono"
 
 DEFAULT_TIME_COLOR = "#FFFFFF"
 DEFAULT_TEMP_COLOR = "#FFFFFF"
@@ -420,11 +420,11 @@ def build_weather_row(weather, temp_color, humidity_color, show_unit, unit_syste
                     cross_align = "center",
                     children = [
                         render.Padding(
-                            pad = (0, 1, 0, 0),
+                            pad = (0, 0, 0, 0),
                             child = render.Text(content = day_str, font = DAY_FONT, color = DAY_COLOR),
                         ),
                         render.Padding(
-                            pad = (0, 1, 0, 0),
+                            pad = (0, 2, 0, 0),
                             child = render.Text(content = date_str, font = DAY_FONT, color = DAY_COLOR),
                         ),
                     ],
