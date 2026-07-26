@@ -108,6 +108,7 @@ def get_schema():
                 icon = "key",
                 desc = "OpenWeather API key (not needed for NWS).",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "unit_system",
@@ -484,10 +485,23 @@ def build_frame(now, is_24hour, time_color, temp_color, humidity_color, show_uni
 
 # ── Night mode ───────────────────────────────────────────────────────────
 
+def parse_hhmm(s, default):
+    # Only accept a strict 4-digit HHmm string with valid hour/minute ranges
+    # (e.g. "2300"). Anything else - wrong length, non-digits, out-of-range
+    # hour/minute like "11pm" or "23:00" - falls back to `default` rather
+    # than crashing int(), since Starlark has no try/catch.
+    if not s or len(s) != 4 or not s.isdigit():
+        return default
+    hour = int(s[0:2])
+    minute = int(s[2:4])
+    if hour > 23 or minute > 59:
+        return default
+    return hour * 100 + minute
+
 def is_night(now, start_str, end_str):
     current = now.hour * 100 + now.minute
-    start = int(start_str) if start_str else 2300
-    end = int(end_str) if end_str else 700
+    start = parse_hhmm(start_str, 2300)
+    end = parse_hhmm(end_str, 700)
     if start > end:
         return current >= start or current < end
     return current >= start and current < end
@@ -534,7 +548,7 @@ def get_weather(config, lat, lng, unit_system):
         return fetch_openweather(lat, lng, api_key, unit_system)
 
 def default_weather():
-    return {"temp": 0, "humidity": 0, "condition": "cloudy", "description": ""}
+    return {"temp": None, "humidity": None, "condition": "cloudy", "description": "unavailable"}
 
 def no_api_key_weather():
     return {"temp": None, "humidity": None, "condition": "cloudy", "description": "no key"}
