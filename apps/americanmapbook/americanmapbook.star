@@ -2040,9 +2040,14 @@ def main(config):
 
     # the usa_map_data we have comes in 8 sections, basically coordiantes of 8 different islands.
     # for mapping purposes we'll group them into the mainland, hawaii and alaska
-    mainland_sections = [1]
-    hawaii_sections = [2, 3, 4, 5, 6]
-    alaska_sections = [7, 8, 9]
+    # Group geojson subgroups into mainland, Hawaii, and Alaska
+    MAINLAND_SECTION_INDEXES = [1]
+    HAWAII_SECTION_INDEXES = [2, 3, 4, 5, 6]
+    ALASKA_SECTION_INDEXES = [7, 8, 9]
+
+    mainland_sections = MAINLAND_SECTION_INDEXES
+    hawaii_sections = HAWAII_SECTION_INDEXES
+    alaska_sections = ALASKA_SECTION_INDEXES
 
     map_color = config.get("map_outline_color", DEFAULT_COLORS[0])
     unvisited_color = config.get("unvisited_color", DEFAULT_COLORS[1])
