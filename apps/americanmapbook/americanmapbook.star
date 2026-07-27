@@ -2126,22 +2126,18 @@ def main(config):
     config_item = "park"
 
     tracking_type = config.get("type", TRACKING_OPTIONS[0].value)
-
     if tracking_type == "national_parks":
         usa_locations = usa_national_parks
         preface = "PARK"
         config_item = "park"
-    elif tracking_type == "capitols":
-        usa_locations = usa_capitols
-        preface = "STATE"
-        config_item = "location"
     elif tracking_type == "world_heritage_sites":
         usa_locations = world_heritage_sites
         preface = "HERITAGE"
         config_item = "site"
     else:
-        usa_locations = None
-        config_item = ""
+        usa_locations = usa_capitols
+        preface = "STATE"
+        config_item = "location"
 
     if usa_locations != None:
         for location in usa_locations:
