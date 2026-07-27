@@ -2272,12 +2272,12 @@ TRACKING_OPTIONS = [
     schema.Option(value = "world_heritage_sites", display = "World Heritage Sites"),
 ]
 
-def get_tracking_items(type):
-    if type == "capitols":
+def get_tracking_items(tracking_type):
+    if tracking_type == "capitols":
         return get_location_options(usa_capitols)
-    elif type == "national_parks":
+    elif tracking_type == "national_parks":
         return get_national_park_options(usa_national_parks)
-    elif type == "world_heritage_sites":
+    elif tracking_type == "world_heritage_sites":
         return get_world_heritage_options(world_heritage_sites)
     else:
         return get_location_options(usa_capitols)
