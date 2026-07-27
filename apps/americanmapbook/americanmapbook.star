@@ -333,10 +333,11 @@ def get_presidential_library_options(libraries):
     ]
 
 TRACKING_OPTIONS = [
-    schema.Option(value = "capitols", display = "State Capitols"),
+
     schema.Option(value = "national_parks", display = "National Parks"),
-    schema.Option(value = "world_heritage_sites", display = "World Heritage Sites"),
     schema.Option(value = "presidential_libraries", display = "Presidential Libraries"),
+    schema.Option(value = "capitols", display = "State Capitols"),
+    schema.Option(value = "world_heritage_sites", display = "World Heritage Sites"),
 ]
 def slugify(value):
     return (
