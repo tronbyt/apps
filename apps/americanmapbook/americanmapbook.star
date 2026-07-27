@@ -2001,12 +2001,10 @@ def get_dot(color, size = 1):
     )
 
 def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
+    return render.Padding(
         pad = (left, top, right, bottom),
         child = element,
     )
-
-    return padded_element
 
 def convert_point_for_map(point, offset, height):
     converted_x = point[0] + offset[2]
@@ -2058,7 +2056,6 @@ def main(config):
     # Create frames for display
     animation_frames = []  # Build the animation gradually instead of rendering everything at once.
     items_to_plot = []  # Keep track of everything currently visible in the animation.
-    gridpoints = []
 
     width, height = canvas.width(), canvas.height()
     is2x = canvas.is2x()
