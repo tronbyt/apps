@@ -1,4 +1,3 @@
-
 # USA JSON structure
 usa_map_data = {
     "coordinates": [

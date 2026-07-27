@@ -5,9 +5,9 @@ Description: Tracking your visits across the USA
 Author: Robert Ison
 """
 
+load("americanmapbook_data.star", "presidential_libraries", "usa_capitols", "usa_map_data", "usa_national_parks", "world_heritage_sites")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("americanmapbook_data.star", "usa_map_data", "usa_capitols", "usa_national_parks", "world_heritage_sites", "presidential_libraries")
 
 DEFAULT_COLORS = ["#009A17", "#708090", "#FFD700"]  #map, unvisited, visited
 
@@ -76,7 +76,7 @@ def convert_point_for_map(point, offset, height):
     converted_x = point[0] + offset[2]
     converted_y = height - point[1] + offset[3]
     return converted_x, converted_y
-    
+
 def main(config):
     # Holds the coordinates of the outline of the different maps
     mainland_coordinates = []
@@ -126,7 +126,7 @@ def main(config):
     width, height = canvas.width(), canvas.height()
     is2x = canvas.is2x()
     font = "terminus-14" if is2x else "CG-pixel-3x5-mono"
-    dot_size = 1 #if is2x else 1
+    dot_size = 1  #if is2x else 1
 
     # This map of USA includes Alaska and Hawaii
     # Offset for Mainland, Hawaii, Alaska - width of map, height of map, move right, move up
@@ -187,11 +187,13 @@ def main(config):
         preface = "STATE"
         config_item = "location"
 
+    total_visited = 0
+
     if usa_locations != None:
         for location in usa_locations:
             idx = location["map"] - 1
             if (0 <= idx) and (idx < len(group_coordinates)):
-                if config.get("%s_%s_%s" % (preface, slugify(location["state"]),    slugify(location[config_item.lower()]),)) == "true":
+                if config.get("%s_%s_%s" % (preface, slugify(location["state"]), slugify(location[config_item.lower()]))) == "true":
                     visited_group_coordinates[idx].append([location["coordinates"]["lon"], location["coordinates"]["lat"]])
                 else:
                     group_coordinates[idx].append([location["coordinates"]["lon"], location["coordinates"]["lat"]])
@@ -213,7 +215,6 @@ def main(config):
                 animation_frames.append(render.Stack(children = items_to_plot))
 
         # Loop through all three groups of visited
-        total_visited = 0
         for i, group in enumerate(visited_group_coordinates):
             gridpoints = normalize_coordinates(group, maps[i], offsets[i][0], offsets[i][1])
 
@@ -279,7 +280,7 @@ def main(config):
                     ),
                     width - pad - text_w,
                     height - pad - text_h,
-                )
+                ),
             )
 
         animation_frames.append(render.Stack(children = final_items))
@@ -333,20 +334,20 @@ def get_presidential_library_options(libraries):
     ]
 
 TRACKING_OPTIONS = [
-
     schema.Option(value = "national_parks", display = "National Parks"),
     schema.Option(value = "presidential_libraries", display = "Presidential Libraries"),
     schema.Option(value = "capitols", display = "State Capitols"),
     schema.Option(value = "world_heritage_sites", display = "World Heritage Sites"),
 ]
+
 def slugify(value):
     return (
         value
-        .replace(" ", "_")
-        .replace(".", "")
-        .replace(",", "")
-        .replace("'", "")
-        .replace("-", "_")
+            .replace(" ", "_")
+            .replace(".", "")
+            .replace(",", "")
+            .replace("'", "")
+            .replace("-", "_")
     )
 
 def get_tracking_items(tracking_type):
