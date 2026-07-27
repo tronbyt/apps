@@ -8,7 +8,7 @@ Author: Robert Ison
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-DEFAULT_COLORS = ["#009A17", "#708090", "#FFD700"]  #map, unvisted, visited
+DEFAULT_COLORS = ["#009A17", "#708090", "#FFD700"]  #map, unvisited, visited
 
 # USA JSON structure
 usa_map_data = {
@@ -2038,8 +2038,8 @@ def main(config):
     hawaii_coordinates = []
     alaska_coordinates = []
 
-    # the usa_map_data we have comes in 8 sections, basically coordiantes of 8 different islands.
-    # for mapping purposes we'll group them into the mainland, hawaii and alaska
+    # The usa_map_data coordinates come in multiple subgroups.
+    # For mapping purposes, group them into mainland, Hawaii, and Alaska.
     # Group geojson subgroups into mainland, Hawaii, and Alaska
     MAINLAND_SECTION_INDEXES = [1]
     HAWAII_SECTION_INDEXES = [2, 3, 4, 5, 6]
@@ -2074,9 +2074,9 @@ def main(config):
     # keep track of the three different maps
     maps = [mainland_bounds, hawaii_bounds, alaska_bounds]
 
-    #Create Frames for Display
-    animation_frames = []  #We want to display the map, but build up slowly, not just stack the whole thing at once
-    items_to_plot = []  #As we progress through the list of items for our display, we keep adding to stacked_items
+    # Create frames for display
+    animation_frames = []  # Build the animation gradually instead of rendering everything at once.
+    items_to_plot = []  # Keep track of everything currently visible in the animation.
     gridpoints = []
 
     width, height = canvas.width(), canvas.height()
