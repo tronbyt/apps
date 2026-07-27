@@ -1946,35 +1946,14 @@ world_heritage_sites = [
 ]
 
 def get_bounds(coordinates):
-    if not coordinates:
-        return {
-            "minx": 0,
-            "maxx": 0,
-            "miny": 0,
-            "maxy": 0,
-        }
-
-    minx = coordinates[0][0]
-    maxx = coordinates[0][0]
-    miny = coordinates[0][1]
-    maxy = coordinates[0][1]
-
-    for coord in coordinates:
-        x, y = coord[0], coord[1]
-        if x < minx:
-            minx = x
-        if x > maxx:
-            maxx = x
-        if y < miny:
-            miny = y
-        if y > maxy:
-            maxy = y
+    xs = [coord[0] for coord in coordinates]
+    ys = [coord[1] for coord in coordinates]
 
     return {
-        "minx": minx,
-        "maxx": maxx,
-        "miny": miny,
-        "maxy": maxy,
+        "min_x": min(xs),
+        "max_x": max(xs),
+        "min_y": min(ys),
+        "max_y": max(ys),
     }
 
 def normalize_coordinates(coords, bounds, grid_width, grid_height):
@@ -1982,10 +1961,11 @@ def normalize_coordinates(coords, bounds, grid_width, grid_height):
     for point in coords:
         raw_coords.append((point[0], point[1]))
 
-    min_x = bounds["minx"]
-    max_x = bounds["maxx"]
-    min_y = bounds["miny"]
-    max_y = bounds["maxy"]
+    # Initialize min/max values
+    min_x = bounds["min_x"]
+    max_x = bounds["max_x"]
+    min_y = bounds["min_y"]
+    max_y = bounds["max_y"]
 
     def scale(value, min_val, max_val, new_min, new_max):
         if max_val == min_val:
