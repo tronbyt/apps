@@ -2153,15 +2153,17 @@ def main(config):
                 converted_x, converted_y = convert_point_for_map(point, offsets[i], height)
                 total_visited = total_visited + 1
 
+                # Add the visited dot
                 items_to_plot.append(
                     add_padding_to_child_element(
                         get_dot(visited_color, dot_size),
                         converted_x,
                         converted_y,
-                    )
+                    ),
                 )
 
-                frame_items = list(items_to_plot)
+                # Prepare a frame-specific children list so we don't keep stacking count boxes
+                frame_children = list(items_to_plot)
 
                 if config.get("showCount") == "true":
                     display_text = render.Text(
@@ -2171,8 +2173,7 @@ def main(config):
                     )
                     text_w, text_h = display_text.size()
                     pad = 2 if is2x else 1
-
-                    counter_overlay = add_padding_to_child_element(
+                    count_box = add_padding_to_child_element(
                         render.Box(
                             color = "#000",
                             width = text_w,
@@ -2182,10 +2183,10 @@ def main(config):
                         width - pad - text_w,
                         height - pad - text_h,
                     )
+                    frame_children.append(count_box)
 
-                    frame_items.append(counter_overlay)
-
-                animation_frames.append(render.Stack(children = frame_items))
+                # For each visited point, add a frame with map + unvisited + visited (+ optional count)
+                animation_frames.append(render.Stack(children = frame_children))
 
     # Add several frames of the final product to keep on screen for longer
     for _ in range(100):
