@@ -1946,67 +1946,61 @@ world_heritage_sites = [
 ]
 
 def get_bounds(coordinates):
-    """
-    Looks through the coordinates and determins the min and max x and y coordinates
-
-    Args:
-        coordinates (List of lists): The coordinates
-
-    Returns:
-        dictionary of min and max coordinates
-
-    """
     if not coordinates:
-        return {"min_x": None, "max_x": None, "min_y": None, "max_y": None}
+        return {
+            "minx": 0,
+            "maxx": 0,
+            "miny": 0,
+            "maxy": 0,
+        }
 
-    min_x = coordinates[0][0]
-    max_x = coordinates[0][0]
-    min_y = coordinates[0][1]
-    max_y = coordinates[0][1]
+    minx = coordinates[0][0]
+    maxx = coordinates[0][0]
+    miny = coordinates[0][1]
+    maxy = coordinates[0][1]
 
     for coord in coordinates:
         x, y = coord[0], coord[1]
-        if x < min_x:
-            min_x = x
-        if x > max_x:
-            max_x = x
-        if y < min_y:
-            min_y = y
-        if y > max_y:
-            max_y = y
+        if x < minx:
+            minx = x
+        if x > maxx:
+            maxx = x
+        if y < miny:
+            miny = y
+        if y > maxy:
+            maxy = y
 
-    #print("min_x: %s max_x:  %s , : min_y, %s: max_y: %s" % (min_x, max_x, min_y,max_y))
-
-    return {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
+    return {
+        "minx": minx,
+        "maxx": maxx,
+        "miny": miny,
+        "maxy": maxy,
+    }
 
 def normalize_coordinates(coords, bounds, grid_width, grid_height):
-    # Extract all coordinate pairs from the nested structure
     raw_coords = []
     for point in coords:
         raw_coords.append((point[0], point[1]))
 
-    # Initialize min/max values
-    min_x = bounds["min_x"]
-    max_x = bounds["max_x"]
-    min_y = bounds["min_y"]
-    max_y = bounds["max_y"]
+    min_x = bounds["minx"]
+    max_x = bounds["maxx"]
+    min_y = bounds["miny"]
+    max_y = bounds["maxy"]
 
-    # Function to scale values to fit within the grid
     def scale(value, min_val, max_val, new_min, new_max):
+        if max_val == min_val:
+            return new_min
         return int((value - min_val) * (new_max - new_min) / (max_val - min_val) + new_min)
 
-    # Normalize coordinates to fit within the grid
     grid_points = []
-
     for coord in raw_coords:
         x = coord[0]
         y = coord[1]
         grid_x = scale(x, min_x, max_x, 0, grid_width - 1)
         grid_y = scale(y, min_y, max_y, 0, grid_height - 1)
-        grid_points.append((grid_x, grid_y))  # Allow duplicates
-        #print("X: %s Y: %s" % (grid_x, grid_y))
+        grid_points.append((grid_x, grid_y))
 
-    return grid_points  # Return as a list with duplicates allowed
+    return grid_points
 
 def get_plot(grid_points, width, height, color = "#ff0"):
     return render.Plot(
