@@ -2027,6 +2027,11 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
     return padded_element
 
+def convert_point_for_map(point, offset, height):
+    converted_x = point[0] + offset[2]
+    converted_y = height - point[1] + offset[3]
+    return converted_x, converted_y
+    
 def main(config):
     # Holds the coordinates of the outline of the different maps
     mainland_coordinates = []
@@ -2151,8 +2156,7 @@ def main(config):
                 # however, the coordinates of the individual dots start at the top right
                 # also, these points are moved around to fit on the 'inset' map they belong to
                 # these formulae account for those adjustments to get the items on the right spot on the right map
-                converted_x = point[0] + offsets[i][2]
-                converted_y = height - point[1] + offsets[i][3]
+                converted_x, converted_y = convert_point_for_map(point, offsets[i], height)
 
                 items_to_plot.append(add_padding_to_child_element(get_dot(unvisited_color, dot_size), converted_x, converted_y))
 
@@ -2165,8 +2169,7 @@ def main(config):
             gridpoints = normalize_coordinates(group, maps[i], offsets[i][0], offsets[i][1])
 
             for point in gridpoints:
-                converted_x = point[0] + offsets[i][2]
-                converted_y = height - point[1] + offsets[i][3]
+                converted_x, converted_y = convert_point_for_map(point, offsets[i], height)
                 total_visited = total_visited + 1
 
                 items_to_plot.append(
