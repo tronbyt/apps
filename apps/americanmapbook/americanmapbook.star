@@ -1969,7 +1969,8 @@ def normalize_coordinates(coords, bounds, grid_width, grid_height):
 
     def scale(value, min_val, max_val, new_min, new_max):
         if max_val == min_val:
-            return new_min
+            # Degenerate case: all points share the same coordinate; put them in the middle.
+            return int((new_min + new_max) / 2)
         return int((value - min_val) * (new_max - new_min) / (max_val - min_val) + new_min)
 
     grid_points = []
