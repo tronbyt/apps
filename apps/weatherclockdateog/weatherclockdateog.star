@@ -108,7 +108,6 @@ def get_schema():
                 icon = "key",
                 desc = "OpenWeather API key (not needed for NWS).",
                 default = "",
-                secret = True,
             ),
             schema.Dropdown(
                 id = "unit_system",
