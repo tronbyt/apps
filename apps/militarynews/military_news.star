@@ -71,6 +71,7 @@ BRANCH_COLOR_PALETTE = [
 BRANCH_FILTERS = {
     "air-force": [
         "air force topics",
+        "air force bases",
         "air force",
         "airman",
         "airmen",
@@ -81,8 +82,10 @@ BRANCH_FILTERS = {
         "unmanned aircraft systems",
     ],
     "army": [
+        "><![cdata[army]]>",
         "army",
         "army rangers",
+        "army training",
         "soldier",
         "soldiers",
         "west point",
@@ -96,6 +99,7 @@ BRANCH_FILTERS = {
         "marine corps",
         "marine corps operations",
         "marine corps uniforms",
+        "marine corps reserve",
         "marines",
     ],
     "navy": [
@@ -154,61 +158,11 @@ def main(config):
 
         if selected_branch == "military":
             matched = True
-
-        elif selected_branch == "air-force":
-            matched = (
-                raw_item.find("air force topics") >= 0 or
-                raw_item.find("air force bases") >= 0 or
-                raw_item.find("air force") >= 0 or
-                raw_item.find("aircraft") >= 0 or
-                raw_item.find("fighter aircraft") >= 0 or
-                raw_item.find("attack aircraft") >= 0 or
-                raw_item.find("surveillance aircraft") >= 0 or
-                raw_item.find("unmanned aircraft systems") >= 0
-            )
-
-        elif selected_branch == "army":
-            matched = (
-                raw_item.find("><![cdata[army]]>") >= 0 or
-                raw_item.find("army rangers") >= 0 or
-                raw_item.find("army training") >= 0 or
-                raw_item.find("west point") >= 0 or
-                raw_item.find("soldier") >= 0 or
-                raw_item.find("soldiers") >= 0
-            )
-
-        elif selected_branch == "coast-guard":
-            matched = (
-                raw_item.find("coast guard") >= 0 or
-                raw_item.find("uscg") >= 0
-            )
-
-        elif selected_branch == "marine-corps":
-            matched = (
-                raw_item.find("marine corps topics") >= 0 or
-                raw_item.find("marine corps operations") >= 0 or
-                raw_item.find("marine corps reserve") >= 0 or
-                raw_item.find("marine corps uniforms") >= 0 or
-                raw_item.find("marine corps") >= 0 or
-                raw_item.find("marines") >= 0
-            )
-
-        elif selected_branch == "navy":
-            matched = (
-                raw_item.find("us navy topics") >= 0 or
-                raw_item.find("navy") >= 0 or
-                raw_item.find("fleet") >= 0 or
-                raw_item.find("sailor") >= 0 or
-                raw_item.find("sailors") >= 0
-            )
-
-        elif selected_branch == "space-force":
-            matched = (
-                raw_item.find("space force") >= 0 or
-                raw_item.find("ussf") >= 0 or
-                raw_item.find("guardian") >= 0 or
-                raw_item.find("guardians") >= 0
-            )
+        else:
+            for keyword in BRANCH_FILTERS.get(selected_branch, []):
+                if raw_item.find(keyword) >= 0:
+                    matched = True
+                    break
 
         if matched:
             matching_items.append(item_num)
@@ -218,7 +172,7 @@ def main(config):
     selected_items = []
 
     if selected_branch == "military":
-        pool = nonmatching_items[:]
+        pool = matching_items[:]
         for _ in range(3):
             if len(pool) == 0:
                 break
