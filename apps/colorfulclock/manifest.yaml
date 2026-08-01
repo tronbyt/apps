@@ -1,0 +1,17 @@
+---
+id: colorful-clock
+name: Colorful Clock
+summary: Colorful Clock
+desc: Shows the time like on an old wall clock.
+author: LukiLeu
+fileName: colorful_clock.star
+packageName: colorfulclock
+recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - retro
+  - art
+  - utility
+published: '2022-09-15T18:57:26Z'
+updated: '2025-12-02T19:30:22Z'

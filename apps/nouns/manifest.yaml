@@ -1,0 +1,16 @@
+---
+id: nouns
+name: Nouns
+summary: Show current Noun auction
+desc: Displays the Noun currently under auctionand bid details.
+author: miracle2k
+fileName: nouns.star
+packageName: nouns
+recommendedInterval: 5
+category: entertainment
+tags:
+  - finance
+  - retro
+  - clock
+published: '2023-07-27T14:18:05Z'
+updated: '2025-12-23T13:24:18Z'

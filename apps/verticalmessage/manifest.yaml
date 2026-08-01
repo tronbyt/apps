@@ -1,0 +1,14 @@
+---
+id: vertical-message
+name: Vertical Message
+summary: Display messages vertically
+desc: Display a message vertically.
+author: rs7q5
+fileName: vertical_message.star
+packageName: verticalmessage
+category: utilities
+tags:
+  - art
+  - utility
+published: '2022-02-25T16:18:19Z'
+updated: '2025-12-02T19:30:22Z'

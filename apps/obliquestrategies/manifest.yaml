@@ -1,0 +1,16 @@
+---
+id: obliquestrategies
+name: ObliqueStrategies
+summary: 100+ Worthwhile Dilemmas
+desc: Picks an Oblique Strategy at random and displays it.
+author: '@parsnbl'
+fileName: obliquestrategies.star
+packageName: obliquestrategies
+recommendedInterval: 5
+category: entertainment
+tags:
+  - time
+  - art
+  - lifestyle
+published: '2023-03-23T12:23:54Z'
+updated: '2025-12-02T19:30:22Z'

@@ -1,0 +1,15 @@
+---
+id: womens-t20-wc
+name: Womens T20 WC
+summary: Cricket scores for T20 WC
+desc: Shows live scores for the selected Womens T20 team. Also can show post game details or upcoming match information.
+author: M0ntyP
+fileName: womens_t20_wc.star
+packageName: womenst20wc
+recommendedInterval: 5
+broken: true
+category: sports
+tags:
+  - cricket
+published: '2023-02-08T17:59:12Z'
+updated: '2025-12-05T22:28:51Z'

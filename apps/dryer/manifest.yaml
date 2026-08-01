@@ -1,0 +1,15 @@
+---
+id: dryer
+name: Dryer
+summary: 'Notification: dryer'
+desc: Displays a notification that a dryer is done.
+author: savdagod
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - smart-home
+  - utility
+  - wide 2x support
+published: '2025-04-06T20:57:21Z'
+updated: '2025-11-30T20:08:55Z'

@@ -1,0 +1,14 @@
+---
+id: hrbfc
+name: HRBFC
+summary: H&R Beavers' Live Scores
+desc: Live scores and upcoming match details for the Hampton and Richmond Borough Football Club. Go Beavers!
+author: Jonathan Damico
+fileName: hrbfc.star
+packageName: hrbfc
+recommendedInterval: 5
+category: sports
+tags:
+  - rugby
+published: '2023-09-06T14:39:53Z'
+updated: '2025-11-29T17:52:33Z'

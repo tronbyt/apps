@@ -1,0 +1,14 @@
+---
+id: zapier
+name: Zapier
+summary: Integrate with Zapier
+desc: The Zapier app allows you to trigger information on your Tidbyt from a Zap.
+author: Tidbyt
+fileName: zapier.star
+packageName: zapier
+recommendedInterval: 5
+category: utilities
+tags:
+  - smart-home
+published: '2022-10-24T20:54:28Z'
+updated: '2025-11-30T20:08:55Z'

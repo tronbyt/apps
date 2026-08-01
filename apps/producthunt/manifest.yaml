@@ -1,0 +1,15 @@
+---
+id: product-hunt
+name: Product Hunt
+summary: Product Hunt top products
+desc: View the daily top tech products from Product Hunt. Generate your Developer Token at https://www.producthunt.com/v2/oauth/applications.
+author: Daniel Sitnik
+recommendedInterval: 5
+fileName: product_hunt.star
+packageName: producthunt
+category: entertainment
+tags:
+  - tech
+  - news
+published: '2024-05-22T18:28:40Z'
+updated: '2025-12-23T13:24:18Z'

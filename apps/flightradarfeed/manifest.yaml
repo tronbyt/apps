@@ -1,0 +1,14 @@
+---
+id: flight-radar-feed
+name: Flight Radar Feed
+summary: View FR24 Radar Feed
+desc: Feed of the flights tracked by a radar recording data for Flightradar24.
+author: kinson
+fileName: flight_radar_feed.star
+packageName: flightradarfeed
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2024-01-09T19:56:37Z'
+updated: '2025-11-30T20:08:55Z'

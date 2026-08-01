@@ -1,0 +1,16 @@
+---
+id: next-ufc
+name: Next UFC
+summary: Next UFC event
+desc: Shows next upcoming UFC event with date and time.
+author: Stephen So
+recommendedInterval: 5
+fileName: next_ufc.star
+packageName: nextufc
+category: sports
+tags:
+  - news
+  - ufc
+  - mma
+published: '2024-05-22T18:24:44Z'
+updated: '2025-12-17T23:02:59Z'

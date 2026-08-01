@@ -1,0 +1,596 @@
+"""
+Applet: OG Clock Remake with Weather
+Summary: OG Clock Remake with Location Configuration and Weather Display
+Description: Display the time in addition to current weather and humidity from either OpenWeather or National Weather Service (no API key required for NWS). To request an OpenWeather API key, see https://home.openweathermap.org/users/sign_up.
+Author: g3rmanaviator
+Version: 1.0
+
+"""
+
+load("encoding/json.star", "json")
+load("http.star", "http")
+load("images/cloudy.png", CLOUDY_ASSET = "file")
+load("images/foggy.png", FOGGY_ASSET = "file")
+load("images/haily.png", HAILY_ASSET = "file")
+load("images/moony.png", MOONY_ASSET = "file")
+load("images/moonyish.png", MOONYISH_ASSET = "file")
+load("images/raindrop_icon.png", RAINDROP_ICON_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/sleety.png", SLEETY_ASSET = "file")
+load("images/sleety2.png", SLEETY2_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/snowy2.png", SNOWY2_ASSET = "file")
+load("images/sunny.png", SUNNY_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_ASSET = "file")
+load("images/thundery.png", THUNDERY_ASSET = "file")
+load("images/tornady.png", TORNADY_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
+load("time.star", "time")
+
+DEFAULT_LOCATION = """
+{
+	"lat": "40.6781784",
+	"lng": "-73.9441579",
+	"description": "Brooklyn, NY, USA",
+	"locality": "Brooklyn",
+	"place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
+	"timezone": "America/New_York"
+}
+"""
+
+# Weather API URLs from Time & Weather
+NWS_POINTS_URL = "https://api.weather.gov/points/{latitude},{longitude}"
+NWS_STATIONS_URL = "https://api.weather.gov/gridpoints/{grid_id}/{grid_x},{grid_y}/stations"
+NWS_LATEST_OBSERVATION_URL = "{station_url}/observations/latest"
+OPENWEATHER_CURRWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units={units}&lang=en"
+OPENWEATHER_AIR_POLLUTION_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat={latitude}&lon={longitude}&appid={api_key}"
+OPENWEATHER_ONECALL_URL = "https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&exclude=minutely,hourly,daily,alerts&appid={api_key}&units={units}&lang=en"
+
+TEMP_COLOR_DEFAULT = "#FFFFFF"
+TIME_NIGHT_COLOR = "#333333"
+
+# Complete weather icons from Time & Weather
+WEATHER_ICONS = {
+    "cloudy.png": CLOUDY_ASSET.readall(),
+    "foggy.png": FOGGY_ASSET.readall(),
+    "haily.png": HAILY_ASSET.readall(),
+    "moony.png": MOONY_ASSET.readall(),
+    "moonyish.png": MOONYISH_ASSET.readall(),
+    "rainy.png": RAINY_ASSET.readall(),
+    "sleety.png": SLEETY_ASSET.readall(),
+    "sleety2.png": SLEETY2_ASSET.readall(),
+    "snowy.png": SNOWY_ASSET.readall(),
+    "snowy2.png": SNOWY2_ASSET.readall(),
+    "sunny.png": SUNNY_ASSET.readall(),
+    "sunnyish.png": SUNNYISH_ASSET.readall(),
+    "thundery.png": THUNDERY_ASSET.readall(),
+    "tornady.png": TORNADY_ASSET.readall(),
+    "windy.png": WINDY_ASSET.readall(),
+}
+
+RAINDROP_ICON = RAINDROP_ICON_ASSET.readall()
+
+# Weather API functions from Time & Weather
+def get_nws_observation_station(lat, lon, ttl = 3600):
+    # Get the grid point data
+    res = http.get(NWS_POINTS_URL.format(
+        latitude = lat,
+        longitude = lon,
+    ), ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Could not obtain the grid point data.", res.status_code)
+
+    properties = res.json()["properties"]
+    grid_id = properties["gridId"]
+    grid_x = properties["gridX"]
+    grid_y = properties["gridY"]
+
+    # Get the stations list from the gridpoint
+    stations_url = NWS_STATIONS_URL.format(
+        grid_id = grid_id,
+        grid_x = grid_x,
+        grid_y = grid_y,
+    )
+    stations_res = http.get(stations_url, ttl_seconds = ttl)
+    if stations_res.status_code != 200:
+        fail("Could not obtain stations list.", stations_res.status_code)
+
+    # Get the first station from the observationStations list
+    observation_stations = stations_res.json()["observationStations"]
+    if len(observation_stations) == 0:
+        fail("No observation stations found for this location.")
+
+    first_station = observation_stations[0]
+    return first_station
+
+def get_nws_latest_observation(station_url, ttl = 300):
+    # Call the station's latest observation endpoint
+    latest_url = NWS_LATEST_OBSERVATION_URL.format(station_url = station_url)
+    res = http.get(latest_url, ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Could not obtain latest observation.", res.status_code)
+    return res.json()
+
+def get_current_weather_conditions(url, ttl):
+    res = http.get(url, ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Current conditions request failed with status", res.status_code)
+    return res.json()
+
+def get_openweather_air_pollution(api_key, latitude, longitude):
+    res = http.get(
+        url = OPENWEATHER_AIR_POLLUTION_URL,
+        params = {
+            "lat": str(latitude),
+            "lon": str(longitude),
+            "appid": api_key,
+        },
+    )
+
+    air_quality = {}
+    air_quality["index"] = int(res.json()["list"][0]["main"]["aqi"])
+    return air_quality
+
+def nightScreen(now, config):
+    # Use OG Clock’s settings
+    use_24_hour = config.bool("24hour_format", False)
+    time_color = TIME_NIGHT_COLOR  # dim color at night
+
+    # Blinking colon: reuse your exact OG logic
+    if config.bool("blink", True):
+        blink_vec = [render.Text(":", font = "6x13", color = time_color)] * 5
+        blink_vec.extend([render.Text(":", font = "6x13", color = "#000")] * 5)
+        blink_text = render.Animation(blink_vec)
+    else:
+        blink_text = render.Text(":", font = "6x13", color = time_color)
+
+    # Hours / minutes: reuse your existing formatting
+    if use_24_hour:
+        hour_text = now.format("15")
+        minute_text = now.format("04")
+    else:
+        if now.hour == 0:
+            hour_text = "12"
+        elif now.hour > 12:
+            hour_text = str(now.hour - 12)
+        else:
+            hour_text = str(now.hour)
+        minute_text = now.format("04 PM")
+
+    return render.Root(
+        delay = 500,
+        max_age = 120,
+        child = render.Padding(
+            pad = (0, 8, 0, 0),
+            child = render.Column(
+                expanded = True,
+                cross_align = "center",
+                children = [
+                    render.Box(width = 64, height = 1),
+                    render.Row(
+                        children = [
+                            render.Text(content = hour_text, font = "6x13", color = time_color),
+                            blink_text,
+                            render.Text(content = minute_text, font = "6x13", color = time_color),
+                        ],
+                    ),
+                ],
+            ),
+        ),
+    )
+
+def main(config):
+    # Get location info from config or use default
+    location_info = json.decode(config.get("location", DEFAULT_LOCATION))
+    timezone = location_info["timezone"]
+    latitude = float(location_info["lat"])
+    longitude = float(location_info["lng"])
+
+    # Add this right after getting the current time
+    now = time.now().in_location(timezone)
+
+    # Night mode check
+    nightModeStr = config.get("nightModeStart")
+    if nightModeStr == None:
+        nightModeStartHr = 23
+        nightModeStartMin = 0
+    else:
+        nightModeStartHr = int(nightModeStr[0:2])
+        if nightModeStartHr >= 24:
+            nightModeStartHr = 0
+        nightModeStartMin = int(nightModeStr[2:4])
+
+    dayModeStr = config.get("nightModeEnd")
+    if dayModeStr == None:
+        dayModeEndHr = 7
+        dayModeEndMin = 0
+    else:
+        dayModeEndHr = int(dayModeStr[0:2])
+        dayModeEndMin = int(dayModeStr[2:4])
+
+    # Update variable names to match:
+    start_total = nightModeStartHr * 60 + nightModeStartMin
+    end_total = dayModeEndHr * 60 + dayModeEndMin
+
+    night_mode_enabled = config.bool("night_mode", False)
+    if night_mode_enabled:
+        current_hour = now.hour
+        current_minute = now.minute
+        current_total = current_hour * 60 + current_minute
+
+        # Check if night mode crosses midnight
+        if start_total > end_total:
+            # Crosses midnight (e.g., 23:00 to 07:00)
+            in_night_mode = current_total >= start_total or current_total < end_total
+        else:
+            # Same day (e.g., 01:00 to 05:00)
+            in_night_mode = current_total >= start_total and current_total < end_total
+
+        if in_night_mode:
+            return nightScreen(now, config)
+
+    # Get display settings from OG Clock
+    use_24_hour = config.bool("24hour_format", False)
+    time_color = config.get("time_color", "fff")
+
+    # Get blinking separator setting (matching custom clock implementation)
+    if config.bool("blink", True):
+        blink_vec = [render.Text(":", font = "6x13", color = time_color)] * 5
+        blink_vec.extend([render.Text(":", font = "6x13", color = "#000")] * 5)
+        blink_text = render.Animation(blink_vec)
+    else:
+        blink_text = render.Text(":", font = "6x13", color = time_color)
+
+    # Weather settings
+    api_service = config.get("weatherApiService") or "OpenWeather"
+    api_key = config.get("apiKey", "")
+    system_of_measurement = config.get("systemOfMeasurement", "Imperial").lower()
+    temp_color = config.get("tempColor", TEMP_COLOR_DEFAULT)
+
+    display_metric = (system_of_measurement == "metric")
+    display_sample = not (api_key) and api_service != "Open-Meteo" and api_service != "National Weather Service (NWS)"
+
+    # Format time components for proper blinking colon display
+    if use_24_hour:
+        hour_text = now.format("15")
+        minute_text = now.format("04")
+    else:
+        if now.hour == 0:
+            hour_text = "12"
+        elif now.hour > 12:
+            hour_text = str(now.hour - 12)
+        else:
+            hour_text = str(now.hour)
+        minute_text = now.format("04 PM")
+
+    # Initialize weather variables
+    icon_ref = None
+    result_current_conditions = {}
+
+    if display_sample:
+        # Sample data to display if user-specified API / location key are not available
+        icon_ref = "sunnyish.png"
+        result_current_conditions["temp"] = 14 if display_metric else 57
+        result_current_conditions["humidity"] = 50
+    elif api_service == "National Weather Service (NWS)":
+        station_url = get_nws_observation_station(latitude, longitude, 3600)
+        observation_data = get_nws_latest_observation(station_url, 300)
+
+        properties = observation_data.get("properties", {})
+
+        # Get temperature - NWS observations use Celsius by default
+        temp_data = properties.get("temperature", {})
+        temp_celsius = temp_data.get("value") if temp_data else None
+        if temp_celsius != None:
+            if display_metric:
+                result_current_conditions["temp"] = int(temp_celsius)
+            else:
+                result_current_conditions["temp"] = int((temp_celsius * 9.0 / 5.0) + 32)
+        else:
+            result_current_conditions["temp"] = "?"
+
+        # Get humidity
+        humidity_data = properties.get("relativeHumidity", {})
+        humidity_value = humidity_data.get("value") if humidity_data else None
+        if humidity_value != None:
+            result_current_conditions["humidity"] = int(humidity_value)
+        else:
+            result_current_conditions["humidity"] = "?"
+
+        # Determine icon based on text description and time of day
+        text_description = properties.get("textDescription", "")
+        if text_description:
+            text_description = text_description.lower()
+
+        # Check if it's daytime (simple check - can be improved)
+        current_hour = now.hour
+        is_daytime = current_hour >= 6 and current_hour < 19
+
+        # Icon mapping based on text description
+        if text_description:
+            if ("clear" in text_description or "fair" in text_description) and is_daytime:
+                icon_ref = "sunny.png"
+            elif ("mostly clear" in text_description or "partly cloudy" in text_description or "few clouds" in text_description) and is_daytime:
+                icon_ref = "sunnyish.png"
+            elif "cloudy" in text_description or "overcast" in text_description:
+                icon_ref = "cloudy.png"
+            elif "rain" in text_description or "drizzle" in text_description:
+                icon_ref = "rainy.png"
+            elif "thunder" in text_description or "storm" in text_description:
+                icon_ref = "thundery.png"
+            elif "snow" in text_description:
+                icon_ref = "snowy2.png"
+            elif "fog" in text_description or "mist" in text_description:
+                icon_ref = "foggy.png"
+            elif ("clear" in text_description or "fair" in text_description) and not is_daytime:
+                icon_ref = "moony.png"
+            elif ("mostly clear" in text_description or "partly cloudy" in text_description) and not is_daytime:
+                icon_ref = "moonyish.png"
+            else:
+                icon_ref = "cloudy.png"  # default
+        else:
+            icon_ref = "cloudy.png"  # default if no description
+
+    elif api_service == "OpenWeather":
+        request_url = OPENWEATHER_CURRWEATHER_URL.format(
+            latitude = latitude,
+            longitude = longitude,
+            api_key = api_key,
+            units = system_of_measurement,
+        )
+        raw_current_conditions = get_current_weather_conditions(request_url, 300)
+
+        result_current_conditions["temp"] = int(raw_current_conditions["main"]["temp"])
+        result_current_conditions["humidity"] = int(raw_current_conditions["main"]["humidity"])
+
+        icon_num = int(raw_current_conditions["weather"][0]["id"])
+        icon_code = str(raw_current_conditions["weather"][0]["icon"])
+        if icon_num == 800 and "d" in icon_code:
+            icon_ref = "sunny.png"
+        elif icon_num >= 801 and icon_num <= 802 and "d" in icon_code:
+            icon_ref = "sunnyish.png"
+        elif icon_num >= 803 and icon_num <= 804 and "d" in icon_code:
+            icon_ref = "cloudy.png"
+        elif (icon_num >= 300 and icon_num < 400) or (icon_num >= 500 and icon_num < 600) or icon_num == 701:
+            icon_ref = "rainy.png"
+        elif icon_num >= 200 and icon_num < 300:
+            icon_ref = "thundery.png"
+        elif icon_num >= 600 and icon_num < 700:
+            icon_ref = "snowy2.png"
+        elif icon_num == 731:
+            icon_ref = "windy.png"
+        elif icon_num >= 701 and icon_num < 800:
+            icon_ref = "foggy.png"
+        elif icon_num == 800 and "n" in icon_code:
+            icon_ref = "moony.png"
+        elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
+            icon_ref = "moonyish.png"
+
+    elif api_service == "OpenWeatherOneCall":
+        request_url = OPENWEATHER_ONECALL_URL.format(
+            latitude = latitude,
+            longitude = longitude,
+            api_key = api_key,
+            units = system_of_measurement,
+        )
+        raw_current_conditions = get_current_weather_conditions(request_url, 300)
+
+        result_current_conditions["temp"] = int(raw_current_conditions["current"]["temp"])
+        result_current_conditions["humidity"] = int(raw_current_conditions["current"]["humidity"])
+
+        icon_num = int(raw_current_conditions["current"]["weather"][0]["id"])
+        icon_code = str(raw_current_conditions["current"]["weather"][0]["icon"])
+        if icon_num == 800 and "d" in icon_code:
+            icon_ref = "sunny.png"
+        elif icon_num >= 801 and icon_num <= 802 and "d" in icon_code:
+            icon_ref = "sunnyish.png"
+        elif icon_num >= 803 and icon_num <= 804 and "d" in icon_code:
+            icon_ref = "cloudy.png"
+        elif (icon_num >= 300 and icon_num < 400) or (icon_num >= 500 and icon_num < 600) or icon_num == 701:
+            icon_ref = "rainy.png"
+        elif icon_num >= 200 and icon_num < 300:
+            icon_ref = "thundery.png"
+        elif icon_num >= 600 and icon_num < 700:
+            icon_ref = "snowy2.png"
+        elif icon_num == 731:
+            icon_ref = "windy.png"
+        elif icon_num >= 701 and icon_num < 800:
+            icon_ref = "foggy.png"
+        elif icon_num == 800 and "n" in icon_code:
+            icon_ref = "moony.png"
+        elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
+            icon_ref = "moonyish.png"
+
+    # Prepare weather display components
+    if icon_ref:
+        weather_image = render.Image(width = 16, height = 16, src = WEATHER_ICONS[icon_ref])
+    else:
+        weather_image = render.Box(width = 16, height = 16)
+
+    # Temperature and humidity display
+    show_unit = config.bool("show_temp_unit", True)
+    temp_unit = ("C" if display_metric else "F") if show_unit else ""
+    temp_text = render.Text(
+        content = str(result_current_conditions.get("temp", "?")) + "°" + temp_unit,
+        font = "5x8",
+        color = temp_color,
+    )
+
+    humidity_text = render.Text(
+        content = str(result_current_conditions.get("humidity", "?")) + "%",
+        font = "5x8",
+        color = "#848fEE",
+    )
+
+    # Layout - keeping OG Clock structure but adding weather
+    return render.Root(
+        delay = 500,
+        max_age = 60,
+        child = render.Box(
+            render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    # Render Time - using the exact custom clock blinking implementation
+                    render.Row(
+                        children = [
+                            render.Text(
+                                content = hour_text,
+                                font = "6x13",
+                                color = time_color,
+                            ),
+                            # Blinking colon separator (exactly like custom clock)
+                            blink_text,
+                            render.Text(
+                                content = minute_text,
+                                font = "6x13",
+                                color = time_color,
+                            ),
+                        ],
+                    ),
+                    # Weather section
+                    render.Row(
+                        cross_align = "center",
+                        children = [
+                            # Render Weather Icon
+                            weather_image,
+                            # Add spacing
+                            render.Box(width = 4, height = 1),
+                            render.Column(
+                                children = [
+                                    # Render Temperature
+                                    temp_text,
+                                    # Render Humidity
+                                    humidity_text,
+                                ],
+                            ),
+                        ],
+                    ),
+                    # Sample indicator
+                    render.Text(
+                        content = "SAMPLE" if display_sample else "",
+                        font = "tom-thumb",
+                        color = "#FF0000",
+                    ) if display_sample else render.Box(width = 1, height = 1),
+                ],
+            ),
+        ),
+    )
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Location(
+                id = "location",
+                name = "Location",
+                desc = "Location for which to display time and weather.",
+                icon = "locationArrow",
+            ),
+            schema.Toggle(
+                id = "24hour_format",
+                name = "24 hour clock",
+                desc = "Enable for 24-hour time format.",
+                icon = "clock",
+                default = False,
+            ),
+            schema.Color(
+                id = "time_color",
+                name = "Time color",
+                desc = "Change the color of the time.",
+                icon = "brush",
+                default = "fff",
+            ),
+            schema.Dropdown(
+                id = "weatherApiService",
+                name = "Weather API Service",
+                desc = "Select your preferred Weather API",
+                icon = "database",
+                default = "OpenWeather",
+                options = [
+                    schema.Option(
+                        display = "National Weather Service (NWS)",
+                        value = "National Weather Service (NWS)",
+                    ),
+                    schema.Option(
+                        display = "OpenWeather",
+                        value = "OpenWeather",
+                    ),
+                    schema.Option(
+                        display = "OpenWeather (One Call API 3.0)",
+                        value = "OpenWeatherOneCall",
+                    ),
+                ],
+            ),
+            schema.Text(
+                id = "apiKey",
+                name = "API Key",
+                desc = "API key for weather data access (not needed for NWS)",
+                icon = "gear",
+                default = "",
+                secret = True,
+            ),
+            schema.Dropdown(
+                id = "systemOfMeasurement",
+                name = "System of measurement",
+                desc = "Choose which system to display measurements",
+                icon = "ruler",
+                default = "Imperial",
+                options = [
+                    schema.Option(
+                        display = "Imperial",
+                        value = "Imperial",
+                    ),
+                    schema.Option(
+                        display = "Metric",
+                        value = "Metric",
+                    ),
+                ],
+            ),
+            schema.Color(
+                id = "tempColor",
+                name = "Temperature color",
+                desc = "Color for temperature display",
+                icon = "brush",
+                default = TEMP_COLOR_DEFAULT,
+            ),
+            schema.Toggle(
+                id = "show_temp_unit",
+                name = "Show temperature unit",
+                desc = "Display C or F after temperature",
+                icon = "thermometer",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "blink",
+                name = "Blinking separator",
+                desc = "Blink the colon between hours and minutes.",
+                icon = "gear",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "night_mode",
+                name = "Night Mode",
+                desc = "Enable night mode - Dim the display and show only the clock",
+                icon = "gear",
+                default = False,
+            ),
+            schema.Text(
+                id = "nightModeStart",
+                name = "Night Mode Start",
+                icon = "clock",
+                desc = "Use 24-hour format (HHmm), e.g. 2300",
+                default = "2300",
+            ),
+            schema.Text(
+                id = "nightModeEnd",
+                name = "Night Mode End",
+                icon = "clock",
+                desc = "Use 24-hour format (HHmm), e.g. 0730",
+                default = "0700",
+            ),
+        ],
+    )
