@@ -129,7 +129,8 @@ def main(config):
 
     TestID = "421-2026"
     SelectedTourneyID = config.get("TournamentList", TestID)
-    SelectedTourneyID = SelectedTourneyID.split("_")[0]
+
+    #SelectedTourneyID = SelectedTourneyID.split("_")[0]
     ShowCompleted = config.get("CompletedOn", "true")
     ShowScheduled = config.get("ScheduledOn", "false")
     Number_Events = len(ATP_JSON["events"])
@@ -1227,7 +1228,7 @@ def get_schema():
 
             Value = schema.Option(
                 display = EventName,
-                value = EventID + "_" + EventName,
+                value = EventID,
             )
 
             TournamentOptions.append(Value)
