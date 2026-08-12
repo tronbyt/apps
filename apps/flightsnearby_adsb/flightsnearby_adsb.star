@@ -44,6 +44,19 @@ TAILS = {
 }
 DEFAULT_TAIL = TAILS["ELE"]
 
+def get_tail_image(airline_code, logostream_api_key):
+    tail = TAILS.get(airline_code)
+    if tail != None:
+        return tail
+
+    if logostream_api_key:
+        logostream_url = "https://airlines-api.logostream.dev/airlines/icao/%s?key=%s&variant=tail" % (airline_code, logostream_api_key)
+        res = http.get(logostream_url, ttl_seconds = 86400)
+        if res.status_code == 200:
+            return res.body()
+
+    return DEFAULT_TAIL
+
 CFG_DEFAULT_LOCATION = json.encode({
     "lat": "37.5630",
     "lng": "-122.3255",
@@ -106,6 +119,13 @@ def get_schema():
                 desc = "Show extended data for nearest flight?",
                 icon = "gear",
                 default = CFG_DEFAULT_EXTEND,
+            ),
+            schema.Text(
+                id = "logostream_api_key",
+                name = "Logostream API Key",
+                icon = "key",
+                desc = "Optional API Key from logostream.dev to fetch tail logos for airlines not in the built-in list. Get one at https://airline.logostream.dev/pricing",
+                secret = True,
             ),
         ],
     )
@@ -302,6 +322,7 @@ def main(config):
     distance = int(config.get("distance", CFG_DEFAULT_DISTANCE))
     hide_when_nothing_to_display = config.bool("hide", CFG_DEFAULT_HIDE_IF_NONE)
     extend = config.bool("extend", CFG_DEFAULT_EXTEND)
+    logostream_api_key = config.get("logostream_api_key")
 
     print("Showing flights near lat: %s, %s within %s km" % (lat, lng, distance))
     flight = None
@@ -368,6 +389,6 @@ def main(config):
         print("[%s] %s → %s, %s, %s" % (flight["airline"], flight["origin"], flight["destination"], flight["flightNumber"], flight["aircraftType"]))
 
     return render.Root(
-        child = update_display(TAILS.get(flight["airline"], DEFAULT_TAIL), text),
+        child = update_display(get_tail_image(flight["airline"], logostream_api_key), text),
         show_full_animation = True,
     )
