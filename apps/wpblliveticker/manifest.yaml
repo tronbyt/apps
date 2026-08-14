@@ -1,0 +1,16 @@
+---
+id: wpbl-live-ticker
+name: WPBL Live Ticker
+summary: Live WPBL scorebug
+desc: Shows a live game state bug for any Women's Pro Baseball League team. Score, inning, balls and strikes, base runners, outs, and current batter. Falls back to a matchup card before first pitch and a final card after the game.
+author: Colin Weir
+fileName: wpblliveticker.star
+packageName: wpblliveticker
+recommendedInterval: 15
+supports2x: true
+category: sports
+tags:
+  - baseball
+  - wpbl
+  - sports
+  - scores
