@@ -292,7 +292,10 @@ def get_team_winning_percentage(user_and_roster_map, league_rosters):
         team_wins = team["settings"]["wins"]
         team_losses = team["settings"]["losses"]
         team_ties = team["settings"]["ties"]
-        team_winning_pct_calc = (2 * team_wins) / (2 * (team_wins + team_losses + team_ties))
+        if team_wins + team_losses + team_ties == 0:
+            team_winning_pct_calc = team["roster_id"]
+        else:
+            team_winning_pct_calc = (2 * team_wins) / (2 * (team_wins + team_losses + team_ties))
         team_winning_percentage[user_and_roster_map[team["roster_id"]]["username"]] = team_winning_pct_calc
 
     sorted_team_winning_percentage = sorted(team_winning_percentage.items(), key = lambda x: x[1], reverse = True)
