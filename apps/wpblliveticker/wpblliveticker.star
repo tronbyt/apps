@@ -1,10 +1,11 @@
 """
 Applet: WPBL Live Ticker
 Summary: Live WPBL scorebug
-Description: Shows a live game state bug for any Women's Pro Baseball League
-    team. Score, inning, balls and strikes, base runners, outs, and current
-    batter. Falls back to a matchup card before first pitch and a final card
-    after the game.
+Description: Shows a live game state bug for one or more Women's Pro
+    Baseball League teams — check any combination of the 4 clubs to rotate
+    through all of them. Score, inning, balls and strikes, base runners,
+    outs, and current batter. Falls back to a matchup card before first
+    pitch and a final card after the game.
 Author: Colin Weir
 """
 
@@ -86,6 +87,9 @@ TEAMS = {
     "fttth861nft1j2s7": ["NYH", "#091C47", "#68C4E9", "New York Heights"],
     "vhubhz8li07tmgq8": ["SFF", "#2D1748", "#FF2100", "San Francisco Firebells"],
 }
+
+# Fixed rotation/display order — same order the checkboxes appear in.
+TEAM_IDS = ["9f08or2mffx81409", "v4gisr4rbgmn67b0", "fttth861nft1j2s7", "vhubhz8li07tmgq8"]
 
 def team_info(team_id):
     return TEAMS.get(team_id, ["WPBL", "#222222", "#ffffff", "WPBL"])
@@ -575,9 +579,11 @@ def live_frame(away_id, home_id, status, lit_side, note):
         ],
     )
 
-def live_screen(away_id, home_id, status, scored_side, note):
+def live_frames(away_id, home_id, status, scored_side, note):
+    """Always a list — a single steady-state frame when nothing just
+    happened, or the full flash/settle sequence when it did."""
     if scored_side == None and note == None:
-        return live_frame(away_id, home_id, status, None, None)
+        return [live_frame(away_id, home_id, status, None, None)]
 
     frames = []
     active = NOTE_FRAMES if note != None else FLASH_FRAMES
@@ -587,10 +593,9 @@ def live_screen(away_id, home_id, status, scored_side, note):
             lit = scored_side
         frames.append(live_frame(away_id, home_id, status, lit, note))
 
-    for _ in range(SETTLE_FRAMES):
-        frames.append(live_frame(away_id, home_id, status, None, None))
+    frames += repeat(live_frame(away_id, home_id, status, None, None), SETTLE_FRAMES)
 
-    return render.Animation(children = frames)
+    return frames
 
 def detect_run(game_id, away_runs, home_runs, override):
     """Compare against the last render. Returns "away", "home", or None."""
@@ -799,7 +804,10 @@ def next_screen_empty():
         ],
     )
 
-def postgame_rotation(boxscore, games, team_id, finished_game, tz):
+def repeat(node, n):
+    return [node for _ in range(n)]
+
+def postgame_frames(boxscore, games, team_id, finished_game, tz):
     """Final with records, then the next matchup in logos."""
     upcoming = fetch_next_game(games, team_id, finished_game.get("scheduled_start", ""))
 
@@ -808,9 +816,8 @@ def postgame_rotation(boxscore, games, team_id, finished_game, tz):
 
     frames = []
     for panel in panels:
-        for _ in range(PANEL_FRAMES):
-            frames.append(panel)
-    return render.Animation(children = frames)
+        frames += repeat(panel, PANEL_FRAMES)
+    return frames
 
 def message(text):
     return render.Box(
@@ -819,33 +826,30 @@ def message(text):
 
 # ---------- entry point ----------
 
-def main(config):
-    team_id = config.get("team", DEFAULT_TEAM)
-    tz = config.get("$tz", DEFAULT_TZ)
+def selected_teams(config):
+    return [tid for tid in TEAM_IDS if config.bool("team_%s" % tid, tid == DEFAULT_TEAM)]
 
-    games = fetch_games()
-    today = time.now().in_location("UTC").format("2006-01-02")
+def team_screen(team_id, games, today, tz, hide_idle, score_override, play_override):
+    """One team's current frames, plus live-flash metadata (max_age,
+    show_full_animation) when live — None for every other state.
+    `frames` is always a list, possibly empty (idle + hide_idle)."""
     game = pick_today_game(games, team_id, today)
-
     if game == None:
-        if config.bool("hide_idle", True):
-            return []
-        return render.Root(child = message("No game today"))
+        if hide_idle:
+            return [], None
+        return [message("No game today")], None
 
     status_text = game.get("status", "")
 
     if status_text == "Not Started":
-        return render.Root(child = pregame_screen(game, tz))
+        return [pregame_screen(game, tz)], None
 
     box = fetch_boxscore(game["game_id"])
     if box == None:
-        return render.Root(child = message("Fetch error"))
+        return [message("Fetch error")], None
 
     if is_final_status(box.get("game_status", status_text)):
-        return render.Root(
-            child = postgame_rotation(box, games, team_id, game, tz),
-            delay = FRAME_DELAY,
-        )
+        return postgame_frames(box, games, team_id, game, tz), None
 
     # Live (or a status string we don't recognize — safest to try live).
     live_status = box.get("status", {})
@@ -856,42 +860,107 @@ def main(config):
         game["game_id"],
         num(live_status.get("away_runs")),
         num(live_status.get("home_runs")),
-        config.get("prev_score", ""),
+        score_override,
     )
 
     note = detect_play(
         game["game_id"],
         fetch_last_meaningful_play(box.get("plays")),
-        config.get("prev_play", ""),
+        play_override,
     )
 
-    return render.Root(
-        child = live_screen(away_id, home_id, live_status, scored_side, note),
-        delay = FRAME_DELAY,
-        max_age = LIVE_TTL,
-        show_full_animation = scored_side != None or note != None,
-    )
+    frames = live_frames(away_id, home_id, live_status, scored_side, note)
+    live_meta = (LIVE_TTL, scored_side != None or note != None)
+    return frames, live_meta
+
+def main(config):
+    tz = config.get("$tz", DEFAULT_TZ)
+    hide_idle = config.bool("hide_idle", True)
+    teams = selected_teams(config)
+
+    if len(teams) == 0:
+        return [] if hide_idle else render.Root(child = message("No team selected"))
+
+    games = fetch_games()
+    today = time.now().in_location("UTC").format("2006-01-02")
+
+    if len(teams) == 1:
+        # Single team: preserve the exact original behavior (no rotation
+        # overhead, live-flash max_age/show_full_animation hints intact).
+        frames, live_meta = team_screen(
+            teams[0],
+            games,
+            today,
+            tz,
+            hide_idle,
+            config.get("prev_score", ""),
+            config.get("prev_play", ""),
+        )
+        if len(frames) == 0:
+            return []
+
+        child = frames[0] if len(frames) == 1 else render.Animation(children = frames)
+
+        if live_meta != None:
+            max_age, show_full = live_meta
+            return render.Root(child = child, delay = FRAME_DELAY, max_age = max_age, show_full_animation = show_full)
+        if len(frames) > 1:
+            return render.Root(child = child, delay = FRAME_DELAY)
+        return render.Root(child = child)
+
+    # Multiple teams: rotate through each selected team's screen in turn.
+    # The single-game "prev_score"/"prev_play" override doesn't generalize
+    # to more than one game at once, so every team falls back to cache.star
+    # for its own flash-detection state (the common no-op case anyway).
+    all_frames = []
+    seen_game_ids = {}
+    for team_id in teams:
+        # WPBL only has 4 teams, so two selected teams playing each other
+        # is a real, common case — without this, their shared game would
+        # show twice back to back with an identical score. Whichever team
+        # comes first in TEAM_IDS order "claims" the game; the other is
+        # skipped for this slot (its own distinct next-game panel included).
+        today_game = pick_today_game(games, team_id, today)
+        game_id = today_game.get("game_id") if today_game != None else None
+        if game_id != None:
+            if game_id in seen_game_ids:
+                continue
+            seen_game_ids[game_id] = True
+
+        frames, _ = team_screen(team_id, games, today, tz, hide_idle, "", "")
+
+        # A lone frame (idle message, pregame card, error, or a quiet live
+        # bug) would otherwise flash by in a single FRAME_DELAY tick — hold
+        # it for a full panel's worth like the postgame/live-flash sequences
+        # already do.
+        if len(frames) == 1:
+            frames = repeat(frames[0], PANEL_FRAMES)
+
+        all_frames += frames
+
+    if len(all_frames) == 0:
+        return []
+
+    return render.Root(child = render.Animation(children = all_frames), delay = FRAME_DELAY)
 
 def get_schema():
-    options = [
-        schema.Option(display = "%s" % v[3], value = k)
-        for k, v in TEAMS.items()
+    team_toggles = [
+        schema.Toggle(
+            id = "team_%s" % team_id,
+            name = TEAMS[team_id][3],
+            desc = "Follow the %s." % TEAMS[team_id][3],
+            icon = "baseball",
+            default = team_id == DEFAULT_TEAM,
+        )
+        for team_id in TEAM_IDS
     ]
     return schema.Schema(
         version = "1",
-        fields = [
-            schema.Dropdown(
-                id = "team",
-                name = "Team",
-                desc = "Which WPBL club to track.",
-                icon = "baseball",
-                default = DEFAULT_TEAM,
-                options = options,
-            ),
+        fields = team_toggles + [
             schema.Toggle(
                 id = "hide_idle",
                 name = "Skip on off days",
-                desc = "Hide the app entirely when there is no game.",
+                desc = "Hide a team's turn in the rotation when it has no game.",
                 icon = "eyeSlash",
                 default = True,
             ),
