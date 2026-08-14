@@ -116,13 +116,22 @@ def num(value, fallback = 0):
         return fallback
     return int(value)
 
+def format_scheduled(game, tz, layout, fallback = "TBD"):
+    """A malformed/missing scheduled_start shouldn't crash the whole
+    render — Starlark has no try/except, so this checks before parsing
+    rather than catching a failure after the fact."""
+    scheduled_start = game.get("scheduled_start", "")
+    if scheduled_start == "":
+        return fallback
+    return time.parse_time(scheduled_start).in_location(tz).format(layout)
+
 # ---------- schedule / boxscore fetching ----------
 
 def fetch_games():
     resp = http.get(GAMES_URL, ttl_seconds = GAMES_TTL)
     if resp.status_code != 200:
         return []
-    return resp.json().get("games", [])
+    return resp.json().get("games", []) or []
 
 def team_games(games, team_id):
     return [
@@ -132,12 +141,19 @@ def team_games(games, team_id):
     ]
 
 def is_final_status(status):
-    return status.find("Final") >= 0
+    return (status or "").find("Final") >= 0
 
-def sched_date(g):
-    return g.get("scheduled_start", "")[:10]
+def sched_date(g, tz):
+    """scheduled_start is UTC — comparing its raw date substring against a
+    tz-local "today" would misfile any game near the UTC day boundary (WPBL's
+    17:00-23:30 UTC evening games sit close to it), so this converts to the
+    same tz before taking the date."""
+    scheduled_start = g.get("scheduled_start") or ""
+    if scheduled_start == "":
+        return ""
+    return time.parse_time(scheduled_start).in_location(tz).format("2006-01-02")
 
-def pick_today_game(games, team_id, today):
+def pick_today_game(games, team_id, today, tz):
     """WPBL's schedule carries stale "Not Started" duplicate game_ids that
     were superseded by a different game_id once the real game was played
     (observed: two dead "Not Started" stubs for the same matchup/day sitting
@@ -146,21 +162,21 @@ def pick_today_game(games, team_id, today):
     — it's recent for whichever record is actually live or just went final,
     and stale for an abandoned duplicate — so the most recently updated
     game for today is always the one worth showing."""
-    mine = [g for g in team_games(games, team_id) if sched_date(g) == today]
+    mine = [g for g in team_games(games, team_id) if sched_date(g, tz) == today]
     if len(mine) == 0:
         return None
-    return sorted(mine, key = lambda g: g.get("updated_at", ""), reverse = True)[0]
+    return sorted(mine, key = lambda g: g.get("updated_at") or "", reverse = True)[0]
 
 def fetch_next_game(games, team_id, after_start):
     """Earliest upcoming game for this team after the given ISO timestamp."""
     mine = [
         g
         for g in team_games(games, team_id)
-        if not is_final_status(g.get("status", "")) and g.get("scheduled_start", "") > after_start
+        if not is_final_status(g.get("status", "")) and (g.get("scheduled_start") or "") > after_start
     ]
     if len(mine) == 0:
         return None
-    return sorted(mine, key = lambda g: g.get("scheduled_start", ""))[0]
+    return sorted(mine, key = lambda g: g.get("scheduled_start") or "")[0]
 
 def fetch_boxscore(game_id):
     resp = http.get(BOXSCORE_URL % game_id, ttl_seconds = LIVE_TTL)
@@ -612,6 +628,12 @@ def detect_run(game_id, away_runs, home_runs, override):
     if len(parts) != 2:
         return None
 
+    # A malformed override (bad config value, corrupt cache entry) would
+    # otherwise crash int() with no way to catch it — Starlark has no
+    # exception handling, so this checks before converting.
+    if not parts[0].isdigit() or not parts[1].isdigit():
+        return None
+
     prev_away = int(parts[0])
     prev_home = int(parts[1])
 
@@ -661,8 +683,8 @@ def flat_screen(away_id, home_id, header, away_text, home_text):
 def pregame_screen(game, tz):
     away_id = game.get("away_team_id", "")
     home_id = game.get("home_team_id", "")
-    start = time.parse_time(game["scheduled_start"]).in_location(tz)
-    return flat_screen(away_id, home_id, start.format("3:04PM"), "-", "-")
+    header = format_scheduled(game, tz, "3:04PM")
+    return flat_screen(away_id, home_id, header, "-", "-")
 
 def logo_block(team_id, size):
     """WPBL's own hosted logo images sit behind a Cloudflare bot challenge
@@ -711,7 +733,7 @@ def score_font_for(away_runs, home_runs):
     return "5x8" if (away_runs > 9 or home_runs > 9) else "6x13"
 
 def final_screen(boxscore):
-    teams = boxscore.get("teams", [])
+    teams = boxscore.get("teams", []) or []
     away = find_side(teams, "away")
     home = find_side(teams, "home")
     away_id = away.get("id", "")
@@ -768,7 +790,7 @@ def final_screen(boxscore):
 def next_logos(game, tz):
     away_id = game.get("away_team_id", "")
     home_id = game.get("home_team_id", "")
-    start = time.parse_time(game["scheduled_start"]).in_location(tz)
+    start_text = format_scheduled(game, tz, "Mon 3:04PM")
 
     return render.Column(
         children = [
@@ -787,7 +809,7 @@ def next_logos(game, tz):
                     ],
                 ),
             ),
-            slim_bar(start.format("Mon 3:04PM"), True),
+            slim_bar(start_text, True),
         ],
     )
 
@@ -809,7 +831,7 @@ def repeat(node, n):
 
 def postgame_frames(boxscore, games, team_id, finished_game, tz):
     """Final with records, then the next matchup in logos."""
-    upcoming = fetch_next_game(games, team_id, finished_game.get("scheduled_start", ""))
+    upcoming = fetch_next_game(games, team_id, finished_game.get("scheduled_start") or "")
 
     panels = [final_screen(boxscore)]
     panels.append(next_logos(upcoming, tz) if upcoming != None else next_screen_empty())
@@ -833,38 +855,42 @@ def team_screen(team_id, games, today, tz, hide_idle, score_override, play_overr
     """One team's current frames, plus live-flash metadata (max_age,
     show_full_animation) when live — None for every other state.
     `frames` is always a list, possibly empty (idle + hide_idle)."""
-    game = pick_today_game(games, team_id, today)
+    game = pick_today_game(games, team_id, today, tz)
     if game == None:
         if hide_idle:
             return [], None
-        return [message("No game today")], None
+        return [message("%s: no game today" % team_info(team_id)[3])], None
 
     status_text = game.get("status", "")
 
     if status_text == "Not Started":
         return [pregame_screen(game, tz)], None
 
-    box = fetch_boxscore(game["game_id"])
+    game_id = game.get("game_id", "")
+    if game_id == "":
+        return [message("%s: malformed game data" % team_info(team_id)[3])], None
+
+    box = fetch_boxscore(game_id)
     if box == None:
-        return [message("Fetch error")], None
+        return [message("%s: fetch error" % team_info(team_id)[3])], None
 
     if is_final_status(box.get("game_status", status_text)):
         return postgame_frames(box, games, team_id, game, tz), None
 
     # Live (or a status string we don't recognize — safest to try live).
-    live_status = box.get("status", {})
+    live_status = box.get("status", {}) or {}
     away_id = game.get("away_team_id", "")
     home_id = game.get("home_team_id", "")
 
     scored_side = detect_run(
-        game["game_id"],
+        game_id,
         num(live_status.get("away_runs")),
         num(live_status.get("home_runs")),
         score_override,
     )
 
     note = detect_play(
-        game["game_id"],
+        game_id,
         fetch_last_meaningful_play(box.get("plays")),
         play_override,
     )
@@ -882,7 +908,12 @@ def main(config):
         return [] if hide_idle else render.Root(child = message("No team selected"))
 
     games = fetch_games()
-    today = time.now().in_location("UTC").format("2006-01-02")
+
+    # "Today" in the device's own timezone, not UTC — WPBL's evening games
+    # (17:00-23:30 UTC) already sit close to the UTC day boundary, so a
+    # viewer whose local midnight falls in that window would otherwise see
+    # today's/tomorrow's game misfiled by a day right when it matters most.
+    today = time.now().in_location(tz).format("2006-01-02")
 
     if len(teams) == 1:
         # Single team: preserve the exact original behavior (no rotation
@@ -914,20 +945,22 @@ def main(config):
     # for its own flash-detection state (the common no-op case anyway).
     all_frames = []
     seen_game_ids = {}
+    any_live = False
     for team_id in teams:
         # WPBL only has 4 teams, so two selected teams playing each other
         # is a real, common case — without this, their shared game would
         # show twice back to back with an identical score. Whichever team
         # comes first in TEAM_IDS order "claims" the game; the other is
         # skipped for this slot (its own distinct next-game panel included).
-        today_game = pick_today_game(games, team_id, today)
+        today_game = pick_today_game(games, team_id, today, tz)
         game_id = today_game.get("game_id") if today_game != None else None
         if game_id != None:
             if game_id in seen_game_ids:
                 continue
             seen_game_ids[game_id] = True
 
-        frames, _ = team_screen(team_id, games, today, tz, hide_idle, "", "")
+        frames, live_meta = team_screen(team_id, games, today, tz, hide_idle, "", "")
+        any_live = any_live or live_meta != None
 
         # A lone frame (idle message, pregame card, error, or a quiet live
         # bug) would otherwise flash by in a single FRAME_DELAY tick — hold
@@ -941,6 +974,11 @@ def main(config):
     if len(all_frames) == 0:
         return []
 
+    # At least one selected team is live right now — refresh at the same
+    # cadence as the single-team path so scores don't lag behind just
+    # because more than one team is being watched.
+    if any_live:
+        return render.Root(child = render.Animation(children = all_frames), delay = FRAME_DELAY, max_age = LIVE_TTL)
     return render.Root(child = render.Animation(children = all_frames), delay = FRAME_DELAY)
 
 def get_schema():
