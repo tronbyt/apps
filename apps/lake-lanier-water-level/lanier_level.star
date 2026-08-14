@@ -151,6 +151,9 @@ def main(config):
     if not data:
         return []
 
+    animate = config.bool("animate", True)
+    show_ticker = config.bool("show_ticker", True)
+
     diff = float(data.get("feet_above_full") or 0.0)
     trend = data.get("trend") or "down"
     temp_raw = data.get("water_temp_f")
@@ -163,12 +166,15 @@ def main(config):
     temp_str = ("%dF" % int(temp_raw + 0.5)) if temp_raw != None else ""
     updated = fmt_time(updated_iso, timezone)
 
-    # ── Water (animated, positioned at row 14) ───────────────────────
-    wave_anim = render.Animation(children = [
-        wave_frame(f * 0.18, accent)
-        for f in range(WAVE_FRAMES)
-    ])
-    water_layer = render.Padding(pad = (0, WAVE_TOP, 0, 0), child = wave_anim)
+    # ── Water (positioned at row 14); optional ripple ────────────────
+    if animate:
+        water_child = render.Animation(children = [
+            wave_frame(f * 0.18, accent)
+            for f in range(WAVE_FRAMES)
+        ])
+    else:
+        water_child = wave_frame(0, accent)
+    water_layer = render.Padding(pad = (0, WAVE_TOP, 0, 0), child = water_child)
 
     # ── Header (rows 0-4): LANIER · temp ─────────────────────────────
     header = render.Row(
@@ -209,30 +215,45 @@ def main(config):
     ticker_pieces.append(" UPDATED " + updated)
     ticker_text = "  ·  ".join(ticker_pieces) + "  ·  "
 
-    bottom = render.Column(children = [
-        render.Box(width = 64, height = BOTTOM_BAND_Y),  # transparent spacer
-        dotted_divider(),
-        render.Box(width = 64, height = 1),
-        render.Marquee(
+    if show_ticker:
+        ticker_row = render.Marquee(
             width = 64,
             child = render.Text(
                 ticker_text,
                 font = "CG-pixel-3x5-mono",
                 color = COLOR_WHITE,
             ),
-        ),
+        )
+    else:
+        ticker_row = render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(
+                    "UPDATED " + updated,
+                    font = "CG-pixel-3x5-mono",
+                    color = COLOR_WHITE,
+                ),
+            ],
+        )
+
+    bottom = render.Column(children = [
+        render.Box(width = 64, height = BOTTOM_BAND_Y),  # transparent spacer
+        dotted_divider(),
+        render.Box(width = 64, height = 1),
+        ticker_row,
         render.Box(width = 64, height = 1),
         zone_bar(),
     ])
 
-    return render.Root(
-        delay = 100,
-        child = render.Stack(children = [
-            water_layer,
-            text_overlay,
-            bottom,
-        ]),
-    )
+    stack = render.Stack(children = [
+        water_layer,
+        text_overlay,
+        bottom,
+    ])
+    if animate or show_ticker:
+        return render.Root(delay = 100, child = stack)
+    return render.Root(child = stack)
 
 def get_schema():
     return schema.Schema(
@@ -243,6 +264,20 @@ def get_schema():
                 name = "Location",
                 desc = "Timezone used for the last-update time in the ticker.",
                 icon = "locationDot",
+            ),
+            schema.Toggle(
+                id = "animate",
+                name = "Animate waves",
+                desc = "Ripple the water surface. Turn off for a static display.",
+                icon = "water",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "show_ticker",
+                name = "Scrolling ticker",
+                desc = "Scroll extra status text. Off shows only the last-update time.",
+                icon = "textWidth",
+                default = True,
             ),
         ],
     )
