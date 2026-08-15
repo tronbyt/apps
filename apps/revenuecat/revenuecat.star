@@ -33,6 +33,15 @@ REVENUE_MEASURE = 0
 # Stands in for a project selection when the key cannot list any projects.
 NO_PROJECT = "none"
 
+# The project list pages forward with a cursor. The cap bounds the walk at 500
+# projects, far past any real account, so a malformed cursor cannot loop.
+PROJECT_PAGE_SIZE = 100
+MAX_PROJECT_PAGES = 5
+
+# Marquee scrolls a pixel per delay, so 2x halves it to hold the same speed.
+MARQUEE_DELAY = 50
+MARQUEE_DELAY_2X = 25
+
 BACKGROUND_COLOR = "#000000"
 BRAND_COLOR = "#F2545B"
 LABEL_COLOR = "#7A8195"
@@ -399,6 +408,7 @@ def render_message(title, message):
                     render.Marquee(
                         width = canvas.width() - 4 * scale,
                         align = "center",
+                        delay = MARQUEE_DELAY_2X if canvas.is2x() else MARQUEE_DELAY,
                         child = render.Text(
                             content = message,
                             font = "tb-8" if not canvas.is2x() else "terminus-16",
@@ -441,6 +451,7 @@ def render_dashboard(title, revenue, mrr, subscriptions, daily, currency, is_dem
             render.Box(width = 2 * scale, height = 1),
             render.Marquee(
                 width = inner_width - 4 * scale,
+                delay = MARQUEE_DELAY_2X if is_2x else MARQUEE_DELAY,
                 child = render.Text(content = header_text, font = label_font, color = LABEL_COLOR),
             ),
         ],
@@ -565,12 +576,34 @@ def main(config):
     )
 
 def fetch_projects(api_key, ttl_seconds):
-    """Returns the account's projects, or an empty list when unreachable."""
-    body = revenuecat_get("/projects", api_key, {"limit": "20"}, ttl_seconds)
-    if body == None:
-        return []
+    """Returns the account's projects, or an empty list when unreachable.
 
-    return body.get("items", [])
+    The endpoint pages forward with a cursor, so a single request would
+    silently truncate an account holding more projects than one page.
+    """
+    projects = []
+    cursor = ""
+
+    for _page in range(MAX_PROJECT_PAGES):
+        params = {"limit": str(PROJECT_PAGE_SIZE)}
+        if cursor:
+            params["starting_after"] = cursor
+
+        body = revenuecat_get("/projects", api_key, params, ttl_seconds)
+        if body == None:
+            break
+
+        items = body.get("items", [])
+        projects.extend(items)
+
+        if not body.get("next_page") or not items:
+            break
+
+        cursor = items[-1].get("id")
+        if not cursor:
+            break
+
+    return projects
 
 def project_name(projects, project_id):
     """Resolves a project id to its name, falling back to the id itself."""
