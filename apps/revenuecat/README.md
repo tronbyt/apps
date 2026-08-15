@@ -19,6 +19,9 @@ selection. Editing the API Key field refreshes the list.
 
 - Data is fetched twice a day, at local noon and midnight, well inside the
   25 requests per minute limit on RevenueCat's metrics endpoints.
+- The current day is excluded from the sparkline and the comparison. RevenueCat
+  flags it as incomplete while it is still accumulating, so counting it would
+  understate the window until the day closes.
 - The percentage compares the 28-day window against the 28 days before it.
   Shorter windows are too noisy for low-volume apps, where a single purchase
   landing either side of the boundary flips the result. When there is no prior

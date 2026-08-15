@@ -197,9 +197,11 @@ def fetch_daily_revenue(api_key, project_id, currency, timezone, ttl_seconds):
     """Returns daily revenue for the window, oldest first. Empty if unavailable."""
 
     # Twice the display window: the older half is the baseline the percentage
-    # is measured against, at no extra request.
+    # is measured against, at no extra request. A few spare days cover the
+    # incomplete rows dropped below, so both windows stay full length.
     today = time.now().in_location(timezone)
-    start = today - time.parse_duration("{}h".format(2 * REVENUE_WINDOW_DAYS * 24))
+    span_days = 2 * REVENUE_WINDOW_DAYS + 3
+    start = today - time.parse_duration("{}h".format(span_days * 24))
 
     body = revenuecat_get(
         "/projects/{}/charts/revenue".format(project_id),
@@ -221,6 +223,11 @@ def fetch_daily_revenue(api_key, project_id, currency, timezone, ttl_seconds):
         # The revenue chart interleaves several measures, one row each per day:
         # revenue is measure 0, with transactions and ad impressions after it.
         if type(row) != "dict" or row.get("measure") != REVENUE_MEASURE:
+            continue
+
+        # The current day is still accumulating. Including it would understate
+        # the window and drag the comparison down until the day closes.
+        if row.get("incomplete"):
             continue
 
         value = row.get("value")

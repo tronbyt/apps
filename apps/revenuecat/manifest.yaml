@@ -6,7 +6,7 @@ desc: Shows 28-day revenue for one RevenueCat project, with a cumulative sparkli
 author: Ryan Taylor
 fileName: revenuecat.star
 packageName: revenuecat
-recommendedInterval: 300
+recommendedInterval: 5
 supports2x: true
 category: finance
 tags:
