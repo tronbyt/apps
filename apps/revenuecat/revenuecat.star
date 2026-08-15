@@ -38,9 +38,12 @@ NO_PROJECT = "none"
 PROJECT_PAGE_SIZE = 100
 MAX_PROJECT_PAGES = 5
 
-# Marquee scrolls a pixel per delay, so 2x halves it to hold the same speed.
-MARQUEE_DELAY = 50
-MARQUEE_DELAY_2X = 25
+# Frame delay in milliseconds. A 2x canvas scrolls twice the pixels for the
+# same apparent distance, so halving the frame delay holds the speed steady.
+# This belongs on render.Root: Marquee's own delay is an initial pause counted
+# in frames, not a speed control.
+ROOT_DELAY = 50
+ROOT_DELAY_2X = 25
 
 BACKGROUND_COLOR = "#000000"
 BRAND_COLOR = "#F2545B"
@@ -397,6 +400,7 @@ def render_message(title, message):
     title_font = "6x13" if not canvas.is2x() else "terminus-16"
 
     return render.Root(
+        delay = ROOT_DELAY_2X if canvas.is2x() else ROOT_DELAY,
         child = render.Box(
             color = BACKGROUND_COLOR,
             child = render.Column(
@@ -408,7 +412,6 @@ def render_message(title, message):
                     render.Marquee(
                         width = canvas.width() - 4 * scale,
                         align = "center",
-                        delay = MARQUEE_DELAY_2X if canvas.is2x() else MARQUEE_DELAY,
                         child = render.Text(
                             content = message,
                             font = "tb-8" if not canvas.is2x() else "terminus-16",
@@ -451,7 +454,6 @@ def render_dashboard(title, revenue, mrr, subscriptions, daily, currency, is_dem
             render.Box(width = 2 * scale, height = 1),
             render.Marquee(
                 width = inner_width - 4 * scale,
-                delay = MARQUEE_DELAY_2X if is_2x else MARQUEE_DELAY,
                 child = render.Text(content = header_text, font = label_font, color = LABEL_COLOR),
             ),
         ],
@@ -500,6 +502,7 @@ def render_dashboard(title, revenue, mrr, subscriptions, daily, currency, is_dem
     )
 
     return render.Root(
+        delay = ROOT_DELAY_2X if is_2x else ROOT_DELAY,
         child = render.Box(
             width = width,
             height = height,
