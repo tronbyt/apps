@@ -19,8 +19,22 @@ ORANGE = "#db8f00"
 WIDTH = 64
 HEIGHT = 32
 
-def newEgg():
+# How many times to re-roll an egg that landed on the snake before giving up.
+EGG_PLACEMENT_TRIES = 16
+
+def randomCell():
     return [random.number(2, WIDTH - 2), random.number(2, HEIGHT - 2)]
+
+def newEgg(snake):
+    egg = randomCell()
+
+    # Don't hide the egg underneath the snake. Bounded retry: Starlark has no
+    # while loop, and a long snake could in principle fill every candidate cell.
+    for _ in range(EGG_PLACEMENT_TRIES):
+        if not collideTail(snake, egg):
+            break
+        egg = randomCell()
+    return egg
 
 white_pixel = render.Box(
     width = 1,
@@ -73,7 +87,7 @@ def playSnake(STARTING_SIZE, GROWTH_RATE):
         snake.append([SNAKE_INIT[0] + x, SNAKE_INIT[1]])
 
     # init egg
-    egg = newEgg()
+    egg = newEgg(snake)
 
     for _ in range(300):
         snakePos = snake[-1]
@@ -114,17 +128,21 @@ def playSnake(STARTING_SIZE, GROWTH_RATE):
                 if collideTail(snake, [snakePos[0] - 1, snakePos[1]]):
                     snakeDir = ["u", "r", "d"][random.number(0, 2)]
 
+        # render frame
+        # This has to happen before the egg is consumed below. Otherwise the
+        # frame in which the head lands on the egg is drawn with the *next*
+        # egg already in place, so the egg always appears to teleport away one
+        # step before the snake reaches it and the catch is never shown.
+        frames.append(render_frame(snake, egg))
+
         # get egg
         if snakePos == egg:
-            egg = newEgg()
+            egg = newEgg(snake)
             for _ in range(GROWTH_RATE):
                 tail = [0, 0]
                 tail[0] = snake[-1][0]
                 tail[1] = snake[-1][1]
                 snake.insert(0, tail)
-
-        # render frame
-        frames.append(render_frame(snake, egg))
 
         # move snake towards egg
         tail = snake.pop(0)
