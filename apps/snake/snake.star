@@ -19,18 +19,18 @@ ORANGE = "#db8f00"
 WIDTH = 64
 HEIGHT = 32
 
-# How many times to re-roll an egg that landed on the snake before giving up.
+# How many candidate cells to roll for a new egg before giving up.
 EGG_PLACEMENT_TRIES = 16
 
 def randomCell():
     return [random.number(2, WIDTH - 2), random.number(2, HEIGHT - 2)]
 
 def newEgg(snake):
-    egg = randomCell()
-
     # Don't hide the egg underneath the snake. Bounded retry: Starlark has no
-    # while loop, and a long snake could in principle fill every candidate cell.
-    for _ in range(EGG_PLACEMENT_TRIES):
+    # while loop, and a long snake could in principle fill every candidate cell,
+    # so after EGG_PLACEMENT_TRIES rolls we give up and accept the last one.
+    egg = randomCell()
+    for _ in range(EGG_PLACEMENT_TRIES - 1):
         if not collideTail(snake, egg):
             break
         egg = randomCell()
