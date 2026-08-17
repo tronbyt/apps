@@ -46,31 +46,29 @@ green_pixel = render.Box(
     height = 1,
     color = GREEN,
 )
-red_pixel = render.Box(
-    width = 1,
-    height = 1,
-    color = RED,
-)
-orange_pixel = render.Box(
-    width = 1,
-    height = 1,
-    color = ORANGE,
-)
-black_pixel = render.Box(
-    width = 1,
-    height = 1,
+background = render.Box(
+    width = WIDTH,
+    height = HEIGHT,
     color = BLACK,
 )
 
+def place_pixel(pos, pixel):
+    return render.Padding(
+        pad = (pos[0], pos[1], 0, 0),
+        child = pixel,
+    )
+
 def render_frame(snake, egg):
-    rows = [[black_pixel for c in range(WIDTH)] for r in range(HEIGHT)]
-
+    # Draw only the live cells on a black background instead of a full
+    # WIDTH x HEIGHT grid of 1x1 boxes: ~2000 widgets per frame down to a
+    # few dozen, which is what lets 300 frames render within the budget on
+    # Pi-class servers. The egg is drawn last so it overdraws the head on
+    # the catch frame, matching the old row-grid renderer.
+    children = [background]
     for s in snake:
-        rows[s[1]][s[0]] = white_pixel
-    rows[egg[1]][egg[0]] = green_pixel
-
-    frame = render.Column(children = [render.Row(children = row) for row in rows])
-    return frame
+        children.append(place_pixel(s, white_pixel))
+    children.append(place_pixel(egg, green_pixel))
+    return render.Stack(children = children)
 
 def collideTail(snake, pos):
     return pos in snake
