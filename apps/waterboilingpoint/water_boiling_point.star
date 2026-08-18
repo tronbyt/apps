@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/boil_16x32.gif", boil_img = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Default settings
@@ -41,17 +41,25 @@ def main(config):
 
     unit = config.get("unit", DEFAULT_UNIT)
     bp = calc_boiling_point(air_pressure, unit)
-    bp_text = str(bp) + "°" + unit
+    unit_suffix = unit if unit == "K" else "°" + unit
+    bp_text = str(bp) + unit_suffix
+
+    scale = 2 if canvas.is2x() else 1
+    font = "terminus-16" if canvas.is2x() else "tb-8"
 
     return render.Root(
         child = render.Row(
             expanded = True,
             children = [
-                render.Image(src = boil_img.readall()),
+                render.Image(
+                    src = boil_img.readall(),
+                    width = 16 * scale,
+                    height = 32 * scale,
+                ),
                 render.Box(
                     child = render.Text(
                         content = bp_text,
-                        font = "terminus-12",
+                        font = font,
                         color = "#BEE8F6",
                     ),
                 ),
@@ -118,7 +126,13 @@ def get_air_pressure(config):
         print("get_air_pressure cannot find 'grnd_level' in OpenWeather data")
         return render_error("Cannot decode OpenWeather data")
 
-    return int(decoded["main"]["grnd_level"])
+    grnd_level = decoded["main"]["grnd_level"]
+
+    if type(grnd_level) not in VALID_NUMS or grnd_level <= 0:
+        print("get_air_pressure received an invalid 'grnd_level' in OpenWeather data")
+        return render_error("Cannot decode OpenWeather data")
+
+    return int(grnd_level)
 
 def convert_temp(temp, unit):
     """Convert temperature between different units (Kelvin, Celsius, Fahrenheit).
@@ -166,8 +180,8 @@ def calc_boiling_point(p, unit):
         The boiling point temperature as a float in the specified unit,
         or None if inputs are invalid.
     """
-    if type(p) not in VALID_NUMS:
-        print("calc_boiling_point requires p to be an int or float")
+    if type(p) not in VALID_NUMS or p <= 0:
+        print("calc_boiling_point requires p to be a positive int or float")
         return None
     if unit not in VALID_UNITS:
         print("calc_boiling_point requires unit to be one of 'K', 'C', or 'F'")
@@ -196,6 +210,10 @@ def render_error(code):
     Returns:
         A render.Root object displaying the error message with magenta formatting
     """
+    scale = 2 if canvas.is2x() else 1
+    font = "terminus-14" if canvas.is2x() else "tom-thumb"
+    width, _ = canvas.size()
+
     return render.Root(
         render.Column(
             main_align = "center",
@@ -204,22 +222,22 @@ def render_error(code):
                 render.WrappedText(
                     color = "#ff00ff",
                     content = "WATER BOILING POINT ERROR",
-                    font = "tom-thumb",
+                    font = font,
                     align = "center",
                 ),
                 render.Box(
-                    width = 64,
-                    height = 1,
+                    width = width,
+                    height = 1 * scale,
                     color = "#ff00ff",
                 ),
                 render.Box(
-                    width = 64,
-                    height = 1,
+                    width = width,
+                    height = 1 * scale,
                     color = "#000",
                 ),
                 render.WrappedText(
                     content = code,
-                    font = "tom-thumb",
+                    font = font,
                     align = "center",
                 ),
             ],
