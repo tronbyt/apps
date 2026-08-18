@@ -22,7 +22,7 @@ def main(config):
     f_selector = config.bool("fahrenheit_temperatures", False)
 
     # API URL
-    apiURL = "https://www.aviationweather.gov/api/data/metar?requestType=retrieve&format=json&ids=%s&mostrecentforeachstation=constraint&hoursBeforeNow=2"
+    apiURL = "https://www.aviationweather.gov/api/data/metar?format=json&ids=%s&hours=2"
 
     # Store cahces by airport. That way if two users are pulling the same airport's METAR it is only fetched once.
     cacheName = "metar/" + airport
