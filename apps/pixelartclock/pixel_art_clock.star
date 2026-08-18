@@ -1,13 +1,16 @@
 """
 Applet: Pixel Art Clock
 Summary: Clock & pixel-art weather
-Description: Displays a clock, today's max and min temperatures, with a pixel-art illustration by @abipixel matching today's forecast from AccuWeather. To request an AccuWeather API key, see https://developer.accuweather.com/getting-started. To determine AccuWeather location key, search https://www.accuweather.com for a location and extract trailing number, e.g. 2191987 for https://www.accuweather.com/en/us/lavallette/08735/weather-forecast/2191987.
+Description: Displays a clock, the coming 24 hours' high and low temperatures, and a pixel-art illustration by @abipixel matching the local forecast from OpenWeatherMap. Get a free API key at https://home.openweathermap.org/api_keys — the standard free tier is all this app needs (new keys can take up to two hours to activate; the app shows sample data until then).
 Author: JavierM42
 """
 
-# Based on the AccuWeather Forecast app by sudeepban
+# Based on the AccuWeather Forecast app by sudeepban.
+# OpenWeatherMap port: uses the free 5 day / 3 hour forecast API
+# (https://openweathermap.org/forecast5) instead of AccuWeather.
 
 load("animation.star", "animation")
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/clear_night_background.png", CLEAR_NIGHT_BACKGROUND_ASSET = "file")
 load("images/clear_night_background@2x.png", CLEAR_NIGHT_BACKGROUND_ASSET_2X = "file")
@@ -60,7 +63,20 @@ SMALL_LIGHTNING = (SMALL_LIGHTNING_ASSET_2X if IS_2X else SMALL_LIGHTNING_ASSET)
 SUN = (SUN_ASSET_2X if IS_2X else SUN_ASSET).readall()
 SUN_WITH_RAYS = (SUN_WITH_RAYS_ASSET_2X if IS_2X else SUN_WITH_RAYS_ASSET).readall()
 
-ACCUWEATHER_FORECAST_URL = "http://dataservice.accuweather.com/forecasts/v1/daily/1day/{location_key}?apikey={api_key}&details=true"
+# Free-tier 5 day / 3 hour forecast. cnt=8 limits the response to the next
+# 24 hours — the window the displayed high/low covers. units=imperial keeps
+# the internal pipeline in °F like the original app; get_temp converts for
+# display.
+OPENWEATHER_FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=imperial&cnt=8"
+
+DEFAULT_LOCATION = json.encode({
+    "lat": "40.678",
+    "lng": "-73.944",
+    "description": "Brooklyn, NY, USA",
+    "locality": "Brooklyn",
+    "place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
+    "timezone": "America/New_York",
+})
 
 max_temp_color = "#fcc"
 min_temp_color = "#ccf"
@@ -181,85 +197,120 @@ def get_temp(f_temp, display_celsius):
         return int(math.round((f_temp - 32) / 1.8))
     return f_temp
 
-def get_result_forecast(temp_min, temp_max, icon_num, display_celsius):
+def get_result_forecast(temp_min, temp_max, condition_id, is_day, display_celsius):
     return {
         "temp_min": get_temp(temp_min, display_celsius),
         "temp_max": get_temp(temp_max, display_celsius),
-        "icon_num": icon_num,
+        "condition_id": condition_id,
+        "is_day": is_day,
     }
 
-def main(config):
-    api_key = config.get("apiKey", None)
-    location_key = config.get("locationKey", None)
-    temp_units = config.get("tempUnits", "F")
+# Maps an OpenWeatherMap condition id (https://openweathermap.org/weather-conditions)
+# to one of the nine illustrations. Rain/thunder/snow reuse the day art at
+# night, matching the original app's handling of AccuWeather night icons.
+def get_weather(condition_id, is_day):
+    if condition_id >= 200 and condition_id < 300:
+        # thunderstorm
+        return "thunderstorm"
+    elif condition_id == 511:
+        # freezing rain — OWM's icon taxonomy gives 511 the snow icon (13d),
+        # and the AccuWeather original showed snow art for freezing rain
+        return "snowy"
+    elif condition_id >= 300 and condition_id < 600:
+        # drizzle and rain
+        return "rainy"
+    elif condition_id >= 600 and condition_id < 700:
+        # snow and sleet
+        return "snowy"
+    elif condition_id == 771 or condition_id == 781:
+        # squall / tornado — OWM has no plain "windy" condition,
+        # these are the only wind-driven codes
+        return "windy"
+    elif condition_id >= 700 and condition_id < 800:
+        # atmosphere: mist, haze, fog, dust, ash
+        return "cloudy" if is_day else "cloudy_night"
+    elif condition_id == 800:
+        # clear sky
+        return "sunny" if is_day else "clear_night"
+    elif condition_id == 801:
+        # few clouds (11-25%)
+        return "sunnyish" if is_day else "clear_night"
+    elif condition_id == 802:
+        # scattered clouds (25-50%)
+        return "sunnyish" if is_day else "cloudy_night"
+    elif condition_id == 803 or condition_id == 804:
+        # broken / overcast clouds
+        return "cloudy" if is_day else "cloudy_night"
+    else:
+        # default to clear, but should never happen
+        return "sunny" if is_day else "clear_night"
 
-    # clock
-    timezone = config.get("timezone", "America/New_York")
+def main(config):
+    api_key = config.get("owmApiKey", None)
+    temp_units = config.get("tempUnits", "F")
+    raw_location = config.get("location")
+    location = json.decode(raw_location or DEFAULT_LOCATION)
+
+    # clock — a user-picked location's timezone wins; otherwise the device's
+    # own timezone ($tz, supplied by the server); otherwise Eastern
+    timezone = (location.get("timezone") if raw_location else None) or config.get("$tz") or "America/New_York"
     now = time.now().in_location(timezone)
 
     # get weather info
-    display_sample = not (api_key and location_key)
+    display_sample = not api_key
     display_celsius = (temp_units == "C")
 
-    if display_sample:
-        # sample data to display if user-specified API / location key are not available, also useful for testing
-        result_forecast = get_result_forecast(65, 75, 1, display_celsius)
-    else:
-        resp = http.get(ACCUWEATHER_FORECAST_URL.format(location_key = location_key, api_key = api_key), ttl_seconds = 3600)
-        if resp.status_code != 200:
-            fail("AccuWeather forecast request failed with status", resp.status_code)
-
-        resp_json = resp.json()
-
-        raw_forecast = resp_json["DailyForecasts"][0]
-
-        # day/night
-        rise_epoch = int(raw_forecast["Sun"]["EpochRise"])
-        set_epoch = int(raw_forecast["Sun"]["EpochSet"])
-        now_epoch = now.unix
-        is_day = (rise_epoch <= now_epoch) and (now_epoch <= set_epoch)
-        day_or_night = "Day" if is_day else "Night"
-
-        result_forecast = get_result_forecast(
-            int(raw_forecast["Temperature"]["Minimum"]["Value"]),
-            int(raw_forecast["Temperature"]["Maximum"]["Value"]),
-            int(raw_forecast[day_or_night]["Icon"]),
-            display_celsius,
+    result_forecast = None
+    if not display_sample:
+        url = OPENWEATHER_FORECAST_URL.format(
+            lat = location["lat"],
+            lon = location["lng"],
+            api_key = api_key,
         )
+        resp = http.get(url, ttl_seconds = 3600)
+        if resp.status_code == 401:
+            # a fresh OWM key can take up to ~2 hours to activate (and a
+            # leftover key from the AccuWeather era is also a 401 here) —
+            # show the sample display rather than a hard error
+            display_sample = True
+        elif resp.status_code != 200:
+            # other failures are transient; fail() keeps the last good render
+            fail("OpenWeatherMap forecast request failed with status", resp.status_code)
+        else:
+            resp_json = resp.json()
 
-    # # weather icon, see https://developer.accuweather.com/weather-icons
-    icon_num = result_forecast["icon_num"]
+            # day/night
+            rise_epoch = int(resp_json["city"]["sunrise"])
+            set_epoch = int(resp_json["city"]["sunset"])
+            now_epoch = now.unix
+            is_day = (rise_epoch <= now_epoch) and (now_epoch <= set_epoch)
 
-    if icon_num == 1:
-        # sunny
-        weather = "sunny"
-    elif icon_num >= 2 and icon_num <= 5:
-        # mostly sunny
-        weather = "sunnyish"
-    elif (icon_num >= 6 and icon_num <= 8) or icon_num == 11:
-        # cloudy
-        weather = "cloudy"
-    elif (icon_num >= 12 and icon_num <= 14) or icon_num == 18 or icon_num == 39 or icon_num == 40:
-        # rainy
-        weather = "rainy"
-    elif icon_num >= 15 and icon_num <= 17 or icon_num == 41 or icon_num == 42:
-        # thunderstorm
-        weather = "thunderstorm"
-    elif (icon_num >= 19 and icon_num <= 26) or icon_num == 29 or icon_num == 43 or icon_num == 44:
-        # snow
-        weather = "snowy"
-    elif icon_num == 32:
-        # wind
-        weather = "windy"
-    elif (icon_num >= 33 and icon_num <= 34):
-        # clear night
-        weather = "clear_night"
-    elif (icon_num >= 35 and icon_num <= 38):
-        # cloudy night
-        weather = "cloudy_night"
-    else:
-        # default to sunny, but should never happen
-        weather = "sunny"
+            # high/low across the coming 24 hours (8 x 3h slices). The free
+            # forecast API only carries future slices, so a true calendar-day
+            # range isn't available; a rolling 24h window stays meaningful at
+            # any hour of the day.
+            entries = resp_json["list"]
+            temp_min = entries[0]["main"]["temp_min"]
+            temp_max = entries[0]["main"]["temp_max"]
+            for entry in entries:
+                if entry["main"]["temp_min"] < temp_min:
+                    temp_min = entry["main"]["temp_min"]
+                if entry["main"]["temp_max"] > temp_max:
+                    temp_max = entry["main"]["temp_max"]
+
+            result_forecast = get_result_forecast(
+                int(math.round(temp_min)),
+                int(math.round(temp_max)),
+                int(entries[0]["weather"][0]["id"]),
+                is_day,
+                display_celsius,
+            )
+
+    if display_sample:
+        # sample data when no (working) API key is available, also useful for testing
+        result_forecast = get_result_forecast(65, 75, 800, True, display_celsius)
+
+    weather = get_weather(result_forecast["condition_id"], result_forecast["is_day"])
 
     # temperatures
     temperatures = render.Column(
@@ -272,49 +323,77 @@ def main(config):
     )
 
     clock_color = clock_colors[weather]
+    twelve_hour = (config.get("clockFormat", "24") == "12")
+    blink_colon = config.bool("blinkColon", True)
+    colon_dots = render.Column(
+        children = [
+            render.Box(width = 3 * SCALE, height = 2 * SCALE, color = clock_color),
+            render.Box(width = 3 * SCALE, height = 3 * SCALE),
+            render.Box(width = 3 * SCALE, height = 2 * SCALE, color = clock_color),
+        ],
+    )
+    clock_children = [
+        render.Box(
+            child = render.Text(
+                # 12-hour mode drops the leading zero, clock-style
+                content = now.format("3" if twelve_hour else "15"),
+                font = CLOCK_FONT,
+                color = clock_color,
+            ),
+            width = 18 * SCALE,
+            height = 14 * SCALE,
+        ),
+        render.Box(
+            width = 9 * SCALE,
+            height = 7 * SCALE,
+            child = render.Animation(
+                children = [
+                    colon_dots,
+                    render.Box(width = 3 * SCALE, height = 7 * SCALE),
+                ],
+            ) if blink_colon else colon_dots,
+        ),
+        render.Box(
+            child = render.Text(
+                content = now.format("04"),
+                font = CLOCK_FONT,
+                color = clock_color,
+            ),
+            width = 19 * SCALE,
+            height = 14 * SCALE,
+        ),
+    ]
     clock = render.Box(
         width = 45 * SCALE,
         height = 15 * SCALE,
         child = render.Row(
-            children = [
-                render.Box(
-                    child = render.Text(
-                        content = now.format("15"),
-                        font = CLOCK_FONT,
-                        color = clock_color,
-                    ),
-                    width = 18 * SCALE,
-                    height = 14 * SCALE,
-                ),
-                render.Box(
-                    width = 9 * SCALE,
-                    height = 7 * SCALE,
-                    child = render.Animation(
-                        children = [
-                            render.Column(
-                                children = [
-                                    render.Box(width = 3 * SCALE, height = 2 * SCALE, color = clock_color),
-                                    render.Box(width = 3 * SCALE, height = 3 * SCALE),
-                                    render.Box(width = 3 * SCALE, height = 2 * SCALE, color = clock_color),
-                                ],
-                            ),
-                            render.Box(width = 3 * SCALE, height = 7 * SCALE),
-                        ],
-                    ),
-                ),
-                render.Box(
-                    child = render.Text(
-                        content = now.format("04"),
-                        font = CLOCK_FONT,
-                        color = clock_color,
-                    ),
-                    width = 19 * SCALE,
-                    height = 14 * SCALE,
-                ),
-            ],
+            children = clock_children,
             cross_align = "center",
         ),
     )
+    if twelve_hour:
+        # AM/PM sits under the minutes, alarm-clock style, so it stays
+        # clear of the top-right art (e.g. the sun) on 64-wide displays
+        clock = render.Column(
+            children = [
+                clock,
+                render.Box(
+                    width = 45 * SCALE,
+                    height = 7 * SCALE,
+                    child = render.Row(
+                        children = [
+                            render.Text(
+                                content = now.format("PM"),
+                                font = TEMP_FONT,
+                                color = clock_color,
+                            ),
+                        ],
+                        main_align = "end",
+                        expanded = True,
+                    ),
+                ),
+            ],
+        )
 
     # illustration
     illustration = illustrations[weather]
@@ -358,28 +437,49 @@ def get_schema():
             value = "C",
         ),
     ]
+    clockFormatOptions = [
+        schema.Option(
+            display = "24-hour",
+            value = "24",
+        ),
+        schema.Option(
+            display = "12-hour with AM/PM",
+            value = "12",
+        ),
+    ]
     return schema.Schema(
         version = "1",
         fields = [
             schema.Text(
-                id = "apiKey",
-                name = "AccuWeather API Key",
-                desc = "API key for AccuWeather data access",
+                # deliberately NOT reusing the old "apiKey" field id: configs
+                # from the AccuWeather era hold a key that's meaningless here,
+                # and a fresh id lets those installs degrade to sample mode
+                id = "owmApiKey",
+                name = "OpenWeatherMap API Key",
+                desc = "Free API key from https://home.openweathermap.org/api_keys",
                 icon = "gear",
                 secret = True,
             ),
-            schema.Text(
-                id = "locationKey",
-                name = "AccuWeather Location Key",
-                desc = "Location key for AccuWeather data access",
+            schema.Location(
+                id = "location",
+                name = "Location",
+                desc = "Location for the weather forecast and clock timezone",
                 icon = "locationDot",
-                secret = True,
             ),
-            schema.Text(
-                id = "timezone",
-                name = "Timezone",
-                desc = "Timezone for clock",
+            schema.Dropdown(
+                id = "clockFormat",
+                name = "Clock format",
+                desc = "24-hour or 12-hour time",
                 icon = "clock",
+                default = clockFormatOptions[0].value,
+                options = clockFormatOptions,
+            ),
+            schema.Toggle(
+                id = "blinkColon",
+                name = "Blinking colon",
+                desc = "Whether the clock's colon blinks",
+                icon = "clock",
+                default = True,
             ),
             schema.Dropdown(
                 id = "tempUnits",
