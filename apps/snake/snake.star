@@ -19,8 +19,22 @@ ORANGE = "#db8f00"
 WIDTH = 64
 HEIGHT = 32
 
-def newEgg():
+# How many candidate cells to roll for a new egg before giving up.
+EGG_PLACEMENT_TRIES = 16
+
+def randomCell():
     return [random.number(2, WIDTH - 2), random.number(2, HEIGHT - 2)]
+
+def newEgg(snake):
+    # Don't hide the egg underneath the snake. Bounded retry: Starlark has no
+    # while loop, and a long snake could in principle fill every candidate cell,
+    # so after EGG_PLACEMENT_TRIES rolls we give up and accept the last one.
+    egg = randomCell()
+    for _ in range(EGG_PLACEMENT_TRIES - 1):
+        if not collideTail(snake, egg):
+            break
+        egg = randomCell()
+    return egg
 
 white_pixel = render.Box(
     width = 1,
@@ -32,31 +46,29 @@ green_pixel = render.Box(
     height = 1,
     color = GREEN,
 )
-red_pixel = render.Box(
-    width = 1,
-    height = 1,
-    color = RED,
-)
-orange_pixel = render.Box(
-    width = 1,
-    height = 1,
-    color = ORANGE,
-)
-black_pixel = render.Box(
-    width = 1,
-    height = 1,
+background = render.Box(
+    width = WIDTH,
+    height = HEIGHT,
     color = BLACK,
 )
 
+def place_pixel(pos, pixel):
+    return render.Padding(
+        pad = (pos[0], pos[1], 0, 0),
+        child = pixel,
+    )
+
 def render_frame(snake, egg):
-    rows = [[black_pixel for c in range(WIDTH)] for r in range(HEIGHT)]
-
+    # Draw only the live cells on a black background instead of a full
+    # WIDTH x HEIGHT grid of 1x1 boxes: ~2000 widgets per frame down to a
+    # few dozen, which is what lets 300 frames render within the budget on
+    # Pi-class servers. The egg is drawn last so it overdraws the head on
+    # the catch frame, matching the old row-grid renderer.
+    children = [background]
     for s in snake:
-        rows[s[1]][s[0]] = white_pixel
-    rows[egg[1]][egg[0]] = green_pixel
-
-    frame = render.Column(children = [render.Row(children = row) for row in rows])
-    return frame
+        children.append(place_pixel(s, white_pixel))
+    children.append(place_pixel(egg, green_pixel))
+    return render.Stack(children = children)
 
 def collideTail(snake, pos):
     return pos in snake
@@ -73,7 +85,7 @@ def playSnake(STARTING_SIZE, GROWTH_RATE):
         snake.append([SNAKE_INIT[0] + x, SNAKE_INIT[1]])
 
     # init egg
-    egg = newEgg()
+    egg = newEgg(snake)
 
     for _ in range(300):
         snakePos = snake[-1]
@@ -114,17 +126,21 @@ def playSnake(STARTING_SIZE, GROWTH_RATE):
                 if collideTail(snake, [snakePos[0] - 1, snakePos[1]]):
                     snakeDir = ["u", "r", "d"][random.number(0, 2)]
 
+        # render frame
+        # This has to happen before the egg is consumed below. Otherwise the
+        # frame in which the head lands on the egg is drawn with the *next*
+        # egg already in place, so the egg always appears to teleport away one
+        # step before the snake reaches it and the catch is never shown.
+        frames.append(render_frame(snake, egg))
+
         # get egg
         if snakePos == egg:
-            egg = newEgg()
+            egg = newEgg(snake)
             for _ in range(GROWTH_RATE):
                 tail = [0, 0]
                 tail[0] = snake[-1][0]
                 tail[1] = snake[-1][1]
                 snake.insert(0, tail)
-
-        # render frame
-        frames.append(render_frame(snake, egg))
 
         # move snake towards egg
         tail = snake.pop(0)
