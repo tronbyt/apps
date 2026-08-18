@@ -255,7 +255,7 @@ def get_schema():
             value = "F",
         ),
         schema.Option(
-            display = "Kelvin (°K)",
+            display = "Kelvin (K)",
             value = "K",
         ),
     ]
