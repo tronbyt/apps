@@ -1,0 +1,12 @@
+---
+id: water-boiling-point
+name: Water Boiling Point
+summary: Boiling point of H2O by location
+desc: Displays the current boiling point of water given the set location's ground level air pressure. You can get a free OpenWeather API key at https://home.openweathermap.org/users/sign_up.
+author: frame-shift
+fileName: water_boiling_point.star
+packageName: waterboilingpoint
+recommendedInterval: 60
+published: '2026-08-18T00:10:08Z'
+updated: '2026-08-18T01:22:10Z'
+tags: []
