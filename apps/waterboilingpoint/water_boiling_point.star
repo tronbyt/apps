@@ -42,7 +42,7 @@ def main(config):
     unit = config.get("unit", DEFAULT_UNIT)
     bp = calc_boiling_point(air_pressure, unit)
     unit_suffix = unit if unit == "K" else "°" + unit
-    bp_text = str(bp) + unit_suffix
+    bp_text = str(bp) + " " + unit_suffix
 
     scale = 2 if canvas.is2x() else 1
     font = "terminus-16" if canvas.is2x() else "tb-8"
