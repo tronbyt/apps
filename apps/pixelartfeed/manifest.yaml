@@ -1,0 +1,18 @@
+---
+id: pixel-art-feed
+name: Pixel Art Feed
+summary: Art from r/PixelArt
+desc: Shows artwork from r/PixelArt at full nearest-neighbour crispness, with no API key required. Pick hot, newest, or top of the day through all time. Art that isn't the shape of the panel is panned rather than squashed — tall pieces top to bottom, panoramas left to right — and animated GIFs keep animating while they move. Optional artist credit along the bottom.
+author: nsluke
+fileName: pixel_art_feed.star
+packageName: pixelartfeed
+recommendedInterval: 30
+supports2x: true
+category: art
+tags:
+  - art
+  - pixelart
+  - reddit
+  - wide 2x support
+published: '2026-08-19T17:23:38Z'
+updated: '2026-08-19T17:23:38Z'
