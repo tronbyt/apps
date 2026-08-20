@@ -554,8 +554,8 @@ async function renderAppDetail() {
 
   // Report Broken button (right side)
   const reportButton = document.createElement('a');
-  const starFileText = app.starFile ? `\n\nStar file to add: \`${app.starFile}\`` : '\n\nNo .star file found for this app.';
-  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=The%20app%20%60${encodeURIComponent(appName)}%60%20appears%20to%20be%20broken.%0A%0APlease%20add%20the%20following%20line%20to%20the%20%60broken_apps.txt%60%20file:${encodeURIComponent(starFileText)}`;
+  const reportBody = `The app \`${appName}\` appears to be broken.\n\nPlease describe why the app is broken and how to reproduce the issue:`;
+  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=${encodeURIComponent(reportBody)}`;
   reportButton.href = reportUrl;
   reportButton.target = '_blank';
   reportButton.className = 'btn btn-warning report-button';
