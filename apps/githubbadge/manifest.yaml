@@ -1,0 +1,16 @@
+---
+id: github-badge
+name: GitHub Badge
+summary: GitHub action status
+desc: Displays a GitHub badge for the status of the configured Action.
+author: Cavallando
+fileName: github_badge.star
+packageName: githubbadge
+recommendedInterval: 5
+category: utilities
+tags:
+  - tracking
+  - tech
+  - utility
+published: '2023-01-02T15:58:23Z'
+updated: '2025-12-02T19:30:22Z'

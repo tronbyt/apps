@@ -1,0 +1,13 @@
+---
+id: charlestownferry
+name: CharlestownFerry
+summary: Ferry Depature Times
+desc: Displays three upcoming ferry depature times for the Charlestown, MA Ferry.
+author: jblaker
+fileName: charlestownferry.star
+packageName: charlestownferry
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2022-05-03T17:06:09Z'
+updated: '2025-12-05T22:28:51Z'

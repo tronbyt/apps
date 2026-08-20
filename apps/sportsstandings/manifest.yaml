@@ -1,0 +1,14 @@
+---
+id: sports-standings
+name: Sports Standings
+summary: Get sports standings
+desc: Get various sports standings (data courtesy of ESPN).
+author: rs7q5
+fileName: sports_standings.star
+packageName: sportsstandings
+recommendedInterval: 5
+category: sports
+tags:
+  - news
+published: '2022-02-01T21:34:19Z'
+updated: '2025-12-02T19:30:22Z'

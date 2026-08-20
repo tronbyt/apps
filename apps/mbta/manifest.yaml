@@ -1,0 +1,13 @@
+---
+id: mbta
+name: MBTA
+summary: MBTA departures
+desc: MBTA bus and rail departure times. Updated to support Tronbyt.
+author: Marcus Better & Eric Pierce
+fileName: mbta.star
+packageName: mbta
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2022-02-01T21:38:47Z'
+updated: '2025-11-29T17:52:33Z'

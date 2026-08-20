@@ -1,0 +1,17 @@
+---
+id: stupid-chat
+name: Stupid Chat
+summary: Tidbyt messaging
+desc: Send messages and pictures to your Tidbyt, share with family and friends.
+author: harrisonpage
+recommendedInterval: 5
+fileName: stupid_chat.star
+packageName: stupidchat
+category: utilities
+tags:
+  - tidbyt
+  - notification
+  - lifestyle
+  - utility
+published: '2024-09-25T14:40:52Z'
+updated: '2025-12-17T23:02:59Z'

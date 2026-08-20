@@ -1,0 +1,15 @@
+---
+id: fortnite-store
+name: Fortnite Store
+summary: See the Fortnite shop
+desc: See items currently featured in the Fortnite shop.
+author: naominori
+fileName: fortnite_store.star
+packageName: fortnitestore
+recommendedInterval: 5
+category: entertainment
+tags:
+  - gaming
+  - utility
+published: '2023-02-01T20:41:16Z'
+updated: '2025-11-30T20:08:55Z'

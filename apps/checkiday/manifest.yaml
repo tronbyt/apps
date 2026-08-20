@@ -1,0 +1,15 @@
+---
+id: checkiday
+name: Checkiday
+summary: Celebrate today's holidays
+desc: A complete list of today's holidays, most of which you won't find on a calendar!
+author: westy92
+fileName: checkiday.star
+packageName: checkiday
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - productivity
+  - news
+published: '2023-10-12T16:13:03Z'
+updated: '2025-12-05T22:28:51Z'

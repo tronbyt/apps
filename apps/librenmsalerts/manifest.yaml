@@ -1,0 +1,17 @@
+---
+id: librenms-alerts
+name: LibreNMS Alerts
+summary: LibreNMS Alert Display
+desc: Displays a summary of the currently active LibreNMS alerts.
+author: '@jtinel'
+fileName: librenms_alerts.star
+packageName: librenmsalerts
+recommendedInterval: 5
+category: utilities
+tags:
+  - nms
+  - tracking
+  - notification
+  - tech
+published: '2023-05-18T18:16:29Z'
+updated: '2025-11-29T23:55:39Z'

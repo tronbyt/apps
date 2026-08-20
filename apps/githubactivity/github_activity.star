@@ -1,0 +1,434 @@
+"""
+Applet: GitHub Activity
+Summary: See your GitHub activity
+Description: Display the last 13 weeks of your GitHub contribution graph in addition to other metrics on your GitHub profile.
+Author: rs7q5
+"""
+
+#github_activity.star
+#Created 20221117 RIS
+#Last Modified 20230607 RIS
+
+load("http.star", "http")
+load("images/issue_icon.png", ISSUE_ICON_ASSET = "file")
+load("images/people_icon.png", PEOPLE_ICON_ASSET = "file")
+load("images/pr_icon.png", PR_ICON_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
+
+ISSUE_ICON = ISSUE_ICON_ASSET.readall()
+PEOPLE_ICON = PEOPLE_ICON_ASSET.readall()
+PR_ICON = PR_ICON_ASSET.readall()
+
+############
+FONT = "tom-thumb"  #set font
+BASE_URL = "https://api.github.com/graphql"
+
+############
+#CONTRIBUTION COLORS (DOES NOT INCLUDE THE ZERO)
+CONTRIBUTION_LEVELS = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"]
+
+CONTRIBUTION_THEMES = {
+    #THEMES DO NOT INCLUDE THE NONE VECTOR!!!!
+    "GitHub": ["#9be9a8", "#40c463", "#30a14e", "#216e39"],
+    "GitHub dark": ["#0e4429", "#006d32", "#26a641", "#39d353"],
+    "Halloween": ["#ffee4a", "#ffc501", "#fe9600", "#03001c"],
+    "Halloween dark": ["#631c03", "#bd561d", "#fa7a18", "#fddf68"],
+    "Winter": ["#b6e3ff", "#54aeff", "0969da", "#0a3069"],
+    "Winter dark": ["#0a3069", "#0969da", "#54aeff", "#b6e3ff"],
+}
+
+HALLOWEEN_DARK_THEMES = ["GitHub dark", "Halloween dark", "Winter dark"]  #themes that get the dark halloween theme
+
+BACKGROUND_THEMES = {
+    #THEMES DO NOT INCLUDE THE NONE VECTOR!!!!
+    "Light": {"empty": "#ebedf0", "background": "#f6f8fa"},
+    "Dark dimmed": {"empty": "#2d333b", "background": "#1c2128"},
+    "Dark": {"empty": "#000000", "background": "#000000"},
+}
+
+#GREEN = "#57ab5a" #used for open issues and pull requests
+GREEN = "#40c463"
+GREEN_FILL = "#40c463"
+GREEN_FILL2 = "#40c46380"  #GREEN FILL WITH OPACITY (alpha is 50%)
+
+############
+#stuff for open issues/prs
+ISSUE_PR_COLOR = "#57ab5a"
+PEOPLE_COLOR = "#768390"
+
+DEBUG = True
+
+############
+def main(config):
+    #get user data
+    auth_token = config.get("access_token")
+    if auth_token == None:
+        data = None  #creates empty stat information
+    else:
+        data = get_contributions(auth_token)
+        # print(data["contributionsCollection"]["hasAnyRestrictedContributions"])
+
+    #create parts of the final frame (error handling done in each of these)
+    chart = contribution_chart(data, config)
+    if config.get("fullscreen_chart"):
+        return render.Root(child = chart)
+    activity_overview = contribution_activity(data)  #get the activity overview
+
+    #get stats like total contributions (in last year), open issues/pulls, and followers/following
+    other_stats = contribution_stats(data)
+
+    ##################
+    #create final frame
+    frame = render.Row(
+        main_align = "space_between",
+        expanded = True,
+        children = [
+            chart,
+            activity_overview,
+        ],
+    )
+    frame_final = render.Column(
+        main_align = "space_between",
+        expanded = True,
+        children = [
+            frame,
+            other_stats,
+        ],
+    )
+
+    return render.Root(
+        delay = 100,  #speed up scroll text
+        show_full_animation = True,
+        child = frame_final,
+    )
+
+def get_schema():
+    background_theme_opts = [
+        schema.Option(display = color, value = color)
+        for color in BACKGROUND_THEMES.keys()
+    ]
+    theme_opts = [
+        schema.Option(display = color, value = color)
+        for color in CONTRIBUTION_THEMES.keys()
+    ]
+
+    return [
+        schema.Text(
+            id = "github_username",
+            name = "GitHub Username",
+            desc = "Personal Username",
+            icon = "person",
+        ),
+        schema.Text(
+            id = "access_token",
+            name = "GitHub Personal Access Token",
+            desc = "Personal Access token",
+            icon = "lock",
+            secret = True,
+        ),
+        schema.Dropdown(
+            id = "background_theme",
+            name = "Background theme",
+            desc = "Select the background theme of the contribution graph.",
+            icon = "fillDrip",
+            options = background_theme_opts,
+            default = background_theme_opts[1].value,
+        ),
+        schema.Dropdown(
+            id = "theme",
+            name = "Theme",
+            desc = "Select the color theme of the contribution graph.",
+            icon = "fillDrip",
+            options = theme_opts,
+            default = theme_opts[0].value,
+        ),
+        schema.Toggle(
+            id = "fullscreen_chart",
+            name = "Fullscreen chart",
+            desc = "Make the contributions chart fullscreen",
+            icon = "gear",
+            default = False,
+        ),
+    ]
+
+def get_contributions(auth_token):
+    #get the contribution data for a user
+    dataQuery = {
+        "query": """query {
+                  viewer {
+                    login
+                    followers {
+                      totalCount
+                    }
+                    following {
+                      totalCount
+                    }
+                    issues(states: OPEN) {
+                      totalCount
+                    }
+                    pullRequests(states: OPEN){
+                      totalCount
+                    }
+                    contributionsCollection {
+                      hasAnyRestrictedContributions
+                      totalCommitContributions
+                      totalPullRequestReviewContributions
+                      totalPullRequestContributions
+                      totalIssueContributions
+                      user {
+                        issues(states:OPEN) {
+                          totalCount
+                        }
+                      }
+                      contributionCalendar {
+                        totalContributions
+                        colors
+                        isHalloween
+                        weeks {
+                          contributionDays{
+                            color
+                            contributionCount
+                            contributionLevel
+                            date
+                            weekday
+                          }
+                          firstDay
+                        }
+                      }
+                      
+                    }
+              }
+              }
+              """,
+    }
+
+    #get data
+    rep = http.post(
+        BASE_URL,
+        headers = {
+            "Authorization": "Bearer " + auth_token,
+        },
+        json_body = dataQuery,
+        ttl_seconds = 600,  #store data for 10 minutes
+    )
+
+    if rep.status_code != 200:
+        print("%s Error, could not get authorization token!!!!" % rep.status_code)
+        return None
+    else:
+        data = rep.json()["data"]["viewer"]
+        # user = data["login"]
+        # print(data["contributionsCollection"]["restrictedContributionsCount"])
+
+    return data
+
+######################################################
+#functions to create displayed information
+def contribution_square(fill, background):
+    #make github square for contribution
+    #size of squares
+    x1 = 2  #size of inner square
+    pad = 1
+    x2 = x1 + pad  #size of outer square
+
+    #return render.Padding(child=render.Box(width=x1,height=x1,color=color),pad=1,color=BACKGROUND_COLOR)
+    return render.Box(
+        width = x2,
+        height = x2,
+        color = background,
+        child = render.Box(width = x1, height = x1, color = fill),
+    )  #don't use padding otherwise have to distinguish between inner and outer edges
+
+def contribution_square_fullscreen(fill, background, isTopBotEdge):
+    #make github square for contribution
+    #size of squares
+    x1 = 4  #size of inner square
+    pad = 1
+    x2 = x1 + pad  #size of outer square
+
+    if isTopBotEdge:
+        return render.Box(
+            width = x2,
+            height = x1 - 1,
+            color = background,
+            child = render.Box(width = x1, height = x1 - 1, color = fill),
+        )
+
+    #return render.Padding(child=render.Box(width=x1,height=x1,color=color),pad=1,color=BACKGROUND_COLOR)
+    return render.Box(
+        width = x2,
+        height = x2,
+        color = background,
+        child = render.Box(width = x1, height = x1, color = fill),
+    )  #don't use padding otherwise have to distinguish between inner and outer edges
+
+def contribution_chart(data, config):
+    #replicate the contributions chart that is seen on GitHub for the last 13 weeks
+    ###########
+    #figure out color scheme
+    background_name = config.str("background_theme", "Dark dimmed")
+    empty_color, background_color = BACKGROUND_THEMES[background_name].values()
+    fill_name = config.str("theme", "GitHub")
+    fullscreen_chart = config.bool("fullscreen_chart")
+
+    if data == None:
+        cdata = range(0, 13)  #only need to iterate through 13 weeks
+        halloween_logic = False  #this does not matter since everything will be empty or background color
+    else:
+        cdata = data["contributionsCollection"]["contributionCalendar"]["weeks"][-13:]
+        halloween_logic = data["contributionsCollection"]["contributionCalendar"]["isHalloween"]
+
+    #change theme if it is Halloween
+    if halloween_logic:
+        if fill_name in HALLOWEEN_DARK_THEMES:
+            fill_name = "Halloween dark"
+        else:
+            fill_name = "Halloween"
+
+    #get fill_vec used to determine the colors
+    fill_vec = [BACKGROUND_THEMES[background_name]["empty"]]
+    fill_vec.extend(CONTRIBUTION_THEMES[fill_name])
+
+    ##############
+    #create contribution squares
+    cdata2 = []
+    for (i, week) in enumerate(cdata):
+        weekdata = range(0, 7) if data == None else week["contributionDays"]
+        left = 1 if i == 0 else 0  #padding for squares along the left edge
+
+        w = []
+        for (j, day) in enumerate(weekdata):
+            if data == None:
+                ctmp = empty_color
+            else:
+                ctmp = fill_vec[CONTRIBUTION_LEVELS.index(day["contributionLevel"])]
+
+            #add extra padding around the top and left border squares
+            top = 1 if j == 0 else 0  #padding to squares along the top edge
+            bottom = 1 if j == 6 else 0
+            w.append(render.Padding(
+                child = contribution_square_fullscreen(ctmp, background_color, (top or bottom)) if fullscreen_chart else contribution_square(ctmp, background_color),
+                pad = (0, 0, 0, top) if fullscreen_chart else (left, top, 0, 0),
+                color = background_color,
+            ))
+
+        #add empty squares for days that have not occurred yet
+        w.extend([
+            contribution_square_fullscreen(background_color, background_color, False) if fullscreen_chart else contribution_square(background_color, background_color),
+        ] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
+
+        cdata2.append(render.Column(children = w))
+
+    cdata3 = render.Row(children = cdata2)  #height=22 and width = 40 (with outer border)
+
+    return cdata3
+
+def contribution_activity(data):
+    #create the graph of the contribution activity in last year
+    if data == None:
+        #empty plot
+        plotdata = []
+    else:
+        #percentages may be slightly different than in GitHub due to rounding
+        total = data["contributionsCollection"]["contributionCalendar"]["totalContributions"]
+        codeReview = data["contributionsCollection"]["totalPullRequestReviewContributions"]
+        commits = data["contributionsCollection"]["totalCommitContributions"]
+        pulls = data["contributionsCollection"]["totalPullRequestContributions"]
+        issues = data["contributionsCollection"]["totalIssueContributions"]
+
+        if DEBUG:
+            print("Total contributions: %d" % total)
+            print("   Code review: %d - %f %%" % (codeReview, codeReview / total * 100))
+            print("   Commits: %d - %f %%" % (commits, commits / total * 100))
+            print("   Pull requests: %d - %f %%" % (pulls, pulls / total * 100))
+            print("   Issues: %d - %f %%" % (issues, issues / total * 100))
+
+        ########
+        #plot activity overview
+        plotdata = [
+            (0, codeReview / total),
+            (-1 * commits / total, 0),
+            (0, -1 * pulls / total),
+            (issues / total, 0),
+            (0, codeReview / total),
+        ]
+
+    p1 = render.Plot(
+        data = plotdata,
+        width = 22,
+        height = 22,
+        color = GREEN_FILL,
+        fill_color = GREEN_FILL2,
+        fill_color_inverted = GREEN_FILL2,
+        fill = True,
+        #color_inverted="#f00",
+        x_lim = (-1, 1),
+        y_lim = (-1, 1),
+    )
+
+    #########
+    pfinal = render.Stack(
+        children = [
+            render.Box(width = 22, height = 22, child = render.Box(width = 22, height = 1, color = "#fff")),
+            render.Box(width = 22, height = 22, child = render.Box(width = 1, height = 22, color = "#fff")),
+            render.Box(width = 22, height = 22, child = p1),
+        ],
+    )
+    return pfinal
+
+def contribution_stats(data):
+    #get stats like total contributions (in last year), open issues/pulls, and followers/following
+    if data == None:
+        final_text = render.Text("Set username and token !!!!", height = 9, offset = 1, font = FONT)
+    else:
+        #get data
+        total = int(data["contributionsCollection"]["contributionCalendar"]["totalContributions"])  #total contributions in last year
+        issues = int(data["issues"]["totalCount"])
+        pulls = int(data["pullRequests"]["totalCount"])
+        followers = int(data["followers"]["totalCount"])
+        following = int(data["following"]["totalCount"])
+
+        ##############
+        #create images
+        # issue_img = render.Circle(
+        #     color = ISSUE_PR_COLOR,
+        #     diameter = 8,
+        #     child = render.Circle(
+        #         color = "#000000",
+        #         diameter = 6,
+        #         child = render.Circle(color = ISSUE_PR_COLOR, diameter = 2),
+        #     ),
+        # )
+        issue_img = render.Image(src = ISSUE_ICON, width = 8, height = 8)
+        pr_img = render.Image(src = PR_ICON, width = 8, height = 8)
+        people_img = render.Image(src = PEOPLE_ICON, width = 8, height = 8)
+
+        #final text
+        final_text = render.Row(
+            #expanded=True,
+            children = [
+                #total contributions in last year
+                render.Text(str(total), height = 9, offset = 1, font = FONT),
+                render.Padding(child = render.Text("contributions", height = 9, offset = 1, font = FONT), pad = (2, 0, 0, 0)),
+                render.Padding(child = render.Text("in", height = 9, offset = 1, font = FONT), pad = (2, 0, 0, 0)),
+                render.Padding(child = render.Text("last", height = 9, offset = 1, font = FONT), pad = (2, 0, 0, 0)),
+                render.Padding(child = render.Text("year", height = 9, offset = 1, font = FONT), pad = (2, 0, 0, 0)),
+                #render.Text("in last year",height=9,offset=1,font=FONT),
+                ######
+                #issues open
+                render.Padding(child = issue_img, pad = (4, 0, 1, 0)),
+                render.Text(content = str(issues), height = 9, offset = 1, font = FONT),
+                ######
+                #pulls open
+                render.Padding(child = pr_img, pad = (4, 0, 1, 0)),
+                render.Text(content = str(pulls), height = 9, offset = 1, font = FONT),
+                ######
+                #followers • following
+                render.Padding(child = people_img, pad = (4, 0, 1, 0)),
+                render.Text(content = str(followers), height = 9, offset = 1, font = FONT),
+                render.Text("•", height = 9, offset = 1, font = FONT),
+                render.Text(content = str(following), height = 9, offset = 1, font = FONT),
+            ],
+        )
+    return render.Marquee(width = 64, child = final_text, offset_start = 64, offset_end = 64, align = "start")

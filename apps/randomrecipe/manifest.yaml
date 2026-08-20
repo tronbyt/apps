@@ -1,0 +1,15 @@
+---
+id: random-recipe
+name: Random Recipe
+summary: Get a random recipe idea
+desc: Display a random recipe from themealdb.com.
+author: noahpodgurski
+recommendedInterval: 5
+fileName: random_recipe.star
+packageName: randomrecipe
+category: utilities
+tags:
+  - lifestyle
+  - utility
+published: '2024-09-25T14:47:22Z'
+updated: '2025-12-17T23:02:59Z'

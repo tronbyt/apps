@@ -1,0 +1,16 @@
+---
+id: meeting-stats
+name: Meeting Stats
+summary: Weekly Meeting Insights
+desc: Analyzes your Outlook calendar and provides a summary of your weekly meeting load.
+author: Matt-Pesce
+fileName: meeting_stats.star
+packageName: meetingstats
+recommendedInterval: 5
+category: utilities
+tags:
+  - productivity
+  - meeting
+  - utility
+published: '2023-10-19T19:50:59Z'
+updated: '2025-11-29T21:14:16Z'

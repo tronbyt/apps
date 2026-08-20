@@ -1,0 +1,16 @@
+---
+id: nts-radio
+name: NTS Radio
+summary: Shows live show on NTS
+desc: Shows live show info for NTS Radio.
+author: M0ntyP
+fileName: nts_radio.star
+packageName: ntsradio
+recommendedInterval: 5
+category: entertainment
+tags:
+  - music
+  - real-time
+  - media
+published: '2023-08-23T14:11:58Z'
+updated: '2025-11-30T20:08:55Z'
