@@ -59,7 +59,7 @@ DEFAULT_CHARACTER = "chinpokodin"
 DEFAULT_REALM = "firetree"
 DEFAULT_REGION = "us"
 DEFAULT_AUTH_TTL = 86399
-RAID_EXCLUDE_LIST = ["The Dreamrift","The Voidspire","March on Quel'Danas","Sporefall","The Tidebound Grotto"]  # list of excluded raids that aren't part of the current season but returned in the API
+RAID_EXCLUDE_LIST = ["The Dreamrift", "The Voidspire", "March on Quel'Danas", "Sporefall", "The Tidebound Grotto"]  # list of excluded raids that aren't part of the current season but returned in the API
 
 def main(config):
     character_name = config.get("character", DEFAULT_CHARACTER).lower()
