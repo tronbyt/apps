@@ -6,6 +6,7 @@ Author: possan
 """
 
 load("encoding/json.star", "json")
+load("fireworks_64x32.gif", fireworks_img = "file")
 load("math.star", "math")
 load("re.star", "re")
 load("render.star", "render")
@@ -182,15 +183,27 @@ def main(config):
 
     widgetMode = config.bool("$widget")
 
+    # Show fireworks when D/M/Y are all equal integers (added by frame_shift)
+    fireworks_holder = render.Box(width = 1, height = 1, color = "#00000000")
+    if config.bool("fireworks") == True:
+        equal_dmy_check = [int(v) for v in [state["day_progress"], state["month_progress"], state["year_progress"]]]
+        if len(set(equal_dmy_check)) == 1:
+            fireworks_holder = render.Image(src = fireworks_img.readall())
+
     return render.Root(
         delay = 32,  # 30 fps
-        child = render.Box(
-            child = render.Animation(
-                children = [
-                    get_frame(state, fr, config)
-                    for fr in range(0 if not widgetMode else 299, 300)
-                ],
-            ),
+        child = render.Stack(
+            children = [
+                render.Box(
+                    child = render.Animation(
+                        children = [
+                            get_frame(state, fr, config)
+                            for fr in range(0 if not widgetMode else 299, 300)
+                        ],
+                    ),
+                ),
+                fireworks_holder,
+            ],
         ),
     )
 
@@ -313,6 +326,13 @@ def get_schema():
                 desc = "The end time of the day progress bar (minute).",
                 options = minute,
                 default = "0",
+            ),
+            schema.Toggle(
+                id = "fireworks",
+                name = "Show fireworks",
+                desc = "Display fireworks when the day, month, and year percent values are all equal.",
+                icon = "burst",
+                default = True,
             ),
         ],
     )
