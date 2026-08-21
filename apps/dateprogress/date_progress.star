@@ -6,9 +6,10 @@ Author: possan
 """
 
 load("encoding/json.star", "json")
+load("fireworks_64x32.gif", fireworks_img = "file")
 load("math.star", "math")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -24,7 +25,9 @@ P_COLOR_YEAR = "#0ff"  # Cyan
 P_COLOR_MONTH = "#0f0"  # Green
 P_COLOR_DAY = "#f00"  # Red
 
-FRAME_WIDTH = 64
+SCALE = 2 if canvas.is2x() else 1
+FRAME_WIDTH = 64 * SCALE
+FONT = "terminus-16" if canvas.is2x() else "tb-8"
 
 def lightness(color, amount):
     hsl_color = rgb_to_hsl(*hex_to_rgb(color))
@@ -181,16 +184,35 @@ def main(config):
     }
 
     widgetMode = config.bool("$widget")
+    width, height = canvas.size()
+
+    # Show fireworks when D/M/Y are all equal integers (added by frame_shift)
+    fireworks_holder = render.Box(width = 1, height = 1, color = "#00000000")
+    if config.bool("fireworks", True):
+        equal_dmy_check = [int(v) for v in [state["day_progress"], state["month_progress"], state["year_progress"]]]
+        if len(set(equal_dmy_check)) == 1:
+            fireworks_holder = render.Image(
+                src = fireworks_img.readall(),
+                width = canvas.width(),
+                height = canvas.height(),
+            )
 
     return render.Root(
         delay = 32,  # 30 fps
-        child = render.Box(
-            child = render.Animation(
-                children = [
-                    get_frame(state, fr, config)
-                    for fr in range(0 if not widgetMode else 299, 300)
-                ],
-            ),
+        child = render.Stack(
+            children = [
+                render.Box(
+                    width = width,
+                    height = height,
+                    child = render.Animation(
+                        children = [
+                            get_frame(state, fr, config)
+                            for fr in range(0 if not widgetMode else 299, 300)
+                        ],
+                    ),
+                ),
+                fireworks_holder,
+            ],
         ),
     )
 
@@ -314,6 +336,13 @@ def get_schema():
                 options = minute,
                 default = "0",
             ),
+            schema.Toggle(
+                id = "fireworks",
+                name = "Show fireworks",
+                desc = "Display fireworks when the day, month, and year percent values are all equal.",
+                icon = "burst",
+                default = True,
+            ),
         ],
     )
 
@@ -330,19 +359,19 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
     label2color = col3
 
     labelcomponent = None
-    widthmax = FRAME_WIDTH - 1
+    widthmax = FRAME_WIDTH - SCALE
     if state["show_labels"] == True:
         labelcomponent = render.Stack(
             children = [
                 render.Text(
                     content = label,
                     color = label1color,
-                    font = "tom-thumb",
+                    font = FONT,
                 ),
-                render.Box(width = 4, height = 6),
+                render.Box(width = 4 * SCALE, height = 6 * SCALE),
             ],
         )
-        widthmax -= 4
+        widthmax -= 4 * SCALE
 
     progresswidth = max(1, int(widthmax * animpercent / 100))
 
@@ -353,8 +382,8 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
             cross_align = "center",
             expanded = True,
             children = [
-                render.Box(width = progresswidth, height = 7, color = col2),
-                render.Box(width = 1, height = 7, color = col3),
+                render.Box(width = progresswidth, height = 7 * SCALE, color = col2),
+                render.Box(width = SCALE, height = 7 * SCALE, color = col3),
             ],
         )
 
@@ -363,7 +392,7 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
         label2component = render.Text(
             content = "{}%".format(int(percent * animprogress / 100)),
             color = label2color,
-            font = "tom-thumb",
+            font = FONT,
         )
 
     return render.Row(
@@ -379,7 +408,7 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
                         cross_align = "center",
                         expanded = True,
                         children = [
-                            render.Box(width = widthmax, height = 7, color = col1),
+                            render.Box(width = widthmax, height = 7 * SCALE, color = col1),
                         ],
                     ),
                     progressfill,
@@ -388,13 +417,13 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
                         cross_align = "center",
                         expanded = True,
                         children = [
-                            render.Box(width = 1, height = 8),
+                            render.Box(width = SCALE, height = 8 * SCALE),
                             label2component,
                         ],
                     ),
                 ],
             ),
-            render.Box(width = 1, height = 8),
+            render.Box(width = SCALE, height = 8 * SCALE),
         ],
     )
 

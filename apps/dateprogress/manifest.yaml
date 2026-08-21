@@ -6,7 +6,8 @@ desc: Shows todays date as colorful progressbars, you can show the progress of t
 author: possan
 fileName: date_progress.star
 packageName: dateprogress
-recommendedInterval: 5
+recommendedInterval: 1
+supports2x: true
 category: utilities
 tags:
   - time
@@ -14,4 +15,4 @@ tags:
   - art
   - utility
 published: '2022-02-02T01:17:26Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-08-21T01:33:37Z'
