@@ -27,6 +27,7 @@ P_COLOR_DAY = "#f00"  # Red
 
 SCALE = 2 if canvas.is2x() else 1
 FRAME_WIDTH = 64 * SCALE
+FONT = "terminus-16" if canvas.is2x() else "tb-8"
 
 def lightness(color, amount):
     hsl_color = rgb_to_hsl(*hex_to_rgb(color))
@@ -365,7 +366,7 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
                 render.Text(
                     content = label,
                     color = label1color,
-                    font = "tom-thumb",
+                    font = FONT,
                 ),
                 render.Box(width = 4 * SCALE, height = 6 * SCALE),
             ],
@@ -391,7 +392,7 @@ def render_progress_bar(state, label, percent, col1, col2, col3, animprogress):
         label2component = render.Text(
             content = "{}%".format(int(percent * animprogress / 100)),
             color = label2color,
-            font = "tom-thumb",
+            font = FONT,
         )
 
     return render.Row(
