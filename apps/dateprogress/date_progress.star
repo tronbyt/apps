@@ -27,7 +27,11 @@ P_COLOR_DAY = "#f00"  # Red
 
 SCALE = 2 if canvas.is2x() else 1
 FRAME_WIDTH = 64 * SCALE
-FONT = "terminus-16" if canvas.is2x() else "tb-8"
+
+# tom-thumb (height 6) renders the tightest, cleanest bars at 1x; the
+# recommended tb-8/terminus-16 pairing looked bulky here. terminus-12
+# (height 12) is the closest 2x match to tom-thumb's proportions.
+FONT = "terminus-12" if canvas.is2x() else "tom-thumb"
 
 def lightness(color, amount):
     hsl_color = rgb_to_hsl(*hex_to_rgb(color))
