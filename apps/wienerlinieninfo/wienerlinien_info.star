@@ -11,8 +11,9 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
-RED_TRIGGER = 2
-YELLOW_TRIGGER = 6
+RED_REMAINING_MIN_THRESHOLD = 2
+YELLOW_REMAINING_MIN_THRESHOLD = 6
+#DIVA of station "Stephansplatz"
 WELLKNOWN_DIVA = "60201320"
 
 #From https://www.wienerlinien.at/ogd_realtime/doku/ogd/wienerlinien-ogd-haltestellen.csv
@@ -2029,6 +2030,7 @@ DIVA_DB = [
 
 #############
 
+# returns the "monitors" array of the API response. The API documentation can be found here: https://www.wienerlinien.at/ogd_realtime/doku/ogd/wienerlinien-echtzeitdaten-dokumentation.pdf
 def getInfo(externalDiva):
     if externalDiva.isdigit() and len(externalDiva) == 8 and externalDiva[0:3] == "602":
         diva = externalDiva
@@ -2286,15 +2288,15 @@ def minutesColor(minutesValue, primary, walkingTime):
     GREEN_WEAK = "#080"
 
     if primary:
-        if minutesValue - walkingTime < RED_TRIGGER:
+        if minutesValue - walkingTime < RED_REMAINING_MIN_THRESHOLD:
             color = RED_INTENSE
-        elif minutesValue - walkingTime < YELLOW_TRIGGER:
+        elif minutesValue - walkingTime < YELLOW_REMAINING_MIN_THRESHOLD:
             color = YELLOW_INTENSE
         else:
             color = GREEN_INTENSE
-    elif minutesValue - walkingTime < RED_TRIGGER:
+    elif minutesValue - walkingTime < RED_REMAINING_MIN_THRESHOLD:
         color = RED_WEAK
-    elif minutesValue - walkingTime < YELLOW_TRIGGER:
+    elif minutesValue - walkingTime < YELLOW_REMAINING_MIN_THRESHOLD:
         color = YELLOW_WEAK
     else:
         color = GREEN_WEAK
@@ -2431,7 +2433,7 @@ def drawEntry(t1, t2, dirStr, isFirstEntry, walkingTime):
 
 #############
 
-def getStationsNerarby(location):
+def getStationsNearby(location):
     jsonDecoded = json.decode(location)
     lat = 48.208091  # Default location is the Stepahsplatz...
     lng = 16.371443
@@ -2544,16 +2546,8 @@ def get_schema():
                 name = "Station to monitor",
                 desc = "Write an address in Vienna to look for stations nearby and select one.",
                 icon = "mapLocationDot",
-                handler = getStationsNerarby,
+                handler = getStationsNearby,
             ),
-            #             schema.Text(
-            #                 id = "divaCode",
-            #                 name = "Station DIVA code",
-            #                 desc = """Locate the DIVA code in (remove spaces):
-            # https:// www.wienerlinien.at/ ogd_realtime/ doku/ ogd/ wienerlinien-ogd-haltestellen.csv""",
-            #                 icon = "barcode",
-            #                 default = "60201320",
-            #                 ),
             schema.Text(
                 id = "line",
                 name = "Line",
