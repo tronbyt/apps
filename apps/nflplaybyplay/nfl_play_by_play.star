@@ -31,7 +31,7 @@ API_BASE = "https://site.api.espn.com"
 SCOREBOARD_PATH = "/apis/site/v2/sports/football/nfl/scoreboard"
 STANDINGS_PATH = "/apis/v2/sports/football/nfl/standings?level=3"
 
-FRESH_LIVE = 30  # live game: re-poll every 30s
+FRESH_LIVE = 10  # live game: re-poll every 10s (ESPN serves max-age=2; a play cycle is ~40s)
 FRESH_IDLE = 600  # no live game: every 10 min
 RETRY_TTL = 60  # back off after a failure
 STALE_TTL = 21600  # serve last good extract up to 6h through an outage
