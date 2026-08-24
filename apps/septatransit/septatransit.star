@@ -21,7 +21,14 @@ DEFAULT_STOP = "10264"
 DEFAULT_BANNER = ""
 
 def call_routes_api():
-    cached = cache.get("routes_flat")
+    now = time.now().in_location("America/New_York")
+
+    # Keyed by local date: the filtered result depends on which release is
+    # "current" as of `now`, so a cache written before local midnight must
+    # not survive past it — otherwise a render right after midnight would
+    # keep serving yesterday's release for up to the full 24h TTL.
+    cache_key = "routes_flat_" + now.format("20060102")
+    cached = cache.get(cache_key)
     if cached != None:
         return sort_routes(json.decode(cached))
 
@@ -35,11 +42,10 @@ def call_routes_api():
         routes = r.json()
 
     if len(routes) > 0:
-        now = time.now().in_location("America/New_York")
         selected_release = select_release(routes, now)
         if selected_release != None:
             routes = [route for route in routes if route.get("release_name", "") == selected_release]
-        cache.set("routes_flat", json.encode(routes), ttl_seconds = 86400)
+        cache.set(cache_key, json.encode(routes), ttl_seconds = 86400)
         return sort_routes(routes)
 
     # Fallback to v2, then v1, if the flat feed fails or is empty —
@@ -106,7 +112,12 @@ def get_route_info(route_id):
     return None
 
 def fetch_stops(route_id):
-    cache_key = "stops_flat_" + route_id
+    now = time.now().in_location("America/New_York")
+
+    # Keyed by local date for the same reason as the routes cache above: the
+    # filtered result depends on which release is "current" as of `now`, so
+    # a cache written before local midnight must not survive past it.
+    cache_key = "stops_flat_" + route_id + "_" + now.format("20060102")
     cached = cache.get(cache_key)
     if cached != None:
         return json.decode(cached)
@@ -119,7 +130,6 @@ def fetch_stops(route_id):
     # release at once (e.g. before/after a route reconfiguration) — pick the
     # currently-active release so old and new alignments aren't mixed together.
     if len(stops) > 0:
-        now = time.now().in_location("America/New_York")
         selected_release = select_release(stops, now)
         if selected_release != None:
             stops = [s for s in stops if s.get("release_name", "") == selected_release]
