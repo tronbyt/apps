@@ -14,16 +14,17 @@ def regional_rail_station_options():
     regional_rail_stations = [
         "30th Street Station",
         "49th Street",
-        "9th Street",
         "Airport Terminal A",
         "Airport Terminal B",
         "Airport Terminal C D",
         "Airport Terminal E F",
         "Allegheny",
+        "Allen Lane",
         "Ambler",
         "Angora",
         "Ardmore",
         "Ardsley",
+        "Bala",
         "Berwyn",
         "Bethayres",
         "Bridesburg",
@@ -33,12 +34,12 @@ def regional_rail_station_options():
         "Chalfont",
         "Chelten Avenue",
         "Cheltenham",
-        "Chester Transportation Center",
+        "Chester TC",
         "Chestnut Hill East",
         "Chestnut Hill West",
         "Churchmans Crossing",
         "Claymont",
-        "Clifton–Aldan",
+        "Clifton-Aldan",
         "Colmar",
         "Conshohocken",
         "Cornwells Heights",
@@ -49,7 +50,7 @@ def regional_rail_station_options():
         "Cynwyd",
         "Darby",
         "Daylesford",
-        "Delaware Valley University",
+        "Delaware Valley College",
         "Devon",
         "Downingtown",
         "Doylestown",
@@ -58,11 +59,11 @@ def regional_rail_station_options():
         "Eddington",
         "Eddystone",
         "Elkins Park",
-        "Elm Street",
+        "Elm St",
         "Elwyn",
         "Exton",
-        "Fern Rock Transportation Center",
-        "Fernwood–Yeadon",
+        "Fern Rock TC",
+        "Fernwood-Yeadon",
         "Folcroft",
         "Forest Hills",
         "Fort Washington",
@@ -78,7 +79,7 @@ def regional_rail_station_options():
         "Haverford",
         "Highland",
         "Highland Avenue",
-        "Holmesburg Junction",
+        "Holmesburg Jct",
         "Ivy Ridge",
         "Jefferson Station",
         "Jenkintown Wyncote",
@@ -123,7 +124,6 @@ def regional_rail_station_options():
         "Prospect Park",
         "Queen Lane",
         "Radnor",
-        "Richard Allen Lane",
         "Ridley Park",
         "Rosemont",
         "Roslyn",
@@ -178,21 +178,303 @@ def regional_rail_station_options():
         )
     return station_options
 
-API_BASE = "http://www3.septa.org/api"
-API_ROUTES = API_BASE + "/Routes"
+API_BASE = "https://www3.septa.org/api"
 API_SCHEDULE = API_BASE + "/Arrivals"
 DEFAULT_STATION = "Wayne Junction"
 DEFAULT_DIRECTION = "S"
 
-def call_schedule_api(direction, station):
-    r = http.get(API_SCHEDULE, params = {"station": station, "direction": direction, "results": "4"}, ttl_seconds = 30)
-    schedule_raw = r.json()
-    schedule = schedule_raw.values()[0][0].values()[0]
-    return schedule
+# Every train's "line" field is one of these 13 names (confirmed against
+# live Arrivals data). Each gets its own toggle, checked by default, so
+# riders can hide lines they don't use — useful at a hub station like
+# Suburban Station or Jefferson Station where every line's trains show up
+# in the same departure board.
+REGIONAL_RAIL_LINES = [
+    ("air", "Airport"),
+    ("che", "Chestnut Hill East"),
+    ("chw", "Chestnut Hill West"),
+    ("cyn", "Cynwyd"),
+    ("fox", "Fox Chase"),
+    ("lan", "Lansdale/Doylestown"),
+    ("med", "Media/Wawa"),
+    ("nor", "Manayunk/Norristown"),
+    ("pao", "Paoli/Thorndale"),
+    ("tre", "Trenton"),
+    ("war", "Warminster"),
+    ("wil", "Wilmington/Newark"),
+    ("wtr", "West Trenton"),
+]
 
-def get_schedule(direction, station, scale):
+def enabled_lines_from_config(config):
+    enabled = {}
+    for suffix, name in REGIONAL_RAIL_LINES:
+        enabled[name] = config.bool("line_" + suffix, True)
+    return enabled
+
+def line_toggle_fields():
+    fields = []
+    for suffix, name in REGIONAL_RAIL_LINES:
+        fields.append(
+            schema.Toggle(
+                id = "line_" + suffix,
+                name = name,
+                desc = "Show " + name + " Line departures.",
+                icon = "train",
+                default = True,
+            ),
+        )
+    return fields
+
+# Maps a station to which compass direction ("N" or "S") its Arrivals API
+# result labels as Inbound (toward Center City). Determined by cross-checking
+# live trip origin/destination against each of the 13 lines' known direction
+# (SEPTA's ex-Reading-heritage lines run Inbound=Southbound; ex-PRR lines run
+# the opposite) — not derivable from compass direction alone, since lines
+# radiate from Center City in every direction. Stations on Cynwyd or Fox
+# Chase are omitted (couldn't get a live sample to confirm — both had zero
+# scheduled trains at verification time), as are the handful of core hub
+# stations (30th Street, Suburban, Jefferson, Temple University, Penn
+# Medicine) where every line converges and "inbound/outbound" stops being
+# a meaningful distinction; both fall back to plain compass labels.
+STATION_INBOUND_DIRECTION = {
+    "49th Street": "N",
+    "Airport Terminal A": "N",
+    "Airport Terminal B": "N",
+    "Airport Terminal C D": "N",
+    "Airport Terminal E F": "N",
+    "Allegheny": "S",
+    "Allen Lane": "N",
+    "Ambler": "S",
+    "Angora": "N",
+    "Ardmore": "N",
+    "Ardsley": "S",
+    "Berwyn": "N",
+    "Bethayres": "S",
+    "Bridesburg": "N",
+    "Bristol": "N",
+    "Bryn Mawr": "N",
+    "Carpenter": "N",
+    "Chalfont": "S",
+    "Chelten Avenue": "N",
+    "Chester TC": "N",
+    "Chestnut Hill East": "S",
+    "Chestnut Hill West": "N",
+    "Churchmans Crossing": "N",
+    "Claymont": "N",
+    "Clifton-Aldan": "N",
+    "Colmar": "S",
+    "Conshohocken": "S",
+    "Cornwells Heights": "N",
+    "Crestmont": "S",
+    "Croydon": "N",
+    "Crum Lynne": "N",
+    "Curtis Park": "N",
+    "Darby": "N",
+    "Daylesford": "N",
+    "Delaware Valley College": "S",
+    "Devon": "N",
+    "Downingtown": "N",
+    "Doylestown": "S",
+    "East Falls": "S",
+    "Eastwick": "N",
+    "Eddington": "N",
+    "Eddystone": "N",
+    "Elkins Park": "S",
+    "Elm St": "S",
+    "Elwyn": "N",
+    "Exton": "N",
+    "Fern Rock TC": "S",
+    "Fernwood-Yeadon": "N",
+    "Folcroft": "N",
+    "Forest Hills": "S",
+    "Fort Washington": "S",
+    "Fortuna": "S",
+    "Germantown": "S",
+    "Gladstone": "N",
+    "Glenolden": "N",
+    "Glenside": "S",
+    "Gravers": "S",
+    "Gwynedd Valley": "S",
+    "Hatboro": "S",
+    "Haverford": "N",
+    "Highland": "N",
+    "Highland Avenue": "N",
+    "Holmesburg Jct": "N",
+    "Ivy Ridge": "S",
+    "Jenkintown Wyncote": "S",
+    "Langhorne": "S",
+    "Lansdale": "S",
+    "Lansdowne": "N",
+    "Levittown": "N",
+    "Link Belt": "S",
+    "Main Street": "S",
+    "Malvern": "N",
+    "Manayunk": "S",
+    "Marcus Hook": "N",
+    "Meadowbrook": "S",
+    "Media": "N",
+    "Melrose Park": "S",
+    "Merion": "N",
+    "Miquon": "S",
+    "Morton": "N",
+    "Mount Airy": "S",
+    "Moylan-Rose Valley": "N",
+    "Narberth": "N",
+    "Neshaminy Falls": "S",
+    "New Britain": "S",
+    "Newark": "N",
+    "Noble": "S",
+    "Norristown TC": "S",
+    "North Broad": "S",
+    "North Hills": "S",
+    "North Philadelphia": "N",
+    "North Wales": "S",
+    "Norwood": "N",
+    "Oreland": "S",
+    "Overbrook": "N",
+    "Paoli": "N",
+    "Penllyn": "S",
+    "Pennbrook": "S",
+    "Philmont": "S",
+    "Primos": "N",
+    "Prospect Park": "N",
+    "Queen Lane": "N",
+    "Radnor": "N",
+    "Ridley Park": "N",
+    "Rosemont": "N",
+    "Roslyn": "S",
+    "Rydal": "S",
+    "Secane": "N",
+    "Sedgwick": "S",
+    "Sharon Hill": "N",
+    "Somerton": "S",
+    "Spring Mill": "S",
+    "St. Davids": "N",
+    "St. Martins": "N",
+    "Stenton": "S",
+    "Strafford": "N",
+    "Swarthmore": "N",
+    "Tacony": "N",
+    "Thorndale": "N",
+    "Torresdale": "N",
+    "Trenton": "N",
+    "Trevose": "S",
+    "Tulpehocken": "N",
+    "Upsal": "N",
+    "Villanova": "N",
+    "Wallingford": "N",
+    "Warminster": "S",
+    "Washington Lane": "S",
+    "Wawa": "N",
+    "Wayne": "N",
+    "Wayne Junction": "S",
+    "West Trenton": "S",
+    "Whitford": "N",
+    "Willow Grove": "S",
+    "Wilmington": "N",
+    "Wissahickon": "S",
+    "Wister": "S",
+    "Woodbourne": "S",
+    "Wyndmoor": "S",
+    "Wynnewood": "N",
+    "Yardley": "S",
+}
+
+def select_direction(station):
+    inbound = STATION_INBOUND_DIRECTION.get(station)
+    if inbound == None:
+        options = [
+            schema.Option(display = "Northbound", value = "N"),
+            schema.Option(display = "Southbound", value = "S"),
+        ]
+    elif inbound == "N":
+        options = [
+            schema.Option(display = "Inbound (toward Center City)", value = "N"),
+            schema.Option(display = "Outbound", value = "S"),
+        ]
+    else:
+        options = [
+            schema.Option(display = "Inbound (toward Center City)", value = "S"),
+            schema.Option(display = "Outbound", value = "N"),
+        ]
+
+    return [
+        schema.Dropdown(
+            id = "direction",
+            name = "Direction",
+            desc = "Select a direction",
+            icon = "compass",
+            default = options[0].value,
+            options = options,
+        ),
+    ]
+
+def call_schedule_api(direction, station):
+    # Over-fetch beyond the 4 we display: once a line filter is applied,
+    # the first 4 raw results may not include 4 that survive it.
+    r = http.get(API_SCHEDULE, params = {"station": station, "direction": direction, "results": "20"}, ttl_seconds = 30)
+
+    # SEPTA returns HTTP 400 with {"error": "..."} for a station name it
+    # doesn't recognize, and HTTP 200 with a normal-looking payload otherwise
+    # — but that payload's shape still varies: a nested empty list [[]] when
+    # there are simply no upcoming trains for this station/direction right
+    # now (common for branch termini, or late at night), vs.
+    # [{"Northbound": [...]}] / [{"Southbound": [...]}] when there are.
+    # Every level below is checked before indexing so none of these shapes
+    # can crash the render.
+    if r.status_code != 200:
+        return []
+
+    schedule_raw = r.json()
+    if type(schedule_raw) != "dict":
+        return []
+
+    day_values = schedule_raw.values()
+    if len(day_values) < 1 or type(day_values[0]) != "list" or len(day_values[0]) < 1:
+        return []
+
+    direction_group = day_values[0][0]
+    if type(direction_group) != "dict":
+        return []
+
+    dir_values = direction_group.values()
+    if len(dir_values) < 1 or type(dir_values[0]) != "list":
+        return []
+
+    return dir_values[0]
+
+def parse_status_delay(status):
+    # SEPTA's regional rail "status" is either "On Time" or "N min" — and
+    # that N is how late the train is running, *not* a countdown to
+    # departure (verified against sched_time, which doesn't move regardless
+    # of this value; two trains scheduled tens of minutes apart have shown
+    # the identical "N min" at the same moment). "999 min" is the same
+    # bogus/no-data sentinel pattern SEPTA uses on the bus side.
+    if status == "On Time":
+        return 0
+    if status.endswith(" min"):
+        prefix = status[:-4]
+        if prefix.isdigit():
+            mins = int(prefix)
+            if mins < 900:
+                return mins
+    return None
+
+def get_schedule(direction, station, scale, enabled_lines):
     schedule = call_schedule_api(direction, station)
+
+    # Only keep trains on a line the rider has enabled. A line name we don't
+    # recognize (a gap in our list, or SEPTA adding a new one) fails open
+    # rather than silently hiding real service.
+    schedule = [i for i in schedule if enabled_lines.get(i.get("line"), True)]
+    schedule = schedule[:4]
+
     list_of_departures = []
+
+    row_font = "tom-thumb" if scale == 1 else "terminus-12"
+    row_height = 6 * scale
+    time_width = 25 * scale
+    text_width = 39 * scale
+    min_rows = 4
 
     for i in schedule:
         parsed_departure = time.parse_time(i["sched_time"], "2006-01-02 15:04:05.000", "America/New_York").format("3:04")
@@ -212,10 +494,17 @@ def get_schedule(direction, station, scale):
         else:
             departure = parsed_departure
 
-        row_font = "tom-thumb" if scale == 1 else "terminus-12"
-        row_height = 6 * scale
-        time_width = 25 * scale
-        text_width = 39 * scale
+        # Color the time itself by lateness (matching the bus apps' live
+        # indicator), and only append a status label when we actually trust
+        # it — the 999-sentinel case shows no delay info rather than a
+        # fabricated one.
+        delay_mins = parse_status_delay(i["status"])
+        if delay_mins == None:
+            time_color = text
+            status_text = ""
+        else:
+            time_color = "#f00" if delay_mins > 5 else "#0f0"
+            status_text = " - On time" if delay_mins == 0 else " - %dm late" % delay_mins
 
         item = render.Box(
             height = row_height,
@@ -229,12 +518,12 @@ def get_schedule(direction, station, scale):
                         child = render.Text(
                             departure,
                             font = row_font,
-                            color = text,
+                            color = time_color,
                         ),
                     ),
                     render.Marquee(
                         child = render.Text(
-                            i["train_id"] + " " + i["service_type"] + " to " + i["destination"] + " - " + i["status"],
+                            i["train_id"] + " " + i["service_type"] + " to " + i["destination"] + status_text,
                             font = row_font,
                             color = text,
                         ),
@@ -248,21 +537,29 @@ def get_schedule(direction, station, scale):
         list_of_departures.append(item)
 
     if len(list_of_departures) < 1:
-        return [render.Box(
-            height = 6 * scale,
+        list_of_departures = [render.Box(
+            height = row_height,
             width = 64 * scale,
             color = "#000",
-            child = render.Text("Select a stop", font = "tom-thumb" if scale == 1 else "tb-8"),
+            child = render.Text("No departures", font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
-    else:
-        return list_of_departures
+
+    # Pad with blank rows so the schedule always fills min_rows — otherwise
+    # the accent bar below it rides up under a short departure list instead
+    # of staying pinned to the bottom of the display.
+    for i in range(len(list_of_departures), min_rows):
+        background = "#222" if i % 2 == 1 else "#000"
+        list_of_departures.append(render.Box(height = row_height, width = 64 * scale, color = background))
+
+    return list_of_departures
 
 def main(config):
     scale = 2 if canvas.is2x() else 1
     station = config.str("station", DEFAULT_STATION)
     direction = config.str("direction", DEFAULT_DIRECTION)
     user_text = config.str("banner", "")
-    schedule = get_schedule(direction, station, scale)
+    enabled_lines = enabled_lines_from_config(config)
+    schedule = get_schedule(direction, station, scale, enabled_lines)
     left_pad = 1 * scale
 
     if config.bool("use_custom_banner_color"):
@@ -314,23 +611,12 @@ def get_schema():
                 default = DEFAULT_STATION,
                 options = regional_rail_station_options(),
             ),
-            schema.Dropdown(
+            schema.Generated(
                 id = "direction",
-                name = "Direction",
-                desc = "Select a direction",
-                icon = "compass",
-                default = DEFAULT_DIRECTION,
-                options = [
-                    schema.Option(
-                        display = "N",
-                        value = "N",
-                    ),
-                    schema.Option(
-                        display = "S",
-                        value = "S",
-                    ),
-                ],
+                source = "station",
+                handler = select_direction,
             ),
+        ] + line_toggle_fields() + [
             schema.Text(
                 id = "banner",
                 name = "Custom banner text",
