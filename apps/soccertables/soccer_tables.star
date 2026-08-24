@@ -65,10 +65,10 @@ def main(config):
                 stats = entries[0]["stats"]
 
                 for j, k in enumerate(stats):
-                    if k["name"] == "points":
+                    if k["name"] == "rank":
                         statNumber = j
 
-                entries = sorted(entries, key = lambda e: e["stats"][statNumber]["value"], reverse = True)
+                entries = sorted(entries, key = lambda e: e["stats"][statNumber]["value"], reverse = False)
 
                 for x in range(0, len(entries), entriesToDisplay):
                     cycleCount = cycleCount + 1
