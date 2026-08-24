@@ -21,21 +21,36 @@ DEFAULT_STOP = "10264"
 DEFAULT_BANNER = ""
 
 def call_routes_api():
-    cached = cache.get("routes_v2")
+    cached = cache.get("routes_flat")
     if cached != None:
         return sort_routes(json.decode(cached))
 
-    # Try v2 first
-    r = http.get(API_V2 + "/routes/")
+    # The flat routes.json feed is what septa.org itself uses, and is kept
+    # current with newly added routes (e.g. route 76) well before the v2
+    # API's route list catches up. It can list entries from more than one
+    # schedule release at once, so pick the currently-active release.
+    r = http.get(API_FLAT + "/routes.json")
     routes = []
     if r.status_code == 200:
         routes = r.json()
 
     if len(routes) > 0:
-        cache.set("routes_v2", json.encode(routes), ttl_seconds = 604800)
+        now = time.now().in_location("America/New_York")
+        selected_release = select_release(routes, now)
+        if selected_release != None:
+            routes = [route for route in routes if route.get("release_name", "") == selected_release]
+        cache.set("routes_flat", json.encode(routes), ttl_seconds = 86400)
         return sort_routes(routes)
 
-    # Fallback to v1 if v2 fails or is empty — do not cache so v2 is retried next render
+    # Fallback to v2, then v1, if the flat feed fails or is empty —
+    # do not cache so the flat feed is retried next render.
+    r = http.get(API_V2 + "/routes/")
+    if r.status_code == 200:
+        routes = r.json()
+
+    if len(routes) > 0:
+        return sort_routes(routes)
+
     r = http.get(API_V1 + "/Routes/")
     if r.status_code == 200:
         routes = r.json()
@@ -58,11 +73,19 @@ def sort_routes(routes):
 def get_routes():
     routes = call_routes_api()
     list_of_routes = []
+    seen = {}
 
     for i in routes:
         # 0: Tram/Trolley, 1: Subway, 3: Bus (GTFS types)
         # 2 is Rail, which we often exclude or handle differently
         if i["route_type"] != 2:
+            # Defends against a mixed-release route list (e.g. if release
+            # selection couldn't find a parseable date) showing the same
+            # route twice in the dropdown.
+            if seen.get(i["route_id"]):
+                continue
+            seen[i["route_id"]] = True
+
             list_of_routes.append(
                 schema.Option(
                     display = i["route_short_name"] + ": " + i["route_long_name"],
@@ -83,7 +106,7 @@ def get_route_info(route_id):
     return None
 
 def fetch_stops(route_id):
-    cache_key = "stops_v2_" + route_id
+    cache_key = "stops_flat_" + route_id
     cached = cache.get(cache_key)
     if cached != None:
         return json.decode(cached)
@@ -92,8 +115,15 @@ def fetch_stops(route_id):
     r = http.get(url)
     stops = r.json() if r.status_code == 200 else []
 
+    # Like routes.json, this feed can list stops from more than one schedule
+    # release at once (e.g. before/after a route reconfiguration) — pick the
+    # currently-active release so old and new alignments aren't mixed together.
     if len(stops) > 0:
-        cache.set(cache_key, json.encode(stops), ttl_seconds = 604800)
+        now = time.now().in_location("America/New_York")
+        selected_release = select_release(stops, now)
+        if selected_release != None:
+            stops = [s for s in stops if s.get("release_name", "") == selected_release]
+        cache.set(cache_key, json.encode(stops), ttl_seconds = 86400)
     return stops
 
 def sort_stops_geographically(stops):
@@ -179,11 +209,11 @@ def parse_release_date(release_name):
         return None
     return release_name
 
-def select_schedule_release(full_schedule, now):
+def select_release(items, now):
     today = now.format("20060102")
     dated_releases = []
 
-    for s in full_schedule:
+    for s in items:
         release_name = parse_release_date(s.get("release_name", ""))
         if release_name == None:
             continue
@@ -197,7 +227,49 @@ def select_schedule_release(full_schedule, now):
     if eligible:
         return max(eligible)
 
-    return max(dated_releases)
+    # Nothing has gone live yet — best guess is the soonest upcoming release,
+    # not the furthest-out one.
+    return min(dated_releases)
+
+def fetch_calendar():
+    cached = cache.get("calendar_flat")
+    if cached != None:
+        return json.decode(cached)
+
+    r = http.get(API_FLAT + "/calendar.json")
+    calendar = {}
+    if r.status_code == 200:
+        data = r.json()
+        if type(data) == "dict":
+            calendar = data
+
+    if calendar:
+        cache.set("calendar_flat", json.encode(calendar), ttl_seconds = 86400)
+    return calendar
+
+def active_service_ids_today(now):
+    # SEPTA publishes an authoritative calendar mapping each calendar date to
+    # the service_id(s) actually in effect that day — a much better source of
+    # truth than guessing from schedule frequency (see call_schedule_api).
+    calendar = fetch_calendar()
+    entry = calendar.get(now.format("20060102"))
+    if type(entry) != "dict":
+        return None
+    ids = entry.get("service_id")
+    if type(ids) != "list":
+        return None
+    return {str(sid): True for sid in ids}
+
+def id_str(value):
+    # flat-api's schedule.json encodes trip_id/service_id as JSON numbers,
+    # which Pixlet's JSON decoder hands back as float (e.g. 812821.0) —
+    # str() on that includes a trailing ".0" that won't match the plain
+    # "812821"/"10"/"SID..." strings used as keys elsewhere (live trip data
+    # keyed by v2's string trip_id, calendar.json's service_id strings), so
+    # normalize whole numbers through int() first.
+    if type(value) == "string":
+        return value
+    return str(int(value))
 
 def call_schedule_api(route, stopid):
     cache_key = "sched_v2_%s_%s" % (route, stopid)
@@ -224,17 +296,22 @@ def call_schedule_api(route, stopid):
     r_trips = http.get("%s/trips/?route_id=%s" % (API_V2, route))
     if r_trips.status_code == 200:
         for t in r_trips.json():
-            live_data[t["trip_id"]] = t
+            live_data[id_str(t["trip_id"])] = t
 
     # Fallback to v1 if v2 yields nothing
     if not live_data:
         r_v1 = http.get("%s/TransitView/index.php" % API_V1, params = {"route": route})
         if r_v1.status_code == 200:
             v1_data = r_v1.json()
-            for b in v1_data.get("bus", []):
+
+            # SEPTA's v1 API returns {"bus": [...]} normally, but an empty
+            # list `[]` (no "bus" key to .get) when the route has no active buses.
+            bus_list = v1_data.get("bus", []) if type(v1_data) == "dict" else []
+            for b in bus_list:
                 # Map v1 fields to v2 format for consistency
                 tid = b.get("trip")
                 if tid:
+                    tid = id_str(tid)
                     live_data[tid] = {
                         "trip_id": tid,
                         "delay": b.get("late", 0),
@@ -244,7 +321,8 @@ def call_schedule_api(route, stopid):
 
     now = time.now().in_location("America/New_York")
     now_secs = parse_time_to_seconds(now.format("15:04:05"))
-    selected_release = select_schedule_release(full_schedule, now)
+    now_hour = int(now.format("15"))
+    selected_release = select_release(full_schedule, now)
 
     filtered_schedule = full_schedule
     if selected_release != None:
@@ -254,7 +332,7 @@ def call_schedule_api(route, stopid):
 
     # Infer today's service_id from live trips
     for s in filtered_schedule:
-        if str(s["trip_id"]) in live_data:
+        if id_str(s["trip_id"]) in live_data:
             svc_id = s["service_id"]
             service_id_counts[svc_id] = service_id_counts.get(svc_id, 0) + 1
 
@@ -265,10 +343,26 @@ def call_schedule_api(route, stopid):
             max_count = count
             today_service_id = svc_id
 
-    # Fallback guess for service_id based on day of week
+    # Fallback: consult SEPTA's calendar for which service_id(s) are actually
+    # active today, and intersect with the ones this route/stop's schedule
+    # actually has. calendar.json's service_id list is system-wide, so only
+    # trust it here if it narrows things down to exactly one candidate.
     if not today_service_id:
-        # If we can't infer it from live data, we'll look for the most frequent
-        # service_id in the schedule. This is safer than hardcoding 10/12/13.
+        active_ids = active_service_ids_today(now)
+        if active_ids != None:
+            route_service_ids = {}
+            for s in filtered_schedule:
+                route_service_ids[id_str(s["service_id"])] = s["service_id"]
+            matched = [route_service_ids[sid] for sid in route_service_ids if sid in active_ids]
+            if len(matched) == 1:
+                today_service_id = matched[0]
+
+    # Last-resort fallback: the most frequent service_id in the schedule.
+    # This can pick the wrong day type (e.g. a weekday pattern on a
+    # Saturday/Sunday, since weekday service is usually the most frequent
+    # one in the feed), so it only kicks in if live data and the calendar
+    # both came up empty.
+    if not today_service_id:
         counts = {}
         for s in filtered_schedule:
             sid = s["service_id"]
@@ -289,20 +383,35 @@ def call_schedule_api(route, stopid):
 
         # A single release should already be canonical, but keep trip_id-based
         # dedupe in case SEPTA repeats the same trip within that release.
-        tid = str(s["trip_id"])
+        tid = id_str(s["trip_id"])
         if tid not in unique_trips:
             unique_trips[tid] = s
 
     results = []
     for s in unique_trips.values():
-        trip_id = str(s["trip_id"])
+        trip_id = id_str(s["trip_id"])
         sched_secs = parse_time_to_seconds(s["arrival_time"])
+
+        # SEPTA schedules use after-midnight notation for overnight trips
+        # (e.g. "24:15:00" for 12:15am the next calendar day). That's correct
+        # as-is while it's still evening, but once the wall clock has itself
+        # crossed into that next day, re-anchor it to today's 0-based clock —
+        # otherwise the ETA comes out ~24h too high for a trip that's really
+        # imminent or already arriving.
+        if sched_secs >= 86400 and now_hour < 4:
+            sched_secs -= 86400
+
         delay = 0
         is_live = False
         live = None
 
         if trip_id in live_data:
             live = live_data[trip_id]
+
+            # A canceled trip won't arrive at all — drop it rather than
+            # falling back to showing its original scheduled time.
+            if live.get("status") == "CANCELED":
+                continue
 
             # Use live data only if it has GPS and sane delay
             # SEPTA sometimes sends "998" or other bogus delay for "NO GPS"
@@ -386,13 +495,28 @@ def get_schedule(route, stopid, show_relative_times, scale):
             time_color = text
 
         headsign = dep["headsign"]
-        if dep.get("stops_away") != None:
-            if dep["stops_away"] <= 0:
+        stops_away = dep.get("stops_away")
+
+        # A stop count is only intuitive when the bus is genuinely close by —
+        # "58 stops away" isn't a distance anyone can picture. SEPTA buses
+        # stop at nearly every block, so 15 is still "visibly coming" rather
+        # than "could be anywhere on the route." Beyond that, a time-based
+        # lateness/on-time indicator is more useful.
+        if stops_away != None and stops_away <= 15:
+            if stops_away <= 0:
                 headsign += " - Approaching"
-            elif dep["stops_away"] == 1:
+            elif stops_away == 1:
                 headsign += " - 1 stop away"
             else:
-                headsign += " - %d stops away" % dep["stops_away"]
+                headsign += " - %d stops away" % stops_away
+        elif dep["is_live"]:
+            delay_mins = dep["delay_mins"]
+            if delay_mins >= 2:
+                headsign += " - %dm late" % delay_mins
+            elif delay_mins <= -2:
+                headsign += " - %dm early" % -delay_mins
+            else:
+                headsign += " - On time"
 
         row_font = "tom-thumb" if scale == 1 else "terminus-12"
         row_height = 6 * scale
@@ -429,16 +553,26 @@ def get_schedule(route, stopid, show_relative_times, scale):
         )
         list_of_departures.append(item)
 
+    row_height = 6 * scale
+    min_rows = 4
+
     if len(list_of_departures) < 1:
         msg = "No departures" if stopid else "Select a stop"
-        return [render.Box(
-            height = 6 * scale,
+        list_of_departures = [render.Box(
+            height = row_height,
             width = 64 * scale,
             color = "#000",
             child = render.Text(msg, font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
-    else:
-        return list_of_departures
+
+    # Pad with blank rows so the schedule always fills min_rows — otherwise
+    # the accent bar below it rides up under a short departure list instead
+    # of staying pinned to the bottom of the display.
+    for i in range(len(list_of_departures), min_rows):
+        background = "#222" if i % 2 == 1 else "#000"
+        list_of_departures.append(render.Box(height = row_height, width = 64 * scale, color = background))
+
+    return list_of_departures
 
 def select_stop(route):
     options = get_stops(route)
