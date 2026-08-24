@@ -3,12 +3,12 @@ id: hvv-departures
 name: HVV Departures
 summary: HVV Departures
 desc: Display real-time departure times for trains, buses and ferries in Hamburg (HVV).
-author: Felix Bruns
+author: Felix Bruns, Frank Dornberger
 fileName: hvv_departures.star
 packageName: hvvdepartures
-broken: true
+broken: false
 recommendedInterval: 5
 category: transit
 tags: []
 published: '2022-02-24T01:03:53Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-08-24T20:44:00Z'

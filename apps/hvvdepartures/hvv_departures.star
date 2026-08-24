@@ -2,20 +2,21 @@
 Applet: HVV Departures
 Summary: HVV Departures
 Description: Display real-time departure times for trains, buses and ferries in Hamburg (HVV).
-Author: fxb (Felix Bruns)
+Author: fxb (Felix Bruns), Frank Dornberger
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/image_akn.png", IMAGE_AKN_ASSET = "file")
+load("images/image_ferry.png", IMAGE_FERRY_ASSET = "file")
 load("images/image_logo.png", IMAGE_LOGO_ASSET = "file")
 load("images/image_metro_bus.png", IMAGE_METRO_BUS_ASSET = "file")
 load("images/image_night_bus.png", IMAGE_NIGHT_BUS_ASSET = "file")
 load("images/image_s1.png", IMAGE_S1_ASSET = "file")
-load("images/image_s11.png", IMAGE_S11_ASSET = "file")
 load("images/image_s2.png", IMAGE_S2_ASSET = "file")
-load("images/image_s21.png", IMAGE_S21_ASSET = "file")
-load("images/image_s3_s31.png", IMAGE_S3_S31_ASSET = "file")
+load("images/image_s3.png", IMAGE_S3_ASSET = "file")
+load("images/image_s5.png", IMAGE_S5_ASSET = "file")
+load("images/image_s7.png", IMAGE_S7_ASSET = "file")
 load("images/image_xpress_bus.png", IMAGE_XPRESS_BUS_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
@@ -23,30 +24,30 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 IMAGE_AKN = IMAGE_AKN_ASSET.readall()
+IMAGE_FERRY = IMAGE_FERRY_ASSET.readall()
 IMAGE_LOGO = IMAGE_LOGO_ASSET.readall()
 IMAGE_METRO_BUS = IMAGE_METRO_BUS_ASSET.readall()
 IMAGE_NIGHT_BUS = IMAGE_NIGHT_BUS_ASSET.readall()
 IMAGE_S1 = IMAGE_S1_ASSET.readall()
-IMAGE_S11 = IMAGE_S11_ASSET.readall()
 IMAGE_S2 = IMAGE_S2_ASSET.readall()
-IMAGE_S21 = IMAGE_S21_ASSET.readall()
-IMAGE_S3_S31 = IMAGE_S3_S31_ASSET.readall()
+IMAGE_S3 = IMAGE_S3_ASSET.readall()
+IMAGE_S5 = IMAGE_S5_ASSET.readall()
+IMAGE_S7 = IMAGE_S7_ASSET.readall()
 IMAGE_XPRESS_BUS = IMAGE_XPRESS_BUS_ASSET.readall()
 
 # The API endpoints used to retrieve locations and departures.
 #
-# This applet uses APIs provided by https://transport.rest/, which provide
+# This applet uses APIs provided by https://transitous.org/, which provide
 # real-time data, without any API keys, reasonable rate-limits and for free.
 #
-# Currently this applet only supports departure times for Hamburg (HVV),
-# but can theoretically be re-used for Berlin & Brandenburg (VBB, BVG) or
-# even "Deutsche Bahn" long-distance trains.
+# Please consider supporting the Transitous project:
+#   https://transitous.org/
 #
-# Please consider supporting the maintainer of these APIs:
-#   https://github.com/sponsors/derhuerst
-#
-HVV_REST_API_LOCATIONS_URL = "https://v5.hvv.transport.rest/locations"
-HVV_REST_API_DEPARTURES_URL = "https://v5.hvv.transport.rest/stops/%s/departures"
+TRANSITOUS_API_GEOCODE_URL = "https://api.transitous.org/api/v1/geocode"
+TRANSITOUS_API_STOPTIMES_URL = "https://api.transitous.org/api/v6/stoptimes"
+TRANSITOUS_REQUEST_HEADERS = {
+    "User-Agent": "tronbyt-hvv-departures/2.0 (+https://github.com/tronbyt/apps/tree/main/apps/hvvdepartures)",
+}
 
 # Cache API responses for a short time, as we want things to be as recent as possible.
 CACHE_TTL_SECONDS = 30
@@ -56,9 +57,7 @@ RFC3339_FORMAT = "2006-01-02T15:04:05Z07:00"
 
 # The default station ID to use, if none is set by the user.
 # This currently defaults to "Hamburg Hbf" (main station).
-DEFAULT_STATION_ID = "90"
-
-# Background images for known lines, as well as the HVV logo.
+DEFAULT_STATION_ID = "de-DELFI_de:02000:10950_G"
 
 # Configuration for backgrounds and colors for all known lines.
 LINE_CONFIG = {
@@ -70,11 +69,10 @@ LINE_CONFIG = {
 
     # Suburban trains (S-Bahn)
     "s1": {"image": IMAGE_S1, "color": "#ffffff"},
-    "s11": {"image": IMAGE_S11, "color": "#1a962b"},
-    "s2": {"image": IMAGE_S2, "color": "#b41439"},
-    "s21": {"image": IMAGE_S21, "color": "#ffffff"},
-    "s3": {"image": IMAGE_S3_S31, "color": "#ffffff"},
-    "s31": {"image": IMAGE_S3_S31, "color": "#ffffff"},
+    "s2": {"image": IMAGE_S2, "color": "#ffffff"},
+    "s3": {"image": IMAGE_S3, "color": "#ffffff"},
+    "s5": {"image": IMAGE_S5, "color": "#ffffff"},
+    "s7": {"image": IMAGE_S7, "color": "#ffffff"},
 
     # AKN commuter trains
     "a1": {"image": IMAGE_AKN, "color": "#ffffff"},
@@ -94,10 +92,10 @@ LINE_CONFIG = {
 # These are used as fallbacks in case there is no specific config above.
 # Basically this will result in only rendering the plain line name, without
 # any background image or color.
-DEFAULT_SUBWAY_CONFIG = {"color": "#ffffff"}
-DEFAULT_SUBURBAN_CONFIG = {"color": "#ffffff"}
-DEFAULT_BUS_CONFIG = {"color": "#ffffff"}
-DEFAULT_REGIONAL_TRAIN_CONFIG = {"color": "#ffffff"}
+DEFAULT_SUBWAY_CONFIG = {"background-color": None, "color": "#ffffff"}
+DEFAULT_SUBURBAN_CONFIG = {"image": None, "color": "#ffffff"}
+DEFAULT_BUS_CONFIG = {"image": None, "color": "#ffffff"}
+DEFAULT_REGIONAL_TRAIN_CONFIG = {"background-color": None, "color": "#ffffff"}
 
 # Other colors used throughout the applet.
 COLOR_BACKGROUND = "#000000"
@@ -186,11 +184,25 @@ def render_regional_train_icon(id, name):
         ]),
     ]))
 
+def render_ferry_icon(name):
+    """Render a trapezoid shaped ferry icon.
+
+    Args:
+        name: The name (line number) of the ferry line.
+
+    Returns:
+        A definition of what to render.
+    """
+    return render.Box(width = 18, height = 15, padding = 2, child = render.Stack(children = [
+        render.Image(width = 14, height = 9, src = IMAGE_FERRY),
+        render.Box(width = 16, height = 9, child = render.Text(name, offset = -1, font = "tom-thumb", color = "#ffffff")),
+    ]))
+
 def render_line_icon(line):
     """Render an icon for a given line.
 
     Args:
-        line: A "line" dictionary, retrieved from the API.
+        line: A "line" dictionary, built from the Transitous API response.
 
     Returns:
         A definition of what to render.
@@ -198,8 +210,6 @@ def render_line_icon(line):
     id = line["id"]
     name = line["name"]
     product = line["product"]
-
-    #print("Product:", product, "Mode:", line["mode"])
 
     if product == "subway":
         return render_subway_icon(id, name)
@@ -212,14 +222,12 @@ def render_line_icon(line):
     elif product == "bus" or \
          product == "express-bus":
         return render_bus_icon(id, name)
-    elif product == "anruf-sammel-taxi" or \
-         product == "long-distance-train" or \
-         product == "long-distance-bus":
-        # Currently unsupported (taxi & long distance trains).
-        return None
+    elif product == "ferry":
+        return render_ferry_icon(name)
 
-    # Fallback to just rendering nothing.
-    return None
+    # Fallback for anything we don't have a dedicated icon for (e.g. taxi or
+    # long distance trains/buses): just an empty box.
+    return render.Box(width = 18, height = 15)
 
 def render_relative_departure_time(time_actual):
     """Render a relative departure time.
@@ -325,34 +333,112 @@ def render_departure(departure, time_format):
         ],
     )
 
-def fetch_departures(station_id, extra_params = {}, duration_minutes = 1440, max_results = 2):
+# Maps a "category" (see 'classify_stop_time') to the "product" string that
+# 'render_line_icon' expects.
+CATEGORY_TO_PRODUCT = {
+    "subway": "subway",
+    "suburban": "suburban",
+    "akn": "akn",
+    "rb": "regional-train",
+    "re": "regional-express-train",
+    "bus": "bus",
+    "express_bus": "express-bus",
+    "ferry": "ferry",
+}
+
+# Maps a "category" (see 'classify_stop_time') to the Transitous API's
+# "mode" enum value used to request it.
+CATEGORY_TO_API_MODE = {
+    "subway": "SUBWAY",
+    "suburban": "SUBURBAN",
+    "akn": "REGIONAL_RAIL",
+    "rb": "REGIONAL_RAIL",
+    "re": "REGIONAL_RAIL",
+    "bus": "BUS",
+    "express_bus": "BUS",
+    "ferry": "FERRY",
+}
+
+def classify_stop_time(stop_time):
+    """Classify a Transitous 'stopTimes' entry into one of our categories.
+
+    AKN and RB/RE all share the "REGIONAL_RAIL" mode, and regular and Xpress
+    buses both share the "BUS" mode, so those are further distinguished by
+    the line's (lowercased) short name.
+
+    Args:
+        stop_time: A single entry from the Transitous 'stoptimes' response.
+
+    Returns:
+        A tuple of (category, id, name). "category" is None if this stop
+        time doesn't map to any product we know how to render (e.g. a
+        long-distance train passing through a station we queried).
+    """
+    mode = stop_time.get("mode")
+    name = stop_time.get("routeShortName") or stop_time.get("displayName") or ""
+    id = name.lower()
+
+    if mode == "SUBWAY":
+        return ("subway", id, name)
+    elif mode == "SUBURBAN":
+        return ("suburban", id, name)
+    elif mode == "FERRY":
+        return ("ferry", id, name)
+    elif mode == "BUS":
+        is_xpress_bus = len(id) > 0 and id[0] == "x"
+        return ("express_bus" if is_xpress_bus else "bus", id, name)
+    elif mode == "REGIONAL_RAIL":
+        is_akn = len(id) > 1 and id[0] == "a" and id[1] in "0123456789"
+        if is_akn:
+            return ("akn", id, name)
+        elif id.startswith("re"):
+            return ("re", id, name)
+        elif id.startswith("rb"):
+            return ("rb", id, name)
+
+    # Fallback for anything we don't recognize (e.g. long-distance trains).
+    return (None, id, name)
+
+def fetch_departures(station_id, categories, at_time = None, max_results = 2):
     """Fetch departures given a station identifier.
 
     Args:
-        station_id: A station identifier to fetch departures for.
-        extra_params: Additional request parameters.
-        duration_minutes: Get departures up to X minutes into the future.
+        station_id: A Transitous stop identifier to fetch departures for.
+        categories: The set of categories (see 'classify_stop_time') to
+            include in the result.
+        at_time: Optional RFC3339 timestamp to fetch departures from,
+            instead of the current time.
         max_results: Return at most this number of results.
 
     Returns:
-        An API response containing the departures.
+        A list of "departure" dictionaries (in the shape 'render_departure'
+        expects), or None if the request failed.
     """
-    url = HVV_REST_API_DEPARTURES_URL % station_id
+    if len(categories) == 0:
+        return []
 
-    # Set base request parameters.
+    # Only ask the API for the modes we actually need, then further filter
+    # and classify results client-side (see 'classify_stop_time').
+    modes = {}
+    for category in categories:
+        modes[CATEGORY_TO_API_MODE[category]] = True
+
+    # Overfetch, since results get filtered and classified client-side below.
     params = {
-        "duration": str(duration_minutes),
-        "results": str(max_results),
-        "includeRelatedStations": "true",
-        "linesOfStops": "false",
-        "remarks": "false",
-        "stopovers": "false",
+        "stopId": station_id,
+        "n": str(max_results * 15),
+        "mode": ",".join(modes.keys()),
     }
 
-    # Add additional request parameters.
-    params.update(extra_params)
+    if at_time != None:
+        params["time"] = at_time
 
-    response = http.get(url = url, params = params, ttl_seconds = CACHE_TTL_SECONDS)
+    response = http.get(
+        url = TRANSITOUS_API_STOPTIMES_URL,
+        params = params,
+        headers = TRANSITOUS_REQUEST_HEADERS,
+        ttl_seconds = CACHE_TTL_SECONDS,
+    )
 
     if response.status_code != 200:
         print("API request failed with status %d" % response.status_code)
@@ -360,7 +446,28 @@ def fetch_departures(station_id, extra_params = {}, duration_minutes = 1440, max
 
     data = response.json()
 
-    return data
+    departures = []
+    for stop_time in data.get("stopTimes", []):
+        (category, id, name) = classify_stop_time(stop_time)
+        if category == None or category not in categories:
+            continue
+
+        place = stop_time.get("place", {})
+        departures.append({
+            "line": {
+                "id": id,
+                "name": name,
+                "product": CATEGORY_TO_PRODUCT[category],
+            },
+            "direction": stop_time.get("headsign", ""),
+            "plannedWhen": place.get("scheduledDeparture"),
+            "when": place.get("departure"),
+        })
+
+        if len(departures) >= max_results:
+            break
+
+    return departures
 
 def get_config_option_value(config, key, default = None):
     """Get the value of a 'schema.Option' from the applet configuration.
@@ -377,8 +484,17 @@ def get_config_option_value(config, key, default = None):
     data = json.decode(blob) if blob != None else None
     return data["value"] if data != None else default
 
-def bool_str(value):
-    return "true" if value == True else "false"
+def is_legacy_station_id(station_id):
+    """Check whether a station ID is in HVV's old numeric format.
+
+    Args:
+        station_id: The configured station ID.
+
+    Returns:
+        True if this looks like an old HVV station ID (e.g. "90"), which
+        can't be resolved against the Transitous API.
+    """
+    return station_id != None and len(station_id) > 0 and station_id.isdigit()
 
 def parse_config(config):
     """Parse the applet configuration into some convenient structures.
@@ -390,11 +506,11 @@ def parse_config(config):
         A tuple of transformed applet configuration values.
     """
     station_id = get_config_option_value(config, "station_id", DEFAULT_STATION_ID)
-    direction_id = get_config_option_value(config, "direction_id")
     time_format = config.str("time_format", "relative")
     time_offset = time.parse_duration(config.str("time_offset", "0m"))
 
-    # Which means of transport are selected?
+    # Which means of transport are selected? Each maps to one of the
+    # categories used in 'classify_stop_time' / 'fetch_departures'.
     include_subway = config.bool("include_subway", True)
     include_suburban = config.bool("include_suburban", True)
     include_bus = config.bool("include_bus", True)
@@ -408,29 +524,25 @@ def parse_config(config):
                            include_rb or include_re or \
                            include_akn or include_ferry
 
-    # API request parameters derived from the applet configuration.
-    params = {
-        "subway": bool_str(include_subway),
-        "suburban": bool_str(include_suburban),
-        "bus": bool_str(include_bus),
-        "express-bus": bool_str(include_express_bus),
-        "akn": bool_str(include_akn),
-        "regional-train": bool_str(include_rb),
-        "regional-express-train": bool_str(include_re),
-        "ferry": bool_str(include_ferry),
-        "anruf-sammel-taxi": "false",
-        "long-distance-train": "false",
-        "long-distance-bus": "false",
-    }
+    categories = []
+    if include_subway:
+        categories.append("subway")
+    if include_suburban:
+        categories.append("suburban")
+    if include_bus:
+        categories.append("bus")
+    if include_express_bus:
+        categories.append("express_bus")
+    if include_akn:
+        categories.append("akn")
+    if include_rb:
+        categories.append("rb")
+    if include_re:
+        categories.append("re")
+    if include_ferry:
+        categories.append("ferry")
 
-    # If a direction was set, add it to the API request parameters.
-    if direction_id != None:
-        params["direction"] = direction_id
-
-    if time_offset != 0:
-        params["when"] = (time.now() + time_offset).format(RFC3339_FORMAT)
-
-    return (station_id, time_format, is_anything_selected, params)
+    return (station_id, time_format, time_offset, is_anything_selected, categories)
 
 def render_message(message, color):
     """Render a message in a given color, below the HVV logo.
@@ -467,14 +579,19 @@ def main(config):
     Returns:
         A definition of what to render.
     """
-    (station_id, time_format, is_anything_selected, params) = parse_config(config)
+    (station_id, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
 
     # None of the products are selected...
     if is_anything_selected == False:
         return render_message("Choose at least one vessel", COLOR_MESSAGE_INFO)
 
+    if is_legacy_station_id(station_id):
+        return render_message("Please re-select your station in the app settings", COLOR_MESSAGE_INFO)
+
+    at_time = (time.now() + time_offset).format(RFC3339_FORMAT) if time_offset != 0 else None
+
     # Fetch departures and show an error message, if it fails.
-    departures = fetch_departures(station_id, params)
+    departures = fetch_departures(station_id, categories, at_time)
     if departures == None:
         return render_message("Error fetching departures!", COLOR_MESSAGE_ERROR)
 
@@ -514,15 +631,15 @@ def find_stations(query, max_results = 2):
     if len(query) == 0:
         return []
 
-    response = http.get(url = HVV_REST_API_LOCATIONS_URL, params = {
-        "query": query,
-        "fuzzy": "true",
-        "results": str(max_results),
-        "stops": "true",
-        "addresses": "false",
-        "poi": "false",
-        "linesOfStops": "false",
-    })
+    response = http.get(
+        url = TRANSITOUS_API_GEOCODE_URL,
+        params = {
+            "text": query,
+            "type": "STOP",
+            "numResults": str(max_results),
+        },
+        headers = TRANSITOUS_REQUEST_HEADERS,
+    )
 
     if response.status_code != 200:
         print("API request failed with status %d" % response.status_code)
@@ -575,13 +692,6 @@ def get_schema():
                 name = "Station",
                 desc = "Pick a station",
                 icon = "mapPin",
-                handler = find_stations,
-            ),
-            schema.Typeahead(
-                id = "direction_id",
-                name = "Direction",
-                desc = "Pick a direction (optional)",
-                icon = "locationArrow",
                 handler = find_stations,
             ),
             schema.Dropdown(
