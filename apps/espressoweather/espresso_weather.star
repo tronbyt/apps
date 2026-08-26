@@ -39,6 +39,7 @@ PAL = {
     "w": SNOW_C,
     "f": FLASH,
     "m": MOON,
+    "h": "#78889B",
     "u": HI_RED,
     "v": LO_BLUE,
 }
@@ -192,7 +193,7 @@ def bitmap(rows):
     return render.Column(children = out)
 
 def falling_frames(char, cols, n_frames):
-    """Cloud with 2px precipitation streaks falling beneath it, looping."""
+    """Cloud with single flakes drifting straight down beneath it, looping."""
     frames = []
     drop_rows = 8
     for f in range(n_frames):
@@ -202,9 +203,33 @@ def falling_frames(char, cols, n_frames):
             for c in range(16):
                 hit = False
                 for i, col in enumerate(cols):
-                    if c == col and (r - f + i * 3) % drop_rows < 2:
+                    if c == col and (r - f + i * 3) % drop_rows == 0:
                         hit = True
                 line += char if hit else "."
+            rows.append(line)
+        frames.append(bitmap(rows))
+    return frames
+
+def rain_cloud():
+    # blue-gray storm cloud, like the rain-cloud emoji
+    return [row.replace("g", "h") for row in CLOUD_TOP]
+
+def rain_frames():
+    """Slanted 2px rain streaks under a blue-gray cloud (a la the emoji)."""
+    frames = []
+    drop_rows = 8
+    bases = [5, 8, 11, 14]
+    for f in range(drop_rows):
+        rows = rain_cloud()
+        for r in range(drop_rows):
+            line = ""
+            for c in range(16):
+                hit = False
+                for i, base in enumerate(bases):
+                    p = (f + i * 3) % drop_rows
+                    if (r == p or r == p - 1) and c == base - (r // 2):
+                        hit = True
+                line += "b" if hit else "."
             rows.append(line)
         frames.append(bitmap(rows))
     return frames
@@ -212,7 +237,7 @@ def falling_frames(char, cols, n_frames):
 def storm_frames():
     frames = []
     for f in range(8):
-        rows = list(CLOUD_TOP)
+        rows = rain_cloud()
         if f in (2, 3):  # lightning flash
             rows += BOLT
         else:
@@ -231,11 +256,11 @@ def describe(code, is_day):
     if code in (71, 73, 75, 77, 85, 86):
         return "SNOW", falling_frames("w", [2, 6, 10, 13], 8)
     if code in (56, 57, 66, 67):
-        return "FRZ RAIN", falling_frames("b", [2, 6, 10, 13], 8)
+        return "FRZ RAIN", rain_frames()
     if code in (51, 53, 55):
-        return "DRIZZLE", falling_frames("b", [2, 6, 10, 13], 8)
+        return "DRIZZLE", rain_frames()
     if code in (61, 63, 65, 80, 81, 82):
-        return "SHOWERS", falling_frames("b", [2, 6, 10, 13], 8)
+        return "SHOWERS", rain_frames()
     if code in (45, 48):
         return "FOG", [bitmap(FOG)]
     if code == 3:
