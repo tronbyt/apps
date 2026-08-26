@@ -334,51 +334,6 @@ def render_departure(departure, time_format):
         ],
     )
 
-def render_journey(journey, time_format):
-    """Render a journey as a sequence of line icons, with a departure countdown.
-
-    Args:
-        journey: A "journey" dictionary, as returned by 'fetch_journey'.
-        time_format: The time layout string to use or "relative".
-
-    Returns:
-        A definition of what to render.
-    """
-    time_planned = time.parse_time(journey["plannedWhen"])
-    time_actual = time.parse_time(journey["when"])
-    duration_minutes = int(journey["duration_seconds"] / 60)
-
-    icons = [render_line_icon(leg["line"]) for leg in journey["legs"] if leg["line"]["product"] != None]
-
-    return render.Root(
-        child = render.Box(
-            color = COLOR_BACKGROUND,
-            child = render.Column(
-                expanded = True,
-                main_align = "center",
-                cross_align = "center",
-                children = [
-                    render.Row(main_align = "center", cross_align = "center", children = icons),
-                    render.Box(height = 2),
-                    render.Row(
-                        expanded = True,
-                        main_align = "space_between",
-                        cross_align = "center",
-                        children = [
-                            render_departure_time(time_format, time_planned, time_actual),
-                            render.Text(
-                                content = "%d min" % duration_minutes,
-                                height = 7,
-                                font = "tom-thumb",
-                                color = COLOR_MESSAGE_INFO,
-                            ),
-                        ],
-                    ),
-                ],
-            ),
-        ),
-    )
-
 # Maps a "category" (see 'classify_stop_time') to the "product" string that
 # 'render_line_icon' expects.
 CATEGORY_TO_PRODUCT = {
@@ -526,8 +481,8 @@ def fetch_departures(station_id, categories, direction_filter = "", at_time = No
 
     return departures
 
-def fetch_journey(from_station_id, to_station_id, categories, at_time = None):
-    """Fetch the best journey between two stations.
+def fetch_journey(from_station_id, to_station_id, categories, at_time = None, max_results = 2):
+    """Fetch the next journeys between two stations.
 
     Args:
         from_station_id: Origin Transitous stop identifier.
@@ -535,15 +490,15 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None):
         categories: The set of categories (see 'classify_stop_time') the
             journey planner is allowed to use.
         at_time: Optional RFC3339 timestamp for the desired departure time.
+        max_results: Return at most this number of itineraries.
 
     Returns:
-        A "journey" dictionary with "legs" (a list of "line" dictionaries,
-        in the shape 'render_line_icon' expects), "plannedWhen", "when" and
-        "duration_seconds", or None if the request failed. "legs" is empty
-        if no destination is configured or no itinerary was found.
+        A list of "departure" dictionaries (in the shape 'render_departure'
+        expects, with "direction" being the sequence of lines taken, e.g.
+        "U2 › S3"), or None if the request failed.
     """
     if to_station_id == None or len(to_station_id) == 0:
-        return {"legs": []}
+        return []
 
     modes = {}
     for category in categories:
@@ -570,29 +525,32 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None):
         return None
 
     data = response.json()
-    itineraries = data.get("itineraries", [])
-    if len(itineraries) == 0:
-        return {"legs": []}
 
-    itinerary = itineraries[0]
+    journeys = []
+    for itinerary in data.get("itineraries", [])[0:max_results]:
+        line = None
+        line_names = []
+        for leg in itinerary["legs"]:
+            (category, id, name) = classify_stop_time(leg)
+            if category == None:
+                continue
+            line_names.append(name)
+            if line == None:
+                line = {"id": id, "name": name, "product": CATEGORY_TO_PRODUCT[category]}
 
-    legs = []
-    for leg in itinerary["legs"]:
-        (category, id, name) = classify_stop_time(leg)
-        legs.append({
-            "id": id,
-            "name": name,
-            "product": CATEGORY_TO_PRODUCT[category] if category != None else None,
+        if line == None:
+            # An all-walking itinerary: no dedicated icon for that.
+            line = {"id": "", "name": "", "product": None}
+
+        first_leg = itinerary["legs"][0]
+        journeys.append({
+            "line": line,
+            "direction": " › ".join(line_names) if len(line_names) > 0 else "Walk",
+            "plannedWhen": first_leg.get("scheduledStartTime", first_leg["startTime"]),
+            "when": first_leg["startTime"],
         })
 
-    first_leg = itinerary["legs"][0]
-
-    return {
-        "legs": [{"line": leg} for leg in legs],
-        "plannedWhen": first_leg.get("scheduledStartTime", first_leg["startTime"]),
-        "when": first_leg["startTime"],
-        "duration_seconds": itinerary["duration"],
-    }
+    return journeys
 
 def get_config_option_value(config, key, default = None):
     """Get the value of a 'schema.Option' from the applet configuration.
@@ -698,6 +656,30 @@ def render_message(message, color):
         ),
     )
 
+def render_departures(departures, time_format):
+    """Render up to two departures, separated by a divider.
+
+    Args:
+        departures: A list of "departure" dictionaries (see 'render_departure').
+        time_format: The time layout string to use or "relative".
+
+    Returns:
+        A definition of what to render.
+    """
+    return render.Root(
+        child = render.Box(
+            color = COLOR_BACKGROUND,
+            child = render.Column(
+                expanded = True,
+                children = [
+                    render_departure(departures[0], time_format) if len(departures) > 0 else None,
+                    render.Box(width = 64, height = 1, color = COLOR_SEPARATOR),
+                    render_departure(departures[1], time_format) if len(departures) > 1 else None,
+                ],
+            ),
+        ),
+    )
+
 def main(config):
     """The applet entry point.
 
@@ -725,14 +707,14 @@ def main(config):
         if is_legacy_station_id(to_station_id):
             return render_message("Please re-select your destination in the app settings", COLOR_MESSAGE_INFO)
 
-        journey = fetch_journey(station_id, to_station_id, categories, at_time)
-        if journey == None:
+        journeys = fetch_journey(station_id, to_station_id, categories, at_time)
+        if journeys == None:
             return render_message("Error fetching journey!", COLOR_MESSAGE_ERROR)
 
-        if len(journey["legs"]) == 0:
+        if len(journeys) == 0:
             return render_message("No journey found", COLOR_MESSAGE_INFO)
 
-        return render_journey(journey, time_format)
+        return render_departures(journeys, time_format)
 
     # Fetch departures and show an error message, if it fails.
     departures = fetch_departures(station_id, categories, direction_filter, at_time)
@@ -747,19 +729,7 @@ def main(config):
     if len(departures) == 0:
         return render_message("Couldn't find any departures", COLOR_MESSAGE_INFO)
 
-    return render.Root(
-        child = render.Box(
-            color = COLOR_BACKGROUND,
-            child = render.Column(
-                expanded = True,
-                children = [
-                    render_departure(departures[0], time_format) if len(departures) > 0 else None,
-                    render.Box(width = 64, height = 1, color = COLOR_SEPARATOR),
-                    render_departure(departures[1], time_format) if len(departures) > 1 else None,
-                ],
-            ),
-        ),
-    )
+    return render_departures(departures, time_format)
 
 def find_stations(query):
     """Search the API for a list of stations matching a (fuzzy) query.
