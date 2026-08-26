@@ -39,90 +39,120 @@ PAL = {
 }
 
 SUN = [
-    ".....y.....",
-    ".y...y...y.",
-    "..y.....y..",
-    "....yyy....",
-    "...yyyyy...",
-    "y..yyyyy..y",
-    "...yyyyy...",
-    "....yyy....",
-    "..y.....y..",
-    ".y...y...y.",
-    ".....y.....",
+    ".......yy.......",
+    ".......yy.......",
+    "..y..........y..",
+    "...y........y...",
+    "......yyyy......",
+    ".....yyyyyy.....",
+    "....yyyyyyyy....",
+    "yy..yyyyyyyy..yy",
+    "yy..yyyyyyyy..yy",
+    "....yyyyyyyy....",
+    ".....yyyyyy.....",
+    "......yyyy......",
+    "...y........y...",
+    "..y..........y..",
+    ".......yy.......",
+    ".......yy.......",
 ]
 
 MOON_ICON = [
-    "....mmm....",
-    "..mmmmm....",
-    ".mmmm......",
-    ".mmm.......",
-    ".mmm.......",
-    ".mmm.......",
-    ".mmm.......",
-    ".mmmm......",
-    "..mmmmm..m.",
-    "....mmmmm..",
-    "...........",
+    "......mmmm......",
+    "....mmmmmm......",
+    "...mmmm....m....",
+    "..mmm.....mmm...",
+    "..mmm......m....",
+    ".mmm............",
+    ".mmm............",
+    ".mmm............",
+    ".mmm............",
+    ".mmm............",
+    "..mmm...........",
+    "..mmmm..........",
+    "...mmmmm........",
+    "....mmmmmmm.....",
+    "......mmmm......",
+    "................",
 ]
 
 CLOUD_ICON = [
-    "...........",
-    "...........",
-    "....ggg....",
-    "..ggggggg..",
-    ".ggggggggg.",
-    "gggggggggg.",
-    ".gggggggg..",
-    "...........",
-    "...........",
-    "...........",
-    "...........",
+    "................",
+    "................",
+    "......ggggg.....",
+    "....ggggggg.....",
+    "...ggggggggg....",
+    "..ggggggggggg...",
+    ".ggggggggggggg..",
+    ".gggggggggggggg.",
+    ".gggggggggggggg.",
+    "..gggggggggggg..",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
 ]
 
 PARTSUN = [
-    "..y..y.....",
-    "...yyy..y..",
-    ".y.yyy.....",
-    "...yyyy....",
-    "..gggggg...",
-    ".gggggggg..",
-    "gggggggggg.",
-    ".gggggggg..",
-    "...........",
-    "...........",
-    "...........",
+    "................",
+    ".y..yy..........",
+    "...yyyy.........",
+    "..yyyyyy........",
+    "..yyyyyy........",
+    "..yyyyyy........",
+    "..yyyy.ggggg....",
+    "...ggggggggg....",
+    "..ggggggggggg...",
+    ".ggggggggggggg..",
+    ".gggggggggggggg.",
+    "..gggggggggggg..",
+    "................",
+    "................",
+    "................",
+    "................",
 ]
 
 FOG = [
-    "...........",
-    "...........",
-    ".ggggggg...",
-    "...........",
-    "..ggggggg..",
-    "...........",
-    ".ggggggg...",
-    "...........",
-    "...ggggggg.",
-    "...........",
-    "...........",
+    "................",
+    "................",
+    "..gggggggggg....",
+    "................",
+    "....gggggggggg..",
+    "................",
+    "..gggggggggg....",
+    "................",
+    "....gggggggggg..",
+    "................",
+    "..gggggggggg....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
 ]
 
 CLOUD_TOP = [
-    "....ggg....",
-    "..ggggggg..",
-    ".ggggggggg.",
-    "gggggggggg.",
-    ".gggggggg..",
+    "......ggggg.....",
+    "....ggggggg.....",
+    "...ggggggggg....",
+    "..ggggggggggg...",
+    ".ggggggggggggg..",
+    ".gggggggggggggg.",
+    ".gggggggggggggg.",
+    "..gggggggggggg..",
 ]
 
 BOLT = [
-    "....ff.....",
-    "...ff......",
-    "..ffff.....",
-    "....ff.....",
-    "...ff......",
-    "..f........",
+    "......fff.......",
+    ".....fff........",
+    "....ffffff......",
+    "......fff.......",
+    ".....fff........",
+    "....ff..........",
+    "...f............",
+    "................",
 ]
 
 def bitmap(rows):
@@ -138,17 +168,17 @@ def bitmap(rows):
     return render.Column(children = out)
 
 def falling_frames(char, cols, n_frames):
-    """Cloud with precipitation falling beneath it, as n looping frames."""
+    """Cloud with 2px precipitation streaks falling beneath it, looping."""
     frames = []
-    drop_rows = 6
+    drop_rows = 8
     for f in range(n_frames):
         rows = list(CLOUD_TOP)
         for r in range(drop_rows):
             line = ""
-            for c in range(11):
+            for c in range(16):
                 hit = False
                 for i, col in enumerate(cols):
-                    if c == col and (r + f + i * 2) % drop_rows == i % drop_rows:
+                    if c == col and (r - f + i * 3) % drop_rows < 2:
                         hit = True
                 line += char if hit else "."
             rows.append(line)
@@ -159,13 +189,13 @@ def storm_frames():
     frames = []
     for f in range(8):
         rows = list(CLOUD_TOP)
-        if f in (2, 3):
+        if f in (2, 3):  # lightning flash
             rows += BOLT
         else:
-            for r in range(6):
+            for r in range(8):
                 line = ""
-                for c in range(11):
-                    line += "b" if (c in (2, 8) and (r + f) % 6 == 0) else "."
+                for c in range(16):
+                    line += "b" if (c in (3, 11) and (r - f) % 8 < 2) else "."
                 rows.append(line)
         frames.append(bitmap(rows))
     return frames
@@ -175,13 +205,13 @@ def describe(code, is_day):
     if code >= 95:
         return "T-STORMS", storm_frames()
     if code in (71, 73, 75, 77, 85, 86):
-        return "SNOW", falling_frames("w", [2, 5, 8], 6)
+        return "SNOW", falling_frames("w", [2, 6, 10, 13], 8)
     if code in (56, 57, 66, 67):
-        return "FRZ RAIN", falling_frames("b", [2, 5, 8], 6)
+        return "FRZ RAIN", falling_frames("b", [2, 6, 10, 13], 8)
     if code in (51, 53, 55):
-        return "DRIZZLE", falling_frames("b", [2, 5, 8], 6)
+        return "DRIZZLE", falling_frames("b", [2, 6, 10, 13], 8)
     if code in (61, 63, 65, 80, 81, 82):
-        return "SHOWERS", falling_frames("b", [2, 5, 8], 6)
+        return "SHOWERS", falling_frames("b", [2, 6, 10, 13], 8)
     if code in (45, 48):
         return "FOG", [bitmap(FOG)]
     if code == 3:
