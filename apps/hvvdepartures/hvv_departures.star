@@ -45,6 +45,7 @@ IMAGE_XPRESS_BUS = IMAGE_XPRESS_BUS_ASSET.readall()
 #
 TRANSITOUS_API_GEOCODE_URL = "https://api.transitous.org/api/v1/geocode"
 TRANSITOUS_API_STOPTIMES_URL = "https://api.transitous.org/api/v6/stoptimes"
+TRANSITOUS_API_PLAN_URL = "https://api.transitous.org/api/v6/plan"
 TRANSITOUS_REQUEST_HEADERS = {
     "User-Agent": "tronbyt-hvv-departures/2.0 (+https://github.com/tronbyt/apps/tree/main/apps/hvvdepartures)",
 }
@@ -333,6 +334,51 @@ def render_departure(departure, time_format):
         ],
     )
 
+def render_journey(journey, time_format):
+    """Render a journey as a sequence of line icons, with a departure countdown.
+
+    Args:
+        journey: A "journey" dictionary, as returned by 'fetch_journey'.
+        time_format: The time layout string to use or "relative".
+
+    Returns:
+        A definition of what to render.
+    """
+    time_planned = time.parse_time(journey["plannedWhen"])
+    time_actual = time.parse_time(journey["when"])
+    duration_minutes = int(journey["duration_seconds"] / 60)
+
+    icons = [render_line_icon(leg["line"]) for leg in journey["legs"] if leg["line"]["product"] != None]
+
+    return render.Root(
+        child = render.Box(
+            color = COLOR_BACKGROUND,
+            child = render.Column(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.Row(main_align = "center", cross_align = "center", children = icons),
+                    render.Box(height = 2),
+                    render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render_departure_time(time_format, time_planned, time_actual),
+                            render.Text(
+                                content = "%d min" % duration_minutes,
+                                height = 7,
+                                font = "tom-thumb",
+                                color = COLOR_MESSAGE_INFO,
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ),
+    )
+
 # Maps a "category" (see 'classify_stop_time') to the "product" string that
 # 'render_line_icon' expects.
 CATEGORY_TO_PRODUCT = {
@@ -480,6 +526,74 @@ def fetch_departures(station_id, categories, direction_filter = "", at_time = No
 
     return departures
 
+def fetch_journey(from_station_id, to_station_id, categories, at_time = None):
+    """Fetch the best journey between two stations.
+
+    Args:
+        from_station_id: Origin Transitous stop identifier.
+        to_station_id: Destination Transitous stop identifier.
+        categories: The set of categories (see 'classify_stop_time') the
+            journey planner is allowed to use.
+        at_time: Optional RFC3339 timestamp for the desired departure time.
+
+    Returns:
+        A "journey" dictionary with "legs" (a list of "line" dictionaries,
+        in the shape 'render_line_icon' expects), "plannedWhen", "when" and
+        "duration_seconds", or None if the request failed. "legs" is empty
+        if no destination is configured or no itinerary was found.
+    """
+    if to_station_id == None or len(to_station_id) == 0:
+        return {"legs": []}
+
+    modes = {}
+    for category in categories:
+        modes[CATEGORY_TO_API_MODE[category]] = True
+
+    params = {
+        "fromPlace": from_station_id,
+        "toPlace": to_station_id,
+        "transitModes": ",".join(modes.keys()),
+    }
+
+    if at_time != None:
+        params["time"] = at_time
+
+    response = http.get(
+        url = TRANSITOUS_API_PLAN_URL,
+        params = params,
+        headers = TRANSITOUS_REQUEST_HEADERS,
+        ttl_seconds = CACHE_TTL_SECONDS,
+    )
+
+    if response.status_code != 200:
+        print("API request failed with status %d" % response.status_code)
+        return None
+
+    data = response.json()
+    itineraries = data.get("itineraries", [])
+    if len(itineraries) == 0:
+        return {"legs": []}
+
+    itinerary = itineraries[0]
+
+    legs = []
+    for leg in itinerary["legs"]:
+        (category, id, name) = classify_stop_time(leg)
+        legs.append({
+            "id": id,
+            "name": name,
+            "product": CATEGORY_TO_PRODUCT[category] if category != None else None,
+        })
+
+    first_leg = itinerary["legs"][0]
+
+    return {
+        "legs": [{"line": leg} for leg in legs],
+        "plannedWhen": first_leg.get("scheduledStartTime", first_leg["startTime"]),
+        "when": first_leg["startTime"],
+        "duration_seconds": itinerary["duration"],
+    }
+
 def get_config_option_value(config, key, default = None):
     """Get the value of a 'schema.Option' from the applet configuration.
 
@@ -516,7 +630,9 @@ def parse_config(config):
     Returns:
         A tuple of transformed applet configuration values.
     """
+    widget_mode = config.str("widget_mode", "departures")
     station_id = get_config_option_value(config, "station_id", DEFAULT_STATION_ID)
+    to_station_id = get_config_option_value(config, "to_station_id")
     direction_filter = config.str("direction_filter", "").strip(" ")
     time_format = config.str("time_format", "relative")
     time_offset = time.parse_duration(config.str("time_offset", "0m"))
@@ -554,7 +670,7 @@ def parse_config(config):
     if include_ferry:
         categories.append("ferry")
 
-    return (station_id, direction_filter, time_format, time_offset, is_anything_selected, categories)
+    return (widget_mode, station_id, to_station_id, direction_filter, time_format, time_offset, is_anything_selected, categories)
 
 def render_message(message, color):
     """Render a message in a given color, below the HVV logo.
@@ -591,7 +707,7 @@ def main(config):
     Returns:
         A definition of what to render.
     """
-    (station_id, direction_filter, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
+    (widget_mode, station_id, to_station_id, direction_filter, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
 
     # None of the products are selected...
     if is_anything_selected == False:
@@ -601,6 +717,22 @@ def main(config):
         return render_message("Please re-select your station in the app settings", COLOR_MESSAGE_INFO)
 
     at_time = (time.now() + time_offset).format(RFC3339_FORMAT) if time_offset != 0 else None
+
+    if widget_mode == "journey":
+        if to_station_id == None:
+            return render_message("Pick a destination station", COLOR_MESSAGE_INFO)
+
+        if is_legacy_station_id(to_station_id):
+            return render_message("Please re-select your destination in the app settings", COLOR_MESSAGE_INFO)
+
+        journey = fetch_journey(station_id, to_station_id, categories, at_time)
+        if journey == None:
+            return render_message("Error fetching journey!", COLOR_MESSAGE_ERROR)
+
+        if len(journey["legs"]) == 0:
+            return render_message("No journey found", COLOR_MESSAGE_INFO)
+
+        return render_journey(journey, time_format)
 
     # Fetch departures and show an error message, if it fails.
     departures = fetch_departures(station_id, categories, direction_filter, at_time)
@@ -695,20 +827,46 @@ def get_schema():
         ),
     ]
 
+    widget_mode_options = [
+        schema.Option(
+            display = "Departure board",
+            value = "departures",
+        ),
+        schema.Option(
+            display = "Journey planner",
+            value = "journey",
+        ),
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Dropdown(
+                id = "widget_mode",
+                name = "Mode",
+                desc = "Show departures from a station, or a journey between two stations",
+                icon = "route",
+                default = widget_mode_options[0].value,
+                options = widget_mode_options,
+            ),
             schema.Typeahead(
                 id = "station_id",
                 name = "Station",
-                desc = "Pick a station",
+                desc = "Pick a station (the origin, in Journey planner mode)",
+                icon = "mapPin",
+                handler = find_stations,
+            ),
+            schema.Typeahead(
+                id = "to_station_id",
+                name = "Destination",
+                desc = "Pick a destination (Journey planner mode only)",
                 icon = "mapPin",
                 handler = find_stations,
             ),
             schema.Text(
                 id = "direction_filter",
                 name = "Direction filter",
-                desc = "Only show departures whose direction contains this text, e.g. a destination name (optional)",
+                desc = "Departure board mode only: only show departures whose direction contains this text, e.g. a destination name (optional)",
                 icon = "arrowRight",
                 default = "",
             ),
