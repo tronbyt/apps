@@ -53,6 +53,10 @@ TRANSITOUS_REQUEST_HEADERS = {
 # Cache API responses for a short time, as we want things to be as recent as possible.
 CACHE_TTL_SECONDS = 30
 
+# Journey planner: walks shorter than this are assumed to be a same-station
+# platform change and aren't called out in the "direction" text.
+MIN_NOTABLE_WALK_SECONDS = 120
+
 # The RFC3339 date and time format string used by Go / Starlark.
 RFC3339_FORMAT = "2006-01-02T15:04:05Z07:00"
 
@@ -529,12 +533,19 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None, ma
     journeys = []
     for itinerary in data.get("itineraries", [])[0:max_results]:
         line = None
-        line_names = []
+        tokens = []
         for leg in itinerary["legs"]:
+            if leg.get("mode") == "WALK":
+                # Note anything beyond a short walk across a platform, so a
+                # leading/connecting walk to a different stop isn't hidden.
+                if leg.get("duration", 0) >= MIN_NOTABLE_WALK_SECONDS:
+                    tokens.append("Walk")
+                continue
+
             (category, id, name) = classify_stop_time(leg)
             if category == None:
                 continue
-            line_names.append(name)
+            tokens.append(name)
             if line == None:
                 line = {"id": id, "name": name, "product": CATEGORY_TO_PRODUCT[category]}
 
@@ -545,7 +556,7 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None, ma
         first_leg = itinerary["legs"][0]
         journeys.append({
             "line": line,
-            "direction": " › ".join(line_names) if len(line_names) > 0 else "Walk",
+            "direction": " › ".join(tokens) if len(tokens) > 0 else "Walk",
             "plannedWhen": first_leg.get("scheduledStartTime", first_leg["startTime"]),
             "when": first_leg["startTime"],
         })
