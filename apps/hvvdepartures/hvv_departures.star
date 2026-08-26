@@ -399,13 +399,16 @@ def classify_stop_time(stop_time):
     # Fallback for anything we don't recognize (e.g. long-distance trains).
     return (None, id, name)
 
-def fetch_departures(station_id, categories, at_time = None, max_results = 2):
+def fetch_departures(station_id, categories, direction_filter = "", at_time = None, max_results = 2):
     """Fetch departures given a station identifier.
 
     Args:
         station_id: A Transitous stop identifier to fetch departures for.
         categories: The set of categories (see 'classify_stop_time') to
             include in the result.
+        direction_filter: If non-empty, only include departures whose
+            direction (the text shown in the UI, e.g. "Wedel") contains
+            this (case-insensitive).
         at_time: Optional RFC3339 timestamp to fetch departures from,
             instead of the current time.
         max_results: Return at most this number of results.
@@ -424,9 +427,11 @@ def fetch_departures(station_id, categories, at_time = None, max_results = 2):
         modes[CATEGORY_TO_API_MODE[category]] = True
 
     # Overfetch, since results get filtered and classified client-side below.
+    # Filtering by direction narrows things down further, so overfetch more.
+    overfetch_factor = 30 if direction_filter != "" else 15
     params = {
         "stopId": station_id,
-        "n": str(max_results * 15),
+        "n": str(max_results * overfetch_factor),
         "mode": ",".join(modes.keys()),
     }
 
@@ -446,10 +451,16 @@ def fetch_departures(station_id, categories, at_time = None, max_results = 2):
 
     data = response.json()
 
+    direction_filter = direction_filter.lower()
+
     departures = []
     for stop_time in data.get("stopTimes", []):
         (category, id, name) = classify_stop_time(stop_time)
         if category == None or category not in categories:
+            continue
+
+        direction = stop_time.get("headsign", "")
+        if direction_filter != "" and direction_filter not in direction.lower():
             continue
 
         place = stop_time.get("place", {})
@@ -459,7 +470,7 @@ def fetch_departures(station_id, categories, at_time = None, max_results = 2):
                 "name": name,
                 "product": CATEGORY_TO_PRODUCT[category],
             },
-            "direction": stop_time.get("headsign", ""),
+            "direction": direction,
             "plannedWhen": place.get("scheduledDeparture"),
             "when": place.get("departure"),
         })
@@ -506,6 +517,7 @@ def parse_config(config):
         A tuple of transformed applet configuration values.
     """
     station_id = get_config_option_value(config, "station_id", DEFAULT_STATION_ID)
+    direction_filter = config.str("direction_filter", "").strip(" ")
     time_format = config.str("time_format", "relative")
     time_offset = time.parse_duration(config.str("time_offset", "0m"))
 
@@ -542,7 +554,7 @@ def parse_config(config):
     if include_ferry:
         categories.append("ferry")
 
-    return (station_id, time_format, time_offset, is_anything_selected, categories)
+    return (station_id, direction_filter, time_format, time_offset, is_anything_selected, categories)
 
 def render_message(message, color):
     """Render a message in a given color, below the HVV logo.
@@ -579,7 +591,7 @@ def main(config):
     Returns:
         A definition of what to render.
     """
-    (station_id, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
+    (station_id, direction_filter, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
 
     # None of the products are selected...
     if is_anything_selected == False:
@@ -591,7 +603,7 @@ def main(config):
     at_time = (time.now() + time_offset).format(RFC3339_FORMAT) if time_offset != 0 else None
 
     # Fetch departures and show an error message, if it fails.
-    departures = fetch_departures(station_id, categories, at_time)
+    departures = fetch_departures(station_id, categories, direction_filter, at_time)
     if departures == None:
         return render_message("Error fetching departures!", COLOR_MESSAGE_ERROR)
 
@@ -692,6 +704,13 @@ def get_schema():
                 desc = "Pick a station",
                 icon = "mapPin",
                 handler = find_stations,
+            ),
+            schema.Text(
+                id = "direction_filter",
+                name = "Direction filter",
+                desc = "Only show departures whose direction contains this text, e.g. a destination name (optional)",
+                icon = "arrowRight",
+                default = "",
             ),
             schema.Dropdown(
                 id = "time_format",
