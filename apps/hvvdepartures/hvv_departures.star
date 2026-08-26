@@ -73,21 +73,21 @@ LINE_CONFIG = {
     "u4": {"background-color": "#00aaad", "color": "#ffffff"},
 
     # Suburban trains (S-Bahn)
-    "s1": {"image": IMAGE_S1, "color": "#ffffff"},
-    "s2": {"image": IMAGE_S2, "color": "#ffffff"},
-    "s3": {"image": IMAGE_S3, "color": "#ffffff"},
-    "s5": {"image": IMAGE_S5, "color": "#ffffff"},
-    "s7": {"image": IMAGE_S7, "color": "#ffffff"},
+    "s1": {"image": IMAGE_S1, "color": "#ffffff", "text_color": "#0aa537"},
+    "s2": {"image": IMAGE_S2, "color": "#ffffff", "text_color": "#b71b43"},
+    "s3": {"image": IMAGE_S3, "color": "#ffffff", "text_color": "#652282"},
+    "s5": {"image": IMAGE_S5, "color": "#ffffff", "text_color": "#008abd"},
+    "s7": {"image": IMAGE_S7, "color": "#ffffff", "text_color": "#cf7822"},
 
     # AKN commuter trains
-    "a1": {"image": IMAGE_AKN, "color": "#ffffff"},
-    "a2": {"image": IMAGE_AKN, "color": "#ffffff"},
-    "a3": {"image": IMAGE_AKN, "color": "#ffffff"},
+    "a1": {"image": IMAGE_AKN, "color": "#ffffff", "text_color": "#fe8019"},
+    "a2": {"image": IMAGE_AKN, "color": "#ffffff", "text_color": "#fe8019"},
+    "a3": {"image": IMAGE_AKN, "color": "#ffffff", "text_color": "#fe8019"},
 
     # Buses (MetroBus, XpressBus, NachtBus)
-    "metro_bus": {"image": IMAGE_METRO_BUS, "color": "#ffffff"},
-    "xpress_bus": {"image": IMAGE_XPRESS_BUS, "color": "#ffffff"},
-    "night_bus": {"image": IMAGE_NIGHT_BUS, "color": "#ffffff"},
+    "metro_bus": {"image": IMAGE_METRO_BUS, "color": "#ffffff", "text_color": "#ed0020"},
+    "xpress_bus": {"image": IMAGE_XPRESS_BUS, "color": "#ffffff", "text_color": "#1e9738"},
+    "night_bus": {"image": IMAGE_NIGHT_BUS, "color": "#ffffff", "text_color": "#222222"},
 
     # Regional trains (Regional-Bahn, Regional-Express)
     "rb": {"background-color": "#2f2f2f", "color": "#ffffff"},
@@ -110,6 +110,61 @@ COLOR_MESSAGE_ERROR = "#ff9900"
 COLOR_DEPARTURE_TIME = "#ff9900"
 COLOR_DEPARTURE_TIME_DELAYED = "#ff0000"
 COLOR_DEPARTURE_TIME_ON_TIME = "#00ff00"
+
+# Ferries all use the same badge/brand color, see IMAGE_FERRY.
+FERRY_TEXT_COLOR = "#0994c7"
+
+# Below this perceived brightness, a line's own color is too dark to read as
+# text on our black background, so we fall back to white instead.
+MIN_LINE_TEXT_LUMINANCE = 50
+
+def hex_luminance(hex_color):
+    """Compute the perceived brightness of a "#rrggbb" color (0-255).
+
+    Args:
+        hex_color: A "#rrggbb" color string.
+
+    Returns:
+        The perceived brightness, from 0 (black) to 255 (white).
+    """
+    r = int(hex_color[1:3], 16)
+    g = int(hex_color[3:5], 16)
+    b = int(hex_color[5:7], 16)
+    return 0.299 * r + 0.587 * g + 0.114 * b
+
+def get_line_text_color(line):
+    """Pick a color for a line's name, e.g. when listing several lines in a
+    journey. Falls back to white if the line has no color of its own, or if
+    that color would be too dark to read against our black background.
+
+    Args:
+        line: A "line" dictionary (see 'render_line_icon').
+
+    Returns:
+        A "#rrggbb" color string.
+    """
+    product = line["product"]
+    id = line["id"]
+
+    if product == "subway":
+        color = LINE_CONFIG.get(id, DEFAULT_SUBWAY_CONFIG).get("background-color")
+    elif product == "regional-train" or product == "regional-express-train":
+        color = LINE_CONFIG.get(id[0:2], DEFAULT_REGIONAL_TRAIN_CONFIG).get("background-color")
+    elif product == "ferry":
+        color = FERRY_TEXT_COLOR
+    elif product == "bus" or product == "express-bus":
+        is_xpress_bus = len(id) > 0 and id[0] == "x"
+        is_night_bus = len(id) == 3 and id[0] == "6"
+        key = "xpress_bus" if is_xpress_bus else "night_bus" if is_night_bus else "metro_bus"
+        color = LINE_CONFIG.get(key, DEFAULT_BUS_CONFIG).get("text_color")
+    else:
+        # Suburban and AKN lines.
+        color = LINE_CONFIG.get(id, {}).get("text_color")
+
+    if color == None or hex_luminance(color) < MIN_LINE_TEXT_LUMINANCE:
+        return COLOR_MESSAGE_INFO
+
+    return color
 
 def render_subway_icon(id, name):
     """Render a rectangular subway (U-Bahn) icon.
@@ -309,6 +364,17 @@ def render_departure(departure, time_format):
     time_planned = time.parse_time(departure["plannedWhen"])
     time_actual = time.parse_time(departure["when"])
 
+    direction = departure["direction"]
+    if type(direction) == "list":
+        # A list of {"text", "color"} tokens (see 'fetch_journey'), rendered
+        # as colored fragments instead of a single plain-colored string.
+        direction_widget = render.Row(children = [
+            render.Text(content = token["text"], height = 8, font = "tb-8", color = token["color"])
+            for token in direction
+        ])
+    else:
+        direction_widget = render.Text(content = direction, height = 8, font = "tb-8")
+
     return render.Row(
         expanded = True,
         main_align = "start",
@@ -323,11 +389,7 @@ def render_departure(departure, time_format):
                 children = [
                     render.Marquee(
                         width = 48,
-                        child = render.Text(
-                            content = departure["direction"],
-                            height = 8,
-                            font = "tb-8",
-                        ),
+                        child = direction_widget,
                     ),
                     render.Marquee(
                         render_departure_time(time_format, time_planned, time_actual),
@@ -549,30 +611,50 @@ def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds =
                 continue
 
         line = None
-        tokens = []
+        parts = []
+        distinct_line_ids = {}
         for leg in itinerary["legs"]:
             if leg.get("mode") == "WALK":
                 # Note anything beyond a short walk across a platform, so a
                 # leading/connecting walk to a different stop isn't hidden.
                 if leg.get("duration", 0) >= MIN_NOTABLE_WALK_SECONDS:
-                    tokens.append("Walk")
+                    parts.append(("walk", None))
                 continue
 
             (category, id, name) = classify_stop_time(leg)
             if category == None:
                 continue
-            tokens.append(name)
+            leg_line = {"id": id, "name": name, "product": CATEGORY_TO_PRODUCT[category]}
+            parts.append(("line", leg_line))
+            distinct_line_ids[id] = True
             if line == None:
-                line = {"id": id, "name": name, "product": CATEGORY_TO_PRODUCT[category]}
+                line = leg_line
 
         if line == None:
             # An all-walking itinerary: no dedicated icon for that.
             line = {"id": "", "name": "", "product": None}
 
+        # Only color line names apart if the journey actually involves
+        # changing between different lines; a single line stays plain white.
+        needs_color = len(distinct_line_ids) > 1
+
+        tokens = []
+        for (kind, part_line) in parts:
+            if len(tokens) > 0:
+                tokens.append({"text": " › ", "color": COLOR_MESSAGE_INFO})
+            if kind == "walk":
+                tokens.append({"text": "Walk", "color": COLOR_MESSAGE_INFO})
+            else:
+                color = get_line_text_color(part_line) if needs_color else COLOR_MESSAGE_INFO
+                tokens.append({"text": part_line["name"], "color": color})
+
+        if len(tokens) == 0:
+            tokens = [{"text": "Walk", "color": COLOR_MESSAGE_INFO}]
+
         first_leg = itinerary["legs"][0]
         journeys.append({
             "line": line,
-            "direction": " › ".join(tokens) if len(tokens) > 0 else "Walk",
+            "direction": tokens,
             "plannedWhen": first_leg.get("scheduledStartTime", first_leg["startTime"]),
             "when": first_leg["startTime"],
         })
