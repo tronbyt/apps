@@ -1,0 +1,14 @@
+---
+id: espresso-weather
+name: Espresso Weather
+summary: Weather in espresso tones
+desc: Current temperature, animated pixel-art conditions, daily high/low and precipitation chance in a warm espresso palette. Powered by Open-Meteo — works worldwide, no API key.
+author: adamlee117097
+fileName: espresso_weather.star
+packageName: espressoweather
+recommendedInterval: 10
+category: weather
+tags:
+  - weather
+  - forecast
+  - retro
