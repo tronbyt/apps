@@ -7,8 +7,10 @@ Author: adamlee117097
 
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 DEFAULT_LOCATION = """
 {
@@ -326,16 +328,28 @@ def offline(msg):
         ),
     )
 
+DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+
+def forecast_col(label, icon_frames, temp_text, temp_col):
+    return render.Column(
+        cross_align = "center",
+        children = [
+            render.Text(content = label, font = "tom-thumb", color = AMBER),
+            render.Animation(children = icon_frames),
+            render.Text(content = temp_text, color = temp_col),
+        ],
+    )
+
 def main(config):
     loc = json.decode(config.get("location") or DEFAULT_LOCATION)
-    unit = "celsius" if config.bool("celsius", False) else "fahrenheit"
+    celsius = config.bool("celsius", False)
+    unit = "celsius" if celsius else "fahrenheit"
 
     url = ("https://api.open-meteo.com/v1/forecast" +
            "?latitude=" + str(loc["lat"]) +
            "&longitude=" + str(loc["lng"]) +
            "&current=temperature_2m,weather_code,is_day" +
-           "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
-           "&hourly=precipitation_probability&forecast_hours=6&forecast_days=1" +
+           "&daily=weather_code,temperature_2m_max&forecast_days=3" +
            "&temperature_unit=" + unit + "&timezone=auto")
 
     res = http.get(url, ttl_seconds = 600)
@@ -349,75 +363,33 @@ def main(config):
     t = float(cur.get("temperature_2m", 0))
     temp = int(t + 0.5) if t >= 0 else int(t - 0.5)
     is_day = cur.get("is_day", 1) == 1
-    label, icon_frames = describe(int(cur.get("weather_code", 0)), is_day)
+    now_icon = describe(int(cur.get("weather_code", 0)), is_day)[1]
+
+    cols = [forecast_col("NOW", now_icon, str(temp) + "\u00b0", temp_color(temp, celsius))]
 
     daily = data["daily"]
-    hi = int(float(daily["temperature_2m_max"][0]) + 0.5)
-    lo = int(float(daily["temperature_2m_min"][0]) + 0.5)
-
-    pop = int(daily.get("precipitation_probability_max", [0])[0] or 0)
-    for p in data.get("hourly", {}).get("precipitation_probability", [])[:6]:
-        if p != None and int(p) > pop:
-            pop = int(p)
-
-    tc = temp_color(temp, config.bool("celsius", False))
-
-    top = render.Box(
-        height = 20,
-        child = render.Row(
-            expanded = True,
-            main_align = "center",
-            cross_align = "center",
-            children = [
-                render.Padding(
-                    pad = (0, 1, 3, 0),
-                    child = render.Animation(children = icon_frames),
-                ),
-                render.Text(content = str(temp), font = "10x20", color = tc),
-                degree_mark(tc),
-            ],
-        ),
-    )
-
-    label_row = render.Box(
-        height = 6,
-        child = render.Text(content = label, font = "tom-thumb", color = AMBER),
-    )
-
-    divider = render.Box(width = 64, height = 1, color = "#33220A")
-
-    footer = render.Box(
-        height = 5,
-        child = render.Padding(
-            pad = (2, 0, 2, 0),
-            child = render.Row(
-                expanded = True,
-                main_align = "space_between",
-                children = [
-                    render.Row(
-                        children = [
-                            render.Padding(pad = (0, 1, 1, 0), child = bitmap(UP_ARROW)),
-                            render.Text(content = str(hi), font = "tom-thumb", color = HI_RED),
-                            render.Box(width = 4, height = 1),
-                            render.Padding(pad = (0, 1, 1, 0), child = bitmap(DOWN_ARROW)),
-                            render.Text(content = str(lo), font = "tom-thumb", color = LO_BLUE),
-                        ],
-                    ),
-                    render.Row(
-                        children = [
-                            render.Padding(pad = (0, 0, 1, 0), child = bitmap(DROP)),
-                            render.Text(content = str(pop) + "%", font = "tom-thumb", color = RAIN if pop >= 30 else DIM),
-                        ],
-                    ),
-                ],
-            ),
-        ),
-    )
+    for i in range(len(daily["time"])):
+        if len(cols) >= 3:
+            break
+        high = int(float(daily["temperature_2m_max"][i]) + 0.5)
+        if i == 0:
+            # only show today's high while it is still ahead of the current temp
+            if high <= temp:
+                continue
+            label = "TODAY"
+        else:
+            day = time.parse_time(daily["time"][i] + "T12:00:00Z")
+            label = DAY_LABELS[humanize.day_of_week(day)]
+        day_icon = describe(int(daily["weather_code"][i]), True)[1]
+        cols.append(forecast_col(label, day_icon, str(high) + "\u00b0", GOLD))
 
     return render.Root(
         delay = 180,
-        child = render.Column(
-            children = [top, label_row, divider, footer],
+        child = render.Row(
+            expanded = True,
+            main_align = "space_around",
+            cross_align = "center",
+            children = cols,
         ),
     )
 
