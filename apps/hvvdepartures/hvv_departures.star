@@ -485,7 +485,7 @@ def fetch_departures(station_id, categories, direction_filter = "", at_time = No
 
     return departures
 
-def fetch_journey(from_station_id, to_station_id, categories, at_time = None, max_results = 2):
+def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds = 0, at_time = None, max_results = 2):
     """Fetch the next journeys between two stations.
 
     Args:
@@ -493,6 +493,8 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None, ma
         to_station_id: Destination Transitous stop identifier.
         categories: The set of categories (see 'classify_stop_time') the
             journey planner is allowed to use.
+        max_walk_seconds: If non-zero, skip itineraries with any walking
+            leg longer than this.
         at_time: Optional RFC3339 timestamp for the desired departure time.
         max_results: Return at most this number of itineraries.
 
@@ -514,6 +516,12 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None, ma
         "transitModes": ",".join(modes.keys()),
     }
 
+    if max_walk_seconds > 0:
+        # Overfetch, since the max-walk filter below can rule out candidates.
+        # Left at the server default otherwise, since asking for more/fewer
+        # itineraries than that also shifts which ones get ranked first.
+        params["numItineraries"] = str(max_results * 5)
+
     if at_time != None:
         params["time"] = at_time
 
@@ -531,7 +539,15 @@ def fetch_journey(from_station_id, to_station_id, categories, at_time = None, ma
     data = response.json()
 
     journeys = []
-    for itinerary in data.get("itineraries", [])[0:max_results]:
+    for itinerary in data.get("itineraries", []):
+        if len(journeys) >= max_results:
+            break
+
+        if max_walk_seconds > 0:
+            longest_walk = max([leg.get("duration", 0) for leg in itinerary["legs"] if leg.get("mode") == "WALK"] + [0])
+            if longest_walk > max_walk_seconds:
+                continue
+
         line = None
         tokens = []
         for leg in itinerary["legs"]:
@@ -602,6 +618,7 @@ def parse_config(config):
     widget_mode = config.str("widget_mode", "departures")
     station_id = get_config_option_value(config, "station_id", DEFAULT_STATION_ID)
     to_station_id = get_config_option_value(config, "to_station_id")
+    max_walk_minutes = int(config.str("max_walk_minutes", "0"))
     direction_filter = config.str("direction_filter", "").strip(" ")
     time_format = config.str("time_format", "relative")
     time_offset = time.parse_duration(config.str("time_offset", "0m"))
@@ -639,7 +656,7 @@ def parse_config(config):
     if include_ferry:
         categories.append("ferry")
 
-    return (widget_mode, station_id, to_station_id, direction_filter, time_format, time_offset, is_anything_selected, categories)
+    return (widget_mode, station_id, to_station_id, max_walk_minutes, direction_filter, time_format, time_offset, is_anything_selected, categories)
 
 def render_message(message, color):
     """Render a message in a given color, below the HVV logo.
@@ -700,7 +717,7 @@ def main(config):
     Returns:
         A definition of what to render.
     """
-    (widget_mode, station_id, to_station_id, direction_filter, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
+    (widget_mode, station_id, to_station_id, max_walk_minutes, direction_filter, time_format, time_offset, is_anything_selected, categories) = parse_config(config)
 
     # None of the products are selected...
     if is_anything_selected == False:
@@ -718,7 +735,7 @@ def main(config):
         if is_legacy_station_id(to_station_id):
             return render_message("Please re-select your destination in the app settings", COLOR_MESSAGE_INFO)
 
-        journeys = fetch_journey(station_id, to_station_id, categories, at_time)
+        journeys = fetch_journey(station_id, to_station_id, categories, max_walk_minutes * 60, at_time)
         if journeys == None:
             return render_message("Error fetching journey!", COLOR_MESSAGE_ERROR)
 
@@ -819,6 +836,29 @@ def get_schema():
         ),
     ]
 
+    max_walk_options = [
+        schema.Option(
+            display = "No limit",
+            value = "0",
+        ),
+        schema.Option(
+            display = "5 minutes",
+            value = "5",
+        ),
+        schema.Option(
+            display = "10 minutes",
+            value = "10",
+        ),
+        schema.Option(
+            display = "15 minutes",
+            value = "15",
+        ),
+        schema.Option(
+            display = "20 minutes",
+            value = "20",
+        ),
+    ]
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -843,6 +883,14 @@ def get_schema():
                 desc = "Pick a destination (Journey planner mode only)",
                 icon = "mapPin",
                 handler = find_stations,
+            ),
+            schema.Dropdown(
+                id = "max_walk_minutes",
+                name = "Max walk",
+                desc = "Journey planner mode only: skip routes with a walk longer than this",
+                icon = "personWalking",
+                default = max_walk_options[0].value,
+                options = max_walk_options,
             ),
             schema.Text(
                 id = "direction_filter",
