@@ -617,12 +617,11 @@ def main(config):
         ),
     )
 
-def find_stations(query, max_results = 2):
+def find_stations(query):
     """Search the API for a list of stations matching a (fuzzy) query.
 
     Args:
         query: The (fuzzy) query string.
-        max_results: Return at most this number of results.
 
     Returns:
         A list of 'schema.Option', each corresponding to a station.
@@ -636,7 +635,7 @@ def find_stations(query, max_results = 2):
         params = {
             "text": query,
             "type": "STOP",
-            "numResults": str(max_results),
+            "numResults": "2",
         },
         headers = TRANSITOUS_REQUEST_HEADERS,
     )
