@@ -547,6 +547,17 @@ def fetch_departures(station_id, categories, direction_filter = "", at_time = No
 
     return departures
 
+def journey_sort_key(journey):
+    """Sort key for a "journey" dict (see 'fetch_journey'), by departure time.
+
+    Args:
+        journey: A "journey" dictionary.
+
+    Returns:
+        A value suitable for sorting journeys chronologically.
+    """
+    return journey["when"]
+
 def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds = 0, at_time = None, max_results = 2):
     """Fetch the next journeys between two stations.
 
@@ -600,11 +611,12 @@ def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds =
 
     data = response.json()
 
-    journeys = []
-    for itinerary in data.get("itineraries", []):
-        if len(journeys) >= max_results:
-            break
+    # "direct" holds walking-only connections (e.g. a destination within
+    # walking distance), returned separately from transit "itineraries".
+    candidates = data.get("direct", []) + data.get("itineraries", [])
 
+    journeys = []
+    for itinerary in candidates:
         if max_walk_seconds > 0:
             longest_walk = max([leg.get("duration", 0) for leg in itinerary["legs"] if leg.get("mode") == "WALK"] + [0])
             if longest_walk > max_walk_seconds:
@@ -613,6 +625,7 @@ def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds =
         line = None
         parts = []
         distinct_line_ids = {}
+        uses_excluded_category = False
         for leg in itinerary["legs"]:
             if leg.get("mode") == "WALK":
                 # Note anything beyond a short walk across a platform, so a
@@ -622,13 +635,21 @@ def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds =
                 continue
 
             (category, id, name) = classify_stop_time(leg)
-            if category == None:
-                continue
+            if category == None or category not in categories:
+                # This itinerary relies on a line we can't render or the
+                # user excluded; the whole route (not just this leg) is
+                # unusable, so stop looking at its legs and skip it below.
+                uses_excluded_category = True
+                break
+
             leg_line = {"id": id, "name": name, "product": CATEGORY_TO_PRODUCT[category]}
             parts.append(("line", leg_line))
             distinct_line_ids[id] = True
             if line == None:
                 line = leg_line
+
+        if uses_excluded_category:
+            continue
 
         if line == None:
             # An all-walking itinerary: no dedicated icon for that.
@@ -659,7 +680,7 @@ def fetch_journey(from_station_id, to_station_id, categories, max_walk_seconds =
             "when": first_leg["startTime"],
         })
 
-    return journeys
+    return sorted(journeys, key = journey_sort_key)[0:max_results]
 
 def get_config_option_value(config, key, default = None):
     """Get the value of a 'schema.Option' from the applet configuration.
