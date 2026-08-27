@@ -140,6 +140,7 @@ Robustness:\r
 ================================================================================\r
 """
 
+load("hash.star", "hash")
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
@@ -381,7 +382,7 @@ def get_access_token(client_id, client_secret, refresh_token):
     """
 
     # Use a unique cache key for each Spotify account
-    token_cache_key = cache_key("access_token_" + hash_string(refresh_token))
+    token_cache_key = cache_key("access_token_" + hash.sha256(refresh_token))
 
     # Check if we're in error backoff
     backoff = get_error_backoff()
