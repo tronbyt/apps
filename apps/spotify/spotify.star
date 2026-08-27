@@ -140,9 +140,9 @@ Robustness:\r
 ================================================================================\r
 """
 
-load("hash.star", "hash")
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
+load("hash.star", "hash")
 load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
