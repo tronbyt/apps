@@ -380,17 +380,20 @@ def get_access_token(client_id, client_secret, refresh_token):
     Implements caching and pre-emptive refresh.
     """
 
+    # Use a unique cache key for each Spotify account
+    token_cache_key = cache_key("access_token_" + hash_string(refresh_token))
+
     # Check if we're in error backoff
     backoff = get_error_backoff()
     if backoff > 0:
         # Still use cached token if available during backoff
-        cached = cache.get(cache_key("access_token"))
+        cached = cache.get(token_cache_key)
         if cached:
             return cached, None
         return None, "Rate limited (retry in %ds)" % backoff
 
     # Check cache for valid token
-    cached_token = cache.get(cache_key("access_token"))
+    cached_token = cache.get(token_cache_key)
     if cached_token:
         return cached_token, None
 
@@ -415,7 +418,7 @@ def get_access_token(client_id, client_secret, refresh_token):
         token = data.get("access_token")
         if token:
             # Cache token
-            cache.set(cache_key("access_token"), token, ttl_seconds = TOKEN_CACHE_TTL)
+            cache.set(token_cache_key, token, ttl_seconds = TOKEN_CACHE_TTL)
             clear_error_backoff()
             return token, None
         return None, "No token in response"
