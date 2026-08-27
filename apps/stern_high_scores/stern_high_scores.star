@@ -1,5 +1,6 @@
 load("cache.star", "cache")
 load("color.star", "color")
+load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
@@ -78,21 +79,38 @@ def login(username, password):
         "User-Agent": "Mozilla/5.0",
         "Content-Type": "application/json",
     }
-    body = json.encode({"username": username, "password": password})
-    rep = http.post(login_url, headers = headers, body = body)
 
-    if rep.status_code != 200:
-        print("Login failed! Status Code: " + str(rep.status_code))
-        print("Response Body: " + rep.body())
+    usernames_to_try = [username]
+    if "@" in username:
+        usernames_to_try.append(username.split("@")[0])
+
+    for u in usernames_to_try:
+        body = json.encode({"username": u, "password": password})
+        rep = http.post(login_url, headers = headers, body = body)
+
+        if rep.status_code == 200:
+            data = rep.json()
+            token = data.get("access") or data.get("access_token")
+            if token:
+                return {"token": token}
+
+    return None
+
+def get_user_id_from_token(token):
+    parts = token.split(".")
+    if len(parts) < 2:
         return None
-
-    data = rep.json()
-    token = data.get("access") or data.get("access_token")
-
-    if not token:
+    payload = parts[1].replace("-", "+").replace("_", "/")
+    pad_len = (4 - (len(payload) % 4)) % 4
+    payload += "=" * pad_len
+    decoded = base64.decode(payload)
+    if not decoded:
         return None
-
-    return {"token": token}
+    data = json.decode(decoded)
+    user_id = data.get("user_id")
+    if user_id:
+        return str(user_id)
+    return None
 
 def normalize_game_name(name):
     n = name.strip()
@@ -114,23 +132,49 @@ def normalize_game_name(name):
 
 def get_personal_scores(auth):
     # Use a chunk of token as cache key suffix
-    cache_key = "stern_personal_scores_v9_" + auth["token"][:15]
+    cache_key = "stern_personal_scores_v10_" + auth["token"][:15]
     cached_data = cache.get(cache_key)
     if cached_data:
         return json.decode(cached_data)
 
-    url = "https://api.prd.sternpinball.io/api/v1/portal/user_stats/"
+    token = auth["token"]
     headers = {
         "User-Agent": "Mozilla/5.0",
-        "Authorization": "Bearer " + auth["token"],
+        "Authorization": "Bearer " + token,
     }
-    rep = http.get(url, headers = headers)
-    if rep.status_code != 200:
+
+    user_id = get_user_id_from_token(token)
+
+    # Fallback to user_registered_machines endpoint if user_id was not in token
+    if not user_id:
+        m_rep = http.get("https://api.prd.sternpinball.io/api/v1/portal/user_registered_machines/?group_type=home", headers = headers)
+        if m_rep.status_code == 200:
+            m_data = m_rep.json()
+            user_id = str(m_data.get("user", {}).get("id", ""))
+
+    if not user_id:
         return []
 
-    data = rep.json()
-    stats = data.get("stats", {})
-    titles = stats.get("titles", [])
+    # Map titles to model type from user registered home machines if available
+    user_models_by_title = {}
+    m_rep = http.get("https://api.prd.sternpinball.io/api/v1/portal/user_registered_machines/?group_type=home", headers = headers, ttl_seconds = 3600)
+    if m_rep.status_code == 200:
+        m_data = m_rep.json()
+        machines = m_data.get("user", {}).get("machines", [])
+        for m in machines:
+            model_info = m.get("model") or {}
+            m_type = model_info.get("type", "pro")
+            title_info = model_info.get("title") or {}
+            title_name = title_info.get("name", "")
+            if title_name:
+                user_models_by_title[title_name] = m_type.lower()
+
+    # Fetch game titles list
+    titles_url = "https://api.prd.sternpinball.io/api/v1/portal/game_titles/"
+    titles_rep = http.get(titles_url, headers = headers, ttl_seconds = 86400)
+    if titles_rep.status_code != 200:
+        return []
+    titles = titles_rep.json()
 
     # Fetch global games list to extract logo URLs
     games_url = "https://insider.sternpinball.com/games?_rsc=1"
@@ -145,6 +189,30 @@ def get_personal_scores(auth):
     results = []
     for t in titles:
         game_name = t.get("name", "")
+        pk = t.get("pk")
+        if not pk:
+            continue
+
+        stat_url = "https://api.prd.sternpinball.io/api/v1/portal/user_title_stats/?user_id=" + user_id + "&title_id=" + str(pk)
+        stat_rep = http.get(stat_url, headers = headers, ttl_seconds = 300)
+        if stat_rep.status_code != 200:
+            continue
+
+        stat_data = stat_rep.json()
+        max_score = stat_data.get("max_score", 0)
+        if not max_score or max_score <= 0:
+            continue
+
+        percentile = stat_data.get("score_percentile")
+        percent_str = ""
+        if percentile != None and percentile > 0:
+            top_pct = 100 - int(percentile)
+            if top_pct <= 0:
+                top_pct = 1
+            percent_str = " (Top " + str(top_pct) + "%)"
+
+        m_type = user_models_by_title.get(game_name, "best")
+
         search_name = normalize_game_name(game_name)
 
         logo_url = ""
@@ -180,45 +248,20 @@ def get_personal_scores(auth):
                     if http_start > -1:
                         logo_url = extract_until_quote(games_body, http_start)
 
-        game_scores = []
-        for s in t.get("high_scores_by_model", []):
-            model_info = s.get("model", {})
-            m_type = model_info.get("type", "unknown")
-            score = s.get("high_score", 0)
+        game_scores = [{
+            "model": m_type,
+            "score": int(max_score),
+            "percent": percent_str,
+        }]
 
-            if score > 0:
-                game_scores.append({
-                    "model": m_type.lower(),
-                    "score": int(score),
-                    "percent": "",  # Not available in new API yet
-                })
-
-        if game_scores:
-            # Sort scores: Pro, Premium, Limited
-            ordered_scores = []
-            for m_type in ["pro", "premium", "limited"]:
-                for s in game_scores:
-                    if s["model"].lower() == m_type:
-                        ordered_scores.append(s)
-
-            # Add any that didn't match (e.g. "LE", "Home Edition", etc.)
-            for s in game_scores:
-                match = False
-                for m_type in ["pro", "premium", "limited"]:
-                    if s["model"].lower() == m_type:
-                        match = True
-                        break
-                if not match:
-                    ordered_scores.append(s)
-
-            results.append({
-                "name": game_name,
-                "logo": logo_url,
-                "scores": ordered_scores,
-                "c1": c1,
-                "c2": c2,
-                "mid_c": mid_color(c1, c2),
-            })
+        results.append({
+            "name": game_name,
+            "logo": logo_url,
+            "scores": game_scores,
+            "c1": c1,
+            "c2": c2,
+            "mid_c": mid_color(c1, c2),
+        })
 
     cache.set(cache_key, json.encode(results), ttl_seconds = 300)
     return results
