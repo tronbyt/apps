@@ -142,6 +142,7 @@ Robustness:\r
 
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
+load("hash.star", "hash")
 load("http.star", "http")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -380,19 +381,22 @@ def get_access_token(client_id, client_secret, refresh_token):
     Implements caching and pre-emptive refresh.
     """
 
+    # Use a unique cache key for each Spotify account
+    token_cache_key = cache_key("access_token_" + hash.sha256(refresh_token))
+
     # Check if we're in error backoff
     backoff = get_error_backoff()
     if backoff > 0:
         # Still use cached token if available during backoff
-        cached = cache.get(cache_key("access_token"))
+        cached = cache.get(token_cache_key)
         if cached:
-            return cached, None
-        return None, "Rate limited (retry in %ds)" % backoff
+            return cached, token_cache_key, None
+        return None, token_cache_key, "Rate limited (retry in %ds)" % backoff
 
     # Check cache for valid token
-    cached_token = cache.get(cache_key("access_token"))
+    cached_token = cache.get(token_cache_key)
     if cached_token:
-        return cached_token, None
+        return cached_token, token_cache_key, None
 
     # Need to refresh - build request
     auth_header = make_basic_auth(client_id, client_secret)
@@ -415,36 +419,36 @@ def get_access_token(client_id, client_secret, refresh_token):
         token = data.get("access_token")
         if token:
             # Cache token
-            cache.set(cache_key("access_token"), token, ttl_seconds = TOKEN_CACHE_TTL)
+            cache.set(token_cache_key, token, ttl_seconds = TOKEN_CACHE_TTL)
             clear_error_backoff()
-            return token, None
-        return None, "No token in response"
+            return token, token_cache_key, None
+        return None, token_cache_key, "No token in response"
 
     # Handle errors
     if resp.status_code == 400:
         error_data = resp.json()
         error = error_data.get("error", "")
         if "invalid_grant" in error:
-            return None, "Token revoked - reauthorize"
-        return None, "Bad request: " + error
+            return None, token_cache_key, "Token revoked - reauthorize"
+        return None, token_cache_key, "Bad request: " + error
 
     if resp.status_code == 401:
-        return None, "Invalid credentials"
+        return None, token_cache_key, "Invalid credentials"
 
     if resp.status_code == 429:
         # Rate limited
         increase_error_backoff()
-        return None, "Rate limited"
+        return None, token_cache_key, "Rate limited"
 
     # Other errors - implement backoff
     increase_error_backoff()
-    return None, "Auth error: " + str(resp.status_code)
+    return None, token_cache_key, "Auth error: " + str(resp.status_code)
 
 # =============================================================================
 # SPOTIFY API
 # =============================================================================
 
-def fetch_player_state(access_token):
+def fetch_player_state(access_token, token_cache_key):
     """
     Fetch full player state including device info.
     Returns dict with player info or None.
@@ -460,7 +464,7 @@ def fetch_player_state(access_token):
 
     if resp.status_code == 401:
         # Token expired - clear cache
-        cache.set(cache_key("access_token"), "", ttl_seconds = 1)
+        cache.set(token_cache_key, "", ttl_seconds = 1)
         return None
 
     if resp.status_code != 200:
@@ -468,7 +472,7 @@ def fetch_player_state(access_token):
 
     return resp.json()
 
-def fetch_currently_playing(access_token):
+def fetch_currently_playing(access_token, token_cache_key):
     """
     Fetch currently playing track/episode.
     Returns dict with track info or None.
@@ -487,7 +491,7 @@ def fetch_currently_playing(access_token):
         return None
 
     if resp.status_code == 401:
-        cache.set(cache_key("access_token"), "", ttl_seconds = 1)
+        cache.set(token_cache_key, "", ttl_seconds = 1)
         return None
 
     if resp.status_code != 200:
@@ -663,25 +667,25 @@ def parse_playback_state(data, player_data = None):
 
     return content
 
-def get_playback_info(access_token, include_recent):
+def get_playback_info(access_token, token_cache_key, include_recent):
     """
     Get current playback info, optionally falling back to recent.
     Returns (playback_dict, is_current, error_string)
     """
 
     # Try currently playing
-    now_playing = fetch_currently_playing(access_token)
+    now_playing = fetch_currently_playing(access_token, token_cache_key)
 
     if now_playing and now_playing.get("is_playing"):
         # Get additional player state for device/shuffle/repeat info
-        player = fetch_player_state(access_token)
+        player = fetch_player_state(access_token, token_cache_key)
         state = parse_playback_state(now_playing, player)
         if state:
             return state, True, None
 
     # Not playing - try paused state
     if now_playing and now_playing.get("item"):
-        player = fetch_player_state(access_token)
+        player = fetch_player_state(access_token, token_cache_key)
         state = parse_playback_state(now_playing, player)
         if state:
             state["is_playing"] = False
@@ -1292,7 +1296,7 @@ def main(config):
         return render_setup_needed()
 
     # Get access token
-    access_token, auth_error = get_access_token(client_id, client_secret, refresh_token)
+    access_token, token_cache_key, auth_error = get_access_token(client_id, client_secret, refresh_token)
 
     if auth_error:
         if "revoked" in auth_error or "reauthorize" in auth_error:
@@ -1309,7 +1313,7 @@ def main(config):
 
     # Get playback info
     include_recent = config.bool("show_recently_played", False)
-    state, is_current, fetch_error = get_playback_info(access_token, include_recent)
+    state, is_current, fetch_error = get_playback_info(access_token, token_cache_key, include_recent)
 
     if fetch_error:
         return render_error("API Error", fetch_error)
