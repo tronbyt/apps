@@ -190,15 +190,22 @@ def is_ink(glyph, x, y):
 def blit_mark(fb, glyph, x, y, face, rim):
     """Face colour by row, except on the outermost pixel of the shape, which
     takes the rim colour instead. That one substitution is the whole edge
-    treatment on the real mark."""
+    treatment.
+
+    Where the shape narrows to a couple of pixels — the point of the wedge —
+    every pixel is an edge, and rimming all of them would sink the tip into the
+    deep end of the rim ramp until it vanishes against a black panel. Those
+    rows keep the face instead, so the point stays the brightest thing on the
+    mark rather than the darkest."""
     for gy in range(len(glyph)):
         row = glyph[gy]
         for gx in range(len(row)):
             if row[gx] == ".":
                 continue
+            thin = not is_ink(glyph, gx - 2, gy) and not is_ink(glyph, gx + 2, gy)
             edge = not is_ink(glyph, gx - 1, gy) or not is_ink(glyph, gx + 1, gy)
             edge = edge or not is_ink(glyph, gx, gy - 1) or not is_ink(glyph, gx, gy + 1)
-            if edge:
+            if edge and not thin:
                 put(fb, x + gx, y + gy, rim[gy])
             else:
                 put(fb, x + gx, y + gy, face[gy])
