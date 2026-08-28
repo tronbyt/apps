@@ -412,52 +412,74 @@ def unit_label(value, singular, plural):
 def countdown_parts(days, hours, minutes, seconds):
     """The largest unit still standing becomes the hero, and whatever is left
     under it becomes the running line. On the last day that turns the display
-    into an hours clock, then a minutes one, then a bare seconds count."""
+    into an hours clock, then a minutes one, then a bare seconds count. Each
+    unit also carries a short label and a short running line, for when the
+    number itself grows too wide to leave room for the full ones."""
     if days > 0:
-        return (str(days), unit_label(days, "DAY", "DAYS"), two(hours) + ":" + two(minutes) + ":" + two(seconds))
+        return (
+            str(days),
+            unit_label(days, "DAY", "DAYS"),
+            "D",
+            two(hours) + ":" + two(minutes) + ":" + two(seconds),
+            two(hours) + ":" + two(minutes),
+        )
     if hours > 0:
-        return (str(hours), unit_label(hours, "HOUR", "HOURS"), two(minutes) + ":" + two(seconds))
+        return (
+            str(hours),
+            unit_label(hours, "HOUR", "HOURS"),
+            "H",
+            two(minutes) + ":" + two(seconds),
+            two(minutes),
+        )
     if minutes > 0:
-        return (str(minutes), unit_label(minutes, "MIN", "MINS"), two(seconds))
-    return (str(seconds), unit_label(seconds, "SECOND", "SECONDS"), "")
+        return (str(minutes), unit_label(minutes, "MIN", "MINS"), "M", two(seconds), two(seconds))
+    return (str(seconds), unit_label(seconds, "SECOND", "SECONDS"), "S", "", "")
+
+def side_column(hero_w, parts):
+    """Give up the least that will fit. A target a few years out still leaves
+    room for the unit and an hours-and-minutes line; one centuries out ends up
+    as the bare number, but everything in between degrades a step at a time
+    rather than dropping straight to nothing."""
+    label = parts[1]
+    short = parts[2]
+    clock = parts[3]
+    brief = parts[4]
+    for choice in [(label, clock), (label, brief), (short, brief), (label, ""), (short, ""), ("", "")]:
+        width = text_width(SMALL, choice[0], 1)
+        line_w = text_width(SMALL, choice[1], 1)
+        if line_w > width:
+            width = line_w
+        if width == 0:
+            return ("", "", 0)
+        if hero_w + GAP + width <= WIDTH:
+            return (choice[0], choice[1], width)
+    return ("", "", 0)
 
 def draw_countdown(fb, days, hours, minutes, seconds):
     parts = countdown_parts(days, hours, minutes, seconds)
     hero = parts[0]
-    label = parts[1]
-    clock = parts[2]
     hero_w = text_width(BIG, hero, 1)
-    label_w = text_width(SMALL, label, 1)
-    clock_w = text_width(SMALL, clock, 1)
-    side_w = label_w
-    if clock_w > side_w:
-        side_w = clock_w
-    total = hero_w + GAP + side_w
+    side = side_column(hero_w, parts)
+    label = side[0]
+    clock = side[1]
+    side_w = side[2]
 
-    # A target far enough out to need five digits would run off the panel, so
-    # the running line is the first thing to go.
-    if total > WIDTH and clock != "":
-        clock = ""
-        side_w = label_w
-        total = hero_w + GAP + side_w
-
-    # A target centuries out leaves no room for the unit beside the number,
-    # so the number takes the whole block on its own.
-    if total > WIDTH:
-        x = (WIDTH - hero_w) // 2
-        if x < 0:
-            x = 0
-        draw_text(fb, BIG, hero, x, BLOCK_Y, INK, 1)
-        return
-
+    total = hero_w
+    if side_w > 0:
+        total += GAP + side_w
     x = (WIDTH - total) // 2
     if x < 0:
         x = 0
     draw_text(fb, BIG, hero, x, BLOCK_Y, INK, 1)
-    side_x = x + hero_w + GAP
-    if clock == "":
-        draw_text(fb, SMALL, label, side_x, BLOCK_Y + 4, LABEL, 1)
+    if side_w == 0:
         return
+
+    side_x = x + hero_w + GAP
+    label_w = text_width(SMALL, label, 1)
+    if clock == "":
+        draw_text(fb, SMALL, label, side_x + (side_w - label_w) // 2, BLOCK_Y + 4, LABEL, 1)
+        return
+    clock_w = text_width(SMALL, clock, 1)
     draw_text(fb, SMALL, label, side_x + (side_w - label_w) // 2, BLOCK_Y + 1, LABEL, 1)
     draw_text(fb, SMALL, clock, side_x + (side_w - clock_w) // 2, BLOCK_Y + 8, INK, 1)
 
