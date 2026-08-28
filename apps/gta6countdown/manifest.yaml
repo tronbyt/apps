@@ -1,0 +1,16 @@
+---
+id: gta-6-countdown
+name: GTA 6 Countdown
+summary: Counts down to GTA 6
+desc: Days, hours, minutes and seconds until Grand Theft Auto VI on 19 November 2026, under a numeral that runs blue through pink to gold. Rockstar has never announced a launch hour, so it counts to midnight in your own timezone, and you can set your own target date if the release moves again.
+author: nsluke
+fileName: gta_6_countdown.star
+packageName: gta6countdown
+recommendedInterval: 1
+supports2x: true
+category: gaming
+tags:
+  - gaming
+  - time
+  - retro
+  - wide 2x support
