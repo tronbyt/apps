@@ -13,6 +13,7 @@ load("schema.star", "schema")
 
 RED_REMAINING_MIN_THRESHOLD = 2
 YELLOW_REMAINING_MIN_THRESHOLD = 6
+
 #DIVA of station "Stephansplatz"
 WELLKNOWN_DIVA = "60201320"
 
@@ -2357,9 +2358,9 @@ def drawEntry(t1, t2, dirStr, isFirstEntry, walkingTime):
 
     boxWidth = 0
     if addedSpace:  # two entries
-        boxWidth = len("%s" % t1) * 5 + len("%s" % t2) * 4 + 2
+        boxWidth = len("%d" % t1) * 5 + len("%d" % t2) * 4 + 2
     elif validEntry:  # one entry
-        boxWidth = (len("%s" % t1) * 5) + 1
+        boxWidth = (len("%d" % t1) * 5) + 1
     else:  # no entries
         boxWidth = 0
 
@@ -2419,12 +2420,12 @@ def drawEntry(t1, t2, dirStr, isFirstEntry, walkingTime):
                             height = 10,
                             #color = "#880"
                         ),
-                        render.Row(
-                            children = minutesPanel,
+                        render.Box(
+                            child = render.Row(children = minutesPanel),
+                            width = boxWidth,
+                            height = 10,
                         ),
                     ],
-                    expanded = True,
-                    main_align = "end",
                 ),
             ],
         ),
