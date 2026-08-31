@@ -566,36 +566,24 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
         ]
 
     left_column_string = [
-        render.Row(
-            children = [
-                render.Box(
-                    height = 3 * SCALE,
-                    width = SCALE,
-                ),
-            ],
+        render.Box(
+            height = 3 * SCALE,
+            width = SCALE,
         ),
-        render.Row(
-            children = [
-                render.WrappedText(
-                    content = str_current,
-                    font = FONT_MEDIUM,
-                    color = color_reading,
-                    width = left_col_width,
-                    height = 14 * SCALE,
-                    align = "center",
-                ),
-            ],
+        render.WrappedText(
+            content = str_current,
+            font = FONT_MEDIUM,
+            color = color_reading,
+            width = left_col_width,
+            height = 14 * SCALE,
+            align = "center",
         ),
         render.Row(
             children = left_delta_row,
         ),
-        render.Row(
-            children = [
-                render.Box(
-                    height = 2 * SCALE,
-                    width = SCALE,
-                ),
-            ],
+        render.Box(
+            height = 2 * SCALE,
+            width = SCALE,
         ),
         render.Row(
             main_align = "start",
@@ -830,51 +818,27 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
         ]
 
     left_column_string = [
-        render.Row(
-            children = [
-                render.Box(
-                    height = SCALE,
-                    width = SCALE,
-                ),
-            ],
+        render.Box(
+            height = SCALE,
+            width = SCALE,
         ),
-        render.Row(
-            main_align = "center",
-            cross_align = "start",
-            children = [
-                render.WrappedText(
-                    content = str_current,
-                    font = FONT_MEDIUM,
-                    color = color_reading,
-                    width = left_col_width,
-                    height = 12 * SCALE,
-                    align = "center",
-                ),
-            ],
+        render.WrappedText(
+            content = str_current,
+            font = FONT_MEDIUM,
+            color = color_reading,
+            width = left_col_width,
+            height = 12 * SCALE,
+            align = "center",
         ),
         render.Row(
             children = left_delta_row,
         ),
-        render.Row(
-            main_align = "center",
-            cross_align = "start",
-            children = [
-                render.Animation(
-                    sm_clock_row,
-                ),
-            ],
-        ),
-        render.Row(
-            main_align = "center",
-            cross_align = "start",
-            children = [
-                render.Text(
-                    content = full_ago_dashes,
-                    font = FONT_TINY,
-                    color = color_ago,
-                    offset = SCALE,
-                ),
-            ],
+        render.Animation(sm_clock_row),
+        render.Text(
+            content = full_ago_dashes,
+            font = FONT_TINY,
+            color = color_ago,
+            offset = SCALE,
         ),
     ]
 
@@ -975,13 +939,9 @@ def build_two_column_output(left_column_string, graph_plot, graph_hour_bars, gra
                                 cross_align = "start",
                                 expanded = True,
                                 children = [
-                                    render.Column(
-                                        children = [
-                                            render.Box(
-                                                width = SCALE,
-                                                height = 32 * SCALE,
-                                            ),
-                                        ],
+                                    render.Box(
+                                        width = SCALE,
+                                        height = 32 * SCALE,
                                     ),
                                     render.Column(
                                         cross_align = "center",
