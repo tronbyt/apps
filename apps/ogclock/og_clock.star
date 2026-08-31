@@ -1,9 +1,9 @@
 """
 Applet: OG Clock Remake with Weather
 Summary: OG Clock Remake with Location Configuration and Weather Display
-Description: Display the time in addition to current weather and humidity from either OpenWeather or National Weather Service (no API key required for NWS). To request an OpenWeather API key, see https://home.openweathermap.org/users/sign_up.
+Description: Display time plus current temperature and humidity from OpenWeather, National Weather Service, or an Ambient Weather station. Ambient Weather requires an Application Key and API Key from AmbientWeather.net.
 Author: g3rmanaviator
-Version: 1.0
+Version: 1.1
 
 """
 
@@ -47,6 +47,7 @@ NWS_LATEST_OBSERVATION_URL = "{station_url}/observations/latest"
 OPENWEATHER_CURRWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units={units}&lang=en"
 OPENWEATHER_AIR_POLLUTION_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat={latitude}&lon={longitude}&appid={api_key}"
 OPENWEATHER_ONECALL_URL = "https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&exclude=minutely,hourly,daily,alerts&appid={api_key}&units={units}&lang=en"
+AMBIENT_WEATHER_DEVICES_URL = "https://rt.ambientweather.net/v1/devices"
 
 TEMP_COLOR_DEFAULT = "#FFFFFF"
 TIME_NIGHT_COLOR = "#333333"
@@ -118,6 +119,67 @@ def get_current_weather_conditions(url, ttl):
     if res.status_code != 200:
         fail("Current conditions request failed with status", res.status_code)
     return res.json()
+
+def get_ambient_weather_conditions(application_key, api_key, station_id, display_metric, now):
+    # The devices endpoint returns every station available to the supplied API key,
+    # with the most recent observation in each device's lastData object.
+    res = http.get(
+        url = AMBIENT_WEATHER_DEVICES_URL,
+        params = {
+            "applicationKey": application_key,
+            "apiKey": api_key,
+        },
+        ttl_seconds = 60,
+    )
+    if res.status_code != 200:
+        fail("Ambient Weather device request failed with status", res.status_code)
+
+    stations = res.json()
+    if len(stations) == 0:
+        fail("No Ambient Weather devices are available for this API key.")
+
+    station = stations[0]
+    if station_id:
+        station = None
+        for candidate in stations:
+            if candidate.get("macAddress") == station_id:
+                station = candidate
+                break
+        if station == None:
+            fail("Ambient Weather device was not found. Check the station MAC address.")
+
+    conditions = station.get("lastData", {})
+    temp_f = conditions.get("tempf", conditions.get("temp1f"))
+    if temp_f == None:
+        fail("The selected Ambient Weather device has no outdoor temperature reading.")
+
+    temperature = int(temp_f)
+    if display_metric:
+        temperature = int((temp_f - 32) * 5.0 / 9.0)
+
+    # Ambient Weather supplies measurements rather than a weather-condition code.
+    # Use recent rain and wind when available; otherwise select a time-appropriate
+    # neutral sky icon.
+    if conditions.get("hourlyrainin", 0) > 0:
+        icon_ref = "rainy.png"
+    elif conditions.get("windspeedmph", 0) >= 20:
+        icon_ref = "windy.png"
+    elif now.hour >= 6 and now.hour < 19:
+        icon_ref = "sunnyish.png"
+    else:
+        icon_ref = "moonyish.png"
+
+    humidity = conditions.get("humidity")
+    if humidity != None:
+        humidity = int(humidity)
+    else:
+        humidity = "?"
+
+    return {
+        "temp": temperature,
+        "humidity": humidity,
+        "icon_ref": icon_ref,
+    }
 
 def get_openweather_air_pollution(api_key, latitude, longitude):
     res = http.get(
@@ -246,11 +308,18 @@ def main(config):
     # Weather settings
     api_service = config.get("weatherApiService") or "OpenWeather"
     api_key = config.get("apiKey", "")
+    ambient_application_key = config.get("ambientApplicationKey", "")
+    ambient_api_key = config.get("ambientApiKey", "")
+    ambient_station_id = config.get("ambientStationId", "")
     system_of_measurement = config.get("systemOfMeasurement", "Imperial").lower()
     temp_color = config.get("tempColor", TEMP_COLOR_DEFAULT)
 
     display_metric = (system_of_measurement == "metric")
-    display_sample = not (api_key) and api_service != "Open-Meteo" and api_service != "National Weather Service (NWS)"
+    display_sample = (
+        (api_service == "OpenWeather" or api_service == "OpenWeatherOneCall") and not api_key
+    ) or (
+        api_service == "Ambient Weather" and (not ambient_application_key or not ambient_api_key)
+    )
 
     # Format time components for proper blinking colon display
     if use_24_hour:
@@ -403,6 +472,18 @@ def main(config):
         elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
             icon_ref = "moonyish.png"
 
+    elif api_service == "Ambient Weather":
+        ambient_conditions = get_ambient_weather_conditions(
+            application_key = ambient_application_key,
+            api_key = ambient_api_key,
+            station_id = ambient_station_id,
+            display_metric = display_metric,
+            now = now,
+        )
+        result_current_conditions["temp"] = ambient_conditions["temp"]
+        result_current_conditions["humidity"] = ambient_conditions["humidity"]
+        icon_ref = ambient_conditions["icon_ref"]
+
     # Prepare weather display components
     if icon_ref:
         weather_image = render.Image(width = 16, height = 16, src = WEATHER_ICONS[icon_ref])
@@ -523,6 +604,10 @@ def get_schema():
                         display = "OpenWeather (One Call API 3.0)",
                         value = "OpenWeatherOneCall",
                     ),
+                    schema.Option(
+                        display = "Ambient Weather",
+                        value = "Ambient Weather",
+                    ),
                 ],
             ),
             schema.Text(
@@ -532,6 +617,29 @@ def get_schema():
                 icon = "gear",
                 default = "",
                 secret = True,
+            ),
+            schema.Text(
+                id = "ambientApplicationKey",
+                name = "Ambient Weather Application Key",
+                desc = "Application key from your AmbientWeather.net account. Required when Ambient Weather is selected.",
+                icon = "key",
+                default = "",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ambientApiKey",
+                name = "Ambient Weather API Key",
+                desc = "API key from your AmbientWeather.net account. Required when Ambient Weather is selected.",
+                icon = "key",
+                default = "",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ambientStationId",
+                name = "Ambient Weather Station MAC Address",
+                desc = "Optional. Select a station by MAC address; leave blank to use the first available device.",
+                icon = "temperatureHalf",
+                default = "",
             ),
             schema.Dropdown(
                 id = "systemOfMeasurement",
