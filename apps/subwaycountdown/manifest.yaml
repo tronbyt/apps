@@ -1,0 +1,16 @@
+---
+id: subway-countdown
+name: Subway Countdown
+summary: NYC subway times, no API key
+desc: Live NYC subway arrivals read straight from the MTA's own realtime feeds - no API key, no third-party service in the middle. Two layouts on one engine - a station board listing the next three trains across every line at your station (one direction or both at once, with per-line delay flags and a strip that names the disruption), and a big-number countdown readable across the room. Tell it your walk time and the big number becomes when to leave rather than when the train arrives, while the board dims trains you would miss. Stale data says so instead of quietly lying. All 496 stations. Data from the Metropolitan Transportation Authority.
+author: nsluke
+fileName: subway_countdown.star
+packageName: subwaycountdown
+recommendedInterval: 1
+category: transit
+tags:
+  - nyc
+  - subway
+  - mta
+  - transit
+  - commute
