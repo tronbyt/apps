@@ -1,0 +1,16 @@
+---
+id: unifi-network
+name: UniFi Network
+summary: Live network activity
+desc: Live WAN throughput, a download sparkline, device health and client counts from your UniFi sites. Reads the UniFi Cloud (Site Manager) API by default, so all it needs is one key from unifi.ui.com and no LAN name resolution; cloud mode charts the real 24-hour ISP series. A local console mode is there for consoles whose hostname the display can resolve and whose certificate it trusts. An amber "!" beside the UNIFI tag means a firmware update is waiting.
+author: nsluke
+fileName: unifi_network.star
+packageName: unifinetwork
+recommendedInterval: 1
+supports2x: true
+category: smart-home
+tags:
+  - tech
+  - smart-home
+  - real-time
+  - wide 2x support
