@@ -92,6 +92,12 @@ GRAPH_BOTTOM = 40
 MIN_CACHE_TTL = 10 * time.second
 READING_AGE_THRESHOLD = 5 * time.minute + 30 * time.second
 
+# Readings outside this range are reported as LOW/HIGH instead of a number.
+LOW_READING = 39
+HIGH_READING = 401
+LABEL_LOW = "LOW"
+LABEL_HIGH = "HIGH"
+
 DEFAULT_LOCATION = """
 {
     "lat": "40.666250",
@@ -199,6 +205,11 @@ def main(config):
             str_delta = "+0"
         elif (sgv_delta > 0):
             str_delta = "+" + str_delta
+
+    if sgv_current_mgdl <= LOW_READING:
+        str_current = LABEL_LOW
+    elif sgv_current_mgdl >= HIGH_READING:
+        str_current = LABEL_HIGH
 
     str_delta = str_delta.replace("0", "O")
 
@@ -684,23 +695,15 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
             ),
             render.Row(
                 cross_align = "center",
-                main_align = "start",
+                main_align = "space_evenly",
                 expanded = True,
                 children = [
-                    render.Box(
-                        width = 7 * SCALE,
-                        height = 18 * SCALE,
-                    ),
                     render.WrappedText(
                         content = str_current,
                         font = FONT_MEDIUM,
                         color = color_reading,
-                        width = 40 if IS_2X else 18,
+                        width = 28 * SCALE,
                         align = "center",
-                        height = 18 * SCALE,
-                    ),
-                    render.Box(
-                        width = 4 * SCALE,
                         height = 18 * SCALE,
                     ),
                     render.WrappedText(
@@ -711,10 +714,6 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
                         width = 30 * SCALE,
                         linespacing = 0,
                         height = 14 * SCALE,
-                    ),
-                    render.Box(
-                        width = 5 * SCALE,
-                        height = 18 * SCALE,
                     ),
                 ],
             ),
