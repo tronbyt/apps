@@ -537,7 +537,7 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
         left_delta_row = [
             render.WrappedText(
                 content = str_delta,
-                font = "10x13" if IS_2X else "CG-pixel-3x5-mono",
+                font = "6x10" if IS_2X else "CG-pixel-3x5-mono",
                 color = color_delta,
                 linespacing = 2 * SCALE,
                 width = left_col_width,
