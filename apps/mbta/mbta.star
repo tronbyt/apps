@@ -176,16 +176,32 @@ def find(xs, pred):
 
 def get_stops(location):
     loc = json.decode(location)
+
+    # The location object reaches this handler two ways, and they disagree on
+    # type. A fresh pick in the location search box yields strings, matching the
+    # documented schema. A location restored from the device record yields JSON
+    # numbers, because the server stores the coordinates as floats. http.get
+    # rejects non-string params, so the second path used to abort the handler and
+    # surface in the UI as "Error loading options" with no way to recover.
+    lat = loc.get("lat")
+    lng = loc.get("lng")
+    if lat == None or lng == None or lat == "" or lng == "":
+        return []
+
     params = {
         "page[limit]": "100",
-        "filter[latitude]": loc["lat"],
-        "filter[longitude]": loc["lng"],
+        "filter[latitude]": str(lat),
+        "filter[longitude]": str(lng),
         "sort": "distance",
     }
 
     rep = http.get("https://api-v3.mbta.com/stops", params = params)
     if rep.status_code != 200:
-        fail("MBTA API request failed with status {}".format(rep.status_code))
+        # Returning no options leaves the picker empty but retryable. Failing
+        # hard here is indistinguishable, to the user, from a broken app, and
+        # keyless clients are throttled at 20 requests/minute so a non-200 is
+        # reachable from the settings screen alone.
+        return []
     data = rep.json()
     stops = []
     for s in data["data"]:
