@@ -161,6 +161,9 @@ def main(config):
             return display_failure("Nightscout Error: " + str(status_code) + " " + http.status_text(status_code))
 
     # Pull the data from the cache
+    if nightscout_data["sgv_current"] == "":
+        return display_failure("Nightscout: No recent readings")
+
     sgv_current_mgdl = int(nightscout_data["sgv_current"])
     sgv_delta = nightscout_data["sgv_delta"]
     latest_reading_dt = nightscout_data["latest_reading_date"]
@@ -1324,7 +1327,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         ns_properties = resp.json()
 
     sgv_current = ""
-    sgv_delta = ""
+    sgv_delta = 0
     latest_reading_date = ""
     direction = ""
     iob = "n/a"
@@ -1332,16 +1335,26 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     nightscout_history = []
 
     if "bgnow" in ns_properties:
-        if "last" in ns_properties["bgnow"]:
-            sgv_current = str(int(ns_properties["bgnow"]["last"]))
-        if "mills" in ns_properties["bgnow"]:
-            latest_reading_date = time.from_timestamp(int(ns_properties["bgnow"]["mills"] / 1000))
+        bgnow = ns_properties["bgnow"]
+
+        # Nightscout leaves "last" and "mills" off of bgnow when the reading is
+        # out of range, so fall back to the newest entry in sgvs.
+        sgvs = bgnow.get("sgvs", [])
+
+        if "last" in bgnow:
+            sgv_current = str(int(bgnow["last"]))
+        elif sgvs:
+            sgv_current = str(int(sgvs[0]["mgdl"]))
+
+        if "mills" in bgnow:
+            latest_reading_date = time.from_timestamp(int(bgnow["mills"] / 1000))
+        elif sgvs:
+            latest_reading_date = time.from_timestamp(int(sgvs[0]["mills"] / 1000))
     if "delta" in ns_properties:
         if "absolute" in ns_properties["delta"]:
-            sgv_delta = ns_properties["delta"]["absolute"]
-            sgv_delta = int(sgv_delta)
-            if display_unit == "mmol":
-                sgv_delta = mgdl_to_mmol(int(sgv_delta))
+            sgv_delta = int(ns_properties["delta"]["absolute"])
+    if display_unit == "mmol":
+        sgv_delta = mgdl_to_mmol(sgv_delta)
     if "direction" in ns_properties:
         if "value" in ns_properties["direction"]:
             direction = ns_properties["direction"]["value"]
