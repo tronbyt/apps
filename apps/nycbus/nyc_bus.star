@@ -48,9 +48,9 @@ def get_stops(location, config):
         BUSTIME_STOPS_FOR_LOCATION_URL,
         params = {
             "key": api_key,
-            "lat": loc["lat"],
+            "lat": str(loc["lat"]),
             "latSpan": "0.001",
-            "lon": loc["lng"],
+            "lon": str(loc["lng"]),
             "longSpan": "0.001",
         },
     )
