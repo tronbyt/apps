@@ -14,7 +14,6 @@ load("time.star", "time")
 URL = "https://api-v3.mbta.com/predictions"
 STOPS_URL = "https://api-v3.mbta.com/stops"
 ROUTES_URL = "https://api-v3.mbta.com/routes"
-SCHEDULES_URL = "https://api-v3.mbta.com/schedules"
 
 # Separates stop id from route id in a stop option's value, for stops served by
 # more than one route. A bare stop id, the old format, still works.
@@ -275,48 +274,85 @@ def split_stop_value(value):
         return parts[0], parts[1]
     return value, ""
 
-def stop_service(stop_ids):
-    """Map each stop to the routes and directions it actually serves.
+def keyed(params, api_key):
+    """Attach the configured API key, if there is one.
 
-    The two stops on opposite sides of a street share one name, so the picker
-    listed e.g. "Main St @ Lebanon St" twice with nothing to tell them apart and
-    picking wrong meant watching buses leave the other way. Schedules are the
-    only endpoint tying a stop to a direction, and one batched call covers the
-    whole nearby set.
+    Schema handlers get the same key the render path uses. Without it MBTA
+    throttles at 20 requests per minute per IP, and building the stop list takes
+    roughly nine, so two settings-page loads in a minute were enough to start
+    returning 429 and empty the picker.
+    """
+    if api_key:
+        params["api_key"] = api_key
+    return params
 
-    Returns {stop_id: {"routes": [...], "directions": [...]}}. A stop with no
-    service today is simply absent, and the caller falls back to a plain name.
+def stop_service(stop_ids, api_key):
+    """Map each nearby stop to the routes and directions it serves.
+
+    Asking for schedules by stop reads as the obvious approach and does not hold
+    up: that response is paged, a busy area runs past the limit, and every stop
+    beyond it comes back silently unlabelled. Asking instead which stops each
+    route serves, per direction, is a handful of small requests that covers
+    every stop and does not depend on today's timetable.
+
+        /routes?filter[stop]=...        one call, the routes serving the area
+                  |
+                  |-- /stops?filter[route]=137&filter[direction_id]=0
+                  |-- /stops?filter[route]=137&filter[direction_id]=1
+                  \\-- ... two per route, each cached for an hour
+                  |
+                  v
+        {stop_id: {"routes": [...], "directions": [...]}}
+
+    Returns that map alongside each route's label and destinations, since the
+    first call already carries them.
     """
     if not stop_ids:
-        return {}
+        return {}, {}
 
     rep = http.get(
-        SCHEDULES_URL,
-        params = {
-            "filter[stop]": ",".join(stop_ids),
-            "page[limit]": "1000",
-            "fields[schedule]": "direction_id",
-        },
+        ROUTES_URL,
+        params = keyed({"filter[stop]": ",".join(stop_ids)}, api_key),
         ttl_seconds = LOOKUP_TTL,
     )
     if rep.status_code != 200:
-        return {}
+        return {}, {}
 
+    wanted = {}
+    for sid in stop_ids:
+        wanted[sid] = True
+
+    labels = {}
     service = {}
-    for entry in rep.json().get("data", []):
-        rel = entry["relationships"]
-        stop_ref = rel.get("stop", {}).get("data")
-        route_ref = rel.get("route", {}).get("data")
-        if not stop_ref or not route_ref:
-            continue
+    for route in rep.json().get("data", []):
+        route_id = route["id"]
+        attrs = route["attributes"]
+        labels[route_id] = {
+            "name": attrs["short_name"] or attrs["long_name"] or route_id,
+            "destinations": attrs["direction_destinations"] or [],
+        }
 
-        sid = stop_ref["id"]
-        if sid not in service:
-            service[sid] = {"routes": {}, "directions": {}}
-        service[sid]["routes"][route_ref["id"]] = True
+        for direction in (0, 1):
+            served = http.get(
+                STOPS_URL,
+                params = keyed({
+                    "filter[route]": route_id,
+                    "filter[direction_id]": str(direction),
+                    "page[limit]": "300",
+                }, api_key),
+                ttl_seconds = LOOKUP_TTL,
+            )
+            if served.status_code != 200:
+                continue
 
-        # JSON numbers decode to floats, and a float cannot index a list.
-        service[sid]["directions"][int(entry["attributes"]["direction_id"])] = True
+            for stop in served.json().get("data", []):
+                sid = stop["id"]
+                if sid not in wanted:
+                    continue
+                if sid not in service:
+                    service[sid] = {"routes": {}, "directions": {}}
+                service[sid]["routes"][route_id] = True
+                service[sid]["directions"][direction] = True
 
     resolved = {}
     for sid in service:
@@ -324,29 +360,7 @@ def stop_service(stop_ids):
             "routes": sorted(service[sid]["routes"]),
             "directions": sorted(service[sid]["directions"]),
         }
-    return resolved
-
-def route_labels(route_ids):
-    """Short name and per-direction destination for each route, in one call."""
-    if not route_ids:
-        return {}
-
-    rep = http.get(
-        ROUTES_URL,
-        params = {"filter[id]": ",".join(route_ids)},
-        ttl_seconds = LOOKUP_TTL,
-    )
-    if rep.status_code != 200:
-        return {}
-
-    labels = {}
-    for route in rep.json().get("data", []):
-        attrs = route["attributes"]
-        labels[route["id"]] = {
-            "name": attrs["short_name"] or attrs["long_name"] or route["id"],
-            "destinations": attrs["direction_destinations"] or [],
-        }
-    return labels
+    return resolved, labels
 
 def destination_of(labels, route_id, directions):
     """Where this route goes from this stop, when the stop serves one direction.
@@ -362,8 +376,9 @@ def destination_of(labels, route_id, directions):
         return destinations[direction]
     return ""
 
-def get_stops(location):
+def get_stops(location, config):
     loc = json.decode(location)
+    api_key = (config.get("api", "") or "").strip()
 
     # The location object reaches this handler two ways, and they disagree on
     # type. A fresh pick in the location search box yields strings, matching the
@@ -376,12 +391,12 @@ def get_stops(location):
     if lat == None or lng == None or lat == "" or lng == "":
         return []
 
-    params = {
+    params = keyed({
         "page[limit]": "100",
         "filter[latitude]": str(lat),
         "filter[longitude]": str(lng),
         "sort": "distance",
-    }
+    }, api_key)
 
     rep = http.get(STOPS_URL, params = params, ttl_seconds = LOOKUP_TTL)
     if rep.status_code != 200:
@@ -405,13 +420,7 @@ def get_stops(location):
     if not nearby:
         return []
 
-    service = stop_service([sid for sid, _ in nearby])
-
-    route_ids = {}
-    for sid, _ in nearby:
-        for route_id in service.get(sid, {}).get("routes", []):
-            route_ids[route_id] = True
-    labels = route_labels(sorted(route_ids))
+    service, labels = stop_service([sid for sid, _ in nearby], api_key)
 
     options = []
     for sid, name in nearby:
@@ -470,7 +479,10 @@ def get_schema():
             schema.LocationBased(
                 id = "stop",
                 name = "Stop",
-                desc = "The stop or station name.",
+                desc = "Search by street address, or by coordinates such as " +
+                       "42.4711,-71.0613, to centre on a specific stop. A town " +
+                       "name centres on the town, and only stops within about a " +
+                       "mile of that point are listed.",
                 icon = "bus",
                 handler = get_stops,
             ),
