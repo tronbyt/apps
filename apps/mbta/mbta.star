@@ -145,8 +145,8 @@ def headsign(prediction, route_attrs, trips, attrs):
 
     The route's direction_destinations only describes the line as a whole, so at
     a stop midway along it every vehicle reads as the far terminus. Route 137 at
-    Main St @ Briggs St is the clear case: consecutive buses run to Oak Grove and
-    to Malden, but direction_destinations labels both "Malden Center Station".
+    North Ave @ Church St is the clear case: consecutive buses run to Oak Grove
+    and to Malden, but direction_destinations labels both "Malden Center Station".
     The per-trip headsign is the real answer; the route is the fallback for when
     a trip is missing from the response's included section.
     """
@@ -450,7 +450,35 @@ def get_stops(location, config):
         else:
             options.append(schema.Option(display = name, value = sid))
 
-    return options
+    return preserve_saved(options, config)
+
+def preserve_saved(options, config):
+    """Make sure the stop already configured is still offered.
+
+    The settings page re-queries stops using the device's location rather than
+    whatever was searched when the stop was picked, and it reselects the saved
+    stop only when an option matches it exactly. A stop outside the device's
+    radius therefore disappears from the list, nothing matches, the form quietly
+    falls back to the first entry, and saving overwrites the real choice.
+    Relabelling an option does the same, since the match is on the whole option.
+
+    Re-offering the saved option verbatim keeps it both selectable and selected.
+    """
+    saved = config.get("stop", "")
+    if not saved:
+        return options
+
+    saved_option = json.decode(saved)
+    display = saved_option.get("display", "")
+    value = saved_option.get("value", "")
+    if not display or not value:
+        return options
+
+    for option in options:
+        if option.value == value and option.display == display:
+            return options
+
+    return [schema.Option(display = display, value = value)] + options
 
 def get_schema():
     options = [
@@ -480,7 +508,7 @@ def get_schema():
                 id = "stop",
                 name = "Stop",
                 desc = "Search by street address, or by coordinates such as " +
-                       "42.4711,-71.0613, to centre on a specific stop. A town " +
+                       "42.5056,-71.0784, to centre on a specific stop. A town " +
                        "name centres on the town, and only stops within about a " +
                        "mile of that point are listed.",
                 icon = "bus",
