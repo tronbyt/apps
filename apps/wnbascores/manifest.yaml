@@ -6,7 +6,6 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: lunchbox8484
 fileName: wnba_scores.star
 packageName: wnbascores
-broken: true
 recommendedInterval: 5
 category: sports
 tags:
