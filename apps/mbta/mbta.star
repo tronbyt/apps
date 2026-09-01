@@ -301,11 +301,14 @@ def get_stops(location):
     return stops
 
 def get_route_field(stop_option):
-    """Offer a route filter, but only where one would do something.
+    """Offer a route filter listing the routes that serve the chosen stop.
 
-    Most bus stops are served by a single route in a single direction, and there
-    the filter is a control that cannot change the display. It is only offered
-    once the chosen stop actually has more than one route to choose between.
+    The field is shown even when only one route serves the stop, where it cannot
+    change what is displayed. Hiding it there was tried first and read as a
+    missing feature: most stops are single-route, so most users saw no control at
+    all and had no way to tell whether that was deliberate. Listing the routes is
+    itself useful information, and it keeps the field observable everywhere, so a
+    handler that stops working is visible rather than silent.
     """
     if not stop_option:
         return []
@@ -331,7 +334,7 @@ def get_route_field(stop_option):
             value = route["id"],
         ))
 
-    if len(options) < 2:
+    if not options:
         return []
 
     return [
