@@ -14,6 +14,11 @@ load("time.star", "time")
 URL = "https://api-v3.mbta.com/predictions"
 STOPS_URL = "https://api-v3.mbta.com/stops"
 ROUTES_URL = "https://api-v3.mbta.com/routes"
+SCHEDULES_URL = "https://api-v3.mbta.com/schedules"
+
+# Separates stop id from route id in a stop option's value, for stops served by
+# more than one route. A bare stop id, the old format, still works.
+ROUTE_SEP = "|"
 
 # Stop and route lists are reference data that changes on timetable boundaries,
 # so they are cached hard. Predictions are deliberately not cached: the app's
@@ -23,10 +28,6 @@ LOOKUP_TTL = 3600
 
 # Only two rows fit on a 64x32 display; widget mode has room for another.
 MAX_DEPARTURES = 3
-
-# Sentinel for "do not filter by route". Schema validation rejects both an empty
-# option value and an empty dropdown default, so this cannot be "".
-ROUTE_ALL = "all"
 
 API_KEY = ""
 
@@ -47,16 +48,20 @@ def main(config):
     stop = json.decode(option)
     mintime = config.get("mintime", "0")
     api_key = (config.get("api", "") or "").strip()
-    route_filter = (config.get("route", "") or "").strip()
 
     widgetMode = config.bool("$widget")
+
+    # A stop option carries its route when the stop serves more than one, so
+    # picking a stop picks the route and the direction together. Values saved
+    # before that existed are a bare stop id and still work.
+    stop_id, route_filter = split_stop_value(stop["value"])
 
     params = {
         "sort": "departure_time",
         "include": "route,trip",
-        "filter[stop]": stop["value"],
+        "filter[stop]": stop_id,
     }
-    if route_filter != "" and route_filter != ROUTE_ALL:
+    if route_filter:
         params["filter[route]"] = route_filter
     if api_key != "":
         params["api_key"] = api_key
@@ -259,6 +264,104 @@ def renderDeparture(departure, widgetMode = False):
         cross_align = "center",
     )
 
+def split_stop_value(value):
+    """A stop option's value is "9199|137" where the route matters, else "9199".
+
+    Values saved before the route was folded in are a bare stop id, so both
+    forms have to keep working.
+    """
+    if ROUTE_SEP in value:
+        parts = value.split(ROUTE_SEP)
+        return parts[0], parts[1]
+    return value, ""
+
+def stop_service(stop_ids):
+    """Map each stop to the routes and directions it actually serves.
+
+    The two stops on opposite sides of a street share one name, so the picker
+    listed e.g. "Main St @ Lebanon St" twice with nothing to tell them apart and
+    picking wrong meant watching buses leave the other way. Schedules are the
+    only endpoint tying a stop to a direction, and one batched call covers the
+    whole nearby set.
+
+    Returns {stop_id: {"routes": [...], "directions": [...]}}. A stop with no
+    service today is simply absent, and the caller falls back to a plain name.
+    """
+    if not stop_ids:
+        return {}
+
+    rep = http.get(
+        SCHEDULES_URL,
+        params = {
+            "filter[stop]": ",".join(stop_ids),
+            "page[limit]": "1000",
+            "fields[schedule]": "direction_id",
+        },
+        ttl_seconds = LOOKUP_TTL,
+    )
+    if rep.status_code != 200:
+        return {}
+
+    service = {}
+    for entry in rep.json().get("data", []):
+        rel = entry["relationships"]
+        stop_ref = rel.get("stop", {}).get("data")
+        route_ref = rel.get("route", {}).get("data")
+        if not stop_ref or not route_ref:
+            continue
+
+        sid = stop_ref["id"]
+        if sid not in service:
+            service[sid] = {"routes": {}, "directions": {}}
+        service[sid]["routes"][route_ref["id"]] = True
+
+        # JSON numbers decode to floats, and a float cannot index a list.
+        service[sid]["directions"][int(entry["attributes"]["direction_id"])] = True
+
+    resolved = {}
+    for sid in service:
+        resolved[sid] = {
+            "routes": sorted(service[sid]["routes"]),
+            "directions": sorted(service[sid]["directions"]),
+        }
+    return resolved
+
+def route_labels(route_ids):
+    """Short name and per-direction destination for each route, in one call."""
+    if not route_ids:
+        return {}
+
+    rep = http.get(
+        ROUTES_URL,
+        params = {"filter[id]": ",".join(route_ids)},
+        ttl_seconds = LOOKUP_TTL,
+    )
+    if rep.status_code != 200:
+        return {}
+
+    labels = {}
+    for route in rep.json().get("data", []):
+        attrs = route["attributes"]
+        labels[route["id"]] = {
+            "name": attrs["short_name"] or attrs["long_name"] or route["id"],
+            "destinations": attrs["direction_destinations"] or [],
+        }
+    return labels
+
+def destination_of(labels, route_id, directions):
+    """Where this route goes from this stop, when the stop serves one direction.
+
+    A stop serving both directions of the same route cannot be disambiguated by
+    stop and route alone, so it gets no destination rather than a misleading one.
+    """
+    if len(directions) != 1:
+        return ""
+    destinations = labels.get(route_id, {}).get("destinations", [])
+    direction = directions[0]
+    if direction < len(destinations):
+        return destinations[direction]
+    return ""
+
 def get_stops(location):
     loc = json.decode(location)
 
@@ -287,66 +390,58 @@ def get_stops(location):
         # keyless clients are throttled at 20 requests/minute so a non-200 is
         # reachable from the settings screen alone.
         return []
-    data = rep.json()
-    stops = []
-    for s in data["data"]:
+
+    nearby = []
+    name_counts = {}
+    for s in rep.json()["data"]:
         if s["type"] != "stop":
             continue
         if s["relationships"]["parent_station"]["data"]:
             continue
-        stops.append(schema.Option(
-            display = s["attributes"]["name"],
-            value = s["id"],
-        ))
-    return stops
+        name = s["attributes"]["name"]
+        nearby.append((s["id"], name))
+        name_counts[name] = name_counts.get(name, 0) + 1
 
-def get_route_field(stop_option):
-    """Offer a route filter listing the routes that serve the chosen stop.
-
-    The field is shown even when only one route serves the stop, where it cannot
-    change what is displayed. Hiding it there was tried first and read as a
-    missing feature: most stops are single-route, so most users saw no control at
-    all and had no way to tell whether that was deliberate. Listing the routes is
-    itself useful information, and it keeps the field observable everywhere, so a
-    handler that stops working is visible rather than silent.
-    """
-    if not stop_option:
+    if not nearby:
         return []
 
-    stop = json.decode(stop_option)
-    stop_id = stop.get("value", "")
-    if not stop_id:
-        return []
+    service = stop_service([sid for sid, _ in nearby])
 
-    rep = http.get(
-        ROUTES_URL,
-        params = {"filter[stop]": stop_id},
-        ttl_seconds = LOOKUP_TTL,
-    )
-    if rep.status_code != 200:
-        return []
+    route_ids = {}
+    for sid, _ in nearby:
+        for route_id in service.get(sid, {}).get("routes", []):
+            route_ids[route_id] = True
+    labels = route_labels(sorted(route_ids))
 
     options = []
-    for route in rep.json()["data"]:
-        attrs = route["attributes"]
-        options.append(schema.Option(
-            display = attrs["short_name"] or attrs["long_name"] or route["id"],
-            value = route["id"],
-        ))
+    for sid, name in nearby:
+        routes = service.get(sid, {}).get("routes", [])
+        directions = service.get(sid, {}).get("directions", [])
 
-    if not options:
-        return []
+        # One option per route where the stop serves several, so choosing a stop
+        # chooses the route and the direction together.
+        if len(routes) > 1:
+            for route_id in routes:
+                destination = destination_of(labels, route_id, directions)
+                label = labels.get(route_id, {}).get("name", route_id)
+                suffix = "{} to {}".format(label, destination) if destination else label
+                options.append(schema.Option(
+                    display = "{} ({})".format(name, suffix),
+                    value = "{}{}{}".format(sid, ROUTE_SEP, route_id),
+                ))
+            continue
 
-    return [
-        schema.Dropdown(
-            id = "route",
-            name = "Route",
-            desc = "Show only one of the routes serving this stop.",
-            icon = "bus",
-            default = ROUTE_ALL,
-            options = [schema.Option(display = "All routes", value = ROUTE_ALL)] + options,
-        ),
-    ]
+        # A single-route stop only needs a label when its name is ambiguous.
+        destination = destination_of(labels, routes[0], directions) if routes else ""
+        if name_counts[name] > 1 and destination:
+            options.append(schema.Option(
+                display = "{} (to {})".format(name, destination),
+                value = sid,
+            ))
+        else:
+            options.append(schema.Option(display = name, value = sid))
+
+    return options
 
 def get_schema():
     options = [
@@ -378,11 +473,6 @@ def get_schema():
                 desc = "The stop or station name.",
                 icon = "bus",
                 handler = get_stops,
-            ),
-            schema.Generated(
-                id = "route_generated",
-                source = "stop",
-                handler = get_route_field,
             ),
             schema.Dropdown(
                 id = "mintime",
