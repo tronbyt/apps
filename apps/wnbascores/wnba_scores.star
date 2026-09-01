@@ -495,7 +495,7 @@ teamOptions = [
     ),
     schema.Option(
         display = "Connecticut Sun",
-        value = "CONN",
+        value = "CON",
     ),
     schema.Option(
         display = "Dallas Wings",
@@ -530,8 +530,16 @@ teamOptions = [
         value = "PHX",
     ),
     schema.Option(
+        display = "Portland Fire",
+        value = "POR",
+    ),
+    schema.Option(
         display = "Seattle Storm",
         value = "SEA",
+    ),
+    schema.Option(
+        display = "Toronto Tempo",
+        value = "TOR",
     ),
     schema.Option(
         display = "Washington Mystics",
