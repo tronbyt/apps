@@ -1,0 +1,6 @@
+---
+id: p2000
+name: P2000
+summary: P2000 by region and service
+desc: Displays the latest Dutch P2000 alert on a Tronbyt or HUB75 display. Filter alerts by up to three safety regions, capcodes, and individual emergency services.
+author: bertvm
