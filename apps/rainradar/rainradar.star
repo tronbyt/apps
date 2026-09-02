@@ -88,7 +88,7 @@ def _hud_frame(radar, label, stamp):
                 children = [
                     render.Box(
                         height = 7,
-                        color = "#000000",
+                        color = "#0007",
                         child = render.Padding(
                             pad = (1, 0, 1, 0),
                             child = render.Row(
