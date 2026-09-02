@@ -1,3 +1,4 @@
+---
 id: newsy
 name: Newsy
 summary: RSS headline ticker
@@ -9,3 +10,5 @@ recommendedInterval: 5
 category: news
 tags:
   - news
+published: '2026-09-02T18:55:45Z'
+updated: '2026-09-02T18:55:45Z'
