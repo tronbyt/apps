@@ -1267,6 +1267,396 @@ minutesObj = {
             {"text": ["e cinquanta", "nove"], "h": 0, "o": 2, "military": True},
         ],
     },
+    "zh-CN": {
+        "0": [
+            {"text": [], "h": 0, "o": 2, "military": True},
+            {"text": [], "h": 0, "o": 2},
+            {"text": ["整"], "h": 0, "o": 2},
+        ],
+        "1": [
+            {"text": ["零一分"], "h": 0, "o": 2, "military": True},
+            {"text": ["一分"], "h": 0, "o": 2},
+        ],
+        "2": [
+            {"text": ["零二分"], "h": 0, "o": 2, "military": True},
+            {"text": ["二分"], "h": 0, "o": 2},
+        ],
+        "3": [
+            {"text": ["零三分"], "h": 0, "o": 2, "military": True},
+            {"text": ["三分"], "h": 0, "o": 2},
+        ],
+        "4": [
+            {"text": ["零四分"], "h": 0, "o": 2, "military": True},
+            {"text": ["四分"], "h": 0, "o": 2},
+        ],
+        "5": [
+            {"text": ["零五分"], "h": 0, "o": 2, "military": True},
+            {"text": ["五分"], "h": 0, "o": 2},
+        ],
+        "6": [
+            {"text": ["零六分"], "h": 0, "o": 2, "military": True},
+            {"text": ["六分"], "h": 0, "o": 2},
+        ],
+        "7": [
+            {"text": ["零七分"], "h": 0, "o": 2, "military": True},
+            {"text": ["七分"], "h": 0, "o": 2},
+        ],
+        "8": [
+            {"text": ["零八分"], "h": 0, "o": 2, "military": True},
+            {"text": ["八分"], "h": 0, "o": 2},
+        ],
+        "9": [
+            {"text": ["零九分"], "h": 0, "o": 2, "military": True},
+            {"text": ["九分"], "h": 0, "o": 2},
+        ],
+        "10": [
+            {"text": ["十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "11": [
+            {"text": ["十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "12": [
+            {"text": ["十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "13": [
+            {"text": ["十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "14": [
+            {"text": ["十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "15": [
+            {"text": ["十五分"], "h": 0, "o": 2, "military": True},
+            {"text": ["一刻"], "h": 0, "o": 2},
+        ],
+        "16": [
+            {"text": ["十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "17": [
+            {"text": ["十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "18": [
+            {"text": ["十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "19": [
+            {"text": ["十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "20": [
+            {"text": ["二十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "21": [
+            {"text": ["二十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "22": [
+            {"text": ["二十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "23": [
+            {"text": ["二十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "24": [
+            {"text": ["二十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "25": [
+            {"text": ["二十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "26": [
+            {"text": ["二十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "27": [
+            {"text": ["二十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "28": [
+            {"text": ["二十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "29": [
+            {"text": ["二十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "30": [
+            {"text": ["三十分"], "h": 0, "o": 2, "military": True},
+            {"text": ["半"], "h": 0, "o": 2},
+        ],
+        "31": [
+            {"text": ["三十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "32": [
+            {"text": ["三十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "33": [
+            {"text": ["三十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "34": [
+            {"text": ["三十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "35": [
+            {"text": ["三十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "36": [
+            {"text": ["三十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "37": [
+            {"text": ["三十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "38": [
+            {"text": ["三十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "39": [
+            {"text": ["三十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "40": [
+            {"text": ["四十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "41": [
+            {"text": ["四十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "42": [
+            {"text": ["四十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "43": [
+            {"text": ["四十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "44": [
+            {"text": ["四十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "45": [
+            {"text": ["四十五分"], "h": 0, "o": 2, "military": True},
+            {"text": ["三刻"], "h": 0, "o": 2},
+            {"text": ["差一刻"], "h": 1, "o": 1},
+        ],
+        "46": [
+            {"text": ["四十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "47": [
+            {"text": ["四十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "48": [
+            {"text": ["四十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "49": [
+            {"text": ["四十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "50": [
+            {"text": ["五十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "51": [
+            {"text": ["五十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "52": [
+            {"text": ["五十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "53": [
+            {"text": ["五十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "54": [
+            {"text": ["五十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "55": [
+            {"text": ["五十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "56": [
+            {"text": ["五十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "57": [
+            {"text": ["五十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "58": [
+            {"text": ["五十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "59": [
+            {"text": ["五十九分"], "h": 0, "o": 2, "military": True},
+        ],
+    },
+    "ja-JP": {
+        "0": [
+            {"text": [], "h": 0, "o": 2, "military": True},
+            {"text": [], "h": 0, "o": 2},
+        ],
+        "1": [
+            {"text": ["一分"], "h": 0, "o": 2, "military": True},
+            {"text": ["一分"], "h": 0, "o": 2},
+        ],
+        "2": [
+            {"text": ["二分"], "h": 0, "o": 2, "military": True},
+            {"text": ["二分"], "h": 0, "o": 2},
+        ],
+        "3": [
+            {"text": ["三分"], "h": 0, "o": 2, "military": True},
+            {"text": ["三分"], "h": 0, "o": 2},
+        ],
+        "4": [
+            {"text": ["四分"], "h": 0, "o": 2, "military": True},
+            {"text": ["四分"], "h": 0, "o": 2},
+        ],
+        "5": [
+            {"text": ["五分"], "h": 0, "o": 2, "military": True},
+            {"text": ["五分"], "h": 0, "o": 2},
+        ],
+        "6": [
+            {"text": ["六分"], "h": 0, "o": 2, "military": True},
+            {"text": ["六分"], "h": 0, "o": 2},
+        ],
+        "7": [
+            {"text": ["七分"], "h": 0, "o": 2, "military": True},
+            {"text": ["七分"], "h": 0, "o": 2},
+        ],
+        "8": [
+            {"text": ["八分"], "h": 0, "o": 2, "military": True},
+            {"text": ["八分"], "h": 0, "o": 2},
+        ],
+        "9": [
+            {"text": ["九分"], "h": 0, "o": 2, "military": True},
+            {"text": ["九分"], "h": 0, "o": 2},
+        ],
+        "10": [
+            {"text": ["十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "11": [
+            {"text": ["十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "12": [
+            {"text": ["十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "13": [
+            {"text": ["十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "14": [
+            {"text": ["十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "15": [
+            {"text": ["十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "16": [
+            {"text": ["十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "17": [
+            {"text": ["十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "18": [
+            {"text": ["十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "19": [
+            {"text": ["十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "20": [
+            {"text": ["二十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "21": [
+            {"text": ["二十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "22": [
+            {"text": ["二十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "23": [
+            {"text": ["二十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "24": [
+            {"text": ["二十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "25": [
+            {"text": ["二十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "26": [
+            {"text": ["二十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "27": [
+            {"text": ["二十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "28": [
+            {"text": ["二十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "29": [
+            {"text": ["二十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "30": [
+            {"text": ["三十分"], "h": 0, "o": 2, "military": True},
+            {"text": ["半"], "h": 0, "o": 2},
+        ],
+        "31": [
+            {"text": ["三十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "32": [
+            {"text": ["三十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "33": [
+            {"text": ["三十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "34": [
+            {"text": ["三十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "35": [
+            {"text": ["三十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "36": [
+            {"text": ["三十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "37": [
+            {"text": ["三十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "38": [
+            {"text": ["三十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "39": [
+            {"text": ["三十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "40": [
+            {"text": ["四十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "41": [
+            {"text": ["四十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "42": [
+            {"text": ["四十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "43": [
+            {"text": ["四十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "44": [
+            {"text": ["四十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "45": [
+            {"text": ["四十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "46": [
+            {"text": ["四十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "47": [
+            {"text": ["四十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "48": [
+            {"text": ["四十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "49": [
+            {"text": ["四十九分"], "h": 0, "o": 2, "military": True},
+        ],
+        "50": [
+            {"text": ["五十分"], "h": 0, "o": 2, "military": True},
+        ],
+        "51": [
+            {"text": ["五十一分"], "h": 0, "o": 2, "military": True},
+        ],
+        "52": [
+            {"text": ["五十二分"], "h": 0, "o": 2, "military": True},
+        ],
+        "53": [
+            {"text": ["五十三分"], "h": 0, "o": 2, "military": True},
+        ],
+        "54": [
+            {"text": ["五十四分"], "h": 0, "o": 2, "military": True},
+        ],
+        "55": [
+            {"text": ["五十五分"], "h": 0, "o": 2, "military": True},
+        ],
+        "56": [
+            {"text": ["五十六分"], "h": 0, "o": 2, "military": True},
+        ],
+        "57": [
+            {"text": ["五十七分"], "h": 0, "o": 2, "military": True},
+        ],
+        "58": [
+            {"text": ["五十八分"], "h": 0, "o": 2, "military": True},
+        ],
+        "59": [
+            {"text": ["五十九分"], "h": 0, "o": 2, "military": True},
+        ],
+    },
 }
 
 timeOfDayObj = {
@@ -1321,6 +1711,8 @@ timeOfDayObj = {
         {"hourMin": 13, "hourMax": 18, "text": [["del pomeriggio"]]},
         {"hourMin": 18, "hourMax": 24, "text": [["di sera"]]},
     ],
+    "zh-CN": [],
+    "ja-JP": [],
 }
 
 hoursObj = {
@@ -1483,6 +1875,58 @@ hoursObj = {
         "21": ["le nove", "le ventuno"],
         "22": ["le dieci", "le ventidue"],
         "23": ["le undici", "le ventitré"],
+    },
+    "zh-CN": {
+        "0": ["十二点", "零点"],
+        "1": ["一点", "一点"],
+        "2": ["兩点", "兩点"],
+        "3": ["三点", "三点"],
+        "4": ["四点", "四点"],
+        "5": ["五点", "五点"],
+        "6": ["六点", "六点"],
+        "7": ["七点", "七点"],
+        "8": ["八点", "八点"],
+        "9": ["九点", "九点"],
+        "10": ["十点", "十点"],
+        "11": ["十一点", "十一点"],
+        "12": ["十二点", "十二点"],
+        "13": ["一点", "十三点"],
+        "14": ["兩点", "十四点"],
+        "15": ["三点", "十五点"],
+        "16": ["四点", "十六点"],
+        "17": ["五点", "十七点"],
+        "18": ["六点", "十八点"],
+        "19": ["七点", "十九点"],
+        "20": ["八点", "二十点"],
+        "21": ["九点", "二十一点"],
+        "22": ["十点", "二十二点"],
+        "23": ["十一点", "二十三点"],
+    },
+    "ja-JP": {
+        "0": ["十二時", "零時"],
+        "1": ["一時", "一時"],
+        "2": ["二時", "二時"],
+        "3": ["三時", "三時"],
+        "4": ["四時", "四時"],
+        "5": ["五時", "五時"],
+        "6": ["六時", "六時"],
+        "7": ["七時", "七時"],
+        "8": ["八時", "八時"],
+        "9": ["九時", "九時"],
+        "10": ["十時", "十時"],
+        "11": ["十一時", "十一時"],
+        "12": ["十二時", "十二時"],
+        "13": ["一時", "十三時"],
+        "14": ["二時", "十四時"],
+        "15": ["三時", "十五時"],
+        "16": ["四時", "十六時"],
+        "17": ["五時", "十七時"],
+        "18": ["六時", "十八時"],
+        "19": ["七時", "十九時"],
+        "20": ["八時", "二十時"],
+        "21": ["九時", "二十一時"],
+        "22": ["十時", "二十二時"],
+        "23": ["十一時", "二十三時"],
     },
 }
 
@@ -1652,6 +2096,60 @@ gameOfThronesObj = {
         "22": "",
         "23": "",
     },
+    "zh-CN": {
+        "stem": "",
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": "",
+        "7": "",
+        "8": "",
+        "9": "",
+        "10": "",
+        "11": "",
+        "12": "",
+        "13": "",
+        "14": "",
+        "15": "",
+        "16": "",
+        "17": "",
+        "18": "",
+        "19": "",
+        "20": "",
+        "21": "",
+        "22": "",
+        "23": "",
+    },
+    "ja-JP": {
+        "stem": "",
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": "",
+        "7": "",
+        "8": "",
+        "9": "",
+        "10": "",
+        "11": "",
+        "12": "",
+        "13": "",
+        "14": "",
+        "15": "",
+        "16": "",
+        "17": "",
+        "18": "",
+        "19": "",
+        "20": "",
+        "21": "",
+        "22": "",
+        "23": "",
+    },
 }
 
 specialObj = {
@@ -1701,6 +2199,8 @@ specialObj = {
         "12:0": [["mezzogiorno"], ["mezzogiorno"], ["mezzogiorno", "in punto"]],
         "12:30": [["mezzogiorno", "e mezzo"], ["mezzogiorno", "e trenta"]],
     },
+    "zh-CN": {},
+    "ja-JP": {},
 }
 
 # Everything about a dialect that is behaviour rather than vocabulary.
@@ -1737,6 +2237,8 @@ dialectObj = {
         "ampm": ["AM", "PM"],
         "dayPartFollowsHourWord": False,
         "additiveHourIndex": 0,
+        "glyphs": False,
+        "lineHeight": 8,
         "upperFixups": [],
     },
     "fr-FR": {
@@ -1749,6 +2251,8 @@ dialectObj = {
         "ampm": [],
         "dayPartFollowsHourWord": True,
         "additiveHourIndex": 0,
+        "glyphs": False,
+        "lineHeight": 8,
         "upperFixups": [],
     },
     "de-DE": {
@@ -1761,6 +2265,8 @@ dialectObj = {
         "ampm": [],
         "dayPartFollowsHourWord": False,
         "additiveHourIndex": 1,
+        "glyphs": False,
+        "lineHeight": 8,
         "upperFixups": [["ß", "SS"]],
     },
     "es-ES": {
@@ -1773,6 +2279,8 @@ dialectObj = {
         "ampm": [],
         "dayPartFollowsHourWord": True,
         "additiveHourIndex": 0,
+        "glyphs": False,
+        "lineHeight": 8,
         "upperFixups": [],
     },
     "pt-BR": {
@@ -1785,6 +2293,8 @@ dialectObj = {
         "ampm": [],
         "dayPartFollowsHourWord": True,
         "additiveHourIndex": 0,
+        "glyphs": False,
+        "lineHeight": 8,
         "upperFixups": [],
     },
     "it-IT": {
@@ -1797,7 +2307,37 @@ dialectObj = {
         "ampm": [],
         "dayPartFollowsHourWord": True,
         "additiveHourIndex": 0,
+        "glyphs": False,
+        "lineHeight": 8,
         "upperFixups": [],
+    },
+    "zh-CN": {
+        "subtitleFont": "tom-thumb",
+        "subtitleHeight": 8,
+        "subtitleCascade": False,
+        "militaryPad": "",
+        "militaryNoun": [],
+        "militarySingularHours": [],
+        "ampm": [],
+        "dayPartFollowsHourWord": False,
+        "additiveHourIndex": 0,
+        "upperFixups": [],
+        "glyphs": True,
+        "lineHeight": 14,
+    },
+    "ja-JP": {
+        "subtitleFont": "tom-thumb",
+        "subtitleHeight": 8,
+        "subtitleCascade": False,
+        "militaryPad": "",
+        "militaryNoun": [],
+        "militarySingularHours": [],
+        "ampm": [],
+        "dayPartFollowsHourWord": False,
+        "additiveHourIndex": 0,
+        "upperFixups": [],
+        "glyphs": True,
+        "lineHeight": 14,
     },
 }
 
@@ -1907,6 +2447,79 @@ def time_of_day(hour, timeOfDay, config, rules):
                 returnTime += timeRange["text"][rangeIndex]
         return returnTime
 
+# Chinese and Japanese have no font here to draw them with: every one of pixlet's
+# 27 built-in fonts is Latin, and each CJK codepoint renders as the same tofu box.
+# So those two dialects carry their own 12x12 bitmaps, one hex digit per three
+# pixels, twelve rows per glyph.
+#
+# Source: the Shinonome 12-dot gothic font (shnmk12), by Yasuyuki Furukawa and
+# maintained by /efont/ -- http://openlab.ring.gr.jp/efont/ -- released into the
+# public domain, with conversion and embedding explicitly permitted.
+#
+# JIS X 0208 has no simplified 两, so Chinese two o'clock uses the traditional 兩.
+# Same word, same reading; only the glyph is the older form.
+cjkGlyphs = {
+    "零": "7fc040ffe842b5a0a03f8c067f8048058040",
+    "一": "0000000000000007fe000000000000000000",
+    "二": "0000007fc000000000000000000ffe000000",
+    "三": "0007fc0000000003f8000000000000ffe000",
+    "四": "000ffe8a28a28a2926a1ec02802ffe000000",
+    "五": "0003fc0400400403f80480480880880887fe",
+    "六": "040040040ffe000120110208204404804000",
+    "七": "10010010010011efe01001001001041040fc",
+    "八": "0001f0010010110110110108208204404802",
+    "九": "0800800807f009009009009011011221240e",
+    "十": "040040040040ffe040040040040040040040",
+    "点": "04004007e0403f82082083f8000524492892",
+    "時": "020efca20a20bfee08bfea88a48a08e08018",
+    "分": "0900900881082045fa849048048088108230",
+    "半": "0402481481507fc040040ffe040040040040",
+    "刻": "102112ff2112292692152252482182242c06",
+    "差": "1100a07fc0403f8040ffe2003fc4208203fe",
+    "整": "220fbeaa4fa4758a942227fc04027c240ffe",
+    "兩": "000ffe040ffe842b5a94a94aad6c62842846",
+}
+
+CJK_SIZE = 12
+
+# the glyph box is inked edge to edge, so stacked lines need explicit leading
+CJK_LEAD = 2
+
+def cjk_row(bits, color):
+    children = []
+    run = 0
+    gap = 0
+    for i in range(CJK_SIZE):
+        if (bits >> (CJK_SIZE - 1 - i)) & 1:
+            if gap > 0:
+                children.append(render.Box(width = gap, height = 1))
+                gap = 0
+            run += 1
+        else:
+            if run > 0:
+                children.append(render.Box(width = run, height = 1, color = color))
+                run = 0
+            gap += 1
+    if run > 0:
+        children.append(render.Box(width = run, height = 1, color = color))
+    if gap > 0:
+        children.append(render.Box(width = gap, height = 1))
+    return render.Row(children = children)
+
+def cjk_char(ch, color):
+    hexrows = cjkGlyphs.get(ch)
+    if not hexrows:
+        return render.Box(width = CJK_SIZE, height = CJK_SIZE)
+    return render.Column(
+        children = [cjk_row(int(hexrows[i * 3:(i + 1) * 3], 16), color) for i in range(CJK_SIZE)],
+    )
+
+def cjk_line(text, color):
+    return render.Padding(
+        pad = (0, 0, 0, CJK_LEAD),
+        child = render.Row(children = [cjk_char(c, color) for c in text.codepoints()]),
+    )
+
 def to_caps(lines, rules):
     # .upper() leaves "ß" alone, so German would read "DREIßIG"; its uppercase is "SS"
     out = []
@@ -1916,9 +2529,8 @@ def to_caps(lines, rules):
         out.append(line.upper())
     return out
 
-def calculate_top_margin(showTime, subTime, littleH):
+def calculate_top_margin(showTime, subTime, bigH, littleH):
     fullHeight = 32
-    bigH = 8
 
     topMargin = int(math.ceil((fullHeight - (bigH * len(showTime)) - (littleH * len(subTime))) / 2))
 
@@ -1964,7 +2576,7 @@ def main(config):
         subTime = time_of_day(dayPartHour, timeOfDay, config, rules)
 
     # the panel is 32px tall; drop the subtitle rather than clip the time
-    if (8 * len(showTime)) + (rules["subtitleHeight"] * len(subTime)) > 32:
+    if (rules["lineHeight"] * len(showTime)) + (rules["subtitleHeight"] * len(subTime)) > 32:
         subTime = []
 
     # apply lettercase styling
@@ -1973,7 +2585,10 @@ def main(config):
         subTime = to_caps(subTime, rules)
 
     # render the words
-    textTime = [render.Text(" " * i + s) for i, s in enumerate(showTime)]
+    if rules["glyphs"]:
+        textTime = [cjk_line(s, "#fff") for s in showTime]
+    else:
+        textTime = [render.Text(" " * i + s) for i, s in enumerate(showTime)]
 
     subIndent = len(showTime) if rules["subtitleCascade"] else 0
 
@@ -1983,7 +2598,7 @@ def main(config):
     ) for i, s in enumerate(subTime)]
 
     # center the text vertically
-    topMargin = calculate_top_margin(showTime, subTime, rules["subtitleHeight"])
+    topMargin = calculate_top_margin(showTime, subTime, rules["lineHeight"], rules["subtitleHeight"])
 
     # once the column already fills the panel, a bottom pad costs it a row --
     # and that row is where the descenders of the last line live
@@ -2023,6 +2638,14 @@ def get_schema():
         schema.Option(
             display = "Português (Brasil)",
             value = "pt-BR",
+        ),
+        schema.Option(
+            display = "中文 (简体)",
+            value = "zh-CN",
+        ),
+        schema.Option(
+            display = "日本語",
+            value = "ja-JP",
         ),
     ]
 
