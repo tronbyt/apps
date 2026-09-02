@@ -149,7 +149,7 @@ def get_ambient_weather_conditions(application_key, api_key, station_id, display
             fail("Ambient Weather device was not found. Check the station MAC address.")
 
     conditions = station.get("lastData", {})
-    temp_f = conditions.get("tempf", conditions.get("temp1f"))
+    temp_f = conditions.get("tempf")
     if temp_f == None:
         fail("The selected Ambient Weather device has no outdoor temperature reading.")
 
