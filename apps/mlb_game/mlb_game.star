@@ -4,7 +4,7 @@
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -986,6 +986,217 @@ def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final,
         ),
     )
 
+# ----------------------- Square (64x64) layout --------------------------------
+def is_square():
+    # Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    # 2x square one 128x128, so a bare height test gets both wrong.
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def square_team_tile(bg, code3, score, logo_url):
+    fg = team_font_color(bg)
+    left = render.Row(
+        children = [
+            team_logo_sprite(code3, fg, logo_url),
+            spacer_w(3),
+            render.Text(code3, font = "CG-pixel-3x5-mono", color = fg),
+        ],
+        main_align = "start",
+        cross_align = "center",
+    )
+    return render.Box(
+        color = bg,
+        height = 16,
+        padding = 1,
+        child = render.Row(
+            children = [left, render.Text(str(score), font = "6x13", color = fg)],
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "center",
+        ),
+    )
+
+def square_bases(on1, on2, on3):
+    # Same diamond trio as bases_tile, packed into 15 rows for the square strip.
+    top = render.Row(children = [base_diamond(on2)], main_align = "center")
+    mid = render.Row(
+        children = [base_diamond(on3), spacer_w(3), base_diamond(on1)],
+        main_align = "center",
+    )
+    return render.Column(
+        children = [top, spacer_h(1), mid],
+        main_align = "start",
+        cross_align = "center",
+    )
+
+def square_inning_group(inning, top_half, game_label):
+    row = render.Row(
+        children = [
+            render.Column(
+                children = [spacer_h(3), tiny_arrow(top_half)],
+                main_align = "start",
+                cross_align = "start",
+            ),
+            spacer_w(1),
+            render.Text(str(inning), font = "5x8"),
+        ],
+        main_align = "start",
+        cross_align = "start",
+    )
+    if game_label == "":
+        return row
+    return render.Column(
+        children = [
+            render.Row(
+                children = [render.Text(game_label, font = "CG-pixel-3x5-mono")],
+                main_align = "center",
+            ),
+            row,
+        ],
+        main_align = "start",
+        cross_align = "center",
+    )
+
+def square_count_group(balls, strikes, outs):
+    return render.Column(
+        children = [
+            render.Row(
+                children = [render.Text(str(balls) + "-" + str(strikes), font = "5x8")],
+                main_align = "center",
+                cross_align = "center",
+            ),
+            spacer_h(1),
+            render.Row(children = [outs_row(outs)], main_align = "center", cross_align = "center"),
+        ],
+        main_align = "start",
+        cross_align = "center",
+    )
+
+def square_status_live(d):
+    return render.Box(
+        height = 15,
+        child = render.Row(
+            children = [
+                render.Box(width = 17, height = 15, child = square_bases(d["on1"], d["on2"], d["on3"])),
+                spacer_w(6),
+                square_inning_group(d["inning"], d["top"], d["game_label"]),
+                spacer_w(6),
+                square_count_group(d["balls"], d["strikes"], d["outs"]),
+            ],
+            main_align = "center",
+            cross_align = "center",
+        ),
+    )
+
+def square_status_final(game_label):
+    children = []
+    if game_label != "":
+        children.append(render.Row(
+            children = [render.Text(game_label, font = "CG-pixel-3x5-mono")],
+            main_align = "center",
+        ))
+    children.append(render.Row(
+        children = [render.Text("Final", font = "6x10-rounded")],
+        main_align = "center",
+    ))
+    return render.Box(
+        height = 15,
+        child = render.Column(
+            children = children,
+            main_align = "center",
+            cross_align = "center",
+        ),
+    )
+
+def square_status_preview(game_label):
+    if game_label != "":
+        return render.Box(
+            height = 15,
+            child = render.Text(game_label, font = "CG-pixel-3x5-mono"),
+        )
+    return render.Box(height = 15, child = square_bases(False, False, False))
+
+def square_stat_cell(text, color):
+    return render.Box(
+        width = 11,
+        height = 5,
+        child = render.Text(text, font = "CG-pixel-3x5-mono", color = color),
+    )
+
+def square_stat_row(label, r, h, e, color):
+    return render.Row(
+        children = [
+            render.Box(
+                width = 15,
+                height = 5,
+                child = render.Text(label, font = "CG-pixel-3x5-mono", color = color),
+            ),
+            square_stat_cell(r, color),
+            square_stat_cell(h, color),
+            square_stat_cell(e, color),
+        ],
+        main_align = "start",
+        cross_align = "start",
+    )
+
+def square_boxscore(d):
+    header = render.Row(
+        children = [
+            render.Box(width = 15, height = 5),
+            square_stat_cell("R", "#ffd24a"),
+            square_stat_cell("H", "#ffd24a"),
+            square_stat_cell("E", "#ffd24a"),
+        ],
+        main_align = "start",
+        cross_align = "start",
+    )
+    away_row = square_stat_row(
+        d["away"],
+        str(d["ascore"]),
+        str(as_int(d.get("ahits"), 0)),
+        str(as_int(d.get("aerrors"), 0)),
+        "#ffffff",
+    )
+    home_row = square_stat_row(
+        d["home"],
+        str(d["hscore"]),
+        str(as_int(d.get("hhits"), 0)),
+        str(as_int(d.get("herrors"), 0)),
+        "#ffffff",
+    )
+    return render.Box(
+        height = 17,
+        child = render.Column(
+            children = [header, spacer_h(1), away_row, spacer_h(1), home_row],
+            main_align = "start",
+            cross_align = "start",
+        ),
+    )
+
+def square_layout(d):
+    away_tile = square_team_tile(d["away_bg"], d["away"], d["ascore"], d["away_logo_url"])
+    home_tile = square_team_tile(d["home_bg"], d["home"], d["hscore"], d["home_logo_url"])
+    if d["is_final"]:
+        status = square_status_final(d["game_label"])
+        bottom = square_boxscore(d)
+    elif d["is_preview"]:
+        status = square_status_preview(d["game_label"])
+        bottom = render.Box(
+            height = 17,
+            child = count_tile(d["inning"], d["top"], d["balls"], d["strikes"], d["outs"], d["start_text"], ""),
+        )
+    else:
+        status = square_status_live(d)
+        bottom = square_boxscore(d)
+    return render.Box(
+        color = "#000000",
+        child = render.Column(
+            children = [away_tile, home_tile, status, bottom],
+            main_align = "start",
+            cross_align = "stretch",
+        ),
+    )
+
 # ----------------------- Fetch + cache (no try/except) ------------------------
 def get_game_data(config):
     d = default_game()
@@ -1091,6 +1302,18 @@ def get_game_data(config):
         d["on2"] = has_runner(offense, "second")
         d["on3"] = has_runner(offense, "third")
 
+        # Hits and errors feed the box-score line on square (64x64) panels.
+        ls_teams = linescore.get("teams")
+        if type(ls_teams) == "dict":
+            ls_away = ls_teams.get("away")
+            ls_home = ls_teams.get("home")
+            if type(ls_away) == "dict":
+                d["ahits"] = as_int(ls_away.get("hits"), 0)
+                d["aerrors"] = as_int(ls_away.get("errors"), 0)
+            if type(ls_home) == "dict":
+                d["hhits"] = as_int(ls_home.get("hits"), 0)
+                d["herrors"] = as_int(ls_home.get("errors"), 0)
+
     return d
 
 # ----------------------- Main -------------------------------------------------
@@ -1114,6 +1337,10 @@ def main(config):
         v = config.get(k)
         if v != None and type(v) == "bool":
             d[k] = v
+
+    # 64x64 panels get their own layout; wide panels keep the layout below.
+    if is_square():
+        return render.Root(child = square_layout(d))
 
     return render.Root(
         child = render.Box(
