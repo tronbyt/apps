@@ -1,0 +1,15 @@
+---
+id: sonos-now-playing
+name: Sonos Now Playing
+summary: What's playing on a Sonos
+desc: Shows the track playing on a Sonos speaker with title, artist, album, art, and play state, polled directly over your LAN. No cloud account, no OAuth, no API key. It talks UPnP to the speaker itself, so it needs a tronbyt-style server on the same network as the speaker. Enter the speaker's IP address to set it up; until then it shows a demo card.
+author: nsluke
+fileName: sonos_now_playing.star
+packageName: sonosnowplaying
+recommendedInterval: 1
+category: entertainment
+tags:
+  - music
+  - sonos
+  - now-playing
+  - smart-home
