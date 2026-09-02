@@ -144,7 +144,7 @@ def _marker(px, py, style):
     )
 
 def _fetch_basemap_tile(zoom, x, y):
-    url = "https://a.basemaps.cartocdn.com/dark_all/%d/%d/%d.png" % (zoom, x, y)
+    url = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/%d/%d/%d" % (zoom, y, x)
     res = http.get(
         url,
         ttl_seconds = BASEMAP_TTL,
