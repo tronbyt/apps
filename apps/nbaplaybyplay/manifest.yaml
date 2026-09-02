@@ -1,0 +1,15 @@
+---
+id: nba-play-by-play
+name: NBA Play By Play
+summary: Follow your NBA team live
+desc: Live game state for your favorite NBA team, sibling of NFL Play By Play. During games it shows the quarter and clock with the score on team-color bands, and the last play scrolls by when ESPN reports one. On game day it counts down to tipoff with both teams' records; the rest of the week it shows your team's record with division standings scrolling underneath. Works with no setup (it defaults to the Knicks) - pick your team in the settings. Uses ESPN's public scoreboard, no API key needed.
+author: nsluke
+fileName: nba_play_by_play.star
+packageName: nbaplaybyplay
+recommendedInterval: 30
+category: sports
+tags:
+  - nba
+  - basketball
+  - sports
+  - live
