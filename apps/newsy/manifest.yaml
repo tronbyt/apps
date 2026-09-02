@@ -1,0 +1,11 @@
+id: newsy
+name: Newsy
+summary: RSS headline ticker
+desc: Custom 64x32 RSS news ticker displaying headlines from Google News, BBC, NPR, Associated Press, or custom feeds.
+author: SamuLab
+fileName: newsy.star
+packageName: newsy
+recommendedInterval: 5
+category: news
+tags:
+  - news
