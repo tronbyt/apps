@@ -1,0 +1,16 @@
+---
+id: cfb-play-by-play
+name: CFB Play By Play
+summary: Follow your CFB team live
+desc: Live game state for your college football team, the college sibling of NFL Play By Play. During games it shows the score, quarter and clock, down and distance, field position, possession, and timeouts on team-color bands; on game day it shows kickoff time with ranks and records, and the rest of the week your record, next game, and the AP Top 10. Works out of the box following Ohio State - enter any FBS team's ESPN abbreviation (OSU, MICH, BAMA, TEX) to follow yours. Uses ESPN's public scoreboard, no API key needed.
+author: nsluke
+fileName: cfb_play_by_play.star
+packageName: cfbplaybyplay
+recommendedInterval: 1
+category: sports
+tags:
+  - cfb
+  - ncaaf
+  - college football
+  - sports
+  - live
