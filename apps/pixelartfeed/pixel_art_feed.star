@@ -515,6 +515,16 @@ def probe_webp(body, o):
 
 # --- Layout ---
 
+def is_square(w, h):
+    """True on a square panel, false on the 2:1 one.
+
+    Branches on the panel's SHAPE, never its size. A 2x device reports the
+    doubled canvas — 128x64 when it is wide, 128x128 when it is square —
+    so a height test would call both of those 64-tall and get one of them
+    wrong. The slack keeps a merely tallish panel on the wide branch.
+    """
+    return h * 2 > w + 16
+
 def build_art(art, w, h, overlay, mode, speed):
     """Scale the piece for the panel, panning it if it overflows."""
     iw, ih = art["iw"], art["ih"]
@@ -534,8 +544,21 @@ def build_art(art, w, h, overlay, mode, speed):
     # Pan mode. Fit across the panel first; if the piece is so wide that
     # doing so leaves it as a thin band, fit its height and pan sideways
     # instead. Either way nothing is cropped — it's all shown, in time.
+    #
+    # Where "a thin band" starts depends on the panel's shape. On the 2:1
+    # panel, 60% of the height means only pieces wider than about 3.4:1
+    # get laid on their side, and the letterboxing that leaves below that
+    # is a few rows. A square panel measured the same way would letterbox
+    # everything from 1:1 to 1.7:1 — 5:4, 4:3, 3:2, the shapes most pixel
+    # art is actually drawn in — and bar a third of the panel to do it. So
+    # a square asks for the full height: anything that does not already
+    # reach the bottom is covered by its height and panned sideways
+    # instead, which fills the square and still shows the whole piece.
+    # Travel stays short, since a piece in that band is at most ~1.7:1.
+    band = h if is_square(w, h) else h * 6 // 10
+
     sw, sh = by_width
-    if sh < h * 6 // 10:
+    if sh < band:
         sw, sh = by_height
 
     if sh > h and sh - h <= MAX_TRAVEL:
