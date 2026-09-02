@@ -38,7 +38,7 @@ load("images/tb_logo.png", TB_LOGO_ASSET = "file")
 load("images/tex_logo.png", TEX_LOGO_ASSET = "file")
 load("images/tor_logo.png", TOR_LOGO_ASSET = "file")
 load("images/was_logo.png", WAS_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -85,6 +85,12 @@ HIGHLIGHT_COLOR = "#65FE08"
 # get top 9 teams (almost everyone)
 DISPLAY_LIMIT = 9
 
+# square panel layout: team rows are 9px tall (render_Team),
+# six of them fit below a 10px header
+ROW_HEIGHT = 9
+SQUARE_PAGE_SIZE = 6
+SQUARE_HEADER_HEIGHT = 10
+
 CACHE_TIMEOUT = 300  # five minutes
 
 HTTP_SUCCESS_CODE = 200
@@ -97,6 +103,10 @@ def main(config):
     year = str(time.now().year)  #use current year
 
     standings = get_Standings(league_id, year)
+
+    # square panels get their own layout so we can show six teams per page
+    if is_square():
+        return render_SquareWildCard(standings, league_id, year)
 
     # if we have some widgets, we can display them now
     if len(standings) > 0:
@@ -149,6 +159,78 @@ def build_keyframe(offset, pct):
         percentage = pct,
         transforms = [animation.Translate(0, offset)],
         curve = "ease_in_out",
+    )
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def render_SquareWildCard(standings, league_id, year):
+    # zero-state for square panels: league logo centered, message underneath
+    if len(standings) == 0:
+        return render.Root(
+            child = render.Stack(
+                children = [
+                    render.Padding(
+                        pad = (0, 13, 0, 0),
+                        child = render.Image(
+                            src = MLB_LEAGUE_IMAGE,
+                        ),
+                    ),
+                    render.Padding(
+                        pad = (0, 52, 0, 0),
+                        child = render.Marquee(
+                            width = 64,
+                            child = render.Text(
+                                content = "No wild card race to display for league year " + year,
+                                color = SMALL_FONT_COLOR,
+                                font = SMALL_FONT,
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+    # same 9px team rows as the wide layout, but six whole rows fit under the
+    # header, so we pan through two pages (1-6, then the last six) instead of
+    # three; rows slide underneath the opaque header so no sliver rows show
+    rows = len(standings)
+    second_stop = SQUARE_HEADER_HEIGHT
+    if rows > SQUARE_PAGE_SIZE:
+        second_stop = SQUARE_HEADER_HEIGHT - ROW_HEIGHT * (rows - SQUARE_PAGE_SIZE)
+    return render.Root(
+        delay = 80,
+        show_full_animation = True,
+        child = render.Stack(
+            children = [
+                animation.Transformation(
+                    duration = 200,
+                    height = ROW_HEIGHT * rows,
+                    keyframes = [
+                        build_keyframe(SQUARE_HEADER_HEIGHT, 0.0),
+                        build_keyframe(SQUARE_HEADER_HEIGHT, 0.45),
+                        build_keyframe(second_stop, 0.60),
+                        build_keyframe(second_stop, 1.0),
+                    ],
+                    child = render_WildCardStandings(standings),
+                    wait_for_child = True,
+                ),
+                render_SquareHeader(league_id),
+            ],
+        ),
+    )
+
+def render_SquareHeader(league_id):
+    text = "NL" if league_id == NL_LEAGUE_ID else "AL"
+    text += " WILD CARD"
+    return render.Box(
+        height = SQUARE_HEADER_HEIGHT,
+        width = 64,
+        color = "#000000",
+        child = render_rainbow_word(text, GAMES_BACK_FONT),
     )
 
 def get_schema():
