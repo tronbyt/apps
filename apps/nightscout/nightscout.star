@@ -92,6 +92,12 @@ GRAPH_BOTTOM = 40
 MIN_CACHE_TTL = 10 * time.second
 READING_AGE_THRESHOLD = 5 * time.minute + 30 * time.second
 
+# Readings outside this range are reported as LOW/HIGH instead of a number.
+LOW_READING = 39
+HIGH_READING = 401
+LABEL_LOW = "LOW"
+LABEL_HIGH = "HIGH"
+
 DEFAULT_LOCATION = """
 {
     "lat": "40.666250",
@@ -161,6 +167,9 @@ def main(config):
             return display_failure("Nightscout Error: " + str(status_code) + " " + http.status_text(status_code))
 
     # Pull the data from the cache
+    if nightscout_data["sgv_current"] == "":
+        return display_failure("Nightscout: No recent readings")
+
     sgv_current_mgdl = int(nightscout_data["sgv_current"])
     sgv_delta = nightscout_data["sgv_delta"]
     latest_reading_dt = nightscout_data["latest_reading_date"]
@@ -196,6 +205,11 @@ def main(config):
             str_delta = "+0"
         elif (sgv_delta > 0):
             str_delta = "+" + str_delta
+
+    if sgv_current_mgdl <= LOW_READING:
+        str_current = LABEL_LOW
+    elif sgv_current_mgdl >= HIGH_READING:
+        str_current = LABEL_HIGH
 
     str_delta = str_delta.replace("0", "O")
 
@@ -523,7 +537,7 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
         left_delta_row = [
             render.WrappedText(
                 content = str_delta,
-                font = "10x13" if IS_2X else "CG-pixel-3x5-mono",
+                font = "6x10" if IS_2X else "CG-pixel-3x5-mono",
                 color = color_delta,
                 linespacing = 2 * SCALE,
                 width = left_col_width,
@@ -552,36 +566,24 @@ def build_no_clock_layouts(str_current, str_delta, direction, reading_mins_ago, 
         ]
 
     left_column_string = [
-        render.Row(
-            children = [
-                render.Box(
-                    height = 3 * SCALE,
-                    width = SCALE,
-                ),
-            ],
+        render.Box(
+            height = 3 * SCALE,
+            width = SCALE,
         ),
-        render.Row(
-            children = [
-                render.WrappedText(
-                    content = str_current,
-                    font = FONT_MEDIUM,
-                    color = color_reading,
-                    width = left_col_width,
-                    height = 14 * SCALE,
-                    align = "center",
-                ),
-            ],
+        render.WrappedText(
+            content = str_current,
+            font = FONT_MEDIUM,
+            color = color_reading,
+            width = left_col_width,
+            height = 14 * SCALE,
+            align = "center",
         ),
         render.Row(
             children = left_delta_row,
         ),
-        render.Row(
-            children = [
-                render.Box(
-                    height = 2 * SCALE,
-                    width = SCALE,
-                ),
-            ],
+        render.Box(
+            height = 2 * SCALE,
+            width = SCALE,
         ),
         render.Row(
             main_align = "start",
@@ -681,23 +683,15 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
             ),
             render.Row(
                 cross_align = "center",
-                main_align = "start",
+                main_align = "space_evenly",
                 expanded = True,
                 children = [
-                    render.Box(
-                        width = 7 * SCALE,
-                        height = 18 * SCALE,
-                    ),
                     render.WrappedText(
                         content = str_current,
                         font = FONT_MEDIUM,
                         color = color_reading,
-                        width = 40 if IS_2X else 18,
+                        width = 28 * SCALE,
                         align = "center",
-                        height = 18 * SCALE,
-                    ),
-                    render.Box(
-                        width = 4 * SCALE,
                         height = 18 * SCALE,
                     ),
                     render.WrappedText(
@@ -708,10 +702,6 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
                         width = 30 * SCALE,
                         linespacing = 0,
                         height = 14 * SCALE,
-                    ),
-                    render.Box(
-                        width = 5 * SCALE,
-                        height = 18 * SCALE,
                     ),
                 ],
             ),
@@ -828,51 +818,27 @@ def build_clock_layouts(clock_option, now, show_24_hour_time, nightscout_iob, ni
         ]
 
     left_column_string = [
-        render.Row(
-            children = [
-                render.Box(
-                    height = SCALE,
-                    width = SCALE,
-                ),
-            ],
+        render.Box(
+            height = SCALE,
+            width = SCALE,
         ),
-        render.Row(
-            main_align = "center",
-            cross_align = "start",
-            children = [
-                render.WrappedText(
-                    content = str_current,
-                    font = FONT_MEDIUM,
-                    color = color_reading,
-                    width = left_col_width,
-                    height = 12 * SCALE,
-                    align = "center",
-                ),
-            ],
+        render.WrappedText(
+            content = str_current,
+            font = FONT_MEDIUM,
+            color = color_reading,
+            width = left_col_width,
+            height = 12 * SCALE,
+            align = "center",
         ),
         render.Row(
             children = left_delta_row,
         ),
-        render.Row(
-            main_align = "center",
-            cross_align = "start",
-            children = [
-                render.Animation(
-                    sm_clock_row,
-                ),
-            ],
-        ),
-        render.Row(
-            main_align = "center",
-            cross_align = "start",
-            children = [
-                render.Text(
-                    content = full_ago_dashes,
-                    font = FONT_TINY,
-                    color = color_ago,
-                    offset = SCALE,
-                ),
-            ],
+        render.Animation(sm_clock_row),
+        render.Text(
+            content = full_ago_dashes,
+            font = FONT_TINY,
+            color = color_ago,
+            offset = SCALE,
         ),
     ]
 
@@ -973,13 +939,9 @@ def build_two_column_output(left_column_string, graph_plot, graph_hour_bars, gra
                                 cross_align = "start",
                                 expanded = True,
                                 children = [
-                                    render.Column(
-                                        children = [
-                                            render.Box(
-                                                width = SCALE,
-                                                height = 32 * SCALE,
-                                            ),
-                                        ],
+                                    render.Box(
+                                        width = SCALE,
+                                        height = 32 * SCALE,
                                     ),
                                     render.Column(
                                         cross_align = "center",
@@ -1324,7 +1286,7 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
         ns_properties = resp.json()
 
     sgv_current = ""
-    sgv_delta = ""
+    sgv_delta = 0
     latest_reading_date = ""
     direction = ""
     iob = "n/a"
@@ -1332,16 +1294,26 @@ def get_nightscout_data(nightscout_url, nightscout_token, show_graph, display_un
     nightscout_history = []
 
     if "bgnow" in ns_properties:
-        if "last" in ns_properties["bgnow"]:
-            sgv_current = str(int(ns_properties["bgnow"]["last"]))
-        if "mills" in ns_properties["bgnow"]:
-            latest_reading_date = time.from_timestamp(int(ns_properties["bgnow"]["mills"] / 1000))
+        bgnow = ns_properties["bgnow"]
+
+        # Nightscout leaves "last" and "mills" off of bgnow when the reading is
+        # out of range, so fall back to the newest entry in sgvs.
+        sgvs = bgnow.get("sgvs", [])
+
+        if "last" in bgnow:
+            sgv_current = str(int(bgnow["last"]))
+        elif sgvs:
+            sgv_current = str(int(sgvs[0]["mgdl"]))
+
+        if "mills" in bgnow:
+            latest_reading_date = time.from_timestamp(int(bgnow["mills"] / 1000))
+        elif sgvs:
+            latest_reading_date = time.from_timestamp(int(sgvs[0]["mills"] / 1000))
     if "delta" in ns_properties:
         if "absolute" in ns_properties["delta"]:
-            sgv_delta = ns_properties["delta"]["absolute"]
-            sgv_delta = int(sgv_delta)
-            if display_unit == "mmol":
-                sgv_delta = mgdl_to_mmol(int(sgv_delta))
+            sgv_delta = int(ns_properties["delta"]["absolute"])
+    if display_unit == "mmol":
+        sgv_delta = mgdl_to_mmol(sgv_delta)
     if "direction" in ns_properties:
         if "value" in ns_properties["direction"]:
             direction = ns_properties["direction"]["value"]
