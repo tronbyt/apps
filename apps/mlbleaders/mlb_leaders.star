@@ -10,7 +10,7 @@ Author: rs7q5
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -114,6 +114,9 @@ def main(config):
     else:
         statName_vec = [config.str("statName%d" % (idx + 1), x) for idx, x in enumerate(["homeRuns", "hits", "battingAverage"])]
     display_opt = config.bool("show_single", False)
+
+    if is_square():  #square panels get their own vertical layout
+        return main_square(config, statName_vec, display_opt)
 
     frames_all = []
     frames_all2 = []
@@ -397,3 +400,147 @@ def get_frame_multi(stat):
                 if idx2 == 1:  #only show top 2
                     break
     return render.Marquee(render.Row(expanded = False, children = frame_tmp), scroll_direction = "horizontal", width = 64, offset_start = 64, offset_end = 64)
+
+#####################################################
+#functions for square (64x64) displays
+def is_square():
+    #branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    #2x square one 128x128, so a bare height test gets both wrong
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def main_square(config, statName_vec, display_opt):
+    #square panels have twice the rows, so the leaders stack vertically (like
+    #the single statistic format) instead of scrolling by sideways
+    w, h = canvas.size()
+
+    if display_opt:  #show statistic 1 only (same as wide but more rows visible)
+        x = statName_vec[0]
+        stat_tmp = get_leaders(x)
+
+        if config.bool("title_bkgd", False):
+            title_tmp = render.Box(
+                width = w,
+                height = 5,
+                color = mlb_blue,
+                child = render.Marquee(width = w, child = render.Text(format_title(x), font = font, color = "#fff")),
+            )
+        else:
+            title_tmp = render.Marquee(width = w, child = render.Text(format_title(x), font = font, color = mlb_blue))
+
+        if type(stat_tmp) != "dict":
+            frame_tmp = render.WrappedText(stat_tmp[0], font = font, color = mlb_red)
+        else:
+            frame_tmp = render.Marquee(
+                render.Column(expanded = False, children = get_frame_single_square(stat_tmp, w)),
+                scroll_direction = "vertical",
+                height = h - 5,
+                offset_start = 32,
+                offset_end = 32,
+            )
+        final_frame = render.Column([title_tmp, frame_tmp])
+    else:  #all statistics scroll vertically in one long column
+        frames_all = []
+        for _, x in enumerate(statName_vec):
+            stat_tmp = get_leaders(x)
+            frames_all.extend(get_title_square(format_title(x), w, config.bool("title_bkgd", False)))
+            if type(stat_tmp) != "dict":
+                frames_all.append(render.WrappedText(stat_tmp[0], font = font, color = mlb_red))
+            else:
+                frames_all.extend(get_frame_multi_square(stat_tmp))
+        final_frame = render.Marquee(
+            render.Column(expanded = False, children = frames_all),
+            scroll_direction = "vertical",
+            height = h,
+            offset_start = 32,
+            offset_end = 32,
+        )
+
+    return render.Root(
+        delay = int(config.str("speed", "50")),  #speed up scroll text
+        show_full_animation = True,
+        child = final_frame,
+    )
+
+def get_title_square(title, w, title_bkgd):
+    #stat titles scroll with the stats on a square panel, so wrap long ones
+    #onto multiple full lines (a nested marquee doesn't animate)
+    span = w // 4  #characters per line (font is monospaced 3px wide + 1px space)
+
+    lines = []
+    line_tmp = ""
+    for word in split_sentence(title, span, join_word = True).split(" "):
+        if word == "":
+            continue
+        line_new = word if line_tmp == "" else line_tmp + " " + word
+        if len(line_new) > span:
+            lines.append(line_tmp)
+            line_tmp = word
+        else:
+            line_tmp = line_new
+    if line_tmp != "":
+        lines.append(line_tmp)
+
+    title_tmp = []
+    for idx, line in enumerate(lines):
+        if idx > 0:  #1px gap so wrapped lines don't touch
+            title_tmp.append(render.Box(width = w, height = 1, color = mlb_blue if title_bkgd else "#000"))
+        if title_bkgd:
+            title_tmp.append(render.Stack(children = [
+                render.Box(width = w, height = 5, color = mlb_blue),
+                render.Text(line, font = font, color = "#fff"),
+            ]))
+        else:
+            title_tmp.append(render.Text(line, font = font, color = mlb_blue))
+    return title_tmp
+
+def get_frame_single_square(stat, w):
+    #same rows as get_frame_single (all leaders grabbed), sized to the panel
+    frame_tmp = []
+    for key, val in stat.items():
+        frame_tmp.append(render.Box(width = w, height = 7, child = render.Text(key, font = font), color = "#808080"))
+        if val == []:
+            frame_tmp.append(render.Text("NONE", font = font))
+        else:
+            for idx2, y in enumerate(val):
+                frame_tmp.append(get_leader_row_square(y, color_opts[idx2 % 2]))
+    return frame_tmp
+
+def get_frame_multi_square(stat):
+    #same stats as get_frame_multi (top 2 of each group), one row per leader
+    frame_tmp = []
+    for key, val in stat.items():
+        frame_tmp.append(render.Text(key, font = font, color = mlb_red))
+        if val == []:
+            frame_tmp.append(render.Text("NONE", font = font))
+            continue
+        for idx2, y in enumerate(val):
+            frame_tmp.append(get_leader_row_square(y, color_opts[idx2 % 2]))
+            if idx2 == 1:  #only show top 2
+                break
+    return frame_tmp
+
+def get_leader_row_square(y, ctmp):
+    #one leader row (rank and name on the left, team and value on the right)
+    name_tmp = split_sentence(y[1], 8, join_word = True)
+    name_final = render.WrappedText(content = name_tmp, width = 32, font = font4, color = ctmp)
+    rank_name = render.Row(
+        children = [
+            render.Text("%d." % y[0], font = font4, color = ctmp),  #rank
+            name_final,
+        ],
+    )
+    return render.Row(
+        expanded = True,
+        main_align = "space_between",
+        children = [
+            rank_name,
+            render.Column(
+                cross_align = "end",
+                children = [
+                    render.Text(y[2], font = font, color = ctmp),  #team
+                    render.Text(y[3], font = font, color = mlb_red),  #value
+                ],
+            ),
+        ],
+    )
