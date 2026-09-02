@@ -1,0 +1,14 @@
+---
+id: google-calendar
+name: Google Calendar
+summary: Your next event at a glance
+desc: Shows the next event on your primary Google Calendar - the title beside a pixel calendar icon, with when it starts, NOW while it is in progress, and All day for date-only events. On a tronbyt server with a Google connection it works with no setup via the injected token; otherwise supply a Google Cloud OAuth client ID, secret, and a refresh token minted once with the calendar read-only scope. With nothing left today it previews the next event in the coming week.
+author: nsluke
+fileName: google_calendar.star
+packageName: googlecalendar
+recommendedInterval: 5
+category: utilities
+tags:
+  - calendar
+  - productivity
+  - google
