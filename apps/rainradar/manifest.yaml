@@ -1,0 +1,12 @@
+id: rainradar
+name: RainRadar
+summary: Animated local weather radar
+desc: 64x32 animated weather radar centered on a location you pick. Uses RainViewer scans from about the last hour on a dark map.
+author: SamuLab
+fileName: rainradar.star
+packageName: rainradar
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - radar
