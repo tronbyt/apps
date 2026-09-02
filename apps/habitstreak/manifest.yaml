@@ -1,0 +1,15 @@
+---
+id: habit-streak
+name: Habit Streak
+summary: Streak flame for any habit
+desc: A streak flame for any habit, with no API, no account, and all of the math on-device. Set the day your streak started and bump "last completed" whenever you do the thing; the app handles daily, weekday, and weekly cadences with weekend grace, timezone-correct day rollover, and a month of history as dots. With nothing configured it shows a clearly-labeled demo streak. Displays can't take button input, so the two dates are the honest interface for now - server-push logging is future work.
+author: nsluke
+fileName: habit_streak.star
+packageName: habitstreak
+recommendedInterval: 30
+category: lifestyle
+tags:
+  - habit
+  - streak
+  - motivation
+  - lifestyle
