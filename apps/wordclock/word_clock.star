@@ -194,6 +194,214 @@ minutesObj = {
             {"text": ["one", "to"], "h": 1, "o": 1},
         ],
     },
+    "fr-FR": {
+        "0": [
+            {"text": [], "h": 0, "o": 2, "military": True},
+            {"text": [], "h": 0, "o": 2},
+            {"text": ["pile"], "h": 0, "o": 2},
+        ],
+        "1": [
+            {"text": ["une"], "h": 0, "o": 2, "military": True},
+            {"text": ["une"], "h": 0, "o": 2},
+        ],
+        "2": [
+            {"text": ["deux"], "h": 0, "o": 2, "military": True},
+            {"text": ["deux"], "h": 0, "o": 2},
+        ],
+        "3": [
+            {"text": ["trois"], "h": 0, "o": 2, "military": True},
+            {"text": ["trois"], "h": 0, "o": 2},
+        ],
+        "4": [
+            {"text": ["quatre"], "h": 0, "o": 2, "military": True},
+            {"text": ["quatre"], "h": 0, "o": 2},
+        ],
+        "5": [
+            {"text": ["cinq"], "h": 0, "o": 2, "military": True},
+            {"text": ["cinq"], "h": 0, "o": 2},
+        ],
+        "6": [
+            {"text": ["six"], "h": 0, "o": 2, "military": True},
+            {"text": ["six"], "h": 0, "o": 2},
+        ],
+        "7": [
+            {"text": ["sept"], "h": 0, "o": 2, "military": True},
+            {"text": ["sept"], "h": 0, "o": 2},
+        ],
+        "8": [
+            {"text": ["huit"], "h": 0, "o": 2, "military": True},
+            {"text": ["huit"], "h": 0, "o": 2},
+        ],
+        "9": [
+            {"text": ["neuf"], "h": 0, "o": 2, "military": True},
+            {"text": ["neuf"], "h": 0, "o": 2},
+        ],
+        "10": [
+            {"text": ["dix"], "h": 0, "o": 2, "military": True},
+        ],
+        "11": [
+            {"text": ["onze"], "h": 0, "o": 2, "military": True},
+        ],
+        "12": [
+            {"text": ["douze"], "h": 0, "o": 2, "military": True},
+        ],
+        "13": [
+            {"text": ["treize"], "h": 0, "o": 2, "military": True},
+        ],
+        "14": [
+            {"text": ["quatorze"], "h": 0, "o": 2, "military": True},
+        ],
+        "15": [
+            {"text": ["quinze"], "h": 0, "o": 2, "military": True},
+            {"text": ["et quart"], "h": 0, "o": 2},
+        ],
+        "16": [
+            {"text": ["seize"], "h": 0, "o": 2, "military": True},
+        ],
+        "17": [
+            {"text": ["dix-sept"], "h": 0, "o": 2, "military": True},
+        ],
+        "18": [
+            {"text": ["dix-huit"], "h": 0, "o": 2, "military": True},
+        ],
+        "19": [
+            {"text": ["dix-neuf"], "h": 0, "o": 2, "military": True},
+        ],
+        "20": [
+            {"text": ["vingt"], "h": 0, "o": 2, "military": True},
+        ],
+        "21": [
+            {"text": ["vingt", "et-une"], "h": 0, "o": 2, "military": True},
+        ],
+        "22": [
+            {"text": ["vingt-deux"], "h": 0, "o": 2, "military": True},
+        ],
+        "23": [
+            {"text": ["vingt-trois"], "h": 0, "o": 2, "military": True},
+        ],
+        "24": [
+            {"text": ["vingt", "quatre"], "h": 0, "o": 2, "military": True},
+        ],
+        "25": [
+            {"text": ["vingt-cinq"], "h": 0, "o": 2, "military": True},
+        ],
+        "26": [
+            {"text": ["vingt-six"], "h": 0, "o": 2, "military": True},
+        ],
+        "27": [
+            {"text": ["vingt-sept"], "h": 0, "o": 2, "military": True},
+        ],
+        "28": [
+            {"text": ["vingt-huit"], "h": 0, "o": 2, "military": True},
+        ],
+        "29": [
+            {"text": ["vingt-neuf"], "h": 0, "o": 2, "military": True},
+        ],
+        "30": [
+            {"text": ["trente"], "h": 0, "o": 2, "military": True},
+            {"text": ["et demie"], "h": 0, "o": 2},
+        ],
+        "31": [
+            {"text": ["trente", "et-une"], "h": 0, "o": 2, "military": True},
+        ],
+        "32": [
+            {"text": ["trente-deux"], "h": 0, "o": 2, "military": True},
+        ],
+        "33": [
+            {"text": ["trente-trois"], "h": 0, "o": 2, "military": True},
+        ],
+        "34": [
+            {"text": ["trente", "quatre"], "h": 0, "o": 2, "military": True},
+        ],
+        "35": [
+            {"text": ["trente-cinq"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "vingt-cinq"], "h": 1, "o": 2},
+        ],
+        "36": [
+            {"text": ["trente-six"], "h": 0, "o": 2, "military": True},
+        ],
+        "37": [
+            {"text": ["trente-sept"], "h": 0, "o": 2, "military": True},
+        ],
+        "38": [
+            {"text": ["trente-huit"], "h": 0, "o": 2, "military": True},
+        ],
+        "39": [
+            {"text": ["trente-neuf"], "h": 0, "o": 2, "military": True},
+        ],
+        "40": [
+            {"text": ["quarante"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "vingt"], "h": 1, "o": 2},
+        ],
+        "41": [
+            {"text": ["quarante", "et-une"], "h": 0, "o": 2, "military": True},
+        ],
+        "42": [
+            {"text": ["quarante", "deux"], "h": 0, "o": 2, "military": True},
+        ],
+        "43": [
+            {"text": ["quarante", "trois"], "h": 0, "o": 2, "military": True},
+        ],
+        "44": [
+            {"text": ["quarante", "quatre"], "h": 0, "o": 2, "military": True},
+        ],
+        "45": [
+            {"text": ["quarante", "cinq"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "le quart"], "h": 1, "o": 2},
+        ],
+        "46": [
+            {"text": ["quarante", "six"], "h": 0, "o": 2, "military": True},
+        ],
+        "47": [
+            {"text": ["quarante", "sept"], "h": 0, "o": 2, "military": True},
+        ],
+        "48": [
+            {"text": ["quarante", "huit"], "h": 0, "o": 2, "military": True},
+        ],
+        "49": [
+            {"text": ["quarante", "neuf"], "h": 0, "o": 2, "military": True},
+        ],
+        "50": [
+            {"text": ["cinquante"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "dix"], "h": 1, "o": 2},
+        ],
+        "51": [
+            {"text": ["cinquante", "et-une"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "neuf"], "h": 1, "o": 2},
+        ],
+        "52": [
+            {"text": ["cinquante", "deux"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "huit"], "h": 1, "o": 2},
+        ],
+        "53": [
+            {"text": ["cinquante", "trois"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "sept"], "h": 1, "o": 2},
+        ],
+        "54": [
+            {"text": ["cinquante", "quatre"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "six"], "h": 1, "o": 2},
+        ],
+        "55": [
+            {"text": ["cinquante", "cinq"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "cinq"], "h": 1, "o": 2},
+        ],
+        "56": [
+            {"text": ["cinquante", "six"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "quatre"], "h": 1, "o": 2},
+        ],
+        "57": [
+            {"text": ["cinquante", "sept"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "trois"], "h": 1, "o": 2},
+        ],
+        "58": [
+            {"text": ["cinquante", "huit"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "deux"], "h": 1, "o": 2},
+        ],
+        "59": [
+            {"text": ["cinquante", "neuf"], "h": 0, "o": 2, "military": True},
+            {"text": ["moins", "une"], "h": 1, "o": 2},
+        ],
+    },
 }
 
 timeOfDayObj = {
@@ -202,6 +410,17 @@ timeOfDayObj = {
         {"hourMin": 12, "hourMax": 17, "text": [["in the", "afternoon"], ["PM"]]},
         {"hourMin": 17, "hourMax": 21, "text": [["in the", "evening"], ["PM"]]},
         {"hourMin": 21, "hourMax": 24, "text": [["at night"], ["PM"]]},
+    ],
+    # French ranges are not the English ones: 21:00-23:59 is "du soir", never
+    # "de la nuit", and midi/minuit take no complement at all. Ranges must stay
+    # disjoint -- time_of_day() concatenates every match rather than picking one.
+    "fr-FR": [
+        {"hourMin": 0, "hourMax": 1, "text": [[]]},
+        {"hourMin": 1, "hourMax": 5, "text": [["du matin"], ["de la nuit"]]},
+        {"hourMin": 5, "hourMax": 12, "text": [["du matin"]]},
+        {"hourMin": 12, "hourMax": 13, "text": [[]]},
+        {"hourMin": 13, "hourMax": 18, "text": [["de l'après-midi"]]},
+        {"hourMin": 18, "hourMax": 24, "text": [["du soir"]]},
     ],
 }
 
@@ -231,6 +450,36 @@ hoursObj = {
         "21": ["nine", "twenty-one"],
         "22": ["ten", "twenty-two"],
         "23": ["eleven", "twenty-three"],
+    },
+    # Index 0 is the 12-hour word and carries the hour noun, because agreement
+    # depends on the hour ("une heure" vs "deux heures"). Index -1 is the bare
+    # 24-hour numeral: "dix-sept heures" is 70px on a 63px line, so military_time()
+    # renders the noun as its own line instead.
+    "fr-FR": {
+        "0": ["minuit", "zéro"],
+        "1": ["une heure", "une"],
+        "2": ["deux heures", "deux"],
+        "3": ["trois heures", "trois"],
+        "4": ["quatre heures", "quatre"],
+        "5": ["cinq heures", "cinq"],
+        "6": ["six heures", "six"],
+        "7": ["sept heures", "sept"],
+        "8": ["huit heures", "huit"],
+        "9": ["neuf heures", "neuf"],
+        "10": ["dix heures", "dix"],
+        "11": ["onze heures", "onze"],
+        "12": ["midi", "douze"],
+        "13": ["une heure", "treize"],
+        "14": ["deux heures", "quatorze"],
+        "15": ["trois heures", "quinze"],
+        "16": ["quatre heures", "seize"],
+        "17": ["cinq heures", "dix-sept"],
+        "18": ["six heures", "dix-huit"],
+        "19": ["sept heures", "dix-neuf"],
+        "20": ["huit heures", "vingt"],
+        "21": ["neuf heures", "vingt-et-une"],
+        "22": ["dix heures", "vingt-deux"],
+        "23": ["onze heures", "vingt-trois"],
     },
 }
 
@@ -262,6 +511,36 @@ gameOfThronesObj = {
         "22": "ghosts",
         "23": "ghosts",
     },
+    # Not translated: the hour names belong to an English-language franchise and
+    # game_of_thrones() is gated to en-US. The key still has to exist, because
+    # main() indexes this table for whatever dialect is selected.
+    "fr-FR": {
+        "stem": "",
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": "",
+        "7": "",
+        "8": "",
+        "9": "",
+        "10": "",
+        "11": "",
+        "12": "",
+        "13": "",
+        "14": "",
+        "15": "",
+        "16": "",
+        "17": "",
+        "18": "",
+        "19": "",
+        "20": "",
+        "21": "",
+        "22": "",
+        "23": "",
+    },
 }
 
 specialObj = {
@@ -269,17 +548,73 @@ specialObj = {
         "0:0": [["midnight"], ["twelve"], ["twelve", "o'clock"]],
         "12:0": [["noon"], ["twelve"], ["twelve", "o'clock"]],
     },
+    # The :30 entries carry the one agreement the minute table cannot express:
+    # postposed "demi" agrees with the noun before it, so it is "huit heures et
+    # demie" but "midi et demi". A minute entry cannot know which hour it landed on.
+    "fr-FR": {
+        "0:0": [["minuit"], ["minuit", "pile"]],
+        "0:30": [["minuit", "et demi"], ["minuit", "trente"]],
+        "12:0": [["midi"], ["midi", "pile"]],
+        "12:30": [["midi", "et demi"], ["midi", "trente"]],
+    },
 }
 
-def military_time(hour, min, hours, minutes):
+# Everything about a dialect that is behaviour rather than vocabulary.
+#
+# subtitleFont     CG-pixel-3x5-mono has no accented glyphs at all -- they render
+#                  zero-width, so "l'après-midi" would come out "l'aprs-midi".
+#                  tom-thumb is the same size class and does carry them.
+# subtitleHeight   the glyph box plus the 1px padding above and below each line.
+# subtitleCascade  whether the subtitle keeps stepping right under the time.
+#                  French complements are long ("de l'après-midi" is 59px of a
+#                  63px line), so they start at the margin instead.
+# militaryPad      English pads a 24-hour hour ("zero eight hundred"). French
+#                  speaks no leading zero: 07:05 is "sept heures cinq".
+# militaryNoun     dialects that say an hour noun get it as its own line, so a
+#                  long hour word ("dix-sept heures") never outgrows the panel.
+#                  Singular first: "zéro heure", "une heure", "vingt-et-une heures".
+# ampm             empty for dialects that have no such convention. French has
+#                  none, and "AM" is actively misleading -- it reads as "après-midi".
+# dayPartFollowsHourWord
+#                  which hour the part-of-day complement describes. In French it
+#                  belongs to the hour that was spoken, so "moins" times take the
+#                  complement of the hour they count back from -- 17:50 is "six
+#                  heures moins dix du soir", and 11:45 is "midi moins le quart"
+#                  with none at all. English says "quarter til twelve in the
+#                  morning", where the complement still describes 11:45.
+dialectObj = {
+    "en-US": {
+        "subtitleFont": "CG-pixel-3x5-mono",
+        "subtitleHeight": 7,
+        "subtitleCascade": True,
+        "militaryPad": "zero ",
+        "militaryNoun": [],
+        "ampm": ["AM", "PM"],
+        "dayPartFollowsHourWord": False,
+    },
+    "fr-FR": {
+        "subtitleFont": "tom-thumb",
+        "subtitleHeight": 8,
+        "subtitleCascade": False,
+        "militaryPad": "",
+        "militaryNoun": ["heure", "heures"],
+        "ampm": [],
+        "dayPartFollowsHourWord": True,
+    },
+}
+
+def military_time(hour, min, hours, minutes, rules):
     returnTime = []
 
     # add hour text
     hourText = ""
-    if hour < 10 and hour > 0:
-        hourText += "zero "
+    if rules["militaryPad"] and hour < 10 and hour > 0:
+        hourText += rules["militaryPad"]
     hourText += hours[str(hour)][-1]
     returnTime.append(hourText)
+
+    if rules["militaryNoun"]:
+        returnTime.append(rules["militaryNoun"][0] if hour <= 1 else rules["militaryNoun"][1])
 
     # add minutes text
     returnTime += minutes[str(min)][0]["text"]
@@ -289,14 +624,15 @@ def military_time(hour, min, hours, minutes):
 def display_time(hour, min, hours, minutes, special, config):
     returnTime = []
 
+    # a time the dialect words specially (noon, midnight, "midi et demi")
+    specialKey = (":").join([str(hour), str(min)])
+
     if config.get("display", "random") == "random":
-        # handle noon and midnight
-        if hour % 12 == 0 and min == 0:
-            specialKey = (":").join([str(hour), str(min)])
+        if specialKey in special:
             specialIndex = random.number(0, len(special[specialKey]) - 1)
             for i in special[specialKey][specialIndex]:
                 returnTime.append(i)
-            return returnTime
+            return returnTime, hour
         else:
             # handle all other times
             # get hour text options
@@ -305,7 +641,7 @@ def display_time(hour, min, hours, minutes, special, config):
             nextHourText = hours[str(nextHourIndex)][0]
 
             # get a random entry of the minute (that isn't military time)
-            minuteMinimum = 1 if min < 10 else 0
+            minuteMinimum = 1 if min < 10 and len(minutes[str(min)]) > 1 else 0
             minuteMaximum = len(minutes[str(min)]) - 1
             minuteIndex = random.number(minuteMinimum, minuteMaximum)
             minuteObj = minutes[str(min)][minuteIndex]
@@ -314,66 +650,66 @@ def display_time(hour, min, hours, minutes, special, config):
             # h is whether to use the subsequent hour word
             # o is whether the text comes before (1) or after (2) the hour word
             hourWord = thisHourText if minuteObj["h"] == 0 else nextHourText
+            spokenHour = hour if minuteObj["h"] == 0 else nextHourIndex
             minuteWord = minuteObj["text"]
             if minuteObj["o"] == 1:
                 if len(minuteWord) > 1:
                     minuteWord = [minuteWord[0], " ".join([minuteWord[1], hourWord])]
-                    return minuteWord
+                    return minuteWord, spokenHour
                 else:
-                    return minuteWord + [hourWord] if minuteObj["text"] != "" else [hourWord]
+                    returnTime = minuteWord + [hourWord] if minuteObj["text"] != "" else [hourWord]
+                    return returnTime, spokenHour
             else:  # minuteObj["o"] == 2
-                return [hourWord] + minuteWord if minuteObj["text"] != "" else [hourWord]
+                returnTime = [hourWord] + minuteWord if minuteObj["text"] != "" else [hourWord]
+                return returnTime, spokenHour
 
     else:
         # account for noon/midnight
-        if hour % 12 == 0 and min == 0:
-            specialKey = (":").join([str(hour), str(min)])
-            timeText = special[specialKey][0]
-            returnTime.append(timeText)
+        if specialKey in special:
+            returnTime += special[specialKey][0]
 
         else:
             # add hour text
             returnTime.append(hours[str(hour)][0])
 
             # add minutes text
-            minIndex = 1 if min < 10 else 0  # avoid military times
+            minIndex = 1 if min < 10 and len(minutes[str(min)]) > 1 else 0  # avoid military times
             minutesTime = minutes[str(min)][minIndex]["text"]
             returnTime += minutesTime
 
-        return returnTime
+        return returnTime, hour
 
-def game_of_thrones(hour, gameOfThrones, config):
+def game_of_thrones(hour, gameOfThrones, dialect):
     returnTime = []
+    if dialect != "en-US":
+        return returnTime
     if len(gameOfThrones[str(hour)]) > 0:
-        if config.get("dialect") == "en-US":
-            returnTime = [gameOfThrones["stem"], gameOfThrones[str(hour)]]
+        returnTime = [gameOfThrones["stem"], gameOfThrones[str(hour)]]
     return returnTime
 
-def time_of_day(hour, timeOfDay, config):
+def time_of_day(hour, timeOfDay, config, rules):
     returnTime = []
+    basic = config.get("display", False) == "basic"
 
     if config.bool("military", False):  # don't show anything
         return returnTime
-    elif config.get("display", False) == "basic":  # just show AM/PM
-        # if dialect uses AM/PM
-        if config.get("dialect") == "en-US":
-            returnTime = ["am".upper()] if hour < 12 else ["pm".upper()]
-        return returnTime
-    else:  # pick random from list
+    elif basic and rules["ampm"]:  # just show AM/PM
+        return [rules["ampm"][0]] if hour < 12 else [rules["ampm"][1]]
+    else:  # a dialect without AM/PM says the part of day instead
         for timeRange in timeOfDay:
             if hour >= timeRange["hourMin"] and hour < timeRange["hourMax"]:
-                rangeIndex = random.number(0, len(timeRange["text"]) - 1)
+                rangeIndex = 0 if basic else random.number(0, len(timeRange["text"]) - 1)
                 returnTime += timeRange["text"][rangeIndex]
         return returnTime
 
-def calculate_top_margin(showTime, subTime):
+def calculate_top_margin(showTime, subTime, littleH):
     fullHeight = 32
     bigH = 8
-    littleH = 7
 
     topMargin = int(math.ceil((fullHeight - (bigH * len(showTime)) - (littleH * len(subTime))) / 2))
 
-    return topMargin
+    # a negative margin silently slices the top off the first line
+    return topMargin if topMargin > 0 else 0
 
 def main(config):
     location = config.get("location")
@@ -385,27 +721,37 @@ def main(config):
     hour = now.hour
     min = now.minute
 
-    # set the dialect globally
+    # set the dialect globally; an unknown value would abort the render
     dialect = config.get("dialect", "en-US")
+    if dialect not in hoursObj:
+        dialect = "en-US"
     minutes = minutesObj[dialect]
     timeOfDay = timeOfDayObj[dialect]
     hours = hoursObj[dialect]
     gameOfThrones = gameOfThronesObj[dialect]
     special = specialObj[dialect]
+    rules = dialectObj[dialect]
 
     # apply the config rules
     showTime = []
     subTime = []
-    if config.bool("military"):  # use Military Time
-        showTime = military_time(hour, min, hours, minutes)
+    dayPartHour = hour
+    if config.bool("military", False):  # use Military Time
+        showTime = military_time(hour, min, hours, minutes, rules)
     else:  # basic vs. surprise me
-        showTime = display_time(hour, min, hours, minutes, special, config)
+        showTime, spokenHour = display_time(hour, min, hours, minutes, special, config)
+        if rules["dayPartFollowsHourWord"]:
+            dayPartHour = spokenHour
 
     # add GoT description or add time of day
     if config.bool("game_of_thrones"):
-        subTime = game_of_thrones(hour, gameOfThrones, config)
+        subTime = game_of_thrones(hour, gameOfThrones, dialect)
     if config.bool("time_of_day") and subTime == []:
-        subTime = time_of_day(hour, timeOfDay, config)
+        subTime = time_of_day(dayPartHour, timeOfDay, config, rules)
+
+    # the panel is 32px tall; drop the subtitle rather than clip the time
+    if (8 * len(showTime)) + (rules["subtitleHeight"] * len(subTime)) > 32:
+        subTime = []
 
     # apply lettercase styling
     if config.get("caps", "caps") == "caps":
@@ -415,17 +761,23 @@ def main(config):
     # render the words
     textTime = [render.Text(" " * i + s) for i, s in enumerate(showTime)]
 
+    subIndent = len(showTime) if rules["subtitleCascade"] else 0
+
     textTime += [render.Padding(
         pad = (0, 1, 0, 1),
-        child = render.Text(" " * len(showTime) + " " * i + s, font = "CG-pixel-3x5-mono"),
+        child = render.Text(" " * subIndent + " " * i + s, font = rules["subtitleFont"]),
     ) for i, s in enumerate(subTime)]
 
     # center the text vertically
-    topMargin = calculate_top_margin(showTime, subTime)
+    topMargin = calculate_top_margin(showTime, subTime, rules["subtitleHeight"])
+
+    # once the column already fills the panel, a bottom pad costs it a row --
+    # and that row is where the descenders of the last line live
+    bottomPad = 1 if topMargin > 0 else 0
 
     return render.Root(
         child = render.Padding(
-            pad = (1, topMargin, 0, 1),
+            pad = (1, topMargin, 0, bottomPad),
             child = render.Column(
                 children = textTime,
             ),
@@ -437,6 +789,10 @@ def get_schema():
         schema.Option(
             display = "American English",
             value = "en-US",
+        ),
+        schema.Option(
+            display = "Français (France)",
+            value = "fr-FR",
         ),
     ]
 
