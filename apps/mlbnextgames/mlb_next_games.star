@@ -6,12 +6,13 @@ Author: Anthony Rocchio
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 BASE = "https://statsapi.mlb.com/api/v1/schedule"
 GAMES_TO_DISPLAY = 3
+SQUARE_GAMES_TO_DISPLAY = GAMES_TO_DISPLAY * 2  # square panels fit two tiers of three
 FONT = "CG-pixel-3x5-mono"
 IMAGE_BASE = "https://a.espncdn.com/i/teamlogos/mlb/500/scoreboard/"
 IMAGE_BASE_DARK = "https://a.espncdn.com/i/teamlogos/mlb/500-dark/scoreboard/"
@@ -129,7 +130,83 @@ def create_game_display(game_date, opponent_nickname, logo):
         ],
     )
 
+def is_square():
+    """ Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong.
+    """
+
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def main_square(config):
+    """ Square (64x64) layout: same game cards as the wide layout, but two
+    32px tiers stacked so twice the days fit on screen
+    """
+
+    team = config.get("team", "Angels")
+    timezone = time.tz()
+
+    url_params = generate_url_parameters(team, timezone)
+    schedule = get_schedule(BASE + url_params)
+
+    games_processed = 0
+    game_cols = []
+
+    if schedule == "":  # error occurred while calling API
+        game_cols.append(render.WrappedText(content = "Error getting schedule", color = "#FFF", linespacing = 3))
+    elif len(schedule["dates"]) == 0:  # no games in time period searched
+        return []
+    else:
+        for game_day in schedule["dates"]:
+            todays_games = get_date_info(game_day, timezone)
+
+            for tg in todays_games:
+                games_processed += 1
+                if games_processed > SQUARE_GAMES_TO_DISPLAY:
+                    break
+                opponent_id = get_opponent(tg, team)
+
+                opponent_nicknames = [x["nick"] for x in TEAMS if x["id"] == opponent_id]
+
+                if len(opponent_nicknames) > 0:
+                    opponent_nickname = opponent_nicknames[0]
+                    logo = get_team_logo(opponent_id)
+                else:
+                    opponent_nickname = "TBD"
+                    logo = ""
+
+                game_cols.append(create_game_display(tg["date"], opponent_nickname, logo))
+
+            if games_processed > SQUARE_GAMES_TO_DISPLAY:
+                break
+
+    # each tier gets half the panel, so the game cards keep the density
+    # they have on a wide panel instead of stretching to fill the square
+    _, height = canvas.size()
+    tiers = []
+    for i in range(0, len(game_cols), GAMES_TO_DISPLAY):
+        tiers.append(render.Box(
+            height = height // 2,
+            child = render.Row(
+                main_align = "space_around",
+                expanded = True,
+                children = game_cols[i:i + GAMES_TO_DISPLAY],
+            ),
+        ))
+
+    return render.Root(
+        delay = 500,
+        child = render.Column(
+            main_align = "space_around",
+            expanded = True,
+            children = tiers,
+        ),
+    )
+
 def main(config):
+    if is_square():
+        return main_square(config)
+
     team = config.get("team", "Angels")
     timezone = time.tz()
 
