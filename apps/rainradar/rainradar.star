@@ -1,5 +1,5 @@
 """
-RainRadar — Pixlet weather radar for a 64x32 Tronbyt.
+RainRadar - Pixlet weather radar for a 64x32 Tronbyt.
 Pick a location (or lat/lon). Loops recent RainViewer scans on a dark map.
 Radar data: RainViewer Weather Maps API (personal/educational use).
 https://www.rainviewer.com/
@@ -16,6 +16,9 @@ MAPS_URL = "https://api.rainviewer.com/public/weather-maps.json"
 MAPS_TTL = 120
 TILE_TTL = 600
 BASEMAP_TTL = 86400
+ALERTS_TTL = 300
+EARTH_HALF = 20037508.342789244
+IMAGE_URL = "%s%s/256/%d/%s/%s/%d/1_1.png"
 
 DEFAULT_LOCATION = """{
     "lat": "29.7604",
@@ -29,15 +32,16 @@ def main(config):
     loc = _location(config)
     zoom = _clamp_int(config.get("zoom", "7"), 4, 9, 7)
     color = _clamp_int(config.get("color", "6"), 0, 8, 6)
-    frame_count = _clamp_int(config.get("frames", "6"), 3, 12, 6)
+    frame_count = _clamp_int(config.get("frames", "2"), 2, 12, 2)
     delay = _clamp_int(config.get("delay", "400"), 150, 1200, 400)
     marker_style = config.get("marker", "red")
     time_format = config.get("time_format", "15:04")
-    x0, y0, ox, oy, x1, y1, ox2, oy2 = _deg2num(loc["lat"], loc["lng"], zoom)
 
     maps = http.get(MAPS_URL, ttl_seconds = MAPS_TTL)
     if maps.status_code != 200:
         return _error("Radar unavailable")
+
+    alert_text = _nws_alert(loc["lat"], loc["lng"])
 
     data = maps.json()
     host = data.get("host") or "https://tilecache.rainviewer.com"
@@ -51,11 +55,11 @@ def main(config):
         path = frame.get("path")
         if not path:
             continue
-        rf = _radar_frame_centered(host, path, zoom, x0, y0, ox, oy, x1, y1, ox2, oy2, color)
+        rf = _radar_widget(host, path, zoom, loc["lat"], loc["lng"], color)
         if not rf:
             continue
         stamp = _stamp(frame.get("time"), loc["timezone"], time_format)
-        images.append(_hud_frame(rf, loc["label"], stamp))
+        images.append(_hud_frame(rf, loc["label"], stamp, alert_text))
 
     if not images:
         return _error("No radar image")
@@ -66,46 +70,64 @@ def main(config):
     marker_w = _marker(32, 16, marker_style)
     stack_children = [
         render.Box(width = 64, height = 32, color = "#020617"),
-        _basemap_centered(zoom, x0, y0, ox, oy, x1, y1, ox2, oy2),
+        _satellite_crop(loc["lat"], loc["lng"], zoom),
         render.Animation(children = anim_children),
     ]
     if marker_w:
         stack_children.append(marker_w)
+    if alert_text:
+        stack_children.append(render.Box(width = 64, height = 1, color = "#EF4444"))
+        stack_children.append(render.Padding(pad = (0, 31, 0, 0), child = render.Box(width = 64, height = 1, color = "#EF4444")))
+        stack_children.append(render.Box(width = 1, height = 32, color = "#EF4444"))
+        stack_children.append(render.Padding(pad = (63, 0, 0, 0), child = render.Box(width = 1, height = 32, color = "#EF4444")))
+
     return render.Root(
         delay = delay,
         max_age = 600,
-        child = render.Stack(children = stack_children),
+        child = render.Box(width = 64, height = 32, child = render.Stack(children = stack_children)),
     )
 
-def _hud_frame(radar, label, stamp):
+def _hud_frame(radar, label, stamp, alert_text):
     right = stamp if stamp else "RADAR"
-    return render.Stack(
-        children = [
-            radar,
-            render.Column(
-                expanded = True,
-                main_align = "start",
-                children = [
-                    render.Box(
-                        height = 7,
-                        color = "#0007",
-                        child = render.Padding(
-                            pad = (1, 0, 1, 0),
-                            child = render.Row(
-                                expanded = True,
-                                main_align = "space_between",
-                                cross_align = "center",
-                                children = [
-                                    render.Text(label, font = "tom-thumb", color = "#86EFAC"),
-                                    render.Text(right, font = "tom-thumb", color = "#E5E7EB"),
-                                ],
+    if alert_text:
+        left = render.Marquee(
+            width = 40,
+            child = render.Text(alert_text, font = "tom-thumb", color = "#FCA5A5"),
+        )
+    else:
+        left = render.Text(label, font = "tom-thumb", color = "#86EFAC")
+    return render.Box(
+        width = 64,
+        height = 32,
+        child = render.Stack(
+            children = [
+                radar,
+                render.Column(
+                    expanded = True,
+                    main_align = "start",
+                    children = [
+                        render.Box(
+                            height = 7,
+                            color = "#0007",
+                            child = render.Padding(
+                                pad = (1, 0, 1, 0),
+                                child = render.Row(
+                                    expanded = True,
+                                    main_align = "space_between",
+                                    cross_align = "center",
+                                    children = [
+                                        left,
+                                        render.Text(right, font = "tom-thumb", color = "#E5E7EB"),
+                                    ],
+                                ),
                             ),
                         ),
-                    ),
-                ],
-            ),
-        ],
+                    ],
+                ),
+            ],
+        ),
     )
+
 MARKER_COLORS = {
     "red": "#EF4444",
     "white": "#FFFFFF",
@@ -143,63 +165,86 @@ def _marker(px, py, style):
         ),
     )
 
-def _fetch_basemap_tile(zoom, x, y):
-    url = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/%d/%d/%d" % (zoom, y, x)
+def _fmt_coord(value):
+    # Starlark has no "%.4f"; RainViewer widget URLs require a decimal point.
+    scaled = int(math.round(value * 10000.0))
+    sign = ""
+    if scaled < 0:
+        sign = "-"
+        scaled = -scaled
+    whole = scaled // 10000
+    frac = scaled % 10000
+    frac_s = ("0000" + str(frac))[-4:]
+    return sign + str(whole) + "." + frac_s
+
+def _crop64(src):
+    return render.Padding(
+        pad = (0, -16, 0, 0),
+        child = render.Image(src = src, width = 64, height = 64),
+    )
+
+def _radar_widget(host, path, zoom, lat, lng, color):
+    url = IMAGE_URL % (host, path, zoom, _fmt_coord(lat), _fmt_coord(lng), color)
+    tile = http.get(url, ttl_seconds = TILE_TTL)
+    if tile.status_code != 200 or not tile.body():
+        return None
+    return _crop64(tile.body())
+
+def _web_mercator(lat, lng, zoom):
+    n = math.pow(2.0, zoom)
+    tile_m = (2 * EARTH_HALF) / n
+    half = tile_m / 2
+    mx = lng * EARTH_HALF / 180.0
+    my = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / (math.pi / 180.0) * EARTH_HALF / 180.0
+    return mx, my, half
+
+def _satellite_crop(lat, lng, zoom):
+    mx, my, half = _web_mercator(lat, lng, zoom)
+    xmin = mx - half
+    ymin = my - half
+    xmax = mx + half
+    ymax = my + half
+    url = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=%f,%f,%f,%f&bboxSR=3857&imageSR=3857&size=64,64&format=jpg&f=image" % (xmin, ymin, xmax, ymax)
     res = http.get(
         url,
         ttl_seconds = BASEMAP_TTL,
         headers = {"User-Agent": "RainRadar-Pixlet/1.0 (personal)"},
     )
     if res.status_code != 200 or not res.body():
-        return None
-    return render.Image(src = res.body(), width = 64, height = 32)
-
-def _basemap_centered(zoom, x0, y0, ox, oy, x1, y1, ox2, oy2):
-    b00 = _fetch_basemap_tile(zoom, x0, y0)
-    b10 = _fetch_basemap_tile(zoom, x1, y0)
-    b01 = _fetch_basemap_tile(zoom, x0, y1)
-    b11 = _fetch_basemap_tile(zoom, x1, y1)
-
-    tiles = []
-    if b00:
-        tiles.append(render.Padding(pad = (ox, oy, 0, 0), child = b00))
-    if b10:
-        tiles.append(render.Padding(pad = (ox2, oy, 0, 0), child = b10))
-    if b01:
-        tiles.append(render.Padding(pad = (ox, oy2, 0, 0), child = b01))
-    if b11:
-        tiles.append(render.Padding(pad = (ox2, oy2, 0, 0), child = b11))
-
-    if not tiles:
         return render.Box(width = 64, height = 32, color = "#020617")
-    return render.Stack(children = tiles)
+    return _crop64(res.body())
 
-def _fetch_radar_tile(host, path, zoom, x, y, color):
-    url = "%s%s/256/%d/%d/%d/%d/1_1.png" % (host, path, zoom, x, y, color)
-    tile = http.get(url, ttl_seconds = TILE_TTL)
-    if tile.status_code != 200 or not tile.body():
-        return None
-    return render.Image(src = tile.body(), width = 64, height = 32)
-
-def _radar_frame_centered(host, path, zoom, x0, y0, ox, oy, x1, y1, ox2, oy2, color):
-    t00 = _fetch_radar_tile(host, path, zoom, x0, y0, color)
-    t10 = _fetch_radar_tile(host, path, zoom, x1, y0, color)
-    t01 = _fetch_radar_tile(host, path, zoom, x0, y1, color)
-    t11 = _fetch_radar_tile(host, path, zoom, x1, y1, color)
-
-    tiles = []
-    if t00:
-        tiles.append(render.Padding(pad = (ox, oy, 0, 0), child = t00))
-    if t10:
-        tiles.append(render.Padding(pad = (ox2, oy, 0, 0), child = t10))
-    if t01:
-        tiles.append(render.Padding(pad = (ox, oy2, 0, 0), child = t01))
-    if t11:
-        tiles.append(render.Padding(pad = (ox2, oy2, 0, 0), child = t11))
-
-    if not tiles:
-        return None
-    return render.Stack(children = tiles)
+def _nws_alert(lat, lng):
+    url = "https://api.weather.gov/alerts/active?point=%s,%s&status=actual" % (
+        _fmt_coord(lat),
+        _fmt_coord(lng),
+    )
+    res = http.get(
+        url,
+        ttl_seconds = ALERTS_TTL,
+        headers = {
+            "User-Agent": "RainRadar-Pixlet/1.0 (sgmorton@gmail.com)",
+            "Accept": "application/geo+json",
+        },
+    )
+    if res.status_code != 200 or not res.body():
+        return ""
+    data = res.json()
+    if type(data) != "dict":
+        return ""
+    features = data.get("features")
+    if type(features) != "list" or len(features) < 1:
+        return ""
+    first = features[0]
+    if type(first) != "dict":
+        return "ALERT"
+    props = first.get("properties")
+    if type(props) != "dict":
+        return "ALERT"
+    headline = props.get("headline") or props.get("event") or "ALERT"
+    if type(headline) != "string" or not headline:
+        return "ALERT"
+    return headline
 
 def _is_num_str(s):
     if not s:
@@ -260,22 +305,26 @@ def _location(config):
     # Format clean display label (e.g. "BAYTOWN" from "Baytown, TX")
     clean_label = locality.split(",")[0].strip().upper()
 
-    # Geocode locality (e.g. "Dallas, TX", "Lufkin, TX", "77520")
-    geo_url = "https://nominatim.openstreetmap.org/search?q=%s&format=json&limit=1" % (locality.replace(" ", "+"))
-    res = http.get(
-        geo_url,
-        ttl_seconds = 86400,
-        headers = {"User-Agent": "RainRadar-Pixlet/1.0 (personal)"},
-    )
-    if res.status_code == 200:
-        geo_data = res.json()
-        if type(geo_data) == "list" and len(geo_data) > 0:
-            first = geo_data[0]
-            lat = float(str(first.get("lat", lat)))
-            lng = float(str(first.get("lon", lng)))
-            if clean_label.isdigit() or not clean_label:
-                city_name = first.get("name") or locality
-                clean_label = city_name.split(",")[0].strip().upper()
+    loc_key = locality.strip().upper()
+    skip_geo = loc_key == "HOUSTON" or loc_key == "HOUSTON, TX"
+
+    if not skip_geo:
+        # Geocode locality (e.g. "Dallas, TX", "Lufkin, TX", "77520")
+        geo_url = "https://nominatim.openstreetmap.org/search?q=%s&format=json&limit=1" % (locality.replace(" ", "+"))
+        res = http.get(
+            geo_url,
+            ttl_seconds = 86400,
+            headers = {"User-Agent": "RainRadar-Pixlet/1.0 (personal)"},
+        )
+        if res.status_code == 200:
+            geo_data = res.json()
+            if type(geo_data) == "list" and len(geo_data) > 0:
+                first = geo_data[0]
+                lat = float(str(first.get("lat", lat)))
+                lng = float(str(first.get("lon", lng)))
+                if clean_label.isdigit() or not clean_label:
+                    city_name = first.get("name") or locality
+                    clean_label = city_name.split(",")[0].strip().upper()
 
     label = clean_label[:10] if clean_label else "LOCATION"
 
@@ -285,43 +334,6 @@ def _location(config):
         "label": label,
         "timezone": tz,
     }
-
-def _deg2num(lat, lon, zoom):
-    lat_rad = lat * math.pi / 180.0
-    n = math.pow(2.0, zoom)
-    x_exact = (lon + 180.0) / 360.0 * n
-    y_exact = (1.0 - math.log(math.tan(lat_rad) + (1.0 / math.cos(lat_rad))) / math.pi) / 2.0 * n
-
-    x0 = int(math.floor(x_exact))
-    y0 = int(math.floor(y_exact))
-
-    px = int(math.floor((x_exact - x0) * 64.0))
-    py = int(math.floor((y_exact - y0) * 32.0))
-
-    ox = 32 - px
-    oy = 16 - py
-
-    if ox > 0:
-        x1 = x0 - 1
-        ox2 = ox - 64
-    else:
-        x1 = x0 + 1
-        ox2 = ox + 64
-
-    if oy > 0:
-        y1 = y0 - 1
-        oy2 = oy - 32
-    else:
-        y1 = y0 + 1
-        oy2 = oy + 32
-
-    max_tile = int(n) - 1
-    x0 = _clamp_int(x0, 0, max_tile, 0)
-    y0 = _clamp_int(y0, 0, max_tile, 0)
-    x1 = _clamp_int(x1, 0, max_tile, 0)
-    y1 = _clamp_int(y1, 0, max_tile, 0)
-
-    return x0, y0, ox, oy, x1, y1, ox2, oy2
 
 def _stamp(unix, timezone, fmt):
     if not unix or fmt == "off":
@@ -416,10 +428,11 @@ def get_schema():
             schema.Dropdown(
                 id = "frames",
                 name = "Animation frames",
-                desc = "How many ~10-minute radar scans to loop. 6 is about an hour.",
+                desc = "How many ~10-minute radar scans to loop. 2 is about 20 minutes.",
                 icon = "clapperboard",
-                default = "6",
+                default = "2",
                 options = [
+                    schema.Option(display = "2 (20 min)", value = "2"),
                     schema.Option(display = "3 (30 min)", value = "3"),
                     schema.Option(display = "6 (1 hour)", value = "6"),
                     schema.Option(display = "9 (90 min)", value = "9"),
