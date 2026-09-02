@@ -8,7 +8,7 @@ Description: Display the accurate time in a human-readable way. Inspired by Max 
 load("encoding/json.star", "json")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -2480,17 +2480,38 @@ cjkGlyphs = {
     "兩": "000ffe040ffe842b5a94a94aad6c62842846",
 }
 
-CJK_SIZE = 12
+cjkGlyphs16 = {
+    "零": "00003ffc01007ffe41025d7a41021d78028004401ff0600e1ff0011001600100",
+    "一": "00000000000000000000000000027fff00000000000000000000000000000000",
+    "二": "000000001ffc00000000000000000000000000000000000000007fff00000000",
+    "三": "00001ffc000000000000000000000ff8000000000000000000007fff00000000",
+    "四": "000000007ffe444244424442444244464846483e5002600240027ffe00000000",
+    "五": "00003ffe00800080008000801ff801080108010801080208020802087fff0000",
+    "六": "00800080008000807fff00000000000004200410040808080804100420040000",
+    "七": "04000400040004000406047807807c0004000400040004040404020401fc0000",
+    "八": "000003e000200020042004200420042004100410041008080808100420024001",
+    "九": "00000200020002007fe0022002200220022004200420042008221022201e4000",
+    "十": "0080008000800080008000807fff008000800080008000800080008000800080",
+    "点": "00800080008000fe008000800ff80808080808080ff800001008124421224122",
+    "時": "002000207dfe44204420442047ff7c04440447ff450444847c8400040004000c",
+    "分": "03e00020042004100810080810042ff241110110011002100210041008101060",
+    "半": "0080008410840888049004803ffe0080008000807fff00800080008000800080",
+    "刻": "040204227fe20422042239220a22062204a208a2112223020482084210426006",
+    "差": "041002201ffe008000800ff8008000807fff040007fc0840084010402fff4000",
+    "整": "04207fa0043f3f6425543f940e08153464c204011ffc008008f808807fff0000",
+    "兩": "00007fff008000803ffe208220822cb2249224922aaa2aaa31c6208220822086",
+}
 
-# the glyph box is inked edge to edge, so stacked lines need explicit leading
+# A square panel is the same 64px wide but twice as tall, so CJK moves up to the
+# 16-dot cut of the same font: still four glyphs to a line, far more legible.
 CJK_LEAD = 2
 
-def cjk_row(bits, color):
+def cjk_row(bits, size, color):
     children = []
     run = 0
     gap = 0
-    for i in range(CJK_SIZE):
-        if (bits >> (CJK_SIZE - 1 - i)) & 1:
+    for i in range(size):
+        if (bits >> (size - 1 - i)) & 1:
             if gap > 0:
                 children.append(render.Box(width = gap, height = 1))
                 gap = 0
@@ -2506,19 +2527,86 @@ def cjk_row(bits, color):
         children.append(render.Box(width = gap, height = 1))
     return render.Row(children = children)
 
-def cjk_char(ch, color):
-    hexrows = cjkGlyphs.get(ch)
+def cjk_char(ch, size, color):
+    table = cjkGlyphs16 if size == 16 else cjkGlyphs
+    hexrows = table.get(ch)
     if not hexrows:
-        return render.Box(width = CJK_SIZE, height = CJK_SIZE)
+        return render.Box(width = size, height = size)
+
+    # one hex digit per four pixels of row: three digits at 12, four at 16
+    digits = size // 4
     return render.Column(
-        children = [cjk_row(int(hexrows[i * 3:(i + 1) * 3], 16), color) for i in range(CJK_SIZE)],
+        children = [
+            cjk_row(int(hexrows[i * digits:(i + 1) * digits], 16), size, color)
+            for i in range(size)
+        ],
     )
 
-def cjk_line(text, color):
+def cjk_line(text, size, color):
     return render.Padding(
         pad = (0, 0, 0, CJK_LEAD),
-        child = render.Row(children = [cjk_char(c, color) for c in text.codepoints()]),
+        child = render.Row(children = [cjk_char(c, size, color) for c in text.codepoints()]),
     )
+
+# On a square panel the text font grows from tb-8 to 6x10. The panel is no wider,
+# so lines have to be rebroken: 6x10 is a fixed 6px advance and 10 characters is
+# 60px of the 63 available.
+SQUARE_COLS = 10
+
+# Every word the tables can emit that is longer than the budget and has no space
+# or hyphen to break on. Each splits at a compound or syllable boundary. Keyed on
+# the authored case, because wrapping runs before the lettercase styling.
+squareBreaks = {
+    "Mitternacht": ["Mitter", "nacht"],
+    "nachmittags": ["nach", "mittags"],
+    "mezzogiorno": ["mezzo", "giorno"],
+    "diciassette": ["dicias", "sette"],
+    "quattordici": ["quattor", "dici"],
+    "veinticinco": ["veinti", "cinco"],
+    "veintisiete": ["veinti", "siete"],
+    "veintinueve": ["veinti", "nueve"],
+    "nightengale": ["nighten", "gale"],
+}
+
+def break_once(line):
+    """Split a line once at the last space or hyphen inside the budget."""
+    if len(line) <= SQUARE_COLS:
+        return [line]
+
+    hard = squareBreaks.get(line)
+    if hard:
+        return hard
+
+    cut = -1
+    for i in range(len(line)):
+        if line[i] == " " and i <= SQUARE_COLS:
+            cut = i
+        elif line[i] == "-" and i + 1 <= SQUARE_COLS:
+            cut = i
+    if cut < 0:
+        return [line]
+
+    head = line[:cut] if line[cut] == " " else line[:cut + 1]
+    return [head, line[cut + 1:]]
+
+def wrap_lines(lines):
+    """Rebreak authored lines to the square budget. Three passes is one more than
+    the longest line the tables can produce needs."""
+    parts = lines
+    for _ in range(3):
+        out = []
+        for p in parts:
+            out += break_once(p)
+        if len(out) == len(parts):
+            return out
+        parts = out
+    return parts
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h * 2 > w + 16
 
 def to_caps(lines, rules):
     # .upper() leaves "ß" alone, so German would read "DREIßIG"; its uppercase is "SS"
@@ -2529,9 +2617,7 @@ def to_caps(lines, rules):
         out.append(line.upper())
     return out
 
-def calculate_top_margin(showTime, subTime, bigH, littleH):
-    fullHeight = 32
-
+def calculate_top_margin(showTime, subTime, bigH, littleH, fullHeight):
     topMargin = int(math.ceil((fullHeight - (bigH * len(showTime)) - (littleH * len(subTime))) / 2))
 
     # a negative margin silently slices the top off the first line
@@ -2575,8 +2661,26 @@ def main(config):
     if config.bool("time_of_day") and subTime == []:
         subTime = time_of_day(dayPartHour, timeOfDay, config, rules)
 
-    # the panel is 32px tall; drop the subtitle rather than clip the time
-    if (rules["lineHeight"] * len(showTime)) + (rules["subtitleHeight"] * len(subTime)) > 32:
+    # a square panel is the same width but twice as tall, so the text grows and
+    # the lines have to be rebroken to the narrower character budget
+    square = is_square()
+    panelHeight = canvas.height()
+    if square:
+        lineH = 18 if rules["glyphs"] else 10
+        bodyFont = "6x10"
+        subFont = "tb-8"
+        subH = 10
+        if not rules["glyphs"]:
+            showTime = wrap_lines(showTime)
+            subTime = wrap_lines(subTime)
+    else:
+        lineH = rules["lineHeight"]
+        bodyFont = ""
+        subFont = rules["subtitleFont"]
+        subH = rules["subtitleHeight"]
+
+    # drop the subtitle rather than clip the time
+    if (lineH * len(showTime)) + (subH * len(subTime)) > panelHeight:
         subTime = []
 
     # apply lettercase styling
@@ -2586,27 +2690,34 @@ def main(config):
 
     # render the words
     if rules["glyphs"]:
-        textTime = [cjk_line(s, "#fff") for s in showTime]
+        textTime = [cjk_line(s, 16 if square else 12, "#fff") for s in showTime]
+    elif square:
+        # no staircase indent on a square panel: at 6px a space costs more of the
+        # line than the extra height buys back
+        textTime = [render.Text(s, font = bodyFont) for s in showTime]
     else:
         textTime = [render.Text(" " * i + s) for i, s in enumerate(showTime)]
 
-    subIndent = len(showTime) if rules["subtitleCascade"] else 0
+    subIndent = 0 if square else (len(showTime) if rules["subtitleCascade"] else 0)
 
     textTime += [render.Padding(
         pad = (0, 1, 0, 1),
-        child = render.Text(" " * subIndent + " " * i + s, font = rules["subtitleFont"]),
+        child = render.Text(("" if square else " " * (subIndent + i)) + s, font = subFont),
     ) for i, s in enumerate(subTime)]
 
     # center the text vertically
-    topMargin = calculate_top_margin(showTime, subTime, rules["lineHeight"], rules["subtitleHeight"])
+    topMargin = calculate_top_margin(showTime, subTime, lineH, subH, panelHeight)
 
     # once the column already fills the panel, a bottom pad costs it a row --
     # and that row is where the descenders of the last line live
     bottomPad = 1 if topMargin > 0 else 0
 
+    # four 16px glyphs fill a 64px panel exactly, so square CJK gives up its margin
+    leftPad = 0 if (square and rules["glyphs"]) else 1
+
     return render.Root(
         child = render.Padding(
-            pad = (1, topMargin, 0, bottomPad),
+            pad = (leftPad, topMargin, 0, bottomPad),
             child = render.Column(
                 children = textTime,
             ),
