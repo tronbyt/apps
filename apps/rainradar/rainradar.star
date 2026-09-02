@@ -32,6 +32,7 @@ def main(config):
     frame_count = _clamp_int(config.get("frames", "6"), 3, 12, 6)
     delay = _clamp_int(config.get("delay", "400"), 150, 1200, 400)
     marker_style = config.get("marker", "red")
+    time_format = config.get("time_format", "15:04")
     x0, y0, ox, oy, x1, y1, ox2, oy2 = _deg2num(loc["lat"], loc["lng"], zoom)
 
     maps = http.get(MAPS_URL, ttl_seconds = MAPS_TTL)
@@ -51,8 +52,10 @@ def main(config):
         if not path:
             continue
         rf = _radar_frame_centered(host, path, zoom, x0, y0, ox, oy, x1, y1, ox2, oy2, color)
-        if rf:
-            images.append(rf)
+        if not rf:
+            continue
+        stamp = _stamp(frame.get("time"), loc["timezone"], time_format)
+        images.append(_hud_frame(rf, loc["label"], stamp))
 
     if not images:
         return _error("No radar image")
@@ -60,10 +63,6 @@ def main(config):
     # Hold the latest scan a beat so the current picture is readable.
     anim_children = images + [images[-1], images[-1]]
 
-    stamp = _stamp(selected[-1].get("time"), loc["timezone"])
-    header_right = stamp if stamp else "RADAR"
-
-    # Location is centered at x=32, y=16 on the 64x32 screen
     marker_w = _marker(32, 16, marker_style)
     stack_children = [
         render.Box(width = 64, height = 32, color = "#020617"),
@@ -72,38 +71,41 @@ def main(config):
     ]
     if marker_w:
         stack_children.append(marker_w)
-
-    stack_children.append(
-        render.Column(
-            expanded = True,
-            main_align = "start",
-            children = [
-                render.Box(
-                    height = 7,
-                    color = "#000000",
-                    child = render.Padding(
-                        pad = (1, 0, 1, 0),
-                        child = render.Row(
-                            expanded = True,
-                            main_align = "space_between",
-                            cross_align = "center",
-                            children = [
-                                render.Text(loc["label"], font = "tom-thumb", color = "#86EFAC"),
-                                render.Text(header_right, font = "tom-thumb", color = "#E5E7EB"),
-                            ],
-                        ),
-                    ),
-                ),
-            ],
-        )
-    )
-
     return render.Root(
         delay = delay,
         max_age = 600,
         child = render.Stack(children = stack_children),
     )
 
+def _hud_frame(radar, label, stamp):
+    right = stamp if stamp else "RADAR"
+    return render.Stack(
+        children = [
+            radar,
+            render.Column(
+                expanded = True,
+                main_align = "start",
+                children = [
+                    render.Box(
+                        height = 7,
+                        color = "#000000",
+                        child = render.Padding(
+                            pad = (1, 0, 1, 0),
+                            child = render.Row(
+                                expanded = True,
+                                main_align = "space_between",
+                                cross_align = "center",
+                                children = [
+                                    render.Text(label, font = "tom-thumb", color = "#86EFAC"),
+                                    render.Text(right, font = "tom-thumb", color = "#E5E7EB"),
+                                ],
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        ],
+    )
 MARKER_COLORS = {
     "red": "#EF4444",
     "white": "#FFFFFF",
@@ -321,11 +323,11 @@ def _deg2num(lat, lon, zoom):
 
     return x0, y0, ox, oy, x1, y1, ox2, oy2
 
-def _stamp(unix, timezone):
-    if not unix:
+def _stamp(unix, timezone, fmt):
+    if not unix or fmt == "off":
         return ""
     t = time.from_timestamp(int(unix)).in_location(timezone)
-    return t.format("3:04")
+    return t.format(fmt)
 
 def _clamp_int(value, lo, hi, default):
     n = int(value) if value else default
@@ -377,6 +379,18 @@ def get_schema():
                     schema.Option(display = "UTC", value = "UTC"),
                 ],
             ),
+            schema.Dropdown(
+                id = "time_format",
+                name = "Time overlay",
+                desc = "How each radar frame shows its scan time. Same options as Weather Map.",
+                icon = "clock",
+                default = "15:04",
+                options = [
+                    schema.Option(display = "Off", value = "off"),
+                    schema.Option(display = "12-hour", value = "3:04 PM"),
+                    schema.Option(display = "24-hour", value = "15:04"),
+                ],
+            ),
             schema.Text(
                 id = "override",
                 name = "Latitude Longitude Override",
@@ -403,7 +417,7 @@ def get_schema():
                 id = "frames",
                 name = "Animation frames",
                 desc = "How many ~10-minute radar scans to loop. 6 is about an hour.",
-                icon = "clapperboardPlay",
+                icon = "clapperboard",
                 default = "6",
                 options = [
                     schema.Option(display = "3 (30 min)", value = "3"),
