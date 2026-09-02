@@ -1,0 +1,16 @@
+---
+id: arr-coming-soon
+name: Coming Soon For Sonarr/Radarr
+summary: What your *arr drops next
+desc: Tonight's episodes and this week's movie releases, straight from your own Sonarr or Radarr calendar. Point it at your instance's URL and API key (Settings > General) and it talks to your server directly, so run it on the same network. With nothing configured it shows a built-in demo card. Air times follow your location, and a green pip means Sonarr already has the file.
+author: nsluke
+fileName: arr_coming_soon.star
+packageName: arrcomingsoon
+recommendedInterval: 60
+category: utilities
+tags:
+  - sonarr
+  - radarr
+  - media
+  - selfhosted
+  - calendar
