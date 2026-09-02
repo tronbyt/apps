@@ -40,7 +40,7 @@ load("images/tb_logo.png", TB_LOGO_ASSET = "file")
 load("images/tex_logo.png", TEX_LOGO_ASSET = "file")
 load("images/tor_logo.png", TOR_LOGO_ASSET = "file")
 load("images/was_logo.png", WAS_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -92,6 +92,11 @@ def main(config):
     year = str(time.now().year)  # use current year
 
     standings = get_Standings(division_id, year)
+
+    # square panels get a second tier: the same card carousel up top
+    # plus the whole division table underneath
+    if is_square():
+        return render_square(standings, division_id, year)
 
     # if we have some widgets, we can display them now
     if len(standings) > 0:
@@ -146,6 +151,12 @@ def build_keyframe(offset, pct):
         transforms = [animation.Translate(offset, 0)],
         curve = "ease_in_out",
     )
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h * 2 > w + 16
 
 def get_schema():
     options = [
@@ -375,6 +386,134 @@ def render_record_info(team, clinched, wins, losses, games_back, div_rank):
             render_rainbow_word("DIV", SMALL_FONT),
             render_rainbow_word("CHAMP", SMALL_FONT),
         ]
+
+def render_square(standings, division_id, year):
+    # zero-state, square edition: marquee below the league image
+    # instead of on top of it
+    if len(standings) == 0:
+        return render.Root(
+            child = render.Column(
+                children = [
+                    render.Image(
+                        src = MLB_LEAGUE_IMAGE,
+                    ),
+                    render.Box(
+                        height = 32,
+                        width = 64,
+                        child = render.Marquee(
+                            width = 64,
+                            child = render.Text(
+                                content = "No standings to display for league year " + year,
+                                color = SMALL_FONT_COLOR,
+                                font = SMALL_FONT,
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+    # breathing room between the carousel and the table
+    table_rows = [render.Box(height = 1, width = 64)]
+    for info in standings:
+        table_rows.append(render_table_row(info))
+
+    return render.Root(
+        delay = 80,
+        show_full_animation = True,
+        child = render.Column(
+            children = [
+                render.Row(
+                    children = [
+                        render_lefter(division_id),
+                        animation.Transformation(
+                            duration = 180,
+                            width = 295,
+                            height = 32,
+                            keyframes = [
+                                build_keyframe(0, 0.0),
+                                build_keyframe(0, 0.08),
+                                build_keyframe(-59, 0.25),
+                                build_keyframe(-118, 0.50),
+                                build_keyframe(-177, 0.75),
+                                build_keyframe(-236, 0.9),
+                                build_keyframe(-236, 1.0),
+                            ],
+                            child = render_DivisionStandings(standings),
+                            wait_for_child = True,
+                        ),
+                    ],
+                ),
+            ] + table_rows,
+        ),
+    )
+
+def render_table_row(info):
+    team = TEAM_INFO[info.TeamId]
+    if info.Clinched:
+        # clinchers get the same rainbow treatment the card gives them
+        abbrev = render_rainbow_word(team.Abbreviation, SMALL_FONT)
+    else:
+        abbrev = render.Text(
+            content = team.Abbreviation,
+            font = SMALL_FONT,
+            color = team.ForegroundColor,
+        )
+    return render.Box(
+        height = 6,
+        width = 64,
+        color = team.BackgroundColor,
+        child = render.Row(
+            expanded = True,
+            main_align = "start",
+            cross_align = "center",
+            children = [
+                render.Box(
+                    width = 1,
+                    height = 5,
+                ),
+                render.Box(
+                    width = 13,
+                    height = 5,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "start",
+                        children = [abbrev],
+                    ),
+                ),
+                render.Box(
+                    width = 27,
+                    height = 5,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        children = [
+                            render.Text(
+                                content = "{}-{}".format(info.Wins, info.Losses),
+                                font = SMALL_FONT,
+                                color = team.ForegroundColor,
+                            ),
+                        ],
+                    ),
+                ),
+                render.Box(
+                    width = 22,
+                    height = 5,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        children = [
+                            render.Text(
+                                content = info.GamesBack.removesuffix(".0"),
+                                font = SMALL_FONT,
+                                color = team.ForegroundColor,
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+    )
 
 #################
 ## TEAM CONFIG ##
