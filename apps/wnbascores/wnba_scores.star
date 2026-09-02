@@ -495,7 +495,7 @@ teamOptions = [
     ),
     schema.Option(
         display = "Connecticut Sun",
-        value = "CONN",
+        value = "CON",
     ),
     schema.Option(
         display = "Dallas Wings",
@@ -530,8 +530,16 @@ teamOptions = [
         value = "PHX",
     ),
     schema.Option(
+        display = "Portland Fire",
+        value = "POR",
+    ),
+    schema.Option(
         display = "Seattle Storm",
         value = "SEA",
+    ),
+    schema.Option(
+        display = "Toronto Tempo",
+        value = "TOR",
     ),
     schema.Option(
         display = "Washington Mystics",
@@ -816,9 +824,12 @@ def get_logoType(team, logo):
     if usealt != "NO":
         logo = get_cachable_data(usealt, 36000)
     else:
-        logo = logo.replace("500/scoreboard", "500-dark/scoreboard")
-        logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
-        logo = get_cachable_data(logo + "&h=50&w=50")
+        # ESPN serves a mix of "500/<abbr>.png" and "500/scoreboard/<abbr>.png",
+        # but only the plain "500-dark/<abbr>.png" variant exists for every team.
+        logo = logo.replace("500/scoreboard", "500")
+        logo = logo.replace("/500/", "/500-dark/")
+        logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=")
+        logo = get_cachable_data(logo + "&h=50&w=50", 36000)
     return logo
 
 def get_logoSize(team):
