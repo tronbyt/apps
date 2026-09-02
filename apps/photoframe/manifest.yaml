@@ -1,0 +1,15 @@
+---
+id: photo-frame
+name: Photo Frame
+summary: One photo, smart-cropped
+desc: Shows one photo from a URL, resized and smart-cropped server-side so faces and subjects survive the 64x32 panel instead of being squashed. Choose smart crop, letterbox, or stretch, and add an optional caption overlay. With no URL configured it shows a built-in placeholder scene, so it works out of the box. The photo is fetched through the images.weserv.nl proxy, so point it at a publicly reachable image URL.
+author: nsluke
+fileName: photo_frame.star
+packageName: photoframe
+recommendedInterval: 60
+category: utilities
+tags:
+  - photo
+  - art
+  - customization
+  - utility
