@@ -38,7 +38,7 @@ load("images/tb_logo.png", TB_LOGO_ASSET = "file")
 load("images/tex_logo.png", TEX_LOGO_ASSET = "file")
 load("images/tor_logo.png", TOR_LOGO_ASSET = "file")
 load("images/was_logo.png", WAS_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -87,6 +87,9 @@ def main(config):
     team_id = get_team_to_follow(config)
 
     info = http_get_number(team_id)
+
+    if is_square():
+        return render_square(team_id, info)
 
     if info.Clinched or info.Magic or info.Eliminated or not info.HasData:
         background_color = TEAM_INFO[team_id].BackgroundColor
@@ -407,6 +410,161 @@ def render_elim_with_hue(number, on_hue, off_hue):
             ),
         ],
     )
+
+###################
+## 64x64 SUPPORT ##
+###################
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def render_square(team_id, info):
+    w, h = canvas.size()
+
+    # same background and delay rules as the wide layout
+    if info.Clinched or info.Magic or info.Eliminated or not info.HasData:
+        background_color = TEAM_INFO[team_id].BackgroundColor
+        if info.Clinched or info.Magic:
+            delay = 100
+        else:
+            delay = 0
+    else:  # if you are in danger of being eliminated, get black background
+        background_color = "#000000"
+        delay = 100
+
+    # the extra rows show the division race the magic number comes from
+    division = []
+    if info.Success:
+        division = http_get_division(team_id)
+
+    if len(division) == 0:
+        # nothing to tabulate, show the league logo instead
+        bottom = render.Box(
+            height = h - 32,
+            width = w,
+            child = render.Image(
+                src = MLB_LEAGUE_IMAGE,
+                width = 32,
+            ),
+        )
+    else:
+        bottom = render_division_table(team_id, division, w)
+
+    return render.Root(
+        delay = delay,
+        child = render.Column(
+            children = [
+                render.Row(
+                    children = [
+                        render_logo(team_id, 32),
+                        render.Box(
+                            height = 32,
+                            width = 32,
+                            color = background_color,
+                            child = render_number_info(team_id, info),
+                        ),
+                    ],
+                ),
+                bottom,
+            ],
+        ),
+    )
+
+def render_division_table(team_id, division, width):
+    # 1px rule, then one 6px row per division team (5 teams = 31px of 32)
+    rows = [
+        render.Box(
+            height = 1,
+            width = width,
+            color = TEAM_INFO[team_id].ForegroundColor,
+        ),
+    ]
+    for entry in division:
+        rows.append(render_division_row(team_id, entry, width))
+    return render.Column(
+        children = rows,
+    )
+
+def render_division_row(team_id, entry, width):
+    team = TEAM_INFO[entry.Id]
+    followed = entry.Id == team_id
+    text_color = team.ForegroundColor if followed else "#FFFFFF"
+
+    # the leader gets its magic number, everyone else their elimination number
+    number_color = text_color
+    if not followed and entry.Number == "E":
+        number_color = BRIGHT_RED
+
+    # pad in the mono font so the columns line up: ABB  W-L  number
+    record = str(entry.Wins) + "-" + str(entry.Losses)
+    left = pad_right(team.Abbreviation, 3) + " " + pad_left(record, 6) + " "
+    return render.Box(
+        height = 6,
+        width = width,
+        color = team.BackgroundColor if followed else "#000000",
+        child = render.Row(
+            children = [
+                render.Text(
+                    content = left,
+                    font = COMMON_FONT,
+                    color = text_color,
+                ),
+                render.Text(
+                    content = pad_left(entry.Number, 3),
+                    font = COMMON_FONT,
+                    color = number_color,
+                ),
+            ],
+        ),
+    )
+
+def pad_left(content, size):
+    return " " * (size - len(content)) + content
+
+def pad_right(content, size):
+    return content + " " * (size - len(content))
+
+def http_get_division(team_id):
+    # same request as http_get_number, so this is served from its cache
+    query_params = {
+        "fields": "records,division,id,teamRecords,team,magicNumber,eliminationNumberDivision,clinched,clinchIndicator,divisionRank,wins,losses",
+        "leagueId": str(TEAM_INFO[team_id].LeagueId),
+        "season": str(time.now().year),
+    }
+
+    # cache response for 5 minutes
+    response = http.get(MLB_STANDINGS_URL, params = query_params, ttl_seconds = 300)
+
+    division = []
+    if not is_response_OK(response):
+        return division
+    records = response.json().get("records")
+    if records == None:
+        return division
+    for record in records:
+        # if it matches our division, collect every team in it
+        if int(record.get("division").get("id")) == TEAM_INFO[team_id].DivisionId:
+            for team_record in record.get("teamRecords"):
+                other_id = int(team_record.get("team").get("id"))
+                if other_id not in TEAM_INFO:
+                    continue
+                number = team_record.get("magicNumber")
+                if number == None:
+                    number = team_record.get("eliminationNumberDivision")
+                if number == None:
+                    number = "-"
+                division.append(
+                    struct(
+                        Id = other_id,
+                        Wins = int(team_record.get("wins")),
+                        Losses = int(team_record.get("losses")),
+                        Number = str(number),
+                    ),
+                )
+            break  # we found our division
+    return division
 
 ######################
 ## HTTP REQUEST API ##
