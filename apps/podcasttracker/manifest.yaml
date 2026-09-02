@@ -1,0 +1,15 @@
+---
+id: podcast-tracker
+name: Podcast Tracker
+summary: Latest episode of your show
+desc: Shows the newest episode of your podcast with its artwork, title, episode length, and how long ago it dropped, plus an amber NEW badge for the first 36 hours. Point it at a show name (found via Apple Podcasts, no key needed) or directly at any RSS feed URL. With no configuration it shows a demo card explaining setup.
+author: nsluke
+fileName: podcast_tracker.star
+packageName: podcasttracker
+recommendedInterval: 30
+category: entertainment
+tags:
+  - podcast
+  - rss
+  - media
+  - audio
