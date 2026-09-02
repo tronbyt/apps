@@ -1,8 +1,8 @@
 ---
 id: unifi-network
 name: UniFi Network
-summary: Live network activity
-desc: Live WAN throughput, a download sparkline, device health and client counts from your UniFi sites. Reads the UniFi Cloud (Site Manager) API by default, so all it needs is one key from unifi.ui.com and no LAN name resolution; cloud mode charts the real 24-hour ISP series. A local console mode is there for consoles whose hostname the display can resolve and whose certificate it trusts. An amber "!" beside the UNIFI tag means a firmware update is waiting.
+summary: WAN latency and clients
+desc: 'Your UniFi network on one panel: WAN latency now, a 24-hour latency chart with packet loss marked in red, how many devices are up, and how many clients are on wifi and on cable. Reads the UniFi Cloud (Site Manager) API by default, so all it needs is one key from unifi.ui.com and no LAN name resolution. Cloud mode names the site it is showing and defaults to one you own; it does not chart the ISP speed figures that API reports, because those are the provisioned plan rate rather than live traffic. Local console mode shows live WAN throughput instead, for consoles whose hostname the display can resolve and whose certificate it trusts. An amber "!" beside the UNIFI tag means a firmware update is waiting.'
 author: nsluke
 fileName: unifi_network.star
 packageName: unifinetwork

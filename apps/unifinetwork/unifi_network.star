@@ -1,7 +1,7 @@
 """
 Applet: UniFi Network
-Summary: Live network activity
-Description: Live WAN throughput, a download sparkline, device health and client counts from your UniFi sites. Reads the UniFi Cloud (Site Manager) API by default, so all it needs is one key from unifi.ui.com and no LAN name resolution; cloud mode charts the real 24-hour ISP series. A local console mode is there for consoles whose hostname the display can resolve and whose certificate it trusts. An amber "!" beside the UNIFI tag means a firmware update is waiting.
+Summary: WAN latency and clients
+Description: Your UniFi network on one panel: WAN latency now, a 24-hour latency chart with packet loss marked in red, how many devices are up, and how many clients are on wifi and on cable. Reads the UniFi Cloud (Site Manager) API by default, so all it needs is one key from unifi.ui.com and no LAN name resolution. Cloud mode names the site it is showing and defaults to one you own; it does not chart the ISP speed figures that API reports, because those are the provisioned plan rate rather than live traffic. Local console mode shows live WAN throughput instead, for consoles whose hostname the display can resolve and whose certificate it trusts. An amber "!" beside the UNIFI tag means a firmware update is waiting.
 Author: nsluke
 """
 
@@ -20,6 +20,7 @@ GREEN = "#3ED860"
 AMBER = "#FFB23C"
 RED = "#F0524A"
 SPARK_BODY = "#7A4A10"
+SPARK_LOSS = "#6B1F1B"
 
 # Cloud (Site Manager) transport. api.ui.com is in public DNS and carries an
 # ordinary public certificate, so it resolves and verifies from any network.
@@ -43,6 +44,41 @@ CACHE_TTL = 3600
 
 # Sparkline bars are log-scaled from this floor up to the window peak.
 FLOOR_BPS = 100000
+
+# Round-trip latency, in ms, at which the hero reading stops being white-hot
+# amber and starts being a complaint. A home WAN sits under 40; anything over
+# AMBER_MS is a satellite link, a saturated uplink or a sick one.
+AMBER_MS = 120
+RED_MS = 250
+
+# Above this a reading has stopped being a measurement and become a symptom,
+# and it has also stopped fitting: the hero draws ">999" in red instead of a
+# four or five digit number nobody reads across a room.
+MAX_MS = 999
+
+# How far back the hero may look for a current reading, in five minute bins.
+# The newest bin is often still filling and reports nothing, which is what a
+# fallback is for; an hour-old number presented as "now" is not.
+STALE_BINS = 3
+
+# Glyph cells the hero reserves for the reading when sizing the site label:
+# three for every latency the panel can print, four for the ">999" clamp. Held
+# constant across readings on purpose -- see latency_hero(). The stability is
+# bought with label width: a reserved three cells is what turns "ARCHTOP" into
+# "ARCHT." at every reading rather than only at three-digit ones, and this
+# constant is the whole of that trade.
+MS_GLYPHS = 3
+MS_GLYPHS_OVER = 4
+
+# Model strings of every UniFi box that routes: Dream Machine/Router/Wall, the
+# UXG and USG gateways, and the Cloud Gateway line, whose models all carry the
+# word "gateway". Matched against `model`, never against `name`, because `name`
+# is whatever the owner typed and an access point called "Router" must not win.
+GATEWAY_MODELS = ("gateway", "dream", "udm", "uxg", "usg", "ugw")
+
+# Weakest signal of the three, and last, because "express" is a marketing word
+# before it is a product line.
+GATEWAY_MODELS_WEAK = ("express",)
 
 # Hand-drawn marks, because no font at this size can carry the words.
 #
@@ -284,6 +320,21 @@ def as_text(v):
     if type(v) == "string":
         return v
     return ""
+
+def key_ok(key):
+    """Whether this key can go in a header at all.
+
+    Go's transport refuses a header value carrying a newline or any other
+    control character, and refusing is a transport error: an uncatchable
+    render abort, a blank panel with no card on it, and the app dropped from
+    the rotation. A key pasted out of a file, or set through a JSON config
+    where a trailing byte survived, is the ordinary way this happens. main()
+    strips the obvious case; this catches the rest and says so on the panel.
+    """
+    for c in key.codepoints():
+        if c < " " or c > "~":
+            return False
+    return True
 
 def api_get(url, key, ttl, params = {}):
     return http.get(
@@ -531,14 +582,29 @@ def metric(l, txt, color, down, mid):
         w + 6 * l["s"],
     )
 
-def hero(l, down, up, gw):
+def hero(l, view):
     """The one band big enough to be read across a room."""
+    gw = view["gw"]
     if gw == "down":
         return big_line(l, "WAN DOWN", RED)
     if gw == "missing":
         return big_line(l, "NO GATEWAY", AMBER)
     if gw == "none":
         return big_line(l, "NO DEVICES", AMBER)
+    if view["mode"] == "latency":
+        return latency_hero(l, view["latency"], view["label"])
+    return rate_hero(l, view["down"], view["up"])
+
+def rate_hero(l, down, up):
+    """Local mode: the console's own instantaneous uplink counters.
+
+    The reading is coarse. Under a sustained, independently measured 355 Mbit/s
+    download the same console's uplink.rxRateBps sampled 0.4, 12.9 and 102.1
+    Mbit/s within half a minute, because it is whatever the last ~23 second
+    heartbeat happened to catch rather than an average. It is shown to two
+    significant figures for that reason, and the sparkline underneath it is
+    where the shape of the traffic actually lives.
+    """
     if down == None:
         return big_line(l, "NO DATA", DIM)
 
@@ -547,9 +613,14 @@ def hero(l, down, up, gw):
 
     # Two 4-character rates at the hero font leave the readings 2px apart,
     # which merges them into one blob; shrink a size instead.
-    _, dw = metric(l, d_txt, AMBER, True, False)
-    _, uw = metric(l, u_txt, BLUE, False, False)
-    mid = dw + uw + 4 * l["s"] > l["w"] - 2 * l["pad"]
+    #
+    # Measured on the *widest* string the formatter can return, not on this
+    # sample's: a rate that swings two decades between renders would otherwise
+    # change font every minute, and the panel would appear to breathe. Four
+    # glyphs at the hero advance is the cap fmt_rate is written to, and a "."
+    # is narrower than a glyph cell, so this is a true worst case.
+    worst = 4 * l["big_adv"] + 6 * l["s"]
+    mid = 2 * worst + 4 * l["s"] > l["w"] - 2 * l["pad"]
 
     dwidget, _ = metric(l, d_txt, AMBER, True, mid)
     uwidget, _ = metric(l, u_txt, BLUE, False, mid)
@@ -559,6 +630,140 @@ def hero(l, down, up, gw):
         cross_align = "center",
         children = [dwidget, uwidget],
     )
+
+def latency_color(ms):
+    """White is a reading, amber is a complaint, red is a problem."""
+    if ms >= RED_MS:
+        return RED
+    if ms >= AMBER_MS:
+        return AMBER
+    return WHITE
+
+def latency_hero(l, ms, label):
+    """Cloud mode: round-trip latency now, and which site that is.
+
+    Latency, not throughput, because the Site Manager API has no throughput to
+    give: measured across 278 consecutive 5-minute periods its download_kbps
+    and upload_kbps never moved once, and read 0 all day on a second, perfectly
+    healthy connection. They are the provisioned plan rate. avgLatency,
+    maxLatency and packetLoss are the fields that actually vary, so they are
+    the ones on the panel.
+
+    The site label earns its half of the row because an account can hold
+    several sites and this API hands them back in an order the user never
+    chose; a number with no name on it is a number from an arbitrary network.
+    """
+    parts = []
+    budget = (l["w"] - 2 * l["pad"]) // l["s"]
+    if ms != None:
+        # A reading this far out of range is a dead or dying link rather than
+        # a number to read, and five digits would not fit beside the label
+        # anyway. Clamped rather than dropped: the old code discarded anything
+        # over 999 and walked back to an older, healthier period, which put a
+        # white 8 MS on a WAN sitting at 1400.
+        txt = "%d" % ms
+        glyphs = MS_GLYPHS
+        if ms > MAX_MS:
+            txt = ">%d" % MAX_MS
+            glyphs = MS_GLYPHS_OVER
+
+        # 1x units throughout, as in footer(): the 2x label font is relatively
+        # narrower, so measuring each canvas on its own terms would truncate
+        # the site name at one size and not the other.
+        #
+        # Sized on the widest reading the hero can print, not on this one, for
+        # the reason rate_hero() gives about its own font: a budget that moves
+        # with the metric took a letter off the site name as latency crossed
+        # 10 ms and another as it crossed 100, so ARCHTOP became ARCHTO -- the
+        # one thing on the panel that says WHICH network this is, changing
+        # shape whenever the network did. Every printable reading now costs
+        # the label the same three cells. Only the ">999" clamp costs a
+        # fourth, and that is a state the panel is already shouting in.
+        budget -= glyphs * 6 + 10 + 4
+        parts.append(render.Row(
+            cross_align = "center",
+            children = [
+                render.Text(content = txt, font = l["font_big"], color = latency_color(ms)),
+                gap(l, 1),
+                mark(l, GLYPH_MS, DIM),
+            ],
+        ))
+
+    shown = fit_label(label, budget)
+    if shown != "":
+        # font_dom, not the label font: a site is named by its owner or by its
+        # ISP, and both routinely contain the M, W and V that the 3px fonts
+        # collapse into H and Y.
+        parts.append(render.Text(content = shown, font = l["font_dom"], color = BLUE))
+
+    if len(parts) == 0:
+        return big_line(l, "NO DATA", DIM)
+    return render.Row(
+        expanded = True,
+        main_align = "space_between" if len(parts) > 1 else "center",
+        cross_align = "center",
+        children = parts,
+    )
+
+# tb-8 advances, read off the shipped font by rendering "XH" and subtracting
+# the ink width of "H": I, J and T are 4 wide, M, V, W and Y are 6, every other
+# capital and every digit is 5, a space is 3 and a full stop is 2. Anything
+# else is budgeted at 6, the widest cell in the face, so an unexpected glyph
+# can only ever leave the label shorter than it had room for — never spill it
+# off the edge of the panel, which nothing in the render tree would clip.
+LABEL_NARROW = "IJT"
+LABEL_WIDE = "MVWY"
+LABEL_KNOWN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+def char_adv(c):
+    if c == " ":
+        return 3
+    if c == ".":
+        return 2
+    if c == "-":
+        return 4
+    if c in LABEL_NARROW:
+        return 4
+    if c in LABEL_WIDE:
+        return 6
+    if c in LABEL_KNOWN:
+        return 5
+    return 6
+
+def label_width(txt):
+    w = 0
+    for c in txt.codepoints():
+        w += char_adv(c)
+    return w
+
+def fit_label(txt, budget):
+    """The most of a site name that fits, in 1x pixels.
+
+    Whole name, else its first word, else as much of that word as fits with a
+    full stop after it: an "ARCHTOP" is a site a person recognises, an
+    "ARCHTOP FIB" is a glitch -- and so, more quietly, is an "ARCHTO", which a
+    reader has no way to tell from a site actually called that. Anything cut
+    mid-word says it was cut.
+    """
+    if txt == "" or budget <= 0:
+        return ""
+    if label_width(txt) <= budget:
+        return txt
+    first = txt.split(" ")[0]
+    if first != "" and label_width(first) <= budget:
+        return first
+    room = budget - char_adv(".")
+    out = ""
+    w = 0
+    for c in first.codepoints():
+        cw = char_adv(c)
+        if w + cw > room:
+            break
+        out += c
+        w += cw
+    if out == "":
+        return ""
+    return out + "."
 
 def big_line(l, text, color):
     # The hero font is 5px wide, where W, V, M and N are unmistakable — these
@@ -570,47 +775,107 @@ def big_line(l, text, color):
         children = [render.Text(content = text, font = l["font_big"], color = color)],
     )
 
-def sparkline(l, samples, h):
-    """Bottom-anchored bars of download rate, newest at the right.
+def spark_heights(samples, body_h, s, scale):
+    """Bar heights in pixels, one per sample, or [] when there is nothing to draw.
 
-    Bars are log-scaled across the window's own range: home WAN traffic spans
-    several decades, so a linear scale flattens everything that is not the one
-    big spike. The axis is always drawn, so an empty window reads as a chart
-    filling up rather than as a dead band.
+    Two scales, because the two modes chart quantities of different shape.
+    "log" is for local mode's bits/sec: home WAN traffic spans several decades,
+    so a linear scale flattens everything that is not the one big spike.
+    "range" is for cloud mode's milliseconds, which span a handful of integers
+    -- 8 to 12 across a real day -- where a log scale, or any scale anchored at
+    zero, draws a solid rectangle and says nothing.
     """
-    s = l["s"]
-    body_h = h - s
+    if len(samples) < 2:
+        return []
 
     peak = 0
     for v in samples:
         if v > peak:
             peak = v
 
-    bars = []
-    if len(samples) >= 2 and peak > FLOOR_BPS:
+    out = []
+    if scale == "log":
+        if peak <= FLOOR_BPS:
+            return []
         low = peak
         for v in samples:
             if v > FLOOR_BPS and v < low:
                 low = v
-
         flat = low >= peak
         base = math.log(low)
         span = 1.0 if flat else math.log(peak) - base
-
         for v in samples:
             if v <= FLOOR_BPS:
-                height = s
+                out.append(s)
             elif flat:
-                height = body_h // 2
+                out.append(body_h // 2)
             else:
-                height = s + int((math.log(v) - base) / span * (body_h - s))
-            if height <= s:
-                bars.append(render.Box(width = s, height = s, color = AMBER))
-            else:
-                bars.append(render.Column(children = [
-                    render.Box(width = s, height = s, color = AMBER),
-                    render.Box(width = s, height = height - s, color = SPARK_BODY),
-                ]))
+                out.append(s + int((math.log(v) - base) / span * (body_h - s)))
+        return out
+
+    if peak <= 0:
+        return []
+    low = peak
+    for v in samples:
+        if v > 0 and v < low:
+            low = v
+
+    # A window whose peak never moves has no range to scale against, and it is
+    # not a contrived case: latency on a healthy short-haul link sits on one
+    # integer for hours. Half height for all of it -- flat, and honestly flat.
+    #
+    # This has to come BEFORE the base below, which is one unit under the
+    # quietest reading: on a flat window that makes the span exactly one unit
+    # and every bar the full height of the band, which is the solid filled
+    # rectangle this scale exists to avoid.
+    if low >= peak:
+        for v in samples:
+            out.append(s if v <= 0 else body_h // 2)
+        return out
+
+    # One unit below the quietest reading, so the quietest bar is still a bar
+    # and not a gap in the chart.
+    base = low - 1
+    if base < 0:
+        base = 0
+    span = peak - base
+    for v in samples:
+        if v <= 0:
+            out.append(s)
+        else:
+            out.append(s + (v - base) * (body_h - s) // span)
+    return out
+
+def sparkline(l, samples, flags, h, scale):
+    """Bottom-anchored bars, newest at the right.
+
+    A bar flagged in `flags` is drawn in red: cloud mode uses it to mark the
+    five minute periods that dropped packets, which is the one thing a latency
+    chart can show that the number above it cannot. The axis is always drawn,
+    so an empty window reads as a chart filling up rather than as a dead band.
+    """
+    s = l["s"]
+    body_h = h - s
+
+    bars = []
+    heights = spark_heights(samples, body_h, s, scale)
+    for i in range(len(heights)):
+        height = heights[i]
+        if height > body_h:
+            height = body_h
+        lost = i < len(flags) and flags[i] > 0
+        cap = RED if lost else AMBER
+        if height <= s:
+            bars.append(render.Box(width = s, height = s, color = cap))
+        else:
+            bars.append(render.Column(children = [
+                render.Box(width = s, height = s, color = cap),
+                render.Box(
+                    width = s,
+                    height = height - s,
+                    color = SPARK_LOSS if lost else SPARK_BODY,
+                ),
+            ]))
 
     if len(bars) == 0:
         body = render.Box(height = body_h)
@@ -692,17 +957,6 @@ def marked(l, glyph, value):
         ],
     )
 
-def latency_group(l, value):
-    """A number, then a drawn "MS"."""
-    return render.Row(
-        cross_align = "center",
-        children = [
-            render.Text(content = value, font = l["font_sm"], color = WHITE),
-            gap(l, 1),
-            mark(l, GLYPH_MS, DIM),
-        ],
-    )
-
 def labelled(l, value, label):
     return render.Row(
         cross_align = "center",
@@ -713,43 +967,23 @@ def labelled(l, value, label):
         ],
     )
 
-def footer(l, wireless, wired, clients, latency):
-    """Client counts by medium, with latency when there is room for it.
+def footer(l, wireless, wired, clients):
+    """Client counts by medium.
 
     A lone "-" where a number belongs reads as a broken app, so an unknown
     count gives its rows to the sparkline instead.
-
-    All the width arithmetic is in 1x units on purpose. The 2x label font is
-    relatively narrower than the 1x one, so measuring each canvas on its own
-    terms would split the footer at one size and not the other, and the two
-    sizes would show different facts for the same data.
     """
     groups = []
-    used = 0
 
     if wireless != None and wired != None:
-        a = fmt_count(wireless)
-        b = fmt_count(wired)
-        groups.append(marked(l, GLYPH_WIFI, a))
-        groups.append(marked(l, GLYPH_WIRE, b))
-        used = (len(a) + len(b)) * 4 + 2 * (5 + 2)
+        groups.append(marked(l, GLYPH_WIFI, fmt_count(wireless)))
+        groups.append(marked(l, GLYPH_WIRE, fmt_count(wired)))
     elif clients != None:
-        txt = fmt_count(clients)
-        groups.append(labelled(l, txt, "CLIENTS"))
-        used = len(txt) * 4 + 2 + 7 * 4
+        groups.append(labelled(l, fmt_count(clients), "CLIENTS"))
     elif wireless != None:
-        txt = fmt_count(wireless)
-        groups.append(marked(l, GLYPH_WIFI, txt))
-        used = len(txt) * 4 + 5 + 2
+        groups.append(marked(l, GLYPH_WIFI, fmt_count(wireless)))
     elif wired != None:
-        txt = fmt_count(wired)
-        groups.append(marked(l, GLYPH_WIRE, txt))
-        used = len(txt) * 4 + 5 + 2
-
-    if latency != None:
-        txt = "%d" % latency
-        if used + len(groups) * 4 + len(txt) * 4 + 1 + 9 <= 62:
-            groups.append(latency_group(l, txt))
+        groups.append(marked(l, GLYPH_WIRE, fmt_count(wired)))
 
     if len(groups) == 0:
         return None
@@ -764,7 +998,7 @@ def footer(l, wireless, wired, clients, latency):
 def panel(l, view):
     s = l["s"]
     pad = l["pad"]
-    foot = footer(l, view["wireless"], view["wired"], view["clients"], view["latency"])
+    foot = footer(l, view["wireless"], view["wired"], view["clients"])
 
     spark_h = l["spark_h"]
     if foot == None:
@@ -783,12 +1017,12 @@ def panel(l, view):
             pad = (pad, 0, pad, 0),
             child = render.Box(
                 height = l["big_h"],
-                child = hero(l, view["down"], view["up"], view["gw"]),
+                child = hero(l, view),
             ),
         ),
         render.Padding(
             pad = (pad, 0, pad, 0),
-            child = sparkline(l, view["samples"], spark_h),
+            child = sparkline(l, view["samples"], view["flags"], spark_h, view["scale"]),
         ),
     ]
     if foot != None:
@@ -833,6 +1067,68 @@ def history(host, sample):
         samples = samples[len(samples) - MAX_SAMPLES:]
     cache.set(key, ",".join([str(v) for v in samples]), ttl_seconds = CACHE_TTL)
     return samples
+
+def is_public_ip(addr):
+    """True for a dotted quad that is not on a private or link-local net.
+
+    The one field on a real console's device row that gives the gateway away:
+    every other device reports its LAN address, and the router reports the WAN
+    address it holds. Anything unparseable, and anything inside RFC1918,
+    loopback, link-local or the carrier-grade NAT block, is not evidence.
+    """
+    parts = addr.split(".")
+    if len(parts) != 4:
+        return False
+    nums = []
+    for p in parts:
+        if p == "" or not p.isdigit() or len(p) > 3:
+            return False
+        n = int(p)
+        if n > 255:
+            return False
+        nums.append(n)
+    a = nums[0]
+    b = nums[1]
+    if a == 10 or a == 127 or a == 0:
+        return False
+    if a == 192 and b == 168:
+        return False
+    if a == 172 and b >= 16 and b <= 31:
+        return False
+    if a == 169 and b == 254:
+        return False
+    if a == 100 and b >= 64 and b <= 127:
+        return False
+    return True
+
+def gateway_rank(device):
+    """How sure we are that this device is the router. 0 means not a candidate.
+
+    "First device whose features contains gateway" is what the API documents
+    and it finds nothing on real hardware: a UniFi Dream Wall, which *is* the
+    gateway for its site, reports features ["switching", "accessPoint"] and no
+    gateway entry at all. Every device also carries an uplink block with a
+    rate in it — the switch's uplink is its cable to the router — so "has
+    uplink stats" is not a test either, and picking wrong would put LAN traffic
+    on the panel labelled as WAN.
+
+    So: the documented flag first, then the model, which is a vendor string
+    rather than the owner's nickname, then the giveaway that this device holds
+    the public address.
+    """
+    features = dget(device, "features", [])
+    if type(features) == "list" and "gateway" in features:
+        return 4
+    model = as_text(dget(device, "model", "")).lower()
+    for kw in GATEWAY_MODELS:
+        if kw in model:
+            return 3
+    if is_public_ip(as_text(dget(device, "ipAddress", ""))):
+        return 2
+    for kw in GATEWAY_MODELS_WEAK:
+        if kw in model:
+            return 1
+    return 0
 
 def client_count(base, site_id, key, filter):
     params = {"limit": "1"}
@@ -886,22 +1182,41 @@ def local_view(l, config, api_key):
     if devices.status_code != 200:
         return (None, http_card(l, devices.status_code, "local"))
 
-    device_list = as_list(dget(resp_json(devices), "data", []))
+    # The same undecodable-200 check the /sites call above makes, and here it
+    # matters more: an empty device list is not an absence on this panel, it
+    # is an assertion. Left unchecked, a captive portal's HTML rendered
+    # "NO DEVICES", "0/0 UP" and a red dot -- a specific claim about the
+    # network, built from a reply that never parsed -- above a footer still
+    # counting the clients the calls that DID parse returned.
+    device_body = resp_json(devices)
+    if device_body == None:
+        return (None, card(l, "NOT A CONSOLE", AMBER, "CHECK ADDRESS"))
+
+    device_list = as_list(dget(device_body, "data", []))
 
     total = 0
     online = 0
     updatable = False
     gateway = None
+    best = 0
     for d in device_list:
         if type(d) != "dict":
             continue
         total += 1
-        if dget(d, "state", "") == "ONLINE":
+        up_now = dget(d, "state", "") == "ONLINE"
+        if up_now:
             online += 1
         if dget(d, "firmwareUpdatable", False) == True:
             updatable = True
-        features = dget(d, "features", [])
-        if gateway == None and type(features) == "list" and "gateway" in features:
+
+        # An online candidate beats an offline one of the same rank, but never
+        # a stronger signal: a powered-down Dream Machine is still the gateway,
+        # and a live access point holding a public address is still not.
+        score = gateway_rank(d) * 2
+        if score > 0 and up_now:
+            score += 1
+        if score > best:
+            best = score
             gateway = d
 
     down = None
@@ -917,10 +1232,14 @@ def local_view(l, config, api_key):
             if stats.status_code == 200:
                 uplink = dget(resp_json(stats), "uplink")
 
-                # Units are undocumented: treated as bits/sec, which matches the
-                # UniFi UI and the sibling rxRateLimitKbps field. Re-verify
-                # against a live console. Cloud mode has no such doubt — its
-                # download_kbps is documented as kilobits.
+                # Units stay formally unresolved. Under a sustained,
+                # independently measured 355 Mbit/s download this field peaked
+                # at 102,144,744, which is 102 Mbit/s read as bits and 817
+                # Mbit/s read as bytes; neither matches the load, and the same
+                # run also read 384,520 twice in a row, so the sample is coarse
+                # as well. Kept as bits, which is the UniFi UI's own convention
+                # and matches the sibling rxRateLimitKbps field, and presented
+                # as a rounded headline rather than a measurement.
                 down = as_num(dget(uplink, "rxRateBps"))
                 up = as_num(dget(uplink, "txRateBps"))
 
@@ -932,14 +1251,18 @@ def local_view(l, config, api_key):
         if wired < 0:
             wired = 0
 
-    # A gateway that is offline or absent is the one state worth shouting
-    # about, so it takes the hero row and turns the dot red.
+    # A gateway that is offline is the one state worth shouting about, so it
+    # takes the hero row and turns the dot red.
+    #
+    # Not finding one is NOT that state, whatever the old code claimed. On real
+    # hardware the router does not announce itself (see gateway_rank), so
+    # "NO GATEWAY" here was a false alarm printed over a perfectly healthy
+    # network. When nothing scores, the WAN half of the panel simply has no
+    # reading and says so, and the device and client half is still true.
     gw = "ok"
     if total == 0:
         gw = "none"
-    elif gateway == None:
-        gw = "missing"
-    elif dget(gateway, "state", "") != "ONLINE":
+    elif gateway != None and dget(gateway, "state", "") != "ONLINE":
         gw = "down"
 
     if gw == "ok":
@@ -961,44 +1284,53 @@ def local_view(l, config, api_key):
         "wired": wired,
         "clients": clients,
         "latency": None,
+        "label": "",
+        "mode": "rate",
+        "scale": "log",
+        "flags": [],
     }, None)
 
 def metric_time(row):
     return row[0]
 
-def cloud_series(body, site_id, strict):
-    """Flattens isp-metrics periods into (time, down_kbps, up_kbps, ms) rows.
+def cloud_series(body, site_id):
+    """Flattens isp-metrics periods into (time, avg_ms, max_ms, loss) rows.
 
-    Every level here is optional in practice: the shape is version-dependent,
-    a fresh console reports no periods at all, and the newest bin is often
-    still filling. Sorted by metricTime rather than trusted to arrive ordered.
+    Latency and loss only. download_kbps and upload_kbps are in this payload
+    and they are not throughput: across 278 consecutive five minute periods on
+    a live account they never changed once (862000/39000 all day), and on a
+    second, healthy console they read 0 for every period of the day. They are
+    the provisioned plan rate, so a chart drawn from them is a filled
+    rectangle or an empty band, and a hero drawn from them is a number that
+    never moves. avgLatency, maxLatency and packetLoss are what actually vary.
 
-    This endpoint answers for every console on the account, and only sites
-    with a UniFi gateway report at all, so the first entry is routinely a
-    different network from the one on the panel. When the user named a site
-    and nothing here belongs to it, strict keeps the WAN half empty: showing
-    the neighbouring site's throughput, latency and sparkline underneath this
-    site's device and client counts is unmarked and unfalsifiable from the
-    panel. Where no site was named, the first entry is the documented
-    fallback and stays.
+    Every level here is optional in practice: the shape is version-dependent
+    and a fresh console reports no periods at all. Sorted by metricTime rather
+    than trusted to arrive ordered.
+
+    Matched on siteId and nothing else. This endpoint answers for every console
+    on the account -- and only for the ones the key owns, so two of three sites
+    reported on the live account -- which means the first entry is routinely a
+    different network from the one on the panel. Wearing a neighbouring site's
+    latency and chart under this site's device and client counts is unmarked
+    and unfalsifiable from across the room, so a site with no entry here gets
+    an empty WAN half instead.
 
     Args:
         body: the decoded /v1/isp-metrics/5m payload, of any shape.
         site_id: the siteId of the site on the panel, possibly "".
-        strict: True when the user named that site and we found it.
 
     Returns:
-        Rows for the chosen site, or [] when strict and none belong to it.
+        Rows for that site, or [] when none belong to it.
     """
     entry = None
-    for e in as_list(dget(body, "data", [])):
-        if type(e) != "dict":
-            continue
-        if entry == None and not strict:
-            entry = e
-        if site_id != "" and as_text(dget(e, "siteId", "")) == site_id:
-            entry = e
-            break
+    if site_id != "":
+        for e in as_list(dget(body, "data", [])):
+            if type(e) != "dict":
+                continue
+            if as_text(dget(e, "siteId", "")) == site_id:
+                entry = e
+                break
     if entry == None:
         return []
 
@@ -1007,13 +1339,14 @@ def cloud_series(body, site_id, strict):
         if type(p) != "dict":
             continue
         wan = dget(dget(p, "data", {}), "wan", {})
-        d = as_num(dget(wan, "download_kbps"))
-        u = as_num(dget(wan, "upload_kbps"))
+        avg = as_num(dget(wan, "avgLatency"))
+        peak = as_num(dget(wan, "maxLatency"))
+        loss = as_num(dget(wan, "packetLoss"))
         rows.append((
             as_text(dget(p, "metricTime", "")),
-            d if d != None else 0,
-            u if u != None else 0,
-            as_num(dget(wan, "avgLatency")),
+            avg,
+            peak if peak != None else avg,
+            loss if loss != None and loss > 0 else 0,
         ))
     return sorted(rows, key = metric_time)
 
@@ -1021,7 +1354,9 @@ def downsample(values, target):
     """Squeezes a series onto the panel, keeping each bucket's peak.
 
     A 24 hour 5 minute series is up to 288 points against 62 columns; the mean
-    would erase exactly the bursts the chart exists to show.
+    would erase exactly the spikes the chart exists to show. Loss flags ride
+    through here as 0/1 ints for the same reason: one bad period in a bucket
+    has to survive the squeeze.
     """
     n = len(values)
     if n <= target or target <= 0:
@@ -1039,33 +1374,130 @@ def downsample(values, target):
         out.append(top)
     return out
 
+def site_haystacks(site):
+    """Everything a user might reasonably type to mean this site.
+
+    meta.name alone is not enough. On the live account all three sites are
+    named "default" and described "Default"; what tells them apart is the ISP,
+    the gateway model and the ids. So "archtop", "fios", "udw", a gateway MAC
+    and a pasted siteId all have to work.
+    """
+    meta = dget(site, "meta", {})
+    stats = dget(site, "statistics", {})
+    isp = dget(stats, "ispInfo", {})
+    return [
+        as_text(dget(meta, "name", "")),
+        as_text(dget(meta, "desc", "")),
+        as_text(dget(isp, "name", "")),
+        as_text(dget(isp, "organization", "")),
+        as_text(dget(dget(stats, "gateway", {}), "shortname", "")),
+        as_text(dget(meta, "gatewayMac", "")),
+        as_text(dget(site, "siteId", "")),
+        as_text(dget(site, "hostId", "")),
+    ]
+
+def site_label(site):
+    """What to call this site on the panel.
+
+    The owner's own name for it when they gave it one, and the ISP when they
+    did not, which on real accounts is most of the time: "default" is the name
+    every site is born with and few people ever change it.
+    """
+    meta = dget(site, "meta", {})
+    for key in ("name", "desc"):
+        txt = as_text(dget(meta, key, "")).strip()
+        if txt != "" and txt.lower() != "default":
+            return txt.upper()
+    stats = dget(site, "statistics", {})
+    txt = as_text(dget(dget(stats, "ispInfo", {}), "name", "")).strip()
+    if txt != "":
+        return txt.upper()
+    return as_text(dget(dget(stats, "gateway", {}), "shortname", "")).strip().upper()
+
+def site_matches(site, want):
+    """Whether anything a user might type to mean this site contains `want`."""
+    for hay in site_haystacks(site):
+        if hay != "" and want in hay.lower():
+            return True
+    return False
+
+def prefer_owned(sites):
+    """Narrows a list of sites to the ones with the strongest claim to be ours.
+
+    Ownership first, then admin, and the whole list back when neither tells
+    them apart: narrowing to nothing would turn "which of these" into "none of
+    these", which is a different and wrong answer.
+    """
+    owned = []
+    for s in sites:
+        if dget(s, "isOwner", False) == True:
+            owned.append(s)
+    if len(owned) > 0:
+        return owned
+    admin = []
+    for s in sites:
+        if as_text(dget(s, "permission", "")).lower() == "admin":
+            admin.append(s)
+    if len(admin) > 0:
+        return admin
+    return sites
+
 def pick_site(body, want):
-    """Chooses a site by name or description, else the first one.
+    """Chooses the site to show, and says whether the user chose it.
+
+    With no site configured, prefers one the key owns. An account routinely
+    carries consoles that were shared with it -- three sites on the live
+    account, the first of them read-only and belonging to somebody else -- and
+    data[0] is whatever order the API felt like. Someone else's network is
+    never the sane default: it is not the one the owner wants on their wall,
+    and it is the one the metrics endpoint declines to report on.
+
+    A configured site gets the same care, because the field is a substring
+    match and the strings are not distinctive. On the live account all three
+    sites are named "default" and two report the same gateway shortname, so
+    "default" -- the name UniFi gives every site and the one its own UI shows
+    -- fits all three, and "udmpro" fits two. Taking the first was the old
+    data[0] bug moved onto the configured path, where it was worse: it made
+    filling the field in less safe than leaving it blank. So the matches are
+    narrowed the way the blank case is, and an ambiguity that survives that is
+    reported rather than resolved by list order.
 
     Args:
         body: the decoded /v1/sites payload, of any shape.
         want: the lowercased site the user asked for, or "".
 
     Returns:
-        (site, matched) — matched is True only when a name was asked for and
-        found. An unmatched name falls back to the first site for the whole
-        panel, so its metrics may fall back too; a matched one may not.
+        (site, count, hits) -- site is None when nothing matched or more than
+        one did. count is how many sites the key can see and hits how many of
+        them `want` fitted, both for the card that says so.
     """
-    sites = as_list(dget(body, "data", []))
-    chosen = None
-    for s in sites:
-        if type(s) != "dict":
-            continue
-        if chosen == None:
-            chosen = s
-        if want == "":
-            continue
-        meta = dget(s, "meta", {})
-        name = as_text(dget(meta, "name", "")).lower()
-        desc = as_text(dget(meta, "desc", "")).lower()
-        if (name != "" and want in name) or (desc != "" and want in desc):
-            return (s, True)
-    return (chosen, False)
+    sites = []
+    for s in as_list(dget(body, "data", [])):
+        if type(s) == "dict":
+            sites.append(s)
+
+    if want != "":
+        hits = []
+        for s in sites:
+            if site_matches(s, want):
+                hits.append(s)
+
+        # Deliberately no fallback: a named site that cannot be found must not
+        # quietly become a different one.
+        if len(hits) == 0:
+            return (None, len(sites), 0)
+
+        best = hits
+        if len(best) > 1:
+            best = prefer_owned(best)
+        if len(best) == 1:
+            return (best[0], len(sites), len(hits))
+        return (None, len(sites), len(hits))
+
+    picked = prefer_owned(sites)
+    if len(picked) > 0:
+        return (picked[0], len(sites), 0)
+    return (None, 0, 0)
 
 def cloud_view(l, config, api_key):
     """Fetches everything the panel needs from the Site Manager API.
@@ -1073,7 +1505,7 @@ def cloud_view(l, config, api_key):
     Two calls, no LAN dependency and no name the display has to resolve.
 
     Returns:
-        (view, card) — exactly one of the two is None.
+        (view, card) -- exactly one of the two is None.
     """
     base = cloud_base(config)
 
@@ -1085,15 +1517,28 @@ def cloud_view(l, config, api_key):
     if site_body == None:
         return (None, card(l, "NO REPLY", AMBER, "CHECK ADDRESS"))
 
-    site, named = pick_site(site_body, (config.str("site") or "").strip().lower())
+    want = (config.str("site") or "").strip().lower()
+    site, site_count, site_hits = pick_site(site_body, want)
     if site == None:
+        if site_hits > 1:
+            # Refused, not resolved: the sites this fits include, first in the
+            # list on the live account, a read-only console belonging to
+            # somebody else. Spelled without M, W or V like every other string
+            # in this font -- "N SITES MATCH" reads "N SITES HATCH" -- and it
+            # names the two fields that actually tell sites apart, since the
+            # names on a real account do not.
+            return (None, card(l, "%d SITES FIT" % site_hits, AMBER, "USE ISP OR ID"))
+        if want != "" and site_count > 0:
+            return (None, card(l, "NO SUCH SITE", AMBER, "%d SITES ON KEY" % site_count))
         return (None, card(l, "NO SITES", AMBER, "CHECK KEY SCOPE"))
 
     site_id = as_text(dget(site, "siteId", ""))
 
     # statistics and all of its children are loosely typed and change between
-    # console releases: every level is read through dget, and an absent count
-    # stays None rather than becoming a zero we would then present as fact.
+    # console releases -- the live payload carries percentages.txRetry,
+    # ispInfo.asn, wans and wanMagic, none of which the spec mentions -- so
+    # every level is read through dget, and an absent count stays None rather
+    # than becoming a zero we would then present as fact.
     stats = dget(site, "statistics", {})
     counts = dget(stats, "counts", {})
     total = as_num(dget(counts, "totalDevice"))
@@ -1106,15 +1551,21 @@ def cloud_view(l, config, api_key):
     uptime = as_num(dget(dget(stats, "percentages", {}), "wanUptime"))
     issues = as_list(dget(stats, "internetIssues", []))
 
-    known = total != None
+    # Two different kinds of known, because the ratio needs both halves of it
+    # and the hero needs only the first. Substituting zero for an absent
+    # offlineDevice printed "9/9 UP" in white under a green dot -- an
+    # unqualified all-clear assembled from a count that was never reported --
+    # which is exactly what the note above says this block does not do.
+    have_total = total != None
+    ratio_known = have_total and offline != None
     online = 0
-    if known:
-        online = total - (offline if offline != None else 0)
+    if ratio_known:
+        online = total - offline
         if online < 0:
             online = 0
 
     gw = "ok"
-    if known and total == 0:
+    if have_total and total == 0:
         gw = "none"
     elif gw_count != None and gw_count == 0:
         gw = "missing"
@@ -1124,7 +1575,7 @@ def cloud_view(l, config, api_key):
     # GREEN is an assertion about the network and may only be made from data
     # we actually read. statistics and its children are version-dependent, and
     # the spec says so outright, so a console that renames or drops counts
-    # leaves every field above None — and a dot that defaults to green would
+    # leaves every field above None -- and a dot that defaults to green would
     # then show a steady all-clear while every device could be offline. When
     # nothing health-bearing parsed, the dot goes dim: unknown, not well.
     # Local mode has no such state, it reads the device list itself.
@@ -1133,12 +1584,15 @@ def cloud_view(l, config, api_key):
         if v != None:
             health_known = True
 
+    # ratio_known joins health_known for the same reason: green with no
+    # offline count is a claim that every device is up, made without the
+    # field that would say so.
     dot = GREEN
     if gw != "ok" or len(issues) > 0 or (uptime != None and uptime < 99):
         dot = RED
     elif (offline != None and offline > 0) or (pending != None and pending > 0):
         dot = AMBER
-    elif not health_known:
+    elif not health_known or not ratio_known:
         dot = DIM
 
     clients = None
@@ -1148,48 +1602,69 @@ def cloud_view(l, config, api_key):
         # parts is worse than no total.
         clients = wireless + wired
 
-    down = None
-    up = None
     latency = None
     samples = []
+    flags = []
     metrics = api_get(base + "/v1/isp-metrics/5m", api_key, TTL_CLOUD, {"duration": "24h"})
     metrics_body = resp_json(metrics)
 
     # A failure here is not fatal: /v1/sites already answered, so the device
     # and client half of the panel is good. Losing the series costs the hero
-    # row and the chart, not the app.
+    # number and the chart, not the app.
     if ok2xx(cloud_status(metrics, metrics_body)):
-        rows = cloud_series(metrics_body, site_id, named)
+        rows = cloud_series(metrics_body, site_id)
+        columns = (l["w"] - 2 * l["pad"]) // l["s"]
 
-        # download_kbps is documented as kilobits; the sparkline and the rate
-        # formatter both work in bits/sec, as local mode's uplink does.
-        samples = downsample(
-            [r[1] * 1000 for r in rows],
-            (l["w"] - 2 * l["pad"]) // l["s"],
-        )
+        # The bars are the peak of each five minute bin, which is where a
+        # latency chart has any shape at all: across a real day avgLatency held
+        # two values (8 and 9) where maxLatency moved through five (8 to 12).
+        # The hero above them stays the average, because that is the honest
+        # answer to "what is my latency right now".
+        samples = downsample([r[2] for r in rows if r[2] != None], columns)
+        flags = downsample([1 if r[3] > 0 else 0 for r in rows if r[2] != None], columns)
 
-        # The newest bin is usually still filling and reads all zeros, which
-        # would show a live link as idle; fall back to the last one that moved.
-        pick = None
-        for i in range(len(rows)):
-            r = rows[len(rows) - 1 - i]
-            if r[1] != 0 or r[2] != 0:
-                pick = r
+        # Newest first, because the newest bin is the current reading, and
+        # the walk back from it is bounded. The bin now filling can report
+        # nothing yet, which is what a fallback is for; an hour-old number
+        # presented as "now" is not. Unbounded, this scanned a whole day: a
+        # WAN that had been down for an hour -- every recent bin 0 ms and 100%
+        # loss -- printed the last healthy 8 MS in white, with a 1px red stub
+        # at the edge of the chart as the only sign. Past STALE_BINS there is
+        # no current reading and the panel says nothing rather than something
+        # old.
+        #
+        # No upper bound here either. A reading over MAX_MS used to be
+        # skipped, so a link sitting at 1400 ms all day rendered no number at
+        # all and looked like a site with no metrics; the hero clamps it to
+        # ">999" in red instead.
+        for i in range(STALE_BINS):
+            if i >= len(rows):
                 break
-        if pick == None and len(rows) > 0:
-            pick = rows[len(rows) - 1]
-        if pick != None:
-            down = pick[1] * 1000
-            up = pick[2] * 1000
-            latency = pick[3]
-            if latency != None and (latency < 0 or latency > 999):
-                latency = None
+            r = rows[len(rows) - 1 - i]
+            if r[1] != None and r[1] > 0:
+                latency = r[1]
+                break
 
-    ratio, ratio_color = health(gw, online, total if known else 0, known)
+    # Latency is the only field in this payload that measures the WAN itself
+    # -- the ISP speed figures never move -- and until now it coloured the
+    # number and nothing else. A link at 400 ms drew a red reading under a
+    # green dot, which across a room reads as an all-clear with something odd
+    # in it rather than as a problem.
+    if latency != None:
+        if latency >= RED_MS:
+            dot = RED
+        elif latency >= AMBER_MS and dot == GREEN:
+            dot = AMBER
+
+    ratio, ratio_color = health(gw, online, total if ratio_known else 0, ratio_known)
     return ({
-        "down": down,
-        "up": up,
+        "down": None,
+        "up": None,
         "samples": samples,
+        "flags": flags,
+        "scale": "range",
+        "mode": "latency",
+        "label": site_label(site),
         "ratio": ratio,
         "ratio_color": ratio_color,
         "dot": dot,
@@ -1205,9 +1680,19 @@ def main(config):
     l = layout()
     src = pick_source(config)
 
-    api_key = config.str("api_key") or ""
-    if api_key.strip() == "":
+    # Stripped here rather than only tested stripped, which is what the old
+    # line did: the untouched value was the one that went into the header. A
+    # key pasted out of a file or a `cat` carries a trailing newline, Go's
+    # transport refuses to send that header at all, and a transport error is
+    # an uncatchable render abort -- a blank panel with no card on it and the
+    # app gone from the rotation. Same failure class clean_host() spends its
+    # length pre-empting for the address field, which had a guard where the
+    # key had none.
+    api_key = (config.str("api_key") or "").strip()
+    if api_key == "":
         return setup_card(l, src)
+    if not key_ok(api_key):
+        return card(l, "BAD API KEY", RED, "CHECK FOR TYPOS")
 
     if src == "local":
         view, msg = local_view(l, config, api_key)
@@ -1242,7 +1727,7 @@ def get_schema():
             schema.Text(
                 id = "site",
                 name = "Site",
-                desc = "Cloud mode only, optional. Part of the site name; blank uses your first site.",
+                desc = "Cloud mode only, optional. Part of the site name, its ISP, its gateway model or its ID -- most sites are called \"Default\", so \"verizon\" or \"udm\" is often the thing that tells yours apart. A value that fits more than one site is reported, not guessed at. Blank picks a site you own.",
                 icon = "sitemap",
             ),
             schema.Text(
