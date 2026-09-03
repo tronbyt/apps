@@ -11,6 +11,14 @@ series-title marquee over S05E03 + air time/weekday; Radarr rows are title
 marquee over release type (DIGITAL / CINEMA / DISC) + weekday. A green pip
 after the episode label means Sonarr already has the file.
 
+Layout (64x64): the same header, rule and item rows - the square panel just
+holds twice the list. Its 56 rows of body divide into four 14px slots, so
+four items show instead of two, each with a pixel of air above and below it,
+and the "+N" counter starts counting from the fourth row instead of the
+second. A list of fewer than four items centres in that body, exactly as a
+status card's message does, so a quiet calendar sits on the panel's middle
+instead of leaving three quarters of it black.
+
 Ordering is "what's next", not "what's on the calendar today": an episode
 that already aired more than AIRED_GRACE hours ago sinks below everything
 still upcoming and only ever appears as filler, so a two-row panel headed
@@ -37,7 +45,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -62,6 +70,19 @@ SONARR_BLUE = "#35C5F4"
 RADARR_GOLD = "#FFC230"
 
 DAYS = {"1": 1, "3": 3, "7": 7}
+
+# Item rows the body can hold under the 7px header + 1px rule. The 2:1 panel
+# leaves 24 rows, i.e. two 12px items; the square panel leaves 56, i.e. four
+# 14px slots (the same 12px item with a pixel of air above and below it).
+WIDE_ROWS = 2
+SQUARE_ROWS = 4
+
+# Height of the body a panel leaves below the header + rule. Used twice, and
+# for the same reason both times: a status card's message box is the whole
+# body so CAN'T CONNECT centres instead of hugging the top edge, and a square
+# list shorter than SQUARE_ROWS centres in it for the same reason.
+WIDE_BODY = 24
+SQUARE_BODY = 56
 
 # RFC3339 sniff: time.parse_time on a malformed string ABORTS the render
 # (uncatchable), so nothing reaches it without matching one of these first.
@@ -443,6 +464,16 @@ def day_label(t, diff):
 
 # ------------------------------------------------------------------- layouts
 
+def is_square():
+    """True on a square panel, false on the 2:1 one.
+
+    Branches on the canvas's SHAPE, never its size: a 2x wide device reports
+    128x64 and a 2x square one 128x128, so a bare height test would call both
+    of those 64-tall and get one of them wrong. The slack keeps a merely
+    tallish panel on the wide branch."""
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
 def accent_of(service):
     return SONARR_BLUE if service == "sonarr" else RADARR_GOLD
 
@@ -519,8 +550,26 @@ def item_row(row, service):
         ],
     )
 
+def square_slot(item):
+    """One list row in a square panel's 14px slot.
+
+    The square panel's body is 56 rows deep and the item row is the same 12px
+    one the wide panel draws, so four of them fit with a pixel of air above
+    and below each - which is what keeps four stacked title/time pairs
+    reading as four items, and what makes a full list run to the panel's last
+    row. A short list is centred in the same body by render_list."""
+    return render.Column(
+        children = [
+            render.Box(width = 64, height = 1),
+            item,
+            render.Box(width = 64, height = 1),
+        ],
+    )
+
 def render_list(service, items, now, tz, days, demo, stale_host = None):
     rows = classify(items, now, tz, days)
+    square = is_square()
+    shown = SQUARE_ROWS if square else WIDE_ROWS
     if len(rows) == 0:
         if stale_host != None:
             # The live fetch failed AND the cached extract no longer holds
@@ -554,19 +603,44 @@ def render_list(service, items, now, tz, days, demo, stale_host = None):
     corner = ""
     if demo:
         corner = "DEMO"
-    elif len(rows) > 2:
-        corner = "+" + str(len(rows) - 2)
+    elif len(rows) > shown:
+        corner = "+" + str(len(rows) - shown)
 
     kids = [
         header(service, label, corner),
         render.Box(width = 64, height = 1, color = RULE),
     ]
-    for row in rows[:2]:
-        kids.append(item_row(row, service))
+
+    # Same rows, same order - the square panel just shows more of them, so
+    # the "+N" starts counting at the fourth item instead of the second.
+    slots = []
+    for row in rows[:shown]:
+        item = item_row(row, service)
+        slots.append(square_slot(item) if square else item)
+
+    if square:
+        # Four slots fill the 56-row body exactly, so centring is a no-op on a
+        # full panel; it only moves the one-, two- and three-item lists, which
+        # are ordinary configurations rather than edge cases ("Tonight only"
+        # is a first-class Days-ahead option, and a quiet Radarr week is the
+        # normal week). Top-aligning those left up to 44 of 64 rows black
+        # under a list that had stopped early. Same mechanism a status card
+        # already uses, so a short list and an ALL CAUGHT UP card sit on the
+        # same axis. The cost is real and accepted: when the calendar's length
+        # changes between refreshes the rows step up or down the panel.
+        kids.append(render.Box(
+            width = 64,
+            height = SQUARE_BODY,
+            child = render.Column(main_align = "center", children = slots),
+        ))
+    else:
+        kids.extend(slots)
     return render.Root(child = render.Column(children = kids))
 
 def card(service, big, small, big_color):
-    """Full-status card: caught-up, unreachable, bad key."""
+    """Full-status card: caught-up, unreachable, bad key. The message box is
+    the whole body the panel leaves under the header, so the message sits in
+    the middle of a square panel rather than in the top third of it."""
     return render.Root(
         child = render.Column(
             children = [
@@ -574,7 +648,7 @@ def card(service, big, small, big_color):
                 render.Box(width = 64, height = 1, color = RULE),
                 render.Box(
                     width = 64,
-                    height = 24,
+                    height = SQUARE_BODY if is_square() else WIDE_BODY,
                     child = render.Column(
                         main_align = "center",
                         cross_align = "center",
@@ -597,7 +671,11 @@ def card(service, big, small, big_color):
 
 def demo_items(service, now, tz):
     """Fictional-but-plausible calendar, built relative to render time so the
-    demo always opens on a TONIGHT state. Zero network."""
+    demo always opens on a TONIGHT state. Zero network.
+
+    Four of each, which is what fills a square panel's four slots; the wide
+    panel shows the first two of the same list and is untouched by the fourth
+    (demo mode always flies the DEMO chip, never a "+N")."""
     if service == "sonarr":
         return [
             {"t": "Signal Lost", "l": "S03E05", "u": demo_utc(now, tz, 0, 21), "h": False},
@@ -609,6 +687,7 @@ def demo_items(service, now, tz):
         {"t": "Midnight Freight (2026)", "rel": [[demo_date(now, tz, 0), "DIGITAL"]]},
         {"t": "The Glass Orchard (2025)", "rel": [[demo_date(now, tz, 3), "DISC"]]},
         {"t": "Static Fields (2026)", "rel": [[demo_date(now, tz, 5), "CINEMA"]]},
+        {"t": "Paper Lanterns (2026)", "rel": [[demo_date(now, tz, 6), "DIGITAL"]]},
     ]
 
 def demo_utc(now, tz, days_ahead, hour):
