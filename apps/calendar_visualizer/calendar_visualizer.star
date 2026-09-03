@@ -381,7 +381,8 @@ def main(config):
     ttl = int(config.str("ttl", "3600"))
     rep = http.get(url, ttl_seconds = ttl)
     if rep.status_code != 200:
-        fail("iCal fetch failed with status %d", rep.status_code)
+        print("iCal fetch failed with status %d" % rep.status_code)
+        return []
 
     location_data = json.decode(config.get("location", DEFAULT_LOCATION))
     timezone = location_data.get("timezone", time.tz())
