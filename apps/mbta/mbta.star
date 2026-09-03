@@ -175,7 +175,14 @@ def find(xs, pred):
     return None
 
 def get_stops(location):
-    loc = json.decode(location)
+    # The handler is also reached with values that are not a location object at
+    # all. An empty string fails to decode, and the settings page sends the
+    # literal "null" whenever the device itself has no location set, since it
+    # stringifies a null device location into the field. Both aborted the handler,
+    # which the UI reports only as "Error loading options".
+    loc = json.decode(location, None) if location else None
+    if type(loc) != "dict":
+        return []
 
     # The location object reaches this handler two ways, and they disagree on
     # type. A fresh pick in the location search box yields strings, matching the
