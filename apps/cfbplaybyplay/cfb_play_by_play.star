@@ -36,13 +36,19 @@ Field notes from live probing (2026-09-01, week 1):
     show in the pregame/final/idle states instead of the live bands - always
     as an amber number or "AP14", never "#14": tom-thumb's "#" glyph renders
     as an unreadable blob (checked on-panel).
+
+On a 64x64 panel the same four states get their own layout: the two team
+bands become full-width 20px tiles (bigger logo, and room for the AP rank
+the 36px wide band cannot hold), stacked over a 23px band that gives the
+quarter, clock, down & distance and field position a row each - so nothing
+has to be compacted the way the wide 27px column forces.
 """
 
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -598,6 +604,9 @@ def marquee_strip(text, color, height = 7):
 # ------------------------------------------------------------------- states
 
 def live_view(game, final, kp):
+    if is_square():
+        return square_live_view(game, final, kp)
+
     sit = game.get("sit", None)
     left = []
     if final:
@@ -706,6 +715,9 @@ def band(team, game, sit, is_home, kp):
     )
 
 def pregame_root(game, team, kick, kp):
+    if is_square():
+        return square_pregame_root(game, team, kick, kp)
+
     away, home = game["away"], game["home"]
     focus = focus_side(game, team)
     left = render.Box(
@@ -797,6 +809,11 @@ def idle_frame(me, line3, marq_next, base, kp):
     ap = get_rankings(base, kp)
     marq = join_dot(marq_next, ap.get("m", "") if ap != None else "")
 
+    # The rankings fetch stays above the branch: both panels show the same
+    # marquee and make the same requests.
+    if is_square():
+        return square_idle_root(me, line3, marq, kp)
+
     name_row = []
     if ranked(me):
         name_row.append(render.Text("AP" + str(me["rank"]), font = "tom-thumb", color = AMBER))
@@ -835,6 +852,10 @@ def notfound_root(team):
     """Nothing resolved for this abbreviation. Two different causes land here
     - a typo'd team, or a total ESPN outage on a cold cache - so the copy
     offers the fix without asserting the user got it wrong."""
+    marq = "No FBS game found for " + team[0:10] + " - check back soon, or set your ESPN abbreviation: OSU MICH BAMA TEX ND UGA ORE"
+    if is_square():
+        return square_notfound_root(team, marq)
+
     body = render.Column(
         children = [
             render.Box(
@@ -861,10 +882,269 @@ def notfound_root(team):
                     ],
                 ),
             ),
-            marquee_strip(
-                "No FBS game found for " + team[0:10] + " - check back soon, or set your ESPN abbreviation: OSU MICH BAMA TEX ND UGA ORE",
-                "#4A3000",
+            marquee_strip(marq, "#4A3000"),
+        ],
+    )
+    return render.Root(child = body, show_full_animation = True)
+
+# --------------------------------------------------------- square (64x64)
+#
+# A square panel is not the wide layout with room underneath: the two team
+# bands stop sharing a row with a 27px status column and become full-width
+# tiles, and everything the wide layout has to compact - the AP rank, the
+# down & distance, the field position - gets written out in full underneath.
+
+def is_square():
+    # Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    # 2x square one 128x128, so a bare height test gets one of them wrong.
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def square_rule():
+    # The wide layout separates the status column from the bands with a 1px
+    # DARKGREY line; on square that line lies down between the tiles and the
+    # status band, so the band reads as its own compartment.
+    return render.Box(width = 64, height = 1, color = DARKGREY)
+
+def square_band(team, game, sit, right, is_home, kp):
+    """64x20 team tile: an 18px logo (13px on wide), the AP rank the wide
+    band has no room for, the abbreviation, and the score - or the record
+    before kickoff. Geometry: logo x=1-18, name field x=20-43, right slot
+    x=44-58 live (x=43-58 pregame), timeout pips at x=61. The possession ball
+    uses the wide band's spacer rule, for the same reason: a 4-char abbr
+    already ends in a blank column and an extra spacer would push the ball
+    into the pips.
+
+    Unlike the wide band, this row carries the name AND the score, so both
+    slots get hard bounds rather than trusting the text to stop in time:
+    tb-8 is proportional (M V W Y advance 6px, I J T 4px, everything else 5),
+    so a 4-char abbreviation is anywhere from 16 to 24px wide, and the right
+    slot is right-aligned. Unbounded, a wide enough name walks the ball into
+    the score, and a wide enough score walks back into the name - reachable
+    only from a junk payload, but the parse layer caps abbr/score length for
+    exactly the same reason.
+
+      name field  24px = the widest possible 4-char advance (4 x 6px), so
+                  the name itself is never clipped; the ball fits beside
+                  every real abbreviation (WASH, the widest at 21px, puts it
+                  at x=41-43). NAVY and ARMY are 22px and give up the ball's
+                  last column; four M's give up the ball entirely.
+      right slot  15px live = a 3-digit tb-8 score exactly, so scores keep
+                  their x=44-58 placement and junk clips at 44 instead of
+                  crossing the ball. 16px pregame, where no ball can exist
+                  and a 4-char tom-thumb record (the real maximum, "12-1")
+                  needs the extra pixel."""
+    bg = team["color"]
+    pre = game["state"] == "pre"
+    has_ball = sit != None and sit["valid"] and sit["poss"] == team["id"]
+    touts = -1
+    if sit != None and game["state"] == "in":
+        touts = sit["hto"] if is_home else sit["ato"]
+
+    name_row = [render.Text(team["abbr"], font = "tb-8", color = accent_on(bg, team["alt"]))]
+    if has_ball:
+        ball_color = RED if sit["red"] else AMBER
+        if len(team["abbr"]) < 4:
+            name_row.append(render.Box(width = 1, height = 1))
+        name_row.append(render.Box(width = 3, height = 3, color = ball_color))
+
+    # Ranks fit here and only here: the tile is 64px wide, so an amber
+    # "AP12" sits above the name instead of colliding with the pips.
+    tag = "AP" + str(team["rank"]) if ranked(team) else ""
+    tag_row = render.Row(
+        cross_align = "center",
+        children = [
+            render.Text(tag, font = "tom-thumb", color = AMBER),
+            render.Box(width = 1, height = 6),
+        ],
+    )
+
+    pips = []
+    if touts >= 0:
+        for i in range(3):
+            pips.append(render.Box(width = 1, height = 2, color = WHITE if i < touts else "#333333"))
+            if i < 2:
+                pips.append(render.Box(width = 1, height = 1))
+
+    return render.Stack(
+        children = [
+            render.Box(width = 64, height = 20, color = bg),
+            render.Padding(
+                pad = (1, 1, 0, 0),
+                child = render.Row(
+                    cross_align = "center",
+                    children = [
+                        logo_cell(team, 18, kp),
+                        render.Padding(
+                            pad = (1, 0, 0, 0),
+                            child = render.Column(children = [tag_row, render.Box(
+                                width = 24,
+                                height = 8,
+                                child = render.Row(
+                                    expanded = True,
+                                    main_align = "start",
+                                    cross_align = "center",
+                                    children = name_row,
+                                ),
+                            )]),
+                        ),
+                    ],
+                ),
             ),
+            render.Padding(
+                pad = (43 if pre else 44, 0, 0, 0),
+                child = render.Box(
+                    width = 16 if pre else 15,
+                    height = 20,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        cross_align = "center",
+                        children = [render.Text(
+                            right,
+                            font = "tom-thumb" if pre else "tb-8",
+                            color = GREY if pre else WHITE,
+                        )],
+                    ),
+                ),
+            ),
+            render.Padding(pad = (61, 6, 0, 0), child = render.Column(children = pips)),
+        ],
+    )
+
+def square_status(game, sit, final):
+    """The 23px band under the tiles. This is what the extra height buys:
+    the wide layout squeezes quarter, clock, down and field position into a
+    27px column and has to compact the last two ("3rd & Goal" -> "3rd&GL",
+    "UCLA 38" -> "UCLA38"). Here each gets its own full-width row, written
+    exactly as ESPN words it."""
+    lines = []
+    if final:
+        lines.append(render.Text("F/OT" if game["period"] > 4 else "FIN", font = "tb-8", color = WHITE))
+
+        # The wide final tags the ranked side(s) down the left column; on
+        # square the ranks are already on the tiles, so the room goes to the
+        # records instead - the one number a finished game changes.
+        for t in [game["away"], game["home"]]:
+            if t["record"] != "":
+                lines.append(render.Text(t["abbr"] + " " + t["record"], font = "tom-thumb", color = GREY))
+    elif game["status_name"] == "STATUS_HALFTIME":
+        lines.append(render.Text("HALF", font = "tb-8", color = WHITE))
+    elif sit != None and sit["valid"]:
+        # Quarter and clock share one row so down and spot get one each.
+        lines.append(render.Row(
+            cross_align = "center",
+            children = [
+                render.Text(quarter_label(game), font = "tom-thumb", color = GREY),
+                render.Box(width = 3, height = 1),
+                render.Text(game["clock"], font = "tb-8", color = WHITE),
+            ],
+        ))
+        lines.append(render.Text(sit["down_text"][0:15], font = "tom-thumb", color = WHITE))
+        lines.append(render.Text(sit["spot"][0:15], font = "tom-thumb", color = RED if sit["red"] else AMBER))
+    else:
+        # Between plays there is no down to show, so the clock stacks under
+        # the quarter the way it does on the wide panel instead of leaving
+        # two empty rows below a single line.
+        lines.append(render.Text(quarter_label(game), font = "tom-thumb", color = GREY))
+        lines.append(render.Text(game["clock"], font = "tb-8", color = WHITE))
+
+    return render.Box(
+        width = 64,
+        height = 23,
+        child = render.Column(main_align = "center", cross_align = "center", children = lines),
+    )
+
+def square_live_view(game, final, kp):
+    sit = game.get("sit", None)
+    return render.Column(
+        children = [
+            square_band(game["away"], game, sit, game["away"]["score"], False, kp),
+            square_band(game["home"], game, sit, game["home"]["score"], True, kp),
+            square_rule(),
+            square_status(game, sit, final),
+        ],
+    )
+
+def square_pregame_root(game, team, kick, kp):
+    away, home = game["away"], game["home"]
+    focus = focus_side(game, team)
+    body = render.Column(
+        children = [
+            # 4 chars, the wide pre_panel's cap and the real maximum ("12-1"):
+            # the tile's right slot is 16px and tom-thumb advances 4px/char.
+            square_band(away, game, None, away["record"][0:4], False, kp),
+            square_band(home, game, None, home["record"][0:4], True, kp),
+            square_rule(),
+            render.Box(
+                width = 64,
+                height = 16,
+                child = render.Column(
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        render.Text("TODAY", font = "tom-thumb", color = GREY),
+                        render.Text(kick.format("3:04"), font = "tb-8", color = WHITE),
+                    ],
+                ),
+            ),
+            marquee_strip(pre_tag(away) + " @ " + pre_tag(home), focus["color"]),
+        ],
+    )
+    return render.Root(child = body, show_full_animation = True)
+
+def square_idle_root(me, line3, marq, kp):
+    """One team, so the height goes to the crest: a 32px logo (22px on wide,
+    where it has to share the row with the text) over the identity lines."""
+    name_row = []
+    if ranked(me):
+        name_row.append(render.Text("AP" + str(me["rank"]), font = "tom-thumb", color = AMBER))
+        name_row.append(render.Box(width = 2, height = 1))
+    name_row.append(render.Text(me["abbr"], font = "tb-8", color = WHITE))
+
+    lines = [logo_cell(me, 32, kp), render.Box(width = 1, height = 2), render.Row(cross_align = "end", children = name_row)]
+    if me["record"] != "":
+        lines.append(render.Text(me["record"], font = "tom-thumb", color = GREY))
+    if line3 != "":
+        # 14 chars here against the wide layout's 8: the line has the whole
+        # panel to itself instead of a 40px gap beside a logo.
+        lines.append(render.Text(line3[0:14], font = "tom-thumb", color = AMBER))
+
+    body = render.Column(
+        children = [
+            render.Box(
+                width = 64,
+                height = 57,
+                child = render.Column(main_align = "center", cross_align = "center", children = lines),
+            ),
+            marquee_strip(marq, me["color"]),
+        ],
+    )
+    return render.Root(child = body, show_full_animation = True)
+
+def square_notfound_root(team, marq):
+    body = render.Column(
+        children = [
+            render.Box(
+                width = 64,
+                height = 57,
+                child = render.Column(
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        render.Box(
+                            width = 22,
+                            height = 22,
+                            color = "#222222",
+                            child = render.Text("?", font = "tb-8", color = AMBER),
+                        ),
+                        render.Box(width = 1, height = 3),
+                        render.Text(team[0:8], font = "tb-8", color = WHITE),
+                        render.Text("NO GAME", font = "tom-thumb", color = GREY),
+                    ],
+                ),
+            ),
+            marquee_strip(marq, "#4A3000"),
         ],
     )
     return render.Root(child = body, show_full_animation = True)
