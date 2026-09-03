@@ -39,12 +39,21 @@ handled below, because each one otherwise renders as confident nonsense:
 Outside 09:30-16:00 ET on weekdays (or when the last trade is from an older
 session — holidays, the delayed first minutes of the open) a dim dot marks
 the reading as "most recent session" rather than live.
+
+On a 64x64 panel the chart is the thing worth growing, since it is what the
+first-party app was built around: symbol and price stop sharing a row and
+the sparkline takes 38 of the 64 rows instead of 16, with yesterday's close
+drawn across it as a dim level whenever the session crossed it. Same points
+(the panel is no wider), same colours, same dot — see square_layout(). When
+there is no session to draw at all, the square panel does NOT keep the tall
+header and 38 black rows under it: the reading centres instead, the way the
+message cards do — see square_no_chart().
 """
 
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -78,6 +87,14 @@ AMBER = "#FFA33A"
 
 MAX_POINTS = 64  # one cached close per panel column, at most
 
+# Square (64x64) panel proportions. The original app was built around its
+# sparkline, so that is what the extra rows buy: a 38px chart instead of a
+# 16px strip, with the symbol, price and change stacked above it. The point
+# count is deliberately NOT raised — the panel is still 64 columns wide.
+SQ_PLOT_H = 38
+SQ_GAP_H = 2
+SQ_SYMBOL_CHARS = 12  # tb-8 runs ~5px/char; 12 fills the 62px inside the margins
+
 def main(config):
     sym = normalize(config.str("symbol", "AAPL"))
     if not is_symbol(sym):
@@ -108,6 +125,22 @@ def main(config):
     color, fill = GREY, GREY_FILL
     if direction != None:
         color, fill = (GREEN, GREEN_FILL) if direction >= 0 else (RED, RED_FILL)
+
+    # 64x64 panels get their own layout; wide panels keep the one below.
+    if is_square():
+        return render.Root(
+            child = square_layout(
+                display_symbol(q, sym),
+                price,
+                chg,
+                pct,
+                color,
+                fill,
+                closes,
+                q,
+                show_pct,
+            ),
+        )
 
     return render.Root(
         child = render.Column(
@@ -419,6 +452,17 @@ def abs_f(x):
 
 # ------------------------------------------------------------------- layout
 
+def is_square():
+    """True on a 64x64 panel, false on the classic 2:1 one.
+
+    Branches on the canvas's SHAPE, never its size: a 2x wide panel reports
+    128x64 and a 2x square one 128x128, so a bare height test reads both as
+    64-tall and gets one of them wrong. The slack keeps a merely tallish
+    panel on the wide branch.
+    """
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
 def top_row(sym, price):
     """SYMBOL left, price right, both tb-8 — the first-party look. The
     symbol yields to the price: tb-8 runs ~5px/char, so truncate the symbol
@@ -440,9 +484,10 @@ def top_row(sym, price):
         ),
     )
 
-def change_row(chg, pct, color, show_pct, closed):
-    """The day change, colored; the other form of it in grey when it fits;
-    a dim dot on the right when the reading is a past session's."""
+def change_texts(chg, pct, color, show_pct):
+    """The change as one or two Texts: the leading form in the day's color,
+    the other form in grey when both fit. Shared by the wide change row and
+    the square no-chart card so the two can never word it differently."""
     if chg == None:
         primary, secondary = "--", ""
     elif show_pct:
@@ -455,7 +500,11 @@ def change_row(chg, pct, color, show_pct, closed):
     texts = [render.Text(primary, font = "tom-thumb", color = color)]
     if secondary != "" and 4 * (len(primary) + 1 + len(secondary)) <= 56:
         texts.append(render.Text(" " + secondary, font = "tom-thumb", color = GREY))
+    return texts
 
+def change_row(chg, pct, color, show_pct, closed):
+    """The day change, colored; the other form of it in grey when it fits;
+    a dim dot on the right when the reading is a past session's."""
     right = []
     if closed:
         right = [render.Box(width = 2, height = 2, color = DIM)]
@@ -466,20 +515,31 @@ def change_row(chg, pct, color, show_pct, closed):
             expanded = True,
             main_align = "space_between",
             cross_align = "center",
-            children = [render.Row(children = texts)] + right,
+            children = [render.Row(children = change_texts(chg, pct, color, show_pct))] + right,
         ),
     )
 
+def plot_points(closes, q, price):
+    """The points a session line would be drawn from: the session's closes,
+    or the honest two-point open->price line when there is no series at all
+    (holiday gap, brand-new listing). Empty when there is nothing whatever
+    to plot — a quote with a price but no open and no closes, which is a
+    pre-market or halted-then-resumed reading. Both layouts ask this one
+    question so they cannot disagree about whether a chart exists."""
+    if len(closes) >= 2:
+        return closes
+    if q["open"] != None and price != None:
+        return [q["open"], price]
+    return []
+
 def sparkline(closes, q, price, color, fill):
-    """The session's price line, filled, in the day's color. With no series
-    at all (holiday gap, brand-new listing) fall back to a two-point line
-    from the open so the direction still reads; failing that, dark glass."""
-    pts = closes
+    """The session's price line, filled, in the day's color. With nothing at
+    all to plot, dark glass: on a 2:1 panel that is a 16px strip under a
+    full-height reading, which is a different (and much smaller) hole than
+    the same strip would be on a square one — see square_no_chart()."""
+    pts = plot_points(closes, q, price)
     if len(pts) < 2:
-        if q["open"] != None and price != None:
-            pts = [q["open"], price]
-        else:
-            return render.Box(width = 64, height = 16)
+        return render.Box(width = 64, height = 16)
 
     lo, hi = pts[0], pts[0]
     for v in pts:
@@ -503,10 +563,168 @@ def sparkline(closes, q, price, color, fill):
         y_lim = (lo - pad, hi + pad),
     )
 
-def message_card(sym, line1, line2):
+# ------------------------------------------------- square (64x64) layout
+
+def square_layout(sym, price, chg, pct, color, fill, closes, q, show_pct):
+    """The same panel, re-proportioned for a square one.
+
+    Not the 2:1 layout with black underneath it: the symbol and the price
+    stop sharing a row (so neither has to yield width to the other) and the
+    sparkline — the thing the first-party app was built around — grows from
+    a 16px strip to 38px, most of the panel. 17 + 7 + 2 + 38 = 64 exactly.
+    Colours, fonts and the market-closed dot are the wide layout's own;
+    `change_row` is literally the same function.
+
+    The one case that is NOT just re-proportioned is a reading with no
+    session line at all. Growing an empty plot to 38 rows grows the hole
+    with it, so that state gets its own centred card instead.
+    """
+    pts = plot_points(closes, q, price)
+    if len(pts) < 2:
+        return square_no_chart(sym, price, chg, pct, color, show_pct, q)
+
+    return render.Column(
+        children = [
+            square_head(sym, price),
+            change_row(chg, pct, color, show_pct, market_closed(q)),
+            render.Box(width = 64, height = SQ_GAP_H),
+            square_sparkline(pts, q, color, fill),
+        ],
+    )
+
+def square_no_chart(sym, price, chg, pct, color, show_pct, q):
+    """A real quote with nothing to plot under it.
+
+    Reached when the quote has a price but no open and the chart is empty —
+    a pre-market reading, or a name halted before it printed. The wide panel
+    absorbs this in 16 dark rows beneath a reading that already fills the
+    other 16; a square panel would have to leave 38 of its 64 rows black
+    under a header pinned to the top, which is the one thing this layout
+    exists to stop. So the reading centres instead, in the same shape
+    `message_card` uses, with a grey line naming what is missing — the
+    ticker, its price, its change, and no pretence of a session.
+    """
+    right = []
+    if market_closed(q):
+        right = [
+            render.Box(width = 3, height = 1),
+            render.Box(width = 2, height = 2, color = DIM),
+        ]
+
     return render.Box(
         width = 64,
-        height = 32,
+        height = 64,
+        child = render.Column(
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                render.Text(sym[:SQ_SYMBOL_CHARS], font = "tb-8", color = WHITE),
+                render.Text(fmt_price(price), font = "tb-8", color = WHITE),
+                render.Box(width = 1, height = 2),
+                render.Row(
+                    cross_align = "center",
+                    children = change_texts(chg, pct, color, show_pct) + right,
+                ),
+                render.Box(width = 1, height = 2),
+                render.Text("no chart data", font = "tom-thumb", color = GREY),
+            ],
+        ),
+    )
+
+def square_head(sym, price):
+    """SYMBOL over price, both tb-8, both left. On the 2:1 panel these share
+    one row and the symbol is truncated to whatever the price leaves of it;
+    with a row each, the price is never a reason to shorten the ticker."""
+    return render.Padding(
+        pad = (1, 1, 1, 0),
+        child = render.Column(
+            children = [
+                render.Text(sym[:SQ_SYMBOL_CHARS], font = "tb-8", color = WHITE),
+                render.Text(fmt_price(price), font = "tb-8", color = WHITE),
+            ],
+        ),
+    )
+
+def square_sparkline(pts, q, color, fill):
+    """The session line with SQ_PLOT_H rows instead of 16.
+
+    Same points (still <= 64 — the panel is no wider, and `plot_points` has
+    already resolved the two-point open->price fallback), same day colour
+    and fill. The height is the whole change, plus the one thing 16 rows had
+    no room for: the previous close as a dim level, so the fill has a
+    visible line to be above or below. There is no empty case here — with
+    fewer than two points `square_layout` never gets this far.
+    """
+    lo, hi = pts[0], pts[0]
+    for v in pts:
+        if v < lo:
+            lo = v
+        if v > hi:
+            hi = v
+    pad = (hi - lo) * 0.05
+    if pad == 0:
+        pad = 1.0
+
+    x_lim = (0.0, float(len(pts) - 1))
+    y_lim = (lo - pad, hi + pad)
+    line = render.Plot(
+        data = [(float(i), pts[i]) for i in range(len(pts))],
+        width = 64,
+        height = SQ_PLOT_H,
+        color = color,
+        color_inverted = color,
+        fill = True,
+        fill_color = fill,
+        x_lim = x_lim,
+        y_lim = y_lim,
+    )
+
+    ref = baseline(q, lo, hi)
+    if ref == None:
+        return line
+
+    # A second Plot on the SAME limits rather than a Box at a row computed
+    # here: the renderer does the value->pixel mapping either way, so this
+    # one cannot drift a row off the level it claims to mark.
+    return render.Stack(
+        children = [
+            line,
+            render.Plot(
+                data = [(x_lim[0], ref), (x_lim[1], ref)],
+                width = 64,
+                height = SQ_PLOT_H,
+                color = DIM,
+                color_inverted = DIM,
+                x_lim = x_lim,
+                y_lim = y_lim,
+            ),
+        ],
+    )
+
+def baseline(q, lo, hi):
+    """Yesterday's close, but only when the session actually straddles it.
+
+    Skipped with no previous close to draw (and on a zero one, the same
+    not-a-baseline the change math already refuses). Skipped when the whole
+    session sits on one side of it: the level would land in the 5% headroom
+    and read as a frame along the top or bottom edge, and it would be saying
+    what the green or red change row has said already. A level earns its row
+    when the day crossed it — then it marks which parts of the session were
+    up and which were down, which is the one thing 16 rows had no room for.
+    """
+    prev = q["prev"]
+    if prev == None or prev == 0:
+        return None
+    if prev <= lo or prev >= hi:
+        return None
+    return prev
+
+def message_card(sym, line1, line2):
+    # The cards centre in whatever panel they land on: on a square one a
+    # 32px box would strand the whole message in the top half.
+    return render.Box(
+        width = 64,
+        height = 64 if is_square() else 32,
         child = render.Column(
             main_align = "center",
             cross_align = "center",
