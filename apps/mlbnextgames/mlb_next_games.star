@@ -136,7 +136,7 @@ def is_square():
     """
 
     w, h = canvas.size()
-    return h * 2 > w + 16
+    return h == w
 
 def main_square(config):
     """ Square (64x64) layout: same game cards as the wide layout, but two
