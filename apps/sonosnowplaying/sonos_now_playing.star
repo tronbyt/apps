@@ -40,7 +40,7 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CONTROL_PATH = "/MediaRenderer/AVTransport/Control"
@@ -58,6 +58,25 @@ ART_TTL = 3600  # art bytes for a given URI don't change
 # marquee restarts mid-string and the tail is never displayed.
 MAX_LINE = 63
 MAX_LABEL = 60
+
+# Square (64x64) panel geometry. The cover becomes the picture at 40x40 -
+# 6.25x the area it gets as a thumbnail beside the text on a 2:1 panel - and
+# the text lines fall underneath it across the whole panel instead of into a
+# 45px gutter:  1 + 40 + 2 + 6 + 1 + 6 + 1 + 7 = 64.
+# By the same arithmetic as MAX_LINE, a 60px marquee's cycle is 4n + 59
+# frames, so 60 characters is the longest line that still completes one pass
+# inside the 300-frame cap (measured: 60 chars -> 299 frames, 61 -> pinned).
+# The status bar keeps its 55px marquee, so MAX_LABEL carries over unchanged.
+SQ_ART = 40
+SQ_LINE_W = 60
+SQ_LINE = 60
+
+# The embedded assets are 16x16 pixel art, so on a square panel they are drawn
+# at an exact 2x and centred in the 40px frame rather than stretched to fill
+# it. This renderer scales nearest-neighbour, so a 2.5x resample would widen
+# some source pixels to 3 and leave others at 2 - which, on a drawing this
+# small, visibly breaks the speaker cabinet's symmetry (checked side by side).
+SQ_ASSET = 32
 
 # Bytes legal in a URL host besides letters and digits: % - . : [ ] _ ~
 HOST_PUNCT = [37, 45, 46, 58, 91, 93, 95, 126]
@@ -105,7 +124,7 @@ def main(config):
         title = "(no track info)"
     art = art_widget(art_url(d.get("art", ""), base, config.bool("remote_art", False)))
     return render.Root(
-        child = card(art, title, d.get("ar", ""), d.get("al", ""), glyph(st), label, AMBER),
+        child = panel_card(art, title, d.get("ar", ""), d.get("al", ""), glyph(st), label, AMBER),
     )
 
 def base_url(ip):
@@ -385,6 +404,35 @@ def tag_text(doc, name):
 
 # -------------------------------------------------------------------- views
 
+def is_square():
+    """True on a square panel, false on the 2:1 one.
+
+    Branches on the panel's SHAPE, never its height: an aspect test is right
+    at either scale (128x64 is wide, 128x128 is square) where `h == 64` is
+    ambiguous between them. The slack keeps a merely tallish panel - 64x40 -
+    on the wide branch.
+
+    On scale, precisely, because the SQ_* constants below are absolute pixel
+    counts and only hold on a 64-unit canvas: canvas.size() reports the
+    DOUBLED canvas only for an app whose manifest sets `supports2x: true`
+    (pixlet clears the 2x flag otherwise, and size() returns the scaled
+    dimensions). This app's manifest does not set it, so canvas.size() is
+    always the logical panel - 64x32 or 64x64 - and rendering at 2x is pure
+    magnification of a 64-unit card. That is the precondition that keeps a
+    fixed 64-wide layout centred instead of stranded in the corner of a
+    128x128 canvas; opting into supports2x later would mean scaling SQ_ART,
+    the line widths and the status bar to match. The predicate itself needs
+    no change either way - it is already correct at both scales."""
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def panel_card(art, title, artist, album, state_glyph, label, label_color):
+    """One card, two panels. Every state in this app - playing, radio, idle,
+    demo, unreachable - is a card, so the shape test lives here once."""
+    if is_square():
+        return square_card(art, title, artist, state_glyph, label, label_color)
+    return card(art, title, artist, album, state_glyph, label, label_color)
+
 def card(art, title, artist, album, state_glyph, label, label_color):
     """16px art | three tom-thumb marquee lines, over a 7px status bar:
     play-state glyph + room label. 2 + 22 + 1 + 7 = 32."""
@@ -409,23 +457,62 @@ def card(art, title, artist, album, state_glyph, label, label_color):
                 ],
             ),
             render.Box(width = 64, height = 1, color = RULE),
-            render.Box(
-                width = 64,
-                height = 7,
-                child = render.Row(
-                    children = [
-                        render.Padding(pad = (1, 1, 0, 0), child = render.Box(width = 5, height = 5, child = state_glyph)),
-                        render.Padding(
-                            pad = (2, 1, 0, 0),
-                            child = render.Marquee(
-                                width = 55,
-                                child = render.Text(fit(label, MAX_LABEL), font = "tom-thumb", color = label_color),
-                            ),
-                        ),
-                    ],
-                ),
-            ),
+            status_bar(state_glyph, label, label_color),
         ],
+    )
+
+def square_card(art, title, artist, state_glyph, label, label_color):
+    """The 64x64 card: same colours, same font, same status bar - but the
+    cover stops being a thumbnail and becomes the picture, 40x40 across the
+    top with the text stacked full-width underneath instead of squeezed into
+    a 45px gutter beside it. The album line is what pays for that: on this
+    panel the sleeve IS the album, at 6.25x the area it gets on the 2:1 one,
+    so the two lines that a cover cannot show - the track and who plays it -
+    are the two that stay. 1 + 40 + 2 + 6 + 1 + 6 + 1 + 7 = 64."""
+    return render.Column(
+        children = [
+            render.Box(width = 64, height = 1),
+            render.Box(width = 64, height = SQ_ART, child = art),
+            render.Box(width = 64, height = 2),
+            sq_line(title, WHITE),
+            render.Box(width = 64, height = 1),
+            sq_line(artist, DIM),
+            render.Box(width = 64, height = 1, color = RULE),
+            status_bar(state_glyph, label, label_color),
+        ],
+    )
+
+def status_bar(state_glyph, label, label_color):
+    """Play-state glyph + room label. 64x7 on either panel - the wide card's
+    bar was already full-width, so the square one keeps it pixel for pixel
+    (and with it MAX_LABEL, which is tuned to this 55px marquee)."""
+    return render.Box(
+        width = 64,
+        height = 7,
+        child = render.Row(
+            children = [
+                render.Padding(pad = (1, 1, 0, 0), child = render.Box(width = 5, height = 5, child = state_glyph)),
+                render.Padding(
+                    pad = (2, 1, 0, 0),
+                    child = render.Marquee(
+                        width = 55,
+                        child = render.Text(fit(label, MAX_LABEL), font = "tom-thumb", color = label_color),
+                    ),
+                ),
+            ],
+        ),
+    )
+
+def sq_line(text, color):
+    """A full-width text line on the square panel. Wider viewport, shorter
+    string budget: a 60px marquee takes 4n + 59 frames to complete a pass, so
+    SQ_LINE is 60 where the 45px wide-panel line affords 63."""
+    return render.Padding(
+        pad = (2, 0, 0, 0),
+        child = render.Marquee(
+            width = SQ_LINE_W,
+            child = render.Text(fit(text, SQ_LINE), font = "tom-thumb", color = color),
+        ),
     )
 
 def line(text, color):
@@ -460,10 +547,18 @@ def art_widget(url):
     promotes them from unproven to reusable for the rest of ART_TTL."""
     body = get_art(url)
     if body == None:
-        return render.Image(src = SPEAKER, width = 16, height = 16)
-    img = render.Image(src = body, width = 16, height = 16)
+        return asset_image(SPEAKER)
+    px = SQ_ART if is_square() else 16
+    img = render.Image(src = body, width = px, height = px)
     cache.set(art_ok_key(url), "1", ttl_seconds = ART_TTL)
     return img
+
+def asset_image(src):
+    """One of the two embedded 16x16 pixel-art tiles, at the size its panel
+    wants: 16 on the 2:1 panel, an exact 2x on the square one (SQ_ASSET), so
+    the drawn pixels stay square inside the 40px art frame."""
+    px = SQ_ASSET if is_square() else 16
+    return render.Image(src = src, width = px, height = px)
 
 def glyph(st):
     if st == "PAUSED_PLAYBACK" or st == "PAUSED_RECORDING":
@@ -491,8 +586,8 @@ def glyph(st):
 def demo_card():
     """Default config: no speaker IP yet. Zero network - the art ships in the
     binary. Looks like the real thing, says so in the status bar."""
-    return card(
-        render.Image(src = DEMO_ART, width = 16, height = 16),
+    return panel_card(
+        asset_image(DEMO_ART),
         "Sunset Interlude",
         "The Analog Hearts",
         "Warm Static",
@@ -502,8 +597,8 @@ def demo_card():
     )
 
 def idle_card(label):
-    return card(
-        render.Image(src = SPEAKER, width = 16, height = 16),
+    return panel_card(
+        asset_image(SPEAKER),
         "Nothing playing",
         "",
         "",
@@ -517,8 +612,8 @@ def unreachable_card(base, label, why):
     that could exist ('Speaker unreachable'), or the address itself is not one
     ('Check speaker IP' - a room name in the IP box)."""
     host = base.replace("http://", "").replace("https://", "")
-    return card(
-        render.Image(src = SPEAKER, width = 16, height = 16),
+    return panel_card(
+        asset_image(SPEAKER),
         why,
         host,
         "",
