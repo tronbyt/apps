@@ -33,12 +33,19 @@ before this was written; field notes that differ from folklore:
     free key.
 
 Source images are often multi-megabyte, so they are never fetched raw:
-images.weserv.nl resizes server-side to exactly 64x32 (~800 bytes of
-baseline JPEG, verified end to end). Bytes that render.Image cannot decode
-are the other uncatchable abort, so they are decoded BEFORE they reach the
-3-day cache, and a cached entry is demoted to a 1s TTL for exactly as long
-as it spends in the decoder. A bad picture can cost one render; it can never
-replay from cache for three days.
+images.weserv.nl resizes server-side to exactly the panel's own size (~800
+bytes of baseline JPEG for a 64x32 panel, ~1.3 KB for a 64x64 one, both
+verified end to end). Bytes that render.Image cannot decode are the other
+uncatchable abort, so they are decoded BEFORE they reach the 3-day cache,
+and a cached entry is demoted to a 1s TTL for exactly as long as it spends
+in the decoder. A bad picture can cost one render; it can never replay from
+cache for three days.
+
+On a square (64x64) panel the app asks the proxy for a 64x64 crop instead of
+a 64x32 one, so roughly twice the photograph survives - still full bleed,
+still with the title strip along the bottom, but 57 rows of sky under it
+rather than 25. The requested size is part of the image cache key, or the
+two panel shapes would serve each other's crops.
 """
 
 load("cache.star", "cache")
@@ -46,7 +53,7 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -81,6 +88,7 @@ def main(config):
     key = (config.get("api_key") or "").strip() or DEMO_KEY
     show_title = config.bool("show_title", True)
     show_date = config.bool("show_date", False)
+    w, h = panel()
 
     # The first renders after a cold cache stay off the network entirely -
     # see the docstring. Cached work is still served, so on a server that has
@@ -89,7 +97,7 @@ def main(config):
 
     today = nasa_today()
     apod = get_apod(base, key, live, today)
-    img = get_art(proxy, apod, live)
+    img = get_art(proxy, apod, live, w, h)
 
     if apod != None and apod["date"] != "" and apod["date"] != today:
         # A picture up to STALE_TTL old must never pass for today's. The chip
@@ -98,10 +106,31 @@ def main(config):
         show_date = True
 
     if img != None:
-        body = picture_view(img, apod, show_title, show_date)
+        body = picture_view(img, apod, show_title, show_date, w, h)
     else:
-        body = starfield_card(apod, show_title, show_date)
+        body = starfield_card(apod, show_title, show_date, w, h)
     return render.Root(child = body, show_full_animation = True)
+
+def is_square(w, h):
+    """True on a square panel, false on the 2:1 one.
+
+    Branches on the panel's SHAPE, never its size. A 2x device reports the
+    doubled canvas - 128x64 when it is wide, 128x128 when it is square - so a
+    bare height test would call both of those 64-tall and get one of them
+    wrong. The slack keeps a merely tallish panel on the wide branch."""
+    return h * 2 > w + 16
+
+def panel():
+    """The grid this render draws on.
+
+    A square panel is taken exactly as the canvas reports it, so the picture
+    is asked for and drawn at the panel's real resolution. The 2:1 layout is
+    the one that shipped: it stays pinned to its own 64x32 grid whatever a
+    doubled canvas reports, so it renders precisely as it always has."""
+    w, h = canvas.size()
+    if is_square(w, h):
+        return w, h
+    return 64, 32
 
 def url_conf(config, field):
     """A hidden hook's value, but only if it is an absolute http(s) URL.
@@ -222,16 +251,23 @@ def strv(d, k):
     v = d.get(k, "")
     return v if type(v) == "string" else ""
 
-def get_art(proxy, apod, live):
-    """The day's picture at exactly 64x32 via the weserv resizing proxy - the
-    source images are often multi-megabyte and must never be fetched raw.
-    Returns the decoded widget, because decoding is itself a failure point:
-    bytes render.Image rejects abort the render, so nothing reaches the
-    3-day cache until the decoder has accepted it. None -> starfield card."""
+def get_art(proxy, apod, live, w, h):
+    """The day's picture at exactly the panel's size via the weserv resizing
+    proxy - the source images are often multi-megabyte and must never be
+    fetched raw. Returns the decoded widget, because decoding is itself a
+    failure point: bytes render.Image rejects abort the render, so nothing
+    reaches the 3-day cache until the decoder has accepted it. None ->
+    starfield card.
+
+    The requested size is part of the cache key. Two panel shapes ask this
+    proxy for two genuinely different crops of the same photograph, and
+    without the size in the key a square panel would be served the 2:1
+    panel's letterbox, or the other way round."""
     if apod == None or apod["src"] == "":
         return None
     date = apod["date"] if apod["date"] != "" else "na"
-    ck = "apod:v1:i:" + proxy + ":" + date + ":" + apod["src"]
+    size = str(w) + "x" + str(h)
+    ck = "apod:v1:i:" + proxy + ":" + size + ":" + date + ":" + apod["src"]
 
     cached = cache.get(ck)
     if cached != None:
@@ -243,7 +279,7 @@ def get_art(proxy, apod, live):
         cache.set(ck, cached, ttl_seconds = 1)
         art = base64.decode(cached)
         if looks_jpeg(art):
-            img = render.Image(src = art, width = 64, height = 32)
+            img = render.Image(src = art, width = w, height = h)
             cache.set(ck, cached, ttl_seconds = STALE_TTL)
             return img
         print("apod: cached art no longer sniffs as JPEG; dropped")
@@ -264,8 +300,8 @@ def get_art(proxy, apod, live):
         proxy,
         params = {
             "url": src,
-            "w": "64",
-            "h": "32",
+            "w": str(w),
+            "h": str(h),
             "fit": "cover",
             "a": "attention",
             "output": "jpg",
@@ -276,7 +312,7 @@ def get_art(proxy, apod, live):
     if resp.status_code != 200 or not looks_jpeg(body):
         print("apod: art fetch failed (" + str(resp.status_code) + ")")
         return None
-    img = render.Image(src = body, width = 64, height = 32)  # decode, then cache
+    img = render.Image(src = body, width = w, height = h)  # decode, then cache
     cache.set(ck, base64.encode(body), ttl_seconds = STALE_TTL)
     return img
 
@@ -365,8 +401,13 @@ def date_seed(date):
 
 # ------------------------------------------------------------------- states
 
-def picture_view(img, apod, show_title, show_date):
-    """The main event: the picture edge to edge, caption furniture on top."""
+def picture_view(img, apod, show_title, show_date, w, h):
+    """The main event: the picture edge to edge, caption furniture on top.
+
+    Identical on both panels, because the panel is what changed and not the
+    design: a square one simply holds a taller crop of the same photograph
+    under the same strip. The furniture is pinned to the edges rather than to
+    a row number, so it lands the same way on either."""
     layers = [img]
     if show_date:
         ds = fmt_date(apod["date"])
@@ -374,11 +415,11 @@ def picture_view(img, apod, show_title, show_date):
             layers.append(date_chip(ds))
     if apod["media"] == "video":
         layers.append(render.Padding(
-            pad = (54, 1, 0, 0),
+            pad = (w - 10, 1, 0, 0),
             child = render.Box(width = 9, height = 7, color = SHADE, child = play_glyph()),
         ))
     if show_title and apod["title"] != "":
-        layers.append(title_bar(apod["title"], video = False))
+        layers.append(title_bar(apod["title"], False, w, h))
     return render.Stack(children = layers)
 
 def date_chip(ds):
@@ -392,20 +433,25 @@ def date_chip(ds):
         ),
     )
 
-def title_bar(title, video):
+def title_bar(title, video, w, h):
+    """The strip along the bottom edge, one text row tall on either panel.
+
+    It stays 7 rows because it is a footnote to the picture, not a caption
+    box: on the square panel that is a ninth of the height instead of a
+    quarter, which is the whole point of the extra rows going to the sky."""
     kids = []
-    marquee_w = 62
+    marquee_w = w - 2
     if video:
         kids = [play_glyph(), render.Box(width = 2, height = 1)]
-        marquee_w = 57
+        marquee_w = w - 7
     kids.append(render.Marquee(
         width = marquee_w,
         child = render.Text(title, font = "tom-thumb", color = INK),
     ))
     return render.Padding(
-        pad = (0, 25, 0, 0),
+        pad = (0, h - 7, 0, 0),
         child = render.Box(
-            width = 64,
+            width = w,
             height = 7,
             color = SHADE,
             child = render.Row(cross_align = "center", children = kids),
@@ -432,11 +478,19 @@ def star_color():
         return "#9DB4FF"
     return "#FFD9A0"
 
-def starfield_card(apod, show_title, show_date):
+def starfield_card(apod, show_title, show_date, w, h):
     """Every path that has no picture ends here: cold boot, API down with
     nothing cached, a video day with no thumbnail, a hostile payload. Drawn
     procedurally, seeded by the APOD date so the sky holds still all day.
-    With a title to show it becomes the title card; otherwise the wordmark."""
+    With a title to show it becomes the title card; otherwise the wordmark.
+
+    It is drawn to the panel, not to a 64x32 band parked in a corner of one:
+    the star count follows the panel's AREA so a square sky is as dense as
+    the 2:1 one rather than the same handful of stars spread half as thin,
+    and the bright crosses gain a second row of bands to sit in. Every bound
+    below is a fraction of the panel that evaluates, at 64x32, to exactly the
+    numbers this card has always drawn - same count, same order, same
+    seeded sequence, so the 2:1 sky is unchanged pixel for pixel."""
     date = ""
     title = ""
     video = False
@@ -446,37 +500,42 @@ def starfield_card(apod, show_title, show_date):
         video = apod["media"] == "video"
     random.seed(date_seed(date))
 
-    layers = [render.Box(width = 64, height = 32, color = NIGHT)]
-    for _ in range(42):
-        x = random.number(0, 63)
-        y = random.number(0, 31)
+    layers = [render.Box(width = w, height = h, color = NIGHT)]
+    for _ in range(42 * w * h // (64 * 32)):
+        x = random.number(0, w - 1)
+        y = random.number(0, h - 1)
         layers.append(render.Padding(
             pad = (x, y, 0, 0),
             child = render.Box(width = 1, height = 1, color = star_color()),
         ))
-    for i in range(3):
-        # One bright cross per third of the panel so they never clump.
-        x = random.number(2 + i * 22, 16 + i * 22)
-        y = random.number(3, 21)
-        layers.append(render.Padding(
-            pad = (x - 1, y, 0, 0),
-            child = render.Box(width = 3, height = 1, color = INK),
-        ))
-        layers.append(render.Padding(
-            pad = (x, y - 1, 0, 0),
-            child = render.Box(width = 1, height = 3, color = INK),
-        ))
+    bands = 2 if is_square(w, h) else 1
+    band = h // bands
+    for b in range(bands):
+        for i in range(3):
+            # One bright cross per third of the panel, per band, so they
+            # never clump.
+            lo = 2 + i * w * 11 // 32
+            x = random.number(lo, lo + w * 7 // 32)
+            y = random.number(3 + b * band, 3 + b * band + band * 18 // 32)
+            layers.append(render.Padding(
+                pad = (x - 1, y, 0, 0),
+                child = render.Box(width = 3, height = 1, color = INK),
+            ))
+            layers.append(render.Padding(
+                pad = (x, y - 1, 0, 0),
+                child = render.Box(width = 1, height = 3, color = INK),
+            ))
 
     if title != "" and show_title:
         if show_date:
             ds = fmt_date(date)
             if ds != "":
                 layers.append(date_chip(ds))
-        layers.append(title_bar(title, video))
+        layers.append(title_bar(title, video, w, h))
     else:
         layers.append(render.Box(
-            width = 64,
-            height = 32,
+            width = w,
+            height = h,
             child = render.Column(
                 main_align = "center",
                 cross_align = "center",
