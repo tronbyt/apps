@@ -434,11 +434,11 @@ def main(config):
     # Handle iCalendar Line Folding (RFC 5545)
     lines = []
     for line in raw_lines:
-        line = clean_line(line)
+        line = line.replace("\r", "")
         if (line.startswith(" ") or line.startswith("\t")) and len(lines) > 0:
-            lines[-1] += line[1:]
-        elif line:
-            lines.append(line)
+            lines[-1] += line[1:].rstrip()
+        elif line.strip():
+            lines.append(line.strip())
 
     parsed_events = []
     in_vevent = False
