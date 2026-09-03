@@ -12,6 +12,11 @@ Four states, mirroring the NFL app:
             bands; HALF / END Q3 variants during stoppages
   final   - FIN (or F/OT) beside the score bands, for 24h after tipoff
 
+On a 64x64 panel the same four states get a square layout: the two team
+bands stack as full-width tiles over a state band that gives the last-play
+marquee the whole width, and idle shows the division standing still as a
+table instead of scrolling it past a 7px strip.
+
 Data: ESPN's public scoreboard + standings JSON (no key). Basketball field
 notes, all from live probes (see NOTES.md): the undated scoreboard returns
 the NEXT scheduled game through the whole offseason, so "pre" only renders
@@ -28,7 +33,7 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -334,6 +339,10 @@ def get_standings(team, base):
                 "marquee": "  ".join(lines),
                 "record": record,
                 "div": str(dd.get("name") or dd.get("abbreviation") or ""),
+                # The same ranked division, unjoined: a 64x64 panel has the
+                # rows to show the table standing still instead of scrolling
+                # it. Wide panels never read this key.
+                "rows": [{"a": r["a"], "rec": r["rec"]} for r in rows],
             }
     if out != None:
         cache.set(ck, json.encode(out), ttl_seconds = STALE_TTL)
@@ -445,9 +454,313 @@ def logo_cell(team, size):
         child = render.Text(team["abbr"][0:1], font = "tom-thumb", color = text_on(team["color"])),
     )
 
+# --------------------------------------------------- square (64x64) layouts
+
+def is_square():
+    # Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    # 2x square one 128x128, so a bare height test gets both wrong.
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def square_cell(width, text, color):
+    """Left-aligned fixed-width cell, for the division table's columns."""
+    return render.Box(
+        width = width,
+        height = 6,
+        child = render.Row(
+            expanded = True,
+            main_align = "start",
+            cross_align = "center",
+            children = [render.Text(text, font = "tom-thumb", color = color)],
+        ),
+    )
+
+def square_tile(team, logo_px, abbr_color, right):
+    """Full-width 64x21 team tile: logo, abbrev, one number on the right.
+
+    The wide band is 36px of a shared row, so its abbrev and score have to
+    stack in a 20px column beside a 14px logo. Here the tile owns the whole
+    width and they read straight across, both a font larger. Same team-color
+    ground, same accent-on-band rule, same white number.
+
+    The widths are budgeted for the worst real payload, measured in these
+    fonts: 60px of padded tile less the logo and a 3px gutter leaves the
+    abbrev ("UTAH", the league's only 4-char code, 18px in tb-8) beside a
+    3-digit score (18px in 6x13) or a 5-char record ("62-20", 20px in
+    tom-thumb) with clear air between them - which is why the pregame tile
+    spends 2px of crest that the live tile keeps.
+
+    Both halves of that budget are enforced rather than assumed, because
+    space_between alone degrades badly: it hands the leftovers to the gap, so
+    an abbrev even a few px over budget takes the gap to zero and welds the
+    letters to the digits. So the abbrev gets a fixed 20px cell (clipped, not
+    overflowing - tb-8 is proportional, so a character count can't bound a
+    width: UTAH is 18px but four Ws are 23px) and the number a 3px left pad.
+    Worst case is then exactly 60px with either number, so the number is
+    never the thing that gives - and with real payloads both are pure slack
+    absorbed from what was already blank, so nothing moves."""
+    return render.Box(
+        width = 64,
+        height = 21,
+        color = team["color"],
+        child = render.Padding(
+            pad = (2, 0, 2, 0),
+            child = render.Row(
+                expanded = True,
+                main_align = "space_between",
+                cross_align = "center",
+                children = [
+                    render.Row(
+                        cross_align = "center",
+                        children = [
+                            logo_cell(team, logo_px),
+                            render.Box(width = 3, height = 1),
+                            render.Box(
+                                width = 20,
+                                height = 10,  # tb-8's own line box; a shorter one would crop the glyphs
+                                child = render.Row(
+                                    expanded = True,
+                                    main_align = "start",
+                                    cross_align = "center",
+                                    children = [render.Text(team["abbr"][0:4], font = "tb-8", color = abbr_color)],
+                                ),
+                            ),
+                        ],
+                    ),
+                    render.Padding(pad = (3, 0, 0, 0), child = right),
+                ],
+            ),
+        ),
+    )
+
+def square_status(game, final):
+    """The state line under the two tiles: quarter beside the clock (a real
+    scoreboard reads across, and the square has the width for it), or FIN /
+    HALF / END Qn. The last play scrolls below it at the full panel width -
+    the wide layout can only give that marquee a 25px slot."""
+    if final:
+        fin = "FIN"
+        if game["period"] > 4:
+            fin = "F/OT"
+        head = [render.Text(fin, font = "tb-8", color = WHITE)]
+    elif game["status_name"] == "STATUS_HALFTIME":
+        head = [render.Text("HALF", font = "tb-8", color = WHITE)]
+    elif game["status_name"] == "STATUS_END_PERIOD":
+        head = [
+            render.Text(quarter_label(game), font = "tom-thumb", color = GREY),
+            render.Box(width = 3, height = 1),
+            render.Text("END", font = "tb-8", color = WHITE),
+        ]
+    elif quarter_label(game) == "" and game["clock"] == "":
+        head = [render.Text("LIVE", font = "tb-8", color = WHITE)]
+    else:
+        head = [
+            render.Text(quarter_label(game), font = "tom-thumb", color = GREY),
+            render.Box(width = 3, height = 1),
+            render.Text(game["clock"][0:5], font = "tb-8", color = WHITE),
+        ]
+
+    row = render.Row(children = head, main_align = "center", cross_align = "center")
+    if final or game["play"] == "":
+        return render.Box(width = 64, height = 21, child = row)
+    return render.Box(
+        width = 64,
+        height = 21,
+        child = render.Column(
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                row,
+                render.Box(width = 62, height = 3),
+                render.Marquee(
+                    width = 62,
+                    child = render.Text(game["play"], font = "tom-thumb", color = AMBER),
+                ),
+            ],
+        ),
+    )
+
+def square_live(game, final):
+    """Two stacked score tiles over the state band. The wide layout's 1px
+    DARKGREY rule survives the rotation - vertical there, horizontal here."""
+    away, home = game["away"], game["home"]
+    return render.Column(
+        children = [
+            square_tile(
+                away,
+                16,
+                accent_on(away["color"], away["alt"]),
+                render.Text(away["score"][0:3], font = "6x13", color = WHITE),
+            ),
+            square_tile(
+                home,
+                16,
+                accent_on(home["color"], home["alt"]),
+                render.Text(home["score"][0:3], font = "6x13", color = WHITE),
+            ),
+            render.Box(width = 64, height = 1, color = DARKGREY),
+            square_status(game, final),
+        ],
+    )
+
+def square_pre_tile(team):
+    """Pregame tile: the record replaces the score. On the wide panel a 5-char
+    NBA record cannot fit an 18px team panel and has to ride the marquee; a
+    full-width tile just prints it."""
+    fg = text_on(team["color"])
+    rec = team["record"][0:5]
+    if rec == "":
+        return square_tile(team, 16, fg, render.Box(width = 1, height = 1))
+    return square_tile(team, 14, fg, render.Text(rec, font = "tom-thumb", color = fg))
+
+def square_pregame(game, team, tip, base):
+    tip_row = render.Row(
+        children = [
+            render.Text("TIP", font = "tom-thumb", color = GREY),
+            render.Box(width = 3, height = 1),
+            render.Text(tip.format("3:04"), font = "tb-8", color = WHITE),
+        ],
+        main_align = "center",
+        cross_align = "center",
+    )
+    children = [
+        square_pre_tile(game["away"]),
+        square_pre_tile(game["home"]),
+        render.Box(width = 64, height = 1, color = DARKGREY),
+    ]
+    if matchup_line(game) != "":
+        children.append(render.Box(width = 64, height = 21, child = tip_row))
+    else:
+        # No records (preseason/offseason events carry none), so the tiles are
+        # bare and the division marquee earns the strip, same as on wide.
+        away, home = game["away"], game["home"]
+        focus = home if home["abbr"] == team else away
+        children.append(render.Box(width = 64, height = 14, child = tip_row))
+        children.append(marquee_strip(get_standings(team, base), focus["color"]))
+    return render.Root(child = render.Column(children = children), show_full_animation = True)
+
+def square_div_table(rows, team):
+    """The whole division, standing still. This is the trade the square makes
+    for its extra rows: the wide panel can only scroll these five teams past a
+    7px strip, one at a time; here they are all readable at once, focus team
+    in the app's amber."""
+    lines = []
+    for i, raw in enumerate(rows[0:5]):
+        # Five rows is the whole division; the dict-normalize is the same
+        # habit as every other read in this file - these come back out of
+        # cache.star, so treat them as a payload rather than as locals.
+        row = as_dict(raw)
+        abbr = str(row.get("a") or "?")
+        color = AMBER if abbr == team else WHITE
+        lines.append(render.Row(
+            children = [
+                render.Box(width = 2, height = 6),
+                square_cell(9, str(i + 1), GREY),
+                square_cell(21, abbr[0:4], color),
+                square_cell(30, str(row.get("rec") or "")[0:7], GREY),
+            ],
+            main_align = "start",
+            cross_align = "center",
+        ))
+    return render.Box(
+        width = 64,
+        height = 31,
+        # Centered, not top-aligned: a full division fills the box either way,
+        # but a mangled feed with two rows sits in the middle of the block
+        # instead of hanging off the strip above a black third.
+        child = render.Column(children = lines, main_align = "center", cross_align = "start"),
+    )
+
+def square_idle(team, base):
+    st = get_standings(team, base)
+    color = team_idle_color(team, base)
+    logo_url = "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/" + team.lower() + ".png"
+    fake = {"abbr": team, "color": "#222222", "alt": WHITE, "logo": logo_url, "id": "", "score": ""}
+    record = st["record"] if st != None else ""
+    rows = as_list(st.get("rows")) if st != None else []
+
+    if len(rows) == 0:
+        # Nothing to table (an outage, or standings ESPN mangled): don't leave
+        # a black half under the crest. The logo goes up to 36px with the name
+        # stacked beneath it - a square crest for a square panel - and the
+        # scrolling strip the wide panel would have shown stays put.
+        return render.Root(
+            child = render.Column(
+                children = [
+                    render.Box(
+                        width = 64,
+                        height = 57,
+                        child = render.Column(
+                            main_align = "center",
+                            cross_align = "center",
+                            children = [
+                                logo_cell(fake, 36),
+                                render.Box(width = 1, height = 2),
+                                render.Text(team, font = "tb-8", color = GREY),
+                                render.Text(record, font = "tom-thumb", color = WHITE),
+                            ],
+                        ),
+                    ),
+                    marquee_strip(st, color),
+                ],
+            ),
+            show_full_animation = True,
+        )
+    return render.Root(
+        child = render.Column(
+            children = [
+                square_crest(fake, team, record, 25, 24),
+                render.Box(
+                    width = 64,
+                    height = 8,
+                    color = color,
+                    child = render.Padding(
+                        pad = (2, 0, 0, 0),
+                        child = render.Row(
+                            expanded = True,
+                            main_align = "start",
+                            cross_align = "center",
+                            children = [render.Text(
+                                str(st.get("div", ""))[0:14],
+                                font = "tom-thumb",
+                                color = text_on(color),
+                            )],
+                        ),
+                    ),
+                ),
+                square_div_table(rows, team),
+            ],
+        ),
+        show_full_animation = True,
+    )
+
+def square_crest(fake, team, record, height, size):
+    return render.Box(
+        width = 64,
+        height = height,
+        child = render.Row(
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                logo_cell(fake, size),
+                render.Box(width = 4, height = 1),
+                render.Column(
+                    cross_align = "center",
+                    children = [
+                        render.Text(team, font = "tb-8", color = GREY),
+                        render.Text(record, font = "tom-thumb", color = WHITE),
+                    ],
+                ),
+            ],
+        ),
+    )
+
 # ------------------------------------------------------------------- states
 
 def live_view(game, final):
+    if is_square():
+        return square_live(game, final)
+
     left = []
     if final:
         fin = "FIN"
@@ -531,6 +844,9 @@ def band(team):
     )
 
 def pregame_root(game, team, tip, base):
+    if is_square():
+        return square_pregame(game, team, tip, base)
+
     away, home = game["away"], game["home"]
     panels = render.Row(
         children = [
@@ -604,6 +920,9 @@ def pre_panel(team):
     )
 
 def idle_root(team, base):
+    if is_square():
+        return square_idle(team, base)
+
     st = get_standings(team, base)
     logo_url = "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/" + team.lower() + ".png"
     fake = {"abbr": team, "color": "#222222", "alt": WHITE, "logo": logo_url, "id": "", "score": ""}
