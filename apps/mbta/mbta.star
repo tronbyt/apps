@@ -377,8 +377,16 @@ def destination_of(labels, route_id, directions):
     return ""
 
 def get_stops(location, config):
-    loc = json.decode(location)
     api_key = (config.get("api", "") or "").strip()
+
+    # The handler is also reached with values that are not a location object at
+    # all. An empty string fails to decode, and the settings page sends the
+    # literal "null" whenever the device itself has no location set, since it
+    # stringifies a null device location into the field. Both aborted the handler,
+    # which the UI reports only as "Error loading options".
+    loc = json.decode(location, None) if location else None
+    if type(loc) != "dict":
+        return preserve_saved([], config)
 
     # The location object reaches this handler two ways, and they disagree on
     # type. A fresh pick in the location search box yields strings, matching the
@@ -389,7 +397,7 @@ def get_stops(location, config):
     lat = loc.get("lat")
     lng = loc.get("lng")
     if lat == None or lng == None or lat == "" or lng == "":
-        return []
+        return preserve_saved([], config)
 
     params = keyed({
         "page[limit]": "100",
@@ -403,8 +411,9 @@ def get_stops(location, config):
         # Returning no options leaves the picker empty but retryable. Failing
         # hard here is indistinguishable, to the user, from a broken app, and
         # keyless clients are throttled at 20 requests/minute so a non-200 is
-        # reachable from the settings screen alone.
-        return []
+        # reachable from the settings screen alone. The already-configured stop
+        # is still offered, so a transient failure cannot silently drop it.
+        return preserve_saved([], config)
 
     nearby = []
     name_counts = {}
@@ -418,7 +427,7 @@ def get_stops(location, config):
         name_counts[name] = name_counts.get(name, 0) + 1
 
     if not nearby:
-        return []
+        return preserve_saved([], config)
 
     service, labels = stop_service([sid for sid, _ in nearby], api_key)
 
