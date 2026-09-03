@@ -418,7 +418,7 @@ def is_square():
     """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
     2x square one 128x128, so a bare height test gets both wrong."""
     w, h = canvas.size()
-    return h * 2 > w + 16
+    return h == w
 
 def render_square(team_id, info):
     w, h = canvas.size()
