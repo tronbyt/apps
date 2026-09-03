@@ -40,11 +40,19 @@ labeled "demo mode" in the corner so a real device never lies to its owner.
 A date the user DID set but that can't be read never falls through to that
 demo - it gets the red "check dates" card instead, so the panel never prints
 a fabricated number under someone's own habit name.
+
+On a SQUARE (64x64) panel the extra rows go to the history, which is the part
+the 2:1 layout had to squeeze hardest: 28 due-days crammed into a 2x14 strip
+of 2px dots becomes a 5x7 WEEKDAY-ALIGNED grid of 4px dots, so a week is a
+row and a weekday is a column, and today gets the outline it always wanted
+(a 2px dot can't draw one, so the wide panel settles for white). Everything
+above it - flame, count, name, status - is the same readout at twice the
+sprite scale. See is_square() and the square section below.
 """
 
 load("encoding/json.star", "json")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -65,6 +73,39 @@ MIN_LEVEL = 0x66
 DOT_BEFORE = "#1E1E1E"  # due day before the streak started (or padding)
 DOT_MISS = "#532B2B"  # due day inside the window with no completion
 DOT_TODAY_PENDING = "#FFFFFF"
+
+# Square (64x64) history grid: 5 rows x 7 columns of 4px dots. The wide panel
+# fits 28 due days as 2px dots in a 2x14 strip; the square gets 35 cells, a
+# weekday per column, and 6 columns of gutter between Friday and Saturday so
+# the week reads without a row of 3px header letters.
+SQ_ROWS = 5
+SQ_COLS = 7
+SQ_DOT = 4
+SQ_ROW_GAP = 1
+SQ_COL_GAP = 2
+SQ_WEEKEND_GAP = 6
+
+# The flame at 2x is 22 rows; the count block beside it is a 20-row number over
+# a 6-row caption. 26 holds the taller of the two whichever number font is in
+# play, so the rows below never shift.
+SQ_HERO_H = 26
+
+# Marquees and centred text get the panel less a pixel each side.
+SQ_TEXT_W = 62
+
+# The two single-line rows between the hero and the grid. Pinned, not natural:
+# tom-thumb is 6 rows, but a name carrying a colour-emoji glyph falls back to a
+# taller font, and an unpinned row would push the grid's bottom week - the row
+# holding today - off the panel. The wide layout already clips the same glyph
+# inside its fixed 42x25 body box; this is the square equivalent.
+SQ_LINE_H = 6
+
+# What the setup/error card leaves for its message once the 22px flame, the 8px
+# title and their two gaps are laid in: 22 + 3 + 8 + 2 + 27 = 62, centred, so
+# the card all but fills the panel and the flame still clears the top edge.
+# Four wrapped lines fit without moving; longer messages scroll (see
+# square_card), so the height is a comfort setting, never a clipping one.
+SQ_CARD_MSG_H = 27
 
 # Flame sprite, 11x11. o = outer (accent), i = inner, c = core, . = clear.
 # Three frames of flicker; frame order o1,o2,o1,o3 reads as a soft waver.
@@ -343,6 +384,8 @@ def count_label(st):
 
 def streak_view(name, accent, show_grid, cadence, start, done, today, demo):
     st = compute(cadence, start, done, today)
+    if is_square():
+        return square_streak_view(name, accent, show_grid, cadence, st, start, done, today, demo)
     body_h = 25 if show_grid else 32
 
     if st["due"]:
@@ -428,6 +471,8 @@ def error_view(msg):
     return card(DEFAULT_ACCENT, "check dates", RED, msg, GREY)
 
 def card(accent, title, title_color, msg, msg_color):
+    if is_square():
+        return square_card(accent, title, title_color, msg, msg_color)
     return render.Row(
         children = [
             render.Box(
@@ -450,32 +495,302 @@ def card(accent, title, title_color, msg, msg_color):
         ],
     )
 
-# ------------------------------------------------------------------- sprite
+# ------------------------------------------------------- square (64x64) panel
 
-def flame(accent, dead):
-    if dead:
-        pal = {"o": "#4A4A4A", "i": "#6A6A6A", "c": "#8A8A8A"}
-        return sprite(FLAME_1, pal)
-    pal = {"o": accent, "i": lighten(accent, 40), "c": lighten(accent, 75)}
-    return render.Animation(
+def is_square():
+    # Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    # 2x square one 128x128, so a bare height test gets both wrong.
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def square_streak_view(name, accent, show_grid, cadence, st, start, done, today, demo):
+    """The same readout, re-proportioned for a panel twice as tall.
+
+    Row budget (64 total, with the grid on): hero 26, gap 1, name 6, status 6,
+    gap 1, grid 24. With the grid off the same stack is centred with room to
+    breathe rather than left stranded against the top edge."""
+
+    # Pinned height, not the natural one: the count block is 26 rows tall with
+    # the 10x20 number and 19 with the 6x13 fallback, and letting that through
+    # would float the whole panel up by 4 rows on the one streak long enough to
+    # hit the clamp. Everything below the hero stays put whatever the count is.
+    hero = render.Box(
+        height = SQ_HERO_H,
+        child = render.Row(
+            cross_align = "center",
+            children = [
+                flame(accent, dead = not st["alive"], px = 2),
+                render.Box(width = 2, height = 1),
+                square_count_block(st, accent, cadence, demo),
+            ],
+        ),
+    )
+
+    # Both text rows are pinned to SQ_LINE_H for the same reason the hero is
+    # pinned: nothing above the grid may decide how many rows the grid gets. The
+    # name is the row that can actually overflow - it is free user text, and a
+    # colour emoji in it renders from a taller fallback font - but the status
+    # line is pinned too so the row budget in the docstring is a contract and
+    # not a hope.
+    name_line = render.Box(
+        width = 64,
+        height = SQ_LINE_H,
+        child = render.Marquee(
+            width = SQ_TEXT_W,
+            align = "center",
+            child = render.Text(name, font = "tom-thumb", color = WHITE),
+        ),
+    )
+    status = render.Box(width = 64, height = SQ_LINE_H, child = square_status(st, accent))
+
+    if not show_grid:
+        return render.Box(
+            width = 64,
+            height = 64,
+            child = render.Column(
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    hero,
+                    render.Box(width = 1, height = 4),
+                    name_line,
+                    render.Box(width = 1, height = 3),
+                    status,
+                ],
+            ),
+        )
+
+    return render.Column(
+        cross_align = "center",
         children = [
-            sprite(FLAME_1, pal),
-            sprite(FLAME_2, pal),
-            sprite(FLAME_1, pal),
-            sprite(FLAME_3, pal),
+            hero,
+            render.Box(width = 1, height = 1),
+            name_line,
+            status,
+            render.Box(width = 1, height = 1),
+            square_grid(cadence, start, done, today, accent),
         ],
     )
 
-def sprite(rows, pal):
+def square_count_block(st, accent, cadence, demo):
+    """The streak number one size up from the wide panel, with the cadence (or
+    the demo label) as a caption under it - the wide layout's third line, moved
+    beside the flame so the freed rows can go to the grid."""
+    n = st["count"]
+    label = str(n) if n <= 9999 else "9999+"
+
+    # 40 columns are left beside the 22px flame. "10x20" is 10 per glyph, so it
+    # carries up to 4 digits; beyond that (only "9999+" reaches it) fall to the
+    # font the wide panel uses for its headline number.
+    font = "10x20" if len(label) <= 4 else "6x13"
+    return render.Column(
+        cross_align = "start",
+        children = [
+            render.Text(label, font = font, color = accent if st["alive"] else GREY),
+            render.Text("demo mode" if demo else cadence, font = "tom-thumb", color = DIM),
+        ],
+    )
+
+def square_status(st, accent):
+    """Wide's status line, unchanged but for a marquee that gets the full
+    panel width instead of the 40 columns the 2:1 layout could spare."""
+    if st["due"]:
+        return render.Row(
+            cross_align = "center",
+            children = [
+                render.Box(width = 3, height = 3, color = AMBER),
+                render.Box(width = 2, height = 1),
+                render.Text("due today", font = "tom-thumb", color = AMBER),
+            ],
+        )
+    if st["alive"]:
+        return render.Text(count_label(st), font = "tom-thumb", color = accent)
+    return render.Marquee(
+        width = SQ_TEXT_W,
+        align = "center",
+        child = render.Text(
+            "ended " + str(st["ended"]) + "d ago - update dates to restart",
+            font = "tom-thumb",
+            color = GREY,
+        ),
+    )
+
+# --------------------------------------------------------------- square grid
+
+def square_grid(cadence, start, done, today, accent):
+    """5 rows x 7 columns of 4px dots - 35 cells against the wide strip's 28.
+
+    For daily and weekdays a row is a calendar week and a column is a weekday,
+    Monday first, with today's week on the bottom row; a wider gutter between
+    Friday and Saturday makes the weekend visible without spending five rows on
+    a header of 3px letters that a LED panel would render as noise. Under
+    'weekdays' the two weekend columns go dark on their own, so the cadence is
+    legible in the shape of the grid.
+
+    'weekly' has no weekday to align to, so it keeps the wide layout's week
+    buckets and simply gets more of them: 35 weeks across the same 5x7, up from
+    28, evenly spaced with no gutter."""
+    weekly = cadence == "weekly"
+    if weekly:
+        cells = square_week_cells(start, done, today, accent)
+    else:
+        cells = square_day_cells(cadence, start, done, today, accent)
+
+    rows = []
+    for r in range(SQ_ROWS):
+        boxes = []
+        for c in range(SQ_COLS):
+            boxes.append(square_dot(cells[r * SQ_COLS + c]))
+            if c < SQ_COLS - 1:
+                gap = SQ_COL_GAP
+                if not weekly and c == 4:
+                    gap = SQ_WEEKEND_GAP
+                boxes.append(render.Box(width = gap, height = 1))
+        if r > 0:
+            rows.append(render.Box(width = 1, height = SQ_ROW_GAP))
+        rows.append(render.Row(children = boxes))
+    return render.Column(cross_align = "center", children = rows)
+
+def square_dot(cell):
+    """A cell is [fill, ring]. An empty fill is the panel's own black, which is
+    what a day still in the future looks like; a ring is the outline the 2px
+    wide-panel dot could never draw around today."""
+    fill, ring = cell[0], cell[1]
+    if ring == "":
+        if fill == "":
+            return render.Box(width = SQ_DOT, height = SQ_DOT)
+        return render.Box(width = SQ_DOT, height = SQ_DOT, color = fill)
+    return render.Box(
+        width = SQ_DOT,
+        height = SQ_DOT,
+        color = ring,
+        child = render.Box(
+            width = SQ_DOT - 2,
+            height = SQ_DOT - 2,
+            color = fill if fill != "" else "#000000",
+        ),
+    )
+
+def square_day_cells(cadence, start, done, today, accent):
+    """35 calendar days ending with today's week, Monday-first.
+
+    Cell meaning matches the wide strip exactly, with two additions the taller
+    panel makes possible: days later this week are simply not drawn yet, and
+    today is outlined - white while something is owed (wide's white dot), dim
+    once it is done or when nothing is due today (wide draws nothing at all on
+    a non-due day, because such a day never enters its due-days-only strip)."""
+    first = today - dow(today) - 7 * (SQ_ROWS - 1)
+    cells = []
+    for i in range(SQ_ROWS * SQ_COLS):
+        s = first + i
+        due_day = cadence != "weekdays" or dow(s) < 5
+        if s > today:
+            cells.append(["", ""])  # later this week: nothing to say yet
+        elif s == today:
+            if s <= done:
+                cells.append([lighten(accent, 45), DIM])
+            elif not due_day:
+                cells.append([DOT_BEFORE, DIM])
+            else:
+                cells.append(["", DOT_TODAY_PENDING])
+        elif not due_day or s < start:
+            cells.append([DOT_BEFORE, ""])
+        elif s <= done:
+            cells.append([accent, ""])
+        else:
+            cells.append([DOT_MISS, ""])
+    return cells
+
+def square_week_cells(start, done, today, accent):
+    """35 week-buckets ending today - the wide layout's week_cells rule (a
+    bucket is filled if any of its 7 days falls inside [start, done]), just
+    given the 7 extra buckets the square panel has room for."""
+    cells = []
+    total = SQ_ROWS * SQ_COLS
+    for k in range(total - 1, -1, -1):
+        high = today - 7 * k
+        low = high - 6
+        if k == 0:
+            if done < low:
+                cells.append(["", DOT_TODAY_PENDING])
+            else:
+                cells.append([lighten(accent, 45), DIM])
+        elif high < start:
+            cells.append([DOT_BEFORE, ""])
+        elif low <= done:
+            cells.append([accent, ""])
+        else:
+            cells.append([DOT_MISS, ""])
+    return cells
+
+def square_card(accent, title, title_color, msg, msg_color):
+    """The setup and error cards, stacked instead of side by side: the square
+    has no spare width to sit a flame beside the text, but it has the height to
+    put one above it at twice the size, with the title a font larger.
+
+    The message is the real win. The wide card can only scroll one 47px line,
+    so the reader waits for the end of every sentence; here it is WRAPPED
+    across the full width, and most of these messages - every 'set X in
+    settings' - then fit whole and never move at all. The wrap sits in a
+    vertical marquee so the two long ones (the 70-character 'check dates'
+    sentences) still scroll rather than clip: nothing is ever cut off, and the
+    common case became instant. Verified against every card message below."""
+    return render.Box(
+        width = 64,
+        height = 64,
+        child = render.Column(
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                flame(accent, dead = False, px = 2),
+                render.Box(width = 1, height = 3),
+                render.Text(title, font = "tb-8", color = title_color),
+                render.Box(width = 1, height = 2),
+                render.Marquee(
+                    width = SQ_TEXT_W,
+                    height = SQ_CARD_MSG_H,
+                    scroll_direction = "vertical",
+                    child = render.WrappedText(
+                        msg,
+                        font = "tom-thumb",
+                        color = msg_color,
+                        width = SQ_TEXT_W,
+                        align = "center",
+                    ),
+                ),
+            ],
+        ),
+    )
+
+# ------------------------------------------------------------------- sprite
+
+def flame(accent, dead, px = 1):
+    """The flame at px pixels per sprite pixel. px = 1 is the 11x11 wide-panel
+    glyph; the square panel draws the same art at px = 2 (22x22) rather than a
+    second sprite, so both panels are pixel-for-pixel the same flame."""
+    if dead:
+        pal = {"o": "#4A4A4A", "i": "#6A6A6A", "c": "#8A8A8A"}
+        return sprite(FLAME_1, pal, px)
+    pal = {"o": accent, "i": lighten(accent, 40), "c": lighten(accent, 75)}
+    return render.Animation(
+        children = [
+            sprite(FLAME_1, pal, px),
+            sprite(FLAME_2, pal, px),
+            sprite(FLAME_1, pal, px),
+            sprite(FLAME_3, pal, px),
+        ],
+    )
+
+def sprite(rows, pal, px = 1):
     out = []
     for row in rows:
         boxes = []
         for ch in row.elems():
             color = pal.get(ch, "")
             if color == "":
-                boxes.append(render.Box(width = 1, height = 1))
+                boxes.append(render.Box(width = px, height = px))
             else:
-                boxes.append(render.Box(width = 1, height = 1, color = color))
+                boxes.append(render.Box(width = px, height = px, color = color))
         out.append(render.Row(children = boxes))
     return render.Column(children = out)
 
