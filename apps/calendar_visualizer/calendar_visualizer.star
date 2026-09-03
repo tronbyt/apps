@@ -470,8 +470,10 @@ def main(config):
             elif prop == "RRULE":
                 cur_event["rrule"] = val
             elif prop == "EXDATE":
-                ex_t, _ = parse_ical_date(val, params, timezone)
-                cur_event["exdates"].append(ex_t)
+                for ex_val in val.split(","):
+                    if ex_val.strip():
+                        ex_t, _ = parse_ical_date(ex_val, params, timezone)
+                        cur_event["exdates"].append(ex_t)
 
     # Process and Expand Recurrences into Render Arrays
     day_events = []
