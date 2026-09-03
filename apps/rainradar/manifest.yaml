@@ -1,3 +1,4 @@
+---
 id: rainradar
 name: RainRadar
 summary: Animated weather radar
@@ -10,3 +11,5 @@ category: weather
 tags:
   - weather
   - radar
+published: '2026-09-02T19:58:42Z'
+updated: '2026-09-03T13:17:07Z'
