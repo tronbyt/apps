@@ -106,19 +106,22 @@ def _hud_frame(radar, label, stamp, alert_text):
                     expanded = True,
                     main_align = "start",
                     children = [
-                        render.Box(
-                            height = 7,
-                            color = "#0007",
-                            child = render.Padding(
-                                pad = (1, 0, 1, 0),
-                                child = render.Row(
-                                    expanded = True,
-                                    main_align = "space_between",
-                                    cross_align = "center",
-                                    children = [
-                                        left,
-                                        render.Text(right, font = "tom-thumb", color = "#E5E7EB"),
-                                    ],
+                        render.Padding(
+                            pad = (1, 1, 1, 0),
+                            child = render.Box(
+                                height = 7,
+                                color = "#0001",
+                                child = render.Padding(
+                                    pad = (1, 0, 1, 0),
+                                    child = render.Row(
+                                        expanded = True,
+                                        main_align = "space_between",
+                                        cross_align = "center",
+                                        children = [
+                                            left,
+                                            render.Text(right, font = "tom-thumb", color = "#E5E7EB"),
+                                        ],
+                                    ),
                                 ),
                             ),
                         ),
