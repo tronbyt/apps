@@ -1,0 +1,6 @@
+---
+id: calendar-visualizer
+name: Calendar Visualizer
+summary: Spatial Calendar Visualizer
+desc: Displays a very dense visualization of events from a Google Calendar iCal URL.
+author: Ctrl-G
