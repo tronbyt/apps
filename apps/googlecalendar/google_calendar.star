@@ -11,6 +11,11 @@ progress, "Thursday" for tomorrow onward, "All day" for date-only events.
 With nothing left today it previews the next event within a week, or shows
 "All clear".
 
+On a square (64x64) panel that same card is the top half and the height goes
+to what a glance asks next: a hairline, then the following events one row
+each, "when | what". Cards that are not about an event (setup, offline, All
+clear) become a centred poster instead. See square_card.
+
 Auth, three ways, first match wins:
   1. config "auth" non-empty -> used directly as a Bearer access token. This
      is the tronbyt server Connections injection contract: the server owns
@@ -50,7 +55,7 @@ they belong to.
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -68,6 +73,7 @@ MAX_TOKEN_TTL = 86400  # cache.set rejects an oversized ttl, so cap expires_in
 MAX_RESULTS = 25  # page size; declined events are filtered after the fetch
 MAX_PAGES = 3  # follow nextPageToken this far while nothing has survived
 WINDOW = 7 * 24 * 3600  # look ahead one week
+MAX_LIST = 3  # square panels only: how far down the agenda the list runs
 
 WHITE = "#FFFFFF"
 GREY = "#9C9C9C"
@@ -77,6 +83,7 @@ GREEN = "#4CD964"
 BANNER = "#EA4335"  # the Google Calendar red
 PAPER = "#E8E8E8"
 INKDARK = "#1A1A1A"
+RULE = "#333333"  # the hairline under the square panel's hero
 
 # The character table backing tiny_hash. find() returns -1 for anything
 # exotic, which still hashes; this only needs to separate cache keys.
@@ -261,19 +268,25 @@ def fetch_events(token, idh, now, tz, base):
         print("gcal: no readable event in " + str(junk) + " item(s)")
         return None
 
-    # An empty list is only honest as "All clear" when no page was left unread.
-    return {"v": 1, "e": out, "u": len(out) == 0 and more != ""}
+    # How far the reading got is part of the reading. "u" (unknown): the week
+    # came back empty with a page still unread, so it is not "All clear". "c"
+    # (complete): every page in the window was read, so a list that ran out is
+    # genuinely the end of the week and the square agenda may say so.
+    return {"v": 1, "e": out, "u": len(out) == 0 and more != "", "c": more == ""}
 
 def as_record(v):
-    """Cached extract, tolerating the pre-pagination shape (a bare list)."""
+    """Cached extract, tolerating shapes written by older versions: the
+    pre-pagination one (a bare list) and the pre-"c" one. Both read as
+    incomplete, so the panel declines to claim a whole week rather than
+    guessing on one - a stale entry is replaced within a poll anyway."""
     if type(v) == "list":
-        return {"v": 1, "e": v, "u": False}
+        return {"v": 1, "e": v, "u": False, "c": False}
     if type(v) != "dict":
         return None
     evs = v.get("e", None)
     if type(evs) != "list":
         return None
-    return {"v": 1, "e": evs, "u": v.get("u", False) == True}
+    return {"v": 1, "e": evs, "u": v.get("u", False) == True, "c": v.get("c", False) == True}
 
 def enc_time(s):
     return s.replace("+", "%2B")  # a "+00:00" offset must not become a space
@@ -454,17 +467,27 @@ def render_events(rec, now, tz):
     parsed = parse_events(rec["e"], now, tz)
     today = now.format(DAY_FMT)
 
+    # Whether the fetch actually finished the week, carried down to the square
+    # agenda: only a complete reading may end its list with "nothing else".
+    whole = rec["c"]
+
+    # The loops below carry an index because a square panel's card lists what
+    # comes AFTER the one it picked, and the list is start-ordered: everything
+    # past the winning index is exactly "what follows". Wide panels ignore it.
+
     # 1. A timed event in progress right now. The badge shows today, not the
     # day it started: a shift or a conference that began on Monday still
     # means "now" on Wednesday.
-    for ev in parsed:
+    for i in range(len(parsed)):
+        ev = parsed[i]
         if not ev["a"] and ev["st"].unix <= now.unix:
-            return card(now, ev["t"], "NOW", GREEN, until_line(ev["en"], now))
+            return card(now, ev["t"], "NOW", GREEN, until_line(ev["en"], now), tail(parsed, i, now), whole)
 
     # 2. A timed event starting within the hour. Deliberately NOT gated on
     # the calendar date: at 23:30 the next event is usually tomorrow, and it
     # still deserves the countdown (and the red <=5 min warning).
-    for ev in parsed:
+    for i in range(len(parsed)):
+        ev = parsed[i]
         if ev["a"]:
             continue
         mins = (ev["st"].unix - now.unix) // 60
@@ -472,29 +495,32 @@ def render_events(rec, now, tz):
             if mins < 1:
                 mins = 1
             color = RED if mins <= 5 else AMBER
-            return card(ev["st"], ev["t"], "in " + str(mins) + " min", color, ev["st"].format("3:04 PM"))
+            return card(ev["st"], ev["t"], "in " + str(mins) + " min", color, ev["st"].format("3:04 PM"), tail(parsed, i, now), whole)
 
     # 3. A later timed event still on today's date.
-    for ev in parsed:
+    for i in range(len(parsed)):
+        ev = parsed[i]
         if not ev["a"] and ev["st"].format(DAY_FMT) == today:
-            return card(ev["st"], ev["t"], ev["st"].format("3:04 PM"), WHITE, "")
+            return card(ev["st"], ev["t"], ev["st"].format("3:04 PM"), WHITE, "", tail(parsed, i, now), whole)
 
     # 4. An all-day event covering today. The badge shows today for the same
     # reason as state 1: a holiday week that started on Saturday is on now.
-    for ev in parsed:
+    for i in range(len(parsed)):
+        ev = parsed[i]
         if ev["a"] and ev["sd"] <= today and today < ev["ed"]:
-            return card(now, ev["t"], "All day", AMBER, "")
+            return card(now, ev["t"], "All day", AMBER, "", tail(parsed, i, now), whole)
 
     # 5. The earliest upcoming event within the week (list is start-ordered).
     # Weekday alone on the when-line: "Wednesday" is 36px, always static,
     # where "Wed 12:45PM" is 44px and would jiggle inside a 43px marquee.
     # The clock time goes on the dim third line instead.
-    for ev in parsed:
+    for i in range(len(parsed)):
+        ev = parsed[i]
         if ev["st"].unix > now.unix and ev["st"].unix - now.unix < WINDOW:
             when = when_label(ev["st"], now)
             if ev["a"]:
-                return card(ev["st"], ev["t"], when, WHITE, "all day")
-            return card(ev["st"], ev["t"], when, WHITE, ev["st"].format("3:04 PM"))
+                return card(ev["st"], ev["t"], when, WHITE, "all day", tail(parsed, i, now), whole)
+            return card(ev["st"], ev["t"], when, WHITE, ev["st"].format("3:04 PM"), tail(parsed, i, now), whole)
 
     # 6. Nothing survived. Only claim an empty week when the reading actually
     # said so - a page we could not finish reading is not "All clear".
@@ -517,11 +543,46 @@ def when_label(st, now):
         return "Next " + st.format("Mon")
     return st.format("Monday")
 
+def tail(parsed, i, now):
+    """What follows the event on the card: the next MAX_LIST events, already
+    labelled for the square panel's agenda list. Built here rather than in the
+    drawing code because this is the only place `now` meets the ordered list.
+
+    An event that has already begun is skipped whatever its index: the card
+    above is the one that is on now, and a second thing running concurrently
+    is not "up next"."""
+    out = []
+    for p in parsed[i + 1:]:
+        if p["st"].unix <= now.unix:
+            continue
+        out.append({"w": short_when(p["st"], p["a"], now), "t": p["t"]})
+        if len(out) == MAX_LIST:
+            break
+    return out
+
+def short_when(st, all_day, now):
+    """At most 6 characters, which is exactly the list's 24px label column: a
+    clock time for something today, the weekday for any other day. The exact
+    minute of a Thursday meeting is not what a glance is for - the hero card
+    above carries the precise wording for the event that is actually next."""
+    if st.format(DAY_FMT) != now.format(DAY_FMT):
+        return st.format("Mon")
+    if all_day:
+        return "today"
+    return st.format("3:04") + ("p" if st.format("PM") == "PM" else "a")
+
 # ------------------------------------------------------------------- drawing
 
-def card(icon_t, title, when, when_color, dim):
+def card(icon_t, title, when, when_color, dim, rest = None, whole = False):
     """Calendar icon left, title marquee + when-line right. Every text row is
-    capped at 43px by its own Marquee, so nothing can collide with the icon."""
+    capped at 43px by its own Marquee, so nothing can collide with the icon.
+
+    `rest` is what follows this event, for square panels only; None marks a
+    card that is not about an event at all (setup, offline, All clear).
+    `whole` says whether the fetch read the entire week, which is what lets a
+    square agenda end its list with a claim; wide ignores both."""
+    if is_square():
+        return square_card(icon_t, title, when, when_color, dim, rest, whole)
     rows = [
         render.Marquee(width = 43, child = render.Text(title, font = "tom-thumb", color = WHITE)),
         render.Box(width = 1, height = 3),
@@ -558,6 +619,162 @@ def cal_icon(t):
                 height = 12,
                 color = PAPER,
                 child = render.Text(t.format("2"), font = "tb-8", color = INKDARK),
+            ),
+        ],
+    )
+
+# ----------------------------------------------------- square (64x64) layout
+
+def is_square():
+    # Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    # 2x square one 128x128, so a bare height test gets one of them wrong.
+    w, h = canvas.size()
+    return h * 2 > w + 16
+
+def square_card(icon_t, title, when, when_color, dim, rest, whole):
+    """The square panel is not the wide card with room underneath - that is
+    the thing it is here to stop doing.
+
+    A card about an event becomes an agenda. The wide card answers "what is
+    next"; the second half of a square answers the question a glance asks
+    immediately afterwards, "and then?", from events the app already fetched
+    and cached but had nowhere to put. Hero on top, a hairline, then the next
+    few, one compact row each.
+
+    A card about nothing in particular - the setup prompt, an outage, All
+    clear - has no agenda to draw, so it becomes a poster instead: the badge
+    centred over its message, with the whole 64px width to say it in rather
+    than the 43px the icon leaves beside it on the wide panel."""
+    if rest == None:
+        return render.Root(child = square_poster(icon_t, title, when, when_color, dim))
+    return render.Root(
+        child = render.Column(
+            children = [
+                square_hero(icon_t, title, when, when_color, dim),
+                render.Box(width = 64, height = 2),
+                render.Box(width = 64, height = 1, color = RULE),
+                render.Box(width = 64, height = 3),
+                square_agenda(rest, whole),
+            ],
+        ),
+    )
+
+def square_hero(icon_t, title, when, when_color, dim):
+    """The wide card's own composition - badge left, title over when-line
+    right - drawn at the size a square has room for. Same colours, same font,
+    same order; the badge grows and the marquees lose 3px to it."""
+    rows = [
+        render.Marquee(width = 41, child = render.Text(title, font = "tom-thumb", color = WHITE)),
+        render.Box(width = 1, height = 3),
+        render.Marquee(width = 41, child = render.Text(when, font = "tom-thumb", color = when_color)),
+    ]
+    if dim != "":
+        rows.append(render.Box(width = 1, height = 2))
+        rows.append(render.Marquee(width = 41, child = render.Text(dim, font = "tom-thumb", color = GREY)))
+    return render.Row(
+        children = [
+            render.Box(width = 22, height = 31, child = big_cal_icon(icon_t)),
+            render.Box(
+                width = 42,
+                height = 31,
+                child = render.Padding(pad = (1, 0, 0, 0), child = render.Column(children = rows)),
+            ),
+        ],
+    )
+
+def square_agenda(rest, whole):
+    """The bottom 27 rows: up to MAX_LIST rows of "when | what", spread evenly
+    so a short list sits balanced in the band instead of clinging to the rule
+    with a hole under it.
+
+    A short list ends with a line saying what it is, because a reading is worth
+    more panel than the black it would otherwise be - but WHICH line depends on
+    how far the fetch got. fetch_events stops following pages the moment one
+    event survives the declined filter, so a calendar whose first page is
+    almost all declined can leave real events unread. "nothing else this week"
+    is a claim about the week and is only earned when `whole` says every page
+    was read; otherwise the list says what is true of the app instead."""
+    rows = [square_row(ev) for ev in rest]
+    if len(rest) < MAX_LIST:
+        if not whole:
+            rows.append(centred("more unread", GREY))
+        else:
+            rows.append(centred("nothing else", GREY))
+            if len(rest) == 0:
+                rows.append(centred("this week", GREY))
+    return render.Box(
+        width = 64,
+        height = 27,
+        child = render.Column(children = rows, main_align = "space_evenly", cross_align = "center"),
+    )
+
+def square_row(ev):
+    """One agenda line: the when in 24px (six tom-thumb cells, which is every
+    label short_when can produce), then the title. Both halves are Marquees
+    for the same reason every row on the wide card is - a width a widget
+    cannot exceed is what keeps a 170-character meeting title out of its
+    neighbour."""
+    return render.Padding(
+        pad = (1, 0, 0, 0),
+        child = render.Row(
+            children = [
+                render.Marquee(width = 24, child = render.Text(ev["w"], font = "tom-thumb", color = GREY)),
+                render.Box(width = 3, height = 1),
+                render.Marquee(width = 36, child = render.Text(ev["t"], font = "tom-thumb", color = WHITE)),
+            ],
+        ),
+    )
+
+def square_poster(icon_t, title, when, when_color, dim):
+    """Badge over message, centred on the whole panel.
+
+    The Box is not decoration: main_align only has something to align inside
+    a bounded height, and a Column handed straight to render.Root has none -
+    it draws from y=0 and the poster hangs off the top edge with a third of
+    the panel black beneath it. square_agenda is bounded the same way."""
+    children = [
+        big_cal_icon(icon_t),
+        render.Box(width = 1, height = 5),
+        centred(title, WHITE),
+        render.Box(width = 1, height = 3),
+        centred(when, when_color),
+    ]
+    if dim != "":
+        children.append(render.Box(width = 1, height = 2))
+        children.append(centred(dim, GREY))
+    return render.Box(
+        width = 64,
+        height = 64,
+        child = render.Column(children = children, main_align = "center", cross_align = "center"),
+    )
+
+def centred(s, color):
+    """Centred across the panel when it fits, marqueed when it does not.
+    tom-thumb is a 4px monospace cell, so the width is countable - and len()
+    counts BYTES, so a multibyte title only ever over-counts and falls to the
+    marquee, which is the harmless side to be wrong on."""
+    t = render.Text(s, font = "tom-thumb", color = color)
+    if len(s) * 4 <= 62:
+        return render.Row(children = [t], expanded = True, main_align = "center")
+    return render.Marquee(width = 64, child = t)
+
+def big_cal_icon(t):
+    """The wide card's page-a-day badge at the size a square affords: the day
+    number goes from an 8px font to a 13px one, the banner from 17px to 21px
+    wide. Same red, same paper, same shape."""
+    return render.Column(
+        children = [
+            render.Box(
+                width = 21,
+                height = 9,
+                color = BANNER,
+                child = render.Text(t.format("Jan").upper(), font = "tom-thumb", color = WHITE),
+            ),
+            render.Box(
+                width = 21,
+                height = 16,
+                color = PAPER,
+                child = render.Text(t.format("2"), font = "6x13", color = INKDARK),
             ),
         ],
     )
