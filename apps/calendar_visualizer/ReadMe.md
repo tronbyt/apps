@@ -7,13 +7,13 @@ Created by: Ctrl-G & Google's Gemini (Flash 3.6 - I think, although it might hav
 Summary: Calendar Visualization App
 
 Description: Displays a very dense visualization of events from a Google Calendar iCal URL.  Probably only helpful for
-persons who don't have a lot of closely spaced events in their google calendar.  This was produced because I always wanted
-to see the spacial relationship between the current time and my next 'event / meeting'.
+persons who don't have a lot of closely spaced events in their Google Calendar.  This was produced because I always wanted
+to see the spatial relationship between the current time and my next 'event / meeting'.
 
 The calendar graphing area shows 62 days, one day for each vertical column of LEDs.  Each dot in the vertical column indicates the following time:
 
 <i>Calendar Visualizer - No animation</i>
-<img src = "./calendar_visualizer-DispExplain.gif" >
+<img src="./calendar_visualizer-DispExplain.gif" alt="Calendar Visualizer display explanation">
 
 Future expansion:
 
