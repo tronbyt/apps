@@ -56,6 +56,18 @@ as a refused connection.
 With no URL configured (the default), it renders a built-in dusk scene drawn
 entirely from pixlet primitives: zero network, safe for CI and the store demo.
 
+On a 64x64 panel the app asks the proxy for a 64x64 crop instead of a 64x32
+one and hangs it edge to edge. That is the whole square layout, and it is the
+one that matters for a photo app: the same `a=attention` crop over a square
+frame keeps roughly twice the picture, so a portrait or a 4:3 snapshot loses a
+sliver where the 2:1 slice threw away half of it. All three fit modes keep
+their meaning (cover fills, contain letterboxes inside the square, fill
+stretches), the requested dimensions are part of the cache key so a wide and a
+square panel sharing a server never serve each other's crop, the drawn
+placeholder is composed for 64 rows rather than stretched, and the caption
+strip stays exactly what it is on the wide panel - seven rows along the very
+bottom. Panels are told apart by SHAPE, never size: see is_square().
+
 The proxy base can be overridden via the "proxy" config value - a test hook
 for pointing the app at a stub server. It is deliberately NOT a schema field
 (users would only break their app with it), and like every other URL we hand
@@ -66,7 +78,7 @@ render on a URL Go's net/url cannot parse.
 load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 PROXY_BASE = "https://images.weserv.nl"
@@ -99,16 +111,32 @@ def main(config):
         proxy = PROXY_BASE
     proxy = proxy.rstrip("/")
 
+    # Every drawn row below is derived from this, and it is the only thing the
+    # square panel changes: the frame is 64 wide either way, and 64 tall
+    # instead of 32. It is also the height the PROXY is asked to crop to.
+    ph = 64 if is_square() else 32
+
     if url == "":
-        return render.Root(child = placeholder("ADD IMAGE URL", setup = True))
+        return render.Root(child = placeholder("ADD IMAGE URL", True, ph))
     if not parseable_url(proxy):
         # A malformed proxy override would abort every render inside http.get.
-        return render.Root(child = placeholder("BAD PROXY URL", setup = False))
+        return render.Root(child = placeholder("BAD PROXY URL", False, ph))
 
-    photo = get_photo(url, mode, proxy)
+    photo = get_photo(url, mode, proxy, ph)
     if photo == None:
-        return render.Root(child = placeholder("CHECK IMAGE URL", setup = False))
-    return render.Root(child = photo_view(photo, caption))
+        return render.Root(child = placeholder("CHECK IMAGE URL", False, ph))
+    return render.Root(child = photo_view(photo, caption, ph))
+
+def is_square():
+    """True on a square panel, false on the 2:1 one.
+
+    Branches on the panel's SHAPE, never its size. A 2x device reports the
+    doubled canvas - 128x64 when it is wide, 128x128 when it is square - so a
+    height test would call both of those 64 tall and get one of them wrong.
+    The slack keeps a merely tallish panel on the wide branch.
+    """
+    w, h = canvas.size()
+    return h * 2 > w + 16
 
 # ---------------------------------------------------------------- URL checks
 
@@ -341,11 +369,16 @@ def webp_size(b):
 
 # ---------------------------------------------------------------- data layer
 
-def proxy_params(url, mode):
+def proxy_params(url, mode, ph):
+    """The proxy is asked for exactly the pixels the panel has - 64x32 or
+    64x64. Verified live against weserv 2026-09-03: all three fit modes return
+    exactly 64x64 for h=64, ~1.2-1.8KB. Asking for the square directly is what
+    makes the square layout worth having: `a=attention` gets to keep the whole
+    height of the subject instead of a 2:1 band through it."""
     p = {
         "url": url,
         "w": "64",
-        "h": "32",
+        "h": str(ph),
         "output": "jpg",  # guarantees a single frame: decode cost is fixed
     }
     if mode == "contain":
@@ -386,7 +419,7 @@ def fetch_image(url, gate_key, params, cap):
     cache.set(gate_key, "1", ttl_seconds = FRESH_TTL)
     return body, "ok"
 
-def get_photo(url, mode, proxy):
+def get_photo(url, mode, proxy, ph):
     """The decoded photo widget for this exact config, or None. Order: fresh
     proxy fetch -> cached proxy bytes -> direct origin fetch (own gate, only
     when the PROXY was at fault) -> cached direct bytes.
@@ -396,70 +429,81 @@ def get_photo(url, mode, proxy):
     stored: the display cache only ever holds bytes already proven renderable,
     and a decoder-hostile origin costs one aborted render per gate window
     instead of poisoning the 7-day key for the whole outage. Proxy and direct
-    bytes live under separate keys because they need different fitting."""
-    ck = "photo_frame:2:" + proxy + "|" + mode + "|" + url
+    bytes live under separate keys because they need different fitting.
 
-    body, verdict = fetch_image(proxy + "/", ck + ":gate", proxy_params(url, mode), PROXY_CAP)
+    The REQUESTED DIMENSIONS are part of the key. They have to be: one server
+    drives every panel it owns, so a 64x32 and a 64x64 device on the same
+    server ask for the same photo in the same mode and get back genuinely
+    different crops. Without the dimensions in the key whichever rendered
+    first would hand its crop to the other for up to seven days."""
+    ck = "photo_frame:3:" + proxy + "|" + mode + "|64x" + str(ph) + "|" + url
+
+    body, verdict = fetch_image(proxy + "/", ck + ":gate", proxy_params(url, mode, ph), PROXY_CAP)
     if body != None:
-        img = fitted_image(body, mode, proxied = True)
+        img = fitted_image(body, mode, True, ph)
         cache.set(ck, base64.encode(body), ttl_seconds = STALE_TTL)
         return img
 
     raw = cache.get(ck)
     if raw != None:
-        return fitted_image(base64.decode(raw), mode, proxied = True)
+        return fitted_image(base64.decode(raw), mode, True, ph)
 
     if verdict != "proxy" or not parseable_url(url):
         return None
 
     body, _ = fetch_image(url, ck + ":dgate", {}, DIRECT_CAP)
     if body != None:
-        img = fitted_image(body, mode, proxied = False)
+        img = fitted_image(body, mode, False, ph)
         cache.set(ck + ":d", base64.encode(body), ttl_seconds = STALE_TTL)
         return img
 
     raw = cache.get(ck + ":d")
     if raw != None:
-        return fitted_image(base64.decode(raw), mode, proxied = False)
+        return fitted_image(base64.decode(raw), mode, False, ph)
     return None
 
 # -------------------------------------------------------------------- states
 
-def fitted_image(body, mode, proxied):
-    """Decode the bytes and size them for the 64x32 panel. Constructing the
+def fitted_image(body, mode, proxied, ph):
+    """Decode the bytes and size them for a 64 x ph panel. Constructing the
     Image is what decodes, so this is also the point where undecodable bytes
     abort - callers cache only after it returns.
 
-    Proxy output is already exactly 64x32, so it goes in full-bleed. Direct
+    Proxy output is already exactly the panel (64x32 or 64x64, since
+    proxy_params asks for ph), so it goes in full-bleed either way. Direct
     origin bytes are the ORIGINAL photo, so the fit mode has to be honored
     here or the dropdown would silently mean nothing during a proxy outage.
     Measured on pixlet 0.34 with banded test images: width+height stretches to
     the box (= fill); one axis alone scales to that axis keeping the aspect
     ratio, which the centering Box then letterboxes or center-crops. So the
-    axis to pin is whichever gives the wanted result for this photo's shape."""
+    axis to pin is whichever gives the wanted result for this photo's shape -
+    and which axis that is depends on the panel, which is why the comparison
+    below is against ph rather than a hardcoded 2:1."""
     if proxied:
         return render.Image(src = body, width = 64)
     if mode == "fill":
-        return render.Image(src = body, width = 64, height = 32)
+        return render.Image(src = body, width = 64, height = ph)
 
     size = image_size(body)
     if size == None:
         return render.Image(src = body, width = 64)  # unreadable header: aspect-safe default
 
-    wide = size[0] * 32 > size[1] * 64  # wider than the panel's own 2:1
+    wide = size[0] * ph > size[1] * 64  # wider than the panel's own aspect
     if mode == "contain":
         pin_width = wide  # a wide photo fits inside the panel by its width
     else:
         pin_width = not wide  # cover: a tall photo has to overflow vertically
     if pin_width:
         return render.Image(src = body, width = 64)
-    return render.Image(src = body, height = 32)
+    return render.Image(src = body, height = ph)
 
-def photo_view(img, caption):
-    """The photo full-bleed on black, with the optional caption strip over it."""
+def photo_view(img, caption, ph):
+    """The photo full-bleed on black, with the optional caption strip over it.
+    Square panels get a bigger photo, not a photo with a margin: the Box is the
+    whole panel and the strip stays seven rows on its bottom edge."""
     base = render.Box(
         width = 64,
-        height = 32,
+        height = ph,
         color = "#000000",
         child = img,
     )
@@ -469,7 +513,7 @@ def photo_view(img, caption):
         children = [
             base,
             render.Padding(
-                pad = (0, 25, 0, 0),
+                pad = (0, ph - 7, 0, 0),
                 child = render.Box(
                     width = 64,
                     height = 7,
@@ -484,11 +528,18 @@ def photo_view(img, caption):
     )
 
 # A dusk-over-water scene from pure primitives: the zero-network default and
-# the fetch-error card. Layout map (y): 0-19 sky, sun disc 8-15, mountain
-# silhouettes 10-19, water 20-31, note strip overlays 25-31.
+# the fetch-error card. Same palette on both panels, composed twice rather
+# than stretched or padded. Layout maps (y):
+#   2:1     0-19 sky, sun disc 8-15, peaks 10-19, water 20-31, note 25-31.
+#   square  0-39 sky, sun disc 16-31, peaks 20-39, water 40-63, note 57-63.
 
 SKY = ["#1B1240", "#2C1A52", "#452260", "#672C64", "#93405C", "#C05A48", "#E87E36", "#F7A53C"]
 SKY_H = [3, 3, 3, 3, 2, 2, 2, 2]
+
+# 40 rows for the square panel's sky, keeping the wide gradient's habit of
+# thinning toward the horizon so the warm end stays compressed near the water.
+SKY_H_SQ = [6, 6, 6, 5, 5, 4, 4, 4]
+
 WATER = ["#8A4058", "#7A3754", "#6A2F50", "#5B284B", "#4D2246", "#411C41", "#36173C", "#2D1338", "#251034", "#1E0D30", "#180A2C", "#130828"]
 SUN = "#FFD98C"
 MTN_BACK = "#3A1D52"
@@ -511,7 +562,33 @@ def peak(cx, top, rows, color):
         out.append(at(x, top + i, w, 1, color))
     return out
 
-def placeholder(note, setup):
+def placeholder(note, setup, ph):
+    """The scene for a 64 x ph panel, titled when it is the setup card, with
+    the note strip on the bottom edge. Only the scene beneath differs by
+    panel; the title and the strip are the same seven-row furniture on both."""
+    if ph == 64:
+        layers = square_scene()
+        title_y = 6
+    else:
+        layers = wide_scene()
+        title_y = 2
+
+    if setup:
+        layers.append(render.Padding(pad = (11, title_y + 1, 0, 0), child = render.Text("PHOTO FRAME", font = "tom-thumb", color = "#00000080")))
+        layers.append(render.Padding(pad = (10, title_y, 0, 0), child = render.Text("PHOTO FRAME", font = "tom-thumb", color = WHITE)))
+
+    layers.append(render.Padding(
+        pad = (0, ph - 7, 0, 0),
+        child = render.Box(
+            width = 64,
+            height = 7,
+            color = SHADE,
+            child = render.Text(note, font = "tom-thumb", color = AMBER),
+        ),
+    ))
+    return render.Stack(children = layers)
+
+def wide_scene():
     layers = []
 
     sky = []
@@ -533,21 +610,38 @@ def placeholder(note, setup):
     layers.extend(peak(11, 10, 10, MTN_BACK))
     layers.extend(peak(56, 13, 7, MTN_BACK))
     layers.extend(peak(24, 15, 5, MTN_FRONT))
+    return layers
 
-    if setup:
-        layers.append(render.Padding(pad = (11, 3, 0, 0), child = render.Text("PHOTO FRAME", font = "tom-thumb", color = "#00000080")))
-        layers.append(render.Padding(pad = (10, 2, 0, 0), child = render.Text("PHOTO FRAME", font = "tom-thumb", color = WHITE)))
+def square_scene():
+    """The same dusk, composed for 64 rows. Every element grows into the extra
+    height rather than floating in it: eight taller sky bands, twelve water
+    colors two rows each, a round sun instead of the squat ellipse that reads
+    right on a 2:1 panel (and set the same fraction of the way down its much
+    deeper sky), peaks twice as tall, and six glint dashes running the length
+    of the water instead of four crammed into twelve rows."""
+    layers = []
 
-    layers.append(render.Padding(
-        pad = (0, 25, 0, 0),
-        child = render.Box(
-            width = 64,
-            height = 7,
-            color = SHADE,
-            child = render.Text(note, font = "tom-thumb", color = AMBER),
-        ),
-    ))
-    return render.Stack(children = layers)
+    sky = []
+    for i in range(len(SKY)):
+        sky.append(render.Box(width = 64, height = SKY_H_SQ[i], color = SKY[i]))
+    layers.append(render.Column(children = sky))
+
+    water = []
+    for c in WATER:
+        water.append(render.Box(width = 64, height = 2, color = c))
+    layers.append(render.Padding(pad = (0, 40, 0, 0), child = render.Column(children = water)))
+
+    # Sun low over the water, its glint dashed down the swell. A 16px disc
+    # centred on x=44, the same side of the frame it sits on when wide.
+    for x, y, w in [(41, 16, 6), (39, 17, 10), (38, 18, 12), (37, 19, 14), (37, 20, 14), (36, 21, 16), (36, 22, 16), (36, 23, 16), (36, 24, 16), (36, 25, 16), (36, 26, 16), (37, 27, 14), (37, 28, 14), (38, 29, 12), (39, 30, 10), (41, 31, 6)]:
+        layers.append(at(x, y, w, 1, SUN))
+    for x, y, w, c in [(38, 40, 12, "#FFC985"), (39, 43, 10, "#FFC985"), (40, 46, 8, "#E8A86E"), (41, 50, 6, "#E8A86E"), (42, 54, 4, "#C9895E"), (43, 58, 3, "#A86E52")]:
+        layers.append(at(x, y, w, 1, c))
+
+    layers.extend(peak(11, 20, 20, MTN_BACK))
+    layers.extend(peak(56, 26, 14, MTN_BACK))
+    layers.extend(peak(24, 30, 10, MTN_FRONT))
+    return layers
 
 # -------------------------------------------------------------------- schema
 
@@ -565,7 +659,7 @@ def get_schema():
             schema.Dropdown(
                 id = "mode",
                 name = "Fit",
-                desc = "How the photo fills the 64x32 panel.",
+                desc = "How the photo fills the panel.",
                 icon = "image",
                 default = "cover",
                 options = [
