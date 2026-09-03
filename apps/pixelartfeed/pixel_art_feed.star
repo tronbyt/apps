@@ -523,7 +523,7 @@ def is_square(w, h):
     so a height test would call both of those 64-tall and get one of them
     wrong. The slack keeps a merely tallish panel on the wide branch.
     """
-    return h * 2 > w + 16
+    return h == w
 
 def build_art(art, w, h, overlay, mode, speed):
     """Scale the piece for the panel, panning it if it overflows."""
