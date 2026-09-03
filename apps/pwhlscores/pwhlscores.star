@@ -7,7 +7,7 @@ Author: hiawatha98
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -30,7 +30,14 @@ SEASONS_URL = (
 DEFAULT_LOCATION = '{"timezone": "America/New_York"}'
 
 ISO_FMT = "2006-01-02T15:04:05Z07:00"
-LIVE_WINDOW = "5h"  # treat a non-final game started within this window as live
+LIVE_WINDOW = "5h"  # a started game is only treated as live for this long
+
+# HockeyTech publishes no status enum, so match on GameStatusString's text
+# rather than on numeric codes. "Unofficial Final" contains "final" and so
+# counts as complete, which is what we want: the score is real, only the stats
+# are still being verified.
+LIVE_STATUS = "2"
+DISRUPTED_MARKS = ["postpone", "suspend", "cancel", "delay"]
 
 BAR_LIVE = "#cc2222"
 BAR_FINAL = "#444444"
@@ -50,11 +57,11 @@ def main(config):
     if team != "all":
         games = [g for g in games if g["HomeID"] == team or g["VisitorID"] == team]
 
-    if len(games) == 0:
+    kind, game = pick_game(games, now)
+    if game == None:
         return message("No games")
 
-    game = pick_game(games, now)
-    return render_game(game, now, tz)
+    return render_game(kind, game, tz)
 
 def fetch_games():
     resp = http.get(SCOREBAR_URL, ttl_seconds = 60)
@@ -65,102 +72,149 @@ def fetch_games():
 def parse_start(game):
     return time.parse_time(game["GameDateISO8601"], format = ISO_FMT)
 
+def status_text(game):
+    return game.get("GameStatusString", "").lower()
+
 def is_final(game):
-    return game["GameStatus"] == "4" or game["GameStatusString"] == "Final"
+    return game.get("GameStatus", "") == "4" or "final" in status_text(game)
+
+def is_disrupted(game):
+    text = status_text(game)
+    for mark in DISRUPTED_MARKS:
+        if mark in text:
+            return True
+    return False
+
+def period_number(game):
+    period = game.get("Period", "")
+    return int(period) if period.isdigit() else 0
+
+def is_live(game, start, now, window):
+    # Require a positive in-progress signal. Treating "started and not final" as
+    # live shows postponed and suspended games as though they were being played,
+    # with whatever period and clock the feed happens to carry.
+    if game.get("GameStatus", "") == LIVE_STATUS:
+        return True
+    if start > now or now - start >= window:
+        return False
+    return period_number(game) > 0
 
 def pick_game(games, now):
     # Prefer a live game; else the soonest upcoming; else the most recent final.
+    # A game that matches none of those - disrupted, or started long ago and
+    # never finalised - is left out rather than shown as something it is not.
     window = time.parse_duration(LIVE_WINDOW)
     live = None
     upcoming = None
     past = None
     for g in games:
-        st = parse_start(g)
-        final = is_final(g)
-        if not final and st <= now and now - st < window:
-            if live == None or st < live[0]:
-                live = (st, g)
-        elif not final and st > now:
-            if upcoming == None or st < upcoming[0]:
-                upcoming = (st, g)
-        elif past == None or st > past[0]:
-            past = (st, g)
+        if is_disrupted(g):
+            continue
+        start = parse_start(g)
+        if is_final(g):
+            if past == None or start > past[0]:
+                past = (start, g)
+        elif is_live(g, start, now, window):
+            if live == None or start < live[0]:
+                live = (start, g)
+        elif start > now:
+            if upcoming == None or start < upcoming[0]:
+                upcoming = (start, g)
 
-    chosen = live or upcoming or past
-    return chosen[1] if chosen != None else games[0]
+    if live != None:
+        return ("live", live[1])
+    if upcoming != None:
+        return ("next", upcoming[1])
+    if past != None:
+        return ("final", past[1])
+    return (None, None)
 
-def render_game(game, now, tz):
+def render_game(kind, game, tz):
+    scale = 2 if is_2x() else 1
     away_logo = fetch_logo(game["VisitorLogo"])
     home_logo = fetch_logo(game["HomeLogo"])
-    st = parse_start(game)
 
-    if is_final(game):
+    if kind == "final":
         bar_color = BAR_FINAL
         bar_text = final_text(game)
-        center = score_widget(game)
-    elif st > now:
+        center = score_widget(game, scale)
+    elif kind == "next":
         bar_color = BAR_NEXT
-        bar_text = st.in_location(tz).format("Jan 2 3:04 PM")
-        center = render.Text(content = "VS", font = "tom-thumb", color = AMBER)
+        bar_text = parse_start(game).in_location(tz).format("Jan 2 3:04 PM")
+        center = render.Text(content = "VS", font = small_font(scale), color = AMBER)
     else:
         bar_color = BAR_LIVE
         bar_text = live_text(game)
-        center = score_widget(game)
+        center = score_widget(game, scale)
 
     return render.Root(
         child = render.Column(
             children = [
-                status_bar(bar_color, bar_text),
+                status_bar(bar_color, bar_text, scale),
                 render.Row(
                     expanded = True,
                     main_align = "space_between",
                     cross_align = "center",
                     children = [
-                        team_widget(away_logo, game["VisitorCode"]),
+                        team_widget(away_logo, game["VisitorCode"], scale),
                         center,
-                        team_widget(home_logo, game["HomeCode"]),
+                        team_widget(home_logo, game["HomeCode"], scale),
                     ],
                 ),
             ],
         ),
     )
 
-def status_bar(color, text):
+def is_2x():
+    # canvas.is2x() is the documented signal, but the released pixlet CLI never
+    # sets it, so treat a double-width canvas as 2x too. Both hold on real 2x
+    # hardware, and the second keeps the layout testable with -w 128 -t 64.
+    return canvas.is2x() or canvas.width() >= 128
+
+def small_font(scale):
+    # terminus-16 is the default 2x font, but it is too tall for the status bar;
+    # terminus-12 keeps the same proportions the 1x bar has with tom-thumb.
+    return "terminus-12" if scale == 2 else "tom-thumb"
+
+def score_font(scale):
+    return "terminus-16" if scale == 2 else "tb-8"
+
+def status_bar(color, text, scale):
     return render.Box(
-        width = 64,
-        height = 7,
+        width = canvas.width(),
+        height = 7 * scale,
         color = color,
         child = render.Marquee(
-            width = 62,
-            child = render.Text(content = text, font = "tom-thumb", color = WHITE),
+            width = canvas.width() - 2 * scale,
+            child = render.Text(content = text, font = small_font(scale), color = WHITE),
         ),
     )
 
-def team_widget(logo, code):
+def team_widget(logo, code, scale):
     if logo != None:
-        child = render.Image(src = logo, width = 22, height = 22)
+        child = render.Image(src = logo, width = 22 * scale, height = 22 * scale)
     else:
-        child = render.Text(content = code, font = "tom-thumb", color = WHITE)
-    return render.Box(width = 24, height = 24, child = child)
+        child = render.Text(content = code, font = small_font(scale), color = WHITE)
+    return render.Box(width = 24 * scale, height = 24 * scale, child = child)
 
-def score_widget(game):
+def score_widget(game, scale):
     return render.Text(
         content = "%s-%s" % (game["VisitorGoals"], game["HomeGoals"]),
-        font = "tb-8",
+        font = score_font(scale),
         color = WHITE,
     )
 
 def final_text(game):
-    if game["PeriodNameShort"] == "SO":
+    if game.get("PeriodNameShort", "") == "SO":
         return "FINAL/SO"
-    if int(game["Period"]) > 3:
+    if period_number(game) > 3:
         return "FINAL/OT"
     return "FINAL"
 
 def live_text(game):
-    if game["Intermission"] == "1":
-        return game["PeriodNameShort"] + " INT"
-    return game["PeriodNameShort"] + " " + game["GameClock"]
+    if game.get("Intermission", "") == "1":
+        return game.get("PeriodNameShort", "") + " INT"
+    return game.get("PeriodNameShort", "") + " " + game.get("GameClock", "")
 
 def fetch_logo(url):
     if url == "":
@@ -171,9 +225,10 @@ def fetch_logo(url):
     return resp.body()
 
 def message(text):
+    scale = 2 if is_2x() else 1
     return render.Root(
         child = render.Box(
-            child = render.WrappedText(content = text, font = "tom-thumb", align = "center"),
+            child = render.WrappedText(content = text, font = small_font(scale), align = "center"),
         ),
     )
 
