@@ -2245,8 +2245,14 @@ def main(config):
         temp_w = 0
         if have_temp:
             unit_mark = "F" if units == "fahrenheit" else "C"
-            label = "%d°%s" % (temp, unit_mark)
-            temp_w = len(label)
+            digits = "%d" % temp
+            label = "%s°%s" % (digits, unit_mark)
+
+            # Glyph count, NOT len(label): Starlark strings are byte strings,
+            # so the degree sign (2 bytes in UTF-8) counts twice and shoves the
+            # icon a whole 4px tom-thumb cell right of the number. Built from
+            # the same pieces as `label` so the two can't drift apart.
+            temp_w = len(digits) + 1 + len(unit_mark)
             tf = temp if units == "fahrenheit" else temp * 9.0 / 5.0 + 32
             if tf >= 90:
                 tint = "#ff9e6b"
