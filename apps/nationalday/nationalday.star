@@ -12,7 +12,7 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-VERSION = 24315
+VERSION = 24316
 
 # 2x (128x64) uses the wider canvas and a larger font; 1x is unchanged.
 IS2X = canvas.is2x()
@@ -106,6 +106,9 @@ def main(config):
                         height = ARTICLE_AREA_HEIGHT,
                         scroll_direction = "vertical",
                         offset_start = ARTICLE_AREA_HEIGHT,
+                        # only takes effect on short lists that fit without
+                        # scrolling; the marquee ignores it once it scrolls
+                        align = "center",
                         child =
                             render.Column(
                                 main_align = "space_between",
@@ -182,8 +185,12 @@ def displayItem(json_data):
     item = []
 
     for i in range(len(json_data)):
+        # spacer goes between items, never after the last one: a trailing
+        # spacer is measured as part of the column and would push a centered
+        # short list up by half its height
+        if i > 0:
+            item.append(render.Box(width = FULL_WIDTH, height = SPACER_HEIGHT, color = SPACER_COLOR))
         item.append(render.WrappedText(json_data[i], font = ARTICLE_SUB_TITLE_FONT, color = ARTICLE_SUB_TITLE_COLOR[i % 2], align = "center"))
-        item.append(render.Box(width = FULL_WIDTH, height = SPACER_HEIGHT, color = SPACER_COLOR))
 
     return item
 

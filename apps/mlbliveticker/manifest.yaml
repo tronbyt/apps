@@ -1,0 +1,18 @@
+---
+id: mlbliveticker
+name: MLB Live Ticker
+summary: Live MLB scorebug
+desc: Live score, inning, count, base runners and outs for any MLB team, with scorecard notation flashed on each completed at bat. Shows the final score with records and the next scheduled game once play ends.
+author: Vurrfett
+fileName: mlbliveticker.star
+packageName: mlbliveticker
+recommendedInterval: 15
+supports2x: false
+category: sports
+tags:
+  - baseball
+  - mlb
+  - sports
+  - scores
+published: '2026-08-10T04:42:53Z'
+updated: '2026-08-10T04:50:18Z'

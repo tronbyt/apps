@@ -12,16 +12,22 @@ def login(username, password):
         "User-Agent": "Mozilla/5.0",
         "Content-Type": "application/json",
     }
-    body = json.encode({"username": username, "password": password})
-    rep = http.post(login_url, headers = headers, body = body)
 
-    if rep.status_code != 200:
-        print("Login failed! Status Code: " + str(rep.status_code))
-        print("Response Body: " + rep.body())
-        return None
+    usernames_to_try = [username]
+    if "@" in username:
+        usernames_to_try.append(username.split("@")[0])
 
-    data = rep.json()
-    return data.get("access") or data.get("access_token")
+    for u in usernames_to_try:
+        body = json.encode({"username": u, "password": password})
+        rep = http.post(login_url, headers = headers, body = body)
+
+        if rep.status_code == 200:
+            data = rep.json()
+            token = data.get("access") or data.get("access_token")
+            if token:
+                return token
+
+    return None
 
 def main(config):
     username = config.get("username")

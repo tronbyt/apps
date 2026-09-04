@@ -6,7 +6,6 @@ Author: Robert Ison
 """
 
 load("http.star", "http")  #HTTP Client
-load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -50,92 +49,201 @@ BRANCHES = [
 ]
 
 BRANCH_COLOR_PALETTE = [
-    ["#002b80", "#d2af39", "#00338f", "#00369e", "#b6860a"],
-    ["#dad3c1", "#746b5a", "#a39976", "#555346", "#555346"],
-    ["#f2531b", "#223c70", "#bb5949", "#ffffff", "#ffffff"],
-    ["#a77c29", "#004481", "#cc101f", "#ffd500", "#757575"],
-    ["#022a3a", "#e8b00f", "#c6ccd0", "#0076a9", "#0076a9"],
-    ["#014b8b", "#9ca09f", "#792330", "#0f263a", "#792330"],
+    # air-force
+    ["#003594", "#B2B4B2", "#FFFFFF", "#FFC72C", "#FFC72C"],
+
+    # army
+    ["#FFCC01", "#F1E4C7", "#FFFFFF", "#7A8B6F", "#FFCC01"],
+
+    # coast-guard
+    ["#005DAA", "#FFFFFF", "#E6382F", "#9FD8FF", "#FFFFFF"],
+
+    # marine-corps
+    ["#CC101F", "#FFD500", "#FFFFFF", "#A77C29", "#FFD500"],
+
+    # navy
+    ["#E8B00F", "#C6CCD0", "#FFFFFF", "#088199", "#E8B00F"],
+
+    # space-force
+    ["#FFFFFF", "#C0C7D1", "#7FB3FF", "#8A8D8F", "#FFFFFF"],
 ]
+
+BRANCH_FILTERS = {
+    "air-force": [
+        "air force topics",
+        "air force bases",
+        "air force",
+        "airman",
+        "airmen",
+        "aircraft",
+        "fighter aircraft",
+        "attack aircraft",
+        "surveillance aircraft",
+        "unmanned aircraft systems",
+    ],
+    "army": [
+        "><![cdata[army]]>",
+        "army",
+        "army rangers",
+        "army training",
+        "soldier",
+        "soldiers",
+        "west point",
+    ],
+    "coast-guard": [
+        "coast guard",
+        "uscg",
+    ],
+    "marine-corps": [
+        "marine corps topics",
+        "marine corps",
+        "marine corps operations",
+        "marine corps uniforms",
+        "marine corps reserve",
+        "marines",
+    ],
+    "navy": [
+        "us navy topics",
+        "navy",
+        "sailor",
+        "sailors",
+        "fleet",
+    ],
+    "space-force": [
+        "space force",
+        "ussf",
+        "guardian",
+        "guardians",
+    ],
+}
 
 def main(config):
     selected_branch = config.get("branch", BRANCH_OPTIONS[6].value)
     branch_index = BRANCHES.index(selected_branch)
 
-    if branch_index == (len(BRANCHES) - 1):
-        #Pick a random branch
-        branch_index = randomize(0, len(BRANCHES) - 2)
+    if selected_branch == "military":
+        palette_index = randomize(0, len(BRANCHES) - 2)
+        header = "All Branches"
+    else:
+        palette_index = branch_index
+        header = BRANCH_OPTIONS[branch_index].display
 
     show_instructions = config.bool("instructions", False)
     if show_instructions:
-        return show_instructions_screen(BRANCH_COLOR_PALETTE[branch_index], int(config.get("scroll", 45)))
+        return show_instructions_screen(BRANCH_COLOR_PALETTE[palette_index], int(config.get("scroll", 45)))
 
-    #Pick a news feed based on the branch
-    rss_feed_url = ("https://www.military.com/rss-feeds/content?keyword=%s&type=news" % BRANCHES[branch_index])
+    colors = BRANCH_COLOR_PALETTE[palette_index]
+    rss_feed_url = "https://www.military.com/feed/daily-news/?viewMode=syndicationYahoo&articleCount=15"
 
     xml_data = get_military_news(rss_feed_url)
-    colors = BRANCH_COLOR_PALETTE[branch_index]
-    if (xml_data == None):
-        number_of_items = 0
-    else:
-        number_of_items = xml_data.count("<item>")
+    if xml_data == None:
+        return []
 
+    number_of_items = xml_data.count("<item>")
     if number_of_items == 0:
         return []
+
+    doc = xpath.loads(xml_data)
+
+    item_blocks = xml_data.split("<item>")
+    matching_items = []
+    nonmatching_items = []
+
+    for item_num in range(1, number_of_items + 1):
+        raw_item = ""
+        if item_num < len(item_blocks):
+            raw_item = item_blocks[item_num].split("</item>")[0].lower()
+
+        matched = False
+
+        if selected_branch == "military":
+            matched = True
+        else:
+            for keyword in BRANCH_FILTERS.get(selected_branch, []):
+                if raw_item.find(keyword) >= 0:
+                    matched = True
+                    break
+
+        if matched:
+            matching_items.append(item_num)
+        else:
+            nonmatching_items.append(item_num)
+
+    selected_items = []
+
+    if selected_branch == "military":
+        pool = matching_items[:]
+        for _ in range(3):
+            if len(pool) == 0:
+                break
+            pick_index = randomize(0, len(pool) - 1)
+            selected_items.append(pool[pick_index])
+            pool.pop(pick_index)
+    elif len(matching_items) >= 3:
+        pool = matching_items[:]
+        for _ in range(3):
+            if len(pool) == 0:
+                break
+            pick_index = randomize(0, len(pool) - 1)
+            selected_items.append(pool[pick_index])
+            pool.pop(pick_index)
     else:
-        header = BRANCH_OPTIONS[branch_index].display
-        thirds = int(math.round(number_of_items / 3))
-        item_group_points = [
-            [1, 1 if thirds == 0 else thirds],
-            [thirds + 1, 2 * thirds],
-            [2 * thirds + 1, number_of_items],
-        ]
+        for item_num in matching_items:
+            selected_items.append(item_num)
 
-        display_text_lines = []
-        for i in range(len(item_group_points)):
-            #print(item_group_points[i][1] >= item_group_points[i][0])
-            if (item_group_points[i][1] >= item_group_points[i][0]):
-                current_query = "//item[" + str(randomize(item_group_points[i][0], item_group_points[i][1])) + "]/title"
+        pool = nonmatching_items[:]
+        remaining_slots = 3 - len(selected_items)
+        for _ in range(remaining_slots):
+            if len(pool) == 0:
+                break
+            pick_index = randomize(0, len(pool) - 1)
+            selected_items.append(pool[pick_index])
+            pool.pop(pick_index)
 
-                #print(xpath.loads(xml_data).query(current_query))
-                display_text_lines.append(xpath.loads(xml_data).query(current_query))
-            else:
-                display_text_lines.append("")
+    display_text_lines = []
+    for item_num in selected_items:
+        title = doc.query("//item[" + str(item_num) + "]/title") or ""
+        display_text_lines.append(title)
 
-        return render.Root(
-            render.Column(
-                children = [
-                    render.Marquee(
-                        width = 64,
-                        offset_start = 15,
-                        child = render.Text(header, color = colors[4], font = "5x8"),
-                    ),
-                    render.Marquee(
-                        width = 64,
-                        offset_start = len(header) * 5,
-                        child = render.Text(display_text_lines[0], color = colors[0], font = "5x8"),
-                    ),
-                    render.Marquee(
-                        offset_start = len(display_text_lines[0]) * 5,
-                        width = 64,
-                        child = render.Text(display_text_lines[1], color = colors[1], font = "5x8"),
-                    ),
-                    render.Marquee(
-                        offset_start = (len(display_text_lines[0]) + len(display_text_lines[2])) * 5,
-                        width = 64,
-                        child = render.Text(display_text_lines[2], color = colors[2], font = "5x8"),
-                    ),
-                ],
-            ),
-            show_full_animation = True,
-            delay = int(config.get("scroll", 45)),
-        )
+    for _ in range(3 - len(display_text_lines)):
+        display_text_lines.append("")
+
+    return render.Root(
+        render.Column(
+            children = [
+                render.Marquee(
+                    width = 64,
+                    offset_start = 15,
+                    child = render.Text(header, color = colors[4], font = "5x8"),
+                ),
+                render.Marquee(
+                    width = 64,
+                    offset_start = len(header) * 5,
+                    child = render.Text(display_text_lines[0], color = colors[0], font = "5x8"),
+                ),
+                render.Marquee(
+                    offset_start = len(display_text_lines[0]) * 5,
+                    width = 64,
+                    child = render.Text(display_text_lines[1], color = colors[1], font = "5x8"),
+                ),
+                render.Marquee(
+                    offset_start = (len(display_text_lines[0]) + len(display_text_lines[1])) * 5,
+                    width = 64,
+                    child = render.Text(display_text_lines[2], color = colors[2], font = "5x8"),
+                ),
+            ],
+        ),
+        show_full_animation = True,
+        delay = int(config.get("scroll", 45)),
+    )
 
 def get_military_news(rss):
-    url = rss
     res = http.get(
-        url = url,
-        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "Accept": "text/html"},
+        url = rss,
+        headers = {
+            "User-Agent": "curl/8.0",
+            "Accept": "application/rss+xml, application/xml, text/xml, */*",
+        },
         ttl_seconds = CACHE_TTL_SECONDS,
     )
 

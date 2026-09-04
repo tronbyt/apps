@@ -5,6 +5,7 @@ load("images/img_2274bcef.bin", IMG_2274bcef_ASSET = "file")
 load("images/img_7b76fdf3.bin", IMG_7b76fdf3_ASSET = "file")
 load("images/img_adff806b.svg", IMG_adff806b_ASSET = "file")
 load("images/img_fbe29b76.svg", IMG_fbe29b76_ASSET = "file")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -56,6 +57,24 @@ MAX_TIME_PERIOD = 24
 
 TIME_FORMAT = "2006-01-02T15:04:05Z"
 
+def parse_state_value(state):
+    if state == None or state in ("unavailable", "unknown", "none", ""):
+        return None
+    s = state.strip()
+    if not s:
+        return None
+    if s.startswith("-"):
+        s = s[1:]
+    if not s:
+        return None
+    parts = s.split(".")
+    if len(parts) not in [1, 2]:
+        return None
+    for part in parts:
+        if not part.isdigit():
+            return None
+    return float(state)
+
 def main(config):
     timezone = None
     location = config.get("location")
@@ -90,9 +109,9 @@ def main(config):
         if len(parts) == 2:
             min_val = float(parts[0])
             max_val = float(parts[1])
-            if current_value == "unavailable" or current_value == "unknown":
+            val = parse_state_value(current_value)
+            if val == None:
                 return []
-            val = float(current_value)
             if val < min_val or val > max_val:
                 return []
     stats = calc_stats(timezone, data)
@@ -104,9 +123,10 @@ def calculate_hourly_average(config, data):
     if config.bool("use_raw_data"):
         points = []
         for i, entry in enumerate(data):
-            if entry["state"] == "unavailable" or entry["state"] == "unknown":
+            value = parse_state_value(entry["state"])
+            if value == None:
                 continue
-            points.append((i, float(entry["state"])))
+            points.append((i, value))
         return points
 
     hourly_averages = {}
@@ -116,12 +136,12 @@ def calculate_hourly_average(config, data):
     index = 0
 
     for entry in data:
-        if entry["state"] == "unavailable" or entry["state"] == "unknown":
+        value = parse_state_value(entry["state"])
+        if value == None:
             continue
 
         timestamp = entry["last_changed"]
         hour = int(timestamp.split("T")[1].split(":")[0])
-        value = float(entry["state"])
 
         if hour != current_hour:
             if current_hour != None:
@@ -151,10 +171,9 @@ def calc_stats(timezone, data):
     count = 0
 
     for entry in data:
-        if entry["state"] == "unavailable" or entry["state"] == "unknown":
+        value = parse_state_value(entry["state"])
+        if value == None:
             continue
-
-        value = float(entry["state"])
         total_value += value
         count += 1
         if value < lowest_value:
@@ -234,6 +253,10 @@ def render_app(config, current_value, points, stats, unit, label):
             child = render_graph_column(config, current_value, points, unit, label),
         )
 
+def round(num, precision):
+    """Round a float to the specified number of significant digits"""
+    return math.round(num * math.pow(10, precision)) / math.pow(10, precision)
+
 def render_graph_column(config, current_value, points, unit, label):
     icon = get_icon(config)
     children = []
@@ -245,6 +268,13 @@ def render_graph_column(config, current_value, points, unit, label):
             width = 12,
             height = 12,
         ))
+    if (config.str("round_to") in ["0", "1", "2"]):
+        decimal = int(config.get("round_to"))
+        val = parse_state_value(current_value)
+        if val == None:
+            val = 0
+        val = round(val, decimal)
+        current_value = str(int(val)) if val == int(val) else str(val)
     children.append(render.Text(content = current_value + unit, font = "6x13"))
     align = "space_between" if label else "end"
     return render.Column(
@@ -388,6 +418,31 @@ def get_schema():
                 desc = "Only display when value is within this range. Format: min,max (e.g. 5,1000). Leave empty to always show.",
                 icon = "filter",
                 name = "Display range",
+            ),
+            schema.Dropdown(
+                id = "round_to",
+                desc = "Round to which decimal",
+                icon = "filter",
+                name = "Round To",
+                default = "none",
+                options = [
+                    schema.Option(
+                        display = "None",
+                        value = "none",
+                    ),
+                    schema.Option(
+                        display = "Ones",
+                        value = "0",
+                    ),
+                    schema.Option(
+                        display = "Tenths",
+                        value = "1",
+                    ),
+                    schema.Option(
+                        display = "Hundreths",
+                        value = "2",
+                    ),
+                ],
             ),
             schema.Location(
                 id = "location",

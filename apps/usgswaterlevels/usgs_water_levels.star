@@ -13,22 +13,22 @@ load("time.star", "time")
 # Default USGS site ID (Lake Champlain at Burlington, VT)
 DEFAULT_SITE_ID = "04294500"
 CACHE_TTL_SECONDS = 3600  # 1 hour
+USGS_API_BASE = "https://api.waterdata.usgs.gov/ogcapi/v0/collections"
 
 def main(config):
-    site_id = config.get("site_id", DEFAULT_SITE_ID)
+    site_id = normalize_site_id(config.get("site_id", DEFAULT_SITE_ID))
     water_body_type = config.get("water_body_type", "0")  # 0 for lakes, 1 for rivers
     param_code = config.get("param_code", "auto")  # auto or specific code
+    custom_display_name = config.get("display_name", "")
 
-    # Get cached data or fetch new data
+    # Get fresh data, falling back to cache only when the fetch fails
     cache_key = "usgs_data_" + site_id + "_" + water_body_type + "_" + param_code
     cached_data = cache.get(cache_key)
-
-    if cached_data != None:
+    data = fetch_usgs_data(site_id, water_body_type, param_code)
+    if data:
+        cache.set(cache_key, json.encode(data), ttl_seconds = CACHE_TTL_SECONDS)
+    elif cached_data != None:
         data = json.decode(cached_data)
-    else:
-        data = fetch_usgs_data(site_id, water_body_type, param_code)
-        if data:
-            cache.set(cache_key, json.encode(data), ttl_seconds = CACHE_TTL_SECONDS)
 
     if not data:
         return render.Root(
@@ -40,6 +40,8 @@ def main(config):
                 ],
             ),
         )
+
+    site_name = custom_display_name if custom_display_name else data["site_name"]
 
     # Create the display - 3 box layout
     return render.Root(
@@ -57,8 +59,8 @@ def main(config):
                                     children = [
                                         render.Marquee(
                                             width = 54,
-                                            child = render.Text(data["site_name"], color = "#4A90E2", font = "tom-thumb"),
-                                        ) if len(data["site_name"]) > 12 else render.Text(data["site_name"], color = "#888", font = "tom-thumb"),
+                                            child = render.Text(site_name, color = "#4A90E2", font = "tom-thumb"),
+                                        ) if len(site_name) > 12 else render.Text(site_name, color = "#888", font = "tom-thumb"),
                                         render.Text(data["param_description"], color = "#ff4", font = "tom-thumb"),
                                     ],
                                 ),
@@ -109,133 +111,94 @@ def main(config):
         ),
     )
 
+def normalize_site_id(site_id):
+    site_id = site_id.strip()
+    if site_id.startswith("USGS-"):
+        site_id = site_id[5:]
+    return site_id
+
+def monitoring_location_id(site_id):
+    return "USGS-" + normalize_site_id(site_id)
+
+def fetch_site_name(location_id):
+    url = USGS_API_BASE + "/monitoring-locations/items/" + location_id
+    resp = http.get(url, ttl_seconds = CACHE_TTL_SECONDS)
+    if resp.status_code != 200:
+        print("Error fetching site metadata: " + str(resp.status_code))
+        return None
+
+    props = resp.json().get("properties", {})
+    return props.get("monitoring_location_name")
+
+def get_param_codes(water_body_type, param_code):
+    if param_code == "auto":
+        if water_body_type == "0":
+            return ["62614", "00062", "62610", "62611", "00065", "00010", "00095"]
+        return ["00065", "00060", "72255", "00010", "00095", "00048", "62614", "00062", "62610", "62611"]
+    return [param_code]
+
 def fetch_usgs_data(site_id, water_body_type, param_code):
-    # Get 30 days of data for high/low calculation, plus current data
+    site_id = normalize_site_id(site_id)
+    if site_id == "":
+        print("Empty site ID")
+        return None
+
+    location_id = monitoring_location_id(site_id)
+    site_name = fetch_site_name(location_id)
+    param_codes = get_param_codes(water_body_type, param_code)
+
     end_date = time.now()
     start_date_30d = time.now() - time.parse_duration("720h")  # 30 days
-    start_date_current = time.now() - time.parse_duration("24h")  # Current data
+    start_str = start_date_30d.format("2006-01-02") + "T00:00:00Z"
+    end_str = end_date.format("2006-01-02") + "T23:59:59Z"
 
-    start_str_30d = start_date_30d.format("2006-01-02")
-    start_str_current = start_date_current.format("2006-01-02")
-    end_str = end_date.format("2006-01-02")
-
-    # Select parameter codes based on settings
-    if param_code == "auto":
-        # Auto-select based on water body type - prioritize working codes for lakes
-        if water_body_type == "0":
-            # Lake/reservoir - try working codes first for Lake Champlain
-            param_codes = ["62614", "00010", "00095", "62610", "62611", "00062", "00065"]  # Temp, conductance, then elevation codes
-        else:
-            # River/stream gage height
-            param_codes = ["00065", "00010", "00095"]  # Gage height, then temp, conductance
-    else:
-        # Use the specific parameter code selected by user
-        param_codes = [param_code]
-
-    # Try each parameter code until we find data
     for param_code_to_try in param_codes:
         print("Trying parameter code: " + param_code_to_try)
 
-        # USGS Instantaneous Values Web Service URL
-        url = "https://waterservices.usgs.gov/nwis/iv/"
+        param_parts = []
+        param_parts.append("monitoring_location_id=" + location_id)
+        param_parts.append("parameter_code=" + param_code_to_try)
+        param_parts.append("datetime=" + start_str + "/" + end_str)
+        param_parts.append("limit=10000")
+        full_url = USGS_API_BASE + "/continuous/items?" + "&".join(param_parts)
 
-        # First get 30 days of data for high/low calculation
-        param_parts_30d = []
-        param_parts_30d.append("format=json")
-        param_parts_30d.append("sites=" + site_id)
-        param_parts_30d.append("startDT=" + start_str_30d)
-        param_parts_30d.append("endDT=" + end_str)
-        param_parts_30d.append("parameterCd=" + param_code_to_try)
-        param_parts_30d.append("siteStatus=all")
-        param_string_30d = "&".join(param_parts_30d)
-        full_url_30d = url + "?" + param_string_30d
+        print("Fetching USGS continuous data from: " + full_url)
 
-        print("Fetching 30-day USGS data from: " + full_url_30d)
-
-        resp_30d = http.get(full_url_30d, ttl_seconds = CACHE_TTL_SECONDS)
-        if resp_30d.status_code != 200:
-            print("Error fetching 30-day USGS data: " + str(resp_30d.status_code))
+        resp = http.get(full_url, ttl_seconds = CACHE_TTL_SECONDS)
+        if resp.status_code != 200:
+            print("Error fetching continuous data: " + str(resp.status_code))
             continue
 
-        usgs_data_30d = resp_30d.json()
-
-        if not usgs_data_30d.get("value") or not usgs_data_30d["value"].get("timeSeries"):
-            print("No 30-day time series data found for parameter " + param_code_to_try)
+        features = resp.json().get("features", [])
+        if not features:
+            print("No continuous data found for parameter " + param_code_to_try)
             continue
 
-        time_series_30d = usgs_data_30d["value"]["timeSeries"][0]
-        values_30d = time_series_30d["values"][0]["value"]
+        processed_values = []
+        for feature in features:
+            val_str = feature.get("properties", {}).get("value")
+            if val_str != None and val_str != "":
+                processed_values.append(float(val_str))
 
-        if not values_30d:
-            print("No 30-day values found in time series for parameter " + param_code_to_try)
-            continue
-
-        # Now get current data
-        param_parts_current = []
-        param_parts_current.append("format=json")
-        param_parts_current.append("sites=" + site_id)
-        param_parts_current.append("startDT=" + start_str_current)
-        param_parts_current.append("endDT=" + end_str)
-        param_parts_current.append("parameterCd=" + param_code_to_try)
-        param_parts_current.append("siteStatus=all")
-        param_string_current = "&".join(param_parts_current)
-        full_url_current = url + "?" + param_string_current
-
-        print("Fetching current USGS data from: " + full_url_current)
-
-        resp_current = http.get(full_url_current, ttl_seconds = CACHE_TTL_SECONDS)
-        if resp_current.status_code != 200:
-            print("Error fetching current USGS data: " + str(resp_current.status_code))
-            continue
-
-        usgs_data_current = resp_current.json()
-
-        if not usgs_data_current.get("value") or not usgs_data_current["value"].get("timeSeries"):
-            print("No current time series data found for parameter " + param_code_to_try)
-            continue
-
-        time_series_current = usgs_data_current["value"]["timeSeries"][0]
-        site_info = time_series_current["sourceInfo"]
-        values_current = time_series_current["values"][0]["value"]
-
-        if not values_current:
-            print("No current values found in time series for parameter " + param_code_to_try)
+        if not processed_values:
+            print("No valid values found for parameter " + param_code_to_try)
             continue
 
         print("Found data with parameter code: " + param_code_to_try)
 
-        # Process the 30-day values for high/low
-        processed_values_30d = []
-        for value in values_30d:
-            val_str = value.get("value", "")
-            if val_str and val_str != "":
-                processed_values_30d.append(float(val_str))
+        high_30d = max(processed_values)
+        low_30d = min(processed_values)
+        current_value = processed_values[len(processed_values) - 1]
 
-        # Process current values
-        processed_values_current = []
-        for value in values_current[-10:]:  # Last 10 readings
-            val_str = value.get("value", "")
-            if val_str and val_str != "":
-                processed_values_current.append(float(val_str))
+        recent_values = processed_values
+        if len(processed_values) > 10:
+            recent_values = processed_values[len(processed_values) - 10:]
 
-        if not processed_values_current:
-            print("No valid current values found for parameter " + param_code_to_try)
-            continue
-
-        # Calculate 30-day high and low
-        high_30d = None
-        low_30d = None
-        if processed_values_30d:
-            high_30d = max(processed_values_30d)
-            low_30d = min(processed_values_30d)
-
-        # Calculate trend from current data
         trend = "Unknown"
-        if len(processed_values_current) >= 6:
-            recent_vals = processed_values_current[-3:]
-            older_vals = processed_values_current[:3]
+        if len(recent_values) >= 6:
+            recent_vals = recent_values[len(recent_values) - 3:]
+            older_vals = recent_values[:3]
 
-            # Calculate averages manually since sum() isn't available
             recent_total = 0
             for val in recent_vals:
                 recent_total = recent_total + val
@@ -253,30 +216,22 @@ def fetch_usgs_data(site_id, water_body_type, param_code):
             else:
                 trend = "Stable"
 
-        # Get parameter description for display
-        param_description = get_param_description(param_code_to_try)
-
-        # Convert temperature from Celsius to Fahrenheit if it's temperature data
-        current_value = processed_values_current[-1] if processed_values_current else 0
-        if param_code_to_try == "00010":  # Water temperature
-            current_value = (current_value * 9 / 5) + 32  # Convert C to F
-            if high_30d != None:
-                high_30d = (high_30d * 9 / 5) + 32
-            if low_30d != None:
-                low_30d = (low_30d * 9 / 5) + 32
+        if param_code_to_try == "00010":
+            current_value = (current_value * 9 / 5) + 32
+            high_30d = (high_30d * 9 / 5) + 32
+            low_30d = (low_30d * 9 / 5) + 32
 
         return {
-            "site_name": site_info["siteName"],
-            "values": processed_values_current,
+            "site_name": site_name if site_name else site_id,
+            "values": recent_values,
             "current_value": current_value,
             "high_30d": high_30d,
             "low_30d": low_30d,
             "trend": trend,
             "units": get_param_units(param_code_to_try),
-            "param_description": param_description,
+            "param_description": get_param_description(param_code_to_try),
         }
 
-    # If we get here, no parameter codes worked
     print("No data found for any parameter codes")
     return None
 
@@ -287,6 +242,9 @@ def get_param_description(param_code):
         "00010": "Water Temp",
         "00095": "Conductance",
         "00065": "Gage Height",
+        "00060": "Flow Rate",
+        "72255": "Velocity",
+        "00048": "Gas Saturation",
         "00062": "Lake Level",
         "62610": "Lake Level",
         "62611": "Lake Level",
@@ -299,6 +257,9 @@ def get_param_units(param_code):
         "00010": "°F",  # Temperature in Fahrenheit
         "00095": "μS/cm",
         "00065": "ft",  # Gage height in feet
+        "00060": "cfs",  # Discharge in cubic feet per second
+        "72255": "ft/s",  # Mean water velocity
+        "00048": "%",  # Dissolved gas saturation
         "00062": "ft",  # Lake elevation in feet
         "62610": "ft",  # Lake elevation NGVD 1929 in feet
         "62611": "ft",  # Lake elevation NAVD 1988 in feet
@@ -312,6 +273,9 @@ def get_param_icon(param_description):
         "Water Temp": "🌡️",
         "Conductance": "⚡",
         "Gage Height": "📏",
+        "Flow Rate": "💨",
+        "Velocity": "🏃",
+        "Gas Saturation": "🫧",
         "Lake Level": "🌊",
         "Daily Level": "📊",
     }
@@ -460,6 +424,45 @@ def get_trend_color(trend):
     else:
         return "#FFD93D"  # Yellow
 
+def get_lake_param_options():
+    return [
+        schema.Option(display = "Auto (tries multiple)", value = "auto"),
+        schema.Option(display = "Daily Lake Level", value = "62614"),
+        schema.Option(display = "Lake/Reservoir Elevation", value = "00062"),
+        schema.Option(display = "Lake Elevation - NGVD 1929", value = "62610"),
+        schema.Option(display = "Lake Elevation - NAVD 1988", value = "62611"),
+        schema.Option(display = "Water Temperature", value = "00010"),
+        schema.Option(display = "Specific Conductance", value = "00095"),
+    ]
+
+def get_river_param_options():
+    return [
+        schema.Option(display = "Auto (tries multiple)", value = "auto"),
+        schema.Option(display = "Gage Height", value = "00065"),
+        schema.Option(display = "Discharge (Flow)", value = "00060"),
+        schema.Option(display = "Water Velocity", value = "72255"),
+        schema.Option(display = "Dissolved Gas Saturation", value = "00048"),
+        schema.Option(display = "Water Temperature", value = "00010"),
+        schema.Option(display = "Specific Conductance", value = "00095"),
+    ]
+
+def param_options_for_water_body(water_body_type):
+    if water_body_type == "1":
+        options = get_river_param_options()
+    else:
+        options = get_lake_param_options()
+
+    return [
+        schema.Dropdown(
+            id = "param_code",
+            name = "Data Parameter",
+            desc = "Choose what type of data to display",
+            icon = "ruler",
+            default = "auto",
+            options = options,
+        ),
+    ]
+
 def get_schema():
     # Configuration schema for the app
     return schema.Schema(
@@ -468,9 +471,16 @@ def get_schema():
             schema.Text(
                 id = "site_id",
                 name = "USGS Site ID",
-                desc = "Enter the USGS site ID for your local water body",
+                desc = "Enter the USGS site ID (e.g. 04294500 or USGS-04294500)",
                 icon = "water",
                 default = DEFAULT_SITE_ID,
+            ),
+            schema.Text(
+                id = "display_name",
+                name = "Custom Display Name",
+                desc = "Leave blank to use USGS defined name",
+                icon = "user",
+                default = "",
             ),
             schema.Dropdown(
                 id = "water_body_type",
@@ -483,22 +493,10 @@ def get_schema():
                     schema.Option(display = "River/Stream", value = "1"),
                 ],
             ),
-            schema.Dropdown(
+            schema.Generated(
                 id = "param_code",
-                name = "Data Parameter",
-                desc = "Choose what type of data to display",
-                icon = "ruler",
-                default = "00010",
-                options = [
-                    schema.Option(display = "Auto (tries multiple)", value = "auto"),
-                    schema.Option(display = "Daily Lake Level", value = "62614"),
-                    schema.Option(display = "Water Temperature", value = "00010"),
-                    schema.Option(display = "Specific Conductance", value = "00095"),
-                    schema.Option(display = "Lake Elevation - NGVD 1929", value = "62610"),
-                    schema.Option(display = "Lake Elevation - NAVD 1988", value = "62611"),
-                    schema.Option(display = "Lake/Reservoir Elevation", value = "00062"),
-                    schema.Option(display = "River/Stream Gage Height", value = "00065"),
-                ],
+                source = "water_body_type",
+                handler = param_options_for_water_body,
             ),
         ],
     )

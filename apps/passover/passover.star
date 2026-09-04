@@ -5,8 +5,17 @@ Description: Shows countdown to Passover or which day of the 8-day celebration i
 Author: jvivona
 """
 
-load("render.star", "render")
+load("images/cup.png", CUP = "file")
+load("images/star.png", STAR = "file")
+load("render.star", "canvas", "render")
 load("time.star", "time")
+
+# 2x (128x64) adds a Star of David + Kiddush cup and an expanded date line;
+# 1x (64x32) is unchanged.
+IS2X = canvas.is2x()
+
+STAR_IMG = STAR.readall()
+CUP_IMG = CUP.readall()
 
 PASSOVER_DATES = [
     {"year": 2026, "start": "2026-04-01", "end": "2026-04-08"},
@@ -24,6 +33,7 @@ PASSOVER_DATES = [
 
 # Hebrew text for Passover
 PASSOVER_HEBREW = "פסח"
+CHAG_SAMEACH = "חג שמח"
 
 def main():
     now = time.now().in_location(time.tz())
@@ -53,6 +63,40 @@ def main():
     else:
         return render_default()
 
+# --- 2x sprite helpers -------------------------------------------------------
+
+def top_row_2x(with_cup):
+    """Star of David + Hebrew word, optionally flanked by the Kiddush cup."""
+    children = [
+        render.Image(src = STAR_IMG),
+        render.Box(width = 5, height = 1),
+        render.Text(content = PASSOVER_HEBREW, font = "6x13", color = "#FFD700"),
+    ]
+    if with_cup:
+        children.append(render.Box(width = 5, height = 1))
+        children.append(render.Image(src = CUP_IMG))
+    return render.Row(
+        main_align = "center",
+        cross_align = "center",
+        children = children,
+    )
+
+def frame_2x(children):
+    return render.Root(
+        child = render.Box(
+            width = 128,
+            height = 64,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = children,
+            ),
+        ),
+    )
+
+# --- During Passover ---------------------------------------------------------
+
 def render_during_passover(passover, now, timezone):
     """Render display during Passover showing which day it is"""
     start_time = time.parse_time(passover["start"] + "T00:00:00Z").in_location(timezone)
@@ -74,6 +118,22 @@ def render_during_passover(passover, now, timezone):
     ]
 
     day_name = day_names[day_of_passover - 1]
+
+    if IS2X:
+        return frame_2x([
+            top_row_2x(True),
+            render.Text(content = CHAG_SAMEACH, font = "6x13", color = "#87CEEB"),
+            render.Text(content = day_name, font = "5x8", color = "#FFFFFF"),
+            render.Row(
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.Text(content = "Day ", font = "tb-8", color = "#98D8C8"),
+                    render.Text(content = str(day_of_passover), font = "tb-8", color = "#FFD700"),
+                    render.Text(content = " of 8", font = "tb-8", color = "#98D8C8"),
+                ],
+            ),
+        ])
 
     return render.Root(
         child = render.Box(
@@ -139,6 +199,8 @@ def render_during_passover(passover, now, timezone):
         ),
     )
 
+# --- Countdown ---------------------------------------------------------------
+
 def render_countdown(passover, now, timezone):
     """Render countdown to next Passover"""
     start_time = time.parse_time(passover["start"] + "T00:00:00Z").in_location(timezone)
@@ -146,6 +208,29 @@ def render_countdown(passover, now, timezone):
     # Calculate time until Passover
     time_until = start_time - now
     days_until = int(time_until.hours / 24)
+
+    if IS2X:
+        # Parse at noon UTC so the displayed calendar date never shifts a day
+        # under a negative UTC offset (e.g. America/New_York).
+        start_disp = time.parse_time(passover["start"] + "T12:00:00Z").in_location(timezone)
+        return frame_2x([
+            top_row_2x(True),
+            render.Row(
+                cross_align = "center",
+                children = [
+                    render.Text(content = str(days_until), font = "6x13", color = "#FFD700"),
+                    render.Text(content = " days", font = "6x13", color = "#FFFFFF"),
+                ],
+            ),
+            render.Column(
+                cross_align = "center",
+                children = [
+                    render.Text(content = start_disp.format("Monday"), font = "5x8", color = "#FFFFFF"),
+                    render.Text(content = start_disp.format("January 2"), font = "tom-thumb", color = "#FFFFFF"),
+                    render.Text(content = str(passover["year"]), font = "tom-thumb", color = "#98D8C8"),
+                ],
+            ),
+        ])
 
     return render.Root(
         child = render.Box(
@@ -206,8 +291,16 @@ def render_countdown(passover, now, timezone):
         ),
     )
 
+# --- Default -----------------------------------------------------------------
+
 def render_default():
     """Default render if no Passover data available"""
+    if IS2X:
+        return frame_2x([
+            top_row_2x(True),
+            render.Text(content = "Passover", font = "6x13", color = "#FFFFFF"),
+        ])
+
     return render.Root(
         child = render.Box(
             child = render.Column(

@@ -11,7 +11,7 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
-ADDS_URL = "https://aviationweather.gov/api/data/metar?ids=%s&format=json&hoursBeforeNow=2"
+ADDS_URL = "https://aviationweather.gov/api/data/metar?ids=%s&format=json&hours=2"
 DEFAULT_AIRPORT = "KJFK, KLGA, KBOS, KDCA"
 
 # encryption, schema
@@ -19,6 +19,13 @@ DEFAULT_AIRPORT = "KJFK, KLGA, KBOS, KDCA"
 # play with fonts
 
 MAX_AGE = 60 * 10
+
+def normalize_airport(airport):
+    # Users often enter 3-letter US airport codes (e.g. JFK); prepend
+    # the US ICAO prefix "K" so lookups work without it.
+    if len(airport) == 3:
+        return "K" + airport
+    return airport
 
 def decoded_result_for_airport(airport):
     rep = http.get(ADDS_URL % airport, ttl_seconds = 60)
@@ -303,7 +310,7 @@ def get_schema():
             schema.Text(
                 id = "icao",
                 name = "Airport(s)",
-                desc = "Comma-separated list of ICAO airport codes. Use just one for METAR text.",
+                desc = "Comma-separated list of ICAO airport codes. Use just one for METAR text. 3-letter US codes (e.g. JFK) are automatically prefixed with K.",
                 icon = "plane",
             ),
             schema.Toggle(
@@ -319,7 +326,7 @@ def get_schema():
 def main(config):
     airports = config.get("icao") or DEFAULT_AIRPORT
     airports = airports.upper()
-    airports = [a.strip() for a in airports.split(",")]
+    airports = [normalize_airport(a.strip()) for a in airports.split(",")]
     if len(airports) == 1:
         return render_single_airport(config, airports[0])
     elif len(airports) <= 4:

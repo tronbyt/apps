@@ -51,8 +51,8 @@ def get_params(config):
 
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    params["lat"] = loc["lat"]
-    params["lng"] = loc["lng"]
+    params["lat"] = str(loc["lat"])
+    params["lng"] = str(loc["lng"])
     params["tz"] = loc["timezone"] if time.is_valid_timezone(loc["timezone"]) else DEFAULT_LOCATION["timezone"]
 
     params["dist"] = config.get("distance") or DEFAULT_DISTANCE

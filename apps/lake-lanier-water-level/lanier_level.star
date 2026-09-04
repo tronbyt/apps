@@ -1,218 +1,283 @@
+"""
+Applet: Lake Lanier Level
+Summary: Lake Lanier water levels
+Description: Live Lake Lanier water level relative to full pool, with alert-zone colors, trend, water temp, and a scrolling ticker.
+Author: jspeigner
+"""
+
+load("encoding/json.star", "json")
 load("http.star", "http")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
-WATER_LEVEL_API = "https://attrhlvatssgurlriewu.supabase.co/functions/v1/water-level-api"
+# ── API ──────────────────────────────────────────────────────────────
+API_BASE = "https://attrhlvatssgurlriewu.supabase.co/functions/v1/water-level-api"
 
-# Display mode: "A" for Simple Stats, "B" for Mini Chart, "alternate" to switch between modes
-# This is used as a fallback when schema config is not available
-DISPLAY_MODE = "alternate"
+# Public anon key — safe to embed in client apps per the Lanier Level docs.
+# Row Level Security enforces read-only public access.
+ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0dHJobHZhdHNzZ3VybHJpZXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0Mjk3NDgsImV4cCI6MjA3MzAwNTc0OH0._CZ809RYQ9AVbovN6-bv-SH762FIopprd0dqkftFhT8"
 
-def get_color(feet_above_full):
-    """Returns color based on feet above full pool level"""
-    if feet_above_full >= -1:
-        return "#00FF00"  # Green - Near or above full
-    elif feet_above_full >= -3:
-        return "#FFFF00"  # Yellow - Slightly below
-    elif feet_above_full >= -5:
-        return "#FFA500"  # Orange - Moderately below
-    else:
-        return "#FF0000"  # Red - Significantly below
+# API refreshes hourly; cache 10 min to play nice with the app cycle.
+CACHE_TTL = 600
+DEFAULT_TIMEZONE = "America/New_York"
 
-def get_trend_icon(trend):
-    """Returns icon character based on trend direction"""
+# ── Palette ──────────────────────────────────────────────────────────
+WATER_DARK = "#3F4F2C"
+COLOR_DIM = "#444444"
+COLOR_MIDDIM = "#666666"
+COLOR_CYAN = "#33CCDD"
+COLOR_YELLOW = "#FFCC33"
+COLOR_WHITE = "#EEEEEE"
+COLOR_GREEN = "#3DDD66"
+COLOR_RED = "#FF3344"
+COLOR_AMBER = "#FF9933"
+COLOR_BLUE = "#3399EE"
+COLOR_BLACK = "#000000"
+
+# ── Geometry ─────────────────────────────────────────────────────────
+WAVE_FRAMES = 8  # frames in the wave loop (~0.8 s @ 100 ms)
+WAVE_TOP = 14  # first row of the water window
+BOTTOM_BAND_Y = 23  # first row of the divider/ticker/zone band
+
+# ── Data fetch ───────────────────────────────────────────────────────
+def fetch_latest():
+    resp = http.get(
+        API_BASE + "?endpoint=latest",
+        headers = {
+            "apikey": ANON_KEY,
+            "Authorization": "Bearer " + ANON_KEY,
+        },
+        ttl_seconds = CACHE_TTL,
+    )
+    if resp.status_code != 200:
+        return None
+    body = resp.json()
+    if not body or not body.get("data"):
+        return None
+    return body["data"]
+
+# ── Helpers ──────────────────────────────────────────────────────────
+def zone_color(diff):
+    if diff > 0:
+        return COLOR_BLUE  # above full pool
+    if diff > -1:
+        return COLOR_GREEN  # within 1 ft
+    if diff > -3:
+        return COLOR_YELLOW  # 1–3 ft below
+    if diff > -6:
+        return COLOR_AMBER  # 3–6 ft below
+    return COLOR_RED  # > 6 ft below
+
+def trend_color(trend):
     if trend == "up":
-        return "↑"
-    elif trend == "down":
-        return "↓"
+        return COLOR_GREEN
+    return COLOR_RED
+
+def fmt_diff(v):
+    neg = v < 0
+    abs_v = -v if neg else v
+    whole = int(abs_v)
+    frac = int(abs_v * 100 + 0.5) % 100
+    frac_str = "%d" % frac
+    if len(frac_str) < 2:
+        frac_str = "0" + frac_str
+    if neg:
+        return "-%d.%s" % (whole, frac_str)
+    return "+%d.%s" % (whole, frac_str)
+
+def get_timezone(config):
+    loc = config.get("location")
+    if loc:
+        return json.decode(loc)["timezone"]
+    return DEFAULT_TIMEZONE
+
+def fmt_time(iso, timezone):
+    if not iso:
+        return "--"
+    t = time.parse_time(iso)
+    return t.in_location(timezone).format("3:04PM").replace("AM", "A").replace("PM", "P")
+
+# ── Wave layer ───────────────────────────────────────────────────────
+def wave_column(x, t, accent):
+    """One 1×9 column: transparent sky on top, accent surface pixel, dark body."""
+    wave = math.sin(x * 0.35 + t * 1.6) * 1.1 + math.sin(x * 0.18 - t * 1.0) * 0.6
+    surf = int(2.0 + wave + 0.5)
+    if surf < 0:
+        surf = 0
+    if surf > 8:
+        surf = 8
+    body = 9 - surf
+
+    parts = []
+    if surf > 0:
+        parts.append(render.Box(width = 1, height = surf))  # transparent
+    parts.append(render.Box(width = 1, height = 1, color = accent))
+    if body > 1:
+        parts.append(render.Box(width = 1, height = body - 1, color = WATER_DARK))
+    return render.Column(children = parts)
+
+def wave_frame(t, accent):
+    return render.Row(children = [wave_column(x, t, accent) for x in range(64)])
+
+# ── Zone bar (bottom row, 1px tall) ──────────────────────────────────
+def zone_bar():
+    cells = []
+    for x in range(64):
+        frac = float(x) / 63.0
+        if frac < 0.15:
+            c = "#552222"
+        elif frac < 0.50:
+            c = "#553311"
+        elif frac < 0.85:
+            c = "#225522"
+        else:
+            c = "#223355"
+        cells.append(render.Box(width = 1, height = 1, color = c))
+    return render.Row(children = cells)
+
+# ── Dotted divider row ───────────────────────────────────────────────
+def dotted_divider():
+    cells = []
+    for x in range(64):
+        c = COLOR_DIM if x % 2 == 0 else COLOR_BLACK
+        cells.append(render.Box(width = 1, height = 1, color = c))
+    return render.Row(children = cells)
+
+# ── Main ─────────────────────────────────────────────────────────────
+def main(config):
+    data = fetch_latest()
+    if not data:
+        return []
+
+    animate = config.bool("animate", True)
+    show_ticker = config.bool("show_ticker", True)
+
+    diff = float(data.get("feet_above_full") or 0.0)
+    trend = data.get("trend") or "down"
+    temp_raw = data.get("water_temp_f")
+    updated_iso = data.get("usgs_timestamp") or data.get("created_at") or ""
+    timezone = get_timezone(config)
+
+    accent = zone_color(diff)
+    tc = trend_color(trend)
+    diff_str = fmt_diff(diff)
+    temp_str = ("%dF" % int(temp_raw + 0.5)) if temp_raw != None else ""
+    updated = fmt_time(updated_iso, timezone)
+
+    # ── Water (positioned at row 14); optional ripple ────────────────
+    if animate:
+        water_child = render.Animation(children = [
+            wave_frame(f * 0.18, accent)
+            for f in range(WAVE_FRAMES)
+        ])
     else:
-        return "→"
+        water_child = wave_frame(0, accent)
+    water_layer = render.Padding(pad = (0, WAVE_TOP, 0, 0), child = water_child)
 
-def format_float(value, decimals):
-    """Format a float to a string with specified decimal places"""
+    # ── Header (rows 0-4): LANIER · temp ─────────────────────────────
+    header = render.Row(
+        expanded = True,
+        main_align = "space_between",
+        cross_align = "start",
+        children = [
+            render.Text("LANIER", font = "CG-pixel-3x5-mono", color = COLOR_CYAN),
+            render.Text(temp_str, font = "CG-pixel-3x5-mono", color = COLOR_YELLOW),
+        ],
+    )
 
-    # Convert to float and then to string
-    fval = float(value)
-    str_val = str(fval)
-    parts = str_val.split(".")
-
-    if len(parts) == 1:
-        # No decimal point, add zeros
-        result = parts[0] + "."
-        for _ in range(decimals):
-            result = result + "0"
-        return result
-    else:
-        # Has decimal point, pad or truncate
-        decimal_part = parts[1]
-        if len(decimal_part) < decimals:
-            # Pad with zeros
-            for _ in range(decimals - len(decimal_part)):
-                decimal_part = decimal_part + "0"
-        elif len(decimal_part) > decimals:
-            # Truncate (simple truncation, not rounding)
-            decimal_part = decimal_part[:decimals]
-        return parts[0] + "." + decimal_part
-
-def get_schema():
-    """Returns schema for Tidbyt App Store submission"""
-    return schema.Schema(
-        version = "1",
-        fields = [
-            schema.Toggle(
-                id = "show_chart",
-                name = "Show Chart",
-                desc = "Show 7-day history chart",
-                icon = "chartLine",
-                default = False,
+    # ── Hero row (rows 7-13): -5.28 FT centered ──────────────────────
+    hero = render.Row(
+        expanded = True,
+        main_align = "center",
+        cross_align = "end",
+        children = [
+            render.Text(diff_str, font = "tb-8", color = tc),
+            render.Box(width = 2, height = 1),
+            render.Padding(
+                pad = (0, 0, 0, 1),
+                child = render.Text("FT", font = "CG-pixel-3x5-mono", color = COLOR_MIDDIM),
             ),
         ],
     )
 
-def mode_a_simple_stats(_level, feet_above, trend):
-    """Mode A - Simple Stats Display"""
-    feet_above_str = format_float(feet_above, 1) + " ft from full"
-    return render.Root(
-        child = render.Column(
-            children = [
-                render.Text("Lake Lanier", color = "#4A90A4", font = "tb-8"),
-                render.Text(feet_above_str, color = get_color(feet_above), font = "6x13"),
-                render.Row(children = [
-                    render.Text(get_trend_icon(trend), color = "#888"),
-                ]),
-            ],
-        ),
-    )
+    text_overlay = render.Column(children = [
+        header,
+        render.Box(width = 64, height = 1),
+        hero,
+    ])
 
-def mode_b_mini_chart(_level, trend, history_data):
-    """Mode B - Mini Chart Display with 7-day history"""
+    # ── Bottom band (rows 23-31): divider · ticker · zone bar ────────
+    ticker_pieces = ["LAKE LANIER", " " + diff_str + " FT FROM FULL"]
+    if temp_str:
+        ticker_pieces.append(" WATER " + temp_str)
+    ticker_pieces.append(" UPDATED " + updated)
+    ticker_text = "  ·  ".join(ticker_pieces) + "  ·  "
 
-    # Prepare data points for the chart
-    data_points = []
-    if len(history_data) > 0:
-        # Create data points: (x_index, y_value)
-        for i, record in enumerate(history_data):
-            height = float(record["gage_height"])
-            data_points.append((i, height))
-
-    # Get color based on current level
-    current_feet_above = float(history_data[-1]["feet_above_full"]) if len(history_data) > 0 else 0.0
-    chart_color = get_color(current_feet_above)
-
-    # Build chart display
-    chart_widget = render.Text("No data", color = "#888")
-    if len(data_points) > 0:
-        heights = [float(d["gage_height"]) for d in history_data]
-        chart_widget = render.Plot(
-            data = data_points,
+    if show_ticker:
+        ticker_row = render.Marquee(
             width = 64,
-            height = 16,
-            color = chart_color,
-            y_lim = (min(heights), max(heights)),
+            child = render.Text(
+                ticker_text,
+                font = "CG-pixel-3x5-mono",
+                color = COLOR_WHITE,
+            ),
+        )
+    else:
+        ticker_row = render.Row(
+            expanded = True,
+            main_align = "center",
+            children = [
+                render.Text(
+                    "UPDATED " + updated,
+                    font = "CG-pixel-3x5-mono",
+                    color = COLOR_WHITE,
+                ),
+            ],
         )
 
-    # Display feet from full
-    feet_above_str = format_float(current_feet_above, 1) + " ft from full"
-    return render.Root(
-        child = render.Column(
-            children = [
-                # Top: Feet from full + trend
-                render.Row(children = [
-                    render.Text(feet_above_str, color = get_color(current_feet_above), font = "6x13"),
-                    render.Text(" " + get_trend_icon(trend), color = "#888"),
-                ]),
-                # Bottom: 7-day historical chart
-                chart_widget,
-            ],
-        ),
+    bottom = render.Column(children = [
+        render.Box(width = 64, height = BOTTOM_BAND_Y),  # transparent spacer
+        dotted_divider(),
+        render.Box(width = 64, height = 1),
+        ticker_row,
+        render.Box(width = 64, height = 1),
+        zone_bar(),
+    ])
+
+    stack = render.Stack(children = [
+        water_layer,
+        text_overlay,
+        bottom,
+    ])
+    if animate or show_ticker:
+        return render.Root(delay = 100, child = stack)
+    return render.Root(child = stack)
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Location(
+                id = "location",
+                name = "Location",
+                desc = "Timezone used for the last-update time in the ticker.",
+                icon = "locationDot",
+            ),
+            schema.Toggle(
+                id = "animate",
+                name = "Animate waves",
+                desc = "Ripple the water surface. Turn off for a static display.",
+                icon = "water",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "show_ticker",
+                name = "Scrolling ticker",
+                desc = "Scroll extra status text. Off shows only the last-update time.",
+                icon = "textWidth",
+                default = True,
+            ),
+        ],
     )
-
-def main(config = None):
-    # Determine which mode to display
-    # Priority: 1) Schema config (show_chart), 2) config parameter, 3) DISPLAY_MODE constant
-    current_mode = DISPLAY_MODE
-    use_chart = False
-
-    # Check schema config first (for Tidbyt App Store)
-    if config != None:
-        if config.get("show_chart") != None:
-            # Schema config takes priority
-            use_chart = config.get("show_chart")
-        elif config.get("mode") != None:
-            # Fallback to mode parameter for direct usage
-            current_mode = config.get("mode")
-
-    # If schema config is set, use it; otherwise use current_mode
-    if config != None and config.get("show_chart") != None:
-        # Schema config mode
-        if not use_chart:
-            # Simple stats mode
-            rep = http.get(WATER_LEVEL_API + "?endpoint=latest")
-            if rep.status_code != 200:
-                return render.Root(child = render.Text("API Error"))
-            latest_data = rep.json()["data"]
-            return mode_a_simple_stats(
-                latest_data["gage_height"],
-                latest_data["feet_above_full"],
-                latest_data["trend"],
-            )
-        else:
-            # Chart mode
-            rep = http.get(WATER_LEVEL_API + "?endpoint=latest")
-            if rep.status_code != 200:
-                return render.Root(child = render.Text("API Error"))
-            latest_data = rep.json()["data"]
-
-            history_rep = http.get(WATER_LEVEL_API + "?endpoint=history&days=7&limit=100")
-            if history_rep.status_code != 200:
-                return mode_a_simple_stats(
-                    latest_data["gage_height"],
-                    latest_data["feet_above_full"],
-                    latest_data["trend"],
-                )
-
-            history_json = history_rep.json()
-            history_data = history_json.get("data", [])
-            return mode_b_mini_chart(
-                latest_data["gage_height"],
-                latest_data["trend"],
-                history_data,
-            )
-
-    # Legacy mode handling (for direct usage without schema)
-    # Fetch latest water level data
-    rep = http.get(WATER_LEVEL_API + "?endpoint=latest")
-    if rep.status_code != 200:
-        return render.Root(child = render.Text("API Error"))
-
-    latest_data = rep.json()["data"]
-    level = latest_data["gage_height"]
-    feet_above = latest_data["feet_above_full"]
-    trend = latest_data["trend"]
-
-    # If Mode A, return simple stats
-    if current_mode == "A":
-        return mode_a_simple_stats(level, feet_above, trend)
-
-    # If Mode B or alternate, fetch historical data and show chart
-    if current_mode == "B" or current_mode == "alternate":
-        history_rep = http.get(WATER_LEVEL_API + "?endpoint=history&days=7&limit=100")
-        if history_rep.status_code != 200:
-            # Fallback to Mode A if history fetch fails
-            return mode_a_simple_stats(level, feet_above, trend)
-
-        history_json = history_rep.json()
-        history_data = history_json.get("data", [])
-
-        # For alternate mode, switch based on whether we have enough data points
-        if current_mode == "alternate":
-            # Simple alternation: use chart if we have data, otherwise use stats
-            if len(history_data) >= 7:
-                return mode_b_mini_chart(level, trend, history_data)
-            else:
-                return mode_a_simple_stats(level, feet_above, trend)
-
-        return mode_b_mini_chart(level, trend, history_data)
-
-    # Default to Mode A
-    return mode_a_simple_stats(level, feet_above, trend)

@@ -1,0 +1,17 @@
+---
+id: nasa-apod
+name: NASA APOD
+summary: NASA's daily space picture
+desc: NASA's Astronomy Picture of the Day, edge to edge, with the title on a translucent strip you can turn off. Works with zero setup on NASA's shared DEMO_KEY; paste your own free api.nasa.gov key if you run several devices. Video days show the video's thumbnail when NASA provides one and a starfield title card when it doesn't. On a server that has never fetched a picture the first render draws a starfield card instead of going near the network, and the picture arrives on the next refresh. A picture that isn't today's always carries its date.
+author: nsluke
+fileName: apod.star
+packageName: apod
+recommendedInterval: 240
+category: science
+tags:
+  - space
+  - nasa
+  - science
+  - art
+published: '2026-09-02T23:17:52Z'
+updated: '2026-09-03T05:14:01Z'
