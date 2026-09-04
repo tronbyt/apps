@@ -7,7 +7,7 @@ Author: mabroadfo1027
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -78,6 +78,7 @@ MAGNIFY_LOGO = """
 
 def main(config):
     renderCategory = []
+    gameData = []
     selectedTeam = config.get("selectedTeam", "all")
     displayType = config.get("displayType", "colors")
     pregameDisplay = config.get("pregameDisplay", "record")
@@ -221,6 +222,25 @@ def main(config):
                     else:
                         homeScoreColor = "#fff"
                         awayScoreColor = "#fff"
+
+            gameData.append({
+                "home": home,
+                "away": away,
+                "homeTeamName": homeTeamName,
+                "awayTeamName": awayTeamName,
+                "homeColor": homeColor,
+                "awayColor": awayColor,
+                "homeLogo": homeLogo,
+                "awayLogo": awayLogo,
+                "homeLogoSize": homeLogoSize,
+                "awayLogoSize": awayLogoSize,
+                "homeScore": homeScore,
+                "awayScore": awayScore,
+                "homeScoreColor": homeScoreColor,
+                "awayScoreColor": awayScoreColor,
+                "gameTime": gameTime,
+                "scoreFont": scoreFont,
+            })
 
             if displayType == "retro":
                 retroTextColor = "#ffe065"
@@ -487,6 +507,9 @@ def main(config):
                         ),
                     ],
                 )
+
+        if is_square():
+            return get_square_root(gameData, displayType, displayTop, now, rotationSpeed, timeColor)
 
         return render.Root(
             delay = int(rotationSpeed) * 1000,
@@ -931,3 +954,185 @@ def get_cachable_data(url, ttl_seconds = CACHE_TTL_SECONDS):
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
     return res.body()
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def get_square_root(games, displayType, displayTop, now, rotationSpeed, timeColor):
+    if displayType == "retro":
+        textColor = "#ffe065"
+        borderColor = "#000"
+    elif displayType == "stadium":
+        textColor = "#fff"
+        borderColor = "#345252"
+    else:
+        textColor = "#fff"
+        borderColor = "#000"
+    squareScreens = []
+    for j in range(0, len(games), 2):
+        topGame = games[j]
+        frameChildren = [
+            render.Row(
+                expanded = True,
+                main_align = "space_between",
+                cross_align = "start",
+                children = get_date_column(displayTop, now, j // 2, rotationSpeed, textColor, borderColor, displayType, topGame["gameTime"], timeColor),
+            ),
+        ]
+        if j + 1 < len(games):
+            bottomGame = games[j + 1]
+            frameChildren.append(get_square_card(topGame, displayType))
+            frameChildren.extend(get_date_column("gameinfo", now, j // 2, rotationSpeed, textColor, borderColor, displayType, bottomGame["gameTime"], timeColor))
+            frameChildren.append(get_square_card(bottomGame, displayType))
+        else:
+            frameChildren.extend(get_square_detail(topGame, displayType, textColor))
+        squareScreens.append(render.Column(children = frameChildren))
+    return render.Root(
+        delay = int(rotationSpeed) * 1000,
+        show_full_animation = True,
+        child = render.Column(
+            children = [
+                render.Animation(
+                    children = squareScreens,
+                ),
+            ],
+        ),
+    )
+
+def get_square_card(game, displayType):
+    scoreFont = game["scoreFont"]
+    if displayType == "retro":
+        retroTextColor = "#ffe065"
+        retroFont = "CG-pixel-3x5-mono"
+        return render.Column(
+            children = [
+                render.Box(width = 64, height = 12, color = game["homeColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Box(width = 40, height = 12, child = render.Text(content = get_team_name(game["homeTeamName"]), color = retroTextColor, font = retroFont)),
+                    render.Box(width = 26, height = 12, child = render.Text(content = get_record(game["homeScore"]), color = retroTextColor, font = retroFont)),
+                ])),
+                render.Box(width = 64, height = 12, color = game["awayColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Box(width = 40, height = 12, child = render.Text(content = get_team_name(game["awayTeamName"]), color = retroTextColor, font = retroFont)),
+                    render.Box(width = 26, height = 12, child = render.Text(content = get_record(game["awayScore"]), color = retroTextColor, font = retroFont)),
+                ])),
+            ],
+        )
+    elif displayType == "stadium":
+        backgroundColor = "#0f3027"
+        borderColor = "#345252"
+        textFont = "tb-8"
+        return render.Column(
+            children = [
+                render.Box(width = 64, height = 12, color = borderColor, child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Box(width = 1, height = 10, color = borderColor),
+                    render.Box(width = 31, height = 10, child = render.Box(width = 29, height = 10, color = backgroundColor, child = render.Text(content = game["home"][:3].upper(), color = game["homeScoreColor"], font = textFont))),
+                    render.Box(width = 31, height = 10, child = render.Box(width = 29, height = 10, color = backgroundColor, child = render.Text(content = get_record(game["homeScore"]), color = game["homeScoreColor"], font = scoreFont))),
+                    render.Box(width = 1, height = 10, color = borderColor),
+                ])),
+                render.Box(width = 64, height = 1, color = borderColor),
+                render.Box(width = 64, height = 10, color = borderColor, child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Box(width = 1, height = 10, color = borderColor),
+                    render.Box(width = 31, height = 10, child = render.Box(width = 29, height = 10, color = backgroundColor, child = render.Text(content = game["away"][:3].upper(), color = game["awayScoreColor"], font = textFont))),
+                    render.Box(width = 31, height = 10, child = render.Box(width = 29, height = 10, color = backgroundColor, child = render.Text(content = get_record(game["awayScore"]), color = game["awayScoreColor"], font = scoreFont))),
+                    render.Box(width = 1, height = 10, color = borderColor),
+                ])),
+                render.Box(width = 64, height = 1, color = borderColor),
+            ],
+        )
+    elif displayType == "horizontal":
+        return render.Row(
+            children = [
+                render.Box(width = 32, height = 24, color = game["homeColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Column(expanded = True, main_align = "start", cross_align = "center", children = [
+                        render.Stack(children = [
+                            render.Box(width = 32, height = 24, child = render.Image(game["homeLogo"], width = 32, height = 32)),
+                            render.Column(expanded = True, main_align = "start", cross_align = "center", children = [
+                                render.Box(width = 32, height = 16),
+                                render.Box(width = 32, height = 8, color = "#000a", child = render.Text(content = game["homeScore"], color = game["homeScoreColor"], font = scoreFont)),
+                            ]),
+                        ]),
+                    ]),
+                ])),
+                render.Box(width = 32, height = 24, color = game["awayColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Column(expanded = True, main_align = "start", cross_align = "center", children = [
+                        render.Stack(children = [
+                            render.Box(width = 32, height = 24, child = render.Image(game["awayLogo"], width = 32, height = 32)),
+                            render.Column(expanded = True, main_align = "start", cross_align = "center", children = [
+                                render.Box(width = 32, height = 16),
+                                render.Box(width = 32, height = 8, color = "#000a", child = render.Text(content = game["awayScore"], color = game["awayScoreColor"], font = scoreFont)),
+                            ]),
+                        ]),
+                    ]),
+                ])),
+            ],
+        )
+    elif displayType == "logos":
+        return render.Column(
+            children = [
+                render.Box(width = 64, height = 12, color = game["homeColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Image(game["homeLogo"], width = 30, height = 30),
+                    render.Box(width = 34, height = 12, child = render.Text(content = game["homeScore"], color = game["homeScoreColor"], font = scoreFont)),
+                ])),
+                render.Box(width = 64, height = 12, color = game["awayColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Image(game["awayLogo"], width = 30, height = 30),
+                    render.Box(width = 34, height = 12, child = render.Text(content = game["awayScore"], color = game["awayScoreColor"], font = scoreFont)),
+                ])),
+            ],
+        )
+    else:
+        textFont = "Dina_r400-6"
+        return render.Column(
+            children = [
+                render.Box(width = 64, height = 12, color = game["homeColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Box(width = 16, height = 16, child = render.Image(game["homeLogo"], width = game["homeLogoSize"], height = game["homeLogoSize"])),
+                    render.Box(width = 24, height = 12, child = render.Text(content = game["home"][:3], color = game["homeScoreColor"], font = textFont)),
+                    render.Box(width = 24, height = 12, child = render.Text(content = get_record(game["homeScore"]), color = game["homeScoreColor"], font = scoreFont)),
+                ])),
+                render.Box(width = 64, height = 12, color = game["awayColor"], child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                    render.Box(width = 16, height = 16, child = render.Image(game["awayLogo"], width = game["awayLogoSize"], height = game["awayLogoSize"])),
+                    render.Box(width = 24, height = 12, child = render.Text(content = game["away"][:3], color = game["awayScoreColor"], font = textFont)),
+                    render.Box(width = 24, height = 12, child = render.Text(content = get_record(game["awayScore"]), color = game["awayScoreColor"], font = scoreFont)),
+                ])),
+            ],
+        )
+
+def get_square_detail(game, displayType, textColor):
+    detailFont = "CG-pixel-3x5-mono"
+    if displayType == "retro":
+        return [
+            render.Box(width = 64, height = 27, color = "#222", child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                render.Box(width = 38, height = 27, child = render.Text(content = get_team_name(game["homeTeamName"]), color = textColor, font = detailFont)),
+                render.Box(width = 26, height = 27, child = render.Text(content = get_record(game["homeScore"]), color = textColor, font = detailFont)),
+            ])),
+            render.Box(width = 64, height = 2),
+            render.Box(width = 64, height = 27, color = "#222", child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                render.Box(width = 38, height = 27, child = render.Text(content = get_team_name(game["awayTeamName"]), color = textColor, font = detailFont)),
+                render.Box(width = 26, height = 27, child = render.Text(content = get_record(game["awayScore"]), color = textColor, font = detailFont)),
+            ])),
+        ]
+    elif displayType == "stadium":
+        return [
+            get_square_card(game, displayType),
+            render.Box(width = 64, height = 4),
+            render.Box(width = 64, height = 14, color = "#345252", child = render.Box(width = 62, height = 12, color = "#0f3027", child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
+                render.Text(content = get_team_name(game["homeTeamName"]), color = game["homeScoreColor"], font = "tb-8"),
+            ]))),
+            render.Box(width = 64, height = 14, color = "#345252", child = render.Box(width = 62, height = 12, color = "#0f3027", child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
+                render.Text(content = get_team_name(game["awayTeamName"]), color = game["awayScoreColor"], font = "tb-8"),
+            ]))),
+        ]
+    else:
+        homeRowColor = displayType == "black" and "#222" or game["homeColor"]
+        awayRowColor = displayType == "black" and "#222" or game["awayColor"]
+        return [
+            get_square_card(game, displayType),
+            render.Box(width = 64, height = 4),
+            render.Box(width = 64, height = 14, color = homeRowColor, child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
+                render.Text(content = get_team_name(game["homeTeamName"]), color = game["homeScoreColor"], font = "tb-8"),
+            ])),
+            render.Box(width = 64, height = 14, color = awayRowColor, child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
+                render.Text(content = get_team_name(game["awayTeamName"]), color = game["awayScoreColor"], font = "tb-8"),
+            ])),
+        ]
