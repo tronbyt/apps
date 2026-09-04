@@ -983,7 +983,8 @@ def heat_haze_layer(frame):
 
 # ---------------------------------------------------------------------------
 # Seasonal tree: an always-on scenery accent standing at the left edge of the
-# ground bar, showing the real meteorological season (or a demo override).
+# ground bar, showing the canopy state real trees would be in at this
+# latitude and date (or a demo override).
 # Spring/summer/fall share one leafy canopy shape recolored per season; winter
 # swaps in a bare, veiny branch silhouette with a static snow dusting that
 # never falls off. Fall and spring also keep a static scatter of fallen
@@ -992,17 +993,95 @@ def heat_haze_layer(frame):
 # strong wind instead strips them off and streams them across the screen.
 # ---------------------------------------------------------------------------
 
-def season_from_month(month, southern):
-    """Meteorological season from a 1-12 month. Southern Hemisphere is offset
-    6 months from Northern (e.g. December is summer, not winter)."""
-    m = ((month - 1 + 6) % 12) + 1 if southern else month
-    if m == 12 or m <= 2:
-        return "winter"
-    if m <= 5:
+# Foliage phenology: which of the four canopy looks a real tree wears here
+# today. Deliberately NOT the meteorological calendar -- that one flips to
+# fall on Sep 1 everywhere on Earth, which paints Hampton VA in peak color
+# seven weeks before its maples actually turn. Instead the four transition
+# dates slide with latitude: spring runs later and autumn earlier as you go
+# north (the idea behind Hopkins' bioclimatic law, retuned to the gentler
+# slopes modern satellite phenology measures), and both shoulder seasons
+# compress toward the poles, where the canopy leafs out and drops fast.
+#
+# Anchored on the mid-Atlantic (lat 38), so at the home location's 37.0N the
+# canopy holds green until mid-October; Vermont (44N) starts turning in late
+# September, the Gulf coast (30N) not until early November.
+#
+# Deliberately network-free: it needs only lat + date, both always on hand.
+# The Open-Meteo path that could supply elevation and temperature normals is
+# skipped entirely whenever NWS covers the location (see _live_inputs), so
+# leaning on it here would make the tree's color depend on which weather
+# backend answered -- and would put an outage-prone fetch on a code path
+# that currently survives Open-Meteo being down.
+PHENO_REF_LAT = 38.0  # calibration latitude for every anchor date below
+
+# transition anchors at PHENO_REF_LAT, as day-of-year
+PHENO_LEAF_OUT = 88.0  # ~Mar 29: buds break, blossom
+PHENO_TURN = 285.0  # ~Oct 12: color starts showing
+
+# how far those anchors slide per degree of latitude away from the reference
+PHENO_SPRING_SLOPE = 3.0  # days later per degree north
+PHENO_FALL_SLOPE = 2.7  # days earlier per degree north
+
+# ...and how long each shoulder season lasts, tapering toward the poles
+PHENO_SPRING_DAYS = 47.0
+PHENO_SPRING_TAPER = 1.0
+PHENO_SPRING_DAYS_MIN = 18.0
+PHENO_FALL_DAYS = 45.0
+PHENO_FALL_TAPER = 0.8
+PHENO_FALL_DAYS_MIN = 25.0
+
+# clamps: past roughly 60 degrees the linear slides would run off the
+# calendar (turning in July), so cap them at the boreal extremes instead
+PHENO_LEAF_OUT_MAX = 155.0  # ~Jun 4
+PHENO_TURN_MIN = 236.0  # ~Aug 24
+
+# climate cutoffs, both on absolute latitude:
+#   below EVERGREEN the broadleaf canopy never turns at all (Miami, Hawaii)
+#   below NO_BARE it turns late but keeps its leaves through the mild winter
+PHENO_EVERGREEN_LAT = 26.0
+PHENO_NO_BARE_LAT = 31.0
+
+# where inside the fall window the canopy stops being "a green tree with some
+# gold in it" and becomes full color. Kept short: past-peak leaves still read
+# as peak color at this scale, so the early, patchy phase is the shorter one.
+PHENO_PEAK_FRAC = 0.35
+
+# cumulative days before each month, common (non-leap) year
+DOY_CUM = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+
+def day_of_year(month, day):
+    """1-365 ordinal day. Leap years are ignored: the one-day slop is far
+    inside the tolerance of any threshold below."""
+    m = min(12, max(1, month))
+    return DOY_CUM[m - 1] + day
+
+def foliage_season(month, day, lat):
+    """Canopy state for a date and latitude: "winter", "spring", "summer",
+    "fall_early" (green crown going gold at its sunlit edges) or "fall_peak"
+    (full turn). Southern Hemisphere runs the same curve half a year out of
+    phase, off absolute latitude."""
+    alat = -lat if lat < 0 else lat
+    if alat < PHENO_EVERGREEN_LAT:
+        return "summer"  # tropics: nothing turns, nothing drops
+
+    doy = day_of_year(month, day)
+    if lat < 0:
+        doy = ((doy + 182) % 365) + 1
+
+    d = alat - PHENO_REF_LAT
+    leaf_out = min(PHENO_LEAF_OUT + d * PHENO_SPRING_SLOPE, PHENO_LEAF_OUT_MAX)
+    full_green = leaf_out + max(PHENO_SPRING_DAYS - d * PHENO_SPRING_TAPER, PHENO_SPRING_DAYS_MIN)
+    turn = max(PHENO_TURN - d * PHENO_FALL_SLOPE, PHENO_TURN_MIN)
+    bare = min(turn + max(PHENO_FALL_DAYS - d * PHENO_FALL_TAPER, PHENO_FALL_DAYS_MIN), 365.0)
+
+    if doy < leaf_out or doy >= bare:
+        # subtropical winters are green ones -- no bare-branch silhouette
+        return "winter" if alat >= PHENO_NO_BARE_LAT else "summer"
+    if doy < full_green:
         return "spring"
-    if m <= 8:
+    if doy < turn:
         return "summer"
-    return "fall"
+    return "fall_early" if (doy - turn) / (bare - turn) < PHENO_PEAK_FRAC else "fall_peak"
 
 # sprite anchor: 10 wide x 16 tall, canopy rows 9..17, trunk 18..24, base
 # meeting the ground bar at y=25. All box/pixel tables below are tree-local
@@ -1034,7 +1113,8 @@ TREE_GRASS_PX = [(1, 14), (1, 15), (8, 15)]
 TREE_GRASS_COLS = {
     "spring": "#4a9a4a",
     "summer": "#3f8f3f",
-    "fall": "#9a8a3a",
+    "fall_early": "#6d8f3a",
+    "fall_peak": "#9a8a3a",
     "winter": "#7a7568",
 }
 
@@ -1067,14 +1147,30 @@ TREE_CANOPY_RIM = [(6, 0, 1, 1), (6, 1, 2, 1), (7, 2, 2, 1), (8, 3, 1, 1), (8, 4
 TREE_SEASON_COLORS = {
     "spring": ("#d9a0bc", "#ffc9de", "#ffe0ee"),
     "summer": ("#2e6b2e", "#3f8f3f", "#5aa85a"),
-    "fall": ("#a8551a", "#d97a26", "#e8a33d"),
+    "fall_early": ("#41762c", "#5f9433", "#8fae3e"),
+    "fall_peak": ("#a8551a", "#d97a26", "#e8a33d"),
     "winter": ("#4a3c2e", "#5b4a3a", "#7a6a58"),
 }
 
 # fall only: mottled color patches (x, y, w, h, color) drawn over the base
 # canopy instead of the generic highlights -- golds, ambers, and deep reds so
 # the crown reads as mixed turning leaves, not one flat orange.
-TREE_FALL_PATCHES = [
+#
+# Two sets, because a 45-day fall that looks identical throughout is the
+# giveaway that nothing is really being modeled. Early turn is a still-green
+# crown with gold creeping in at the top and outer edges -- which is where it
+# actually starts, on the most sun-exposed leaves -- with a single amber patch
+# hinting at what's coming. Peak is the full mixed burn. Cells covered by
+# TREE_CANOPY_RIM are avoided in the early set, since the rim draws after.
+TREE_FALL_PATCHES_EARLY = [
+    (3, 0, 2, 1, "#e0cc55"),
+    (2, 1, 2, 1, "#cdbe45"),
+    (4, 1, 2, 1, "#d99a35"),
+    (6, 2, 1, 1, "#e0cc55"),
+    (1, 3, 2, 1, "#cdbe45"),
+    (4, 4, 2, 1, "#c2b84a"),
+]
+TREE_FALL_PATCHES_PEAK = [
     (3, 0, 2, 1, "#f0c040"),
     (2, 1, 2, 1, "#c8531f"),
     (6, 1, 2, 1, "#f0c040"),
@@ -1087,10 +1183,19 @@ TREE_FALL_PATCHES = [
     (5, 7, 2, 1, "#f0c040"),
 ]
 
+# season -> patch overlay. Membership doubles as the "is this a fall look?"
+# test everywhere below, so adding a stage never means hunting down string
+# comparisons.
+TREE_FALL_PATCH_SETS = {
+    "fall_early": TREE_FALL_PATCHES_EARLY,
+    "fall_peak": TREE_FALL_PATCHES_PEAK,
+}
+
 # ground-scatter and airborne-leaf palettes (fall mixes the turning colors;
 # spring stays in the blossom pinks)
 TREE_LEAF_COLS = {
-    "fall": ["#e0742a", "#f0c040", "#b5451f", "#e8a33d"],
+    "fall_early": ["#d8c24a", "#9fb03c", "#e8a33d"],
+    "fall_peak": ["#e0742a", "#f0c040", "#b5451f", "#e8a33d"],
     "spring": ["#ffc9de", "#ffe0ee"],
 }
 
@@ -1162,8 +1267,8 @@ def tree_widget(season, lean = 0, hide_tips = False):
             b = _tree_lean_box(x, y, w, h, shade_col, lean)
             if b != None:
                 children.append(b)
-        if season == "fall":
-            for (x, y, w, h, col) in TREE_FALL_PATCHES:
+        if season in TREE_FALL_PATCH_SETS:
+            for (x, y, w, h, col) in TREE_FALL_PATCH_SETS[season]:
                 b = _tree_lean_box(x, y, w, h, col, lean)
                 if b != None:
                     children.append(b)
@@ -1200,6 +1305,10 @@ def tree_tip_sway_layer(frame, lean):
 # the silhouette. Winter's bare branches never rustle.
 TREE_RUSTLE_PX = [(3, 1), (6, 2), (2, 4), (7, 4), (5, 6), (8, 5)]
 
+# fall rustle catches the light as a turning leaf, not just a brighter one --
+# muted while the crown is only starting to turn, full gold at peak
+TREE_RUSTLE_ACCENT = {"fall_early": "#d8c24a", "fall_peak": "#f0c040"}
+
 def tree_rustle_layer(frame, season, lean):
     hi = TREE_SEASON_COLORS[season][2]
     step = 2.0 * math.pi / N_FRAMES
@@ -1208,7 +1317,8 @@ def tree_rustle_layer(frame, season, lean):
         # integer-harmonic sin per pixel, so each flicker wraps seamlessly
         if math.sin(frame * step * (2 + i % 3) + i * 2.1) < 0.35:
             continue
-        col = "#f0c040" if season == "fall" and i % 2 == 0 else hi
+        accent = TREE_RUSTLE_ACCENT.get(season)
+        col = accent if accent != None and i % 2 == 0 else hi
         nx = x + lean
         if nx < 0 or nx >= WIDTH:
             continue
@@ -1898,8 +2008,9 @@ def _live_inputs(config, units):
     temp_f = None if temp == None else (float(temp) if units == "fahrenheit" else temp * 9.0 / 5.0 + 32)
     heat_haze = _heat_haze_auto(is_day, temp_f, clouds, fog, storm, smoke, precip)
 
-    # seasonal tree: real meteorological season, hemisphere-aware from latitude
-    season = season_from_month(now.month, lat < 0)
+    # seasonal tree: canopy state real trees hold at this latitude and date,
+    # not the meteorological calendar (see foliage_season)
+    season = foliage_season(now.month, now.day, lat)
 
     wx = struct(clouds = clouds, precip = precip, precip_level = plevel, fog = fog, storm = storm, smoke = smoke, wind = wind, wind_dir = wind_dir, alert = alert, alert_text = alert_text, cloud_seed = cloud_seed, tornado = False, aurora = False, heat_haze = heat_haze, season = season)
     return elev, frac, is_day, wx, temp, phase
@@ -1946,7 +2057,7 @@ PRESETS = {
     "heatwave": struct(elev = 72, arc = 50, phase = 50, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 101, wind = 4, alert = 0, season = "summer"),
     "starry_night": struct(elev = -45, arc = 50, phase = 50, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 44, wind = 2, alert = 0),
     "crescent_moon": struct(elev = -30, arc = 68, phase = 10, clouds = 0, precip = "none", precip_level = 0, fog = False, storm = False, temp = 49, wind = 3, alert = 0),
-    "harvest_moon": struct(elev = -6, arc = 88, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 58, wind = 5, alert = 0, season = "fall"),
+    "harvest_moon": struct(elev = -6, arc = 88, phase = 50, clouds = 1, precip = "none", precip_level = 0, fog = False, storm = False, temp = 58, wind = 5, alert = 0, season = "fall_peak"),
     "hurricane": struct(elev = 6, arc = 50, phase = 50, clouds = 4, precip = "rain", precip_level = 3, fog = False, storm = True, temp = 79, wind = 90, alert = 3, alert_text = "Hurricane Warning", season = "summer"),
     "tornado": struct(elev = 7, arc = 50, phase = 50, clouds = 4, precip = "rain", precip_level = 2, fog = False, storm = True, temp = 74, wind = 46, alert = 3, tornado = True, alert_text = "Tornado Warning", season = "spring"),
     "ice_storm": struct(elev = 10, arc = 45, phase = 50, clouds = 4, precip = "ice", precip_level = 3, fog = False, storm = False, temp = 30, wind = 18, alert = 2, alert_text = "Ice Storm Warning", season = "winter"),
@@ -1959,17 +2070,20 @@ PRESETS = {
 def _demo_season(config, implied = None):
     """Season dial: an explicit choice wins outright; on 'auto' a seasonal
     preset's implied season (blizzard -> winter, heatwave -> summer, ...)
-    applies if one was given, else it derives from the Month dial (Southern
-    Hemisphere if a negative override latitude is set)."""
+    applies if one was given, else it derives from the Month dial run through
+    the same latitude-aware phenology as the live path -- at the override
+    latitude when one is set, else the mid-Atlantic reference."""
     choice = config.get("demo_season", "auto")
     if choice != "auto":
-        return choice
+        # "fall" is the pre-split value; configs saved before the early-turn
+        # stage existed still carry it, so keep honoring it as peak color.
+        return "fall_peak" if choice == "fall" else choice
     if implied != None:
         return implied
     month = int(_num(config, "demo_month", 6.0))
     lat_s = config.get("demo_lat", "").strip()
-    southern = _num(config, "demo_lat", 0.0) < 0 if lat_s != "" else False
-    return season_from_month(month, southern)
+    lat = _num(config, "demo_lat", PHENO_REF_LAT) if lat_s != "" else PHENO_REF_LAT
+    return foliage_season(month, 15, lat)
 
 def _demo_inputs(config, units):
     """Simulator: deterministic, offline overrides for every render input.
@@ -2325,14 +2439,15 @@ def _demo_fields(demo_on):
         schema.Dropdown(
             id = "demo_season",
             name = "Season (tree)",
-            desc = "Auto follows a seasonal preset's implied season (blizzard = winter, heatwave = summer, ...) or else the Month dial below (Southern Hemisphere if a negative override latitude is set); pick one directly to preview it regardless of preset or month.",
+            desc = "Auto follows a seasonal preset's implied season (blizzard = winter, heatwave = summer, ...) or else the Month dial below, read through the same latitude-aware foliage timing as live mode (set an override latitude to see it: mid-October turns at 38N, late September at 44N, never in the tropics); pick one directly to preview it regardless of preset or month. Fall has two looks - the crown goes gold at its sunlit edges first, then turns fully.",
             icon = "tree",
             default = "auto",
             options = [
                 schema.Option(display = "Auto (from month)", value = "auto"),
                 schema.Option(display = "🌸 Spring", value = "spring"),
                 schema.Option(display = "☀️ Summer", value = "summer"),
-                schema.Option(display = "🍂 Fall", value = "fall"),
+                schema.Option(display = "🍁 Fall - early turn", value = "fall_early"),
+                schema.Option(display = "🍂 Fall - peak color", value = "fall_peak"),
                 schema.Option(display = "❄️ Winter", value = "winter"),
             ],
         ),
@@ -2480,7 +2595,7 @@ def _demo_fields(demo_on):
         schema.Text(
             id = "demo_lat",
             name = "Override latitude",
-            desc = "Real astronomy mode: fill BOTH lat and lng to compute the real sky for a place/season instead of the dials above.",
+            desc = "Real astronomy mode: fill BOTH lat and lng to compute the real sky for a place/season instead of the dials above. On its own it also sets the latitude the tree's foliage timing is computed for.",
             icon = "locationDot",
             default = "",
         ),
@@ -2494,7 +2609,7 @@ def _demo_fields(demo_on):
         schema.Dropdown(
             id = "demo_month",
             name = "Month (season)",
-            desc = "Season for real-astronomy mode.",
+            desc = "Season for real-astronomy mode, and the date the tree's foliage timing is read at.",
             icon = "calendar",
             default = "6",
             options = [
