@@ -1,0 +1,15 @@
+---
+id: tennis-season
+name: Tennis Season
+summary: Tennis all year round
+desc: Follows the tennis season rather than a single scoreboard. During a tournament it rotates live scores, then results, then what is on next. Between tournaments it counts down to the next one with the host city, surface and defending champion. Optionally follow one player - their live match takes over the screen, and when they are knocked out the app steps aside. Men's, women's or both, on 64x32 and 64x64 panels.
+author: NSLuke
+fileName: tennis_season.star
+packageName: tennisseason
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time
+  - tennis
+published: '2026-09-05T01:27:48Z'
+updated: '2026-09-05T01:27:48Z'
