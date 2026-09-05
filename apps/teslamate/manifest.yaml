@@ -1,0 +1,18 @@
+---
+id: teslamate
+name: TeslaMate
+summary: Tesla info via HA
+desc: Shows your Tesla's current Name, Charge in Mi/KM and battery %, Plugged In Status via TeslaMate integration through Home Assistant REST API. Big thanks to @mrrobot245 for the original TeslaFi app which this is based on.
+author: brombomb
+fileName: teslamate.star
+packageName: teslamate
+recommendedInterval: 30
+supports2x: true
+minPixletVersion: v0.49.9
+category: smart-home
+tags:
+  - tech
+  - utility
+  - wide 2x support
+published: '2025-10-03T21:03:51Z'
+updated: '2026-05-19T04:03:00Z'

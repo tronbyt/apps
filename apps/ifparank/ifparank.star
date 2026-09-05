@@ -1,0 +1,79 @@
+"""
+Applet: IFPARank
+Author: cubsaaron
+Summary: Display IFPA Ranking
+Description: Display an International Flipper Pinball Association (IFPA) World Ranking.
+"""
+
+load("encoding/json.star", "json")
+load("http.star", "http")
+load("images/pin_icon.png", PIN_ICON_ASSET = "file")
+load("render.star", "render")
+load("schema.star", "schema")
+
+PIN_ICON = PIN_ICON_ASSET.readall()
+
+def main(config):
+    apiKey = config.get("ifpa_api_key")
+    playerId = config.str("playerId", "1")  # Default to KME, also specified in schema
+    if apiKey == None:
+        return render.Root(
+            child = render.Text("No IFPA API Key provided.", font = "5x8"),
+        )
+    IFPA_URL = "https://api.ifpapinball.com/v1/player/" + playerId + "?api_key=" + apiKey
+
+    # Keep a cache of the JSON response from the IFPA servers. Key is the user ID, value is the response as a String
+    #        print ("Calling IFPA API")
+    res = http.get(IFPA_URL, ttl_seconds = 43200)
+    if res.status_code != 200:
+        fail("IFPA request failed: statusCode =", res.status_code)
+    ifpaCache = json.encode(res.json())  #res.json() converts to dict, but store in cache as a string
+
+    #    else :
+    #        print ("Using cache")
+
+    j = json.decode(ifpaCache)  # need to turn cached string back into a dict
+    ifpa_initial = j["player"]["initials"]
+    ifpa_rank = j["player_stats"]["current_wppr_rank"]
+
+    return render.Root(
+        child = render.Box(
+            render.Row(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Image(src = PIN_ICON),
+                    render.Column(
+                        cross_align = "center",
+                        children = [
+                            render.Text("IFPA", color = "#fc6203", font = "tb-8"),
+                            render.Text("#%s" % ifpa_rank, color = "#fc6203", font = "6x13"),
+                            render.Text(ifpa_initial, color = "#fc6203", font = "tb-8"),
+                        ],
+                    ),
+                ],
+            ),
+        ),
+    )
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "playerId",
+                name = "Player ID",
+                desc = "IFPA Player ID",
+                icon = "user",
+                default = "1",
+            ),
+            schema.Text(
+                id = "ifpa_api_key",
+                name = "IFPA API Key",
+                desc = "An IFPA API key to access the IFPA API.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
+    )

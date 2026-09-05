@@ -1,0 +1,18 @@
+---
+id: getaway-clock
+name: Getaway Clock
+summary: Clock over a crime spree
+desc: The time in the fat bevelled numerals an arcade score readout would use, over a four-lane street seen from directly above — traffic both ways, a squad car working its lightbar, and a wanted meter that fills as the hour runs out. Styled after the top-down crime games of the late nineties. The city follows your clock through daylight, dusk and a night pass with every car running its lamps.
+author: nsluke
+fileName: getaway_clock.star
+packageName: getawayclock
+recommendedInterval: 0
+supports2x: true
+category: clocks
+tags:
+  - clock
+  - gaming
+  - retro
+  - wide 2x support
+published: '2026-08-28T17:52:55Z'
+updated: '2026-08-28T17:52:55Z'

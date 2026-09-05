@@ -1,0 +1,16 @@
+---
+id: mayo-clinic-news
+name: Mayo Clinic News
+summary: Display Mayo Clinic News
+desc: Display current Mayo Clinic news headlines from their newsroom RSS feed.
+author: jvivona
+fileName: mayo_clinic_news.star
+packageName: mayoclinicnews
+recommendedInterval: 10
+supports2x: true
+category: news
+tags:
+  - news
+  - lifestyle
+published: '2023-09-29T15:04:21Z'
+updated: '2026-06-17T20:47:04Z'

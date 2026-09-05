@@ -1,0 +1,15 @@
+---
+id: dexcom-display
+name: Dexcom Display
+summary: Display dexcom g7 data
+desc: A Tidbyt application that displays real-time continuous glucose monitor (CGM) data from Dexcom G7/G6 devices on your Tidbyt LED display.
+author: JustinFay01
+fileName: dexcom_display.star
+packageName: dexcomdisplay
+category: health
+tags:
+  - health
+  - medical
+  - real-time
+published: '2026-04-07T20:59:29Z'
+updated: '2026-04-07T21:43:31Z'

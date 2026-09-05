@@ -1,0 +1,16 @@
+---
+id: arcade-classics
+name: Arcade Classics
+summary: Classic arcade animations
+desc: Animations from classic arcade video games.
+author: Steve Otteson
+fileName: arcade_classics.star
+packageName: arcadeclassics
+recommendedInterval: 5
+category: entertainment
+tags:
+  - gaming
+  - retro
+  - art
+published: '2022-03-02T18:20:26Z'
+updated: '2025-12-28T23:11:23Z'

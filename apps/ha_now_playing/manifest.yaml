@@ -1,0 +1,16 @@
+---
+id: ha-now-playing
+name: HA Now Playing
+summary: Home Assistant Now Playing
+desc: Display track details and artwork from any Home Assistant media_player entity.
+author: drudge, gabe565
+supports2x: true
+recommendedInterval: 0
+category: utilities
+tags:
+  - smart-home
+  - media-player
+  - utility
+  - wide 2x support
+published: '2025-10-30T09:15:56Z'
+updated: '2025-12-05T22:28:51Z'

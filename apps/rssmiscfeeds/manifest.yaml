@@ -1,0 +1,17 @@
+---
+id: rss-misc-feeds
+name: RSS Misc Feeds
+summary: Provides misc RSS Feeds
+desc: Based upon a curated list, allow user to select display of various RSS feeds not covered in standalone apps.
+author: jvivona
+fileName: rss_misc_feeds.star
+packageName: rssmiscfeeds
+recommendedInterval: 10
+supports2x: true
+category: utilities
+tags:
+  - news
+  - utility
+  - art
+published: '2023-11-05T13:34:53Z'
+updated: '2026-06-17T20:47:04Z'

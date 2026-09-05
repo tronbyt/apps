@@ -1,0 +1,14 @@
+---
+id: london-bus-stop
+name: London Bus Stop
+summary: Upcoming arrivals
+desc: Shows upcoming arrivals at a specific bus stop in London.
+author: dinosaursrarr
+fileName: london_bus_stop.star
+packageName: londonbusstop
+recommendedInterval: 5
+category: transit
+tags:
+  - local
+published: '2022-06-03T15:01:44Z'
+updated: '2025-12-23T13:24:18Z'

@@ -1,0 +1,16 @@
+---
+id: meh
+name: Meh
+summary: Meh Deal
+desc: Current deal on meh.com.
+author: hoop33
+fileName: meh.star
+packageName: meh
+recommendedInterval: 5
+category: utilities
+tags:
+  - deals
+  - utility
+  - discounts
+published: '2023-02-02T21:29:47Z'
+updated: '2025-12-23T13:24:18Z'

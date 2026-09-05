@@ -1,0 +1,17 @@
+---
+id: stocks-classic
+name: Stocks (Classic)
+summary: Classic one-symbol stocks
+desc: A faithful recreation of Tidbyt's first-party Stocks app, which died with its data provider. One symbol per install, with the price, the day's change in green or red, and the current or most recent session's intraday sparkline filling the bottom of the panel. Data comes keyless from Cboe's delayed-quote feed (about 15 minutes behind), so it works with zero setup for US-listed stocks, ETFs, and ^SPX-style indexes; non-US listings are not available.
+author: nsluke
+fileName: stocks_classic.star
+packageName: stocksclassic
+recommendedInterval: 5
+category: finance
+tags:
+  - stocks
+  - finance
+  - tickers
+  - chart
+published: '2026-09-02T23:17:51Z'
+updated: '2026-09-03T05:14:11Z'

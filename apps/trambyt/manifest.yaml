@@ -1,0 +1,14 @@
+---
+id: trambyt
+name: Trambyt
+summary: Departures for Västtrafik
+desc: Show departures for Västtrafik stops.
+author: protocol7
+fileName: trambyt.star
+packageName: trambyt
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2022-12-05T16:46:35Z'
+updated: '2025-12-05T22:28:51Z'

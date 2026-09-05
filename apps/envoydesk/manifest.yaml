@@ -1,0 +1,17 @@
+---
+id: envoy-desk
+name: Envoy Desk
+summary: Envoy Desk information
+desc: Can be placed on an Envoy Desk to display its current status.
+author: skalum@envoy.com
+fileName: envoy_desk.star
+packageName: envoydesk
+recommendedInterval: 5
+category: utilities
+tags:
+  - tracking
+  - utility
+  - smart-home
+  - art
+published: '2023-09-06T14:15:35Z'
+updated: '2025-12-23T13:24:18Z'

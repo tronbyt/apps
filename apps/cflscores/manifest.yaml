@@ -1,0 +1,15 @@
+---
+id: cfl-scores
+name: CFL Scores
+summary: CFL football scores
+desc: Displays live and upcoming CFL scores from a data feed.
+author: LunchBox8484
+fileName: cfl_scores.star
+packageName: cflscores
+recommendedInterval: 5
+category: sports
+tags:
+  - cfl
+  - football
+published: '2024-04-25T18:15:24Z'
+updated: '2025-11-29T23:55:39Z'

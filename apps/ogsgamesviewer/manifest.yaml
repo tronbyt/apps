@@ -1,0 +1,16 @@
+---
+id: ogs-games-viewer
+name: OGS Games Viewer
+summary: Shows OGS Games
+desc: Shows a visualization of currently active Go games on OGS (Online Go Server) for a given user.
+author: Neal Wright
+fileName: ogs_games_viewer.star
+packageName: ogsgamesviewer
+recommendedInterval: 5
+category: utilities
+tags:
+  - gaming
+  - real-time
+  - utility
+published: '2022-07-01T19:15:09Z'
+updated: '2025-12-05T22:28:51Z'
