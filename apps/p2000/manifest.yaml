@@ -6,4 +6,11 @@ desc: Displays the latest Dutch P2000 alert on a Tronbyt or HUB75 display. Filte
 author: bertvm
 published: '2026-09-02T19:59:26Z'
 updated: '2026-09-02T19:59:26Z'
-tags: []
+category: news
+tags:
+  - p2000
+  - alerts
+  - emergency
+  - netherlands
+  - public-safety
+  - local
