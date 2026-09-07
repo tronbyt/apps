@@ -22,7 +22,7 @@ jobs:
 
       - name: Find last successful build
         id: lastsuccess
-        uses: SamhammerAG/last-successful-build-action@v7
+        uses: SamhammerAG/last-successful-build-action@v8
         with:
           branch: "main"
           workflow: "Build and Test"
