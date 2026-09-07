@@ -1,0 +1,19 @@
+---
+id: firewalla-network
+name: Firewalla Network
+summary: Firewalla network & threats
+desc: Displays an overview of your Firewalla network. Includes box name, threat alarm badge, 24-hour blocked flows sparkline, active client count, and total data transferred.
+author: brombomb
+fileName: firewalla_network.star
+packageName: firewallanetwork
+recommendedInterval: 1
+supports2x: true
+category: smart-home
+tags:
+  - smart-home
+  - tech
+  - tracking
+  - real-time
+  - utility
+published: '2026-09-07T02:48:09Z'
+updated: '2026-09-07T03:29:21Z'
