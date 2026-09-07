@@ -9,7 +9,7 @@ Author: Garrett Eddington
 
 load("cache.star", "cache")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -925,6 +925,194 @@ def message(text):
         child = render.WrappedText(text, font = "tom-thumb", color = "#777"),
     )
 
+# ---------- square panels ----------
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def grid_cell(width, height, text, color):
+    return cell(width, height, render.Text(text, font = "tom-thumb", color = color))
+
+def half_cell(innings, n, side, live, active):
+    """One half inning of the line score. Blank until the half starts, X for
+    a ninth that was never needed, + for the once-a-season ten run inning
+    (two tom-thumb digits will not fit a four pixel column)."""
+    if n > len(innings) or "runs" not in innings[n - 1].get(side, {}):
+        if live or n > len(innings):
+            return ("", WHITE)
+        return ("X", "#7a7a7a")
+    runs = num(innings[n - 1][side].get("runs"))
+    if runs > 9:
+        return ("+", AMBER if active else BASE_ON)
+    if active:
+        return (str(runs), AMBER)
+    return (str(runs), WHITE if runs > 0 else "#7a7a7a")
+
+def linescore_grid(game, ls, live):
+    """The classic line score: nine innings, a rule, then R H E. The column
+    arithmetic is 3 chip + 9x4 innings + 1 rule + 2 + 7 R + 1 rule + 7 H +
+    1 rule + 6 E = 64. The totals get rules rather than gaps because
+    tom-thumb's 1 is two pixels wide inside a four pixel advance, so no
+    affordable gap reads wider than the hole in 13 and thirteen hits after
+    thirteen runs fuses into one long number. Inning cells only hold one
+    digit, so past the ninth the window slides and the header keeps the
+    ones digit: 8 9 0 1 reads as 8 9 10 11."""
+    away_bg = team_info(num(game["teams"]["away"]["team"]["id"]))[1]
+    home_bg = team_info(num(game["teams"]["home"]["team"]["id"]))[1]
+    innings = ls.get("innings", [])
+    cur = num(ls.get("currentInning"), 1)
+    first = cur - 8 if cur > 9 else 1
+    is_top = ls.get("inningState", "Top") in ["Top", "Middle"]
+
+    columns = [
+        render.Column(
+            children = [
+                render.Box(width = 3, height = 6),
+                cell(3, 7, render.Box(width = 2, height = 5, color = away_bg)),
+                cell(3, 7, render.Box(width = 2, height = 5, color = home_bg)),
+            ],
+        ),
+    ]
+
+    for i in range(9):
+        n = first + i
+        away_text, away_color = half_cell(innings, n, "away", live, live and n == cur and is_top)
+        home_text, home_color = half_cell(innings, n, "home", live, live and n == cur and not is_top)
+        columns.append(render.Column(
+            children = [
+                grid_cell(4, 6, str(n % 10), AMBER if live and n == cur else "#7a7a7a"),
+                grid_cell(4, 7, away_text, away_color),
+                grid_cell(4, 7, home_text, home_color),
+            ],
+        ))
+
+    columns.append(cell(1, 20, render.Box(width = 1, height = 18, color = DIM)))
+    columns.append(render.Box(width = 2, height = 20))
+
+    teams = ls.get("teams", {})
+    for label, key, width in [("R", "runs", 7), ("H", "hits", 7), ("E", "errors", 6)]:
+        color = WHITE if key == "runs" else "#dddddd"
+        if label != "R":
+            columns.append(cell(1, 20, render.Box(width = 1, height = 18, color = DIM)))
+        columns.append(render.Column(
+            children = [
+                grid_cell(width, 6, label, "#7a7a7a"),
+                grid_cell(width, 7, str(num(teams.get("away", {}).get(key))), color),
+                grid_cell(width, 7, str(num(teams.get("home", {}).get(key))), color),
+            ],
+        ))
+
+    return render.Row(children = columns)
+
+def live_bottom(game, ls):
+    """The rows a wide panel never has room for: the box score and the man
+    on the mound. Built once and shared across every animation frame."""
+    pitcher = last_name(ls.get("defense", {}).get("pitcher", {}).get("fullName", ""))
+    return render.Column(
+        children = [
+            render.Box(width = 64, height = 2, color = BLACK),
+            linescore_grid(game, ls, True),
+            render.Box(width = 64, height = 2, color = BLACK),
+            info_bar("P " + pitcher if pitcher != "" else "", ""),
+        ],
+    )
+
+def live_frame_square(game, ls, lit_side, note, bottom):
+    """One full 64x64 frame: the wide scorebug up top, extras below."""
+    return render.Column(
+        children = [
+            live_frame(game, ls, lit_side, note),
+            bottom,
+        ],
+    )
+
+def live_screen_square(game, ls, scored_side, note):
+    """Same strobe and settle cadence as the wide screen."""
+    bottom = live_bottom(game, ls)
+    if scored_side == None and note == None:
+        return live_frame_square(game, ls, None, None, bottom)
+
+    frames = []
+    active = NOTE_FRAMES if note != None else FLASH_FRAMES
+    for i in range(active):
+        lit = None
+        if scored_side != None and i < FLASH_FRAMES and i % 2 == 0:
+            lit = scored_side
+        frames.append(live_frame_square(game, ls, lit, note, bottom))
+
+    for _ in range(SETTLE_FRAMES):
+        frames.append(live_frame_square(game, ls, None, None, bottom))
+
+    return render.Animation(children = frames)
+
+def postgame_square(game, team_id, tz):
+    """Final bug, the full line score, and the next matchup on one screen,
+    so nothing has to rotate."""
+    upcoming = fetch_next_game(team_id, tz)
+    ls = fetch_linescore(game["gamePk"])
+
+    if "fetch_error" in ls:
+        # No line score to show, so stack the two wide panels instead.
+        return render.Column(
+            children = [
+                final_screen(game),
+                next_screen(upcoming, tz),
+            ],
+        )
+
+    if upcoming != None:
+        home_next = num(upcoming["teams"]["home"]["team"]["id"]) == num(team_id)
+        other = upcoming["teams"]["away" if home_next else "home"]["team"]["id"]
+        start = time.parse_time(upcoming["gameDate"]).in_location(tz)
+        next_bars = [
+            slim_bar("NEXT " + ("VS " if home_next else "@ ") + team_info(num(other))[0], True),
+            slim_bar(start.format("Mon 3:04PM"), True),
+        ]
+    else:
+        next_bars = [
+            slim_bar("NEXT", True),
+            slim_bar("NO GAME", True),
+        ]
+
+    return render.Column(
+        children = [
+            final_screen(game),
+            linescore_grid(game, ls, False),
+        ] + next_bars,
+    )
+
+def pregame_square(game, tz):
+    """Matchup logos over first pitch time, season records underneath."""
+    away = game["teams"]["away"]
+    home = game["teams"]["home"]
+    start = time.parse_time(game["gameDate"]).in_location(tz)
+
+    return render.Column(
+        children = [
+            render.Box(
+                width = 64,
+                height = 32,
+                color = BLACK,
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                    children = [
+                        logo(num(away["team"]["id"]), 24),
+                        render.Text("@", font = "6x13", color = WHITE),
+                        logo(num(home["team"]["id"]), 24),
+                    ],
+                ),
+            ),
+            slim_bar(start.format("3:04PM"), True),
+            team_line(away, "-", False),
+            team_line(home, "-", False),
+        ],
+    )
+
 # ---------- entry point ----------
 
 def main(config):
@@ -958,6 +1146,14 @@ def main(config):
             config.get("prev_play", ""),
         )
 
+        if is_square():
+            return render.Root(
+                child = live_screen_square(game, ls, scored_side, note),
+                delay = FRAME_DELAY,
+                max_age = LIVE_TTL,
+                show_full_animation = scored_side != None or note != None,
+            )
+
         return render.Root(
             child = live_screen(game, ls, scored_side, note),
             delay = FRAME_DELAY,
@@ -966,10 +1162,16 @@ def main(config):
         )
 
     if state == "Final":
+        if is_square():
+            return render.Root(child = postgame_square(game, team_id, tz))
+
         return render.Root(
             child = postgame_rotation(game, team_id, tz),
             delay = FRAME_DELAY,
         )
+
+    if is_square():
+        return render.Root(child = pregame_square(game, tz))
 
     return render.Root(child = pregame_screen(game, tz))
 
