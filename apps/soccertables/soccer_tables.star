@@ -24,7 +24,7 @@ Added Champions League, Europa League and Europa Conference League
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CACHE_TTL_SECONDS = 300
@@ -40,6 +40,9 @@ ALT_COLOR = """
 """
 
 def main(config):
+    if is_square():
+        return main_square(config)
+
     renderCategory = []
     teamsToShow = 4
 
@@ -81,6 +84,66 @@ def main(config):
                                 children = [
                                     render.Column(
                                         children = get_team(x, entries, entriesToDisplay, 25, LeagueName, 8, selectedColor, selectedDisplay),
+                                    ),
+                                ],
+                            ),
+                        ],
+                    )
+        return render.Root(
+            show_full_animation = True,
+            delay = int(RotationSpeed) * 1000,
+            child = render.Animation(children = renderCategory),
+        )
+    else:
+        return []
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def main_square(config):
+    # 64x64 version of the same table - the 8px league header stays, and the extra height fits 8 team rows of 7px per page instead of 4
+    renderCategory = []
+    teamsToShow = 8
+
+    RotationSpeed = config.get("speed", "3")
+    selectedLeague = config.get("LeagueOptions", DEFAULT_LEAGUE)
+    selectedColor = config.get("ColorOptions", "black")
+    selectedDisplay = config.get("DisplayOptions", "Rank")
+    league2 = {API: API + selectedLeague + "/standings"}
+
+    standings = get_standings(league2)
+    statNumber = 0
+
+    if (standings):
+        for _, s in enumerate(standings[0]["children"]):
+            entries = s["standings"]["entries"]
+
+            if entries:
+                entriesToDisplay = teamsToShow
+                LeagueName = getLeagueName(selectedLeague)
+                if selectedLeague == "usa.1":
+                    LeagueName = LeagueName + " - " + s["abbreviation"]
+                stats = entries[0]["stats"]
+
+                for j, k in enumerate(stats):
+                    if k["name"] == "rank":
+                        statNumber = j
+
+                entries = sorted(entries, key = lambda e: e["stats"][statNumber]["value"], reverse = False)
+
+                for x in range(0, len(entries), entriesToDisplay):
+                    renderCategory.extend(
+                        [
+                            render.Column(
+                                expanded = True,
+                                main_align = "start",
+                                cross_align = "start",
+                                children = [
+                                    render.Column(
+                                        children = get_team(x, entries, entriesToDisplay, 56, LeagueName, 8, selectedColor, selectedDisplay),
                                     ),
                                 ],
                             ),
