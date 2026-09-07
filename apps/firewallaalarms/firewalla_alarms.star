@@ -2,7 +2,7 @@
 Applet: Firewalla Security
 Summary: Firewalla security & alarms
 Description: Displays real-time security status and active alarms for your Firewalla network. Features an alert ticker when threats occur and an all-clear shield status when secure.
-Author: Rob Walsh
+Author: brombomb
 """
 
 load("encoding/json.star", "json")

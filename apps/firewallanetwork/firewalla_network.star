@@ -2,7 +2,7 @@
 Applet: Firewalla Network
 Summary: Firewalla network & threats
 Description: Displays an overview of your Firewalla network. Includes box name, threat alarm badge, 24-hour blocked flows sparkline, active client count, and total data transferred.
-Author: Rob Walsh
+Author: brombomb
 """
 
 load("encoding/json.star", "json")

@@ -2,7 +2,7 @@
 Applet: Firewalla Top Talkers
 Summary: Top bandwidth consumers
 Description: Displays top bandwidth-consuming devices on your Firewalla network. Supports toggling between the last hour and the last 24 hours to spot active hogs or daily heavy hitters.
-Author: Rob Walsh
+Author: brombomb
 """
 
 load("encoding/json.star", "json")
