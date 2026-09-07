@@ -6,7 +6,7 @@ Author: plumbob86
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 leagueCode = "ELC"
@@ -15,6 +15,12 @@ RED = "#FFFFFF"
 WHITE = "#FF0000"
 GREEN = "#00FF00"
 PLAYOFF = "#008000"
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     relCount = 0
@@ -67,6 +73,10 @@ def main(config):
     else:
         print("Miss! Calling API.")
 
+    # square panels fit eight 8px rows per page instead of four
+    if is_square():
+        return renderSquareTable(table, clubCount, relCount, playCount, proCount)
+
     stackList = []
     usehue = "#FFFFFF"
 
@@ -100,6 +110,43 @@ def main(config):
 
     return render.Root(
         delay = int(15000 / (clubCount / 4)),
+        child =
+            render.Animation(
+                children = (
+                    stackList
+                ),
+            ),
+    )
+
+def renderSquareTable(table, clubCount, relCount, playCount, proCount):
+    stackList = []
+    usehue = "#FFFFFF"
+
+    for i in range(0, len(table), 8):
+        textList = []
+
+        padNum = 0
+        for j in range(8):
+            if j + i < len(table):
+                if i + j < proCount:
+                    usehue = GREEN
+                elif i + j > (clubCount - 1) - relCount:
+                    usehue = WHITE
+                elif (i + j >= proCount) and (i + j < proCount + playCount):
+                    usehue = PLAYOFF
+                else:
+                    usehue = RED
+                position = ""
+                if (i + j + 1) < 10:
+                    position = "0" + str(i + j + 1)
+                else:
+                    position = str(i + j + 1)
+                textList.append(render.Padding(pad = (0, padNum, 0, 0), child = render.Text(color = usehue, content = "#" + position + " " + table[i + j].get("team").get("tla") + " Pts:" + str(int(table[i + j].get("points"))))))
+                padNum += 8
+        stackList.append(render.Stack(children = textList))
+
+    return render.Root(
+        delay = int(15000 / (clubCount / 8)),
         child =
             render.Animation(
                 children = (
