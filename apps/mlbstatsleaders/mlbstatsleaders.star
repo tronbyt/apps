@@ -6,7 +6,7 @@ Author: symm512
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -160,6 +160,12 @@ def format_name(full_name, stat_key):
 def normalize(s):
     return (s or "").lower().replace(" ", "").replace("-", "")
 
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
 def fetch_leaders(stat_key):
     if stat_key == "None":
         return []
@@ -182,6 +188,37 @@ def fetch_leaders(stat_key):
     leaders = []
 
     for l in leaders_data[:5]:
+        leaders.append({
+            "name": format_name(l["person"]["fullName"], stat_key),
+            "team": TEAM_NAME_MAP.get(l["team"].get("name"), l["team"].get("abbreviation", l["team"].get("name", "???"))),
+            "value": l["value"],
+        })
+    return leaders
+
+def fetch_leaders_square(stat_key):
+    """Same feed as fetch_leaders, but asks for ten names so the square
+    panel can show a full top-10 board."""
+    if stat_key == "None":
+        return []
+
+    config = STAT_CONFIG[stat_key]
+    url = "https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories={}&statGroup={}&season={}&limit=10".format(
+        config["api"],
+        config["group"],
+        time.now().year,
+    )
+    res = http.get(url, ttl_seconds = 3600)
+    if res.status_code != 200:
+        return []
+
+    data = res.json()
+    league_leaders = data.get("leagueLeaders")
+    if not league_leaders or len(league_leaders) == 0:
+        return []
+    leaders_data = league_leaders[0].get("leaders", [])
+    leaders = []
+
+    for l in leaders_data[:10]:
         leaders.append({
             "name": format_name(l["person"]["fullName"], stat_key),
             "team": TEAM_NAME_MAP.get(l["team"].get("name"), l["team"].get("abbreviation", l["team"].get("name", "???"))),
@@ -246,6 +283,25 @@ def render_stat_slide(stat_key, leaders):
 
     return render.Column(children = rows)
 
+def main_square(rotation_speed, selected_stats):
+    """64x64: the same boards on the same rotation, ten leaders deep.
+    Title (5px) plus ten 6px rows fills the panel with no dead band."""
+    slides = []
+    for stat in selected_stats:
+        leaders = fetch_leaders_square(stat)
+        if leaders:
+            slides.append(render_stat_slide(stat, leaders))
+
+    if not slides:
+        return render.Root(
+            child = render.WrappedText("No Stats Found"),
+        )
+
+    return render.Root(
+        delay = rotation_speed * 1000,
+        child = render.Animation(children = slides),
+    )
+
 def main(config):
     rotation_speed = int(config.get("speed", "3"))
     selected_stats = []
@@ -256,6 +312,9 @@ def main(config):
 
     if not selected_stats:
         selected_stats = ["HR", "ERA"]
+
+    if is_square():
+        return main_square(rotation_speed, selected_stats)
 
     slides = []
     for stat in selected_stats:
