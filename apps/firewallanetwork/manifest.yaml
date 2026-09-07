@@ -8,6 +8,13 @@ fileName: firewalla_network.star
 packageName: firewallanetwork
 recommendedInterval: 1
 supports2x: true
+category: smart-home
+tags:
+  - smart-home
+  - tech
+  - tracking
+  - real-time
+  - utility
+  - wide 2x support
 published: '2026-09-07T02:48:09Z'
 updated: '2026-09-07T03:17:40Z'
-tags: []
