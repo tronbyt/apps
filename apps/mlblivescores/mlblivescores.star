@@ -1,6 +1,6 @@
 load("cache.star", "cache")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -408,6 +408,251 @@ def render_loading(abbr, my_color):
         ),
     )
 
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def pad_num(n, w):
+    return pad_right("%d" % n, w)
+
+def parse_square(data, box, team_id):
+    sq = {}
+
+    # The feed's ids decode as floats, so the str() compare in main never
+    # matches; the square layouts key "my team" color off this instead.
+    home_id = safe_get(data, "gameData", "teams", "home", "id")
+    sq["is_home"] = type(home_id) in ("int", "float") and "%d" % home_id == team_id
+    away_w = safe_get(data, "gameData", "teams", "away", "record", "wins")
+    away_l = safe_get(data, "gameData", "teams", "away", "record", "losses")
+    home_w = safe_get(data, "gameData", "teams", "home", "record", "wins")
+    home_l = safe_get(data, "gameData", "teams", "home", "record", "losses")
+    sq["away_record"] = "%d-%d" % (away_w, away_l) if type(away_w) in ("int", "float") and type(away_l) in ("int", "float") else ""
+    sq["home_record"] = "%d-%d" % (home_w, home_l) if type(home_w) in ("int", "float") and type(home_l) in ("int", "float") else ""
+    sq["venue"] = truncate(safe_get(data, "gameData", "venue", "name") or "", 16)
+    sq["stars"] = []
+    if box != None:
+        away_batters = safe_get(box, "teams", "away", "batters") or []
+        home_batters = safe_get(box, "teams", "home", "batters") or []
+        away_players = safe_get(box, "teams", "away", "players") or {}
+        home_players = safe_get(box, "teams", "home", "players") or {}
+        stars = []
+        for pid in away_batters + home_batters:
+            if type(pid) not in ("int", "float"):
+                continue
+            key = "ID%d" % pid
+            p = away_players.get(key) or home_players.get(key)
+            if p == None:
+                continue
+            name = last_name(safe_get(p, "person", "fullName") or "")
+            stats = safe_get(p, "stats", "batting") or {}
+            hits = stats.get("hits") or 0
+            hr = stats.get("homeRuns") or 0
+            rbi = stats.get("rbi") or 0
+            ab = stats.get("atBats") or 0
+            if ab == 0:
+                continue
+            parts = []
+            if hr > 0:
+                parts.append("%dHR" % hr)
+            if hits > 0:
+                parts.append("%dH" % hits)
+            if rbi > 0:
+                parts.append("%dRBI" % rbi)
+            if len(parts) > 0 and (hr > 0 or hits >= 2 or rbi >= 2):
+                stars.append(name + " " + "/".join(parts))
+        sq["stars"] = stars[:4]
+    return sq
+
+def team_line(abbr, record, color):
+    content = abbr if record == "" else abbr + " " + record
+    return render.Text(content = content, color = color, font = "CG-pixel-3x5-mono")
+
+def sp_line(name):
+    return render.Text(content = "SP " + (name if name != "" else "TBD"), color = COLOR_CYAN, font = "CG-pixel-3x5-mono")
+
+def rhe_table(g, away_color, home_color):
+    return [
+        render.Text(content = "    R  H  E", color = COLOR_GRAY, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %s %s %d" % (pad_right(g["away_abbr"], 3), pad_num(g["away_score"], 2), pad_num(g["away_hits"], 2), g["away_err"]), color = away_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %s %s %d" % (pad_right(g["home_abbr"], 3), pad_num(g["home_score"], 2), pad_num(g["home_hits"], 2), g["home_err"]), color = home_color, font = "CG-pixel-3x5-mono"),
+    ]
+
+def lineup_ticker(g, sq, height):
+    if len(g["away_lineup"]) == 0 and len(g["home_lineup"]) == 0:
+        children = [render.Text(content = "Lineups TBA", color = COLOR_GRAY, font = "CG-pixel-3x5-mono")]
+        if sq["venue"] != "":
+            children.append(render.Box(height = 1))
+            children.append(render.Text(content = sq["venue"], color = COLOR_GRAY, font = "CG-pixel-3x5-mono"))
+        return render.Column(children = children)
+    rows = []
+    for abbr, lineup in [(g["away_abbr"], g["away_lineup"]), (g["home_abbr"], g["home_lineup"])]:
+        if len(lineup) == 0:
+            continue
+        if len(rows) > 0:
+            rows.append(render.Box(height = 2))
+        rows.append(render.Text(content = abbr + ":", color = COLOR_WHITE, font = "CG-pixel-3x5-mono"))
+        for name in lineup:
+            rows.append(render.Box(height = 1))
+            rows.append(render.Text(content = name, color = COLOR_GRAY, font = "CG-pixel-3x5-mono"))
+    return render.Marquee(height = height, scroll_direction = "vertical", child = render.Column(children = rows), offset_start = 0, offset_end = 0)
+
+def render_pregame_square(g, sq, my_color, is_home):
+    away_color = my_color if not is_home else COLOR_WHITE
+    home_color = my_color if is_home else COLOR_WHITE
+    matchup = "%s @ %s" % (g["away_abbr"], g["home_abbr"])
+    return render.Root(
+        delay = 50,
+        child = render.Column(
+            expanded = True,
+            main_align = "start",
+            cross_align = "start",
+            children = [
+                render.Text(content = matchup, color = COLOR_WHITE, font = "CG-pixel-3x5-mono"),
+                render.Box(height = 1),
+                render.Text(content = g["game_time"], color = COLOR_CYAN, font = "CG-pixel-3x5-mono"),
+                render.Box(height = 1),
+                render.Text(content = "Game Day!", color = my_color, font = "CG-pixel-3x5-mono"),
+                render.Box(height = 2),
+                team_line(g["away_abbr"], sq["away_record"], away_color),
+                sp_line(g["away_probable"]),
+                render.Box(height = 1),
+                team_line(g["home_abbr"], sq["home_record"], home_color),
+                sp_line(g["home_probable"]),
+                render.Box(height = 2),
+                lineup_ticker(g, sq, 22),
+            ],
+        ),
+    )
+
+def base_diamond(g, my_color):
+    return render.Column(children = [
+        render.Row(children = [render.Box(width = 4, height = 5, color = COLOR_BLACK), make_dot(g["base2"] == 1, my_color, 5)]),
+        render.Box(height = 1),
+        render.Row(children = [make_dot(g["base3"] == 1, my_color, 5), render.Box(width = 3, height = 5, color = COLOR_BLACK), make_dot(g["base1"] == 1, my_color, 5)]),
+    ])
+
+def count_stack(g):
+    outs_vals = [1 if i < g["outs"] else 0 for i in range(3)]
+    return render.Column(children = [
+        dot_row([1 if i < g["balls"] else 0 for i in range(4)], COLOR_BALL, size = 2, gap = 1),
+        render.Box(height = 1),
+        dot_row([1 if i < g["strikes"] else 0 for i in range(3)], COLOR_STRIKE, size = 2, gap = 1),
+        render.Box(height = 1),
+        dot_row(outs_vals, COLOR_WHITE),
+    ])
+
+def render_live_square(g, my_color, is_home):
+    away_color = my_color if not is_home else COLOR_WHITE
+    home_color = my_color if is_home else COLOR_WHITE
+    score_row = render.Row(children = [
+        render.Text(content = "%s %d" % (g["away_abbr"], g["away_score"]), color = away_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "  ", color = COLOR_WHITE, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %d" % (g["home_abbr"], g["home_score"]), color = home_color, font = "CG-pixel-3x5-mono"),
+    ])
+    arrow = "v" if g["inning_half"] == "Bottom" else "^"
+    dly = " DLY" if g["is_delayed"] else ""
+    inning_row = render.Text(content = "%s %d%s" % (arrow, g["inning"], dly), color = COLOR_CYAN, font = "CG-pixel-3x5-mono")
+    diamond_row = render.Row(
+        cross_align = "center",
+        children = [
+            render.Box(width = 13, height = 11, child = base_diamond(g, my_color)),
+            render.Box(width = 8, height = 11, color = COLOR_BLACK),
+            render.Box(width = 11, height = 9, child = count_stack(g)),
+        ],
+    )
+    content = render.Column(children = [
+        score_row,
+        render.Box(height = 1),
+        inning_row,
+        render.Box(height = 2),
+        diamond_row,
+        render.Box(height = 2),
+        render.Text(content = "P: " + g["pitcher"], color = COLOR_GRAY, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "B: " + g["batter"], color = COLOR_GRAY, font = "CG-pixel-3x5-mono"),
+        render.Box(height = 2),
+    ] + rhe_table(g, away_color, home_color))
+    last_play = g["last_play"] if g["last_play"] != "" else "Waiting..."
+    scroll_row = render.Marquee(width = 64, child = render.Text(content = "Last: " + last_play, color = COLOR_WHITE, font = "CG-pixel-3x5-mono"), offset_start = 64, offset_end = 0)
+    return render.Root(
+        delay = 50,
+        child = render.Column(
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "start",
+            children = [content, scroll_row],
+        ),
+    )
+
+def render_final_square(g, sq, my_color, is_home):
+    away_color = my_color if not is_home else COLOR_WHITE
+    home_color = my_color if is_home else COLOR_WHITE
+    my_score = g["home_score"] if is_home else g["away_score"]
+    opp_score = g["away_score"] if is_home else g["home_score"]
+    won = my_score > opp_score
+    result_color = COLOR_GREEN if won else COLOR_RED
+    result_word = "W" if won else "L"
+    header_row = render.Row(children = [
+        render.Text(content = "FINAL  ", color = COLOR_YELLOW, font = "CG-pixel-3x5-mono"),
+        render.Text(content = result_word, color = result_color, font = "CG-pixel-3x5-mono"),
+    ])
+    score_row = render.Row(children = [
+        render.Text(content = "%s %d" % (g["away_abbr"], g["away_score"]), color = away_color, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "  ", color = COLOR_WHITE, font = "CG-pixel-3x5-mono"),
+        render.Text(content = "%s %d" % (g["home_abbr"], g["home_score"]), color = home_color, font = "CG-pixel-3x5-mono"),
+    ])
+    decisions = []
+    if g["winner_pitcher"] != "":
+        decisions.append(render.Text(content = "W: " + g["winner_pitcher"], color = COLOR_YELLOW, font = "CG-pixel-3x5-mono"))
+        decisions.append(render.Text(content = "L: " + g["loser_pitcher"], color = COLOR_YELLOW, font = "CG-pixel-3x5-mono"))
+        if g["save_pitcher"] != "":
+            decisions.append(render.Text(content = "SV: " + g["save_pitcher"], color = COLOR_YELLOW, font = "CG-pixel-3x5-mono"))
+    stars = []
+    for b in sq["stars"][:2]:
+        stars.append(render.Text(content = truncate(b, 16), color = COLOR_WHITE, font = "CG-pixel-3x5-mono"))
+    if len(stars) > 0:
+        stars.insert(0, render.Box(height = 2))
+    parts = []
+    if len(sq["stars"]) > 2:
+        parts.append("Stars: " + "  ".join(sq["stars"][2:]))
+    for hl in g["highlights"][:5]:
+        parts.append(hl)
+    if len(parts) == 0:
+        parts = ["Game over"]
+    content = render.Column(children = [
+        header_row,
+        render.Box(height = 1),
+        score_row,
+        render.Box(height = 2),
+    ] + rhe_table(g, away_color, home_color) + [render.Box(height = 2)] + decisions + stars)
+    scroll_row = render.Marquee(width = 64, child = render.Text(content = "   |   ".join(parts), color = COLOR_YELLOW, font = "CG-pixel-3x5-mono"), offset_start = 64, offset_end = 0)
+    return render.Root(
+        delay = 50,
+        child = render.Column(
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "start",
+            children = [content, scroll_row],
+        ),
+    )
+
+def render_status_square(abbr, name, my_color, message):
+    children = [render.Text(content = abbr, color = my_color, font = "6x13")]
+    if name != "":
+        children.append(render.Box(height = 1))
+        children.append(render.Text(content = name, color = COLOR_WHITE, font = "CG-pixel-3x5-mono"))
+    children.append(render.Box(height = 3))
+    children.append(render.Text(content = message, color = COLOR_GRAY, font = "CG-pixel-3x5-mono"))
+    return render.Root(
+        child = render.Column(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children = children,
+        ),
+    )
+
 def get_schema():
     options = []
     for tid, abbr in TEAMS.items():
@@ -434,10 +679,14 @@ def main(config):
 
     game_pk = fetch_todays_game(team_id)
     if game_pk == None:
+        if is_square():
+            return render_status_square(abbr, TEAM_NAMES.get(team_id, ""), my_color, "No game today")
         return render_no_game(abbr, my_color)
 
     data = fetch_live(game_pk)
     if data == None:
+        if is_square():
+            return render_status_square(abbr, TEAM_NAMES.get(team_id, ""), my_color, "Loading...")
         return render_loading(abbr, my_color)
 
     box = fetch_boxscore(game_pk)
@@ -447,6 +696,14 @@ def main(config):
     is_home = home_id == team_id
 
     status = g["status_code"]
+    if is_square():
+        sq = parse_square(data, box, team_id)
+        if status == "P":
+            return render_pregame_square(g, sq, my_color, sq["is_home"])
+        elif status == "F":
+            return render_final_square(g, sq, my_color, sq["is_home"])
+        else:
+            return render_live_square(g, my_color, sq["is_home"])
     if status == "P":
         return render_pregame(g, my_color)
     elif status == "F":

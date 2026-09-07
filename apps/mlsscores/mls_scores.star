@@ -147,17 +147,22 @@ def main(config):
                 else:
                     gameTime = convertedTime.format("3:04 PM")
                 if pregameDisplay == "odds":
-                    checkOdds = competition.get("odds", "NO")
-                    if checkOdds != "NO":
-                        theOdds = competition["odds"][1]
-                        checkHomeOdds = theOdds.get("homeTeamOdds", "NO")
-                        checkAwayOdds = theOdds.get("awayTeamOdds", "NO")
-                        if checkHomeOdds != "NO" and checkAwayOdds != "NO":
-                            homeScore = get_odds(float(competition["odds"][1]["homeTeamOdds"]["moneyLine"]))
-                            awayScore = get_odds(float(competition["odds"][1]["awayTeamOdds"]["moneyLine"]))
-                        else:
-                            homeScore = ""
-                            awayScore = ""
+                    # ESPN returns at most one odds entry, that entry is often
+                    # JSON null, and when it is not it frequently carries no
+                    # moneyLine. Indexing any of those directly aborts the whole
+                    # render, which leaves the panel frozen on its last frame.
+                    oddsList = competition.get("odds") or []
+                    theOdds = oddsList[0] if len(oddsList) > 0 else None
+                    homeTeamOdds = (theOdds or {}).get("homeTeamOdds") or {}
+                    awayTeamOdds = (theOdds or {}).get("awayTeamOdds") or {}
+                    checkHomeOdds = homeTeamOdds.get("moneyLine")
+                    checkAwayOdds = awayTeamOdds.get("moneyLine")
+                    if checkHomeOdds != None and checkAwayOdds != None:
+                        homeScore = get_odds(float(checkHomeOdds))
+                        awayScore = get_odds(float(checkAwayOdds))
+                    else:
+                        homeScore = ""
+                        awayScore = ""
                 elif pregameDisplay == "record":
                     checkSeries = competition.get("series", "NO")
                     checkRecord = homeCompetitor.get("records", "NO")
@@ -191,11 +196,14 @@ def main(config):
             if gameStatus == "post":
                 gameTime = s["status"]["type"]["shortDetail"]
                 gameName = s["status"]["type"]["name"]
-                checkSeries = competition.get("series", "NO")
-                checkNotes = len(competition["notes"])
+                checkSeries = competition.get("series") or "NO"
+                checkNotes = len(competition.get("notes") or [])
                 if checkSeries != "NO":
-                    seriesSummary = competition["series"]["summary"]
-                    gameTime = seriesSummary.replace("series ", "")
+                    # A soccer series object carries competitors/title/completed
+                    # but no summary, so indexing it aborts the render.
+                    seriesSummary = checkSeries.get("summary", "")
+                    if seriesSummary != "":
+                        gameTime = seriesSummary.replace("series ", "")
                 if checkNotes > 0 and checkSeries == "NO":
                     gameHeadline = competition["notes"][0]["headline"]
                     if gameHeadline.find(" - ") > 0:
