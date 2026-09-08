@@ -23,6 +23,7 @@ runtime_exceptions["apps/acfilmshowtimes"]="5s"
 runtime_exceptions["apps/perlinnoise"]="5s"
 runtime_exceptions["apps/arcraiderstats"]="3s"
 runtime_exceptions["apps/aflscores"]="3s"
+runtime_exceptions["apps/weathermap"]="3s"
 
 
 if [ -z "${TARGETS}" ]; then
