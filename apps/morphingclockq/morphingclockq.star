@@ -28,12 +28,12 @@ Geometry, segment layout and all 10 Morph0()..Morph9() transition
 functions below are a direct, line-by-line translation of Digit.cpp.
 """
 
-load("render.star", "render")
-load("time.star", "time")
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # ---------------------------------------------------------------------------
 # Digit geometry (matches Digit.cpp: segHeight = segWidth = 6)
@@ -44,8 +44,8 @@ load("schema.star", "schema")
 
 SEG_H = 6
 SEG_W = 6
-DIGIT_W = SEG_W + 2       # 8
-DIGIT_H = SEG_H * 2 + 3   # 15
+DIGIT_W = SEG_W + 2  # 8
+DIGIT_H = SEG_H * 2 + 3  # 15
 
 # Segment endpoints: (x1, y1, x2, y2), axis-aligned only (as in the original)
 SEGMENTS = {
@@ -425,7 +425,7 @@ def weather_row(lat, lon, units, show_wind_dir):
 # App
 # ---------------------------------------------------------------------------
 
-FRAME_DELAY_MS = 45   # ~ the original's animSpeed
+FRAME_DELAY_MS = 45  # ~ the original's animSpeed
 
 # How long (in frames) to hold on the settled digits before the WebP would
 # loop back to frame 0 and replay the morph. This needs to comfortably
@@ -450,7 +450,7 @@ AMPM_X = 56  # a couple px to the right of the last minute digit (ends at x=53)
 COLOR_AMPM = "#33aaff"  # matches the default digit color
 
 # Bottom row: day-of-week + date
-DATE_ROW_Y = 25       # leaves a couple of rows of breathing room below the digits
+DATE_ROW_Y = 25  # leaves a couple of rows of breathing room below the digits
 DATE_FONT = "tom-thumb"  # tiny 3x5 pixel font, fits comfortably in the remaining space
 COLOR_DATE = "#33cc33"
 
@@ -510,7 +510,7 @@ def main(config):
     # shown most of the time.
     for i in range(4):
         last = per_digit[i][len(per_digit[i]) - 1]
-        while len(per_digit[i]) < max_len:
+        for _n in range(max_len - len(per_digit[i])):
             per_digit[i].append(last)
         for _n in range(HOLD_FRAMES):
             per_digit[i].append(last)
