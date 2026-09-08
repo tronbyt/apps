@@ -107,6 +107,13 @@ UNIT_FORMATS = [
 ]
 DEFAULT_UNIT_FORMAT = UNIT_FORMATS[0]
 
+SIGNIFICANT_WEATHER_THRESHOLDS = [
+    schema.Option(display = "%d%%" % percentage, value = "%d" % percentage)
+    for percentage in range(1, 21)
+]
+DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD = SIGNIFICANT_WEATHER_THRESHOLDS[4]
+VISIBLE_MAP_BOUNDS = (0, 16, 64, 48)
+
 # There theoretically are zoom levels 0 through 23, but zooming in closer
 # than an area 9x9 km is of questionable usability due to Tidbyt screen size.
 #
@@ -204,12 +211,12 @@ DEFAULT_LOCATION = """
 }
 """
 
-def render_frame(frame, image, opts):
+def render_frame(frame, map_image, opts):
     """Render a frame of the weather layer animation.
 
     Args:
         frame: A frame object.
-        image: A binary image.
+        map_image: The decoded radar image widget.
         opts: A struct of rendering options.
 
     Returns:
@@ -231,11 +238,7 @@ def render_frame(frame, image, opts):
     return render.Stack(children = [
         render.Padding(
             pad = (0, -16, 0, 0),
-            child = render.Image(
-                src = image,
-                width = 64,
-                height = 64,
-            ),
+            child = map_image,
         ),
         render.Box(
             height = 7,
@@ -358,6 +361,8 @@ def main(config):
         time_format = config.get("time_format", DEFAULT_TIME_FORMAT.value),
         unit_format = config.get("unit_format", DEFAULT_UNIT_FORMAT.value),
         snow = "1" if config.bool("snow") else "0",
+        only_significant_weather = config.bool("only_significant_weather", False),
+        significant_weather_threshold = float(config.get("significant_weather_threshold", DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD.value)),
     )
 
     # Fetch all radar images.
@@ -367,8 +372,31 @@ def main(config):
     if any([image == None for (frame, image) in frames_and_images]):
         return render_error()
 
+    map_images = [
+        (frame, render.Image(src = image, width = 64, height = 64))
+        for (frame, image) in frames_and_images
+    ]
+
+    eligible = True
+    peak_coverage = None
+    if getattr(opts, "only_significant_weather"):
+        coverages = [
+            map_image.opaque_pixel_percentage(bounds = VISIBLE_MAP_BOUNDS)
+            for (frame, map_image) in map_images
+        ]
+        peak_coverage = max(coverages) if len(coverages) > 0 else 0.0
+        eligible = peak_coverage >= getattr(opts, "significant_weather_threshold")
+
+    print("Only significant weather enabled: %s" % getattr(opts, "only_significant_weather"))
+    print("Peak precipitation coverage: %s" % ("not evaluated" if peak_coverage == None else "%s%%" % humanize.float("#.##", peak_coverage)))
+    print("Significant weather threshold: %s%%" % humanize.float("#.##", getattr(opts, "significant_weather_threshold")))
+    print("Eligible for display: %s" % eligible)
+
+    if not eligible:
+        return []
+
     # Render a frame for each item of radar data in the past and in the forecast.
-    frames = [render_frame(frame, image, opts) for (frame, image) in frames_and_images]
+    frames = [render_frame(frame, map_image, opts) for (frame, map_image) in map_images]
 
     return render.Root(
         child = render.Animation(children = frames),
@@ -431,6 +459,21 @@ def get_schema():
                 desc = "Enable or disable snow layer.",
                 icon = "snowflake",
                 default = True,
+            ),
+            schema.Toggle(
+                id = "only_significant_weather",
+                name = "Only display when significant weather is present",
+                desc = "Skip this app when peak precipitation coverage across the radar animation is below the configured threshold.",
+                icon = "cloudRain",
+                default = False,
+            ),
+            schema.Dropdown(
+                id = "significant_weather_threshold",
+                name = "Peak Weather Coverage",
+                desc = "Choose how much of the visible map must contain precipitation. 5–10% recommended.",
+                icon = "percent",
+                default = DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD.value,
+                options = SIGNIFICANT_WEATHER_THRESHOLDS,
             ),
         ],
     )
