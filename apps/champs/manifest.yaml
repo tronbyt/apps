@@ -1,3 +1,4 @@
+---
 id: champs
 name: Champs
 summary: Random past championships
@@ -6,3 +7,6 @@ author: Matt Thommes
 packageName: champs
 fileName: champs.star
 recommendedInterval: 30
+published: '2026-09-09T14:31:44Z'
+updated: '2026-09-09T14:31:44Z'
+tags: []
