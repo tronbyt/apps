@@ -1,0 +1,17 @@
+---
+id: wpbl-standings
+name: WPBL Standings
+summary: WPBL baseball standings
+desc: Displays the current standings (regular season and postseason) for the Women's Pro Baseball League.
+author: zandif
+fileName: wpbl_standings.star
+packageName: wpblstandings
+recommendedInterval: 30
+supports2x: true
+category: sports
+tags:
+  - baseball
+  - wpbl
+  - sports
+  - standings
+  - women's sports
