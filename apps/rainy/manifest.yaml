@@ -1,0 +1,14 @@
+﻿---
+id: rainy
+name: Rainy?
+summary: Rain intensity ticker
+desc: Two 24-hour rain-intensity bars from Open-Meteo hourly precipitation. Houston default.
+author: SamuLab
+fileName: rainy.star
+packageName: rainy
+recommendedInterval: 10
+category: weather
+tags:
+  - weather
+  - rain
+  - forecast
