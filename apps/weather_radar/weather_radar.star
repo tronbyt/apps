@@ -8,16 +8,9 @@ Author: brombomb
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("images/sample_radar_0.png", SAMPLE_RADAR_0_ASSET = "file")
-load("images/sample_radar_1.png", SAMPLE_RADAR_1_ASSET = "file")
-load("images/sample_radar_2.png", SAMPLE_RADAR_2_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-
-SAMPLE_RADAR_0 = SAMPLE_RADAR_0_ASSET.readall()
-SAMPLE_RADAR_1 = SAMPLE_RADAR_1_ASSET.readall()
-SAMPLE_RADAR_2 = SAMPLE_RADAR_2_ASSET.readall()
 
 WEATHER_MAPS_URL = "https://api.rainviewer.com/public/weather-maps.json"
 IMAGE_URL_LAYOUT = "{host}{path}/256/{zoom}/{lat}/{lng}/{color}/0_{snow}.png"
@@ -269,13 +262,9 @@ def main(config):
             if img_bytes:
                 frames_raw.append((f, img_bytes))
 
-    # If network/API failed, fall back to sequential pre-cached sample frames
+    # If network/API failed or no frames returned, skip rendering
     if not frames_raw:
-        frames_raw = [
-            ({"time": 0}, SAMPLE_RADAR_0),
-            ({"time": 0}, SAMPLE_RADAR_1),
-            ({"time": 0}, SAMPLE_RADAR_2),
-        ]
+        return []
 
     # Check precipitation detection (RainViewer empty tiles are <= 400 bytes)
     if only_precip:
