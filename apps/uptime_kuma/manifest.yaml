@@ -1,0 +1,18 @@
+---
+id: uptime-kuma
+name: Uptime Kuma
+summary: Uptime Kuma status monitor
+desc: Track service status, uptime percentage, and incident alerts from your Uptime Kuma status pages.
+author: brombomb
+fileName: uptime_kuma.star
+packageName: uptimekuma
+supports2x: true
+recommendedInterval: 1
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - automation
+published: '2026-09-11T04:41:30Z'
+updated: '2026-09-11T04:41:30Z'
