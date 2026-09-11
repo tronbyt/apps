@@ -330,7 +330,7 @@ def render_service_card(scale, width, card_height, m, card_idx, total_cards, fon
         ),
     )
 
-def render_carousel(scale, width, height, title, monitors, up_count, down_count, kuma_icon, font_title, font_main, font_tiny):
+def render_carousel(scale, width, height, title, monitors, up_count, down_count, kuma_icon, font_title, font_main, font_tiny, hold_frames = 70):
     header = render_header(scale, width, kuma_icon, title, up_count, down_count, font_title, font_tiny)
     header_height = 13 * scale
     card_height = height - header_height - (1 * scale)
@@ -351,11 +351,72 @@ def render_carousel(scale, width, height, title, monitors, up_count, down_count,
     if total == 1:
         body = cards[0]
     else:
-        base_hold = 36 if total <= 4 else (24 if total <= 8 else 14)
-        hold_frames = base_hold * scale
         card_frames = []
 
-        swipe_offsets = [54, 44, 35, 27, 20, 14, 9, 5, 2, 1] if scale == 1 else [110, 96, 83, 71, 60, 50, 41, 33, 26, 20, 15, 11, 8, 5, 3, 2, 1]
+        # Smooth ease-in-out horizontal card swipe (~1.0s transition)
+        swipe_offsets = [
+            64,
+            63,
+            62,
+            60,
+            57,
+            54,
+            51,
+            47,
+            43,
+            38,
+            32,
+            26,
+            21,
+            17,
+            13,
+            10,
+            7,
+            4,
+            2,
+            1,
+        ] if scale == 1 else [
+            128,
+            127,
+            126,
+            125,
+            123,
+            122,
+            120,
+            117,
+            115,
+            112,
+            109,
+            106,
+            102,
+            98,
+            94,
+            90,
+            85,
+            80,
+            75,
+            70,
+            64,
+            58,
+            53,
+            48,
+            43,
+            38,
+            34,
+            30,
+            26,
+            22,
+            19,
+            16,
+            13,
+            11,
+            8,
+            6,
+            5,
+            3,
+            2,
+            1,
+        ]
 
         for i in range(total):
             cur_card = cards[i]
@@ -532,6 +593,16 @@ def main(config):
     kuma_icon = KUMA_ICON_ASSET.readall()
 
     if mode == "carousel":
+        speed_option = config.str("carousel_speed", "normal")
+        base_hold = 70
+        if speed_option == "slow":
+            base_hold = 100
+        elif speed_option == "relaxed":
+            base_hold = 80
+        elif speed_option == "fast":
+            base_hold = 50
+        hold_frames = base_hold * scale
+
         root_child = render_carousel(
             scale,
             width,
@@ -544,6 +615,7 @@ def main(config):
             font_title,
             font_main,
             font_tiny,
+            hold_frames = hold_frames,
         )
     elif mode == "matrix":
         root_child = render_matrix(
@@ -576,6 +648,7 @@ def main(config):
     delay = 50 // scale
     return render.Root(
         delay = delay,
+        show_full_animation = True if mode == "carousel" else False,
         child = render.Box(
             width = width,
             height = height,
@@ -589,6 +662,13 @@ def get_schema():
         schema.Option(display = "Service Dashboard & Alert", value = "dashboard"),
         schema.Option(display = "Monitors Carousel", value = "carousel"),
         schema.Option(display = "Status Dot Matrix", value = "matrix"),
+    ]
+
+    carousel_speed_options = [
+        schema.Option(display = "Normal (3.5s hold)", value = "normal"),
+        schema.Option(display = "Relaxed (4s hold)", value = "relaxed"),
+        schema.Option(display = "Slow (5s hold)", value = "slow"),
+        schema.Option(display = "Brisk (2.5s hold)", value = "fast"),
     ]
 
     return schema.Schema(
@@ -615,6 +695,14 @@ def get_schema():
                 icon = "cubesStacked",
                 default = "dashboard",
                 options = modes,
+            ),
+            schema.Dropdown(
+                id = "carousel_speed",
+                name = "Carousel Speed",
+                desc = "Hold duration per card before transitioning in carousel mode",
+                icon = "gaugeHigh",
+                default = "normal",
+                options = carousel_speed_options,
             ),
             schema.Toggle(
                 id = "alert_only",
