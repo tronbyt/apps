@@ -1,0 +1,2612 @@
+[
+ {
+  "league": "NFL",
+  "year": 1967,
+  "title": "Super Bowl I",
+  "winner": "Packers",
+  "winner_abbr": "GB",
+  "loser": "Chiefs",
+  "loser_abbr": "KC",
+  "score": "35-10"
+ },
+ {
+  "league": "NFL",
+  "year": 1968,
+  "title": "Super Bowl II",
+  "winner": "Packers",
+  "winner_abbr": "GB",
+  "loser": "Oakland Raiders",
+  "loser_abbr": "LV",
+  "score": "33-14"
+ },
+ {
+  "league": "NFL",
+  "year": 1969,
+  "title": "Super Bowl III",
+  "winner": "Jets",
+  "winner_abbr": "NYJ",
+  "loser": "Baltimore Colts",
+  "loser_abbr": "IND",
+  "score": "16-7"
+ },
+ {
+  "league": "NFL",
+  "year": 1970,
+  "title": "Super Bowl IV",
+  "winner": "Chiefs",
+  "winner_abbr": "KC",
+  "loser": "Vikings",
+  "loser_abbr": "MIN",
+  "score": "23-7"
+ },
+ {
+  "league": "NFL",
+  "year": 1971,
+  "title": "Super Bowl V",
+  "winner": "Baltimore Colts",
+  "winner_abbr": "IND",
+  "loser": "Cowboys",
+  "loser_abbr": "DAL",
+  "score": "16-13"
+ },
+ {
+  "league": "NFL",
+  "year": 1972,
+  "title": "Super Bowl VI",
+  "winner": "Cowboys",
+  "winner_abbr": "DAL",
+  "loser": "Dolphins",
+  "loser_abbr": "MIA",
+  "score": "24-3"
+ },
+ {
+  "league": "NFL",
+  "year": 1973,
+  "title": "Super Bowl VII",
+  "winner": "Dolphins",
+  "winner_abbr": "MIA",
+  "loser": "Redskins",
+  "loser_abbr": "WSH",
+  "score": "14-7"
+ },
+ {
+  "league": "NFL",
+  "year": 1974,
+  "title": "Super Bowl VIII",
+  "winner": "Dolphins",
+  "winner_abbr": "MIA",
+  "loser": "Vikings",
+  "loser_abbr": "MIN",
+  "score": "24-7"
+ },
+ {
+  "league": "NFL",
+  "year": 1975,
+  "title": "Super Bowl IX",
+  "winner": "Steelers",
+  "winner_abbr": "PIT",
+  "loser": "Vikings",
+  "loser_abbr": "MIN",
+  "score": "16-6"
+ },
+ {
+  "league": "NFL",
+  "year": 1976,
+  "title": "Super Bowl X",
+  "winner": "Steelers",
+  "winner_abbr": "PIT",
+  "loser": "Cowboys",
+  "loser_abbr": "DAL",
+  "score": "21-17"
+ },
+ {
+  "league": "NFL",
+  "year": 1977,
+  "title": "Super Bowl XI",
+  "winner": "Oakland Raiders",
+  "winner_abbr": "LV",
+  "loser": "Vikings",
+  "loser_abbr": "MIN",
+  "score": "32-14"
+ },
+ {
+  "league": "NFL",
+  "year": 1978,
+  "title": "Super Bowl XII",
+  "winner": "Cowboys",
+  "winner_abbr": "DAL",
+  "loser": "Broncos",
+  "loser_abbr": "DEN",
+  "score": "27-10"
+ },
+ {
+  "league": "NFL",
+  "year": 1979,
+  "title": "Super Bowl XIII",
+  "winner": "Steelers",
+  "winner_abbr": "PIT",
+  "loser": "Cowboys",
+  "loser_abbr": "DAL",
+  "score": "35-31"
+ },
+ {
+  "league": "NFL",
+  "year": 1980,
+  "title": "Super Bowl XIV",
+  "winner": "Steelers",
+  "winner_abbr": "PIT",
+  "loser": "Rams",
+  "loser_abbr": "LAR",
+  "score": "31-19"
+ },
+ {
+  "league": "NFL",
+  "year": 1981,
+  "title": "Super Bowl XV",
+  "winner": "Oakland Raiders",
+  "winner_abbr": "LV",
+  "loser": "Eagles",
+  "loser_abbr": "PHI",
+  "score": "27-10"
+ },
+ {
+  "league": "NFL",
+  "year": 1982,
+  "title": "Super Bowl XVI",
+  "winner": "49ers",
+  "winner_abbr": "SF",
+  "loser": "Bengals",
+  "loser_abbr": "CIN",
+  "score": "26-21"
+ },
+ {
+  "league": "NFL",
+  "year": 1983,
+  "title": "Super Bowl XVII",
+  "winner": "Redskins",
+  "winner_abbr": "WSH",
+  "loser": "Dolphins",
+  "loser_abbr": "MIA",
+  "score": "27-17"
+ },
+ {
+  "league": "NFL",
+  "year": 1984,
+  "title": "Super Bowl XVIII",
+  "winner": "L.A. Raiders",
+  "winner_abbr": "LV",
+  "loser": "Redskins",
+  "loser_abbr": "WSH",
+  "score": "38-9"
+ },
+ {
+  "league": "NFL",
+  "year": 1985,
+  "title": "Super Bowl XIX",
+  "winner": "49ers",
+  "winner_abbr": "SF",
+  "loser": "Dolphins",
+  "loser_abbr": "MIA",
+  "score": "38-16"
+ },
+ {
+  "league": "NFL",
+  "year": 1986,
+  "title": "Super Bowl XX",
+  "winner": "Bears",
+  "winner_abbr": "CHI",
+  "loser": "Patriots",
+  "loser_abbr": "NE",
+  "score": "46-10"
+ },
+ {
+  "league": "NFL",
+  "year": 1987,
+  "title": "Super Bowl XXI",
+  "winner": "Giants",
+  "winner_abbr": "NYG",
+  "loser": "Broncos",
+  "loser_abbr": "DEN",
+  "score": "39-20"
+ },
+ {
+  "league": "NFL",
+  "year": 1988,
+  "title": "Super Bowl XXII",
+  "winner": "Redskins",
+  "winner_abbr": "WSH",
+  "loser": "Broncos",
+  "loser_abbr": "DEN",
+  "score": "42-10"
+ },
+ {
+  "league": "NFL",
+  "year": 1989,
+  "title": "Super Bowl XXIII",
+  "winner": "49ers",
+  "winner_abbr": "SF",
+  "loser": "Bengals",
+  "loser_abbr": "CIN",
+  "score": "20-16"
+ },
+ {
+  "league": "NFL",
+  "year": 1990,
+  "title": "Super Bowl XXIV",
+  "winner": "49ers",
+  "winner_abbr": "SF",
+  "loser": "Broncos",
+  "loser_abbr": "DEN",
+  "score": "55-10"
+ },
+ {
+  "league": "NFL",
+  "year": 1991,
+  "title": "Super Bowl XXV",
+  "winner": "Giants",
+  "winner_abbr": "NYG",
+  "loser": "Bills",
+  "loser_abbr": "BUF",
+  "score": "20-19"
+ },
+ {
+  "league": "NFL",
+  "year": 1992,
+  "title": "Super Bowl XXVI",
+  "winner": "Redskins",
+  "winner_abbr": "WSH",
+  "loser": "Bills",
+  "loser_abbr": "BUF",
+  "score": "37-24"
+ },
+ {
+  "league": "NFL",
+  "year": 1993,
+  "title": "Super Bowl XXVII",
+  "winner": "Cowboys",
+  "winner_abbr": "DAL",
+  "loser": "Bills",
+  "loser_abbr": "BUF",
+  "score": "52-17"
+ },
+ {
+  "league": "NFL",
+  "year": 1994,
+  "title": "Super Bowl XXVIII",
+  "winner": "Cowboys",
+  "winner_abbr": "DAL",
+  "loser": "Bills",
+  "loser_abbr": "BUF",
+  "score": "30-13"
+ },
+ {
+  "league": "NFL",
+  "year": 1995,
+  "title": "Super Bowl XXIX",
+  "winner": "49ers",
+  "winner_abbr": "SF",
+  "loser": "San Diego Chargers",
+  "loser_abbr": "LAC",
+  "score": "49-26"
+ },
+ {
+  "league": "NFL",
+  "year": 1996,
+  "title": "Super Bowl XXX",
+  "winner": "Cowboys",
+  "winner_abbr": "DAL",
+  "loser": "Steelers",
+  "loser_abbr": "PIT",
+  "score": "27-17"
+ },
+ {
+  "league": "NFL",
+  "year": 1997,
+  "title": "Super Bowl XXXI",
+  "winner": "Packers",
+  "winner_abbr": "GB",
+  "loser": "Patriots",
+  "loser_abbr": "NE",
+  "score": "35-21"
+ },
+ {
+  "league": "NFL",
+  "year": 1998,
+  "title": "Super Bowl XXXII",
+  "winner": "Broncos",
+  "winner_abbr": "DEN",
+  "loser": "Packers",
+  "loser_abbr": "GB",
+  "score": "31-24"
+ },
+ {
+  "league": "NFL",
+  "year": 1999,
+  "title": "Super Bowl XXXIII",
+  "winner": "Broncos",
+  "winner_abbr": "DEN",
+  "loser": "Falcons",
+  "loser_abbr": "ATL",
+  "score": "34-19"
+ },
+ {
+  "league": "NFL",
+  "year": 2000,
+  "title": "Super Bowl XXXIV",
+  "winner": "St. Louis Rams",
+  "winner_abbr": "LAR",
+  "loser": "Titans",
+  "loser_abbr": "TEN",
+  "score": "23-16"
+ },
+ {
+  "league": "NFL",
+  "year": 2001,
+  "title": "Super Bowl XXXV",
+  "winner": "Ravens",
+  "winner_abbr": "BAL",
+  "loser": "Giants",
+  "loser_abbr": "NYG",
+  "score": "34-7"
+ },
+ {
+  "league": "NFL",
+  "year": 2002,
+  "title": "Super Bowl XXXVI",
+  "winner": "Patriots",
+  "winner_abbr": "NE",
+  "loser": "St. Louis Rams",
+  "loser_abbr": "LAR",
+  "score": "20-17"
+ },
+ {
+  "league": "NFL",
+  "year": 2003,
+  "title": "Super Bowl XXXVII",
+  "winner": "Buccaneers",
+  "winner_abbr": "TB",
+  "loser": "Oakland Raiders",
+  "loser_abbr": "LV",
+  "score": "48-21"
+ },
+ {
+  "league": "NFL",
+  "year": 2004,
+  "title": "Super Bowl XXXVIII",
+  "winner": "Patriots",
+  "winner_abbr": "NE",
+  "loser": "Panthers",
+  "loser_abbr": "CAR",
+  "score": "32-29"
+ },
+ {
+  "league": "NFL",
+  "year": 2005,
+  "title": "Super Bowl XXXIX",
+  "winner": "Patriots",
+  "winner_abbr": "NE",
+  "loser": "Eagles",
+  "loser_abbr": "PHI",
+  "score": "24-21"
+ },
+ {
+  "league": "NFL",
+  "year": 2006,
+  "title": "Super Bowl XL",
+  "winner": "Steelers",
+  "winner_abbr": "PIT",
+  "loser": "Seahawks",
+  "loser_abbr": "SEA",
+  "score": "21-10"
+ },
+ {
+  "league": "NFL",
+  "year": 2007,
+  "title": "Super Bowl XLI",
+  "winner": "Colts",
+  "winner_abbr": "IND",
+  "loser": "Bears",
+  "loser_abbr": "CHI",
+  "score": "29-17"
+ },
+ {
+  "league": "NFL",
+  "year": 2008,
+  "title": "Super Bowl XLII",
+  "winner": "Giants",
+  "winner_abbr": "NYG",
+  "loser": "Patriots",
+  "loser_abbr": "NE",
+  "score": "17-14"
+ },
+ {
+  "league": "NFL",
+  "year": 2009,
+  "title": "Super Bowl XLIII",
+  "winner": "Steelers",
+  "winner_abbr": "PIT",
+  "loser": "Cardinals",
+  "loser_abbr": "ARI",
+  "score": "27-23"
+ },
+ {
+  "league": "NFL",
+  "year": 2010,
+  "title": "Super Bowl XLIV",
+  "winner": "Saints",
+  "winner_abbr": "NO",
+  "loser": "Colts",
+  "loser_abbr": "IND",
+  "score": "31-17"
+ },
+ {
+  "league": "NFL",
+  "year": 2011,
+  "title": "Super Bowl XLV",
+  "winner": "Packers",
+  "winner_abbr": "GB",
+  "loser": "Steelers",
+  "loser_abbr": "PIT",
+  "score": "31-25"
+ },
+ {
+  "league": "NFL",
+  "year": 2012,
+  "title": "Super Bowl XLVI",
+  "winner": "Giants",
+  "winner_abbr": "NYG",
+  "loser": "Patriots",
+  "loser_abbr": "NE",
+  "score": "21-17"
+ },
+ {
+  "league": "NFL",
+  "year": 2013,
+  "title": "Super Bowl XLVII",
+  "winner": "Ravens",
+  "winner_abbr": "BAL",
+  "loser": "49ers",
+  "loser_abbr": "SF",
+  "score": "34-31"
+ },
+ {
+  "league": "NFL",
+  "year": 2014,
+  "title": "Super Bowl XLVIII",
+  "winner": "Seahawks",
+  "winner_abbr": "SEA",
+  "loser": "Broncos",
+  "loser_abbr": "DEN",
+  "score": "43-8"
+ },
+ {
+  "league": "NFL",
+  "year": 2015,
+  "title": "Super Bowl XLIX",
+  "winner": "Patriots",
+  "winner_abbr": "NE",
+  "loser": "Seahawks",
+  "loser_abbr": "SEA",
+  "score": "28-24"
+ },
+ {
+  "league": "NFL",
+  "year": 2016,
+  "title": "Super Bowl 50",
+  "winner": "Broncos",
+  "winner_abbr": "DEN",
+  "loser": "Panthers",
+  "loser_abbr": "CAR",
+  "score": "24-10"
+ },
+ {
+  "league": "NFL",
+  "year": 2017,
+  "title": "Super Bowl LI",
+  "winner": "Patriots",
+  "winner_abbr": "NE",
+  "loser": "Falcons",
+  "loser_abbr": "ATL",
+  "score": "34-28"
+ },
+ {
+  "league": "NFL",
+  "year": 2018,
+  "title": "Super Bowl LII",
+  "winner": "Eagles",
+  "winner_abbr": "PHI",
+  "loser": "Patriots",
+  "loser_abbr": "NE",
+  "score": "41-33"
+ },
+ {
+  "league": "NFL",
+  "year": 2019,
+  "title": "Super Bowl LIII",
+  "winner": "Patriots",
+  "winner_abbr": "NE",
+  "loser": "Rams",
+  "loser_abbr": "LAR",
+  "score": "13-3"
+ },
+ {
+  "league": "NFL",
+  "year": 2020,
+  "title": "Super Bowl LIV",
+  "winner": "Chiefs",
+  "winner_abbr": "KC",
+  "loser": "49ers",
+  "loser_abbr": "SF",
+  "score": "31-20"
+ },
+ {
+  "league": "NFL",
+  "year": 2021,
+  "title": "Super Bowl LV",
+  "winner": "Buccaneers",
+  "winner_abbr": "TB",
+  "loser": "Chiefs",
+  "loser_abbr": "KC",
+  "score": "31-9"
+ },
+ {
+  "league": "NFL",
+  "year": 2022,
+  "title": "Super Bowl LVI",
+  "winner": "Rams",
+  "winner_abbr": "LAR",
+  "loser": "Bengals",
+  "loser_abbr": "CIN",
+  "score": "23-20"
+ },
+ {
+  "league": "NFL",
+  "year": 2023,
+  "title": "Super Bowl LVII",
+  "winner": "Chiefs",
+  "winner_abbr": "KC",
+  "loser": "Eagles",
+  "loser_abbr": "PHI",
+  "score": "38-35"
+ },
+ {
+  "league": "NFL",
+  "year": 2024,
+  "title": "Super Bowl LVIII",
+  "winner": "Chiefs",
+  "winner_abbr": "KC",
+  "loser": "49ers",
+  "loser_abbr": "SF",
+  "score": "25-22"
+ },
+ {
+  "league": "NFL",
+  "year": 2025,
+  "title": "Super Bowl LIX",
+  "winner": "Eagles",
+  "winner_abbr": "PHI",
+  "loser": "Chiefs",
+  "loser_abbr": "KC",
+  "score": "40-22"
+ },
+ {
+  "league": "NFL",
+  "year": 2026,
+  "title": "Super Bowl LX",
+  "winner": "Seahawks",
+  "winner_abbr": "SEA",
+  "loser": "Patriots",
+  "loser_abbr": "NE",
+  "score": "29-13"
+ },
+ {
+  "league": "MLB",
+  "year": 1903,
+  "title": "World Series",
+  "winner": "Boston Americans",
+  "winner_abbr": "BOS",
+  "loser": "Pirates",
+  "loser_abbr": "PIT",
+  "score": "5-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1905,
+  "title": "World Series",
+  "winner": "N.Y. Giants",
+  "winner_abbr": "SF",
+  "loser": "Phila. Athletics",
+  "loser_abbr": "ATH",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1906,
+  "title": "World Series",
+  "winner": "White Sox",
+  "winner_abbr": "CWS",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1907,
+  "title": "World Series",
+  "winner": "Cubs",
+  "winner_abbr": "CHC",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1908,
+  "title": "World Series",
+  "winner": "Cubs",
+  "winner_abbr": "CHC",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1909,
+  "title": "World Series",
+  "winner": "Pirates",
+  "winner_abbr": "PIT",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1910,
+  "title": "World Series",
+  "winner": "Phila. Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1911,
+  "title": "World Series",
+  "winner": "Phila. Athletics",
+  "winner_abbr": "ATH",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1912,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1913,
+  "title": "World Series",
+  "winner": "Phila. Athletics",
+  "winner_abbr": "ATH",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1914,
+  "title": "World Series",
+  "winner": "Boston Braves",
+  "winner_abbr": "ATL",
+  "loser": "Phila. Athletics",
+  "loser_abbr": "ATH",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1915,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Phillies",
+  "loser_abbr": "PHI",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1916,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Brooklyn Robins",
+  "loser_abbr": "LAD",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1917,
+  "title": "World Series",
+  "winner": "White Sox",
+  "winner_abbr": "CWS",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1918,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1919,
+  "title": "World Series",
+  "winner": "Reds",
+  "winner_abbr": "CIN",
+  "loser": "White Sox",
+  "loser_abbr": "CWS",
+  "score": "5-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1920,
+  "title": "World Series",
+  "winner": "Indians",
+  "winner_abbr": "CLE",
+  "loser": "Brooklyn Robins",
+  "loser_abbr": "LAD",
+  "score": "5-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1921,
+  "title": "World Series",
+  "winner": "N.Y. Giants",
+  "winner_abbr": "SF",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "5-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1922,
+  "title": "World Series",
+  "winner": "N.Y. Giants",
+  "winner_abbr": "SF",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1923,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1924,
+  "title": "World Series",
+  "winner": "Wash. Senators",
+  "winner_abbr": "MIN",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1925,
+  "title": "World Series",
+  "winner": "Pirates",
+  "winner_abbr": "PIT",
+  "loser": "Wash. Senators",
+  "loser_abbr": "MIN",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1926,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1927,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Pirates",
+  "loser_abbr": "PIT",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1928,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1929,
+  "title": "World Series",
+  "winner": "Phila. Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1930,
+  "title": "World Series",
+  "winner": "Phila. Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1931,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Phila. Athletics",
+  "loser_abbr": "ATH",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1932,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1933,
+  "title": "World Series",
+  "winner": "N.Y. Giants",
+  "winner_abbr": "SF",
+  "loser": "Wash. Senators",
+  "loser_abbr": "MIN",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1934,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1935,
+  "title": "World Series",
+  "winner": "Tigers",
+  "winner_abbr": "DET",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1936,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1937,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1938,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1939,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Reds",
+  "loser_abbr": "CIN",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1940,
+  "title": "World Series",
+  "winner": "Reds",
+  "winner_abbr": "CIN",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1941,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Brooklyn Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1942,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1943,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1944,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "St. Louis Browns",
+  "loser_abbr": "BAL",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1945,
+  "title": "World Series",
+  "winner": "Tigers",
+  "winner_abbr": "DET",
+  "loser": "Cubs",
+  "loser_abbr": "CHC",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1946,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Red Sox",
+  "loser_abbr": "BOS",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1947,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Brooklyn Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1948,
+  "title": "World Series",
+  "winner": "Indians",
+  "winner_abbr": "CLE",
+  "loser": "Boston Braves",
+  "loser_abbr": "ATL",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1949,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Brooklyn Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1950,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Phillies",
+  "loser_abbr": "PHI",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1951,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "N.Y. Giants",
+  "loser_abbr": "SF",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1952,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Brooklyn Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1953,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Brooklyn Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1954,
+  "title": "World Series",
+  "winner": "N.Y. Giants",
+  "winner_abbr": "SF",
+  "loser": "Indians",
+  "loser_abbr": "CLE",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1955,
+  "title": "World Series",
+  "winner": "Brooklyn Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1956,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Brooklyn Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1957,
+  "title": "World Series",
+  "winner": "Milwaukee Braves",
+  "winner_abbr": "ATL",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1958,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Milwaukee Braves",
+  "loser_abbr": "ATL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1959,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "White Sox",
+  "loser_abbr": "CWS",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1960,
+  "title": "World Series",
+  "winner": "Pirates",
+  "winner_abbr": "PIT",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1961,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Reds",
+  "loser_abbr": "CIN",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1962,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Giants",
+  "loser_abbr": "SF",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1963,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1964,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1965,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Twins",
+  "loser_abbr": "MIN",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1966,
+  "title": "World Series",
+  "winner": "Orioles",
+  "winner_abbr": "BAL",
+  "loser": "Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1967,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Red Sox",
+  "loser_abbr": "BOS",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1968,
+  "title": "World Series",
+  "winner": "Tigers",
+  "winner_abbr": "DET",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1969,
+  "title": "World Series",
+  "winner": "Mets",
+  "winner_abbr": "NYM",
+  "loser": "Orioles",
+  "loser_abbr": "BAL",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1970,
+  "title": "World Series",
+  "winner": "Orioles",
+  "winner_abbr": "BAL",
+  "loser": "Reds",
+  "loser_abbr": "CIN",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1971,
+  "title": "World Series",
+  "winner": "Pirates",
+  "winner_abbr": "PIT",
+  "loser": "Orioles",
+  "loser_abbr": "BAL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1972,
+  "title": "World Series",
+  "winner": "Oakland Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Reds",
+  "loser_abbr": "CIN",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1973,
+  "title": "World Series",
+  "winner": "Oakland Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Mets",
+  "loser_abbr": "NYM",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1974,
+  "title": "World Series",
+  "winner": "Oakland Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1975,
+  "title": "World Series",
+  "winner": "Reds",
+  "winner_abbr": "CIN",
+  "loser": "Red Sox",
+  "loser_abbr": "BOS",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1976,
+  "title": "World Series",
+  "winner": "Reds",
+  "winner_abbr": "CIN",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1977,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1978,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1979,
+  "title": "World Series",
+  "winner": "Pirates",
+  "winner_abbr": "PIT",
+  "loser": "Orioles",
+  "loser_abbr": "BAL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1980,
+  "title": "World Series",
+  "winner": "Phillies",
+  "winner_abbr": "PHI",
+  "loser": "Royals",
+  "loser_abbr": "KC",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1981,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1982,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Brewers",
+  "loser_abbr": "MIL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1983,
+  "title": "World Series",
+  "winner": "Orioles",
+  "winner_abbr": "BAL",
+  "loser": "Phillies",
+  "loser_abbr": "PHI",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1984,
+  "title": "World Series",
+  "winner": "Tigers",
+  "winner_abbr": "DET",
+  "loser": "Padres",
+  "loser_abbr": "SD",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1985,
+  "title": "World Series",
+  "winner": "Royals",
+  "winner_abbr": "KC",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1986,
+  "title": "World Series",
+  "winner": "Mets",
+  "winner_abbr": "NYM",
+  "loser": "Red Sox",
+  "loser_abbr": "BOS",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1987,
+  "title": "World Series",
+  "winner": "Twins",
+  "winner_abbr": "MIN",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1988,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Oakland Athletics",
+  "loser_abbr": "ATH",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 1989,
+  "title": "World Series",
+  "winner": "Oakland Athletics",
+  "winner_abbr": "ATH",
+  "loser": "Giants",
+  "loser_abbr": "SF",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1990,
+  "title": "World Series",
+  "winner": "Reds",
+  "winner_abbr": "CIN",
+  "loser": "Oakland Athletics",
+  "loser_abbr": "ATH",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1991,
+  "title": "World Series",
+  "winner": "Twins",
+  "winner_abbr": "MIN",
+  "loser": "Braves",
+  "loser_abbr": "ATL",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1992,
+  "title": "World Series",
+  "winner": "Blue Jays",
+  "winner_abbr": "TOR",
+  "loser": "Braves",
+  "loser_abbr": "ATL",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1993,
+  "title": "World Series",
+  "winner": "Blue Jays",
+  "winner_abbr": "TOR",
+  "loser": "Phillies",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1995,
+  "title": "World Series",
+  "winner": "Braves",
+  "winner_abbr": "ATL",
+  "loser": "Indians",
+  "loser_abbr": "CLE",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1996,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Braves",
+  "loser_abbr": "ATL",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 1997,
+  "title": "World Series",
+  "winner": "Florida Marlins",
+  "winner_abbr": "MIA",
+  "loser": "Indians",
+  "loser_abbr": "CLE",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 1998,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Padres",
+  "loser_abbr": "SD",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 1999,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Braves",
+  "loser_abbr": "ATL",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 2000,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Mets",
+  "loser_abbr": "NYM",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2001,
+  "title": "World Series",
+  "winner": "Diamondbacks",
+  "winner_abbr": "ARI",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2002,
+  "title": "World Series",
+  "winner": "Anaheim Angels",
+  "winner_abbr": "LAA",
+  "loser": "Giants",
+  "loser_abbr": "SF",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2003,
+  "title": "World Series",
+  "winner": "Florida Marlins",
+  "winner_abbr": "MIA",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 2004,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 2005,
+  "title": "World Series",
+  "winner": "White Sox",
+  "winner_abbr": "CWS",
+  "loser": "Astros",
+  "loser_abbr": "HOU",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 2006,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2007,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Rockies",
+  "loser_abbr": "COL",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 2008,
+  "title": "World Series",
+  "winner": "Phillies",
+  "winner_abbr": "PHI",
+  "loser": "Rays",
+  "loser_abbr": "TB",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2009,
+  "title": "World Series",
+  "winner": "Yankees",
+  "winner_abbr": "NYY",
+  "loser": "Phillies",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 2010,
+  "title": "World Series",
+  "winner": "Giants",
+  "winner_abbr": "SF",
+  "loser": "Rangers",
+  "loser_abbr": "TEX",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2011,
+  "title": "World Series",
+  "winner": "Cardinals",
+  "winner_abbr": "STL",
+  "loser": "Rangers",
+  "loser_abbr": "TEX",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2012,
+  "title": "World Series",
+  "winner": "Giants",
+  "winner_abbr": "SF",
+  "loser": "Tigers",
+  "loser_abbr": "DET",
+  "score": "4-0"
+ },
+ {
+  "league": "MLB",
+  "year": 2013,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Cardinals",
+  "loser_abbr": "STL",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 2014,
+  "title": "World Series",
+  "winner": "Giants",
+  "winner_abbr": "SF",
+  "loser": "Royals",
+  "loser_abbr": "KC",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2015,
+  "title": "World Series",
+  "winner": "Royals",
+  "winner_abbr": "KC",
+  "loser": "Mets",
+  "loser_abbr": "NYM",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2016,
+  "title": "World Series",
+  "winner": "Cubs",
+  "winner_abbr": "CHC",
+  "loser": "Indians",
+  "loser_abbr": "CLE",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2017,
+  "title": "World Series",
+  "winner": "Astros",
+  "winner_abbr": "HOU",
+  "loser": "Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2018,
+  "title": "World Series",
+  "winner": "Red Sox",
+  "winner_abbr": "BOS",
+  "loser": "Dodgers",
+  "loser_abbr": "LAD",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2019,
+  "title": "World Series",
+  "winner": "Nationals",
+  "winner_abbr": "WSH",
+  "loser": "Astros",
+  "loser_abbr": "HOU",
+  "score": "4-3"
+ },
+ {
+  "league": "MLB",
+  "year": 2020,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Rays",
+  "loser_abbr": "TB",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 2021,
+  "title": "World Series",
+  "winner": "Braves",
+  "winner_abbr": "ATL",
+  "loser": "Astros",
+  "loser_abbr": "HOU",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 2022,
+  "title": "World Series",
+  "winner": "Astros",
+  "winner_abbr": "HOU",
+  "loser": "Phillies",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "MLB",
+  "year": 2023,
+  "title": "World Series",
+  "winner": "Rangers",
+  "winner_abbr": "TEX",
+  "loser": "Diamondbacks",
+  "loser_abbr": "ARI",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2024,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Yankees",
+  "loser_abbr": "NYY",
+  "score": "4-1"
+ },
+ {
+  "league": "MLB",
+  "year": 2025,
+  "title": "World Series",
+  "winner": "Dodgers",
+  "winner_abbr": "LAD",
+  "loser": "Blue Jays",
+  "loser_abbr": "TOR",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1947,
+  "title": "BAA Finals",
+  "winner": "Phila. Warriors",
+  "winner_abbr": "GS",
+  "loser": "Chicago Stags",
+  "loser_abbr": "",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1948,
+  "title": "BAA Finals",
+  "winner": "Baltimore Bullets",
+  "winner_abbr": "",
+  "loser": "Phila. Warriors",
+  "loser_abbr": "GS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1949,
+  "title": "BAA Finals",
+  "winner": "Mpls. Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Wash. Capitols",
+  "loser_abbr": "",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1950,
+  "title": "NBA Finals",
+  "winner": "Mpls. Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Syracuse Nationals",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1951,
+  "title": "NBA Finals",
+  "winner": "Rochester Royals",
+  "winner_abbr": "SAC",
+  "loser": "Knicks",
+  "loser_abbr": "NY",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1952,
+  "title": "NBA Finals",
+  "winner": "Mpls. Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Knicks",
+  "loser_abbr": "NY",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1953,
+  "title": "NBA Finals",
+  "winner": "Mpls. Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Knicks",
+  "loser_abbr": "NY",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1954,
+  "title": "NBA Finals",
+  "winner": "Mpls. Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Syracuse Nationals",
+  "loser_abbr": "PHI",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1955,
+  "title": "NBA Finals",
+  "winner": "Syracuse Nationals",
+  "winner_abbr": "PHI",
+  "loser": "Ft. Wayne Pistons",
+  "loser_abbr": "DET",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1956,
+  "title": "NBA Finals",
+  "winner": "Phila. Warriors",
+  "winner_abbr": "GS",
+  "loser": "Ft. Wayne Pistons",
+  "loser_abbr": "DET",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1957,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "St. Louis Hawks",
+  "loser_abbr": "ATL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1958,
+  "title": "NBA Finals",
+  "winner": "St. Louis Hawks",
+  "winner_abbr": "ATL",
+  "loser": "Celtics",
+  "loser_abbr": "BOS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1959,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Mpls. Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 1960,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "St. Louis Hawks",
+  "loser_abbr": "ATL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1961,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "St. Louis Hawks",
+  "loser_abbr": "ATL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1962,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1963,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1964,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "S.F. Warriors",
+  "loser_abbr": "GS",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1965,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1966,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1967,
+  "title": "NBA Finals",
+  "winner": "76ers",
+  "winner_abbr": "PHI",
+  "loser": "S.F. Warriors",
+  "loser_abbr": "GS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1968,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1969,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1970,
+  "title": "NBA Finals",
+  "winner": "Knicks",
+  "winner_abbr": "NY",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1971,
+  "title": "NBA Finals",
+  "winner": "Bucks",
+  "winner_abbr": "MIL",
+  "loser": "Baltimore Bullets",
+  "loser_abbr": "WSH",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 1972,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Knicks",
+  "loser_abbr": "NY",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1973,
+  "title": "NBA Finals",
+  "winner": "Knicks",
+  "winner_abbr": "NY",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1974,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Bucks",
+  "loser_abbr": "MIL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1975,
+  "title": "NBA Finals",
+  "winner": "Warriors",
+  "winner_abbr": "GS",
+  "loser": "Wash. Bullets",
+  "loser_abbr": "WSH",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 1976,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Suns",
+  "loser_abbr": "PHX",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1977,
+  "title": "NBA Finals",
+  "winner": "Trail Blazers",
+  "winner_abbr": "POR",
+  "loser": "76ers",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1978,
+  "title": "NBA Finals",
+  "winner": "Wash. Bullets",
+  "winner_abbr": "WSH",
+  "loser": "Seattle SuperSonics",
+  "loser_abbr": "OKC",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1979,
+  "title": "NBA Finals",
+  "winner": "Seattle SuperSonics",
+  "winner_abbr": "OKC",
+  "loser": "Wash. Bullets",
+  "loser_abbr": "WSH",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1980,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "76ers",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1981,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Rockets",
+  "loser_abbr": "HOU",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1982,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "76ers",
+  "loser_abbr": "PHI",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1983,
+  "title": "NBA Finals",
+  "winner": "76ers",
+  "winner_abbr": "PHI",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 1984,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1985,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Celtics",
+  "loser_abbr": "BOS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1986,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Rockets",
+  "loser_abbr": "HOU",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1987,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Celtics",
+  "loser_abbr": "BOS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1988,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Pistons",
+  "loser_abbr": "DET",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1989,
+  "title": "NBA Finals",
+  "winner": "Pistons",
+  "winner_abbr": "DET",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 1990,
+  "title": "NBA Finals",
+  "winner": "Pistons",
+  "winner_abbr": "DET",
+  "loser": "Trail Blazers",
+  "loser_abbr": "POR",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1991,
+  "title": "NBA Finals",
+  "winner": "Bulls",
+  "winner_abbr": "CHI",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 1992,
+  "title": "NBA Finals",
+  "winner": "Bulls",
+  "winner_abbr": "CHI",
+  "loser": "Trail Blazers",
+  "loser_abbr": "POR",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1993,
+  "title": "NBA Finals",
+  "winner": "Bulls",
+  "winner_abbr": "CHI",
+  "loser": "Suns",
+  "loser_abbr": "PHX",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1994,
+  "title": "NBA Finals",
+  "winner": "Rockets",
+  "winner_abbr": "HOU",
+  "loser": "Knicks",
+  "loser_abbr": "NY",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 1995,
+  "title": "NBA Finals",
+  "winner": "Rockets",
+  "winner_abbr": "HOU",
+  "loser": "Magic",
+  "loser_abbr": "ORL",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 1996,
+  "title": "NBA Finals",
+  "winner": "Bulls",
+  "winner_abbr": "CHI",
+  "loser": "Seattle SuperSonics",
+  "loser_abbr": "OKC",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1997,
+  "title": "NBA Finals",
+  "winner": "Bulls",
+  "winner_abbr": "CHI",
+  "loser": "Jazz",
+  "loser_abbr": "UTAH",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1998,
+  "title": "NBA Finals",
+  "winner": "Bulls",
+  "winner_abbr": "CHI",
+  "loser": "Jazz",
+  "loser_abbr": "UTAH",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 1999,
+  "title": "NBA Finals",
+  "winner": "Spurs",
+  "winner_abbr": "SA",
+  "loser": "Knicks",
+  "loser_abbr": "NY",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2000,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Pacers",
+  "loser_abbr": "IND",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2001,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "76ers",
+  "loser_abbr": "PHI",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2002,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "New Jersey Nets",
+  "loser_abbr": "BKN",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 2003,
+  "title": "NBA Finals",
+  "winner": "Spurs",
+  "winner_abbr": "SA",
+  "loser": "New Jersey Nets",
+  "loser_abbr": "BKN",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2004,
+  "title": "NBA Finals",
+  "winner": "Pistons",
+  "winner_abbr": "DET",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2005,
+  "title": "NBA Finals",
+  "winner": "Spurs",
+  "winner_abbr": "SA",
+  "loser": "Pistons",
+  "loser_abbr": "DET",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 2006,
+  "title": "NBA Finals",
+  "winner": "Heat",
+  "winner_abbr": "MIA",
+  "loser": "Mavericks",
+  "loser_abbr": "DAL",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2007,
+  "title": "NBA Finals",
+  "winner": "Spurs",
+  "winner_abbr": "SA",
+  "loser": "Cavaliers",
+  "loser_abbr": "CLE",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 2008,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Lakers",
+  "loser_abbr": "LAL",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2009,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Magic",
+  "loser_abbr": "ORL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2010,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Celtics",
+  "loser_abbr": "BOS",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 2011,
+  "title": "NBA Finals",
+  "winner": "Mavericks",
+  "winner_abbr": "DAL",
+  "loser": "Heat",
+  "loser_abbr": "MIA",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2012,
+  "title": "NBA Finals",
+  "winner": "Heat",
+  "winner_abbr": "MIA",
+  "loser": "Thunder",
+  "loser_abbr": "OKC",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2013,
+  "title": "NBA Finals",
+  "winner": "Heat",
+  "winner_abbr": "MIA",
+  "loser": "Spurs",
+  "loser_abbr": "SA",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 2014,
+  "title": "NBA Finals",
+  "winner": "Spurs",
+  "winner_abbr": "SA",
+  "loser": "Heat",
+  "loser_abbr": "MIA",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2015,
+  "title": "NBA Finals",
+  "winner": "Warriors",
+  "winner_abbr": "GS",
+  "loser": "Cavaliers",
+  "loser_abbr": "CLE",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2016,
+  "title": "NBA Finals",
+  "winner": "Cavaliers",
+  "winner_abbr": "CLE",
+  "loser": "Warriors",
+  "loser_abbr": "GS",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 2017,
+  "title": "NBA Finals",
+  "winner": "Warriors",
+  "winner_abbr": "GS",
+  "loser": "Cavaliers",
+  "loser_abbr": "CLE",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2018,
+  "title": "NBA Finals",
+  "winner": "Warriors",
+  "winner_abbr": "GS",
+  "loser": "Cavaliers",
+  "loser_abbr": "CLE",
+  "score": "4-0"
+ },
+ {
+  "league": "NBA",
+  "year": 2019,
+  "title": "NBA Finals",
+  "winner": "Raptors",
+  "winner_abbr": "TOR",
+  "loser": "Warriors",
+  "loser_abbr": "GS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2020,
+  "title": "NBA Finals",
+  "winner": "Lakers",
+  "winner_abbr": "LAL",
+  "loser": "Heat",
+  "loser_abbr": "MIA",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2021,
+  "title": "NBA Finals",
+  "winner": "Bucks",
+  "winner_abbr": "MIL",
+  "loser": "Suns",
+  "loser_abbr": "PHX",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2022,
+  "title": "NBA Finals",
+  "winner": "Warriors",
+  "winner_abbr": "GS",
+  "loser": "Celtics",
+  "loser_abbr": "BOS",
+  "score": "4-2"
+ },
+ {
+  "league": "NBA",
+  "year": 2023,
+  "title": "NBA Finals",
+  "winner": "Nuggets",
+  "winner_abbr": "DEN",
+  "loser": "Heat",
+  "loser_abbr": "MIA",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2024,
+  "title": "NBA Finals",
+  "winner": "Celtics",
+  "winner_abbr": "BOS",
+  "loser": "Mavericks",
+  "loser_abbr": "DAL",
+  "score": "4-1"
+ },
+ {
+  "league": "NBA",
+  "year": 2025,
+  "title": "NBA Finals",
+  "winner": "Thunder",
+  "winner_abbr": "OKC",
+  "loser": "Pacers",
+  "loser_abbr": "IND",
+  "score": "4-3"
+ },
+ {
+  "league": "NBA",
+  "year": 2026,
+  "title": "NBA Finals",
+  "winner": "Knicks",
+  "winner_abbr": "NY",
+  "loser": "Spurs",
+  "loser_abbr": "SA",
+  "score": "4-1"
+ }
+]
