@@ -1,0 +1,18 @@
+---
+id: moon-phase
+name: Moon Phase
+summary: Shows current moon phase
+desc: Shows phase of moon based on location.
+author: Chris Wyman
+fileName: moon_phase.star
+packageName: moonphase
+recommendedInterval: 5
+category: utilities
+tags:
+  - space
+  - science
+  - weather
+  - utility
+  - local
+published: '2022-09-15T16:29:40Z'
+updated: '2025-11-30T20:08:55Z'

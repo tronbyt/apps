@@ -1,0 +1,15 @@
+---
+id: worldcuptoday
+name: World Cup Today
+summary: Today's World Cup games
+desc: Displays live and upcoming World Cup soccer matches for the current day.
+author: Brombomb
+fileName: worldcuptoday.star
+packageName: worldcuptoday
+recommendedInterval: 60
+supports2x: true
+category: sports
+tags:
+  - soccer
+published: '2026-06-11T17:45:32Z'
+updated: '2026-06-11T17:45:32Z'

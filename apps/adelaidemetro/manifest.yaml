@@ -1,0 +1,13 @@
+---
+id: adelaide-metro
+name: Adelaide Metro
+summary: PT services in Adelaide
+desc: Displays upcoming services for train stations and bus & tram stops around Adelaide.
+author: M0ntyP
+fileName: adelaide_metro.star
+packageName: adelaidemetro
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2023-02-03T20:58:19Z'
+updated: '2025-12-02T19:30:22Z'

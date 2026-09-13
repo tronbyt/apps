@@ -1,0 +1,15 @@
+---
+id: smooth-fm
+name: Smooth FM
+summary: Now playing on Smooth
+desc: Shows the current playing song on Smooth FM for various stations around Australia..
+author: M0ntyP
+fileName: smooth_fm.star
+packageName: smoothfm
+recommendedInterval: 5
+category: entertainment
+tags:
+  - music
+  - real-time
+published: '2023-06-27T22:14:40Z'
+updated: '2025-11-30T19:58:27Z'

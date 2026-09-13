@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyline Tracer Simple</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      color: #222;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+    .panel {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .controls {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .row {
+      display: grid;
+      gap: 6px;
+    }
+    .row.inline {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      background: #ddd;
+      overflow: hidden;
+      border: 1px solid #bbb;
+    }
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .preview {
+      display: grid;
+      grid-template-columns: repeat(64, 1fr);
+      gap: 1px;
+      background: #999;
+      padding: 1px;
+    }
+    .preview span {
+      aspect-ratio: 1;
+      background: #eee;
+    }
+    .preview span.on {
+      background: #00838f;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel controls">
+      <h2>Skyline Tracer</h2>
+
+      <div class="row">
+        <label for="imageLoader">Load image</label>
+        <input id="imageLoader" type="file" accept="image/*">
+      </div>
+
+      <div class="row inline">
+        <label for="scaleX">Horizontal scale</label>
+        <span id="scaleXValue">100%</span>
+      </div>
+      <input id="scaleX" type="range" min="10" max="300" value="100">
+
+      <div class="row inline">
+        <label for="scaleY">Vertical scale</label>
+        <span id="scaleYValue">100%</span>
+      </div>
+      <input id="scaleY" type="range" min="10" max="300" value="100">
+
+      <div class="row inline">
+        <label for="offsetX">Horizontal offset</label>
+        <span id="offsetXValue">0</span>
+      </div>
+      <input id="offsetX" type="range" min="-640" max="640" value="0">
+
+      <div class="row inline">
+        <label for="offsetY">Vertical offset</label>
+        <span id="offsetYValue">0</span>
+      </div>
+      <input id="offsetY" type="range" min="-320" max="320" value="0">
+
+      <div class="row inline">
+        <label for="dragRequiresClick">Drag requires click</label>
+        <input id="dragRequiresClick" type="checkbox" checked>
+      </div>
+
+      <div class="buttons">
+        <button id="fitButton" type="button">Fit</button>
+        <button id="centerButton" type="button">Center</button>
+        <button id="clearButton" type="button">Clear</button>
+        <button id="copyButton" type="button">Copy Matrix</button>
+      </div>
+
+      <div>Tip: drag to paint 1s, hold Shift while dragging to erase back to 0.</div>
+    </div>
+
+    <div class="panel">
+      <div style="margin-bottom: 12px;">
+        <strong id="markedCount">Marked: 0</strong> |
+        <span id="cellStatus">Cell: --</span>
+      </div>
+
+      <div class="frame">
+        <canvas id="imageCanvas" width="1280" height="640"></canvas>
+        <canvas id="overlayCanvas" width="1280" height="640"></canvas>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 320px 1fr; gap:16px; margin-top:16px;">
+        <div>
+          <div style="margin-bottom:8px;"><strong>Preview</strong></div>
+          <div id="preview" class="preview"></div>
+        </div>
+        <div>
+          <div style="margin-bottom:8px;"><strong>Matrix</strong></div>
+          <textarea id="matrixOutput"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const COLS = 64;
+    const ROWS = 32;
+    const CANVAS_WIDTH = 1280;
+    const CANVAS_HEIGHT = 640;
+    const CELL_WIDTH = CANVAS_WIDTH / COLS;
+    const CELL_HEIGHT = CANVAS_HEIGHT / ROWS;
+
+    const imageCanvas = document.getElementById('imageCanvas');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const imageCtx = imageCanvas.getContext('2d');
+    const overlayCtx = overlayCanvas.getContext('2d');
+
+    const imageLoader = document.getElementById('imageLoader');
+    const scaleX = document.getElementById('scaleX');
+    const scaleY = document.getElementById('scaleY');
+    const offsetX = document.getElementById('offsetX');
+    const offsetY = document.getElementById('offsetY');
+    const scaleXValue = document.getElementById('scaleXValue');
+    const scaleYValue = document.getElementById('scaleYValue');
+    const offsetXValue = document.getElementById('offsetXValue');
+    const offsetYValue = document.getElementById('offsetYValue');
+    const dragRequiresClick = document.getElementById('dragRequiresClick');
+    const fitButton = document.getElementById('fitButton');
+    const centerButton = document.getElementById('centerButton');
+    const clearButton = document.getElementById('clearButton');
+    const copyButton = document.getElementById('copyButton');
+    const markedCount = document.getElementById('markedCount');
+    const cellStatus = document.getElementById('cellStatus');
+    const matrixOutput = document.getElementById('matrixOutput');
+    const preview = document.getElementById('preview');
+
+    const matrix = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    const previewCells = [];
+    for (let i = 0; i < COLS * ROWS; i++) {
+      const s = document.createElement('span');
+      preview.appendChild(s);
+      previewCells.push(s);
+    }
+
+    const state = {
+      image: null,
+      dragging: false,
+      activeValue: 1
+    };
+
+    function updateLabels() {
+      scaleXValue.textContent = scaleX.value + '%';
+      scaleYValue.textContent = scaleY.value + '%';
+      offsetXValue.textContent = offsetX.value;
+      offsetYValue.textContent = offsetY.value;
+    }
+
+    function getImageRect() {
+      if (!state.image) return null;
+      const baseScale = Math.min(CANVAS_WIDTH / state.image.width, CANVAS_HEIGHT / state.image.height);
+      const drawWidth = state.image.width * baseScale * (Number(scaleX.value) / 100);
+      const drawHeight = state.image.height * baseScale * (Number(scaleY.value) / 100);
+      const x = (CANVAS_WIDTH - drawWidth) / 2 + Number(offsetX.value);
+      const y = (CANVAS_HEIGHT - drawHeight) / 2 + Number(offsetY.value);
+      return { x, y, drawWidth, drawHeight };
+    }
+
+    function drawImageLayer() {
+      imageCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      imageCtx.fillStyle = '#ddd';
+      imageCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      if (state.image) {
+        const rect = getImageRect();
+        imageCtx.drawImage(state.image, rect.x, rect.y, rect.drawWidth, rect.drawHeight);
+      }
+
+      imageCtx.strokeStyle = 'rgba(0,0,0,0.18)';
+      imageCtx.lineWidth = 1;
+      for (let x = 0; x <= CANVAS_WIDTH; x += CELL_WIDTH) {
+        imageCtx.beginPath();
+        imageCtx.moveTo(x, 0);
+        imageCtx.lineTo(x, CANVAS_HEIGHT);
+        imageCtx.stroke();
+      }
+      for (let y = 0; y <= CANVAS_HEIGHT; y += CELL_HEIGHT) {
+        imageCtx.beginPath();
+        imageCtx.moveTo(0, y);
+        imageCtx.lineTo(CANVAS_WIDTH, y);
+        imageCtx.stroke();
+      }
+    }
+
+    function drawOverlay() {
+      overlayCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          if (matrix[row][col] === 1) {
+            overlayCtx.fillStyle = 'rgba(0,131,143,0.35)';
+            overlayCtx.fillRect(col * CELL_WIDTH, row * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
+          }
+        }
+      }
+
+      overlayCtx.strokeStyle = 'rgba(0,0,0,0.22)';
+      overlayCtx.lineWidth = 1;
+      for (let x = 0; x <= CANVAS_WIDTH; x += CELL_WIDTH) {
+        overlayCtx.beginPath();
+        overlayCtx.moveTo(x, 0);
+        overlayCtx.lineTo(x, CANVAS_HEIGHT);
+        overlayCtx.stroke();
+      }
+      for (let y = 0; y <= CANVAS_HEIGHT; y += CELL_HEIGHT) {
+        overlayCtx.beginPath();
+        overlayCtx.moveTo(0, y);
+        overlayCtx.lineTo(CANVAS_WIDTH, y);
+        overlayCtx.stroke();
+      }
+    }
+
+    function updateOutput() {
+      matrixOutput.value = '[\n' + matrix.map(row => '  [' + row.join(', ') + ']').join(',\n') + '\n]';
+      const total = matrix.flat().reduce((a, b) => a + b, 0);
+      markedCount.textContent = 'Marked: ' + total;
+      matrix.flat().forEach((value, index) => {
+        previewCells[index].className = value ? 'on' : '';
+      });
+    }
+
+    function drawAll() {
+      drawImageLayer();
+      drawOverlay();
+      updateOutput();
+    }
+
+    function eventToCell(event) {
+      const rect = overlayCanvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
+      const y = (event.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
+      const col = Math.max(0, Math.min(COLS - 1, Math.floor(x / CELL_WIDTH)));
+      const row = Math.max(0, Math.min(ROWS - 1, Math.floor(y / CELL_HEIGHT)));
+      return { row, col };
+    }
+
+    function paintAtEvent(event) {
+      const { row, col } = eventToCell(event);
+      const value = event.shiftKey ? 0 : state.activeValue;
+      matrix[row][col] = value;
+      cellStatus.textContent = `Cell: ${col}, ${row} = ${value}`;
+      drawOverlay();
+      updateOutput();
+    }
+
+    overlayCanvas.addEventListener('pointerdown', (event) => {
+      state.dragging = true;
+      state.activeValue = event.shiftKey ? 0 : 1;
+      if (overlayCanvas.setPointerCapture) {
+        overlayCanvas.setPointerCapture(event.pointerId);
+      }
+      paintAtEvent(event);
+    });
+
+    overlayCanvas.addEventListener('pointermove', (event) => {
+      const { row, col } = eventToCell(event);
+      cellStatus.textContent = `Cell: ${col}, ${row} = ${matrix[row][col]}`;
+
+      if (!dragRequiresClick.checked) {
+        paintAtEvent(event);
+        return;
+      }
+
+      if (state.dragging) {
+        paintAtEvent(event);
+      }
+    });
+
+    function stopDrag() {
+      state.dragging = false;
+    }
+
+    overlayCanvas.addEventListener('pointerup', stopDrag);
+    overlayCanvas.addEventListener('pointerleave', stopDrag);
+    overlayCanvas.addEventListener('pointercancel', stopDrag);
+
+    imageLoader.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const img = new Image();
+        img.onload = function () {
+          state.image = img;
+          drawAll();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function centerImage() {
+      offsetX.value = 0;
+      offsetY.value = 0;
+      updateLabels();
+    }
+
+    function fitImage() {
+      scaleX.value = 100;
+      scaleY.value = 100;
+      centerImage();
+      drawAll();
+    }
+
+    [scaleX, scaleY, offsetX, offsetY].forEach(el => {
+      el.addEventListener('input', () => {
+        updateLabels();
+        drawAll();
+      });
+    });
+
+    fitButton.addEventListener('click', fitImage);
+    centerButton.addEventListener('click', () => {
+      centerImage();
+      drawAll();
+    });
+
+    clearButton.addEventListener('click', () => {
+      matrix.forEach(row => row.fill(0));
+      drawAll();
+    });
+
+    copyButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(matrixOutput.value);
+      } catch (e) {
+        matrixOutput.select();
+        document.execCommand('copy');
+      }
+    });
+
+    updateLabels();
+    drawAll();
+  </script>
+</body>
+</html>

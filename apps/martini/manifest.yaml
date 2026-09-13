@@ -1,0 +1,13 @@
+---
+id: martini
+name: Martini
+summary: Displays your martini order
+desc: Displays your martini order based on your preferences.
+author: Robert Ison
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - lifestyle
+  - personalization
+published: '2024-10-11T15:17:06Z'
+updated: '2025-11-29T23:55:39Z'

@@ -1,0 +1,15 @@
+---
+id: positive-quote
+name: Positive Quote
+summary: Display a positive quote
+desc: Shows the user a random positive quote.
+author: Brian Bell
+fileName: positive_quote.star
+packageName: positivequote
+recommendedInterval: 5
+category: utilities
+tags:
+  - lifestyle
+  - utility
+published: '2022-12-05T15:22:47Z'
+updated: '2025-12-04T09:38:27Z'

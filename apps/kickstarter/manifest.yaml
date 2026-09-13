@@ -1,0 +1,15 @@
+---
+id: kickstarter
+name: Kickstarter
+summary: Kickstarter project status
+desc: Display the total amount raised and the number of backers for a Kickstarter project. The project must be publicly visible.
+author: sethvargo
+fileName: kickstarter.star
+packageName: kickstarter
+recommendedInterval: 5
+category: utilities
+tags:
+  - finance
+  - utility
+published: '2022-08-04T18:11:24Z'
+updated: '2025-12-05T22:28:51Z'

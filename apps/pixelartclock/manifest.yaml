@@ -1,0 +1,19 @@
+---
+id: pixel-art-clock
+name: Pixel Art Clock
+summary: Clock & pixel-art weather
+desc: Displays a clock, the coming 24 hours' high and low temperatures, and a pixel-art illustration by @abipixel matching the local forecast from OpenWeatherMap. Get a free API key at https://home.openweathermap.org/api_keys — the standard free tier is all this app needs (new keys can take up to two hours to activate; the app shows sample data until then).
+author: JavierM42
+recommendedInterval: 0
+fileName: pixel_art_clock.star
+packageName: pixelartclock
+supports2x: true
+category: clocks
+tags:
+  - weather
+  - art
+  - clock
+  - utility
+  - wide 2x support
+published: '2025-05-14T19:55:24Z'
+updated: '2026-08-17T03:05:27Z'

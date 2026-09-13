@@ -1,0 +1,16 @@
+---
+id: github-repo
+name: GitHub Repo
+summary: Display GitHub repo stats
+desc: Display various statistics of a public GitHub repo.
+author: rs7q5
+fileName: github_repo.star
+packageName: githubrepo
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - dev
+  - utility
+published: '2023-01-03T17:40:02Z'
+updated: '2025-11-29T23:55:39Z'

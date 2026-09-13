@@ -1,0 +1,15 @@
+---
+id: snake2
+name: Snake 2
+summary: Another snake game
+desc: Watch snake play out.
+author: dgoldstein1
+fileName: snake2.star
+packageName: snake2
+recommendedInterval: 5
+category: entertainment
+tags:
+  - gaming
+  - retro
+published: '2023-11-05T20:58:26Z'
+updated: '2025-12-02T19:30:22Z'

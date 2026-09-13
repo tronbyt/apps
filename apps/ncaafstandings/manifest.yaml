@@ -1,0 +1,16 @@
+---
+id: ncaaf-standings
+name: NCAAF Standings
+summary: NCAAF football standings
+desc: View NCAAF standings by conference.
+author: LunchBox8484
+fileName: ncaaf_standings.star
+packageName: ncaafstandings
+recommendedInterval: 5
+category: sports
+tags:
+  - news
+  - ncaaf
+  - football
+published: '2022-08-18T14:51:01Z'
+updated: '2025-11-29T17:52:33Z'

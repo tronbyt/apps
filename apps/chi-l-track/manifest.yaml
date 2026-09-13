@@ -1,0 +1,13 @@
+---
+id: chi-l-track
+name: Chi L Track
+summary: Track arrivals for CTA L
+desc: Track arrivals at Chicago CTA L (rapid transit) stations. App allows two different stops - usually 2 directions for a single station. The app can differentiate between scheduled and live tracked trains as well.
+author: FabioCZ
+fileName: chi_l_track.star
+packageName: chiltrack
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2023-10-19T18:17:51Z'
+updated: '2025-12-02T19:30:22Z'

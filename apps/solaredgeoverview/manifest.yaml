@@ -1,0 +1,16 @@
+---
+id: solaredgeovr
+name: SolarEdgeOvr
+summary: Solar Edge Site Overview
+desc: Display current data for Site specific Solar Edge information.
+author: markazali
+recommendedInterval: 5
+fileName: solaredge.star
+packageName: solaredgeoverview
+category: smart-home
+tags:
+  - utility
+  - smart-home
+  - power-monitoring
+published: '2024-10-21T15:24:44Z'
+updated: '2025-12-23T13:24:18Z'

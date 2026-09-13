@@ -1,0 +1,16 @@
+---
+id: cpbl-live-score
+name: CPBL Live Score
+summary: Display CPBL live scores
+desc: Display CPBL live scores & upcoming games. (Require BetsAPI token).
+author: yuping917
+fileName: cpbl_live_score.star
+packageName: cpbllivescore
+category: sports
+tags:
+  - real-time
+  - gaming
+  - cpbl
+  - baseball
+published: '2024-04-05T17:09:42Z'
+updated: '2025-11-07T06:33:45Z'

@@ -1,0 +1,17 @@
+---
+id: retro-game-goals
+name: Retro Game Goals
+summary: RetroAchievements for games
+desc: Display RetroAchievements for a random game on a specified or random console.
+author: UnBurn
+fileName: retro_game_goals.star
+packageName: retrogamegoals
+recommendedInterval: 5
+category: gaming
+tags:
+  - retro
+  - tracking
+  - gaming
+  - tech
+published: '2023-11-29T17:52:37Z'
+updated: '2025-12-05T22:28:51Z'

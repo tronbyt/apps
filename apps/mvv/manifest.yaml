@@ -1,0 +1,13 @@
+---
+id: mvv
+name: MVV
+summary: MVV departures (Munich)
+desc: Departure times for the Münchner Verkehrsverbund (MVV).
+author: Robin Sommer
+fileName: mvv.star
+packageName: mvv
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2022-09-15T20:03:51Z'
+updated: '2025-12-05T22:28:51Z'

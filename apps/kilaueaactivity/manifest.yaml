@@ -1,0 +1,18 @@
+---
+id: kilauea-activity
+name: Kīlauea Activity
+summary: Live USGS volcano activity
+desc: Displays Kīlauea's latest official USGS status as an animated pixel-art caldera with distinct activity and warning states.
+author: daveshilobod
+fileName: kilaueaactivity.star
+packageName: kilaueaactivity
+recommendedInterval: 5
+category: science
+tags:
+  - science
+  - nature
+  - alert
+  - hawaii
+  - volcano
+published: '2026-07-19T22:14:43Z'
+updated: '2026-07-20T19:01:51Z'

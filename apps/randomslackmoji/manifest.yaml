@@ -1,0 +1,14 @@
+---
+id: random-slackmoji
+name: Random Slackmoji
+summary: Displays a random Slackmoji
+desc: Displays a random image from slackmojis.com!
+author: btjones
+fileName: random_slackmoji.star
+packageName: randomslackmoji
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+published: '2022-04-04T15:40:33Z'
+updated: '2025-12-05T22:28:51Z'

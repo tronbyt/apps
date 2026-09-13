@@ -1,0 +1,15 @@
+---
+id: nws-daily-forecast
+name: NWS Daily Forecast
+summary: NWS three day forecast
+desc: Three day weather forecast from the National Weather Service, styled like the AccuWeather app. Shows weather icon, day of week, low / high temperature, and wind direction.
+author: Glen Robertson
+fileName: nws_daily_forecast.star
+packageName: nws_daily_forecast
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - local
+published: '2026-05-05T15:54:16Z'
+updated: '2026-05-05T15:54:16Z'

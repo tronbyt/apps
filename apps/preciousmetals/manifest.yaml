@@ -1,0 +1,15 @@
+---
+id: precious-metals
+name: Precious Metals
+summary: Quotes on precious metals
+desc: Quotes for gold, platinum and silver.
+author: threeio
+fileName: precious_metals.star
+packageName: preciousmetals
+recommendedInterval: 5
+category: finance
+tags:
+  - gold
+  - finance
+published: '2022-06-09T16:49:56Z'
+updated: '2025-11-30T19:58:27Z'

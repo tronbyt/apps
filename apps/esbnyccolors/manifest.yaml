@@ -1,0 +1,16 @@
+---
+id: esb-nyc-colors
+name: ESB NYC Colors
+summary: Empire State Bld Colors
+desc: Shows today's colors of the Empire State Building.
+author: sklose
+fileName: esb_nyc_colors.star
+packageName: esbnyccolors
+recommendedInterval: 5
+category: utilities
+tags:
+  - local
+  - art
+  - utility
+published: '2023-11-19T17:41:28Z'
+updated: '2025-12-02T19:30:22Z'

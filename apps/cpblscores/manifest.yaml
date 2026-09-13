@@ -1,0 +1,15 @@
+---
+id: cpbl-scores
+name: CPBL Scores
+summary: CPBL scores and schedule
+desc: Display CPBL scores and schedule, require theSportDB API key .
+author: yuping917
+fileName: cpbl_scores.star
+packageName: cpblscores
+broken: true
+category: sports
+tags:
+  - cpbl
+  - baseball
+published: '2024-03-21T13:23:32Z'
+updated: '2025-12-05T22:28:51Z'

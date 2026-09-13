@@ -1,0 +1,14 @@
+---
+id: busy-tube
+name: Busy Tube
+summary: London station crowding
+desc: Tells you how busy a given TfL-operated station in London currently is. Data updated every five minutes.
+author: dinosaursrarr
+fileName: busy_tube.star
+packageName: busytube
+recommendedInterval: 5
+category: transit
+tags:
+  - local
+published: '2022-09-22T19:27:52Z'
+updated: '2025-12-05T22:28:51Z'

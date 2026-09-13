@@ -1,0 +1,16 @@
+---
+id: bbc-radio
+name: BBC Radio
+summary: What's live now on the BBC
+desc: Shows what program is currently being broadcast on each of the BBC's radio stations.
+author: dinosaursrarr
+fileName: bbc_radio.star
+packageName: bbcradio
+recommendedInterval: 10
+category: entertainment
+tags:
+  - news
+  - music
+  - real-time
+published: '2023-07-27T14:32:50Z'
+updated: '2025-12-05T22:28:51Z'

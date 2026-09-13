@@ -1,0 +1,18 @@
+---
+id: docker-container-monitor
+name: Docker Container Monitor
+summary: Monitor Docker containers
+desc: Monitor Docker containers, track health status, view dot matrix or fleet summary, and receive alerts for stopped or unhealthy containers.
+author: brombomb
+fileName: docker_container_monitor.star
+packageName: dockercontainermonitor
+supports2x: true
+recommendedInterval: 1
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - automation
+published: '2026-09-11T05:00:04Z'
+updated: '2026-09-11T05:00:04Z'
