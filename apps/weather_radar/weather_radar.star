@@ -8,6 +8,7 @@ Author: brombomb
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -15,6 +16,20 @@ load("time.star", "time")
 WEATHER_MAPS_URL = "https://api.rainviewer.com/public/weather-maps.json"
 IMAGE_URL_LAYOUT = "{host}{path}/256/{zoom}/{lat}/{lng}/{color}/0_{snow}.png"
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current=temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m&wind_speed_unit=mph&temperature_unit=fahrenheit"
+EARTH_HALF = 20037508.342789244
+ARCGIS_EXPORT_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/%s/MapServer/export?bbox=%f,%f,%f,%f&bboxSR=3857&imageSR=3857&size=%d,%d&format=%s%s&f=image"
+
+BASEMAP_CONFIGS = {
+    "dark": [
+        ("Canvas/World_Dark_Gray_Base", "png", ""),
+    ],
+    "satellite": [
+        ("World_Imagery", "jpg", ""),
+    ],
+    "terrain": [
+        ("Elevation/World_Hillshade_Dark", "jpg", ""),
+    ],
+}
 
 DEFAULT_LOCATION = """{
   "lat": "33.7490",
@@ -86,6 +101,32 @@ def fetch_frame_image(host, path, zoom, lat, lng, color_scheme, snow):
     if res.status_code != 200:
         return None
     return res.body()
+
+def get_basemap_bbox(lat, lng, api_zoom):
+    """Compute Web Mercator (EPSG:3857) bounding box matching RainViewer 256 coordinate tile."""
+    n = math.pow(2.0, int(api_zoom))
+    half = EARTH_HALF / n
+    mx = lng * EARTH_HALF / 180.0
+    my = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) * EARTH_HALF / math.pi
+    return mx - half, my - half, mx + half, my + half
+
+def fetch_basemap_layers(basemap_key, lat, lng, api_zoom, tile_size):
+    """Fetch static geographic base layers from ArcGIS REST services with 24-hour cache."""
+    if basemap_key == "off" or basemap_key not in BASEMAP_CONFIGS:
+        return []
+
+    services = BASEMAP_CONFIGS[basemap_key]
+    xmin, ymin, xmax, ymax = get_basemap_bbox(lat, lng, api_zoom)
+
+    images = []
+    headers = {"User-Agent": "Tronbyt-WeatherRadar/1.0"}
+    for service, fmt, extra in services:
+        url = ARCGIS_EXPORT_URL % (service, xmin, ymin, xmax, ymax, tile_size, tile_size, fmt, extra)
+        res = http.get(url, ttl_seconds = 86400, headers = headers)
+        if res.status_code == 200 and res.body():
+            images.append(res.body())
+
+    return images
 
 def render_color_scale(palette, width, scale):
     """Render a Windy-style color intensity scale bar across the bottom."""
@@ -221,6 +262,8 @@ def main(config):
     color_scheme = config.get("color_scheme", "6")
     palette = COLOR_PALETTES.get(color_scheme, COLOR_PALETTES["6"])
 
+    basemap = config.get("basemap", "off")
+
     snow = config.bool("snow", True)
     show_legend = config.bool("show_legend", True)
     show_reticle = config.bool("show_reticle", True)
@@ -279,6 +322,9 @@ def main(config):
     tile_pad_left = (width - tile_size) // 2
     tile_pad_top = (height - tile_size) // 2
 
+    # Fetch static geographic basemap layers (cached 24h, reused across frames)
+    basemap_layers = fetch_basemap_layers(basemap, raw_lat, raw_lng, api_zoom, tile_size)
+
     rendered_frames = []
     total_frames = len(frames_raw)
 
@@ -293,21 +339,41 @@ def main(config):
         if not time_badge:
             time_badge = "NOW" if idx == total_frames - 1 else "-%dm" % ((total_frames - 1 - idx) * 5)
 
-        layers = [
+        map_stack = [
             # Solid deep dark radar background
             render.Box(width = width, height = height, color = "#04060b"),
-            # Centered radar map tile
-            render.Box(
-                width = width,
-                height = height,
-                child = render.Padding(
+        ]
+
+        # Geographic basemap layers beneath radar
+        for b_img in basemap_layers:
+            map_stack.append(
+                render.Padding(
                     pad = (tile_pad_left, tile_pad_top, 0, 0),
                     child = render.Image(
-                        src = img_bytes,
+                        src = b_img,
                         width = tile_size,
                         height = tile_size,
                     ),
                 ),
+            )
+
+        # Centered radar map tile
+        map_stack.append(
+            render.Padding(
+                pad = (tile_pad_left, tile_pad_top, 0, 0),
+                child = render.Image(
+                    src = img_bytes,
+                    width = tile_size,
+                    height = tile_size,
+                ),
+            ),
+        )
+
+        layers = [
+            render.Box(
+                width = width,
+                height = height,
+                child = render.Stack(children = map_stack),
             ),
         ]
 
@@ -374,6 +440,13 @@ def get_schema():
         schema.Option(display = "Dark Sky", value = "8"),
     ]
 
+    basemap_options = [
+        schema.Option(display = "Dark Canvas", value = "dark"),
+        schema.Option(display = "Satellite Imagery", value = "satellite"),
+        schema.Option(display = "Dark Terrain / Relief", value = "terrain"),
+        schema.Option(display = "Off (Solid Black)", value = "off"),
+    ]
+
     speed_options = [
         schema.Option(display = "Fast (200 ms)", value = "200"),
         schema.Option(display = "Normal (350 ms)", value = "350"),
@@ -402,6 +475,14 @@ def get_schema():
                 icon = "magnifyingGlassPlus",
                 default = zoom_options[3].value,
                 options = zoom_options,
+            ),
+            schema.Dropdown(
+                id = "basemap",
+                name = "Base Map Layer",
+                desc = "Geographic map beneath radar sweeps",
+                icon = "map",
+                default = "off",
+                options = basemap_options,
             ),
             schema.Dropdown(
                 id = "color_scheme",
