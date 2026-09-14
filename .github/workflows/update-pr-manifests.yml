@@ -62,7 +62,7 @@ jobs:
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"
             git add apps/*/manifest.yaml
-            git commit -m "chore: auto-update manifest metadata [skip ci]"
+            git commit -m "chore: auto-update manifest metadata"
             git remote add pr-remote https://x-access-token:${{ secrets.ACTIONS_PAT }}@github.com/${HEAD_REPO}.git
             git push pr-remote HEAD:${HEAD_REF}
           fi
