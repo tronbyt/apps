@@ -38,11 +38,27 @@ def format_time(seconds):
         return "%dh %dm" % (hours, minutes)
     return "%dm" % minutes
 
+def is_image(data):
+    """Safely validate image bytes for PNG, JPEG, GIF, or WebP."""
+    if not data or len(data) < 8:
+        return False
+    if data[1:4] == "PNG":
+        return True
+    if data[:3] == "GIF":
+        return True
+    if data[:4] == "RIFF" and len(data) >= 12 and data[8:12] == "WEBP":
+        return True
+    if ord(data[0]) in [65533, 255] and ord(data[1]) in [65533, 216] and ord(data[2]) in [65533, 255]:
+        return True
+    return False
+
 def fetch_abs_progress(server_url, api_token):
     if not server_url or not api_token or server_url.strip() == "" or api_token.strip() == "":
         return SAMPLE_DATA
 
     clean_url = server_url.strip()
+    if not clean_url.startswith("http://") and not clean_url.startswith("https://"):
+        clean_url = "http://" + clean_url
     if clean_url.endswith("/"):
         clean_url = clean_url[:-1]
 
@@ -69,7 +85,7 @@ def fetch_abs_progress(server_url, api_token):
         items_res = http.get(items_url, headers = headers, ttl_seconds = 30)
         if items_res.status_code == 200:
             items_data = items_res.json()
-            in_progress = items_data.get("inProgress") or []
+            in_progress = items_data.get("libraryItems") or items_data.get("inProgress") or []
             if in_progress:
                 first = in_progress[0]
                 item_id = first.get("id", "")
@@ -82,7 +98,9 @@ def fetch_abs_progress(server_url, api_token):
                 duration = int(media.get("duration", 0))
                 current_time = int(progress_obj.get("currentTime", 0))
                 prog = progress_obj.get("progress", 0.0)
-                cover_path = media.get("coverPath") or ""
+                if prog == 0.0 and duration > 0 and current_time > 0:
+                    prog = float(current_time) / duration
+                cover_path = media.get("coverPath") or first.get("coverPath") or ""
 
                 result = {
                     "title": title,
@@ -101,7 +119,7 @@ def fetch_abs_progress(server_url, api_token):
     # Use first active session
     sess = sessions[0]
     media_meta = sess.get("mediaMetadata") or {}
-    item_id = sess.get("mediaItemId") or sess.get("libraryItemId") or ""
+    item_id = sess.get("libraryItemId") or sess.get("mediaItemId") or ""
     title = sess.get("displayTitle") or media_meta.get("title") or "Audiobook"
     author = sess.get("displayAuthor") or media_meta.get("author") or media_meta.get("authorName") or ""
     duration = int(sess.get("duration", 0))
@@ -122,33 +140,56 @@ def fetch_abs_progress(server_url, api_token):
     cache.set(cache_key, json.encode(result), ttl_seconds = 15)
     return result
 
-def fetch_cover_image(server_url, api_token, cover_path, item_id):
+def fetch_cover_image(server_url, api_token, cover_path, item_id, target_width = 48):
     if not server_url or not api_token:
         return None
 
     clean_url = server_url.strip()
+    if not clean_url.startswith("http://") and not clean_url.startswith("https://"):
+        clean_url = "http://" + clean_url
     if clean_url.endswith("/"):
         clean_url = clean_url[:-1]
 
-    if cover_path and cover_path.startswith("http"):
-        cover_url = cover_path
-    elif cover_path and cover_path.startswith("/"):
-        cover_url = clean_url + cover_path
-    elif item_id and item_id.strip() != "":
-        cover_url = clean_url + "/api/items/" + item_id.strip() + "/cover"
-    elif cover_path:
-        cover_url = clean_url + "/" + cover_path
-    else:
-        return None
+    # Resolve item_id if missing but embedded in cover_path (e.g. /metadata/items/<id>/...)
+    resolved_id = item_id.strip() if item_id else ""
+    if not resolved_id and cover_path and "/items/" in cover_path:
+        parts = cover_path.split("/items/")
+        if len(parts) > 1:
+            resolved_id = parts[1].split("/")[0]
+
+    urls_to_try = []
+
+    # Audiobookshelf's official cover endpoint is /api/items/<id>/cover
+    if resolved_id:
+        urls_to_try.append("%s/api/items/%s/cover?width=%d" % (clean_url, resolved_id, target_width))
+        urls_to_try.append("%s/api/items/%s/cover" % (clean_url, resolved_id))
+
+    if cover_path:
+        if cover_path.startswith("http://") or cover_path.startswith("https://"):
+            urls_to_try.append(cover_path)
+        elif not cover_path.startswith("/metadata/"):
+            if cover_path.startswith("/"):
+                urls_to_try.append(clean_url + cover_path)
+            else:
+                urls_to_try.append(clean_url + "/" + cover_path)
 
     headers = {
         "Authorization": "Bearer " + api_token.strip(),
         "User-Agent": "Tronbyt-Audiobookshelf",
     }
 
-    res = http.get(cover_url, headers = headers, ttl_seconds = 3600)
-    if res.status_code == 200:
-        return res.body()
+    for url in urls_to_try:
+        cache_key = "abs_cov_" + url
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+
+        res = http.get(url, headers = headers, ttl_seconds = 3600)
+        if res.status_code == 200:
+            body = res.body()
+            if is_image(body):
+                cache.set(cache_key, body, ttl_seconds = 3600)
+                return body
 
     return None
 
@@ -266,7 +307,13 @@ def main(config):
 
     cover_bytes = None
     if server_url and api_token:
-        cover_bytes = fetch_cover_image(server_url, api_token, data.get("cover_path", ""), data.get("item_id", ""))
+        cover_bytes = fetch_cover_image(
+            server_url,
+            api_token,
+            data.get("cover_path", ""),
+            data.get("item_id", ""),
+            target_width = 24 * scale,
+        )
 
     if not cover_bytes:
         cover_bytes = SAMPLE_COVER_ASSET.readall()
