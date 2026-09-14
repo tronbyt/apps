@@ -8,7 +8,6 @@ Author: brombomb
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("images/sample_cover.png", SAMPLE_COVER_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
@@ -193,15 +192,46 @@ def fetch_cover_image(server_url, api_token, cover_path, item_id, target_width =
 
     return None
 
+def render_cover_fallback(scale, width, height, title):
+    # Stylized procedural book jacket
+    spine_width = 2 * scale
+    initial = title[:1].upper() if title else "A"
+    return render.Box(
+        width = width,
+        height = height,
+        color = "#1e2430",
+        child = render.Row(
+            expanded = True,
+            children = [
+                render.Box(width = spine_width, height = height, color = ABS_GOLD),
+                render.Box(
+                    width = width - spine_width,
+                    height = height,
+                    child = render.Column(
+                        main_align = "center",
+                        cross_align = "center",
+                        children = [
+                            render.Text(initial, font = "tb-8" if scale == 1 else "terminus-14", color = ABS_GOLD),
+                            render.Box(width = 8 * scale, height = 1 * scale, color = "#475569"),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+    )
+
 def render_abs_view(scale, width, data, cover_bytes, font_title, font_tiny):
     cover_width = 24 * scale
     cover_height = 30 * scale
 
-    cover_widget = render.Image(
-        src = cover_bytes,
-        width = cover_width,
-        height = cover_height,
-    )
+    if cover_bytes:
+        cover_widget = render.Image(
+            src = cover_bytes,
+            width = cover_width,
+            height = cover_height,
+        )
+    else:
+        cover_widget = render_cover_fallback(scale, cover_width, cover_height, data.get("title", ""))
 
     text_width = width - cover_width - (4 * scale)
     progress_pct = int(data["progress"] * 100)
@@ -314,9 +344,6 @@ def main(config):
             data.get("item_id", ""),
             target_width = 24 * scale,
         )
-
-    if not cover_bytes:
-        cover_bytes = SAMPLE_COVER_ASSET.readall()
 
     root_child = render_abs_view(
         scale,
