@@ -45,6 +45,75 @@ def get_priority_meta(p):
     else:
         return {"label": "LOW", "color": MUTED, "bg": "#111822"}
 
+def parse_topic_url(raw_topic, raw_server):
+    """Extract server URL and clean topic name from a topic URL or raw topic string."""
+    topic_str = raw_topic.strip() if raw_topic else ""
+    server_str = raw_server.strip() if raw_server else "https://ntfy.sh"
+
+    if topic_str.startswith("http://") or topic_str.startswith("https://"):
+        url = topic_str
+    elif "/" in topic_str:
+        url = "https://" + topic_str
+    else:
+        url = None
+
+    if url:
+        parts = url.split("://", 1)
+        protocol = parts[0]
+        rest = parts[1]
+
+        if "?" in rest:
+            rest = rest.split("?")[0]
+        if rest.endswith("/"):
+            rest = rest[:-1]
+
+        slash_idx = rest.find("/")
+        if slash_idx != -1:
+            server = protocol + "://" + rest[:slash_idx]
+            path = rest[slash_idx + 1:].strip()
+            for suffix in ["/json", "/sse", "/ws", "/raw"]:
+                if path.endswith(suffix):
+                    path = path[:-len(suffix)]
+            return server, path
+        else:
+            return protocol + "://" + rest, ""
+
+    server = server_str if server_str else "https://ntfy.sh"
+    if server.endswith("/"):
+        server = server[:-1]
+    return server, topic_str
+
+def is_image(data):
+    """Safely validate image bytes for PNG, JPEG, GIF, or WebP."""
+    if not data or len(data) < 8:
+        return False
+    if data[1:4] == "PNG":
+        return True
+    if data[:3] == "GIF":
+        return True
+    if data[:4] == "RIFF" and len(data) >= 12 and data[8:12] == "WEBP":
+        return True
+    if ord(data[0]) in [65533, 255] and ord(data[1]) in [65533, 216] and ord(data[2]) in [65533, 255]:
+        return True
+    return False
+
+def fetch_icon(icon_url):
+    """Fetch external notification icon with caching."""
+    if not icon_url:
+        return None
+    cache_key = "ntfy_ico_data_" + icon_url
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
+    res = http.get(icon_url, headers = {"User-Agent": "Tronbyt-ntfy-Pulse"}, ttl_seconds = 3600)
+    if res.status_code == 200:
+        body = res.body()
+        if is_image(body):
+            cache.set(cache_key, body, ttl_seconds = 3600)
+            return body
+    return None
+
 def fetch_ntfy_messages(server_url, topic, auth_token, window_min):
     if not topic or topic.strip() == "":
         return [SAMPLE_ALERT]
@@ -84,14 +153,14 @@ def fetch_ntfy_messages(server_url, topic, auth_token, window_min):
     cache.set(cache_key, json.encode(messages), ttl_seconds = 30)
     return messages
 
-def render_alert_view(scale, width, height, alert, ntfy_icon, font_title, font_main, font_tiny):
+def render_alert_view(scale, width, height, alert, icon_bytes, display_name, font_title, font_main, font_tiny):
     icon_width = 11 * scale
     icon_height = 11 * scale
 
     priority = alert.get("priority", 3)
     p_meta = get_priority_meta(priority)
 
-    title = alert.get("title") or alert.get("topic") or "ntfy Alert"
+    title = alert.get("title") or display_name or alert.get("topic") or "ntfy Alert"
     message = alert.get("message", "")
 
     header = render.Row(
@@ -102,7 +171,7 @@ def render_alert_view(scale, width, height, alert, ntfy_icon, font_title, font_m
             render.Row(
                 cross_align = "center",
                 children = [
-                    render.Image(src = ntfy_icon, width = icon_width, height = icon_height),
+                    render.Image(src = icon_bytes, width = icon_width, height = icon_height),
                     render.Box(width = 2 * scale, height = 1),
                     render.Text(title[:12 if scale == 1 else 18], font = font_title, color = WHITE),
                 ],
@@ -118,6 +187,7 @@ def render_alert_view(scale, width, height, alert, ntfy_icon, font_title, font_m
     )
 
     body_height = height - (14 * scale)
+    bottom_label = display_name if display_name else "ntfy"
 
     return render.Column(
         expanded = True,
@@ -145,7 +215,7 @@ def render_alert_view(scale, width, height, alert, ntfy_icon, font_title, font_m
                                 expanded = True,
                                 children = [
                                     render.Text("Active Alert", font = font_tiny, color = MUTED),
-                                    render.Text("ntfy", font = font_tiny, color = NTFY_TEAL),
+                                    render.Text(bottom_label[:12 if scale == 1 else 20], font = font_tiny, color = NTFY_TEAL),
                                 ],
                             ),
                         ],
@@ -155,16 +225,16 @@ def render_alert_view(scale, width, height, alert, ntfy_icon, font_title, font_m
         ],
     )
 
-def render_ambient_pulse(scale, width, topic, window_min, ntfy_icon, font_title, font_main, font_tiny):
+def render_ambient_pulse(scale, width, label, window_min, icon_bytes, font_title, font_main, font_tiny):
     icon_width = 11 * scale
     icon_height = 11 * scale
 
     header = render.Row(
         cross_align = "center",
         children = [
-            render.Image(src = ntfy_icon, width = icon_width, height = icon_height),
+            render.Image(src = icon_bytes, width = icon_width, height = icon_height),
             render.Box(width = 3 * scale, height = 1),
-            render.Text(topic[:12 if scale == 1 else 20], font = font_title, color = NTFY_TEAL),
+            render.Text(label[:12 if scale == 1 else 20], font = font_title, color = NTFY_TEAL),
         ],
     )
 
@@ -200,8 +270,11 @@ def main(config):
     font_main = "tb-8" if scale == 1 else "terminus-14"
     font_tiny = "tom-thumb" if scale == 1 else "tb-8"
 
-    server_url = config.str("server_url", "https://ntfy.sh")
-    topic = config.str("topic", "")
+    raw_server = config.str("server_url", "https://ntfy.sh")
+    raw_topic = config.str("topic", "")
+    server_url, topic = parse_topic_url(raw_topic, raw_server)
+
+    display_name = config.str("display_name", "").strip()
     auth_token = config.str("auth_token", "")
     window_min = int(config.str("window_minutes", "15"))
     quiet_when_idle = config.bool("quiet_when_idle", False)
@@ -228,16 +301,24 @@ def main(config):
     # Filter messages meeting minimum priority
     valid_alerts = [m for m in messages if m.get("priority", 3) >= min_priority]
 
+    # Resolve display label
+    label = display_name if display_name else (topic if topic else "ntfy")
+    default_icon = NTFY_ICON_ASSET.readall()
+
     if not valid_alerts:
         if quiet_when_idle:
             return []
-        topic_display = topic if topic and topic.strip() != "" else "ntfy"
+
+        # Check if topic has a cached icon from a recent notification
+        cached_icon = cache.get("ntfy_topic_ico_" + topic) if topic else None
+        icon_bytes = cached_icon if cached_icon else default_icon
+
         root_child = render_ambient_pulse(
             scale,
             width,
-            topic_display,
+            label,
             window_min,
-            NTFY_ICON_ASSET.readall(),
+            icon_bytes,
             font_title,
             font_main,
             font_tiny,
@@ -245,12 +326,36 @@ def main(config):
     else:
         # Show newest alert
         latest_alert = valid_alerts[-1]
+
+        # Extract icon from ntfy alert (explicit icon URL or image attachment)
+        icon_url = latest_alert.get("icon")
+        if not icon_url:
+            att = latest_alert.get("attachment")
+            if type(att) == "dict" and att.get("type", "").startswith("image/"):
+                icon_url = att.get("url")
+
+        icon_bytes = None
+        if icon_url and type(icon_url) == "string":
+            icon_url = icon_url.strip()
+            if icon_url.startswith("/"):
+                icon_url = server_url + icon_url
+            if icon_url.startswith("http://") or icon_url.startswith("https://"):
+                icon_bytes = fetch_icon(icon_url)
+
+        if icon_bytes:
+            if topic:
+                cache.set("ntfy_topic_ico_" + topic, icon_bytes, ttl_seconds = 86400)
+        else:
+            cached_icon = cache.get("ntfy_topic_ico_" + topic) if topic else None
+            icon_bytes = cached_icon if cached_icon else default_icon
+
         root_child = render_alert_view(
             scale,
             width,
             height,
             latest_alert,
-            NTFY_ICON_ASSET.readall(),
+            icon_bytes,
+            display_name,
             font_title,
             font_main,
             font_tiny,
@@ -287,17 +392,16 @@ def get_schema():
         version = "1",
         fields = [
             schema.Text(
-                id = "server_url",
-                name = "ntfy Server URL",
-                desc = "Host URL of ntfy (default https://ntfy.sh)",
-                icon = "server",
-                default = "https://ntfy.sh",
+                id = "topic",
+                name = "Topic or URL",
+                desc = "ntfy topic URL (e.g. https://ntfy.sh/mytopic) or topic name",
+                icon = "bell",
             ),
             schema.Text(
-                id = "topic",
-                name = "Topic",
-                desc = "The ntfy topic to poll for notifications",
-                icon = "bell",
+                id = "display_name",
+                name = "Display Name",
+                desc = "Custom display name for header (e.g. Homelab, Alerts)",
+                icon = "tag",
             ),
             schema.Text(
                 id = "auth_token",
@@ -305,6 +409,13 @@ def get_schema():
                 desc = "Token for private or protected topics",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Text(
+                id = "server_url",
+                name = "ntfy Server (Optional)",
+                desc = "Server base URL if not included in topic URL (default https://ntfy.sh)",
+                icon = "server",
+                default = "https://ntfy.sh",
             ),
             schema.Dropdown(
                 id = "window_minutes",
