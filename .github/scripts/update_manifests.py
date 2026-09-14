@@ -15,6 +15,8 @@ def get_git_dates(path):
             "Merge updated-apps",
             "Fix YAML formatting",
             "Update manifest metadata",
+            "chore: auto-update manifest metadata",
+            "auto-update manifest metadata",
             "Merge branch",
             "Tag consolidation",
             "llm generated categories",
