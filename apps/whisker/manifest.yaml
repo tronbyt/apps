@@ -1,0 +1,17 @@
+---
+id: whisker
+name: Whisker
+summary: Monitor Litter-Robot status
+desc: Ambient desk gauge for Litter-Robot tracking waste drawer level, cycle status, and cat visits.
+author: brombomb
+fileName: whisker.star
+packageName: whisker
+supports2x: true
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - automation
+  - wide 2x support
