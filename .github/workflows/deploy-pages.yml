@@ -1,6 +1,12 @@
 name: Build and Deploy App Viewer to GitHub Pages
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+      - 'broken_apps.txt'
   workflow_run:
     workflows: ["Update App Metadata"]
     types:
@@ -14,12 +20,12 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v7
