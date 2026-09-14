@@ -2,7 +2,7 @@
 id: champs
 name: Champs
 summary: Random past championships
-desc: Displays a randomly selected Super Bowl, World Series or NBA Finals result from any year, with current franchise logos.
+desc: Displays a randomly selected Super Bowl, World Series, NBA Finals, Stanley Cup or WNBA Finals result from any year, with current franchise logos.
 author: Matt Thommes
 category: sports
 packageName: champs
