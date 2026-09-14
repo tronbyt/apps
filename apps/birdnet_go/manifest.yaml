@@ -1,0 +1,17 @@
+---
+id: birdnet-go
+name: Birdnet Go
+summary: Backyard bird sound detections
+desc: Displays the latest real-time bird acoustic detection, photo, and confidence score from your local BirdNET-Go station.
+author: brombomb
+fileName: birdnet_go.star
+packageName: birdnetgo
+supports2x: true
+recommendedInterval: 1
+category: utilities
+tags:
+  - nature
+  - birds
+  - audio
+  - tech
+  - wide 2x support
