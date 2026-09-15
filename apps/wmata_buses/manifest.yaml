@@ -1,0 +1,13 @@
+---
+id: wmata-buses
+name: WMATA Buses
+summary: Buses in the WMATA system
+desc: This app tells you the next buses to arrive at 1-2 bus stops in in Washington, DC.
+author: abrahamrowe
+fileName: wmata_buses.star
+packageName: wmatabuses
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2023-09-21T17:56:35Z'
+updated: '2025-12-23T13:24:18Z'

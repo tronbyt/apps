@@ -1,0 +1,19 @@
+---
+id: skylines
+name: Skylines
+summary: City Skylines
+desc: Displays city skylines.
+author: Robert Ison
+packageName: skylines
+fileName: skylines.star
+recommendedInterval: 5
+supports2x: true
+category: art
+tags:
+  - city
+  - art
+  - wide 2x support
+  - skylines
+  - travel
+published: '2025-09-03T21:22:35Z'
+updated: '2026-06-08T04:45:11Z'

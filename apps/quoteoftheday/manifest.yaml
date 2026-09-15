@@ -1,0 +1,16 @@
+---
+id: quote-of-the-day
+name: A Quote A Day
+summary: Cool daily quotes
+desc: Provides inspirational, humorous or otherwise interesting quotes throughout the day.
+author: Taylor White
+fileName: quote_of_the_day.star
+packageName: quoteoftheday
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - art
+  - lifestyle
+  - time
+published: '2024-01-23T18:08:58Z'
+updated: '2025-12-02T19:30:22Z'

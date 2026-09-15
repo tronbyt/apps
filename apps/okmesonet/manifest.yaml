@@ -1,0 +1,12 @@
+---
+id: okmesonet
+name: OK Mesonet
+summary: Oklahoma Mesonet weather
+desc: Current conditions from an Oklahoma Mesonet station of your choice. Shows temperature, wind and gusts, humidity or dewpoint, rainfall, and pressure, with a data-freshness dot and heat and red-flag accents.
+author: jonfishr
+fileName: ok_mesonet.star
+packageName: okmesonet
+recommendedInterval: 5
+published: '2026-07-03T01:03:51Z'
+updated: '2026-07-03T01:03:51Z'
+tags: []

@@ -1,0 +1,15 @@
+---
+id: dothraki-wotd
+name: Dothraki WotD
+summary: Dothraki word of the day
+desc: Display a random Dothraki word of the day.
+author: tavdog
+fileName: dothraki_wotd.star
+packageName: dothrakiwotd
+recommendedInterval: 5
+category: education
+tags:
+  - education
+  - news
+published: '2023-10-15T13:51:16Z'
+updated: '2025-11-30T19:58:27Z'

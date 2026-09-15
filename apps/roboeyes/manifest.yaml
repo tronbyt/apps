@@ -1,0 +1,13 @@
+---
+id: roboeyes
+name: Robo Eyes
+summary: Animated robot eyes
+desc: Animated robot eyes that look around, blink, and react with different moods.
+author: Brombomb
+fileName: roboeyes.star
+packageName: roboeyes
+recommendedInterval: 1
+supports2x: true
+published: '2026-05-29T01:57:18Z'
+updated: '2026-05-29T01:57:18Z'
+tags: []

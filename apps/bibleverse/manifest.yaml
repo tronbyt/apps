@@ -1,0 +1,15 @@
+---
+id: bible-verse
+name: Bible Verse
+summary: Bible verse every 3 minutes
+desc: Displays new bible verse every 3 seconds from different bible translations.
+author: blaiseAI
+recommendedInterval: 5
+fileName: bible_verse.star
+packageName: bibleverse
+category: utilities
+tags:
+  - lifestyle
+  - bible
+published: '2024-06-06T20:44:03Z'
+updated: '2025-12-17T23:02:59Z'

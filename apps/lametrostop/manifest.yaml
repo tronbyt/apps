@@ -1,0 +1,13 @@
+---
+id: la-metro-stop
+name: LA Metro Stop
+summary: LA metro times for stop
+desc: Get departure times for LA metro train stop.
+author: connorwashere
+fileName: la_metro_stop.star
+packageName: lametrostop
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2023-06-09T15:44:00Z'
+updated: '2025-11-29T17:52:33Z'

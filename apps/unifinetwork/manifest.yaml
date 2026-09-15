@@ -1,0 +1,18 @@
+---
+id: unifi-network
+name: UniFi Network
+summary: WAN latency and clients
+desc: 'Your UniFi network on one panel: WAN latency now, a 24-hour latency chart with packet loss marked in red, how many devices are up, and how many clients are on wifi and on cable. Reads the UniFi Cloud (Site Manager) API by default, so all it needs is one key from unifi.ui.com and no LAN name resolution. Cloud mode names the site it is showing and defaults to one you own; it does not chart the ISP speed figures that API reports, because those are the provisioned plan rate rather than live traffic. Local console mode shows live WAN throughput instead, for consoles whose hostname the display can resolve and whose certificate it trusts. An amber "!" beside the UNIFI tag means a firmware update is waiting.'
+author: nsluke
+fileName: unifi_network.star
+packageName: unifinetwork
+recommendedInterval: 1
+supports2x: true
+category: smart-home
+tags:
+  - tech
+  - smart-home
+  - real-time
+  - wide 2x support
+published: '2026-08-31T21:20:49Z'
+updated: '2026-09-02T00:23:54Z'

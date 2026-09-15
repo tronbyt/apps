@@ -1,0 +1,15 @@
+---
+id: fireworks
+name: Fireworks
+summary: Fireworks and a message
+desc: Celebrate with fireworks and a custom message.
+author: Andrew Knotts
+fileName: fireworks.star
+packageName: fireworks
+recommendedInterval: 5
+category: entertainment
+tags:
+  - fireworks
+  - art
+published: '2023-07-10T13:36:25Z'
+updated: '2025-12-02T19:30:22Z'

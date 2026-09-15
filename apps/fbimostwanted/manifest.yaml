@@ -1,0 +1,17 @@
+---
+id: fbimostwanted
+name: FBI Most Wanted
+summary: Top 10 Most Wanted by FBI
+desc: Displays info on 10 most wanted criminals.
+author: Robert Ison
+fileName: fbimostwanted.star
+packageName: fbimostwanted
+recommendedInterval: 60
+supports2x: true
+category: news
+tags:
+  - news
+  - public-safety
+  - wide 2x support
+published: '2026-01-05T23:11:21Z'
+updated: '2026-03-02T20:21:40Z'
