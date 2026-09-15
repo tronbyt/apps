@@ -286,6 +286,151 @@ NBA = [
     (2026, "NBA Finals", "NY", "Knicks", "SA", "Spurs", "4-1"),
 ]
 
+# 1918-1926 Stanley Cup Finals featured NHL vs. PCHA/WCHL champions.
+# 1919 was cancelled due to the flu pandemic.
+# 2005 was cancelled due to the NHL lockout.
+NHL = [
+    (1918, "Stanley Cup Final", "TOR", "Toronto Arenas", "", "Vancouver Millionaires", "3-2"),
+    (1920, "Stanley Cup Final", "", "Ottawa Senators", "", "Seattle Metropolitans", "3-2"),
+    (1921, "Stanley Cup Final", "", "Ottawa Senators", "", "Vancouver Millionaires", "3-2"),
+    (1922, "Stanley Cup Final", "TOR", "Toronto St. Pats", "", "Vancouver Millionaires", "3-2"),
+    (1923, "Stanley Cup Final", "", "Ottawa Senators", "", "Edmonton Eskimos", "2-0"),
+    (1924, "Stanley Cup Final", "MTL", "Canadiens", "", "Calgary Tigers", "2-0"),
+    (1925, "Stanley Cup Final", "", "Victoria Cougars", "MTL", "Canadiens", "3-1"),
+    (1926, "Stanley Cup Final", "", "Montreal Maroons", "", "Victoria Cougars", "3-1"),
+    (1927, "Stanley Cup Final", "", "Ottawa Senators", "BOS", "Bruins", "2-0"),
+    (1928, "Stanley Cup Final", "NYR", "Rangers", "", "Montreal Maroons", "3-2"),
+    (1929, "Stanley Cup Final", "BOS", "Bruins", "NYR", "Rangers", "2-0"),
+    (1930, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "2-0"),
+    (1931, "Stanley Cup Final", "MTL", "Canadiens", "CHI", "Black Hawks", "3-2"),
+    (1932, "Stanley Cup Final", "TOR", "Maple Leafs", "NYR", "Rangers", "3-0"),
+    (1933, "Stanley Cup Final", "NYR", "Rangers", "TOR", "Maple Leafs", "3-1"),
+    (1934, "Stanley Cup Final", "CHI", "Black Hawks", "DET", "Red Wings", "3-1"),
+    (1935, "Stanley Cup Final", "", "Montreal Maroons", "TOR", "Maple Leafs", "3-0"),
+    (1936, "Stanley Cup Final", "DET", "Red Wings", "TOR", "Maple Leafs", "3-1"),
+    (1937, "Stanley Cup Final", "DET", "Red Wings", "NYR", "Rangers", "3-2"),
+    (1938, "Stanley Cup Final", "CHI", "Black Hawks", "TOR", "Maple Leafs", "3-1"),
+    (1939, "Stanley Cup Final", "BOS", "Bruins", "TOR", "Maple Leafs", "4-1"),
+    (1940, "Stanley Cup Final", "NYR", "Rangers", "TOR", "Maple Leafs", "4-2"),
+    (1941, "Stanley Cup Final", "BOS", "Bruins", "DET", "Red Wings", "4-0"),
+    (1942, "Stanley Cup Final", "TOR", "Maple Leafs", "DET", "Red Wings", "4-3"),
+    (1943, "Stanley Cup Final", "DET", "Red Wings", "BOS", "Bruins", "4-0"),
+    (1944, "Stanley Cup Final", "MTL", "Canadiens", "CHI", "Black Hawks", "4-0"),
+    (1945, "Stanley Cup Final", "TOR", "Maple Leafs", "DET", "Red Wings", "4-3"),
+    (1946, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "4-1"),
+    (1947, "Stanley Cup Final", "TOR", "Maple Leafs", "MTL", "Canadiens", "4-2"),
+    (1948, "Stanley Cup Final", "TOR", "Maple Leafs", "DET", "Red Wings", "4-0"),
+    (1949, "Stanley Cup Final", "TOR", "Maple Leafs", "DET", "Red Wings", "4-0"),
+    (1950, "Stanley Cup Final", "DET", "Red Wings", "NYR", "Rangers", "4-3"),
+    (1951, "Stanley Cup Final", "TOR", "Maple Leafs", "MTL", "Canadiens", "4-1"),
+    (1952, "Stanley Cup Final", "DET", "Red Wings", "MTL", "Canadiens", "4-0"),
+    (1953, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "4-1"),
+    (1954, "Stanley Cup Final", "DET", "Red Wings", "MTL", "Canadiens", "4-3"),
+    (1955, "Stanley Cup Final", "DET", "Red Wings", "MTL", "Canadiens", "4-3"),
+    (1956, "Stanley Cup Final", "MTL", "Canadiens", "DET", "Red Wings", "4-1"),
+    (1957, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "4-1"),
+    (1958, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "4-2"),
+    (1959, "Stanley Cup Final", "MTL", "Canadiens", "TOR", "Maple Leafs", "4-1"),
+    (1960, "Stanley Cup Final", "MTL", "Canadiens", "TOR", "Maple Leafs", "4-0"),
+    (1961, "Stanley Cup Final", "CHI", "Black Hawks", "DET", "Red Wings", "4-2"),
+    (1962, "Stanley Cup Final", "TOR", "Maple Leafs", "CHI", "Black Hawks", "4-2"),
+    (1963, "Stanley Cup Final", "TOR", "Maple Leafs", "DET", "Red Wings", "4-1"),
+    (1964, "Stanley Cup Final", "TOR", "Maple Leafs", "DET", "Red Wings", "4-3"),
+    (1965, "Stanley Cup Final", "MTL", "Canadiens", "CHI", "Black Hawks", "4-3"),
+    (1966, "Stanley Cup Final", "MTL", "Canadiens", "DET", "Red Wings", "4-2"),
+    (1967, "Stanley Cup Final", "TOR", "Maple Leafs", "MTL", "Canadiens", "4-2"),
+    (1968, "Stanley Cup Final", "MTL", "Canadiens", "STL", "Blues", "4-0"),
+    (1969, "Stanley Cup Final", "MTL", "Canadiens", "STL", "Blues", "4-0"),
+    (1970, "Stanley Cup Final", "BOS", "Bruins", "STL", "Blues", "4-0"),
+    (1971, "Stanley Cup Final", "MTL", "Canadiens", "CHI", "Black Hawks", "4-3"),
+    (1972, "Stanley Cup Final", "BOS", "Bruins", "NYR", "Rangers", "4-2"),
+    (1973, "Stanley Cup Final", "MTL", "Canadiens", "CHI", "Black Hawks", "4-2"),
+    (1974, "Stanley Cup Final", "PHI", "Flyers", "BOS", "Bruins", "4-2"),
+    (1975, "Stanley Cup Final", "PHI", "Flyers", "BUF", "Sabres", "4-2"),
+    (1976, "Stanley Cup Final", "MTL", "Canadiens", "PHI", "Flyers", "4-0"),
+    (1977, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "4-0"),
+    (1978, "Stanley Cup Final", "MTL", "Canadiens", "BOS", "Bruins", "4-2"),
+    (1979, "Stanley Cup Final", "MTL", "Canadiens", "NYR", "Rangers", "4-1"),
+    (1980, "Stanley Cup Final", "NYI", "Islanders", "PHI", "Flyers", "4-2"),
+    (1981, "Stanley Cup Final", "NYI", "Islanders", "DAL", "Minnesota North Stars", "4-1"),
+    (1982, "Stanley Cup Final", "NYI", "Islanders", "VAN", "Canucks", "4-0"),
+    (1983, "Stanley Cup Final", "NYI", "Islanders", "EDM", "Oilers", "4-0"),
+    (1984, "Stanley Cup Final", "EDM", "Oilers", "NYI", "Islanders", "4-1"),
+    (1985, "Stanley Cup Final", "EDM", "Oilers", "PHI", "Flyers", "4-1"),
+    (1986, "Stanley Cup Final", "MTL", "Canadiens", "CGY", "Flames", "4-1"),
+    (1987, "Stanley Cup Final", "EDM", "Oilers", "PHI", "Flyers", "4-3"),
+    (1988, "Stanley Cup Final", "EDM", "Oilers", "BOS", "Bruins", "4-0"),
+    (1989, "Stanley Cup Final", "CGY", "Flames", "MTL", "Canadiens", "4-2"),
+    (1990, "Stanley Cup Final", "EDM", "Oilers", "BOS", "Bruins", "4-1"),
+    (1991, "Stanley Cup Final", "PIT", "Penguins", "DAL", "Minnesota North Stars", "4-2"),
+    (1992, "Stanley Cup Final", "PIT", "Penguins", "CHI", "Blackhawks", "4-0"),
+    (1993, "Stanley Cup Final", "MTL", "Canadiens", "LA", "Kings", "4-1"),
+    (1994, "Stanley Cup Final", "NYR", "Rangers", "VAN", "Canucks", "4-3"),
+    (1995, "Stanley Cup Final", "NJ", "Devils", "DET", "Red Wings", "4-0"),
+    (1996, "Stanley Cup Final", "COL", "Avalanche", "FLA", "Panthers", "4-0"),
+    (1997, "Stanley Cup Final", "DET", "Red Wings", "PHI", "Flyers", "4-0"),
+    (1998, "Stanley Cup Final", "DET", "Red Wings", "WSH", "Capitals", "4-0"),
+    (1999, "Stanley Cup Final", "DAL", "Stars", "BUF", "Sabres", "4-2"),
+    (2000, "Stanley Cup Final", "NJ", "Devils", "DAL", "Stars", "4-2"),
+    (2001, "Stanley Cup Final", "COL", "Avalanche", "NJ", "Devils", "4-3"),
+    (2002, "Stanley Cup Final", "DET", "Red Wings", "CAR", "Hurricanes", "4-1"),
+    (2003, "Stanley Cup Final", "NJ", "Devils", "ANA", "Mighty Ducks", "4-3"),
+    (2004, "Stanley Cup Final", "TB", "Lightning", "CGY", "Flames", "4-3"),
+    (2006, "Stanley Cup Final", "CAR", "Hurricanes", "EDM", "Oilers", "4-3"),
+    (2007, "Stanley Cup Final", "ANA", "Ducks", "OTT", "Senators", "4-1"),
+    (2008, "Stanley Cup Final", "DET", "Red Wings", "PIT", "Penguins", "4-2"),
+    (2009, "Stanley Cup Final", "PIT", "Penguins", "DET", "Red Wings", "4-3"),
+    (2010, "Stanley Cup Final", "CHI", "Blackhawks", "PHI", "Flyers", "4-2"),
+    (2011, "Stanley Cup Final", "BOS", "Bruins", "VAN", "Canucks", "4-3"),
+    (2012, "Stanley Cup Final", "LA", "Kings", "NJ", "Devils", "4-2"),
+    (2013, "Stanley Cup Final", "CHI", "Blackhawks", "BOS", "Bruins", "4-2"),
+    (2014, "Stanley Cup Final", "LA", "Kings", "NYR", "Rangers", "4-1"),
+    (2015, "Stanley Cup Final", "CHI", "Blackhawks", "TB", "Lightning", "4-2"),
+    (2016, "Stanley Cup Final", "PIT", "Penguins", "SJ", "Sharks", "4-2"),
+    (2017, "Stanley Cup Final", "PIT", "Penguins", "NSH", "Predators", "4-2"),
+    (2018, "Stanley Cup Final", "WSH", "Capitals", "VGK", "Golden Knights", "4-1"),
+    (2019, "Stanley Cup Final", "STL", "Blues", "BOS", "Bruins", "4-3"),
+    (2020, "Stanley Cup Final", "TB", "Lightning", "DAL", "Stars", "4-2"),
+    (2021, "Stanley Cup Final", "TB", "Lightning", "MTL", "Canadiens", "4-1"),
+    (2022, "Stanley Cup Final", "COL", "Avalanche", "TB", "Lightning", "4-2"),
+    (2023, "Stanley Cup Final", "VGK", "Golden Knights", "FLA", "Panthers", "4-1"),
+    (2024, "Stanley Cup Final", "FLA", "Panthers", "EDM", "Oilers", "4-3"),
+    (2025, "Stanley Cup Final", "FLA", "Panthers", "EDM", "Oilers", "4-2"),
+    (2026, "Stanley Cup Final", "CAR", "Hurricanes", "VGK", "Golden Knights", "4-2"),
+]
+
+WNBA = [
+    (1997, "WNBA Finals", "", "Houston Comets", "NY", "Liberty", "1-0"),
+    (1998, "WNBA Finals", "", "Houston Comets", "PHX", "Mercury", "2-1"),
+    (1999, "WNBA Finals", "", "Houston Comets", "NY", "Liberty", "2-1"),
+    (2000, "WNBA Finals", "", "Houston Comets", "NY", "Liberty", "2-0"),
+    (2001, "WNBA Finals", "LA", "Sparks", "", "Charlotte Sting", "2-0"),
+    (2002, "WNBA Finals", "LA", "Sparks", "NY", "Liberty", "2-0"),
+    (2003, "WNBA Finals", "DAL", "Detroit Shock", "LA", "Sparks", "2-1"),
+    (2004, "WNBA Finals", "SEA", "Storm", "CONN", "Sun", "2-1"),
+    (2005, "WNBA Finals", "", "Sacramento Monarchs", "CONN", "Sun", "3-1"),
+    (2006, "WNBA Finals", "DAL", "Detroit Shock", "", "Sacramento Monarchs", "3-2"),
+    (2007, "WNBA Finals", "PHX", "Mercury", "DAL", "Detroit Shock", "3-2"),
+    (2008, "WNBA Finals", "DAL", "Detroit Shock", "LV", "San Antonio Silver Stars", "3-0"),
+    (2009, "WNBA Finals", "PHX", "Mercury", "IND", "Fever", "3-2"),
+    (2010, "WNBA Finals", "SEA", "Storm", "ATL", "Dream", "3-0"),
+    (2011, "WNBA Finals", "MIN", "Lynx", "ATL", "Dream", "3-0"),
+    (2012, "WNBA Finals", "IND", "Fever", "MIN", "Lynx", "3-1"),
+    (2013, "WNBA Finals", "MIN", "Lynx", "ATL", "Dream", "3-0"),
+    (2014, "WNBA Finals", "PHX", "Mercury", "CHI", "Sky", "3-0"),
+    (2015, "WNBA Finals", "MIN", "Lynx", "IND", "Fever", "3-2"),
+    (2016, "WNBA Finals", "LA", "Sparks", "MIN", "Lynx", "3-2"),
+    (2017, "WNBA Finals", "MIN", "Lynx", "LA", "Sparks", "3-2"),
+    (2018, "WNBA Finals", "SEA", "Storm", "WSH", "Mystics", "3-0"),
+    (2019, "WNBA Finals", "WSH", "Mystics", "CONN", "Sun", "3-2"),
+    (2020, "WNBA Finals", "SEA", "Storm", "LV", "Aces", "3-0"),
+    (2021, "WNBA Finals", "CHI", "Sky", "PHX", "Mercury", "3-1"),
+    (2022, "WNBA Finals", "LV", "Aces", "CONN", "Sun", "3-1"),
+    (2023, "WNBA Finals", "LV", "Aces", "NY", "Liberty", "3-1"),
+    (2024, "WNBA Finals", "NY", "Liberty", "MIN", "Lynx", "3-2"),
+    (2025, "WNBA Finals", "LV", "Aces", "PHX", "Mercury", "4-0"),
+]
+
 
 def rows(league, entries):
     return [
@@ -305,7 +450,13 @@ def rows(league, entries):
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
-    data = rows("NFL", NFL) + rows("MLB", MLB) + rows("NBA", NBA)
+    data = (
+        rows("NFL", NFL)
+        + rows("MLB", MLB)
+        + rows("NBA", NBA)
+        + rows("NHL", NHL)
+        + rows("WNBA", WNBA)
+    )
 
     with open(os.path.join(here, "champs.json"), "w") as f:
         json.dump(data, f, indent=1)
@@ -313,7 +464,7 @@ def main():
 
     # Compact one-row-per-line JSON embedded in the applet.
     lines = ",\n".join(json.dumps(r, separators=(",", ":")) for r in data)
-    block = "DATA_JSON = \"\"\"[\n" + lines + "\n]\"\"\"\n"
+    block = 'DATA_JSON = """[\n' + lines + '\n]"""\n'
 
     star_path = os.path.join(here, "champs.star")
     with open(star_path) as f:
