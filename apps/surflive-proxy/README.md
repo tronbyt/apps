@@ -2,7 +2,7 @@
 
 Shows the current surf conditions for a surf spot, plus a short wave-height
 forecast, identical in spirit to the [Surflive](../surflive) app, but routes
-all Surfline API calls through a self-hosted **proxy sidecar** instead of
+all Surfline API calls through a self-hosted [**proxy sidecar**](https://github.com/mpias670/tronbyt-proxy-sidecar) instead of
 calling `services.surfline.com` directly.
 
 ## Why?

@@ -3,7 +3,7 @@ id: surflive-proxy
 name: Surflive Proxy
 summary: Live surf conditions (via proxy)
 desc: Shows the current surf conditions for a surf spot, routed through a self-hosted proxy sidecar that handles Surfline's Cloudflare bot protection.
-author: tronbyt
+author: mpias670
 fileName: surflive_proxy.star
 packageName: surfliveproxy
 recommendedInterval: 5
