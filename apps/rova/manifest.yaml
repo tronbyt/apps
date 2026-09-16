@@ -1,0 +1,17 @@
+---
+id: rova
+name: ROVA
+summary: Dutch waste collection days
+desc: Displays the next ROVA waste collection day for each waste type at your postal code and house number.
+author: bertvm
+recommendedInterval: 60
+supports2x: true
+category: lifestyle
+tags:
+  - waste
+  - netherlands
+  - utility
+  - smart-home
+  - wide 2x support
+published: '2026-09-08T20:00:00Z'
+updated: '2026-09-08T20:41:35Z'
