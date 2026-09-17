@@ -230,7 +230,7 @@ def fetch_data():
 
     # Format Regular Season Standings
     standings_list = []
-    for team_code, row in regular_records.items():
+    for row in regular_records.values():
         if row["team"] == "TBD" and row["wins"] == 0 and row["losses"] == 0:
             continue
 
