@@ -134,19 +134,6 @@ def parse_scores(game):
 
     return None, None
 
-def detect_playoff_round(game):
-    """Identifies the series round (e.g. Finals vs Semifinals)."""
-    text_check = (
-        str(game.get("round", "")) + " " +
-        str(game.get("series", "")) + " " +
-        str(game.get("game_type", "")) + " " +
-        str(game.get("eventTypeDescription", ""))
-    ).lower()
-
-    if "champ" in text_check or "final" in text_check and "semi" not in text_check:
-        return "FINALS"
-    return "SEMIFINALS"
-
 def fetch_data():
     """Fetches games, splits into regular season standings and postseason series."""
     cached = cache.get("wpbl_all_data")
@@ -163,6 +150,7 @@ def fetch_data():
     # Initialize records dynamically
     regular_records = {}
     postseason_matchups = {}
+    series_order = []
 
     # Aggregate game results
     for g in games:
@@ -188,18 +176,17 @@ def fetch_data():
 
         if is_postseason:
             # Sort keys to ensure matchup identity regardless of home/away
-            round_label = detect_playoff_round(g)
             teams_sorted = [home_key, away_key]
             if home_key > away_key:
                 teams_sorted = [away_key, home_key]
 
-            # Unique key incorporates the round so Semifinals and Finals don't collide
-            m_key = round_label + ":" + teams_sorted[0] + "-" + teams_sorted[1]
+            m_key = teams_sorted[0] + "-" + teams_sorted[1]
             team1, team2 = teams_sorted[0], teams_sorted[1]
 
+            # Track discovery order: each newly observed pair of teams forms a new series
             if m_key not in postseason_matchups:
+                series_order.append(m_key)
                 postseason_matchups[m_key] = {
-                    "round": round_label,
                     "team1": team1,
                     "team2": team2,
                     "team1_color": get_team_color(team1),
@@ -210,6 +197,7 @@ def fetch_data():
                     "wins2": 0,
                 }
 
+            # Increment wins only for finished games
             if is_final and home_score != None and away_score != None:
                 if home_score > away_score:
                     if home_key == team1:
@@ -221,7 +209,6 @@ def fetch_data():
                         postseason_matchups[m_key]["wins1"] += 1
                     else:
                         postseason_matchups[m_key]["wins2"] += 1
-
         else:
             # Regular Season aggregation
             for k in [home_key, away_key]:
@@ -243,7 +230,7 @@ def fetch_data():
 
     # Format Regular Season Standings
     standings_list = []
-    for team_code, row in regular_records.items():
+    for row in regular_records.values():
         if row["team"] == "TBD" and row["wins"] == 0 and row["losses"] == 0:
             continue
 
@@ -288,16 +275,11 @@ def fetch_data():
                 else:
                     row["gb"] = str(diff // 2) + ".5"
 
-    # Format Postseason Series (Prioritize FINALS first)
-    finals_list = []
-    semis_list = []
-    for _, match in postseason_matchups.items():
-        if match["round"] == "FINALS":
-            finals_list.append(match)
-        else:
-            semis_list.append(match)
-
-    postseason_list = finals_list + semis_list
+    # Order series newest first (reverse of discovery order)
+    postseason_list = []
+    for idx in range(len(series_order) - 1, -1, -1):
+        m_key = series_order[idx]
+        postseason_list.append(postseason_matchups[m_key])
 
     payload = {
         "regular": standings_list,
@@ -414,98 +396,81 @@ def render_row(item, is_alternate, scale):
         ),
     )
 
-def render_postseason_card(item, card_height_unscaled, scale):
-    """Renders a postseason matchup series card dynamically fitting available height."""
-    round_label = item.get("round", "SERIES")
-    is_finals = round_label == "FINALS"
-    label_color = "#FFD700" if is_finals else "#888888"
-
-    # Dynamic pill height based on available card slot
-    pill_height = 12 if card_height_unscaled >= 24 else 9
+def render_postseason_row(item, is_alternate, scale):
+    """Renders a postseason series matchup row without individual headers."""
+    bg_color = "#111111" if is_alternate else "#000000"
 
     return render.Box(
         width = 64 * scale,
-        height = card_height_unscaled * scale,
-        color = "#000000",
-        child = render.Column(
+        height = 8 * scale,
+        color = bg_color,
+        child = render.Row(
             expanded = True,
-            main_align = "space_evenly",
+            main_align = "space_around",
             cross_align = "center",
             children = [
-                render.Text(
-                    content = "CHAMPIONSHIP" if (is_finals and card_height_unscaled >= 20) else round_label,
-                    font = get_font("CG-pixel-3x5-mono", scale),
-                    color = label_color,
+                # Left Team
+                render.Box(
+                    width = 25 * scale,
+                    height = 8 * scale,
+                    color = item["team1_bg"],
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Padding(
+                                pad = (2 * scale, 0, 0, 0),
+                                child = render.Text(
+                                    content = item["team1"],
+                                    font = get_font("tom-thumb", scale),
+                                    color = item["team1_color"],
+                                ),
+                            ),
+                            render.Padding(
+                                pad = (0, 0, 3 * scale, 0),
+                                child = render.Text(
+                                    content = str(item["wins1"]),
+                                    font = get_font("tb-8", scale),
+                                    color = "#FFFFFF" if item["wins1"] >= item["wins2"] else "#666666",
+                                ),
+                            ),
+                        ],
+                    ),
                 ),
-                render.Row(
-                    expanded = True,
-                    main_align = "space_around",
-                    cross_align = "center",
-                    children = [
-                        # Left Team
-                        render.Box(
-                            width = 25 * scale,
-                            height = pill_height * scale,
-                            color = item["team1_bg"],
-                            child = render.Row(
-                                expanded = True,
-                                main_align = "space_between",
-                                cross_align = "center",
-                                children = [
-                                    render.Padding(
-                                        pad = (2 * scale, 0, 0, 0),
-                                        child = render.Text(
-                                            content = item["team1"],
-                                            font = get_font("tom-thumb", scale),
-                                            color = item["team1_color"],
-                                        ),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 0, 3 * scale, 0),
-                                        child = render.Text(
-                                            content = str(item["wins1"]),
-                                            font = get_font("tb-8", scale),
-                                            color = "#FFFFFF" if item["wins1"] >= item["wins2"] else "#666666",
-                                        ),
-                                    ),
-                                ],
+                render.Text(
+                    content = "VS",
+                    font = get_font("CG-pixel-3x5-mono", scale),
+                    color = "#555555",
+                ),
+                # Right Team
+                render.Box(
+                    width = 25 * scale,
+                    height = 8 * scale,
+                    color = item["team2_bg"],
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Padding(
+                                pad = (3 * scale, 0, 0, 0),
+                                child = render.Text(
+                                    content = str(item["wins2"]),
+                                    font = get_font("tb-8", scale),
+                                    color = "#FFFFFF" if item["wins2"] >= item["wins1"] else "#666666",
+                                ),
                             ),
-                        ),
-                        render.Text(
-                            content = "VS",
-                            font = get_font("CG-pixel-3x5-mono", scale),
-                            color = "#555555",
-                        ),
-                        # Right Team
-                        render.Box(
-                            width = 25 * scale,
-                            height = pill_height * scale,
-                            color = item["team2_bg"],
-                            child = render.Row(
-                                expanded = True,
-                                main_align = "space_between",
-                                cross_align = "center",
-                                children = [
-                                    render.Padding(
-                                        pad = (3 * scale, 0, 0, 0),
-                                        child = render.Text(
-                                            content = str(item["wins2"]),
-                                            font = get_font("tb-8", scale),
-                                            color = "#FFFFFF" if item["wins2"] >= item["wins1"] else "#666666",
-                                        ),
-                                    ),
-                                    render.Padding(
-                                        pad = (0, 0, 2 * scale, 0),
-                                        child = render.Text(
-                                            content = item["team2"],
-                                            font = get_font("tom-thumb", scale),
-                                            color = item["team2_color"],
-                                        ),
-                                    ),
-                                ],
+                            render.Padding(
+                                pad = (0, 0, 2 * scale, 0),
+                                child = render.Text(
+                                    content = item["team2"],
+                                    font = get_font("tom-thumb", scale),
+                                    color = item["team2_color"],
+                                ),
                             ),
-                        ),
-                    ],
+                        ],
+                    ),
                 ),
             ],
         ),
@@ -591,35 +556,70 @@ def build_regular_view(standings, scale):
     )
 
 def build_postseason_view(postseason, scale):
-    """Builds the postseason series view supporting 1, 2, or 3+ series."""
+    """Builds the postseason series view with a single header and series results."""
+    header = render.Box(
+        width = 64 * scale,
+        height = 8 * scale,
+        color = "#00281F",
+        child = render.Row(
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "center",
+            children = [
+                render.Padding(
+                    pad = (1 * scale, 0, 0, 0),
+                    child = render.Text(
+                        content = "WPBL",
+                        font = get_font("tb-8", scale),
+                        color = "#FFD700",
+                    ),
+                ),
+                render.Padding(
+                    pad = (0, 1 * scale, 2 * scale, 0),
+                    child = render.Text(
+                        content = "POSTSEASON",
+                        font = get_font("tom-thumb", scale),
+                        color = "#A0A0A0",
+                    ),
+                ),
+            ],
+        ),
+    )
+
     count = len(postseason)
     if count == 0:
         return render.Box(width = 64 * scale, height = 32 * scale)
 
-    # 1 Matchup: Fill whole 32px height
-    # 2 Matchups: Each gets 16px
-    # 3+ Matchups (e.g. 2 Semis + 1 Finals): 16px each inside a vertical marquee with 10s hold
-    slot_height = 32 if count == 1 else 16
-    cards = []
-    for match in postseason:
-        cards.append(render_postseason_card(match, slot_height, scale))
+    rows = []
+    for i, match in enumerate(postseason):
+        rows.append(render_postseason_row(match, is_alternate = (i % 2 == 1), scale = scale))
 
     if count > 2:
-        return render.Box(
+        content_area = render.Box(
             width = 64 * scale,
-            height = 32 * scale,
+            height = 24 * scale,
             child = render.Marquee(
-                height = 32 * scale,
+                height = 24 * scale,
                 scroll_direction = "vertical",
-                delay = 100,  # 10s hold on top series before cycling through the rest
-                child = render.Column(children = cards),
+                delay = 50,  # 50 frames * ~100ms/frame = ~5 second hold before scrolling
+                child = render.Column(
+                    main_align = "start",
+                    children = rows,
+                ),
             ),
+        )
+    else:
+        content_area = render.Column(
+            main_align = "start",
+            children = rows,
         )
 
     return render.Column(
-        expanded = True,
-        main_align = "space_evenly",
-        children = cards,
+        main_align = "start",
+        children = [
+            header,
+            content_area,
+        ],
     )
 
 def main(config):
