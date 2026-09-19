@@ -3988,26 +3988,28 @@ def get_schema():
 
 def get_scores(urls, team):
     allscores = []
-    gameCount = 0
     for i, s in urls.items():
         data = get_cachable_data(s)
         decodedata = json.decode(data)
         allscores.extend(decodedata["events"])
-        if team != "all" and team != "":
-            newScores = []
-            for _, s in enumerate(allscores):
-                home = s["competitions"][0]["competitors"][0]["team"]["id"]
-                away = s["competitions"][0]["competitors"][1]["team"]["id"]
-                gameStatus = s["status"]["type"]["state"]
-                if (home == team or away == team) and gameStatus == "post":
-                    newScores.append(s)
-                elif (home == team or away == team) and gameCount == 0:
-                    if gameStatus == "in":
-                        newScores.clear()
-                    newScores.append(s)
-                    gameCount = gameCount + 1
-            allscores = newScores
         all([i, allscores])
+
+    if team != "all" and team != "":
+        newScores = []
+        gameCount = 0
+        for _, s in enumerate(allscores):
+            home = s["competitions"][0]["competitors"][0]["team"]["id"]
+            away = s["competitions"][0]["competitors"][1]["team"]["id"]
+            gameStatus = s["status"]["type"]["state"]
+            if (home == team or away == team) and gameStatus == "post":
+                newScores.append(s)
+            elif (home == team or away == team) and gameCount == 0:
+                if gameStatus == "in":
+                    newScores.clear()
+                newScores.append(s)
+                gameCount = gameCount + 1
+        allscores = newScores
+
     return allscores
 
 def empty_scores(allscores):
