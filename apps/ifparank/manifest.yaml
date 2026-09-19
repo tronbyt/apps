@@ -1,0 +1,16 @@
+---
+id: ifparank
+name: IFPARank
+summary: Display IFPA Ranking
+desc: Display an International Flipper Pinball Association (IFPA) World Ranking.
+author: cubsaaron
+fileName: ifparank.star
+packageName: ifparank
+recommendedInterval: 5
+category: entertainment
+tags:
+  - sports
+  - flipper
+  - gaming
+published: '2022-04-04T16:21:30Z'
+updated: '2025-12-05T22:28:51Z'

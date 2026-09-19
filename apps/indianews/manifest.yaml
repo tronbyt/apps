@@ -1,0 +1,15 @@
+---
+id: india-news
+name: India News
+summary: Top India news
+desc: Top 4 news headlines from India.
+author: vipulchhajer
+fileName: india_news.star
+packageName: indianews
+recommendedInterval: 10
+category: news
+tags:
+  - local
+  - news
+published: '2023-11-29T17:56:33Z'
+updated: '2025-11-29T17:52:33Z'

@@ -1,0 +1,16 @@
+---
+id: drawbridge-status
+name: Drawbridge Status
+summary: Display Drawbridge Status
+desc: Shows whether a drawbridge is open or not, and when it is expected to rise again. For now, only the Saint-Louis-de-Gonzague drawbridge (QC) is supported.
+author: sumara523
+fileName: drawbridge_status.star
+packageName: drawbridgestatus
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+  - local
+  - tracking
+published: '2023-11-16T17:17:56Z'
+updated: '2025-12-02T19:30:22Z'

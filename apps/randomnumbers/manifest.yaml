@@ -1,0 +1,16 @@
+---
+id: random-numbers
+name: Random Numbers
+summary: Display random numbers
+desc: Display random numbers.
+author: Kyle Bolstad
+fileName: random_numbers.star
+packageName: randomnumbers
+recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - science
+  - art
+published: '2023-09-21T17:11:24Z'
+updated: '2025-11-30T19:58:27Z'

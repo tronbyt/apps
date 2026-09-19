@@ -1,0 +1,15 @@
+---
+id: lobster-facts
+name: Lobster Facts
+summary: Random Lobster Facts
+desc: Displays a random lobster fact.
+author: Marc ten Bosch
+fileName: lobster_facts.star
+packageName: lobsterfacts
+recommendedInterval: 5
+category: entertainment
+tags:
+  - nature
+  - music
+published: '2023-07-12T14:59:06Z'
+updated: '2025-12-28T23:11:23Z'

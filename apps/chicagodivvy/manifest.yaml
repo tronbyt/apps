@@ -1,0 +1,14 @@
+---
+id: chicago-divvy
+name: Chicago Divvy
+summary: Chicago Divvy Stations
+desc: Shows bike availability of a Divvy Station in the Chicagoland area.
+author: wilcot
+fileName: chicago_divvy.star
+packageName: chicagodivvy
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2024-03-07T21:17:09Z'
+updated: '2025-11-29T23:55:39Z'

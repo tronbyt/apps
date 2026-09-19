@@ -1,0 +1,12 @@
+---
+id: morphingclockq
+name: Morphing ClockQ
+summary: Morphing Clock Display
+desc: A unique clock display that morphs the time.  It also shows the temp,humidity,wind and weather description.
+author: gquiring
+category: Clocks
+tags:
+  - clock
+  - time
+published: '2026-09-08T20:20:38Z'
+updated: '2026-09-08T20:26:59Z'

@@ -1,0 +1,12 @@
+---
+id: uv-index-visualizer
+name: UV Visualizer
+summary: UV Index visuals
+desc: Selectable UV index visualizations - Driven by currentuvindex.com.
+author: Dylan Stout
+fileName: uvindexvisualizer.star
+packageName: uvindexvisualizer
+supports2x: true
+published: '2026-06-30T19:20:59Z'
+updated: '2026-06-30T19:27:20Z'
+tags: []

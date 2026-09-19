@@ -1,0 +1,15 @@
+---
+id: atc-radar
+name: ATC Radar
+summary: Display local air traffic
+desc: Display local air traffic.
+author: Robert Ison
+fileName: atc_radar.star
+packageName: atcradar
+recommendedInterval: 5
+category: transit
+tags:
+  - air-traffic
+  - real-time
+published: '2023-11-16T17:16:35Z'
+updated: '2025-12-02T19:30:22Z'

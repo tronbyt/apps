@@ -1,0 +1,16 @@
+---
+id: peanutspictures
+name: Peanuts Pictures
+summary: Peanuts Pixel Art
+desc: Shows a specific or random pixel art piece of characters from the Peanuts comics series.
+author: michaelalbinson
+fileName: peanuts_pictures.star
+packageName: peanutspictures
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+  - media
+  - retro
+published: '2023-07-27T14:39:22Z'
+updated: '2025-12-02T19:30:22Z'
