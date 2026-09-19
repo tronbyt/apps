@@ -74,7 +74,7 @@ MS_GLYPHS_OVER = 4
 # UXG and USG gateways, and the Cloud Gateway line, whose models all carry the
 # word "gateway". Matched against `model`, never against `name`, because `name`
 # is whatever the owner typed and an access point called "Router" must not win.
-GATEWAY_MODELS = ("gateway", "dream", "udm", "uxg", "usg", "ugw")
+GATEWAY_MODELS = ("gateway", "dream", "udm", "udr", "udw", "ucg", "uxg", "usg", "ugw")
 
 # Weakest signal of the three, and last, because "express" is a marketing word
 # before it is a product line.
