@@ -6,12 +6,11 @@ desc: Shows the daily pick deal from Guitar Center.
 author: Bennett Schoonerman
 fileName: gc_daily_pick.star
 packageName: gcdailypick
-broken: true
-recommendedInterval: 5
+recommendedInterval: 10
 category: utilities
 tags:
   - music
   - utility
   - deals
 published: '2024-01-06T16:33:46Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-09-16T22:28:51Z'

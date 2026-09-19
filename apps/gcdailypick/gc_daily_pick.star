@@ -4,67 +4,117 @@ Summary: Guitar Center daily pick
 Description: Shows the daily pick deal from Guitar Center.
 Author: Bennett Schoonerman
 """
-
 load("animation.star", "animation")
-load("html.star", "html")
 load("http.star", "http")
-load("images/guitar_center_logo.png", GUITAR_CENTER_LOGO_ASSET = "file")
 load("render.star", "render")
 
-GUITAR_CENTER_LOGO = GUITAR_CENTER_LOGO_ASSET.readall()
+GUITAR_CENTER_LOGO = ""
 
 # only changes once per day but we will refetch on the hour to be safe
 CACHE_TTL = 3600
+GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1z4UprVH5z79gc85e_inF0NDzAD7pmmExNme1V17Ne-c/export?format=csv&gid=1879148122"
 
-# Load Guitar Center logo from base64 encoded data
 
-def fetchDealImage(page):
-    imageUrl = page.find(".daily_pick_content .dealImage").attr("src")
-    resp = http.get(
-        url = imageUrl,
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        },
-        ttl_seconds = CACHE_TTL,
-    )
+def splitCsvLine(line):
+    cells = []
+    current = ""
+    in_quotes = False
+
+    i = 0
+    for i in range(len(line)):
+        char = line[i]
+        if char == '"':
+            if in_quotes and i + 1 < len(line) and line[i + 1] == '"':
+                current += '"'
+                i = i + 1
+            else:
+                in_quotes = not in_quotes
+        elif char == "," and not in_quotes:
+            cells.append(current)
+            current = ""
+        else:
+            current += char
+
+    cells.append(current)
+    return cells
+
+
+def fetchDealImage(image_url):
+    if image_url == "":
+        return GUITAR_CENTER_LOGO
+
+    resp = http.get(url = image_url, ttl_seconds = CACHE_TTL)
+    if resp.status_code != 200:
+        return GUITAR_CENTER_LOGO
     return resp.body()
 
-# helper to remove new lines like Price or Save that is part of the scraped text
-def polishStrings(input_string):
-    # Find the indices of '\n' and '\u00a0'
-    start_index = input_string.find("\n")
-    end_index = input_string.find("\u00a0")
 
-    if start_index != -1 and end_index != -1:
-        modified_string = input_string[:start_index] + input_string[end_index + 2:]
-        return modified_string
-    else:
-        return input_string
+def parseDealRow(raw_csv):
+    lines = raw_csv.split("\n")
+    if len(lines) < 2:
+        return {}
 
-def extractDealInfo(page):
-    dealImageData = fetchDealImage(page)
-    data = {
-        "itemName": page.find(".daily_pick_content .displayNameColor").text(),
-        "originalPrice": page.find(".dailypick-was .price-display-value").text(),
-        "savings": polishStrings(page.find(".daily_pick_content .dailypick-save").text()),
-        "price": polishStrings(page.find(".daily_pick_content .dailypick-price").text()),
-        "dealImage": dealImageData,
-    }
-    return data
+    header = splitCsvLine(lines[0])
+    latest_row = {}
+    latest_timestamp = ""
+
+    for i in range(1, len(lines)):
+        row_text = lines[i]
+        if row_text == "":
+            continue
+
+        values = splitCsvLine(row_text)
+        if len(values) < len(header):
+            continue
+
+        row = {}
+        for j in range(len(header)):
+            key = header[j].strip()
+            row[key] = values[j].strip()
+
+        row_timestamp = row.get("scrapedAt", "")
+        if row_timestamp > latest_timestamp:
+            latest_row = row
+            latest_timestamp = row_timestamp
+
+    return latest_row
+
 
 def getDailyPick():
-    resp = http.get(
-        url = "https://www.guitarcenter.com/Daily-Pick.gc",
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        },
-        ttl_seconds = CACHE_TTL,
-    )
-    page = html(resp.body())
-    return extractDealInfo(page)
+    resp = http.get(url = GOOGLE_SHEET_CSV_URL, ttl_seconds = CACHE_TTL)
+    row = parseDealRow(resp.body())
+
+    if row == {}:
+        return {
+            "itemName": "Daily Pick",
+            "originalPrice": "$0.00",
+            "savings": "$0.00",
+            "price": "$0.00",
+            "dealImage": GUITAR_CENTER_LOGO,
+        }
+
+    discount = row.get("discount", "$0.00")
+    if discount == "":
+        discount = "$0.00"
+
+    return {
+        "itemName": row.get("title", "Daily Pick"),
+        "originalPrice": row.get("originalPrice", "$0.00"),
+        "savings": discount,
+        "price": row.get("price", discount),
+        "dealImage": fetchDealImage(row.get("image", "")),
+    }
 
 def main():
     data = getDailyPick()
+    deal_image = render.Box(
+        width = 24,
+        height = 24,
+        color = "#111111",
+        child = render.Text("GC", color = "#FFFFFF", font = "tb-8"),
+    )
+    if data["dealImage"] != "":
+        deal_image = render.Image(width = 24, height = 24, src = data["dealImage"])
 
     # print(data)
     return render.Root(
@@ -72,7 +122,12 @@ def main():
             children = [
                 animation.Transformation(
                     duration = 450,
-                    child = render.Image(src = GUITAR_CENTER_LOGO, width = 64, height = 32),
+                    child = render.Box(
+                        width = 64,
+                        height = 32,
+                        color = "#020202",
+                        child = render.Text("GC", color = "#FFFFFF", font = "tb-8"),
+                    ),
                     keyframes = [
                         #slide GC logo up
                         animation.Keyframe(
@@ -114,7 +169,7 @@ def main():
                                             render.Box(width = 40, height = 8, child = render.Text(content = data["price"], color = "#85BB65")),
                                         ],
                                     ),
-                                    render.Image(width = 24, height = 24, src = data["dealImage"]),
+                                    deal_image,
                                 ],
                             ),
                         ],
