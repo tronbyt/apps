@@ -67,6 +67,7 @@ def fetch_kuma_data(base_url, slug):
     groups = page_data.get("publicGroupList") or []
     for g in groups:
         for m in g.get("monitorList") or []:
+            m["id"] = int(m["id"])
             monitors_list.append(m)
 
     hb_res = http.get(hb_url, headers = headers, ttl_seconds = 30)
@@ -302,7 +303,7 @@ def render_service_card(scale, width, card_height, m, card_idx, total_cards, fon
         ],
     )
 
-    ping_str = "%dms" % m["ping"] if m["ping"] > 0 else "0ms"
+    ping_str = "%dms" % m["ping"] if m["ping"] != None and m["ping"] > 0 else "0ms"
     uptime_val = m.get("uptime", 100.0)
     uptime_str = "100%" if uptime_val >= 99.95 else str(uptime_val) + "%"
     stat_line = ping_str + " · " + uptime_str
