@@ -149,7 +149,15 @@ def main(config):
     loc = json.decode(location)
     timezone = loc["timezone"]
     now = time.now().in_location(timezone)
-    league = {LEAGUE: API + "?limit=300"}
+    league = {}
+    if selectedTeam == "all":
+        league[LEAGUE] = API + "?limit=300"
+    else:
+        for d in range(-1, 7):
+            day_time = now + time.parse_duration("%dh" % (d * 24))
+            day_str = day_time.format("20060102")
+            league[day_str] = API + "?limit=300&dates=" + day_str
+
     scores = get_scores(league, selectedTeam)
     if len(scores) == 0:
         return render.Root(
