@@ -112,15 +112,19 @@ def main(config):
     timezone = time.tz()
     now = time.now().in_location(timezone)
 
-    # calculate start and end date if we are set to use range of days
-    date_range_search = ""
+    # calculate single dates if we are set to use range of days
+    league = {}
     if config.bool("day_range", False):
-        back_time = now - time.parse_duration("%dh" % (int(config.get("days_back", 1)) * 24))
-        fwd_time = now + time.parse_duration("%dh" % (int(config.get("days_forward", 1)) * 24))
-        date_range_search = "?dates=%s-%s" % (back_time.format("20060102"), (fwd_time.format("20060102")))
+        days_back = int(config.get("days_back", 1))
+        days_forward = int(config.get("days_forward", 1))
+        for d in range(-days_back, days_forward + 1):
+            day_time = now + time.parse_duration("%dh" % (d * 24))
+            day_str = day_time.format("20060102")
+            league[day_str] = API + selectedLeague + "/scoreboard?dates=" + day_str
+    else:
+        league[API] = API + selectedLeague + "/scoreboard"
 
-    scoreboard_url = API + selectedLeague + "/scoreboard" + date_range_search
-    league = {API: scoreboard_url}
+    scoreboard_url = API + selectedLeague + "/scoreboard"
 
     scores = get_scores(league)
 
