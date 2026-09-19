@@ -1190,9 +1190,8 @@ def notStarted(EventIndex, JSON):
     return Display
 
 def get_schema():
-    TOURNEY_CACHE = 10800  # 3hrs
     ATP_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard"
-    CacheData = get_cachable_data(ATP_SCORES_URL, TOURNEY_CACHE)
+    CacheData = get_cachable_data(ATP_SCORES_URL, 300)
     ATP_JSON = json.decode(CacheData)
 
     Number_Events = len(ATP_JSON["events"])
