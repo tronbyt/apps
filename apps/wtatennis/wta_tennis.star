@@ -1287,7 +1287,7 @@ RotationOptions = [
 ]
 
 def get_cachable_data(url, timeout):
-    res = http.get(url = url, ttl_seconds = timeout, headers = {"Connection": "close"})
+    res = http.get(url = url, ttl_seconds = timeout)
 
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
