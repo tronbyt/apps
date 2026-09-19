@@ -94,6 +94,9 @@ Updated method of finding "Mens Singles" event when its not 1st event of the tou
 
 v1.19
 Removed headers from the http.get request as it was producing 403 errors
+
+v1.20
+Reduced cache timeout for tournament fetching, this was causing the match data to keep the cached version for up to 3 hours
 """
 
 load("encoding/json.star", "json")
