@@ -7,12 +7,29 @@ Author: Bennett Schoonerman
 load("animation.star", "animation")
 load("http.star", "http")
 load("render.star", "render")
+load("schema.star", "schema")
 
 GUITAR_CENTER_LOGO = ""
 
 # only changes once per day but we will refetch on the hour to be safe
 CACHE_TTL = 3600
-GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1z4UprVH5z79gc85e_inF0NDzAD7pmmExNme1V17Ne-c/export?format=csv&gid=1879148122"
+
+GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1z4UprVH5z79gc85e_inF0NDzAD7pmmExNme1V17Ne-c/export?format=csv&"
+SOURCE_SHEETS = {
+    "guitar_center": "gid=1900080353",
+    "musicians_friend": "gid=1879148122",
+}
+
+SOURCE_OPTIONS = [
+    schema.Option(
+        display = "Guitar Center",
+        value = "guitar_center",
+    ),
+    schema.Option(
+        display = "Musician's Friend",
+        value = "musicians_friend",
+    ),
+]
 
 
 def splitCsvLine(line):
@@ -80,8 +97,10 @@ def parseDealRow(raw_csv):
     return latest_row
 
 
-def getDailyPick():
-    resp = http.get(url = GOOGLE_SHEET_CSV_URL, ttl_seconds = CACHE_TTL)
+def getDailyPick(source_name):
+    selected_sheet = SOURCE_SHEETS.get(source_name, SOURCE_SHEETS["guitar_center"])
+    sheet_url = GOOGLE_SHEET_CSV_URL + selected_sheet
+    resp = http.get(url = sheet_url, ttl_seconds = CACHE_TTL)
     row = parseDealRow(resp.body())
 
     if row == {}:
@@ -105,13 +124,25 @@ def getDailyPick():
         "dealImage": fetchDealImage(row.get("image", "")),
     }
 
-def main():
-    data = getDailyPick()
+
+def getBrandLabel(source_name):
+    if source_name == "musicians_friend":
+        return "MF"
+    return "GC"
+
+
+def main(config):
+    source_name = config.get("source", "guitar_center")
+    if source_name not in SOURCE_SHEETS:
+        source_name = "guitar_center"
+
+    data = getDailyPick(source_name)
+    brand_label = getBrandLabel(source_name)
     deal_image = render.Box(
         width = 24,
         height = 24,
         color = "#111111",
-        child = render.Text("GC", color = "#FFFFFF", font = "tb-8"),
+        child = render.Text(brand_label, color = "#FFFFFF", font = "tb-8"),
     )
     if data["dealImage"] != "":
         deal_image = render.Image(width = 24, height = 24, src = data["dealImage"])
@@ -121,12 +152,12 @@ def main():
         child = render.Stack(
             children = [
                 animation.Transformation(
-                    duration = 450,
+                    duration = 350,
                     child = render.Box(
                         width = 64,
                         height = 32,
                         color = "#020202",
-                        child = render.Text("GC", color = "#FFFFFF", font = "tb-8"),
+                        child = render.Text(brand_label, color = "#FFFFFF", font = "tb-8"),
                     ),
                     keyframes = [
                         #slide GC logo up
@@ -150,14 +181,15 @@ def main():
                     ],
                 ),
                 animation.Transformation(
-                    duration = 450,
+                    duration = 350,
                     child = render.Column(
                         children = [
                             render.Marquee(
                                 width = 64,
                                 child = render.Text(data["itemName"], ""),
-                                offset_start = 5,
-                                offset_end = 32,
+                                offset_start = 4,
+                                offset_end = 64,
+                                delay = 75
                             ),
                             render.Row(
                                 children = [
@@ -194,4 +226,20 @@ def main():
                 ),
             ],
         ),
+    )
+
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Dropdown(
+                id = "source",
+                name = "Source",
+                desc = "Choose where to pull the daily pick from.",
+                icon = "guitar",
+                options = SOURCE_OPTIONS,
+                default = "guitar_center",
+            ),
+        ],
     )
