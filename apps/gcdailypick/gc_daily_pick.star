@@ -8,8 +8,9 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
+load("images/musiciansFriend.png", MUSICIANS_FRIEND_LOGO_ASSET = "file")
+load("images/guitarCenter.png", GUITAR_CENTER_LOGO_ASSET = "file")
 
-GUITAR_CENTER_LOGO = ""
 
 # only changes once per day but we will refetch on the hour to be safe
 CACHE_TTL = 3600
@@ -58,11 +59,11 @@ def splitCsvLine(line):
 
 def fetchDealImage(image_url):
     if image_url == "":
-        return GUITAR_CENTER_LOGO
+        return GUITAR_CENTER_LOGO_ASSET.readall()
 
     resp = http.get(url = image_url, ttl_seconds = CACHE_TTL)
     if resp.status_code != 200:
-        return GUITAR_CENTER_LOGO
+        return GUITAR_CENTER_LOGO_ASSET.readall()
     return resp.body()
 
 
@@ -109,7 +110,7 @@ def getDailyPick(source_name):
             "originalPrice": "$0.00",
             "savings": "$0.00",
             "price": "$0.00",
-            "dealImage": GUITAR_CENTER_LOGO,
+            "dealImage": GUITAR_CENTER_LOGO_ASSET.readall(),
         }
 
     discount = row.get("discount", "$0.00")
@@ -131,6 +132,12 @@ def getBrandLabel(source_name):
     return "GC"
 
 
+def getBrandLogo(source_name):
+    if source_name == "musicians_friend":
+        return MUSICIANS_FRIEND_LOGO_ASSET.readall()
+    return GUITAR_CENTER_LOGO_ASSET.readall()
+
+
 def main(config):
     source_name = config.get("source", "guitar_center")
     if source_name not in SOURCE_SHEETS:
@@ -138,6 +145,7 @@ def main(config):
 
     data = getDailyPick(source_name)
     brand_label = getBrandLabel(source_name)
+    brand_logo = getBrandLogo(source_name)
     deal_image = render.Box(
         width = 24,
         height = 24,
@@ -157,7 +165,7 @@ def main(config):
                         width = 64,
                         height = 32,
                         color = "#020202",
-                        child = render.Text(brand_label, color = "#FFFFFF", font = "tb-8"),
+                        child = render.Image(brand_logo, width = 64, height = 32)
                     ),
                     keyframes = [
                         #slide GC logo up
