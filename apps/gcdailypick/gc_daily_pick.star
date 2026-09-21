@@ -4,13 +4,13 @@ Summary: Guitar Center daily pick
 Description: Shows the daily pick deal from Guitar Center.
 Author: Bennett Schoonerman
 """
+
 load("animation.star", "animation")
 load("http.star", "http")
+load("images/guitarCenter.png", GUITAR_CENTER_LOGO_ASSET = "file")
+load("images/musiciansFriend.png", MUSICIANS_FRIEND_LOGO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("images/musiciansFriend.png", MUSICIANS_FRIEND_LOGO_ASSET = "file")
-load("images/guitarCenter.png", GUITAR_CENTER_LOGO_ASSET = "file")
-
 
 # only changes once per day but we will refetch on the hour to be safe
 CACHE_TTL = 3600
@@ -31,7 +31,6 @@ SOURCE_OPTIONS = [
         value = "musicians_friend",
     ),
 ]
-
 
 def splitCsvLine(line):
     cells = []
@@ -56,7 +55,6 @@ def splitCsvLine(line):
     cells.append(current)
     return cells
 
-
 def fetchDealImage(image_url):
     if image_url == "":
         return GUITAR_CENTER_LOGO_ASSET.readall()
@@ -65,7 +63,6 @@ def fetchDealImage(image_url):
     if resp.status_code != 200:
         return GUITAR_CENTER_LOGO_ASSET.readall()
     return resp.body()
-
 
 def parseDealRow(raw_csv):
     lines = raw_csv.split("\n")
@@ -97,7 +94,6 @@ def parseDealRow(raw_csv):
 
     return latest_row
 
-
 def getDailyPick(source_name):
     selected_sheet = SOURCE_SHEETS.get(source_name, SOURCE_SHEETS["guitar_center"])
     sheet_url = GOOGLE_SHEET_CSV_URL + selected_sheet
@@ -125,18 +121,15 @@ def getDailyPick(source_name):
         "dealImage": fetchDealImage(row.get("image", "")),
     }
 
-
 def getBrandLabel(source_name):
     if source_name == "musicians_friend":
         return "MF"
     return "GC"
 
-
 def getBrandLogo(source_name):
     if source_name == "musicians_friend":
         return MUSICIANS_FRIEND_LOGO_ASSET.readall()
     return GUITAR_CENTER_LOGO_ASSET.readall()
-
 
 def main(config):
     source_name = config.get("source", "guitar_center")
@@ -165,7 +158,7 @@ def main(config):
                         width = 64,
                         height = 32,
                         color = "#020202",
-                        child = render.Image(brand_logo, width = 64, height = 32)
+                        child = render.Image(brand_logo, width = 64, height = 32),
                     ),
                     keyframes = [
                         #slide GC logo up
@@ -197,7 +190,7 @@ def main(config):
                                 child = render.Text(data["itemName"], ""),
                                 offset_start = 4,
                                 offset_end = 64,
-                                delay = 75
+                                delay = 75,
                             ),
                             render.Row(
                                 children = [
@@ -235,7 +228,6 @@ def main(config):
             ],
         ),
     )
-
 
 def get_schema():
     return schema.Schema(
