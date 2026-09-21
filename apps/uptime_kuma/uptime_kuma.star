@@ -170,7 +170,7 @@ def render_header(scale, width, kuma_icon, title_text, up_count, down_count, fon
         children = right_elements,
     )
 
-    max_title_w = width - (33 * scale if down_count > 0 else 24 * scale)
+    max_title_w = width - (33 * scale if down_count > 0 else 28 * scale)
 
     return render.Row(
         expanded = True,
@@ -198,11 +198,14 @@ def render_dashboard(scale, width, height, title, monitors, up_count, down_count
                 width = width - (8 * scale),
                 child = render.Text("! " + first["name"] + " DOWN", font = font_main, color = RED),
             ),
-            render.Text(first["msg"][:22] if first["msg"] else "Connection Failed", font = font_tiny, color = YELLOW),
         ]
-        if len(down_monitors) > 1:
+        if len(down_monitors) == 1:
             alert_children.append(
-                render.Text("+%d more down" % (len(down_monitors) - 1), font = font_tiny, color = MUTED),
+                render.Text(first["msg"][:22] if first["msg"] else "Monitor Failed", font = font_tiny, color = YELLOW),
+            )
+        else:
+            alert_children.append(
+                render.Text("+%d more" % (len(down_monitors) - 1), font = font_tiny, color = MUTED),
             )
 
         body = render.Box(
