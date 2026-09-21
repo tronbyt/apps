@@ -56,9 +56,8 @@ def main(config):
             return []
         else:
             return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
-            
-    # if there's an event inProgress, and it's not an All Day event, show the event
     elif event["detail"]["inProgress"] and not event["detail"]["isAllDay"]:
+        # if there's an event inProgress, and it's not an All Day event, show the event
         return build_event_frame(event)
     elif event["detail"]:
         return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
