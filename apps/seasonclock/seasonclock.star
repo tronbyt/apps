@@ -378,6 +378,7 @@ def outline_text(content, font, lx, ly):
 
 LBL_Y1 = 19 if IS2X else 20
 LBL_Y2 = 26
+HEAD_Y = 5  # a headline word sits a little lower than the big number would
 
 def text_overlay(big, suffix, line1, line2):
     # big number on the left; two small label lines beneath it.
@@ -389,6 +390,16 @@ def text_overlay(big, suffix, line1, line2):
     widgets.append(outline_text(line1, LBL_FONT, 2, LBL_Y1))
     widgets.append(outline_text(line2, LBL_FONT, 2, LBL_Y2))
     return widgets
+
+def word_overlay(head, line1, line2):
+    # Same three-line shape as text_overlay, but with a word in the headline
+    # slot instead of a number. Used on a changeover day, where the count is
+    # zero and a big "0" reads as a glitch rather than as news.
+    return [
+        outline_text(head, NUM_FONT_SM, 2, HEAD_Y),
+        outline_text(line1, LBL_FONT, 2, LBL_Y1),
+        outline_text(line2, LBL_FONT, 2, LBL_Y2),
+    ]
 
 def notice(msg):
     return render.Root(
@@ -422,6 +433,13 @@ def main(config):
     now_local = now.in_location(timezone)
     jd_now = julian_day(now_local.year, now_local.month, now_local.day)
 
+    # The boundary is an instant, not a date, so on the day it falls the season
+    # both ends and begins mid-day. Both modes call that out rather than showing
+    # a bare count of zero days.
+    n_local = nxt_start.in_location(timezone)
+    jd_next = julian_day(n_local.year, n_local.month, n_local.day)
+    changeover = jd_next <= jd_now
+
     if mode == "dayof":
         s_local = cur_start.in_location(timezone)
         jd_start = julian_day(s_local.year, s_local.month, s_local.day)
@@ -429,25 +447,27 @@ def main(config):
         season = EVENT_SEASON[hemisphere][cur_event]
         big = str(day_of)
         suffix = ordinal_suffix(day_of)
-        line1 = "DAY OF"
-        line2 = SEASON[season]["label"]
+        if changeover:
+            line1 = "LAST DAY"
+            line2 = "OF " + SEASON[season]["label"]
+        else:
+            line1 = "DAY OF"
+            line2 = SEASON[season]["label"]
+        overlay = text_overlay(big, suffix, line1, line2)
     else:
-        n_local = nxt_start.in_location(timezone)
-        jd_next = julian_day(n_local.year, n_local.month, n_local.day)
         days = jd_next - jd_now
         season = EVENT_SEASON[hemisphere][nxt_event]
-        suffix = ""
-        if days <= 0:
-            big = "0"
-            line1 = "STARTS"
-            line2 = SEASON[season]["label"]
+        if changeover:
+            overlay = word_overlay(SEASON[season]["label"], "STARTS", "TODAY")
         else:
-            big = str(days)
-            line1 = "DAY TO" if days == 1 else "DAYS TO"
-            line2 = SEASON[season]["label"]
+            overlay = text_overlay(
+                str(days),
+                "",
+                "DAY TO" if days == 1 else "DAYS TO",
+                SEASON[season]["label"],
+            )
 
     scene_fn = SCENE_FN[season]
-    overlay = text_overlay(big, suffix, line1, line2)
 
     frames = []
     for f in range(FRAME_COUNT):
