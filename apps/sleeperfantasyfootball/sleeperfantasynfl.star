@@ -45,7 +45,7 @@ def main(config):
         league_name = get_league_name(league_id)
         league_users = get_league_users(league_id)
         league_rosters = get_league_rosters(league_id)
-        user_id = get_current_user_user_id(league_id, username, league_users)
+        user_id = get_current_user_user_id(username, league_users)
         roster_id = get_current_user_roster_id(user_id, league_rosters)
         user_and_roster_map = build_user_and_roster_mapping(league_rosters, league_users)
 
@@ -192,17 +192,18 @@ def get_league_rosters(league_id):
         else:
             return []
 
-def get_current_user_user_id(league_id, username, league_users):
+def get_current_user_user_id(username, league_users):
     user_id = ""
-    user_id_cached = cache.get(league_id + "_user_id")
+    user_id_cache_key = username + "_user_id"
+    user_id_cached = cache.get(user_id_cache_key)
     if user_id_cached != None:
-        print("    Cache Hit! Used cached user id")
+        print("    Cache Hit! Used cached user id (" + user_id_cached + ")")
         return user_id_cached
     else:
         for user in league_users:
             if user["display_name"] == username:
                 user_id = user["user_id"]
-                cache.set(league_id + "_user_id", str(user_id), ttl_seconds = USER_ID_CACHE_TTL)
+                cache.set(user_id_cache_key, str(user_id), ttl_seconds = USER_ID_CACHE_TTL)
 
         return user_id
 
@@ -398,7 +399,7 @@ def get_current_leagues(username):
 
     user_id_cached = cache.get(username + "_user_id")
     if user_id_cached != None:
-        print("    Cache Hit! Used cached used id")
+        print("    Cache Hit! Used cached used id (" + user_id_cached + ")")
         user_id = user_id_cached
     else:
         user_url = SLEEPER_API_BASE_URL + "/user/" + username
