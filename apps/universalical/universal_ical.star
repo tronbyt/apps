@@ -21,6 +21,7 @@ def main(config):
 
     ics_url = config.str("ics_url", DEFAULT_ICS_URL)
     show_in_progress = config.bool("show_in_progress", DEFAULT_SHOW_IN_PROGRESS)
+    skip_when_done = config.bool("skip_when_done", DEFAULT_SKIP_WHEN_DONE)
 
     # get all day variable, set default to "showAllDay"
     all_day_behavior = config.get("all_day", "showAllDay")
@@ -50,10 +51,13 @@ def main(config):
     event = ics.json()["data"]
 
     if not event:
-        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
-        #if there's an event inProgress, and it's not an All Day event, show the event
-
+        if skip_when_done:
+            # If skip_when_done is True, return nothing to mark app as inactive
+            return []
+        else:
+            return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
     elif event["detail"]["inProgress"] and not event["detail"]["isAllDay"]:
+        # if there's an event inProgress, and it's not an All Day event, show the event
         return build_event_frame(event)
     elif event["detail"]:
         return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
@@ -391,6 +395,13 @@ def get_schema():
                 default = DEFAULT_SHOW_IN_PROGRESS,
                 icon = "calendar",
             ),
+            schema.Toggle(
+                id = P_SKIP_WHEN_DONE,
+                name = "Skip When Events Are Done",
+                desc = "Skip app when events are done for the day.",
+                default = DEFAULT_SKIP_WHEN_DONE,
+                icon = "eye",
+            ),
             schema.Dropdown(
                 id = P_ALL_DAY,
                 name = "Show All Day Events",
@@ -407,6 +418,7 @@ P_ICS_URL = "ics_url"
 P_SHOW_EXPANDED_TIME_WINDOW = "show_expanded_time_window"
 P_SHOW_FULL_NAMES = "show_full_names"
 P_SHOW_IN_PROGRESS = "show_in_progress"
+P_SKIP_WHEN_DONE = "skip_when_done"
 P_TRUNCATE_EVENT_SUMMARY = "truncate_event_summary"
 P_ALL_DAY = "all_day"
 
@@ -415,6 +427,7 @@ DEFAULT_SHOW_EXPANDED_TIME_WINDOW = True
 DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
 DEFAULT_SHOW_IN_PROGRESS = True
+DEFAULT_SKIP_WHEN_DONE = False
 FRAME_DELAY = 100
 LAMBDA_URL = "https://6bfnhr9vy7.execute-api.us-east-1.amazonaws.com/ics-next-event"
 
