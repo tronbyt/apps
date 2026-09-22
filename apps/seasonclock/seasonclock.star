@@ -441,19 +441,21 @@ def main(config):
     changeover = jd_next <= jd_now
 
     if mode == "dayof":
-        s_local = cur_start.in_location(timezone)
-        jd_start = julian_day(s_local.year, s_local.month, s_local.day)
-        day_of = jd_now - jd_start + 1
         season = EVENT_SEASON[hemisphere][cur_event]
-        big = str(day_of)
-        suffix = ordinal_suffix(day_of)
         if changeover:
-            line1 = "LAST DAY"
-            line2 = "OF " + SEASON[season]["label"]
+            # Which number the day happens to be stops being the news once it
+            # is the last one, so "LAST" takes the headline slot outright.
+            overlay = word_overlay("LAST", "DAY OF", SEASON[season]["label"])
         else:
-            line1 = "DAY OF"
-            line2 = SEASON[season]["label"]
-        overlay = text_overlay(big, suffix, line1, line2)
+            s_local = cur_start.in_location(timezone)
+            jd_start = julian_day(s_local.year, s_local.month, s_local.day)
+            day_of = jd_now - jd_start + 1
+            overlay = text_overlay(
+                str(day_of),
+                ordinal_suffix(day_of),
+                "DAY OF",
+                SEASON[season]["label"],
+            )
     else:
         days = jd_next - jd_now
         season = EVENT_SEASON[hemisphere][nxt_event]
