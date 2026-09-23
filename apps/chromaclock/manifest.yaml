@@ -7,10 +7,9 @@ author: alejoar
 fileName: chromaclock.star
 packageName: chromaclock
 recommendedInterval: 0
-supports2x: true
+supports2x: false
 category: clocks
 tags:
   - clock
-  - wide 2x support
 published: '2026-09-23T15:49:17Z'
 updated: '2026-09-23T15:49:17Z'

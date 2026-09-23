@@ -7,7 +7,7 @@ Author: alejoar
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "canvas", "render")
+load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -97,7 +97,7 @@ def put(buf, x, y, c):
     if x >= 0 and x < W and y >= 0 and y < H:
         buf[y][x] = c
 
-def buf_to_widget(buf, px):
+def buf_to_widget(buf):
     # Run-length encode each row into boxes
     rows = []
     for y in range(H):
@@ -106,7 +106,7 @@ def buf_to_widget(buf, px):
         start = 0
         for x in range(1, W + 1):
             if x == W or row[x] != row[start]:
-                children.append(render.Box(width = (x - start) * px, height = px, color = hexc(row[start])))
+                children.append(render.Box(width = x - start, height = 1, color = hexc(row[start])))
                 start = x
         rows.append(render.Row(children = children))
     return render.Column(children = rows)
@@ -1531,7 +1531,6 @@ def main(config):
     base_rgb = None
     if config.get("color", "auto") != "auto":
         base_rgb = parse_hex(config.get("color"))
-    px = 2 if canvas.is2x() else 1
     seconds = DEFAULT_SECONDS
 
     frames = []
@@ -1541,7 +1540,7 @@ def main(config):
         for i in range(seconds * 10):
             t = i / 10.0
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_prism(fnow, use_24h, t, show_seconds), px))
+            frames.append(buf_to_widget(frame_prism(fnow, use_24h, t, show_seconds)))
         delay = step
     elif style == "flap":
         # 4 fps so the flip reads as motion
@@ -1550,13 +1549,13 @@ def main(config):
             fnow = now + time.parse_duration("%dms" % (i * step))
             since_minute = fnow.second + (fnow.nanosecond / 1e9)
             flip_t = since_minute / 0.75 if since_minute < 0.75 else 1.0
-            frames.append(buf_to_widget(frame_flap(fnow, use_24h, base_rgb, flip_t, show_seconds), px))
+            frames.append(buf_to_widget(frame_flap(fnow, use_24h, base_rgb, flip_t, show_seconds)))
         delay = step
     elif style == "matrix":
         step = 100
         for i in range(seconds * 10):
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_matrix(fnow, use_24h, i), px))
+            frames.append(buf_to_widget(frame_matrix(fnow, use_24h, i)))
         delay = step
     elif style == "fire":
         step = 100
@@ -1567,21 +1566,21 @@ def main(config):
             fire_step(heat, [], -i - 1)
         for i in range(seconds * 10):
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_fire(fnow, use_24h, heat, i), px))
+            frames.append(buf_to_widget(frame_fire(fnow, use_24h, heat, i)))
         delay = step
     elif style == "morph":
         step = 100
         for i in range(seconds * 10):
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_morph(fnow, use_24h, base_rgb, fnow.nanosecond / 1e9, morph_seconds), px))
+            frames.append(buf_to_widget(frame_morph(fnow, use_24h, base_rgb, fnow.nanosecond / 1e9, morph_seconds)))
         delay = step
     elif style == "pong":
         step = 100
-        frames = [buf_to_widget(b, px) for b in pong_frames(now, use_24h, seconds * 10, step)]
+        frames = [buf_to_widget(b) for b in pong_frames(now, use_24h, seconds * 10, step)]
         delay = step
     elif style == "snow":
         step = 100
-        frames = [buf_to_widget(b, px) for b in snow_frames(now, use_24h, seconds * 10, step)]
+        frames = [buf_to_widget(b) for b in snow_frames(now, use_24h, seconds * 10, step)]
         delay = step
     elif style == "tetris":
         step = 100
@@ -1595,7 +1594,7 @@ def main(config):
                 blocks, colon_x = tetris_blocks(fnow, use_24h)
                 shown = label
                 t0 = i / 10.0
-            frames.append(buf_to_widget(frame_tetris(fnow, blocks, colon_x, i / 10.0 - t0), px))
+            frames.append(buf_to_widget(frame_tetris(fnow, blocks, colon_x, i / 10.0 - t0)))
         delay = step
     elif style == "moon":
         step = 250
@@ -1603,7 +1602,7 @@ def main(config):
         cells = moon_cells(p)
         for i in range(seconds * 4):
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_moon(fnow, use_24h, cells, p, i), px))
+            frames.append(buf_to_widget(frame_moon(fnow, use_24h, cells, p, i)))
         delay = step
     elif style in ("analog", "bighour", "aquarium", "lava", "starfield", "pacman"):
         step = 250 if style in ("analog", "bighour") else 100
@@ -1623,7 +1622,7 @@ def main(config):
                 buf = frame_starfield(fnow, use_24h, i)
             else:
                 buf = frame_pacman(fnow, use_24h, i, sub)
-            frames.append(buf_to_widget(buf, px))
+            frames.append(buf_to_widget(buf))
         delay = step
     elif style in ("dotgrid", "dayprogress", "world"):
         step = 1000
@@ -1641,23 +1640,23 @@ def main(config):
                 buf = frame_dayprogress(fnow, use_24h, tz)
             else:
                 buf = frame_world(fnow, use_24h, base_rgb, zones)
-            frames.append(buf_to_widget(buf, px))
+            frames.append(buf_to_widget(buf))
         delay = step
     elif style == "words":
         # Only changes once a minute: one frame is enough
-        frames.append(buf_to_widget(frame_words(now, base_rgb), px))
+        frames.append(buf_to_widget(frame_words(now, base_rgb)))
         delay = 1000
     elif style == "binary":
         step = 1000
         for i in range(seconds):
             fnow = now + time.parse_duration("%ds" % i)
-            frames.append(buf_to_widget(frame_binary(fnow, use_24h), px))
+            frames.append(buf_to_widget(frame_binary(fnow, use_24h)))
         delay = step
     elif style == "outline":
         step = 500
         for i in range(seconds * 2):
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_outline(fnow, use_24h, base_rgb, show_seconds), px))
+            frames.append(buf_to_widget(frame_outline(fnow, use_24h, base_rgb, show_seconds)))
         delay = step
     else:
         step = 250
@@ -1669,7 +1668,7 @@ def main(config):
                 buf = frame_horizon(fnow, use_24h, i // 4)
             else:
                 buf = frame_neon(fnow, use_24h, base_rgb, sec_frac, show_seconds, neon_memo)
-            frames.append(buf_to_widget(buf, px))
+            frames.append(buf_to_widget(buf))
         delay = step
 
     return render.Root(
