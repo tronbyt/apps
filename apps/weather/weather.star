@@ -127,6 +127,18 @@ def main(config):
         if rep.status_code == 200:
             weather_data = json.decode(rep.body())
             daily_data = process_forecast_onecall_v4(weather_data, timezone)
+
+            # Optionally show current conditions for today (one extra API call)
+            if config.bool("current_conditions", False) and len(daily_data) > 0:
+                url = "https://api.openweathermap.org/data/4.0/onecall/current?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_onecall_key)
+                rep = http.get(url, ttl_seconds = cache_sec)
+                if rep.status_code == 200:
+                    current_list = json.decode(rep.body()).get("data", [])
+                    if len(current_list) > 0:
+                        current = current_list[0]
+                        current_day = time.from_timestamp(int(current["dt"])).in_location(timezone).format("2006-01-02")
+                        if current_day == daily_data[0]["date"].format("2006-01-02"):
+                            daily_data[0]["weather"] = map_weather_main(current["weather"][0])
         else:
             url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_onecall_key)
             rep = http.get(url, ttl_seconds = cache_sec)
@@ -571,6 +583,22 @@ def get_forecast_width(temp, is_today):
 def round_temp(temp):
     return (temp * 10 + 5) // 10
 
+def map_weather_main(weather):
+    """
+    Map an OpenWeather "weather" entry to the app's image key.
+    """
+    weather_main = weather["main"]
+
+    # Check if icon starts with 02 or 03 and override weather_main
+    if weather["icon"].startswith(("02", "03")):
+        weather_main = "Partly_Sun"
+
+    # Check if weather is some atmospheric condition that can be represented as fog
+    if weather_main == "Haze" or weather_main == "Smoke" or weather_main == "Ash":
+        weather_main = "Mist"
+
+    return weather_main
+
 def process_forecast_onecall_v4(weather_data, timezone):
     """
     Process One Call API 4.0 timeline/1day response data.
@@ -584,22 +612,10 @@ def process_forecast_onecall_v4(weather_data, timezone):
         if day_time.format("2006-01-02") < today:
             continue
 
-        # Get main weather and icon code
-        weather_main = day["weather"][0]["main"]
-        weather_icon = day["weather"][0]["icon"]
-
-        # Check if icon starts with 02 or 03 and override weather_main
-        if weather_icon.startswith(("02", "03")):
-            weather_main = "Partly_Sun"
-
-        # Check if weather is some atmospheric condition that can be represented as fog
-        if weather_main == "Haze" or weather_main == "Smoke" or weather_main == "Ash":
-            weather_main = "Mist"
-
         daily_forecasts.append({
             "high": day["temp"]["max"],
             "low": day["temp"]["min"],
-            "weather": weather_main,
+            "weather": map_weather_main(day["weather"][0]),
             "date": day_time,
         })
 
@@ -909,6 +925,13 @@ def get_schema():
                 desc = "One Call API 4.0 (or 3.0) key for enhanced features. Requires 'One Call by Call' subscription with 1000 free calls/day.",
                 icon = "gear",
                 secret = True,
+            ),
+            schema.Toggle(
+                id = "current_conditions",
+                name = "Current Conditions for Today",
+                desc = "Show today's current conditions instead of the daily forecast. Uses one extra One Call API 4.0 call per refresh.",
+                icon = "cloudSun",
+                default = False,
             ),
             schema.Text(
                 id = "api_v2",
