@@ -110,28 +110,33 @@ def main(config):
     showthreeday = config.bool("showthreeday", False)  # Add new config option
     image_scale = 1 if config.bool("force_1x_images") else scale
 
-    # Get API keys - check for both V3 and V2.5
-    api_v3_key = config.get("api_v3", "")
+    # Get API keys - check for both One Call (4.0/3.0) and V2.5
+    # The config id stays "api_v3" so previously saved keys keep working.
+    api_onecall_key = config.get("api_v3", "")
     api_v2_key = config.get("api_v2", config.get("api", ""))  # fallback to original field for backward compatibility
 
     cache_mins_str = config.str("cache_mins", str(DEFAULT_CACHE_MINS))
     cache_mins = int(cache_mins_str) if cache_mins_str.isdigit() else DEFAULT_CACHE_MINS
     cache_sec = cache_mins * 60
 
-    # Determine which API to use - prefer V3 if available, fallback to V2.5
-    if api_v3_key and api_v3_key != "":
-        # Use One Call API 3.0
-        url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v3_key)
-
-        # Fetch weather data
+    # Determine which API to use - prefer One Call if available, fallback to V2.5
+    if api_onecall_key and api_onecall_key != "":
+        # Try One Call API 4.0 first, then fall back to 3.0 for older subscriptions
+        url = "https://api.openweathermap.org/data/4.0/onecall/timeline/1day?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_onecall_key)
         rep = http.get(url, ttl_seconds = cache_sec)
-        if rep.status_code != 200:
-            return error_display("Weather API Error")
+        if rep.status_code == 200:
+            weather_data = json.decode(rep.body())
+            daily_data = process_forecast_onecall_v4(weather_data, timezone)
+        else:
+            url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_onecall_key)
+            rep = http.get(url, ttl_seconds = cache_sec)
+            if rep.status_code != 200:
+                return error_display("Weather API Error")
 
-        weather_data = json.decode(rep.body())
+            weather_data = json.decode(rep.body())
 
-        # Process forecast data using One Call API 3.0 processing
-        daily_data = process_forecast_onecall(weather_data, timezone)
+            # Process forecast data using One Call API 3.0 processing
+            daily_data = process_forecast_onecall(weather_data, timezone)
     elif api_v2_key and api_v2_key != "":
         # Use Standard Forecast API 2.5
         url = "https://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_v2_key)
@@ -566,6 +571,43 @@ def get_forecast_width(temp, is_today):
 def round_temp(temp):
     return (temp * 10 + 5) // 10
 
+def process_forecast_onecall_v4(weather_data, timezone):
+    """
+    Process One Call API 4.0 timeline/1day response data.
+    Daily forecasts are returned in the "data" list; entries before today are skipped.
+    """
+    daily_forecasts = []
+    today = time.now().in_location(timezone).format("2006-01-02")
+
+    for day in weather_data.get("data", []):
+        day_time = time.from_timestamp(int(day["dt"])).in_location(timezone)
+        if day_time.format("2006-01-02") < today:
+            continue
+
+        # Get main weather and icon code
+        weather_main = day["weather"][0]["main"]
+        weather_icon = day["weather"][0]["icon"]
+
+        # Check if icon starts with 02 or 03 and override weather_main
+        if weather_icon.startswith(("02", "03")):
+            weather_main = "Partly_Sun"
+
+        # Check if weather is some atmospheric condition that can be represented as fog
+        if weather_main == "Haze" or weather_main == "Smoke" or weather_main == "Ash":
+            weather_main = "Mist"
+
+        daily_forecasts.append({
+            "high": day["temp"]["max"],
+            "low": day["temp"]["min"],
+            "weather": weather_main,
+            "date": day_time,
+        })
+
+        if len(daily_forecasts) >= 3:
+            break
+
+    return daily_forecasts
+
 def process_forecast_onecall(weather_data, timezone):
     """
     Process One Call API 3.0 response data.
@@ -863,8 +905,8 @@ def get_schema():
             ),
             schema.Text(
                 id = "api_v3",
-                name = "OpenWeather One Call API 3.0 Key (Optional)",
-                desc = "One Call API 3.0 key for enhanced features. Requires 'One Call by Call' subscription with 1000 free calls/day.",
+                name = "OpenWeather One Call API Key (Optional)",
+                desc = "One Call API 4.0 (or 3.0) key for enhanced features. Requires 'One Call by Call' subscription with 1000 free calls/day.",
                 icon = "gear",
                 secret = True,
             ),
