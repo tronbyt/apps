@@ -175,7 +175,7 @@ def main(config):
 
     # Create the display
     if showthreeday:
-        return render_weather(daily_data, scale, image_scale)
+        return render_weather(daily_data, scale, image_scale, config.bool("extended_forecast", True))
     else:
         return render_single_day(daily_data, scale, image_scale)
 
@@ -632,7 +632,7 @@ def process_forecast_onecall_v4(weather_data, timezone):
             "date": day_time,
         })
 
-        if len(daily_forecasts) >= 3:
+        if len(daily_forecasts) >= 6:
             break
 
     return daily_forecasts
@@ -672,7 +672,7 @@ def process_forecast_onecall(weather_data, timezone):
     # Process daily forecasts
     if "daily" in weather_data:
         for i, day in enumerate(weather_data["daily"]):
-            if i >= 3:  # Limit to 3 days total
+            if i >= 6:  # Limit to 6 days total
                 break
 
             day_time = time.from_timestamp(day["dt"]).in_location(timezone)
@@ -708,7 +708,7 @@ def process_forecast_onecall(weather_data, timezone):
                 "date": day_time,
             })
 
-    return daily_forecasts[:3]
+    return daily_forecasts[:6]
 
 def process_forecast(forecast_list, timezone):
     # Group forecasts by day and find high/low temps
@@ -740,13 +740,18 @@ def process_forecast(forecast_list, timezone):
                 "low": temp,
                 "weather": weather_main,
                 "date": day_time,
+                "samples": 1,
             }
         else:
             days[day_key]["high"] = max(days[day_key]["high"], temp)
             days[day_key]["low"] = min(days[day_key]["low"], temp)
+            days[day_key]["samples"] += 1
 
-    # Sort and take first 3 days
-    sorted_days = sorted(days.values(), key = lambda x: x["date"])[:3]
+    # Sort and take the first 6 days, skipping a partial last day (under half its 3-hour readings)
+    sorted_days = sorted(days.values(), key = lambda x: x["date"])
+    if len(sorted_days) > 1 and sorted_days[-1]["samples"] < 4:
+        sorted_days = sorted_days[:-1]
+    sorted_days = sorted_days[:6]
     return sorted_days
 
 WEATHER_ICONS = {
@@ -793,27 +798,19 @@ def get_weather_icon(forecast, scale = 1):
         icon = WEATHER_ICONS.get(forecast)
     return icon.readall() if icon else ""
 
-def render_weather(daily_data, scale = 1, icon_scale = 1):
-    # Create weather icons mapping
-
-    # Calculate dimensions
-    DAY_WIDTH = 20 * scale
-    DIVIDER_WIDTH = scale
-    TOTAL_WIDTH = (DAY_WIDTH * 3) + (DIVIDER_WIDTH * 2)
-    HEIGHT = 32 * scale
+def render_day_column(day, is_today, scale, icon_scale):
     SUFFIX = "°" if scale == 2 else ""
 
-    # Create columns first
-    columns = []
-    for i, day in enumerate(daily_data):
-        # Get day abbreviation (today's is replaced by the current temperature when available)
-        if i == 0 and "current_temp" in day:
-            day_abbr = "%d" % round_temp(day["current_temp"]) + SUFFIX
-        else:
-            day_abbr = tr(day["date"].format("Mon")[:3].upper())
+    # Today's label is replaced by the current temperature when available
+    if is_today and "current_temp" in day:
+        day_abbr = "%d" % round_temp(day["current_temp"]) + SUFFIX
+    else:
+        day_abbr = tr(day["date"].format("Mon")[:3].upper())
 
-        # Create day column
-        day_column = render.Column(
+    return render.Box(
+        width = 20 * scale,
+        height = 32 * scale,
+        child = render.Column(
             expanded = True,
             main_align = "space_around",
             cross_align = "center",
@@ -843,39 +840,49 @@ def render_weather(daily_data, scale = 1, icon_scale = 1):
                     color = "#FFF",
                 ),
             ],
-        )
-
-        columns.append(day_column)
-
-        # Add divider if not last column
-        if i < 2:
-            columns.append(
-                render.Box(
-                    width = DIVIDER_WIDTH,
-                    height = HEIGHT,
-                    color = "#444",
-                ),
-            )
-
-    # Create the display with ALL children at once
-    weather_display = render.Root(
-        child = render.Stack(
-            children = [
-                render.Box(
-                    width = TOTAL_WIDTH,
-                    height = HEIGHT,
-                    color = "#000",
-                ),
-                render.Row(
-                    expanded = True,
-                    main_align = "space_evenly",
-                    children = columns,
-                ),
-            ],
         ),
     )
 
-    return weather_display
+def render_three_days(days, first_is_today, scale, icon_scale):
+    """One 64x32 page: three 20px day columns with 1px dividers and 1px margins."""
+    children = [render.Box(width = scale, height = 32 * scale)]
+    for i, day in enumerate(days):
+        if i > 0:
+            children.append(render.Box(width = scale, height = 32 * scale, color = "#444"))
+        children.append(render_day_column(day, first_is_today and i == 0, scale, icon_scale))
+    return render.Row(children = children)
+
+def render_weather(daily_data, scale = 1, icon_scale = 1, extended = False):
+    width = 64 * scale
+    height = 32 * scale
+    first_page = render_three_days(daily_data[:3], True, scale, icon_scale)
+
+    # Not enough data (or extended forecast off): just the first three days
+    if not extended or len(daily_data) < 6:
+        return render.Root(child = first_page)
+
+    # Show today and the next two days, then slide left to the following three
+    delay_ms = 50
+    total_frames = int(15000 / delay_ms)
+    hold_frames = int(6000 / delay_ms)
+    slide_frames = int(800 / delay_ms)
+    duration = total_frames - hold_frames
+    strip = render.Row(children = [
+        first_page,
+        render_three_days(daily_data[3:6], False, scale, icon_scale),
+    ])
+    return render.Root(
+        delay = delay_ms,
+        child = animation.Transformation(
+            child = strip,
+            duration = duration,
+            delay = hold_frames,
+            # The strip holds both pages; the screen crops it to the visible one
+            width = 2 * width,
+            height = height,
+            keyframes = make_keyframes(0, -width, slide_frames * 1.0 / duration),
+        ),
+    )
 
 def error_display(message, scale = 1):
     return render.Root(
@@ -926,6 +933,13 @@ def get_schema():
                 desc = "Toggle between three day and single day display.",
                 default = True,
                 icon = "calendar",
+            ),
+            schema.Toggle(
+                id = "extended_forecast",
+                name = "Extended Forecast",
+                desc = "In the three day display, slide over to the following three days.",
+                default = True,
+                icon = "calendarWeek",
             ),
             schema.Dropdown(
                 id = "units",
