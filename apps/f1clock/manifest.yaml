@@ -1,0 +1,17 @@
+---
+id: f1-clock
+name: F1 Clock
+summary: Formula 1 racing clock
+desc: Large digital clock with animated 8px Formula 1 cars racing across the track with real, condensed, or historic gaps.
+author: brombomb
+fileName: f1_clock.star
+packageName: f1clock
+recommendedInterval: 1
+supports2x: true
+category: sports
+tags:
+  - time
+  - sports
+  - racing
+published: '2026-09-23T21:39:13Z'
+updated: '2026-09-23T21:39:13Z'
