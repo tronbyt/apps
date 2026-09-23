@@ -109,6 +109,8 @@ def main(config):
     units = config.get("units", "imperial")
     showthreeday = config.bool("showthreeday", False)  # Add new config option
     image_scale = 1 if config.bool("force_1x_images") else scale
+    show_current_icon = config.bool("current_conditions", False)
+    show_current_temp = config.bool("current_temp", False)
 
     # Get API keys - check for both One Call (4.0/3.0) and V2.5
     # The config id stays "api_v3" so previously saved keys keep working.
@@ -128,8 +130,8 @@ def main(config):
             weather_data = json.decode(rep.body())
             daily_data = process_forecast_onecall_v4(weather_data, timezone)
 
-            # Optionally show current conditions for today (one extra API call)
-            if config.bool("current_conditions", False) and len(daily_data) > 0:
+            # Optionally show current conditions/temperature for today (one extra API call)
+            if (show_current_icon or show_current_temp) and len(daily_data) > 0:
                 url = "https://api.openweathermap.org/data/4.0/onecall/current?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_onecall_key)
                 rep = http.get(url, ttl_seconds = cache_sec)
                 if rep.status_code == 200:
@@ -138,7 +140,9 @@ def main(config):
                         current = current_list[0]
                         current_day = time.from_timestamp(int(current["dt"])).in_location(timezone).format("2006-01-02")
                         if current_day == daily_data[0]["date"].format("2006-01-02"):
-                            daily_data[0]["weather"] = map_weather_main(current["weather"][0])
+                            if show_current_icon:
+                                daily_data[0]["weather"] = map_weather_main(current["weather"][0])
+                            daily_data[0]["current_temp"] = current["temp"]
         else:
             url = "https://api.openweathermap.org/data/3.0/onecall?lat={}&lon={}&units={}&appid={}".format(lat, lng, units, api_onecall_key)
             rep = http.get(url, ttl_seconds = cache_sec)
@@ -165,6 +169,10 @@ def main(config):
     else:
         return error_display("No API Key Provided", scale)
 
+    # Today's label shows the current temperature only when enabled
+    if not show_current_temp and len(daily_data) > 0:
+        daily_data[0].pop("current_temp", None)
+
     # Create the display
     if showthreeday:
         return render_weather(daily_data, scale, image_scale)
@@ -178,8 +186,8 @@ def render_single_day(daily_data, scale = 1, image_scale = 1):
     day = daily_data[0]
     tomorrow = daily_data[1]
 
-    # Get day abbreviation
-    day_abbr = _get_day_abbr(day["date"])
+    # Get day abbreviation (today's is replaced by the current temperature when available)
+    day_abbr = _get_today_label(day)
     tomorrow_abbr = _get_day_abbr(tomorrow["date"])
     slide_percentage = get_slide_percentage(day["weather"])
     should_render_day_at_top = get_should_render_day_at_top(day["weather"])
@@ -240,7 +248,7 @@ def render_single_day(daily_data, scale = 1, image_scale = 1):
                 render.Padding(
                     pad = (scale, 0, 0, 2 * scale),
                     child = render.Box(
-                        width = 14 * scale,
+                        width = max(14 * scale, len(list(day_abbr.codepoints())) * (5 if scale == 1 else 8) + scale),
                         height = 8 * scale,
                         color = "#000000CC",
                         child = render.Text(
@@ -413,6 +421,11 @@ def get_slide_percentage(forecast):
         "Partly_Sun": 33,
     }
     return slide_map.get(forecast, 40)
+
+def _get_today_label(day):
+    if "current_temp" in day:
+        return "%d°" % round_temp(day["current_temp"])
+    return _get_day_abbr(day["date"])
 
 def _get_day_abbr(date):
     abbr = date.format("Mon")[:3].upper()
@@ -651,6 +664,7 @@ def process_forecast_onecall(weather_data, timezone):
         daily_forecasts.append({
             "high": current["temp"],
             "low": current["temp"],
+            "current_temp": current["temp"],
             "weather": weather_main,
             "date": current_time,
         })
@@ -792,9 +806,11 @@ def render_weather(daily_data, scale = 1, icon_scale = 1):
     # Create columns first
     columns = []
     for i, day in enumerate(daily_data):
-        # Get day abbreviation
-        day_abbr = day["date"].format("Mon")[:3].upper()
-        day_abbr = tr(day_abbr)
+        # Get day abbreviation (today's is replaced by the current temperature when available)
+        if i == 0 and "current_temp" in day:
+            day_abbr = "%d" % round_temp(day["current_temp"]) + SUFFIX
+        else:
+            day_abbr = tr(day["date"].format("Mon")[:3].upper())
 
         # Create day column
         day_column = render.Column(
@@ -928,9 +944,16 @@ def get_schema():
             ),
             schema.Toggle(
                 id = "current_conditions",
-                name = "Current Conditions for Today",
-                desc = "Show today's current conditions instead of the daily forecast. Uses one extra One Call API 4.0 call per refresh.",
+                name = "Current Conditions Icon",
+                desc = "Show today's current conditions instead of the daily forecast icon. Uses one extra One Call API 4.0 call per refresh.",
                 icon = "cloudSun",
+                default = False,
+            ),
+            schema.Toggle(
+                id = "current_temp",
+                name = "Current Temperature",
+                desc = "Show the current temperature in place of today's day name. Requires a One Call key; uses one extra One Call API 4.0 call per refresh.",
+                icon = "temperatureHalf",
                 default = False,
             ),
             schema.Text(
