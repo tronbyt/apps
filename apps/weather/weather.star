@@ -32,8 +32,12 @@ load("images/mist_full.png", MIST_FULL_IMAGE = "file")
 load("images/mist_full@2x.png", MIST_FULL_IMAGE_2X = "file")
 load("images/moon.png", MOON_IMAGE = "file")
 load("images/moon@2x.png", MOON_IMAGE_2X = "file")
+load("images/moon_full.png", MOON_FULL_IMAGE = "file")
+load("images/moon_full@2x.png", MOON_FULL_IMAGE_2X = "file")
 load("images/moonish.png", MOONISH_IMAGE = "file")
 load("images/moonish@2x.png", MOONISH_IMAGE_2X = "file")
+load("images/partly_moon_full.png", PARTLY_MOON_FULL_IMAGE = "file")
+load("images/partly_moon_full@2x.png", PARTLY_MOON_FULL_IMAGE_2X = "file")
 load("images/partly_sun.png", PARTLY_SUN_IMAGE = "file")
 load("images/partly_sun@2x.png", PARTLY_SUN_IMAGE_2X = "file")
 load("images/partly_sun_full.png", PARTLY_SUN_FULL_IMAGE = "file")
@@ -58,6 +62,7 @@ load("images/tornado.png", TORNADO_IMAGE = "file")
 load("images/tornado@2x.png", TORNADO_IMAGE_2X = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
+load("sunrise.star", "sunrise")
 load("time.star", "time")
 
 DEFAULT_LOCATION = """
@@ -82,6 +87,8 @@ WEATHER_FULL_IMAGE = {
     "Mist": MIST_FULL_IMAGE,
     "Drizzle": DRIZZLE_FULL_IMAGE,
     "Rain": RAIN_FULL_IMAGE,
+    "Clear_Night": MOON_FULL_IMAGE,
+    "Partly_Sun_Night": PARTLY_MOON_FULL_IMAGE,
 }
 
 WEATHER_FULL_IMAGE_2X = {
@@ -93,6 +100,8 @@ WEATHER_FULL_IMAGE_2X = {
     "Mist": MIST_FULL_IMAGE_2X,
     "Drizzle": DRIZZLE_FULL_IMAGE_2X,
     "Rain": RAIN_FULL_IMAGE_2X,
+    "Clear_Night": MOON_FULL_IMAGE_2X,
+    "Partly_Sun_Night": PARTLY_MOON_FULL_IMAGE_2X,
 }
 
 def main(config):
@@ -177,9 +186,11 @@ def main(config):
     if showthreeday:
         return render_weather(daily_data, scale, image_scale, config.bool("extended_forecast", True))
     else:
-        return render_single_day(daily_data, scale, image_scale)
+        # At night, today's big picture shows the moon instead of the sun
+        is_night = sunrise.elevation(float(lat), float(lng), time.now()) < 0
+        return render_single_day(daily_data, scale, image_scale, is_night)
 
-def render_single_day(daily_data, scale = 1, image_scale = 1):
+def render_single_day(daily_data, scale = 1, image_scale = 1, is_night = False):
     if len(daily_data) < 2:  # If we don't have at least 2 days
         return error_display("Weather API Error")
 
@@ -310,7 +321,7 @@ def render_single_day(daily_data, scale = 1, image_scale = 1):
                 # Layer 1: Background image - slides left
                 animation.Transformation(
                     child = render.Image(
-                        src = get_weather_image(day["weather"], image_scale),
+                        src = get_weather_image(night_variant(day["weather"]) if is_night else day["weather"], image_scale),
                         width = screen_width,
                         height = screen_height,
                     ),
@@ -399,6 +410,12 @@ def render_single_day(daily_data, scale = 1, image_scale = 1):
             ],
         ),
     )
+
+def night_variant(forecast):
+    # Only the sunny pictures have a night version
+    if forecast in ("Clear", "Partly_Sun"):
+        return forecast + "_Night"
+    return forecast
 
 def get_should_render_day_at_top(forecast):
     if forecast == "Snow":
