@@ -7,7 +7,7 @@ Author: alejoar
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -90,23 +90,32 @@ def parse_hex(s):
 
 # ---------- pixel buffer ----------
 
-def new_buf(color):
-    return [[color for _ in range(W)] for _ in range(H)]
+def new_buf(color, w = W, h = H):
+    return [[color for _ in range(w)] for _ in range(h)]
 
 def put(buf, x, y, c):
-    if x >= 0 and x < W and y >= 0 and y < H:
-        buf[y][x] = c
+    if y >= 0 and y < len(buf):
+        row = buf[y]
+        if x >= 0 and x < len(row):
+            row[x] = c
 
 def buf_to_widget(buf):
-    # Run-length encode each row into boxes
+    # Run-length encode each row into boxes. 64x32 buffers are doubled on 2x
+    # screens; the few styles drawn natively at 128x64 are used as-is.
+    h = len(buf)
+    w = len(buf[0])
+    px = 2 if canvas.is2x() and w == W else 1
     rows = []
-    for y in range(H):
+    for y in range(h):
         row = buf[y]
         children = []
         start = 0
-        for x in range(1, W + 1):
-            if x == W or row[x] != row[start]:
-                children.append(render.Box(width = x - start, height = 1, color = hexc(row[start])))
+        for x in range(1, w + 1):
+            if x == w or row[x] != row[start]:
+                if row[start] == None:
+                    children.append(render.Box(width = (x - start) * px, height = px))
+                else:
+                    children.append(render.Box(width = (x - start) * px, height = px, color = hexc(row[start])))
                 start = x
         rows.append(render.Row(children = children))
     return render.Column(children = rows)
@@ -856,28 +865,30 @@ TINY = dict(LETTERS.items() + SMALL.items() + EXTRA_LETTERS.items())
 
 WEEKDAYS = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4, "Sat": 5, "Sun": 6}
 
-def tiny_width(text):
+def tiny_width(text, sc = 1):
     w = 0
     for i, ch in enumerate(text.elems()):
         w += 2 if ch == " " else len(TINY[ch][0])
         if i < len(text) - 1:
             w += 1
-    return w
+    return w * sc
 
-def draw_tiny(buf, text, x, y, color):
+def draw_tiny(buf, text, x, y, color, sc = 1):
     for ch in text.elems():
         if ch == " ":
-            x += 3
+            x += 3 * sc
             continue
         g = TINY[ch]
         for gy in range(5):
             for gx in range(len(g[0])):
                 if g[gy][gx] == "#":
-                    put(buf, x + gx, y + gy, color)
-        x += len(g[0]) + 1
+                    for dy in range(sc):
+                        for dx in range(sc):
+                            put(buf, x + gx * sc + dx, y + gy * sc + dy, color)
+        x += (len(g[0]) + 1) * sc
 
-def draw_tiny_centered(buf, text, cx, y, color):
-    draw_tiny(buf, text, cx - tiny_width(text) // 2, y, color)
+def draw_tiny_centered(buf, text, cx, y, color, sc = 1):
+    draw_tiny(buf, text, cx - tiny_width(text, sc) // 2, y, color, sc)
 
 def iround(v):
     return int(math.floor(v + 0.5))
@@ -905,23 +916,25 @@ def time_label(now, use_24h, colon = True):
     hs, ms, _ = time_parts(now, use_24h)
     return hs + (":" if colon else " ") + ms
 
-def draw_mid_time(buf, now, use_24h, x, y, color, colon = True):
-    """5x9 time (HH:MM) at scale 1, top-left at (x, y). Returns its width."""
+def draw_mid_time(buf, now, use_24h, x, y, color, colon = True, sc = 1):
+    """5x9 time (HH:MM) at the given scale, top-left at (x, y). Returns its width."""
     hs, ms, _ = time_parts(now, use_24h)
-    hcells, hw, _ = glyph_cells(hs, GLYPHS, 5, 9, 1, 1, 0)
-    mcells, mw, _ = glyph_cells(ms, GLYPHS, 5, 9, 1, 1, 0)
+    hcells, hw, _ = glyph_cells(hs, GLYPHS, 5, 9, sc, sc, 0)
+    mcells, mw, _ = glyph_cells(ms, GLYPHS, 5, 9, sc, sc, 0)
     for (cx, cy) in hcells:
         put(buf, x + cx, y + cy, color)
     for (cx, cy) in mcells:
-        put(buf, x + hw + 3 + cx, y + cy, color)
+        put(buf, x + hw + 3 * sc + cx, y + cy, color)
     if colon:
-        put(buf, x + hw + 1, y + 2, color)
-        put(buf, x + hw + 1, y + 6, color)
-    return hw + 3 + mw
+        for cy in (2, 6):
+            for dy in range(sc):
+                for dx in range(sc):
+                    put(buf, x + hw + sc + dx, y + cy * sc + dy, color)
+    return hw + 3 * sc + mw
 
-def mid_time_width(now, use_24h):
+def mid_time_width(now, use_24h, sc = 1):
     hs, ms, _ = time_parts(now, use_24h)
-    return glyph_cells(hs, GLYPHS, 5, 9, 1, 1, 0)[1] + 3 + glyph_cells(ms, GLYPHS, 5, 9, 1, 1, 0)[1]
+    return glyph_cells(hs, GLYPHS, 5, 9, sc, sc, 0)[1] + 3 * sc + glyph_cells(ms, GLYPHS, 5, 9, sc, sc, 0)[1]
 
 def draw_big_time(buf, now, use_24h, color, ring = None, oy = None):
     digits, colon, ampm, box = big_time_cells(now, use_24h, oy = oy)
@@ -1084,7 +1097,7 @@ def moon_cells(p):
             cells.append((x, y, c))
     return cells
 
-def frame_moon(now, use_24h, cells, p, frame):
+def frame_moon(now, use_24h, p, frame):
     buf = new_buf((0, 0, 0))
 
     # Twinkling stars behind everything
@@ -1093,8 +1106,6 @@ def frame_moon(now, use_24h, cells, p, frame):
         sy = rnd(i * 13 + 9) % H
         tw = noise(i, frame // 2, 11)
         put(buf, sx, sy, scale_rgb((255, 255, 230), 0.15 + 0.5 * tw))
-    for (x, y, c) in cells:
-        buf[y][x] = c
 
     right = 47
     tw = mid_time_width(now, use_24h)
@@ -1352,6 +1363,232 @@ def frame_aquarium(now, use_24h, t):
     draw_mid_time(buf, now, use_24h, x, 1, (235, 245, 255), now.second % 2 == 0)
     return buf
 
+# ---------- native 2x (128x64) versions ----------
+
+W2 = 128
+H2 = 64
+
+def thick_line(buf, x0, y0, x1, y1, color, width):
+    # Parallel Bresenham lines for 2px-wide hands
+    offsets = [(0, 0)] if width == 1 else [(0, 0), (1, 0), (0, 1), (1, 1)]
+    for (ox, oy) in offsets:
+        draw_line(buf, x0 + ox, y0 + oy, x1 + ox, y1 + oy, color)
+
+def frame_analog_2x(now, use_24h, base_rgb, sub):
+    accent = base_rgb if base_rgb else neon_color(now)
+    buf = new_buf((0, 0, 0), W2, H2)
+    cx = 31.5
+    cy = 31.5
+
+    def at(r, a):
+        return iround(cx + r * math.sin(a) - 0.5), iround(cy - r * math.cos(a) - 0.5)
+
+    # Rim, minute ticks and hour ticks
+    for i in range(360):
+        x, y = at(30.5, i * math.pi / 180)
+        put(buf, x, y, (38, 38, 48))
+    for m in range(60):
+        a = m * math.pi / 30
+        if m % 5 == 0:
+            major = m % 15 == 0
+            x0, y0 = at(28.0, a)
+            x1, y1 = at(24.0 if major else 25.5, a)
+            thick_line(buf, x0, y0, x1, y1, (225, 225, 230) if major else (150, 150, 160), 2 if major else 1)
+        else:
+            x, y = at(28.0, a)
+            put(buf, x, y, (70, 70, 82))
+
+    secs = now.second + sub
+    ha = (now.hour % 12 + now.minute / 60.0) * math.pi / 6
+    ma = (now.minute + secs / 60.0) * math.pi / 30
+    sa = secs * math.pi / 30
+    hx, hy = at(15.0, ha)
+    mx, my = at(23.0, ma)
+    sx, sy = at(26.0, sa)
+    tx, ty = at(-6.0, sa)
+    thick_line(buf, 31, 31, hx, hy, (240, 236, 228), 2)
+    thick_line(buf, 31, 31, mx, my, (240, 236, 228), 2)
+    draw_line(buf, tx, ty, sx, sy, accent)
+    for dy in range(-1, 2):
+        for dx in range(-1, 2):
+            put(buf, 31 + dx, 31 + dy, accent)
+    put(buf, 31, 31, (0, 0, 0))
+
+    # Digital time and date on the right
+    right = 96
+    tw = mid_time_width(now, use_24h, 2)
+    draw_mid_time(buf, now, use_24h, right - tw // 2, 10, (240, 236, 228), now.second % 2 == 0, 2)
+    date = now.format("Mon").upper() + " " + str(now.day)
+    draw_tiny_centered(buf, date, right, 38, accent, 2)
+    _, _, ampm = time_parts(now, use_24h)
+    if ampm:
+        draw_tiny_centered(buf, ampm, right, 52, (110, 108, 104), 2)
+    return buf
+
+def moon_cells_2x(p):
+    cells = []
+    cx = 31.5
+    cy = 32.0
+    r = 25.0
+    k = math.cos(2 * math.pi * p)
+    craters = [
+        (-8.0, -6.0, 4.0),
+        (6.0, 4.0, 5.0),
+        (-4.0, 10.0, 3.0),
+        (10.0, -10.0, 3.0),
+        (-13.0, 4.0, 2.5),
+        (2.0, -14.0, 2.0),
+        (13.0, 12.0, 2.0),
+        (-1.0, 1.0, 1.5),
+    ]
+    dark = (20, 22, 32)
+    for y in range(5, 60):
+        for x in range(5, 59):
+            nx = (x + 0.5 - cx) / r
+            ny = (y + 0.5 - cy) / r
+            d2 = nx * nx + ny * ny
+            if d2 > 1:
+                continue
+            w = math.sqrt(1 - ny * ny)
+            u = nx / w if w > 0 else 0
+
+            # Soft terminator: blend across the shadow line instead of a hard edge
+            edge = (u - k) if p < 0.5 else (-k - u)
+            blend = clamp(edge * 4 + 0.5, 0.0, 1.0)
+            lit = scale_rgb((238, 234, 214), 0.7 + 0.3 * math.sqrt(1 - d2))
+            for (qx, qy, qr) in craters:
+                dd = (x + 0.5 - cx - qx) * (x + 0.5 - cx - qx) + (y + 0.5 - cy - qy) * (y + 0.5 - cy - qy)
+                if dd <= qr * qr:
+                    # Crater floor darker, with a lighter rim on the lower-right
+                    lit = scale_rgb(lit, 0.78 if dd < (qr - 0.8) * (qr - 0.8) else 0.9)
+            cells.append((x, y, mix(dark, lit, blend)))
+    return cells
+
+def frame_moon_2x(now, use_24h, p, frame):
+    buf = new_buf((0, 0, 0), W2, H2)
+
+    # Twinkling stars; a few bright ones get a small cross
+    for i in range(34):
+        sx = rnd(i * 7 + 3) % W2
+        sy = rnd(i * 13 + 9) % H2
+        tw = noise(i, frame // 2, 11)
+        c = scale_rgb((255, 255, 230), 0.15 + 0.55 * tw)
+        put(buf, sx, sy, c)
+        if i % 9 == 0 and tw > 0.6:
+            for (dx, dy) in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                put(buf, sx + dx, sy + dy, scale_rgb(c, 0.4))
+
+    right = 94
+    tw = mid_time_width(now, use_24h, 2)
+    draw_mid_time(buf, now, use_24h, right - tw // 2, 8, (240, 236, 228), now.second % 2 == 0, 2)
+    for (limit, a, b) in MOON_PHASES:
+        if p < limit:
+            draw_tiny_centered(buf, a, right, 34, (200, 196, 180), 2)
+            draw_tiny_centered(buf, b, right, 48, (140, 138, 128), 2)
+            break
+    return buf
+
+# Right-facing fish: # body, s stripe, o eye; two tail poses for a little wiggle
+FISH_SPRITES_2X = [
+    [
+        ".....###....",
+        "#..#######..",
+        "##.###s###o#",
+        "######s#####",
+        "#..#######..",
+        ".....##.....",
+    ],
+    [
+        ".....###....",
+        "...#######..",
+        "#####s####o#",
+        "######s#####",
+        "...#######..",
+        ".....##.....",
+    ],
+]
+
+AQUARIUM_RAY_PHASES = 12
+
+def aquarium_backgrounds():
+    """Water with slow diagonal light rays, pre-drawn for a cycle of ray positions."""
+    backgrounds = []
+    for k in range(AQUARIUM_RAY_PHASES):
+        phase = k * 2 * math.pi / AQUARIUM_RAY_PHASES
+        rays = [math.sin(d * 0.09 - phase) > 0.7 for d in range(W2 + H2)]
+        bg = []
+        for y in range(H2):
+            base = mix((12, 50, 110), (4, 16, 44), y / (H2 - 1.0))
+            lit = mix(base, (40, 110, 170), 0.18 * (1 - y / 64.0))
+            shift = int(y * 0.6)
+            bg.append([lit if rays[x + shift] else base for x in range(W2)])
+        backgrounds.append(bg)
+    return backgrounds
+
+def aquarium_sand_2x():
+    sand = new_buf(None, W2, H2)
+    for x in range(W2):
+        top = 57 + iround(math.sin(x * 0.12) * 1.2)
+        for y in range(top, H2):
+            n = noise(x, y, 3)
+            sand[y][x] = mix((196, 166, 106), (150, 120, 70), n) if n < 0.93 else (110, 100, 90)
+    return buf_to_widget(sand)
+
+def frame_aquarium_2x(now, use_24h, t, backgrounds):
+    # The rays drift one step every ~0.9s
+    bg = backgrounds[int(t / 0.9) % AQUARIUM_RAY_PHASES]
+    buf = [list(row) for row in bg]
+
+    # Seaweed: 2px stems with leaves, swaying more toward the tip
+    for (sx, height, seed) in ((10, 24, 1), (38, 17, 2), (86, 26, 3), (112, 19, 4), (122, 12, 5)):
+        for i in range(height):
+            y = 56 - i
+            sway = math.sin(t * 1.6 + i * 0.25 + seed) * (i / float(height)) * 3
+            x = sx + iround(sway)
+            c = (30, 140 + i * 3, 70)
+            put(buf, x, y, c)
+            put(buf, x + 1, y, scale_rgb(c, 0.75))
+            if i % 5 == 3:
+                side = 1 if (i // 5) % 2 == 0 else -1
+                put(buf, x + (2 if side > 0 else -1), y - 1, c)
+                put(buf, x + (3 if side > 0 else -2), y - 2, scale_rgb(c, 0.85))
+
+    # Bubbles: little rings that wobble on the way up
+    for b in range(9):
+        speed = 6 + 6 * noise(b, 1, 9)
+        y = iround(56 - ((t * speed + noise(b, 2, 9) * 68) % 68))
+        x = int(14 + noise(b, 3, 9) * 100) + iround(math.sin(t * 3 + b) * 1.5)
+        c = (150, 200, 255)
+        if b % 3 == 0:
+            for (dx, dy) in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+                put(buf, x + dx, y + dy, c)
+        else:
+            put(buf, x, y, c)
+
+    # Fish
+    for (fy, speed, direction, color, offset) in FISH:
+        span = W2 + 24
+        pos = (offset * 2 + t * speed * 1.5) % span - 12
+        x0 = iround(pos if direction > 0 else W2 - pos)
+        sprite = FISH_SPRITES_2X[int(t * 4 + offset) % 2]
+        stripe = mix(color, (255, 255, 255), 0.45)
+        for ry in range(6):
+            for rx in range(12):
+                ch = sprite[ry][rx if direction > 0 else 11 - rx]
+                if ch == "#":
+                    put(buf, x0 + rx, fy * 2 + ry, color)
+                elif ch == "s":
+                    put(buf, x0 + rx, fy * 2 + ry, stripe)
+                elif ch == "o":
+                    put(buf, x0 + rx, fy * 2 + ry, (15, 15, 20))
+
+    # Time floating at the top
+    tw = mid_time_width(now, use_24h, 2)
+    x = (W2 - tw) // 2
+    draw_mid_time(buf, now, use_24h, x + 2, 4, (5, 20, 50), now.second % 2 == 0, 2)
+    draw_mid_time(buf, now, use_24h, x, 2, (235, 245, 255), now.second % 2 == 0, 2)
+    return buf
+
 # --- Snow ---
 
 def snow_frames(now, use_24h, count, step):
@@ -1599,30 +1836,48 @@ def main(config):
     elif style == "moon":
         step = 250
         p = moon_phase(now)
-        cells = moon_cells(p)
+        native2x = canvas.is2x()
+        cells = moon_cells_2x(p) if native2x else moon_cells(p)
+
+        # The moon doesn't change during a render: draw it once as a layer over the stars
+        disc = new_buf(None, W2, H2) if native2x else new_buf(None)
+        for (x, y, c) in cells:
+            disc[y][x] = c
+        disc_layer = buf_to_widget(disc)
         for i in range(seconds * 4):
             fnow = now + time.parse_duration("%dms" % (i * step))
-            frames.append(buf_to_widget(frame_moon(fnow, use_24h, cells, p, i)))
+            if native2x:
+                layer = buf_to_widget(frame_moon_2x(fnow, use_24h, p, i))
+            else:
+                layer = buf_to_widget(frame_moon(fnow, use_24h, p, i))
+            frames.append(render.Stack(children = [layer, disc_layer]))
         delay = step
     elif style in ("analog", "bighour", "aquarium", "lava", "starfield", "pacman"):
         step = 250 if style in ("analog", "bighour") else 100
+
+        # The 2x aquarium is the heaviest to draw: 5 fps keeps it quick to render
+        if style == "aquarium" and canvas.is2x():
+            step = 200
+        aquarium_bgs = aquarium_backgrounds() if style == "aquarium" and canvas.is2x() else None
+        sand_layer = aquarium_sand_2x() if aquarium_bgs else None
         for i in range(seconds * 1000 // step):
             fnow = now + time.parse_duration("%dms" % (i * step))
             sub = fnow.nanosecond / 1e9
             t = i * step / 1000.0
             if style == "analog":
-                buf = frame_analog(fnow, use_24h, base_rgb, sub)
+                buf = frame_analog_2x(fnow, use_24h, base_rgb, sub) if canvas.is2x() else frame_analog(fnow, use_24h, base_rgb, sub)
             elif style == "bighour":
                 buf = frame_bighour(fnow, use_24h, base_rgb, sub)
             elif style == "aquarium":
-                buf = frame_aquarium(fnow, use_24h, t)
+                buf = frame_aquarium_2x(fnow, use_24h, t, aquarium_bgs) if canvas.is2x() else frame_aquarium(fnow, use_24h, t)
             elif style == "lava":
                 buf = frame_lava(fnow, use_24h, t)
             elif style == "starfield":
                 buf = frame_starfield(fnow, use_24h, i)
             else:
                 buf = frame_pacman(fnow, use_24h, i, sub)
-            frames.append(buf_to_widget(buf))
+            widget = buf_to_widget(buf)
+            frames.append(render.Stack(children = [widget, sand_layer]) if sand_layer else widget)
         delay = step
     elif style in ("dotgrid", "dayprogress", "world"):
         step = 1000
