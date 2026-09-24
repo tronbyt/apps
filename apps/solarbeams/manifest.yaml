@@ -1,0 +1,17 @@
+---
+id: solar-beams
+name: Solar Beams
+summary: Sunlight kinetic art
+desc: Kinetic visualization of solar irradiance hitting the ground, inspired by Breakfast's "Under the Sun" flip-disc artwork. Beams of light shift in density and speed based on real-time sunlight.
+author: brombomb
+fileName: solar_beams.star
+packageName: solarbeams
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - weather
+  - art
+  - animation
+published: '2026-09-24T15:05:28Z'
+updated: '2026-09-24T15:05:28Z'
