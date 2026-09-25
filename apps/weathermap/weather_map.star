@@ -36,32 +36,9 @@ IMAGE_URL_LAYOUT = "{host}{path}/{size}/{zoom}/{lat}/{lng}/{color}/{smooth}_{sno
 IMAGE_CACHE_PAST_TTL_SECONDS = 7200
 IMAGE_CACHE_FORECAST_TTL_SECONDS = 120
 
-# A list of color schemes available in the RainViewer API:
-#
-#   https://www.rainviewer.com/api/color-schemes.html
-#
-# There seem to be more color schemes at least up to value "22". These
-# are currently omitted here, as it is unclear whether RainViewer allows
-# API callers to use those freely or restrict them to their mobile apps.
-#
-# Additionally mappings from names to values are unknown for these.
-#
-# The color scheme with value "0" is actually a "Black & White" image
-# containing "dBZ" (decibels) values encoded in the image pixels, and
-# is therefore also excluded from the below list, as it is useless to
-# display as-is.
-#
-COLOR_SCHEMES = [
-    schema.Option(display = "Original", value = "1"),
-    schema.Option(display = "Universal Blue", value = "2"),
-    schema.Option(display = "TITAN", value = "3"),
-    schema.Option(display = "The Weather Channel (TWC)", value = "4"),
-    schema.Option(display = "Meteored", value = "5"),
-    schema.Option(display = "NEXRAD Level III", value = "6"),
-    schema.Option(display = "Rainbow @ SELEX-IS", value = "7"),
-    schema.Option(display = "Dark Sky", value = "8"),
-]
-DEFAULT_COLOR_SCHEME = COLOR_SCHEMES[1]
+# RainViewer only supports Universal Blue since January 2026.
+# https://www.rainviewer.com/api/transition-faq.html
+RADAR_COLOR_SCHEME = 2
 
 # A list of delays to choose from.
 FRAME_DELAYS = [
@@ -295,7 +272,7 @@ def create_image_url(frame, opts):
         lng = lng,
         size = 256,
         zoom = zoom_level,
-        color = getattr(opts, "color_scheme"),
+        color = RADAR_COLOR_SCHEME,
         smooth = 0,
         snow = getattr(opts, "snow"),
     )
@@ -356,7 +333,6 @@ def main(config):
         host = data["host"],
         location = json.decode(config.get("location", DEFAULT_LOCATION)),
         zoom_level = int(config.get("zoom_level", DEFAULT_ZOOM_LEVEL.value)),
-        color_scheme = int(config.get("color_scheme", DEFAULT_COLOR_SCHEME.value)),
         frame_delay = int(config.get("frame_delay", DEFAULT_FRAME_DELAY.value)),
         time_format = config.get("time_format", DEFAULT_TIME_FORMAT.value),
         unit_format = config.get("unit_format", DEFAULT_UNIT_FORMAT.value),
@@ -420,14 +396,6 @@ def get_schema():
                 icon = "globe",
                 default = DEFAULT_ZOOM_LEVEL.value,
                 options = ZOOM_LEVELS,
-            ),
-            schema.Dropdown(
-                id = "color_scheme",
-                name = "Color Scheme",
-                desc = "Pick a color scheme.",
-                icon = "palette",
-                default = DEFAULT_COLOR_SCHEME.value,
-                options = COLOR_SCHEMES,
             ),
             schema.Dropdown(
                 id = "frame_delay",
