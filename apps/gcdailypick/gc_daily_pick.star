@@ -9,11 +9,13 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("images/guitarCenter.png", GUITAR_CENTER_LOGO_ASSET = "file")
 load("images/musiciansFriend.png", MUSICIANS_FRIEND_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # only changes once per day but we will refetch on the hour to be safe
 CACHE_TTL = 3600
+SCALE = 2 if canvas.is2x() else 1
+TRANSFORM_DURATION = 250
 
 GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1z4UprVH5z79gc85e_inF0NDzAD7pmmExNme1V17Ne-c/export?format=csv&"
 SOURCE_SHEETS = {
@@ -140,25 +142,25 @@ def main(config):
     brand_label = getBrandLabel(source_name)
     brand_logo = getBrandLogo(source_name)
     deal_image = render.Box(
-        width = 24,
-        height = 24,
+        width = 24 * SCALE,
+        height = 24 * SCALE,
         color = "#111111",
         child = render.Text(brand_label, color = "#FFFFFF", font = "tb-8"),
     )
     if data["dealImage"] != "":
-        deal_image = render.Image(width = 24, height = 24, src = data["dealImage"])
+        deal_image = render.Image(width = 24 * SCALE, height = 24 * SCALE, src = data["dealImage"])
 
     # print(data)
     return render.Root(
         child = render.Stack(
             children = [
                 animation.Transformation(
-                    duration = 350,
+                    duration = TRANSFORM_DURATION,
                     child = render.Box(
-                        width = 64,
-                        height = 32,
+                        width = 64 * SCALE,
+                        height = 32 * SCALE,
                         color = "#020202",
-                        child = render.Image(brand_logo, width = 64, height = 32),
+                        child = render.Image(brand_logo, width = 64 * SCALE, height = 32 * SCALE),
                     ),
                     keyframes = [
                         #slide GC logo up
@@ -172,34 +174,34 @@ def main(config):
                         ),
                         animation.Keyframe(
                             percentage = 0.2,
-                            transforms = [animation.Translate(0, -64)],
+                            transforms = [animation.Translate(0, -64 * SCALE)],
                         ),
                         animation.Keyframe(
                             percentage = 1,
-                            transforms = [animation.Translate(0, -64)],
+                            transforms = [animation.Translate(0, -64 * SCALE)],
                             curve = "ease_in",
                         ),
                     ],
                 ),
                 animation.Transformation(
-                    duration = 350,
+                    duration = TRANSFORM_DURATION,
                     child = render.Column(
                         children = [
                             render.Marquee(
-                                width = 64,
+                                width = 64 * SCALE,
                                 child = render.Text(data["itemName"], ""),
-                                offset_start = 4,
-                                offset_end = 64,
-                                delay = 75,
+                                offset_start = 4 * SCALE,
+                                offset_end = 64 * SCALE,
+                                delay = 50,
                             ),
                             render.Row(
                                 children = [
                                     render.Column(
                                         children = [
-                                            render.Box(width = 40, height = 8, child = render.Row(children = [render.Text(content = data["originalPrice"])])),
-                                            render.Box(width = 40, height = 8, child = render.Text(content = "-" + data["savings"], color = "#EA202E")),
-                                            render.Box(width = 40, height = 1, child = render.Row(children = [render.Box(width = 30, height = 1, color = "#ccc")])),
-                                            render.Box(width = 40, height = 8, child = render.Text(content = data["price"], color = "#85BB65")),
+                                            render.Box(width = 40 * SCALE, height = 8 * SCALE, child = render.Row(children = [render.Text(content = data["originalPrice"])])),
+                                            render.Box(width = 40 * SCALE, height = 8 * SCALE, child = render.Text(content = "-" + data["savings"], color = "#EA202E")),
+                                            render.Box(width = 40 * SCALE, height = 1 * SCALE, child = render.Row(children = [render.Box(width = 30 * SCALE, height = 1 * SCALE, color = "#ccc")])),
+                                            render.Box(width = 40 * SCALE, height = 8 * SCALE, child = render.Text(content = data["price"], color = "#85BB65")),
                                         ],
                                     ),
                                     deal_image,
@@ -211,12 +213,12 @@ def main(config):
                         #slide GC logo up
                         animation.Keyframe(
                             percentage = 0,
-                            transforms = [animation.Translate(0, 64)],
+                            transforms = [animation.Translate(0, 64 * SCALE)],
                             curve = "ease_out",
                         ),
                         animation.Keyframe(
                             percentage = 0.1,
-                            transforms = [animation.Translate(0, 64)],
+                            transforms = [animation.Translate(0, 64 * SCALE)],
                             curve = "ease_out",
                         ),
                         animation.Keyframe(
