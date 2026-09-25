@@ -44,10 +44,10 @@ def font(name):
 
 # Unofficial, reverse-engineered API — see WPBL.md at the root of this repo
 # for the full write-up. No auth, no CORS, Presto Sports data underneath.
-GAMES_URL = "https://stats.womensprobaseballleague.com/v1/games?limit=0"
+GAMES_URL = "https://stats.womensprobaseballleague.com/v1/games?limit=100"
 BOXSCORE_URL = "https://stats.womensprobaseballleague.com/v1/games/%s/boxscore"
 
-DEFAULT_TEAM = "9f08or2mffx81409"  # Boston Hunters
+DEFAULT_TEAM = "Boston Hunters"
 DEFAULT_TZ = "America/Phoenix"
 
 GAMES_TTL = 300  # schedule/status list — which game is "today's" changes slowly
@@ -76,30 +76,41 @@ GOOD = BASE_ON
 OUT_WHITE = WHITE
 BAD = "#ff4040"
 
-# team_id: [abbreviation, row background, row text color, full name]
+# Canonical team names used as stable keys: [abbreviation, row bg, row fg, display name]
 # Colors sourced from each team's official palette per Wikipedia's infobox
 # (verified hex, not guessed) — same values the Based iOS app uses. Dark
 # primary + vivid secondary, mirroring how this file already treats teams
 # like the Pirates/White Sox/Giants (dark bg, bright accent text).
 TEAMS = {
-    "9f08or2mffx81409": ["BOS", "#00281F", "#F4801B", "Boston Hunters"],
-    "v4gisr4rbgmn67b0": ["LAQ", "#000000", "#B09067", "Los Angeles Queens"],
-    "fttth861nft1j2s7": ["NYH", "#091C47", "#68C4E9", "New York Heights"],
-    "vhubhz8li07tmgq8": ["SFF", "#2D1748", "#FF2100", "San Francisco Firebells"],
+    "Boston Hunters": ["BOS", "#00281F", "#F4801B", "Boston Hunters"],
+    "Los Angeles Queens": ["LAQ", "#000000", "#B09067", "Los Angeles Queens"],
+    "New York Heights": ["NYH", "#091C47", "#68C4E9", "New York Heights"],
+    "San Francisco Firebells": ["SFF", "#2D1748", "#FF2100", "San Francisco Firebells"],
 }
 
 # Fixed rotation/display order — same order the checkboxes appear in.
-TEAM_IDS = ["9f08or2mffx81409", "v4gisr4rbgmn67b0", "fttth861nft1j2s7", "vhubhz8li07tmgq8"]
+TEAM_NAMES = ["Boston Hunters", "Los Angeles Queens", "New York Heights", "San Francisco Firebells"]
 
-def team_info(team_id):
-    return TEAMS.get(team_id, ["WPBL", "#222222", "#ffffff", "WPBL"])
+def team_info(name):
+    key = normalize_team_key(name)
+    return TEAMS.get(key, ["WPBL", "#222222", "#ffffff", name if name else "WPBL"])
 
 TEAM_LOGOS = {
-    "9f08or2mffx81409": BOSTON_LOGO,
-    "v4gisr4rbgmn67b0": LAQ_LOGO,
-    "fttth861nft1j2s7": NYH_LOGO,
-    "vhubhz8li07tmgq8": SFF_LOGO,
+    "Boston Hunters": BOSTON_LOGO,
+    "Los Angeles Queens": LAQ_LOGO,
+    "New York Heights": NYH_LOGO,
+    "San Francisco Firebells": SFF_LOGO,
 }
+
+def normalize_team_key(raw_name):
+    """Matches any substring or casing variation to the canonical team name."""
+    if not raw_name:
+        return ""
+    lower = raw_name.lower()
+    for canonical in TEAM_NAMES:
+        if canonical.lower() in lower or lower in canonical.lower():
+            return canonical
+    return raw_name
 
 def last_name(full_name):
     if not full_name:
@@ -133,11 +144,13 @@ def fetch_games():
         return []
     return resp.json().get("games", []) or []
 
-def team_games(games, team_id):
+def team_games(games, team_name):
+    canonical = normalize_team_key(team_name)
     return [
         g
         for g in games
-        if g.get("home_team_id") == team_id or g.get("away_team_id") == team_id
+        if normalize_team_key(g.get("home_team_name", "")) == canonical or
+           normalize_team_key(g.get("away_team_name", "")) == canonical
     ]
 
 def is_final_status(status):
@@ -153,7 +166,7 @@ def sched_date(g, tz):
         return ""
     return time.parse_time(scheduled_start).in_location(tz).format("2006-01-02")
 
-def pick_today_game(games, team_id, today, tz):
+def pick_today_game(games, team_name, today, tz):
     """WPBL's schedule carries stale "Not Started" duplicate game_ids that
     were superseded by a different game_id once the real game was played
     (observed: two dead "Not Started" stubs for the same matchup/day sitting
@@ -162,16 +175,16 @@ def pick_today_game(games, team_id, today, tz):
     — it's recent for whichever record is actually live or just went final,
     and stale for an abandoned duplicate — so the most recently updated
     game for today is always the one worth showing."""
-    mine = [g for g in team_games(games, team_id) if sched_date(g, tz) == today]
+    mine = [g for g in team_games(games, team_name) if sched_date(g, tz) == today]
     if len(mine) == 0:
         return None
     return sorted(mine, key = lambda g: g.get("updated_at") or "", reverse = True)[0]
 
-def fetch_next_game(games, team_id, after_start):
+def fetch_next_game(games, team_name, after_start):
     """Earliest upcoming game for this team after the given ISO timestamp."""
     mine = [
         g
-        for g in team_games(games, team_id)
+        for g in team_games(games, team_name)
         if not is_final_status(g.get("status", "")) and (g.get("scheduled_start") or "") > after_start
     ]
     if len(mine) == 0:
@@ -189,6 +202,11 @@ def find_side(teams, side):
         if t.get("side") == side:
             return t
     return {}
+
+def team_key_from_side(side_data, fallback_name = ""):
+    """Extracts team name from boxscore team blocks if available."""
+    name = side_data.get("name") or side_data.get("team_name") or side_data.get("teamName") or fallback_name
+    return normalize_team_key(name)
 
 # ---------- play-by-play notation ----------
 
@@ -439,8 +457,8 @@ def info_bar(left_text, right_text):
         ),
     )
 
-def team_row(team_id, runs, batting, flash = False):
-    abbr, bg, fg, _ = team_info(team_id)
+def team_row(team_name, runs, batting, flash = False):
+    abbr, bg, fg, _ = team_info(team_name)
     if flash:
         # Invert the row so it reads across the room.
         bg = WHITE
@@ -564,14 +582,14 @@ def state_block(status, note):
 
 # ---------- screens ----------
 
-def live_frame(away_id, home_id, status, lit_side, note):
+def live_frame(away_name, home_name, status, lit_side, note):
     """One full 64x32 frame. lit_side is None, "away", or "home"."""
     away_runs = num(status.get("away_runs"))
     home_runs = num(status.get("home_runs"))
     is_top = status.get("half", "top") != "bottom"
 
     if lit_side != None:
-        scorer = away_id if lit_side == "away" else home_id
+        scorer = away_name if lit_side == "away" else home_name
         header = "%s SCORES" % team_info(scorer)[0]
         trailer = ""
     else:
@@ -585,8 +603,8 @@ def live_frame(away_id, home_id, status, lit_side, note):
                 children = [
                     render.Column(
                         children = [
-                            team_row(away_id, away_runs, is_top, lit_side == "away"),
-                            team_row(home_id, home_runs, not is_top, lit_side == "home"),
+                            team_row(away_name, away_runs, is_top, lit_side == "away"),
+                            team_row(home_name, home_runs, not is_top, lit_side == "home"),
                         ],
                     ),
                     state_block(status, note),
@@ -595,11 +613,11 @@ def live_frame(away_id, home_id, status, lit_side, note):
         ],
     )
 
-def live_frames(away_id, home_id, status, scored_side, note):
+def live_frames(away_name, home_name, status, scored_side, note):
     """Always a list — a single steady-state frame when nothing just
     happened, or the full flash/settle sequence when it did."""
     if scored_side == None and note == None:
-        return [live_frame(away_id, home_id, status, None, None)]
+        return [live_frame(away_name, home_name, status, None, None)]
 
     frames = []
     active = NOTE_FRAMES if note != None else FLASH_FRAMES
@@ -607,9 +625,9 @@ def live_frames(away_id, home_id, status, scored_side, note):
         lit = None
         if scored_side != None and i < FLASH_FRAMES and i % 2 == 0:
             lit = scored_side
-        frames.append(live_frame(away_id, home_id, status, lit, note))
+        frames.append(live_frame(away_name, home_name, status, lit, note))
 
-    frames += repeat(live_frame(away_id, home_id, status, None, None), SETTLE_FRAMES)
+    frames += repeat(live_frame(away_name, home_name, status, None, None), SETTLE_FRAMES)
 
     return frames
 
@@ -646,9 +664,9 @@ def detect_run(game_id, away_runs, home_runs, override):
         return "home"
     return None
 
-def wide_row(team_id, text):
+def wide_row(team_name, text):
     """Full-width row, for screens with no bases to make room for."""
-    abbr, bg, fg, _ = team_info(team_id)
+    abbr, bg, fg, _ = team_info(team_name)
 
     return render.Box(
         width = px(64),
@@ -671,32 +689,33 @@ def wide_row(team_id, text):
         ),
     )
 
-def flat_screen(away_id, home_id, header, away_text, home_text):
+def flat_screen(away_name, home_name, header, away_text, home_text):
     return render.Column(
         children = [
             info_bar(header, ""),
-            wide_row(away_id, away_text),
-            wide_row(home_id, home_text),
+            wide_row(away_name, away_text),
+            wide_row(home_name, home_text),
         ],
     )
 
 def pregame_screen(game, tz):
-    away_id = game.get("away_team_id", "")
-    home_id = game.get("home_team_id", "")
+    away_name = game.get("away_team_name", "")
+    home_name = game.get("home_team_name", "")
     header = format_scheduled(game, tz, "3:04PM")
-    return flat_screen(away_id, home_id, header, "-", "-")
+    return flat_screen(away_name, home_name, header, "-", "-")
 
-def logo_block(team_id, size):
+def logo_block(team_name, size):
     """WPBL's own hosted logo images sit behind a Cloudflare bot challenge
     that blocks server-side fetches (verified: direct requests get a 403
     with cf-mitigated: challenge), so real crests are bundled locally
     instead — cropped from each team's brand kit, see TEAM_LOGOS above.
     Falls back to a colored initial block for any team not in that map."""
-    logo = TEAM_LOGOS.get(team_id)
+    canonical = normalize_team_key(team_name)
+    logo = TEAM_LOGOS.get(canonical)
     if logo != None:
         return render.Image(src = logo.readall(), width = px(size), height = px(size))
 
-    abbr, bg, fg, _ = team_info(team_id)
+    abbr, bg, fg, _ = team_info(team_name)
     return render.Box(
         width = px(size),
         height = px(size),
@@ -732,12 +751,14 @@ def slim_bar(text, center = False):
 def score_font_for(away_runs, home_runs):
     return "5x8" if (away_runs > 9 or home_runs > 9) else "6x13"
 
-def final_screen(boxscore):
+def final_screen(boxscore, default_away = "", default_home = ""):
     teams = boxscore.get("teams", []) or []
     away = find_side(teams, "away")
     home = find_side(teams, "home")
-    away_id = away.get("id", "")
-    home_id = home.get("id", "")
+
+    away_name = team_key_from_side(away, default_away)
+    home_name = team_key_from_side(home, default_home)
+
     away_runs = num((away.get("totals") or {}).get("runs"))
     home_runs = num((home.get("totals") or {}).get("runs"))
 
@@ -761,11 +782,11 @@ def final_screen(boxscore):
                     main_align = "space_evenly",
                     cross_align = "center",
                     children = [
-                        logo_block(away_id, 20),
+                        logo_block(away_name, 20),
                         score_of(away_runs, away_runs > home_runs),
                         render.Text("-", font = font("tom-thumb"), color = "#8a8a8a"),
                         score_of(home_runs, home_runs > away_runs),
-                        logo_block(home_id, 20),
+                        logo_block(home_name, 20),
                     ],
                 ),
             ),
@@ -788,8 +809,8 @@ def final_screen(boxscore):
     )
 
 def next_logos(game, tz):
-    away_id = game.get("away_team_id", "")
-    home_id = game.get("home_team_id", "")
+    away_name = game.get("away_team_name", "")
+    home_name = game.get("home_team_name", "")
     start_text = format_scheduled(game, tz, "Mon 3:04PM")
 
     return render.Column(
@@ -803,9 +824,9 @@ def next_logos(game, tz):
                     main_align = "space_evenly",
                     cross_align = "center",
                     children = [
-                        logo_block(away_id, 24),
+                        logo_block(away_name, 24),
                         render.Text("@", font = font("6x13"), color = WHITE),
-                        logo_block(home_id, 24),
+                        logo_block(home_name, 24),
                     ],
                 ),
             ),
@@ -829,11 +850,14 @@ def next_screen_empty():
 def repeat(node, n):
     return [node for _ in range(n)]
 
-def postgame_frames(boxscore, games, team_id, finished_game, tz):
+def postgame_frames(boxscore, games, team_name, finished_game, tz):
     """Final with records, then the next matchup in logos."""
-    upcoming = fetch_next_game(games, team_id, finished_game.get("scheduled_start") or "")
+    upcoming = fetch_next_game(games, team_name, finished_game.get("scheduled_start") or "")
 
-    panels = [final_screen(boxscore)]
+    away_name = finished_game.get("away_team_name", "")
+    home_name = finished_game.get("home_team_name", "")
+
+    panels = [final_screen(boxscore, away_name, home_name)]
     panels.append(next_logos(upcoming, tz) if upcoming != None else next_screen_empty())
 
     frames = []
@@ -848,18 +872,21 @@ def message(text):
 
 # ---------- entry point ----------
 
-def selected_teams(config):
-    return [tid for tid in TEAM_IDS if config.bool("team_%s" % tid, tid == DEFAULT_TEAM)]
+def team_toggle_id(team_name):
+    return "team_" + team_name.lower().replace(" ", "_")
 
-def team_screen(team_id, games, today, tz, hide_idle, score_override, play_override):
+def selected_teams(config):
+    return [name for name in TEAM_NAMES if config.bool(team_toggle_id(name), name == DEFAULT_TEAM)]
+
+def team_screen(team_name, games, today, tz, hide_idle, score_override, play_override):
     """One team's current frames, plus live-flash metadata (max_age,
     show_full_animation) when live — None for every other state.
     `frames` is always a list, possibly empty (idle + hide_idle)."""
-    game = pick_today_game(games, team_id, today, tz)
+    game = pick_today_game(games, team_name, today, tz)
     if game == None:
         if hide_idle:
             return [], None
-        return [message("%s: no game today" % team_info(team_id)[3])], None
+        return [message("%s: no game today" % team_name)], None
 
     status_text = game.get("status", "")
 
@@ -868,19 +895,19 @@ def team_screen(team_id, games, today, tz, hide_idle, score_override, play_overr
 
     game_id = game.get("game_id", "")
     if game_id == "":
-        return [message("%s: malformed game data" % team_info(team_id)[3])], None
+        return [message("%s: malformed game data" % team_name)], None
 
     box = fetch_boxscore(game_id)
     if box == None:
-        return [message("%s: fetch error" % team_info(team_id)[3])], None
+        return [message("%s: fetch error" % team_name)], None
 
     if is_final_status(box.get("game_status", status_text)):
-        return postgame_frames(box, games, team_id, game, tz), None
+        return postgame_frames(box, games, team_name, game, tz), None
 
     # Live (or a status string we don't recognize — safest to try live).
     live_status = box.get("status", {}) or {}
-    away_id = game.get("away_team_id", "")
-    home_id = game.get("home_team_id", "")
+    away_name = game.get("away_team_name", "")
+    home_name = game.get("home_team_name", "")
 
     scored_side = detect_run(
         game_id,
@@ -895,7 +922,7 @@ def team_screen(team_id, games, today, tz, hide_idle, score_override, play_overr
         play_override,
     )
 
-    frames = live_frames(away_id, home_id, live_status, scored_side, note)
+    frames = live_frames(away_name, home_name, live_status, scored_side, note)
     live_meta = (LIVE_TTL, scored_side != None or note != None)
     return frames, live_meta
 
@@ -946,20 +973,20 @@ def main(config):
     all_frames = []
     seen_game_ids = {}
     any_live = False
-    for team_id in teams:
+    for team_name in teams:
         # WPBL only has 4 teams, so two selected teams playing each other
         # is a real, common case — without this, their shared game would
         # show twice back to back with an identical score. Whichever team
-        # comes first in TEAM_IDS order "claims" the game; the other is
+        # comes first in TEAM_NAMES order "claims" the game; the other is
         # skipped for this slot (its own distinct next-game panel included).
-        today_game = pick_today_game(games, team_id, today, tz)
+        today_game = pick_today_game(games, team_name, today, tz)
         game_id = today_game.get("game_id") if today_game != None else None
         if game_id != None:
             if game_id in seen_game_ids:
                 continue
             seen_game_ids[game_id] = True
 
-        frames, live_meta = team_screen(team_id, games, today, tz, hide_idle, "", "")
+        frames, live_meta = team_screen(team_name, games, today, tz, hide_idle, "", "")
         any_live = any_live or live_meta != None
 
         # A lone frame (idle message, pregame card, error, or a quiet live
@@ -984,13 +1011,13 @@ def main(config):
 def get_schema():
     team_toggles = [
         schema.Toggle(
-            id = "team_%s" % team_id,
-            name = TEAMS[team_id][3],
-            desc = "Follow the %s." % TEAMS[team_id][3],
+            id = team_toggle_id(team_name),
+            name = team_name,
+            desc = "Follow the %s." % team_name,
             icon = "baseball",
-            default = team_id == DEFAULT_TEAM,
+            default = team_name == DEFAULT_TEAM,
         )
-        for team_id in TEAM_IDS
+        for team_name in TEAM_NAMES
     ]
     return schema.Schema(
         version = "1",

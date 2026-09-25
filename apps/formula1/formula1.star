@@ -118,6 +118,38 @@ def main(config):
         # handle date & time display options here
         date_str = date_and_time3.format("Jan 2" if config.bool("date_us", DEFAULTS["date_us"]) else "2 Jan")  #current format of your current date str
 
+        # track images are curated by hand, so a new or returning circuit is in
+        # the schedule feed before its image exists. indexing the dict directly
+        # failed the whole render, and a failed render leaves the device showing
+        # the previous race until someone adds the image.
+        track_img = tracks.get(next_race["Circuit"]["circuitId"].lower())
+
+        race_detail = render.Column(
+            children = [
+                render.Text(date_str, font = font_medium),
+                render.Text(time_str, font = font_small),
+                render.Text("Race " + next_race["round"], font = font_small),
+            ],
+        )
+
+        if track_img != None:
+            detail_row = render.Row(
+                children = [
+                    render.Image(src = base64.decode(track_img), height = TRACK_IMG_BASE_HEIGHT * scale, width = TRACK_IMG_BASE_WIDTH * scale),
+                    render.Padding(
+                        child = race_detail,
+                        pad = (4, 0, 0, 0) if scale == 2 else (0, 0, 0, 0),
+                    ),
+                ],
+            )
+        else:
+            # no image for this circuit - centre the details rather than fail
+            detail_row = render.Row(
+                expanded = True,
+                main_align = "center",
+                children = [race_detail],
+            )
+
         return render.Root(
             child = render.Column(
                 children = [
@@ -128,21 +160,7 @@ def main(config):
                         offset_end = MARQUEE_OFFSET * scale,
                     ),
                     render.Box(width = canvas.width(), height = 1 * scale, color = "#a0a"),
-                    render.Row(
-                        children = [
-                            render.Image(src = base64.decode(tracks[next_race["Circuit"]["circuitId"].lower()]), height = TRACK_IMG_BASE_HEIGHT * scale, width = TRACK_IMG_BASE_WIDTH * scale),
-                            render.Padding(
-                                child = render.Column(
-                                    children = [
-                                        render.Text(date_str, font = font_medium),
-                                        render.Text(time_str, font = font_small),
-                                        render.Text("Race " + next_race["round"], font = font_small),
-                                    ],
-                                ),
-                                pad = (4, 0, 0, 0) if scale == 2 else (0, 0, 0, 0),
-                            ),
-                        ],
-                    ),
+                    detail_row,
                 ],
             ),
         )

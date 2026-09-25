@@ -15,6 +15,8 @@ def get_git_dates(path):
             "Merge updated-apps",
             "Fix YAML formatting",
             "Update manifest metadata",
+            "chore: auto-update manifest metadata",
+            "auto-update manifest metadata",
             "Merge branch",
             "Tag consolidation",
             "llm generated categories",
@@ -83,15 +85,19 @@ def update_manifest(manifest_path):
         return
 
     # Check if we need to update
-    with open(manifest_path, "r") as f:
+    with open(manifest_path, "r", encoding="utf-8") as f:
         try:
-            data = yaml.safe_load(f)
+            docs = [doc for doc in yaml.safe_load_all(f) if doc is not None]
+            if not docs:
+                data = {}
+            else:
+                data = {}
+                for doc in docs:
+                    if isinstance(doc, dict):
+                        data.update(doc)
         except Exception as e:
             print(f"Error parsing YAML in {manifest_path}: {e}")
             return
-
-    if data is None:
-        data = {}
 
     changed = False
     # Only set published if it's missing. This preserves historical dates

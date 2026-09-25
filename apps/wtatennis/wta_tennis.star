@@ -84,6 +84,9 @@ Updated for 2026 season
 v1.16
 Updated method of finding "Womens Singles" event when its not 1st event of the tournament
 Updated some other logic
+
+v1.17
+Reduced cache timeout for tournament fetching, this was causing the match data to keep the cached version for up to 3 hours
 """
 
 load("encoding/json.star", "json")
@@ -95,6 +98,7 @@ load("time.star", "time")
 
 SLAM_LIST = ["154-2026", "188-2026", "172-2026", "189-2026"]
 WTA1000_LIST = ["256-2026", "25-2026", "713-2026", "411-2026", "413-2026", "414-2026", "421-2026", "718-2026", "959-2026", "381-2026", "382-2026"]
+
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 WTA_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/wta/scoreboard"
 
@@ -103,8 +107,8 @@ def main(config):
     timezone = time.tz()
     RotationSpeed = config.get("speed", "3")
 
-    # hold 1 min cache for live scores
-    CacheData = get_cachable_data(WTA_SCORES_URL, 120)
+    # hold 5 min cache for live scores
+    CacheData = get_cachable_data(WTA_SCORES_URL, 300)
     WTA_JSON = json.decode(CacheData)
 
     Display1 = []
@@ -1153,9 +1157,9 @@ def getScheduledMatches(SelectedTourneyID, EventIndex, ScheduledMatchList, JSON,
     return Display
 
 def get_schema():
-    TOURNEY_CACHE = 10800  # 3hrs
+    #TOURNEY_CACHE = 10800  # 3hrs
     WTA_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/wta/scoreboard"
-    CacheData = get_cachable_data(WTA_SCORES_URL, TOURNEY_CACHE)
+    CacheData = get_cachable_data(WTA_SCORES_URL, 300)
     WTA_JSON = json.decode(CacheData)
 
     Number_Events = len(WTA_JSON["events"])

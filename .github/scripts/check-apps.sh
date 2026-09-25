@@ -23,7 +23,18 @@ runtime_exceptions["apps/acfilmshowtimes"]="5s"
 runtime_exceptions["apps/perlinnoise"]="5s"
 runtime_exceptions["apps/arcraiderstats"]="3s"
 runtime_exceptions["apps/aflscores"]="3s"
+runtime_exceptions["apps/weathermap"]="3s"
 
+is_broken_app() {
+    local manifest="$1/manifest.yaml"
+    if [[ ! -f "$manifest" ]]; then
+        return 1
+    fi
+
+    local broken
+    broken=$(grep -E '^broken:' "$manifest" | head -n1 | sed -E 's/^broken:[[:space:]]*//' | tr -d '\r' | tr '[:upper:]' '[:lower:]')
+    [[ "$broken" == "true" || "$broken" == "yes" || "$broken" == "1" ]]
+}
 
 if [ -z "${TARGETS}" ]; then
     echo "✔️ No apps modified"
@@ -33,6 +44,11 @@ fi
 for target in "${targets_array[@]}"; do
     if [[ ! -d "$target" ]]; then
         # app was deleted
+        continue
+    fi
+
+    if is_broken_app "$target"; then
+        echo "⏭️ Skipping broken app: ${target}"
         continue
     fi
 

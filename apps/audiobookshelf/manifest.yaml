@@ -1,0 +1,19 @@
+---
+id: audiobookshelf
+name: Audiobookshelf
+summary: Audiobookshelf now playing
+desc: Track currently playing audiobooks and podcasts from your Audiobookshelf server.
+author: brombomb
+fileName: audiobookshelf.star
+packageName: audiobookshelf
+supports2x: true
+recommendedInterval: 1
+category: media
+tags:
+  - tech
+  - tracking
+  - media
+  - audio
+  - wide 2x support
+published: '2026-09-14T02:49:52Z'
+updated: '2026-09-14T15:08:17Z'
