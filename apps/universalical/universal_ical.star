@@ -20,6 +20,7 @@ def main(config):
     show_full_names = config.bool("show_full_names", DEFAULT_SHOW_FULL_NAMES)
 
     ics_url = config.str("ics_url", DEFAULT_ICS_URL)
+    api_url = config.str(P_API_URL, "").strip() or LAMBDA_URL
     show_in_progress = config.bool("show_in_progress", DEFAULT_SHOW_IN_PROGRESS)
     skip_when_done = config.bool("skip_when_done", DEFAULT_SKIP_WHEN_DONE)
 
@@ -41,7 +42,7 @@ def main(config):
 
     now = time.now().in_location(timezone)
     ics = http.post(
-        url = LAMBDA_URL,
+        url = api_url,
         json_body = {"icsUrl": ics_url, "tz": timezone, "showInProgress": show_in_progress, "includeAllDayEvents": include_all_day, "onlyShowAllDayEvents": only_show_all_day},
     )
 
@@ -410,6 +411,13 @@ def get_schema():
                 options = options,
                 icon = "calendar",
             ),
+            schema.Text(
+                id = P_API_URL,
+                name = "API URL",
+                desc = "Optional URL of a self-hosted ICS parsing service (see github.com/gabe565/ics-calendar-tidbyt). Leave blank to use the default.",
+                icon = "server",
+                default = "",
+            ),
         ],
     )
 
@@ -421,6 +429,7 @@ P_SHOW_IN_PROGRESS = "show_in_progress"
 P_SKIP_WHEN_DONE = "skip_when_done"
 P_TRUNCATE_EVENT_SUMMARY = "truncate_event_summary"
 P_ALL_DAY = "all_day"
+P_API_URL = "api_url"
 
 DONE_TEXT = "DONE FOR THE DAY :-)"
 DEFAULT_SHOW_EXPANDED_TIME_WINDOW = True
@@ -429,6 +438,8 @@ DEFAULT_SHOW_FULL_NAMES = False
 DEFAULT_SHOW_IN_PROGRESS = True
 DEFAULT_SKIP_WHEN_DONE = False
 FRAME_DELAY = 100
+
+# Self-hostable alternative: https://github.com/gabe565/ics-calendar-tidbyt
 LAMBDA_URL = "https://6bfnhr9vy7.execute-api.us-east-1.amazonaws.com/ics-next-event"
 
 #this is the original AWS Lambda URL that is hosting the helper function
