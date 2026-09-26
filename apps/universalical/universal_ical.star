@@ -17,6 +17,16 @@ def main(config):
     )
 
     show_expanded_time_window = config.bool("show_expanded_time_window", DEFAULT_SHOW_EXPANDED_TIME_WINDOW)
+
+    # Read color settings
+    colors = {
+        "primary": config.str(P_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR),
+        "frame_bg": config.str(P_FRAME_BG_COLOR, DEFAULT_FRAME_BG_COLOR),
+        "soon": config.str(P_SOON_COLOR, DEFAULT_SOON_COLOR),
+        "imminent": config.str(P_IMMINENT_COLOR, DEFAULT_IMMINENT_COLOR),
+        "event_bg": config.str(P_EVENT_BG_COLOR, DEFAULT_EVENT_BG_COLOR),
+        "event_text": config.str(P_EVENT_TEXT_COLOR, DEFAULT_EVENT_TEXT_COLOR),
+    }
     show_full_names = config.bool("show_full_names", DEFAULT_SHOW_FULL_NAMES)
 
     ics_url = config.str("ics_url", DEFAULT_ICS_URL)
@@ -56,23 +66,23 @@ def main(config):
             # If skip_when_done is True, return nothing to mark app as inactive
             return []
         else:
-            return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
+            return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, colors)
     elif event["detail"]["inProgress"] and not event["detail"]["isAllDay"]:
         # if there's an event inProgress, and it's not an All Day event, show the event
-        return build_event_frame(event)
+        return build_event_frame(event, colors)
     elif event["detail"]:
-        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
+        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, colors)
     else:
-        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names)
+        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, colors)
 
-def get_calendar_text_color(event):
-    DEFAULT = "#ff83f3"
+def get_calendar_text_color(event, colors):
+    DEFAULT = colors["primary"]
     if event["detail"]["isAllDay"]:
         return DEFAULT
     elif event["detail"]["minutesUntilStart"] <= 5:
-        return "#ff5000"
+        return colors["soon"]
     elif event["detail"]["minutesUntilStart"] <= 2:
-        return "#9000ff"
+        return colors["imminent"]
     else:
         return DEFAULT
 
@@ -141,10 +151,11 @@ def get_calendar_text_copy(event, now, eventStart, eventEnd, show_expanded_time_
     else:
         return DEFAULT
 
-def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names):
+def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names, colors):
     baseObject = {
         "currentMonth": now.format("Jan").upper(),
         "currentDay": humanize.ordinal(now.day),
+        "primaryColor": colors["primary"],
         "now": now,
     }
 
@@ -164,7 +175,7 @@ def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, sho
         "summary": get_event_summary(event["name"]),
         "eventStartTimestamp": startTime,
         "copy": get_calendar_text_copy(event, now, startTime, endTime, show_expanded_time_window, show_full_names),
-        "textColor": get_calendar_text_color(event),
+        "textColor": get_calendar_text_color(event, colors),
         "shouldAnimateText": should_animate_text(event),
         "hasEvent": True,
         "isToday": event["detail"]["isToday"],
@@ -173,12 +184,12 @@ def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, sho
 
     return dict(baseObject.items() + eventObject.items())
 
-def render_calendar_base_object(top, bottom):
+def render_calendar_base_object(top, bottom, bg_color):
     return render.Root(
         delay = FRAME_DELAY,
         child = render.Box(
             padding = 2,
-            color = "#111",
+            color = bg_color,
             child = render.Column(
                 expanded = True,
                 children = top + bottom,
@@ -186,7 +197,7 @@ def render_calendar_base_object(top, bottom):
         ),
     )
 
-def get_calendar_top(data):
+def get_calendar_top(data, colors):
     return [
         render.Row(
             cross_align = "center",
@@ -196,13 +207,13 @@ def get_calendar_top(data):
                 render.Box(width = 2, height = 1),
                 render.Text(
                     data["currentMonth"],
-                    color = "#ff83f3",
+                    color = colors["primary"],
                     offset = -1,
                 ),
                 render.Box(width = 1, height = 1),
                 render.Text(
                     data["currentDay"],
-                    color = "#ff83f3",
+                    color = colors["primary"],
                     offset = -1,
                 ),
             ],
@@ -235,7 +246,7 @@ def get_calendar_bottom(data):
         children.append(
             render.WrappedText(
                 DONE_TEXT,
-                color = "#ff83f3",
+                color = data["primaryColor"],
             ),
         )
 
@@ -254,11 +265,11 @@ def get_calendar_bottom(data):
         ),
     ]
 
-def build_calendar_frame(now, usersTz, event, show_expanded_time_window, show_full_names):
-    data = get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names)
+def build_calendar_frame(now, usersTz, event, show_expanded_time_window, show_full_names, colors):
+    data = get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names, colors)
 
     # top half displays the calendar icon and date
-    top = get_calendar_top(data)
+    top = get_calendar_top(data, colors)
     bottom = get_calendar_bottom(data)
 
     # if it's an all day event, build the calendar up top and drop the name of the event below
@@ -270,6 +281,7 @@ def build_calendar_frame(now, usersTz, event, show_expanded_time_window, show_fu
     return render_calendar_base_object(
         top = top,
         bottom = bottom,
+        bg_color = colors["frame_bg"],
     )
 
 def get_event_frame_copy_config(event):
@@ -292,12 +304,12 @@ def get_event_frame_copy_config(event):
     return {
         "summary": get_event_summary(event["name"]),
         "tagline": tagline,
-        "bgColor": "#ff78e9",
-        "textColor": "#fff500",
     }
 
-def build_event_frame(event):
+def build_event_frame(event, colors):
     data = get_event_frame_copy_config(event)
+    data["bgColor"] = colors["event_bg"]
+    data["textColor"] = colors["event_text"]
     baseChildren = [
         render.WrappedText(
             data["summary"].upper(),
@@ -411,6 +423,48 @@ def get_schema():
                 options = options,
                 icon = "calendar",
             ),
+            schema.Color(
+                id = P_PRIMARY_COLOR,
+                name = "Primary Color",
+                desc = "Accent color for the date and upcoming event time.",
+                default = DEFAULT_PRIMARY_COLOR,
+                icon = "brush",
+            ),
+            schema.Color(
+                id = P_FRAME_BG_COLOR,
+                name = "Background Color",
+                desc = "Background color of the calendar frame.",
+                default = DEFAULT_FRAME_BG_COLOR,
+                icon = "brush",
+            ),
+            schema.Color(
+                id = P_SOON_COLOR,
+                name = "Soon Color",
+                desc = "Event time color when an event starts within 5 minutes.",
+                default = DEFAULT_SOON_COLOR,
+                icon = "brush",
+            ),
+            schema.Color(
+                id = P_IMMINENT_COLOR,
+                name = "Imminent Color",
+                desc = "Event time color when an event starts within 2 minutes.",
+                default = DEFAULT_IMMINENT_COLOR,
+                icon = "brush",
+            ),
+            schema.Color(
+                id = P_EVENT_BG_COLOR,
+                name = "In-Progress Divider Color",
+                desc = "Divider color on the in-progress event screen.",
+                default = DEFAULT_EVENT_BG_COLOR,
+                icon = "brush",
+            ),
+            schema.Color(
+                id = P_EVENT_TEXT_COLOR,
+                name = "In-Progress Text Color",
+                desc = "Time remaining color on the in-progress event screen.",
+                default = DEFAULT_EVENT_TEXT_COLOR,
+                icon = "brush",
+            ),
             schema.Text(
                 id = P_API_URL,
                 name = "API URL",
@@ -430,6 +484,12 @@ P_SKIP_WHEN_DONE = "skip_when_done"
 P_TRUNCATE_EVENT_SUMMARY = "truncate_event_summary"
 P_ALL_DAY = "all_day"
 P_API_URL = "api_url"
+P_PRIMARY_COLOR = "primary_color"
+P_FRAME_BG_COLOR = "frame_bg_color"
+P_SOON_COLOR = "soon_color"
+P_IMMINENT_COLOR = "imminent_color"
+P_EVENT_BG_COLOR = "event_bg_color"
+P_EVENT_TEXT_COLOR = "event_text_color"
 
 DONE_TEXT = "DONE FOR THE DAY :-)"
 DEFAULT_SHOW_EXPANDED_TIME_WINDOW = True
@@ -437,6 +497,12 @@ DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
 DEFAULT_SHOW_IN_PROGRESS = True
 DEFAULT_SKIP_WHEN_DONE = False
+DEFAULT_PRIMARY_COLOR = "#ff83f3"
+DEFAULT_FRAME_BG_COLOR = "#111"
+DEFAULT_SOON_COLOR = "#ff5000"
+DEFAULT_IMMINENT_COLOR = "#9000ff"
+DEFAULT_EVENT_BG_COLOR = "#ff78e9"
+DEFAULT_EVENT_TEXT_COLOR = "#fff500"
 FRAME_DELAY = 100
 
 # Self-hostable alternative: https://github.com/gabe565/ics-calendar-tidbyt
