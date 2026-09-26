@@ -139,14 +139,17 @@ def get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_name
 def get_calendar_text_copy(event, now, eventStart, eventEnd, show_expanded_time_window, show_full_names, time_format):
     DEFAULT = eventStart.format("at " + time_format)
 
-    if not event["detail"]["isToday"] and not show_expanded_time_window:
+    if event["detail"] and not event["detail"]["isAllDay"] and event["detail"]["minutesUntilStart"] <= 10:
+        if event["detail"]["minutesUntilStart"] < 1:
+            return "now"
+        else:
+            return "in %d min" % event["detail"]["minutesUntilStart"]
+    elif not event["detail"]["isToday"] and not show_expanded_time_window:
         return DONE_TEXT
     elif event["detail"]["isToday"] and not event["detail"]["inProgress"]:
         return DEFAULT
     elif event["detail"] and show_expanded_time_window:
         return get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names, time_format)
-    elif event["detail"] and not event["detail"]["isAllDay"] and event["detail"]["minutesUntilStart"] <= 5:
-        return "in %d min" % event["detail"]["minutesUntilStart"]
     elif event["detail"]["isAllDay"] and not show_expanded_time_window:
         return get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names, time_format)
     else:
