@@ -28,6 +28,7 @@ def main(config):
         "event_text": config.str(P_EVENT_TEXT_COLOR, DEFAULT_EVENT_TEXT_COLOR),
     }
     show_full_names = config.bool("show_full_names", DEFAULT_SHOW_FULL_NAMES)
+    time_format = "15:04" if config.bool(P_USE_24_HOUR, DEFAULT_USE_24_HOUR) else "3:04 PM"
 
     ics_url = config.str("ics_url", DEFAULT_ICS_URL)
     api_url = config.str(P_API_URL, "").strip() or LAMBDA_URL
@@ -66,14 +67,14 @@ def main(config):
             # If skip_when_done is True, return nothing to mark app as inactive
             return []
         else:
-            return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, colors)
+            return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, time_format, colors)
     elif event["detail"]["inProgress"] and not event["detail"]["isAllDay"]:
         # if there's an event inProgress, and it's not an All Day event, show the event
         return build_event_frame(event, colors)
     elif event["detail"]:
-        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, colors)
+        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, time_format, colors)
     else:
-        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, colors)
+        return build_calendar_frame(now, timezone, event, show_expanded_time_window, show_full_names, time_format, colors)
 
 def get_calendar_text_color(event, colors):
     DEFAULT = colors["primary"]
@@ -91,22 +92,22 @@ def should_animate_text(event):
         return False
     return event["detail"]["minutesUntilStart"] <= 5
 
-def get_tomorrow_text_copy(eventStart, show_full_names):
-    DEFAULT = eventStart.format("TMRW 3:04 PM")
+def get_tomorrow_text_copy(eventStart, show_full_names, time_format):
+    DEFAULT = eventStart.format("TMRW " + time_format)
     if show_full_names:
-        return eventStart.format("Tomorrow at 3:04 PM")
+        return eventStart.format("Tomorrow at " + time_format)
     else:
         return DEFAULT
 
-def get_this_week_text_copy(eventStart, show_full_names):
-    DEFAULT = eventStart.format("Mon at 3:04 PM")
+def get_this_week_text_copy(eventStart, show_full_names, time_format):
+    DEFAULT = eventStart.format("Mon at " + time_format)
 
     if show_full_names:
-        return eventStart.format("Monday at 3:04 PM")
+        return eventStart.format("Monday at " + time_format)
     else:
         return DEFAULT
 
-def get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names):
+def get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names, time_format):
     DEFAULT = "in %s" % humanize.relative_time(now, eventStart)
 
     multiday = False
@@ -128,30 +129,30 @@ def get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_name
         else:
             return eventStart.format("on Mon")
     elif event["detail"]["isTomorrow"]:
-        return get_tomorrow_text_copy(eventStart, show_full_names)
+        return get_tomorrow_text_copy(eventStart, show_full_names, time_format)
 
     elif event["detail"]["isThisWeek"]:
-        return get_this_week_text_copy(eventStart, show_full_names)
+        return get_this_week_text_copy(eventStart, show_full_names, time_format)
     else:
         return DEFAULT
 
-def get_calendar_text_copy(event, now, eventStart, eventEnd, show_expanded_time_window, show_full_names):
-    DEFAULT = eventStart.format("at 3:04 PM")
+def get_calendar_text_copy(event, now, eventStart, eventEnd, show_expanded_time_window, show_full_names, time_format):
+    DEFAULT = eventStart.format("at " + time_format)
 
     if not event["detail"]["isToday"] and not show_expanded_time_window:
         return DONE_TEXT
     elif event["detail"]["isToday"] and not event["detail"]["inProgress"]:
         return DEFAULT
     elif event["detail"] and show_expanded_time_window:
-        return get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names)
+        return get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names, time_format)
     elif event["detail"] and not event["detail"]["isAllDay"] and event["detail"]["minutesUntilStart"] <= 5:
         return "in %d min" % event["detail"]["minutesUntilStart"]
     elif event["detail"]["isAllDay"] and not show_expanded_time_window:
-        return get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names)
+        return get_expanded_time_text_copy(event, now, eventStart, eventEnd, show_full_names, time_format)
     else:
         return DEFAULT
 
-def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names, colors):
+def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names, time_format, colors):
     baseObject = {
         "currentMonth": now.format("Jan").upper(),
         "currentDay": humanize.ordinal(now.day),
@@ -174,7 +175,7 @@ def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, sho
     eventObject = {
         "summary": get_event_summary(event["name"]),
         "eventStartTimestamp": startTime,
-        "copy": get_calendar_text_copy(event, now, startTime, endTime, show_expanded_time_window, show_full_names),
+        "copy": get_calendar_text_copy(event, now, startTime, endTime, show_expanded_time_window, show_full_names, time_format),
         "textColor": get_calendar_text_color(event, colors),
         "shouldAnimateText": should_animate_text(event),
         "hasEvent": True,
@@ -265,8 +266,8 @@ def get_calendar_bottom(data):
         ),
     ]
 
-def build_calendar_frame(now, usersTz, event, show_expanded_time_window, show_full_names, colors):
-    data = get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names, colors)
+def build_calendar_frame(now, usersTz, event, show_expanded_time_window, show_full_names, time_format, colors):
+    data = get_calendar_render_data(now, usersTz, event, show_expanded_time_window, show_full_names, time_format, colors)
 
     # top half displays the calendar icon and date
     top = get_calendar_top(data, colors)
@@ -415,6 +416,13 @@ def get_schema():
                 default = DEFAULT_SKIP_WHEN_DONE,
                 icon = "eye",
             ),
+            schema.Toggle(
+                id = P_USE_24_HOUR,
+                name = "Use 24-Hour Time",
+                desc = "Format times using a 24-hour clock.",
+                default = DEFAULT_USE_24_HOUR,
+                icon = "clock",
+            ),
             schema.Dropdown(
                 id = P_ALL_DAY,
                 name = "Show All Day Events",
@@ -483,6 +491,7 @@ P_SHOW_IN_PROGRESS = "show_in_progress"
 P_SKIP_WHEN_DONE = "skip_when_done"
 P_TRUNCATE_EVENT_SUMMARY = "truncate_event_summary"
 P_ALL_DAY = "all_day"
+P_USE_24_HOUR = "use_24_hour"
 P_API_URL = "api_url"
 P_PRIMARY_COLOR = "primary_color"
 P_FRAME_BG_COLOR = "frame_bg_color"
@@ -497,6 +506,7 @@ DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
 DEFAULT_SHOW_IN_PROGRESS = True
 DEFAULT_SKIP_WHEN_DONE = False
+DEFAULT_USE_24_HOUR = False
 DEFAULT_PRIMARY_COLOR = "#ff83f3"
 DEFAULT_FRAME_BG_COLOR = "#111"
 DEFAULT_SOON_COLOR = "#ff5000"
