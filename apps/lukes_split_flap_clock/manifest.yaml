@@ -1,0 +1,16 @@
+---
+id: lukes-split-flap-clock
+name: Luke's Split Flap Clock
+summary: Split flap clock that holds
+desc: A mechanical split flap board that flips once and then holds still until the next rotation. Clock layouts or a custom message, six themes, color cards, and four reveal patterns.
+author: nsluke
+fileName: lukes_split_flap_clock.star
+packageName: lukessplitflapclock
+recommendedInterval: 1
+supports2x: true
+category: clocks
+tags:
+  - retro
+  - clock
+published: '2026-08-19T17:07:51Z'
+updated: '2026-08-19T17:07:51Z'

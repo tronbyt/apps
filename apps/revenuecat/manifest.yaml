@@ -1,0 +1,17 @@
+---
+id: revenuecat
+name: RevenueCat
+summary: Your subscription metrics
+desc: Shows 28-day revenue for one RevenueCat project, with a cumulative sparkline, the change against the previous 28 days, MRR and active subscriptions. Data refreshes twice a day, at local noon and midnight.
+author: Ryan Taylor
+fileName: revenuecat.star
+packageName: revenuecat
+recommendedInterval: 5
+supports2x: true
+category: finance
+tags:
+  - revenuecat
+  - finance
+  - subscriptions
+published: '2026-08-15T19:19:19Z'
+updated: '2026-08-15T19:48:39Z'

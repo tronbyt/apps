@@ -1,0 +1,17 @@
+---
+id: school-days-left
+name: School Days Left
+summary: Count school days left
+desc: Count actual school days left, excluding weekends and configured days off.
+author: Rourke McNamara
+fileName: schooldaysleft.star
+packageName: schooldaysleft
+recommendedInterval: 60
+category: utilities
+published: '2026-05-25T17:14:51Z'
+updated: '2026-09-21T20:23:10Z'
+tags:
+  - countdown
+  - school
+  - calendar
+  - utility

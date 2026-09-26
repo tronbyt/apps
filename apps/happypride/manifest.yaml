@@ -1,0 +1,15 @@
+---
+id: happy-pride
+name: Happy Pride
+summary: Celebrates LGBTQ Pride
+desc: Shows LGBT pride flag, trans pride flag, and "Happy Pride!!!".  More features to come.
+author: Knauerhase
+recommendedInterval: 5
+fileName: pride.star
+packageName: happypride
+category: entertainment
+tags:
+  - art
+  - community
+published: '2024-06-06T20:30:48Z'
+updated: '2025-12-17T23:02:59Z'

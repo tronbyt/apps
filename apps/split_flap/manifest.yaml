@@ -1,0 +1,15 @@
+---
+id: split-flap
+name: Split Flap
+summary: Retro split-flap display
+desc: A pixel version of a split-flap display (like a Vesta board) that shuffles letters.
+author: Brombomb
+fileName: split_flap.star
+packageName: splitflap
+recommendedInterval: 1
+supports2x: true
+category: utilities
+tags:
+  - retro
+published: '2026-05-15T19:01:04Z'
+updated: '2026-05-21T14:57:38Z'

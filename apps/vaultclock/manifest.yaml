@@ -1,0 +1,19 @@
+---
+id: vault-clock
+name: Vault Clock
+summary: Wrist terminal clock
+desc: Clock and weather styled as a vault dweller's wrist terminal — phosphor CRT, tab strip, scanlines, a dropout that tears the picture every ten seconds, and the little guy walking in place between the readouts. Six screen colours, 12/24 hour, metric or imperial, and no API key to fill in. Weather data by Open-Meteo.com (CC BY 4.0).
+author: LukeByt
+fileName: vault_clock.star
+packageName: vaultclock
+recommendedInterval: 1
+supports2x: true
+category: clocks
+tags:
+  - clock
+  - weather
+  - retro
+  - terminal
+  - wide 2x support
+published: '2026-08-19T08:00:23Z'
+updated: '2026-08-19T16:45:16Z'

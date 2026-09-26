@@ -1,0 +1,17 @@
+---
+id: finaza-stocks
+name: Finaza Stocks
+summary: Displays Stock/ETF ticker
+desc: Displays Stock Ticker. No API Key Reuquired. Configure upto 5 Symbols to show on the ticker.
+author: Sunil Taneja
+fileName: finaza_stocks.star
+packageName: finazastocks
+recommendedInterval: 1
+broken: true
+brokenReason: API endpoint is no longer available
+category: finance
+tags:
+  - finance
+  - tickers
+published: '2023-06-12T18:47:09Z'
+updated: '2025-12-05T22:28:51Z'

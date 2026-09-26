@@ -1,0 +1,19 @@
+---
+id: ntfy-pulse
+name: Ntfy Pulse Listener
+summary: Ambient alerts from ntfy
+desc: Polls an ntfy topic for real-time push alerts, displaying urgent notifications or an ambient health pulse.
+author: brombomb
+fileName: ntfy_pulse.star
+packageName: ntfypulse
+supports2x: true
+recommendedInterval: 1
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - notification
+  - wide 2x support
+published: '2026-09-14T02:49:43Z'
+updated: '2026-09-14T03:12:55Z'
