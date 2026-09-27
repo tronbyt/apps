@@ -37,6 +37,7 @@ TEAM_SEARCH_API = "https://tidbyt.apis.ajcomputers.com/soccer/api/search/%s"
 DEFAULT_TEAM_DISPLAY = "visitor"  # default to Visitor first, then Home - US order
 DEFAULT_DISPLAY_SPEED = "2000"
 EXTRA_TEAM_KEYS = ("teamid2", "teamid3", "teamid4")  # 2x only
+TILE_TEXT_INSET = 2  # LEDs the league / time line moves in from the edges when tiled
 
 SHORTENED_WORDS = """
 {
@@ -75,7 +76,7 @@ def main(config):
     tiles = []
     seen_events = {}
     for teamid in team_ids:
-        frames = team_frames(config, teamid, timezone, now, seen_events)
+        frames = team_frames(config, teamid, timezone, now, seen_events, len(team_ids) > 1)
         if len(frames) == 0:
             continue
         if widgetMode or len(frames) == 1:
@@ -103,8 +104,10 @@ def main(config):
         child = root_child,
     )
 
-def team_frames(config, teamid, timezone, now, seen_events):
-    # One 64x32 frame per upcoming / current / past game for the team.
+def team_frames(config, teamid, timezone, now, seen_events, tiled):
+    # One 64x32 frame per upcoming / current / past game for the team. When
+    # tiled next to other teams, the league / time line is inset from the edges.
+    inset = TILE_TEXT_INSET if tiled else 0
     renderCategory = []
 
     league = API % ("all", str(teamid))
@@ -316,7 +319,7 @@ def team_frames(config, teamid, timezone, now, seen_events):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -369,7 +372,7 @@ def team_frames(config, teamid, timezone, now, seen_events):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -410,7 +413,7 @@ def team_frames(config, teamid, timezone, now, seen_events):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -453,7 +456,7 @@ def team_frames(config, teamid, timezone, now, seen_events):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -496,7 +499,7 @@ def team_frames(config, teamid, timezone, now, seen_events):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -506,20 +509,26 @@ def team_frames(config, teamid, timezone, now, seen_events):
     return renderCategory
 
 def tile_grid(tiles):
+    # 1-LED black gutters between tiles. A tile's last column and top row only
+    # ever hold band color / logo (never text), so the left tile of a pair gives
+    # up its last column and second-row tiles give up their top row.
     rows = []
     for i in range(0, len(tiles), 2):
+        h = 32
+        if i > 0:
+            rows.append(render.Box(width = 128, height = 1, color = "#000000"))
+            h = 31
+
+        def cell(t, w):
+            if h < 32:
+                t = render.Padding(pad = (0, h - 32, 0, 0), child = t)
+            return render.Box(width = w, height = h, child = t)
+
         pair = tiles[i:i + 2]
         if len(pair) == 2:
-            # Side by side, the left tile's date would butt into the right tile's
-            # league label. Its last column only ever holds band color (never
-            # text), so trim it to 63 wide and put a 1-LED black gutter there.
-            row = [
-                render.Box(width = 63, height = 32, child = pair[0]),
-                render.Box(width = 1, height = 32, color = "#000000"),
-                render.Box(width = 64, height = 32, child = pair[1]),
-            ]
+            row = [cell(pair[0], 63), render.Box(width = 1, height = h, color = "#000000"), cell(pair[1], 64)]
         else:
-            row = [render.Box(width = 64, height = 32, child = pair[0])]
+            row = [cell(pair[0], 64)]
         rows.append(render.Row(children = row))
     return render.Box(
         width = canvas.width(),
@@ -769,13 +778,19 @@ def get_shortened_display(text):
         text = text.replace(s, words[s])
     return text
 
-def get_gametime_column(gameTime, textColor, leagueAbbr):
+def get_gametime_column(gameTime, textColor, leagueAbbr, inset = 0):
     # I swear - this is the only way...
 
     gameTimeColumn = [
         render.WrappedText(width = 25, height = 6, content = leagueAbbr, linespacing = 1, font = "CG-pixel-3x5-mono", color = textColor, align = "center"),
-        render.WrappedText(width = 39, height = 6, content = get_shortened_display(gameTime), linespacing = 1, font = "CG-pixel-3x5-mono", color = textColor, align = "right"),
+        render.WrappedText(width = 39 - 2 * inset, height = 6, content = get_shortened_display(gameTime), linespacing = 1, font = "CG-pixel-3x5-mono", color = textColor, align = "right"),
     ]
+
+    # tiled on 2x: pull the league / time in from the tile edges so neighboring
+    # tiles' text doesn't run together (still 64 wide in total)
+    if inset > 0:
+        gameTimeColumn[0] = render.Padding(pad = (inset, 0, 0, 0), child = gameTimeColumn[0])
+        gameTimeColumn.append(render.Box(width = inset, height = 1))
     return gameTimeColumn
 
 def get_cachable_data(url):
