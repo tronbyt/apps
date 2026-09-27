@@ -38,6 +38,7 @@ DEFAULT_TEAM_DISPLAY = "visitor"  # default to Visitor first, then Home - US ord
 DEFAULT_DISPLAY_SPEED = "2000"
 ABBR_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/main/soccermens/league_abbr.json"
 ABBR_TTL = 43200
+EXTRA_TEAM_KEYS = ("teamid2", "teamid3", "teamid4")  # 2x only
 TEAM_TTL_SECONDS = 3600  # opponent colors + records barely change; don't refetch every minute
 
 SHORTENED_WORDS = """
@@ -67,9 +68,14 @@ def main(config):
 
     teamid = get_team_id(config, "teamid") or DEFAULT_TEAM
 
-    # The 2x wide style shows up to 4 teams at once on a completely separate render path.
-    if config.get("displayType", "colors") == "wide":
-        return render_wide(config, teamid, timezone, now)
+    # On a 2x display, picking Team 2-4 (or the Wide style) switches to the wide
+    # grid, whatever style is selected - it's a completely separate render path.
+    # On 1x the extra teams are ignored and a leftover Wide style falls back to
+    # Team Colors (settings can be carried over from a 2x device).
+    extra_ids = [get_team_id(config, k) for k in EXTRA_TEAM_KEYS]
+    if is_wide_canvas():
+        if config.get("displayType", "colors") == "wide" or any(extra_ids):
+            return render_wide(config, [teamid] + extra_ids, timezone, now)
 
     league = API % ("all", str(teamid))
     teamdata = get_scores(league)
@@ -79,6 +85,8 @@ def main(config):
         leagueAbbr = scores[0]["league"]["abbreviation"][0:6]
         leagueSlug = scores[0]["league"]["slug"]
         displayType = config.get("displayType", "colors")
+        if displayType == "wide":
+            displayType = "colors"
 
         #logoType = config.get("logoType", "primary")
         timeColor = config.get("displayTimeColor", "#FFF")
@@ -512,11 +520,13 @@ displayOptions = [
         display = "Retro",
         value = "retro",
     ),
-    schema.Option(
-        display = "Wide · Up to 4 Teams (2x)",
-        value = "wide",
-    ),
 ]
+
+# 2x only: forces the wide layout even with a single team (one big card).
+wideDisplayOption = schema.Option(
+    display = "Wide (2x)",
+    value = "wide",
+)
 
 pregameOptions = [
     schema.Option(
@@ -564,6 +574,30 @@ displaySpeeds = [
 ]
 
 def get_schema():
+    # The server builds the settings form with the device's canvas, so
+    # canvas.is2x() here is true only when configuring a 2x device. The extra
+    # teams + wide options are only offered there.
+    is2x = canvas.is2x()
+
+    extra_teams = []
+    wide_fields = []
+    if is2x:
+        for i in range(len(EXTRA_TEAM_KEYS)):
+            extra_teams.append(schema.Typeahead(
+                id = EXTRA_TEAM_KEYS[i],
+                name = "Team %d (optional)" % (i + 2),
+                desc = "Add teams to show all their games at once in a grid",
+                icon = "futbol",
+                handler = search_teams,
+            ))
+        wide_fields.append(schema.Toggle(
+            id = "wide_team_colors",
+            name = "Team color backgrounds",
+            desc = "Multi-team / Wide view: tint each team's area with its team color (off = grey bands).",
+            icon = "palette",
+            default = True,
+        ))
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -574,29 +608,7 @@ def get_schema():
                 icon = "futbol",
                 handler = search_teams,
             ),
-            # Extra teams live at the top level (not in a Generated field) because
-            # pixlet only registers typeahead handlers from the top-level schema.
-            schema.Typeahead(
-                id = "teamid2",
-                name = "Team 2 (Wide 2x only)",
-                desc = "Additional team for the Wide display type",
-                icon = "futbol",
-                handler = search_teams,
-            ),
-            schema.Typeahead(
-                id = "teamid3",
-                name = "Team 3 (Wide 2x only)",
-                desc = "Additional team for the Wide display type",
-                icon = "futbol",
-                handler = search_teams,
-            ),
-            schema.Typeahead(
-                id = "teamid4",
-                name = "Team 4 (Wide 2x only)",
-                desc = "Additional team for the Wide display type",
-                icon = "futbol",
-                handler = search_teams,
-            ),
+        ] + extra_teams + [
             schema.Dropdown(
                 id = "team_sequence",
                 name = "Display which team first?",
@@ -611,13 +623,9 @@ def get_schema():
                 desc = "Style of how the scores are displayed.",
                 icon = "desktop",
                 default = displayOptions[0].value,
-                options = displayOptions,
+                options = displayOptions + ([wideDisplayOption] if is2x else []),
             ),
-            schema.Generated(
-                id = "wide_generated",
-                source = "displayType",
-                handler = show_wide_options,
-            ),
+        ] + wide_fields + [
             schema.Color(
                 id = "displayTimeColor",
                 name = "Time Color",
@@ -650,21 +658,6 @@ def get_schema():
             ),
         ],
     )
-
-def show_wide_options(displayType):
-    # Team-colors background toggle only applies to the wide 2x style.
-    if displayType == "wide":
-        return [
-            schema.Toggle(
-                id = "wide_team_colors",
-                name = "Team color backgrounds",
-                desc = "Tint each team's area with its team color (off = grey bands).",
-                icon = "palette",
-                default = True,
-            ),
-        ]
-    else:
-        return []
 
 def search_teams(team_text):
     if len(team_text) > 3:
@@ -806,15 +799,15 @@ W_TEAM_ALPHA = "80"  # alpha on team-color bands so they read softer over black 
 W_W = 128
 W_H = 64
 
-def render_wide(config, teamid, timezone, now):
-    # This layout needs the native 128x64 (2x) canvas. The device signals 2x via
-    # canvas.is2x(); CLI `-w 128 -t 64` reports width 128 but not is2x. Accept
-    # either so it works on real wide hardware and in local render tests.
-    if not (canvas.is2x() or canvas.width() >= W_W):
-        return wide_needs_2x()
+def is_wide_canvas():
+    # The device signals 2x via canvas.is2x(); CLI `-w 128 -t 64` reports width
+    # 128 but not is2x. Accept either so it works on real wide hardware and in
+    # local render tests.
+    return canvas.is2x() or canvas.width() >= W_W
 
+def render_wide(config, ids, timezone, now):
     team_ids = []
-    for tid in [teamid] + [get_team_id(config, k) for k in ("teamid2", "teamid3", "teamid4")]:
+    for tid in ids:
         if tid and str(tid) not in team_ids:
             team_ids.append(str(tid))
 
@@ -1058,27 +1051,6 @@ def wide_team_color(hexcolor):
         g = (g * 125) // lum
         b = (b * 125) // lum
     return "#" + hex2(r) + hex2(g) + hex2(b) + W_TEAM_ALPHA
-
-def wide_needs_2x():
-    # 1x devices can't fit the wide layout; explain rather than render garbage.
-    return render.Root(
-        child = render.Box(
-            width = 64,
-            height = 32,
-            color = W_BG,
-            child = render.Column(
-                expanded = True,
-                main_align = "center",
-                cross_align = "center",
-                children = [
-                    render.Text(content = "WIDE VIEW", font = "tb-8", color = W_WIN),
-                    render.Box(width = 1, height = 1),
-                    render.Text(content = "needs a 2x", font = "tom-thumb", color = W_WHITE),
-                    render.Text(content = "display", font = "tom-thumb", color = W_WHITE),
-                ],
-            ),
-        ),
-    )
 
 # ---- grid ------------------------------------------------------------------
 # 1 team: one big card. 2: two full-width cells stacked. 3: two cells on top,

@@ -18,18 +18,19 @@ Displayed:
 - Select color for time (uses new schema.Color)
 - 12 hour vs 24 hour time & US vs Intl date format
 
-## Wide · Up to 4 Teams (2x displays)
+## Up to 4 teams on 2x displays
 
-On a 2x (128x64) display, pick the **Wide · Up to 4 Teams (2x)** display type and add up to 3 more teams
-with the **Team 2 / Team 3 / Team 4** pickers (they're ignored by the other display types). Every team's
-game shows at once - same design as the Soccer Mens / Soccer Womens Wide 4 view:
+When configuring a 2x (128x64) display, the settings add **Team 2 / Team 3 / Team 4** pickers (they don't
+appear for 1x displays). Pick any of them and every team's game shows at once in a grid, whatever display
+type is selected - same design as the Soccer Mens / Soccer Womens Wide 4 view:
 
-- 4 teams: 2x2 grid; 3 teams: two on top, one full width below; 2 teams: two full width; 1 team: one big card
+- 4 teams: 2x2 grid; 3 teams: two on top, one full width below; 2 teams: two full width
 - Each cell: competition + date strip, both teams (flag, code or name, score or W-D-L record), and a status strip -
   kickoff time, live clock (green), HT (amber), FT / FT with penalty tally (grey)
 - Winners are shown in yellow; "Team color backgrounds" toggles the team-color bands
 - If two of your teams play each other, the game is shown once
-- On a 1x display this style shows a "needs a 2x display" notice; the original styles still work everywhere
+- The **Wide (2x)** display type uses the same look for a single team (one big card)
+- On a 1x display only the first team is shown, in the selected display type
 
 ![2x screenshot](soccersingle@2x.webp)
 
