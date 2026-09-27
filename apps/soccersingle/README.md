@@ -30,6 +30,13 @@ select (the same display type is used for every team):
 
 ![2x screenshot](soccersingle@2x.webp)
 
+## 2 teams on 64x64 square displays
+
+When configuring a square (64x64) display, the settings add a **Team 2** picker. The two teams' games are
+stacked, in the selected display type; with one team, its game is centered.
+
+![64x64 screenshot](soccersingle@64x64.webp)
+
 ## Thanks
 
 Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you

@@ -11,6 +11,7 @@ Author: jvivona
 # 20240802 added code to handle widgetMode - only show the 1st piece, no animations
 # 20240926 resolve issue where sometimes FT indicator from API is longer than can be displayed, override to show just FT
 # 20260927 on 2x displays, optional Team 2-4 pickers tile up to 4 teams at once in the selected display type
+#          on square 64x64 displays, an optional Team 2 picker stacks 2 teams
 
 # Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you
 # and thanks to @dinotash/@dinosaursrarr for making me think deep thoughts about connected schema fields
@@ -36,7 +37,7 @@ API = "https://site.api.espn.com/apis/site/v2/sports/soccer/%s/teams/%s"
 TEAM_SEARCH_API = "https://tidbyt.apis.ajcomputers.com/soccer/api/search/%s"
 DEFAULT_TEAM_DISPLAY = "visitor"  # default to Visitor first, then Home - US order
 DEFAULT_DISPLAY_SPEED = "2000"
-EXTRA_TEAM_KEYS = ("teamid2", "teamid3", "teamid4")  # 2x only
+EXTRA_TEAM_KEYS = ("teamid2", "teamid3", "teamid4")  # 2x: all three; square: teamid2
 TILE_TEXT_INSET = 2  # LEDs the league / time line moves in from the edges when tiled
 
 SHORTENED_WORDS = """
@@ -65,18 +66,21 @@ def main(config):
 
     team_ids = [str(get_team_id(config, "teamid") or DEFAULT_TEAM)]
 
-    # On a 2x display, Team 2-4 each get their own 64x32 tile in the selected
-    # display type. On 1x they're ignored (settings can carry over from a 2x device).
-    if is_wide_canvas():
-        for key in EXTRA_TEAM_KEYS:
-            tid = get_team_id(config, key)
-            if tid and str(tid) not in team_ids:
-                team_ids.append(str(tid))
+    # Extra teams each get their own 64x32 tile in the selected display type:
+    # Team 2-4 on a 2x display, Team 2 on a square one. Any others are ignored
+    # (settings can carry over from a different device).
+    for key in EXTRA_TEAM_KEYS[:extra_team_count()]:
+        tid = get_team_id(config, key)
+        if tid and str(tid) not in team_ids:
+            team_ids.append(str(tid))
+
+    # side-by-side tiles pull their league / time line in from the edges
+    inset_text = len(team_ids) > 1 and tile_columns() == 2
 
     tiles = []
     seen_events = {}
     for teamid in team_ids:
-        frames = team_frames(config, teamid, timezone, now, seen_events, len(team_ids) > 1)
+        frames = team_frames(config, teamid, timezone, now, seen_events, inset_text)
         if len(frames) == 0:
             continue
         if widgetMode or len(frames) == 1:
@@ -87,10 +91,10 @@ def main(config):
     if len(tiles) == 0:
         return []
 
-    # `supports2x: true` makes the server hand every style a 128x64 canvas. The
-    # classic styles are 64x32, so on a wide canvas they're laid out as crisp
-    # 64x32 tiles: 1 centered, 2 side by side, 3 as two over one, 4 as 2x2.
-    if is_wide_canvas():
+    # The classic styles are 64x32. On a bigger canvas they're laid out as crisp
+    # 64x32 tiles: 2x (128x64) - 1 centered, 2 side by side, 3 as two over one,
+    # 4 as 2x2; square (64x64) - 1 centered, 2 stacked.
+    if is_wide_canvas() or is_square():
         root_child = tile_grid(tiles)
     else:
         root_child = render.Column(children = [tiles[0]])
@@ -104,10 +108,10 @@ def main(config):
         child = root_child,
     )
 
-def team_frames(config, teamid, timezone, now, seen_events, tiled):
+def team_frames(config, teamid, timezone, now, seen_events, inset_text):
     # One 64x32 frame per upcoming / current / past game for the team. When
-    # tiled next to other teams, the league / time line is inset from the edges.
-    inset = TILE_TEXT_INSET if tiled else 0
+    # tiled side by side with other teams, the league / time line is inset from the edges.
+    inset = TILE_TEXT_INSET if inset_text else 0
     renderCategory = []
 
     league = API % ("all", str(teamid))
@@ -512,14 +516,15 @@ def tile_grid(tiles):
     # 1-LED black gutters between tiles. A tile's last column and top row only
     # ever hold band color / logo (never text), so the left tile of a pair gives
     # up its last column and second-row tiles give up their top row.
+    cols = tile_columns()
     rows = []
-    for i in range(0, len(tiles), 2):
+    for i in range(0, len(tiles), cols):
         h = 32
         if i > 0:
-            rows.append(render.Box(width = 128, height = 1, color = "#000000"))
+            rows.append(render.Box(width = 64 * cols, height = 1, color = "#000000"))
             h = 31
 
-        pair = tiles[i:i + 2]
+        pair = tiles[i:i + cols]
         if len(pair) == 2:
             row = [tile_cell(pair[0], 63, h), render.Box(width = 1, height = h, color = "#000000"), tile_cell(pair[1], 64, h)]
         else:
@@ -543,6 +548,25 @@ def is_wide_canvas():
     # The device signals 2x via canvas.is2x(); CLI `-w 128 -t 64` reports width
     # 128 but not is2x. Accept either so it works in local render tests too.
     return canvas.is2x() or canvas.width() >= 128
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a square panel reports 64x64 (a 2x
+    square one would be 128x128), so a bare size test gets it wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def tile_columns():
+    # 64x32 tiles per row: two across a 128-wide canvas, else one (stacked)
+    return 2 if canvas.width() >= 128 else 1
+
+def extra_team_count():
+    # How many of Team 2-4 the canvas has room for: 2x (and wider) panels fit a
+    # 2x2 grid of tiles, a square 64x64 panel fits two stacked, 1x fits one.
+    if is_wide_canvas():
+        return len(EXTRA_TEAM_KEYS)
+    if is_square():
+        return 1
+    return 0
 
 displayOptions = [
     schema.Option(
@@ -609,21 +633,18 @@ displaySpeeds = [
 ]
 
 def get_schema():
-    # The server builds the settings form with the device's canvas, so
-    # canvas.is2x() here is true only when configuring a 2x device. The extra
-    # teams are only offered there.
-    is2x = canvas.is2x()
-
+    # The server builds the settings form with the device's canvas (size and
+    # 2x flag), so only the extra teams this display has room for are offered:
+    # Team 2-4 on 2x, Team 2 on a square panel, none on 1x.
     extra_teams = []
-    if is2x:
-        for i in range(len(EXTRA_TEAM_KEYS)):
-            extra_teams.append(schema.Typeahead(
-                id = EXTRA_TEAM_KEYS[i],
-                name = "Team %d (optional)" % (i + 2),
-                desc = "Add teams to show all their games at once",
-                icon = "futbol",
-                handler = search_teams,
-            ))
+    for i in range(extra_team_count()):
+        extra_teams.append(schema.Typeahead(
+            id = EXTRA_TEAM_KEYS[i],
+            name = "Team %d (optional)" % (i + 2),
+            desc = "Add teams to show all their games at once",
+            icon = "futbol",
+            handler = search_teams,
+        ))
 
     return schema.Schema(
         version = "1",
