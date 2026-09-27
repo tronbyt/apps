@@ -10,7 +10,7 @@ Author: jvivona
 # 20240223 fixed issue with PPD games showing before their scheduled start time
 # 20240802 added code to handle widgetMode - only show the 1st piece, no animations
 # 20240926 resolve issue where sometimes FT indicator from API is longer than can be displayed, override to show just FT
-# 20260927 on 2x displays, optional Team 2-4 pickers show up to 4 teams at once in a grid
+# 20260927 on 2x displays, optional Team 2-4 pickers tile up to 4 teams at once in the selected display type
 
 # Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you
 # and thanks to @dinotash/@dinosaursrarr for making me think deep thoughts about connected schema fields
@@ -36,10 +36,7 @@ API = "https://site.api.espn.com/apis/site/v2/sports/soccer/%s/teams/%s"
 TEAM_SEARCH_API = "https://tidbyt.apis.ajcomputers.com/soccer/api/search/%s"
 DEFAULT_TEAM_DISPLAY = "visitor"  # default to Visitor first, then Home - US order
 DEFAULT_DISPLAY_SPEED = "2000"
-ABBR_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/main/soccermens/league_abbr.json"
-ABBR_TTL = 43200
 EXTRA_TEAM_KEYS = ("teamid2", "teamid3", "teamid4")  # 2x only
-TEAM_TTL_SECONDS = 3600  # opponent colors + records barely change; don't refetch every minute
 
 SHORTENED_WORDS = """
 {
@@ -60,20 +57,55 @@ SHORTENED_WORDS = """
 
 def main(config):
     widgetMode = config.bool("$widget")
-    renderCategory = []
 
     # we already need now value in multiple places - so just go ahead and get it and use it
     timezone = time.tz()
     now = time.now().in_location(timezone)
 
-    teamid = get_team_id(config, "teamid") or DEFAULT_TEAM
+    team_ids = [str(get_team_id(config, "teamid") or DEFAULT_TEAM)]
 
-    # On a 2x display, picking any of Team 2-4 switches to the multi-team grid,
-    # whatever display type is selected - it's a completely separate render path.
-    # On 1x the extra teams are ignored (settings can carry over from a 2x device).
-    extra_ids = [get_team_id(config, k) for k in EXTRA_TEAM_KEYS]
-    if is_wide_canvas() and any(extra_ids):
-        return render_wide(config, [teamid] + extra_ids, timezone, now)
+    # On a 2x display, Team 2-4 each get their own 64x32 tile in the selected
+    # display type. On 1x they're ignored (settings can carry over from a 2x device).
+    if is_wide_canvas():
+        for key in EXTRA_TEAM_KEYS:
+            tid = get_team_id(config, key)
+            if tid and str(tid) not in team_ids:
+                team_ids.append(str(tid))
+
+    tiles = []
+    seen_events = {}
+    for teamid in team_ids:
+        frames = team_frames(config, teamid, timezone, now, seen_events)
+        if len(frames) == 0:
+            continue
+        if widgetMode or len(frames) == 1:
+            tiles.append(frames[0])
+        else:
+            tiles.append(render.Animation(children = frames))
+
+    if len(tiles) == 0:
+        return []
+
+    # `supports2x: true` makes the server hand every style a 128x64 canvas. The
+    # classic styles are 64x32, so on a wide canvas they're laid out as crisp
+    # 64x32 tiles: 1 centered, 2 side by side, 3 as two over one, 4 as 2x2.
+    if is_wide_canvas():
+        root_child = tile_grid(tiles)
+    else:
+        root_child = render.Column(children = [tiles[0]])
+
+    rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
+    return render.Root(
+        delay = rotationSpeed,
+        show_full_animation = True,
+        child = root_child,
+    ) if not widgetMode else render.Root(
+        child = root_child,
+    )
+
+def team_frames(config, teamid, timezone, now, seen_events):
+    # One 64x32 frame per upcoming / current / past game for the team.
+    renderCategory = []
 
     league = API % ("all", str(teamid))
     teamdata = get_scores(league)
@@ -87,9 +119,12 @@ def main(config):
         #logoType = config.get("logoType", "primary")
         timeColor = config.get("displayTimeColor", "#FFF")
 
-        rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
-
         for _, s in enumerate(scores):
+            # two picked teams playing each other share one tile
+            if s["id"] in seen_events:
+                continue
+            seen_events[s["id"]] = True
+
             gameStatus = s["competitions"][0]["status"]["type"]["state"]
             competition = s["competitions"][0]
             home = competition["competitors"][0]["team"]["abbreviation"]
@@ -468,36 +503,23 @@ def main(config):
                     ],
                 )
 
-        root_child = render.Animation(children = renderCategory) if not widgetMode else renderCategory[0]
+    return renderCategory
 
-        # `supports2x: true` makes the server hand every style a 128x64 canvas.
-        # The legacy 64x32 styles aren't responsive, so on a wide canvas pin them
-        # to a crisp, centered 64x32 island instead of rendering broken top-left.
-        # (The multi-team grid is native 2x and uses the full canvas.)
-        if canvas.is2x() or canvas.width() > 64:
-            root_child = render.Box(
-                width = canvas.width(),
-                height = canvas.height(),
-                color = "#000000",
-                child = render.Column(
-                    expanded = True,
-                    main_align = "center",
-                    cross_align = "center",
-                    children = [render.Box(width = 64, height = 32, child = root_child)],
-                ),
-            )
-        else:
-            root_child = render.Column(children = [root_child])
+def tile_grid(tiles):
+    rows = []
+    for i in range(0, len(tiles), 2):
+        rows.append(render.Row(children = [render.Box(width = 64, height = 32, child = t) for t in tiles[i:i + 2]]))
+    return render.Box(
+        width = canvas.width(),
+        height = canvas.height(),
+        color = "#000000",
+        child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
+    )
 
-        return render.Root(
-            delay = rotationSpeed,
-            show_full_animation = True,
-            child = root_child,
-        ) if not widgetMode else render.Root(
-            child = root_child,
-        )
-    else:
-        return []
+def is_wide_canvas():
+    # The device signals 2x via canvas.is2x(); CLI `-w 128 -t 64` reports width
+    # 128 but not is2x. Accept either so it works in local render tests too.
+    return canvas.is2x() or canvas.width() >= 128
 
 displayOptions = [
     schema.Option(
@@ -566,27 +588,19 @@ displaySpeeds = [
 def get_schema():
     # The server builds the settings form with the device's canvas, so
     # canvas.is2x() here is true only when configuring a 2x device. The extra
-    # teams + grid color toggle are only offered there.
+    # teams are only offered there.
     is2x = canvas.is2x()
 
     extra_teams = []
-    wide_fields = []
     if is2x:
         for i in range(len(EXTRA_TEAM_KEYS)):
             extra_teams.append(schema.Typeahead(
                 id = EXTRA_TEAM_KEYS[i],
                 name = "Team %d (optional)" % (i + 2),
-                desc = "Add teams to show all their games at once in a grid",
+                desc = "Add teams to show all their games at once",
                 icon = "futbol",
                 handler = search_teams,
             ))
-        wide_fields.append(schema.Toggle(
-            id = "wide_team_colors",
-            name = "Team color backgrounds",
-            desc = "Multi-team grid: tint each team's area with its team color (off = grey bands).",
-            icon = "palette",
-            default = True,
-        ))
 
     return schema.Schema(
         version = "1",
@@ -615,7 +629,6 @@ def get_schema():
                 default = displayOptions[0].value,
                 options = displayOptions,
             ),
-        ] + wide_fields + [
             schema.Color(
                 id = "displayTimeColor",
                 name = "Time Color",
@@ -766,363 +779,3 @@ def get_team_id(config, key):
     if not raw:
         return None
     return (json.decode(raw) or {}).get("value") or None
-
-# ============================================================================
-# Multi-team 2x grid (shown on 2x displays when any of Team 2-4 is picked)
-# Same design language as the soccermens / soccerwomens Wide 4 grid, but every
-# cell is a different team's game, so each cell carries its own competition +
-# date strip instead of one shared header. All sizes are in LED units.
-# ============================================================================
-
-# State / accent tokens (shared with the soccermens wide styles)
-W_BG = "#000000"  # pure black (LED off)
-W_WIN = "#ffe14d"  # winner text (yellow)
-W_WHITE = "#ffffff"  # loser / neutral text
-W_LIVE = "#2ee65f"  # in-progress (green)
-W_HALF = "#ffb02e"  # half-time (amber)
-W_FINAL = "#7f8794"  # final / muted label (grey)
-W_HDR_BG = "#11151f"  # competition strip bg (a hair lighter than black)
-W_STEEL = "#444b57"  # fallback for near-black team colors
-W_OFF_BG = "#262b33"  # team band when the colors toggle is OFF
-W_TEAM_ALPHA = "80"  # alpha on team-color bands so they read softer over black (~50%)
-
-W_W = 128
-W_H = 64
-
-def is_wide_canvas():
-    # The device signals 2x via canvas.is2x(); CLI `-w 128 -t 64` reports width
-    # 128 but not is2x. Accept either so it works on real wide hardware and in
-    # local render tests.
-    return canvas.is2x() or canvas.width() >= W_W
-
-def render_wide(config, ids, timezone, now):
-    team_ids = []
-    for tid in ids:
-        if tid and str(tid) not in team_ids:
-            team_ids.append(str(tid))
-
-    abbrs = fetch_json(ABBR_URL, ABBR_TTL) or {}
-
-    games = []
-    seen_events = {}
-    for tid in team_ids:
-        team = (fetch_json(API % ("all", tid), CACHE_TTL_SECONDS) or {}).get("team") or {}
-        events = team.get("nextEvent") or []
-        if len(events) == 0:
-            continue
-
-        # two picked teams playing each other share one cell
-        event_id = events[0].get("id")
-        if event_id in seen_events:
-            continue
-        seen_events[event_id] = True
-
-        g = parse_game_single(events[0], team, config, timezone, now, abbrs)
-        if g != None:
-            games.append(g)
-
-    if len(games) == 0:
-        return []
-
-    colors_on = config.bool("wide_team_colors", True)
-    header_color = config.get("displayTimeColor", "#FFF")
-    return render.Root(child = wide_grid(games, colors_on, header_color))
-
-def fetch_json(url, ttl):
-    # Soft fetch: one team's API hiccup shouldn't blank the other teams' cells.
-    res = http.get(url = url, ttl_seconds = ttl)
-    if res.status_code != 200:
-        return None
-    return json.decode(res.body())
-
-def parse_game_single(event, tracked, config, timezone, now, abbrs):
-    comps = event.get("competitions") or []
-    if len(comps) == 0:
-        return None
-    comp = comps[0]
-    competitors = comp.get("competitors") or []
-    if len(competitors) < 2:
-        return None
-    home_c = competitors[0]
-    away_c = competitors[1]
-    if home_c.get("homeAway") == "away":
-        home_c, away_c = away_c, home_c
-
-    status = (comp.get("status") or {}).get("type") or {}
-    state = status.get("state") or "pre"
-    type_name = status.get("name") or ""
-    short_detail = status.get("shortDetail") or ""
-    postponed = type_name == "STATUS_POSTPONED"
-
-    league = event.get("league") or {}
-    slug = league.get("slug") or ""
-    league_label = abbrs.get(slug) or (league.get("abbreviation") or slug)[0:6].strip()
-
-    date_str = event.get("date") or ""
-    if not date_str:
-        return None
-    dt = time.parse_time(date_str, format = "2006-01-02T15:04Z").in_location(timezone)
-    if dt.format("20060102") == now.format("20060102"):
-        day_text = "TODAY"
-    elif config.bool("is_us_date_format", False):
-        day_text = dt.format("1/2")
-    else:
-        day_text = dt.format("2 Jan")
-
-    # records only matter before kickoff (or when there's no score to show)
-    want_record = state == "pre" or postponed
-    home = single_side(home_c, tracked, slug, want_record)
-    away = single_side(away_c, tracked, slug, want_record)
-
-    # penalty shootout: regulation score stays in the score slot; the tally goes
-    # in the status strip ("FT 4-2") - a live running tally would be stale, so
-    # a live shootout just says "PENS".
-    hp = home["pens"]
-    ap = away["pens"]
-    pen_final = type_name == "STATUS_FINAL_PEN"
-    pen_live = state == "in" and (hp > 0 or ap > 0)
-
-    # winner (post only) - shown by yellow text, never a swapped background
-    home_win = False
-    away_win = False
-    if state == "post" and not postponed:
-        if pen_final:
-            home_win = hp > ap
-            away_win = ap > hp
-        else:
-            home_win = int_or(home["score"]) > int_or(away["score"])
-            away_win = int_or(away["score"]) > int_or(home["score"])
-    home["color_text"] = W_WIN if home_win else W_WHITE
-    away["color_text"] = W_WIN if away_win else W_WHITE
-
-    kickoff = ""
-    if state == "pre":
-        kickoff = wide_kickoff(dt, config)
-        status_text = kickoff
-        status_color = W_WHITE
-    elif state == "in":
-        up = short_detail.upper()
-        if pen_live:
-            status_text = "PENS"
-            status_color = W_LIVE
-        elif up.startswith("HT") or up.find("HALF") >= 0:
-            status_text = "HT"
-            status_color = W_HALF
-        else:
-            status_text = short_detail.strip()[:6]
-            status_color = W_LIVE
-    elif postponed:
-        status_text = "PPD"
-        status_color = W_FINAL
-        home["score"] = ""
-        away["score"] = ""
-    else:
-        status_text = "FT"
-        status_color = W_FINAL
-
-    # team_sequence: which team sits on top
-    if config.get("team_sequence", DEFAULT_TEAM_DISPLAY) == "home":
-        first, second = home, away
-    else:
-        first, second = away, home
-
-    if pen_final:
-        status_text = "FT %d-%d" % (first["pens"], second["pens"])
-
-    return dict(
-        state = state,
-        postponed = postponed,
-        league_label = league_label,
-        day_text = day_text,
-        status_text = status_text,
-        status_color = status_color,
-        first = first,
-        second = second,
-    )
-
-def single_side(competitor, tracked, slug, want_record):
-    team = competitor.get("team") or {}
-    team_id = str(competitor.get("id") or team.get("id") or "")
-    name = team.get("shortDisplayName") or team.get("displayName") or ""
-    code = team.get("abbreviation") or (name[0:3].upper() if name else "?")
-    logos = team.get("logos") or []
-    logo_url = (logos[0].get("href") if len(logos) > 0 else "") or MISSING_LOGO
-
-    # this endpoint nests the score: {"displayValue": "2", "shootoutScore": 4, ...}
-    score = ""
-    pens = 0
-    sc = competitor.get("score")
-    if type(sc) == "dict":
-        score = str(sc.get("displayValue") or "")
-        pens = int_or(sc.get("shootoutScore"))
-    elif sc != None:
-        score = str(sc)
-    if pens == 0:
-        pens = int_or(competitor.get("shootoutScore"))
-
-    # The team-detail call carries the color; the tracked team's is already in hand.
-    if team_id == str(tracked.get("id") or ""):
-        color = tracked.get("color")
-    else:
-        color = ((fetch_json(API % ("all", team_id), TEAM_TTL_SECONDS) or {}).get("team") or {}).get("color")
-
-    record = ""
-    if want_record and slug:
-        rec = ((fetch_json(API % (slug, team_id), TEAM_TTL_SECONDS) or {}).get("team") or {}).get("record") or {}
-        items = rec.get("items") or []
-        if len(items) > 0:
-            record = str(items[0].get("summary") or "")
-
-    return dict(
-        code = code[:3],
-        color = wide_team_color(color),
-        logo = wide_logo(logo_url),
-        score = score,
-        pens = pens,
-        record = record,
-        color_text = W_WHITE,
-    )
-
-def wide_logo(url):
-    if url == MISSING_LOGO:
-        return get_cachable_data(MISSING_LOGO)
-    url = url.replace("500/scoreboard", "500-dark/scoreboard")
-    url = url.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
-    res = http.get(url = url + "&h=50&w=50", ttl_seconds = TEAM_TTL_SECONDS)
-    if res.status_code != 200:
-        return get_cachable_data(MISSING_LOGO)
-    return res.body()
-
-def int_or(v):
-    if type(v) == "int":
-        return v
-    if type(v) == "float":
-        return int(v)
-    if v != None and str(v).isdigit():
-        return int(str(v))
-    return 0
-
-def wide_kickoff(dt, config):
-    if config.bool("is_24_hour_format", False):
-        return dt.format("15:04")
-    return dt.format("3:04PM")[:-1]  # strip trailing M -> "3:04P"
-
-HEX = "0123456789abcdef"
-
-def hex2(n):
-    # Starlark's % formatting has no width/zero-pad, so build hex bytes by hand.
-    if n < 0:
-        n = 0
-    if n > 255:
-        n = 255
-    return HEX[n // 16] + HEX[n % 16]
-
-def wide_team_color(hexcolor):
-    # Alpha-suffixed so the band softens against the black panel, keeping white /
-    # yellow text readable. Same rules as the soccermens wide styles.
-    if not hexcolor:
-        return W_STEEL + W_TEAM_ALPHA
-    h = hexcolor.replace("#", "")
-    if len(h) != 6:
-        return W_STEEL + W_TEAM_ALPHA
-    r = int(h[0:2], 16)
-    g = int(h[2:4], 16)
-    b = int(h[4:6], 16)
-    lum = (299 * r + 587 * g + 114 * b) // 1000
-
-    # near-black is invisible on a black panel -> steel
-    if lum < 55:
-        return W_STEEL + W_TEAM_ALPHA
-
-    # too light/bright kills white & yellow text -> scale down to a mid lum
-    if lum > 125:
-        r = (r * 125) // lum
-        g = (g * 125) // lum
-        b = (b * 125) // lum
-    return "#" + hex2(r) + hex2(g) + hex2(b) + W_TEAM_ALPHA
-
-# ---- grid ------------------------------------------------------------------
-# Every cell is the same size. 1 team: centered. 2: side by side, centered
-# vertically. 3: two side by side over one centered. 4: 2x2 grid. Black 1-LED
-# gridlines between cells.
-
-W_CELL_W = 63  # 63 + 1 gridline + 63 == 127, centered on the 128 canvas
-W_CELL_H = 31  # 31 + 1 gridline + 31 == 63, centered on the 64 canvas
-W_STRIP_H = 7  # competition + date strip
-W_STATUS_H = 6  # kickoff / clock / FT strip
-
-def wide_grid(games, colors_on, header_color):
-    cells = [wide_cell(g, colors_on, header_color) for g in games]
-
-    rows = []
-    for i in range(0, len(cells), 2):
-        pair = cells[i:i + 2]
-        if len(pair) == 2:
-            pair = [pair[0], render.Box(width = 1, height = W_CELL_H, color = W_BG), pair[1]]
-        if i > 0:
-            rows.append(render.Box(width = W_W, height = 1, color = W_BG))
-        rows.append(render.Row(expanded = True, main_align = "center", children = pair))
-
-    return render.Box(
-        width = W_W,
-        height = W_H,
-        color = W_BG,
-        child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
-    )
-
-def wide_cell(g, colors_on, header_color):
-    # competition + date strip / first team / second team / status strip
-    line_h = (W_CELL_H - W_STRIP_H - W_STATUS_H) // 2
-    first = g["first"]
-    second = g["second"]
-    return render.Column(children = [
-        render.Box(
-            width = W_CELL_W,
-            height = W_STRIP_H,
-            color = W_HDR_BG,
-            child = render.Padding(pad = (2, 0, 2, 0), child = render.Row(
-                expanded = True,
-                main_align = "space_between",
-                cross_align = "center",
-                children = [
-                    render.Text(content = g["league_label"], font = "tom-thumb", color = header_color),
-                    render.Text(content = g["day_text"], font = "tom-thumb", color = header_color),
-                ],
-            )),
-        ),
-        wide_line(g, first, first["color"] if colors_on else W_OFF_BG, line_h),
-        wide_line(g, second, second["color"] if colors_on else W_OFF_BG, W_CELL_H - W_STRIP_H - W_STATUS_H - line_h),
-        render.Box(
-            width = W_CELL_W,
-            height = W_STATUS_H,
-            color = W_BG,
-            child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
-                render.Text(content = g["status_text"], font = "tom-thumb", color = g["status_color"]),
-            ]),
-        ),
-    ])
-
-def wide_line(g, side, bg, lh):
-    if g["state"] == "pre" or g["postponed"]:
-        rightval = render.Text(content = side["record"], font = "tom-thumb", color = W_WHITE)
-    else:
-        rightval = render.Text(content = side["score"], font = "tb-8", color = side["color_text"])
-
-    return render.Box(
-        width = W_CELL_W,
-        height = lh,
-        color = bg,
-        child = render.Padding(pad = (2, 0, 2, 0), child = render.Row(
-            expanded = True,
-            main_align = "space_between",
-            cross_align = "center",
-            children = [
-                render.Row(cross_align = "center", children = [
-                    render.Image(src = side["logo"], width = 9, height = 9),
-                    render.Box(width = 3, height = 1),
-                    render.Text(content = side["code"], font = "tb-8", color = side["color_text"]),
-                ]),
-                rightval,
-            ],
-        )),
-    )

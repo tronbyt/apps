@@ -21,16 +21,12 @@ Displayed:
 ## Up to 4 teams on 2x displays
 
 When configuring a 2x (128x64) display, the settings add **Team 2 / Team 3 / Team 4** pickers (they don't
-appear for 1x displays). Pick any of them and every team's game shows at once in a grid, whatever display
-type is selected - same design as the Soccer Mens / Soccer Womens Wide 4 view:
+appear for 1x displays). Each team's game is shown at once as its own 64x32 tile, in the display type you
+select (the same display type is used for every team):
 
-- Same-size cells, centered: 2 teams side by side; 3 teams two side by side over one; 4 teams a 2x2 grid
-- Each cell: competition + date strip, both teams (flag, code or name, score or W-D-L record), and a status strip -
-  kickoff time, live clock (green), HT (amber), FT / FT with penalty tally (grey)
-- Winners are shown in yellow; "Team color backgrounds" toggles the team-color bands
+- 1 team: centered; 2 teams: side by side; 3 teams: two side by side over one centered; 4 teams: 2x2
 - If two of your teams play each other, the game is shown once
-- With only one team picked, the selected display type is used as usual
-- On a 1x display only the first team is shown, in the selected display type
+- On a 1x display only the first team is shown
 
 ![2x screenshot](soccersingle@2x.webp)
 
