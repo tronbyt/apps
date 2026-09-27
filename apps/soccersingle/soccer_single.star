@@ -519,16 +519,11 @@ def tile_grid(tiles):
             rows.append(render.Box(width = 128, height = 1, color = "#000000"))
             h = 31
 
-        def cell(t, w):
-            if h < 32:
-                t = render.Padding(pad = (0, h - 32, 0, 0), child = t)
-            return render.Box(width = w, height = h, child = t)
-
         pair = tiles[i:i + 2]
         if len(pair) == 2:
-            row = [cell(pair[0], 63), render.Box(width = 1, height = h, color = "#000000"), cell(pair[1], 64)]
+            row = [tile_cell(pair[0], 63, h), render.Box(width = 1, height = h, color = "#000000"), tile_cell(pair[1], 64, h)]
         else:
-            row = [cell(pair[0], 64)]
+            row = [tile_cell(pair[0], 64, h)]
         rows.append(render.Row(children = row))
     return render.Box(
         width = canvas.width(),
@@ -536,6 +531,13 @@ def tile_grid(tiles):
         color = "#000000",
         child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
     )
+
+def tile_cell(tile, w, h):
+    # Clip a 64x32 tile to w x h, trimming from the right and (via negative
+    # padding) the top.
+    if h < 32:
+        tile = render.Padding(pad = (0, h - 32, 0, 0), child = tile)
+    return render.Box(width = w, height = h, child = tile)
 
 def is_wide_canvas():
     # The device signals 2x via canvas.is2x(); CLI `-w 128 -t 64` reports width
