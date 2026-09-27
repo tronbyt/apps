@@ -29,7 +29,7 @@ type is selected - same design as the Soccer Mens / Soccer Womens Wide 4 view:
   kickoff time, live clock (green), HT (amber), FT / FT with penalty tally (grey)
 - Winners are shown in yellow; "Team color backgrounds" toggles the team-color bands
 - If two of your teams play each other, the game is shown once
-- The **Wide (2x)** display type uses the same look for a single team (one big card)
+- With only one team picked, the selected display type is used as usual
 - On a 1x display only the first team is shown, in the selected display type
 
 ![2x screenshot](soccersingle@2x.webp)

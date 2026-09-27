@@ -10,7 +10,7 @@ Author: jvivona
 # 20240223 fixed issue with PPD games showing before their scheduled start time
 # 20240802 added code to handle widgetMode - only show the 1st piece, no animations
 # 20240926 resolve issue where sometimes FT indicator from API is longer than can be displayed, override to show just FT
-# 20260927 added "Wide" 2x display type - up to 4 teams on one 128x64 screen
+# 20260927 on 2x displays, optional Team 2-4 pickers show up to 4 teams at once in a grid
 
 # Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you
 # and thanks to @dinotash/@dinosaursrarr for making me think deep thoughts about connected schema fields
@@ -68,14 +68,12 @@ def main(config):
 
     teamid = get_team_id(config, "teamid") or DEFAULT_TEAM
 
-    # On a 2x display, picking Team 2-4 (or the Wide style) switches to the wide
-    # grid, whatever style is selected - it's a completely separate render path.
-    # On 1x the extra teams are ignored and a leftover Wide style falls back to
-    # Team Colors (settings can be carried over from a 2x device).
+    # On a 2x display, picking any of Team 2-4 switches to the multi-team grid,
+    # whatever display type is selected - it's a completely separate render path.
+    # On 1x the extra teams are ignored (settings can carry over from a 2x device).
     extra_ids = [get_team_id(config, k) for k in EXTRA_TEAM_KEYS]
-    if is_wide_canvas():
-        if config.get("displayType", "colors") == "wide" or any(extra_ids):
-            return render_wide(config, [teamid] + extra_ids, timezone, now)
+    if is_wide_canvas() and any(extra_ids):
+        return render_wide(config, [teamid] + extra_ids, timezone, now)
 
     league = API % ("all", str(teamid))
     teamdata = get_scores(league)
@@ -85,8 +83,6 @@ def main(config):
         leagueAbbr = scores[0]["league"]["abbreviation"][0:6]
         leagueSlug = scores[0]["league"]["slug"]
         displayType = config.get("displayType", "colors")
-        if displayType == "wide":
-            displayType = "colors"
 
         #logoType = config.get("logoType", "primary")
         timeColor = config.get("displayTimeColor", "#FFF")
@@ -477,7 +473,7 @@ def main(config):
         # `supports2x: true` makes the server hand every style a 128x64 canvas.
         # The legacy 64x32 styles aren't responsive, so on a wide canvas pin them
         # to a crisp, centered 64x32 island instead of rendering broken top-left.
-        # (Wide is the native 2x style and uses the full canvas.)
+        # (The multi-team grid is native 2x and uses the full canvas.)
         if canvas.is2x() or canvas.width() > 64:
             root_child = render.Box(
                 width = canvas.width(),
@@ -521,12 +517,6 @@ displayOptions = [
         value = "retro",
     ),
 ]
-
-# 2x only: forces the wide layout even with a single team (one big card).
-wideDisplayOption = schema.Option(
-    display = "Wide (2x)",
-    value = "wide",
-)
 
 pregameOptions = [
     schema.Option(
@@ -576,7 +566,7 @@ displaySpeeds = [
 def get_schema():
     # The server builds the settings form with the device's canvas, so
     # canvas.is2x() here is true only when configuring a 2x device. The extra
-    # teams + wide options are only offered there.
+    # teams + grid color toggle are only offered there.
     is2x = canvas.is2x()
 
     extra_teams = []
@@ -593,7 +583,7 @@ def get_schema():
         wide_fields.append(schema.Toggle(
             id = "wide_team_colors",
             name = "Team color backgrounds",
-            desc = "Multi-team / Wide view: tint each team's area with its team color (off = grey bands).",
+            desc = "Multi-team grid: tint each team's area with its team color (off = grey bands).",
             icon = "palette",
             default = True,
         ))
@@ -623,7 +613,7 @@ def get_schema():
                 desc = "Style of how the scores are displayed.",
                 icon = "desktop",
                 default = displayOptions[0].value,
-                options = displayOptions + ([wideDisplayOption] if is2x else []),
+                options = displayOptions,
             ),
         ] + wide_fields + [
             schema.Color(
@@ -778,7 +768,7 @@ def get_team_id(config, key):
     return (json.decode(raw) or {}).get("value") or None
 
 # ============================================================================
-# Wide 2x layout (display option "Wide · Up to 4 Teams")
+# Multi-team 2x grid (shown on 2x displays when any of Team 2-4 is picked)
 # Same design language as the soccermens / soccerwomens Wide 4 grid, but every
 # cell is a different team's game, so each cell carries its own competition +
 # date strip instead of one shared header. All sizes are in LED units.
