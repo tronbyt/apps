@@ -508,7 +508,19 @@ def team_frames(config, teamid, timezone, now, seen_events):
 def tile_grid(tiles):
     rows = []
     for i in range(0, len(tiles), 2):
-        rows.append(render.Row(children = [render.Box(width = 64, height = 32, child = t) for t in tiles[i:i + 2]]))
+        pair = tiles[i:i + 2]
+        if len(pair) == 2:
+            # Side by side, the left tile's date would butt into the right tile's
+            # league label. Its last column only ever holds band color (never
+            # text), so trim it to 63 wide and put a 1-LED black gutter there.
+            row = [
+                render.Box(width = 63, height = 32, child = pair[0]),
+                render.Box(width = 1, height = 32, color = "#000000"),
+                render.Box(width = 64, height = 32, child = pair[1]),
+            ]
+        else:
+            row = [render.Box(width = 64, height = 32, child = pair[0])]
+        rows.append(render.Row(children = row))
     return render.Box(
         width = canvas.width(),
         height = canvas.height(),
