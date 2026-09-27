@@ -24,7 +24,7 @@ When configuring a 2x (128x64) display, the settings add **Team 2 / Team 3 / Tea
 appear for 1x displays). Pick any of them and every team's game shows at once in a grid, whatever display
 type is selected - same design as the Soccer Mens / Soccer Womens Wide 4 view:
 
-- 4 teams: 2x2 grid; 3 teams: two on top, one full width below; 2 teams: two full width
+- Same-size cells, centered: 2 teams side by side; 3 teams two side by side over one; 4 teams a 2x2 grid
 - Each cell: competition + date strip, both teams (flag, code or name, score or W-D-L record), and a status strip -
   kickoff time, live clock (green), HT (amber), FT / FT with penalty tally (grey)
 - Winners are shown in yellow; "Team color backgrounds" toggles the team-color bands

@@ -975,7 +975,6 @@ def single_side(competitor, tracked, slug, want_record):
 
     return dict(
         code = code[:3],
-        name = name,
         color = wide_team_color(color),
         logo = wide_logo(logo_url),
         score = score,
@@ -1043,98 +1042,74 @@ def wide_team_color(hexcolor):
     return "#" + hex2(r) + hex2(g) + hex2(b) + W_TEAM_ALPHA
 
 # ---- grid ------------------------------------------------------------------
-# 1 team: one big card. 2: two full-width cells stacked. 3: two cells on top,
-# one full-width below. 4: 2x2 grid. Black 1-LED gridlines between cells.
+# Every cell is the same size. 1 team: centered. 2: side by side, centered
+# vertically. 3: two side by side over one centered. 4: 2x2 grid. Black 1-LED
+# gridlines between cells.
 
-W_CELL_H = 31  # (64 - 1 gridline) // 2
-W_LEFT_W = 64  # 64 + 1 gridline + 63 == 128
-W_RIGHT_W = 63
+W_CELL_W = 63  # 63 + 1 gridline + 63 == 127, centered on the 128 canvas
+W_CELL_H = 31  # 31 + 1 gridline + 31 == 63, centered on the 64 canvas
+W_STRIP_H = 7  # competition + date strip
+W_STATUS_H = 6  # kickoff / clock / FT strip
 
 def wide_grid(games, colors_on, header_color):
-    n = len(games)
-    if n == 1:
-        return wide_cell(games[0], W_W, W_H, colors_on, header_color)
+    cells = [wide_cell(g, colors_on, header_color) for g in games]
 
-    def cell(g, w):
-        return wide_cell(g, w, W_CELL_H, colors_on, header_color)
-
-    def pair(a, b):
-        return render.Row(children = [cell(a, W_LEFT_W), render.Box(width = 1, height = W_CELL_H, color = W_BG), cell(b, W_RIGHT_W)])
-
-    if n == 2:
-        top, bottom = cell(games[0], W_W), cell(games[1], W_W)
-    elif n == 3:
-        top, bottom = pair(games[0], games[1]), cell(games[2], W_W)
-    else:
-        top, bottom = pair(games[0], games[1]), pair(games[2], games[3])
+    rows = []
+    for i in range(0, len(cells), 2):
+        pair = cells[i:i + 2]
+        if len(pair) == 2:
+            pair = [pair[0], render.Box(width = 1, height = W_CELL_H, color = W_BG), pair[1]]
+        if i > 0:
+            rows.append(render.Box(width = W_W, height = 1, color = W_BG))
+        rows.append(render.Row(expanded = True, main_align = "center", children = pair))
 
     return render.Box(
         width = W_W,
         height = W_H,
         color = W_BG,
-        child = render.Column(
-            expanded = True,
-            main_align = "center",
-            children = [top, render.Box(width = W_W, height = 1, color = W_BG), bottom],
-        ),
+        child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
     )
 
-def wide_cell(g, w, h, colors_on, header_color):
+def wide_cell(g, colors_on, header_color):
     # competition + date strip / first team / second team / status strip
-    big = h >= 48
-    strip_h = 9 if big else 7
-    status_h = 9 if big else 6
-    line_h = (h - strip_h - status_h) // 2
-    strip_font = "tb-8" if big else "tom-thumb"
-
+    line_h = (W_CELL_H - W_STRIP_H - W_STATUS_H) // 2
     first = g["first"]
     second = g["second"]
     return render.Column(children = [
         render.Box(
-            width = w,
-            height = strip_h,
+            width = W_CELL_W,
+            height = W_STRIP_H,
             color = W_HDR_BG,
             child = render.Padding(pad = (2, 0, 2, 0), child = render.Row(
                 expanded = True,
                 main_align = "space_between",
                 cross_align = "center",
                 children = [
-                    render.Text(content = g["league_label"], font = strip_font, color = header_color),
-                    render.Text(content = g["day_text"], font = strip_font, color = header_color),
+                    render.Text(content = g["league_label"], font = "tom-thumb", color = header_color),
+                    render.Text(content = g["day_text"], font = "tom-thumb", color = header_color),
                 ],
             )),
         ),
-        wide_line(g, first, first["color"] if colors_on else W_OFF_BG, w, line_h, big),
-        wide_line(g, second, second["color"] if colors_on else W_OFF_BG, w, h - strip_h - status_h - line_h, big),
+        wide_line(g, first, first["color"] if colors_on else W_OFF_BG, line_h),
+        wide_line(g, second, second["color"] if colors_on else W_OFF_BG, W_CELL_H - W_STRIP_H - W_STATUS_H - line_h),
         render.Box(
-            width = w,
-            height = status_h,
+            width = W_CELL_W,
+            height = W_STATUS_H,
             color = W_BG,
             child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
-                render.Text(content = g["status_text"], font = strip_font, color = g["status_color"]),
+                render.Text(content = g["status_text"], font = "tom-thumb", color = g["status_color"]),
             ]),
         ),
     ])
 
-def wide_line(g, side, bg, w, lh, big):
-    flag_size = 18 if big else 9
-    name_font = "6x13" if big else "tb-8"
-
-    # full-width cells have room for the team name, half cells get the 3-letter code
-    if big:
-        label = side["name"][:11]
-    elif w >= W_W:
-        label = side["name"][:15]
-    else:
-        label = side["code"]
-
+def wide_line(g, side, bg, lh):
     if g["state"] == "pre" or g["postponed"]:
-        rightval = render.Text(content = side["record"], font = "tb-8" if big else "tom-thumb", color = W_WHITE)
+        rightval = render.Text(content = side["record"], font = "tom-thumb", color = W_WHITE)
     else:
-        rightval = render.Text(content = side["score"], font = name_font, color = side["color_text"])
+        rightval = render.Text(content = side["score"], font = "tb-8", color = side["color_text"])
 
     return render.Box(
-        width = w,
+        width = W_CELL_W,
         height = lh,
         color = bg,
         child = render.Padding(pad = (2, 0, 2, 0), child = render.Row(
@@ -1143,9 +1118,9 @@ def wide_line(g, side, bg, w, lh, big):
             cross_align = "center",
             children = [
                 render.Row(cross_align = "center", children = [
-                    render.Image(src = side["logo"], width = flag_size, height = flag_size),
+                    render.Image(src = side["logo"], width = 9, height = 9),
                     render.Box(width = 3, height = 1),
-                    render.Text(content = label, font = name_font, color = side["color_text"]),
+                    render.Text(content = side["code"], font = "tb-8", color = side["color_text"]),
                 ]),
                 rightval,
             ],
