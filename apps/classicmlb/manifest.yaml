@@ -9,6 +9,8 @@ packageName: classicmlb
 recommendedInterval: 0
 category: sports
 tags:
-- baseball
-- mlb
-- real-time
+  - baseball
+  - mlb
+  - real-time
+published: '2026-09-30T20:06:40Z'
+updated: '2026-09-30T20:06:40Z'
