@@ -1,0 +1,14 @@
+---
+id: retro-phillies
+name: Retro Phillies
+summary: Animated Phillies baseball
+desc: Follow the Phillies with animated pitches, hits, runners, and Phanatic inning breaks. Beta; requires a separate companion service. See README for installation and optional game focus.
+author: cdadamo
+fileName: retro_phillies.star
+packageName: retrophillies
+recommendedInterval: 0
+category: sports
+tags:
+  - baseball
+  - mlb
+  - real-time
