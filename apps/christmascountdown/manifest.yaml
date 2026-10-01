@@ -8,6 +8,7 @@ fileName: christmascountdown.star
 packageName: christmascountdown
 recommendedInterval: 60
 supports2x: true
+supports64x64: true
 minPixletVersion: v0.49.0
 category: utilities
 tags:

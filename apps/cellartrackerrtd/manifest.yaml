@@ -8,6 +8,7 @@ fileName: cellartrackerrtd.star
 packageName: cellartrackerrtd
 recommendedInterval: 5
 broken: true
+supports64x64: true
 category: utilities
 tags:
   - lifestyle

@@ -15,7 +15,7 @@ Push to device:
   pixlet push $TIDBYT_DEVICE_ID civics_test.webp --api-token $TIDBYT_API_KEY --installation-id civicstest
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -376,7 +376,7 @@ def main(_):
     return render.Root(
         delay = FRAME_MS,
         show_full_animation = True,
-        child = render.Animation(children = frames),
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames))),
     )
 
 # ---------------------------------------------------------------------------

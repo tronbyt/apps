@@ -7,6 +7,7 @@ author: Oliver
 fileName: canvas.star
 packageName: canvas
 recommendedInterval: 5
+supports64x64: true
 category: smart-home
 tags:
   - art

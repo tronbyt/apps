@@ -7,15 +7,20 @@ Author: dinosaursrarr
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 ALIVE = True
 DEAD = False
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 REFRESH_MILLISECONDS = 200
+
+# Every frame repaints every row grown so far, so a 64-row panel adds two
+# rows per frame (at twice the delay, so the pace is unchanged) to keep the
+# render inside the server deadline.
+ROWS_PER_FRAME = max(1, HEIGHT // 32)
 CHOOSE_RANDOM = "-"
 SINGLE_CELL = "+"
 
@@ -66,10 +71,11 @@ def animate(alive_cell, dead_cell, rule, starting_row):
     grid = [first_row]
     frames.append(render_grid(grid, alive_cell, dead_cell))
 
-    for _ in range(HEIGHT):
+    for i in range(HEIGHT):
         row = next_row(grid[-1], rule)
         grid.append(row)
-        frames.append(render_grid(grid, alive_cell, dead_cell))
+        if (i + 1) % ROWS_PER_FRAME == 0 or i == HEIGHT - 1:
+            frames.append(render_grid(grid, alive_cell, dead_cell))
 
     return render.Animation(children = frames)
 
@@ -108,7 +114,7 @@ def main(config):
     )
 
     return render.Root(
-        delay = REFRESH_MILLISECONDS,
+        delay = REFRESH_MILLISECONDS * ROWS_PER_FRAME,
         child = render.Stack(
             children = [
                 animate(alive_cell, dead_cell, rule, starting_row),

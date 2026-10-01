@@ -8,6 +8,7 @@ fileName: chromaclock.star
 packageName: chromaclock
 recommendedInterval: 0
 supports2x: true
+supports64x64: true
 category: clocks
 tags:
   - clock

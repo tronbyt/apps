@@ -4,6 +4,7 @@ name: Champs
 summary: Random past championships
 desc: Displays a randomly selected Super Bowl, World Series, NBA Finals, Stanley Cup or WNBA Finals result from any year, with current franchise logos.
 author: Matt Thommes
+supports64x64: true
 category: sports
 packageName: champs
 fileName: champs.star

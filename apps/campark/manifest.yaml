@@ -7,6 +7,7 @@ author: derekllaw
 fileName: campark.star
 packageName: campark
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - real-time

@@ -7,6 +7,7 @@ author: dinosaursrarr
 fileName: cellularautomata.star
 packageName: cellularautomata
 recommendedInterval: 5
+supports64x64: true
 category: education
 tags:
   - science
