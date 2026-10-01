@@ -6,7 +6,7 @@ Author: Robert Ison
 """
 
 load("http.star", "http")  #HTTP Client
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")  #XPath Expressions to read XML RSS Feed
@@ -117,6 +117,19 @@ BRANCH_FILTERS = {
     ],
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+# A header line and HEADLINES headlines, each an 8px marquee: three on a
+# 64x32 panel, seven on a 64x64 one.
+HEADLINES = (canvas.height() - 8) // 8
+
 def main(config):
     selected_branch = config.get("branch", BRANCH_OPTIONS[6].value)
     branch_index = BRANCHES.index(selected_branch)
@@ -173,15 +186,15 @@ def main(config):
 
     if selected_branch == "military":
         pool = matching_items[:]
-        for _ in range(3):
+        for _ in range(HEADLINES):
             if len(pool) == 0:
                 break
             pick_index = randomize(0, len(pool) - 1)
             selected_items.append(pool[pick_index])
             pool.pop(pick_index)
-    elif len(matching_items) >= 3:
+    elif len(matching_items) >= HEADLINES:
         pool = matching_items[:]
-        for _ in range(3):
+        for _ in range(HEADLINES):
             if len(pool) == 0:
                 break
             pick_index = randomize(0, len(pool) - 1)
@@ -192,7 +205,7 @@ def main(config):
             selected_items.append(item_num)
 
         pool = nonmatching_items[:]
-        remaining_slots = 3 - len(selected_items)
+        remaining_slots = HEADLINES - len(selected_items)
         for _ in range(remaining_slots):
             if len(pool) == 0:
                 break
@@ -205,33 +218,32 @@ def main(config):
         title = doc.query("//item[" + str(item_num) + "]/title") or ""
         display_text_lines.append(title)
 
-    for _ in range(3 - len(display_text_lines)):
+    for _ in range(HEADLINES - len(display_text_lines)):
         display_text_lines.append("")
+
+    # Each headline starts scrolling when the one above it has finished: the
+    # header's width offsets the first, and every line after that waits for
+    # all the headlines above it.
+    lines = [
+        render.Marquee(
+            width = 64,
+            offset_start = 15,
+            child = render.Text(header, color = colors[4], font = "5x8"),
+        ),
+    ]
+    chars_above = 0
+    for i in range(HEADLINES):
+        offset = len(header) * 5 if i == 0 else chars_above * 5
+        lines.append(render.Marquee(
+            width = 64,
+            offset_start = offset,
+            child = render.Text(display_text_lines[i], color = colors[i % 4], font = "5x8"),
+        ))
+        chars_above += len(display_text_lines[i])
 
     return render.Root(
         render.Column(
-            children = [
-                render.Marquee(
-                    width = 64,
-                    offset_start = 15,
-                    child = render.Text(header, color = colors[4], font = "5x8"),
-                ),
-                render.Marquee(
-                    width = 64,
-                    offset_start = len(header) * 5,
-                    child = render.Text(display_text_lines[0], color = colors[0], font = "5x8"),
-                ),
-                render.Marquee(
-                    offset_start = len(display_text_lines[0]) * 5,
-                    width = 64,
-                    child = render.Text(display_text_lines[1], color = colors[1], font = "5x8"),
-                ),
-                render.Marquee(
-                    offset_start = (len(display_text_lines[0]) + len(display_text_lines[1])) * 5,
-                    width = 64,
-                    child = render.Text(display_text_lines[2], color = colors[2], font = "5x8"),
-                ),
-            ],
+            children = lines,
         ),
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
