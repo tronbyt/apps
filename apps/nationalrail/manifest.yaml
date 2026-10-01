@@ -7,6 +7,7 @@ author: dinosaursrarr
 fileName: national_rail.star
 packageName: nationalrail
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - local

@@ -4,6 +4,7 @@ name: Morphing ClockQ
 summary: Morphing Clock Display
 desc: A unique clock display that morphs the time.  It also shows the temp,humidity,wind and weather description.
 author: gquiring
+supports64x64: true
 category: clocks
 tags:
   - clock

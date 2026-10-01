@@ -9,6 +9,7 @@ packageName: murphyusagas
 recommendedInterval: 5
 broken: true
 brokenReason: API blocked by Incapsula WAF
+supports64x64: true
 category: utilities
 tags:
   - gas-prices
