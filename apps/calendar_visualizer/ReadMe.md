@@ -7,22 +7,24 @@ Created by: Ctrl-G & Google's Gemini (Flash 3.6 - I think, although it might hav
 Summary: Calendar Visualization App
 
 Description: Displays a very dense visualization of events from a Google Calendar iCal URL.  Probably only helpful for
-persons who don't have a lot of closely spaced events in their Google Calendar.  This was produced because I always wanted
-to see the spatial relationship between the current time and my next 'event / meeting'.
+persons who don't have a lot of closely spaced events in their google calendar.  This was produced because I always wanted
+to see the spacial relationship between the current time and my next 'event / meeting'.
 
 The calendar graphing area shows 62 days, one day for each vertical column of LEDs.  Each dot in the vertical column indicates the following time:
 
 <i>Calendar Visualizer - No animation</i>
-<img src="./calendar_visualizer-DispExplain.gif" alt="Calendar Visualizer display explanation">
+<img src = "./calendar_visualizer-DispExplain.gif" >
 
 Future expansion:
 
         *.  Blinking colon of the clock.
         
-        *.  Blinking current time dot (Done and optional!) on event graph display possibly
-            to coincide with blinking colon of the clock (which is currently not blinking).
-            The event graph display dot to reveal of the item under the dot, if any, when
-            the dot is off.
+        *.  Fixed a problem with displaying recurring events when they were created in
+            a ST / DST time different than the one which is currently being observed.
+            Now there is another similar problem with events being shifted for the part
+            of the display that is not current, ie event in a time zone  that is different
+            than the one currently being displayed, but this makes more since than what
+            was being displayed before so I'll fix this later.
 
         *.  Color entry for each of the hard coded color entries above.  This to be
             superseded by ...
