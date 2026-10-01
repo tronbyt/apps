@@ -6,7 +6,7 @@ Author: y34752
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def getlistasstring(listin):
@@ -32,10 +32,10 @@ def main(config):
         child = render.Column(
             children = [
                 render.Marquee(
-                    offset_start = 32,
-                    offset_end = 32,
+                    offset_start = canvas.height(),
+                    offset_end = canvas.height(),
                     width = 64,
-                    height = 32,
+                    height = canvas.height(),
                     scroll_direction = "vertical",
                     child =
                         render.Column(

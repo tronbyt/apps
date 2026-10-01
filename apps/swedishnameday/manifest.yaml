@@ -6,6 +6,7 @@ desc: Shows today's name day names in Sweden.
 author: y34752
 fileName: swedish_name_day.star
 packageName: swedishnameday
+supports64x64: true
 category: lifestyle
 tags:
   - local

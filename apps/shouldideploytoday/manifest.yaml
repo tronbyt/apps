@@ -6,6 +6,7 @@ desc: Fun responses to the developers dilemma, powered by shouldideploy.today.
 author: Austin Daviscourt
 fileName: shouldideploy.star
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - dev

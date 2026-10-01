@@ -8,6 +8,7 @@ fileName: theguardiannews.star
 packageName: theguardiannews
 recommendedInterval: 10
 supports2x: true
+supports64x64: true
 category: news
 tags:
   - news

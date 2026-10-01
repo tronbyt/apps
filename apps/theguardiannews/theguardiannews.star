@@ -66,9 +66,10 @@ def render_1x(news, edition):
                     child = render.Text("Guardian (%s)" % edition, color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = -1),
                 ),
                 render.Marquee(
-                    height = ARTICLE_AREA_HEIGHT,
+                    # the rows under the title: 24 on 64x32, 56 on square
+                    height = canvas.height() - TITLE_HEIGHT,
                     scroll_direction = "vertical",
-                    offset_start = 24,
+                    offset_start = canvas.height() - TITLE_HEIGHT,
                     child =
                         render.Column(
                             main_align = "space_between",
