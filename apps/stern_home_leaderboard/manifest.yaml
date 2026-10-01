@@ -8,6 +8,7 @@ fileName: stern_home_leaderboard.star
 packageName: stern_home_leaderboard
 recommendedInterval: 360
 supports2x: true
+category: gaming
 tags:
   - pinball
 published: '2026-04-27T05:01:44Z'
