@@ -7,7 +7,7 @@ Author: Woolycoin437420
 
 load("cache.star", "cache")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 #Constants
@@ -210,7 +210,9 @@ def main(config):
                             ],
                         ),
                         scroll_direction = "vertical",
-                        height = 15,
+                        # whatever is left between the 7px header and the
+                        # 11px status bar: 14 rows on 64x32, 46 on 64x64
+                        height = canvas.height() - 18,
                     ),
                     render.Box(
                         child = render.Marquee(
