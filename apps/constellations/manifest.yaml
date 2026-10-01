@@ -8,6 +8,7 @@ recommendedInterval: 1
 fileName: constellations.star
 packageName: constellations
 supports2x: true
+supports64x64: true
 category: science
 tags:
   - space

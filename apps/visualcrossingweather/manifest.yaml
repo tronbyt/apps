@@ -6,6 +6,7 @@ desc: Display current temperature, humidity, and conditions for a user-specified
 author: ryan-doucette
 fileName: visualcrossing_weather.star
 packageName: visualcrossingweather
+supports64x64: true
 category: weather
 tags:
   - weather

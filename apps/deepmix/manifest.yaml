@@ -6,6 +6,7 @@ author: Brombomb
 fileName: deepmix.star
 packageName: deepmix
 id: deep-mix
+supports64x64: true
 category: entertainment
 tags:
   - music
