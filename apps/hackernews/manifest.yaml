@@ -7,6 +7,7 @@ author: Nick Comer
 recommendedInterval: 10
 fileName: hacker_news.star
 packageName: hackernews
+supports64x64: true
 category: news
 tags:
   - tech
