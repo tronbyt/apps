@@ -97,21 +97,26 @@ def grid(filled, living_color):
     `filled` only ever counts up to the number of lived months, the blue front
     sweeps left-to-right, row by row, and unlived months are always white.
     """
+
+    # Each row is at most three runs (lived, remaining, phantom) in that
+    # order, so it is painted as up to three Boxes instead of one per cell:
+    # pixel-identical and ~16x fewer widgets per frame, which is what keeps
+    # the 64x64 render inside the server deadline.
     rows = []
     for r in range(ROWS):
-        cells = []
-        for c in range(COLS):
-            index = r * COLS + c
-            if index >= TOTAL_MONTHS:
-                # Phantom cells past month 984 (the tail of the last row) stay
-                # background so the grid ends cleanly.
-                color = BG_COLOR
-            elif index < filled:
-                color = living_color
-            else:
-                color = REMAINING_COLOR
-            cells.append(render.Box(width = CELL_W, height = CELL_H, color = color))
-        rows.append(render.Row(children = cells))
+        start = r * COLS
+        end = min(start + COLS, TOTAL_MONTHS)
+        lived = min(max(filled - start, 0), end - start)
+        runs = [
+            (lived, living_color),
+            (end - start - lived, REMAINING_COLOR),
+            (COLS - (end - start), BG_COLOR),
+        ]
+        rows.append(render.Row(children = [
+            render.Box(width = n * CELL_W, height = CELL_H, color = color)
+            for n, color in runs
+            if n > 0
+        ]))
     return render.Column(children = rows)
 
 def frame(filled, living_color):

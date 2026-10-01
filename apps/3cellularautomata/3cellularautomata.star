@@ -14,6 +14,11 @@ load("time.star", "time")
 WIDTH = canvas.width()
 HEIGHT = canvas.height()
 REFRESH_MILLISECONDS = 200
+
+# Every frame repaints every row grown so far, so a 64-row panel adds two
+# rows per frame (at twice the delay, so the pace is unchanged) to keep the
+# render inside the server deadline.
+ROWS_PER_FRAME = max(1, HEIGHT // 32)
 CHOOSE_RANDOM = "-"
 SINGLE_CELL = "+"
 STATES = 3
@@ -63,10 +68,11 @@ def animate(cells, rule, starting_row):
     grid = [first_row]
     frames.append(render_grid(grid, cells))
 
-    for _ in range(HEIGHT):
+    for i in range(HEIGHT):
         row = next_row(grid[-1], rule)
         grid.append(row)
-        frames.append(render_grid(grid, cells))
+        if (i + 1) % ROWS_PER_FRAME == 0 or i == HEIGHT - 1:
+            frames.append(render_grid(grid, cells))
 
     return render.Animation(children = frames)
 
@@ -101,7 +107,7 @@ def main(config):
     print("Using rule {}".format(rule))
 
     return render.Root(
-        delay = REFRESH_MILLISECONDS,
+        delay = REFRESH_MILLISECONDS * ROWS_PER_FRAME,
         child = animate(cells, rule, starting_row),
     )
 

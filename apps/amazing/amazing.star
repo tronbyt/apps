@@ -28,34 +28,37 @@ MAX_STEPS = 1000000
 WHITE = "#ffffff"
 BLACK = "#000000"
 
-# Returns a pixel at x, y in a given colour.
-def draw_pixel(x, y, cell):
+# Returns the three pixels of a carved edge (two cells and the gap between
+# them, which are always in a line) as a single 3x1 or 1x3 box. Every frame
+# re-stacks everything drawn so far, so one box per edge instead of three
+# pixels is what keeps the 64x64 render inside the server deadline.
+def draw_edge(first, second, wall_colour):
+    x0 = 2 * min(first[0], second[0])
+    y0 = 2 * min(first[1], second[1])
     return render.Padding(
-        pad = (x, y, 0, 0),
-        child = cell,
+        pad = (x0, y0, 0, 0),
+        child = render.Box(
+            width = 2 * abs(first[0] - second[0]) + 1,
+            height = 2 * abs(first[1] - second[1]) + 1,
+            color = wall_colour,
+        ),
     )
 
 # Draws a single frame from a list of pairs of points that are connected.
-def draw_frame(old_pixels, edge_pairs, foreground_cell):
+def draw_frame(old_pixels, edge_pairs, wall_colour):
     pixels = list(old_pixels)
     for edge_pair in edge_pairs:
-        first = edge_pair[0]
-        second = edge_pair[1]
-        pixels.extend([
-            draw_pixel(2 * first[0], 2 * first[1], foreground_cell),
-            draw_pixel(first[0] + second[0], first[1] + second[1], foreground_cell),
-            draw_pixel(2 * second[0], 2 * second[1], foreground_cell),
-        ])
+        pixels.append(draw_edge(edge_pair[0], edge_pair[1], wall_colour))
     return render.Stack(children = pixels), pixels
 
 # Draws a series of frames from the given maze generator function. Maze generator
 # functions should return a list containing cells added at each step.
-def draw_animation(generator_fn, foreground_cell, background):
+def draw_animation(generator_fn, wall_colour, background):
     frames = []
     pixels = [background]
     sequence = generator_fn()
     for i in range(0, len(sequence), STEP_SIZE):
-        frame, pixels = draw_frame(pixels, sequence[i:i + STEP_SIZE], foreground_cell)
+        frame, pixels = draw_frame(pixels, sequence[i:i + STEP_SIZE], wall_colour)
         frames.append(frame)
 
     # Pause on end result so we can admire it
@@ -480,11 +483,6 @@ def main(config):
 
     # Turns out to be much faster to reuse a single pixel than
     # to create new ones as needed.
-    wall_cell = render.Box(
-        height = 1,
-        width = 1,
-        color = wall_colour,
-    )
     background = render.Box(
         color = background_colour,
     )
@@ -492,7 +490,7 @@ def main(config):
     # seed the RNG with a new value every 15 seconds
     random.seed(time.now().unix // 15)
 
-    return draw_animation(algorithm, wall_cell, background)
+    return draw_animation(algorithm, wall_colour, background)
 
 def get_schema():
     algorithms = [
