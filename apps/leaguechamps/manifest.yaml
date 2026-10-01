@@ -7,6 +7,7 @@ author: xl0lli
 fileName: league_champs.star
 packageName: leaguechamps
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - utility

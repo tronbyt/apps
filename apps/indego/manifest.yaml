@@ -5,6 +5,7 @@ summary: Indego bike share
 desc: Shows available bikes and docks at an Indego station.
 author: radiocolin
 supports2x: true
+supports64x64: true
 fileName: indego.star
 packageName: indego
 recommendedInterval: 5

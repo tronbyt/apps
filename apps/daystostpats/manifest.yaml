@@ -7,6 +7,7 @@ author: oogashaka
 fileName: days_to_st_pats.star
 packageName: daystostpats
 recommendedInterval: 60
+supports64x64: true
 category: lifestyle
 tags:
   - time

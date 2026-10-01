@@ -6,7 +6,7 @@ Author: PMK (@pmk)
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 URL_HASHRATE = "https://mempool.space/api/v1/mining/hashrate"
@@ -25,7 +25,8 @@ def main(config):
     plot = render.Plot(
         data = [(int(h["timestamp"]), int(h["avgHashrate"])) for h in hashrate["hashrates"]],
         width = 64,
-        height = 32,
+        # the chart is the whole panel: 32 rows or 64
+        height = canvas.height(),
         color = "#0f0",
         fill = True,
     )

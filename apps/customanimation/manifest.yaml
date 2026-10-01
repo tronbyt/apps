@@ -7,6 +7,7 @@ author: tronbyt
 fileName: custom_animation.star
 packageName: customanimation
 recommendedInterval: 10000
+supports64x64: true
 category: utilities
 tags:
   - art

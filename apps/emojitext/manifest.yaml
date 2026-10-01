@@ -6,6 +6,7 @@ desc: Displays a customizable emoji with two lines of text that can scroll if th
 author: brombomb
 fileName: emoji-text.star
 packageName: emojitext
+supports64x64: true
 category: utilities
 tags:
   - emoji
