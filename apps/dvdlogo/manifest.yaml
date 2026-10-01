@@ -8,6 +8,7 @@ fileName: dvd_logo.star
 packageName: dvdlogo
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - retro

@@ -6,6 +6,7 @@ desc: A Tidbyt application that displays real-time continuous glucose monitor (C
 author: JustinFay01
 fileName: dexcom_display.star
 packageName: dexcomdisplay
+supports64x64: true
 category: health
 tags:
   - health

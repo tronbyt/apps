@@ -8,5 +8,6 @@ fileName: discovercashback.star
 packageName: discovercashback
 published: '2026-06-30T19:20:49Z'
 updated: '2026-06-30T19:50:51Z'
+supports64x64: true
 category: finance
 tags: []

@@ -6,6 +6,7 @@ desc: Viser kollektivavganger i Norge basert på et API fra Entur.
 author: jakobbbbbbb
 fileName: entur_departures.star
 packageName: enturdepartures
+supports64x64: true
 category: transit
 tags:
   - transportation

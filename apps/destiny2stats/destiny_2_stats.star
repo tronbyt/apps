@@ -7,7 +7,7 @@ Author: brandontod97
 
 load("http.star", "http")
 load("images/error.png", ERROR_IMAGE = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -42,7 +42,8 @@ def main(config):
 
     if apiResponse.json()["ErrorStatus"] == "ApiInvalidOrExpiredKey" or len(apiResponse.json()["Response"]) == 0:
         return render.Root(
-            child = render.Column(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 main_align = "center",
                 expanded = True,
                 children = [
@@ -59,7 +60,7 @@ def main(config):
                         child = render.Text("Invalid ID"),
                     ),
                 ],
-            ),
+            )),
         )
     else:
         print("Recieved valid response")
@@ -140,7 +141,8 @@ def get_character_race(race_value):
 
 def get_view(show_id, image, displayed_character, display_name, display_name_code):
     no_username_view = render.Root(
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             cross_align = "center",
             children = [
                 render.Image(src = image, width = 32, height = 32),
@@ -165,11 +167,12 @@ def get_view(show_id, image, displayed_character, display_name, display_name_cod
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
     username_view = render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             cross_align = "center",
             children = [
                 render.Row(
@@ -217,7 +220,7 @@ def get_view(show_id, image, displayed_character, display_name, display_name_cod
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
     if show_id:

@@ -7,7 +7,7 @@ Author: Remy Blok
 # Special thanks to Max Timkovich for the original English Fuzzy Clock
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -165,12 +165,13 @@ def main(config):
     texts = [render.Text(" " * i + s) for i, s in enumerate(fuzzed)]
 
     return render.Root(
-        child = render.Padding(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
             pad = 4,
             child = render.Column(
                 children = texts,
             ),
-        ),
+        )),
     )
 
 def get_schema():

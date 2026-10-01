@@ -7,6 +7,7 @@ author: imnotdannorton
 fileName: mrdiv_gifs.star
 packageName: divbyt
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art

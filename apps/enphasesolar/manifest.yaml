@@ -7,6 +7,7 @@ author: laodaochong
 fileName: enphase_solar.star
 packageName: enphasesolar
 recommendedInterval: 5
+supports64x64: true
 category: technology
 tags:
   - utility

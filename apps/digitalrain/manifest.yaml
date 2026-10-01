@@ -8,6 +8,7 @@ fileName: digital_rain.star
 packageName: digitalrain
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - tech

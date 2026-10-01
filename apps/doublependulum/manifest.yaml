@@ -8,6 +8,7 @@ packageName: doublependulum
 id: double-pendulum
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 minPixletVersion: v0.50.0
 category: entertainment
 tags:
