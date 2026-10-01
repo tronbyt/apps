@@ -15,10 +15,11 @@ load("schema.star", "schema")
 GRID_ROWS = canvas.height() // 2 - 1
 GRID_COLS = canvas.width() // 2 - 1
 
-# A bigger maze means a longer solve; panels with more than 64x32 pixels keep
-# every other frame so the animation stays inside the server's render deadline
-# on a Pi-class host (the solve just runs twice as fast).
-FRAME_STEP = 2 if canvas.width() * canvas.height() > 64 * 32 else 1
+# A bigger maze means a longer solve; panels keep one frame per 64x32-worth of
+# pixels (every other frame on 64x64, every fourth on 128x64) so the animation
+# stays inside the server's render deadline on a Pi-class host - the solve just
+# plays faster.
+FRAME_STEP = max(1, (canvas.width() * canvas.height()) // (64 * 32))
 
 # Returns False if there is no cell to the east
 # or the cell itself.
