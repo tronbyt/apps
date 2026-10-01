@@ -7,6 +7,7 @@ author: M0ntyP
 fileName: afl_ladder.star
 packageName: aflladder
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - real-time

@@ -7,6 +7,7 @@ author: Godfrey Systems Web Development
 fileName: days_to_xmas.star
 packageName: daystoxmas
 recommendedInterval: 60
+supports64x64: true
 category: utilities
 tags:
   - time

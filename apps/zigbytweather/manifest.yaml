@@ -6,6 +6,7 @@ desc: Displays time, date, temperature (F/C), and weather condition glyph. Weath
 author: ryan-doucette
 packageName: zigbytweather
 recommendedInterval: 0
+supports64x64: true
 category: weather
 tags:
   - open-meteo

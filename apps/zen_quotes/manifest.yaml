@@ -8,6 +8,7 @@ fileName: zen_quotes.star
 packageName: zenquotes
 recommendedInterval: 1440
 supports2x: true
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle

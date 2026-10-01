@@ -8,6 +8,7 @@ fileName: aadailyreflect.star
 packageName: aadailyreflect
 recommendedInterval: 30
 supports2x: true
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle
