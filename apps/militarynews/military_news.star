@@ -223,7 +223,12 @@ def main(config):
 
     # Each headline starts scrolling when the one above it has finished: the
     # header's width offsets the first, and every line after that waits for
-    # all the headlines above it.
+    # all the headlines above it. The animation is therefore as long as all
+    # the headlines laid end to end, and with seven of them that is more than
+    # a Raspberry Pi can render inside the server's deadline -- so on a
+    # square panel every headline starts with the first, and the animation
+    # is only as long as the longest one.
+    chain = not is_square()
     lines = [
         render.Marquee(
             width = 64,
@@ -233,7 +238,7 @@ def main(config):
     ]
     chars_above = 0
     for i in range(HEADLINES):
-        offset = len(header) * 5 if i == 0 else chars_above * 5
+        offset = len(header) * 5 if (i == 0 or not chain) else chars_above * 5
         lines.append(render.Marquee(
             width = 64,
             offset_start = offset,
