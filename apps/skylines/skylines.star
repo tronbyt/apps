@@ -22,6 +22,7 @@ SCALE = min(SCREEN_WIDTH // BASE_WIDTH, SCREEN_HEIGHT // BASE_HEIGHT)
 #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
 DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
 NUMBER_OF_STARS = 5
+DOTS_PER_FRAME = 1 if SCREEN_WIDTH * SCREEN_HEIGHT <= 64 * 32 else 3
 
 display_type = [
     schema.Option(display = "Display a Random City", value = "Random"),
@@ -134,9 +135,12 @@ def draw_skyline(data, show_stars, colors):
                     potential_star_locations.append((i, randomize(0, sky)))
         star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
 
-    for pixel in pixels:
-        x, y, color = pixel
-        stacked_dots.append(create_dot(x, y, color))
+    # Each frame re-composites every dot drawn so far, so the draw-in costs
+    # frames x dots. Panels with more than 64x32 pixels add a few dots per frame
+    # to keep the render inside the server deadline.
+    for i in range(0, len(pixels), DOTS_PER_FRAME):
+        for x, y, color in pixels[i:i + DOTS_PER_FRAME]:
+            stacked_dots.append(create_dot(x, y, color))
         animation_frames.append(render.Stack(children = list(stacked_dots)))
 
     # We increase the range to 100 so the "hold" lasts longer
