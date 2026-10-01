@@ -7,6 +7,7 @@ author: dinosaursrarr
 recommendedInterval: 5
 fileName: uk_polling.star
 packageName: ukpolling
+supports64x64: true
 category: news
 tags:
   - local

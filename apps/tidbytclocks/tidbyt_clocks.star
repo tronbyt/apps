@@ -9,12 +9,16 @@ Author: rs7q5
 #Last Modified 20230516 RIS
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 BASE_URL = "https://api.tidbyt.com/v0/apps"
 FONT = "tom-thumb"
 DEFAULT_TIMEZONE = "America/New_York"
+
+# The clock and the caption scrolling over it take the rows under the 6px
+# header: 26 on a 64x32 panel, 58 on a square one.
+CLOCK_HEIGHT = canvas.height() - 6
 
 def main():
     #get list of apps
@@ -47,7 +51,7 @@ def main():
     time_text.extend([render.Text(content = now.format("15 04"), font = "10x20")] * 5)
     time_frame = render.Box(
         width = 64,
-        height = 26,
+        height = CLOCK_HEIGHT,
         child = render.Animation(
             children = time_text,
         ),
@@ -65,7 +69,7 @@ def main():
                     time_frame,
                     render.Box(width = 64, height = 64, color = "#000000bf"),  #this is to make the clock visible in the back
                     render.Marquee(
-                        height = 26,
+                        height = CLOCK_HEIGHT,
                         scroll_direction = "vertical",
                         offset_start = 32,
                         offset_end = 32,

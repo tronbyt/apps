@@ -5,6 +5,7 @@ summary: Breadwinner Tracker
 desc: A way to track your yeasty growth.
 author: JeffLac
 recommendedInterval: 5
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle
