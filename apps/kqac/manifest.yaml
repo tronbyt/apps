@@ -7,6 +7,7 @@ author: Andrew Westling
 fileName: kqac.star
 packageName: kqac
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - classical

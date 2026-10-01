@@ -7,6 +7,7 @@ author: Daniel Sitnik
 fileName: npm_packages.star
 packageName: npmpackages
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech

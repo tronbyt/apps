@@ -8,7 +8,7 @@ Author: sgomez72
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # URLs for CTA Alerts and Status
@@ -94,7 +94,9 @@ def main(config):
                 ),
                 render.Box(width = 64, height = 1, color = "#565a5c"),
                 render.Box(
-                    height = 15,
+                    # the rows under the 16px header and its rule: 15 on
+                    # 64x32, 47 on a square panel
+                    height = canvas.height() - 17,
                     width = 64,
                     child = render_alert_data(ctaData["alerts"], displayOption),
                 ),

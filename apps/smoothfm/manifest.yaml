@@ -7,6 +7,7 @@ author: M0ntyP
 fileName: smooth_fm.star
 packageName: smoothfm
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - music
