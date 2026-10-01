@@ -22,7 +22,11 @@ SCALE = min(SCREEN_WIDTH // BASE_WIDTH, SCREEN_HEIGHT // BASE_HEIGHT)
 #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
 DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
 NUMBER_OF_STARS = 5
-DOTS_PER_FRAME = 1 if SCREEN_WIDTH * SCREEN_HEIGHT <= 64 * 32 else 6
+BIG_PANEL = SCREEN_WIDTH * SCREEN_HEIGHT > 64 * 32
+DOTS_PER_FRAME = 8 if BIG_PANEL else 1
+
+# Frames of twinkling stars once the skyline is complete; fewer on big panels.
+HOLD_FRAMES = 60 if BIG_PANEL else 100
 
 display_type = [
     schema.Option(display = "Display a Random City", value = "Random"),
@@ -171,7 +175,7 @@ def draw_skyline(data, show_stars, colors):
         animation_frames.append(render.Stack(children = [create_run(r) for r in runs]))
 
     # We increase the range to 100 so the "hold" lasts longer
-    for frame_idx in range(100):
+    for frame_idx in range(HOLD_FRAMES):
         # Start with the full city
         this_frame_layers = [create_run(r) for r in runs]
 
