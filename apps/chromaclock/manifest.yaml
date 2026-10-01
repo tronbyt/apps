@@ -1,0 +1,16 @@
+---
+id: chromaclock
+name: Chroma Clock
+summary: Stylish animated clock
+desc: A clock with 23 looks, or a random one each time, from simple (outline, words, analog, dot grid, moon, world clocks) to animated (neon, morph, matrix, fire, pong, tetris, aquarium, snow, lava lamp, starfield, pac-man and more).
+author: alejoar
+fileName: chromaclock.star
+packageName: chromaclock
+recommendedInterval: 0
+supports2x: true
+category: clocks
+tags:
+  - clock
+  - wide 2x support
+published: '2026-09-23T15:49:17Z'
+updated: '2026-09-23T23:08:58Z'

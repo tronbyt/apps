@@ -67,6 +67,7 @@ def fetch_kuma_data(base_url, slug):
     groups = page_data.get("publicGroupList") or []
     for g in groups:
         for m in g.get("monitorList") or []:
+            m["id"] = int(m["id"])
             monitors_list.append(m)
 
     hb_res = http.get(hb_url, headers = headers, ttl_seconds = 30)
@@ -169,7 +170,7 @@ def render_header(scale, width, kuma_icon, title_text, up_count, down_count, fon
         children = right_elements,
     )
 
-    max_title_w = width - (33 * scale if down_count > 0 else 24 * scale)
+    max_title_w = width - (33 * scale if down_count > 0 else 28 * scale)
 
     return render.Row(
         expanded = True,
@@ -197,11 +198,14 @@ def render_dashboard(scale, width, height, title, monitors, up_count, down_count
                 width = width - (8 * scale),
                 child = render.Text("! " + first["name"] + " DOWN", font = font_main, color = RED),
             ),
-            render.Text(first["msg"][:22] if first["msg"] else "Connection Failed", font = font_tiny, color = YELLOW),
         ]
-        if len(down_monitors) > 1:
+        if len(down_monitors) == 1:
             alert_children.append(
-                render.Text("+%d more down" % (len(down_monitors) - 1), font = font_tiny, color = MUTED),
+                render.Text(first["msg"][:22] if first["msg"] else "Monitor Failed", font = font_tiny, color = YELLOW),
+            )
+        else:
+            alert_children.append(
+                render.Text("+%d more" % (len(down_monitors) - 1), font = font_tiny, color = MUTED),
             )
 
         body = render.Box(
@@ -302,7 +306,7 @@ def render_service_card(scale, width, card_height, m, card_idx, total_cards, fon
         ],
     )
 
-    ping_str = "%dms" % m["ping"] if m["ping"] > 0 else "0ms"
+    ping_str = "%dms" % m["ping"] if m["ping"] != None and m["ping"] > 0 else "0ms"
     uptime_val = m.get("uptime", 100.0)
     uptime_str = "100%" if uptime_val >= 99.95 else str(uptime_val) + "%"
     stat_line = ping_str + " · " + uptime_str

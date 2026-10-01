@@ -1,7 +1,7 @@
 """
 Applet: Rainy?
 Summary: Rain intensity ticker
-Description: Two 24-hour rain-intensity bars from Open-Meteo hourly precipitation. Houston default.
+Description: Two 24-hour rain bars from Open-Meteo hourly precipitation and chance of rain. Houston default.
 Author: SamuLab
 """
 
@@ -27,6 +27,19 @@ INTENSITY = [
     (999.0, "#EF4444"),
 ]
 
+# Below this many mm/hour an hour counts as dry and is shaded by chance of rain.
+DRY_MM = 0.05
+
+# Faint tint for dry hours by precipitation probability (%). Each step blends
+# the dry gray (#4B5563) a little toward the 0.2 mm cyan, staying clearly dimmer
+# than real rain. Below the first threshold the hour stays plain gray.
+CHANCE = [
+    (60, "#339EB4"),  # ~58% gray -> cyan
+    (40, "#398EA2"),  # ~45%
+    (25, "#3E7D8F"),  # ~32%
+    (15, "#436E7F"),  # ~20%
+]
+
 DEFAULT_LOCATION = """{
     "lat": "29.7604",
     "lng": "-95.3698",
@@ -43,6 +56,8 @@ def main(config):
 
     today = fc["today"]
     tomorrow = fc["tomorrow"]
+    today_pop = fc["today_pop"]
+    tomorrow_pop = fc["tomorrow_pop"]
     code = fc["code"]
     is_day = fc["is_day"]
 
@@ -69,7 +84,7 @@ def main(config):
         ),
         render.Padding(
             pad = (BAR_X, 6, 0, 0),
-            child = _bar(today),
+            child = _bar(today, today_pop),
         ),
         # Now indicator line on today's bar
         render.Padding(
@@ -88,7 +103,7 @@ def main(config):
         ),
         render.Padding(
             pad = (BAR_X, 21, 0, 0),
-            child = _bar(tomorrow),
+            child = _bar(tomorrow, tomorrow_pop),
         ),
     ]
 
@@ -126,27 +141,25 @@ def _condition_icon(code, is_day):
     # Thunderstorm (WMO 95, 96, 99)
     if code in [95, 96, 99]:
         return _thunder_icon()
+
     # Rain / Drizzle / Showers
-    elif code in [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]:
+    if code in [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]:
         return _rain_icon()
+
     # Snow (WMO 71, 73, 75, 77, 85, 86)
-    elif code in [71, 73, 75, 77, 85, 86]:
+    if code in [71, 73, 75, 77, 85, 86]:
         return _snow_icon()
+
     # Fog / Overcast (WMO 45, 48, 3)
-    elif code in [45, 48, 3]:
+    if code in [45, 48, 3]:
         return _cloud_icon()
+
     # Partly cloudy (WMO 1, 2)
-    elif code in [1, 2]:
-        if is_day == 1:
-            return _sun_cloud_icon()
-        else:
-            return _moon_cloud_icon()
+    if code in [1, 2]:
+        return _sun_cloud_icon() if is_day == 1 else _moon_cloud_icon()
+
     # Clear sky (WMO 0)
-    else:
-        if is_day == 1:
-            return _sun_icon()
-        else:
-            return _moon_icon()
+    return _sun_icon() if is_day == 1 else _moon_icon()
 
 def _sun_icon():
     return render.Column(
@@ -247,10 +260,13 @@ def _snow_icon():
         ],
     )
 
-def _bar(mm):
+def _bar(mm, pop = None):
     segs = []
     for i in range(HOURS):
-        segs.append(render.Box(width = PX_PER_HOUR, height = BAR_H, color = _color(mm[i])))
+        p = None
+        if pop != None:
+            p = pop[i]
+        segs.append(render.Box(width = PX_PER_HOUR, height = BAR_H, color = _color(mm[i], p)))
     return render.Row(children = segs)
 
 def _ticks():
@@ -282,9 +298,15 @@ def _ticks():
         ],
     )
 
-def _color(mm):
+def _color(mm, pop = None):
     if mm == None or mm < 0:
         return "#23262B"
+
+    # Dry hour: faint tint by chance of rain; real rainfall uses INTENSITY.
+    if mm < DRY_MM and pop != None:
+        for threshold, color in CHANCE:
+            if pop >= threshold:
+                return color
     last = INTENSITY[0][1]
     for threshold, color in INTENSITY:
         if mm <= threshold:
@@ -293,7 +315,7 @@ def _color(mm):
     return last
 
 def _forecast(loc):
-    url = "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=weather_code,is_day&hourly=precipitation&forecast_days=2&timezone=%s" % (
+    url = "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=weather_code,is_day&hourly=precipitation,precipitation_probability&forecast_days=2&timezone=%s" % (
         str(loc["lat"]),
         str(loc["lng"]),
         loc["timezone"],
@@ -321,6 +343,12 @@ def _forecast(loc):
     precip = hourly.get("precipitation")
     if type(times) != "list" or type(precip) != "list":
         return None
+
+    # Optional: missing / null probability falls back to amount-only shading.
+    probs = hourly.get("precipitation_probability")
+    if type(probs) != "list":
+        probs = []
+
     out = []
     n = len(times)
     if len(precip) < n:
@@ -330,12 +358,19 @@ def _forecast(loc):
         mm = 0.0
         if type(p) == "int" or type(p) == "float":
             mm = float(p)
-        out.append((times[i], mm))
+        pop = None
+        if i < len(probs):
+            q = probs[i]
+            if type(q) == "int" or type(q) == "float":
+                pop = float(q)
+        out.append((times[i], mm, pop))
 
-    today, next_day = _split_days(out, loc["timezone"])
+    today, next_day, today_pop, next_pop = _split_days(out, loc["timezone"])
     return {
         "today": today,
         "tomorrow": next_day,
+        "today_pop": today_pop,
+        "tomorrow_pop": next_pop,
         "code": code,
         "is_day": is_day,
     }
@@ -346,7 +381,9 @@ def _split_days(hours, timezone):
     tomorrow_key = (now + time.parse_duration("24h")).format("2006-01-02")
     today = [-1.0] * HOURS
     next_day = [-1.0] * HOURS
-    for stamp, mm in hours:
+    today_pop = [None] * HOURS
+    next_pop = [None] * HOURS
+    for stamp, mm, pop in hours:
         if type(stamp) != "string" or len(stamp) < 13:
             continue
         day = stamp[0:10]
@@ -355,9 +392,11 @@ def _split_days(hours, timezone):
             continue
         if day == today_key:
             today[hour] = mm
+            today_pop[hour] = pop
         elif day == tomorrow_key:
             next_day[hour] = mm
-    return today, next_day
+            next_pop[hour] = pop
+    return today, next_day, today_pop, next_pop
 
 def _geocode(query):
     q = ""

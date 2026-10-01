@@ -1,0 +1,16 @@
+---
+id: zabbixproblems
+name: Zabbix Problems
+summary: Active Zabbix alerts
+desc: Display unresolved Zabbix 7.0 problems with host names, severity and age. Configure your own HTTPS endpoint and API token. Filter by severity, host group, acknowledgement and suppression. Includes a credential-free demo mode.
+author: Silas Suessmilch
+fileName: zabbix_problems.star
+packageName: zabbixproblems
+supports2x: true
+category: utilities
+tags:
+  - monitoring
+  - zabbix
+  - infrastructure
+published: '2026-09-19T10:13:59Z'
+updated: '2026-09-19T10:13:59Z'

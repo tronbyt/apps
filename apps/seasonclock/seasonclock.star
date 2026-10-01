@@ -1,7 +1,7 @@
 """
 Applet: Season Clock
 Summary: Countdown to the next season
-Description: Shows a lively seasonal scene with a countdown to the next astronomical season, or the current day of the season, for either hemisphere. Stack two instances to see both at once.
+Description: Shows a lively seasonal scene with a countdown to the next season, or the current day of the season, for either hemisphere. Seasons follow the solstices and equinoxes, or optionally the fixed three-month blocks weather services use. Stack two instances to see both at once.
 Author: Joe Vivona
 """
 
@@ -231,6 +231,33 @@ def ordinal_suffix(n):
         return "rd"
     return "th"
 
+# Meteorological seasons are fixed three-month blocks starting on the 1st, so
+# they need no boundary table and never run out of range. Indexed by
+# (month % 12) // 3 they line up with the astronomical event of the same
+# quarter, which lets both definitions share EVENT_SEASON and the labels.
+MET_EVENTS = ["dec_solstice", "mar_equinox", "jun_solstice", "sep_equinox"]
+MET_START_MONTH = [12, 3, 6, 9]
+
+def find_seasons_met(now_local):
+    # Return (current_event, jd of its 1st, next_event, jd of its 1st).
+    # All local: a meteorological block turns over at local midnight, not at an
+    # instant shared worldwide, so there is nothing to convert from UTC.
+    q = (now_local.month % 12) // 3
+    start_month = MET_START_MONTH[q]
+    start_year = now_local.year
+    if start_month == 12 and now_local.month != 12:
+        # January and February belong to the December block of the year before.
+        start_year = now_local.year - 1
+    nq = (q + 1) % 4
+    next_month = MET_START_MONTH[nq]
+    next_year = start_year if next_month > start_month else start_year + 1
+    return (
+        MET_EVENTS[q],
+        julian_day(start_year, start_month, 1),
+        MET_EVENTS[nq],
+        julian_day(next_year, next_month, 1),
+    )
+
 def find_seasons(now_unix):
     # Return (current_event, current_start_time, next_event, next_start_time) or None.
     current = None
@@ -378,6 +405,7 @@ def outline_text(content, font, lx, ly):
 
 LBL_Y1 = 19 if IS2X else 20
 LBL_Y2 = 26
+HEAD_Y = 5  # a headline word sits a little lower than the big number would
 
 def text_overlay(big, suffix, line1, line2):
     # big number on the left; two small label lines beneath it.
@@ -389,6 +417,16 @@ def text_overlay(big, suffix, line1, line2):
     widgets.append(outline_text(line1, LBL_FONT, 2, LBL_Y1))
     widgets.append(outline_text(line2, LBL_FONT, 2, LBL_Y2))
     return widgets
+
+def word_overlay(head, line1, line2):
+    # Same three-line shape as text_overlay, but with a word in the headline
+    # slot instead of a number. Used on a changeover day, where the count is
+    # zero and a big "0" reads as a glitch rather than as news.
+    return [
+        outline_text(head, NUM_FONT_SM, 2, HEAD_Y),
+        outline_text(line1, LBL_FONT, 2, LBL_Y1),
+        outline_text(line2, LBL_FONT, 2, LBL_Y2),
+    ]
 
 def notice(msg):
     return render.Root(
@@ -414,40 +452,65 @@ def main(config):
         now = time.parse_time(dev_date)
     else:
         now = time.now()
-    seasons = find_seasons(now.unix)
-    if seasons == None:
-        return notice("Season Clock needs an update (out of date range).")
-    cur_event, cur_start, nxt_event, nxt_start = seasons
 
     now_local = now.in_location(timezone)
     jd_now = julian_day(now_local.year, now_local.month, now_local.day)
 
-    if mode == "dayof":
+    # Both definitions reduce to the same four numbers: the events either side of
+    # today and the local dates their seasons start on, as Julian day numbers.
+    if config.bool("meteorological", False):
+        cur_event, jd_start, nxt_event, jd_next = find_seasons_met(now_local)
+
+        # A block turns over at midnight, so no day is ever both the last of one
+        # season and the first of the next: today is the last day when tomorrow
+        # opens the next block, and a season starts today when it is day one.
+        last_day = jd_next == jd_now + 1
+        starting = cur_event if jd_start == jd_now else None
+    else:
+        seasons = find_seasons(now.unix)
+        if seasons == None:
+            return notice("Season Clock needs an update (out of date range).")
+        cur_event, cur_start, nxt_event, nxt_start = seasons
         s_local = cur_start.in_location(timezone)
         jd_start = julian_day(s_local.year, s_local.month, s_local.day)
-        day_of = jd_now - jd_start + 1
-        season = EVENT_SEASON[hemisphere][cur_event]
-        big = str(day_of)
-        suffix = ordinal_suffix(day_of)
-        line1 = "DAY OF"
-        line2 = SEASON[season]["label"]
-    else:
         n_local = nxt_start.in_location(timezone)
         jd_next = julian_day(n_local.year, n_local.month, n_local.day)
+
+        # A solstice or equinox is an instant, not a date, so on the day it falls
+        # the season both ends and begins part-way through. Today is therefore
+        # the last day of the old season and the first of the new one at once.
+        last_day = jd_next <= jd_now
+        starting = nxt_event if jd_next <= jd_now else None
+
+    if mode == "dayof":
+        season = EVENT_SEASON[hemisphere][cur_event]
+        if last_day:
+            # Which number the day happens to be stops being the news once it
+            # is the last one, so "LAST" takes the headline slot outright.
+            overlay = word_overlay("LAST", "DAY OF", SEASON[season]["label"])
+        else:
+            day_of = jd_now - jd_start + 1
+            overlay = text_overlay(
+                str(day_of),
+                ordinal_suffix(day_of),
+                "DAY OF",
+                SEASON[season]["label"],
+            )
+    elif starting != None:
+        # Name the season whose first day is today, and show its scene.
+        season = EVENT_SEASON[hemisphere][starting]
+        overlay = word_overlay(SEASON[season]["label"], "STARTS", "TODAY")
+    else:
         days = jd_next - jd_now
         season = EVENT_SEASON[hemisphere][nxt_event]
-        suffix = ""
-        if days <= 0:
-            big = "0"
-            line1 = "STARTS"
-            line2 = SEASON[season]["label"]
-        else:
-            big = str(days)
-            line1 = "DAY TO" if days == 1 else "DAYS TO"
-            line2 = SEASON[season]["label"]
+        overlay = text_overlay(
+            str(days),
+            "",
+            "DAY TO" if days == 1 else "DAYS TO",
+            SEASON[season]["label"],
+        )
 
     scene_fn = SCENE_FN[season]
-    overlay = text_overlay(big, suffix, line1, line2)
 
     frames = []
     for f in range(FRAME_COUNT):
@@ -484,6 +547,13 @@ def get_schema():
                 name = "Location",
                 desc = "Used for your hemisphere and timezone.",
                 icon = "locationDot",
+            ),
+            schema.Toggle(
+                id = "meteorological",
+                name = "Meteorological seasons",
+                desc = "Fixed three-month seasons starting Mar/Jun/Sep/Dec 1, as weather services (and most of Australia and NZ) reckon them, instead of the solstices and equinoxes.",
+                icon = "cloudSun",
+                default = False,
             ),
             schema.Dropdown(
                 id = "mode",

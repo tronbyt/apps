@@ -1,0 +1,16 @@
+---
+id: classic-mlb
+name: Classic MLB
+summary: Classic baseball scoreboard
+desc: Follow your MLB team with logos, scores, bases, counts, and division standings. Tidbyt-inspired 64x32 layout. Optional live postseason or all-game focus; see README.
+author: cdadamo
+fileName: classic_mlb.star
+packageName: classicmlb
+recommendedInterval: 0
+category: sports
+tags:
+  - baseball
+  - mlb
+  - real-time
+published: '2026-09-30T20:06:40Z'
+updated: '2026-09-30T20:06:40Z'

@@ -8,4 +8,9 @@ fileName: vbbtransport.star
 packageName: vbbtransport
 recommendedInterval: 1
 category: transit
----
+published: '2026-05-25T17:14:51Z'
+updated: '2026-09-22T02:01:43Z'
+tags:
+  - transit
+  - train
+  - bus
