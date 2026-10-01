@@ -7,6 +7,7 @@ author: tidbytdev
 recommendedInterval: 5
 fileName: retrograde_planet.star
 packageName: retrogradeplanet
+supports64x64: true
 category: science
 tags:
   - space

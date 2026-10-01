@@ -4,6 +4,7 @@ name: Roundels
 summary: See air force roundels
 desc: Display Air Force roundels of world.
 author: Robert Ison
+supports64x64: true
 category: art
 tags:
   - art

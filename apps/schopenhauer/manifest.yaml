@@ -5,6 +5,7 @@ summary: Random Schopenhauer quote
 desc: The App displays a random quote by Arthur Schopenhauer.
 author: nelken
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art

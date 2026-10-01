@@ -5,6 +5,7 @@ summary: Relay Live
 desc: Shows live stream information for the Relay podcast network.
 author: radiocolin
 supports2x: true
+supports64x64: true
 fileName: relay_fm_live.star
 packageName: relayfmlive
 recommendedInterval: 5

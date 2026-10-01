@@ -7,6 +7,7 @@ author: Max Timkovich
 fileName: rocketleaguestats.star
 packageName: rocketleaguestats
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - sports

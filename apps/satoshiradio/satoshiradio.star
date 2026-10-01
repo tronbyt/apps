@@ -9,7 +9,7 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/logo.webp", LOGO_ASSET = "file")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LOGO = LOGO_ASSET.readall()
@@ -18,6 +18,15 @@ DEFAULT_ADDRESS = ""
 DEFAULT_TIMEFRAME = "hashrate5m"
 DEFAULT_SHOW_POOL_HASHRATE = True
 DEFAULT_SHOW_POOL_WORKERS = False
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     address = config.str("address", DEFAULT_ADDRESS)
@@ -52,7 +61,18 @@ def main(config):
         render_info(info, False, "", "Radio")
 
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render.Image(src = LOGO),
+                render.Column(
+                    children = info,
+                    main_align = "center",
+                    expanded = True,
+                ),
+            ],
+            expanded = True,
+        ))) if is_square() else render.Row(
             children = [
                 render.Image(src = LOGO),
                 render.Column(

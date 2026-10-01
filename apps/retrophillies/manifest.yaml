@@ -7,6 +7,7 @@ author: cdadamo
 fileName: retro_phillies.star
 packageName: retrophillies
 recommendedInterval: 0
+supports64x64: true
 category: sports
 tags:
   - baseball

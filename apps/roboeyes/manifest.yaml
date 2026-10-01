@@ -8,6 +8,7 @@ fileName: roboeyes.star
 packageName: roboeyes
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: entertainment
 published: '2026-05-29T01:57:18Z'
 updated: '2026-05-29T01:57:18Z'

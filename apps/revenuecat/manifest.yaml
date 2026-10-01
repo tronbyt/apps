@@ -8,6 +8,7 @@ fileName: revenuecat.star
 packageName: revenuecat
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: finance
 tags:
   - revenuecat

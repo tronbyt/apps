@@ -8,6 +8,7 @@ fileName: sailgp.star
 packageName: sailgp
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: sports
 tags:
   - leaderboards

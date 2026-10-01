@@ -57,6 +57,15 @@ DEFAULTS = {
     "nri_page_duration": 95,
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     displaytype = config.get("datadisplay", DEFAULTS["display"])
 
@@ -85,7 +94,13 @@ def main(config):
 
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            main_align = "space_between" if IS2X else "start",
+            cross_align = "center" if IS2X else "start",
+            expanded = IS2X,
+            children = [title_bar(displaytype)] + displayrow,
+        ))) if is_square() else render.Column(
             main_align = "space_between" if IS2X else "start",
             cross_align = "center" if IS2X else "start",
             expanded = IS2X,
