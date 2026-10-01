@@ -6,6 +6,7 @@ desc: Scrolls live FBI Most Wanted persons using the official FBI public API. Cl
 author: Rosie Domenech
 fileName: fbiwanted.star
 packageName: fbiwanted
+supports64x64: true
 category: news
 tags:
   - news

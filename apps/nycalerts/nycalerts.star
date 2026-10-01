@@ -7,7 +7,7 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 RSS_URL = "https://feeds.everbridge.net/feeds/453003085617722/rss/rss.xml"
@@ -155,7 +155,9 @@ def main(config):
                 render.Box(width = 64, height = 1, color = color),
                 render.Box(
                     width = 64,
-                    height = 20,
+                    # the rows under the 11px header and its rule: 20 on
+                    # 64x32, 52 on a square panel
+                    height = canvas.height() - 12,
                     color = BLACK,
                     child = render.Padding(
                         pad = (0, 4, 0, 0),

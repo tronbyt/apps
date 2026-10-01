@@ -7,6 +7,7 @@ author: chrisbateman
 fileName: year_progress.star
 packageName: yearprogress
 recommendedInterval: 60
+supports64x64: true
 category: utilities
 tags:
   - tracking

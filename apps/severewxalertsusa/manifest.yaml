@@ -8,6 +8,7 @@ fileName: severewxalertsusa.star
 packageName: severewxalertsusa
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: weather
 tags:
   - weather
