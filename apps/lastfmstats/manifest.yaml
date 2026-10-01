@@ -7,6 +7,7 @@ author: skinner452
 fileName: lastfmstats.star
 packageName: lastfmstats
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - music

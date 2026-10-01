@@ -7,6 +7,7 @@ author: kevwoods
 fileName: life_clock.star
 packageName: lifeclock
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - game-of-life

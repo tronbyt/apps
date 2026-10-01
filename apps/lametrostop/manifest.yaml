@@ -7,6 +7,7 @@ author: connorwashere
 fileName: la_metro_stop.star
 packageName: lametrostop
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags: []
 published: '2023-06-09T15:44:00Z'

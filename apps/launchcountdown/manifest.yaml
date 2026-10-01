@@ -8,6 +8,7 @@ fileName: launchcountdown.star
 packageName: launchcountdown
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - space

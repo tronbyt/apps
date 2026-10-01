@@ -8,7 +8,7 @@ Author: Denton-L
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -88,6 +88,15 @@ def safe_int(s):
 
     return int(s)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     token = config.get("token")
     render_config = struct(
@@ -121,7 +130,11 @@ def main(config):
         return []
 
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            [render.Box(render.Text("Lichess Games", font = BIG_FONT), width = WIDTH, height = BIG_FONT_HEIGHT)] +
+            [render_row(game, render_config) for game in my_turn_correspondence],
+        ))) if is_square() else render.Column(
             [render.Box(render.Text("Lichess Games", font = BIG_FONT), width = WIDTH, height = BIG_FONT_HEIGHT)] +
             [render_row(game, render_config) for game in my_turn_correspondence],
         ),

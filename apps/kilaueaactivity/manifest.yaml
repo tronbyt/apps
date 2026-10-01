@@ -7,6 +7,7 @@ author: daveshilobod
 fileName: kilaueaactivity.star
 packageName: kilaueaactivity
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - science

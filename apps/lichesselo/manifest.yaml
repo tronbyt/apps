@@ -7,6 +7,7 @@ author: trbarron
 fileName: lichess_elo.star
 packageName: lichesselo
 recommendedInterval: 15
+supports64x64: true
 category: sports
 tags:
   - gaming

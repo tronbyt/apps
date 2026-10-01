@@ -7,6 +7,7 @@ author: alewando
 fileName: langtons_ant.star
 packageName: langtonsant
 recommendedInterval: 5
+supports64x64: true
 category: art
 tags:
   - art
