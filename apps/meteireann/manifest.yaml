@@ -7,6 +7,7 @@ author: vincentezw
 recommendedInterval: 5
 fileName: met_eireann.star
 packageName: meteireann
+supports64x64: true
 category: weather
 tags:
   - weather

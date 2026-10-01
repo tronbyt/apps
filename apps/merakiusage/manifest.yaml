@@ -7,6 +7,7 @@ author: UnBurn
 fileName: meraki_usage.star
 packageName: merakiusage
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech

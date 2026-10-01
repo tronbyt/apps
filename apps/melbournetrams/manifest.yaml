@@ -7,6 +7,7 @@ author: bendiep
 fileName: melbourne_trams.star
 packageName: melbournetrams
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags: []
 published: '2024-09-10T18:18:27Z'

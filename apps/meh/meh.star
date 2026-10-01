@@ -7,7 +7,7 @@ Author: hoop33
 
 load("http.star", "http")
 load("images/no_deal.png", NO_DEAL_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 MEH_URL = "https://meh.com/api/1/current.json?apikey="
@@ -29,6 +29,15 @@ def get_schema():
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     api_key = config.get("meh_api_key")
 
@@ -37,7 +46,44 @@ def main(config):
 
     return render.Root(
         delay = 150,
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render.Box(
+                    width = 32,
+                    height = 32,
+                    child = render.Image(
+                        src = image,
+                        width = 32,
+                        height = 32,
+                    ),
+                ),
+                render.Box(
+                    width = 32,
+                    height = 32,
+                    child = render.Padding(
+                        pad = (1, 0, 0, 0),
+                        child = render.Column(
+                            main_align = "space_around",
+                            children = [
+                                render.WrappedText(
+                                    content = deal["title"],
+                                    font = "tom-thumb",
+                                    color = "#0ff",
+                                    width = 32,
+                                    height = 24,
+                                ),
+                                render.Text(
+                                    content = "$" + str(deal["items"][0]["price"]),
+                                    font = "tom-thumb",
+                                    color = "#f00",
+                                ),
+                            ],
+                        ),
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render.Box(
                     width = 32,

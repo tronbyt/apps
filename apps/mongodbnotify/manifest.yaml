@@ -6,6 +6,7 @@ desc: Be sure to read the README.md which will walk you through the setup proces
 author: bsbishop
 fileName: mongodb_notify.star
 packageName: mongodbnotify
+supports64x64: true
 category: smart-home
 tags:
   - smart-home
