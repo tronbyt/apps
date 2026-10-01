@@ -7,6 +7,7 @@ author: wurtz
 fileName: sky_know.star
 packageName: skyknow
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather

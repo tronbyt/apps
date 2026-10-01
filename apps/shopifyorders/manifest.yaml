@@ -9,6 +9,7 @@ packageName: shopifyorders
 recommendedInterval: 5
 broken: true
 brokenReason: The API domain www.shopcounter.app no longer exists (DNS lookup failure).
+supports64x64: true
 category: utilities
 tags:
   - utility

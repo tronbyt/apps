@@ -7,6 +7,7 @@ author: Blkhwks19
 fileName: simple_scoreboard.star
 packageName: simplescoreboard
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - sports

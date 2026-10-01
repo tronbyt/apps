@@ -7,9 +7,18 @@ Author: nyergler
 
 load("encoding/csv.star", "csv")
 load("images/sfbf_icon.png", SFBF_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     route = config.str("route", "")
@@ -80,7 +89,30 @@ def main(config):
             displayTimes.append(render.Text(t))
 
     return render.Root(
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
+            expanded = True,
+            children = [
+                render.Marquee(
+                    child = render.Text(stop),
+                    width = 64,
+                ),
+                render.Row(
+                    cross_align = "center",
+                    expanded = True,
+                    children = [
+                        render.Image(
+                            src = ICON,
+                            width = 32,
+                        ),
+                        render.Column(
+                            expanded = True,
+                            children = displayTimes,
+                        ),
+                    ],
+                ),
+            ],
+        )))) if is_square() else render.Column(
             expanded = True,
             children = [
                 render.Marquee(

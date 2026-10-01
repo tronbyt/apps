@@ -7,6 +7,7 @@ author: jweier
 fileName: sleeperfantasynfl.star
 packageName: sleeperfantasynfl
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - media

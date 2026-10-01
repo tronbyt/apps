@@ -5,6 +5,7 @@ summary: SEPTA Regional Rail
 desc: Displays departure times for SEPTA regional rail.
 author: radiocolin
 supports2x: true
+supports64x64: true
 fileName: septaregionalrail.star
 packageName: septarr
 recommendedInterval: 5

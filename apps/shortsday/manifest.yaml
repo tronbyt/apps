@@ -6,6 +6,7 @@ desc: Checks forecast high for a location and tells you if it will be warm enoug
 author: riserperson
 fileName: shortsday.star
 packageName: shortsday
+supports64x64: true
 category: weather
 tags:
   - weather

@@ -5,6 +5,7 @@ summary: Displays shows in your area
 desc: Displays shows coming to your area.
 author: Robert Ison
 recommendedInterval: 720
+supports64x64: true
 category: clocks
 tags:
   - media

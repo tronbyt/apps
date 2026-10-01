@@ -7,6 +7,7 @@ author: tavdog
 fileName: shipsnearby.star
 packageName: shipsnearby
 recommendedInterval: 30
+supports64x64: true
 category: transit
 tags:
   - utility
