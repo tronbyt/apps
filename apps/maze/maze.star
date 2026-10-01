@@ -304,7 +304,7 @@ def main(config):
 
     if FRAME_BUDGET:
         solve_frames, hold = frames[:-HOLD_FRAMES], frames[-HOLD_FRAMES:]
-        step = max(1, len(solve_frames) // FRAME_BUDGET)
+        step = max(1, (len(solve_frames) + FRAME_BUDGET - 1) // FRAME_BUDGET)  # ceil: never more than the budget
         frames = solve_frames[::step] + hold[::2]
 
     animation = render.Animation(children = [frame_to_render(frame) for frame in frames])
