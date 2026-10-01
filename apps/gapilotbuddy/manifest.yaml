@@ -7,6 +7,7 @@ author: icdevin
 fileName: ga_pilot_buddy.star
 packageName: gapilotbuddy
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather

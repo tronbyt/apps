@@ -7,6 +7,7 @@ author: frame-shift
 fileName: fly_gene.star
 packageName: flygene
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - biology

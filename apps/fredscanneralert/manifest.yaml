@@ -8,6 +8,7 @@ fileName: fredscanner_alert.star
 packageName: fredscanneralert
 broken: true
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - news

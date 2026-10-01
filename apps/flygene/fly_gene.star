@@ -12,7 +12,7 @@ load("images/header.png", HEADER_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 # length in nucleotides of each chromosome
 CHROMO_LEN = {
@@ -37,13 +37,14 @@ def main():
 
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             main_align = "center",
             cross_align = "center",
             children = [
                 render.Animation(children = render_animation()),
             ],
-        ),
+        ))),
     )
 
 def get_gene():

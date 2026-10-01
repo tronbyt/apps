@@ -7,7 +7,7 @@ Author: dinosaursrarr
 
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -146,7 +146,8 @@ def main(config):
     return render.Root(
         max_age = 120,
         delay = REFRESH_MILLISECONDS,
-        child = make_animation(timezone),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = make_animation(timezone))),
     )
 
 def get_schema():

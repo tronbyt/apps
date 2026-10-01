@@ -7,6 +7,7 @@ author: Greg Worthing
 fileName: frog_desk.star
 packageName: frogdesk
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - pixel-art

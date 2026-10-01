@@ -7,6 +7,7 @@ author: Jake Manske
 fileName: flythel.star
 packageName: flythel
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - real-time
