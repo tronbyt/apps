@@ -92,11 +92,12 @@ def render_content(raw_data, fr):
     )
 
 # 1500 frames at 64x32 already takes a Raspberry Pi 3B 18-30 of the server's
-# 30 seconds. A square or wide panel has twice the pixels, and 750 frames
-# there still timed out on that hardware, so taller canvases get 500: about
-# 17 seconds of animation at 30fps, longer than any rotation slot, rendered
-# in roughly the time a 64x32 panel takes for the full 1500.
-FRAME_COUNT = 1500 if canvas.height() <= 32 else 500
+# 30 seconds, and the cost scales with pixels times frames. Larger canvases
+# get a frame budget of about two million pixel-frames -- 488 at 64x64, 244
+# at 128x64 -- which measured 18-28s on that hardware and is still eight or
+# more seconds of animation at 30fps, longer than any rotation slot. A 64x32
+# panel keeps the full 1500.
+FRAME_COUNT = 1500 if canvas.height() <= 32 else max(200, 2000000 // (canvas.width() * canvas.height()))
 
 def render_animated_content(raw_data):
     return render.Animation(
