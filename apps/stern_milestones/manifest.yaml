@@ -8,6 +8,7 @@ fileName: stern_milestones.star
 packageName: sternmilestones
 recommendedInterval: 360
 supports2x: true
+category: gaming
 tags:
   - pinball
 published: '2026-04-27T05:01:44Z'
