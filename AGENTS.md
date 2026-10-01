@@ -51,7 +51,44 @@ pixlet render apps/<appname>/<app_name>.star key=value
 - Default 1x font is `tb-8`; default 2x font is `terminus-16`.
 - **Animations:** If using `render.Marquee`, halve the delay for 2x to maintain scroll speed. If halving the delay speeds up embedded `render.Image` animations, use the image's `hold_frames` parameter to slow it back down.
 
-## 8. Reference Documentation
+## 8. Square (64x64) Panel Support
+Square panels render at **64x64**. They are a different canvas *shape*, not a
+higher resolution, so `canvas.is2x()` is **false** on them.
+
+There are three real canvases: `64x32` (classic), `128x64` (2x, `is2x()` true)
+and `64x64` (square, `is2x()` false).
+
+- **Tell panels apart by shape, never by size:**
+  ```starlark
+  WIDTH, HEIGHT = canvas.size()
+
+  def is_square():
+      w, h = canvas.size()
+      return h == w
+  ```
+  Do **not** test `HEIGHT == 64`: the 128x64 wide panel is also 64 tall. Do not
+  use heuristics on the aspect ratio either -- `h == w` is the definition.
+- **Declare the capability in `manifest.yaml`:**
+  ```yaml
+  supports64x64: true
+  ```
+  This is what puts the `64x64` badge on the app in the app store and lets
+  users filter for apps their display can show. CI fails an app that adapts its
+  layout for square panels without declaring the flag, so add it in the same
+  change as the layout work.
+- **Preview:**
+  ```sh
+  pixlet render -w 64 -t 64 -z 9 apps/<appname>/<app_name>.star -o apps/<appname>/<appname>@64x64.webp
+  ```
+  The `@64x64.webp` screenshot is optional. Unlike `@2x.webp` its presence does
+  not imply the capability -- a screenshot shows a preview exists, not that the
+  author checked the app on a square panel. `supports64x64` stays a manifest
+  assertion.
+- A square panel has twice the vertical room of a classic panel and the same
+  width, so the usual port is to stack what the 64x32 layout puts side by side,
+  or to show more rows of the same content.
+
+## 9. Reference Documentation
 - [Modules](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/modules.md) | [Widgets](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/widgets.md) | [Animation](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/animation.md) | [Schema](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/schema/schema.md) | [Filters](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/filters.md)
 - **Fonts**: Run `pixlet community list-fonts` or view the [Fonts Reference](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/fonts.md).
 - **Icons**: Run `pixlet community list-icons`.

@@ -7,9 +7,10 @@ author: plumbob86
 fileName: footballtable.star
 packageName: footballtable
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - nfl
   - football
 published: '2023-11-09T15:23:28Z'
-updated: '2026-09-03T04:51:47Z'
+updated: '2026-10-01T15:26:52Z'

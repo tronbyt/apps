@@ -7,9 +7,10 @@ author: Anthony Rocchio
 fileName: mlb_next_games.star
 packageName: mlbnextgames
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - mlb
   - baseball
 published: '2023-07-31T15:45:53Z'
-updated: '2026-09-03T04:50:15Z'
+updated: '2026-10-01T15:26:52Z'
