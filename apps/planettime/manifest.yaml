@@ -8,6 +8,7 @@ fileName: planet_time.star
 packageName: planettime
 minPixletVersion: v0.30.0
 supports2x: true
+supports64x64: true
 category: clocks
 tags:
   - space
@@ -15,4 +16,4 @@ tags:
   - planets
   - wide 2x support
 published: '2026-01-30T22:19:23Z'
-updated: '2026-01-31T04:11:54Z'
+updated: '2026-10-01T16:46:55Z'
