@@ -9,7 +9,7 @@ Description: Shows a timetable for a station in the Swiss Public Transport
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/error_icon.png", ERROR_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -116,8 +116,12 @@ def main(config):
                 break
 
         # Generate the board
+        # A departure row is about six pixels, so a 64x32 panel holds five and
+        # a square one holds ten. Bounded by what the API actually returned:
+        # the fixed five could already run off the end of a short response.
+        rows = 5 * canvas.height() // 32
         childRow = []
-        for i in range(startID, startID + 5):
+        for i in range(startID, min(startID + rows, len(resp["connections"]))):
             # Get the data from the response
             trainCategory = resp["connections"][i]["*G"]
             if trainCategory[0] == "S":
