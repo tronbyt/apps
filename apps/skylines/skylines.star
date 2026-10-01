@@ -59,6 +59,31 @@ def create_dot(x, y, color = "#fff"):
         ),
     )
 
+def extend_runs(runs, x, y, color):
+    """Add dot (x, y) to the run list, merging it into the last run when it
+    continues that vertical line."""
+    if runs:
+        last = runs[-1]
+        if last[0] == x and last[3] == color:
+            if y == last[2] + 1:
+                last[2] = y
+                return
+            if y == last[1] - 1:
+                last[1] = y
+                return
+    runs.append([x, y, y, color])
+
+def create_run(run):
+    x, y_top, y_bottom, color = run
+    return render.Padding(
+        pad = (x * SCALE, y_top * SCALE, 0, 0),
+        child = render.Box(
+            width = SCALE,
+            height = (y_bottom - y_top + 1) * SCALE,
+            color = color,
+        ),
+    )
+
 def start_from_top(y_top, y_bottom, current_pen_y):
     """
     Returns true if the next pass should start from the top, otherwise false
@@ -103,7 +128,7 @@ def get_column_bounds(screen, x, height):
 
 def draw_skyline(data, show_stars, colors):
     animation_frames = []
-    stacked_dots = []
+    runs = []
     star_locations = []
 
     width = len(data[0])
@@ -135,18 +160,20 @@ def draw_skyline(data, show_stars, colors):
                     potential_star_locations.append((i, randomize(0, sky)))
         star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
 
-    # Each frame re-composites every dot drawn so far, so the draw-in costs
-    # frames x dots. Panels with more than 64x32 pixels add a few dots per frame
-    # to keep the render inside the server deadline.
+    # Every frame re-composites everything drawn so far, so the draw-in costs
+    # frames x boxes. Dots arrive column by column, so consecutive dots are
+    # merged into one vertical-line Box each (pixel-identical, far fewer
+    # boxes); panels with more than 64x32 pixels also add a few dots per
+    # frame to stay inside the server deadline.
     for i in range(0, len(pixels), DOTS_PER_FRAME):
         for x, y, color in pixels[i:i + DOTS_PER_FRAME]:
-            stacked_dots.append(create_dot(x, y, color))
-        animation_frames.append(render.Stack(children = list(stacked_dots)))
+            extend_runs(runs, x, y, color)
+        animation_frames.append(render.Stack(children = [create_run(r) for r in runs]))
 
     # We increase the range to 100 so the "hold" lasts longer
     for frame_idx in range(100):
         # Start with the full city
-        this_frame_layers = list(stacked_dots)
+        this_frame_layers = [create_run(r) for r in runs]
 
         twinkle_frame_spacing = 12  # how many frames between star twinkles
 
