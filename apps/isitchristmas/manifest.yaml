@@ -7,6 +7,7 @@ author: Austin Fonacier
 fileName: is_it_christmas.star
 packageName: isitchristmas
 recommendedInterval: 5
+supports64x64: true
 category: lifestyle
 tags:
   - time
