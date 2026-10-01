@@ -7,6 +7,7 @@ author: tobyxdd
 fileName: stocks.star
 packageName: compactstocks
 recommendedInterval: 5
+supports64x64: true
 category: finance
 tags:
   - finance

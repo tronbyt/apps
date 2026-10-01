@@ -7,6 +7,7 @@ author: Andrew Hill
 fileName: comed_price.star
 packageName: comedprice
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - utility

@@ -7,6 +7,7 @@ author: Henry So, Jr.
 fileName: clock_by_henry.star
 packageName: clockbyhenry
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - clock

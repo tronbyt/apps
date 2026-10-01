@@ -6,6 +6,7 @@ desc: Display CPBL game status and final scores.
 author: yuping917
 fileName: cpbl_scoreboard.star
 packageName: cpblscoreboard
+supports64x64: true
 category: sports
 tags:
   - gaming

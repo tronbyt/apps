@@ -8,6 +8,7 @@ recommendedInterval: 5
 fileName: congress_watch.star
 packageName: congresswatch
 supports2x: true
+supports64x64: true
 category: news
 tags:
   - news

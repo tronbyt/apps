@@ -7,6 +7,7 @@ author: Daniel Segel
 fileName: clockwithseconds.star
 packageName: clockwithseconds
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - clock

@@ -8,6 +8,7 @@ recommendedInterval: 1
 fileName: cpi_tracker.star
 packageName: cpitracker
 supports2x: true
+supports64x64: true
 category: finance
 tags:
   - finance
