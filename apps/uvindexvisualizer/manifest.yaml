@@ -7,6 +7,7 @@ author: Dylan Stout
 fileName: uvindexvisualizer.star
 packageName: uvindexvisualizer
 supports2x: true
+category: weather
 published: '2026-06-30T19:20:59Z'
 updated: '2026-06-30T19:27:20Z'
 tags: []

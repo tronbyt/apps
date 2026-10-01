@@ -8,7 +8,7 @@ fileName: gc_daily_pick.star
 packageName: gcdailypick
 supports2x: true
 recommendedInterval: 10
-category: shopping
+category: finance
 tags:
   - music
   - utility

@@ -10,6 +10,8 @@ Author: jvivona
 # 20240223 fixed issue with PPD games showing before their scheduled start time
 # 20240802 added code to handle widgetMode - only show the 1st piece, no animations
 # 20240926 resolve issue where sometimes FT indicator from API is longer than can be displayed, override to show just FT
+# 20260927 on 2x displays, optional Team 2-4 pickers tile up to 4 teams at once in the selected display type
+#          on square 64x64 displays, an optional Team 2 picker stacks 2 teams
 
 # Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you
 # and thanks to @dinotash/@dinosaursrarr for making me think deep thoughts about connected schema fields
@@ -17,7 +19,7 @@ Author: jvivona
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -35,6 +37,8 @@ API = "https://site.api.espn.com/apis/site/v2/sports/soccer/%s/teams/%s"
 TEAM_SEARCH_API = "https://tidbyt.apis.ajcomputers.com/soccer/api/search/%s"
 DEFAULT_TEAM_DISPLAY = "visitor"  # default to Visitor first, then Home - US order
 DEFAULT_DISPLAY_SPEED = "2000"
+EXTRA_TEAM_KEYS = ("teamid2", "teamid3", "teamid4")  # 2x: all three; square: teamid2
+TILE_TEXT_INSET = 2  # LEDs the league / time line moves in from the edges when tiled
 
 SHORTENED_WORDS = """
 {
@@ -55,16 +59,60 @@ SHORTENED_WORDS = """
 
 def main(config):
     widgetMode = config.bool("$widget")
-    renderCategory = []
 
     # we already need now value in multiple places - so just go ahead and get it and use it
     timezone = time.tz()
     now = time.now().in_location(timezone)
 
-    if config.get("teamid"):
-        teamid = json.decode(config.get("teamid"))["value"]
+    team_ids = [str(get_team_id(config, "teamid") or DEFAULT_TEAM)]
+
+    # Extra teams each get their own 64x32 tile in the selected display type:
+    # Team 2-4 on a 2x display, Team 2 on a square one. Any others are ignored
+    # (settings can carry over from a different device).
+    for key in EXTRA_TEAM_KEYS[:extra_team_count()]:
+        tid = get_team_id(config, key)
+        if tid and str(tid) not in team_ids:
+            team_ids.append(str(tid))
+
+    # side-by-side tiles pull their league / time line in from the edges
+    inset_text = len(team_ids) > 1 and tile_columns() == 2
+
+    tiles = []
+    seen_events = {}
+    for teamid in team_ids:
+        frames = team_frames(config, teamid, timezone, now, seen_events, inset_text)
+        if len(frames) == 0:
+            continue
+        if widgetMode or len(frames) == 1:
+            tiles.append(frames[0])
+        else:
+            tiles.append(render.Animation(children = frames))
+
+    if len(tiles) == 0:
+        return []
+
+    # The classic styles are 64x32. On a bigger canvas they're laid out as crisp
+    # 64x32 tiles: 2x (128x64) - 1 centered, 2 side by side, 3 as two over one,
+    # 4 as 2x2; square (64x64) - 1 centered, 2 stacked.
+    if is_wide_canvas() or is_square():
+        root_child = tile_grid(tiles)
     else:
-        teamid = DEFAULT_TEAM
+        root_child = render.Column(children = [tiles[0]])
+
+    rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
+    return render.Root(
+        delay = rotationSpeed,
+        show_full_animation = True,
+        child = root_child,
+    ) if not widgetMode else render.Root(
+        child = root_child,
+    )
+
+def team_frames(config, teamid, timezone, now, seen_events, inset_text):
+    # One 64x32 frame per upcoming / current / past game for the team. When
+    # tiled side by side with other teams, the league / time line is inset from the edges.
+    inset = TILE_TEXT_INSET if inset_text else 0
+    renderCategory = []
 
     league = API % ("all", str(teamid))
     teamdata = get_scores(league)
@@ -78,9 +126,12 @@ def main(config):
         #logoType = config.get("logoType", "primary")
         timeColor = config.get("displayTimeColor", "#FFF")
 
-        rotationSpeed = int(config.get("displaySpeed", DEFAULT_DISPLAY_SPEED))
-
         for _, s in enumerate(scores):
+            # two picked teams playing each other share one tile
+            if s["id"] in seen_events:
+                continue
+            seen_events[s["id"]] = True
+
             gameStatus = s["competitions"][0]["status"]["type"]["state"]
             competition = s["competitions"][0]
             home = competition["competitors"][0]["team"]["abbreviation"]
@@ -272,7 +323,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -325,7 +376,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -366,7 +417,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -409,7 +460,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
@@ -452,28 +503,70 @@ def main(config):
                                     expanded = True,
                                     main_align = "end",
                                     cross_align = "center",
-                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr),
+                                    children = get_gametime_column(gameTime, timeColor, leagueAbbr, inset),
                                 ),
                             ],
                         ),
                     ],
                 )
 
-        return render.Root(
-            delay = rotationSpeed,
-            show_full_animation = True,
-            child = render.Column(
-                children = [
-                    render.Animation(
-                        children = renderCategory,
-                    ),
-                ],
-            ),
-        ) if not widgetMode else render.Root(
-            child = renderCategory[0],
-        )
-    else:
-        return []
+    return renderCategory
+
+def tile_grid(tiles):
+    # 1-LED black gutters between tiles. A tile's last column and top row only
+    # ever hold band color / logo (never text), so the left tile of a pair gives
+    # up its last column and second-row tiles give up their top row.
+    cols = tile_columns()
+    rows = []
+    for i in range(0, len(tiles), cols):
+        h = 32
+        if i > 0:
+            rows.append(render.Box(width = 64 * cols, height = 1, color = "#000000"))
+            h = 31
+
+        pair = tiles[i:i + cols]
+        if len(pair) == 2:
+            row = [tile_cell(pair[0], 63, h), render.Box(width = 1, height = h, color = "#000000"), tile_cell(pair[1], 64, h)]
+        else:
+            row = [tile_cell(pair[0], 64, h)]
+        rows.append(render.Row(children = row))
+    return render.Box(
+        width = canvas.width(),
+        height = canvas.height(),
+        color = "#000000",
+        child = render.Column(expanded = True, main_align = "center", cross_align = "center", children = rows),
+    )
+
+def tile_cell(tile, w, h):
+    # Clip a 64x32 tile to w x h, trimming from the right and (via negative
+    # padding) the top.
+    if h < 32:
+        tile = render.Padding(pad = (0, h - 32, 0, 0), child = tile)
+    return render.Box(width = w, height = h, child = tile)
+
+def is_wide_canvas():
+    # The device signals 2x via canvas.is2x(); CLI `-w 128 -t 64` reports width
+    # 128 but not is2x. Accept either so it works in local render tests too.
+    return canvas.is2x() or canvas.width() >= 128
+
+def is_square():
+    """Branch on canvas SHAPE, not size: a square panel reports 64x64 (a 2x
+    square one would be 128x128), so a bare size test gets it wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def tile_columns():
+    # 64x32 tiles per row: two across a 128-wide canvas, else one (stacked)
+    return 2 if canvas.width() >= 128 else 1
+
+def extra_team_count():
+    # How many of Team 2-4 the canvas has room for: 2x (and wider) panels fit a
+    # 2x2 grid of tiles, a square 64x64 panel fits two stacked, 1x fits one.
+    if is_wide_canvas():
+        return len(EXTRA_TEAM_KEYS)
+    if is_square():
+        return 1
+    return 0
 
 displayOptions = [
     schema.Option(
@@ -540,6 +633,19 @@ displaySpeeds = [
 ]
 
 def get_schema():
+    # The server builds the settings form with the device's canvas (size and
+    # 2x flag), so only the extra teams this display has room for are offered:
+    # Team 2-4 on 2x, Team 2 on a square panel, none on 1x.
+    extra_teams = []
+    for i in range(extra_team_count()):
+        extra_teams.append(schema.Typeahead(
+            id = EXTRA_TEAM_KEYS[i],
+            name = "Team %d (optional)" % (i + 2),
+            desc = "Add teams to show all their games at once",
+            icon = "futbol",
+            handler = search_teams,
+        ))
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -550,6 +656,7 @@ def get_schema():
                 icon = "futbol",
                 handler = search_teams,
             ),
+        ] + extra_teams + [
             schema.Dropdown(
                 id = "team_sequence",
                 name = "Display which team first?",
@@ -694,13 +801,19 @@ def get_shortened_display(text):
         text = text.replace(s, words[s])
     return text
 
-def get_gametime_column(gameTime, textColor, leagueAbbr):
+def get_gametime_column(gameTime, textColor, leagueAbbr, inset = 0):
     # I swear - this is the only way...
 
     gameTimeColumn = [
         render.WrappedText(width = 25, height = 6, content = leagueAbbr, linespacing = 1, font = "CG-pixel-3x5-mono", color = textColor, align = "center"),
-        render.WrappedText(width = 39, height = 6, content = get_shortened_display(gameTime), linespacing = 1, font = "CG-pixel-3x5-mono", color = textColor, align = "right"),
+        render.WrappedText(width = 39 - 2 * inset, height = 6, content = get_shortened_display(gameTime), linespacing = 1, font = "CG-pixel-3x5-mono", color = textColor, align = "right"),
     ]
+
+    # tiled on 2x: pull the league / time in from the tile edges so neighboring
+    # tiles' text doesn't run together (still 64 wide in total)
+    if inset > 0:
+        gameTimeColumn[0] = render.Padding(pad = (inset, 0, 0, 0), child = gameTimeColumn[0])
+        gameTimeColumn.append(render.Box(width = inset, height = 1))
     return gameTimeColumn
 
 def get_cachable_data(url):
@@ -709,3 +822,10 @@ def get_cachable_data(url):
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
     return res.body()
+
+def get_team_id(config, key):
+    # Typeahead values are stored as JSON: {"display": ..., "value": <team id>}
+    raw = config.get(key)
+    if not raw:
+        return None
+    return (json.decode(raw) or {}).get("value") or None
