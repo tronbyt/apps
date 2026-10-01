@@ -8,6 +8,7 @@ fileName: ha_split_flap.star
 packageName: ha_split_flap
 recommendedInterval: 60
 supports2x: true
+supports64x64: true
 category: smart-home
 tags:
   - retro

@@ -9,7 +9,7 @@ load("bsoup.star", "bsoup")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 SOURCE = "source"
@@ -236,7 +236,8 @@ def render_seats(predictions, source):
 
 def render_error(msg):
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Box(
                     width = 64,
@@ -259,7 +260,7 @@ def render_error(msg):
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
 def fetch_source(source):
@@ -368,7 +369,8 @@ def main(config):
 
     return render.Root(
         delay = 2000,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             cross_align = "center",
             children = [
                 render.Box(
@@ -388,7 +390,7 @@ def main(config):
                     child = render_seats(predictions, source),
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

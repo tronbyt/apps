@@ -7,6 +7,7 @@ author: gabe565
 fileName: hex_color_clock.star
 packageName: hexcolorclock
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - clock

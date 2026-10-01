@@ -7,7 +7,7 @@ Description: Shows today's Hebrew date, the weekly Torah portion, and candle lig
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -210,7 +210,8 @@ def clean_holiday_name(title):
 
 def render_error(msg):
     return render.Root(
-        child = render.Box(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
             width = 64,
             height = 32,
             child = render.WrappedText(
@@ -219,7 +220,7 @@ def render_error(msg):
                 color = COLOR_ERROR,
                 font = "tom-thumb",
             ),
-        ),
+        )),
     )
 
 def event_row(label, t, time_color):
@@ -771,12 +772,14 @@ def main(config):
 
     # ── Render ────────────────────────────────────────────────────────────────
     if len(slides) == 1:
-        return render.Root(max_age = 86400, child = slides[0])
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        return render.Root(max_age = 86400, child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = slides))[0])
 
     return render.Root(
         max_age = 86400,
         delay = SLIDE_DELAY_MS,
-        child = render.Animation(children = slides),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = slides))),
     )
 
 # ── Schema ────────────────────────────────────────────────────────────────────

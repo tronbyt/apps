@@ -6,7 +6,7 @@ Author: masonwongcs
 """
 
 load("images/animation.gif", ANIMATION_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ANIMATION = ANIMATION_ASSET.readall()
 
@@ -18,5 +18,6 @@ ANIMATION = ANIMATION_ASSET.readall()
 
 def main():
     return render.Root(
-        child = render.Image(src = ANIMATION),
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(src = ANIMATION)),
     )

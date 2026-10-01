@@ -5,6 +5,7 @@ summary: Homefiniti visitor stats
 desc: View live visitor stats of your Homefiniti-hosted website.
 author: Donald Mull Jr
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - sports

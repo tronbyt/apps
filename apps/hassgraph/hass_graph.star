@@ -6,7 +6,7 @@ load("images/img_7b76fdf3.bin", IMG_7b76fdf3_ASSET = "file")
 load("images/img_adff806b.svg", IMG_adff806b_ASSET = "file")
 load("images/img_fbe29b76.svg", IMG_fbe29b76_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -231,7 +231,8 @@ def get_time_period(input_str):
 def render_app(config, current_value, points, stats, unit, label):
     if config.bool("show_history"):
         return render.Root(
-            child = animation.Transformation(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = animation.Transformation(
                 child = render.Row(
                     children = [
                         render_graph_column(config, current_value, points, unit, label),
@@ -246,11 +247,12 @@ def render_app(config, current_value, points, stats, unit, label):
                     animation.Keyframe(curve = "ease_in", percentage = 0.2, transforms = [animation.Translate(-43, 0)]),
                     animation.Keyframe(curve = "ease_in", percentage = 1.0, transforms = [animation.Translate(-43, 0)]),
                 ],
-            ),
+            )),
         )
     else:
         return render.Root(
-            child = render_graph_column(config, current_value, points, unit, label),
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render_graph_column(config, current_value, points, unit, label)),
         )
 
 def round(num, precision):
@@ -292,7 +294,7 @@ def render_graph_column(config, current_value, points, unit, label):
             render.Plot(
                 data = points,
                 width = 64,
-                height = 18,
+                height = canvas.height() - 14,  # 18 under the 13-row header on 64x32
                 color = config.str("line_positive", DEFAULT_COLOURS["line_positive"]),
                 color_inverted = config.str("line_negative", DEFAULT_COLOURS["line_negative"]),
                 fill_color = config.str("fill_positive", DEFAULT_COLOURS["fill_positive"]),
@@ -328,7 +330,8 @@ def render_stats_column(stats, unit):
 
 def render_error_message(message):
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Box(child = render.Image(src = ICONS["ha"], width = 15, height = 15), height = 15),
                 render.WrappedText(
@@ -339,7 +342,7 @@ def render_error_message(message):
                     width = 64,
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

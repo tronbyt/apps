@@ -8,7 +8,7 @@ Author: Anthony Rocchio
 load("images/ghost_gif.gif", GHOST_GIF_ASSET = "file")
 load("images/jack_gif.gif", JACK_GIF_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 GHOST_GIF = GHOST_GIF_ASSET.readall()
@@ -35,7 +35,8 @@ def main():
 
     return render.Root(
         delay = 500,
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             main_align = "center",
             cross_align = "center",
             expanded = True,
@@ -57,5 +58,5 @@ def main():
                     height = 35,
                 ),
             ],
-        ),
+        )),
     )

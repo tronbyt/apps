@@ -107,7 +107,8 @@ def main(config):
 
     if not entity_status:
         return render.Root(
-            child = render.WrappedText("Config missing or API error", color = "#ff0000"),
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Config missing or API error", color = "#ff0000")),
         )
 
     status = entity_status.get("state")
@@ -164,7 +165,8 @@ def main(config):
 
     return render.Root(
         delay = 50 if scale == 1 else 25,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Padding(
                     pad = (pad, 2, 0 if show_art else pad, 0),
@@ -190,7 +192,7 @@ def main(config):
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

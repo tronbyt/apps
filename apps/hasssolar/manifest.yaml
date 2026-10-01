@@ -8,6 +8,7 @@ fileName: hass_solar.star
 packageName: hasssolar
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 minPixletVersion: v0.49.0
 category: utilities
 tags:
