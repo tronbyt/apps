@@ -8,6 +8,7 @@ fileName: dense_time_temp.star
 packageName: densetimetemp
 recommendedInterval: 5
 broken: true
+supports64x64: true
 category: weather
 tags:
   - clock

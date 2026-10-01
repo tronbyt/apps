@@ -7,6 +7,7 @@ author: Robert Ison
 fileName: currencyconverter.star
 packageName: currencyconverter
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - finance

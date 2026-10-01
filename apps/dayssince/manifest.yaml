@@ -7,6 +7,7 @@ author: Drew Tschetter
 recommendedInterval: 60
 fileName: days_since.star
 packageName: dayssince
+supports64x64: true
 category: utilities
 tags:
   - clock

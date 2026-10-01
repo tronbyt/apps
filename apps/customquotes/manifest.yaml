@@ -7,6 +7,7 @@ author: vipulchhajer
 fileName: custom_quotes.star
 packageName: customquotes
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - art

@@ -29,7 +29,7 @@ load("images/windsock_3.png", WINDSOCK_3_ASSET = "file")
 load("images/windsock_4.png", WINDSOCK_4_ASSET = "file")
 load("images/windsock_5.png", WINDSOCK_5_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -367,6 +367,8 @@ def display_instructions(config):
 
     return render.Root(
         render.Column(
+            expanded = True,
+            main_align = "center",
             children = [
                 render.Marquee(
                     width = 64,
@@ -527,10 +529,11 @@ def main(config):
     display_items.append(add_padding_to_child_element(render.Box(color = "#000", height = info_box_height - 4, width = info_box_width - 4), 51, 19 + height_offset))
     display_items.append(add_padding_to_child_element(render.Text(display_humidity, font = "CG-pixel-3x5-mono", color = "#fff"), 49 + centering_additional_offet, 19 + height_offset))
 
+    # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
     return render.Root(
-        render.Stack(
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = display_items,
-        ),
+        ))),
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
     )

@@ -7,6 +7,7 @@ author: dinosaursrarr
 fileName: cuneiform.star
 packageName: cuneiform
 recommendedInterval: 5
+supports64x64: true
 category: reference
 tags:
   - ancient

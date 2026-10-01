@@ -7,6 +7,7 @@ author: Cavallando
 fileName: datadog_monitors.star
 packageName: datadogmonitors
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tracking

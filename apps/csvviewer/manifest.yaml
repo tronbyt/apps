@@ -7,6 +7,7 @@ author: Teo Fleming @mokolodi1
 fileName: csvviewer.star
 packageName: csvviewer
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech

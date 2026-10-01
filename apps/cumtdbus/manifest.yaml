@@ -6,6 +6,7 @@ desc: Real time bus tacker for CUMTD.
 author: Nol6n
 fileName: cumtd_bus.star
 packageName: cumtdbus
+supports64x64: true
 category: transit
 tags:
   - transportation
