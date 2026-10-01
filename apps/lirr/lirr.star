@@ -31,7 +31,7 @@ def is_square():
     w, h = canvas.size()
     return h == w
 
-TRAINS = 4 if is_square() else 2
+TRAINS = 3 if is_square() else 2
 
 def main(config):
     station_id = config.str("station")
@@ -52,8 +52,11 @@ def main(config):
     if len(stops) == 1:
         return render.Root(child = renderTrain(gtfs, stops[0]))
 
-    # A train is 15 rows plus a rule: two fit on a 64x32 panel, four on a
-    # square one, bounded by what the station actually has coming.
+    # A train is 15 rows plus a rule: two fit on a 64x32 panel, three on a
+    # square one with room to spare, bounded by what the station actually
+    # has coming. Four fit too, but each train is its own marquee over a
+    # GTFS feed downloaded per render, and four of them timed out on a
+    # Raspberry Pi 3B.
     shown = min(len(stops), TRAINS)
     children = []
     for i in range(shown):
