@@ -77,6 +77,15 @@ def convert_point_for_map(point, offset, height):
     converted_y = height - point[1] + offset[3]
     return converted_x, converted_y
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, and being 2:1 it fits the mainland without stretching it.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Holds the coordinates of the outline of the different maps
     mainland_coordinates = []
@@ -128,12 +137,30 @@ def main(config):
     font = "terminus-14" if is2x else "CG-pixel-3x5-mono"
     dot_size = 1  #if is2x else 1
 
+    # The mainland is about twice as wide as it is tall, so a canvas that is
+    # 2:1 fits it almost exactly and a square one would stretch it by half as
+    # much again. On a square panel the map keeps its own proportions and is
+    # centred instead, and the Alaska and Hawaii insets move down with it so
+    # they stay beside the coast rather than floating above the map.
+    map_width = width - 3
+    map_height = height - 2
+
+    # The plot is canvas-sized and the normalised map sits against the bottom
+    # of it, so this padding is what lifts the map into place -- which is why
+    # it is negative.
+    map_lift = -2
+    inset_lift = 0
+    if is_square():
+        map_height = map_width // 2
+        map_lift = -((height - map_height) // 2)
+        inset_lift = map_lift
+
     # This map of USA includes Alaska and Hawaii
     # Offset for Mainland, Hawaii, Alaska - width of map, height of map, move right, move up
     offsets = [
-        [width - 3, height - 2, 4, -2],
-        [16, 16, 20, -2] if is2x else [10, 10, 10, 0],
-        [20, 20, 2, -2] if is2x else [12, 12, 0, 0],
+        [map_width, map_height, 4, map_lift],
+        [16, 16, 20, -2 + inset_lift] if is2x else [10, 10, 10, inset_lift],
+        [20, 20, 2, -2 + inset_lift] if is2x else [12, 12, 0, inset_lift],
     ]
 
     # now that we figured out the bounds for each geographic area, we can
