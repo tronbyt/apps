@@ -7,6 +7,7 @@ author: Robert Ison
 recommendedInterval: 5
 fileName: greek_letters.star
 packageName: greekletters
+supports64x64: true
 category: education
 tags:
   - education

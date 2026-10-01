@@ -7,6 +7,7 @@ author: tavdog
 recommendedInterval: 5
 fileName: github_repos.star
 packageName: githubrepos
+supports64x64: true
 category: utilities
 tags:
   - tech

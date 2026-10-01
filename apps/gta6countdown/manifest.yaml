@@ -8,6 +8,7 @@ fileName: gta_6_countdown.star
 packageName: gta6countdown
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: gaming
 tags:
   - gaming

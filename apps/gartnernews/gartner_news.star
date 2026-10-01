@@ -7,7 +7,7 @@ Author: Robert Ison
 
 load("http.star", "http")  #HTTP Client
 load("images/gartner_logo.png", GARTNER_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")  #XPath Expressions to read XML RSS Feed
 
@@ -59,7 +59,8 @@ def main(config):
                 display_text[marquee_row] = "%s - %s" % (display_text[marquee_row], current_title)
 
     return render.Root(
-        render.Column(
+        # Centre the block on taller panels (64x64).
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Row(
                     children = [
@@ -97,7 +98,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
     )

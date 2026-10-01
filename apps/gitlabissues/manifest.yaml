@@ -7,6 +7,7 @@ author: Sven Ringger
 fileName: gitlab_issues.star
 packageName: gitlabissues
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech

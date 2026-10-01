@@ -7,7 +7,7 @@ Author: ElliottAYoung
 
 load("http.star", "http")
 load("images/github_image.png", GITHUB_IMAGE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 GITHUB_IMAGE = GITHUB_IMAGE_ASSET.readall()
@@ -34,7 +34,8 @@ def render_notifications(count):
         notification_word = "Notifications"
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Padding(
                     pad = (0, 2, 0, 0),
@@ -63,12 +64,13 @@ def render_notifications(count):
                     ],
                 ),
             ],
-        ),
+        ))),
     )
 
 def render_error(err):
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Padding(
                     pad = (0, 2, 0, 0),
@@ -86,7 +88,7 @@ def render_error(err):
                     ),
                 ),
             ],
-        ),
+        ))),
     )
 
 def main(config):

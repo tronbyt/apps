@@ -7,6 +7,7 @@ author: Sunny Ng
 fileName: goodservice.star
 packageName: goodservice
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - local

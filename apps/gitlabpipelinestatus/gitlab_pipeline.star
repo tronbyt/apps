@@ -12,7 +12,7 @@ load("images/failed.png", FAILED_ASSET = "file")
 load("images/manual.png", MANUAL_ASSET = "file")
 load("images/running.png", RUNNING_ASSET = "file")
 load("images/success.png", SUCCESS_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CANCELED = CANCELED_ASSET.readall()
@@ -39,10 +39,11 @@ def main(config):
         ],
     )
     return render.Root(
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             children =
                 [ICON, padding, box],
-        ),
+        )),
     )
 
 def get_pipeline_status(accesstoken, id, ref):

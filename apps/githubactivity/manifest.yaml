@@ -7,6 +7,7 @@ author: rs7q5
 fileName: github_activity.star
 packageName: githubactivity
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech

@@ -7,12 +7,12 @@ Author: Jeffrey Lancaster
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-PIXLET_W = 64
-PIXLET_H = 32
+PIXLET_W = canvas.width()
+PIXLET_H = canvas.height()
 GLOBAL_FONT = "tom-thumb"  # or "CG-pixel-3x5-mono"
 
 def median(val1, val2):
