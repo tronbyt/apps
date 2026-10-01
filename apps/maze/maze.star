@@ -15,11 +15,13 @@ load("schema.star", "schema")
 GRID_ROWS = canvas.height() // 2 - 1
 GRID_COLS = canvas.width() // 2 - 1
 
-# A bigger maze means a longer solve; panels keep one frame per 64x32-worth of
-# pixels (every other frame on 64x64, every fourth on 128x64) so the animation
-# stays inside the server's render deadline on a Pi-class host - the solve just
-# plays faster.
-FRAME_STEP = max(1, (canvas.width() * canvas.height()) // (64 * 32))
+# A bigger maze means a longer solve, and every frame costs more pixels, so
+# panels larger than 64x32 get a frame budget (100 on 64x64, 50 on 128x64;
+# the solve just plays faster) to stay inside the server's render deadline
+# on a Pi-class host. 0 keeps every frame, which is what 64x32 does.
+PANEL_UNITS = (canvas.width() * canvas.height()) // (64 * 32)
+FRAME_BUDGET = 0 if PANEL_UNITS <= 1 else 200 // PANEL_UNITS
+HOLD_FRAMES = 50
 
 # Returns False if there is no cell to the east
 # or the cell itself.
@@ -185,7 +187,7 @@ def solve(colors, grid, row, col, path, maze_frame, frames):
     frames.append(copy_frame(colors, maze_frame, path))
 
     if row == GRID_ROWS - 1 and col == GRID_COLS - 1:
-        for _ in range(0, 50):
+        for _ in range(0, HOLD_FRAMES):
             frames.append(copy_frame(colors, maze_frame, path))
         return True
 
@@ -300,6 +302,11 @@ def main(config):
     frames = []
     solve(colors, grid, 0, 0, path, maze_frame, frames)
 
-    animation = render.Animation(children = [frame_to_render(frame) for frame in frames[::FRAME_STEP]])
+    if FRAME_BUDGET:
+        solve_frames, hold = frames[:-HOLD_FRAMES], frames[-HOLD_FRAMES:]
+        step = max(1, len(solve_frames) // FRAME_BUDGET)
+        frames = solve_frames[::step] + hold[::2]
+
+    animation = render.Animation(children = [frame_to_render(frame) for frame in frames])
 
     return render.Root(child = animation)
