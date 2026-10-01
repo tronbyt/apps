@@ -8,6 +8,7 @@ fileName: twitch_live.star
 packageName: twitchlive
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - gaming
