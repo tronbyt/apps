@@ -7,6 +7,7 @@ author: TomForeman86
 recommendedInterval: 5
 fileName: octowatts.star
 packageName: OctoWatts
+supports64x64: true
 category: utilities
 tags:
   - utility

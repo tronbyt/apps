@@ -7,6 +7,7 @@ author: M0ntyP
 fileName: afl_scores.star
 packageName: aflscores
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - afl

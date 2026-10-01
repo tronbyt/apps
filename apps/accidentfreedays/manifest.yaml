@@ -7,6 +7,7 @@ author: Robert Ison
 fileName: accidentfreedays.star
 packageName: accidentfreedays
 recommendedInterval: 240
+supports64x64: true
 category: utilities
 tags:
   - lifestyle

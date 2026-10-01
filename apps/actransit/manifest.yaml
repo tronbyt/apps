@@ -7,6 +7,7 @@ author: wshue0
 fileName: ac_transit.star
 packageName: actransit
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - real-time

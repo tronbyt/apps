@@ -13,22 +13,24 @@ the whole time. After the lived months are filled, the grid holds before the
 Tidbyt loops the animation.
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 # --- Layout -----------------------------------------------------------------
 LIFESPAN_YEARS = 82
 TOTAL_MONTHS = LIFESPAN_YEARS * 12  # 984
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 
 # Cells are 2px wide x 1px tall, 32 per row. 32 cols * 2px == 64px (full width).
 # 984 months span 31 rows (30 * 32 + 24), so the grid is 64x31 -- essentially the
 # whole panel, with the last row holding the final 24 months.
 COLS = 32
-CELL_W = 2
-CELL_H = 1
+
+# Cells scale with the panel: 2x1 on 64x32, 2x2 on 64x64, 4x2 on 128x64.
+CELL_W = WIDTH // COLS
+CELL_H = HEIGHT // 32
 ROWS = (TOTAL_MONTHS + COLS - 1) // COLS  # 31
 GRID_W = COLS * CELL_W  # 64
 GRID_H = ROWS * CELL_H  # 31

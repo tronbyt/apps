@@ -7,6 +7,7 @@ author: Jed Schmidt
 fileName: airbnb_calendar.star
 packageName: airbnbcalendar
 recommendedInterval: 60
+supports64x64: true
 category: utilities
 tags:
   - tech

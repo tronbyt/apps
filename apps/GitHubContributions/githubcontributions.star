@@ -162,8 +162,8 @@ def get_phased_graph(grid):
 
     cols = len(grid[0])
     graph_width = get_graph_width(cols)
-    screen_width = 128 if canvas.is2x() else 64
-    screen_height = 64 if canvas.is2x() else 32
+    screen_width = canvas.width()
+    screen_height = canvas.height()
 
     # Corrected to ensure the graph starts with a little buffer, so you don't miss the first few weeks of contributions. The graph will scroll from -leading_space to max_scroll, giving a nice entrance effect.
     leading_space = screen_width // 8
@@ -209,7 +209,7 @@ def main(config):
     if not username or not token:
         return render.Root(
             child = render.Marquee(
-                width = 128 if canvas.is2x() else 64,
+                width = canvas.width(),
                 child = render.Text("Enter username & token"),
             ),
         )

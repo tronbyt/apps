@@ -8,5 +8,6 @@ fileName: agetracker.star
 packageName: agetracker
 published: '2026-06-30T19:20:53Z'
 updated: '2026-06-30T19:27:20Z'
+supports64x64: true
 category: utilities
 tags: []

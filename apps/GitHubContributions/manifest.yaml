@@ -8,6 +8,7 @@ fileName: githubcontributions.star
 packageName: githubcontributions
 recommendedInterval: 60
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - tech

@@ -8,6 +8,7 @@ fileName: 3cellularautomata.star
 packageName: 3cellularautomata
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - art

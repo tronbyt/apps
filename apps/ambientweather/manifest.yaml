@@ -7,6 +7,7 @@ author: Jon Maddox
 fileName: ambient_weather.star
 packageName: ambientweather
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather

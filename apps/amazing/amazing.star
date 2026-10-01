@@ -6,20 +6,21 @@ Author: dinosaursrarr
 """
 
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-# Tidbyt size is fixed
-WIDTH_CELLS = 32
-HEIGHT_CELLS = 16
+# Each cell is 2x2 pixels, so the maze fills whatever panel it is drawn on.
+WIDTH_CELLS = canvas.width() // 2
+HEIGHT_CELLS = canvas.height() // 2
 
 # Display final result for longer than intermediate steps.
 FINAL_FRAME_LENGTH = 40
 
 # Determines how many cells to add in each frame of animation. Higher values
 # mean faster render times but less smooth animations.
-STEP_SIZE = 8
+# Scaled with the cell count so bigger panels keep the same frame count.
+STEP_SIZE = 8 * max(1, (WIDTH_CELLS * HEIGHT_CELLS) // 512)
 
 # make lint doesn't allow while loops, so workaround with large finite limit.
 MAX_STEPS = 1000000
