@@ -7,6 +7,7 @@ author: Rory Sawyer
 fileName: defector.star
 packageName: defector
 recommendedInterval: 10
+supports64x64: true
 category: entertainment
 tags:
   - news

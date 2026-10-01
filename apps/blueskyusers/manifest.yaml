@@ -7,6 +7,7 @@ author: Daniel Sitnik
 recommendedInterval: 5
 fileName: bluesky_users.star
 packageName: blueskyusers
+supports64x64: true
 category: utilities
 tags:
   - media

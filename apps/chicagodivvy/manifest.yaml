@@ -7,6 +7,7 @@ author: wilcot
 fileName: chicago_divvy.star
 packageName: chicagodivvy
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - utility
