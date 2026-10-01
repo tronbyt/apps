@@ -22,7 +22,7 @@ SCALE = min(SCREEN_WIDTH // BASE_WIDTH, SCREEN_HEIGHT // BASE_HEIGHT)
 #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
 DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
 NUMBER_OF_STARS = 5
-DOTS_PER_FRAME = 1 if SCREEN_WIDTH * SCREEN_HEIGHT <= 64 * 32 else 3
+DOTS_PER_FRAME = 1 if SCREEN_WIDTH * SCREEN_HEIGHT <= 64 * 32 else 6
 
 display_type = [
     schema.Option(display = "Display a Random City", value = "Random"),
