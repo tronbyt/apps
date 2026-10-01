@@ -7,6 +7,7 @@ author: Jordan Fitzpatrick
 recommendedInterval: 5
 fileName: neo_tracker.star
 packageName: neotracker
+supports64x64: true
 category: science
 tags:
   - space

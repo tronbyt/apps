@@ -13,11 +13,24 @@ Updated abbreviations
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LADDER_URL = "https://www.nrl.com/ladder//data?competition=111"
 LADDER_CACHE = 600
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+# Four 7px team rows fit under the 5px heading on a 64x32 panel; a square
+# panel has the rows for eight, so it shows twice as many per page.
+ROW_SCALE = 2 if is_square() else 1
 
 def main(config):
     RotationSpeed = config.get("speed", "3")
@@ -29,7 +42,7 @@ def main(config):
     LadderData = get_cachable_data(LADDER_URL, LADDER_CACHE)
     LadderJSON = json.decode(LadderData)
 
-    for x in range(0, 17, teamsToShow):
+    for x in range(0, 17, teamsToShow * ROW_SCALE):
         renderCategory.extend(
             [
                 render.Column(
@@ -77,7 +90,7 @@ def get_screen(x, LadderJSON):
     ]
     output.extend(heading)
 
-    for i in range(0, 4):
+    for i in range(0, 4 * ROW_SCALE):
         if i + x < len(s):
             TeamName = s[i + x]["teamNickname"]
             TeamPts = str(s[i + x]["stats"]["points"])
