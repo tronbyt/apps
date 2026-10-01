@@ -7,6 +7,7 @@ author: Alan Moore
 fileName: today_in_history.star
 packageName: todayinhistory
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - education

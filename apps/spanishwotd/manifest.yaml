@@ -7,6 +7,7 @@ author: logancornelius
 fileName: spanish_wotd.star
 packageName: spanishwotd
 recommendedInterval: 5
+supports64x64: true
 category: education
 tags:
   - education

@@ -7,6 +7,7 @@ author: Sebastian Ekström
 fileName: sveriges_radio.star
 packageName: sverigesradio
 recommendedInterval: 10
+supports64x64: true
 category: entertainment
 tags:
   - real-time

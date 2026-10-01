@@ -6,13 +6,52 @@ Author: blaiseAI
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 API_URL = "https://bible-api.com/?random=verse&translation={}"
 
 DEFAULT_TRANSLATION = "kjv"
 DEFAULT_REFERENCE_COLOR = "#00FF00"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def verse(text):
+    """The verse under the reference.
+
+    On a 64x32 panel it is one line scrolled sideways. A square panel has
+    the rows to wrap it to the panel width and scroll it up instead.
+    """
+    if is_square():
+        return render.Marquee(
+            height = canvas.height() - 6,
+            scroll_direction = "vertical",
+            offset_start = canvas.height() - 6,
+            offset_end = canvas.height() - 6,
+            child = render.WrappedText(
+                content = text,
+                width = 64,
+                color = "#FFFFFF",
+                font = "tb-8",
+                linespacing = 1,
+            ),
+        )
+    return render.Marquee(
+        width = 64,
+        height = 32,
+        child = render.Text(
+            content = text,
+            color = "#FFFFFF",
+            font = "tb-8",
+        ),
+    )
 
 def main(config):
     translation = config.get("translation", DEFAULT_TRANSLATION)
@@ -38,15 +77,7 @@ def main(config):
                     color = color,
                     font = "CG-pixel-3x5-mono",
                 ),
-                render.Marquee(
-                    width = 64,
-                    height = 32,
-                    child = render.Text(
-                        content = verse_text,
-                        color = "#FFFFFF",
-                        font = "tb-8",
-                    ),
-                ),
+                verse(verse_text),
             ],
         ),
     )

@@ -34,7 +34,10 @@ ARTICLE_SUB_TITLE_FONT = "tb-8" if IS2X else "tom-thumb"
 ARTICLE_SUB_TITLE_COLOR = "#ff8c00"
 ARTICLE_COLOR = "#00eeff"
 SPACER_COLOR = "#000"
-ARTICLE_AREA_HEIGHT = 55 if IS2X else 24
+
+# The rows under the title. 24 at 64x32 and 55 at 128x64 as before; 57 on a
+# 64x64 square panel, which reports is2x() false and is sized here by height.
+ARTICLE_AREA_HEIGHT = canvas.height() - TITLE_HEIGHT - (0 if IS2X else 1)
 SPACER_HEIGHT = 6 if IS2X else 3
 
 # data is regenerated through the day with a freshly shuffled item ordering - cache 1 hour so each refresh

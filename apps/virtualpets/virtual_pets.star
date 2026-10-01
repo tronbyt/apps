@@ -15,7 +15,7 @@ load("images/spring_444b637d.png", SPRING_444b637d_ASSET = "file")
 load("images/summer_7b049e9c.png", SUMMER_7b049e9c_ASSET = "file")
 load("images/winter_b0402df9.png", WINTER_b0402df9_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -76,24 +76,33 @@ def main(config):
     else:
         name_shadow, name_name = [None, None]
 
-    # Render for display
+    # Render for display. The scene is 64x32 artwork; on a taller panel it
+    # sits in the middle.
     return render.Root(
         delay = ani_delay,
-        child = render.Stack(
-            children = [
-                # Background
-                render_bg(season, period),
-                # Filter for scene
-                filter,
-                # Pet action
-                ani_action,
-                # Filter for pet
-                filter,
-                # Row for name shadow
-                name_shadow,
-                # Row for name
-                name_name,
-            ],
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = [
+                        # Background
+                        render_bg(season, period),
+                        # Filter for scene
+                        filter,
+                        # Pet action
+                        ani_action,
+                        # Filter for pet
+                        filter,
+                        # Row for name shadow
+                        name_shadow,
+                        # Row for name
+                        name_name,
+                    ],
+                ),
+            ),
         ),
     )
 

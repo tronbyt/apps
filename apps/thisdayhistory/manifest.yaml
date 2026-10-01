@@ -8,6 +8,7 @@ recommendedInterval: 5
 fileName: this_day_history.star
 packageName: thisdayhistory
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - education
