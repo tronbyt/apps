@@ -8,7 +8,7 @@ Author: PMK (@pmk)
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/background_image.gif", BACKGROUND_IMAGE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -99,11 +99,30 @@ def render_animated_content(raw_data):
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     is_animating = config.bool("is_animating", DEFAULT_IS_ANIMATING)
     has_background_image = config.bool("has_background_image", DEFAULT_HAS_BACKGROUND_IMAGE)
 
     raw_data = get_data()["data"]
+
+    # The flag is a 68x50 image cropped to a 64x32 panel; a square panel has
+    # the rows for all 50 of it, so it is centred rather than cropped, and
+    # the five lines of figures are centred over it instead of top-aligned.
+    if is_square():
+        image_pad = (-2, (canvas.height() - 50) // 2, 0, 0)
+        content_pad = (3, (canvas.height() - 31) // 2, 0, 0)
+    else:
+        image_pad = (-5, -9, 0, 0)
+        content_pad = (3, 1, 0, 0)
 
     conditional_background_image_elements = []
     if has_background_image:
@@ -111,7 +130,7 @@ def main(config):
             render.Stack(
                 children = [
                     render.Padding(
-                        pad = (-5, -9, 0, 0),
+                        pad = image_pad,
                         child = render.Image(
                             src = BACKGROUND_IMAGE,
                             width = 68,
@@ -119,8 +138,8 @@ def main(config):
                         ),
                     ),
                     render.Box(
-                        width = 64,
-                        height = 32,
+                        width = canvas.width(),
+                        height = canvas.height(),
                         color = "#000B",
                     ),
                 ],
@@ -129,7 +148,7 @@ def main(config):
 
     conditional_background_image_elements.append(
         render.Padding(
-            pad = (3, 1, 0, 0),
+            pad = content_pad,
             child = render_animated_content(raw_data) if is_animating else render_content(raw_data, 1),
         ),
     )

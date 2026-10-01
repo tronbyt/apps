@@ -7,6 +7,7 @@ author: dev-manuel
 fileName: germanpartypolls.star
 packageName: germanpartypolls
 recommendedInterval: 5
+supports64x64: true
 category: news
 tags:
   - polls

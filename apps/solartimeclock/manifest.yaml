@@ -7,6 +7,7 @@ author: Daniel Sitnik
 fileName: solar_time_clock.star
 packageName: solartimeclock
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - utility
