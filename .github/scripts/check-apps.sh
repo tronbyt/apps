@@ -52,9 +52,11 @@ check_square_flag() {
     fi
 
     # Shape-aware apps are identified by the is_square() convention (either a
-    # local helper or canvas.is_square()). Apps that render identically at any
-    # aspect ratio need no flag.
-    if ! grep -rqE 'is_square' "$target" --include='*.star'; then
+    # local helper or canvas.is_square()), or by comparing the canvas
+    # dimensions directly, so an app that spells the test its own way is still
+    # caught. Apps that render identically at any aspect ratio need no flag.
+    if ! grep -rqE 'is_square|canvas\.(width|height)\(\) *== *canvas\.(height|width)\(\)' \
+        "$target" --include='*.star'; then
         return 0
     fi
 
