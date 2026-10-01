@@ -7,6 +7,7 @@ author: theterg
 fileName: nyc_air_quality.star
 packageName: nycairquality
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather

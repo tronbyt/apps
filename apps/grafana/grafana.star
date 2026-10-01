@@ -8,7 +8,7 @@ Author: tavdog
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -100,8 +100,8 @@ def main(config):
                 y_lim = (float(min), float(max))
             feed_graph = render.Plot(
                 data = points,
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 color = config.str("graph_color", "#00c"),
                 y_lim = y_lim,
             )
@@ -122,8 +122,8 @@ def main(config):
                 y2_lim = (float(min), float(max))
             feed2_graph = render.Plot(
                 data = points,
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 color = config.str("graph2_color", "#00c"),
                 y_lim = y2_lim,
             )
