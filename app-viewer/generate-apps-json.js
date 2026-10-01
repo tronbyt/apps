@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs';
 import { join, extname, dirname, basename } from 'path';
+import { createHash } from 'crypto';
 import { load } from 'js-yaml';
 import { fileURLToPath } from 'url';
 
@@ -22,6 +23,81 @@ const outputDir = dirname(outputFile);
 const OUTPUT_FILE = outputFile;
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
+
+function normalizeAuthor(author) {
+  return author
+    .normalize('NFKC')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLocaleLowerCase('en-US');
+}
+
+function slugifyAuthor(authorKey) {
+  const slug = authorKey
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return slug || 'author';
+}
+
+function buildAuthorProfiles(apps) {
+  const profilesByKey = new Map();
+
+  for (const app of apps) {
+    if (!app.author || !app.author.trim()) continue;
+
+    const authorKey = normalizeAuthor(app.author);
+    let profile = profilesByKey.get(authorKey);
+    if (!profile) {
+      profile = {
+        key: authorKey,
+        displayNames: new Map(),
+        apps: []
+      };
+      profilesByKey.set(authorKey, profile);
+    }
+
+    profile.displayNames.set(app.author, (profile.displayNames.get(app.author) || 0) + 1);
+    profile.apps.push(app);
+  }
+
+  const profiles = [...profilesByKey.values()];
+  const profilesByBaseSlug = new Map();
+
+  for (const profile of profiles) {
+    profile.displayName = [...profile.displayNames.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0];
+    profile.baseSlug = slugifyAuthor(profile.key);
+
+    const matches = profilesByBaseSlug.get(profile.baseSlug) || [];
+    matches.push(profile);
+    profilesByBaseSlug.set(profile.baseSlug, matches);
+  }
+
+  for (const matchingProfiles of profilesByBaseSlug.values()) {
+    for (const profile of matchingProfiles) {
+      profile.slug = matchingProfiles.length === 1
+        ? profile.baseSlug
+        : `${profile.baseSlug}-${createHash('sha256').update(profile.key).digest('hex').slice(0, 8)}`;
+
+      for (const app of profile.apps) {
+        app.authorSlug = profile.slug;
+      }
+    }
+  }
+
+  return profiles.sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
+function escapeHtmlAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
 function parseManifest(appPath) {
   try {
@@ -168,7 +244,7 @@ function scanApps() {
 function generateHtmlFiles(apps) {
   const detailsDir = join(outputDir, 'details');
   if (!existsSync(detailsDir)) {
-    mkdirSync(detailsDir);
+    mkdirSync(detailsDir, { recursive: true });
   }
 
   const templatePath = join(__dirname, 'app.html');
@@ -203,14 +279,54 @@ function generateHtmlFiles(apps) {
   }
 }
 
+function generateAuthorHtmlFiles(profiles) {
+  const authorsDir = join(outputDir, 'authors');
+  if (!existsSync(authorsDir)) {
+    mkdirSync(authorsDir, { recursive: true });
+  }
+
+  const templatePath = join(__dirname, 'author.html');
+  let template = readFileSync(templatePath, 'utf8');
+
+  template = template.replace('href="style.css"', 'href="../style.css"');
+  template = template.replace('src="main.js"', 'src="../main.js"');
+  template = template.replace('href="index.html"', 'href="../index.html"');
+
+  for (const profile of profiles) {
+    const appCount = profile.apps.length;
+    const title = `${profile.displayName} - Tronbyt Apps`;
+    const description = `${appCount} Tronbyt ${appCount === 1 ? 'app' : 'apps'} by ${profile.displayName}.`;
+    const url = `https://tronbyt.github.io/apps/authors/${encodeURIComponent(profile.slug)}.html`;
+
+    const metaTags = `<title>${escapeHtmlAttribute(title)}</title>
+        <meta name="description" content="${escapeHtmlAttribute(description)}">
+        <meta property="og:title" content="${escapeHtmlAttribute(title)}">
+        <meta property="og:description" content="${escapeHtmlAttribute(description)}">
+        <meta property="og:url" content="${escapeHtmlAttribute(url)}">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="${escapeHtmlAttribute(title)}">
+        <meta name="twitter:description" content="${escapeHtmlAttribute(description)}">
+        <meta name="author-slug" content="${escapeHtmlAttribute(profile.slug)}">
+        <meta name="author-name" content="${escapeHtmlAttribute(profile.displayName)}">`;
+
+    const authorHtml = template.replace('<title>Author Profile</title>', metaTags);
+    writeFileSync(join(authorsDir, `${profile.slug}.html`), authorHtml);
+  }
+}
+
 function main() {
   const apps = scanApps();
+  const authorProfiles = buildAuthorProfiles(apps);
   writeFileSync(OUTPUT_FILE, JSON.stringify(apps, null, 2));
   console.log(`Generated ${OUTPUT_FILE} with ${apps.length} apps.`);
 
   // Generate static HTML pages with Open Graph tags
   generateHtmlFiles(apps);
   console.log(`Generated ${apps.length} static detail HTML pages with metadata.`);
+
+  generateAuthorHtmlFiles(authorProfiles);
+  console.log(`Generated ${authorProfiles.length} static author HTML pages with metadata.`);
 }
 
 main();
