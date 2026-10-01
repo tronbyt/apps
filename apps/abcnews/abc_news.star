@@ -19,6 +19,15 @@ load("xpath.star", "xpath")
 RSS_FEED_PREFIX = "https://www.abc.net.au/news/feed/"
 RSS_FEED_SUFFIX = "/rss.xml"
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     NewsSelection = config.get("news", "10719986")
     RSS_FEED = RSS_FEED_PREFIX + NewsSelection + RSS_FEED_SUFFIX
@@ -74,7 +83,16 @@ def articles(topic, description):
     articles.append(render.Box(width = 64, height = 1, color = "#fff"))
     articles.append(render.Box(width = 64, height = 1, color = "#000"))
 
-    for i in range(0, len(description), 1):
+    # The whole list scrolls through the marquee, so its length is the
+    # animation's length. A square panel's marquee is 56 rows instead of 24
+    # and the full feed timed out on a Raspberry Pi 3B there; it gets the
+    # first eight stories, which is still more than the 24-row panel gets
+    # through in one rotation.
+    shown = len(description)
+    if is_square():
+        shown = min(shown, 8)
+
+    for i in range(0, shown, 1):
         articles.append(render.WrappedText(content = description[i], color = content_color, font = "CG-pixel-3x5-mono", linespacing = 1))
         articles.append(render.Box(width = 64, height = 3, color = "#000"))
 
