@@ -7,6 +7,7 @@ author: CJ Sturgess
 recommendedInterval: 5
 fileName: az_highway_signs.star
 packageName: azhighwaysigns
+supports64x64: true
 category: transit
 tags:
   - utility

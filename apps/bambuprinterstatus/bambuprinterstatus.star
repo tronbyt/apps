@@ -315,6 +315,8 @@ def main(config):
     if not status_url:
         return render.Root(
             render.Column(
+                expanded = True,
+                main_align = "center",
                 children = [
                     render.Text("Bambu Status", font = font, color = PALETTE["text_primary"]),
                     render.Text("No status URL", font = font, color = PALETTE["warning"]),
@@ -330,6 +332,8 @@ def main(config):
     if resp.status_code != 200:
         return render.Root(
             render.Column(
+                expanded = True,
+                main_align = "center",
                 children = [
                     render.Text("Bambu Status", font = font, color = PALETTE["text_primary"]),
                     render.Text("HTTP error", font = font, color = PALETTE["error"]),
@@ -358,6 +362,8 @@ def main(config):
 
     return render.Root(
         render.Column(
+            expanded = True,
+            main_align = "center",
             children = [
                 render.Text(
                     content = printer_name,

@@ -7,6 +7,7 @@ author: M0ntyP
 fileName: atp_tennis.star
 packageName: atptennis
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - real-time

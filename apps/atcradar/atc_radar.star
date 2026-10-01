@@ -23,7 +23,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -46,7 +46,7 @@ GREEN_COLOR = "#1C8E61"
 YELLOW_COLOR = "#FFFF00"
 RED_COLOR = "#FF0000"
 FLIGHT_RADAR_URL = "https://flight-radar1.p.rapidapi.com/flights/list-in-boundary"
-WIDTH = 64  # Radar width
+WIDTH = canvas.width()  # Radar width
 
 RADAR_X = 0  # x-position
 RADAR_Y = 1  # y-position
@@ -186,6 +186,8 @@ def display_instructions():
     instructions_3 = "You can hide when the data is old, or update more or less frequently. Adjust to fit your budget and desire for current data."
     return render.Root(
         render.Column(
+            expanded = True,
+            main_align = "center",
             children = [
                 render.Marquee(
                     width = 64,
@@ -242,9 +244,9 @@ def main(config):
     search_distance = int(config.get("distance", DEFAULT_DISTANCE))
 
     if (config.bool("info_bar", True)):
-        radar_height = 31
+        radar_height = canvas.height() - 1
     else:
-        radar_height = 32
+        radar_height = canvas.height()
 
     flights_cache_key = "_".join(["All", "Flight", "Data", lat, lng])
     flights = get_flights_from_cache(flights_cache_key)

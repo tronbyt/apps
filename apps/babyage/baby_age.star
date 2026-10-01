@@ -6,13 +6,22 @@ Author: helmc2
 """
 
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 DEFAULT_BIRTH_DATE_TIME = "2022-01-01T00:00:00Z"
 DEFAULT_BABY_NAME = "Baby"
 DEFAULT_TIMEZONE = "America/Chicago"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     birthdate = config.get("birthdate", DEFAULT_BIRTH_DATE_TIME)
@@ -52,7 +61,7 @@ def main(config):
         child = render.Box(
             render.Padding(
                 child = render.Column(
-                    main_align = "start",
+                    main_align = "center" if is_square() else "start",
                     expanded = True,
                     children = [
                         render.Row(cross_align = "center", expanded = True, main_align = "space_around", children = [

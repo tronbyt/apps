@@ -7,6 +7,7 @@ author: Robert Ison
 fileName: atc_radar.star
 packageName: atcradar
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - air-traffic

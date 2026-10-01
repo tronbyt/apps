@@ -7,6 +7,7 @@ author: helmc2
 fileName: baby_age.star
 packageName: babyage
 recommendedInterval: 5
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle

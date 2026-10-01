@@ -8,6 +8,7 @@ fileName: arc_raiders_stats.star
 packageName: arcraiderstats
 recommendedInterval: 600
 supports2x: true
+supports64x64: true
 category: gaming
 tags:
   - gaming

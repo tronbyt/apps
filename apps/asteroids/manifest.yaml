@@ -8,5 +8,6 @@ fileName: asteroids.star
 packageName: asteroids
 published: '2026-05-06T17:34:49Z'
 updated: '2026-05-20T18:59:25Z'
+supports64x64: true
 category: gaming
 tags: []
