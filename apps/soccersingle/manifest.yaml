@@ -2,13 +2,15 @@
 id: soccer-single
 name: Soccer Single
 summary: Soccer Single Team
-desc: Show upcoming / current / future game for a single soccer team across all leagues / tournaments they play in - one app tracks the team everywhere.  Score rolls over at 1AM US ET after the end of the game as per the standard ESPN API.
+desc: Show upcoming / current / future game for a single soccer team across all leagues / tournaments they play in - one app tracks the team everywhere.  Score rolls over at 1AM US ET after the end of the game as per the standard ESPN API. On 2x displays, pick up to 4 teams to show them all at once (2 on 64x64 square displays).
 author: jvivona
 fileName: soccer_single.star
 packageName: soccersingle
 recommendedInterval: 5
+supports2x: true
+supports64x64: true
 category: sports
 tags:
   - soccer
 published: '2023-03-30T16:44:13Z'
-updated: '2025-11-30T20:08:55Z'
+updated: '2026-09-27T17:36:40Z'
