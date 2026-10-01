@@ -8,7 +8,7 @@ Author: andersheie
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -715,6 +715,15 @@ def rainbow_farts_pixels():
 
     return frames
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     style = config.get("style", "flag")
     original_style = style
@@ -743,5 +752,6 @@ def main(config):
 
     return render.Root(
         delay = 100,  # Slower animation (default is ~50ms)
-        child = render.Animation(children = frames),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames)))) if is_square() else render.Animation(children = frames),
     )

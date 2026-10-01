@@ -7,6 +7,7 @@ author: Nicole Brooks
 fileName: pollen_count.star
 packageName: pollencount
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather

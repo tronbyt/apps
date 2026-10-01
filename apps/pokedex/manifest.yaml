@@ -8,6 +8,7 @@ fileName: pokedex.star
 packageName: pokedex
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: gaming
 tags:
   - gaming

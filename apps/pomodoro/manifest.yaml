@@ -5,6 +5,7 @@ summary: Pomodoro Timer
 desc: A time management tool to break work into intervals.
 author: rwong2888
 recommendedInterval: 1
+supports64x64: true
 category: lifestyle
 tags:
   - focus
