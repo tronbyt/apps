@@ -6,7 +6,7 @@ Author: DavidGoldman
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_STATION = "NEW"
@@ -94,6 +94,10 @@ def get_schema():
         ],
     )
 
+# A train takes 17 rows (two lines of text beside an 11px disc) plus a 1px
+# rule, so a 64x32 panel shows two and a 64x64 panel shows three.
+ROWS = max(2, (canvas.height() + 1) // 18)
+
 def main(config):
     selected_station = config.get("station", DEFAULT_STATION)
     direction_filter = config.get("direction_filter", ALL_DIRECTION)
@@ -142,7 +146,7 @@ def main(config):
     children = []
 
     first = True
-    for train in train_info[:2]:
+    for train in train_info[:ROWS]:
         head_sign = train["headSign"]
         dest = train["destination"]
         arrival = train["arrival"]

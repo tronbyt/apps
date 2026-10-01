@@ -7,6 +7,7 @@ author: AmillionAir
 fileName: abstract_clock.star
 packageName: abstractclock
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - time

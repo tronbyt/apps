@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -404,6 +404,12 @@ def main(config):
     if magnitude_sorting:
         earthquake_events = sorted(earthquake_events, key = lambda item: item[1])
 
+    # The map and the projection are fixed at 64x32, so on a taller panel the
+    # map sits in the middle rather than against the top edge, and the
+    # magnitude label goes under it instead of over it. Both offsets are zero
+    # on a 64x32 panel.
+    map_top = (canvas.height() - DISPLAY_Y_SIZE) // 2
+
     if earthquake_events or last_event:
         render_stack = [render_map(WORLD_MAP_ARRAY, map_center, map_brightness)]
         if earthquake_events:
@@ -419,13 +425,19 @@ def main(config):
             blink_pixel(x, y, blink_on),
         )
 
+        layers = [
+            render.Padding(
+                pad = (0, map_top, 0, 0),
+                child = render.Stack(children = render_stack),
+            ),
+        ]
         if show_latest_magnitude:
             mag_str = humanize.float("0.0", last_event[1])
             mag_label = render.Text(mag_str, color = blink_on)
             mag_width = mag_label.size()[0]
-            render_stack.append(
+            layers.append(
                 render.Padding(
-                    pad = ((DISPLAY_X_SIZE - mag_width) // 2, DISPLAY_Y_SIZE - 9, 0, 0),
+                    pad = ((DISPLAY_X_SIZE - mag_width) // 2, canvas.height() - 9, 0, 0),
                     child = mag_label,
                 ),
             )
@@ -433,12 +445,15 @@ def main(config):
         return render.Root(
             delay = 500,
             child = render.Stack(
-                children = render_stack,
+                children = layers,
             ),
         )
     elif not hide_when_empty:
         return render.Root(
-            child = render_map(WORLD_MAP_ARRAY, map_center),
+            child = render.Padding(
+                pad = (0, map_top, 0, 0),
+                child = render_map(WORLD_MAP_ARRAY, map_center),
+            ),
         )
     else:
         return []

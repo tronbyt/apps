@@ -7,7 +7,7 @@ Author: PMK (@pmk)
 
 load("http.star", "http")
 load("images/logo.gif", LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -37,11 +37,56 @@ def get_image(image_url):
         fail("Image from nobsbitcoin.com request failed with status %d @ %s", response.status_code, image_url)
     return response.body()
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     category = config.str("category", DEFAULT_CATEGORY)
 
     news_feed = get_news_feed(category)
     news_item = get_latest_item_from_raw_xml(news_feed)
+
+    # On a classic panel the headline scrolls over the logo because there is
+    # no room for both. A square panel has the rows: logo on top, headline
+    # scrolling through everything underneath.
+    if is_square():
+        return render.Root(
+            delay = 120,
+            show_full_animation = True,
+            max_age = 60 * 5,
+            child = render.Column(
+                cross_align = "center",
+                children = [
+                    render.Padding(
+                        pad = (0, 2, 0, 2),
+                        child = render.Image(
+                            src = LOGO,
+                            width = 40,
+                            height = 29,
+                        ),
+                    ),
+                    render.Marquee(
+                        width = 62,
+                        height = canvas.height() - 33,
+                        offset_start = canvas.height() - 33,
+                        offset_end = canvas.height() - 33,
+                        scroll_direction = "vertical",
+                        child = render.WrappedText(
+                            content = news_item["description"],
+                            font = "tom-thumb",
+                            color = "#fff",
+                            align = "center",
+                        ),
+                    ),
+                ],
+            ),
+        )
 
     return render.Root(
         delay = 120,

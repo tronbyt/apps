@@ -47,7 +47,7 @@ load("images/map.png", MAP_ASSET = "file")
 load("images/pixel.png", PIXEL_ASSET = "file")
 load("images/pm.png", PM_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -65,6 +65,15 @@ DATE_H = 7
 
 CHAR_W = 9
 SEP_W = 3
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = config.get("location")
@@ -107,52 +116,108 @@ def main(config):
     )
 
     night_above, sunrise = sunrise_plot(tm)
+
+    # The map is a fixed 64x32 asset and the terminator is plotted against
+    # it, so on a square panel it keeps its size and sits in the middle, and
+    # the time and date -- overlaid on the map on a classic panel because
+    # there is nowhere else for them -- move into the rows above and below.
+    map_layers = [
+        render.Padding(
+            pad = (map_offset, 0, 0, 0),
+            child = render.Image(MAP),
+        ),
+        render.Padding(
+            pad = (
+                map_offset + (-WIDTH if map_offset > 0 else WIDTH),
+                0,
+                0,
+                0,
+            ),
+            child = render.Image(MAP),
+        ) if map_offset != 0 else None,
+        render.Row([
+            render.Padding(
+                pad = (0, y if night_above else 0, 0, 0),
+                child = render.Image(
+                    src = PIXEL,
+                    width = 1,
+                    height = HEIGHT - y if night_above else y,
+                ),
+            )
+            for i in range(WIDTH)
+            for y in [sunrise[(i - map_offset) % WIDTH]]
+        ]),
+    ]
+    time_row = render.Row(
+        main_align = "center",
+        expanded = True,
+        children = [
+            render.Animation([
+                render_time(tm, time_format[0]),
+                render_time(tm, time_format[1]) if blink_time else None,
+            ]),
+            render.Padding(
+                pad = (1, 9, 0, 0),
+                child = render.Image(AM_PM[tm.hour < 12]),
+            ) if time_format[2] else None,
+        ],
+    ) if time_format else None
+    date_stack = render.Stack([
+        render.Padding(
+            pad = (-1, 1, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (2, 1, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (0, 0, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (0, 2, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (0, 1, 0, 0),
+            child = render.Row(
+                main_align = "center",
+                expanded = True,
+                children = [
+                    render.Text(
+                        content = formatted_date,
+                        font = "tom-thumb",
+                        color = "#ff0",
+                    ),
+                ],
+            ),
+        ),
+    ]) if show_date else None
+
+    if is_square():
+        return render.Root(
+            delay = 1000,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    time_row,
+                    render.Stack(map_layers),
+                    date_stack,
+                ],
+            ),
+        )
+
     return render.Root(
         delay = 1000,
-        child = render.Stack([
-            render.Padding(
-                pad = (map_offset, 0, 0, 0),
-                child = render.Image(MAP),
-            ),
-            render.Padding(
-                pad = (
-                    map_offset + (-WIDTH if map_offset > 0 else WIDTH),
-                    0,
-                    0,
-                    0,
-                ),
-                child = render.Image(MAP),
-            ) if map_offset != 0 else None,
-            render.Row([
-                render.Padding(
-                    pad = (0, y if night_above else 0, 0, 0),
-                    child = render.Image(
-                        src = PIXEL,
-                        width = 1,
-                        height = HEIGHT - y if night_above else y,
-                    ),
-                )
-                for i in range(WIDTH)
-                for y in [sunrise[(i - map_offset) % WIDTH]]
-            ]),
+        child = render.Stack(map_layers + [
             render.Column(
                 main_align = "center",
                 expanded = True,
                 children = [
-                    render.Row(
-                        main_align = "center",
-                        expanded = True,
-                        children = [
-                            render.Animation([
-                                render_time(tm, time_format[0]),
-                                render_time(tm, time_format[1]) if blink_time else None,
-                            ]),
-                            render.Padding(
-                                pad = (1, 9, 0, 0),
-                                child = render.Image(AM_PM[tm.hour < 12]),
-                            ) if time_format[2] else None,
-                        ],
-                    ),
+                    time_row,
                     render.Box(
                         width = WIDTH,
                         height = 3,
@@ -161,38 +226,7 @@ def main(config):
             ) if time_format else None,
             render.Padding(
                 pad = (0, HEIGHT - DATE_H, 0, 0),
-                child = render.Stack([
-                    render.Padding(
-                        pad = (-1, 1, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (2, 1, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (0, 0, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (0, 2, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (0, 1, 0, 0),
-                        child = render.Row(
-                            main_align = "center",
-                            expanded = True,
-                            children = [
-                                render.Text(
-                                    content = formatted_date,
-                                    font = "tom-thumb",
-                                    color = "#ff0",
-                                ),
-                            ],
-                        ),
-                    ),
-                ]),
+                child = date_stack,
             ) if show_date else None,
         ]),
     )

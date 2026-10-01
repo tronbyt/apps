@@ -7,6 +7,7 @@ author: PMK (@pmk)
 fileName: nobsbitcoin.star
 packageName: nobsbitcoin
 recommendedInterval: 1
+supports64x64: true
 category: finance
 tags:
   - crypto

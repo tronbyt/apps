@@ -7,6 +7,7 @@ author: Brian McLaughlin (SpinStabilized)
 fileName: earthquake_map.star
 packageName: earthquakemap
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - science
