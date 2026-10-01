@@ -7,6 +7,7 @@ author: Anthony Rocchio
 fileName: mlb_next_games.star
 packageName: mlbnextgames
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - mlb

@@ -7,6 +7,7 @@ author: plumbob86
 fileName: footballtable.star
 packageName: footballtable
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - nfl

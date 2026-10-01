@@ -7,6 +7,7 @@ author: mabroadfo1027
 fileName: eplscores.star
 packageName: eplscores
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - real-time

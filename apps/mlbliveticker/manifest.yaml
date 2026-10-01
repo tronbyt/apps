@@ -8,6 +8,7 @@ fileName: mlbliveticker.star
 packageName: mlbliveticker
 recommendedInterval: 15
 supports2x: false
+supports64x64: true
 category: sports
 tags:
   - baseball
