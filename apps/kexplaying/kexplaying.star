@@ -59,19 +59,23 @@ def now_playing(song, artist, album):
                             height = BAND_HEIGHT,
                             color = "e68a00",
                         ),
-                        render.Row(
-                            expanded = True,
-                            main_align = "space_evenly",
-                            children = [
-                                render.Padding(
-                                    child = render.Image(src = album, height = ART_SIZE, width = ART_SIZE),
-                                    pad = 1,
-                                ),
-                                render.Padding(
-                                    child = render.Image(src = KEXP_LOGO, height = ART_SIZE, width = ART_SIZE),
-                                    pad = 1,
-                                ),
-                            ],
+                        render.Box(
+                            width = 64,
+                            height = BAND_HEIGHT,
+                            child = render.Row(
+                                expanded = True,
+                                main_align = "space_evenly",
+                                children = [
+                                    render.Padding(
+                                        child = render.Image(src = album, height = ART_SIZE, width = ART_SIZE),
+                                        pad = 1,
+                                    ),
+                                    render.Padding(
+                                        child = render.Image(src = KEXP_LOGO, height = ART_SIZE, width = ART_SIZE),
+                                        pad = 1,
+                                    ),
+                                ],
+                            ),
                         ),
                     ],
                 ),
