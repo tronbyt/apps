@@ -83,8 +83,8 @@ def render_message(message, is_wide):
 
     # Updated: Uses tb-8 instead of tom-thumb for better readability on standard screens
     font = "6x13" if is_wide else "tb-8"
-    width = 128 if is_wide else 64
-    height = 64 if is_wide else 32
+    width = canvas.width()
+    height = canvas.height()
 
     return render.Root(
         child = render.Box(
@@ -122,7 +122,7 @@ def main(config):
     hide_if_empty = config.bool("hide_if_empty", True)
 
     if not user_id or not api_key:
-        return render.Root(child = render.WrappedText("Setup API Key"))
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Setup API Key")))
 
     headers = get_auth_headers(user_id, api_key)
 
@@ -168,7 +168,7 @@ def main(config):
     # 6. Fetch Full Details
     detail_rep = http.get(BATCH_DETAIL_URL.format(batch_id = batch_id), headers = headers, ttl_seconds = 300)
     if detail_rep.status_code != 200:
-        return render.Root(child = render.Text("API Error: %d" % detail_rep.status_code))
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("API Error: %d" % detail_rep.status_code)))
 
     batch = detail_rep.json()
     recipe_name = batch.get("recipe", {}).get("name", "Unknown")
@@ -317,7 +317,8 @@ def render_layout(is_wide, name, status, data, sg, temp, abv_text, att_text, uni
         # ==========================================
         return render.Root(
             delay = r_delay,
-            child = render.Column(
+            # Centre the 32-row layout on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 children = [
                     # Header: "[Name] ([Status])" -> Name (Yellow), Status (White)
                     render.Box(
@@ -360,7 +361,7 @@ def render_layout(is_wide, name, status, data, sg, temp, abv_text, att_text, uni
                         ],
                     ),
                 ],
-            ),
+            )),
         )
 
 def get_schema():

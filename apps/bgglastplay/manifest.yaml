@@ -7,6 +7,7 @@ author: DanDobrick
 recommendedInterval: 5
 fileName: bgg_last_play.star
 packageName: bgglastplay
+supports64x64: true
 category: gaming
 tags:
   - gaming

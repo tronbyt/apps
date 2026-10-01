@@ -8,6 +8,7 @@ fileName: billboardtop10.star
 packageName: billboardtop10
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - music

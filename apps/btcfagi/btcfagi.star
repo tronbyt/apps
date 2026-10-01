@@ -8,7 +8,7 @@ Author: PMK (@pmk)
 load("animation.star", "animation")
 load("http.star", "http")
 load("images/background.gif", BACKGROUND_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 BACKGROUND = BACKGROUND_ASSET.readall()
 
@@ -41,7 +41,8 @@ def main():
     return render.Root(
         delay = 15,
         max_age = 60 * 60 * 6,
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Row(
                     expanded = True,
@@ -114,5 +115,5 @@ def main():
                     ],
                 ),
             ],
-        ),
+        ))),
     )

@@ -8,5 +8,6 @@ fileName: brownian.star
 packageName: brownian
 published: '2026-06-10T21:58:47Z'
 updated: '2026-06-10T23:33:18Z'
+supports64x64: true
 category: science
 tags: []

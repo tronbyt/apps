@@ -7,7 +7,7 @@ Author: Anders Heie
 
 load("cache.star", "cache")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Global defines
@@ -194,6 +194,15 @@ BORED_ACTIVITIES = [
     {"activity": "Practice your Oscar acceptance speech for 'Best Human'", "effort": 0.3},
 ]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Cache key for tracking which activity to show next
     cache_key = "bored_activity_index"
@@ -346,10 +355,12 @@ def main(config):
             ],
         )
 
+    main_h = canvas.height() - 14  # 18 on 64x32: leaves room for the meter and labels
+
     # Create the main content area
     if config.get("direction", DEFAULT_DIRECTION) == "horizontal":
         main_content = render.Box(
-            height = 18,  # Leave room for effort meter and larger label
+            height = main_h,
             child = render.Marquee(
                 width = 64,
                 child = render.Text(activity, color = color, font = font),
@@ -363,9 +374,10 @@ def main(config):
             font = "tb-8"
 
         main_content = render.Box(
-            height = 18,  # Leave room for effort meter and larger label
+            height = main_h,
             child = render.Marquee(
-                height = 18,
+                height = main_h,
+                align = "center" if is_square() else "start",
                 child = render.WrappedText(
                     content = activity,
                     color = color,

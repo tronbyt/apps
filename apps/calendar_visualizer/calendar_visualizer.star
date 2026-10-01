@@ -10,7 +10,7 @@ Version: 26.09.02.0001
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -372,10 +372,10 @@ def main(config):
     url = config.str("calendar_url", "")
     if not url:
         return render.Root(
-            render.Padding(
+            render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
                 pad = (1, 1, 1, 1),
                 child = render.WrappedText("Enter a Google Calendar iCal URL in settings.", font = "tom-thumb"),
-            ),
+            )),
         )
 
     ttl = int(config.str("ttl", "3600"))
@@ -529,14 +529,13 @@ def main(config):
         frames.append(frame_all)  # Frame with dot!
         frames.append(frame_background)  # Basically everything drawn (No dot).
 
+        # The graph is hand-placed for 64x32; bound it and centre it on taller panels (64x64).
         ret_val = render.Root(
             delay = 500,
-            child = render.Animation(
-                children = frames,
-            ),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames))),
         )
     else:
-        ret_val = render.Root(frame_all)
+        ret_val = render.Root(render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = frame_all)))
 
     return ret_val
 

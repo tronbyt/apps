@@ -7,6 +7,7 @@ author: tomzorz
 recommendedInterval: 5
 fileName: bkk_schedule.star
 packageName: bkkschedule
+supports64x64: true
 category: transit
 tags:
   - productivity

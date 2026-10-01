@@ -72,7 +72,8 @@ def main(config):
     row4 += " (Sample Data)" if not api_key else ""
 
     return render.Root(
-        render.Column(
+        # Centre the block on taller panels (64x64).
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Row(
                     children = [
@@ -113,7 +114,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = int(config.get("scroll", 45)) // 2 if canvas.is2x() else int(config.get("scroll", 45)),
     )

@@ -6,6 +6,7 @@ desc: See your latest Bird Buddy feeder visitors. Must use username/password for
 author: Brombomb
 fileName: bird_buddy.star
 packageName: birdbuddy
+supports64x64: true
 category: utilities
 tags:
   - tech
