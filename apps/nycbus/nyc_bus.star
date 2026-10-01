@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -70,6 +70,15 @@ def get_stops(location, config):
 
     return stops
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     api_key = config.get("api_key")
     widgetMode = config.bool("$widget")
@@ -86,7 +95,17 @@ def main(config):
 
     if journeys == None or len(journeys) == 0:
         return render.Root(
-            child = render.Column(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = [
+                    render.Marquee(
+                        width = 64,
+                        child = render.Text("No buses found"),
+                    ),
+                ],
+            ))) if is_square() else render.Column(
                 expanded = True,
                 main_align = "space_evenly",
                 children = [
@@ -100,7 +119,13 @@ def main(config):
 
     if len(journeys) == 1:
         return render.Root(
-            child = render.Column(
+            # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
+                expanded = True,
+                children = [
+                    build_row(journeys[0], widgetMode),
+                ],
+            )))) if is_square() else render.Column(
                 expanded = True,
                 children = [
                     build_row(journeys[0], widgetMode),
@@ -110,7 +135,20 @@ def main(config):
 
     return render.Root(
         delay = 75,
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
+            expanded = True,
+            main_align = "start",
+            children = [
+                build_row(journeys[0], widgetMode),
+                render.Box(
+                    width = 64,
+                    height = 1,
+                    color = "#666",
+                ),
+                build_row(journeys[1], widgetMode),
+            ],
+        )))) if is_square() else render.Column(
             expanded = True,
             main_align = "start",
             children = [

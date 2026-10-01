@@ -7,6 +7,7 @@ author: Brian Bell
 fileName: office_status.star
 packageName: officestatus
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - office

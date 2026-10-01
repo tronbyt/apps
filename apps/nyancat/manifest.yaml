@@ -7,6 +7,7 @@ author: Mack Ward
 fileName: nyan_cat.star
 packageName: nyancat
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art

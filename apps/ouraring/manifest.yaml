@@ -7,6 +7,7 @@ author: Aiden Vigue
 fileName: ouraring.star
 packageName: ouraring
 recommendedInterval: 5
+supports64x64: true
 category: health
 tags:
   - lifestyle

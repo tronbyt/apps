@@ -7,6 +7,7 @@ author: noahpodgurski
 fileName: octoprint.star
 packageName: octoprint
 recommendedInterval: 5
+supports64x64: true
 category: smart-home
 tags:
   - tech

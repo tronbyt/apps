@@ -9,6 +9,7 @@ packageName: ordertrends
 recommendedInterval: 5
 broken: true
 brokenReason: 'www.shopcounter.app: no such host'
+supports64x64: true
 category: utilities
 tags:
   - utility

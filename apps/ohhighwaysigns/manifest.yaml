@@ -9,6 +9,7 @@ packageName: ohhighwaysigns
 recommendedInterval: 5
 broken: true
 brokenReason: 'publicapi.ohgo.com: no such host'
+supports64x64: true
 category: transit
 tags:
   - local

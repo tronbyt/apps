@@ -17,7 +17,7 @@ load("images/nyan_cat_frame_6.png", NYAN_CAT_FRAME_6_ASSET = "file")
 load("images/nyan_cat_frame_7.png", NYAN_CAT_FRAME_7_ASSET = "file")
 load("images/nyan_cat_frame_8.png", NYAN_CAT_FRAME_8_ASSET = "file")
 load("images/nyan_cat_frame_9.png", NYAN_CAT_FRAME_9_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FRAMES = [
@@ -35,9 +35,21 @@ FRAMES = [
     NYAN_CAT_FRAME_12_ASSET.readall(),
 ]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     return render.Root(
-        child = render.Animation(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
+            children = [render.Image(src = f) for f in FRAMES],
+        ))) if is_square() else render.Animation(
             children = [render.Image(src = f) for f in FRAMES],
         ),
     )

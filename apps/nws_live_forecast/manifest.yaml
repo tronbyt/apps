@@ -7,6 +7,7 @@ author: czarandy
 fileName: nws_live_forecast.star
 packageName: nws_live_forecast
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather

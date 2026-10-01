@@ -7,6 +7,7 @@ author: AdamMoses-GitHub
 fileName: opm_status.star
 packageName: opmstatus
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - local
