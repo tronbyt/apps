@@ -7,6 +7,7 @@ author: Jake Manske
 fileName: lordoftherings.star
 packageName: lordoftherings
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art

@@ -7,6 +7,7 @@ author: kanroot
 fileName: marketstack.star
 packageName: marketstack
 recommendedInterval: 1
+supports64x64: true
 category: finance
 tags:
   - finance

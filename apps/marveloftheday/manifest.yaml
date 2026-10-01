@@ -9,6 +9,7 @@ packageName: marveloftheday
 recommendedInterval: 5
 broken: true
 brokenReason: API access closed
+supports64x64: true
 category: entertainment
 tags:
   - media

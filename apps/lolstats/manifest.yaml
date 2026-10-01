@@ -7,6 +7,7 @@ author: thiagoss
 recommendedInterval: 5
 fileName: lol_stats.star
 packageName: lolstats
+supports64x64: true
 category: gaming
 tags: []
 published: '2025-07-10T19:21:24Z'

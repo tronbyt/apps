@@ -7,6 +7,7 @@ author: Mantle Rev Ops
 fileName: mantle.star
 packageName: mantle
 recommendedInterval: 5
+supports64x64: true
 category: finance
 tags:
   - finance

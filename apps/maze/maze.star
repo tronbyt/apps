@@ -7,12 +7,13 @@ Author: gstark
 
 # Load support utilities
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-# Constants defining the size of the Tidbyt
-GRID_ROWS = 15
-GRID_COLS = 31
+# Maze cells are 2px (wall + passage) plus one closing wall, so the grid
+# fills whatever panel it is drawn on: 15x31 on 64x32, 31x31 on 64x64.
+GRID_ROWS = canvas.height() // 2 - 1
+GRID_COLS = canvas.width() // 2 - 1
 
 # Returns False if there is no cell to the east
 # or the cell itself.
@@ -161,13 +162,7 @@ def draw_path(colors, frame, path):
             opacity = int(index / (len(path) - 1) * 254)
         opacity = digit_to_hex(int(opacity / 16)) + digit_to_hex(opacity % 16)
 
-        color = colors["solve_color"] + opacity
-
-        pixel = render.Box(
-            width = 1,
-            height = 1,
-            color = color,
-        )
+        pixel = colors["solve_color"] + opacity
 
         row = cell[0] * 2 + 1
         col = cell[1] * 2 + 1
@@ -239,8 +234,17 @@ def get_schema():
         ],
     )
 
+def row_to_render(row):
+    boxes = []
+    start = 0
+    for i in range(1, len(row) + 1):
+        if i == len(row) or row[i] != row[start]:
+            boxes.append(render.Box(width = i - start, height = 1, color = row[start]))
+            start = i
+    return render.Row(children = boxes)
+
 def frame_to_render(frame):
-    return render.Column(children = [render.Row(children = row) for row in frame])
+    return render.Column(children = [row_to_render(row) for row in frame])
 
 def main(config):
     colors = {
@@ -279,17 +283,10 @@ def main(config):
             else:
                 active.pop(cell_index)
 
-    pixel = render.Box(
-        width = 1,
-        height = 1,
-        color = colors["maze_color"],
-    )
-
-    blank = render.Box(
-        width = 1,
-        height = 1,
-        color = "#000000",
-    )
+    # Frames hold colours, not widgets; frame_to_render paints each row as
+    # runs of one colour, which keeps the bigger panels inside the render deadline.
+    pixel = colors["maze_color"]
+    blank = "#000000"
 
     maze_frame = render_frame(grid, pixel, blank)
 
