@@ -7,6 +7,7 @@ author: flavioribeiro
 fileName: marex.star
 packageName: marex
 recommendedInterval: 30
+category: weather
 published: '2026-06-30T19:20:58Z'
 updated: '2026-06-30T19:50:51Z'
 tags: []
