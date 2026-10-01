@@ -8,6 +8,7 @@ fileName: phase_of_moon.star
 packageName: phaseofmoon
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: science
 tags:
   - weather

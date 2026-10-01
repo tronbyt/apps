@@ -7,6 +7,7 @@ author: chrisbateman
 fileName: fine_art.star
 packageName: fineart
 recommendedInterval: 5
+supports64x64: true
 category: art
 tags:
   - art
