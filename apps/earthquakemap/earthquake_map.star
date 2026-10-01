@@ -46,6 +46,14 @@ DEFAULT_SHOW_LATEST_MAGNITUDE = False
 DISPLAY_X_SIZE = 64
 DISPLAY_Y_SIZE = 32
 
+# Square-panel pan: the world is drawn at PAN_SCALE and advances PAN_STEP
+# pixels every PAN_DELAY ms, so one full wrap takes about ten seconds; the
+# latest quake blinks every PAN_BLINK frames.
+PAN_SCALE = 2
+PAN_STEP = 4
+PAN_DELAY = 200
+PAN_BLINK = 3
+
 HTTP_STATUS_OK = 200
 
 API_CACHE_TTL = 60 * 15  # seconds
@@ -238,7 +246,20 @@ def map_projection(longitude, latitude, screen_width = 64, screen_height = 32, m
         x = pixel_shift(x, map_center)
     return x, y
 
-def render_map(map_array, map_center = 0, brightness = 0.25):
+def map_points(map_array, map_center = 0):
+    """The coastline as (x, y) map coordinates, shifted for the centre meridian.
+
+    The pan on a square panel paints only the pixels that are on screen in
+    each frame, so it wants coordinates rather than widgets.
+    """
+    points = []
+    for y, row in enumerate(map_array):
+        for x, map_pixel in enumerate(row):
+            if map_pixel:
+                points.append((pixel_shift(x, map_center), y))
+    return points
+
+def render_map(map_array, map_center = 0, brightness = 0.25, scale = 1):
     """Shift pixels to account for map central merdian.
 
     Args:
@@ -255,7 +276,7 @@ def render_map(map_array, map_center = 0, brightness = 0.25):
             if map_pixel:
                 x = pixel_shift(x, map_center)
                 map_stack.append(
-                    pixel(x, y, "#FFFFFF", brightness),
+                    pixel(x, y, "#FFFFFF", brightness, scale),
                 )
     return render.Stack(children = map_stack)
 
@@ -283,7 +304,7 @@ def pixel_shift(x, center_longitude = 0):
 # Render Utility Functions
 #-------------------------------------------------------------------------------
 
-def pixel(x, y, color, alpha = 1.0):
+def pixel(x, y, color, alpha = 1.0, scale = 1):
     """Pixel by pixel drawing for Tidbyt
 
     Accepts a pixel coordinate as x and y integers on the Tidbyt display as well
@@ -311,8 +332,8 @@ def pixel(x, y, color, alpha = 1.0):
     if len(color) != 5 and len(color) != 9:
         color = color + uint8_to_hex(int(alpha * 255))
     return render.Padding(
-        pad = (x, y, 0, 0),
-        child = render.Box(width = 1, height = 1, color = color),
+        pad = (x * scale, y * scale, 0, 0),
+        child = render.Box(width = scale, height = scale, color = color),
     )
 
 def blink_pixel(x, y, color_on, color_off = "#000000FF"):
@@ -350,6 +371,15 @@ def blink_pixel(x, y, color_on, color_off = "#000000FF"):
 #-------------------------------------------------------------------------------
 # Main
 #-------------------------------------------------------------------------------
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """Main function body.
@@ -408,52 +438,75 @@ def main(config):
     # map sits in the middle rather than against the top edge, and the
     # magnitude label goes under it instead of over it. Both offsets are zero
     # on a 64x32 panel.
-    map_top = (canvas.height() - DISPLAY_Y_SIZE) // 2
+    # The map and the projection are fixed at 64x32. A square panel has the
+    # rows to draw every pixel of it 2x2 -- a 128x64 world that no longer
+    # fits across the panel -- so it pans left to right and wraps at the date
+    # line, with the quakes plotted at the same scale. On a 64x32 panel the
+    # scale is 1 and nothing moves.
+    scale = PAN_SCALE if is_square() else 1
+    world_w = DISPLAY_X_SIZE * scale
 
     if earthquake_events or last_event:
-        render_stack = [render_map(WORLD_MAP_ARRAY, map_center, map_brightness)]
+        render_stack = [render_map(WORLD_MAP_ARRAY, map_center, map_brightness, scale)]
         if earthquake_events:
             for event in earthquake_events:
                 x, y = map_projection(event[0][0], event[0][1], map_center = map_center)
                 render_stack.append(
-                    pixel(x, y, mag_to_color(event[1])),
+                    pixel(x, y, mag_to_color(event[1]), scale = scale),
                 )
 
         x, y = map_projection(last_event[0][0], last_event[0][1], map_center = map_center)
         blink_on = mag_to_color(last_event[1])
-        render_stack.append(
-            blink_pixel(x, y, blink_on),
-        )
 
-        layers = [
-            render.Padding(
-                pad = (0, map_top, 0, 0),
-                child = render.Stack(children = render_stack),
-            ),
-        ]
+        label = None
         if show_latest_magnitude:
             mag_str = humanize.float("0.0", last_event[1])
             mag_label = render.Text(mag_str, color = blink_on)
             mag_width = mag_label.size()[0]
-            layers.append(
-                render.Padding(
-                    pad = ((DISPLAY_X_SIZE - mag_width) // 2, canvas.height() - 9, 0, 0),
-                    child = mag_label,
-                ),
+            label = render.Padding(
+                pad = ((DISPLAY_X_SIZE - mag_width) // 2, canvas.height() - 9, 0, 0),
+                child = mag_label,
             )
 
+        if scale == 1:
+            render_stack.append(blink_pixel(x, y, blink_on))
+            return render.Root(
+                delay = 500,
+                child = render.Stack(children = [render.Stack(children = render_stack), label]),
+            )
+
+        # Every pixel is its own widget, so the pan is built frame by frame
+        # from only the pixels that are on screen in that frame: one copy of
+        # the world, no off-panel padding, about half the coastline per
+        # frame. Two whole worlds per frame timed out on a Raspberry Pi 3B.
+        coast = [(px, py, "#FFFFFF" + uint8_to_hex(int(map_brightness * 255))) for px, py in map_points(WORLD_MAP_ARRAY, map_center)]
+        quakes = []
+        if earthquake_events:
+            for event in earthquake_events:
+                qx, qy = map_projection(event[0][0], event[0][1], map_center = map_center)
+                quakes.append((qx, qy, mag_to_color(event[1])))
+        panel_w = canvas.width()
+        frames = []
+        for k in range(0, world_w, PAN_STEP):
+            lit = (k // PAN_BLINK) % 2 == 0
+            dots = coast + quakes + [(x, y, blink_on if lit else "#000000FF")]
+            visible = []
+            for px, py, color in dots:
+                sx = (px * scale - k) % world_w
+                if sx < panel_w:
+                    visible.append(render.Padding(
+                        pad = (sx, py * scale, 0, 0),
+                        child = render.Box(width = scale, height = scale, color = color),
+                    ))
+            frames.append(render.Stack(children = visible + [label]))
+
         return render.Root(
-            delay = 500,
-            child = render.Stack(
-                children = layers,
-            ),
+            delay = PAN_DELAY,
+            child = render.Animation(children = frames),
         )
     elif not hide_when_empty:
         return render.Root(
-            child = render.Padding(
-                pad = (0, map_top, 0, 0),
-                child = render_map(WORLD_MAP_ARRAY, map_center),
-            ),
+            child = render_map(WORLD_MAP_ARRAY, map_center, scale = scale),
         )
     else:
         return []
