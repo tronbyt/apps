@@ -8,7 +8,7 @@ Author: Philippe Dellaert (pdellaert)
 load("animation.star", "animation")
 load("http.star", "http")
 load("images/fbw_icon.png", FBW_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 FBW_ICON = FBW_ICON_ASSET.readall()
 
@@ -24,7 +24,8 @@ def getCount():
 
 def main():
     return render.Root(
-        child = animation.Transformation(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = animation.Transformation(
             child = render.Row(
                 expanded = True,
                 cross_align = "center",
@@ -82,5 +83,5 @@ def main():
             origin = animation.Origin(x = 1, y = 0),
             duration = 250,
             delay = 0,
-        ),
+        )),
     )

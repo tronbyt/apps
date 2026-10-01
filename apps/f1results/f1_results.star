@@ -30,7 +30,7 @@ Updated for 2026 season
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -128,7 +128,8 @@ def main(config):
 
         # nothing has happened yet
         return render.Root(
-            child = render.Column(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 main_align = "start",
                 cross_align = "start",
                 children = [
@@ -173,7 +174,7 @@ def main(config):
                         ],
                     ),
                 ],
-            ),
+            )),
         )
 
     if Session == "R":
@@ -265,7 +266,8 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(RotationSpeed) * 1000,
-        child = render.Animation(children = renderCategory),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = renderCategory))),
     )
 
 RotationOptions = [

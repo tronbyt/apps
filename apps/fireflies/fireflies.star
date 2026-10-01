@@ -6,7 +6,7 @@
 load("encoding/json.star", "json")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -371,13 +371,16 @@ def render_column(frame):
     return render.Column(children = rows)
 
 def render_row(row):
+    # Consecutive cells of the same colour are painted as one Box: pixel-
+    # identical, and a fraction of the widgets per frame (the field is mostly
+    # black), which is what keeps the render inside the server deadline.
     cells = []
-    for cell in row:
-        cells.append(render_cell(cell))
+    start = 0
+    for i in range(1, len(row) + 1):
+        if i == len(row) or row[i] != row[start]:
+            cells.append(render.Box(width = i - start, height = 1, color = row[start]))
+            start = i
     return render.Row(children = cells)
-
-def render_cell(cell):
-    return render.Box(width = 1, height = 1, color = cell)
 
 def render_clock(timezone):
     return render.Padding(
@@ -398,7 +401,8 @@ def render_clock(timezone):
 def render_animation(frames):
     return render.Root(
         delay = DELAY,
-        child = render.Animation(children = frames),
+        # The field is simulated at 64x32; centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = frames)),
     )
 
 def hex_rgb_to_hsl(hex_color):

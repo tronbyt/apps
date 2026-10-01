@@ -8,6 +8,7 @@ fileName: f1_clock.star
 packageName: f1clock
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: sports
 tags:
   - time

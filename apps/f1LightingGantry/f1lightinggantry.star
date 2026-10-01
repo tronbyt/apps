@@ -30,9 +30,10 @@ def main():
 
     return render.Root(
         delay = 1000 if canvas.is2x() else 650,
-        child = render.Animation(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
             children = animation,
-        ),
+        )),
         show_full_animation = True,
     )
 

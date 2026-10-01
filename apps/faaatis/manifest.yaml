@@ -7,6 +7,7 @@ author: Connick Shields
 recommendedInterval: 5
 fileName: faa_atis.star
 packageName: faaatis
+supports64x64: true
 category: transit
 tags:
   - weather

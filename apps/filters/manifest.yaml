@@ -6,6 +6,7 @@ desc: Displays a notification that filters need to be replaced.
 author: savdagod
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - smart-home

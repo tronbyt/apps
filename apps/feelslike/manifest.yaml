@@ -7,6 +7,7 @@ author: eanplatter
 fileName: feels_like.star
 packageName: feelslike
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather

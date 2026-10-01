@@ -7,6 +7,7 @@ author: Philippe Dellaert (pdellaert)
 recommendedInterval: 5
 fileName: flybywire_flights.star
 packageName: fbw-flight-stats
+supports64x64: true
 category: transit
 tags:
   - sports

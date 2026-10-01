@@ -8,6 +8,7 @@ fileName: firewalla_alarms.star
 packageName: firewallaalarms
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: smart-home
 tags:
   - smart-home
