@@ -19,9 +19,7 @@ REFRESH_MILLISECONDS = 75
 # Panels with more than 64x32 pixels get half the frames (7.5 s of life per
 # loop): 200 frames of a 64x64 field blow the server's render deadline on a
 # Pi-class host, and the loop restarts from a fresh random field anyway.
-FRAME_COUNT = APP_DURATION_MILLISECONDS // REFRESH_MILLISECONDS
-if WIDTH * HEIGHT > 64 * 32:
-    FRAME_COUNT = FRAME_COUNT // 2
+FRAME_COUNT = (APP_DURATION_MILLISECONDS // REFRESH_MILLISECONDS) // (2 if WIDTH * HEIGHT > 64 * 32 else 1)
 
 # The offsets of a cell's eight neighbours.
 # We wrap around at the edges, so we are treating the board
