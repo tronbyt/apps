@@ -8,6 +8,7 @@ fileName: hubble_live.star
 packageName: hubblelive
 recommendedInterval: 5
 broken: true
+supports64x64: true
 category: science
 tags:
   - space

@@ -7,6 +7,7 @@ author: vipulchhajer
 fileName: india_news.star
 packageName: indianews
 recommendedInterval: 10
+supports64x64: true
 category: news
 tags:
   - local

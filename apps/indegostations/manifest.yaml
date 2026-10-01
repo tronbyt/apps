@@ -7,6 +7,7 @@ author: RayPatt
 fileName: indego_stations.star
 packageName: indegostations
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - utility

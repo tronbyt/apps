@@ -8,6 +8,7 @@ fileName: influxdb.star
 packageName: influxdb
 recommendedInterval: 60
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - data-visual

@@ -7,6 +7,7 @@ author: Jonathan Damico
 fileName: hrbfc.star
 packageName: hrbfc
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - rugby

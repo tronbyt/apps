@@ -5,6 +5,15 @@ load("schema.star", "schema")
 
 BORDER_SIZE = 2 if canvas.is2x() else 1
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     URL = config.get("immich_url", "https://example.com")
     API_KEY = config.get("immich_api_key", "")
@@ -20,7 +29,8 @@ def main(config):
 
     if res.status_code != 200:
         return render.Root(
-            child = render.WrappedText("Server not accessible"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Server not accessible"))) if is_square() else render.WrappedText("Server not accessible"),
         )
     else:
         headers = {
@@ -30,13 +40,15 @@ def main(config):
         status = res.json().get("statusCode")
         if status != None:
             return render.Root(
-                child = render.WrappedText("Album not accessible"),
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Album not accessible"))) if is_square() else render.WrappedText("Album not accessible"),
             )
         assets = res.json()["assets"]
         assetCount = int(res.json()["assetCount"]) - 1
         if assetCount < 0:
             return render.Root(
-                child = render.WrappedText("Album is Empty"),
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Album is Empty"))) if is_square() else render.WrappedText("Album is Empty"),
             )
         randomCount = random.number(0, assetCount)
         assetID = assets[randomCount]["id"]
@@ -46,7 +58,8 @@ def main(config):
         res_req_metadata = http.get(IMG_URL, headers = headers)
         if (res_req_metadata.status_code != 200):
             return render.Root(
-                child = render.WrappedText("Unable to retrieve image. Check API Perms"),
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Unable to retrieve image. Check API Perms"))) if is_square() else render.WrappedText("Unable to retrieve image. Check API Perms"),
             )
         res_metadata = res_req_metadata.json()
         country = res_metadata["exifInfo"].get("country")
@@ -54,7 +67,25 @@ def main(config):
         city = res_metadata["exifInfo"].get("city")
         photo_date = res_metadata["exifInfo"].get("dateTimeOriginal")
         return render.Root(
-            child = render.Stack(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
+                children = [
+                    render.Box(
+                        padding = BORDER_SIZE,
+                        color = "#fff",
+                        child = render.Image(
+                            src = res_img.body(),
+                            width = canvas.width() - BORDER_SIZE,
+                            height = canvas.height() - BORDER_SIZE,
+                        ),
+                    ),
+                    render.Column(
+                        children = get_text(photo_date, country, state, city, SHOW_DATE, SHOW_LOCATION),
+                        main_align = "end",
+                        expanded = True,
+                    ),
+                ],
+            ))) if is_square() else render.Stack(
                 children = [
                     render.Box(
                         padding = BORDER_SIZE,
