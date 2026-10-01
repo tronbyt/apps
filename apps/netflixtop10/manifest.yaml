@@ -9,6 +9,7 @@ packageName: netflixtop10
 broken: true
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - media

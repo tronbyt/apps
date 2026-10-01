@@ -7,6 +7,7 @@ author: nsluke
 fileName: nfl_play_by_play.star
 packageName: nflplaybyplay
 recommendedInterval: 30
+supports64x64: true
 category: sports
 tags:
   - nfl

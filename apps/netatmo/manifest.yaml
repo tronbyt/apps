@@ -7,6 +7,7 @@ author: danmcclain
 fileName: netatmo.star
 packageName: netatmo
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather

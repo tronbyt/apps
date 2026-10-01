@@ -7,6 +7,7 @@ author: miracle2k
 fileName: nouns.star
 packageName: nouns
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - finance

@@ -6,6 +6,7 @@ desc: Displays the next streetcar arrival time for a selected New Orleans RTA ro
 author: Ryan Schultz
 fileName: nola_streetcar.star
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags: []
 published: '2025-03-30T20:06:52Z'

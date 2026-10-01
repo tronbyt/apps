@@ -11,7 +11,7 @@ load("images/down_deg.png", DOWN_DEG_ASSET = "file")
 load("images/down_press.png", DOWN_PRESS_ASSET = "file")
 load("images/up_deg.png", UP_DEG_ASSET = "file")
 load("images/up_press.png", UP_PRESS_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 
@@ -22,6 +22,15 @@ UP_PRESS = UP_PRESS_ASSET.readall()
 
 OAUTH2_CLIENT_SECRET = secret.decrypt("AV6+xWcEY+xlza5nc6Vx3IhSZOD+MGdeVROlRBYrpIwypN5EIIncp7hyCiIQMGVnPS0Q1SlVfHZXB92095MTfHew3wzuEJ14ihbjpxbZNQJhuYA+4O3fR4GFjOTy98EfJobFvxLguAtnNE149hITsJeIxyKfnI2yHZFVgg2Y2pYHoHzSqA==")
 CLIENT_ID = "622106585db6d223df25fdf8"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     refresh_token = config.get("auth")
@@ -86,7 +95,11 @@ def main(config):
         ),
     ))
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            expanded = True,
+            children = rows,
+        ))) if is_square() else render.Column(
             expanded = True,
             children = rows,
         ),
