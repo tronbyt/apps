@@ -6,7 +6,7 @@ Author: k.wajdowicz
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -18,6 +18,10 @@ TIMEZONE_MAP = {
     "CST": "America/Chicago",
     "EST": "America/New_York",
 }
+
+# The tide curve takes whatever is under the two text lines: 22 rows on a
+# 64x32 panel, 54 on a square one.
+PLOT_HEIGHT = canvas.height() - 10
 
 def main(config):
     station_id = config.get("stationid") or config.get("station")
@@ -73,7 +77,7 @@ def main(config):
                                 render.Plot(
                                     data = points,
                                     width = 64,
-                                    height = 22,
+                                    height = PLOT_HEIGHT,
                                     color = "#368BC1",
                                     fill_color = "#123456",
                                     color_inverted = "#800080",
@@ -85,7 +89,7 @@ def main(config):
                                 render.Plot(
                                     data = [(calculated_hours, min), (calculated_hours, max)],
                                     width = 64,
-                                    height = 22,
+                                    height = PLOT_HEIGHT,
                                     color = "#626567",
                                     color_inverted = "#626567",
                                     x_lim = (0, 24),

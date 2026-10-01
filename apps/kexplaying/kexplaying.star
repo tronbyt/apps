@@ -9,7 +9,7 @@ load("http.star", "http")
 load("images/kexp_logo.png", KEXP_LOGO_ASSET = "file")
 load("images/kexp_mic.jpg", KEXP_MIC_ASSET = "file")
 load("images/kexp_vinyl.png", KEXP_VINYL_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 KEXP_LOGO = KEXP_LOGO_ASSET.readall()
 KEXP_MIC = KEXP_MIC_ASSET.readall()
@@ -41,6 +41,13 @@ def api_error():
         ),
     )
 
+# The orange band holds the art and the logo; the 12px marquee under it is
+# fixed, so the band takes the rest: 24 rows on a 64x32 panel, 52 on 64x64,
+# where the art grows from 22px to 30px (two of them side by side is the
+# limit of a 64px panel).
+BAND_HEIGHT = canvas.height() - 12
+ART_SIZE = min(BAND_HEIGHT - 2, 30)
+
 def now_playing(song, artist, album):
     return render.Root(
         child = render.Column(
@@ -49,7 +56,7 @@ def now_playing(song, artist, album):
                     children = [
                         render.Box(
                             width = 64,
-                            height = 24,
+                            height = BAND_HEIGHT,
                             color = "e68a00",
                         ),
                         render.Row(
@@ -57,11 +64,11 @@ def now_playing(song, artist, album):
                             main_align = "space_evenly",
                             children = [
                                 render.Padding(
-                                    child = render.Image(src = album, height = 22, width = 22),
+                                    child = render.Image(src = album, height = ART_SIZE, width = ART_SIZE),
                                     pad = 1,
                                 ),
                                 render.Padding(
-                                    child = render.Image(src = KEXP_LOGO, height = 22, width = 22),
+                                    child = render.Image(src = KEXP_LOGO, height = ART_SIZE, width = ART_SIZE),
                                     pad = 1,
                                 ),
                             ],

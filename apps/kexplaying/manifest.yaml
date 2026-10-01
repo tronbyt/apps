@@ -7,6 +7,7 @@ author: Ken Winke
 fileName: kexplaying.star
 packageName: kexplaying
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - music

@@ -8,6 +8,7 @@ fileName: nationalday.star
 packageName: nationalday
 recommendedInterval: 30
 supports2x: true
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle
