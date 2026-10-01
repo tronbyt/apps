@@ -12,7 +12,7 @@ Author: Matt Fischer
 
 load("images/pdp11_icon.png", PDP11_ICON_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 PDP11_ICON = PDP11_ICON_ASSET.readall()
 
@@ -163,7 +163,20 @@ def bottomRow():
 
 def render_pdp():
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                topRow(),
+                emptyRow(),
+                secondRow(),
+                ledRow(1),
+                emptyRow(3),
+                thirdRow(20),
+                ledRow(20),
+                emptyRow(4),
+                bottomRow(),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 topRow(),
                 emptyRow(),
@@ -177,6 +190,15 @@ def render_pdp():
             ],
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     return render_pdp()

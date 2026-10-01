@@ -7,6 +7,7 @@ author: michaelalbinson
 fileName: peanuts_pictures.star
 packageName: peanutspictures
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art

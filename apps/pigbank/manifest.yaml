@@ -8,6 +8,7 @@ fileName: pigbank.star
 packageName: pigbank
 recommendedInterval: 5
 supports2x: false
+supports64x64: true
 category: finance
 tags:
   - finance

@@ -11,7 +11,7 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -92,6 +92,15 @@ TIDBYT_WIDTH = 64
 
 ZIPPOPOTAMUS_API_TTL_SECONDS = 60 * 60 * 24
 ZIPPOPOTAMUS_API_URL = "http://api.zippopotam.us"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     pkge_api_key = re.sub("\\s", "", config.str("pkge_api_key")) if config.str("pkge_api_key") else None
@@ -375,7 +384,15 @@ def main(config):
 
         if children:
             return render.Root(
-                render.Box(
+                # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+                (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Box(
+                    child = render.Column(
+                        expanded = True,
+                        main_align = "space_evenly",
+                        children = children,
+                    ),
+                    padding = PADDING,
+                )))) if is_square() else render.Box(
                     child = render.Column(
                         expanded = True,
                         main_align = "space_evenly",

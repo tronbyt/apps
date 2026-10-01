@@ -7,6 +7,7 @@ author: tobyxdd
 fileName: parrot.star
 packageName: partyparrot
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - nature

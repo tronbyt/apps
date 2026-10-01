@@ -8,6 +8,7 @@ fileName: overheadlive.star
 packageName: overheadlive
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: transit
 tags:
   - aviation

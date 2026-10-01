@@ -7,6 +7,7 @@ author: Matt-Pesce
 fileName: outlook_calendar.star
 packageName: outlookcalendar
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - productivity
