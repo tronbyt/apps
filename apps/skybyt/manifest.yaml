@@ -7,6 +7,7 @@ author: Alex Karp
 fileName: skybyt.star
 packageName: skybyt
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - media

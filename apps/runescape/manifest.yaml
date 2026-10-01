@@ -7,6 +7,7 @@ author: blakekwehrle
 fileName: runescape.star
 packageName: runescape
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - gaming

@@ -7,6 +7,7 @@ author: Jed Schmidt
 fileName: mealviewer.star
 packageName: mealviewer
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - education

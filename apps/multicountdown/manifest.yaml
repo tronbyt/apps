@@ -7,6 +7,7 @@ author: BestDistress
 fileName: multicountdown.star
 packageName: multicountdown
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - clock

@@ -7,6 +7,7 @@ author: Brombomb
 fileName: polygon_bounce.star
 packageName: polygonbounce
 supports2x: true
+supports64x64: true
 minPixletVersion: v0.50.0
 category: entertainment
 tags:

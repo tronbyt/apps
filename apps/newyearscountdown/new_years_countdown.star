@@ -1,6 +1,6 @@
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 FRAME_DELAYS = {"Normal": "100", "Fast": "60"}
@@ -29,13 +29,15 @@ FIREWORK_CELLS = compile_cells()
 
 def summon_fireworks():
     rockets = []
-    max_altitude = 32 - ROCKET_FLARES_RADIUS
+
+    # rockets climb to the top of whatever panel they are on
+    max_altitude = canvas.height() - ROCKET_FLARES_RADIUS
     min_altitude = max_altitude - 3
     for rocket_i in range(ROCKET_COUNT):
         rockets.append({
             "cells": FIREWORK_CELLS[random.number(0, len(FIREWORK_CELLS) - 1)],
             "fuse": ROCKET_FUSE_SPACING * rocket_i,
-            "position_x": random.number(ROCKET_FLARES_RADIUS, 64 - ROCKET_FLARES_RADIUS),
+            "position_x": random.number(ROCKET_FLARES_RADIUS, canvas.width() - ROCKET_FLARES_RADIUS),
             "altitude": -1,
             "max_altitude": random.number(min_altitude, max_altitude),
             "burst_frame_ms": -1,
@@ -96,7 +98,7 @@ def render_rocket(timestamp_ms, frame_delay, rocket):
         rocket["altitude"] = min(rocket["altitude"], rocket["max_altitude"])
         r_pad = (
             rocket["position_x"],
-            32 - int(rocket["altitude"]),
+            canvas.height() - int(rocket["altitude"]),
             0,
             0,
         )
@@ -132,7 +134,7 @@ def render_rocket(timestamp_ms, frame_delay, rocket):
             flare_distance = burst_percent * flare["max_dist"]
             flare_pad = (
                 int(rocket["position_x"] + flare["cos"] * flare_distance),
-                int(32 - rocket["altitude"] + flare["sin"] * flare_distance),
+                int(canvas.height() - rocket["altitude"] + flare["sin"] * flare_distance),
                 0,
                 0,
             )

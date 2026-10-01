@@ -7,6 +7,7 @@ author: Marc ten Bosch
 fileName: lobster_facts.star
 packageName: lobsterfacts
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - nature

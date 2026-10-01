@@ -6,6 +6,7 @@ desc: Based on the HAIM band's I Quit album cover.
 author: kaisle51
 fileName: iquit.star
 packageName: iquit
+supports64x64: true
 category: entertainment
 tags:
   - music

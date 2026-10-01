@@ -7,6 +7,7 @@ author: dereklarmstrong
 fileName: new_years_countdown.star
 packageName: newyearscountdown
 recommendedInterval: 60
+supports64x64: true
 category: entertainment
 tags:
   - time
