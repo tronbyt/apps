@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -235,7 +235,8 @@ def main(config):
 
     return render.Root(
         max_age = 300,  # Data updated every 5 mins
-        child = render.Padding(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
             pad = (1, 1, 1, 1),
             child = render.Box(
                 width = CONTAINER_WIDTH,
@@ -284,7 +285,7 @@ def main(config):
                     ],
                 ),
             ),
-        ),
+        )),
     )
 
 def get_schema():

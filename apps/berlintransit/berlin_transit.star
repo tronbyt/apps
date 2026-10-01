@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -119,7 +119,8 @@ def get_root_element(departures, station_name):
     return render.Root(
         max_age = 120,
         delay = 25,
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             children = [
                 render.Box(
                     width = 64,
@@ -143,7 +144,7 @@ def get_root_element(departures, station_name):
                 ),
                 render_departures(departures),
             ],
-        ),
+        ))),
     )
 
 #Renders the departures for a station. Rotates through sets of four rows at a time

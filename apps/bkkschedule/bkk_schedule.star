@@ -12,7 +12,7 @@ Author: tomzorz
 
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -96,7 +96,7 @@ def main(config):
     API_KEY = config.get("api_key")
 
     if API_KEY == None or API_KEY == "":
-        return render.Root(child = render.Text(content = "No API Key provided."))
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text(content = "No API Key provided.")))
 
     config_stop = "BKK_" + config.get("stop_id", DEFAULT_STOP_ID)
 
@@ -200,7 +200,8 @@ def main(config):
             child = render.Animation(children = animation_children),
         )
 
-    return render.Root(child = final_child, max_age = 60)
+    # Centre the board on taller panels (64x64).
+    return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = final_child), max_age = 60)
 
 def get_schema():
     return schema.Schema(

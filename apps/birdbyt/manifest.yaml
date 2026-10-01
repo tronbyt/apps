@@ -7,10 +7,11 @@ author: Becky Sweger
 fileName: birdbyt.star
 packageName: birdbyt
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - nature
   - weather
   - local
 published: '2023-06-15T20:32:24Z'
-updated: '2026-08-26T21:15:48Z'
+updated: '2026-10-01T20:24:07Z'
