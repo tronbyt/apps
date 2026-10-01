@@ -8,6 +8,7 @@ fileName: bday_countdown.star
 packageName: bdaycountdown
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - lifestyle

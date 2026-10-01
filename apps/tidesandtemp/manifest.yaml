@@ -7,6 +7,7 @@ author: sudeepban
 fileName: tides_and_temp.star
 packageName: tidesandtemp
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather

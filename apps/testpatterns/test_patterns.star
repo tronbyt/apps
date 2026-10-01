@@ -6,7 +6,7 @@ Description: Test patterns are as old as TV broadcasts.
 """
 
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 COLORS = [
     "#ffffff",
@@ -64,6 +64,6 @@ def main():
 def column(color):
     return render.Column([
         render.Row([
-            render.Box(width = 8, height = 32, color = color),
+            render.Box(width = canvas.width() // 8, height = canvas.height(), color = color),
         ]),
     ])

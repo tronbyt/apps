@@ -7,6 +7,7 @@ author: rs7q5
 fileName: shuffle_images.star
 packageName: shuffleimages
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - art

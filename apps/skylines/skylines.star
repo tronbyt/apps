@@ -16,7 +16,8 @@ SCREEN_HEIGHT = canvas.height()
 BASE_WIDTH = 64
 BASE_HEIGHT = 32
 
-SCALE = SCREEN_HEIGHT // BASE_HEIGHT
+# Scale by the tighter axis: the 64x64 square is 64 wide like 1x, so SCALE stays 1 there.
+SCALE = min(SCREEN_WIDTH // BASE_WIDTH, SCREEN_HEIGHT // BASE_HEIGHT)
 
 #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
 DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
@@ -251,16 +252,16 @@ def main(config):
                 last_frame,
                 add_padding_to_child_element(
                     render.Box(width = text_w, height = text_h, color = "#000"),
-                    SCREEN_WIDTH - text_w,
-                    SCREEN_HEIGHT - text_h,
+                    BASE_WIDTH * SCALE - text_w,
+                    BASE_HEIGHT * SCALE - text_h,
                 ),
                 add_padding_to_child_element(
                     render.Marquee(
                         width = BASE_WIDTH * SCALE,
                         child = render.Text(text_to_display, font = font, color = text_color),
                     ),
-                    SCREEN_WIDTH - text_w,
-                    SCREEN_HEIGHT - text_h,
+                    BASE_WIDTH * SCALE - text_w,
+                    BASE_HEIGHT * SCALE - text_h,
                 ),
             ],
         )
@@ -274,11 +275,15 @@ def main(config):
 
     return render.Root(
         delay = int(config.get("scroll", 45)),
-        child = render.Stack(
-            children =
-                [
-                    render.Animation(children = animation_frames),
-                ],
+        # Centre the scaled 64x32 scene on panels that are taller than that (64x64).
+        child = render.Box(
+            width = SCREEN_WIDTH,
+            height = SCREEN_HEIGHT,
+            child = render.Box(
+                width = BASE_WIDTH * SCALE,
+                height = BASE_HEIGHT * SCALE,
+                child = render.Animation(children = animation_frames),
+            ),
         ),
         show_full_animation = True,
     )

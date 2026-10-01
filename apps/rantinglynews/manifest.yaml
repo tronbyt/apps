@@ -7,6 +7,7 @@ author: '@Mad-Chemist'
 fileName: rantinglynews.star
 packageName: rantinglynews
 recommendedInterval: 10
+supports64x64: true
 category: news
 tags:
   - news
