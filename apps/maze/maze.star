@@ -15,6 +15,11 @@ load("schema.star", "schema")
 GRID_ROWS = canvas.height() // 2 - 1
 GRID_COLS = canvas.width() // 2 - 1
 
+# A bigger maze means a longer solve; panels with more than 64x32 pixels keep
+# every other frame so the animation stays inside the server's render deadline
+# on a Pi-class host (the solve just runs twice as fast).
+FRAME_STEP = 2 if canvas.width() * canvas.height() > 64 * 32 else 1
+
 # Returns False if there is no cell to the east
 # or the cell itself.
 def east(grid, cell):
@@ -294,6 +299,6 @@ def main(config):
     frames = []
     solve(colors, grid, 0, 0, path, maze_frame, frames)
 
-    animation = render.Animation(children = [frame_to_render(frame) for frame in frames])
+    animation = render.Animation(children = [frame_to_render(frame) for frame in frames[::FRAME_STEP]])
 
     return render.Root(child = animation)
