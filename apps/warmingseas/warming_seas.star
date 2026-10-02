@@ -117,6 +117,42 @@ def parse_location(config):
             return decoded
     return DEFAULT_LOCATION
 
+def format_locality(loc):
+    if not loc or type(loc) != "dict":
+        return "Miami, FL"
+
+    city = loc.get("city") or loc.get("locality") or ""
+    state = loc.get("state") or loc.get("admin_area") or loc.get("province") or ""
+    country = loc.get("country") or loc.get("country_code") or ""
+    description = loc.get("description") or loc.get("place_name") or loc.get("locality") or ""
+
+    if "," in city:
+        description = city
+        city = ""
+
+    if not city and description and "," in description:
+        parts = [p.strip() for p in description.split(",")]
+        if len(parts) >= 3:
+            city = parts[0]
+            state = parts[1]
+            country = parts[-1]
+        elif len(parts) == 2:
+            city = parts[0]
+            country = parts[1]
+
+    country_upper = country.upper()
+    is_us = country_upper in ["US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA"] or (state != "" and country == "")
+
+    if city != "" and is_us and state != "":
+        return "%s, %s" % (city, state)
+    elif city != "" and country != "":
+        return "%s, %s" % (city, country)
+    elif city != "":
+        return city
+    elif description != "":
+        return description
+    return "Miami, FL"
+
 HEX_CACHE = [HEX_CHARS[i // 16] + HEX_CHARS[i % 16] for i in range(256)]
 
 def rgb_to_hex(rgb):
@@ -170,7 +206,7 @@ def get_ocean_data(config):
         loc = parse_location(config)
         lat = float(loc.get("lat", DEFAULT_LOCATION["lat"]))
         lng = float(loc.get("lng", DEFAULT_LOCATION["lng"]))
-        locality = loc.get("locality", "Ocean Coast")
+        locality = format_locality(loc)
 
     marine_url = "https://marine-api.open-meteo.com/v1/marine?latitude=%s&longitude=%s&current=wave_height,ocean_current_velocity" % (lat, lng)
     res = http.get(marine_url, ttl_seconds = 1800)
