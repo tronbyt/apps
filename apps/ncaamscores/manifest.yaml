@@ -7,6 +7,7 @@ author: LunchBox8484
 fileName: ncaam_scores.star
 packageName: ncaamscores
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - real-time
@@ -14,4 +15,4 @@ tags:
   - nba
   - basketball
 published: '2022-11-10T15:12:34Z'
-updated: '2026-09-19T17:20:14Z'
+updated: '2026-10-01T21:58:58Z'

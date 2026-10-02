@@ -29,7 +29,7 @@ load("images/icon_lic.png", ICON_LIC_ASSET = "file")
 load("images/icon_nyp.png", ICON_NYP_ASSET = "file")
 load("images/icon_unknown.png", ICON_UNKNOWN_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -330,7 +330,15 @@ TERMINAL_CODES = {
 # ERRORS
 def NO_TRAINS(station):
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Text("No trains for"),
+                render.Text("this station +"),
+                render.Text("branch at this"),
+                render.Text("time (%s)." % station),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Text("No trains for"),
                 render.Text("this station +"),
@@ -342,7 +350,14 @@ def NO_TRAINS(station):
 
 def API_ERROR(code):
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Text("An error (%s)" % code),
+                render.Text("occured while"),
+                render.Text("fetching data."),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Text("An error (%s)" % code),
                 render.Text("occured while"),
@@ -426,6 +441,15 @@ BRANCH_ICONS = {
 }
 
 # MAIN CODE
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # get user settings
     station_code = config.str("station", DEFAULT_STATION)
@@ -512,7 +536,74 @@ def main(config):
 
     return render.Root(
         delay = 850,  # make sure we can make it through the stops before our window on the device ends
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Box(
+                    # branch color
+                    width = 64,
+                    height = 1,
+                    color = branch_color,
+                ),
+                render.Box(
+                    # alerts, if any
+                    width = 64,
+                    height = 1,
+                    color = "#ffe91f" if is_alert else "#000000",
+                ),
+                render.Row(
+                    children = [
+                        render.Padding(child = render.Image(train_icon), pad = (0, 0, 1, 0)),  # branch/terminal icon
+                        render.Column(children = [
+                            # train number, eta, peak info
+                            render.Row(expanded = True, main_align = "space_between", children = [
+                                render.Box(
+                                    child = render.Marquee(
+                                        child = render.Text(train_number),
+                                        align = "center",
+                                        width = 20,
+                                    ),
+                                    width = 20,
+                                    height = 8,
+                                    color = branch_color,
+                                ),  # make the train number look nice, use a marquee to scroll it in case it's longer than usual (ie special gameday trains)
+                                render.Animation(children = [
+                                    render.Text(stop_time.in_location("America/New_York").format("3:04"), color = train_otp_color),  # janky way of slowing this animation down
+                                    render.Text(stop_time.in_location("America/New_York").format("3:04"), color = train_otp_color),
+                                    render.Text(stop_time.in_location("America/New_York").format("3:04"), color = train_otp_color),
+                                    render.Text("%s %s" % ("▴" if is_peak else "▾", eta_str if eta != 0 else "Arr")),  # peak icon and eta, or "Arr"iving if it's zero.
+                                    render.Text("%s %s" % ("▴" if is_peak else "▾", eta_str if eta != 0 else "Arr")),
+                                    render.Text("%s %s" % ("▴" if is_peak else "▾", eta_str if eta != 0 else "Arr")),
+                                ]),
+                            ]),
+                            render.Row(children = [
+                                render.Text("%s " % stop_track_type),  # "Track" or "Platform"
+                                render.Text(stop_track, color = "#ffffff" if not track_change else STATUS_COLORS["ARRIVING"]),  # change the color if there's a track change to draw attention to it.
+                                render.Image(ALERT_ICON) if track_change else None,  # show the alert icon if there's been a track change
+                            ]),
+                        ]),
+                    ],
+                ),
+                render.Animation(children = [
+                    # stops
+                    render.Text(stop, font = "tb-8")
+                    for stop in next_stops[:-1]  # all but the last stop get 1 frame.
+                ] + [render.Text(next_stops[-1], font = "tb-8")] * 3),  # hold the last stop on screen longer
+                render.Padding(
+                    # consist
+                    child = render.Row(children = cars, expanded = True, main_align = "center"),
+                    pad = (1, 2, 0, 0),
+                ),
+                render.Row(expanded = True, main_align = "center", children = [
+                    # train loading and platform indicator
+                    render.Padding(pad = (0, 1, 0, 0), child = render.Box(width = 62, height = 1, color = status_color) if stop_status != "ARRIVING" else render.Animation(children = [
+                        # flash the "platform" if the train is arriving
+                        render.Box(width = 62, height = 1, color = STATUS_COLORS["ARRIVING"]),
+                        render.Box(width = 62, height = 1, color = STATUS_COLORS["BERTHED"]),
+                    ])),
+                ]),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Box(
                     # branch color
