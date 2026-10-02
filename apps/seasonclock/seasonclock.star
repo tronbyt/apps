@@ -430,13 +430,26 @@ def word_overlay(head, line1, line2):
 
 def notice(msg):
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            color = "#101820",
+            child = render.WrappedText(content = msg, font = "tb-8", color = "#ffcc00", align = "center"),
+        ))) if is_square() else render.Box(
             color = "#101820",
             child = render.WrappedText(content = msg, font = "tb-8", color = "#ffcc00", align = "center"),
         ),
     )
 
 # ---------- main ----------
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = json.decode(config.get("location") or DEFAULT_LOCATION)
@@ -518,7 +531,8 @@ def main(config):
         frames.append(render.Stack(children = children))
 
     return render.Root(
-        child = render.Animation(children = frames),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames)))) if is_square() else render.Animation(children = frames),
         delay = DELAY_MS,
     )
 
