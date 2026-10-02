@@ -7,9 +7,10 @@ author: SamuLab
 fileName: rainradar.star
 packageName: rainradar
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather
   - radar
 published: '2026-09-02T19:58:42Z'
-updated: '2026-09-03T13:17:07Z'
+updated: '2026-10-01T22:22:03Z'

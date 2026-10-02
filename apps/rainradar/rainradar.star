@@ -8,7 +8,7 @@ https://www.rainviewer.com/
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -27,6 +27,15 @@ DEFAULT_LOCATION = """{
     "locality": "Houston",
     "timezone": "America/Chicago"
 }"""
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     loc = _location(config)
@@ -84,7 +93,8 @@ def main(config):
     return render.Root(
         delay = delay,
         max_age = 600,
-        child = render.Box(width = 64, height = 32, child = render.Stack(children = stack_children)),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = stack_children)))) if is_square() else render.Box(width = 64, height = 32, child = render.Stack(children = stack_children)),
     )
 
 def _hud_frame(radar, label, stamp, alert_text):
@@ -354,7 +364,18 @@ def _clamp_int(value, lo, hi, default):
 
 def _error(msg):
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            color = "#020617",
+            child = render.Column(
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.Text("RADAR", font = "tom-thumb", color = "#F87171"),
+                    render.Text(msg, font = "tom-thumb", color = "#E5E7EB"),
+                ],
+            ),
+        ))) if is_square() else render.Box(
             color = "#020617",
             child = render.Column(
                 main_align = "center",

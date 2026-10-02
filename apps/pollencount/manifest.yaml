@@ -7,10 +7,11 @@ author: Nicole Brooks
 fileName: pollen_count.star
 packageName: pollencount
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather
   - lifestyle
   - utility
 published: '2022-05-05T11:29:06Z'
-updated: '2026-07-19T23:48:39Z'
+updated: '2026-10-01T22:22:03Z'
