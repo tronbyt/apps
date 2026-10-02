@@ -9,6 +9,7 @@ packageName: mercuryretrograde
 recommendedInterval: 5
 broken: true
 brokenReason: The API endpoint mercuryretrogradeapi.com is timed out/unreachable.
+supports64x64: true
 category: reference
 tags:
   - horoscope
@@ -17,4 +18,4 @@ tags:
   - retrograde
   - lifestyle
 published: '2023-09-21T17:27:54Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:54:45Z'

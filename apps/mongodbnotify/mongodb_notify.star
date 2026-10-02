@@ -1,11 +1,20 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CACHE_TTL_SECONDS = 60
 
 nilWidget = render.Box(width = -1, height = -1)
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     result = []
@@ -52,7 +61,8 @@ def main(config):
 
     if (len(pages) > 0):
         result = render.Root(
-            child = render_child(wrap_pages(pages)),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render_child(wrap_pages(pages)))) if is_square() else render_child(wrap_pages(pages)),
             delay = (int(config.get("root_delay", "3")) * 1000),
             show_full_animation = config.bool("root_show_full_animation", True),
         )
@@ -228,7 +238,8 @@ def render_child(json):
         )
     elif (widget == "Root"):
         result = render.Root(
-            child = child,
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = child)) if is_square() else child,
             delay = int(params.setdefault("delay", 0)),
             max_age = int(params.setdefault("max_age", 0)),
             show_full_animation = bool(params.setdefault("show_full_animation", False)),

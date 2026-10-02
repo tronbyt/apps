@@ -7,7 +7,8 @@ author: Marcus Better & Eric Pierce
 fileName: mbta.star
 packageName: mbta
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags: []
 published: '2022-02-01T21:38:47Z'
-updated: '2026-09-03T02:35:10Z'
+updated: '2026-10-01T21:54:45Z'
