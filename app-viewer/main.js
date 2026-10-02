@@ -350,6 +350,18 @@ function resolveAppAssetUrl(value, appName) {
   return `${APPS_DIR}/${appName}/${value}`;
 }
 
+function formatManifestDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC'
+  }).format(date);
+}
+
 function getAppNameFromURL() {
   const params = new URLSearchParams(window.location.search);
   const paramApp = params.get('app');
@@ -471,27 +483,94 @@ async function renderAppDetail() {
     detailsList.appendChild(descDesc);
   }
 
+  if (app.published) {
+    const publishedTerm = document.createElement('dt');
+    publishedTerm.textContent = 'Published:';
+    const publishedDesc = document.createElement('dd');
+    const publishedTime = document.createElement('time');
+    publishedTime.dateTime = app.published;
+    publishedTime.textContent = formatManifestDate(app.published);
+    publishedDesc.appendChild(publishedTime);
+    detailsList.appendChild(publishedTerm);
+    detailsList.appendChild(publishedDesc);
+  }
+
+  if (app.updated) {
+    const updatedTerm = document.createElement('dt');
+    updatedTerm.textContent = 'Last Updated:';
+    const updatedDesc = document.createElement('dd');
+    const updatedTime = document.createElement('time');
+    updatedTime.dateTime = app.updated;
+    updatedTime.textContent = formatManifestDate(app.updated);
+    updatedDesc.appendChild(updatedTime);
+    detailsList.appendChild(updatedTerm);
+    detailsList.appendChild(updatedDesc);
+  }
+
+  const displaysTerm = document.createElement('dt');
+  displaysTerm.textContent = 'Supported Displays:';
+  const displaysDesc = document.createElement('dd');
+  displaysDesc.className = 'app-display-capabilities';
+  const displaySizes = ['64×32'];
+  if (app.supports2x) displaySizes.push('128×64 (2×)');
+  if (app.supports64x64) displaySizes.push('64×64');
+  displaySizes.forEach(size => {
+    const badge = document.createElement('span');
+    badge.textContent = size;
+    displaysDesc.appendChild(badge);
+  });
+  detailsList.appendChild(displaysTerm);
+  detailsList.appendChild(displaysDesc);
+
   leftCol.appendChild(detailsList);
   detailsTable.appendChild(leftCol);
 
   // Add app image if available
-  if (app.image) {
+  if (app.image || app.image64x64) {
     const rightCol = document.createElement('div');
     rightCol.className = 'col-md-4';
 
     const imageContainer = document.createElement('div');
-    imageContainer.className = 'text-center position-relative';
-    if (app.supports2x) {
-      imageContainer.classList.add('app-2x');
+    imageContainer.className = 'app-preview-gallery';
+
+    if (app.image) {
+      const wideFigure = document.createElement('figure');
+      wideFigure.className = 'app-preview mb-0';
+      if (app.supports2x) wideFigure.classList.add('app-2x');
+
+      const image = document.createElement('img');
+      const displayImage = (app.supports2x && app.image2x) ? app.image2x : app.image;
+      image.src = `${APPS_DIR}/${displayImage}`;
+      image.alt = `${app.displayName || app.name} wide preview`;
+      image.className = 'app-preview-image img-fluid rounded border';
+
+      const caption = document.createElement('figcaption');
+      caption.className = 'app-preview-caption';
+      caption.textContent = app.supports2x ? '64×32 / 128×64 preview' : '64×32 preview';
+
+      wideFigure.appendChild(image);
+      wideFigure.appendChild(caption);
+      imageContainer.appendChild(wideFigure);
     }
 
-    const image = document.createElement('img');
-    const displayImage = (app.supports2x && app.image2x) ? app.image2x : app.image;
-    image.src = `${APPS_DIR}/${displayImage}`;
-    image.alt = app.displayName || app.name;
-    image.className = 'app-preview-image img-fluid rounded border';
+    if (app.image64x64) {
+      const squareFigure = document.createElement('figure');
+      squareFigure.className = 'app-preview app-preview-square mb-0';
 
-    imageContainer.appendChild(image);
+      const squareImage = document.createElement('img');
+      squareImage.src = `${APPS_DIR}/${app.image64x64}`;
+      squareImage.alt = `${app.displayName || app.name} square preview`;
+      squareImage.className = 'app-preview-image app-preview-image-square img-fluid rounded border';
+
+      const squareCaption = document.createElement('figcaption');
+      squareCaption.className = 'app-preview-caption';
+      squareCaption.textContent = '64×64 preview';
+
+      squareFigure.appendChild(squareImage);
+      squareFigure.appendChild(squareCaption);
+      imageContainer.appendChild(squareFigure);
+    }
+
     rightCol.appendChild(imageContainer);
     detailsTable.appendChild(rightCol);
   }

@@ -173,6 +173,11 @@ body.dot-matrix-enabled #app-content .app-2x .app-preview-image {
   mask-image: url('./dots@2x.svg');
 }
 
+body.dot-matrix-enabled #app-content .app-preview-image-square {
+  -webkit-mask-image: url('./dots@64x64.svg');
+  mask-image: url('./dots@64x64.svg');
+}
+
 #app-content {
   background: #222;
   border-radius: 8px;
@@ -193,6 +198,42 @@ body.dot-matrix-enabled #app-content .app-2x .app-preview-image {
   margin: 0;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.app-display-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.app-display-capabilities span {
+  background: #181818;
+  border: 1px solid #444;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+}
+
+.app-preview-gallery {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+
+.app-preview {
+  max-width: 100%;
+  text-align: center;
+}
+
+#app-content .app-preview-image-square {
+  aspect-ratio: 1 / 1;
+  max-width: 16rem;
+}
+
+.app-preview-caption {
+  color: #aaa;
+  font-size: 0.55rem;
+  line-height: 1.5;
+  margin-top: 0.5rem;
 }
 
 .app-readme {

@@ -209,7 +209,9 @@ function scanApps() {
     let author = null;
     let recommendedInterval = null;
     let supports2x = false;
+    let supports64x64 = false;
     let image2x = null;
+    let image64x64 = null;
     let category = null;
     let tags = [];
     let published = null;
@@ -222,6 +224,7 @@ function scanApps() {
       author = manifest.author || null;
       recommendedInterval = manifest.recommendedInterval || null;
       supports2x = Boolean(manifest.supports2x);
+      supports64x64 = Boolean(manifest.supports64x64);
       category = manifest.category || null;
       tags = manifest.tags || [];
       published = manifest.published || null;
@@ -235,6 +238,16 @@ function scanApps() {
         const candidate2x = `${base}@2x${ext}`;
         if (files.includes(candidate2x)) {
             image2x = `${appName}/${candidate2x}`;
+        }
+    }
+
+    // Try to find the corresponding 64x64 image if the app supports square displays
+    if (supports64x64 && image) {
+        const ext = extname(image);
+        const base = basename(image, ext);
+        const candidate64x64 = `${base}@64x64${ext}`;
+        if (files.includes(candidate64x64)) {
+            image64x64 = `${appName}/${candidate64x64}`;
         }
     }
 
@@ -252,7 +265,9 @@ function scanApps() {
       recommendedInterval: recommendedInterval,
       image: image ? `${appName}/${image}` : null,
       image2x: image2x,
+      image64x64: image64x64,
       supports2x: supports2x,
+      supports64x64: supports64x64,
       md: md ? `${appName}/${md}` : null,
       starFile: starFile,
       category: category,

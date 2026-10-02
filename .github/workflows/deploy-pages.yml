@@ -59,6 +59,7 @@ jobs:
           cp app-viewer-source/app-viewer/style.css _site/
           cp app-viewer-source/app-viewer/dots.svg _site/
           cp app-viewer-source/app-viewer/dots@2x.svg _site/
+          cp app-viewer-source/app-viewer/dots@64x64.svg _site/
 
           # Generate apps.json directly into the site root (using apps from main branch)
           node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps
