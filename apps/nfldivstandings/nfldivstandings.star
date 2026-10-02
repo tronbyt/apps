@@ -39,13 +39,22 @@ load("images/logo_sf.png", LOGO_SF_ASSET = "file")
 load("images/logo_tb.png", LOGO_TB_ASSET = "file")
 load("images/logo_ten.png", LOGO_TEN_ASSET = "file")
 load("images/logo_wsh.png", LOGO_WSH_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/football/nfl/standings"
 STANDINGS_TTL_SECONDS = 300  # 5 minutes
 HTTP_OK = 200
 RECORD_FONT = "CG-pixel-4x5-mono"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     division_id = config.get("division") or "10"  # NFC North default
@@ -62,7 +71,28 @@ def main(config):
     return render.Root(
         delay = 80,
         show_full_animation = True,
-        child = render.Row(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Row(
+            children = [
+                render.Box(
+                    width = 5,
+                    height = 32,
+                    child = render_lefter(division_id),
+                ),
+                animation.Transformation(
+                    duration = 180,
+                    width = 236,
+                    keyframes = [
+                        build_keyframe(0, 0.0),
+                        build_keyframe(-59, 0.33),
+                        build_keyframe(-118, 0.66),
+                        build_keyframe(-177, 1.0),
+                    ],
+                    child = render_division_standings(standings),
+                    wait_for_child = True,
+                ),
+            ],
+        )))) if is_square() else render.Row(
             children = [
                 render.Box(
                     width = 5,

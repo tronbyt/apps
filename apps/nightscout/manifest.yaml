@@ -8,6 +8,7 @@ fileName: nightscout.star
 packageName: nightscout
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: health
 tags:
   - lifestyle
@@ -15,4 +16,4 @@ tags:
   - utility
   - wide 2x support
 published: '2022-01-19T18:18:31Z'
-updated: '2026-08-31T23:48:25Z'
+updated: '2026-10-01T22:07:01Z'

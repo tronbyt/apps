@@ -7,10 +7,11 @@ author: LunchBox8484
 fileName: nhl_scores.star
 packageName: nhlscores
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - utility
   - nhl
   - hockey
 published: '2022-04-27T14:37:57Z'
-updated: '2026-09-19T17:20:14Z'
+updated: '2026-10-01T22:07:01Z'

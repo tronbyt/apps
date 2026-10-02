@@ -7,9 +7,10 @@ author: danmcclain
 fileName: netatmo.star
 packageName: netatmo
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather
   - smart-home
 published: '2022-02-28T19:38:45Z'
-updated: '2025-12-23T13:24:18Z'
+updated: '2026-10-01T22:07:01Z'
