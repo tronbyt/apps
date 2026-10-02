@@ -115,6 +115,15 @@ def get_next_recording(live, timezone, scale, api_key):
         color = "#333F48",
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
     timezone = config.get("timezone") or "America/New_York"
@@ -151,7 +160,14 @@ def main(config):
         expanded = True,
     )
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Box(height = 2 * scale, color = "#34657F"),
+                main_content,
+                render.Box(height = 1 * scale, color = "#34657F"),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Box(height = 2 * scale, color = "#34657F"),
                 main_content,

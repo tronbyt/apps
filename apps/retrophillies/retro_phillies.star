@@ -2,7 +2,7 @@
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -347,19 +347,31 @@ def frame(s, t):
         rows.append(render.Row(children = runs))
     return render.Column(children = rows)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     if config.get("fixture"):
         s = json.decode(config["fixture"])
     else:
         endpoint = config.get("feed_url", "").rstrip("/")
         if not endpoint:
-            return render.Root(child = render.Column(children = [render.Text("RETRO PHILLIES", font = "CG-pixel-3x5-mono", color = "#ffcf55"), render.Text("SET COMPANION", font = "CG-pixel-3x5-mono"), render.Text("SEE README", font = "CG-pixel-3x5-mono")]))
+            # Centre the block on the square (64x64); other panels unchanged.
+            return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(children = [render.Text("RETRO PHILLIES", font = "CG-pixel-3x5-mono", color = "#ffcf55"), render.Text("SET COMPANION", font = "CG-pixel-3x5-mono"), render.Text("SEE README", font = "CG-pixel-3x5-mono")]))) if is_square() else render.Column(children = [render.Text("RETRO PHILLIES", font = "CG-pixel-3x5-mono", color = "#ffcf55"), render.Text("SET COMPANION", font = "CG-pixel-3x5-mono"), render.Text("SEE README", font = "CG-pixel-3x5-mono")]))
         consumer = config.get("consumer", "display1")
         if not consumer or len(consumer) > 48 or any([ch not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_" for ch in consumer.elems()]):
-            return render.Root(child = render.Text("Check display ID"))
+            # Centre the block on the square (64x64); other panels unchanged.
+            return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Check display ID"))) if is_square() else render.Text("Check display ID"))
         response = http.get(endpoint + "/retro-baseball?consumer=" + consumer, ttl_seconds = 1)
         if response.status_code != 200:
-            return render.Root(child = render.Text("Feed unavailable"))
+            # Centre the block on the square (64x64); other panels unchanged.
+            return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Feed unavailable"))) if is_square() else render.Text("Feed unavailable"))
         s = response.json()
         s["uiTime"] = time.now().unix
     role = config.get("role", "rotation")
@@ -368,7 +380,9 @@ def main(config):
     if role == "allgames" and not s.get("inGameWindow", False):
         return []
     s["mascot"] = config.bool("mascot", True)
-    return render.Root(delay = 200, child = render.Animation(children = [frame(s, i / 5.0) for i in range(50)]))
+
+    # Centre the block on the square (64x64); other panels unchanged.
+    return render.Root(delay = 200, child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = [frame(s, i / 5.0) for i in range(50)]))) if is_square() else render.Animation(children = [frame(s, i / 5.0) for i in range(50)]))
 
 def get_schema():
     return schema.Schema(version = "1", fields = [

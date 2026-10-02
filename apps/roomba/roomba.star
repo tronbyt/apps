@@ -8,7 +8,7 @@ Author: noahpodgurski
 load("http.star", "http")
 load("images/ricon.png", RICON_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 RICON = RICON_ASSET.readall()
@@ -212,6 +212,15 @@ def requestStatus(serverIP, serverPort, apiKey):
     res = res.json()
     return res
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     white_pixel = render.Box(
         width = 1,
@@ -338,7 +347,88 @@ def main(config):
         error = 21
 
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            expanded = True,
+            main_align = "start",
+            cross_align = "start",
+            children = [
+                render.Column(
+                    main_align = "start",
+                    cross_align = "start",
+                    children = [
+                        render.Stack(
+                            children = [
+                                render.Padding(
+                                    pad = 1,
+                                    child = render.Row(
+                                        expanded = True,
+                                        main_align = "space_around",
+                                        children = [
+                                            render.Stack(children = [
+                                                render.Image(src = RICON),
+                                            ]),
+                                            render.Text(name),
+                                        ],
+                                    ),
+                                ),
+                            ],
+                        ),
+                        render.Padding(
+                            pad = (1, 1, 0, 0),
+                            child = render.Row(
+                                main_align = "space_around",
+                                cross_align = "center",
+                                expanded = True,
+                                children = [
+                                    render.Stack(
+                                        children = [
+                                            render.Padding(
+                                                pad = (0, 0, 50, 0),
+                                                child = render.Column(
+                                                    expanded = True,
+                                                    children = [
+                                                        render.Row(children = row)
+                                                        for row in batteryIconRows
+                                                    ],
+                                                ),
+                                            ),
+                                            render.Padding(
+                                                pad = (9, 0, 0, 0),
+                                                child = render.WrappedText(batLabel, font = "5x8"),
+                                            ),
+                                            render.Padding(
+                                                pad = (13, statusOffset, 1, 1),
+                                                child = render.Column(
+                                                    expanded = True,
+                                                    children = [
+                                                        render.WrappedText(phaseLabel, font = "5x8", color = phaseLabelColor),
+                                                    ],
+                                                ),
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ) if not error else render.Row(
+                                main_align = "space_around",
+                                cross_align = "center",
+                                expanded = True,
+                                children = [
+                                    render.Stack(
+                                        children = [
+                                            render.Padding(
+                                                pad = 0,
+                                                child = render.WrappedText(ERROR_CODES[error], font = "5x8", color = RED),
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Row(
             expanded = True,
             main_align = "start",
             cross_align = "start",

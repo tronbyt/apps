@@ -7,10 +7,11 @@ author: Nicole Brooks
 fileName: reddit_images.star
 packageName: redditimages
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art
   - news
   - media
 published: '2022-03-13T21:43:01Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T22:30:43Z'

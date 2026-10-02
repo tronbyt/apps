@@ -7,7 +7,7 @@ Author: Alex Serriere
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -117,6 +117,15 @@ def show_arrivals(stops_data):
         scroll_direction = "vertical",
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     stop1 = none_str_to_none_val(config.get("stop1", DEFAULT_STOP_ID_1))
     stop2 = none_str_to_none_val(config.get("stop2", DEFAULT_STOP_ID_2))
@@ -126,7 +135,8 @@ def main(config):
     if stop2:
         stops_arrivals.append(get_arrivals_for_stop(stop2, config))
     return render.Root(
-        child = show_arrivals(stops_arrivals),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = show_arrivals(stops_arrivals))) if is_square() else show_arrivals(stops_arrivals),
         delay = 150,
         max_age = 30,
         show_full_animation = True,
