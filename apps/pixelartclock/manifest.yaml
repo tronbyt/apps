@@ -8,6 +8,7 @@ recommendedInterval: 0
 fileName: pixel_art_clock.star
 packageName: pixelartclock
 supports2x: true
+supports64x64: true
 category: clocks
 tags:
   - weather
@@ -16,4 +17,4 @@ tags:
   - utility
   - wide 2x support
 published: '2025-05-14T19:55:24Z'
-updated: '2026-08-17T03:05:27Z'
+updated: '2026-10-01T22:17:11Z'

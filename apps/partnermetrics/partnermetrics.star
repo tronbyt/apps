@@ -14,7 +14,7 @@ load("images/picture_frame_bg.gif", IMAGE_PICTURE_FRAME_BG_ASSET = "file")
 load("images/recent_orders.png", RECENT_ORDERS_ASSET = "file")
 load("images/trends_animated.gif", TRENDS_ANIMATED_ASSET = "file")
 load("images/trends_container.png", TRENDS_CONTAINER_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -74,7 +74,50 @@ def api_fetch(partnermetricsCookie, request_config):
 # Returns: A Pixlet root element
 def error_view():
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Image(IMAGE_STARFIELD),
+                render.Column(
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                    children = [
+                        animation.Transformation(
+                            child = render.Image(IMAGE_ALIEN_ERROR),
+                            width = 25,
+                            height = 18,
+                            duration = 150,
+                            direction = "alternate",
+                            fill_mode = "forwards",
+                            keyframes = [
+                                animation.Keyframe(
+                                    percentage = 0.0,
+                                    transforms = [animation.Translate(0, 0)],
+                                ),
+                                animation.Keyframe(
+                                    percentage = 0.25,
+                                    transforms = [animation.Translate(0, 1)],
+                                ),
+                                animation.Keyframe(
+                                    percentage = 0.50,
+                                    transforms = [animation.Translate(0, 0)],
+                                ),
+                                animation.Keyframe(
+                                    percentage = 0.75,
+                                    transforms = [animation.Translate(0, 1)],
+                                ),
+                            ],
+                        ),
+                        render.Marquee(
+                            width = 64,
+                            offset_start = 64,
+                            child = render.Text(content = "We hit a snag. Please check your app.", color = "#FF0"),
+                        ),
+                    ],
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Image(IMAGE_STARFIELD),
                 render.Column(
@@ -119,6 +162,15 @@ def error_view():
         ),
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     partnermetricsCookie = config.get("partnermetricsCookie")
     timezone = time.tz()
@@ -135,7 +187,27 @@ def main(config):
     value = api_data
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Image(src = IMAGE_PICTURE_FRAME_BG),
+                render.Box(
+                    padding = 7,
+                    child = render.Column(
+                        cross_align = "center",
+                        children = [
+                            render_single_label("TrustReviews"),
+                            render.WrappedText(
+                                align = "center",
+                                content = "$" + value,
+                                color = COLOR_ALOE,
+                                font = FONT_TOM_THUMB,
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Image(src = IMAGE_PICTURE_FRAME_BG),
                 render.Box(

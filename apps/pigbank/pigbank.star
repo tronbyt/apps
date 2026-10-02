@@ -7,7 +7,7 @@ Author: PigBank
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Endereco publico do PigBank (a rota repassa para o backend)
@@ -64,6 +64,15 @@ ACCENTS = {
     "Ç": "C",
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     key = config.str("key", "").strip()
     if not key:
@@ -84,7 +93,13 @@ def main(config):
     name = display_name(data.get("name"))
 
     if data.get("firstTime"):
-        return render.Root(child = render.Stack(children = [
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = [
+            pig(),
+            centered("OI " + name + "!" if name else "OI!", 9, WHITE),
+            centered("PIGBANK", 17, EMERALD),
+            centered("CONECTADO", 23, DIM),
+        ])))) if is_square() else render.Stack(children = [
             pig(),
             centered("OI " + name + "!" if name else "OI!", 9, WHITE),
             centered("PIGBANK", 17, EMERALD),
@@ -108,15 +123,20 @@ def main(config):
 
     if not piggies:
         if not mesada:
-            return render.Root(child = cofrinho[0])
-        return render.Root(delay = FRAME_MS, child = render.Animation(children = cofrinho))
+            # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+            return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = cofrinho))) if is_square() else cofrinho[0])
+
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        return render.Root(delay = FRAME_MS, child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = cofrinho)))) if is_square() else render.Animation(children = cofrinho))
 
     # Depois do cofrinho, uma tela por porquinho; tudo cabe em uns 15 s de rotacao
     per_piggy = max(4, min(8, (TOTAL_FRAMES - len(cofrinho)) // len(piggies)))
     frames = list(cofrinho)
     for i, piggy in enumerate(piggies):
         frames += [porquinho(piggy, i + 1, screens)] * per_piggy
-    return render.Root(delay = FRAME_MS, child = render.Animation(children = frames))
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+
+    return render.Root(delay = FRAME_MS, child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames)))) if is_square() else render.Animation(children = frames))
 
 # Tela de um porquinho: nome, quanto tem guardado e os filhotinhos da proxima mesada
 def porquinho(piggy, index, screens):
@@ -173,7 +193,13 @@ def dots(count, active, y):
     return at(RIGHT_X, y, render.Box(width = RIGHT_W, height = 1, child = render.Row(children = row)))
 
 def message(line1, line2, color):
-    return render.Root(child = render.Stack(children = [
+    # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = [
+        pig(),
+        centered("PIGBANK", 6, EMERALD),
+        centered(line1, 14, WHITE),
+        centered(line2, 21, color),
+    ])))) if is_square() else render.Stack(children = [
         pig(),
         centered("PIGBANK", 6, EMERALD),
         centered(line1, 14, WHITE),

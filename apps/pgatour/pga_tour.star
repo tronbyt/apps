@@ -109,7 +109,7 @@ Updated PLAYER_MAPPING
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -204,6 +204,15 @@ MAJOR_MAPPING = """
     "401811953": "#965115"
 }
 """
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     renderCategory = []
@@ -326,7 +335,8 @@ def main(config):
             return render.Root(
                 show_full_animation = True,
                 delay = int(RotationSpeed) * 1000,
-                child = render.Animation(children = renderCategory),
+                # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = renderCategory)))) if is_square() else render.Animation(children = renderCategory),
             )
 
         elif status == "pre":
@@ -343,7 +353,45 @@ def main(config):
             # show what event is coming up next
             return render.Root(
                 show_full_animation = True,
-                child = render.Column(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                    main_align = "start",
+                    cross_align = "start",
+                    children = [
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Box(width = 64, height = 5, color = "#0039A6", child = render.Text(content = Title, color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Box(width = 64, height = 12, color = "#000", child = render.Text(content = "Next event...", color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Marquee(width = 64, height = 12, child = render.Text(content = PreTournamentName + " - " + Location, color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Box(width = 64, height = 10, color = "#000", child = render.Text(content = StartDate + " - " + EndDate, color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                    ],
+                ))) if is_square() else render.Column(
                     main_align = "start",
                     cross_align = "start",
                     children = [
