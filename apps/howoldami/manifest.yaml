@@ -7,9 +7,10 @@ author: mabroadfo1027
 fileName: howoldami.star
 packageName: howoldami
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - lifestyle
   - utility
 published: '2022-09-02T14:34:12Z'
-updated: '2025-11-29T21:14:16Z'
+updated: '2026-10-01T21:37:10Z'

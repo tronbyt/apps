@@ -8,10 +8,11 @@ fileName: hubble_live.star
 packageName: hubblelive
 recommendedInterval: 5
 broken: true
+supports64x64: true
 category: science
 tags:
   - space
   - tech
   - science
 published: '2023-01-02T16:40:19Z'
-updated: '2026-05-20T18:59:25Z'
+updated: '2026-10-01T21:37:10Z'

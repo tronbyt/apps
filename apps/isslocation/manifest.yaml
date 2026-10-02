@@ -7,6 +7,7 @@ author: carmineguida
 fileName: iss_location.star
 packageName: isslocation
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - space
@@ -14,4 +15,4 @@ tags:
   - local
   - real-time
 published: '2023-05-12T16:16:30Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:37:10Z'

@@ -9,7 +9,7 @@ Author: vipulchhajer
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -22,6 +22,15 @@ yesterdayf = yesterday.format("2006-01-02")
 #this is the API service for news
 NEWS_URL = "http://newsapi.org/v2/everything?q=india&searchIn=description&sortBy=popularity&from={}&to={}&domains=indiatimes.com,livemint.com,thehindu.com,indianexpress.com&language=en&apiKey=".format(yesterdayf, todayf)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # set default api key
     API = config.get("news_api_key")
@@ -33,7 +42,22 @@ def main(config):
     #Display error if no API found
     if API == None:
         return render.Root(
-            child = render.Column(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                children = [
+                    render.Box(
+                        width = 64,
+                        height = 7,
+                        padding = 0,
+                        color = "#cccccc33",
+                        child = render.Text("India News", color = "#FF9933", font = "tom-thumb", offset = -1),
+                    ),
+                    render.WrappedText(
+                        content = "Missing API",
+                        width = 36,
+                    ),
+                ],
+            ))) if is_square() else render.Column(
                 children = [
                     render.Box(
                         width = 64,
@@ -91,7 +115,7 @@ def main(config):
                         child = render.Text("India News", color = "#FF9933", font = "tom-thumb", offset = -1),
                     ),
                     render.Marquee(
-                        height = 32,
+                        height = max(32, canvas.height() - 7),  # 32 on 64x32 (unchanged), 57 on the square
                         scroll_direction = "vertical",
                         child = render.Column(
                             #main_align="space_between",

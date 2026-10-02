@@ -10,7 +10,7 @@ load("http.star", "http")
 load("images/eye_img.png", EYE_IMG_ASSET = "file")
 load("images/iss_img.png", ISS_IMG_ASSET = "file")
 load("images/mag_img.png", MAG_IMG_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -34,6 +34,15 @@ SAT_ID = "25544"  # ISS code
 NUM_DAYS = "1"  # passes for the next 2 days
 MIN_DURATION = "10"  # minimum time of visible pass
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     api_key = config.get("n2yo_api_key")
     ttl_time = 5200
@@ -49,7 +58,8 @@ def main(config):
 
     if "error" in data:
         return render.Root(
-            child = render.WrappedText("API error", align = "center", font = "tb-8", color = "#FF0000"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("API error", align = "center", font = "tb-8", color = "#FF0000"))) if is_square() else render.WrappedText("API error", align = "center", font = "tb-8", color = "#FF0000"),
         )
 
     else:
@@ -95,7 +105,15 @@ def main(config):
         )
 
         return render.Root(
-            child = render.Row(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    col1,
+                    render.Box(child = col2, width = 46),
+                ],
+            ))) if is_square() else render.Row(
                 main_align = "center",
                 cross_align = "center",
                 children = [
@@ -108,7 +126,8 @@ def main(config):
         # No filtered passes found
         ttl_time = 86400
         return render.Root(
-            child = render.WrappedText("No passes found", align = "center", font = "tb-8", color = "#FF0000"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("No passes found", align = "center", font = "tb-8", color = "#FF0000"))) if is_square() else render.WrappedText("No passes found", align = "center", font = "tb-8", color = "#FF0000"),
         )
 
 def get_data(url, ttl_time):

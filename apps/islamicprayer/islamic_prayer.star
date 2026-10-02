@@ -8,7 +8,7 @@ Author: Austin Fonacier
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -33,6 +33,15 @@ COLOR_7 = "#a17e4b"
 COLOR_8 = "#3c5453"
 ALL_COLORS = [COLOR_0, COLOR_1, COLOR_2, COLOR_3, COLOR_4, COLOR_5, COLOR_6, COLOR_7, COLOR_8]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     loc = location(config)
     latitude = loc["lat"]
@@ -49,7 +58,17 @@ def main(config):
 
     return render.Root(
         delay = int(config.str("speed", "70")),
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render_top_column(day, month, year),
+                # render.Box(
+                render.Animation(
+                    children = get_render_frames(prayer_timings, show_sunrise, non_color_mode),
+                ),
+                # )
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render_top_column(day, month, year),
                 # render.Box(
