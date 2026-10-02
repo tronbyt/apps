@@ -70,9 +70,10 @@ def main(config):
         map_items = append_items_to_render(map_items, get_map_points(lighthouse_coordinates, map_area, map_pixel_size, config), VISITED_COLOR)
 
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             map_items,
-        ),
+        ))),
     )
 
 def define_map_area(map_coordinates, longitude_range = [], latitude_range = []):

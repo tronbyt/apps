@@ -9,7 +9,7 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("images/fly_logo.png", FLY_LOGO_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FLY_LOGO = FLY_LOGO_ASSET.readall()
@@ -22,8 +22,8 @@ FLY_API_BASE_URL = "https://api.machines.dev"
 DOT_DIAMETER = 4
 IMG_PAD = 1
 TEXT_HEIGHT = 8
-SCREEN_HEIGHT = 32
-SCREEN_WIDTH = 64
+SCREEN_HEIGHT = canvas.height()
+SCREEN_WIDTH = canvas.width()
 LOGO_WIDTH = 12
 LOGO_HEIGHT = 12
 

@@ -1,6 +1,6 @@
 load("encoding/base64.star", "base64")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -3863,7 +3863,8 @@ def main(config):
     for name in order:
         _append_scene(children, name)
     return render.Root(
-        child = render.Animation(children = children),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = children))),
         delay = 5,
         show_full_animation = config.bool("finish_animation", True),
         max_age = 300,

@@ -7,9 +7,10 @@ author: naominori
 fileName: fortnite_store.star
 packageName: fortnitestore
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - gaming
   - utility
 published: '2023-02-01T20:41:16Z'
-updated: '2025-11-30T20:08:55Z'
+updated: '2026-10-01T21:08:18Z'
