@@ -10,4 +10,11 @@ recommendedInterval: 60
 supports2x: true
 published: '2026-10-02T07:49:03Z'
 updated: '2026-10-02T07:49:03Z'
-tags: []
+category: weather
+tags:
+  - weather
+  - hurricanes
+  - storms
+  - maps
+  - tropical
+  - wide 2x support
