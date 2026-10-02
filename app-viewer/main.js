@@ -144,6 +144,16 @@ function renderAppsList(apps, brokenApps = []) {
       badgeContainer.appendChild(badge2x);
     }
 
+    // Add square-display badge independently of pixel density
+    if (app.supports64x64) {
+      const squareBadge = document.createElement('div');
+      squareBadge.className = 'app-badge badge-square';
+      squareBadge.title = 'Supports square displays';
+      squareBadge.setAttribute('data-bs-toggle', 'tooltip');
+      squareBadge.textContent = '□';
+      badgeContainer.appendChild(squareBadge);
+    }
+
     // URL for app details page
     const detailUrl = BASE_PATH + `details/${encodeURIComponent(app.name)}.html`;
 

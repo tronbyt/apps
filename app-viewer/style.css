@@ -354,9 +354,17 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   color: #000;
 }
 
-.badge-2x {
+.badge-2x,
+.badge-square {
   background: rgba(13, 110, 253, 0.9);
   color: #fff;
+}
+
+.badge-square {
+  font-size: 0.85rem;
+  line-height: 0.75rem;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 
 .btn-warning {
