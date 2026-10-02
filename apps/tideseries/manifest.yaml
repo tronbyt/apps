@@ -1,0 +1,17 @@
+---
+id: tide-series
+name: Tide Series
+summary: Kinetic coastal tide art
+desc: A kinetic ocean matrix inspired by Breakfast's artwork, visualizing lunar cycles, sea level ebb and flow, and coastal tidal heights in real time.
+author: brombomb
+fileName: tide_series.star
+packageName: tideseries
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - tide
+  - ocean
+  - moon
+  - art
+  - real-time
