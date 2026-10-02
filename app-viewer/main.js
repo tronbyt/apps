@@ -436,12 +436,12 @@ async function renderAppDetail() {
   title.textContent = app.displayName || app.name;
   detailsSection.appendChild(title);
 
-  // App details table
+  // App details and previews
   const detailsTable = document.createElement('div');
-  detailsTable.className = 'row mb-4';
+  detailsTable.className = 'app-details-layout mb-4';
 
   const leftCol = document.createElement('div');
-  leftCol.className = 'col-md-8';
+  leftCol.className = 'app-details-metadata';
 
   // Create details list
   const detailsList = document.createElement('dl');
@@ -528,7 +528,7 @@ async function renderAppDetail() {
   // Add app image if available
   if (app.image || app.image64x64) {
     const rightCol = document.createElement('div');
-    rightCol.className = 'col-md-4';
+    rightCol.className = 'app-details-previews';
 
     const imageContainer = document.createElement('div');
     imageContainer.className = 'app-preview-gallery';
@@ -544,12 +544,17 @@ async function renderAppDetail() {
       image.alt = `${app.displayName || app.name} wide preview`;
       image.className = 'app-preview-image img-fluid rounded border';
 
-      const caption = document.createElement('figcaption');
-      caption.className = 'app-preview-caption';
-      caption.textContent = app.supports2x ? '64×32 / 128×64 preview' : '64×32 preview';
-
       wideFigure.appendChild(image);
-      wideFigure.appendChild(caption);
+
+      if (app.supports2x) {
+        const badge2x = document.createElement('span');
+        badge2x.className = 'app-badge badge-2x app-preview-badge';
+        badge2x.title = 'Supports 2x resolution';
+        badge2x.setAttribute('data-bs-toggle', 'tooltip');
+        badge2x.textContent = '2X';
+        wideFigure.appendChild(badge2x);
+      }
+
       imageContainer.appendChild(wideFigure);
     }
 
@@ -562,12 +567,14 @@ async function renderAppDetail() {
       squareImage.alt = `${app.displayName || app.name} square preview`;
       squareImage.className = 'app-preview-image app-preview-image-square img-fluid rounded border';
 
-      const squareCaption = document.createElement('figcaption');
-      squareCaption.className = 'app-preview-caption';
-      squareCaption.textContent = '64×64 preview';
+      const squareBadge = document.createElement('span');
+      squareBadge.className = 'app-badge badge-2x app-preview-badge';
+      squareBadge.title = '64×64 square display';
+      squareBadge.setAttribute('data-bs-toggle', 'tooltip');
+      squareBadge.textContent = '64×64';
 
       squareFigure.appendChild(squareImage);
-      squareFigure.appendChild(squareCaption);
+      squareFigure.appendChild(squareBadge);
       imageContainer.appendChild(squareFigure);
     }
 

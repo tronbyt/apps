@@ -200,6 +200,18 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   overflow-wrap: anywhere;
 }
 
+.app-details-layout {
+  align-items: start;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 30rem);
+}
+
+.app-details-metadata,
+.app-details-previews {
+  min-width: 0;
+}
+
 .app-display-capabilities {
   display: flex;
   flex-wrap: wrap;
@@ -214,26 +226,36 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 }
 
 .app-preview-gallery {
-  display: grid;
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  justify-items: center;
+  justify-content: center;
 }
 
 .app-preview {
+  flex: 1 1 24rem;
+  margin: 0;
   max-width: 100%;
+  position: relative;
   text-align: center;
+}
+
+.app-preview-square {
+  flex-basis: 18rem;
+  max-width: 20rem;
 }
 
 #app-content .app-preview-image-square {
   aspect-ratio: 1 / 1;
-  max-width: 16rem;
+  max-width: 20rem;
 }
 
-.app-preview-caption {
-  color: #aaa;
-  font-size: 0.55rem;
-  line-height: 1.5;
-  margin-top: 0.5rem;
+.app-preview-badge {
+  position: absolute;
+  right: 0.65rem;
+  top: 0.65rem;
+  z-index: 1;
 }
 
 .app-readme {
@@ -574,6 +596,16 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   }
 }
 
+@media (max-width: 991px) {
+  .app-details-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-preview-gallery {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 767px) {
   .viewer-header {
     gap: 0.75rem;
@@ -599,6 +631,20 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
   .app-metadata dt:not(:first-child) {
     margin-top: 0.6rem;
+  }
+
+  .app-details-layout {
+    gap: 1.5rem;
+  }
+
+  .app-preview,
+  .app-preview-square {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
+  #app-content .app-preview-image-square {
+    max-width: min(100%, 20rem);
   }
 
   .app-readme {
