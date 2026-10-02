@@ -1,0 +1,19 @@
+---
+id: world-skies
+name: World Skies
+summary: Kinetic atmospheric sky art
+desc: A kinetic atmospheric data matrix inspired by Breakfast's artwork, visualizing cloud density waves, global sky visibility, and celestial light transit in real time.
+author: brombomb
+fileName: world_skies.star
+packageName: worldskies
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - sky
+  - clouds
+  - weather
+  - art
+  - real-time
+published: '2026-10-02T03:45:12Z'
+updated: '2026-10-02T03:45:12Z'
