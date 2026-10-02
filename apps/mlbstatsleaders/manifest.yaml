@@ -7,9 +7,10 @@ author: symm512
 fileName: mlbstatsleaders.star
 packageName: mlbstatsleaders
 recommendedInterval: 60
+supports64x64: true
 category: sports
 published: '2026-05-25T17:14:51Z'
-updated: '2026-09-21T20:23:10Z'
+updated: '2026-10-01T15:26:52Z'
 tags:
   - baseball
   - mlb
