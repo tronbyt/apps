@@ -8,8 +8,9 @@ fileName: cbc_rss_feed.star
 packageName: cbcrssfeed
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: news
 tags:
   - news
 published: '2023-09-06T14:37:51Z'
-updated: '2026-06-17T20:47:04Z'
+updated: '2026-10-01T20:31:47Z'

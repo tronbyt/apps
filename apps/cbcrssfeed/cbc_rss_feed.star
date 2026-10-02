@@ -31,7 +31,7 @@ ARTICLE_FONT = "tb-8"
 ARTICLE_COLOR = "#65d0e6"
 SPACER_COLOR = "#000"
 ARTICLE_LINESPACING = 0
-ARTICLE_AREA_HEIGHT = 24
+ARTICLE_AREA_HEIGHT = canvas.height() - TITLE_HEIGHT  # 24 on 64x32
 
 RSS_STUB = "https://www.cbc.ca/webfeed/rss/rss-{}"
 

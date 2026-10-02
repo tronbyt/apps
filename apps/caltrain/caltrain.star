@@ -301,6 +301,15 @@ def _demo_visit(train_num, destination, departure_time):
         },
     }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     stationID = config.get("stop", STATIC_STATIONS[11]["id"])
     direction = config.get("direction", "south")
@@ -425,6 +434,7 @@ def main(config):
     return render.Root(
         child = render.Column(
             expanded = True,
+            main_align = "center" if is_square() else "start",
             children = children,
         ),
     )

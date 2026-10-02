@@ -1662,7 +1662,7 @@ def main(config):
     delay = int(delay / 2) if is_double_sized else delay
 
     return render.Root(
-        render.Column(
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Row(
                     children = [
@@ -1723,7 +1723,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = delay,
     )

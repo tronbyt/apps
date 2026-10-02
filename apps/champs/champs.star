@@ -468,6 +468,7 @@ def main(config):
     return render.Root(
         child = render.Column(
             expanded = True,
+            main_align = "center",
             children = [
                 render_header(champ),
                 render_team(champ["league"], champ["winner_abbr"], champ["winner"], scores[0], WINNER_COLOR),
