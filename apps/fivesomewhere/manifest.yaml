@@ -7,9 +7,10 @@ author: grantmatheny
 fileName: five_somewhere.star
 packageName: fivesomewhere
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - clock
   - utility
 published: '2022-05-04T02:06:20Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T21:00:02Z'
