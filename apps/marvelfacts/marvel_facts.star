@@ -13,12 +13,21 @@ load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 BASE_URL = "https://gateway.marvel.com/v1/public/characters?"
 LIMIT = "50"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """Main Function
@@ -56,6 +65,36 @@ def main(config):
     else:
         next_text = char_desc
 
+    text_column = render.Column(
+        children = [
+            render.Row(
+                expanded = True,
+                main_align = "center",
+                children = [render.Marquee(
+                    width = 62,
+                    height = 8,
+                    align = "center",
+                    child = render.Text(str(char_name), font = "Dina_r400-6"),
+                    scroll_direction = "horizontal",
+                )],
+            ),
+            render.Row(
+                main_align = "space_evenly",
+                cross_align = "center",
+                expanded = True,
+                children = [
+                    render.Marquee(
+                        width = 60,
+                        height = 22,
+                        align = "center",
+                        child = render.WrappedText(content = str(next_text), width = 64, font = "tb-8", align = "center"),
+                        scroll_direction = "vertical",
+                    ),
+                ],
+            ),
+        ],
+    )
+
     return render.Root(
         child = render.Stack(
             children = [
@@ -67,35 +106,8 @@ def main(config):
                         color = "#000000",
                     ),
                 ),
-                render.Column(
-                    children = [
-                        render.Row(
-                            expanded = True,
-                            main_align = "center",
-                            children = [render.Marquee(
-                                width = 62,
-                                height = 8,
-                                align = "center",
-                                child = render.Text(str(char_name), font = "Dina_r400-6"),
-                                scroll_direction = "horizontal",
-                            )],
-                        ),
-                        render.Row(
-                            main_align = "space_evenly",
-                            cross_align = "center",
-                            expanded = True,
-                            children = [
-                                render.Marquee(
-                                    width = 60,
-                                    height = 22,
-                                    align = "center",
-                                    child = render.WrappedText(content = str(next_text), width = 64, font = "tb-8", align = "center"),
-                                    scroll_direction = "vertical",
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
+                # Centre the text on the square (64x64); other panels unchanged.
+                (render.Box(width = canvas.width(), height = canvas.height(), child = text_column)) if is_square() else text_column,
             ],
         ),
     )

@@ -21,7 +21,7 @@ load("images/legolas_img.png", LEGOLAS_IMG_ASSET = "file")
 load("images/samwise_img.png", SAMWISE_IMG_ASSET = "file")
 load("images/saruman_img.png", SARUMAN_IMG_ASSET = "file")
 load("images/sauron_img.png", SAURON_IMG_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -49,6 +49,15 @@ LOTR_URL = "https://the-one-api.dev/v2"
 HTTP_OK = 200
 
 CACHE_TIMEOUT = 600  # ten minutes
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     char_id = config.get("character") or RANDOM
@@ -93,7 +102,52 @@ def main(config):
     # render the image
     return render.Root(
         delay = 200,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            main_align = "start",
+            children = [
+                render.Box(
+                    height = 16,
+                    width = 64,
+                    child = render.Marquee(
+                        child = render.WrappedText(
+                            content = quote,
+                            font = MOVIE_FONT,
+                            linespacing = 1,
+                            width = 64,
+                        ),
+                        height = 16,
+                        scroll_direction = "vertical",
+                        offset_start = 16,
+                        align = "center",
+                    ),
+                ),
+                render.Row(
+                    main_align = "start",
+                    children = [
+                        render.Image(
+                            src = character_to_use.Img,
+                        ),
+                        render.Column(
+                            cross_align = "start",
+                            children = [
+                                render.Text(
+                                    content = character_to_use.Name,
+                                    font = character_to_use.Font,
+                                    color = character_to_use.Color,
+                                ),
+                                render.WrappedText(
+                                    content = movie,
+                                    font = MOVIE_FONT,
+                                    color = MOVIE_COLOR,
+                                    linespacing = 1,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Column(
             main_align = "start",
             children = [
                 render.Box(

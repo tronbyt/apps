@@ -7,10 +7,11 @@ author: Kaitlyn Musial
 fileName: marvel_facts.star
 packageName: marvelfacts
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - media
   - fandom
   - music
 published: '2022-11-10T15:02:16Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T21:48:48Z'

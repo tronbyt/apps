@@ -7,12 +7,21 @@ Author: gstark
 
 # Load support utilities
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-# Constants defining the size of the Tidbyt
-GRID_ROWS = 15
-GRID_COLS = 31
+# Maze cells are 2px (wall + passage) plus one closing wall, so the grid
+# fills whatever panel it is drawn on: 15x31 on 64x32, 31x31 on 64x64.
+GRID_ROWS = canvas.height() // 2 - 1
+GRID_COLS = canvas.width() // 2 - 1
+
+# A bigger maze means a longer solve, and every frame costs more pixels, so
+# panels larger than 64x32 get a frame budget (100 on 64x64, 50 on 128x64;
+# the solve just plays faster) to stay inside the server's render deadline
+# on a Pi-class host. 0 keeps every frame, which is what 64x32 does.
+PANEL_UNITS = (canvas.width() * canvas.height()) // (64 * 32)
+FRAME_BUDGET = 0 if PANEL_UNITS <= 1 else 200 // PANEL_UNITS
+HOLD_FRAMES = 50
 
 # Returns False if there is no cell to the east
 # or the cell itself.
@@ -161,13 +170,7 @@ def draw_path(colors, frame, path):
             opacity = int(index / (len(path) - 1) * 254)
         opacity = digit_to_hex(int(opacity / 16)) + digit_to_hex(opacity % 16)
 
-        color = colors["solve_color"] + opacity
-
-        pixel = render.Box(
-            width = 1,
-            height = 1,
-            color = color,
-        )
+        pixel = colors["solve_color"] + opacity
 
         row = cell[0] * 2 + 1
         col = cell[1] * 2 + 1
@@ -184,7 +187,7 @@ def solve(colors, grid, row, col, path, maze_frame, frames):
     frames.append(copy_frame(colors, maze_frame, path))
 
     if row == GRID_ROWS - 1 and col == GRID_COLS - 1:
-        for _ in range(0, 50):
+        for _ in range(0, HOLD_FRAMES):
             frames.append(copy_frame(colors, maze_frame, path))
         return True
 
@@ -239,8 +242,17 @@ def get_schema():
         ],
     )
 
+def row_to_render(row):
+    boxes = []
+    start = 0
+    for i in range(1, len(row) + 1):
+        if i == len(row) or row[i] != row[start]:
+            boxes.append(render.Box(width = i - start, height = 1, color = row[start]))
+            start = i
+    return render.Row(children = boxes)
+
 def frame_to_render(frame):
-    return render.Column(children = [render.Row(children = row) for row in frame])
+    return render.Column(children = [row_to_render(row) for row in frame])
 
 def main(config):
     colors = {
@@ -279,23 +291,21 @@ def main(config):
             else:
                 active.pop(cell_index)
 
-    pixel = render.Box(
-        width = 1,
-        height = 1,
-        color = colors["maze_color"],
-    )
-
-    blank = render.Box(
-        width = 1,
-        height = 1,
-        color = "#000000",
-    )
+    # Frames hold colours, not widgets; frame_to_render paints each row as
+    # runs of one colour, which keeps the bigger panels inside the render deadline.
+    pixel = colors["maze_color"]
+    blank = "#000000"
 
     maze_frame = render_frame(grid, pixel, blank)
 
     path = [[0, 0]]
     frames = []
     solve(colors, grid, 0, 0, path, maze_frame, frames)
+
+    if FRAME_BUDGET:
+        solve_frames, hold = frames[:-HOLD_FRAMES], frames[-HOLD_FRAMES:]
+        step = max(1, (len(solve_frames) + FRAME_BUDGET - 1) // FRAME_BUDGET)  # ceil: never more than the budget
+        frames = solve_frames[::step] + hold[::2]
 
     animation = render.Animation(children = [frame_to_render(frame) for frame in frames])
 
