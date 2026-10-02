@@ -8,7 +8,7 @@ Author: Dave Shilobod
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -152,6 +152,15 @@ FIXTURE_PAYLOADS = {
     },
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     mock_state = config.get("fixture") or config.get("mock_state")
     if mock_state and str(mock_state).lower() == "cycle":
@@ -168,22 +177,33 @@ def main(config):
     preview = config.get("preview")
     if preview == "scene":
         phase = int(config.get("preview_phase", "3")) % 6
-        return render.Root(child = scene_frame(status, phase))
+
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = scene_frame(status, phase)))) if is_square() else scene_frame(status, phase))
     if preview == "info":
         return render.Root(
-            child = info_animation(status, False),
+            # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = info_animation(status, False)))) if is_square() else info_animation(status, False),
             delay = FRAME_DELAY_MS,
             show_full_animation = True,
         )
     if preview == "detail":
         return render.Root(
-            child = info_animation(status, True),
+            # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = info_animation(status, True)))) if is_square() else info_animation(status, True),
             delay = FRAME_DELAY_MS,
             show_full_animation = True,
         )
 
     return render.Root(
-        child = render.Sequence(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Sequence(
+            children = [
+                scene_animation(status),
+                info_animation(status, False),
+                info_animation(status, True),
+            ],
+        )))) if is_square() else render.Sequence(
             children = [
                 scene_animation(status),
                 info_animation(status, False),
@@ -217,7 +237,8 @@ def cycle_demo():
         children.append(info_animation(status, False, CYCLE_INFO_FRAME_COUNT))
 
     return render.Root(
-        child = render.Sequence(children = children),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Sequence(children = children)))) if is_square() else render.Sequence(children = children),
         delay = FRAME_DELAY_MS,
         max_age = HTTP_CACHE_TTL_SECONDS,
         show_full_animation = True,

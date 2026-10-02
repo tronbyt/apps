@@ -7,6 +7,7 @@ author: daveshilobod
 fileName: kilaueaactivity.star
 packageName: kilaueaactivity
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - science
@@ -15,4 +16,4 @@ tags:
   - hawaii
   - volcano
 published: '2026-07-19T22:14:43Z'
-updated: '2026-07-20T19:01:51Z'
+updated: '2026-10-01T21:41:49Z'

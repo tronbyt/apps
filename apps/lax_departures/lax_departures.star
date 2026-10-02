@@ -1,6 +1,6 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 # Fetch data from your deployed Lambda API
 def fetch_data():
@@ -45,10 +45,20 @@ def make_page(flights, page_index, total_pages):
     return render.Column(children = rows)
 
 # Main entrypoint
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     flights = fetch_data()
     if flights == None:
-        return render.Root(child = render.Text("Error", font = "5x8", color = "#ff0000"))
+        # Centre the block on the square (64x64); other panels unchanged.
+        return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Error", font = "5x8", color = "#ff0000"))) if is_square() else render.Text("Error", font = "5x8", color = "#ff0000"))
 
     pages = []
     total_pages = (min(len(flights), 6) + 2) // 3  # ceil(len / 3)
@@ -62,5 +72,6 @@ def main():
             pages.append(page)
 
     return render.Root(
-        child = render.Sequence(children = pages),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Sequence(children = pages))) if is_square() else render.Sequence(children = pages),
     )

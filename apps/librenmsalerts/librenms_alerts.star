@@ -8,7 +8,7 @@ Author: @jtinel
 
 load("http.star", "http")
 load("images/librenms_icon.png", LIBRENMS_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LIBRENMS_ICON = LIBRENMS_ICON_ASSET.readall()
@@ -91,7 +91,26 @@ def print_line(color):
 def render_error(error_msg):
     return render.Root(
         delay = FRAME_DELAY_MS,
-        child = render.Box(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Box(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = [
+                    print_logo(),
+                    print_line(colors["white"]),
+                    render.Marquee(
+                        width = 64,
+                        offset_start = 48,
+                        offset_end = 64,
+                        align = "center",
+                        child = render.Text(
+                            content = error_msg,
+                        ),
+                    ),
+                ],
+            ),
+        )))) if is_square() else render.Box(
             child = render.Column(
                 expanded = True,
                 main_align = "space_evenly",
@@ -177,7 +196,15 @@ def render_output(alert_count, alerting_devices):
     # Render the output
     return render.Root(
         delay = FRAME_DELAY_MS,
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            height = 32,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = children,
+            ),
+        ))) if is_square() else render.Box(
             height = 32,
             child = render.Column(
                 expanded = True,
@@ -189,6 +216,15 @@ def render_output(alert_count, alerting_devices):
 
 def demo_data():
     return render_output(1, ", ".join(demo_alerting_devices))
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """ Display a count of LibreNMS alerts and a list of the alerting hosts.

@@ -7,6 +7,7 @@ author: dinosaursrarr
 fileName: life.star
 packageName: life
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - gaming
@@ -14,4 +15,4 @@ tags:
   - space
   - art
 published: '2022-06-09T16:47:04Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T22:31:47Z'

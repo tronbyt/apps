@@ -40,6 +40,15 @@ LEVELS = [
     schema.Option(display = "Warning", value = "warning"),
 ]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     is_wide = hasattr(canvas, "is2x") and canvas.is2x()
     height = 64 if is_wide else 32
@@ -83,7 +92,19 @@ def main(config):
     image = cam_rep.body()
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Padding(
+                    pad = (0, -img_offset_y, 0, 0),
+                    child = render.Image(image, width = img_width, height = img_height),
+                ),
+                render.Padding(
+                    pad = (0, text_y, 0, 0),
+                    child = render.Text("Kilauea", font = "tb-8", color = color_hex) if show_label else render.Box(),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Padding(
                     pad = (0, -img_offset_y, 0, 0),
@@ -118,7 +139,15 @@ def extract_status(text):
 
 def render_error(msg):
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                render.Text("Kilauea", font = "tb-8"),
+                render.Text(msg, font = "tb-8"),
+            ],
+        ))) if is_square() else render.Column(
             main_align = "center",
             cross_align = "center",
             children = [

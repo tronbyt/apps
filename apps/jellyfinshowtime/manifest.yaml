@@ -5,6 +5,7 @@ summary: Explore your Jellyfin library
 desc: View recently added or played media, or your entire media library from your Jellyfin server. Forked from plexshowtime.
 author: radiocolin
 supports2x: true
+supports64x64: true
 recommendedInterval: 5
 fileName: jellyfinshowtime.star
 packageName: jellyfinshowtime
@@ -14,4 +15,4 @@ tags:
   - media-library
   - library-viewer
 published: '2026-03-31T20:19:10Z'
-updated: '2026-04-21T03:07:29Z'
+updated: '2026-10-01T21:41:49Z'

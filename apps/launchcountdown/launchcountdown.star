@@ -213,7 +213,30 @@ def display_instructions(config):
     app_title = "Launch Countdown"
 
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Marquee(
+                    width = 64,
+                    child = render.Text(app_title, color = "#65d0e6", font = "5x8"),
+                ),
+                render.Marquee(
+                    width = 64,
+                    offset_start = len(app_title) * 5,
+                    child = render.Text(instructions_1, color = "#f4a306"),
+                ),
+                render.Marquee(
+                    offset_start = len(instructions_1) * 5,
+                    width = 64,
+                    child = render.Text(instructions_2, color = "#f4a306"),
+                ),
+                render.Marquee(
+                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
+                    width = 64,
+                    child = render.Text(instructions_3, color = "#f4a306"),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Marquee(
                     width = 64,
@@ -267,6 +290,15 @@ def replace_local_time_into_description(description, local_time, utc_time):
     local_part = "%d:%s %s (%s)" % (local_hour_12, local_min_raw, local_ampm, timezone_abbr)
 
     return description.replace(utc_part, local_part)
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """ Main
@@ -366,7 +398,62 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = delay,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Column(
+                    children = [
+                        render.Row(
+                            children = [
+                                render.Column(
+                                    children = [
+                                        render.Marquee(width = canvas.width() - 16, child = render.Text(row1, color = "#65d0e6")),
+                                        render.Marquee(width = canvas.width() - 16, child = render.Text(row2, color = "#FFFFFF")),
+                                    ],
+                                ),
+                                render.Animation(
+                                    children = [
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_E),
+                                        render.Image(src = ROCKET_ICON_F),
+                                        render.Image(src = ROCKET_ICON_G),
+                                        render.Image(src = ROCKET_ICON_F),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_E),
+                                        render.Image(src = ROCKET_ICON_D),
+                                        render.Image(src = ROCKET_ICON_C),
+                                        render.Image(src = ROCKET_ICON_B),
+                                        render.Image(src = ROCKET_ICON),
+                                        render.Image(src = ROCKET_ICON),
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Marquee(width = canvas.width(), child = render.Text(row3, color = "#fff")),
+                render.Marquee(width = canvas.width(), child = render.Text(row4, color = "#ff0")),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Column(
                     children = [
