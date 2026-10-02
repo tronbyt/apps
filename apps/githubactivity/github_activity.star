@@ -13,7 +13,7 @@ load("http.star", "http")
 load("images/issue_icon.png", ISSUE_ICON_ASSET = "file")
 load("images/people_icon.png", PEOPLE_ICON_ASSET = "file")
 load("images/pr_icon.png", PR_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ISSUE_ICON = ISSUE_ICON_ASSET.readall()
@@ -72,7 +72,8 @@ def main(config):
     #create parts of the final frame (error handling done in each of these)
     chart = contribution_chart(data, config)
     if config.get("fullscreen_chart"):
-        return render.Root(child = chart)
+        # Centre the block on taller panels (64x64).
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = chart))
     activity_overview = contribution_activity(data)  #get the activity overview
 
     #get stats like total contributions (in last year), open issues/pulls, and followers/following
@@ -100,7 +101,8 @@ def main(config):
     return render.Root(
         delay = 100,  #speed up scroll text
         show_full_animation = True,
-        child = frame_final,
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = frame_final),
     )
 
 def get_schema():

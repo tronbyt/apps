@@ -22,7 +22,7 @@ load("images/pr_icon.png", PR_ICON_ASSET = "file")
 load("images/star_icon.png", STAR_ICON_ASSET = "file")
 load("images/tag_icon.png", TAG_ICON_ASSET = "file")
 load("images/watch_icon.png", WATCH_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -120,7 +120,8 @@ def main(config):
     return render.Root(
         delay = 100,  #speed up scroll text
         show_full_animation = True,
-        child = frame_final,
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = frame_final),
     )
 
 def get_schema():

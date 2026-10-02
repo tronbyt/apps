@@ -7,10 +7,11 @@ author: rs7q5
 fileName: github_activity.star
 packageName: githubactivity
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech
   - tracking
   - productivity
 published: '2023-01-23T21:26:30Z'
-updated: '2025-12-23T13:24:18Z'
+updated: '2026-10-01T21:17:57Z'
