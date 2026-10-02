@@ -8,11 +8,10 @@ fileName: warming_seas.star
 packageName: warmingseas
 recommendedInterval: 5
 supports2x: true
-category: climate
+category: weather
 tags:
-  - ocean
   - weather
   - art
   - real-time
 published: '2026-10-01T15:09:12Z'
-updated: '2026-10-02T03:28:59Z'
+updated: '2026-10-01T15:09:12Z'

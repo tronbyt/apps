@@ -8,10 +8,11 @@ fileName: river_oxygen.star
 packageName: riveroxygen
 recommendedInterval: 5
 supports2x: true
-category: climate
+category: weather
 tags:
   - river
   - water
+  - weather
   - art
   - real-time
 published: '2026-10-02T03:45:12Z'

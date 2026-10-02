@@ -11,8 +11,8 @@ supports2x: true
 category: weather
 tags:
   - tide
-  - ocean
   - moon
+  - weather
   - art
   - real-time
 published: '2026-10-02T03:45:12Z'
