@@ -7,9 +7,10 @@ author: InTheDaylight14
 fileName: hass_entity.star
 packageName: hassentity
 recommendedInterval: 5
+supports64x64: true
 category: smart-home
 tags:
   - smart-home
   - utility
 published: '2023-01-23T18:44:44Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:23:34Z'

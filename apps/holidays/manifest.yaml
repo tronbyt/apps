@@ -5,6 +5,7 @@ summary: Date + holidays/birthdays
 desc: Shows the current date along with icons for US national holidays and customizable birthdays.
 author: czarandy
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - time
@@ -12,4 +13,4 @@ tags:
   - productivity
   - utility
 published: '2024-07-09T14:54:03Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T21:23:34Z'

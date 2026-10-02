@@ -7,7 +7,8 @@ author: Valerio Italiano
 fileName: hellocal.star
 packageName: hellocal
 supports2x: true
+supports64x64: true
 category: utilities
 published: '2026-06-30T19:20:54Z'
-updated: '2026-06-30T19:50:51Z'
+updated: '2026-10-01T21:23:34Z'
 tags: []

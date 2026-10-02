@@ -6,7 +6,7 @@ Author: InTheDaylight14
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 STATIC_ENDPOINT = "/api/states/"
@@ -40,7 +40,8 @@ def main(config):
 
     return render.Root(
         delay = 6000,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.WrappedText(
                     content = friendly_name,
@@ -65,7 +66,7 @@ def main(config):
                     scroll_direction = "vertical",
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

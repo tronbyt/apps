@@ -7,10 +7,11 @@ author: vincentezw
 recommendedInterval: 5
 fileName: hass_graph.star
 packageName: hassgraph
+supports64x64: true
 category: utilities
 tags:
   - smart-home
   - sports
   - utility
 published: '2024-06-19T15:18:22Z'
-updated: '2026-07-10T15:44:48Z'
+updated: '2026-10-01T21:23:34Z'

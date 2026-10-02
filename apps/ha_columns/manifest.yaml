@@ -8,6 +8,7 @@ fileName: ha_columns.star
 packageName: ha_columns
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: smart-home
 tags:
   - smart-home
@@ -16,4 +17,4 @@ tags:
   - tech
   - wide 2x support
 published: '2025-11-22T01:28:25Z'
-updated: '2026-01-07T00:24:38Z'
+updated: '2026-10-01T21:23:34Z'
