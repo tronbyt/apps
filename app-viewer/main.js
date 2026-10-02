@@ -1,9 +1,11 @@
 // --- CONFIG ---
 // Use GitHub Pages structure for both local and production
 const isDetailsPage = window.location.pathname.includes('/details/');
-const BASE_PATH = isDetailsPage ? '../' : '';
-const APPS_DIR = isDetailsPage ? '../apps' : 'apps';
-const BROKEN_APPS_FILE = isDetailsPage ? '../broken_apps.txt' : 'broken_apps.txt';
+const isAuthorPage = window.location.pathname.includes('/authors/');
+const isNestedPage = isDetailsPage || isAuthorPage;
+const BASE_PATH = isNestedPage ? '../' : '';
+const APPS_DIR = isNestedPage ? '../apps' : 'apps';
+const BROKEN_APPS_FILE = isNestedPage ? '../broken_apps.txt' : 'broken_apps.txt';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 
@@ -434,7 +436,15 @@ async function renderAppDetail() {
     authorTerm.textContent = 'Author:';
     const authorDesc = document.createElement('dd');
     authorDesc.className = 'col-sm-9';
-    authorDesc.textContent = app.author;
+    if (app.authorSlug) {
+      const authorLink = document.createElement('a');
+      authorLink.href = `${BASE_PATH}authors/${encodeURIComponent(app.authorSlug)}.html`;
+      authorLink.className = 'author-link';
+      authorLink.textContent = app.author;
+      authorDesc.appendChild(authorLink);
+    } else {
+      authorDesc.textContent = app.author;
+    }
     detailsList.appendChild(authorTerm);
     detailsList.appendChild(authorDesc);
   }
@@ -574,9 +584,75 @@ async function renderAppDetail() {
   });
 }
 
+// --- AUTHOR PROFILE PAGE LOGIC ---
+function getAuthorSlugFromURL() {
+  const metaAuthor = document.querySelector('meta[name="author-slug"]');
+  if (metaAuthor) return metaAuthor.getAttribute('content');
+
+  const pathname = window.location.pathname;
+  if (pathname.includes('/authors/')) {
+    const match = pathname.match(/\/authors\/([^/]+)\.html/);
+    if (match) return decodeURIComponent(match[1]);
+  }
+
+  return null;
+}
+
+async function renderAuthorProfile() {
+  const container = document.getElementById('author-content');
+  const authorSlug = getAuthorSlugFromURL();
+
+  if (!authorSlug) {
+    container.innerHTML = '<div class="alert alert-danger">Author not specified.</div>';
+    return;
+  }
+
+  const { apps, brokenApps } = await preloadAppData();
+  const authorApps = apps.filter(app => app.authorSlug === authorSlug);
+
+  if (authorApps.length === 0) {
+    container.innerHTML = '<div class="alert alert-danger">Author not found.</div>';
+    return;
+  }
+
+  const metaAuthorName = document.querySelector('meta[name="author-name"]');
+  const authorName = metaAuthorName?.getAttribute('content') || authorApps[0].author;
+
+  const header = document.createElement('div');
+  header.className = 'author-profile-header mb-4';
+
+  const title = document.createElement('h1');
+  title.className = 'main-title mb-3';
+  title.textContent = authorName;
+
+  const count = document.createElement('p');
+  count.className = 'author-app-count mb-0';
+  count.textContent = `${authorApps.length} ${authorApps.length === 1 ? 'app' : 'apps'}`;
+
+  header.appendChild(title);
+  header.appendChild(count);
+  container.appendChild(header);
+
+  const list = document.createElement('div');
+  list.id = 'apps-list';
+  list.className = 'row g-4';
+  container.appendChild(list);
+
+  authorApps.sort((a, b) => {
+    const nameA = (a.displayName || a.name).toLowerCase();
+    const nameB = (b.displayName || b.name).toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+  renderAppsList(authorApps, brokenApps);
+}
+
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
-  if (document.getElementById('apps-list')) {
+  if (document.getElementById('author-content')) {
+    // Author profile page
+    await renderAuthorProfile();
+    setupDotMatrixToggle();
+  } else if (document.getElementById('apps-list')) {
     // Index page - preload all data simultaneously
     const { apps, brokenApps } = await preloadAppData();
     renderAppsList(apps, brokenApps);

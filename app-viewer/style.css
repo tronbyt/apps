@@ -47,6 +47,30 @@ body {
   text-shadow: 1px 1px 0 #000;
 }
 
+.author-link {
+  color: #ffd700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.author-link:hover,
+.author-link:focus-visible {
+  color: #ffed4a;
+}
+
+.author-profile-header {
+  background: #222;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px #000a;
+}
+
+.author-app-count {
+  color: #bbb;
+  font-size: 0.8rem;
+}
+
 /* Clickable title styling */
 .card-title a {
   color: inherit;
