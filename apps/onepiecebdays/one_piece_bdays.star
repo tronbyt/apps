@@ -6,7 +6,7 @@ Author: raymbartlett
 """
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -459,6 +459,15 @@ birthdays = {
     "12-31": ["Gol D. Roger"],
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = config.get("location") or DEFAULT_LOCATION
     loc = json.decode(location)
@@ -478,7 +487,33 @@ def main(config):
 
     return render.Root(
         delay = 150,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            cross_align = "start",
+            children = [
+                render.Box(
+                    color = HEADER_BACKGROUND,
+                    height = 9,
+                    child = render.Text(
+                        content = header_text,
+                        font = "tb-8",
+                        color = HEADER_TEXT,
+                    ),
+                ),
+                render.Box(
+                    height = 23,
+                    child = render.Marquee(
+                        height = 23,
+                        child = render.WrappedText(
+                            content = characters,
+                            width = 64,
+                            align = marquee_alignment,
+                        ),
+                        scroll_direction = "vertical",
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             cross_align = "start",
             children = [
                 render.Box(

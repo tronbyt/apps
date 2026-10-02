@@ -7,6 +7,7 @@ author: g3rmanaviator
 fileName: og_clock.star
 packageName: ogclock
 recommendedInterval: 1
+supports64x64: true
 category: clocks
 tags:
   - weather
@@ -14,4 +15,4 @@ tags:
   - clock
   - nws
 published: '2025-09-29T19:23:26Z'
-updated: '2026-09-02T18:18:35Z'
+updated: '2026-10-01T22:12:18Z'

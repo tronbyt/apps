@@ -8,7 +8,7 @@ Author: noahpodgurski
 load("animation.star", "animation")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 REFRESH_TIME = 30
@@ -44,7 +44,20 @@ def requestSnapshot(snapshotURL):
 
 def render_error(message):
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            width = 64,
+            height = 32,
+            child = render.Column(
+                main_align = "center",
+                cross_align = "center",
+                expanded = True,
+                children = [
+                    render.Text("Octoprint", font = "tom-thumb"),
+                    render.WrappedText(message, color = RED, align = "center", font = "tom-thumb"),
+                ],
+            ),
+        ))) if is_square() else render.Box(
             width = 64,
             height = 32,
             child = render.Column(
@@ -179,6 +192,15 @@ def renderProgress(label, progress_value, padding):
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     name = None
     printTimeLeft = None
@@ -269,7 +291,82 @@ def main(config):
 
     if snapshot:
         return render.Root(
-            child = render.Stack(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
+                children = [
+                    animation.Transformation(
+                        child = render.Box(
+                            width = 64,
+                            height = 32,
+                            child = render.Padding(
+                                pad = (0, 1, 0, 0),
+                                child = render.Column(
+                                    main_align = "center",
+                                    cross_align = "center",
+                                    expanded = True,
+                                    children = status_children(name, state, stateColor, printTimeLeft, completion, has_job),
+                                ),
+                            ),
+                        ),
+                        duration = 200,
+                        delay = 0,
+                        origin = animation.Origin(0, 0),
+                        keyframes = [
+                            animation.Keyframe(
+                                percentage = 0.0,
+                                transforms = [animation.Translate(-0, 0)],
+                                curve = "ease_in_out",
+                            ),
+                            animation.Keyframe(
+                                percentage = 0.9,
+                                transforms = [animation.Translate(-0, 0)],
+                                curve = "ease_in_out",
+                            ),
+                            animation.Keyframe(
+                                percentage = 1.0,
+                                transforms = [animation.Translate(64, 0)],
+                                curve = "ease_in_out",
+                            ),
+                        ],
+                    ),
+                    animation.Transformation(
+                        child = render.Stack(
+                            children = [
+                                render.Image(src = snapshot, width = 64, height = 32),
+                                render.Box(
+                                    width = 64,
+                                    height = 32,
+                                    child = render.Row(
+                                        expanded = True,
+                                        main_align = "start",
+                                        children = [render.Stack(children = overlay_children)],
+                                    ),
+                                ),
+                            ],
+                        ),
+                        duration = 200,
+                        delay = 180,
+                        origin = animation.Origin(0, 0),
+                        keyframes = [
+                            animation.Keyframe(
+                                percentage = 0.0,
+                                transforms = [animation.Translate(-64, 0)],
+                                curve = "ease_in_out",
+                            ),
+                            animation.Keyframe(
+                                percentage = 0.1,
+                                transforms = [animation.Translate(-0, 0)],
+                                curve = "ease_in_out",
+                            ),
+                            animation.Keyframe(
+                                percentage = 1.0,
+                                transforms = [animation.Translate(0, 0)],
+                                curve = "ease_in_out",
+                            ),
+                        ],
+                    ),
+                ],
+            ))) if is_square() else render.Stack(
                 children = [
                     animation.Transformation(
                         child = render.Box(
@@ -347,7 +444,20 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            width = 64,
+            height = 32,
+            child = render.Padding(
+                pad = (0, 1, 0, 0),
+                child = render.Column(
+                    main_align = "center",
+                    cross_align = "center",
+                    expanded = True,
+                    children = status_children(name, state, stateColor, printTimeLeft, completion, has_job),
+                ),
+            ),
+        ))) if is_square() else render.Box(
             width = 64,
             height = 32,
             child = render.Padding(
