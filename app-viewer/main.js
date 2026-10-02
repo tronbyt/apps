@@ -344,6 +344,12 @@ async function fetchAppMarkdown(appName) {
   return null;
 }
 
+function resolveAppAssetUrl(value, appName) {
+  if (!value || typeof value !== 'string') return value;
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|apps\/)/i.test(value)) return value;
+  return `${APPS_DIR}/${appName}/${value}`;
+}
+
 function getAppNameFromURL() {
   const params = new URLSearchParams(window.location.search);
   const paramApp = params.get('app');
@@ -410,7 +416,7 @@ async function renderAppDetail() {
 
   // Create app details section from manifest data
   const detailsSection = document.createElement('div');
-  detailsSection.className = 'mb-4';
+  detailsSection.className = 'app-summary mb-4';
 
   // App title
   const title = document.createElement('h1');
@@ -427,15 +433,13 @@ async function renderAppDetail() {
 
   // Create details list
   const detailsList = document.createElement('dl');
-  detailsList.className = 'row';
+  detailsList.className = 'app-metadata';
 
   // Add details from manifest
   if (app.author) {
     const authorTerm = document.createElement('dt');
-    authorTerm.className = 'col-sm-3';
     authorTerm.textContent = 'Author:';
     const authorDesc = document.createElement('dd');
-    authorDesc.className = 'col-sm-9';
     if (app.authorSlug) {
       const authorLink = document.createElement('a');
       authorLink.href = `${BASE_PATH}authors/${encodeURIComponent(app.authorSlug)}.html`;
@@ -451,10 +455,8 @@ async function renderAppDetail() {
 
   if (app.recommendedInterval) {
     const intervalTerm = document.createElement('dt');
-    intervalTerm.className = 'col-sm-3';
     intervalTerm.textContent = 'Update Interval:';
     const intervalDesc = document.createElement('dd');
-    intervalDesc.className = 'col-sm-9';
     intervalDesc.textContent = `${app.recommendedInterval} minutes`;
     detailsList.appendChild(intervalTerm);
     detailsList.appendChild(intervalDesc);
@@ -462,10 +464,8 @@ async function renderAppDetail() {
 
   if (app.description) {
     const descTerm = document.createElement('dt');
-    descTerm.className = 'col-sm-3';
     descTerm.textContent = 'Description:';
     const descDesc = document.createElement('dd');
-    descDesc.className = 'col-sm-9';
     descDesc.textContent = app.description;
     detailsList.appendChild(descTerm);
     detailsList.appendChild(descDesc);
@@ -489,7 +489,7 @@ async function renderAppDetail() {
     const displayImage = (app.supports2x && app.image2x) ? app.image2x : app.image;
     image.src = `${APPS_DIR}/${displayImage}`;
     image.alt = app.displayName || app.name;
-    image.className = 'img-fluid rounded border';
+    image.className = 'app-preview-image img-fluid rounded border';
 
     imageContainer.appendChild(image);
     rightCol.appendChild(imageContainer);
@@ -523,9 +523,7 @@ async function renderAppDetail() {
         }
 
         // If href is relative, prefix with correct app path
-        if (href && typeof href === 'string' && !href.match(/^(https?:\/\/|\/|apps\/)/)) {
-          href = `${APPS_DIR}/${appName}/${href}`;
-        }
+        href = resolveAppAssetUrl(href, appName);
         let out = `<img src="${href || ''}" alt="${text || ''}"`;
         if (title) out += ` title="${title}"`;
         out += ' />';
@@ -534,7 +532,13 @@ async function renderAppDetail() {
 
       // Create a div to hold the sanitized markdown content
       const markdownContainer = document.createElement('div');
+      markdownContainer.className = 'app-readme';
       markdownContainer.innerHTML = DOMPurify.sanitize(marked.parse(md, { renderer }));
+      markdownContainer.querySelectorAll('img').forEach(image => {
+        const resolvedSrc = resolveAppAssetUrl(image.getAttribute('src'), appName);
+        if (resolvedSrc) image.src = resolvedSrc;
+        if (!image.alt) image.alt = `${app.displayName || app.name} screenshot`;
+      });
       container.appendChild(markdownContainer);
     } catch (error) {
       console.error('Marked.js error:', error);
