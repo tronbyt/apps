@@ -1,0 +1,20 @@
+---
+id: hurricane-map
+name: Hurricane Map
+summary: Show current hurricanes/cyclones
+desc: Displays current tropical depressions, storms, hurricanes, cyclones, and typhoons across the globe. Data from the NHC and JTWC.
+author: frame-shift
+fileName: hurricane_map.star
+packageName: hurricanemap
+recommendedInterval: 60
+supports2x: true
+published: '2026-10-02T07:49:03Z'
+updated: '2026-10-02T17:46:33Z'
+category: weather
+tags:
+  - weather
+  - hurricanes
+  - storms
+  - maps
+  - tropical
+  - wide 2x support
