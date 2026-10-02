@@ -7,7 +7,8 @@ author: cbromano
 recommendedInterval: 5
 fileName: dc_next_train.star
 packageName: dcnexttrain
+supports64x64: true
 category: transit
 tags: []
 published: '2024-10-09T16:53:20Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T20:48:26Z'

@@ -157,7 +157,7 @@ load("images/zar_flag.webp", ZAR_FLAG = "file")
 load("images/zmw_flag.webp", ZMW_FLAG = "file")
 load("images/zwl_flag.webp", ZWL_FLAG = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -829,8 +829,9 @@ def main(config):
     foreign_currency_cost_in_local = float(exchange_data_decoded_json["conversion_rates"][foreign_currency.upper()])
     local_currency_cost_in_foreign = float(math.pow(foreign_currency_cost_in_local, -1))
 
+    # Centre the block on taller panels (64x64).
     return render.Root(
-        render.Row(
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             children = [
                 render.Column(
                     children = [
@@ -874,7 +875,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():
