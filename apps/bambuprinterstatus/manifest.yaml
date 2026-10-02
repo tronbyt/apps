@@ -7,6 +7,7 @@ author: Robert Ison
 fileName: bambuprinterstatus.star
 packageName: bambuprinterstatus
 supports2x: true
+supports64x64: true
 recommendedInterval: 5
 category: hardware
 tags:
@@ -17,4 +18,4 @@ tags:
   - hardware
   - automation
 published: '2026-06-13T12:00:00Z'
-updated: '2026-06-16T02:10:40Z'
+updated: '2026-10-01T20:09:53Z'

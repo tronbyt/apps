@@ -6,6 +6,7 @@ desc: Display the current time in beats, a decimal time format where the 24-hour
 author: Stephen Washington
 fileName: beat_time.star
 packageName: beattime
+supports64x64: true
 category: clocks
 tags:
   - clock
@@ -13,4 +14,4 @@ tags:
   - utility
   - retro
 published: '2023-03-02T15:59:01Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T20:09:53Z'

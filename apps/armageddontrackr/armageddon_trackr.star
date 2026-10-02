@@ -9,7 +9,7 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/dino.png", DINO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -28,7 +28,7 @@ def main(config):
     api_key = config.get("api_key")
     if not api_key:
         return render.Root(
-            child = render_static_dino(),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render_static_dino())),
         )
     else:
         unit = config.get("distance_key", DEFAULT_UNIT)
@@ -62,58 +62,64 @@ def main(config):
         return render.Root(
             delay = 90,
             show_full_animation = bool(1),
-            child = render.Row(
-                children = [
-                    render.Box(
-                        width = 64,
-                        child = render.Sequence(
-                            children = [
-                                render.Animation(generate_string_segments(date_string)),
-                                render.Animation(generate_static_string_frames(date_string, 10)),
-                                render.Animation(generate_string_segments(asteroid_string)),
-                                render.Animation(generate_static_string_frames(asteroid_string, 10)),
-                                render.Animation(generate_string_segments(pre_proximity_string)),
-                                render.Animation(generate_static_string_frames(pre_proximity_string, 10)),
-                                render.Animation(generate_string_segments(proximity_string)),
-                                render.Animation(generate_static_string_frames(proximity_string, 10)),
-                                animation.Transformation(
-                                    child = render.Row(
-                                        expanded = bool(1),
-                                        cross_align = "end",
-                                        main_align = "end",
-                                        children = [
-                                            render.Box(
-                                                height = 32,
-                                                width = 34,
-                                                child = render.WrappedText("", font = "tom-thumb"),
+            # The sequence is laid out for 64x32 (the dino slides up from y=32);
+            # bound it to that and centre it on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Row(
+                    children = [
+                        render.Box(
+                            width = 64,
+                            child = render.Sequence(
+                                children = [
+                                    render.Animation(generate_string_segments(date_string)),
+                                    render.Animation(generate_static_string_frames(date_string, 10)),
+                                    render.Animation(generate_string_segments(asteroid_string)),
+                                    render.Animation(generate_static_string_frames(asteroid_string, 10)),
+                                    render.Animation(generate_string_segments(pre_proximity_string)),
+                                    render.Animation(generate_static_string_frames(pre_proximity_string, 10)),
+                                    render.Animation(generate_string_segments(proximity_string)),
+                                    render.Animation(generate_static_string_frames(proximity_string, 10)),
+                                    animation.Transformation(
+                                        child = render.Row(
+                                            expanded = bool(1),
+                                            cross_align = "end",
+                                            main_align = "end",
+                                            children = [
+                                                render.Box(
+                                                    height = 32,
+                                                    width = 34,
+                                                    child = render.WrappedText("", font = "tom-thumb"),
+                                                ),
+                                                render.Box(
+                                                    height = 26,
+                                                    width = 28,
+                                                    child = render.Image(DINO),
+                                                ),
+                                            ],
+                                        ),
+                                        duration = 8,
+                                        keyframes = [
+                                            animation.Keyframe(
+                                                percentage = 0.0,
+                                                transforms = [animation.Translate(0, 32)],
+                                                curve = "ease_out",
                                             ),
-                                            render.Box(
-                                                height = 26,
-                                                width = 28,
-                                                child = render.Image(DINO),
+                                            animation.Keyframe(
+                                                percentage = 1.0,
+                                                transforms = [animation.Translate(0, 0)],
+                                                curve = "ease_out",
                                             ),
                                         ],
                                     ),
-                                    duration = 8,
-                                    keyframes = [
-                                        animation.Keyframe(
-                                            percentage = 0.0,
-                                            transforms = [animation.Translate(0, 32)],
-                                            curve = "ease_out",
-                                        ),
-                                        animation.Keyframe(
-                                            percentage = 1.0,
-                                            transforms = [animation.Translate(0, 0)],
-                                            curve = "ease_out",
-                                        ),
-                                    ],
-                                ),
-                                render.Animation(static_dino),
-                            ],
+                                    render.Animation(static_dino),
+                                ],
+                            ),
                         ),
-                    ),
-                ],
-            ),
+                    ],
+                ),
+            )),
         )
 
 def get_schema():

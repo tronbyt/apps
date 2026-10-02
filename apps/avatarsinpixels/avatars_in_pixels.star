@@ -9,7 +9,7 @@ load("animation.star", "animation")
 load("cache.star", "cache")
 load("http.star", "http")
 load("images/error_icon.png", ERROR_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 ERROR_ICON = ERROR_ICON_ASSET.readall()
 
@@ -99,7 +99,7 @@ def render_animation(img):
         ],
     )
 
-    return render.Root(anim)
+    return render.Root(render.Box(width = canvas.width(), height = canvas.height(), child = anim))
 
 def render_error(error):
     return render.Root(

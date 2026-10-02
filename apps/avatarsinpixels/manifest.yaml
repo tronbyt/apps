@@ -7,8 +7,9 @@ author: Daniel Sitnik
 fileName: avatars_in_pixels.star
 packageName: avatarsinpixels
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art
 published: '2023-07-12T15:09:44Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T20:09:53Z'
