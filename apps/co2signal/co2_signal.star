@@ -11,7 +11,7 @@ load("hash.star", "hash")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 BASE_URL = "https://api.electricitymaps.com/v3"  # base electricity maps api url
@@ -128,13 +128,14 @@ def render_data(api_key, location):
 
         return render.Root(
             delay = 3000,
-            child = render.Animation(
+            # Centre the frames on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
                 children = [
                     frame_main,
                     frame_renewable,
                     frame_fossil_free,
                 ],
-            ),
+            )),
         )
 
 # Get and cache Electricity Maps data for the given api key and location.

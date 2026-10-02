@@ -915,18 +915,13 @@ denver = [-104.88111, 39.7618]
 def get_layout():
     marquee_height = 8
 
-    if canvas.is2x():
-        display_width = 128
-        display_height = 64
-        map_width = 128
-        map_height = display_height - marquee_height
-        marquee_y = map_height
-    else:
-        display_width = 64
-        display_height = 32
-        map_width = 64
-        map_height = 24
-        marquee_y = 24
+    # The map takes everything above the marquee, whatever the panel size:
+    # 64x24 on 64x32, 128x56 on 128x64, 64x56 on 64x64.
+    display_width = canvas.width()
+    display_height = canvas.height()
+    map_width = display_width
+    map_height = display_height - marquee_height
+    marquee_y = map_height
 
     return {
         "display_width": display_width,
