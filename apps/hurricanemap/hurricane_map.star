@@ -57,7 +57,6 @@ PATTERN_POS = r"\d{6}Z.+?-+?\sNEAR\s(\d.+?[N|S])\s*?(\d.+?[E|W])"
 PATTERN_WIND = r"MAX SUSTAINED WINDS.*?(\d+).*?KT"
 PATTERN_NAME = r"SUBJ.+?\d([A-Z])\s\((.+?)\)"
 TD_NHC_SUFFIX = ["-E", "-C"]  # All possible NHC suffixes for TDs
-TD_JTWC_SUFFIX = ["W", "E", "C", "A", "B", "S", "P", "L"]  # All possible JTWC suffixes for TDs
 NUM_STRS = list(STR_TO_NUM.keys())
 
 def main(config):
@@ -78,33 +77,20 @@ def main(config):
 
     # Build map and storms
     map = build_map(map_choice, map_color)
-    #storm_data = get_nhc() + get_jtwc() #TK OFF FOR TESTING
-
-    # REMOVE FOR TESTING TK ---
-    storm_data = [
-        {"lat": 12.1, "lon": -161.7, "wind": 30, "name": format_name("Twenty-One-C")},  # Tropical depression (central Pacific)
-        {"lat": 15.2, "lon": 87.9, "wind": 40, "name": "Mala"},  # Tropical storm (Bay of Bengal)
-        {"lat": 14.8, "lon": -108.7, "wind": 50, "name": "Linda"},  # Tropical storm (eastern Pacific)
-        {"lat": 26.3, "lon": -68.5, "wind": 90, "name": "Dennis"},  # Category 2 hurricane (Atlantic)
-        {"lat": 17.4, "lon": 131.2, "wind": 140, "name": "Dujuan"},  # Category 5 (western Pacific super typhoon)
-    ]
-    # TK --- remove above
-
+    storm_data = (get_nhc() or []) + (get_jtwc() or [])
     if hide_if_quiet and not storm_data:  # Hide if no storm data exists
         return None
 
     storms = [build_storm(s["lat"], s["lon"], s["wind"], s["name"], sym_size, map_choice, config) for s in storm_data]
     storms = [s for s in storms if s]
-
     if hide_if_quiet and not storms:  # Hide if no storm data in selected basin
         return None
-
-    delay = 25 if canvas.is2x() else 50
 
     if show_names:
         name_banner = make_name_banner([(s["name"], s["intensity"], s["display_lon"]) for s in storms])
     else:
         name_banner = BLANK_PX
+    delay = 25 if canvas.is2x() else 50
 
     return render.Root(
         show_full_animation = True,
@@ -355,8 +341,8 @@ def build_storm(lat, lon, wind, name, sym_size, map_choice, config):
         storm: (dict | None) Storm display metadata and rendered symbol, or None if the storm is off the map.
     """
     symbol = build_symbol(wind, sym_size, config)
-    sym_size = math.sqrt(len(symbol.children))  # Width/height of symbol
-    pad_adj = int((sym_size - 1) // 2)  # Ensures center of symbol at correct location on display
+    sym_dim = math.sqrt(len(symbol.children))  # Width/height of symbol
+    pad_adj = int((sym_dim - 1) // 2)  # Ensures center of symbol at correct location on display
     top = MAP_BOUNDS[map_choice]["top"]
     bottom = MAP_BOUNDS[map_choice]["bottom"]
     left = MAP_BOUNDS[map_choice]["left"]
@@ -366,7 +352,7 @@ def build_storm(lat, lon, wind, name, sym_size, map_choice, config):
     scale = 2 if canvas.is2x() else 1
     display_lat = lat_to_row(lat, top, bottom, 32 * scale)
     display_lon = lon_to_col(lon, left, right, 64 * scale)
-    if not display_lat or not display_lon:  # Returns None if storm off the map
+    if display_lat == None or display_lon == None:  # Returns None if storm off the map
         return None
 
     pad_top = display_lat - pad_adj
@@ -423,7 +409,7 @@ def get_nhc():
     """
     resp = http.get(url = URL_NHC, headers = HEADERS, ttl_seconds = REFRESH_RATE)
     if resp.status_code != 200:
-        print("NHC request failed with status %s", str(resp.status_code))
+        print("NHC request failed with status %s" % str(resp.status_code))
         return None
 
     decoded = resp.json()
@@ -459,7 +445,7 @@ def parse_jtwc(url):
     """
     resp = http.get(url = url, headers = HEADERS, ttl_seconds = REFRESH_RATE)
     if resp.status_code != 200:
-        print("JTWC Warning request failed with status %s", str(resp.status_code))
+        print("JTWC Warning request failed with status %s" % str(resp.status_code))
         return None
 
     # Extract data
@@ -495,7 +481,7 @@ def get_jtwc():
     """
     resp = http.get(url = URL_JTWC, headers = HEADERS, ttl_seconds = REFRESH_RATE)
     if resp.status_code != 200:
-        print("JTWC request failed with status %s", str(resp.status_code))
+        print("JTWC request failed with status %s" % str(resp.status_code))
         return None
 
     xml = xpath.loads(resp.body())
@@ -517,7 +503,8 @@ def get_jtwc():
         return None
 
     # Set storm data from warning URLs
-    storms = [parse_jtwc(u) for u in storm_urls if storm_urls]
+    storms = [parse_jtwc(u) for u in storm_urls]
+    storms = [s for s in storms if s]  # Removes storms that could not be parsed
 
     return storms
 
