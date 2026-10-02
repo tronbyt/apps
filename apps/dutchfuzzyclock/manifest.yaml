@@ -7,6 +7,7 @@ author: Remy Blok
 fileName: dutch_fuzzy_clock.star
 packageName: dutchfuzzyclock
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - time
@@ -15,4 +16,4 @@ tags:
   - clock
   - education
 published: '2022-06-22T01:18:11Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T20:55:01Z'

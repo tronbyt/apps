@@ -10,7 +10,7 @@ load("encoding/base64.star", "base64")
 load("hash.star", "hash")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 TITLE_TEXT_COLOR = "#fff"
@@ -18,7 +18,7 @@ TITLE_BKG_COLOR = "#ff0000aa"
 TITLE_FONT = "tom-thumb"
 TITLE_HEIGHT = 8
 TITLE_WIDTH = 64
-AREA_HEIGHT = 24
+AREA_HEIGHT = canvas.height() - TITLE_HEIGHT  # was 24
 
 ENDPOINT_SYSTEMS = "https://api.enphaseenergy.com/api/v4/systems"
 ENDPOINT_SUMMARY = "https://api.enphaseenergy.com/api/v4/systems/{}/summary"

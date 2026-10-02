@@ -8,6 +8,7 @@ fileName: digital_rain.star
 packageName: digitalrain
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - tech
@@ -15,4 +16,4 @@ tags:
   - art
   - wide 2x support
 published: '2022-01-11T13:14:57Z'
-updated: '2026-03-05T06:58:42Z'
+updated: '2026-10-01T20:55:01Z'

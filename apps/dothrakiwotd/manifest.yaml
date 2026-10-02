@@ -7,9 +7,10 @@ author: tavdog
 fileName: dothraki_wotd.star
 packageName: dothrakiwotd
 recommendedInterval: 5
+supports64x64: true
 category: education
 tags:
   - education
   - news
 published: '2023-10-15T13:51:16Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T20:55:01Z'

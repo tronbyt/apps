@@ -7,6 +7,7 @@ author: brombomb
 fileName: docker_container_monitor.star
 packageName: dockercontainermonitor
 supports2x: true
+supports64x64: true
 recommendedInterval: 1
 category: utilities
 tags:
@@ -15,4 +16,4 @@ tags:
   - utility
   - automation
 published: '2026-09-11T05:00:04Z'
-updated: '2026-09-11T05:00:04Z'
+updated: '2026-10-01T20:55:01Z'

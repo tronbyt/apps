@@ -1,12 +1,12 @@
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 # Entur API endpoint for real-time departures
 ENTUR_API_URL = "https://api.entur.io/journey-planner/v3/graphql"
-DISPLAY_WIDTH = 64
-DISPLAY_HEIGHT = 32
+DISPLAY_WIDTH = canvas.width()
+DISPLAY_HEIGHT = canvas.height()
 HEADER_HEIGHT = 6
 HEADER_FONT_WIDTH = 5
 HEADER_INDICATOR_WIDTH = 6
@@ -316,7 +316,8 @@ def main(config):
 
     return render.Root(
         delay = 350,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [header, separator] + departures,
-        ),
+        )),
     )
