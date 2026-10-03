@@ -8,10 +8,11 @@ fileName: random_pokedex.star
 packageName: randompokedex
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: gaming
 tags:
   - gaming
   - retro
   - wide 2x support
 published: '2023-09-05T19:41:59Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T18:38:43Z'

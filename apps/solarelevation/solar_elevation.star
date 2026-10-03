@@ -7,7 +7,7 @@ Author: dinosaursrarr
 
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -54,14 +54,26 @@ def draw(elevation):
         sun_pad = 14 - int(math.round((-90.0 - elevation) / angle_per_frame))
 
     # TODO: Background colours? Blue during day, sunset/sunrise gradient, dark at night?
+    # The sun dial and the reading sit side by side on a 64x32 panel; a
+    # square panel has the rows to stack them, each in its own half.
+    layout = render.Column if is_square() else render.Row
+
+    # Stacked, each half is centred by a full-width Box rather than by
+    # cross_align, which an expanded Column does not apply to fixed-size
+    # children.
+    def half(widget):
+        if is_square():
+            return render.Box(width = 62, height = 30, child = widget)
+        return widget
+
     return render.Padding(
         pad = (1, 1, 1, 1),
-        child = render.Row(
-            main_align = "center",
+        child = layout(
+            main_align = "space_evenly" if is_square() else "center",
             cross_align = "center",
             expanded = True,
             children = [
-                render.Box(
+                half(render.Box(
                     width = 30,
                     height = 30,
                     color = "#000",
@@ -89,13 +101,16 @@ def draw(elevation):
                             ),
                         ],
                     ),
-                ),
-                render.Box(
+                )),
+                # the gap between the dial and the reading when they sit
+                # side by side; stacked, the two 30px boxes already fill the
+                # 62 padded rows and there is none
+                None if is_square() else render.Box(
                     width = 2,
                     height = 30,
                     color = "#000",
                 ),
-                render.Box(
+                half(render.Box(
                     width = 30,
                     height = 30,
                     color = "#000",
@@ -109,10 +124,19 @@ def draw(elevation):
                             ),
                         ],
                     ),
-                ),
+                )),
             ],
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))

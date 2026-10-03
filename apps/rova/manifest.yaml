@@ -6,6 +6,7 @@ desc: Displays the next ROVA waste collection day for each waste type at your po
 author: bertvm
 recommendedInterval: 60
 supports2x: true
+supports64x64: true
 category: lifestyle
 tags:
   - waste
@@ -14,4 +15,4 @@ tags:
   - smart-home
   - wide 2x support
 published: '2026-09-08T20:00:00Z'
-updated: '2026-09-08T20:41:35Z'
+updated: '2026-10-01T18:52:35Z'

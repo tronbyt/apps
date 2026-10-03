@@ -1,0 +1,24 @@
+# Canonical app categories for manifest.yaml `category` fields.
+# Keep this list in sync with .github/scripts/check-categories.py (CI).
+categories:
+  - art
+  - clocks
+  - education
+  - entertainment
+  - finance
+  - food
+  - gaming
+  - hardware
+  - health
+  - lifestyle
+  - news
+  - reference
+  - science
+  - smart-home
+  - social
+  - sports
+  - technology
+  - transit
+  - travel
+  - utilities
+  - weather

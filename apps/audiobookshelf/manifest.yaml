@@ -8,7 +8,7 @@ fileName: audiobookshelf.star
 packageName: audiobookshelf
 supports2x: true
 recommendedInterval: 1
-category: media
+category: entertainment
 tags:
   - tech
   - tracking

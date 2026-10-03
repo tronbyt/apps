@@ -8,6 +8,7 @@ fileName: mlbliveticker.star
 packageName: mlbliveticker
 recommendedInterval: 15
 supports2x: false
+supports64x64: true
 category: sports
 tags:
   - baseball
@@ -15,4 +16,4 @@ tags:
   - sports
   - scores
 published: '2026-08-10T04:42:53Z'
-updated: '2026-09-03T04:52:08Z'
+updated: '2026-10-01T15:26:52Z'

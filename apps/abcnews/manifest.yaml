@@ -5,6 +5,7 @@ summary: Displays ABC News Headlines
 desc: Displays headlines from ABC News Australia. Select the topic from the dropdown and it will display the last 5 headlines.
 author: M0ntyP
 published: '2026-05-05T16:01:26Z'
-updated: '2026-10-01T18:22:01Z'
+updated: '2026-05-20T18:59:25Z'
+category: news
 tags: []
 supports64x64: true
