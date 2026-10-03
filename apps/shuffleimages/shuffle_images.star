@@ -11,7 +11,7 @@ Author: rs7q5
 
 load("encoding/base64.star", "base64")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -49,7 +49,7 @@ def main(config):
 
     return render.Root(
         delay = delay,
-        child = img,
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = img),
     )
 
 def get_schema():

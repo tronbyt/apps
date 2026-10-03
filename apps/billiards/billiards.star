@@ -1,4 +1,4 @@
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Fast Newton-Raphson iterative approximation for square root
@@ -257,7 +257,12 @@ def main(config):
                     ),
                 )
 
-        frames.append(render.Stack(children = children))
+        # The table is drawn at 64x32; centre it on taller panels (64x64).
+        frames.append(render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Box(width = 64, height = 32, child = render.Stack(children = children)),
+        ))
 
     return render.Root(
         delay = 60,
