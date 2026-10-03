@@ -6,7 +6,7 @@ Author: Josh Reed
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 TEXTBYT_API_URL = "https://us-central1-textbyt-rest-api.cloudfunctions.net/textbyt/v1/"
@@ -41,9 +41,9 @@ def main(config):
                     color = "#D2691E",
                 ),
                 render.Marquee(
-                    height = 23,  # 32 - 8 (author line) - 1 (divider line)
-                    offset_start = 24,
-                    offset_end = 24,
+                    height = canvas.height() - 9,  # minus the author line (8) and divider (1)
+                    offset_start = canvas.height() - 8,
+                    offset_end = canvas.height() - 8,
                     child = render.WrappedText(
                         content = msg_txt,
                         width = 64,
