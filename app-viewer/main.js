@@ -127,16 +127,6 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
     const badgeContainer = document.createElement('div');
     badgeContainer.className = 'badge-container';
     
-    // Add broken badge if needed
-    if (isBroken) {
-      const brokenBadge = document.createElement('div');
-      brokenBadge.className = 'app-badge badge-broken';
-      brokenBadge.title = 'This app is marked as broken';
-      brokenBadge.setAttribute('data-bs-toggle', 'tooltip');
-      brokenBadge.textContent = '⚠️';
-      badgeContainer.appendChild(brokenBadge);
-    }
-
     // Add 2x badge if needed
     if (displayMode === 'standard' && app.supports2x) {
       const badge2x = document.createElement('div');
@@ -188,18 +178,22 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
     // Create clickable title
     const titleLink = document.createElement('a');
     titleLink.href = detailUrl;
-    titleLink.className = 'text-decoration-none';
+    titleLink.className = 'text-decoration-none d-block';
 
     const title = document.createElement('h5');
-    title.className = 'card-title';
-    title.textContent = app.displayName || app.name; // Use displayName from manifest or fallback to folder name
+    title.className = 'card-title app-card-title';
+
+    const titleText = document.createElement('span');
+    titleText.textContent = app.displayName || app.name; // Use displayName from manifest or fallback to folder name
+    title.appendChild(titleText);
 
     if (isBroken) {
       const warningSpan = document.createElement('span');
-      warningSpan.className = 'text-warning';
+      warningSpan.className = 'app-card-broken-icon text-warning';
       warningSpan.title = 'Broken app';
       warningSpan.setAttribute('data-bs-toggle', 'tooltip');
-      warningSpan.textContent = ' ⚠️';
+      warningSpan.setAttribute('aria-label', 'Broken app');
+      warningSpan.textContent = '⚠️';
       title.appendChild(warningSpan);
     }
 

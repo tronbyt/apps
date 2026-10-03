@@ -569,9 +569,19 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   cursor: default;
 }
 
-.badge-broken {
-  background: rgba(255, 193, 7, 0.9);
-  color: #000;
+.app-card-title {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.app-card-title > span:first-child {
+  min-width: 0;
+}
+
+.app-card-broken-icon {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .badge-2x {
