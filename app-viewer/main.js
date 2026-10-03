@@ -100,7 +100,7 @@ async function fetchAppsList() {
   return [];
 }
 
-function renderAppsList(apps, brokenApps = []) {
+function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
   const list = document.getElementById('apps-list');
   list.replaceChildren();
   apps.forEach(app => {
@@ -117,8 +117,10 @@ function renderAppsList(apps, brokenApps = []) {
     // Create image container with clickable link
     const imageContainer = document.createElement('div');
     imageContainer.className = 'position-relative';
-    if (app.supports2x) {
+    if (displayMode === 'wide') {
       imageContainer.classList.add('app-2x');
+    } else if (displayMode === 'square') {
+      imageContainer.classList.add('app-square');
     }
 
     // Create badge container
@@ -136,23 +138,13 @@ function renderAppsList(apps, brokenApps = []) {
     }
 
     // Add 2x badge if needed
-    if (app.supports2x) {
+    if (displayMode === 'standard' && app.supports2x) {
       const badge2x = document.createElement('div');
       badge2x.className = 'app-badge badge-2x';
       badge2x.title = 'Supports 2x resolution';
       badge2x.setAttribute('data-bs-toggle', 'tooltip');
       badge2x.textContent = '2X';
       badgeContainer.appendChild(badge2x);
-    }
-
-    // Add square-display badge independently of pixel density
-    if (app.supports64x64) {
-      const squareBadge = document.createElement('div');
-      squareBadge.className = 'app-badge badge-square';
-      squareBadge.title = 'Supports square displays';
-      squareBadge.setAttribute('data-bs-toggle', 'tooltip');
-      squareBadge.textContent = '□';
-      badgeContainer.appendChild(squareBadge);
     }
 
     // URL for app details page
@@ -165,7 +157,12 @@ function renderAppsList(apps, brokenApps = []) {
 
     // Create image element
     let imageElement;
-    if (app.supports2x && app.image2x) {
+    if (displayMode === 'square' && app.image64x64) {
+      imageElement = document.createElement('img');
+      imageElement.src = `${APPS_DIR}/${app.image64x64}`;
+      imageElement.className = 'card-img-top';
+      imageElement.alt = `${app.name} square preview`;
+    } else if (displayMode === 'wide' && app.image2x) {
       imageElement = document.createElement('img');
       imageElement.src = `${APPS_DIR}/${app.image2x}`;
       imageElement.className = 'card-img-top';
@@ -253,6 +250,7 @@ function setupSearch(apps, brokenApps) {
   const selectedTagLabel = document.getElementById('selected-tag-label');
   const clearTagFilter = document.getElementById('clear-tag-filter');
   const categoryFilter = document.getElementById('category-filter');
+  const displayFilter = document.getElementById('display-filter');
   const sortOrder = document.getElementById('sort-order');
   const hideBrokenApps = document.getElementById('hide-broken-apps');
 
@@ -285,6 +283,7 @@ function setupSearch(apps, brokenApps) {
   function filterApps() {
     const searchVal = search.value.toLowerCase();
     const categoryVal = categoryFilter.value;
+    const displayVal = displayFilter.value;
     const sortVal = sortOrder.value;
 
     let filtered = apps.filter(app => {
@@ -296,8 +295,11 @@ function setupSearch(apps, brokenApps) {
         (app.tags && app.tags.some(t => t.toLowerCase().includes(searchVal)));
       const matchesCategory = !categoryVal || app.category === categoryVal;
       const matchesTag = !selectedTag || (app.tags && app.tags.includes(selectedTag));
+      const matchesDisplay = displayVal === 'standard' ||
+        (displayVal === 'wide' && app.supports2x) ||
+        (displayVal === 'square' && app.supports64x64);
       const matchesBroken = !hideBrokenApps.checked || !isAppBroken(app, brokenApps);
-      return matchesSearch && matchesCategory && matchesTag && matchesBroken;
+      return matchesSearch && matchesCategory && matchesTag && matchesDisplay && matchesBroken;
     });
 
     // Sort the filtered apps
@@ -318,7 +320,7 @@ function setupSearch(apps, brokenApps) {
       }
     });
 
-    renderAppsList(filtered, brokenApps);
+    renderAppsList(filtered, brokenApps, displayVal);
 
     // The clear button belongs to the search field, so only show it for text.
     clearButton.style.display = searchVal ? 'block' : 'none';
@@ -329,6 +331,7 @@ function setupSearch(apps, brokenApps) {
 
   // Handle filter changes
   categoryFilter.addEventListener('change', filterApps);
+  displayFilter.addEventListener('change', filterApps);
   sortOrder.addEventListener('change', filterApps);
   hideBrokenApps.addEventListener('change', () => {
     try {

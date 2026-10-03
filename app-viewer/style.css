@@ -182,6 +182,68 @@ body {
   border-left: 1px solid #444;
 }
 
+.viewer-filters {
+  align-items: center;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns:
+    minmax(12rem, 0.8fr)
+    minmax(18rem, 1.2fr)
+    minmax(20rem, 1.35fr)
+    minmax(15rem, 1.15fr);
+  grid-template-areas:
+    'search search search dot'
+    'category display sort broken';
+}
+
+.viewer-search {
+  grid-area: search;
+}
+
+.category-filter {
+  grid-area: category;
+}
+
+.display-filter {
+  grid-area: display;
+}
+
+.sort-filter {
+  grid-area: sort;
+}
+
+.preference-dot {
+  grid-area: dot;
+}
+
+.preference-broken {
+  grid-area: broken;
+}
+
+.viewer-preference {
+  align-items: center;
+  display: flex;
+  min-width: 0;
+}
+
+.viewer-preference .form-check {
+  margin-bottom: 0;
+}
+
+.viewer-filters .form-select {
+  font-size: 0.75rem;
+}
+
+.app-square .card-img-top {
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+body.dot-matrix-enabled .app-square .card-img-top[src]:not([src=""]) {
+  -webkit-mask-image: url('./dots@64x64.svg');
+  mask-image: url('./dots@64x64.svg');
+}
+
 .card-img-top {
   object-fit: cover;
   aspect-ratio: 2 / 1;
@@ -497,17 +559,9 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   color: #000;
 }
 
-.badge-2x,
-.badge-square {
+.badge-2x {
   background: rgba(13, 110, 253, 0.9);
   color: #fff;
-}
-
-.badge-square {
-  font-size: 0.85rem;
-  line-height: 0.75rem;
-  padding-left: 7px;
-  padding-right: 7px;
 }
 
 .btn-warning {
@@ -767,6 +821,20 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   }
 }
 
+@media (max-width: 1199px) {
+  .viewer-filters {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-areas:
+      'search search search search search search search search search search search search'
+      'category category category display display display display sort sort sort sort sort'
+      'dot dot dot dot dot dot broken broken broken broken broken broken';
+  }
+
+  .viewer-preference {
+    padding-top: 0.25rem;
+  }
+}
+
 @media (max-width: 767px) {
   .viewer-header {
     gap: 0.75rem;
@@ -829,6 +897,19 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
   .detail-actions .btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 575px) {
+  .viewer-filters {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'search'
+      'category'
+      'display'
+      'sort'
+      'dot'
+      'broken';
   }
 }
 

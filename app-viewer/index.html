@@ -15,8 +15,8 @@
             <h1 class="mb-4 main-title"><img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4"> Apps
                 Viewer</h1>
 
-            <div class="row mb-4">
-                <div class="col-md-6">
+            <div class="viewer-filters mb-4">
+                <div class="viewer-search">
                     <div class="search-control">
                         <div class="search-tag-token" id="selected-tag-filter" hidden>
                             <span id="selected-tag-label"></span>
@@ -28,35 +28,39 @@
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-3">
+                <div class="viewer-preference preference-dot">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
+                        <label class="form-check-label" for="dot-matrix-toggle">
+                            Dot matrix overlay
+                        </label>
+                    </div>
+                </div>
+                <div class="category-filter">
                     <select id="category-filter" class="form-select">
                         <option value="">All Categories</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="display-filter">
+                    <select id="display-filter" class="form-select">
+                        <option value="standard">Display: Standard / 1x</option>
+                        <option value="wide">Display: Wide / 2x</option>
+                        <option value="square">Display: Square</option>
+                    </select>
+                </div>
+                <div class="sort-filter">
                     <select id="sort-order" class="form-select">
                         <option value="alphabetical">Sort: A-Z</option>
                         <option value="newest">Sort: Newest</option>
                         <option value="updated">Sort: Last Updated</option>
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <div class="viewer-preferences d-flex align-items-center gap-4 flex-wrap pt-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
-                            <label class="form-check-label" for="dot-matrix-toggle">
-                                Dot matrix overlay
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="hide-broken-apps">
-                            <label class="form-check-label" for="hide-broken-apps">
-                                Hide broken apps
-                            </label>
-                        </div>
+                <div class="viewer-preference preference-broken">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="hide-broken-apps">
+                        <label class="form-check-label" for="hide-broken-apps">
+                            Hide broken apps
+                        </label>
                     </div>
                 </div>
             </div>
