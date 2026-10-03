@@ -1,3 +1,5 @@
+import { classifyReadmeImage, normalizeReadmeImageUrl } from './readme-images.js';
+
 // --- CONFIG ---
 // Use GitHub Pages structure for both local and production
 const isDetailsPage = window.location.pathname.includes('/details/');
@@ -387,6 +389,7 @@ async function fetchAppMarkdown(appName) {
 
 function resolveAppAssetUrl(value, appName) {
   if (!value || typeof value !== 'string') return value;
+  value = normalizeReadmeImageUrl(value);
   const normalizedAppsDir = APPS_DIR.replace(/\/+$/, '');
   if (value === normalizedAppsDir || value.startsWith(`${normalizedAppsDir}/`)) return value;
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|apps\/)/i.test(value)) return value;
@@ -713,6 +716,31 @@ async function renderAppDetail() {
         const resolvedSrc = resolveAppAssetUrl(image.getAttribute('src'), appName);
         if (resolvedSrc) image.src = resolvedSrc;
         if (!image.alt) image.alt = `${app.displayName || app.name} screenshot`;
+
+        const classifyImage = () => {
+          const kind = classifyReadmeImage({
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+            source: image.currentSrc || image.src,
+            supports2x: app.supports2x,
+            supports64x64: app.supports64x64
+          });
+          if (!kind) return;
+          image.classList.add('readme-device-screenshot', `readme-device-${kind}`);
+        };
+
+        const hideUnavailableImage = () => {
+          image.hidden = true;
+          image.setAttribute('aria-hidden', 'true');
+        };
+
+        if (image.complete) {
+          if (image.naturalWidth > 0) classifyImage();
+          else hideUnavailableImage();
+        } else {
+          image.addEventListener('load', classifyImage, { once: true });
+          image.addEventListener('error', hideUnavailableImage, { once: true });
+        }
       });
       readmeSection.appendChild(markdownContainer);
     } catch (error) {

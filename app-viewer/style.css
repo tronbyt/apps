@@ -517,6 +517,31 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   width: auto;
 }
 
+.app-readme img.readme-device-screenshot {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+body.dot-matrix-enabled .app-readme img.readme-device-screenshot {
+  -webkit-mask-image: url('./dots.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-image: url('./dots.svg');
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
+body.dot-matrix-enabled .app-readme img.readme-device-wide {
+  -webkit-mask-image: url('./dots@2x.svg');
+  mask-image: url('./dots@2x.svg');
+}
+
+body.dot-matrix-enabled .app-readme img.readme-device-square {
+  -webkit-mask-image: url('./dots@64x64.svg');
+  mask-image: url('./dots@64x64.svg');
+}
+
 .app-readme pre,
 .app-readme table {
   display: block;
