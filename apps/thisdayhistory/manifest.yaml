@@ -8,9 +8,10 @@ recommendedInterval: 5
 fileName: this_day_history.star
 packageName: thisdayhistory
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - education
   - utility
 published: '2024-10-29T14:51:42Z'
-updated: '2026-06-17T20:47:04Z'
+updated: '2026-10-01T19:16:27Z'
