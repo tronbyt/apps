@@ -200,17 +200,11 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   overflow-wrap: anywhere;
 }
 
-.app-metadata .app-description-label,
-.app-metadata .app-description-value {
-  grid-column: 1 / -1;
-}
-
-.app-metadata .app-description-label {
-  margin-top: 0.85rem;
-}
-
-.app-description-value {
+.app-summary-description {
+  font-size: 0.85rem;
   line-height: 1.65;
+  margin: 0 0 1.5rem;
+  max-width: 58rem;
 }
 
 .app-details-layout {
@@ -236,6 +230,33 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   border: 1px solid #444;
   border-radius: 999px;
   padding: 0.25rem 0.5rem;
+}
+
+.app-tags {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.app-tags-label {
+  margin-right: 0.15rem;
+}
+
+.app-tag-pill {
+  background: #181818;
+  border: 1px solid #555;
+  border-radius: 999px;
+  color: #ffd700;
+  padding: 0.3rem 0.6rem;
+  text-decoration: none;
+}
+
+.app-tag-pill:hover,
+.app-tag-pill:focus-visible {
+  background: #333;
+  border-color: #ffd700;
+  color: #fff;
 }
 
 .app-preview-gallery {
@@ -660,8 +681,9 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
     margin-top: 0.6rem;
   }
 
-  .app-metadata .app-description-label {
-    margin-top: 0.85rem;
+  .app-summary-description {
+    font-size: 0.75rem;
+    margin-bottom: 1.25rem;
   }
 
   .app-details-layout {

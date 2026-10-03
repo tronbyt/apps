@@ -267,6 +267,11 @@ function setupSearch(apps, brokenApps) {
     tagFilter.appendChild(option);
   });
 
+  const requestedTag = new URLSearchParams(window.location.search).get('tag');
+  if (requestedTag && uniqueTags.includes(requestedTag)) {
+    tagFilter.value = requestedTag;
+  }
+
   function filterApps() {
     const searchVal = search.value.toLowerCase();
     const categoryVal = categoryFilter.value;
@@ -442,9 +447,16 @@ async function renderAppDetail() {
 
   // App title
   const title = document.createElement('h1');
-  title.className = 'mb-3';
+  title.className = app.description ? 'mb-2' : 'mb-3';
   title.textContent = app.displayName || app.name;
   detailsSection.appendChild(title);
+
+  if (app.description) {
+    const description = document.createElement('p');
+    description.className = 'app-summary-description';
+    description.textContent = app.description;
+    detailsSection.appendChild(description);
+  }
 
   // App details and previews
   const detailsTable = document.createElement('div');
@@ -523,17 +535,6 @@ async function renderAppDetail() {
   detailsList.appendChild(displaysTerm);
   detailsList.appendChild(displaysDesc);
 
-  if (app.description) {
-    const descTerm = document.createElement('dt');
-    descTerm.className = 'app-description-label';
-    descTerm.textContent = 'Description:';
-    const descDesc = document.createElement('dd');
-    descDesc.className = 'app-description-value';
-    descDesc.textContent = app.description;
-    detailsList.appendChild(descTerm);
-    detailsList.appendChild(descDesc);
-  }
-
   leftCol.appendChild(detailsList);
   detailsTable.appendChild(leftCol);
 
@@ -595,6 +596,28 @@ async function renderAppDetail() {
   }
 
   detailsSection.appendChild(detailsTable);
+
+  if (app.tags?.length) {
+    const tags = document.createElement('nav');
+    tags.className = 'app-tags';
+    tags.setAttribute('aria-label', 'App tags');
+
+    const tagsLabel = document.createElement('span');
+    tagsLabel.className = 'app-tags-label';
+    tagsLabel.textContent = 'Tags:';
+    tags.appendChild(tagsLabel);
+
+    app.tags.forEach(tag => {
+      const tagLink = document.createElement('a');
+      tagLink.className = 'app-tag-pill';
+      tagLink.href = `${BASE_PATH}index.html?tag=${encodeURIComponent(tag)}`;
+      tagLink.textContent = tag;
+      tags.appendChild(tagLink);
+    });
+
+    detailsSection.appendChild(tags);
+  }
+
   container.appendChild(detailsSection);
 
   // Try to load markdown for additional details
