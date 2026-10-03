@@ -11,6 +11,10 @@ body {
   text-shadow: 2px 2px 0 #000;
 }
 
+.title-short {
+  display: none;
+}
+
 .card {
   background: #222;
   border: 2px solid #444;
@@ -763,6 +767,16 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
   #tronbyt-settings-label {
     display: none;
+  }
+}
+
+@container viewer-header (max-width: 68rem) {
+  .title-full {
+    display: none;
+  }
+
+  .title-short {
+    display: inline;
   }
 }
 
