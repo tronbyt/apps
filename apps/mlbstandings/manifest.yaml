@@ -7,9 +7,10 @@ author: LunchBox8484
 fileName: mlb_standings.star
 packageName: mlbstandings
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - mlb
   - baseball
 published: '2022-08-18T14:51:01Z'
-updated: '2026-09-03T04:50:16Z'
+updated: '2026-10-01T15:26:52Z'

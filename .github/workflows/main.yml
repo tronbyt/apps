@@ -20,6 +20,17 @@ jobs:
       - name: Setup build agent
         run: ./.github/scripts/setup.sh
 
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install PyYAML
+
+      - name: Validate manifest categories
+        run: python3 .github/scripts/check-categories.py
+
       - name: Find last successful build
         id: lastsuccess
         uses: SamhammerAG/last-successful-build-action@v8

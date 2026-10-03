@@ -7,10 +7,11 @@ author: '@objectivelabs'
 recommendedInterval: 5
 fileName: northernlights.star
 packageName: northernlights
+supports64x64: true
 category: science
 tags:
   - space
   - weather
   - tech
 published: '2024-05-22T18:34:31Z'
-updated: '2026-05-25T17:35:56Z'
+updated: '2026-10-01T16:29:58Z'

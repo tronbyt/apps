@@ -8,6 +8,7 @@ fileName: pokedexplus.star
 packageName: pokedexplus
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 minPixletVersion: v0.49.4
 category: gaming
 tags:
@@ -16,4 +17,4 @@ tags:
   - art
   - wide 2x support
 published: '2023-09-06T15:28:25Z'
-updated: '2025-12-11T17:34:07Z'
+updated: '2026-10-01T18:52:35Z'
