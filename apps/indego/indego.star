@@ -89,32 +89,38 @@ def main(config):
     icon_height = 15 if scale == 1 else 28
     text_height = 10 if scale == 1 else 22
 
+    # The card is laid out for 32 * scale rows; a square panel is 64 tall
+    # but not 2x, so the 32-row card is centred.
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
-            children = [
-                render.Column(
-                    children = [
-                        render.Stack(children = [
-                            render.Box(height = header_height, width = 64 * scale, color = "#8C189A", child = render.Padding(pad = header_pad, child = render.Marquee(width = 64 * scale, offset_start = 64 * scale, offset_end = 64 * scale, child = render.Text(dock_data["name"], font = header_font)))),
-                        ]),
-                        render.Row(children = [
-                            render.Column(children = [
-                                render.Box(width = 21 * scale, height = icon_height, child = render.Image(src = regular_bike_image, width = 21 * scale, height = icon_height)),
-                                render.Box(width = 21 * scale, height = text_height, child = render.Text(str(dock_data["classicBikesAvailable"]), font = data_font, color = regular_bike_color)),
+        child = render.Box(
+            width = 64 * scale,
+            height = canvas.height(),
+            child = render.Column(
+                children = [
+                    render.Column(
+                        children = [
+                            render.Stack(children = [
+                                render.Box(height = header_height, width = 64 * scale, color = "#8C189A", child = render.Padding(pad = header_pad, child = render.Marquee(width = 64 * scale, offset_start = 64 * scale, offset_end = 64 * scale, child = render.Text(dock_data["name"], font = header_font)))),
                             ]),
-                            render.Column(children = [
-                                render.Box(width = 21 * scale, height = icon_height, child = render.Image(src = electric_bike_image, width = 21 * scale, height = icon_height)),
-                                render.Box(width = 21 * scale, height = text_height, child = render.Text(str(dock_data["electricBikesAvailable"]), font = data_font, color = electric_bike_color)),
+                            render.Row(children = [
+                                render.Column(children = [
+                                    render.Box(width = 21 * scale, height = icon_height, child = render.Image(src = regular_bike_image, width = 21 * scale, height = icon_height)),
+                                    render.Box(width = 21 * scale, height = text_height, child = render.Text(str(dock_data["classicBikesAvailable"]), font = data_font, color = regular_bike_color)),
+                                ]),
+                                render.Column(children = [
+                                    render.Box(width = 21 * scale, height = icon_height, child = render.Image(src = electric_bike_image, width = 21 * scale, height = icon_height)),
+                                    render.Box(width = 21 * scale, height = text_height, child = render.Text(str(dock_data["electricBikesAvailable"]), font = data_font, color = electric_bike_color)),
+                                ]),
+                                render.Column(children = [
+                                    render.Box(width = 22 * scale, height = icon_height, child = render.Image(src = dock_image, width = 21 * scale, height = icon_height)),
+                                    render.Box(width = 22 * scale, height = text_height, child = render.Text(str(dock_data["docksAvailable"]), font = data_font, color = dock_color)),
+                                ]),
                             ]),
-                            render.Column(children = [
-                                render.Box(width = 22 * scale, height = icon_height, child = render.Image(src = dock_image, width = 21 * scale, height = icon_height)),
-                                render.Box(width = 22 * scale, height = text_height, child = render.Text(str(dock_data["docksAvailable"]), font = data_font, color = dock_color)),
-                            ]),
-                        ]),
-                    ],
-                ),
-            ],
+                        ],
+                    ),
+                ],
+            ),
         ),
     )
 

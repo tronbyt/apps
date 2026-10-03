@@ -6,7 +6,7 @@ Author: Alex Miller/AmillionAir
 """
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -22,6 +22,15 @@ DEFAULT_LOCATION = """
 """
 DEFAULT_IS_24_HOUR_FORMAT = False
 DEFAULT_IS_US_DATE_FORMAT = False
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = config.get("location", DEFAULT_LOCATION)
@@ -47,8 +56,11 @@ def main(config):
     return render.Root(
         delay = 500,
         max_age = 120,
+        # The three lines total 30 rows; on a square panel the column
+        # spreads them down the panel instead of stacking them at the top.
         child = render.Column(
             expanded = True,
+            main_align = "space_evenly" if is_square() else "start",
             cross_align = "center",
             children = [
                 render.Box(width = 64, height = 1),
