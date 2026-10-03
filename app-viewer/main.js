@@ -729,17 +729,10 @@ async function renderAppDetail() {
           image.classList.add('readme-device-screenshot', `readme-device-${kind}`);
         };
 
-        const hideUnavailableImage = () => {
-          image.hidden = true;
-          image.setAttribute('aria-hidden', 'true');
-        };
-
         if (image.complete) {
           if (image.naturalWidth > 0) classifyImage();
-          else hideUnavailableImage();
         } else {
           image.addEventListener('load', classifyImage, { once: true });
-          image.addEventListener('error', hideUnavailableImage, { once: true });
         }
       });
       readmeSection.appendChild(markdownContainer);
