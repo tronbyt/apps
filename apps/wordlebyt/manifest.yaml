@@ -7,6 +7,7 @@ author: skola28
 fileName: wordlebyt.star
 packageName: wordlebyt
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - gaming
@@ -14,4 +15,4 @@ tags:
   - art
   - sports
 published: '2022-07-19T14:38:57Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T16:46:59Z'
