@@ -323,10 +323,8 @@ function setupSearch(apps, brokenApps) {
 
     renderAppsList(filtered, brokenApps);
 
-    // Show/hide clear button based on any filters being active
-    const hasFilters = searchVal || categoryVal || tagVal ||
-      sortVal !== DEFAULT_SORT_ORDER || hideBrokenApps.checked;
-    clearButton.style.display = hasFilters ? 'block' : 'none';
+    // The clear button belongs to the search field, so only show it for text.
+    clearButton.style.display = searchVal ? 'block' : 'none';
   }
 
   // Handle search input
@@ -348,15 +346,6 @@ function setupSearch(apps, brokenApps) {
   // Handle clear button click
   clearButton.addEventListener('click', () => {
     search.value = '';
-    categoryFilter.value = '';
-    tagFilter.value = '';
-    sortOrder.value = DEFAULT_SORT_ORDER;
-    hideBrokenApps.checked = false;
-    try {
-      localStorage.setItem('hideBrokenApps', 'false');
-    } catch {
-      // Ignore unavailable storage.
-    }
     filterApps();
     search.focus();
   });
