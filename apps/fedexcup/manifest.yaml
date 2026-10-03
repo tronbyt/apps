@@ -1,0 +1,15 @@
+---
+id: fedex-cup
+name: FedEx Cup
+summary: Shows FedEx Cup standings
+desc: Shows the standings for the PGA Tour's FedEx Cup.
+author: M0ntyP
+fileName: fedex_cup.star
+packageName: fedexcup
+recommendedInterval: 5
+broken: true
+category: sports
+tags:
+  - golf
+published: '2023-06-27T17:54:24Z'
+updated: '2025-12-05T22:28:51Z'

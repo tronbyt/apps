@@ -1,0 +1,14 @@
+---
+id: vgk-next-game
+name: VGK Next Game
+summary: Shows next VGK Game
+desc: Shows the date of the next Vegas Golden Knights game.
+author: theimpossibleleap
+fileName: vgk_next_game.star
+packageName: vgknextgame
+category: sports
+tags:
+  - nhl
+  - hockey
+published: '2024-02-08T18:06:58Z'
+updated: '2025-12-02T19:30:22Z'

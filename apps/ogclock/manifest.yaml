@@ -1,0 +1,17 @@
+---
+id: og-clock
+name: OG Clock
+summary: Display time & weather
+desc: Display the time plus current temperature and humidity from OpenWeather, National Weather Service, or your Ambient Weather station. Ambient Weather requires an Application Key and API Key from your AmbientWeather.net account.
+author: g3rmanaviator
+fileName: og_clock.star
+packageName: ogclock
+recommendedInterval: 1
+category: clocks
+tags:
+  - weather
+  - utility
+  - clock
+  - nws
+published: '2025-09-29T19:23:26Z'
+updated: '2026-09-02T18:18:35Z'

@@ -1,0 +1,16 @@
+---
+id: test-patterns
+name: Test Patterns
+summary: Pretty test patterns
+desc: Test patterns are as old as TV broadcasts.
+author: harrisonpage
+fileName: test_patterns.star
+packageName: testpatterns
+recommendedInterval: 5
+category: entertainment
+tags:
+  - media
+  - art
+  - retro
+published: '2022-06-22T01:19:03Z'
+updated: '2025-11-30T19:58:27Z'

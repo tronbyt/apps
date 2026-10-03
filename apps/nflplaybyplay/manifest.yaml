@@ -1,0 +1,17 @@
+---
+id: nfl-play-by-play
+name: NFL Play By Play
+summary: Follow your NFL team live
+desc: Live game state for your favorite NFL team, in the spirit of Tidbyt's original Football app. During games it shows the score, quarter and clock, down and distance, field position, possession, and timeouts on team-color bands. On game day it counts down to kickoff; the rest of the week it shows your team's record with division standings scrolling underneath. Uses ESPN's public scoreboard, no API key needed.
+author: nsluke
+fileName: nfl_play_by_play.star
+packageName: nflplaybyplay
+recommendedInterval: 30
+category: sports
+tags:
+  - nfl
+  - football
+  - sports
+  - live
+published: '2026-08-23T02:29:10Z'
+updated: '2026-08-24T16:16:50Z'

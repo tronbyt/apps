@@ -1,0 +1,15 @@
+---
+id: tw-baseball-cpbl
+name: TW Baseball CPBL
+summary: CPBL scores
+desc: Shows baseball scores for the CPBL.
+author: Mark Chu
+recommendedInterval: 5
+fileName: tw_baseball_cpbl.star
+packageName: twbaseballcpbl
+category: sports
+tags:
+  - mlb
+  - baseball
+published: '2024-09-25T14:43:51Z'
+updated: '2025-12-23T13:24:18Z'

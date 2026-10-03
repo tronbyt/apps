@@ -1,0 +1,14 @@
+---
+id: sbb-timetable
+name: SBB Timetable
+summary: SBB Timetable
+desc: Shows a timetable for a station in the Swiss Public Transport network.
+author: LukiLeu
+fileName: sbb_timetable.star
+packageName: sbbtimetable
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags: []
+published: '2022-01-17T22:56:38Z'
+updated: '2026-10-01T16:47:09Z'

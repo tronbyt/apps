@@ -1,0 +1,14 @@
+---
+id: sobriety-counter
+name: Sobriety Counter
+summary: Show your sober day count
+desc: Show how many days you've been sober from any addiction.
+author: elliotstoner
+recommendedInterval: 60
+fileName: sobriety_counter.star
+packageName: sobrietycounter
+category: health
+tags:
+  - lifestyle
+published: '2024-07-03T21:03:10Z'
+updated: '2025-12-17T23:02:59Z'

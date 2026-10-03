@@ -1,0 +1,16 @@
+---
+id: this-day-history
+name: This Day In History
+summary: Historical events today
+desc: Display random historical events from today, plus people born and people who died on this day (if you select those options).  Uses Wikipedia information. / Muestra eventos históricos de hoy, incluyendo nacimientos y defunciones (si se selecciona). Usa información de Wikipedia.
+author: jvivona
+recommendedInterval: 5
+fileName: this_day_history.star
+packageName: thisdayhistory
+supports2x: true
+category: entertainment
+tags:
+  - education
+  - utility
+published: '2024-10-29T14:51:42Z'
+updated: '2026-06-17T20:47:04Z'

@@ -1,0 +1,16 @@
+---
+id: on-air
+name: On Air
+summary: Displays On Air Sign
+desc: ' Displays ''On Air'' Sign that you turn on or off.'
+author: Robert Ison
+recommendedInterval: 5
+fileName: on_air.star
+packageName: onair
+category: utilities
+tags:
+  - utility
+  - tracking
+  - notification
+published: '2024-10-07T16:18:04Z'
+updated: '2025-12-17T23:02:59Z'

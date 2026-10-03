@@ -1,0 +1,17 @@
+---
+id: wrigley-clock
+name: Wrigley Clock
+summary: Wrigley Scoreboard Clock
+desc: Clock that shows the current time as seen on the old Wrigley Field scoreboard.
+author: Garrett W
+fileName: wrigley_clock.star
+packageName: wrigleyclock
+supports64x64: true
+category: clocks
+tags:
+  - retro
+  - sports
+  - time
+  - utility
+published: '2025-07-21T12:05:11Z'
+updated: '2026-10-01T16:46:55Z'

@@ -1,0 +1,14 @@
+---
+id: strava
+name: Strava
+summary: Displays athlete stats
+desc: Displays your YTD or all-time athlete stats recorded on Strava.
+author: Rob Kimball
+fileName: strava.star
+packageName: strava
+category: lifestyle
+tags:
+  - lifestyle
+  - sports
+published: '2022-03-14T23:14:49Z'
+updated: '2026-01-09T06:59:21Z'

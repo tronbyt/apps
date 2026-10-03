@@ -1,0 +1,16 @@
+---
+id: crypto-tracker
+name: Crypto Tracker
+summary: Tracks crypto price
+desc: Display crypto prices in USD over the last 24 hours.
+author: Ethan Fuerst (@ethanfuerst)
+fileName: crypto_tracker.star
+packageName: cryptotracker
+recommendedInterval: 1
+category: utilities
+tags:
+  - crypto
+  - finance
+  - utility
+published: '2022-04-04T15:43:01Z'
+updated: '2025-12-05T22:28:51Z'

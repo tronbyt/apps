@@ -1,0 +1,16 @@
+---
+id: bbc-sounds
+name: BBC Sounds
+summary: BBC Radio Stations
+desc: Shows what's currently playing on BBC Radio stations from BBC Sounds.
+author: Andrew Westling
+recommendedInterval: 10
+fileName: bbc_sounds.star
+packageName: bbcsounds
+category: entertainment
+tags:
+  - music
+  - real-time
+  - news
+published: '2025-06-12T12:18:16Z'
+updated: '2025-12-17T23:02:59Z'

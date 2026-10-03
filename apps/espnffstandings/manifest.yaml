@@ -1,0 +1,15 @@
+---
+id: espn-ff-standings
+name: ESPN FF Standings
+summary: Fantasy Football Standings
+desc: Displays the ordered standings with team name and team record.
+author: gmatthews1182
+recommendedInterval: 5
+fileName: espn_ff_standings.star
+packageName: espnffstandings
+category: sports
+tags:
+  - nfl
+  - football
+published: '2024-10-07T16:17:46Z'
+updated: '2025-12-17T23:02:59Z'

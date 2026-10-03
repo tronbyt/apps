@@ -1,0 +1,18 @@
+---
+id: frog-desk
+name: Frog Desk
+summary: A frog at its pixel desk
+desc: A hand-drawn 64×32 pixel-art desk scene with six original animated Frog Desk moments. Choose the full rotation, a themed group, or one specific scene.
+author: Greg Worthing
+fileName: frog_desk.star
+packageName: frogdesk
+recommendedInterval: 5
+category: entertainment
+tags:
+  - pixel-art
+  - animation
+  - frog
+  - desk
+  - retro
+published: '2026-09-19T04:34:34Z'
+updated: '2026-09-19T04:34:34Z'

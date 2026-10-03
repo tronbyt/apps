@@ -1,0 +1,15 @@
+---
+id: cyclecast
+name: CycleCast
+summary: Weather Data for Cyclists
+desc: Displays weather data important for cyclists.
+author: Robert Ison
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - sports
+  - outdoor
+  - utility
+published: '2025-04-23T01:37:30Z'
+updated: '2025-12-02T19:30:22Z'

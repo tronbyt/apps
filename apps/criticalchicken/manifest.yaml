@@ -1,0 +1,15 @@
+---
+id: critical-chicken
+name: Critical Chicken
+summary: Gaming news
+desc: Shows the latest post from CriticalChicken.com.
+author: Critical Chicken
+fileName: critical_chicken.star
+packageName: criticalchicken
+recommendedInterval: 5
+category: entertainment
+tags:
+  - news
+  - gaming
+published: '2023-08-23T14:10:51Z'
+updated: '2025-12-02T19:30:22Z'

@@ -1,0 +1,14 @@
+---
+id: whatthecommit
+name: WhatTheCommit
+summary: Random commit message
+desc: This app displays a random funny commit message from whatthecommit.com.
+author: dev-manuel
+fileName: whatthecommit.star
+packageName: whatthecommit
+recommendedInterval: 5
+category: entertainment
+tags:
+  - tech
+published: '2024-09-20T15:02:51Z'
+updated: '2025-12-02T19:30:22Z'

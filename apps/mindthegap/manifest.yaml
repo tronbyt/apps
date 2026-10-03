@@ -1,0 +1,14 @@
+---
+id: mind-the-gap
+name: Mind The Gap
+summary: Tube platform simulator
+desc: Important advice for Londoners to remember at all times.
+author: dinosaursrarr
+fileName: mind_the_gap.star
+packageName: mindthegap
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2022-05-10T21:15:38Z'
+updated: '2025-11-30T19:58:27Z'

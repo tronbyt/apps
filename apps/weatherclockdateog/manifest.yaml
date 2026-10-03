@@ -1,0 +1,16 @@
+---
+id: weather-clock-date-og
+name: Weather Clock With Date OG
+summary: OG-Style Weather Clock
+desc: Displays the current time alongside local weather conditions fetched from OpenWeather or the National Weather Service, with an optional day-of-week and date column.
+author: alustig
+fileName: weatherclockdateog.star
+packageName: weatherclockdateog
+recommendedInterval: 0
+category: weather
+tags:
+  - weather
+  - clock
+  - time
+published: '2026-07-26T03:57:32Z'
+updated: '2026-07-27T22:38:17Z'

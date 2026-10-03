@@ -1,0 +1,15 @@
+---
+id: adafruitio
+name: AdafruitIO
+summary: Display AdafruitIO Feed
+desc: Show value or graph of various Adafruit IO Feeds.
+author: tavdog
+fileName: adafruitio.star
+packageName: adafruitio
+category: utilities
+tags:
+  - tech
+  - smart-home
+  - utility
+published: '2023-11-01T18:27:25Z'
+updated: '2025-11-30T19:58:27Z'

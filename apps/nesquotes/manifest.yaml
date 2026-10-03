@@ -1,0 +1,16 @@
+---
+id: nes-quotes
+name: NES Quotes
+summary: Random NES quotes
+desc: Displays random quotes from Nintendo Entertainment System games.
+author: Mark McIntyre
+fileName: nes_quotes.star
+packageName: nesquotes
+recommendedInterval: 5
+category: gaming
+tags:
+  - retro
+  - art
+  - gaming
+published: '2022-10-13T19:48:43Z'
+updated: '2025-12-02T19:30:22Z'

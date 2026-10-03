@@ -1,0 +1,18 @@
+---
+id: relay-fm-live
+name: Relay Live
+summary: Relay Live
+desc: Shows live stream information for the Relay podcast network.
+author: radiocolin
+supports2x: true
+fileName: relay_fm_live.star
+packageName: relayfmlive
+recommendedInterval: 5
+category: entertainment
+tags:
+  - media
+  - real-time
+  - music
+  - tech
+published: '2023-05-18T20:20:53Z'
+updated: '2026-04-22T15:15:00Z'
