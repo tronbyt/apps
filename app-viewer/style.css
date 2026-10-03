@@ -386,12 +386,11 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
 .app-broken-icon {
   align-items: center;
-  border: 2px solid #ff7777;
-  color: #ff9999;
   display: inline-flex;
   height: 1.65rem;
   justify-content: center;
   line-height: 1;
+  font-size: 1.1rem;
   width: 1.65rem;
 }
 
@@ -454,6 +453,11 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
 .app-preview-wide {
   grid-column: 1 / -1;
+}
+
+.app-preview-gallery-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 20rem;
 }
 
 #app-content .app-preview-image-square {

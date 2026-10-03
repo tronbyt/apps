@@ -562,7 +562,7 @@ async function renderAppDetail() {
     const brokenIcon = document.createElement('span');
     brokenIcon.className = 'app-broken-icon';
     brokenIcon.setAttribute('aria-hidden', 'true');
-    brokenIcon.textContent = '!';
+    brokenIcon.textContent = '⚠️';
 
     const brokenText = document.createElement('div');
     const brokenHeading = document.createElement('strong');
@@ -586,6 +586,12 @@ async function renderAppDetail() {
     const imageContainer = document.createElement('div');
     imageContainer.className = 'app-preview-gallery';
 
+    const hasWidePreview = Boolean(app.supports2x && app.image2x);
+    const previewCount = Number(hasWidePreview) + Number(Boolean(app.image)) + Number(Boolean(app.image64x64));
+    if (previewCount === 1 && !hasWidePreview) {
+      imageContainer.classList.add('app-preview-gallery-single');
+    }
+
     function appendPreview(imagePath, previewClass, dimensions, altText, maskClass = '') {
       const figure = document.createElement('figure');
       figure.className = `app-preview ${previewClass} mb-0`;
@@ -608,7 +614,7 @@ async function renderAppDetail() {
       imageContainer.appendChild(figure);
     }
 
-    if (app.supports2x && app.image2x) {
+    if (hasWidePreview) {
       appendPreview(
         app.image2x,
         'app-preview-wide',
@@ -738,16 +744,35 @@ async function renderAppDetail() {
   backButton.textContent = '← Back to Apps';
 
   // Report Broken button (right side)
-  const reportButton = document.createElement('a');
-  const reportBody = `The app \`${appName}\` appears to be broken.\n\nPlease describe why the app is broken and how to reproduce the issue:`;
-  const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=${encodeURIComponent(reportBody)}`;
-  reportButton.href = reportUrl;
-  reportButton.target = '_blank';
-  reportButton.className = 'btn btn-warning report-button';
-  reportButton.textContent = isBroken ? '⚠️ Already Reported' : '🐛 Report Broken';
+  let reportControl;
+  if (isBroken) {
+    const reportTooltip = document.createElement('span');
+    reportTooltip.className = 'd-inline-block';
+    reportTooltip.title = 'Already Reported';
+    reportTooltip.setAttribute('data-bs-toggle', 'tooltip');
+    reportTooltip.setAttribute('tabindex', '0');
+
+    const reportButton = document.createElement('button');
+    reportButton.type = 'button';
+    reportButton.className = 'btn btn-warning report-button';
+    reportButton.disabled = true;
+    reportButton.textContent = '🐛 Report Broken';
+    reportTooltip.appendChild(reportButton);
+    reportControl = reportTooltip;
+  } else {
+    const reportButton = document.createElement('a');
+    const reportBody = `The app \`${appName}\` appears to be broken.\n\nPlease describe why the app is broken and how to reproduce the issue:`;
+    const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=${encodeURIComponent(reportBody)}`;
+    reportButton.href = reportUrl;
+    reportButton.target = '_blank';
+    reportButton.rel = 'noopener';
+    reportButton.className = 'btn btn-warning report-button';
+    reportButton.textContent = '🐛 Report Broken';
+    reportControl = reportButton;
+  }
 
   reportContainer.appendChild(backButton);
-  reportContainer.appendChild(reportButton);
+  reportContainer.appendChild(reportControl);
   container.appendChild(reportContainer);
 
   // Initialize tooltips for the app detail page
