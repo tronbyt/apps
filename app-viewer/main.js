@@ -250,7 +250,6 @@ function setupSearch(apps, brokenApps) {
   const search = document.getElementById('search');
   const clearButton = document.getElementById('clear-search');
   const categoryFilter = document.getElementById('category-filter');
-  const tagFilter = document.getElementById('tag-filter');
   const sortOrder = document.getElementById('sort-order');
   const hideBrokenApps = document.getElementById('hide-broken-apps');
 
@@ -269,25 +268,14 @@ function setupSearch(apps, brokenApps) {
     categoryFilter.appendChild(option);
   });
 
-  // Extract and populate tags
-  const allTags = apps.flatMap(app => app.tags || []).filter(Boolean);
-  const uniqueTags = [...new Set(allTags)].sort();
-  uniqueTags.forEach(tag => {
-    const option = document.createElement('option');
-    option.value = tag;
-    option.textContent = tag;
-    tagFilter.appendChild(option);
-  });
-
   const requestedTag = new URLSearchParams(window.location.search).get('tag');
-  if (requestedTag && uniqueTags.includes(requestedTag)) {
-    tagFilter.value = requestedTag;
+  if (requestedTag) {
+    search.value = requestedTag;
   }
 
   function filterApps() {
     const searchVal = search.value.toLowerCase();
     const categoryVal = categoryFilter.value;
-    const tagVal = tagFilter.value;
     const sortVal = sortOrder.value;
 
     let filtered = apps.filter(app => {
@@ -298,9 +286,8 @@ function setupSearch(apps, brokenApps) {
         (app.category && app.category.toLowerCase().includes(searchVal)) ||
         (app.tags && app.tags.some(t => t.toLowerCase().includes(searchVal)));
       const matchesCategory = !categoryVal || app.category === categoryVal;
-      const matchesTag = !tagVal || (app.tags && app.tags.includes(tagVal));
       const matchesBroken = !hideBrokenApps.checked || !isAppBroken(app, brokenApps);
-      return matchesSearch && matchesCategory && matchesTag && matchesBroken;
+      return matchesSearch && matchesCategory && matchesBroken;
     });
 
     // Sort the filtered apps
@@ -332,7 +319,6 @@ function setupSearch(apps, brokenApps) {
 
   // Handle filter changes
   categoryFilter.addEventListener('change', filterApps);
-  tagFilter.addEventListener('change', filterApps);
   sortOrder.addEventListener('change', filterApps);
   hideBrokenApps.addEventListener('change', () => {
     try {

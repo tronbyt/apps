@@ -16,7 +16,7 @@
                 Viewer</h1>
 
             <div class="row mb-4">
-                <div class="col-md-9">
+                <div class="col-md-6">
                     <div class="input-group">
                         <input type="text" id="search" class="form-control" placeholder="Search apps...">
                         <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
@@ -33,26 +33,21 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select id="tag-filter" class="form-select">
-                        <option value="">All Tags</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
                     <select id="sort-order" class="form-select">
                         <option value="alphabetical">Sort: A-Z</option>
                         <option value="newest">Sort: Newest</option>
                         <option value="updated">Sort: Last Updated</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <div class="viewer-preferences pt-2">
+                <div class="col-md-6">
+                    <div class="viewer-preferences d-flex align-items-center gap-4 flex-wrap pt-2">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
                             <label class="form-check-label" for="dot-matrix-toggle">
                                 Dot matrix overlay
                             </label>
                         </div>
-                        <div class="form-check mt-2">
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="hide-broken-apps">
                             <label class="form-check-label" for="hide-broken-apps">
                                 Hide broken apps
