@@ -200,6 +200,19 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   overflow-wrap: anywhere;
 }
 
+.app-metadata .app-description-label,
+.app-metadata .app-description-value {
+  grid-column: 1 / -1;
+}
+
+.app-metadata .app-description-label {
+  margin-top: 0.85rem;
+}
+
+.app-description-value {
+  line-height: 1.65;
+}
+
 .app-details-layout {
   align-items: start;
   display: grid;
@@ -256,6 +269,12 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   right: 0.65rem;
   top: 0.65rem;
   z-index: 1;
+}
+
+.app-readme-section {
+  border-top: 2px solid #444;
+  margin-top: 2rem;
+  padding-top: 2rem;
 }
 
 .app-readme {
@@ -641,6 +660,10 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
     margin-top: 0.6rem;
   }
 
+  .app-metadata .app-description-label {
+    margin-top: 0.85rem;
+  }
+
   .app-details-layout {
     gap: 1.5rem;
   }
@@ -657,6 +680,11 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
   .app-readme {
     font-size: 0.7rem;
+  }
+
+  .app-readme-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
   }
 
   .detail-actions {
