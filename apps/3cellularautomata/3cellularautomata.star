@@ -14,6 +14,11 @@ load("time.star", "time")
 WIDTH = canvas.width()
 HEIGHT = canvas.height()
 REFRESH_MILLISECONDS = 200
+
+# Every frame repaints every row grown so far, so a 64-row panel adds two
+# rows per frame (at twice the delay, so the pace is unchanged) to keep the
+# render inside the server deadline.
+ROWS_PER_FRAME = max(1, HEIGHT // 32)
 CHOOSE_RANDOM = "-"
 SINGLE_CELL = "+"
 STATES = 3
@@ -38,17 +43,22 @@ def next_row(current_row, rule):
         new_row.append(child)
     return new_row
 
-def render_grid(grid, cells):
-    return render.Column(
-        children = [
-            render.Row(
-                children = [cells[c] for c in row],
-            )
-            for row in grid
-        ],
-    )
+def render_row(row, colours):
+    # Consecutive cells in the same state are painted as one Box: pixel-
+    # identical, and a fraction of the widgets per frame (every frame repaints
+    # every row grown so far).
+    boxes = []
+    start = 0
+    for i in range(1, len(row) + 1):
+        if i == len(row) or row[i] != row[start]:
+            boxes.append(render.Box(width = i - start, height = 1, color = colours[row[start]]))
+            start = i
+    return render.Row(children = boxes)
 
-def animate(cells, rule, starting_row):
+def render_grid(grid, colours):
+    return render.Column(children = [render_row(row, colours) for row in grid])
+
+def animate(colours, rule, starting_row):
     frames = []
 
     first_row = [0] * WIDTH
@@ -61,12 +71,13 @@ def animate(cells, rule, starting_row):
                 first_row[i] = STATES - 1
 
     grid = [first_row]
-    frames.append(render_grid(grid, cells))
+    frames.append(render_grid(grid, colours))
 
-    for _ in range(HEIGHT):
+    for i in range(HEIGHT):
         row = next_row(grid[-1], rule)
         grid.append(row)
-        frames.append(render_grid(grid, cells))
+        if (i + 1) % ROWS_PER_FRAME == 0 or i == HEIGHT - 1:
+            frames.append(render_grid(grid, colours))
 
     return render.Animation(children = frames)
 
@@ -77,18 +88,6 @@ def main(config):
         if not colour:
             colour = DEFAULT_COLOURS[s]
         colours.append(colour)
-
-    # Turns out to be significantly faster to re-use
-    # a single element rather than create one for each
-    # cell on each iteration.
-    cells = [
-        render.Box(
-            width = 1,
-            height = 1,
-            color = c,
-        )
-        for c in colours
-    ]
 
     starting_row = config.get("starting_row")
     if not starting_row:
@@ -101,8 +100,8 @@ def main(config):
     print("Using rule {}".format(rule))
 
     return render.Root(
-        delay = REFRESH_MILLISECONDS,
-        child = animate(cells, rule, starting_row),
+        delay = REFRESH_MILLISECONDS * ROWS_PER_FRAME,
+        child = animate(colours, rule, starting_row),
     )
 
 def get_schema():
