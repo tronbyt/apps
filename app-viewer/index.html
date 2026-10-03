@@ -17,7 +17,11 @@
 
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <div class="input-group">
+                    <div class="search-control">
+                        <div class="search-tag-token" id="selected-tag-filter" hidden>
+                            <span id="selected-tag-label"></span>
+                            <button type="button" id="clear-tag-filter" aria-label="Remove tag filter">&times;</button>
+                        </div>
                         <input type="text" id="search" class="form-control" placeholder="Search apps...">
                         <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
                             <span aria-hidden="true">&times;</span>
