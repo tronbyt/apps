@@ -361,6 +361,8 @@ async function fetchAppMarkdown(appName) {
 
 function resolveAppAssetUrl(value, appName) {
   if (!value || typeof value !== 'string') return value;
+  const normalizedAppsDir = APPS_DIR.replace(/\/+$/, '');
+  if (value === normalizedAppsDir || value.startsWith(`${normalizedAppsDir}/`)) return value;
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|apps\/)/i.test(value)) return value;
   return `${APPS_DIR}/${appName}/${value}`;
 }
@@ -521,7 +523,7 @@ async function renderAppDetail() {
   }
 
   const displaysTerm = document.createElement('dt');
-  displaysTerm.textContent = 'Supported Displays:';
+  displaysTerm.textContent = 'Displays:';
   const displaysDesc = document.createElement('dd');
   displaysDesc.className = 'app-display-capabilities';
   const displaySizes = ['64×32'];

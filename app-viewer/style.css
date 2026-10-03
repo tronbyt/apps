@@ -48,14 +48,13 @@ body {
 }
 
 .author-link {
-  color: #ffd700;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  color: #9ccfc1;
+  text-decoration: none;
 }
 
 .author-link:hover,
 .author-link:focus-visible {
-  color: #ffed4a;
+  color: #d0fff2;
 }
 
 .author-profile-header {
@@ -644,13 +643,23 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1199px) {
   .app-details-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .app-preview-gallery {
     justify-content: flex-start;
+  }
+
+  .app-preview {
+    flex: 0 1 30rem;
+    max-width: 30rem;
+  }
+
+  .app-preview-square {
+    flex-basis: 20rem;
+    max-width: 20rem;
   }
 }
 
