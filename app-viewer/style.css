@@ -354,11 +354,19 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   gap: 0.4rem;
 }
 
-.app-display-capabilities span {
+.app-display-capabilities a {
   background: #181818;
   border: 1px solid #444;
   border-radius: 999px;
+  color: #ddd;
   padding: 0.25rem 0.5rem;
+  text-decoration: none;
+}
+
+.app-display-capabilities a:hover,
+.app-display-capabilities a:focus-visible {
+  border-color: #ffd700;
+  color: #ffd700;
 }
 
 .app-broken-notice {
@@ -426,28 +434,26 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
 .app-preview-gallery {
   align-items: start;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 1rem;
-  justify-content: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 30rem;
+  width: 100%;
 }
 
 .app-preview {
-  flex: 1 1 24rem;
   margin: 0;
-  max-width: 100%;
+  min-width: 0;
   position: relative;
   text-align: center;
 }
 
-.app-preview-square {
-  flex-basis: 18rem;
-  max-width: 20rem;
+.app-preview-wide {
+  grid-column: 1 / -1;
 }
 
 #app-content .app-preview-image-square {
   aspect-ratio: 1 / 1;
-  max-width: 20rem;
 }
 
 .app-preview-badge {
@@ -455,6 +461,11 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   right: 0.65rem;
   top: 0.65rem;
   z-index: 1;
+}
+
+.badge-dimensions {
+  background: rgba(13, 110, 253, 0.9);
+  color: #fff;
 }
 
 .app-readme-section {
@@ -807,17 +818,7 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   }
 
   .app-preview-gallery {
-    justify-content: flex-start;
-  }
-
-  .app-preview {
-    flex: 0 1 30rem;
-    max-width: 30rem;
-  }
-
-  .app-preview-square {
-    flex-basis: 20rem;
-    max-width: 20rem;
+    justify-self: start;
   }
 }
 
@@ -869,16 +870,6 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
 
   .app-details-layout {
     gap: 1.5rem;
-  }
-
-  .app-preview,
-  .app-preview-square {
-    flex-basis: 100%;
-    max-width: 100%;
-  }
-
-  #app-content .app-preview-image-square {
-    max-width: min(100%, 20rem);
   }
 
   .app-readme {

@@ -270,8 +270,14 @@ function setupSearch(apps, brokenApps) {
   });
 
   const knownTags = new Set(apps.flatMap(app => app.tags || []));
-  const requestedTag = new URLSearchParams(window.location.search).get('tag');
+  const queryParams = new URLSearchParams(window.location.search);
+  const requestedTag = queryParams.get('tag');
   let selectedTag = requestedTag && knownTags.has(requestedTag) ? requestedTag : '';
+
+  const requestedDisplay = queryParams.get('display');
+  if (['standard', 'wide', 'square'].includes(requestedDisplay)) {
+    displayFilter.value = requestedDisplay;
+  }
 
   function updateSelectedTag() {
     selectedTagLabel.textContent = selectedTag;
@@ -534,13 +540,20 @@ async function renderAppDetail() {
   displaysTerm.textContent = 'Displays:';
   const displaysDesc = document.createElement('dd');
   displaysDesc.className = 'app-display-capabilities';
-  const displaySizes = ['64×32'];
-  if (app.supports2x) displaySizes.push('128×64 (2×)');
-  if (app.supports64x64) displaySizes.push('64×64');
-  displaySizes.forEach(size => {
-    const badge = document.createElement('span');
-    badge.textContent = size;
-    displaysDesc.appendChild(badge);
+  const displayCapabilities = [
+    { mode: 'standard', label: 'Standard / 1x' }
+  ];
+  if (app.supports2x) {
+    displayCapabilities.push({ mode: 'wide', label: 'Wide / 2x' });
+  }
+  if (app.supports64x64) {
+    displayCapabilities.push({ mode: 'square', label: 'Square' });
+  }
+  displayCapabilities.forEach(({ mode, label }) => {
+    const link = document.createElement('a');
+    link.href = `${BASE_PATH}index.html?display=${mode}`;
+    link.textContent = label;
+    displaysDesc.appendChild(link);
   });
   detailsList.appendChild(displaysTerm);
   detailsList.appendChild(displaysDesc);
@@ -572,56 +585,61 @@ async function renderAppDetail() {
   detailsTable.appendChild(leftCol);
 
   // Add app image if available
-  if (app.image || app.image64x64) {
+  if (app.image || app.image2x || app.image64x64) {
     const rightCol = document.createElement('div');
     rightCol.className = 'app-details-previews';
 
     const imageContainer = document.createElement('div');
     imageContainer.className = 'app-preview-gallery';
 
-    if (app.image) {
-      const wideFigure = document.createElement('figure');
-      wideFigure.className = 'app-preview mb-0';
-      if (app.supports2x) wideFigure.classList.add('app-2x');
+    function appendPreview(imagePath, previewClass, dimensions, altText, maskClass = '') {
+      const figure = document.createElement('figure');
+      figure.className = `app-preview ${previewClass} mb-0`;
+      if (maskClass) figure.classList.add(maskClass);
 
       const image = document.createElement('img');
-      const displayImage = (app.supports2x && app.image2x) ? app.image2x : app.image;
-      image.src = `${APPS_DIR}/${displayImage}`;
-      image.alt = `${app.displayName || app.name} wide preview`;
+      image.src = `${APPS_DIR}/${imagePath}`;
+      image.alt = altText;
       image.className = 'app-preview-image img-fluid rounded border';
-
-      wideFigure.appendChild(image);
-
-      if (app.supports2x) {
-        const badge2x = document.createElement('span');
-        badge2x.className = 'app-badge badge-2x app-preview-badge';
-        badge2x.title = 'Supports 2x resolution';
-        badge2x.setAttribute('data-bs-toggle', 'tooltip');
-        badge2x.textContent = '2X';
-        wideFigure.appendChild(badge2x);
+      if (previewClass === 'app-preview-square') {
+        image.classList.add('app-preview-image-square');
       }
 
-      imageContainer.appendChild(wideFigure);
+      const badge = document.createElement('span');
+      badge.className = 'app-badge badge-dimensions app-preview-badge';
+      badge.textContent = dimensions;
+
+      figure.appendChild(image);
+      figure.appendChild(badge);
+      imageContainer.appendChild(figure);
+    }
+
+    if (app.supports2x && app.image2x) {
+      appendPreview(
+        app.image2x,
+        'app-preview-wide',
+        '128×64',
+        `${app.displayName || app.name} 128×64 preview`,
+        'app-2x'
+      );
+    }
+
+    if (app.image) {
+      appendPreview(
+        app.image,
+        'app-preview-standard',
+        '64×32',
+        `${app.displayName || app.name} 64×32 preview`
+      );
     }
 
     if (app.image64x64) {
-      const squareFigure = document.createElement('figure');
-      squareFigure.className = 'app-preview app-preview-square mb-0';
-
-      const squareImage = document.createElement('img');
-      squareImage.src = `${APPS_DIR}/${app.image64x64}`;
-      squareImage.alt = `${app.displayName || app.name} square preview`;
-      squareImage.className = 'app-preview-image app-preview-image-square img-fluid rounded border';
-
-      const squareBadge = document.createElement('span');
-      squareBadge.className = 'app-badge badge-2x app-preview-badge';
-      squareBadge.title = '64×64 square display';
-      squareBadge.setAttribute('data-bs-toggle', 'tooltip');
-      squareBadge.textContent = '64×64';
-
-      squareFigure.appendChild(squareImage);
-      squareFigure.appendChild(squareBadge);
-      imageContainer.appendChild(squareFigure);
+      appendPreview(
+        app.image64x64,
+        'app-preview-square',
+        '64×64',
+        `${app.displayName || app.name} 64×64 preview`
+      );
     }
 
     rightCol.appendChild(imageContainer);
