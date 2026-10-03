@@ -8,6 +8,7 @@ const APPS_DIR = isNestedPage ? '../apps' : 'apps';
 const BROKEN_APPS_FILE = isNestedPage ? '../broken_apps.txt' : 'broken_apps.txt';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
+const DEFAULT_SORT_ORDER = 'updated';
 
 // --- CACHE MANAGEMENT ---
 // Simple in-memory cache to avoid redundant network requests
@@ -107,7 +108,7 @@ function renderAppsList(apps, brokenApps = []) {
     card.className = 'col-md-4';
 
     // Check if the app's star file is in the broken apps list
-    const isBroken = app.starFile && brokenApps.includes(app.starFile);
+    const isBroken = isAppBroken(app, brokenApps);
 
     // Create card structure
     const cardDiv = document.createElement('div');
@@ -241,12 +242,23 @@ function renderAppsList(apps, brokenApps = []) {
   });
 }
 
+function isAppBroken(app, brokenApps = []) {
+  return app.broken === true || Boolean(app.starFile && brokenApps.includes(app.starFile));
+}
+
 function setupSearch(apps, brokenApps) {
   const search = document.getElementById('search');
   const clearButton = document.getElementById('clear-search');
   const categoryFilter = document.getElementById('category-filter');
   const tagFilter = document.getElementById('tag-filter');
   const sortOrder = document.getElementById('sort-order');
+  const hideBrokenApps = document.getElementById('hide-broken-apps');
+
+  try {
+    hideBrokenApps.checked = localStorage.getItem('hideBrokenApps') === 'true';
+  } catch {
+    hideBrokenApps.checked = false;
+  }
 
   // Extract and populate categories
   const categories = [...new Set(apps.map(app => app.category).filter(Boolean))].sort();
@@ -287,7 +299,8 @@ function setupSearch(apps, brokenApps) {
         (app.tags && app.tags.some(t => t.toLowerCase().includes(searchVal)));
       const matchesCategory = !categoryVal || app.category === categoryVal;
       const matchesTag = !tagVal || (app.tags && app.tags.includes(tagVal));
-      return matchesSearch && matchesCategory && matchesTag;
+      const matchesBroken = !hideBrokenApps.checked || !isAppBroken(app, brokenApps);
+      return matchesSearch && matchesCategory && matchesTag && matchesBroken;
     });
 
     // Sort the filtered apps
@@ -311,7 +324,8 @@ function setupSearch(apps, brokenApps) {
     renderAppsList(filtered, brokenApps);
 
     // Show/hide clear button based on any filters being active
-    const hasFilters = searchVal || categoryVal || tagVal || sortVal !== 'alphabetical';
+    const hasFilters = searchVal || categoryVal || tagVal ||
+      sortVal !== DEFAULT_SORT_ORDER || hideBrokenApps.checked;
     clearButton.style.display = hasFilters ? 'block' : 'none';
   }
 
@@ -322,15 +336,28 @@ function setupSearch(apps, brokenApps) {
   categoryFilter.addEventListener('change', filterApps);
   tagFilter.addEventListener('change', filterApps);
   sortOrder.addEventListener('change', filterApps);
+  hideBrokenApps.addEventListener('change', () => {
+    try {
+      localStorage.setItem('hideBrokenApps', String(hideBrokenApps.checked));
+    } catch {
+      // Filtering still works for this page when storage is unavailable.
+    }
+    filterApps();
+  });
 
   // Handle clear button click
   clearButton.addEventListener('click', () => {
     search.value = '';
     categoryFilter.value = '';
     tagFilter.value = '';
-    sortOrder.value = 'alphabetical';
-    renderAppsList(apps.sort((a, b) => (a.displayName || a.name).toLowerCase().localeCompare((b.displayName || b.name).toLowerCase())), brokenApps);
-    clearButton.style.display = 'none';
+    sortOrder.value = DEFAULT_SORT_ORDER;
+    hideBrokenApps.checked = false;
+    try {
+      localStorage.setItem('hideBrokenApps', 'false');
+    } catch {
+      // Ignore unavailable storage.
+    }
+    filterApps();
     search.focus();
   });
 
@@ -423,25 +450,7 @@ async function renderAppDetail() {
   }
 
   const brokenApps = await fetchBrokenApps();
-  const isBroken = app.starFile && brokenApps.includes(app.starFile);
-
-  // Add broken app warning if needed
-  if (isBroken) {
-    const brokenAlert = document.createElement('div');
-    brokenAlert.className = 'alert alert-warning';
-
-    const strongElement = document.createElement('strong');
-
-    const warningIcon = document.createElement('span');
-    warningIcon.title = 'This app has been reported as broken';
-    warningIcon.setAttribute('data-bs-toggle', 'tooltip');
-    warningIcon.textContent = '⚠️';
-
-    strongElement.appendChild(warningIcon);
-    strongElement.appendChild(document.createTextNode(' This app is marked as broken'));
-    brokenAlert.appendChild(strongElement);
-    container.appendChild(brokenAlert);
-  }
+  const isBroken = isAppBroken(app, brokenApps);
 
   // Create app details section from manifest data
   const detailsSection = document.createElement('div');
@@ -538,6 +547,29 @@ async function renderAppDetail() {
   detailsList.appendChild(displaysDesc);
 
   leftCol.appendChild(detailsList);
+
+  if (isBroken) {
+    const brokenNotice = document.createElement('aside');
+    brokenNotice.className = 'app-broken-notice';
+    brokenNotice.setAttribute('aria-label', 'Broken app warning');
+
+    const brokenIcon = document.createElement('span');
+    brokenIcon.className = 'app-broken-icon';
+    brokenIcon.setAttribute('aria-hidden', 'true');
+    brokenIcon.textContent = '!';
+
+    const brokenText = document.createElement('div');
+    const brokenHeading = document.createElement('strong');
+    brokenHeading.textContent = 'Marked as broken';
+    const brokenReason = document.createElement('p');
+    brokenReason.textContent = app.brokenReason || 'No reason has been provided.';
+
+    brokenText.appendChild(brokenHeading);
+    brokenText.appendChild(brokenReason);
+    brokenNotice.appendChild(brokenIcon);
+    brokenNotice.appendChild(brokenText);
+    leftCol.appendChild(brokenNotice);
+  }
   detailsTable.appendChild(leftCol);
 
   // Add app image if available

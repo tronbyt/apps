@@ -216,6 +216,8 @@ function scanApps() {
     let tags = [];
     let published = null;
     let updated = null;
+    let broken = false;
+    let brokenReason = null;
 
     if (manifest) {
       summary = manifest.summary || null;
@@ -229,6 +231,8 @@ function scanApps() {
       tags = manifest.tags || [];
       published = manifest.published || null;
       updated = manifest.updated || null;
+      broken = Boolean(manifest.broken);
+      brokenReason = manifest.brokenReason || null;
     }
 
     // Try to find the corresponding @2x image if the app supports it
@@ -273,7 +277,9 @@ function scanApps() {
       category: category,
       tags: tags,
       published: published,
-      updated: updated
+      updated: updated,
+      broken: broken,
+      brokenReason: brokenReason
     });
   }
   return apps;

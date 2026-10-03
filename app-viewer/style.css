@@ -231,6 +231,42 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   padding: 0.25rem 0.5rem;
 }
 
+.app-broken-notice {
+  align-items: start;
+  background: #2b1d1d;
+  border: 2px solid #8c4848;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  margin-top: 1rem;
+  padding: 0.8rem;
+}
+
+.app-broken-icon {
+  align-items: center;
+  border: 2px solid #ff7777;
+  color: #ff9999;
+  display: inline-flex;
+  height: 1.65rem;
+  justify-content: center;
+  line-height: 1;
+  width: 1.65rem;
+}
+
+.app-broken-notice strong {
+  color: #ff9999;
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.app-broken-notice p {
+  color: #ddd;
+  font-size: 0.65rem;
+  line-height: 1.6;
+  margin: 0.45rem 0 0;
+}
+
 .app-tags {
   align-items: center;
   display: flex;
