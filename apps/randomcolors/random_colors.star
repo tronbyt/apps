@@ -6,7 +6,7 @@ Author: M0ntyP
 """
 
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 def main():
     COLORS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
@@ -29,7 +29,8 @@ def main():
                     expanded = True,
                     main_align = "space_between",
                     cross_align = "end",
-                    children = [render.Box(width = 64, height = 24, color = COLOR_STRING)],
+                    # the rows above the 8px label: 24 on 64x32, 56 on square
+                    children = [render.Box(width = 64, height = canvas.height() - 8, color = COLOR_STRING)],
                 ),
                 render.Row(
                     expanded = True,

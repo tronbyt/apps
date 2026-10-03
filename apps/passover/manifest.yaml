@@ -6,9 +6,10 @@ desc: Track days until Passover show current when it is in progress.
 author: jvivona
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: lifestyle
 tags:
   - time
   - lifestyle
 published: '2026-03-20T00:15:10Z'
-updated: '2026-07-06T16:50:15Z'
+updated: '2026-10-01T19:27:54Z'

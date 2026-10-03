@@ -7,6 +7,7 @@ author: dinosaursrarr
 fileName: shabbat.star
 packageName: shabbat
 recommendedInterval: 5
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle
@@ -14,4 +15,4 @@ tags:
   - productivity
   - jewish
 published: '2022-09-15T16:22:46Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T19:27:54Z'

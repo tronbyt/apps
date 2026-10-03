@@ -9,7 +9,7 @@ Updated: API modernization
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Updated API endpoint
@@ -141,6 +141,15 @@ def query_api():
     cache.set("path_data", json.encode(response_json), ttl_seconds = 30)
     return response_json
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     station = config.get("station") or "grove_street"
     desired_direction = config.get("direction") or "both"
@@ -169,6 +178,11 @@ def main(config):
                 get_display_row(messages[1], widgetMode),
             ],
         )
+
+    # On a square panel the rows spread down the panel instead of stacking
+    # at the top.
+    if is_square():
+        content = render.Column(expanded = True, main_align = "space_evenly", children = [content])
 
     return render.Root(
         child = content,

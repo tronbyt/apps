@@ -11,7 +11,7 @@ Author: rs7q5
 
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 base_URL = "https://v2.jokeapi.dev/joke/Any"
@@ -43,7 +43,8 @@ def main(config):
             children = [
                 render.Text("JokeAPI", color = "#6600cc", font = font),
                 render.Marquee(
-                    height = 24,
+                    # the rows under the title: 24 on 64x32, 56 on square
+                    height = canvas.height() - 8,
                     scroll_direction = "vertical",
                     child = render.Column(
                         main_align = "space_between",

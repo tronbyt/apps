@@ -14,6 +14,10 @@ load("time.star", "time")
 # 1x (64x32) is unchanged.
 IS2X = canvas.is2x()
 
+# The middle block of the 1x layouts: a tom-thumb line, a 1px gap and a 6x13
+# line.
+MIDDLE_HEIGHT = 21
+
 STAR_IMG = STAR.readall()
 CUP_IMG = CUP.readall()
 
@@ -135,8 +139,11 @@ def render_during_passover(passover, now, timezone):
             ),
         ])
 
+    # The 1x box takes the panel height so the expanded column has rows to
+    # spread into on a square panel; on 64x32 it is the same 32.
     return render.Root(
         child = render.Box(
+            height = canvas.height(),
             child = render.Column(
                 expanded = True,
                 main_align = "space_between",
@@ -152,22 +159,27 @@ def render_during_passover(passover, now, timezone):
                         ),
                     ),
                     # Middle section with celebration text
-                    render.Column(
-                        main_align = "center",
-                        cross_align = "center",
-                        children = [
-                            render.Text(
-                                content = "חג שמח",
-                                font = "6x13",
-                                color = "#87CEEB",
-                            ),
-                            render.Box(height = 2),
-                            render.Text(
-                                content = day_name,
-                                font = "tom-thumb",
-                                color = "#FFFFFF",
-                            ),
-                        ],
+                    # boxed: a bare nested Column here defeats the parent's
+                    # space_between and clips the layout at 32 rows
+                    render.Box(
+                        height = MIDDLE_HEIGHT,
+                        child = render.Column(
+                            main_align = "center",
+                            cross_align = "center",
+                            children = [
+                                render.Text(
+                                    content = "חג שמח",
+                                    font = "6x13",
+                                    color = "#87CEEB",
+                                ),
+                                render.Box(height = 2),
+                                render.Text(
+                                    content = day_name,
+                                    font = "tom-thumb",
+                                    color = "#FFFFFF",
+                                ),
+                            ],
+                        ),
                     ),
                     # Bottom section with day number
                     render.Box(
@@ -232,8 +244,11 @@ def render_countdown(passover, now, timezone):
             ),
         ])
 
+    # The 1x box takes the panel height so the expanded column has rows to
+    # spread into on a square panel; on 64x32 it is the same 32.
     return render.Root(
         child = render.Box(
+            height = canvas.height(),
             child = render.Column(
                 expanded = True,
                 main_align = "space_between",
@@ -249,33 +264,38 @@ def render_countdown(passover, now, timezone):
                         ),
                     ),
                     # Middle section with countdown
-                    render.Column(
-                        main_align = "center",
-                        cross_align = "center",
-                        children = [
-                            render.Text(
-                                content = "Countdown",
-                                font = "tom-thumb",
-                                color = "#87CEEB",
-                            ),
-                            render.Box(height = 1),
-                            render.Row(
-                                main_align = "center",
-                                children = [
-                                    render.Text(
-                                        content = str(days_until),
-                                        font = "6x13",
-                                        color = "#FFD700",
-                                    ),
-                                    render.Box(width = 2),
-                                    render.Text(
-                                        content = "days" if days_until != 1 else "day",
-                                        font = "6x13",
-                                        color = "#FFFFFF",
-                                    ),
-                                ],
-                            ),
-                        ],
+                    # boxed: a bare nested Column here defeats the parent's
+                    # space_between and clips the layout at 32 rows
+                    render.Box(
+                        height = MIDDLE_HEIGHT,
+                        child = render.Column(
+                            main_align = "center",
+                            cross_align = "center",
+                            children = [
+                                render.Text(
+                                    content = "Countdown",
+                                    font = "tom-thumb",
+                                    color = "#87CEEB",
+                                ),
+                                render.Box(height = 1),
+                                render.Row(
+                                    main_align = "center",
+                                    children = [
+                                        render.Text(
+                                            content = str(days_until),
+                                            font = "6x13",
+                                            color = "#FFD700",
+                                        ),
+                                        render.Box(width = 2),
+                                        render.Text(
+                                            content = "days" if days_until != 1 else "day",
+                                            font = "6x13",
+                                            color = "#FFFFFF",
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        ),
                     ),
                     # Bottom section with year
                     render.Box(
@@ -301,8 +321,11 @@ def render_default():
             render.Text(content = "Passover", font = "6x13", color = "#FFFFFF"),
         ])
 
+    # The 1x box takes the panel height so the expanded column has rows to
+    # spread into on a square panel; on 64x32 it is the same 32.
     return render.Root(
         child = render.Box(
+            height = canvas.height(),
             child = render.Column(
                 expanded = True,
                 main_align = "center",

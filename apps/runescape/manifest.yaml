@@ -7,10 +7,11 @@ author: blakekwehrle
 fileName: runescape.star
 packageName: runescape
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - gaming
   - inventory
   - tech
 published: '2023-11-06T20:00:06Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T19:27:54Z'

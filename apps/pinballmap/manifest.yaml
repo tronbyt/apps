@@ -7,9 +7,10 @@ author: scottwainstock
 fileName: pinball_map.star
 packageName: pinballmap
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - retro
   - gaming
 published: '2023-11-01T18:26:46Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T19:27:54Z'
