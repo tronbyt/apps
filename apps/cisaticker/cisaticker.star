@@ -7,7 +7,7 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CISA_RSS = "https://www.cisa.gov/uscert/ncas/alerts.xml"
@@ -76,36 +76,40 @@ def alert_row(text, color):
         ),
     )
 
+# An alert row is 7px plus a 1px rule under the 8px masthead, so a 64x32
+# panel holds three and a 64x64 panel holds seven.
+ROWS = (canvas.height() - 8) // 8
+ROW_COLORS = [WHITE, YELLOW, BLUE]
+
 def main(_):
-    alerts = get_alerts(3)
-    for _ in range(3 - len(alerts)):
+    alerts = get_alerts(ROWS)
+    for _ in range(ROWS - len(alerts)):
         alerts.append("No further alerts")
+
+    children = [
+        render.Box(
+            width = 64,
+            height = 8,
+            color = RED,
+            child = render.Padding(
+                pad = (3, 1, 0, 0),
+                child = render.Text(
+                    content = "CISA TOP ALERTS",
+                    font = "CG-pixel-3x5-mono",
+                    color = WHITE,
+                ),
+            ),
+        ),
+        render.Box(width = 64, height = 1, color = YELLOW),
+    ]
+    for i in range(ROWS):
+        if i > 0:
+            children.append(render.Box(width = 64, height = 1, color = DIM))
+        children.append(alert_row(alerts[i], ROW_COLORS[i % len(ROW_COLORS)]))
 
     return render.Root(
         delay = 30,
-        child = render.Column(
-            children = [
-                render.Box(
-                    width = 64,
-                    height = 8,
-                    color = RED,
-                    child = render.Padding(
-                        pad = (3, 1, 0, 0),
-                        child = render.Text(
-                            content = "CISA TOP ALERTS",
-                            font = "CG-pixel-3x5-mono",
-                            color = WHITE,
-                        ),
-                    ),
-                ),
-                render.Box(width = 64, height = 1, color = YELLOW),
-                alert_row(alerts[0], WHITE),
-                render.Box(width = 64, height = 1, color = DIM),
-                alert_row(alerts[1], YELLOW),
-                render.Box(width = 64, height = 1, color = DIM),
-                alert_row(alerts[2], BLUE),
-            ],
-        ),
+        child = render.Column(children = children),
     )
 
 def get_schema():
