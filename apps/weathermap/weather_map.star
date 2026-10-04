@@ -306,7 +306,11 @@ def fetch_images(radar, opts):
     images_forecast = [(frame, fetch_image(frame, opts, False)) for frame in radar["nowcast"]]
     return images_past + images_forecast
 
-def render_error():
+def render_error(config):
+    if config.bool("only_significant_weather", False):
+        print("Only significant weather enabled: True; peak precipitation coverage: unavailable; threshold: %s%%; eligible for display: False (weather data unavailable)" % config.get("significant_weather_threshold", DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD.value))
+        return []
+
     return render.Root(
         child = render.Box(
             child = render.WrappedText(
@@ -329,7 +333,7 @@ def main(config):
 
     if response.status_code != 200:
         print("API request failed with status %d" % response.status_code)
-        return render_error()
+        return render_error(config)
 
     data = response.json()
     opts = struct(
@@ -347,9 +351,9 @@ def main(config):
     # Fetch all radar images.
     frames_and_images = fetch_images(data["radar"], opts)
 
-    # Render an error message if any of the frames failed to render.
+    # Skip unavailable weather when filtering; otherwise preserve the error frame.
     if any([image == None for (frame, image) in frames_and_images]):
-        return render_error()
+        return render_error(config)
 
     map_images = [
         (frame, render.Image(
@@ -444,7 +448,7 @@ def get_schema():
             schema.Toggle(
                 id = "only_significant_weather",
                 name = "Only display when significant weather is present",
-                desc = "Skip when too little of the map has radar returns of at least 15 dBZ (blue rain colors or stronger, plus snow). Very faint returns and very light drizzle are excluded.",
+                desc = "Skip when weather data is unavailable or too little of the map has radar returns of at least 15 dBZ (blue rain colors or stronger, plus snow). Very faint returns and very light drizzle are excluded.",
                 icon = "cloudRain",
                 default = False,
             ),
