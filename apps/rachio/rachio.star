@@ -28,6 +28,15 @@ WEATHER_CLIMATE_SKIP = "WEATHER_INTELLIGENCE_CLIMATE_SKIP"
 WEATHER_SKIP = "WEATHER_INTELLIGENCE_SKIP"
 ZONE_STARTED = "ZONE_STARTED"
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     tz = time.tz()
     now = time.now().in_location(tz)
@@ -114,7 +123,34 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
 def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 64, font_height = 8, font = "5x8", font_width = 5):
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    main_align = "start",
+                    cross_align = "start",
+                    children = [
+                        render.Image(src = RACHIO_ICON),
+                        render.Box(width = 1, height = 1, color = "#000"),
+                        render.Stack(
+                            children = [
+                                render.Text(time.format("Jan 02"), font = font, color = RACHIO_BLUE),
+                                add_padding_to_child_element(render.Text(time.format("3:04 PM"), font = font, color = RACHIO_BLUE), 0, font_height),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Marquee(
+                    width = screen_width,
+                    child = render.Text(line_3, color = RACHIO_SECONDARY_COLOR, font = font),
+                ),
+                render.Marquee(
+                    offset_start = len(line_3) * font_width,
+                    width = screen_width,
+                    child = render.Text(line_4, color = RACHIO_SECONDARY_COLOR, font = font),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     main_align = "start",
@@ -186,7 +222,34 @@ def render_rachio(tz, config, device_name, recent_events, current_events, now, d
         if len(display) > 0:
             line_4 = "Zone %d: %s" % (current_event.get("zoneNumber", 0), display)
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    main_align = "start",
+                    cross_align = "start",
+                    children = [
+                        render.Image(src = RACHIO_ICON),
+                        render.Box(width = 1, height = 1, color = "#000"),
+                        render.Stack(
+                            children = [
+                                render.Marquee(width = screen_width - icon_width, child = render.Text(line_1, font = font, color = RACHIO_BLUE)),
+                                add_padding_to_child_element(render.Marquee(offset_start = len(line_1) * font_width, width = screen_width, child = render.Text(line_2, color = RACHIO_BLUE, font = font)), 0, font_height),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Marquee(
+                    width = screen_width,
+                    child = render.Text(line_3, color = RACHIO_SECONDARY_COLOR, font = font),
+                ),
+                render.Marquee(
+                    offset_start = len(line_3) * font_width,
+                    width = screen_width,
+                    child = render.Text(line_4, color = RACHIO_SECONDARY_COLOR, font = font),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     main_align = "start",

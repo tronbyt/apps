@@ -6,6 +6,7 @@ desc: View schedules and data for a Rachio sprinkler system.
 author: Matt Fischer and Rob Ison
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 fileName: rachio.star
 packageName: rachio
 category: utilities
@@ -13,4 +14,4 @@ tags:
   - smart-home
   - wide 2x support
 published: '2024-10-07T16:14:56Z'
-updated: '2026-03-25T02:56:56Z'
+updated: '2026-10-01T22:22:03Z'

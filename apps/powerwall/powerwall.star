@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 TESLA_AUTH_URL = "https://auth.tesla.com/oauth2/v3/token"
@@ -65,6 +65,15 @@ def get_access_token(refresh_token, site_id):
 
             return {"status_code": str(auth_rep.status_code), "access_token": str(access_token)}
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     print("-------Starting new update-------")
 
@@ -102,7 +111,35 @@ def main(config):
         charge = int(o["response"]["percentage_charged"])
 
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                height = 32,
+                width = 64,
+                color = "#000000",
+                child = render.Stack(
+                    children = [
+                        render.Box(
+                            child = render.PieChart(
+                                colors = ["004400", "0f0"],
+                                weights = [100 - charge, charge],
+                                diameter = 30,
+                            ),
+                        ),
+                        render.Box(
+                            child = render.Circle(
+                                color = "#000",
+                                diameter = 22,
+                            ),
+                        ),
+                        render.Box(
+                            child = render.Text(
+                                content = str(charge)[0:3] + "%",
+                                color = "#ffffff",
+                            ),
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 height = 32,
                 width = 64,
                 color = "#000000",
@@ -134,7 +171,11 @@ def main(config):
     else:
         error_message = "Check " + error_details["error_section"] + ". " + error_details["error"]
         return render.Root(
-            child = render.Marquee(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Marquee(
+                width = 64,
+                child = render.Text(error_message),
+            ))) if is_square() else render.Marquee(
                 width = 64,
                 child = render.Text(error_message),
             ),

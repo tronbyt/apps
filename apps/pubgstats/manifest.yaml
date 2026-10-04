@@ -7,10 +7,11 @@ author: joes-io
 fileName: pubg_stats.star
 packageName: pubgstats
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - gaming
   - sports
   - utility
 published: '2022-08-04T16:21:25Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T22:22:03Z'

@@ -9,7 +9,7 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEVICE_WIDTH = 64
@@ -17,6 +17,15 @@ DEVICE_HEIGHT = 32
 HEADER_HEIGHT = 8
 ROW_HEIGHT = 12
 DELAY_MS = 60
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     servername = config.get("servername", "My Seedbox")
@@ -305,7 +314,17 @@ def get_scroll_frames(item, next_item):
 
 def render_header(servername, frames):
     return render.Root(
-        child = render.Column(children = [
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(children = [
+            render.Box(
+                height = HEADER_HEIGHT,
+                width = DEVICE_WIDTH,
+                color = "#004080",
+                child = render.Text(servername),
+            ),
+            render.Box(height = 2, width = DEVICE_WIDTH),
+            render.Animation(frames),
+        ]))) if is_square() else render.Column(children = [
             render.Box(
                 height = HEADER_HEIGHT,
                 width = DEVICE_WIDTH,

@@ -9,7 +9,7 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/pubg_logo.png", PUBG_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 PUBG_LOGO = PUBG_LOGO_ASSET.readall()
@@ -76,6 +76,15 @@ stat_details = [
     ("Past Week's Wins", "weeklyWins", "PAST WEEK'S WINS", ""),
     ("Past Week's Kills", "weeklyKills", "PAST WEEK'S KILLS", ""),
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     header = {
@@ -145,7 +154,106 @@ def main(config):
 
     # Render output to display
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                # Background
+                background_render,
+
+                # PUBG logo animation
+                animation.Transformation(
+                    child = render.Image(src = PUBG_LOGO),
+                    duration = logo_duration,
+                    delay = logo_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(-64, 0)],
+                        ),
+                    ],
+                ),
+
+                # Scrolling name animation
+                animation.Transformation(
+                    child = render.Padding(
+                        pad = (2, 2, 0, 0),
+                        child = render.Text(
+                            content = player_name,
+                            font = "CG-pixel-3x5-mono",
+                            color = text_color,
+                        ),
+                    ),
+                    duration = name_duration,
+                    delay = name_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(62, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                    ],
+                ),
+
+                # Scrolling stat label animation
+                animation.Transformation(
+                    child = render.Padding(
+                        pad = (2, 10, 0, 0),
+                        child = stat_label_child,
+                    ),
+                    duration = stat_label_duration,
+                    delay = stat_label_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(62, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                    ],
+                ),
+
+                # Scrolling stat animation
+                animation.Transformation(
+                    child = render.Padding(
+                        pad = (2, 18, 0, 0),
+                        child = render.Text(
+                            content = (calc_lifetime_stat(lifetime_stats, selected_stat) + display_unit),
+                            font = "6x13",
+                            color = text_color,
+                        ),
+                    ),
+                    duration = stat_duration,
+                    delay = stat_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(62, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                    ],
+                ),
+
+                # End delay animation
+                animation.Transformation(
+                    child = render.Box(),
+                    duration = 0,
+                    delay = end_delay,
+                    keyframes = [],
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 # Background
                 background_render,
@@ -256,7 +364,25 @@ def pretty_error(resp):
 
     # Return render of error to Tidbyt
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                # Background
+                background_render,
+
+                # Error message
+                render.Marquee(
+                    width = 64,
+                    child = render.Padding(
+                        pad = (0, 11, 0, 0),
+                        child = render.Text(
+                            content = "PUBG STATS ERROR: {}".format(error),
+                            color = text_color,
+                        ),
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 # Background
                 background_render,

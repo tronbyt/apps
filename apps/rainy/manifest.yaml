@@ -7,10 +7,11 @@ author: SamuLab
 fileName: rainy.star
 packageName: rainy
 recommendedInterval: 10
+supports64x64: true
 category: weather
 tags:
   - weather
   - rain
   - forecast
 published: '2026-09-10T18:16:54Z'
-updated: '2026-09-30T00:46:08Z'
+updated: '2026-10-01T22:22:03Z'
