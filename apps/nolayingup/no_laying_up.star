@@ -8,6 +8,10 @@ Very niche app for the true NLU sickos out there
 
 v1.1
 Updated to reflect change in titles in RSS feed
+
+v1.2
+Distinguish Nest podcast episodes from the other podcasts with blue color
+Changed blog color to yellow
 """
 
 load("http.star", "http")
@@ -26,18 +30,21 @@ def main():
     description = []
     content_type = []
     pod_type = []
-    NLUPOD = True
+    NLUPOD = "NLU"
 
     for i in range(0, 6, 1):
         desc = channel[i]
         strippedlink = link[i][23:]
-        NLUPOD = True
 
-        # if its a podcast, check which one and remove chars at the front depending on which one - NLU or TrapDraw
+        # if its a podcast, check which one and remove chars at the front depending on which one - NLU (by default), TrapDraw or Nest
         if strippedlink.startswith("p"):
             podstrip = strippedlink[9:]
             if podstrip.startswith("t"):
-                NLUPOD = False
+                NLUPOD = "Trap"
+            elif podstrip.startswith("ne"):
+                NLUPOD = "Nest"
+            else:
+                NLUPOD = "NLU"
 
         # if its video content, check if its Nest or NLU content and revise description
         if strippedlink.startswith("v"):
@@ -87,14 +94,16 @@ def articles(description, content_type, pod_type):
 
     for i in range(0, len(description), 1):
         if content_type[i] == "pod":
-            if pod_type[i] == True:
+            if pod_type[i] == "NLU":
                 content_color = "#eb9b34"
-            else:
+            elif pod_type[i] == "Trap":
                 content_color = "#019b5b"
+            elif pod_type[i] == "Nest":
+                content_color = "#3a34eb"
         elif content_type[i] == "vid":
             content_color = "#eb3449"
         elif content_type[i] == "blo":
-            content_color = "#3440eb"
+            content_color = "#ebe534"
 
         articles.append(render.WrappedText(content = description[i], color = content_color, font = "CG-pixel-3x5-mono", linespacing = 1))
         articles.append(render.Box(width = 64, height = 3, color = "#000"))
