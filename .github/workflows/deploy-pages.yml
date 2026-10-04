@@ -14,6 +14,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for deployment (for example, merged app-viewer-source changes)'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -44,9 +49,8 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
-        run: |
-          cd app-viewer-source/app-viewer
-          npm install
+        working-directory: app-viewer-source/app-viewer
+        run: npm ci
 
       - name: Build site into staging directory
         run: |
@@ -60,8 +64,25 @@ jobs:
           cp app-viewer-source/app-viewer/dots.svg _site/
           cp app-viewer-source/app-viewer/dots@2x.svg _site/
 
+          # These assets are introduced by the upcoming Viewer changes. Copy
+          # them when present so this workflow works before and after those
+          # changes merge to app-viewer-source.
+          for asset in server-url.js readme-images.js dots@64x64.svg; do
+            if [ -f "app-viewer-source/app-viewer/${asset}" ]; then
+              cp "app-viewer-source/app-viewer/${asset}" _site/
+            fi
+          done
+
           # Generate apps.json directly into the site root (using apps from main branch)
           node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps
+
+          # Record which repository and app-data revision produced this
+          # catalogue. Matching servers can use this provenance without
+          # trusting editable browser input.
+          node main/.github/scripts/write-app-viewer-catalogue-metadata.mjs \
+            --output _site/catalogue-meta.json \
+            --repository "${GITHUB_REPOSITORY}" \
+            --commit "$(git -C main rev-parse HEAD)"
 
           # Copy the apps directory (images and other assets referenced by the viewer)
           cp -r main/apps _site/apps
@@ -71,6 +92,9 @@ jobs:
 
           # Disable Jekyll
           touch _site/.nojekyll
+
+      - name: Check generated site references
+        run: node main/.github/scripts/check-app-viewer-site.mjs _site
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
