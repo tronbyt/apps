@@ -91,12 +91,35 @@ function buildAuthorProfiles(apps) {
   return profiles.sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
-function escapeHtmlAttribute(value) {
+export function escapeHtmlAttribute(value) {
   return String(value)
+    .replace(/\r?\n/g, ' ')
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+export function buildAppMetaTags(app) {
+  const title = app.displayName ? `${app.displayName} - Tronbyt App` : 'Tronbyt App';
+  const description = app.summary || app.description || 'View details for this Tronbyt app.';
+  const imageUrl = app.image
+    ? `https://tronbyt.github.io/apps/apps/${app.image}`
+    : 'https://avatars.githubusercontent.com/u/200508996?s=400&v=4';
+  const url = `https://tronbyt.github.io/apps/details/${encodeURIComponent(app.name)}.html`;
+
+  return `<title>${escapeHtmlAttribute(title)}</title>
+        <meta name="description" content="${escapeHtmlAttribute(description)}">
+        <meta property="og:title" content="${escapeHtmlAttribute(title)}">
+        <meta property="og:description" content="${escapeHtmlAttribute(description)}">
+        <meta property="og:image" content="${escapeHtmlAttribute(imageUrl)}">
+        <meta property="og:url" content="${escapeHtmlAttribute(url)}">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="${escapeHtmlAttribute(title)}">
+        <meta name="twitter:description" content="${escapeHtmlAttribute(description)}">
+        <meta name="twitter:image" content="${escapeHtmlAttribute(imageUrl)}">
+        <meta name="app-name" content="${escapeHtmlAttribute(app.name)}">`;
 }
 
 function parseManifest(appPath) {
@@ -256,25 +279,7 @@ function generateHtmlFiles(apps) {
   template = template.replace('href="index.html"', 'href="../index.html"');
 
   for (const app of apps) {
-    const title = app.displayName ? `${app.displayName} - Tronbyt App` : 'Tronbyt App';
-    const description = app.summary || app.description || 'View details for this Tronbyt app.';
-    const imageUrl = app.image ? `https://tronbyt.github.io/apps/apps/${app.image}` : `https://avatars.githubusercontent.com/u/200508996?s=400&v=4`;
-    const url = `https://tronbyt.github.io/apps/details/${encodeURIComponent(app.name)}.html`;
-
-    const metaTags = `<title>${title}</title>
-        <meta name="description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">
-        <meta property="og:title" content="${title.replace(/"/g, '&quot;')}">
-        <meta property="og:description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">
-        <meta property="og:image" content="${imageUrl}">
-        <meta property="og:url" content="${url}">
-        <meta property="og:type" content="website">
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="${title.replace(/"/g, '&quot;')}">
-        <meta name="twitter:description" content="${description.replace(/"/g, '&quot;').replace(/\n/g, ' ')}">
-        <meta name="twitter:image" content="${imageUrl}">
-        <meta name="app-name" content="${app.name}">`;
-
-    const appHtml = template.replace('<title>App Details</title>', metaTags);
+    const appHtml = template.replace('<title>App Details</title>', buildAppMetaTags(app));
     writeFileSync(join(detailsDir, `${app.name}.html`), appHtml);
   }
 }
@@ -329,4 +334,6 @@ function main() {
   console.log(`Generated ${authorProfiles.length} static author HTML pages with metadata.`);
 }
 
-main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main();
+}
