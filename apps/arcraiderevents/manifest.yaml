@@ -6,10 +6,11 @@ desc: Displays active and upcoming ARC Raiders in-game events with live countdow
 author: jeffver
 fileName: arc_raiders_events.star
 packageName: arcraiderevents
+supports64x64: true
 category: gaming
 tags:
   - arc raiders
   - gaming
   - events
 published: '2026-04-07T20:59:29Z'
-updated: '2026-04-07T21:43:31Z'
+updated: '2026-10-01T18:38:43Z'

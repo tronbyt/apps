@@ -8,7 +8,7 @@ Author: dinosaursrarr
 load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -200,13 +200,23 @@ def main(config):
     stations = dict(national, **local)
     station = stations[station]
 
+    # The three layers are placed for 32 rows; on a taller panel the stack
+    # sits in the middle.
     return render.Root(
-        child = render.Stack(
-            children = [
-                render_station(station),
-                render_program(station, show_synopsis, colour),
-                render_progress_bar(station, colour),
-            ],
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = [
+                        render_station(station),
+                        render_program(station, show_synopsis, colour),
+                        render_progress_bar(station, colour),
+                    ],
+                ),
+            ),
         ),
     )
 

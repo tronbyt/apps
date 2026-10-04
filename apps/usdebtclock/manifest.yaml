@@ -7,10 +7,11 @@ author: PMK (@pmk)
 fileName: usdebtclock.star
 packageName: usdebtclock
 recommendedInterval: 60
+supports64x64: true
 category: clocks
 tags:
   - finance
   - clock
   - utility
 published: '2024-02-01T22:51:46Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T16:57:56Z'
