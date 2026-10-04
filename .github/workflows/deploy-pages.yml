@@ -67,7 +67,7 @@ jobs:
           # These assets are introduced by the upcoming Viewer changes. Copy
           # them when present so this workflow works before and after those
           # changes merge to app-viewer-source.
-          for asset in server-url.js readme-images.js dots@64x64.svg; do
+          for asset in server-url.js readme-images.js dots@64x64.svg github-logo.svg; do
             if [ -f "app-viewer-source/app-viewer/${asset}" ]; then
               cp "app-viewer-source/app-viewer/${asset}" _site/
             fi
