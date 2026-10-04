@@ -1,6 +1,6 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -8,6 +8,15 @@ DEFAULT_TIMEZONE = "America/New_York"
 LAMBDA_URL = "https://ozjgejjru4.execute-api.us-east-1.amazonaws.com/prod/"
 DEFAULT_ICS_URL = "https://ics.calendarlabs.com/76/8d23255e/US_Holidays.ics"
 DEFAULT_TITLE = "Next event"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = config.str("loc")
@@ -44,7 +53,12 @@ def main(config):
         }
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            cross_align = "center",
+            main_align = "space_around",
+            children = render_top(config) + render_bottom(next_event),
+        ))) if is_square() else render.Column(
             cross_align = "center",
             main_align = "space_around",
             children = render_top(config) + render_bottom(next_event),
