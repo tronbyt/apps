@@ -14,7 +14,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -28,8 +28,22 @@ USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
 # Timings
 ONE_HOUR = 3600  # 1 hour
 ONE_MINUTE = 60  # 1 minute
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 DEFAULT_SCREEN = render.Root(
-    child = render.WrappedText(
+    # Centre the block on the square (64x64); other panels unchanged.
+    child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
+        content = "Match cannot be displayed. Please choose a different team.",
+        font = "tom-thumb",
+    ))) if is_square() else render.WrappedText(
         content = "Match cannot be displayed. Please choose a different team.",
         font = "tom-thumb",
     ),
@@ -181,7 +195,10 @@ def render_current_match(match, tz):
         )
     return render.Root(
         delay = int(4000),
-        child = render.Animation(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
+            children = render_columns,
+        ))) if is_square() else render.Animation(
             children = render_columns,
         ),
     )
@@ -229,7 +246,43 @@ def render_next_match(match_data, tz):
     match_state_status_row = render_status_row(match_state_status)
     return render.Root(
         delay = 4000,
-        child = render.Animation(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
+            children = [
+                render.Column(
+                    children = [
+                        team_1_row,
+                        vs_row,
+                        team_2_row,
+                        match_title_status_row,
+                    ],
+                ),
+                render.Column(
+                    children = [
+                        team_1_row,
+                        vs_row,
+                        team_2_row,
+                        match_state_status_row,
+                    ],
+                ),
+                render.Column(
+                    children = [
+                        team_1_row,
+                        vs_row,
+                        team_2_row,
+                        match_state_status_row,
+                    ],
+                ),
+                render.Column(
+                    children = [
+                        team_1_row,
+                        vs_row,
+                        team_2_row,
+                        match_venue_status_row,
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Animation(
             children = [
                 render.Column(
                     children = [
@@ -367,7 +420,10 @@ def render_past_match(match, tz):
         )
     return render.Root(
         delay = int(4000),
-        child = render.Animation(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
+            children = columns,
+        ))) if is_square() else render.Animation(
             children = columns,
         ),
     )

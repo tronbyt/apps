@@ -6,6 +6,7 @@ desc: Display information about random games from the extensive MobyGames databa
 author: pandincus
 fileName: moby_games.star
 packageName: mobygames
+supports64x64: true
 category: gaming
 tags:
   - gaming
@@ -13,4 +14,4 @@ tags:
   - tech
   - education
 published: '2023-11-07T14:44:32Z'
-updated: '2025-11-05T22:37:44Z'
+updated: '2026-10-01T21:54:45Z'

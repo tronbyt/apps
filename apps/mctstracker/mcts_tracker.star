@@ -8,7 +8,7 @@ Author: Josiah Winslow
 load("http.star", "http")
 load("images/mcts_icon.webp", MCTS_ICON_ASSET = "file")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -336,13 +336,28 @@ def render_message(message, header = None, color = INFO_COLOR):
 
 def render_app(stop_id, children):
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render_mcts_logo(stop_id),
+                render.Column(children = children),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render_mcts_logo(stop_id),
                 render.Column(children = children),
             ],
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     stop_id = config.get("stop", DEFAULT_STOP_ID)
