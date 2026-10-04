@@ -27,6 +27,18 @@ jobs:
       - name: Install Python dependencies
         run: pip install PyYAML
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: app-viewer/package-lock.json
+
+      - name: Test App Viewer
+        run: |
+          npm --prefix app-viewer ci
+          npm --prefix app-viewer test
+
       - name: Validate manifest categories
         run: python3 .github/scripts/check-categories.py
 
