@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     width="512"
+     height="512"
+     role="img"
+     aria-labelledby="title"
+     shape-rendering="crispEdges">
+  <title id="title">White pixel-style logo</title>
+  <path fill="#fff" d="
+    M9 1h6v1H9z
+    M7 2h10v1H7z
+    M5 3h14v1H5z
+    M4 4h16v1H4z
+    M3 5h18v1H3z
+    M3 6h3v1H3z M8 6h8v1H8z M18 6h3v1h-3z
+    M2 7h4v1H2z M9 7h1v1H9z M14 7h1v1h-1z M18 7h4v1h-4z
+    M2 8h4v1H2z M18 8h4v1h-4z
+    M1 9h4v1H1z M19 9h4v1h-4z
+    M1 10h4v1H1z M19 10h4v1h-4z
+    M1 11h4v1H1z M19 11h4v1h-4z
+    M1 12h4v1H1z M19 12h4v1h-4z
+    M1 13h4v1H1z M19 13h4v1h-4z
+    M1 14h5v1H1z M18 14h5v1h-5z
+    M2 15h5v1H2z M17 15h5v1h-5z
+    M2 16h2v1H2z M6 16h3v1H6z M15 16h7v1h-7z
+    M3 17h2v1H3z M7 17h2v1H7z M14 17h7v1h-7z
+    M3 18h2v1H3z M15 18h6v1h-6z
+    M4 19h2v1H4z M15 19h5v1h-5z
+    M5 20h4v1H5z M15 20h4v1h-4z
+    M6 21h3v1H6z M15 21h3v1h-3z
+    M8 22h1v1H8z M15 22h1v1h-1z
+  "/>
+</svg>

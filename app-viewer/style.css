@@ -523,6 +523,15 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   image-rendering: crisp-edges;
 }
 
+.app-readme img.readme-device-standard,
+.app-readme img.readme-device-square {
+  width: min(100%, 14.5rem);
+}
+
+.app-readme img.readme-device-wide {
+  width: min(100%, 30rem);
+}
+
 body.dot-matrix-enabled .app-readme img.readme-device-screenshot {
   -webkit-mask-image: url('./dots.svg');
   -webkit-mask-repeat: no-repeat;
@@ -613,6 +622,51 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
   margin-left: auto;
 }
 
+.pixel-tooltip {
+  position: relative;
+}
+
+.pixel-tooltip::after {
+  background: #111;
+  border: 1px solid #666;
+  border-radius: 4px;
+  bottom: calc(100% + 0.5rem);
+  box-shadow: 0 2px 8px #000c;
+  color: #fff;
+  content: attr(data-tooltip);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  left: 50%;
+  line-height: 1.45;
+  opacity: 0;
+  padding: 0.45rem 0.55rem;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, 0.25rem);
+  transition: opacity 120ms ease, transform 120ms ease;
+  visibility: hidden;
+  white-space: nowrap;
+  z-index: 30;
+}
+
+.pixel-tooltip:hover::after,
+.pixel-tooltip:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+.app-list-more {
+  padding-block: 0.5rem 1rem;
+}
+
+.app-list-loading {
+  color: #aaa;
+  font-size: 0.65rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .badge-2x {
   background: rgba(13, 110, 253, 0.9);
   color: #fff;
@@ -629,79 +683,11 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
   background: #e0a800;
 }
 
-.btn-success {
-  background: #008f45;
-  border: none;
-  color: #fff;
-  font-family: 'Press Start 2P', monospace;
-}
-
-.btn-success:hover {
-  background: #00a950;
-}
-
 .viewer-header {
   container: viewer-header / inline-size;
   flex-wrap: nowrap;
   gap: 1rem;
   min-width: 0;
-}
-
-.server-settings-button {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.65rem;
-  justify-content: center;
-  max-width: 28rem;
-  white-space: nowrap;
-}
-
-#tronbyt-settings-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.connection-icon {
-  display: inline-block;
-  flex: 0 0 21px;
-  height: 15px;
-  position: relative;
-  width: 21px;
-}
-
-.connection-icon::before {
-  background: currentColor;
-  box-shadow:
-    3px 0 currentColor,
-    6px 0 currentColor,
-    9px 0 currentColor,
-    12px 0 currentColor,
-    15px 0 currentColor,
-    9px -6px currentColor,
-    12px -3px currentColor,
-    12px 3px currentColor,
-    9px 6px currentColor;
-  content: '';
-  height: 3px;
-  left: 0;
-  position: absolute;
-  top: 6px;
-  width: 3px;
-}
-
-.server-settings-button.connected {
-  border-color: #00a950;
-  color: #8ff0b5;
-}
-
-.server-settings-button.connected .connection-icon::before {
-  box-shadow:
-    3px 3px currentColor,
-    6px 6px currentColor,
-    9px 3px currentColor,
-    12px 0 currentColor,
-    15px -3px currentColor,
-    18px -6px currentColor;
 }
 
 .card-actions .btn,
@@ -710,6 +696,38 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
   display: inline-flex;
   gap: 0.65rem;
   justify-content: center;
+}
+
+.detail-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.app-source-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  line-height: 1;
+  padding: 0.25rem;
+  text-decoration: none;
+}
+
+.app-source-link:hover,
+.app-source-link:focus-visible {
+  opacity: 1;
+}
+
+.github-pixel-icon {
+  height: 1.75rem;
+  image-rendering: pixelated;
+  opacity: 0.72;
+  width: 1.75rem;
+}
+
+.app-source-link:hover .github-pixel-icon,
+.app-source-link:focus-visible .github-pixel-icon {
+  opacity: 1;
 }
 
 .button-icon {
@@ -725,89 +743,6 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
   top: 2px;
 }
 
-.server-intro {
-  color: #e0e0e0;
-  font-size: 0.75rem;
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
-}
-
-.tronbyt-install-action[hidden] {
-  display: none !important;
-}
-
-.modal-content {
-  background: #222;
-  border: 2px solid #444;
-  color: #e0e0e0;
-}
-
-.modal-header,
-.modal-footer {
-  border-color: #444;
-}
-
-.modal .btn-close {
-  filter: invert(1);
-}
-
-.server-help {
-  color: #aaa;
-  font-size: 0.65rem;
-  line-height: 1.6;
-}
-
-.server-requirement {
-  color: #ffd761;
-  font-size: 0.65rem;
-  line-height: 1.6;
-  margin: -0.5rem 0 1.25rem;
-}
-
-#tronbyt-server-error {
-  min-height: 1.2rem;
-  font-size: 0.65rem;
-  line-height: 1.5;
-}
-
-.connection-status-pending {
-  color: #ffd761;
-}
-
-.connection-status-error {
-  color: #ff6b6b;
-}
-
-.connection-status-success {
-  color: #8ff0b5;
-}
-
-.connection-troubleshooting {
-  border-top: 1px solid #444;
-  color: #aaa;
-  font-size: 0.65rem;
-  line-height: 1.5;
-  padding-top: 1rem;
-}
-
-.connection-troubleshooting-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-@container viewer-header (max-width: 52rem) {
-  .server-settings-button {
-    flex: 0 0 3.25rem;
-    height: 3.25rem;
-    padding: 0;
-    width: 3.25rem;
-  }
-
-  #tronbyt-settings-label {
-    display: none;
-  }
-}
 
 @container viewer-header (max-width: 68rem) {
   .title-full {
@@ -890,6 +825,37 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
 }
 
 @media (max-width: 767px) {
+  #apps-list {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+  }
+
+  #apps-list .card {
+    min-height: 0;
+  }
+
+  #apps-list .card-body {
+    padding: 0.8rem;
+  }
+
+  #apps-list .card-title {
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  #apps-list .card-description {
+    font-size: 0.6rem;
+    line-height: 1.45;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  #apps-list .btn {
+    padding: 0.5rem 0.35rem;
+    font-size: 0.62rem;
+    line-height: 1.4;
+  }
+
   .viewer-header {
     gap: 0.75rem;
   }
@@ -935,11 +901,23 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
   }
 
   .detail-actions {
+    margin-top: 0;
     width: 100%;
-    margin-top: 1rem;
   }
 
-  .detail-actions .btn {
+  .detail-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .detail-actions .report-button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 419px) {
+  #apps-list .app-list-item {
     width: 100%;
   }
 }

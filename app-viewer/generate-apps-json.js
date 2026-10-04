@@ -156,8 +156,16 @@ function findPreview(files, appName, manifest, starFile) {
     files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase()));
 }
 
-function findMarkdown(files) {
-  return files.find(f => MD_FILES.includes(f));
+export function findMarkdown(files) {
+  const exactMatch = MD_FILES.find(candidate => files.includes(candidate));
+  if (exactMatch) return exactMatch;
+
+  for (const candidate of MD_FILES) {
+    const match = files.find(file => file.toLocaleLowerCase('en-US') === candidate.toLocaleLowerCase('en-US'));
+    if (match) return match;
+  }
+
+  return undefined;
 }
 
 function getReadmeDescription(appPath, mdFile) {

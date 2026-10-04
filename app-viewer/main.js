@@ -8,26 +8,85 @@ const isNestedPage = isDetailsPage || isAuthorPage;
 const BASE_PATH = isNestedPage ? '../' : '';
 const APPS_DIR = isNestedPage ? '../apps' : 'apps';
 const BROKEN_APPS_FILE = isNestedPage ? '../broken_apps.txt' : 'broken_apps.txt';
+const CATALOGUE_META_FILE = isNestedPage ? '../catalogue-meta.json' : 'catalogue-meta.json';
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 const DEFAULT_SORT_ORDER = 'updated';
+const APP_BATCH_SIZE = 60;
+const SEARCH_DEBOUNCE_MS = 150;
+const VIEWER_STATE_PARAMS = ['q', 'category', 'display', 'sort', 'tag', 'hideBroken', 'count', 'scroll'];
+let appListObserver = null;
+
+function getViewerStateParams(search = window.location.search) {
+  const source = new URLSearchParams(search);
+  const state = new URLSearchParams();
+  VIEWER_STATE_PARAMS.forEach(name => {
+    if (source.has(name)) state.set(name, source.get(name));
+  });
+  return state;
+}
+
+function buildViewerStateUrl(path) {
+  const params = getViewerStateParams();
+  const query = params.toString();
+  return `${path}${query ? `?${query}` : ''}`;
+}
+
+export function rememberViewerScroll(event) {
+  const scrollY = Math.round(window.scrollY);
+  const catalogueUrl = new URL(window.location.href);
+  const detailUrl = new URL(event.currentTarget.href, window.location.href);
+
+  if (scrollY > 0) {
+    catalogueUrl.searchParams.set('scroll', String(scrollY));
+    detailUrl.searchParams.set('scroll', String(scrollY));
+  } else {
+    catalogueUrl.searchParams.delete('scroll');
+    detailUrl.searchParams.delete('scroll');
+  }
+
+  // Save the position on the catalogue history entry itself. The browser can
+  // then restore it when the detail page uses history.back(), even if the
+  // dynamically generated catalogue must be rebuilt instead of coming from
+  // the back/forward cache. Keep it on the detail URL as the fallback too.
+  window.history.replaceState(window.history.state, '', catalogueUrl);
+  event.currentTarget.href = detailUrl.href;
+}
+
+export function restoreViewerScroll(scrollY) {
+  const restore = () => window.scrollTo(0, scrollY);
+
+  // Restore immediately when the catalogue is already laid out (for example,
+  // from the back/forward cache), then correct once the web font has finished
+  // loading because it can change card heights above the saved position.
+  restore();
+  const fontsReady = document.fonts?.ready || Promise.resolve();
+  fontsReady.then(() => {
+    restore();
+    requestAnimationFrame(() => requestAnimationFrame(restore));
+  });
+}
 
 // --- CACHE MANAGEMENT ---
 // Simple in-memory cache to avoid redundant network requests
-// Data persists for the duration of the browser session
+// Data persists only for this page lifetime; each page load revalidates it.
 const appCache = {
   appsList: null,
   brokenApps: null,
+  catalogueMetadata: null,
   isAppsListLoaded: false,
-  isBrokenAppsLoaded: false
+  isBrokenAppsLoaded: false,
+  isCatalogueMetadataLoaded: false
 };
 
 // Function to clear cache (useful for development or manual refresh)
 function clearAppCache() {
   appCache.appsList = null;
   appCache.brokenApps = null;
+  appCache.catalogueMetadata = null;
   appCache.isAppsListLoaded = false;
   appCache.isBrokenAppsLoaded = false;
+  appCache.isCatalogueMetadataLoaded = false;
 }
 
 // Function to preload all data (useful for optimizing initial page load)
@@ -49,7 +108,7 @@ async function fetchBrokenApps() {
 
   console.log('🔄 Fetching broken apps from server...');
   try {
-    const res = await fetch(BROKEN_APPS_FILE);
+    const res = await fetch(BROKEN_APPS_FILE, { cache: 'no-cache' });
     if (res.ok) {
       const text = await res.text();
       const brokenApps = text.split('\n').map(line => line.trim()).filter(line => line);
@@ -81,7 +140,7 @@ async function fetchAppsList() {
   console.log('🔄 Fetching apps list from server...');
   // Load the generated apps.json file
   try {
-    const res = await fetch(BASE_PATH + 'apps.json');
+    const res = await fetch(BASE_PATH + 'apps.json', { cache: 'no-cache' });
     if (res.ok) {
       const apps = await res.json();
 
@@ -102,12 +161,65 @@ async function fetchAppsList() {
   return [];
 }
 
-function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
+async function fetchCatalogueMetadata() {
+  if (appCache.isCatalogueMetadataLoaded) return appCache.catalogueMetadata;
+
+  try {
+    const response = await fetch(CATALOGUE_META_FILE, { cache: 'no-cache' });
+    if (response.ok) {
+      appCache.catalogueMetadata = normalizeCatalogueMetadata(await response.json());
+    }
+  } catch (error) {
+    console.warn('Catalogue provenance is unavailable:', error);
+  }
+
+  appCache.isCatalogueMetadataLoaded = true;
+  return appCache.catalogueMetadata;
+}
+
+export function normalizeCatalogueMetadata(metadata) {
+  const validRepository = typeof metadata?.repository === 'string' &&
+    /^github\.com\/[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(metadata.repository);
+  const validCommit = typeof metadata?.commit === 'string' &&
+    /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(metadata.commit);
+
+  if (metadata?.schemaVersion !== 1 || !validRepository || !validCommit) return null;
+
+  return {
+    repository: metadata.repository.toLowerCase(),
+    commit: metadata.commit.toLowerCase()
+  };
+}
+
+export function buildAppSourceUrl(metadata, appName) {
+  if (!metadata) return null;
+  return `https://${metadata.repository}/tree/main/apps/${encodeURIComponent(appName)}`;
+}
+
+function createPixelGithubIcon() {
+  const icon = document.createElement('img');
+  icon.src = `${BASE_PATH}github-logo.svg`;
+  icon.alt = '';
+  icon.className = 'github-pixel-icon';
+  return icon;
+}
+
+function renderAppsList(
+  apps,
+  brokenApps = [],
+  displayMode = 'standard',
+  { limit = apps.length, onLoadMore = null } = {}
+) {
   const list = document.getElementById('apps-list');
+  appListObserver?.disconnect();
+  appListObserver = null;
+  list.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
+    bootstrap.Tooltip.getInstance(element)?.dispose();
+  });
   list.replaceChildren();
-  apps.forEach(app => {
+  apps.slice(0, limit).forEach(app => {
     const card = document.createElement('div');
-    card.className = 'col-md-4';
+    card.className = 'col-6 col-md-4 app-list-item';
 
     // Check if the app's star file is in the broken apps list
     const isBroken = isAppBroken(app, brokenApps);
@@ -132,20 +244,22 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
     // Add 2x badge if needed
     if (displayMode === 'standard' && app.supports2x) {
       const badge2x = document.createElement('div');
-      badge2x.className = 'app-badge badge-2x';
-      badge2x.title = 'Supports 2x resolution';
-      badge2x.setAttribute('data-bs-toggle', 'tooltip');
+      badge2x.className = 'app-badge badge-2x pixel-tooltip';
+      badge2x.dataset.tooltip = 'Supports Wide / 2x';
+      badge2x.setAttribute('aria-label', 'Supports Wide / 2x');
+      badge2x.setAttribute('tabindex', '0');
       badge2x.textContent = '2X';
       badgeContainer.appendChild(badge2x);
     }
 
     // URL for app details page
-    const detailUrl = BASE_PATH + `details/${encodeURIComponent(app.name)}.html`;
+    const detailUrl = buildViewerStateUrl(BASE_PATH + `details/${encodeURIComponent(app.name)}.html`);
 
     // Wrap image in a link
     const imageLink = document.createElement('a');
     imageLink.href = detailUrl;
     imageLink.className = 'text-decoration-none';
+    imageLink.addEventListener('click', rememberViewerScroll);
 
     // Create image element
     let imageElement;
@@ -154,16 +268,22 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
       imageElement.src = `${APPS_DIR}/${app.image64x64}`;
       imageElement.className = 'card-img-top';
       imageElement.alt = `${app.name} square preview`;
+      imageElement.loading = 'lazy';
+      imageElement.decoding = 'async';
     } else if (displayMode === 'wide' && app.image2x) {
       imageElement = document.createElement('img');
       imageElement.src = `${APPS_DIR}/${app.image2x}`;
       imageElement.className = 'card-img-top';
       imageElement.alt = app.name;
+      imageElement.loading = 'lazy';
+      imageElement.decoding = 'async';
     } else if (app.image) {
       imageElement = document.createElement('img');
       imageElement.src = `${APPS_DIR}/${app.image}`;
       imageElement.className = 'card-img-top';
       imageElement.alt = app.name; // Safe: alt attribute is automatically escaped
+      imageElement.loading = 'lazy';
+      imageElement.decoding = 'async';
     } else {
       imageElement = document.createElement('div');
       imageElement.className = 'card-img-top d-flex align-items-center justify-content-center bg-secondary text-white';
@@ -181,6 +301,7 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
     const titleLink = document.createElement('a');
     titleLink.href = detailUrl;
     titleLink.className = 'text-decoration-none d-block';
+    titleLink.addEventListener('click', rememberViewerScroll);
 
     const title = document.createElement('h5');
     title.className = 'card-title app-card-title';
@@ -191,10 +312,10 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
 
     if (isBroken) {
       const warningSpan = document.createElement('span');
-      warningSpan.className = 'app-card-broken-icon text-warning';
-      warningSpan.title = 'Broken app';
-      warningSpan.setAttribute('data-bs-toggle', 'tooltip');
+      warningSpan.className = 'app-card-broken-icon text-warning pixel-tooltip';
+      warningSpan.dataset.tooltip = 'Broken app';
       warningSpan.setAttribute('aria-label', 'Broken app');
+      warningSpan.setAttribute('tabindex', '0');
       warningSpan.textContent = '⚠️';
       title.appendChild(warningSpan);
     }
@@ -216,6 +337,7 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
     button.href = detailUrl;
     button.className = 'btn btn-primary mt-auto';
     button.textContent = '📄 View Details';
+    button.addEventListener('click', rememberViewerScroll);
 
     cardBody.appendChild(button);
 
@@ -226,17 +348,87 @@ function renderAppsList(apps, brokenApps = [], displayMode = 'standard') {
     list.appendChild(card);
   });
 
-  // Initialize tooltips
-  const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-  tooltips.forEach(tooltip => {
-    new bootstrap.Tooltip(tooltip, {
-      customClass: 'tooltip-custom'
-    });
-  });
+  if (limit < apps.length && onLoadMore) {
+    const moreContainer = document.createElement('div');
+    moreContainer.className = 'col-12 d-flex justify-content-center app-list-more';
+    moreContainer.setAttribute('aria-live', 'polite');
+
+    const moreButton = document.createElement('button');
+    moreButton.type = 'button';
+    moreButton.className = 'btn btn-secondary';
+    moreButton.textContent = `Load more (${apps.length - limit} remaining)`;
+    moreButton.addEventListener('click', onLoadMore);
+
+    moreContainer.appendChild(moreButton);
+    list.appendChild(moreContainer);
+
+    if ('IntersectionObserver' in window) {
+      moreButton.hidden = true;
+      const loadingText = document.createElement('span');
+      loadingText.className = 'app-list-loading';
+      loadingText.textContent = 'More apps load automatically as you scroll';
+      moreContainer.appendChild(loadingText);
+
+      appListObserver = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        appListObserver?.disconnect();
+        appListObserver = null;
+        loadingText.textContent = 'Loading more apps…';
+        onLoadMore();
+      }, { rootMargin: '600px 0px' });
+      appListObserver.observe(moreContainer);
+    }
+  }
 }
 
 function isAppBroken(app, brokenApps = []) {
   return app.broken === true || Boolean(app.starFile && brokenApps.includes(app.starFile));
+}
+
+export function filterAndSortApps(apps, {
+  search = '',
+  category = '',
+  tag = '',
+  display = 'standard',
+  sort = DEFAULT_SORT_ORDER,
+  hideBroken = false,
+  brokenApps = []
+} = {}) {
+  const searchValue = search.toLowerCase();
+  const filtered = apps.filter(app => {
+    const matchesSearch = !searchValue ||
+      app.name.toLowerCase().includes(searchValue) ||
+      (app.displayName && app.displayName.toLowerCase().includes(searchValue)) ||
+      (app.summary && app.summary.toLowerCase().includes(searchValue)) ||
+      (app.description && app.description.toLowerCase().includes(searchValue)) ||
+      (app.author && app.author.toLowerCase().includes(searchValue)) ||
+      (app.category && app.category.toLowerCase().includes(searchValue)) ||
+      (app.tags && app.tags.some(value => value.toLowerCase().includes(searchValue)));
+    const matchesCategory = !category || app.category === category;
+    const matchesTag = !tag || (app.tags && app.tags.includes(tag));
+    const matchesDisplay = display === 'standard' ||
+      (display === 'wide' && app.supports2x) ||
+      (display === 'square' && app.supports64x64);
+    const matchesBroken = !hideBroken || !isAppBroken(app, brokenApps);
+    return matchesSearch && matchesCategory && matchesTag && matchesDisplay && matchesBroken;
+  });
+
+  return filtered.sort((a, b) => {
+    if (sort === 'newest') {
+      const dateA = a.published ? new Date(a.published) : new Date(0);
+      const dateB = b.published ? new Date(b.published) : new Date(0);
+      return dateB - dateA;
+    }
+    if (sort === 'updated') {
+      const dateA = a.updated ? new Date(a.updated) : new Date(0);
+      const dateB = b.updated ? new Date(b.updated) : new Date(0);
+      return dateB - dateA;
+    }
+
+    const nameA = (a.displayName || a.name).toLowerCase();
+    const nameB = (b.displayName || b.name).toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
 }
 
 function setupSearch(apps, brokenApps) {
@@ -249,11 +441,22 @@ function setupSearch(apps, brokenApps) {
   const displayFilter = document.getElementById('display-filter');
   const sortOrder = document.getElementById('sort-order');
   const hideBrokenApps = document.getElementById('hide-broken-apps');
+  const queryParams = new URLSearchParams(window.location.search);
+  const requestedScroll = Number.parseInt(queryParams.get('scroll') || '', 10);
+  const requestedCount = Number.parseInt(queryParams.get('count') || '', 10);
+  let visibleCount = Number.isFinite(requestedCount) && requestedCount > APP_BATCH_SIZE
+    ? requestedCount
+    : APP_BATCH_SIZE;
+  let searchTimer;
 
-  try {
-    hideBrokenApps.checked = localStorage.getItem('hideBrokenApps') === 'true';
-  } catch {
-    hideBrokenApps.checked = false;
+  if (queryParams.get('hideBroken') === '1') {
+    hideBrokenApps.checked = true;
+  } else {
+    try {
+      hideBrokenApps.checked = localStorage.getItem('hideBrokenApps') === 'true';
+    } catch {
+      hideBrokenApps.checked = false;
+    }
   }
 
   // Extract and populate categories
@@ -266,13 +469,24 @@ function setupSearch(apps, brokenApps) {
   });
 
   const knownTags = new Set(apps.flatMap(app => app.tags || []));
-  const queryParams = new URLSearchParams(window.location.search);
   const requestedTag = queryParams.get('tag');
   let selectedTag = requestedTag && knownTags.has(requestedTag) ? requestedTag : '';
+
+  search.value = queryParams.get('q') || '';
+
+  const requestedCategory = queryParams.get('category');
+  if (requestedCategory && categories.includes(requestedCategory)) {
+    categoryFilter.value = requestedCategory;
+  }
 
   const requestedDisplay = queryParams.get('display');
   if (['standard', 'wide', 'square'].includes(requestedDisplay)) {
     displayFilter.value = requestedDisplay;
+  }
+
+  const requestedSort = queryParams.get('sort');
+  if (['updated', 'alphabetical', 'newest'].includes(requestedSort)) {
+    sortOrder.value = requestedSort;
   }
 
   function updateSelectedTag() {
@@ -282,54 +496,58 @@ function setupSearch(apps, brokenApps) {
 
   updateSelectedTag();
 
-  function filterApps() {
+  function filterApps({ resetVisible = true } = {}) {
+    if (resetVisible) visibleCount = APP_BATCH_SIZE;
     const searchVal = search.value.toLowerCase();
     const categoryVal = categoryFilter.value;
     const displayVal = displayFilter.value;
     const sortVal = sortOrder.value;
 
-    let filtered = apps.filter(app => {
-      const matchesSearch = !searchVal ||
-        app.name.toLowerCase().includes(searchVal) ||
-        (app.displayName && app.displayName.toLowerCase().includes(searchVal)) ||
-        (app.summary && app.summary.toLowerCase().includes(searchVal)) ||
-        (app.category && app.category.toLowerCase().includes(searchVal)) ||
-        (app.tags && app.tags.some(t => t.toLowerCase().includes(searchVal)));
-      const matchesCategory = !categoryVal || app.category === categoryVal;
-      const matchesTag = !selectedTag || (app.tags && app.tags.includes(selectedTag));
-      const matchesDisplay = displayVal === 'standard' ||
-        (displayVal === 'wide' && app.supports2x) ||
-        (displayVal === 'square' && app.supports64x64);
-      const matchesBroken = !hideBrokenApps.checked || !isAppBroken(app, brokenApps);
-      return matchesSearch && matchesCategory && matchesTag && matchesDisplay && matchesBroken;
+    const url = new URL(window.location.href);
+    const setOrDelete = (name, value, defaultValue = '') => {
+      if (value && value !== defaultValue) {
+        url.searchParams.set(name, value);
+      } else {
+        url.searchParams.delete(name);
+      }
+    };
+    setOrDelete('q', search.value.trim());
+    setOrDelete('category', categoryVal);
+    setOrDelete('display', displayVal, 'standard');
+    setOrDelete('sort', sortVal, DEFAULT_SORT_ORDER);
+    setOrDelete('tag', selectedTag);
+    setOrDelete('hideBroken', hideBrokenApps.checked ? '1' : '');
+    setOrDelete('count', visibleCount > APP_BATCH_SIZE ? String(visibleCount) : '');
+    url.searchParams.delete('scroll');
+    window.history.replaceState({}, '', url);
+
+    const filtered = filterAndSortApps(apps, {
+      search: searchVal,
+      category: categoryVal,
+      tag: selectedTag,
+      display: displayVal,
+      sort: sortVal,
+      hideBroken: hideBrokenApps.checked,
+      brokenApps
     });
 
-    // Sort the filtered apps
-    filtered.sort((a, b) => {
-      if (sortVal === 'newest') {
-        const dateA = a.published ? new Date(a.published) : new Date(0);
-        const dateB = b.published ? new Date(b.published) : new Date(0);
-        return dateB - dateA;
-      } else if (sortVal === 'updated') {
-        const dateA = a.updated ? new Date(a.updated) : new Date(0);
-        const dateB = b.updated ? new Date(b.updated) : new Date(0);
-        return dateB - dateA;
-      } else {
-        // Alphabetical
-        const nameA = (a.displayName || a.name).toLowerCase();
-        const nameB = (b.displayName || b.name).toLowerCase();
-        return nameA.localeCompare(nameB);
+    renderAppsList(filtered, brokenApps, displayVal, {
+      limit: visibleCount,
+      onLoadMore: () => {
+        visibleCount += APP_BATCH_SIZE;
+        filterApps({ resetVisible: false });
       }
     });
-
-    renderAppsList(filtered, brokenApps, displayVal);
 
     // The clear button belongs to the search field, so only show it for text.
     clearButton.style.display = searchVal ? 'block' : 'none';
   }
 
   // Handle search input
-  search.addEventListener('input', filterApps);
+  search.addEventListener('input', () => {
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(filterApps, SEARCH_DEBOUNCE_MS);
+  });
 
   // Handle filter changes
   categoryFilter.addEventListener('change', filterApps);
@@ -346,6 +564,7 @@ function setupSearch(apps, brokenApps) {
 
   // Handle clear button click
   clearButton.addEventListener('click', () => {
+    window.clearTimeout(searchTimer);
     search.value = '';
     filterApps();
     search.focus();
@@ -354,16 +573,14 @@ function setupSearch(apps, brokenApps) {
   clearTagFilter.addEventListener('click', () => {
     selectedTag = '';
     updateSelectedTag();
-
-    const url = new URL(window.location.href);
-    url.searchParams.delete('tag');
-    window.history.replaceState({}, '', url);
-
     filterApps();
     search.focus();
   });
 
-  filterApps();
+  filterApps({ resetVisible: false });
+  if (Number.isFinite(requestedScroll) && requestedScroll > 0) {
+    restoreViewerScroll(requestedScroll);
+  }
 }
 
 // --- APP DETAIL PAGE LOGIC ---
@@ -427,9 +644,33 @@ function getAppNameFromURL() {
   return null;
 }
 
+function configureBackToAppsLink(link, fallbackUrl) {
+  link.href = fallbackUrl;
+  link.addEventListener('click', event => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    try {
+      const referrer = new URL(document.referrer);
+      const catalogueUrl = new URL(fallbackUrl, window.location.href);
+      const catalogueDirectory = catalogueUrl.pathname.replace(/index\.html$/, '');
+      const cameFromCatalogue = referrer.origin === window.location.origin &&
+        (referrer.pathname === catalogueUrl.pathname || referrer.pathname === catalogueDirectory);
+      if (!cameFromCatalogue) return;
+    } catch {
+      return;
+    }
+
+    event.preventDefault();
+    window.history.back();
+  });
+}
+
 async function renderAppDetail() {
   const appName = getAppNameFromURL();
   const container = document.getElementById('app-content');
+  const backToAppsUrl = buildViewerStateUrl(`${BASE_PATH}index.html`);
+  const headerBackButton = document.querySelector('body > .container > a.btn-secondary');
+  if (headerBackButton) configureBackToAppsLink(headerBackButton, backToAppsUrl);
   if (!appName) {
     // Safe: static HTML content
     container.innerHTML = '<div class="alert alert-danger">App not specified.</div>';
@@ -451,8 +692,12 @@ async function renderAppDetail() {
     return;
   }
 
-  const brokenApps = await fetchBrokenApps();
+  const [brokenApps, catalogueMetadata] = await Promise.all([
+    fetchBrokenApps(),
+    fetchCatalogueMetadata()
+  ]);
   const isBroken = isAppBroken(app, brokenApps);
+  const appSourceUrl = buildAppSourceUrl(catalogueMetadata, appName);
 
   // Create app details section from manifest data
   const detailsSection = document.createElement('div');
@@ -603,6 +848,8 @@ async function renderAppDetail() {
       const image = document.createElement('img');
       image.src = `${APPS_DIR}/${imagePath}`;
       image.alt = altText;
+      image.loading = 'lazy';
+      image.decoding = 'async';
       image.className = 'app-preview-image img-fluid rounded border';
       if (previewClass === 'app-preview-square') {
         image.classList.add('app-preview-image-square');
@@ -716,6 +963,9 @@ async function renderAppDetail() {
         const resolvedSrc = resolveAppAssetUrl(image.getAttribute('src'), appName);
         if (resolvedSrc) image.src = resolvedSrc;
         if (!image.alt) image.alt = `${app.displayName || app.name} screenshot`;
+        image.referrerPolicy = 'no-referrer';
+        image.loading = 'lazy';
+        image.decoding = 'async';
 
         const classifyImage = () => {
           const kind = classifyReadmeImage({
@@ -754,17 +1004,32 @@ async function renderAppDetail() {
     container.appendChild(readmeSection);
   }
 
-  // Add buttons at the bottom - Back to Apps on left, Report Broken on right
+  // Add buttons at the bottom - Back to Apps on left, Report Issue on right
   const reportContainer = document.createElement('div');
-  reportContainer.className = 'mt-4 pt-4 border-top d-flex justify-content-between';
+  reportContainer.className = 'detail-footer mt-4 pt-4 border-top d-flex justify-content-between';
 
   // Back to Apps button (left side)
   const backButton = document.createElement('a');
-  backButton.href = isDetailsPage ? '../index.html' : 'index.html';
+  configureBackToAppsLink(backButton, backToAppsUrl);
   backButton.className = 'btn btn-secondary';
   backButton.textContent = '← Back to Apps';
 
-  // Report Broken button (right side)
+  // Report Issue button (right side)
+  const rightActions = document.createElement('div');
+  rightActions.className = 'detail-actions';
+
+  let sourceLink = null;
+  if (appSourceUrl) {
+    sourceLink = document.createElement('a');
+    sourceLink.href = appSourceUrl;
+    sourceLink.target = '_blank';
+    sourceLink.rel = 'noopener';
+    sourceLink.className = 'app-source-link pixel-tooltip';
+    sourceLink.dataset.tooltip = 'View app source on GitHub';
+    sourceLink.setAttribute('aria-label', 'View app source on GitHub');
+    sourceLink.appendChild(createPixelGithubIcon());
+  }
+
   let reportControl;
   if (isBroken) {
     const reportTooltip = document.createElement('span');
@@ -777,23 +1042,29 @@ async function renderAppDetail() {
     reportButton.type = 'button';
     reportButton.className = 'btn btn-warning report-button';
     reportButton.disabled = true;
-    reportButton.textContent = '🐛 Report Broken';
+    reportButton.textContent = '🐛 Report Issue';
     reportTooltip.appendChild(reportButton);
     reportControl = reportTooltip;
   } else {
     const reportButton = document.createElement('a');
-    const reportBody = `The app \`${appName}\` appears to be broken.\n\nPlease describe why the app is broken and how to reproduce the issue:`;
-    const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=Report%20Broken%20App:%20${encodeURIComponent(appName)}&body=${encodeURIComponent(reportBody)}`;
+    const reportTitle = `Feedback for app: ${app.displayName || appName}`;
+    const appReference = appSourceUrl
+      ? `App folder: [\`apps/${appName}\`](${appSourceUrl})`
+      : `App: \`apps/${appName}\``;
+    const reportBody = `${appReference}\n\nPlease describe your feedback, problem, or suggestion:`;
+    const reportUrl = `https://github.com/tronbyt/apps/issues/new?title=${encodeURIComponent(reportTitle)}&body=${encodeURIComponent(reportBody)}`;
     reportButton.href = reportUrl;
     reportButton.target = '_blank';
     reportButton.rel = 'noopener';
     reportButton.className = 'btn btn-warning report-button';
-    reportButton.textContent = '🐛 Report Broken';
+    reportButton.textContent = '🐛 Report Issue';
     reportControl = reportButton;
   }
 
   reportContainer.appendChild(backButton);
-  reportContainer.appendChild(reportControl);
+  rightActions.appendChild(reportControl);
+  if (sourceLink) rightActions.appendChild(sourceLink);
+  reportContainer.appendChild(rightActions);
   container.appendChild(reportContainer);
 
   // Initialize tooltips for the app detail page
@@ -876,7 +1147,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else if (document.getElementById('apps-list')) {
     // Index page - preload all data simultaneously
     const { apps, brokenApps } = await preloadAppData();
-    renderAppsList(apps, brokenApps);
     setupSearch(apps, brokenApps);
     setupDotMatrixToggle();
   } else if (document.getElementById('app-content')) {
