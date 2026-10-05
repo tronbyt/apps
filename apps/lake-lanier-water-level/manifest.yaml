@@ -1,0 +1,16 @@
+---
+id: lake-lanier-water-level
+name: Lake Lanier Level
+summary: Lake Lanier water levels
+desc: Live Lake Sidney Lanier water level relative to full pool (1,071 ft), with alert-zone colors, trend, water temperature, and a scrolling ticker. Data from USGS via lanierlevel.com.
+author: jspeigner
+fileName: lanier_level.star
+packageName: lake-lanier-water-level
+recommendedInterval: 10
+category: weather
+tags:
+  - weather
+  - water level
+  - lake
+published: '2026-04-07T20:59:29Z'
+updated: '2026-08-14T18:35:30Z'

@@ -7,3 +7,10 @@ author: PMK (@pmk)
 fileName: mempool.star
 packageName: mempool
 recommendedInterval: 1
+supports64x64: true
+category: finance
+tags:
+  - crypto
+  - finance
+published: '2023-09-15T18:44:34Z'
+updated: '2026-10-01T16:29:58Z'

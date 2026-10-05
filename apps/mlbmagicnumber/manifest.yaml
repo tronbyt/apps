@@ -7,3 +7,10 @@ author: Jake Manske
 fileName: mlb_magic_number.star
 packageName: mlbmagicnumber
 recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - mlb
+  - baseball
+published: '2023-09-05T17:46:47Z'
+updated: '2026-10-01T15:26:52Z'

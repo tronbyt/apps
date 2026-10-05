@@ -7,3 +7,9 @@ author: theterg
 fileName: nyc_air_quality.star
 packageName: nycairquality
 recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - utility
+published: '2023-07-10T13:18:12Z'
+updated: '2025-11-30T20:08:55Z'

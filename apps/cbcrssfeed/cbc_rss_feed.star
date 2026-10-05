@@ -6,7 +6,8 @@ Author: jvivona
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("re.star", "re")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -34,12 +35,64 @@ ARTICLE_AREA_HEIGHT = 24
 
 RSS_STUB = "https://www.cbc.ca/webfeed/rss/rss-{}"
 
+# short section labels for the 2x header (the schema display names like
+# "Region - Kitchener-Waterloo" are far too long to fit beside the title)
+SECTION_TITLE = {
+    "topstories": "Top",
+    "world": "World",
+    "canada": "Canada",
+    "politics": "Politics",
+    "business": "Business",
+    "health": "Health",
+    "arts": "Arts",
+    "technology": "Tech",
+    "Indigenous": "Indigenous",
+    "offbeat": "Offbeat",
+    "sports": "Sports",
+    "sports-cfl": "CFL",
+    "sports-curling": "Curling",
+    "sports-figureskating": "Skating",
+    "sports-mlb": "MLB",
+    "sports-nba": "NBA",
+    "sports-nfl": "NFL",
+    "sports-nhl": "NHL",
+    "sports-soccer": "Soccer",
+    "canada-britishcolumbia": "BC",
+    "canada-calgary": "Calgary",
+    "canada-edmonton": "Edmonton",
+    "canada-hamiltonnews": "Hamilton",
+    "canada-kamloops": "Kamloops",
+    "canada-kitchenerwaterloo": "Kitchener",
+    "canada-london": "London",
+    "canada-manitoba": "Manitoba",
+    "canada-montreal": "Montreal",
+    "canada-newbrunswick": "N.B.",
+    "canada-newfoundland": "Nfld",
+    "canada-north": "North",
+    "canada-novascotia": "N.S.",
+    "canada-ottawa": "Ottawa",
+    "canada-pei": "PEI",
+    "canada-saskatchewan": "Sask",
+    "canada-saskatoon": "Saskatoon",
+    "canada-sudbury": "Sudbury",
+    "canada-thunderbay": "Thunder Bay",
+    "canada-toronto": "Toronto",
+    "canada-windsor": "Windsor",
+}
+
 def main(config):
     edition = config.get("news_edition", DEFAULT_NEWS)
 
     articlecount = int(config.get("articlecount", DEFAULT_ARTICLE_COUNT))
     articles = get_cacheable_data(edition.lower(), articlecount)
 
+    if canvas.is2x():
+        return render_2x(articles, edition)
+    return render_1x(articles)
+
+def render_1x(articles):
+    # 64x32 layout (unchanged): "CBC.ca News" title bar with headlines-only
+    # scrolling beneath it.
     return render.Root(
         delay = 100,
         show_full_animation = True,
@@ -66,6 +119,46 @@ def main(config):
         ),
     )
 
+def render_2x(articles, edition):
+    # 128x64 layout: fixed "CBC" + section header, then each article as a white
+    # headline followed by its description in the roomier canvas.
+    body = []
+    for article in articles:
+        body.append(render.WrappedText(content = clean_text(article[0]), color = TEXT_COLOR, font = ARTICLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 2, color = SPACER_COLOR))
+        desc = clean_text(article[1])
+        if desc != "":
+            body.append(render.WrappedText(content = desc, color = ARTICLE_COLOR, font = ARTICLE_SUB_TITLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 9, color = SPACER_COLOR))
+
+    return render.Root(
+        delay = 100,
+        show_full_animation = True,
+        child = render.Column(
+            children = [
+                render.Box(
+                    width = 128,
+                    height = 9,
+                    color = TITLE_BKG_COLOR,
+                    child = render.Row(
+                        cross_align = "center",
+                        children = [
+                            render.Text("CBC", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                            render.Box(width = 6, height = 1),
+                            render.Text(SECTION_TITLE.get(edition, edition), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_FONT),
+                        ],
+                    ),
+                ),
+                render.Marquee(
+                    height = 55,
+                    scroll_direction = "vertical",
+                    offset_start = 55,
+                    child = render.Column(children = body),
+                ),
+            ],
+        ),
+    )
+
 def render_article(news):
     #formats color and font of text
     news_text = []
@@ -77,6 +170,18 @@ def render_article(news):
         news_text.append(render.Box(width = 64, height = 8, color = SPACER_COLOR))
 
     return (news_text)
+
+def clean_text(s):
+    if not s:
+        return ""
+
+    # CBC descriptions embed HTML (an <img> tag then a <p> summary); strip all
+    # tags, unescape the common entities, then collapse whitespace so only the
+    # summary prose remains. &amp; is first so double-escaped entities resolve.
+    s = re.sub("<[^>]*>", " ", s)
+    for entity, char in [("&amp;", "&"), ("&apos;", "'"), ("&#39;", "'"), ("&quot;", "\""), ("&#34;", "\""), ("&lt;", "<"), ("&gt;", ">"), ("&nbsp;", " ")]:
+        s = s.replace(entity, char)
+    return " ".join(s.split())
 
 def get_schema():
     return schema.Schema(

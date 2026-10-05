@@ -6,4 +6,12 @@ desc: Shows todays daily reflection title, summary and reference from aa.org/dai
 author: jvivona
 fileName: aadailyreflect.star
 packageName: aadailyreflect
-recommendedInterval: 5
+recommendedInterval: 30
+supports2x: true
+supports64x64: true
+category: lifestyle
+tags:
+  - lifestyle
+  - daily-reflection
+published: '2022-11-18T22:27:20Z'
+updated: '2026-10-01T18:58:08Z'

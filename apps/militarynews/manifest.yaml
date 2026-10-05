@@ -7,3 +7,10 @@ author: Robert Ison
 recommendedInterval: 10
 fileName: military_news.star
 packageName: militarynews
+supports64x64: true
+category: news
+tags:
+  - tech
+  - news
+published: '2024-08-20T15:31:26Z'
+updated: '2026-10-01T17:25:50Z'

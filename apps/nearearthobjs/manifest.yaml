@@ -7,3 +7,12 @@ author: noahcolvin
 fileName: near_earth_objs.star
 packageName: nearearthobjs
 recommendedInterval: 5
+supports64x64: true
+category: science
+tags:
+  - space
+  - science
+  - weather
+  - utility
+published: '2022-02-09T22:55:35Z'
+updated: '2026-10-01T18:38:43Z'

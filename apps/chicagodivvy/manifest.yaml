@@ -7,3 +7,8 @@ author: wilcot
 fileName: chicago_divvy.star
 packageName: chicagodivvy
 recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2024-03-07T21:17:09Z'
+updated: '2025-11-29T23:55:39Z'

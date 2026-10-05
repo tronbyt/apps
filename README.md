@@ -8,7 +8,7 @@
 
 ### **Discover, explore, and install hundreds of apps!**
 
-**[🎯 View the Current Apps →](https://tronbyt.github.io/apps/app-viewer/)**
+**[🎯 View the Current Apps →](https://tronbyt.github.io/apps/)**
 
 ---
 

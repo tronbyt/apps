@@ -143,13 +143,16 @@ def get_bus_route_options(api_key):
         )
         for route in routes
     ]
-    return schema.Dropdown(
-        id = "route",
-        name = "Bus Route",
-        desc = "The CTA Bus Route to get departure schedule for.",
-        icon = "bus",
-        options = options,
-    )
+    return [
+        schema.Dropdown(
+            id = "route",
+            name = "Bus Route",
+            desc = "The CTA Bus Route to get departure schedule for.",
+            icon = "bus",
+            default = DEFAULT_ROUTE,
+            options = options,
+        ),
+    ]
 
 ######################
 # Utility methods

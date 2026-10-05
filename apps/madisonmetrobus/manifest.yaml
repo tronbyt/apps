@@ -8,4 +8,8 @@ fileName: madison_metro_bus.star
 packageName: madisonmetrobus
 recommendedInterval: 5
 broken: true
-brokenReason: "api.smsmybus.com: no such host"
+brokenReason: 'api.smsmybus.com: no such host'
+category: transit
+tags: []
+published: '2024-09-17T15:06:27Z'
+updated: '2025-12-05T22:28:51Z'

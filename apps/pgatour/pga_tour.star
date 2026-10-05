@@ -86,6 +86,25 @@ Updated PLAYER_MAPPING
 v2.10
 Updated Tournament IDs for 2026 Season
 Updated timezone check
+
+v2.10.1
+Updated PLAYER_MAPPING
+
+v2.11
+Fixed bug that was showing 3rd round score as final round score
+
+v2.12
+Added different colour title bar for Playoff events, using "FedEx" purple
+Added different colour title bar for Signature events, using an orange colour
+Added opposite field event for the AP Inv...might be too late!
+Added more entries for Tournament renaming map
+
+v2.13 
+Changed winner font colour to gold, seems more fitting of a champion
+Handling for team events eg Zurich
+
+v2.14
+Updated PLAYER_MAPPING
 """
 
 load("encoding/json.star", "json")
@@ -118,7 +137,19 @@ PLAYER_MAPPING = """
     "4382434": "Norgaard",
     "4404992": "B.Griffin",
     "5962": "L.Griffin",
-    "686": "Z.Johnson"
+    "686": "Z.Johnson",
+    "9506": "J.Smith",
+    "5211425": "B.Brown",
+    "1407": "D.Brown",
+    "4877953": "S.T.Lee",
+    "5076011": "Dumont De",
+    "4355673": "B.Wu",
+    "4423323": "D.Wu",
+    "9127": "A.Svensson",
+    "4699329": "J.Svensson",
+    "4364865": "A.Fitzpatrick",
+    "9037": "M.Fitzpatrick",
+    "5724": "C.Kim"
 }
 """
 
@@ -131,10 +162,11 @@ TOURNAMENT_MAPPING = """
     "401811935": "Arnold Palm",
     "401811937": "The Players",
     "401811943": "Zurich Clas",
+    "401811944": "Cadillac Ch",
     "401811958": "Puntacana",
     "401811948": "The CJ Cup",
     "401811938": "Valspar",
-    "401811939": "Houston Opn",
+    "401811939": "Houston Op",
     "401811940": "Texas Open",
     "401811941": "The Masters",
     "401811942": "Heritage",
@@ -142,22 +174,34 @@ TOURNAMENT_MAPPING = """
     "401811950": "Memorial",
     "401811947": "PGA Champ",
     "401465538": "Barbasol",
-    "401811955": "Scottish",
+    "401811955": "Scottish Op",
     "401811961": "Wyndham",
     "401811962": "FedEx St.J",
     "401811963": "BMW Champ",
     "401811964": "TOUR CHAMP",
-    "401811956": "ISCO Champ"
+    "401811956": "ISCO Champ",
+    "401811945": "Truist Ch",
+    "401811946": "Myrtle Be",
+    "401811953": "Travelers"
 }
 """
 
 MAJOR_MAPPING = """
 {
-    "401811937": "#003360",
+    "401811937": "#003361",
     "401811941": "#006747",
     "401811947": "#00205B",
     "401811952": "#003865",
-    "401811957": "#1A1C3C"
+    "401811957": "#1A1C3C",
+    "401811962": "#4d148c",
+    "401811963": "#4d148c",
+    "401811964": "#4d148c",
+    "401811935": "#965115",
+    "401811942": "#965115",
+    "401811944": "#965115",
+    "401811945": "#965115",
+    "401811950": "#965115",
+    "401811953": "#965115"
 }
 """
 
@@ -237,10 +281,10 @@ def main(config):
             stage = stage.replace("Round 3", "R3")
             stage = stage.replace("Round 4", "R4")
             stage = stage.replace("Playoff - Play Complete", "PO")
+            stage = stage.replace("Playoff - In Progress", "PO")
             stage = stage.replace(" - In Progress", "")
             stage = stage.replace(" - Suspended", "")
             stage = stage.replace(" - Play Complete", "")
-            stage = stage.replace(" - Playoff", "PO")
 
             if entries:
                 if stage != "F":
@@ -355,14 +399,23 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
 
     for i in range(0, 4):
         if i + x < len(s):
-            playerID = s[i + x]["id"]
+            item = s[i + x]
+            playerID = item["id"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
                 playerName = Mapping[playerID]
-
+            elif "lastName" in item:
+                playerName = item["lastName"][:12]
             else:
-                playerName = s[i + x]["lastName"][:12]
+                playerName = item["name"]
+
+            # if team event, split the names
+            if "/" in playerName:
+                parts = playerName.split("/", 1)  # only split into two parts
+                first = parts[0][:4]
+                second = parts[1][:4] if len(parts) > 1 else ""
+                playerName = first + "/" + second
 
             score = s[i + x]["score"]
             displayScore = str(score)
@@ -381,9 +434,9 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
             # Players who have completed their round are shown in white, in progress rounds are in yellow which slowly transitions to white as the round progresses.
             playerFontColor = getPlayerFontColor(HolesCompleted, ColorGradient)
 
-            # if tournament is over, show winner in blue
+            # if tournament is over, show winner in gold
             if (i + x) == 0 and stage == "F":
-                playerFontColor = "#68f"
+                playerFontColor = "#d1b358"
 
             player = render.Row(
                 expanded = True,
@@ -440,21 +493,31 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
     LeaderTeeTimeFormat = time.parse_time(LeaderTeeTime, format = "2006-01-02T15:04Z").in_location(timezone)
     TimeDiff = LeaderTeeTimeFormat - time.now()
 
-    #print(TimeDiff)
     if TimeDiff.hours < 12:
         ShowTeeTimes = True
 
     for i in range(0, 4):
         ProgressStr = ""
         if i + x < len(s):
-            playerState = s[i + x]["status"]["state"]
-            playerID = s[i + x]["id"]
+            item = s[i + x]
+            playerState = item["status"]["state"]
+            playerID = item["id"]
+            period = item["status"]["period"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
                 playerName = Mapping[playerID]
+            elif "lastName" in item:
+                playerName = item["lastName"][:12]
             else:
-                playerName = s[i + x]["lastName"][:12]
+                playerName = item["name"]
+
+            # if team event, split the names
+            if "/" in playerName:
+                parts = playerName.split("/", 1)  # only split into two parts
+                first = parts[0][:4]
+                second = parts[1][:4] if len(parts) > 1 else ""
+                playerName = first + "/" + second
 
             # check if they've played at least 1 hole this round
             if (s[i + x]["status"]["thru"]) > 0:
@@ -470,6 +533,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             # if the player hasn't started their round, show their tee time in your local time
             # also check its not a playoff
             # Only show tee times if its less than 12hrs until the leader tees off
+
             if playerState == "pre":
                 if s[i + x]["status"]["playoff"] != True:
                     if ShowTeeTimes == True:
@@ -499,8 +563,10 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             if playerState == "post":
                 for i in range(0, len(t), 1):
                     if playerID == t[i]["id"]:
-                        CompletedRound = len(t[i]["linescores"]) - 2
-
+                        if period == 4:
+                            CompletedRound = 3
+                        else:
+                            CompletedRound = len(t[i]["linescores"]) - 2
                         RoundScore = t[i]["linescores"][CompletedRound]["value"]
                         ProgressStr = str(int(RoundScore))
 
@@ -595,6 +661,8 @@ def OppositeFieldCheck(ID):
     elif ID == "401811957":  # The Open -> Barracuda
         i = 1
     elif ID == "401811955":  # Scottish Open -> ISCO Champ
+        i = 1
+    elif ID == "401811935":  # AP Inv -> Puerto Rico
         i = 1
     else:
         i = 0

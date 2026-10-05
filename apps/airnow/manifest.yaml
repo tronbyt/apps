@@ -8,3 +8,10 @@ fileName: airnow.star
 packageName: airnow
 recommendedInterval: 5
 supports2x: true
+category: utilities
+tags:
+  - weather
+  - utility
+  - wide 2x support
+published: '2023-06-15T20:34:58Z'
+updated: '2026-07-21T00:45:38Z'

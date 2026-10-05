@@ -1,0 +1,15 @@
+---
+id: slow-shakespeare
+name: Slow Shakespeare
+summary: Learn sonnets daily
+desc: Learn a Shakespeare sonnet one line at a time. One new line per day, 14 days per sonnet. Sync learning with friends by matching start dates.
+author: Matt Milligan
+fileName: slow_shakespeare.star
+packageName: slowshakespeare
+category: education
+tags:
+  - education
+  - shakespeare
+  - poetry
+published: '2026-04-07T20:59:29Z'
+updated: '2026-04-07T21:43:31Z'

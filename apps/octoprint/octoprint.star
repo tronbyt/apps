@@ -28,17 +28,56 @@ SAMPLE_JOB = {"job": {"averagePrintTime": None, "estimatedPrintTime": 22088.3260
 SAMPLE_PRINTER = {"sd": {"ready": False}, "state": {"error": "", "flags": {"printing": True, "ready": False, "sdReady": False, "resuming": False, "cancelling": False, "closedOrError": False, "error": False, "finishing": False, "operational": True, "paused": False, "pausing": False}, "text": "Printing"}, "temperature": {"W": {"actual": 0.0, "offset": 0.0, "target": None}, "bed": {"actual": 60.02, "offset": 0.0, "target": 60.0}, "tool0": {"actual": 199.81, "offset": 0.0, "target": 200.0}}}
 
 def request(endpoint, serverIP, serverPort, apiKey):
-    res = http.get("http://%s:%s%s" % (serverIP, serverPort, endpoint), headers = {"X-API-Key": apiKey}, ttl_seconds = REFRESH_TIME)
+    url = "http://%s:%s%s" % (serverIP, serverPort, endpoint)
+    res = http.get(url, headers = {"X-API-Key": apiKey}, ttl_seconds = REFRESH_TIME)
     if res.status_code != 200:
-        print("request failed with status %d", res.status_code)
-        fail("request failed with status %d", res.status_code)
-    return res.json()
+        print("GET %s failed: %d %s" % (url, res.status_code, res.body()))
+        return None, res.status_code
+    return res.json(), res.status_code
 
 def requestSnapshot(snapshotURL):
     res = http.get(snapshotURL)
     if res.status_code != 200:
-        fail("request failed with status %d", res.status_code)
+        print("GET %s failed: %d" % (snapshotURL, res.status_code))
+        return None
     return res.body()
+
+def render_error(message):
+    return render.Root(
+        child = render.Box(
+            width = 64,
+            height = 32,
+            child = render.Column(
+                main_align = "center",
+                cross_align = "center",
+                expanded = True,
+                children = [
+                    render.Text("Octoprint", font = "tom-thumb"),
+                    render.WrappedText(message, color = RED, align = "center", font = "tom-thumb"),
+                ],
+            ),
+        ),
+    )
+
+def job_file(job):
+    return ((job.get("job") or {}).get("file") or {})
+
+def status_children(name, state, stateColor, printTimeLeft, completion, has_job):
+    if not has_job:
+        return [
+            render.Text("Octoprint"),
+            render.WrappedText(state, color = stateColor),
+        ]
+
+    children = [
+        render.Text("%s" % (name[:15] if name else "Octoprint"), font = "tom-thumb"),
+        render.WrappedText(state, color = stateColor),
+    ]
+    if printTimeLeft != None:
+        children.append(render.Text("%s hrs left" % printTimeLeft))
+    if completion != None:
+        children.append(renderProgress("Completion", completion, 1))
+    return children
 
 # convert color specification from JSON to hex string
 def to_rgb(color, combine = None, combine_level = 0.5):
@@ -153,35 +192,82 @@ def main(config):
         # use sample data
         job = SAMPLE_JOB
         printer = SAMPLE_PRINTER
-
     else:
-        job = request("/api/job", serverIP, serverPort, apiKey)
-        printer = request("/api/printer", serverIP, serverPort, apiKey)
+        job, job_status = request("/api/job", serverIP, serverPort, apiKey)
+        if job == None:
+            print("job unavailable (%s)" % job_status)
+            if job_status == 403:
+                return render_error("Permissions error")
+            return []
 
-    if job["progress"]["completion"] != None:
-        completion = math.round(job["progress"]["completion"])
-        name = job["job"]["file"]["display"].removesuffix(".gcode")
-        name = name[:16]  # only show the first 15 chars of name otherwise it'll just be a random portion of the middle of the filename
+        # 409 is OctoPrint's normal response when the printer is disconnected
+        printer, printer_status = request("/api/printer", serverIP, serverPort, apiKey)
+        if printer == None:
+            print("printer unavailable (%s), skipping render" % printer_status)
+            if printer_status == 403:
+                return render_error("Permissions error")
+            return []
 
-        # printTime = str(math.round(job["progress"]["printTime"] / 360) / 10)
-        printTimeLeft = str(math.round(job["progress"]["printTimeLeft"] / 360) / 10)
+    progress = job.get("progress") or {}
+    file_info = job_file(job)
+    has_job = bool(file_info.get("path"))
 
+    if progress.get("completion") != None:
+        completion = math.round(progress["completion"])
+        name = (file_info.get("display") or "").removesuffix(".gcode")
+        name = name[:16]
+        if progress.get("printTimeLeft") != None:
+            printTimeLeft = str(math.round(progress["printTimeLeft"] / 360) / 10)
+
+    bed = None
+    tool = None
     state = printer["state"]["text"]
-    bed = int(printer["temperature"]["bed"]["actual"])
-    tool = int(printer["temperature"]["tool0"]["actual"])
     stateColor = WHITE
-    if printer["state"]["flags"]["closedOrError"] or printer["state"]["flags"]["error"] or printer["state"]["flags"]["cancelling"]:
+    temps = printer.get("temperature") or {}
+    if temps.get("bed") and temps["bed"].get("actual") != None:
+        bed = int(temps["bed"]["actual"])
+    if temps.get("tool0") and temps["tool0"].get("actual") != None:
+        tool = int(temps["tool0"]["actual"])
+    flags = printer["state"]["flags"]
+    if flags["closedOrError"] or flags["error"] or flags["cancelling"]:
         stateColor = RED
-    if printer["state"]["flags"]["printing"] or printer["state"]["flags"]["finishing"]:
+    if flags["printing"] or flags["finishing"]:
         stateColor = GREEN
 
     snapshotURL = None
+    snapshot = None
     if serverIP and showSnapshot:
-        settings = request("/api/settings", serverIP, serverPort, apiKey)
-        snapshotURL = settings["webcam"]["snapshotUrl"]
+        settings, _ = request("/api/settings", serverIP, serverPort, apiKey)
+        if settings:
+            snapshotURL = (settings.get("webcam") or {}).get("snapshotUrl")
     if snapshotURL:
         snapshot = requestSnapshot(snapshotURL)
 
+    overlay_children = []
+    if tool != None:
+        overlay_children.append(
+            render.Column(
+                main_align = "start",
+                cross_align = "start",
+                expanded = True,
+                children = [
+                    render.Text("tool %s°" % tool, color = WHITE, font = "tom-thumb"),
+                ],
+            ),
+        )
+    if bed != None:
+        overlay_children.append(
+            render.Column(
+                main_align = "end",
+                cross_align = "start",
+                expanded = True,
+                children = [
+                    render.Text("bed %s°" % bed, color = WHITE, font = "tom-thumb"),
+                ],
+            ),
+        )
+
+    if snapshot:
         return render.Root(
             child = render.Stack(
                 children = [
@@ -195,15 +281,7 @@ def main(config):
                                     main_align = "center",
                                     cross_align = "center",
                                     expanded = True,
-                                    children = [
-                                        render.Text("%s" % name[:15], font = "tom-thumb"),
-                                        render.WrappedText(state, color = stateColor),
-                                        render.Text("%s hrs left" % printTimeLeft),
-                                        renderProgress("Completion", completion, 1),
-                                    ] if job["job"]["file"]["path"] else [
-                                        render.Text("Octoprint"),
-                                        render.WrappedText(state, color = stateColor),
-                                    ],
+                                    children = status_children(name, state, stateColor, printTimeLeft, completion, has_job),
                                 ),
                             ),
                         ),
@@ -238,26 +316,7 @@ def main(config):
                                     child = render.Row(
                                         expanded = True,
                                         main_align = "start",
-                                        children = [render.Stack(
-                                            children = [
-                                                render.Column(
-                                                    main_align = "start",
-                                                    cross_align = "start",
-                                                    expanded = True,
-                                                    children = [
-                                                        render.Text("tool %s°" % tool, color = WHITE, font = "tom-thumb"),
-                                                    ],
-                                                ),
-                                                render.Column(
-                                                    main_align = "end",
-                                                    cross_align = "start",
-                                                    expanded = True,
-                                                    children = [
-                                                        render.Text("bed %s°" % bed, color = WHITE, font = "tom-thumb"),
-                                                    ],
-                                                ),
-                                            ],
-                                        )],
+                                        children = [render.Stack(children = overlay_children)],
                                     ),
                                 ),
                             ],
@@ -287,30 +346,21 @@ def main(config):
             ),
         )
 
-    else:
-        return render.Root(
-            child = render.Box(
-                width = 64,
-                height = 32,
-                child = render.Padding(
-                    pad = (0, 1, 0, 0),
-                    child = render.Column(
-                        main_align = "center",
-                        cross_align = "center",
-                        expanded = True,
-                        children = [
-                            render.Text("%s" % name, font = "tom-thumb"),
-                            render.WrappedText(state, color = stateColor),
-                            render.Text("%s hrs left" % printTimeLeft),
-                            renderProgress("Completion", completion, 1),
-                        ] if job["job"]["file"]["path"] else [
-                            render.Text("Octoprint"),
-                            render.WrappedText(state, color = stateColor),
-                        ],
-                    ),
+    return render.Root(
+        child = render.Box(
+            width = 64,
+            height = 32,
+            child = render.Padding(
+                pad = (0, 1, 0, 0),
+                child = render.Column(
+                    main_align = "center",
+                    cross_align = "center",
+                    expanded = True,
+                    children = status_children(name, state, stateColor, printTimeLeft, completion, has_job),
                 ),
             ),
-        )
+        ),
+    )
 
 def get_schema():
     return schema.Schema(

@@ -7,3 +7,9 @@ author: Kyle Bolstad
 fileName: package_tracker.star
 packageName: packagetracker
 recommendedInterval: 5
+category: utilities
+tags:
+  - tracking
+  - utility
+published: '2023-10-19T19:36:23Z'
+updated: '2025-11-29T23:55:39Z'

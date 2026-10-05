@@ -11,6 +11,8 @@ load("schema.star", "schema")
 
 SCRYFALL_API = "https://api.scryfall.com/cards/random"
 
+SCRYFALL_HEADER = { "Accept": "application/json", "User-Agent": "MtgScryOne/Application" }
+
 DEFAULT_TTL_TIME = 1800
 MARQUEE_DELAY = 10
 
@@ -124,11 +126,11 @@ def get_random_card(config):
         url = url + "?q="
         url = url + "%20".join(queries)
 
-    card_json = http.get(url, ttl_seconds = int(config.get("time_frequency", "3600")))
+    card_json = http.get(url, headers = SCRYFALL_HEADER,  ttl_seconds = int(config.get("time_frequency", "3600")))
     return card_json.json()
 
 def get_card_image(config, image_url):
-    return http.get(image_url, ttl_seconds = int(config.get("time_frequency", "3600"))).body()
+    return http.get(image_url, headers = SCRYFALL_HEADER, ttl_seconds = int(config.get("time_frequency", "3600"))).body()
 
 def get_mana_colors(colors):
     ret = []

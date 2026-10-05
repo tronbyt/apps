@@ -7,3 +7,10 @@ author: jvivona
 fileName: soccerwomens.star
 packageName: soccerwomens
 recommendedInterval: 5
+supports2x: true
+category: sports
+tags:
+  - real-time
+  - soccer
+published: '2023-01-03T17:29:27Z'
+updated: '2026-09-19T16:48:28Z'

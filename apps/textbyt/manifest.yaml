@@ -7,3 +7,12 @@ author: Josh Reed
 fileName: textbyt.star
 packageName: textbyt
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tidbyt
+  - smart-home
+  - notification
+  - utility
+published: '2022-09-22T15:49:15Z'
+updated: '2026-10-01T18:38:43Z'

@@ -7,3 +7,10 @@ author: Aiden Mitchell
 fileName: patterson_times.star
 packageName: pattersontimes
 recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - local
+  - utility
+published: '2023-10-07T18:41:34Z'
+updated: '2026-10-01T18:52:35Z'

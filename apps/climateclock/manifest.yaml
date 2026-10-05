@@ -7,3 +7,10 @@ author: Rob Kimball
 fileName: climate_clock.star
 packageName: climateclock
 recommendedInterval: 5
+category: clocks
+tags:
+  - weather
+  - utility
+  - clock
+published: '2022-05-03T17:47:36Z'
+updated: '2025-11-29T23:55:39Z'

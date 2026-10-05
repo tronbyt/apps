@@ -18,6 +18,25 @@ Displayed:
 - Select color for time (uses new schema.Color)
 - 12 hour vs 24 hour time & US vs Intl date format
 
+## Up to 4 teams on 2x displays
+
+When configuring a 2x (128x64) display, the settings add **Team 2 / Team 3 / Team 4** pickers (they don't
+appear for 1x displays). Each team's game is shown at once as its own 64x32 tile, in the display type you
+select (the same display type is used for every team):
+
+- 1 team: centered; 2 teams: side by side; 3 teams: two side by side over one centered; 4 teams: 2x2
+- If two of your teams play each other, the game is shown once
+- On a 1x display only the first team is shown
+
+![2x screenshot](soccersingle@2x.webp)
+
+## 2 teams on 64x64 square displays
+
+When configuring a square (64x64) display, the settings add a **Team 2** picker. The two teams' games are
+stacked, in the selected display type; with one team, its game is centered.
+
+![64x64 screenshot](soccersingle@64x64.webp)
+
 ## Thanks
 
 Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you

@@ -8,3 +8,10 @@ fileName: whosthatpokemon.star
 packageName: whosthatpokemon
 recommendedInterval: 5
 supports2x: true
+category: gaming
+tags:
+  - gaming
+  - retro
+  - wide 2x support
+published: '2022-04-11T15:45:18Z'
+updated: '2026-05-15T00:04:16Z'

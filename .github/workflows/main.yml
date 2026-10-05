@@ -13,16 +13,27 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup build agent
         run: ./.github/scripts/setup.sh
 
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install PyYAML
+
+      - name: Validate manifest categories
+        run: python3 .github/scripts/check-categories.py
+
       - name: Find last successful build
         id: lastsuccess
-        uses: SamhammerAG/last-successful-build-action@v7
+        uses: SamhammerAG/last-successful-build-action@v8
         with:
           branch: "main"
           workflow: "Build and Test"

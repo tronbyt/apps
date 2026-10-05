@@ -7,3 +7,10 @@ author: pawliger
 fileName: tix_clock.star
 packageName: tixclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - clock
+  - art
+published: '2023-03-23T12:09:15Z'
+updated: '2025-12-02T19:30:22Z'

@@ -13,8 +13,9 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-COUNTRIES_REST_ENDPOINT_ALL = "https://restcountries.com/v3.1/all?fields=name,cca3,capital,translations,flags"
-COUNTRIES_REST_ENDPOINT_REGION = "https://restcountries.com/v3.1/region/{0}?fields=name,cca3,capital,translations,flags"
+COUNTRIES_API_BASE = "https://api.restcountries.com/countries/v5"
+COUNTRIES_API_FIELDS = "names,codes,capitals,flag"
+COUNTRIES_API_PAGE_SIZE = 100
 
 # start on Jan 1 2023
 REFERENCE_DATE = time.parse_time("2023-01-01T00:00:00Z")
@@ -43,30 +44,38 @@ def main(config):
     # get the region selected
     region = config.get("region") or "all"
 
+    # get the API key
+    api_key = config.get("api_key") or "rc_live_demo"
+
     # get the country for the current config
-    country = get_country(region, country_index)
+    country = get_country(region, country_index, api_key)
 
     # parse country information
-    capital_city = country.get("capital")
-    if capital_city:
-        # capitals are an array, grab the first one
-        capital_city = capital_city[0]
+    capitals = country.get("capitals")
+    if type(capitals) == "list" and len(capitals) > 0:
+        capital_city = capitals[0].get("name") or "No Capital City"
     else:
         capital_city = "No Capital City"
 
     # get the common name
+    names = country.get("names")
     lang = config.get("language") or "eng"
     if lang == "eng":
-        country_name = country.get("name")
+        country_name = names
     elif lang == "native":
-        native_names = country.get("name").get("nativeName")
-
-        # native names are in a dictionary, grab the first one
-        country_name = native_names.values()[0]
+        native = names.get("native")
+        if native:
+            country_name = native.values()[0]
+        else:
+            country_name = None
     else:
-        country_name = country.get("translations").get(lang)
+        translations = names.get("translations")
+        if translations:
+            country_name = translations.get(lang)
+        else:
+            country_name = None
     if not country_name:
-        country_name = country.get("name")
+        country_name = names
     country_name = country_name.get("common")
 
     # look up the flag
@@ -106,51 +115,63 @@ def main(config):
         ),
     )
 
-def get_country(region, country_index):
+def get_country(region, country_index, api_key):
     """ gets the country based on the current configuration
 
     Args:
         region (string): the region we are limited to
         country_index (int): the index of the country we are processing
+        api_key (string): the REST Countries v5 API key
     Returns:
         a dict "country" object
     """
 
-    # get the URL based on region selected
-    url = get_url(region)
+    # get the base URL based on region selected
+    base_url = get_url(region)
+    headers = {"Authorization": "Bearer " + api_key}
 
-    # ping it
-    response = http.get(url, ttl_seconds = CACHE_TIMEOUT)
+    # paginate to collect all countries (max 5 pages = 500 countries)
+    all_countries = []
+    for _ in range(5):
+        url = base_url + "&offset=" + str(len(all_countries))
+        response = http.get(url, headers = headers, ttl_seconds = CACHE_TIMEOUT)
 
-    # check status code
-    if response.status_code != HTTP_OK:
-        # if we are not OK, return the default country with information about the failure
-        country = {
-            "name": {
-                "common": "HTTP ERROR",
-            },
-            "cca3": "N/A",
-            "capital": ["ERROR CODE: " + str(response.status_code)],
-        }
+        if response.status_code != HTTP_OK:
+            return {
+                "names": {
+                    "common": "HTTP ERROR",
+                },
+                "codes": {
+                    "alpha_3": "N/A",
+                },
+                "capitals": [{"name": "ERROR CODE: " + str(response.status_code)}],
+            }
+
+        data = response.json()
+        objects = data.get("data").get("objects")
+        all_countries.extend(objects)
+
+        meta = data.get("data").get("meta")
+        if not meta.get("more"):
+            break
+
+    # sort by country code for consistent ordering
+    sorted_countries = sorted(all_countries, get_cca3)
+
+    # count how many results we have
+    num_countries = len(sorted_countries)
+
+    # get the country based on index modulo how many countries there are for this region
+    if country_index < 0:
+        country_index = random.number(0, num_countries - 1)
     else:
-        # parse response object and sort it so we can get the right country in the loop
-        countries = response.json()
-        sorted_countries = sorted(countries, get_cca3)
-
-        # count how many results we have
-        num_countries = len(sorted_countries)
-
-        # get the country based on index modulo how many countries there are for this region
-        if country_index < 0:
-            country_index = random.number(0, num_countries - 1)
-        else:
-            country_index = country_index % num_countries
-        country = sorted_countries[country_index]
+        country_index = country_index % num_countries
+    country = sorted_countries[country_index]
 
     return country
 
 def get_schema():
-    options = [
+    region_options = [
         schema.Option(
             display = "All",
             value = "all",
@@ -231,8 +252,8 @@ def get_schema():
                 name = "Region",
                 desc = "Limit world capitals to this region.",
                 icon = "globe",
-                default = "all",  # use all as the default
-                options = options,
+                default = "all",
+                options = region_options,
             ),
             schema.Dropdown(
                 id = "language",
@@ -250,17 +271,25 @@ def get_schema():
                 default = "24",
                 options = frequency,
             ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "REST Countries v5 API key. Sign up for free at restcountries.com.",
+                icon = "key",
+                default = "rc_live_demo",
+                secret = True,
+            ),
         ],
     )
 
 def get_cca3(country):
-    return country.get("cca3")
+    return country.get("codes").get("alpha_3")
 
 def get_url(region):
-    if region == "all":
-        return COUNTRIES_REST_ENDPOINT_ALL
-    else:
-        return COUNTRIES_REST_ENDPOINT_REGION.format(region)
+    url = COUNTRIES_API_BASE + "?response_fields=" + COUNTRIES_API_FIELDS + "&limit=" + str(COUNTRIES_API_PAGE_SIZE)
+    if region != "all":
+        url += "&region=" + region
+    return url
 
 def get_flag(country):
     """ gets the flag based on the country
@@ -272,7 +301,8 @@ def get_flag(country):
     """
 
     # try to get the flag from the URL first
-    url = country.get("flags").get("png")
+    flag = country.get("flag")
+    url = flag.get("url_png") if type(flag) == "dict" else None
     if url:
         response = http.get(url, ttl_seconds = CACHE_TIMEOUT)
         if response.status_code == 200:

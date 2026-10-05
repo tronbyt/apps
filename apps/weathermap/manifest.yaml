@@ -7,3 +7,10 @@ author: Felix Bruns
 fileName: weather_map.star
 packageName: weathermap
 recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - art
+  - tech
+published: '2022-03-02T04:00:42Z'
+updated: '2026-09-25T19:25:58Z'

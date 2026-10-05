@@ -1,0 +1,16 @@
+---
+id: live-tennis
+name: Live Tennis
+summary: Live WTA, Challenger, ITF
+desc: 'Live scores for the circuits ESPN does not carry. Every other tennis app in this repo reads site.api.espn.com, which serves exactly two tennis leagues, atp and wta, so Challenger and ITF have no app at all. This one reads the whole live slate from the Live Tennis API (livetennisapi.com) instead: pick Challenger, ITF, WTA or all tours and it shows whatever is on court right now, no tournament to choose. Per match: both surnames, the set score, the games in the current set and the point in the current game, with a green ball beside the server and a red bar beside a player holding break point. Rotates through the live matches, walking further down the slate each refresh. Needs a free API key (no card), whose quota is 100 requests a day: at the recommended 15 minute interval that is 1440/15 = 96 a day, and the response is cached for 900 seconds so the app cannot poll harder than that whatever the device asks.'
+author: Ben Abulafia
+fileName: livetennis.star
+packageName: livetennis
+recommendedInterval: 15
+category: sports
+tags:
+  - real-time
+  - tennis
+  - sports
+published: '2026-09-13T05:33:52Z'
+updated: '2026-09-13T05:33:52Z'

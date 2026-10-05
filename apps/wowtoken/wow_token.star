@@ -6,7 +6,7 @@ Description: Displays the current price of the World of Warcraft token in variou
 
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("images/gold_icon.jpg", GOLD_ICON_ASSET = "file")
+load("images/token.png", GOLD_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 

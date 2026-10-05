@@ -12,4 +12,4 @@ Pick the league you are interested in, then mark the locations of all the stadiu
 
 The locations you have visited as indicated in the settings will then appear in bright yellow, then blink. They'll blink once more before the display repeats.
 
-![Stadium Tracker for Tidbyt](stadium_tracker.webp)
+![Stadium Tracker for Tidbyt](stadiumtracker.webp)

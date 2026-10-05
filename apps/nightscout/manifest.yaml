@@ -8,3 +8,11 @@ fileName: nightscout.star
 packageName: nightscout
 recommendedInterval: 5
 supports2x: true
+category: health
+tags:
+  - lifestyle
+  - tracking
+  - utility
+  - wide 2x support
+published: '2022-01-19T18:18:31Z'
+updated: '2026-08-31T23:48:25Z'

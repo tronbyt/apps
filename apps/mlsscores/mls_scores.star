@@ -86,9 +86,15 @@ def main(config):
     loc = json.decode(location)
     timezone = loc["timezone"]
     now = time.now().in_location(timezone)
-    datePast = now - time.parse_duration("%dh" % 1 * 24)
-    dateFuture = now + time.parse_duration("%dh" % 6 * 24)
-    league = {LEAGUE: API + "?limit=100" + (selectedTeam == "all" and " " or "&dates=" + datePast.format("20060102") + "-" + dateFuture.format("20060102"))}
+    league = {}
+    if selectedTeam == "all":
+        league[LEAGUE] = API + "?limit=100"
+    else:
+        for d in range(-1, 7):
+            day_time = now + time.parse_duration("%dh" % (d * 24))
+            day_str = day_time.format("20060102")
+            league[day_str] = API + "?limit=100&dates=" + day_str
+
     scores = get_scores(league, selectedTeam)
     if len(scores) > 0:
         for i, s in enumerate(scores):
@@ -147,17 +153,22 @@ def main(config):
                 else:
                     gameTime = convertedTime.format("3:04 PM")
                 if pregameDisplay == "odds":
-                    checkOdds = competition.get("odds", "NO")
-                    if checkOdds != "NO":
-                        theOdds = competition["odds"][1]
-                        checkHomeOdds = theOdds.get("homeTeamOdds", "NO")
-                        checkAwayOdds = theOdds.get("awayTeamOdds", "NO")
-                        if checkHomeOdds != "NO" and checkAwayOdds != "NO":
-                            homeScore = get_odds(float(competition["odds"][1]["homeTeamOdds"]["moneyLine"]))
-                            awayScore = get_odds(float(competition["odds"][1]["awayTeamOdds"]["moneyLine"]))
-                        else:
-                            homeScore = ""
-                            awayScore = ""
+                    # ESPN returns at most one odds entry, that entry is often
+                    # JSON null, and when it is not it frequently carries no
+                    # moneyLine. Indexing any of those directly aborts the whole
+                    # render, which leaves the panel frozen on its last frame.
+                    oddsList = competition.get("odds") or []
+                    theOdds = oddsList[0] if len(oddsList) > 0 else None
+                    homeTeamOdds = (theOdds or {}).get("homeTeamOdds") or {}
+                    awayTeamOdds = (theOdds or {}).get("awayTeamOdds") or {}
+                    checkHomeOdds = homeTeamOdds.get("moneyLine")
+                    checkAwayOdds = awayTeamOdds.get("moneyLine")
+                    if checkHomeOdds != None and checkAwayOdds != None:
+                        homeScore = get_odds(float(checkHomeOdds))
+                        awayScore = get_odds(float(checkAwayOdds))
+                    else:
+                        homeScore = ""
+                        awayScore = ""
                 elif pregameDisplay == "record":
                     checkSeries = competition.get("series", "NO")
                     checkRecord = homeCompetitor.get("records", "NO")
@@ -191,11 +202,14 @@ def main(config):
             if gameStatus == "post":
                 gameTime = s["status"]["type"]["shortDetail"]
                 gameName = s["status"]["type"]["name"]
-                checkSeries = competition.get("series", "NO")
-                checkNotes = len(competition["notes"])
+                checkSeries = competition.get("series") or "NO"
+                checkNotes = len(competition.get("notes") or [])
                 if checkSeries != "NO":
-                    seriesSummary = competition["series"]["summary"]
-                    gameTime = seriesSummary.replace("series ", "")
+                    # A soccer series object carries competitors/title/completed
+                    # but no summary, so indexing it aborts the render.
+                    seriesSummary = checkSeries.get("summary", "")
+                    if seriesSummary != "":
+                        gameTime = seriesSummary.replace("series ", "")
                 if checkNotes > 0 and checkSeries == "NO":
                     gameHeadline = competition["notes"][0]["headline"]
                     if gameHeadline.find(" - ") > 0:
@@ -829,26 +843,28 @@ def get_schema():
 
 def get_scores(urls, team):
     allscores = []
-    gameCount = 0
     for i, s in urls.items():
         data = get_cachable_data(s)
         decodedata = json.decode(data)
         allscores.extend(decodedata["events"])
-        if team != "all" and team != "":
-            newScores = []
-            for _, s in enumerate(allscores):
-                home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
-                away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
-                gameStatus = s["status"]["type"]["state"]
-                if (home == team or away == team) and gameStatus == "post":
-                    newScores.append(s)
-                elif (home == team or away == team) and gameCount == 0:
-                    if gameStatus == "in":
-                        newScores.clear()
-                    newScores.append(s)
-                    gameCount = gameCount + 1
-            allscores = newScores
         all([i, allscores])
+
+    if team != "all" and team != "":
+        newScores = []
+        gameCount = 0
+        for _, s in enumerate(allscores):
+            home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
+            away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
+            gameStatus = s["status"]["type"]["state"]
+            if (home == team or away == team) and gameStatus == "post":
+                newScores.append(s)
+            elif (home == team or away == team) and gameCount == 0:
+                if gameStatus == "in":
+                    newScores.clear()
+                newScores.append(s)
+                gameCount = gameCount + 1
+        allscores = newScores
+
     return allscores
 
 def get_odds(theOdds):

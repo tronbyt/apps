@@ -75,6 +75,8 @@ load("images/red_anim.gif", RED_ANIM = "file")
 load("images/red_anim@2x.gif", RED_ANIM_2X = "file")
 load("images/renault_logo.png", RENAULT_LOGO_18x18 = "file")
 load("images/renault_logo@2x.png", RENAULT_LOGO_18x18_2X = "file")
+load("images/rivian_logo.png", RIVIAN_LOGO_18x18 = "file")
+load("images/rivian_logo@2x.png", RIVIAN_LOGO_18x18_2X = "file")
 load("images/seat_logo.png", SEAT_LOGO_18x16 = "file")
 load("images/seat_logo@2x.png", SEAT_LOGO_18x16_2X = "file")
 load("images/skoda_logo.png", SKODA_LOGO_18x18 = "file")
@@ -923,6 +925,12 @@ EV_LOGOS = {
         "width": 18,
         "height": 18,
     },
+    "RIVIAN": {
+        "logo": RIVIAN_LOGO_18x18,
+        "logo_2x": RIVIAN_LOGO_18x18_2X,
+        "width": 18,
+        "height": 18,
+    },
     "AUDI": {
         "logo": AUDI_LOGO_24x9,
         "logo_2x": AUDI_LOGO_24x9_2X,
@@ -1137,6 +1145,10 @@ def get_schema():
                     schema.Option(
                         display = "Audi",
                         value = "AUDI",
+                    ),
+                    schema.Option(
+                        display = "Rivian",
+                        value = "RIVIAN",
                     ),
                     schema.Option(
                         display = "BMW",

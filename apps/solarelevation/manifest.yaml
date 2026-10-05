@@ -7,3 +7,12 @@ author: dinosaursrarr
 fileName: solar_elevation.star
 packageName: solarelevation
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - weather
+  - clock
+  - utility
+  - sports
+published: '2022-09-15T19:25:19Z'
+updated: '2026-10-01T18:52:35Z'

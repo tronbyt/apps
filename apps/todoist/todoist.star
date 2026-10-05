@@ -2,16 +2,14 @@
 Applet: Todoist
 Summary: Integration with Todoist
 Description: Shows the number of tasks you have due today.
-Author: zephyern
+Author: zephyern/oleksii-ivanov
 """
 
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/todoist_icon.png", TODOIST_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 TODOIST_ICON = TODOIST_ICON_ASSET.readall()
 
@@ -21,22 +19,20 @@ DEFAULT_SHOW_IF_EMPTY = True
 
 NO_TASKS_CONTENT = "No Tasks :)"
 
-TODOIST_URL = "https://api.todoist.com/rest/v2/tasks"
-
-OAUTH2_CLIENT_ID = secret.decrypt("AV6+xWcE3uxifd70n+JncXgagNue2eYtPYP05tbS77/hAd//mp4OQfMp+easxFROFLbCWsen/FCCDIzz8y5huFcAfV0hdyGL3mTGWaoUO2tVBvUUtGqPbOfb3HdJxMjuMb7C1fDFNqhdXhfJmo+UgRzRYzVZ/Q/C/sSl7U25DOrtKqhRs8I=")
-OAUTH2_CLIENT_SECRET = secret.decrypt("AV6+xWcEYGPbL6d105xHQ68RZWY/KSrCK/ivqz2Y2AkrVuPO9iUFkYXBqoJs4phKRdeh2QxHjjGTuwQ7RakOEPrER+2VACdGHiiytCIpMZ5Qst1PeuMT5NECKqmHhW73MwReMBtvyPl0SbjdF8XijqzhK/YvcDTwVOdZZALaj+3dvGnqANk=")
+TODOIST_URL = "https://api.todoist.com/api/v1/tasks/filter"
 
 def main(config):
-    token = config.get("auth") or config.get("dev_api_key")
+    token = config.get("api_key")
     if token:
         filter_name = "%s" % (config.get("name") or DEFAULT_NAME)
         filter = config.get("filter") or DEFAULT_FILTER
 
         print("Querying for tasks.")
-        rep = http.get(TODOIST_URL, headers = {"Authorization": "Bearer %s" % token}, params = {"filter": filter}, ttl_seconds = 60)
+        rep = http.get(TODOIST_URL, headers = {"Authorization": "Bearer %s" % token}, params = {"query": filter}, ttl_seconds = 60)
 
         if rep.status_code == 200:
-            tasks = rep.json()
+            data = rep.json()
+            tasks = data.get("results", [])
             num_tasks = len(tasks)
         elif rep.status_code == 204:
             num_tasks = 0
@@ -81,44 +77,16 @@ def main(config):
             ),
     )
 
-def oauth_handler(params):
-    params = json.decode(params)
-    res = http.post(
-        url = "https://todoist.com/oauth/access_token",
-        headers = {
-            "Accept": "application/json",
-        },
-        form_body = dict(
-            code = params["code"],
-            client_id = OAUTH2_CLIENT_ID,
-            client_secret = OAUTH2_CLIENT_SECRET,
-        ),
-        form_encoding = "application/x-www-form-urlencoded",
-    )
-    if res.status_code != 200:
-        fail("token request failed with status code: %d - %s" %
-             (res.status_code, res.body()))
-
-    token_params = res.json()
-    access_token = token_params["access_token"]
-
-    return access_token
-
 def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.OAuth2(
-                id = "auth",
-                name = "Todoist",
-                desc = "Connect your Todoist account.",
-                icon = "squareCheck",
-                handler = oauth_handler,
-                client_id = OAUTH2_CLIENT_ID or "fake-client-id",
-                authorization_endpoint = "https://todoist.com/oauth/authorize",
-                scopes = [
-                    "data:read",
-                ],
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Your Todoist API token. Find it in Todoist Settings > Integrations > Developer.",
+                icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "name",

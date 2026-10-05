@@ -7,4 +7,8 @@ author: Jack Sherbal
 fileName: trivia.star
 packageName: trivia
 broken: true
-brokenReason: "Jservice API (http://jservice.io) is blocking requests (403 Forbidden)."
+brokenReason: Jservice API (http://jservice.io) is blocking requests (403 Forbidden).
+category: entertainment
+tags: []
+published: '2022-11-17T19:55:45Z'
+updated: '2025-12-05T22:28:51Z'

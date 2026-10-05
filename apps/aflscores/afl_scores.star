@@ -53,6 +53,15 @@ Handling for Indigenous team names
 v2.6
 Updated for 2026 season
 Updated timezone check
+
+v2.7
+Squiggle API now requiring the current year to be added to all requests
+
+v2.7.1
+Bug fix: forgot to update the function calls for live games...
+
+v2.8
+Added User Agent info to API request as per new requirements from provider
 """
 
 load("encoding/json.star", "json")
@@ -72,7 +81,7 @@ TEAM_SUFFIX = "&teamId="
 SQUIGGLE_PREFIX = "https://api.squiggle.com.au/?q=games;round="
 INCOMPLETE_SUFFIX = ";complete=!100"
 COMPLETE_SUFFIX = ";complete=100"
-YEAR_SUFFIX = ";year=2026"
+YEAR_PREFIX = ";year="
 
 MATCH_CACHE = 21600
 LADDER_CACHE = 86400
@@ -109,6 +118,7 @@ def main(config):
 
     # Get the Current Round, according to the API
     CurrentRound = str(MatchesJSON["matches"][0]["compSeason"]["currentRoundNumber"])
+    YEAR = YEAR_PREFIX + str(MatchesJSON["matches"][0]["compSeason"]["name"])[0:4]
 
     if ViewSelection == "All" or ViewSelection == "Live":
         CURRENT_ROUND_URL = ROUND_URL + CurrentRound
@@ -120,7 +130,7 @@ def main(config):
     CurrentRoundJSON = json.decode(RoundData)
 
     # Use the Squiggle API for live games, cache data for 30 secs
-    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX
+    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX + YEAR
 
     LiveData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
     LiveJSON = json.decode(LiveData)
@@ -195,7 +205,7 @@ def main(config):
 
             # We have a live game!
             if status == "LIVE":
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
 
             # if the game is complete, show the status and get the scores
@@ -222,9 +232,8 @@ def main(config):
         for x in range(0, GamesThisRound, 1):
             status = CurrentRoundJSON["matches"][x]["status"]
 
-            #print(status)
             if status == "LIVE":
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
                 LiveCount = LiveCount + 1
 
@@ -434,7 +443,7 @@ def main(config):
             # We have a live game!
             if status == "LIVE":
                 #print("LIVE")
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
 
             # if the game is complete, show the status and get the scores
@@ -454,7 +463,7 @@ def main(config):
         ),
     )
 
-def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
+def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR):
     renderDisplay = []
 
     # get start time for the match in question
@@ -585,7 +594,7 @@ def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
     # So lets look at completed games for the round in Squiggle, match the team we're looking at and pass info to the showCompletedGame function
     if LiveMatch == False:
         CurrentRound = str(CurrentRoundJSON["matches"][0]["compSeason"]["currentRoundNumber"])
-        SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + COMPLETE_SUFFIX + YEAR_SUFFIX
+        SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + COMPLETE_SUFFIX + YEAR
         CompletedData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
         CompletedJSON = json.decode(CompletedData)
         CompletedMatches = len(CompletedJSON["games"])
@@ -920,8 +929,9 @@ def MoreOptions(View):
         return None
 
 def get_cachable_data(url, timeout):
-    #SOMETHING IN HERE TO HANDLE OFFLINE FEED
-    res = http.get(url = url, ttl_seconds = timeout)
+    res = http.get(url = url, ttl_seconds = timeout, headers = {
+        "User-Agent": "Tronbyt Application (AFL Scores) - steve@schtev.com",
+    })
 
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))

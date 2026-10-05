@@ -88,6 +88,15 @@ If the next scheduled match is the final, then look ahead 48hrs instead of the n
 
 v1.17
 Updated for 2026 season
+
+v1.18
+Updated method of finding "Mens Singles" event when its not 1st event of the tournament
+
+v1.19
+Removed headers from the http.get request as it was producing 403 errors
+
+v1.20
+Reduced cache timeout for tournament fetching, this was causing the match data to keep the cached version for up to 3 hours
 """
 
 load("encoding/json.star", "json")
@@ -108,8 +117,8 @@ def main(config):
     timezone = time.tz()
     RotationSpeed = config.get("speed", "3")
 
-    # hold 1 min cache for live scores
-    CacheData = get_cachable_data(ATP_SCORES_URL, 60)
+    # hold 5 min cache for live scores
+    CacheData = get_cachable_data(ATP_SCORES_URL, 300)
     ATP_JSON = json.decode(CacheData)
 
     Display1 = []
@@ -123,6 +132,8 @@ def main(config):
 
     TestID = "421-2026"
     SelectedTourneyID = config.get("TournamentList", TestID)
+
+    #SelectedTourneyID = SelectedTourneyID.split("_")[0]
     ShowCompleted = config.get("CompletedOn", "true")
     ShowScheduled = config.get("ScheduledOn", "false")
     Number_Events = len(ATP_JSON["events"])
@@ -147,7 +158,13 @@ def main(config):
                 # Sometimes results for both ATP & WTA will be listed, so check if the first "groupings" is Mens Singles
                 # and if so, Womens Singles will be next (GroupingsID = 1)
                 if ATP_JSON["events"][x]["groupings"][GroupingsID]["grouping"]["slug"] != "mens-singles":
-                    GroupingsID = 1
+                    for q in range(0, len(ATP_JSON["events"][x]["groupings"]), 1):
+                        if ATP_JSON["events"][x]["groupings"][q]["grouping"]["slug"] == "mens-singles":
+                            GroupingsID = q
+                            break
+                        else:
+                            continue
+
                 TotalMatches = len(ATP_JSON["events"][x]["groupings"][GroupingsID]["competitions"])
 
                 for y in range(0, TotalMatches, 1):
@@ -385,8 +402,16 @@ def getLiveScores(SelectedTourneyID, EventIndex, InProgressMatchList, JSON):
             Player1NameColor = "#fff"
             Player2NameColor = "#fff"
 
+            #if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "mens-singles":
+            #    GroupingsID = 1
+
             if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "mens-singles":
-                GroupingsID = 1
+                for q in range(0, len(JSON["events"][EventIndex]["groupings"]), 1):
+                    if JSON["events"][EventIndex]["groupings"][q]["grouping"]["slug"] == "mens-singles":
+                        GroupingsID = q
+                        break
+                    else:
+                        continue
 
             # pop the index from the list and go straight to that match
             x = InProgressMatchList.pop()
@@ -645,8 +670,16 @@ def getCompletedMatches(SelectedTourneyID, EventIndex, CompletedMatchList, JSON)
             # pop the index from the list and go straight to that match
             x = CompletedMatchList.pop()
 
+            #if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "mens-singles":
+            #    GroupingsID = 1
+
             if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "mens-singles":
-                GroupingsID = 1
+                for q in range(0, len(JSON["events"][EventIndex]["groupings"]), 1):
+                    if JSON["events"][EventIndex]["groupings"][q]["grouping"]["slug"] == "mens-singles":
+                        GroupingsID = q
+                        break
+                    else:
+                        continue
 
             Player1_Name = JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][0]["athlete"]["shortName"]
             Player2_Name = JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][1]["athlete"]["shortName"]
@@ -943,8 +976,16 @@ def getScheduledMatches(SelectedTourneyID, EventIndex, ScheduledMatchList, JSON,
             # pop the index from the list and go straight to that match
             x = ScheduledMatchList.pop()
 
+            # if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "mens-singles":
+            #     GroupingsID = 1
+
             if JSON["events"][EventIndex]["groupings"][0]["grouping"]["slug"] != "mens-singles":
-                GroupingsID = 1
+                for q in range(0, len(JSON["events"][EventIndex]["groupings"]), 1):
+                    if JSON["events"][EventIndex]["groupings"][q]["grouping"]["slug"] == "mens-singles":
+                        GroupingsID = q
+                        break
+                    else:
+                        continue
 
             # check that we have players before displaying them or display blank line
             if "athlete" in JSON["events"][EventIndex]["groupings"][GroupingsID]["competitions"][x]["competitors"][0]:
@@ -1149,9 +1190,8 @@ def notStarted(EventIndex, JSON):
     return Display
 
 def get_schema():
-    TOURNEY_CACHE = 10800  # 3hrs
     ATP_SCORES_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard"
-    CacheData = get_cachable_data(ATP_SCORES_URL, TOURNEY_CACHE)
+    CacheData = get_cachable_data(ATP_SCORES_URL, 300)
     ATP_JSON = json.decode(CacheData)
 
     Number_Events = len(ATP_JSON["events"])

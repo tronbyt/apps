@@ -1,7 +1,7 @@
 """
 Applet: Pollen Count
 Summary: Pollen count for your area
-Description: Displays a pollen count for your area. Enter your location for updates every 12 hours on the current conditions in your town, as well as which types of pollen are in the air today. Get your Secret key by creating a developer account on tomorrow.io.
+Description: Displays a pollen count for your area. Enter your location for updates every 12 hours on the current conditions in your town, as well as which types of pollen are in the air today. Get your API key from the Google Maps Platform (Pollen API).
 Author: Nicole Brooks
 """
 
@@ -38,27 +38,34 @@ COLORS = {
     "green": "#338722",
 }
 DEFAULT_TIMEZONE = "America/New_York"
-API_URL_BASE = "https://api.tomorrow.io/v4/timelines?&fields=treeIndex,weedIndex,grassIndex&timesteps=1d&location="
+API_URL_BASE = "https://pollen.googleapis.com/v1/forecast:lookup?days=1&location.latitude="
+MIN_LEVEL_OPTIONS = [
+    schema.Option(display = "Always show", value = "0"),
+    schema.Option(display = "Low", value = "2"),
+    schema.Option(display = "Moderate", value = "3"),
+    schema.Option(display = "High", value = "4"),
+    schema.Option(display = "Very High", value = "5"),
+]
 
 def main(config):
     print("Initializing Pollen Count...")
 
     #Get lat and long from schema.
     loc = json.decode(config.get("location", DEFAULT_LOCATION))
-    timezone = loc.get("timezone")  #use to make sure to get the correct day
 
-    #Round to 1 decimal place (1.1km)
-    lat = roundToHalf(float(loc.get("lat")))
-    lng = roundToHalf(float(loc.get("lng")))
+    lat = float(loc.get("lat"))
+    lng = float(loc.get("lng"))
 
-    latLngStr = str(lat) + "," + str(lng)
-    dev_key = config.str("dev_key", "1234")
+    dev_key = config.str("dev_key", "")
+    min_level = int(config.get("min_level", "0"))
 
-    #Check cache for pollen for this lat/long
+    # make API call and cache result
     print("calling API")
+    todaysCount = getTodaysCount(lat, lng, dev_key)
 
-    #If not, make API call and cache result
-    todaysCount = getTodaysCount(latLngStr, dev_key, timezone)
+    if shouldHideBelowMinLevel(todaysCount, min_level):
+        print("Hiding app: all pollen types below minimum level %d" % min_level)
+        return []
 
     firstMixin = None
     secondMixin = None
@@ -66,15 +73,16 @@ def main(config):
         print("Error! " + todaysCount["message"])
         average = ""
 
-        # Custom message only for rate limit.
         skySrc = images["skyLowPollen"]
         groundSrc = images["groundBare"]
-        if todaysCount["code"] == 429001:
+
+        # Google API rate limit is HTTP 429
+        if todaysCount.get("code") == 429:
             textOne = "RATE"
             textTwo = "LIMIT"
         else:
             textOne = "ERROR"
-            textTwo = todaysCount["type"]  #str(int(todaysCount["type"]))
+            textTwo = todaysCount.get("status", "UNKNOWN")
         textColumn = [
             render.Text(
                 content = textOne,
@@ -176,43 +184,62 @@ def main(config):
             ),
     )
 
-# Checking cache for data already stored.
-def checkLatLngCache(latLng, dev_key):
-    print("checking cache for: " + latLng)
-    cachedPollen = cache.get(dev_key)
-    if cachedPollen == None:
-        return None
-    return json.decode(cachedPollen)
-
-# Rounds to the nearest 0.5.
-def roundToHalf(floatNum):
-    oneDecimal = float(int(floatNum * 10) / 10)
-    noDecimal = int(floatNum)
-    decimal = oneDecimal - noDecimal
-    if decimal >= 0.3 and decimal <= 0.7:
-        num = noDecimal + 0.5
-    elif decimal < 0.3:
-        num = noDecimal
-    elif decimal > 0.7:
-        num = noDecimal + 1
-    else:
-        num = None
-
-    return num
-
 # Make API call and process data.
-def getTodaysCount(latLng, dev_key, timezone):
-    print("Getting API for: " + latLng + " for " + str(3600 * 12) + " seconds")
-    FULL_URL = API_URL_BASE + latLng + "&apikey=" + dev_key + "&timezone=" + timezone
+def getTodaysCount(lat, lng, dev_key):
+    print("Getting API for: " + str(lat) + "," + str(lng) + " for " + str(3600 * 12) + " seconds")
+    FULL_URL = (
+        API_URL_BASE +
+        str(lat) +
+        "&location.longitude=" +
+        str(lng) +
+        "&key=" +
+        dev_key
+    )
     rep = http.get(FULL_URL, ttl_seconds = 3600 * 12)
     data = rep.json()
 
-    if "code" in data:
-        return data
+    print(rep.body())
 
-    pollenData = data["data"]["timelines"][0]["intervals"][0]["values"]
+    # Google API errors come back as { "error": { "code": ..., "message": ..., "status": ... } }
+    if "error" in data:
+        err = data["error"]
+        return {
+            "message": err.get("message", "Unknown error"),
+            "code": err.get("code", 0),
+            "status": err.get("status", "ERROR"),
+        }
 
-    return pollenData
+    # Parse pollenTypeInfo array into the flat dict shape the rest of the app expects:
+    # { "treeIndex": N, "grassIndex": N, "weedIndex": N }
+    pollenTypeInfo = data["dailyInfo"][0]["pollenTypeInfo"]
+    result = {}
+    for entry in pollenTypeInfo:
+        code = entry["code"]
+        if "indexInfo" not in entry:
+            continue
+        value = entry["indexInfo"]["value"]
+        if code == "TREE":
+            result["treeIndex"] = value
+        elif code == "GRASS":
+            result["grassIndex"] = value
+        elif code == "WEED":
+            result["weedIndex"] = value
+
+    return result
+
+def shouldHideBelowMinLevel(indexes, min_level):
+    if min_level <= 0:
+        return False
+
+    if "message" in indexes:
+        return False
+
+    # Missing types are out of season and count as 0.
+    for indexName in ["treeIndex", "grassIndex", "weedIndex"]:
+        if indexes.get(indexName, 0) >= min_level:
+            return False
+
+    return True
 
 # Get total average of pollen indexes to two decimal points.
 def getAverage(indexes):
@@ -331,10 +358,18 @@ def get_schema():
             ),
             schema.Text(
                 id = "dev_key",
-                name = "Secret key",
-                desc = "Secret key from tomorrow.io.",
+                name = "API Key",
+                desc = "API key from Google Maps Platform (Pollen API).",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Dropdown(
+                id = "min_level",
+                name = "Minimum Level to Show",
+                desc = "Hide the app when all pollen types are below this level.",
+                icon = "eyeSlash",
+                options = MIN_LEVEL_OPTIONS,
+                default = "0",
             ),
         ],
     )

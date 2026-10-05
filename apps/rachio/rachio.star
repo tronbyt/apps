@@ -20,7 +20,6 @@ RACHIO_SECONDARY_COLOR = "#00A676"
 ACCURACY_IN_MINUTES = 3  #We'll round to the nearest 3 minutes when calling Rachio API
 LONG_TTL_SECONDS = 7200
 RACHIO_URL = "https://api.rach.io/1/public"
-SAMPLE_DATA = [{"type": "WEATHER_INTELLIGENCE_CLIMATE_SKIP", "date": "Thursday 04:31AM", "summary": "Water all zones was scheduled for 10/03 at 04:26 AM (EDT), but will be skipped based on weather and soil conditions."}, {"type": "WEATHER_INTELLIGENCE_SKIP", "date": "Sunday 04:31AM", "summary": "Water all zones was scheduled for 10/06 at 04:28 AM (EDT), but was skipped due to PLUS weather network which observed 0.00 in and predicted 0.16 in precipitation compared to schedules's threshold of 0.13 in."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:45PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:48PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:50PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:51PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:55PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "WEATHER_INTELLIGENCE_SKIP", "date": "Thursday 04:31AM", "summary": "Water all zones was scheduled for 10/10 at 04:30 AM (EDT), but was skipped due to PLUS weather network which observed 5.10 in and predicted 3.96 in precipitation compared to schedules's threshold of 0.13 in."}, {"type": "WEATHER_INTELLIGENCE_CLIMATE_SKIP", "date": "Sunday 04:36AM", "summary": "Water all zones was scheduled for 10/13 at 04:32 AM (EDT), but will be skipped based on weather and soil conditions."}, {"type": "WEATHER_INTELLIGENCE_CLIMATE_SKIP", "date": "Thursday 04:36AM", "summary": "Water all zones was scheduled for 10/17 at 04:34 AM (EDT), but will be skipped based on weather and soil conditions."}, {"type": "SCHEDULE_STARTED", "date": "Saturday 06:11PM", "summary": "Quick Run will run for 1 minutes."}]
 SHORT_TTL_SECONDS = 600
 
 SCHED_START = "SCHEDULE_STARTED"
@@ -50,28 +49,34 @@ def main(config):
         font_width = 8
 
     if (api_key.strip() == ""):
-        return display_error_screen(now, "Please enter your API Key", "It can be found in the Rachio App", delay, screen_width, font_height, font)
+        return display_error_screen(now, "Please enter your API Key", "It can be found in the Rachio App", delay, screen_width, font_height, font, font_width)
 
     devices = get_devices(api_key)
     selected_device = config.str("device")
 
-    if (devices == None or selected_device == None or selected_device == ""):
-        if devices == None:
+    if (not devices or selected_device == None or selected_device == ""):
+        if not devices:
             # No device selected, and no device available from the list, send an error
-            return display_error_screen(now, "No devices found.", "Make sure you have entered the correct API key and selected your display device", delay, screen_width, font_height, font, font_width, icon_width)
+            return display_error_screen(now, "No devices found.", "Check API key and device selection", delay, screen_width, font_height, font, font_width)
         else:
             selected_device = devices[0]["id"]
 
-    # we have a selected device; otherwise, they've already been sent to the display_error_screen
-
-    now = time.now().in_location(tz)
-
     # If we use the time to the millisecond, nothing will ever be cached and we'll hit our limit of rachio requests in a day
     # So we'll round off to the nearest X minutes (They provide enough calls to give you 1 per minutes.)
-    # But in addition, let's go a few minutes into the future, no point in every making a call that could miss the most recent event.
-    now = time.now() + time.parse_duration("{}m".format(str(ACCURACY_IN_MINUTES)))
+    # But in addition, let's go a few minutes into the future, no point in ever making a call that could miss the most recent event.
 
-    rounded_time = time.time(year = now.year, month = now.month, day = now.day, hour = now.hour, minute = round_to_nearest_X(now.minute, ACCURACY_IN_MINUTES), second = 0, location = tz)
+    # Use the 'now' variable already defined at line 52
+    api_time = now + time.parse_duration("{}m".format(ACCURACY_IN_MINUTES))
+
+    rounded_time = time.time(
+        year = api_time.year,
+        month = api_time.month,
+        day = api_time.day,
+        hour = api_time.hour,
+        minute = round_to_nearest_X(api_time.minute, ACCURACY_IN_MINUTES),
+        second = 0,
+        location = tz,
+    )
 
     # The data they send is a little odd in that the there isn't a time stamp, but a time display.
     # So to get the 'last' and 'next' event, you could get all the data at once, and parse through their time display
@@ -143,53 +148,43 @@ def display_error_screen(time, line_3, line_4 = "", delay = 45, screen_width = 6
 def render_rachio(tz, config, device_name, recent_events, current_events, now, delay, skip_when_empty = True, screen_width = 64, icon_width = 16, font_height = 8, font_width = 5, font = "5x8"):
     show_device_name = config.bool("title_display", True)
 
-    line_1 = "Rachio"
-    line_2 = now.format("Mon Jan 2")
-    line_3 = ""
-    line_4 = ""
-
-    if (show_device_name):
-        line_1 = device_name
-
+    # 1. Check if we even have events
     show_recent_events = recent_events != None and len(recent_events) > 0
-
-    if (not show_recent_events):
+    if not show_recent_events:
         if skip_when_empty:
             return []
-        else:
-            return display_error_screen(now, "No Events within a week.", "", delay, screen_width, font_height, font, font_width, icon_width)
+        return display_error_screen(now, "No Events within a week.", "", delay, screen_width, font_height, font, font_width, icon_width)
 
-    # whew, made it with at least one event to display
+    # 2. Get our main event data
+    latest_event = recent_events[len(recent_events) - 1]
+    readable_date = time.from_timestamp(int(int(latest_event["eventDate"]) / 1000.0)).in_location(tz)
 
-    #do we have any current events?
+    # 3. Handle the "Stale" logic (Stop showing 'Current' if it's been > 3 hours)
+    time_since_event = now - readable_date
+    is_stale = time_since_event > time.parse_duration("3h")
+
     show_current_events = current_events != None and len(current_events) > 0
+    if is_stale or (latest_event["type"] == SCHED_STOP):
+        show_current_events = False
 
-    if show_recent_events:
-        latest_event = recent_events[len(recent_events) - 1]
+    # 4. Handle "Today" vs Date logic
+    is_today = (readable_date.year == now.year and
+                readable_date.month == now.month and
+                readable_date.day == now.day)
 
-        #this current event is only relevant if the latest_event
-        if (latest_event["type"] and latest_event["type"] == SCHED_STOP):
-            show_current_events = False
+    preface = "Current" if show_current_events else "Last"
 
-        preface = "Last"
-        if show_current_events:
-            preface = "Current"
+    line_1 = device_name if show_device_name else "Rachio"
+    line_2 = readable_date.format("Today at 3:04 PM") if is_today else readable_date.format("Mon, Jan 2 at 3:04 PM")
+    line_3 = "%s: %s (%s)" % (preface, latest_event["display_type"], readable_date.format("3:04 PM"))
+    line_4 = ""
 
-        readable_date = time.from_timestamp(int(int(latest_event["eventDate"]) / 1000.0)).in_location(tz)
-        line_2 = readable_date.format("Mon Jan 2 at 3:04 PM")
-        line_3 = "%s: %s - %s" % (preface, latest_event["summary"], readable_date.format("Mon Jan 2 at 3:04 PM"))
-
+    # 5. Add Zone details if something is currently running
     if show_current_events:
         current_event = current_events[len(current_events) - 1]
         display = current_event["summary"].strip()
         if len(display) > 0:
-            display = "Zone: %s" % display
-
-        if line_3 == "":
-            line_3 = display
-        else:
-            line_4 = display
-
+            line_4 = "Zone %d: %s" % (current_event.get("zoneNumber", 0), display)
     return render.Root(
         render.Column(
             children = [
@@ -238,6 +233,14 @@ def get_events(deviceId, api_key, start, end):
     return event_response.json()
 
 def get_selected_events(tz, events, current):
+    SUBTYPE_MAP = {
+        "WEATHER_INTELLIGENCE_SKIP": "Rain Skip",
+        "WEATHER_INTELLIGENCE_CLIMATE_SKIP": "Soil Saturation Skip",
+        "WEATHER_INTELLIGENCE_FREEZE_SKIP": "Freeze Skip",
+        "SCHEDULE_STARTED": "Started",
+        "SCHEDULE_COMPLETED": "Finished",
+    }
+
     selected_sub_types = []
     if current:
         selected_sub_types = [ZONE_STARTED]
@@ -245,13 +248,27 @@ def get_selected_events(tz, events, current):
         selected_sub_types = [SCHED_START, SCHED_STOP, WEATHER_SKIP, WEATHER_CLIMATE_SKIP]
 
     selected_events = []
+
     for event in events:
-        if "subType" in event.keys():
-            if event["subType"] in selected_sub_types:
-                eventDateSecs = time.from_timestamp(int(event["eventDate"] / 1000)).in_location(tz)
-                parsedDate = eventDateSecs.format("Monday 03:04PM")
-                newEvent = dict(type = event["subType"], date = parsedDate, summary = event["summary"], eventDate = event["eventDate"])
-                selected_events.append(newEvent)
+        # .get() returns None if the key doesn't exist, preventing a crash
+        sub_type = event.get("subType")
+
+        # Now check if the sub_type is one we care about
+        if sub_type in selected_sub_types:
+            eventDateSecs = time.from_timestamp(int(event["eventDate"] / 1000)).in_location(tz)
+            parsedDate = eventDateSecs.format("Monday 03:04PM")
+            display_name = SUBTYPE_MAP.get(sub_type, sub_type)
+
+            # Create the dictionary and append
+            newEvent = dict(
+                type = sub_type,
+                display_type = display_name,
+                date = parsedDate,
+                summary = event.get("summary", ""),
+                eventDate = event["eventDate"],
+                zoneNumber = event.get("zoneNumber", 0),
+            )
+            selected_events.append(newEvent)
 
     return selected_events
 

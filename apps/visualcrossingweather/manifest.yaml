@@ -6,3 +6,11 @@ desc: Display current temperature, humidity, and conditions for a user-specified
 author: ryan-doucette
 fileName: visualcrossing_weather.star
 packageName: visualcrossingweather
+supports64x64: true
+category: weather
+tags:
+  - weather
+  - humidity
+  - local
+published: '2025-07-25T17:59:08Z'
+updated: '2026-10-01T18:46:01Z'

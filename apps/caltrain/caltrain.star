@@ -11,13 +11,24 @@ Author: quacksire
 #
 # Caltrain stop ids are 5 digits long, however there's two ids for each stop, XXXX1 for northbound and XXXX2 for southbound
 
+load("caltrain_logo.webp", CT_LOGO_FILE = "file")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-#
+
+FONT_1X = "tom-thumb"
+FONT_2X = "terminus-12"
+
+def s(val):
+    """Scale a dimension value for 2x rendering."""
+    return val * 2 if canvas.is2x() else val
+
+def font():
+    """Return the appropriate font for current resolution."""
+    return FONT_2X if canvas.is2x() else FONT_1X
 
 STATIC_STATIONS = [
     {"id": "7002", "Name": "22nd Street"},
@@ -53,188 +64,116 @@ STATIC_STATIONS = [
     {"id": "7027", "Name": "Tamien"},
 ]
 
-# Function to get Caltrain departures
+# Fetch future departures for a single 5-digit stop code
+def _fetch_future_departures(stop_code, key):
+    url = "http://api.511.org/transit/StopMonitoring?api_key=%s&agency=CT&stopCode=%s&format=json" % (key, stop_code)
+    response = http.get(url, ttl_seconds = 1)
+    if response.status_code != 200:
+        fail("Rate Limit")
+
+    cleaned_content = clean_response(response.body())
+    visits = json.decode(cleaned_content)["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"]
+
+    future = []
+    for visit in visits:
+        departure = visit["MonitoredVehicleJourney"]["MonitoredCall"]["AimedDepartureTime"]
+        if humanize.time(time.parse_time(departure)).find("from") != -1:
+            future.append(visit)
+    return future
+
+# Fetch raw Caltrain departure data for a stop
 def get_caltrain_departures(stop_id, key):
-    # stop_id is the 5 digit stop id, with the last digit being 1 or 2 indicating the direction
-    # key is the 511 API key
+    if len(stop_id) == 4:
+        departures = _fetch_future_departures(stop_id + "1", key) + _fetch_future_departures(stop_id + "2", key)
+        return manual_sort(departures, compare_departures)
 
-    # We want to modify this function to add support for allowing the user to select both directions
+    return _fetch_future_departures(stop_id, key)
 
-    # get only the first 3 of visits
-    ETAS = []
-    FUTURE_ETAS = []
-    print(stop_id, key)
+# Column widths for departure rows at each resolution
+# tom-thumb is ~4px/char, terminus-12 is ~6px/char
+COL_TRAIN_1X = 13  # 3 chars + 1px
+COL_DEST_1X = 33  # 8 chars + 1px
+COL_TIME_1X = 14  # 3 chars + 2px
+COL_DEST_CHARS_1X = 8
 
-    if (len(stop_id) == 4):
-        # We need to get the northbound and southbound departures
+COL_TRAIN_2X = 21  # 3 chars * 6 + 3px
+COL_DEST_2X = 78  # 12 chars * 6 + 6px
+COL_TIME_2X = 24  # 3 chars * 6 + 6px
+COL_DEST_CHARS_2X = 12
 
-        northbound_stop_id = stop_id + "1"
-        southbound_stop_id = stop_id + "2"
+ROW_HEIGHT_1X = 6
+ROW_HEIGHT_2X = 12
 
-        # --- Northbound departures ---
+# Render a single departure row for the default view
+def render_departure_row(visit, color_train, color_scheme = "classic"):
+    journey = visit["MonitoredVehicleJourney"]
+    train_num = journey["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"]
+    train_color = get_train_color(train_num, color_scheme) if color_train else "#fff"
+    is2x = canvas.is2x()
+    dest_chars = COL_DEST_CHARS_2X if is2x else COL_DEST_CHARS_1X
+    col_train = COL_TRAIN_2X if is2x else COL_TRAIN_1X
+    col_dest = COL_DEST_2X if is2x else COL_DEST_1X
+    col_time = COL_TIME_2X if is2x else COL_TIME_1X
+    row_h = ROW_HEIGHT_2X if is2x else ROW_HEIGHT_1X
+    time_str = rjust(simplify_time_duration(humanize.time(time.parse_time(journey["MonitoredCall"]["AimedDepartureTime"]))), 3)
+    return render.Row(
+        expanded = True,
+        cross_align = "center",
+        children = [
+            render.Box(width = col_train, height = row_h, child = render.Text(content = train_num, color = train_color, font = font())),
+            render.Box(width = col_dest, height = row_h, child = render.Text(content = truncate_pad(stationNameCleaner(journey["DestinationName"]), dest_chars), color = "#F00", font = font())),
+            render.Box(width = col_time, height = row_h, child = render.Text(content = time_str, font = font())),
+        ],
+    )
 
-        # Define the URL and make an HTTP request
-        url = "http://api.511.org/transit/StopMonitoring?api_key=%s&agency=CT&stopCode=%s&format=json" % (key, northbound_stop_id)
-        print(url)
-        response = http.get(url, ttl_seconds = 1)
-        if response.status_code != 200:
-            print("Nope")
-            fail("Rate Limit")
+# Render default view: up to 3 departure rows
+def render_default(departures, color_train, color_scheme = "classic"):
+    rows = []
+    for departure in departures[:3]:
+        rows.append(render_departure_row(departure, color_train, color_scheme))
 
-        # Trim BOM or unwanted characters from the beginning of the response
-        cleaned_content = clean_response(response.body())
+    # Pad to 3 rows
+    for _ in range(3 - len(rows)):
+        rows.append(render.Row(expanded = True, children = [render.Text(content = "", font = font())]))
+    return rows
 
-        # Extract Caltrain departures
-        monitored_stop = json.decode(cleaned_content)
+# Map type abbreviation to a representative train number prefix for color lookup
+TYPE_COLOR_PREFIX = {"LCL": "1", "LTD": "4", "EXP": "5", "WKD": "6", "SCC": "8", "OTH": "9"}
 
-        monitored_stop_visits = monitored_stop["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"]
+# Render "Times by type" view: group departures by train type, show comma-separated times
+def render_times_by_type(departures, color_scheme = "classic"):
+    type_order = []
+    type_times = {}
+    for visit in departures:
+        journey = visit["MonitoredVehicleJourney"]
+        train_num = journey["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"]
+        train_type = get_train_type(train_num)
+        time_str = simplify_time_duration(humanize.time(time.parse_time(journey["MonitoredCall"]["AimedDepartureTime"])))
+        if train_type not in type_times:
+            type_order.append(train_type)
+            type_times[train_type] = []
+        type_times[train_type].append(time_str)
 
-        for visit in monitored_stop_visits:
-            stop = visit["MonitoredVehicleJourney"]
-            if (humanize.time(time.parse_time(stop["MonitoredCall"]["AimedDepartureTime"]))).find("from") != -1:
-                FUTURE_ETAS.append(visit)
-
-        # --- Southbound departures ---
-        # Define the URL and make an HTTP request
-        url = "http://api.511.org/transit/StopMonitoring?api_key=%s&agency=CT&stopCode=%s&format=json" % (key, southbound_stop_id)
-        print(url)
-        response = http.get(url, ttl_seconds = 1)
-        if response.status_code != 200:
-            print("Nope")
-            fail("Rate Limit")
-
-        # Trim BOM or unwanted characters from the beginning of the response
-        cleaned_content = clean_response(response.body())
-
-        # Extract Caltrain departures
-        monitored_stop = json.decode(cleaned_content)
-
-        monitored_stop_visits = monitored_stop["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"]
-
-        for visit in monitored_stop_visits:
-            stop = visit["MonitoredVehicleJourney"]
-            if (humanize.time(time.parse_time(stop["MonitoredCall"]["AimedDepartureTime"]))).find("from") != -1:
-                FUTURE_ETAS.append(visit)
-
-        ## Now we have the departures for both directions, we need to sort them by time
-        FUTURE_ETAS = manual_sort(FUTURE_ETAS, compare_stops)
-
-    if (len(stop_id) == 5):
-        # Define the URL and make an HTTP request
-        url = "http://api.511.org/transit/StopMonitoring?api_key=%s&agency=CT&stopCode=%s&format=json" % (key, stop_id)
-        print(url)
-        response = http.get(url, ttl_seconds = 1)
-        if response.status_code != 200:
-            print("Nope")
-            fail("Rate Limit")
-
-        # Trim BOM or unwanted characters from the beginning of the response
-        cleaned_content = clean_response(response.body())
-
-        # Extract Caltrain departures
-        monitored_stop = json.decode(cleaned_content)
-
-        monitored_stop_visits = monitored_stop["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"]
-
-        for visit in monitored_stop_visits:
-            stop = visit["MonitoredVehicleJourney"]
-            if (humanize.time(time.parse_time(stop["MonitoredCall"]["AimedDepartureTime"]))).find("from") != -1:
-                FUTURE_ETAS.append(visit)
-
-    if len(FUTURE_ETAS) > 0:
-        first_slot = FUTURE_ETAS[0]["MonitoredVehicleJourney"]
-        first_train_number = get_train_color(first_slot["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"])
-
-        ETAS.append(
+    rows = []
+    for t in type_order[:3]:
+        prefix = TYPE_COLOR_PREFIX.get(t, "9")
+        color = get_train_color(prefix + "XX", color_scheme)
+        times_str = ", ".join(type_times[t])
+        rows.append(
             render.Row(
                 expanded = True,
                 cross_align = "center",
                 children = [
-                    render.Text(content = first_slot["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"], color = first_train_number, font = "tom-thumb"),
-                    render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                    render.Text(content = get_first_8_chars(stationNameCleaner(first_slot["DestinationName"])), color = "#F00", font = "tom-thumb"),
-                    render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                    render.Text(content = simplify_time_duration(humanize.time(time.parse_time(first_slot["MonitoredCall"]["AimedDepartureTime"]))), font = "tom-thumb"),
+                    render.Text(content = ljust(t, 4), color = color, font = font()),
+                    render.Text(content = times_str, font = font()),
                 ],
             ),
         )
-    if len(FUTURE_ETAS) > 1:
-        second_slot = FUTURE_ETAS[1]["MonitoredVehicleJourney"]
-        second_train_number = get_train_color(second_slot["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"])
 
-        ETAS.append(
-            render.Row(
-                expanded = True,
-                cross_align = "center",
-                children = [
-                    render.Text(content = second_slot["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"], color = second_train_number, font = "tom-thumb"),
-                    render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                    render.Text(content = get_first_8_chars(stationNameCleaner(second_slot["DestinationName"])), color = "#F00", font = "tom-thumb"),
-                    render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                    render.Text(content = simplify_time_duration(humanize.time(time.parse_time(second_slot["MonitoredCall"]["AimedDepartureTime"]))), font = "tom-thumb"),
-                ],
-            ),
-        )
-        if len(FUTURE_ETAS) > 2:
-            third_slot = FUTURE_ETAS[2]["MonitoredVehicleJourney"]
-            third_train_number = get_train_color(third_slot["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"])
-
-            ETAS.append(
-                render.Row(
-                    expanded = True,
-                    cross_align = "center",
-                    children = [
-                        render.Text(
-                            content = third_slot["FramedVehicleJourneyRef"]["DatedVehicleJourneyRef"],
-                            color = third_train_number,
-                            font = "tom-thumb",
-                        ),
-                        render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                        render.Text(
-                            content = get_first_8_chars(stationNameCleaner(third_slot["DestinationName"])),
-                            font = "tom-thumb",
-                            color = "#F00",
-                        ),
-                        render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                        render.Text(
-                            content = simplify_time_duration(
-                                humanize.time(time.parse_time(third_slot["MonitoredCall"]["AimedDepartureTime"])),
-                            ),
-                            font = "tom-thumb",
-                        ),
-                    ],
-                ),
-            )
-
-        # check if the ETAS array has three item, and if not add blank elements until its up to three
-        # this Starlark dialect does **not** support while loops
-        if len(ETAS) < 3:
-            ETAS.append(
-                render.Row(
-                    expanded = True,
-                    cross_align = "center",
-                    children = [
-                        render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                        render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                        render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                    ],
-                ),
-            )
-            if len(ETAS) < 3:
-                ETAS.append(
-                    render.Row(
-                        expanded = True,
-                        cross_align = "center",
-                        children = [
-                            render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                            render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                            render.Text(content = "|", color = "#000", font = "tom-thumb"),
-                        ],
-                    ),
-                )
-
-    #"""
-    return ETAS
+    # Pad to 3 rows
+    for _ in range(3 - len(rows)):
+        rows.append(render.Row(expanded = True, children = [render.Text(content = "", font = font())]))
+    return rows
 
 # Manually implement sorting
 def manual_sort(lst, compare_func):
@@ -244,9 +183,11 @@ def manual_sort(lst, compare_func):
                 lst[i], lst[j] = lst[j], lst[i]
     return lst
 
-# Comparison function for sorting
-def compare_stops(a, b):
-    return int(a["id"]) - int(b["id"])
+# Comparison function for sorting departures by time
+def compare_departures(a, b):
+    time_a = a["MonitoredVehicleJourney"]["MonitoredCall"]["AimedDepartureTime"]
+    time_b = b["MonitoredVehicleJourney"]["MonitoredCall"]["AimedDepartureTime"]
+    return time_a < time_b
 
 # Function to clean the response by removing unwanted characters
 def clean_response(content):
@@ -259,69 +200,60 @@ def clean_response(content):
 def stationNameCleaner(station_name):
     return station_name.replace(" Northbound", "").replace(" Southbound", "").replace("Caltrain Station", "").replace("Caltrain", "")
 
-# Function to filter and modify Caltrain stops
-def filter_and_modify_stops(caltrain_stops):
-    processed_stations = set()
-    filtered_stops = []
-
-    for stop in caltrain_stops:
-        # Extract station name without "Northbound" or "Southbound"
-
-        station_name = stationNameCleaner(stop["Name"])
-        print(stop["Name"])
-
-        # Trim the last digit of the stop ID
-        stop["id"] = stop["id"][:-1]
-
-        # If the station name is in the set, skip it
-        if station_name in processed_stations:
-            continue
-
-        # Add the modified stop to the result
-        filtered_stops.append({
-            "id": stop["id"],
-            "Name": station_name,
-        })
-
-        # Add the station name to the set
-        processed_stations.add(station_name)
-
-    return filtered_stops
-
 def ljust(input_string, width, fillchar = " "):
     return input_string + fillchar * (width - len(input_string))
 
-def get_first_8_chars(input_string):
-    if len(input_string) < 8:
-        input_string = ljust(input_string, 8)
-    return input_string[:8]
+def rjust(input_string, width, fillchar = " "):
+    if len(input_string) >= width:
+        return input_string
+    return fillchar * (width - len(input_string)) + input_string
+
+def truncate_pad(input_string, width):
+    if len(input_string) < width:
+        input_string = ljust(input_string, width)
+    return input_string[:width]
+
+# Map train number prefix to type abbreviation
+def get_train_type(train_number):
+    train_type_map = {
+        "1": "LCL",
+        "4": "LTD",
+        "5": "EXP",
+        "6": "WKD",
+        "8": "SCC",
+    }
+    prefix = train_number[0]
+    return train_type_map.get(prefix, "OTH")
+
+# Original color scheme for train numbers
+CLASSIC_COLORS = {
+    "1": "#888",
+    "4": "#0ff",
+    "5": "#f00",
+    "6": "#888",
+    "8": "#ff0",
+    "9": "#f0f",
+}
+
+# Updated color scheme with more distinct, accessible colors
+UPDATED_COLORS = {
+    "1": "#888",
+    "4": "#0ff",
+    "5": "#c23b22",
+    "6": "#aaa",
+    "8": "#f0d68c",
+    "9": "#f0f",
+}
 
 # function to get color of train number, according to the caltrain website
-def get_train_color(train_number):
-    # Caltrain's new color scheme for the Full Electrification schedule post September 21, 2024
-    # we want #rgb
-    # 1XX, 6XX are grey
-    # 8XX are yellow
-    # 5XX is red
-    # 4XX is turquoise
-    # 9XX and others are light purple
-    if train_number[0] == "1" or train_number[0] == "6":
-        return "#888"
-    if train_number[0] == "4":
-        return "#0ff"
-    if train_number[0] == "5":
-        return "#f00"
-    if train_number[0] == "8":
-        return "#ff0"
-    if train_number[0] == "9":
-        return "#f0f"
-    return "#f0f"
+def get_train_color(train_number, color_scheme = "classic"):
+    prefix = train_number[0]
+    colors = UPDATED_COLORS if color_scheme == "updated" else CLASSIC_COLORS
+    return colors.get(prefix, "#f0f")
 
 # Function to convert time duration string to simplified format
 def simplify_time_duration(duration_string):
-    # Split the input string to extract the numeric value and unit
     parts = duration_string.split()
-    print(parts)
 
     # only return the duration in minutes
 
@@ -355,106 +287,52 @@ def simplify_time_duration(duration_string):
     # If the input string doesn't match the expected format, return the original string
     return duration_string
 
+# Build a fake visit object matching the API structure for demo/preview
+def _demo_visit(train_num, destination, departure_time):
+    return {
+        "MonitoredVehicleJourney": {
+            "FramedVehicleJourneyRef": {
+                "DatedVehicleJourneyRef": train_num,
+            },
+            "DestinationName": destination,
+            "MonitoredCall": {
+                "AimedDepartureTime": departure_time.format("2006-01-02T15:04:05Z07:00"),
+            },
+        },
+    }
+
 def main(config):
     stationID = config.get("stop", STATIC_STATIONS[11]["id"])
     direction = config.get("direction", "south")
     api_key = config.get("apiKey", "")
+    display_format = config.get("display_format", "default")
+    color_train = config.bool("color_train", False)
+    color_scheme = config.get("color_scheme", "classic")
+    minimum_time_string = config.get("minimum_time", "0")
+    minimum_time = int(minimum_time_string) if minimum_time_string.isdigit() else 0
+    demo_mode = config.bool("demo_mode", False)
+    logo_style = config.get("logo_style", "classic")
 
-    # Caltrain Logo
-    CT_LOGO_RQ = http.get("https://agency-logos.sfbatransit.community/caltrain-circle.png")
-    CT_LOGO = CT_LOGO_RQ.body()
+    if logo_style == "updated":
+        CT_LOGO = CT_LOGO_FILE.readall()
+    else:
+        CT_LOGO_RQ = http.get("https://agency-logos.sfbatransit.community/caltrain-circle.png")
+        CT_LOGO = CT_LOGO_RQ.body()
 
-    # Demo mode, for render preview
-    #
-    #return render.Root(
-    #    child=render.Column(
-    #        expanded=True,
-    #        children=[
-    #            render.Row(
-    #                expanded=True,
-    #                main_align="left",
-    #                children=[
-    #                    render.Image(
-    #                        src=CT_LOGO,
-    #                        width=10,
-    #                        height=10,
-    #                    ),
-    #                    render.Text(content="San Francisco", offset=2, height=10, font="tom-thumb"),
-    #                ],
-    #            ),
-    #            render.Row(
-    #                expanded=True,
-    #                cross_align="center",
-    #                children=[
-    #                    render.Text(
-    #                        content="102",
-    #                        color=get_train_color("102"),
-    #                        font="tom-thumb",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="San Jose",
-    #                        font="tom-thumb",
-    #                        color="#F00",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="4",
-    #                        font="tom-thumb",
-    #                    ),
-    #                ],
-    #            ),
-    #            render.Row(
-    #                expanded=True,
-    #                cross_align="center",
-    #                children=[
-    #                    render.Text(
-    #                        content="512",
-    #                        color=get_train_color("512"),
-    #                        font="tom-thumb",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="Tamien  ",
-    #                        font="tom-thumb",
-    #                        color="#F00",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="13",
-    #                        font="tom-thumb",
-    #                    ),
-    #                ],
-    #            ),
-    #            render.Row(
-    #                expanded=True,
-    #                cross_align="center",
-    #                children=[
-    #                    render.Text(
-    #                        content="416",
-    #                        color=get_train_color("416"),
-    #                        font="tom-thumb",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="Gilroy  ",
-    #                        font="tom-thumb",
-    #                        color="#F00",
-    #                    ),
-    #                    render.Text(content="|", color="#000", font="tom-thumb"),
-    #                    render.Text(
-    #                        content="18",
-    #                        font="tom-thumb",
-    #                    ),
-    #                ],
-    #            ),
-    #        ],
-    #    ),
-    #)
-    #"""
-
-    # If the API key is empty, fail
-    if api_key == "":
+    # Demo mode uses fake data for preview; otherwise require API key
+    if demo_mode:
+        now = time.now()
+        departures = [
+            _demo_visit("102", "San Jose", now + time.minute * 4),
+            _demo_visit("512", "Tamien", now + time.minute * 13),
+            _demo_visit("416", "Gilroy", now + time.minute * 18),
+            _demo_visit("148", "San Jose", now + time.minute * 25),
+            _demo_visit("802", "Gilroy", now + time.minute * 32),
+            _demo_visit("604", "San Jose", now + time.minute * 41),
+            _demo_visit("520", "Tamien", now + time.minute * 55),
+        ]
+        stop_name = "Hillsdale"
+    elif api_key == "":
         return render.Root(
             child = render.Column(
                 expanded = True,
@@ -463,75 +341,87 @@ def main(config):
                         expanded = True,
                         main_align = "center",
                         children = [
-                            render.Text(content = "No 511 API token", offset = 2, height = 10, color = "#F00", font = "tom-thumb"),
+                            render.Text(content = "No 511 API token", offset = s(2), height = s(10), color = "#F00", font = font()),
                         ],
                     ),
                     render.Row(
                         expanded = True,
                         main_align = "center",
                         children = [
-                            render.Text(content = "Get one from", offset = 2, height = 10, font = "tom-thumb"),
+                            render.Text(content = "Get one from", offset = s(2), height = s(10), font = font()),
                         ],
                     ),
                     render.Row(
                         expanded = True,
                         main_align = "center",
                         children = [
-                            render.Text(content = "ducks.win/511", offset = 2, height = 10, font = "tom-thumb"),
+                            render.Text(content = "ducks.win/511", offset = s(2), height = s(10), font = font()),
                         ],
                     ),
                 ],
             ),
         )
+    else:
+        # Caltrain stop ids are 5 digits long, however there's two ids for each stop, XXXX1 for northbound and XXXX2 for southbound
+        etaID = ""
+        if direction == "north":
+            etaID = stationID + "1"
+        if direction == "south":
+            etaID = stationID + "2"
+        departures = get_caltrain_departures(etaID, api_key)
+        stop_name = ""
+        for stop in STATIC_STATIONS:
+            if stop["id"] == stationID:
+                stop_name = stop["Name"]
 
-    # Caltrain stop ids are 5 digits long, however there's two ids for each stop, XXXX1 for northbound and XXXX2 for southbound
-    # We are provided the first 4 digits of the stop with `stationID`, and the direction "Northbound" or "Southbound" with `direction`
-    etaID = ""
-    ETA = []
-
-    if direction == "north":
-        etaID = stationID + "1"
-    if direction == "south":
-        etaID = stationID + "2"
-    ETA = get_caltrain_departures(etaID, api_key)
-
-    # find the stop name
-    stop_name = ""
-    for stop in STATIC_STATIONS:
-        if stop["id"] == stationID:
-            stop_name = stop["Name"]
+    # Filter out departures closer than minimum_time
+    if minimum_time > 0:
+        filtered = []
+        for visit in departures:
+            journey = visit["MonitoredVehicleJourney"]
+            mins_str = simplify_time_duration(humanize.time(time.parse_time(journey["MonitoredCall"]["AimedDepartureTime"])))
+            if mins_str.isdigit() and int(mins_str) >= minimum_time:
+                filtered.append(visit)
+        departures = filtered
 
     children = [
         render.Row(
             expanded = True,
             main_align = "left",
             children = [
-                render.Image(
-                    src = CT_LOGO,
-                    width = 10,
-                    height = 10,
+                render.Padding(
+                    pad = (s(1), s(1), 0, s(1)),
+                    child = render.Image(
+                        src = CT_LOGO,
+                        width = s(8),
+                        height = s(8),
+                    ),
                 ),
-                render.Text(content = stop_name, offset = 2, height = 10, font = "tom-thumb"),
+                render.Padding(
+                    pad = (s(1), 0, 0, 0),
+                    child = render.Text(content = stop_name, offset = s(2), height = s(10), font = font()),
+                ),
             ],
         ),
     ]
 
-    if (len(ETA) == 0):
+    if len(departures) == 0:
         children.append(
             render.Row(
                 expanded = True,
                 main_align = "center",
                 children = [
-                    render.Text(content = "No trains :(", offset = 2, height = 10, font = "tom-thumb"),
+                    render.Text(content = "No trains :(", offset = s(2), height = s(10), font = font()),
                 ],
             ),
         )
+    elif display_format == "times_by_type":
+        for row in render_times_by_type(departures, color_scheme):
+            children.append(row)
+    else:
+        for row in render_default(departures, color_train, color_scheme):
+            children.append(row)
 
-    for eta in ETA:
-        if len(children) < 4:
-            children.append(eta)
-
-    #,
     return render.Root(
         child = render.Column(
             expanded = True,
@@ -586,6 +476,78 @@ def get_schema():
                         value = "south",
                     ),
                 ],
+            ),
+            schema.Dropdown(
+                id = "display_format",
+                name = "Display format",
+                desc = "How to display departures",
+                icon = "tableColumns",
+                default = "default",
+                options = [
+                    schema.Option(
+                        display = "Default",
+                        value = "default",
+                    ),
+                    schema.Option(
+                        display = "Times by type",
+                        value = "times_by_type",
+                    ),
+                ],
+            ),
+            schema.Toggle(
+                id = "color_train",
+                name = "Color train type",
+                desc = "Color the train number by type",
+                icon = "palette",
+                default = False,
+            ),
+            schema.Dropdown(
+                id = "color_scheme",
+                name = "Color scheme",
+                desc = "Classic uses original colors, Updated uses refined colors",
+                icon = "swatchbook",
+                default = "classic",
+                options = [
+                    schema.Option(
+                        display = "Classic",
+                        value = "classic",
+                    ),
+                    schema.Option(
+                        display = "Updated",
+                        value = "updated",
+                    ),
+                ],
+            ),
+            schema.Dropdown(
+                id = "logo_style",
+                name = "Logo style",
+                desc = "Classic uses the original remote logo, Updated uses a bundled logo",
+                icon = "image",
+                default = "classic",
+                options = [
+                    schema.Option(
+                        display = "Classic",
+                        value = "classic",
+                    ),
+                    schema.Option(
+                        display = "Updated",
+                        value = "updated",
+                    ),
+                ],
+            ),
+            schema.Text(
+                id = "minimum_time",
+                name = "Minimum time to show",
+                desc = "Don't show departures nearer than this many minutes",
+                icon = "clock",
+                default = "0",
+            ),
+            schema.Toggle(
+                id = "demo_mode",
+                name = "Demo mode",
+                desc = "Show fake data for preview (no API key needed)",
+                icon = "flask",
+                default = False,
             ),
         ],
     )

@@ -5,6 +5,7 @@ load("images/img_2274bcef.bin", IMG_2274bcef_ASSET = "file")
 load("images/img_7b76fdf3.bin", IMG_7b76fdf3_ASSET = "file")
 load("images/img_adff806b.svg", IMG_adff806b_ASSET = "file")
 load("images/img_fbe29b76.svg", IMG_fbe29b76_ASSET = "file")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -56,6 +57,24 @@ MAX_TIME_PERIOD = 24
 
 TIME_FORMAT = "2006-01-02T15:04:05Z"
 
+def parse_state_value(state):
+    if state == None or state in ("unavailable", "unknown", "none", ""):
+        return None
+    s = state.strip()
+    if not s:
+        return None
+    if s.startswith("-"):
+        s = s[1:]
+    if not s:
+        return None
+    parts = s.split(".")
+    if len(parts) not in [1, 2]:
+        return None
+    for part in parts:
+        if not part.isdigit():
+            return None
+    return float(state)
+
 def main(config):
     timezone = None
     location = config.get("location")
@@ -80,14 +99,36 @@ def main(config):
     elif len(data) < 1:
         return render_error_message("No data available")
 
-    unit = data[0]["attributes"]["unit_of_measurement"]
-    points = calculate_hourly_average(data)
+    unit = data[0]["attributes"].get("unit_of_measurement", "")
+    points = calculate_hourly_average(config, data)
     current_value = data[-1]["state"]
+
+    range_str = config.str("display_range", "")
+    if range_str:
+        parts = range_str.split(",")
+        if len(parts) == 2:
+            min_val = float(parts[0])
+            max_val = float(parts[1])
+            val = parse_state_value(current_value)
+            if val == None:
+                return []
+            if val < min_val or val > max_val:
+                return []
     stats = calc_stats(timezone, data)
 
-    return render_app(config, current_value, points, stats, unit)
+    label = config.str("custom_label", "")
+    return render_app(config, current_value, points, stats, unit, label)
 
-def calculate_hourly_average(data):
+def calculate_hourly_average(config, data):
+    if config.bool("use_raw_data"):
+        points = []
+        for i, entry in enumerate(data):
+            value = parse_state_value(entry["state"])
+            if value == None:
+                continue
+            points.append((i, value))
+        return points
+
     hourly_averages = {}
     current_hour = None
     hour_total = 0
@@ -95,12 +136,12 @@ def calculate_hourly_average(data):
     index = 0
 
     for entry in data:
-        if entry["state"] == "unavailable" or entry["state"] == "unknown":
+        value = parse_state_value(entry["state"])
+        if value == None:
             continue
 
         timestamp = entry["last_changed"]
         hour = int(timestamp.split("T")[1].split(":")[0])
-        value = float(entry["state"])
 
         if hour != current_hour:
             if current_hour != None:
@@ -130,10 +171,9 @@ def calc_stats(timezone, data):
     count = 0
 
     for entry in data:
-        if entry["state"] == "unavailable" or entry["state"] == "unknown":
+        value = parse_state_value(entry["state"])
+        if value == None:
             continue
-
-        value = float(entry["state"])
         total_value += value
         count += 1
         if value < lowest_value:
@@ -175,6 +215,8 @@ def get_entity_data(config, start_time):
 
 def get_icon(config):
     icon = config.str("icon")
+    if icon == "none":
+        return None
     return ICONS[icon] if icon in ICONS else ICONS["thermometer"]
 
 def get_time_period(input_str):
@@ -186,13 +228,13 @@ def get_time_period(input_str):
 
     return time_period
 
-def render_app(config, current_value, points, stats, unit):
+def render_app(config, current_value, points, stats, unit, label):
     if config.bool("show_history"):
         return render.Root(
             child = animation.Transformation(
                 child = render.Row(
                     children = [
-                        render_graph_column(config, current_value, points, unit),
+                        render_graph_column(config, current_value, points, unit, label),
                         render_stats_column(stats, unit),
                     ],
                 ),
@@ -208,25 +250,41 @@ def render_app(config, current_value, points, stats, unit):
         )
     else:
         return render.Root(
-            child = render_graph_column(config, current_value, points, unit),
+            child = render_graph_column(config, current_value, points, unit, label),
         )
 
-def render_graph_column(config, current_value, points, unit):
+def round(num, precision):
+    """Round a float to the specified number of significant digits"""
+    return math.round(num * math.pow(10, precision)) / math.pow(10, precision)
+
+def render_graph_column(config, current_value, points, unit, label):
+    icon = get_icon(config)
+    children = []
+    if label:
+        children.append(render.Text(content = label, font = "6x13", color = "#888888"))
+    if icon:
+        children.append(render.Box(
+            child = render.Image(src = icon, width = 10, height = 10),
+            width = 12,
+            height = 12,
+        ))
+    if (config.str("round_to") in ["0", "1", "2"]):
+        decimal = int(config.get("round_to"))
+        val = parse_state_value(current_value)
+        if val == None:
+            val = 0
+        val = round(val, decimal)
+        current_value = str(int(val)) if val == int(val) else str(val)
+    children.append(render.Text(content = current_value + unit, font = "6x13"))
+    align = "space_between" if label else "end"
     return render.Column(
         children = [
             render.Box(
                 child = render.Row(
-                    children = [
-                        render.Box(
-                            child = render.Image(src = get_icon(config), width = 10, height = 10),
-                            width = 12,
-                            height = 12,
-                        ),
-                        render.Text(content = current_value + unit, font = "6x13"),
-                    ],
+                    children = children,
                     expanded = True,
                     cross_align = "center",
-                    main_align = "end",
+                    main_align = align,
                 ),
                 width = 64,
                 height = 13,
@@ -287,6 +345,10 @@ def render_error_message(message):
 def get_schema():
     icons = [
         schema.Option(
+            display = "None",
+            value = "none",
+        ),
+        schema.Option(
             display = "Raindrop",
             value = "drop",
         ),
@@ -344,6 +406,44 @@ def get_schema():
                 icon = "list",
                 default = True,
             ),
+            schema.Toggle(
+                id = "use_raw_data",
+                name = "Use raw data",
+                desc = "Plot raw data points instead of hourly averages",
+                icon = "chartLine",
+                default = False,
+            ),
+            schema.Text(
+                id = "display_range",
+                desc = "Only display when value is within this range. Format: min,max (e.g. 5,1000). Leave empty to always show.",
+                icon = "filter",
+                name = "Display range",
+            ),
+            schema.Dropdown(
+                id = "round_to",
+                desc = "Round to which decimal",
+                icon = "filter",
+                name = "Round To",
+                default = "none",
+                options = [
+                    schema.Option(
+                        display = "None",
+                        value = "none",
+                    ),
+                    schema.Option(
+                        display = "Ones",
+                        value = "0",
+                    ),
+                    schema.Option(
+                        display = "Tenths",
+                        value = "1",
+                    ),
+                    schema.Option(
+                        display = "Hundreths",
+                        value = "2",
+                    ),
+                ],
+            ),
             schema.Location(
                 id = "location",
                 name = "Location",
@@ -357,6 +457,12 @@ def get_schema():
                 icon = "icons",
                 name = "Icon",
                 options = icons,
+            ),
+            schema.Text(
+                id = "custom_label",
+                desc = "Optional label displayed to the left of the icon.",
+                icon = "tag",
+                name = "Custom label",
             ),
             schema.Color(
                 id = "line_positive",

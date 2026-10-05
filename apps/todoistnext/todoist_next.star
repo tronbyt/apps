@@ -2,7 +2,7 @@
 Applet: Todoist Next
 Summary: Todoist next due/overdue
 Description: Displays the next due or overdue task from todoist.
-Author: alisdair(https://discuss.tidbyt.com/t/todoist-integration/502/5), Updated by: akeslo
+Author: alisdair(https://discuss.tidbyt.com/t/todoist-integration/502/5), Updated by: akeslo and oleksii-ivanov
 """
 
 load("http.star", "http")
@@ -13,9 +13,7 @@ load("time.star", "time")
 
 ZEN_ICON = ZEN_ICON_ASSET.readall()
 
-TODOIST_API_BASE_URL = "https://api.todoist.com/rest/v2"
-
-TODOIST_API_TASKS_URL = TODOIST_API_BASE_URL + "/tasks?filter=(overdue|today)"
+TODOIST_API_TASKS_URL = "https://api.todoist.com/api/v1/tasks/filter"
 
 MODEL_KEY_TEXT = "text"
 MODEL_KEY_DUE = "due"
@@ -40,10 +38,11 @@ def main(config):
     # Download tasks
 
     TOKEN = config.get("TodoistAPIToken", "False")
-    resp = http.get(TODOIST_API_TASKS_URL, headers = {"Authorization": "Bearer " + TOKEN})
+    resp = http.get(TODOIST_API_TASKS_URL, headers = {"Authorization": "Bearer " + TOKEN}, params = {"query": "overdue | today"})
 
     if resp.status_code == 200:
-        parsed = resp.json()
+        data = resp.json()
+        parsed = data.get("results", [])
 
         # Compute model to display
         model = None

@@ -60,22 +60,23 @@ load("images/wetterhorn_peak.png", WETTERHORN_PEAK_ASSET = "file")
 load("images/wilson_peak.png", WILSON_PEAK_ASSET = "file")
 load("images/windom_peak.png", WINDOM_PEAK_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("random.star", "random")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DISPLAY_OPTIONS = [
+display_options = [
     schema.Option(value = "random", display = "Random 14er"),
     schema.Option(value = "visited", display = "Random visited 14er"),
     schema.Option(value = "unvisited", display = "Random unvisited 14er"),
 ]
 
-MEASUREMENT_OPTIONS = [
+measurement_options = [
     schema.Option(value = "metric", display = "Metric System"),
     schema.Option(value = "imperial", display = "Imperial System"),
 ]
 
-SORT_OPTIONS = [
+sort_options = [
     schema.Option(value = "Name", display = "Sort by Mountain Name"),
     schema.Option(value = "Range", display = "Sort by Range name"),
     schema.Option(value = "Elevation", display = "Sort by Mountain Elevation"),
@@ -83,19 +84,35 @@ SORT_OPTIONS = [
     schema.Option(value = "Class", display = "Sort by Class"),
 ]
 
-#Selected, Denver, Marquee Color, Visited, unvisitied
-DEFAULT_COLORS = ["#0000ff", "#ff0000", "#65d0e6", "#ffff00", "#aaaaaa"]
+scroll_speed_options = [
+    schema.Option(
+        display = "Slow Scroll",
+        value = "60",
+    ),
+    schema.Option(
+        display = "Medium Scroll",
+        value = "45",
+    ),
+    schema.Option(
+        display = "Fast Scroll",
+        value = "30",
+    ),
+]
 
-COLORADO = [
+#Selected, Denver, Marquee Color, Visited, unvisitied
+default_colors = ["#0000ff", "#ff0000", "#65d0e6", "#ffff00", "#aaaaaa"]
+
+km_to_miles = 0.621371
+meters_to_feet = 3.28084
+
+colorado = [
     [-109.05, 41],
     [-102.05158, 41],
     [-102.4207, 37],
     [-109.04516, 37],
 ]
 
-DENVER = [-104.88111, 39.7618]
-
-MOUNTAIN_DATA = [
+mountain_data = [
     {
         "Name": "Blanca Peak",
         "Range": "Sangre de Cristo Range",
@@ -893,91 +910,124 @@ MOUNTAIN_DATA = [
     },
 ]
 
-def add_copies_of_frame_to_frames(frames, items, number_of_frames):
-    for _ in range(number_of_frames):
-        frames.append(render.Stack(children = list(items)))
+denver = [-104.88111, 39.7618]
+
+def get_layout():
+    marquee_height = 8
+
+    if canvas.is2x():
+        display_width = 128
+        display_height = 64
+        map_width = 128
+        map_height = display_height - marquee_height
+        marquee_y = map_height
+    else:
+        display_width = 64
+        display_height = 32
+        map_width = 64
+        map_height = 24
+        marquee_y = 24
+
+    return {
+        "display_width": display_width,
+        "display_height": display_height,
+        "map_width": map_width,
+        "map_height": map_height,
+        "marquee_height": marquee_height,
+        "marquee_y": marquee_y,
+    }
+
+def get_mountain_position(mountain, layout):
+    return get_screen_coordinates_from_actual(
+        colorado,
+        [mountain["Longitude Degrees"], mountain["Latitude Degrees"]],
+        layout["map_width"],
+        layout["map_height"],
+    )
 
 def main(config):
+    random.seed(time.now().unix // 15)
+    layout = get_layout()
+
     show_instructions = config.bool("instructions", False)
 
     if show_instructions == True:
-        return show_instructions_screen()
+        return show_instructions_screen(config, layout)
 
-    show_mountain_outline = config.bool("outline", True)
+    show_mountain_outline = config.bool("outline", False)
 
-    is_metric_system = config.get("measurement", MEASUREMENT_OPTIONS[0].value) == MEASUREMENT_OPTIONS[0].value
+    is_metric_system = config.get("measurement", measurement_options[0].value) == measurement_options[0].value
 
     display_candidates = []
-    display_type = config.get("display", DISPLAY_OPTIONS[0].value)
+    display_type = config.get("display", display_options[0].value)
 
     i = 0
 
-    for mountain in MOUNTAIN_DATA:
-        if (display_type == "random" or (display_type == "visited" and config.get("_%s" % mountain["Name"]) == "true") or (display_type == "unvisited" and config.get("_%s" % mountain["Name"]) != "true")):
+    for mountain in mountain_data:
+        if (display_type == "random" or (display_type == "visited" and config.bool("_%s" % mountain["Name"])) or (display_type == "unvisited" and not config.bool("_%s" % mountain["Name"]))):
             display_candidates.append(i)
         i = i + 1
 
-    random_mountain = MOUNTAIN_DATA[randomize(0, len(MOUNTAIN_DATA) - 1)]
+    random_mountain = mountain_data[random.number(0, len(mountain_data) - 1)]
 
-    # we have a random one, but if we have a valid filtered group to choose from, we'll do that now
     if (len(display_candidates) > 0):
-        random_mountain = MOUNTAIN_DATA[display_candidates[randomize(0, len(display_candidates) - 1)]]
+        random_mountain = mountain_data[display_candidates[random.number(0, len(display_candidates) - 1)]]
 
-    random_mountain_position = [random_mountain["XCoord"], random_mountain["YCoord"]]
+    random_mountain_position = get_mountain_position(random_mountain, layout)
 
-    Denver_position = get_screen_coordinates_from_actual(COLORADO, DENVER)
+    denver_position = get_screen_coordinates_from_actual(
+        colorado,
+        denver,
+        layout["map_width"],
+        layout["map_height"],
+    )
 
     hiking_distance = float(random_mountain["Hiking Distance"])
     hiking_elevation = float(random_mountain["Hiking Elevation Gain"])
     elevation_units = "meters"
-    distance_units = "km"
+    distance_label = "km"
 
     if is_metric_system == False:
-        hiking_distance = math.round((hiking_distance / 1.6))
-        hiking_elevation = math.round(3.38 * hiking_elevation)
+        hiking_distance = math.round(hiking_distance * km_to_miles)
+        hiking_elevation = math.round(hiking_elevation * meters_to_feet)
         elevation_units = "feet"
-        distance_units = "mile"
+        distance_label = "mile"
 
-    # Over Time let's display little different aspects of the mountains
-    if randomize(0, 1) == 1:
+    if random.number(0, 1) == 1:
         mountain_description = "%s in the %s - %s %s is a class %s mountain.             " % (random_mountain["Name"], random_mountain["Range"], random_mountain["Description"], random_mountain["Name"], random_mountain["Class"])
     else:
-        mountain_description = "%s is a class %s mountain. Expect a %s %s hike that has an elevation gain of %s %s.           " % (random_mountain["Name"], random_mountain["Class"], humanize.float("#,###.", hiking_distance), distance_units, humanize.float("#,###.", hiking_elevation), elevation_units)
+        mountain_description = "%s is a class %s mountain. Expect a %s %s hike that has an elevation gain of %s %s.           " % (random_mountain["Name"], random_mountain["Class"], humanize.float("#,###.", hiking_distance), distance_label, humanize.float("#,###.", hiking_elevation), elevation_units)
 
-    #Create Frames for Display
     animation_frames = []
     stacked_items = []
 
     base_layer = render.Box(color = "#000", height = 1, width = 1)
 
     if show_mountain_outline:
-        animation_frames = get_mountain_outline(random_mountain)
+        animation_frames = get_mountain_outline(random_mountain, layout)
         base_layer = render.Stack(children = animation_frames)
         stacked_items.append(base_layer)
         add_copies_of_frame_to_frames(animation_frames, stacked_items, 5)
 
-    # Denver
     stacked_items.append(
         render.Padding(
-            pad = (Denver_position[0], Denver_position[1], 0, 0),
+            pad = (denver_position[0], denver_position[1], 0, 0),
             child =
                 render.Circle(
-                    color = config.get("denver_color", DEFAULT_COLORS[1]),
+                    color = config.get("denver_color", default_colors[1]),
                     diameter = 1,
                 ),
         ),
     )
 
-    # Add Visited Points
-    visited_mountain_points = get_positions(config, True, MOUNTAIN_DATA)
+    visited_mountain_points = get_positions(config, True, mountain_data, layout)
     for item in visited_mountain_points:
         stacked_items.append(item)
         animation_frames.append(render.Stack(children = list(stacked_items)))
 
     add_copies_of_frame_to_frames(animation_frames, stacked_items, 10)
 
-    # Add Unvisited Points
-    unvisited_mountain_points = get_positions(config, False, MOUNTAIN_DATA)
+    unvisited_mountain_points = get_positions(config, False, mountain_data, layout)
     for item in unvisited_mountain_points:
         stacked_items.append(item)
         animation_frames.append(render.Stack(children = list(stacked_items)))
@@ -986,13 +1036,12 @@ def main(config):
 
     animation_frames.append(render.Stack(children = list(stacked_items)))
 
-    # Selected Mountain
     stacked_items.append(
         render.Padding(
             pad = (random_mountain_position[0], random_mountain_position[1], 0, 0),
             child =
                 render.Circle(
-                    color = config.get("selected_color", DEFAULT_COLORS[0]),
+                    color = config.get("selected_color", default_colors[0]),
                     diameter = 1,
                 ),
         ),
@@ -1004,38 +1053,33 @@ def main(config):
         render.Animation(children = animation_frames),
     ]
 
-    show_information_bar = config.bool("information_bar", True)
+    show_information_bar = config.bool("information_bar", False)
 
     if show_information_bar:
         all_elements.append(
             render.Padding(
-                pad = (0, 24, 0, 0),
+                pad = (0, layout["marquee_y"], 0, 0),
                 child =
                     render.Marquee(
-                        width = 64,
+                        width = layout["display_width"],
                         offset_start = 15,
-                        child = render.Text(content = mountain_description, color = config.get("marquee_color", DEFAULT_COLORS[2]), font = "tb-8", offset = 0),
+                        child = render.Text(content = mountain_description, color = config.get("marquee_color", default_colors[2]), offset = 0),
                     ),
             ),
         )
 
     return render.Root(
-        delay = 50,
-        #child = render.Animation(children=animation_frames),
         child = render.Stack(children = all_elements),
         show_full_animation = True,
+        delay = int(config.get("scroll", 45)),
     )
 
-def get_screen_coordinates_from_actual(map, location):
-    SCREEN_WIDTH = 64
-    SCREEN_HEIGHT = 32
-
+def get_screen_coordinates_from_actual(map, location, screen_width, screen_height):
     max_long = None
     min_long = None
     max_lat = None
     min_lat = None
 
-    #get max_long, min_long, max_lat, min_lat
     for dot in map:
         if max_long == None or max_long < dot[0]:
             max_long = dot[0]
@@ -1050,79 +1094,31 @@ def get_screen_coordinates_from_actual(map, location):
     range_y = abs(max_lat - min_lat)
 
     coords = [0, 0]
-    coords[0] = int((location[0] - min_long) / range_x * SCREEN_WIDTH)
-    coords[1] = int((-(location[1] - max_lat)) / range_y * SCREEN_HEIGHT)
+    coords[0] = int((location[0] - min_long) / range_x * (screen_width - 1))
+    coords[1] = int((-(location[1] - max_lat)) / range_y * (screen_height - 1))
 
     return coords
 
-def randomize(min, max):
-    now = time.now()
-    rand = int(str(now.nanosecond)[-6:-3]) / 1000
-    return int(rand * (max + 1 - min) + min)
-
-def show_instructions_screen():
-    ##############################################################################################################################################################################################################################
-    header = "Colorado 14ers"
-    instructions_1 = "Screen represents State of Colorado. Random mountain is picked from a group (visited, unvisited, or all peaks). You decide if the selected mountain's outline appears."
-    instructions_2 = " You check peaks you've visited. All peaks are displayed and color-coded based on your choices. Default Red is Denver, yellow is visited, grey is unvisited."
-    instructions_3 = " You can sort the list of peaks by name, range, distance, elevation or class. "
-    return render.Root(
-        render.Column(
-            children = [
-                render.Marquee(
-                    width = 64,
-                    offset_start = 15,
-                    child = render.Text(header, color = "#65d0e6", font = "5x8"),
-                ),
-                render.Marquee(
-                    width = 64,
-                    offset_start = len(header) * 5,
-                    child = render.Text(instructions_1, color = "#f4a306"),
-                ),
-                render.Marquee(
-                    offset_start = len(instructions_1) * 5,
-                    width = 64,
-                    child = render.Text(instructions_2, color = "#f4a306"),
-                ),
-                render.Marquee(
-                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
-                    width = 64,
-                    child = render.Text(instructions_3, color = "#f4a306"),
-                ),
-            ],
-        ),
-        show_full_animation = True,
-    )
-
-def get_mountain_outline(mountain):
+def get_mountain_outline(mountain, layout):
     image = mountain["Outline"]
-    IMG_WIDTH = 64
-    IMG_HEIGHT = 32
+    img_width = layout["map_width"]
+    img_height = layout["map_height"]
     frames = []
 
-    for reveal_w in range(1, IMG_WIDTH + 1):
-        cover_w = IMG_WIDTH - reveal_w
+    for reveal_w in range(1, img_width + 1):
+        cover_w = img_width - reveal_w
 
         frames.append(
             render.Stack(
                 children = [
-                    # background / base image (full)
-                    render.Image(src = image),
-
-                    # a Row that places a fixed-width Box at the right
-                    render.Stack(
-                        children = [
-                            render.Image(src = image),  #render.Box(),  # expands to take remaining left space
-                            add_padding_to_child_element(
-                                render.Box(
-                                    # the cover that hides the right-side pixel
-                                    width = IMG_WIDTH,
-                                    height = IMG_HEIGHT,
-                                    color = "#000",  # set to your background color (not transparent)
-                                ),
-                                65 - cover_w,
-                            ),
-                        ],
+                    render.Image(src = image, width = img_width),
+                    add_padding_to_child_element(
+                        render.Box(
+                            width = cover_w,
+                            height = img_height,
+                            color = "#000",
+                        ),
+                        reveal_w,
                     ),
                 ],
             ),
@@ -1130,34 +1126,17 @@ def get_mountain_outline(mountain):
 
     return frames
 
-def get_positions(config, visited, mountains):
+def get_positions(config, visited, mountains, layout):
     children = []
     current_location = ""
-    color = config.get("visited_color", DEFAULT_COLORS[3])
-    if visited == False:
-        color = config.get("unvisited_color", DEFAULT_COLORS[4])
+    color = config.get("visited_color", default_colors[3])
 
-    previous_items = []
+    if visited == False:
+        color = config.get("unvisited_color", default_colors[4])
 
     for item in mountains:
         if config.bool("_%s" % item["Name"], False) == visited:
-            current_location = [item["XCoord"], item["YCoord"]]
-            # Code used to check for duplicate locations on the map and for help adjusting overlaps.
-            # orig_coordinates = get_screen_coordinates_from_actual(COLORADO, [item["Longitude Degrees"], item["Latitude Degrees"]])
-            # if current_location[0] == orig_coordinates[0] and current_location[1] == orig_coordinates[1]:
-            #     print("%s %s %s" % (item["Name"],orig_coordinates[0], orig_coordinates[1]))
-            # else:
-            #     print("Old: %s %s %s" % (item["Name"],orig_coordinates[0], orig_coordinates[1]))
-            #     print("New: %s %s %s" % (item["Name"],current_location[0], current_location[1]))
-
-            #See if this location is a duplicate
-            # for x in previous_items:
-            #     if x[0] == current_location[0]:
-            #         if x[1] == current_location[1]:
-            #             print("DUPLICATE %s %s %s" % (item["Name"], current_location[0], current_location[1]))
-
-            previous_items.append(current_location)
-
+            current_location = get_mountain_position(item, layout)
             children.append(
                 render.Padding(
                     pad = (current_location[0], current_location[1], 0, 0),
@@ -1171,6 +1150,45 @@ def get_positions(config, visited, mountains):
 
     return children
 
+def add_copies_of_frame_to_frames(frames, items, number_of_frames):
+    for _ in range(number_of_frames):
+        frames.append(render.Stack(children = list(items)))
+
+def show_instructions_screen(config, layout):
+    ##############################################################################################################################################################################################################################
+    header = "Colorado 14ers"
+    instructions_1 = "Screen represents State of Colorado. Random mountain is picked from a group (visited, unvisited, or all peaks). You decide if the selected mountain's outline appears."
+    instructions_2 = " You check peaks you've visited. All peaks are displayed and color-coded based on your choices. Default Red is Denver, yellow is visited, grey is unvisited."
+    instructions_3 = " You can sort the list of peaks by name, range, distance, elevation or class. "
+    return render.Root(
+        render.Column(
+            children = [
+                render.Marquee(
+                    width = layout["display_width"],
+                    offset_start = 15,
+                    child = render.Text(header, color = "#65d0e6"),
+                ),
+                render.Marquee(
+                    width = layout["display_width"],
+                    offset_start = len(header) * 5,
+                    child = render.Text(instructions_1, color = "#f4a306"),
+                ),
+                render.Marquee(
+                    offset_start = len(instructions_1) * 5,
+                    width = layout["display_width"],
+                    child = render.Text(instructions_2, color = "#f4a306"),
+                ),
+                render.Marquee(
+                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
+                    width = layout["display_width"],
+                    child = render.Text(instructions_3, color = "#f4a306"),
+                ),
+            ],
+        ),
+        show_full_animation = True,
+        delay = int(config.get("scroll", 45)),
+    )
+
 def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
     padded_element = render.Padding(
         pad = (left, top, right, bottom),
@@ -1179,25 +1197,22 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 
     return padded_element
 
-def get_visited(type):
-    display_data = sorted(MOUNTAIN_DATA, key = lambda m: m[type], reverse = False)
+def get_sorted_mountain_toggles(sort_key):
+    display_data = sorted(mountain_data, key = lambda m: m[sort_key], reverse = False)
 
-    description_type = type
+    description_type = sort_key
     description_info = ""
-    suffix = ""
 
     #Override in a couple cases
-    if type == "Name":
+    if sort_key == "Name":
         description_type = "Range"
-    elif type == "Class":
+    elif sort_key == "Class":
         description_info = "Class: "
-    elif type == "Elevation":
+    elif sort_key == "Elevation":
         description_type = "Range"
-    elif type == "Hiking Distance":
-        suffix = " km"
 
     return [
-        schema.Toggle(id = "_%s" % (mountain["Name"]), name = mountain["Name"], desc = "%s%s%s" % (description_info, mountain[description_type], suffix), icon = "mountain")
+        schema.Toggle(id = "_%s" % (mountain["Name"]), name = mountain["Name"], desc = "%s%s" % (description_info, mountain[description_type]), icon = "mountain")
         for mountain in display_data
     ]
 
@@ -1219,6 +1234,14 @@ def get_schema():
                 icon = "book",
                 default = False,
             ),
+            schema.Dropdown(
+                id = "scroll",
+                name = "Scroll",
+                desc = "Scroll Speed",
+                icon = "scroll",
+                options = scroll_speed_options,
+                default = scroll_speed_options[0].value,
+            ),
             schema.Toggle(
                 id = "outline",
                 name = "Display Mountain Outline",
@@ -1231,64 +1254,64 @@ def get_schema():
                 name = "Color",
                 desc = "Selected Mountain Color",
                 icon = "brush",
-                default = DEFAULT_COLORS[0],
+                default = default_colors[0],
             ),
             schema.Color(
                 id = "denver_color",
                 name = "Color",
                 desc = "Denver Location Color",
                 icon = "brush",
-                default = DEFAULT_COLORS[1],
+                default = default_colors[1],
             ),
             schema.Color(
                 id = "marquee_color",
                 name = "Color",
                 desc = "Scrolling Information Text Color",
                 icon = "brush",
-                default = DEFAULT_COLORS[2],
+                default = default_colors[2],
             ),
             schema.Color(
                 id = "visited_color",
                 name = "Color",
                 desc = "Visited Location Color",
                 icon = "brush",
-                default = DEFAULT_COLORS[3],
+                default = default_colors[3],
             ),
             schema.Color(
                 id = "unvisited_color",
                 name = "Color",
                 desc = "Unvisited Location Color",
                 icon = "brush",
-                default = DEFAULT_COLORS[4],
+                default = default_colors[4],
             ),
             schema.Dropdown(
                 id = "measurement",
                 name = "Measurement System",
                 desc = "Measurement System",
                 icon = "ruler",
-                options = MEASUREMENT_OPTIONS,
-                default = MEASUREMENT_OPTIONS[0].value,
+                options = measurement_options,
+                default = measurement_options[0].value,
             ),
             schema.Dropdown(
                 id = "sort",
                 name = "Sort List of Mountains",
                 desc = "",
                 icon = "sort",
-                options = SORT_OPTIONS,
-                default = SORT_OPTIONS[0].value,
+                options = sort_options,
+                default = sort_options[0].value,
             ),
             schema.Dropdown(
                 id = "display",
                 name = "Display",
                 desc = "What to Display?",
                 icon = "gear",
-                options = DISPLAY_OPTIONS,
-                default = DISPLAY_OPTIONS[0].value,
+                options = display_options,
+                default = display_options[0].value,
             ),
             schema.Generated(
                 id = "visited",
                 source = "sort",
-                handler = get_visited,
+                handler = get_sorted_mountain_toggles,
             ),
         ],
     )
