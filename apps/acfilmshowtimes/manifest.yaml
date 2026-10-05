@@ -7,9 +7,10 @@ author: Platt Thompson & Jim Cummings
 fileName: ac_film_showtimes.star
 packageName: acfilmshowtimes
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - media
   - theaters
 published: '2023-03-14T18:48:18Z'
-updated: '2026-05-01T16:28:33Z'
+updated: '2026-10-01T19:59:14Z'

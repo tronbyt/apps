@@ -8,7 +8,7 @@ Author: wshue0
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -79,10 +79,10 @@ def main(config):
         return render.Root(
             delay = 60,
             child = render.Box(
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 child = render.Column(
-                    main_align = "start",
+                    main_align = "center",
                     cross_align = "center",
                     children = [
                         render.Row(
@@ -206,10 +206,10 @@ def main(config):
         return render.Root(
             delay = 120,
             child = render.Box(
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 child = render.Column(
-                    main_align = "start",
+                    main_align = "center",
                     cross_align = "center",
                     children = [
                         entry1,

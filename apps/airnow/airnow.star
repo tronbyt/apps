@@ -108,7 +108,7 @@ def render_alert_circle(aqi, alert_colors):
 
     return render.Box(
         width = 26 * scale,
-        height = 32 * scale,
+        height = canvas.height(),
         padding = 1 * scale,
         child = render.Circle(
             color = bg_color,
@@ -128,7 +128,7 @@ def render_category_text(category_name, reporting_area, alert_colors):
 
     return render.Box(
         width = 38 * scale,
-        height = 32 * scale,
+        height = canvas.height(),
         child = render.Column(
             expanded = True,
             main_align = "space_around",

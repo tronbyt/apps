@@ -43,7 +43,7 @@ Addition of Port Dock station and route, opening 25th August
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -94,7 +94,7 @@ def main(config):
 
         return render.Root(
             delay = int(2000),
-            child = render.Animation(children = Display),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = Display)),
         )
 
     # if its valid, then cache it
@@ -196,7 +196,7 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(3000),
-        child = render.Animation(children = Display1),
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = Display1)),
     )
 
 def GetTimes_Route(StopName, Routes, RouteColors, RouteLen, NEXTSCHED_JSON):
