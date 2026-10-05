@@ -9,12 +9,13 @@ def main(config):
     URL = config.get("immich_url", "https://example.com")
     API_KEY = config.get("immich_api_key", "")
 
-    # SHOW_FAVORITES = config.bool("show_favorites", False)
+    SHOW_FAVORITES = config.bool("show_favorites", False)
     ALBUM = config.get("immich_album_id", "invalid")
     STATUS_URL = "%s/api/server/ping" % (URL)
     ABOUT_URL = "%s/api/server/about" % (URL)
     ALBUM_URL = "%s/api/albums/%s" % (URL, ALBUM)
-    PHOTO_URL = "%s/api/search/metadata" % (URL)
+    ALBUM_SEARCH_URL = "%s/api/search/metadata" % (URL)
+    FAV_SEARCH_URL = "%s/api/search/random" % (URL)
     SHOW_DATE = config.bool("show_date", True)
     SHOW_LOCATION = config.bool("show_location", False)
 
@@ -26,31 +27,37 @@ def main(config):
         )
     else:
         headers = {"x-api-key": API_KEY}
-        res = http.get(ABOUT_URL, headers = headers)
-        server_version = res.json()["version"].split(".")[0]
         assetID = "0000"
-        assets = []
-        assetCount = 0
-        if server_version == "v3":
-            res_body = {"albumIds": ["%s" % (ALBUM)], "type": "IMAGE"}
-            res = http.post(PHOTO_URL, headers = headers, json_body = res_body)
-            assets = res.json()["assets"]["items"]
-            assetCount = int(res.json()["assets"]["count"]) - 1
+        if SHOW_FAVORITES:
+            res_body = {"isFavorite": True, "type": "IMAGE", "size": 1}
+            res = http.post(FAV_SEARCH_URL, headers = headers, json_body = res_body)
+            print(res.json())
+            assetID = res.json()[0]["id"]
         else:
-            res = http.get(ALBUM_URL, headers = headers)
-            status = res.json().get("statusCode")
-            if status != None:
+            assets = []
+            assetCount = 0
+            res = http.get(ABOUT_URL, headers = headers)
+            server_version = res.json()["version"].split(".")[0]
+            if server_version == "v3":
+                res_body = {"albumIds": ["%s" % (ALBUM)], "type": "IMAGE"}
+                res = http.post(ALBUM_SEARCH_URL, headers = headers, json_body = res_body)
+                assets = res.json()["assets"]["items"]
+                assetCount = int(res.json()["assets"]["count"]) - 1
+            else:
+                res = http.get(ALBUM_URL, headers = headers)
+                status = res.json().get("statusCode")
+                if status != None:
+                    return render.Root(
+                        child = render.WrappedText("Album not accessible"),
+                    )
+                assets = res.json()["assets"]
+                assetCount = int(res.json()["assetCount"]) - 1
+            if assetCount < 0:
                 return render.Root(
-                    child = render.WrappedText("Album not accessible"),
+                    child = render.WrappedText("Album is Empty"),
                 )
-            assets = res.json()["assets"]
-            assetCount = int(res.json()["assetCount"]) - 1
-        if assetCount < 0:
-            return render.Root(
-                child = render.WrappedText("Album is Empty"),
-            )
-        randomCount = random.number(0, assetCount)
-        assetID = assets[randomCount]["id"]
+            randomCount = random.number(0, assetCount)
+            assetID = assets[randomCount]["id"]
 
         IMG_URL = "%s/api/assets/%s" % (URL, assetID)
         print(IMG_URL)
@@ -149,7 +156,7 @@ def get_schema():
             schema.Toggle(
                 id = "show_favorites",
                 name = "Show Favorites",
-                desc = "(Does nothing right now) Show the images that you have added to your favorites. This will override any albums you have selected to be shown",
+                desc = "Show the images that you have added to your favorites. This will override any albums you have selected to be shown",
                 icon = "heart",
                 default = False,
             ),
