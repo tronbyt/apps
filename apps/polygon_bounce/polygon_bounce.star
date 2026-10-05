@@ -69,8 +69,10 @@ def main(config):
     random.seed(int(time.now().unix))
 
     scale = 2 if canvas.is2x() else 1
-    width = 64 * scale
-    height = 32 * scale
+
+    # the bounce box is the canvas: 64x32, 128x64 or 64x64
+    width = canvas.width()
+    height = canvas.height()
 
     num_sides = int(config.get("side_count", DEFAULT_SIDES))
     color_mode = config.get("color_mode", DEFAULT_MODE)
