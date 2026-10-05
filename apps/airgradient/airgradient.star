@@ -376,13 +376,16 @@ def fetch_ha_history(ha_url, ha_token, entity_id, hours):
         return []
 
     base_url = ha_url.strip().rstrip("/")
-    start_time = time.now() - time.parse_duration(str(hours) + "h")
+    now = time.now()
+    start_time = now - time.parse_duration(str(hours) + "h")
     start_time_str = start_time.format("2006-01-02T15:04:05Z")
+    end_time_str = now.format("2006-01-02T15:04:05Z")
 
-    url = "%s/api/history/period/%s?filter_entity_id=%s&minimal_response=true&no_attributes=true&significant_changes_only=0" % (
+    url = "%s/api/history/period/%s?filter_entity_id=%s&end_time=%s&minimal_response=true&no_attributes=true&significant_changes_only=0" % (
         base_url,
         start_time_str,
         entity_id,
+        end_time_str,
     )
     headers = {
         "Authorization": "Bearer " + ha_token,
@@ -414,7 +417,16 @@ def get_or_update_direct_history(device_url, metric_key, current_val, hours):
     if cached:
         history = json.decode(cached)
 
-    history.append([now_unix, current_val])
+    # Only append a new history point if at least 60 seconds have elapsed since the last point,
+    # otherwise update the latest point in place so config adjustments don't pop in phantom bars.
+    if len(history) > 0 and len(history[-1]) == 2:
+        last_time = history[-1][0]
+        if (now_unix - last_time) < 60:
+            history[-1] = [now_unix, current_val]
+        else:
+            history.append([now_unix, current_val])
+    else:
+        history.append([now_unix, current_val])
 
     filtered = []
     for item in history:
