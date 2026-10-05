@@ -1,7 +1,7 @@
 """
 Applet: AirGradient
-Summary: AirGradient ONE monitor
-Description: Interfaces with an AirGradient ONE indoor air quality monitor via direct local network or Home Assistant, capturing the LED bar and screen metrics.
+Summary: AirGradient ONE & Open Air monitor
+Description: Interfaces with an AirGradient ONE or Open Air air quality monitor via direct local network or Home Assistant, capturing the LED bar and screen metrics.
 Author: brombomb
 """
 
@@ -14,8 +14,10 @@ load("schema.star", "schema")
 # Default mock data matching the AirGradient ONE (I-9PSL)
 DEFAULT_DATA = {
     "rco2": 708,
+    "pm01": 0.2,
     "pm02": 0.5,
     "pm02Compensated": 2.7,
+    "pm10": 3.1,
     "atmp": 23.5,
     "atmpCompensated": 23.5,
     "rhum": 38.0,
@@ -153,10 +155,15 @@ def get_label_palette(setting, custom_color = None):
         # Default: high contrast bright white
         return "#FFFFFF", "#D0D5DD"
 
-def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl):
+def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_co2):
     mode = led_mode
     if mode == "auto":
-        mode = device_mode if device_mode in ["co2", "pm", "iaqs", "off"] else "co2"
+        if has_co2:
+            mode = device_mode if device_mode in ["co2", "pm", "iaqs", "off"] else "co2"
+        else:
+            mode = "pm"
+    elif mode == "co2" and not has_co2:
+        mode = "pm"
 
     count = 0
     tier_color = COLOR_LED_GREEN
@@ -169,7 +176,7 @@ def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl):
         level, tier_color = get_pm25_level(pm25)
         count = level
     elif mode == "iaqs":
-        level, tier_color = get_iaqs_level(co2, pm25)
+        level, tier_color = get_iaqs_level(co2 if has_co2 else 400, pm25)
         count = level
     elif mode == "off":
         count = 0
@@ -332,13 +339,13 @@ def render_led_bar_2x(leds):
         ],
     )
 
-def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color):
-    c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
+def render_dashboard_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color):
+    c_col1 = col1_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
     return render.Column(
         children = [
-            # Top header row: Temp & Humidity
+            # Top header row: Temp & Humidity (Upper left = Temp, Upper right = Humidity)
             render.Padding(
                 pad = (2, 0, 2, 0),
                 child = render.Row(
@@ -358,15 +365,15 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                 expanded = True,
                 main_align = "space_between",
                 children = [
-                    # Col 1: CO2
+                    # Col 1: CO2 (or PM1.0 on Open Air)
                     render.Padding(
                         pad = (2, 0, 0, 0),
                         child = render.Column(
                             cross_align = "start",
                             children = [
-                                render.Text("CO2", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(co2_str, font = "tb-8", color = c_co2),
-                                render.Text("ppm", font = "CG-pixel-3x5-mono", color = c_unit),
+                                render.Text(col1_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col1_str, font = "tb-8", color = c_col1),
+                                render.Text(col1_unit, font = "CG-pixel-3x5-mono", color = c_unit),
                             ],
                         ),
                     ),
@@ -376,23 +383,23 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                     render.Column(
                         cross_align = "start",
                         children = [
-                            render.Text("PM2.5", font = "CG-pixel-3x5-mono", color = c_label),
+                            render.Text(pm_label, font = "CG-pixel-3x5-mono", color = c_label),
                             render.Text(pm_str, font = "tb-8", color = c_pm),
                             render.Text("ug/m3", font = "CG-pixel-3x5-mono", color = c_unit),
                         ],
                     ),
                     # Vertical separator
                     render.Box(width = 1, height = col_height, color = divider_color),
-                    # Col 3: VOC & NOx
+                    # Col 3: VOC / NOx / PM10
                     render.Padding(
                         pad = (0, 0, 2, 0),
                         child = render.Column(
                             cross_align = "start",
                             children = [
-                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(voc_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
-                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(nox_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                                render.Text(col3_top_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col3_top_val, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                                render.Text(col3_bot_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col3_bot_val, font = "tom-thumb", color = COLOR_TEXT_WHITE),
                             ],
                         ),
                     ),
@@ -401,8 +408,8 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
         ],
     )
 
-def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, c_label, divider_color):
-    c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
+def render_big_numbers_1x(temp_str, hum_str, _col1_label, col1_str, col1_unit, col1_color, _pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, c_label, divider_color):
+    c_col1 = col1_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
     return render.Column(
@@ -426,7 +433,7 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                 expanded = True,
                 main_align = "space_around",
                 children = [
-                    # CO2 card
+                    # Col 1 card
                     render.Box(
                         width = 31,
                         height = 16,
@@ -434,10 +441,10 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                             cross_align = "center",
                             main_align = "center",
                             children = [
-                                render.Text(co2_str, font = "6x10", color = c_co2),
+                                render.Text(col1_str, font = "6x10", color = c_col1),
                                 render.Padding(
                                     pad = (1, 3, 0, 0),
-                                    child = render.Text("ppm", font = "CG-pixel-3x5-mono", color = c_label),
+                                    child = render.Text(col1_unit, font = "CG-pixel-3x5-mono", color = c_label),
                                 ),
                             ],
                         ),
@@ -462,7 +469,7 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                 ],
             ),
             render.Box(width = 64, height = 1, color = divider_color),
-            # Bottom row: VOC & NOx
+            # Bottom row: secondary metrics
             render.Padding(
                 pad = (3, 0, 3, 0),
                 child = render.Row(
@@ -472,14 +479,14 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                     children = [
                         render.Row(
                             children = [
-                                render.Text("VOC ", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(voc_str, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
+                                render.Text("%s " % col3_top_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col3_top_val, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
                             ],
                         ),
                         render.Row(
                             children = [
-                                render.Text("NOx ", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(nox_str, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
+                                render.Text("%s " % col3_bot_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col3_bot_val, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
                             ],
                         ),
                     ],
@@ -488,8 +495,8 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
         ],
     )
 
-def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h, c_label, divider_color):
-    co2_bg, co2_fg = get_block_palette(co2_lvl)
+def render_color_blocks_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, block_h, c_label, divider_color):
+    col1_bg, col1_fg = get_block_palette(col1_lvl)
     pm_bg, pm_fg = get_block_palette(pm_lvl)
 
     return render.Column(
@@ -513,18 +520,18 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                 expanded = True,
                 main_align = "space_between",
                 children = [
-                    # CO2 Section Box
+                    # Col 1 Section Box
                     render.Box(
                         width = 23,
                         height = block_h,
-                        color = co2_bg,
+                        color = col1_bg,
                         child = render.Column(
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("CO2", font = "CG-pixel-3x5-mono", color = co2_fg),
-                                render.Text(co2_str, font = "tb-8", color = co2_fg),
-                                render.Text("ppm", font = "CG-pixel-3x5-mono", color = co2_fg),
+                                render.Text(col1_label, font = "CG-pixel-3x5-mono", color = col1_fg),
+                                render.Text(col1_str, font = "tb-8", color = col1_fg),
+                                render.Text(col1_unit, font = "CG-pixel-3x5-mono", color = col1_fg),
                             ],
                         ),
                     ),
@@ -538,14 +545,14 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("PM2.5", font = "CG-pixel-3x5-mono", color = pm_fg),
+                                render.Text(pm_label, font = "CG-pixel-3x5-mono", color = pm_fg),
                                 render.Text(pm_str, font = "tb-8", color = pm_fg),
                                 render.Text("ug/m3", font = "CG-pixel-3x5-mono", color = pm_fg),
                             ],
                         ),
                     ),
                     render.Box(width = 1, height = block_h, color = COLOR_BG),
-                    # VOC / NOx Box
+                    # Col 3 Box
                     render.Box(
                         width = 16,
                         height = block_h,
@@ -554,10 +561,10 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(voc_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
-                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = c_label),
-                                render.Text(nox_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                                render.Text(col3_top_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col3_top_val, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                                render.Text(col3_bot_label, font = "CG-pixel-3x5-mono", color = c_label),
+                                render.Text(col3_bot_val, font = "tom-thumb", color = COLOR_TEXT_WHITE),
                             ],
                         ),
                     ),
@@ -566,8 +573,8 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
         ],
     )
 
-def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color):
-    c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
+def render_dashboard_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color, device_title):
+    c_col1 = col1_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
     return render.Column(
@@ -584,7 +591,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                         render.Row(
                             cross_align = "center",
                             children = [
-                                render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = c_unit),
+                                render.Text(device_title, font = "CG-pixel-3x5-mono", color = c_unit),
                             ],
                         ),
                         render.Text(hum_str, font = "tb-8", color = COLOR_TEXT_WHITE),
@@ -597,7 +604,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
             render.Row(
                 expanded = True,
                 children = [
-                    # Col 1: CO2
+                    # Col 1
                     render.Box(
                         width = 46,
                         height = col_height,
@@ -605,9 +612,9 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                             cross_align = "start",
                             main_align = "space_around",
                             children = [
-                                render.Text("CO2", font = "tb-8", color = c_label),
-                                render.Text(co2_str, font = "terminus-16", color = c_co2),
-                                render.Text("ppm", font = "tb-8", color = c_unit),
+                                render.Text(col1_label, font = "tb-8", color = c_label),
+                                render.Text(col1_str, font = "terminus-16", color = c_col1),
+                                render.Text(col1_unit, font = "tb-8", color = c_unit),
                             ],
                         ),
                     ),
@@ -622,7 +629,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                                 cross_align = "start",
                                 main_align = "space_around",
                                 children = [
-                                    render.Text("PM2.5", font = "tb-8", color = c_label),
+                                    render.Text(pm_label, font = "tb-8", color = c_label),
                                     render.Text(pm_str, font = "terminus-16", color = c_pm),
                                     render.Text("ug/m3", font = "tb-8", color = c_unit),
                                 ],
@@ -630,7 +637,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                         ),
                     ),
                     render.Box(width = 1, height = col_height, color = divider_color),
-                    # Col 3: VOC & NOx
+                    # Col 3
                     render.Box(
                         width = 34,
                         height = col_height,
@@ -640,10 +647,10 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                                 cross_align = "start",
                                 main_align = "space_around",
                                 children = [
-                                    render.Text("VOC:", font = "tb-8", color = c_label),
-                                    render.Text(voc_str, font = "tb-8", color = COLOR_TEXT_WHITE),
-                                    render.Text("NOx:", font = "tb-8", color = c_label),
-                                    render.Text(nox_str, font = "tb-8", color = COLOR_TEXT_WHITE),
+                                    render.Text("%s:" % col3_top_label, font = "tb-8", color = c_label),
+                                    render.Text(col3_top_val, font = "tb-8", color = COLOR_TEXT_WHITE),
+                                    render.Text("%s:" % col3_bot_label, font = "tb-8", color = c_label),
+                                    render.Text(col3_bot_val, font = "tb-8", color = COLOR_TEXT_WHITE),
                                 ],
                             ),
                         ),
@@ -653,8 +660,8 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
         ],
     )
 
-def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h, c_label, divider_color):
-    co2_bg, co2_fg = get_block_palette(co2_lvl)
+def render_color_blocks_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, block_h, c_label, divider_color, device_title):
+    col1_bg, col1_fg = get_block_palette(col1_lvl)
     pm_bg, pm_fg = get_block_palette(pm_lvl)
 
     return render.Column(
@@ -668,7 +675,7 @@ def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                     cross_align = "center",
                     children = [
                         render.Text(temp_str, font = "tb-8", color = COLOR_TEXT_WHITE),
-                        render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = c_label),
+                        render.Text(device_title, font = "CG-pixel-3x5-mono", color = c_label),
                         render.Text(hum_str, font = "tb-8", color = COLOR_TEXT_WHITE),
                     ],
                 ),
@@ -680,18 +687,18 @@ def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                 expanded = True,
                 main_align = "space_between",
                 children = [
-                    # Col 1: CO2
+                    # Col 1
                     render.Box(
                         width = 46,
                         height = block_h,
-                        color = co2_bg,
+                        color = col1_bg,
                         child = render.Column(
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("CO2", font = "tb-8", color = co2_fg),
-                                render.Text(co2_str, font = "terminus-16", color = co2_fg),
-                                render.Text("ppm", font = "tb-8", color = co2_fg),
+                                render.Text(col1_label, font = "tb-8", color = col1_fg),
+                                render.Text(col1_str, font = "terminus-16", color = col1_fg),
+                                render.Text(col1_unit, font = "tb-8", color = col1_fg),
                             ],
                         ),
                     ),
@@ -705,14 +712,14 @@ def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("PM2.5", font = "tb-8", color = pm_fg),
+                                render.Text(pm_label, font = "tb-8", color = pm_fg),
                                 render.Text(pm_str, font = "terminus-16", color = pm_fg),
                                 render.Text("ug/m3", font = "tb-8", color = pm_fg),
                             ],
                         ),
                     ),
                     render.Box(width = 1, height = block_h, color = COLOR_BG),
-                    # Col 3: VOC & NOx
+                    # Col 3
                     render.Box(
                         width = 34,
                         height = block_h,
@@ -721,10 +728,10 @@ def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("VOC", font = "tb-8", color = c_label),
-                                render.Text(voc_str, font = "tb-8", color = COLOR_TEXT_WHITE),
-                                render.Text("NOx", font = "tb-8", color = c_label),
-                                render.Text(nox_str, font = "tb-8", color = COLOR_TEXT_WHITE),
+                                render.Text(col3_top_label, font = "tb-8", color = c_label),
+                                render.Text(col3_top_val, font = "tb-8", color = COLOR_TEXT_WHITE),
+                                render.Text(col3_bot_label, font = "tb-8", color = c_label),
+                                render.Text(col3_bot_val, font = "tb-8", color = COLOR_TEXT_WHITE),
                             ],
                         ),
                     ),
@@ -764,9 +771,17 @@ def main(config):
     else:
         data, _ = fetch_direct_data(device_url)
 
+    # Detect device model and available sensors (e.g. AirGradient ONE vs Open Air)
+    model_str = data.get("model", "")
+    is_open_air = model_str.startswith("O-") or ("pm02" in data and data.get("rco2") == None)
+    has_co2 = data.get("rco2") != None and not is_open_air
+
     # Extract metrics
     co2_raw = data.get("rco2", 0)
-    co2 = int(math.round(co2_raw)) if co2_raw else 0
+    co2 = int(math.round(co2_raw)) if (co2_raw and has_co2) else 0
+
+    pm01_raw = float(data.get("pm01", 0) or 0)
+    pm10_raw = float(data.get("pm10", 0) or 0)
 
     pm25_comp = data.get("pm02Compensated")
     pm25_raw = data.get("pm02", 0)
@@ -776,7 +791,7 @@ def main(config):
     rhum_raw = data.get("rhumCompensated") or data.get("rhum", 40.0)
     tvoc_raw = data.get("tvocIndex", 0)
     nox_raw = data.get("noxIndex", 0)
-    device_led_mode = data.get("ledMode", "co2")
+    device_led_mode = data.get("ledMode", "co2" if has_co2 else "pm")
 
     # Smart Temperature handling: check if input is already Fahrenheit
     temp_val = float(atmp_raw)
@@ -795,18 +810,38 @@ def main(config):
             temp_f = (temp_val * 9.0 / 5.0) + 32.0
             temp_str = "%s°F" % format_number(temp_f)
 
+    # Relative humidity (upper right number on screen)
     hum_str = "%s%%" % format_number(rhum_raw)
-    co2_str = format_number(co2)
+
+    # Format column values
+    if has_co2:
+        col1_label = "CO2"
+        col1_str = format_number(co2)
+        col1_unit = "ppm"
+        col1_lvl, col1_color = get_co2_level(co2)
+    else:
+        col1_label = "PM1.0"
+        col1_str = format_pm(pm01_raw)
+        col1_unit = "ug/m3"
+        col1_lvl, col1_color = get_pm25_level(pm01_raw)
+
+    pm_label = "PM2.5"
     pm_str = format_pm(pm25)
-    voc_str = format_number(tvoc_raw)
-    nox_str = format_number(nox_raw)
-
-    # Compute LED bar colors and states
-    leds, led_level = calculate_led_bar(co2, pm25, led_mode, device_led_mode, direction_rtl)
-
-    # Air quality color accents
-    co2_lvl, co2_color = get_co2_level(co2)
     pm_lvl, pm_color = get_pm25_level(pm25)
+
+    if not has_co2 and pm10_raw > 0:
+        col3_top_label = "PM10"
+        col3_top_val = format_number(pm10_raw)
+        col3_bot_label = "NOx" if nox_raw > 0 else "VOC"
+        col3_bot_val = format_number(nox_raw if nox_raw > 0 else tvoc_raw)
+    else:
+        col3_top_label = "VOC"
+        col3_top_val = format_number(tvoc_raw)
+        col3_bot_label = "NOx"
+        col3_bot_val = format_number(nox_raw)
+
+    # Compute LED bar colors and states (auto-adapts to Open Air)
+    leds, led_level = calculate_led_bar(co2, pm25, led_mode, device_led_mode, direction_rtl, has_co2)
 
     # Label colors
     c_label, c_unit = get_label_palette(label_color_setting, custom_label_color)
@@ -821,6 +856,8 @@ def main(config):
         canvas_bg = get_ambient_bg(led_level)
         divider_color = COLOR_DIVIDER_AMBIENT
 
+    device_title = "AIRGRADIENT OPEN AIR" if is_open_air else "AIRGRADIENT ONE"
+
     # Build layout children
     children = []
 
@@ -831,9 +868,9 @@ def main(config):
             children.append(render.Box(width = width, height = 1, color = canvas_bg))
 
         if display_mode == "blocks":
-            body = render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height, c_label, divider_color)
+            body = render_color_blocks_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, col_height, c_label, divider_color, device_title)
         else:
-            body = render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color)
+            body = render_dashboard_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color, device_title)
         children.append(body)
     else:
         col_height = 21 if show_led_bar else 24
@@ -842,11 +879,11 @@ def main(config):
             children.append(render.Box(width = width, height = 1, color = canvas_bg))
 
         if display_mode == "big":
-            body = render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, c_label, divider_color)
+            body = render_big_numbers_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, c_label, divider_color)
         elif display_mode == "blocks":
-            body = render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height, c_label, divider_color)
+            body = render_color_blocks_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, col_height, c_label, divider_color)
         else:
-            body = render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color)
+            body = render_dashboard_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color)
         children.append(body)
 
     return render.Root(
@@ -861,92 +898,6 @@ def main(config):
         ),
     )
 
-def get_source_fields(source):
-    if source == "homeassistant":
-        return [
-            schema.Text(
-                id = "ha_url",
-                name = "Home Assistant URL",
-                desc = "Base URL of Home Assistant (e.g. http://homeassistant.local:8123)",
-                icon = "server",
-                default = "http://homeassistant.local:8123",
-            ),
-            schema.Text(
-                id = "ha_token",
-                name = "Home Assistant Token",
-                desc = "Long-Lived Access Token for Home Assistant",
-                icon = "key",
-                secret = True,
-            ),
-            schema.Text(
-                id = "ha_prefix",
-                name = "Home Assistant Entity Prefix",
-                desc = "Prefix for sensors (e.g. airgradient_one for sensor.airgradient_one_co2)",
-                icon = "tag",
-                default = "airgradient_one",
-            ),
-            schema.Text(
-                id = "ha_co2_entity",
-                name = "Custom CO2 Entity (optional)",
-                desc = "Override entity ID for CO2 (e.g. sensor.living_room_co2)",
-                icon = "smog",
-            ),
-            schema.Text(
-                id = "ha_pm25_entity",
-                name = "Custom PM2.5 Entity (optional)",
-                desc = "Override entity ID for PM2.5 (e.g. sensor.living_room_pm2_5)",
-                icon = "wind",
-            ),
-            schema.Text(
-                id = "ha_temp_entity",
-                name = "Custom Temp Entity (optional)",
-                desc = "Override entity ID for Temperature",
-                icon = "temperatureHalf",
-            ),
-            schema.Text(
-                id = "ha_hum_entity",
-                name = "Custom Humidity Entity (optional)",
-                desc = "Override entity ID for Humidity",
-                icon = "droplet",
-            ),
-            schema.Text(
-                id = "ha_tvoc_entity",
-                name = "Custom TVOC Entity (optional)",
-                desc = "Override entity ID for TVOC",
-                icon = "flask",
-            ),
-            schema.Text(
-                id = "ha_nox_entity",
-                name = "Custom NOx Entity (optional)",
-                desc = "Override entity ID for NOx",
-                icon = "biohazard",
-            ),
-        ]
-
-    # Default to direct local
-    return [
-        schema.Text(
-            id = "device_url",
-            name = "AirGradient Device URL / IP",
-            desc = "IP address or hostname of your AirGradient monitor (e.g. http://192.168.1.27 or http://air.gradient.lan)",
-            icon = "networkWired",
-            default = "http://192.168.1.27",
-        ),
-    ]
-
-def get_label_fields(label_color):
-    if label_color == "custom":
-        return [
-            schema.Color(
-                id = "custom_label_color",
-                name = "Custom Label Color",
-                desc = "User-defined color for metric labels and units",
-                icon = "palette",
-                default = "#FFFFFF",
-            ),
-        ]
-    return []
-
 def get_schema():
     return schema.Schema(
         version = "1",
@@ -954,18 +905,20 @@ def get_schema():
             schema.Dropdown(
                 id = "source",
                 name = "Data Source",
-                desc = "Choose how to connect to your AirGradient ONE",
+                desc = "Choose how to connect to your AirGradient monitor",
                 icon = "plug",
                 default = "direct",
                 options = [
-                    schema.Option(display = "Direct Local (AirGradient ONE)", value = "direct"),
+                    schema.Option(display = "Direct Local (IP / Hostname)", value = "direct"),
                     schema.Option(display = "Home Assistant", value = "homeassistant"),
                 ],
             ),
-            schema.Generated(
-                id = "source_config",
-                source = "source",
-                handler = get_source_fields,
+            schema.Text(
+                id = "device_url",
+                name = "AirGradient Device URL / IP",
+                desc = "Direct mode: IP address or hostname (e.g. http://192.168.1.27 or http://air.gradient.lan)",
+                icon = "networkWired",
+                default = "http://192.168.1.27",
             ),
             schema.Dropdown(
                 id = "display_mode",
@@ -994,10 +947,12 @@ def get_schema():
                     schema.Option(display = "Custom Color", value = "custom"),
                 ],
             ),
-            schema.Generated(
-                id = "custom_label_config",
-                source = "label_color",
-                handler = get_label_fields,
+            schema.Color(
+                id = "custom_label_color",
+                name = "Custom Label Color",
+                desc = "User-defined color for metric labels and units",
+                icon = "palette",
+                default = "#FFFFFF",
             ),
             schema.Toggle(
                 id = "show_led_bar",
@@ -1024,8 +979,8 @@ def get_schema():
                 icon = "sliders",
                 default = "auto",
                 options = [
-                    schema.Option(display = "Auto (from Monitor Settings)", value = "auto"),
-                    schema.Option(display = "CO2", value = "co2"),
+                    schema.Option(display = "Auto (from Monitor / PM for Open Air)", value = "auto"),
+                    schema.Option(display = "CO2 (AirGradient ONE)", value = "co2"),
                     schema.Option(display = "PM2.5", value = "pm"),
                     schema.Option(display = "IAQS (Air Quality Score)", value = "iaqs"),
                     schema.Option(display = "Off", value = "off"),
@@ -1044,6 +999,63 @@ def get_schema():
                 desc = "Color code the readings (Green/Yellow/Orange/Red/Purple) for easy reading across the room",
                 icon = "palette",
                 default = True,
+            ),
+            schema.Text(
+                id = "ha_url",
+                name = "HA URL (Home Assistant mode)",
+                desc = "Base URL of Home Assistant (e.g. http://homeassistant.local:8123)",
+                icon = "server",
+                default = "http://homeassistant.local:8123",
+            ),
+            schema.Text(
+                id = "ha_token",
+                name = "HA Token (Home Assistant mode)",
+                desc = "Long-Lived Access Token for Home Assistant",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ha_prefix",
+                name = "HA Entity Prefix (Home Assistant mode)",
+                desc = "Prefix for sensors (e.g. airgradient_one for sensor.airgradient_one_co2)",
+                icon = "tag",
+                default = "airgradient_one",
+            ),
+            schema.Text(
+                id = "ha_co2_entity",
+                name = "HA Custom CO2 Entity (optional)",
+                desc = "Override entity ID for CO2 (e.g. sensor.living_room_co2)",
+                icon = "smog",
+            ),
+            schema.Text(
+                id = "ha_pm25_entity",
+                name = "HA Custom PM2.5 Entity (optional)",
+                desc = "Override entity ID for PM2.5 (e.g. sensor.living_room_pm2_5)",
+                icon = "wind",
+            ),
+            schema.Text(
+                id = "ha_temp_entity",
+                name = "HA Custom Temp Entity (optional)",
+                desc = "Override entity ID for Temperature",
+                icon = "temperatureHalf",
+            ),
+            schema.Text(
+                id = "ha_hum_entity",
+                name = "HA Custom Humidity Entity (optional)",
+                desc = "Override entity ID for Humidity",
+                icon = "droplet",
+            ),
+            schema.Text(
+                id = "ha_tvoc_entity",
+                name = "HA Custom TVOC Entity (optional)",
+                desc = "Override entity ID for TVOC",
+                icon = "flask",
+            ),
+            schema.Text(
+                id = "ha_nox_entity",
+                name = "HA Custom NOx Entity (optional)",
+                desc = "Override entity ID for NOx",
+                icon = "biohazard",
             ),
         ],
     )
