@@ -59,6 +59,7 @@ def main(config):
 
     displayChildren = [
         render.Row(
+            cross_align = "center",
             children = [
                 render.Image(src = (CAKE_FRAME1_2X if scale == 2 else CAKE_FRAME1).readall(), width = 24 * scale, height = 24 * scale),
                 render.Box(
@@ -73,6 +74,7 @@ def main(config):
             ],
         ),
         render.Row(
+            cross_align = "center",
             children = [
                 render.Image(src = (CAKE_FRAME2_2X if scale == 2 else CAKE_FRAME2).readall(), width = 24 * scale, height = 24 * scale),
                 render.Box(

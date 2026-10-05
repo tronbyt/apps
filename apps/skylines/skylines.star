@@ -16,11 +16,17 @@ SCREEN_HEIGHT = canvas.height()
 BASE_WIDTH = 64
 BASE_HEIGHT = 32
 
-SCALE = SCREEN_HEIGHT // BASE_HEIGHT
+# Scale by the tighter axis: the 64x64 square is 64 wide like 1x, so SCALE stays 1 there.
+SCALE = min(SCREEN_WIDTH // BASE_WIDTH, SCREEN_HEIGHT // BASE_HEIGHT)
 
 #1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
 DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
 NUMBER_OF_STARS = 5
+BIG_PANEL = SCREEN_WIDTH * SCREEN_HEIGHT > 64 * 32
+DOTS_PER_FRAME = 8 if BIG_PANEL else 1
+
+# Frames of twinkling stars once the skyline is complete; fewer on big panels.
+HOLD_FRAMES = 60 if BIG_PANEL else 100
 
 display_type = [
     schema.Option(display = "Display a Random City", value = "Random"),
@@ -53,6 +59,31 @@ def create_dot(x, y, color = "#fff"):
         child = render.Box(
             width = SCALE,
             height = SCALE,
+            color = color,
+        ),
+    )
+
+def extend_runs(runs, x, y, color):
+    """Add dot (x, y) to the run list, merging it into the last run when it
+    continues that vertical line."""
+    if runs:
+        last = runs[-1]
+        if last[0] == x and last[3] == color:
+            if y == last[2] + 1:
+                last[2] = y
+                return
+            if y == last[1] - 1:
+                last[1] = y
+                return
+    runs.append([x, y, y, color])
+
+def create_run(run):
+    x, y_top, y_bottom, color = run
+    return render.Padding(
+        pad = (x * SCALE, y_top * SCALE, 0, 0),
+        child = render.Box(
+            width = SCALE,
+            height = (y_bottom - y_top + 1) * SCALE,
             color = color,
         ),
     )
@@ -101,7 +132,7 @@ def get_column_bounds(screen, x, height):
 
 def draw_skyline(data, show_stars, colors):
     animation_frames = []
-    stacked_dots = []
+    runs = []
     star_locations = []
 
     width = len(data[0])
@@ -133,15 +164,20 @@ def draw_skyline(data, show_stars, colors):
                     potential_star_locations.append((i, randomize(0, sky)))
         star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
 
-    for pixel in pixels:
-        x, y, color = pixel
-        stacked_dots.append(create_dot(x, y, color))
-        animation_frames.append(render.Stack(children = list(stacked_dots)))
+    # Every frame re-composites everything drawn so far, so the draw-in costs
+    # frames x boxes. Dots arrive column by column, so consecutive dots are
+    # merged into one vertical-line Box each (pixel-identical, far fewer
+    # boxes); panels with more than 64x32 pixels also add a few dots per
+    # frame to stay inside the server deadline.
+    for i in range(0, len(pixels), DOTS_PER_FRAME):
+        for x, y, color in pixels[i:i + DOTS_PER_FRAME]:
+            extend_runs(runs, x, y, color)
+        animation_frames.append(render.Stack(children = [create_run(r) for r in runs]))
 
     # We increase the range to 100 so the "hold" lasts longer
-    for frame_idx in range(100):
+    for frame_idx in range(HOLD_FRAMES):
         # Start with the full city
-        this_frame_layers = list(stacked_dots)
+        this_frame_layers = [create_run(r) for r in runs]
 
         twinkle_frame_spacing = 12  # how many frames between star twinkles
 
@@ -251,16 +287,16 @@ def main(config):
                 last_frame,
                 add_padding_to_child_element(
                     render.Box(width = text_w, height = text_h, color = "#000"),
-                    SCREEN_WIDTH - text_w,
-                    SCREEN_HEIGHT - text_h,
+                    BASE_WIDTH * SCALE - text_w,
+                    BASE_HEIGHT * SCALE - text_h,
                 ),
                 add_padding_to_child_element(
                     render.Marquee(
                         width = BASE_WIDTH * SCALE,
                         child = render.Text(text_to_display, font = font, color = text_color),
                     ),
-                    SCREEN_WIDTH - text_w,
-                    SCREEN_HEIGHT - text_h,
+                    BASE_WIDTH * SCALE - text_w,
+                    BASE_HEIGHT * SCALE - text_h,
                 ),
             ],
         )
@@ -274,11 +310,15 @@ def main(config):
 
     return render.Root(
         delay = int(config.get("scroll", 45)),
-        child = render.Stack(
-            children =
-                [
-                    render.Animation(children = animation_frames),
-                ],
+        # Centre the scaled 64x32 scene on panels that are taller than that (64x64).
+        child = render.Box(
+            width = SCREEN_WIDTH,
+            height = SCREEN_HEIGHT,
+            child = render.Box(
+                width = BASE_WIDTH * SCALE,
+                height = BASE_HEIGHT * SCALE,
+                child = render.Animation(children = animation_frames),
+            ),
         ),
         show_full_animation = True,
     )
