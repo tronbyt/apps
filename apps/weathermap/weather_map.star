@@ -8,6 +8,7 @@ Author: Felix Bruns
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("radar_palette.star", "MIN_REFLECTIVITY_DBZ", "PRECIPITATION_COLORS")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -89,7 +90,9 @@ SIGNIFICANT_WEATHER_THRESHOLDS = [
     for percentage in range(1, 21)
 ]
 DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD = SIGNIFICANT_WEATHER_THRESHOLDS[4]
-VISIBLE_MAP_BOUNDS = (0, 16, 64, 48)
+
+# The displayed middle half of each 256x256 radar tile, in SOURCE pixels.
+VISIBLE_MAP_BOUNDS = (0, 64, 256, 192)
 
 # There theoretically are zoom levels 0 through 23, but zooming in closer
 # than an area 9x9 km is of questionable usability due to Tidbyt screen size.
@@ -303,7 +306,11 @@ def fetch_images(radar, opts):
     images_forecast = [(frame, fetch_image(frame, opts, False)) for frame in radar["nowcast"]]
     return images_past + images_forecast
 
-def render_error():
+def render_error(config):
+    if config.bool("only_significant_weather", False):
+        print("Only significant weather enabled: True; peak precipitation coverage: unavailable; threshold: %s%%; eligible for display: False (weather data unavailable)" % config.get("significant_weather_threshold", DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD.value))
+        return []
+
     return render.Root(
         child = render.Box(
             child = render.WrappedText(
@@ -326,7 +333,7 @@ def main(config):
 
     if response.status_code != 200:
         print("API request failed with status %d" % response.status_code)
-        return render_error()
+        return render_error(config)
 
     data = response.json()
     opts = struct(
@@ -344,12 +351,17 @@ def main(config):
     # Fetch all radar images.
     frames_and_images = fetch_images(data["radar"], opts)
 
-    # Render an error message if any of the frames failed to render.
+    # Skip unavailable weather when filtering; otherwise preserve the error frame.
     if any([image == None for (frame, image) in frames_and_images]):
-        return render_error()
+        return render_error(config)
 
     map_images = [
-        (frame, render.Image(src = image, width = 64, height = 64))
+        (frame, render.Image(
+            src = image,
+            width = 64,
+            height = 64,
+            **({"retain_original": True} if getattr(opts, "only_significant_weather") else {})
+        ))
         for (frame, image) in frames_and_images
     ]
 
@@ -357,13 +369,18 @@ def main(config):
     peak_coverage = None
     if getattr(opts, "only_significant_weather"):
         coverages = [
-            map_image.opaque_pixel_percentage(bounds = VISIBLE_MAP_BOUNDS)
+            map_image.color_pixel_percentage(
+                colors = PRECIPITATION_COLORS,
+                bounds = VISIBLE_MAP_BOUNDS,
+                original = True,
+            )
             for (frame, map_image) in map_images
         ]
         peak_coverage = max(coverages) if len(coverages) > 0 else 0.0
         eligible = peak_coverage >= getattr(opts, "significant_weather_threshold")
 
     print("Only significant weather enabled: %s" % getattr(opts, "only_significant_weather"))
+    print("Minimum radar reflectivity: %s dBZ (source pixels, before resizing)" % MIN_REFLECTIVITY_DBZ)
     print("Peak precipitation coverage: %s" % ("not evaluated" if peak_coverage == None else "%s%%" % humanize.float("#.##", peak_coverage)))
     print("Significant weather threshold: %s%%" % humanize.float("#.##", getattr(opts, "significant_weather_threshold")))
     print("Eligible for display: %s" % eligible)
@@ -431,14 +448,14 @@ def get_schema():
             schema.Toggle(
                 id = "only_significant_weather",
                 name = "Only display when significant weather is present",
-                desc = "Skip this app when peak precipitation coverage across the radar animation is below the configured threshold.",
+                desc = "Skip when weather data is unavailable or too little of the map has radar returns of at least 15 dBZ (blue rain colors or stronger, plus snow). Very faint returns and very light drizzle are excluded.",
                 icon = "cloudRain",
                 default = False,
             ),
             schema.Dropdown(
                 id = "significant_weather_threshold",
                 name = "Peak Weather Coverage",
-                desc = "Choose how much of the visible map must contain precipitation. 5–10% recommended.",
+                desc = "Peak map area with radar returns of at least 15 dBZ during the animation. Measured before resizing. 5–20% recommended.",
                 icon = "percent",
                 default = DEFAULT_SIGNIFICANT_WEATHER_THRESHOLD.value,
                 options = SIGNIFICANT_WEATHER_THRESHOLDS,
