@@ -39,6 +39,20 @@ COLOR_LED_OFF = "#181b1f"
 COLOR_STATUS_OFF = "#121417"
 COLOR_STATUS_ERR = "#FF2828"
 
+# Block colors for section backgrounds
+BLOCK_GREEN = "#00A638"
+BLOCK_YELLOW = "#CCA300"
+BLOCK_ORANGE = "#CC5C00"
+BLOCK_RED = "#CC2222"
+BLOCK_PURPLE = "#8F10D4"
+
+# Ambient full-screen background tints
+AMBIENT_GREEN = "#002E12"
+AMBIENT_YELLOW = "#382900"
+AMBIENT_ORANGE = "#3D1600"
+AMBIENT_RED = "#3D0808"
+AMBIENT_PURPLE = "#2A063A"
+
 COLOR_TEXT_WHITE = "#FFFFFF"
 COLOR_TEXT_DIM = "#8A929B"
 COLOR_TEXT_SUBTLE = "#555A60"
@@ -102,6 +116,30 @@ def get_iaqs_level(co2, pm25):
     else:
         return 9, COLOR_LED_PURPLE
 
+def get_block_palette(level):
+    if level <= 2:
+        return BLOCK_GREEN, "#000000"
+    elif level <= 4:
+        return BLOCK_YELLOW, "#000000"
+    elif level <= 6:
+        return BLOCK_ORANGE, "#FFFFFF"
+    elif level <= 8:
+        return BLOCK_RED, "#FFFFFF"
+    else:
+        return BLOCK_PURPLE, "#FFFFFF"
+
+def get_ambient_bg(level):
+    if level <= 2:
+        return AMBIENT_GREEN
+    elif level <= 4:
+        return AMBIENT_YELLOW
+    elif level <= 6:
+        return AMBIENT_ORANGE
+    elif level <= 8:
+        return AMBIENT_RED
+    else:
+        return AMBIENT_PURPLE
+
 def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_error):
     mode = led_mode
     if mode == "auto":
@@ -109,23 +147,24 @@ def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_error
 
     count = 0
     tier_color = COLOR_LED_GREEN
+    level = 1
 
     if mode == "co2":
-        count, tier_color = get_co2_level(co2)
+        level, tier_color = get_co2_level(co2)
+        count = level
     elif mode == "pm":
-        count, tier_color = get_pm25_level(pm25)
+        level, tier_color = get_pm25_level(pm25)
+        count = level
     elif mode == "iaqs":
-        count, tier_color = get_iaqs_level(co2, pm25)
+        level, tier_color = get_iaqs_level(co2, pm25)
+        count = level
     elif mode == "off":
         count = 0
 
-    # Build 9 LED states
     leds = []
     is_extreme = (mode == "co2" and co2 > 3000) or (mode == "pm" and pm25 > 225)
 
     for i in range(9):
-        # Determine if this LED index is active based on direction
-        # Physical AirGradient ONE fills from right to left (index 8 down to 0)
         active = False
         if direction_rtl:
             if i >= (9 - count):
@@ -143,7 +182,7 @@ def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_error
             leds.append(COLOR_LED_OFF)
 
     status_color = COLOR_STATUS_ERR if has_error else COLOR_STATUS_OFF
-    return status_color, leds, tier_color
+    return status_color, leds, level
 
 def normalize_url(url):
     cleaned = url.strip()
@@ -289,7 +328,7 @@ def render_led_bar_2x(status_color, leds):
         ],
     )
 
-def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color):
+def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height):
     c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
@@ -328,7 +367,7 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                         ),
                     ),
                     # Vertical separator
-                    render.Box(width = 1, height = 21, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
                     # Col 2: PM2.5
                     render.Column(
                         cross_align = "start",
@@ -339,7 +378,7 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                         ],
                     ),
                     # Vertical separator
-                    render.Box(width = 1, height = 21, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
                     # Col 3: VOC & NOx
                     render.Padding(
                         pad = (0, 0, 2, 0),
@@ -445,7 +484,85 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
         ],
     )
 
-def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color):
+def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h):
+    co2_bg, co2_fg = get_block_palette(co2_lvl)
+    pm_bg, pm_fg = get_block_palette(pm_lvl)
+
+    return render.Column(
+        children = [
+            # Header
+            render.Padding(
+                pad = (2, 0, 2, 0),
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    cross_align = "center",
+                    children = [
+                        render.Text(temp_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                        render.Text(hum_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                    ],
+                ),
+            ),
+            render.Box(width = 64, height = 1, color = COLOR_DIVIDER),
+            # 3 Color Block Tiles
+            render.Row(
+                expanded = True,
+                main_align = "space_between",
+                children = [
+                    # CO2 Section Box
+                    render.Box(
+                        width = 23,
+                        height = block_h,
+                        color = co2_bg,
+                        child = render.Column(
+                            cross_align = "center",
+                            main_align = "space_around",
+                            children = [
+                                render.Text("CO2", font = "CG-pixel-3x5-mono", color = co2_fg),
+                                render.Text(co2_str, font = "tb-8", color = co2_fg),
+                                render.Text("ppm", font = "CG-pixel-3x5-mono", color = co2_fg),
+                            ],
+                        ),
+                    ),
+                    render.Box(width = 1, height = block_h, color = COLOR_BG),
+                    # PM2.5 Section Box
+                    render.Box(
+                        width = 23,
+                        height = block_h,
+                        color = pm_bg,
+                        child = render.Column(
+                            cross_align = "center",
+                            main_align = "space_around",
+                            children = [
+                                render.Text("PM2.5", font = "CG-pixel-3x5-mono", color = pm_fg),
+                                render.Text(pm_str, font = "tb-8", color = pm_fg),
+                                render.Text("ug/m3", font = "CG-pixel-3x5-mono", color = pm_fg),
+                            ],
+                        ),
+                    ),
+                    render.Box(width = 1, height = block_h, color = COLOR_BG),
+                    # VOC / NOx Box
+                    render.Box(
+                        width = 16,
+                        height = block_h,
+                        color = "#16191E",
+                        child = render.Column(
+                            cross_align = "center",
+                            main_align = "space_around",
+                            children = [
+                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text(voc_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text(nox_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        ],
+    )
+
+def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height):
     c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
@@ -479,7 +596,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                     # Col 1: CO2
                     render.Box(
                         width = 46,
-                        height = 46,
+                        height = col_height,
                         child = render.Column(
                             cross_align = "start",
                             main_align = "space_around",
@@ -490,11 +607,11 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                             ],
                         ),
                     ),
-                    render.Box(width = 1, height = 46, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
                     # Col 2: PM2.5
                     render.Box(
                         width = 46,
-                        height = 46,
+                        height = col_height,
                         child = render.Padding(
                             pad = (3, 0, 0, 0),
                             child = render.Column(
@@ -508,11 +625,11 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                             ),
                         ),
                     ),
-                    render.Box(width = 1, height = 46, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
                     # Col 3: VOC & NOx
                     render.Box(
                         width = 34,
-                        height = 46,
+                        height = col_height,
                         child = render.Padding(
                             pad = (4, 0, 0, 0),
                             child = render.Column(
@@ -532,14 +649,99 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
         ],
     )
 
+def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h):
+    co2_bg, co2_fg = get_block_palette(co2_lvl)
+    pm_bg, pm_fg = get_block_palette(pm_lvl)
+
+    return render.Column(
+        children = [
+            # Top header row: Temp & Humidity
+            render.Padding(
+                pad = (4, 1, 4, 1),
+                child = render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    cross_align = "center",
+                    children = [
+                        render.Text(temp_str, font = "tb-8", color = COLOR_TEXT_WHITE),
+                        render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                        render.Text(hum_str, font = "tb-8", color = COLOR_TEXT_WHITE),
+                    ],
+                ),
+            ),
+            # Divider line
+            render.Box(width = 128, height = 1, color = COLOR_DIVIDER),
+            # Main 3 Color Blocks
+            render.Row(
+                expanded = True,
+                main_align = "space_between",
+                children = [
+                    # Col 1: CO2
+                    render.Box(
+                        width = 46,
+                        height = block_h,
+                        color = co2_bg,
+                        child = render.Column(
+                            cross_align = "center",
+                            main_align = "space_around",
+                            children = [
+                                render.Text("CO2", font = "tb-8", color = co2_fg),
+                                render.Text(co2_str, font = "terminus-16", color = co2_fg),
+                                render.Text("ppm", font = "tb-8", color = co2_fg),
+                            ],
+                        ),
+                    ),
+                    render.Box(width = 1, height = block_h, color = COLOR_BG),
+                    # Col 2: PM2.5
+                    render.Box(
+                        width = 46,
+                        height = block_h,
+                        color = pm_bg,
+                        child = render.Column(
+                            cross_align = "center",
+                            main_align = "space_around",
+                            children = [
+                                render.Text("PM2.5", font = "tb-8", color = pm_fg),
+                                render.Text(pm_str, font = "terminus-16", color = pm_fg),
+                                render.Text("ug/m3", font = "tb-8", color = pm_fg),
+                            ],
+                        ),
+                    ),
+                    render.Box(width = 1, height = block_h, color = COLOR_BG),
+                    # Col 3: VOC & NOx
+                    render.Box(
+                        width = 34,
+                        height = block_h,
+                        color = "#16191E",
+                        child = render.Column(
+                            cross_align = "center",
+                            main_align = "space_around",
+                            children = [
+                                render.Text("VOC", font = "tb-8", color = COLOR_TEXT_DIM),
+                                render.Text(voc_str, font = "tb-8", color = COLOR_TEXT_WHITE),
+                                render.Text("NOx", font = "tb-8", color = COLOR_TEXT_DIM),
+                                render.Text(nox_str, font = "tb-8", color = COLOR_TEXT_WHITE),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        ],
+    )
+
 def main(config):
     source = config.get("source", "direct")
     device_url = config.get("device_url", "http://192.168.1.27")
     temp_unit = config.get("temp_unit", "f")
     display_mode = config.get("display_mode", "classic")
+    show_led_bar = config.bool("show_led_bar", True)
     led_mode = config.get("led_mode", "auto")
     direction_rtl = config.bool("direction_rtl", True)
     use_color = config.bool("use_color", True)
+
+    # If led_mode is explicitly off, hide the bar completely (no gray dots)
+    if led_mode == "off":
+        show_led_bar = False
 
     # Fetch data
     if source == "homeassistant":
@@ -594,46 +796,56 @@ def main(config):
     nox_str = format_number(nox_raw)
 
     # Compute LED bar colors and states
-    status_color, leds, _ = calculate_led_bar(co2, pm25, led_mode, device_led_mode, direction_rtl, has_error)
+    status_color, leds, led_level = calculate_led_bar(co2, pm25, led_mode, device_led_mode, direction_rtl, has_error)
 
     # Air quality color accents
-    _, co2_color = get_co2_level(co2)
-    _, pm_color = get_pm25_level(pm25)
+    co2_lvl, co2_color = get_co2_level(co2)
+    pm_lvl, pm_color = get_pm25_level(pm25)
 
     is2x = canvas.is2x()
     width, height = canvas.size()
 
+    # Determine canvas background color
+    canvas_bg = COLOR_BG
+    if display_mode == "ambient":
+        canvas_bg = get_ambient_bg(led_level)
+
+    # Build layout children
+    children = []
+
     if is2x:
-        led_bar = render_led_bar_2x(status_color, leds)
-        body = render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color)
+        col_height = 46 if show_led_bar else 52
+        if show_led_bar:
+            children.append(render_led_bar_2x(status_color, leds))
+            children.append(render.Box(width = width, height = 1, color = canvas_bg))
+
+        if display_mode == "blocks":
+            body = render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height)
+        else:
+            body = render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height)
+        children.append(body)
     else:
-        led_bar = render_led_bar_1x(status_color, leds)
+        col_height = 21 if show_led_bar else 24
+        if show_led_bar:
+            children.append(render_led_bar_1x(status_color, leds))
+            children.append(render.Box(width = width, height = 1, color = canvas_bg))
+
         if display_mode == "big":
             body = render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color)
-        elif display_mode == "cycle":
-            frame1 = render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color)
-            frame2 = render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color)
-            body = render.Animation(
-                children = [
-                    render.Column(children = [frame1]),
-                    render.Column(children = [frame2]),
-                ],
-            )
+        elif display_mode == "blocks":
+            body = render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height)
         else:
-            body = render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color)
+            body = render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height)
+        children.append(body)
 
     return render.Root(
         max_age = 15,
         child = render.Box(
             width = width,
             height = height,
-            color = COLOR_BG,
+            color = canvas_bg,
             child = render.Column(
-                children = [
-                    led_bar,
-                    render.Box(width = width, height = 1, color = COLOR_BG),
-                    body,
-                ],
+                children = children,
             ),
         ),
     )
@@ -669,8 +881,16 @@ def get_schema():
                 options = [
                     schema.Option(display = "AirGradient ONE (Classic 3-Column)", value = "classic"),
                     schema.Option(display = "Big Numbers (Across the Room)", value = "big"),
-                    schema.Option(display = "Cycling (Alternating Views)", value = "cycle"),
+                    schema.Option(display = "Color Blocks (Section Backgrounds)", value = "blocks"),
+                    schema.Option(display = "Ambient (Full Background Color)", value = "ambient"),
                 ],
+            ),
+            schema.Toggle(
+                id = "show_led_bar",
+                name = "Show LED Bar",
+                desc = "Display the 11-LED bar along the top. Turn off to completely hide it without gray dots.",
+                icon = "lightbulb",
+                default = True,
             ),
             schema.Dropdown(
                 id = "temp_unit",
@@ -687,7 +907,7 @@ def get_schema():
                 id = "led_mode",
                 name = "LED Bar Metric",
                 desc = "Pollutant represented on the top LED bar",
-                icon = "lightbulb",
+                icon = "sliders",
                 default = "auto",
                 options = [
                     schema.Option(display = "Auto (from Monitor Settings)", value = "auto"),

@@ -10,10 +10,12 @@ Captures both the physical 11-LED status & pollutant bar and the environmental m
   - 1 Status LED on the far left (alerting to connectivity issues).
   - 9 Pollutant LEDs extending from right to left (matching hardware behavior) with official AirGradient color thresholds: Green (Good), Yellow (Moderate), Orange (Elevated), Red (High), and Purple (Hazardous).
   - Configurable to follow the device's active LED mode (CO2, PM2.5, IAQS) or override to your preference.
+  - Can be toggled off completely via `Show LED Bar` or `LED Bar Metric: Off` with zero residual gray dots.
 - **Multiple Display Modes**:
-  - **Classic 3-Column**: Faithful replica of the AirGradient ONE OLED screen layout with Temperature, Humidity, CO2, PM2.5, VOC Index, and NOx Index.
+  - **AirGradient ONE (Classic 3-Column)**: Faithful recreation of the AirGradient ONE OLED screen layout with Temperature, Humidity, CO2, PM2.5, VOC Index, and NOx Index.
   - **Big Numbers (Across the Room)**: High-visibility large font layout optimized for effortless reading across a living room or office.
-  - **Cycling**: Alternates between the classic dashboard view and big number view.
+  - **Color Blocks (Section Backgrounds)**: Colored alert tiles where each section's background turns green, yellow, orange, red, or purple based on that pollutant's level, with high-contrast text and labels.
+  - **Ambient (Full Background Color)**: The entire screen background changes dynamically to match the current air quality alert color.
 - **Dual Connection Options**:
   - **Direct Local Network (Default)**: Connects directly to the monitor's local HTTP API (e.g. `http://192.168.1.27` or `http://air.gradient.lan`). No cloud or third-party service required.
   - **Home Assistant**: Query Home Assistant sensors directly using a Long-Lived Access Token, supporting entity prefix conventions (`sensor.airgradient_one_*`) and custom entity overrides.
