@@ -8,7 +8,7 @@ Author: Ali-Mahmood
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 BRAEMAR_PRICES_URL = "https://api.braemarscreen.com/api/graphql"
@@ -153,8 +153,11 @@ def main(config):
         max_age = 120,
         delay = 100,
         show_full_animation = True,
+        # The index cards scroll through a viewport two rows taller than the
+        # panel: 34 on 64x32, 66 on a square panel, where a whole 45-row
+        # card is on screen at once.
         child = render.Marquee(
-            height = 34,
+            height = canvas.height() + 2,
             offset_start = 5,
             offset_end = 0,
             scroll_direction = "vertical",

@@ -7,9 +7,10 @@ author: greg-n
 fileName: word_of_the_day.star
 packageName: wordoftheday
 recommendedInterval: 240
+supports64x64: true
 category: education
 tags:
   - education
   - utility
 published: '2022-07-11T21:27:55Z'
-updated: '2026-06-05T04:27:18Z'
+updated: '2026-10-01T19:16:27Z'

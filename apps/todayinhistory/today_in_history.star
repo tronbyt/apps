@@ -4,7 +4,7 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("random.star", "random")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -90,7 +90,9 @@ def page_render(title, the_day, entry):
     quote_scroll = render.Marquee(
         child = render.Column(children = [part, quote]),
         scroll_direction = "vertical",
-        height = 18,
+        # the rows between the header and the footer: 18 on 64x32, 50 on
+        # a square panel
+        height = canvas.height() - 14,
     )
     header = render.Row(
         children = [render.Text(content = title, font = FONT_TITLE, color = "#0F0")],

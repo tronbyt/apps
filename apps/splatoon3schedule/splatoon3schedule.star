@@ -6,7 +6,7 @@ Author: Denton-L
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -176,6 +176,15 @@ def render_splatfest(current_fest, mode_name):
         render.Text(current_fest["title"]),
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     mode_name = config.get("mode", MODES.keys()[0])
     mode = MODES[mode_name]
@@ -204,7 +213,7 @@ def main(config):
             render.Marquee(first_row, width = WIDTH),
             render.Marquee(second_row, width = WIDTH),
             render.Row(image_renders, main_align = "space_between", cross_align = "center"),
-        ], main_align = "space_between", cross_align = "center"),
+        ], expanded = is_square(), main_align = "space_between", cross_align = "center"),
         max_age = MAX_AGE,
     )
 
