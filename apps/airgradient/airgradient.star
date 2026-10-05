@@ -482,6 +482,20 @@ def get_metric_meta(metric_key, data, is_open_air):
     else:
         return get_metric_meta("pm25", data, is_open_air)
 
+def get_metric_level_and_color(metric_key, val):
+    if metric_key == "co2":
+        return get_co2_level(val)
+    elif metric_key in ["pm25", "pm01"]:
+        return get_pm25_level(val)
+    elif metric_key == "tvoc":
+        return get_tvoc_level(val)
+    elif metric_key == "nox":
+        return get_nox_level(val)
+    elif metric_key == "pm10":
+        return get_pm10_level(val)
+    else:
+        return get_pm25_level(val)
+
 def render_led_bar_1x(leds):
     pollutant_children = []
     for i in range(9):
@@ -1078,6 +1092,193 @@ def render_sparkline_2x(metric_name, time_badge, cur_val_str, unit_str, min_str,
         ],
     )
 
+def render_color_bars_1x(metric_key, metric_name, time_badge, cur_val_str, unit_str, min_str, max_str, series, min_val, max_val, cur_color, plot_h, c_label, divider_color):
+    sampled = downsample_points(series, 20)
+    val_range = max_val - min_val
+    bars = []
+    for val in sampled:
+        if val_range > 0:
+            ratio = (val - min_val) / float(val_range)
+            h = int(2 + ratio * (plot_h - 2))
+        else:
+            h = plot_h // 2
+        _, bar_color = get_metric_level_and_color(metric_key, val)
+        bars.append(
+            render.Column(
+                main_align = "end",
+                children = [
+                    render.Box(width = 2, height = h, color = bar_color),
+                ],
+            ),
+        )
+        bars.append(render.Box(width = 1, height = plot_h, color = COLOR_BG))
+
+    if len(bars) > 0:
+        bars = bars[:-1]
+
+    return render.Column(
+        main_align = "start",
+        cross_align = "start",
+        children = [
+            # Header row (height 7)
+            render.Box(
+                width = 64,
+                height = 7,
+                child = render.Padding(
+                    pad = (2, 0, 2, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Row(
+                                cross_align = "center",
+                                children = [
+                                    render.Text(metric_name, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
+                                    render.Box(width = 2),
+                                    render.Text(time_badge, font = "tom-thumb", color = c_label),
+                                ],
+                            ),
+                            render.Row(
+                                cross_align = "center",
+                                children = [
+                                    render.Text(cur_val_str, font = "tom-thumb", color = cur_color),
+                                    render.Box(width = 1),
+                                    render.Text(unit_str, font = "CG-pixel-3x5-mono", color = c_label),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            # Stats row (height 6)
+            render.Box(
+                width = 64,
+                height = 6,
+                child = render.Padding(
+                    pad = (2, 0, 2, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text("min " + min_str, font = "tom-thumb", color = c_label),
+                            render.Text("max " + max_str, font = "tom-thumb", color = c_label),
+                        ],
+                    ),
+                ),
+            ),
+            render.Box(width = 64, height = 1, color = divider_color),
+            # Bars
+            render.Padding(
+                pad = (2, 0, 0, 0),
+                child = render.Row(
+                    cross_align = "end",
+                    children = bars,
+                ),
+            ),
+        ],
+    )
+
+def render_color_bars_2x(metric_key, metric_name, time_badge, cur_val_str, unit_str, min_str, max_str, series, min_val, max_val, cur_color, plot_h, c_label, divider_color, device_title):
+    sampled = downsample_points(series, 24)
+    val_range = max_val - min_val
+    bars = []
+    for val in sampled:
+        if val_range > 0:
+            ratio = (val - min_val) / float(val_range)
+            h = int(3 + ratio * (plot_h - 3))
+        else:
+            h = plot_h // 2
+        _, bar_color = get_metric_level_and_color(metric_key, val)
+        bars.append(
+            render.Column(
+                main_align = "end",
+                children = [
+                    render.Box(width = 4, height = h, color = bar_color),
+                ],
+            ),
+        )
+        bars.append(render.Box(width = 1, height = plot_h, color = COLOR_BG))
+
+    if len(bars) > 0:
+        bars = bars[:-1]
+
+    return render.Column(
+        main_align = "start",
+        cross_align = "start",
+        children = [
+            # Top device title / badge (height 9)
+            render.Box(
+                width = 128,
+                height = 9,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text(device_title, font = "CG-pixel-3x5-mono", color = c_label),
+                            render.Text(time_badge + " HISTORY", font = "CG-pixel-3x5-mono", color = c_label),
+                        ],
+                    ),
+                ),
+            ),
+            render.Box(width = 128, height = 1, color = divider_color),
+            # Main metric & current value row (height 12)
+            render.Box(
+                width = 128,
+                height = 12,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text(metric_name, font = "tb-8", color = COLOR_TEXT_WHITE),
+                            render.Row(
+                                cross_align = "center",
+                                children = [
+                                    render.Text(cur_val_str, font = "tb-8", color = cur_color),
+                                    render.Box(width = 2),
+                                    render.Text(unit_str, font = "tom-thumb", color = c_label),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            # Stats row (height 8)
+            render.Box(
+                width = 128,
+                height = 8,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text("min " + min_str + " " + unit_str, font = "tom-thumb", color = c_label),
+                            render.Text("max " + max_str + " " + unit_str, font = "tom-thumb", color = c_label),
+                        ],
+                    ),
+                ),
+            ),
+            render.Box(width = 128, height = 1, color = divider_color),
+            # Bars
+            render.Padding(
+                pad = (4, 0, 0, 0),
+                child = render.Row(
+                    cross_align = "end",
+                    children = bars,
+                ),
+            ),
+        ],
+    )
+
 def main(config):
     source = config.get("source", "direct")
     device_url = config.get("device_url", "http://192.168.1.27")
@@ -1209,12 +1410,15 @@ def main(config):
     time_badge = "24h"
     plot_data_1x = []
     plot_data_2x = []
+    series = []
+    min_val = 0.0
+    max_val = 10.0
     y_lim = (0.0, 10.0)
     spark_line_color = COLOR_TEXT_WHITE
     spark_fill_color = "#151515"
 
-    # Prepare Sparkline data if in sparkline mode
-    if display_mode == "sparkline":
+    # Prepare Sparkline / Graph data if in graph or sparkline mode
+    if display_mode in ["graph", "sparkline"]:
         spark_name, spark_unit, spark_cur_val, spark_lvl, spark_color, spark_ha_suffix = get_metric_meta(sparkline_metric, data, is_open_air)
         spark_line_color = spark_color if use_color else COLOR_TEXT_WHITE
         spark_fill_color = get_sparkline_fill_color(spark_lvl) if use_color else "#151515"
@@ -1270,8 +1474,11 @@ def main(config):
 
         if display_mode == "blocks":
             body = render_color_blocks_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, col_height, c_label, divider_color, device_title)
+        elif display_mode == "graph":
+            spark_h = 28 if show_led_bar else 33
+            body = render_color_bars_2x(sparkline_metric, spark_name, time_badge, cur_str, spark_unit, min_str, max_str, series, min_val, max_val, spark_line_color, spark_h, c_label, divider_color, device_title)
         elif display_mode == "sparkline":
-            spark_h = 34 if show_led_bar else 39
+            spark_h = 28 if show_led_bar else 33
             body = render_sparkline_2x(spark_name, time_badge, cur_str, spark_unit, min_str, max_str, plot_data_2x, y_lim, spark_line_color, spark_fill_color, spark_h, c_label, divider_color, device_title)
         else:
             body = render_dashboard_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color, device_title)
@@ -1286,8 +1493,11 @@ def main(config):
             body = render_big_numbers_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, c_label, divider_color)
         elif display_mode == "blocks":
             body = render_color_blocks_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, col_height, c_label, divider_color)
+        elif display_mode == "graph":
+            spark_h = 15 if show_led_bar else 18
+            body = render_color_bars_1x(sparkline_metric, spark_name, time_badge, cur_str, spark_unit, min_str, max_str, series, min_val, max_val, spark_line_color, spark_h, c_label, divider_color)
         elif display_mode == "sparkline":
-            spark_h = 16 if show_led_bar else 19
+            spark_h = 15 if show_led_bar else 18
             body = render_sparkline_1x(spark_name, time_badge, cur_str, spark_unit, min_str, max_str, plot_data_1x, y_lim, spark_line_color, spark_fill_color, spark_h, c_label, divider_color)
         else:
             body = render_dashboard_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color)
@@ -1338,7 +1548,8 @@ def get_schema():
                     schema.Option(display = "Big Numbers (Across the Room)", value = "big"),
                     schema.Option(display = "Color Blocks (Section Backgrounds)", value = "blocks"),
                     schema.Option(display = "Ambient (Full Background Color)", value = "ambient"),
-                    schema.Option(display = "Sparkline History", value = "sparkline"),
+                    schema.Option(display = "Color-Coded Graph (Air Quality Bars)", value = "graph"),
+                    schema.Option(display = "Sparkline History (Area Plot)", value = "sparkline"),
                 ],
             ),
             schema.Dropdown(

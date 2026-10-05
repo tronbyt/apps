@@ -15,7 +15,8 @@ Captures both the hardware pollutant LED bar and the environmental metrics displ
   - **Big Numbers (Across the Room)**: High-visibility large font layout optimized for effortless reading across a living room or office.
   - **Color Blocks (Section Backgrounds)**: Colored alert tiles where each section's background turns green, yellow, orange, red, or purple based on that pollutant's level, with high-contrast text and labels.
   - **Ambient (Full Background Color)**: The entire screen background changes dynamically to match the current air quality alert color.
-  - **Sparkline History**: Plots historical trends for any selected pollutant (**PM2.5, CO2, TVOC, NOx, PM10, or PM1.0**) across **8, 12, 24, or 48 hours** with min/max statistics and alert color fills. Powered instantly by Home Assistant's history database or accumulated locally in Direct mode.
+  - **Color-Coded Graph (Air Quality Bars)**: A multi-color historical timeline where every vertical bar is individually color-coded according to the pollutant's Air Quality category (Green $\rightarrow$ Yellow $\rightarrow$ Orange $\rightarrow$ Red $\rightarrow$ Purple) at that specific moment in time.
+  - **Sparkline History (Area Plot)**: Plots a continuous smooth curve with shaded under-area for any selected pollutant (**PM2.5, CO2, TVOC, NOx, PM10, or PM1.0**) across **8, 12, 24, or 48 hours** with min/max statistics.
 - **Open Air (Outdoor) Auto-Detection**:
   - Automatically identifies AirGradient Open Air models (`O-` prefix or missing CO2 sensor).
   - Seamlessly shifts Column 1 from CO2 (ppm) to PM1.0 (µg/m³), Column 2 to PM2.5, and Column 3 to PM10, while configuring the LED bar for PM2.5.
