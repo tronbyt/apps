@@ -1169,12 +1169,18 @@ def render_color_bars_1x(metric_key, metric_name, time_badge, cur_val_str, unit_
                 ),
             ),
             render.Box(width = 64, height = 1, color = divider_color),
-            # Bars
-            render.Padding(
-                pad = (2, 0, 0, 0),
-                child = render.Row(
-                    cross_align = "end",
-                    children = bars,
+            # Bars (aligned to the right so recent readings sit at the present/now edge)
+            render.Box(
+                width = 64,
+                height = plot_h,
+                child = render.Padding(
+                    pad = (2, 0, 2, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        cross_align = "end",
+                        children = bars,
+                    ),
                 ),
             ),
         ],
@@ -1268,12 +1274,18 @@ def render_color_bars_2x(metric_key, metric_name, time_badge, cur_val_str, unit_
                 ),
             ),
             render.Box(width = 128, height = 1, color = divider_color),
-            # Bars
-            render.Padding(
-                pad = (4, 0, 0, 0),
-                child = render.Row(
-                    cross_align = "end",
-                    children = bars,
+            # Bars (aligned to the right so recent readings sit at the present/now edge)
+            render.Box(
+                width = 128,
+                height = plot_h,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        cross_align = "end",
+                        children = bars,
+                    ),
                 ),
             ),
         ],
