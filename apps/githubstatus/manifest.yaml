@@ -7,9 +7,10 @@ author: hross
 fileName: github_status.star
 packageName: githubstatus
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tracking
   - tech-support
 published: '2023-05-04T17:04:30Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T19:34:09Z'
