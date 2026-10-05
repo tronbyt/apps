@@ -1,7 +1,7 @@
 """
 Applet: No Laying Up
 Summary: Lists NLU content
-Description: No Laying Up produces golf and golf adjacent media content. This app displays the last 6 items posted to the No Laying Up RSS feed. Orange for NLU podcasts, green for Trap Draw podcasts, blue for blogs entries and red for video content. 
+Description: No Laying Up produces golf and golf adjacent media content. This app displays the last 6 items posted to the No Laying Up RSS feed. Orange for NLU podcasts, green for Trap Draw podcasts, blue for Nest podcasts, yellow for blogs and red for video content. 
 Author: M0ntyP
 
 Very niche app for the true NLU sickos out there
@@ -12,6 +12,11 @@ Updated to reflect change in titles in RSS feed
 v1.2
 Distinguish Nest podcast episodes from the other podcasts with blue color
 Changed blog color to yellow
+
+v1.2.1
+Changed Nest color to lighter blue, previous color was too dark
+Stripped "Episode" from the title of Nest pods to align with other pod title format, "<Episode Number>: <Title>"
+Updated app description to reflect new colors
 """
 
 load("http.star", "http")
@@ -43,6 +48,7 @@ def main():
                 NLUPOD = "Trap"
             elif podstrip.startswith("ne"):
                 NLUPOD = "Nest"
+                desc = desc[8:]
             else:
                 NLUPOD = "NLU"
 
@@ -99,7 +105,7 @@ def articles(description, content_type, pod_type):
             elif pod_type[i] == "Trap":
                 content_color = "#019b5b"
             elif pod_type[i] == "Nest":
-                content_color = "#3a34eb"
+                content_color = "#88ccff"
         elif content_type[i] == "vid":
             content_color = "#eb3449"
         elif content_type[i] == "blo":
