@@ -36,8 +36,6 @@ COLOR_LED_ORANGE = "#FF8C00"
 COLOR_LED_RED = "#FF2828"
 COLOR_LED_PURPLE = "#B418FF"
 COLOR_LED_OFF = "#181b1f"
-COLOR_STATUS_OFF = "#121417"
-COLOR_STATUS_ERR = "#FF2828"
 
 # Block colors for section backgrounds
 BLOCK_GREEN = "#00A638"
@@ -155,7 +153,7 @@ def get_label_palette(setting, custom_color = None):
         # Default: high contrast bright white
         return "#FFFFFF", "#D0D5DD"
 
-def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_error):
+def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl):
     mode = led_mode
     if mode == "auto":
         mode = device_mode if device_mode in ["co2", "pm", "iaqs", "off"] else "co2"
@@ -196,8 +194,7 @@ def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_error
         else:
             leds.append(COLOR_LED_OFF)
 
-    status_color = COLOR_STATUS_ERR if has_error else COLOR_STATUS_OFF
-    return status_color, leds, level
+    return leds, level
 
 def normalize_url(url):
     cleaned = url.strip()
@@ -285,7 +282,7 @@ def format_pm(val):
         return s
     return str(int(math.round(val)))
 
-def render_led_bar_1x(status_color, leds):
+def render_led_bar_1x(leds):
     pollutant_children = []
     for i in range(9):
         pollutant_children.append(
@@ -300,13 +297,9 @@ def render_led_bar_1x(status_color, leds):
 
     return render.Row(
         expanded = True,
-        main_align = "space_between",
+        main_align = "end",
         cross_align = "center",
         children = [
-            render.Padding(
-                pad = (2, 0, 0, 0),
-                child = render.Box(width = 2, height = 2, color = status_color),
-            ),
             render.Padding(
                 pad = (0, 0, 2, 0),
                 child = render.Row(children = pollutant_children),
@@ -314,7 +307,7 @@ def render_led_bar_1x(status_color, leds):
         ],
     )
 
-def render_led_bar_2x(status_color, leds):
+def render_led_bar_2x(leds):
     pollutant_children = []
     for i in range(9):
         pollutant_children.append(
@@ -329,13 +322,9 @@ def render_led_bar_2x(status_color, leds):
 
     return render.Row(
         expanded = True,
-        main_align = "space_between",
+        main_align = "end",
         cross_align = "center",
         children = [
-            render.Padding(
-                pad = (4, 0, 0, 0),
-                child = render.Box(width = 4, height = 4, color = status_color),
-            ),
             render.Padding(
                 pad = (0, 0, 4, 0),
                 child = render.Row(children = pollutant_children),
@@ -771,9 +760,9 @@ def main(config):
         hum_ov = config.get("ha_hum_entity", "")
         tvoc_ov = config.get("ha_tvoc_entity", "")
         nox_ov = config.get("ha_nox_entity", "")
-        data, has_error = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
+        data, _ = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
     else:
-        data, has_error = fetch_direct_data(device_url)
+        data, _ = fetch_direct_data(device_url)
 
     # Extract metrics
     co2_raw = data.get("rco2", 0)
@@ -813,7 +802,7 @@ def main(config):
     nox_str = format_number(nox_raw)
 
     # Compute LED bar colors and states
-    status_color, leds, led_level = calculate_led_bar(co2, pm25, led_mode, device_led_mode, direction_rtl, has_error)
+    leds, led_level = calculate_led_bar(co2, pm25, led_mode, device_led_mode, direction_rtl)
 
     # Air quality color accents
     co2_lvl, co2_color = get_co2_level(co2)
@@ -838,7 +827,7 @@ def main(config):
     if is2x:
         col_height = 46 if show_led_bar else 52
         if show_led_bar:
-            children.append(render_led_bar_2x(status_color, leds))
+            children.append(render_led_bar_2x(leds))
             children.append(render.Box(width = width, height = 1, color = canvas_bg))
 
         if display_mode == "blocks":
@@ -849,7 +838,7 @@ def main(config):
     else:
         col_height = 21 if show_led_bar else 24
         if show_led_bar:
-            children.append(render_led_bar_1x(status_color, leds))
+            children.append(render_led_bar_1x(leds))
             children.append(render.Box(width = width, height = 1, color = canvas_bg))
 
         if display_mode == "big":

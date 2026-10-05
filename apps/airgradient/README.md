@@ -6,8 +6,7 @@ Captures both the physical 11-LED status & pollutant bar and the environmental m
 
 ## Features
 
-- **Hardware LED Bar Emulation**: Replicates the physical AirGradient ONE top LED bar:
-  - 1 Status LED on the far left (alerting to connectivity issues).
+- **Hardware LED Bar Emulation**: Replicates the physical AirGradient ONE pollutant LED bar:
   - 9 Pollutant LEDs extending from right to left (matching hardware behavior) with official AirGradient color thresholds: Green (Good), Yellow (Moderate), Orange (Elevated), Red (High), and Purple (Hazardous).
   - Configurable to follow the device's active LED mode (CO2, PM2.5, IAQS) or override to your preference.
   - Can be toggled off completely via `Show LED Bar` or `LED Bar Metric: Off` with zero residual gray dots.
