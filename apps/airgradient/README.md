@@ -17,7 +17,7 @@ Captures both the physical 11-LED status & pollutant bar and the environmental m
   - **Color Blocks (Section Backgrounds)**: Colored alert tiles where each section's background turns green, yellow, orange, red, or purple based on that pollutant's level, with high-contrast text and labels.
   - **Ambient (Full Background Color)**: The entire screen background changes dynamically to match the current air quality alert color.
 - **Label Contrast / Color Options**:
-  - Customize the metric labels and units (`CO2`, `PM2.5`, `VOC`, `ppm`, etc.) with choices for **Bright White (High Contrast)**, **Muted Grey (Classic)**, **Warm Gold**, or **Cool Cyan** to ensure maximum legibility against ambient and tinted backgrounds.
+  - Customize the metric labels and units (`CO2`, `PM2.5`, `VOC`, `ppm`, etc.) with choices for **Bright White (High Contrast)**, **Muted Grey (Classic)**, **Warm Gold**, **Cool Cyan**, or a **Custom Color** picker to ensure maximum legibility against ambient and tinted backgrounds.
 - **Dynamic Dual Connection Support**:
   - **Direct Local Network (Default)**: Connects directly to the monitor's local HTTP API (e.g. `http://192.168.1.27` or `http://air.gradient.lan`). The schema dynamically shows only the local device URL.
   - **Home Assistant**: Query Home Assistant sensors directly using a Long-Lived Access Token, dynamically revealing HA URL, token, and entity prefix/override options when selected.

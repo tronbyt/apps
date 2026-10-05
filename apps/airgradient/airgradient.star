@@ -141,13 +141,16 @@ def get_ambient_bg(level):
     else:
         return AMBIENT_PURPLE
 
-def get_label_palette(setting):
+def get_label_palette(setting, custom_color = None):
     if setting == "muted":
         return COLOR_TEXT_DIM, COLOR_TEXT_SUBTLE
     elif setting == "gold":
         return "#FFE066", "#D4B040"
     elif setting == "cyan":
         return "#70D6FF", "#4FA8D1"
+    elif setting == "custom":
+        c = custom_color if custom_color else "#FFFFFF"
+        return c, c
     else:
         # Default: high contrast bright white
         return "#FFFFFF", "#D0D5DD"
@@ -747,6 +750,7 @@ def main(config):
     temp_unit = config.get("temp_unit", "f")
     display_mode = config.get("display_mode", "classic")
     label_color_setting = config.get("label_color", "white")
+    custom_label_color = config.get("custom_label_color", "#FFFFFF")
     show_led_bar = config.bool("show_led_bar", True)
     led_mode = config.get("led_mode", "auto")
     direction_rtl = config.bool("direction_rtl", True)
@@ -816,7 +820,7 @@ def main(config):
     pm_lvl, pm_color = get_pm25_level(pm25)
 
     # Label colors
-    c_label, c_unit = get_label_palette(label_color_setting)
+    c_label, c_unit = get_label_palette(label_color_setting, custom_label_color)
 
     is2x = canvas.is2x()
     width, height = canvas.size()
@@ -941,6 +945,19 @@ def get_source_fields(source):
         ),
     ]
 
+def get_label_fields(label_color):
+    if label_color == "custom":
+        return [
+            schema.Color(
+                id = "custom_label_color",
+                name = "Custom Label Color",
+                desc = "User-defined color for metric labels and units",
+                icon = "palette",
+                default = "#FFFFFF",
+            ),
+        ]
+    return []
+
 def get_schema():
     return schema.Schema(
         version = "1",
@@ -985,7 +1002,13 @@ def get_schema():
                     schema.Option(display = "Muted Grey (Classic)", value = "muted"),
                     schema.Option(display = "Warm Gold", value = "gold"),
                     schema.Option(display = "Cool Cyan", value = "cyan"),
+                    schema.Option(display = "Custom Color", value = "custom"),
                 ],
+            ),
+            schema.Generated(
+                id = "custom_label_config",
+                source = "label_color",
+                handler = get_label_fields,
             ),
             schema.Toggle(
                 id = "show_led_bar",
