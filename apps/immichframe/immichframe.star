@@ -12,7 +12,9 @@ def main(config):
     # SHOW_FAVORITES = config.bool("show_favorites", False)
     ALBUM = config.get("immich_album_id", "invalid")
     STATUS_URL = "%s/api/server/ping" % (URL)
+    ABOUT_URL = "%s/api/server/about" % (URL)
     ALBUM_URL = "%s/api/albums/%s" % (URL, ALBUM)
+    PHOTO_URL = "%s/api/search/metadata" % (URL)
     SHOW_DATE = config.bool("show_date", True)
     SHOW_LOCATION = config.bool("show_location", False)
 
@@ -23,23 +25,33 @@ def main(config):
             child = render.WrappedText("Server not accessible"),
         )
     else:
-        headers = {
-            "x-api-key": API_KEY,
-        }
-        res = http.get(ALBUM_URL, headers = headers)
-        status = res.json().get("statusCode")
-        if status != None:
-            return render.Root(
-                child = render.WrappedText("Album not accessible"),
-            )
-        assets = res.json()["assets"]
-        assetCount = int(res.json()["assetCount"]) - 1
+        headers = {"x-api-key": API_KEY}
+        res = http.get(ABOUT_URL, headers = headers)
+        server_version = res.json()["version"].split(".")[0]
+        assetID = "0000"
+        assets = []
+        assetCount = 0
+        if server_version == "v3":
+            res_body = {"albumIds": ["%s" % (ALBUM)], "type": "IMAGE"}
+            res = http.post(PHOTO_URL, headers = headers, json_body = res_body)
+            assets = res.json()["assets"]["items"]
+            assetCount = int(res.json()["assets"]["count"]) - 1
+        else:
+            res = http.get(ALBUM_URL, headers = headers)
+            status = res.json().get("statusCode")
+            if status != None:
+                return render.Root(
+                    child = render.WrappedText("Album not accessible"),
+                )
+            assets = res.json()["assets"]
+            assetCount = int(res.json()["assetCount"]) - 1
         if assetCount < 0:
             return render.Root(
                 child = render.WrappedText("Album is Empty"),
             )
         randomCount = random.number(0, assetCount)
         assetID = assets[randomCount]["id"]
+
         IMG_URL = "%s/api/assets/%s" % (URL, assetID)
         print(IMG_URL)
         res_img = http.get("%s/thumbnail" % IMG_URL, headers = headers)
