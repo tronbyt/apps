@@ -1,0 +1,16 @@
+---
+id: airgradient
+name: AirGradient
+summary: AirGradient ONE monitor
+desc: Interfaces with an AirGradient ONE indoor air quality monitor via direct local network or Home Assistant, capturing the LED bar and screen metrics.
+author: brombomb
+fileName: airgradient.star
+packageName: airgradient
+recommendedInterval: 5
+supports2x: true
+category: smart-home
+tags:
+  - smart-home
+  - utilities
+  - hardware
+  - health
