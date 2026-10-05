@@ -5,11 +5,13 @@ Description: Interfaces with an AirGradient ONE or Open Air air quality monitor 
 Author: brombomb
 """
 
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # Default mock data matching the AirGradient ONE (I-9PSL)
 DEFAULT_DATA = {
@@ -130,6 +132,63 @@ def get_block_palette(level):
         return BLOCK_PURPLE, "#FFFFFF"
 
 def get_ambient_bg(level):
+    if level <= 2:
+        return AMBIENT_GREEN
+    elif level <= 4:
+        return AMBIENT_YELLOW
+    elif level <= 6:
+        return AMBIENT_ORANGE
+    elif level <= 8:
+        return AMBIENT_RED
+    else:
+        return AMBIENT_PURPLE
+
+MOCK_SPARKLINE_DATA = {
+    "co2": [620.0, 610.0, 600.0, 590.0, 580.0, 585.0, 630.0, 710.0, 850.0, 940.0, 1020.0, 1100.0, 1050.0, 920.0, 880.0, 810.0, 790.0, 820.0, 860.0, 900.0, 840.0, 800.0, 770.0, 708.0],
+    "pm25": [1.2, 1.4, 1.8, 1.5, 2.0, 2.8, 3.8, 4.4, 5.0, 4.2, 3.5, 2.0, 1.5, 2.2, 3.8, 4.2, 3.0, 2.1, 2.0, 2.5, 2.8, 2.2, 2.0, 2.7],
+    "tvoc": [20.0, 22.0, 18.0, 15.0, 25.0, 45.0, 80.0, 120.0, 160.0, 110.0, 75.0, 50.0, 42.0, 60.0, 95.0, 130.0, 70.0, 48.0, 38.0, 32.0, 28.0, 30.0, 32.0, 35.0],
+    "nox": [1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 4.0, 8.0, 12.0, 6.0, 3.0, 2.0, 1.0, 2.0, 5.0, 7.0, 3.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    "pm10": [2.2, 2.4, 2.8, 2.5, 3.0, 3.8, 4.8, 5.4, 6.0, 5.2, 4.5, 3.0, 2.5, 3.2, 4.8, 5.2, 4.0, 3.1, 3.0, 3.5, 3.8, 3.2, 3.0, 3.1],
+    "pm01": [0.8, 0.9, 1.1, 1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 2.4, 2.0, 1.2, 1.0, 1.4, 2.2, 2.5, 1.8, 1.3, 1.1, 1.4, 1.5, 1.2, 1.0, 1.1],
+}
+
+def get_tvoc_level(tvoc):
+    if tvoc <= 100:
+        return 1, COLOR_LED_GREEN
+    elif tvoc <= 150:
+        return 3, COLOR_LED_YELLOW
+    elif tvoc <= 250:
+        return 5, COLOR_LED_ORANGE
+    elif tvoc <= 350:
+        return 7, COLOR_LED_RED
+    else:
+        return 9, COLOR_LED_PURPLE
+
+def get_nox_level(nox):
+    if nox <= 1:
+        return 1, COLOR_LED_GREEN
+    elif nox <= 5:
+        return 3, COLOR_LED_YELLOW
+    elif nox <= 15:
+        return 5, COLOR_LED_ORANGE
+    elif nox <= 30:
+        return 7, COLOR_LED_RED
+    else:
+        return 9, COLOR_LED_PURPLE
+
+def get_pm10_level(pm10):
+    if pm10 <= 20:
+        return 1, COLOR_LED_GREEN
+    elif pm10 <= 50:
+        return 3, COLOR_LED_YELLOW
+    elif pm10 <= 100:
+        return 5, COLOR_LED_ORANGE
+    elif pm10 <= 150:
+        return 7, COLOR_LED_RED
+    else:
+        return 9, COLOR_LED_PURPLE
+
+def get_sparkline_fill_color(level):
     if level <= 2:
         return AMBIENT_GREEN
     elif level <= 4:
@@ -288,6 +347,140 @@ def format_pm(val):
             s = s[:-2]
         return s
     return str(int(math.round(val)))
+
+def format_sparkline_val(metric_key, val):
+    if metric_key in ["pm25", "pm10", "pm01"]:
+        return format_pm(val)
+    return format_number(val)
+
+def parse_state_value(state):
+    if state == None or state in ("unavailable", "unknown", "none", ""):
+        return None
+    s = str(state).strip()
+    if not s:
+        return None
+    if s.startswith("-"):
+        s = s[1:]
+    if not s:
+        return None
+    parts = s.split(".")
+    if len(parts) not in [1, 2]:
+        return None
+    for part in parts:
+        if not part.isdigit():
+            return None
+    return float(str(state))
+
+def fetch_ha_history(ha_url, ha_token, entity_id, hours):
+    if not ha_token or ha_token == "APIKEY":
+        return []
+
+    base_url = ha_url.strip().rstrip("/")
+    start_time = time.now() - time.parse_duration(str(hours) + "h")
+    start_time_str = start_time.format("2006-01-02T15:04:05Z")
+
+    url = "%s/api/history/period/%s?filter_entity_id=%s&minimal_response=true&no_attributes=true&significant_changes_only=0" % (
+        base_url,
+        start_time_str,
+        entity_id,
+    )
+    headers = {
+        "Authorization": "Bearer " + ha_token,
+        "Content-Type": "application/json",
+    }
+    resp = http.get(url, headers = headers, ttl_seconds = 120)
+    if resp.status_code != 200:
+        return []
+
+    data = resp.json()
+    if not data or len(data) == 0:
+        return []
+
+    entries = data[0]
+    points = []
+    for entry in entries:
+        val = parse_state_value(entry.get("state"))
+        if val != None:
+            points.append(val)
+    return points
+
+def get_or_update_direct_history(device_url, metric_key, current_val, hours):
+    cache_key = "ag_hist:%s:%s" % (device_url, metric_key)
+    now_unix = time.now().unix
+    cutoff = now_unix - (hours * 3600)
+
+    history = []
+    cached = cache.get(cache_key)
+    if cached:
+        history = json.decode(cached)
+
+    history.append([now_unix, current_val])
+
+    filtered = []
+    for item in history:
+        if len(item) == 2 and item[0] >= cutoff:
+            filtered.append(item)
+
+    if len(filtered) > 200:
+        step = len(filtered) / 200.0
+        filtered = [filtered[int(i * step)] for i in range(200)]
+
+    cache.set(cache_key, json.encode(filtered), ttl_seconds = 48 * 3600)
+    return [item[1] for item in filtered]
+
+def get_plot_series(raw_points, metric_key, current_val, is_mock):
+    if len(raw_points) >= 2:
+        return raw_points
+    if is_mock or len(raw_points) == 0:
+        mock = MOCK_SPARKLINE_DATA.get(metric_key, MOCK_SPARKLINE_DATA["pm25"])
+        return mock
+    v = float(current_val)
+    step = 0.5 if v <= 5 else (v * 0.05)
+    v_low = max(0.0, v - step)
+    return [v_low, v + step, v]
+
+def downsample_points(points, target_count):
+    if len(points) <= target_count:
+        return points
+    step = len(points) / float(target_count)
+    sampled = []
+    for i in range(target_count):
+        idx = int(i * step)
+        if idx < len(points):
+            sampled.append(points[idx])
+    return sampled
+
+def get_metric_meta(metric_key, data, is_open_air):
+    if metric_key == "co2":
+        if is_open_air and not data.get("rco2"):
+            return get_metric_meta("pm25", data, is_open_air)
+        val = data.get("rco2", 0)
+        level, color = get_co2_level(val)
+        return "CO2", "ppm", val, level, color, "_co2"
+    elif metric_key == "pm25":
+        val = data.get("pm02Compensated")
+        if val == None:
+            val = data.get("pm02", 0)
+        level, color = get_pm25_level(val)
+        return "PM2.5", "ug", val, level, color, "_pm2_5"
+    elif metric_key == "tvoc":
+        val = data.get("tvocIndex", 0)
+        level, color = get_tvoc_level(val)
+        return "VOC", "idx", val, level, color, "_tvoc_index"
+    elif metric_key == "nox":
+        val = data.get("noxIndex", 0)
+        level, color = get_nox_level(val)
+        return "NOx", "idx", val, level, color, "_nox_index"
+    elif metric_key == "pm10":
+        val = data.get("pm10", 0)
+        level, color = get_pm10_level(val)
+        return "PM10", "ug", val, level, color, "_pm10"
+    elif metric_key == "pm01":
+        val = data.get("pm01", 0)
+        level, color = get_pm25_level(val)
+        return "PM1.0", "ug", val, level, color, "_pm1"
+    else:
+        return get_metric_meta("pm25", data, is_open_air)
 
 def render_led_bar_1x(leds):
     pollutant_children = []
@@ -740,11 +933,159 @@ def render_color_blocks_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, c
         ],
     )
 
+def render_sparkline_1x(metric_name, time_badge, cur_val_str, unit_str, min_str, max_str, plot_data, y_lim, line_color, fill_color, plot_h, c_label, divider_color):
+    return render.Column(
+        main_align = "start",
+        cross_align = "start",
+        children = [
+            # Header row (height 7)
+            render.Box(
+                width = 64,
+                height = 7,
+                child = render.Padding(
+                    pad = (2, 0, 2, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Row(
+                                cross_align = "center",
+                                children = [
+                                    render.Text(metric_name, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
+                                    render.Box(width = 2),
+                                    render.Text(time_badge, font = "tom-thumb", color = c_label),
+                                ],
+                            ),
+                            render.Row(
+                                cross_align = "center",
+                                children = [
+                                    render.Text(cur_val_str, font = "tom-thumb", color = line_color),
+                                    render.Box(width = 1),
+                                    render.Text(unit_str, font = "CG-pixel-3x5-mono", color = c_label),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            # Stats row (height 6)
+            render.Box(
+                width = 64,
+                height = 6,
+                child = render.Padding(
+                    pad = (2, 0, 2, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text("min " + min_str, font = "tom-thumb", color = c_label),
+                            render.Text("max " + max_str, font = "tom-thumb", color = c_label),
+                        ],
+                    ),
+                ),
+            ),
+            render.Box(width = 64, height = 1, color = divider_color),
+            # Plot
+            render.Plot(
+                data = plot_data,
+                width = 64,
+                height = plot_h,
+                color = line_color,
+                fill = True,
+                fill_color = fill_color,
+                y_lim = y_lim,
+            ),
+        ],
+    )
+
+def render_sparkline_2x(metric_name, time_badge, cur_val_str, unit_str, min_str, max_str, plot_data, y_lim, line_color, fill_color, plot_h, c_label, divider_color, device_title):
+    return render.Column(
+        main_align = "start",
+        cross_align = "start",
+        children = [
+            # Top device title / badge (height 9)
+            render.Box(
+                width = 128,
+                height = 9,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text(device_title, font = "CG-pixel-3x5-mono", color = c_label),
+                            render.Text(time_badge + " HISTORY", font = "CG-pixel-3x5-mono", color = c_label),
+                        ],
+                    ),
+                ),
+            ),
+            render.Box(width = 128, height = 1, color = divider_color),
+            # Main metric & current value row (height 12)
+            render.Box(
+                width = 128,
+                height = 12,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text(metric_name, font = "tb-8", color = COLOR_TEXT_WHITE),
+                            render.Row(
+                                cross_align = "center",
+                                children = [
+                                    render.Text(cur_val_str, font = "tb-8", color = line_color),
+                                    render.Box(width = 2),
+                                    render.Text(unit_str, font = "tom-thumb", color = c_label),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            # Stats row (height 8)
+            render.Box(
+                width = 128,
+                height = 8,
+                child = render.Padding(
+                    pad = (4, 0, 4, 0),
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "space_between",
+                        cross_align = "center",
+                        children = [
+                            render.Text("min " + min_str + " " + unit_str, font = "tom-thumb", color = c_label),
+                            render.Text("max " + max_str + " " + unit_str, font = "tom-thumb", color = c_label),
+                        ],
+                    ),
+                ),
+            ),
+            render.Box(width = 128, height = 1, color = divider_color),
+            # Plot
+            render.Plot(
+                data = plot_data,
+                width = 128,
+                height = plot_h,
+                color = line_color,
+                fill = True,
+                fill_color = fill_color,
+                y_lim = y_lim,
+            ),
+        ],
+    )
+
 def main(config):
     source = config.get("source", "direct")
     device_url = config.get("device_url", "http://192.168.1.27")
     temp_unit = config.get("temp_unit", "f")
     display_mode = config.get("display_mode", "classic")
+    sparkline_metric = config.get("sparkline_metric", "pm25")
+    sparkline_hours_str = config.get("sparkline_hours", "24")
+    sparkline_hours = int(sparkline_hours_str) if sparkline_hours_str.isdigit() else 24
     label_color_setting = config.get("label_color", "white")
     custom_label_color = config.get("custom_label_color", "#FFFFFF")
     show_led_bar = config.bool("show_led_bar", True)
@@ -756,20 +1097,21 @@ def main(config):
     if led_mode == "off":
         show_led_bar = False
 
+    ha_url = config.get("ha_url", "http://homeassistant.local:8123")
+    ha_token = config.get("ha_token", "")
+    ha_prefix = config.get("ha_prefix", "airgradient_one")
+    co2_ov = config.get("ha_co2_entity", "")
+    pm_ov = config.get("ha_pm25_entity", "")
+    temp_ov = config.get("ha_temp_entity", "")
+    hum_ov = config.get("ha_hum_entity", "")
+    tvoc_ov = config.get("ha_tvoc_entity", "")
+    nox_ov = config.get("ha_nox_entity", "")
+
     # Fetch data
     if source == "homeassistant":
-        ha_url = config.get("ha_url", "http://homeassistant.local:8123")
-        ha_token = config.get("ha_token", "")
-        ha_prefix = config.get("ha_prefix", "airgradient_one")
-        co2_ov = config.get("ha_co2_entity", "")
-        pm_ov = config.get("ha_pm25_entity", "")
-        temp_ov = config.get("ha_temp_entity", "")
-        hum_ov = config.get("ha_hum_entity", "")
-        tvoc_ov = config.get("ha_tvoc_entity", "")
-        nox_ov = config.get("ha_nox_entity", "")
-        data, _ = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
+        data, is_mock = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
     else:
-        data, _ = fetch_direct_data(device_url)
+        data, is_mock = fetch_direct_data(device_url)
 
     # Detect device model and available sensors (e.g. AirGradient ONE vs Open Air)
     model_str = data.get("model", "")
@@ -858,6 +1200,65 @@ def main(config):
 
     device_title = "AIRGRADIENT OPEN AIR" if is_open_air else "AIRGRADIENT ONE"
 
+    # Default sparkline values
+    spark_name = "PM2.5"
+    spark_unit = "ug"
+    cur_str = "0"
+    min_str = "0"
+    max_str = "0"
+    time_badge = "24h"
+    plot_data_1x = []
+    plot_data_2x = []
+    y_lim = (0.0, 10.0)
+    spark_line_color = COLOR_TEXT_WHITE
+    spark_fill_color = "#151515"
+
+    # Prepare Sparkline data if in sparkline mode
+    if display_mode == "sparkline":
+        spark_name, spark_unit, spark_cur_val, spark_lvl, spark_color, spark_ha_suffix = get_metric_meta(sparkline_metric, data, is_open_air)
+        spark_line_color = spark_color if use_color else COLOR_TEXT_WHITE
+        spark_fill_color = get_sparkline_fill_color(spark_lvl) if use_color else "#151515"
+
+        if source == "homeassistant":
+            p = ha_prefix if ha_prefix else "airgradient_one"
+            if sparkline_metric == "co2":
+                spark_entity = co2_ov if co2_ov else "sensor.%s_co2" % p
+            elif sparkline_metric == "pm25":
+                spark_entity = pm_ov if pm_ov else "sensor.%s_pm2_5" % p
+            elif sparkline_metric == "tvoc":
+                spark_entity = tvoc_ov if tvoc_ov else "sensor.%s_tvoc_index" % p
+            elif sparkline_metric == "nox":
+                spark_entity = nox_ov if nox_ov else "sensor.%s_nox_index" % p
+            elif sparkline_metric == "pm10":
+                spark_entity = "sensor.%s_pm10" % p
+            elif sparkline_metric == "pm01":
+                spark_entity = "sensor.%s_pm1" % p
+            else:
+                spark_entity = "sensor.%s%s" % (p, spark_ha_suffix)
+
+            raw_history = fetch_ha_history(ha_url, ha_token, spark_entity, sparkline_hours)
+        else:
+            raw_history = get_or_update_direct_history(device_url, sparkline_metric, spark_cur_val, sparkline_hours)
+
+        series = get_plot_series(raw_history, sparkline_metric, spark_cur_val, is_mock)
+        sampled_1x = downsample_points(series, 48)
+        sampled_2x = downsample_points(series, 96)
+        plot_data_1x = [(i, float(sampled_1x[i])) for i in range(len(sampled_1x))]
+        plot_data_2x = [(i, float(sampled_2x[i])) for i in range(len(sampled_2x))]
+
+        min_val = min(series)
+        max_val = max(series)
+        if max_val <= min_val:
+            y_lim = (max(0.0, float(min_val) - 1.0), float(max_val) + 1.0)
+        else:
+            y_pad = (float(max_val) - float(min_val)) * 0.08
+            y_lim = (max(0.0, float(min_val) - y_pad), float(max_val) + y_pad)
+
+        min_str = format_sparkline_val(sparkline_metric, min_val)
+        max_str = format_sparkline_val(sparkline_metric, max_val)
+        cur_str = format_sparkline_val(sparkline_metric, spark_cur_val)
+        time_badge = str(sparkline_hours) + "h"
+
     # Build layout children
     children = []
 
@@ -869,6 +1270,9 @@ def main(config):
 
         if display_mode == "blocks":
             body = render_color_blocks_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, col_height, c_label, divider_color, device_title)
+        elif display_mode == "sparkline":
+            spark_h = 34 if show_led_bar else 39
+            body = render_sparkline_2x(spark_name, time_badge, cur_str, spark_unit, min_str, max_str, plot_data_2x, y_lim, spark_line_color, spark_fill_color, spark_h, c_label, divider_color, device_title)
         else:
             body = render_dashboard_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color, device_title)
         children.append(body)
@@ -882,6 +1286,9 @@ def main(config):
             body = render_big_numbers_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, c_label, divider_color)
         elif display_mode == "blocks":
             body = render_color_blocks_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_lvl, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_lvl, col_height, c_label, divider_color)
+        elif display_mode == "sparkline":
+            spark_h = 16 if show_led_bar else 19
+            body = render_sparkline_1x(spark_name, time_badge, cur_str, spark_unit, min_str, max_str, plot_data_1x, y_lim, spark_line_color, spark_fill_color, spark_h, c_label, divider_color)
         else:
             body = render_dashboard_1x(temp_str, hum_str, col1_label, col1_str, col1_unit, col1_color, pm_label, pm_str, col3_top_label, col3_top_val, col3_bot_label, col3_bot_val, pm_color, use_color, col_height, c_label, c_unit, divider_color)
         children.append(body)
@@ -931,6 +1338,35 @@ def get_schema():
                     schema.Option(display = "Big Numbers (Across the Room)", value = "big"),
                     schema.Option(display = "Color Blocks (Section Backgrounds)", value = "blocks"),
                     schema.Option(display = "Ambient (Full Background Color)", value = "ambient"),
+                    schema.Option(display = "Sparkline History", value = "sparkline"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "sparkline_metric",
+                name = "Sparkline Metric",
+                desc = "Metric to graph in Sparkline History mode",
+                icon = "chartLine",
+                default = "pm25",
+                options = [
+                    schema.Option(display = "PM2.5 (µg/m³)", value = "pm25"),
+                    schema.Option(display = "CO2 (ppm)", value = "co2"),
+                    schema.Option(display = "TVOC (Index)", value = "tvoc"),
+                    schema.Option(display = "NOx (Index)", value = "nox"),
+                    schema.Option(display = "PM10 (µg/m³)", value = "pm10"),
+                    schema.Option(display = "PM1.0 (µg/m³)", value = "pm01"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "sparkline_hours",
+                name = "Sparkline Time Range",
+                desc = "Historical duration for the sparkline chart",
+                icon = "clock",
+                default = "24",
+                options = [
+                    schema.Option(display = "Last 8 Hours", value = "8"),
+                    schema.Option(display = "Last 12 Hours", value = "12"),
+                    schema.Option(display = "Last 24 Hours (Default)", value = "24"),
+                    schema.Option(display = "Last 48 Hours", value = "48"),
                 ],
             ),
             schema.Dropdown(
