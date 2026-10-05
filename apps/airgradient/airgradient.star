@@ -57,6 +57,7 @@ COLOR_TEXT_WHITE = "#FFFFFF"
 COLOR_TEXT_DIM = "#8A929B"
 COLOR_TEXT_SUBTLE = "#555A60"
 COLOR_DIVIDER = "#24272D"
+COLOR_DIVIDER_AMBIENT = "#444D56"
 COLOR_BG = "#000000"
 
 def get_co2_level(co2):
@@ -139,6 +140,17 @@ def get_ambient_bg(level):
         return AMBIENT_RED
     else:
         return AMBIENT_PURPLE
+
+def get_label_palette(setting):
+    if setting == "muted":
+        return COLOR_TEXT_DIM, COLOR_TEXT_SUBTLE
+    elif setting == "gold":
+        return "#FFE066", "#D4B040"
+    elif setting == "cyan":
+        return "#70D6FF", "#4FA8D1"
+    else:
+        # Default: high contrast bright white
+        return "#FFFFFF", "#D0D5DD"
 
 def calculate_led_bar(co2, pm25, led_mode, device_mode, direction_rtl, has_error):
     mode = led_mode
@@ -328,7 +340,7 @@ def render_led_bar_2x(status_color, leds):
         ],
     )
 
-def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height):
+def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color):
     c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
@@ -348,7 +360,7 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                 ),
             ),
             # Divider line
-            render.Box(width = 64, height = 1, color = COLOR_DIVIDER),
+            render.Box(width = 64, height = 1, color = divider_color),
             # Main 3 Columns
             render.Row(
                 expanded = True,
@@ -360,34 +372,34 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                         child = render.Column(
                             cross_align = "start",
                             children = [
-                                render.Text("CO2", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("CO2", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(co2_str, font = "tb-8", color = c_co2),
-                                render.Text("ppm", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                                render.Text("ppm", font = "CG-pixel-3x5-mono", color = c_unit),
                             ],
                         ),
                     ),
                     # Vertical separator
-                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = divider_color),
                     # Col 2: PM2.5
                     render.Column(
                         cross_align = "start",
                         children = [
-                            render.Text("PM2.5", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                            render.Text("PM2.5", font = "CG-pixel-3x5-mono", color = c_label),
                             render.Text(pm_str, font = "tb-8", color = c_pm),
-                            render.Text("ug/m3", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                            render.Text("ug/m3", font = "CG-pixel-3x5-mono", color = c_unit),
                         ],
                     ),
                     # Vertical separator
-                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = divider_color),
                     # Col 3: VOC & NOx
                     render.Padding(
                         pad = (0, 0, 2, 0),
                         child = render.Column(
                             cross_align = "start",
                             children = [
-                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(voc_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
-                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(nox_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
                             ],
                         ),
@@ -397,7 +409,7 @@ def render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
         ],
     )
 
-def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color):
+def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, c_label, divider_color):
     c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
@@ -416,7 +428,7 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                     ],
                 ),
             ),
-            render.Box(width = 64, height = 1, color = COLOR_DIVIDER),
+            render.Box(width = 64, height = 1, color = divider_color),
             # Big split cards
             render.Row(
                 expanded = True,
@@ -433,12 +445,12 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                                 render.Text(co2_str, font = "6x10", color = c_co2),
                                 render.Padding(
                                     pad = (1, 3, 0, 0),
-                                    child = render.Text("ppm", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                                    child = render.Text("ppm", font = "CG-pixel-3x5-mono", color = c_label),
                                 ),
                             ],
                         ),
                     ),
-                    render.Box(width = 1, height = 16, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = 16, color = divider_color),
                     # PM2.5 card
                     render.Box(
                         width = 31,
@@ -450,14 +462,14 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                                 render.Text(pm_str, font = "6x10", color = c_pm),
                                 render.Padding(
                                     pad = (1, 3, 0, 0),
-                                    child = render.Text("ug", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                                    child = render.Text("ug", font = "CG-pixel-3x5-mono", color = c_label),
                                 ),
                             ],
                         ),
                     ),
                 ],
             ),
-            render.Box(width = 64, height = 1, color = COLOR_DIVIDER),
+            render.Box(width = 64, height = 1, color = divider_color),
             # Bottom row: VOC & NOx
             render.Padding(
                 pad = (3, 0, 3, 0),
@@ -468,13 +480,13 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
                     children = [
                         render.Row(
                             children = [
-                                render.Text("VOC ", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("VOC ", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(voc_str, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
                             ],
                         ),
                         render.Row(
                             children = [
-                                render.Text("NOx ", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("NOx ", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(nox_str, font = "CG-pixel-3x5-mono", color = COLOR_TEXT_WHITE),
                             ],
                         ),
@@ -484,7 +496,7 @@ def render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, 
         ],
     )
 
-def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h):
+def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h, c_label, divider_color):
     co2_bg, co2_fg = get_block_palette(co2_lvl)
     pm_bg, pm_fg = get_block_palette(pm_lvl)
 
@@ -503,7 +515,7 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                     ],
                 ),
             ),
-            render.Box(width = 64, height = 1, color = COLOR_DIVIDER),
+            render.Box(width = 64, height = 1, color = divider_color),
             # 3 Color Block Tiles
             render.Row(
                 expanded = True,
@@ -550,9 +562,9 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("VOC", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(voc_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
-                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_DIM),
+                                render.Text("NOx", font = "CG-pixel-3x5-mono", color = c_label),
                                 render.Text(nox_str, font = "tom-thumb", color = COLOR_TEXT_WHITE),
                             ],
                         ),
@@ -562,7 +574,7 @@ def render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
         ],
     )
 
-def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height):
+def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color):
     c_co2 = co2_color if use_color else COLOR_TEXT_WHITE
     c_pm = pm_color if use_color else COLOR_TEXT_WHITE
 
@@ -580,7 +592,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                         render.Row(
                             cross_align = "center",
                             children = [
-                                render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                                render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = c_unit),
                             ],
                         ),
                         render.Text(hum_str, font = "tb-8", color = COLOR_TEXT_WHITE),
@@ -588,7 +600,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                 ),
             ),
             # Divider line
-            render.Box(width = 128, height = 1, color = COLOR_DIVIDER),
+            render.Box(width = 128, height = 1, color = divider_color),
             # Main 3 Columns at 2x resolution
             render.Row(
                 expanded = True,
@@ -601,13 +613,13 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                             cross_align = "start",
                             main_align = "space_around",
                             children = [
-                                render.Text("CO2", font = "tb-8", color = COLOR_TEXT_DIM),
+                                render.Text("CO2", font = "tb-8", color = c_label),
                                 render.Text(co2_str, font = "terminus-16", color = c_co2),
-                                render.Text("ppm", font = "tb-8", color = COLOR_TEXT_SUBTLE),
+                                render.Text("ppm", font = "tb-8", color = c_unit),
                             ],
                         ),
                     ),
-                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = divider_color),
                     # Col 2: PM2.5
                     render.Box(
                         width = 46,
@@ -618,14 +630,14 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                                 cross_align = "start",
                                 main_align = "space_around",
                                 children = [
-                                    render.Text("PM2.5", font = "tb-8", color = COLOR_TEXT_DIM),
+                                    render.Text("PM2.5", font = "tb-8", color = c_label),
                                     render.Text(pm_str, font = "terminus-16", color = c_pm),
-                                    render.Text("ug/m3", font = "tb-8", color = COLOR_TEXT_SUBTLE),
+                                    render.Text("ug/m3", font = "tb-8", color = c_unit),
                                 ],
                             ),
                         ),
                     ),
-                    render.Box(width = 1, height = col_height, color = COLOR_DIVIDER),
+                    render.Box(width = 1, height = col_height, color = divider_color),
                     # Col 3: VOC & NOx
                     render.Box(
                         width = 34,
@@ -636,9 +648,9 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
                                 cross_align = "start",
                                 main_align = "space_around",
                                 children = [
-                                    render.Text("VOC:", font = "tb-8", color = COLOR_TEXT_DIM),
+                                    render.Text("VOC:", font = "tb-8", color = c_label),
                                     render.Text(voc_str, font = "tb-8", color = COLOR_TEXT_WHITE),
-                                    render.Text("NOx:", font = "tb-8", color = COLOR_TEXT_DIM),
+                                    render.Text("NOx:", font = "tb-8", color = c_label),
                                     render.Text(nox_str, font = "tb-8", color = COLOR_TEXT_WHITE),
                                 ],
                             ),
@@ -649,7 +661,7 @@ def render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co
         ],
     )
 
-def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h):
+def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, block_h, c_label, divider_color):
     co2_bg, co2_fg = get_block_palette(co2_lvl)
     pm_bg, pm_fg = get_block_palette(pm_lvl)
 
@@ -664,13 +676,13 @@ def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                     cross_align = "center",
                     children = [
                         render.Text(temp_str, font = "tb-8", color = COLOR_TEXT_WHITE),
-                        render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = COLOR_TEXT_SUBTLE),
+                        render.Text("AIRGRADIENT ONE", font = "CG-pixel-3x5-mono", color = c_label),
                         render.Text(hum_str, font = "tb-8", color = COLOR_TEXT_WHITE),
                     ],
                 ),
             ),
             # Divider line
-            render.Box(width = 128, height = 1, color = COLOR_DIVIDER),
+            render.Box(width = 128, height = 1, color = divider_color),
             # Main 3 Color Blocks
             render.Row(
                 expanded = True,
@@ -717,9 +729,9 @@ def render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str,
                             cross_align = "center",
                             main_align = "space_around",
                             children = [
-                                render.Text("VOC", font = "tb-8", color = COLOR_TEXT_DIM),
+                                render.Text("VOC", font = "tb-8", color = c_label),
                                 render.Text(voc_str, font = "tb-8", color = COLOR_TEXT_WHITE),
-                                render.Text("NOx", font = "tb-8", color = COLOR_TEXT_DIM),
+                                render.Text("NOx", font = "tb-8", color = c_label),
                                 render.Text(nox_str, font = "tb-8", color = COLOR_TEXT_WHITE),
                             ],
                         ),
@@ -734,6 +746,7 @@ def main(config):
     device_url = config.get("device_url", "http://192.168.1.27")
     temp_unit = config.get("temp_unit", "f")
     display_mode = config.get("display_mode", "classic")
+    label_color_setting = config.get("label_color", "white")
     show_led_bar = config.bool("show_led_bar", True)
     led_mode = config.get("led_mode", "auto")
     direction_rtl = config.bool("direction_rtl", True)
@@ -802,13 +815,18 @@ def main(config):
     co2_lvl, co2_color = get_co2_level(co2)
     pm_lvl, pm_color = get_pm25_level(pm25)
 
+    # Label colors
+    c_label, c_unit = get_label_palette(label_color_setting)
+
     is2x = canvas.is2x()
     width, height = canvas.size()
 
-    # Determine canvas background color
+    # Determine canvas background color and divider color
     canvas_bg = COLOR_BG
+    divider_color = COLOR_DIVIDER
     if display_mode == "ambient":
         canvas_bg = get_ambient_bg(led_level)
+        divider_color = COLOR_DIVIDER_AMBIENT
 
     # Build layout children
     children = []
@@ -820,9 +838,9 @@ def main(config):
             children.append(render.Box(width = width, height = 1, color = canvas_bg))
 
         if display_mode == "blocks":
-            body = render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height)
+            body = render_color_blocks_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height, c_label, divider_color)
         else:
-            body = render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height)
+            body = render_dashboard_2x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color)
         children.append(body)
     else:
         col_height = 21 if show_led_bar else 24
@@ -831,11 +849,11 @@ def main(config):
             children.append(render.Box(width = width, height = 1, color = canvas_bg))
 
         if display_mode == "big":
-            body = render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color)
+            body = render_big_numbers_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, c_label, divider_color)
         elif display_mode == "blocks":
-            body = render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height)
+            body = render_color_blocks_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_lvl, pm_lvl, col_height, c_label, divider_color)
         else:
-            body = render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height)
+            body = render_dashboard_1x(temp_str, hum_str, co2_str, pm_str, voc_str, nox_str, co2_color, pm_color, use_color, col_height, c_label, c_unit, divider_color)
         children.append(body)
 
     return render.Root(
@@ -850,87 +868,9 @@ def main(config):
         ),
     )
 
-def get_schema():
-    return schema.Schema(
-        version = "1",
-        fields = [
-            schema.Dropdown(
-                id = "source",
-                name = "Data Source",
-                desc = "Choose how to connect to your AirGradient ONE",
-                icon = "plug",
-                default = "direct",
-                options = [
-                    schema.Option(display = "Direct Local (AirGradient ONE)", value = "direct"),
-                    schema.Option(display = "Home Assistant", value = "homeassistant"),
-                ],
-            ),
-            schema.Text(
-                id = "device_url",
-                name = "AirGradient Device URL / IP",
-                desc = "IP address or hostname of your AirGradient monitor (e.g. http://192.168.1.27 or http://air.gradient.lan)",
-                icon = "networkWired",
-                default = "http://192.168.1.27",
-            ),
-            schema.Dropdown(
-                id = "display_mode",
-                name = "Display Mode",
-                desc = "Screen layout style for the Tronbyt display",
-                icon = "tableColumns",
-                default = "classic",
-                options = [
-                    schema.Option(display = "AirGradient ONE (Classic 3-Column)", value = "classic"),
-                    schema.Option(display = "Big Numbers (Across the Room)", value = "big"),
-                    schema.Option(display = "Color Blocks (Section Backgrounds)", value = "blocks"),
-                    schema.Option(display = "Ambient (Full Background Color)", value = "ambient"),
-                ],
-            ),
-            schema.Toggle(
-                id = "show_led_bar",
-                name = "Show LED Bar",
-                desc = "Display the 11-LED bar along the top. Turn off to completely hide it without gray dots.",
-                icon = "lightbulb",
-                default = True,
-            ),
-            schema.Dropdown(
-                id = "temp_unit",
-                name = "Temperature Unit",
-                desc = "Select temperature format",
-                icon = "temperatureHalf",
-                default = "f",
-                options = [
-                    schema.Option(display = "Fahrenheit (°F)", value = "f"),
-                    schema.Option(display = "Celsius (°C)", value = "c"),
-                ],
-            ),
-            schema.Dropdown(
-                id = "led_mode",
-                name = "LED Bar Metric",
-                desc = "Pollutant represented on the top LED bar",
-                icon = "sliders",
-                default = "auto",
-                options = [
-                    schema.Option(display = "Auto (from Monitor Settings)", value = "auto"),
-                    schema.Option(display = "CO2", value = "co2"),
-                    schema.Option(display = "PM2.5", value = "pm"),
-                    schema.Option(display = "IAQS (Air Quality Score)", value = "iaqs"),
-                    schema.Option(display = "Off", value = "off"),
-                ],
-            ),
-            schema.Toggle(
-                id = "direction_rtl",
-                name = "Physical LED Direction (R to L)",
-                desc = "Light up from right to left matching physical AirGradient hardware",
-                icon = "arrowLeft",
-                default = True,
-            ),
-            schema.Toggle(
-                id = "use_color",
-                name = "Air Quality Color Accents",
-                desc = "Color code the readings (Green/Yellow/Orange/Red/Purple) for easy reading across the room",
-                icon = "palette",
-                default = True,
-            ),
+def get_source_fields(source):
+    if source == "homeassistant":
+        return [
             schema.Text(
                 id = "ha_url",
                 name = "Home Assistant URL",
@@ -987,6 +927,111 @@ def get_schema():
                 name = "Custom NOx Entity (optional)",
                 desc = "Override entity ID for NOx",
                 icon = "biohazard",
+            ),
+        ]
+
+    # Default to direct local
+    return [
+        schema.Text(
+            id = "device_url",
+            name = "AirGradient Device URL / IP",
+            desc = "IP address or hostname of your AirGradient monitor (e.g. http://192.168.1.27 or http://air.gradient.lan)",
+            icon = "networkWired",
+            default = "http://192.168.1.27",
+        ),
+    ]
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Dropdown(
+                id = "source",
+                name = "Data Source",
+                desc = "Choose how to connect to your AirGradient ONE",
+                icon = "plug",
+                default = "direct",
+                options = [
+                    schema.Option(display = "Direct Local (AirGradient ONE)", value = "direct"),
+                    schema.Option(display = "Home Assistant", value = "homeassistant"),
+                ],
+            ),
+            schema.Generated(
+                id = "source_config",
+                source = "source",
+                handler = get_source_fields,
+            ),
+            schema.Dropdown(
+                id = "display_mode",
+                name = "Display Mode",
+                desc = "Screen layout style for the Tronbyt display",
+                icon = "tableColumns",
+                default = "classic",
+                options = [
+                    schema.Option(display = "AirGradient ONE (Classic 3-Column)", value = "classic"),
+                    schema.Option(display = "Big Numbers (Across the Room)", value = "big"),
+                    schema.Option(display = "Color Blocks (Section Backgrounds)", value = "blocks"),
+                    schema.Option(display = "Ambient (Full Background Color)", value = "ambient"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "label_color",
+                name = "Label Contrast / Color",
+                desc = "Color of the metric labels and units (CO2, PM2.5, VOC, ppm, etc.)",
+                icon = "font",
+                default = "white",
+                options = [
+                    schema.Option(display = "Bright White (High Contrast)", value = "white"),
+                    schema.Option(display = "Muted Grey (Classic)", value = "muted"),
+                    schema.Option(display = "Warm Gold", value = "gold"),
+                    schema.Option(display = "Cool Cyan", value = "cyan"),
+                ],
+            ),
+            schema.Toggle(
+                id = "show_led_bar",
+                name = "Show LED Bar",
+                desc = "Display the 11-LED bar along the top. Turn off to completely hide it without gray dots.",
+                icon = "lightbulb",
+                default = True,
+            ),
+            schema.Dropdown(
+                id = "temp_unit",
+                name = "Temperature Unit",
+                desc = "Select temperature format",
+                icon = "temperatureHalf",
+                default = "f",
+                options = [
+                    schema.Option(display = "Fahrenheit (°F)", value = "f"),
+                    schema.Option(display = "Celsius (°C)", value = "c"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "led_mode",
+                name = "LED Bar Metric",
+                desc = "Pollutant represented on the top LED bar",
+                icon = "sliders",
+                default = "auto",
+                options = [
+                    schema.Option(display = "Auto (from Monitor Settings)", value = "auto"),
+                    schema.Option(display = "CO2", value = "co2"),
+                    schema.Option(display = "PM2.5", value = "pm"),
+                    schema.Option(display = "IAQS (Air Quality Score)", value = "iaqs"),
+                    schema.Option(display = "Off", value = "off"),
+                ],
+            ),
+            schema.Toggle(
+                id = "direction_rtl",
+                name = "Physical LED Direction (R to L)",
+                desc = "Light up from right to left matching physical AirGradient hardware",
+                icon = "arrowLeft",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "use_color",
+                name = "Air Quality Color Accents",
+                desc = "Color code the readings (Green/Yellow/Orange/Red/Purple) for easy reading across the room",
+                icon = "palette",
+                default = True,
             ),
         ],
     )
