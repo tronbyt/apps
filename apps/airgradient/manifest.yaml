@@ -11,6 +11,7 @@ supports2x: true
 category: smart-home
 tags:
   - smart-home
-  - utilities
-  - hardware
-  - health
+  - weather
+  - utility
+  - real-time
+  - wide 2x support
