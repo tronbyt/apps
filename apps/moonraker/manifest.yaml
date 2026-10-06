@@ -3,7 +3,7 @@ id: moonraker
 name: Moonraker Klipper
 summary: Monitor Klipper 3D printer
 desc: Direct Moonraker connection to monitor 3D print progress, nozzle & bed temperatures, print time, and current file.
-author: brombomb
+author: Brombomb
 fileName: moonraker.star
 packageName: moonraker
 supports2x: true

@@ -2,7 +2,7 @@
 Applet: ha3dprint
 Summary: View HA 3D printer status
 Description: Display the current job name, progress and remaining time for a selected 3D printer via Home Assistant.
-Author: brombomb
+Author: Brombomb
 """
 
 load("encoding/json.star", "json")

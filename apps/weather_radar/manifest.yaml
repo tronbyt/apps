@@ -3,7 +3,7 @@ id: weather-radar
 name: Weather Radar
 summary: Live weather radar sweeps
 desc: Display animated precipitation radar and atmospheric sweeps with vibrant color scaling.
-author: brombomb
+author: Brombomb
 fileName: weather_radar.star
 packageName: weatherradar
 recommendedInterval: 2

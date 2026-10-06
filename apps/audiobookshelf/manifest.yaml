@@ -3,7 +3,7 @@ id: audiobookshelf
 name: Audiobookshelf
 summary: Audiobookshelf now playing
 desc: Track currently playing audiobooks and podcasts from your Audiobookshelf server.
-author: brombomb
+author: Brombomb
 fileName: audiobookshelf.star
 packageName: audiobookshelf
 supports2x: true
