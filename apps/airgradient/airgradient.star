@@ -2,7 +2,7 @@
 Applet: AirGradient
 Summary: AirGradient ONE & Open Air monitor
 Description: Interfaces with an AirGradient ONE or Open Air air quality monitor via direct local network or Home Assistant, capturing the LED bar and screen metrics.
-Author: brombomb
+Author: Brombomb
 """
 
 load("encoding/json.star", "json")
