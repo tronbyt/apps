@@ -8,7 +8,7 @@ Work in `D:\MortonWebWorks\rainy` (own folder). AntiGravity is the IDE. Author: 
 - Dry hours (< 0.05 mm) get a faint teal tint by chance of rain: 15-24%, 25-39%, 40-59%, 60%+ (blank below 15%). Real rainfall uses the brighter intensity colours.
 - Default: Houston, TX
 - Catalog slug: `rainy`
-- Bars: 2px/hour, 48px, x=8–55. TODAY / TOM labels (tom-thumb). Now-tick on TODAY only.
+- Bars: 2px/hour, 48px, x=8–55. Labels default to TDY / TOM, with an optional weekday mode (MON, TUE, etc.). Now-tick on today only.
 - Colors: gray → cyan → blue → purple → red. No words inside the bar.
 
 ```bat
