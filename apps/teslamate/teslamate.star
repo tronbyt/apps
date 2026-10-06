@@ -3,7 +3,7 @@ Applet: TeslaMate
 Summary: Shows charge/name/range via Home Assistant
 Description: Shows your Tesla's current Name, Charge in Mi/KM and battery % via TeslaMate integration through Home Assistant REST API. Also shows if its charging or not.
 Supports Home Assistant integration or default test values.
-Author: brombomb
+Author: Brombomb
 
 Based on the original TeslaFi app by @mrrobot245
 Licensed under the Apache License, Version 2.0

@@ -2,7 +2,7 @@
 Applet: Audiobookshelf
 Summary: Audiobookshelf now playing
 Description: Track currently playing audiobooks and podcasts from your Audiobookshelf server.
-Author: brombomb
+Author: Brombomb
 """
 
 load("cache.star", "cache")

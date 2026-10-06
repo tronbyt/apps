@@ -2,7 +2,7 @@
 Applet: Docker Container Monitor
 Summary: Monitor Docker containers
 Description: Monitor single or multiple Docker containers, track health status, view dot matrix or fleet summary, and receive alerts for stopped or unhealthy containers.
-Author: brombomb
+Author: Brombomb
 """
 
 load("cache.star", "cache")
