@@ -6,6 +6,7 @@ desc: My index tracking pizza prices near the pentagon! Powered by BestTime http
 author: eSoLu
 fileName: pentagon_pizza_ix.star
 packageName: pentagonpizzaix
+supports64x64: true
 category: utilities
 tags:
   - lifestyle
@@ -13,4 +14,4 @@ tags:
   - local
   - tracking
 published: '2025-09-03T12:28:09Z'
-updated: '2025-09-03T19:40:56Z'
+updated: '2026-10-01T18:17:08Z'
