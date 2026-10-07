@@ -17,7 +17,7 @@ Moon phase: computed locally from the date.
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -2185,6 +2185,15 @@ def _demo_inputs(config, units):
     wx = struct(clouds = clouds, precip = precip, precip_level = plevel, fog = fog, storm = storm, smoke = smoke, wind = wind, wind_dir = wind_dir, alert = alert, alert_text = alert_text, cloud_seed = cloud_seed, tornado = tornado, aurora = aurora, heat_haze = heat_haze, season = season)
     return elev, frac, is_day, wx, temp, phase
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     units = config.get("units", "fahrenheit")
     show_temp = config.bool("show_temp", True)
@@ -2416,7 +2425,8 @@ def main(config):
 
     return render.Root(
         delay = FRAME_DELAY,
-        child = render.Animation(children = frames),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames)))) if is_square() else render.Animation(children = frames),
     )
 
 def _demo_fields(demo_on):

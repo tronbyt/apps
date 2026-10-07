@@ -7,8 +7,9 @@ author: wurtz
 fileName: sky_know.star
 packageName: skyknow
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - weather
 published: '2026-03-20T00:13:48Z'
-updated: '2026-03-20T00:13:48Z'
+updated: '2026-10-01T22:41:51Z'

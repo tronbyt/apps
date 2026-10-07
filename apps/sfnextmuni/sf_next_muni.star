@@ -7,7 +7,7 @@ Author: Martin Strauss
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -431,6 +431,15 @@ def fetch_cached(url, ttl, debug = False):
 def higher_priority_than(pri, threshold):
     return threshold == "Low" or pri == "High" or threshold == pri
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     debug = config.bool("debug", False)
     if debug:
@@ -440,7 +449,8 @@ def main(config):
         if debug:
             print("[ERROR] No 511.org API Key provided")
         return render.Root(
-            child = render.WrappedText("No 511.org API Key provided.", font = "tom-thumb"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("No 511.org API Key provided.", font = "tom-thumb"))) if is_square() else render.WrappedText("No 511.org API Key provided.", font = "tom-thumb"),
         )
 
     # Get the stop configuration
@@ -470,7 +480,8 @@ def main(config):
         if debug:
             print("[ERROR] No valid stop selected")
         return render.Root(
-            child = render.Text("Please select a stop.", font = "tom-thumb"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Please select a stop.", font = "tom-thumb"))) if is_square() else render.Text("Please select a stop.", font = "tom-thumb"),
         )
 
     ## Fetch and parse predictions
@@ -751,7 +762,13 @@ def renderOutput(stopTitle, output, messages, config):
     return render.Root(
         delay = int(config.str("speed", "50")),  # Allow customization of scroll speed.
         show_full_animation = True,
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
+            children = rows,
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "center",
+        )))) if is_square() else render.Column(
             children = rows,
             expanded = True,
             main_align = "space_between",
