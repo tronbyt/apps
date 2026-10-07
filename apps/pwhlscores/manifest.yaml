@@ -7,6 +7,7 @@ author: hiawatha98
 fileName: pwhlscores.star
 packageName: pwhlscores
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - pwhl
@@ -14,4 +15,4 @@ tags:
   - sports
   - scores
 published: '2026-09-03T00:55:56Z'
-updated: '2026-09-03T02:28:52Z'
+updated: '2026-10-01T19:04:39Z'

@@ -7,10 +7,11 @@ author: '@parsnbl'
 fileName: obliquestrategies.star
 packageName: obliquestrategies
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - time
   - art
   - lifestyle
 published: '2023-03-23T12:23:54Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T19:04:39Z'
