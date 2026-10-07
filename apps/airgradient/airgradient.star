@@ -250,20 +250,13 @@ def normalize_url(url):
     return cleaned
 
 def fetch_direct_data(device_url):
+    if not device_url or not device_url.strip():
+        return DEFAULT_DATA, False
+
     target = normalize_url(device_url)
     resp = http.get(target, ttl_seconds = 10)
     if resp.status_code == 200:
         return resp.json(), False
-
-    # Try fallback to standard hostnames
-    if "192.168.1.27" in target:
-        fallback_resp = http.get("http://air.gradient.lan/measures/current", ttl_seconds = 10)
-        if fallback_resp.status_code == 200:
-            return fallback_resp.json(), False
-    elif "air.gradient.lan" in target:
-        fallback_resp = http.get("http://192.168.1.27/measures/current", ttl_seconds = 10)
-        if fallback_resp.status_code == 200:
-            return fallback_resp.json(), False
 
     return DEFAULT_DATA, True
 
@@ -778,7 +771,7 @@ def render_color_blocks_2x(temp_str, hum_str, col1_label, col1_str, col1_unit, c
 
 def main(config):
     source = config.get("source", "direct")
-    device_url = config.get("device_url", "http://192.168.1.27")
+    device_url = config.get("device_url", "")
     temp_unit = config.get("temp_unit", "f")
     display_mode = config.get("display_mode", "classic")
     label_color_setting = config.get("label_color", "white")
@@ -792,7 +785,7 @@ def main(config):
     if led_mode == "off":
         show_led_bar = False
 
-    ha_url = config.get("ha_url", "http://homeassistant.local:8123")
+    ha_url = config.get("ha_url", "")
     ha_token = config.get("ha_token", "")
     ha_prefix = config.get("ha_prefix", "airgradient_one")
     co2_ov = config.get("ha_co2_entity", "")
@@ -804,7 +797,12 @@ def main(config):
 
     # Fetch data
     if source == "homeassistant":
-        data, _ = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
+        if not ha_url or not ha_token:
+            data = DEFAULT_DATA
+        else:
+            data, _ = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
+    elif not device_url or not device_url.strip():
+        data = DEFAULT_DATA
     else:
         data, _ = fetch_direct_data(device_url)
 
@@ -953,9 +951,8 @@ def get_schema():
             schema.Text(
                 id = "device_url",
                 name = "AirGradient Device URL / IP",
-                desc = "Direct mode: IP address or hostname (e.g. http://192.168.1.27 or http://air.gradient.lan)",
+                desc = "Direct mode: IP address or hostname (e.g. http://192.168.1.50 or http://airgradient.local)",
                 icon = "networkWired",
-                default = "http://192.168.1.27",
             ),
             schema.Dropdown(
                 id = "display_mode",
