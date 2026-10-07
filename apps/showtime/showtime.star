@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -128,6 +128,15 @@ MARKETS = {
     ],
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     #Get the market id to know which market to download events for, and to create a unique cache
     market_id = config.get("mymarket")
@@ -199,7 +208,10 @@ def main(config):
     display_items.append(description)
 
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = display_items,
+        )))) if is_square() else render.Stack(
             children = display_items,
         ),
         show_full_animation = True,

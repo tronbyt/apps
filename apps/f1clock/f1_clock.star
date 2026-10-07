@@ -2,7 +2,7 @@
 Applet: F1 Clock
 Summary: Formula 1 racing clock
 Description: Large digital clock with animated 8px Formula 1 cars racing across the track with real, condensed, or historic gaps.
-Author: brombomb
+Author: Brombomb
 """
 
 load("http.star", "http")

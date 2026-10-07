@@ -2,7 +2,7 @@
 Applet: Uptime Kuma
 Summary: Monitor services with Uptime Kuma
 Description: Track service status, uptime percentage, and incident alerts from your Uptime Kuma status pages.
-Author: brombomb
+Author: Brombomb
 """
 
 load("cache.star", "cache")
