@@ -68,6 +68,32 @@ def parse_hex_color(val, default = ABS_GOLD):
             return c
     return default
 
+def parse_speed(val, default = 1.0):
+    if not val:
+        return default
+    s = str(val).strip().lower()
+    if s.endswith("x"):
+        s = s[:-1].strip()
+    if not s:
+        return default
+    has_digit = False
+    dot_count = 0
+    for ch in s.elems():
+        if ch == ".":
+            dot_count += 1
+            if dot_count > 1:
+                return default
+        elif ch in "0123456789":
+            has_digit = True
+        else:
+            return default
+    if not has_digit:
+        return default
+    speed = float(s)
+    if speed <= 0.1 or speed > 10.0:
+        return default
+    return speed
+
 def render_smart_text(text, font, color, max_width, scale, scroll_mode = "scroll"):
     """Renders text: static if scroll_mode is 'static' or text fits max_width, marquee if scrolling is enabled and overflows."""
     if scroll_mode == "static":
@@ -337,7 +363,7 @@ def render_cover_fallback(scale, width, height, title, accent_color = ABS_GOLD):
         ),
     )
 
-def render_abs_view(scale, width, data, cover_bytes, font_title, font_tiny, cover_aspect = "square", bar_style = "standard", accent_color = ABS_GOLD, time_mode = "remaining", scroll_mode = "scroll"):
+def render_abs_view(scale, width, data, cover_bytes, font_title, font_tiny, cover_aspect = "square", bar_style = "standard", accent_color = ABS_GOLD, time_mode = "remaining", scroll_mode = "scroll", listen_speed = 1.0):
     if cover_aspect == "rectangular":
         cover_width = 24 * scale
         cover_height = 30 * scale
@@ -358,7 +384,8 @@ def render_abs_view(scale, width, data, cover_bytes, font_title, font_tiny, cove
     progress_pct = int(data["progress"] * 100)
 
     # Format time display cleanly for compact width
-    time_left = data["duration"] - data["current_time"]
+    raw_time_left = data["duration"] - data["current_time"]
+    time_left = int(raw_time_left / listen_speed) if listen_speed > 0 else raw_time_left
     if time_mode == "elapsed":
         time_display = format_time(data["current_time"], compact = True)
     elif time_mode == "total":
@@ -427,15 +454,25 @@ def render_abs_view(scale, width, data, cover_bytes, font_title, font_tiny, cove
 
     column_children.append(progress_bar)
 
-    bottom_row = render.Row(
-        expanded = True,
-        cross_align = "center",
-        main_align = "space_between",
-        children = [
-            render.Text("%d%%" % progress_pct, font = font_tiny, color = accent_color),
-            render.Text(time_display, font = font_tiny, color = MUTED),
-        ],
-    )
+    if scale == 1:
+        bottom_row = render.Row(
+            expanded = True,
+            cross_align = "center",
+            main_align = "end",
+            children = [
+                render.Text(time_display, font = font_tiny, color = MUTED),
+            ],
+        )
+    else:
+        bottom_row = render.Row(
+            expanded = True,
+            cross_align = "center",
+            main_align = "space_between",
+            children = [
+                render.Text("%d%%" % progress_pct, font = font_tiny, color = accent_color),
+                render.Text(time_display, font = font_tiny, color = MUTED),
+            ],
+        )
     column_children.append(bottom_row)
 
     text_column = render.Column(
@@ -474,6 +511,9 @@ def main(config):
     color_scheme = config.str("color_scheme", "gold")
     time_mode = config.str("time_mode", "remaining")
     scroll_mode = config.str("scroll_mode", "scroll")
+
+    speed_setting = config.str("listen_speed", "") or config.str("read_speed", "") or config.str("playback_speed", "1.0")
+    listen_speed = parse_speed(speed_setting, default = 1.0)
 
     if color_scheme == "custom":
         accent_color = parse_hex_color(config.str("custom_color", "#f59e0b"), ABS_GOLD)
@@ -530,6 +570,7 @@ def main(config):
         accent_color = accent_color,
         time_mode = time_mode,
         scroll_mode = scroll_mode,
+        listen_speed = listen_speed,
     )
 
     delay = 40 // scale
@@ -624,6 +665,23 @@ def get_schema():
                     schema.Option(display = "Remaining Time (-2h26m)", value = "remaining"),
                     schema.Option(display = "Elapsed Time (1h30m)", value = "elapsed"),
                     schema.Option(display = "Total Duration (3h56m)", value = "total"),
+                ],
+            ),
+            schema.Dropdown(
+                id = "listen_speed",
+                name = "Listen Speed",
+                desc = "Playback speed factor to recalculate realistic time remaining",
+                icon = "gauge",
+                default = "1.0",
+                options = [
+                    schema.Option(display = "0.5x", value = "0.5"),
+                    schema.Option(display = "0.75x", value = "0.75"),
+                    schema.Option(display = "1.0x (Normal)", value = "1.0"),
+                    schema.Option(display = "1.25x", value = "1.25"),
+                    schema.Option(display = "1.5x", value = "1.5"),
+                    schema.Option(display = "1.75x", value = "1.75"),
+                    schema.Option(display = "2.0x", value = "2.0"),
+                    schema.Option(display = "2.5x", value = "2.5"),
                 ],
             ),
         ],
