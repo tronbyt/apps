@@ -545,13 +545,27 @@ def fetch_stations_from_website():
     # The format uses indexed references where objects contain indices pointing to values
     data = json.decode(json_content)
 
-    # Iterate through the data array to find station objects. Nuxt stores the
-    # typename and title as indices into this same array. Do not depend on other
-    # fields such as path or stationCode, which have changed over time.
+    # Find the explicit Departure Vision station collection. Nuxt stores the
+    # collection, its objects, and their fields as indices into this same array.
+    dv_stations_idx = None
+    for item in data:
+        if type(item) == "dict" and "dvStations" in item:
+            candidate_idx = item["dvStations"]
+            if type(candidate_idx) == "int" and candidate_idx >= 0 and candidate_idx < len(data) and type(data[candidate_idx]) == "list":
+                dv_stations_idx = candidate_idx
+                break
+
+    if dv_stations_idx == None:
+        print("Could not find Departure Vision stations in Nuxt data")
+        return result
+
     stations_found = 0
     stations_seen = {}
-    for i in range(len(data)):
-        item = data[i]
+    for station_idx in data[dv_stations_idx]:
+        if type(station_idx) != "int" or station_idx < 0 or station_idx >= len(data):
+            continue
+
+        item = data[station_idx]
 
         # Check if this is a dict with the expected station structure
         if type(item) == "dict" and "__typename" in item and "title" in item:
