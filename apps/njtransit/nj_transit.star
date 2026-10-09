@@ -349,6 +349,10 @@ def render_departure_row(departure):
 def get_schema():
     options = getStationListOptions()
 
+    # Keep the schema valid if NJ Transit is unavailable or changes its page data.
+    if len(options) == 0:
+        options = [create_option("Station list unavailable", DEFAULT_STATION)]
+
     fields = [
         schema.Dropdown(
             id = "station",
@@ -541,26 +545,28 @@ def fetch_stations_from_website():
     # The format uses indexed references where objects contain indices pointing to values
     data = json.decode(json_content)
 
-    # Iterate through the data array to find station objects
-    # Station objects have the pattern: {"__typename": idx1, "title": idx2, "path": idx3}
-    # where data[idx1] == "TrainScheduleStation" and data[idx2] is the station name
+    # Iterate through the data array to find station objects. Nuxt stores the
+    # typename and title as indices into this same array. Do not depend on other
+    # fields such as path or stationCode, which have changed over time.
     stations_found = 0
+    stations_seen = {}
     for i in range(len(data)):
         item = data[i]
 
         # Check if this is a dict with the expected station structure
-        if type(item) == "dict" and "__typename" in item and "title" in item and "path" in item:
+        if type(item) == "dict" and "__typename" in item and "title" in item:
             typename_idx = item["__typename"]
             title_idx = item["title"]
 
             # Safely get values by index
-            if typename_idx < len(data) and title_idx < len(data):
+            if type(typename_idx) == "int" and type(title_idx) == "int" and typename_idx >= 0 and title_idx >= 0 and typename_idx < len(data) and title_idx < len(data):
                 typename = data[typename_idx]
                 title = data[title_idx]
 
                 # Check if this is a TrainScheduleStation with a valid title
-                if typename == "TrainScheduleStation" and type(title) == "string" and len(title) > 0:
+                if typename == "TrainScheduleStation" and type(title) == "string" and len(title) > 0 and title not in stations_seen:
                     result.append(title)
+                    stations_seen[title] = True
                     stations_found = stations_found + 1
 
     print("Got response of '%s' stations" % stations_found)
