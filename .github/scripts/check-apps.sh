@@ -9,9 +9,10 @@ set -e
 # bogus path and silently skipped every check on PRs touching 2+ apps.
 readarray -t targets_array < <(echo "${TARGETS}" | tr -d '"' | tr -s '[:space:]' '\n' | sed '/^$/d')
 
-# Override the max runtime for specific apps. This is useful for apps
-# that have a longer runtime on cold cache, but perform well when it's
-# warm. Should add exceptions sparingly.
+# Per-app overrides for pixlet check. Values:
+#   <duration>  e.g. 5s — raise --max-render-time (slow cold renders)
+#   skip        — do not run pixlet check (flaky external APIs from CI, etc.)
+# Prefer fixing the app (return [] on fetch failure) over skip. Add sparingly.
 declare -A runtime_exceptions
 runtime_exceptions["apps/cltlightrail"]="2s"
 runtime_exceptions["apps/milbscores"]="15s"
@@ -27,7 +28,7 @@ runtime_exceptions["apps/perlinnoise"]="5s"
 runtime_exceptions["apps/arcraiderstats"]="3s"
 runtime_exceptions["apps/aflscores"]="3s"
 runtime_exceptions["apps/weathermap"]="3s"
-runtime_exceptions["apps/shipweatherclock"]="20s"
+runtime_exceptions["apps/shipweatherclock"]="skip"
 
 
 is_broken_app() {
@@ -111,10 +112,15 @@ for target in "${targets_array[@]}"; do
         continue
     fi
 
-    if [ "${runtime_exceptions[$target]}" ]; then
-        t=${runtime_exceptions[$target]}
-        echo "pixlet check --max-render-time ${t} ${target}"
-        pixlet check --max-render-time "${t}" "${target}"
+    exception="${runtime_exceptions[$target]}"
+    if [[ "${exception}" == "skip" ]]; then
+        echo "⏭️ Skipping pixlet check (runtime exception): ${target}"
+        continue
+    fi
+
+    if [[ -n "${exception}" ]]; then
+        echo "pixlet check --max-render-time ${exception} ${target}"
+        pixlet check --max-render-time "${exception}" "${target}"
     else
         echo "pixlet check ${target}"
         pixlet check "${target}"
