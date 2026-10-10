@@ -5,6 +5,17 @@ https://github.com/cptntrps
 Original code and sprite drawings: cptntrps, developed with OpenAI Codex.
 License: Apache License, Version 2.0 (see the repository LICENSE).
 
+Development information:
+Original summaries based on NHS Best Start in Life's week-by-week pregnancy guide.
+Source pages checked 2026-10-10; exact per-week links are in DEVELOPMENT.md.
+https://www.nhs.uk/best-start-in-life/pregnancy/week-by-week-guide-to-pregnancy/
+NHS has not reviewed or endorsed this app.
+
+Practical tips:
+Original summaries of public guidance from NHS, NIH, and CDC.
+Exact sources, explanations, and limitations are in TIPS.md.
+Those organizations have not reviewed or endorsed this app.
+
 Third-party artwork:
 The Polly Pocket sprite is adapted from Kenney Tiny Dungeon,
 Tiles/tile_0099.png. Original artwork by Kenney, licensed CC0.
