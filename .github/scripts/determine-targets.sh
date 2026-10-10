@@ -3,7 +3,7 @@
 set -e
 
 # Determine base commit.
-OLD_COMMIT=$(git merge-base "${BASE_SHA}" "${HEAD_SHA}")
+OLD_COMMIT=$(git merge-base ${BASE_SHA} ${HEAD_SHA})
 NEW_COMMIT=${HEAD_SHA}
 echo "OLD_COMMIT=${OLD_COMMIT}"
 echo "NEW_COMMIT=${NEW_COMMIT}"
