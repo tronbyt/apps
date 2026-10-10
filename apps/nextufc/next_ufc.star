@@ -30,7 +30,8 @@ def main():
     rep = http.get(url, ttl_seconds = 3600)
 
     if rep.status_code != 200:
-        fail("get failed with status %d", rep.status_code)
+        print("ESPN schedule request failed with status %d" % rep.status_code)
+        return []
 
     doc = html(rep.body())
 
@@ -48,7 +49,8 @@ def main():
         rep1 = http.get(url1, ttl_seconds = 3600)
 
         if rep1.status_code != 200:
-            fail("get failed with status %d", rep1.status_code)
+            print("ESPN schedule request failed with status %d" % rep1.status_code)
+            return []
 
         doc = html(rep1.body())
 
