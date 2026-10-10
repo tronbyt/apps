@@ -1,0 +1,19 @@
+---
+id: river-oxygen
+name: River Oxygen Series
+summary: Kinetic river vitality art
+desc: A kinetic fluid data matrix inspired by Breakfast's ecological artwork, visualizing river health, dissolved oxygen levels, and water currents in real time.
+author: brombomb
+fileName: river_oxygen.star
+packageName: riveroxygen
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - river
+  - water
+  - weather
+  - art
+  - real-time
+published: '2026-10-02T03:45:12Z'
+updated: '2026-10-02T04:23:40Z'
