@@ -1,0 +1,14 @@
+---
+id: baby-size
+name: Baby Size
+summary: Baby growth in pixel art
+desc: Follow pregnancy weeks with rotating pixel-art comparisons, estimated length and weight, and a due-date countdown.
+author: cptntrps
+fileName: baby_size.star
+packageName: babysize
+recommendedInterval: 1
+category: health
+tags:
+  - lifestyle
+  - tracking
+  - pixel-art
