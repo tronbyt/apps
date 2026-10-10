@@ -28,12 +28,12 @@ development around that week; timing varies for each baby. Before week 4 and fro
 week 41 onward, a general timing message replaces the weekly fact.
 [Every development fact has an NHS source](DEVELOPMENT.md).
 
-The **TRY THIS** card draws from nine suggestions grounded in NHS, NIH, and CDC
-guidance, with its main source credited on the panel. [Tip sources and explanations](TIPS.md)
-describe the evidence and limitations. Nutrition tips apply throughout pregnancy;
-their placement beside a milestone does not mean a food causes that milestone.
-Food suggestions are for the pregnant parent and should fit their allergies and
-prenatal care. Voice activities carry no claim of improved intelligence.
+The **TRY THIS** card draws from nine suggestions grounded in NHS and NIH
+guidance, with its main source credited on the panel. They focus on everyday
+habits: varied meals, hydration, rest, comfortable walks, sharing chores, and
+chatting with the baby. [Tip sources and explanations](TIPS.md) describe the
+supporting guidance and when symptoms need medical attention. Pairings do not
+claim to cause a milestone, and voice activities carry no intelligence claim.
 
 Length and weight are illustrative weekly estimates, not individual measurements.
 Length switches from crown-rump through week 19 to crown-heel at week 20, so the
@@ -80,7 +80,7 @@ Development facts are original short summaries based on **NHS Best Start in Life
 checked on 2026-10-10. [Per-week sources and context](DEVELOPMENT.md). The NHS has
 not reviewed or endorsed this app.
 
-Practical tips use public guidance from **NHS, NIH, and CDC**, with individual
+Practical tips use public guidance from **NHS and NIH**, with individual
 citations in [TIPS.md](TIPS.md). Those organizations have not endorsed this app.
 
 The Polly Pocket sprite adapts **Kenney's Tiny Dungeon**, `Tiles/tile_0099.png`,

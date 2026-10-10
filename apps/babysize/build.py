@@ -97,7 +97,7 @@ and run pixlet format before submitting.
 
 Due date -> pregnancy week (due date minus 280 days = week 0). Sizes are common weekly averages:
 crown-rump length to week 19, crown-heel from week 20. Every baby differs. Development summaries are based on NHS Best Start in Life;
-see DEVELOPMENT.md for sources and attribution. Practical tips use NHS, NIH, and CDC
+see DEVELOPMENT.md for sources and attribution. Practical tips use NHS and NIH
 guidance; see TIPS.md. These are general tips, not individual medical advice.
 """
 
