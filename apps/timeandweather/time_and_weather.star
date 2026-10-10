@@ -1,0 +1,1122 @@
+"""
+Applet: Time & Weather
+Summary: Display time & weather
+Description: Display the time in addition to current weather conditions from either National Weather Service (NWS), OpenWeather, OpenWeather 3.0 One Call, Tomorrow.io, Open-Meteo, or Weatherbit weather APIs. To request an OpenWeather API key, see https://home.openweathermap.org/users/sign_up. To request a Tomorrow.io API key, see https://docs.tomorrow.io/login?redirect_uri=/reference/intro/getting-started. To request a Weatherbit API key, see https://www.weatherbit.io/account/create.
+Author: sudeepban
+"""
+
+load("encoding/json.star", "json")
+load("http.star", "http")
+load("images/cloud_icon.png", CLOUD_ICON_ASSET = "file")
+load("images/cloudy.png", CLOUDY_ASSET = "file")
+load("images/colon.png", COLON_ASSET = "file")
+load("images/droplets_icon.png", DROPLETS_ICON_ASSET = "file")
+load("images/E.png", E_ASSET = "file")
+load("images/eyeglasses_icon.png", EYEGLASSES_ICON_ASSET = "file")
+load("images/foggy.png", FOGGY_ASSET = "file")
+load("images/haily.png", HAILY_ASSET = "file")
+load("images/moony.png", MOONY_ASSET = "file")
+load("images/moonyish.png", MOONYISH_ASSET = "file")
+load("images/N.png", N_ASSET = "file")
+load("images/NE.png", NE_ASSET = "file")
+load("images/NW.png", NW_ASSET = "file")
+load("images/raindrop_icon.png", RAINDROP_ICON_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/S.png", S_ASSET = "file")
+load("images/SE.png", SE_ASSET = "file")
+load("images/sleety.png", SLEETY_ASSET = "file")
+load("images/sleety2.png", SLEETY2_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/snowy2.png", SNOWY2_ASSET = "file")
+load("images/sunny.png", SUNNY_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_ASSET = "file")
+load("images/SW.png", SW_ASSET = "file")
+load("images/thundery.png", THUNDERY_ASSET = "file")
+load("images/tornady.png", TORNADY_ASSET = "file")
+load("images/W.png", W_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
+load("re.star", "re")
+load("render.star", "render")
+load("schema.star", "schema")
+load("time.star", "time")
+
+CLOUD_ICON = CLOUD_ICON_ASSET.readall()
+COLON = COLON_ASSET.readall()
+DROPLETS_ICON = DROPLETS_ICON_ASSET.readall()
+EYEGLASSES_ICON = EYEGLASSES_ICON_ASSET.readall()
+RAINDROP_ICON = RAINDROP_ICON_ASSET.readall()
+
+# Default location
+DEFAULT_LOCATION = """
+{
+    "lat": 40.6781784,
+    "lng": -73.9441579,
+    "locality": "Brooklyn",
+    "timezone": "America/New_York",
+    "locationKey": 2627454
+}
+"""
+
+NWS_GRID_FORECAST_POINT_URL = "https://api.weather.gov/points/{latitude},{longitude}"
+NWS_HOURLY_GRID_FORECAST_URL = "https://api.weather.gov/gridpoints/BOX/{gridX},{gridY}/forecast/hourly"
+OPENWEATHER_CURRWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units={units}&lang=en"
+OPENWEATHER_AIR_POLLUTION_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat={latitude}&lon={longitude}&appid={api_key}"
+OPENWEATHER_ONECALL_URL = "https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&exclude=minutely,hourly,daily,alerts&appid={api_key}&units={units}&lang=en"
+ACCUWEATHER_LOCATION_URL = "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey={api_key}&q={latitude}%2C{longitude}"
+
+ACCUWEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/{locationKey}?apikey={api_key}&details=true"
+TOMORROW_IO_REALTIME_URL = "https://api.tomorrow.io/v4/weather/realtime?location={latitude},{longitude}&apikey={api_key}&units={units}"
+OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m&hourly=dew_point_2m,visibility,uv_index&models=best_match&temperature_unit={temperature_unit}&wind_speed_unit={wind_speed_unit}&forecast_hours=1"
+WEATHERBIT_CURRENT_WEATHER_URL = "https://api.weatherbit.io/v2.0/current?lat={latitude}&lon={longitude}&key={api_key}&lang=en&units={units}"
+
+TEMP_COLOR_DEFAULT = "#FFFFFF"
+
+# weather icons borrowed from stock Tidbyt Weather app
+WEATHER_ICONS = {
+    "cloudy.png": CLOUDY_ASSET.readall(),
+    "foggy.png": FOGGY_ASSET.readall(),
+    "haily.png": HAILY_ASSET.readall(),
+    "moony.png": MOONY_ASSET.readall(),
+    "moonyish.png": MOONYISH_ASSET.readall(),
+    "rainy.png": RAINY_ASSET.readall(),
+    "sleety.png": SLEETY_ASSET.readall(),
+    "sleety2.png": SLEETY2_ASSET.readall(),
+    "snowy.png": SNOWY_ASSET.readall(),
+    "snowy2.png": SNOWY2_ASSET.readall(),
+    "sunny.png": SUNNY_ASSET.readall(),
+    "sunnyish.png": SUNNYISH_ASSET.readall(),
+    "thundery.png": THUNDERY_ASSET.readall(),
+    "tornady.png": TORNADY_ASSET.readall(),
+    "windy.png": WINDY_ASSET.readall(),
+}
+
+# wind icons representing wind direction as arrows
+WIND_ICONS = {
+    "N": N_ASSET.readall(),
+    "NE": NE_ASSET.readall(),
+    "E": E_ASSET.readall(),
+    "SE": SE_ASSET.readall(),
+    "S": S_ASSET.readall(),
+    "SW": SW_ASSET.readall(),
+    "W": W_ASSET.readall(),
+    "NW": NW_ASSET.readall(),
+}
+
+# simple colon image to save space when displaying time
+
+def get_nws_hourly_grid_forecast_url(lat, lon, ttl = 3600):
+    res = http.get(NWS_GRID_FORECAST_POINT_URL.format(
+        latitude = lat,
+        longitude = lon,
+    ), ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Could not obtain the grid forecast for a point location.", res.status_code)
+    return res.json()["properties"]["forecastHourly"]
+
+def get_current_weather_conditions(url, ttl):
+    res = http.get(url, ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Current conditions request failed with status", res.status_code)
+    return res.json()
+
+def aqi_label(num):
+    switch = {
+        0: "Good",
+        1: "Good",
+        2: "Fair",
+        3: "Moderate",
+        4: "Poor",
+        5: "Very Poor",
+    }
+    return switch.get(num, "Invalid input")
+
+def get_openweather_air_pollution(api_key, latitude, longitude):
+    res = http.get(
+        url = OPENWEATHER_AIR_POLLUTION_URL,
+        params = {
+            "lat": str(latitude),
+            "lon": str(longitude),
+            "appid": api_key,
+        },
+    )
+
+    air_quality = {}
+    air_quality["index"] = int(res.json()["list"][0]["main"]["aqi"])
+    air_quality["label"] = aqi_label(air_quality["index"])
+    return air_quality
+
+def main(config):
+    api_service = config.get("weatherApiService") or "OpenWeather"
+    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    latitude = float(location["lat"])
+    longitude = float(location["lng"])
+
+    #location_key is only used in Accuweather so this is moved to Accuweather section
+    #location_key = int(location["locationKey"])
+    timezone = location["timezone"]
+    api_key = config.get("apiKey", "")
+    system_of_measurement = config.get("systemOfMeasurement", "Imperial").lower()
+    temp_color = config.get("tempColor", TEMP_COLOR_DEFAULT)
+
+    display_metric = (system_of_measurement == "metric")
+    display_sample = not (api_key) and api_service != "Open-Meteo" and api_service != "National Weather Service (NWS)"
+
+    time_format = config.get("timeFormat", "12 hour")
+    now = time.now().in_location(timezone)
+    hours = now.hour
+    minutes = now.minute
+
+    # Initialize additional various variables
+    wind_dir, hours_str, wind_speed_text, wind_mph_text, arrow_image, humidity_text, humidity_unit_text, humidity_image, dew_point_text, dew_point_unit_text, dew_image, uv_index_text, uv_index_label_text, visibility_text, visibility_unit_text, eye_image, cloud_coverage_text, cloud_coverage_unit_text, cloud_image, pressure_text, pressure_unit_text, aqi_prefix_text, aqi_text = "N", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
+    result_current_conditions = {}
+    icon_ref = 0
+
+    enabledMetrics = {}
+    enabledMetrics["windSpeed"] = config.get("windSpeedEnabled", True)
+    enabledMetrics["humidity"] = config.get("humidityEnabled", False)
+    enabledMetrics["dewPoint"] = config.get("dewPointEnabled", False)
+    enabledMetrics["uvIndex"] = config.get("uvIndexEnabled", False)
+    enabledMetrics["visibility"] = config.get("visibilityEnabled", False)
+    enabledMetrics["cloudCoverage"] = config.get("cloudCoverageEnabled", False)
+    enabledMetrics["pressure"] = config.get("pressureEnabled", False)
+    enabledMetrics["aqi"] = config.get("aqiEnabled", False)
+
+    if display_sample:
+        # sample data to display if user-specified API / location key are not available, also useful for testing
+        icon_ref = "sunnyish.png"
+        result_current_conditions["icon_num"] = 3
+        result_current_conditions["temp"] = 14 if display_metric else 57
+        result_current_conditions["feels_like"] = 18 if display_metric else 63
+        result_current_conditions["wind_speed"] = 5 if display_metric else 12
+        result_current_conditions["wind_dir"] = "N" if api_service == "National Weather Service (NWS)" or api_service == "Open-Meteo" else 0
+        result_current_conditions["humidity"] = 50
+        result_current_conditions["dew_point"] = int(16.1) if display_metric else int(61.0)
+        result_current_conditions["uv_index"] = 3
+        result_current_conditions["visibility"] = int(16.3) if display_metric else int(10.1)
+        result_current_conditions["cloud_coverage"] = 80
+        result_current_conditions["pressure"] = int(1014.90) if display_metric else int(29.97)
+    else:
+        if api_service == "National Weather Service (NWS)":
+            enabledMetrics["uvIndex"] = False
+            enabledMetrics["visibility"] = False
+            enabledMetrics["cloudCoverage"] = False
+            enabledMetrics["pressure"] = False
+            enabledMetrics["aqi"] = False
+
+            hourly_forecast_url = get_nws_hourly_grid_forecast_url(latitude, longitude, 3600)  # cache for minimum of 1 hr. (this does not really change once 'Location' has been set via schema field)
+            raw_current_conditions = get_current_weather_conditions(hourly_forecast_url, 300)["properties"]["periods"][0]  # ttl of 5 min. (to prevent abuse)
+            result_current_conditions["icon"] = {
+                "condition": str(raw_current_conditions["shortForecast"]).lower(),
+                "daytime": raw_current_conditions["isDaytime"],
+            }
+            temperature = int(raw_current_conditions["temperature"])
+            result_current_conditions["temp"] = int(temperature if raw_current_conditions["temperatureUnit"] == "F" and not (display_metric) else ((temperature - 32) * (5 / 9)))
+            wind_speed = int(re.match("\\d+", raw_current_conditions["windSpeed"])[0][0])
+            result_current_conditions["wind_speed"] = int(wind_speed * (1 if "mph" in raw_current_conditions["windSpeed"] and not (display_metric) else 0.44704))
+            result_current_conditions["wind_dir"] = str(raw_current_conditions["windDirection"])
+
+            icon_phrase = result_current_conditions["icon"]["condition"]
+            is_daytime = result_current_conditions["icon"]["daytime"]
+            if (icon_phrase == "sunny" or "fair" in icon_phrase or "clear" in icon_phrase) and is_daytime:
+                # sunny
+                icon_ref = "sunny.png"
+            elif ("mostly sunny" in icon_phrase or "partly sunny" in icon_phrase or "few clouds" in icon_phrase or "partly cloudy" in icon_phrase) and is_daytime:
+                # mostly sunny
+                icon_ref = "sunnyish.png"
+            elif icon_phrase == "cloudy" or "mostly cloudy" in icon_phrase or "overcast" in icon_phrase:
+                # cloudy (day)
+                icon_ref = "cloudy.png"
+            elif "rain" in icon_phrase:
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif "thunderstorm" in icon_phrase:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif "snow" in icon_phrase:
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif ("fair" in icon_phrase or "clear" in icon_phrase) and not (is_daytime):
+                # clear (night)
+                icon_ref = "moony.png"
+            elif ("few clouds" in icon_phrase or "partly cloudy" in icon_phrase) and not (is_daytime):
+                # partly cloudy (night)
+                icon_ref = "moonyish.png"
+
+            result_current_conditions["humidity"] = int(raw_current_conditions["relativeHumidity"]["value"])
+            dewpoint = int(raw_current_conditions["dewpoint"]["value"])
+            result_current_conditions["dew_point"] = int(dewpoint if "degC" in raw_current_conditions["dewpoint"]["unitCode"] and display_metric else (dewpoint * 1.8) + 32)
+
+        elif api_service == "OpenWeather":
+            enabledMetrics["dewPoint"] = False
+            enabledMetrics["uvIndex"] = False
+
+            request_url = OPENWEATHER_CURRWEATHER_URL.format(
+                latitude = latitude,
+                longitude = longitude,
+                api_key = api_key,
+                units = system_of_measurement,
+            )
+            raw_current_conditions = get_current_weather_conditions(request_url, 300)  # allows only 60 free calls per minute (ttl of 5 min.)
+
+            result_current_conditions["icon"] = {"id": int(raw_current_conditions["weather"][0]["id"]), "code": str(raw_current_conditions["weather"][0]["icon"])}
+            result_current_conditions["temp"] = int(raw_current_conditions["main"]["temp"])
+            result_current_conditions["feels_like"] = int(raw_current_conditions["main"]["feels_like"])
+            result_current_conditions["wind_speed"] = int(raw_current_conditions["wind"]["speed"] * (3.6 if display_metric else 1))  # 1 m/s = 3.6 km/h)
+            result_current_conditions["wind_dir"] = int(raw_current_conditions["wind"]["deg"])
+
+            icon_num = result_current_conditions["icon"]["id"]
+            icon_code = result_current_conditions["icon"]["code"]
+            if icon_num == 800 and "d" in icon_code:
+                # sunny
+                icon_ref = "sunny.png"
+            elif icon_num >= 801 and icon_num <= 802 and "d" in icon_code:
+                # mostly sunny
+                icon_ref = "sunnyish.png"
+            elif icon_num >= 803 and icon_num <= 804 and "d" in icon_code:
+                # cloudy (day)
+                icon_ref = "cloudy.png"
+            elif (icon_num >= 300 and icon_num < 400) or (icon_num >= 500 and icon_num < 600) or icon_num == 701:
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif icon_num >= 200 and icon_num < 300:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif icon_num >= 600 and icon_num < 700:
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif icon_num == 731:
+                # wind
+                icon_ref = "windy.png"
+            elif icon_num == 800 and "n" in icon_code:
+                # clear (night)
+                icon_ref = "moony.png"
+            elif icon_num == 781:
+                # tornado
+                icon_ref = "tornady.png"
+            elif icon_num >= 702 and icon_num < 781:
+                # foggy, misty, dusty, squall, smoke, sand - OpenWeather classifies these as "atmosphere"
+                icon_ref = "foggy.png"
+            elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
+                # partly cloudy (night)
+                icon_ref = "moonyish.png"
+
+            result_current_conditions["humidity"] = int(raw_current_conditions["main"]["humidity"])
+            result_current_conditions["visibility"] = int(raw_current_conditions["visibility"] * (0.001 if display_metric else 0.00062137))
+            result_current_conditions["cloud_coverage"] = int(raw_current_conditions["clouds"]["all"])
+            result_current_conditions["pressure"] = int(raw_current_conditions["main"]["pressure"] * (0.02952998307 if display_metric else 1))  # 1 inHg (imperial) = 33.863886666667 hPa (metric)
+
+            air_quality = get_openweather_air_pollution(api_key, latitude, longitude)
+            result_current_conditions["aqi"] = air_quality["index"]
+            # result_current_conditions["aqi_label"] = air_quality["label"]
+
+        elif api_service == "Accuweather":
+            enabledMetrics["aqi"] = False
+
+            request_url = ACCUWEATHER_LOCATION_URL.format(
+                api_key = api_key,
+                latitude = str(latitude),
+                longitude = str(longitude),
+            )
+            location_key = get_current_weather_conditions(request_url, 300)["Key"]
+
+            #print(location_key) # uncomment to debug
+            units = ("Metric" if system_of_measurement == "metric" else "Imperial")
+            request_url = ACCUWEATHER_URL.format(
+                locationKey = location_key,
+                api_key = api_key,
+            )
+            raw_current_conditions = get_current_weather_conditions(request_url, 300)  # allows only 60 free calls per minute (ttl of 5 min.)
+            raw_current_conditions = raw_current_conditions[0]
+
+            #print(raw_current_conditions["Day"])
+            #result_current_conditions["icon"] = int(raw_current_conditions["Day"]["Icon"])
+
+            result_current_conditions["temp"] = int(raw_current_conditions["Temperature"][units]["Value"])
+            result_current_conditions["feels_like"] = int(raw_current_conditions["RealFeelTemperature"][units]["Value"])
+            result_current_conditions["wind_speed"] = int(raw_current_conditions["Wind"]["Speed"][units]["Value"])
+            result_current_conditions["wind_dir"] = raw_current_conditions["Wind"]["Direction"]["English"]
+
+            icon_num = raw_current_conditions["WeatherIcon"]
+
+            if icon_num == 1:
+                # sunny
+                icon_ref = "sunny.png"
+            elif icon_num >= 2 and icon_num <= 5:
+                # mostly sunny
+                icon_ref = "sunnyish.png"
+            elif icon_num >= 6 and icon_num <= 8:
+                # cloudy (day)
+                icon_ref = "cloudy.png"
+            elif icon_num == 11:
+                # fog
+                icon_ref = "foggy.png"
+            elif (icon_num >= 12 and icon_num <= 14) or icon_num == 18:
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif (icon_num >= 15 and icon_num < 17) or icon_num == 41 or icon_num == 42:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif (icon_num >= 19 and icon_num < 26) or icon_num == 29 or icon_num == 43 or icon_num == 44:
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif icon_num == 32:
+                # wind
+                icon_ref = "windy.png"
+            elif icon_num == 33 or icon_num == 34:
+                # moon
+                icon_ref = "moony.png"
+            elif (icon_num >= 35 and icon_num <= 40):
+                #cloudy moon
+                icon_ref = "moonyish.png"
+            else:
+                icon_ref = None
+
+            result_current_conditions["humidity"] = int(raw_current_conditions["RelativeHumidity"])
+            result_current_conditions["cloud_coverage"] = int(raw_current_conditions["CloudCover"])
+            result_current_conditions["visibility"] = int(raw_current_conditions["Visibility"][units]["Value"])
+            result_current_conditions["pressure"] = int(raw_current_conditions["Pressure"][units]["Value"])
+            result_current_conditions["uv_index"] = int(raw_current_conditions["UVIndex"])
+            #result_current_conditions["aqi"] = 0
+
+            #for item in raw_current_conditions["AirAndPollen"]:
+            #    if item["Name"] == "AirQuality":
+            #        result_current_conditions["aqi"] = int(item["Value"])
+
+        elif api_service == "OpenWeatherOneCall":
+            request_url = OPENWEATHER_ONECALL_URL.format(
+                latitude = latitude,
+                longitude = longitude,
+                api_key = api_key,
+                units = system_of_measurement,
+            )
+            raw_current_conditions = get_current_weather_conditions(request_url, 300)  # TTL of 5 min.
+
+            result_current_conditions["icon"] = {"id": int(raw_current_conditions["current"]["weather"][0]["id"]), "code": str(raw_current_conditions["current"]["weather"][0]["icon"])}
+            result_current_conditions["temp"] = int(raw_current_conditions["current"]["temp"])
+            result_current_conditions["feels_like"] = int(raw_current_conditions["current"]["feels_like"])
+            result_current_conditions["wind_speed"] = int(raw_current_conditions["current"]["wind_speed"])
+            result_current_conditions["wind_dir"] = int(raw_current_conditions["current"]["wind_deg"])
+
+            icon_num = result_current_conditions["icon"]["id"]
+            icon_code = result_current_conditions["icon"]["code"]
+            if icon_num == 800 and "d" in icon_code:
+                # sunny
+                icon_ref = "sunny.png"
+            elif icon_num >= 801 and icon_num <= 802 and "d" in icon_code:
+                # mostly sunny
+                icon_ref = "sunnyish.png"
+            elif icon_num >= 803 and icon_num <= 804 and "d" in icon_code:
+                # cloudy (day)
+                icon_ref = "cloudy.png"
+            elif (icon_num >= 300 and icon_num < 400) or (icon_num >= 500 and icon_num < 600) or icon_num == 701:
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif icon_num >= 200 and icon_num < 300:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif icon_num >= 600 and icon_num < 700:
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif icon_num == 731:
+                # wind
+                icon_ref = "windy.png"
+            elif icon_num == 781:
+                # tornado
+                icon_ref = "tornady.png"
+            elif icon_num >= 702 and icon_num < 781:
+                # foggy, misty, dusty, squall, smoke, sand - OpenWeather classifies these as "atmosphere"
+                icon_ref = "foggy.png"
+            elif icon_num == 800 and "n" in icon_code:
+                # clear (night)
+                icon_ref = "moony.png"
+            elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
+                # partly cloudy (night)
+                icon_ref = "moonyish.png"
+            result_current_conditions["humidity"] = int(raw_current_conditions["current"]["humidity"])
+            result_current_conditions["dew_point"] = int(raw_current_conditions["current"]["dew_point"])
+            result_current_conditions["uv_index"] = int(raw_current_conditions["current"]["uvi"])
+            result_current_conditions["visibility"] = int(raw_current_conditions["current"]["visibility"] * (0.001 if display_metric else 0.00062137))
+            result_current_conditions["cloud_coverage"] = int(raw_current_conditions["current"]["clouds"])
+            result_current_conditions["pressure"] = int(raw_current_conditions["current"]["pressure"] * (0.02952998307 if display_metric else 1))  # 1 inHg (imperial) = 33.863886666667 hPa (metric)
+
+            air_quality = get_openweather_air_pollution(api_key, latitude, longitude)
+            result_current_conditions["aqi"] = air_quality["index"]
+            # result_current_conditions["aqi_label"] = air_quality["label"]
+
+        elif api_service == "Tomorrow.io":
+            enabledMetrics["aqi"] = False
+
+            request_url = TOMORROW_IO_REALTIME_URL.format(
+                latitude = latitude,
+                longitude = longitude,
+                api_key = api_key,
+                units = system_of_measurement,
+            )
+            raw_current_conditions = get_current_weather_conditions(request_url, 300)  # allows only 500 free requests per day (ttl of 5 min.)
+
+            result_current_conditions["weather_code"] = int(raw_current_conditions["data"]["values"]["weatherCode"])
+            result_current_conditions["temp"] = int(raw_current_conditions["data"]["values"]["temperature"])
+            result_current_conditions["feels_like"] = int(raw_current_conditions["data"]["values"]["temperatureApparent"])
+            result_current_conditions["wind_speed"] = int(raw_current_conditions["data"]["values"]["windSpeed"] * (3.6 if display_metric else 1))  # convert to km/h if metric
+            result_current_conditions["wind_dir"] = int(raw_current_conditions["data"]["values"]["windDirection"])
+
+            icon_num = result_current_conditions["weather_code"]
+            if (icon_num >= 1000 and icon_num <= 1101) and hours < 21:
+                # sunny
+                icon_ref = "sunny.png"
+            elif icon_num == 1100 and hours < 21:
+                # mostly sunny
+                icon_ref = "sunnyish.png"
+            elif ((icon_num >= 1101 and icon_num <= 1103) or icon_num == 1001) and hours < 21:
+                # cloudy (day and night)
+                icon_ref = "cloudy.png"
+            elif (icon_num >= 4000 and icon_num <= 4001) or (icon_num >= 4200 and icon_num <= 4201):
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif icon_num == 8000:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif (icon_num >= 5000 and icon_num <= 5001) or (icon_num >= 5100 and icon_num <= 5101):
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif (icon_num >= 1000 and icon_num <= 1101) and hours >= 21:
+                # clear (night)
+                icon_ref = "moony.png"
+            elif ((icon_num >= 1102 and icon_num <= 1103) or icon_num == 1001) and hours >= 21:
+                # partly cloudy (night)
+                icon_ref = "moonyish.png"
+
+            result_current_conditions["humidity"] = int(raw_current_conditions["data"]["values"]["humidity"])
+            result_current_conditions["dew_point"] = int(raw_current_conditions["data"]["values"]["dewPoint"])
+            result_current_conditions["uv_index"] = int(raw_current_conditions["data"]["values"]["uvIndex"])
+            result_current_conditions["visibility"] = int(raw_current_conditions["data"]["values"]["visibility"])
+            result_current_conditions["cloud_coverage"] = int(raw_current_conditions["data"]["values"]["cloudCover"])
+            result_current_conditions["pressure"] = int(raw_current_conditions["data"]["values"]["pressureSurfaceLevel"])
+
+        elif api_service == "Open-Meteo":
+            enabledMetrics["aqi"] = False
+
+            request_url = OPEN_METEO_FORECAST_URL.format(
+                latitude = latitude,
+                longitude = longitude,
+                temperature_unit = ("celsius" if system_of_measurement == "metric" else "fahrenheit"),
+                wind_speed_unit = ("kmh" if system_of_measurement == "metric" else "mph"),
+            )
+            raw_current_conditions = get_current_weather_conditions(request_url, 3600)
+
+            result_current_conditions["weather_code"] = {"id": int(raw_current_conditions["current"]["weather_code"]), "is_day": int(raw_current_conditions["current"]["is_day"])}
+            result_current_conditions["temp"] = int(raw_current_conditions["current"]["temperature_2m"])
+            result_current_conditions["feels_like"] = int(raw_current_conditions["current"]["apparent_temperature"])
+            result_current_conditions["wind_speed"] = int(raw_current_conditions["current"]["wind_speed_10m"])
+            result_current_conditions["wind_dir"] = int(raw_current_conditions["current"]["wind_direction_10m"])
+
+            icon_num = result_current_conditions["weather_code"]["id"]
+            is_day = result_current_conditions["weather_code"]["is_day"]
+            if icon_num == 0 and is_day == 1:
+                # sunny
+                icon_ref = "sunny.png"
+            elif icon_num == 1 and is_day == 1:
+                # mostly sunny
+                icon_ref = "sunnyish.png"
+            elif icon_num >= 2 and icon_num <= 3 and is_day == 1:
+                # cloudy (day and night)
+                icon_ref = "cloudy.png"
+            elif icon_num == 51 or icon_num == 53 or icon_num == 55 or icon_num == 61 or icon_num == 63 or icon_num == 65 or (icon_num >= 80 and icon_num <= 82):
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif icon_num == 95 or icon_num == 96 or icon_num == 99:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif icon_num == 71 or icon_num == 73 or icon_num == 75 or icon_num == 77 or (icon_num >= 85 and icon_num <= 86):
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif icon_num == 0 and is_day == 0:
+                # clear (night)
+                icon_ref = "moony.png"
+            elif icon_num >= 1 and icon_num <= 3 and is_day == 0:
+                # partly cloudy (night)
+                icon_ref = "moonyish.png"
+
+            result_current_conditions["humidity"] = int(raw_current_conditions["current"]["relative_humidity_2m"])
+            result_current_conditions["dew_point"] = int(raw_current_conditions["hourly"]["dew_point_2m"][0])
+            result_current_conditions["uv_index"] = int(raw_current_conditions["hourly"]["uv_index"][0])
+            result_current_conditions["visibility"] = int(raw_current_conditions["hourly"]["visibility"][0] * (0.001 if display_metric else 0.0006213712))
+            result_current_conditions["cloud_coverage"] = int(raw_current_conditions["current"]["cloud_cover"])
+            result_current_conditions["pressure"] = int(raw_current_conditions["current"]["pressure_msl"] * (1 if display_metric else 0.02952998307))  # 1 inHg (imperial) = 33.863886666667 hPa (metric)
+
+        elif api_service == "Weatherbit":
+            request_url = WEATHERBIT_CURRENT_WEATHER_URL.format(
+                latitude = latitude,
+                longitude = longitude,
+                api_key = api_key,
+                units = ("M" if system_of_measurement == "metric" else "I"),
+            )
+            raw_current_conditions = get_current_weather_conditions(request_url, 300)["data"][0]  # TTL of 5 min.
+
+            result_current_conditions["icon"] = {"id": int(raw_current_conditions["weather"]["code"]), "code": str(raw_current_conditions["weather"]["icon"])}
+            result_current_conditions["temp"] = int(raw_current_conditions["temp"])
+            result_current_conditions["feels_like"] = int(raw_current_conditions["app_temp"])
+            result_current_conditions["wind_speed"] = int(raw_current_conditions["wind_spd"] * (3.6 if display_metric else 1))  # 1 m/s = 3.6 km/h)
+            result_current_conditions["wind_dir"] = int(raw_current_conditions["wind_dir"])
+
+            icon_num = result_current_conditions["icon"]["id"]
+            icon_code = result_current_conditions["icon"]["code"]
+            if icon_num == 800 and "d" in icon_code:
+                # sunny
+                icon_ref = "sunny.png"
+            elif icon_num >= 801 and icon_num <= 802 and "d" in icon_code:
+                # mostly sunnSy
+                icon_ref = "sunnyish.png"
+            elif icon_num >= 803 and icon_num <= 804 and "d" in icon_code:
+                # cloudy (day)
+                icon_ref = "cloudy.png"
+            elif (icon_num >= 300 and icon_num < 400) or (icon_num >= 500 and icon_num < 600) or icon_num == 900:
+                # rain (day and night)
+                icon_ref = "rainy.png"
+            elif icon_num >= 200 and icon_num < 300:
+                # thunderstorm (day and night)
+                icon_ref = "thundery.png"
+            elif icon_num >= 600 and icon_num < 700:
+                # snow (day and night)
+                icon_ref = "snowy2.png"
+            elif icon_num == 800 and "n" in icon_code:
+                # clear (night)
+                icon_ref = "moony.png"
+            elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
+                # partly cloudy (night)
+                icon_ref = "moonyish.png"
+
+            result_current_conditions["humidity"] = int(raw_current_conditions["rh"])
+            result_current_conditions["dew_point"] = int(raw_current_conditions["dewpt"])
+            result_current_conditions["uv_index"] = int(raw_current_conditions["uv"])
+            result_current_conditions["visibility"] = int(raw_current_conditions["vis"])
+            result_current_conditions["cloud_coverage"] = int(raw_current_conditions["clouds"])
+            result_current_conditions["pressure"] = int(raw_current_conditions["pres"] * (1 if display_metric else 0.02952998307))  # 1 inHg (imperial) = 33.863886666667 hPa (metric)
+            result_current_conditions["aqi"] = int(raw_current_conditions["aqi"])
+
+        print(result_current_conditions)  # uncomment to debug
+
+    if icon_ref:
+        weather_image = render.Image(width = 24, height = 24, src = WEATHER_ICONS[icon_ref])
+    else:
+        weather_image = render.Box(width = 24, height = 24)
+
+    # wind direction, reduce to cardinal and ordinal directions only
+    wind_dir = result_current_conditions.get("wind_dir", "N")
+
+    if type(wind_dir) == "int" or type(wind_dir) == "float":
+        deg = int(wind_dir) % 360  # normalize to 0–359
+        if deg < 22 or deg >= 338:
+            wind_dir = "N"
+        elif deg < 68:
+            wind_dir = "NE"
+        elif deg < 113:
+            wind_dir = "E"
+        elif deg < 158:
+            wind_dir = "SE"
+        elif deg < 203:
+            wind_dir = "S"
+        elif deg < 248:
+            wind_dir = "SW"
+        elif deg < 293:
+            wind_dir = "W"
+        else:
+            wind_dir = "NW"
+
+    elif type(wind_dir) == "string":
+        if wind_dir == "NNE" or wind_dir == "ENE":
+            wind_dir = "NE"
+        elif wind_dir == "ESE" or wind_dir == "SSE":
+            wind_dir = "SE"
+        elif wind_dir == "SSW" or wind_dir == "WSW":
+            wind_dir = "SW"
+        elif wind_dir == "WNW" or wind_dir == "NNW":
+            wind_dir = "NW"
+
+        # else keep as-is if already N, NE, E, etc.
+
+    if hours == 0:
+        hours_str = ("12" if time_format == "12 hour" else "00")
+    elif hours > 12 and time_format == "12 hour":
+        hours_str = str(hours - 12)
+    else:
+        hours_str = ("0" if hours < 10 and time_format != "12 hour" else "") + str(hours)
+
+    time_hh_text = render.Text(
+        content = hours_str,
+        font = "tom-thumb",
+    )
+    time_mm_text = render.Text(content = ("0000" + str(minutes))[-2:], font = "tom-thumb")
+    time_ampm_text = render.Text(content = "AM" if hours < 12 else "PM", font = "tom-thumb")
+
+    temp_text = render.Text(content = str(result_current_conditions["temp"]) + "°" + ("C" if display_metric else "F"), font = "6x13", color = temp_color)
+    feels_like_text = render.Text(content = "FEELS " + str(result_current_conditions["feels_like"]), font = "tom-thumb", color = temp_color) if result_current_conditions.get("feels_like") else None
+
+    if enabledMetrics["windSpeed"]:
+        wind_speed_text = render.Text(content = str(result_current_conditions["wind_speed"]), font = "tom-thumb", color = "#AED6F1")
+        wind_mph_text = render.Text(content = "km/h" if display_metric else "mph", font = "tom-thumb", color = "#AED6F1")
+
+        arrow_src = WIND_ICONS[wind_dir]
+        if arrow_src:
+            arrow_image = render.Image(width = 7, height = 7, src = arrow_src)
+        else:
+            arrow_image = render.Box(width = 7, height = 7)
+
+    if enabledMetrics["humidity"]:
+        humidity_text = render.Padding(
+            child = render.Text(content = str(result_current_conditions["humidity"]), font = "tom-thumb", color = "#AED6F1"),
+            pad = (0, 1, 0, 0),
+        )
+        humidity_unit_text = render.Text(content = "%", font = "tom-thumb", color = "#AED6F1")
+        humidity_image = render.Image(width = 5, height = 6, src = RAINDROP_ICON)
+
+    if enabledMetrics["dewPoint"]:
+        dew_point_text = render.Text(content = str(result_current_conditions["dew_point"]), font = "tom-thumb", color = "#88D1FF")
+        dew_point_unit_text = render.Text(content = "°C" if display_metric else "°F", font = "tom-thumb", color = "#88D1FF")
+        dew_image = render.Image(width = 6, height = 7, src = DROPLETS_ICON)
+
+    if enabledMetrics["uvIndex"]:
+        uv_index = result_current_conditions["uv_index"]
+        uv_index_label = "Low"
+        uv_index_label_color = "#4C9329"
+        if uv_index >= 3 and uv_index <= 5:
+            uv_index_label = "Mod."  # Moderate
+            uv_index_label_color = "#F2E34B"
+        elif uv_index >= 6 and uv_index <= 7:
+            uv_index_label = "High"
+            uv_index_label_color = "#E7642B"
+        elif uv_index >= 8 and uv_index <= 10:
+            uv_index_label = "V.High"  # Very High
+            uv_index_label_color = "#C72A23"
+        elif uv_index >= 11:
+            uv_index_label = "Extr."  # Extreme
+            uv_index_label_color = "#674BC2"
+        uv_index_text = render.Padding(
+            child = render.Text(content = str(uv_index), font = "tom-thumb", color = uv_index_label_color),
+            pad = (0, 1, 0, 0),
+        )
+        uv_index_label_text = render.Padding(
+            child = render.Text(content = uv_index_label, font = "tom-thumb", color = uv_index_label_color),
+            pad = (0, 1, 0, 0),
+        )
+
+    if enabledMetrics["visibility"]:
+        visibility_text = render.Padding(
+            child = render.Text(content = str(result_current_conditions["visibility"]), font = "tom-thumb", color = "#FFF"),
+            pad = (0, 1, 0, 0),
+        )
+        visibility_unit_text = render.Text(content = "km" if display_metric else "mi", font = "tom-thumb", color = "#FFF")
+        eye_image = render.Image(src = EYEGLASSES_ICON, width = 7, height = 6)
+
+    if enabledMetrics["cloudCoverage"]:
+        cloud_coverage_text = render.Padding(
+            child = render.Text(
+                content = str(result_current_conditions["cloud_coverage"]),
+                font = "tom-thumb",
+                color = "#FFF",
+            ),
+            pad = (0, 1, 0, 0),
+        )
+        cloud_coverage_unit_text = render.Text(
+            content = "%",
+            font = "tom-thumb",
+            color = "#FFF",
+        )
+        cloud_image = render.Image(width = 8, height = 6, src = CLOUD_ICON)
+
+    if enabledMetrics["pressure"]:
+        pressure_text = render.Padding(
+            child = render.Text(content = str(result_current_conditions["pressure"]), font = "tom-thumb", color = "#FFF"),
+            pad = (0, 1, 0, 0),
+        )
+        pressure_unit_text = render.Text(content = "hPa" if display_metric else "inHg", font = "tom-thumb", color = "#FFF")
+
+    if enabledMetrics["aqi"]:
+        def aqi_color(num):
+            switch = {
+                1: "#26de81",
+                2: "#fed330",
+                3: "#fd9644",
+                4: "#eb2f06",
+                5: "#b71540",
+            }
+            return switch.get(num, "#FFF")
+
+        aqi = result_current_conditions.get("aqi", "-")
+        aqi_text = render.Padding(
+            child = render.Text(content = str(aqi), font = "tom-thumb", color = aqi_color(aqi)),
+            pad = (0, 1, 0, 0),
+        )
+        aqi_prefix_text = render.Text(content = "AQI:", font = "tom-thumb", color = "#CCC")
+
+    return render.Root(
+        delay = 2500,
+        child = render.Stack(
+            children = [
+                render.Row(
+                    children = [
+                        render.Column(
+                            children = [
+                                weather_image,
+                                render.Row(
+                                    children = [
+                                        time_hh_text,
+                                        render.Image(width = 2, height = 5, src = COLON),
+                                        time_mm_text,
+                                        render.Box(width = 1) if time_format == "12 hour" else None,
+                                        time_ampm_text if time_format == "12 hour" else None,
+                                    ],
+                                ),
+                            ],
+                            expanded = True,
+                            cross_align = "center",
+                        ),
+                        render.Column(
+                            children = [
+                                temp_text,
+                                feels_like_text,
+                                render.Padding(
+                                    pad = (0, 2, 0, 0),
+                                    child = render.Animation(
+                                        children = [
+                                            render.Row(
+                                                children = [
+                                                    wind_speed_text,
+                                                    render.Box(width = 1, height = 1),
+                                                    wind_mph_text,
+                                                    # render.Box(width = 2, height = 1),
+                                                    arrow_image,
+                                                ],
+                                                cross_align = "end",
+                                                main_align = "center",
+                                            ) if enabledMetrics["windSpeed"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    humidity_text,
+                                                    render.Box(width = 1, height = 1),
+                                                    humidity_unit_text,
+                                                    render.Box(width = 2, height = 1),
+                                                    humidity_image,
+                                                ],
+                                                cross_align = "end",
+                                                main_align = "center",
+                                            ) if enabledMetrics["humidity"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    render.Padding(
+                                                        pad = (0, 1, 0, 0),
+                                                        child = dew_point_text,
+                                                    ),
+                                                    render.Padding(
+                                                        pad = (0, 1, 0, 0),
+                                                        child = dew_point_unit_text,
+                                                    ),
+                                                    render.Box(width = 2, height = 1),
+                                                    dew_image,
+                                                ],
+                                                cross_align = "center",
+                                                main_align = "center",
+                                            ) if enabledMetrics["dewPoint"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    uv_index_text,
+                                                    render.Box(width = 3, height = 1),
+                                                    uv_index_label_text,
+                                                ],
+                                                cross_align = "center",
+                                                main_align = "center",
+                                            ) if enabledMetrics["uvIndex"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    visibility_text,
+                                                    render.Box(width = 1, height = 1),
+                                                    visibility_unit_text,
+                                                    render.Box(width = 2, height = 1),
+                                                    eye_image,
+                                                ],
+                                                cross_align = "end",
+                                                main_align = "center",
+                                            ) if enabledMetrics["visibility"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    cloud_coverage_text,
+                                                    render.Box(width = 1, height = 1),
+                                                    cloud_coverage_unit_text,
+                                                    render.Box(width = 2, height = 1),
+                                                    cloud_image,
+                                                ],
+                                                cross_align = "end",
+                                                main_align = "center",
+                                            ) if enabledMetrics["cloudCoverage"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    pressure_text,
+                                                    render.Box(width = 1, height = 1),
+                                                    pressure_unit_text,
+                                                ],
+                                                cross_align = "end",
+                                                main_align = "center",
+                                            ) if enabledMetrics["pressure"] == "true" else None,
+                                            render.Row(
+                                                children = [
+                                                    aqi_prefix_text,
+                                                    render.Box(width = 1, height = 1),
+                                                    aqi_text,
+                                                ],
+                                                cross_align = "end",
+                                                main_align = "center",
+                                            ) if enabledMetrics["aqi"] == "true" else None,
+                                        ],
+                                    ),
+                                ),
+                            ],
+                            expanded = True,
+                            main_align = "center",
+                            cross_align = "center",
+                        ),
+                    ],
+                    expanded = True,
+                    main_align = "space_around",
+                    cross_align = "center",
+                ),
+                render.Row(
+                    children = [render.Text("SAMPLE" if display_sample else "", font = "6x13", color = "#FF0000", height = 22)],
+                    main_align = "center",
+                    expanded = True,
+                ),
+            ],
+        ),
+    )
+
+def more_toggles(weatherApiService):
+    additional_toggles = {
+        "wind_speed": schema.Toggle(
+            id = "windSpeedEnabled",
+            name = "Wind speed",
+            desc = "Display wind speed",
+            icon = "wind",
+            default = True,
+        ),
+        "humidity": schema.Toggle(
+            id = "humidityEnabled",
+            name = "Humidity",
+            desc = "Display humidity",
+            icon = "water",
+            default = False,
+        ),
+        "dew_point": schema.Toggle(
+            id = "dewPointEnabled",
+            name = "Dew point",
+            desc = "Display dew point",
+            icon = "droplet",
+            default = False,
+        ),
+        "uv_index": schema.Toggle(
+            id = "uvIndexEnabled",
+            name = "UV Index",
+            desc = "Display UV Index",
+            icon = "umbrellaBeach",
+            default = False,
+        ),
+        "visibility": schema.Toggle(
+            id = "visibilityEnabled",
+            name = "Visibility",
+            desc = "Display visibility",
+            icon = "eye",
+            default = False,
+        ),
+        "cloud_coverage": schema.Toggle(
+            id = "cloudCoverageEnabled",
+            name = "Cloud coverage",
+            desc = "Display cloud coverage",
+            icon = "cloudSun",
+            default = False,
+        ),
+        "pressure": schema.Toggle(
+            id = "pressureEnabled",
+            name = "Pressure",
+            desc = "Display pressure",
+            icon = "arrowTrendDown",
+            default = False,
+        ),
+        "aqi": schema.Toggle(
+            id = "aqiEnabled",
+            name = "AQI",
+            desc = "Display air quality index",
+            icon = "star",
+            default = False,
+        ),
+    }
+
+    if weatherApiService == "National Weather Service (NWS)":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["dew_point"],
+        ]
+    elif weatherApiService == "Accuweather":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["cloud_coverage"],
+            additional_toggles["visibility"],
+            additional_toggles["pressure"],
+            additional_toggles["uv_index"],
+        ]
+    elif weatherApiService == "OpenWeather":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["visibility"],
+            additional_toggles["cloud_coverage"],
+            additional_toggles["pressure"],
+            additional_toggles["aqi"],
+        ]
+    elif weatherApiService == "OpenWeatherOneCall":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["dew_point"],
+            additional_toggles["uv_index"],
+            additional_toggles["visibility"],
+            additional_toggles["cloud_coverage"],
+            additional_toggles["pressure"],
+            additional_toggles["aqi"],
+        ]
+    elif weatherApiService == "Tomorrow.io":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["dew_point"],
+            additional_toggles["uv_index"],
+            additional_toggles["visibility"],
+            additional_toggles["cloud_coverage"],
+            additional_toggles["pressure"],
+        ]
+    elif weatherApiService == "Open-Meteo":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["dew_point"],
+            additional_toggles["uv_index"],
+            additional_toggles["visibility"],
+            additional_toggles["cloud_coverage"],
+            additional_toggles["pressure"],
+        ]
+    elif weatherApiService == "Weatherbit":
+        return [
+            additional_toggles["wind_speed"],
+            additional_toggles["humidity"],
+            additional_toggles["dew_point"],
+            additional_toggles["uv_index"],
+            additional_toggles["visibility"],
+            additional_toggles["cloud_coverage"],
+            additional_toggles["pressure"],
+            additional_toggles["aqi"],
+        ]
+    else:
+        return []
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Dropdown(
+                id = "weatherApiService",
+                name = "Weather API Service",
+                desc = "Select your preferred Weather API",
+                icon = "database",
+                default = "OpenWeather",
+                options = [
+                    schema.Option(
+                        display = "Accuweather",
+                        value = "Accuweather",
+                    ),
+                    schema.Option(
+                        display = "National Weather Service (NWS)",
+                        value = "National Weather Service (NWS)",
+                    ),
+                    schema.Option(
+                        display = "OpenWeather",
+                        value = "OpenWeather",
+                    ),
+                    schema.Option(
+                        display = "OpenWeather (One Call API 3.0)",
+                        value = "OpenWeatherOneCall",
+                    ),
+                    schema.Option(
+                        display = "Tomorrow.io",
+                        value = "Tomorrow.io",
+                    ),
+                    schema.Option(
+                        display = "Open-Meteo",
+                        value = "Open-Meteo",
+                    ),
+                    schema.Option(
+                        display = "Weatherbit",
+                        value = "Weatherbit",
+                    ),
+                ],
+            ),
+            schema.Text(
+                id = "apiKey",
+                name = "API Key",
+                desc = "API key for weather data access",
+                icon = "gear",
+                default = "",
+                secret = True,
+            ),
+            schema.Location(
+                id = "location",
+                name = "Location",
+                desc = "Location for which to display weather",
+                icon = "locationDot",
+            ),
+            schema.Dropdown(
+                id = "systemOfMeasurement",
+                name = "System of measurement",
+                desc = "Choose which system to display measurements",
+                icon = "ruler",
+                default = "Imperial",
+                options = [
+                    schema.Option(
+                        display = "Imperial",
+                        value = "Imperial",
+                    ),
+                    schema.Option(
+                        display = "Metric",
+                        value = "Metric",
+                    ),
+                ],
+            ),
+            schema.Dropdown(
+                id = "timeFormat",
+                name = "Time Format",
+                desc = "The format used for the time",
+                icon = "clock",
+                default = "12 hour",
+                options = [
+                    schema.Option(
+                        display = "12 hour",
+                        value = "12 hour",
+                    ),
+                    schema.Option(
+                        display = "24 hour",
+                        value = "24 hour",
+                    ),
+                ],
+            ),
+            schema.Color(
+                id = "tempColor",
+                name = "Temperature color",
+                desc = "Color for temperature",
+                icon = "brush",
+                default = TEMP_COLOR_DEFAULT,
+            ),
+            schema.Generated(
+                id = "generatedWeatherMetrics",
+                source = "weatherApiService",
+                handler = more_toggles,
+            ),
+        ],
+    )

@@ -1,0 +1,16 @@
+---
+id: enphasesummary
+name: Enphase Summary
+summary: Enphase system summary
+desc: Daily, weekly, monthly, annual and lifetime energy production and consumption monitor for your Enphase solar panels.
+author: ckyr
+fileName: enphasesummary.star
+packageName: enphasesummary
+recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - smart-home
+  - tracking
+published: '2025-10-18T00:45:15Z'
+updated: '2026-03-26T22:39:37Z'

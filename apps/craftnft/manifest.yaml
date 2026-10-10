@@ -1,0 +1,15 @@
+---
+id: craftnft
+name: CraftNFT
+summary: Craft NFT Display
+desc: Display random Craft NFT owned by a user.
+author: tavdog
+fileName: craftnft.star
+packageName: craftnft
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+  - gaming
+published: '2023-04-17T14:12:32Z'
+updated: '2025-12-28T23:11:23Z'

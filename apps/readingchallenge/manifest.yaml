@@ -1,0 +1,15 @@
+---
+id: reading-challenge
+name: Reading Challenge
+summary: Goodreads challenge tracker
+desc: Displays progress towards your Goodreads yearly goal, navigate to your goodreads.com/user_challenges/{id} to get your challenge id from the URL.
+author: panderson54
+fileName: reading_challenge.star
+packageName: readingchallenge
+recommendedInterval: 5
+supports64x64: true
+category: lifestyle
+tags:
+  - education
+published: '2023-03-02T17:06:39Z'
+updated: '2026-10-01T18:17:08Z'

@@ -1,0 +1,15 @@
+---
+id: gvbyt
+name: Gvbyt
+summary: Live tram departures
+desc: Displays live tram departures for GVB stops in Amsterdam.
+author: Matt Jones
+fileName: gvbyt.star
+packageName: gvbyt
+recommendedInterval: 5
+category: transit
+tags:
+  - utility
+  - real-time
+published: '2023-12-17T12:47:36Z'
+updated: '2025-11-30T19:58:27Z'

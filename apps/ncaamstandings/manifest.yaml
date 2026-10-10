@@ -1,0 +1,16 @@
+---
+id: ncaam-standings
+name: NCAAM Standings
+summary: NCAAM basketball standings
+desc: View NCAAM standings by conference.
+author: LunchBox8484
+fileName: ncaam_standings.star
+packageName: ncaamstandings
+recommendedInterval: 5
+category: sports
+tags:
+  - news
+  - nba
+  - basketball
+published: '2023-01-23T18:45:02Z'
+updated: '2025-11-29T17:52:33Z'

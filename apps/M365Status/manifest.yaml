@@ -1,0 +1,13 @@
+---
+id: m365-status
+name: M365 Status
+summary: Shows current status of M365
+desc: Simple app that looks at the Microsoft Admin Center Status RSS feed and shows the latest status and time of the last update. Visit https://status.cloud.microsoft for more info!
+author: M0ntyP
+supports64x64: true
+category: utilities
+tags:
+  - utility
+  - admin
+published: '2026-01-23T22:34:33Z'
+updated: '2026-10-01T18:58:08Z'

@@ -1,0 +1,15 @@
+---
+id: dome-watch
+name: Dome Watch
+summary: US House Floor activity
+desc: Show current US House floor activity in real-time, include live vote counts.
+author: Shaun Brown
+fileName: dome_watch.star
+packageName: domewatch
+recommendedInterval: 5
+category: news
+tags:
+  - news
+  - real-time
+published: '2023-06-09T16:16:31Z'
+updated: '2025-12-02T19:30:22Z'

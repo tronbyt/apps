@@ -1,0 +1,14 @@
+---
+id: shortsday
+name: ShortsDay
+summary: Is it a shorts day
+desc: Checks forecast high for a location and tells you if it will be warm enough for shorts.
+author: riserperson
+fileName: shortsday.star
+packageName: shortsday
+supports64x64: true
+category: weather
+tags:
+  - weather
+published: '2026-04-07T20:59:29Z'
+updated: '2026-10-01T22:41:51Z'

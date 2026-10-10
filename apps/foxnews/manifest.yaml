@@ -1,0 +1,16 @@
+---
+id: fox-news
+name: Fox News
+summary: Fox News display
+desc: Display Fox News headlines.
+author: jvivona
+fileName: fox_news.star
+packageName: foxnews
+recommendedInterval: 10
+supports2x: true
+supports64x64: true
+category: news
+tags:
+  - news
+published: '2023-03-23T12:33:10Z'
+updated: '2026-10-01T17:19:01Z'

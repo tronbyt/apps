@@ -1,0 +1,15 @@
+---
+id: rantinglynews
+name: RantinglyNews
+summary: Show news from Rantingly
+desc: Show top news stories from Rantingly.com.
+author: '@Mad-Chemist'
+fileName: rantinglynews.star
+packageName: rantinglynews
+recommendedInterval: 10
+category: news
+tags:
+  - news
+  - top-stories
+published: '2023-03-23T12:31:29Z'
+updated: '2025-12-05T22:28:51Z'

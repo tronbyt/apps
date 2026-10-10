@@ -1,0 +1,15 @@
+---
+id: rainradar
+name: RainRadar
+summary: Animated weather radar
+desc: Shows an animated weather radar centered on a location you pick, using RainViewer scans from about the last 20 minutes on a satellite map.
+author: SamuLab
+fileName: rainradar.star
+packageName: rainradar
+recommendedInterval: 5
+category: weather
+tags:
+  - weather
+  - radar
+published: '2026-09-02T19:58:42Z'
+updated: '2026-09-03T13:17:07Z'

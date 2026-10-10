@@ -1,0 +1,16 @@
+---
+id: skicolorado
+name: SkiColorado
+summary: Colorado ski reports
+desc: Checks all the colorado ski resorts for their current conditions.
+author: mharlach
+fileName: skicolorado.star
+packageName: skicolorado
+recommendedInterval: 5
+category: weather
+tags:
+  - sports
+  - weather
+  - nature
+published: '2023-11-16T17:13:36Z'
+updated: '2025-11-30T20:08:55Z'

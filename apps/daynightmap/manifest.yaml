@@ -1,0 +1,16 @@
+---
+id: day-night-map
+name: Day Night Map
+summary: Day & Night World Map
+desc: A map of the Earth showing the day and the night. The map is based on Equirectangular (0°) by Tobias Jung (CC BY-SA 4.0).
+author: Henry So, Jr.
+fileName: day_night_map.star
+packageName: daynightmap
+recommendedInterval: 5
+supports64x64: true
+category: science
+tags:
+  - space
+  - weather
+published: '2022-01-17T18:36:32Z'
+updated: '2026-10-01T17:07:58Z'

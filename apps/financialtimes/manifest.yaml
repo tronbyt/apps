@@ -1,0 +1,16 @@
+---
+id: financial-times
+name: Financial Times
+summary: Financial Times news
+desc: Display Financial Times news based upon user selected section.
+author: jvivona
+fileName: financial_times.star
+packageName: financialtimes
+recommendedInterval: 10
+supports2x: true
+category: news
+tags:
+  - finance
+  - news
+published: '2023-03-14T19:37:17Z'
+updated: '2026-06-17T20:47:04Z'

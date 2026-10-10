@@ -1,0 +1,15 @@
+---
+id: minions-clapping
+name: Minions Clapping
+summary: Animation of minions
+desc: A fun animation showing minions clapping enthusiastically.
+author: mal5z
+recommendedInterval: 5
+fileName: minions_clapping.star
+packageName: minionsclapping
+category: entertainment
+tags:
+  - art
+  - music
+published: '2024-08-20T15:42:07Z'
+updated: '2025-12-17T23:02:59Z'

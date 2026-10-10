@@ -1,0 +1,15 @@
+---
+id: portuguese-phrases
+name: PT Phrases
+summary: European Portuguese phrases
+desc: Cycles through common European Portuguese (PT-PT) phrases with English translations.
+author: Joey Spooner
+fileName: portuguese_phrases.star
+packageName: portuguesephrases
+category: education
+tags:
+  - education
+  - portuguese
+  - phrases
+published: '2026-04-07T20:59:29Z'
+updated: '2026-04-07T21:43:31Z'

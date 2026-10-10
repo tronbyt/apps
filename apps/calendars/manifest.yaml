@@ -1,0 +1,17 @@
+---
+id: calendars
+name: Calendars
+summary: Today's date but different
+desc: Shows the current date converted into various other regular calendars.
+author: dinosaursrarr
+fileName: calendars.star
+packageName: calendars
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - utility
+  - time
+  - local
+published: '2024-03-15T16:12:27Z'
+updated: '2025-11-29T21:14:16Z'

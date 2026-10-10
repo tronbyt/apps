@@ -1,0 +1,17 @@
+---
+id: feels-like
+name: Feels Like
+summary: A weather display
+desc: An abstract weather display that communicates feeling in a natural way.
+author: eanplatter
+fileName: feels_like.star
+packageName: feelslike
+recommendedInterval: 5
+category: utilities
+tags:
+  - weather
+  - utility
+  - nature
+  - art
+published: '2023-05-11T21:14:05Z'
+updated: '2025-12-05T22:28:51Z'
