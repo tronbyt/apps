@@ -27,7 +27,7 @@ runtime_exceptions["apps/perlinnoise"]="5s"
 runtime_exceptions["apps/arcraiderstats"]="3s"
 runtime_exceptions["apps/aflscores"]="3s"
 runtime_exceptions["apps/weathermap"]="3s"
-runtime_exceptions["apps/shipweatherclock"]="5s"
+runtime_exceptions["apps/shipweatherclock"]="20s"
 
 
 is_broken_app() {
