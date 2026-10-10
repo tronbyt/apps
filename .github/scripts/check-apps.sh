@@ -19,7 +19,6 @@ runtime_exceptions["apps/ncaafscores"]="5s"
 runtime_exceptions["apps/ncaafstandings"]="5s"
 runtime_exceptions["apps/ncaamstandings"]="5s"
 runtime_exceptions["apps/ncaanowstandings"]="5s"
-runtime_exceptions["apps/ncaanowstandings"]="5s"
 runtime_exceptions["apps/ncaawstandings"]="5s"
 runtime_exceptions["apps/nflstandings"]="5s"
 runtime_exceptions["apps/nhlstandings"]="5s"
@@ -28,6 +27,8 @@ runtime_exceptions["apps/perlinnoise"]="5s"
 runtime_exceptions["apps/arcraiderstats"]="3s"
 runtime_exceptions["apps/aflscores"]="3s"
 runtime_exceptions["apps/weathermap"]="3s"
+runtime_exceptions["apps/shipweatherclock"]="5s"
+
 
 is_broken_app() {
     local manifest="$1/manifest.yaml"
