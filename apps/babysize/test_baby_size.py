@@ -28,9 +28,9 @@ class BabySizeTests(unittest.TestCase):
         for node in ast.parse(cls.source).body:
             if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name):
                 name = node.targets[0].id
-                if name in {"SIZES", "CHOICES", "NAMES", "POKEMON_HEIGHTS", "S1", "S2", "DEVELOPMENT", "TIPS", "WEEK_TIPS"}:
+                if name in {"SIZES", "CHOICES", "NAMES", "POKEMON_HEIGHTS", "S1", "S2"}:
                     cls.catalog[name] = ast.literal_eval(node.value)
-            elif isinstance(node, ast.FunctionDef) and node.name in {"comparison_choices", "valid_date", "development_lines", "tip_id"}:
+            elif isinstance(node, ast.FunctionDef) and node.name in {"comparison_choices", "valid_date"}:
                 exec(compile(ast.Module(body=[node], type_ignores=[]), "baby_size.star", "exec"), cls.catalog)
 
     def test_curated_selection(self):
@@ -114,55 +114,10 @@ class BabySizeTests(unittest.TestCase):
 
     def test_generated_artifact_matches_sources(self):
         with tempfile.TemporaryDirectory() as temp:
-            for name in ("build.py", "sprites.py", "pokemon.py", "development.py", "tips.py"):
+            for name in ("build.py", "sprites.py", "pokemon.py"):
                 shutil.copyfile(APP / name, Path(temp) / name)
             subprocess.run([sys.executable, str(Path(temp) / "build.py")], check=True, capture_output=True)
             self.assertEqual((Path(temp) / "baby_size.star").read_bytes(), (APP / "baby_size.star").read_bytes())
-
-    def test_development_week_boundaries_and_text(self):
-        self.assertEqual(set(self.catalog["DEVELOPMENT"]), {str(w) for w in range(4, 41)})
-        for week in range(4, 41):
-            for index, lang in enumerate(("en", "pt")):
-                expected = self.catalog["DEVELOPMENT"][str(week)][index]
-                self.assertEqual(len(expected), 3)
-                self.assertTrue(all(line.isascii() and 0 < len(line) <= 15 for line in expected))
-                for day in range(7):
-                    self.assertEqual(self.catalog["development_lines"](week * 7 + day, lang), expected)
-        for gest in (-1, 0, 27, 287, 300):
-            self.assertEqual(self.catalog["development_lines"](gest, "en"), ["DEVELOPMENT", "TIMING VARIES", "FOR EACH BABY"])
-
-    def test_every_development_and_tip_card_renders(self):
-        before_main, after_main = self.source.split("def main(config):", 1)
-        _, schema = after_main.split("def get_schema():", 1)
-        for week in (3, *range(4, 41), 41):
-            for lang in ("en", "pt"):
-                for page in ("page_development", "page_tip"):
-                    source = (before_main + "def main(config):\n"
-                              f"    return render.Root(child = {page}({week * 7}, {min(40, max(4, week))}, 0, {lang!r}))\n"
-                              + "def get_schema():" + schema)
-                    with self.subTest(week=week, lang=lang, page=page):
-                        self.render(source)
-
-    def test_tip_coverage_sources_and_hearing_timing(self):
-        from tips import TIPS, WEEK_TIPS
-        self.assertEqual(set(WEEK_TIPS), set(range(4, 41)))
-        self.assertEqual(set(WEEK_TIPS.values()), set(TIPS))
-        for tip in TIPS.values():
-            self.assertTrue(tip["reason"])
-            self.assertTrue(tip["sources"])
-            self.assertTrue(all(url.startswith("https://") for url in tip["sources"]))
-            for lines in tip["lines"]:
-                self.assertEqual(len(lines), 3)
-                self.assertTrue(all(line.isascii() and 0 < len(line) <= 15 for line in lines))
-        for week in range(4, 41):
-            for day in range(7):
-                key = self.catalog["tip_id"](week * 7 + day)
-                self.assertEqual(key, WEEK_TIPS[week])
-                self.assertEqual(self.catalog["TIPS"][key], (*TIPS[key]["lines"], TIPS[key]["badge"]))
-                if key == "voice":
-                    self.assertGreaterEqual(week, 21)
-        for gest in (-1, 27, 287, 300):
-            self.assertEqual(self.catalog["tip_id"](gest), "prenatal")
 
 
 if __name__ == "__main__":
