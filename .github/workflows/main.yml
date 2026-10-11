@@ -12,6 +12,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # Default (unset): catch-up since last successful main build.
+      # Set repo variable PIXLET_CHECK_ONLY_LAST_PUSH=true to pixlet-check only apps
+      # with .star changes in this push (no catch-up).
+      PIXLET_CHECK_ONLY_LAST_PUSH: ${{ vars.PIXLET_CHECK_ONLY_LAST_PUSH || 'false' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -33,6 +38,7 @@ jobs:
 
       - name: Find last successful build
         id: lastsuccess
+        if: env.PIXLET_CHECK_ONLY_LAST_PUSH != 'true'
         uses: SamhammerAG/last-successful-build-action@v8
         with:
           branch: "main"
@@ -42,10 +48,24 @@ jobs:
 
       - name: Determine targets
         id: targets
-        run: ./.github/scripts/determine-targets.sh
         env:
-          BASE_SHA: ${{ steps.lastsuccess.outputs.sha }}
+          EVENT_BEFORE: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
+          LAST_SUCCESS_SHA: ${{ steps.lastsuccess.outputs.sha }}
+        run: |
+          zero="0000000000000000000000000000000000000000"
+          if [[ "${PIXLET_CHECK_ONLY_LAST_PUSH}" == "true" ]]; then
+            echo "Pixlet target mode: PIXLET_CHECK_ONLY_LAST_PUSH"
+            if [[ "${EVENT_BEFORE}" == "${zero}" ]]; then
+              echo "No previous commit on branch; skipping pixlet check targets"
+              echo "targets=" >> "${GITHUB_OUTPUT}"
+            else
+              BASE_SHA="${EVENT_BEFORE}" HEAD_SHA="${HEAD_SHA}" ./.github/scripts/determine-targets.sh
+            fi
+          else
+            echo "Pixlet target mode: since last successful build"
+            BASE_SHA="${LAST_SUCCESS_SHA}" HEAD_SHA="${HEAD_SHA}" ./.github/scripts/determine-targets.sh
+          fi
 
       - name: Check modified apps
         run: ./.github/scripts/check-apps.sh
