@@ -67,7 +67,7 @@ jobs:
           # These assets are introduced by the upcoming Viewer changes. Copy
           # them when present so this workflow works before and after those
           # changes merge to app-viewer-source.
-          for asset in server-url.js readme-images.js dots@64x64.svg github-logo.svg; do
+          for asset in readme-images.js dots@64x64.svg github-logo.svg; do
             if [ -f "app-viewer-source/app-viewer/${asset}" ]; then
               cp "app-viewer-source/app-viewer/${asset}" _site/
             fi
@@ -77,8 +77,8 @@ jobs:
           node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps
 
           # Record which repository and app-data revision produced this
-          # catalogue. Matching servers can use this provenance without
-          # trusting editable browser input.
+          # catalogue so the Viewer can link each app to its exact source,
+          # including on forks.
           node main/.github/scripts/write-app-viewer-catalogue-metadata.mjs \
             --output _site/catalogue-meta.json \
             --repository "${GITHUB_REPOSITORY}" \
