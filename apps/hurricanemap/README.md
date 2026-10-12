@@ -22,7 +22,7 @@ A storm's intensity dictates which shapes and colors to use, depending on the se
 
 |                     | Large | Medium | Small |
 |---------------------|-------|--------|-------|
-| Tropical Depression | ![Tropical Depression - Large](images/icon_large_td.png) | ![Tropical Depression - Medium](images/icon_s_m_td.png) | ![Tropical Depression - Small](images/icon_s_m_td.png) |
+| Tropical Depression | ![Tropical Depression - Large](images/icon_large_td.png) | ![Tropical Depression - Medium](images/icon_medium_td.png) | ![Tropical Depression - Small](images/icon_small_td.png) |
 | Tropical Storm      | ![Tropical Storm - Large](images/icon_large_ts.png) | ![Tropical Storm - Medium](images/icon_medium_ts.png) | ![Tropical Storm - Small](images/icon_small_ts.png) |
 | Category 1          | ![Category 1 - Large](images/icon_large_cat1.png) | ![Category 1 - Medium](images/icon_medium_cat1.png) | ![Category 1 - Small](images/icon_small_cat1.png) |
 | Category 2          | ![Category 2 - Large](images/icon_large_cat2.png) | ![Category 2 - Medium](images/icon_medium_cat2.png) | ![Category 2 - Small](images/icon_small_cat2.png) |

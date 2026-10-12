@@ -56,8 +56,20 @@ PATTERN_WEBTXT = r"(https?:\/\/[^\s'\"<>]+\d+web\.txt)(.*?)<\/a>"
 PATTERN_POS = r"\d{6}Z.+?-+?\sNEAR\s(\d.+?[N|S])\s*?(\d.+?[E|W])"
 PATTERN_WIND = r"MAX SUSTAINED WINDS.*?(\d+).*?KT"
 PATTERN_NAME = r"SUBJ.+?\d([A-Z])\s\((.+?)\)"
+PATTERN_DEG = r"MOVEMENT.+?(\d+?)\sDEGREES.+?KTS"
 TD_NHC_SUFFIX = ["-E", "-C"]  # All possible NHC suffixes for TDs
 NUM_STRS = list(STR_TO_NUM.keys())
+HEADINGS = [
+    ("N", 338, 359),
+    ("N", 0, 22),  # N is the only heading to wrap around
+    ("NE", 23, 67),
+    ("E", 68, 112),
+    ("SE", 113, 157),
+    ("S", 158, 202),
+    ("SW", 203, 247),
+    ("W", 248, 292),
+    ("NW", 293, 337),
+]
 
 def main(config):
     """Render the selected hurricane map with active storm symbols.
@@ -81,13 +93,22 @@ def main(config):
     if hide_if_quiet and not storm_data:  # Hide if no storm data exists
         return None
 
-    storms = [build_storm(s["lat"], s["lon"], s["wind"], s["name"], sym_size, map_choice, config) for s in storm_data]
+    storms = [build_storm(
+        s["lat"],
+        s["lon"],
+        s["wind"],
+        s["name"],
+        s["deg"],
+        sym_size,
+        map_choice,
+        config,
+    ) for s in storm_data]
     storms = [s for s in storms if s]
     if hide_if_quiet and not storms:  # Hide if no storm data in selected basin
         return None
 
     if show_names:
-        name_banner = make_name_banner([(s["name"], s["intensity"], s["display_lon"]) for s in storms])
+        name_banner = make_name_banner([(s["name"], s["intensity"], s["display_lon"], s["heading"]) for s in storms])
     else:
         name_banner = BLANK_PX
     delay = 25 if canvas.is2x() else 50
@@ -190,17 +211,20 @@ def make_name_banner(storms):
     """Build a storm name banner sorted by horizontal display position.
 
     Args:
-        storms: (list[tuple]) List of (name, intensity, location) tuples.
+        storms: (list[tuple]) List of (name, intensity, location, heading) tuples.
 
     Returns:
         render.Padding: (render.Padding) A marquee of storm names with intensity labels.
     """
     storm_names = []
     for s in storms:
-        name, intensity, loc = s
+        name, intensity, loc, hdg = s
         if type(intensity) == "int":
             intensity = "H" + str(intensity)
-        storm_names.append((intensity + " " + name, loc))
+        label = intensity + " " + name
+        if hdg:  # Heading can be empty if the data is unavailable
+            label += " (" + hdg + ")"
+        storm_names.append((label, loc))
 
     # Sort names from left to right on the display
     if len(storm_names) == 1:
@@ -281,6 +305,25 @@ def build_symbol(wind, sym_size, config):
 
     return render.Stack(children = built_sym)
 
+def deg_to_heading(deg):
+    """Convert a compass heading in degrees to a named direction.
+
+    Args:
+        deg: (float | int | None) Heading in degrees, or None if unknown.
+
+    Returns:
+        heading: (str) Compass heading label, or "" if the heading is missing or outside 0-359.
+    """
+    if deg == None:
+        return ""
+
+    d = int(deg)
+    for hdg, d_min, d_max in HEADINGS:
+        if d >= d_min and d <= d_max:
+            return hdg
+
+    return ""
+
 def merc(lat):
     """Convert a latitude coordinate to its Mercator projection value.
 
@@ -325,7 +368,7 @@ def lon_to_col(lon, lon_left, lon_right, width):
 
     return col if 0 <= col and col < width else None
 
-def build_storm(lat, lon, wind, name, sym_size, map_choice, config):
+def build_storm(lat, lon, wind, name, deg, sym_size, map_choice, config):
     """Build a storm marker and metadata for display on the selected map.
 
     Args:
@@ -333,6 +376,7 @@ def build_storm(lat, lon, wind, name, sym_size, map_choice, config):
         lon: (float) Longitude of the storm center in degrees.
         wind: (int) Storm wind speed in knots.
         name: (str) Storm name to display.
+        deg: (int | None) Storm heading in degrees, or None if unknown.
         sym_size: (str) Symbol size as "small", "medium", or "large".
         map_choice: (str) Name of the map to use.
         config: (config object) Configuration used to render the storm symbol.
@@ -367,6 +411,7 @@ def build_storm(lat, lon, wind, name, sym_size, map_choice, config):
         "name": name,
         "intensity": calc_intensity(wind),
         "display_lon": pad_left,
+        "heading": deg_to_heading(deg),
     }
 
 def format_name(name):
@@ -422,12 +467,14 @@ def get_nhc():
 
     storms = []
     for storm in nhc_storms:
+        move_dir = storm.get("movementDir")  # Can be null or missing; heading is optional
         storms.append(
             {
                 "name": format_name(storm["name"]),
                 "lat": storm["latitudeNumeric"],
                 "lon": storm["longitudeNumeric"],
                 "wind": int(storm["intensity"]),
+                "deg": int(move_dir) if move_dir != None else None,
             },
         )
 
@@ -450,9 +497,10 @@ def parse_jtwc(url):
 
     # Extract data
     pos = re.match(PATTERN_POS, resp.body())
-    winds = re.match(PATTERN_WIND, resp.body())
+    wind = re.match(PATTERN_WIND, resp.body())
     name = re.match(PATTERN_NAME, resp.body())
-    if not pos or not winds or not name:
+    deg = re.match(PATTERN_DEG, resp.body())  # Heading is optional; storm still displays without it
+    if not pos or not wind or not name:
         return None
 
     # Parse latitude
@@ -469,7 +517,8 @@ def parse_jtwc(url):
         "name": format_name(name),
         "lat": lat_float * lat_dir,
         "lon": lon_float * lon_dir,
-        "wind": int(winds[0][1]),
+        "wind": int(wind[0][1]),
+        "deg": int(deg[0][1]) if deg else None,
     }
 
 def get_jtwc():
@@ -586,7 +635,7 @@ def get_schema():
             schema.Toggle(
                 id = "show_names",
                 name = "Show names",
-                desc = "Show the names of displayed storms, sorted from left to right",
+                desc = "Show the intensity, name, and heading of displayed storms, sorted from left to right on the display",
                 icon = "hurricane",
                 default = DEFAULT_NAMES,
             ),
