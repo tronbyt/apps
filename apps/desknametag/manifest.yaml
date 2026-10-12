@@ -7,6 +7,7 @@ author: Brian Bell
 fileName: desk_name_tag.star
 packageName: desknametag
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tracking
@@ -14,4 +15,4 @@ tags:
   - art
   - utility
 published: '2022-09-02T13:59:43Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T18:22:01Z'

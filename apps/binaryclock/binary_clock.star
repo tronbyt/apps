@@ -7,7 +7,7 @@ Author: LukiLeu
 
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -66,15 +66,28 @@ def render_bar(value, color_dots, color_dots_bg, width_bar, height_bar):
         children = reversed(children_bar),
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+# A square panel is the same 64 wide, so the six columns keep their width; it
+# has twice the rows, so every bar and the box it sits in get twice the height.
+VSCALE = 2 if is_square() else 1
+
 # Render a single column
 def render_col(value, text, color_text, color_dots, color_dots_bg, width_bar, height_bar, show_text):
     if (True == show_text) and (height_bar <= 2):
         return render.Column(
             children = [
                 render.Box(
-                    height = 20 if height_bar == 1 else 25,
+                    height = (20 if height_bar == 1 else 25) * VSCALE,
                     width = 5 if width_bar <= 5 else width_bar,
-                    child = render_bar(value, color_dots, color_dots_bg, width_bar, height_bar),
+                    child = render_bar(value, color_dots, color_dots_bg, width_bar, height_bar * VSCALE),
                 ),
                 render.Box(
                     height = 8 if height_bar == 1 else 7,
@@ -91,9 +104,9 @@ def render_col(value, text, color_text, color_dots, color_dots_bg, width_bar, he
         return render.Column(
             children = [
                 render.Box(
-                    height = 32,
+                    height = 32 * VSCALE,
                     width = 5 if width_bar <= 5 else width_bar,
-                    child = render_bar(value, color_dots, color_dots_bg, width_bar, height_bar),
+                    child = render_bar(value, color_dots, color_dots_bg, width_bar, height_bar * VSCALE),
                 ),
             ],
         )

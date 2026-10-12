@@ -8,10 +8,11 @@ recommendedInterval: 1
 fileName: constellations.star
 packageName: constellations
 supports2x: true
+supports64x64: true
 category: science
 tags:
   - space
   - science
   - wide 2x support
 published: '2026-01-30T03:34:35Z'
-updated: '2026-02-02T06:33:12Z'
+updated: '2026-10-01T18:46:01Z'

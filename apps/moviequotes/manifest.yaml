@@ -7,9 +7,10 @@ author: Austin Fonacier
 fileName: movie_quotes.star
 packageName: moviequotes
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - media
   - art
 published: '2022-05-03T16:48:25Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T18:46:01Z'
