@@ -12,39 +12,59 @@
 
     <body>
         <div class="container py-4">
-            <h1 class="mb-4 main-title"><img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4"> Apps
-                Viewer</h1>
-
-            <div class="input-group mb-4">
-                <input type="text" id="search" class="form-control" placeholder="Search apps...">
-                <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="viewer-header mb-4">
+                <h1 class="main-title mb-0">
+                    <img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4" alt="">
+                    <span class="title-full">Tronbyt App Viewer</span>
+                    <span class="title-short">App Viewer</span>
+                </h1>
             </div>
 
-            <div class="row mb-4">
-                <div class="col-md-3">
+            <div class="viewer-filters mb-4">
+                <div class="viewer-search">
+                    <div class="search-control">
+                        <div class="search-tag-token" id="selected-tag-filter" hidden>
+                            <span id="selected-tag-label"></span>
+                            <button type="button" id="clear-tag-filter" aria-label="Remove tag filter">&times;</button>
+                        </div>
+                        <input type="text" id="search" class="form-control" placeholder="Search apps...">
+                        <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="viewer-preference preference-dot">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
+                        <label class="form-check-label" for="dot-matrix-toggle">
+                            Dot matrix overlay
+                        </label>
+                    </div>
+                </div>
+                <div class="category-filter">
                     <select id="category-filter" class="form-select">
                         <option value="">All Categories</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <select id="tag-filter" class="form-select">
-                        <option value="">All Tags</option>
+                <div class="display-filter">
+                    <select id="display-filter" class="form-select">
+                        <option value="standard">Display: Standard / 1x</option>
+                        <option value="wide">Display: Wide / 2x</option>
+                        <option value="square">Display: Square</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="sort-filter">
                     <select id="sort-order" class="form-select">
                         <option value="alphabetical">Sort: A-Z</option>
                         <option value="newest">Sort: Newest</option>
-                        <option value="updated">Sort: Last Updated</option>
+                        <option value="updated" selected>Sort: Last Updated</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-check pt-2">
-                        <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
-                        <label class="form-check-label" for="dot-matrix-toggle">
-                            Dot matrix overlay
+                <div class="viewer-preference preference-broken">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="hide-broken-apps">
+                        <label class="form-check-label" for="hide-broken-apps">
+                            Hide broken apps
                         </label>
                     </div>
                 </div>
@@ -53,7 +73,7 @@
             <div id="apps-list" class="row g-4"></div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="main.js"></script>
+        <script type="module" src="main.js"></script>
     </body>
 
 </html>

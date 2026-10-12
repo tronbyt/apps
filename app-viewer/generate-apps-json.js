@@ -156,8 +156,16 @@ function findPreview(files, appName, manifest, starFile) {
     files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase()));
 }
 
-function findMarkdown(files) {
-  return files.find(f => MD_FILES.includes(f));
+export function findMarkdown(files) {
+  const exactMatch = MD_FILES.find(candidate => files.includes(candidate));
+  if (exactMatch) return exactMatch;
+
+  for (const candidate of MD_FILES) {
+    const match = files.find(file => file.toLocaleLowerCase('en-US') === candidate.toLocaleLowerCase('en-US'));
+    if (match) return match;
+  }
+
+  return undefined;
 }
 
 function getReadmeDescription(appPath, mdFile) {
@@ -209,11 +217,15 @@ function scanApps() {
     let author = null;
     let recommendedInterval = null;
     let supports2x = false;
+    let supports64x64 = false;
     let image2x = null;
+    let image64x64 = null;
     let category = null;
     let tags = [];
     let published = null;
     let updated = null;
+    let broken = false;
+    let brokenReason = null;
 
     if (manifest) {
       summary = manifest.summary || null;
@@ -222,10 +234,13 @@ function scanApps() {
       author = manifest.author || null;
       recommendedInterval = manifest.recommendedInterval || null;
       supports2x = Boolean(manifest.supports2x);
+      supports64x64 = Boolean(manifest.supports64x64);
       category = manifest.category || null;
       tags = manifest.tags || [];
       published = manifest.published || null;
       updated = manifest.updated || null;
+      broken = Boolean(manifest.broken);
+      brokenReason = manifest.brokenReason || null;
     }
 
     // Try to find the corresponding @2x image if the app supports it
@@ -235,6 +250,16 @@ function scanApps() {
         const candidate2x = `${base}@2x${ext}`;
         if (files.includes(candidate2x)) {
             image2x = `${appName}/${candidate2x}`;
+        }
+    }
+
+    // Try to find the corresponding 64x64 image if the app supports square displays
+    if (supports64x64 && image) {
+        const ext = extname(image);
+        const base = basename(image, ext);
+        const candidate64x64 = `${base}@64x64${ext}`;
+        if (files.includes(candidate64x64)) {
+            image64x64 = `${appName}/${candidate64x64}`;
         }
     }
 
@@ -252,13 +277,17 @@ function scanApps() {
       recommendedInterval: recommendedInterval,
       image: image ? `${appName}/${image}` : null,
       image2x: image2x,
+      image64x64: image64x64,
       supports2x: supports2x,
+      supports64x64: supports64x64,
       md: md ? `${appName}/${md}` : null,
       starFile: starFile,
       category: category,
       tags: tags,
       published: published,
-      updated: updated
+      updated: updated,
+      broken: broken,
+      brokenReason: brokenReason
     });
   }
   return apps;
