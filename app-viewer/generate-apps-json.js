@@ -1,8 +1,9 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join, extname, dirname, basename } from 'path';
 import { createHash } from 'crypto';
 import { load } from 'js-yaml';
 import { fileURLToPath } from 'url';
+import { buildAppCard, buildSiteCard, cardFileName, CARD_HEIGHT, CARD_WIDTH } from './social-cards.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,11 +12,14 @@ const __dirname = dirname(__filename);
 const args = process.argv.slice(2);
 let outputFile = join(__dirname, 'apps.json');
 let appsPath = join(__dirname, '../apps');
+let withCards = true;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--output' && i + 1 < args.length) {
     outputFile = args[i + 1];
   } else if (args[i] === '--apps-path' && i + 1 < args.length) {
     appsPath = args[i + 1];
+  } else if (args[i] === '--no-cards') {
+    withCards = false; // Quicker local builds: pages still link to cards, but none are drawn
   }
 }
 const APPS_DIR = appsPath;
@@ -23,6 +27,11 @@ const outputDir = dirname(outputFile);
 const OUTPUT_FILE = outputFile;
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
+const SITE_URL = 'https://tronbyt.github.io/apps/';
+const SITE_NAME = 'Tronbyt App Viewer';
+// The card for the home and author pages; index.html refers to it by this name
+const SITE_CARD = 'cards/tronbyt-app-viewer.png';
+const CARD_CONCURRENCY = 4;
 
 function normalizeAuthor(author) {
   return author
@@ -100,26 +109,160 @@ export function escapeHtmlAttribute(value) {
     .replace(/>/g, '&gt;');
 }
 
-export function buildAppMetaTags(app) {
-  const title = app.displayName ? `${app.displayName} - Tronbyt App` : 'Tronbyt App';
-  const description = app.summary || app.description || 'View details for this Tronbyt app.';
-  const imageUrl = app.image
-    ? `https://tronbyt.github.io/apps/apps/${app.image}`
-    : 'https://avatars.githubusercontent.com/u/200508996?s=400&v=4';
-  const url = `https://tronbyt.github.io/apps/details/${encodeURIComponent(app.name)}.html`;
-
+// Open Graph / Twitter tags shared by every generated page
+function socialTags({ title, description, url, image, imageAlt }) {
   return `<title>${escapeHtmlAttribute(title)}</title>
         <meta name="description" content="${escapeHtmlAttribute(description)}">
+        <link rel="canonical" href="${escapeHtmlAttribute(url)}">
+        <meta property="og:site_name" content="${SITE_NAME}">
         <meta property="og:title" content="${escapeHtmlAttribute(title)}">
         <meta property="og:description" content="${escapeHtmlAttribute(description)}">
-        <meta property="og:image" content="${escapeHtmlAttribute(imageUrl)}">
         <meta property="og:url" content="${escapeHtmlAttribute(url)}">
         <meta property="og:type" content="website">
+        <meta property="og:image" content="${escapeHtmlAttribute(image)}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="${CARD_WIDTH}">
+        <meta property="og:image:height" content="${CARD_HEIGHT}">
+        <meta property="og:image:alt" content="${escapeHtmlAttribute(imageAlt)}">
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="${escapeHtmlAttribute(title)}">
         <meta name="twitter:description" content="${escapeHtmlAttribute(description)}">
-        <meta name="twitter:image" content="${escapeHtmlAttribute(imageUrl)}">
+        <meta name="twitter:image" content="${escapeHtmlAttribute(image)}">
+        <meta name="twitter:image:alt" content="${escapeHtmlAttribute(imageAlt)}">`;
+}
+
+// JSON for a <script> element: "<" is escaped so the data can't end the element early
+function scriptJson(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
+}
+
+export function appPageUrl(app) {
+  return `${SITE_URL}details/${encodeURIComponent(app.name)}.html`;
+}
+
+export function buildAppMetaTags(app, cardPath = SITE_CARD) {
+  const name = app.displayName || app.name;
+  const title = `${name} - Tronbyt App`;
+  const description = app.summary || app.description || 'View details for this Tronbyt app.';
+  const url = appPageUrl(app);
+  const image = SITE_URL + cardPath;
+
+  // Structured data, so search engines know the page describes an app
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name,
+    description: app.description || app.summary || undefined,
+    url,
+    image,
+    applicationCategory: 'Tronbyt app',
+    applicationSubCategory: app.category || undefined,
+    operatingSystem: 'Tronbyt',
+    keywords: app.tags && app.tags.length ? app.tags.join(', ') : undefined,
+    author: app.author ? { '@type': 'Person', name: app.author } : undefined,
+    datePublished: app.published || undefined,
+    dateModified: app.updated || undefined,
+  };
+
+  return `${socialTags({ title, description, url, image, imageAlt: `${name} on a Tronbyt display` })}
+        <script type="application/ld+json">${scriptJson(data)}</script>
         <meta name="app-name" content="${escapeHtmlAttribute(app.name)}">`;
+}
+
+// The app's details written into the page, for search engines and sharing sites that don't run JavaScript.
+// The page's script replaces it with the full details.
+export function buildAppPrerender(app) {
+  const name = app.displayName || app.name;
+  const parts = [`<h1>${escapeHtmlAttribute(name)}</h1>`];
+  if (app.summary && app.summary !== app.description) parts.push(`<p>${escapeHtmlAttribute(app.summary)}</p>`);
+  if (app.description) parts.push(`<p>${escapeHtmlAttribute(app.description)}</p>`);
+  if (app.author) {
+    const author = escapeHtmlAttribute(app.author);
+    parts.push(app.authorSlug
+      ? `<p>By <a href="../authors/${encodeURIComponent(app.authorSlug)}.html">${author}</a></p>`
+      : `<p>By ${author}</p>`);
+  }
+  if (app.tags && app.tags.length) {
+    const tags = app.tags.map(tag => `<a href="../index.html?tag=${encodeURIComponent(tag)}">${escapeHtmlAttribute(tag)}</a>`);
+    parts.push(`<p>Tags: ${tags.join(', ')}</p>`);
+  }
+  return parts.join('\n                ');
+}
+
+export function buildAuthorMetaTags(profile, cardPath = SITE_CARD) {
+  const appCount = profile.apps.length;
+  const title = `${profile.displayName} - Tronbyt Apps`;
+  const description = `${appCount} Tronbyt ${appCount === 1 ? 'app' : 'apps'} by ${profile.displayName}.`;
+  const url = `${SITE_URL}authors/${encodeURIComponent(profile.slug)}.html`;
+  return `${socialTags({ title, description, url, image: SITE_URL + cardPath, imageAlt: SITE_NAME })}
+        <meta name="author-slug" content="${escapeHtmlAttribute(profile.slug)}">
+        <meta name="author-name" content="${escapeHtmlAttribute(profile.displayName)}">`;
+}
+
+// The author's apps written into the page as links, so search engines can find each app's page
+export function buildAuthorPrerender(profile) {
+  const apps = profile.apps
+    .map(app => `<li><a href="../details/${encodeURIComponent(app.name)}.html">${escapeHtmlAttribute(app.displayName || app.name)}</a>${app.summary ? ` - ${escapeHtmlAttribute(app.summary)}` : ''}</li>`)
+    .join('\n                    ');
+  return `<h1>${escapeHtmlAttribute(profile.displayName)}</h1>
+                <ul>
+                    ${apps}
+                </ul>`;
+}
+
+function sitemapDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toISOString().slice(0, 10) : null;
+}
+
+// Every page, for search engines
+export function buildSitemap(apps, profiles) {
+  const entry = (url, lastmod) =>
+    `  <url><loc>${escapeHtmlAttribute(url)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${[
+    entry(SITE_URL),
+    ...apps.map(app => entry(appPageUrl(app), sitemapDate(app.updated || app.published))),
+    ...profiles.map(profile => entry(`${SITE_URL}authors/${encodeURIComponent(profile.slug)}.html`)),
+  ].join('\n')}
+</urlset>
+`;
+}
+
+// The screenshot shown on an app's card: 128x64 if there is one, then 64x32, then 64x64
+function cardScreenshot(app) {
+  const image = app.image2x || app.image || app.image64x64;
+  return image ? join(APPS_DIR, image) : null;
+}
+
+// Work out each app's card file name (it depends on the screenshot, so a new screenshot gives a new card)
+function planCards(apps) {
+  return new Map(apps.map(app => {
+    const screenshot = cardScreenshot(app);
+    let bytes = null;
+    try {
+      bytes = screenshot ? readFileSync(screenshot) : null;
+    } catch {
+      // A missing screenshot gets the logo card
+    }
+    return [app.name, `cards/${cardFileName(app, bytes)}`];
+  }));
+}
+
+async function generateCards(apps, cards) {
+  const cardsDir = join(outputDir, 'cards');
+  rmSync(cardsDir, { recursive: true, force: true }); // Only the current cards are published
+  mkdirSync(cardsDir, { recursive: true });
+  await buildSiteCard(apps.length, join(outputDir, SITE_CARD));
+
+  const queue = [...apps];
+  const worker = async () => {
+    for (let app = queue.shift(); app; app = queue.shift()) {
+      await buildAppCard(app, cardScreenshot(app), join(outputDir, cards.get(app.name)));
+    }
+  };
+  await Promise.all(Array.from({ length: CARD_CONCURRENCY }, worker));
 }
 
 function parseManifest(appPath) {
@@ -293,7 +436,7 @@ function scanApps() {
   return apps;
 }
 
-function generateHtmlFiles(apps) {
+function generateHtmlFiles(apps, cards) {
   const detailsDir = join(outputDir, 'details');
   if (!existsSync(detailsDir)) {
     mkdirSync(detailsDir, { recursive: true });
@@ -308,7 +451,11 @@ function generateHtmlFiles(apps) {
   template = template.replace('href="index.html"', 'href="../index.html"');
 
   for (const app of apps) {
-    const appHtml = template.replace('<title>App Details</title>', buildAppMetaTags(app));
+    const appHtml = template
+      .replace('<title>App Details</title>', buildAppMetaTags(app, cards.get(app.name)))
+      .replace('<div id="app-content"></div>', `<div id="app-content">
+                ${buildAppPrerender(app)}
+            </div>`);
     writeFileSync(join(detailsDir, `${app.name}.html`), appHtml);
   }
 }
@@ -327,42 +474,39 @@ function generateAuthorHtmlFiles(profiles) {
   template = template.replace('href="index.html"', 'href="../index.html"');
 
   for (const profile of profiles) {
-    const appCount = profile.apps.length;
-    const title = `${profile.displayName} - Tronbyt Apps`;
-    const description = `${appCount} Tronbyt ${appCount === 1 ? 'app' : 'apps'} by ${profile.displayName}.`;
-    const url = `https://tronbyt.github.io/apps/authors/${encodeURIComponent(profile.slug)}.html`;
-
-    const metaTags = `<title>${escapeHtmlAttribute(title)}</title>
-        <meta name="description" content="${escapeHtmlAttribute(description)}">
-        <meta property="og:title" content="${escapeHtmlAttribute(title)}">
-        <meta property="og:description" content="${escapeHtmlAttribute(description)}">
-        <meta property="og:url" content="${escapeHtmlAttribute(url)}">
-        <meta property="og:type" content="website">
-        <meta name="twitter:card" content="summary">
-        <meta name="twitter:title" content="${escapeHtmlAttribute(title)}">
-        <meta name="twitter:description" content="${escapeHtmlAttribute(description)}">
-        <meta name="author-slug" content="${escapeHtmlAttribute(profile.slug)}">
-        <meta name="author-name" content="${escapeHtmlAttribute(profile.displayName)}">`;
-
-    const authorHtml = template.replace('<title>Author Profile</title>', metaTags);
+    const authorHtml = template
+      .replace('<title>Author Profile</title>', buildAuthorMetaTags(profile))
+      .replace('<div id="author-content"></div>', `<div id="author-content">
+                ${buildAuthorPrerender(profile)}
+            </div>`);
     writeFileSync(join(authorsDir, `${profile.slug}.html`), authorHtml);
   }
 }
 
-function main() {
+async function main() {
   const apps = scanApps();
   const authorProfiles = buildAuthorProfiles(apps);
   writeFileSync(OUTPUT_FILE, JSON.stringify(apps, null, 2));
   console.log(`Generated ${OUTPUT_FILE} with ${apps.length} apps.`);
 
   // Generate static HTML pages with Open Graph tags
-  generateHtmlFiles(apps);
+  const cards = planCards(apps);
+  generateHtmlFiles(apps, cards);
   console.log(`Generated ${apps.length} static detail HTML pages with metadata.`);
 
   generateAuthorHtmlFiles(authorProfiles);
   console.log(`Generated ${authorProfiles.length} static author HTML pages with metadata.`);
+
+  writeFileSync(join(outputDir, 'sitemap.xml'), buildSitemap(apps, authorProfiles));
+  console.log('Generated sitemap.xml.');
+
+  if (withCards) {
+    const started = Date.now();
+    await generateCards(apps, cards);
+    console.log(`Generated ${apps.length + 1} social cards in ${Math.round((Date.now() - started) / 1000)}s.`);
+  }
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  main();
+  await main();
 }
