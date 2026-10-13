@@ -97,10 +97,11 @@ def header_of(title):
 
 def make_fact(title, social, plain, url, short_url):
     # The DigiFact's text, and its link sentence (e.g. "View more stats here:") without the address - that is shown
-    # next to the link's QR code instead
+    # next to the link's QR code instead. The social text has the short link in lower case (older data: the full
+    # address).
     link_text = ""
     if url and short_url and social.startswith(plain):
-        link_text = social[len(plain):].replace(url, "").strip()
+        link_text = social[len(plain):].replace(short_url.lower(), "").replace(url, "").strip()
     return {
         "header": header_of(title or "DigiFact"),
         "text": plain,
