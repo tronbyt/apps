@@ -15,6 +15,18 @@ body {
   display: none;
 }
 
+/* The logo and title link back to the home page */
+.home-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-link:hover,
+.home-link:focus-visible {
+  color: inherit;
+  opacity: 0.85;
+}
+
 .card {
   background: #222;
   border: 2px solid #444;
@@ -67,6 +79,11 @@ body {
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px #000a;
+}
+
+/* Long author names with no spaces wrap inside the box rather than running off it */
+.author-profile-header .main-title {
+  overflow-wrap: anywhere;
 }
 
 .author-app-count {
@@ -338,6 +355,7 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   line-height: 1.65;
   margin: 0 0 1.5rem;
   max-width: 58rem;
+  overflow-wrap: anywhere; /* Long URLs in descriptions wrap rather than running over the previews */
 }
 
 .app-details-layout {
