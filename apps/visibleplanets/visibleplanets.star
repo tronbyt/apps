@@ -6,13 +6,14 @@ Author: Robert Ison
 """
 
 # Notes:
-# Pulls down data every 15 minutes near sunrise/sunset because the inner planets move a lot during this time
-# Pulls down data every hour starting 30 minutes after sunset until 30 minutes befor sunrise
-# Pulls down the expected evening sky during the day -- when it is sunny, there are no 'visible planets' so we'll display what you can expect in the evening.
+# Requests a 15-minute cache duration near sunrise/sunset.
+# Requests a one-hour cache duration at night outside those windows.
+# During the day, displays the expected sky 30 minutes after sunset.
 
-load("encoding/json.star", "json")  #Used to figure out timezone
-load("http.star", "http")  #for calling to astronomyapi.com
-load("humanize.star", "humanize")  #for easy reading numbers and times
+
+load("encoding/json.star", "json")
+load("http.star", "http")
+load("humanize.star", "humanize")
 load("images/jupiter.png", JUPITER_ASSET = "file")
 load("images/mars.png", MARS_ASSET = "file")
 load("images/mercury.png", MERCURY_ASSET = "file")
@@ -20,17 +21,18 @@ load("images/neptune.png", NEPTUNE_ASSET = "file")
 load("images/saturn.png", SATURN_ASSET = "file")
 load("images/uranus.png", URANUS_ASSET = "file")
 load("images/venus.png", VENUS_ASSET = "file")
-load("math.star", "math")  #for calculating distance to planets
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
-load("sunrise.star", "sunrise")  #to calcuate day/night and when planets will be visible
-load("time.star", "time")  #Used to display time and calcuate lenght of TTL cache
+load("sunrise.star", "sunrise")
+load("time.star", "time")
+
 
 app_hash = "M2IxYmY2OWUtZWIzMS00NTM0LTkyOWItMmRiMDlhMWVkYjI5OmZhN2YxOTM2M2I2N2QzZDNiYjEzNmNkMDhjMzM3YmUzZTQwMjE3ODg1MjIzY2QyYTNiNzFkZDlhYzU1YzBkODdkOWE0YjFiODkwMWUxN2JkZDU3YmZjOTBmZWI4NmE5MjdlMTBjNjZhYWFkYzFhMjE1NjdiOGYxNTUxOGNmMDU1ZGMwOTFhNzg5Nzc5M2FhNDE5OTUyMDAzNTUyY2U2ZWQ5NWUxNDZmMjkxZWQ0M2RhYzNjNGRmMjNmYTc5NTU2OTQ0MGVlNWY1N2NhOTJmYjNmYTg4OWYxOWFlNWQxMzU2"
 time_display_format = "3:04 PM"
 application_delimiter = ":"
 
-#planet images
+
 planet_images = {
     "mercury": MERCURY_ASSET.readall(),
     "venus": VENUS_ASSET.readall(),
@@ -41,8 +43,8 @@ planet_images = {
     "neptune": NEPTUNE_ASSET.readall(),
 }
 
-#color of text used to display planet name
-#colors are picked from the planet images
+
+# Colors are picked from the planet images.
 planet_colors = {
     "mercury": "#bc6700",
     "venus": "#c19e5e",
@@ -53,42 +55,49 @@ planet_colors = {
     "neptune": "#121178",
 }
 
+
 default_location = """
 {
-	"lat": "28.53933",
-	"lng": "-81.38325",
-	"description": "Orlando, FL, USA",
-	"locality": "Orlando",
-	"place_id": "???",
-	"timezone": "America/New_York"
+    "lat": "28.53933",
+    "lng": "-81.38325",
+    "description": "Orlando, FL, USA",
+    "locality": "Orlando",
+    "place_id": "???",
+    "timezone": "America/New_York"
 }
 """
 
-#Used to convert bearing and altitude to a point on 2D display
+
+# Used to convert bearing and altitude to a point on the 2D display.
 compass_position = [6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 6]
 altitude_position = [4, 3, 2, 1, 0]
 
+
 def main(config):
-    """ Visible Planets
+    """Displays the selected planet or a summary of the night sky."""
 
-    Args:
-        config: Configuration Items to control how the app is displayed
-    Returns:
-        Display for Tidbyt
-    """
-
-    #settings:
     system = config.get("system") or "metric"
     hide_quiet = config.get("hide_quiet")
     location = json.decode(config.get("location", default_location))
+    planet = config.get("planet", "mercury")
 
-    planet = config.get("planet", "mercury")  #default to mercury
+    # Get the current time in the selected location's timezone.
+    now = time.now().in_location(location["timezone"])
 
-    #get locations sunrise/sunset
-    now = time.now()
-    sunrise_time = sunrise.sunrise(float(location["lat"]), float(location["lng"]), now).in_location(location["timezone"])
-    sunset_time = sunrise.sunset(float(location["lat"]), float(location["lng"]), now).in_location(location["timezone"])
+    # Calculate sunrise and sunset for the selected location.
+    sunrise_time = sunrise.sunrise(
+        float(location["lat"]),
+        float(location["lng"]),
+        now,
+    ).in_location(location["timezone"])
 
+    sunset_time = sunrise.sunset(
+        float(location["lat"]),
+        float(location["lng"]),
+        now,
+    ).in_location(location["timezone"])
+
+    # Fix #1: Test proximity on either side of sunrise/sunset.
     near_sunrise_now = abs((now - sunrise_time).hours) <= 0.5
     near_sunset_now = abs((now - sunset_time).hours) <= 0.5
 
@@ -101,75 +110,66 @@ def main(config):
     check_offset = 0
 
     if is_daytime:
-        # During the day, show the sky 30 minutes AFTER sunset.
+        # Fix #2: Forecast 30 minutes AFTER sunset.
         hours_until_sunset = (sunset_time - now).hours
         check_offset = hours_until_sunset + 0.5
 
-        # Keep the daytime forecast cached until 30 minutes BEFORE sunset.
-        # Near sunset, the proximity check below overrides this to 15 minutes.
+        # Keep the forecast cache duration separate from its target time.
+        # Set the duration to reach 30 minutes BEFORE sunset.
         cache_ttl_seconds = max(
             60,
             int((hours_until_sunset - 0.5) * 60 * 60),
         )
 
-    # Refresh every 15 minutes within 30 minutes of sunrise or sunset.
+    # Near sunrise/sunset, override the cache duration to 15 minutes.
     if near_sunrise_now or near_sunset_now:
-        cache_ttl_seconds = 15 * 60 #Let's check each 15 minutes around sunset and sunrise as inner planets move quite a bit then
-    elif is_before_sunset and is_after_sunrise:
-        #during the day you can't see much so let's get the early evening's sky and present that.
-        #so during the day your Tidbyt will tell you what you can see this evening.
-        check_offset = abs((now - sunset_time).hours) - 0.5
-        cache_ttl_seconds = check_offset * 60 * 60
+        cache_ttl_seconds = 15 * 60
 
-    #we've calculated sunset and sunrise with the exact gps coordinates, but now we will round the coordinates to one decimal
-    #place for two reasons:
-    #1) We don't give the API host the exact position of any Tidbyt user, and
-    #2) We can reduce api calls by grouping people that live close enough to share the same rounded coordinates
-
-    location["lng"] = str((math.round(float(location["lng"]) * 10)) * math.pow(10, -1))
-    location["lat"] = str((math.round(float(location["lat"]) * 10)) * math.pow(10, -1))
+    # Sunrise/sunset were calculated with the exact GPS coordinates.
+    # Round coordinates before sending them to the API:
+    # 1) Avoid sending the user's exact position.
+    # 2) Allow nearby users to share rounded coordinates.
+    location["lng"] = str(
+        math.round(float(location["lng"]) * 10) * math.pow(10, -1),
+    )
+    location["lat"] = str(
+        math.round(float(location["lat"]) * 10) * math.pow(10, -1),
+    )
 
     if planet == "all":
         return get_summary_of_night_sky(location, check_offset)
     else:
         visibility_disclaimer = ""
         is_inner_planet = planet == "mercury" or planet == "venus"
-        if (is_after_sunrise == True and is_before_sunset == True):
-            #Daytime
-            if ((abs((now - sunrise_time).hours) < abs((now - sunset_time).hours)) and is_inner_planet):
-                # closer to sunrise
+
+        if is_after_sunrise == True and is_before_sunset == True:
+            # Daytime.
+            if (
+                abs((now - sunrise_time).hours) <
+                abs((now - sunset_time).hours)
+            ) and is_inner_planet:
                 visibility_disclaimer = "around sunrise at %s" % sunrise_time.format(time_display_format)
             else:
-                # closer to sunset
-                # since we can't see this till sunset, let's cache this until
-                # 30 minutes before sunset, save a few API calls
-
                 if is_inner_planet:
-                    # let's check visibility of inner planets at sunset instead of now
-                    # to avoid telling folks the planet will be visible in the evening, when it might
-                    # dip below the horizon before then.
                     visibility_disclaimer = "around sunset at %s" % sunset_time.format(time_display_format)
                 else:
                     visibility_disclaimer = "after sunset at %s" % sunset_time.format(time_display_format)
-        elif (abs((now - sunrise_time).hours) < abs((now - sunset_time).hours)):
-            # Nighttime closer to sunrise
+        elif abs((now - sunrise_time).hours) < abs((now - sunset_time).hours):
             visibility_disclaimer = "before sunrise at %s" % sunrise_time.format(time_display_format)
         else:
-            # Nighttime closer to sunset
             visibility_disclaimer = "after sunset at %s" % sunset_time.format(time_display_format)
 
-        # planet image of the selected planet
         image = planet_images[planet]
-
-        # initialize row 1 and row 2 display data
         row1 = ""
         row2 = ""
 
-        # JSon Data holding all planetary positioning data
-        position_json = get_all_planet_information(location, check_offset, cache_ttl_seconds)
+        position_json = get_all_planet_information(
+            location,
+            check_offset,
+            cache_ttl_seconds,
+        )
         planet_element = get_planet_element(planet, position_json)
 
-        # pull data from json dataset
         constellation = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["constellation"]["name"]
         altitude = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["altitude"]["degrees"]
         altitude = math.floor(float(altitude))
@@ -180,115 +180,107 @@ def main(config):
         if system == "metric":
             distance_display = "%s KMs away" % get_readable_large_number(distance)
         else:
-            distance_display = "%s miles away" % get_readable_large_number(math.floor(float(distance) * 0.6213712))
+            distance_display = "%s miles away" % get_readable_large_number(
+                math.floor(float(distance) * 0.6213712),
+            )
 
         show_display = True
 
         if altitude < 0:
-            # below horizon
             if hide_quiet == True or hide_quiet == "true":
                 show_display = False
             else:
                 row1 = "Not Visible as it is below the horizon."
                 row2 = "%s" % distance_display
         else:
-            # above horizon
-            row1 = "%s at %s°" % (get_cardinal_position_from_degrees(float(bearing)), altitude)
+            row1 = "%s at %s°" % (
+                get_cardinal_position_from_degrees(float(bearing)),
+                altitude,
+            )
+
             if is_inner_planet:
-                row2 = "Mag %s in %s %s" % (humanize.float("#.#", magnitude), constellation, distance_display)
+                row2 = "Mag %s in %s %s" % (
+                    humanize.float("#.#", magnitude),
+                    constellation,
+                    distance_display,
+                )
             else:
-                row2 = "Mag %s %s %s in %s %s" % (humanize.float("#.#", magnitude), get_magnitude_description(magnitude), visibility_disclaimer, constellation, distance_display)
+                row2 = "Mag %s %s %s in %s %s" % (
+                    humanize.float("#.#", magnitude),
+                    get_magnitude_description(magnitude),
+                    visibility_disclaimer,
+                    constellation,
+                    distance_display,
+                )
 
         if show_display == True:
             return get_display(image, planet, row1, row2, config)
         else:
-            # hiding if the planet is below horizon and user checked
-            # to hide when nothing to show
             return []
+
 
 def get_planet_element(planet, position_json):
     planet_list = position_json["data"]["table"]["rows"]
+
     for i in range(0, len(planet_list)):
         if planet_list[i]["entry"]["name"].lower() == planet:
             return i
 
-    #this should never happen
+    # Original fallback retained.
     return 0
 
+
 def get_all_planet_information(location, check_offset, cache_ttl_seconds):
-    """ Gets the information on a particular planet based on location and time
+    """Gets planetary positions for the location and requested time."""
 
-    Args:
-        planet: the name of the planet we are displaying
-        location: the location of the user
-        check_offset: How much further in time do we want to check?
-        cache_ttl_seconds: How long to we keep this data before refreshing
-    Returns:
-        JSON data of planet from perspective of given location and time
-    """
-
-    # Check now or include an offset
     check_time = get_local_time(location, check_offset)
-
-    position_json = get_all_body_positions(location, check_time, cache_ttl_seconds)
+    position_json = get_all_body_positions(
+        location,
+        check_time,
+        cache_ttl_seconds,
+    )
 
     return position_json
 
+
 def degrees_to_x(degrees):
-    if (degrees > 180):
+    if degrees > 180:
         return int(degrees - 180)
     else:
         return int(degrees + 180)
 
-def nexty(y, difference):
-    """ Gets the next y coordinate based on the direction we want to go
 
-    Args:
-        y: the current coordinate
-        difference: The direction and steps we want to move to look for a blank
-    Returns:
-        The next y coordinate to check
-    """
+def nexty(y, difference):
+    """Gets the next horizontal coordinate, wrapping at the edges."""
+
     nexty = y + difference
 
-    #if we scroll off the page along the horizon, let's go to the other side
-    if (nexty > 12):
+    if nexty > 12:
         nexty = 0
-    elif (nexty < 0):
+    elif nexty < 0:
         nexty = 12
 
     return nexty
 
-def nextx(x, difference):
-    """ Gets the next x coordinate based on the direction we want to go
 
-    Args:
-        x: the current coordinate
-        difference: The direction and steps we want to move to look for a blank
-    Returns:
-        The next x coordinate to check
-    """
+def nextx(x, difference):
+    """Gets the next vertical coordinate, clamping at the edges."""
+
     nextx = x + difference
 
-    #if we scroll off the top or bottom, let's just stay there, and find a blank to the left or right instead
-    if (nextx > 4):
+    if nextx > 4:
         nextx = 4
-    elif (nextx < 0):
+    elif nextx < 0:
         nextx = 0
 
     return nextx
 
+
 def get_planet_code(object):
-    """ Gets the single character planet code based on the object's name
-
-    Args:
-        object: the name of the celestial object
-
-    Returns:
-        The single letter code for display
-    """
+    """Gets a single-character code for a celestial object."""
 
     planet_code = object[0]
+
     if object == "mercury":
         planet_code = "E"
     elif object == "moon":
@@ -298,120 +290,125 @@ def get_planet_code(object):
 
     return planet_code
 
-def place_in_next_slot(summary, existing_item, new_item, magnitude):
-    """ When the slot we want to place a planet is occupied, we'll use this function to figure out the next best place to put it.
 
-    Args:
-        summary: the summary contains all the planet names in the position on the 2d array
-        existing_item: information on the item that is in the spot of:
-        new_item: the new item that we are looking to place
-        magnitude: the apparent magnitude (brightness) of an object
-    """
+def place_in_next_slot(summary, existing_item, new_item, magnitude):
+    """Looks for an available slot when the requested slot is occupied."""
+
     ynew = new_item[2]
     yexist = existing_item[2]
     ydirection = 0
-    if (ynew > yexist):
+
+    if ynew > yexist:
         ydirection = +1
     else:
         ydirection = -1
 
     xnew = degrees_to_x(new_item[1])
     xexist = degrees_to_x(existing_item[1])
-
     xdirection = 0
-    if (xnew > xexist):
-        #new is to the right of the existing
+
+    if xnew > xexist:
         xdirection = 1
     else:
-        #new is to the left of the existing
         xdirection = -1
 
-    #loop through summary, one step at a time looking for an empty space ... go up/down then left/right
     testx = new_item[3]
     testy = new_item[4]
     alt = False
     planet_code = get_planet_code(new_item[0])
 
-    # Loop until we find a blank spot nearest the correct spot.
-    # There are 5 x 12 = 60 slots, and at most
     for _ in range(100):
-        if (summary[testx][testy] == " "):
-            summary[testx][testy] = "%s%s%s" % (planet_code, application_delimiter, get_magnitude_color(magnitude))
+        if summary[testx][testy] == " ":
+            summary[testx][testy] = "%s%s%s" % (
+                planet_code,
+                application_delimiter,
+                get_magnitude_color(magnitude),
+            )
             break
         else:
             alt = not alt
-            if (alt):
+
+            if alt:
                 testx = nextx(testx, xdirection)
             else:
                 testy = nexty(testy, ydirection)
 
+
 def place_duplicate(summary, display_items, x, y, magnitude):
-    """ We need to find an empty spot in the summary to place this code. It should be in the same approximate order as it appears in real life. So, if Mars and Venus are in the same slot, but Mars is slightly west of Venus, Mars should appear in that direction
+    """Finds the existing item occupying a requested summary position."""
 
-    Args:
-        summary: summary is the 2d array summarizing the night sky
-        display_items: information on all the display items (planets) with coordinates, bearing, altitude needed to figure out where to plot
-        x: x coordinate
-        y: y coordinate
-        magnitude: apparent magnitude (brightness) of object
-    """
-
-    #find first duplicate
     for item in display_items:
-        if (display_items[item][3] == x and display_items[item][4] == y):
-            place_in_next_slot(summary, display_items[item], display_items[len(display_items) - 1], magnitude)
+        if display_items[item][3] == x and display_items[item][4] == y:
+            place_in_next_slot(
+                summary,
+                display_items[item],
+                display_items[len(display_items) - 1],
+                magnitude,
+            )
             break
 
-def update_summary(summary, display_items, planet, x, y, magnitude):
-    """ Updates the Summary 2d array with a new planet
 
-    Args:
-        summary: summary is the 2d array summarizing the night sky
-        display_items: information on all the display items (planets) with coordinates, bearing, altitude needed to figure out where to plot
-        planet: the current planet to plot
-        x: x coordinate
-        y: y coordinate
-        magnitude: apparent magnitude (brightness) of object
-    """
+def update_summary(summary, display_items, planet, x, y, magnitude):
+    """Adds a planet to the summary grid."""
 
     planet_code = get_planet_code(planet).upper()
 
-    if (summary[x][y] == " "):
-        summary[x][y] = "%s%s%s" % (planet_code, application_delimiter, get_magnitude_color(magnitude))
+    if summary[x][y] == " ":
+        summary[x][y] = "%s%s%s" % (
+            planet_code,
+            application_delimiter,
+            get_magnitude_color(magnitude),
+        )
     else:
         place_duplicate(summary, display_items, x, y, magnitude)
 
+
 def concatenate(items):
     return_value = ""
+
     for letter in items:
         return_value = return_value + letter
 
     return return_value
 
+
 def get_summary_of_night_sky(location, check_offset):
-    """ Gets a summary of the entire night sky
+    """Displays a summary of celestial objects above the horizon."""
 
-    Args:
-        location: location of user
-        check_offset: the time offset to grab night sky info
+    summary = [
+        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+    ]
 
-    Returns:
-        The tidbyt display
-    """
-
-    # initialize the summary 2D array meant to hold the letter of the visible planet in the right spot on the 2D display
-    summary = [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]]
-
-    # place to store visible items info
     display_items = {}
     i = 0
-    cache_ttl_seconds = 60 * 60 * 1  #1 hour x 60 minutes per hour * 60 seconds per minute
-    object_list = ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "moon"]
+    cache_ttl_seconds = 60 * 60 * 1
+
+    object_list = [
+        "mercury",
+        "venus",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        "moon",
+    ]
+
     for object in object_list:
-        if (object == "venus" or object == "mercury"):
+        if object == "venus" or object == "mercury":
             cache_ttl_seconds = 15 * 60
-        position_json = get_all_planet_information(location, check_offset, cache_ttl_seconds)
+
+        position_json = get_all_planet_information(
+            location,
+            check_offset,
+            cache_ttl_seconds,
+        )
         planet_element = get_planet_element(object, position_json)
+
         altitude = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["altitude"]["degrees"]
         altitude = math.floor(float(altitude))
         bearing = float(position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["azimuth"]["degrees"])
@@ -420,8 +417,24 @@ def get_summary_of_night_sky(location, check_offset):
         if altitude > 0:
             x = altitude_position[int(math.round(float(altitude) // 18))]
             y = compass_position[int(math.round(float(bearing) // 30))]
-            display_items[i] = [object, bearing, altitude, x, y, magnitude]
-            update_summary(summary, display_items, object, x, y, magnitude)
+
+            display_items[i] = [
+                object,
+                bearing,
+                altitude,
+                x,
+                y,
+                magnitude,
+            ]
+
+            update_summary(
+                summary,
+                display_items,
+                object,
+                x,
+                y,
+                magnitude,
+            )
 
     return render.Root(
         render.Column(
@@ -441,48 +454,56 @@ def get_summary_of_night_sky(location, check_offset):
                 render.Row(
                     children = get_render_row_children(summary[4]),
                 ),
-                render.Box(width = 64, height = 1, color = "#009900"),
-                render.Box(width = 64, height = 1, color = "#000000"),
+                render.Box(
+                    width = 64,
+                    height = 1,
+                    color = "#009900",
+                ),
+                render.Box(
+                    width = 64,
+                    height = 1,
+                    color = "#000000",
+                ),
                 render.Row(
                     children = [
-                        render.Text(content = "S  W  N  E  S", color = "#ffffff", font = "CG-pixel-4x5-mono"),
+                        render.Text(
+                            content = "S  W  N  E  S",
+                            color = "#ffffff",
+                            font = "CG-pixel-4x5-mono",
+                        ),
                     ],
                 ),
             ],
         ),
     )
 
-def get_render_row_children(items):
-    """ Returns the children of a display row based on the simply 2D summary array of celestial objects and their relative positions and magnitude
 
-    Args:
-        items: The "Items" are the letters indicating celestial objects in that layer of the sky
-    Returns:
-        The Children of a dispplay row
-    """
+def get_render_row_children(items):
+    """Converts a summary row into renderable text elements."""
+
     children = []
 
     for item in items:
         items = item.split(application_delimiter)
         itemcolor = "#000000"
+
         if len(items) == 2:
             itemcolor = items[1]
-        children.append(render.Text(content = items[0], font = "CG-pixel-4x5-mono", color = itemcolor))
+
+        children.append(
+            render.Text(
+                content = items[0],
+                font = "CG-pixel-4x5-mono",
+                color = itemcolor,
+            ),
+        )
 
     return children
 
-def get_display(image, planet, row1, row2, config):
-    """ Gets the display based on the selected image, planet and calculated describtion
 
-    Args:
-        image: the image of the given planet
-        planet: the name of the planet we are displaying
-        row1: Row1 Text is generally the direction and degrees above horizon to view the planet
-        row2: Row2 Gives additional information on when to look, which constellation, and distance from earth
-        config: The config object to figure out what display speed to present
-    Returns:
-        The display information for your Tidbyt
-    """
+def get_display(image, planet, row1, row2, config):
+    """Renders the selected planet and its information."""
+
     return render.Root(
         render.Column(
             children = [
@@ -495,7 +516,11 @@ def get_display(image, planet, row1, row2, config):
                         ),
                         render.Column(
                             children = [
-                                render.Text(" %s" % planet.capitalize(), color = planet_colors[planet], font = "6x13"),
+                                render.Text(
+                                    " %s" % planet.capitalize(),
+                                    color = planet_colors[planet],
+                                    font = "6x13",
+                                ),
                             ],
                         ),
                     ],
@@ -506,11 +531,19 @@ def get_display(image, planet, row1, row2, config):
                             children = [
                                 render.Marquee(
                                     width = 64,
-                                    child = render.Text(row1, color = "#ffff00", font = "5x8"),
+                                    child = render.Text(
+                                        row1,
+                                        color = "#ffff00",
+                                        font = "5x8",
+                                    ),
                                 ),
                                 render.Marquee(
                                     width = 64,
-                                    child = render.Text(row2, color = "#ffff00", font = "5x8"),
+                                    child = render.Text(
+                                        row2,
+                                        color = "#ffff00",
+                                        font = "5x8",
+                                    ),
                                 ),
                             ],
                         ),
@@ -522,16 +555,12 @@ def get_display(image, planet, row1, row2, config):
         delay = int(config.get("scroll", 45)),
     )
 
-def get_magnitude_color(magnitude):
-    """ Gets a description of the visibility based on the magnitude
 
-    Args:
-        magnitude: scale used to determine relative brightness of objects
-    Returns:
-        Color code for display color representing brightness
-    """
+def get_magnitude_color(magnitude):
+    """Gets the display color associated with apparent magnitude."""
 
     color = "#ffffff"
+
     if magnitude < 0:
         color = "#ffff00"
     elif magnitude < 2:
@@ -547,15 +576,12 @@ def get_magnitude_color(magnitude):
 
     return color
 
-def get_magnitude_description(magnitude):
-    """ Gets a description of the visibility based on the magnitude
 
-    Args:
-        magnitude: scale used to determine relative brightness of objects
-    Returns:
-        Description of that brightness
-    """
+def get_magnitude_description(magnitude):
+    """Gets the original visibility description for a magnitude."""
+
     description = ""
+
     if magnitude < 0:
         description = "easily visible"
     elif magnitude < 4:
@@ -573,37 +599,53 @@ def get_magnitude_description(magnitude):
 
     return description
 
-def get_cardinal_position_from_degrees(bearing):
-    """ Returns the cardinal position for a given bearing
 
-    Args:
-        bearing: in degrees
-    Returns:
-        The Cardinal position (N, NW, NE, S, SW, SE, E, W)
-    """
+def get_cardinal_position_from_degrees(bearing):
+    """Returns the compass direction for a bearing."""
 
     if bearing < 0:
         bearing = 360 + bearing
 
-    # have bearning in degrees, now convert to cardinal point
-    compass_brackets = ["North", "NNE", "NE", "ENE", "East", "ESE", "SE", "SSE", "South", "SSW", "SW", "WSW", "West", "WNW", "NW", "NNW", "North"]
-    display_cardinal_point = compass_brackets[int(math.round(bearing // 22.5))]
+    compass_brackets = [
+        "North",
+        "NNE",
+        "NE",
+        "ENE",
+        "East",
+        "ESE",
+        "SE",
+        "SSE",
+        "South",
+        "SSW",
+        "SW",
+        "WSW",
+        "West",
+        "WNW",
+        "NW",
+        "NNW",
+        "North",
+    ]
+
+    display_cardinal_point = compass_brackets[
+        int(math.round(bearing // 22.5))
+    ]
+
     return display_cardinal_point
 
-def get_readable_large_number(number):
-    """ Gets a readable version of a large number 25B instead of 25,123,345,345 for example.
 
-    Args:
-        number: The actual number
-    Returns:
-        Readable display number as a string
-    """
+def get_readable_large_number(number):
+    """Formats a large number using thousand/million/billion suffixes."""
 
     abbreviation = ("", "thousand", "million", "billion", "trillion")
     checkval = float(number)
     returnval = ""
+
     for i in range(0, 5):
-        returnval = "%s %s" % (humanize.float("#.", checkval), abbreviation[i])
+        returnval = "%s %s" % (
+            humanize.float("#.", checkval),
+            abbreviation[i],
+        )
+
         if checkval < 1000:
             break
 
@@ -612,21 +654,28 @@ def get_readable_large_number(number):
 
     return returnval
 
+
 def get_all_body_positions(location, check_time, ttl_seconds = 3600):
-    """ Gets the JSon Data from astronomyapi
+    """Gets body-position data from AstronomyAPI."""
 
-    Args:
+    date_code = "%s-%s-%s" % (
+        two_character_time_date_part(check_time.year),
+        two_character_time_date_part(check_time.month),
+        two_character_time_date_part(check_time.day),
+    )
 
-        location: Location of the observer
-        check_time: Time to get the data for the given planet
-    Returns:
-        JSon Data
-    """
-
-    date_code = "%s-%s-%s" % (two_character_time_date_part(check_time.year), two_character_time_date_part(check_time.month), two_character_time_date_part(check_time.day))
     tomorrow_date_code = check_time + time.parse_duration("24h")
-    tomorrow_date_code = "%s-%s-%s" % (two_character_time_date_part(tomorrow_date_code.year), two_character_time_date_part(tomorrow_date_code.month), two_character_time_date_part(tomorrow_date_code.day))
-    time_code = "%s:%s:%s" % (two_character_time_date_part(check_time.hour), two_character_time_date_part(check_time.minute), two_character_time_date_part(check_time.second))
+    tomorrow_date_code = "%s-%s-%s" % (
+        two_character_time_date_part(tomorrow_date_code.year),
+        two_character_time_date_part(tomorrow_date_code.month),
+        two_character_time_date_part(tomorrow_date_code.day),
+    )
+
+    time_code = "%s:%s:%s" % (
+        two_character_time_date_part(check_time.hour),
+        two_character_time_date_part(check_time.minute),
+        two_character_time_date_part(check_time.second),
+    )
 
     params = {
         "longitude": location["lng"],
@@ -651,35 +700,31 @@ def get_all_body_positions(location, check_time, ttl_seconds = 3600):
     else:
         return None
 
-def two_character_time_date_part(number):
-    """ Returns two characters to represent an hour/minute/second needed when puttin together a timestamp 03:01:04
 
-    Args:
-        number: number we need to represent in two characters
-    Returns:
-        A two character string that represents the given number
-    """
+def two_character_time_date_part(number):
+    """Pads a single-digit date or time component with a leading zero."""
+
     if len(str(number)) == 1:
         return "0" + str(number)
     else:
         return str(number)
 
-def get_local_time(config, offset_hours):
-    """ Returns the local time based on the configuration of the app
+
+def get_local_time(location, offset_hours):
+    """Returns the requested time in the selected location's timezone.
 
     Args:
-        config: the config object provided by the Tidbyt platform
-        offset_hours: it will add this many hours (subtrack if negative) to the current local time
-    Returns:
-        The local time
-    """
-    timezone = json.decode(config.get("location", default_location))["timezone"]
-    offset_hours = offset_hours
+        location: Decoded location dictionary containing the timezone.
+        offset_hours: Hours to add to the current time, or subtract if negative.
 
-    #local_time = time.now().in_location(timezone)
-    local_time = time.now() + time.parse_duration("%sh" % offset_hours)
-    local_time = local_time.in_location(timezone)
-    return local_time
+    Returns:
+        The requested time in the selected location's timezone.
+    """
+
+    # Fix #3: Use the decoded location directly, not the app config.
+    check_time = time.now() + time.parse_duration("%sh" % offset_hours)
+    return check_time.in_location(location["timezone"])
+
 
 def get_schema():
     planet_options = [
@@ -712,6 +757,7 @@ def get_schema():
             value = "30",
         ),
     ]
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -719,7 +765,7 @@ def get_schema():
                 id = "planet",
                 name = "Planet",
                 desc = "Pick the planet you want to track.",
-                icon = "globe",  #skyatlas #moon, globe, mars, marsandvenus satelliteDish
+                icon = "globe",
                 options = planet_options,
                 default = planet_options[7].value,
             ),
