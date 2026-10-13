@@ -81,6 +81,11 @@ body {
   box-shadow: 0 2px 8px #000a;
 }
 
+/* Long author names with no spaces wrap inside the box rather than running off it */
+.author-profile-header .main-title {
+  overflow-wrap: anywhere;
+}
+
 .author-app-count {
   color: #bbb;
   font-size: 0.8rem;
