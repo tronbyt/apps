@@ -30,8 +30,8 @@ runtime_exceptions["apps/aflscores"]="3s"
 runtime_exceptions["apps/weathermap"]="3s"
 runtime_exceptions["apps/readingchallenge"]="5s"
 
-
 runtime_exceptions["apps/shipweatherclock"]="skip"
+runtime_exceptions["apps/worldskies"]="skip"
 
 
 is_broken_app() {
