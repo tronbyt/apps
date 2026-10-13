@@ -350,6 +350,7 @@ body.dot-matrix-enabled #app-content .app-preview-image-square {
   line-height: 1.65;
   margin: 0 0 1.5rem;
   max-width: 58rem;
+  overflow-wrap: anywhere; /* Long URLs in descriptions wrap rather than running over the previews */
 }
 
 .app-details-layout {
