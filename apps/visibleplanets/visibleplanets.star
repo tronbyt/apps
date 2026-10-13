@@ -6,10 +6,12 @@ Author: Robert Ison
 """
 
 # Notes:
+# Fetches all body positions once per render.
 # Requests a 15-minute cache duration near sunrise/sunset.
 # Requests a one-hour cache duration at night outside those windows.
 # During the day, calculates the expected sky 30 minutes after sunset.
-# Single-planet displays identify the time their coordinates apply to.
+# Nighttime request timestamps use stable 15-minute or hourly buckets.
+# Single-planet labels show the actual requested calculation time.
 
 
 load("encoding/json.star", "json")
@@ -99,18 +101,16 @@ def main(config):
 
     near_sunrise_now = abs((now - sunrise_time).hours) <= 0.5
     near_sunset_now = abs((now - sunset_time).hours) <= 0.5
+    near_solar_event = near_sunrise_now or near_sunset_now
 
     is_daytime = now > sunrise_time and now < sunset_time
 
-    # Default: calculate the current sky using this explicit timestamp.
-    check_time = now
+    # Default nighttime cache duration.
     cache_ttl_seconds = 60 * 60
-    time_label = "As of %s" % check_time.format(time_display_format)
 
     if is_daytime:
         # Forecast the sky 30 minutes after sunset.
         check_time = sunset_time + time.parse_duration("30m")
-        time_label = "Tonight at %s" % check_time.format(time_display_format)
 
         # Set the cache duration to reach 30 minutes before sunset.
         cache_ttl_seconds = max(
@@ -118,8 +118,18 @@ def main(config):
             int(((sunset_time - now).hours - 0.5) * 60 * 60),
         )
 
-    # Near sunrise/sunset, override the cache duration to 15 minutes.
-    if near_sunrise_now or near_sunset_now:
+        time_label = "Tonight at %s" % check_time.format(time_display_format)
+    else:
+        # Stable request times let repeated renders reuse HTTP responses.
+        # Near sunrise/sunset: :00, :15, :30, or :45.
+        # Otherwise: the start of the current hour.
+        bucket_minutes = 15 if near_solar_event else 60
+
+        check_time = get_bucketed_time(now, bucket_minutes)
+        time_label = "As of %s" % check_time.format(time_display_format)
+
+    # Apply the same cache policy to single-planet and summary displays.
+    if near_solar_event:
         cache_ttl_seconds = 15 * 60
 
     # Sunrise/sunset were calculated with the exact GPS coordinates.
@@ -133,8 +143,18 @@ def main(config):
         math.round(float(location["lat"]) * 10) * math.pow(10, -1),
     )
 
+    # Fetch once. Both display modes use this same response.
+    position_json = get_all_planet_information(
+        location,
+        check_time,
+        cache_ttl_seconds,
+    )
+
+    if position_json == None:
+        return []
+
     if planet == "all":
-        return get_summary_of_night_sky(location, check_time)
+        return get_summary_of_night_sky(position_json)
     else:
         is_inner_planet = planet == "mercury" or planet == "venus"
 
@@ -142,11 +162,6 @@ def main(config):
         row1 = ""
         row2 = ""
 
-        position_json = get_all_planet_information(
-            location,
-            check_time,
-            cache_ttl_seconds,
-        )
         planet_element = get_planet_element(planet, position_json)
 
         constellation = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["constellation"]["name"]
@@ -196,6 +211,25 @@ def main(config):
             return get_display(image, planet, row1, row2, config)
         else:
             return []
+
+
+def get_bucketed_time(local_time, bucket_minutes):
+    """Rounds a local timestamp down to a stable minute bucket.
+
+    Args:
+        local_time: Timestamp in the observer's timezone.
+        bucket_minutes: 15 or 60.
+
+    Returns:
+        Timestamp at the beginning of the current bucket.
+    """
+
+    seconds_into_bucket = (
+        (local_time.minute % bucket_minutes) * 60 +
+        local_time.second
+    )
+
+    return local_time - time.parse_duration("%ss" % seconds_into_bucket)
 
 
 def get_planet_element(planet, position_json):
@@ -357,8 +391,8 @@ def concatenate(items):
     return return_value
 
 
-def get_summary_of_night_sky(location, check_time):
-    """Displays a sky summary for the supplied calculation timestamp."""
+def get_summary_of_night_sky(position_json):
+    """Displays a sky summary using the already-fetched body positions."""
 
     summary = [
         [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
@@ -370,7 +404,6 @@ def get_summary_of_night_sky(location, check_time):
 
     display_items = {}
     i = 0
-    cache_ttl_seconds = 60 * 60 * 1
 
     object_list = [
         "mercury",
@@ -383,15 +416,9 @@ def get_summary_of_night_sky(location, check_time):
         "moon",
     ]
 
+    # No HTTP requests inside this loop.
+    # Every object uses the same response and calculation timestamp.
     for object in object_list:
-        if object == "venus" or object == "mercury":
-            cache_ttl_seconds = 15 * 60
-
-        position_json = get_all_planet_information(
-            location,
-            check_time,
-            cache_ttl_seconds,
-        )
         planet_element = get_planet_element(object, position_json)
 
         altitude = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["altitude"]["degrees"]
