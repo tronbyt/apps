@@ -15,6 +15,18 @@ body {
   display: none;
 }
 
+/* The logo and title link back to the home page */
+.home-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-link:hover,
+.home-link:focus-visible {
+  color: inherit;
+  opacity: 0.85;
+}
+
 .card {
   background: #222;
   border: 2px solid #444;
