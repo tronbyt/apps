@@ -23,7 +23,7 @@ The DigiFacts live in the [digibyte-digifacts](https://github.com/DigiNode-Tools
 - **Translate:** improve the existing translations or add a new language - see the [translation guide](https://github.com/DigiNode-Tools/digibyte-digifacts/blob/main/translation-guide.md). You can read through the DigiFacts side by side with English on the [proofreading pages](https://digifacts.diginode.tools/proofread/).
 - **New DigiFacts** are welcome too - see [how to contribute](https://github.com/DigiNode-Tools/digibyte-digifacts#contributing).
 
-The app fetches the DigiFacts from [digifacts.diginode.tools](https://digifacts.diginode.tools/help/), so improvements show up on your display automatically.
+The app fetches the DigiFacts from [digifacts.diginode.tools](https://digifacts.diginode.tools/help/), so improvements show up on your display automatically. If the website can't be reached, the app keeps showing DigiFacts from the last copy it fetched. If it hasn't been able to reach the website for over a week, the DigiFact's number is shown in amber, so you know something is wrong.
 
 ## Run a DigiByte node
 

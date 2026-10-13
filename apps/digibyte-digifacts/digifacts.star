@@ -41,8 +41,11 @@ NO_CYRILLIC = ["tom-thumb"]  # Fonts without Cyrillic letters (for Russian, the 
 
 DIGIBYTE_BLUE = "#0066cc"
 TEXT_COLOR = "#ffffff"
+STALE_COLOR = "#ffa500"  # The DigiFact's number is shown in amber if the website hasn't been reached for a week
 CACHE_SECONDS = 3600
 DAY_CACHE_SECONDS = 2 * 86400  # How long the DigiFact of the day being shown is remembered
+FALLBACK_CACHE_SECONDS = 30 * 86400  # How long the DigiFacts are kept, to show if the website can't be reached
+STALE_SECONDS = 7 * 86400  # After this long without reaching the website, the DigiFact's number is shown in amber
 DEFAULT_CHANGE_HOUR = "4"  # The DigiFact of the day changes at 04:00, unless another time is chosen
 INTRO_SECONDS = 2  # How long the DigiByte logo and the DigiFact number are shown before the DigiFact scrolls
 QR_SECONDS = 5  # How long the QR code for the DigiFact's link is shown at the end
@@ -69,10 +72,24 @@ def main(config):
     return render_fact(fact, size, lang)
 
 def get_json(url):
+    # Returns the file's data, and whether it is stale: the last copy fetched, used because the website can't be
+    # reached, and older than STALE_SECONDS. The last copy of each file is kept, so DigiFacts can still be shown if
+    # the website can't be reached for a while.
+    key = "json:" + url
+    now = time.now().unix
     res = http.get(url = url, ttl_seconds = CACHE_SECONDS)
-    if res.status_code != 200:
-        return None
-    return json.decode(res.body())
+    if res.status_code == 200:
+        body = res.body()
+        cache.set(key, json.encode({"time": now, "body": body}), ttl_seconds = FALLBACK_CACHE_SECONDS)
+        return json.decode(body), False
+    print("Couldn't load %s (status %d)" % (url, res.status_code))
+    saved = cache.get(key)
+    if saved == None:
+        return None, False
+    saved = json.decode(saved)
+    age = now - int(saved["time"])
+    print("Using the last copy fetched, %d seconds ago" % age)
+    return json.decode(saved["body"]), age > STALE_SECONDS
 
 def header_of(title):
     # "DigiFact # 22 - Did you know..." -> "DigiFact #22" (short enough for a 64 pixel wide display)
@@ -94,7 +111,7 @@ def make_fact(title, social, plain, url, short_url):
 def fact_of_the_day(lang, tz, change_hour):
     # The DigiFact of the day changes at midnight UTC on the website. Here it changes at the chosen hour where the
     # display is: the DigiFact being shown is remembered until the local day changes, then the newest one is shown.
-    latest = get_json("%s/%s/today.json" % (SITE, lang))
+    latest, stale = get_json("%s/%s/today.json" % (SITE, lang))
     if latest != None and not latest.get("plain"):
         latest = None
 
@@ -119,17 +136,21 @@ def fact_of_the_day(lang, tz, change_hour):
         data = saved["fact"]
     else:
         return None
-    return make_fact(data.get("title"), data.get("text", ""), data["plain"], data.get("url", ""), data.get("short_url", ""))
+    fact = make_fact(data.get("title"), data.get("text", ""), data["plain"], data.get("url", ""), data.get("short_url", ""))
+    fact["stale"] = stale
+    return fact
 
 def random_fact(lang):
-    social = get_json("%s/%s/social.json" % (SITE, lang))
-    plain = get_json("%s/%s/plain.json" % (SITE, lang))
+    social, social_stale = get_json("%s/%s/social.json" % (SITE, lang))
+    plain, plain_stale = get_json("%s/%s/plain.json" % (SITE, lang))
     if social == None or plain == None or len(plain) == 0:
         return None
     keys = list(plain.keys())
     key = keys[random.number(0, len(keys) - 1)]
-    fact = plain[key]
-    return make_fact(fact.get("title"), social.get(key, {}).get("content", ""), fact.get("content", ""), fact.get("url", ""), fact.get("short_url", ""))
+    data = plain[key]
+    fact = make_fact(data.get("title"), social.get(key, {}).get("content", ""), data.get("content", ""), data.get("url", ""), data.get("short_url", ""))
+    fact["stale"] = social_stale or plain_stale
+    return fact
 
 def text_width(text, font):
     return render.Text(text, font = font).size()[0]
@@ -165,12 +186,12 @@ def logo(big):
         return render.Image(src = DGB_ICON_2X.readall(), width = 36, height = 36)
     return render.Image(src = DGB_ICON.readall(), width = 18, height = 18)
 
-def intro_card(header, width, height, font):
+def intro_card(header, width, height, font, color):
     # The DigiByte logo with the DigiFact's name and number ("DigiFact" above "#22")
     parts = header.rsplit("#", 1)
     name = [
-        render.Text(parts[0].strip(), font = font, color = TEXT_COLOR),
-        render.Text("#" + parts[1] if len(parts) == 2 else "", font = font, color = TEXT_COLOR),
+        render.Text(parts[0].strip(), font = font, color = color),
+        render.Text("#" + parts[1] if len(parts) == 2 else "", font = font, color = color),
     ]
     if width == height:
         # Square (64x64): the bigger logo, with the name and number underneath
@@ -297,7 +318,8 @@ def render_fact(fact, size, lang):
     text = render.Column(children = [render.Text(line, font = body_font, color = TEXT_COLOR) for line in lines])
     text_height = len(lines) * line_height
 
-    intro = intro_card(fact["header"], width, height, title_font)
+    header_color = STALE_COLOR if fact.get("stale") else TEXT_COLOR
+    intro = intro_card(fact["header"], width, height, title_font, header_color)
 
     # What scrolls: (the intro card on wide displays,) the text, then the QR code, which ends up filling the view
     if square:
@@ -328,7 +350,7 @@ def render_fact(fact, size, lang):
             width = width,
             height = 8,
             color = DIGIBYTE_BLUE,
-            child = render.Text(fact["header"], font = "tb-8", color = TEXT_COLOR),
+            child = render.Text(fact["header"], font = "tb-8", color = header_color),
         )
         body = render.Column(children = [banner, render.Box(width = width, height = 1), moving])
         parts = [hold(intro, INTRO_SECONDS, delay), body]
