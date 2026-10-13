@@ -7,13 +7,16 @@ Author: Robert Ison
 
 # Notes:
 # Fetches all body positions once per render.
+# Requests only the calculation date.
 # Requests a 15-minute cache duration near sunrise/sunset.
 # Requests a one-hour cache duration at night outside those windows.
 # During the day, calculates the expected sky 30 minutes after sunset.
 # Nighttime request timestamps use stable 15-minute or hourly buckets.
 # Single-planet labels show the actual requested calculation time.
 # Summary placement uses bounded coordinates and nearest empty cells.
-# Missing or incomplete body data is handled without selecting another body.
+# Missing or incomplete body data never selects another body as a fallback.
+# A valid summary always displays, even when no objects are above the horizon.
+# The hide toggle applies only to individual planets.
 
 
 load("encoding/json.star", "json")
@@ -76,11 +79,11 @@ default_location = """
 
 
 def main(config):
-    """Displays the selected planet or a summary of the night sky."""
+    """Displays the selected planet or a planets-and-Moon sky summary."""
 
     system = config.get("system") or "metric"
     hide_quiet = config.get("hide_quiet")
-    planet = config.get("planet", "mercury")
+    planet = config.get("planet", "all")
 
     # Reject unexpected selections before indexing the image dictionary.
     if planet != "all" and planet not in planet_images:
@@ -166,6 +169,8 @@ def main(config):
     if rows == None or len(rows) == 0:
         return []
 
+    # Summary mode does not use the hide toggle.
+    # An empty chart still displays when no valid objects are above the horizon.
     if planet == "all":
         return get_summary_of_night_sky(rows)
 
@@ -281,7 +286,6 @@ def parse_number(value):
     if value_type == "int" or value_type == "float":
         number = float(value)
 
-        # Reject NaN and values outside a generous practical bound.
         if number != number or abs(number) > 1e100:
             return None
 
@@ -330,7 +334,6 @@ def parse_number(value):
         if not is_digit_string(exponent):
             return None
 
-        # Bound the exponent before calling float().
         if len(exponent) > 3 or int(exponent) > 100:
             return None
 
@@ -417,7 +420,6 @@ def get_body_information(body_name, rows):
         ),
     )
 
-    # Position cannot be displayed without both coordinates.
     if altitude == None or bearing == None:
         return None
 
@@ -571,7 +573,7 @@ def place_summary_object(summary, object_name, altitude, bearing, magnitude):
 
 
 def get_summary_of_night_sky(rows):
-    """Displays valid objects using the already-fetched body rows."""
+    """Always renders a summary chart from valid, already-fetched rows."""
 
     summary = [
         [" " for _ in range(summary_column_count)]
@@ -592,7 +594,6 @@ def get_summary_of_night_sky(rows):
     for object_name in object_list:
         body = get_body_information(object_name, rows)
 
-        # Skip missing or unusable bodies without affecting the others.
         if body == None:
             continue
 
@@ -605,6 +606,7 @@ def get_summary_of_night_sky(rows):
                 body["magnitude"],
             )
 
+    # Render even if no objects were placed.
     return render.Root(
         render.Column(
             children = [
@@ -713,7 +715,7 @@ def get_display(image, planet, row1, row2, config):
             ],
         ),
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
+        delay = int(config.get("scroll", 60)),
     )
 
 
@@ -798,19 +800,12 @@ def get_readable_large_number(number):
 
 
 def get_all_body_positions(location, check_time, ttl_seconds = 3600):
-    """Gets body-position data for the supplied calculation timestamp."""
+    """Gets body positions for the calculation date and timestamp."""
 
     date_code = "%s-%s-%s" % (
         two_character_time_date_part(check_time.year),
         two_character_time_date_part(check_time.month),
         two_character_time_date_part(check_time.day),
-    )
-
-    tomorrow_date_code = check_time + time.parse_duration("24h")
-    tomorrow_date_code = "%s-%s-%s" % (
-        two_character_time_date_part(tomorrow_date_code.year),
-        two_character_time_date_part(tomorrow_date_code.month),
-        two_character_time_date_part(tomorrow_date_code.day),
     )
 
     time_code = "%s:%s:%s" % (
@@ -819,12 +814,13 @@ def get_all_body_positions(location, check_time, ttl_seconds = 3600):
         two_character_time_date_part(check_time.second),
     )
 
+    # Request only the date whose first cell we display.
     params = {
         "longitude": location["lng"],
         "latitude": location["lat"],
         "elevation": "0",
         "from_date": date_code,
-        "to_date": tomorrow_date_code,
+        "to_date": date_code,
         "time": time_code,
     }
 
@@ -866,7 +862,7 @@ def get_schema():
         schema.Option(value = "saturn", display = "Saturn"),
         schema.Option(value = "uranus", display = "Uranus"),
         schema.Option(value = "neptune", display = "Neptune"),
-        schema.Option(value = "all", display = "All Visible Planets"),
+        schema.Option(value = "all", display = "Planets + Moon"),
     ]
 
     measurement_options = [
@@ -886,10 +882,10 @@ def get_schema():
             schema.Dropdown(
                 id = "planet",
                 name = "Planet",
-                desc = "Pick the planet you want to track.",
+                desc = "Pick a planet or the planets-and-Moon summary.",
                 icon = "globe",
                 options = planet_options,
-                default = planet_options[7].value,
+                default = "all",
             ),
             schema.Location(
                 id = "location",
@@ -911,12 +907,12 @@ def get_schema():
                 desc = "Scroll Speed",
                 icon = "stopwatch",
                 options = scroll_speed_options,
-                default = scroll_speed_options[0].value,
+                default = "60",
             ),
             schema.Toggle(
                 id = "hide_quiet",
                 name = "Hide if not visible",
-                desc = "Skip displaying this app when the selected planet is below the horizon?",
+                desc = "Hide an individual planet below the horizon. The summary stays visible.",
                 icon = "gear",
                 default = True,
             ),
