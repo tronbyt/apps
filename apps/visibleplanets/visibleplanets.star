@@ -12,6 +12,7 @@ Author: Robert Ison
 # During the day, calculates the expected sky 30 minutes after sunset.
 # Nighttime request timestamps use stable 15-minute or hourly buckets.
 # Single-planet labels show the actual requested calculation time.
+# Summary placement uses bounded coordinates and nearest empty cells.
 
 
 load("encoding/json.star", "json")
@@ -34,6 +35,9 @@ load("time.star", "time")
 app_hash = "M2IxYmY2OWUtZWIzMS00NTM0LTkyOWItMmRiMDlhMWVkYjI5OmZhN2YxOTM2M2I2N2QzZDNiYjEzNmNkMDhjMzM3YmUzZTQwMjE3ODg1MjIzY2QyYTNiNzFkZDlhYzU1YzBkODdkOWE0YjFiODkwMWUxN2JkZDU3YmZjOTBmZWI4NmE5MjdlMTBjNjZhYWFkYzFhMjE1NjdiOGYxNTUxOGNmMDU1ZGMwOTFhNzg5Nzc5M2FhNDE5OTUyMDAzNTUyY2U2ZWQ5NWUxNDZmMjkxZWQ0M2RhYzNjNGRmMjNmYTc5NTU2OTQ0MGVlNWY1N2NhOTJmYjNmYTg4OWYxOWFlNWQxMzU2"
 time_display_format = "3:04 PM"
 application_delimiter = ":"
+
+summary_row_count = 5
+summary_column_count = 13
 
 
 planet_images = {
@@ -71,11 +75,6 @@ default_location = """
 """
 
 
-# Used to convert bearing and altitude to a point on the 2D display.
-compass_position = [6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 6]
-altitude_position = [4, 3, 2, 1, 0]
-
-
 def main(config):
     """Displays the selected planet or a summary of the night sky."""
 
@@ -105,7 +104,6 @@ def main(config):
 
     is_daytime = now > sunrise_time and now < sunset_time
 
-    # Default nighttime cache duration.
     cache_ttl_seconds = 60 * 60
 
     if is_daytime:
@@ -120,22 +118,16 @@ def main(config):
 
         time_label = "Tonight at %s" % check_time.format(time_display_format)
     else:
-        # Stable request times let repeated renders reuse HTTP responses.
-        # Near sunrise/sunset: :00, :15, :30, or :45.
-        # Otherwise: the start of the current hour.
+        # Stable request times allow repeated renders to reuse responses.
         bucket_minutes = 15 if near_solar_event else 60
-
         check_time = get_bucketed_time(now, bucket_minutes)
+
         time_label = "As of %s" % check_time.format(time_display_format)
 
-    # Apply the same cache policy to single-planet and summary displays.
     if near_solar_event:
         cache_ttl_seconds = 15 * 60
 
-    # Sunrise/sunset were calculated with the exact GPS coordinates.
-    # Round coordinates before sending them to the API:
-    # 1) Avoid sending the user's exact position.
-    # 2) Allow nearby users to share rounded coordinates.
+    # Calculate solar events with exact coordinates, then round for the API.
     location["lng"] = str(
         math.round(float(location["lng"]) * 10) * math.pow(10, -1),
     )
@@ -143,7 +135,7 @@ def main(config):
         math.round(float(location["lat"]) * 10) * math.pow(10, -1),
     )
 
-    # Fetch once. Both display modes use this same response.
+    # Fetch once for either display mode.
     position_json = get_all_planet_information(
         location,
         check_time,
@@ -155,74 +147,61 @@ def main(config):
 
     if planet == "all":
         return get_summary_of_night_sky(position_json)
+
+    is_inner_planet = planet == "mercury" or planet == "venus"
+    image = planet_images[planet]
+
+    planet_element = get_planet_element(planet, position_json)
+    cell = position_json["data"]["table"]["rows"][planet_element]["cells"][0]
+
+    constellation = cell["position"]["constellation"]["name"]
+    altitude = float(cell["position"]["horizontal"]["altitude"]["degrees"])
+    bearing = float(cell["position"]["horizontal"]["azimuth"]["degrees"])
+    magnitude = float(cell["extraInfo"]["magnitude"])
+    distance = cell["distance"]["fromEarth"]["km"]
+
+    # Preserve raw altitude for the horizon check.
+    display_altitude = int(math.floor(altitude))
+
+    if system == "metric":
+        distance_display = "%s KMs away" % get_readable_large_number(distance)
     else:
-        is_inner_planet = planet == "mercury" or planet == "venus"
+        distance_display = "%s miles away" % get_readable_large_number(
+            math.floor(float(distance) * 0.6213712),
+        )
 
-        image = planet_images[planet]
-        row1 = ""
-        row2 = ""
-
-        planet_element = get_planet_element(planet, position_json)
-
-        constellation = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["constellation"]["name"]
-        altitude = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["altitude"]["degrees"]
-        altitude = math.floor(float(altitude))
-        bearing = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["azimuth"]["degrees"]
-        magnitude = float(position_json["data"]["table"]["rows"][planet_element]["cells"][0]["extraInfo"]["magnitude"])
-        distance = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["distance"]["fromEarth"]["km"]
-
-        if system == "metric":
-            distance_display = "%s KMs away" % get_readable_large_number(distance)
-        else:
-            distance_display = "%s miles away" % get_readable_large_number(
-                math.floor(float(distance) * 0.6213712),
-            )
-
-        show_display = True
-
-        if altitude < 0:
-            if hide_quiet == True or hide_quiet == "true":
-                show_display = False
-            else:
-                row1 = "%s: Below the horizon" % time_label
-                row2 = distance_display
-        else:
-            row1 = "%s: %s at %s°" % (
-                time_label,
-                get_cardinal_position_from_degrees(float(bearing)),
-                altitude,
-            )
-
-            if is_inner_planet:
-                row2 = "Mag %s in %s %s" % (
-                    humanize.float("#.#", magnitude),
-                    constellation,
-                    distance_display,
-                )
-            else:
-                row2 = "Mag %s %s in %s %s" % (
-                    humanize.float("#.#", magnitude),
-                    get_magnitude_description(magnitude),
-                    constellation,
-                    distance_display,
-                )
-
-        if show_display == True:
-            return get_display(image, planet, row1, row2, config)
-        else:
+    if altitude < 0:
+        if hide_quiet == True or hide_quiet == "true":
             return []
+
+        row1 = "%s: Below the horizon" % time_label
+        row2 = distance_display
+    else:
+        row1 = "%s: %s at %s°" % (
+            time_label,
+            get_cardinal_position_from_degrees(bearing),
+            display_altitude,
+        )
+
+        if is_inner_planet:
+            row2 = "Mag %s in %s %s" % (
+                humanize.float("#.#", magnitude),
+                constellation,
+                distance_display,
+            )
+        else:
+            row2 = "Mag %s %s in %s %s" % (
+                humanize.float("#.#", magnitude),
+                get_magnitude_description(magnitude),
+                constellation,
+                distance_display,
+            )
+
+    return get_display(image, planet, row1, row2, config)
 
 
 def get_bucketed_time(local_time, bucket_minutes):
-    """Rounds a local timestamp down to a stable minute bucket.
-
-    Args:
-        local_time: Timestamp in the observer's timezone.
-        bucket_minutes: 15 or 60.
-
-    Returns:
-        Timestamp at the beginning of the current bucket.
-    """
+    """Rounds a local timestamp down to a stable minute bucket."""
 
     seconds_into_bucket = (
         (local_time.minute % bucket_minutes) * 60 +
@@ -235,7 +214,7 @@ def get_bucketed_time(local_time, bucket_minutes):
 def get_planet_element(planet, position_json):
     planet_list = position_json["data"]["table"]["rows"]
 
-    for i in range(0, len(planet_list)):
+    for i in range(len(planet_list)):
         if planet_list[i]["entry"]["name"].lower() == planet:
             return i
 
@@ -244,16 +223,7 @@ def get_planet_element(planet, position_json):
 
 
 def get_all_planet_information(location, check_time, cache_ttl_seconds):
-    """Gets planetary positions for an explicit calculation time.
-
-    Args:
-        location: Decoded observer location.
-        check_time: Timestamp for which positions should be calculated.
-        cache_ttl_seconds: Requested HTTP cache duration.
-
-    Returns:
-        Planetary position data from AstronomyAPI.
-    """
+    """Gets planetary positions for an explicit calculation time."""
 
     return get_all_body_positions(
         location,
@@ -262,148 +232,124 @@ def get_all_planet_information(location, check_time, cache_ttl_seconds):
     )
 
 
-def degrees_to_x(degrees):
-    if degrees > 180:
-        return int(degrees - 180)
-    else:
-        return int(degrees + 180)
+def get_planet_code(object_name):
+    """Gets an uppercase, single-character celestial object code."""
+
+    if object_name == "mercury":
+        return "E"
+    elif object_name == "moon":
+        return "O"
+    elif object_name == "sun":
+        return "*"
+
+    return object_name[0].upper()
 
 
-def nexty(y, difference):
-    """Gets the next horizontal coordinate, wrapping at the edges."""
+def get_summary_coordinates(altitude, bearing):
+    """Maps altitude and bearing to bounded chart coordinates.
 
-    nexty = y + difference
+    Rows run from high altitude at the top to the horizon at the bottom.
+    Columns follow the existing S-W-N-E-S chart.
 
-    if nexty > 12:
-        nexty = 0
-    elif nexty < 0:
-        nexty = 12
+    Returns:
+        Desired row, desired column, fractional row, fractional column.
+    """
 
-    return nexty
+    bounded_altitude = max(0.0, min(90.0, altitude))
+
+    # Preserve five 18-degree altitude bands.
+    # Clamp the band so 90 degrees cannot produce an invalid index.
+    altitude_band = min(
+        summary_row_count - 1,
+        int(bounded_altitude // 18),
+    )
+
+    row = summary_row_count - 1 - altitude_band
+
+    # Convert azimuth to the S-W-N-E-S chart:
+    # South = either edge, West = 3, North = 6, East = 9.
+    chart_degrees = (bearing + 180.0) % 360.0
+    fractional_column = chart_degrees / 30.0
+
+    # Select the nearest 30-degree column rather than flooring first.
+    column = int(math.floor(fractional_column + 0.5))
+    column = max(0, min(summary_column_count - 1, column))
+
+    # Fractional positions help choose a nearby slot when objects overlap.
+    fractional_row = (
+        summary_row_count - 1 -
+        bounded_altitude / 18.0
+    )
+    fractional_row = max(
+        0.0,
+        min(float(summary_row_count - 1), fractional_row),
+    )
+
+    return row, column, fractional_row, fractional_column
 
 
-def nextx(x, difference):
-    """Gets the next vertical coordinate, clamping at the edges."""
+def place_summary_object(summary, object_name, altitude, bearing, magnitude):
+    """Places an object in its desired cell or the nearest empty cell.
 
-    nextx = x + difference
+    Searches every chart cell if the desired cell is occupied.
+    No coordinate wrapping or unbounded collision loop is needed.
 
-    if nextx > 4:
-        nextx = 4
-    elif nextx < 0:
-        nextx = 0
+    Returns:
+        True if placed, or False if the chart is full.
+    """
 
-    return nextx
+    row, column, fractional_row, fractional_column = get_summary_coordinates(
+        altitude,
+        bearing,
+    )
 
+    content = "%s%s%s" % (
+        get_planet_code(object_name),
+        application_delimiter,
+        get_magnitude_color(magnitude),
+    )
 
-def get_planet_code(object):
-    """Gets a single-character code for a celestial object."""
+    if summary[row][column] == " ":
+        summary[row][column] = content
+        return True
 
-    planet_code = object[0]
+    best_row = -1
+    best_column = -1
+    best_distance = None
 
-    if object == "mercury":
-        planet_code = "E"
-    elif object == "moon":
-        planet_code = "O"
-    elif object == "sun":
-        planet_code = "*"
+    for candidate_row in range(summary_row_count):
+        for candidate_column in range(summary_column_count):
+            if summary[candidate_row][candidate_column] != " ":
+                continue
 
-    return planet_code
+            row_distance = candidate_row - fractional_row
+            column_distance = candidate_column - fractional_column
 
-
-def place_in_next_slot(summary, existing_item, new_item, magnitude):
-    """Looks for an available slot when the requested slot is occupied."""
-
-    ynew = new_item[2]
-    yexist = existing_item[2]
-    ydirection = 0
-
-    if ynew > yexist:
-        ydirection = +1
-    else:
-        ydirection = -1
-
-    xnew = degrees_to_x(new_item[1])
-    xexist = degrees_to_x(existing_item[1])
-    xdirection = 0
-
-    if xnew > xexist:
-        xdirection = 1
-    else:
-        xdirection = -1
-
-    testx = new_item[3]
-    testy = new_item[4]
-    alt = False
-    planet_code = get_planet_code(new_item[0])
-
-    for _ in range(100):
-        if summary[testx][testy] == " ":
-            summary[testx][testy] = "%s%s%s" % (
-                planet_code,
-                application_delimiter,
-                get_magnitude_color(magnitude),
+            distance = (
+                row_distance * row_distance +
+                column_distance * column_distance
             )
-            break
-        else:
-            alt = not alt
 
-            if alt:
-                testx = nextx(testx, xdirection)
-            else:
-                testy = nexty(testy, ydirection)
+            if best_distance == None or distance < best_distance:
+                best_distance = distance
+                best_row = candidate_row
+                best_column = candidate_column
 
+    if best_row < 0:
+        return False
 
-def place_duplicate(summary, display_items, x, y, magnitude):
-    """Finds the existing item occupying a requested summary position."""
-
-    for item in display_items:
-        if display_items[item][3] == x and display_items[item][4] == y:
-            place_in_next_slot(
-                summary,
-                display_items[item],
-                display_items[len(display_items) - 1],
-                magnitude,
-            )
-            break
-
-
-def update_summary(summary, display_items, planet, x, y, magnitude):
-    """Adds a planet to the summary grid."""
-
-    planet_code = get_planet_code(planet).upper()
-
-    if summary[x][y] == " ":
-        summary[x][y] = "%s%s%s" % (
-            planet_code,
-            application_delimiter,
-            get_magnitude_color(magnitude),
-        )
-    else:
-        place_duplicate(summary, display_items, x, y, magnitude)
-
-
-def concatenate(items):
-    return_value = ""
-
-    for letter in items:
-        return_value = return_value + letter
-
-    return return_value
+    summary[best_row][best_column] = content
+    return True
 
 
 def get_summary_of_night_sky(position_json):
     """Displays a sky summary using the already-fetched body positions."""
 
+    # Create independent rows rather than sharing one mutable row.
     summary = [
-        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
-        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
-        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
-        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
-        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        [" " for _ in range(summary_column_count)]
+        for _ in range(summary_row_count)
     ]
-
-    display_items = {}
-    i = 0
 
     object_list = [
         "mercury",
@@ -416,35 +362,26 @@ def get_summary_of_night_sky(position_json):
         "moon",
     ]
 
-    # No HTTP requests inside this loop.
     # Every object uses the same response and calculation timestamp.
-    for object in object_list:
-        planet_element = get_planet_element(object, position_json)
+    for object_name in object_list:
+        planet_element = get_planet_element(object_name, position_json)
+        cell = position_json["data"]["table"]["rows"][planet_element]["cells"][0]
 
-        altitude = position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["altitude"]["degrees"]
-        altitude = math.floor(float(altitude))
-        bearing = float(position_json["data"]["table"]["rows"][planet_element]["cells"][0]["position"]["horizontal"]["azimuth"]["degrees"])
-        magnitude = float(position_json["data"]["table"]["rows"][planet_element]["cells"][0]["extraInfo"]["magnitude"])
+        altitude = float(
+            cell["position"]["horizontal"]["altitude"]["degrees"],
+        )
+        bearing = float(
+            cell["position"]["horizontal"]["azimuth"]["degrees"],
+        )
+        magnitude = float(cell["extraInfo"]["magnitude"])
 
+        # Check the raw altitude, not a floored display value.
         if altitude > 0:
-            x = altitude_position[int(math.round(float(altitude) // 18))]
-            y = compass_position[int(math.round(float(bearing) // 30))]
-
-            display_items[i] = [
-                object,
-                bearing,
-                altitude,
-                x,
-                y,
-                magnitude,
-            ]
-
-            update_summary(
+            place_summary_object(
                 summary,
-                display_items,
-                object,
-                x,
-                y,
+                object_name,
+                altitude,
+                bearing,
                 magnitude,
             )
 
@@ -496,15 +433,15 @@ def get_render_row_children(items):
     children = []
 
     for item in items:
-        items = item.split(application_delimiter)
+        parts = item.split(application_delimiter)
         itemcolor = "#000000"
 
-        if len(items) == 2:
-            itemcolor = items[1]
+        if len(parts) == 2:
+            itemcolor = parts[1]
 
         children.append(
             render.Text(
-                content = items[0],
+                content = parts[0],
                 font = "CG-pixel-4x5-mono",
                 color = itemcolor,
             ),
@@ -613,10 +550,7 @@ def get_magnitude_description(magnitude):
 
 
 def get_cardinal_position_from_degrees(bearing):
-    """Returns the compass direction for a bearing."""
-
-    if bearing < 0:
-        bearing = 360 + bearing
+    """Returns the nearest of sixteen compass directions."""
 
     compass_brackets = [
         "North",
@@ -635,14 +569,12 @@ def get_cardinal_position_from_degrees(bearing):
         "WNW",
         "NW",
         "NNW",
-        "North",
     ]
 
-    display_cardinal_point = compass_brackets[
-        int(math.round(bearing // 22.5))
-    ]
+    normalized_bearing = bearing % 360.0
+    index = int((normalized_bearing + 11.25) // 22.5) % 16
 
-    return display_cardinal_point
+    return compass_brackets[index]
 
 
 def get_readable_large_number(number):
