@@ -8,6 +8,12 @@ on:
       - main
     tags:
       - "v*"
+  workflow_dispatch:
+      inputs:
+        skip_check_apps:
+          description: "Skip check-apps.sh (verified locally)"
+          type: boolean
+          default: false
 
 jobs:
   check:
@@ -48,6 +54,7 @@ jobs:
 
       - name: Determine targets
         id: targets
+        if: ${{ !inputs.skip_check_apps }}
         env:
           EVENT_BEFORE: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
@@ -68,6 +75,11 @@ jobs:
           fi
 
       - name: Check modified apps
+        if: ${{ !inputs.skip_check_apps && vars.SKIP_CHECK_APPS != 'true' }}
         run: ./.github/scripts/check-apps.sh
         env:
           TARGETS: "${{ steps.targets.outputs.targets }}"
+
+      - name: Note skipped check
+        if: ${{ inputs.skip_check_apps || vars.SKIP_CHECK_APPS == 'true' }}
+        run: echo "::warning::check-apps skipped via manual override"
