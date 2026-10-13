@@ -17,6 +17,7 @@ Author: Robert Ison
 # Missing or incomplete body data never selects another body as a fallback.
 # A valid summary always displays, even when no objects are above the horizon.
 # The hide toggle applies only to individual planets.
+# Magnitude descriptions are guidance, not guarantees of visibility.
 
 
 load("encoding/json.star", "json")
@@ -42,7 +43,6 @@ application_delimiter = ":"
 
 summary_row_count = 5
 summary_column_count = 13
-
 
 planet_images = {
     "mercury": MERCURY_ASSET.readall(),
@@ -79,7 +79,7 @@ default_location = """
 
 
 def main(config):
-    """Displays the selected planet or a planets-and-Moon sky summary."""
+    """Displays the selected planet or the Full Sky View."""
 
     system = config.get("system") or "metric"
     hide_quiet = config.get("hide_quiet")
@@ -169,8 +169,7 @@ def main(config):
     if rows == None or len(rows) == 0:
         return []
 
-    # Summary mode does not use the hide toggle.
-    # An empty chart still displays when no valid objects are above the horizon.
+    # Full Sky View does not use the hide toggle.
     if planet == "all":
         return get_summary_of_night_sky(rows)
 
@@ -211,6 +210,8 @@ def main(config):
         if magnitude != None:
             details.append("Mag %s" % humanize.float("#.#", magnitude))
 
+            # Preserve the original behavior for Mercury and Venus:
+            # show magnitude without the additional visibility description.
             if planet != "mercury" and planet != "venus":
                 details.append(get_magnitude_description(magnitude))
 
@@ -738,9 +739,8 @@ def get_magnitude_color(magnitude):
 
     return "#ffffff"
 
-
 def get_magnitude_description(magnitude):
-    """Gets the original visibility description for a magnitude."""
+    """Returns the original visibility description for a magnitude."""
 
     if magnitude == None:
         return ""
@@ -814,7 +814,6 @@ def get_all_body_positions(location, check_time, ttl_seconds = 3600):
         two_character_time_date_part(check_time.second),
     )
 
-    # Request only the date whose first cell we display.
     params = {
         "longitude": location["lng"],
         "latitude": location["lat"],
@@ -862,7 +861,7 @@ def get_schema():
         schema.Option(value = "saturn", display = "Saturn"),
         schema.Option(value = "uranus", display = "Uranus"),
         schema.Option(value = "neptune", display = "Neptune"),
-        schema.Option(value = "all", display = "Planets + Moon"),
+        schema.Option(value = "all", display = "Full Sky View"),
     ]
 
     measurement_options = [
@@ -882,7 +881,7 @@ def get_schema():
             schema.Dropdown(
                 id = "planet",
                 name = "Planet",
-                desc = "Pick a planet or the planets-and-Moon summary.",
+                desc = "Pick a single planet or Full Sky View, mapping the planets and Moon.",
                 icon = "globe",
                 options = planet_options,
                 default = "all",
@@ -890,7 +889,7 @@ def get_schema():
             schema.Location(
                 id = "location",
                 name = "Location",
-                desc = "Your location to determine if the selected planet is visible.",
+                desc = "Your location to calculate the sky positions.",
                 icon = "locationDot",
             ),
             schema.Dropdown(
@@ -912,7 +911,7 @@ def get_schema():
             schema.Toggle(
                 id = "hide_quiet",
                 name = "Hide if not visible",
-                desc = "Hide an individual planet below the horizon. The summary stays visible.",
+                desc = "Hide an individual planet below the horizon. Full Sky View stays visible.",
                 icon = "gear",
                 default = True,
             ),
