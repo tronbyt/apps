@@ -8,7 +8,8 @@ Author: Robert Ison
 # Notes:
 # Requests a 15-minute cache duration near sunrise/sunset.
 # Requests a one-hour cache duration at night outside those windows.
-# During the day, displays the expected sky 30 minutes after sunset.
+# During the day, calculates the expected sky 30 minutes after sunset.
+# Single-planet displays identify the time their coordinates apply to.
 
 
 load("encoding/json.star", "json")
@@ -81,10 +82,9 @@ def main(config):
     location = json.decode(config.get("location", default_location))
     planet = config.get("planet", "mercury")
 
-    # Get the current time in the selected location's timezone.
+    # Capture the current time once in the selected location's timezone.
     now = time.now().in_location(location["timezone"])
 
-    # Calculate sunrise and sunset for the selected location.
     sunrise_time = sunrise.sunrise(
         float(location["lat"]),
         float(location["lng"]),
@@ -97,28 +97,25 @@ def main(config):
         now,
     ).in_location(location["timezone"])
 
-    # Fix #1: Test proximity on either side of sunrise/sunset.
     near_sunrise_now = abs((now - sunrise_time).hours) <= 0.5
     near_sunset_now = abs((now - sunset_time).hours) <= 0.5
 
-    is_after_sunrise = now > sunrise_time
-    is_before_sunset = now < sunset_time
-    is_daytime = is_after_sunrise and is_before_sunset
+    is_daytime = now > sunrise_time and now < sunset_time
 
-    # Default: show the current sky and cache for one hour.
+    # Default: calculate the current sky using this explicit timestamp.
+    check_time = now
     cache_ttl_seconds = 60 * 60
-    check_offset = 0
+    time_label = "As of %s" % check_time.format(time_display_format)
 
     if is_daytime:
-        # Fix #2: Forecast 30 minutes AFTER sunset.
-        hours_until_sunset = (sunset_time - now).hours
-        check_offset = hours_until_sunset + 0.5
+        # Forecast the sky 30 minutes after sunset.
+        check_time = sunset_time + time.parse_duration("30m")
+        time_label = "Tonight at %s" % check_time.format(time_display_format)
 
-        # Keep the forecast cache duration separate from its target time.
-        # Set the duration to reach 30 minutes BEFORE sunset.
+        # Set the cache duration to reach 30 minutes before sunset.
         cache_ttl_seconds = max(
             60,
-            int((hours_until_sunset - 0.5) * 60 * 60),
+            int(((sunset_time - now).hours - 0.5) * 60 * 60),
         )
 
     # Near sunrise/sunset, override the cache duration to 15 minutes.
@@ -137,27 +134,9 @@ def main(config):
     )
 
     if planet == "all":
-        return get_summary_of_night_sky(location, check_offset)
+        return get_summary_of_night_sky(location, check_time)
     else:
-        visibility_disclaimer = ""
         is_inner_planet = planet == "mercury" or planet == "venus"
-
-        if is_after_sunrise == True and is_before_sunset == True:
-            # Daytime.
-            if (
-                abs((now - sunrise_time).hours) <
-                abs((now - sunset_time).hours)
-            ) and is_inner_planet:
-                visibility_disclaimer = "around sunrise at %s" % sunrise_time.format(time_display_format)
-            else:
-                if is_inner_planet:
-                    visibility_disclaimer = "around sunset at %s" % sunset_time.format(time_display_format)
-                else:
-                    visibility_disclaimer = "after sunset at %s" % sunset_time.format(time_display_format)
-        elif abs((now - sunrise_time).hours) < abs((now - sunset_time).hours):
-            visibility_disclaimer = "before sunrise at %s" % sunrise_time.format(time_display_format)
-        else:
-            visibility_disclaimer = "after sunset at %s" % sunset_time.format(time_display_format)
 
         image = planet_images[planet]
         row1 = ""
@@ -165,7 +144,7 @@ def main(config):
 
         position_json = get_all_planet_information(
             location,
-            check_offset,
+            check_time,
             cache_ttl_seconds,
         )
         planet_element = get_planet_element(planet, position_json)
@@ -190,10 +169,11 @@ def main(config):
             if hide_quiet == True or hide_quiet == "true":
                 show_display = False
             else:
-                row1 = "Not Visible as it is below the horizon."
-                row2 = "%s" % distance_display
+                row1 = "%s: Below the horizon" % time_label
+                row2 = distance_display
         else:
-            row1 = "%s at %s°" % (
+            row1 = "%s: %s at %s°" % (
+                time_label,
                 get_cardinal_position_from_degrees(float(bearing)),
                 altitude,
             )
@@ -205,10 +185,9 @@ def main(config):
                     distance_display,
                 )
             else:
-                row2 = "Mag %s %s %s in %s %s" % (
+                row2 = "Mag %s %s in %s %s" % (
                     humanize.float("#.#", magnitude),
                     get_magnitude_description(magnitude),
-                    visibility_disclaimer,
                     constellation,
                     distance_display,
                 )
@@ -230,17 +209,23 @@ def get_planet_element(planet, position_json):
     return 0
 
 
-def get_all_planet_information(location, check_offset, cache_ttl_seconds):
-    """Gets planetary positions for the location and requested time."""
+def get_all_planet_information(location, check_time, cache_ttl_seconds):
+    """Gets planetary positions for an explicit calculation time.
 
-    check_time = get_local_time(location, check_offset)
-    position_json = get_all_body_positions(
+    Args:
+        location: Decoded observer location.
+        check_time: Timestamp for which positions should be calculated.
+        cache_ttl_seconds: Requested HTTP cache duration.
+
+    Returns:
+        Planetary position data from AstronomyAPI.
+    """
+
+    return get_all_body_positions(
         location,
         check_time,
         cache_ttl_seconds,
     )
-
-    return position_json
 
 
 def degrees_to_x(degrees):
@@ -372,8 +357,8 @@ def concatenate(items):
     return return_value
 
 
-def get_summary_of_night_sky(location, check_offset):
-    """Displays a summary of celestial objects above the horizon."""
+def get_summary_of_night_sky(location, check_time):
+    """Displays a sky summary for the supplied calculation timestamp."""
 
     summary = [
         [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
@@ -404,7 +389,7 @@ def get_summary_of_night_sky(location, check_offset):
 
         position_json = get_all_planet_information(
             location,
-            check_offset,
+            check_time,
             cache_ttl_seconds,
         )
         planet_element = get_planet_element(object, position_json)
@@ -656,7 +641,7 @@ def get_readable_large_number(number):
 
 
 def get_all_body_positions(location, check_time, ttl_seconds = 3600):
-    """Gets body-position data from AstronomyAPI."""
+    """Gets body-position data for the supplied calculation timestamp."""
 
     date_code = "%s-%s-%s" % (
         two_character_time_date_part(check_time.year),
@@ -708,22 +693,6 @@ def two_character_time_date_part(number):
         return "0" + str(number)
     else:
         return str(number)
-
-
-def get_local_time(location, offset_hours):
-    """Returns the requested time in the selected location's timezone.
-
-    Args:
-        location: Decoded location dictionary containing the timezone.
-        offset_hours: Hours to add to the current time, or subtract if negative.
-
-    Returns:
-        The requested time in the selected location's timezone.
-    """
-
-    # Fix #3: Use the decoded location directly, not the app config.
-    check_time = time.now() + time.parse_duration("%sh" % offset_hours)
-    return check_time.in_location(location["timezone"])
 
 
 def get_schema():
