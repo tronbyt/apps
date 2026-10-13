@@ -89,18 +89,32 @@ def main(config):
     sunrise_time = sunrise.sunrise(float(location["lat"]), float(location["lng"]), now).in_location(location["timezone"])
     sunset_time = sunrise.sunset(float(location["lat"]), float(location["lng"]), now).in_location(location["timezone"])
 
-    near_sunrise_now = True if ((now - sunrise_time).hours) < 0.5 else False
-    near_sunset_now = True if ((now - sunset_time).hours) < 0.5 else False
+    near_sunrise_now = abs((now - sunrise_time).hours) <= 0.5
+    near_sunset_now = abs((now - sunset_time).hours) <= 0.5
 
     is_after_sunrise = now > sunrise_time
     is_before_sunset = now < sunset_time
+    is_daytime = is_after_sunrise and is_before_sunset
 
-    #print("Now: %s Sunrise:%s Sunset: %s Near Sunrise: %s Near Sunset: %s IsAfterSunrise: %s IsBeforeSunset: %s" % (now, sunrise_time, sunset_time, near_sunrise_now, near_sunset_now, is_after_sunrise, is_before_sunset))
+    # Default: show the current sky and cache for one hour.
+    cache_ttl_seconds = 60 * 60
+    check_offset = 0
 
-    cache_ttl_seconds = 1 * 60 * 60  #default to one hour
-    check_offset = 0  #by default we will check for the planets right now
+    if is_daytime:
+        # During the day, show the sky 30 minutes AFTER sunset.
+        hours_until_sunset = (sunset_time - now).hours
+        check_offset = hours_until_sunset + 0.5
+
+        # Keep the daytime forecast cached until 30 minutes BEFORE sunset.
+        # Near sunset, the proximity check below overrides this to 15 minutes.
+        cache_ttl_seconds = max(
+            60,
+            int((hours_until_sunset - 0.5) * 60 * 60),
+        )
+
+    # Refresh every 15 minutes within 30 minutes of sunrise or sunset.
     if near_sunrise_now or near_sunset_now:
-        cache_ttl_seconds = 15 * 60  #Let's check each 15 minutes around sunset and sunrise as inner planets move quite a bit then
+        cache_ttl_seconds = 15 * 60 #Let's check each 15 minutes around sunset and sunrise as inner planets move quite a bit then
     elif is_before_sunset and is_after_sunrise:
         #during the day you can't see much so let's get the early evening's sky and present that.
         #so during the day your Tidbyt will tell you what you can see this evening.
