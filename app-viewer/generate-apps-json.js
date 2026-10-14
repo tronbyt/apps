@@ -436,6 +436,15 @@ function scanApps() {
   return apps;
 }
 
+// Detail and author pages are written one folder down (details/, authors/), so their relative links need "../".
+// Every link to the home page is adjusted: the header logo and the Back to Apps button both use it.
+export function adjustTemplateForNestedPage(template) {
+  return template
+    .replace('href="style.css"', 'href="../style.css"')
+    .replace('src="main.js"', 'src="../main.js"')
+    .replaceAll('href="index.html"', 'href="../index.html"');
+}
+
 function generateHtmlFiles(apps, cards) {
   const detailsDir = join(outputDir, 'details');
   if (!existsSync(detailsDir)) {
@@ -443,12 +452,7 @@ function generateHtmlFiles(apps, cards) {
   }
 
   const templatePath = join(__dirname, 'app.html');
-  let template = readFileSync(templatePath, 'utf8');
-
-  // Adjust relative paths in template
-  template = template.replace('href="style.css"', 'href="../style.css"');
-  template = template.replace('src="main.js"', 'src="../main.js"');
-  template = template.replace('href="index.html"', 'href="../index.html"');
+  const template = adjustTemplateForNestedPage(readFileSync(templatePath, 'utf8'));
 
   for (const app of apps) {
     const appHtml = template
@@ -467,11 +471,7 @@ function generateAuthorHtmlFiles(profiles) {
   }
 
   const templatePath = join(__dirname, 'author.html');
-  let template = readFileSync(templatePath, 'utf8');
-
-  template = template.replace('href="style.css"', 'href="../style.css"');
-  template = template.replace('src="main.js"', 'src="../main.js"');
-  template = template.replace('href="index.html"', 'href="../index.html"');
+  const template = adjustTemplateForNestedPage(readFileSync(templatePath, 'utf8'));
 
   for (const profile of profiles) {
     const authorHtml = template
