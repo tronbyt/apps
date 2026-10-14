@@ -95,8 +95,8 @@ def get_bounding_box(centrePoint, distance):
     maxLon = 0
 
     # define deltaLon to help determine min and max longitudes
-    deltaLon = math.asin(math.sin(radDist) / math.cos(radLat))
     if (minLat > MIN_LAT) and (maxLat < MAX_LAT):
+        deltaLon = math.asin(math.sin(radDist) / math.cos(radLat))
         minLon = radLon - deltaLon
         maxLon = radLon + deltaLon
         if minLon < MIN_LON:
