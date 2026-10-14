@@ -147,6 +147,7 @@ def get_distance(lat_1, lng_1, lat_2, lng_2):
 
     # buildifier: disable=integer-division
     temp = (math.pow(math.sin(d_lat / 2), 2) + math.cos(lat_1) * math.cos(lat_2) * math.pow(math.sin(d_lng / 2), 2))
+    temp = max(0.0, min(1.0, temp))
     distance = 6371.0 * (2 * math.atan2(math.sqrt(temp), math.sqrt(1 - temp)))
     return distance
 
