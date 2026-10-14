@@ -35,3 +35,5 @@ app-viewer/apps.json
 .claude/settings.local.json
 /app-viewer/details/
 /app-viewer/authors/
+/app-viewer/cards/
+/app-viewer/sitemap.xml

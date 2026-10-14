@@ -2,7 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
-import { adjustTemplateForNestedPage, buildAppMetaTags, escapeHtmlAttribute, findMarkdown } from './generate-apps-json.js';
+import {
+  adjustTemplateForNestedPage,
+  buildAppMetaTags,
+  buildAppPrerender,
+  buildAuthorPrerender,
+  buildSitemap,
+  escapeHtmlAttribute,
+  findMarkdown,
+  pointHomePageAtCard,
+  tileCandidates,
+} from './generate-apps-json.js';
 
 test('escapes values used in generated HTML', () => {
   assert.equal(
@@ -12,18 +22,60 @@ test('escapes values used in generated HTML', () => {
 });
 
 test('generated app metadata cannot close tags or attributes', () => {
-  const metadata = buildAppMetaTags({
+  const app = {
     name: 'unsafe\" onload=\"alert(1)',
     displayName: '</title><script>alert(1)</script>',
     summary: '\"><img src=x onerror=alert(1)>',
-    image: 'preview\" onerror=\"alert(1).webp'
-  });
+  };
+  const metadata = buildAppMetaTags(app, 'cards/preview\" onerror=\"alert(1).png');
 
-  assert.doesNotMatch(metadata, /<script|<img/i);
-  assert.match(metadata, /&lt;\/title&gt;&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
-  assert.match(metadata, /&quot;&gt;&lt;img src=x onerror=alert\(1\)&gt;/);
-  assert.match(metadata, /preview&quot; onerror=&quot;alert\(1\)\.webp/);
-  assert.doesNotMatch(metadata, /content="[^"]*" on(?:load|error)=/i);
+  // The structured data is the only element added, and nothing in it can end it early
+  const structured = metadata.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(structured);
+  assert.doesNotMatch(structured[1], /</);
+  assert.equal(JSON.parse(structured[1]).name, app.displayName);
+
+  const tags = metadata.replace(structured[0], '');
+  assert.doesNotMatch(tags, /<script|<img/i);
+  assert.match(tags, /&lt;\/title&gt;&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.match(tags, /&quot;&gt;&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(tags, /preview&quot; onerror=&quot;alert\(1\)\.png/);
+  assert.doesNotMatch(tags, /content="[^"]*" on(?:load|error)=/i);
+});
+
+test('app pages have share tags pointing at the app\'s card', () => {
+  const metadata = buildAppMetaTags({ name: 'clock', displayName: 'Clock', summary: 'Tells the time' }, 'cards/clock-0123456789.png');
+  assert.match(metadata, /<meta property="og:image" content="https:\/\/tronbyt\.github\.io\/apps\/cards\/clock-0123456789\.png">/);
+  assert.match(metadata, /<meta property="og:image:width" content="1200">/);
+  assert.match(metadata, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(metadata, /<link rel="canonical" href="https:\/\/tronbyt\.github\.io\/apps\/details\/clock\.html">/);
+});
+
+test('the details written into app and author pages are escaped', () => {
+  const app = {
+    name: 'bad',
+    displayName: '<script>x</script>',
+    description: '<img src=x onerror=alert(1)>',
+    author: '<b>Author</b>',
+    authorSlug: 'author',
+    tags: ['"><script>'],
+  };
+  for (const html of [buildAppPrerender(app), buildAuthorPrerender({ displayName: '<i>Author</i>', apps: [app] })]) {
+    assert.doesNotMatch(html, /<script|<img|<b>|<i>/i);
+  }
+  assert.match(buildAppPrerender(app), /href="\.\.\/authors\/author\.html"/);
+  assert.match(buildAuthorPrerender({ displayName: 'Author', apps: [app] }), /href="\.\.\/details\/bad\.html"/);
+});
+
+test('the sitemap lists every page, with dates where an app has one', () => {
+  const sitemap = buildSitemap(
+    [{ name: 'clock', updated: '2026-10-01T12:00:00Z' }, { name: 'a&b' }],
+    [{ slug: 'olly' }],
+  );
+  assert.match(sitemap, /<loc>https:\/\/tronbyt\.github\.io\/apps\/<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/tronbyt\.github\.io\/apps\/details\/clock\.html<\/loc><lastmod>2026-10-01<\/lastmod>/);
+  assert.match(sitemap, /details\/a%26b\.html<\/loc><\/url>/);
+  assert.match(sitemap, /<loc>https:\/\/tronbyt\.github\.io\/apps\/authors\/olly\.html<\/loc>/);
 });
 
 test('finds mixed-case README filenames and preserves their actual path', () => {
@@ -46,3 +98,23 @@ for (const page of ['app.html', 'author.html']) {
     assert.ok(html.includes('src="../main.js"'));
   });
 }
+
+test('tiles show working apps, most recently updated first, preferring 64x32 screenshots', () => {
+  const files = tileCandidates([
+    { name: 'old', image: 'old/old.webp', updated: '2026-01-01T00:00:00Z' },
+    { name: 'broken', image: 'broken/broken.webp', updated: '2026-12-01T00:00:00Z', broken: true },
+    { name: 'none', updated: '2026-11-01T00:00:00Z' },
+    { name: 'new', image: 'new/new.webp', image2x: 'new/new@2x.webp', updated: '2026-10-01T00:00:00Z' },
+    { name: 'published', image2x: 'published/published@2x.webp', published: '2026-06-01T00:00:00Z' },
+  ]);
+  assert.deepEqual(files.map(f => f.split('/').slice(-1)[0]), ['new.webp', 'published@2x.webp', 'old.webp']);
+});
+
+test('points every home page card tag at the current home card', () => {
+  const html = readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+  const updated = pointHomePageAtCard(html, 'cards/tronbyt-app-viewer-0123456789.png');
+  assert.equal(updated.includes('cards/tronbyt-app-viewer.png'), false);
+  assert.equal(updated.split('https://tronbyt.github.io/apps/cards/tronbyt-app-viewer-0123456789.png').length - 1, 2);
+  // A second build over an already updated copy still finds the tags
+  assert.equal(pointHomePageAtCard(updated, 'cards/tronbyt-app-viewer-abcdef0123.png').includes('-abcdef0123.png'), true);
+});

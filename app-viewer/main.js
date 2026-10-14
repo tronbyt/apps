@@ -1110,6 +1110,8 @@ async function renderAuthorProfile() {
   const metaAuthorName = document.querySelector('meta[name="author-name"]');
   const authorName = metaAuthorName?.getAttribute('content') || authorApps[0].author;
 
+  container.replaceChildren(); // Remove the summary written into the page for search engines
+
   const header = document.createElement('div');
   header.className = 'author-profile-header mb-4';
 
