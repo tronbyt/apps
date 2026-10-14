@@ -427,10 +427,12 @@ def get_brightness(flight):
     #brightest for lower flights, dim for flights very high
     return max(math.floor(70 - flight[5] / 35000 * 60), 10)
 
-def create_dot(radar_height, lng, lat, extremes, color, lightness = 35, dx = 0, dy = 0):
+def create_dot(radar_height, lat, lng, extremes, color, lightness = 35, dx = 0, dy = 0):
     hue, _, _ = hex_rgb_to_hsl(color)
-    x = get_coordinate(lat, extremes[2], extremes[3], WIDTH - 1) + dx
-    y = (radar_height - 1) - get_coordinate(lng, extremes[0], extremes[1], radar_height - 1) + dy
+
+    x = get_coordinate(lng, extremes[2], extremes[3], WIDTH - 1) + dx
+    y = (radar_height - 1) - get_coordinate(lat, extremes[0], extremes[1], radar_height - 1) + dy
+
     return [x, y, hue, lightness]
 
 def get_coordinate(flight_coordinate, lower, upper, size):
