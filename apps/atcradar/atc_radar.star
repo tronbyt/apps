@@ -404,7 +404,6 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
     # create updated radar (everyone moves one pixel based on heading)
-    radar.append(create_dot(radar_height, float(home_lat), float(home_lng), extremes, color, 70))
     for flight in flights:
         adjustment = get_pixel_movement(flight[4])
 
@@ -532,7 +531,7 @@ def int_to_hex(value):
 def generate_screen(array, radar_height):
     arr = [["#000000" for i in range(WIDTH)] for j in range(radar_height)]
 
-    for dot in array:
+    for dot in array[1:] + array[:1]:
         x = int(dot[RADAR_X])
         y = int(dot[RADAR_Y])
 
