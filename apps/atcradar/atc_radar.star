@@ -40,7 +40,7 @@ DEFAULT_LOCATION = json.encode({
 TESTMODE = False  # Set to False for production -- saves calls to the API during testing
 DELAY = 225  # Delay between frames (milliseconds)
 N_FRAMES = int(10 * 1000 / DELAY)  # Number of frames to equate to 10 seconds based on delay
-DEFAULT_DISTANCE = "10"
+DEFAULT_DISTANCE = "5"
 WHITE_COLOR = "#FFF"
 GREEN_COLOR = "#1C8E61"
 YELLOW_COLOR = "#FFFF00"
@@ -211,7 +211,7 @@ def display_instructions():
     )
 
 def main(config):
-    show_instructions = config.bool("instructions", True)
+    show_instructions = config.bool("instructions", False)
     if show_instructions:
         return display_instructions()
 
@@ -228,7 +228,7 @@ def main(config):
         )
 
     hide_when_nothing_to_display = config.bool("hide", True)
-    hide_data_older_than_seconds = int(config.get("hideold", 600))
+    hide_data_older_than_seconds = int(config.get("hideold", 900))
 
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     cache_tty = int(config.get("cache", 60))
