@@ -52,6 +52,20 @@ jobs:
         working-directory: app-viewer-source/app-viewer
         run: npm ci
 
+      # Social cards are named after a hash of their content, so cards from the previous deployment can be reused
+      # instead of drawn again. If they can't be fetched, every card is drawn as before.
+      - name: Get the previous deployment's social cards
+        continue-on-error: true
+        run: |
+          mkdir -p previous-cards
+          git -C main fetch --depth 1 origin gh-pages
+          if git -C main cat-file -e FETCH_HEAD:cards 2>/dev/null; then
+            git -C main archive FETCH_HEAD cards | tar -x -C previous-cards
+            echo "Reusing up to $(ls previous-cards/cards | wc -l) previous cards"
+          else
+            echo "The previous deployment has no cards yet; every card will be drawn"
+          fi
+
       - name: Build site into staging directory
         run: |
           mkdir -p _site
@@ -74,7 +88,7 @@ jobs:
           done
 
           # Generate apps.json directly into the site root (using apps from main branch)
-          node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps
+          node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps --reuse-cards previous-cards/cards
 
           # Record which repository and app-data revision produced this
           # catalogue so the Viewer can link each app to its exact source,
