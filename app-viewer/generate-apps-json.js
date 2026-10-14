@@ -332,25 +332,22 @@ function parseManifest(appPath) {
   return null;
 }
 
-function findPreview(files, appName, manifest, starFile) {
+// The preview screenshot, found the same way as Tronbyt Server so both show the same one: a file named after the
+// manifest's packageName, then the .star file, then "screenshot", preferring .webp, then .gif, then .png (so a
+// Pixlet render wins over an older photo with the same name). The folder name and any other image are fallbacks.
+const PREVIEW_EXTS = ['.webp', '.gif', '.png'];
+
+export function findPreview(files, appName, manifest, starFile) {
   const fileSet = new Set(files);
+  const starName = manifest?.fileName || starFile;
+  const bases = [manifest?.packageName || appName, starName && starName.replace(/\.star$/, ''), 'screenshot', appName];
 
-  const check = (base, stripExt = false) => {
-    if (!base) return null;
-    const baseName = stripExt ? base.replace(/\.[^/.]+$/, "") : base;
-    for (const ext of IMAGE_EXTS) {
-      const fileName = `${baseName}${ext}`;
-      if (fileSet.has(fileName)) {
-        return fileName;
-      }
+  for (const base of new Set(bases.filter(Boolean))) {
+    for (const ext of PREVIEW_EXTS) {
+      if (fileSet.has(`${base}${ext}`)) return `${base}${ext}`;
     }
-    return null;
-  };
-
-  return check(appName) ||
-    check(manifest?.fileName, true) ||
-    check(starFile, true) ||
-    files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase()));
+  }
+  return files.find(f => IMAGE_EXTS.includes(extname(f).toLowerCase())) || null;
 }
 
 export function findMarkdown(files) {
