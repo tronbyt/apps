@@ -281,7 +281,7 @@ def main(config):
     extremes = initialize_extremes(orig_lat, orig_lng)
 
     #calculate the nearest flight
-    nearest_flight = 0
+    nearest_flight = None
 
     if flights:
         for flight in flights:
@@ -289,7 +289,8 @@ def main(config):
 
             #update extremes with each flight we want to plot
             if distance < search_distance:
-                nearest_flight = distance if nearest_flight == 0 else (distance if distance < nearest_flight else nearest_flight)
+                if nearest_flight == None or distance < nearest_flight:
+                    nearest_flight = distance
                 extremes = update_extremes(flight[2], flight[3], extremes)
                 display_flights.append(flight)
 
