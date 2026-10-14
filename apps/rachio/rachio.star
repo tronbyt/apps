@@ -11,7 +11,6 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-
 RACHIO_ICON = RACHIO_ICON_ASSET.readall()
 
 RACHIO_BLUE = "#0070D2"
@@ -45,7 +44,6 @@ SCHEDULE_EVENT_NAMES = {
     WEATHER_CLIMATE_SKIP: "Soil Saturation Skip",
     WEATHER_FREEZE_SKIP: "Freeze Skip",
 }
-
 
 def main(config):
     tz = time.tz()
@@ -176,14 +174,12 @@ def main(config):
         font = font,
     )
 
-
 def get_selected_device(devices, selected_device):
     for device in devices:
         if device["id"] == selected_device:
             return device
 
     return None
-
 
 def get_latest_event(events):
     latest = None
@@ -200,7 +196,6 @@ def get_latest_event(events):
                 latest = event
 
     return latest
-
 
 def normalize_events(events, now):
     normalized = []
@@ -242,7 +237,6 @@ def normalize_events(events, now):
         })
 
     return normalized
-
 
 def get_activity_state(events, now):
     schedule_events = []
@@ -295,7 +289,6 @@ def get_activity_state(events, now):
         "likely_active": likely_active,
     }
 
-
 def format_zone_detail(event, prefix = "Last zone"):
     zone_number = event.get("zoneNumber")
     summary = event.get("summary") or ""
@@ -310,7 +303,6 @@ def format_zone_detail(event, prefix = "Last zone"):
         return "%s: %s" % (label, summary)
 
     return "%s started" % label
-
 
 def format_event_date(event, now, tz):
     event_time = time.from_timestamp(
@@ -328,7 +320,6 @@ def format_event_date(event, now, tz):
 
     return event_time.format("Mon, Jan 2") + " at " + event_time.format("3:04 PM")
 
-
 def add_padding_to_child_element(
         element,
         left = 0,
@@ -339,7 +330,6 @@ def add_padding_to_child_element(
         pad = (left, top, right, bottom),
         child = element,
     )
-
 
 def build_display(
         line_1,
@@ -416,7 +406,6 @@ def build_display(
         delay = delay,
     )
 
-
 def display_error_screen(
         now,
         line_3,
@@ -439,7 +428,6 @@ def display_error_screen(
         font = font,
         font_width = font_width,
     )
-
 
 def render_rachio(
         config,
@@ -539,12 +527,10 @@ def render_rachio(
         font_width = font_width,
     )
 
-
 def get_headers(api_key):
     return {
         "Authorization": "Bearer %s" % api_key,
     }
-
 
 def get_events(device_id, api_key, start, end):
     start_time = int(start.unix * 1000)
@@ -564,7 +550,7 @@ def get_events(device_id, api_key, start, end):
     if response.status_code != 200:
         print(
             "Rachio event request failed with status %d" %
-            response.status_code
+            response.status_code,
         )
         return None
 
@@ -575,7 +561,6 @@ def get_events(device_id, api_key, start, end):
         return None
 
     return events
-
 
 def get_devices(api_key):
     info_url = "%s/person/info" % RACHIO_URL
@@ -589,7 +574,7 @@ def get_devices(api_key):
     if response.status_code != 200:
         print(
             "Rachio person-info request failed with status %d" %
-            response.status_code
+            response.status_code,
         )
         return None
 
@@ -616,7 +601,7 @@ def get_devices(api_key):
     if person_response.status_code != 200:
         print(
             "Rachio person request failed with status %d" %
-            person_response.status_code
+            person_response.status_code,
         )
         return None
 
@@ -645,7 +630,6 @@ def get_devices(api_key):
             })
 
     return device_information
-
 
 def generate_option_list_of_devices(api_key):
     if api_key == None:
@@ -679,7 +663,6 @@ def generate_option_list_of_devices(api_key):
             default = options[0].value,
         ),
     ]
-
 
 def get_schema():
     scroll_speed_options = [
