@@ -63,7 +63,7 @@ def rad_to_deg(num):
 
 def get_bounding_box(centrePoint, distance):
     distance = int(distance)
-    if distance < 0:
+    if distance <= 0:
         fail("Distance must be greater than 0")
 
     # coordinate limits
@@ -238,6 +238,9 @@ def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     cache_tty = int(config.get("cache", 60))
 
+    if cache_tty <= 0:
+        fail("Update Frequency must be greater than 0")
+
     orig_lat = location["lat"]
     orig_lng = location["lng"]
 
@@ -245,6 +248,8 @@ def main(config):
     lng = reduce_accuracy(orig_lng)
 
     search_distance = int(config.get("distance", DEFAULT_DISTANCE))
+    if search_distance <= 0:
+        fail("Distance must be greater than 0")
 
     if (config.bool("info_bar", True)):
         radar_height = 31
