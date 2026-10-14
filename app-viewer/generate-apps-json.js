@@ -1,9 +1,18 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync } from 'fs';
+import { copyFileSync, existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join, extname, dirname, basename } from 'path';
 import { createHash } from 'crypto';
 import { load } from 'js-yaml';
 import { fileURLToPath } from 'url';
-import { buildAppCard, buildSiteCard, cardFileName, CARD_HEIGHT, CARD_WIDTH } from './social-cards.js';
+import {
+  buildAppCard,
+  buildAuthorCard,
+  buildSiteCard,
+  cardFileName,
+  CARD_HEIGHT,
+  CARD_WIDTH,
+  MAX_TILES,
+  tiledCardFileName,
+} from './social-cards.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,11 +22,16 @@ const args = process.argv.slice(2);
 let outputFile = join(__dirname, 'apps.json');
 let appsPath = join(__dirname, '../apps');
 let withCards = true;
+let reuseCardsDir = null;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--output' && i + 1 < args.length) {
     outputFile = args[i + 1];
   } else if (args[i] === '--apps-path' && i + 1 < args.length) {
     appsPath = args[i + 1];
+  } else if (args[i] === '--reuse-cards' && i + 1 < args.length) {
+    // A folder of previously published cards (e.g. the last deployment's cards/). A card whose file name, which
+    // includes a hash of everything on it, is already there is copied rather than drawn again.
+    reuseCardsDir = args[i + 1];
   } else if (args[i] === '--no-cards') {
     withCards = false; // Quicker local builds: pages still link to cards, but none are drawn
   }
@@ -194,7 +208,7 @@ export function buildAuthorMetaTags(profile, cardPath = SITE_CARD) {
   const title = `${profile.displayName} - Tronbyt Apps`;
   const description = `${appCount} Tronbyt ${appCount === 1 ? 'app' : 'apps'} by ${profile.displayName}.`;
   const url = `${SITE_URL}authors/${encodeURIComponent(profile.slug)}.html`;
-  return `${socialTags({ title, description, url, image: SITE_URL + cardPath, imageAlt: SITE_NAME })}
+  return `${socialTags({ title, description, url, image: SITE_URL + cardPath, imageAlt: `Tronbyt apps by ${profile.displayName}` })}
         <meta name="author-slug" content="${escapeHtmlAttribute(profile.slug)}">
         <meta name="author-name" content="${escapeHtmlAttribute(profile.displayName)}">`;
 }
@@ -250,19 +264,59 @@ function planCards(apps) {
   }));
 }
 
-async function generateCards(apps, cards) {
+// Screenshots to tile on an author or home card: apps that aren't marked broken, most recently updated first,
+// preferring the 64x32 screenshot (a 128x64 one loses its dots when drawn small). A few extra candidates are kept
+// in case some can't be read.
+export function tileCandidates(apps) {
+  return apps
+    .filter(app => !app.broken && (app.image || app.image2x || app.image64x64))
+    .sort((a, b) => String(b.updated || b.published || '').localeCompare(String(a.updated || a.published || '')))
+    .slice(0, MAX_TILES * 2)
+    .map(app => join(APPS_DIR, app.image || app.image2x || app.image64x64));
+}
+
+function authorCardTexts(profile) {
+  return [profile.displayName, profile.apps.length];
+}
+
+// Each author's card file name (it depends on their apps' screenshots, so it changes when the card would)
+function planAuthorCards(profiles) {
+  return new Map(profiles.map(profile => [
+    profile.slug,
+    `cards/${tiledCardFileName(`author-${profile.slug}`, authorCardTexts(profile), tileCandidates(profile.apps))}`,
+  ]));
+}
+
+async function generateCards(apps, cards, profiles, authorCards) {
   const cardsDir = join(outputDir, 'cards');
   rmSync(cardsDir, { recursive: true, force: true }); // Only the current cards are published
   mkdirSync(cardsDir, { recursive: true });
-  await buildSiteCard(apps.length, join(outputDir, SITE_CARD));
+  await buildSiteCard(apps.length, join(outputDir, SITE_CARD), tileCandidates(apps));
 
-  const queue = [...apps];
-  const worker = async () => {
-    for (let app = queue.shift(); app; app = queue.shift()) {
-      await buildAppCard(app, cardScreenshot(app), join(outputDir, cards.get(app.name)));
+  let reused = 0;
+  const reuseOr = (cardPath, build) => () => {
+    const previous = reuseCardsDir ? join(reuseCardsDir, basename(cardPath)) : null;
+    if (previous && existsSync(previous)) {
+      copyFileSync(previous, join(outputDir, cardPath));
+      reused++;
+      return Promise.resolve();
     }
+    return build(join(outputDir, cardPath));
+  };
+  const jobs = [
+    ...apps.map(app => reuseOr(cards.get(app.name), out => buildAppCard(app, cardScreenshot(app), out))),
+    ...profiles.map(profile => reuseOr(authorCards.get(profile.slug), out => buildAuthorCard(
+      profile.displayName,
+      profile.apps.length,
+      out,
+      tileCandidates(profile.apps),
+    ))),
+  ];
+  const worker = async () => {
+    for (let job = jobs.shift(); job; job = jobs.shift()) await job();
   };
   await Promise.all(Array.from({ length: CARD_CONCURRENCY }, worker));
+  return reused;
 }
 
 function parseManifest(appPath) {
@@ -464,7 +518,7 @@ function generateHtmlFiles(apps, cards) {
   }
 }
 
-function generateAuthorHtmlFiles(profiles) {
+function generateAuthorHtmlFiles(profiles, authorCards) {
   const authorsDir = join(outputDir, 'authors');
   if (!existsSync(authorsDir)) {
     mkdirSync(authorsDir, { recursive: true });
@@ -475,7 +529,7 @@ function generateAuthorHtmlFiles(profiles) {
 
   for (const profile of profiles) {
     const authorHtml = template
-      .replace('<title>Author Profile</title>', buildAuthorMetaTags(profile))
+      .replace('<title>Author Profile</title>', buildAuthorMetaTags(profile, authorCards.get(profile.slug)))
       .replace('<div id="author-content"></div>', `<div id="author-content">
                 ${buildAuthorPrerender(profile)}
             </div>`);
@@ -494,7 +548,8 @@ async function main() {
   generateHtmlFiles(apps, cards);
   console.log(`Generated ${apps.length} static detail HTML pages with metadata.`);
 
-  generateAuthorHtmlFiles(authorProfiles);
+  const authorCards = planAuthorCards(authorProfiles);
+  generateAuthorHtmlFiles(authorProfiles, authorCards);
   console.log(`Generated ${authorProfiles.length} static author HTML pages with metadata.`);
 
   writeFileSync(join(outputDir, 'sitemap.xml'), buildSitemap(apps, authorProfiles));
@@ -502,8 +557,8 @@ async function main() {
 
   if (withCards) {
     const started = Date.now();
-    await generateCards(apps, cards);
-    console.log(`Generated ${apps.length + 1} social cards in ${Math.round((Date.now() - started) / 1000)}s.`);
+    const reused = await generateCards(apps, cards, authorProfiles, authorCards);
+    console.log(`Generated ${apps.length + authorProfiles.length + 1} social cards (${reused} reused) in ${Math.round((Date.now() - started) / 1000)}s.`);
   }
 }
 

@@ -46,6 +46,20 @@ export function cardFileName(app, screenshot) {
   return `${app.name}-${hash}.png`;
 }
 
+// The file name for a tiled (author) card: changes whenever its text or any candidate screenshot changes
+export function tiledCardFileName(prefix, texts, screenshotFiles) {
+  const hash = createHash('sha256').update(JSON.stringify([CARD_VERSION, 'tiles', MAX_TILES, texts]));
+  for (const file of screenshotFiles) {
+    hash.update(file);
+    try {
+      hash.update(readFileSync(file));
+    } catch {
+      // An unreadable screenshot is skipped when drawing, so it only contributes its path
+    }
+  }
+  return `${prefix}-${hash.digest('hex').slice(0, 10)}.png`;
+}
+
 export function wrapText(text, perLine, maxLines) {
   const lines = [];
   let line = '';
@@ -169,13 +183,17 @@ function dotMatrix({ data, width, height }, cell) {
   return sharp(out, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
 }
 
-// The screen area: the screenshot as an LED dot matrix; a photo, odd-sized screenshot or one with a grid already
-// drawn on, fitted as it is; or the Tronbyt logo when there is no screenshot
-async function screenImage(file) {
-  if (!file) {
-    const size = 240;
-    return { input: await sharp(LOGO).resize(size, size).png().toBuffer(), width: size, height: size };
-  }
+// Load a screenshot for drawing: its busiest frame, as the display's own pixels when it is a display-sized (or
+// whole-number enlarged) screenshot, or as an image to show as it is (a photo, an odd size, or one with a grid
+// already drawn on). Loaded screenshots are kept, as the same one can appear on an app, author and home card.
+const loadedScreens = new Map();
+
+export function loadScreen(file) {
+  if (!loadedScreens.has(file)) loadedScreens.set(file, readScreen(file));
+  return loadedScreens.get(file);
+}
+
+async function readScreen(file) {
   let frame = await bestFrame(file);
   let scale = enlargement(frame.width, frame.height);
   if (scale > 1) {
@@ -184,15 +202,87 @@ async function screenImage(file) {
     if (litFraction(small.data) < frame.lit * 0.5) scale = 0;
     else frame = small;
   }
-  if (scale === 0) {
-    const { data, info } = await sharp(frame.data, { raw: { width: frame.width, height: frame.height, channels: 4 } })
-      .resize(SCREEN_WIDTH, SCREEN_HEIGHT, { fit: 'inside' })
+  return { pixels: scale !== 0, frame };
+}
+
+// Draw a loaded screenshot as large as fits in the given space: an LED dot matrix for display pixels, otherwise
+// the image fitted as it is
+async function drawScreen({ pixels, frame }, maxWidth, maxHeight) {
+  const cell = Math.floor(Math.min(maxWidth / frame.width, maxHeight / frame.height));
+  if (pixels && cell >= 4) {
+    return { input: await dotMatrix(frame, cell), width: frame.width * cell, height: frame.height * cell };
+  }
+  if (pixels) {
+    // Too small for whole-pixel LEDs to fill the space: draw them larger, then scale down to fit, so the screen
+    // fills its tile and the dots still show
+    const { data, info } = await sharp(await dotMatrix(frame, 4))
+      .resize(maxWidth, maxHeight, { fit: 'inside', kernel: 'lanczos3' })
       .png()
       .toBuffer({ resolveWithObject: true });
     return { input: data, width: info.width, height: info.height };
   }
-  const cell = Math.floor(Math.min(SCREEN_WIDTH / frame.width, SCREEN_HEIGHT / frame.height));
-  return { input: await dotMatrix(frame, cell), width: frame.width * cell, height: frame.height * cell };
+  const { data, info } = await sharp(frame.data, { raw: { width: frame.width, height: frame.height, channels: 4 } })
+    .resize(maxWidth, maxHeight, { fit: 'inside', kernel: pixels ? 'nearest' : 'lanczos3' })
+    .png()
+    .toBuffer({ resolveWithObject: true });
+  return { input: data, width: info.width, height: info.height };
+}
+
+async function logoScreen() {
+  const size = 240;
+  return { input: await sharp(LOGO).resize(size, size).png().toBuffer(), width: size, height: size };
+}
+
+// The screen area of an app's card: its screenshot, or the Tronbyt logo when there is none
+async function screenImage(file) {
+  if (!file) return logoScreen();
+  return drawScreen(await loadScreen(file), SCREEN_WIDTH, SCREEN_HEIGHT);
+}
+
+// The most screenshots tiled on an author or home card; beyond this they get too small to read
+export const MAX_TILES = 9;
+const TILE_GAP = 16;
+const TILE_BEZEL = 4;
+
+// The grid (columns, rows) that gives the largest 2:1 tiles for this many screenshots
+export function tileGrid(count, width = SCREEN_WIDTH, height = SCREEN_HEIGHT) {
+  let best = null;
+  for (let columns = 1; columns <= count; columns++) {
+    const rows = Math.ceil(count / columns);
+    const tileWidth = Math.min((width - TILE_GAP * (columns - 1)) / columns, ((height - TILE_GAP * (rows - 1)) / rows) * 2);
+    if (!best || tileWidth > best.tileWidth) best = { columns, rows, tileWidth: Math.floor(tileWidth) };
+  }
+  return best;
+}
+
+// Several screenshots tiled across the screen area, each with its own bezel. Returned like a single screen image,
+// with `framed` set so the card doesn't draw another bezel around the whole grid.
+async function tiledScreen(files) {
+  const { columns, rows, tileWidth } = tileGrid(files.length);
+  const tileHeight = Math.floor(tileWidth / 2);
+  const width = columns * tileWidth + (columns - 1) * TILE_GAP;
+  const height = rows * tileHeight + (rows - 1) * TILE_GAP;
+  const layers = [];
+  for (const [i, file] of files.entries()) {
+    const column = i % columns;
+    const row = Math.floor(i / columns);
+    // An incomplete last row is centred
+    const inRow = row === rows - 1 ? files.length - row * columns : columns;
+    const offset = Math.round(((columns - inRow) * (tileWidth + TILE_GAP)) / 2);
+    const inner = await drawScreen(await loadScreen(file), tileWidth - TILE_BEZEL * 2, tileHeight - TILE_BEZEL * 2);
+    const left = offset + column * (tileWidth + TILE_GAP);
+    const top = row * (tileHeight + TILE_GAP);
+    layers.push(
+      { input: { create: { width: tileWidth, height: tileHeight, channels: 4, background: '#444444' } }, left, top },
+      { input: { create: { width: tileWidth - 4, height: tileHeight - 4, channels: 4, background: '#000000' } }, left: left + 2, top: top + 2 },
+      { input: inner.input, left: left + Math.round((tileWidth - inner.width) / 2), top: top + Math.round((tileHeight - inner.height) / 2) },
+    );
+  }
+  const input = await sharp({ create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(layers)
+    .png()
+    .toBuffer();
+  return { input, width, height, framed: true };
 }
 
 async function header() {
@@ -231,8 +321,7 @@ async function writeCard(screen, blocks, outFile) {
   await sharp({ create: { width: CARD_WIDTH, height: CARD_HEIGHT, channels: 4, background: BACKGROUND } })
     .composite([
       ...(await header()),
-      bezel(12, '#444444'),
-      bezel(10, '#000000'),
+      ...(screen.framed ? [] : [bezel(12, '#444444'), bezel(10, '#000000')]),
       { input: screen.input, left, top },
       ...textColumn(blocks),
       await footer(),
@@ -259,9 +348,35 @@ export async function buildAppCard(app, screenshotFile, outFile) {
   ], outFile);
 }
 
-// The card for the home page and author pages
-export async function buildSiteCard(appCount, outFile) {
-  await writeCard(await screenImage(null), [
+// Up to MAX_TILES screenshots tiled, taking candidates in order and skipping any that can't be read; the logo if
+// none can
+async function tiledOrLogo(files) {
+  const readable = [];
+  for (const file of files) {
+    if (readable.length === MAX_TILES) break;
+    try {
+      await loadScreen(file);
+      readable.push(file);
+    } catch (error) {
+      console.warn(`Couldn't use ${file} in a tiled social card: ${error.message}`);
+    }
+  }
+  if (!readable.length) return logoScreen();
+  if (readable.length === 1) return screenImage(readable[0]);
+  return tiledScreen(readable);
+}
+
+// The card for an author's page: their most recently updated apps, tiled
+export async function buildAuthorCard(name, appCount, outFile, screenshotFiles) {
+  await writeCard(await tiledOrLogo(screenshotFiles), [
+    [await renderText(name, fittingSize(name, TEXT_WIDTH, [32, 24, 16]), TEXT_WIDTH, TITLE_COLOR, 3), 32],
+    [await renderText(`${appCount.toLocaleString('en-US')} ${appCount === 1 ? 'app' : 'apps'} for Tronbyt displays`, 16, TEXT_WIDTH, TEXT_COLOR, 3), 0],
+  ], outFile);
+}
+
+// The card for the home page
+export async function buildSiteCard(appCount, outFile, screenshotFiles = []) {
+  await writeCard(await tiledOrLogo(screenshotFiles), [
     [await renderText('Browse Tronbyt apps', 32, TEXT_WIDTH, TITLE_COLOR, 2), 32],
     [await renderText(`Screenshots, details and documentation for ${appCount.toLocaleString('en-US')} apps for Tronbyt displays.`, 16, TEXT_WIDTH, TEXT_COLOR, 5), 0],
   ], outFile);

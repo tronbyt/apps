@@ -10,6 +10,7 @@ import {
   buildSitemap,
   escapeHtmlAttribute,
   findMarkdown,
+  tileCandidates,
 } from './generate-apps-json.js';
 
 test('escapes values used in generated HTML', () => {
@@ -96,3 +97,14 @@ for (const page of ['app.html', 'author.html']) {
     assert.ok(html.includes('src="../main.js"'));
   });
 }
+
+test('tiles show working apps, most recently updated first, preferring 64x32 screenshots', () => {
+  const files = tileCandidates([
+    { name: 'old', image: 'old/old.webp', updated: '2026-01-01T00:00:00Z' },
+    { name: 'broken', image: 'broken/broken.webp', updated: '2026-12-01T00:00:00Z', broken: true },
+    { name: 'none', updated: '2026-11-01T00:00:00Z' },
+    { name: 'new', image: 'new/new.webp', image2x: 'new/new@2x.webp', updated: '2026-10-01T00:00:00Z' },
+    { name: 'published', image2x: 'published/published@2x.webp', published: '2026-06-01T00:00:00Z' },
+  ]);
+  assert.deepEqual(files.map(f => f.split('/').slice(-1)[0]), ['new.webp', 'published@2x.webp', 'old.webp']);
+});

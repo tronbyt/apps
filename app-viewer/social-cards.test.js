@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 
-import { cardFileName, enlargement, fittingSize, shrink, wrapText } from './social-cards.js';
+import { cardFileName, enlargement, fittingSize, MAX_TILES, shrink, tiledCardFileName, tileGrid, wrapText } from './social-cards.js';
 
 test('a card gets a new file name when anything on it changes', () => {
   const app = { name: 'clock', displayName: 'Clock', summary: 'Tells the time', author: 'Olly' };
@@ -52,4 +55,29 @@ test('shrinks an enlarged screenshot back to its pixels', () => {
   assert.equal(small.width, 2);
   assert.equal(small.height, 1);
   assert.deepEqual([...small.data], [255, 0, 0, 255, 0, 0, 255, 255]);
+});
+
+test('tiles screenshots in the grid that makes them largest', () => {
+  assert.deepEqual([tileGrid(1).columns, tileGrid(1).rows], [1, 1]);
+  assert.deepEqual([tileGrid(2).columns, tileGrid(2).rows], [1, 2]); // Two 2:1 screenshots stack in a 640x360 area
+  assert.deepEqual([tileGrid(4).columns, tileGrid(4).rows], [2, 2]);
+  assert.deepEqual([tileGrid(MAX_TILES).columns, tileGrid(MAX_TILES).rows], [3, 3]);
+  assert.ok(tileGrid(1).tileWidth > tileGrid(4).tileWidth);
+  assert.ok(tileGrid(4).tileWidth > tileGrid(MAX_TILES).tileWidth);
+});
+
+test('an author card gets a new file name when its text or screenshots change', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cards-'));
+  const a = join(dir, 'a.webp');
+  const b = join(dir, 'b.webp');
+  writeFileSync(a, 'one');
+  writeFileSync(b, 'two');
+  const name = tiledCardFileName('author-olly', ['Olly', 2], [a, b]);
+  assert.match(name, /^author-olly-[0-9a-f]{10}\.png$/);
+  assert.equal(tiledCardFileName('author-olly', ['Olly', 2], [a, b]), name);
+  assert.notEqual(tiledCardFileName('author-olly', ['Olly', 3], [a, b]), name);
+  assert.notEqual(tiledCardFileName('author-olly', ['Olly', 2], [b, a]), name);
+  writeFileSync(b, 'changed');
+  assert.notEqual(tiledCardFileName('author-olly', ['Olly', 2], [a, b]), name);
+  assert.ok(tiledCardFileName('author-olly', ['Olly', 2], [a, join(dir, 'missing.webp')])); // Unreadable files are tolerated
 });
