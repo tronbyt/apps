@@ -397,7 +397,7 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
         radar.append(create_dot(radar_height, flight[2], flight[3], extremes, color_plane, 70))
 
     # Draw initial frames
-    for _ in radar:
+    for _ in range(2):
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
@@ -410,12 +410,12 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
         radar.append(create_dot(radar_height, flight[2], flight[3], extremes, color_plane, get_brightness(flight), adjustment[0], adjustment[1]))
 
     # Draw frames
-    for _ in radar:
+    for _ in range(1):
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
     # Draw frames
-    for _ in radar:
+    for _ in range(1):
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
@@ -570,6 +570,7 @@ def renderAnimation(frames, info_bar_length, info_bar_color):
                 render.Box(width = info_bar_length, height = 1, color = info_bar_color),
             ],
         ),
+        delay = DELAY,
     )
 
 def get_schema():
