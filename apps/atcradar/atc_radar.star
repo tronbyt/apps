@@ -309,9 +309,9 @@ def main(config):
 def get_stale_warning_color(seconds, max_seconds):
     percentage = seconds / max_seconds
     color = WHITE_COLOR
-    if (percentage < 0.33):
+    if percentage < (1.0 / 3):
         color = GREEN_COLOR
-    elif (percentage < 0.66):
+    elif percentage < (2.0 / 3):
         color = YELLOW_COLOR
     else:
         color = RED_COLOR
