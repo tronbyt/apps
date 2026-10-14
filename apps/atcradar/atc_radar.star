@@ -176,7 +176,7 @@ def get_bearing(lat_1, lng_1, lat_2, lng_2):
 
 def get_pixel_movement(deg):
     # have bearning in degrees, now convert pixel movements equivalent
-    compass_brackets = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [1, -1], [-1, 0], [-1, -1], [0, -1]]
+    compass_brackets = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]]
     return compass_brackets[int(math.round(deg / 45))]
 
 def display_instructions():
