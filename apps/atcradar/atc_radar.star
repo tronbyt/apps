@@ -151,9 +151,21 @@ def get_distance(lat_1, lng_1, lat_2, lng_2):
     return distance
 
 def get_pixel_movement(deg):
-    # have bearning in degrees, now convert pixel movements equivalent
-    compass_brackets = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]]
-    return compass_brackets[int(math.round(deg / 45))]
+    compass_brackets = [
+        [0, -1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+        [-1, 1],
+        [-1, 0],
+        [-1, -1],
+    ]
+
+    heading = deg % 360
+    index = int(math.floor((heading + 22.5) / 45)) % 8
+
+    return compass_brackets[index]
 
 def display_instructions():
     ##############################################################################################################################################################################################################################
