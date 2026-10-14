@@ -220,7 +220,7 @@ def main(config):
     hide_data_older_than_seconds = int(config.get("hideold", 900))
 
     location = json.decode(config.get("location", DEFAULT_LOCATION))
-    cache_tty = int(config.get("cache", 60))
+    cache_tty = int(config.get("cache", 300))
 
     if cache_tty <= 0:
         fail("Update Frequency must be greater than 0")
@@ -341,16 +341,6 @@ def get_flights_from_cache(key):
     fetched_at = time.from_timestamp(int(cache_data[1][0]))
 
     return flights, fetched_at
-
-def get_time_from_cache(key):
-    cache_data = cache.get(key)
-    #print("Cache_data: %s" % cache_data)
-
-    if cache_data == None:
-        return None
-    else:
-        cache_data = json.decode(cache_data)
-        return time.from_timestamp(int(cache_data[1][0]))
 
 def set_cache_flight_data(key, tty, flights):
     cache_data = []
