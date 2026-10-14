@@ -10,6 +10,7 @@ import {
   buildSitemap,
   escapeHtmlAttribute,
   findMarkdown,
+  pointHomePageAtCard,
   tileCandidates,
 } from './generate-apps-json.js';
 
@@ -107,4 +108,13 @@ test('tiles show working apps, most recently updated first, preferring 64x32 scr
     { name: 'published', image2x: 'published/published@2x.webp', published: '2026-06-01T00:00:00Z' },
   ]);
   assert.deepEqual(files.map(f => f.split('/').slice(-1)[0]), ['new.webp', 'published@2x.webp', 'old.webp']);
+});
+
+test('points every home page card tag at the current home card', () => {
+  const html = readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+  const updated = pointHomePageAtCard(html, 'cards/tronbyt-app-viewer-0123456789.png');
+  assert.equal(updated.includes('cards/tronbyt-app-viewer.png'), false);
+  assert.equal(updated.split('https://tronbyt.github.io/apps/cards/tronbyt-app-viewer-0123456789.png').length - 1, 2);
+  // A second build over an already updated copy still finds the tags
+  assert.equal(pointHomePageAtCard(updated, 'cards/tronbyt-app-viewer-abcdef0123.png').includes('-abcdef0123.png'), true);
 });

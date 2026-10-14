@@ -50,12 +50,14 @@ export function cardFileName(app, screenshot) {
 export function tiledCardFileName(prefix, texts, screenshotFiles) {
   const hash = createHash('sha256').update(JSON.stringify([CARD_VERSION, 'tiles', MAX_TILES, texts]));
   for (const file of screenshotFiles) {
-    hash.update(file);
+    // Only the bytes count, not the path, so the name doesn't depend on where the apps were checked out
+    let bytes = Buffer.alloc(0);
     try {
-      hash.update(readFileSync(file));
+      bytes = readFileSync(file);
     } catch {
-      // An unreadable screenshot is skipped when drawing, so it only contributes its path
+      // An unreadable screenshot is skipped when drawing
     }
+    hash.update(`${bytes.length}:`).update(bytes);
   }
   return `${prefix}-${hash.digest('hex').slice(0, 10)}.png`;
 }

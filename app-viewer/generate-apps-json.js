@@ -1,5 +1,5 @@
 import { copyFileSync, existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync } from 'fs';
-import { join, extname, dirname, basename } from 'path';
+import { join, extname, dirname, basename, resolve } from 'path';
 import { createHash } from 'crypto';
 import { load } from 'js-yaml';
 import { fileURLToPath } from 'url';
@@ -43,7 +43,8 @@ const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
 const SITE_URL = 'https://tronbyt.github.io/apps/';
 const SITE_NAME = 'Tronbyt App Viewer';
-// The card for the home and author pages; index.html refers to it by this name
+// The placeholder card name in index.html. A build into a separate folder (the deployed site) rewrites the copied
+// index.html to point at the home card's hashed name instead, so sharing sites fetch it again when it changes.
 const SITE_CARD = 'cards/tronbyt-app-viewer.png';
 const CARD_CONCURRENCY = 4;
 
@@ -287,11 +288,28 @@ function planAuthorCards(profiles) {
   ]));
 }
 
-async function generateCards(apps, cards, profiles, authorCards) {
+// The home card's file name: changes whenever the app count or any recently updated app's screenshot changes
+function planSiteCard(apps) {
+  return `cards/${tiledCardFileName('tronbyt-app-viewer', ['site', apps.length], tileCandidates(apps))}`;
+}
+
+// Point the home page's card tags at the current home card
+export function pointHomePageAtCard(html, cardPath) {
+  return html.replace(/https:\/\/tronbyt\.github\.io\/apps\/cards\/tronbyt-app-viewer[\w-]*\.png/g, SITE_URL + cardPath);
+}
+
+// The site's own copy of index.html, if this build writes into a separate folder (the source copy is left alone)
+function updateHomePage(siteCard) {
+  const homePage = join(outputDir, 'index.html');
+  if (resolve(outputDir) === resolve(__dirname) || !existsSync(homePage)) return false;
+  writeFileSync(homePage, pointHomePageAtCard(readFileSync(homePage, 'utf8'), siteCard));
+  return true;
+}
+
+async function generateCards(apps, cards, profiles, authorCards, siteCard) {
   const cardsDir = join(outputDir, 'cards');
   rmSync(cardsDir, { recursive: true, force: true }); // Only the current cards are published
   mkdirSync(cardsDir, { recursive: true });
-  await buildSiteCard(apps.length, join(outputDir, SITE_CARD), tileCandidates(apps));
 
   let reused = 0;
   const reuseOr = (cardPath, build) => () => {
@@ -304,6 +322,7 @@ async function generateCards(apps, cards, profiles, authorCards) {
     return build(join(outputDir, cardPath));
   };
   const jobs = [
+    reuseOr(siteCard, out => buildSiteCard(apps.length, out, tileCandidates(apps))),
     ...apps.map(app => reuseOr(cards.get(app.name), out => buildAppCard(app, cardScreenshot(app), out))),
     ...profiles.map(profile => reuseOr(authorCards.get(profile.slug), out => buildAuthorCard(
       profile.displayName,
@@ -552,9 +571,12 @@ async function main() {
   writeFileSync(join(outputDir, 'sitemap.xml'), buildSitemap(apps, authorProfiles));
   console.log('Generated sitemap.xml.');
 
+  const siteCard = planSiteCard(apps);
+  if (updateHomePage(siteCard)) console.log(`Pointed index.html at ${siteCard}.`);
+
   if (withCards) {
     const started = Date.now();
-    const reused = await generateCards(apps, cards, authorProfiles, authorCards);
+    const reused = await generateCards(apps, cards, authorProfiles, authorCards, siteCard);
     console.log(`Generated ${apps.length + authorProfiles.length + 1} social cards (${reused} reused) in ${Math.round((Date.now() - started) / 1000)}s.`);
   }
 }
