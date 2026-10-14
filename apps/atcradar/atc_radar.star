@@ -150,32 +150,6 @@ def get_distance(lat_1, lng_1, lat_2, lng_2):
     distance = 6371.0 * (2 * math.atan2(math.sqrt(temp), math.sqrt(1 - temp)))
     return distance
 
-def get_bearing(lat_1, lng_1, lat_2, lng_2):
-    lat_1 = math.radians(float(lat_1))
-    lat_2 = math.radians(float(lat_2))
-    lng_1 = math.radians(float(lng_1))
-    lng_2 = math.radians(float(lng_2))
-
-    #Let ‘R’ be the radius of Earth,
-    #‘L’ be the longitude,
-    #‘θ’ be latitude,
-    #‘β‘ be get_Bearing.
-    #β = atan2(X,Y) where
-    #X = cos θb * sin ∆L
-    #Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
-
-    x = math.cos(lat_2) * math.sin((lng_2 - lng_1))
-    y = math.cos(lat_1) * math.sin(lat_2) - math.sin(lat_1) * math.cos(lat_2) * math.cos((lng_2 - lng_1))
-    bearing = math.degrees(math.atan2(x, y))
-
-    # our compass brackets are broken up in 45 degree increments from 0 8
-    # to find the right bracket we need degrees from 0 to 360 then divide by 45 and round
-    # what we get though is degrees -180 to 0 to 180 so this will convert to 0 to 360
-    if bearing < 0:
-        bearing = 360 + bearing
-
-    return bearing
-
 def get_pixel_movement(deg):
     # have bearning in degrees, now convert pixel movements equivalent
     compass_brackets = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]]
