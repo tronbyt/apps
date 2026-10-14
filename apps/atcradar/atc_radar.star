@@ -270,13 +270,9 @@ def main(config):
             if rep.status_code != 200:
                 fail("Failed to fetch flights with status code:", rep.status_code)
 
-            if rep.json()["aircraft"]:
-                flights = rep.json()["aircraft"]
-                set_cache_flight_data(flights_cache_key, cache_tty, flights)
-                data_from_date = time.now()
-
-            else:
-                flights = []
+            flights = rep.json()["aircraft"]
+            set_cache_flight_data(flights_cache_key, cache_tty, flights)
+            data_from_date = time.now()
     else:
         #print("Got flight data from cache")
         data_from_date = get_time_from_cache(flights_cache_key)
