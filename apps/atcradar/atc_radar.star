@@ -247,9 +247,8 @@ def main(config):
         radar_height = 32
 
     flights_cache_key = "_".join(["All", "Flight", "Data", lat, lng])
-    flights = get_flights_from_cache(flights_cache_key)
+    flights, data_from_date = get_flights_from_cache(flights_cache_key)
     display_flights = []
-    data_from_date = None
 
     if flights == None:
         #print("Contacting Flight Radar")
@@ -273,9 +272,6 @@ def main(config):
             flights = rep.json()["aircraft"]
             set_cache_flight_data(flights_cache_key, cache_tty, flights)
             data_from_date = time.now()
-    else:
-        #print("Got flight data from cache")
-        data_from_date = get_time_from_cache(flights_cache_key)
 
     # calculate the area of the map we want to display
     extremes = initialize_extremes(orig_lat, orig_lng)
@@ -342,11 +338,15 @@ def initialize_extremes(lat, lng):
 
 def get_flights_from_cache(key):
     cache_data = cache.get(key)
+
     if cache_data == None:
-        return None
-    else:
-        cache_data = json.decode(cache_data)
-        return cache_data[0]
+        return None, None
+
+    cache_data = json.decode(cache_data)
+    flights = cache_data[0]
+    fetched_at = time.from_timestamp(int(cache_data[1][0]))
+
+    return flights, fetched_at
 
 def get_time_from_cache(key):
     cache_data = cache.get(key)
