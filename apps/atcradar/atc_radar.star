@@ -39,7 +39,6 @@ DEFAULT_LOCATION = json.encode({
 #Constants
 TESTMODE = False  # Set to False for production -- saves calls to the API during testing
 DELAY = 225  # Delay between frames (milliseconds)
-N_FRAMES = int(10 * 1000 / DELAY)  # Number of frames to equate to 10 seconds based on delay
 DEFAULT_DISTANCE = "5"
 WHITE_COLOR = "#FFF"
 GREEN_COLOR = "#1C8E61"
@@ -52,8 +51,6 @@ RADAR_X = 0  # x-position
 RADAR_Y = 1  # y-position
 RADAR_hue = 2  # hue
 RADAR_LIGHTNESS = 3  # lightness
-PI = 3.1415926535897932384626  # pi
-SCALE = 10000  # Scale value for generating random numbers to a specific decimal place [10 -> 0.1, 100 -> 0.01, 1000 -> .001]
 
 def deg_to_rad(num):
     return num * (math.pi / 180)
@@ -429,7 +426,7 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
 
 def get_brightness(flight):
     #brightest for lower flights, dim for flights very high
-    return max(math.floor(70 - flight[5] / 35000 * 60), 10)
+    return max(10, min(70, math.floor(70 - flight[5] / 35000 * 60)))
 
 def create_dot(radar_height, lat, lng, extremes, color, lightness = 35, dx = 0, dy = 0):
     hue, _, _ = hex_rgb_to_hsl(color)
