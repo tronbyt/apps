@@ -427,8 +427,8 @@ def get_brightness(flight):
 
 def create_dot(radar_height, lng, lat, extremes, color, lightness = 35, dx = 0, dy = 0):
     hue, _, _ = hex_rgb_to_hsl(color)
-    x = min(WIDTH - 1, get_coordinate(lat, extremes[2], extremes[3], WIDTH - 1) + dx)
-    y = min(radar_height - 1, (radar_height - 1) - (get_coordinate(lng, extremes[0], extremes[1], radar_height - 1)) + dy)
+    x = get_coordinate(lat, extremes[2], extremes[3], WIDTH - 1) + dx
+    y = (radar_height - 1) - get_coordinate(lng, extremes[0], extremes[1], radar_height - 1) + dy
     return [x, y, hue, lightness]
 
 def get_coordinate(flight_coordinate, lower, upper, size):
@@ -527,9 +527,22 @@ def int_to_hex(value):
 
 def generate_screen(array, radar_height):
     arr = [["#000000" for i in range(WIDTH)] for j in range(radar_height)]
-    for list in array:
-        if list[RADAR_LIGHTNESS] > 0:
-            arr[int(list[RADAR_Y])][int(list[RADAR_X])] = hsl_to_hex_rgb(list[RADAR_hue], 1., list[RADAR_LIGHTNESS] / 100)
+
+    for dot in array:
+        x = int(dot[RADAR_X])
+        y = int(dot[RADAR_Y])
+
+        if (
+            x >= 0 and x < WIDTH and
+            y >= 0 and y < radar_height and
+            dot[RADAR_LIGHTNESS] > 0
+        ):
+            arr[y][x] = hsl_to_hex_rgb(
+                dot[RADAR_hue],
+                1.0,
+                dot[RADAR_LIGHTNESS] / 100,
+            )
+
     return arr
 
 def render_frame(frame):
