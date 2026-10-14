@@ -116,7 +116,7 @@ def get_bounding_box(centrePoint, distance):
     ]
 
 def reduce_accuracy(coord):
-    coord_list = coord.split(".")
+    coord_list = str(coord).split(".")
     coord_remainder = coord_list[1]
     if len(coord_remainder) > 3:
         coord_remainder = coord_remainder[0:3]
@@ -145,8 +145,8 @@ def get_distance(lat_1, lng_1, lat_2, lng_2):
 
     # buildifier: disable=integer-division
     temp = (math.pow(math.sin(d_lat / 2), 2) + math.cos(lat_1) * math.cos(lat_2) * math.pow(math.sin(d_lng / 2), 2))
-    distance = 3959.9986576 * (2 * math.atan2(math.sqrt(temp), math.sqrt(1 - temp)))
-    return math.floor(distance)
+    distance = 6371.0 * (2 * math.atan2(math.sqrt(temp), math.sqrt(1 - temp)))
+    return distance
 
 def get_bearing(lat_1, lng_1, lat_2, lng_2):
     lat_1 = math.radians(float(lat_1))
