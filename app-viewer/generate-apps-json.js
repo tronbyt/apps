@@ -265,13 +265,13 @@ function planCards(apps) {
 }
 
 // Screenshots to tile on an author or home card: apps that aren't marked broken, most recently updated first,
-// preferring the 64x32 screenshot (a 128x64 one loses its dots when drawn small). A few extra candidates are kept
-// in case some can't be read.
+// preferring the 64x32 screenshot (a 128x64 one loses its dots when drawn small). Extra candidates are kept in case
+// some can't be read or are skipped as photos or blank screens.
 export function tileCandidates(apps) {
   return apps
     .filter(app => !app.broken && (app.image || app.image2x || app.image64x64))
     .sort((a, b) => String(b.updated || b.published || '').localeCompare(String(a.updated || a.published || '')))
-    .slice(0, MAX_TILES * 2)
+    .slice(0, MAX_TILES * 3)
     .map(app => join(APPS_DIR, app.image || app.image2x || app.image64x64));
 }
 

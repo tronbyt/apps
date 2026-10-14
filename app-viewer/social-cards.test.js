@@ -4,7 +4,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { cardFileName, enlargement, fittingSize, MAX_TILES, shrink, tiledCardFileName, tileGrid, wrapText } from './social-cards.js';
+import {
+  cardFileName,
+  enlargement,
+  fittingSize,
+  isTileable,
+  MAX_TILES,
+  shrink,
+  tiledCardFileName,
+  tileGrid,
+  wrapText,
+} from './social-cards.js';
 
 test('a card gets a new file name when anything on it changes', () => {
   const app = { name: 'clock', displayName: 'Clock', summary: 'Tells the time', author: 'Olly' };
@@ -80,4 +90,19 @@ test('an author card gets a new file name when its text or screenshots change', 
   writeFileSync(b, 'changed');
   assert.notEqual(tiledCardFileName('author-olly', ['Olly', 2], [a, b]), name);
   assert.ok(tiledCardFileName('author-olly', ['Olly', 2], [a, join(dir, 'missing.webp')])); // Unreadable files are tolerated
+});
+
+test('only tiles display renders with something lit', () => {
+  const frame = lit => {
+    const data = Buffer.alloc(64 * 32 * 4);
+    for (let p = 0; p < 64 * 32; p++) {
+      if (p < lit * 64 * 32) data.set([255, 255, 255, 255], p * 4);
+      else data[p * 4 + 3] = 255;
+    }
+    return { data, width: 64, height: 32 };
+  };
+  assert.equal(isTileable({ pixels: true, frame: frame(0.2) }), true);
+  assert.equal(isTileable({ pixels: true, frame: frame(0) }), false); // Blank
+  assert.equal(isTileable({ pixels: true, frame: frame(0.01) }), false); // Nearly blank
+  assert.equal(isTileable({ pixels: false, frame: frame(0.5) }), false); // A photo or odd-sized image
 });

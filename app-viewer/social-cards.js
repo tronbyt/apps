@@ -348,19 +348,30 @@ export async function buildAppCard(app, screenshotFile, outFile) {
   ], outFile);
 }
 
-// Up to MAX_TILES screenshots tiled, taking candidates in order and skipping any that can't be read; the logo if
-// none can
+// Screenshots good enough to tile: a real display render (not a photo, an odd size or one with a grid drawn on)
+// with at least this much of its busiest frame lit
+const MIN_TILE_LIT = 0.03;
+
+export function isTileable({ pixels, frame }) {
+  return pixels && litFraction(frame.data) >= MIN_TILE_LIT;
+}
+
+// Up to MAX_TILES screenshots tiled, taking candidates in order and skipping any that can't be read, are blank, or
+// are photos. Photos are only used when there's nothing better; the logo if there's nothing at all.
 async function tiledOrLogo(files) {
-  const readable = [];
+  const good = [];
+  const photos = [];
   for (const file of files) {
-    if (readable.length === MAX_TILES) break;
+    if (good.length === MAX_TILES) break;
     try {
-      await loadScreen(file);
-      readable.push(file);
+      const screen = await loadScreen(file);
+      if (isTileable(screen)) good.push(file);
+      else if (!screen.pixels && litFraction(screen.frame.data) >= MIN_TILE_LIT) photos.push(file);
     } catch (error) {
       console.warn(`Couldn't use ${file} in a tiled social card: ${error.message}`);
     }
   }
+  const readable = good.length ? good : photos.slice(0, MAX_TILES);
   if (!readable.length) return logoScreen();
   if (readable.length === 1) return screenImage(readable[0]);
   return tiledScreen(readable);
