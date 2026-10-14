@@ -117,9 +117,14 @@ def get_bounding_box(centrePoint, distance):
 
 def reduce_accuracy(coord):
     coord_list = str(coord).split(".")
+
+    if len(coord_list) == 1:
+        return coord_list[0] + ".000"
+
     coord_remainder = coord_list[1]
     if len(coord_remainder) > 3:
         coord_remainder = coord_remainder[0:3]
+
     return ".".join([coord_list[0], coord_remainder])
 
 def update_display(text):
