@@ -304,7 +304,7 @@ def main(config):
 
         info_bar_length = int(WIDTH * min((nearest_flight / search_distance), 1))
         info_bar_color = get_stale_warning_color((time.now() - data_from_date).seconds, cache_tty)
-        return get_flight_radar(display_flights, extremes, orig_lat, orig_lng, info_bar_length, info_bar_color, radar_height)
+        return get_flight_radar(display_flights, extremes, orig_lat, orig_lng, info_bar_length, info_bar_color, radar_height, config.bool("info_bar", True))
     elif hide_when_nothing_to_display == True:
         return []
     else:
@@ -378,7 +378,7 @@ def update_extremes(lat1, lng1, extremes):
         extremes[3] = lng1
     return extremes
 
-def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, info_bar_color, radar_height):
+def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, info_bar_color, radar_height, show_info_bar):
     radar = []
     frames = []
 
@@ -419,7 +419,7 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
-    return renderAnimation(frames, info_bar_length, info_bar_color)
+    return renderAnimation(frames, info_bar_length, info_bar_color, show_info_bar)
 
 def get_brightness(flight):
     #brightest for lower flights, dim for flights very high
@@ -560,15 +560,25 @@ def render_row(row):
 def render_cell(cell):
     return render.Box(width = 1, height = 1, color = cell)
 
-def renderAnimation(frames, info_bar_length, info_bar_color):
+def renderAnimation(frames, info_bar_length, info_bar_color, show_info_bar):
+    children = [
+        render.Animation(
+            children = frames,
+        ),
+    ]
+
+    if show_info_bar:
+        children.append(
+            render.Box(
+                width = info_bar_length,
+                height = 1,
+                color = info_bar_color,
+            ),
+        )
+
     return render.Root(
-        render.Column(
-            children = [
-                render.Animation(
-                    children = frames,
-                ),
-                render.Box(width = info_bar_length, height = 1, color = info_bar_color),
-            ],
+        child = render.Column(
+            children = children,
         ),
         delay = DELAY,
     )
