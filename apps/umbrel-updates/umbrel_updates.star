@@ -11,8 +11,8 @@ load("hash.star", "hash")
 load("http.star", "http")
 load("images/ok.png", OK_ICON = "file")
 load("images/ok@2x.png", OK_ICON_2X = "file")
-load("images/update.png", UPDATE_ICON = "file")
-load("images/update@2x.png", UPDATE_ICON_2X = "file")
+load("images/umbrel.png", UMBREL_LOGO = "file")
+load("images/umbrel@2x.png", UMBREL_LOGO_2X = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
@@ -145,14 +145,22 @@ def fetch_updates(base, device_token):
 def plural(count, word):
     return "%d %s%s" % (count, word, "" if count == 1 else "s")
 
+def umbrel_logo(scale):
+    """Umbrel's logo, drawn as pixel art in Umbrel's purple."""
+    return render.Image(src = (UMBREL_LOGO_2X if scale == 2 else UMBREL_LOGO).readall())
+
 def render_updates(result, width, scale, fonts):
     updates = result["updates"]
+    title = plural(len(updates), "update").upper()
+
+    # "12 UPDATES" is too wide beside the logo on a 64-pixel-wide display, so use a smaller font from 10 updates
+    title_font = fonts["title"] if scale == 2 or len(title) <= 9 else "tom-thumb"
     header = render.Row(
         cross_align = "center",
         children = [
-            render.Image(src = (UPDATE_ICON_2X if scale == 2 else UPDATE_ICON).readall()),
+            umbrel_logo(scale),
             render.Box(width = 2 * scale, height = 1),
-            render.Text(plural(len(updates), "update").upper(), font = fonts["title"], color = AMBER),
+            render.Text(title, font = title_font, color = AMBER),
         ],
     )
 
@@ -178,22 +186,35 @@ def render_updates(result, width, scale, fonts):
         ],
     )
 
-def render_up_to_date(result, scale, fonts):
-    lines = [render.Text("UP TO", font = fonts["title"], color = GREEN), render.Text("DATE", font = fonts["title"], color = GREEN)]
-    if result["installed"]:
-        lines.append(render.Text(plural(result["installed"], "app"), font = fonts["small"], color = MUTED))
-    return render.Row(
-        expanded = True,
-        main_align = "space_evenly",
-        cross_align = "center",
-        children = [
-            render.Image(src = (OK_ICON_2X if scale == 2 else OK_ICON).readall()),
-            render.Column(cross_align = "center", children = lines),
-        ],
+def centred(width, scale, children):
+    """The logo above some lines, in the middle of the display."""
+    return render.Box(
+        width = width,
+        height = canvas.height(),
+        child = render.Column(
+            cross_align = "center",
+            children = [umbrel_logo(scale), render.Box(width = 1, height = 3 * scale)] + children,
+        ),
     )
 
-def render_message(text, width, fonts):
-    return render.WrappedText(text, font = fonts["small"], color = RED, width = width, align = "center")
+def render_up_to_date(result, width, scale, fonts):
+    lines = [
+        render.Row(
+            cross_align = "center",
+            children = [
+                render.Image(src = (OK_ICON_2X if scale == 2 else OK_ICON).readall()),
+                render.Box(width = 2 * scale, height = 1),
+                render.Text("UP TO DATE", font = fonts["title"], color = GREEN),
+            ],
+        ),
+    ]
+    if result["installed"]:
+        lines.append(render.Box(width = 1, height = scale))
+        lines.append(render.Text(plural(result["installed"], "app"), font = fonts["small"], color = MUTED))
+    return centred(width, scale, lines)
+
+def render_message(text, width, scale, fonts):
+    return centred(width, scale, [render.WrappedText(text, font = fonts["small"], color = RED, width = width, align = "center")])
 
 def main(config):
     width, height = canvas.size()
@@ -202,7 +223,7 @@ def main(config):
         "title": "terminus-16" if scale == 2 else "tb-8",
         "name": "terminus-14" if scale == 2 else "tb-8",
         "small": "tb-8" if scale == 2 else "tom-thumb",
-        "header_height": 18 if scale == 2 else 9,
+        "header_height": 16 if scale == 2 else 8,
     }
 
     base = base_url(config.str("umbrel_url", ""))
@@ -213,13 +234,13 @@ def main(config):
         result, error = fetch_updates(base, device_token)
 
     if error:
-        child = render_message(error, width, fonts)
+        child = render_message(error, width, scale, fonts)
     elif result["updates"]:
         child = render_updates(result, width, scale, fonts)
     elif config.bool("hide_when_up_to_date", False):
         return []
     else:
-        child = render_up_to_date(result, scale, fonts)
+        child = render_up_to_date(result, width, scale, fonts)
 
     return render.Root(
         delay = 100 // scale,
