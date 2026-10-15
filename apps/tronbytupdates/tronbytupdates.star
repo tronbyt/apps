@@ -12,7 +12,6 @@ load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-
 DEFAULT_REPO = "Tronbyt/apps"
 DEFAULT_BRANCH = "main"
 
@@ -24,7 +23,7 @@ FILES_PER_PAGE = 100
 MAX_FILE_PAGES = 3
 
 CACHE_TTL_UNAUTHENTICATED = 28800  # 8 hours
-CACHE_TTL_AUTHENTICATED = 3600     # 1 hour
+CACHE_TTL_AUTHENTICATED = 3600  # 1 hour
 
 TRONBYT_PALETTE = [
     "#00FFFF",
@@ -40,7 +39,6 @@ SCROLL_SPEED_OPTIONS = [
     schema.Option(display = "Medium Scroll", value = "45"),
     schema.Option(display = "Fast Scroll", value = "30"),
 ]
-
 
 def get_schema():
     return schema.Schema(
@@ -93,7 +91,6 @@ def get_schema():
         ],
     )
 
-
 def get_delay(config):
     value = config.str("scroll", "60")
 
@@ -103,7 +100,6 @@ def get_delay(config):
 
     delay = int(value)
     return delay // 2 if canvas.is2x() else delay
-
 
 def get_fonts():
     if canvas.is2x():
@@ -121,13 +117,11 @@ def get_fonts():
         "large_width": 5,
     }
 
-
 def clean_text(value):
     if value == None:
         return ""
 
     return " ".join(str(value).split())
-
 
 def person_name(value):
     if type(value) == "dict":
@@ -138,7 +132,6 @@ def person_name(value):
         )
 
     return clean_text(value)
-
 
 def normalize_authors(value):
     if type(value) == "list" or type(value) == "tuple":
@@ -154,7 +147,6 @@ def normalize_authors(value):
 
     return person_name(value) or "Unknown"
 
-
 def is_broken(value):
     if value == None:
         return False
@@ -165,7 +157,6 @@ def is_broken(value):
         "1",
         "on",
     ]
-
 
 def validate_repo(repo):
     parts = repo.split("/")
@@ -185,18 +176,14 @@ def validate_repo(repo):
 
     return True
 
-
 def encode_component(value):
     # url_encode uses query escaping; paths need %20 rather than +.
     return humanize.url_encode(value).replace("+", "%20")
 
-
 def get_headers(token, raw = False):
     headers = {
         "Accept": (
-            "application/vnd.github.raw+json"
-            if raw else
-            "application/vnd.github+json"
+            "application/vnd.github.raw+json" if raw else "application/vnd.github+json"
         ),
     }
 
@@ -204,7 +191,6 @@ def get_headers(token, raw = False):
         headers["Authorization"] = "Bearer " + token
 
     return headers
-
 
 def api_error(context, status_code):
     if status_code == 401:
@@ -224,11 +210,9 @@ def api_error(context, status_code):
         reason,
     )
 
-
 def add_warning(warnings, message):
     if message and message not in warnings:
         warnings.append(message)
-
 
 def get_changed_apps(commit_sha, repo, headers, cache_ttl):
     apps = []
@@ -296,8 +280,7 @@ def get_changed_apps(commit_sha, repo, headers, cache_ttl):
         "apps": apps,
         "error": error,
     }
-    
-    
+
 def get_manifest_info(app_folder, repo, snapshot_sha, headers, cache_ttl):
     for filename in ["manifest.yaml", "manifest.yml"]:
         url = "https://api.github.com/repos/%s/contents/apps/%s/%s?ref=%s" % (
@@ -366,7 +349,6 @@ def get_manifest_info(app_folder, repo, snapshot_sha, headers, cache_ttl):
         "info": None,
         "error": "",
     }
-
 
 def find_recent_app_changes(repo, branch, token, cache_ttl):
     headers = get_headers(token)
@@ -502,7 +484,6 @@ def find_recent_app_changes(repo, branch, token, cache_ttl):
         "error": "",
     }
 
-
 def render_lines(config, lines, colors):
     fonts = get_fonts()
     children = []
@@ -535,7 +516,6 @@ def render_lines(config, lines, colors):
         delay = get_delay(config),
     )
 
-
 def display_instructions(config):
     return render_lines(
         config,
@@ -553,7 +533,6 @@ def display_instructions(config):
         ],
     )
 
-
 def display_error(config, message):
     return render_lines(
         config,
@@ -561,13 +540,11 @@ def display_error(config, message):
         [TRONBYT_PALETTE[5], TRONBYT_PALETTE[1]],
     )
 
-
 def hide_or_error(config, message):
     if config.bool("hide_on_error", True):
         return []
 
     return display_error(config, message)
-
 
 def join_names(names):
     if not names:
@@ -580,7 +557,6 @@ def join_names(names):
         return names[0] + " and " + names[1]
 
     return ", ".join(names[:-1]) + " and " + names[-1]
-
 
 def display_updates(config, items, warnings):
     # Avoid random.number(0, 0) and ambiguity about its upper bound.
@@ -634,7 +610,6 @@ def display_updates(config, items, warnings):
 
     return render_lines(config, lines, colors)
 
-
 def main(config):
     if config.bool("instructions", False):
         return display_instructions(config)
@@ -653,9 +628,7 @@ def main(config):
         )
 
     cache_ttl = (
-        CACHE_TTL_AUTHENTICATED
-        if token else
-        CACHE_TTL_UNAUTHENTICATED
+        CACHE_TTL_AUTHENTICATED if token else CACHE_TTL_UNAUTHENTICATED
     )
 
     result = find_recent_app_changes(
