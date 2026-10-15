@@ -1,7 +1,7 @@
 """
 Applet: Umbrel Updates
 Summary: Updates for your Umbrel apps
-Description: Shows which apps installed on your Umbrel home server have an update available. Needs umbrelOS 2.0 or later.
+Description: Shows which apps installed on your Umbrel home server have an update available, and only appears when there are updates. Needs umbrelOS 2.0 or later.
 Author: saltedlolly
 """
 
@@ -9,8 +9,6 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
-load("images/ok.png", OK_ICON = "file")
-load("images/ok@2x.png", OK_ICON_2X = "file")
 load("images/umbrel.png", UMBREL_LOGO = "file")
 load("images/umbrel@2x.png", UMBREL_LOGO_2X = "file")
 load("render.star", "canvas", "render")
@@ -34,14 +32,12 @@ ACCESS_TOKEN_TTL = 50 * 60
 RESULT_TTL = 10 * 60
 
 AMBER = "#ffaa00"
-GREEN = "#3cdc5a"
 RED = "#ff5050"
 WHITE = "#ffffff"
 MUTED = "#999999"
 
 # Shown when the app hasn't been set up, e.g. in the app store's preview
 DEMO = {
-    "installed": 18,
     "updates": [
         {"name": "Nextcloud", "version": "31.0.4"},
         {"name": "Immich", "version": "1.135.0"},
@@ -95,7 +91,7 @@ def query(base, path, access_token):
     return 200, resp.json()["result"]["data"]
 
 def fetch_updates(base, device_token):
-    """The apps with an update available, and how many apps are installed."""
+    """The apps with an update available."""
     key = "umbrel-%s" % hash.sha256(base + "|" + device_token)
     cached = cache.get(key + "-result")
     if cached:
@@ -122,18 +118,16 @@ def fetch_updates(base, device_token):
         return None, "Umbrel error %d" % status
     cache.set(key + "-access", access_token, ttl_seconds = ACCESS_TOKEN_TTL)
 
-    # Names for the app IDs. Only the name of each app is used.
+    # Names for the app IDs, only needed when there are updates. Only the name of each app is used.
     names = {}
-    installed = 0
-    status, apps = query(base, "apps.list", access_token)
-    if status == 200:
-        for app in apps:
-            installed += 1
-            if app.get("name"):
-                names[app["id"]] = app["name"]
+    if updates:
+        status, apps = query(base, "apps.list", access_token)
+        if status == 200:
+            for app in apps:
+                if app.get("name"):
+                    names[app["id"]] = app["name"]
 
     result = {
-        "installed": installed,
         "updates": sorted(
             [{"name": names.get(u["id"], u["id"]), "version": u["version"]} for u in updates],
             key = lambda u: u["name"].lower(),
@@ -197,22 +191,6 @@ def centred(width, scale, children):
         ),
     )
 
-def render_up_to_date(result, width, scale, fonts):
-    lines = [
-        render.Row(
-            cross_align = "center",
-            children = [
-                render.Image(src = (OK_ICON_2X if scale == 2 else OK_ICON).readall()),
-                render.Box(width = 2 * scale, height = 1),
-                render.Text("UP TO DATE", font = fonts["title"], color = GREEN),
-            ],
-        ),
-    ]
-    if result["installed"]:
-        lines.append(render.Box(width = 1, height = scale))
-        lines.append(render.Text(plural(result["installed"], "app"), font = fonts["small"], color = MUTED))
-    return centred(width, scale, lines)
-
 def render_message(text, width, scale, fonts):
     return centred(width, scale, [render.WrappedText(text, font = fonts["small"], color = RED, width = width, align = "center")])
 
@@ -237,10 +215,9 @@ def main(config):
         child = render_message(error, width, scale, fonts)
     elif result["updates"]:
         child = render_updates(result, width, scale, fonts)
-    elif config.bool("hide_when_up_to_date", False):
-        return []
     else:
-        child = render_up_to_date(result, width, scale, fonts)
+        # Nothing to update: skip this app on the display
+        return []
 
     return render.Root(
         delay = 100 // scale,
@@ -263,13 +240,6 @@ def get_schema():
                 desc = "From signing in to your Umbrel once (see the app's README)",
                 icon = "key",
                 secret = True,
-            ),
-            schema.Toggle(
-                id = "hide_when_up_to_date",
-                name = "Only show when there are updates",
-                desc = "Skip this app when all your Umbrel apps are up to date",
-                icon = "eyeSlash",
-                default = False,
             ),
         ],
     )

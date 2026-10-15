@@ -1,6 +1,6 @@
 # Umbrel Updates
 
-Shows which apps on your [Umbrel](https://umbrel.com) home server have an update available, with each app's new version. When everything is up to date it says so, or it can skip its turn on your display until there's something to update.
+Shows which apps on your [Umbrel](https://umbrel.com) home server have an update available, with each app's new version. It only appears on your display when there are updates; the rest of the time it skips its turn. If something's wrong, such as a device token that no longer works, it shows a message so you know.
 
 It covers apps from the official Umbrel App Store and from any community app stores you've added to your Umbrel.
 
