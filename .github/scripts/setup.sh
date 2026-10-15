@@ -26,7 +26,7 @@ if ! gzip -t "$OUT" 2>/dev/null; then
 fi
 
 echo "Extracting ${ASSET} to /usr/local/bin"
-sudo tar -xzf "$OUT" -C /usr/local/bin --strip-components=1
-sudo chmod +x /usr/local/bin/pixlet || true
+sudo tar -xzf "$OUT" -C /usr/local/bin
+sudo chmod +x /usr/local/bin/pixlet
 
 echo "pixlet ${PIXLET_VERSION} installed"
