@@ -37,7 +37,9 @@ const {
   filterAndSortApps,
   normalizeCatalogueMetadata,
   rememberViewerScroll,
-  restoreViewerScroll
+  restoreViewerScroll,
+  shareablePageUrl,
+  tidyPageAddress
 } = await import('./main.js');
 
 test('saves catalogue scroll state before navigating to app details', () => {
@@ -121,4 +123,64 @@ test('composes catalogue search, filters, broken state and sorting before batchi
   assert.deepEqual(filterAndSortApps(apps, {
     hideBroken: true, brokenApps: ['alpha.star'], sort: 'newest'
   }).map(app => app.name), ['beta']);
+});
+
+test('a detail page moves the catalogue state out of its address and drops .html', () => {
+  const location = window.location;
+  const history = window.history;
+  let replaced = null;
+  window.location = {
+    href: 'https://apps.tronbyt.com/details/uptime_kuma.html?display=wide&scroll=2109#readme',
+    pathname: '/details/uptime_kuma.html',
+    search: '?display=wide&scroll=2109'
+  };
+  window.history = {
+    state: null,
+    replaceState(state, title, url) {
+      replaced = { state, url: String(url) };
+    }
+  };
+  try {
+    tidyPageAddress();
+    assert.equal(replaced.url, 'https://apps.tronbyt.com/details/uptime_kuma#readme');
+    assert.deepEqual(replaced.state, { viewerState: 'display=wide&scroll=2109' });
+  } finally {
+    window.location = location;
+    window.history = history;
+  }
+});
+
+test('after a reload the saved catalogue state is kept', () => {
+  const location = window.location;
+  const history = window.history;
+  let replaced = null;
+  window.location = {
+    href: 'https://apps.tronbyt.com/details/uptime_kuma',
+    pathname: '/details/uptime_kuma',
+    search: ''
+  };
+  window.history = {
+    state: { viewerState: 'display=wide&scroll=2109' },
+    replaceState(state, title, url) {
+      replaced = { state, url: String(url) };
+    }
+  };
+  try {
+    tidyPageAddress();
+    assert.equal(replaced, null); // Already tidy: nothing to change, and the saved state is left alone
+  } finally {
+    window.location = location;
+    window.history = history;
+  }
+});
+
+test('the shared link is the page alone', () => {
+  assert.equal(
+    shareablePageUrl('https://apps.tronbyt.com/details/uptime_kuma.html?display=wide&scroll=2109#readme'),
+    'https://apps.tronbyt.com/details/uptime_kuma'
+  );
+  assert.equal(
+    shareablePageUrl('https://apps.tronbyt.com/authors/robert-ison?q=clock'),
+    'https://apps.tronbyt.com/authors/robert-ison'
+  );
 });

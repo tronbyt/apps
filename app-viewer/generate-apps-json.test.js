@@ -49,7 +49,7 @@ test('app pages have share tags pointing at the app\'s card', () => {
   assert.match(metadata, /<meta property="og:image" content="https:\/\/apps\.tronbyt\.com\/cards\/clock-0123456789\.png">/);
   assert.match(metadata, /<meta property="og:image:width" content="1200">/);
   assert.match(metadata, /<meta name="twitter:card" content="summary_large_image">/);
-  assert.match(metadata, /<link rel="canonical" href="https:\/\/apps\.tronbyt\.com\/details\/clock\.html">/);
+  assert.match(metadata, /<link rel="canonical" href="https:\/\/apps\.tronbyt\.com\/details\/clock">/);
 });
 
 test('the details written into app and author pages are escaped', () => {
@@ -64,8 +64,8 @@ test('the details written into app and author pages are escaped', () => {
   for (const html of [buildAppPrerender(app), buildAuthorPrerender({ displayName: '<i>Author</i>', apps: [app] })]) {
     assert.doesNotMatch(html, /<script|<img|<b>|<i>/i);
   }
-  assert.match(buildAppPrerender(app), /href="\.\.\/authors\/author\.html"/);
-  assert.match(buildAuthorPrerender({ displayName: 'Author', apps: [app] }), /href="\.\.\/details\/bad\.html"/);
+  assert.match(buildAppPrerender(app), /href="\.\.\/authors\/author"/);
+  assert.match(buildAuthorPrerender({ displayName: 'Author', apps: [app] }), /href="\.\.\/details\/bad"/);
 });
 
 test('the sitemap lists every page, with dates where an app has one', () => {
@@ -74,9 +74,9 @@ test('the sitemap lists every page, with dates where an app has one', () => {
     [{ slug: 'olly' }],
   );
   assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/details\/clock\.html<\/loc><lastmod>2026-10-01<\/lastmod>/);
-  assert.match(sitemap, /details\/a%26b\.html<\/loc><\/url>/);
-  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/authors\/olly\.html<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/details\/clock<\/loc><lastmod>2026-10-01<\/lastmod>/);
+  assert.match(sitemap, /details\/a%26b<\/loc><\/url>/);
+  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/authors\/olly<\/loc>/);
 });
 
 test('finds mixed-case README filenames and preserves their actual path', () => {
