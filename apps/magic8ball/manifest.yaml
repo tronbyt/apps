@@ -1,0 +1,18 @@
+---
+id: magic-8-ball
+name: Magic 8 Ball
+summary: Answer your deepest questions
+desc: Roll one of 20 classic Magic 8 Ball answers. Good luck!
+author: frame-shift
+fileName: magic_8_ball.star
+packageName: magic8ball
+recommendedInterval: 0
+supports2x: true
+supports64x64: true
+category: entertainment
+tags:
+  - fun
+  - retro
+  - novelty
+  - toy
+  - wide 2x support
