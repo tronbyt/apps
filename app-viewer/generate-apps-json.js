@@ -152,7 +152,7 @@ function scriptJson(value) {
 }
 
 export function appPageUrl(app) {
-  return `${SITE_URL}details/${encodeURIComponent(app.name)}.html`;
+  return `${SITE_URL}details/${encodeURIComponent(app.name)}`;
 }
 
 export function buildAppMetaTags(app, cardPath = SITE_CARD) {
@@ -194,7 +194,7 @@ export function buildAppPrerender(app) {
   if (app.author) {
     const author = escapeHtmlAttribute(app.author);
     parts.push(app.authorSlug
-      ? `<p>By <a href="../authors/${encodeURIComponent(app.authorSlug)}.html">${author}</a></p>`
+      ? `<p>By <a href="../authors/${encodeURIComponent(app.authorSlug)}">${author}</a></p>`
       : `<p>By ${author}</p>`);
   }
   if (app.tags && app.tags.length) {
@@ -208,7 +208,7 @@ export function buildAuthorMetaTags(profile, cardPath = SITE_CARD) {
   const appCount = profile.apps.length;
   const title = `${profile.displayName} - Tronbyt Apps`;
   const description = `${appCount} Tronbyt ${appCount === 1 ? 'app' : 'apps'} by ${profile.displayName}.`;
-  const url = `${SITE_URL}authors/${encodeURIComponent(profile.slug)}.html`;
+  const url = `${SITE_URL}authors/${encodeURIComponent(profile.slug)}`;
   return `${socialTags({ title, description, url, image: SITE_URL + cardPath, imageAlt: `Tronbyt apps by ${profile.displayName}` })}
         <meta name="author-slug" content="${escapeHtmlAttribute(profile.slug)}">
         <meta name="author-name" content="${escapeHtmlAttribute(profile.displayName)}">`;
@@ -217,7 +217,7 @@ export function buildAuthorMetaTags(profile, cardPath = SITE_CARD) {
 // The author's apps written into the page as links, so search engines can find each app's page
 export function buildAuthorPrerender(profile) {
   const apps = profile.apps
-    .map(app => `<li><a href="../details/${encodeURIComponent(app.name)}.html">${escapeHtmlAttribute(app.displayName || app.name)}</a>${app.summary ? ` - ${escapeHtmlAttribute(app.summary)}` : ''}</li>`)
+    .map(app => `<li><a href="../details/${encodeURIComponent(app.name)}">${escapeHtmlAttribute(app.displayName || app.name)}</a>${app.summary ? ` - ${escapeHtmlAttribute(app.summary)}` : ''}</li>`)
     .join('\n                    ');
   return `<h1>${escapeHtmlAttribute(profile.displayName)}</h1>
                 <ul>
@@ -248,7 +248,7 @@ export function buildSitemap(apps, profiles) {
 ${[
     entry(SITE_URL),
     ...apps.map(app => entry(appPageUrl(app), sitemapDate(app.updated || app.published))),
-    ...profiles.map(profile => entry(`${SITE_URL}authors/${encodeURIComponent(profile.slug)}.html`)),
+    ...profiles.map(profile => entry(`${SITE_URL}authors/${encodeURIComponent(profile.slug)}`)),
   ].join('\n')}
 </urlset>
 `;

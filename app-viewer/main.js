@@ -26,8 +26,15 @@ function getViewerStateParams(search = window.location.search) {
   return state;
 }
 
+// The catalogue's state (search, filters, scroll) arrives on a detail or author page in its address, then is kept in
+// the page's history entry instead (see tidyPageAddress), where it survives a reload
+function currentViewerState() {
+  const fromAddress = getViewerStateParams();
+  return fromAddress.toString() ? fromAddress : getViewerStateParams(window.history.state?.viewerState || '');
+}
+
 function buildViewerStateUrl(path) {
-  const params = getViewerStateParams();
+  const params = currentViewerState();
   const query = params.toString();
   return `${path}${query ? `?${query}` : ''}`;
 }
@@ -51,6 +58,55 @@ export function rememberViewerScroll(event) {
   // the back/forward cache. Keep it on the detail URL as the fallback too.
   window.history.replaceState(window.history.state, '', catalogueUrl);
   event.currentTarget.href = detailUrl.href;
+}
+
+// Takes the catalogue's state and any ".html" out of a detail or author page's address, so what's in the address bar is
+// the page's own clean link and can be copied and shared. The state moves into the history entry, so Back to Apps still
+// returns to the same place, even after a reload.
+export function tidyPageAddress() {
+  const url = new URL(window.location.href);
+  const viewerState = currentViewerState().toString();
+  VIEWER_STATE_PARAMS.forEach(name => url.searchParams.delete(name));
+  url.pathname = url.pathname.replace(/\.html$/, '');
+  if (url.href !== window.location.href || viewerState !== (window.history.state?.viewerState || '')) {
+    window.history.replaceState({ ...(window.history.state || {}), viewerState }, '', url);
+  }
+}
+
+// The page's clean link, for sharing
+export function shareablePageUrl(href = window.location.href) {
+  const url = new URL(href);
+  url.search = '';
+  url.hash = '';
+  url.pathname = url.pathname.replace(/\.html$/, '');
+  return url.href;
+}
+
+// "Share": the share sheet on phones and tablets, otherwise copies the link
+function createShareButton(title) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn btn-info share-button';
+  button.textContent = '🔗 Share';
+  button.addEventListener('click', async () => {
+    const url = shareablePageUrl();
+    if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
+      try {
+        await navigator.share({ title, url });
+      } catch {
+        // Cancelled
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      button.textContent = '✓ Link copied';
+      setTimeout(() => { button.textContent = '🔗 Share'; }, 2000);
+    } catch {
+      window.prompt('Copy this link:', url);
+    }
+  });
+  return button;
 }
 
 export function restoreViewerScroll(scrollY) {
@@ -253,7 +309,7 @@ function renderAppsList(
     }
 
     // URL for app details page
-    const detailUrl = buildViewerStateUrl(BASE_PATH + `details/${encodeURIComponent(app.name)}.html`);
+    const detailUrl = buildViewerStateUrl(BASE_PATH + `details/${encodeURIComponent(app.name)}`);
 
     // Wrap image in a link
     const imageLink = document.createElement('a');
@@ -637,7 +693,7 @@ function getAppNameFromURL() {
   // Fallback to filename
   const pathname = window.location.pathname;
   if (pathname.includes('/details/')) {
-    const match = pathname.match(/\/details\/([^/]+)\.html/);
+    const match = pathname.match(/\/details\/([^/]+?)(?:\.html)?$/);
     if (match) return decodeURIComponent(match[1]);
   }
 
@@ -734,7 +790,7 @@ async function renderAppDetail() {
     const authorDesc = document.createElement('dd');
     if (app.authorSlug) {
       const authorLink = document.createElement('a');
-      authorLink.href = `${BASE_PATH}authors/${encodeURIComponent(app.authorSlug)}.html`;
+      authorLink.href = `${BASE_PATH}authors/${encodeURIComponent(app.authorSlug)}`;
       authorLink.className = 'author-link';
       authorLink.textContent = app.author;
       authorDesc.appendChild(authorLink);
@@ -1004,7 +1060,7 @@ async function renderAppDetail() {
     container.appendChild(readmeSection);
   }
 
-  // Add buttons at the bottom - Back to Apps on left, Report Issue on right
+  // Add buttons at the bottom - Back to Apps on left, Share and Report Issue on right
   const reportContainer = document.createElement('div');
   reportContainer.className = 'detail-footer mt-4 pt-4 border-top d-flex justify-content-between';
 
@@ -1062,6 +1118,7 @@ async function renderAppDetail() {
   }
 
   reportContainer.appendChild(backButton);
+  rightActions.appendChild(createShareButton(`${app.displayName || appName} - Tronbyt App`));
   rightActions.appendChild(reportControl);
   if (sourceLink) rightActions.appendChild(sourceLink);
   reportContainer.appendChild(rightActions);
@@ -1083,7 +1140,7 @@ function getAuthorSlugFromURL() {
 
   const pathname = window.location.pathname;
   if (pathname.includes('/authors/')) {
-    const match = pathname.match(/\/authors\/([^/]+)\.html/);
+    const match = pathname.match(/\/authors\/([^/]+?)(?:\.html)?$/);
     if (match) return decodeURIComponent(match[1]);
   }
 
@@ -1123,8 +1180,12 @@ async function renderAuthorProfile() {
   count.className = 'author-app-count mb-0';
   count.textContent = `${authorApps.length} ${authorApps.length === 1 ? 'app' : 'apps'}`;
 
+  const share = createShareButton(`${authorName} - Tronbyt Apps`);
+  share.classList.add('mt-3');
+
   header.appendChild(title);
   header.appendChild(count);
+  header.appendChild(share);
   container.appendChild(header);
 
   const list = document.createElement('div');
@@ -1144,6 +1205,7 @@ async function renderAuthorProfile() {
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('author-content')) {
     // Author profile page
+    tidyPageAddress();
     await renderAuthorProfile();
     setupDotMatrixToggle();
   } else if (document.getElementById('apps-list')) {
@@ -1153,6 +1215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupDotMatrixToggle();
   } else if (document.getElementById('app-content')) {
     // App detail page
+    tidyPageAddress();
     renderAppDetail();
     setupDotMatrixToggle();
   }

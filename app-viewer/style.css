@@ -929,7 +929,8 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
     gap: 1rem;
   }
 
-  .detail-actions .report-button {
+  .detail-actions .report-button,
+  .detail-actions .share-button {
     flex: 1 1 auto;
   }
 }
@@ -972,7 +973,8 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
   font-size: 0.7rem;
 }
 
-.report-button {
+.report-button,
+.share-button {
   font-family: 'Press Start 2P', monospace;
 }
 
