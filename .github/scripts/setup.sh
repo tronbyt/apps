@@ -18,9 +18,8 @@ if ! curl -fSL --retry 3 --retry-delay 2 -o "$OUT" "$URL"; then
   exit 2
 fi
 
-# Quick magic-bytes check for gzip: first two bytes 1f 8b
-if ! head -c 2 "$OUT" | od -An -t x1 | tr -s ' ' | grep -q '^1f 8b'; then
-  echo "ERROR: downloaded file is not a gzip archive" >&2
+if ! gzip -t "$OUT" 2>/dev/null; then
+  echo "ERROR: downloaded file is not a valid gzip archive" >&2
   echo "First 300 bytes for debug:" >&2
   head -c 300 "$OUT" | sed -n '1,200p' >&2
   exit 3
