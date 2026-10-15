@@ -9,6 +9,7 @@ import {
   buildAuthorPrerender,
   buildSitemap,
   escapeHtmlAttribute,
+  buildRobotsTxt,
   findMarkdown,
   pointHomePageAtCard,
   tileCandidates,
@@ -45,10 +46,10 @@ test('generated app metadata cannot close tags or attributes', () => {
 
 test('app pages have share tags pointing at the app\'s card', () => {
   const metadata = buildAppMetaTags({ name: 'clock', displayName: 'Clock', summary: 'Tells the time' }, 'cards/clock-0123456789.png');
-  assert.match(metadata, /<meta property="og:image" content="https:\/\/tronbyt\.github\.io\/apps\/cards\/clock-0123456789\.png">/);
+  assert.match(metadata, /<meta property="og:image" content="https:\/\/apps\.tronbyt\.com\/cards\/clock-0123456789\.png">/);
   assert.match(metadata, /<meta property="og:image:width" content="1200">/);
   assert.match(metadata, /<meta name="twitter:card" content="summary_large_image">/);
-  assert.match(metadata, /<link rel="canonical" href="https:\/\/tronbyt\.github\.io\/apps\/details\/clock\.html">/);
+  assert.match(metadata, /<link rel="canonical" href="https:\/\/apps\.tronbyt\.com\/details\/clock\.html">/);
 });
 
 test('the details written into app and author pages are escaped', () => {
@@ -72,10 +73,10 @@ test('the sitemap lists every page, with dates where an app has one', () => {
     [{ name: 'clock', updated: '2026-10-01T12:00:00Z' }, { name: 'a&b' }],
     [{ slug: 'olly' }],
   );
-  assert.match(sitemap, /<loc>https:\/\/tronbyt\.github\.io\/apps\/<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/tronbyt\.github\.io\/apps\/details\/clock\.html<\/loc><lastmod>2026-10-01<\/lastmod>/);
+  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/details\/clock\.html<\/loc><lastmod>2026-10-01<\/lastmod>/);
   assert.match(sitemap, /details\/a%26b\.html<\/loc><\/url>/);
-  assert.match(sitemap, /<loc>https:\/\/tronbyt\.github\.io\/apps\/authors\/olly\.html<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/apps\.tronbyt\.com\/authors\/olly\.html<\/loc>/);
 });
 
 test('finds mixed-case README filenames and preserves their actual path', () => {
@@ -114,7 +115,17 @@ test('points every home page card tag at the current home card', () => {
   const html = readFileSync(new URL('./index.html', import.meta.url), 'utf8');
   const updated = pointHomePageAtCard(html, 'cards/tronbyt-app-viewer-0123456789.png');
   assert.equal(updated.includes('cards/tronbyt-app-viewer.png'), false);
-  assert.equal(updated.split('https://tronbyt.github.io/apps/cards/tronbyt-app-viewer-0123456789.png').length - 1, 2);
+  assert.equal(updated.split('https://apps.tronbyt.com/cards/tronbyt-app-viewer-0123456789.png').length - 1, 2);
   // A second build over an already updated copy still finds the tags
   assert.equal(pointHomePageAtCard(updated, 'cards/tronbyt-app-viewer-abcdef0123.png').includes('-abcdef0123.png'), true);
+});
+
+test('robots.txt points search engines at the sitemap', () => {
+  assert.equal(buildRobotsTxt(), 'User-agent: *\nAllow: /\n\nSitemap: https://apps.tronbyt.com/sitemap.xml\n');
+});
+
+test('repoints a home page card tag from the old site address', () => {
+  const html = '<meta property="og:image" content="https://tronbyt.github.io/apps/cards/tronbyt-app-viewer.png">';
+  assert.equal(pointHomePageAtCard(html, 'cards/tronbyt-app-viewer-0123456789.png'),
+    '<meta property="og:image" content="https://apps.tronbyt.com/cards/tronbyt-app-viewer-0123456789.png">');
 });

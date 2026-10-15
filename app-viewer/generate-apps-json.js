@@ -41,7 +41,7 @@ const outputDir = dirname(outputFile);
 const OUTPUT_FILE = outputFile;
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const MD_FILES = ['README.md', 'readme.md', 'index.md'];
-const SITE_URL = 'https://tronbyt.github.io/apps/';
+const SITE_URL = 'https://apps.tronbyt.com/';
 const SITE_NAME = 'Tronbyt App Viewer';
 // The placeholder card name in index.html. A build into a separate folder (the deployed site) rewrites the copied
 // index.html to point at the home card's hashed name instead, so sharing sites fetch it again when it changes.
@@ -231,6 +231,15 @@ function sitemapDate(value) {
 }
 
 // Every page, for search engines
+// Lets search engines find the sitemap
+export function buildRobotsTxt() {
+  return `User-agent: *
+Allow: /
+
+Sitemap: ${SITE_URL}sitemap.xml
+`;
+}
+
 export function buildSitemap(apps, profiles) {
   const entry = (url, lastmod) =>
     `  <url><loc>${escapeHtmlAttribute(url)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`;
@@ -295,7 +304,7 @@ function planSiteCard(apps) {
 
 // Point the home page's card tags at the current home card
 export function pointHomePageAtCard(html, cardPath) {
-  return html.replace(/https:\/\/tronbyt\.github\.io\/apps\/cards\/tronbyt-app-viewer[\w-]*\.png/g, SITE_URL + cardPath);
+  return html.replace(/https:\/\/[^"]*\/cards\/tronbyt-app-viewer[\w-]*\.png/g, SITE_URL + cardPath);
 }
 
 // The site's own copy of index.html, if this build writes into a separate folder (the source copy is left alone)
@@ -569,7 +578,8 @@ async function main() {
   console.log(`Generated ${authorProfiles.length} static author HTML pages with metadata.`);
 
   writeFileSync(join(outputDir, 'sitemap.xml'), buildSitemap(apps, authorProfiles));
-  console.log('Generated sitemap.xml.');
+  writeFileSync(join(outputDir, 'robots.txt'), buildRobotsTxt());
+  console.log('Generated sitemap.xml and robots.txt.');
 
   const siteCard = planSiteCard(apps);
   if (updateHomePage(siteCard)) console.log(`Pointed index.html at ${siteCard}.`);

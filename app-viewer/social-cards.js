@@ -10,7 +10,7 @@ export const CARD_WIDTH = 1200;
 export const CARD_HEIGHT = 630;
 
 // Change this when the card design changes, so every card gets a new file name and sharing sites fetch it again
-const CARD_VERSION = 1;
+const CARD_VERSION = 2;
 
 const SOCIAL_DIR = new URL('./social/', import.meta.url);
 const LOGO = readFileSync(new URL('tronbyt-logo.png', SOCIAL_DIR));
@@ -296,7 +296,7 @@ async function header() {
 }
 
 async function footer() {
-  const site = await renderText('tronbyt.github.io/apps', 16, 600, SITE_COLOR, 1);
+  const site = await renderText('apps.tronbyt.com', 16, 600, SITE_COLOR, 1);
   return { input: site.data, left: CARD_WIDTH - 60 - site.info.width, top: CARD_HEIGHT - 40 - site.info.height };
 }
 
