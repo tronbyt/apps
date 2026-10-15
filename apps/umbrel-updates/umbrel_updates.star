@@ -242,8 +242,8 @@ def render_up_to_date(result, width, scale, fonts):
         lines.append(render.Text(plural(result["installed"], "app"), font = fonts["small"], color = MUTED))
     return centred(width, scale, lines)
 
-def render_message(text, width, scale, fonts):
-    return centred(width, scale, [render.WrappedText(text, font = fonts["small"], color = RED, width = width, align = "center")])
+def render_message(text, width, scale, fonts, color = RED):
+    return centred(width, scale, [render.WrappedText(text, font = fonts["small"], color = color, width = width, align = "center")])
 
 def main(config):
     width, height = canvas.size()
@@ -257,7 +257,20 @@ def main(config):
 
     base = base_url(config.str("umbrel_url", ""))
     device_token = config.str("device_token", "").strip()
-    if not base or not device_token:
+
+    # Settings missing on a Tronbyt server (which always passes the display's time zone as "$tz"): say which, even
+    # when only showing updates. Without "$tz", e.g. in the app store's preview or `pixlet check`, show an example.
+    missing = None
+    if not base and not device_token:
+        missing = "Add your Umbrel's address and device token"
+    elif not base:
+        missing = "Add your Umbrel's address"
+    elif not device_token:
+        missing = "Add a device token (see the README)"
+
+    if missing and config.get("$tz"):
+        return render.Root(child = render.Box(width = width, height = height, child = render_message(missing, width, scale, fonts, AMBER)))
+    if missing:
         result, error = DEMO, None
     else:
         result, error = fetch_updates(base, device_token)
