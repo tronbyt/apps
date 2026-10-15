@@ -1,6 +1,6 @@
 """
 Applet: Umbrel Updates
-Summary: Updates for your Umbrel and its apps
+Summary: Umbrel and app updates
 Description: Shows umbrelOS updates and which apps installed on your Umbrel home server have an update available. Needs umbrelOS 2.0 or later.
 Author: saltedlolly
 """
