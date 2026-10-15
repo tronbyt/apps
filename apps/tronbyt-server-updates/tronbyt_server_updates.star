@@ -6,6 +6,7 @@ Author: saltedlolly
 """
 
 load("cache.star", "cache")
+load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
 load("images/ok.png", OK_ICON = "file")
@@ -15,14 +16,18 @@ load("images/tronbyt@2x.png", TRONBYT_LOGO_2X = "file")
 load("re.star", "re")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 # Apps run inside the Tronbyt server, which listens on port 8000 unless it's been changed
 DEFAULT_SERVER_URL = "http://localhost:8000"
 RELEASES_URL = "https://api.github.com/repos/tronbyt/server/releases/latest"
 
-# How often to check: the server's own version, and GitHub for a new release
-SERVER_TTL = 30 * 60
+# How often to check GitHub for a new release, and the server's own version. The server's version only changes
+# when it's updated, so it's rechecked often only while it's behind the latest release, so the update message goes
+# soon after the server is updated.
 RELEASE_TTL = 6 * 60 * 60
+SERVER_TTL = 6 * 60 * 60
+SERVER_TTL_WHILE_BEHIND = 5 * 60
 
 AMBER = "#ffaa00"
 GREEN = "#3cdc5a"
@@ -37,10 +42,18 @@ def version_numbers(version):
         return None
     return [int(n) for n in found[0][1:4]]
 
-def server_version(base):
+def server_version(base, latest):
     """The version the server shows at the bottom of its pages, e.g. "Server v2.4.0", from its login page, which
     doesn't need a login. Later, the server may be able to give apps its version directly."""
-    resp = http.get(base + "/auth/login", ttl_seconds = SERVER_TTL)
+    key = "tronbyt-server-version-%s" % hash.sha256(base)
+    saved = cache.get(key)
+    if saved:
+        saved = json.decode(saved)
+        behind = latest and version_numbers(saved["version"]) and version_numbers(latest) > version_numbers(saved["version"])
+        if not behind or time.now().unix - saved["checked"] < SERVER_TTL_WHILE_BEHIND:
+            return saved["version"], None
+
+    resp = http.get(base + "/auth/login")
     if resp.status_code != 200:
         return None, "Tronbyt server error %d" % resp.status_code
 
@@ -49,7 +62,9 @@ def server_version(base):
     found = re.match(r"(?m)^\S*\s*(v\d+\.\d+\.\d+[^\s<(]*)\s*(\(<a|</div>)", resp.body())
     if not found:
         return None, "Can't find the server's version"
-    return found[0][1], None
+    version = found[0][1]
+    cache.set(key, json.encode({"version": version, "checked": time.now().unix}), ttl_seconds = SERVER_TTL)
+    return version, None
 
 def latest_release():
     """The latest Tronbyt Server release on GitHub, e.g. "v2.5.0". The last one found is remembered, so a GitHub
@@ -73,10 +88,10 @@ def check(base):
     attempt = "tronbyt-server-attempt-%s" % hash.sha256(base)
     if cache.get(attempt) == "started":
         cache.set(attempt, "", ttl_seconds = 60)
-        return None, None, "Can't connect to your Tronbyt server"
+        return None, None, "Can't connect to your Tronbyt server or GitHub"
     cache.set(attempt, "started", ttl_seconds = 24 * 60 * 60)
-    current, error = server_version(base)
-    latest = latest_release() if not error else None
+    latest = latest_release()
+    current, error = server_version(base, latest)
     cache.set(attempt, "", ttl_seconds = 60)
 
     if error:

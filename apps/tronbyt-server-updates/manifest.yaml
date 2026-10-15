@@ -6,7 +6,7 @@ desc: Shows when a new version of Tronbyt Server is available, comparing the ver
 author: saltedlolly
 fileName: tronbyt_server_updates.star
 packageName: tronbyt-server-updates
-recommendedInterval: 60
+recommendedInterval: 5
 supports2x: true
 supports64x64: true
 category: utilities

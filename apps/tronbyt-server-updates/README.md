@@ -8,7 +8,7 @@ Usually there's nothing to set. The app runs inside your Tronbyt server and chec
 
 ## How it works
 
-- **Your server's version** comes from the bottom of its login page, which shows e.g. "Server v2.4.0" and doesn't need you to be signed in. It's checked every 30 minutes.
+- **Your server's version** comes from the bottom of its login page, which shows e.g. "Server v2.4.0" and doesn't need you to be signed in. While your server is up to date it's checked every 6 hours. While an update is waiting, it's checked every 5 minutes, so the message goes within a few minutes of updating your server.
 - **The latest version** comes from [Tronbyt Server's releases on GitHub](https://github.com/tronbyt/server/releases), checked every 6 hours. If GitHub can't be reached, the last version found is used.
 - If the app can't connect to your server, it shows "Can't connect to your Tronbyt server" every other time its turn comes round, until it can.
 
