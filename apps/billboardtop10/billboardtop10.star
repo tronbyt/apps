@@ -13,7 +13,6 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-
 BILLBOARD_ICON = BILLBOARD_ICON_ASSET.readall()
 
 DEFAULT_COLORS = [
@@ -65,13 +64,11 @@ SAMPLE_SONGS = [
     ("Der Kommissar", "After The Fire", 5, 14),
 ]
 
-
 def clean_text(value):
     if value == None:
         return ""
 
     return " ".join(str(value).split())
-
 
 def positive_integer(value):
     text = clean_text(value)
@@ -86,13 +83,11 @@ def positive_integer(value):
     number = int(text)
     return number if number > 0 else None
 
-
 def is_leap_year(year):
     return (
         year % 4 == 0 and
         (year % 100 != 0 or year % 400 == 0)
     )
-
 
 def month_lengths(year):
     return [
@@ -110,7 +105,6 @@ def month_lengths(year):
         31,
     ]
 
-
 def days_since_epoch(year, month, day):
     total = 0
 
@@ -124,16 +118,13 @@ def days_since_epoch(year, month, day):
 
     return total + day - 1
 
-
 def pad2(number):
     text = str(number)
     return "0" + text if len(text) < 2 else text
 
-
 def pad4(number):
     text = str(number)
     return "0" * max(0, 4 - len(text)) + text
-
 
 def date_from_days(days):
     year = 1970
@@ -190,7 +181,6 @@ def parse_chart_date(value):
 
     return days_since_epoch(year, month, day)
 
-
 def publication_cycle(now):
     # Unix days are UTC calendar days.
     today = now // DAY
@@ -203,7 +193,6 @@ def publication_cycle(now):
         "base": tuesday * DAY + BASE_CHECK_HOUR_UTC * HOUR,
         "date": date_from_days(tuesday + 4),
     }
-
 
 def sample_data():
     songs = {}
@@ -224,7 +213,6 @@ def sample_data():
         "date": "1983-05-14",
         "songs": songs,
     }
-
 
 def normalize_chart(data):
     if type(data) != "dict":
@@ -273,7 +261,6 @@ def normalize_chart(data):
         "songs": songs,
     }
 
-
 def api_error(status):
     if status == 401:
         return "API key rejected"
@@ -285,7 +272,6 @@ def api_error(status):
         return "API rate limit reached"
 
     return "Billboard API HTTP %s" % status
-
 
 def fetch_chart(api_key, chart_name, chart_date):
     response = http.get(
@@ -316,7 +302,6 @@ def fetch_chart(api_key, chart_name, chart_date):
         "status": response.status_code,
     }
 
-
 def empty_state():
     return {
         "chart": None,
@@ -328,7 +313,6 @@ def empty_state():
         "failures": 0,
         "error": "",
     }
-
 
 def load_state(key):
     stored = cache.get(key)
@@ -343,14 +327,12 @@ def load_state(key):
 
     return state
 
-
 def save_state(key, state):
     cache.set(
         key,
         json.encode(state),
         ttl_seconds = STATE_TTL,
     )
-
 
 def learned_offset(state):
     offsets = []
@@ -388,7 +370,6 @@ def learned_offset(state):
     # Modest buffer after the estimated availability time.
     return min(median + HOUR, DAY)
 
-
 def schedule_next(state, now):
     cycle = publication_cycle(now)
     planned = cycle["base"] + learned_offset(state)
@@ -401,9 +382,7 @@ def schedule_next(state, now):
         return planned
 
     interval = (
-        POLL_INTERVAL
-        if now < cycle["base"] + 2 * DAY else
-        LATE_POLL_INTERVAL
+        POLL_INTERVAL if now < cycle["base"] + 2 * DAY else LATE_POLL_INTERVAL
     )
 
     next_check = now + interval
@@ -415,7 +394,6 @@ def schedule_next(state, now):
         next_check = min(next_check, next_week)
 
     return next_check
-
 
 def usable_chart(state, now):
     chart = state.get("chart")
@@ -432,7 +410,6 @@ def usable_chart(state, now):
         return None
 
     return chart
-
 
 def record_transition(state, old_chart, new_chart, now, cycle):
     if old_chart == None:
@@ -458,7 +435,6 @@ def record_transition(state, old_chart, new_chart, now, cycle):
     history = state.get("history", [])
     history.append(observation)
     state["history"] = history[-MAX_HISTORY:]
-
 
 def get_chart(api_key, chart_name):
     now = int(time.now().unix)
@@ -563,7 +539,6 @@ def get_chart(api_key, chart_name):
         ),
     }
 
-
 def movement_indicator(current, previous):
     if previous == None:
         return ""
@@ -575,7 +550,6 @@ def movement_indicator(current, previous):
         return " (↓%s)" % (current - previous)
 
     return ""
-
 
 def song_text(item, include_weeks = False):
     text = "%s by %s #%s%s" % (
@@ -590,7 +564,6 @@ def song_text(item, include_weeks = False):
 
     return text
 
-
 def songs_text(songs, start, end):
     parts = []
 
@@ -599,14 +572,12 @@ def songs_text(songs, start, end):
 
     return " * ".join(parts)
 
-
 def list_display(value):
     for option in LIST_OPTIONS:
         if option.value == value:
             return option.display
 
     return LIST_OPTIONS[0].display
-
 
 def get_delay(config):
     value = config.str("scroll", "60")
@@ -616,7 +587,6 @@ def get_delay(config):
 
     delay = int(value)
     return delay // 2 if canvas.is2x() else delay
-
 
 def display_error(config, message):
     font = "terminus-16" if canvas.is2x() else "5x8"
@@ -764,7 +734,6 @@ def display_chart(config, chart, chart_name, count, sample, result):
         delay = get_delay(config),
     )
 
-
 def main(config):
     chart_name = config.str("list", LIST_OPTIONS[0].value)
 
@@ -812,7 +781,6 @@ def main(config):
         False,
         result,
     )
-
 
 def get_schema():
     return schema.Schema(
