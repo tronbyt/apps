@@ -1,6 +1,6 @@
 # Umbrel Updates
 
-Shows which apps on your [Umbrel](https://umbrel.com) home server have an update available, with each app's new version. It only appears on your display when there are updates; the rest of the time it skips its turn. If something's wrong, such as a device token that no longer works, it shows a message so you know.
+Shows which apps on your [Umbrel](https://umbrel.com) home server have an update available, with each app's new version. By default it only appears on your display when there are updates, and skips its turn the rest of the time. Turn off **Only show when there are updates** to also see a screen saying your apps are up to date, so you know it's working. If something's wrong, such as an Umbrel it can't connect to or a device token that no longer works, it shows a message either way.
 
 It covers apps from the official Umbrel App Store and from any community app stores you've added to your Umbrel.
 
@@ -37,7 +37,7 @@ Then, in the app's settings on your Tronbyt server:
 - **Umbrel address**: your Umbrel's IP address on your network, e.g. `http://192.168.1.100`. Use the IP address rather than `umbrel.local`, which often doesn't work from inside a server. Use `http://`: your Umbrel's `https://` certificate is only trusted by devices you've set up for it, so the app switches a local `https://` address to `http://` itself.
 - **Device token**: the token printed above.
 
-If the app can't reach your Umbrel (for example, while it's restarting), it's skipped on your display until it can.
+If the app can't connect to your Umbrel (for example, while it's restarting), it shows "Can't connect to your Umbrel" every other time its turn comes round, until it can.
 
 ### Keeping your Umbrel safe
 
