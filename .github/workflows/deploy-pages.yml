@@ -117,3 +117,6 @@ jobs:
           publish_dir: ./_site
           publish_branch: gh-pages
           force_orphan: true
+          # The App Viewer's own domain. Only the official repository claims it, so a fork's deploy stays on its
+          # github.io address.
+          cname: ${{ github.repository == 'tronbyt/apps' && 'apps.tronbyt.com' || '' }}
