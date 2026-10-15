@@ -1,7 +1,7 @@
 """
 Applet: Umbrel Updates
-Summary: Updates for your Umbrel apps
-Description: Shows which apps installed on your Umbrel home server have an update available. Needs umbrelOS 2.0 or later.
+Summary: Updates for your Umbrel and its apps
+Description: Shows umbrelOS updates and which apps installed on your Umbrel home server have an update available. Needs umbrelOS 2.0 or later.
 Author: saltedlolly
 """
 
@@ -34,6 +34,7 @@ ACCESS_TOKEN_TTL = 50 * 60
 RESULT_TTL = 10 * 60
 
 AMBER = "#ffaa00"
+UMBREL_PURPLE = "#5351fb"
 GREEN = "#3cdc5a"
 RED = "#ff5050"
 WHITE = "#ffffff"
@@ -43,6 +44,7 @@ MUTED = "#999999"
 DEMO = {
     "installed": 18,
     "updates": [
+        {"name": "umbrelOS", "version": "2.0.1", "system": True},
         {"name": "Nextcloud", "version": "31.0.4"},
         {"name": "Immich", "version": "1.135.0"},
         {"name": "Home Assistant", "version": "2025.10.2"},
@@ -148,12 +150,21 @@ def contact_umbrel(base, device_token, key):
             if app.get("name"):
                 names[app["id"]] = app["name"]
 
+    app_updates = sorted(
+        [{"name": names.get(u["id"], u["id"]), "version": u["version"]} for u in updates],
+        key = lambda u: u["name"].lower(),
+    )
+
+    # An umbrelOS update goes first. If it can't be checked (e.g. Umbrel's update server can't be reached), the app
+    # updates are still shown.
+    system = []
+    status, release = query(base, "system.checkUpdate", access_token)
+    if status == 200 and release and release.get("available") and release.get("version"):
+        system.append({"name": "umbrelOS", "version": release["version"].lstrip("v"), "system": True})
+
     result = {
         "installed": installed,
-        "updates": sorted(
-            [{"name": names.get(u["id"], u["id"]), "version": u["version"]} for u in updates],
-            key = lambda u: u["name"].lower(),
-        ),
+        "updates": system + app_updates,
     }
     cache.set(key + "-result", json.encode(result), ttl_seconds = RESULT_TTL)
     return result, None
@@ -182,7 +193,7 @@ def render_updates(result, width, scale, fonts):
 
     rows = []
     for u in updates:
-        rows.append(render.WrappedText(u["name"], font = fonts["name"], color = WHITE, width = width))
+        rows.append(render.WrappedText(u["name"], font = fonts["name"], color = UMBREL_PURPLE if u.get("system") else WHITE, width = width))
         rows.append(render.Text(u["version"], font = fonts["small"], color = MUTED))
         rows.append(render.Box(width = 1, height = 2 * scale))
 

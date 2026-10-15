@@ -1,8 +1,8 @@
 ---
 id: umbrel-updates
 name: Umbrel Updates
-summary: Updates for your Umbrel apps
-desc: Shows which apps on your Umbrel home server have an update available, from the official Umbrel App Store and any community app stores. By default it only appears when there are updates. Needs umbrelOS 2.0 or later, and a Tronbyt server that can reach your Umbrel.
+summary: Updates for your Umbrel and its apps
+desc: Shows when a new version of umbrelOS is available, and which apps on your Umbrel home server have an update, from the official Umbrel App Store and any community app stores. By default it only appears when there are updates. Needs umbrelOS 2.0 or later, and a Tronbyt server that can reach your Umbrel.
 author: saltedlolly
 fileName: umbrel_updates.star
 packageName: umbrel-updates

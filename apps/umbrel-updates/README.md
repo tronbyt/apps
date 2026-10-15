@@ -1,6 +1,6 @@
 # Umbrel Updates
 
-Shows which apps on your [Umbrel](https://umbrel.com) home server have an update available, with each app's new version. By default it only appears on your display when there are updates, and skips its turn the rest of the time. Turn off **Only show when there are updates** to also see a screen saying your apps are up to date, so you know it's working. If something's wrong, such as an Umbrel it can't connect to or a device token that no longer works, it shows a message either way.
+Shows when there's an update for your [Umbrel](https://umbrel.com) home server: a new version of umbrelOS, listed first, and which of your apps have an update, with each one's new version. By default it only appears on your display when there are updates, and skips its turn the rest of the time. Turn off **Only show when there are updates** to also see a screen saying your apps are up to date, so you know it's working. If something's wrong, such as an Umbrel it can't connect to or a device token that no longer works, it shows a message either way.
 
 It covers apps from the official Umbrel App Store and from any community app stores you've added to your Umbrel.
 
