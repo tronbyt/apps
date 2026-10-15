@@ -42,15 +42,21 @@ SUN_ICON = SUN_ICON_ASSET.readall()
 WINDROSE_ICON = WINDROSE_ICON_ASSET.readall()
 
 WINDSOCKS = [
-    WINDSOCK_1_ASSET.readall(), WINDSOCK_2_ASSET.readall(),
-    WINDSOCK_3_ASSET.readall(), WINDSOCK_4_ASSET.readall(),
+    WINDSOCK_1_ASSET.readall(),
+    WINDSOCK_2_ASSET.readall(),
+    WINDSOCK_3_ASSET.readall(),
+    WINDSOCK_4_ASSET.readall(),
     WINDSOCK_5_ASSET.readall(),
 ]
 MOON_ICONS = [
-    MOON_0_ASSET.readall(), MOON_1_ASSET.readall(),
-    MOON_2_ASSET.readall(), MOON_3_ASSET.readall(),
-    MOON_4_ASSET.readall(), MOON_5_ASSET.readall(),
-    MOON_6_ASSET.readall(), MOON_7_ASSET.readall(),
+    MOON_0_ASSET.readall(),
+    MOON_1_ASSET.readall(),
+    MOON_2_ASSET.readall(),
+    MOON_3_ASSET.readall(),
+    MOON_4_ASSET.readall(),
+    MOON_5_ASSET.readall(),
+    MOON_6_ASSET.readall(),
+    MOON_7_ASSET.readall(),
 ]
 
 DEFAULT_LOCATION = '{"lat":"28.53933","lng":"-81.38325","timezone":"America/New_York","description":"Orlando, FL, USA"}'
@@ -61,10 +67,17 @@ MAX_FALLBACK_AGE = 3 * 3600
 STATE_TTL = 24 * 3600
 
 FIELDS = [
-    "temperature_2m", "apparent_temperature", "wind_speed_10m",
-    "wind_gusts_10m", "wind_direction_10m", "precipitation",
-    "precipitation_probability", "relative_humidity_2m",
-    "cloud_cover", "uv_index", "is_day",
+    "temperature_2m",
+    "apparent_temperature",
+    "wind_speed_10m",
+    "wind_gusts_10m",
+    "wind_direction_10m",
+    "precipitation",
+    "precipitation_probability",
+    "relative_humidity_2m",
+    "cloud_cover",
+    "uv_index",
+    "is_day",
 ]
 REQUIRED_FIELDS = ["temperature_2m", "wind_speed_10m", "wind_direction_10m"]
 SCROLL_OPTIONS = [
@@ -73,23 +86,18 @@ SCROLL_OPTIONS = [
     schema.Option(display = "Fast Scroll", value = "30"),
 ]
 
-
 def clean_text(value):
     return "" if value == None else " ".join(str(value).split())
-
 
 def numeric(value):
     return type(value) == "int" or type(value) == "float"
 
-
 def rounded_coordinate(value):
     return math.round(float(value) * 10) / 10.0
-
 
 def get_delay(config):
     value = config.str("scroll", "60")
     return int(value) if value in ["60", "45", "30"] else 60
-
 
 def scaled_image(src, scale):
     image = render.Image(src = src)
@@ -98,10 +106,8 @@ def scaled_image(src, scale):
     width, height = image.size()
     return render.Image(src = src, width = width * scale, height = height * scale)
 
-
 def place(child, x, y, scale):
     return render.Padding(pad = (x * scale, y * scale, 0, 0), child = child)
-
 
 def choose_color(value, thresholds, colors):
     if value == None:
@@ -111,10 +117,8 @@ def choose_color(value, thresholds, colors):
             return colors[index]
     return colors[-1]
 
-
 def uv_value(value):
     return None if value == None else max(0, int(math.round(value)))
-
 
 def uv_label(value):
     if value == None:
@@ -125,23 +129,18 @@ def uv_label(value):
             return labels[index]
     return labels[-1]
 
-
 def uv_color(value):
     return choose_color(value, [2, 5, 7, 10], ["#8FC93A", "#FFD700", "#FF8C00", "#FF4500", "#800080"])
-
 
 def temperature_color(value):
     return choose_color(value, [32, 50, 65, 75, 85, 95], ["#00A8E8", "#66D3FA", "#5BC8AC", "#8FC93A", "#FFD700", "#FF8C00", "#D62828"])
 
-
 def humidity_color(value):
     return choose_color(value, [20, 40, 60, 75, 85, 95], ["#FF4500", "#FF8C00", "#FFD700", "#8FC93A", "#5BC8AC", "#66D3FA", "#00A8E8"])
-
 
 def cardinal_direction(bearing):
     directions = ["North", "NNE", "NE", "ENE", "East", "ESE", "SE", "SSE", "South", "SSW", "SW", "WSW", "West", "WNW", "NW", "NNW"]
     return directions[int(((bearing % 360) + 11.25) // 22.5) % 16]
-
 
 def moon_index(year, month, day):
     if month <= 2:
@@ -153,31 +152,39 @@ def moon_index(year, month, day):
     phase = ((julian - 2451550.1) % 29.53058867) / 29.53058867
     return int(phase * 8 + 0.5) % 8
 
-
 def windsock_category(speed):
     for index in range(4):
         if speed <= [6.91, 10.36, 13.81, 17.26][index]:
             return index
     return 4
 
-
 def animated_windsock(wind, gusts, scale):
     low = windsock_category(max(0, wind))
-    high = windsock_category(max(wind, gusts if gusts != None else wind))
+    high = windsock_category(
+        max(wind, gusts if gusts != None else wind),
+    )
+
     frames = []
-    for cycle in range(2):
-        for hold in range(10):
+
+    for _ in range(2):
+        for _ in range(10):
             frames.append(scaled_image(WINDSOCKS[low], scale))
+
         for category in range(low, high + 1):
-            for hold in range(2):
-                frames.append(scaled_image(WINDSOCKS[category], scale))
+            for _ in range(2):
+                frames.append(
+                    scaled_image(WINDSOCKS[category], scale),
+                )
+
         for category in range(high, low - 1, -1):
-            for hold in range(6):
-                frames.append(scaled_image(WINDSOCKS[category], scale))
+            for _ in range(6):
+                frames.append(
+                    scaled_image(WINDSOCKS[category], scale),
+                )
+
     return render.Animation(children = frames)
 
-
-def animated_arrow(direction, scale):   
+def animated_arrow(direction, scale):
     direction = (direction + 180) % 360
     keyframes = [animation.Keyframe(
         percentage = 0.0,
@@ -204,7 +211,6 @@ def animated_arrow(direction, scale):
         origin = animation.Origin(0.5, 0.5),
         keyframes = keyframes,
     )
-
 
 def select_conditions(data, now):
     if type(data) != "dict" or data.get("error"):
@@ -242,14 +248,12 @@ def select_conditions(data, now):
     conditions["wind_direction_10m"] %= 360
     return conditions
 
-
 def weather_error(status):
     if status == 429:
         return "Weather API rate limited"
     if status == 400:
         return "Weather API rejected location or parameters"
     return "Weather API HTTP %s" % status
-
 
 def get_weather(latitude, longitude, timezone, now):
     key = "cyclecast-v3-%s-%s-%s" % (latitude, longitude, timezone)
@@ -302,7 +306,6 @@ def get_weather(latitude, longitude, timezone, now):
         return {"conditions": previous, "stale": True, "error": error}
     return {"conditions": None, "stale": False, "error": error}
 
-
 def sample_conditions(now):
     return {
         "timestamp": now - now % 3600,
@@ -319,13 +322,11 @@ def sample_conditions(now):
         "is_day": 1,
     }
 
-
 def number_text(value, units = "", decimals = False):
     if value == None:
         return "unavailable"
     number = math.round(value * 10) / 10.0 if decimals else int(math.round(value))
     return "%s%s" % (number, units)
-
 
 def hour_label(conditions, local_time, now, sample):
     if sample:
@@ -335,7 +336,6 @@ def hour_label(conditions, local_time, now, sample):
     minute = minutes % 60
     minute_text = "0" + str(minute) if minute < 10 else str(minute)
     return "%s:%s %s forecast" % (hour % 12 or 12, minute_text, "AM" if hour < 12 else "PM")
-
 
 def information_message(conditions, label):
     c = conditions
@@ -348,12 +348,12 @@ def information_message(conditions, label):
         number_text(c["relative_humidity_2m"], "%"),
         number_text(c["precipitation_probability"], "%"),
         number_text(c["precipitation"], " mm", True),
-        number_text(c["uv_index"], "", True), uv_label(uv),
+        number_text(c["uv_index"], "", True),
+        uv_label(uv),
         cardinal_direction(c["wind_direction_10m"]),
         number_text(c["wind_speed_10m"], " mph", True),
         number_text(c["wind_gusts_10m"], " mph", True),
     )
-
 
 def info_box(items, value, color, x, y, scale):
     text = "--" if value == None else str(int(math.round(value)))
@@ -364,7 +364,6 @@ def info_box(items, value, color, x, y, scale):
     left = x * scale + max(0, (14 * scale - width) // 2)
     top = y * scale + max(0, (9 * scale - height) // 2)
     items.append(render.Padding(pad = (left, top, 0, 0), child = label))
-
 
 def display_error(config, message):
     if config.bool("hide_on_error", False):
@@ -377,7 +376,6 @@ def display_error(config, message):
         show_full_animation = True,
         delay = get_delay(config),
     )
-
 
 def display_instructions(config):
     messages = [
@@ -392,7 +390,6 @@ def display_instructions(config):
         children.append(render.Marquee(width = canvas.width(), offset_start = offset, child = render.Text(message, font = "5x8", color = "#FFAA00")))
         offset += len(message) * 5
     return render.Root(child = render.Column(children = children), show_full_animation = True, delay = get_delay(config))
-
 
 def main(config):
     if config.bool("instructions", False):
@@ -421,6 +418,7 @@ def main(config):
         return display_error(config, result["error"])
 
     scale = 2 if canvas.is2x() else 1
+
     # Always expose sample/fallback status, even if the info-bar toggle is off.
     show_bar = config.bool("show_info_bar", False) or sample or result["stale"]
     offset = 0 if show_bar else 5
@@ -466,7 +464,6 @@ def main(config):
     else:
         items.append(place(scaled_image(FLAG_BASE, scale), 0, 24, scale))
     return render.Root(child = render.Stack(children = items), show_full_animation = True, delay = get_delay(config))
-
 
 def get_schema():
     return schema.Schema(version = "1", fields = [
