@@ -30,8 +30,10 @@ CLIENT = {
 # An access token lasts an hour; refresh it a little early
 ACCESS_TOKEN_TTL = 50 * 60
 
-# How often to ask the Umbrel for updates
-RESULT_TTL = 10 * 60
+# How often to ask the Umbrel for updates. While updates are listed it's asked more often, so an update you've
+# installed drops off the list soon after.
+RESULT_TTL = 15 * 60
+RESULT_TTL_WITH_UPDATES = 5 * 60
 
 AMBER = "#ffaa00"
 UMBREL_PURPLE = "#5351fb"
@@ -166,7 +168,7 @@ def contact_umbrel(base, device_token, key):
         "installed": installed,
         "updates": system + app_updates,
     }
-    cache.set(key + "-result", json.encode(result), ttl_seconds = RESULT_TTL)
+    cache.set(key + "-result", json.encode(result), ttl_seconds = RESULT_TTL_WITH_UPDATES if result["updates"] else RESULT_TTL)
     return result, None
 
 def plural(count, word):

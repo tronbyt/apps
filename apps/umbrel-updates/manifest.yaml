@@ -6,7 +6,7 @@ desc: Shows when a new version of umbrelOS is available, and which apps on your 
 author: saltedlolly
 fileName: umbrel_updates.star
 packageName: umbrel-updates
-recommendedInterval: 10
+recommendedInterval: 5
 supports2x: true
 supports64x64: true
 category: utilities
