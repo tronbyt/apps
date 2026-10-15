@@ -54,6 +54,8 @@ My [saltedlolly App Store](https://github.com/saltedlolly/umbrel-app-store) is a
 
 Community app stores aren't official Umbrel services. Back up your data, and test an app before relying on it.
 
+Umbrel and the Umbrel logo belong to Umbrel, Inc. This app is an independent project, not made or endorsed by Umbrel.
+
 ## Author
 
 [saltedlolly](https://github.com/saltedlolly)
