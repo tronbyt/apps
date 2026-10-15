@@ -1,0 +1,17 @@
+---
+id: tronbyt-server-updates
+name: Tronbyt Server Updates
+summary: Tronbyt Server updates
+desc: Shows when a new version of Tronbyt Server is available, comparing the version your server is running with the latest release on GitHub. By default it only appears when there's an update.
+author: saltedlolly
+fileName: tronbyt_server_updates.star
+packageName: tronbyt-server-updates
+recommendedInterval: 60
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - utility
+  - self-hosted
+  - tronbyt
