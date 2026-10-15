@@ -156,8 +156,12 @@ def main(config):
         "small": "tb-8" if scale == 2 else "tom-thumb",
     }
 
-    # The setting defaults to the usual address. With no address at all (in the app store's preview), show an example.
+    # Tronbyt Server shows a text setting's default but only saves it if it's edited, so the address is often empty.
+    # On a Tronbyt server (which always passes the display's time zone as "$tz") that means the usual address. Without
+    # one, e.g. in `pixlet check` or a preview, show an example.
     base = config.str("server_url", "").strip().rstrip("/")
+    if not base and config.get("$tz"):
+        base = DEFAULT_SERVER_URL
     if not base:
         current, latest, error = "v2.4.0", "v2.5.0", None
     else:
