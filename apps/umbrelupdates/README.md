@@ -34,7 +34,7 @@ PYEOF
 
 Then, in the app's settings on your Tronbyt server:
 
-- **Umbrel address**: your Umbrel's IP address on your network, e.g. `http://192.168.1.20`. Use the IP address rather than `umbrel.local`, which often doesn't work from inside a server.
+- **Umbrel address**: your Umbrel's IP address on your network, e.g. `http://192.168.1.100`. Use the IP address rather than `umbrel.local`, which often doesn't work from inside a server. Use `http://`: your Umbrel's `https://` certificate is only trusted by devices you've set up for it, so the app switches a local `https://` address to `http://` itself.
 - **Device token**: the token printed above.
 
 If the app can't reach your Umbrel (for example, while it's restarting), it's skipped on your display until it can.

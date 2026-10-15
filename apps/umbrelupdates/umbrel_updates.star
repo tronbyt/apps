@@ -50,9 +50,26 @@ DEMO = {
     ],
 }
 
+def is_local_host(host):
+    """umbrel.local and other .local names, or a private IPv4 address."""
+    host = host.split(":")[0].lower()
+    if host.endswith(".local") or host == "localhost":
+        return True
+    parts = host.split(".")
+    if len(parts) != 4 or not all([p.isdigit() for p in parts]):
+        return False
+    a, b = int(parts[0]), int(parts[1])
+    return a == 10 or a == 127 or (a == 192 and b == 168) or (a == 172 and b >= 16 and b <= 31)
+
 def base_url(address):
     address = address.strip().rstrip("/")
-    if address and not (address.startswith("http://") or address.startswith("https://")):
+    if not address:
+        return ""
+    if address.startswith("https://") and is_local_host(address[len("https://"):].split("/")[0]):
+        # On your own network, Umbrel's HTTPS certificate is one that only your Umbrel trusts, so a Tronbyt server
+        # can't check it. Its plain HTTP address works the same.
+        address = "http://" + address[len("https://"):]
+    elif not (address.startswith("http://") or address.startswith("https://")):
         address = "http://" + address
     return address
 
@@ -216,7 +233,7 @@ def get_schema():
             schema.Text(
                 id = "umbrel_url",
                 name = "Umbrel address",
-                desc = "Your Umbrel's address on your network, e.g. http://192.168.1.20",
+                desc = "Your Umbrel's address on your network, e.g. http://192.168.1.100",
                 icon = "server",
             ),
             schema.Text(
