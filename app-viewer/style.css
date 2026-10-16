@@ -87,7 +87,7 @@ body {
 }
 
 /* Back to Apps on the left, Share on the right */
-.author-top-row {
+.page-top-row {
   align-items: center;
   display: flex;
   gap: 1rem;
@@ -95,12 +95,12 @@ body {
   margin-bottom: 1rem;
 }
 
-.author-top-row .btn {
+.page-top-row .btn {
   white-space: nowrap;
 }
 
 @media (max-width: 420px) {
-  .author-top-row .btn {
+  .page-top-row .btn {
     font-size: 0.75rem;
   }
 }
@@ -110,7 +110,7 @@ body {
     font-size: 0.45rem;
   }
 
-  .author-top-row .btn {
+  .page-top-row .btn {
     font-size: 0.65rem;
     padding: 0.35rem 0.6rem;
   }
@@ -1156,8 +1156,7 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
     gap: 1rem;
   }
 
-  .detail-actions .report-button,
-  .detail-actions .share-button {
+  .detail-actions .report-button {
     flex: 1 1 auto;
   }
 }

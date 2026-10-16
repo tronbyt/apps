@@ -82,6 +82,18 @@ export function shareablePageUrl(href = window.location.href) {
   return url.href;
 }
 
+// Share goes on the same row as the Back to Apps button at the top of the page, on the right
+function placeShareButton(title) {
+  const backToApps = document.querySelector('body > .container > a.btn-secondary');
+  if (!backToApps) return;
+  const topRow = document.createElement('div');
+  topRow.className = 'page-top-row';
+  backToApps.replaceWith(topRow);
+  backToApps.classList.remove('mb-3');
+  topRow.appendChild(backToApps);
+  topRow.appendChild(createShareButton(title));
+}
+
 // "Share": the share sheet on phones and tablets, otherwise copies the link
 function createShareButton(title) {
   const button = document.createElement('button');
@@ -1060,7 +1072,9 @@ async function renderAppDetail() {
     container.appendChild(readmeSection);
   }
 
-  // Add buttons at the bottom - Back to Apps on left, Share and Report Issue on right
+  placeShareButton(`${app.displayName || appName} - Tronbyt App`);
+
+  // Add buttons at the bottom - Back to Apps on left, Report Issue on right
   const reportContainer = document.createElement('div');
   reportContainer.className = 'detail-footer mt-4 pt-4 border-top d-flex justify-content-between';
 
@@ -1118,7 +1132,6 @@ async function renderAppDetail() {
   }
 
   reportContainer.appendChild(backButton);
-  rightActions.appendChild(createShareButton(`${app.displayName || appName} - Tronbyt App`));
   rightActions.appendChild(reportControl);
   if (sourceLink) rightActions.appendChild(sourceLink);
   reportContainer.appendChild(rightActions);
@@ -1176,18 +1189,7 @@ async function renderAuthorProfile() {
   title.className = 'main-title mb-3';
   title.textContent = authorName;
 
-  const share = createShareButton(`${authorName} - Tronbyt Apps`);
-
-  // Share goes on the same row as Back to Apps, on the right
-  const backToApps = document.querySelector('body > .container > a.btn-secondary');
-  if (backToApps) {
-    const topRow = document.createElement('div');
-    topRow.className = 'author-top-row';
-    backToApps.replaceWith(topRow);
-    backToApps.classList.remove('mb-3');
-    topRow.appendChild(backToApps);
-    topRow.appendChild(share);
-  }
+  placeShareButton(`${authorName} - Tronbyt Apps`);
 
   header.appendChild(title);
   header.appendChild(createDisplayCounts(authorApps));
