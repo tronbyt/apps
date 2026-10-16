@@ -1192,7 +1192,6 @@ async function renderAuthorProfile() {
   placeShareButton(`${authorName} - Tronbyt Apps`);
 
   header.appendChild(title);
-  header.appendChild(createDisplayCounts(authorApps));
   container.appendChild(header);
 
   // Display and Sort, as on the catalogue. They start from the catalogue's choices when the page was opened from it.
@@ -1218,6 +1217,22 @@ async function renderAuthorProfile() {
     filters.appendChild(dotMatrix);
     if (emptyWrapper && !emptyWrapper.children.length) emptyWrapper.remove();
   }
+
+  // Hide broken apps, as on the catalogue; it also sets which apps the counts and the footer include
+  const hideBroken = document.createElement('div');
+  hideBroken.className = 'form-check author-filters-dot-matrix';
+  const hideBrokenApps = document.createElement('input');
+  hideBrokenApps.className = 'form-check-input';
+  hideBrokenApps.type = 'checkbox';
+  hideBrokenApps.id = 'hide-broken-apps';
+  hideBrokenApps.checked = isHidingBrokenApps();
+  const hideBrokenLabel = document.createElement('label');
+  hideBrokenLabel.className = 'form-check-label';
+  hideBrokenLabel.htmlFor = 'hide-broken-apps';
+  hideBrokenLabel.textContent = 'Hide broken apps';
+  hideBroken.appendChild(hideBrokenApps);
+  hideBroken.appendChild(hideBrokenLabel);
+  filters.appendChild(hideBroken);
   container.appendChild(filters);
 
   const list = document.createElement('div');
@@ -1228,19 +1243,38 @@ async function renderAuthorProfile() {
   function showApps() {
     const display = displayFilter.value;
     const sort = sortOrder.value;
+    const hidingBroken = hideBrokenApps.checked;
 
     // Remember the choices with the rest of the catalogue's state, so the app pages opened from here and Back to
     // Apps keep them, without adding them to the address
     const saved = currentViewerState();
     if (display === 'standard') saved.delete('display'); else saved.set('display', display);
     if (sort === DEFAULT_SORT_ORDER) saved.delete('sort'); else saved.set('sort', sort);
+    if (hidingBroken) saved.set('hideBroken', '1'); else saved.delete('hideBroken');
     window.history.replaceState({ ...(window.history.state || {}), viewerState: saved.toString() }, '', window.location.href);
 
-    renderAppsList(filterAndSortApps(authorApps, { display, sort }), brokenApps, display);
+    const shownApps = hidingBroken ? authorApps.filter(app => !isAppBroken(app, brokenApps)) : authorApps;
+    header.querySelector('.display-counts')?.remove();
+    header.appendChild(createDisplayCounts(shownApps));
+    renderAppsList(filterAndSortApps(shownApps, { display, sort }), brokenApps, display);
+    if (!shownApps.length) {
+      const message = document.createElement('p');
+      message.className = 'author-empty';
+      message.textContent = `All of ${authorName}'s apps are broken. Untick Hide broken apps to see them.`;
+      list.appendChild(message);
+    }
   }
 
   displayFilter.addEventListener('change', showApps);
   sortOrder.addEventListener('change', showApps);
+  hideBrokenApps.addEventListener('change', () => {
+    try {
+      localStorage.setItem('hideBrokenApps', String(hideBrokenApps.checked));
+    } catch {
+      // Filtering still works for this page when storage is unavailable.
+    }
+    showApps();
+  });
   showApps();
 }
 
@@ -1254,6 +1288,10 @@ function createDisplayCounts(apps, { showPercent = false } = {}) {
   const displayCounts = document.createElement('div');
   displayCounts.className = 'display-counts';
   displayCounts.appendChild(count);
+  if (!apps.length) {
+    displayCounts.classList.add('display-counts-empty'); // No separator after the total
+    return displayCounts;
+  }
   // The counts for each display wrap within their own block, so a wrapped line starts under the first of them
   const countClip = document.createElement('div');
   countClip.className = 'display-counts-clip';

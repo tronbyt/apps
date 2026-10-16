@@ -476,6 +476,17 @@ body {
   margin-bottom: 0;
 }
 
+.author-empty {
+  color: #aaa;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.display-counts-empty .display-counts-total::after {
+  content: none;
+}
+
 @media (max-width: 575px) {
   .author-filters .form-select {
     flex-basis: 100%;
