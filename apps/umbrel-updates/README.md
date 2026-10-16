@@ -16,7 +16,7 @@ The app needs your Umbrel's address and a **device token**: a sign-in for this a
 On a Mac or Linux computer, paste this into a terminal (Windows: run it with `python`):
 
 ```sh
-python3 - <<'PYEOF'
+python3 -c "$(cat <<'PYEOF'
 import getpass, json, urllib.request
 url = (input("Umbrel address [http://umbrel.local]: ") or "http://umbrel.local").rstrip("/")
 body = {
@@ -30,6 +30,7 @@ if code:
 request = urllib.request.Request(url + "/trpc/user.loginNative", json.dumps(body).encode(), {"Content-Type": "application/json"})
 print("\nDevice token:", json.load(urllib.request.urlopen(request))["result"]["data"]["deviceToken"])
 PYEOF
+)"
 ```
 
 Then, in the app's settings on your Tronbyt server:
