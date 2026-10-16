@@ -1176,29 +1176,144 @@ async function renderAuthorProfile() {
   title.className = 'main-title mb-3';
   title.textContent = authorName;
 
-  const count = document.createElement('p');
-  count.className = 'author-app-count mb-0';
-  count.textContent = `${authorApps.length} ${authorApps.length === 1 ? 'app' : 'apps'}`;
-
   const share = createShareButton(`${authorName} - Tronbyt Apps`);
-  share.classList.add('mt-3');
+
+  // Share goes on the same row as Back to Apps, on the right
+  const backToApps = document.querySelector('body > .container > a.btn-secondary');
+  if (backToApps) {
+    const topRow = document.createElement('div');
+    topRow.className = 'author-top-row';
+    backToApps.replaceWith(topRow);
+    backToApps.classList.remove('mb-3');
+    topRow.appendChild(backToApps);
+    topRow.appendChild(share);
+  }
 
   header.appendChild(title);
-  header.appendChild(count);
-  header.appendChild(share);
+  header.appendChild(createDisplayCounts(authorApps));
   container.appendChild(header);
+
+  // Display and Sort, as on the catalogue. They start from the catalogue's choices when the page was opened from it.
+  const state = currentViewerState();
+  // Only the displays at least one of the author's apps supports (every app works on a standard display)
+  const displayOptions = DISPLAY_OPTIONS.filter(([value]) => value === 'standard' ||
+    (value === 'wide' && authorApps.some(app => app.supports2x)) ||
+    (value === 'square' && authorApps.some(app => app.supports64x64)));
+  const displayFilter = createFilterSelect('display-filter', 'Display', displayOptions,
+    displayOptions.some(([value]) => value === state.get('display')) ? state.get('display') : 'standard');
+  const sortOrder = createFilterSelect('sort-order', 'Sort', SORT_OPTIONS,
+    SORT_OPTIONS.some(([value]) => value === state.get('sort')) ? state.get('sort') : DEFAULT_SORT_ORDER);
+  const filters = document.createElement('div');
+  filters.className = 'author-filters mb-4';
+  if (displayOptions.length > 1) filters.appendChild(displayFilter); // Only Standard: nothing to choose
+  if (authorApps.length > 1) filters.appendChild(sortOrder); // Nothing to sort with one app
+
+  // The page's dot matrix setting sits to the right of the menus
+  const dotMatrix = document.getElementById('dot-matrix-toggle')?.closest('.form-check');
+  if (dotMatrix) {
+    const emptyWrapper = dotMatrix.parentElement;
+    dotMatrix.classList.add('author-filters-dot-matrix');
+    filters.appendChild(dotMatrix);
+    if (emptyWrapper && !emptyWrapper.children.length) emptyWrapper.remove();
+  }
+  container.appendChild(filters);
 
   const list = document.createElement('div');
   list.id = 'apps-list';
   list.className = 'row g-4';
   container.appendChild(list);
 
-  authorApps.sort((a, b) => {
-    const nameA = (a.displayName || a.name).toLowerCase();
-    const nameB = (b.displayName || b.name).toLowerCase();
-    return nameA.localeCompare(nameB);
-  });
-  renderAppsList(authorApps, brokenApps);
+  function showApps() {
+    const display = displayFilter.value;
+    const sort = sortOrder.value;
+
+    // Remember the choices with the rest of the catalogue's state, so the app pages opened from here and Back to
+    // Apps keep them, without adding them to the address
+    const saved = currentViewerState();
+    if (display === 'standard') saved.delete('display'); else saved.set('display', display);
+    if (sort === DEFAULT_SORT_ORDER) saved.delete('sort'); else saved.set('sort', sort);
+    window.history.replaceState({ ...(window.history.state || {}), viewerState: saved.toString() }, '', window.location.href);
+
+    renderAppsList(filterAndSortApps(authorApps, { display, sort }), brokenApps, display);
+  }
+
+  displayFilter.addEventListener('change', showApps);
+  sortOrder.addEventListener('change', showApps);
+  showApps();
+}
+
+// A row of app counts: the total, then how many support each display (every app works on a standard display).
+// Used in an author's panel and, for the whole catalogue, in the footer.
+function createDisplayCounts(apps) {
+  const count = document.createElement('span');
+  count.className = 'display-counts-total';
+  count.textContent = `${apps.length.toLocaleString('en-US')} ${apps.length === 1 ? 'app' : 'apps'}`;
+
+  const displayCounts = document.createElement('div');
+  displayCounts.className = 'display-counts';
+  displayCounts.appendChild(count);
+  // The counts for each display wrap within their own block, so a wrapped line starts under the first of them
+  const countClip = document.createElement('div');
+  countClip.className = 'display-counts-clip';
+  const countList = document.createElement('div');
+  countList.className = 'display-counts-list';
+  countClip.appendChild(countList);
+  displayCounts.appendChild(countClip);
+  for (const [value, label] of DISPLAY_OPTIONS) {
+    const supported = apps.filter(app => value === 'standard' ||
+      (value === 'wide' && app.supports2x) || (value === 'square' && app.supports64x64)).length;
+    if (!supported) continue;
+    const box = document.createElement('span');
+    box.className = 'display-count';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const number = document.createElement('span');
+    number.className = 'display-count-number';
+    number.textContent = `${supported.toLocaleString('en-US')} ${supported === 1 ? 'app' : 'apps'}`;
+    const text = document.createElement('span');
+    text.className = 'display-count-text';
+    text.appendChild(name);
+    text.appendChild(number);
+    box.appendChild(text);
+    countList.appendChild(box);
+  }
+  return displayCounts;
+}
+
+// A thin footer on every page: a link to Tronbyt, and the catalogue's app counts
+async function renderSiteFooter() {
+  const page = document.querySelector('body > .container');
+  if (!page || page.querySelector('.site-footer')) return;
+  const apps = await fetchAppsList();
+
+  const footer = document.createElement('footer');
+  footer.className = 'site-footer';
+  const link = document.createElement('a');
+  link.href = 'https://tronbyt.com/';
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.textContent = 'Learn about Tronbyt';
+  footer.appendChild(link);
+  if (apps.length) footer.appendChild(createDisplayCounts(apps));
+  page.appendChild(footer);
+}
+
+const DISPLAY_OPTIONS = [['standard', 'Standard / 1x'], ['wide', 'Wide / 2x'], ['square', 'Square']];
+const SORT_OPTIONS = [['alphabetical', 'A-Z'], ['newest', 'Newest'], ['updated', 'Last Updated']];
+
+function createFilterSelect(id, label, options, selected) {
+  const select = document.createElement('select');
+  select.id = id;
+  select.className = 'form-select';
+  select.setAttribute('aria-label', label);
+  for (const [value, text] of options) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = `${label}: ${text}`;
+    option.selected = value === selected;
+    select.appendChild(option);
+  }
+  return select;
 }
 
 // --- INIT ---
@@ -1216,9 +1331,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else if (document.getElementById('app-content')) {
     // App detail page
     tidyPageAddress();
-    renderAppDetail();
     setupDotMatrixToggle();
+    await renderAppDetail();
   }
+  renderSiteFooter();
 });
 
 // --- DOT MATRIX TOGGLE ---
