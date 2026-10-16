@@ -1243,8 +1243,8 @@ async function renderAuthorProfile() {
 }
 
 // A row of app counts: the total, then how many support each display (every app works on a standard display).
-// Used in an author's panel and, for the whole catalogue, in the footer.
-function createDisplayCounts(apps) {
+// Used in an author's panel and, for the whole catalogue, in the footer, where each count also shows its share of the total.
+function createDisplayCounts(apps, { showPercent = false } = {}) {
   const count = document.createElement('span');
   count.className = 'display-counts-total';
   count.textContent = `${apps.length.toLocaleString('en-US')} ${apps.length === 1 ? 'app' : 'apps'}`;
@@ -1273,11 +1273,26 @@ function createDisplayCounts(apps) {
     const text = document.createElement('span');
     text.className = 'display-count-text';
     text.appendChild(name);
+    // The share stays with its count, so the two wrap together
+    if (showPercent) {
+      const percent = document.createElement('span');
+      percent.className = 'display-count-percent';
+      percent.textContent = `(${formatShare(supported, apps.length)})`;
+      number.appendChild(percent);
+    }
     text.appendChild(number);
     box.appendChild(text);
     countList.appendChild(box);
   }
   return displayCounts;
+}
+
+// A share of the total as a whole percentage, never rounded up to 100% or down to 0%
+function formatShare(part, total) {
+  const percent = Math.round(part / total * 100);
+  if (part < total && percent === 100) return '99%';
+  if (part > 0 && percent === 0) return '<1%';
+  return `${percent}%`;
 }
 
 // A thin footer on every page: a link to Tronbyt, and the catalogue's app counts
@@ -1294,7 +1309,7 @@ async function renderSiteFooter() {
   link.rel = 'noopener';
   link.textContent = 'Learn about Tronbyt';
   footer.appendChild(link);
-  if (apps.length) footer.appendChild(createDisplayCounts(apps));
+  if (apps.length) footer.appendChild(createDisplayCounts(apps, { showPercent: true }));
   page.appendChild(footer);
 }
 

@@ -240,6 +240,12 @@ body {
   color: #c4c4c4;
 }
 
+/* The footer's share of the catalogue, set closer to its count and dimmer than it */
+.display-count-percent {
+  color: #888;
+  margin-left: 0.3rem;
+}
+
 /* A thin footer on every page: a link to Tronbyt on the left, the catalogue's app counts on the right */
 .site-footer {
   align-items: center;
