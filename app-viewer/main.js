@@ -1297,11 +1297,25 @@ function formatShare(part, total) {
   return `${percent}%`;
 }
 
-// A thin footer on every page: a link to Tronbyt, and the catalogue's app counts
+// Whether "Hide broken apps" is ticked: from the catalogue's state when the page was opened from it, otherwise the
+// choice remembered in this browser
+function isHidingBrokenApps() {
+  const checkbox = document.getElementById('hide-broken-apps');
+  if (checkbox) return checkbox.checked;
+  if (currentViewerState().get('hideBroken') === '1') return true;
+  try {
+    return localStorage.getItem('hideBrokenApps') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+// A thin footer on every page: a link to Tronbyt, and the catalogue's app counts, leaving out broken apps when
+// "Hide broken apps" is ticked
 async function renderSiteFooter() {
   const page = document.querySelector('body > .container');
   if (!page || page.querySelector('.site-footer')) return;
-  const apps = await fetchAppsList();
+  const { apps, brokenApps } = await preloadAppData();
 
   const footer = document.createElement('footer');
   footer.className = 'site-footer';
@@ -1311,8 +1325,15 @@ async function renderSiteFooter() {
   link.rel = 'noopener';
   link.textContent = 'Learn about Tronbyt';
   footer.appendChild(link);
-  if (apps.length) footer.appendChild(createDisplayCounts(apps, { showPercent: true }));
   page.appendChild(footer);
+
+  const showCounts = () => {
+    footer.querySelector('.display-counts')?.remove();
+    const counted = isHidingBrokenApps() ? apps.filter(app => !isAppBroken(app, brokenApps)) : apps;
+    if (counted.length) footer.appendChild(createDisplayCounts(counted, { showPercent: true }));
+  };
+  showCounts();
+  document.getElementById('hide-broken-apps')?.addEventListener('change', showCounts);
 }
 
 const DISPLAY_OPTIONS = [['standard', 'Standard / 1x'], ['wide', 'Wide / 2x'], ['square', 'Square']];
