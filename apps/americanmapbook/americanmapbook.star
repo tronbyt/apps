@@ -5,13 +5,113 @@ Description: Tracking your visits across the USA
 Author: Robert Ison
 """
 
-load("americanmapbook_data.star", "presidential_libraries", "usa_capitols", "usa_map_data", "usa_national_parks", "world_heritage_sites")
+load(
+    "americanmapbook_data.star",
+    "presidential_libraries",
+    "usa_capitols",
+    "usa_map_data",
+    "usa_national_parks",
+    "world_heritage_sites",
+)
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-DEFAULT_COLORS = ["#009A17", "#708090", "#FFD700"]  #map, unvisited, visited
+# Map outline, unvisited locations, visited locations.
+DEFAULT_COLORS = ["#009A17", "#708090", "#FFD700"]
+
+FRAME_DELAY = 75
+FINAL_HOLD_FRAMES = 100
+
+# These subgroup numbers belong to this specific usa_map_data dataset.
+# Recheck them if the source geometry or its subgroup order changes.
+MAINLAND_SECTION_INDEXES = [1]
+HAWAII_SECTION_INDEXES = [2, 3, 4, 5, 6]
+ALASKA_SECTION_INDEXES = [7, 8, 9]
+
+TRACKING_OPTIONS = [
+    schema.Option(value = "national_parks", display = "National Parks"),
+    schema.Option(
+        value = "presidential_libraries",
+        display = "Presidential Libraries",
+    ),
+    schema.Option(value = "capitols", display = "State Capitols"),
+    schema.Option(
+        value = "world_heritage_sites",
+        display = "World Heritage Sites",
+    ),
+]
+
+def show_instructions_screen():
+    width, _ = canvas.size()
+    is2x = canvas.is2x()
+    font = "terminus-14" if is2x else "CG-pixel-3x5-mono"
+    character_width = 8 if is2x else 4
+
+    messages = [
+        "American Mapbook",
+        "Choose National Parks, Presidential Libraries, State Capitols, or World Heritage Sites in settings. Mark the places you have visited in the checklist.",
+        "The map draws first, then unvisited places, then visited places. Default colors: green outline, grey unvisited, yellow visited. Change colors in settings. Nearby places may share a pixel.",
+        "Turn on Count to show visited locations, not distinct dots. Alaska and Hawaii appear as insets. Turn off Show Instructions to return to your map.",
+    ]
+
+    children = []
+    offset = 15
+
+    for index in range(len(messages)):
+        message = messages[index]
+
+        children.append(
+            render.Marquee(
+                width = width,
+                offset_start = offset,
+                child = render.Text(
+                    content = message,
+                    font = font,
+                    color = "#65D0E6" if index == 0 else "#F4A306",
+                ),
+            ),
+        )
+
+        offset += len(message) * character_width
+
+    return render.Root(
+        delay = FRAME_DELAY,
+        child = render.Column(children = children),
+        show_full_animation = True,
+    )
+
+def slugify(value):
+    return (
+        value
+            .replace(" ", "_")
+            .replace(".", "")
+            .replace(",", "")
+            .replace("'", "")
+            .replace("-", "_")
+    )
+
+def get_visit_setting_id(preface, state, name):
+    """Preserve the IDs already used by each category's saved settings.
+
+    Presidential libraries historically used slugify().
+    Capitols, parks and heritage sites replaced spaces only.
+
+    Both schema generation and main() must call this helper so punctuation
+    cannot make a saved toggle differ from the setting being read.
+    """
+    if preface == "PRESIDENTIAL":
+        state_id = slugify(state)
+        name_id = slugify(name)
+    else:
+        state_id = state.replace(" ", "_")
+        name_id = name.replace(" ", "_")
+
+    return "%s_%s_%s" % (preface, state_id, name_id)
 
 def get_bounds(coordinates):
+    if not coordinates:
+        return None
+
     xs = [coord[0] for coord in coordinates]
     ys = [coord[1] for coord in coordinates]
 
@@ -22,32 +122,35 @@ def get_bounds(coordinates):
         "max_y": max(ys),
     }
 
+def scale_coordinate(value, min_value, max_value, grid_size):
+    if max_value == min_value:
+        # All points share this coordinate: place them in the middle.
+        return int((grid_size - 1) / 2)
+
+    return int(
+        (value - min_value) *
+        (grid_size - 1) /
+        (max_value - min_value),
+    )
+
 def normalize_coordinates(coords, bounds, grid_width, grid_height):
-    raw_coords = []
-    for point in coords:
-        raw_coords.append((point[0], point[1]))
-
-    # Initialize min/max values
-    min_x = bounds["min_x"]
-    max_x = bounds["max_x"]
-    min_y = bounds["min_y"]
-    max_y = bounds["max_y"]
-
-    def scale(value, min_val, max_val, new_min, new_max):
-        if max_val == min_val:
-            # Degenerate case: all points share the same coordinate; put them in the middle.
-            return int((new_min + new_max) / 2)
-        return int((value - min_val) * (new_max - new_min) / (max_val - min_val) + new_min)
-
-    grid_points = []
-    for coord in raw_coords:
-        x = coord[0]
-        y = coord[1]
-        grid_x = scale(x, min_x, max_x, 0, grid_width - 1)
-        grid_y = scale(y, min_y, max_y, 0, grid_height - 1)
-        grid_points.append((grid_x, grid_y))
-
-    return grid_points
+    return [
+        (
+            scale_coordinate(
+                point[0],
+                bounds["min_x"],
+                bounds["max_x"],
+                grid_width,
+            ),
+            scale_coordinate(
+                point[1],
+                bounds["min_y"],
+                bounds["max_y"],
+                grid_height,
+            ),
+        )
+        for point in coords
+    ]
 
 def get_plot(grid_points, width, height, color = "#ff0"):
     return render.Plot(
@@ -66,316 +169,431 @@ def get_dot(color, size = 1):
         color = color,
     )
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
+def add_padding_to_child_element(
+        element,
+        left = 0,
+        top = 0,
+        right = 0,
+        bottom = 0):
     return render.Padding(
         pad = (left, top, right, bottom),
         child = element,
     )
 
 def convert_point_for_map(point, offset, height):
+    # Plot coordinates start at bottom-left; widget placement is top-left.
+    # The last visible pixel row is height - 1, not height.
     converted_x = point[0] + offset[2]
-    converted_y = height - point[1] + offset[3]
+    converted_y = height - 1 - point[1] + offset[3]
     return converted_x, converted_y
 
 def is_square():
-    """True on a 64x64 panel.
+    """Identify square panels by shape, not by height.
 
-    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
-    also 64 tall, and being 2:1 it fits the mainland without stretching it.
+    A 128x64 panel is also 64 pixels tall, but its 2:1 shape should retain
+    the wide-panel map arrangement.
     """
-    w, h = canvas.size()
-    return h == w
+    width, height = canvas.size()
+    return width == height
+
+def get_map_index(subgroup_number):
+    if subgroup_number in MAINLAND_SECTION_INDEXES:
+        return 0
+    elif subgroup_number in HAWAII_SECTION_INDEXES:
+        return 1
+    elif subgroup_number in ALASKA_SECTION_INDEXES:
+        return 2
+    return -1
+
+def get_tracking_details(tracking_type):
+    if tracking_type == "national_parks":
+        return usa_national_parks, "PARK", "park"
+    elif tracking_type == "world_heritage_sites":
+        return world_heritage_sites, "HERITAGE", "site"
+    elif tracking_type == "presidential_libraries":
+        return presidential_libraries, "PRESIDENTIAL", "site"
+
+    return usa_capitols, "STATE", "location"
+
+def get_count_box(count, width, height, font, color, is2x):
+    display_text = render.Text(
+        content = str(count),
+        font = font,
+        color = color,
+    )
+    text_width, text_height = display_text.size()
+    pad = 2 if is2x else 1
+
+    return add_padding_to_child_element(
+        render.Box(
+            color = "#000",
+            width = text_width,
+            height = text_height,
+            child = display_text,
+        ),
+        width - pad - text_width,
+        height - pad - text_height,
+    )
+
+def get_animation_frame(
+        items,
+        show_count,
+        count,
+        width,
+        height,
+        font,
+        color,
+        is2x):
+    # Snapshot the visible items so subsequent additions cannot alter
+    # what this particular frame is intended to contain.
+    frame_children = list(items)
+
+    if show_count:
+        frame_children.append(
+            get_count_box(
+                count,
+                width,
+                height,
+                font,
+                color,
+                is2x,
+            ),
+        )
+
+    return render.Stack(children = frame_children)
+
+def error_screen(message, width, font):
+    return render.Root(
+        child = render.WrappedText(
+            content = message,
+            width = width,
+            align = "center",
+            color = "#ff0000",
+            font = font,
+        ),
+    )
 
 def main(config):
-    # Holds the coordinates of the outline of the different maps
-    mainland_coordinates = []
-    hawaii_coordinates = []
-    alaska_coordinates = []
+    if config.bool("show_instructions", False):
+        return show_instructions_screen()
 
-    # The usa_map_data coordinates come in multiple subgroups.
-    # For mapping purposes, group them into mainland, Hawaii, and Alaska.
-    # Group geojson subgroups into mainland, Hawaii, and Alaska
-    MAINLAND_SECTION_INDEXES = [1]
-    HAWAII_SECTION_INDEXES = [2, 3, 4, 5, 6]
-    ALASKA_SECTION_INDEXES = [7, 8, 9]
+    width, height = canvas.size()
+    width, height = canvas.size()
+    is2x = canvas.is2x()
+    font = "terminus-14" if is2x else "CG-pixel-3x5-mono"
 
-    mainland_sections = MAINLAND_SECTION_INDEXES
-    hawaii_sections = HAWAII_SECTION_INDEXES
-    alaska_sections = ALASKA_SECTION_INDEXES
+    # Markers intentionally remain one pixel on every display.
+    dot_size = 1
 
-    map_color = config.get("map_outline_color", DEFAULT_COLORS[0])
-    unvisited_color = config.get("unvisited_color", DEFAULT_COLORS[1])
-    visited_color = config.get("visited_color", DEFAULT_COLORS[2])
+    show_count = config.bool("showCount", False)
+    map_color = config.get("map_outline_color") or DEFAULT_COLORS[0]
+    unvisited_color = config.get("unvisited_color") or DEFAULT_COLORS[1]
+    visited_color = config.get("visited_color") or DEFAULT_COLORS[2]
+
+    # Group the geometry into mainland, Hawaii and Alaska while preserving
+    # each subgroup separately for drawing individual outline segments.
+    map_coordinates = [[], [], []]
+    outline_sections = []
 
     subgroup_counter = 0
     for group in usa_map_data["coordinates"]:
         for subgroup in group:
-            subgroup_counter = subgroup_counter + 1
+            subgroup_counter += 1
+            map_index = get_map_index(subgroup_counter)
 
-            for coordinate in subgroup:
-                if subgroup_counter in mainland_sections:
-                    mainland_coordinates.append([coordinate[0], coordinate[1]])
-                elif subgroup_counter in hawaii_sections:
-                    hawaii_coordinates.append([coordinate[0], coordinate[1]])
-                elif subgroup_counter in alaska_sections:
-                    alaska_coordinates.append([coordinate[0], coordinate[1]])
+            if map_index != -1 and subgroup:
+                outline_sections.append((map_index, subgroup))
 
-    # now that we have all the coordinates of the three map sections, let's figure out the bounds to help us map properly on our tidbyt display
-    mainland_bounds = get_bounds(mainland_coordinates)
-    hawaii_bounds = get_bounds(hawaii_coordinates)
-    alaska_bounds = get_bounds(alaska_coordinates)
+                for coordinate in subgroup:
+                    map_coordinates[map_index].append(
+                        (coordinate[0], coordinate[1]),
+                    )
 
-    # keep track of the three different maps
-    maps = [mainland_bounds, hawaii_bounds, alaska_bounds]
+    map_bounds = [
+        get_bounds(coordinates)
+        for coordinates in map_coordinates
+    ]
 
-    # Create frames for display
-    animation_frames = []  # Build the animation gradually instead of rendering everything at once.
-    items_to_plot = []  # Keep track of everything currently visible in the animation.
+    if None in map_bounds:
+        return error_screen(
+            "Map data missing: check mainland, Hawaii and Alaska sections.",
+            width,
+            font,
+        )
 
-    width, height = canvas.width(), canvas.height()
-    is2x = canvas.is2x()
-    font = "terminus-14" if is2x else "CG-pixel-3x5-mono"
-    dot_size = 1  #if is2x else 1
-
-    # The mainland is about twice as wide as it is tall, so a canvas that is
-    # 2:1 fits it almost exactly and a square one would stretch it by half as
-    # much again. On a square panel the map keeps its own proportions and is
-    # centred instead, and the Alaska and Hawaii insets move down with it so
-    # they stay beside the coast rather than floating above the map.
-    map_width = width - 3
+    # Four pixels of left offset means the normalized mainland can occupy
+    # width - 4 pixels without placing its rightmost point off-screen.
+    map_width = width - 4
     map_height = height - 2
 
-    # The plot is canvas-sized and the normalised map sits against the bottom
-    # of it, so this padding is what lifts the map into place -- which is why
-    # it is negative.
+    # Plot coordinates are bottom-origin. Negative top padding lifts the
+    # canvas-sized plot and its normalized map into their intended position.
     map_lift = -2
     inset_lift = 0
+
+    # Keep the mainland approximately 2:1 on square panels rather than
+    # stretching it vertically. Move the insets down with the mainland.
     if is_square():
         map_height = map_width // 2
         map_lift = -((height - map_height) // 2)
         inset_lift = map_lift
 
-    # This map of USA includes Alaska and Hawaii
-    # Offset for Mainland, Hawaii, Alaska - width of map, height of map, move right, move up
+    # Each entry is:
+    # [normalized width, normalized height, horizontal offset, vertical offset]
     offsets = [
         [map_width, map_height, 4, map_lift],
         [16, 16, 20, -2 + inset_lift] if is2x else [10, 10, 10, inset_lift],
         [20, 20, 2, -2 + inset_lift] if is2x else [12, 12, 0, inset_lift],
     ]
 
-    # now that we figured out the bounds for each geographic area, we can
-    # calculate the plot points
-    subgroup_counter = 0
-    for group in usa_map_data["coordinates"]:
-        for subgroup in group:
-            subgroup_counter = subgroup_counter + 1
-            offset_idx = -1
-            if subgroup_counter in mainland_sections:
-                offset_idx = 0
-            elif subgroup_counter in hawaii_sections:
-                offset_idx = 1
-            elif subgroup_counter in alaska_sections:
-                offset_idx = 2
-            if offset_idx != -1:
-                bounds = maps[offset_idx]
-                offset_vals = offsets[offset_idx]
-                gridpoints = normalize_coordinates(subgroup, bounds, offset_vals[0], offset_vals[1])
-                plot = get_plot(gridpoints, width, height, map_color)
-                padded_plot = add_padding_to_child_element(plot, offset_vals[2], offset_vals[3])
-                items_to_plot.append(padded_plot)
+    animation_frames = []
+    items_to_plot = []
 
-            # Animation Frames start with each group of outlines for USA areas
-            animation_frames.append(render.Stack(children = items_to_plot))
+    # Add one outline section per frame. Unassigned or empty subgroups do
+    # not create duplicate animation frames.
+    for map_index, subgroup in outline_sections:
+        offset = offsets[map_index]
+        grid_points = normalize_coordinates(
+            subgroup,
+            map_bounds[map_index],
+            offset[0],
+            offset[1],
+        )
 
-    # now add all items
-    group_coordinates = [[], [], []]
-    visited_group_coordinates = [[], [], []]
+        plot = get_plot(grid_points, width, height, map_color)
 
-    #defaults
-    usa_locations = usa_capitols
-    preface = "PARK"
-    config_item = "park"
+        items_to_plot.append(
+            add_padding_to_child_element(
+                plot,
+                offset[2],
+                offset[3],
+            ),
+        )
 
-    tracking_type = config.get("type", TRACKING_OPTIONS[0].value)
-    if tracking_type == "national_parks":
-        usa_locations = usa_national_parks
-        preface = "PARK"
-        config_item = "park"
-    elif tracking_type == "world_heritage_sites":
-        usa_locations = world_heritage_sites
-        preface = "HERITAGE"
-        config_item = "site"
-    elif tracking_type == "presidential_libraries":
-        usa_locations = presidential_libraries
-        preface = "PRESIDENTIAL"
-        config_item = "site"
-    else:
-        usa_locations = usa_capitols
-        preface = "STATE"
-        config_item = "location"
+        animation_frames.append(
+            render.Stack(children = list(items_to_plot)),
+        )
 
-    total_visited = 0
+    tracking_type = config.get("type") or TRACKING_OPTIONS[0].value
+    locations, preface, name_field = get_tracking_details(tracking_type)
 
-    if usa_locations != None:
-        for location in usa_locations:
-            idx = location["map"] - 1
-            if (0 <= idx) and (idx < len(group_coordinates)):
-                if config.get("%s_%s_%s" % (preface, slugify(location["state"]), slugify(location[config_item.lower()]))) == "true":
-                    visited_group_coordinates[idx].append([location["coordinates"]["lon"], location["coordinates"]["lat"]])
-                else:
-                    group_coordinates[idx].append([location["coordinates"]["lon"], location["coordinates"]["lat"]])
+    if locations == None:
+        return error_screen(
+            "Location data unavailable.",
+            width,
+            font,
+        )
 
-        # Loop through all three groups of unvisited
-        for i, group in enumerate(group_coordinates):
-            gridpoints = normalize_coordinates(group, maps[i], offsets[i][0], offsets[i][1])
+    unvisited_coordinates = [[], [], []]
+    visited_coordinates = [[], [], []]
 
-            for point in gridpoints:
-                # The plot coordinates start at the bottom left
-                # however, the coordinates of the individual dots start at the top right
-                # also, these points are moved around to fit on the 'inset' map they belong to
-                # these formulae account for those adjustments to get the items on the right spot on the right map
-                converted_x, converted_y = convert_point_for_map(point, offsets[i], height)
+    for location in locations:
+        map_index = location["map"] - 1
 
-                items_to_plot.append(add_padding_to_child_element(get_dot(unvisited_color, dot_size), converted_x, converted_y))
-
-                # Next set of frames is MAP + unvisited Items one at a time
-                animation_frames.append(render.Stack(children = items_to_plot))
-
-        # Loop through all three groups of visited
-        for i, group in enumerate(visited_group_coordinates):
-            gridpoints = normalize_coordinates(group, maps[i], offsets[i][0], offsets[i][1])
-
-            for point in gridpoints:
-                converted_x, converted_y = convert_point_for_map(point, offsets[i], height)
-                total_visited = total_visited + 1
-
-                # Add the visited dot
-                items_to_plot.append(
-                    add_padding_to_child_element(
-                        get_dot(visited_color, dot_size),
-                        converted_x,
-                        converted_y,
-                    ),
-                )
-
-                # Prepare a frame-specific children list so we don't keep stacking count boxes
-                frame_children = list(items_to_plot)
-
-                if config.get("showCount") == "true":
-                    display_text = render.Text(
-                        content = str(total_visited),
-                        font = font,
-                        color = visited_color,
-                    )
-                    text_w, text_h = display_text.size()
-                    pad = 2 if is2x else 1
-                    count_box = add_padding_to_child_element(
-                        render.Box(
-                            color = "#000",
-                            width = text_w,
-                            height = text_h,
-                            child = display_text,
-                        ),
-                        width - pad - text_w,
-                        height - pad - text_h,
-                    )
-                    frame_children.append(count_box)
-
-                # For each visited point, add a frame with map + unvisited + visited (+ optional count)
-                animation_frames.append(render.Stack(children = frame_children))
-
-    # Add several frames of the final product to keep on screen for longer
-    for _ in range(100):
-        final_items = list(items_to_plot)
-
-        if config.get("showCount") == "true":
-            display_text = render.Text(
-                content = str(total_visited),
-                font = font,
-                color = visited_color,
+        # Preserve the original behavior: entries outside the three
+        # supported map groups are not plotted or included in the count.
+        if 0 <= map_index and map_index < len(map_bounds):
+            setting_id = get_visit_setting_id(
+                preface,
+                location["state"],
+                location[name_field],
             )
-            text_w, text_h = display_text.size()
-            pad = 2 if is2x else 1
 
-            final_items.append(
+            coordinates = (
+                location["coordinates"]["lon"],
+                location["coordinates"]["lat"],
+            )
+
+            if config.bool(setting_id, False):
+                visited_coordinates[map_index].append(coordinates)
+            else:
+                unvisited_coordinates[map_index].append(coordinates)
+
+    # Draw unvisited locations first.
+    for map_index, coordinates in enumerate(unvisited_coordinates):
+        offset = offsets[map_index]
+        grid_points = normalize_coordinates(
+            coordinates,
+            map_bounds[map_index],
+            offset[0],
+            offset[1],
+        )
+
+        for point in grid_points:
+            converted_x, converted_y = convert_point_for_map(
+                point,
+                offset,
+                height,
+            )
+
+            items_to_plot.append(
                 add_padding_to_child_element(
-                    render.Box(
-                        color = "#000",
-                        width = text_w,
-                        height = text_h,
-                        child = display_text,
-                    ),
-                    width - pad - text_w,
-                    height - pad - text_h,
+                    get_dot(unvisited_color, dot_size),
+                    converted_x,
+                    converted_y,
                 ),
             )
 
-        animation_frames.append(render.Stack(children = final_items))
+            animation_frames.append(
+                render.Stack(children = list(items_to_plot)),
+            )
+
+    # Visited locations are drawn last so they remain visible when multiple
+    # locations occupy the same pixel. The count tracks locations, not pixels.
+    total_visited = 0
+
+    for map_index, coordinates in enumerate(visited_coordinates):
+        offset = offsets[map_index]
+        grid_points = normalize_coordinates(
+            coordinates,
+            map_bounds[map_index],
+            offset[0],
+            offset[1],
+        )
+
+        for point in grid_points:
+            converted_x, converted_y = convert_point_for_map(
+                point,
+                offset,
+                height,
+            )
+
+            total_visited += 1
+
+            items_to_plot.append(
+                add_padding_to_child_element(
+                    get_dot(visited_color, dot_size),
+                    converted_x,
+                    converted_y,
+                ),
+            )
+
+            animation_frames.append(
+                get_animation_frame(
+                    items_to_plot,
+                    show_count,
+                    total_visited,
+                    width,
+                    height,
+                    font,
+                    visited_color,
+                    is2x,
+                ),
+            )
+
+    # Build the final scene once, then repeat it to preserve the original
+    # final hold: 100 frames at 75 milliseconds each, nominally 7.5 seconds.
+    # This also displays a zero count when no locations are marked visited.
+    final_frame = get_animation_frame(
+        items_to_plot,
+        show_count,
+        total_visited,
+        width,
+        height,
+        font,
+        visited_color,
+        is2x,
+    )
+
+    for _ in range(FINAL_HOLD_FRAMES):
+        animation_frames.append(final_frame)
 
     return render.Root(
-        delay = 75,
+        delay = FRAME_DELAY,
         child = render.Animation(
             children = animation_frames,
         ),
     )
 
 def get_location_options(locations):
-    sorted_locations = sorted(locations, key = lambda entry: entry["state"])
+    sorted_locations = sorted(
+        locations,
+        key = lambda entry: entry["state"],
+    )
 
     return [
-        schema.Toggle(id = "STATE_%s_%s" % (location["state"].replace(" ", "_"), location["location"].replace(" ", "_")), name = location["state"], desc = "%s, %s" % (location["location"], location["state"]), icon = "landmarkDome", default = False)
+        schema.Toggle(
+            id = get_visit_setting_id(
+                "STATE",
+                location["state"],
+                location["location"],
+            ),
+            name = location["state"],
+            desc = "%s, %s" % (
+                location["location"],
+                location["state"],
+            ),
+            icon = "landmarkDome",
+            default = False,
+        )
         for location in sorted_locations
     ]
 
 def get_national_park_options(parks):
-    sorted_parks = sorted(parks, key = lambda entry: (entry["state"], entry["park"]))
+    sorted_parks = sorted(
+        parks,
+        key = lambda entry: (entry["state"], entry["park"]),
+    )
 
     return [
-        schema.Toggle(id = "PARK_%s_%s" % (park["state"].replace(" ", "_"), park["park"].replace(" ", "_")), name = park["park"].replace(" National Park", ""), desc = "%s, %s" % (park["park"], park["state"]), icon = "tree", default = False)
+        schema.Toggle(
+            id = get_visit_setting_id(
+                "PARK",
+                park["state"],
+                park["park"],
+            ),
+            name = park["park"].replace(" National Park", ""),
+            desc = "%s, %s" % (park["park"], park["state"]),
+            icon = "tree",
+            default = False,
+        )
         for park in sorted_parks
     ]
 
 def get_world_heritage_options(sites):
-    sorted_sites = sorted(sites, key = lambda entry: (entry["state"], entry["site"]))
+    sorted_sites = sorted(
+        sites,
+        key = lambda entry: (entry["state"], entry["site"]),
+    )
 
     return [
-        schema.Toggle(id = "HERITAGE_%s_%s" % (site["state"].replace(" ", "_"), site["site"].replace(" ", "_")), name = site["site"], desc = "%s, %s" % (site["site"], site["state"]), icon = "locationPin", default = False)
+        schema.Toggle(
+            id = get_visit_setting_id(
+                "HERITAGE",
+                site["state"],
+                site["site"],
+            ),
+            name = site["site"],
+            desc = "%s, %s" % (site["site"], site["state"]),
+            icon = "locationPin",
+            default = False,
+        )
         for site in sorted_sites
     ]
 
 def get_presidential_library_options(libraries):
-    sorted_libraries = sorted(libraries, key = lambda entry: (entry["state"], entry["site"]))
+    sorted_libraries = sorted(
+        libraries,
+        key = lambda entry: (entry["state"], entry["site"]),
+    )
 
     return [
         schema.Toggle(
-            id = "PRESIDENTIAL_%s_%s" % (
-                slugify(library["state"]),
-                slugify(library["site"]),
+            id = get_visit_setting_id(
+                "PRESIDENTIAL",
+                library["state"],
+                library["site"],
             ),
             name = library["site"],
-            desc = "%s, %s" % (library["site"], library["state"]),
+            desc = "%s, %s" % (
+                library["site"],
+                library["state"],
+            ),
             icon = "landmarkDome",
             default = False,
         )
         for library in sorted_libraries
     ]
-
-TRACKING_OPTIONS = [
-    schema.Option(value = "national_parks", display = "National Parks"),
-    schema.Option(value = "presidential_libraries", display = "Presidential Libraries"),
-    schema.Option(value = "capitols", display = "State Capitols"),
-    schema.Option(value = "world_heritage_sites", display = "World Heritage Sites"),
-]
-
-def slugify(value):
-    return (
-        value
-            .replace(" ", "_")
-            .replace(".", "")
-            .replace(",", "")
-            .replace("'", "")
-            .replace("-", "_")
-    )
 
 def get_tracking_items(tracking_type):
     if tracking_type == "capitols":
@@ -386,18 +604,26 @@ def get_tracking_items(tracking_type):
         return get_world_heritage_options(world_heritage_sites)
     elif tracking_type == "presidential_libraries":
         return get_presidential_library_options(presidential_libraries)
-    else:
-        return get_location_options(usa_capitols)
+
+    return get_location_options(usa_capitols)
 
 def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
             schema.Toggle(
+                id = "show_instructions",
+                name = "Show Instructions",
+                desc = "Show scrolling help instead of your map",
+                icon = "circleInfo",
+                default = False,
+            ),
+            schema.Toggle(
                 id = "showCount",
                 name = "Count",
                 desc = "Display the Count of Visited Items?",
                 icon = "calculator",
+                default = False,
             ),
             schema.Color(
                 id = "map_outline_color",
