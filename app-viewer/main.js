@@ -82,6 +82,18 @@ export function shareablePageUrl(href = window.location.href) {
   return url.href;
 }
 
+// Share goes on the same row as the Back to Apps button at the top of the page, on the right
+function placeShareButton(title) {
+  const backToApps = document.querySelector('body > .container > a.btn-secondary');
+  if (!backToApps) return;
+  const topRow = document.createElement('div');
+  topRow.className = 'page-top-row';
+  backToApps.replaceWith(topRow);
+  backToApps.classList.remove('mb-3');
+  topRow.appendChild(backToApps);
+  topRow.appendChild(createShareButton(title));
+}
+
 // "Share": the share sheet on phones and tablets, otherwise copies the link
 function createShareButton(title) {
   const button = document.createElement('button');
@@ -1060,7 +1072,9 @@ async function renderAppDetail() {
     container.appendChild(readmeSection);
   }
 
-  // Add buttons at the bottom - Back to Apps on left, Share and Report Issue on right
+  placeShareButton(`${app.displayName || appName} - Tronbyt App`);
+
+  // Add buttons at the bottom - Back to Apps on left, Report Issue on right
   const reportContainer = document.createElement('div');
   reportContainer.className = 'detail-footer mt-4 pt-4 border-top d-flex justify-content-between';
 
@@ -1118,7 +1132,6 @@ async function renderAppDetail() {
   }
 
   reportContainer.appendChild(backButton);
-  rightActions.appendChild(createShareButton(`${app.displayName || appName} - Tronbyt App`));
   rightActions.appendChild(reportControl);
   if (sourceLink) rightActions.appendChild(sourceLink);
   reportContainer.appendChild(rightActions);
@@ -1176,29 +1189,207 @@ async function renderAuthorProfile() {
   title.className = 'main-title mb-3';
   title.textContent = authorName;
 
-  const count = document.createElement('p');
-  count.className = 'author-app-count mb-0';
-  count.textContent = `${authorApps.length} ${authorApps.length === 1 ? 'app' : 'apps'}`;
-
-  const share = createShareButton(`${authorName} - Tronbyt Apps`);
-  share.classList.add('mt-3');
+  placeShareButton(`${authorName} - Tronbyt Apps`);
 
   header.appendChild(title);
-  header.appendChild(count);
-  header.appendChild(share);
   container.appendChild(header);
+
+  // Display and Sort, as on the catalogue. They start from the catalogue's choices when the page was opened from it.
+  const state = currentViewerState();
+  // Only the displays at least one of the author's apps supports (every app works on a standard display)
+  const displayOptions = DISPLAY_OPTIONS.filter(([value]) => value === 'standard' ||
+    (value === 'wide' && authorApps.some(app => app.supports2x)) ||
+    (value === 'square' && authorApps.some(app => app.supports64x64)));
+  const displayFilter = createFilterSelect('display-filter', 'Display', displayOptions,
+    displayOptions.some(([value]) => value === state.get('display')) ? state.get('display') : 'standard');
+  const sortOrder = createFilterSelect('sort-order', 'Sort', SORT_OPTIONS,
+    SORT_OPTIONS.some(([value]) => value === state.get('sort')) ? state.get('sort') : DEFAULT_SORT_ORDER);
+  const filters = document.createElement('div');
+  filters.className = 'author-filters mb-4';
+  if (displayOptions.length > 1) filters.appendChild(displayFilter); // Only Standard: nothing to choose
+  if (authorApps.length > 1) filters.appendChild(sortOrder); // Nothing to sort with one app
+
+  // The page's dot matrix setting sits to the right of the menus
+  const dotMatrix = document.getElementById('dot-matrix-toggle')?.closest('.form-check');
+  if (dotMatrix) {
+    const emptyWrapper = dotMatrix.parentElement;
+    dotMatrix.classList.add('author-filters-dot-matrix');
+    filters.appendChild(dotMatrix);
+    if (emptyWrapper && !emptyWrapper.children.length) emptyWrapper.remove();
+  }
+
+  // Hide broken apps, as on the catalogue; it also sets which apps the counts and the footer include
+  const hideBroken = document.createElement('div');
+  hideBroken.className = 'form-check author-filters-dot-matrix';
+  const hideBrokenApps = document.createElement('input');
+  hideBrokenApps.className = 'form-check-input';
+  hideBrokenApps.type = 'checkbox';
+  hideBrokenApps.id = 'hide-broken-apps';
+  hideBrokenApps.checked = isHidingBrokenApps();
+  const hideBrokenLabel = document.createElement('label');
+  hideBrokenLabel.className = 'form-check-label';
+  hideBrokenLabel.htmlFor = 'hide-broken-apps';
+  hideBrokenLabel.textContent = 'Hide broken apps';
+  hideBroken.appendChild(hideBrokenApps);
+  hideBroken.appendChild(hideBrokenLabel);
+  filters.appendChild(hideBroken);
+  container.appendChild(filters);
 
   const list = document.createElement('div');
   list.id = 'apps-list';
   list.className = 'row g-4';
   container.appendChild(list);
 
-  authorApps.sort((a, b) => {
-    const nameA = (a.displayName || a.name).toLowerCase();
-    const nameB = (b.displayName || b.name).toLowerCase();
-    return nameA.localeCompare(nameB);
+  function showApps() {
+    const display = displayFilter.value;
+    const sort = sortOrder.value;
+    const hidingBroken = hideBrokenApps.checked;
+
+    // Remember the choices with the rest of the catalogue's state, so the app pages opened from here and Back to
+    // Apps keep them, without adding them to the address
+    const saved = currentViewerState();
+    if (display === 'standard') saved.delete('display'); else saved.set('display', display);
+    if (sort === DEFAULT_SORT_ORDER) saved.delete('sort'); else saved.set('sort', sort);
+    if (hidingBroken) saved.set('hideBroken', '1'); else saved.delete('hideBroken');
+    window.history.replaceState({ ...(window.history.state || {}), viewerState: saved.toString() }, '', window.location.href);
+
+    const shownApps = hidingBroken ? authorApps.filter(app => !isAppBroken(app, brokenApps)) : authorApps;
+    header.querySelector('.display-counts')?.remove();
+    header.appendChild(createDisplayCounts(shownApps));
+    renderAppsList(filterAndSortApps(shownApps, { display, sort }), brokenApps, display);
+    if (!shownApps.length) {
+      const message = document.createElement('p');
+      message.className = 'author-empty';
+      message.textContent = `All of ${authorName}'s apps are broken. Untick Hide broken apps to see them.`;
+      list.appendChild(message);
+    }
+  }
+
+  displayFilter.addEventListener('change', showApps);
+  sortOrder.addEventListener('change', showApps);
+  hideBrokenApps.addEventListener('change', () => {
+    try {
+      localStorage.setItem('hideBrokenApps', String(hideBrokenApps.checked));
+    } catch {
+      // Filtering still works for this page when storage is unavailable.
+    }
+    showApps();
   });
-  renderAppsList(authorApps, brokenApps);
+  showApps();
+}
+
+// A row of app counts: the total, then how many support each display (every app works on a standard display).
+// Used in an author's panel and, for the whole catalogue, in the footer, where each count also shows its share of the total.
+function createDisplayCounts(apps, { showPercent = false } = {}) {
+  const count = document.createElement('span');
+  count.className = 'display-counts-total';
+  count.textContent = `${apps.length.toLocaleString('en-US')} ${apps.length === 1 ? 'app' : 'apps'}`;
+
+  const displayCounts = document.createElement('div');
+  displayCounts.className = 'display-counts';
+  displayCounts.appendChild(count);
+  if (!apps.length) {
+    displayCounts.classList.add('display-counts-empty'); // No separator after the total
+    return displayCounts;
+  }
+  // The counts for each display wrap within their own block, so a wrapped line starts under the first of them
+  const countClip = document.createElement('div');
+  countClip.className = 'display-counts-clip';
+  const countList = document.createElement('div');
+  countList.className = 'display-counts-list';
+  countClip.appendChild(countList);
+  displayCounts.appendChild(countClip);
+  for (const [value, label] of DISPLAY_OPTIONS) {
+    const supported = apps.filter(app => value === 'standard' ||
+      (value === 'wide' && app.supports2x) || (value === 'square' && app.supports64x64)).length;
+    if (!supported) continue;
+    const box = document.createElement('span');
+    box.className = 'display-count';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const number = document.createElement('span');
+    number.className = 'display-count-number';
+    number.textContent = `${supported.toLocaleString('en-US')} ${supported === 1 ? 'app' : 'apps'}`;
+    const text = document.createElement('span');
+    text.className = 'display-count-text';
+    text.appendChild(name);
+    // The share stays with its count, so the two wrap together
+    if (showPercent) {
+      const percent = document.createElement('span');
+      percent.className = 'display-count-percent';
+      percent.textContent = `(${formatShare(supported, apps.length)})`;
+      number.appendChild(percent);
+    }
+    text.appendChild(number);
+    box.appendChild(text);
+    countList.appendChild(box);
+  }
+  return displayCounts;
+}
+
+// A share of the total as a whole percentage, never rounded up to 100% or down to 0%
+function formatShare(part, total) {
+  const percent = Math.round(part / total * 100);
+  if (part < total && percent === 100) return '99%';
+  if (part > 0 && percent === 0) return '<1%';
+  return `${percent}%`;
+}
+
+// Whether "Hide broken apps" is ticked: from the catalogue's state when the page was opened from it, otherwise the
+// choice remembered in this browser
+function isHidingBrokenApps() {
+  const checkbox = document.getElementById('hide-broken-apps');
+  if (checkbox) return checkbox.checked;
+  if (currentViewerState().get('hideBroken') === '1') return true;
+  try {
+    return localStorage.getItem('hideBrokenApps') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+// A thin footer on every page: a link to Tronbyt, and the catalogue's app counts, leaving out broken apps when
+// "Hide broken apps" is ticked
+async function renderSiteFooter() {
+  const page = document.querySelector('body > .container');
+  if (!page || page.querySelector('.site-footer')) return;
+  const { apps, brokenApps } = await preloadAppData();
+
+  const footer = document.createElement('footer');
+  footer.className = 'site-footer';
+  const link = document.createElement('a');
+  link.href = 'https://tronbyt.com/';
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.textContent = 'Learn about Tronbyt';
+  footer.appendChild(link);
+  page.appendChild(footer);
+
+  const showCounts = () => {
+    footer.querySelector('.display-counts')?.remove();
+    const counted = isHidingBrokenApps() ? apps.filter(app => !isAppBroken(app, brokenApps)) : apps;
+    if (counted.length) footer.appendChild(createDisplayCounts(counted, { showPercent: true }));
+  };
+  showCounts();
+  document.getElementById('hide-broken-apps')?.addEventListener('change', showCounts);
+}
+
+const DISPLAY_OPTIONS = [['standard', 'Standard / 1x'], ['wide', 'Wide / 2x'], ['square', 'Square']];
+const SORT_OPTIONS = [['alphabetical', 'A-Z'], ['newest', 'Newest'], ['updated', 'Last Updated']];
+
+function createFilterSelect(id, label, options, selected) {
+  const select = document.createElement('select');
+  select.id = id;
+  select.className = 'form-select';
+  select.setAttribute('aria-label', label);
+  for (const [value, text] of options) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = `${label}: ${text}`;
+    option.selected = value === selected;
+    select.appendChild(option);
+  }
+  return select;
 }
 
 // --- INIT ---
@@ -1216,9 +1407,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else if (document.getElementById('app-content')) {
     // App detail page
     tidyPageAddress();
-    renderAppDetail();
     setupDotMatrixToggle();
+    await renderAppDetail();
   }
+  renderSiteFooter();
 });
 
 // --- DOT MATRIX TOGGLE ---

@@ -77,8 +77,8 @@ body {
   background: #222;
   border: 2px solid #444;
   border-radius: 8px;
-  padding: 1.5rem;
   box-shadow: 0 2px 8px #000a;
+  padding: 1.5rem;
 }
 
 /* Long author names with no spaces wrap inside the box rather than running off it */
@@ -86,9 +86,212 @@ body {
   overflow-wrap: anywhere;
 }
 
-.author-app-count {
-  color: #bbb;
-  font-size: 0.8rem;
+/* Back to Apps on the left, Share on the right */
+.page-top-row {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.page-top-row .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .page-top-row .btn {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-footer .display-counts {
+    font-size: 0.45rem;
+  }
+
+  .page-top-row .btn {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.6rem;
+  }
+}
+
+/* The total, then the count for each display */
+/* The total, the display names and the counts are all one size; colour tells them apart */
+.display-counts {
+  align-items: flex-start;
+  display: flex;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+}
+
+/* The total is centred in a row as tall as the pills, so the letters line up with them */
+.display-counts-total {
+  align-items: center;
+  color: #f2f2f2;
+  display: inline-flex;
+  flex: 0 0 auto;
+  line-height: 1;
+  min-height: 1.6rem;
+}
+
+/* A dot after the total, and between the display counts */
+.display-counts-total::after,
+.display-count::before {
+  color: #777;
+  content: "\00b7";
+  display: inline-block;
+  font-size: 1.4rem;
+  text-align: center;
+  width: 2rem;
+}
+
+.display-counts-total::after {
+  line-height: 0;
+}
+
+/* The counts wrap within their own block, so a wrapped line starts under the first display, not the total. The
+   list is pulled left by one dot's width inside a box that clips it, so no line starts with a dot. */
+.display-counts-clip {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.display-counts-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -2rem;
+  row-gap: 0.5rem;
+}
+
+/* The total and each count share one row height, so they line up */
+.display-count {
+  align-items: center;
+  color: #aaa;
+  display: flex;
+  max-width: 100%;
+  min-height: 1.6rem;
+}
+
+/* The dot doesn't add to the row's height */
+.display-count::before {
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* The display's name and its count; on very narrow screens the count goes under the name */
+.display-count-text {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  min-width: 0;
+}
+
+/* A faint pill outline marks out each display's full name. Line height 1 keeps the letters centred, as the
+   font has more space below its letters than above. */
+.display-count-text > span:first-child {
+  border: 1px solid #3a3a3a;
+  border-radius: 999px;
+  line-height: 1;
+  padding: 0.35rem 0.6rem;
+  white-space: nowrap;
+}
+
+.display-count-number {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* On phones the total stays on the left, with one display per line beside it */
+@media (max-width: 575px) {
+  .display-counts-list {
+    flex-direction: column;
+  }
+}
+
+/* Tighter on the narrowest screens, so each display's count fits beside its name */
+@media (max-width: 420px) {
+  .author-profile-header .display-counts-total::after,
+  .author-profile-header .display-count::before {
+    width: 1.2rem;
+  }
+
+  .author-profile-header .display-counts-list {
+    margin-left: -1.2rem;
+  }
+
+  .author-profile-header .display-counts {
+    font-size: 0.5rem;
+  }
+
+  .author-profile-header .display-count-text {
+    column-gap: 0.45rem;
+  }
+
+  .author-profile-header .display-count-text > span:first-child {
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* Dimmer than the total, which is the sum of all the author's apps, and brighter than the display names */
+.display-count-number {
+  color: #c4c4c4;
+}
+
+/* The footer's share of the catalogue, set closer to its count and dimmer than it */
+.display-count-percent {
+  color: #888;
+  margin-left: 0.3rem;
+}
+
+/* A thin footer on every page: a link to Tronbyt on the left, the catalogue's app counts on the right */
+.site-footer {
+  align-items: center;
+  border-top: 1px solid #333;
+  display: flex;
+  flex-wrap: wrap;
+  font-family: 'Press Start 2P', monospace;
+  gap: 0.5rem 1.5rem;
+  justify-content: space-between;
+  margin-top: 2.5rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
+.site-footer > a {
+  color: #aaa;
+  font-size: 0.55rem;
+  text-decoration: none;
+}
+
+.site-footer > a:hover,
+.site-footer > a:focus-visible {
+  color: #ffd700;
+}
+
+/* A smaller version of the counts row */
+.site-footer .display-counts {
+  font-size: 0.5rem;
+}
+
+.site-footer .display-counts-total,
+.site-footer .display-count {
+  min-height: 1.2rem;
+}
+
+.site-footer .display-counts-total::after,
+.site-footer .display-count::before {
+  font-size: 1rem;
+  width: 1.4rem;
+}
+
+.site-footer .display-counts-list {
+  margin-left: -1.4rem;
+}
+
+.site-footer .display-count-text > span:first-child {
+  padding: 0.2rem 0.45rem;
 }
 
 /* Clickable title styling */
@@ -253,6 +456,41 @@ body {
 
 .viewer-filters .form-select {
   font-size: 0.75rem;
+}
+
+/* Display and Sort on author pages */
+.author-filters {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.author-filters .form-select {
+  flex: 0 1 18rem;
+  font-size: 0.75rem;
+  min-width: 14rem;
+}
+
+.author-filters-dot-matrix {
+  margin-bottom: 0;
+}
+
+.author-empty {
+  color: #aaa;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.display-counts-empty .display-counts-total::after {
+  content: none;
+}
+
+@media (max-width: 575px) {
+  .author-filters .form-select {
+    flex-basis: 100%;
+  }
 }
 
 .app-square .card-img-top {
@@ -929,8 +1167,7 @@ body.dot-matrix-enabled .app-readme img.readme-device-square {
     gap: 1rem;
   }
 
-  .detail-actions .report-button,
-  .detail-actions .share-button {
+  .detail-actions .report-button {
     flex: 1 1 auto;
   }
 }
