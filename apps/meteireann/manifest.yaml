@@ -7,9 +7,10 @@ author: vincentezw
 recommendedInterval: 5
 fileName: met_eireann.star
 packageName: meteireann
+supports64x64: true
 category: weather
 tags:
   - weather
   - local
 published: '2024-07-03T21:02:45Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T21:54:45Z'

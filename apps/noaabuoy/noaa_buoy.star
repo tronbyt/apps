@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
@@ -341,7 +341,13 @@ def render_swell_graph(data_points, buoy_name, h_unit_pref, t_unit_pref, data, u
     )
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                graph_widget,
+                text_overlay,
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 graph_widget,
                 text_overlay,
@@ -575,6 +581,15 @@ def fetch_data(buoy_id, last_data):
 
     return data
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     debug_print("##########################")
     data = dict()
@@ -648,7 +663,30 @@ def main(config):
     if "error" in data:  # if we have error key, then we got no good swell data, display the error
         #debug_print("buoy_id: " + str(buoy_id))
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                render.Column(
+                    expanded = True,
+                    cross_align = "center",
+                    main_align = "space_evenly",
+                    children = [
+                        render.Text(
+                            content = "Buoy:" + str(buoy_id),
+                            font = "tb-8",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "Error",
+                            font = "tb-8",
+                            color = "#FF0000",
+                        ),
+                        render.Text(
+                            content = data["error"],
+                            color = "#FF0000",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 render.Column(
                     expanded = True,
                     cross_align = "center",
@@ -708,7 +746,25 @@ def main(config):
 
         # Fallback if no spec data available
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                render.Column(
+                    cross_align = "center",
+                    main_align = "center",
+                    children = [
+                        render.Text(
+                            content = buoy_name if buoy_name else buoy_id,
+                            font = "tb-8",
+                            color = "#AAEEDD",
+                        ),
+                        render.Text(
+                            content = "No Graph Data",
+                            font = "tb-8",
+                            color = "#FF0000",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 render.Column(
                     cross_align = "center",
                     main_align = "center",
@@ -783,7 +839,29 @@ def main(config):
 
         period_display = str(int(float(period) + 0.5)) if type(period) == type("") and period.replace(".", "", 1).isdigit() else str(period)
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                render.Column(
+                    cross_align = "center",
+                    main_align = "center",
+                    children = [
+                        render.Text(
+                            content = buoy_name,
+                            font = "tb-8",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "%s%s %ss" % (height, unit_display, period_display),
+                            font = "6x13",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "%s°%s" % (mwd, wtemp),
+                            color = "#FFAA00",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 render.Column(
                     cross_align = "center",
                     main_align = "center",
@@ -826,7 +904,29 @@ def main(config):
             atemp = " %s%s" % (str(at), t_unit_pref)
 
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                render.Column(
+                    cross_align = "center",
+                    main_align = "center",
+                    children = [
+                        render.Text(
+                            content = buoy_name,
+                            font = "tb-8",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "%s%s kts" % (avg, gust),
+                            font = "6x13",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "%s°%s" % (data["WDIR"], atemp),
+                            color = "#FFAA00",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 render.Column(
                     cross_align = "center",
                     main_align = "center",
@@ -865,7 +965,29 @@ def main(config):
             air = FtoC(air)
 
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                render.Column(
+                    cross_align = "center",
+                    main_align = "center",
+                    children = [
+                        render.Text(
+                            content = buoy_name,
+                            font = "tb-8",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "Air:%s°%s" % (air, t_unit_pref),
+                            font = "6x13",
+                            color = swell_color,
+                        ),
+                        render.Text(
+                            content = "Water : %s°%s" % (water, t_unit_pref),
+                            color = "#1166FF",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 render.Column(
                     cross_align = "center",
                     main_align = "center",
@@ -901,7 +1023,29 @@ def main(config):
                 water = FtoC(water)
 
             return render.Root(
-                child = render.Box(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = [
+                            render.Text(
+                                content = buoy_name,
+                                font = "tb-8",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "Tide: %s %s" % (data["TIDE"], "ft"),
+                                #font = "6x13",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "Water : %s°%s" % (water, t_unit_pref),
+                                color = "#1166FF",
+                            ),
+                        ],
+                    ),
+                ))) if is_square() else render.Box(
                     render.Column(
                         cross_align = "center",
                         main_align = "center",
@@ -944,7 +1088,29 @@ def main(config):
             if len(lines) < 2:
                 lines.append("")
             return render.Root(
-                child = render.Box(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = [
+                            render.Text(
+                                content = buoy_name,
+                                font = "tb-8",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = lines[0],
+                                #font = "6x13",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = lines[1],
+                                color = "#1166FF",
+                            ),
+                        ],
+                    ),
+                ))) if is_square() else render.Box(
                     render.Column(
                         cross_align = "center",
                         main_align = "center",
@@ -1030,7 +1196,29 @@ def main(config):
                 buoy_display_name = buoy_name + "*"
 
             return render.Root(
-                child = render.Box(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = [
+                            render.Text(
+                                content = buoy_display_name,
+                                font = "tb-8",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "%s%s %ss" % (height, unit_display, period_display),
+                                font = "6x13",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "%s°%s" % (mwd, wtemp),
+                                color = "#FFAA00",
+                            ),
+                        ],
+                    ),
+                ))) if is_square() else render.Box(
                     render.Column(
                         cross_align = "center",
                         main_align = "center",
@@ -1055,7 +1243,29 @@ def main(config):
             )
         else:
             return render.Root(
-                child = render.Box(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = [
+                            render.Text(
+                                content = buoy_name,
+                                font = "tb-8",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "Nothing to",
+                                font = "tb-8",
+                                color = "#FF0000",
+                            ),
+                            render.Text(
+                                content = "Display",
+                                color = "#FF0000",
+                            ),
+                        ],
+                    ),
+                ))) if is_square() else render.Box(
                     render.Column(
                         cross_align = "center",
                         main_align = "center",
@@ -1141,7 +1351,29 @@ def main(config):
                 buoy_display_name = buoy_name + "*"
 
             return render.Root(
-                child = render.Box(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = [
+                            render.Text(
+                                content = buoy_display_name,
+                                font = "tb-8",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "%s%s %ss" % (height, unit_display, period_display),
+                                font = "6x13",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "%s°%s" % (mwd, wtemp),
+                                color = "#FFAA00",
+                            ),
+                        ],
+                    ),
+                ))) if is_square() else render.Box(
                     render.Column(
                         cross_align = "center",
                         main_align = "center",
@@ -1166,7 +1398,29 @@ def main(config):
             )
         else:
             return render.Root(
-                child = render.Box(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    render.Column(
+                        cross_align = "center",
+                        main_align = "center",
+                        children = [
+                            render.Text(
+                                content = buoy_name,
+                                font = "tb-8",
+                                color = swell_color,
+                            ),
+                            render.Text(
+                                content = "Nothing to",
+                                font = "tb-8",
+                                color = "#FF0000",
+                            ),
+                            render.Text(
+                                content = "Display",
+                                color = "#FF0000",
+                            ),
+                        ],
+                    ),
+                ))) if is_square() else render.Box(
                     render.Column(
                         cross_align = "center",
                         main_align = "center",

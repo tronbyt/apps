@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
@@ -24,6 +24,15 @@ auth_endpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authori
 token_endpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token"
 
 # -------- MAIN TIDBYT FUNCTIONS --------
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     access_token = refresh_access_token(config)
@@ -72,22 +81,52 @@ def get_schema():
 
 def render_no_xbox():
     return render.Root(
-        render.Text(content = "No Xbox / Minecraft"),
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text(content = "No Xbox / Minecraft"))) if is_square() else render.Text(content = "No Xbox / Minecraft"),
     )
 
 def render_not_logged_in():
     return render.Root(
-        render.Text(content = "Please login"),
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text(content = "Please login"))) if is_square() else render.Text(content = "Please login"),
     )
 
 def render_no_realms():
     return render.Root(
-        render.Text(content = "No Realms Found"),
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text(content = "No Realms Found"))) if is_square() else render.Text(content = "No Realms Found"),
     )
 
 def render_realms(name, slot, players, max_players, motd):
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    children = [
+                        render.Padding(
+                            child = render.Circle(color = slot_map(slot), diameter = 6),
+                            pad = (1, 1, 2, 1),
+                        ),
+                        render.Text(content = name),
+                    ],
+                    expanded = True,
+                ),
+                render.Row(
+                    children = [
+                        render.Text(content = "Online: " + str(players) + "/" + str(max_players)),
+                    ],
+                    main_align = "center",
+                    expanded = True,
+                ),
+                render.Marquee(
+                    width = 64,
+                    child = render.Text(content = motd),
+                    offset_start = 5,
+                    offset_end = 32,
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     children = [

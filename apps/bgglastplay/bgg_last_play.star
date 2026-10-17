@@ -8,7 +8,7 @@ Author: DanDobrick
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
@@ -146,9 +146,8 @@ def render_main(config, game_image, last_play_date, last_play_game):
     ))
 
     return render.Root(
-        child = render.Stack(
-            children = children,
-        ),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = children))),
     )
 
 def demo(config):

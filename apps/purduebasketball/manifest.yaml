@@ -7,9 +7,10 @@ author: Griffinov22
 fileName: purdue_basketball.star
 packageName: purduebasketball
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - nba
   - basketball
 published: '2024-07-17T15:04:09Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T22:22:03Z'

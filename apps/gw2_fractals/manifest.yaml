@@ -4,9 +4,10 @@ name: GW2 Fractals
 summary: See today's FOTM dailies
 desc: See today's T4 dailies and recommended fractals in Guild Wars 2.
 author: Alec Deitloff
+supports64x64: true
 category: entertainment
 tags:
   - art
   - gaming
 published: '2024-09-25T14:46:55Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T21:17:57Z'

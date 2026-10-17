@@ -5,7 +5,7 @@ load("images/heart_image.png", HEART_IMAGE_ASSET = "file")
 load("images/lb_image.png", LB_IMAGE_ASSET = "file")
 load("images/rewatch_image.png", REWATCH_IMAGE_ASSET = "file")
 load("images/star_image.png", STAR_IMAGE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -35,12 +35,22 @@ ACTIVITY_START_INDEX = 0
 ACTIVITY_END_INDEX = 4
 REVIEW_COUNT = 3
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     api_key = config.get("letterboxd_api_key")
     api_secret = config.get("letterboxd_api_secret")
     if not api_key or not api_secret:
         return render.Root(
-            child = render.Text("Please set your Letterboxd API key and secret in the config."),
+            # On the square the message is wrapped and centred instead of clipped to one line; other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Please set your Letterboxd API key and secret in the config.", align = "center"))) if is_square() else render.Text("Please set your Letterboxd API key and secret in the config."),
         )
     username = config.str("username", DEFAULT_USERNAME)
     Lid = getLID(username)
@@ -50,7 +60,8 @@ def main(config):
     entryList = recentActivity[ACTIVITY_START_INDEX:ACTIVITY_END_INDEX]
     entryList = [getEntry(api_key, api_secret, Lid, entryList[i]) for i in range(REVIEW_COUNT)]
     return render.Root(
-        child = renderReviews(entryList),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = renderReviews(entryList))) if is_square() else renderReviews(entryList),
     )
 
 # functions

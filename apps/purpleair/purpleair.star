@@ -12,7 +12,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/range.png", RANGE_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 RANGE = RANGE_ASSET.readall()
@@ -31,6 +31,15 @@ PARTICLE_SENSOR_B = "Sensor B"
 # MAIN APP
 
 api_key = None
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     api_key = config.get("api_key")
@@ -83,7 +92,29 @@ def main(config):
             name = "%s\n(inside)" % name
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Box(
+                    width = 64,
+                    height = 32,
+                    color = BACKGROUND_COLOR,
+                    child = render.Column(
+                        children = [
+                            render.Stack(
+                                render_range(aqi),
+                            ),
+                            render.Padding(
+                                pad = (2, 2, 0, 0),
+                                child = render_animation(aqi, temp, humidity, name, show_title, show_temp, show_name, temp_unit),
+                            ),
+                        ],
+                        expanded = True,
+                        main_align = "space_evenly",
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Box(
                     width = 64,

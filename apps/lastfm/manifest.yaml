@@ -7,9 +7,10 @@ author: Chuck
 fileName: last_fm.star
 packageName: lastfm
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - music
   - art
 published: '2023-01-24T16:52:01Z'
-updated: '2025-11-30T20:08:55Z'
+updated: '2026-10-01T21:41:49Z'

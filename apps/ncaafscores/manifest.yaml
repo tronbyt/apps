@@ -7,10 +7,11 @@ author: LunchBox8484
 fileName: ncaaf_scores.star
 packageName: ncaafscores
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - utility
   - ncaaf
   - football
 published: '2022-08-18T14:51:01Z'
-updated: '2026-10-13T21:17:57Z'
+updated: '2026-10-17T18:55:52Z'

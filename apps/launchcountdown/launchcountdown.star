@@ -18,6 +18,27 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 ROCKET_ICON = ROCKET_ICON_ASSET.readall()
 ROCKET_ICON_B = ROCKET_ICON_B_ASSET.readall()
 ROCKET_ICON_C = ROCKET_ICON_C_ASSET.readall()
@@ -400,7 +421,7 @@ def display_status(title, message, scroll_speed):
     return render.Root(
         delay = scroll_speed,
         show_full_animation = True,
-        child = render.Column(
+        child = center_on_square(render.Column(
             children = [
                 fit_or_scroll(
                     title,
@@ -417,7 +438,7 @@ def display_status(title, message, scroll_speed):
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
 def display_error(message, show_errors, scroll_speed):
@@ -493,7 +514,7 @@ def display_instructions(scroll_speed):
     return render.Root(
         delay = scroll_speed,
         show_full_animation = True,
-        child = render.Column(children = children),
+        child = center_on_square(render.Column(children = children)),
     )
 
 def rocket_animation():
@@ -596,7 +617,7 @@ def display_launch(rows, scroll_speed):
     return render.Root(
         show_full_animation = True,
         delay = scroll_speed,
-        child = render.Column(
+        child = center_on_square(render.Column(
             children = [
                 render.Row(
                     children = [
@@ -612,7 +633,7 @@ def display_launch(rows, scroll_speed):
                 widgets[2],
                 widgets[3],
             ],
-        ),
+        )),
     )
 
 def replace_local_time_into_description(description, local_time, utc_time):

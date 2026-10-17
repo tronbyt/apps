@@ -6,6 +6,7 @@ desc: Customize gradient fills for your Tidbyt.
 author: Jeffrey Lancaster
 fileName: gradient.star
 packageName: gradient
+supports64x64: true
 category: utilities
 tags:
   - tidbyt
@@ -13,4 +14,4 @@ tags:
   - art
   - utility
 published: '2023-07-27T14:26:00Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T21:17:57Z'

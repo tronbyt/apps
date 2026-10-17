@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -71,8 +71,8 @@ def main(config):
         dprint("No API Key provided in config")
         return render.Root(
             render.Box(
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 child = render.Column(
                     main_align = "space_around",
                     cross_align = "center",
@@ -141,33 +141,37 @@ def main(config):
                     height = 8,
                     child = render.Text("AIR QUALITY", font = "tb-8", color = "#01ffff"),
                 ),
-                render.Row(
-                    children = [
-                        render.Padding(
-                            pad = 2,
-                            child = render.Circle(
-                                color = aqi_color,
-                                diameter = 20,
+                # Centre the body under the header on taller panels (64x64).
+                render.Box(
+                    height = canvas.height() - 8,
+                    child = render.Row(
+                        children = [
+                            render.Padding(
+                                pad = 2,
                                 child = render.Circle(
-                                    color = "#1a1a1a",
-                                    diameter = 16,
-                                    child = render.Marquee(
-                                        width = 10,
-                                        align = "center",
-                                        child = render.Text(aqi_text, font = "6x13", color = aqi_color),
+                                    color = aqi_color,
+                                    diameter = 20,
+                                    child = render.Circle(
+                                        color = "#1a1a1a",
+                                        diameter = 16,
+                                        child = render.Marquee(
+                                            width = 10,
+                                            align = "center",
+                                            child = render.Text(aqi_text, font = "6x13", color = aqi_color),
+                                        ),
                                     ),
                                 ),
                             ),
-                        ),
-                        # conditional separator bar when display_type is pollutants
-                        (render.Box(width = 1, height = 24, color = "#3b3b3b") if display_type == "pollutants" else None),
-                        render.Padding(
-                            pad = 2,
-                            child = render.Column(
-                                children = displayed_content,
+                            # conditional separator bar when display_type is pollutants
+                            (render.Box(width = 1, height = 24, color = "#3b3b3b") if display_type == "pollutants" else None),
+                            render.Padding(
+                                pad = 2,
+                                child = render.Column(
+                                    children = displayed_content,
+                                ),
                             ),
-                        ),
-                    ],
+                        ],
+                    ),
                 ),
             ],
         ),

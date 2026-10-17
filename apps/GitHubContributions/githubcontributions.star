@@ -81,8 +81,9 @@ def get_layout():
     is_2x = canvas.is2x()
 
     return {
-        "screen_width": 128 if is_2x else 64,
-        "screen_height": 64 if is_2x else 32,
+        # The panel's own size: 64x32, 128x64, or the 64x64 square.
+        "screen_width": canvas.width(),
+        "screen_height": canvas.height(),
         "cell_width": 8 if is_2x else 4,
         "weekday_height": 8 if is_2x else 4,
         "weekend_height": 8 if is_2x else 3,

@@ -5,6 +5,7 @@ summary: Home Assistant Calendar
 desc: Shows events from Home Assistant Calendar entities.
 author: radiocolin
 supports2x: true
+supports64x64: true
 fileName: ha_calendar.star
 packageName: hacalendar
 recommendedInterval: 5
@@ -14,4 +15,4 @@ tags:
   - calendar
   - smart-home
 published: '2026-04-20T21:56:35Z'
-updated: '2026-04-20T21:59:03Z'
+updated: '2026-10-01T21:17:57Z'

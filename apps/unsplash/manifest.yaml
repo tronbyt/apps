@@ -8,9 +8,10 @@ fileName: unsplash.star
 packageName: unsplash
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - art
   - wide 2x support
 published: '2022-03-18T13:52:23Z'
-updated: '2025-11-30T20:08:55Z'
+updated: '2026-10-01T16:46:52Z'

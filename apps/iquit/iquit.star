@@ -14,7 +14,7 @@ load("images/frame_6_289fa720.png", FRAME_6_289fa720_ASSET = "file")
 load("images/frame_7_4677f412.png", FRAME_7_4677f412_ASSET = "file")
 load("images/frame_8_340c5e61.png", FRAME_8_340c5e61_ASSET = "file")
 load("images/frame_9_5964adb8.png", FRAME_9_5964adb8_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 def main():
     def getFrames(animationName):
@@ -49,16 +49,22 @@ def main():
     def action():
         return IQUIT
 
+    # The animation is 64x32 artwork; on a taller panel it sits in the
+    # middle.
     return render.Root(
         delay = setDelay(action()),
-        child = render.Stack(
-            children = [
-                render.Box(
-                    width = 64,
-                    height = 32,
-                ),
-                getIQuit(action()),
-            ],
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Stack(
+                children = [
+                    render.Box(
+                        width = 64,
+                        height = 32,
+                    ),
+                    getIQuit(action()),
+                ],
+            ),
         ),
     )
 

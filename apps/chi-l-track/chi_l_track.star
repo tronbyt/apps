@@ -7,7 +7,7 @@ Author: FabioCZ
 
 load("cache.star", "cache")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -326,17 +326,17 @@ def main(config):
     apiKey = config.get("api_key")
 
     if not apiKey:
-        return render.Root(child = render.Text("CTA API Key not set"))
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("CTA API Key not set")))
 
     return render.Root(
-        render.Column(
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Box(width = 1, height = 1),
                 renderPredictions(render, firstLineConfig, apiKey),
                 renderAnimatedTrain(render, showAnimatedTrain),
                 renderPredictions(render, secondLineConfig, apiKey),
             ],
-        ),
+        )),
     )
 
 def directionName(dirId):

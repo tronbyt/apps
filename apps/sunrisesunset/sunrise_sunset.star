@@ -55,6 +55,15 @@ DEFAULT_ITEMS_TO_DISPLAY = "both"
 
 # Images
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, but it is a 2x panel and already uses the 2x artwork.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
 
@@ -157,6 +166,24 @@ def main(config):
                 render.Image(src = image),
                 render.Text(text),
             ],
+        )
+
+    # A square panel is 64 wide like 1x, so it keeps the 1x artwork -- the 2x
+    # sun is 58px wide and would leave six pixels for the time beside it. What
+    # it has is twice the rows, and the three blocks here total 29 of them, so
+    # on square they are spread down the panel instead of stacked against the
+    # top edge above a black half.
+    if is_square():
+        return render.Root(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = [
+                    top,
+                    middle,
+                    bottom,
+                ],
+            ),
         )
 
     return render.Root(

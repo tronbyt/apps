@@ -2,7 +2,7 @@ load("encoding/base64.star", "base64")
 load("http.star", "http")
 
 #Add in the needed code bases
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -250,22 +250,25 @@ def get_due_date_cutoff_hours(config):
         cutoff_days = DEFAULT_DUE_DATE_CUTOFF_DAYS
     return min(int(cutoff_days), MAX_DUE_DATE_CUTOFF_DAYS) * 24
 
+# Each assignment row is 16px tall: two per page on 64x32, four on 64x64.
+PER_PAGE = canvas.height() // 16
+
 def make_assignment_page(assignments, page_number, total_pages):
     page_label = "{}/{}".format(page_number, total_pages)
-    children = [
-        showEvent(assignments[0], page_label if len(assignments) == 1 else ""),
-        render.Box(width = 100, height = 1, color = "#ffffff"),
-    ]
-    if len(assignments) == 2:
-        children.append(showEvent(assignments[1], page_label))
+    children = []
+    for i, assignment in enumerate(assignments):
+        is_last = i == len(assignments) - 1
+        children.append(showEvent(assignment, page_label if is_last else ""))
+        if not is_last or len(assignments) == 1:
+            children.append(render.Box(width = 100, height = 1, color = "#ffffff"))
     return render.Column(children = children)
 
 def render_assignment_pages(assignments):
     assignments = sorted(assignments, key = lambda assignment: time.parse_time(assignment[0]).unix)
-    total_pages = (len(assignments) + 1) // 2
+    total_pages = (len(assignments) + PER_PAGE - 1) // PER_PAGE
     pages = [
-        make_assignment_page(assignments[index:index + 2], index // 2 + 1, total_pages)
-        for index in range(0, len(assignments), 2)
+        make_assignment_page(assignments[index:index + PER_PAGE], index // PER_PAGE + 1, total_pages)
+        for index in range(0, len(assignments), PER_PAGE)
     ]
 
     if len(pages) == 1:

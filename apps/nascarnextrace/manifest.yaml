@@ -7,6 +7,7 @@ author: jvivona
 fileName: nascarnextrace.star
 packageName: nascarnextrace
 recommendedInterval: 5
+supports64x64: true
 category: sports
 tags:
   - clock
@@ -14,4 +15,4 @@ tags:
   - nascar
   - racing
 published: '2022-09-22T16:13:09Z'
-updated: '2026-06-01T00:38:37Z'
+updated: '2026-10-01T21:58:58Z'

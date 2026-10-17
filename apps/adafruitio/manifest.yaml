@@ -6,10 +6,11 @@ desc: Show value or graph of various Adafruit IO Feeds.
 author: tavdog
 fileName: adafruitio.star
 packageName: adafruitio
+supports64x64: true
 category: utilities
 tags:
   - tech
   - smart-home
   - utility
 published: '2023-11-01T18:27:25Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T19:59:14Z'

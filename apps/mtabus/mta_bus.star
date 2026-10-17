@@ -11,7 +11,7 @@ load("animation.star", "animation")
 load("http.star", "http")
 load("images/bus_image_base_64.png", BUS_IMAGE_BASE_64_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -21,6 +21,15 @@ CACHE_TTL_SECONDS = 60
 BUSTIME_URL = "https://bustime.mta.info/api/siri/stop-monitoring.json?key={key}&OperatorRef=MTA&MonitoringRef={stop}"
 
 BUS_ANIMATION_DURATION = 200
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     is_key_set = "key" in config
@@ -42,7 +51,42 @@ def main(config):
                 bus_name = journey.get("PublishedLineName")
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Box(
+                    width = 64,
+                    height = 11,
+                    child = render.Text("Next {}".format(bus_name), font = "6x13"),
+                ),
+                render.Box(
+                    width = 64,
+                    height = 24,
+                    child = render.Stack(
+                        children = [
+                            render.Column(
+                                children = get_wait_time_rows(visits, is_key_set, is_stop_set, response_was_error),
+                            ),
+                            animation.Transformation(
+                                child = render.Image(src = BUS_IMAGE_BASE_64, width = 26),
+                                duration = BUS_ANIMATION_DURATION,
+                                delay = 60,
+                                keyframes = [
+                                    animation.Keyframe(
+                                        percentage = 0.0,
+                                        transforms = [animation.Translate(-64, 0)],
+                                    ),
+                                    animation.Keyframe(
+                                        percentage = 1.0,
+                                        transforms = [animation.Translate(64, 0)],
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Box(
                     width = 64,

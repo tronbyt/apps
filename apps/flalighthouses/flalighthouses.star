@@ -20,6 +20,27 @@ load(
     LIGHTHOUSE_GIF_2X_ASSET = "file",
 )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 MAP_CITIES_COLOR = "#ff0000"
 VISITED_COLOR = "#ffff00"
 UNVISITED_COLOR = "#565a06"
@@ -68,7 +89,11 @@ def append_visited_count(children, config, color):
         margin = 1
 
     x = margin
-    y = max(0, canvas.height() - text_height - margin)
+
+    # On the square the 64x32 scene is bounded and centred, so the count
+    # sits against the scene's bottom edge, not the panel's.
+    scene_height = 32 if is_square() else canvas.height()
+    y = max(0, scene_height - text_height - margin)
 
     children.append(
         render.Padding(
@@ -201,9 +226,9 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Stack(
+        child = center_on_square(render.Stack(
             children = map_items,
-        ),
+        ), 64, 32),
     )
 
 def define_map_area(map_coordinates, existing_area = None):

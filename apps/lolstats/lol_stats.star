@@ -7,7 +7,7 @@ Author: thiagoss
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -48,6 +48,15 @@ famous_players = [
 def random_famous_player():
     selection_index = random.number(0, len(famous_players) - 1)
     return famous_players[selection_index]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     random.seed(time.now().unix // 15)
@@ -155,7 +164,17 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                player_row,
+                horizontal_rule,
+                total_win_losses_row,
+                horizontal_rule,
+                last_match_row,
+                match_sequence_row,
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 player_row,
                 horizontal_rule,
@@ -169,7 +188,40 @@ def main(config):
 
 def render_error(title, msg):
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Marquee(
+                    width = 64,
+                    delay = 12,
+                    child = render.Text(
+                        content = title,
+                        color = "#FF0000",
+                        font = PLAYER_FONT,
+                    ),
+                ),
+                render.Marquee(
+                    width = 64,
+                    delay = 12,
+                    child = render.Text(
+                        content = msg,
+                        font = WL_FONT,
+                    ),
+                ),
+                render.Padding(
+                    pad = (0, 1, 0, 0),
+                    child = horizontal_rule,
+                ),
+                render.Padding(
+                    pad = (0, 8, 0, 0),
+                    child = render.Text(
+                        content = "== LOL Stats. ==",
+                        font = WL_FONT,
+                        color = "#AAAAAA",
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Marquee(
                     width = 64,

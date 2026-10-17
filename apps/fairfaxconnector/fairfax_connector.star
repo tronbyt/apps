@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bus_stop_picture.png", BUS_STOP_PICTURE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 BUS_STOP_PICTURE = BUS_STOP_PICTURE_ASSET.readall()
@@ -130,18 +130,20 @@ def main(config):
     predictions = getPredictions(stop, config)
     if predictions == None:
         return render.Root(
-            child = render.Column(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 children = [
                     banner,
                     render.Text(
                         content = "API Error",
                     ),
                 ],
-            ),
+            )),
         )
     if len(predictions) == 0:
         return render.Root(
-            child = render.Stack(
+            # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
                 children = [
                     render.Padding(
                         pad = (38, 5, 0, 0),
@@ -154,7 +156,7 @@ def main(config):
                         src = BUS_STOP_PICTURE,
                     ),
                 ],
-            ),
+            ))),
         )
     rows = [
         banner,
@@ -169,9 +171,10 @@ def main(config):
     for prediction in predictions:
         rows.append(renderBusRow(prediction, config))
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = rows,
-        ),
+        )),
     )
 
 def get_schema():

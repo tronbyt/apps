@@ -15,7 +15,7 @@ Example gif generated through the following command:
 load("http.star", "http")
 load("images/icon_left.png", ICON_LEFT_ASSET = "file")
 load("images/icon_right.png", ICON_RIGHT_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ICON_LEFT = ICON_LEFT_ASSET.readall()
@@ -43,7 +43,8 @@ def main(config):
     decrypted_key = config.get("fortnite_api_key")
     if not decrypted_key:
         return render.Root(
-            child = render.WrappedText("API Key not set", color = "#ff0000"),
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("API Key not set", color = "#ff0000")),
         )
 
     headers = {
@@ -98,7 +99,8 @@ def main(config):
 
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Column(
                     children = [
@@ -136,7 +138,7 @@ def main(config):
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
 ########################################################################################### Schema ###########################################################################################

@@ -7,10 +7,11 @@ author: BriHen
 fileName: mario_and_yoshi.star
 packageName: marioandyoshi
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - gaming
   - retro
   - media
 published: '2023-12-29T13:57:02Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T21:48:48Z'

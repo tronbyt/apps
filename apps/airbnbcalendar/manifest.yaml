@@ -7,6 +7,7 @@ author: Jed Schmidt
 fileName: airbnb_calendar.star
 packageName: airbnbcalendar
 recommendedInterval: 60
+supports64x64: true
 category: utilities
 tags:
   - tech
@@ -14,4 +15,4 @@ tags:
   - utility
   - productivity
 published: '2023-03-14T19:16:32Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T19:59:14Z'

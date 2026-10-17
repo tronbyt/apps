@@ -12,7 +12,7 @@ load("images/red_barron.png", RED_BARRON_ASSET = "file")
 load("images/snoopy_and_woodstock.png", SNOOPY_AND_WOODSTOCK_ASSET = "file")
 load("images/snoopy_and_woodstock_walking.gif", SNOOPY_AND_WOODSTOCK_WALKING_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_SPEED = 500
@@ -31,6 +31,15 @@ all_opts = [
     OPT_SNOOPY_AND_WOODSTOCK,
     OPT_SNOOPY_AND_WOODSTOCK_WALKING,
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     image_opt = config.get("image")
@@ -54,7 +63,8 @@ def main(config):
 
     return render.Root(
         delay = int(DEFAULT_SPEED),
-        child = render.Image(img_to_display),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(img_to_display))) if is_square() else render.Image(img_to_display),
     )
 
 def fancy_snoopy():

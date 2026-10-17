@@ -14,7 +14,7 @@ v 1.4 - Add 2x support
 load("cricbuzz.star", "load_display_match")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("scoreboard.star", "render_scoreboard")
+load("scoreboard.star", "center_on_square", "render_scoreboard")
 load("time.star", "time")
 
 DEFAULT_TEAM_ID = "4"
@@ -118,10 +118,10 @@ def main(config):
     team = team_settings_by_id.get(team_id)
     if not team:
         return render.Root(
-            child = render.WrappedText(
+            child = center_on_square(render.WrappedText(
                 content = "Match cannot be displayed. Please choose a different team.",
                 font = "terminus-12" if scale == 2 else "tom-thumb",
-            ),
+            )),
         )
 
     fixture_value = config.get("days_forward", ALWAYS_SHOW_FIXTURES)

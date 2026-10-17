@@ -7,8 +7,9 @@ author: jondkelley
 fileName: bofh_quotes.star
 packageName: bofhquotes
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art
 published: '2023-10-12T16:09:54Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T20:24:07Z'

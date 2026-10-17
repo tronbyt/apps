@@ -7,10 +7,11 @@ author: jspeigner
 fileName: lanier_level.star
 packageName: lake-lanier-water-level
 recommendedInterval: 10
+supports64x64: true
 category: weather
 tags:
   - weather
   - water level
   - lake
 published: '2026-04-07T20:59:29Z'
-updated: '2026-08-14T18:35:30Z'
+updated: '2026-10-01T21:41:49Z'

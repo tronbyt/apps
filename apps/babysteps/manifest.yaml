@@ -7,8 +7,9 @@ author: Robert Ison
 fileName: baby_steps.star
 packageName: babysteps
 recommendedInterval: 5
+supports64x64: true
 category: finance
 tags:
   - finance
 published: '2023-02-01T21:24:22Z'
-updated: '2026-10-13T21:21:44Z'
+updated: '2026-10-17T18:55:16Z'
