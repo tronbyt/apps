@@ -5,6 +5,7 @@ summary: Weather Data for Cyclists
 desc: Displays weather data important for cyclists.
 author: Robert Ison
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather
@@ -12,4 +13,4 @@ tags:
   - outdoor
   - utility
 published: '2025-04-23T01:37:30Z'
-updated: '2026-10-15T01:44:25Z'
+updated: '2026-10-17T19:08:50Z'

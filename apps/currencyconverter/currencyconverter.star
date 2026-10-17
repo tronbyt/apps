@@ -164,9 +164,30 @@ load("images/yer_flag.webp", YER_FLAG = "file")
 load("images/zar_flag.webp", ZAR_FLAG = "file")
 load("images/zmw_flag.webp", ZMW_FLAG = "file")
 load("images/zwl_flag.webp", ZWL_FLAG = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
 
 # Currency metadata and existing bundled flag assets.
 currencies = {
@@ -458,7 +479,7 @@ def show_instructions_screen():
         offset += len(message) * 5
 
     return render.Root(
-        child = render.Column(children = children),
+        child = center_on_square(render.Column(children = children)),
         show_full_animation = True,
     )
 
@@ -518,7 +539,7 @@ def main(config):
         return error_display("Invalid Rate")
 
     return render.Root(
-        child = render.Row(
+        child = center_on_square(render.Row(
             children = [
                 render.Column(
                     children = [
@@ -554,7 +575,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():
