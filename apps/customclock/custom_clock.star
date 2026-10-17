@@ -8,7 +8,7 @@ Author: rs7q5
 #Last modified 20230414 RIS
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -94,7 +94,7 @@ def main(config):
     return render.Root(
         delay = 100,  #speed up scroll text
         max_age = 120,
-        child = render.Box(width = 64, height = 32, child = final_frame),
+        child = render.Box(width = 64, height = canvas.height(), child = final_frame),
     )
 
 def get_schema():

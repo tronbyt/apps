@@ -7,7 +7,7 @@ Author: broepke
 
 load("http.star", "http")
 load("images/cat_icon.png", CAT_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 CAT_ICON = CAT_ICON_ASSET.readall()
 
@@ -53,9 +53,10 @@ def main():
                     ],
                 ),
                 render.Marquee(
-                    height = 24,
+                    # the rows under the header: 24 on 64x32, 54 on square
+                    height = canvas.height() - 10,
                     scroll_direction = "vertical",
-                    offset_start = 24,
+                    offset_start = canvas.height() - 10,
                     child =
                         render.Column(
                             main_align = "space_between",
