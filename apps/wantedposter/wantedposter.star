@@ -10,7 +10,7 @@ load("images/default_criminal.png", DEFAULT_CRIMINAL_ASSET = "file")
 load("images/wanted_bottom.png", WANTED_BOTTOM_ASSET = "file")
 load("images/wanted_header.png", WANTED_HEADER_ASSET = "file")
 load("images/wanted_side.png", WANTED_SIDE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_CRIMINAL = DEFAULT_CRIMINAL_ASSET.readall()
@@ -32,23 +32,28 @@ def main(config):
     sidewidth = 17
     picturewidth = 64 - 2 * sidewidth
 
+    # The poster is 64x32 artwork; on a taller panel it sits in the middle.
     return render.Root(
-        render.Column(
-            children = [
-                render.Image(src = WANTED_HEADER),
-                render.Row(
-                    children = [
-                        render.Image(src = WANTED_SIDE),
-                        render.Image(src = photo, width = picturewidth, height = 20),
-                        render.Image(src = WANTED_SIDE),
-                    ],
-                ),
-                render.Row(
-                    children = [
-                        render.Image(src = WANTED_BOTTOM),
-                    ],
-                ),
-            ],
+        render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Column(
+                children = [
+                    render.Image(src = WANTED_HEADER),
+                    render.Row(
+                        children = [
+                            render.Image(src = WANTED_SIDE),
+                            render.Image(src = photo, width = picturewidth, height = 20),
+                            render.Image(src = WANTED_SIDE),
+                        ],
+                    ),
+                    render.Row(
+                        children = [
+                            render.Image(src = WANTED_BOTTOM),
+                        ],
+                    ),
+                ],
+            ),
         ),
     )
 
