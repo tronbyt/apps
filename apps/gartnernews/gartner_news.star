@@ -36,6 +36,9 @@ def main(config):
         number_of_items = 0
 
     if number_of_items == 0:
+        # Gartner's site is behind Cloudflare, which sometimes challenges requests (status 403) instead of
+        # returning the feed. Skip this app until it's available again; see the README.
+        print("Gartner's news feed isn't available (status %d), so this app is skipped" % gartner_xml.status_code)
         return []
     else:
         display_text = ["", ""]  # number of display_text rows to display is two
