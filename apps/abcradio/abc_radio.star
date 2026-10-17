@@ -7,7 +7,7 @@ Author: M0ntyP
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CACHE_TIMEOUT = 120
@@ -15,6 +15,15 @@ CACHE_TIMEOUT = 120
 NOWPLAYING_PREFIX_URL = "https://music.abcradio.net.au/api/v1/plays/"
 NOWPLAYING_SUFFIX_URL = "/now.json"
 DEFAULT_TIMEZONE = "Australia/Adelaide"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     StationSelection = config.get("station", "triplej")
@@ -39,7 +48,11 @@ def main(config):
     return render.Root(
         delay = 75,
         show_full_animation = True,
+        # The bands total 32 rows; on a square panel the column expands and
+        # spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly",
             children = [
                 render.Box(
                     width = 64,

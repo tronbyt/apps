@@ -35,6 +35,17 @@ SPACER_COLOR = "#000"
 ARTICLE_AREA_HEIGHT = 55 if IS2X else 24
 SPACER_HEIGHT = 6 if IS2X else 4
 
+# Devices reject a webp over 460,000 bytes (firmware HTTP_BUFFER_SIZE_MAX) and
+# show an "oversize" screen instead. File size grows with scroll length (a long
+# month runs 1,200+ frames at 2x), so cap the marquee at a frame budget: ~510
+# bytes/frame worst case at 2x and ~250 at 1x keeps the render under ~400 KB.
+MAX_SCROLL_FRAMES = 700 if IS2X else 1500
+
+# pixlet's marquee silently clips content taller than 20x its height, so treat
+# that as not fitting either and drop whole items instead of cutting mid-list.
+MARQUEE_MAX_SCALE = 20
+SCROLL_BUDGET = min(MAX_SCROLL_FRAMES, MARQUEE_MAX_SCALE * ARTICLE_AREA_HEIGHT)
+
 DEFAULT_TIMEZONE = "America/New_York"
 CACHE_TTL_SECONDS = 3600
 
@@ -96,6 +107,8 @@ def main(config):
     empty_msg = "No national {}s".format(mode)
 
     if not config.bool("$widget", False):
+        if rc == 0:
+            json_data = fit_items(json_data)
         return render.Root(
             delay = 100,
             show_full_animation = True,
@@ -163,6 +176,29 @@ def format_header_date(mode, day_str, fallback):
         return month_name[:3]
     else:  # day
         return "{} {}".format(month_name[:3], day_num)
+
+def fit_items(items):
+    # Drop trailing items until the scroll fits SCROLL_BUDGET. When the list
+    # has to be cut, start it at a random item so every celebration still gets
+    # its turn across renders instead of only the first ones.
+    if marquee_frames(items) <= SCROLL_BUDGET:
+        return items
+    start = getRandomItem(len(items))
+    items = items[start:] + items[:start]
+    for _ in range(len(items) - 1):
+        items = items[:-1]
+        if marquee_frames(items) <= SCROLL_BUDGET:
+            break
+    return items
+
+def marquee_frames(items):
+    # frame_count() lays out on a 64x32 canvas unless given real bounds
+    return render.Marquee(
+        height = ARTICLE_AREA_HEIGHT,
+        scroll_direction = "vertical",
+        offset_start = ARTICLE_AREA_HEIGHT,
+        child = render.Column(children = displayItem(items)),
+    ).frame_count((0, 0, canvas.width(), canvas.height()))
 
 def getRandomItem(length):
     return random.number(0, length - 1)

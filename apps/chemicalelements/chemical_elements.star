@@ -5,14 +5,46 @@ Description: Displays chemical element details.
 Author: Robert Ison
 """
 
-load("humanize.star", "humanize")
-load("math.star", "math")
 load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 DEFAULT_TIMEZONE = "America/New_York"
+
+CATEGORY_COLORS = {
+    "Nonmetal": "aec6cf",
+    "Noble Gas": "bf00ff",
+    "Alkali Metal": "ff0000",
+    "Alkaline Earth": "ffa500",
+    "Metalloid": "006f86",
+    "Halogen": "800080",
+    "Basic Metal": "008000",
+    "Transition Metal": "ffffbf",
+    "Lanthanoid": "22b14c",
+    "Actinoid": "013220",
+}
 
 ELEMENTS = [
     {
@@ -26,7 +58,6 @@ ELEMENTS = [
         "BoilingPoint": -252.9,
         "StateRoomTemp": "Gas",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 2,
@@ -39,7 +70,6 @@ ELEMENTS = [
         "BoilingPoint": -268.9,
         "StateRoomTemp": "Gas",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
     {
         "AtomicNumber": 3,
@@ -52,7 +82,6 @@ ELEMENTS = [
         "BoilingPoint": 1342,
         "StateRoomTemp": "Solid",
         "Type": "Alkali Metal",
-        "Color": "ff0000",
     },
     {
         "AtomicNumber": 4,
@@ -65,7 +94,6 @@ ELEMENTS = [
         "BoilingPoint": 2970,
         "StateRoomTemp": "Solid",
         "Type": "Alkaline Earth",
-        "Color": "ffa500",
     },
     {
         "AtomicNumber": 5,
@@ -78,7 +106,6 @@ ELEMENTS = [
         "BoilingPoint": 2550,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 6,
@@ -91,7 +118,6 @@ ELEMENTS = [
         "BoilingPoint": 4827,
         "StateRoomTemp": "Solid",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 7,
@@ -104,7 +130,6 @@ ELEMENTS = [
         "BoilingPoint": -195.8,
         "StateRoomTemp": "Gas",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 8,
@@ -117,7 +142,6 @@ ELEMENTS = [
         "BoilingPoint": -183,
         "StateRoomTemp": "Gas",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 9,
@@ -130,7 +154,6 @@ ELEMENTS = [
         "BoilingPoint": -188.1,
         "StateRoomTemp": "Gas",
         "Type": "Halogen",
-        "Color": "800080",
     },
     {
         "AtomicNumber": 10,
@@ -139,11 +162,10 @@ ELEMENTS = [
         "Period": 2,
         "Name": "Neon",
         "Mass": 20.18,
-        "MeltingPoint": -248,
-        "BoilingPoint": -248.7,
+        "MeltingPoint": -248.59,
+        "BoilingPoint": -246.046,
         "StateRoomTemp": "Gas",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
     {
         "AtomicNumber": 11,
@@ -156,7 +178,6 @@ ELEMENTS = [
         "BoilingPoint": 883,
         "StateRoomTemp": "Solid",
         "Type": "Alkali Metal",
-        "Color": "ff0000",
     },
     {
         "AtomicNumber": 12,
@@ -169,7 +190,6 @@ ELEMENTS = [
         "BoilingPoint": 1090,
         "StateRoomTemp": "Solid",
         "Type": "Alkaline Earth",
-        "Color": "ffa500",
     },
     {
         "AtomicNumber": 13,
@@ -182,7 +202,6 @@ ELEMENTS = [
         "BoilingPoint": 2467,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 14,
@@ -195,7 +214,6 @@ ELEMENTS = [
         "BoilingPoint": 2355,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 15,
@@ -208,7 +226,6 @@ ELEMENTS = [
         "BoilingPoint": 280,
         "StateRoomTemp": "Solid",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 16,
@@ -221,7 +238,6 @@ ELEMENTS = [
         "BoilingPoint": 444.7,
         "StateRoomTemp": "Solid",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 17,
@@ -234,7 +250,6 @@ ELEMENTS = [
         "BoilingPoint": -34.6,
         "StateRoomTemp": "Gas",
         "Type": "Halogen",
-        "Color": "800080",
     },
     {
         "AtomicNumber": 18,
@@ -247,7 +262,6 @@ ELEMENTS = [
         "BoilingPoint": -185.7,
         "StateRoomTemp": "Gas",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
     {
         "AtomicNumber": 19,
@@ -260,7 +274,6 @@ ELEMENTS = [
         "BoilingPoint": 760,
         "StateRoomTemp": "Solid",
         "Type": "Alkali Metal",
-        "Color": "ff0000",
     },
     {
         "AtomicNumber": 20,
@@ -273,7 +286,6 @@ ELEMENTS = [
         "BoilingPoint": 1484,
         "StateRoomTemp": "Solid",
         "Type": "Alkaline Earth",
-        "Color": "ffa500",
     },
     {
         "AtomicNumber": 21,
@@ -286,7 +298,6 @@ ELEMENTS = [
         "BoilingPoint": 2832,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 22,
@@ -299,7 +310,6 @@ ELEMENTS = [
         "BoilingPoint": 3287,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 23,
@@ -312,7 +322,6 @@ ELEMENTS = [
         "BoilingPoint": 3380,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 24,
@@ -325,7 +334,6 @@ ELEMENTS = [
         "BoilingPoint": 2672,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 25,
@@ -338,7 +346,6 @@ ELEMENTS = [
         "BoilingPoint": 1962,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 26,
@@ -351,7 +358,6 @@ ELEMENTS = [
         "BoilingPoint": 2750,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 27,
@@ -364,7 +370,6 @@ ELEMENTS = [
         "BoilingPoint": 2870,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 28,
@@ -377,7 +382,6 @@ ELEMENTS = [
         "BoilingPoint": 2730,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 29,
@@ -390,7 +394,6 @@ ELEMENTS = [
         "BoilingPoint": 2567,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 30,
@@ -403,7 +406,6 @@ ELEMENTS = [
         "BoilingPoint": 906,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 31,
@@ -416,7 +418,6 @@ ELEMENTS = [
         "BoilingPoint": 2403,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 32,
@@ -429,7 +430,6 @@ ELEMENTS = [
         "BoilingPoint": 2830,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 33,
@@ -442,7 +442,6 @@ ELEMENTS = [
         "BoilingPoint": 617,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 34,
@@ -455,7 +454,6 @@ ELEMENTS = [
         "BoilingPoint": 685,
         "StateRoomTemp": "Solid",
         "Type": "Nonmetal",
-        "Color": "aec6cf",
     },
     {
         "AtomicNumber": 35,
@@ -468,7 +466,6 @@ ELEMENTS = [
         "BoilingPoint": 58.8,
         "StateRoomTemp": "Liquid",
         "Type": "Halogen",
-        "Color": "800080",
     },
     {
         "AtomicNumber": 36,
@@ -481,7 +478,6 @@ ELEMENTS = [
         "BoilingPoint": -152,
         "StateRoomTemp": "Gas",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
     {
         "AtomicNumber": 37,
@@ -494,7 +490,6 @@ ELEMENTS = [
         "BoilingPoint": 686,
         "StateRoomTemp": "Solid",
         "Type": "Alkali Metal",
-        "Color": "ff0000",
     },
     {
         "AtomicNumber": 38,
@@ -507,7 +502,6 @@ ELEMENTS = [
         "BoilingPoint": 1384,
         "StateRoomTemp": "Solid",
         "Type": "Alkaline Earth",
-        "Color": "ffa500",
     },
     {
         "AtomicNumber": 39,
@@ -520,7 +514,6 @@ ELEMENTS = [
         "BoilingPoint": 3337,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 40,
@@ -533,7 +526,6 @@ ELEMENTS = [
         "BoilingPoint": 4377,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 41,
@@ -546,7 +538,6 @@ ELEMENTS = [
         "BoilingPoint": 4742,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 42,
@@ -559,7 +550,6 @@ ELEMENTS = [
         "BoilingPoint": 4612,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 43,
@@ -572,7 +562,6 @@ ELEMENTS = [
         "BoilingPoint": 4877,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 44,
@@ -585,7 +574,6 @@ ELEMENTS = [
         "BoilingPoint": 3900,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 45,
@@ -598,7 +586,6 @@ ELEMENTS = [
         "BoilingPoint": 3727,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 46,
@@ -611,7 +598,6 @@ ELEMENTS = [
         "BoilingPoint": 3140,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 47,
@@ -624,7 +610,6 @@ ELEMENTS = [
         "BoilingPoint": 2212,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 48,
@@ -637,7 +622,6 @@ ELEMENTS = [
         "BoilingPoint": 765,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 49,
@@ -650,7 +634,6 @@ ELEMENTS = [
         "BoilingPoint": 2080,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 50,
@@ -663,7 +646,6 @@ ELEMENTS = [
         "BoilingPoint": 2270,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 51,
@@ -676,7 +658,6 @@ ELEMENTS = [
         "BoilingPoint": 1950,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 52,
@@ -689,7 +670,6 @@ ELEMENTS = [
         "BoilingPoint": 989.8,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 53,
@@ -702,7 +682,6 @@ ELEMENTS = [
         "BoilingPoint": 184,
         "StateRoomTemp": "Solid",
         "Type": "Halogen",
-        "Color": "800080",
     },
     {
         "AtomicNumber": 54,
@@ -715,7 +694,6 @@ ELEMENTS = [
         "BoilingPoint": -107.1,
         "StateRoomTemp": "Gas",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
     {
         "AtomicNumber": 55,
@@ -728,7 +706,6 @@ ELEMENTS = [
         "BoilingPoint": 669,
         "StateRoomTemp": "Solid",
         "Type": "Alkali Metal",
-        "Color": "ff0000",
     },
     {
         "AtomicNumber": 56,
@@ -741,7 +718,6 @@ ELEMENTS = [
         "BoilingPoint": 1640,
         "StateRoomTemp": "Solid",
         "Type": "Alkaline Earth",
-        "Color": "ffa500",
     },
     {
         "AtomicNumber": 57,
@@ -754,7 +730,6 @@ ELEMENTS = [
         "BoilingPoint": 3454,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 58,
@@ -767,7 +742,6 @@ ELEMENTS = [
         "BoilingPoint": 3257,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 59,
@@ -780,7 +754,6 @@ ELEMENTS = [
         "BoilingPoint": 3017,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 60,
@@ -793,7 +766,6 @@ ELEMENTS = [
         "BoilingPoint": 3127,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 61,
@@ -806,7 +778,6 @@ ELEMENTS = [
         "BoilingPoint": 3000,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 62,
@@ -819,7 +790,6 @@ ELEMENTS = [
         "BoilingPoint": 1794,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 63,
@@ -832,7 +802,6 @@ ELEMENTS = [
         "BoilingPoint": 1529,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 64,
@@ -845,7 +814,6 @@ ELEMENTS = [
         "BoilingPoint": 3273,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 65,
@@ -858,7 +826,6 @@ ELEMENTS = [
         "BoilingPoint": 3230,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 66,
@@ -871,7 +838,6 @@ ELEMENTS = [
         "BoilingPoint": 2567,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 67,
@@ -884,7 +850,6 @@ ELEMENTS = [
         "BoilingPoint": 2700,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 68,
@@ -897,7 +862,6 @@ ELEMENTS = [
         "BoilingPoint": 2868,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 69,
@@ -910,7 +874,6 @@ ELEMENTS = [
         "BoilingPoint": 1950,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 70,
@@ -923,7 +886,6 @@ ELEMENTS = [
         "BoilingPoint": 1196,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 71,
@@ -936,7 +898,6 @@ ELEMENTS = [
         "BoilingPoint": 3402,
         "StateRoomTemp": "Solid",
         "Type": "Lanthanoid",
-        "Color": "22b14c",
     },
     {
         "AtomicNumber": 72,
@@ -949,7 +910,6 @@ ELEMENTS = [
         "BoilingPoint": 4600,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 73,
@@ -962,7 +922,6 @@ ELEMENTS = [
         "BoilingPoint": 5425,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 74,
@@ -975,7 +934,6 @@ ELEMENTS = [
         "BoilingPoint": 5660,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 75,
@@ -988,7 +946,6 @@ ELEMENTS = [
         "BoilingPoint": 5600,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 76,
@@ -1001,7 +958,6 @@ ELEMENTS = [
         "BoilingPoint": 5030,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 77,
@@ -1014,7 +970,6 @@ ELEMENTS = [
         "BoilingPoint": 4130,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 78,
@@ -1027,7 +982,6 @@ ELEMENTS = [
         "BoilingPoint": 3827,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 79,
@@ -1040,7 +994,6 @@ ELEMENTS = [
         "BoilingPoint": 3080,
         "StateRoomTemp": "Solid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 80,
@@ -1053,7 +1006,6 @@ ELEMENTS = [
         "BoilingPoint": 357,
         "StateRoomTemp": "Liquid",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 81,
@@ -1066,7 +1018,6 @@ ELEMENTS = [
         "BoilingPoint": 1457,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 82,
@@ -1079,7 +1030,6 @@ ELEMENTS = [
         "BoilingPoint": 1740,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 83,
@@ -1092,7 +1042,6 @@ ELEMENTS = [
         "BoilingPoint": 1560,
         "StateRoomTemp": "Solid",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 84,
@@ -1105,7 +1054,6 @@ ELEMENTS = [
         "BoilingPoint": 962,
         "StateRoomTemp": "Solid",
         "Type": "Metalloid",
-        "Color": "006f86",
     },
     {
         "AtomicNumber": 85,
@@ -1118,7 +1066,6 @@ ELEMENTS = [
         "BoilingPoint": 337,
         "StateRoomTemp": "Solid",
         "Type": "Halogen",
-        "Color": "800080",
     },
     {
         "AtomicNumber": 86,
@@ -1131,7 +1078,6 @@ ELEMENTS = [
         "BoilingPoint": -61.8,
         "StateRoomTemp": "Gas",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
     {
         "AtomicNumber": 87,
@@ -1144,7 +1090,6 @@ ELEMENTS = [
         "BoilingPoint": 677,
         "StateRoomTemp": "Solid",
         "Type": "Alkali Metal",
-        "Color": "ff0000",
     },
     {
         "AtomicNumber": 88,
@@ -1157,7 +1102,6 @@ ELEMENTS = [
         "BoilingPoint": 1140,
         "StateRoomTemp": "Solid",
         "Type": "Alkaline Earth",
-        "Color": "ffa500",
     },
     {
         "AtomicNumber": 89,
@@ -1170,7 +1114,6 @@ ELEMENTS = [
         "BoilingPoint": 3200,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 90,
@@ -1183,7 +1126,6 @@ ELEMENTS = [
         "BoilingPoint": 4790,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 91,
@@ -1196,7 +1138,6 @@ ELEMENTS = [
         "BoilingPoint": 4000,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 92,
@@ -1209,7 +1150,6 @@ ELEMENTS = [
         "BoilingPoint": 3818,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 93,
@@ -1222,7 +1162,6 @@ ELEMENTS = [
         "BoilingPoint": 3900,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 94,
@@ -1235,7 +1174,6 @@ ELEMENTS = [
         "BoilingPoint": 3232,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 95,
@@ -1248,7 +1186,6 @@ ELEMENTS = [
         "BoilingPoint": 2607,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 96,
@@ -1258,10 +1195,9 @@ ELEMENTS = [
         "Name": "Curium",
         "Mass": 247.07,
         "MeltingPoint": 1340,
-        "BoilingPoint": "",
+        "BoilingPoint": None,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 97,
@@ -1271,10 +1207,9 @@ ELEMENTS = [
         "Name": "Berkelium",
         "Mass": 247.07,
         "MeltingPoint": 986,
-        "BoilingPoint": "",
+        "BoilingPoint": None,
         "StateRoomTemp": "Solid",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 98,
@@ -1283,11 +1218,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Californium",
         "Mass": 251.08,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 99,
@@ -1296,11 +1230,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Einsteinium",
         "Mass": 252.08,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 100,
@@ -1309,11 +1242,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Fermium",
         "Mass": 257.1,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 101,
@@ -1322,11 +1254,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Mendelevium",
         "Mass": 258.1,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 102,
@@ -1335,11 +1266,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Nobelium",
         "Mass": 259.1,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 103,
@@ -1348,11 +1278,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Lawrencium",
         "Mass": 262.11,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Actinoid",
-        "Color": "013220",
     },
     {
         "AtomicNumber": 104,
@@ -1361,11 +1290,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Rutherfordium",
         "Mass": 267.12,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 105,
@@ -1374,11 +1302,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Dubnium",
         "Mass": 270.13,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 106,
@@ -1387,11 +1314,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Seaborgium",
         "Mass": 269.13,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 107,
@@ -1400,11 +1326,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Bohrium",
         "Mass": 270.13,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 108,
@@ -1413,11 +1338,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Hassium",
         "Mass": 269.13,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 109,
@@ -1426,11 +1350,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Meitnerium",
         "Mass": 278.16,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 110,
@@ -1439,37 +1362,34 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Darmstadtium",
         "Mass": 281.17,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 111,
         "Symbol": "Rg",
         "Group": "11",
         "Period": 7,
-        "Name": "Roentgentium",
+        "Name": "Roentgenium",
         "Mass": 281.17,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 112,
         "Symbol": "Cn",
         "Group": "12",
         "Period": 7,
-        "Name": "Copernicum",
+        "Name": "Copernicium",
         "Mass": 285.18,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Transition Metal",
-        "Color": "ffffbf",
     },
     {
         "AtomicNumber": 113,
@@ -1478,11 +1398,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Nihonium",
         "Mass": 286.18,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 114,
@@ -1491,11 +1410,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Flerovium",
         "Mass": 289.19,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 115,
@@ -1504,11 +1422,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Moscovium",
         "Mass": 289.2,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 116,
@@ -1517,11 +1434,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Livermorium",
         "Mass": 293.2,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Basic Metal",
-        "Color": "008000",
     },
     {
         "AtomicNumber": 117,
@@ -1530,11 +1446,10 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Tennessine",
         "Mass": 293.21,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Halogen",
-        "Color": "800080",
     },
     {
         "AtomicNumber": 118,
@@ -1543,86 +1458,69 @@ ELEMENTS = [
         "Period": 7,
         "Name": "Oganesson",
         "Mass": 294.21,
-        "MeltingPoint": "",
-        "BoilingPoint": "",
+        "MeltingPoint": None,
+        "BoilingPoint": None,
         "StateRoomTemp": "",
         "Type": "Noble Gas",
-        "Color": "bf00ff",
     },
 ]
 
 def get_main_commentary(element):
-    """ getMainCommentary
-
-    Args:
-        element: the element we need data from
-
-    Returns:
-        The display text for the first commentary line.
-    """
-    display_text = "Atomic number {}, {} is in group {} and period {}.".format(element["AtomicNumber"], element["Name"], element["Group"].lower(), element["Period"])
-    return display_text
+    """Describe the element's place in the periodic table."""
+    group = element["Group"]
+    if group in ["Lanthanoids", "Actinoids"]:
+        return "Atomic number {}, {} belongs to the {} in period {}.".format(
+            element["AtomicNumber"],
+            element["Name"],
+            group.lower(),
+            element["Period"],
+        )
+    return "Atomic number {}, {} is in group {} and period {}.".format(
+        element["AtomicNumber"],
+        element["Name"],
+        group,
+        element["Period"],
+    )
 
 def get_secondary_commentary(element):
-    """ getSecondaryCommentary
+    """Describe classification and neutral-atom particle counts."""
+    element_type = element["Type"].lower()
+    article = "an" if element_type[0] in "aeiou" else "a"
 
-    Args:
-        element: the element we need data from
-
-    Returns:
-        The display text for the second commentary line.
-    """
-    vowels = ["a", "e", "i", "o", "u"]
-    article = "a"
-    if element["Type"][0].lower() in vowels:
-        article = "an"
-
-    display_text = "With an atomic weight of {}u, {} is {} {} and has {} protons, {} neutrons and {} electrons.".format(element["Mass"], element["Name"], article, element["Type"].lower(), element["AtomicNumber"], int(math.floor(element["Mass"] - element["AtomicNumber"])), element["AtomicNumber"])
-    return display_text
+    # Neutron counts require an identified isotope, not the Mass field.
+    return "{} is {} {}. A neutral atom has {} protons and {} electrons.".format(
+        element["Name"],
+        article,
+        element_type,
+        element["AtomicNumber"],
+        element["AtomicNumber"],
+    )
 
 def get_tertiary_commentary(element):
-    """ getTertiaryCommentary
-
-    Args:
-        element: the element we need data from
-
-    Returns:
-        The display text for the third commentary line.
-    """
-    display_text = element["Name"]
+    """Describe available physical properties without discarding zero values."""
+    parts = []
     if element["StateRoomTemp"]:
-        display_text += " is {} at room temperature ".format((element["StateRoomTemp"]).lower())
-    if element["MeltingPoint"]:
-        #display_text += "with melting point of %s%sC " % (element["MeltingPoint"], chr(176))
-        display_text += "with melting point of {}{}C ".format(humanize.float("#,###.", float(element["MeltingPoint"])), chr(176))
-        #humanize.float("#,###.", accident_free_days)
+        parts.append("{} is {} at room temperature.".format(
+            element["Name"],
+            element["StateRoomTemp"].lower(),
+        ))
+    if element["MeltingPoint"] != None:
+        parts.append("Melting point: {}{}C.".format(element["MeltingPoint"], chr(176)))
+    if element["BoilingPoint"] != None:
+        parts.append("Boiling point: {}{}C.".format(element["BoilingPoint"], chr(176)))
+    return " ".join(parts) if parts else "Physical-property data unavailable."
 
-    if element["BoilingPoint"]:
-        display_text += "and boiling point of {}{}C ".format(humanize.float("#,###.", float(element["BoilingPoint"])), chr(176))
-    return display_text
-
-def day_of_year(date, timezone):
-    """ day_of_year
-
-    Args:
-        date: the current time
-        timezone: the current timezone
-
-    Returns:
-        The day of the year, an integer between 1 and 366
-    """
-    first_day_of_year = time.time(year = date.year, month = 1, day = 1, hour = 0, minute = 0, second = 0, location = timezone)
-    doy = int((date - first_day_of_year).hours / 24) + 1
-    return doy
+def day_of_year(date):
+    """Return calendar day 1-366; date must already be in the target timezone."""
+    days_before_month = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+    leap_year = date.year % 4 == 0 and (date.year % 100 != 0 or date.year % 400 == 0)
+    result = days_before_month[date.month - 1] + date.day
+    if leap_year and date.month > 2:
+        result += 1
+    return result
 
 def main(config):
-    """ Main
-
-    Args:
-        config: Configuration Items to control how the app is displayed
-    Returns:
-        The display information for the Tidbyt
-    """
+    """Display one element, with commentary rows scrolling in sequence."""
 
     is_double_sized = canvas.is2x()
     screen_width = canvas.width()
@@ -1633,96 +1531,218 @@ def main(config):
         box_width = 53
         spacer_size = 4
         adjustment = 1
+        commentary_line_height = 16
     else:
         small_font = "CG-pixel-3x5-mono"
         large_font = "5x8"
         box_width = 32
         spacer_size = 2
         adjustment = 0
+        commentary_line_height = 8
 
-    #instead can choose one element per day based on day of year..
-    #it'll cycle through a new element each day and restart on the 119th day
-    if (config.get("display", ELEMENT_DISPLAY_OPTIONS[0].value) == ELEMENT_DISPLAY_OPTIONS[0].value):
-        now = config.get("time")
-        now = (time.parse_time(now) if now else time.now())
-        current_element = ELEMENTS[(day_of_year(now, DEFAULT_TIMEZONE) - 1) % len(ELEMENTS)]
-    else:
-        #default is random element
-        # seed the RNG with a new value every minute to improve
-        # cross-user caching while still appearing random.
-        random.seed(time.now().unix // 60)
+    # Resolve the timestamp once, including an optional testing override.
+    configured_time = config.get("time")
+    now = time.parse_time(configured_time) if configured_time else time.now()
+    now = now.in_location(DEFAULT_TIMEZONE)
+
+    # January 1 always starts with hydrogen.
+    display_mode = config.get(
+        "display",
+        ELEMENT_DISPLAY_OPTIONS[0].value,
+    )
+
+    if display_mode == "Random":
+        random.seed(now.unix // 60)
         current_element = ELEMENTS[int(random.number(0, len(ELEMENTS)))]
+    else:
+        current_element = ELEMENTS[(day_of_year(now) - 1) % len(ELEMENTS)]
 
-    row1 = current_element["Name"]
-    row2 = get_main_commentary(current_element)
-    row3 = get_secondary_commentary(current_element)
-    row4 = get_tertiary_commentary(current_element)
+    element_color = CATEGORY_COLORS[current_element["Type"]]
 
-    delay = int(config.get("scroll", 45))
-    delay = int(delay / 2) if is_double_sized else delay
+    commentary_texts = [
+        current_element["Name"],
+        get_main_commentary(current_element),
+        get_secondary_commentary(current_element),
+        get_tertiary_commentary(current_element),
+    ]
+
+    # Root delay is milliseconds per frame.
+    delay = int(
+        config.get("scroll", SCROLL_SPEED_OPTIONS[0].value),
+    )
+    if is_double_sized:
+        delay = max(1, delay // 2)
+    else:
+        delay = max(1, delay)
+
+    commentary_width = screen_width - box_width - 3
+
+    # Pause for two seconds before reading each row.
+    # Adjust this value to change the pause between active rows.
+    reading_pause_ms = 200
+    reading_pause_frames = max(1, reading_pause_ms // delay)
+
+    # Stationary previews of all four rows.
+    # A one-line-high WrappedText clips the remaining text instead
+    # of allowing it to run into adjacent rows.
+    static_rows = []
+
+    for text in commentary_texts:
+        static_rows.append(
+            render.WrappedText(
+                content = text,
+                width = commentary_width,
+                height = commentary_line_height,
+                font = large_font,
+                color = "#606060",
+                align = "left",
+            ),
+        )
+
+    static_commentary = render.Column(
+        children = static_rows,
+        main_align = "start",
+        cross_align = "start",
+    )
+
+    # Each stage contains only ONE animated commentary row.
+    # Sequence completes that stage before starting the next.
+    commentary_stages = []
+
+    for active_index in range(len(commentary_texts)):
+        # Hold the stationary previews before this row scrolls.
+        commentary_stages.append(
+            render.Animation(
+                children = [
+                    static_commentary
+                    for unused in range(reading_pause_frames)
+                ],
+            ),
+        )
+
+        stage_rows = []
+
+        for row_index in range(len(commentary_texts)):
+            if row_index == active_index:
+                stage_rows.append(
+                    render.Marquee(
+                        width = commentary_width,
+                        child = render.Text(
+                            commentary_texts[row_index],
+                            color = "#ffd700",
+                            font = large_font,
+                            height = commentary_line_height,
+                        ),
+                    ),
+                )
+            else:
+                stage_rows.append(static_rows[row_index])
+
+        commentary_stages.append(
+            render.Column(
+                children = stage_rows,
+                main_align = "start",
+                cross_align = "start",
+            ),
+        )
+
+    commentary = render.Sequence(
+        children = commentary_stages,
+    )
+
+    # Left-hand periodic-table tile.
+    element_tile = render.Row(
+        children = [
+            render.Box(
+                width = 1,
+                height = box_width,
+                color = element_color,
+            ),
+            render.Column(
+                children = [
+                    render.Box(
+                        width = box_width,
+                        height = 1,
+                        color = element_color,
+                    ),
+                    render.Box(
+                        width = box_width,
+                        height = spacer_size,
+                        color = "#000000",
+                    ),
+                    render.Text(
+                        " {}".format(current_element["AtomicNumber"]),
+                        color = "#ffffff",
+                        font = small_font,
+                    ),
+                    render.Box(
+                        width = box_width,
+                        height = spacer_size,
+                        color = "#000000",
+                    ),
+                    render.Text(
+                        " {}".format(current_element["Symbol"]),
+                        color = "#ffffff",
+                        font = small_font,
+                    ),
+                    render.Box(
+                        width = box_width,
+                        height = spacer_size,
+                        color = "#000000",
+                    ),
+                    render.Marquee(
+                        width = box_width - 2,
+                        child = render.Text(
+                            " {}".format(current_element["Name"]),
+                            color = "#ffffff",
+                            font = small_font,
+                        ),
+                    ),
+                    render.Box(
+                        width = box_width,
+                        height = spacer_size,
+                        color = "#000000",
+                    ),
+                    render.Marquee(
+                        width = box_width - 2,
+                        child = render.Text(
+                            " {}".format(current_element["Mass"]),
+                            color = "#ffffff",
+                            font = small_font,
+                        ),
+                    ),
+                    render.Box(
+                        width = box_width,
+                        height = spacer_size - adjustment,
+                        color = "#000000",
+                    ),
+                    render.Box(
+                        width = box_width,
+                        height = 1,
+                        color = element_color,
+                    ),
+                ],
+            ),
+            render.Box(
+                width = 1,
+                height = box_width,
+                color = element_color,
+            ),
+        ],
+    )
 
     return render.Root(
-        render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+        child = center_on_square(render.Row(
             children = [
-                render.Row(
-                    children = [
-                        render.Column(
-                            children = [
-                                render.Box(width = 1, height = box_width, color = current_element["Color"]),
-                            ],
-                        ),
-                        render.Column(
-                            children = [
-                                render.Box(width = box_width, height = 1, color = current_element["Color"]),
-                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
-                                render.Text(" {}".format(current_element["AtomicNumber"]), color = "fff", font = small_font),
-                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
-                                render.Text(" {}".format(current_element["Symbol"]), color = "fff", font = small_font),
-                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
-                                render.Marquee(
-                                    width = box_width - 2,
-                                    child = render.Text(" {}".format(current_element["Name"]), color = "fff", font = small_font),
-                                ),
-                                render.Box(width = box_width, height = spacer_size, color = "#000000"),
-                                render.Text(" {}".format(current_element["Mass"]), color = "fff", font = small_font),
-                                render.Box(width = box_width, height = spacer_size - adjustment, color = "#000000"),
-                                render.Box(width = box_width, height = 1, color = current_element["Color"]),
-                            ],
-                        ),
-                        render.Column(
-                            children = [
-                                render.Box(width = 1, height = box_width, color = current_element["Color"]),
-                            ],
-                        ),
-                        render.Column(
-                            children = [
-                                render.Box(width = 1, height = box_width, color = "#000000"),
-                            ],
-                        ),
-                        render.Column(
-                            children = [
-                                render.Marquee(
-                                    width = screen_width - box_width - 3,
-                                    child = render.Text(row1, color = "#ffd700", font = large_font),
-                                ),
-                                render.Marquee(
-                                    width = screen_width - box_width - 3,
-                                    child = render.Text(row2, color = "#ffd700", font = large_font),
-                                ),
-                                render.Marquee(
-                                    width = screen_width - box_width - 3,
-                                    child = render.Text(row3, color = "#ffd700", font = large_font),
-                                ),
-                                render.Marquee(
-                                    width = screen_width - box_width - 3,
-                                    child = render.Text(row4, color = "#ffd700", font = large_font),
-                                ),
-                            ],
-                            main_align = "space_evenly",
-                        ),
-                    ],
+                element_tile,
+                render.Box(
+                    width = 1,
+                    height = box_width,
+                    color = "#000000",
                 ),
+                commentary,
             ],
+            cross_align = "start",
         )),
         show_full_animation = True,
         delay = delay,
@@ -1749,7 +1769,7 @@ ELEMENT_DISPLAY_OPTIONS = [
         value = "OncePerDay",
     ),
     schema.Option(
-        display = "Random Element Each Time",
+        display = "Random Element Each Minute",
         value = "Random",
     ),
 ]
