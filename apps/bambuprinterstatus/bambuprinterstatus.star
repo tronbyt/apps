@@ -11,7 +11,6 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-
 DEFAULT_STATUS_URL = ""
 DEFAULT_SCROLL = "60"
 DEFAULT_TIMEZONE = "America/New_York"
@@ -36,7 +35,6 @@ PALETTE = {
     "info": "58D1FF",
 }
 
-
 def _truncate(text, max_len):
     if text == None:
         return ""
@@ -51,13 +49,11 @@ def _truncate(text, max_len):
 
     return text[:max_len - 1] + "…"
 
-
 def _safe_get(obj, key, default = None):
     if type(obj) != "dict":
         return default
 
     return obj.get(key, default)
-
 
 def _text(value):
     if value == None:
@@ -77,7 +73,6 @@ def _text(value):
 
     return str(value).strip()
 
-
 def _join_unique(values):
     parts = []
 
@@ -88,7 +83,6 @@ def _join_unique(values):
             parts.append(text)
 
     return " · ".join(parts)
-
 
 def _seconds(value):
     value_type = type(value)
@@ -116,7 +110,6 @@ def _seconds(value):
         return 0
 
     return value
-
 
 def _fmt_duration(total):
     total = _seconds(total)
@@ -149,7 +142,6 @@ def _fmt_duration(total):
 
     return str(hrs) + "h " + str(rem) + "m"
 
-
 def _parse_timestamp(value):
     text = _text(value)
 
@@ -163,7 +155,6 @@ def _parse_timestamp(value):
         text,
         "2006-01-02T15:04:05Z07:00",
     )
-
 
 def _timestamp_info(value, now):
     parsed = _parse_timestamp(value)
@@ -190,7 +181,6 @@ def _timestamp_info(value, now):
         "future": False,
     }
 
-
 def _status_url(config):
     direct = _text(config.get("status_url"))
 
@@ -211,7 +201,6 @@ def _status_url(config):
 
     return base + "/status.json"
 
-
 def _printers(data):
     printers = _safe_get(data, "printers", [])
 
@@ -223,7 +212,6 @@ def _printers(data):
         for printer in printers
         if type(printer) == "dict"
     ]
-
 
 def printer_field(status_url):
     status_url = _text(status_url)
@@ -267,7 +255,6 @@ def printer_field(status_url):
             options = options,
         ),
     ]
-
 
 def get_schema():
     if SETUP_GUIDE_URL:
@@ -385,7 +372,6 @@ def get_schema():
         ],
     )
 
-
 def _first_printer(data, selected_id):
     printers = _printers(data)
 
@@ -402,10 +388,8 @@ def _first_printer(data, selected_id):
 
     return printers[0]
 
-
 def _state(printer):
     return _text(printer.get("state")).upper() or "UNKNOWN"
-
 
 def _status_color(state):
     if state == "PRINTING":
@@ -422,10 +406,8 @@ def _status_color(state):
 
     return PALETTE["text_primary"]
 
-
 def _is_active(state):
     return state == "PRINTING" or state == "PAUSED"
-
 
 def _job_name(printer, max_len):
     name = _join_unique([
@@ -436,7 +418,6 @@ def _job_name(printer, max_len):
 
     return _truncate(name or "No active print", max_len)
 
-
 def _last_job_name(printer, max_len):
     name = _join_unique([
         printer.get("last_completed_job_name"),
@@ -444,7 +425,6 @@ def _last_job_name(printer, max_len):
     ])
 
     return _truncate(name or "No recent job", max_len)
-
 
 def _headline(printer, recently_finished):
     state = _state(printer)
@@ -477,7 +457,6 @@ def _headline(printer, recently_finished):
 
     return _truncate(state, 12)
 
-
 def _subline(printer, max_len):
     state = _state(printer)
 
@@ -504,7 +483,6 @@ def _subline(printer, max_len):
 
     return "No current job"
 
-
 def _finish_label(now, finish, timezone):
     local_now = now.in_location(timezone)
     local_finish = finish.in_location(timezone)
@@ -529,7 +507,6 @@ def _finish_label(now, finish, timezone):
         return "Done ~Tomorrow " + clock
 
     return "Done ~" + local_finish.format("Jan 2, 3:04 PM")
-
 
 def _print_timing(printer, now, update_info):
     remaining = _seconds(printer.get("time_left"))
@@ -563,7 +540,6 @@ def _print_timing(printer, now, update_info):
         "finish": finish,
     }
 
-
 def _last_duration(printer):
     duration = _text(
         printer.get("last_completed_duration_text"),
@@ -581,7 +557,6 @@ def _last_duration(printer):
 
     return ""
 
-
 def _error_detail(printer):
     # Optional existing fields; no JSON producer change is required.
     for key in ["error_message", "error_text", "error"]:
@@ -594,7 +569,6 @@ def _error_detail(printer):
                 return text
 
     return ""
-
 
 def _footer(
         printer,
@@ -684,7 +658,6 @@ def _footer(
 
     return "Status unavailable"
 
-
 def _message_screen(font, delay, line2, line3, line4):
     return render.Root(
         render.Column(
@@ -714,7 +687,6 @@ def _message_screen(font, delay, line2, line3, line4):
         show_full_animation = True,
         delay = delay,
     )
-
 
 def _instructions_screen(
         font,
@@ -789,7 +761,6 @@ def _instructions_screen(
         show_full_animation = True,
         delay = delay,
     )
-
 
 def main(config):
     font = "tb-8"
