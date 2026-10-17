@@ -16,7 +16,7 @@ load("images/recent_orders.png", RECENT_ORDERS_ASSET = "file")
 load("images/recent_sales.png", RECENT_SALES_ASSET = "file")
 load("images/trends_animated.gif", TRENDS_ANIMATED_ASSET = "file")
 load("images/trends_container.png", TRENDS_CONTAINER_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 IMAGE_ANIMATED_SHOPIFY_BAG = IMAGE_ANIMATED_SHOPIFY_BAG_ASSET.readall()
@@ -75,7 +75,50 @@ def api_fetch(counter_id, request_config):
 # Returns: A Pixlet root element
 def error_view():
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Image(IMAGE_STARFIELD),
+                render.Column(
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                    children = [
+                        animation.Transformation(
+                            child = render.Image(IMAGE_ALIEN_ERROR),
+                            width = 25,
+                            height = 18,
+                            duration = 150,
+                            direction = "alternate",
+                            fill_mode = "forwards",
+                            keyframes = [
+                                animation.Keyframe(
+                                    percentage = 0.0,
+                                    transforms = [animation.Translate(0, 0)],
+                                ),
+                                animation.Keyframe(
+                                    percentage = 0.25,
+                                    transforms = [animation.Translate(0, 1)],
+                                ),
+                                animation.Keyframe(
+                                    percentage = 0.50,
+                                    transforms = [animation.Translate(0, 0)],
+                                ),
+                                animation.Keyframe(
+                                    percentage = 0.75,
+                                    transforms = [animation.Translate(0, 1)],
+                                ),
+                            ],
+                        ),
+                        render.Marquee(
+                            width = 64,
+                            offset_start = 64,
+                            child = render.Text(content = "We hit a snag. Please check your app.", color = "#FF0"),
+                        ),
+                    ],
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Image(IMAGE_STARFIELD),
                 render.Column(
@@ -169,6 +212,15 @@ def render_gradient(width, height, start_color, end_color):
         height = height,
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     counter_id = config.get("counterId")
     request_config = {}
@@ -185,7 +237,24 @@ def main(config):
 
     return render.Root(
         delay = 100,
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
+            expanded = True,
+            children = [
+                render_header_row(logo, text_color, background_color),
+                render.Box(
+                    width = 64,
+                    height = 1,
+                    color = COLOR_WHITE,
+                ),
+                render.Column(
+                    expanded = True,
+                    children = [
+                        render_marquee(orders),
+                    ],
+                ),
+            ],
+        )))) if is_square() else render.Column(
             expanded = True,
             children = [
                 render_header_row(logo, text_color, background_color),

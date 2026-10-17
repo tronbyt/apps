@@ -2,7 +2,7 @@
 Applet: Weather Radar
 Summary: Live weather radar sweeps
 Description: Display animated precipitation radar and atmospheric sweeps with vibrant color scaling.
-Author: brombomb
+Author: Brombomb
 """
 
 load("encoding/json.star", "json")
