@@ -7,11 +7,20 @@ Author: humbertogontijo
 
 load("cache.star", "cache")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 SHOULD_I_DEPLOY_URL = "https://shouldideploy.today/api?tz="
 DEFAULT_TIMEZONE = "UTC"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     tz = config.get("tz", DEFAULT_TIMEZONE)
@@ -45,17 +54,22 @@ def main(config):
                     main_align = "space_evenly",
                     cross_align = "center",
                     children = [
-                        render.Marquee(
-                            width = 60,
-                            child = render.Text(
-                                content = msg_txt,
-                            ),
-                        ),
+                        _render_message(msg_txt),
                     ],
                 ),
             ],
         ),
     )
+
+def _render_message(msg_txt):
+    if is_square():
+        # Square panel: wrap the verdict under the title instead of a one-line ticker.
+        return render.Marquee(
+            height = canvas.height() - 16,
+            scroll_direction = "vertical",
+            child = render.WrappedText(content = msg_txt, width = canvas.width(), align = "center"),
+        )
+    return render.Marquee(width = 60, child = render.Text(content = msg_txt))
 
 def get_schema():
     return schema.Schema(

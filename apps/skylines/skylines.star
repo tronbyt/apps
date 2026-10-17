@@ -10,6 +10,27 @@ load("schema.star", "schema")
 load("skylines_data.star", "CITIES")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 SCREEN_WIDTH = canvas.width()
 SCREEN_HEIGHT = canvas.height()
 
@@ -457,11 +478,11 @@ def main(config):
 
     return render.Root(
         delay = int(config.get("scroll", DEFAULT_FRAME_DELAY)),
-        child = render.Stack(
+        child = center_on_square(render.Stack(
             children = [
                 render.Animation(children = animation_frames),
             ],
-        ),
+        ), BASE_WIDTH * SCALE, BASE_HEIGHT * SCALE),
         show_full_animation = True,
     )
 
