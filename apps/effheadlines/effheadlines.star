@@ -11,7 +11,7 @@ load("http.star", "http")
 load("qrcode.star", "qrcode")
 load("random.star", "random")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 EFF_XML_URL = "https://www.eff.org/rss/updates.xml"
 
@@ -68,10 +68,10 @@ def main():
                             font = "tom-thumb",
                             width = 32,
                         ),
-                        height = 32,
+                        height = canvas.height(),
                         scroll_direction = "vertical",
-                        offset_start = 32,
-                        offset_end = 32,
+                        offset_start = canvas.height(),
+                        offset_end = canvas.height(),
                     ),
                 ],
             ),
