@@ -7,11 +7,20 @@ Author: Griffinov22
 
 load("http.star", "http")
 load("images/purdue_logo.png", PURDUE_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 PURDUE_LOGO = PURDUE_LOGO_ASSET.readall()
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     year = time.now().year
@@ -21,7 +30,8 @@ def main(config):
 
     if (api_key == ""):
         return render.Root(
-            child = render.Text("API KEY Needed"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("API KEY Needed"))) if is_square() else render.Text("API KEY Needed"),
         )
 
     purdue_stat = get_purdue_stat(cbb_stat_endpoint)
@@ -30,7 +40,23 @@ def main(config):
     # child = render.Text("{}-{}".format(wins,losses))
 
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            # width=48,
+            padding = 5,
+            child = render.Column(
+                children = [render.Row(
+                    children = [
+                        render.Image(src = PURDUE_LOGO, width = 24),
+                        render.Text("{}-{}".format(wins, losses)),
+                    ],
+                    main_align = "space_between",
+                    cross_align = "center",
+                    expanded = True,
+                )],
+                cross_align = "center",
+            ),
+        ))) if is_square() else render.Box(
             # width=48,
             padding = 5,
             child = render.Column(

@@ -7,9 +7,30 @@ Author: SamuLab
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
 
 CACHE_TTL = 300
 BAR_X = 14
@@ -127,12 +148,12 @@ def main(config):
 
     return render.Root(
         max_age = 600,
-        child = render.Box(
+        child = center_on_square(render.Box(
             width = 64,
             height = 32,
             color = "#000000",
             child = render.Stack(children = stack_children),
-        ),
+        )),
     )
 
 def _header(code, is_day):
