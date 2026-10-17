@@ -18,6 +18,7 @@ jobs:
       - name: Save trusted scripts
         run: |
           cp .github/scripts/update_manifests.py /tmp/update_manifests.py
+          cp .github/scripts/determine-metadata-targets.sh /tmp/determine-metadata-targets.sh
 
       - name: Fetch PR branch
         run: |
@@ -40,10 +41,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          OLD_COMMIT=$(git merge-base ${BASE_SHA} ${HEAD_SHA})
-          TARGETS=$(git diff --name-only $OLD_COMMIT $HEAD_SHA | grep '^apps/' | cut -d'/' -f1-2 | sort -u | xargs)
-          echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+        run: /tmp/determine-metadata-targets.sh
 
       - name: Update manifest metadata
         if: steps.targets.outputs.targets != ''

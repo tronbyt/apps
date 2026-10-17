@@ -1,6 +1,6 @@
 load("bsoup.star", "bsoup")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 TIDBYT_HEIGHT = 32
@@ -30,6 +30,15 @@ SHORT_PARTY_NAME_DICT = {
     "Sonstige": "Sonstige",
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Example usage:
     html_text = http.get("https://www.wahlrecht.de/umfragen/").body()
@@ -38,6 +47,50 @@ def main(config):
     data_for_pie = [party for party in showing_data["results"] if can_be_float(str(party["percentage"]))]
     # print(data_for_pie)
     # print(showing_data)
+
+    # Beside the list the pie is 16px. A square panel has the rows to put a
+    # 24px pie and the poll date on top and the full list underneath, where
+    # six parties at 6px each fit without scrolling.
+    if is_square():
+        pie_band = 30
+        return render.Root(
+            render.Column(
+                [
+                    render.Box(
+                        height = pie_band,
+                        child = render.Row(
+                            main_align = "center",
+                            cross_align = "center",
+                            children = [
+                                render.PieChart(
+                                    colors = [PARTY_COLOR_DICT[party["name"]] for party in data_for_pie],
+                                    weights = [float(party["percentage"]) for party in data_for_pie],
+                                    diameter = 24,
+                                ),
+                                render.Padding(
+                                    pad = (4, 0, 0, 0),
+                                    child = render.Text(
+                                        str(showing_data["date"]["day"]) + "." + str(showing_data["date"]["month"]),
+                                        font = "tom-thumb",
+                                        color = "#ffffff",
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                    render.Marquee(
+                        render.Column([
+                            render.Text(get_display_line_for_party(party), font = "tom-thumb", color = PARTY_COLOR_DICT[party["name"]])
+                            for party in showing_data["results"]
+                        ], main_align = "center"),
+                        scroll_direction = "vertical",
+                        height = canvas.height() - pie_band,
+                        delay = 50,
+                    ),
+                ],
+                cross_align = "center",
+            ),
+        )
 
     return render.Root(
         render.Row(

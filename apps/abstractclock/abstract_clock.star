@@ -7,7 +7,7 @@ Author: AmillionAir
 
 load("encoding/json.star", "json")
 load("images/top.png", TOP_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -27,6 +27,15 @@ DEFAULT_LOCATION = """
 P_COLOR_MINUTE = "#0ff"  # Cyan
 P_COLOR_MONTH = "#0f0"  # Green
 P_COLOR_HOUR = "#f00"  # Red
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     COLOR_MINUTE = config.get("color_minute", P_COLOR_MINUTE)
@@ -126,29 +135,36 @@ def main(config):
     else:
         Hand = 63
 
+    # The hands are drawn across the panel width, which is the same on a
+    # square panel; what a square panel has is rows, so the hands get three
+    # times the length and the scale and labels move to the top and bottom.
+    stretch = 3 if is_square() else 1
+
     return render.Root(
         max_age = 120,
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_between",
             children = [
                 render.Image(TOP),
                 render.Stack(
                     children = [
                         render.Row(
                             children = [
-                                render.Box(width = MHand, height = 11),
-                                render.Box(width = 1, height = 13, color = MIcon),
+                                render.Box(width = MHand, height = 11 * stretch),
+                                render.Box(width = 1, height = 13 * stretch, color = MIcon),
                             ],
                         ),
                         render.Row(
                             children = [
-                                render.Box(width = int(Minute) + 3, height = 9),
-                                render.Box(width = 1, height = 11, color = COLOR_MINUTE),
+                                render.Box(width = int(Minute) + 3, height = 9 * stretch),
+                                render.Box(width = 1, height = 11 * stretch, color = COLOR_MINUTE),
                             ],
                         ),
                         render.Row(
                             children = [
-                                render.Box(width = Hand, height = 9),
-                                render.Box(width = 1, height = 9, color = COLOR_HOUR),
+                                render.Box(width = Hand, height = 9 * stretch),
+                                render.Box(width = 1, height = 9 * stretch, color = COLOR_HOUR),
                             ],
                         ),
                     ],

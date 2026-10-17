@@ -2,7 +2,7 @@
 Applet: Ntfy Pulse Listener
 Summary: Ambient alerts from ntfy
 Description: Polls an ntfy topic for real-time push alerts, displaying urgent notifications or an ambient health pulse.
-Author: brombomb
+Author: Brombomb
 """
 
 load("cache.star", "cache")

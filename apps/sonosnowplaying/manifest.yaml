@@ -7,6 +7,7 @@ author: nsluke
 fileName: sonos_now_playing.star
 packageName: sonosnowplaying
 recommendedInterval: 1
+supports64x64: true
 category: entertainment
 tags:
   - music
@@ -14,4 +15,4 @@ tags:
   - now-playing
   - smart-home
 published: '2026-09-02T23:17:51Z'
-updated: '2026-09-03T05:14:08Z'
+updated: '2026-10-01T15:26:52Z'
