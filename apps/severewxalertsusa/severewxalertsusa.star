@@ -26,6 +26,15 @@ DEFAULT_LOCATION = """
 """
 
 ## run the main applications
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
     jsonLocation = json.decode(config.str("location") or DEFAULT_LOCATION)  ## set the location from the schema data or use the default
@@ -57,7 +66,10 @@ def main(config):
     return render.Root(
         delay = 5000,
         show_full_animation = True,
-        child = render.Animation(columnFrames),
+        # Every frame is laid out for 32 rows (or 64 at 2x); on a square
+        # panel, which is 64 tall but not 2x, each is centred rather than
+        # hung from the top edge.
+        child = render.Animation([render.Box(height = canvas.height(), child = f) for f in columnFrames] if is_square() else columnFrames),
     )
 
 def get_schema():
