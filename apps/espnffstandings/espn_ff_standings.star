@@ -6,7 +6,7 @@ Author: gmatthews1182
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FANTASY_BASE_ENDPOINT = "https://lm-api-reads.fantasy.espn.com/apis/v3/games/"
@@ -139,12 +139,13 @@ def main(config):
     return render.Root(
         delay = int("4") * 1000,
         show_full_animation = True,
-        child = render.Column(
+        # The team pages are expanded Columns; bound the block to 64x32 before centring it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             children = [
                 title,
                 render.Animation(children = render_category),  # Animated team display below
             ],
-        ),
+        ))),
     )
 
 def init_base_league(league_id, year, sport, espn_s2, swid):

@@ -5,7 +5,8 @@ summary: Shows more BART routes
 desc: Like the official BART applet but shows up to 8 routes for a station.
 author: scoobmx
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags: []
 published: '2024-08-20T15:49:43Z'
-updated: '2026-01-13T09:01:43Z'
+updated: '2026-10-01T20:55:01Z'
