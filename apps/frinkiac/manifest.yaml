@@ -1,0 +1,15 @@
+---
+id: frinkiac
+name: Frinkiac
+summary: Random Simpsons frames
+desc: Shows random stills from the Frinkiac archive with season and movie filtering.
+author: radiocolin
+fileName: frinkiac.star
+packageName: frinkiac
+recommendedInterval: 60
+supports2x: true
+supports64x64: true
+category: entertainment
+published: '2026-04-27T16:21:16Z'
+updated: '2026-10-17T18:55:03Z'
+tags: []

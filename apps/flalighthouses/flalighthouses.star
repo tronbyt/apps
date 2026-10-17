@@ -1,0 +1,455 @@
+"""
+Applet: Florida Lighthouses
+Summary: Displays Florida lighthouses
+Description: Displays Florida lighthouse locations and highlights visited sites.
+Author: Robert Ison
+"""
+
+load("florida_cities.star", "FLORIDA_CITIES")
+load("florida_lighthouses.star", "FLORIDA_LIGHTHOUSES")
+load("florida_map.star", "FLORIDA_MAP")
+load("math.star", "math")
+load("render.star", "canvas", "render")
+load("schema.star", "schema")
+load(
+    "support_files/lighthouse_animation.gif",
+    LIGHTHOUSE_GIF_ASSET = "file",
+)
+load(
+    "support_files/lighthouse_animation_2x.gif",
+    LIGHTHOUSE_GIF_2X_ASSET = "file",
+)
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
+MAP_CITIES_COLOR = "#ff0000"
+VISITED_COLOR = "#ffff00"
+UNVISITED_COLOR = "#565a06"
+BRIGHT_OUTLINE_COLOR = "#ffffff"
+DULL_OUTLINE_COLOR = "#111111"
+
+# Preserve these IDs so existing visited selections still match.
+CONFIG_PATTERN_LIGHTHOUSES = "Item_%s_%s"
+
+def lighthouse_setting_id(longitude, latitude):
+    return CONFIG_PATTERN_LIGHTHOUSES % (
+        longitude,
+        latitude,
+    )
+
+def visited_lighthouse_count(config):
+    # Count lighthouse entries, not illuminated map pixels.
+    # Different coordinates may project to the same pixel.
+    count = 0
+
+    for lighthouse in FLORIDA_LIGHTHOUSES:
+        if config.bool(
+            lighthouse_setting_id(
+                lighthouse[3],
+                lighthouse[4],
+            ),
+            False,
+        ):
+            count += 1
+
+    return count
+
+def append_visited_count(children, config, color):
+    text = "{}/{}".format(
+        visited_lighthouse_count(config),
+        len(FLORIDA_LIGHTHOUSES),
+    )
+
+    if canvas.is2x():
+        font = "terminus-16"
+        text_height = 16
+        margin = 2
+    else:
+        font = "5x8"
+        text_height = 8
+        margin = 1
+
+    x = margin
+
+    # On the square the 64x32 scene is bounded and centred, so the count
+    # sits against the scene's bottom edge, not the panel's.
+    scene_height = 32 if is_square() else canvas.height()
+    y = max(0, scene_height - text_height - margin)
+
+    children.append(
+        render.Padding(
+            child = render.Text(
+                text,
+                color = color,
+                font = font,
+            ),
+            pad = (x, y, 0, 0),
+        ),
+    )
+
+def main(config):
+    map_pixel_size = [80, 50] if canvas.is2x() else [45, 30]
+
+    is_display_cities = config.bool("displayMajorCities", False)
+    is_display_picks = config.bool("pickVisits", False)
+    is_display_art = config.bool("displayArtwork", True)
+    is_display_count = config.bool("showVisitedCount", False)
+
+    # Avoid an unexpectedly empty lighthouse layer when
+    # highlighting is disabled.
+    hide_unvisited = (
+        config.bool("hideUnvisited", False) and
+        is_display_picks
+    )
+
+    cities_color = (
+        config.get("citiesColor", MAP_CITIES_COLOR) or
+        MAP_CITIES_COLOR
+    )
+    visited_color = (
+        config.get("visitedColor", VISITED_COLOR) or
+        VISITED_COLOR
+    )
+    unvisited_color = (
+        config.get("unvisitedColor", UNVISITED_COLOR) or
+        UNVISITED_COLOR
+    )
+
+    # Coordinate order is longitude, latitude.
+    lighthouse_coordinates = [
+        [lighthouse[3], lighthouse[4]]
+        for lighthouse in FLORIDA_LIGHTHOUSES
+    ]
+
+    # Preserve the original geographic framing:
+    # map outline, expanded as needed for lighthouse locations.
+    map_area = define_map_area(FLORIDA_MAP)
+    map_area = define_map_area(
+        lighthouse_coordinates,
+        map_area,
+    )
+
+    if map_area == None:
+        return []
+
+    map_items = []
+
+    if is_display_art:
+        if canvas.is2x():
+            lighthouse_animation = LIGHTHOUSE_GIF_2X_ASSET.readall()
+        else:
+            lighthouse_animation = LIGHTHOUSE_GIF_ASSET.readall()
+
+        map_items.append(
+            render.Image(src = lighthouse_animation),
+        )
+
+    map_outline_color = (
+        DULL_OUTLINE_COLOR if is_display_art else BRIGHT_OUTLINE_COLOR
+    )
+
+    # Map outline.
+    append_items_to_render(
+        map_items,
+        get_map_points(
+            FLORIDA_MAP,
+            map_area,
+            map_pixel_size,
+        ),
+        map_outline_color,
+    )
+
+    # Major cities.
+    if is_display_cities:
+        append_items_to_render(
+            map_items,
+            get_map_points(
+                FLORIDA_CITIES,
+                map_area,
+                map_pixel_size,
+            ),
+            cities_color,
+        )
+
+    # All lighthouse locations, unless visited-only view is active.
+    if not hide_unvisited:
+        append_items_to_render(
+            map_items,
+            get_map_points(
+                lighthouse_coordinates,
+                map_area,
+                map_pixel_size,
+            ),
+            unvisited_color,
+        )
+
+    # Any selected lighthouse lights its pixel, even when
+    # another lighthouse projects to that same pixel.
+    if is_display_picks:
+        append_items_to_render(
+            map_items,
+            get_map_points(
+                lighthouse_coordinates,
+                map_area,
+                map_pixel_size,
+                config,
+            ),
+            visited_color,
+        )
+
+    # The count reflects saved selections even when the
+    # visited highlighting is temporarily switched off.
+    if is_display_count:
+        append_visited_count(
+            map_items,
+            config,
+            visited_color,
+        )
+
+    return render.Root(
+        child = center_on_square(render.Stack(
+            children = map_items,
+        ), 64, 32),
+    )
+
+def define_map_area(map_coordinates, existing_area = None):
+    if existing_area != None:
+        longitude_range = [
+            existing_area[0][0],
+            existing_area[0][1],
+        ]
+        latitude_range = [
+            existing_area[1][0],
+            existing_area[1][1],
+        ]
+    elif map_coordinates:
+        longitude_range = [
+            map_coordinates[0][0],
+            map_coordinates[0][0],
+        ]
+        latitude_range = [
+            map_coordinates[0][1],
+            map_coordinates[0][1],
+        ]
+    else:
+        return None
+
+    for longitude, latitude in map_coordinates:
+        longitude_range[0] = min(
+            longitude_range[0],
+            longitude,
+        )
+        longitude_range[1] = max(
+            longitude_range[1],
+            longitude,
+        )
+        latitude_range[0] = min(
+            latitude_range[0],
+            latitude,
+        )
+        latitude_range[1] = max(
+            latitude_range[1],
+            latitude,
+        )
+
+    return [longitude_range, latitude_range]
+
+def get_map_points(
+        map_coordinates,
+        map_area,
+        pixel_area,
+        config = None):
+    width = pixel_area[0]
+    height = pixel_area[1]
+
+    # Stored as columns: map_array[x][y].
+    map_array = [
+        [0 for y in range(height)]
+        for x in range(width)
+    ]
+
+    if map_area == None or width <= 0 or height <= 0:
+        return map_array
+
+    min_longitude = map_area[0][0]
+    max_longitude = map_area[0][1]
+    min_latitude = map_area[1][0]
+    max_latitude = map_area[1][1]
+
+    longitude_span = max_longitude - min_longitude
+    latitude_span = max_latitude - min_latitude
+
+    for longitude, latitude in map_coordinates:
+        # Keep the existing framing rather than moving
+        # outlying coordinates onto an unrelated edge pixel.
+        if longitude < min_longitude or longitude > max_longitude:
+            continue
+
+        if latitude < min_latitude or latitude > max_latitude:
+            continue
+
+        if config != None:
+            if not config.bool(
+                lighthouse_setting_id(longitude, latitude),
+                False,
+            ):
+                continue
+
+        if longitude_span > 0:
+            x = int(math.round(
+                (longitude - min_longitude) /
+                longitude_span *
+                (width - 1),
+            ))
+        else:
+            x = (width - 1) // 2
+
+        if latitude_span > 0:
+            y = height - 1 - int(math.round(
+                (latitude - min_latitude) /
+                latitude_span *
+                (height - 1),
+            ))
+        else:
+            y = (height - 1) // 2
+
+        if x < 0 or x >= width or y < 0 or y >= height:
+            continue
+
+        # Shared pixels are intentional: any included location
+        # is enough to illuminate the pixel.
+        map_array[x][y] = 1
+
+    return map_array
+
+def append_items_to_render(children, points, color):
+    for x in range(len(points)):
+        for y in range(len(points[x])):
+            if points[x][y] > 0:
+                children.append(
+                    render.Padding(
+                        child = render.Circle(
+                            diameter = 1,
+                            color = color,
+                        ),
+                        pad = (x, y, 0, 0),
+                    ),
+                )
+
+    return children
+
+def get_lighthouses(enabled):
+    if str(enabled).lower() != "true":
+        return []
+
+    items = sorted(
+        FLORIDA_LIGHTHOUSES,
+        key = lambda item: item[0],
+    )
+
+    return [
+        schema.Toggle(
+            id = lighthouse_setting_id(
+                item[3],
+                item[4],
+            ),
+            name = item[0],
+            desc = str(item[5]) if item[5] != None else "",
+            icon = "towerCell",
+            default = False,
+        )
+        for item in items
+    ]
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Toggle(
+                id = "displayArtwork",
+                name = "Show Background Artwork",
+                desc = "Display the animated lighthouse background.",
+                icon = "photoFilm",
+                default = True,
+            ),
+            schema.Toggle(
+                id = "displayMajorCities",
+                name = "Show Major Cities",
+                desc = "Display major Florida cities.",
+                icon = "city",
+                default = False,
+            ),
+            schema.Toggle(
+                id = "pickVisits",
+                name = "Highlight Visited Lighthouses",
+                desc = "Highlight your selected lighthouse locations.",
+                icon = "highlighter",
+                default = False,
+            ),
+            schema.Generated(
+                id = "lighthouseList",
+                source = "pickVisits",
+                handler = get_lighthouses,
+            ),
+            schema.Toggle(
+                id = "hideUnvisited",
+                name = "Hide Unvisited Lighthouses",
+                desc = (
+                    "Show only visited lighthouse markers when " +
+                    "Highlight Visited Lighthouses is enabled."
+                ),
+                icon = "towerCell",
+                default = False,
+            ),
+            schema.Toggle(
+                id = "showVisitedCount",
+                name = "Show Visited Count",
+                desc = (
+                    "Show visited/total in the upper-right corner. " +
+                    "Counts lighthouse entries, not map pixels."
+                ),
+                icon = "info",
+                default = False,
+            ),
+            schema.Color(
+                id = "visitedColor",
+                name = "Visited Lighthouse Color",
+                desc = "Color of visited markers and the optional count.",
+                icon = "brush",
+                default = VISITED_COLOR,
+            ),
+            schema.Color(
+                id = "unvisitedColor",
+                name = "Unvisited Lighthouse Color",
+                desc = "Color of unvisited lighthouse markers.",
+                icon = "brush",
+                default = UNVISITED_COLOR,
+            ),
+            schema.Color(
+                id = "citiesColor",
+                name = "Major City Color",
+                desc = "Color of major city markers.",
+                icon = "brush",
+                default = MAP_CITIES_COLOR,
+            ),
+        ],
+    )

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tronbyt App Viewer</title>
+        <meta name="description" content="Browse apps for Tronbyt displays: screenshots, details and documentation for every app in the Tronbyt app store.">
+        <link rel="canonical" href="https://apps.tronbyt.com/">
+        <meta property="og:site_name" content="Tronbyt App Viewer">
+        <meta property="og:title" content="Tronbyt App Viewer">
+        <meta property="og:description" content="Browse apps for Tronbyt displays: screenshots, details and documentation for every app in the Tronbyt app store.">
+        <meta property="og:url" content="https://apps.tronbyt.com/">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="https://apps.tronbyt.com/cards/tronbyt-app-viewer-865401918a.png">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Tronbyt App Viewer">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Tronbyt App Viewer">
+        <meta name="twitter:description" content="Browse apps for Tronbyt displays: screenshots, details and documentation for every app in the Tronbyt app store.">
+        <meta name="twitter:image" content="https://apps.tronbyt.com/cards/tronbyt-app-viewer-865401918a.png">
+        <meta name="twitter:image:alt" content="Tronbyt App Viewer">
+        <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/200508996?s=48&v=4">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        <div class="container py-4">
+            <div class="viewer-header mb-4">
+                <h1 class="main-title mb-0">
+                    <a href="index.html" class="home-link" title="Tronbyt App Viewer home">
+                        <img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4" alt="">
+                        <span class="title-full">Tronbyt App Viewer</span>
+                        <span class="title-short">App Viewer</span>
+                    </a>
+                </h1>
+            </div>
+
+            <div class="viewer-filters mb-4">
+                <div class="viewer-search">
+                    <div class="search-control">
+                        <div class="search-tag-token" id="selected-tag-filter" hidden>
+                            <span id="selected-tag-label"></span>
+                            <button type="button" id="clear-tag-filter" aria-label="Remove tag filter">&times;</button>
+                        </div>
+                        <input type="text" id="search" class="form-control" placeholder="Search apps...">
+                        <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="viewer-preference preference-dot">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
+                        <label class="form-check-label" for="dot-matrix-toggle">
+                            Dot matrix overlay
+                        </label>
+                    </div>
+                </div>
+                <div class="category-filter">
+                    <select id="category-filter" class="form-select">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div class="display-filter">
+                    <select id="display-filter" class="form-select">
+                        <option value="standard">Display: Standard / 1x</option>
+                        <option value="wide">Display: Wide / 2x</option>
+                        <option value="square">Display: Square</option>
+                    </select>
+                </div>
+                <div class="sort-filter">
+                    <select id="sort-order" class="form-select">
+                        <option value="alphabetical">Sort: A-Z</option>
+                        <option value="newest">Sort: Newest</option>
+                        <option value="updated" selected>Sort: Last Updated</option>
+                    </select>
+                </div>
+                <div class="viewer-preference preference-broken">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="hide-broken-apps">
+                        <label class="form-check-label" for="hide-broken-apps">
+                            Hide broken apps
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="apps-list" class="row g-4"></div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script type="module" src="main.js"></script>
+    </body>
+
+</html>

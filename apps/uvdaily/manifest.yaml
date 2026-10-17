@@ -1,0 +1,17 @@
+---
+id: uv-daily
+name: UV Daily
+summary: Hourly UV distribution
+desc: The day's UV index as a color-coded hourly distribution, framed by sunrise and sunset, with the peak's time under its own bar. Data by Open-Meteo, UV from Copernicus Atmosphere Monitoring Service (CAMS) ENSEMBLE.
+author: iicky
+fileName: uv_daily.star
+packageName: uvdaily
+recommendedInterval: 60
+supports2x: true
+category: weather
+tags:
+  - weather
+  - uv
+  - health
+published: '2026-08-24T03:07:33Z'
+updated: '2026-08-24T03:07:33Z'

@@ -1,0 +1,20 @@
+---
+id: launchcountdown
+name: LaunchCountdown
+summary: Displays next world launch
+desc: Displays the next rocket launch in the world.
+author: Robert Ison
+fileName: launchcountdown.star
+packageName: launchcountdown
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - space
+  - science
+  - real-time
+  - tech
+  - wide 2x support
+published: '2022-04-04T16:11:33Z'
+updated: '2026-10-17T19:08:51Z'

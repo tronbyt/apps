@@ -1,0 +1,15 @@
+---
+id: yahoofinance
+name: Yahoo Finance
+summary: Track stock price
+desc: Tracks a stock price, change and chart using free data from Yahoo Finance. No API key required.
+author: petergCA
+fileName: yahoofinance.star
+packageName: yahoofinance
+recommendedInterval: 1
+category: finance
+tags:
+  - finance
+  - stocks
+published: '2026-09-02T21:15:00Z'
+updated: '2026-09-03T16:39:36Z'

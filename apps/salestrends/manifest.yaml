@@ -1,0 +1,19 @@
+---
+id: shopify-sales-trends
+name: Shopify Sales
+summary: Display sales totals
+desc: Showcase your daily, weekly, monthly, or annual sales totals.
+author: Shopify
+fileName: sales_trends.star
+packageName: salestrends
+recommendedInterval: 5
+broken: true
+brokenReason: 'www.shopcounter.app: no such host'
+supports64x64: true
+category: utilities
+tags:
+  - finance
+  - tech
+  - utility
+published: '2022-11-30T17:31:36Z'
+updated: '2026-10-01T22:30:43Z'

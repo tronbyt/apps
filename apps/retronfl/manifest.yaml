@@ -1,0 +1,14 @@
+---
+id: retro-nfl
+name: Retro NFL
+summary: Classic football scoreboard
+desc: Follow any NFL team with colorful logos, live scores, possession, timeouts, and division standings. Optional separately installed companion enables touchdown animations and game-time focus. Defaults to Philadelphia.
+author: cdadamo
+fileName: retro_nfl.star
+packageName: retronfl
+recommendedInterval: 1
+category: sports
+tags:
+  - nfl
+  - football
+  - real-time
