@@ -134,13 +134,29 @@ GLYPH_MS = [
 # domain fonts (6x10, tb-8, Dina) all carry true M/W/V glyphs, so strings set
 # in those are unconstrained.
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, so a height test would catch it too.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def layout():
     """Panel geometry and fonts for the current canvas.
 
     Returns:
-        A dict of sizes so 1x (64x32) and 2x (128x64) share one layout.
+        A dict of sizes so 1x (64x32), 2x (128x64) and square (64x64) share
+        one layout.
+
+    A square panel is 64 wide like 1x, not 128 like 2x, so every font and
+    width budget below is the 1x choice and `s` stays 1. What it has is twice
+    the rows, and they all go to the sparkline: a 24-hour latency chart is the
+    one thing on this panel that was genuinely starved at 7px tall.
     """
     two = canvas.is2x()
+    sq = is_square()
     s = 2 if two else 1
     return {
         "s": s,
@@ -176,7 +192,10 @@ def layout():
         "font_mid": "6x10" if two else "tb-8",
         "mid_adv": 6 if two else 5,
         "mid_drop": 2 if two else 1,
-        "spark_h": 18 if two else 7,
+        # 1x spends 25 of its 32 rows on the header, hero, footer and the
+        # gaps between them, leaving 7. Square spends the same 25 and has 39
+        # left, so the chart takes all of it.
+        "spark_h": 18 if two else (39 if sq else 7),
     }
 
 def pick_source(config):

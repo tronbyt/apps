@@ -7,6 +7,7 @@ author: nsluke
 fileName: apod.star
 packageName: apod
 recommendedInterval: 240
+supports64x64: true
 category: science
 tags:
   - space
@@ -14,4 +15,4 @@ tags:
   - science
   - art
 published: '2026-09-02T23:17:52Z'
-updated: '2026-09-03T05:14:01Z'
+updated: '2026-10-01T15:26:52Z'

@@ -7,7 +7,7 @@
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FBI_API = "https://api.fbi.gov/wanted/v1/list"
@@ -163,22 +163,58 @@ def person_screen(person):
             render.Box(width = 64, height = 1, color = gold),
             render.Box(
                 width = 64,
-                height = 20,
+                # the rows under the 11px header and its rule: 20 on 64x32,
+                # 52 on a square panel
+                height = canvas.height() - 12,
                 color = NAVY_DARK,
-                child = render.Padding(
-                    pad = (0, 4, 0, 0),
-                    child = render.Marquee(
-                        width = 64,
-                        offset_start = 64,
-                        offset_end = 64,
-                        child = render.Text(
-                            content = ticker,
-                            color = gold,
-                        ),
-                    ),
-                ),
+                child = body(ticker, gold),
             ),
         ],
+    )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def body(text, color):
+    """The notice under the header.
+
+    On a 64x32 panel the body is one line, scrolled sideways through the
+    20 rows it has. A square panel has 52, so the same text is wrapped to
+    the panel width and scrolled up through them instead.
+    """
+    if is_square():
+        return render.Padding(
+            pad = (0, 2, 0, 0),
+            child = render.Marquee(
+                height = canvas.height() - 14,
+                scroll_direction = "vertical",
+                offset_start = canvas.height() - 14,
+                offset_end = canvas.height() - 14,
+                child = render.WrappedText(
+                    content = text,
+                    width = 64,
+                    color = color,
+                    linespacing = 1,
+                ),
+            ),
+        )
+    return render.Padding(
+        pad = (0, 4, 0, 0),
+        child = render.Marquee(
+            width = 64,
+            offset_start = 64,
+            offset_end = 64,
+            child = render.Text(
+                content = text,
+                color = color,
+            ),
+        ),
     )
 
 def main(config):
