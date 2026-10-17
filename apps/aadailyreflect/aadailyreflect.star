@@ -74,7 +74,9 @@ def render_1x(data):
         child = render.Column(
             children = [
                 render.Marquee(
-                    height = REFLECTION_AREA_HEIGHT,
+                    # the rows above the rule and the title: 26 on 64x32,
+                    # 58 on square
+                    height = canvas.height() - 1 - APPTITLE_HEIGHT,
                     scroll_direction = "vertical",
                     offset_start = 16,
                     child =
