@@ -7,7 +7,7 @@ Author: Godfrey Systems Web Development
 
 load("images/present_icon.gif", PRESENT_ICON_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 PRESENT_ICON = PRESENT_ICON_ASSET.readall()
@@ -28,57 +28,67 @@ def main():
 
     description = "{} left".format("Day" if days == 1 else "Days")
 
+    # The layout is hand-placed for 32 rows; on a taller panel it sits in
+    # the middle.
     return render.Root(
-        child = render.Stack(
-            children = [
-                render.Padding(
-                    pad = (0, 0, 0, 0),
-                    child = render.Box(
-                        width = 32,
-                        height = 16,
-                        child = render.Image(
-                            src = PRESENT_ICON,
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = [
+                        render.Padding(
+                            pad = (0, 0, 0, 0),
+                            child = render.Box(
+                                width = 32,
+                                height = 16,
+                                child = render.Image(
+                                    src = PRESENT_ICON,
+                                ),
+                            ),
                         ),
-                    ),
-                ),
-                render.Padding(
-                    pad = (32, 0, 0, 0),
-                    child = render.Box(
-                        width = 32,
-                        height = 16,
-                        child = render.Text(
-                            content = str(days),
-                            color = "#FFFFFF",
-                            font = "10x20",
-                            height = 0,
-                            offset = 0,
+                        render.Padding(
+                            pad = (32, 0, 0, 0),
+                            child = render.Box(
+                                width = 32,
+                                height = 16,
+                                child = render.Text(
+                                    content = str(days),
+                                    color = "#FFFFFF",
+                                    font = "10x20",
+                                    height = 0,
+                                    offset = 0,
+                                ),
+                            ),
                         ),
-                    ),
-                ),
-                render.Padding(
-                    pad = (0, 16, 0, 0),
-                    child = render.Box(
-                        width = 64,
-                        height = 8,
-                        child = render.Text(
-                            content = description,
-                            color = "#FFFFFF",
-                            font = "CG-pixel-3x5-mono",
+                        render.Padding(
+                            pad = (0, 16, 0, 0),
+                            child = render.Box(
+                                width = 64,
+                                height = 8,
+                                child = render.Text(
+                                    content = description,
+                                    color = "#FFFFFF",
+                                    font = "CG-pixel-3x5-mono",
+                                ),
+                            ),
                         ),
-                    ),
-                ),
-                render.Padding(
-                    pad = (0, 24, 0, 0),
-                    child = render.Box(
-                        width = 64,
-                        height = 8,
-                        child = render.Text(
-                            content = xmas_datestring,
-                            color = "#FFFFFF",
-                            font = "CG-pixel-4x5-mono",
+                        render.Padding(
+                            pad = (0, 24, 0, 0),
+                            child = render.Box(
+                                width = 64,
+                                height = 8,
+                                child = render.Text(
+                                    content = xmas_datestring,
+                                    color = "#FFFFFF",
+                                    font = "CG-pixel-4x5-mono",
+                                ),
+                            ),
                         ),
-                    ),
+                    ],
                 ),
-            ],
+            ),
         ),
     )

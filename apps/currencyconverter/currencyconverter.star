@@ -40,9 +40,12 @@ load("images/cny_flag.webp", CNY_FLAG = "file")
 load("images/cop_flag.webp", COP_FLAG = "file")
 load("images/crc_flag.webp", CRC_FLAG = "file")
 load("images/cup_flag.webp", CUP_FLAG = "file")
+load("images/cve_flag.webp", CVE_FLAG = "file")
+load("images/czk_flag.webp", CZK_FLAG = "file")
 load("images/djf_flag.webp", DJF_FLAG = "file")
 load("images/dkk_flag.webp", DKK_FLAG = "file")
 load("images/dop_flag.webp", DOP_FLAG = "file")
+load("images/dzd_flag.webp", DZD_FLAG = "file")
 load("images/egp_flag.webp", EGP_FLAG = "file")
 load("images/ern_flag.webp", ERN_FLAG = "file")
 load("images/etb_flag.webp", ETB_FLAG = "file")
@@ -52,8 +55,10 @@ load("images/fkp_flag.webp", FKP_FLAG = "file")
 load("images/fok_flag.webp", FOK_FLAG = "file")
 load("images/gbp_flag.webp", GBP_FLAG = "file")
 load("images/gel_flag.webp", GEL_FLAG = "file")
+load("images/ggp_flag.webp", GGP_FLAG = "file")
 load("images/ghs_flag.webp", GHS_FLAG = "file")
 load("images/gip_flag.webp", GIP_FLAG = "file")
+load("images/gmd_flag.webp", GMD_FLAG = "file")
 load("images/gnf_flag.webp", GNF_FLAG = "file")
 load("images/gtq_flag.webp", GTQ_FLAG = "file")
 load("images/gyd_flag.webp", GYD_FLAG = "file")
@@ -118,6 +123,7 @@ load("images/pln_flag.webp", PLN_FLAG = "file")
 load("images/pyg_flag.webp", PYG_FLAG = "file")
 load("images/qar_flag.webp", QAR_FLAG = "file")
 load("images/ron_flag.webp", RON_FLAG = "file")
+load("images/rsd_flag.webp", RSD_FLAG = "file")
 load("images/rub_flag.webp", RUB_FLAG = "file")
 load("images/rwf_flag.webp", RWF_FLAG = "file")
 load("images/sar_flag.webp", SAR_FLAG = "file")
@@ -150,701 +156,375 @@ load("images/usd_flag.webp", USD_FLAG = "file")
 load("images/uyu_flag.webp", UYU_FLAG = "file")
 load("images/uzs_flag.webp", UZS_FLAG = "file")
 load("images/ves_flag.webp", VES_FLAG = "file")
+load("images/vnd_flag.webp", VND_FLAG = "file")
 load("images/vuv_flag.webp", VUV_FLAG = "file")
 load("images/wst_flag.webp", WST_FLAG = "file")
 load("images/xaf_flag.webp", XAF_FLAG = "file")
+load("images/yer_flag.webp", YER_FLAG = "file")
 load("images/zar_flag.webp", ZAR_FLAG = "file")
 load("images/zmw_flag.webp", ZMW_FLAG = "file")
 load("images/zwl_flag.webp", ZWL_FLAG = "file")
-load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-# Exchangerate-API.com Info
-
+# Currency metadata and existing bundled flag assets.
 currencies = {
-    "eur": {
-        "name": "Euro",
-        "flag": EURO_FLAG_ASSET.readall(),
-    },
-    "aed": {
-        "name": "United Arab Emirates",
-        "flag": AED_FLAG.readall(),
-    },
-    "all": {
-        "name": "Albania",
-        "flag": ALL_FLAG.readall(),
-    },
-    "amd": {
-        "name": "Armenia",
-        "flag": AMD_FLAG.readall(),
-    },
-    "aoa": {
-        "name": "Angola",
-        "flag": AOA_FLAG.readall(),
-    },
-    "ars": {
-        "name": "Argentina",
-        "flag": ARS_FLAG.readall(),
-    },
-    "aud": {
-        "name": "Australia",
-        "flag": AUD_FLAG.readall(),
-    },
-    "awg": {
-        "name": "Aruba",
-        "flag": AWG_FLAG.readall(),
-    },
-    "azn": {
-        "name": "Azerbaijan",
-        "flag": AZN_FLAG.readall(),
-    },
-    "bam": {
-        "name": "Bosnia and Herzegovina",
-        "flag": BAM_FLAG.readall(),
-    },
-    "bbd": {
-        "name": "Barbados",
-        "flag": BBD_FLAG.readall(),
-    },
-    "bdt": {
-        "name": "Bangladesh",
-        "flag": BDT_FLAG.readall(),
-    },
-    "bhd": {
-        "name": "Bahrain",
-        "flag": BHD_FLAG.readall(),
-    },
-    "bif": {
-        "name": "Burundi",
-        "flag": BIF_FLAG.readall(),
-    },
-    "bmd": {
-        "name": "Bermuda",
-        "flag": BMD_FLAG.readall(),
-    },
-    "bnd": {
-        "name": "Brunei Darussalam",
-        "flag": BND_FLAG.readall(),
-    },
-    "bob": {
-        "name": "Bolivia",
-        "flag": BOB_FLAG.readall(),
-    },
-    "brl": {
-        "name": "Brazil",
-        "flag": BRL_FLAG.readall(),
-    },
-    "bsd": {
-        "name": "Bahamas",
-        "flag": BSD_FLAG.readall(),
-    },
-    "btn": {
-        "name": "Bhutan",
-        "flag": BTN_FLAG.readall(),
-    },
-    "bzd": {
-        "name": "Belize",
-        "flag": BZD_FLAG.readall(),
-    },
-    "byn": {
-        "name": "Belarus",
-        "flag": BYN_FLAG.readall(),
-    },
-    "bwp": {
-        "name": "Botswana",
-        "flag": BWP_FLAG.readall(),
-    },
-    "bgn": {
-        "name": "Bulgaria",
-        "flag": BGN_FLAG.readall(),
-    },
-    "khr": {
-        "name": "Cambodia",
-        "flag": KHR_FLAG.readall(),
-    },
-    "cad": {
-        "name": "Canada",
-        "flag": CAD_FLAG.readall(),
-    },
-    "kyd": {
-        "name": "Cayman Islands",
-        "flag": KYD_FLAG.readall(),
-    },
-    "xaf": {
-        "name": "Central African Republic",
-        "flag": XAF_FLAG.readall(),
-    },
-    "clp": {
-        "name": "Chile",
-        "flag": CLP_FLAG.readall(),
-    },
-    "cny": {
-        "name": "China",
-        "flag": CNY_FLAG.readall(),
-    },
-    "cop": {
-        "name": "Colombia",
-        "flag": COP_FLAG.readall(),
-    },
-    "kmf": {
-        "name": "Comoros",
-        "flag": KMF_FLAG.readall(),
-    },
-    "crc": {
-        "name": "Costa Rica",
-        "flag": CRC_FLAG.readall(),
-    },
-    "hrk": {
-        "name": "Croatia",
-        "flag": HRK_FLAG.readall(),
-    },
-    "cup": {
-        "name": "Cuba",
-        "flag": CUP_FLAG.readall(),
-    },
-    "cdf": {
-        "name": "Congo",
-        "flag": CDF_FLAG.readall(),
-    },
-    "dkk": {
-        "name": "Denmark",
-        "flag": DKK_FLAG.readall(),
-    },
-    "djf": {
-        "name": "Djibouti",
-        "flag": DJF_FLAG.readall(),
-    },
-    "dop": {
-        "name": "Dominican Republic",
-        "flag": DOP_FLAG.readall(),
-    },
-    "egp": {
-        "name": "Egypt",
-        "flag": EGP_FLAG.readall(),
-    },
-    "ern": {
-        "name": "Eritrea",
-        "flag": ERN_FLAG.readall(),
-    },
-    "szl": {
-        "name": "Eswatini",
-        "flag": SZL_FLAG.readall(),
-    },
-    "etb": {
-        "name": "Ethiopia",
-        "flag": ETB_FLAG.readall(),
-    },
-    "fkp": {
-        "name": "Falkland Islands",
-        "flag": FKP_FLAG.readall(),
-    },
-    "fok": {
-        "name": "Faroe Islands",
-        "flag": FOK_FLAG.readall(),
-    },
-    "fjd": {
-        "name": "Fiji",
-        "flag": FJD_FLAG.readall(),
-    },
-    "gel": {
-        "name": "Georgia",
-        "flag": GEL_FLAG.readall(),
-    },
-    "ghs": {
-        "name": "Ghana",
-        "flag": GHS_FLAG.readall(),
-    },
-    "gip": {
-        "name": "Gibraltar",
-        "flag": GIP_FLAG.readall(),
-    },
-    "gtq": {
-        "name": "Guatemala",
-        "flag": GTQ_FLAG.readall(),
-    },
-    "gnf": {
-        "name": "Guinea",
-        "flag": GNF_FLAG.readall(),
-    },
-    "gyd": {
-        "name": "Guyana",
-        "flag": GYD_FLAG.readall(),
-    },
-    "htg": {
-        "name": "Haiti",
-        "flag": HTG_FLAG.readall(),
-    },
-    "hnl": {
-        "name": "Honduras",
-        "flag": HNL_FLAG.readall(),
-    },
-    "hkd": {
-        "name": "Hong Kong",
-        "flag": HKD_FLAG.readall(),
-    },
-    "huf": {
-        "name": "Hungary",
-        "flag": HUF_FLAG.readall(),
-    },
-    "isk": {
-        "name": "Iceland",
-        "flag": ISK_FLAG.readall(),
-    },
-    "inr": {
-        "name": "India",
-        "flag": INR_FLAG.readall(),
-    },
-    "idr": {
-        "name": "Indonesia",
-        "flag": IDR_FLAG.readall(),
-    },
-    "irr": {
-        "name": "Iran",
-        "flag": IRR_FLAG.readall(),
-    },
-    "iqd": {
-        "name": "Iraq",
-        "flag": IQD_FLAG.readall(),
-    },
-    "imp": {
-        "name": "Isle of Man",
-        "flag": IMP_FLAG.readall(),
-    },
-    "ils": {
-        "name": "Israel",
-        "flag": ILS_FLAG.readall(),
-    },
-    "jmd": {
-        "name": "Jamaica",
-        "flag": JMD_FLAG.readall(),
-    },
-    "jpy": {
-        "name": "Japan",
-        "flag": JPY_FLAG.readall(),
-    },
-    "jep": {
-        "name": "Jersey",
-        "flag": JEP_FLAG.readall(),
-    },
-    "jod": {
-        "name": "Jordan",
-        "flag": JOD_FLAG.readall(),
-    },
-    "kzt": {
-        "name": "Kazakhstan",
-        "flag": KZT_FLAG.readall(),
-    },
-    "kes": {
-        "name": "Kenya",
-        "flag": KES_FLAG.readall(),
-    },
-    "kid": {
-        "name": "Kiribati",
-        "flag": KID_FLAG.readall(),
-    },
-    "kwd": {
-        "name": "Kuwait",
-        "flag": KWD_FLAG.readall(),
-    },
-    "kgs": {
-        "name": "Kyrgyzstan",
-        "flag": KGS_FLAG.readall(),
-    },
-    "lak": {
-        "name": "Laos",
-        "flag": LAK_FLAG.readall(),
-    },
-    "lbp": {
-        "name": "Lebanon",
-        "flag": LBP_FLAG.readall(),
-    },
-    "lsl": {
-        "name": "Lesotho",
-        "flag": LSL_FLAG.readall(),
-    },
-    "lrd": {
-        "name": "Liberia",
-        "flag": LRD_FLAG.readall(),
-    },
-    "lyd": {
-        "name": "Libya",
-        "flag": LYD_FLAG.readall(),
-    },
-    "mop": {
-        "name": "Macao",
-        "flag": MOP_FLAG.readall(),
-    },
-    "mga": {
-        "name": "Madagascar",
-        "flag": MGA_FLAG.readall(),
-    },
-    "mwk": {
-        "name": "Malawi",
-        "flag": MWK_FLAG.readall(),
-    },
-    "myr": {
-        "name": "Malaysia",
-        "flag": MYR_FLAG.readall(),
-    },
-    "mvr": {
-        "name": "Maldives",
-        "flag": MVR_FLAG.readall(),
-    },
-    "mru": {
-        "name": "Mauritania",
-        "flag": MRU_FLAG.readall(),
-    },
-    "mur": {
-        "name": "Mauritius",
-        "flag": MUR_FLAG.readall(),
-    },
-    "mxn": {
-        "name": "Mexico",
-        "flag": MXN_FLAG.readall(),
-    },
-    "mdl": {
-        "name": "Moldova, Republic of",
-        "flag": MDL_FLAG.readall(),
-    },
-    "mnt": {
-        "name": "Mongolia",
-        "flag": MNT_FLAG.readall(),
-    },
-    "mad": {
-        "name": "Morocco",
-        "flag": MAD_FLAG.readall(),
-    },
-    "mzn": {
-        "name": "Mozambique",
-        "flag": MZN_FLAG.readall(),
-    },
-    "mmk": {
-        "name": "Myanmar",
-        "flag": MMK_FLAG.readall(),
-    },
-    "nad": {
-        "name": "Namibia",
-        "flag": NAD_FLAG.readall(),
-    },
-    "npr": {
-        "name": "Nepal",
-        "flag": NPR_FLAG.readall(),
-    },
-    "nzd": {
-        "name": "New Zealand",
-        "flag": NZD_FLAG.readall(),
-    },
-    "nio": {
-        "name": "Nicaragua",
-        "flag": NIO_FLAG.readall(),
-    },
-    "ngn": {
-        "name": "Nigeria",
-        "flag": NGN_FLAG.readall(),
-    },
-    "mkd": {
-        "name": "North Macedonia",
-        "flag": MKD_FLAG.readall(),
-    },
-    "nok": {
-        "name": "Norway",
-        "flag": NOK_FLAG.readall(),
-    },
-    "omr": {
-        "name": "Oman",
-        "flag": OMR_FLAG.readall(),
-    },
-    "pkr": {
-        "name": "Pakistan",
-        "flag": PKR_FLAG.readall(),
-    },
-    "pab": {
-        "name": "Panama",
-        "flag": PAB_FLAG.readall(),
-    },
-    "pgk": {
-        "name": "Papua New Guinea",
-        "flag": PGK_FLAG.readall(),
-    },
-    "pyg": {
-        "name": "Paraguay",
-        "flag": PYG_FLAG.readall(),
-    },
-    "pen": {
-        "name": "Peru",
-        "flag": PEN_FLAG.readall(),
-    },
-    "php": {
-        "name": "Philippines",
-        "flag": PHP_FLAG.readall(),
-    },
-    "pln": {
-        "name": "Poland",
-        "flag": PLN_FLAG.readall(),
-    },
-    "qar": {
-        "name": "Qatar",
-        "flag": QAR_FLAG.readall(),
-    },
-    "ron": {
-        "name": "Romania",
-        "flag": RON_FLAG.readall(),
-    },
-    "rub": {
-        "name": "Russia",
-        "flag": RUB_FLAG.readall(),
-    },
-    "rwf": {
-        "name": "Rwanda",
-        "flag": RWF_FLAG.readall(),
-    },
-    "shp": {
-        "name": "Saint Helena",
-        "flag": SHP_FLAG.readall(),
-    },
-    "wst": {
-        "name": "Samoa",
-        "flag": WST_FLAG.readall(),
-    },
-    "stn": {
-        "name": "Sao Tome and Principe",
-        "flag": STN_FLAG.readall(),
-    },
-    "sar": {
-        "name": "Saudi Arabia",
-        "flag": SAR_FLAG.readall(),
-    },
-    "scr": {
-        "name": "Seychelles",
-        "flag": SCR_FLAG.readall(),
-    },
-    "sle": {
-        "name": "Sierra Leone",
-        "flag": SLE_FLAG.readall(),
-    },
-    "sgd": {
-        "name": "Singapore",
-        "flag": SGD_FLAG.readall(),
-    },
-    "sbd": {
-        "name": "Solomon Islands",
-        "flag": SBD_FLAG.readall(),
-    },
-    "sos": {
-        "name": "Somalia",
-        "flag": SOS_FLAG.readall(),
-    },
-    "zar": {
-        "name": "South Africa",
-        "flag": ZAR_FLAG.readall(),
-    },
-    "ssp": {
-        "name": "South Sudan",
-        "flag": SSP_FLAG.readall(),
-    },
-    "lkr": {
-        "name": "Sri Lanka",
-        "flag": LKR_FLAG.readall(),
-    },
-    "sdg": {
-        "name": "Sudan",
-        "flag": SDG_FLAG.readall(),
-    },
-    "srd": {
-        "name": "Suriname",
-        "flag": SRD_FLAG.readall(),
-    },
-    "sek": {
-        "name": "Sweden",
-        "flag": SEK_FLAG.readall(),
-    },
-    "chf": {
-        "name": "Switzerland",
-        "flag": CHF_FLAG.readall(),
-    },
-    "syp": {
-        "name": "Syrian Arab Republic",
-        "flag": SYP_FLAG.readall(),
-    },
-    "twd": {
-        "name": "Taiwan",
-        "flag": TWD_FLAG.readall(),
-    },
-    "tjs": {
-        "name": "Tajikistan",
-        "flag": TJS_FLAG.readall(),
-    },
-    "tzs": {
-        "name": "Tanzania",
-        "flag": TZS_FLAG.readall(),
-    },
-    "thb": {
-        "name": "Thailand",
-        "flag": THB_FLAG.readall(),
-    },
-    "top": {
-        "name": "Tonga",
-        "flag": TOP_FLAG.readall(),
-    },
-    "ttd": {
-        "name": "Trinidad and Tobago",
-        "flag": TTD_FLAG.readall(),
-    },
-    "tnd": {
-        "name": "Tunisia",
-        "flag": TND_FLAG.readall(),
-    },
-    "try": {
-        "name": "Turkey",
-        "flag": TRY_FLAG.readall(),
-    },
-    "tmt": {
-        "name": "Turkmenistan",
-        "flag": TMT_FLAG.readall(),
-    },
-    "tvd": {
-        "name": "Tuvalu",
-        "flag": TVD_FLAG.readall(),
-    },
-    "ugx": {
-        "name": "Uganda",
-        "flag": UGX_FLAG.readall(),
-    },
-    "uah": {
-        "name": "Ukraine",
-        "flag": UAH_FLAG.readall(),
-    },
-    "gbp": {
-        "name": "United Kingdom",
-        "flag": GBP_FLAG.readall(),
-    },
-    "usd": {
-        "name": "USA",
-        "flag": USD_FLAG.readall(),
-    },
-    "uyu": {
-        "name": "Uruguay",
-        "flag": UYU_FLAG.readall(),
-    },
-    "uzs": {
-        "name": "Uzbekistan",
-        "flag": UZS_FLAG.readall(),
-    },
-    "vuv": {
-        "name": "Vanuatu",
-        "flag": VUV_FLAG.readall(),
-    },
-    "ves": {
-        "name": "Venezuela",
-        "flag": VES_FLAG.readall(),
-    },
-    "zmw": {
-        "name": "Zambia",
-        "flag": ZMW_FLAG.readall(),
-    },
-    "zwl": {
-        "name": "Zimbabwe",
-        "flag": ZWL_FLAG.readall(),
-    },
-    "krw": {
-        "name": "South Korea",
-        "flag": KRW_FLAG.readall(),
-    },
+    "aed": {"name": "United Arab Emirates", "flag": AED_FLAG.readall()},
+    "all": {"name": "Albania", "flag": ALL_FLAG.readall()},
+    "amd": {"name": "Armenia", "flag": AMD_FLAG.readall()},
+    "aoa": {"name": "Angola", "flag": AOA_FLAG.readall()},
+    "ars": {"name": "Argentina", "flag": ARS_FLAG.readall()},
+    "aud": {"name": "Australia", "flag": AUD_FLAG.readall()},
+    "awg": {"name": "Aruba", "flag": AWG_FLAG.readall()},
+    "azn": {"name": "Azerbaijan", "flag": AZN_FLAG.readall()},
+    "bam": {"name": "Bosnia and Herzegovina", "flag": BAM_FLAG.readall()},
+    "bbd": {"name": "Barbados", "flag": BBD_FLAG.readall()},
+    "bdt": {"name": "Bangladesh", "flag": BDT_FLAG.readall()},
+    "bgn": {"name": "Bulgaria", "flag": BGN_FLAG.readall()},
+    "bhd": {"name": "Bahrain", "flag": BHD_FLAG.readall()},
+    "bif": {"name": "Burundi", "flag": BIF_FLAG.readall()},
+    "bmd": {"name": "Bermuda", "flag": BMD_FLAG.readall()},
+    "bnd": {"name": "Brunei Darussalam", "flag": BND_FLAG.readall()},
+    "bob": {"name": "Bolivia", "flag": BOB_FLAG.readall()},
+    "brl": {"name": "Brazil", "flag": BRL_FLAG.readall()},
+    "bsd": {"name": "Bahamas", "flag": BSD_FLAG.readall()},
+    "btn": {"name": "Bhutan", "flag": BTN_FLAG.readall()},
+    "bwp": {"name": "Botswana", "flag": BWP_FLAG.readall()},
+    "byn": {"name": "Belarus", "flag": BYN_FLAG.readall()},
+    "bzd": {"name": "Belize", "flag": BZD_FLAG.readall()},
+    "cad": {"name": "Canada", "flag": CAD_FLAG.readall()},
+    "cdf": {"name": "Congo", "flag": CDF_FLAG.readall()},
+    "chf": {"name": "Switzerland", "flag": CHF_FLAG.readall()},
+    "clf": {"name": "Chile (Unidad de Fomento)", "flag": CLP_FLAG.readall()},
+    "clp": {"name": "Chile", "flag": CLP_FLAG.readall()},
+    "cnh": {"name": "China (Offshore Renminbi)", "flag": CNY_FLAG.readall()},
+    "cny": {"name": "China", "flag": CNY_FLAG.readall()},
+    "cop": {"name": "Colombia", "flag": COP_FLAG.readall()},
+    "crc": {"name": "Costa Rica", "flag": CRC_FLAG.readall()},
+    "cup": {"name": "Cuba", "flag": CUP_FLAG.readall()},
+    "cve": {"name": "Cape Verde", "flag": CVE_FLAG.readall()},
+    "czk": {"name": "Czech Republic", "flag": CZK_FLAG.readall()},
+    "djf": {"name": "Djibouti", "flag": DJF_FLAG.readall()},
+    "dkk": {"name": "Denmark", "flag": DKK_FLAG.readall()},
+    "dop": {"name": "Dominican Republic", "flag": DOP_FLAG.readall()},
+    "dzd": {"name": "Algeria", "flag": DZD_FLAG.readall()},
+    "egp": {"name": "Egypt", "flag": EGP_FLAG.readall()},
+    "ern": {"name": "Eritrea", "flag": ERN_FLAG.readall()},
+    "etb": {"name": "Ethiopia", "flag": ETB_FLAG.readall()},
+    "eur": {"name": "Euro", "flag": EURO_FLAG_ASSET.readall()},
+    "fjd": {"name": "Fiji", "flag": FJD_FLAG.readall()},
+    "fkp": {"name": "Falkland Islands", "flag": FKP_FLAG.readall()},
+    "fok": {"name": "Faroe Islands", "flag": FOK_FLAG.readall()},
+    "gbp": {"name": "United Kingdom", "flag": GBP_FLAG.readall()},
+    "gel": {"name": "Georgia", "flag": GEL_FLAG.readall()},
+    "ggp": {"name": "Guernsey", "flag": GGP_FLAG.readall()},
+    "ghs": {"name": "Ghana", "flag": GHS_FLAG.readall()},
+    "gip": {"name": "Gibraltar", "flag": GIP_FLAG.readall()},
+    "gmd": {"name": "The Gambia", "flag": GMD_FLAG.readall()},
+    "gnf": {"name": "Guinea", "flag": GNF_FLAG.readall()},
+    "gtq": {"name": "Guatemala", "flag": GTQ_FLAG.readall()},
+    "gyd": {"name": "Guyana", "flag": GYD_FLAG.readall()},
+    "hkd": {"name": "Hong Kong", "flag": HKD_FLAG.readall()},
+    "hnl": {"name": "Honduras", "flag": HNL_FLAG.readall()},
+    "hrk": {"name": "Croatia", "flag": HRK_FLAG.readall()},
+    "htg": {"name": "Haiti", "flag": HTG_FLAG.readall()},
+    "huf": {"name": "Hungary", "flag": HUF_FLAG.readall()},
+    "idr": {"name": "Indonesia", "flag": IDR_FLAG.readall()},
+    "ils": {"name": "Israel", "flag": ILS_FLAG.readall()},
+    "imp": {"name": "Isle of Man", "flag": IMP_FLAG.readall()},
+    "inr": {"name": "India", "flag": INR_FLAG.readall()},
+    "iqd": {"name": "Iraq", "flag": IQD_FLAG.readall()},
+    "irr": {"name": "Iran", "flag": IRR_FLAG.readall()},
+    "isk": {"name": "Iceland", "flag": ISK_FLAG.readall()},
+    "jep": {"name": "Jersey", "flag": JEP_FLAG.readall()},
+    "jmd": {"name": "Jamaica", "flag": JMD_FLAG.readall()},
+    "jod": {"name": "Jordan", "flag": JOD_FLAG.readall()},
+    "jpy": {"name": "Japan", "flag": JPY_FLAG.readall()},
+    "kes": {"name": "Kenya", "flag": KES_FLAG.readall()},
+    "kgs": {"name": "Kyrgyzstan", "flag": KGS_FLAG.readall()},
+    "khr": {"name": "Cambodia", "flag": KHR_FLAG.readall()},
+    "kid": {"name": "Kiribati", "flag": KID_FLAG.readall()},
+    "kmf": {"name": "Comoros", "flag": KMF_FLAG.readall()},
+    "krw": {"name": "South Korea", "flag": KRW_FLAG.readall()},
+    "kwd": {"name": "Kuwait", "flag": KWD_FLAG.readall()},
+    "kyd": {"name": "Cayman Islands", "flag": KYD_FLAG.readall()},
+    "kzt": {"name": "Kazakhstan", "flag": KZT_FLAG.readall()},
+    "lak": {"name": "Laos", "flag": LAK_FLAG.readall()},
+    "lbp": {"name": "Lebanon", "flag": LBP_FLAG.readall()},
+    "lkr": {"name": "Sri Lanka", "flag": LKR_FLAG.readall()},
+    "lrd": {"name": "Liberia", "flag": LRD_FLAG.readall()},
+    "lsl": {"name": "Lesotho", "flag": LSL_FLAG.readall()},
+    "lyd": {"name": "Libya", "flag": LYD_FLAG.readall()},
+    "mad": {"name": "Morocco", "flag": MAD_FLAG.readall()},
+    "mdl": {"name": "Moldova, Republic of", "flag": MDL_FLAG.readall()},
+    "mga": {"name": "Madagascar", "flag": MGA_FLAG.readall()},
+    "mkd": {"name": "North Macedonia", "flag": MKD_FLAG.readall()},
+    "mmk": {"name": "Myanmar", "flag": MMK_FLAG.readall()},
+    "mnt": {"name": "Mongolia", "flag": MNT_FLAG.readall()},
+    "mop": {"name": "Macao", "flag": MOP_FLAG.readall()},
+    "mru": {"name": "Mauritania", "flag": MRU_FLAG.readall()},
+    "mur": {"name": "Mauritius", "flag": MUR_FLAG.readall()},
+    "mvr": {"name": "Maldives", "flag": MVR_FLAG.readall()},
+    "mwk": {"name": "Malawi", "flag": MWK_FLAG.readall()},
+    "mxn": {"name": "Mexico", "flag": MXN_FLAG.readall()},
+    "myr": {"name": "Malaysia", "flag": MYR_FLAG.readall()},
+    "mzn": {"name": "Mozambique", "flag": MZN_FLAG.readall()},
+    "nad": {"name": "Namibia", "flag": NAD_FLAG.readall()},
+    "ngn": {"name": "Nigeria", "flag": NGN_FLAG.readall()},
+    "nio": {"name": "Nicaragua", "flag": NIO_FLAG.readall()},
+    "nok": {"name": "Norway", "flag": NOK_FLAG.readall()},
+    "npr": {"name": "Nepal", "flag": NPR_FLAG.readall()},
+    "nzd": {"name": "New Zealand", "flag": NZD_FLAG.readall()},
+    "omr": {"name": "Oman", "flag": OMR_FLAG.readall()},
+    "pab": {"name": "Panama", "flag": PAB_FLAG.readall()},
+    "pen": {"name": "Peru", "flag": PEN_FLAG.readall()},
+    "pgk": {"name": "Papua New Guinea", "flag": PGK_FLAG.readall()},
+    "php": {"name": "Philippines", "flag": PHP_FLAG.readall()},
+    "pkr": {"name": "Pakistan", "flag": PKR_FLAG.readall()},
+    "pln": {"name": "Poland", "flag": PLN_FLAG.readall()},
+    "pyg": {"name": "Paraguay", "flag": PYG_FLAG.readall()},
+    "qar": {"name": "Qatar", "flag": QAR_FLAG.readall()},
+    "ron": {"name": "Romania", "flag": RON_FLAG.readall()},
+    "rsd": {"name": "Serbia", "flag": RSD_FLAG.readall()},
+    "rub": {"name": "Russia", "flag": RUB_FLAG.readall()},
+    "rwf": {"name": "Rwanda", "flag": RWF_FLAG.readall()},
+    "sar": {"name": "Saudi Arabia", "flag": SAR_FLAG.readall()},
+    "sbd": {"name": "Solomon Islands", "flag": SBD_FLAG.readall()},
+    "scr": {"name": "Seychelles", "flag": SCR_FLAG.readall()},
+    "sdg": {"name": "Sudan", "flag": SDG_FLAG.readall()},
+    "sek": {"name": "Sweden", "flag": SEK_FLAG.readall()},
+    "sgd": {"name": "Singapore", "flag": SGD_FLAG.readall()},
+    "shp": {"name": "Saint Helena", "flag": SHP_FLAG.readall()},
+    "sle": {"name": "Sierra Leone", "flag": SLE_FLAG.readall()},
+    "sos": {"name": "Somalia", "flag": SOS_FLAG.readall()},
+    "srd": {"name": "Suriname", "flag": SRD_FLAG.readall()},
+    "ssp": {"name": "South Sudan", "flag": SSP_FLAG.readall()},
+    "stn": {"name": "Sao Tome and Principe", "flag": STN_FLAG.readall()},
+    "syp": {"name": "Syrian Arab Republic", "flag": SYP_FLAG.readall()},
+    "szl": {"name": "Eswatini", "flag": SZL_FLAG.readall()},
+    "thb": {"name": "Thailand", "flag": THB_FLAG.readall()},
+    "tjs": {"name": "Tajikistan", "flag": TJS_FLAG.readall()},
+    "tmt": {"name": "Turkmenistan", "flag": TMT_FLAG.readall()},
+    "tnd": {"name": "Tunisia", "flag": TND_FLAG.readall()},
+    "top": {"name": "Tonga", "flag": TOP_FLAG.readall()},
+    "try": {"name": "Turkey", "flag": TRY_FLAG.readall()},
+    "ttd": {"name": "Trinidad and Tobago", "flag": TTD_FLAG.readall()},
+    "tvd": {"name": "Tuvalu", "flag": TVD_FLAG.readall()},
+    "twd": {"name": "Taiwan", "flag": TWD_FLAG.readall()},
+    "tzs": {"name": "Tanzania", "flag": TZS_FLAG.readall()},
+    "uah": {"name": "Ukraine", "flag": UAH_FLAG.readall()},
+    "ugx": {"name": "Uganda", "flag": UGX_FLAG.readall()},
+    "usd": {"name": "USA", "flag": USD_FLAG.readall()},
+    "uyu": {"name": "Uruguay", "flag": UYU_FLAG.readall()},
+    "uzs": {"name": "Uzbekistan", "flag": UZS_FLAG.readall()},
+    "ves": {"name": "Venezuela", "flag": VES_FLAG.readall()},
+    "vnd": {"name": "Vietnam", "flag": VND_FLAG.readall()},
+    "vuv": {"name": "Vanuatu", "flag": VUV_FLAG.readall()},
+    "wst": {"name": "Samoa", "flag": WST_FLAG.readall()},
+    "xaf": {"name": "Central African Republic", "flag": XAF_FLAG.readall()},
+    "yer": {"name": "Yemen", "flag": YER_FLAG.readall()},
+    "zar": {"name": "South Africa", "flag": ZAR_FLAG.readall()},
+    "zmw": {"name": "Zambia", "flag": ZMW_FLAG.readall()},
+    "zwl": {"name": "Zimbabwe", "flag": ZWL_FLAG.readall()},
 }
 
-# retrieves a specific country the list of countries
-def get_currency(currency_code):
-    return currencies[currency_code]
+# The API returns units of the foreign currency per ONE local currency.
+# The display intentionally puts the home/local currency on the TOP row:
+#
+#   TOP:    local flag   -> 1 local buys this many foreign currency units.
+#   BOTTOM: foreign flag -> 1 foreign buys this many local currency units.
+#
+# Example only: if 1 USD = 1.36 CAD, the display is:
+#   USA flag       1.36
+#   Canada flag    0.735  (approximately; actual text uses the masks below)
+#
+# The flag identifies the currency being SPENT, not the units of the number.
+# Keep this established convention: do not swap the two displayed rates.
 
-def get_currency_information(currency_url):
-    res = http.get(
-        url = currency_url,
+DEFAULT_LOCAL = "USD"
+DEFAULT_FOREIGN = "CAD"
+HTTP_CACHE_SECONDS = 60
+MIN_CACHE_SECONDS = 300
+MAX_CACHE_SECONDS = 86400
+
+def get_currency(currency_code):
+    return currencies.get(currency_code.lower())
+
+def error_display(message):
+    return render.Root(
+        child = render.Box(
+            child = render.WrappedText(
+                content = message,
+                width = 64,
+                align = "center",
+                color = "#ff0000",
+            ),
+        ),
     )
 
-    if res.status_code == 200:
-        return res.json()
-    else:
-        return None
+def api_error_message(data):
+    messages = {
+        "invalid-key": "Check API Key",
+        "inactive-account": "Activate API Account",
+        "quota-reached": "API Quota Reached",
+        "unsupported-code": "Currency Unsupported",
+        "unknown-code": "Currency Unsupported",
+        "malformed-request": "API Request Error",
+    }
+    return messages.get(data.get("error-type"), "Exchange API Error")
+
+def is_positive_number(value):
+    # JSON rates must be positive numbers, not strings, booleans or null.
+    if type(value) not in ["int", "float"]:
+        return False
+
+    # Reject NaN and infinity as well as zero and negative numbers.
+    return value > 0 and value < float("inf")
+
+def validate_exchange_data(data, local_currency):
+    if type(data) != "dict":
+        return "Invalid API Response"
+    if data.get("result") != "success":
+        return api_error_message(data)
+    if data.get("base_code") != local_currency:
+        return "Wrong Base Currency"
+    if type(data.get("conversion_rates")) != "dict":
+        return "Rates Unavailable"
+    return None
+
+def get_currency_information(currency_url):
+    # Keep HTTP caching short because cache.star below handles the longer,
+    # API-timestamp-based lifetime. Do not print the URL: it contains the key.
+    res = http.get(url = currency_url, ttl_seconds = HTTP_CACHE_SECONDS)
+    if res.status_code != 200:
+        if res.status_code == 429:
+            return None, "API Rate Limit"
+        if res.status_code in [401, 403]:
+            return None, "API Access Denied"
+        return None, "API HTTP %s" % res.status_code
+    return res.json(), None
+
+def get_cache_time(data):
+    # Refresh five minutes after the API's advertised next update.
+    # Missing, invalid or stale timestamps get a safe short fallback TTL.
+    next_update = data.get("time_next_update_unix")
+    if not is_positive_number(next_update):
+        return MIN_CACHE_SECONDS
+    seconds = int(next_update) - int(time.now().unix) + 300
+    return max(MIN_CACHE_SECONDS, min(MAX_CACHE_SECONDS, seconds))
 
 def get_appropriate_humanize_display(number):
-    """ Gets the appropriate make with the right number of decimals
+    """Keep the original masks, tuned for visual balance on a small display.
 
-        When two currencies are fairly close in value, 3 decimals makes sense
-        However, if one currency is 1,000 time the other, 2 decimals makes sense for the more valuable currency and 6 decimals are
-        needed, just to display enough significant digits.
-        This algorithm figures the most appropriate mask.
-
-    Args:
-        number: the number we need to figure how many decimals are needed
-    Returns:
-        Humanize mask for this particular number
+    This is a glanceable, ballpark comparison, not an executable exchange
+    quote. Visual appeal takes priority over uniform decimal precision.
+    The different thresholds are intentional and remain unchanged.
     """
-    if (number > 1000):
-        mask = "#.##"
-    elif (number > 10):
-        mask = "#.####"
-    elif (number > 0.1):
-        mask = "#.###"
-    elif (number > 0.0001):
-        mask = "#.####"
-    else:
-        mask = "#.######"
-    return mask
+    if number > 1000:
+        return "#.##"
+    elif number > 10:
+        return "#.####"
+    elif number > 0.1:
+        return "#.###"
+    elif number > 0.0001:
+        return "#.####"
+    return "#.######"
 
-def main(config):
-    """ Main
+def show_instructions_screen():
+    messages = [
+        "Currency Converter",
+        "Choose your home and foreign currencies in settings. Enter your ExchangeRate-API key.",
+        "Top: one home currency unit buys the shown amount of foreign currency. Bottom: one foreign unit buys the shown amount of home currency. The flag shows which currency you spend.",
+        "Rates are approximate, not a live exchange quote. Turn off Show Instructions in settings to return to rates.",
+    ]
 
-    Args:
-        config: The past in configuration which includes selected countries
-    Returns:
-        Display to Tidbyt
-    """
-    local_currency = config.get("local") or "usd"
-    foreign_currency = config.get("foreign") or "cad"
+    children = []
+    offset = 15
 
-    key = config.get("api_key")
-    exchange_rate_url = "https://v6.exchangerate-api.com/v6/%s/latest/%s" % (key, local_currency.lower())
-
-    exchange_data_encoded_json = cache.get(exchange_rate_url)
-    if exchange_data_encoded_json == None:
-        exchange_data_decoded_json = get_currency_information(exchange_rate_url)
-
-        if exchange_data_decoded_json:
-            # calculate 5 minutes past the stated next update date to make sure it it'll be updated next time we call
-            cache_time = int(exchange_data_decoded_json["time_next_update_unix"]) - int(time.now().in_location("UTC").unix) + 300
-
-            cache.set(exchange_rate_url, json.encode(exchange_data_decoded_json), ttl_seconds = cache_time)
-    else:
-        exchange_data_decoded_json = json.decode(exchange_data_encoded_json)
-
-    if not exchange_data_decoded_json or "conversion_rates" not in exchange_data_decoded_json:
-        return render.Root(
-            child = render.Box(
-                child = render.WrappedText("Error: Check API Key", width = 64, align = "center", color = "#ff0000"),
+    for index in range(len(messages)):
+        message = messages[index]
+        children.append(
+            render.Marquee(
+                width = 64,
+                offset_start = offset,
+                child = render.Text(
+                    message,
+                    font = "tb-8",
+                    color = "#65D0E6" if index == 0 else "#F4A306",
+                ),
             ),
         )
-
-    foreign_currency_cost_in_local = float(exchange_data_decoded_json["conversion_rates"][foreign_currency.upper()])
-    local_currency_cost_in_foreign = float(math.pow(foreign_currency_cost_in_local, -1))
+        offset += len(message) * 5
 
     return render.Root(
-        render.Row(
+        child = render.Column(children = children),
+        show_full_animation = True,
+    )
+
+def main(config):
+    if config.bool("show_instructions", False):
+        return show_instructions_screen(config)
+
+    local_currency = (config.get("local") or DEFAULT_LOCAL).strip().upper()
+    foreign_currency = (config.get("foreign") or DEFAULT_FOREIGN).strip().upper()
+    local_info = get_currency(local_currency)
+    foreign_info = get_currency(foreign_currency)
+    if local_info == None or foreign_info == None:
+        return error_display("Invalid Currency")
+
+    key = (config.get("api_key") or "").strip()
+    if not key:
+        return error_display("Enter API Key")
+
+    exchange_rate_url = "https://v6.exchangerate-api.com/v6/%s/latest/%s" % (key, local_currency)
+
+    # Cache is shared per app. Include the API key and base currency to keep
+    # different accounts and base-currency datasets separate. Version the
+    # key so responses cached by the older implementation are not reused.
+    cache_key = "currency-converter-v2:" + exchange_rate_url
+    encoded_data = cache.get(cache_key)
+    data = None
+    if encoded_data != None:
+        data = json.decode(encoded_data)
+
+        # Ignore a structurally invalid cached response and fetch again.
+        if validate_exchange_data(data, local_currency) != None:
+            data = None
+
+    if data == None:
+        data, error = get_currency_information(exchange_rate_url)
+        if error != None:
+            return error_display(error)
+        error = validate_exchange_data(data, local_currency)
+        if error != None:
+            return error_display(error)
+
+        # Cache only successful responses with the expected base and rates.
+        cache.set(cache_key, json.encode(data), ttl_seconds = get_cache_time(data))
+
+    rate = data["conversion_rates"].get(foreign_currency)
+    if rate == None:
+        return error_display("Rate Unavailable")
+    if not is_positive_number(rate):
+        return error_display("Invalid Rate")
+
+    # TOP: one unit of home/local currency buys this many foreign units.
+    foreign_per_local = float(rate)
+
+    # BOTTOM: one unit of foreign currency buys this many home/local units.
+    local_per_foreign = 1.0 / foreign_per_local
+    if not is_positive_number(local_per_foreign):
+        return error_display("Invalid Rate")
+
+    return render.Root(
+        child = render.Row(
             children = [
                 render.Column(
                     children = [
-                        render.Image(
-                            src = get_currency(local_currency.lower())["flag"],
-                            width = 16,
-                            height = 15,
-                        ),
+                        render.Image(src = local_info["flag"], width = 16, height = 15),
                         render.Box(width = 16, height = 2),
-                        render.Image(
-                            src = get_currency(foreign_currency.lower())["flag"],
-                            width = 16,
-                            height = 15,
-                        ),
+                        render.Image(src = foreign_info["flag"], width = 16, height = 15),
                     ],
                 ),
                 render.Column(
@@ -854,7 +534,7 @@ def main(config):
                             width = 48,
                             height = 15,
                             child = render.WrappedText(
-                                content = humanize.float(get_appropriate_humanize_display(foreign_currency_cost_in_local), foreign_currency_cost_in_local),
+                                content = humanize.float(get_appropriate_humanize_display(foreign_per_local), foreign_per_local),
                                 width = 48,
                                 align = "right",
                                 font = "tb-8",
@@ -865,7 +545,7 @@ def main(config):
                             width = 48,
                             height = 15,
                             child = render.WrappedText(
-                                content = humanize.float(get_appropriate_humanize_display(local_currency_cost_in_foreign), local_currency_cost_in_foreign),
+                                content = humanize.float(get_appropriate_humanize_display(local_per_foreign), local_per_foreign),
                                 width = 48,
                                 align = "right",
                                 font = "tb-8",
@@ -878,174 +558,60 @@ def main(config):
     )
 
 def get_schema():
+    # Build options from the same currency dictionary used for flags, so
+    # supported entries cannot be accidentally omitted or duplicated.
+    # Keep CAD, GBP and USD pinned first, as in the original menu.
+    preferred = ["cad", "gbp", "usd"]
+    labels = {
+        "usd": "United States",
+        "eur": "European Union Euro",
+        "bnd": "Brunei",
+        "cdf": "Democratic Republic of the Congo",
+        "xaf": "CEMAC",
+        "syp": "Syria",
+        "stn": "Sao Tome and Principe",
+    }
+
+    # Sorting these display-name/code pairs gives the remaining entries
+    # alphabetical country-name order without requiring a lambda function.
+    remaining = sorted([
+        (labels.get(code, currencies[code]["name"]), code)
+        for code in currencies
+        if code not in preferred
+    ])
+    ordered_codes = preferred + [entry[1] for entry in remaining]
     currency_options = [
-        schema.Option(value = "CAD", display = "Canada"),
-        schema.Option(value = "GBP", display = "United Kingdom"),
-        schema.Option(value = "USD", display = "United States"),
-        schema.Option(value = "ALL", display = "Albania"),
-        schema.Option(value = "AOA", display = "Angola"),
-        schema.Option(value = "ARS", display = "Argentina"),
-        schema.Option(value = "AMD", display = "Armenia"),
-        schema.Option(value = "AWG", display = "Aruba"),
-        schema.Option(value = "AUD", display = "Australia"),
-        schema.Option(value = "AZN", display = "Azerbaijan"),
-        schema.Option(value = "BSD", display = "Bahamas"),
-        schema.Option(value = "BHD", display = "Bahrain"),
-        schema.Option(value = "BDT", display = "Bangladesh"),
-        schema.Option(value = "BBD", display = "Barbados"),
-        schema.Option(value = "BYN", display = "Belarus"),
-        schema.Option(value = "BZD", display = "Belize"),
-        schema.Option(value = "BMD", display = "Bermuda"),
-        schema.Option(value = "BTN", display = "Bhutan"),
-        schema.Option(value = "BOB", display = "Bolivia"),
-        schema.Option(value = "BAM", display = "Bosnia and Herzegovina"),
-        schema.Option(value = "BWP", display = "Botswana"),
-        schema.Option(value = "BRL", display = "Brazil"),
-        schema.Option(value = "BND", display = "Brunei"),
-        schema.Option(value = "BGN", display = "Bulgaria"),
-        schema.Option(value = "BIF", display = "Burundi"),
-        schema.Option(value = "KHR", display = "Cambodia"),
-        schema.Option(value = "CAD", display = "Canada"),
-        schema.Option(value = "KYD", display = "Cayman Islands"),
-        schema.Option(value = "XAF", display = "CEMAC"),
-        schema.Option(value = "CLP", display = "Chile"),
-        schema.Option(value = "CNY", display = "China"),
-        schema.Option(value = "COP", display = "Colombia"),
-        schema.Option(value = "KMF", display = "Comoros"),
-        schema.Option(value = "CRC", display = "Costa Rica"),
-        schema.Option(value = "HRK", display = "Croatia"),
-        schema.Option(value = "CUP", display = "Cuba"),
-        schema.Option(value = "CDF", display = "Democratic Republic of the Congo"),
-        schema.Option(value = "DKK", display = "Denmark"),
-        schema.Option(value = "DJF", display = "Djibouti"),
-        schema.Option(value = "DOP", display = "Dominican Republic"),
-        schema.Option(value = "EGP", display = "Egypt"),
-        schema.Option(value = "ERN", display = "Eritrea"),
-        schema.Option(value = "SZL", display = "Eswatini"),
-        schema.Option(value = "ETB", display = "Ethiopia"),
-        schema.Option(value = "EUR", display = "European Union Euro"),
-        schema.Option(value = "FKP", display = "Falkland Islands"),
-        schema.Option(value = "FOK", display = "Faroe Islands"),
-        schema.Option(value = "FJD", display = "Fiji"),
-        schema.Option(value = "GEL", display = "Georgia"),
-        schema.Option(value = "GHS", display = "Ghana"),
-        schema.Option(value = "GIP", display = "Gibraltar"),
-        schema.Option(value = "GTQ", display = "Guatemala"),
-        schema.Option(value = "GNF", display = "Guinea"),
-        schema.Option(value = "GYD", display = "Guyana"),
-        schema.Option(value = "HTG", display = "Haiti"),
-        schema.Option(value = "HNL", display = "Honduras"),
-        schema.Option(value = "HKD", display = "Hong Kong"),
-        schema.Option(value = "HUF", display = "Hungary"),
-        schema.Option(value = "ISK", display = "Iceland"),
-        schema.Option(value = "INR", display = "India"),
-        schema.Option(value = "IDR", display = "Indonesia"),
-        schema.Option(value = "IRR", display = "Iran"),
-        schema.Option(value = "IQD", display = "Iraq"),
-        schema.Option(value = "IMP", display = "Isle of Man"),
-        schema.Option(value = "ILS", display = "Israel"),
-        schema.Option(value = "JMD", display = "Jamaica"),
-        schema.Option(value = "JPY", display = "Japan"),
-        schema.Option(value = "JEP", display = "Jersey"),
-        schema.Option(value = "JOD", display = "Jordan"),
-        schema.Option(value = "KZT", display = "Kazakhstan"),
-        schema.Option(value = "KES", display = "Kenya"),
-        schema.Option(value = "KID", display = "Kiribati"),
-        schema.Option(value = "KWD", display = "Kuwait"),
-        schema.Option(value = "KGS", display = "Kyrgyzstan"),
-        schema.Option(value = "LAK", display = "Laos"),
-        schema.Option(value = "LBP", display = "Lebanon"),
-        schema.Option(value = "LSL", display = "Lesotho"),
-        schema.Option(value = "LRD", display = "Liberia"),
-        schema.Option(value = "LYD", display = "Libya"),
-        schema.Option(value = "MOP", display = "Macau"),
-        schema.Option(value = "MGA", display = "Madagascar"),
-        schema.Option(value = "MWK", display = "Malawi"),
-        schema.Option(value = "MYR", display = "Malaysia"),
-        schema.Option(value = "MVR", display = "Maldives"),
-        schema.Option(value = "MRU", display = "Mauritania"),
-        schema.Option(value = "MUR", display = "Mauritius"),
-        schema.Option(value = "MXN", display = "Mexico"),
-        schema.Option(value = "MDL", display = "Moldova"),
-        schema.Option(value = "MNT", display = "Mongolia"),
-        schema.Option(value = "MAD", display = "Morocco"),
-        schema.Option(value = "MZN", display = "Mozambique"),
-        schema.Option(value = "MMK", display = "Myanmar"),
-        schema.Option(value = "NAD", display = "Namibia"),
-        schema.Option(value = "NPR", display = "Nepal"),
-        schema.Option(value = "NZD", display = "New Zealand"),
-        schema.Option(value = "NIO", display = "Nicaragua"),
-        schema.Option(value = "NGN", display = "Nigeria"),
-        schema.Option(value = "MKD", display = "North Macedonia"),
-        schema.Option(value = "NOK", display = "Norway"),
-        schema.Option(value = "OMR", display = "Oman"),
-        schema.Option(value = "PKR", display = "Pakistan"),
-        schema.Option(value = "PAB", display = "Panama"),
-        schema.Option(value = "PGK", display = "Papua New Guinea"),
-        schema.Option(value = "PYG", display = "Paraguay"),
-        schema.Option(value = "PEN", display = "Peru"),
-        schema.Option(value = "PHP", display = "Philippines"),
-        schema.Option(value = "PLN", display = "Poland"),
-        schema.Option(value = "QAR", display = "Qatar"),
-        schema.Option(value = "RON", display = "Romania"),
-        schema.Option(value = "RUB", display = "Russia"),
-        schema.Option(value = "RWF", display = "Rwanda"),
-        schema.Option(value = "SHP", display = "Saint Helena"),
-        schema.Option(value = "WST", display = "Samoa"),
-        schema.Option(value = "STN", display = "São Tomé and Príncipe"),
-        schema.Option(value = "SAR", display = "Saudi Arabia"),
-        schema.Option(value = "SCR", display = "Seychelles"),
-        schema.Option(value = "SLE", display = "Sierra Leone"),
-        schema.Option(value = "SGD", display = "Singapore"),
-        schema.Option(value = "SBD", display = "Solomon Islands"),
-        schema.Option(value = "SOS", display = "Somalia"),
-        schema.Option(value = "ZAR", display = "South Africa"),
-        schema.Option(value = "KRW", display = "South Korea"),
-        schema.Option(value = "SSP", display = "South Sudan"),
-        schema.Option(value = "LKR", display = "Sri Lanka"),
-        schema.Option(value = "SDG", display = "Sudan"),
-        schema.Option(value = "SEK", display = "Sweden"),
-        schema.Option(value = "CHF", display = "Switzerland"),
-        schema.Option(value = "SYP", display = "Syria"),
-        schema.Option(value = "TWD", display = "Taiwan"),
-        schema.Option(value = "TJS", display = "Tajikistan"),
-        schema.Option(value = "TZS", display = "Tanzania"),
-        schema.Option(value = "TOP", display = "Tonga"),
-        schema.Option(value = "TTD", display = "Trinidad and Tobago"),
-        schema.Option(value = "TND", display = "Tunisia"),
-        schema.Option(value = "TRY", display = "Turkey"),
-        schema.Option(value = "TMT", display = "Turkmenistan"),
-        schema.Option(value = "TVD", display = "Tuvalu"),
-        schema.Option(value = "UGX", display = "Uganda"),
-        schema.Option(value = "UAH", display = "Ukraine"),
-        schema.Option(value = "AED", display = "United Arab Emirates"),
-        schema.Option(value = "GBP", display = "United Kingdom"),
-        schema.Option(value = "USD", display = "United States"),
-        schema.Option(value = "UYU", display = "Uruguay"),
-        schema.Option(value = "UZS", display = "Uzbekistan"),
-        schema.Option(value = "VUV", display = "Vanuatu"),
-        schema.Option(value = "VES", display = "Venezuela"),
-        schema.Option(value = "ZMW", display = "Zambia"),
-        schema.Option(value = "ZWL", display = "Zimbabwe"),
+        schema.Option(
+            value = code.upper(),
+            display = labels.get(code, currencies[code]["name"]),
+        )
+        for code in ordered_codes
     ]
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Toggle(
+                id = "show_instructions",
+                name = "Show Instructions",
+                desc = "Show scrolling help instead of exchange rates",
+                icon = "circleInfo",
+                default = False,
+            ),
             schema.Dropdown(
                 id = "local",
                 name = "Local",
-                desc = "Your local currency",
+                desc = "Your home currency (top row)",
                 icon = "locationDot",
                 options = currency_options,
-                default = currency_options[0].value,
+                default = DEFAULT_LOCAL,
             ),
             schema.Dropdown(
                 id = "foreign",
                 name = "Foreign",
-                desc = "Foreign currency",
+                desc = "Foreign currency (bottom row)",
                 icon = "globe",
                 options = currency_options,
-                default = currency_options[24].value,
+                default = DEFAULT_FOREIGN,
             ),
             schema.Text(
                 id = "api_key",

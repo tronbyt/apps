@@ -553,6 +553,15 @@ def get_schedule(direction, station, scale, enabled_lines):
 
     return list_of_departures
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
     station = config.str("station", DEFAULT_STATION)
@@ -584,7 +593,20 @@ def main(config):
     return render.Root(
         delay = 100,
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Column(
+                    children = [
+                        render.Stack(children = [
+                            render.Box(height = banner_height, width = 64 * scale, color = banner_bg_color),
+                            render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = banner_font, color = banner_text_color)),
+                        ]),
+                    ],
+                ),
+                render.Padding(pad = (0, 0, 0, bottom_pad), color = banner_bg_color, child = render.Column(children = schedule)),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Column(
                     children = [
