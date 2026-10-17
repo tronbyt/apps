@@ -3,11 +3,11 @@ Newsy — Tidbyt Pixlet applet.
 64x32 RSS headline ticker. Up to 3 configurable feeds.
 """
 
-load("render.star", "render")
 load("http.star", "http")
+load("random.star", "random")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
-load("random.star", "random")
 
 DEFAULT_FEED1 = "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en"
 DEFAULT_FEED2 = "https://feeds.bbci.co.uk/news/rss.xml"
@@ -85,7 +85,9 @@ def main(config):
                 ),
                 render.Box(height = 1, color = "#F87171"),
                 render.Box(
-                    height = 23,
+                    # the rows under the header and its rule: 23 on 64x32,
+                    # 55 on a square panel
+                    height = canvas.height() - 9,
                     color = "#020617",
                     child = render.Marquee(
                         width = 64,

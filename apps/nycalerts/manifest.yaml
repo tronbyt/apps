@@ -6,6 +6,7 @@ desc: Scrolls live NYC emergency alerts from the official Notify NYC system. Col
 author: Rosie Domenech
 fileName: nycalerts.star
 packageName: nycalerts
+supports64x64: true
 category: news
 tags:
   - news
@@ -14,4 +15,4 @@ tags:
   - emergency
   - local
 published: '2026-04-14T21:24:42Z'
-updated: '2026-04-14T21:24:42Z'
+updated: '2026-10-01T18:22:49Z'
