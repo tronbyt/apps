@@ -42,7 +42,7 @@ load("images/red_r1.png", RED_R1_ASSET = "file")
 load("images/red_r2.png", RED_R2_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -102,7 +102,8 @@ def main(config):
 
     return render.Root(
         delay = delay.milliseconds,
-        child = render.Animation(allFrames),
+        # Frames are positioned within 64x32; bound and centre them on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(allFrames))),
     )
 
 DEFAULT_SPEED = "30"

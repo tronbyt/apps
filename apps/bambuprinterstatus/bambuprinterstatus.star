@@ -11,6 +11,27 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 DEFAULT_STATUS_URL = ""
 DEFAULT_SCROLL = "60"
 DEFAULT_TIMEZONE = "America/New_York"
@@ -660,7 +681,7 @@ def _footer(
 
 def _message_screen(font, delay, line2, line3, line4):
     return render.Root(
-        render.Column(
+        center_on_square(render.Column(
             children = [
                 render.Text(
                     content = "Bambu Status",
@@ -683,7 +704,7 @@ def _message_screen(font, delay, line2, line3, line4):
                     color = PALETTE["text_muted"],
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = delay,
     )
@@ -723,7 +744,7 @@ def _instructions_screen(
     offset4 = offset3 + len(line3) * font_width
 
     return render.Root(
-        render.Column(
+        center_on_square(render.Column(
             children = [
                 render.Text(
                     content = "Bambu Status",
@@ -757,7 +778,7 @@ def _instructions_screen(
                     ),
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = delay,
     )
@@ -1005,7 +1026,7 @@ def main(config):
     footer_offset = len(line3) * font_width
 
     return render.Root(
-        render.Column(
+        center_on_square(render.Column(
             children = [
                 render.Text(
                     content = printer_name,
@@ -1035,7 +1056,7 @@ def main(config):
                     ),
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = delay,
     )

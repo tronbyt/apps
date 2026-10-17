@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -188,7 +188,8 @@ def main(config):
     if frame == None:
         return []
 
-    return render.Root(delay = 100, child = frame)
+    # The feed card is hand-placed for 64x32; bound and centre it on taller panels (64x64).
+    return render.Root(delay = 100, child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = frame)))
 
 def get_schema():
     return schema.Schema(

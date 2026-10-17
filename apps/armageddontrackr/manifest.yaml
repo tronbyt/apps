@@ -7,9 +7,10 @@ author: flynnt
 fileName: armageddon_trackr.star
 packageName: armageddontrackr
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - asteroids
   - space
 published: '2023-11-19T17:44:29Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T20:09:53Z'

@@ -102,7 +102,7 @@ Reduced cache timeout for tournament fetching, this was causing the match data t
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -338,7 +338,8 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(RotationSpeed) * 1000,
-        child = render.Animation(children = Display1),
+        # Frames are laid out for 64x32; bound and centre them on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = Display1))),
     )
 
 def getLiveScores(SelectedTourneyID, EventIndex, InProgressMatchList, JSON):
