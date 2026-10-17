@@ -1,5 +1,5 @@
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 VERSION = "1.2"
@@ -212,10 +212,11 @@ def main(config):
                 ),
                 render.Marquee(
                     width = 64,
-                    height = 22,
+                    # the rows under the 10px header: 22 on 64x32, 54 on square
+                    height = canvas.height() - 10,
                     scroll_direction = "vertical",
-                    offset_start = 22,
-                    offset_end = 22,
+                    offset_start = canvas.height() - 10,
+                    offset_end = canvas.height() - 10,
                     delay = 80,
                     child = render.Column(
                         children = rows,

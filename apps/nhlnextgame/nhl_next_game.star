@@ -35,6 +35,7 @@ load("images/sjs.png", SJS_ICON = "file")
 load("images/stl.png", STL_ICON = "file")
 load("images/tbl.png", TBL_ICON = "file")
 load("images/tor.png", TOR_ICON = "file")
+load("images/uta.png", UTA_ICON = "file")
 load("images/van.png", VAN_ICON = "file")
 load("images/vgk.png", VGK_ICON = "file")
 load("images/wpg.png", WPG_ICON = "file")
@@ -50,6 +51,8 @@ def getTeamIconFromID(teamID):
         return ANA_ICON.readall()
     elif teamID == 53:  #ARI
         return ARI_ICON.readall()
+    elif teamID == 68:  #UTA
+        return UTA_ICON.readall()
     elif teamID == 6:  #BOS
         return BOS_ICON.readall()
     elif teamID == 7:  #BUF
@@ -116,8 +119,10 @@ def getTeamAbbFromID(teamID):
         return "NYI"
     elif teamID == 24:  #ANA
         return "ANA"
-    elif teamID == 53:  #ARI
-        return "ARI"
+    elif teamID == 53:  #ARI (moved to Utah in 2024)
+        return "UTA"
+    elif teamID == 68:  #UTA
+        return "UTA"
     elif teamID == 6:  #BOS
         return "BOS"
     elif teamID == 7:  #BUF
@@ -182,27 +187,40 @@ def getTeamAbbFromID(teamID):
 def main(config):
     # Get data out of config
     main_team_id = config.str("main_team") or "24"
+    if main_team_id == "53":  # The Arizona Coyotes moved to Utah in 2024
+        main_team_id = "68"
     time_zone_str = config.str("time_zone") or "America/New_York"
     #---------------------------------------
 
-    TEAM_NEXT_GAME_JSON = "https://statsapi.web.nhl.com/api/v1/teams/" + str(main_team_id) + "?expand=team.schedule.next"
-
-    print("Miss! Calling NHL API.")
-    rep = http.get(TEAM_NEXT_GAME_JSON, ttl_seconds = 3600)
+    # The NHL's current API. statsapi.web.nhl.com was retired; team IDs are the same.
+    team = getTeamAbbFromID(int(main_team_id))
+    rep = http.get("https://api-web.nhle.com/v1/club-schedule-season/%s/now" % team, ttl_seconds = 3600)
     if rep.status_code != 200:
-        fail("NHL API request failed with status %d", rep.status_code)
-    nhldata = rep.json()
+        print("NHL schedule request failed with status %d" % rep.status_code)
+        return []
+    games = [g for g in rep.json().get("games", []) if g.get("gameState") not in ("OFF", "FINAL")]
+    if not games:
+        print("No upcoming games for %s" % team)
+        return []
+    game = games[0]
 
-    homeTeamID = nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["team"]["id"]
-    awayTeamID = nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["team"]["id"]
-    homeTeamRecord = str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["wins"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["losses"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["home"]["leagueRecord"]["ot"]))
-    awayTeamRecord = str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["leagueRecord"]["wins"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["leagueRecord"]["losses"])) + "-" + str(int(nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["teams"]["away"]["leagueRecord"]["ot"]))
+    # Team records (wins-losses-overtime losses) come from the standings
+    records = {}
+    rep = http.get("https://api-web.nhle.com/v1/standings/now", ttl_seconds = 3600)
+    if rep.status_code == 200:
+        for t in rep.json().get("standings", []):
+            records[t["teamAbbrev"]["default"]] = "%d-%d-%d" % (t["wins"], t["losses"], t["otLosses"])
+
+    homeTeamID = int(game["homeTeam"]["id"])
+    awayTeamID = int(game["awayTeam"]["id"])
+    homeTeamAbb = game["homeTeam"]["abbrev"]
+    awayTeamAbb = game["awayTeam"]["abbrev"]
+    homeTeamRecord = records.get(homeTeamAbb, "")
+    awayTeamRecord = records.get(awayTeamAbb, "")
     homeTeamIcon = getTeamIconFromID(homeTeamID)
     awayTeamIcon = getTeamIconFromID(awayTeamID)
-    homeTeamAbb = getTeamAbbFromID(homeTeamID)
-    awayTeamAbb = getTeamAbbFromID(awayTeamID)
 
-    gameDate = nhldata["teams"][0]["nextGameSchedule"]["dates"][0]["games"][0]["gameDate"]
+    gameDate = game["startTimeUTC"]
     displayDate = ""
 
     date_key = humanize.time_format("yyyy-MM-dd", time.parse_time(gameDate).in_location(time_zone_str))
@@ -354,7 +372,6 @@ def main(config):
 
 TEAM_LIST = [
     schema.Option(display = "Anaheim Ducks", value = "24"),
-    schema.Option(display = "Arizona Coyotes", value = "53"),
     schema.Option(display = "Boston Bruins", value = "6"),
     schema.Option(display = "Buffalo Sabres", value = "7"),
     schema.Option(display = "Calgary Flames", value = "20"),
@@ -381,6 +398,7 @@ TEAM_LIST = [
     schema.Option(display = "St. Louis Blues", value = "19"),
     schema.Option(display = "Tampa Bay Lightning", value = "14"),
     schema.Option(display = "Toronto Maple Leafs", value = "10"),
+    schema.Option(display = "Utah Mammoth", value = "68"),
     schema.Option(display = "Vancouver Canucks", value = "23"),
     schema.Option(display = "Vegas Golden Knights", value = "54"),
     schema.Option(display = "Washington Capitals", value = "15"),

@@ -7,6 +7,7 @@ author: tavdog
 fileName: shipsnearby.star
 packageName: shipsnearby
 recommendedInterval: 30
+supports64x64: true
 category: transit
 tags:
   - utility
@@ -14,4 +15,4 @@ tags:
   - tracking
   - maritime
 published: '2026-04-22T20:43:00Z'
-updated: '2026-06-03T20:17:19Z'
+updated: '2026-10-01T22:41:51Z'
