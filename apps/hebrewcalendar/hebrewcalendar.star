@@ -11,6 +11,21 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child):
+    """Bound the 64x32 scene and centre it on the square; other panels get it unchanged."""
+    if not is_square():
+        return child
+    return render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = child))
+
 # ── Fallback coords (Brooklyn, NY) used when no city has been selected ───────
 DEFAULT_LAT = "40.6501"
 DEFAULT_LNG = "-73.9496"
@@ -210,8 +225,7 @@ def clean_holiday_name(title):
 
 def render_error(msg):
     return render.Root(
-        # Centre the block on taller panels (64x64).
-        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+        child = center_on_square(render.Box(
             width = 64,
             height = 32,
             child = render.WrappedText(
@@ -772,14 +786,12 @@ def main(config):
 
     # ── Render ────────────────────────────────────────────────────────────────
     if len(slides) == 1:
-        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
-        return render.Root(max_age = 86400, child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = slides))[0])
+        return render.Root(max_age = 86400, child = center_on_square(slides[0]))
 
     return render.Root(
         max_age = 86400,
         delay = SLIDE_DELAY_MS,
-        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
-        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = slides))),
+        child = center_on_square(render.Animation(children = slides)),
     )
 
 # ── Schema ────────────────────────────────────────────────────────────────────
