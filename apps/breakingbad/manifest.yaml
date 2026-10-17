@@ -5,6 +5,7 @@ summary: Breaking Bad Title Display
 desc: Display text in Breaking Bad TV show format.
 author: Robert Ison
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - media
@@ -12,4 +13,4 @@ tags:
   - text-display
   - gaming
 published: '2024-11-05T17:57:28Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T20:24:07Z'
