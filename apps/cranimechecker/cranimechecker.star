@@ -9,7 +9,7 @@ load("encoding/base64.star", "base64")
 load("encoding/csv.star", "csv")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_LANG = "en-US"
@@ -42,7 +42,8 @@ def main(config):
         return show_error("Couldn't load latest episodes :(")
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Marquee(
                     width = 64,
@@ -63,7 +64,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
 def display_image(file_id, anime_cfg, image_cfg, latest_episodes):

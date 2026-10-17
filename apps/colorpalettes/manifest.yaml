@@ -7,8 +7,9 @@ author: frame-shift
 fileName: colorpalettes.star
 packageName: colorpalettes
 recommendedInterval: 30
+supports64x64: true
 category: entertainment
 tags:
   - art
 published: '2026-01-17T04:28:30Z'
-updated: '2026-01-21T05:43:41Z'
+updated: '2026-10-01T20:41:22Z'
