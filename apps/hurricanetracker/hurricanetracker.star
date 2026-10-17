@@ -98,6 +98,48 @@ OLD_UPDATE_OPTIONS = [
     schema.Option(value = "0", display = "Disable old-update label"),
 ]
 
+def display_instructions(scroll_speed):
+    texts = [
+        (
+            "Tracks the nearest system in your selected basin. " +
+            "Developing outlook disturbances aren't shown."
+        ),
+        (
+            "Shows distance & direction to the storm center, " +
+            "winds, pressure & movement."
+        ),
+        "Orange header means an old update, not increased danger.",
+        (
+            "Other tracked systems follow when enabled. " +
+            "Follow official guidance for local threats."
+        ),
+    ]
+
+    rows = staggered_text_rows(
+        texts,
+        [
+            canvas.width(),
+            canvas.width(),
+            canvas.width(),
+            canvas.width(),
+        ],
+        [
+            NHC_COLOR_ALT,
+            "#fff",
+            OLD_UPDATE_COLOR,
+            "#ff0",
+        ],
+        display_font(),
+    )
+
+    return render.Root(
+        delay = scroll_speed,
+        show_full_animation = True,
+        child = render.Column(
+            children = rows,
+        ),
+    )
+
 def format_distance(miles):
     text = str(int(math.round(miles)))
     formatted = ""
@@ -753,10 +795,14 @@ def display_storm(
     )
 
 def main(config):
+    scroll_speed = max(1, int(config.get("scroll", "60")))
+
+    if config.bool("show_instructions", False):
+        return display_instructions(scroll_speed)
+
     basin = config.get("basin", "atlantic") or "atlantic"
     hide_quiet = config.bool("hide_quiet", True)
     show_errors = config.bool("display_errors", False)
-    scroll_speed = max(1, int(config.get("scroll", "60")))
 
     rotation_ms = max(
         1000,
@@ -881,6 +927,16 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Toggle(
+                id = "show_instructions",
+                name = "Show Instructions",
+                desc = (
+                    "Show four scrolling help rows instead of " +
+                    "live hurricane tracking."
+                ),
+                icon = "info",
+                default = False,
+            ),
             schema.Location(
                 id = "location",
                 name = "Location",
