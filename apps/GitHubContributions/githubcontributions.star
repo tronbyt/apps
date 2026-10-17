@@ -14,7 +14,6 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 
 CACHE_TTL = 3600 * 4
@@ -91,7 +90,6 @@ def get_layout():
         "gap": 1,
     }
 
-
 def get_cache_key(username, token):
     # Separate cached data by authentication context without storing
     # the raw token in the cache key.
@@ -105,7 +103,6 @@ def get_cache_key(username, token):
         username.lower(),
         fingerprint,
     )
-
 
 def extract_calendar(data):
     if type(data) != "dict" or data.get("errors"):
@@ -132,7 +129,6 @@ def extract_calendar(data):
         return None
 
     return calendar
-
 
 def get_contributions(username, token):
     cache_key = get_cache_key(username, token)
@@ -265,7 +261,7 @@ def get_contributions(username, token):
         "calendar": calendar,
         "error": None,
     }
-    
+
 def contribution_level(count):
     if count >= 10:
         return 4
@@ -277,7 +273,6 @@ def contribution_level(count):
         return 1
 
     return 0
-
 
 def normalize_contributions(calendar):
     if not calendar or not calendar.get("weeks"):
@@ -314,7 +309,7 @@ def normalize_contributions(calendar):
         return []
 
     return grid
-    
+
 def get_graph_width(cols, layout):
     if cols <= 0:
         return 0
@@ -325,14 +320,12 @@ def get_graph_width(cols, layout):
         (cols - 1) * layout["gap"]
     )
 
-
 def get_graph_height(layout):
     return (
         5 * layout["weekday_height"] +
         2 * layout["weekend_height"] +
         6 * layout["gap"]
     )
-
 
 def render_visible_row(levels, row_height, graph_x, layout):
     screen_width = layout["screen_width"]
@@ -365,9 +358,7 @@ def render_visible_row(levels, row_height, graph_x, layout):
             ))
 
         color = (
-            BACKGROUND_COLOR
-            if level == None
-            else CONTRIBUTION_COLORS[level]
+            BACKGROUND_COLOR if level == None else CONTRIBUTION_COLORS[level]
         )
 
         children.append(render.Box(
@@ -392,7 +383,6 @@ def render_visible_row(levels, row_height, graph_x, layout):
         cross_align = "start",
     )
 
-
 def render_graph_frame(grid, graph_x, layout):
     screen_width = layout["screen_width"]
     screen_height = layout["screen_height"]
@@ -416,9 +406,7 @@ def render_graph_frame(grid, graph_x, layout):
 
     for row in range(7):
         row_height = (
-            layout["weekend_height"]
-            if row in (0, 6)
-            else layout["weekday_height"]
+            layout["weekend_height"] if row in (0, 6) else layout["weekday_height"]
         )
 
         children.append(render_visible_row(
@@ -448,10 +436,8 @@ def render_graph_frame(grid, graph_x, layout):
         cross_align = "start",
     )
 
-
 def ease_in_out(t):
     return t * t * (3 - 2 * t)
-
 
 def get_phased_graph(grid, layout):
     if not grid or not grid[0]:
@@ -523,7 +509,6 @@ def get_phased_graph(grid, layout):
 
     return render.Animation(children = children)
 
-
 def message_root(message, layout):
     return render.Root(
         delay = FRAME_DELAY_MS,
@@ -537,7 +522,6 @@ def message_root(message, layout):
             ),
         ),
     )
-
 
 def main(config):
     layout = get_layout()
@@ -569,7 +553,6 @@ def main(config):
         show_full_animation = True,
         child = get_phased_graph(grid, layout),
     )
-
 
 def get_schema():
     return schema.Schema(
