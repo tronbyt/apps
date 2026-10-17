@@ -3,7 +3,6 @@
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("time.star", "time")
 
 FONT = "CG-pixel-4x5-mono"
 TIMEZONE = "America/New_York"
@@ -18,7 +17,28 @@ TO_NJ = "TO_NJ"
 STATION_NAME_KEY = "station_name_key"
 TRAIN_TIME_KEY = "train_time_key"
 
-DEFAULT_STATION = "JOURNAL_SQUARE"
+# The Port Authority's live PATH arrivals for every station (path.api.razza.dev, used before, has gone)
+RIDEPATH_URL = "https://www.panynj.gov/bin/portauthority/ridepath.json"
+
+# Station codes used by the Port Authority, their names, and the names the old API used, so saved settings still work
+STATIONS = [
+    ("NWK", "Newark", "NEWARK"),
+    ("HAR", "Harrison", "HARRISON"),
+    ("JSQ", "Journal Square", "JOURNAL_SQUARE"),
+    ("GRV", "Grove Street", "GROVE_STREET"),
+    ("EXP", "Exchange Place", "EXCHANGE_PLACE"),
+    ("NEW", "Newport", "NEWPORT"),
+    ("HOB", "Hoboken", "HOBOKEN"),
+    ("WTC", "World Trade Center", "WORLD_TRADE_CENTER"),
+    ("CHR", "Christopher Street", "CHRISTOPHER_STREET"),
+    ("09S", "9th Street", "NINTH_STREET"),
+    ("14S", "14th Street", "FOURTEENTH_STREET"),
+    ("23S", "23rd Street", "TWENTY_THIRD_STREET"),
+    ("33S", "33rd Street", "THIRTY_THIRD_STREET"),
+]
+OLD_STATION_NAMES = {old: code for code, _, old in STATIONS}
+
+DEFAULT_STATION = "JSQ"
 TRUNCATE_LINE_NAMES = {
     "33rd Street via Hoboken": "33rd St.",
     "33rd Street": "33rd St.",
@@ -31,7 +51,10 @@ TRUNCATE_LINE_NAMES = {
 
 def main(config):
     station = config.get("station") or DEFAULT_STATION
+    station = OLD_STATION_NAMES.get(station, station)
     all_trains = getTrainDataFromApi(station)
+    if all_trains == None:
+        return []
 
     return render.Root(
         delay = 200,
@@ -45,53 +68,33 @@ def main(config):
     )
 
 # FUNCTIONS FOR MAIN APP
-def getUrlForStation(station_name):
-    return "https://path.api.razza.dev/v1/stations/{station}/realtime".format(station = station_name)
-
-def getResponseFromApi(station_name):
-    """ gets response from api
+def getTrainsAtStation(station):
+    """ gets the upcoming trains at a station from the Port Authority's live data
 
     Args:
-        station_name: name of station.
+        station: station code, e.g. JSQ
 
     Returns:
-        struct: the response from the api
+        list: trains as dicts with name, direction and minutes, or None if the data isn't available
     """
-    url = getUrlForStation(station_name)
-    resp = http.get(url)
+    resp = http.get(RIDEPATH_URL, ttl_seconds = 30)
     if resp.status_code != 200:
-        fail("PATH request failed with status {}".format(resp.status_code))
-    return resp
-
-def getArrivalInMinutes(arrival_time):
-    arr_time = time.parse_time(arrival_time).in_location(TIMEZONE)
-    now = time.now().in_location(TIMEZONE)
-    mins = int((arr_time - now).minutes)
-    return mins
-
-def jsonToTrainData(json):
-    """ formats json data to dict of train data
-
-    Args:
-        json: json to format
-
-    Returns:
-        list: a list of trains as formatted dict
-    """
-    trains_data = []
-    for train in json:
-        data = {
-            "name": TRUNCATE_LINE_NAMES.get(train["lineName"]),
-            "status": train["status"].replace("_", " "),
-            "minutes": getArrivalInMinutes(train["projectedArrival"]),
-            "direction": train["direction"],
-        }
-        trains_data.append(data)
-
-    return trains_data
-
-def getTrainsFromResponse(rep):
-    return rep.json()["upcomingTrains"]
+        print("PATH request failed with status {}".format(resp.status_code))
+        return None
+    trains = []
+    for result in resp.json().get("results", []):
+        if result.get("consideredStation") != station:
+            continue
+        for destination in result.get("destinations", []):
+            direction = TO_NY if destination.get("label") == "ToNY" else TO_NJ
+            for message in destination.get("messages", []):
+                head_sign = message.get("headSign", "")
+                trains.append({
+                    "name": TRUNCATE_LINE_NAMES.get(head_sign, head_sign),
+                    "direction": direction,
+                    "minutes": int(message.get("secondsToArrival", "0")) // 60,
+                })
+    return trains
 
 def getAllInboundAndOutbound(trains):
     """ gets all available trains in direction, or null
@@ -151,18 +154,15 @@ def getTrainDataFromApi(station_name):
     """ gets train data
 
     Args:
-        station_name: name of station.
+        station_name: station code.
 
     Returns:
-        dict: train data dict
+        dict: upcoming trains in each direction, or None if the data isn't available
     """
-    resp = getResponseFromApi(station_name)
-
-    # cache.set(TRAIN_TIME_KEY, str(rep), ttl_seconds = 60)
-    trains = getTrainsFromResponse(resp)
-    train_data = jsonToTrainData(trains)
-    upcoming_trains = getAllInboundAndOutbound(train_data)
-    return upcoming_trains
+    trains = getTrainsAtStation(station_name)
+    if trains == None:
+        return None
+    return getAllInboundAndOutbound(trains)
 
 def renderTrainMarquee(trains):
     """ renders marquee for given train
@@ -266,34 +266,13 @@ def renderDivider():
 
 # FUNCTIONS FOR SCHEMA
 
-def getAllStationsJson():
-    """ gets all stations as json
-
-    Returns:
-        struct: the response from the api
-    """
-    url = "https://path.api.razza.dev/v1/stations"
-    rep = http.get(url)
-    if rep.status_code != 200:
-        fail("PATH request failed with status {}".format(rep.status_code))
-    return rep.json()["stations"]
-
 def getAllStations():
     """ maps stations to options
 
     Returns:
         list: list of options for schema
     """
-    stations = []
-    json_stations = getAllStationsJson()
-    for station in json_stations:
-        stations.append(
-            schema.Option(
-                display = station["name"],
-                value = station["station"],
-            ),
-        )
-    return stations
+    return [schema.Option(display = name, value = code) for code, name, _ in STATIONS]
 
 # OPTIONS FOR USER
 def get_schema():

@@ -5,6 +5,7 @@ Description: Displays live and upcoming CFL scores from a data feed.
 Author: LunchBox8484
 """
 
+load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
@@ -70,6 +71,10 @@ ALT_LOGO = """
     "WBB": "https://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=winnipeg-blue-bombers&width=40&height=40"
 }
 """
+
+# Shown when neither logo source responds, so a missing logo never stops the app rendering
+TRANSPARENT_PNG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIAAAUAAeImBZsAAAAASUVORK5CYII=")
+
 MAGNIFY_LOGO = """
 {
 }
@@ -809,15 +814,24 @@ def get_background_color(team, displayType, color):
     return color
 
 def get_logoType(team, logo):
+    # Prefer the alternative logo if there is one, then ESPN's. Logo servers sometimes fail (TSN's often returns
+    # errors), so a failed logo falls back rather than stopping the whole app.
     usealtlogo = json.decode(ALT_LOGO)
     usealt = usealtlogo.get(team, "NO")
     if usealt != "NO":
-        logo = get_cachable_data(usealt, 36000)
-    else:
-        logo = logo.replace("500/scoreboard", "500-dark/scoreboard")
-        logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
-        logo = get_cachable_data(logo + "&h=50&w=50")
-    return logo
+        image = get_optional_image(usealt, 36000)
+        if image:
+            return image
+    logo = logo.replace("500/scoreboard", "500-dark/scoreboard")
+    logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
+    return get_optional_image(logo + "&h=50&w=50", CACHE_TTL_SECONDS) or TRANSPARENT_PNG
+
+def get_optional_image(url, ttl_seconds):
+    res = http.get(url = url, ttl_seconds = ttl_seconds)
+    if res.status_code != 200:
+        print("Couldn't load logo %s (status %d)" % (url, res.status_code))
+        return None
+    return res.body()
 
 def get_logoSize(team):
     usealtsize = json.decode(MAGNIFY_LOGO)

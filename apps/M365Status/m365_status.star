@@ -9,12 +9,21 @@ First edition!
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 load("xpath.star", "xpath")
 
 RSS_URL = "https://status.cloud.microsoft/api/feed/mac"
 CACHE_TIMEOUT = 15 * 60  # 15 mins
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     timezone = time.tz()
@@ -65,7 +74,11 @@ def main():
 
     return render.Root(
         show_full_animation = True,
+        # Four bands totalling 33 rows; on a square panel the column expands
+        # and spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             children = [
                 render.Row(
                     children = [

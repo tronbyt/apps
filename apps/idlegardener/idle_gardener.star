@@ -26,6 +26,14 @@ GROWN_STATE = "GROWN"
 GROWING_STATE = "GROWING"
 CHOPPED_STATE = "CHOPPED"
 
+# The sprite for each tree state. Trees are cached as JSON, which can't hold the raw image data, so only the
+# state is stored and the sprite is chosen when the garden is drawn.
+SPRITES = {
+    GROWN_STATE: TREE_GROWN,
+    GROWING_STATE: TREE_GROWING,
+    CHOPPED_STATE: TREE_CHOPPED,
+}
+
 # MAIN
 def main(config):
     garden_id = config.get("garden_id")
@@ -77,7 +85,7 @@ def return_trees(tree_list):
         children = [
             render.Row(
                 children = [
-                    render.Image(src = tree["sprite"])
+                    render.Image(src = SPRITES.get(tree["state"], TREE_GROWN))
                     for tree in column
                 ],
             )
@@ -149,20 +157,20 @@ def perform_growth(tree, garden_id):
 
     if tree_state == GROWN_STATE:
         increment_chopped_count(garden_id)
-        new_tree = update_tree_dict(new_tree, CHOPPED_STATE, TREE_CHOPPED, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(5, 60))
+        new_tree = update_tree_dict(new_tree, CHOPPED_STATE, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(5, 60))
     elif tree_state == GROWING_STATE:
-        new_tree = update_tree_dict(new_tree, GROWN_STATE, TREE_GROWN, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(30, 60))
+        new_tree = update_tree_dict(new_tree, GROWN_STATE, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(30, 60))
     else:
-        new_tree = update_tree_dict(new_tree, GROWING_STATE, TREE_GROWING, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(60, 60 * 2))
+        new_tree = update_tree_dict(new_tree, GROWING_STATE, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(60, 60 * 2))
 
     return new_tree
 
-def update_tree_dict(new_tree, new_state, new_sprite, new_planted_date, new_duration):
+def update_tree_dict(new_tree, new_state, new_planted_date, new_duration):
     """
     To simplify the updating we use this helper method to make sure that we are DRY with our implementation.
     """
     new_tree["state"] = new_state
-    new_tree["sprite"] = new_sprite
+    new_tree.pop("sprite", None)  # Gardens cached by older versions stored (now corrupted) image data here
     new_tree["planted"] = new_planted_date
     new_tree["grow_duration"] = new_duration
 
@@ -195,7 +203,7 @@ def generate_tree_list():
     for _ in range(0, 3):  # The number of columns to iterate over (3 being the standard)
         row_array = []
         for _ in range(0, 8):  # The number of rows to iterate over (8 being the standard)
-            tree = dict(id = random.number(9999, 999999), state = GROWN_STATE, sprite = TREE_GROWN, planted = str(time.now().format("2006-01-02T15:04:05Z07:00")), grow_duration = random.number(5, 60))  # create our dictionary
+            tree = dict(id = random.number(9999, 999999), state = GROWN_STATE, planted = str(time.now().format("2006-01-02T15:04:05Z07:00")), grow_duration = random.number(5, 60))  # create our dictionary
             row_array.append(tree)
         column_array.append(row_array)
 
