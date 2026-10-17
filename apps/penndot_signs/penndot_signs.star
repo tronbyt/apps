@@ -93,6 +93,15 @@ def parse_milepost(sign):
                             return "MP {}".format(float(mp_value))
     return ""
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     """Display the selected PennDOT sign message.
 
@@ -108,7 +117,25 @@ def main(config):
 
     if not full_id or full_id == "none":
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                width = 64 * scale,
+                height = 32 * scale,
+                child = render.Column(
+                    main_align = "center",
+                    cross_align = "center",
+                    children = [
+                        render.Marquee(
+                            width = 64 * scale,
+                            child = render.Text("Select a sign", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+                        ),
+                        render.Marquee(
+                            width = 64 * scale,
+                            child = render.Text("in settings", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 width = 64 * scale,
                 height = 32 * scale,
                 child = render.Column(
@@ -152,7 +179,8 @@ def main(config):
 
     if not selected_sign:
         return render.Root(
-            child = render.Text("Sign not found", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Sign not found", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"))) if is_square() else render.Text("Sign not found", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
         )
 
     # Get message, images, and roadway name
@@ -321,7 +349,10 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = display_children,
+        ))) if is_square() else render.Column(
             children = display_children,
         ),
     )

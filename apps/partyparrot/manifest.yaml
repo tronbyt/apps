@@ -7,10 +7,11 @@ author: tobyxdd
 fileName: parrot.star
 packageName: partyparrot
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - nature
   - gaming
   - music
 published: '2024-11-05T17:55:11Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T22:17:11Z'
