@@ -11,6 +11,7 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+
 DEFAULT_STATUS_URL = ""
 DEFAULT_SCROLL = "60"
 DEFAULT_TIMEZONE = "America/New_York"
@@ -23,6 +24,7 @@ SETUP_GUIDE_URL = ""
 RECENT_FINISH_SECONDS = 30 * 60
 STALE_WARNING_SECONDS = 5 * 60
 STALE_CRITICAL_SECONDS = 15 * 60
+FUTURE_TIMESTAMP_TOLERANCE_SECONDS = 2 * 60
 
 PALETTE = {
     "text_primary": "FFFFFF",
@@ -33,6 +35,7 @@ PALETTE = {
     "error": "FF5A5F",
     "info": "58D1FF",
 }
+
 
 def _truncate(text, max_len):
     if text == None:
@@ -48,11 +51,13 @@ def _truncate(text, max_len):
 
     return text[:max_len - 1] + "…"
 
+
 def _safe_get(obj, key, default = None):
     if type(obj) != "dict":
         return default
 
     return obj.get(key, default)
+
 
 def _text(value):
     if value == None:
@@ -72,6 +77,7 @@ def _text(value):
 
     return str(value).strip()
 
+
 def _join_unique(values):
     parts = []
 
@@ -82,6 +88,7 @@ def _join_unique(values):
             parts.append(text)
 
     return " · ".join(parts)
+
 
 def _seconds(value):
     value_type = type(value)
@@ -110,6 +117,7 @@ def _seconds(value):
 
     return value
 
+
 def _fmt_duration(total):
     total = _seconds(total)
 
@@ -127,10 +135,20 @@ def _fmt_duration(total):
     hrs = mins // 60
     rem = mins % 60
 
+    if hrs >= 24:
+        days = hrs // 24
+        rem_hrs = hrs % 24
+
+        if rem_hrs == 0:
+            return str(days) + "d"
+
+        return str(days) + "d " + str(rem_hrs) + "h"
+
     if rem == 0:
         return str(hrs) + "h"
 
     return str(hrs) + "h " + str(rem) + "m"
+
 
 def _parse_timestamp(value):
     text = _text(value)
@@ -146,18 +164,32 @@ def _parse_timestamp(value):
         "2006-01-02T15:04:05Z07:00",
     )
 
-def _age_seconds(value, now):
+
+def _timestamp_info(value, now):
     parsed = _parse_timestamp(value)
 
     if parsed == None:
-        return None
+        return {
+            "time": None,
+            "age": None,
+            "future": False,
+        }
 
     age = int((now - parsed).seconds)
 
-    if age < 0:
-        return 0
+    if age < -FUTURE_TIMESTAMP_TOLERANCE_SECONDS:
+        return {
+            "time": parsed,
+            "age": None,
+            "future": True,
+        }
 
-    return age
+    return {
+        "time": parsed,
+        "age": max(0, age),
+        "future": False,
+    }
+
 
 def _status_url(config):
     direct = _text(config.get("status_url"))
@@ -179,6 +211,7 @@ def _status_url(config):
 
     return base + "/status.json"
 
+
 def _printers(data):
     printers = _safe_get(data, "printers", [])
 
@@ -190,6 +223,7 @@ def _printers(data):
         for printer in printers
         if type(printer) == "dict"
     ]
+
 
 def printer_field(status_url):
     status_url = _text(status_url)
@@ -234,11 +268,18 @@ def printer_field(status_url):
         ),
     ]
 
-def get_schema():
-    guide_reference = "See the PDF: " + SETUP_GUIDE_TITLE + "."
 
+def get_schema():
     if SETUP_GUIDE_URL:
-        guide_reference += " " + SETUP_GUIDE_URL
+        guide_reference = (
+            "Setup guide: " + SETUP_GUIDE_URL
+        )
+    else:
+        guide_reference = (
+            "Ask the app provider for the PDF titled '" +
+            SETUP_GUIDE_TITLE +
+            "'. No public guide URL is configured."
+        )
 
     return schema.Schema(
         version = "1",
@@ -288,19 +329,31 @@ def get_schema():
                 id = "active_only",
                 name = "Only During Active Prints",
                 desc = (
-                    "Skip inactive printers, including recently completed " +
-                    "prints. Setup instructions override this setting."
+                    "Hide idle and recently completed prints. " +
+                    "Errors and enabled data warnings remain visible. " +
+                    "Setup instructions override this setting."
                 ),
                 icon = "play",
+                default = False,
+            ),
+            schema.Toggle(
+                id = "always_show_offline",
+                name = "Always Show Offline",
+                desc = (
+                    "Show an offline printer even when Only During " +
+                    "Active Prints is enabled."
+                ),
+                icon = "plug",
                 default = False,
             ),
             schema.Toggle(
                 id = "show_finish_time",
                 name = "Estimated Finish Time",
                 desc = (
-                    "Add an estimated local finish time while printing."
+                    "Add an estimated local finish time while printing. " +
+                    "Use updated_at to anchor the estimate when available."
                 ),
-                icon = "schedule",
+                icon = "flagCheckered",
                 default = True,
             ),
             schema.Toggle(
@@ -318,9 +371,10 @@ def get_schema():
                 name = "Warn About Old Data",
                 desc = (
                     "Warn after 5 minutes if JSON includes updated_at. " +
-                    "Show STALE DATA after 15 minutes."
+                    "Show STALE DATA after 15 minutes. Also warn about " +
+                    "timestamps more than 2 minutes in the future."
                 ),
-                icon = "warning",
+                icon = "triangleExclamation",
                 default = True,
             ),
             schema.Generated(
@@ -330,6 +384,7 @@ def get_schema():
             ),
         ],
     )
+
 
 def _first_printer(data, selected_id):
     printers = _printers(data)
@@ -347,8 +402,10 @@ def _first_printer(data, selected_id):
 
     return printers[0]
 
+
 def _state(printer):
     return _text(printer.get("state")).upper() or "UNKNOWN"
+
 
 def _status_color(state):
     if state == "PRINTING":
@@ -357,19 +414,18 @@ def _status_color(state):
     if state == "PAUSED":
         return PALETTE["warning"]
 
-    if state == "OFFLINE":
+    if state == "OFFLINE" or state == "ERROR":
         return PALETTE["error"]
 
     if state == "IDLE":
         return PALETTE["info"]
 
-    if state == "ERROR":
-        return PALETTE["error"]
-
     return PALETTE["text_primary"]
+
 
 def _is_active(state):
     return state == "PRINTING" or state == "PAUSED"
+
 
 def _job_name(printer, max_len):
     name = _join_unique([
@@ -380,6 +436,7 @@ def _job_name(printer, max_len):
 
     return _truncate(name or "No active print", max_len)
 
+
 def _last_job_name(printer, max_len):
     name = _join_unique([
         printer.get("last_completed_job_name"),
@@ -388,7 +445,8 @@ def _last_job_name(printer, max_len):
 
     return _truncate(name or "No recent job", max_len)
 
-def _headline(printer, now, recently_finished, finish_age):
+
+def _headline(printer, recently_finished):
     state = _state(printer)
 
     if state == "PRINTING":
@@ -405,24 +463,20 @@ def _headline(printer, now, recently_finished, finish_age):
     if state == "OFFLINE":
         return "Offline"
 
+    if state == "ERROR":
+        return "Error"
+
     if state == "IDLE":
         if recently_finished:
-            return "Finished · " + _fmt_duration(finish_age) + " ago"
-
-        idle_age = _age_seconds(
-            printer.get("idle_since"),
-            now,
-        )
-
-        if idle_age == None:
-            idle_age = finish_age
-
-        if idle_age != None:
-            return "Idle · " + _fmt_duration(idle_age)
+            return "Finished"
 
         return "Idle"
 
-    return state
+    if state == "UNKNOWN":
+        return "Unknown"
+
+    return _truncate(state, 12)
+
 
 def _subline(printer, max_len):
     state = _state(printer)
@@ -433,19 +487,25 @@ def _subline(printer, max_len):
     if state == "IDLE":
         return _last_job_name(printer, max_len)
 
-    name = (
-        _text(printer.get("job_objects")) or
-        _text(printer.get("job_name")) or
-        "Waiting"
-    )
+    name = _join_unique([
+        printer.get("job_name"),
+        printer.get("plate_name"),
+        printer.get("job_objects"),
+    ])
 
-    return _truncate(name, max_len)
+    if name:
+        return _truncate(name, max_len)
 
-def _finish_label(now, remaining, timezone):
-    finish = now + time.parse_duration(
-        str(remaining) + "s",
-    )
+    if state == "ERROR":
+        return "Printer needs attention"
 
+    if state == "OFFLINE":
+        return "No live connection"
+
+    return "No current job"
+
+
+def _finish_label(now, finish, timezone):
     local_now = now.in_location(timezone)
     local_finish = finish.in_location(timezone)
 
@@ -470,11 +530,90 @@ def _finish_label(now, remaining, timezone):
 
     return "Done ~" + local_finish.format("Jan 2, 3:04 PM")
 
-def _footer(printer, now, timezone, show_finish_time):
+
+def _print_timing(printer, now, update_info):
+    remaining = _seconds(printer.get("time_left"))
+
+    if remaining == None:
+        return {
+            "remaining": None,
+            "finish": None,
+        }
+
+    anchor = now
+
+    if update_info["time"] != None and not update_info["future"]:
+        anchor = update_info["time"]
+
+        # Small future clock skew is tolerated, not added to the estimate.
+        if int((anchor - now).seconds) > 0:
+            anchor = now
+
+    finish = anchor + time.parse_duration(
+        str(remaining) + "s",
+    )
+
+    adjusted_remaining = max(
+        0,
+        int((finish - now).seconds),
+    )
+
+    return {
+        "remaining": adjusted_remaining,
+        "finish": finish,
+    }
+
+
+def _last_duration(printer):
+    duration = _text(
+        printer.get("last_completed_duration_text"),
+    )
+
+    if duration:
+        return duration
+
+    seconds = _seconds(
+        printer.get("last_completed_duration_seconds"),
+    )
+
+    if seconds != None:
+        return _fmt_duration(seconds)
+
+    return ""
+
+
+def _error_detail(printer):
+    # Optional existing fields; no JSON producer change is required.
+    for key in ["error_message", "error_text", "error"]:
+        value = printer.get(key)
+
+        if type(value) == "string":
+            text = value.strip()
+
+            if text:
+                return text
+
+    return ""
+
+
+def _footer(
+        printer,
+        now,
+        timezone,
+        show_finish_time,
+        update_info,
+        recently_finished,
+        finish_info,
+        idle_info):
     state = _state(printer)
 
     if state == "PRINTING":
-        remaining = _seconds(printer.get("time_left"))
+        timing = _print_timing(
+            printer,
+            now,
+            update_info,
+        )
+        remaining = timing["remaining"]
 
         if remaining != None:
             if remaining == 0:
@@ -485,7 +624,7 @@ def _footer(printer, now, timezone, show_finish_time):
             if show_finish_time:
                 text += " · " + _finish_label(
                     now,
-                    remaining,
+                    timing["finish"],
                     timezone,
                 )
 
@@ -498,30 +637,53 @@ def _footer(printer, now, timezone, show_finish_time):
         if estimate:
             return "Est. " + estimate
 
-        return "Printing"
+        return "Time remaining unavailable"
 
     if state == "PAUSED":
-        return "Print paused"
+        detail = _error_detail(printer)
+
+        if detail:
+            return "Paused · " + detail
+
+        return "Print paused · Check printer"
+
+    if state == "ERROR":
+        return _error_detail(printer) or "Check printer"
+
+    if state == "OFFLINE":
+        return "Printer unavailable"
 
     if state == "IDLE":
-        duration = _text(
-            printer.get("last_completed_duration_text"),
-        )
+        parts = []
+        duration = _last_duration(printer)
 
-        if not duration:
-            seconds = _seconds(
-                printer.get("last_completed_duration_seconds"),
+        if recently_finished:
+            parts.append(
+                _fmt_duration(finish_info["age"]) + " ago",
             )
 
-            if seconds != None:
-                duration = _fmt_duration(seconds)
+            if duration:
+                parts.append("Print took " + duration)
+
+            return " · ".join(parts)
+
+        idle_age = idle_info["age"]
+
+        if idle_age == None and not idle_info["future"]:
+            idle_age = finish_info["age"]
+
+        if idle_age != None:
+            parts.append("Idle " + _fmt_duration(idle_age))
 
         if duration:
-            return "Last print: " + duration
+            parts.append("Last print: " + duration)
+        else:
+            parts.append("No print history")
 
-        return "No print history"
+        return " · ".join(parts)
 
-    return "Waiting"
+    return "Status unavailable"
+
 
 def _message_screen(font, delay, line2, line3, line4):
     return render.Root(
@@ -553,14 +715,26 @@ def _message_screen(font, delay, line2, line3, line4):
         delay = delay,
     )
 
+
 def _instructions_screen(
         font,
         delay,
         screen_width,
         font_width):
+    if SETUP_GUIDE_URL:
+        guide_text = (
+            "1. Open the setup guide linked in this app's settings. "
+        )
+    else:
+        guide_text = (
+            "1. Ask the app provider for the PDF titled '" +
+            SETUP_GUIDE_TITLE +
+            "'. No public guide URL is configured. "
+        )
+
     line2 = (
-        "1. Read the PDF supplied with this app. " +
-        "2. Create status.json using its Python script."
+        guide_text +
+        "2. Create status.json using the guide's Python script."
     )
 
     line3 = (
@@ -615,6 +789,7 @@ def _instructions_screen(
         show_full_animation = True,
         delay = delay,
     )
+
 
 def main(config):
     font = "tb-8"
@@ -692,12 +867,9 @@ def main(config):
 
     selected_id = _text(config.get("printer_id"))
     printer = _first_printer(data, selected_id)
-    active_only = config.bool("active_only", False)
 
+    # Configuration/data failures remain visible in active-only mode.
     if not printer:
-        if active_only:
-            return []
-
         if selected_id:
             return _message_screen(
                 font,
@@ -716,20 +888,71 @@ def main(config):
         )
 
     state = _state(printer)
+    active_only = config.bool("active_only", False)
+    warn_stale = config.bool("warn_stale", True)
 
-    if active_only and not _is_active(state):
-        return []
+    updated_at = (
+        printer.get("updated_at") or
+        data.get("updated_at")
+    )
 
-    finish_age = _age_seconds(
+    update_info = _timestamp_info(updated_at, now)
+    finish_info = _timestamp_info(
         printer.get("last_completed_end_time"),
         now,
     )
 
+    idle_info = _timestamp_info(None, now)
+
+    if state == "IDLE":
+        idle_info = _timestamp_info(
+            printer.get("idle_since"),
+            now,
+        )
+
+    data_age = update_info["age"]
+
+    stale_warning = (
+        data_age != None and
+        data_age >= STALE_WARNING_SECONDS
+    )
+
+    # Only flag completion/idle timestamps when relevant to the display.
+    clock_warning = update_info["future"]
+
+    if state == "IDLE":
+        clock_warning = (
+            clock_warning or
+            finish_info["future"] or
+            idle_info["future"]
+        )
+
+    visible_data_warning = (
+        warn_stale and
+        (stale_warning or clock_warning)
+    )
+
+    always_show_offline = config.bool(
+        "always_show_offline",
+        False,
+    )
+
+    if active_only:
+        show_printer = (
+            _is_active(state) or
+            state == "ERROR" or
+            visible_data_warning or
+            (state == "OFFLINE" and always_show_offline)
+        )
+
+        if not show_printer:
+            return []
+
     recently_finished = (
         config.bool("show_recent_finish", True) and
         state == "IDLE" and
-        finish_age != None and
-        finish_age < RECENT_FINISH_SECONDS
+        finish_info["age"] != None and
+        finish_info["age"] < RECENT_FINISH_SECONDS
     )
 
     printer_name = _truncate(
@@ -739,9 +962,7 @@ def main(config):
 
     line2 = _headline(
         printer,
-        now,
         recently_finished,
-        finish_age,
     )
 
     line3 = _subline(
@@ -754,6 +975,10 @@ def main(config):
         now,
         timezone,
         config.bool("show_finish_time", True),
+        update_info,
+        recently_finished,
+        finish_info,
+        idle_info,
     )
 
     status_color = _status_color(state)
@@ -762,27 +987,46 @@ def main(config):
     if recently_finished:
         status_color = PALETTE["success"]
 
-    # This measures timestamp age, not API-call success.
-    updated_at = (
-        printer.get("updated_at") or
-        data.get("updated_at")
-    )
+    if state == "ERROR":
+        footer_color = PALETTE["error"]
+    elif state == "PAUSED":
+        footer_color = PALETTE["warning"]
 
-    if config.bool("warn_stale", True) and updated_at:
-        data_age = _age_seconds(updated_at, now)
+    warning_parts = []
 
-        if data_age != None and data_age >= STALE_WARNING_SECONDS:
-            line4 = "Status " + _fmt_duration(data_age) + " old"
-            footer_color = PALETTE["warning"]
-
+    if warn_stale:
+        if stale_warning:
             if data_age >= STALE_CRITICAL_SECONDS:
                 line2 = "STALE DATA"
                 status_color = PALETTE["error"]
 
-                line4 = (
+                warning_parts.append(
                     "Last state: " + state +
-                    " · Updated " + _fmt_duration(data_age) + " ago"
+                    " · Updated " + _fmt_duration(data_age) + " ago",
                 )
+            else:
+                warning_parts.append(
+                    "Status " + _fmt_duration(data_age) + " old",
+                )
+
+        if clock_warning:
+            if update_info["future"]:
+                warning_parts.append(
+                    "Update timestamp is in the future · Check clocks",
+                )
+            else:
+                warning_parts.append(
+                    "Job timestamp is in the future · Check clocks",
+                )
+
+        if warning_parts:
+            # Preserve actionable error details alongside data warnings.
+            if state == "ERROR":
+                detail = _error_detail(printer) or "Check printer"
+                warning_parts.append(detail)
+
+            line4 = " · ".join(warning_parts)
+            footer_color = PALETTE["warning"]
 
     line4 = _truncate(line4, max_text_length)
 
