@@ -8,12 +8,23 @@ Author: miracle2k
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     screen = render_screen()
-    return render.Root(child = screen)
+
+    # Centre the block on the square (64x64); other panels unchanged.
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = screen)) if is_square() else screen)
 
 def render_screen():
     rep = http.post(

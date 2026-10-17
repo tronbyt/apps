@@ -127,6 +127,15 @@ ARROWS = {
     "NOT COMPUTABLE": "?",
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = config.get("location", DEFAULT_LOCATION)
     loc = json.decode(location)
@@ -412,7 +421,10 @@ def main(config):
 
     return render.Root(
         max_age = 120,
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = output,
+        ))) if is_square() else render.Row(
             children = output,
         ),
         delay = 500,
@@ -1377,7 +1389,24 @@ def mgdl_to_mmol(mgdl):
 def display_failure(msg):
     return render.Root(
         max_age = 120,
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            color = COLOR_RED,
+            width = 64 * SCALE,
+            height = 32 * SCALE,
+            child = render.Box(
+                color = "#000",
+                width = 62 * SCALE,
+                height = 30 * SCALE,
+                child = render.WrappedText(
+                    width = 60 * SCALE,
+                    content = msg,
+                    color = COLOR_NIGHT,
+                    font = "terminus-12" if IS_2X else "tom-thumb",
+                    align = "center",
+                ),
+            ),
+        ))) if is_square() else render.Box(
             color = COLOR_RED,
             width = 64 * SCALE,
             height = 32 * SCALE,
