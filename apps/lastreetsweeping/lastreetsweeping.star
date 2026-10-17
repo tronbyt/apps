@@ -11,7 +11,7 @@ not in the past. No address lookup, no geocoding, no date arithmetic.
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -208,9 +208,12 @@ def topbar(label, count, color):
     ])
 
 def scene(sweeper_x, car_present, sparkle, time_lbl):
-    ground = 21
+    # The scene has the rows under the 7px bar: 25 on a 64x32 panel, 57 on
+    # a square one, where the sky grows and the road stays on the floor.
+    scene_h = canvas.height() - 7
+    ground = scene_h - 4
     layers = [
-        render.Box(width = 64, height = 25, color = SKY),
+        render.Box(width = 64, height = scene_h, color = SKY),
         px(0, ground - 7, 64, 7, ROAD),
         px(0, ground, 64, 4, CURB),
     ]

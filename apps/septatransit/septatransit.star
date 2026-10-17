@@ -533,7 +533,7 @@ def get_schedule(route, stopid, show_relative_times, scale):
 
         item = render.Box(
             height = row_height,
-            width = 64 * scale,
+            width = canvas.width(),
             color = background,
             child = render.Row(
                 children = [
@@ -554,7 +554,7 @@ def get_schedule(route, stopid, show_relative_times, scale):
                             font = row_font,
                             color = text,
                         ),
-                        width = 64 * scale - time_col_width,
+                        width = canvas.width() - time_col_width,
                         offset_start = 40 * scale,
                         offset_end = 40 * scale,
                     ),
@@ -564,13 +564,25 @@ def get_schedule(route, stopid, show_relative_times, scale):
         list_of_departures.append(item)
 
     row_height = 6 * scale
-    min_rows = 4
+
+    # The schedule gets whatever the panel has under the banner and above the
+    # accent bar: four rows on a 64x32 panel, nine on a square one. Both the
+    # padding and the cap come from the same number, so a long list fills the
+    # panel without overflowing it and a short one still pins the accent bar
+    # to the bottom.
+    banner_height = 6 if scale == 1 else 14
+    bottom_pad = 2
+    visible_rows = max(1, (canvas.height() - banner_height - bottom_pad) // row_height)
+    min_rows = visible_rows
+
+    if len(list_of_departures) > visible_rows:
+        list_of_departures = list_of_departures[:visible_rows]
 
     if len(list_of_departures) < 1:
         msg = "No departures" if stopid else "Select a stop"
         list_of_departures = [render.Box(
             height = row_height,
-            width = 64 * scale,
+            width = canvas.width(),
             color = "#000",
             child = render.Text(msg, font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
@@ -580,7 +592,7 @@ def get_schedule(route, stopid, show_relative_times, scale):
     # of staying pinned to the bottom of the display.
     for i in range(len(list_of_departures), min_rows):
         background = "#222" if i % 2 == 1 else "#000"
-        list_of_departures.append(render.Box(height = row_height, width = 64 * scale, color = background))
+        list_of_departures.append(render.Box(height = row_height, width = canvas.width(), color = background))
 
     return list_of_departures
 
@@ -649,7 +661,7 @@ def main(config):
                 render.Column(
                     children = [
                         render.Stack(children = [
-                            render.Box(height = banner_height, width = 64 * scale, color = route_bg_color),
+                            render.Box(height = banner_height, width = canvas.width(), color = route_bg_color),
                             render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = banner_font, color = route_text_color)),
                         ]),
                     ],

@@ -3,7 +3,7 @@ id: emoji-text
 name: Emoji Text
 summary: Display an Emoji and Text
 desc: Displays a customizable emoji with two lines of text that can scroll if they are too long.
-author: brombomb
+author: Brombomb
 fileName: emoji-text.star
 packageName: emojitext
 category: utilities

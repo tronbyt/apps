@@ -7,6 +7,7 @@ author: thickey256
 fileName: json_display.star
 packageName: jsondisplay
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech
@@ -14,4 +15,4 @@ tags:
   - utility
   - clock
 published: '2023-06-12T19:18:34Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T18:52:35Z'

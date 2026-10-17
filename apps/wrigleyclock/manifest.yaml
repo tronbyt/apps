@@ -6,6 +6,7 @@ desc: Clock that shows the current time as seen on the old Wrigley Field scorebo
 author: Garrett W
 fileName: wrigley_clock.star
 packageName: wrigleyclock
+supports64x64: true
 category: clocks
 tags:
   - retro
@@ -13,4 +14,4 @@ tags:
   - time
   - utility
 published: '2025-07-21T12:05:11Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T16:46:55Z'

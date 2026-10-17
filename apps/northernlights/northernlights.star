@@ -7,7 +7,7 @@ Author: @objectivelabs
 
 load("http.star", "http")
 load("images/northern_lights_icon_20px.png", NORTHERN_LIGHTS_ICON_20PX_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # NOAA may reject anonymous clients; identify this community applet.
@@ -140,6 +140,15 @@ def parse_alert_message(alert):
     return summary
 
 # Main function to fetch data and render the UI
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     kp_data = fetch_json(kp_url)
     kp = latest_kp(kp_data)
@@ -208,6 +217,17 @@ def main():
             render.Marquee(
                 width = 64,
                 child = render.Text(alert_text, color = "#fff"),
+            ),
+        )
+
+    # The three bands total 32 rows. On a square panel they are spread down
+    # the panel rather than stacked against the top edge above a black half.
+    if is_square():
+        return render.Root(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = column_children,
             ),
         )
 
