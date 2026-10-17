@@ -1,7 +1,7 @@
 """
 Applet: Skylines
 Summary: City Skylines
-Description: Displays city skylines.
+Description: Displays animated city skylines with optional stars and text.
 Author: Robert Ison
 """
 
@@ -10,48 +10,114 @@ load("schema.star", "schema")
 load("skylines_data.star", "CITIES")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 SCREEN_WIDTH = canvas.width()
 SCREEN_HEIGHT = canvas.height()
 
 BASE_WIDTH = 64
 BASE_HEIGHT = 32
 
-# Scale by the tighter axis: the 64x64 square is 64 wide like 1x, so SCALE stays 1 there.
-SCALE = min(SCREEN_WIDTH // BASE_WIDTH, SCREEN_HEIGHT // BASE_HEIGHT)
+SCALE = max(
+    1,
+    min(
+        SCREEN_WIDTH // BASE_WIDTH,
+        SCREEN_HEIGHT // BASE_HEIGHT,
+    ),
+)
 
-#1 Skyline, 2 Red Dots, 3 Green Trees, 4 Text Color, 5 Star color, 6 alt star color
-DEFAULT_COLORS = ["#fff", "#f00", "#00A550", "#0057B7", "#CCD9FF", "#FFECC2"]
+# Skyline, red details, green details, text, star, alternate star.
+DEFAULT_COLORS = [
+    "#fff",
+    "#f00",
+    "#00A550",
+    "#0057B7",
+    "#CCD9FF",
+    "#FFECC2",
+]
+
 NUMBER_OF_STARS = 5
-BIG_PANEL = SCREEN_WIDTH * SCREEN_HEIGHT > 64 * 32
-DOTS_PER_FRAME = 8 if BIG_PANEL else 1
+STAR_MIN_SPACING = 4
+STAR_CLEARANCE = 3
+TWINKLE_FRAME_SPACING = 12
 
-# Frames of twinkling stars once the skyline is complete; fewer on big panels.
-HOLD_FRAMES = 60 if BIG_PANEL else 100
+SKYLINE_HOLD_FRAMES = 100
+TEXT_HOLD_FRAMES = 80
+
+DEFAULT_FRAME_DELAY = 70
 
 display_type = [
-    schema.Option(display = "Display a Random City", value = "Random"),
-    schema.Option(display = "Pick from Selected", value = "List"),
+    schema.Option(
+        display = "Display a Random City",
+        value = "Random",
+    ),
+    schema.Option(
+        display = "Pick from Selected",
+        value = "List",
+    ),
 ]
 
 text_display_choices = [
-    schema.Option(display = "Display City Name", value = "City"),
-    schema.Option(display = "Display No Text", value = "Nothing"),
-    schema.Option(display = "Display Custom Text", value = "Custom"),
+    schema.Option(
+        display = "Display City Name",
+        value = "City",
+    ),
+    schema.Option(
+        display = "Display No Text",
+        value = "Nothing",
+    ),
+    schema.Option(
+        display = "Display Custom Text",
+        value = "Custom",
+    ),
 ]
 
-def randomize(min, max):
-    now = time.now()
-    base = now.unix * 1000000000 + now.nanosecond + canvas.width() * canvas.height()
-    rand = ((base ^ (base >> 11)) % 1000) / 1000.0
-    return int(rand * (max + 1 - min) + min)
+def randomize(minimum, maximum):
+    if maximum <= minimum:
+        return minimum
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
+    now = time.now()
+    value = (
+        now.unix * 1000000000 +
+        now.nanosecond +
+        SCREEN_WIDTH * SCREEN_HEIGHT
+    )
+
+    value = value ^ (value >> 11)
+    value = (value * 48271) % 2147483647
+    value = value ^ (value >> 13)
+
+    return minimum + value % (maximum - minimum + 1)
+
+def add_padding_to_child_element(
+        element,
+        left = 0,
+        top = 0,
+        right = 0,
+        bottom = 0):
+    return render.Padding(
         pad = (left, top, right, bottom),
         child = element,
     )
-
-    return padded_element
 
 def create_dot(x, y, color = "#fff"):
     return render.Padding(
@@ -63,288 +129,388 @@ def create_dot(x, y, color = "#fff"):
         ),
     )
 
-def extend_runs(runs, x, y, color):
-    """Add dot (x, y) to the run list, merging it into the last run when it
-    continues that vertical line."""
-    if runs:
-        last = runs[-1]
-        if last[0] == x and last[3] == color:
-            if y == last[2] + 1:
-                last[2] = y
-                return
-            if y == last[1] - 1:
-                last[1] = y
-                return
-    runs.append([x, y, y, color])
-
-def create_run(run):
-    x, y_top, y_bottom, color = run
+def create_star(x, y, color):
     return render.Padding(
-        pad = (x * SCALE, y_top * SCALE, 0, 0),
+        pad = (x * SCALE, y * SCALE, 0, 0),
         child = render.Box(
-            width = SCALE,
-            height = (y_bottom - y_top + 1) * SCALE,
+            width = 1,
+            height = 1,
             color = color,
         ),
     )
 
 def start_from_top(y_top, y_bottom, current_pen_y):
-    """
-    Returns true if the next pass should start from the top, otherwise false
+    distance_to_top = abs(current_pen_y - y_top)
+    distance_to_bottom = abs(current_pen_y - y_bottom)
 
-    y_top: What is the y value of the top pixel to be painted in this column
-    y_bottom: What is the y value of the bottom pixel to be painted in this column
-    current_pen_y: What y value did we leave off painting the last column
-
-    returns true or false where true means you should paint from the top
-    """
-
-    # Distance if we start from the top
-    dist_to_top = abs(current_pen_y - y_top)
-
-    # Distance if we start from the bottom
-    dist_to_bottom = abs(current_pen_y - y_bottom)
-
-    # Choose whichever is closer to where the pen already is
-    if dist_to_top <= dist_to_bottom:
-        return True
-    else:
-        return False
+    return distance_to_top <= distance_to_bottom
 
 def get_column_bounds(screen, x, height):
-    """
-    screen: 2D array [y][x] of pixels (1 = building, 0 = empty sky)
-    x: current column
-    height: total screen height (32 for your case)
-
-    returns (y_top, y_bottom) for this column
-    """
-    y_top = 0
-    y_bottom = 0
+    y_top = None
+    y_bottom = None
 
     for y in range(height):
-        if screen[y][x] > 0:  # hit building
-            if y_top == 0:
-                y_top = y  # first building pixel
-            y_bottom = y  # keep updating until last pixel
+        if screen[y][x] > 0:
+            if y_top == None:
+                y_top = y
+
+            y_bottom = y
 
     return (y_top, y_bottom)
 
+def validate_dataset(data):
+    if len(data) == 0:
+        fail("Skyline dataset must contain at least one row.")
+
+    width = len(data[0])
+
+    if width == 0:
+        fail("Skyline dataset rows must not be empty.")
+
+    for row in data:
+        if len(row) != width:
+            fail("All skyline dataset rows must have the same width.")
+
+        for pixel in row:
+            if pixel not in [0, 1, 2, 3]:
+                fail("Skyline pixel values must be 0, 1, 2, or 3.")
+
+def pseudo_shuffle(coords, seed):
+    items = []
+
+    for coordinate in coords:
+        x = coordinate[0]
+        y = coordinate[1]
+
+        key = (
+            x * 73856093
+        ) ^ (
+            y * 19349663
+        ) ^ (
+            seed * 83492791
+        )
+
+        key = ((key ^ (key >> 13)) * 1274126177) % 2147483647
+        key = key ^ (key >> 16)
+
+        items.append((key, coordinate))
+
+    items = sorted(items)
+
+    return [item[1] for item in items]
+
+def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
+    if num_stars <= 0:
+        return []
+
+    shuffled = pseudo_shuffle(coords, seed)
+    chosen = []
+
+    for coordinate in shuffled:
+        acceptable = True
+
+        for other in chosen:
+            if (
+                abs(coordinate[0] - other[0]) < min_spacing and
+                abs(coordinate[1] - other[1]) < min_spacing
+            ):
+                acceptable = False
+                break
+
+        if acceptable:
+            chosen.append(coordinate)
+
+            if len(chosen) >= num_stars:
+                break
+
+    return chosen
+
+def get_star_locations(column_tops, height):
+    candidates = []
+
+    # Leave a one-column margin at each side.
+    for x in range(1, len(column_tops) - 1):
+        top = column_tops[x]
+
+        # Empty columns have open sky down to the bottom margin.
+        if top == None:
+            maximum_y = height - 1 - STAR_CLEARANCE
+        else:
+            maximum_y = top - 1 - STAR_CLEARANCE
+
+        if maximum_y >= 0:
+            candidates.append(
+                (x, randomize(0, maximum_y)),
+            )
+
+    return pick_stars(
+        candidates,
+        NUMBER_OF_STARS,
+        randomize(0, 2147483646),
+        STAR_MIN_SPACING,
+    )
+
+def create_completed_frame(skyline_dots, star_locations, frame_idx):
+    layers = list(skyline_dots)
+
+    twinkle_colors = [
+        "#526080",  # Dim blue
+        "#8A9ABB",  # Medium blue
+        "#CCD9FF",  # Bright cool white
+        "#FFFFFF",  # Peak brightness
+        "#FFECC2",  # Warm white
+        "#8A9ABB",  # Fade down
+        "#526080",  # Dim blue
+        None,  # Briefly off
+    ]
+
+    for index in range(len(star_locations)):
+        star = star_locations[index]
+
+        # Different speeds and offsets keep stars out of sync.
+        frames_per_step = 10 + (index % 3) * 2
+        phase = (
+            (frame_idx // frames_per_step) +
+            index * 3
+        ) % len(twinkle_colors)
+
+        color = twinkle_colors[phase]
+
+        if color != None:
+            layers.append(
+                create_star(star[0], star[1], color),
+            )
+
+    return render.Stack(children = layers)
+
 def draw_skyline(data, show_stars, colors):
+    validate_dataset(data)
+
     animation_frames = []
-    runs = []
-    star_locations = []
+    skyline_dots = []
+    column_tops = []
+    pixels = []
 
     width = len(data[0])
     height = len(data)
     current_pen_y = height
-    pixels = []
-    visible_sky = []
 
     for x in range(width):
         bounds = get_column_bounds(data, x, height)
-        visible_sky.append(bounds[0] - 3)
-        if start_from_top(bounds[0], bounds[1], current_pen_y):
-            for y in range(height):
-                if data[y][x] > 0:
-                    pixels.append((x, y, colors[data[y][x] - 1]))
-                    current_pen_y = y
+
+        y_top = bounds[0]
+        y_bottom = bounds[1]
+
+        column_tops.append(y_top)
+
+        if y_top == None:
+            continue
+
+        if start_from_top(y_top, y_bottom, current_pen_y):
+            rows = range(height)
         else:
-            for y in reversed(range(height)):
-                if data[y][x] > 0:
-                    pixels.append((x, y, colors[data[y][x] - 1]))
-                    current_pen_y = y
+            rows = reversed(range(height))
+
+        for y in rows:
+            pixel_value = data[y][x]
+
+            if pixel_value > 0:
+                pixels.append(
+                    (x, y, colors[pixel_value - 1]),
+                )
+                current_pen_y = y
+
+    for pixel in pixels:
+        skyline_dots.append(
+            create_dot(pixel[0], pixel[1], pixel[2]),
+        )
+
+        animation_frames.append(
+            render.Stack(children = list(skyline_dots)),
+        )
+
+    star_locations = []
 
     if show_stars:
-        potential_star_locations = []
-        for i in range(len(visible_sky)):
-            if (i > 0 and i < len(visible_sky) - 1):
-                if (visible_sky[i - 1] >= visible_sky[i] and visible_sky[i + 1] >= visible_sky[i]):
-                    sky = max(0, visible_sky[i] - 1)
-                    potential_star_locations.append((i, randomize(0, sky)))
-        star_locations = pick_stars(potential_star_locations, NUMBER_OF_STARS, randomize(0, 1000), 4 * SCALE)
+        star_locations = get_star_locations(column_tops, height)
 
-    # Every frame re-composites everything drawn so far, so the draw-in costs
-    # frames x boxes. Dots arrive column by column, so consecutive dots are
-    # merged into one vertical-line Box each (pixel-identical, far fewer
-    # boxes); panels with more than 64x32 pixels also add a few dots per
-    # frame to stay inside the server deadline.
-    for i in range(0, len(pixels), DOTS_PER_FRAME):
-        for x, y, color in pixels[i:i + DOTS_PER_FRAME]:
-            extend_runs(runs, x, y, color)
-        animation_frames.append(render.Stack(children = [create_run(r) for r in runs]))
+    return (animation_frames, skyline_dots, star_locations)
 
-    # We increase the range to 100 so the "hold" lasts longer
-    for frame_idx in range(HOLD_FRAMES):
-        # Start with the full city
-        this_frame_layers = [create_run(r) for r in runs]
+def create_text_overlay(text, color):
+    if SCALE == 2:
+        font = "terminus-16"
+        text_height = 16
+    else:
+        font = "5x8"
+        text_height = 8
 
-        twinkle_frame_spacing = 12  # how many frames between star twinkles
+    text_y = max(0, SCREEN_HEIGHT - text_height)
 
-        if show_stars:
-            for i, star in enumerate(star_locations):
-                if ((frame_idx // twinkle_frame_spacing) + i) % 2 == 0:
-                    c = DEFAULT_COLORS[4]  # Light Blue/White
-                else:
-                    c = DEFAULT_COLORS[5]  # Champagne/Warm White
-
-                this_frame_layers.append(create_dot(star[0], star[1], c))
-
-        animation_frames.append(render.Stack(children = this_frame_layers))
-
-    return animation_frames
-
-def pseudo_shuffle(coords, seed):
-    items = []
-    for c in coords:
-        x = c[0]
-        y = c[1]
-
-        # mixing constants are large primes — just a simple integer hash mixer
-        key = (x * 73856093 + y * 19349663 + seed * 83492791) % 1000000007
-        items.append((key, c))
-    items = sorted(items)  # sorts by key (first tuple element)
-    out = []
-    for it in items:
-        out.append(it[1])
-    return out
+    return render.Stack(
+        children = [
+            add_padding_to_child_element(
+                render.Box(
+                    width = SCREEN_WIDTH,
+                    height = text_height,
+                    color = "#000",
+                ),
+                top = text_y,
+            ),
+            add_padding_to_child_element(
+                render.Marquee(
+                    width = SCREEN_WIDTH,
+                    child = render.Text(
+                        text,
+                        font = font,
+                        color = color,
+                    ),
+                ),
+                top = text_y,
+            ),
+        ],
+    )
 
 def get_safe_name(name):
     return name.lower().replace(" ", "_").replace(".", "")
 
-def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
-    shuffled = pseudo_shuffle(coords, seed)
-    chosen = []
-    for c in shuffled:
-        ok = True
-        for ch in chosen:
-            # use absolute distance on x and y
-            if abs(c[0] - ch[0]) < min_spacing and abs(c[1] - ch[1]) < min_spacing:
-                ok = False
-                break
-        if ok:
-            chosen.append(c)
-            if len(chosen) >= num_stars:
-                break
-    return chosen
+def choose_city(config):
+    if len(CITIES) == 0:
+        fail("No cities were found in skylines_data.star.")
 
-def main(config):
-    CITIES_BY_NAME = {city["name"]: city for city in CITIES}
-    city_names = list(CITIES_BY_NAME.keys())
-
-    skyline_color = config.get("skyline_outline_color", DEFAULT_COLORS[0])
     display = config.get("display_type", display_type[0].value)
-    custom_text = config.get("custom_text")
-    text_display = config.get("text_display", text_display_choices[0].value)
-    text_color = config.get("text_color", DEFAULT_COLORS[3])
+    available_cities = []
 
-    selected_city_dataset = None
-    selected_city = None
-
-    if display == "Random":
-        selected_city = city_names[randomize(0, len(city_names) - 1)]
-
-    else:
-        chosen = []
-
+    if display == "List":
         for city in CITIES:
             safe_name = get_safe_name(city["name"])
-            if config.bool("city_" + safe_name, False):
-                chosen.append(city["name"])
 
-        if len(chosen) == 0:
-            # fallback if nothing selected
-            selected_city = city_names[randomize(0, len(city_names) - 1)]
-        else:
-            selected_city = chosen[randomize(0, len(chosen) - 1)]
+            if config.bool("city_" + safe_name, True):
+                available_cities.append(city)
 
-    selected_city_dataset = CITIES_BY_NAME[selected_city]["dataset"]
+    # Random mode, or fallback when every city is deselected.
+    if len(available_cities) == 0:
+        available_cities = list(CITIES)
 
-    text_to_display = ""
-    if (text_display == "City"):
-        text_to_display = selected_city
-    elif (text_display == "Custom"):
-        if (custom_text != None and len(custom_text) > 0):
-            text_to_display = custom_text.strip()
-        else:
-            text_to_display = selected_city
+    return available_cities[randomize(0, len(available_cities) - 1)]
+
+def get_display_text(config, city_name):
+    text_display = config.get(
+        "text_display",
+        text_display_choices[0].value,
+    )
+
+    if text_display == "City":
+        return city_name
+
+    if text_display == "Custom":
+        custom_text = (config.get("custom_text") or "").strip()
+
+        if len(custom_text) > 0:
+            return custom_text
+
+        return city_name
+
+    return ""
+
+def main(config):
+    selected_city = choose_city(config)
+
+    skyline_color = config.get(
+        "skyline_outline_color",
+        DEFAULT_COLORS[0],
+    )
+
+    text_color = config.get(
+        "text_color",
+        DEFAULT_COLORS[3],
+    )
 
     show_stars = config.bool("stars", True)
-    animation_frames = draw_skyline(selected_city_dataset, show_stars, [skyline_color, DEFAULT_COLORS[1], DEFAULT_COLORS[2]])
-    last_frame = animation_frames[-1]
 
-    if (len(text_to_display) > 0):
-        if SCALE == 2:
-            font = "terminus-16"
-        else:
-            font = "5x8"
+    text_to_display = get_display_text(
+        config,
+        selected_city["name"],
+    )
 
-        text_w = 5 * len(text_to_display) * SCALE
-        text_h = 8 * SCALE
+    drawing = draw_skyline(
+        selected_city["dataset"],
+        show_stars,
+        [
+            skyline_color,
+            DEFAULT_COLORS[1],
+            DEFAULT_COLORS[2],
+        ],
+    )
 
-        final_frame_plus_text = render.Stack(
-            children = [
-                last_frame,
-                add_padding_to_child_element(
-                    render.Box(width = text_w, height = text_h, color = "#000"),
-                    BASE_WIDTH * SCALE - text_w,
-                    BASE_HEIGHT * SCALE - text_h,
-                ),
-                add_padding_to_child_element(
-                    render.Marquee(
-                        width = BASE_WIDTH * SCALE,
-                        child = render.Text(text_to_display, font = font, color = text_color),
-                    ),
-                    BASE_WIDTH * SCALE - text_w,
-                    BASE_HEIGHT * SCALE - text_h,
-                ),
-            ],
+    animation_frames = drawing[0]
+    skyline_dots = drawing[1]
+    star_locations = drawing[2]
+
+    text_overlay = None
+
+    if len(text_to_display) > 0:
+        text_overlay = create_text_overlay(
+            text_to_display,
+            text_color,
         )
 
-        for _ in range(80):
-            animation_frames.append(final_frame_plus_text)
-    else:
-        # we were going to hold the text for 60 frames, but we skipped the text display, so let's just add 60 frames of the last frame from before
-        for _ in range(80):
-            animation_frames.append(last_frame)
+    total_hold_frames = SKYLINE_HOLD_FRAMES + TEXT_HOLD_FRAMES
+
+    for frame_idx in range(total_hold_frames):
+        completed_frame = create_completed_frame(
+            skyline_dots,
+            star_locations,
+            frame_idx,
+        )
+
+        if (
+            frame_idx >= SKYLINE_HOLD_FRAMES and
+            text_overlay != None
+        ):
+            completed_frame = render.Stack(
+                children = [
+                    completed_frame,
+                    text_overlay,
+                ],
+            )
+
+        animation_frames.append(completed_frame)
 
     return render.Root(
-        delay = int(config.get("scroll", 45)),
-        # Centre the scaled 64x32 scene on panels that are taller than that (64x64).
-        child = render.Box(
-            width = SCREEN_WIDTH,
-            height = SCREEN_HEIGHT,
-            child = render.Box(
-                width = BASE_WIDTH * SCALE,
-                height = BASE_HEIGHT * SCALE,
-                child = render.Animation(children = animation_frames),
-            ),
-        ),
+        delay = int(config.get("scroll", DEFAULT_FRAME_DELAY)),
+        child = center_on_square(render.Stack(
+            children = [
+                render.Animation(children = animation_frames),
+            ],
+        ), BASE_WIDTH * SCALE, BASE_HEIGHT * SCALE),
         show_full_animation = True,
     )
 
-def get_city_options(type):
-    display_data = sorted(CITIES, key = lambda m: m["name"], reverse = False)
+def get_city_options(display):
+    display_data = sorted(
+        CITIES,
+        key = lambda city: city["name"],
+    )
 
-    if (type == "List"):
-        city_checkboxes = []
-
-        for city in display_data:
-            safe_name = get_safe_name(city["name"])
-            city_checkboxes.append(
-                schema.Toggle(
-                    id = "city_" + safe_name,
-                    name = city["name"],
-                    desc = city["description"],
-                    default = True,
-                    icon = "city",
-                ),
-            )
-
-        return city_checkboxes
-
-    else:
+    if display != "List":
         return []
+
+    city_checkboxes = []
+
+    for city in display_data:
+        safe_name = get_safe_name(city["name"])
+
+        city_checkboxes.append(
+            schema.Toggle(
+                id = "city_" + safe_name,
+                name = city["name"],
+                desc = city.get("description", ""),
+                default = True,
+                icon = "city",
+            ),
+        )
+
+    return city_checkboxes
 
 def get_schema():
     scroll_speed_options = [
@@ -368,7 +534,7 @@ def get_schema():
             schema.Dropdown(
                 id = "scroll",
                 name = "Speed",
-                desc = "Speed of the drawing",
+                desc = "Speed of the drawing and animation.",
                 icon = "clock",
                 options = scroll_speed_options,
                 default = scroll_speed_options[0].value,
@@ -376,21 +542,21 @@ def get_schema():
             schema.Toggle(
                 id = "stars",
                 name = "Display Stars",
-                desc = "Do you want stars to appear on the screen?",
+                desc = "Show twinkling stars above the skyline.",
                 icon = "star",
                 default = True,
             ),
             schema.Color(
                 id = "skyline_outline_color",
                 name = "Skyline",
-                desc = "Skyline Color",
+                desc = "Skyline color.",
                 icon = "brush",
                 default = DEFAULT_COLORS[0],
             ),
             schema.Color(
                 id = "text_color",
                 name = "Text",
-                desc = "Text Color",
+                desc = "Text color.",
                 icon = "brush",
                 default = DEFAULT_COLORS[3],
             ),
@@ -398,21 +564,21 @@ def get_schema():
                 id = "text_display",
                 icon = "tv",
                 name = "Text Overlay",
-                desc = "What text do you want to display?",
+                desc = "Choose the text displayed over the skyline.",
                 options = text_display_choices,
                 default = text_display_choices[0].value,
             ),
             schema.Text(
                 id = "custom_text",
                 name = "Custom Text",
-                desc = "Text you want to appear over the skyline.",
+                desc = "Text to display instead of the city name.",
                 icon = "pencil",
             ),
             schema.Dropdown(
                 id = "display_type",
                 icon = "tv",
                 name = "What to display",
-                desc = "What do you want this to display?",
+                desc = "Choose from all cities or selected cities.",
                 options = display_type,
                 default = display_type[0].value,
             ),

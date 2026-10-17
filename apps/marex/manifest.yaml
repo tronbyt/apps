@@ -9,5 +9,6 @@ packageName: marex
 recommendedInterval: 30
 category: weather
 published: '2026-06-30T19:20:58Z'
-updated: '2026-06-30T19:50:51Z'
+updated: '2026-10-01T18:38:43Z'
 tags: []
+supports64x64: true

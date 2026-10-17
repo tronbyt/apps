@@ -344,8 +344,10 @@ def main(config):
     # Fetch all radar images.
     frames_and_images = fetch_images(data["radar"], opts)
 
-    # Render an error message if any of the frames failed to render.
-    if any([image == None for (frame, image) in frames_and_images]):
+    # Skip frames whose image failed to load, so one failed request doesn't stop the whole map showing.
+    # Only show an error if none of them loaded.
+    frames_and_images = [(frame, image) for (frame, image) in frames_and_images if image != None]
+    if not frames_and_images:
         return render_error()
 
     map_images = [

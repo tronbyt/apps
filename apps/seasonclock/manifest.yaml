@@ -7,6 +7,7 @@ author: Joe Vivona
 fileName: seasonclock.star
 packageName: seasonclock
 supports2x: true
+supports64x64: true
 category: clocks
 tags:
   - clock
@@ -15,4 +16,4 @@ tags:
   - utility
   - seasons
 published: '2026-06-02T18:19:23Z'
-updated: '2026-09-22T10:22:59Z'
+updated: '2026-10-01T22:41:51Z'
