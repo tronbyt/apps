@@ -6,7 +6,7 @@ Author: Robert Ison
 """
 
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -102,11 +102,11 @@ def get_set_of_taxiway_ids(num):
 
 def get_single_box(type, text, width):
     if type == signage_types[1]:
-        return render.Box(width = width, height = 32, color = "#ffbe02", child = render.Box(width = width - 2, height = 30, color = "#000", child = render.Text(text, color = "#ffbe02", font = sign_font)))
+        return render.Box(width = width, height = canvas.height(), color = "#ffbe02", child = render.Box(width = width - 2, height = canvas.height() - 2, color = "#000", child = render.Text(text, color = "#ffbe02", font = sign_font)))
     elif type == signage_types[2]:
-        return render.Box(width = width, height = 32, color = "#ffbe02", child = render.Text(text, color = "#000", font = sign_font))
+        return render.Box(width = width, height = canvas.height(), color = "#ffbe02", child = render.Text(text, color = "#000", font = sign_font))
     else:  #type == signage_types[3]:
-        return render.Box(width = width, height = 32, color = "#d52124", child = render.Text(text, color = "#fff", font = sign_font))
+        return render.Box(width = width, height = canvas.height(), color = "#d52124", child = render.Text(text, color = "#fff", font = sign_font))
 
 def randomize(min, max):
     now = time.now()
