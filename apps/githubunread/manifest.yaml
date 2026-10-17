@@ -7,6 +7,7 @@ author: ElliottAYoung
 fileName: github_unread.star
 packageName: githubunread
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech
@@ -15,4 +16,4 @@ tags:
   - utility
   - count
 published: '2023-02-03T21:34:31Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:17:57Z'

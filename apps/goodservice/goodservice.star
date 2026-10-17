@@ -11,7 +11,7 @@ load("images/diamond_green.png", DIAMOND_GREEN_ASSET = "file")
 load("images/diamond_orange.png", DIAMOND_ORANGE_ASSET = "file")
 load("images/diamond_purple.png", DIAMOND_PURPLE_ASSET = "file")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -62,6 +62,15 @@ DIAMONDS = {
     "#b933ad": DIAMOND_PURPLE_ASSET.readall(),
     "#ff6319": DIAMOND_ORANGE_ASSET.readall(),
 }
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     routes_req = http.get(SUBWAY_NOW_ROUTES_URL)
@@ -251,7 +260,9 @@ def main(config):
 
     return render.Root(
         child = render.Marquee(
-            height = 32,
+            height = canvas.height(),
+            # Short boards sit mid-panel on the square; 64x32 keeps its top-aligned look.
+            align = "center" if is_square() else "start",
             offset_start = 16,
             offset_end = 16,
             scroll_direction = "vertical",
