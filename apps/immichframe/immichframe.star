@@ -3,6 +3,27 @@ load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 BORDER_SIZE = 2 if canvas.is2x() else 1
 
 def main(config):
@@ -23,7 +44,7 @@ def main(config):
 
     if res.status_code != 200:
         return render.Root(
-            child = render.WrappedText("Server not accessible"),
+            child = center_on_square(render.WrappedText("Server not accessible")),
         )
     else:
         headers = {"x-api-key": API_KEY}
@@ -48,13 +69,13 @@ def main(config):
                 status = res.json().get("statusCode")
                 if status != None:
                     return render.Root(
-                        child = render.WrappedText("Album not accessible"),
+                        child = center_on_square(render.WrappedText("Album not accessible")),
                     )
                 assets = res.json()["assets"]
                 assetCount = int(res.json()["assetCount"]) - 1
             if assetCount < 0:
                 return render.Root(
-                    child = render.WrappedText("Album is Empty"),
+                    child = center_on_square(render.WrappedText("Album is Empty")),
                 )
             randomCount = random.number(0, assetCount)
             assetID = assets[randomCount]["id"]
@@ -65,7 +86,7 @@ def main(config):
         res_req_metadata = http.get(IMG_URL, headers = headers)
         if (res_req_metadata.status_code != 200):
             return render.Root(
-                child = render.WrappedText("Unable to retrieve image. Check API Perms"),
+                child = center_on_square(render.WrappedText("Unable to retrieve image. Check API Perms")),
             )
         res_metadata = res_req_metadata.json()
         country = res_metadata["exifInfo"].get("country")
