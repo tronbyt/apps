@@ -807,10 +807,16 @@ def get_background_color(displayType, color):
     return color
 
 def get_logoType(logo):
-    logo = logo.replace("500/scoreboard", "500-dark/scoreboard")
-    logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
-    logo = get_cachable_data(logo + "&h=50&w=50")
-    return logo
+    # ESPN's default logos are drawn for light backgrounds and can vanish on the
+    # display (e.g. Swansea's black swan). Prefer the "500-dark" variant, and
+    # fall back to the default when a team has none (the CDN returns 404).
+    logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 1) + "&h=50&w=50"
+    dark = logo.replace("/500/", "/500-dark/", 1)
+    if dark != logo:
+        res = http.get(url = dark, ttl_seconds = CACHE_TTL_SECONDS)
+        if res.status_code == 200:
+            return res.body()
+    return get_cachable_data(logo)
 
 def get_logoSize():
     logosize = int(16)

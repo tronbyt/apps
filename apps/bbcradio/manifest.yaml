@@ -7,10 +7,11 @@ author: dinosaursrarr
 fileName: bbc_radio.star
 packageName: bbcradio
 recommendedInterval: 10
+supports64x64: true
 category: entertainment
 tags:
   - news
   - music
   - real-time
 published: '2023-07-27T14:32:50Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T18:58:08Z'

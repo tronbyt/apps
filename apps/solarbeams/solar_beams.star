@@ -2,7 +2,7 @@
 Applet: Solar Beams
 Summary: Sunlight kinetic art
 Description: A kinetic visualization of how much sunlight is hitting the ground, inspired by Breakfast's "Under the Sun" flip-disc artwork. The beams of light shift in density and speed based on real-time solar irradiance.
-Author: brombomb
+Author: Brombomb
 """
 
 load("encoding/json.star", "json")
