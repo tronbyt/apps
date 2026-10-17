@@ -1,7 +1,7 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/metro_icon.png", METRO_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 METRO_ICON = METRO_ICON_ASSET.readall()
@@ -143,7 +143,8 @@ def main(config):
                 animation_children.append(frame_2)
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Row(
                     children = [
@@ -172,7 +173,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
 def time_string(full_string, time_toggle):

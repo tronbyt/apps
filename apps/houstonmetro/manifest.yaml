@@ -7,9 +7,10 @@ author: DanielJRutledge
 fileName: houstonmetro.star
 packageName: houstonmetro
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - local
   - utility
 published: '2023-03-30T16:38:36Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T21:23:34Z'
