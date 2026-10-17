@@ -3,8 +3,6 @@ load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-BORDER_SIZE = 2 if canvas.is2x() else 1
-
 def is_square():
     """True on a 64x64 panel.
 
@@ -14,14 +12,31 @@ def is_square():
     w, h = canvas.size()
     return h == w
 
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
+BORDER_SIZE = 2 if canvas.is2x() else 1
+
 def main(config):
     URL = config.get("immich_url", "https://example.com")
     API_KEY = config.get("immich_api_key", "")
 
-    # SHOW_FAVORITES = config.bool("show_favorites", False)
+    SHOW_FAVORITES = config.bool("show_favorites", False)
     ALBUM = config.get("immich_album_id", "invalid")
     STATUS_URL = "%s/api/server/ping" % (URL)
+    ABOUT_URL = "%s/api/server/about" % (URL)
     ALBUM_URL = "%s/api/albums/%s" % (URL, ALBUM)
+    ALBUM_SEARCH_URL = "%s/api/search/metadata" % (URL)
+    FAV_SEARCH_URL = "%s/api/search/random" % (URL)
     SHOW_DATE = config.bool("show_date", True)
     SHOW_LOCATION = config.bool("show_location", False)
 
@@ -29,37 +44,49 @@ def main(config):
 
     if res.status_code != 200:
         return render.Root(
-            # Centre the block on the square (64x64); other panels unchanged.
-            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Server not accessible"))) if is_square() else render.WrappedText("Server not accessible"),
+            child = center_on_square(render.WrappedText("Server not accessible")),
         )
     else:
-        headers = {
-            "x-api-key": API_KEY,
-        }
-        res = http.get(ALBUM_URL, headers = headers)
-        status = res.json().get("statusCode")
-        if status != None:
-            return render.Root(
-                # Centre the block on the square (64x64); other panels unchanged.
-                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Album not accessible"))) if is_square() else render.WrappedText("Album not accessible"),
-            )
-        assets = res.json()["assets"]
-        assetCount = int(res.json()["assetCount"]) - 1
-        if assetCount < 0:
-            return render.Root(
-                # Centre the block on the square (64x64); other panels unchanged.
-                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Album is Empty"))) if is_square() else render.WrappedText("Album is Empty"),
-            )
-        randomCount = random.number(0, assetCount)
-        assetID = assets[randomCount]["id"]
+        headers = {"x-api-key": API_KEY}
+        assetID = "0000"
+        if SHOW_FAVORITES:
+            res_body = {"isFavorite": True, "type": "IMAGE", "size": 1}
+            res = http.post(FAV_SEARCH_URL, headers = headers, json_body = res_body)
+            print(res.json())
+            assetID = res.json()[0]["id"]
+        else:
+            assets = []
+            assetCount = 0
+            res = http.get(ABOUT_URL, headers = headers)
+            server_version = res.json()["version"].split(".")[0]
+            if server_version == "v3":
+                res_body = {"albumIds": ["%s" % (ALBUM)], "type": "IMAGE"}
+                res = http.post(ALBUM_SEARCH_URL, headers = headers, json_body = res_body)
+                assets = res.json()["assets"]["items"]
+                assetCount = int(res.json()["assets"]["count"]) - 1
+            else:
+                res = http.get(ALBUM_URL, headers = headers)
+                status = res.json().get("statusCode")
+                if status != None:
+                    return render.Root(
+                        child = center_on_square(render.WrappedText("Album not accessible")),
+                    )
+                assets = res.json()["assets"]
+                assetCount = int(res.json()["assetCount"]) - 1
+            if assetCount < 0:
+                return render.Root(
+                    child = center_on_square(render.WrappedText("Album is Empty")),
+                )
+            randomCount = random.number(0, assetCount)
+            assetID = assets[randomCount]["id"]
+
         IMG_URL = "%s/api/assets/%s" % (URL, assetID)
         print(IMG_URL)
         res_img = http.get("%s/thumbnail" % IMG_URL, headers = headers)
         res_req_metadata = http.get(IMG_URL, headers = headers)
         if (res_req_metadata.status_code != 200):
             return render.Root(
-                # Centre the block on the square (64x64); other panels unchanged.
-                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Unable to retrieve image. Check API Perms"))) if is_square() else render.WrappedText("Unable to retrieve image. Check API Perms"),
+                child = center_on_square(render.WrappedText("Unable to retrieve image. Check API Perms")),
             )
         res_metadata = res_req_metadata.json()
         country = res_metadata["exifInfo"].get("country")
@@ -67,25 +94,7 @@ def main(config):
         city = res_metadata["exifInfo"].get("city")
         photo_date = res_metadata["exifInfo"].get("dateTimeOriginal")
         return render.Root(
-            # Centre the block on the square (64x64); other panels unchanged.
-            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
-                children = [
-                    render.Box(
-                        padding = BORDER_SIZE,
-                        color = "#fff",
-                        child = render.Image(
-                            src = res_img.body(),
-                            width = canvas.width() - BORDER_SIZE,
-                            height = canvas.height() - BORDER_SIZE,
-                        ),
-                    ),
-                    render.Column(
-                        children = get_text(photo_date, country, state, city, SHOW_DATE, SHOW_LOCATION),
-                        main_align = "end",
-                        expanded = True,
-                    ),
-                ],
-            ))) if is_square() else render.Stack(
+            child = render.Stack(
                 children = [
                     render.Box(
                         padding = BORDER_SIZE,
@@ -168,7 +177,7 @@ def get_schema():
             schema.Toggle(
                 id = "show_favorites",
                 name = "Show Favorites",
-                desc = "(Does nothing right now) Show the images that you have added to your favorites. This will override any albums you have selected to be shown",
+                desc = "Show the images that you have added to your favorites. This will override any albums you have selected to be shown",
                 icon = "heart",
                 default = False,
             ),

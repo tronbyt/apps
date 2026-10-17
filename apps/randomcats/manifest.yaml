@@ -8,6 +8,7 @@ fileName: random_cats.star
 packageName: randomcats
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: entertainment
 tags:
   - nature
@@ -15,4 +16,4 @@ tags:
   - art
   - wide 2x support
 published: '2022-09-01T18:11:27Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T22:30:43Z'

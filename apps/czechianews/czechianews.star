@@ -9,7 +9,7 @@ load("html.star", "html")
 load("http.star", "http")
 load("images/irozhlas_icon.webp", IROZHLAS_ICON_ASSET = "file")
 load("images/seznam_icon.webp", SEZNAM_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 IROZHLAS_ICON = IROZHLAS_ICON_ASSET.readall()
@@ -82,7 +82,7 @@ def render_text(config, headlineText):
         delay = int(config.str("text_speed", TEXT_SPEED)),
         child = render.Marquee(
             width = 64,
-            height = 32,
+            height = canvas.height(),
             scroll_direction = "vertical",
             align = "center",
             child = render.Column(
