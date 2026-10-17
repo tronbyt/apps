@@ -64,7 +64,7 @@ load("images/united_kingdom_flag.webp", UNITED_KINGDOM_FLAG_ASSET = "file")
 load("images/united_states.png", UNITED_STATES_ASSET = "file")
 load("images/united_states_flag.webp", UNITED_STATES_FLAG_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -238,7 +238,30 @@ def display_instructions(config):
     instructions_2 = "then the flag of the two countries to help identify them. Then you'll see the roundels once more, then the stronger air force will have its roundel and "
     instructions_3 = "flag displayed.  You also have the choice to display the names of the countries in addition to the roundels and flags for even more clarity."
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Marquee(
+                    width = SCREEN_WIDTH,
+                    child = render.Text(title, color = "#60A5FA", font = "5x8"),
+                ),
+                render.Marquee(
+                    width = SCREEN_WIDTH,
+                    child = render.Text(instructions_1, color = "#93C5FD"),
+                    offset_start = len(title) * 5,
+                ),
+                render.Marquee(
+                    offset_start = (len(title) + len(instructions_1)) * 5,
+                    width = SCREEN_WIDTH,
+                    child = render.Text(instructions_2, color = "#93C5FD"),
+                ),
+                render.Marquee(
+                    offset_start = (len(title) + len(instructions_2) + len(instructions_1)) * 5,
+                    width = SCREEN_WIDTH,
+                    child = render.Text(instructions_3, color = "#93C5FD"),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Marquee(
                     width = SCREEN_WIDTH,
@@ -379,6 +402,15 @@ def pick_two_countries(pick):
     second = rest[randomize(0, len(rest) - 1)]
     return (first, second)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     show_instructions = config.bool("instructions", False)
     if show_instructions:
@@ -455,7 +487,10 @@ def main(config):
 
     return render.Root(
         delay = int(config.get("scroll", 45)),
-        child = render.Animation(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(
+            children = animated_frames,
+        )))) if is_square() else render.Animation(
             children = animated_frames,
         ),
         show_full_animation = True,

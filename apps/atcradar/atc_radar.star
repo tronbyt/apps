@@ -39,8 +39,7 @@ DEFAULT_LOCATION = json.encode({
 #Constants
 TESTMODE = False  # Set to False for production -- saves calls to the API during testing
 DELAY = 225  # Delay between frames (milliseconds)
-N_FRAMES = int(10 * 1000 / DELAY)  # Number of frames to equate to 10 seconds based on delay
-DEFAULT_DISTANCE = "10"
+DEFAULT_DISTANCE = "5"
 WHITE_COLOR = "#FFF"
 GREEN_COLOR = "#1C8E61"
 YELLOW_COLOR = "#FFFF00"
@@ -52,8 +51,6 @@ RADAR_X = 0  # x-position
 RADAR_Y = 1  # y-position
 RADAR_hue = 2  # hue
 RADAR_LIGHTNESS = 3  # lightness
-PI = 3.1415926535897932384626  # pi
-SCALE = 10000  # Scale value for generating random numbers to a specific decimal place [10 -> 0.1, 100 -> 0.01, 1000 -> .001]
 
 def deg_to_rad(num):
     return num * (math.pi / 180)
@@ -63,7 +60,7 @@ def rad_to_deg(num):
 
 def get_bounding_box(centrePoint, distance):
     distance = int(distance)
-    if distance < 0:
+    if distance <= 0:
         fail("Distance must be greater than 0")
 
     # coordinate limits
@@ -95,8 +92,8 @@ def get_bounding_box(centrePoint, distance):
     maxLon = 0
 
     # define deltaLon to help determine min and max longitudes
-    deltaLon = math.asin(math.sin(radDist) / math.cos(radLat))
     if (minLat > MIN_LAT) and (maxLat < MAX_LAT):
+        deltaLon = math.asin(math.sin(radDist) / math.cos(radLat))
         minLon = radLon - deltaLon
         maxLon = radLon + deltaLon
         if minLon < MIN_LON:
@@ -116,10 +113,15 @@ def get_bounding_box(centrePoint, distance):
     ]
 
 def reduce_accuracy(coord):
-    coord_list = coord.split(".")
+    coord_list = str(coord).split(".")
+
+    if len(coord_list) == 1:
+        return coord_list[0] + ".000"
+
     coord_remainder = coord_list[1]
     if len(coord_remainder) > 3:
         coord_remainder = coord_remainder[0:3]
+
     return ".".join([coord_list[0], coord_remainder])
 
 def update_display(text):
@@ -145,39 +147,26 @@ def get_distance(lat_1, lng_1, lat_2, lng_2):
 
     # buildifier: disable=integer-division
     temp = (math.pow(math.sin(d_lat / 2), 2) + math.cos(lat_1) * math.cos(lat_2) * math.pow(math.sin(d_lng / 2), 2))
-    distance = 3959.9986576 * (2 * math.atan2(math.sqrt(temp), math.sqrt(1 - temp)))
-    return math.floor(distance)
-
-def get_bearing(lat_1, lng_1, lat_2, lng_2):
-    lat_1 = math.radians(float(lat_1))
-    lat_2 = math.radians(float(lat_2))
-    lng_1 = math.radians(float(lng_1))
-    lng_2 = math.radians(float(lng_2))
-
-    #Let ‘R’ be the radius of Earth,
-    #‘L’ be the longitude,
-    #‘θ’ be latitude,
-    #‘β‘ be get_Bearing.
-    #β = atan2(X,Y) where
-    #X = cos θb * sin ∆L
-    #Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
-
-    x = math.cos(lat_2) * math.sin((lng_2 - lng_1))
-    y = math.cos(lat_1) * math.sin(lat_2) - math.sin(lat_1) * math.cos(lat_2) * math.cos((lng_2 - lng_1))
-    bearing = math.degrees(math.atan2(x, y))
-
-    # our compass brackets are broken up in 45 degree increments from 0 8
-    # to find the right bracket we need degrees from 0 to 360 then divide by 45 and round
-    # what we get though is degrees -180 to 0 to 180 so this will convert to 0 to 360
-    if bearing < 0:
-        bearing = 360 + bearing
-
-    return bearing
+    temp = max(0.0, min(1.0, temp))
+    distance = 6371.0 * (2 * math.atan2(math.sqrt(temp), math.sqrt(1 - temp)))
+    return distance
 
 def get_pixel_movement(deg):
-    # have bearning in degrees, now convert pixel movements equivalent
-    compass_brackets = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [1, -1], [-1, 0], [-1, -1], [0, -1]]
-    return compass_brackets[int(math.round(deg / 45))]
+    compass_brackets = [
+        [0, -1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+        [-1, 1],
+        [-1, 0],
+        [-1, -1],
+    ]
+
+    heading = deg % 360
+    index = int(math.floor((heading + 22.5) / 45)) % 8
+
+    return compass_brackets[index]
 
 def display_instructions():
     ##############################################################################################################################################################################################################################
@@ -211,7 +200,7 @@ def display_instructions():
     )
 
 def main(config):
-    show_instructions = config.bool("instructions", True)
+    show_instructions = config.bool("instructions", False)
     if show_instructions:
         return display_instructions()
 
@@ -228,10 +217,13 @@ def main(config):
         )
 
     hide_when_nothing_to_display = config.bool("hide", True)
-    hide_data_older_than_seconds = int(config.get("hideold", 600))
+    hide_data_older_than_seconds = int(config.get("hideold", 900))
 
     location = json.decode(config.get("location", DEFAULT_LOCATION))
-    cache_tty = int(config.get("cache", 60))
+    cache_tty = int(config.get("cache", 300))
+
+    if cache_tty <= 0:
+        fail("Update Frequency must be greater than 0")
 
     orig_lat = location["lat"]
     orig_lng = location["lng"]
@@ -240,6 +232,8 @@ def main(config):
     lng = reduce_accuracy(orig_lng)
 
     search_distance = int(config.get("distance", DEFAULT_DISTANCE))
+    if search_distance <= 0:
+        fail("Distance must be greater than 0")
 
     if (config.bool("info_bar", True)):
         radar_height = 31
@@ -247,9 +241,8 @@ def main(config):
         radar_height = 32
 
     flights_cache_key = "_".join(["All", "Flight", "Data", lat, lng])
-    flights = get_flights_from_cache(flights_cache_key)
+    flights, data_from_date = get_flights_from_cache(flights_cache_key)
     display_flights = []
-    data_from_date = None
 
     if flights == None:
         #print("Contacting Flight Radar")
@@ -270,22 +263,15 @@ def main(config):
             if rep.status_code != 200:
                 fail("Failed to fetch flights with status code:", rep.status_code)
 
-            if rep.json()["aircraft"]:
-                flights = rep.json()["aircraft"]
-                set_cache_flight_data(flights_cache_key, cache_tty, flights)
-                data_from_date = time.now()
-
-            else:
-                flights = []
-    else:
-        #print("Got flight data from cache")
-        data_from_date = get_time_from_cache(flights_cache_key)
+            flights = rep.json()["aircraft"]
+            set_cache_flight_data(flights_cache_key, cache_tty, flights)
+            data_from_date = time.now()
 
     # calculate the area of the map we want to display
     extremes = initialize_extremes(orig_lat, orig_lng)
 
     #calculate the nearest flight
-    nearest_flight = 0
+    nearest_flight = None
 
     if flights:
         for flight in flights:
@@ -293,7 +279,8 @@ def main(config):
 
             #update extremes with each flight we want to plot
             if distance < search_distance:
-                nearest_flight = distance if nearest_flight == 0 else (distance if distance < nearest_flight else nearest_flight)
+                if nearest_flight == None or distance < nearest_flight:
+                    nearest_flight = distance
                 extremes = update_extremes(flight[2], flight[3], extremes)
                 display_flights.append(flight)
 
@@ -304,7 +291,7 @@ def main(config):
 
         info_bar_length = int(WIDTH * min((nearest_flight / search_distance), 1))
         info_bar_color = get_stale_warning_color((time.now() - data_from_date).seconds, cache_tty)
-        return get_flight_radar(display_flights, extremes, orig_lat, orig_lng, info_bar_length, info_bar_color, radar_height)
+        return get_flight_radar(display_flights, extremes, orig_lat, orig_lng, info_bar_length, info_bar_color, radar_height, config.bool("info_bar", True))
     elif hide_when_nothing_to_display == True:
         return []
     else:
@@ -322,9 +309,9 @@ def main(config):
 def get_stale_warning_color(seconds, max_seconds):
     percentage = seconds / max_seconds
     color = WHITE_COLOR
-    if (percentage < 0.33):
+    if percentage < (1.0 / 3):
         color = GREEN_COLOR
-    elif (percentage < 0.66):
+    elif percentage < (2.0 / 3):
         color = YELLOW_COLOR
     else:
         color = RED_COLOR
@@ -345,21 +332,15 @@ def initialize_extremes(lat, lng):
 
 def get_flights_from_cache(key):
     cache_data = cache.get(key)
-    if cache_data == None:
-        return None
-    else:
-        cache_data = json.decode(cache_data)
-        return cache_data[0]
-
-def get_time_from_cache(key):
-    cache_data = cache.get(key)
-    #print("Cache_data: %s" % cache_data)
 
     if cache_data == None:
-        return None
-    else:
-        cache_data = json.decode(cache_data)
-        return time.from_timestamp(int(cache_data[1][0]))
+        return None, None
+
+    cache_data = json.decode(cache_data)
+    flights = cache_data[0]
+    fetched_at = time.from_timestamp(int(cache_data[1][0]))
+
+    return flights, fetched_at
 
 def set_cache_flight_data(key, tty, flights):
     cache_data = []
@@ -378,7 +359,7 @@ def update_extremes(lat1, lng1, extremes):
         extremes[3] = lng1
     return extremes
 
-def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, info_bar_color, radar_height):
+def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, info_bar_color, radar_height, show_info_bar):
     radar = []
     frames = []
 
@@ -397,12 +378,11 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
         radar.append(create_dot(radar_height, flight[2], flight[3], extremes, color_plane, 70))
 
     # Draw initial frames
-    for _ in radar:
+    for _ in range(2):
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
     # create updated radar (everyone moves one pixel based on heading)
-    radar.append(create_dot(radar_height, float(home_lat), float(home_lng), extremes, color, 70))
     for flight in flights:
         adjustment = get_pixel_movement(flight[4])
 
@@ -410,25 +390,27 @@ def get_flight_radar(flights, extremes, home_lat, home_lng, info_bar_length, inf
         radar.append(create_dot(radar_height, flight[2], flight[3], extremes, color_plane, get_brightness(flight), adjustment[0], adjustment[1]))
 
     # Draw frames
-    for _ in radar:
+    for _ in range(1):
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
     # Draw frames
-    for _ in radar:
+    for _ in range(1):
         # Draw radar into frame
         frames.append(render_frame(generate_screen(radar, radar_height)))
 
-    return renderAnimation(frames, info_bar_length, info_bar_color)
+    return renderAnimation(frames, info_bar_length, info_bar_color, show_info_bar)
 
 def get_brightness(flight):
     #brightest for lower flights, dim for flights very high
-    return max(math.floor(70 - flight[5] / 35000 * 60), 10)
+    return max(10, min(70, math.floor(70 - flight[5] / 35000 * 60)))
 
-def create_dot(radar_height, lng, lat, extremes, color, lightness = 35, dx = 0, dy = 0):
+def create_dot(radar_height, lat, lng, extremes, color, lightness = 35, dx = 0, dy = 0):
     hue, _, _ = hex_rgb_to_hsl(color)
-    x = min(WIDTH - 1, get_coordinate(lat, extremes[2], extremes[3], WIDTH - 1) + dx)
-    y = min(radar_height - 1, (radar_height - 1) - (get_coordinate(lng, extremes[0], extremes[1], radar_height - 1)) + dy)
+
+    x = get_coordinate(lng, extremes[2], extremes[3], WIDTH - 1) + dx
+    y = (radar_height - 1) - get_coordinate(lat, extremes[0], extremes[1], radar_height - 1) + dy
+
     return [x, y, hue, lightness]
 
 def get_coordinate(flight_coordinate, lower, upper, size):
@@ -527,9 +509,22 @@ def int_to_hex(value):
 
 def generate_screen(array, radar_height):
     arr = [["#000000" for i in range(WIDTH)] for j in range(radar_height)]
-    for list in array:
-        if list[RADAR_LIGHTNESS] > 0:
-            arr[int(list[RADAR_Y])][int(list[RADAR_X])] = hsl_to_hex_rgb(list[RADAR_hue], 1., list[RADAR_LIGHTNESS] / 100)
+
+    for dot in array[1:] + array[:1]:
+        x = int(dot[RADAR_X])
+        y = int(dot[RADAR_Y])
+
+        if (
+            x >= 0 and x < WIDTH and
+            y >= 0 and y < radar_height and
+            dot[RADAR_LIGHTNESS] > 0
+        ):
+            arr[y][x] = hsl_to_hex_rgb(
+                dot[RADAR_hue],
+                1.0,
+                dot[RADAR_LIGHTNESS] / 100,
+            )
+
     return arr
 
 def render_frame(frame):
@@ -547,16 +542,27 @@ def render_row(row):
 def render_cell(cell):
     return render.Box(width = 1, height = 1, color = cell)
 
-def renderAnimation(frames, info_bar_length, info_bar_color):
-    return render.Root(
-        render.Column(
-            children = [
-                render.Animation(
-                    children = frames,
-                ),
-                render.Box(width = info_bar_length, height = 1, color = info_bar_color),
-            ],
+def renderAnimation(frames, info_bar_length, info_bar_color, show_info_bar):
+    children = [
+        render.Animation(
+            children = frames,
         ),
+    ]
+
+    if show_info_bar:
+        children.append(
+            render.Box(
+                width = info_bar_length,
+                height = 1,
+                color = info_bar_color,
+            ),
+        )
+
+    return render.Root(
+        child = render.Column(
+            children = children,
+        ),
+        delay = DELAY,
     )
 
 def get_schema():

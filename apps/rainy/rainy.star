@@ -11,12 +11,43 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 CACHE_TTL = 300
 BAR_X = 14
 BAR_W = 48
 BAR_H = 7
 PX_PER_HOUR = 2
 HOURS = 24
+
+NEXT_WEEKDAY = {
+    "MON": "TUE",
+    "TUE": "WED",
+    "WED": "THU",
+    "THU": "FRI",
+    "FRI": "SAT",
+    "SAT": "SUN",
+    "SUN": "MON",
+}
 
 # gray -> cyan -> blue -> purple -> red (mm / hour)
 INTENSITY = [
@@ -48,14 +79,12 @@ DEFAULT_LOCATION = """{
     "timezone": "America/Chicago"
 }"""
 
-def is_square():
-    """True on a 64x64 panel.
+def _day_labels(config, now):
+    if config.get("day_labels") != "weekday":
+        return "TDY", "TOM"
 
-    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
-    also 64 tall.
-    """
-    w, h = canvas.size()
-    return h == w
+    today = now.format("Mon").upper()
+    return today, NEXT_WEEKDAY[today]
 
 def main(config):
     loc = _location(config)
@@ -71,6 +100,7 @@ def main(config):
     is_day = fc["is_day"]
 
     now = time.now().in_location(loc["timezone"])
+    today_label, tomorrow_label = _day_labels(config, now)
     now_min = int(now.format("15")) * 60 + int(now.format("04"))
 
     # Calculate now indicator position on today's bar
@@ -86,10 +116,10 @@ def main(config):
             pad = (1, 0, 0, 0),
             child = _header(code, is_day),
         ),
-        # Today row: "TDY" + top bar
+        # Today row: label + top bar
         render.Padding(
             pad = (1, 7, 0, 0),
-            child = render.Text("TDY", font = "tom-thumb", color = "#9CA3AF"),
+            child = render.Text(today_label, font = "tom-thumb", color = "#9CA3AF"),
         ),
         render.Padding(
             pad = (BAR_X, 6, 0, 0),
@@ -105,10 +135,10 @@ def main(config):
             pad = (0, 14, 0, 0),
             child = _ticks(),
         ),
-        # Tomorrow row: "TOM" + bottom bar
+        # Tomorrow row: label + bottom bar
         render.Padding(
             pad = (1, 22, 0, 0),
-            child = render.Text("TOM", font = "tom-thumb", color = "#9CA3AF"),
+            child = render.Text(tomorrow_label, font = "tom-thumb", color = "#9CA3AF"),
         ),
         render.Padding(
             pad = (BAR_X, 21, 0, 0),
@@ -118,18 +148,12 @@ def main(config):
 
     return render.Root(
         max_age = 600,
-        # Centre the block on the square (64x64); other panels unchanged.
-        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+        child = center_on_square(render.Box(
             width = 64,
             height = 32,
             color = "#000000",
             child = render.Stack(children = stack_children),
-        ))) if is_square() else render.Box(
-            width = 64,
-            height = 32,
-            color = "#000000",
-            child = render.Stack(children = stack_children),
-        ),
+        )),
     )
 
 def _header(code, is_day):
@@ -493,18 +517,7 @@ def _location(config):
 
 def _error(msg):
     return render.Root(
-        # Centre the block on the square (64x64); other panels unchanged.
-        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
-            color = "#000000",
-            child = render.Column(
-                main_align = "center",
-                cross_align = "center",
-                children = [
-                    render.Text("RAINY?", font = "tom-thumb", color = "#22D3EE"),
-                    render.Text(msg, font = "tom-thumb", color = "#E5E7EB"),
-                ],
-            ),
-        ))) if is_square() else render.Box(
+        child = render.Box(
             color = "#000000",
             child = render.Column(
                 main_align = "center",
@@ -559,6 +572,17 @@ def get_schema():
                 name = "Longitude Override",
                 desc = "Optional longitude override (e.g. -95.3698)",
                 icon = "mapPin",
+            ),
+            schema.Dropdown(
+                id = "day_labels",
+                name = "Day labels",
+                desc = "Choose relative labels or weekday names",
+                icon = "calendarDay",
+                default = "relative",
+                options = [
+                    schema.Option(display = "Today / Tomorrow", value = "relative"),
+                    schema.Option(display = "Day of Week", value = "weekday"),
+                ],
             ),
         ],
     )

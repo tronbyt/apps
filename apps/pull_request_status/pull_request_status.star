@@ -1,4 +1,3 @@
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("images/closed_icon_36165f4e.png", CLOSED_ICON_36165f4e_ASSET = "file")
 load("images/merged_icon_f460a18e.png", MERGED_ICON_f460a18e_ASSET = "file")
@@ -98,7 +97,7 @@ def main(config):
                                 width = 62 - image_height,
                             ),
                             (render.Image(
-                                src = base64.decode(status_icon),
+                                src = status_icon,
                                 height = image_height,
                             ) if status_icon else render.Text(
                                 "?",
