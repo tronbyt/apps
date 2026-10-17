@@ -40,6 +40,20 @@ SPACER_COLOR = "#000"
 ARTICLE_AREA_HEIGHT = canvas.height() - TITLE_HEIGHT - (0 if IS2X else 1)
 SPACER_HEIGHT = 6 if IS2X else 3
 
+# Devices reject a webp over 460,000 bytes (firmware HTTP_BUFFER_SIZE_MAX) and
+# show an "oversize" screen instead. File size grows with scroll length, so cap
+# the marquee at a frame budget: ~540 bytes/frame worst case at 2x and ~250 at
+# 1x keeps the render under ~400 KB.
+MAX_SCROLL_FRAMES = 700 if IS2X else 1500
+
+# pixlet's marquee silently clips content taller than 20x its height, so treat
+# that as not fitting either and drop whole items instead of cutting mid-list.
+MARQUEE_MAX_SCALE = 20
+SCROLL_BUDGET = min(MAX_SCROLL_FRAMES, MARQUEE_MAX_SCALE * ARTICLE_AREA_HEIGHT)
+
+# rows per item from displayItem(): year, text, spacer
+ROWS_PER_ITEM = 3
+
 # data is regenerated through the day with a freshly shuffled item ordering - cache 1 hour so each refresh
 # surfaces a new "semi-random" selection while still saving network traffic.
 CACHE_TTL_SECONDS = 3600
@@ -116,7 +130,7 @@ def main(config):
             offset_start = ARTICLE_AREA_HEIGHT,
             child = render.Column(
                 main_align = "space_between",
-                children = getItems(json_data, config.bool(OPTBIRTHS, True), config.bool(OPTDEATHS, True)),
+                children = fit_rows(getItems(json_data, config.bool(OPTBIRTHS, True), config.bool(OPTDEATHS, True))),
             ),
         )
     else:
@@ -214,6 +228,24 @@ def addEvents(out, events, events_order, cursor, count):
         if item != None:
             out += displayItem(item, "")
     return out, cursor
+
+def fit_rows(rows):
+    # Drop trailing items (whole year/text/spacer groups) until the scroll fits
+    # SCROLL_BUDGET, always keeping the first item, so the render stays
+    # under the device's webp size cap.
+    for _ in range(len(rows) // ROWS_PER_ITEM - 1):
+        marquee = render.Marquee(
+            height = ARTICLE_AREA_HEIGHT,
+            scroll_direction = "vertical",
+            offset_start = ARTICLE_AREA_HEIGHT,
+            child = render.Column(children = rows),
+        )
+
+        # frame_count() lays out on a 64x32 canvas unless given real bounds
+        if marquee.frame_count((0, 0, canvas.width(), canvas.height())) <= SCROLL_BUDGET:
+            break
+        rows = rows[:-ROWS_PER_ITEM]
+    return rows
 
 def displayItem(item, prefix):
     return [

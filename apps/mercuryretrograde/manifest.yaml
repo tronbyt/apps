@@ -7,8 +7,6 @@ author: with0ut
 fileName: mercuryretrograde.star
 packageName: mercuryretrograde
 recommendedInterval: 5
-broken: true
-brokenReason: The API endpoint mercuryretrogradeapi.com is timed out/unreachable.
 category: reference
 tags:
   - horoscope
