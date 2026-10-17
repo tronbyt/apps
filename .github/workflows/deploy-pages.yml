@@ -14,6 +14,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for deployment (for example, merged app-viewer-source changes)'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -44,9 +49,22 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
+        working-directory: app-viewer-source/app-viewer
+        run: npm ci
+
+      # Social cards are named after a hash of their content, so cards from the previous deployment can be reused
+      # instead of drawn again. If they can't be fetched, every card is drawn as before.
+      - name: Get the previous deployment's social cards
+        continue-on-error: true
         run: |
-          cd app-viewer-source/app-viewer
-          npm install
+          mkdir -p previous-cards
+          git -C main fetch --depth 1 origin gh-pages
+          if git -C main cat-file -e FETCH_HEAD:cards 2>/dev/null; then
+            git -C main archive FETCH_HEAD cards | tar -x -C previous-cards
+            echo "Reusing up to $(ls previous-cards/cards | wc -l) previous cards"
+          else
+            echo "The previous deployment has no cards yet; every card will be drawn"
+          fi
 
       - name: Build site into staging directory
         run: |
@@ -60,8 +78,25 @@ jobs:
           cp app-viewer-source/app-viewer/dots.svg _site/
           cp app-viewer-source/app-viewer/dots@2x.svg _site/
 
+          # These assets are introduced by the upcoming Viewer changes. Copy
+          # them when present so this workflow works before and after those
+          # changes merge to app-viewer-source.
+          for asset in readme-images.js dots@64x64.svg github-logo.svg; do
+            if [ -f "app-viewer-source/app-viewer/${asset}" ]; then
+              cp "app-viewer-source/app-viewer/${asset}" _site/
+            fi
+          done
+
           # Generate apps.json directly into the site root (using apps from main branch)
-          node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps
+          node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps --reuse-cards previous-cards/cards
+
+          # Record which repository and app-data revision produced this
+          # catalogue so the Viewer can link each app to its exact source,
+          # including on forks.
+          node main/.github/scripts/write-app-viewer-catalogue-metadata.mjs \
+            --output _site/catalogue-meta.json \
+            --repository "${GITHUB_REPOSITORY}" \
+            --commit "$(git -C main rev-parse HEAD)"
 
           # Copy the apps directory (images and other assets referenced by the viewer)
           cp -r main/apps _site/apps
@@ -72,6 +107,9 @@ jobs:
           # Disable Jekyll
           touch _site/.nojekyll
 
+      - name: Check generated site references
+        run: node main/.github/scripts/check-app-viewer-site.mjs _site
+
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -79,3 +117,6 @@ jobs:
           publish_dir: ./_site
           publish_branch: gh-pages
           force_orphan: true
+          # The App Viewer's own domain. Only the official repository claims it, so a fork's deploy stays on its
+          # github.io address.
+          cname: ${{ github.repository == 'tronbyt/apps' && 'apps.tronbyt.com' || '' }}

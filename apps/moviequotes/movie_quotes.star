@@ -8,8 +8,17 @@ Author: Austin Fonacier
 load("encoding/csv.star", "csv")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     quote = get_random_quote()
@@ -17,7 +26,11 @@ def main():
     movie = quote[2]
     year = quote[3]
     return render.Root(
+        # The bands total 31 rows; on a square panel the column expands and
+        # spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly",
             children = [
                 render.Box(
                     height = 10,

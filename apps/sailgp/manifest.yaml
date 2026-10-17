@@ -8,10 +8,11 @@ fileName: sailgp.star
 packageName: sailgp
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: sports
 tags:
   - leaderboards
   - nature
   - sailing
 published: '2023-06-27T21:00:11Z'
-updated: '2026-07-07T10:21:37Z'
+updated: '2026-10-01T22:30:43Z'
