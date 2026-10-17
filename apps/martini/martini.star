@@ -10,7 +10,7 @@ load("images/martini_olives.png", MARTINI_OLIVES_ASSET = "file")
 load("images/martini_onions.png", MARTINI_ONIONS_ASSET = "file")
 load("images/martini_orange.png", MARTINI_ORANGE_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 MARTINI_LEMON = MARTINI_LEMON_ASSET.readall()
@@ -35,6 +35,15 @@ def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom =
 #    for var in args:
 #        i = i + 1
 #        print("%s: %s" % (i, var))
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     base = config.get("base", base_options[len(base_options) - 1].value)
@@ -89,7 +98,13 @@ def main(config):
     message = "     " + PHRASES[random.number(0, len(PHRASES) - 1)] % message
 
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                selected_image,
+                add_padding_to_child_element(render.Marquee(width = 50, child = render.Text(content = message, color = "#fff", font = FONT)), 12, 20),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 selected_image,
                 add_padding_to_child_element(render.Marquee(width = 50, child = render.Text(content = message, color = "#fff", font = FONT)), 12, 20),
