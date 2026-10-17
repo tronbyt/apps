@@ -7,10 +7,11 @@ author: Robert Ison
 fileName: accidentfreedays.star
 packageName: accidentfreedays
 recommendedInterval: 240
+supports64x64: true
 category: utilities
 tags:
   - lifestyle
   - utility
   - tracking
 published: '2023-08-12T12:20:03Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T19:59:14Z'
