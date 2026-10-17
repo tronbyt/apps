@@ -13,7 +13,7 @@ load("humanize.star", "humanize")
 load("images/alien_error.gif", ALIEN_ERROR_ASSET = "file")
 load("images/celebrate_fireworks.gif", CELEBRATE_FIREWORKS_ASSET = "file")
 load("images/starfield.gif", STARFIELD_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -58,6 +58,15 @@ MILESTONE_DEFINITIONS = [
 
 # MAIN
 # ----
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     store_name = config.get("store_name")
     api_token = config.get("api_token")
@@ -92,7 +101,21 @@ def main(config):
     if should_celebrate(celebration):
         print("Celebrating.")
         return render.Root(
-            render.Stack(
+            # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+            (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+                children = [
+                    render.Image(CELEBRATE_FIREWORKS),
+                    render.Box(
+                        render.Column(
+                            cross_align = "center",
+                            children = [
+                                render.Text(get_formatted_number(milestone)),
+                                render.Text("orders!"),
+                            ],
+                        ),
+                    ),
+                ],
+            )))) if is_square() else render.Stack(
                 children = [
                     render.Image(CELEBRATE_FIREWORKS),
                     render.Box(
@@ -303,7 +326,25 @@ def get_order_count(store_name, api_token):
 # Returns: A Pixlet root element
 def error_view(message):
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Image(STARFIELD),
+                render.Column(
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                    children = [
+                        render.Image(ALIEN_ERROR),
+                        render.Marquee(
+                            width = 64,
+                            offset_start = 64,
+                            child = render.Text(content = message, color = "#FF0"),
+                        ),
+                    ],
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Image(STARFIELD),
                 render.Column(
