@@ -6,10 +6,11 @@ desc: For a selected team, this app shows the scorecard for a current match. If 
 author: adilansari
 fileName: mens_cricket.star
 packageName: menscricket
-supports64x64: true
 category: sports
 tags:
   - real-time
   - cricket
+supports2x: true
+supports64x64: true
 published: '2024-09-25T14:46:07Z'
-updated: '2026-10-01T21:54:45Z'
+updated: '2026-08-30T02:36:04Z'

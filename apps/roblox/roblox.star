@@ -5,6 +5,7 @@ Description: Real time views of your Roblox experiences.
 Author: Chad Milburn / CODESTRONG
 """
 
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/roblox_dark_logo.png", ROBLOX_DARK_LOGO_ASSET = "file")
@@ -51,8 +52,12 @@ def main(config):
         print("Using cached user id")
         userRobloxId = str(user_id_cached)
     else:
-        getUserId = "https://users.roblox.com/v1/users/search?keyword=%s&limit=10" % username
-        repGetUserId = http.get(getUserId, ttl_seconds = TTL_SECONDS)
+        # Exact username lookup (the keyword search endpoint is heavily rate limited)
+        repGetUserId = http.post(
+            "https://users.roblox.com/v1/usernames/users",
+            json_body = {"usernames": [username], "excludeBannedUsers": True},
+            ttl_seconds = TTL_SECONDS,
+        )
         if repGetUserId.status_code == 200:
             print("Fetching user id")
             userId = "%d" % repGetUserId.json()["data"][0]["id"] if len(repGetUserId.json()["data"]) > 0 else ""
@@ -119,7 +124,7 @@ def main(config):
             profilePhotoImg = ""
         else:
             profilePhotoUrl = repGetProfilePhoto.json()["data"][0]["imageUrl"]
-            profilePhotoImg = http.get(profilePhotoUrl, ttl_seconds = TTL_SECONDS).body()
+            profilePhotoImg = http.get(profilePhotoUrl, ttl_seconds = TTL_SECONDS).body() if profilePhotoUrl else ""
 
     ### GET ONLINE STYLE
     user_online_status_cached = cache.get("user_online_status_%s" % username)
@@ -128,13 +133,8 @@ def main(config):
         isOnline = json.decode(user_online_status_cached)
     else:
         print("Fetching user online status")
-        getUserOnlineStatus = "https://api.roblox.com/users/%s/onlinestatus/" % userRobloxId
-        repGetUserOnlineStatus = http.get(getUserOnlineStatus, ttl_seconds = TTL_SECONDS)
-        if repGetUserOnlineStatus.status_code != 200:
-            print("Fetching user online status failed with status %d" % repGetUserOnlineStatus.status_code)
-            isOnline = False
-        else:
-            isOnline = repGetUserOnlineStatus.json()["IsOnline"]
+
+        isOnline = get_online_ids([int(userRobloxId)]).get(int(userRobloxId), False)
 
     ### FRIEND MODE
     if view_mode == VIEW_FRIENDS:
@@ -154,11 +154,20 @@ def main(config):
                 userFriends = repGetUsersFriends.json()["data"]
 
         ### POPULATE FRIENDS LIST
+        # The friends list no longer includes names or online status, so look those up for all friends at once
+        friendIds = [friend["id"] for friend in userFriends]
+        friendNames = get_usernames(friendIds)
+        friendOnline = get_online_ids(friendIds)
         friendsList = []
         for friend in userFriends:
             getUserAvatar = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=%d&size=48x48&format=Png&isCircular=true" % friend["id"]
             repGetUserAvatar = http.get(getUserAvatar)
-            friendObject = {"username": friend["name"], "id": "%d" % friend["id"], "isOnline": friend["isOnline"], "avatarUrl": repGetUserAvatar.json()["data"][0]["imageUrl"]}
+            friendObject = {
+                "username": friendNames.get(friend["id"], friend.get("name", "")),
+                "id": "%d" % friend["id"],
+                "isOnline": friendOnline.get(friend["id"], False),
+                "avatarUrl": repGetUserAvatar.json()["data"][0]["imageUrl"],
+            }
             friendsList.append(friendObject)
 
         ### SORT BY ONLINE STATUS
@@ -177,7 +186,9 @@ def main(config):
                 friendAvatar = ""
                 if len(userFriends) != 0 and friend < len(userFriends):
                     friendAvatarUrl = friendsList[friend]["avatarUrl"]
-                    friendAvatar = http.get(friendAvatarUrl, ttl_seconds = TTL_SECONDS).body()
+
+                    # Roblox gives no image URL while an avatar is pending or blocked
+                    friendAvatar = http.get(friendAvatarUrl, ttl_seconds = TTL_SECONDS).body() if friendAvatarUrl else ""
 
             renderFriend.append(
                 render.Padding(
@@ -243,7 +254,7 @@ def main(config):
                 gameAvatar = ""
                 if len(userFavoriteGames) != 0 and game < len(userFavoriteGames):
                     gameAvatarUrl = favoriteGamesList[game]["avatarUrl"]
-                    gameAvatar = http.get(gameAvatarUrl, ttl_seconds = TTL_SECONDS).body()
+                    gameAvatar = http.get(gameAvatarUrl, ttl_seconds = TTL_SECONDS).body() if gameAvatarUrl else ""
 
             renderGame.append(
                 render.Padding(
@@ -317,6 +328,35 @@ def main(config):
             ],
         ),
     )
+
+# Usernames for a list of user ids, as a map of id -> username
+def get_usernames(user_ids):
+    if not user_ids:
+        return {}
+    rep = http.post(
+        "https://users.roblox.com/v1/users",
+        json_body = {"userIds": user_ids, "excludeBannedUsers": False},
+        ttl_seconds = TTL_SECONDS,
+    )
+    if rep.status_code != 200:
+        print("Fetching usernames failed with status %d" % rep.status_code)
+        return {}
+    return {user["id"]: user["name"] for user in rep.json().get("data", [])}
+
+# Online status for a list of user ids, as a map of id -> True/False.
+# Presence types: 0 offline, 1 online, 2 in a game, 3 in Roblox Studio
+def get_online_ids(user_ids):
+    if not user_ids:
+        return {}
+    rep = http.post(
+        "https://presence.roblox.com/v1/presence/users",
+        json_body = {"userIds": user_ids},
+        ttl_seconds = TTL_SECONDS,
+    )
+    if rep.status_code != 200:
+        print("Fetching online status failed with status %d" % rep.status_code)
+        return {}
+    return {p["userId"]: p.get("userPresenceType", 0) != 0 for p in rep.json().get("userPresences", [])}
 
 def get_schema():
     userIcons = ("userAstronaut", "userDoctor", "userTie", "userNurse", "userNinja")
