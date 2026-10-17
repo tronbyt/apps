@@ -83,8 +83,23 @@ def main(config):
 
     width = canvas.width()
     height = canvas.height()
-    img_w = width if is_movie else int((4.0 / 3.0) * height)
-    text_w = 0 if is_movie else width - img_w
+    square = is_square()
+
+    # A 4:3 frame sized to the full height of a square panel would be 85px
+    # wide on a 64px panel: wider than the canvas, leaving the sidebar beside
+    # it a negative width. So on a square panel the frame takes the full width
+    # at its own aspect ratio and the episode strip goes underneath it, which
+    # also stops the frame being squashed to fit.
+    if square:
+        img_w = width
+        img_h = int((3.0 / 4.0) * width)
+        strip_h = height - img_h
+        text_w = 0
+    else:
+        img_w = width if is_movie else int((4.0 / 3.0) * height)
+        img_h = height
+        strip_h = 0
+        text_w = 0 if is_movie else width - img_w
 
     # 3. Optimized Animation Retrieval
     if animate:
@@ -111,13 +126,20 @@ def main(config):
                 # Each image call is cached for 24h
                 f_img_res = http.get(IMAGE_URL_BASE % (f_item.get("Episode"), int(f_item.get("Timestamp"))), ttl_seconds = CACHE_TTL)
                 if f_img_res.status_code == 200:
-                    image_frames.append(render.Image(src = f_img_res.body(), width = img_w, height = height))
+                    image_frames.append(render.Image(src = f_img_res.body(), width = img_w, height = img_h))
                     count += 1
 
             if len(image_frames) > 0:
                 # Calculate delay to hit 15s total (e.g., 18 frames * 833ms = 15s)
                 actual_delay = 15000 // len(image_frames)
                 children = [render.Animation(children = image_frames)]
+                if square:
+                    if not is_movie:
+                        children.append(render_strip(episode_code, width, strip_h))
+                    return render.Root(
+                        delay = actual_delay,
+                        child = render.Column(expanded = True, main_align = "center", children = children),
+                    )
                 if not is_movie:
                     children.append(render_sidebar(episode_code, canvas.is2x(), text_w, height))
 
@@ -131,15 +153,51 @@ def main(config):
     if img_res.status_code != 200:
         return []
 
-    children = [render.Image(src = img_res.body(), width = img_w, height = height)]
+    children = [render.Image(src = img_res.body(), width = img_w, height = img_h)]
+    if square:
+        if not is_movie:
+            children.append(render_strip(episode_code, width, strip_h))
+        return render.Root(child = render.Column(expanded = True, main_align = "center", children = children))
+
     if not is_movie:
         children.append(render_sidebar(episode_code, canvas.is2x(), text_w, height))
 
     return render.Root(child = render.Row(expanded = True, children = children))
 
-def render_sidebar(ep_code, is_2x, width, height):
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, and it has the room beside the frame that this layout wants.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def season_episode(ep_code):
     s_val = ep_code[1:ep_code.find("E")].lstrip("0") or "0"
     e_val = ep_code[ep_code.find("E") + 1:].lstrip("0") or "0"
+    return s_val, e_val
+
+def render_strip(ep_code, width, height):
+    """The sidebar's content laid out along the bottom of a square panel."""
+    s_val, e_val = season_episode(ep_code)
+    return render.Box(
+        width = width,
+        height = height,
+        child = render.Row(
+            expanded = True,
+            main_align = "center",
+            cross_align = "center",
+            children = [
+                render.Text("S" + s_val, color = "#ffcc33", font = "tb-8"),
+                render.Box(width = 4, height = 1),
+                render.Text("E" + e_val, color = "#ffffff", font = "tb-8"),
+            ],
+        ),
+    )
+
+def render_sidebar(ep_code, is_2x, width, height):
+    s_val, e_val = season_episode(ep_code)
 
     meta_children = []
     if is_2x:
