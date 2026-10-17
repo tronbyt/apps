@@ -8,6 +8,7 @@ fileName: chemical_elements.star
 packageName: chemicalelements
 recommendedInterval: 5
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - tech
@@ -15,4 +16,4 @@ tags:
   - utility
   - wide 2x support
 published: '2023-09-29T15:01:53Z'
-updated: '2026-10-17T15:33:39Z'
+updated: '2026-10-17T19:08:50Z'

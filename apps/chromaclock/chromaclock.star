@@ -1929,7 +1929,7 @@ def main(config):
     return render.Root(
         delay = delay,
         show_full_animation = True,
-        child = render.Animation(children = frames),
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = frames)),
     )
 
 STYLES = [
