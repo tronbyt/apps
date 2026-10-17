@@ -7,9 +7,10 @@ author: Denton-L
 fileName: lichesscorrespond.star
 packageName: lichesscorrespond
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - gaming
   - tech
 published: '2024-01-11T18:08:17Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T21:41:49Z'

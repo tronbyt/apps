@@ -6,15 +6,20 @@ Author: dinosaursrarr
 """
 
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ALIVE = True
 DEAD = False
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 APP_DURATION_MILLISECONDS = 15000
 REFRESH_MILLISECONDS = 75
+
+# Panels with more than 64x32 pixels get half the frames (7.5 s of life per
+# loop): 200 frames of a 64x64 field blow the server's render deadline on a
+# Pi-class host, and the loop restarts from a fresh random field anyway.
+FRAME_COUNT = (APP_DURATION_MILLISECONDS // REFRESH_MILLISECONDS) // (2 if WIDTH * HEIGHT > 64 * 32 else 1)
 
 # The offsets of a cell's eight neighbours.
 # We wrap around at the edges, so we are treating the board
@@ -127,22 +132,34 @@ def next_generation(living, neighbours, changed, cache):
     cache[key] = (next_living, next_neighbours, next_changed)
     return next_living, next_neighbours, next_changed
 
-# Display the curent state as widgets on screen.
-def render_frame(living, alive_cell, dead_cell, cache):
+# Display the curent state as widgets on screen. Consecutive cells in the same
+# state are painted as one Box: pixel-identical, and a fraction of the widgets
+# per frame, which is what keeps the 64x64 render inside the server deadline.
+def render_frame(living, alive_colour, dead_colour, cache):
     cached = cache.get(living)
     if cached != None:
         return cached
 
-    rows = [[dead_cell for c in range(WIDTH)] for r in range(HEIGHT)]
-    for x, y in living:
-        rows[y][x] = alive_cell
+    alive = {}
+    for cell in living:
+        alive[cell] = True
 
-    frame = render.Column(children = [render.Row(children = row) for row in rows])
+    rows = []
+    for y in range(HEIGHT):
+        boxes = []
+        start = 0
+        for x in range(1, WIDTH + 1):
+            if x == WIDTH or ((x, y) in alive) != ((start, y) in alive):
+                boxes.append(render.Box(width = x - start, height = 1, color = alive_colour if (start, y) in alive else dead_colour))
+                start = x
+        rows.append(render.Row(children = boxes))
+
+    frame = render.Column(children = rows)
     cache[living] = frame
     return frame
 
 # Create an animation of the game of life with a random starting point.
-def animate(alive_cell, dead_cell):
+def animate(alive_colour, dead_colour):
     frames = []
     living, neighbours, changed = generate_initial_state()
 
@@ -152,8 +169,8 @@ def animate(alive_cell, dead_cell):
     frame_cache = {}
 
     # Generate enough frames to last for the maximum time the app can be on screen.
-    for _ in range(0, APP_DURATION_MILLISECONDS, REFRESH_MILLISECONDS):
-        frames.append(render_frame(tuple(living.keys()), alive_cell, dead_cell, frame_cache))
+    for _ in range(FRAME_COUNT):
+        frames.append(render_frame(tuple(living.keys()), alive_colour, dead_colour, frame_cache))
         living, neighbours, changed = next_generation(living, neighbours, changed, generation_cache)  # evolve to next step
     return render.Animation(children = frames)
 
@@ -165,23 +182,9 @@ def main(config):
     if not dead_colour:
         dead_colour = BLACK
 
-    # Turns out to be significantly faster to re-use
-    # a single element rather than create one for each
-    # cell on each iteration.
-    alive_cell = render.Box(
-        width = 1,
-        height = 1,
-        color = alive_colour,
-    )
-    dead_cell = render.Box(
-        width = 1,
-        height = 1,
-        color = dead_colour,
-    )
-
     return render.Root(
         delay = REFRESH_MILLISECONDS,
-        child = animate(alive_cell, dead_cell),
+        child = animate(alive_colour, dead_colour),
     )
 
 def get_schema():

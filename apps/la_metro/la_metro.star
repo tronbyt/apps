@@ -9,7 +9,7 @@ v1.0 - Initial Release
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LINE_COLORS = """
@@ -35,6 +35,15 @@ DEFAULT_LOCATION = """
 BASE_API = "https://api.goswift.ly/real-time"
 CACHE_TTL_SECS = 60
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     lat = location["lat"]
@@ -51,10 +60,12 @@ def main(config):
 
     # Display error, suggest requesting a new key
     if not NextSchedCacheData:
-        return render.Root(get_failure_message())
+        # Centre the block on the square (64x64); other panels unchanged.
+        return render.Root((render.Box(width = canvas.width(), height = canvas.height(), child = get_failure_message())) if is_square() else get_failure_message())
 
     if NextSchedCacheData.status_code != 200:
-        return render.Root(get_failure_message())
+        # Centre the block on the square (64x64); other panels unchanged.
+        return render.Root((render.Box(width = canvas.width(), height = canvas.height(), child = get_failure_message())) if is_square() else get_failure_message())
 
     NextSchedCacheData = NextSchedCacheData.body()
     predictions = json.decode(NextSchedCacheData)
@@ -71,7 +82,9 @@ def main(config):
     children = []
     for line in StationData:
         children.append(get_line_child(line, show_stops))
-    return render.Root(render.Sequence(children = children), show_full_animation = True)
+        # Centre the block on the square (64x64); other panels unchanged.
+
+    return render.Root((render.Box(width = canvas.width(), height = canvas.height(), child = render.Sequence(children = children))) if is_square() else render.Sequence(children = children), show_full_animation = True)
 
 def get_line_child(line_data, show_stops):
     DestinationCount = len(line_data["destinations"])
