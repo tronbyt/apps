@@ -1,0 +1,36 @@
+name: Test App Viewer Pages Build Helpers
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/app-viewer-build.test.mjs'
+      - '.github/scripts/check-app-viewer-site.mjs'
+      - '.github/scripts/write-app-viewer-catalogue-metadata.mjs'
+      - '.github/workflows/app-viewer-pages-check.yml'
+      - '.github/workflows/deploy-pages.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/scripts/app-viewer-build.test.mjs'
+      - '.github/scripts/check-app-viewer-site.mjs'
+      - '.github/scripts/write-app-viewer-catalogue-metadata.mjs'
+      - '.github/workflows/app-viewer-pages-check.yml'
+      - '.github/workflows/deploy-pages.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
+      - name: Test Pages build helpers
+        run: node --test .github/scripts/app-viewer-build.test.mjs

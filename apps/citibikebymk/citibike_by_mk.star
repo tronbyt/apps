@@ -2,7 +2,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/img_bike_src.jpg", IMG_BIKE_SRC_ASSET = "file")
 load("images/img_park_src.png", IMG_PARK_SRC_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 IMG_BIKE_SRC = IMG_BIKE_SRC_ASSET.readall()
@@ -74,6 +74,15 @@ def get_col_list(bike_data, station_list):
     col_list = [get_stat_col(s, bike_data, station_list) for s in station_list]
     return col_list
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     data_stat = get_resp_stations()
     station_ids = pop_stations(data_stat["stations"])
@@ -85,6 +94,12 @@ def main(config):
 
     station_name = station["value"]
     info = get_stat_col(station_name, data_bikes, station_ids)
+
+    # The block is about 30 rows; a square panel centres it rather than
+    # hanging it from the top edge above a black half.
+    if is_square():
+        info = render.Box(child = info)
+
     return render.Root(
         child = info,
         delay = 80,
