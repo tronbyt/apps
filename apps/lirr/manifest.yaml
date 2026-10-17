@@ -7,8 +7,9 @@ author: bralax
 fileName: lirr.star
 packageName: lirr
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - utility
 published: '2022-02-28T19:36:53Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T18:44:47Z'
