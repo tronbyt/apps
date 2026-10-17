@@ -88,7 +88,24 @@ and `64x64` (square, `is2x()` false).
   width, so the usual port is to stack what the 64x32 layout puts side by side,
   or to show more rows of the same content.
 
-## 9. Reference Documentation
+## 9. Broken Apps
+An app that can't work (for example, because the service it depends on has
+gone or now blocks requests) is marked broken in `manifest.yaml`:
+
+```yaml
+broken: true
+brokenReason: 'api.example.com: no such host'
+```
+
+- Tronbyt Server's app store shows a **BROKEN** badge with the reason, and the
+  App Viewer shows a warning. Keep the reason short and specific.
+- PR checks skip `pixlet check` for broken apps.
+- Only mark an app broken if it fails consistently, not after a single failed
+  request.
+- **When you fix an app, remove both lines in the same pull request.** Checks
+  will then run `pixlet check` on the app again, so it must pass.
+
+## 10. Reference Documentation
 - [Modules](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/modules.md) | [Widgets](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/widgets.md) | [Animation](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/animation.md) | [Schema](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/schema/schema.md) | [Filters](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/filters.md)
 - **Fonts**: Run `pixlet community list-fonts` or view the [Fonts Reference](https://raw.githubusercontent.com/tronbyt/pixlet/refs/heads/main/docs/fonts.md).
 - **Icons**: Run `pixlet community list-icons`.

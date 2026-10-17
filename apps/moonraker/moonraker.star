@@ -2,7 +2,7 @@
 Applet: Moonraker Klipper
 Summary: Monitor Klipper 3D printer
 Description: Direct Moonraker connection to monitor 3D print progress, nozzle & bed temperatures, print time, and current file.
-Author: brombomb
+Author: Brombomb
 """
 
 load("http.star", "http")
