@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
@@ -81,6 +81,15 @@ MSFT_EVENTFETCH_TOKEN_ENDPOINT = "https://login.microsoftonline.com/" + (MSFT_TE
 
 # Time formatting
 RFC3339_FORMAT = "2006-01-02T15:04:05Z07:00"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     # Grab Secrets from Parameters if running in Render mode.   Hash functions will return null value if running locally
@@ -321,7 +330,64 @@ def render_stats(total_duration, total_count, big_duration, banner_line):
         big_meeting_duration_color = Red
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    main_align = "center",
+                    expanded = True,
+                    children = [
+                        render.Text("Meeting Stats"),
+                    ],
+                ),
+                render.Row(
+                    children = [
+                        render.Marquee(
+                            width = 64,
+                            align = "center",
+                            child = render.Text(banner_line, font = "tom-thumb"),
+                        ),
+                    ],
+                ),
+                render.Row(
+                    children = [
+                        render.Column(
+                            children = [
+                                render.Text("Count:", font = "tom-thumb"),
+                                render.Text("Time:", font = "tom-thumb"),
+                                render.Text("Bloated:", font = "tom-thumb"),
+                            ],
+                        ),
+                        render.Column(
+                            cross_align = "end",
+                            children = [
+                                render.Row(
+                                    expanded = True,
+                                    main_align = "end",
+                                    children = [
+                                        render.Text(" %d" % total_count, font = "tom-thumb", color = meeting_count_color),
+                                    ],
+                                ),
+                                render.Row(
+                                    expanded = True,
+                                    main_align = "end",
+                                    children = [
+                                        render.Text(" %sH" % format_total_meeting_duration, font = "tom-thumb", color = meeting_duration_color),
+                                    ],
+                                ),
+                                render.Row(
+                                    expanded = True,
+                                    main_align = "end",
+                                    children = [
+                                        render.Text(" %sH" % format_total_big_meeting_duration, font = "tom-thumb", color = big_meeting_duration_color),
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     main_align = "center",

@@ -15,7 +15,7 @@ load("images/frame6.png", FRAME6_ASSET = "file")
 load("images/frame7.png", FRAME7_ASSET = "file")
 load("images/frame8.png", FRAME8_ASSET = "file")
 load("images/frame9.png", FRAME9_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 FRAME1 = FRAME1_ASSET.readall()
 FRAME10 = FRAME10_ASSET.readall()
@@ -30,10 +30,33 @@ FRAME9 = FRAME9_ASSET.readall()
 
 DEFAULT_WHO = "world"
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     return render.Root(
         delay = 100,
-        child = render.Animation(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(
+            children = [
+                render.Image(src = FRAME1),
+                render.Image(src = FRAME2),
+                render.Image(src = FRAME3),
+                render.Image(src = FRAME4),
+                render.Image(src = FRAME5),
+                render.Image(src = FRAME6),
+                render.Image(src = FRAME7),
+                render.Image(src = FRAME8),
+                render.Image(src = FRAME9),
+                render.Image(src = FRAME10),
+            ],
+        ))) if is_square() else render.Animation(
             children = [
                 render.Image(src = FRAME1),
                 render.Image(src = FRAME2),
