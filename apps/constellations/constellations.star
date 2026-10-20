@@ -61,8 +61,15 @@ DIRECTIONS = [
 ]
 
 FONT = "CG-pixel-4x5-mono"
-FRAME_COUNT = 8
-FRAME_DELAY = 150
+
+# Text and other widgets advance every 50 ms.
+FRAME_DELAY = 50
+
+# Each twinkle phase lasts four rendered frames: 200 ms.
+# Eight phases produce a complete 1.6-second cycle.
+TWINKLE_PHASE_COUNT = 8
+TWINKLE_FRAMES_PER_PHASE = 4
+FRAME_COUNT = TWINKLE_PHASE_COUNT * TWINKLE_FRAMES_PER_PHASE
 
 def clamp(value, low, high):
     return max(low, min(high, value))
@@ -95,7 +102,7 @@ def display_instructions():
             "#F4A306",
         ),
         (
-            "Green dot shows how high to look: bottom is the horizon, middle is halfway up, top is overhead.",
+            "Green dot shows the constellation's approximate height: bottom is the horizon, middle is halfway up, top is overhead.",
             "#F4A306",
         ),
         (
@@ -234,8 +241,7 @@ def brightness_index(star, original_index):
             return 3
         return 4
 
-    # Stable fallback; does not change when other stars set.
-    # This is only a display ranking, not measured brightness.
+    # Stable display ranking, not measured brightness.
     return min(original_index, 4)
 
 def normalize_constellations():
@@ -396,6 +402,47 @@ def project_stars(stars, width, height):
 
     return positions
 
+def merge_overlapping_stars(positions):
+    # Keep one star per pixel, choosing the brighter base brightness.
+    # Equal-brightness ties keep the first star for stable animation.
+    merged = []
+    pixel_indices = {}
+
+    for star in positions:
+        key = (star["x"], star["y"])
+        existing_index = pixel_indices.get(key)
+
+        if existing_index == None:
+            pixel_indices[key] = len(merged)
+            merged.append(star)
+        elif star["color_index"] < merged[existing_index]["color_index"]:
+            merged[existing_index] = star
+
+    return merged
+
+def twinkle_color(color_index, source_index, frame_index):
+    # Hold each phase for several frames without slowing the marquee.
+    phase = (
+        frame_index // TWINKLE_FRAMES_PER_PHASE +
+        source_index * 3
+    ) % TWINKLE_PHASE_COUNT
+
+    brighter = max(0, color_index - 1)
+    dimmer = min(len(BRIGHTNESS_COLORS) - 1, color_index + 1)
+
+    # Gradual cycle: peak, tinted shoulder, base, dim, base, shoulder.
+    # Adjacent stars use staggered phases and never disappear.
+    if phase == 0:
+        return BRIGHTNESS_COLORS[brighter]
+
+    if phase == 1 or phase == 7:
+        return TWINKLE_COLORS[color_index]
+
+    if phase == 3 or phase == 4:
+        return BRIGHTNESS_COLORS[dimmer]
+
+    return BRIGHTNESS_COLORS[color_index]
+
 def render_constellation_screen(
         constellation,
         show_altitude_indicator,
@@ -408,7 +455,10 @@ def render_constellation_screen(
     if not stars:
         return message_screen("Below horizon")
 
-    positions = project_stars(stars, width, star_area_height)
+    positions = merge_overlapping_stars(
+        project_stars(stars, width, star_area_height),
+    )
+
     frames = []
 
     for frame_index in range(FRAME_COUNT):
@@ -421,24 +471,17 @@ def render_constellation_screen(
         ]
 
         for star in positions:
-            color_index = star["color_index"]
-
-            # Eight-frame cycle avoids a timing jump at the loop boundary.
-            twinkle = (
-                star["source_index"] * 3 + frame_index
-            ) % FRAME_COUNT == 0
-
-            color = (
-                TWINKLE_COLORS[color_index] if twinkle else BRIGHTNESS_COLORS[color_index]
-            )
-
             layers.append(
                 render.Padding(
                     pad = (star["x"], star["y"], 0, 0),
                     child = render.Box(
                         width = 1,
                         height = 1,
-                        color = color,
+                        color = twinkle_color(
+                            star["color_index"],
+                            star["source_index"],
+                            frame_index,
+                        ),
                     ),
                 ),
             )
@@ -622,7 +665,7 @@ def get_schema():
             schema.Toggle(
                 id = "alt_indicator",
                 name = "Display Altitude Indicator",
-                desc = "Show reference height: bottom is horizon, top is overhead.",
+                desc = "Show the constellation's approximate height: bottom is horizon, top is overhead.",
                 icon = "angleLeft",
                 default = True,
             ),
