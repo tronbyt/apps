@@ -20,27 +20,6 @@ load(
     LIGHTHOUSE_GIF_2X_ASSET = "file",
 )
 
-def is_square():
-    """True on a 64x64 panel.
-
-    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
-    also 64 tall.
-    """
-    w, h = canvas.size()
-    return h == w
-
-def center_on_square(child, width = None, height = None):
-    """Centre `child` on the square (64x64); other panels get it unchanged.
-
-    A scene hand-laid for 64x32 passes its size so the Box that centres it
-    has the scene's bounds rather than the panel's.
-    """
-    if not is_square():
-        return child
-    if width != None and height != None:
-        child = render.Box(width = width, height = height, child = child)
-    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
-
 MAP_CITIES_COLOR = "#ff0000"
 VISITED_COLOR = "#ffff00"
 UNVISITED_COLOR = "#565a06"
@@ -50,6 +29,65 @@ DULL_OUTLINE_COLOR = "#111111"
 # Preserve these IDs so existing visited selections still match.
 CONFIG_PATTERN_LIGHTHOUSES = "Item_%s_%s"
 
+def is_square():
+    """True when the canvas is square."""
+    width, height = canvas.size()
+    return width == height
+
+def get_layout():
+    """Resolve scene, map, artwork, and text sizing together.
+
+    Square panels retain the original 64x32 scene, centered on the
+    panel. Square layout takes precedence over the 2x flag.
+    """
+    square = is_square()
+    use_2x = canvas.is2x() and not square
+
+    if square:
+        scene_width = 64
+        scene_height = 32
+    else:
+        scene_width = canvas.width()
+        scene_height = canvas.height()
+
+    if use_2x:
+        map_width = 80
+        map_height = 50
+        count_font = "terminus-16"
+        count_height = 16
+        count_margin = 2
+    else:
+        map_width = 45
+        map_height = 30
+        count_font = "5x8"
+        count_height = 8
+        count_margin = 1
+
+    return {
+        "square": square,
+        "use_2x": use_2x,
+        "scene_width": scene_width,
+        "scene_height": scene_height,
+        "map_pixel_size": [
+            min(map_width, scene_width),
+            min(map_height, scene_height),
+        ],
+        "count_font": count_font,
+        "count_height": count_height,
+        "count_margin": count_margin,
+    }
+
+def center_on_square(child, layout):
+    """Center an already-bounded scene on square panels."""
+    if not layout["square"]:
+        return child
+
+    return render.Box(
+        width = canvas.width(),
+        height = canvas.height(),
+        child = child,
+    )
+
 def lighthouse_setting_id(longitude, latitude):
     return CONFIG_PATTERN_LIGHTHOUSES % (
         longitude,
@@ -57,8 +95,7 @@ def lighthouse_setting_id(longitude, latitude):
     )
 
 def visited_lighthouse_count(config):
-    # Count lighthouse entries, not illuminated map pixels.
-    # Different coordinates may project to the same pixel.
+    """Count selected lighthouse entries, not illuminated pixels."""
     count = 0
 
     for lighthouse in FLORIDA_LIGHTHOUSES:
@@ -73,41 +110,35 @@ def visited_lighthouse_count(config):
 
     return count
 
-def append_visited_count(children, config, color):
+def append_visited_count(children, config, color, layout):
     text = "{}/{}".format(
         visited_lighthouse_count(config),
         len(FLORIDA_LIGHTHOUSES),
     )
 
-    if canvas.is2x():
-        font = "terminus-16"
-        text_height = 16
-        margin = 2
-    else:
-        font = "5x8"
-        text_height = 8
-        margin = 1
+    margin = layout["count_margin"]
 
     x = margin
-
-    # On the square the 64x32 scene is bounded and centred, so the count
-    # sits against the scene's bottom edge, not the panel's.
-    scene_height = 32 if is_square() else canvas.height()
-    y = max(0, scene_height - text_height - margin)
+    y = max(
+        0,
+        layout["scene_height"] -
+        layout["count_height"] -
+        margin,
+    )
 
     children.append(
         render.Padding(
             child = render.Text(
                 text,
                 color = color,
-                font = font,
+                font = layout["count_font"],
             ),
             pad = (x, y, 0, 0),
         ),
     )
 
 def main(config):
-    map_pixel_size = [80, 50] if canvas.is2x() else [45, 30]
+    layout = get_layout()
 
     is_display_cities = config.bool("displayMajorCities", False)
     is_display_picks = config.bool("pickVisits", False)
@@ -148,13 +179,25 @@ def main(config):
         map_area,
     )
 
-    if map_area == None:
-        return []
+    # Establish the scene's minimum bounds independently of the
+    # artwork, map markers, cities, and visited count.
+    map_items = [
+        render.Box(
+            width = layout["scene_width"],
+            height = layout["scene_height"],
+        ),
+    ]
 
-    map_items = []
+    if map_area == None:
+        return render.Root(
+            child = center_on_square(
+                render.Stack(children = map_items),
+                layout,
+            ),
+        )
 
     if is_display_art:
-        if canvas.is2x():
+        if layout["use_2x"]:
             lighthouse_animation = LIGHTHOUSE_GIF_2X_ASSET.readall()
         else:
             lighthouse_animation = LIGHTHOUSE_GIF_ASSET.readall()
@@ -173,7 +216,7 @@ def main(config):
         get_map_points(
             FLORIDA_MAP,
             map_area,
-            map_pixel_size,
+            layout["map_pixel_size"],
         ),
         map_outline_color,
     )
@@ -185,7 +228,7 @@ def main(config):
             get_map_points(
                 FLORIDA_CITIES,
                 map_area,
-                map_pixel_size,
+                layout["map_pixel_size"],
             ),
             cities_color,
         )
@@ -197,7 +240,7 @@ def main(config):
             get_map_points(
                 lighthouse_coordinates,
                 map_area,
-                map_pixel_size,
+                layout["map_pixel_size"],
             ),
             unvisited_color,
         )
@@ -210,25 +253,27 @@ def main(config):
             get_map_points(
                 lighthouse_coordinates,
                 map_area,
-                map_pixel_size,
+                layout["map_pixel_size"],
                 config,
             ),
             visited_color,
         )
 
-    # The count reflects saved selections even when the
-    # visited highlighting is temporarily switched off.
+    # The count reflects saved selections even when visited
+    # highlighting is temporarily switched off.
     if is_display_count:
         append_visited_count(
             map_items,
             config,
             visited_color,
+            layout,
         )
 
     return render.Root(
-        child = center_on_square(render.Stack(
-            children = map_items,
-        ), 64, 32),
+        child = center_on_square(
+            render.Stack(children = map_items),
+            layout,
+        ),
     )
 
 def define_map_area(map_coordinates, existing_area = None):
@@ -281,13 +326,16 @@ def get_map_points(
     width = pixel_area[0]
     height = pixel_area[1]
 
+    if width <= 0 or height <= 0:
+        return []
+
     # Stored as columns: map_array[x][y].
     map_array = [
         [0 for y in range(height)]
         for x in range(width)
     ]
 
-    if map_area == None or width <= 0 or height <= 0:
+    if map_area == None:
         return map_array
 
     min_longitude = map_area[0][0]
@@ -299,7 +347,7 @@ def get_map_points(
     latitude_span = max_latitude - min_latitude
 
     for longitude, latitude in map_coordinates:
-        # Keep the existing framing rather than moving
+        # Preserve geographic framing rather than moving
         # outlying coordinates onto an unrelated edge pixel.
         if longitude < min_longitude or longitude > max_longitude:
             continue
@@ -424,7 +472,8 @@ def get_schema():
                 id = "showVisitedCount",
                 name = "Show Visited Count",
                 desc = (
-                    "Show visited/total in the upper-right corner. " +
+                    "Show visited/total in the lower-left corner " +
+                    "of the map scene. " +
                     "Counts lighthouse entries, not map pixels."
                 ),
                 icon = "info",
