@@ -114,13 +114,11 @@ preparation_options = [
     ),
 ]
 
-
 def position(child, left = 0, top = 0):
     return render.Padding(
         pad = (left, top, 0, 0),
         child = child,
     )
-
 
 def option_value(config, setting_id, options, default):
     value = config.get(setting_id)
@@ -131,13 +129,11 @@ def option_value(config, setting_id, options, default):
 
     return default
 
-
 def random_index(count):
     if count <= 1:
         return 0
 
     return min(int(random.float() * count), count - 1)
-
 
 def get_preferences(config):
     return {
@@ -173,7 +169,6 @@ def get_preferences(config):
             DEFAULT_SCROLL,
         ),
     }
-
 
 def build_order(preferences):
     base = preferences["base"]
@@ -236,7 +231,6 @@ def build_order(preferences):
 
     return order
 
-
 def scaled_asset(asset, scale):
     image = render.Image(src = asset)
 
@@ -251,7 +245,6 @@ def scaled_asset(asset, scale):
         height = height * scale,
     )
 
-
 def glass_rectangle(x, y, width, height, color, scale):
     return position(
         render.Box(
@@ -262,7 +255,6 @@ def glass_rectangle(x, y, width, height, color, scale):
         x * scale,
         y * scale,
     )
-
 
 def ungarnished_glass(scale):
     # Self-contained artwork: no additional image asset required.
@@ -309,7 +301,6 @@ def ungarnished_glass(scale):
 
     return render.Stack(children = children)
 
-
 def garnish_artwork(garnish, scale):
     if garnish == "au naturel":
         return ungarnished_glass(scale)
@@ -325,7 +316,6 @@ def garnish_artwork(garnish, scale):
 
     # Olive artwork also approximates caper berries.
     return scaled_asset(MARTINI_OLIVES, scale)
-
 
 def build_scene(preferences, message, scale):
     font = "terminus-16" if scale == 2 else "5x8"
@@ -352,7 +342,6 @@ def build_scene(preferences, message, scale):
         ),
     )
 
-
 def main(config):
     preferences = get_preferences(config)
     order = build_order(preferences)
@@ -374,7 +363,6 @@ def main(config):
         delay = int(preferences["scroll"]),
     )
 
-
 def get_vermouth_options(base):
     if base == "Vesper":
         return []
@@ -389,7 +377,6 @@ def get_vermouth_options(base):
             default = DEFAULT_VERMOUTH,
         ),
     ]
-
 
 def get_schema():
     return schema.Schema(
