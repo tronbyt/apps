@@ -457,7 +457,7 @@ def call_schedule_api(route, stopid):
     # Sort by ETA
     return sorted(results, key = lambda x: x["eta_secs"])[:10]
 
-def get_schedule(route, stopid, show_relative_times, scale):
+def get_schedule(route, stopid, show_relative_times, scale, visible_rows):
     departures = call_schedule_api(route, stopid)
 
     # 1. Pre-process to find max width needed for the time column
@@ -565,16 +565,6 @@ def get_schedule(route, stopid, show_relative_times, scale):
 
     row_height = 6 * scale
 
-    # The schedule gets whatever the panel has under the banner and above the
-    # accent bar: four rows on a 64x32 panel, nine on a square one. Both the
-    # padding and the cap come from the same number, so a long list fills the
-    # panel without overflowing it and a short one still pins the accent bar
-    # to the bottom.
-    banner_height = 6 if scale == 1 else 14
-    bottom_pad = 2
-    visible_rows = max(1, (canvas.height() - banner_height - bottom_pad) // row_height)
-    min_rows = visible_rows
-
     if len(list_of_departures) > visible_rows:
         list_of_departures = list_of_departures[:visible_rows]
 
@@ -587,10 +577,10 @@ def get_schedule(route, stopid, show_relative_times, scale):
             child = render.Text(msg, font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
 
-    # Pad with blank rows so the schedule always fills min_rows — otherwise
+    # Pad with blank rows so the schedule always fills visible_rows — otherwise
     # the accent bar below it rides up under a short departure list instead
     # of staying pinned to the bottom of the display.
-    for i in range(len(list_of_departures), min_rows):
+    for i in range(len(list_of_departures), visible_rows):
         background = "#222" if i % 2 == 1 else "#000"
         list_of_departures.append(render.Box(height = row_height, width = canvas.width(), color = background))
 
@@ -617,7 +607,6 @@ def main(config):
     stop = config.str("stop", DEFAULT_STOP)
     show_relative_times = config.bool("show_relative_times", False)
     user_text = config.str("banner", "")
-    schedule = get_schedule(route, stop, show_relative_times, scale)
     timezone = config.get("timezone") or "America/New_York"
     now = time.now().in_location(timezone)
     left_pad = 4 * scale
@@ -642,7 +631,14 @@ def main(config):
 
     banner_font = "tom-thumb" if scale == 1 else "terminus-14"
     banner_height = 6 if scale == 1 else 14
-    bottom_pad = 2 if scale == 1 else 2
+
+    # The schedule gets as many rows as fit between the banner and a 2px
+    # accent bar: four on 64x32 and 128x64, nine on a square panel. The bar
+    # takes up whatever is left over so it stays pinned to the bottom.
+    row_height = 6 * scale
+    visible_rows = max(1, (canvas.height() - banner_height - 2) // row_height)
+    bottom_pad = canvas.height() - banner_height - visible_rows * row_height
+    schedule = get_schedule(route, stop, show_relative_times, scale, visible_rows)
 
     if config.bool("show_time"):
         if int(now.format("15")) < 12:

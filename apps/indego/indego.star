@@ -89,40 +89,55 @@ def main(config):
     icon_height = 15 if scale == 1 else 28
     text_height = 10 if scale == 1 else 22
 
-    # The card is laid out for 32 * scale rows; a square panel is 64 tall
-    # but not 2x, so the 32-row card is centred.
+    header = render.Box(height = header_height, width = canvas.width(), color = "#8C189A", child = render.Padding(pad = header_pad, child = render.Marquee(width = canvas.width(), offset_start = canvas.width(), offset_end = canvas.width(), child = render.Text(dock_data["name"], font = header_font))))
+
+    counts = [
+        (regular_bike_image, dock_data["classicBikesAvailable"], regular_bike_color),
+        (electric_bike_image, dock_data["electricBikesAvailable"], electric_bike_color),
+        (dock_image, dock_data["docksAvailable"], dock_color),
+    ]
+
+    if is_square():
+        # A square panel has room to stack the three counts, each beside its
+        # icon in a larger font.
+        row_height = (canvas.height() - header_height) // len(counts)
+        rows = [
+            render.Row(
+                main_align = "space_around",
+                cross_align = "center",
+                expanded = True,
+                children = [
+                    render.Image(src = image, width = 21, height = icon_height),
+                    render.Box(width = 30, height = row_height, child = render.Text(str(count), font = "6x13", color = color)),
+                ],
+            )
+            for image, count, color in counts
+        ]
+        return render.Root(
+            show_full_animation = True,
+            child = render.Column(children = [header] + [render.Box(height = row_height, child = row) for row in rows]),
+        )
+
+    widths = [21, 21, 22]
     return render.Root(
         show_full_animation = True,
-        child = render.Box(
-            width = 64 * scale,
-            height = canvas.height(),
-            child = render.Column(
-                children = [
-                    render.Column(
-                        children = [
-                            render.Stack(children = [
-                                render.Box(height = header_height, width = 64 * scale, color = "#8C189A", child = render.Padding(pad = header_pad, child = render.Marquee(width = 64 * scale, offset_start = 64 * scale, offset_end = 64 * scale, child = render.Text(dock_data["name"], font = header_font)))),
-                            ]),
-                            render.Row(children = [
-                                render.Column(children = [
-                                    render.Box(width = 21 * scale, height = icon_height, child = render.Image(src = regular_bike_image, width = 21 * scale, height = icon_height)),
-                                    render.Box(width = 21 * scale, height = text_height, child = render.Text(str(dock_data["classicBikesAvailable"]), font = data_font, color = regular_bike_color)),
-                                ]),
-                                render.Column(children = [
-                                    render.Box(width = 21 * scale, height = icon_height, child = render.Image(src = electric_bike_image, width = 21 * scale, height = icon_height)),
-                                    render.Box(width = 21 * scale, height = text_height, child = render.Text(str(dock_data["electricBikesAvailable"]), font = data_font, color = electric_bike_color)),
-                                ]),
-                                render.Column(children = [
-                                    render.Box(width = 22 * scale, height = icon_height, child = render.Image(src = dock_image, width = 21 * scale, height = icon_height)),
-                                    render.Box(width = 22 * scale, height = text_height, child = render.Text(str(dock_data["docksAvailable"]), font = data_font, color = dock_color)),
-                                ]),
-                            ]),
-                        ],
-                    ),
-                ],
-            ),
+        child = render.Column(
+            children = [
+                header,
+                render.Row(children = [
+                    render.Column(children = [
+                        render.Box(width = widths[i] * scale, height = icon_height, child = render.Image(src = image, width = 21 * scale, height = icon_height)),
+                        render.Box(width = widths[i] * scale, height = text_height, child = render.Text(str(count), font = data_font, color = color)),
+                    ])
+                    for i, (image, count, color) in enumerate(counts)
+                ]),
+            ],
         ),
     )
+
+def is_square():
+    w, h = canvas.size()
+    return h == w
 
 def get_schema():
     return schema.Schema(
