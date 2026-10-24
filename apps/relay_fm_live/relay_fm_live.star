@@ -90,37 +90,28 @@ def get_next_recording(live, timezone, scale, api_key):
         title = render.Text("Check back soon for live streams", font = title_font)
         start_text = render.Text("Relay", font = start_font)
 
-    return render.Box(
-        child = render.Padding(
-            child = render.Column(
-                children = [
-                    header,
-                    render.Marquee(
-                        width = 35 * scale,
-                        child = title,
-                        offset_start = 35 * scale,
-                        offset_end = 35 * scale,
-                    ),
-                    render.Marquee(
-                        width = 35 * scale,
-                        child = start_text,
-                        offset_start = 35 * scale,
-                        offset_end = 35 * scale,
-                    ),
-                ],
+    return header, title, start_text
+
+def render_show(header, title, start_text, width):
+    return render.Column(
+        children = [
+            header,
+            render.Marquee(
+                width = width,
+                child = title,
+                offset_start = width,
+                offset_end = width,
             ),
-            pad = (1 * scale, 0, 0, 0),
-        ),
-        height = 29 * scale,
-        color = "#333F48",
+            render.Marquee(
+                width = width,
+                child = start_text,
+                offset_start = width,
+                offset_end = width,
+            ),
+        ],
     )
 
 def is_square():
-    """True on a 64x64 panel.
-
-    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
-    also 64 tall.
-    """
     w, h = canvas.size()
     return h == w
 
@@ -151,23 +142,42 @@ def main(config):
         img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     elif live:
         img = generate_qrcode(art, scale)
-    show = get_next_recording(live, timezone, scale, api_key)
-    main_content = render.Row(
-        children = [
-            img,
-            show,
-        ],
-        expanded = True,
-    )
-    return render.Root(
-        # Centre the block on the square (64x64); other panels unchanged.
-        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+    header, title, start_text = get_next_recording(live, timezone, scale, api_key)
+
+    if is_square():
+        # Art centred on top, with the show details across the full width
+        # underneath it.
+        main_content = render.Box(
+            height = 61,
+            color = "#333F48",
+            child = render.Column(
+                children = [
+                    render.Box(height = 31, child = img),
+                    render.Padding(
+                        child = render_show(header, title, start_text, 62),
+                        pad = (1, 1, 1, 0),
+                    ),
+                ],
+            ),
+        )
+    else:
+        main_content = render.Row(
             children = [
-                render.Box(height = 2 * scale, color = "#34657F"),
-                main_content,
-                render.Box(height = 1 * scale, color = "#34657F"),
+                img,
+                render.Box(
+                    child = render.Padding(
+                        child = render_show(header, title, start_text, 35 * scale),
+                        pad = (1 * scale, 0, 0, 0),
+                    ),
+                    height = 29 * scale,
+                    color = "#333F48",
+                ),
             ],
-        ))) if is_square() else render.Column(
+            expanded = True,
+        )
+
+    return render.Root(
+        child = render.Column(
             children = [
                 render.Box(height = 2 * scale, color = "#34657F"),
                 main_content,
