@@ -86,6 +86,73 @@ Once configured, your display becomes a handy little window into your printer’
 | Highlight Recent Completion | Shows “Finished” for 30 minutes after a recorded completion. |
 | Warn About Old Data | Enables stale-data and timestamp warnings. |
 
+## Print Completion Sound Notifications
+
+On supported Gen 2 devices, the app can play a notification sound when
+the observed printer status changes directly from `PRINTING` to `IDLE`.
+
+### Configuration
+
+Use the **Notification Sound** dropdown to select:
+
+- **No sound** — disables audio notifications (default).
+- **Chime**
+- **Ding**
+- **Bell**
+- **Pop**
+- **Alert**
+- **Tron Bit**
+
+When a sound is selected, three additional settings appear:
+
+| Setting | Description |
+|---------|-------------|
+| Tronbyt Server URL | The URL of your Tronbyt server, reachable from the environment running Pixlet, including the port if needed. Example: `http://tronbyt.local:8000`. |
+| Notification Device ID | The Tronbyt device ID of the Gen 2 display that should play the sound. |
+| Notification API Key | The device API key configured in Tronbyt. Treat this value as a secret; do not commit it to the repository or share it in screenshots. |
+
+### How It Works
+
+The app caches the previously observed printer status between executions.
+When the previous status is `PRINTING` and the current status is `IDLE`,
+it requests the selected sound from the Tronbyt server.
+
+- Status tracking continues when **No sound** is selected.
+- The first observation establishes a baseline and does not play a sound.
+- Remaining idle does not repeatedly trigger the notification.
+- Audio notifications still work when **Only During Active Prints** hides
+  the idle screen.
+- Selecting **No sound** disables playback without disabling status tracking.
+
+### Requirements and Limitations
+
+- Audio notifications are intended for supported Gen 2 devices running
+  Tronbyt with sound API support.
+- The app must be able to reach the Tronbyt server, and the notification
+  settings must contain a valid device ID and API key.
+- Device mute settings can prevent playback.
+- Notifications occur when an app execution observes the transition, not
+  necessarily at the exact moment the print finishes. A complete printing
+  cycle between app executions may be missed.
+- Only a direct observed `PRINTING` → `IDLE` transition triggers audio.
+  Intermediate states such as `PAUSED`, `ERROR`, or `OFFLINE` break that
+  transition.
+- A transition to `IDLE` is not proof of successful completion. A canceled
+  print that produces the same transition can also trigger the sound.
+- Cached status is not permanent. If the cache is cleared or expires, the
+  next observation establishes a new baseline without playing a sound.
+- Each detected transition makes one playback attempt. Failed requests are
+  logged but are not retried on subsequent idle updates.
+- Leave Tronbyt's separate general-purpose app notification sound disabled
+  if you want sounds only for this app's print-completion transitions.
+
+### Updating from the Earlier Audio Toggle Version
+
+The **Notification Sound** dropdown replaces the separate
+**Audio Notification** toggle. A saved sound selection now enables audio
+regardless of the old toggle's value. Review and save the dropdown selection
+after updating; choose **No sound** to keep notifications disabled.
+
 ## Notes
 
 - Status accuracy and freshness depend on the process updating your JSON feed.
