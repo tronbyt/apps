@@ -5,6 +5,7 @@ Description: View printer status, estimated finish time, and recent print histor
 Authors: Robert Ison
 """
 
+load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "canvas", "render")
@@ -28,9 +29,19 @@ def center_on_square(child, width = None, height = None):
     """
     if not is_square():
         return child
+
     if width != None and height != None:
-        child = render.Box(width = width, height = height, child = child)
-    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+        child = render.Box(
+            width = width,
+            height = height,
+            child = child,
+        )
+
+    return render.Box(
+        width = canvas.width(),
+        height = canvas.height(),
+        child = child,
+    )
 
 DEFAULT_STATUS_URL = ""
 DEFAULT_SCROLL = "60"
@@ -45,6 +56,18 @@ RECENT_FINISH_SECONDS = 30 * 60
 STALE_WARNING_SECONDS = 5 * 60
 STALE_CRITICAL_SECONDS = 15 * 60
 FUTURE_TIMESTAMP_TOLERANCE_SECONDS = 2 * 60
+
+PREVIOUS_STATUS_TTL_SECONDS = 30 * 24 * 60 * 60
+
+# "none" is deliberately excluded: only these values trigger playback.
+NOTIFICATION_SOUNDS = [
+    "chime",
+    "ding",
+    "bell",
+    "pop",
+    "alert",
+    "tron",
+]
 
 PALETTE = {
     "text_primary": "FFFFFF",
@@ -277,6 +300,41 @@ def printer_field(status_url):
         ),
     ]
 
+def audio_notification_fields(sound):
+    # Connection settings appear only when an actual sound is selected.
+    if _text(sound) not in NOTIFICATION_SOUNDS:
+        return []
+
+    return [
+        schema.Text(
+            id = "notification_server_url",
+            name = "Tronbyt Server URL",
+            desc = (
+                "Server URL reachable by Pixlet, including port if needed. " +
+                "Example: http://tronbyt.local:8000"
+            ),
+            icon = "link",
+            default = "",
+        ),
+        schema.Text(
+            id = "notification_device_id",
+            name = "Notification Device ID",
+            desc = "Tronbyt device ID of your Gen 2 display.",
+            icon = "info",
+            default = "",
+        ),
+        schema.Text(
+            id = "notification_api_key",
+            name = "Notification API Key",
+            desc = (
+                "Device API key from Tronbyt. Treat this value as a secret. " +
+                "Do not include it in the source code."
+            ),
+            icon = "lock",
+            default = "",
+        ),
+    ]
+
 def get_schema():
     if SETUP_GUIDE_URL:
         guide_reference = (
@@ -374,6 +432,51 @@ def get_schema():
                 icon = "check",
                 default = True,
             ),
+            schema.Dropdown(
+                id = "notification_sound",
+                name = "Notification Sound",
+                desc = (
+                    "Gen 2 support only. Play when printing changes to idle. " +
+                    "Choose No sound to disable."
+                ),
+                icon = "bell",
+                default = "none",
+                options = [
+                    schema.Option(
+                        display = "No sound",
+                        value = "none",
+                    ),
+                    schema.Option(
+                        display = "Chime",
+                        value = "chime",
+                    ),
+                    schema.Option(
+                        display = "Ding",
+                        value = "ding",
+                    ),
+                    schema.Option(
+                        display = "Bell",
+                        value = "bell",
+                    ),
+                    schema.Option(
+                        display = "Pop",
+                        value = "pop",
+                    ),
+                    schema.Option(
+                        display = "Alert",
+                        value = "alert",
+                    ),
+                    schema.Option(
+                        display = "Tron Bit",
+                        value = "tron",
+                    ),
+                ],
+            ),
+            schema.Generated(
+                id = "audio_notification_settings",
+                source = "notification_sound",
+                handler = audio_notification_fields,
+            ),
             schema.Toggle(
                 id = "warn_stale",
                 name = "Warn About Old Data",
@@ -411,6 +514,67 @@ def _first_printer(data, selected_id):
 
 def _state(printer):
     return _text(printer.get("state")).upper() or "UNKNOWN"
+
+def _check_completion_notification(config, status_url, printer):
+    current_state = _state(printer)
+    printer_id = _text(printer.get("id"))
+    device_id = _text(config.get("notification_device_id"))
+
+    # Cache is shared. Separate sources, printers, and notification devices.
+    cache_key = "bambuprinterstatus:previous-state:v1:" + json.encode([
+        status_url,
+        printer_id,
+        device_id,
+    ])
+
+    previous_state = cache.get(cache_key)
+
+    # Record all observed states, including when No sound is selected.
+    # Update before sending so failed requests do not repeat the alert.
+    cache.set(
+        cache_key,
+        current_state,
+        ttl_seconds = PREVIOUS_STATUS_TTL_SECONDS,
+    )
+
+    # First observation only initializes tracking.
+    # Only the direct PRINTING -> IDLE transition triggers notification.
+    if previous_state != "PRINTING" or current_state != "IDLE":
+        return
+
+    sound = _text(config.get("notification_sound")) or "none"
+
+    # No sound, missing values, and invalid choices remain silent.
+    if sound not in NOTIFICATION_SOUNDS:
+        return
+
+    server_url = _text(
+        config.get("notification_server_url"),
+    ).rstrip("/")
+
+    api_key = _text(config.get("notification_api_key"))
+
+    if not server_url or not device_id or not api_key:
+        print(
+            "Completion audio skipped: notification settings are incomplete.",
+        )
+        return
+
+    response = http.post(
+        server_url + "/v0/devices/" + device_id + "/sound",
+        headers = {
+            "Authorization": "Bearer " + api_key,
+        },
+        json_body = {
+            "sound": sound,
+        },
+    )
+
+    if response.status_code != 200:
+        print(
+            "Completion audio failed: HTTP " +
+            str(response.status_code),
+        )
 
 def _status_color(state):
     if state == "PRINTING":
@@ -880,6 +1044,14 @@ def main(config):
         )
 
     state = _state(printer)
+
+    # Run before active-only mode can hide the idle screen.
+    _check_completion_notification(
+        config,
+        status_url,
+        printer,
+    )
+
     active_only = config.bool("active_only", False)
     warn_stale = config.bool("warn_stale", True)
 
