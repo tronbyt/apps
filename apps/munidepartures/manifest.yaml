@@ -6,9 +6,10 @@ desc: Displays real-time arrival info for selected Muni routes and stops in San 
 author: Bobby Schimm
 fileName: muni_departures.star
 packageName: munidepartures
+supports64x64: true
 category: transit
 tags:
   - muni
   - real-time
 published: '2025-08-08T21:01:17Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T21:58:58Z'

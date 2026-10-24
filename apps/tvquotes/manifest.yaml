@@ -7,10 +7,11 @@ author: rs7q5
 fileName: tv_quotes.star
 packageName: tvquotes
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - media
   - art
   - music
 published: '2022-06-09T17:04:03Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T17:59:41Z'

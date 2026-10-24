@@ -7,10 +7,11 @@ author: Matt Caruso
 fileName: next_event.star
 packageName: nextevent
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - productivity
   - event
   - utility
 published: '2024-05-22T18:28:07Z'
-updated: '2026-10-04T03:19:17Z'
+updated: '2026-10-17T19:08:52Z'

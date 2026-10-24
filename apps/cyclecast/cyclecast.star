@@ -34,6 +34,27 @@ load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 CLOUD_ICON = CLOUD_ICON_ASSET.readall()
 DIRECTIONAL_ARROW = DIRECTIONAL_ARROW_ASSET.readall()
 FLAG_BASE = FLAG_BASE_ASSET.readall()
@@ -369,10 +390,10 @@ def display_error(config, message):
     if config.bool("hide_on_error", False):
         return []
     return render.Root(
-        child = render.Column(children = [
+        child = center_on_square(render.Column(children = [
             render.Text("CycleCast", font = "5x8", color = "#FF7300"),
             render.Marquee(width = canvas.width(), child = render.Text(message, font = "5x8", color = "#FFFF00")),
-        ]),
+        ])),
         show_full_animation = True,
         delay = get_delay(config),
     )
@@ -389,7 +410,7 @@ def display_instructions(config):
     for message in messages:
         children.append(render.Marquee(width = canvas.width(), offset_start = offset, child = render.Text(message, font = "5x8", color = "#FFAA00")))
         offset += len(message) * 5
-    return render.Root(child = render.Column(children = children), show_full_animation = True, delay = get_delay(config))
+    return render.Root(child = center_on_square(render.Column(children = children)), show_full_animation = True, delay = get_delay(config))
 
 def main(config):
     if config.bool("instructions", False):
@@ -463,7 +484,7 @@ def main(config):
         items.append(place(marquee, 0, 27, scale))
     else:
         items.append(place(scaled_image(FLAG_BASE, scale), 0, 24, scale))
-    return render.Root(child = render.Stack(children = items), show_full_animation = True, delay = get_delay(config))
+    return render.Root(child = center_on_square(render.Stack(children = items), 64 * scale, 32 * scale), show_full_animation = True, delay = get_delay(config))
 
 def get_schema():
     return schema.Schema(version = "1", fields = [

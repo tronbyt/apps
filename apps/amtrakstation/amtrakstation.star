@@ -268,6 +268,7 @@ def main(config):
     return render.Root(
         child = render.Column(
             expanded = True,
+            main_align = "center",
             children = children,
         ),
     )

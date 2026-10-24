@@ -3,7 +3,7 @@
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -411,6 +411,15 @@ def _render_combo(stop_code, route_code, api_key):
         return _row(r.get("line"), r.get("labels"), r.get("stop_name"), r.get("direction", ""))
     return _row(r.get("line") or (route_code or "?"), r.get("labels") or ["No", "Data"], r.get("stop_name"), "")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Get API key from config
     api_key = config.get("api_key") or ""
@@ -418,7 +427,16 @@ def main(config):
     # Check if API key is provided
     if not api_key:
         return render.Root(
-            child = render.Column(children = [
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(children = [
+                render.Box(height = 3),
+                render.Text("API Key Required", font = "6x10", color = "#FFFFFF"),
+                render.Box(height = 2),
+                render.Text("Get free key at", font = "tom-thumb", color = "#CCCCCC"),
+                render.Text("511.org/developers", font = "tom-thumb", color = "#CCCCCC"),
+                render.Box(height = 2),
+                render.Text("Add it in settings", font = "tom-thumb", color = "#CCCCCC"),
+            ]))) if is_square() else render.Column(children = [
                 render.Box(height = 3),
                 render.Text("API Key Required", font = "6x10", color = "#FFFFFF"),
                 render.Box(height = 2),
@@ -437,7 +455,13 @@ def main(config):
 
     # Single page with 2 lines - no animation/rotation needed
     return render.Root(
-        child = render.Column(children = [
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(children = [
+            render.Box(height = 1),  # Top padding for even spacing
+            _render_combo(sc1, rc1, api_key),
+            render.Box(height = 1),  # Reduced spacing between the two rows
+            _render_combo(sc2, rc2, api_key),
+        ]))) if is_square() else render.Column(children = [
             render.Box(height = 1),  # Top padding for even spacing
             _render_combo(sc1, rc1, api_key),
             render.Box(height = 1),  # Reduced spacing between the two rows

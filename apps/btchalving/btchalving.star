@@ -7,7 +7,7 @@ Author: PMK (@pmk)
 
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 BLOCKS_PER_HALVING = 210000
 BLOCKS_DIFFICULTY_ADJUSTMENT = 2016
@@ -143,57 +143,64 @@ def main():
     if difficulty_change < -0.1:
         difficulty_change_text_color = "#f00"
 
+    # The two panels are drawn for 64x32; on a taller panel they sit in the
+    # middle of a background-coloured box.
     return render.Root(
         max_age = 30,
         child = render.Box(
             width = 64,
-            height = 32,
+            height = canvas.height(),
             color = BACKGROUND_COLOR,
-            child = render.Column(
-                expanded = True,
-                children = [
-                    render_progress_bar(64, 16, halving_progress, [
-                        render.Text(
-                            content = "HALVING:",
-                            font = "tom-thumb",
-                            color = TEXT_COLOR,
-                            height = 6,
-                        ),
-                        render.Text(
-                            content = "{} left".format(blocks_left_to_next_epoch),
-                            font = "tb-8",
-                            color = TEXT_COLOR,
-                            height = 7,
-                        ),
-                    ]),
-                    render_progress_bar(64, 16, difficulty_adjustment_progress, [
-                        render.Text(
-                            content = "DIFF.ADJ.:",
-                            font = "tom-thumb",
-                            color = TEXT_COLOR,
-                            height = 6,
-                        ),
-                        render.Row(
-                            children = [
-                                render.Text(
-                                    content = str(difficulty_adjustment_remaining),
-                                    font = "tb-8",
-                                    color = TEXT_COLOR,
-                                    height = 7,
-                                ),
-                                render.Padding(
-                                    pad = (4, 0, 0, 0),
-                                    child = render.Text(
-                                        content = "{}%".format(difficulty_change),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                color = BACKGROUND_COLOR,
+                child = render.Column(
+                    expanded = True,
+                    children = [
+                        render_progress_bar(64, 16, halving_progress, [
+                            render.Text(
+                                content = "HALVING:",
+                                font = "tom-thumb",
+                                color = TEXT_COLOR,
+                                height = 6,
+                            ),
+                            render.Text(
+                                content = "{} left".format(blocks_left_to_next_epoch),
+                                font = "tb-8",
+                                color = TEXT_COLOR,
+                                height = 7,
+                            ),
+                        ]),
+                        render_progress_bar(64, 16, difficulty_adjustment_progress, [
+                            render.Text(
+                                content = "DIFF.ADJ.:",
+                                font = "tom-thumb",
+                                color = TEXT_COLOR,
+                                height = 6,
+                            ),
+                            render.Row(
+                                children = [
+                                    render.Text(
+                                        content = str(difficulty_adjustment_remaining),
                                         font = "tb-8",
-                                        color = difficulty_change_text_color,
+                                        color = TEXT_COLOR,
                                         height = 7,
                                     ),
-                                ),
-                            ],
-                        ),
-                    ]),
-                ],
+                                    render.Padding(
+                                        pad = (4, 0, 0, 0),
+                                        child = render.Text(
+                                            content = "{}%".format(difficulty_change),
+                                            font = "tb-8",
+                                            color = difficulty_change_text_color,
+                                            height = 7,
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ]),
+                    ],
+                ),
             ),
         ),
     )

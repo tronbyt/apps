@@ -7,6 +7,7 @@ author: leoadberg
 fileName: beli_feed.star
 packageName: belifeed
 recommendedInterval: 5
+supports64x64: true
 category: social
 tags:
   - media
@@ -14,4 +15,4 @@ tags:
   - social
   - networking
 published: '2023-04-19T17:19:13Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T20:09:53Z'

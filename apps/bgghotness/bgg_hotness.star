@@ -36,7 +36,7 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/logo.png", LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
@@ -121,7 +121,8 @@ def main(config):
 
     return render.Root(
         delay = DELAY_MS,
-        child = render.Animation(frames),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(frames))),
     )
 
 def get_schema():

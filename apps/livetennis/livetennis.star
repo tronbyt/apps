@@ -7,7 +7,7 @@ Author: Ben Abulafia
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -147,6 +147,15 @@ SAMPLE_MATCHES = [
         },
     },
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     api_key = config.str("api_key", "").strip()
@@ -299,7 +308,8 @@ def render_slate(matches, offset, footer_override, footer_color):
         delay = FRAME_DELAY_MS,
         max_age = MAX_AGE_SECONDS,
         show_full_animation = True,
-        child = render.Sequence(children = frames),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Sequence(children = frames))) if is_square() else render.Sequence(children = frames),
     )
 
 def render_match(match, position, total, footer_override, footer_color):
@@ -591,7 +601,26 @@ def render_notice(message):
     return render.Root(
         delay = FRAME_DELAY_MS,
         max_age = MAX_AGE_SECONDS,
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            width = 64,
+            height = 32,
+            color = BG,
+            child = render.Column(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.Text(content = "LIVE TENNIS", font = HEAD_FONT, color = SERVE_COLOR),
+                    render.Box(width = 40, height = 2),
+                    render.Marquee(
+                        width = INNER_W,
+                        align = "center",
+                        child = render.Text(content = message, font = ROW_FONT, color = NAME_COLOR),
+                    ),
+                ],
+            ),
+        ))) if is_square() else render.Box(
             width = 64,
             height = 32,
             color = BG,

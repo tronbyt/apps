@@ -7,7 +7,7 @@ Author: Daniel Sitnik
 
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -31,6 +31,15 @@ DEFAULT_LOCAL_TIME_COLOR = "#1167b1"
 DEBUG = False
 
 # FORMULAS AND CALCULATIONS PORTED FROM https://www.localsiderealtime.com/
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """Main app method.
@@ -84,11 +93,13 @@ def main(config):
 
     return render.Root(
         delay = 1000,
+        # Sized to the panel, and on a square panel the column expands so
+        # space_evenly spreads the title and times down it.
         child = render.Box(
-            height = 32,
+            height = canvas.height(),
             width = 64,
             child = render.Column(
-                expanded = False,
+                expanded = is_square(),
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [

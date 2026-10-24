@@ -7,7 +7,7 @@ Author: cbromano
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 WMATA_BASE_URL = "https://api.wmata.com/StationPrediction.svc/json/GetPrediction/"
@@ -31,7 +31,7 @@ def main(config):
     response = http.get(WMATA_URL, headers = {"api_key": API_KEY}, ttl_seconds = CACHE_TTL)
     if response.status_code != 200:
         return render.Root(
-            child = render.Text("Error!"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Error!")),
         )
 
     trainListing = response.json()["Trains"]
@@ -82,7 +82,8 @@ def main(config):
     else:
         finishedDisplay = render.Text("Hello")
 
-    return render.Root(child = finishedDisplay)
+    # Centre the board on taller panels (64x64).
+    return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = finishedDisplay))
 
 def generateDisplay2(trainDestination, trainArrival, trainCars, trainLine, selectedCars):
     trainRows = 2

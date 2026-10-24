@@ -10,7 +10,7 @@ load("http.star", "http")
 load("images/bike_image.png", BIKE_IMAGE_ASSET = "file")
 load("images/lightning_image.png", LIGHTNING_IMAGE_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 BIKE_IMAGE = BIKE_IMAGE_ASSET.readall()
@@ -143,7 +143,8 @@ def main(config):
 
     return render.Root(
         max_age = 120,
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Padding(
                     pad = (1, 0, 0, 0),
@@ -196,7 +197,7 @@ def main(config):
                     ),
                 ),
             ],
-        ),
+        ))),
     )
 
 def get_schema():

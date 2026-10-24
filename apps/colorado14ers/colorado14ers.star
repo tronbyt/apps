@@ -64,6 +64,27 @@ load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 display_options = [
     schema.Option(value = "random", display = "Random 14er"),
     schema.Option(value = "visited", display = "Random visited 14er"),
@@ -1035,10 +1056,10 @@ def mountain_message(mountain, metric):
 
 def message_screen(config, layout, message):
     return render.Root(
-        child = render.Column(children = [
+        child = center_on_square(render.Column(children = [
             render.Text("Colorado 14ers", font = layout["font"], color = "#65D0E6"),
             render.Marquee(width = layout["display_width"], child = render.Text(message, font = layout["font"], color = "#FFAA00")),
-        ]),
+        ])),
         show_full_animation = True,
         delay = get_delay(config),
     )
@@ -1114,7 +1135,7 @@ def show_instructions_screen(config, layout):
             child = render.Text(message, font = layout["font"], color = "#65D0E6" if index == 0 else "#F4A306"),
         ))
         offset += len(message) * layout["character_width"]
-    return render.Root(child = render.Column(children = children), show_full_animation = True, delay = get_delay(config))
+    return render.Root(child = center_on_square(render.Column(children = children)), show_full_animation = True, delay = get_delay(config))
 
 def get_sorted_mountain_toggles(sort_key):
     if sort_key not in ["Name", "Range", "Elevation", "Hiking Distance", "Class"]:

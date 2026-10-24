@@ -690,11 +690,13 @@ def main(config):
     if config.bool("$widget", False):
         # A still, so a frozen seconds count would only mislead.
         label = clock_label(now.hour, now.minute, use_24)
-        return render.Root(child = render.Stack(children = [
+
+        # The scene is WIDTH x HEIGHT at the 1x/2x scale; bound it to that and centre it on taller panels (64x64).
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = WIDTH * scale, height = HEIGHT * scale, child = render.Stack(children = [
             emit(street_frame(base, 0, lit), palette, scale, boxes),
             at(0, CLOCK_Y, emit(clock_layer(label, meridiem_for(now.hour, use_24), ""), palette, scale, boxes), scale),
             at(0, METER_Y, hud, scale),
-        ]))
+        ]))))
 
     # One clock layer per distinct second rather than per frame; the street is
     # the only thing that has to be redrawn ten times a second.
@@ -719,7 +721,8 @@ def main(config):
     return render.Root(
         delay = DELAY_MS,
         max_age = MAX_AGE,
-        child = render.Animation(children = frames),
+        # The scene is WIDTH x HEIGHT at the 1x/2x scale; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = WIDTH * scale, height = HEIGHT * scale, child = render.Animation(children = frames))),
     )
 
 def get_schema():

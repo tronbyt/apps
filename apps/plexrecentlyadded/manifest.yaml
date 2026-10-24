@@ -7,6 +7,7 @@ author: noahpodgurski
 fileName: plex_recently_added.star
 packageName: plexrecentlyadded
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - plex
@@ -14,4 +15,4 @@ tags:
   - utility
   - tech
 published: '2023-09-29T14:57:09Z'
-updated: '2026-02-11T19:57:08Z'
+updated: '2026-10-01T22:22:03Z'

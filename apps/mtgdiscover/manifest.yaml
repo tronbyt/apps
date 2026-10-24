@@ -6,8 +6,9 @@ desc: 'Cycles through and displays information about random Magic: The Gathering
 author: Staghouse
 fileName: mtg_discover.star
 packageName: mtgdiscover
+supports64x64: true
 category: entertainment
 tags:
   - mtg
 published: '2024-01-09T20:05:20Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:58:58Z'

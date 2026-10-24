@@ -93,6 +93,10 @@ def parse_milepost(sign):
                             return "MP {}".format(float(mp_value))
     return ""
 
+def is_square():
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     """Display the selected PennDOT sign message.
 
@@ -103,24 +107,26 @@ def main(config):
         Render tree displaying sign message and name.
     """
     scale = 2 if canvas.is2x() else 1
+    width, height = canvas.size()
+    square = is_square()
     full_id = config.str("sign_id")
     show_info_bar = config.bool("show_info_bar", True)
 
     if not full_id or full_id == "none":
         return render.Root(
             child = render.Box(
-                width = 64 * scale,
-                height = 32 * scale,
+                width = width,
+                height = height,
                 child = render.Column(
                     main_align = "center",
                     cross_align = "center",
                     children = [
                         render.Marquee(
-                            width = 64 * scale,
+                            width = width,
                             child = render.Text("Select a sign", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
                         ),
                         render.Marquee(
-                            width = 64 * scale,
+                            width = width,
                             child = render.Text("in settings", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
                         ),
                     ],
@@ -151,8 +157,9 @@ def main(config):
             break
 
     if not selected_sign:
+        not_found = render.Text("Sign not found", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14")
         return render.Root(
-            child = render.Text("Sign not found", color = "#F09F00", font = "tb-8" if scale == 1 else "terminus-14"),
+            child = render.Box(width = width, height = height, child = not_found) if square else not_found,
         )
 
     # Get message, images, and roadway name
@@ -251,12 +258,15 @@ def main(config):
     info_font = "tom-thumb" if scale == 1 else "terminus-12"
 
     if show_info_bar:
-        # With info bar: 26px content + 6px bar = 32px
+        # With info bar: 26px content + 6px bar = 32px. A square panel stacks
+        # the roadway and milepost bars instead of alternating them, and gives
+        # the message the rest of the height.
+        bar_rows = 2 if (square and milepost) else 1
         display_children.append(
             render.Box(
-                width = 64 * scale,
-                height = 26 * scale,
-                child = content_widget,
+                width = width,
+                height = height - 6 * scale * bar_rows,
+                child = render.Column(main_align = "center", cross_align = "center", expanded = True, children = [content_widget]) if square else content_widget,
             ),
         )
 
@@ -298,20 +308,24 @@ def main(config):
                 ),
             )
 
-            # 90 frames of roadway, 90 frames of milepost
-            info_frames.extend([roadway_widget] * 90)
-            info_frames.extend([milepost_widget] * 90)
+            if square:
+                display_children.append(roadway_widget)
+                display_children.append(milepost_widget)
+            else:
+                # 90 frames of roadway, 90 frames of milepost
+                info_frames.extend([roadway_widget] * 90)
+                info_frames.extend([milepost_widget] * 90)
 
-            display_children.append(render.Animation(children = info_frames))
+                display_children.append(render.Animation(children = info_frames))
         else:
             # Just show roadway name
             display_children.append(roadway_widget)
     else:
-        # Without info bar: full 32px for content, centered
+        # Without info bar: full height for content, centered
         display_children.append(
             render.Box(
-                width = 64 * scale,
-                height = 32 * scale,
+                width = width,
+                height = height,
                 child = render.Column(
                     main_align = "center",
                     cross_align = "center",

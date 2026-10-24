@@ -7,8 +7,9 @@ author: rs7q5
 fileName: jokes_jokeapi.star
 packageName: jokesjokeapi
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - music
 published: '2022-02-01T23:33:26Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T19:27:54Z'

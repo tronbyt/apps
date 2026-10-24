@@ -1,8 +1,29 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
 
 DEFAULT_ICS_URL = "https://ics.calendarlabs.com/76/8d23255e/US_Holidays.ics"
 DEFAULT_TITLE = "Next event"
@@ -30,11 +51,11 @@ def main(config):
         bottom = render_bottom(next_event, now, timezone)
 
     return render.Root(
-        child = render.Column(
+        child = center_on_square(render.Column(
             cross_align = "center",
             main_align = "space_around",
             children = render_top(config) + bottom,
-        ),
+        )),
     )
 
 def fetch_calendar(url):

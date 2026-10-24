@@ -1,6 +1,27 @@
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
 
 FRAME_DELAY = 4000
 
@@ -167,7 +188,7 @@ def _render_upcoming(match, team_styles, tz, now, layout):
     return render.Root(
         delay = layout.scroll_frame_delay,
         show_full_animation = True,
-        child = render.Animation(children = frames),
+        child = center_on_square(render.Animation(children = frames)),
     )
 
 def _team_scores(match, team_styles):
@@ -328,7 +349,7 @@ def _render_status_animation(columns, layout):
     if layout.scale == 1:
         return render.Root(
             delay = FRAME_DELAY,
-            child = render.Animation(children = columns),
+            child = center_on_square(render.Animation(children = columns)),
         )
 
     frames = []
@@ -337,7 +358,7 @@ def _render_status_animation(columns, layout):
         frames.extend([column] * hold_frames)
     return render.Root(
         delay = layout.scroll_frame_delay,
-        child = render.Animation(children = frames),
+        child = center_on_square(render.Animation(children = frames)),
     )
 
 def _render_status_row(text, layout):

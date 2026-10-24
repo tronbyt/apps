@@ -8,7 +8,7 @@ Author: Brombomb
 load("cache.star", "cache")
 load("http.star", "http")
 load("images/default_finch_icon.webp", DEFAULT_FINCH_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -38,6 +38,15 @@ VALID_BIRD_NODE_TYPES = [
     "FeedItemNewPostcard",
     "FeedItemMysteryVisitorNotRecognized",
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     username = config.str("username", "")
@@ -1201,7 +1210,8 @@ def render_bird_display(sighting):
     ]
 
     return render.Root(
-        child = render.Stack(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
             children = [
                 # Main content
                 render.Row(
@@ -1209,13 +1219,14 @@ def render_bird_display(sighting):
                     children = row_children,
                 ),
             ],
-        ),
+        )),
     )
 
 def render_error(message):
     """Render an error message"""
     return render.Root(
         child = render.Column(
+            expanded = is_square(),
             main_align = "center",
             cross_align = "center",
             children = [

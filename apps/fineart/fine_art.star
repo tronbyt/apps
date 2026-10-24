@@ -75,7 +75,7 @@ load("images/wood_american_gothic.png", WOOD_AMERICAN_GOTHIC_ASSET = "file")
 load("images/wyeth_christina_s_world.png", WYETH_CHRISTINA_S_WORLD_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -162,13 +162,13 @@ def get_caption(text):
     # 4 pixels/character for monospaced tom-thumb
     text_length = len(text) * 4
 
-    pos_start = 64 - MARQUEE_OFFSET_START
+    pos_start = canvas.width() - MARQUEE_OFFSET_START
     pos_end = -text_length + MARQUEE_OFFSET_END
     distance = pos_start - pos_end
     duration = int(distance / 1.75)
     pos_increment = distance / duration
 
-    if (text_length < 65):
+    if (text_length < canvas.width() + 1):
         pos_start = 0
         pos_increment = 0
         duration = 220
@@ -186,7 +186,7 @@ def get_caption(text):
             render.Padding(
                 child = render.Stack(children = [
                     render.Box(
-                        width = 64,
+                        width = canvas.width(),
                         height = 6,
                         color = "000000%s" % box_opacity,
                     ),
@@ -195,7 +195,7 @@ def get_caption(text):
                         pad = (pos, 0, 0, 0),
                     ),
                 ]),
-                pad = (0, 32 - 6, 0, 0),
+                pad = (0, canvas.height() - 6, 0, 0),
             ),
         )
 
@@ -227,11 +227,11 @@ def get_still_frames(child, seconds):
 def get_transforms(painting):
     framing_offset = -abs(painting.get("framing")) if "framing" in painting else 0
 
-    if painting["height"] > 32:
+    if painting["height"] > canvas.height():
         transform_start = get_start_transform(painting, framing_offset, "vertical")
         transform_final = animation.Translate(0, framing_offset)
         final_framing = (0, framing_offset, 0, 0)
-    elif painting["width"] > 64:
+    elif painting["width"] > canvas.width():
         transform_start = get_start_transform(painting, framing_offset, "horizontal")
         transform_final = animation.Translate(framing_offset, 0)
         final_framing = (framing_offset, 0, 0, 0)
@@ -244,19 +244,19 @@ def get_transforms(painting):
 
 def get_start_transform(painting, framing_offset, orientation):
     if orientation == "vertical":
-        center = abs(framing_offset) + (32 / 2)
+        center = abs(framing_offset) + (canvas.height() / 2)
 
         if center / painting["height"] > 0.5:
             return animation.Translate(0, 0)
         else:
-            return animation.Translate(0, -abs(painting["height"] - 32))
+            return animation.Translate(0, -abs(painting["height"] - canvas.height()))
     else:
-        center = abs(framing_offset) + (64 / 2)
+        center = abs(framing_offset) + (canvas.width() / 2)
 
         if center / painting["width"] > 0.5:
             return animation.Translate(0, 0)
         else:
-            return animation.Translate(-abs(painting["width"] - 64), 0)
+            return animation.Translate(-abs(painting["width"] - canvas.width()), 0)
 
 def get_simple_pan(child, transform_start, transform_final):
     delay_seconds = 0.25

@@ -7,8 +7,9 @@ author: Hadlich Labs
 fileName: gpt_color.star
 packageName: gptcolor
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art
 published: '2023-04-19T18:30:36Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:17:57Z'

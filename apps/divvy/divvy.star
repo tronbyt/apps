@@ -8,7 +8,7 @@ Author: Andy Day (@adayNU)
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/lyft_icon.png", LYFT_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LYFT_ICON = LYFT_ICON_ASSET.readall()
@@ -16,6 +16,15 @@ LYFT_ICON = LYFT_ICON_ASSET.readall()
 STATIONS_URL = "https://gbfs.lyft.com/gbfs/1.1/chi/en/station_information.json"
 STATION_STATUS_URL = "https://gbfs.lyft.com/gbfs/1.1/chi/en/station_status.json"
 DEFAULT_STATION = '{"id":"1789242536879942642","name":"Halsted St & Fulton St"}'
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     resp = http.get(STATION_STATUS_URL, ttl_seconds = 60)
@@ -32,8 +41,12 @@ def main(config):
             text = "Bikes:" + str(int(value["num_bikes_available"] - value["num_ebikes_available"])) + "\nE-Bikes:" + str(int(value["num_ebikes_available"]))
             break
 
+    # The header and the bike row total ~32 rows; on a square panel the
+    # column expands and spreads them.
     return render.Root(
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             children = [
                 render.Column(
                     children = [

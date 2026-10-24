@@ -12,10 +12,19 @@ load("images/seattle_morning.gif", SEATTLE_MORNING_ASSET = "file")
 
 # LOAD MODULES
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # MAIN
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Grab the configuration information and adjust variables
     selected_img_id = config.get("image", DEFAULT_MORNING_ID)
@@ -29,7 +38,8 @@ def main(config):
     # Render an image with a slight delay
     return render.Root(
         delay = selected_speed,
-        child = render.Image(src = selected_img),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(src = selected_img))) if is_square() else render.Image(src = selected_img),
     )
 
 def get_schema():

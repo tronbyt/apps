@@ -14,7 +14,7 @@ load("images/sky_low_pollen.png", SKY_LOW_POLLEN_ASSET = "file")
 load("images/sky_med_pollen.png", SKY_MED_POLLEN_ASSET = "file")
 load("images/trees.png", TREES_ASSET = "file")
 load("images/weeds.png", WEEDS_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # DEFAULT_LOC = {
@@ -46,6 +46,15 @@ MIN_LEVEL_OPTIONS = [
     schema.Option(display = "High", value = "4"),
     schema.Option(display = "Very High", value = "5"),
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     print("Initializing Pollen Count...")
@@ -132,7 +141,12 @@ def main(config):
                     render.Box(
                         color = COLORS["yellow"],
                         height = 8,
-                        child = render.Text(
+                        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+                        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Text(
+                            content = "POLLEN COUNT",
+                            font = "tb-8",
+                            color = "#3D1F01",
+                        )))) if is_square() else render.Text(
                             content = "POLLEN COUNT",
                             font = "tb-8",
                             color = "#3D1F01",

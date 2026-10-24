@@ -7,9 +7,10 @@ author: tavdog
 fileName: french_wotd.star
 packageName: frenchwotd
 recommendedInterval: 5
+supports64x64: true
 category: education
 tags:
   - education
   - local
 published: '2023-12-07T18:05:41Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T21:08:18Z'

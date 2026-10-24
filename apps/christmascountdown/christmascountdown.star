@@ -142,7 +142,12 @@ def main(config):
     #--------
     return render.Root(
         delay = 4000,
-        child = render.Animation(children = displayChildren),
+        # The text column is expanded, so bound the frames to the 1x/2x scene size before centring them on taller panels (64x64).
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Box(width = 64 * scale, height = 32 * scale, child = render.Animation(children = displayChildren)),
+        ),
     )
 
 def get_schema():

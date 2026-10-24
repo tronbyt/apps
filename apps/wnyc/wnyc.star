@@ -7,7 +7,7 @@ Author: Andrew Westling
 
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 COLORS = {
@@ -50,6 +50,8 @@ DEFAULT_USE_CUSTOM_COLORS = False
 DEFAULT_COLOR_SHOW_TITLE = COLORS["white"]
 DEFAULT_COLOR_DESCRIPTION = COLORS["medium_gray"]
 
+# The show details scroll through whatever is under the header bar: 27 rows
+# on a 64x32 panel, 59 on a square one.
 RED_HEADER_BAR = render.Stack(
     children = [
         render.Box(width = 64, height = 6, color = COLORS["red"]),
@@ -64,6 +66,15 @@ ERROR_CONTENT = render.Column(
         render.Marquee(width = 64, child = render.Text(content = "Can't connect to WNYC", color = COLORS["red"])),
     ],
 )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     stream = config.str("stream", DEFAULT_STREAM)
@@ -130,7 +141,7 @@ def main(config):
 
         root_contents = render.Marquee(
             scroll_direction = "vertical",
-            height = 27,
+            height = canvas.height() - 5,
             child = render.Column(children = data_parts),
         )
 
@@ -146,13 +157,26 @@ def main(config):
 
         root_contents = render.Row(expanded = True, main_align = "space_between", children = data_parts)
 
+        # A square panel has the rows to put a 40px image above the show
+        # title at full width, instead of a 26px one beside a 37px marquee.
+        if image_src and is_square():
+            root_contents = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Image(src = image_src, height = 40, width = 40),
+                    render.Marquee(width = 64, align = "center", scroll_direction = "horizontal", child = render.Text(content = show_title, font = "tb-8", color = color_show_title)),
+                ],
+            )
+
     if layout == "with_name_only":
         if show_title:
             data_parts.append(render.Padding(pad = 0, child = render.WrappedText(align = "center", width = 64, content = show_title, font = "tb-8", color = color_show_title)))
 
         root_contents = render.Marquee(
             scroll_direction = "vertical",
-            height = 27,
+            height = canvas.height() - 5,
             child = render.Column(children = data_parts),
         )
 

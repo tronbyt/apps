@@ -28,7 +28,7 @@ Author: D. Segel
 #
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -110,7 +110,8 @@ def main(config):
     return render.Root(
         delay = 1000,
         max_age = 120,
-        child = render.Animation(children = time_frames),
+        # Frames are hand-placed for 64x32; bound them and centre them on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = time_frames))),
         # child = animation.Transformation(
         #     child =
         # )

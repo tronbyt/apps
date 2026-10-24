@@ -6,10 +6,11 @@ desc: Show value or graph of Grafana metrics.
 author: tavdog
 fileName: grafana.star
 packageName: grafana
+supports64x64: true
 category: utilities
 tags:
   - tech
   - data-visual
   - utility
 published: '2025-11-21T09:42:57Z'
-updated: '2025-11-22T02:54:19Z'
+updated: '2026-10-01T16:46:59Z'

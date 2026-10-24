@@ -11,6 +11,27 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
 RACHIO_ICON = RACHIO_ICON_ASSET.readall()
 
 RACHIO_BLUE = "#0070D2"
@@ -345,7 +366,7 @@ def build_display(
     header_width = max(1, screen_width - icon_width - 1)
 
     return render.Root(
-        render.Column(
+        center_on_square(render.Column(
             children = [
                 render.Row(
                     main_align = "start",
@@ -401,7 +422,7 @@ def build_display(
                     ),
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = delay,
     )

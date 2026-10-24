@@ -34,7 +34,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/lquote.png", LQUOTE_ASSET = "file")
 load("images/rquote.png", RQUOTE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -44,7 +44,7 @@ RQUOTE = RQUOTE_ASSET.readall()
 URL = "http://feeds.feedburner.com/theysaidso/qod"
 
 WIDTH = 64
-HEIGHT = 32
+HEIGHT = canvas.height()
 
 QUOTE_W = 22
 QUOTE_H = 19

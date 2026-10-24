@@ -7,10 +7,11 @@ author: jay-medina
 fileName: pb_jelly_time.star
 packageName: pbjellytime
 recommendedInterval: 5
+supports64x64: true
 category: clocks
 tags:
   - music
   - dance
   - retro
 published: '2023-02-08T17:14:07Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T22:17:11Z'
