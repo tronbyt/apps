@@ -1,0 +1,14 @@
+---
+id: todoist-next
+name: Todoist Next
+summary: Todoist next due/overdue
+desc: Displays the next due or overdue task from todoist.
+author: Alisdair/Akeslo/oleksii-ivanov
+fileName: todoist_next.star
+packageName: todoistnext
+recommendedInterval: 60
+category: utilities
+tags:
+  - productivity
+published: '2022-07-19T14:37:49Z'
+updated: '2026-02-22T02:07:25Z'

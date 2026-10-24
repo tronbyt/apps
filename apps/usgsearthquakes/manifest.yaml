@@ -1,0 +1,17 @@
+---
+id: usgs-earthquakes
+name: USGS Earthquakes
+summary: Recent nearby earthquakes
+desc: Displays the most recent earthquakes based on location.
+author: Chris Silverberg
+fileName: usgs_earthquakes.star
+packageName: usgsearthquakes
+recommendedInterval: 5
+category: science
+tags:
+  - science
+  - news
+  - weather
+  - utility
+published: '2022-05-03T14:55:36Z'
+updated: '2025-12-05T22:28:51Z'

@@ -1,0 +1,17 @@
+---
+id: nrl-scores
+name: NRL Scores
+summary: Shows NRL scores
+desc: Shows scores for the Australian Rugby League competition (NRL).
+author: M0ntyP
+fileName: nrl_scores.star
+packageName: nrlscores
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - real-time
+  - nrl
+  - rugby
+published: '2023-06-27T17:13:32Z'
+updated: '2026-10-01T22:07:01Z'

@@ -1,0 +1,18 @@
+---
+id: archer-dog
+name: Archer Dog
+summary: Archer Dog Animation
+desc: Displays our favorite dog, Archer!
+author: Jeremy Harnden
+fileName: archerdog.star
+packageName: archerdog
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: entertainment
+tags:
+  - lifestyle
+  - nature
+  - wide 2x support
+published: '2023-12-24T22:31:43Z'
+updated: '2026-10-01T20:09:53Z'

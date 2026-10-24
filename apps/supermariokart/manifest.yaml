@@ -1,0 +1,18 @@
+---
+id: super-mario-kart
+name: Super Mario Kart
+summary: Super Mario Kart Animation
+desc: Animated characters & items from the 1992 Super Mario Kart game.
+author: Kevin Connell
+fileName: super_mario_kart.star
+packageName: supermariokart
+supports2x: true
+category: gaming
+tags:
+  - retro
+  - gaming
+  - media
+  - art
+  - wide 2x support
+published: '2022-08-04T19:30:22Z'
+updated: '2025-12-28T23:07:17Z'
