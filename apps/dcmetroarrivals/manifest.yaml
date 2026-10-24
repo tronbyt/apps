@@ -1,0 +1,14 @@
+---
+id: dc-metro-arrivals
+name: DC Metro Arrivals
+summary: WMATA trains and buses
+desc: Live Metrorail and Metrobus arrivals from WMATA's own API, merged into one list sorted by time. Filter by line, route or destination, and hide anything you can't walk to in time.
+author: Nick Baumann
+fileName: dc_metro_arrivals.star
+packageName: dcmetroarrivals
+recommendedInterval: 1
+supports2x: true
+supports64x64: true
+category: transit
+tags:
+  - real-time
