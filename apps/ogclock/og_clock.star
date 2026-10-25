@@ -129,7 +129,7 @@ def get_ambient_weather_conditions(application_key, api_key, station_id, display
             "applicationKey": application_key,
             "apiKey": api_key,
         },
-        ttl_seconds = 60,
+        ttl_seconds = 300,
     )
     if res.status_code != 200:
         fail("Ambient Weather device request failed with status", res.status_code)
@@ -150,19 +150,21 @@ def get_ambient_weather_conditions(application_key, api_key, station_id, display
 
     conditions = station.get("lastData", {})
     temp_f = conditions.get("tempf")
-    if temp_f == None:
-        fail("The selected Ambient Weather device has no outdoor temperature reading.")
-
-    temperature = int(temp_f)
-    if display_metric:
-        temperature = int((temp_f - 32) * 5.0 / 9.0)
+    if type(temp_f) == "int" or type(temp_f) == "float":
+        temperature = int(temp_f)
+        if display_metric:
+            temperature = int((temp_f - 32) * 5.0 / 9.0)
+    else:
+        temperature = "--"
 
     # Ambient Weather supplies measurements rather than a weather-condition code.
     # Use recent rain and wind when available; otherwise select a time-appropriate
     # neutral sky icon.
-    if conditions.get("hourlyrainin", 0) > 0:
+    hourly_rain = conditions.get("hourlyrainin")
+    wind_speed = conditions.get("windspeedmph")
+    if (type(hourly_rain) == "int" or type(hourly_rain) == "float") and hourly_rain > 0:
         icon_ref = "rainy.png"
-    elif conditions.get("windspeedmph", 0) >= 20:
+    elif (type(wind_speed) == "int" or type(wind_speed) == "float") and wind_speed >= 20:
         icon_ref = "windy.png"
     elif now.hour >= 6 and now.hour < 19:
         icon_ref = "sunnyish.png"
@@ -170,10 +172,10 @@ def get_ambient_weather_conditions(application_key, api_key, station_id, display
         icon_ref = "moonyish.png"
 
     humidity = conditions.get("humidity")
-    if humidity != None:
+    if type(humidity) == "int" or type(humidity) == "float":
         humidity = int(humidity)
     else:
-        humidity = "?"
+        humidity = "--"
 
     return {
         "temp": temperature,
@@ -309,7 +311,6 @@ def main(config):
     api_service = config.get("weatherApiService") or "OpenWeather"
     api_key = config.get("apiKey", "")
     ambient_application_key = config.get("ambientApplicationKey", "")
-    ambient_api_key = config.get("ambientApiKey", "")
     ambient_station_id = config.get("ambientStationId", "")
     system_of_measurement = config.get("systemOfMeasurement", "Imperial").lower()
     temp_color = config.get("tempColor", TEMP_COLOR_DEFAULT)
@@ -318,7 +319,7 @@ def main(config):
     display_sample = (
         (api_service == "OpenWeather" or api_service == "OpenWeatherOneCall") and not api_key
     ) or (
-        api_service == "Ambient Weather" and (not ambient_application_key or not ambient_api_key)
+        api_service == "Ambient Weather" and (not ambient_application_key or not api_key)
     )
 
     # Format time components for proper blinking colon display
@@ -475,7 +476,7 @@ def main(config):
     elif api_service == "Ambient Weather":
         ambient_conditions = get_ambient_weather_conditions(
             application_key = ambient_application_key,
-            api_key = ambient_api_key,
+            api_key = api_key,
             station_id = ambient_station_id,
             display_metric = display_metric,
             now = now,
@@ -613,7 +614,7 @@ def get_schema():
             schema.Text(
                 id = "apiKey",
                 name = "API Key",
-                desc = "API key for weather data access (not needed for NWS)",
+                desc = "API key for the selected weather service (not needed for NWS)",
                 icon = "gear",
                 default = "",
                 secret = True,
@@ -621,15 +622,7 @@ def get_schema():
             schema.Text(
                 id = "ambientApplicationKey",
                 name = "Ambient Weather Application Key",
-                desc = "Application key from your AmbientWeather.net account. Required when Ambient Weather is selected.",
-                icon = "key",
-                default = "",
-                secret = True,
-            ),
-            schema.Text(
-                id = "ambientApiKey",
-                name = "Ambient Weather API Key",
-                desc = "API key from your AmbientWeather.net account. Required when Ambient Weather is selected.",
+                desc = "Application key from your AmbientWeather.net account. Required only when Ambient Weather is selected.",
                 icon = "key",
                 default = "",
                 secret = True,
@@ -637,7 +630,7 @@ def get_schema():
             schema.Text(
                 id = "ambientStationId",
                 name = "Ambient Weather Station MAC Address",
-                desc = "Optional. Select a station by MAC address; leave blank to use the first available device.",
+                desc = "Optional. Select an Ambient Weatherstation by MAC address; leave blank to use the first available device.",
                 icon = "temperatureHalf",
                 default = "",
             ),
