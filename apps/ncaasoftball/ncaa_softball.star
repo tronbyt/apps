@@ -773,6 +773,7 @@ TEAMS = {
     "527": struct_team_def("Pittsburgh Panthers", "PITT", "221", "003594", "527", "40"),
     "601": struct_team_def("Purdue Boilermakers", "PUR", "2509", "373A36", "601", "49"),
     "514": struct_team_def("Rutgers Scarlet Knights", "RUTG", "164", "000000", "514", "49"),
+    "637": struct_team_def("Samford Bulldogs", "SAM", "2535", "005485", "637", "31"),
     "605": struct_team_def("South Carolina Gamecocks", "SC", "2579", "000000", "605", "32"),
     "476": struct_team_def("Stanford Cardinal", "STAN", "24", "8C1515", "476", "47"),
     "793": struct_team_def("Syracuse Orange", "SYR", "183", "000E54", "793", "40"),

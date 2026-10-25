@@ -173,6 +173,14 @@ def get_schema():
                 icon = "user",
                 default = DEFAULT_USERNAME,
             ),
+            schema.Text(
+                id = "jwt_token",
+                name = "JWT Token",
+                desc = "Find 'jwt_token' in your browser cookies for duolingo.com and enter it here. This is required to retrieve your XP data. The token is valid for 30 days and will be cached, but you will need to update it here each time it expires.",
+                icon = "key",
+                default = "",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "xp_target",
                 name = "Daily XP target",
@@ -270,11 +278,30 @@ def main(config):
     xp_target = int(config.str("xp_target", DEFAULT_DAILY_XP_TARGET))
     nickname = config.get("nickname", DEFAULT_NICKNAME)
     display_extra_stats = config.str("extra_week_stats", DEFAULT_SHOW_EXTRA_STATS)
+    jwt_token = config.get("jwt_token", "")
 
     print("XP Target: " + str(xp_target))
 
     # Trim nickname to only display first five characters, and capitalize
     nickname = nickname[:5].upper()
+
+    headers = {
+        "authority": "www.duolingo.com",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "accept-language": "en-US,en;q=0.9",
+        "dnt": "1",
+        "sec-ch-ua": '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+        "Authorization": "Bearer {}".format(jwt_token),
+        "Cookie": "jwt_token={}".format(jwt_token),
+    }
 
     # Setup user cache keys
     duolingo_cache_key_username = "duolingo_%s" % duolingo_username
@@ -317,22 +344,6 @@ def main(config):
     # Lookup userId from supplied username (if not already found in cache)
     if do_duolingo_main_query == True:
         print("Querying duolingo.com for userId...")
-
-        headers = {
-            "authority": "www.duolingo.com",
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "en-US,en;q=0.9",
-            "dnt": "1",
-            "sec-ch-ua": '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"macOS"',
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "none",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-        }
 
         duolingo_main_query = http.get(duolingo_main_query_url, headers = headers, ttl_seconds = 604800)
 
@@ -380,12 +391,6 @@ def main(config):
 
         # Example Query: https://www.duolingo.com/2017-06-30/users/6364229/xp_summaries?startDate=2022-02-24&endDate=2022-02-24&Europe/London
 
-        # Setup xp summary query URL
-        duolingo_xpsummary_query_1 = "https://www.duolingo.com/2017-06-30/users/"
-        duolingo_xpsummary_query_2 = "/xp_summaries?startDate="
-        duolingo_xpsummary_query_3 = "&endDate="
-        duolingo_xpsummary_query_4 = "&timezone="
-
         # Get today's date
         now = time.now().in_location(timezone)
         date_now = now.format("2006-01-02").upper()
@@ -400,10 +405,14 @@ def main(config):
 
         print("Start Date: " + str(startDate) + "   End Date: " + str(endDate))
 
-        DUOLINGO_XP_QUERY_URL = duolingo_xpsummary_query_1 + str(duolingo_userid) + duolingo_xpsummary_query_2 + startDate + duolingo_xpsummary_query_3 + endDate + duolingo_xpsummary_query_4 + timezone
+        DUOLINGO_XP_QUERY_URL = "https://www.duolingo.com/2017-06-30/users/{}/xp_summaries?startDate={}&endDate={}&timezone={}".format(
+            duolingo_userid,
+            startDate,
+            endDate,
+            timezone,
+        )
 
-        print("Querying duolingo.com for XP summary data.")
-        xpsummary_query = http.get(DUOLINGO_XP_QUERY_URL, ttl_seconds = 900)
+        xpsummary_query = http.get(DUOLINGO_XP_QUERY_URL, headers = headers, ttl_seconds = 900)
         if xpsummary_query.status_code != 200:
             print("XP summary query failed with status %d", xpsummary_query.status_code)
             display_error_msg = True
@@ -424,7 +433,7 @@ def main(config):
 
         # If there is no data returned at all for the time frame then we can assume no lessons have been completed recently
         # In this case we need to insert dummy data for the entire time frame
-        if duolingo_xpsummary_json["summaries"] == []:
+        if not duolingo_xpsummary_json or duolingo_xpsummary_json.get("summaries") == []:
             hide_duolingo_in_rotation = True
             print("WARNING: Duolingo returned no data suggesting no lessons have been completed for the last 14 days. App will be hidden.")
         else:

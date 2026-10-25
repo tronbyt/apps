@@ -7,3 +7,12 @@ author: 0xmetaclass
 fileName: farcaster_follows.star
 packageName: farcasterfollows
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - media
+  - networking
+  - tracking
+  - social
+published: '2023-04-27T13:34:51Z'
+updated: '2026-10-01T21:00:02Z'

@@ -7,3 +7,12 @@ author: Diogo Ribeiro Machado @ diogodh
 fileName: iss.star
 packageName: iss
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - space
+  - science
+  - tech
+  - utility
+published: '2024-05-06T15:17:42Z'
+updated: '2026-10-01T21:37:10Z'

@@ -7,3 +7,12 @@ author: J. Keybl
 fileName: fireflies.star
 packageName: fireflies
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - clock
+  - art
+  - time
+  - utility
+published: '2023-10-12T16:21:11Z'
+updated: '2026-10-01T21:00:02Z'

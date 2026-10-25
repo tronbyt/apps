@@ -10,9 +10,8 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bg_image.jpg", BG_IMAGE_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("time.star", "time")
 load("xpath.star", "xpath")
 
 BG_IMAGE = BG_IMAGE_ASSET.readall()
@@ -62,7 +61,7 @@ def get_text(api_url, base_url, heading_response_path, body_response_path, image
         message = "API TEXT"
 
         row = render.Stack([
-            render.Image(src = BG_IMAGE),
+            render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(src = BG_IMAGE)),
             render.Box(
                 render.Row(
                     main_align = "space_evenly",
@@ -251,7 +250,7 @@ def get_text(api_url, base_url, heading_response_path, body_response_path, image
                                 width = 22
                             rendered_image = render.Box(
                                 width = width,
-                                height = 32,
+                                height = canvas.height(),
                                 child = render.Column(
                                     expanded = True,
                                     main_align = "space_evenly",
@@ -259,7 +258,7 @@ def get_text(api_url, base_url, heading_response_path, body_response_path, image
                                     children = [
                                         render.Image(
                                             src = img,
-                                            height = 32,
+                                            height = canvas.height(),
                                         ),
                                     ],
                                 ),

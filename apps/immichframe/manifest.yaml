@@ -6,3 +6,13 @@ desc: Displays pictures from your self host instance of Immich. Allows you to se
 author: sfn-git
 fileName: immichframe.star
 packageName: immichframe
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - art
+  - local
+  - time
+  - wide 2x support
+published: '2026-01-08T22:40:59Z'
+updated: '2026-10-17T19:08:51Z'

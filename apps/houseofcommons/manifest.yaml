@@ -7,3 +7,13 @@ author: dinosaursrarr
 recommendedInterval: 5
 fileName: house_of_commons.star
 packageName: houseofcommons
+supports64x64: true
+category: sports
+tags:
+  - news
+  - local
+  - weather
+  - afl
+  - football
+published: '2024-06-06T20:40:05Z'
+updated: '2026-10-01T21:23:34Z'

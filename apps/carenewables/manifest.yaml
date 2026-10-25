@@ -7,5 +7,9 @@ author: sloanesturz
 fileName: ca_renewables.star
 packageName: carenewables
 recommendedInterval: 5
-broken: true
-brokenReason: "API endpoint is no longer available"
+category: utilities
+tags:
+  - utility
+  - real-time
+published: '2022-09-15T21:20:34Z'
+updated: '2026-10-14T11:13:22Z'

@@ -7,3 +7,12 @@ author: JeffLac (Recreation of Tidbyt Original)
 recommendedInterval: 60
 fileName: time_until.star
 packageName: timeuntil
+supports64x64: true
+category: utilities
+tags:
+  - news
+  - productivity
+  - time
+  - utility
+published: '2025-02-08T21:37:35Z'
+updated: '2026-10-01T18:52:35Z'

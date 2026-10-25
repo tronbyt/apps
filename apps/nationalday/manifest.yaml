@@ -1,7 +1,17 @@
 ---
 id: nationalday
-name: NationalDay
-summary: National Day Calendar
-desc: Show what national day celebrations are today.
+name: National Day/Week/Month
+summary: Day, Week & Month Calendar
+desc: Show national day, week, or month celebrations.
 author: jvivona
-recommendedInterval: 5
+fileName: nationalday.star
+packageName: nationalday
+recommendedInterval: 30
+supports2x: true
+supports64x64: true
+category: lifestyle
+tags:
+  - lifestyle
+  - holiday
+published: '2024-12-07T18:59:35Z'
+updated: '2026-10-17T18:55:09Z'

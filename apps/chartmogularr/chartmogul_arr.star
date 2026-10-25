@@ -7,7 +7,7 @@ Author: Luke Hutchinson and Dakota Walker
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def main(config):
@@ -32,7 +32,7 @@ def main(config):
 
         if response.status_code != 200:
             return render.Root(
-                child = render.Text("API failure."),
+                child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("API failure.")),
             )
 
         response_json = response.json()
@@ -41,11 +41,11 @@ def main(config):
         arr = str(arr)
         arr = arr.split(".")[0]
         return render.Root(
-            child = render.Text("$%sK USD" % arr),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("$%sK USD" % arr)),
         )
     else:
         return render.Root(
-            child = render.Text("$12K USD"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("$12K USD")),
         )
 
 def get_schema():

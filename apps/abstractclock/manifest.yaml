@@ -7,3 +7,11 @@ author: AmillionAir
 fileName: abstract_clock.star
 packageName: abstractclock
 recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - digital-clock
+  - art
+published: '2022-04-04T15:46:29Z'
+updated: '2026-10-01T16:29:58Z'

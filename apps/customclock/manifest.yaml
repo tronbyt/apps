@@ -7,3 +7,12 @@ author: rs7q5
 fileName: custom_clock.star
 packageName: customclock
 recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - art
+  - tech
+  - time
+  - utility
+published: '2023-04-17T17:40:01Z'
+updated: '2026-10-01T19:09:45Z'

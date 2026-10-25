@@ -7,3 +7,9 @@ author: sgomez72
 fileName: chicago_tribune.star
 packageName: chicagotribune
 recommendedInterval: 10
+category: news
+tags:
+  - news
+  - local
+published: '2023-03-23T12:34:01Z'
+updated: '2025-11-29T17:52:33Z'

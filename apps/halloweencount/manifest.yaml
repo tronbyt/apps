@@ -7,3 +7,12 @@ author: Starrlord
 fileName: halloweencount.star
 packageName: halloweencount
 recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - halloween
+  - time
+  - art
+  - gaming
+published: '2025-10-08T22:06:02Z'
+updated: '2026-10-01T21:23:34Z'

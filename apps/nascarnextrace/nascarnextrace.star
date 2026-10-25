@@ -18,7 +18,7 @@ load("animation.star", "animation")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -58,7 +58,7 @@ EASE_IN_OUT = "ease_in_out"
 
 DISPLAY_VALUES = {
     "cup": ["cup", "#333333", "#fff", "NASCAR Cup"],
-    "xfinity": ["xfinity", "#4427ad", "#fff", "Xfinity Series"],
+    "xfinity": ["xfinity", "#4427ad", "#fff", "O'Reilly Series"],
     "trucks": ["trucks", "#990000", "#fff", "Craftsman Trucks"],
     "mfg": "MFG Pts / Wins",
     "own": "Ownr Pts / Wins",
@@ -66,6 +66,15 @@ DISPLAY_VALUES = {
     "ply": "Drvr Playoff Pos",
     "nri": "Next Race",
 }
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     series = config.get("NASCAR_Series", DEFAULT_SERIES)
@@ -82,7 +91,12 @@ def main(config):
 
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                title_box(series, data_display),
+            ] + text,
+        ))) if is_square() else render.Column(
             children = [
                 title_box(series, data_display),
             ] + text,
@@ -319,7 +333,7 @@ def get_schema():
                         value = "cup",
                     ),
                     schema.Option(
-                        display = "NASCAR Xfinity Series",
+                        display = "NASCAR O'Reilly Auto Parts Series",
                         value = "xfinity",
                     ),
                     schema.Option(

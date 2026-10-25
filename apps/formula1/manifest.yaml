@@ -8,3 +8,11 @@ fileName: formula1.star
 packageName: formula1
 recommendedInterval: 5
 supports2x: true
+category: sports
+tags:
+  - real-time
+  - wide 2x support
+  - f1
+  - racing
+published: '2022-05-03T15:03:09Z'
+updated: '2026-09-10T02:41:41Z'

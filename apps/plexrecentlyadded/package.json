@@ -10,7 +10,7 @@
     "author": "noahpodgurski",
     "license": "ISC",
     "dependencies": {
-        "axios": "^1.13.2",
+        "axios": "^1.13.5",
         "http": "^0.0.1-security"
     }
 }

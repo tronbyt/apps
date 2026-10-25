@@ -6,3 +6,11 @@ author: Brombomb
 fileName: deepmix.star
 packageName: deepmix
 id: deep-mix
+supports64x64: true
+category: entertainment
+tags:
+  - music
+  - real-time
+  - media
+published: '2025-11-05T21:07:17Z'
+updated: '2026-10-01T18:46:01Z'

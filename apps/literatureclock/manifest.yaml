@@ -7,3 +7,12 @@ author: Alysha Kwok
 fileName: literature_clock.star
 packageName: literatureclock
 recommendedInterval: 1
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - art
+  - clock
+  - poetry
+published: '2023-03-14T19:19:36Z'
+updated: '2026-10-01T19:09:45Z'

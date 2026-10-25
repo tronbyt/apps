@@ -6,7 +6,7 @@ Author: Neal Wright
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ### CONSTANTS ###
@@ -761,9 +761,9 @@ def main(config):
     game_board = draw_game_board(board_theme)
     game_boxes = draw_game_boxes(games, game_board, username, piece_theme, board_theme)
     return render.Root(
-        child = render.Animation(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(
             children = game_boxes,
-        ),
+        ))),
     )
 
 # Set up configuration options

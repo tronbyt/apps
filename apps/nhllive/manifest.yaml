@@ -7,3 +7,11 @@ author: Reed Arneson
 fileName: nhl_live.star
 packageName: nhllive
 recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - real-time
+  - nhl
+  - hockey
+published: '2022-06-10T17:37:32Z'
+updated: '2026-10-17T19:08:52Z'

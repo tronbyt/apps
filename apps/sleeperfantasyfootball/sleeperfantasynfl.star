@@ -8,7 +8,7 @@ Author: jweier
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 print("     ")
@@ -24,6 +24,15 @@ LEAGUE_NAME_CACHE_TTL = 259200  # 3 days
 CURRENT_WEEK_CACHE_TTL = 43200  # 12 hours
 LEAGUE_ROSTERS_CACHE_TTL = 43200  # 12 hours
 LEAGUE_USERS_CACHE_TTL = 259200  # 3 days
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     print("Main - Start")
@@ -45,7 +54,7 @@ def main(config):
         league_name = get_league_name(league_id)
         league_users = get_league_users(league_id)
         league_rosters = get_league_rosters(league_id)
-        user_id = get_current_user_user_id(league_id, username, league_users)
+        user_id = get_current_user_user_id(username, league_users)
         roster_id = get_current_user_roster_id(user_id, league_rosters)
         user_and_roster_map = build_user_and_roster_mapping(league_rosters, league_users)
 
@@ -141,7 +150,8 @@ def main(config):
     return render.Root(
         delay = int(rotation_speed) * 1000,
         show_full_animation = True,
-        child = render.Animation(children = render_category),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = render_category)))) if is_square() else render.Animation(children = render_category),
     )
 
 def get_league_name(league_id):
@@ -192,17 +202,18 @@ def get_league_rosters(league_id):
         else:
             return []
 
-def get_current_user_user_id(league_id, username, league_users):
+def get_current_user_user_id(username, league_users):
     user_id = ""
-    user_id_cached = cache.get(league_id + "_user_id")
+    user_id_cache_key = username + "_user_id"
+    user_id_cached = cache.get(user_id_cache_key)
     if user_id_cached != None:
-        print("    Cache Hit! Used cached user id")
+        print("    Cache Hit! Used cached user id (" + user_id_cached + ")")
         return user_id_cached
     else:
         for user in league_users:
             if user["display_name"] == username:
                 user_id = user["user_id"]
-                cache.set(league_id + "_user_id", str(user_id), ttl_seconds = USER_ID_CACHE_TTL)
+                cache.set(user_id_cache_key, str(user_id), ttl_seconds = USER_ID_CACHE_TTL)
 
         return user_id
 
@@ -292,7 +303,10 @@ def get_team_winning_percentage(user_and_roster_map, league_rosters):
         team_wins = team["settings"]["wins"]
         team_losses = team["settings"]["losses"]
         team_ties = team["settings"]["ties"]
-        team_winning_pct_calc = (2 * team_wins) / (2 * (team_wins + team_losses + team_ties))
+        if team_wins + team_losses + team_ties == 0:
+            team_winning_pct_calc = team["roster_id"]
+        else:
+            team_winning_pct_calc = (2 * team_wins) / (2 * (team_wins + team_losses + team_ties))
         team_winning_percentage[user_and_roster_map[team["roster_id"]]["username"]] = team_winning_pct_calc
 
     sorted_team_winning_percentage = sorted(team_winning_percentage.items(), key = lambda x: x[1], reverse = True)
@@ -395,7 +409,7 @@ def get_current_leagues(username):
 
     user_id_cached = cache.get(username + "_user_id")
     if user_id_cached != None:
-        print("    Cache Hit! Used cached used id")
+        print("    Cache Hit! Used cached used id (" + user_id_cached + ")")
         user_id = user_id_cached
     else:
         user_url = SLEEPER_API_BASE_URL + "/user/" + username

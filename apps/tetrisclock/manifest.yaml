@@ -7,3 +7,10 @@ author: MarkGamed7794
 fileName: tetris_clock.star
 packageName: tetrisclock
 recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - retro
+  - utility
+published: '2023-01-28T15:31:56Z'
+updated: '2025-12-02T19:30:22Z'

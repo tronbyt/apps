@@ -7,3 +7,9 @@ author: nataliemakhijani
 recommendedInterval: 5
 fileName: mta_railroad_sign.star
 packageName: mtarailroadsign
+supports64x64: true
+category: transit
+tags:
+  - smart-home
+published: '2025-04-23T16:54:31Z'
+updated: '2026-10-01T21:58:58Z'

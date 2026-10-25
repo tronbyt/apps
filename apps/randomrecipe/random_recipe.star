@@ -6,7 +6,7 @@ Author: noahpodgurski
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 SAMPLE_RESPONSE = {"meals": [{"idMeal": "53064", "strMeal": "Fettuccine Alfredo", "strDrinkAlternate": None, "strCategory": "Pasta", "strArea": "Italian", "strInstructions": "Cook pasta according to package instructions in a large pot of boiling water and salt. Add heavy cream and butter to a large skillet over medium heat until the cream bubbles and the butter melts. Whisk in parmesan and add seasoning (salt and black pepper). Let the sauce thicken slightly and then add the pasta and toss until coated in sauce. Garnish with parsley, and it's ready.", "strMealThumb": "https://www.themealdb.com/images/media/meals/0jv5gx1661040802.jpg", "strTags": None, "strYoutube": "https://www.youtube.com/watch?v=LPPcNPdq_j4", "strIngredient1": "Fettuccine", "strIngredient2": "Heavy Cream", "strIngredient3": "Butter", "strIngredient4": "Parmesan", "strIngredient5": "Parsley", "strIngredient6": "Black Pepper", "strIngredient7": "", "strIngredient8": "", "strIngredient9": "", "strIngredient10": "", "strIngredient11": "", "strIngredient12": "", "strIngredient13": "", "strIngredient14": "", "strIngredient15": "", "strIngredient16": "", "strIngredient17": "", "strIngredient18": "", "strIngredient19": "", "strIngredient20": "", "strMeasure1": "1 lb", "strMeasure2": "1/2 cup ", "strMeasure3": "1/2 cup ", "strMeasure4": "1/2 cup ", "strMeasure5": "2 tbsp", "strMeasure6": " ", "strMeasure7": " ", "strMeasure8": " ", "strMeasure9": " ", "strMeasure10": " ", "strMeasure11": " ", "strMeasure12": " ", "strMeasure13": " ", "strMeasure14": " ", "strMeasure15": " ", "strMeasure16": " ", "strMeasure17": " ", "strMeasure18": " ", "strMeasure19": " ", "strMeasure20": " ", "strSource": "https://www.delish.com/cooking/recipe-ideas/a55312/best-homemade-fettuccine-alfredo-recipe/", "strImageSource": None, "strCreativeCommonsConfirmed": None, "dateModified": None}]}
 TITLE = "d95b52"
@@ -22,11 +22,46 @@ def request():
 
     return res.json()
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     data = request()["meals"][0]
 
     imageUrl = data["strMealThumb"]
     imageSrc = http.get(imageUrl, ttl_seconds = REFRESH_TIME).body()
+
+    # Beside the text the photo gets 32px. A square panel has the rows to put
+    # a 44px photo on top and the name, category and cuisine underneath.
+    if is_square():
+        return render.Root(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Image(height = 44, width = 44, src = imageSrc),
+                    render.Marquee(
+                        width = 64,
+                        align = "center",
+                        child = render.Text(data["strMeal"], color = TITLE),
+                    ),
+                    render.Row(
+                        main_align = "center",
+                        children = [
+                            render.Text(data["strCategory"], font = "tom-thumb", color = BLUE),
+                            render.Text(" / " + data["strArea"], font = "tom-thumb"),
+                        ],
+                    ),
+                ],
+            ),
+        )
 
     return render.Root(
         child = render.Box(

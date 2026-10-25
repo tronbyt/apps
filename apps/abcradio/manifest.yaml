@@ -7,3 +7,11 @@ author: M0ntyP
 fileName: abc_radio.star
 packageName: abcradio
 recommendedInterval: 10
+supports64x64: true
+category: entertainment
+tags:
+  - music
+  - real-time
+  - local
+published: '2024-02-01T22:50:22Z'
+updated: '2026-10-01T18:22:01Z'

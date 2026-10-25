@@ -32,7 +32,7 @@ load("images/wind_sw.png", WIND_SW_WIND_SW_ASSET = "file")
 load("images/wind_w.png", WIND_W_WIND_W_ASSET = "file")
 load("images/windy.png", WINDY_WINDY_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -188,41 +188,46 @@ def main(config):
         disp_forecasts.append(rows)
 
     return render.Root(
-        child = render.Stack(
-            children = [
-                render.Row(
-                    children = [
-                        render.Column(
-                            children = disp_forecasts[0],
-                            main_align = "center",
-                            cross_align = "center",
-                        ),
-                        render.Column(
-                            children = [render.Box(width = 1, height = 32, color = "#5A5A5A")],
-                        ),
-                        render.Column(
-                            children = disp_forecasts[1],
-                            main_align = "center",
-                            cross_align = "center",
-                        ),
-                        render.Column(
-                            children = [render.Box(width = 1, height = 32, color = "#5A5A5A")],
-                        ),
-                        render.Column(
-                            children = disp_forecasts[2],
-                            main_align = "center",
-                            cross_align = "center",
-                        ),
-                    ],
-                    main_align = "space_evenly",
-                    expanded = True,
-                ),
-                render.Row(
-                    children = [render.Text("SAMPLE" if display_sample else "", font = "6x13", color = "#FF0000", height = 22)],
-                    main_align = "center",
-                    expanded = True,
-                ),
-            ],
+        # Centre the 32-row forecast on taller panels (64x64).
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Stack(
+                children = [
+                    render.Row(
+                        children = [
+                            render.Column(
+                                children = disp_forecasts[0],
+                                main_align = "center",
+                                cross_align = "center",
+                            ),
+                            render.Column(
+                                children = [render.Box(width = 1, height = 32, color = "#5A5A5A")],
+                            ),
+                            render.Column(
+                                children = disp_forecasts[1],
+                                main_align = "center",
+                                cross_align = "center",
+                            ),
+                            render.Column(
+                                children = [render.Box(width = 1, height = 32, color = "#5A5A5A")],
+                            ),
+                            render.Column(
+                                children = disp_forecasts[2],
+                                main_align = "center",
+                                cross_align = "center",
+                            ),
+                        ],
+                        main_align = "space_evenly",
+                        expanded = True,
+                    ),
+                    render.Row(
+                        children = [render.Text("SAMPLE" if display_sample else "", font = "6x13", color = "#FF0000", height = 22)],
+                        main_align = "center",
+                        expanded = True,
+                    ),
+                ],
+            ),
         ),
     )
 

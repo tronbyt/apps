@@ -7,3 +7,12 @@ author: AndersHeie
 fileName: bored.star
 packageName: bored
 recommendedInterval: 5
+supports64x64: true
+category: lifestyle
+tags:
+  - productivity
+  - art
+  - music
+  - lifestyle
+published: '2023-01-23T18:07:14Z'
+updated: '2026-10-01T20:24:07Z'

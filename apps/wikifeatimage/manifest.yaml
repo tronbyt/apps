@@ -6,4 +6,10 @@ desc: Displays Wikipedia's featured image of the day.
 author: sch0lars
 fileName: wiki_feat_image.star
 packageName: wikifeatimage
-broken: true
+category: art
+tags:
+  - art
+  - utility
+  - time
+published: '2024-02-08T17:46:08Z'
+updated: '2026-10-14T11:00:57Z'

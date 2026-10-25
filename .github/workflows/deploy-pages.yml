@@ -2,52 +2,121 @@ name: Build and Deploy App Viewer to GitHub Pages
 
 on:
   push:
-    branches: [ main, app-viewer-tester ]
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+      - 'broken_apps.txt'
+  workflow_run:
+    workflows: ["Update App Metadata"]
+    types:
+      - completed
+    branches:
+      - main
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for deployment (for example, merged app-viewer-source changes)'
+        required: false
+        type: string
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Checkout main branch
+        uses: actions/checkout@v7
+        with:
+          path: main
+
+      - name: Checkout app-viewer source
+        uses: actions/checkout@v7
+        with:
+          ref: app-viewer-source
+          path: app-viewer-source
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: 'lts/jod'
+          node-version: 'lts/*'
 
       - name: Install dependencies
+        working-directory: app-viewer-source/app-viewer
+        run: npm ci
+
+      # Social cards are named after a hash of their content, so cards from the previous deployment can be reused
+      # instead of drawn again. If they can't be fetched, every card is drawn as before.
+      - name: Get the previous deployment's social cards
+        continue-on-error: true
         run: |
-          cd app-viewer
-          npm install
+          mkdir -p previous-cards
+          git -C main fetch --depth 1 origin gh-pages
+          if git -C main cat-file -e FETCH_HEAD:cards 2>/dev/null; then
+            git -C main archive FETCH_HEAD cards | tar -x -C previous-cards
+            echo "Reusing up to $(ls previous-cards/cards | wc -l) previous cards"
+          else
+            echo "The previous deployment has no cards yet; every card will be drawn"
+          fi
 
-      - name: Generate apps.json
+      - name: Build site into staging directory
         run: |
-          cd app-viewer
-          node generate-apps-json.js
+          mkdir -p _site
 
-      - name: Add .nojekyll file to disable Jekyll
-        run: touch .nojekyll
+          # Copy app-viewer static assets to site root
+          cp app-viewer-source/app-viewer/index.html _site/
+          cp app-viewer-source/app-viewer/app.html _site/
+          cp app-viewer-source/app-viewer/main.js _site/
+          cp app-viewer-source/app-viewer/style.css _site/
+          cp app-viewer-source/app-viewer/dots.svg _site/
+          cp app-viewer-source/app-viewer/dots@2x.svg _site/
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+          # These assets are introduced by the upcoming Viewer changes. Copy
+          # them when present so this workflow works before and after those
+          # changes merge to app-viewer-source.
+          for asset in readme-images.js dots@64x64.svg github-logo.svg; do
+            if [ -f "app-viewer-source/app-viewer/${asset}" ]; then
+              cp "app-viewer-source/app-viewer/${asset}" _site/
+            fi
+          done
+
+          # Generate apps.json directly into the site root (using apps from main branch)
+          node app-viewer-source/app-viewer/generate-apps-json.js --output _site/apps.json --apps-path main/apps --reuse-cards previous-cards/cards
+
+          # Record which repository and app-data revision produced this
+          # catalogue so the Viewer can link each app to its exact source,
+          # including on forks.
+          node main/.github/scripts/write-app-viewer-catalogue-metadata.mjs \
+            --output _site/catalogue-meta.json \
+            --repository "${GITHUB_REPOSITORY}" \
+            --commit "$(git -C main rev-parse HEAD)"
+
+          # Copy the apps directory (images and other assets referenced by the viewer)
+          cp -r main/apps _site/apps
+
+          # Copy broken_apps.txt if present
+          [ -f main/broken_apps.txt ] && cp main/broken_apps.txt _site/ || true
+
+          # Disable Jekyll
+          touch _site/.nojekyll
+
+      - name: Check generated site references
+        run: node main/.github/scripts/check-app-viewer-site.mjs _site
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: './'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/app-viewer-tester'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages
+          force_orphan: true
+          # The App Viewer's own domain. Only the official repository claims it, so a fork's deploy stays on its
+          # github.io address.
+          cname: ${{ github.repository == 'tronbyt/apps' && 'apps.tronbyt.com' || '' }}

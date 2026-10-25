@@ -8,10 +8,10 @@ Description: Show METAR (aviation weather) text for one airport or flight
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-ADDS_URL = "https://www.aviationweather.gov/api/data/metar?requestType=retrieve&format=json&ids=%s&mostrecentforeachstation=constraint&hoursBeforeNow=2"
+ADDS_URL = "https://aviationweather.gov/api/data/metar?ids=%s&format=json&hours=2"
 DEFAULT_AIRPORT = "KJFK, KLGA, KBOS, KDCA"
 
 # encryption, schema
@@ -19,6 +19,13 @@ DEFAULT_AIRPORT = "KJFK, KLGA, KBOS, KDCA"
 # play with fonts
 
 MAX_AGE = 60 * 10
+
+def normalize_airport(airport):
+    # Users often enter 3-letter US airport codes (e.g. JFK); prepend
+    # the US ICAO prefix "K" so lookups work without it.
+    if len(airport) == 3:
+        return "K" + airport
+    return airport
 
 def decoded_result_for_airport(airport):
     rep = http.get(ADDS_URL % airport, ttl_seconds = 60)
@@ -87,18 +94,18 @@ def render_single_airport(config, airport):
             color = "#FFFFFF",
             font = "tom-thumb",
             linespacing = 0,
-            width = 64,
+            width = canvas.width(),
         )
 
         return render.Root(
             child = render.Column([
-                render.Box(height = 2, width = 64, color = color),
+                render.Box(height = 2, width = canvas.width(), color = color),
                 render.Marquee(
                     text_widget,
                     offset_start = 8,
                     offset_end = 48,
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                 ),
             ]),
             delay = 200,
@@ -110,7 +117,7 @@ def render_single_airport(config, airport):
             color = "#FFFFFF",
             font = "tb-8",
             linespacing = 0,
-            width = 62,
+            width = canvas.width() - 2,
         )
 
         return render.Root(
@@ -120,40 +127,49 @@ def render_single_airport(config, airport):
                     offset_start = 8,
                     offset_end = 48,
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                 ),
-                render.Box(height = 64, width = 2, color = color),
+                render.Box(height = canvas.height(), width = 2, color = color),
             ]),
             delay = 200,
             max_age = MAX_AGE,
         )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, but it has the width for the side-by-side layout.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def full_row(airport):
+    """One airport across the full panel width: code, blob, flight category."""
+    result = decoded_result_for_airport(airport)
+    color = result["color"]
+    return render.Row(
+        [
+            # Create a fixed-width box for the airport code so the
+            # flight categories line up
+            render.Stack([
+                render.Box(width = 24, height = 8),
+                render.Text(airport.upper() + " "),
+            ]),
+            render.Circle(color = color, diameter = 6),
+            render.Text(" %s" % result["flight_category"], color = color),
+        ],
+        cross_align = "center",
+    )
+
 def render_four_airports(airports):
-    row_widgets = []
-    for airport in airports:
-        result = decoded_result_for_airport(airport)
-        color = result["color"]
-        row_widgets.append(
-            render.Row(
-                [
-                    # Create a fixed-width box for the airport code so the
-                    # flight categories line up
-                    render.Stack([
-                        render.Box(width = 24, height = 8),
-                        render.Text(airport.upper() + " "),
-                    ]),
-                    render.Circle(color = color, diameter = 6),
-                    render.Text(" %s" % result["flight_category"], color = color),
-                ],
-                cross_align = "center",
-            ),
-        )
+    row_widgets = [full_row(airport) for airport in airports]
 
     return render.Root(
         child = render.Marquee(
             render.Column(row_widgets),
-            height = 32,
-            offset_start = 32,
+            height = canvas.height(),
+            offset_start = canvas.height(),
             scroll_direction = "vertical",
         ),
         delay = 100,
@@ -161,6 +177,22 @@ def render_four_airports(airports):
     )
 
 def render_eight_airports(airports):
+    # Eight airports are split into two columns because only four 8px rows fit
+    # on a 64x32 panel. A square panel has the rows for all eight at full
+    # width, which also leaves room for each one's flight category rather than
+    # just its colour blob.
+    if is_square():
+        return render.Root(
+            child = render.Marquee(
+                render.Column([full_row(airport) for airport in airports]),
+                height = canvas.height(),
+                offset_start = canvas.height(),
+                scroll_direction = "vertical",
+            ),
+            delay = 100,
+            max_age = MAX_AGE,
+        )
+
     left_widgets = []
     for airport in airports[:4]:
         result = decoded_result_for_airport(airport)
@@ -206,11 +238,11 @@ def render_eight_airports(airports):
         child = render.Marquee(
             render.Row([
                 render.Column(left_widgets),
-                render.Box(width = 3, height = 32),
+                render.Box(width = 3, height = canvas.height()),
                 render.Column(right_widgets),
             ]),
-            height = 32,
-            offset_start = 32,
+            height = canvas.height(),
+            offset_start = canvas.height(),
             scroll_direction = "vertical",
         ),
         delay = 100,
@@ -283,13 +315,13 @@ def render_fifteen_airports(airports):
         child = render.Box(render.Marquee(
             render.Row([
                 render.Column(left_widgets),
-                render.Box(width = middle_spacer, height = 32),
+                render.Box(width = middle_spacer, height = canvas.height()),
                 render.Column(mid_widgets),
-                render.Box(width = middle_spacer, height = 32),
+                render.Box(width = middle_spacer, height = canvas.height()),
                 render.Column(right_widgets),
             ]),
-            height = 32,
-            offset_start = 32,
+            height = canvas.height(),
+            offset_start = canvas.height(),
             scroll_direction = "vertical",
         )),
         delay = 100,
@@ -303,7 +335,7 @@ def get_schema():
             schema.Text(
                 id = "icao",
                 name = "Airport(s)",
-                desc = "Comma-separated list of ICAO airport codes. Use just one for METAR text.",
+                desc = "Comma-separated list of ICAO airport codes. Use just one for METAR text. 3-letter US codes (e.g. JFK) are automatically prefixed with K.",
                 icon = "plane",
             ),
             schema.Toggle(
@@ -319,7 +351,7 @@ def get_schema():
 def main(config):
     airports = config.get("icao") or DEFAULT_AIRPORT
     airports = airports.upper()
-    airports = [a.strip() for a in airports.split(",")]
+    airports = [normalize_airport(a.strip()) for a in airports.split(",")]
     if len(airports) == 1:
         return render_single_airport(config, airports[0])
     elif len(airports) <= 4:

@@ -45,6 +45,7 @@ load("http.star", "http")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
+load("time.star", "time")
 
 #URL TO NJ TRANSIT DEPARTURE VISION WEBSITE
 NJ_TRANSIT_DV_URL = "https://www.njtransit.com/dv-to"
@@ -348,6 +349,10 @@ def render_departure_row(departure):
 def get_schema():
     options = getStationListOptions()
 
+    # Keep the schema valid if NJ Transit is unavailable or changes its page data.
+    if len(options) == 0:
+        options = [create_option("Station list unavailable", DEFAULT_STATION)]
+
     fields = [
         schema.Dropdown(
             id = "station",
@@ -452,22 +457,62 @@ def get_departures_for_station(station):
         return []
 
     departures_data = departure_screens.get("items", [])
+    now = time.now().in_location(TIMEZONE)
 
     # Convert GraphQL response to our departure struct format
     result = []
     for item in departures_data:
+        departure_date = item.get("departureDate", "")
+        status = item.get("status", "")
         departure_struct = struct(
-            departing_at = item.get("departureDate", ""),
+            departing_at = departure_date,
             destination = str(item.get("destination", "")).upper(),
             service_line = item.get("lineAbbreviation", "AMTK"),
             train_number = str(item.get("trainID", "")),
             track_number = item.get("track"),
-            departing_in = item.get("status", ""),
+            departing_in = get_departing_in(departure_date, now, status),
         )
         result.append(departure_struct)
 
     print("Found '%s' departures from GraphQL API" % len(result))
     return result
+
+def get_departing_in(departure_date, now, status):
+    """
+    Returns NJ Transit's status when present, otherwise a compact countdown.
+    NJ Transit provides times without a date, so use the current NY date and
+    roll forward when the next departure is after midnight.
+    """
+    if status != "":
+        return status
+
+    if departure_date == "":
+        return ""
+
+    departure_time = time.parse_time(
+        "{} {}".format(now.format("2006-01-02"), departure_date),
+        format = "2006-01-02 3:04 PM",
+        location = TIMEZONE,
+    )
+
+    if departure_time < now:
+        departure_time = departure_time + time.parse_duration("24h")
+
+    minutes_until_departure = (departure_time - now).minutes
+
+    if minutes_until_departure <= 1:
+        return "Sched now"
+
+    if minutes_until_departure < 60:
+        return "Sched in {}m".format(int(minutes_until_departure))
+
+    hours = int(minutes_until_departure / 60)
+    minutes = int(minutes_until_departure % 60)
+
+    if minutes == 0:
+        return "Sched in {}h".format(hours)
+
+    return "Sched in {}h {}m".format(hours, minutes)
 
 def fetch_stations_from_website():
     """
@@ -500,26 +545,42 @@ def fetch_stations_from_website():
     # The format uses indexed references where objects contain indices pointing to values
     data = json.decode(json_content)
 
-    # Iterate through the data array to find station objects
-    # Station objects have the pattern: {"__typename": idx1, "title": idx2, "path": idx3}
-    # where data[idx1] == "TrainScheduleStation" and data[idx2] is the station name
+    # Find the explicit Departure Vision station collection. Nuxt stores the
+    # collection, its objects, and their fields as indices into this same array.
+    dv_stations_idx = None
+    for item in data:
+        if type(item) == "dict" and "dvStations" in item:
+            candidate_idx = item["dvStations"]
+            if type(candidate_idx) == "int" and candidate_idx >= 0 and candidate_idx < len(data) and type(data[candidate_idx]) == "list":
+                dv_stations_idx = candidate_idx
+                break
+
+    if dv_stations_idx == None:
+        print("Could not find Departure Vision stations in Nuxt data")
+        return result
+
     stations_found = 0
-    for i in range(len(data)):
-        item = data[i]
+    stations_seen = {}
+    for station_idx in data[dv_stations_idx]:
+        if type(station_idx) != "int" or station_idx < 0 or station_idx >= len(data):
+            continue
+
+        item = data[station_idx]
 
         # Check if this is a dict with the expected station structure
-        if type(item) == "dict" and "__typename" in item and "title" in item and "path" in item:
+        if type(item) == "dict" and "__typename" in item and "title" in item:
             typename_idx = item["__typename"]
             title_idx = item["title"]
 
             # Safely get values by index
-            if typename_idx < len(data) and title_idx < len(data):
+            if type(typename_idx) == "int" and type(title_idx) == "int" and typename_idx >= 0 and title_idx >= 0 and typename_idx < len(data) and title_idx < len(data):
                 typename = data[typename_idx]
                 title = data[title_idx]
 
                 # Check if this is a TrainScheduleStation with a valid title
-                if typename == "TrainScheduleStation" and type(title) == "string" and len(title) > 0:
+                if typename == "TrainScheduleStation" and type(title) == "string" and len(title) > 0 and title not in stations_seen:
                     result.append(title)
+                    stations_seen[title] = True
                     stations_found = stations_found + 1
 
     print("Got response of '%s' stations" % stations_found)

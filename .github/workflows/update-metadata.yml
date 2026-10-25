@@ -1,0 +1,60 @@
+name: Update App Metadata
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-metadata:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'tronbyt' # Avoid running on forks by default
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Full history needed for git log analysis
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install PyYAML
+
+      - name: Determine metadata targets
+        id: targets
+        if: github.event.before != '0000000000000000000000000000000000000000'
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: ./.github/scripts/determine-metadata-targets.sh
+
+      - name: Update manifest metadata
+        id: update
+        run: |
+          # Determine modified apps
+          if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
+            echo "Initial push or new branch, checking all apps..."
+            python3 .github/scripts/update_manifests.py
+          elif [[ -n "${{ steps.targets.outputs.targets }}" ]]; then
+            echo "Performing incremental update for push..."
+            python3 .github/scripts/update_manifests.py ${{ steps.targets.outputs.targets }}
+          else
+            echo "No apps with non-manifest changes in this push."
+          fi
+
+      - name: Commit and push changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Detected changes in app manifests. Committing updates..."
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add apps/*/manifest.yaml
+            git commit -m "chore: auto-update manifest metadata"
+            git push
+          else
+            echo "No metadata updates required."
+          fi

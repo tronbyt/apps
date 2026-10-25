@@ -7,3 +7,12 @@ author: Matthew Grasmick
 fileName: countdowntimer.star
 packageName: countdowntimer
 recommendedInterval: 1
+supports64x64: true
+category: utilities
+tags:
+  - time
+  - clock
+  - utility
+  - art
+published: '2025-05-31T01:07:30Z'
+updated: '2026-10-01T20:41:22Z'

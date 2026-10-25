@@ -7,3 +7,13 @@ author: Chris Wyman
 fileName: moon_phase.star
 packageName: moonphase
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - space
+  - science
+  - weather
+  - utility
+  - local
+published: '2022-09-15T16:29:40Z'
+updated: '2026-10-01T21:54:45Z'

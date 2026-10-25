@@ -12,7 +12,7 @@ load("images/tropical_drink_icon3.png", TROPICAL_DRINK_ICON3_ASSET = "file")
 load("images/tropical_drink_icon4.png", TROPICAL_DRINK_ICON4_ASSET = "file")
 load("images/tropical_drink_icon5.png", TROPICAL_DRINK_ICON5_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -562,7 +562,8 @@ def main(config):
             completion_message = "You made it! Nice job!" if not widgetMode else "You made it!"
         return render.Root(
             delay = 100,
-            child = render.Column(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 children = [
                     render.Column(
                         children = [
@@ -617,12 +618,13 @@ def main(config):
                         color = "#09f",
                     ),
                 ],
-            ),
+            )),
         )
 
     return render.Root(
         delay = 50,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Column(
                     children = [
@@ -658,7 +660,7 @@ def main(config):
                     child = render.Text(location, color = "#09f"),
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

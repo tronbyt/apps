@@ -33,7 +33,7 @@ ICON_NE = ICON_NE_ASSET.readall()
 SURFLINE_RATING_URL = "https://services.surfline.com/kbyg/spots/forecasts/rating?spotId={spot_id}&days=1&intervalHours=1&correctedWind=False"
 SURFLINE_WAVE_URL = "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={spot_id}&days=1&intervalHours=1"
 SURFLINE_WIND_URL = "https://services.surfline.com/kbyg/spots/forecasts/wind?spotId={spot_id}&days=1&intervalHours=1&corrected=False"
-SURFLINE_QUERY_URL = "https://services.surfline.com/onboarding/spots?query={query}&limit=5&offset=0&camsOnly=false"
+SURFLINE_QUERY_URL = "https://services.surfline.com/search/site?q={query}&querySize=5"
 
 COLOR_BY_SURFLINE_RATING = {
     "FLAT": "#A2ACB9",  #gray
@@ -500,8 +500,9 @@ def transparent(color, p):
     return res
 
 def search_handler(text):
-    response = get(SURFLINE_QUERY_URL.format(query = text))
-    return [schema.Option(display = s["name"], value = s["_id"]) for s in response["spots"]]
+    response = get(SURFLINE_QUERY_URL.format(query = text), SHORT_CACHE_TTL)
+    hits = response[0].get("hits", {}).get("hits", []) if response else []
+    return [schema.Option(display = h["_source"]["name"], value = h["_id"]) for h in hits]
 
 def get_schema():
     min_height_options = [

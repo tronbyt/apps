@@ -149,9 +149,15 @@ def main(config):
     loc = json.decode(location)
     timezone = loc["timezone"]
     now = time.now().in_location(timezone)
-    datePast = now - time.parse_duration("%dh" % 1 * 24)
-    dateFuture = now + time.parse_duration("%dh" % 6 * 24)
-    league = {LEAGUE: API + "?limit=300" + (selectedTeam == "all" and " " or "&dates=" + datePast.format("20060102") + "-" + dateFuture.format("20060102"))}
+    league = {}
+    if selectedTeam == "all":
+        league[LEAGUE] = API + "?limit=300"
+    else:
+        for d in range(-1, 7):
+            day_time = now + time.parse_duration("%dh" % (d * 24))
+            day_str = day_time.format("20060102")
+            league[day_str] = API + "?limit=300&dates=" + day_str
+
     scores = get_scores(league, selectedTeam)
     if len(scores) == 0:
         return render.Root(
@@ -1056,32 +1062,28 @@ def get_schema():
 
 def get_scores(urls, team):
     allscores = []
-    gameCount = 0
     for i, s in urls.items():
         data = get_cachable_data(s)
-        if not data:
-            print("Failed to retrieve data for %s" % s)
-            continue
         decodedata = json.decode(data)
-        if "events" not in decodedata or not decodedata["events"]:
-            print("No events found in data for %s" % s)
-            continue
         allscores.extend(decodedata["events"])
-        if team != "all" and team != "":
-            newScores = []
-            for _, s in enumerate(allscores):
-                home = s["competitions"][0]["competitors"][0]["team"]["id"]
-                away = s["competitions"][0]["competitors"][1]["team"]["id"]
-                gameStatus = s["status"]["type"]["state"]
-                if (home == team or away == team) and gameStatus == "post":
-                    newScores.append(s)
-                elif (home == team or away == team) and gameCount == 0:
-                    if gameStatus == "in":
-                        newScores.clear()
-                    newScores.append(s)
-                    gameCount = gameCount + 1
-            allscores = newScores
         all([i, allscores])
+
+    if team != "all" and team != "":
+        newScores = []
+        gameCount = 0
+        for _, s in enumerate(allscores):
+            home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
+            away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
+            gameStatus = s["status"]["type"]["state"]
+            if (home == team or away == team) and gameStatus == "post":
+                newScores.append(s)
+            elif (home == team or away == team) and gameCount == 0:
+                if gameStatus == "in":
+                    newScores.clear()
+                newScores.append(s)
+                gameCount = gameCount + 1
+        allscores = newScores
+
     return allscores
 
 def empty_scores(allscores):

@@ -7,3 +7,12 @@ author: frame-shift
 fileName: daily_horoscope.star
 packageName: dailyhoroscope
 recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - horoscope
+  - astrology
+  - news
+  - weather
+published: '2023-09-15T18:51:50Z'
+updated: '2026-10-01T20:48:26Z'

@@ -7,3 +7,12 @@ author: dinosaursrarr
 fileName: life.star
 packageName: life
 recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - gaming
+  - game-of-life
+  - space
+  - art
+published: '2022-06-09T16:47:04Z'
+updated: '2026-10-01T22:31:47Z'

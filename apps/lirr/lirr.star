@@ -11,7 +11,7 @@ load("encoding/csv.star", "csv")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -21,6 +21,17 @@ STATIC_GTFS_FILE = "static_gtfs"
 CORE_BACKGROUND_COLOR = "#4D5357"
 CORE_TEXT_COLOR = "#FFFFFF"
 PENN_STATION = "237"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+TRAINS = 3 if is_square() else 2
 
 def main(config):
     station_id = config.str("station")
@@ -40,17 +51,23 @@ def main(config):
         ))
     if len(stops) == 1:
         return render.Root(child = renderTrain(gtfs, stops[0]))
-    return render.Root(child = render.Column(
-        children = [
-            renderTrain(gtfs, stops[0]),
-            render.Box(
+
+    # A train is 15 rows plus a rule: two fit on a 64x32 panel, three on a
+    # square one with room to spare, bounded by what the station actually
+    # has coming. Four fit too, but each train is its own marquee over a
+    # GTFS feed downloaded per render, and four of them timed out on a
+    # Raspberry Pi 3B.
+    shown = min(len(stops), TRAINS)
+    children = []
+    for i in range(shown):
+        if i > 0:
+            children.append(render.Box(
                 color = "#ffffff",
                 width = 64,
                 height = 1,
-            ),
-            renderTrain(gtfs, stops[1]),
-        ],
-    ))
+            ))
+        children.append(renderTrain(gtfs, stops[i]))
+    return render.Root(child = render.Column(children = children))
 
 def renderTrain(gtfs, stop_time):
     trip = gtfs["trips"][stop_time["trip_id"]]

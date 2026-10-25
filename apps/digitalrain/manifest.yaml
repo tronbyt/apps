@@ -7,3 +7,13 @@ author: Henry So, Jr.
 fileName: digital_rain.star
 packageName: digitalrain
 recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: entertainment
+tags:
+  - tech
+  - science
+  - art
+  - wide 2x support
+published: '2022-01-11T13:14:57Z'
+updated: '2026-10-01T20:55:01Z'

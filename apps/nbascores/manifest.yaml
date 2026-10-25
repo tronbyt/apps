@@ -7,3 +7,13 @@ author: LunchBox8484
 fileName: nba_scores.star
 packageName: nbascores
 recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: sports
+tags:
+  - utility
+  - clock
+  - nba
+  - basketball
+published: '2022-04-27T14:37:57Z'
+updated: '2026-10-01T21:58:58Z'

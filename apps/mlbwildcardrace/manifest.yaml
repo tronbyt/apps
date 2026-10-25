@@ -7,3 +7,10 @@ author: Jake Manske
 fileName: mlb_wildcard_race.star
 packageName: mlbwildcardrace
 recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - mlb
+  - baseball
+published: '2022-09-26T13:42:48Z'
+updated: '2026-10-01T15:26:52Z'

@@ -7,3 +7,12 @@ author: rs7q5
 fileName: nationaltoday.star
 packageName: nationaltoday
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - time
+  - news
+  - productivity
+  - lifestyle
+published: '2022-02-01T22:52:49Z'
+updated: '2026-10-01T17:41:43Z'

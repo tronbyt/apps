@@ -8,3 +8,8 @@ fileName: marta_map.star
 packageName: martamap
 broken: true
 recommendedInterval: 5
+category: transit
+tags:
+  - utility
+published: '2023-01-12T21:31:25Z'
+updated: '2025-12-05T22:28:51Z'

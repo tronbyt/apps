@@ -7,3 +7,12 @@ author: Nick Penree
 fileName: mastodon_follows.star
 packageName: mastodonfollows
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - media
+  - sports
+  - utility
+  - finance
+published: '2023-01-23T18:40:24Z'
+updated: '2026-10-01T21:48:48Z'

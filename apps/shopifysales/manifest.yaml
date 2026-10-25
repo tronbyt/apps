@@ -8,4 +8,11 @@ fileName: shopify_sales.star
 packageName: shopifysales
 recommendedInterval: 5
 broken: true
-brokenReason: "www.shopcounter.app: no such host"
+brokenReason: 'www.shopcounter.app: no such host'
+supports64x64: true
+category: utilities
+tags:
+  - finance
+  - tech
+published: '2022-11-30T04:38:20Z'
+updated: '2026-10-01T22:41:51Z'

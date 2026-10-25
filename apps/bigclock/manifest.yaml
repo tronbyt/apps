@@ -7,3 +7,12 @@ author: Joey Hoer
 fileName: big_clock.star
 packageName: bigclock
 recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - retro
+  - clock
+  - weather
+  - time
+published: '2022-01-10T16:50:57Z'
+updated: '2026-10-01T20:24:07Z'

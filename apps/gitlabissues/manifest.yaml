@@ -7,3 +7,10 @@ author: Sven Ringger
 fileName: gitlab_issues.star
 packageName: gitlabissues
 recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - tracking
+published: '2023-04-17T13:25:48Z'
+updated: '2026-10-01T21:17:57Z'

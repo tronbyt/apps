@@ -8,7 +8,7 @@ Author: Stephen So
 load("html.star", "html")
 load("http.star", "http")
 load("images/icon.png", ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 ICON = ICON_ASSET.readall()
@@ -17,11 +17,21 @@ now = time.now()
 nowyear = now.year
 url = "https://www.espn.com/mma/schedule/_/year/" + str(nowyear)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     rep = http.get(url, ttl_seconds = 3600)
 
     if rep.status_code != 200:
-        fail("get failed with status %d", rep.status_code)
+        print("ESPN schedule request failed with status %d" % rep.status_code)
+        return []
 
     doc = html(rep.body())
 
@@ -39,7 +49,8 @@ def main():
         rep1 = http.get(url1, ttl_seconds = 3600)
 
         if rep1.status_code != 200:
-            fail("get failed with status %d", rep1.status_code)
+            print("ESPN schedule request failed with status %d" % rep1.status_code)
+            return []
 
         doc = html(rep1.body())
 
@@ -57,8 +68,12 @@ def main():
     date = event_node.parent().siblings().eq(0).text()
     time = event_node.parent().siblings().eq(1).text()
 
+    # The logo-and-date block and the red event bar total 32 rows; on a
+    # square panel the column expands and spreads them down the panel.
     return render.Root(
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             children = [
                 render.Row(
                     children = [

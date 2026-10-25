@@ -47,12 +47,10 @@ SHORTENED_WORDS = """
 ALT_COLOR = """
 {
     "LAC": "#1281c4",
-    "LAR": "#003594",
     "MIA": "#008E97",
     "NO": "#000000",
     "SEA": "#002244",
     "TB": "#34302B",
-    "TEN": "#0C2340",
     "AFC": "#CD1126",
     "NFC": "#003B66"
 }
@@ -61,7 +59,8 @@ ALT_LOGO = """
 {
     "AFC": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/afc.png",
     "NFC": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/nfc.png",
-    "IND": "https://i.ibb.co/jzMc7SB/colts.png"
+    "IND": "https://i.ibb.co/jzMc7SB/colts.png",
+    "LAR": "https://i.ibb.co/7JjCcrtk/lar.png"
 }
 """
 MAGNIFY_LOGO = """
@@ -75,7 +74,7 @@ MAGNIFY_LOGO = """
     "IND": 14,
     "NYG": 14,
     "SF": 18,
-    "TEN": 18
+    "TEN": 14
 }
 """
 
