@@ -3,10 +3,11 @@ id: nixel-clock
 name: Nixel Clock
 summary: A Pixel Nixie Clock
 desc: Nixie Tube Clock + Pixels = Nixel Clock!
-author: Olly Stedall @saltedlolly
+author: saltedlolly
 fileName: nixel_clock.star
 packageName: nixelclock
 recommendedInterval: 0
+supports2x: true
 supports64x64: true
 category: clocks
 tags:
@@ -14,4 +15,4 @@ tags:
   - digital-clock
   - retro
 published: '2022-03-04T02:03:31Z'
-updated: '2026-10-01T19:04:39Z'
+updated: '2026-10-26T10:24:33Z'
