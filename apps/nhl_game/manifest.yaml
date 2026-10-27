@@ -1,0 +1,16 @@
+---
+id: nhl-game
+name: NHL Game
+summary: NHL game with power plays
+desc: An NHL scoreboard in the style of Tidbyt's original sports apps. Follow one team through the start time and division standings, the live score with period, clock, power plays, and shots on goal, then the final.
+author: ckelley-1992
+fileName: nhl_game.star
+packageName: nhl_game
+recommendedInterval: 1
+supports2x: true
+category: sports
+tags:
+  - nhl
+  - hockey
+  - real-time
+  - wide 2x support
