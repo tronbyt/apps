@@ -31,8 +31,14 @@ def default_game():
         "home_logo_url": "",
         "is_final": False,
         "is_preview": False,
+        "start_label": "START",
         "start_text": "",
+        "final_text": "FIN",
+        "day_text": "",
+        "date_text": "",
+        "standings": "",
         "game_label": "",
+        "is_today": True,
         "has_game": False,
         "fetch_ok": False,
     }
@@ -82,35 +88,30 @@ def int_from_digits(s, d):
             return d
     return int(s)
 
-def tz_suffix(tz):
-    if tz == "America/New_York":
-        return "ET"
-    if tz == "America/Chicago":
-        return "CT"
-    if tz == "America/Denver":
-        return "MT"
-    if tz == "America/Los_Angeles":
-        return "PT"
-    if tz == "America/Anchorage":
-        return "AKT"
-    if tz == "Pacific/Honolulu":
-        return "HT"
-    return ""
-
-def format_start_text(game_date, timezone):
-    # MLB gameDate is RFC3339-like: 2026-02-23T18:35:00Z
-    if type(game_date) != "string" or len(game_date) < 16:
-        return "TBD"
-    tz = as_str(timezone, "")
+def local_tz(config):
+    # Tronbyt passes the device timezone as $tz; time.tz() is the server's.
+    tz = as_str(config.get("$tz"), "")
+    if tz == "":
+        tz = as_str(config.get("timezone"), "")
     if tz == "":
         tz = as_str(time.tz(), "")
     if tz == "":
         tz = "America/New_York"
-    t = time.parse_time(game_date).in_location(tz)
-    suffix = tz_suffix(tz)
-    if suffix != "":
-        return t.format("3:04") + " " + suffix
-    return t.format("3:04")
+    return tz
+
+def parse_game_date(game_date, tz):
+    # MLB gameDate is RFC3339-like: 2026-02-23T18:35:00Z
+    if type(game_date) != "string" or len(game_date) < 16:
+        return None
+    return time.parse_time(game_date).in_location(tz)
+
+def start_label(t, now):
+    # The original said START on game day; later games name the day instead.
+    if t.format("2006-01-02") == now.format("2006-01-02"):
+        return "START"
+    if t - now < time.parse_duration("144h"):
+        return t.format("Mon").upper()
+    return t.format("1/2")
 
 # ----------------------- MLB lookup helpers -----------------------------------
 TEAM_BY_ID = {
@@ -214,6 +215,51 @@ TEAM_BG = {
     "TOR": "#134A8E",
     "WSH": "#AB0003",
 }
+
+# Secondary colors (ESPN alternateColor, with a few LED tweaks) for the
+# pregame abbreviations, which the original drew in each team's accent.
+TEAM_ACCENT = {
+    "ARI": "#E3D4AD",
+    "ATH": "#EFB21E",
+    "ATL": "#BA0C2F",
+    "AZ": "#E3D4AD",
+    "BAL": "#000000",
+    "BOS": "#0D2B56",
+    "CHC": "#CC3433",
+    "CIN": "#FFFFFF",
+    "CLE": "#E31937",
+    "COL": "#C4CED4",
+    "CWS": "#C4CED4",
+    "DET": "#FF4713",
+    "HOU": "#EB6E1F",
+    "KC": "#7AB2DD",
+    "LAA": "#C4CED4",
+    "LAD": "#FFFFFF",
+    "MIA": "#EF3340",
+    "MIL": "#FFC72C",
+    "MIN": "#E20E32",
+    "NYM": "#FF5910",
+    "NYY": "#C4CED4",
+    "PHI": "#3C7FD8",
+    "PIT": "#FDB827",
+    "SD": "#FFC425",
+    "SEA": "#C4CED4",
+    "SF": "#FD5A1E",
+    "STL": "#001541",
+    "TB": "#8FBCE6",
+    "TEX": "#C0111F",
+    "TOR": "#6CACE5",
+    "WSH": "#11225B",
+}
+
+# Pregame screen, measured from the original app-store preview.
+PRE_STATUS_W = 21
+PRE_TEAM_W = 21
+PRE_TOP_H = 25
+STRIP_H = 7
+STRIP_BG = "#3A0610"
+LABEL_GRAY = "#999999"
+DIVIDER_GRAY = "#777777"
 
 ALT_COLOR = {
     "HOU": "#002D62",
@@ -439,6 +485,17 @@ def team_font_color(bg):
         return "#111111"
     return "#ffffff"
 
+def accent_for(code, bg):
+    # Team accent, unless it vanishes on the tile. Compare channels, not
+    # luminance: red on navy is legible at equal brightness.
+    accent = TEAM_ACCENT.get(as_str(code, ""), "#ffffff")
+    dist = 0
+    for i in [1, 3, 5]:
+        dist += abs(hex_byte(accent, i) - hex_byte(bg, i))
+    if dist < 150:
+        return team_font_color(bg)
+    return accent
+
 def mark_for(code):
     c = as_str(code, "")
     if len(c) > 0:
@@ -591,6 +648,14 @@ def has_tracked_linescore(game):
 
     return False
 
+def game_state(game):
+    if type(game) != "dict":
+        return ""
+    status = game.get("status")
+    if type(status) != "dict":
+        return ""
+    return as_str(status.get("abstractGameState"), "")
+
 def is_mlb_team(team, mlb_team_ids):
     if type(team) != "dict":
         return False
@@ -687,7 +752,9 @@ def select_game_info(games, include_exhibition_opponents, mlb_team_ids, selected
             continue
         if not is_public_facing_game(g):
             continue
-        if not has_tracked_linescore(g):
+
+        # Scheduled games have an empty linescore until first pitch.
+        if game_state(g) != "Preview" and not has_tracked_linescore(g):
             continue
         if not include_exhibition_opponents and not has_only_mlb_opponents(g, mlb_team_ids):
             continue
@@ -728,6 +795,51 @@ def select_game_info(games, include_exhibition_opponents, mlb_team_ids, selected
         "game": best,
         "game_label": label,
     }
+
+def pick_game_info(dates, today, include_exhibition_opponents, mlb_team_ids, selected_team_code):
+    # Dates run from yesterday forward: a late game from yesterday that is
+    # still going wins, then today's games, then the next day with a game.
+    for day in dates:
+        if type(day) != "dict":
+            continue
+        day_date = as_str(day.get("date"), "")
+        games = day.get("games")
+        if day_date < today:
+            games = [g for g in (games if type(games) == "list" else []) if game_state(g) == "Live"]
+        info = select_game_info(games, include_exhibition_opponents, mlb_team_ids, selected_team_code)
+        if info != None:
+            info["date"] = day_date
+            return info
+    return None
+
+def get_division_standings(team_id, season):
+    # "1:NYY  2:TOR  3:BOS ..." for the team's division, like the original's
+    # bottom ticker.
+    url = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=" + str(season) + "&standingsTypes=regularSeason"
+    resp = http.get(url = url, ttl_seconds = 3600)
+    if resp.status_code != 200:
+        return ""
+    body = resp.body()
+    if body == None or len(body) == 0 or body[0] != "{":
+        return ""
+    parsed = json.decode(body)
+    if type(parsed) != "dict" or type(parsed.get("records")) != "list":
+        return ""
+    for rec in parsed.get("records"):
+        if type(rec) != "dict" or type(rec.get("teamRecords")) != "list":
+            continue
+        ranked = []
+        for tr in rec.get("teamRecords"):
+            if type(tr) != "dict" or type(tr.get("team")) != "dict":
+                continue
+            ranked.append((int_from_digits(as_str(tr.get("divisionRank"), ""), 9), as_int(tr.get("team").get("id"), 0)))
+        if team_id not in [r[1] for r in ranked]:
+            continue
+        parts = []
+        for rank, tid in sorted(ranked):
+            parts.append(str(rank) + ":" + TEAM_BY_ID.get(tid, "?"))
+        return "  ".join(parts)
+    return ""
 
 # ----------------------- Bases (right-top tile) -------------------------------
 def base_diamond(filled):
@@ -779,44 +891,7 @@ def tiny_arrow(top_half):
     rows = ["..w..", ".www.", "wwwww"] if top_half else ["wwwww", ".www.", "..w.."]
     return render.Box(width = 5, height = 3, child = sprite_palette(rows, {"w": "#ffffff"}))
 
-def count_tile(inning, top_half, balls, strikes, outs, status_text, game_label):
-    if status_text != "":
-        status_child = render.Text(status_text, font = "6x10-rounded")
-        if len(status_text) > 5:
-            status_child = render.Text(status_text, font = "5x8")
-        if len(status_text) >= 3 and (
-            status_text[len(status_text) - 3:] == " ET" or
-            status_text[len(status_text) - 3:] == " CT" or
-            status_text[len(status_text) - 3:] == " MT" or
-            status_text[len(status_text) - 3:] == " PT" or
-            status_text[len(status_text) - 3:] == " HT" or
-            (len(status_text) >= 4 and status_text[len(status_text) - 4:] == " AKT")
-        ):
-            suf_len = 2
-            if len(status_text) >= 4 and status_text[len(status_text) - 4:] == " AKT":
-                suf_len = 3
-            status_child = render.Row(
-                children = [
-                    render.Text(status_text[:len(status_text) - 1 - suf_len], font = "5x8"),
-                    spacer_w(1),
-                    render.Text(status_text[len(status_text) - suf_len:], font = "CG-pixel-3x5-mono"),
-                ],
-                main_align = "center",
-                cross_align = "center",
-            )
-        return render.Box(
-            height = 16,
-            child = render.Box(
-                width = 29,
-                child = render.Row(
-                    children = [status_child],
-                    expanded = True,
-                    main_align = "center",
-                    cross_align = "center",
-                ),
-            ),
-        )
-
+def count_tile(inning, top_half, balls, strikes, outs, game_label):
     left_children = [spacer_h(4)]
     if game_label != "":
         left_children = [
@@ -942,41 +1017,9 @@ def left_panel(away, home, ascore, hscore, away_bg, home_bg, away_logo_url, home
         ),
     )
 
-def game_label_tile(game_label):
-    if game_label == "":
-        return bases_tile(False, False, False)
-    return render.Box(
-        height = 16,
-        child = render.Column(
-            children = [
-                spacer_h(4),
-                render.Row(
-                    children = [render.Text(game_label, font = "CG-pixel-3x5-mono")],
-                    main_align = "center",
-                    cross_align = "center",
-                ),
-            ],
-            main_align = "start",
-            cross_align = "center",
-        ),
-    )
-
-def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final, is_preview, start_text, game_label):
-    if is_final or is_preview:
-        status_text = "Final" if is_final else start_text
-        top = game_label_tile(game_label)
-        bot = count_tile(inning, top_half, balls, strikes, outs, status_text, "")
-        return render.Box(
-            width = 28,
-            child = render.Column(
-                children = [top, bot],
-                main_align = "start",
-                cross_align = "stretch",
-            ),
-        )
-
+def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, game_label):
     top = bases_tile(on1, on2, on3)
-    bot = count_tile(inning, top_half, balls, strikes, outs, "", game_label)
+    bot = count_tile(inning, top_half, balls, strikes, outs, game_label)
     return render.Box(
         width = 29,
         child = render.Column(
@@ -984,6 +1027,110 @@ def right_panel(on1, on2, on3, inning, top_half, balls, strikes, outs, is_final,
             main_align = "start",
             cross_align = "stretch",
         ),
+    )
+
+# ----------------------- Final (right panel) ----------------------------------
+# The original said FIN; extra-inning finals use the box-score F/10 form.
+def final_panel(final_text, day_text, date_text, game_label):
+    children = []
+    if game_label != "":
+        children.append(render.Text(game_label, font = "CG-pixel-3x5-mono", color = LABEL_GRAY))
+        children.append(spacer_h(2))
+    children.extend([
+        render.Text(final_text, font = "6x10-rounded"),
+        spacer_h(3),
+        render.Text(day_text, font = "CG-pixel-3x5-mono", color = LABEL_GRAY),
+        spacer_h(1),
+        render.Text(date_text, font = "CG-pixel-3x5-mono", color = LABEL_GRAY),
+    ])
+    return render.Box(
+        width = 28,
+        height = 32,
+        child = render.Column(
+            children = children,
+            main_align = "center",
+            cross_align = "center",
+        ),
+    )
+
+# ----------------------- Pregame ----------------------------------------------
+# Start time on the left, the two teams side by side, and the division
+# standings ticker along the bottom, as in the original app-store preview.
+def pregame_status(start_label_text, start_text, game_label):
+    children = []
+    if game_label != "":
+        children.append(render.Text(game_label, font = "CG-pixel-3x5-mono", color = LABEL_GRAY))
+        children.append(spacer_h(2))
+    children.extend([
+        render.Text(start_label_text, font = "CG-pixel-3x5-mono", color = LABEL_GRAY),
+        spacer_h(2),
+        render.Text(start_text, font = "CG-pixel-3x5-mono"),
+    ])
+    return render.Column(children = children, main_align = "center", cross_align = "center")
+
+def pregame_logo(code, bg, logo_url, size):
+    img = team_logo_for(code, logo_url)
+    if img == None:
+        return render.Text(mark_for(code), font = "6x13", color = team_font_color(bg))
+    return render.Image(img, width = size, height = size)
+
+def pregame_team_column(code, bg, logo_url, w, h, logo_size, logo_top):
+    # logo_top < 0 centers the stack; otherwise it is the logo's first row.
+    stack = [
+        render.Box(width = w, height = logo_size, child = pregame_logo(code, bg, logo_url, logo_size)),
+        spacer_h(3),
+        render.Text(code, font = "CG-pixel-4x5-mono", color = accent_for(code, bg)),
+    ]
+    if logo_top >= 0:
+        stack = [spacer_h(logo_top)] + stack
+    return render.Box(
+        width = w,
+        height = h,
+        color = bg,
+        child = render.Column(
+            children = stack,
+            expanded = True,
+            main_align = "start" if logo_top >= 0 else "center",
+            cross_align = "center",
+        ),
+    )
+
+def standings_strip(text):
+    if text == "":
+        return render.Box(width = 64, height = STRIP_H, color = STRIP_BG)
+    return render.Box(
+        width = 64,
+        height = STRIP_H,
+        color = STRIP_BG,
+        child = render.Marquee(width = 64, child = render.Text(text, font = "CG-pixel-4x5-mono")),
+    )
+
+def pregame_layout(d):
+    return render.Column(
+        children = [
+            render.Row(
+                children = [
+                    # CG-pixel text carries a trailing blank column, so center
+                    # in x1-20 to land where the original drew START (x1-19).
+                    render.Padding(
+                        pad = (1, 0, 0, 0),
+                        child = render.Box(
+                            width = PRE_STATUS_W - 1,
+                            height = PRE_TOP_H,
+                            child = pregame_status(d["start_label"], d["start_text"], d["game_label"]),
+                        ),
+                    ),
+                    render.Box(width = 1, height = PRE_TOP_H, color = DIVIDER_GRAY),
+                    pregame_team_column(d["away"], d["away_bg"], d["away_logo_url"], PRE_TEAM_W, PRE_TOP_H, 14, 1),
+                    pregame_team_column(d["home"], d["home_bg"], d["home_logo_url"], PRE_TEAM_W, PRE_TOP_H, 14, 1),
+                ],
+                main_align = "start",
+                cross_align = "start",
+            ),
+            standings_strip(d["standings"]),
+        ],
+        main_align = "start",
+        cross_align = "start",
     )
 
 # ----------------------- Square (64x64) layout --------------------------------
@@ -1088,7 +1235,7 @@ def square_status_live(d):
         ),
     )
 
-def square_status_final(game_label):
+def square_status_final(final_text, game_label):
     children = []
     if game_label != "":
         children.append(render.Row(
@@ -1096,7 +1243,7 @@ def square_status_final(game_label):
             main_align = "center",
         ))
     children.append(render.Row(
-        children = [render.Text("Final", font = "6x10-rounded")],
+        children = [render.Text(final_text, font = "6x10-rounded")],
         main_align = "center",
     ))
     return render.Box(
@@ -1108,13 +1255,43 @@ def square_status_final(game_label):
         ),
     )
 
-def square_status_preview(game_label):
-    if game_label != "":
-        return render.Box(
-            height = 15,
-            child = render.Text(game_label, font = "CG-pixel-3x5-mono"),
+def square_pregame_layout(d):
+    # Same pieces as the wide pregame, stacked: start time across the top,
+    # bigger team columns, and the standings ticker at the bottom.
+    status = render.Row(
+        children = [
+            render.Text(d["start_label"], font = "CG-pixel-3x5-mono", color = LABEL_GRAY),
+            spacer_w(4),
+            render.Text(d["start_text"], font = "5x8"),
+        ],
+        main_align = "center",
+        cross_align = "center",
+    )
+    if d["game_label"] != "":
+        status = render.Column(
+            children = [render.Text(d["game_label"], font = "CG-pixel-3x5-mono", color = LABEL_GRAY), spacer_h(1), status],
+            main_align = "start",
+            cross_align = "center",
         )
-    return render.Box(height = 15, child = square_bases(False, False, False))
+    return render.Box(
+        color = "#000000",
+        child = render.Column(
+            children = [
+                render.Box(width = 64, height = 15, child = status),
+                render.Row(
+                    children = [
+                        pregame_team_column(d["away"], d["away_bg"], d["away_logo_url"], 32, 42, 24, -1),
+                        pregame_team_column(d["home"], d["home_bg"], d["home_logo_url"], 32, 42, 24, -1),
+                    ],
+                    main_align = "start",
+                    cross_align = "start",
+                ),
+                standings_strip(d["standings"]),
+            ],
+            main_align = "start",
+            cross_align = "start",
+        ),
+    )
 
 def square_stat_cell(text, color):
     return render.Box(
@@ -1174,17 +1351,13 @@ def square_boxscore(d):
     )
 
 def square_layout(d):
+    if d["is_preview"]:
+        return square_pregame_layout(d)
     away_tile = square_team_tile(d["away_bg"], d["away"], d["ascore"], d["away_logo_url"])
     home_tile = square_team_tile(d["home_bg"], d["home"], d["hscore"], d["home_logo_url"])
     if d["is_final"]:
-        status = square_status_final(d["game_label"])
+        status = square_status_final(d["final_text"], d["game_label"])
         bottom = square_boxscore(d)
-    elif d["is_preview"]:
-        status = square_status_preview(d["game_label"])
-        bottom = render.Box(
-            height = 17,
-            child = count_tile(d["inning"], d["top"], d["balls"], d["strikes"], d["outs"], d["start_text"], ""),
-        )
     else:
         status = square_status_live(d)
         bottom = square_boxscore(d)
@@ -1198,7 +1371,7 @@ def square_layout(d):
     )
 
 # ----------------------- Fetch + cache (no try/except) ------------------------
-def get_game_data(config):
+def get_game_data(config, now, tz):
     d = default_game()
     espn_teams = get_espn_team_map()
     mlb_team_ids = get_mlb_team_ids()
@@ -1209,7 +1382,12 @@ def get_game_data(config):
     if team_code in TEAM_ID_BY_CODE:
         team_id = TEAM_ID_BY_CODE[team_code]
 
-    schedule_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=" + str(team_id) + "&hydrate=linescore"
+    # Yesterday catches late games still in progress after midnight; the
+    # look-ahead finds the next game on off days (the All-Star break is 4).
+    today = now.format("2006-01-02")
+    start_date = (now - time.parse_duration("24h")).format("2006-01-02")
+    end_date = (now + time.parse_duration("240h")).format("2006-01-02")
+    schedule_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=" + str(team_id) + "&startDate=" + start_date + "&endDate=" + end_date + "&hydrate=linescore"
 
     resp = http.get(url = schedule_url, ttl_seconds = 120)
     if resp.status_code != 200:
@@ -1232,11 +1410,7 @@ def get_game_data(config):
     if type(dates) != "list" or len(dates) == 0:
         return d
 
-    day0 = dates[0]
-    if type(day0) != "dict":
-        return d
-
-    game_info = select_game_info(day0.get("games"), include_exhibition_opponents, mlb_team_ids, team_code)
+    game_info = pick_game_info(dates, today, include_exhibition_opponents, mlb_team_ids, team_code)
     if type(game_info) != "dict":
         return d
 
@@ -1247,14 +1421,23 @@ def get_game_data(config):
     d["has_game"] = True
     d["game_label"] = as_str(game_info.get("game_label"), "")
 
+    state = game_state(game)
+    d["is_final"] = (state == "Final")
+    d["is_preview"] = (state == "Preview")
+    d["is_today"] = state == "Live" or as_str(game_info.get("date"), "") == today
+
+    start = parse_game_date(as_str(game.get("gameDate"), ""), tz)
+    if start != None:
+        d["start_label"] = start_label(start, now)
+        d["start_text"] = start.format("3:04")
+        d["day_text"] = start.format("Mon").upper()
+        d["date_text"] = start.format("1/2")
     status = game.get("status")
-    if type(status) == "dict":
-        state = as_str(status.get("abstractGameState"), "")
-        d["is_final"] = (state == "Final")
-        d["is_preview"] = (state == "Preview")
+    if type(status) == "dict" and as_bool(status.get("startTimeTBD"), False):
+        d["start_text"] = "TBD"
 
     if d["is_preview"]:
-        d["start_text"] = format_start_text(as_str(game.get("gameDate"), ""), config.get("timezone"))
+        d["standings"] = get_division_standings(team_id, now.year)
 
     teams = game.get("teams")
     if type(teams) == "dict":
@@ -1314,13 +1497,68 @@ def get_game_data(config):
                 d["hhits"] = as_int(ls_home.get("hits"), 0)
                 d["herrors"] = as_int(ls_home.get("errors"), 0)
 
+        innings = as_int(linescore.get("currentInning"), 0)
+        if d["is_final"] and innings > as_int(linescore.get("scheduledInnings"), 9):
+            d["final_text"] = "F/" + str(innings)
+
+    return d
+
+# ----------------------- Dev fixtures -----------------------------------------
+# `fixture=<name>` renders canned games so the pregame and final screens can
+# be checked without a live game. Not exposed in the schema.
+def fixture_game(name, now, tz):
+    d = default_game()
+    d["has_game"] = True
+    d["fetch_ok"] = True
+    if name == "live":
+        return d
+
+    d["away"] = "CLE"
+    d["home"] = "NYY"
+    d["away_bg"] = team_bg_for("CLE", "")
+    d["home_bg"] = team_bg_for("NYY", "")
+    d["ascore"] = 4
+    d["hscore"] = 2
+    d["standings"] = "1:NYY  2:TOR  3:TB  4:BOS  5:BAL"
+    if name.startswith("pre"):
+        d["is_preview"] = True
+        start = time.time(year = now.year, month = now.month, day = now.day, hour = 19, minute = 5, location = tz)
+        if name == "pre_week":
+            start = start + time.parse_duration("72h")
+            d["is_today"] = False
+        elif name == "pre_dh":
+            d["game_label"] = "G2"
+        d["start_label"] = start_label(start, now)
+        d["start_text"] = start.format("3:04")
+    elif name.startswith("final"):
+        d["is_final"] = True
+        played = now - time.parse_duration("3h")
+        d["day_text"] = played.format("Mon").upper()
+        d["date_text"] = played.format("1/2")
+        d["ahits"] = 9
+        d["hhits"] = 6
+        d["herrors"] = 1
+        if name == "final_extra":
+            d["final_text"] = "F/11"
     return d
 
 # ----------------------- Main -------------------------------------------------
 def main(config):
-    d = get_game_data(config)
+    tz = local_tz(config)
+    now = time.now().in_location(tz)
+    fixture = as_str(config.get("fixture"), "")
+    if fixture != "":
+        d = fixture_game(fixture, now, tz)
+    else:
+        d = get_game_data(config, now, tz)
 
-    if config.bool("gameday_only", False) and d["fetch_ok"] and not d["has_game"]:
+    # No game in the look-ahead window (or no data): skip this cycle rather
+    # than show the placeholder game.
+    if not d["has_game"]:
+        print("--- NO GAME FOUND, SKIPPING RENDER ---")
+        return []
+
+    if config.bool("gameday_only", False) and not d["is_today"]:
         print("--- APPLET HIDDEN FROM ROTATION (NO GAME TODAY) ---")
         return []
 
@@ -1340,7 +1578,28 @@ def main(config):
 
     # 64x64 panels get their own layout; wide panels keep the layout below.
     if is_square():
-        return render.Root(child = square_layout(d))
+        return render.Root(child = square_layout(d), show_full_animation = d["is_preview"])
+
+    if d["is_preview"]:
+        return render.Root(
+            child = render.Box(color = "#000000", child = pregame_layout(d)),
+            show_full_animation = True,
+        )
+
+    if d["is_final"]:
+        right = final_panel(d["final_text"], d["day_text"], d["date_text"], d["game_label"])
+    else:
+        right = right_panel(
+            d["on1"],
+            d["on2"],
+            d["on3"],
+            d["inning"],
+            d["top"],
+            d["balls"],
+            d["strikes"],
+            d["outs"],
+            d["game_label"],
+        )
 
     return render.Root(
         child = render.Box(
@@ -1357,20 +1616,7 @@ def main(config):
                         d["away_logo_url"],
                         d["home_logo_url"],
                     ),
-                    right_panel(
-                        d["on1"],
-                        d["on2"],
-                        d["on3"],
-                        d["inning"],
-                        d["top"],
-                        d["balls"],
-                        d["strikes"],
-                        d["outs"],
-                        d["is_final"],
-                        d["is_preview"],
-                        d["start_text"],
-                        d["game_label"],
-                    ),
+                    right,
                 ],
                 main_align = "start",
                 cross_align = "start",
