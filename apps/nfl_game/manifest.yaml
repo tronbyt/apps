@@ -1,0 +1,16 @@
+---
+id: nfl-game
+name: NFL Game
+summary: NFL game with down and distance
+desc: A recreation of the original Tidbyt NFL app. Follow one team through kickoff time, the live score with quarter, clock, down and distance, possession, and timeouts, then the final.
+author: ckelley-1992
+fileName: nfl_game.star
+packageName: nfl_game
+recommendedInterval: 1
+supports2x: true
+category: sports
+tags:
+  - nfl
+  - football
+  - real-time
+  - wide 2x support
