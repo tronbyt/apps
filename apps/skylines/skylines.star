@@ -5,12 +5,12 @@ Description: Animated city skylines with outlined, fading city names.
 Author: Robert Ison
 """
 
+load("cache.star", "cache")
+load("encoding/json.star", "json")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("skylines_data.star", "CITIES")
 load("time.star", "time")
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 
 SCREEN_WIDTH = canvas.width()
 SCREEN_HEIGHT = canvas.height()
@@ -72,11 +72,9 @@ text_display_choices = [
     ),
 ]
 
-
 def is_square():
     w, h = canvas.size()
     return w == h
-
 
 def center_on_square(child, width = None, height = None):
     if not is_square():
@@ -95,7 +93,6 @@ def center_on_square(child, width = None, height = None):
         child = child,
     )
 
-
 def add_padding_to_child_element(
         element,
         left = 0,
@@ -106,7 +103,6 @@ def add_padding_to_child_element(
         pad = (left, top, right, bottom),
         child = element,
     )
-
 
 def randomize(minimum, maximum):
     if maximum <= minimum:
@@ -126,20 +122,17 @@ def randomize(minimum, maximum):
 
     return minimum + value % (maximum - minimum + 1)
 
-
 def milliseconds_to_frames(milliseconds):
     return max(
         1,
         (milliseconds + FRAME_DELAY_MS // 2) // FRAME_DELAY_MS,
     )
 
-
 def setting_ms(config, name, default):
     return max(
         0,
         int(config.get(name, str(default))),
     )
-
 
 def create_dot(x, y, color = "#fff"):
     return add_padding_to_child_element(
@@ -152,7 +145,6 @@ def create_dot(x, y, color = "#fff"):
         top = y * SCALE,
     )
 
-
 def create_star(x, y, color):
     return add_padding_to_child_element(
         render.Box(
@@ -163,7 +155,6 @@ def create_star(x, y, color):
         left = x * SCALE,
         top = y * SCALE,
     )
-
 
 def scene(layers):
     # Keep every frame the same size.
@@ -176,13 +167,11 @@ def scene(layers):
         ] + layers,
     )
 
-
 def start_from_top(y_top, y_bottom, current_pen_y):
     return (
         abs(current_pen_y - y_top) <=
         abs(current_pen_y - y_bottom)
     )
-
 
 def get_column_bounds(screen, x, height):
     y_top = None
@@ -197,7 +186,6 @@ def get_column_bounds(screen, x, height):
 
     return (y_top, y_bottom)
 
-
 def validate_dataset(data):
     if len(data) == 0 or len(data[0]) == 0:
         fail("Skyline dataset must contain nonempty rows.")
@@ -211,7 +199,6 @@ def validate_dataset(data):
         for pixel in row:
             if pixel not in [0, 1, 2, 3]:
                 fail("Skyline pixel values must be 0, 1, 2, or 3.")
-
 
 def pseudo_shuffle(coords, seed):
     items = []
@@ -235,7 +222,6 @@ def pseudo_shuffle(coords, seed):
         items.append((key, coordinate))
 
     return [item[1] for item in sorted(items)]
-
 
 def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
     if num_stars <= 0:
@@ -262,7 +248,6 @@ def pick_stars(coords, num_stars, seed = 0, min_spacing = 2):
 
     return chosen
 
-
 def get_star_locations(column_tops, height):
     candidates = []
 
@@ -285,7 +270,6 @@ def get_star_locations(column_tops, height):
         randomize(0, 2147483646),
         STAR_MIN_SPACING,
     )
-
 
 def create_completed_frame(
         skyline_dots,
@@ -326,7 +310,6 @@ def create_completed_frame(
             )
 
     return scene(layers)
-
 
 def draw_skyline(
         data,
@@ -401,7 +384,6 @@ def draw_skyline(
 
     return (frames, dots, stars)
 
-
 def color_with_opacity(color, opacity):
     digits = "0123456789abcdef"
     value = color[1:]
@@ -424,16 +406,14 @@ def color_with_opacity(color, opacity):
         digits[opacity % 16]
     )
 
-
 def text_style():
     if SCALE == 2:
         return ("terminus-16", 16)
 
     return ("5x8", 8)
 
-
 def outlined_text(text, color, opacity):
-    font, text_height = text_style()
+    font, _ = text_style()
 
     layers = []
 
@@ -470,9 +450,8 @@ def outlined_text(text, color, opacity):
 
     return render.Stack(children = layers)
 
-
 def outlined_text_size(text):
-    font, text_height = text_style()
+    font, _ = text_style()
 
     width, height = render.Text(
         text,
@@ -486,7 +465,7 @@ def create_text_overlay(
         color,
         opacity = 255,
         scroll_offset = 0):
-    font, text_height = text_style()
+    _, text_height = text_style()
 
     child = outlined_text(
         text,
@@ -494,7 +473,7 @@ def create_text_overlay(
         opacity,
     )
 
-    width, height = outlined_text_size(text)
+    width, _ = outlined_text_size(text)
 
     if width <= SCREEN_WIDTH:
         left = (SCREEN_WIDTH - width) // 2
@@ -510,15 +489,12 @@ def create_text_overlay(
         ),
     )
 
-
-
 def get_safe_name(name):
     return (
         name.lower()
-        .replace(" ", "_")
-        .replace(".", "")
+            .replace(" ", "_")
+            .replace(".", "")
     )
-
 
 def choose_city(config):
     if len(CITIES) == 0:
@@ -595,7 +571,6 @@ def choose_city(config):
 
     return available[0]
 
-
 def get_display_text(config, city_name):
     mode = config.get(
         "text_display",
@@ -617,9 +592,8 @@ def get_display_text(config, city_name):
 
     return ""
 
-
 def append_hold(frames, dots, stars, count):
-    for unused in range(count):
+    for _ in range(count):
         frames.append(
             create_completed_frame(
                 dots,
@@ -627,7 +601,6 @@ def append_hold(frames, dots, stars, count):
                 len(frames),
             ),
         )
-
 
 def append_text_frame(
         frames,
@@ -654,7 +627,6 @@ def append_text_frame(
             ),
         ]),
     )
-
 
 def append_fade(
         frames,
@@ -694,7 +666,6 @@ def append_fade(
             opacity,
             offset,
         )
-
 
 def main(config):
     city = choose_city(config)
@@ -771,8 +742,7 @@ def main(config):
         )
 
     if len(text) > 0:
-        width, height = outlined_text_size(text)
-
+        width, _ = outlined_text_size(text)
 
         distance = max(
             0,
@@ -791,8 +761,8 @@ def main(config):
             )
 
         if distance == 0:
-            for unused in range(
-                milliseconds_to_frames(text_ms)
+            for _ in range(
+                milliseconds_to_frames(text_ms),
             ):
                 append_text_frame(
                     frames,
@@ -809,7 +779,7 @@ def main(config):
                 max(750, text_ms // 2),
             )
 
-            for unused in range(pause_frames):
+            for _ in range(pause_frames):
                 append_text_frame(
                     frames,
                     dots,
@@ -840,7 +810,7 @@ def main(config):
                     offset,
                 )
 
-            for unused in range(pause_frames):
+            for _ in range(pause_frames):
                 append_text_frame(
                     frames,
                     dots,
@@ -881,7 +851,6 @@ def main(config):
         show_full_animation = True,
     )
 
-
 def get_city_options(display):
     if display != "List":
         return []
@@ -899,7 +868,6 @@ def get_city_options(display):
             key = lambda city: city["name"],
         )
     ]
-
 
 def timing_dropdown(
         id,
@@ -921,7 +889,6 @@ def timing_dropdown(
         ],
         default = str(default),
     )
-
 
 def get_schema():
     return schema.Schema(
