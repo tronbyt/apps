@@ -2,7 +2,7 @@
 id: github-assigned-tasks
 name: GitHub Assigned Tasks
 summary: GitHub assigned issue count
-desc: Displays the number of open GitHub issues assigned to you.
+desc: Displays open GitHub issues assigned to you, optionally with closed counts as open - closed.
 author: Tavis
 fileName: github_assigned_tasks.star
 packageName: githubassignedtasks
