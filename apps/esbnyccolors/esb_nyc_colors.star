@@ -56,13 +56,9 @@ def main(config):
 
     pattern = day.get("pattern") or "static"
     frames = color_frames(day, pattern)
-    text = day.get("title") or ""
-    if day.get("description"):
-        text = text + ": " + day["description"] if text else day["description"]
-
     if config.bool("vertical-mode"):
         return render_vertically(day, frames, pattern)
-    return render_horizontally(text, frames, pattern)
+    return render_horizontally(day, frames, pattern)
 
 def todays_lights(dev_date):
     """Today's entry (New York date) from the feed, or None to skip this cycle.
@@ -121,6 +117,23 @@ def sparkles(areas):
         ))
     return dots
 
+def frame_budget(delay):
+    """Frames that fit the dwell the server gave this app; 0 means no limit."""
+    ms = canvas.max_duration_ms()
+    return ms // delay if ms > 0 else 0
+
+def fitted_marquee(candidates, budget):
+    """The first marquee that scrolls through within the budget.
+
+    Candidates go from the fullest text to the shortest. When none fits, the
+    shortest is used and the dwell cuts its tail off.
+    """
+    for marquee in candidates:
+        # frame_count() lays out on a 64x32 canvas unless given real bounds
+        if budget == 0 or marquee.frame_count((0, 0, WIDTH, HEIGHT)) <= budget:
+            return marquee
+    return candidates[-1]
+
 def nested_boxes(colors, width, height):
     """Concentric boxes, the first color outermost."""
     n = len(colors)
@@ -157,8 +170,18 @@ def tower_areas():
             y += h * VS
     return areas
 
-def render_horizontally(text, frames, pattern):
+def render_horizontally(day, frames, pattern):
     box_height = HEIGHT - FONT_HORIZONTAL_HEIGHT - 2 * VS
+    title = day.get("title") or ""
+    description = day.get("description") or ""
+    texts = [t for t in [title + ": " + description if title and description else "", description, title] if t]
+    marquee = fitted_marquee(
+        [
+            render.Marquee(width = WIDTH, child = render.Text(content = t, font = FONT_HORIZONTAL))
+            for t in texts or [""]
+        ],
+        frame_budget(DELAY_HORIZONTAL),
+    )
     return render.Root(
         delay = DELAY_HORIZONTAL,
         child = render.Column(
@@ -166,10 +189,7 @@ def render_horizontally(text, frames, pattern):
             main_align = "space_around",
             cross_align = "center",
             children = [
-                render.Marquee(
-                    width = WIDTH,
-                    child = render.Text(content = text, font = FONT_HORIZONTAL),
-                ),
+                marquee,
                 animated(
                     lambda colors: nested_boxes(colors, WIDTH, box_height),
                     frames,
@@ -183,22 +203,24 @@ def render_horizontally(text, frames, pattern):
 
 def render_vertically(day, frames, pattern):
     text_width = WIDTH - TOWER_WIDTH - WS
-    lines = [render.WrappedText(content = day.get("title") or "", width = text_width, font = FONT_VERTICAL, color = "#fd0")]
+    title = render.WrappedText(content = day.get("title") or "", width = text_width, font = FONT_VERTICAL, color = "#fd0")
+    candidates = [[title]]
     if day.get("description"):
-        lines.append(render.WrappedText(content = day["description"], width = text_width, font = FONT_VERTICAL))
+        description = render.WrappedText(content = day["description"], width = text_width, font = FONT_VERTICAL)
+        candidates = [[title, description], [description]]
+    marquee = fitted_marquee(
+        [
+            render.Marquee(height = HEIGHT, scroll_direction = "vertical", child = render.Column(children = lines))
+            for lines in candidates
+        ],
+        frame_budget(DELAY_VERTICAL),
+    )
     return render.Root(
         delay = DELAY_VERTICAL,
         child = render.Row(
             children = [
                 animated(tower, frames, pattern, DELAY_VERTICAL, tower_areas()),
-                render.Padding(
-                    pad = (WS, 0, 0, 0),
-                    child = render.Marquee(
-                        height = HEIGHT,
-                        scroll_direction = "vertical",
-                        child = render.Column(children = lines),
-                    ),
-                ),
+                render.Padding(pad = (WS, 0, 0, 0), child = marquee),
             ],
         ),
     )
