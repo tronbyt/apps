@@ -174,7 +174,7 @@ def main(config):
     # Vertically center the text block
     num_rows = len(rows)
     total_text_height = (num_rows * FONT_HEIGHT) + ((num_rows - 1) * V_SPACING)
-    top_margin = (32 - total_text_height) // 2
+    top_margin = (canvas.height() - total_text_height) // 2
 
     # Kanji image
     if canvas.is2x():
@@ -188,7 +188,7 @@ def main(config):
             height = image_width,
             width = image_width,
             src = kanji_image_src,
-        ), -6, -13))
+        ), -6, -13 if canvas.height() <= 32 else (canvas.height() - image_width) // 2))  # whole glyph fits on 64x64
 
     # Meaning / On / Kun
     for i, row_text in enumerate(rows):

@@ -6,9 +6,10 @@ desc: Real time bus departures for your preferred stop.
 author: samandmoore
 fileName: nyc_bus.star
 packageName: nycbus
+supports64x64: true
 category: transit
 tags:
   - local
   - utility
 published: '2022-02-24T03:27:18Z'
-updated: '2026-09-01T00:22:27Z'
+updated: '2026-10-01T22:12:18Z'

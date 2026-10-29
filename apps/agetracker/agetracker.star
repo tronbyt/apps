@@ -13,22 +13,24 @@ the whole time. After the lived months are filled, the grid holds before the
 Tidbyt loops the animation.
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 # --- Layout -----------------------------------------------------------------
 LIFESPAN_YEARS = 82
 TOTAL_MONTHS = LIFESPAN_YEARS * 12  # 984
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 
 # Cells are 2px wide x 1px tall, 32 per row. 32 cols * 2px == 64px (full width).
 # 984 months span 31 rows (30 * 32 + 24), so the grid is 64x31 -- essentially the
 # whole panel, with the last row holding the final 24 months.
 COLS = 32
-CELL_W = 2
-CELL_H = 1
+
+# Cells scale with the panel: 2x1 on 64x32, 2x2 on 64x64, 4x2 on 128x64.
+CELL_W = WIDTH // COLS
+CELL_H = HEIGHT // 32
 ROWS = (TOTAL_MONTHS + COLS - 1) // COLS  # 31
 GRID_W = COLS * CELL_W  # 64
 GRID_H = ROWS * CELL_H  # 31
@@ -95,21 +97,26 @@ def grid(filled, living_color):
     `filled` only ever counts up to the number of lived months, the blue front
     sweeps left-to-right, row by row, and unlived months are always white.
     """
+
+    # Each row is at most three runs (lived, remaining, phantom) in that
+    # order, so it is painted as up to three Boxes instead of one per cell:
+    # pixel-identical and ~16x fewer widgets per frame, which is what keeps
+    # the 64x64 render inside the server deadline.
     rows = []
     for r in range(ROWS):
-        cells = []
-        for c in range(COLS):
-            index = r * COLS + c
-            if index >= TOTAL_MONTHS:
-                # Phantom cells past month 984 (the tail of the last row) stay
-                # background so the grid ends cleanly.
-                color = BG_COLOR
-            elif index < filled:
-                color = living_color
-            else:
-                color = REMAINING_COLOR
-            cells.append(render.Box(width = CELL_W, height = CELL_H, color = color))
-        rows.append(render.Row(children = cells))
+        start = r * COLS
+        end = min(start + COLS, TOTAL_MONTHS)
+        lived = min(max(filled - start, 0), end - start)
+        runs = [
+            (lived, living_color),
+            (end - start - lived, REMAINING_COLOR),
+            (COLS - (end - start), BG_COLOR),
+        ]
+        rows.append(render.Row(children = [
+            render.Box(width = n * CELL_W, height = CELL_H, color = color)
+            for n, color in runs
+            if n > 0
+        ]))
     return render.Column(children = rows)
 
 def frame(filled, living_color):

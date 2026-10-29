@@ -46,7 +46,7 @@ load("images/dark13_pixel.png", DARK13_PIXEL_ASSET = "file")
 load("images/dark14_pixel.png", DARK14_PIXEL_ASSET = "file")
 load("images/moon_img.png", MOON_IMG_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -122,6 +122,15 @@ FADE_LNG = math.pi / 6  # 30 degrees in moon longitude, but fade is non-linear (
 FONT = "tom-thumb"
 CLOCK_PADDING = 24  # y-offset of clock in pixels
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     latitude = float(location["lat"])
@@ -145,7 +154,131 @@ def main(config):
 
     return render.Root(
         delay = 1000,
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            expanded = True,
+            main_align = "space_evenly",
+            cross_align = "left",
+            children = [
+                render.Stack([
+                    render.Image(src = MOON_IMG),
+                    # Stack below is a dynamically generated shadow mask built one pixel at a time
+                    render.Stack([
+                        # Each child of Stack is a row of pixels
+                        render.Row([
+                            # Each Row is a 1 pixel tall stack at height "y"
+                            render.Padding(
+                                # This element represents the mask pixel at (x, y)
+                                pad = (0, y, 0, 0),
+                                child = render.Image(
+                                    src = getmaskpixel(x, y, moon_phase, latitude),
+                                ),
+                            )
+                            for x in range(MOONIMG_WIDTH)
+                        ])
+                        for y in range(MOONIMG_HEIGHT)
+                    ]),
+                ]),
+                # optional clock below
+                render.Animation(
+                    children = [
+                        render.Padding(
+                            pad = (0, CLOCK_PADDING, 0, 0),
+                            child = render.Stack(
+                                children = [
+                                    render.Padding(
+                                        # render extra pixels to the right to push time closer to moon
+                                        pad = (3, 0, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time,
+                                            font = FONT,
+                                            color = "#000",
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        # faint shadow right
+                                        pad = (1, 0, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time,
+                                            font = FONT,
+                                            color = "#222",
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        # faint shadow down
+                                        pad = (0, 1, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time,
+                                            font = FONT,
+                                            color = "#222",
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        # medium shadow diagonal down-right
+                                        pad = (1, 1, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time,
+                                            font = FONT,
+                                            color = "#444",
+                                        ),
+                                    ),
+                                    render.Text(
+                                        # bright time
+                                        content = disp_time,
+                                        font = FONT,
+                                        color = "#AAA",
+                                    ),
+                                ],
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (0, CLOCK_PADDING, 0, 0),
+                            child = render.Stack(
+                                children = [
+                                    render.Padding(
+                                        pad = (3, 0, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time_blink,
+                                            font = FONT,
+                                            color = "#000",
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (1, 0, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time_blink,
+                                            font = FONT,
+                                            color = "#222",
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (0, 1, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time_blink,
+                                            font = FONT,
+                                            color = "#222",
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (1, 1, 0, 0),
+                                        child = render.Text(
+                                            content = disp_time_blink,
+                                            font = FONT,
+                                            color = "#444",
+                                        ),
+                                    ),
+                                    render.Text(
+                                        content = disp_time_blink,
+                                        font = FONT,
+                                        color = "#AAA",
+                                    ),
+                                ],
+                            ),
+                        ) if blink_time else None,
+                    ],
+                ) if time_format else None,
+            ],
+        ))) if is_square() else render.Row(
             expanded = True,
             main_align = "space_evenly",
             cross_align = "left",

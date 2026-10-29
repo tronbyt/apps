@@ -7,7 +7,7 @@ Author: Staghouse
 
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ONE_DAY_TTL = 60 * 10 * 24
@@ -15,6 +15,15 @@ ONE_MIN_TTL = 60
 APP_FONT = "tb-8"
 
 # Main application function
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Fetched card
     card = get_scryfall_card()
@@ -25,7 +34,23 @@ def main(config):
 
     if card == False:
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                padding = 1,
+                height = 28,
+                child = render.Column(
+                    children = [
+                        render.WrappedText(
+                            content = "MTG Discover",
+                        ),
+                        render_line_break(),
+                        render.WrappedText(
+                            color = "#999",
+                            content = "No cards found...",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 padding = 1,
                 height = 28,
                 child = render.Column(
@@ -48,7 +73,35 @@ def main(config):
         delay = 100,
         max_age = 30,
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Column(
+                    children = [
+                        render.Padding(
+                            pad = (1, 0, 1, 0),
+                            child = render.Marquee(
+                                width = 62,
+                                offset_start = 62,
+                                child = render_card_name_cost(card),
+                            ),
+                        ),
+                        render_line_break("#999", (1, 0, 1, 1)),
+                    ],
+                ),
+                render.Padding(
+                    pad = (1, 0, 1, 1),
+                    child = render.Marquee(
+                        height = 18,
+                        offset_start = 18,
+                        scroll_direction = "vertical",
+                        child = render.Column(
+                            children = render_details(card, show_rarity, show_prices) + [render_line_break()] + render_details(card, show_rarity, show_prices),
+                        ),
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Column(
                     children = [

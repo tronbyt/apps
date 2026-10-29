@@ -457,7 +457,7 @@ def call_schedule_api(route, stopid):
     # Sort by ETA
     return sorted(results, key = lambda x: x["eta_secs"])[:10]
 
-def get_schedule(route, stopid, show_relative_times, scale):
+def get_schedule(route, stopid, show_relative_times, scale, visible_rows):
     departures = call_schedule_api(route, stopid)
 
     # 1. Pre-process to find max width needed for the time column
@@ -533,7 +533,7 @@ def get_schedule(route, stopid, show_relative_times, scale):
 
         item = render.Box(
             height = row_height,
-            width = 64 * scale,
+            width = canvas.width(),
             color = background,
             child = render.Row(
                 children = [
@@ -554,7 +554,7 @@ def get_schedule(route, stopid, show_relative_times, scale):
                             font = row_font,
                             color = text,
                         ),
-                        width = 64 * scale - time_col_width,
+                        width = canvas.width() - time_col_width,
                         offset_start = 40 * scale,
                         offset_end = 40 * scale,
                     ),
@@ -564,23 +564,25 @@ def get_schedule(route, stopid, show_relative_times, scale):
         list_of_departures.append(item)
 
     row_height = 6 * scale
-    min_rows = 4
+
+    if len(list_of_departures) > visible_rows:
+        list_of_departures = list_of_departures[:visible_rows]
 
     if len(list_of_departures) < 1:
         msg = "No departures" if stopid else "Select a stop"
         list_of_departures = [render.Box(
             height = row_height,
-            width = 64 * scale,
+            width = canvas.width(),
             color = "#000",
             child = render.Text(msg, font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
 
-    # Pad with blank rows so the schedule always fills min_rows — otherwise
+    # Pad with blank rows so the schedule always fills visible_rows — otherwise
     # the accent bar below it rides up under a short departure list instead
     # of staying pinned to the bottom of the display.
-    for i in range(len(list_of_departures), min_rows):
+    for i in range(len(list_of_departures), visible_rows):
         background = "#222" if i % 2 == 1 else "#000"
-        list_of_departures.append(render.Box(height = row_height, width = 64 * scale, color = background))
+        list_of_departures.append(render.Box(height = row_height, width = canvas.width(), color = background))
 
     return list_of_departures
 
@@ -605,7 +607,6 @@ def main(config):
     stop = config.str("stop", DEFAULT_STOP)
     show_relative_times = config.bool("show_relative_times", False)
     user_text = config.str("banner", "")
-    schedule = get_schedule(route, stop, show_relative_times, scale)
     timezone = config.get("timezone") or "America/New_York"
     now = time.now().in_location(timezone)
     left_pad = 4 * scale
@@ -630,7 +631,14 @@ def main(config):
 
     banner_font = "tom-thumb" if scale == 1 else "terminus-14"
     banner_height = 6 if scale == 1 else 14
-    bottom_pad = 2 if scale == 1 else 2
+
+    # The schedule gets as many rows as fit between the banner and a 2px
+    # accent bar: four on 64x32 and 128x64, nine on a square panel. The bar
+    # takes up whatever is left over so it stays pinned to the bottom.
+    row_height = 6 * scale
+    visible_rows = max(1, (canvas.height() - banner_height - 2) // row_height)
+    bottom_pad = canvas.height() - banner_height - visible_rows * row_height
+    schedule = get_schedule(route, stop, show_relative_times, scale, visible_rows)
 
     if config.bool("show_time"):
         if int(now.format("15")) < 12:
@@ -649,7 +657,7 @@ def main(config):
                 render.Column(
                     children = [
                         render.Stack(children = [
-                            render.Box(height = banner_height, width = 64 * scale, color = route_bg_color),
+                            render.Box(height = banner_height, width = canvas.width(), color = route_bg_color),
                             render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = banner_font, color = route_text_color)),
                         ]),
                     ],

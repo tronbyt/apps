@@ -6,7 +6,7 @@ Author: Cline (Generated)
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Base URLs
@@ -97,13 +97,23 @@ def get_schema():
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     route_id = config.get("route_id", "12")
     stop_id = config.get("stop_id")
 
     if not stop_id:
         return render.Root(
-            child = render.Text("Please configure Stop ID"),
+            # On the square the message is wrapped and centred instead of clipped to one line; other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Please configure Stop ID", align = "center"))) if is_square() else render.Text("Please configure Stop ID"),
         )
 
     # --- Get Predictions (Both Directions) ---
@@ -228,7 +238,11 @@ def main(config):
 
     # Wrap final_layout in Padding for vertical centering
     return render.Root(
-        child = render.Padding(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
+            pad = (4, 0, 5, 0),  # T, R, B, L - Calculated for vertical centering
+            child = final_layout,
+        ))) if is_square() else render.Padding(
             pad = (4, 0, 5, 0),  # T, R, B, L - Calculated for vertical centering
             child = final_layout,
         ),

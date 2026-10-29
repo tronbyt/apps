@@ -6,7 +6,7 @@ Author: Sebastian Odell
 """
 
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -51,6 +51,8 @@ def main(config):
                     ),
                 ),
                 render.Box(
+                    # the rows under the date bar: 23 on 64x32, 55 on square
+                    height = canvas.height() - 9,
                     child = render.Row(
                         children = [
                             render.Marquee(

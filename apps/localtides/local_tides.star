@@ -9,9 +9,18 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     # Define constants
@@ -158,7 +167,72 @@ def main(config):
 
     # Render the plot
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Padding(
+                    pad = (0, TIME_ROW, 0, 0),
+                    child = render.Box(
+                        width = VIEWPORT_WIDTH,
+                        height = FONT_HEIGHT,
+                        child = render.WrappedText(
+                            content = humanize.time_format("K:mm aa", now.in_location(timezone)),
+                            font = TEXT_FONT,
+                            color = TIMECOLOR,
+                            align = "right",
+                            width = VIEWPORT_WIDTH,
+                        ),
+                    ),
+                ),
+                render.Padding(
+                    pad = (0, GRAPH_ROW, 0, 0),
+                    child = render.Box(
+                        width = VIEWPORT_WIDTH,
+                        height = AMPL,
+                        child = render.Plot(
+                            data = arr,
+                            width = VIEWPORT_WIDTH,
+                            height = AMPL,
+                            x_lim = (0, N_GRAPH_PTS - 1),
+                            y_lim = (0, AMPL),
+                            fill = True,
+                            color = LINECOLOR,
+                            fill_color = FILLCOLOR,
+                            fill_color_inverted = FILLCOLOR,
+                            chart_type = "line",
+                        ),
+                    ),
+                ),
+                render.Padding(
+                    pad = (0, HL1_ROW, 0, 0),
+                    child = render.Box(
+                        width = VIEWPORT_WIDTH,
+                        height = HL1_ROW_HEIGHT,
+                        child = render.WrappedText(
+                            content = hl_string1,
+                            font = TEXT_FONT,
+                            color = TIDECOLOR,
+                            align = "left",
+                            width = VIEWPORT_WIDTH,
+                        ),
+                    ),
+                ),
+                render.Padding(
+                    pad = (0, HL2_ROW, 0, 0),
+                    child = render.Box(
+                        width = VIEWPORT_WIDTH,
+                        height = HL2_ROW_HEIGHT,
+                        child = render.WrappedText(
+                            content = hl_string2,
+                            font = TEXT_FONT,
+                            color = TIDECOLOR,
+                            align = "right",
+                            width = VIEWPORT_WIDTH,
+                        ),
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Padding(
                     pad = (0, TIME_ROW, 0, 0),

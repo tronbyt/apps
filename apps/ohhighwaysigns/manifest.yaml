@@ -9,9 +9,10 @@ packageName: ohhighwaysigns
 recommendedInterval: 5
 broken: true
 brokenReason: 'publicapi.ohgo.com: no such host'
+supports64x64: true
 category: transit
 tags:
   - local
   - utility
 published: '2022-03-02T04:00:59Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T22:12:18Z'

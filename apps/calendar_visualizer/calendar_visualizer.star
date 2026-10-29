@@ -4,13 +4,13 @@ Summary: Spatial Calendar Visualizer
 Description: Displays a very dense visualization of events from a Google Calendar iCal URL.
 Author: Ctrl-G, Gemini
 Concept: Ctrl-G
-Version: 26.09.02.0001
+Version: 26.10.01.0001
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -47,7 +47,7 @@ def clean_line(line):
 
 # +---------
 # | get_day_of_week(t): - Gemini Version
-# |     Calculate and return the day of the week.
+# |     Calculate and return the day of the week.  Except it no workie.
 # +---------
 
 # def get_day_of_week(t):
@@ -218,16 +218,55 @@ def expand_recurring_event(evt, rrule_str, exdates, win_start, win_end, default_
         interval = rule["INTERVAL"]
 
         if freq == "DAILY":
-            curr = curr + days_to_duration(interval)
+            # Step in UTC to avoid DST day-boundary drift
+            utc_day = time.time(year = curr.year, month = curr.month, day = curr.day, location = "UTC")
+            next_utc = utc_day + days_to_duration(interval)
+            curr = time.time(
+                year = next_utc.year,
+                month = next_utc.month,
+                day = next_utc.day,
+                hour = dtstart.hour,
+                minute = dtstart.minute,
+                second = dtstart.second,
+                location = default_tz,
+            )
         elif freq == "WEEKLY":
-            curr = curr + days_to_duration(7 * interval)
+            # Step calendar days in UTC (where 1 day is strictly 24 hours)
+            # to prevent local DST offset shifts from jumping calendar dates
+            utc_day = time.time(year = curr.year, month = curr.month, day = curr.day, location = "UTC")
+            next_utc = utc_day + days_to_duration(7 * interval)
+            curr = time.time(
+                year = next_utc.year,
+                month = next_utc.month,
+                day = next_utc.day,
+                hour = dtstart.hour,
+                minute = dtstart.minute,
+                second = dtstart.second,
+                location = default_tz,
+            )
         elif freq == "MONTHLY":
             new_m = curr.month + interval
             new_y = curr.year + (new_m - 1) // 12
             new_m = ((new_m - 1) % 12) + 1
-            curr = time.time(year = new_y, month = new_m, day = curr.day, hour = curr.hour, minute = curr.minute, second = curr.second, location = default_tz)
+            curr = time.time(
+                year = new_y,
+                month = new_m,
+                day = curr.day,
+                hour = dtstart.hour,
+                minute = dtstart.minute,
+                second = dtstart.second,
+                location = default_tz,
+            )
         elif freq == "YEARLY":
-            curr = time.time(year = curr.year + interval, month = curr.month, day = curr.day, hour = curr.hour, minute = curr.minute, second = curr.second, location = default_tz)
+            curr = time.time(
+                year = curr.year + interval,
+                month = curr.month,
+                day = curr.day,
+                hour = dtstart.hour,
+                minute = dtstart.minute,
+                second = dtstart.second,
+                location = default_tz,
+            )
         else:
             break
 
@@ -372,10 +411,10 @@ def main(config):
     url = config.str("calendar_url", "")
     if not url:
         return render.Root(
-            render.Padding(
+            render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
                 pad = (1, 1, 1, 1),
                 child = render.WrappedText("Enter a Google Calendar iCal URL in settings.", font = "tom-thumb"),
-            ),
+            )),
         )
 
     ttl = int(config.str("ttl", "3600"))
@@ -529,14 +568,13 @@ def main(config):
         frames.append(frame_all)  # Frame with dot!
         frames.append(frame_background)  # Basically everything drawn (No dot).
 
+        # The graph is hand-placed for 64x32; bound it and centre it on taller panels (64x64).
         ret_val = render.Root(
             delay = 500,
-            child = render.Animation(
-                children = frames,
-            ),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames))),
         )
     else:
-        ret_val = render.Root(frame_all)
+        ret_val = render.Root(render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = frame_all)))
 
     return ret_val
 

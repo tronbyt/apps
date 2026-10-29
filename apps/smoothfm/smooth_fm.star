@@ -6,7 +6,7 @@ Author: M0ntyP
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -14,6 +14,15 @@ CACHE_TIMEOUT = 60
 
 NOWPLAYING_PREFIX_URL = "https://np.tritondigital.com/public/nowplaying?mountName="
 NOWPLAYING_SUFFIX_URL = "&numberToFetch=1&eventType=track&request.preventCache=1687472073814"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     StationSelection = config.get("station", "SMOOTH_ADELAIDE")
@@ -35,7 +44,11 @@ def main(config):
     return render.Root(
         delay = 100,
         show_full_animation = True,
+        # The six bands total 32 rows; on a square panel the column expands
+        # and spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly",
             children = [
                 render.Box(
                     width = 64,

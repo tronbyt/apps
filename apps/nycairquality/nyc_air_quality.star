@@ -13,7 +13,7 @@ load("images/clouds.png", CLOUDS_ASSET = "file")
 load("images/fire_icon.png", FIRE_ICON_ASSET = "file")
 load("images/happy_icon.png", HAPPY_ICON_ASSET = "file")
 load("images/sad_icon.png", SAD_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ANGRY_ICON = ANGRY_ICON_ASSET.readall()
@@ -114,10 +114,16 @@ def main(config):
             icon = render.Image(src = FIRE_ICON)
             color = "#FF0000"
             cloudcolor = rgb(110, 35, 35)
+
+        # The plot and its backdrop take whatever the panel has left once the
+        # PM2.5 row underneath has its 8 rows. On a 64x32 panel that is the
+        # original 24; on a square panel it is 56, which is where the hour to
+        # hour shape of the reading actually becomes visible.
+        plot_h = canvas.height() - 8
         plot = render.Plot(
             data = vals,
-            width = 64,
-            height = 24,
+            width = canvas.width(),
+            height = plot_h,
             color = "#f00",
             color_inverted = "#0f0",
             x_lim = (start, end),
@@ -126,8 +132,8 @@ def main(config):
         # Overlay plot on top of clouds and colored background
         plot = render.Stack(
             children = [
-                render.Box(color = cloudcolor, width = 64, height = 24),
-                render.Image(src = CLOUDS),
+                render.Box(color = cloudcolor, width = canvas.width(), height = plot_h),
+                render.Image(src = CLOUDS, width = canvas.width(), height = plot_h),
                 plot,
             ],
         )

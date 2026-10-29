@@ -9,7 +9,7 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/cal_icon.png", CAL_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
@@ -87,6 +87,15 @@ MSFT_EVENTFETCH_TOKEN_ENDPOINT = "https://login.microsoftonline.com/" + (MSFT_TE
 
 # Time formatting
 RFC3339_FORMAT = "2006-01-02T15:04:05Z07:00"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     # Determine whether to run in Next meeting or full day mode
@@ -250,7 +259,14 @@ def main(config):
         return render.Root(
             #    show_full_animation = True,
             delay = 100,
-            child = render.Marquee(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Marquee(
+                height = 32,
+                offset_start = 5,
+                offset_end = 1,
+                scroll_direction = "vertical",
+                child = calendar_banner,
+            ))) if is_square() else render.Marquee(
                 height = 32,
                 offset_start = 5,
                 offset_end = 1,
@@ -492,7 +508,46 @@ def get_outlook_event_list(start_window, end_window, auth_token, todays_date):
 
 def render_calendar(cal_date, cal_meeting_txt, cal_meeting_time):
     return render.Root(
-        child = render.Stack(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
+            children = [
+                render.Image(src = CAL_ICON),
+                render.Column(
+                    expanded = True,
+                    cross_align = "center",
+                    children = [
+                        render.Text("", font = "tom-thumb"),
+                        render.Padding(
+                            pad = (2, 0, 0, 0),
+                            child = render.Row(
+                                main_align = "center",
+                                expanded = True,
+                                children = [
+                                    render.Text(cal_date),
+                                ],
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (0, 3, 0, 0),
+                            child = render.Column(
+                                cross_align = "center",
+                                children = [
+                                    render.Marquee(
+                                        width = 64,
+                                        align = "center",
+                                        child = render.Text(cal_meeting_txt, color = Yellow),
+                                    ),
+                                    render.Padding(
+                                        pad = (0, 1, 0, 0),
+                                        child = render.Text(cal_meeting_time, color = Green, font = "CG-pixel-3x5-mono"),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Stack(
             children = [
                 render.Image(src = CAL_ICON),
                 render.Column(

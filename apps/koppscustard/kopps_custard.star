@@ -8,7 +8,7 @@ Author: Josiah Winslow
 load("http.star", "http")
 load("images/kopps_icon.webp", KOPPS_ICON_ASSET = "file")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 KOPPS_ICON = KOPPS_ICON_ASSET.readall()
@@ -101,7 +101,23 @@ def render_failure(text):
         # speed. But it also changes the speed of everything else.
         # Therefore, the obvious solution is to include nothing else.
         delay = ERROR_DELAY,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            cross_align = "center",
+            children = [
+                render.Box(
+                    height = HEIGHT - KOPPS_ICON_HEIGHT,
+                    child = render.Marquee(
+                        width = WIDTH,
+                        offset_start = WIDTH,
+                        offset_end = WIDTH,
+                        align = "center",
+                        child = render.Text(color = "#f00", content = text),
+                    ),
+                ),
+                render.Image(src = KOPPS_ICON),
+            ],
+        ))) if is_square() else render.Column(
             cross_align = "center",
             children = [
                 render.Box(
@@ -118,6 +134,15 @@ def render_failure(text):
             ],
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     # Get the current month name
@@ -213,5 +238,6 @@ def main():
 
     return render.Root(
         delay = DELAY,
-        child = render.Animation(children = frames),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames)))) if is_square() else render.Animation(children = frames),
     )

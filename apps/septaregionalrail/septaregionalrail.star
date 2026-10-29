@@ -459,22 +459,21 @@ def parse_status_delay(status):
                 return mins
     return None
 
-def get_schedule(direction, station, scale, enabled_lines):
+def get_schedule(direction, station, scale, enabled_lines, visible_rows):
     schedule = call_schedule_api(direction, station)
 
     # Only keep trains on a line the rider has enabled. A line name we don't
     # recognize (a gap in our list, or SEPTA adding a new one) fails open
     # rather than silently hiding real service.
     schedule = [i for i in schedule if enabled_lines.get(i.get("line"), True)]
-    schedule = schedule[:4]
+    schedule = schedule[:visible_rows]
 
     list_of_departures = []
 
     row_font = "tom-thumb" if scale == 1 else "terminus-12"
     row_height = 6 * scale
     time_width = 25 * scale
-    text_width = 39 * scale
-    min_rows = 4
+    text_width = canvas.width() - time_width
 
     for i in schedule:
         parsed_departure = time.parse_time(i["sched_time"], "2006-01-02 15:04:05.000", "America/New_York").format("3:04")
@@ -508,7 +507,7 @@ def get_schedule(direction, station, scale, enabled_lines):
 
         item = render.Box(
             height = row_height,
-            width = 64 * scale,
+            width = canvas.width(),
             color = background,
             child = render.Row(
                 cross_align = "right",
@@ -539,17 +538,17 @@ def get_schedule(direction, station, scale, enabled_lines):
     if len(list_of_departures) < 1:
         list_of_departures = [render.Box(
             height = row_height,
-            width = 64 * scale,
+            width = canvas.width(),
             color = "#000",
             child = render.Text("No departures", font = "tom-thumb" if scale == 1 else "tb-8"),
         )]
 
-    # Pad with blank rows so the schedule always fills min_rows — otherwise
+    # Pad with blank rows so the schedule always fills visible_rows — otherwise
     # the accent bar below it rides up under a short departure list instead
     # of staying pinned to the bottom of the display.
-    for i in range(len(list_of_departures), min_rows):
+    for i in range(len(list_of_departures), visible_rows):
         background = "#222" if i % 2 == 1 else "#000"
-        list_of_departures.append(render.Box(height = row_height, width = 64 * scale, color = background))
+        list_of_departures.append(render.Box(height = row_height, width = canvas.width(), color = background))
 
     return list_of_departures
 
@@ -559,7 +558,6 @@ def main(config):
     direction = config.str("direction", DEFAULT_DIRECTION)
     user_text = config.str("banner", "")
     enabled_lines = enabled_lines_from_config(config)
-    schedule = get_schedule(direction, station, scale, enabled_lines)
     left_pad = 1 * scale
 
     if config.bool("use_custom_banner_color"):
@@ -579,7 +577,14 @@ def main(config):
 
     banner_font = "tom-thumb" if scale == 1 else "terminus-14"
     banner_height = 6 if scale == 1 else 14
-    bottom_pad = 2 if scale == 1 else 2
+
+    # The schedule gets as many rows as fit between the banner and a 2px
+    # accent bar: four on 64x32 and 128x64, nine on a square panel. The bar
+    # takes up whatever is left over so it stays pinned to the bottom.
+    row_height = 6 * scale
+    visible_rows = (canvas.height() - banner_height - 2) // row_height
+    bottom_pad = canvas.height() - banner_height - visible_rows * row_height
+    schedule = get_schedule(direction, station, scale, enabled_lines, visible_rows)
 
     return render.Root(
         delay = 100,
@@ -589,7 +594,7 @@ def main(config):
                 render.Column(
                     children = [
                         render.Stack(children = [
-                            render.Box(height = banner_height, width = 64 * scale, color = banner_bg_color),
+                            render.Box(height = banner_height, width = canvas.width(), color = banner_bg_color),
                             render.Padding(pad = (left_pad, 0, 0, 0), child = render.Text(banner_text, font = banner_font, color = banner_text_color)),
                         ]),
                     ],

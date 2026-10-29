@@ -15,7 +15,7 @@ load("animation.star", "animation")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 COLOR_TITLE = "#ffa500"
@@ -50,6 +50,10 @@ INDEX_MAP = {
 }
 
 CUSTOM_OPTION = "__custom__"
+
+# The chart takes the rows under the two header lines: 20 on a 64x32 panel,
+# 52 on a square one.
+CHART_HEIGHT = canvas.height() - 12
 
 def main(config):
     IndexSelection = config.get("Index", "%5Eaxjo")
@@ -149,7 +153,7 @@ def print_chart(INDEX_JSON, TotalTicks, LastClose, Interval):
             render.Plot(
                 data = Data,
                 width = ChartWidth,
-                height = 20,
+                height = CHART_HEIGHT,
                 color = COLOR_GREEN,
                 color_inverted = COLOR_RED,
                 fill = True,
@@ -157,7 +161,7 @@ def print_chart(INDEX_JSON, TotalTicks, LastClose, Interval):
             animation.Transformation(
                 child = render.Box(
                     width = 64,
-                    height = 20,
+                    height = CHART_HEIGHT,
                     color = "#000",
                 ),
                 duration = 1500,

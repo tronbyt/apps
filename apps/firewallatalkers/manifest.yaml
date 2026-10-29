@@ -3,11 +3,12 @@ id: firewalla-talkers
 name: Firewalla Top Talkers
 summary: Top bandwidth consumers
 desc: Displays top bandwidth-consuming devices on your Firewalla network. Supports toggling between the last hour and the last 24 hours to spot active hogs or daily heavy hitters.
-author: brombomb
+author: Brombomb
 fileName: firewalla_talkers.star
 packageName: firewallatalkers
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: smart-home
 tags:
   - smart-home
@@ -15,4 +16,4 @@ tags:
   - tracking
   - utility
 published: '2026-09-07T02:41:21Z'
-updated: '2026-09-07T03:29:21Z'
+updated: '2026-10-17T18:55:37Z'

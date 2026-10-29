@@ -12,7 +12,7 @@ load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Root url for the Moby Games API
@@ -156,7 +156,54 @@ def render_output(title, moby_score, description, first_platform_name, first_pla
     # Construct the output
     # That should be a row with two columns, where the left column is the thumbnail image, and the right column is the game title
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render.Column(
+                    children = [image_content],
+                ),
+                render.Column(
+                    children = [
+                        # Inside of a colored box, display the title and moby score in a marquee, like so: "Title (7.8)"
+                        render.Box(
+                            width = 40,
+                            height = 8,
+                            color = "#540007",
+                            child = render.Marquee(
+                                width = 40,
+                                child = render.Text(
+                                    font = "tb-8",
+                                    content = title + " (" + moby_score + ")",
+                                ),
+                            ),
+                        ),
+                        # Display the description in a vertical scrolling marquee
+                        render.Marquee(
+                            height = 19,
+                            scroll_direction = "vertical",
+                            child = render.WrappedText(
+                                font = "CG-pixel-4x5-mono",
+                                width = 40,
+                                content = description,
+                            ),
+                        ),
+                        # Inside of a colored box, display the first platform and release date in a scrolling marquee, like so: "Platform (YYYY-MM-DD)"
+                        render.Box(
+                            width = 40,
+                            height = 5,
+                            color = "#540007",
+                            child = render.Marquee(
+                                width = 40,
+                                child = render.Text(
+                                    font = "CG-pixel-4x5-mono",
+                                    content = first_platform_name + " " + first_platform_release_date,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render.Column(
                     children = [image_content],
@@ -208,6 +255,15 @@ def render_output(title, moby_score, description, first_platform_name, first_pla
 ### -------------------------------------------------- ###
 ###                  Main Applet Logic                 ###
 ### -------------------------------------------------- ###
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     """Main function, invoked by the Pixlet runtime
 

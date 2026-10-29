@@ -28,6 +28,8 @@ def main(config):
 
     return render.Root(
         render.Column(
+            expanded = True,
+            main_align = "center",
             cross_align = "center",
             children = [
                 render.Text(" ACCIDENT FREE", color = "#fff", font = "tb-8"),

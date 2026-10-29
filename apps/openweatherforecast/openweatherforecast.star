@@ -14,7 +14,7 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 OW_GEO_URL = "https://api.openweathermap.org/geo/1.0/zip"
@@ -168,13 +168,28 @@ def render_day_col(day):
 def error_display(msg):
     """Return a scrolling error marquee."""
     return render.Root(
-        child = render.Marquee(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Marquee(
+            width = 64,
+            child = render.Text(msg),
+            offset_start = 32,
+            offset_end = 32,
+        ))) if is_square() else render.Marquee(
             width = 64,
             child = render.Text(msg),
             offset_start = 32,
             offset_end = 32,
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     api_key = config.get("openweather_api_key", "")
@@ -196,7 +211,17 @@ def main(config):
         return error_display("Forecast unavailable")
 
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            expanded = True,
+            main_align = "space_evenly",
+            cross_align = "start",
+            children = [
+                render_day_col(daily[0]),
+                render_day_col(daily[1]),
+                render_day_col(daily[2]),
+            ],
+        ))) if is_square() else render.Row(
             expanded = True,
             main_align = "space_evenly",
             cross_align = "start",

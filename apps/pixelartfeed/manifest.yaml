@@ -8,6 +8,7 @@ fileName: pixel_art_feed.star
 packageName: pixelartfeed
 recommendedInterval: 30
 supports2x: true
+supports64x64: true
 category: art
 tags:
   - art
@@ -15,4 +16,4 @@ tags:
   - reddit
   - wide 2x support
 published: '2026-08-19T17:23:38Z'
-updated: '2026-09-03T04:51:56Z'
+updated: '2026-10-01T15:26:52Z'

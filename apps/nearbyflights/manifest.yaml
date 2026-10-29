@@ -7,6 +7,7 @@ author: Jolars721
 fileName: nearbyflights.star
 packageName: nearbyflights
 recommendedInterval: 90
+supports64x64: true
 category: travel
 tags:
   - flights
@@ -15,4 +16,4 @@ tags:
   - travel
   - radar
 published: '2026-06-25T00:00:00Z'
-updated: '2026-06-26T14:25:51Z'
+updated: '2026-10-01T18:38:43Z'

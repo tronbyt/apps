@@ -33,7 +33,7 @@ load("images/waxing_crescent.webp", WAXING_CRESCENT_ICON_ASSET = "file")
 load("images/waxing_gibbous.webp", WAXING_GIBBOUS_ICON_ASSET = "file")
 load("math.star", "math")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -91,8 +91,9 @@ MSIGNS = {
 
 def render_error(code):
     # Render error messages
+    # Centre the block on taller panels (64x64).
     return render.Root(
-        render.Column(
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             main_align = "center",
             cross_align = "center",
             children = [
@@ -113,7 +114,7 @@ def render_error(code):
                     align = "center",
                 ),
             ],
-        ),
+        )),
     )
 
 def main(config):
@@ -256,8 +257,9 @@ def main(config):
 
     return render.Root(
         delay = scroll_speed,
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
         show_full_animation = True,
-        child = render.Row(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Row(
             children = [
                 render.Column(
                     expanded = True,
@@ -296,7 +298,7 @@ def main(config):
                     offset_end = -32,
                 ),
             ],
-        ),
+        ))),
     )
 
 def edit_horoscope(horoscope):

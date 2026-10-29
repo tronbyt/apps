@@ -3,12 +3,13 @@ id: audiobookshelf
 name: Audiobookshelf
 summary: Audiobookshelf now playing
 desc: Track currently playing audiobooks and podcasts from your Audiobookshelf server.
-author: brombomb
+author: Brombomb
 fileName: audiobookshelf.star
 packageName: audiobookshelf
 supports2x: true
+supports64x64: true
 recommendedInterval: 1
-category: media
+category: entertainment
 tags:
   - tech
   - tracking
@@ -16,4 +17,4 @@ tags:
   - audio
   - wide 2x support
 published: '2026-09-14T02:49:52Z'
-updated: '2026-09-25T22:05:48Z'
+updated: '2026-10-17T19:08:49Z'

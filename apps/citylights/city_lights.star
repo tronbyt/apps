@@ -12,11 +12,22 @@ load("render.star", "canvas", "render")
 HEIGHT = canvas.height()
 WIDTH = canvas.width()
 IS_2X = canvas.is2x()
-BUILDINGS = 8
+
+# The skyline was written against a 64x32 panel: eight buildings on an 8px
+# pitch filling 64px, standing on row 31. Everything below is that same
+# cityscape expressed against the canvas, so a 64x64 panel gets a taller
+# skyline standing on its own floor instead of one hanging at the midline,
+# and a 128x64 panel gets a city across the full width instead of a quarter
+# of one in the corner.
+BUILDING_PITCH = 8
+BUILDINGS = WIDTH // BUILDING_PITCH
 BUILDING_MAX_W = 8
 BUILDING_MIN_W = 2
-BUILDING_MAX_H = 18
-BUILDING_MIN_H = 6
+BUILDING_MAX_H = HEIGHT * 18 // 32
+BUILDING_MIN_H = HEIGHT * 6 // 32
+
+# The sky: stars are scattered above the tallest roof a building can reach.
+STAR_MAX_Y = HEIGHT * 23 // 32
 WINDOW_COLOR_ON = "#E8E337"
 WINDOW_COLOR_OFF = "#222222"
 LIGHT_COLOR_ON = "#FF0000"
@@ -38,8 +49,8 @@ def gen_buildings(frame):
     tallestBuilding = 0
 
     for b in range(BUILDINGS):
-        buildings[b][BUILDING_X] = b * 8
-        buildings[b][BUILDING_Y] = 31
+        buildings[b][BUILDING_X] = b * BUILDING_PITCH
+        buildings[b][BUILDING_Y] = HEIGHT - 1
         buildings[b][BUILDING_H] = random.number(BUILDING_MIN_H, BUILDING_MAX_H)
         buildings[b][BUILDING_W] = random.number(BUILDING_MIN_W, BUILDING_MAX_W)
         buildings[b][BUILDING_WINDOWS] = buildings[b][BUILDING_W] * buildings[b][BUILDING_H]
@@ -70,8 +81,8 @@ def set_tallest_building(building, frame):
         for y in range(building[BUILDING_H]):
             window_y = building[BUILDING_Y] - y
             window_x = building[BUILDING_X] + building[BUILDING_W] - 1
-            if window_x > 63:
-                window_x = 63
+            if window_x > WIDTH - 1:
+                window_x = WIDTH - 1
             frame[window_y][window_x] = WINDOW_COLOR_OFF
         building[BUILDING_WINDOWS] = building[BUILDING_W] * building[BUILDING_H]
 
@@ -81,8 +92,8 @@ def set_tallest_building(building, frame):
 
 def stars(frame):
     for _ in range(random.number(3, 5)):
-        star_x = random.number(0, 63)
-        star_y = random.number(0, 23)
+        star_x = random.number(0, WIDTH - 1)
+        star_y = random.number(0, STAR_MAX_Y)
 
         if not_star_collision(frame, star_y, star_x):
             frame[star_y][star_x] = STAR_COLOR
@@ -93,7 +104,7 @@ def not_star_collision(frame, star_y, star_x):
     if star_x - 1 >= 0:
         no_collision = no_collision and not_color_collision(frame[star_y][star_x - 1])
 
-    if star_x + 1 < 64:
+    if star_x + 1 < WIDTH:
         no_collision = no_collision and not_color_collision(frame[star_y][star_x + 1])
 
     return no_collision
@@ -108,8 +119,8 @@ def update_view(frame, buildings, light_counter):
         window_col = window - (window_row * buildings[b][BUILDING_W])
         window_x = buildings[b][BUILDING_X] + window_col
         window_y = buildings[b][BUILDING_Y] - window_row
-        if window_x > 63:
-            window_x = 63
+        if window_x > WIDTH - 1:
+            window_x = WIDTH - 1
         frame[window_y][window_x] = WINDOW_COLOR_ON
         if (buildings[b][IS_TALLEST]) and (light_counter % 6 == 0):
             update_tallest(buildings[b], frame)

@@ -7,9 +7,10 @@ author: Doug Ewell
 fileName: maya_calendar.star
 packageName: mayacalendar
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - productivity
   - maya
 published: '2023-06-28T04:21:19Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T21:48:48Z'

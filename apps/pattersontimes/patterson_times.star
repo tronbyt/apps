@@ -7,7 +7,7 @@ Author: Aiden Mitchell
 
 load("http.star", "http")
 load("images/expo_icon.png", EXPO_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 EXPO_ICON = EXPO_ICON_ASSET.readall()
@@ -93,7 +93,11 @@ def render_train_times():
     kg_pwu_relative_times = [format_time_difference(diff) for diff in away_from_waterfront_diff]
 
     return render.Root(
+        # Two direction blocks totalling ~32 rows; on a square panel the
+        # column expands and spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             children = [
                 # First row for "Waterfront"
                 render.Row(
@@ -130,6 +134,15 @@ def render_train_times():
             ],
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     return render_train_times()

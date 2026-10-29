@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: pip install PyYAML
 
+      - name: Determine metadata targets
+        id: targets
+        if: github.event.before != '0000000000000000000000000000000000000000'
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: ./.github/scripts/determine-metadata-targets.sh
+
       - name: Update manifest metadata
         id: update
         run: |
@@ -31,14 +39,11 @@ jobs:
           if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
             echo "Initial push or new branch, checking all apps..."
             python3 .github/scripts/update_manifests.py
-          else
+          elif [[ -n "${{ steps.targets.outputs.targets }}" ]]; then
             echo "Performing incremental update for push..."
-            TARGETS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/' | cut -d'/' -f1-2 | sort -u || true)
-            if [ -n "$TARGETS" ]; then
-              python3 .github/scripts/update_manifests.py $TARGETS
-            else
-              echo "No apps modified in this push."
-            fi
+            python3 .github/scripts/update_manifests.py ${{ steps.targets.outputs.targets }}
+          else
+            echo "No apps with non-manifest changes in this push."
           fi
 
       - name: Commit and push changes

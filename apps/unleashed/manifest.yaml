@@ -5,9 +5,10 @@ summary: Unleashed Firmware
 desc: Displays Flipper Zero Unleashed release date.
 author: W00tock
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tech
   - utility
 published: '2024-09-25T14:44:43Z'
-updated: '2025-12-04T09:38:27Z'
+updated: '2026-10-01T19:49:38Z'

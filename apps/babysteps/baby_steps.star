@@ -6,7 +6,7 @@ Author: Robert Ison
 """
 
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 steps = {
@@ -82,6 +82,15 @@ def get_progress_bar(step):
             box_list,
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     """ main
 
@@ -98,8 +107,13 @@ def main(config):
     display_text = steps[current_step]["info"]
     if (current_step < 7):
         display_text = display_text + " Next Step: " + steps[(current_step + 1)]["name"]
+
+    # The rows total ~32; on a square panel the column expands and spreads
+    # them down the panel.
     return render.Root(
         render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             children = [
                 render.Text(content = steps[current_step]["step"], color = steps[current_step]["color"], font = "tb-8"),
                 render.Marquee(width = 64, child = render.Text(content = steps[current_step]["name"], color = "#ffff00", font = "tb-8")),

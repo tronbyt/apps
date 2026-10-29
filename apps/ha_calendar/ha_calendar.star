@@ -116,6 +116,10 @@ def render_events(events, header_color, scale):
 
     return rows
 
+def is_square():
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     scale = 2 if canvas.is2x() else 1
     today = time.now().in_location("America/New_York")
@@ -175,15 +179,34 @@ def main(config):
         )
 
     date_font = "tb-8" if scale == 1 else "terminus-18"
+    date_row = render.Padding(
+        child = render.Text(content = today.format("Mon, Jan 02"), font = date_font),
+        pad = (1 * scale, 0, 0, 0),
+    )
+
+    if is_square():
+        # A square panel has room to list the events together, scrolling
+        # them only when they don't all fit under the date.
+        return render.Root(
+            delay = 100,
+            show_full_animation = True,
+            child = render.Column(
+                children = [
+                    date_row,
+                    render.Marquee(
+                        height = canvas.height() - 8,
+                        scroll_direction = "vertical",
+                        child = render.Column(children = rows),
+                    ),
+                ],
+            ),
+        )
 
     return render.Root(
         delay = delay,
         child = render.Column(
             children = [
-                render.Padding(
-                    child = render.Text(content = today.format("Mon, Jan 02"), font = date_font),
-                    pad = (1 * scale, 0, 0, 0),
-                ),
+                date_row,
                 render.Animation(
                     children = rows,
                 ),

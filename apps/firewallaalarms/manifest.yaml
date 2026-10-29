@@ -3,11 +3,12 @@ id: firewalla-alarms
 name: Firewalla Security
 summary: Firewalla security & alarms
 desc: Displays real-time security status and active alarms for your Firewalla network. Features an alert ticker when threats occur and an all-clear shield status when secure.
-author: brombomb
+author: Brombomb
 fileName: firewalla_alarms.star
 packageName: firewallaalarms
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: smart-home
 tags:
   - smart-home
@@ -16,4 +17,4 @@ tags:
   - real-time
   - utility
 published: '2026-09-07T02:59:42Z'
-updated: '2026-09-07T03:29:21Z'
+updated: '2026-10-17T18:55:37Z'

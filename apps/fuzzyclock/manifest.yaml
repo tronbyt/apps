@@ -8,6 +8,7 @@ fileName: fuzzy_clock.star
 packageName: fuzzyclock
 recommendedInterval: 1
 supports2x: true
+supports64x64: true
 category: clocks
 tags:
   - time
@@ -15,4 +16,4 @@ tags:
   - retro
   - wide 2x support
 published: '2022-01-05T00:39:46Z'
-updated: '2025-12-21T10:08:54Z'
+updated: '2026-10-01T21:08:18Z'

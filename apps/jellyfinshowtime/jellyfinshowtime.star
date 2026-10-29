@@ -236,12 +236,12 @@ def get_text(server_url, api_key, endpoint_map, debug_output, fit_screen, filter
         ]
     elif show_only_artwork:
         if fit_screen:
-            rendered_image = render.Image(height = 32 * scale, src = img_data)
+            rendered_image = render.Image(height = canvas.height(), src = img_data)
         else:
             rendered_image = render.Image(width = 64 * scale, src = img_data)
         marquee_text_array = []
     else:
-        rendered_image = render.Image(height = 25 * scale, src = img_data)
+        rendered_image = render.Image(height = canvas.height() - 7 * scale, src = img_data)
         marquee_text_array = [
             {"type": "heading", "message": header_text, "color": heading_color},
             {"type": "body", "message": body_text, "color": font_color},
@@ -288,7 +288,7 @@ def render_marquee(show_only_artwork, message_array, image, show_summary, using_
                     render.Padding(
                         pad = (1 * scale, 0, 0, 0),
                         child = render.Marquee(
-                            height = 32 * scale,
+                            height = canvas.height(),
                             scroll_direction = "vertical",
                             width = 41 * scale,
                             child = render.Column(children = text_array),
@@ -311,7 +311,9 @@ def render_marquee(show_only_artwork, message_array, image, show_summary, using_
                             ],
                         ),
                     ),
-                    render.Box(width = 64 * scale, height = 25 * scale, child = image),
+                    # The artwork takes all the height under the heading, so a
+                    # square panel shows more of the poster.
+                    render.Box(width = 64 * scale, height = canvas.height() - 7 * scale, child = image),
                 ],
             ),
         )

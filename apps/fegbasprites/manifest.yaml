@@ -7,10 +7,11 @@ author: ClocktimusTime
 recommendedInterval: 5
 fileName: fe_gba_sprites.star
 packageName: fegbasprites
+supports64x64: true
 category: entertainment
 tags:
   - gaming
   - retro
   - media
 published: '2025-03-04T16:41:50Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T21:00:02Z'
