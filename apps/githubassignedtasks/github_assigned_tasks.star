@@ -6,6 +6,7 @@ Author: Tavis
 """
 
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("images/github_image.png", GITHUB_IMAGE_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
@@ -19,12 +20,83 @@ def github_headers(access_token):
         "X-GitHub-Api-Version": "2022-11-28",
     }
 
-def fetch_assigned_issues(access_token, state):
+def fetch_user_login(access_token):
+    response = http.get(
+        "https://api.github.com/user",
+        headers = github_headers(access_token),
+        ttl_seconds = 3600,
+    )
+    if response.status_code != 200:
+        return ""
+
+    login = response.json().get("login", "")
+    if login == None:
+        return ""
+
+    return login
+
+def repo_scope_error(repo_scope, repo_filter, user_login):
+    repo_filter = (repo_filter or "").strip()
+    if repo_scope == "single" and repo_filter == "":
+        return "Set repository."
+
+    if repo_scope == "org" and repo_filter == "":
+        return "Set organization."
+
+    if repo_scope == "mine" and user_login == "":
+        return "Could not load user."
+
+    return ""
+
+def build_issue_query(state, repo_scope, repo_filter, user_login):
+    err = repo_scope_error(repo_scope, repo_filter, user_login)
+    if err != "":
+        return None
+
+    query = "assignee:@me is:{} is:issue".format(state)
+    repo_filter = (repo_filter or "").strip()
+
+    if repo_scope == "single":
+        query = query + " repo:" + repo_filter
+    elif repo_scope == "org":
+        query = query + " org:" + repo_filter
+    elif repo_scope == "mine":
+        query = query + " user:" + user_login
+
+    return query
+
+def fetch_assigned_issues(access_token, query):
+    if query == None:
+        return None
+
     return http.get(
-        "https://api.github.com/search/issues?q=assignee:@me+is:{}+is:issue".format(state),
+        "https://api.github.com/search/issues?q=" + humanize.url_encode(query),
         headers = github_headers(access_token),
         ttl_seconds = 60,
     )
+
+def repo_filter_fields(repo_scope):
+    if repo_scope == "org":
+        return [
+            schema.Text(
+                id = "repo_filter",
+                name = "Organization",
+                desc = "GitHub organization login (e.g. tronbyt).",
+                icon = "building",
+            ),
+        ]
+
+    if repo_scope == "single":
+        return [
+            schema.Text(
+                id = "repo_filter",
+                name = "Repository",
+                desc = "Repository as owner/name (e.g. tronbyt/apps).",
+                icon = "github",
+            ),
+        ]
+
+    return []
 
 def get_count(response):
     body = response.json()
@@ -151,18 +223,34 @@ def main(config):
     if task_label == "":
         task_label = "Assigned Tasks"
 
-    if access_token:
-        open_response = fetch_assigned_issues(access_token, "open")
+    repo_scope = config.get("repo_scope", "all")
+    if repo_scope not in ("all", "mine", "org", "single"):
+        repo_scope = "all"
 
-        if open_response.status_code != 200:
+    repo_filter = config.get("repo_filter", "")
+
+    if access_token:
+        user_login = ""
+        if repo_scope == "mine":
+            user_login = fetch_user_login(access_token)
+
+        scope_err = repo_scope_error(repo_scope, repo_filter, user_login)
+        if scope_err != "":
+            return render_error(scope_err, text_color)
+
+        open_query = build_issue_query("open", repo_scope, repo_filter, user_login)
+        open_response = fetch_assigned_issues(access_token, open_query)
+
+        if open_response == None or open_response.status_code != 200:
             return render_error("Error with Access Token.", text_color)
 
         open_count = get_count(open_response)
         closed_count = 0
 
         if display_mode in ("both", "closed"):
-            closed_response = fetch_assigned_issues(access_token, "closed")
-            if closed_response.status_code != 200:
+            closed_query = build_issue_query("closed", repo_scope, repo_filter, user_login)
+            closed_response = fetch_assigned_issues(access_token, closed_query)
+            if closed_response == None or closed_response.status_code != 200:
                 return render_error("Error with Access Token.", text_color)
 
             closed_count = get_count(closed_response)
@@ -193,6 +281,24 @@ def get_schema():
                 desc = "Personal Access token (repo scope for private issues)",
                 icon = "lock",
                 secret = True,
+            ),
+            schema.Dropdown(
+                id = "repo_scope",
+                name = "Repository scope",
+                desc = "Which repositories to include in assigned issue counts.",
+                icon = "github",
+                default = "all",
+                options = [
+                    schema.Option(display = "All repositories", value = "all"),
+                    schema.Option(display = "Only repositories I own", value = "mine"),
+                    schema.Option(display = "An organization", value = "org"),
+                    schema.Option(display = "Single repository", value = "single"),
+                ],
+            ),
+            schema.Generated(
+                id = "repo_filter_generated",
+                source = "repo_scope",
+                handler = repo_filter_fields,
             ),
             schema.Text(
                 id = "min_tasks",
