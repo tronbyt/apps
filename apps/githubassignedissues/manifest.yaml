@@ -3,7 +3,7 @@ id: github-assigned-issues
 name: GitHub Assigned Issues
 summary: GitHub assigned issue count
 desc: Displays open GitHub issues assigned to you, optionally with closed counts as open - closed.
-author: Tavis
+author: tavdog
 fileName: github_assigned_issues.star
 packageName: githubassignedissues
 recommendedInterval: 5
