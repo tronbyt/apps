@@ -35,6 +35,8 @@ SPARKLE_STEPS = 10
 SPARKLE_DOTS = 5
 SPARKLE_COLOR = "#fff"
 
+FONT_TITLE = "terminus-12" if IS_2X else "tom-thumb"
+FONT_TITLE_HEIGHT = 12 if IS_2X else 6
 FONT_TICKER = "terminus-16" if IS_2X else "tb-8"
 FONT_TICKER_HEIGHT = 16 if IS_2X else 8
 TITLE_COLOR = "#fd0"
@@ -155,48 +157,60 @@ def tower_areas():
     return areas
 
 def render_horizontally(day, frames, pattern):
-    """Tower on the left; beside it the title in gold and a ticker underneath.
+    """Title in gold across the top, concentric color boxes centered in the
+    middle and the description as a ticker along the bottom.
 
-    The title scrolls up only when it is taller than its space. The ticker
-    carries the description, or the title when there is none or the
-    description won't scroll through within the dwell.
+    Both lines scroll only when wider than the panel. A description that won't
+    scroll through within the dwell is cut off; the title is already shown.
     """
-    text_width = WIDTH - TOWER_WIDTH - WS
-    ticker_height = FONT_TICKER_HEIGHT
-    title_height = HEIGHT - ticker_height - VS
-    texts = [t for t in [day.get("description"), day.get("title")] if t] or [""]
-    ticker = fitted_marquee(
-        [render.Marquee(width = text_width, child = render.Text(content = t, font = FONT_TICKER)) for t in texts],
-        frame_budget(DELAY_HORIZONTAL),
-    )
+    title = day.get("title") or ""
+    description = day.get("description") or ""
+    rows = [render.Marquee(
+        width = WIDTH,
+        align = "center",
+        child = render.Text(content = title, font = FONT_TITLE, color = TITLE_COLOR),
+    )]
+    box_height = HEIGHT - FONT_TITLE_HEIGHT - 2 * VS
+    if description:
+        box_height -= FONT_TICKER_HEIGHT
+    rows.append(animated(
+        lambda colors: nested_boxes(colors, WIDTH, box_height),
+        frames,
+        pattern,
+        DELAY_HORIZONTAL,
+        [(0, 0, WIDTH, box_height)],
+    ))
+    if description:
+        rows.append(render.Marquee(
+            width = WIDTH,
+            child = render.Text(content = description, font = FONT_TICKER),
+        ))
     return render.Root(
         delay = DELAY_HORIZONTAL,
-        child = render.Row(
-            children = [
-                animated(tower, frames, pattern, DELAY_HORIZONTAL, tower_areas()),
-                render.Padding(
-                    pad = (WS, 0, 0, 0),
-                    child = render.Column(
-                        expanded = True,
-                        main_align = "space_between",
-                        children = [
-                            render.Marquee(
-                                height = title_height,
-                                scroll_direction = "vertical",
-                                child = render.WrappedText(
-                                    content = day.get("title") or "",
-                                    width = text_width,
-                                    font = FONT_VERTICAL,
-                                    color = TITLE_COLOR,
-                                ),
-                            ),
-                            ticker,
-                        ],
-                    ),
-                ),
-            ],
+        child = render.Column(
+            expanded = True,
+            main_align = "space_between",
+            cross_align = "center",
+            children = rows,
         ),
     )
+
+def nested_boxes(colors, width, height):
+    """Concentric boxes, the first color outermost."""
+    n = len(colors)
+    child = render.Box(
+        width = width - (n - 1) * (width // n),
+        height = height - (n - 1) * (height // n),
+        color = colors[n - 1],
+    )
+    for i in range(n - 2, -1, -1):
+        child = render.Box(
+            width = width - i * (width // n),
+            height = height - i * (height // n),
+            color = colors[i],
+            child = child,
+        )
+    return child
 
 def render_vertically(day, frames, pattern):
     text_width = WIDTH - TOWER_WIDTH - WS
