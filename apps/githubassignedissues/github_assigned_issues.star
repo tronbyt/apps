@@ -1,5 +1,5 @@
 """
-Applet: GitHub Assigned Tasks
+Applet: GitHub Assigned Issues
 Summary: GitHub assigned issue count
 Description: Displays the count of open GitHub issues assigned to you.
 Author: Tavis
