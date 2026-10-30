@@ -5,16 +5,12 @@ Description: View the flights tracked by a radar on Flightradar24.
 Author: kinson
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/plane.png", PLANE_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
-PLANE_ICON = base64.decode(
-    """
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAAXNSR0IArs4c6QAAANpJREFUKFNtkL9OwnAUhb9bIcRBFxYDhFljqgODkOCOYaPtAxBYbHwDZh/BMuID0DD4EjAQhzKxAombu4Fekh9/bANn/O495yRHwFIkBuUo2w+J+i5oAu6vkn940UK9SxQ4/w4E2x+ixMwCL8FBAL1/GyEKYe/JgHO6KxTZoDvDox8y7NVwxz8scjcQZxhX1iauOt1FqLXht1lC8nZDy88dvgOP+WoJYhGLoKpcnKkyDUluv36B/IEI0UfrxJIydN8/mayuzNMscNJJh5UODdnLa27bA4PTi6VLtlDpQKfUrwVNAAAAAElFTkSuQmCC
-""",
-)
+PLANE_ICON = PLANE_ICON_ASSET.readall()
 
 API_URL = "https://data-cloud.flightradar24.com/zones/fcgi/feed.js?radar="
 
@@ -43,19 +39,21 @@ def get_data(url, radar_code):
 
     return flight_strings
 
-def render_flight_info_screen(info, radar, show_radar):
-    flight_number = info[16] or "?"
+def render_flight_info_screen(flight, radar, show_radar):
+    origin = flight.get("origin", "???")
+    destination = flight.get("destination", "???")
+    model = flight.get("model", "???")
+    registration = flight.get("registration", "???")
+    speed = str(flight.get("speed", 0))
+    alt = str(flight.get("altitude", 0))
+    callsign = flight.get("callsign", "???")
 
-    origin = info[11] or "?"
-    destination = info[12] or "?"
-
-    model = info[8] or "?"
-    registration = info[9] or "?"
-
-    speed = str(int(info[5])) or "?"
-    alt = str(int(info[4])) or "?"
-
-    callsign_row = [render.Text(content = flight_number, font = "CG-pixel-3x5-mono")]
+    callsign_row = [
+        render.Padding(
+            pad = (0, 1, 0, 1),
+            child = render.Text(content = callsign, font = "tom-thumb", color = "#E00"),
+        ),
+    ]
 
     if show_radar:
         callsign_row.append(

@@ -5,11 +5,17 @@ Description: Shows the poll rankings for various sports. Currently supports coll
 Author: Derek Holevinsky
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/basketball_icon.png", BASKETBALL_ICON_ASSET = "file")
+load("images/basketball_wnba_icon.png", BASKETBALL_WNBA_ICON_ASSET = "file")
+load("images/football_icon.png", FOOTBALL_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+BASKETBALL_ICON = BASKETBALL_ICON_ASSET.readall()
+BASKETBALL_WNBA_ICON = BASKETBALL_WNBA_ICON_ASSET.readall()
+FOOTBALL_ICON = FOOTBALL_ICON_ASSET.readall()
 
 # URLs
 BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/"
@@ -41,24 +47,6 @@ TEAMS_PER_PAGE = 5
 CACHE_TTL = 21600
 
 # Icons
-FOOTBALL_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAARCAYAAAAG/yacAAAAAXNSR0IArs4c6QAAAINJREFUOE9j
-ZCADMGLTU+yk8R8m3rvvBoYaDAFkDbg0omj6//8/3AZ0FzAyMsLVomjCZgs22+Ca8GlA14hVU8/e
-63DXlThrwtmwQAFrwmYLSCOyBmTbsGrCZRNII8g28m1CdyJRfsLlL/S4QgkImCTJ8QTSSFaKwOVM
-9ERLnVROTPYCAOrPSxJCgxQqAAAAAElFTkSuQmCC
-""")
-
-BASKETBALL_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAFpJREFUKFNj
-ZEACf2qk/4O4LC1PGf7USINlWFqeMsKUwBkwheiKkTWAFYMUopmGbDKYDbKBEZuJMI3IBoAMJU0x
-AwMD2FPEANJMJsnNJIUGzK1EhzO6BlwxCACkcWVThHunDwAAAABJRU5ErkJggg==
-""")
-
-BASKETBALL_WNBA_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAGNJREFUKFOV
-kVEKACEIRB3oFl21z67aLYJZlDVE2CX7muQ5TgYJZ49Ovba5hDQpAODIEQ5mODYYTJJqsEc3k+Rs
-9TYXoOAZ8zY4HA1sQgnWFPGRf7rmXI1xvw3PeL3n3PD1gw9ZgGVTAA6gQAAAAABJRU5ErkJggg==
-""")
 
 def main(config):
     sport = config.get(RANKINGS_SPORT_ID, FOOTBAL_KEY)

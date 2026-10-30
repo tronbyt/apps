@@ -1,0 +1,13 @@
+---
+id: vinylroulette
+name: Vinyl Roulette
+summary: Random vinyl from Discogs
+desc: Display a random vinyl from your Discogs collection on your Tidbyt device!
+author: kaffolder7
+supports2x: true
+category: entertainment
+tags:
+  - music
+  - wide 2x support
+published: '2026-02-12T18:27:35Z'
+updated: '2026-02-17T05:16:47Z'

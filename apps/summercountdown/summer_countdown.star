@@ -5,8 +5,19 @@ Description: Shows a countdown to the start or end of astronomical summer in you
 Author: Andrew Knotts
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/days_to_autumn.png", DAYS_TO_AUTUMN_ASSET = "file")
+load("images/days_to_summer.png", DAYS_TO_SUMMER_ASSET = "file")
+load("images/flower_stage_0.png", FLOWER_STAGE_0_ASSET = "file")
+load("images/flower_stage_1.png", FLOWER_STAGE_1_ASSET = "file")
+load("images/flower_stage_2.png", FLOWER_STAGE_2_ASSET = "file")
+load("images/flower_stage_3.png", FLOWER_STAGE_3_ASSET = "file")
+load("images/flower_stage_4.png", FLOWER_STAGE_4_ASSET = "file")
+load("images/flower_stage_5.png", FLOWER_STAGE_5_ASSET = "file")
+load("images/flower_stage_6.png", FLOWER_STAGE_6_ASSET = "file")
+load("images/flower_stage_7.png", FLOWER_STAGE_7_ASSET = "file")
+load("images/flower_stage_8.png", FLOWER_STAGE_8_ASSET = "file")
+load("images/flower_stage_9.png", FLOWER_STAGE_9_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -37,19 +48,19 @@ FPS = 6
 FRAME_COUNT = int(DURATION_MS / 1000 * FPS)
 
 # Images
-PNG_DAYS_TO_AUTUMN = "iVBORw0KGgoAAAANSUhEUgAAADIAAAAgCAYAAABQISshAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA+ElEQVRYw+1X2w7DIAgV0i/bhy/Zh3VnLzMhBvFSx7qO81K1YMXDrSkFAoHAXwMC2rqcy6cmY+1Zk11qSOuw1rMcW/vKMZ+RVSKiUR3+5mEBIB86z2fdZfOMnV4mpIGnY4TeOGKoOyP5UCO3ml2rR29ENhA4GoNWsMksUvqjXKsFas2XNV3N11tyco2tjAEAuMMls2ktzXTW0qyVrPXk/09nklqNad423Wj3LpotNrT3fJVg/1lDSla2lW2CV092CUaIiBLmsta5XOoBSik9SxKGC542t5rFlm7Pd7SCWMqylw+vZrmsJTyjNPJLOqIr/xajewwE1uIFzaoomS4ColwAAAAASUVORK5CYII="
-PNG_DAYS_TO_SUMMER = "iVBORw0KGgoAAAANSUhEUgAAADIAAAAgCAYAAABQISshAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA8ElEQVRYw+1XQQ7EIAisxP9/2b0sCTEMFa1WU+ZiNaNFGRCvKxAIBD6NIqCNy75sNY61JuI+upE7Y622/rbWld+0o1dTSsk7h940tpRS2Gju98olr4ydVk/IDW7nkfTHyEaXe4SN8pwqS6tlnocbCIzGIAo4qT1Nj3IM6bWXY8UEynSEssbU639CYsnWiXvzueSjg2jhWP/UVLFtiTJ8j9Qlw6wbfIZsCUlqtNhDB9HCKRVangmEFj0l2NnujIq23uJtVRlfc0iT0wn1C5SWZ/KbskPpN1uPGs0zKzZxZ4e86Vn+ZJE9GeiE53Ag8GX8AO7oQ80Ko6ugAAAAAElFTkSuQmCC"
+PNG_DAYS_TO_AUTUMN = DAYS_TO_AUTUMN_ASSET.readall()
+PNG_DAYS_TO_SUMMER = DAYS_TO_SUMMER_ASSET.readall()
 FLOWER_STAGES_PNG = [
-    "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",
+    FLOWER_STAGE_0_ASSET.readall(),
+    FLOWER_STAGE_1_ASSET.readall(),
+    FLOWER_STAGE_2_ASSET.readall(),
+    FLOWER_STAGE_3_ASSET.readall(),
+    FLOWER_STAGE_4_ASSET.readall(),
+    FLOWER_STAGE_5_ASSET.readall(),
+    FLOWER_STAGE_6_ASSET.readall(),
+    FLOWER_STAGE_7_ASSET.readall(),
+    FLOWER_STAGE_8_ASSET.readall(),
+    FLOWER_STAGE_9_ASSET.readall(),
 ]
 
 # Reuse render.Box for efficiency gains
@@ -277,9 +288,7 @@ def draw_sunflower(flower):
         render.Padding(
             pad = (flower["col"] - 3, flower["roots_row"] - flower["stem_length"] - 4, 0, 0),
             child = render.Image(
-                src = base64.decode(
-                    FLOWER_STAGES_PNG[int(flower["bloom_stage"])],
-                ),
+                src = FLOWER_STAGES_PNG[int(flower["bloom_stage"])],
             ),
         ),
     )
@@ -331,17 +340,12 @@ def ripen_random_seeds(width, seeds_widget_list, ripen_percent):
 def render_all_frames(frame_count, config):
     frames = []
 
-    hemisphere = config.get("hemisphere", None)
-    if hemisphere != None:
-        # Handle legacy config option
-        timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    timezone = location["timezone"]
+    if float(location["lat"]) < 0:
+        hemisphere = "southern"
     else:
-        location = json.decode(config.get("location", DEFAULT_LOCATION))
-        timezone = location["timezone"]
-        if float(location["lat"]) < 0:
-            hemisphere = "southern"
-        else:
-            hemisphere = "northern"
+        hemisphere = "northern"
     time_now = time.now().in_location(timezone)
 
     # Calculate days until summer and autumn
@@ -446,7 +450,7 @@ def render_all_frames(frame_count, config):
                     ),
                     render.Padding(
                         pad = msg_pad,
-                        child = render.Image(src = base64.decode(countdown_png)),
+                        child = render.Image(src = countdown_png),
                     ),
                 ]),
             )

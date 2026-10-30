@@ -8,10 +8,13 @@ Author: Mantle Rev Ops
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/mantle_logo.png", MANTLE_LOGO_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 load("time.star", "time")
+
+MANTLE_LOGO = MANTLE_LOGO_ASSET.readall()
 
 MANTLE_HOST = "https://app.heymantle.com"
 
@@ -98,8 +101,6 @@ DATE_RANGES = [
         "interval": "month",
     },
 ]
-
-MANTLE_LOGO = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAADzUExURf/Ie//Hef/Iev/Hef/Hef/Hef/Hef/Hef/Hef/Hef/Hef/Hef7Hef7GeP7Gef3GeP/Jes2hZG1XOmtWOcCXXtGkZW9ZO2pVObyUXP/Ke7GMWBoYFhUTFGFONfjCdnpiQBYUFJV3TLKNWB4aGCskHc6iZOKxbTkvIxkXFhoXFpd4TR0aGCwlHiAcGYRpRJ18Ty0mHhsYF1pJMlRELzMqITwxJUI3KGdTOBcWFWhUOKiFVB4bGJJ0SoJnQxYVFWRRNum3cEs9LN6ua4FmQxIRE5Z3TMieYnJbPLSOWdSmZsygY8KZX3NcPbaPWv/Iev3FeP///3xR0csAAAALdFJOUwAABUem4voXke6vMi/hnwAAAAFiS0dEUONuTLwAAAAHdElNRQfnCBIRNyS8FdjtAAAAvElEQVQY02WPRxaCQBBEZ8jQKGMWMWAEA+accw73v40zLFxI7eq/111VCGHM8YIoSaLAcxgj6mVFBV+qIlOCZQ1+0mSMOAX0UJi5sKGDwiFeJZFoLE5IIplKE5VHApgZK5vLQ8G2iyYISASzVLYq1Zrj1hsmiEiioNny2h2vy4Dkg15/MByNJ1MfsBNrNl+4y5Xtn7Cn68125+wPxxN7SmPPl6t+u+uP54vF0mIGECAE3vBhxQLVA+P+538B3McUE/Dc/ekAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDgtMThUMTc6NTU6MzYrMDA6MDBSrTDKAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTA4LTE4VDE3OjU1OjM2KzAwOjAwI/CIdgAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wOC0xOFQxNzo1NTozNiswMDowMHTlqakAAAAASUVORK5CYII="
 
 def pad_left(in_str, width, character = "0"):
     out_str = in_str
@@ -339,7 +340,77 @@ def render_metric(config, metric, access_token, app_id, current_start_date, comp
         )
 
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            main_align = "space_between",
+            children = [
+                render.Box(
+                    height = 6,
+                    child = render.Row(
+                        expanded = True,
+                        children = [
+                            render.Marquee(
+                                width = 64,
+                                offset_start = 0,
+                                offset_end = 64,
+                                child = render.Row(
+                                    children = marquee_content,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+                render.Box(
+                    padding = 1,
+                    height = 8,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = main_align,
+                        children = metric_content,
+                    ),
+                ),
+                render.Stack(
+                    children = [
+                        render.Plot(
+                            data = current_period_data,
+                            width = 64,
+                            height = 18,
+                            color = COLOR_PRIMARY,
+                            fill_color = COLOR_PRIMARY,
+                            x_lim = (0, max_x),
+                            y_lim = (min_value, max_value + (max_value - min_value) * 0),
+                            fill = True,
+                        ),
+                        render.Padding(
+                            pad = (0, 2, 0, 0),
+                            child = render.Plot(
+                                data = current_period_data,
+                                width = 64,
+                                height = 18,
+                                color = COLOR_BLACK,
+                                fill_color = COLOR_BLACK,
+                                x_lim = (0, max_x),
+                                y_lim = (min_value, max_value + (max_value - min_value) * 0),
+                                fill = True,
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (0, 3, 0, 0),
+                            child = render.Plot(
+                                data = current_period_data,
+                                width = 64,
+                                height = 18,
+                                color = COLOR_SECONDARY,
+                                fill_color = COLOR_SECONDARY,
+                                x_lim = (0, max_x),
+                                y_lim = (min_value, max_value + (max_value - min_value) * 0),
+                                fill = True,
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Column(
             main_align = "space_between",
             children = [
                 render.Box(
@@ -424,7 +495,7 @@ def render_digest(config, access_token, app_id, current_start_date, compare_prev
         print("[digest] app")
         print(app)
         if app.get("faviconData"):
-            logo = app["faviconData"]
+            logo = base64.decode(app["faviconData"])
         else:
             logo = MANTLE_LOGO
 
@@ -560,7 +631,8 @@ def render_digest(config, access_token, app_id, current_start_date, compare_prev
         marquee_content += marquee_label
 
     return render.Root(
-        render.Column(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             expanded = True,
             main_align = "space_evenly",
             children = [
@@ -582,7 +654,80 @@ def render_digest(config, access_token, app_id, current_start_date, compare_prev
                     cross_align = "center",
                     children = [
                         render.Image(
-                            src = base64.decode(logo),
+                            src = logo,
+                            width = 16,
+                            height = 16,
+                        ),
+                        render.Column(
+                            expanded = True,
+                            main_align = "space_evenly",
+                            cross_align = "start",
+                            children = [
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    content = "USR",
+                                    color = COLOR_PRIMARY,
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    content = "MRR",
+                                    color = COLOR_PRIMARY,
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    content = "REV",
+                                    color = COLOR_PRIMARY,
+                                ),
+                            ],
+                        ),
+                        render.Column(
+                            expanded = True,
+                            main_align = "space_evenly",
+                            cross_align = "start",
+                            children = [
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    content = active_installs_text,
+                                    color = COLOR_PRIMARY,
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    content = mrr_text,
+                                    color = COLOR_PRIMARY,
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    content = revenue_text,
+                                    color = COLOR_PRIMARY,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        )))) if is_square() else render.Column(
+            expanded = True,
+            main_align = "space_evenly",
+            children = [
+                render.Box(
+                    height = 6,
+                    child =
+                        render.Marquee(
+                            width = 64,
+                            offset_start = 0,
+                            offset_end = 64,
+                            child = render.Row(
+                                children = marquee_content,
+                            ),
+                        ),
+                ),
+                render.Row(
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                    children = [
+                        render.Image(
+                            src = logo,
                             width = 16,
                             height = 16,
                         ),
@@ -636,6 +781,15 @@ def render_digest(config, access_token, app_id, current_start_date, compare_prev
         ),
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     access_token = config.str("auth")
     app_id = config.str("app")
@@ -643,7 +797,8 @@ def main(config):
     compare_previous_period = config.bool("compare_previous_period", True)
     if not access_token or not app_id:
         return render.Root(
-            child = render.Column(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 children = [
                     render.Box(
                         height = 2,
@@ -654,7 +809,39 @@ def main(config):
                         main_align = "space_around",
                         children = [
                             render.Image(
-                                src = base64.decode(MANTLE_LOGO),
+                                src = MANTLE_LOGO,
+                                width = 16,
+                                height = 16,
+                            ),
+                        ],
+                    ),
+                    render.Box(
+                        height = 5,
+                        width = 1,
+                    ),
+                    render.Row(
+                        expanded = True,
+                        main_align = "space_around",
+                        children = [
+                            render.Text(
+                                content = "Connect account",
+                                font = "tom-thumb",
+                            ),
+                        ],
+                    ),
+                ],
+            ))) if is_square() else render.Column(
+                children = [
+                    render.Box(
+                        height = 2,
+                        width = 1,
+                    ),
+                    render.Row(
+                        expanded = True,
+                        main_align = "space_around",
+                        children = [
+                            render.Image(
+                                src = MANTLE_LOGO,
                                 width = 16,
                                 height = 16,
                             ),

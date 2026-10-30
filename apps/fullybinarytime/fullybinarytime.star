@@ -7,7 +7,7 @@ Author: dinosaursrarr
 
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -139,14 +139,15 @@ def main(config):
     # Determine timezone based on location
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Use special timezone variable.
+    timezone = loc.get("timezone", time.tz())  # Use special timezone variable.
 
     # The smallest bit shown corresponds to a period of ~1.3 seconds, so we should update
     # the screen while the app is showing.
     return render.Root(
         max_age = 120,
         delay = REFRESH_MILLISECONDS,
-        child = make_animation(timezone),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = make_animation(timezone))),
     )
 
 def get_schema():

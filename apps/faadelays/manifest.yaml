@@ -6,4 +6,12 @@ desc: Displays FAA ground stop and delay programs for specified airports.
 author: Matt Broussard
 fileName: faa_delays.star
 packageName: faadelays
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - air-traffic
+  - utility
+  - real-time
+published: '2023-07-31T14:56:08Z'
+updated: '2026-10-01T18:58:08Z'

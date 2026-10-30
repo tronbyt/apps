@@ -6,4 +6,14 @@ desc: Displays multiple HomeAssistant entities (e.g. step counts).
 author: James Woglom
 fileName: hassentitylist.star
 packageName: hassentitylist
-recommended_interval: 5
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: smart-home
+tags:
+  - smart-home
+  - lifestyle
+  - utility
+  - wide 2x support
+published: '2024-01-11T19:01:48Z'
+updated: '2026-10-01T21:23:34Z'

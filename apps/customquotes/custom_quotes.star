@@ -5,9 +5,9 @@ Description: Display quotes from a Google sheet with a quote and author column
 Author: vipulchhajer
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/black_background.png", BLACK_BACKGROUND_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -71,12 +71,13 @@ def main(config):
         if (author != ""):
             author = "-" + author
 
-    image = base64.decode(get_image())
+    image = get_image()
 
     return render.Root(
         show_full_animation = True,
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
         delay = 200,
-        child = render.Stack(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Image(src = image, height = OUTER_HEIGHT, width = OUTER_WIDTH),
                 render.Padding(
@@ -116,13 +117,13 @@ def main(config):
                     ),
                 ),
             ],
-        ),
+        ))),
     )
 
 # Define function to get random image
 def get_image():
     # Return a minimal black background image (1x1 pixel)
-    return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNgAAAAAgABSK+kcQAAAABJRU5ErkJggg=="
+    return BLACK_BACKGROUND_ASSET.readall()
 
 def get_schema():
     return schema.Schema(
@@ -139,6 +140,7 @@ def get_schema():
                 name = "Google Sheets API Key",
                 desc = "Google how to get API Key if you're not familiar",
                 icon = "code",
+                secret = True,
             ),
         ],
     )

@@ -6,4 +6,10 @@ desc: Displays a random image from slackmojis.com!
 author: btjones
 fileName: random_slackmoji.star
 packageName: randomslackmoji
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - art
+published: '2022-04-04T15:40:33Z'
+updated: '2026-10-17T19:08:49Z'

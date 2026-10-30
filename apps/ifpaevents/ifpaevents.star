@@ -7,13 +7,8 @@ Author: coreyhulse
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
-
-API_KEY = """
-AV6+xWcExdMNUN6PYH+JotIsNKvKdvxNA5Efhe5DxwEfoTUjlS3lCzN/EwbIcxY2FmhuIBuf9d0oM8OFv54WMnQFWd50vQ6wT3kXCuGYwxCcicp2jtRvz7k3WeSnDlsVC5cOLDCTYEg6nU+/acQQvUwfsXC3Qd77EKrDAFi67BclFQTyyBA=
-"""
 
 CACHE_TIME_IN_SECONDS = 3600
 DEFAULT_MAX_DISTANCE = 50
@@ -28,12 +23,21 @@ DEFAULT_LOCATION = json.encode({
     "timezone": "America/New_York",
 })
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location_cfg = config.str("location", DEFAULT_LOCATION)
     location = json.decode(location_cfg)
     max_distance = config.str("max_distance", DEFAULT_MAX_DISTANCE)
 
-    apiKey = secret.decrypt(API_KEY) or config.get("dev_api_key")
+    apiKey = config.get("ifpa_api_key")
 
     upcoming_events_url = "https://api.ifpapinball.com/v2/calendar/search?latitude=%s&longitude=%s&distance=%s&distance_type=Miles&api_key=%s" % (location["lat"], location["lng"], max_distance, apiKey)
     upcoming_events_data = http.get(upcoming_events_url, ttl_seconds = CACHE_TIME_IN_SECONDS)
@@ -80,7 +84,25 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    children = [
+                        render.Text("IFPA", font = "tom-thumb", color = "#ff0"),
+                        render.Text(" %s " % location["locality"], font = "tom-thumb", color = "#c50"),
+                    ],
+                    main_align = "center",
+                    expanded = True,
+                ),
+                render.Column(
+                    children = upcoming_events,
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     children = [
@@ -115,6 +137,13 @@ def get_schema():
                 name = "Location",
                 desc = "Monitor new machines from this location",
                 icon = "locationDot",
+            ),
+            schema.Text(
+                id = "ifpa_api_key",
+                name = "IFPA API Key",
+                desc = "An IFPA API key to access the IFPA API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

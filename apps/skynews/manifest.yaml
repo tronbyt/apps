@@ -6,4 +6,10 @@ desc: The current top story (and a short blurb) from SkyNews.com.
 author: meejle
 fileName: skynews.star
 packageName: skynews
-recommended_interval: 10
+recommendedInterval: 10
+supports64x64: true
+category: news
+tags:
+  - news
+published: '2023-02-01T21:51:25Z'
+updated: '2026-10-01T17:39:02Z'

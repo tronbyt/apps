@@ -6,4 +6,11 @@ desc: Get the latest headlines from the Electronic Frontier Foundation.
 author: hainish
 fileName: effheadlines.star
 packageName: effheadlines
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - news
+  - tech
+published: '2022-09-15T19:24:42Z'
+updated: '2026-10-01T19:34:09Z'

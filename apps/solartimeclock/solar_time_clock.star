@@ -5,12 +5,14 @@ Description: A clock that shows the current solar time and (optionally) the loca
 Author: Daniel Sitnik
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/sun_icon.png", SUN_ICON_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+SUN_ICON = SUN_ICON_ASSET.readall()
 
 DEFAULT_24H_FORMAT = False
 DEFAULT_BLINK_TIME = True
@@ -26,11 +28,16 @@ DEFAULT_LOCATION = """
 }
 """
 
-SUN_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAH5JREFUKFNjZMABPlzO+S+gO4URmzRWQZAGTk5lhu/f7zJg0wjXhM9kkG3I8hg2gSTRnYRuG4ommLOQNbEpFzB8vJKL4kywJpjV2DSB5GF+g6ljhClkVymEs9GdB9P0807/fxCbPJuQTSXkPJhaykKPoniChSZRKQI9xPDZDAANlGs8ZqpPTQAAAABJRU5ErkJggg==
-""")
-
 DEBUG = False
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """Main app method.
@@ -104,11 +111,14 @@ def main(config):
 
     return render.Root(
         delay = 500,
+        # Sized to the panel, and on a square panel the column expands so
+        # space_evenly spreads the title and times down it instead of
+        # stacking them in the top half.
         child = render.Box(
-            height = 32,
-            width = 64,
+            height = canvas.height(),
+            width = canvas.width(),
             child = render.Column(
-                expanded = False,
+                expanded = is_square(),
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [

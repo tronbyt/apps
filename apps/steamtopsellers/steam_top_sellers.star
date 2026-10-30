@@ -180,7 +180,7 @@ def get_image_widget(image):
             animation.Keyframe(
                 percentage = 0.0,
                 transforms = [
-                    animation.Scale(.5, .5),
+                    animation.Scale(0.5, 0.5),
                     animation.Translate(random_translate_x, random_translate_y),
                 ],
                 curve = "ease_in_out",

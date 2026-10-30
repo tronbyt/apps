@@ -6,4 +6,12 @@ desc: Select the states you have been to and show them off on your Tidbyt!
 author: sloanesturz
 fileName: states_visited.star
 packageName: statesvisited
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - utility
+  - science
+  - local
+  - smart-home
+published: '2022-11-10T14:40:52Z'
+updated: '2026-10-14T07:52:20Z'

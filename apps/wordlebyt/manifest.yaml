@@ -6,4 +6,13 @@ desc: After playing Wordle on your phone, click Share>Copy text. In the Tidbyt a
 author: skola28
 fileName: wordlebyt.star
 packageName: wordlebyt
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - gaming
+  - utility
+  - art
+  - sports
+published: '2022-07-19T14:38:57Z'
+updated: '2026-10-17T18:55:05Z'

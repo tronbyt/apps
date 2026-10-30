@@ -6,4 +6,11 @@ desc: Track the progress of an event and its segments using sgement nodes and a 
 author: Mike Toscano
 fileName: eventprogress.star
 packageName: eventprogress
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tracking
+  - utility
+published: '2023-07-10T13:46:11Z'
+updated: '2026-10-01T18:58:08Z'

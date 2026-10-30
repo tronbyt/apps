@@ -30,12 +30,29 @@ Author: Henry So, Jr.
 
 # See comments in the code for further attribution
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/am.png", AM_ASSET = "file")
+load("images/char_0.png", CHAR_0_ASSET = "file")
+load("images/char_1.png", CHAR_1_ASSET = "file")
+load("images/char_2.png", CHAR_2_ASSET = "file")
+load("images/char_3.png", CHAR_3_ASSET = "file")
+load("images/char_4.png", CHAR_4_ASSET = "file")
+load("images/char_5.png", CHAR_5_ASSET = "file")
+load("images/char_6.png", CHAR_6_ASSET = "file")
+load("images/char_7.png", CHAR_7_ASSET = "file")
+load("images/char_8.png", CHAR_8_ASSET = "file")
+load("images/char_9.png", CHAR_9_ASSET = "file")
+load("images/colon.png", COLON_ASSET = "file")
+load("images/map.png", MAP_ASSET = "file")
+load("images/pixel.png", PIXEL_ASSET = "file")
+load("images/pm.png", PM_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+MAP = MAP_ASSET.readall()
+PIXEL = PIXEL_ASSET.readall()
 
 WIDTH = 64
 HALF_W = WIDTH // 2
@@ -46,8 +63,25 @@ HALF_HDIV = HDIV / 2
 COEF = 360 / 365.24
 DATE_H = 7
 
+# Square-panel pan: the world is drawn at PAN_SCALE and advances PAN_STEP
+# pixels every PAN_DELAY ms, so one full wrap takes about ten seconds. The
+# time's colon blinks every PAN_BLINK frames, roughly once a second.
+PAN_SCALE = 2
+PAN_STEP = 2
+PAN_DELAY = 150
+PAN_BLINK = 7
+
 CHAR_W = 9
 SEP_W = 3
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = config.get("location")
@@ -60,7 +94,7 @@ def main(config):
 
     tz = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
 
     tm = config.get("force_time")
@@ -90,52 +124,154 @@ def main(config):
     )
 
     night_above, sunrise = sunrise_plot(tm)
-    return render.Root(
-        delay = 1000,
-        child = render.Stack([
-            render.Padding(
-                pad = (map_offset, 0, 0, 0),
-                child = render.Image(MAP),
+
+    # The map is a fixed 64x32 asset and the terminator is plotted against
+    # it, so on a square panel it keeps its size and sits in the middle, and
+    # the time and date -- overlaid on the map on a classic panel because
+    # there is nowhere else for them -- move into the rows above and below.
+    map_layers = [
+        render.Padding(
+            pad = (map_offset, 0, 0, 0),
+            child = render.Image(MAP),
+        ),
+        render.Padding(
+            pad = (
+                map_offset + (-WIDTH if map_offset > 0 else WIDTH),
+                0,
+                0,
+                0,
             ),
+            child = render.Image(MAP),
+        ) if map_offset != 0 else None,
+        render.Row([
             render.Padding(
-                pad = (
-                    map_offset + (-WIDTH if map_offset > 0 else WIDTH),
-                    0,
-                    0,
-                    0,
+                pad = (0, y if night_above else 0, 0, 0),
+                child = render.Image(
+                    src = PIXEL,
+                    width = 1,
+                    height = HEIGHT - y if night_above else y,
                 ),
-                child = render.Image(MAP),
-            ) if map_offset != 0 else None,
+            )
+            for i in range(WIDTH)
+            for y in [sunrise[(i - map_offset) % WIDTH]]
+        ]),
+    ]
+    time_row = render.Row(
+        main_align = "center",
+        expanded = True,
+        children = [
+            render.Animation([
+                render_time(tm, time_format[0]),
+                render_time(tm, time_format[1]) if blink_time else None,
+            ]),
+            render.Padding(
+                pad = (1, 9, 0, 0),
+                child = render.Image(AM_PM[tm.hour < 12]),
+            ) if time_format[2] else None,
+        ],
+    ) if time_format else None
+    date_stack = render.Stack([
+        render.Padding(
+            pad = (-1, 1, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (2, 1, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (0, 0, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (0, 2, 0, 0),
+            child = date_shadow,
+        ),
+        render.Padding(
+            pad = (0, 1, 0, 0),
+            child = render.Row(
+                main_align = "center",
+                expanded = True,
+                children = [
+                    render.Text(
+                        content = formatted_date,
+                        font = "tom-thumb",
+                        color = "#ff0",
+                    ),
+                ],
+            ),
+        ),
+    ]) if show_date else None
+
+    if is_square():
+        # Twice the rows means the map can be drawn at twice the size: a
+        # 128x64 world that no longer fits across the panel, so it pans left
+        # to right and wraps at the date line. The terminator is plotted at
+        # the same scale, and the time and date sit over the map as they do
+        # on a classic panel, time along the top, date along the bottom.
+        s = PAN_SCALE
+        world_w = WIDTH * s
+        world = render.Stack([
+            render.Image(MAP, width = world_w, height = HEIGHT * s),
             render.Row([
                 render.Padding(
-                    pad = (0, y if night_above else 0, 0, 0),
+                    pad = (0, y * s if night_above else 0, 0, 0),
                     child = render.Image(
                         src = PIXEL,
-                        width = 1,
-                        height = HEIGHT - y if night_above else y,
+                        width = s,
+                        height = (HEIGHT - y) * s if night_above else y * s,
                     ),
                 )
                 for i in range(WIDTH)
-                for y in [sunrise[(i - map_offset) % WIDTH]]
+                for y in [sunrise[i]]
             ]),
+        ])
+
+        def time_overlay(k):
+            fmt = time_format[1] if blink_time and (k // PAN_BLINK) % 2 else time_format[0]
+            return render.Padding(
+                pad = (0, 2, 0, 0),
+                child = render.Row(
+                    main_align = "center",
+                    expanded = True,
+                    children = [
+                        render_time(tm, fmt),
+                        render.Padding(
+                            pad = (1, 9, 0, 0),
+                            child = render.Image(AM_PM[tm.hour < 12]),
+                        ) if time_format[2] else None,
+                    ],
+                ),
+            )
+
+        frames = []
+        for k in range(0, world_w, PAN_STEP):
+            # Where the left edge of the world is this frame, kept in
+            # [0, world_w) so the second copy behind it always fills the gap.
+            left = (map_offset * s - k) % world_w
+            frames.append(render.Stack([
+                render.Padding(pad = (left - world_w, 0, 0, 0), child = world),
+                render.Padding(pad = (left, 0, 0, 0), child = world),
+                time_overlay(k) if time_format else None,
+                render.Padding(
+                    pad = (0, HEIGHT * s - DATE_H, 0, 0),
+                    child = date_stack,
+                ) if show_date else None,
+            ]))
+
+        return render.Root(
+            delay = PAN_DELAY,
+            child = render.Animation(frames),
+        )
+
+    return render.Root(
+        delay = 1000,
+        child = render.Stack(map_layers + [
             render.Column(
                 main_align = "center",
                 expanded = True,
                 children = [
-                    render.Row(
-                        main_align = "center",
-                        expanded = True,
-                        children = [
-                            render.Animation([
-                                render_time(tm, time_format[0]),
-                                render_time(tm, time_format[1]) if blink_time else None,
-                            ]),
-                            render.Padding(
-                                pad = (1, 9, 0, 0),
-                                child = render.Image(AM_PM[tm.hour < 12]),
-                            ) if time_format[2] else None,
-                        ],
-                    ),
+                    time_row,
                     render.Box(
                         width = WIDTH,
                         height = 3,
@@ -144,38 +280,7 @@ def main(config):
             ) if time_format else None,
             render.Padding(
                 pad = (0, HEIGHT - DATE_H, 0, 0),
-                child = render.Stack([
-                    render.Padding(
-                        pad = (-1, 1, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (2, 1, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (0, 0, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (0, 2, 0, 0),
-                        child = date_shadow,
-                    ),
-                    render.Padding(
-                        pad = (0, 1, 0, 0),
-                        child = render.Row(
-                            main_align = "center",
-                            expanded = True,
-                            children = [
-                                render.Text(
-                                    content = formatted_date,
-                                    font = "tom-thumb",
-                                    color = "#ff0",
-                                ),
-                            ],
-                        ),
-                    ),
-                ]),
+                child = date_stack,
             ) if show_date else None,
         ]),
     )
@@ -318,158 +423,25 @@ TIME_FORMATS = {
 }
 
 CHARS = {
-    "0": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAACBJREFUCNdjYAxhYGBbycAgFeXAkMk2gSgMUgvSA9QLAKtLDWcg9zY2AAAA
-AElFTkSuQmCC
-"""),
-    "1": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAAClJREFUCNdjYAhgYGBcwsDABsRSQJwJxKJLIGK4sOhSB4asVRMYREMdAFsh
-C+/brVnSAAAAAElFTkSuQmCC
-"""),
-    "2": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAADVJREFUCNdjYAxhYGBbycAgFeXAkMk2gUEEiBlgWMqBgSGTgYFxCQqXITPU
-gSFr1QQG0VAHADcPCpvNILtaAAAAAElFTkSuQmCC
-"""),
-    "3": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAADdJREFUCNdjEA11YMhaNYFBNGwCA4OUAwNDJgMD4xIGBraVQDoKyGebAMci
-QJwJxFJAcbB8CAMAe1kLH6u//1EAAAAASUVORK5CYII=
-"""),
-    "4": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAADBJREFUCNdjYBBhYGDIhGDGJRDMNhWIZzkwSEVBcKYUEAPprFUTGESBNIMU
-FLMyAAAufAnmFFlNYwAAAABJRU5ErkJggg==
-"""),
-    "5": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAADZJREFUCNdjEA11YMhaNYEhE0hnMjBAcAgDQ9ZKBgbRKAcGBrYJcCwCxJlA
-LAUUZwPKM4YwAACW7wvBgXaX4AAAAABJRU5ErkJggg==
-"""),
-    "6": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAADNJREFUCNdjYAhhYGBcycDANoWBQcqBgSGTAYiBYllAscwoB4ZMtgkYWAoo
-zgaUZwxhAABkVQvi4c4RfwAAAABJRU5ErkJggg==
-"""),
-    "7": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAACpJREFUCNdjEA11YMhaNYFBNGwCAwMbEEs5QHAmAxgzLoFgtgmYmNGBAQBj
-PAnf/Sy1fwAAAABJRU5ErkJggg==
-"""),
-    "8": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAACFJREFUCNdjYAxhYGBbycAgFeXAkMk2AY5BfGziyHJAvQCM7gyBEuAcCAAA
-AABJRU5ErkJggg==
-"""),
-    "9": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQAgMAAABSEQbTAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAADVJREFUCNdjYAxhYGBbycAgFeXAkMk2AQNLhU1gYFs1gYERSDMA+QxSDgyM
-mUDmEgYGxgAGAJsMDDArz8tGAAAAAElFTkSuQmCC
-"""),
-    ":": base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAQAAAAQAgMAAABM2DZgAAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAABRJREFUCNdjYIACEYZMIBRBYQEBAB1sAfXTJxecAAAAAElFTkSuQmCC
-"""),
+    "0": CHAR_0_ASSET.readall(),
+    "1": CHAR_1_ASSET.readall(),
+    "2": CHAR_2_ASSET.readall(),
+    "3": CHAR_3_ASSET.readall(),
+    "4": CHAR_4_ASSET.readall(),
+    "5": CHAR_5_ASSET.readall(),
+    "6": CHAR_6_ASSET.readall(),
+    "7": CHAR_7_ASSET.readall(),
+    "8": CHAR_8_ASSET.readall(),
+    "9": CHAR_9_ASSET.readall(),
+    ":": COLON_ASSET.readall(),
 }
 
 AM_PM = {
-    True: base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAHAgMAAABB3ES3AAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAACNJREFUCNdjYGVhYZCKlGRInZXJkDpzJkPWzEggLckg4MICAFINBmTAfA6Y
-AAAAAElFTkSuQmCC
-"""),
-    False: base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAHAgMAAABB3ES3AAAACVBMVEUAAAAAAAD//wCu3yBfAAAA
-AXRSTlMAQObYZgAAACNJREFUCNdjEGVhYciKlGRInZXJkDpzJpAdyZAqKckgwMICAFTtBcSrM+2h
-AAAAAElFTkSuQmCC
-"""),
+    True: AM_ASSET.readall(),
+    False: PM_ASSET.readall(),
 }
-
-PIXEL = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgaAAAAIMAgR+3QgAA
-AAAASUVORK5CYII=
-""")
 
 # The following Base64-encoded image is a scaled-down version of
 # Equirectangular (0°) by Tobias Jung
 # found at https://map-projections.net/single-view/rectang-0:flat-stf
 # This image released under the CC BY-SA 4.0 International license
-MAP = base64.decode("""
-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
-b24ANQHYtpcAAAA4dEVYdGljYzpjb3B5cmlnaHQAQ29weXJpZ2h0IChjKSAxOTk4IEhld2xldHQt
-UGFja2FyZCBDb21wYW55+Vd5NwAAACF0RVh0aWNjOmRlc2NyaXB0aW9uAHNSR0IgSUVDNjE5NjYt
-Mi4xV63aRwAAACZ0RVh0aWNjOm1hbnVmYWN0dXJlcgBJRUMgaHR0cDovL3d3dy5pZWMuY2gcfwBM
-AAAAN3RFWHRpY2M6bW9kZWwASUVDIDYxOTY2LTIuMSBEZWZhdWx0IFJHQiBjb2xvdXIgc3BhY2Ug
-LSBzUkdCRFNIqQAAABJ0RVh0dGlmZjpDb21wcmVzc2lvbgA13jRpagAAACN0RVh0dGlmZjpYUmVz
-b2x1dGlvbgA0NzU1NzQ2MjQvMTY3NzcyMTa325+eAAAAI3RFWHR0aWZmOllSZXNvbHV0aW9uADQ3
-NTU3NDYyNC8xNjc3NzIxNou7fJYAAAAodEVYdHhtcDpDcmVhdGVEYXRlADIwMTctMTAtMDJUMTg6
-NTc6NDMrMDE6MDBtx0PdAAAAHnRFWHR4bXA6Q3JlYXRvclRvb2wAUGhvdG9MaW5lMjAuMDIDkUSJ
-AAAAKnRFWHR4bXA6TWV0YWRhdGFEYXRlADIwMTctMTAtMDJUMTg6NTc6NDMrMDE6MDDlnSxaAAAA
-KHRFWHR4bXA6TW9kaWZ5RGF0ZQAyMDE3LTEwLTAyVDE4OjU3OjQzKzAxOjAw2Tl/5AAAAABJRU5E
-rkJggg==
-""")

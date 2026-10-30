@@ -6,4 +6,10 @@ desc: This app creates a scannable WiFi QR code. It is not compatible with Enter
 author: misusage
 fileName: wifi_qr_code.star
 packageName: wifiqrcode
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - utility
+published: '2022-09-08T17:20:13Z'
+updated: '2025-11-30T19:58:27Z'

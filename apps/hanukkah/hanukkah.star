@@ -1,14 +1,10 @@
-load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("images/candle_image.png", CANDLE_IMAGE_ASSET = "file")
+load("images/main_menorah_image.png", MAIN_MENORAH_IMAGE_ASSET = "file")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
-CANDLE_IMAGE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAwElEQVRoBe3TMQrCMBTG8ZemsYNO4pzJAwgOnT2LN3B09kJ6gC4uxdHBQR2kLoJghSrBoYlPCR7C9wXCl/X/gxDhQAACEJAu0JSd8rExS4kO6Wo67Gtzyn2rnEQACgdavLba+z35UI0Ka+1YEkSyKwazZ21Uc82U0/OJcy6TBPBtvdXnNd+7uHAOTmJ04O1KBuhxfCsdQGL/7wuIjP9Ep7H8yHuJbwwEIAABCEAAAhCAAAQgAAEIQAACEIDAPwu8AYNcK2rAdvQuAAAAAElFTkSuQmCC
-""")
-
-MAIN_MENORAH_IMAGE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAACXBIWXMAAC4jAAAuIwF4pT92AAACTUlEQVRoBe1ZvUoDQRDeeMZAjGhiEKsDxcLCQhQJgo1gpY02voCNtaWNCHkAX8AXsDH6AGlEjBYWChb+IUZUNCZiNEdEL34T70I8EW4lmwlcBiZ7l539Zua73dn7EaIpfAzkU22p1wP/Fl8EQrRyOd9eGIho/quY+ekzuGJg9Vs6E/HikWaap8IsXQ8ndV0f5QiohcMp+TxJRpfecn5f/jHgM7TlScMwAlyxsPnN5tI70Ge2AOCYbQZYSZfQtnuZgBCS//Q0AZeZgs/LBIj+aJCWAZuw3QdYGZ+jvWfLHo5ZCZha26O9/5KTAO5doA3Jj3mZgCckb3qZAM7cy77LS2BkZSNB+lc0qvudflX7q8a3i+CQMwjHuep+hzuh2l8Fn7sIOhOv+3mTgLpT3mAOmzOgwS5I3cOxdwF6Igsr9N4riS1rLwkvIhiQo0H2EkjiOIz9cZP+VCBZYJK6FVl7t7jCypEuNuUsKs/iVscs/stDH6izSuieneT9u/n1+9/+fiBRDBcOxP/i2TB/je+BQQc0cbg6P0fGFQLoxCIhhsMCnddB+uCDZqGTAFWugwDet5NX5cQ1LgjPQlkfhuwi6DroGhumgVcuRjXGdQ1nF0HXA2psGALeS40xpeB+1ACpkRLGmObTMJ+BjkP1qqFdOKZ3gmdQKrz0fiADpRp0C13HepXZPTBETpQSgMQXEU4c2m2FRR9B7qD2i9BB6/gGLc0G+jpEFZxmpgalXecYJCh7a6SaAFrfndAPqB8qI0UY04dTmiUTIGFXZrBb2y9APpyWjITdDwAAAABJRU5ErkJggg==
-""")
+CANDLE_IMAGE = CANDLE_IMAGE_ASSET.readall()
+MAIN_MENORAH_IMAGE = MAIN_MENORAH_IMAGE_ASSET.readall()
 
 def get_hanukkah_dates(year):
     hanukkah_dates = {
@@ -24,18 +20,19 @@ def get_hanukkah_dates(year):
     hanukkah_last_day = hanukkah_first_day + time.parse_duration("192h")
     return hanukkah_first_day, hanukkah_last_day
 
-def main(config):
-    tz = config.get("$tz", "America/New_York")
+def main():
+    tz = time.tz()
     current_time = time.now().in_location(tz)
     current_year = current_time.year
 
     if current_year > 2030:
         return render.Root(
-            child = render.WrappedText(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
                 content = "This app only supports years up to 2030.",
                 color = "#ff0000",
                 font = "CG-pixel-4x5-mono",
-            ),
+            )),
         )
 
     hanukkah_first_day, hanukkah_last_day = get_hanukkah_dates(current_year)
@@ -61,4 +58,5 @@ def main(config):
         candles.append(render.Image(src = MAIN_MENORAH_IMAGE))
         main_child = render.Stack(children = candles)
 
-    return render.Root(child = main_child)
+        # Centre the block on taller panels (64x64).
+    return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = main_child))

@@ -6,4 +6,11 @@ desc: Display Financial Times news based upon user selected section.
 author: jvivona
 fileName: financial_times.star
 packageName: financialtimes
-recommended_interval: 10
+recommendedInterval: 10
+supports2x: true
+category: news
+tags:
+  - finance
+  - news
+published: '2023-03-14T19:37:17Z'
+updated: '2026-10-17T11:02:12Z'

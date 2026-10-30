@@ -5,19 +5,20 @@ Description: See recent top stories submitted to Hacker News with info about upv
 Author: Nick Comer
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/yc_icon.png", YC_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
+
+YC_ICON = YC_ICON_ASSET.readall()
 
 TOP_STORIES_DATA_ENDPOINT = "https://hn-top-tidbyt-prod.nkcmr.dev/top-stories.json"
 
-YC_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAY1BMVEX/ZgD/pGf/nVv/aAT/n17/
-5NL/chT/ZQD/ZAD/aAP/wpn/t4f/bw7/wJb/ZwL/28P/38r/1Lf/49H/nl7/toX/o2X/0bL/eB//
-mFP/bg3/lU7/28L/awj/qW//kkn/rXb/mlb8dFfCAAAATElEQVQI1zXKRxKAIBQD0KjAD/be2/1P
-KaBmkXmTCQAhQIFLec+QUyWO7PRk6sPPsjTXUJnw4KpbRYTs45bLS/bFJzBLf0oc/YS1vh+u0gKf
-2u13AAAAAABJRU5ErkJggg==
-""")
+# The masthead and its rule take 14 rows; the story list scrolls through
+# whatever is left. That is the original 18 on a 64x32 panel and 50 on a
+# square one, which is the difference between reading a headline a line at a
+# time and seeing a whole story with its points and comments at once.
+HEADER_HEIGHT = 14
+STORY_VIEWPORT = canvas.height() - HEADER_HEIGHT
 
 def main():
     resp = http.get(TOP_STORIES_DATA_ENDPOINT)
@@ -80,7 +81,7 @@ def main():
                 render.Box(width = 1, height = 1),  # padding
                 render.Marquee(
                     scroll_direction = "vertical",
-                    height = 18,
+                    height = STORY_VIEWPORT,
                     child = render.Column(
                         children = story_widgets,
                     ),

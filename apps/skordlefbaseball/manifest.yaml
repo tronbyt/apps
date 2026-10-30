@@ -6,4 +6,14 @@ desc: The app gets Fall baseball data from the Skordle website to diplay on the 
 author: Woolycoin437420
 fileName: skordlefbaseball.star
 packageName: skordlefbaseball
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - gaming
+  - tidbyt
+  - utility
+  - mlb
+  - baseball
+published: '2023-11-07T14:45:58Z'
+updated: '2026-10-01T18:17:06Z'

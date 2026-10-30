@@ -6,4 +6,10 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: LunchBox8484
 fileName: ufl_scores.star
 packageName: uflscores
-recommended_interval: 5
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time
+  - football
+published: '2024-03-18T15:28:46Z'
+updated: '2026-10-13T21:24:22Z'

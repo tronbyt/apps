@@ -11,7 +11,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -102,6 +102,10 @@ def get_hst_live():
 
         obs = json.decode(obsjson_raw)
 
+        # Ensure 'state' key exists
+        if "state" not in obs:
+            obs["state"] = "Unknown"
+
         if obs.get("what_am_i_looking_at", None) == "Hubble is acquiring a new target":
             obs["state"] = "Acquiring New Target"
             obs["target_name"] = ""
@@ -134,7 +138,6 @@ def get_hst_live():
         else:
             cache_timeout = DEFAULT_CACHE_TIMEOUT
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("cached_observation", json.encode(obs), ttl_seconds = cache_timeout)
 
     return obs
@@ -235,11 +238,13 @@ def render_display(obs, img_size = 20):
     Returns:
         A `render.Root` object.
     """
-    target_text = obs["target_name"]
-    if obs["category"] and len(obs["category"]) > 0:
-        target_text = "{} - {}".format(obs["category"], obs["target_name"])
+    target_text = obs.get("target_name", "")
+    category = obs.get("category", "")
+    if category and len(category) > 0:
+        target_text = "{} - {}".format(category, target_text)
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Row(
                     main_align = "space_between",
@@ -247,9 +252,9 @@ def render_display(obs, img_size = 20):
                         render.Column(
                             children = [
                                 marquee_text(
-                                    obs["state"],
+                                    obs.get("state", "Unknown"),
                                     width = SCREEN_WIDTH,
-                                    color = OBS_STATE_COLORS.get(obs["state"], WHITE),
+                                    color = OBS_STATE_COLORS.get(obs.get("state", "Unknown"), WHITE),
                                 ),
                                 marquee_text(
                                     target_text,
@@ -264,17 +269,61 @@ def render_display(obs, img_size = 20):
                     children = [
                         render.Column(
                             children = [
-                                marquee_text(obs["science_instrument_acronym"], width = SCREEN_WIDTH - img_size),
+                                marquee_text(obs.get("science_instrument_acronym", ""), width = SCREEN_WIDTH - img_size),
                                 render.Row(
                                     children = [
                                         render.Text(pad_left("RA=", 4), color = CYAN, font = SMALL_FONT),
-                                        render.Text(pad_left(obs["ra"], 7), color = WHITE, font = SMALL_FONT),
+                                        render.Text(pad_left(obs.get("ra", ""), 7), color = WHITE, font = SMALL_FONT),
                                     ],
                                 ),
                                 render.Row(
                                     children = [
                                         render.Text(pad_left("Dec=", 4), color = CYAN, font = SMALL_FONT),
-                                        render.Text(pad_left(obs["dec"], 7), color = WHITE, font = SMALL_FONT),
+                                        render.Text(pad_left(obs.get("dec", ""), 7), color = WHITE, font = SMALL_FONT),
+                                    ],
+                                ),
+                            ],
+                        ),
+                        render_image(obs, img_size),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Column(
+            children = [
+                render.Row(
+                    main_align = "space_between",
+                    children = [
+                        render.Column(
+                            children = [
+                                marquee_text(
+                                    obs.get("state", "Unknown"),
+                                    width = SCREEN_WIDTH,
+                                    color = OBS_STATE_COLORS.get(obs.get("state", "Unknown"), WHITE),
+                                ),
+                                marquee_text(
+                                    target_text,
+                                    width = SCREEN_WIDTH,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Row(
+                    main_align = "space_between",
+                    children = [
+                        render.Column(
+                            children = [
+                                marquee_text(obs.get("science_instrument_acronym", ""), width = SCREEN_WIDTH - img_size),
+                                render.Row(
+                                    children = [
+                                        render.Text(pad_left("RA=", 4), color = CYAN, font = SMALL_FONT),
+                                        render.Text(pad_left(obs.get("ra", ""), 7), color = WHITE, font = SMALL_FONT),
+                                    ],
+                                ),
+                                render.Row(
+                                    children = [
+                                        render.Text(pad_left("Dec=", 4), color = CYAN, font = SMALL_FONT),
+                                        render.Text(pad_left(obs.get("dec", ""), 7), color = WHITE, font = SMALL_FONT),
                                     ],
                                 ),
                             ],
@@ -289,6 +338,15 @@ def render_display(obs, img_size = 20):
 #-------------------------------------------------------------------------------
 # Main
 #-------------------------------------------------------------------------------
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """Main function body.

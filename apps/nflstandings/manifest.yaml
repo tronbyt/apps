@@ -6,4 +6,10 @@ desc: View NFL standings by division.
 author: LunchBox8484
 fileName: nfl_standings.star
 packageName: nflstandings
-recommended_interval: 5
+recommendedInterval: 5
+category: sports
+tags:
+  - nfl
+  - football
+published: '2022-08-18T14:51:01Z'
+updated: '2026-10-13T21:24:22Z'

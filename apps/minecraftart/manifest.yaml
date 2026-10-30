@@ -4,4 +4,14 @@ name: Minecraft Art
 summary: Display Minecraft Paintings
 desc: Cycles through all 4x2 Minecraft paintings like an art gallery.
 author: Michael Maxwell
-recommended_interval: 5
+recommendedInterval: 5
+fileName: minecraft_art.star
+packageName: minecraftart
+supports64x64: true
+category: gaming
+tags:
+  - gaming
+  - retro
+  - art
+published: '2024-09-11T15:25:25Z'
+updated: '2026-10-01T17:39:02Z'

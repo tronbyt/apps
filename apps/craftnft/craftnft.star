@@ -25,19 +25,12 @@ def main(config):
     nft_ttl_seconds = int(config.get("nft_cycle_seconds", DEFAULT_TTL))  # default 5 minutes
     print("ttl:" + str(nft_ttl_seconds))
     address = config.str("user_address", DEFAULT_USER_ADDRESS)
-    nft_image_src = cache.get(address + "_random")
 
-    if nft_image_src == None:
-        nft_image_url = fetch_random_nft(address)
-        if nft_image_url != None:
-            nft_image_src = http.get(nft_image_url).body()
-
-            # set the cache since this is the image we are rendering
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(address + "_random", nft_image_src, ttl_seconds = nft_ttl_seconds)
-
+    nft_image_url = fetch_random_nft(address)
+    if nft_image_url != None:
+        nft_image_src = http.get(nft_image_url, ttl_seconds = nft_ttl_seconds).body()
     else:
-        print("Using Cache")
+        nft_image_src = None
 
     # Here is the error screen
     if nft_image_src == None:
@@ -91,7 +84,9 @@ def fetch_random_nft(address):
         if v != None:
             image_dict[k] = v
 
-    random.seed(time.now().unix)  # // 15)
+    # seed random number generator
+    # random.seed(time.now().unix) // 15)
+
     key_list = image_dict.keys()
     cur_url = ""
     for i in range(len(key_list)):

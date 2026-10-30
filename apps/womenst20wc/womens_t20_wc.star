@@ -9,8 +9,6 @@ v1.0 - First published
 v1.1 - Fixed issue where recent results were not shown and app was showing next match coming up. Made changes to keep the most recent result for 24hrs before moving to next match
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -30,7 +28,7 @@ ALL_MATCH_CACHE = 2 * 3600  # 2 hours
 STANDINGS_CACHE = 6 * 3600  # 6 hours
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     SelectedTeam = config.get("TeamList", DEFAULT_TEAM)
@@ -637,18 +635,8 @@ def get_schema():
     )
 
 def get_cachable_data(url, timeout):
-    key = base64.encode(url)
-
-    data = cache.get(key)
-    if data != None:
-        #print("CACHED")
-        return base64.decode(data)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = timeout)
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = timeout)
 
     return res.body()

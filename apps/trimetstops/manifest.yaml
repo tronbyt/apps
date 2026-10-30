@@ -6,4 +6,9 @@ desc: This shows you the next two estimated (or scheduled) arrivals at a given s
 author: scottwainstock
 fileName: trimet_stops.star
 packageName: trimetstops
-recommended_interval: 5
+recommendedInterval: 5
+category: transit
+tags:
+  - productivity
+published: '2023-09-21T17:55:00Z'
+updated: '2025-11-29T23:55:39Z'

@@ -6,4 +6,9 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: LunchBox8484
 fileName: wbc_scores.star
 packageName: wbcscores
-recommended_interval: 5
+recommendedInterval: 5
+category: sports
+tags:
+  - baseball
+published: '2023-02-02T21:02:51Z'
+updated: '2026-10-13T21:24:22Z'

@@ -9,13 +9,12 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 NFTS_URL = "https://api.opensea.io/v2/chain/ethereum/account/{}/nfts"
 COLLECTION_STATS_URL = "https://api.opensea.io/api/v1/collection/{}/stats"
 
 def main(config):
-    api_key = secret.decrypt("AV6+xWcE6aY6fd81YrVzBfapeIGfdHtBrvi3x5uhwn+APhh3N8foO4a7CpW55B0ZKsZ6Ut1CR5F0y1QG3UTlj/pD5tGToAoCoVYMsxPCyDyVu1tFX1MK1w5DX2yDKFR6lYnYrV5djtLUx1VFs9iPVBbpx26IelzoG8Nc1KghjlnPmPlIdVM=") or config.get("opensea-api-key") or ""
+    api_key = config.get("opensea-api-key") or ""
     public_address = config.get("public_address")
 
     nfts = fetch_opensea_nfts(public_address, api_key)
@@ -140,6 +139,13 @@ def get_schema():
                 desc = "A toggle to display the collection's floor price.",
                 icon = "chartLine",
                 default = False,
+            ),
+            schema.Text(
+                id = "opensea-api-key",
+                name = "OpenSea API Key",
+                desc = "An OpenSea API key to access the OpenSea API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

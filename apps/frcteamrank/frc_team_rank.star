@@ -5,14 +5,14 @@ Description: Displays the ranking of an FRC team at the team's active event.
 Author: dragid10
 """
 
-# Imports
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/default_team_avatar.png", DEFAULT_TEAM_AVATAR_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
+
+DEFAULT_TEAM_AVATAR = DEFAULT_TEAM_AVATAR_ASSET.readall()
 
 ## ==================== BEGIN CONSTANTS ====================
 # Cache and API settings
@@ -27,7 +27,7 @@ WIDGET_HEIGHT = 1
 WIDGET_COLOR = "#ffffff"
 
 # Default values for UI display when API calls fail
-DEFAULT_TEAM_AVATAR = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAACFlBMVEVHcEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAADqWkcAAAD///+MNit9MCZmZmZ3d3fpWkffVkTkWEUEAgHdVUOEMyjgVkTnWUaCMiiBMidIHBYRBwWpQTMiDQrZVEIQBgW4RzjhVkQVCAZRHxgYCQdPHhi9STlSHxnOzs4tEQ45FhHaVELHTTzZU0KnQDPGTDxhJR5kJh4UCAYTBwZOHhi6SDkWCAeAMScXCQdrKSGmQDJqKSBuKiFsKiHeVUPITT2QNywhDQq8SDkkDgvYU0G/STp2LiReJBxFRUVYIhvmWUZfJB1RUVHAwMBzLCNgJR1iJh63RjdlJx+5Rzi2RjcPBgVjJh4ZCggaCgi+SToFAgLJTT3KTj1fJR1dJBxJHBZMHRdLHRfBwcG/v784FhEvEg5QHxjMzMyzDRfUAAAAU3RSTlMA+cgzJQiO7QH89jCV3bvFxjHuJ5BIzvq9LSSL42XhKOQuaJbiZmeXx0rE6/hLvjX9SZLMB9Aj7Dr1PDjbvNrcio2MTUyU3svK35HPN/ZHO+/1JiyWEyAAAALISURBVFjD7ZdlVxtBFIYhREhw9xa3lhbXurvdt5aNkRCCu7sUKVKkReru/g+b8Kmc7uzO0o/k+bjn7HNm9965846Pjxcvu4+9qVmxQeExMeFHY9MyI3ZqCdAmYxuJ2gDlFv+T2e5Xx9qttT3dJlN3T621ucn9IDTPX5nn4FnAOThKf2NseOUEVH4KNJrCfLy2NtI/2Owt0EdqeD03SmCetpEothkzotV8nspwLC4RkzYXdOU8ngIDvggkgaUGl6PkPVXX8fARSVL9EYZKOU/ENayRLCvQyfwnTQm+VsuLqmtwUbp2hVgUiAOLC5GSfZj/bom4eGvWS3Sm/zlMEyeTULF3yym8aeQVCS3IYYqyYSVuHAhhecLgbOQX2eqRwhBp8YwUMIAEhigZo0pEDUhnzFU0GZWIjE0Qb+9UNJMiWpEhKsry1KzOcZsLRx2RHYGiogOoJdoEJ5tE9xAsKjqPD57lrt/lYB2/iO4jSFSkg3u5P/DtJgcb6CJ6gH2iIl+YiDrRwSPqQCeRCfv/W/QbP9mirU/rwgaP6LvUp53Be6J2rN7hYBXt7J+9Vf5l3vIvs8uf5mlIy9wtLuYsnoY8LSrKVLpFRpAkfhJhSNmmHUa8+PZPxHMlohfYw5hHxzGoRPQYx1gRDU4bv0eoRxxraIfCzi8aRy7zFMlDi8DrmR1DAfuAVGGGVzSFUIkj209vbuPzLJj1YVKH/wW4LFwhYh5a6VgTjRq+WFNULB2Q1DqsyPf0J5SVykW2SxXy0W8NhqvyITKqAp9nZcKo4QpPrC3XwSVRu4V5lFXxBW11NMyTjM4UpswoKuWN/ppIPSYcIvtOGJ+AXlus4DbipwLqnzRsm0/GpwMvgZAwhdesnBD3YB5qtff195pMvf19jpFh94PcKB/lpJxI3z7v9yTE7fQSqc4IPHxI5+urOxIcmBTvvZp72YX8ATB0xtXBaCzPAAAAAElFTkSuQmCC")
+
 DEFAULT_TEAM_NAME = "N/A"
 DEFAULT_TEAM_NUMBER = 0
 DEFAULT_RANKING_MSG = "No Ranking"
@@ -37,7 +37,6 @@ DEFAULT_NO_EVENTS_MSG = "No active events for team %d!"
 # Use The Blue Alliance API to get the team's current competition ranking
 TBA_BASE_URL = "https://www.thebluealliance.com/api/v3"
 TBA_API_KEY_DEFAULT = "YOUR_TBA_READ_API_KEY_HERE"
-TBA_API_KEY_ENCRYPTED = "AV6+xWcEi7teQ3dIi5syCMRdr8X9t5Cc0NS2zyaivQLlKToPL+7cd0MQk3ZXQSvLNh2DvGJUgxvX9vfkT6GASc1+ZYni9ENlOyeVAsmvnmgDCQtYogqW0UkKluSxSWc/p9k7HKQT3dzAXitJfzIio6aFZvg1KejmuVO2TLXicXTp91hGO65ci4Cudz8m9Jo0zwL+k1vh6ppKBqA2e74Ie9DsMSgP9A=="  # Encrypted READ key
 
 ## ==================== END CONSTANTS ====================
 
@@ -158,17 +157,23 @@ def get_team_ranking(team_number, event_key, tba_api_key):
         team_ranking_error = MSG_TEAM_RANKING_ERROR % team_number
         fail("%s - Status code: %s" % (team_ranking_error, team_ranking_resp.status_code))
 
-    # Parse the team ranking data
+    # Parse the team ranking data using intermediate variables.
+    # TBA returns qual/ranking/rank as nested objects, but any level can be
+    # None (not just missing) when the event hasn't started matches yet.
     ranking_data = team_ranking_resp.json()
-    if "qual" not in ranking_data:
+    qual_data = ranking_data.get("qual")
+    if not qual_data:
         return -1, 999
-    if "ranking" not in ranking_data["qual"]:
-        return -1, 999
-    if "rank" not in ranking_data["qual"]["ranking"]:
-        return -1, 999
-    team_ranking = ranking_data["qual"]["ranking"]["rank"]
-    total_teams = ranking_data["qual"]["num_teams"]
 
+    ranking_info = qual_data.get("ranking")
+    if not ranking_info:
+        return -1, 999
+
+    team_ranking = ranking_info.get("rank")
+    if team_ranking == None:
+        return -1, 999
+
+    total_teams = ranking_info.get("num_teams", 999)
     return team_ranking, total_teams
 
 def build_avatar_url(team_number):
@@ -232,7 +237,7 @@ def main(config):
     team_avatar = DEFAULT_TEAM_AVATAR
 
     # Get Blue Alliance API key from the user
-    TBA_API_KEY = secret.decrypt(TBA_API_KEY_ENCRYPTED) or config.get("tba_api_key", TBA_API_KEY_DEFAULT)
+    TBA_API_KEY = config.get("tba_api_key", TBA_API_KEY_DEFAULT)
 
     # Check if we have a valid API key
     if TBA_API_KEY and TBA_API_KEY != TBA_API_KEY_DEFAULT:
@@ -375,6 +380,7 @@ def get_schema():
                 name = "TheBlueAlliance API Key",
                 desc = "READ Api key to access TheBlueAlliance API. Can be generated from your TBA account settings: https://www.thebluealliance.com/account",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

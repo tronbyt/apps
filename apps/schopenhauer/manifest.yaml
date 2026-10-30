@@ -4,4 +4,12 @@ name: Schopenhauer
 summary: Random Schopenhauer quote
 desc: The App displays a random quote by Arthur Schopenhauer.
 author: nelken
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - art
+  - lifestyle
+  - education
+published: '2024-06-19T15:25:19Z'
+updated: '2026-10-01T22:30:43Z'

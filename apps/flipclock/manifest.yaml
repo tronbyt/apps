@@ -1,6 +1,16 @@
-id: 34ba5f03-c29f-4656-99e4-81624c441ecf
+---
+id: flipclock
 name: FlipClock
-summary: A classic flip clock
-desc: FlipClock comes to your display.
-author: W00tock
-recommended_interval: 0
+summary: A simple flip clock
+desc: Displays the time with a flip clock animation.
+author: rs7q5
+fileName: flipclock.star
+packageName: flipclock
+broken: true
+category: clocks
+tags:
+  - clock
+  - time
+  - utility
+published: '2024-09-20T15:05:24Z'
+updated: '2025-12-05T22:28:51Z'

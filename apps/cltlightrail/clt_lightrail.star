@@ -5,18 +5,17 @@ Description: Displays in real-time when North & South lightrail trains will arri
 Author: Kevin Connell
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/lynx_icon.png", LYNX_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+LYNX_ICON = LYNX_ICON_ASSET.readall()
+
 #Load LYNX icon from base64 encoded data 29x13
-lynx_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAB0AAAANCAYAAABVRWWUAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH5gcTBA8P7Gvf3AAAA+5JREFUOMuNlG1o1XUUxz/n93+493+v29zj1dqcY8NppDhbLvNZSTIzJSIQekJ6YVmiEBXRu0oLIqigJKXyRRAEImhJ0oQm+DBEK3XlFs221jabd9Pr3b3/p9+vNxcpEvO8Oy++fM758j1HuM06eaILixyiUujiJSZObadq8d4aZXKttuO2GaNbE26i0UtOKbdt6y+jpScW91B+1orTqu+CmcyFLLinDQD5P9iF3nMMdn9O+Yx2JMzjpBtSJhxbpEzwUBSFbbZt1bkJhWM7FY5tVydcx1NKobUhNmrAj+wtSSc83DB7IyJya+iZ0/vxkrUYDFF+kHxgV0pUXKxsFgomLdr0RVpdTKQzIylPxr1kuYfO1ytTeERMtCWO/SlhHKFJHnJrVzymTM6f8cZ5AGzZcvA/QBMb1n3pkLBz9O+qcYd66xZGE1ebAy2jGS/6qLH92Mjre5fzW87jWqyxLPhko3D017h/0wOvHRvo2WkJ/g6FwaDN1JRD+7t9ABZgyz+gS4A2YNj48cHKCid5zTcbO+q5t8aTfJVn3lxWO5bbfKR6iShSJZdaStpzQBfQaCLu2trB3CAO3om1IVu09h44lt4qGX8RsBrotkuieuCDEvSli691xN39I03bDw8/e3wwXoIxo8C3+6S6RRSNQDfwHDAfyAD7RDiuNS9WTpGR1Q35+1793qV3zAbFGsn4bwHjwH6gR5VWfqEEPGRis3tWyzT9xKqGixPF+D2BQIQ6EXYAWWAncD/wHXCyNHSl1mywlNTu35CzahO5ta2VISgQYQbgAruAH4DABh4uTW2As2LJ0tS2b0YLw8UfpcZtLgnOA68APcCDJWfeBuYBGMNcS8nmbQsKQ93D+uXOSxW/nBpxvxbhGeBOYCVwBzAEYAPVwKdAXOpXOEp1mWnJAT/Sdsn2zhJQARXAxwbGMezHyOXpZVHmydbJpTUeTXvOlb3f12/vIbQuS21wBpgOhIADYHav50aQlMDMqS4DV0Oq0i6jQ9eQ8sS/Um0rSDuKR5sn2dwySGt9fWpoPLc20tHTGBmLrfIPO5Z3nq3esYFswdz0FG9An5pfw6Z5NfjRpNd0/atCLt1OEIVcyVl41nXSHkhUgLhAdvwL6jLPZ4RwmSFcB+LbibIDTlnTUZ373Q/L7sYKrtDxWR6ze/1NwQJw5GQfUyc7ydrz5iR1ttKV4h9+UJjIF5VJyCSJhPKMjqvFRM0oPVsZyYjwp1huV+jN/CkZDIR2qgET+2TDAmuWPX7LL2cDaGOYdOZQZgW9cRDORQcrhbAqaQeOZXzEJMpAFzFcNsgJbSd/toJs1igLhxBjVzFxPWL1qvXcTv0Nn8WovFgP3ZQAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjItMDctMTlUMDQ6MTQ6NDUrMDA6MDDsgdXVAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIyLTA3LTE5VDA0OjE0OjQ1KzAwOjAwndxtaQAAAABJRU5ErkJggg==
-""")
 
 LIGHTRAIL = "lightrail"
 CACHE_TTL_SECONDS = 60
@@ -412,7 +411,7 @@ def main(config):
                                         #Lynx Logo
                                         width = 29,
                                         height = 15,
-                                        child = render.Image(src = lynx_ICON),
+                                        child = render.Image(src = LYNX_ICON),
                                     ),
                                     render.Box(
                                         #Current date

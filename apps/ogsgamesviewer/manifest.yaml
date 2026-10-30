@@ -6,4 +6,11 @@ desc: Shows a visualization of currently active Go games on OGS (Online Go Serve
 author: Neal Wright
 fileName: ogs_games_viewer.star
 packageName: ogsgamesviewer
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - gaming
+  - real-time
+  - utility
+published: '2022-07-01T19:15:09Z'
+updated: '2025-12-05T22:28:51Z'

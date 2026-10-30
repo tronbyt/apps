@@ -7,9 +7,26 @@ Author: andymcrae
 
 #some code borrowed or inspired by nhlnextgame by AKKanman
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/logo_adelaide.png", LOGO_ADELAIDE_ASSET = "file")
+load("images/logo_brisbane.png", LOGO_BRISBANE_ASSET = "file")
+load("images/logo_carlton.png", LOGO_CARLTON_ASSET = "file")
+load("images/logo_collingwood.png", LOGO_COLLINGWOOD_ASSET = "file")
+load("images/logo_essendon.png", LOGO_ESSENDON_ASSET = "file")
+load("images/logo_freemantle.png", LOGO_FREEMANTLE_ASSET = "file")
+load("images/logo_geelong.png", LOGO_GEELONG_ASSET = "file")
+load("images/logo_gold_coast.png", LOGO_GOLD_COAST_ASSET = "file")
+load("images/logo_greater_western_sydney.png", LOGO_GREATER_WESTERN_SYDNEY_ASSET = "file")
+load("images/logo_hawthorn.png", LOGO_HAWTHORN_ASSET = "file")
+load("images/logo_melbourne.png", LOGO_MELBOURNE_ASSET = "file")
+load("images/logo_north_melbourne.png", LOGO_NORTH_MELBOURNE_ASSET = "file")
+load("images/logo_port_adelaide.png", LOGO_PORT_ADELAIDE_ASSET = "file")
+load("images/logo_richmond.png", LOGO_RICHMOND_ASSET = "file")
+load("images/logo_st_kilda.png", LOGO_ST_KILDA_ASSET = "file")
+load("images/logo_sydney.png", LOGO_SYDNEY_ASSET = "file")
+load("images/logo_west_coast.png", LOGO_WEST_COAST_ASSET = "file")
+load("images/logo_western_bulldogs.png", LOGO_WESTERN_BULLDOGS_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -24,41 +41,41 @@ DEFAULT_TEAM = "16"
 #team icons in base64
 def getTeamIconFromID(team_id):
     if team_id == 1:  #ADE
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAPUlEQVQ4EWOUUq77z0AFwEQFM8BGUM0gxqsMDMPVa/9fWw9Tr7FIWzhTJSlRLR1RzaDRBEk4YqkW2FQzCAD9vAxi/8qeMQAAAABJRU5ErkJggg==")
+        return (LOGO_ADELAIDE_ASSET.readall())
     elif team_id == 2:  #BRI
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAiUlEQVQ4EWNUnPb5PwMVABMVzAAbMWoQ4ZBk7ODzH0mxVr55BwMIowNsYjA1GGGErrjT1wOmFkzD5NHFMRIkugIUU6AcbGowXATTCLMZxken0Q3DcBFMA7pCmDgumgWXBMxFyAbCxLDpweoikAZkA5A1wsTRDcVqEEwxsgHIhmOTxxnYyIYQwwYAn2wsec27ZnIAAAAASUVORK5CYII=")
+        return (LOGO_BRISBANE_ASSET.readall())
     elif team_id == 3:  #CAR
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAw0lEQVQ4Ea2SQQ7CMAwEKeIVcIR3gvhnr30H1VaayrE3aQ/k4ni9Hidpp/vz/bsM1jJ/S/Xx+hTtVpSB4ADYT4FGAEBTvpq7CmaiAzcgIM4IpOfZQdlADkCRAdTIVWveiIIzyixdHnzSWFdtaERUxBxr0mIe/RsoCkyNmvYAGJDrBZQNEeJqaKdAvVMAUSyg3jscwTaQM7k3QYsnYf+3/2gHicxEd0Im9zwNKMJodNENKqDcqBO4xuwrXy0blHMdV0NbAV9ZXi1TCVCeAAAAAElFTkSuQmCC")
+        return (LOGO_CARLTON_ASSET.readall())
     elif team_id == 4:  #COL
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAP0lEQVQ4EWP8DwQMVAAsIDMYGRnhRiGbiywOUoBLDiTOBDeBQsaoQYQDcDSMRsOIcAgQVjH40hEjsCyhSsEGAACPER2NwKWiAAAAAElFTkSuQmCC")
+        return (LOGO_COLLINGWOOD_ASSET.readall())
     elif team_id == 5:  #ESS
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAdklEQVQ4Ea3UwQ3AIAgF0NI4Tbv/KJ2nSlINRioflNPXhCcHld5Sx4ZKbBCRm3pEx1VmOcUajhKpTW5IQxhzQRpyfyPB0AyBJ7IQCEIQE0KRKeRBfiEvokIRZICiSAetIA1aRRrEQVa99nLPysMTiSB8CO362DL1HBgdOCEVjwAAAABJRU5ErkJggg==")
+        return (LOGO_ESSENDON_ASSET.readall())
     elif team_id == 6:  #FRE
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAtUlEQVQ4Ee2S4RXCIBCDhbHqAm5iR3KTuoBzqR/vxZciwQ7g/egduSQFjvJ8x3q+n4jb49KyPsK19r73wAtGEPuGxMJnJnA/RiwkonYha0Xi1NRw/JcJ3ArJRb4Tx70eccp12dodYTgigHskTk0Nx2XkWL/DdrQZ4YgJnP/UdFN5su2yResnIVw5DYX+zgggmc1M0O0eJIDChcLI/iPHv3ak5kgwwsSPRhBc6LXEnuPRnHSkfgFLoo1BPuVWJAAAAABJRU5ErkJggg==")
+        return (LOGO_FREEMANTLE_ASSET.readall())
     elif team_id == 7:  #GEE
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAN0lEQVQ4EWP8DwQMVACMUsp1VDGIiQqOARsx+AxipFZgU81ro7FGOLWNxhrhMKJagqSaQVSLNQCrGBU8OjaC0wAAAABJRU5ErkJggg==")
+        return (LOGO_GEELONG_ASSET.readall())
     elif team_id == 8:  #GCS
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAApklEQVQ4Ec2RwQ2AMAwDC0JiFR7MxjBsxA482KbIj1SOlQih8qCftol9dduhHnM9t6X0jHW/ytgDYO9noImpvEbcaGTP4EBszgyZpoEgyMycjDXsaSAW86mowxzV2BOCzMzCrGYa92t6KvZaM6PODsT3f0qgoPRqURKrRW8WgjRZlE5hDaSNCAagpVJ4A2mDDejZyA5wIBNjzgys4bX7NW68Xf8PdANMSEAQ9TcZggAAAABJRU5ErkJggg==")
+        return (LOGO_GOLD_COAST_ASSET.readall())
     elif team_id == 9:  #GWS
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAbUlEQVQ4Ea3Uyw3AIAwDUFJ1ABbtNF20G1AiVAlUPnGM73lycoiknLAhpxrPJRQV7xQOSsjDimgo6EMoqEbcUI2IlPvCq/UQuNEIgaAZYoZWiAmyIEvIikwhBBlCKNKFPMgP8iINxCAKya7H9gJ03yO/6E9S7gAAAABJRU5ErkJggg==")
+        return (LOGO_GREATER_WESTERN_SYDNEY_ASSET.readall())
     elif team_id == 10:  #HAW
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAOklEQVQ4EWP8f5D9f9UURwYYaMvZD2MyIIuDBHHJgcSZ4LooZIwaRDgAR8NoNIwIhwBhFaPpiHAYAQBvDQvqUURIwAAAAABJRU5ErkJggg==")
+        return (LOGO_HAWTHORN_ASSET.readall())
     elif team_id == 11:  #MEL
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAZklEQVQ4EWO8ysDwn4EKgMlVuY5iY0BmMIFMocQwmF6wQeQaBjMEpB9uEKmGIRuCYRCxhqEbgtUgQoZhMwSnQbgMw2UIXoPQDcNnCEgto5RyHXUSJMg0agCU6KfEwFGDCIfe4AsjAHY9EhFcE9FpAAAAAElFTkSuQmCC")
+        return (LOGO_MELBOURNE_ASSET.readall())
     elif team_id == 12:  #NOR
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAPklEQVQ4EWP8DwR8HosYYODTjjgYkwFZHCSISw4kzgTXRSFj1CDCATgaRqNhRDgECKsYTUeoYcQIBKgiDAwAleENJA7mL7gAAAAASUVORK5CYII=")
+        return (LOGO_NORTH_MELBOURNE_ASSET.readall())
     elif team_id == 13:  #POR
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAsUlEQVQ4Ea2UwQ6CQAxErXL0//xG/T44GtzZZJrKTgtEe+mmnXl0C8HWFpc/xJQxzEy2sudeoZ5ey2BSBlWjt4OOwCoI/A6qYHuQAZTBUI/B68Ta10RsKOFer4Pejzt1nhVM1ej1iVhwUjtEYzxTEz3WFrnGb+b2nKkrc4TgZfhEdEUBa9usNAMIJiUkLOtJUAbLINCnoC2sgkA7LBvFsyGXfRZCfXk1io7k/j/CaL/GB31XVG9zjPcNAAAAAElFTkSuQmCC")
+        return (LOGO_PORT_ADELAIDE_ASSET.readall())
     elif team_id == 14:  #RIC
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAe0lEQVQ4Ea3U2w2AIAwFUK5xBJ3G9XUah0BrlEdA+oB+XUh66AcAf5cbUDMZANSUP7fYs+xuiit5ypC3TQ3VELJUUA3BejwziaEWIp6IQ0SQBGEhKdKENMgvpEWqkAUpICuSQT1IgHqRAFFI67v26R6XiydiQegQjPrYLo+aMh01CRmxAAAAAElFTkSuQmCC")
+        return (LOGO_RICHMOND_ASSET.readall())
     elif team_id == 15:  #STK
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAQUlEQVQ4EWP8DwQMVAAsIDOuGBhgGKVz4QKGGEiAkZERQxzkFiYMUTIFRg0iHHCjYTQaRoRDgLCKwZeOGKlVsAEA/oIOHbOdgRUAAAAASUVORK5CYII=")
+        return (LOGO_ST_KILDA_ASSET.readall())
     elif team_id == 16:  #SYD
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAYUlEQVQ4Ee3RwQ3AIAgFUHAc91/FeajfxKZVEVs8Nf0nDvBCgBOR0IaEKH4HRsAyHqzOFugtVhHMn9BT7Ip00CrWIkPIwkaICmmYhkyhFpsh6GXJQeHN7Wse7Ifs6334RgfdHyhzzeI3qgAAAABJRU5ErkJggg==")
+        return (LOGO_SYDNEY_ASSET.readall())
     elif team_id == 17:  #WCE
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAANElEQVQ4EWP8f5D9PwM2YPcDmyiDtEo9VnEmrKJkCI4aRDjQRsNoNIwIhwBhFaPpiHAYAQBZHATebqrONQAAAABJRU5ErkJggg==")
+        return (LOGO_WEST_COAST_ASSET.readall())
     elif team_id == 18:  #WBD
-        return ("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEqADAAQAAAABAAAAEgAAAACaqbJVAAAAOElEQVQ4EWPkdV/4n4EKgIkKZoCNGDWIcEgOvjBivKyvP0zTEeOgyyKM/4GAcCohrGIQpqNBF9gALe0MKAvt8SYAAAAASUVORK5CYII=")
+        return (LOGO_WESTERN_BULLDOGS_ASSET.readall())
     return None
 
 #get abbreviated team name from the team_id. Teams are in alphabetical order
@@ -151,10 +168,22 @@ def main(config):
             agames.append(game_data[i]["id"])
 
     #make sure we have the first game either home or away
-    if agames[0] > hgames[0]:
+    if len(agames) > 0 and len(hgames) > 0:
+        if agames[0] > hgames[0]:
+            nextgame_id = int(hgames[0])
+        else:
+            nextgame_id = int(agames[0])
+    elif len(agames) > 0:
+        nextgame_id = int(agames[0])
+    elif len(hgames) > 0:
         nextgame_id = int(hgames[0])
     else:
-        nextgame_id = int(agames[0])
+        # No games found
+        return render.Root(
+            child = render.Box(
+                child = render.WrappedText("No upcoming games found.", font = "tom-thumb", align = "center"),
+            ),
+        )
 
     hometeam_id = ""
     awayteam_id = ""
@@ -180,8 +209,8 @@ def main(config):
     display_time = nextgamedate[11:16]
 
     #get icon data
-    home_team_icon = base64.decode(getTeamIconFromID(hometeam_id))
-    away_team_icon = base64.decode(getTeamIconFromID(awayteam_id))
+    home_team_icon = getTeamIconFromID(hometeam_id)
+    away_team_icon = getTeamIconFromID(awayteam_id)
 
     #get abbreviated team name
     home_team_abb = getTeamAbbFromID(hometeam_id)

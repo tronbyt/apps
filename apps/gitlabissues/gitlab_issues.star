@@ -1,11 +1,12 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/icon.png", ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
+ICON = ICON_ASSET.readall()
+
 # Load GitLab icon from base64 encoded data
-ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABM0lEQVRYR2NkGGDAOMD2M+B0wNuprf9Bjvu2dgnYjbL7rpPl2MdOmmBzcOkfvA6AuRwWRZSGgFDjZLBR3LYuKJ7GGQJD3gHoHsAVkjQLAbIdgEsjqWlh+DqAWgUXLFdhpAFCUUBzB/zJVQOXXJ9eQ6z6+oqZKnZKav9FMYdl8i2w5zFCYNA4AN3bz6+SFxLoPoeZSzAEBp0DYA4iFBK4fIzuIZJDgG4O+DkjG5wLmK/uJir1w0KEVJ/DDMfIBQPuAHRvw7IlzuAwg/rhFDjgcAJYnKMrINjMGnAHwFwMdwjMx7j8Cg2Jv9JGYBXsFSvwepJgCAwaB8Adslgdb2SzxN4k2lNY6wJCee/PQDsAI5dAHUSqz3GWA4RCYNA5gFQHk1wOUGoBIf0kpVhChpEjP+AOAAC5hLghLwV8cwAAAABJRU5ErkJggg==""")
 
 def main(config):
     token = config.get("api-token")
@@ -14,12 +15,13 @@ def main(config):
     icon = render.Image(src = ICON)
     text = render.WrappedText(get_issues(token, domain))
     return render.Root(
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             expanded = True,
             cross_align = "top",
             children =
                 [icon, text],
-        ),
+        )),
     )
 
 def get_issues(accesstoken, domain):
@@ -70,7 +72,6 @@ def get_issues(accesstoken, domain):
         return "You have %d open issues!" % open_issues
 
 def set_cache(name, open_issues):
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(name, open_issues, ttl_seconds = 3600)
 
 def get_schema():
@@ -83,6 +84,7 @@ def get_schema():
                 desc = "Your Gitlab access token",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "custom-domain",

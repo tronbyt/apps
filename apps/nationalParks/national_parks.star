@@ -9,13 +9,11 @@ load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 NPS_URL = "http://developer.nps.gov/api/v1/parks"
-ENCRYPTED_API_KEY = "AV6+xWcEnRp1RyHCmAyC7qmEbynYn5U71Xtp12D94MFpDphg3+bMl+NxPbjaAqx02vWkjpKi0PPymac57nBi9sTHgZUva2dJ0H16B509IGMAtUYgc5EMMqVrgTAcncMvgn3vA1V6teqg4E9MPErRtagbf2TMxplyssfd7ORMSRNeghXVfxCyDds/e8Lt/A=="
 
-def getData():
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+def getData(config):
+    api_key = config.get("nps_api_key")
     params = {
         # 'q':'National Park',
         "limit": "471",
@@ -44,7 +42,7 @@ def shortenDescription(desc):
 def main(config):
     randomNumber = getRandomPark()
     park = int(config.get("park", str(randomNumber)))
-    data = getData()
+    data = getData(config)
     if "error" in data:
         return []
     parkName = data["data"][park]["fullName"]
@@ -189,6 +187,13 @@ def get_schema():
                 icon = "landmark",
                 default = options[0].value,
                 options = options,
+            ),
+            schema.Text(
+                id = "nps_api_key",
+                name = "NPS API Key",
+                desc = "A NPS API key to access the NPS API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

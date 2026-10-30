@@ -5,17 +5,9 @@ Summary: Human readable time
 Description: Display the time in a groovy, human-readable way.
 """
 
-load("encoding/json.star", "json")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-
-DEFAULT_LOCATION = {
-    "lat": 40.7,
-    "lng": -74.0,
-    "locality": "Brooklyn",
-}
-DEFAULT_TIMEZONE = "US/Eastern"
 
 numbersPerLang = {
     "nl-NL": {
@@ -261,9 +253,7 @@ def display_hour(hour):
         hour to display (in 12h format with 12 instead of 0)
     """
 
-    # Handle 24 hour time.
-    if hour > 12:
-        hour -= 12
+    hour = hour % 12
 
     # Handle midnight.
     if hour == 0:
@@ -294,10 +284,8 @@ def fuzzy_time(hours, minutes, language):
     return pattern.format(hour = cur_hour, next_hour = next_hour).split(",")
 
 def main(config):
-    location = config.get("location")
-    loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", DEFAULT_TIMEZONE)
-    now = time.now().in_location(timezone)
+    now = time.now().in_location(time.tz())
+    scale = 2 if canvas.is2x() else 1
 
     hours = now.hour
     minutes = now.minute
@@ -312,16 +300,19 @@ def main(config):
     fuzzed = fuzzy_time(hours, minutes, language)
 
     # Add some left padding for ~style~.
-    texts = [render.Text(" " * i + s) for i, s in enumerate(fuzzed)]
+    font = "terminus-16" if scale == 2 else "5x8"
+    texts = [render.Text(" " * i * scale + s, font = font) for i, s in enumerate(fuzzed)]
 
     return render.Root(
         max_age = 60 * 10,
-        child = render.Padding(
-            pad = 3,
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
+            pad = (3 * scale, 4 * scale, 3 * scale, 4 * scale),
             child = render.Column(
                 children = texts,
+                main_align = "space_evenly",
             ),
-        ),
+        )),
     )
 
 def get_schema():

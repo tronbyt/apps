@@ -5,11 +5,13 @@ Description: Displays your LeetCode stats in a nice way.
 Author: Jake Manske
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/leet_code_logo.png", LEET_CODE_LOGO_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+LEET_CODE_LOGO = LEET_CODE_LOGO_ASSET.readall()
 
 LEETCODE_BASE_URL = "https://leetcode.com/{0}"
 EASY_COLOR = "#00E400"
@@ -17,20 +19,28 @@ MEDIUM_COLOR = "#FFA400"
 HARD_COLOR = "#E60707"
 FONT = "5x8"
 TOTAL_HIST_LENGTH = 62
-LEET_CODE_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAYAAAAPU20uAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAACKADAAQAAAABAAAACQAAAACo5FLiAAAAWklEQVQYGV1OgQ3AMAiCZVfupt7RnenEpUYlaUJBBQIwfwkzA8n8X8mcTFNeDsjES9iuKz93z7EjSnGNU17NnPv3FNZaTVJdHWnN60SUVISGDmrRuDANPkcBPgGIK90UIPuQAAAAAElFTkSuQmCC
-""")
+
 HEADER_FONT = "CG-pixel-3x5-mono"
 HTTP_SUCCESS_CODE = 200
 
 CACHE_LIFE_LENGTH_SECONDS = 300
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     user_name = config.get("user_name") or "LeetCode"
 
     if user_name == None:
         return render.Root(
-            child = render_Header("No user name supplied"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render_Header("No user name supplied"))) if is_square() else render_Header("No user name supplied"),
         )
 
     # grab stats for the user
@@ -38,7 +48,15 @@ def main(config):
 
     # return the histogram
     return render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render_Header(my_stats.Header),
+                render_Histogram("easy", my_stats),
+                render_Histogram("medium", my_stats),
+                render_Histogram("hard", my_stats),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render_Header(my_stats.Header),
                 render_Histogram("easy", my_stats),

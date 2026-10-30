@@ -6,17 +6,13 @@ Author: joes-io
 """
 
 load("animation.star", "animation")
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("images/pubg_logo.png", PUBG_LOGO_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-# Encrypted API Key for "pubgstats"
-ENCRYPTED_API_KEY = "AV6+xWcEawALXuQUcd1HmnSJuJB57+ivDXPv546IFBbkFOuZVwO0g4T8A/26uo0AxNRN6CcNnGHru4vLRo3zDi6Hj0aps5oF1Dc8AnehLwQDQ2pjinO2b6b0oUZzzm7VfP8KLs62RLlQq6C4Xghd/3q5bq62ofmbuH12AL6/AzL1YpTUFNPSSB7hM7Bcroe5HU/GBTbseO6FoOu/SbNkN1MnDAv8VKvPU3ExhBbysJDj5bZI5Kz74mIgQ6Chxncyymk5Cgidr9FYT3JJYPo2PZIJLG5+c5EnPb+nJngOdtYO4xxPFJzv/H9x7pq4GA+Im+xTM0olAKk40o+ytsJaIe/epaNhmlg6cPj13zh4BalXc1D9hIXpcCP+J7yThDGlhaVVDZtC1P3q1e+Pknvt4pztLFAxMb3N00GAB+aNG8ZhfkDQ9Z8qAQm4OvRDb6D7OtVjphmOxOcwux0s3iaxbIVwJg=="
+PUBG_LOGO = PUBG_LOGO_ASSET.readall()
 
 # Default settings if no configuration set in Tidbyt app
 DEFAULT_PLAYER_NAME = "chocoTaco"
@@ -29,7 +25,6 @@ text_color = "#000000"
 background_render = render.Box(width = 64, height = 32, color = background_color)
 
 # Base64 PUBG logo displayed in app
-pubg_logo = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAAXNSR0IArs4c6QAAATlJREFUaEPtWEkOwyAMLP9/dKNUJaKWlzEmjQD3GDUOs3ijvDb/FYL/vQkfF+4kIB3wywBNAeqQWTNExGWlwDYESMVvVQKqk0sFiBBgdYiWLMlyWopF4nOpqZ3nFgLOoBKh1vPz3UcJqIx4FOJAWUDR+L1x2viIIy/FkoAvA6hCkt17laMpEInD1YMhbRApbJGDc/ZFvtmKIc0pSQBhBt4FkEIyQjmrA1CVOUV70hcugsgBI20QiW+JMTUByBzgJdgi7JMVnl3AUgn5IKpSbzF9ZA7wtJ0kQKrGZBROBxiDGTIfICkZqgHaqowcUGtt6YB/O6DnPsDjAGlERXb29l3r/oL7r9ZiQxci1m2Rp20ic4DVsiXwwwiQVJzh+ZBlaAagt26DWxIwM2jt7PA6nAQsyoDogEXxyrAO/E6qIVyYj7UAAAAASUVORK5CYII=""")
 
 # Cache timers for API calls (seconds)
 # 604800 = 7 days
@@ -47,12 +42,6 @@ stat_label_delay = name_delay + 7
 stat_label_duration = 7
 stat_delay = stat_label_delay + 7
 stat_duration = 7
-
-# API header to access PUBG developer API
-header = {
-    "Authorization": "Bearer {}".format(secret.decrypt(ENCRYPTED_API_KEY)),
-    "Accept": "application/vnd.api+json",
-}
 
 # Tuples are 0 = Stat label shown in options, 1 = API use, 2 = Tidbyt display label, 3 = Tidbyt display units of measure (if any)
 stat_details = [
@@ -88,7 +77,21 @@ stat_details = [
     ("Past Week's Kills", "weeklyKills", "PAST WEEK'S KILLS", ""),
 ]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
+    header = {
+        "Authorization": "Bearer {}".format(config.get("pubg_api_key")),
+        "Accept": "application/vnd.api+json",
+    }
+
     # Load user settings from Tidbyt app, or grab defaults
     player_name = config.str("player_name", DEFAULT_PLAYER_NAME)
     platform = config.str("platform", DEFAULT_PLATFORM)
@@ -98,74 +101,38 @@ def main(config):
     display_label = ""
     display_unit = ""
 
-    # Create player cache key
-    player_cache_key = player_name + "_" + platform
-
     # Get the player id from the player name and platform
-    # Check cache for id of entered player name on selected platform
-    player_id_cached = cache.get(player_cache_key)
+    # URL to request player data
+    url = "https://api.pubg.com/shards/{}/players?filter[playerNames]={}".format(platform, player_name)
 
-    # Use cached data if available
-    if player_id_cached != None:
-        player_id = player_id_cached
+    # Request player data
+    resp = http.get(url, headers = header, ttl_seconds = ttl_player_id)
 
-        # Otherwise make new API call
-    else:
-        # URL to request player data
-        url = "https://api.pubg.com/shards/{}/players?filter[playerNames]={}".format(platform, player_name)
+    # Check for API errors
+    if resp.status_code != 200:
+        # Display error on Tidbyt and end
+        return pretty_error(resp)
 
-        # Request player data
-        resp = http.get(url, headers = header)
+    # Get player id from API response
+    player_id = resp.json()["data"][0]["id"]
 
-        # Check for API errors
-        if resp.status_code != 200:
-            # Display error on Tidbyt and end
-            return pretty_error(resp)
+    # URL to request lifetime stats for player
+    url = "https://api.pubg.com/shards/{}/players/{}/seasons/lifetime".format(platform, player_id)
 
-        # Get player id from API response
-        player_id = resp.json()["data"][0]["id"]
+    # Add gamepad filter to Stadia API requests
+    if platform == "stadia":
+        url = url + "?filter[gamepad]=true"
 
-        # Set player id in cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(player_cache_key, str(player_id), ttl_seconds = ttl_player_id)
+    # Request lifetime stats for player
+    resp = http.get(url, headers = header, ttl_seconds = ttl_lifetime_stats)
 
-    # Get lifetime stats for that player id
-    # Create lifetime stats cache key
-    lifetime_stats_cache_key = player_id + "_" + platform
+    # Check for API errors
+    if resp.status_code != 200:
+        # Display error on Tidbyt and end
+        return pretty_error(resp)
 
-    # Check cache for lifetime stats for that player id on selected platform
-    lifetime_stats_cached = cache.get(lifetime_stats_cache_key)
-
-    # Use cached data if available
-    if lifetime_stats_cached != None:
-        lifetime_stats = lifetime_stats_cached
-
-        # Otherwise make new API call
-    else:
-        # URL to request lifetime stats for player
-        url = "https://api.pubg.com/shards/{}/players/{}/seasons/lifetime".format(platform, player_id)
-
-        # Add gamepad filter to Stadia API requests
-        if platform == "stadia":
-            url = url + "?filter[gamepad]=true"
-
-        # Request lifetime stats for player
-        resp = http.get(url, headers = header)
-
-        # Check for API errors
-        if resp.status_code != 200:
-            # Display error on Tidbyt and end
-            return pretty_error(resp)
-
-        # Encode JSON data to be stored in cache
-        lifetime_stats = json.encode(resp.json())
-
-        # Set cache with JSON object from lifetime_stats serialized to string
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(lifetime_stats_cache_key, str(lifetime_stats), ttl_seconds = ttl_lifetime_stats)
-
-    # Decode string back to JSON object to be read
-    lifetime_stats = json.decode(lifetime_stats)
+    # Encode JSON data to be stored in cache
+    lifetime_stats = resp.json()
 
     # Find label and unit type to display for selected stat
     for i in stat_details:
@@ -187,14 +154,113 @@ def main(config):
 
     # Render output to display
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 # Background
                 background_render,
 
                 # PUBG logo animation
                 animation.Transformation(
-                    child = render.Image(src = pubg_logo),
+                    child = render.Image(src = PUBG_LOGO),
+                    duration = logo_duration,
+                    delay = logo_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(-64, 0)],
+                        ),
+                    ],
+                ),
+
+                # Scrolling name animation
+                animation.Transformation(
+                    child = render.Padding(
+                        pad = (2, 2, 0, 0),
+                        child = render.Text(
+                            content = player_name,
+                            font = "CG-pixel-3x5-mono",
+                            color = text_color,
+                        ),
+                    ),
+                    duration = name_duration,
+                    delay = name_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(62, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                    ],
+                ),
+
+                # Scrolling stat label animation
+                animation.Transformation(
+                    child = render.Padding(
+                        pad = (2, 10, 0, 0),
+                        child = stat_label_child,
+                    ),
+                    duration = stat_label_duration,
+                    delay = stat_label_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(62, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                    ],
+                ),
+
+                # Scrolling stat animation
+                animation.Transformation(
+                    child = render.Padding(
+                        pad = (2, 18, 0, 0),
+                        child = render.Text(
+                            content = (calc_lifetime_stat(lifetime_stats, selected_stat) + display_unit),
+                            font = "6x13",
+                            color = text_color,
+                        ),
+                    ),
+                    duration = stat_duration,
+                    delay = stat_delay,
+                    keyframes = [
+                        animation.Keyframe(
+                            percentage = 0.0,
+                            transforms = [animation.Translate(62, 0)],
+                        ),
+                        animation.Keyframe(
+                            percentage = 1.0,
+                            transforms = [animation.Translate(0, 0)],
+                        ),
+                    ],
+                ),
+
+                # End delay animation
+                animation.Transformation(
+                    child = render.Box(),
+                    duration = 0,
+                    delay = end_delay,
+                    keyframes = [],
+                ),
+            ],
+        )))) if is_square() else render.Stack(
+            children = [
+                # Background
+                background_render,
+
+                # PUBG logo animation
+                animation.Transformation(
+                    child = render.Image(src = PUBG_LOGO),
                     duration = logo_duration,
                     delay = logo_delay,
                     keyframes = [
@@ -298,7 +364,25 @@ def pretty_error(resp):
 
     # Return render of error to Tidbyt
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                # Background
+                background_render,
+
+                # Error message
+                render.Marquee(
+                    width = 64,
+                    child = render.Padding(
+                        pad = (0, 11, 0, 0),
+                        child = render.Text(
+                            content = "PUBG STATS ERROR: {}".format(error),
+                            color = text_color,
+                        ),
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 # Background
                 background_render,
@@ -405,6 +489,13 @@ def get_schema():
                 icon = "chartLine",
                 default = stats[0].value,
                 options = stats,
+            ),
+            schema.Text(
+                id = "pubg_api_key",
+                name = "PUBG API Key",
+                desc = "A PUBG API key to access the PUBG API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

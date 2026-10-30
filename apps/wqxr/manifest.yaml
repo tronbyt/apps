@@ -6,4 +6,12 @@ desc: Shows what's currently playing on WQXR, New York's Classical Music Radio S
 author: Andrew Westling
 fileName: wqxr.star
 packageName: wqxr
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - music
+  - classical
+  - real-time
+published: '2023-06-30T16:06:24Z'
+updated: '2026-10-01T18:17:08Z'

@@ -1,6 +1,3 @@
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -40,11 +37,7 @@ def main(config):
     )
 
 def get_rss_data():
-    cached_data = cache.get("rss_data")
-    if cached_data != None:
-        return json.decode(cached_data)
-
-    resp = http.get(RSS_URL)
+    resp = http.get(RSS_URL, ttl_seconds = CACHE_TTL)
     if resp.status_code != 200:
         print("Failed to fetch RSS data")
         return None
@@ -63,7 +56,6 @@ def get_rss_data():
         "pub_date": pub_date,
     }
 
-    cache.set("rss_data", json.encode(rss_data), ttl_seconds = CACHE_TTL)
     return rss_data
 
 def extract_tag_content(text, tag):
@@ -79,15 +71,10 @@ def extract_tag_content(text, tag):
     return text[start_index:end_index].strip()
 
 def render_logo(width, height):
-    cached_logo = cache.get("logo")
-    if cached_logo != None:
-        return render.Image(src = base64.decode(cached_logo), width = width, height = height)
-
-    resp = http.get(LOGO_URL)
+    resp = http.get(LOGO_URL, ttl_seconds = CACHE_TTL)
     if resp.status_code != 200:
         return render.Text("Failed to load logo")
 
-    cache.set("logo", base64.encode(resp.body()), ttl_seconds = CACHE_TTL)
     return render.Image(src = resp.body(), width = width, height = height)
 
 def render_build_info(rss_data, text_color, date_color, show_title, show_date):

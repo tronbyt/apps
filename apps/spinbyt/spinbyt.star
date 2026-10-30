@@ -5,13 +5,14 @@ Description: App that shows the nearest Spin scooter, its battery level, and num
 Author: zachlucas
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/scooter_image.png", SCOOTER_IMAGE_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+
+SCOOTER_IMAGE = SCOOTER_IMAGE_ASSET.readall()
 
 DEFAULT_URL = "https://gbfs.spin.pm/api/gbfs/v2_3/%s/free_bike_status"
 
@@ -38,25 +39,15 @@ def main(config):
     loc = json.decode(location)
 
     # Simple scooter image:
-    scooter_image = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAHKADAAQAAAABAAAAHAAAAABkvfSiAAABO0lEQVRIDe2V0Q3CMAxEA2IMviokGIYdugd8lIpJwlR8dQNmKFzFBcdOWkErQIhIVZzkzi9OIXXuU8173+J5K/8d0BkrSlVXlmVYp25sn0yo4VOCk8C2Wnfv8lTsooKmAM+jjGogATJWsqeGBtjemjucQxKC9DEHwdgAwK7dj3VsPu03Fc5uzR02WjfZ2AAny5xJ9AdmDub16d8/0sXrh2OducuBlwccTwNzSS3+MQMPoVkgLm7v3agPMiCAbffHQDdACE5heTjgzqmsqiraJNYvy1WYiz5PgMHYNA39riiKLtaJg0AEGoaluq67Kuk3QAljLpgY53rCpDY1F/0PCYOJDwA05mB6vk8fAaWxzyR1qVhWqdfNj4aCPhM1socem9Qb1XnMu9EGJNUmCdKx9Kd8BogEQyYN+erxFYZIkUf9Flp2AAAAAElFTkSuQmCC")
 
     # Network Request to get the local scooter information
     # Uses the GBFS standard: https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
-    # First, let's check if we have cached response json:
-    scooter_info_cached = cache.get("scooter_information")
-    if scooter_info_cached != None:
-        print("Cache hit, displaying cached scooter data.")
-        rep = json.decode(scooter_info_cached)
-    else:
-        # Make the GET request
-        print("Cache miss, calling Spin API.")
-        rep = http.get(url)
-        if rep.status_code != 200:
-            fail("Spin request failed with status %d", rep.status_code)
-        rep = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("scooter_information", json.encode(rep), ttl_seconds = 240)
+    # Make the GET request
+    print("Calling Spin API.")
+    rep = http.get(url, ttl_seconds = 240)
+    if rep.status_code != 200:
+        fail("Spin request failed with status %d", rep.status_code)
+    rep = rep.json()
 
     # Start with a super-far distance and no closest bike
     closest_distance = 100000
@@ -121,7 +112,7 @@ def main(config):
     # Scooter and battery UI box:
     scooter_and_battery_box = render.Column(
         children = [
-            render.Image(src = scooter_image),
+            render.Image(src = SCOOTER_IMAGE),
             full_battery,
         ],
     )

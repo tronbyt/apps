@@ -10,7 +10,6 @@ Comments: Written to display the price info of top cryptocurrencies on a Tidbyt 
 Copyright: © 2022 Jeroen Houttuin, Playak - jeroen@playak.com - https://playak.com
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
@@ -83,21 +82,13 @@ COINCOLORS["ZEC"] = "#0290FF"
 def main(config):
     currency = config.get("currency", "USD")
     API = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=" + currency + "&order=market_cap_desc&per_page=100"  # get more coins than needed, to compensate for excluded coins
-    cachename = "cachedjson" + currency  # keep once cache per currency
-    cachedjson = cache.get(cachename)
-    if cachedjson != None:
-        if DEBUG:
-            print("Displaying cached coin market data.")
-    else:
-        if DEBUG:
-            print("Cache needs refresh. Calling market data API.")
-        resp = http.get(API)
-        if resp.status_code != 200:
-            fail("API request failed with status %d", resp.status_code)
-        cachedjson = json.encode(resp.json())
+    if DEBUG:
+        print("Cache needs refresh. Calling market data API.")
+    resp = http.get(API, ttl_seconds = TTL)
+    if resp.status_code != 200:
+        fail("API request failed with status %d", resp.status_code)
+    cachedjson = json.encode(resp.json())
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cachename, cachedjson, ttl_seconds = TTL)
     COINS = []
     counter = 0
     BLACKLIST = " "  # start with a space

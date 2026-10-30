@@ -482,7 +482,7 @@ def get_date_str(timezone):
 def adjust_gametime(gametime_raw, config):
     #return gametime string and adjust for local time
     if config.bool("local_tz", False):
-        timezone = config.get("$tz", "America/New_York")
+        timezone = time.tz()
     else:
         timezone = "America/New_York"
     game_time = time.parse_time(gametime_raw).in_location(timezone)
@@ -672,7 +672,7 @@ def get_basketballgames(today_str, league):
     start_date = today_str
     end_date = today_str
     base_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/%s/scoreboard" % league
-    full_URL = base_URL + "?dates=" + start_date.replace("-", "") + "-" + end_date.replace("-", "")
+    full_URL = base_URL + "?dates=" + start_date.replace("-", "")
 
     #print(full_URL)
     rep = http.get(url = full_URL, ttl_seconds = 60)
@@ -738,7 +738,7 @@ def get_footballgames(today_str, league):
     start_date = today_str
     end_date = today_str
     base_URL = "https://site.api.espn.com/apis/site/v2/sports/football/%s/scoreboard" % league
-    full_URL = base_URL + "?dates=" + start_date.replace("-", "") + "-" + end_date.replace("-", "")
+    full_URL = base_URL + "?dates=" + start_date.replace("-", "")
 
     #print(full_URL)
     rep = http.get(url = full_URL, ttl_seconds = 60)
@@ -802,7 +802,7 @@ def get_soccergames(today_str, league):
     start_date = today_str
     end_date = today_str
     base_URL = "https://site.api.espn.com/apis/site/v2/sports/soccer/%s/scoreboard" % league
-    full_URL = base_URL + "?dates=" + start_date.replace("-", "") + "-" + end_date.replace("-", "")
+    full_URL = base_URL + "?dates=" + start_date.replace("-", "")
 
     #print(full_URL)
     rep = http.get(url = full_URL, ttl_seconds = 60)

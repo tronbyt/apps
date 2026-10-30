@@ -1,7 +1,16 @@
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", r = "render")
+load("render.star", "canvas", r = "render")
 load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     res = http.get("https://h3eypycsyiyi5pyun5svwvlri40rltki.lambda-url.us-east-2.on.aws", ttl_seconds = 15)
@@ -21,7 +30,7 @@ def main():
     if len(name) > 20:
         name = name[:17] + "..."
 
-    img = http.get("https://upload.wikimedia.org/wikipedia/commons/f/ff/Vesta_Rotation.gif").body()
+    # img = http.get("https://upload.wikimedia.org/wikipedia/commons/f/ff/Vesta_Rotation.gif").body()
 
     raw_date = neo.get("date", "N/A")
     parts = raw_date.split("-")
@@ -42,9 +51,13 @@ def main():
     return r.Root(
         child = r.Stack(
             children = [
-                r.Box(width = 64, height = 32, padding = 1, color = "#000000", child = r.Box(width = 63, height = 31, color = "#000000")),
+                r.Box(width = 64, height = canvas.height(), padding = 1, color = "#000000", child = r.Box(width = 63, height = canvas.height() - 1, color = "#000000")),
                 #r.Box(width=63, height=31, color="#000000"),
+                # Four lines totalling 29 rows; on a square panel the column
+                # expands and spreads them down the panel.
                 r.Column(
+                    expanded = is_square(),
+                    main_align = "space_evenly" if is_square() else "start",
                     children = [
                         r.Row(
                             children = [

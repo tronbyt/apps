@@ -4,8 +4,8 @@ Displays the latest status for a given repository in the design of GitHub's Stat
 
 The Personal Access token should be scoped with `repo:read` for whichever repository you want to listen to.
 
-![GitHub Badge for Tidbyt - Success Example](screenshot_success.png)
-![GitHub Badge for Tidbyt - Failing Example](screenshot_failing.png)
-![GitHub Badge for Tidbyt - Loading Example](screenshot_processing.png)
-![GitHub Badge for Tidbyt - Neutral Example](screenshot_cancelled.png)
-![GitHub Badge for Tidbyt - Faulted Example](screenshot_fault.png)
+![GitHub Badge for Tidbyt - Success Example](screenshot_success.webp)
+![GitHub Badge for Tidbyt - Failing Example](screenshot_failing.webp)
+![GitHub Badge for Tidbyt - Loading Example](screenshot_processing.webp)
+![GitHub Badge for Tidbyt - Neutral Example](screenshot_cancelled.webp)
+![GitHub Badge for Tidbyt - Faulted Example](screenshot_fault.webp)

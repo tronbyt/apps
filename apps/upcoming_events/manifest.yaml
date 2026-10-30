@@ -4,7 +4,11 @@ name: Events List
 summary: List of upcoming events
 desc: Displays a list of upcoming events from a Google Calendar iCal URL.
 author: jblaker
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - productivity
+  - news
+  - utility
 published: '2025-03-23T15:43:11Z'
-updated: '2025-10-23T15:05:50Z'
-tags: []
+updated: '2025-11-29T17:52:33Z'

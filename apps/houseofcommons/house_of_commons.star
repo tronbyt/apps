@@ -9,7 +9,7 @@ load("bsoup.star", "bsoup")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 SOURCE = "source"
@@ -112,7 +112,10 @@ FONT = "tom-thumb"
 SIX_HOURS = 60 * 60 * 6
 
 def extract_int(s):
-    return int("".join([c for c in s.elems() if c.isdigit()]))
+    digits = "".join([c for c in s.elems() if c.isdigit()])
+    if not digits:
+        return 0
+    return int(digits)
 
 def extract_percentage(s):
     return float(s.strip().removesuffix("%").strip()) / 100.0
@@ -233,7 +236,8 @@ def render_seats(predictions, source):
 
 def render_error(msg):
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Box(
                     width = 64,
@@ -256,7 +260,7 @@ def render_error(msg):
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
 def fetch_source(source):
@@ -277,8 +281,8 @@ def new_statesman_predictions():
     predictions = {}
     for card in j[CARDS]:
         predictions[card[CATEGORY]] = {
-            SEATS: extract_int(card[TEXT][2]),
-            VOTE_SHARE: extract_percentage(card[TEXT][0]),
+            SEATS: extract_int(card[TEXT][3]),
+            VOTE_SHARE: extract_percentage(card[TEXT][1]),
         }
     return predictions
 
@@ -365,7 +369,8 @@ def main(config):
 
     return render.Root(
         delay = 2000,
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             cross_align = "center",
             children = [
                 render.Box(
@@ -385,7 +390,7 @@ def main(config):
                     child = render_seats(predictions, source),
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

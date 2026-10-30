@@ -4,4 +4,13 @@ name: Dryer
 summary: 'Notification: dryer'
 desc: Displays a notification that a dryer is done.
 author: savdagod
-recommended_interval: 5
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - smart-home
+  - utility
+  - wide 2x support
+published: '2025-04-06T20:57:21Z'
+updated: '2026-10-01T20:55:01Z'

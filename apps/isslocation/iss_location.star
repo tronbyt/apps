@@ -5,19 +5,17 @@ Description: Current city/country/ocean the ISS is flying over.
 Author: carmineguida
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-API_KEY = "AV6+xWcEoZ2Ghxo/Pq1V7vLvA85rHwn8myqaKgarAU7o8q+Jl3fXIJ4WeeR6AMvFbrgeUW4I2KPGG1/3pSwIscAPeNDLci4LPRpl4CbO+tc+fxhe1G6YKTkwNGaXfJrSWRZ3qhQS9oBEh/mRu/eA8sv4"
 API_URL = "http://api.open-notify.org/iss-now.json"
 GEO_URL = "http://api.geonames.org/findNearbyPlaceNameJSON?username="
 OCEAN_URL = "http://api.geonames.org/oceanJSON?username="
 FONT = "tom-thumb"
 LOC_FONT = "tb-8"
+
+TTL_SECONDS = 180
 
 ################################################################################
 
@@ -44,7 +42,7 @@ def get_geo_info(geonames):
 ################################################################################
 
 def get_lat_lon():
-    rep = http.get(API_URL)
+    rep = http.get(API_URL, ttl_seconds = TTL_SECONDS)
     if (rep.status_code != 200):
         fail("API failed wiht status %d", rep.status_code)
     lat = rep.json()["iss_position"]["latitude"]
@@ -62,7 +60,7 @@ def get_lat_lon():
 def get_ocean(api_key, lat, lon):
     temp_url = OCEAN_URL + api_key + "&lat=" + lat + "&lng=" + lon
     country = ""
-    rep = http.get(temp_url)
+    rep = http.get(temp_url, ttl_seconds = TTL_SECONDS)
     if (rep.status_code != 200):
         fail("API failed wiht status %d", rep.status_code)
 
@@ -79,14 +77,10 @@ def get_ocean(api_key, lat, lon):
 ################################################################################
 
 def get_iss_dict(api_key):
-    cached = cache.get("iss_dict")
-    if cached != None:
-        return json.decode(cached)
-
     (lat, lon) = get_lat_lon()
 
     temp_url = GEO_URL + api_key + "&lat=" + lat + "&lng=" + lon
-    rep = http.get(temp_url)
+    rep = http.get(temp_url, ttl_seconds = TTL_SECONDS)
     if (rep.status_code != 200):
         fail("API failed with status %d", rep.status_code)
 
@@ -99,17 +93,24 @@ def get_iss_dict(api_key):
         color = "#E29315"
 
     iss_dict = {"lat": lat, "lon": lon, "city": city, "country": country, "color": color}
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("iss_dict", str(iss_dict), ttl_seconds = 180)
     return iss_dict
 
 ################################################################################
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
-    api_key = config.get("api_key") or secret.decrypt(API_KEY)
+    api_key = config.get("api_key")
     if (api_key == None):
-        return render.Root(child = render.Text("Need api_key."))
+        # Centre the block on the square (64x64); other panels unchanged.
+        return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Need api_key."))) if is_square() else render.Text("Need api_key."))
 
     iss_dict = get_iss_dict(api_key)
 
@@ -125,9 +126,21 @@ def main(config):
     render_sep = render.Box(color = "#222222", width = 64, height = 1)
     render_loc = render.Padding(pad = (1, 0, 1, 1), child = render.WrappedText(content = content, font = LOC_FONT, color = iss_dict["color"]))
 
-    return render.Root(child = render.Column(children = [render_top, render_sep, render_loc]))
+    # Centre the block on the square (64x64); other panels unchanged.
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(children = [render_top, render_sep, render_loc]))) if is_square() else render.Column(children = [render_top, render_sep, render_loc]))
 
 ################################################################################
 
 def get_schema():
-    return schema.Schema(version = "1", fields = [])
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Geonames API Key",
+                desc = "API key for Geonames (http://www.geonames.org/enablefreewebservice)",
+                icon = "key",
+                secret = True,
+            ),
+        ],
+    )

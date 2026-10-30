@@ -93,7 +93,7 @@ def linear_scale(x):
     return x
 
 def main(config):
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     year = time.now().in_location(timezone).year
     cache_id = "%s/%s" % ("us-yield-curve", year)
     color_choice = config.get("graph_color", "Blue")
@@ -130,7 +130,6 @@ def main(config):
             min_yield = min(min_yield, min(yields))
             dates.append(this)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(cache_id, json.encode(dates), ttl_seconds = 60 * 60 * 12)
     else:
         print("Displaying cached data.")

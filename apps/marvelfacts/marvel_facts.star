@@ -13,17 +13,23 @@ load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-PUB_KEY = secret.decrypt("AV6+xWcE8WpLyDHcfeJ+PyFpvP+S4E2BPwV7/LV8IBTXIjGVaQve1CSKDLilApzDNPPurHlcqidgXIvrPZfyOeuHV1DUYpsOhwO3s0do+znLW3SucfVmPV98aTH1lRtTzDuJRYh9k1behyzgtwagj2QQd+f7jjaSiVf01UXzer9BSCVS7e0=")
-PRIV_KEY = secret.decrypt("AV6+xWcEW40A//3n/MUZz4dsj8AfAkQHP1ca3hkhPHEnIgDM4asTmfl1t+THgG/iwg8CaUJbnXtv0wGUN08sZQLPUMmJTmkCKmJrkyqw7SoqRR5sMiRwFEbCcqwXZSeYtypmdS8BrwHL1UA2bbTwGj+l/fSdcNyBBRajUFa3p36cLdso8+K5lFhXEnWVXw==")
 BASE_URL = "https://gateway.marvel.com/v1/public/characters?"
 LIMIT = "50"
 
-def main():
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def main(config):
     """Main Function
 
     Returns:
@@ -39,7 +45,7 @@ def main():
             char_series = cache.get("char_series")
         else:
             print("Miss! Calling Marvel API.")
-            char = getNew()
+            char = getNew(config)
             char_name = char[0]
             char_desc = char[1]
             char_comics = char[2]
@@ -47,7 +53,7 @@ def main():
             cache.set("new-char", "got", ttl_seconds = 1800)
     else:
         print("Miss! Calling Marvel API.")
-        char = getNew()
+        char = getNew(config)
         char_name = char[0]
         char_desc = char[1]
         char_comics = char[2]
@@ -58,6 +64,36 @@ def main():
         next_text = "Comics: " + str(char_comics) + "\nSeries: " + str(char_series)
     else:
         next_text = char_desc
+
+    text_column = render.Column(
+        children = [
+            render.Row(
+                expanded = True,
+                main_align = "center",
+                children = [render.Marquee(
+                    width = 62,
+                    height = 8,
+                    align = "center",
+                    child = render.Text(str(char_name), font = "Dina_r400-6"),
+                    scroll_direction = "horizontal",
+                )],
+            ),
+            render.Row(
+                main_align = "space_evenly",
+                cross_align = "center",
+                expanded = True,
+                children = [
+                    render.Marquee(
+                        width = 60,
+                        height = 22,
+                        align = "center",
+                        child = render.WrappedText(content = str(next_text), width = 64, font = "tb-8", align = "center"),
+                        scroll_direction = "vertical",
+                    ),
+                ],
+            ),
+        ],
+    )
 
     return render.Root(
         child = render.Stack(
@@ -70,40 +106,13 @@ def main():
                         color = "#000000",
                     ),
                 ),
-                render.Column(
-                    children = [
-                        render.Row(
-                            expanded = True,
-                            main_align = "center",
-                            children = [render.Marquee(
-                                width = 62,
-                                height = 8,
-                                align = "center",
-                                child = render.Text(str(char_name), font = "Dina_r400-6"),
-                                scroll_direction = "horizontal",
-                            )],
-                        ),
-                        render.Row(
-                            main_align = "space_evenly",
-                            cross_align = "center",
-                            expanded = True,
-                            children = [
-                                render.Marquee(
-                                    width = 60,
-                                    height = 22,
-                                    align = "center",
-                                    child = render.WrappedText(content = str(next_text), width = 64, font = "tb-8", align = "center"),
-                                    scroll_direction = "vertical",
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
+                # Centre the text on the square (64x64); other panels unchanged.
+                (render.Box(width = canvas.width(), height = canvas.height(), child = text_column)) if is_square() else text_column,
             ],
         ),
     )
 
-def getNew():
+def getNew(config):
     """Gets a new character from the API
 
     Returns:
@@ -111,14 +120,17 @@ def getNew():
     """
     now = str(time.now()).split(" ")[1]
 
-    if PRIV_KEY != None and PUB_KEY != None:
-        digest = str(now) + PRIV_KEY + PUB_KEY
+    public_key = config.get("marvel_public_key")
+    private_key = config.get("marvel_private_key")
+
+    if private_key != None and public_key != None:
+        digest = str(now) + private_key + public_key
         FULL_KEY = hash.md5(digest)
 
         MAX_OFFSET = 1562 - int(LIMIT) - 1
         OFFSET = random.number(0, MAX_OFFSET)
 
-        FINAL_URL = BASE_URL + "&limit=" + LIMIT + "&offset=" + str(OFFSET) + "&ts=" + str(now) + "&hash=" + FULL_KEY + "&apikey=" + PUB_KEY
+        FINAL_URL = BASE_URL + "&limit=" + LIMIT + "&offset=" + str(OFFSET) + "&ts=" + str(now) + "&hash=" + FULL_KEY + "&apikey=" + public_key
 
         full_list = http.get(FINAL_URL).body()
         full_json = json.decode(full_list)
@@ -147,5 +159,20 @@ def getNew():
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Text(
+                id = "marvel_public_key",
+                name = "Marvel Public Key",
+                desc = "Your Marvel Comics API Public Key. See https://developer.marvel.com/ for details.",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Text(
+                id = "marvel_private_key",
+                name = "Marvel Private Key",
+                desc = "Your Marvel Comics API Private Key. See https://developer.marvel.com/ for details.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )

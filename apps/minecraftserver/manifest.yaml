@@ -6,4 +6,10 @@ desc: Displays Minecraft Server Status. Number of players and server icon.
 author: Michael Blades
 fileName: minecraft_server.star
 packageName: minecraftserver
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - gaming
+  - tracking
+published: '2023-02-03T20:50:39Z'
+updated: '2025-12-23T13:24:18Z'

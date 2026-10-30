@@ -6,27 +6,36 @@ Author: Kyle Stark @kaisle51
 Thanks: Dubhouze-Tāvis/tavdog for general help and FtoC, Chad Milburn for dark mode logic, wshue0 for API stuff
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/celcius.png", CELCIUS_ASSET = "file")
+load("images/celcius_white.png", CELCIUS_WHITE_ASSET = "file")
+load("images/char_dash.png", CHAR_DASH_ASSET = "file")
+load("images/char_e.png", CHAR_E_ASSET = "file")
+load("images/char_eight.png", CHAR_EIGHT_ASSET = "file")
+load("images/char_five.png", CHAR_FIVE_ASSET = "file")
+load("images/char_four.png", CHAR_FOUR_ASSET = "file")
+load("images/char_nine.png", CHAR_NINE_ASSET = "file")
+load("images/char_one.png", CHAR_ONE_ASSET = "file")
+load("images/char_r.png", CHAR_R_ASSET = "file")
+load("images/char_seven.png", CHAR_SEVEN_ASSET = "file")
+load("images/char_six.png", CHAR_SIX_ASSET = "file")
+load("images/char_three.png", CHAR_THREE_ASSET = "file")
+load("images/char_two.png", CHAR_TWO_ASSET = "file")
+load("images/char_zero.png", CHAR_ZERO_ASSET = "file")
+load("images/fahrenheit.png", FAHRENHEIT_ASSET = "file")
+load("images/fahrenheit_white.png", FAHRENHEIT_WHITE_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
+IMG_CELCIUS = CELCIUS_ASSET.readall()
+IMG_CELCIUS_WHITE = CELCIUS_WHITE_ASSET.readall()
+IMG_FAHRENHEIT = FAHRENHEIT_ASSET.readall()
+IMG_FAHRENHEIT_WHITE = FAHRENHEIT_WHITE_ASSET.readall()
+
 DEFAULT_DARK_MODE = False
 CACHE_TTL_SECONDS = 1799  #half hour
 WEATHER_URL = "https://api.weather.gov/gridpoints/VEF/63,120/forecast/hourly"
-IMG_CELCIUS = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAANCAYAAACdKY9CAAAAAXNSR0IArs4c6QAAAE9JREFUKJGtkVEKACAIQ2d0/yvbRwaZxhJ6EEo4lymYqEWBR5GgJNftoGcdDpFz7XZxe1JgOdDCF9KBv5I6tKqICcoOAba4fUcAIOz/wwwDfZoPEer2YU8AAAAASUVORK5CYII=
-""")
-IMG_CELCIUS_WHITE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAANCAYAAACdKY9CAAAAAXNSR0IArs4c6QAAAFNJREFUKJGtkUkKwEAIBKuD//9y5zQgEzUZSJ1U1HYRgG0DSBKJFacLVrYTAPHosDXbVUOSupEq4mviK+XCv9IpXKdFY8GxQsX4uPyj5Y/3r3a4Ael+O/mTPITQAAAAAElFTkSuQmCC
-""")
-IMG_FAHRENHEIT = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAAEtJREFUKJGVkFEKACAIQ2d4/yvbRwZqhuxBKOG2UnAwr4KMocGG3sKBdg5FlFLVL35PergJ42AV/IjpACCTc7slanixoklAJ1C0f9jIHw8RR0OxxAAAAABJRU5ErkJggg==
-""")
-IMG_FAHRENHEIT_WHITE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAAE9JREFUKJGVkMENwDAIA88V+6/sviKRFKJyL0DYJhGAbQNIEok1pxtWtRMA8XE4zM7UkKTupIr4u7gJOnL66q/O5S9Nl5+p6CoYJ4zo3vACENE7+ZrutVcAAAAASUVORK5CYII=
-""")
 
 def main(config):
     dark_mode = config.bool("dark_mode") if config.bool("dark_mode") != None and config.bool("dark_mode") != "" else DEFAULT_DARK_MODE
@@ -96,7 +105,7 @@ def main(config):
             )
         else:
             return render.Image(
-                src = base64.decode(getTempDigit(tempFarray[i])),
+                src = getTempDigit(tempFarray[i]),
                 width = 9,
                 height = 15,
             )
@@ -137,7 +146,7 @@ def main(config):
             )
         else:
             return render.Image(
-                src = base64.decode(getTempDigit(tempCarray[i])),
+                src = getTempDigit(tempCarray[i]),
                 width = 9,
                 height = 15,
             )
@@ -233,16 +242,16 @@ def get_schema():
     )
 
 # number images
-IMG_ONE = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAACdJREFUKJFjYKAL+Poh4D8DAwMDEyEFeBUhA6IUEeUmysHw9h0MAAAICBNFsA0FpgAAAABJRU5ErkJggg=="""
-IMG_TWO = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAE5JREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDAhC6AzMemEQV8/RDwH6aICa9KKCBKEQu6FdjcRJTvcCrA6iZ8CmngO/QQRnY08b4jBACKkim05rA2PQAAAABJRU5ErkJggg=="""
-IMG_THREE = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAEZJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDAhC6AzMemEQV8/RDwH6aICa9KKCBKEQu6FdjcRJTv8AKCDkc2ecj5DgYAvLgsHMNwUW8AAAAASUVORK5CYII="""
-IMG_FOUR = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAEBJREFUKJFjYKAq+Poh4D8+cSZcCpH5TAxEAKIUscAY3AIbGJGtQOYz4nITTCFBazB8h0sBXkXIgChFRLmJegAAw84ifoWjgLsAAAAASUVORK5CYII="""
-IMG_FIVE = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAFJJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDABFMAE0BXAAdfPwT8x2YSDDAR4yaiFLEguwHZSmQ3EeU7vACmEaebkE2mge/QrUD2LeW+gwEAwSQptIi80uQAAAAASUVORK5CYII="""
-IMG_SIX = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAFBJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDABFMAE0BXAAdfPwT8x2YSDDAR4yaiFLEguwHZSmQ3EeU7nAqQxZlwKUTm08l3MD7xviMEAOAVMOimYoddAAAAAElFTkSuQmCC"""
-IMG_SEVEN = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAENJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDAhC6AzMemEQV8/RDwH6aICa9KKCBKEUErKTYExSScbkK2asj5DgYA9qIcEuzehakAAAAASUVORK5CYII="""
-IMG_EIGHT = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAElJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDABFMAE0BWANPIgmwSskJkk5mIcRNRiuDWIbsBnU+U73AqQBZnwqVwSPiOEAAAahE4ICNeiqcAAAAASUVORK5CYII="""
-IMG_NINE = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAExJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDABFMAE0BWANPIgmwSskJkk5mIcRNRiuDWIbsBnU+U7/ACmEacbqKx79CtoK7vYAAASyAw7AlgA1kAAAAASUVORK5CYII="""
-IMG_ZERO = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAExJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDABFMAE0BWANPIgmwSskJkk5mIcRNRinA6Gp84+SYx4VJIG9/BAxM5hNH5RMUdUQAAIjEyg2qVaS8AAAAASUVORK5CYII="""
-IMG_E = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAAEhJREFUKJFjYCACMMIYXz8E/EeX5BbYwMjAwMDABFMAE0BXAAdfPwT8x2YSDDAR4yaiFLEguwHZSmQ3EeU7nAqwumlI+o4QAACO/idMvTDKIgAAAABJRU5ErkJggg=="""
-IMG_R = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAADFJREFUKJFjYBjOgBGZ8/VDwH8Ym1tgAyOGImQF2BRiVYAMmIhRyIRLgmRFRLmJegAAfiMRpW0nYCcAAAAASUVORK5CYII="""
-IMG_DASH = """iVBORw0KGgoAAAANSUhEUgAAAAkAAAAPCAYAAAA2yOUNAAAAAXNSR0IArs4c6QAAACJJREFUKJFjYBjOgBGZ8/VDwH8Ym1tgAyOGImQF2BSOcAAAW6cIA5vDZfAAAAAASUVORK5CYII="""
+IMG_ONE = CHAR_ONE_ASSET.readall()
+IMG_TWO = CHAR_TWO_ASSET.readall()
+IMG_THREE = CHAR_THREE_ASSET.readall()
+IMG_FOUR = CHAR_FOUR_ASSET.readall()
+IMG_FIVE = CHAR_FIVE_ASSET.readall()
+IMG_SIX = CHAR_SIX_ASSET.readall()
+IMG_SEVEN = CHAR_SEVEN_ASSET.readall()
+IMG_EIGHT = CHAR_EIGHT_ASSET.readall()
+IMG_NINE = CHAR_NINE_ASSET.readall()
+IMG_ZERO = CHAR_ZERO_ASSET.readall()
+IMG_E = CHAR_E_ASSET.readall()
+IMG_R = CHAR_R_ASSET.readall()
+IMG_DASH = CHAR_DASH_ASSET.readall()

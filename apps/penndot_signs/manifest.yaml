@@ -1,0 +1,14 @@
+---
+id: penndot-signs
+name: PennDOT Signs
+summary: Display PennDOT DMS signs
+desc: Display messages from PennDOT DMS signage on PA highways.
+author: radiocolin
+supports2x: true
+supports64x64: true
+category: transit
+tags:
+  - utility
+  - social
+published: '2025-11-11T13:43:13Z'
+updated: '2026-10-23T23:58:02Z'

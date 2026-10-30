@@ -10,7 +10,6 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 DEFAULT_TEAM_ID = "ACN011"
@@ -19,15 +18,21 @@ GAME_INFO_CACHE_TTL_SECONDS = 120
 GAME_DETAIL_CACHE_TTL_SECONDS = 120
 GAME_INFO_URL = "https://en.cpbl.com.tw/home/getdetaillist"
 GAME_DETAIL_URL = "https://en.cpbl.com.tw/box/getlive"
-REQUEST_VERIFICATION_TOKEN_KEY = "AV6+xWcEb38Fuvn45zBGeaXER8+obOwGCyqs7cLDGYoOogOukLu8ChiRVIps8XAlxodTDZVzDjLk4k7uWXp4SNekQ3dDrwzSD8diFEydKDzS4wnikJOPDFyrrLqb6dN+r1STQFAqx6LC+uVnT9kmVC1dqHTUjfUuVpQCHTrlyEUB8feYcJ03MurXv1dmzLqp8mMkzwdZNqhzIEjfiwIdECIxQ+AfD6l6D9hmA4gXuVW2BxMr5Efu20xSMZTs/DjuCKg="
 
 def main(config):
-    request_verification_token = secret.decrypt(REQUEST_VERIFICATION_TOKEN_KEY) or config.get("dev_api_token")
+    request_verification_token = config.get("request_verification_token")
     target_team_id = config.str("target_team_id", DEFAULT_TEAM_ID)
     game_info = get_game_info(request_verification_token)
 
-    if game_info["GameADetailJson"] == None:
-        fail("Can't get games")
+    if game_info == None:
+        return render.Root(
+            child = render.WrappedText("Error fetching game info", color = "#ff0000"),
+        )
+
+    if game_info.get("GameADetailJson") == None:
+        return render.Root(
+            child = render.WrappedText("Can't get games", color = "#ff0000"),
+        )
 
     games = json.decode(game_info["GameADetailJson"])
 
@@ -85,6 +90,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "request_verification_token",
+                name = "Request Verification Token",
+                desc = "Your request verification token.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "target_team_id",
                 name = "team",
@@ -173,7 +185,8 @@ def get_game_info(request_verification_token):
 
     res = http.post(url = GAME_INFO_URL, form_body = form_body, ttl_seconds = GAME_INFO_CACHE_TTL_SECONDS)
     if res.status_code != 200:
-        fail("request to %s failed with status code: %d - %s" % (GAME_INFO_URL, res.status_code, res.body()))
+        print("request to %s failed with status code: %d" % (GAME_INFO_URL, res.status_code))
+        return None
     return res.json()
 
 def get_game_detail(request_verification_token, game_id):

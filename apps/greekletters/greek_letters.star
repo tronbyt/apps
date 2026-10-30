@@ -8,7 +8,7 @@ Author: Robert Ison
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LETTER_COLOR = "FFD700"
@@ -115,9 +115,10 @@ def main(config):
         display_items.append(add_padding_to_child_element(get_info_stack_for_letter(display_letter_item), 0, 24))
 
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = display_items,
-        ),
+        ))),
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
     )

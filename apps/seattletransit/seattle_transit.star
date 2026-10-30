@@ -8,14 +8,20 @@ Author: maxa010
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-ENCRYPTED_API_KEY = "AV6+xWcEhALFeAkaO4q1aYXDTm4yFiCx1H6qhmrLmXDZaapsABtJzAyD0TelD6CkpX8nNlxDU2deCXMUiVPNMAbovbSfCC0wUq8qsPF/A6PSdKXR4A9SVX5t9VA/gHsp4f1YGCVL40/E8edn61MMtb/4FYvp5derIaU4Gc5wmyUx9vPOeH5uyZdb"
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+    api_key = config.get("onebusaway_api_key")
 
     stopid = config.get("stop")
     if stopid == None:
@@ -73,7 +79,14 @@ def main(config):
         print("Miss! Calling OBA API.")
         rep = http.get(stop_url)
         if rep.status_code != 200:
-            fail("OBA request failed with status %d", rep.status_code)
+            return render.Root(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                    child = render.Text("API Error: %d" % rep.status_code, color = "#FF0000", font = "CG-pixel-3x5-mono"),
+                ))) if is_square() else render.Box(
+                    child = render.Text("API Error: %d" % rep.status_code, color = "#FF0000", font = "CG-pixel-3x5-mono"),
+                ),
+            )
 
         trip_count = len(rep.json()["data"]["entry"]["arrivalsAndDepartures"])
         print(trip_count)
@@ -307,7 +320,61 @@ def main(config):
 
     return render.Root(
         max_age = 60,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Box(height = 1),
+                render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [render.Marquee(width = 64, align = "center", child = render.Text(content = stop_name, color = default_color, font = font))],
+                ),
+                render.Box(height = 1),
+                render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Box(width = 12, height = 5, color = route_background[0], child =
+                                                                                            render.Marquee(width = 12, child = render.Text(content = routes[0], color = route_color[0], font = font))),
+                        render.Marquee(width = 40, align = "center", child = render.Text(content = headsigns[0], color = default_color, font = font)),
+                        render.Marquee(width = 12, align = "end", child = render.Text(content = arrivals[0], color = sched_Dev[0], font = font)),
+                    ],
+                ),
+                render.Box(height = 1),
+                render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Box(width = 12, height = 5, color = route_background[1], child =
+                                                                                            render.Marquee(width = 12, child = render.Text(content = routes[1], color = route_color[1], font = font))),
+                        render.Marquee(width = 40, align = "center", child = render.Text(content = headsigns[1], color = default_color, font = font)),
+                        render.Marquee(width = 12, align = "end", child = render.Text(content = arrivals[1], color = sched_Dev[1], font = font)),
+                    ],
+                ),
+                render.Box(height = 1),
+                render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Box(width = 12, height = 5, color = route_background[2], child =
+                                                                                            render.Marquee(width = 12, child = render.Text(content = routes[2], color = route_color[2], font = font))),
+                        render.Marquee(width = 40, align = "center", child = render.Text(content = headsigns[2], color = default_color, font = font)),
+                        render.Marquee(width = 12, align = "end", child = render.Text(content = arrivals[2], color = sched_Dev[2], font = font)),
+                    ],
+                ),
+                render.Box(height = 1),
+                render.Row(
+                    expanded = True,
+                    main_align = "space_between",
+                    children = [
+                        render.Box(width = 12, height = 5, color = route_background[3], child =
+                                                                                            render.Marquee(width = 12, child = render.Text(content = routes[3], color = route_color[3], font = font))),
+                        render.Marquee(width = 40, align = "center", child = render.Text(content = headsigns[3], color = default_color, font = font)),
+                        render.Marquee(width = 12, align = "end", child = render.Text(content = arrivals[3], color = sched_Dev[3], font = font)),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Box(height = 1),
                 render.Row(
@@ -378,6 +445,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "onebusaway_api_key",
+                name = "OneBusAway API Key",
+                desc = "Your OneBusAway API key. See https://developer.onebusaway.org/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.LocationBased(
                 id = "stop",
                 name = "Stop",
@@ -403,9 +477,9 @@ def get_schema():
         ],
     )
 
-def get_stops(location):
+def get_stops(location, config):
     loc = json.decode(location)
-    api_key = secret.decrypt(ENCRYPTED_API_KEY)
+    api_key = config.get("onebusaway_api_key")
 
     stop_search = "http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json?key=" + api_key + "&lat=" + str(loc["lat"]) + "&lon=" + str(loc["lng"])
     res = http.get(stop_search)

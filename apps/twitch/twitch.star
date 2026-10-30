@@ -5,14 +5,15 @@ Description: Display info for a Twitch username.
 Author: drudge
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/twitch_icon.png", TWITCH_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
+
+TWITCH_ICON = TWITCH_ICON_ASSET.readall()
 
 DEFAULT_CACHE_TTL = 120
 
@@ -23,62 +24,27 @@ kxbTOK6nj7W2ca7Fwd3NDV881ld1uUlsNJPc9rEKMA5tt61x0ibneb4btRapT7W3dSspykK53ZspDxLv
 YPZEg3QI4zXNn3maA
 """)
 
-TWITCH_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABQAAAAXCAYAAAALHW+jAAAAAXNSR0IArs4c6QAAAIRlWElmTU0AKgAA
-AAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAAB
-AAAAWgAAAAAAAABIAAAAAQAAAEgAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAABSgAwAEAAAAAQAA
-ABcAAAAABkfnLgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAA
-ADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4w
-Ij4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1z
-eW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
-eG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpP
-cmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAg
-PC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KGV7hBwAAA1lJREFUOBGNVUloFEEUfdXdMz0J0bgrgyh6UQ8K
-IgrJIVHUJBc9KAY8iJCDQRFFEA+exouCipi4QERBPOpB8OASIiYm4MkcFANGIYkR1IhrMpmtu8v3p6Zn
-shjjh+r6Vf//97eqagVS2yYdaX6pci31+gB83En2QCMNfqBEPhtRD2VVQKSSBkWwBn0wGuC2rgDW7YV2
-IlBaNGch0bEjwMALYKQHcCSy1jrd5EZwK/kDmLsCQe1+WOq/Yit5Czzgw0XAaqnTh1wHtzKeZIhAB7Cy
-TFcoCMwwK/OVPeoUyfcN6+eYLiO1bIU2ggkJoCWMyn85M0qL/I8RoLcDGB81a5G/6zXDtsWCRF1NHMvX
-kDIUwYzUfMNIRoaAmzuBMZYkpO4bQA/HVHK4MXO1ChIp+hIqWmE05CuW/t2ykByFs9DMXicbSoQzkxSC
-JAX/wjkoNED2krIx0Qt1pbb/BAybs2wVcLgLmLNAoAzVHjGzNCDfPJZD+wj+DSg2NKhcBKyvMQD59jGy
-1RvMWo6RAKbH4EXicP4OWEhVJlHOH4NCJHkY8uEJkEa97kb27TVEYxsxOK0pYfhiKHw4Cz9xCJCMV13I
-Pq5BFMsw7LuoLkWYD8cUPjUGuGWGt6nhREuRpsfJ04vsvWFk7dsRLd+FofIYNjfdU18Vr55AlYgxu/Pp
-nQbjH4G1jUD9IcDLQT9sBYafQ0XnMWUP2UwfI4tjwHKx+eh99U0emmkpg0VOfeL4DIw+Laat759lrU5C
-+bznY4PIBl8QVcvx3lHYFILJQyMpT7jqXDEfK8YrTIm7nsA/oR9cQtCfgJq/h4ElkauYCzftod9NY0tz
-h/oVPoGSprreMDllyd8ruOA51N4oAisLOxYHcik+pLyGSQ99lFUde6R+P9uqnW2dyjwvtHVo/F6QheQ0
-cGLvsFJmHg1dNg82L8pgJoUMuxxL5jAUC7C7+Yn6nZgCRhs436uxRhh0wkrQ09XteqFvo587C8ojsFI5
-XDjWrk6JsaiJjsx392m78V4pMtkTKpw0s5Bv2w5dmbbwbo6LxaMZnDverk6XpJKCVmdox5JOrn1BiV3W
-BNUqkdD5jo97PL+KYFmcFzDZT0BkRk/xVzMT2ETHec+ycWWnjl+u0yeELwHJ6v/oD9xZSVC/x8FQAAAA
-AElFTkSuQmCC
-""")
-
 def get_from_twitch_api(path, params, access_token, use_cache = True):
     if not access_token:
         return fail("No access token")
 
-    cache_key = "%s|%s|%s" % (access_token, path, params)
-    cached_res = cache.get(cache_key) if use_cache else None
+    # print("Fetching %s" % cache_key)
+    res = http.get(
+        url = "https://api.twitch.tv/helix%s" % path,
+        params = params,
+        headers = {
+            "Authorization": "Bearer %s" % access_token,
+            "Client-Id": TWITCH_CLIENT_ID,
+        },
+        ttl_seconds = DEFAULT_CACHE_TTL if use_cache else 0,
+    )
 
-    if not cached_res:
-        # print("Fetching %s" % cache_key)
-        res = http.get(
-            url = "https://api.twitch.tv/helix%s" % path,
-            params = params,
-            headers = {
-                "Authorization": "Bearer %s" % access_token,
-                "Client-Id": TWITCH_CLIENT_ID,
-            },
-        )
+    cached_res = res.body()
 
-        cached_res = res.body()
-
-        if res.status_code != 200:
-            # buildifier: disable=print
-            print("get_from_twitch_api failed: %s - %s " % (res.status_code, cached_res))
-            return None
-
-        if use_cache:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, cached_res, DEFAULT_CACHE_TTL)
+    if res.status_code != 200:
+        # buildifier: disable=print
+        print("get_from_twitch_api failed: %s - %s " % (res.status_code, cached_res))
+        return None
 
     # else:
     #    print("Using cached %s" % cache_key)
@@ -234,12 +200,6 @@ def main(config):
 def get_token(params = None, refresh_token = None):
     has_refresh_token = (refresh_token != None)
 
-    # if we have a refresh token try to get a cached access token and return quickly
-    if has_refresh_token:
-        access_token = cache.get(refresh_token)
-        if access_token != None:
-            return access_token
-
     # if params is a string, assume it is json and decode it
     if type(params) == "string":
         params = json.decode(params)
@@ -261,6 +221,7 @@ def get_token(params = None, refresh_token = None):
             client_secret = TWITCH_CLIENT_SECRET,
         ),
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 600,
     )
 
     if res.status_code != 200:
@@ -272,10 +233,6 @@ def get_token(params = None, refresh_token = None):
 
     if not has_refresh_token:
         refresh_token = token_params["refresh_token"]
-
-    # cache the access token so it can be reteived using the refresh token
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
 
     return access_token if has_refresh_token else refresh_token
 

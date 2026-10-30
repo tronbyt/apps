@@ -4,4 +4,14 @@ name: Github Repos
 summary: Status of up to 3 repos
 desc: Shows the workflow status of up to 3 workflows.
 author: tavdog
-recommended_interval: 5
+recommendedInterval: 5
+fileName: github_repos.star
+packageName: githubrepos
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+published: '2025-03-14T02:48:54Z'
+updated: '2026-10-01T21:17:57Z'

@@ -11,9 +11,21 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+WIKIPEDIA_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAQAAAClB0z9AAAAHUlEQVR42mNgYPgPB0AOkIBxQBhK
+4eIiGCAS1SgAimpBv3jp7u8AAAAASUVORK5CYII=""")
+WIKIPEDIA_THUMBNAIL = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAQAAADZc7J/AAABk0lEQVR42t3Vv2uTQRgH8CcRUdRB
+RNSioIjUQXRQBG2xk9BBJ1FwEooEF8lW/4FMNpNi/bk4mLFFQxdBQZwihTiIUMFBRUTQQVtM5W1z
+H0GylTTRdxG/tzzD3QfuhvtGhGIqpWbK6D8pS81UUozfx2v+MqmmGKkkR1IpUjMX0IwskyNZFnLm
+fwKqKp31DHc680Pc68xzvunsUV0JvHRRCHWf8cqQMOod3jhrrZoFSxpOKSibXQnw3WahDmgo2KmF
+5LBLAMac6f4GV4QRACeFG5ix3gfAVxvMdgc+WqfgBeCpsNtPQ8oAJozQHWBMOAdIjgkXbPQJsGyv
+6dWB14rWeAt4JIRxAHX7LK8OcFq4DGg7KDwAMOo6vYDnwiZfAMeFQ9pgzhbzPYHOzSvgsW0GhWlQ
+Nk5vgClhu5bkhKr7whHJvK3e9we0DQp3PTHgh8weYcZN5+kP4Law37BrYFI46oBG/0DLDmGXRdAy
+IAzTP0BFuAVgQpj6M2DBVUsAFk1q/7s/UsrkSMpyF0vuastfrnnr/RfBJHmDsmOptgAAAABJRU5E
+rkJggg==
+""")
+
 WIKIPEDIA_URL = "https://api.wikimedia.org/feed/v1/wikipedia/%s/featured/%s"
-WIKIPEDIA_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAYAAAAPDoR2AAAALUlEQVQIW2NkAIL/QACikQEjCIAkgBRIAVwOxkeRhAtCFROWBJmHrgsshs9BAO7FNfeFAdnIAAAAAElFTkSuQmCC")
-WIKIPEDIA_THUMBNAIL = base64.decode("iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAM6SURBVFhH7ZfLK7RxFMd/80xvhIUklyiSWIh6SbmEjbKgpkRZKclrIyv8A1aYjetMk4WFWVJko9hY0ZRZoCgLJAkb5JLb9/2d85x554m5WbwzG5966jnfM/Oc7+/8Ls+MIgAYHx8fffra1deLjv8L9Gyp0adDw1rcy5+II1LTsJEbm83mYTdxRhv4QwZ2tYHfosUVbcBve9H80ogWV141NpoPiROCuRITyI+BL2vA6XSq5+dniUwaGhpUU1OT8ng86urqSlSlysvLlcPhUPPz8+ry8lJUpTo7O1VOTo6anp4WxSQ5OVkNDQ1JJJABK36/H729vWSKr9XVVeiHc25vbw91dXWst7S04OTkhPWjoyN0dHRAbyZ4vV7c399DL3Bsb2+jtbUVeptjcHAQPp+PP2/liwHi9vYW6enp/wxYoYfSA/Py8vD4+MiaPktQWVmJ/v5+jq309PSgvb1doq+ENECMjIywgcbGRlGCNDc3c25mZobjtbU16Pbi7OyM4wA3NzdISUkJOfIAYQ2cn58jKSmJR7uzsyOqyebmJhsoKCiAXi88LdTiz4yPj4ccgJWwBghqHxXSi0oUE2p5TU0N57q7u5GamoqLiwvJmry9vaGoqAjLy8uihCaigYODAxiGAbvdjuPjY1FNVlZW2ABdw8PDogahtVNcXMxGIhHRANHW1sZFBgYGRDF5f3+H3oacW1xcFDUI7ZKpqSmJwhPVwNbWFhdJS0vD9fW1qCa1tbWcq6ioYEMBDg8PkZGRgbu7O1HCE9WAdb5HR0dFBdbX15GVlYWSkhLOWeeaFmSoaQlFVAPE0tISF8nOzua9T6b06YiJiQksLCxwrqqqinUadWZmJk5PT+XbkYnJALU3MFJ9HGNjYwO5ubl4eHiA/jmBwsJCztF5MDc3h66uLvlmdGIyQLjdbi5SWlqK+vp6TE5OSgaYnZ3lXHV1NcrKyvi0jJWYDVDr9QuGC+Xn5+Pp6UkyZo46Qjky9x1iNkDQIqQiLpdLlCB06lGO1st3+JYBesuNjY3xm+4z1BGaCut2jIWf34SGbsCr3Mcdqk0d2DfDhLBPBlzmfUJwURsS+ueUbdCNFhLw91ypvxbdg++ANBC+AAAAAElFTkSuQmCC")
+WIKIPEDIA_HEADER = {"Accept": "application/json", "User-Agent": "WikiPageToday/Application"}
 
 TTL_TIME = 86400
 MARQUEE_DELAY = 150
@@ -24,7 +36,7 @@ DEFAULT_COLOR = "#FFFFFF"
 def get_featured_article_json(lang, date):
     url = WIKIPEDIA_URL % (lang, date)
 
-    article_json = http.get(url, ttl_seconds = TTL_TIME).json()
+    article_json = http.get(url, headers = WIKIPEDIA_HEADER, ttl_seconds = TTL_TIME).json()
     return article_json
 
 def extract_article_information(article_json):
@@ -33,7 +45,7 @@ def extract_article_information(article_json):
     extract = article["extract"]
     description = get_reduced_extract(extract)
     if "thumbnail" in article and "source" in article["thumbnail"]:
-        image = http.get(article["thumbnail"]["source"], ttl_seconds = TTL_TIME).body()
+        image = http.get(article["thumbnail"]["source"], headers = WIKIPEDIA_HEADER, ttl_seconds = TTL_TIME).body()
     else:
         image = WIKIPEDIA_THUMBNAIL
     return (title, description, image)

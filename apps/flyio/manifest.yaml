@@ -6,4 +6,12 @@ desc: View current status of your Fly.io App's machines.
 author: Cavallando
 fileName: flyio.star
 packageName: flyio
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tracking
+  - tech
+  - utility
+published: '2024-10-07T16:21:11Z'
+updated: '2026-10-01T21:08:18Z'

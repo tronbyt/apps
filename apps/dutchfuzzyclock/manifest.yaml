@@ -6,4 +6,14 @@ desc: Display the time in Dutch, human-readable way.
 author: Remy Blok
 fileName: dutch_fuzzy_clock.star
 packageName: dutchfuzzyclock
-recommended_interval: 0
+recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - dutch
+  - utility
+  - clock
+  - education
+published: '2022-06-22T01:18:11Z'
+updated: '2026-10-01T20:55:01Z'

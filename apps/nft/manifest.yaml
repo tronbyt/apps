@@ -6,4 +6,10 @@ desc: Displays a random NFT associated with an Ethereum public address.
 author: nipterink
 fileName: nft.star
 packageName: nft
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - crypto
+published: '2022-02-25T16:37:03Z'
+updated: '2026-10-01T22:07:01Z'

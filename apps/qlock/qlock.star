@@ -5,41 +5,63 @@ Description: Custom clock with time, binary, beats, and date; all with a custom 
 Author: craigerskine
 """
 
-load("encoding/base64.star", "base64")
+load("images/at.png", AT_ASSET = "file")
+load("images/font_lg_char_0.png", FONT_LG_CHAR_0_ASSET = "file")
+load("images/font_lg_char_1.png", FONT_LG_CHAR_1_ASSET = "file")
+load("images/font_lg_char_2.png", FONT_LG_CHAR_2_ASSET = "file")
+load("images/font_lg_char_3.png", FONT_LG_CHAR_3_ASSET = "file")
+load("images/font_lg_char_4.png", FONT_LG_CHAR_4_ASSET = "file")
+load("images/font_lg_char_5.png", FONT_LG_CHAR_5_ASSET = "file")
+load("images/font_lg_char_6.png", FONT_LG_CHAR_6_ASSET = "file")
+load("images/font_lg_char_7.png", FONT_LG_CHAR_7_ASSET = "file")
+load("images/font_lg_char_8.png", FONT_LG_CHAR_8_ASSET = "file")
+load("images/font_lg_char_9.png", FONT_LG_CHAR_9_ASSET = "file")
+load("images/font_sm_char_0.png", FONT_SM_CHAR_0_ASSET = "file")
+load("images/font_sm_char_1.png", FONT_SM_CHAR_1_ASSET = "file")
+load("images/font_sm_char_2.png", FONT_SM_CHAR_2_ASSET = "file")
+load("images/font_sm_char_3.png", FONT_SM_CHAR_3_ASSET = "file")
+load("images/font_sm_char_4.png", FONT_SM_CHAR_4_ASSET = "file")
+load("images/font_sm_char_5.png", FONT_SM_CHAR_5_ASSET = "file")
+load("images/font_sm_char_6.png", FONT_SM_CHAR_6_ASSET = "file")
+load("images/font_sm_char_7.png", FONT_SM_CHAR_7_ASSET = "file")
+load("images/font_sm_char_8.png", FONT_SM_CHAR_8_ASSET = "file")
+load("images/font_sm_char_9.png", FONT_SM_CHAR_9_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+IMG_AT = AT_ASSET.readall()
 
 # contants
 COLOR_LIGHT = "#FFF"
 COLOR_MEDIUM = "#AAA"
 COLOR_DARK = "#444"
 COLOR_ACTIVE = "#60A5FA"
-IMG_AT = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAABnRSTlMARwBwAEyv7uYjAAAAHklEQVR4AWMAAvcCHwiCchhAAMoGYTQlCFUIPlwSACKBDShuPBCFAAAAAElFTkSuQmCC"
+
 FONT_LG = {
-    0: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAGklEQVR4AWMAAvcCHwhCcBBCcBla8hEI3T0ApgwoeZVEgsQAAAAASUVORK5CYII=",
-    1: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAF0lEQVR4AWMAAvcCHyBiAAMoH11owPgAx6oVQCDcnwcAAAAASUVORK5CYII=",
-    2: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAIUlEQVR4AWNwL/CBIwYgAFIoQnCAm4+iHl0zUcYgEDofAM6RI2oKctaHAAAAAElFTkSuQmCC",
-    3: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAHUlEQVR4AWNwL/CBIwYgAFIoQnCAnY+unmL9aJoBSgkkbYNr508AAAAASUVORK5CYII=",
-    4: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAHUlEQVR4AWNwL/ABIgYGKIM8PgIxAAEKHw7I4wMA0aohZCE1VpkAAAAASUVORK5CYII=",
-    5: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAHklEQVR4AWNwL/BBRjj4DDCAjQ9H6HzCGjHtQ9MMAK81JG2nx/FMAAAAAElFTkSuQmCC",
-    6: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAIklEQVR4AWMAAvcCHwiCcTD5DDCAycdUj4wQ6vHxEQjdPQC+XCRtb/kf7gAAAABJRU5ErkJggg==",
-    7: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAG0lEQVR4AWNwL/BBRhh8OMDHR+hC4aCrJIMPAFA9HFUSvEi6AAAAAElFTkSuQmCC",
-    8: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAHElEQVR4AWMAAvcCHwhCcBBCcBl8fASiVD+6ewBH8Sp/UnvjJQAAAABJRU5ErkJggg==",
-    9: "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAIAAADzWwNnAAAABnRSTlMARwBwAEyv7uYjAAAAIUlEQVR4AWMAAvcCHwhCcBBCcBm8fJxGMMABbj6mfgQHAAZGJG3IQD0FAAAAAElFTkSuQmCC",
+    0: FONT_LG_CHAR_0_ASSET.readall(),
+    1: FONT_LG_CHAR_1_ASSET.readall(),
+    2: FONT_LG_CHAR_2_ASSET.readall(),
+    3: FONT_LG_CHAR_3_ASSET.readall(),
+    4: FONT_LG_CHAR_4_ASSET.readall(),
+    5: FONT_LG_CHAR_5_ASSET.readall(),
+    6: FONT_LG_CHAR_6_ASSET.readall(),
+    7: FONT_LG_CHAR_7_ASSET.readall(),
+    8: FONT_LG_CHAR_8_ASSET.readall(),
+    9: FONT_LG_CHAR_9_ASSET.readall(),
 }
 
 FONT_SM = {
-    0: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAD0lEQVR42mNAgP+oFFwcADLwAv4ksZ7pAAAAAElFTkSuQmCC",
-    1: "iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFCAQAAADFuvUXAAAADUlEQVR42mOAgP8YBAAp7wP9I6P5+wAAAABJRU5ErkJggg==",
-    2: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAEElEQVR42mOAgf9ACARY+ABD3wP9H1yfMQAAAABJRU5ErkJggg==",
-    3: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAEElEQVR42mOAgf9AyICVBwBH2wP9sY99VQAAAABJRU5ErkJggg==",
-    4: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAE0lEQVR42mMAgv9ADKdg7P9wCgBUzgX7pCQQ2wAAAABJRU5ErkJggg==",
-    5: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAD0lEQVR42mNAgP8M/7GyAUPfA/1fwkwYAAAAAElFTkSuQmCC",
-    6: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAEklEQVR42mMAgv9ACKXgAIkNAHOvBPy7Y1D1AAAAAElFTkSuQmCC",
-    7: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAEUlEQVR42mOAgf9AiEwxwPkAbbUH+SXwZucAAAAASUVORK5CYII=",
-    8: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAD0lEQVR42mNAgP8MDFh5ACIBAf8m5PBAAAAAAElFTkSuQmCC",
-    9: "iVBORw0KGgoAAAANSUhEUgAAAAMAAAAFCAQAAAAqeJ4pAAAAEElEQVR42mNAgP8o7P9wCgA17QT8awBcmwAAAABJRU5ErkJggg==",
+    0: FONT_SM_CHAR_0_ASSET.readall(),
+    1: FONT_SM_CHAR_1_ASSET.readall(),
+    2: FONT_SM_CHAR_2_ASSET.readall(),
+    3: FONT_SM_CHAR_3_ASSET.readall(),
+    4: FONT_SM_CHAR_4_ASSET.readall(),
+    5: FONT_SM_CHAR_5_ASSET.readall(),
+    6: FONT_SM_CHAR_6_ASSET.readall(),
+    7: FONT_SM_CHAR_7_ASSET.readall(),
+    8: FONT_SM_CHAR_8_ASSET.readall(),
+    9: FONT_SM_CHAR_9_ASSET.readall(),
 }
 
 def zero_pad(number, width):
@@ -65,7 +87,7 @@ def render_digits(value, width, font = FONT_SM, color = COLOR_MEDIUM, spacing = 
 def render_digit(digit, font, color):
     return render.Stack(children = [
         render.Box(width = 5 if font == FONT_LG else (2 if digit == "1" else 3), height = 10 if font == FONT_LG else 5, color = color),
-        render.Image(src = base64.decode(font[int(digit)])),
+        render.Image(src = font[int(digit)]),
     ])
 
 def main(config):
@@ -141,7 +163,7 @@ def main(config):
                                     render.Stack(
                                         children = [
                                             render.Box(width = 5, height = 5, color = "#666"),
-                                            render.Image(src = base64.decode(IMG_AT)),
+                                            render.Image(src = IMG_AT),
                                         ],
                                     ),
                                     render.Box(width = 2, height = 1),

@@ -6,4 +6,11 @@ desc: Displays the latest tagline from the top of popular tech news site The Ver
 author: '@joevgreathead'
 fileName: verge_taglines.star
 packageName: vergetaglines
-recommended_interval: 10
+recommendedInterval: 10
+supports64x64: true
+category: news
+tags:
+  - tech
+  - news
+published: '2022-04-29T01:20:53Z'
+updated: '2026-10-01T18:52:35Z'

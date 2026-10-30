@@ -6,4 +6,11 @@ desc: Display detailed, decoded METAR information.
 author: SamuelSagarino
 fileName: detailedmetar.star
 packageName: detailedmetar
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - weather
+  - utility
+published: '2023-04-19T19:07:07Z'
+updated: '2026-10-01T20:55:01Z'

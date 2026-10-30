@@ -6,4 +6,11 @@ desc: This app shows a visual representation of currently active chess games for
 author: Neal Wright
 fileName: chess_viewer.star
 packageName: chessviewer
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - gaming
+  - real-time
+published: '2022-07-20T18:05:44Z'
+updated: '2026-10-17T19:08:50Z'

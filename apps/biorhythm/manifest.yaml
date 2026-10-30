@@ -6,4 +6,11 @@ desc: Display biorhythm plots based on your birthday.
 author: J. Keybl
 fileName: biorhythm.star
 packageName: biorhythm
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: health
+tags:
+  - lifestyle
+  - biology
+published: '2023-06-02T14:06:32Z'
+updated: '2026-10-01T17:39:02Z'

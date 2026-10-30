@@ -8,7 +8,7 @@ Author: Conor McLaughlin
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def get_schema():
@@ -47,6 +47,7 @@ def get_schema():
                 name = "client_secret",
                 desc = "From OpenSky API Client details (Note: OpenSky requiring new OAuth2 flow, replacing old Username + Password auth)",
                 icon = "lock",
+                secret = True,
             ),
         ],
     )
@@ -172,7 +173,19 @@ def get_typecode(icao24):
 
 def render_error(status_code):
     screen = render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            cross_align = "center",
+            children = [
+                render.Row(
+                    children = [
+                        render.Image(src = http.get("https://cdn-icons-png.flaticon.com/256/683/683094.png").body(), height = 15),
+                        render.Text(content = "     ", height = 15, offset = 1, font = "6x13", color = "#fcf7c5"),
+                    ],
+                ),
+                render.WrappedText(content = "HTTP" + str(status_code), color = "#f7ba99"),
+            ],
+        ))) if is_square() else render.Column(
             cross_align = "center",
             children = [
                 render.Row(
@@ -216,7 +229,19 @@ def process_states(state_list, your_coord):
 
 def render_empty():
     screen = render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            cross_align = "center",
+            children = [
+                render.Row(
+                    children = [
+                        render.Image(src = http.get("https://cdn-icons-png.flaticon.com/256/683/683094.png").body(), height = 15),
+                        render.Text(content = "     ", height = 15, offset = 1, font = "6x13", color = "#fcf7c5"),
+                    ],
+                ),
+                render.WrappedText(content = "No Planes Overhead", color = "#f7ba99"),
+            ],
+        ))) if is_square() else render.Column(
             cross_align = "center",
             children = [
                 render.Row(
@@ -236,7 +261,26 @@ def render_plane(planes):
     typecode = get_typecode(planes[0]["icao24"])
     print(typecode)
     screen = render.Root(
-        render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            cross_align = "center",
+            children = [
+                render.Row(
+                    children = [
+                        render.Image(src = http.get("https://cdn-icons-png.flaticon.com/256/683/683094.png").body(), height = 15),
+                        render.Text(content = " %s" % planes[0]["callsign"], height = 15, offset = 1, font = "6x13", color = "#fcf7c5"),
+                    ],
+                ),
+                render.Text(content = "%s %s %s %s" % (typecode, planes[0]["dist_from_you"], planes[0]["arrow"], planes[0]["location_vs_you"])),
+                render.Marquee(
+                    child = render.Text(content = "Heading %s at %d mph, Altitude %d ft, %s" % (planes[0]["heading"], planes[0]["speed"], planes[0]["altitude"], planes[0]["climb"])),
+                    scroll_direction = "horizontal",
+                    offset_end = 64,
+                    width = 64,
+                    delay = 100,
+                ),
+            ],
+        ))) if is_square() else render.Column(
             cross_align = "center",
             children = [
                 render.Row(
@@ -285,6 +329,15 @@ def get_fresh_token(client_id, client_secret):
 
     return token_json["access_token"]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     lat = float(config.str("lat", "34.023"))
     lng = float(config.str("lng", "-118.496"))
@@ -298,10 +351,10 @@ def main(config):
     print(your_coord)
 
     params = {
-        "lamin": str(math.round(bbox["lamin"] / .001) * .001),
-        "lomin": str(math.round(bbox["lomin"] / .001) * .001),
-        "lamax": str(math.round(bbox["lamax"] / .001) * .001),
-        "lomax": str(math.round(bbox["lomax"] / .001) * .001),
+        "lamin": str(math.round(bbox["lamin"] / 0.001) * 0.001),
+        "lomin": str(math.round(bbox["lomin"] / 0.001) * 0.001),
+        "lamax": str(math.round(bbox["lamax"] / 0.001) * 0.001),
+        "lomax": str(math.round(bbox["lomax"] / 0.001) * 0.001),
         "extended": "1",
     }
 
@@ -311,7 +364,13 @@ def main(config):
     # If we have no valid token, return a setup screen (lets pixlet check pass)
     if token == "invalid-token":
         return render.Root(
-            render.Column(
+            # Centre the block on the square (64x64); other panels unchanged.
+            (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                children = [
+                    render.WrappedText(content = "Configure OpenSky: Missing Credentials", font = "5x8", color = "#f7ba99"),
+                ],
+                cross_align = "center",
+            ))) if is_square() else render.Column(
                 children = [
                     render.WrappedText(content = "Configure OpenSky: Missing Credentials", font = "5x8", color = "#f7ba99"),
                 ],

@@ -6,11 +6,22 @@ Author: jvivona
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("re.star", "re")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
 VERSION = 23248
+
+# Devices reject a webp over 460,000 bytes (firmware HTTP_BUFFER_SIZE_MAX) and
+# show an "oversize" screen instead. File size grows with scroll length, so cap
+# the marquee at a frame budget: ~690 bytes/frame worst case at 2x and ~430 on
+# 64x64 keeps the render under ~400 KB.
+MAX_SCROLL_FRAMES = 500 if canvas.is2x() else 900
+
+# pixlet's marquee silently clips content taller than 20x its height, so treat
+# that as not fitting either and drop whole items instead of cutting mid-list.
+MARQUEE_MAX_SCALE = 20
 
 # cache data for 15 minutes
 CACHE_TTL_SECONDS = 900
@@ -30,15 +41,69 @@ ARTICLE_FONT = "tb-8"
 ARTICLE_COLOR = "#65d0e6"
 SPACER_COLOR = "#000"
 ARTICLE_LINESPACING = 0
-ARTICLE_AREA_HEIGHT = 24
+ARTICLE_AREA_HEIGHT = canvas.height() - TITLE_HEIGHT  # 24 on 64x32
 
 RSS_STUB = "https://www.cbc.ca/webfeed/rss/rss-{}"
+
+# short section labels for the 2x header (the schema display names like
+# "Region - Kitchener-Waterloo" are far too long to fit beside the title)
+SECTION_TITLE = {
+    "topstories": "Top",
+    "world": "World",
+    "canada": "Canada",
+    "politics": "Politics",
+    "business": "Business",
+    "health": "Health",
+    "arts": "Arts",
+    "technology": "Tech",
+    "Indigenous": "Indigenous",
+    "offbeat": "Offbeat",
+    "sports": "Sports",
+    "sports-cfl": "CFL",
+    "sports-curling": "Curling",
+    "sports-figureskating": "Skating",
+    "sports-mlb": "MLB",
+    "sports-nba": "NBA",
+    "sports-nfl": "NFL",
+    "sports-nhl": "NHL",
+    "sports-soccer": "Soccer",
+    "canada-britishcolumbia": "BC",
+    "canada-calgary": "Calgary",
+    "canada-edmonton": "Edmonton",
+    "canada-hamiltonnews": "Hamilton",
+    "canada-kamloops": "Kamloops",
+    "canada-kitchenerwaterloo": "Kitchener",
+    "canada-london": "London",
+    "canada-manitoba": "Manitoba",
+    "canada-montreal": "Montreal",
+    "canada-newbrunswick": "N.B.",
+    "canada-newfoundland": "Nfld",
+    "canada-north": "North",
+    "canada-novascotia": "N.S.",
+    "canada-ottawa": "Ottawa",
+    "canada-pei": "PEI",
+    "canada-saskatchewan": "Sask",
+    "canada-saskatoon": "Saskatoon",
+    "canada-sudbury": "Sudbury",
+    "canada-thunderbay": "Thunder Bay",
+    "canada-toronto": "Toronto",
+    "canada-windsor": "Windsor",
+}
 
 def main(config):
     edition = config.get("news_edition", DEFAULT_NEWS)
 
     articlecount = int(config.get("articlecount", DEFAULT_ARTICLE_COUNT))
     articles = get_cacheable_data(edition.lower(), articlecount)
+
+    if canvas.is2x():
+        return render_2x(articles, edition)
+    return render_1x(articles)
+
+def render_1x(articles):
+    # 64x32 layout (unchanged): "CBC.ca News" title bar with headlines-only
+    # scrolling beneath it.
+    articles = fit_articles(articles, render_article, ARTICLE_AREA_HEIGHT)
 
     return render.Root(
         delay = 100,
@@ -66,6 +131,39 @@ def main(config):
         ),
     )
 
+def render_2x(articles, edition):
+    # 128x64 layout: fixed "CBC" + section header, then each article as a white
+    # headline followed by its description in the roomier canvas.
+    articles = fit_articles(articles, rows_2x, 55)
+
+    return render.Root(
+        delay = 100,
+        show_full_animation = True,
+        child = render.Column(
+            children = [
+                render.Box(
+                    width = 128,
+                    height = 9,
+                    color = TITLE_BKG_COLOR,
+                    child = render.Row(
+                        cross_align = "center",
+                        children = [
+                            render.Text("CBC", color = TITLE_TEXT_COLOR, font = ARTICLE_FONT),
+                            render.Box(width = 6, height = 1),
+                            render.Text(SECTION_TITLE.get(edition, edition), color = ARTICLE_SUB_TITLE_COLOR, font = ARTICLE_FONT),
+                        ],
+                    ),
+                ),
+                render.Marquee(
+                    height = 55,
+                    scroll_direction = "vertical",
+                    offset_start = 55,
+                    child = render.Column(children = rows_2x(articles)),
+                ),
+            ],
+        ),
+    )
+
 def render_article(news):
     #formats color and font of text
     news_text = []
@@ -77,6 +175,47 @@ def render_article(news):
         news_text.append(render.Box(width = 64, height = 8, color = SPACER_COLOR))
 
     return (news_text)
+
+def rows_2x(articles):
+    body = []
+    for article in articles:
+        body.append(render.WrappedText(content = clean_text(article[0]), color = TEXT_COLOR, font = ARTICLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 2, color = SPACER_COLOR))
+        desc = clean_text(article[1])
+        if desc != "":
+            body.append(render.WrappedText(content = desc, color = ARTICLE_COLOR, font = ARTICLE_SUB_TITLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 9, color = SPACER_COLOR))
+    return body
+
+def fit_articles(articles, rows_for, height):
+    # Drop trailing articles until the scroll fits MAX_SCROLL_FRAMES (always
+    # keeping the first), so the render stays under the device's webp size cap.
+    budget = min(MAX_SCROLL_FRAMES, MARQUEE_MAX_SCALE * height)
+    for _ in range(len(articles) - 1):
+        marquee = render.Marquee(
+            height = height,
+            scroll_direction = "vertical",
+            offset_start = height,
+            child = render.Column(children = rows_for(articles)),
+        )
+
+        # frame_count() lays out on a 64x32 canvas unless given real bounds
+        if marquee.frame_count((0, 0, canvas.width(), canvas.height())) <= budget:
+            break
+        articles = articles[:-1]
+    return articles
+
+def clean_text(s):
+    if not s:
+        return ""
+
+    # CBC descriptions embed HTML (an <img> tag then a <p> summary); strip all
+    # tags, unescape the common entities, then collapse whitespace so only the
+    # summary prose remains. &amp; is first so double-escaped entities resolve.
+    s = re.sub("<[^>]*>", " ", s)
+    for entity, char in [("&amp;", "&"), ("&apos;", "'"), ("&#39;", "'"), ("&quot;", "\""), ("&#34;", "\""), ("&lt;", "<"), ("&gt;", ">"), ("&nbsp;", " ")]:
+        s = s.replace(entity, char)
+    return " ".join(s.split())
 
 def get_schema():
     return schema.Schema(
@@ -281,8 +420,11 @@ def get_cacheable_data(url, articlecount):
     # The CBC website blocks requests from the default user agent (Go-http-client/1.1),
     # so we need to set it to literally anything different. If you encounter a vague "stream error",
     # try changing the user agent string to something else.
-    res = http.get(RSS_STUB.format(url),  ttl_seconds = CACHE_TTL_SECONDS,
-                   headers= {"User-Agent": "Mozilla/5.0 (compatible; Pixlet)"})
+    res = http.get(
+        RSS_STUB.format(url),
+        ttl_seconds = CACHE_TTL_SECONDS,
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; Pixlet)"},
+    )
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
     data = res.body()

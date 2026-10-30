@@ -5,22 +5,28 @@ Description: Shows available bikes and docks at an Indego station.
 Author: radiocolin
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/bike_dock.png", BIKE_DOCK_ASSET = "file")
+load("images/bike_dock_gray.png", BIKE_DOCK_GRAY_ASSET = "file")
+load("images/electric_bike.png", ELECTRIC_BIKE_ASSET = "file")
+load("images/electric_bike_gray.png", ELECTRIC_BIKE_GRAY_ASSET = "file")
+load("images/regular_bike.png", REGULAR_BIKE_ASSET = "file")
+load("images/regular_bike_gray.png", REGULAR_BIKE_GRAY_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+BIKE_DOCK = BIKE_DOCK_ASSET.readall()
+BIKE_DOCK_GRAY = BIKE_DOCK_GRAY_ASSET.readall()
+ELECTRIC_BIKE = ELECTRIC_BIKE_ASSET.readall()
+ELECTRIC_BIKE_GRAY = ELECTRIC_BIKE_GRAY_ASSET.readall()
+REGULAR_BIKE = REGULAR_BIKE_ASSET.readall()
+REGULAR_BIKE_GRAY = REGULAR_BIKE_GRAY_ASSET.readall()
 
 indego_api_endpoint = "https://bts-status.bicycletransit.workers.dev/phl"
 indego_green = "#93D500"
 indego_blue = "#0082CA"
 white = "#fff"
 default_dock = "3162.0"
-regular_bike = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADQAAAADfLQUOAAAAhklEQVQ4Ec2SUQ6AIAxDwXhcj+N9wZF0qYUJ/GlCtpX2sQ9T+stX7lTsLO0DM6qGGMS9+ro5Mke6AXJHESEK52ucPSXvI4M4zLqbqXGgGgFh3fqRbjzojc0hPMaa9TrDh4r7A0JUYXxtEJkffQo0kB2AP1jtagoEYHVD/210gxlg14/FtmsFsqhKMWPbUYEAAAAASUVORK5CYII=")
-electric_bike = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADQAAAADfLQUOAAAApUlEQVQ4EcWS0Q3CMBBDU8QcrMSsrNRFSt/HqxyrhR8kLKW58zmOFXWMf+LxGhuLDO6dZ2niTLw+x6TDLLltx7LjzGvirlIkj1keumfTNSnycM/brOdTj5ErB16AGcgZ9ZFQoQLfKHlq+DSynt4wD2mYHHX2aDBqwN/4fIJGJlZLIpC99ek/pZGi7uFNqIb9a0LFnVA+U8IdkTvBlYFGpGszZz/d33D9cM8te9pUAAAAAElFTkSuQmCC")
-bike_dock = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADQAAAADfLQUOAAAAV0lEQVQ4EWNgoDlY+O8/AwgTAjjUMaLoQzconglVHqaYKHXoikCayRBjgllKLXrUQMpDknAYIsc0MhuH3RADYQphNA7FWIVheqA0C1ZF6IIwTeji9OADAPvYLVbN8V1pAAAAAElFTkSuQmCC")
-regular_bike_gray = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAZ0lEQVQ4jc2SQQ4AIQgDZeNf+6a+1j2ZEFcoetoem3aCYGt/EclBchyFo5L3ytAsnEHsFgpg2+0VkC+rJ/YoOCHrvnb+Z+LK4tUhpvdk4/tgtLNVEgjAAFj1e0igB1dy4fUU4DR/rRcn/VixMyJ6lgAAAABJRU5ErkJggg==")
-electric_bike_gray = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAAcElEQVQ4jcVSWw6AMAgbxrv2TD3t9kWCyEOXGPmCAi2wjfGnkZwkp/qvGy2Bz1dxSdzhvuasCAFIpb69dkSSnUMyNQCiuPcjIq25NVkBS2SbsnUByPFkdU+mscUu+d2vEd2xnTCcoMDbR8ksuvsntgARZXkK5zt/IwAAAABJRU5ErkJggg==")
-bike_dock_gray = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAASElEQVQ4jWNgoDWYOXPm/5kzZ/4nVx0juiJkfnp6OiMDFkCUOmy2kSPGhM0FlIBRA+lgIHIMEpM+mZAVEqMBl4UwmoUUTQMCADmdMerNYrWMAAAAAElFTkSuQmCC")
 
 def get_indego_data():
     r = http.get(indego_api_endpoint, ttl_seconds = 600)
@@ -50,58 +56,88 @@ def get_dock_info(selected_dock):
     return r
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     selected_dock = config.str("dock", default_dock)
     dock_data = get_dock_info(selected_dock)
 
     if dock_data.get("classicBikesAvailable") > 0:
         regular_bike_color = "#FF9400"
-        regular_bike_image = regular_bike
+        regular_bike_image = REGULAR_BIKE
     else:
         regular_bike_color = "#999999"
-        regular_bike_image = regular_bike_gray
+        regular_bike_image = REGULAR_BIKE_GRAY
 
     if dock_data.get("electricBikesAvailable") > 0:
         electric_bike_color = "#1EB100"
-        electric_bike_image = electric_bike
+        electric_bike_image = ELECTRIC_BIKE
     else:
         electric_bike_color = "#999999"
-        electric_bike_image = electric_bike_gray
+        electric_bike_image = ELECTRIC_BIKE_GRAY
 
     if dock_data.get("docksAvailable") > 0:
         dock_color = "#00A1FE"
-        dock_image = bike_dock
+        dock_image = BIKE_DOCK
     else:
         dock_color = "#999999"
-        dock_image = bike_dock_gray
+        dock_image = BIKE_DOCK_GRAY
 
+    header_font = "CG-pixel-4x5-mono" if scale == 1 else "terminus-14"
+    data_font = "Dina_r400-6" if scale == 1 else "terminus-12"
+
+    header_height = 7 if scale == 1 else 14
+    header_pad = (0, 1, 0, 1) if scale == 1 else (0, 0, 0, 0)
+    icon_height = 15 if scale == 1 else 28
+    text_height = 10 if scale == 1 else 22
+
+    header = render.Box(height = header_height, width = canvas.width(), color = "#8C189A", child = render.Padding(pad = header_pad, child = render.Marquee(width = canvas.width(), offset_start = canvas.width(), offset_end = canvas.width(), child = render.Text(dock_data["name"], font = header_font))))
+
+    counts = [
+        (regular_bike_image, dock_data["classicBikesAvailable"], regular_bike_color),
+        (electric_bike_image, dock_data["electricBikesAvailable"], electric_bike_color),
+        (dock_image, dock_data["docksAvailable"], dock_color),
+    ]
+
+    if is_square():
+        # A square panel has room to stack the three counts, each beside its
+        # icon in a larger font.
+        row_height = (canvas.height() - header_height) // len(counts)
+        rows = [
+            render.Row(
+                main_align = "space_around",
+                cross_align = "center",
+                expanded = True,
+                children = [
+                    render.Image(src = image, width = 21, height = icon_height),
+                    render.Box(width = 30, height = row_height, child = render.Text(str(count), font = "6x13", color = color)),
+                ],
+            )
+            for image, count, color in counts
+        ]
+        return render.Root(
+            show_full_animation = True,
+            child = render.Column(children = [header] + [render.Box(height = row_height, child = row) for row in rows]),
+        )
+
+    widths = [21, 21, 22]
     return render.Root(
         show_full_animation = True,
         child = render.Column(
             children = [
-                render.Column(
-                    children = [
-                        render.Stack(children = [
-                            render.Box(height = 7, width = 64, color = "#8C189A", child = render.Padding(pad = (0, 1, 0, 1), child = render.Marquee(width = 64, offset_start = 64, offset_end = 64, child = render.Text(dock_data["name"], font = "CG-pixel-4x5-mono")))),
-                        ]),
-                        render.Row(children = [
-                            render.Column(children = [
-                                render.Box(width = 21, height = 15, child = render.Image(src = regular_bike_image)),
-                                render.Box(width = 21, height = 11, child = render.Text(str(dock_data["classicBikesAvailable"]), font = "Dina_r400-6", color = regular_bike_color)),
-                            ]),
-                            render.Column(children = [
-                                render.Box(width = 21, height = 15, child = render.Image(src = electric_bike_image)),
-                                render.Box(width = 21, height = 11, child = render.Text(str(dock_data["electricBikesAvailable"]), font = "Dina_r400-6", color = electric_bike_color)),
-                            ]),
-                            render.Column(children = [
-                                render.Box(width = 21, height = 15, child = render.Image(src = dock_image)),
-                                render.Box(width = 21, height = 11, child = render.Text(str(dock_data["docksAvailable"]), font = "Dina_r400-6", color = dock_color)),
-                            ]),
-                        ]),
-                    ],
-                ),
+                header,
+                render.Row(children = [
+                    render.Column(children = [
+                        render.Box(width = widths[i] * scale, height = icon_height, child = render.Image(src = image, width = 21 * scale, height = icon_height)),
+                        render.Box(width = widths[i] * scale, height = text_height, child = render.Text(str(count), font = data_font, color = color)),
+                    ])
+                    for i, (image, count, color) in enumerate(counts)
+                ]),
             ],
         ),
     )
+
+def is_square():
+    w, h = canvas.size()
+    return h == w
 
 def get_schema():
     return schema.Schema(

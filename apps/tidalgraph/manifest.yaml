@@ -6,4 +6,12 @@ desc: Shows the tide height throughout the day of the ocean based on the selecte
 author: k.wajdwoicz
 fileName: tidalgraph.star
 packageName: tidalgraph
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - weather
+  - nature
+  - water-level
+published: '2023-04-19T18:39:29Z'
+updated: '2026-10-01T17:39:02Z'

@@ -5,13 +5,13 @@ Description: Displays information about an upcoming SpaceX rocket launch.
 Author: rytrose
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/error_image.png", ERROR_IMAGE_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ERROR_IMAGE = ERROR_IMAGE_ASSET.readall()
 
 # Cache constants
 UPCOMING_LAUNCH_CACHE_KEY = "upcoming_launch"
@@ -31,21 +31,6 @@ DEV_DATA_SOURCE_URL_TEMPLATE = "https://lldev.thespacedevs.com/2.2.0/launch/upco
 DATA_SOURCE_URL_TEMPLATE = "https://ll.thespacedevs.com/2.2.0/launch/upcoming?search={}&mode=normal&limit=1"
 
 # Background image for error screen
-ERROR_IMAGE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACsAAAAgCAMAAAC8RHExAAAAIGNIUk0AAHomAACAhAAA+gAAAIDo
-AAB1MAAA6mAAADqYAAAXcJy6UTwAAAIrUExURcDAwMDAwcDAtb+/J8DAAL3AAzy/hADAwwDAwADAwgDAUwDAAADDAFRsVMIAwsAAwMAAw78A
-g8AAAsAAAMMAAJcAKAoAtQAAwQAAwMDAJ5gAKL+/wL+/wb+/tb+/ALy/Azy+hAC/wwG/wAG/wgC/VAC/AADCAMEAwr8BwL8Bw74Bg78AA78A
-AMIAAAsBtQABwQEBwEREwEREwUVFtk5OMVFRClBQDFFQD25Ih31Ew3xEwH1Ewj1LWwpRCQxQDAtQCSVjW0V8wkR8wER+w0hZh1AOD1AMDFAL
-ClkkMnl2tnx8wXx8wAAAwgAAtwwMNxAQEA4OEREOFIoBicYAwsMAwMQAwMQAwWEIXxMQExQNEAlfXwDGwwDFwQDIxAONixAWFhATEw4RETY4
-OLu7uMXFwsXFwQAEsgAEswEFqg0RORweHy8vLzIvMpgkmMoeysgfyLgLvK4AtbAAt1kJYBQRGxcRHRcRHhYRHBQQEgxVVQKsrAKrqwKurgd7
-exIUFBISEhMTEzQ0NKOjo6ysrKurqwAdWgAdWQAbR1Bje+Hh4ePj4+Pi4/Hh8fjg+Pfg94ZTpUAAckMAdTcBaS4CXy4CYCsEWBcQHRIcGxEo
-KA8fHwoKCg0NDRUVFRsbGx4eHicnJygoKAAhSwAdSVlui////31foS0AZzEAaTIAajIAay8CYhcQHxMTEhMSEhAPDwkJCQwMDB0dHQAhTFhu
-iv3+/n5foS4AZy8CYRQUFAimUx8AAAABYktHRKRZvnq5AAAAB3RJTUUH5wILDg0M3NJKlwAAAUJJREFUOMtjYAACRiZmFiBgZWPn4ODg5OIG
-Ah5ePn5+fgFBIWFhYRFRMXEJIGAYVTuqdlQtLrWSeNVKQdVKA4GMLLMcEMgrKCopKSmrqAKBGq+6hoaGppa2jo6OrqievgEQMBgCgZGxiamZ
-mZm5haWVlZW1ja2dnZ29g6OTk5Ozi6ubm5u7h6eXNxAwiAOBj6+ff0BAQGBQcEhoWHC4f0RERGRUdExMTGxcfEJCQmJSckoqEDCkAUF6RmZW
-dnZ2Tm5efkFhUXFJaVl5RWVVdXV1TW1dfUNDfWNTcwsQMLSCQFt7R2dXV3dPb1//hImTJk+ZMnXa9BkgMHPW7IY5c+fNXwACDAvBYNHiJRCw
-dNnyFStXrly1es1aEFi3fkPDnI1z68GAYRMYLNq8BaJ267YVQLBy++o1DSDgD1G7A8wZzmoBr/8slG0y/HEAAAAldEVYdGRhdGU6Y3JlYXRl
-ADIwMjMtMDItMTFUMTQ6MTI6MTIrMDA6MDCrZgI7AAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAyLTExVDE0OjEyOjAxKzAwOjAwJ3mghAAA
-ACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wMi0xMVQxNDoxMzoxMSswMDowMFME6vsAAAAASUVORK5CYII=""")
 
 def get_schema():
     """Returns the pixlet app schema.
@@ -63,6 +48,7 @@ def get_schema():
                 desc = "(optional) An API key for the Lauch Library 2 API (https://thespacedevs.com/llapi).",
                 icon = "key",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = SEARCH_CONFIG_KEY,
@@ -150,15 +136,6 @@ def get_upcoming_launch(config):
     """
     skip_cache = config.get(SKIP_CACHE_CONFIG_KEY) or False
 
-    # Check the cache
-    launch = cache.get(UPCOMING_LAUNCH_CACHE_KEY)
-    if launch and not skip_cache:
-        return json.decode(launch)
-    else:
-        # Invalidate image cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(UPCOMING_LAUNCH_IMAGE_CACHE_KEY, "", ttl_seconds = 0)
-
     # Determine which API to hit, the real API has a 15 req/hr rate limit.
     # The dev API has no rate limit, but stale data.
     is_dev = config.get(DEV_CONFIG_KEY)
@@ -179,7 +156,7 @@ def get_upcoming_launch(config):
     if api_key:
         headers["Authorization"] = "Token {}".format(api_key)
 
-    response = http.get(url_template.format(search, headers = headers))
+    response = http.get(url_template.format(search, headers = headers), ttl_seconds = CACHE_TTL_SECONDS if not skip_cache else 0)
     if response.status_code != 200:
         return None
 
@@ -193,9 +170,6 @@ def get_upcoming_launch(config):
 
     launch = results[0]
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(UPCOMING_LAUNCH_CACHE_KEY, json.encode(launch), ttl_seconds = CACHE_TTL_SECONDS)
-
     return launch
 
 def get_launch_image(launch):
@@ -208,23 +182,16 @@ def get_launch_image(launch):
         str: A string of binary image data.
     """
 
-    image = cache.get(UPCOMING_LAUNCH_IMAGE_CACHE_KEY)
-    if image:
-        return image
-
     image_url = launch.get("image")
 
     if not image_url or type(image_url) != "string":
         return None
 
-    response = http.get(image_url)
+    response = http.get(image_url, ttl_seconds = CACHE_TTL_SECONDS)
     if response.status_code != 200:
         return None
 
     image = response.body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(UPCOMING_LAUNCH_IMAGE_CACHE_KEY, image, ttl_seconds = CACHE_TTL_SECONDS)
 
     return image
 

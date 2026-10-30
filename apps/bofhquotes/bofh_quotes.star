@@ -1,5 +1,5 @@
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 quotes = [
     {
@@ -1825,7 +1825,8 @@ def main():
     quote = selected_quote["quote"]
 
     return render.Root(
-        child = render.Column(
+        # Centre the 32-row block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             expanded = False,
             children = [
                 render.Text(
@@ -1854,5 +1855,5 @@ def main():
                     ),
                 ),
             ],
-        ),
+        )),
     )

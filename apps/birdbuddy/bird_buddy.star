@@ -6,11 +6,13 @@ Author: Brombomb
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/default_finch_icon.webp", DEFAULT_FINCH_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+DEFAULT_FINCH_ICON = DEFAULT_FINCH_ICON_ASSET.readall()
 
 # Bird Buddy GraphQL API URL
 BIRD_BUDDY_GRAPHQL_URL = "https://graphql.app-api.prod.aws.mybirdbuddy.com/graphql"
@@ -27,7 +29,6 @@ MARQUEE_DELAY = 32
 DEFAULT_BIRD_NAME = "No recent visitors"
 
 # Embedded House Finch icon (32px height, WebP format, 688 bytes)
-DEFAULT_FINCH_ICON = base64.decode("UklGRqgCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSIcBAAABkHRrmyHJ0t+2bdurXtu27d7atnts27Zta2dz1XZnDCIicxARE4D/s6aTm6HsH1DOvPLl+9NOU8nkmybI70f0eWRleMKGCHXmdKwSza56x9p0HYbKAcL+FkbxeUYImd1nQpErGmNMHIjXAmBQ95pQB2UBaDYPEeYVLfxeNkbo75wAk22zhL0OVJ3g3QKFdCsYHiS8B+UpgMMb2viarQLXBRWG6hUaEQTCfVyRoXmbIXYZmDoPpZlNZSmfleaBMQvtkkzlgdP9kxTrVHlk6mfEHTMFt8VDMaNrTMFtsm7m+zDXaIEiuN3OCtc8Is+NcQirlbj8ns5utgA0fVe+fz5y8+S7Kw/Hh7PkOPw/jrWqA4Bqe3x1n4ZCwQLHxJfDFSqssOOJCoCcnEZTsfsCXeeSxjvXDl96OblIhyGjBMCpcu2RCyuuxqno29uap+xuiDk+t9ucRjXJ335s28PLC/J0AUBRHSZb587b8sgq2qctj9DWUZH77XetrocePADU5CFSQV9OxH8bAFZQOCD6AAAA0AUAnQEqIAAgAD6JOpdHpSOiITAYDACgEQlsAJ0y0HtK0GFK9GAHmNsmqw7vyW55QMqSzbigAAD9HA4d1FhaRU4gK+vJY77KIge08aCwuwMWmP/cU9qLFFE7Fb8//GyN9QFsL7m8JlAk19x3+tLtrMmjlgOS9oajz1/xngIk0b9doBcx3kFp9BHQ1ZYjkB7+EweYxkzW/EY7xW4BU/qvcmglxp+vweI7XdCXb/c2Q0A+Hz7BSdhXUs0Hp0qDgtDPZL0Kz3VzAmya2k0BbJU/QLLmtFEqEiXR+cmyeW1mGkg41CqWThGPKnG/1c5u/39e0ZiyyNblAHnAAA==")
 
 # Relevant feed item types for bird sightings
 VALID_BIRD_NODE_TYPES = [
@@ -37,6 +38,15 @@ VALID_BIRD_NODE_TYPES = [
     "FeedItemNewPostcard",
     "FeedItemMysteryVisitorNotRecognized",
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     username = config.str("username", "")
@@ -57,19 +67,52 @@ def main(config):
 
     # Get feeder data
     feeders = get_feeders(token)
+    if feeders == None:
+        print("Token expired or auth error. Re-authenticating...")
+        token = get_auth_token(username, password, force_refresh = True)
+        if not token:
+            return render_error("Authentication failed.\nCheck credentials")
+        feeders = get_feeders(token)
+
     if not feeders:
-        return render_error("No feeders found")
+        return []
 
     # Get the latest bird sighting
     latest_sighting = get_latest_sighting(token, feeders)
 
+    # Only render if there was a sighting
+    timestamp = latest_sighting.get("timestamp")
+    if not timestamp:
+        return []
+
+    clean_ts = clean_timestamp(timestamp)
+    if not clean_ts:
+        return []
+
+    sighting_time = time.parse_time(clean_ts, format = "2006-01-02T15:04:05Z")
+    if not sighting_time:
+        return []
+
+    now = time.now()
+    diff_seconds = now.unix - sighting_time.unix
+    if diff_seconds > 3600:  # older than 1 hour
+        return []
+
+    # Inject random bird icon for mystery visitors
+    if latest_sighting.get("bird_name") == "Mystery Visitor" and not latest_sighting.get("icon_url"):
+        print("Mystery visitor found! Fetching random avatar from the full Bird Buddy catalog...")
+        random_species = get_random_collection_species(token)
+        if random_species and random_species.get("iconUrl"):
+            print("Selected random avatar: {}".format(random_species.get("name", "Unknown")))
+            latest_sighting["icon_url"] = random_species["iconUrl"]
+
     return render_bird_display(latest_sighting)
 
-def get_auth_token(username, password):
+def get_auth_token(username, password, force_refresh = False):
     """Authenticate with Bird Buddy API and get access token"""
 
     cache_key = "bb_token_{}".format(username)
-    cached_token = cache.get(cache_key)
+    cached_token = None if force_refresh else cache.get(cache_key)
 
     if cached_token:
         print("Using cached token")
@@ -227,25 +270,34 @@ def get_feeders(token):
         print("Failed to parse JSON response")
         return []
 
+    # Check for GraphQL errors first
+    is_auth_error = False
+    if feeders_response and "errors" in feeders_response:
+        errors = feeders_response.get("errors", [])
+        for error in errors:
+            err_msg = error.get("message", "")
+            err_code = error.get("extensions", {}).get("code", "")
+            print("GraphQL Feeders Error: {}".format(err_msg or err_code))
+            if err_msg == "AUTH_TOKEN_EXPIRED_ERROR" or err_code == "AUTH_TOKEN_EXPIRED_ERROR" or "auth" in err_msg.lower() or "token" in err_msg.lower():
+                is_auth_error = True
+
+    if is_auth_error:
+        return None
+
     if "data" in feeders_response:
-        me_data = feeders_response.get("data", {}).get("me", {})
+        data = feeders_response.get("data") or {}
+        me_data = data.get("me") or {}
         if me_data:
             feeders_data = me_data.get("feeders", [])
             return feeders_data
         else:
-            print("No 'me' data in response")
+            print("No 'me' data in response. Response: {}".format(feeders_response))
             return []
     else:
-        print("Failed to parse feeders response")
-        if feeders_response and "errors" in feeders_response:
-            errors = feeders_response.get("errors", [])
-            for error in errors:
-                print("GraphQL Feeders Error: {}".format(error.get("message", "Unknown error")))
-        else:
-            print("No response data found")
+        print("Failed to parse feeders response. Response: {}".format(feeders_response))
         return []
 
-def get_latest_sighting(token, feeders):
+def get_latest_sighting(token, feeders, ttl_seconds = CACHE_TTL):
     """Get the most recent bird sighting from feed using GraphQL"""
 
     if not feeders:
@@ -292,6 +344,7 @@ def get_latest_sighting(token, feeders):
                                 ... on FeedItemNewPostcard {
                                     id
                                     createdAt
+                                    inferenceExecutionMode
                                     __typename
                                 }
                                 ... on FeedItemMysteryVisitorNotRecognized {
@@ -341,7 +394,7 @@ def get_latest_sighting(token, feeders):
         url = BIRD_BUDDY_GRAPHQL_URL,
         json_body = feed_query,
         headers = headers,
-        ttl_seconds = CACHE_TTL,
+        ttl_seconds = ttl_seconds,
     )
 
     if response.status_code == 200:
@@ -349,9 +402,11 @@ def get_latest_sighting(token, feeders):
         if not feed_response:
             print("Failed to parse feed JSON response")
         elif "data" in feed_response:
-            me_data = feed_response.get("data", {}).get("me", {})
+            data = feed_response.get("data") or {}
+            me_data = data.get("me") or {}
             if me_data and "feed" in me_data:
-                feed_edges = me_data.get("feed", {}).get("edges", [])
+                feed = me_data.get("feed") or {}
+                feed_edges = feed.get("edges") or []
                 if feed_edges:
                     # Look for the most recent BIRD-related feed item only
                     for edge in feed_edges:
@@ -361,21 +416,36 @@ def get_latest_sighting(token, feeders):
                         # Only include actual bird sighting items, not setup/admin items
                         if node_type in VALID_BIRD_NODE_TYPES:
                             parsed_result = parse_feed_item(node)
+                            print("Parsed feed item: type={}, bird={}, ts={}".format(node_type, parsed_result.get("bird_name"), parsed_result.get("timestamp")))
                             if parsed_result:  # Only return if we got actual data
                                 # Check if this is a postcard that needs bird detail lookup
                                 if "postcard_id" in parsed_result:
                                     postcard_id = parsed_result["postcard_id"]
+                                    raw_data = parsed_result.get("raw_data", {})
+                                    execution_mode = raw_data.get("inferenceExecutionMode", "")
+                                    if execution_mode == "MANUAL_NOT_STARTED":
+                                        print("Postcard execution mode is MANUAL_NOT_STARTED. Triggering AI reanalysis...")
+                                        reanalyze_postcard(token, postcard_id)
+
                                     sighting_result = get_postcard_sighting(token, postcard_id)
                                     if sighting_result:
                                         # Use the postcard timestamp but bird name from sighting
                                         sighting_result["timestamp"] = parsed_result["timestamp"]
+                                        print("Successfully claimed postcard: {}".format(sighting_result))
                                         return sighting_result
+                                    elif ttl_seconds > 0:
+                                        # If claiming the cached postcard failed, re-fetch feed with no cache
+                                        print("Postcard claim failed (likely already collected). Re-fetching fresh feed...")
+                                        return get_latest_sighting(token, feeders, ttl_seconds = 0)
                                     else:
-                                        # Fallback to generic postcard message
-                                        parsed_result["bird_name"] = "Bird Visitor"
-                                        return parsed_result
+                                        # Skip this failed postcard and try the next feed item
+                                        print("Skipping failed postcard, trying next feed item...")
+                                        continue
                                 else:
+                                    print("Returning valid sighting from feed: {}".format(parsed_result))
                                     return parsed_result
+                        else:
+                            print("Skipping non-bird feed item type: {}".format(node_type))
                 else:
                     print("No feed items in response")
             else:
@@ -397,24 +467,88 @@ def get_latest_sighting(token, feeders):
             print("UNAUTHORIZED: Feed access token may be expired")
 
     # Try the collections query if feed fails
+    print("Feed check complete, falling back to collections query...")
     return get_from_collections(token)
 
+def reanalyze_postcard(token, postcard_id):
+    """Trigger the AI identification (reanalysis) for a postcard"""
+
+    reanalyze_mutation = {
+        "query": """
+            mutation ReanalyzePostcard($feedItemId: ID!) {
+                inferenceExternalPostcardReanalyze(feedItemId: $feedItemId) {
+                    updatedFeedItem {
+                        __typename
+                        ... on FeedItemNewPostcard {
+                            id
+                            inferenceExecutionMode
+                        }
+                    }
+                }
+            }
+        """,
+        "variables": {
+            "feedItemId": postcard_id,
+        },
+    }
+
+    headers = {
+        "Authorization": "Bearer {}".format(token),
+        "Content-Type": "application/json",
+    }
+
+    response = http.post(
+        url = BIRD_BUDDY_GRAPHQL_URL,
+        json_body = reanalyze_mutation,
+        headers = headers,
+        ttl_seconds = 0,
+    )
+
+    if response.status_code != 200:
+        print("Postcard reanalyze request failed: {}".format(response.status_code))
+        return False
+
+    reanalyze_response = response.json()
+    if not reanalyze_response:
+        print("Failed to parse reanalyze JSON response")
+        return False
+
+    if "errors" in reanalyze_response:
+        errors = reanalyze_response.get("errors", [])
+        for error in errors:
+            print("Postcard reanalyze error: {}".format(error.get("message", "Unknown error")))
+        return False
+
+    data = reanalyze_response.get("data")
+    if not data or "inferenceExternalPostcardReanalyze" not in data:
+        return False
+
+    reanalyze_result = data.get("inferenceExternalPostcardReanalyze") or {}
+    updated_item = reanalyze_result.get("updatedFeedItem") or {}
+    new_mode = updated_item.get("inferenceExecutionMode")
+    print("Postcard reanalyzed. New mode: {}".format(new_mode))
+
+    return True
+
 def get_postcard_sighting(token, postcard_id):
-    """Convert a postcard to sighting to get bird details using PyBirdBuddy approach"""
+    """Convert a postcard to sighting, identify the visitor if needed, finish/collect the postcard, and return details"""
 
     # Based on POSTCARD_TO_SIGHTING mutation from PyBirdBuddy
+    # Now retrieves reportToken, matchTokens, and suggestions for undecided sightings
     postcard_mutation = {
         "query": """
             mutation sightingCreateFromPostcard($sightingCreateFromPostcardInput: SightingCreateFromPostcardInput!) {
                 sightingCreateFromPostcard(sightingCreateFromPostcardInput: $sightingCreateFromPostcardInput) {
                     ... on SightingCreateFromPostcardResult {
                         sightingReport {
+                            reportToken
                             sightings {
                                 ... on SightingRecognizedBird {
                                     id
                                     color
                                     text
                                     count
+                                    matchTokens
                                     species {
                                         ... on SpeciesBird {
                                             id
@@ -428,6 +562,7 @@ def get_postcard_sighting(token, postcard_id):
                                     id
                                     color
                                     text
+                                    matchTokens
                                     species {
                                         ... on SpeciesBird {
                                             id
@@ -442,10 +577,30 @@ def get_postcard_sighting(token, postcard_id):
                                     color
                                     text
                                     count
+                                    matchTokens
+                                    __typename
+                                }
+                                ... on SightingCantDecideWhichBird {
+                                    id
+                                    matchTokens
+                                    suggestions {
+                                        species {
+                                            ... on SpeciesBird {
+                                                id
+                                                name
+                                                iconUrl
+                                            }
+                                        }
+                                        __typename
+                                    }
                                     __typename
                                 }
                                 __typename
                             }
+                            __typename
+                        }
+                        videoMedia {
+                            id
                             __typename
                         }
                         __typename
@@ -473,64 +628,211 @@ def get_postcard_sighting(token, postcard_id):
         ttl_seconds = 60,
     )
 
-    if response.status_code == 200:
-        sighting_response = response.json()
-        if not sighting_response:
-            print("Failed to parse sighting JSON response")
-        elif "data" in sighting_response:
-            data = sighting_response.get("data")
-            if data and "sightingCreateFromPostcard" in data:
-                create_data = data.get("sightingCreateFromPostcard")
-                if create_data and "sightingReport" in create_data:
-                    sighting_report = create_data.get("sightingReport")
-                    if sighting_report and "sightings" in sighting_report:
-                        sightings = sighting_report.get("sightings", [])
-
-                        if sightings:
-                            # Get the first sighting
-                            sighting = sightings[0]
-                            sighting_type = sighting.get("__typename", "")
-
-                            if sighting_type in ["SightingRecognizedBird", "SightingRecognizedBirdUnlocked"]:
-                                species = sighting.get("species", {})
-                                if species:
-                                    bird_name = species.get("name", "Unknown Bird")
-                                    icon_url = species.get("iconUrl", "")
-                                    return {
-                                        "bird_name": bird_name,
-                                        "timestamp": "",  # We'll use the postcard timestamp
-                                        "icon_url": icon_url,
-                                        "raw_data": sighting,
-                                    }
-                            elif sighting_type == "SightingRecognizedMysteryVisitor":
-                                return {
-                                    "bird_name": "Mystery Visitor",
-                                    "timestamp": "",
-                                    "icon_url": "",
-                                    "raw_data": sighting,
-                                }
-
-        # Check for errors (might be already collected)
-        if sighting_response and "errors" in sighting_response:
-            errors = sighting_response.get("errors", [])
-            for error in errors:
-                print("Postcard sighting error: {}".format(error.get("message", "Unknown error")))
-    else:
+    if response.status_code != 200:
         print("Postcard sighting request failed: {}".format(response.status_code))
-        print("Response body: {}".format(response.body()))
-        if response.status_code == 429:
-            print("RATE LIMITED: Too many postcard requests to Bird Buddy API")
-        elif response.status_code == 500:
-            print("SERVER ERROR: Bird Buddy postcard API internal server error")
-        elif response.status_code == 401:
-            print("UNAUTHORIZED: Postcard access token may be expired")
+        return None
 
-    return None
+    sighting_response = response.json()
+    if not sighting_response:
+        print("Failed to parse sighting JSON response")
+        return None
 
-def get_from_collections(token):
-    """Get bird data from collections using GraphQL"""
+    if "errors" in sighting_response:
+        errors = sighting_response.get("errors", [])
+        for error in errors:
+            print("Postcard sighting error: {} (postcard may already be collected)".format(error.get("message", "Unknown error")))
+        return None
 
-    # Use the collections query from PyBirdBuddy
+    data = sighting_response.get("data") or {}
+    if not data or "sightingCreateFromPostcard" not in data:
+        return None
+
+    create_data = data.get("sightingCreateFromPostcard")
+    if not create_data or "sightingReport" not in create_data:
+        return None
+
+    sighting_report = create_data.get("sightingReport")
+    if not sighting_report:
+        return None
+
+    sightings = sighting_report.get("sightings", [])
+    report_token = sighting_report.get("reportToken", "")
+
+    # Process each sighting to resolve identification if undecided
+    updated_sightings = []
+    final_report_token = report_token
+
+    for sighting in sightings:
+        sighting_type = sighting.get("__typename", "")
+        if sighting_type == "SightingCantDecideWhichBird":
+            suggestions = sighting.get("suggestions", [])
+            chosen_species_id = None
+            if suggestions:
+                first_suggestion = suggestions[0]
+                species = first_suggestion.get("species", {})
+                chosen_species_id = species.get("id")
+
+            if chosen_species_id:
+                # Identify as best guess species
+                print("Undecided visitor. Identifying as best guess species ID: {}".format(chosen_species_id))
+                choose_mutation = {
+                    "query": """
+                        mutation sightingChooseSpecies($sightingChooseSpeciesInput: SightingChooseSpeciesInput!) {
+                            sightingChooseSpecies(sightingChooseSpeciesInput: $sightingChooseSpeciesInput) {
+                                reportToken
+                                sightings {
+                                    ... on SightingRecognizedBird {
+                                        id
+                                        color
+                                        text
+                                        count
+                                        matchTokens
+                                        species {
+                                            ... on SpeciesBird {
+                                                id
+                                                name
+                                                iconUrl
+                                            }
+                                        }
+                                        __typename
+                                    }
+                                    ... on SightingRecognizedBirdUnlocked {
+                                        id
+                                        color
+                                        text
+                                        matchTokens
+                                        species {
+                                            ... on SpeciesBird {
+                                                id
+                                                name
+                                                iconUrl
+                                            }
+                                        }
+                                        __typename
+                                    }
+                                    ... on SightingRecognizedMysteryVisitor {
+                                        id
+                                        color
+                                        text
+                                        count
+                                        matchTokens
+                                        __typename
+                                    }
+                                    __typename
+                                }
+                                __typename
+                            }
+                        }
+                    """,
+                    "variables": {
+                        "sightingChooseSpeciesInput": {
+                            "sightingId": sighting.get("id"),
+                            "speciesId": chosen_species_id,
+                            "reportToken": final_report_token,
+                        },
+                    },
+                }
+                choose_resp = http.post(
+                    url = BIRD_BUDDY_GRAPHQL_URL,
+                    json_body = choose_mutation,
+                    headers = headers,
+                    ttl_seconds = 60,
+                )
+                if choose_resp.status_code == 200:
+                    choose_json = choose_resp.json()
+                    if choose_json and "data" in choose_json:
+                        choose_data = choose_json.get("data", {}).get("sightingChooseSpecies", {})
+                        if choose_data:
+                            final_report_token = choose_data.get("reportToken", final_report_token)
+                            updated_sightings = choose_data.get("sightings", [])
+                else:
+                    print("sightingChooseSpecies mutation failed: {}".format(choose_resp.status_code))
+            else:
+                # Convert to mystery visitor
+                print("Undecided visitor with no suggestions. Converting to Mystery Visitor.")
+                mystery_mutation = {
+                    "query": """
+                        mutation sightingConvertToMysteryVisitor($sightingConvertToMysteryVisitorInput: SightingConvertToMysteryVisitorInput!) {
+                            sightingConvertToMysteryVisitor(sightingConvertToMysteryVisitorInput: $sightingConvertToMysteryVisitorInput) {
+                                reportToken
+                                sightings {
+                                    ... on SightingRecognizedMysteryVisitor {
+                                        id
+                                        color
+                                        text
+                                        count
+                                        matchTokens
+                                        __typename
+                                    }
+                                    __typename
+                                }
+                                __typename
+                            }
+                        }
+                    """,
+                    "variables": {
+                        "sightingConvertToMysteryVisitorInput": {
+                            "sightingId": sighting.get("id"),
+                            "reportToken": final_report_token,
+                        },
+                    },
+                }
+                mystery_resp = http.post(
+                    url = BIRD_BUDDY_GRAPHQL_URL,
+                    json_body = mystery_mutation,
+                    headers = headers,
+                    ttl_seconds = 60,
+                )
+                if mystery_resp.status_code == 200:
+                    mystery_json = mystery_resp.json()
+                    if mystery_json and "data" in mystery_json:
+                        mystery_data = mystery_json.get("data", {}).get("sightingConvertToMysteryVisitor", {})
+                        if mystery_data:
+                            final_report_token = mystery_data.get("reportToken", final_report_token)
+                            updated_sightings = mystery_data.get("sightings", [])
+                else:
+                    print("sightingConvertToMysteryVisitor mutation failed: {}".format(mystery_resp.status_code))
+        else:
+            updated_sightings.append(sighting)
+
+    if not updated_sightings:
+        updated_sightings = sightings
+
+    # Skipping sightingReportPostcardFinish to leave postcards uncollected in user's Bird Buddy app
+    print("Skipping auto-collection of postcard {} as requested".format(postcard_id))
+
+    # Return the first finalized sighting details
+    if updated_sightings:
+        sighting = updated_sightings[0]
+        sighting_type = sighting.get("__typename", "")
+
+        if sighting_type in ["SightingRecognizedBird", "SightingRecognizedBirdUnlocked"]:
+            species = sighting.get("species", {})
+            if species:
+                bird_name = species.get("name", "Unknown Bird")
+                icon_url = species.get("iconUrl", "")
+                return {
+                    "bird_name": bird_name,
+                    "timestamp": "",  # We'll use the postcard timestamp
+                    "icon_url": icon_url,
+                    "raw_data": sighting,
+                }
+            else:
+                return None
+        elif sighting_type == "SightingRecognizedMysteryVisitor":
+            return {
+                "bird_name": "Mystery Visitor",
+                "timestamp": "",
+                "icon_url": "",
+                "raw_data": sighting,
+            }
+        else:
+            return None
+    else:
+        return None
+
+def fetch_bird_collections(token):
+    """Fetch bird collections using GraphQL"""
     collections_query = {
         "query": """
             query meCollections {
@@ -575,50 +877,78 @@ def get_from_collections(token):
         ttl_seconds = CACHE_TTL,
     )
 
+    print("Fetching collections...")
     if response.status_code == 200:
         collections_response = response.json()
         if not collections_response:
             print("Failed to parse collections JSON response")
-        elif "data" in collections_response:
-            me_data = collections_response.get("data", {}).get("me", {})
+            return []
+
+        if "data" in collections_response:
+            data = collections_response.get("data") or {}
+            me_data = data.get("me") or {}
             if me_data and "collections" in me_data:
-                collections = me_data.get("collections", [])
+                collections = me_data.get("collections") or []
+                print("Found {} collections items".format(len(collections)))
 
                 if collections:
-                    # Sort by most recent visit
                     bird_collections = []
                     for collection in collections:
                         if collection.get("__typename") == "CollectionBird":
                             bird_collections.append(collection)
 
-                    if bird_collections:
-                        # Sort by visitLastTime (most recent first)
-                        def get_visit_time(collection):
-                            return collection.get("visitLastTime", "1970-01-01T00:00:00Z")
-
-                        bird_collections.sort(key = get_visit_time, reverse = True)
-
-                        latest_collection = bird_collections[0]
-                        species = latest_collection.get("species", {})
-                        bird_name = species.get("name", "Unknown Bird")
-                        visit_time = latest_collection.get("visitLastTime", "")
-                        icon_url = species.get("iconUrl", "")
-
-                        return {
-                            "bird_name": bird_name,
-                            "timestamp": visit_time,
-                            "icon_url": icon_url,
-                            "raw_data": latest_collection,
-                        }
+                    print("Found {} bird collections".format(len(bird_collections)))
+                    return bird_collections
+            else:
+                print("No me/collections in response data: {}".format(collections_response))
         elif collections_response and "errors" in collections_response:
-            errors = collections_response.get("errors", [])
+            errors = collections_response.get("errors") or []
             for error in errors:
                 print("GraphQL Collections Error: {}".format(error.get("message", "Unknown error")))
     else:
         print("Collections request failed: {}".format(response.status_code))
         print("Collections response body: {}".format(response.body()))
 
+    return []
+
+def get_from_collections(token):
+    """Get latest bird data from collections"""
+    bird_collections = fetch_bird_collections(token)
+
+    if bird_collections:
+        # Sort by visitLastTime (most recent first)
+        def get_visit_time(collection):
+            return collection.get("visitLastTime", "1970-01-01T00:00:00Z")
+
+        bird_collections.sort(key = get_visit_time, reverse = True)
+
+        latest_collection = bird_collections[0]
+        species = latest_collection.get("species") or {}
+        bird_name = species.get("name", "Unknown Bird")
+        visit_time = latest_collection.get("visitLastTime", "")
+        icon_url = species.get("iconUrl", "")
+
+        result = {
+            "bird_name": bird_name,
+            "timestamp": visit_time,
+            "icon_url": icon_url,
+            "raw_data": latest_collection,
+        }
+        print("Returning collections sighting: {}".format(result))
+        return result
+
+    print("No valid collections found, returning default empty sighting")
     return create_default_sighting()
+
+def get_random_collection_species(token):
+    """Get a random bird species from the full Bird Buddy catalog"""
+    bird_collections = fetch_bird_collections(token)
+
+    if bird_collections:
+        # Get pseudo-random index based on current nanosecond
+        idx = time.now().unix % len(bird_collections)
+        return bird_collections[idx].get("species") or {}
+    return {}
 
 def parse_feed_item(feed_node):
     """Parse a single feed item from GraphQL response"""
@@ -640,9 +970,10 @@ def parse_feed_item(feed_node):
                 bird_name = species.get("name") or "Unknown Bird"
                 icon_url = species.get("iconUrl", "")
     elif node_type == "FeedItemCollectedPostcard":
-        # This should have actual bird species data
-        species = feed_node.get("species", {})
-        if species:
+        # This should have actual bird species data (which is a list in GraphQL)
+        species_list = feed_node.get("species") or []
+        if species_list:
+            species = species_list[0]
             bird_name = species.get("name", "Unknown Bird")
             icon_url = species.get("iconUrl", "")
         else:
@@ -772,21 +1103,16 @@ def get_timestamp_color(timestamp_str):
     current_time = time.now()
     diff_seconds = current_time.unix - sighting_time.unix
 
-    # Color decay over 24 hours (86400 seconds)
-    # 0-15 minutes (900 seconds): Full green #00cc66
-    # 15 minutes - 24 hours: Decay to gray #CCCCCC
-
-    if diff_seconds <= 900:  # 15 minutes or less - full green
-        return "#00CC66"
-    elif diff_seconds >= 86400:  # 24 hours or more - full gray
+    # Color decay over 1 hour (3600 seconds)
+    if diff_seconds >= 3600:  # 1 hour or more - full gray
         return "#CCCCCC"
     else:
         # Linear interpolation between green and gray
         # Green: R=0, G=204, B=102
         # Gray:  R=204, G=204, B=204
 
-        # Calculate progress from 15 minutes to 24 hours
-        progress = (diff_seconds - 900) / (86400 - 900)  # 0.0 to 1.0
+        # Calculate progress from 0 minutes to 1 hour
+        progress = (diff_seconds) / (3600)  # 0.0 to 1.0
 
         # Interpolate each color component
         red = int(0 + (204 * progress))  # Red goes from 0 to 204
@@ -884,7 +1210,8 @@ def render_bird_display(sighting):
     ]
 
     return render.Root(
-        child = render.Stack(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
             children = [
                 # Main content
                 render.Row(
@@ -892,13 +1219,14 @@ def render_bird_display(sighting):
                     children = row_children,
                 ),
             ],
-        ),
+        )),
     )
 
 def render_error(message):
     """Render an error message"""
     return render.Root(
         child = render.Column(
+            expanded = is_square(),
             main_align = "center",
             cross_align = "center",
             children = [
@@ -934,6 +1262,7 @@ def get_schema():
                 name = "Bird Buddy Password",
                 desc = "Enter your Bird Buddy account password",
                 icon = "lock",
+                secret = True,
             ),
         ],
     )

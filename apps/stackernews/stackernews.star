@@ -5,14 +5,16 @@ Description: Shows the top post (or random of last 5 posts) on Stacker.news in c
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/logo.gif", LOGO_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
+
+LOGO = LOGO_ASSET.readall()
 
 DEFAULT_ITEM_CATEGORY = "home"
 DEFAULT_ITEM_PERIOD = "day"
@@ -29,10 +31,6 @@ CATEGORIES = {
 }
 
 COLOR_ALTER = "#fada5e"
-
-LOGO = base64.decode("""
-R0lGODlhCwAHALMAAP/qZfzfYEE5GD41GAAAAPvfcHFiKyolEP/iYaqYQvvbX56KPFpOIhEPBqiTP4JyMiH5BAAAAAAALAAAAAALAAcAAAQkkJBTjLzSlFuaXISzSQonFY8UIEJ1AS1DIAiXEOMQnAImDYQIADs=
-""")
 
 def get_feed(category = DEFAULT_ITEM_CATEGORY, ttl_seconds = 60 * 5):
     url = "https://stacker.news/"

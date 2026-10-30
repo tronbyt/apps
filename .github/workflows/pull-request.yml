@@ -1,5 +1,8 @@
 name: Build and Test
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches:
@@ -9,12 +12,23 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup build agent
         run: ./.github/scripts/setup.sh
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install PyYAML
+
+      - name: Validate manifest categories
+        run: python3 .github/scripts/check-categories.py
 
       - name: Determine targets
         id: targets
@@ -23,7 +37,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
-      # - name: Check modified apps
-      #   run: ./.github/scripts/check-apps.sh
-      #   env:
-      #     TARGETS: "${{ steps.targets.outputs.targets }}"
+      - name: Check modified apps
+        run: ./.github/scripts/check-apps.sh
+        env:
+          TARGETS: "${{ steps.targets.outputs.targets }}"

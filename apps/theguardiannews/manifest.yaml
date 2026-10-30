@@ -6,4 +6,13 @@ desc: Gets latest new articles from The Guardian and displays up to 3 articles f
 author: jvivona
 fileName: theguardiannews.star
 packageName: theguardiannews
-recommended_interval: 10
+recommendedInterval: 10
+supports2x: true
+supports64x64: true
+category: news
+tags:
+  - news
+  - guardian
+  - education
+published: '2022-09-29T16:03:51Z'
+updated: '2026-10-17T11:02:12Z'

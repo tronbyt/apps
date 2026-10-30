@@ -5,13 +5,24 @@ Description: Energy production and consumption monitor for your SolarEdge solar 
 Author: marcusb
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/dots_ltr.gif", DOTS_LTR_ASSET = "file")
+load("images/dots_rtl.gif", DOTS_RTL_ASSET = "file")
+load("images/grid.png", GRID_ASSET = "file")
+load("images/house.png", HOUSE_ASSET = "file")
+load("images/solar_panel.png", SOLAR_PANEL_ASSET = "file")
+load("images/solar_panel_off.png", SOLAR_PANEL_OFF_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+DOTS_LTR = DOTS_LTR_ASSET.readall()
+DOTS_RTL = DOTS_RTL_ASSET.readall()
+GRID = GRID_ASSET.readall()
+HOUSE = HOUSE_ASSET.readall()
+SOLAR_PANEL = SOLAR_PANEL_ASSET.readall()
+SOLAR_PANEL_OFF = SOLAR_PANEL_OFF_ASSET.readall()
 
 URL = "https://monitoringapi.solaredge.com/site/{}/currentPowerFlow"
 
@@ -33,57 +44,16 @@ DUMMY_DATA = {
     },
 }
 
-SOLAR_PANEL = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABUAAAAQCAYAAAD52jQlAAAArElEQVQ4ja2T2xGFIAxETxyrcOhM
-y7M0xzb2fjA4kYcPrvsFCSzhBExCZDLDAHwuxZ5ovEq+MfIaWkYSqt3ikdLmlkG38dcmx1U9v2h8
-721mVeaNRgkwpjCzbytTWABO43i4VDMe44lYqlaS4sb5ttKWiu5faQoL+7ae5pLKd+4ntQVPlCMo
-mHpmOcNWLGc7+ES+uFevmELJNcU8ugG+rRKOx9/XoKph40P8rR8wcGBXI4UlEQAAAABJRU5ErkJg
-gg==
-""")
-SOLAR_PANEL_OFF = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABUAAAAQCAYAAAD52jQlAAAAd0lEQVQ4je2TwQrAIAxDo+y7e+iP
-d5cJtY0iustgOWklsb4i8OsTKqxoZrZkLoX6r5FBRAAAqkrX7XIWXFmX3rijFDqTiEBVuz1D1bW+
-yjKFBASJqX96ZDiqRbbVH5yyTKGrilxbzaOrwLtdAs+gdgdEAwcf4lg3XnREWPIOZLAAAAAASUVO
-RK5CYII=
-""")
-GRID = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAt0lEQVQ4jYWQuxEDIQxEhcfFeIZm
-HEEtTimHTmiBa4KYZC+xGKEToITR5+0KEYkAADIi54ycM6z+2wIkSEQUQnArg4cAQxJk+LouAgDn
-nNPcULdcaq2Q/VrrPNN7BwDI1zIopTzvwMN6Ay2y2/A4oGsyf5lqiyil7N13OcPmHU4DMk/Rj/7v
-+8E0wCJaoLWGFD1S9OB8wKcNJMiuE7z6swanlXcwg7puwlJAO8pDLWG5rlXfgv+4AXBeHhx5xCS7
-AAAAAElFTkSuQmCC
-""")
-HOUSE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAb0lEQVQ4jcWQQQrAMAgE19KX9dL/
-v2h7arDRFT1VCIHEGVYBUbxu+ntUCybnkgBPJDu83jsSBbckGUyC7yklOnYUaEkSWwlcPwHQPGxm
-ls2fJQj9anmVAADOTlOVLhXsQJXuUB/d+l/w2UE1q/p7AIUnlBV3qmXkAAAAAElFTkSuQmCC
-""")
-DOTS_LTR = base64.decode("""
-R0lGODlhCgAFAIABAA31VAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJDwABACwAAAAACgAFAAAC
-CYyPmWAc7pRMBQAh+QQJDwABACwAAAAACgAFAAACCIyPqWAcrmIsACH5BAkPAAEALAAAAAAKAAUA
-AAIIjI+pAda8oioAOw==
-""")
-DOTS_RTL = base64.decode("""
-R0lGODlhCgAFAIABAP/RGwAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJDwABACwAAAAACgAFAAAC
-CIyPqQHWvKIqACH5BAkPAAEALAAAAAAKAAUAAAIIjI+pYByuYiwAIfkECQ8AAQAsAAAAAAoABQAA
-AgmMj5lgHO6UTAUAOw==
-""")
-
 def main(config):
     api_key = config.str("api_key")
     site_id = humanize.url_encode(config.str("site_id", ""))
 
     if api_key and site_id:
         url = URL.format(site_id)
-        data = cache.get(url)
-        if not data:
-            rep = http.get(url, params = {"api_key": api_key})
-            if rep.status_code != 200:
-                fail("SolarEdge API request failed with status {}".format(rep.status_code))
-            data = rep.body()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(url, data, ttl_seconds = CACHE_TTL)
+        rep = http.get(url, params = {"api_key": api_key}, ttl_seconds = CACHE_TTL)
+        if rep.status_code != 200:
+            fail("SolarEdge API request failed with status {}".format(rep.status_code))
+        data = rep.body()
         o = json.decode(data)
     else:
         o = DUMMY_DATA
@@ -178,6 +148,7 @@ def get_schema():
                 name = "API key",
                 desc = "API key for the SolarEdge monitoring API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "site_id",

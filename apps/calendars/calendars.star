@@ -29,7 +29,6 @@ DEFAULT_LOCATION = {
     "lng": -0.1276,
     "locality": "London",
 }
-DEFAULT_TIMEZONE = "Europe/London"
 
 Y = "y"  # Computational year in which J_1 falls
 J = "j"  # Number of days that J_c falls before day zero, that is j = -J_c
@@ -339,7 +338,7 @@ def format_date(day, month, year, date_format):
 def main(config):
     location = config.get("location")
     loc = json.decode(location) if location else DEFAULT_LOCATION
-    timezone = loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))  # Utilize special timezone variable
+    timezone = loc.get("timezone", time.tz())  # Utilize special timezone variable
     now = time.now().in_location(timezone)
 
     calendar = config.get("calendar", CHOOSE_RANDOM)

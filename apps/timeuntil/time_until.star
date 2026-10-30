@@ -5,41 +5,50 @@ Description: Got an important event coming up? Time Until keeps you on track!
 Author: JeffLac (Recreation of Tidbyt Original)
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("humanize.star", "humanize")
 
 def get_time_components(duration_seconds):
     """Calculate the two largest time components from seconds."""
+
     # Convert to absolute value for calculation
     abs_seconds = abs(duration_seconds)
-    
+
     components = []
-    
+
     # Calculate days
     days = abs_seconds // 86400
     if days > 0:
         components.append((days, "day" if days == 1 else "days"))
         abs_seconds %= 86400
-    
+
     # Calculate hours
     hours = abs_seconds // 3600
     if hours > 0:
         components.append((hours, "hour" if hours == 1 else "hours"))
         abs_seconds %= 3600
-    
+
     # Calculate minutes
     minutes = abs_seconds // 60
     if minutes > 0:
         components.append((minutes, "minute" if minutes == 1 else "minutes"))
-    
+
     # Return the two largest components
     return components[:2]
 
-def main(config):
+def is_square():
+    """True on a 64x64 panel.
 
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def main(config):
     timezone = config.get("timezone") or "America/New_York"
+
     # Default values
     DEFAULT_EVENT = "HELLO WORLD"  # Changed to uppercase
     DEFAULT_TIME = time.now().in_location(timezone).format("2006-01-02T15:04:05Z07:00")
@@ -48,26 +57,26 @@ def main(config):
     event_name = config.str("event_name", DEFAULT_EVENT).upper()
     event_time = time.parse_time(config.str("event_time", DEFAULT_TIME))
     now = time.now().in_location("America/New_York")
-    
+
     # Calculate time difference in seconds
     time_diff = event_time.unix - now.unix
-    
+
     # Get the two largest time components
     components = get_time_components(time_diff)
-    
+
     # Handle case when no components (very small time difference)
     if not components:
         components = [(0, "mins")]
-    
-    
+
     # Helper function to format time component
     def format_component(comp):
         value, unit = comp
+
         # Replace "minutes" with "mins"
         if unit in ["minute", "minutes"]:
             unit = "min" if value == 1 else "mins"
         return "%d %s" % (value, unit)
-    
+
     cellone = ""
     celltwo = ""
     cellthree = ""
@@ -96,59 +105,62 @@ def main(config):
         rtWidth = 40
 
     return render.Root(
-        child=render.Column(
-            expanded=True,
-            children=[
+        child = render.Column(
+            expanded = True,
+            children = [
                 # Event name with marquee in yellow/orange
                 render.Marquee(
-                    width=64,
-                    child=render.Text(
+                    width = 64,
+                    child = render.Text(
                         event_name,
-                        color="#ffa500",
+                        color = "#ffa500",
                     ),
                 ),
                 # Light purple separator line with 1px padding on each side
                 render.Row(
-                    children=[
-                        render.Box(width=1, height=1),  # Left padding
-                        render.Box(width=62, height=1, color="#b156e3"),  # Separator
-                        render.Box(width=1, height=1),  # Right padding
+                    children = [
+                        render.Box(width = 1, height = 1),  # Left padding
+                        render.Box(width = 62, height = 1, color = "#b156e3"),  # Separator
+                        render.Box(width = 1, height = 1),  # Right padding
                     ],
                 ),
-                # Time display grid
+                # Time display grid; on a square panel it expands and spreads
+                # its two rows down the panel instead of sitting under the rule
                 render.Column(
-                    children=[
+                    expanded = is_square(),
+                    main_align = "space_evenly" if is_square() else "start",
+                    children = [
                         # Top row - fixed height of 10 pixels (half of 20)
                         render.Box(
-                            height=10,
-                            child=render.Row(
-                                expanded=True,
-                                main_align="space_between",
-                                children=[
+                            height = 10,
+                            child = render.Row(
+                                expanded = True,
+                                main_align = "space_between",
+                                children = [
                                     # Top left cell
                                     render.Box(
-                                        width=lfWidth,
-                                        child=render.Row(
-                                            expanded=True,
-                                            main_align="end",
-                                            children=[
-                                                render.Box(width=1, height=1),  # Left padding
-                                                render.Text(cellone, color="#fff"),
-                                                render.Box(width=1, height=1),  # right padding
-                                                ]
+                                        width = lfWidth,
+                                        child = render.Row(
+                                            expanded = True,
+                                            main_align = "end",
+                                            children = [
+                                                render.Box(width = 1, height = 1),  # Left padding
+                                                render.Text(cellone, color = "#fff"),
+                                                render.Box(width = 1, height = 1),  # right padding
+                                            ],
                                         ),
                                     ),
                                     # Top right cell
                                     render.Box(
-                                        width=rtWidth,
-                                        child=render.Row(
-                                            expanded=True,
-                                            main_align="start",
-                                            children=[
-                                                render.Box(width=1, height=1),  # Left padding
-                                                render.Text(celltwo, color="#fff"),
-                                                render.Box(width=1, height=1),  # right padding
-                                                ]
+                                        width = rtWidth,
+                                        child = render.Row(
+                                            expanded = True,
+                                            main_align = "start",
+                                            children = [
+                                                render.Box(width = 1, height = 1),  # Left padding
+                                                render.Text(celltwo, color = "#fff"),
+                                                render.Box(width = 1, height = 1),  # right padding
+                                            ],
                                         ),
                                     ),
                                 ],
@@ -156,35 +168,35 @@ def main(config):
                         ),
                         # Bottom row - fixed height of 10 pixels
                         render.Box(
-                            height=10,
-                            child=render.Row(
-                                expanded=True,
-                                main_align="space_between",
-                                children=[
+                            height = 10,
+                            child = render.Row(
+                                expanded = True,
+                                main_align = "space_between",
+                                children = [
                                     # Bottom left cell
                                     render.Box(
-                                        width=lfWidth,
-                                        child=render.Row(
-                                            expanded=True,
-                                            main_align="end",
-                                            children=[
-                                                render.Box(width=1, height=1),  # Left padding
-                                                render.Text(cellthree, color="#fff"),
-                                                render.Box(width=1, height=1),  # right padding
-                                                ]
+                                        width = lfWidth,
+                                        child = render.Row(
+                                            expanded = True,
+                                            main_align = "end",
+                                            children = [
+                                                render.Box(width = 1, height = 1),  # Left padding
+                                                render.Text(cellthree, color = "#fff"),
+                                                render.Box(width = 1, height = 1),  # right padding
+                                            ],
                                         ),
                                     ),
                                     # Bottom right cell
                                     render.Box(
-                                        width=rtWidth,
-                                        child=render.Row(
-                                            expanded=True,
-                                            main_align="start",
-                                            children=[
-                                                render.Box(width=1, height=1),  # Left padding
-                                                render.Text(cellfour, color="#fff"),
-                                                render.Box(width=1, height=1),  # right padding
-                                                ]
+                                        width = rtWidth,
+                                        child = render.Row(
+                                            expanded = True,
+                                            main_align = "start",
+                                            children = [
+                                                render.Box(width = 1, height = 1),  # Left padding
+                                                render.Text(cellfour, color = "#fff"),
+                                                render.Box(width = 1, height = 1),  # right padding
+                                            ],
                                         ),
                                     ),
                                 ],
@@ -195,7 +207,6 @@ def main(config):
             ],
         ),
     )
-
 
 def get_schema():
     return schema.Schema(

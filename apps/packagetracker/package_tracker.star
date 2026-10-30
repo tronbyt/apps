@@ -6,21 +6,17 @@ Author: Kyle Bolstad
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-CHECKMARK = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAFCAYAAACJmvbYAAAAAXNSR0IArs4c6QAAAERlW
-ElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAA
-AAB6ADAAQAAAABAAAABQAAAACrlow2AAAAIklEQVQIHWNgwAHknoX9xyoFl4AzoMrQ+Qw
-wARiNYRw2CQBc5RBwfuwjGAAAAABJRU5ErkJggg==
-""")
+CHECKMARK = CHECKMARK_ASSET.readall()
+
 CHECKMARK_RIGHT_PADDING = 9
 
 COURIER_ID_UNKNOWN = -1
@@ -96,6 +92,15 @@ TIDBYT_WIDTH = 64
 
 ZIPPOPOTAMUS_API_TTL_SECONDS = 60 * 60 * 24
 ZIPPOPOTAMUS_API_URL = "http://api.zippopotam.us"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     pkge_api_key = re.sub("\\s", "", config.str("pkge_api_key")) if config.str("pkge_api_key") else None
@@ -379,7 +384,15 @@ def main(config):
 
         if children:
             return render.Root(
-                render.Box(
+                # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+                (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Box(
+                    child = render.Column(
+                        expanded = True,
+                        main_align = "space_evenly",
+                        children = children,
+                    ),
+                    padding = PADDING,
+                )))) if is_square() else render.Box(
                     child = render.Column(
                         expanded = True,
                         main_align = "space_evenly",
@@ -403,6 +416,7 @@ def get_schema():
                 desc = "business.pkge.net/settings/api-key",
                 icon = "box",
                 default = "",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "courier_id",

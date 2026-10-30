@@ -6,4 +6,11 @@ desc: Display a random Dothraki word of the day.
 author: tavdog
 fileName: dothraki_wotd.star
 packageName: dothrakiwotd
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: education
+tags:
+  - education
+  - news
+published: '2023-10-15T13:51:16Z'
+updated: '2026-10-01T20:55:01Z'

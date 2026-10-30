@@ -46,7 +46,6 @@ def fetch_latest_result():
         return None
     results = csv.read_all(resp.body())
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(RESULTS_URL, resp.body(), ttl_seconds = seconds_until_next_draw(results[1]))
     return results[1]
 

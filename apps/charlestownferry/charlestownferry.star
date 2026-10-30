@@ -5,29 +5,28 @@ Description: Displays three upcoming ferry depature times for the Charlestown, M
 Author: jblaker
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 FERRY_SCHEDULE_URL = "https://api-v3.mbta.com/schedules?filter[route]=Boat-F4"
 
-def main():
-    response_data_cache = cache.get("response_data")
-    if response_data_cache != None:
-        # print("Hit! Displaying cached data.")
-        response_data = json.decode(response_data_cache)
-    else:
-        # print("Miss! Calling MBTA API.")
-        rep = http.get(FERRY_SCHEDULE_URL)
-        if rep.status_code != 200:
-            fail("MBTA API request failed with status %d", rep.status_code)
-        response_data = rep.json()
+def is_square():
+    """True on a 64x64 panel.
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("response_data", json.encode(response_data), ttl_seconds = 240)
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def main():
+    # print("Calling MBTA API.")
+    rep = http.get(FERRY_SCHEDULE_URL, ttl_seconds = 240)
+    if rep.status_code != 200:
+        fail("MBTA API request failed with status %d", rep.status_code)
+    response_data = rep.json()
 
     ferry_schedule = response_data["data"]
 
@@ -93,6 +92,7 @@ def main():
                 # (left, top, right, bottom)
                 pad = (3, 1, 3, 1),
                 child = render.Column(
+                    expanded = is_square(),
                     main_align = "space_around",
                     cross_align = "start",
                     children = next_departures,

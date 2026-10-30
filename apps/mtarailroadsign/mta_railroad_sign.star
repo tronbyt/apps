@@ -5,12 +5,35 @@ Description: Adds a realtime next train sign for any Metro-North or Long Island 
 Author: nataliemakhijani
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/alert_icon.png", ALERT_ICON_ASSET = "file")
+load("images/branch_babylon.png", BRANCH_BABYLON_ASSET = "file")
+load("images/branch_far_rockaway.png", BRANCH_FAR_ROCKAWAY_ASSET = "file")
+load("images/branch_harlem.png", BRANCH_HARLEM_ASSET = "file")
+load("images/branch_hempstead.png", BRANCH_HEMPSTEAD_ASSET = "file")
+load("images/branch_hudson.png", BRANCH_HUDSON_ASSET = "file")
+load("images/branch_long_beach.png", BRANCH_LONG_BEACH_ASSET = "file")
+load("images/branch_montauk.png", BRANCH_MONTAUK_ASSET = "file")
+load("images/branch_new_canaan.png", BRANCH_NEW_CANAAN_ASSET = "file")
+load("images/branch_new_haven.png", BRANCH_NEW_HAVEN_ASSET = "file")
+load("images/branch_oyster_bay.png", BRANCH_OYSTER_BAY_ASSET = "file")
+load("images/branch_port_jefferson.png", BRANCH_PORT_JEFFERSON_ASSET = "file")
+load("images/branch_port_washington.png", BRANCH_PORT_WASHINGTON_ASSET = "file")
+load("images/branch_ronkonkoma.png", BRANCH_RONKONKOMA_ASSET = "file")
+load("images/branch_west_hempstead.png", BRANCH_WEST_HEMPSTEAD_ASSET = "file")
+load("images/icon_atl.png", ICON_ATL_ASSET = "file")
+load("images/icon_gct.png", ICON_GCT_ASSET = "file")
+load("images/icon_hpa.png", ICON_HPA_ASSET = "file")
+load("images/icon_jam.png", ICON_JAM_ASSET = "file")
+load("images/icon_lic.png", ICON_LIC_ASSET = "file")
+load("images/icon_nyp.png", ICON_NYP_ASSET = "file")
+load("images/icon_unknown.png", ICON_UNKNOWN_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ALERT_ICON = ALERT_ICON_ASSET.readall()
 
 # OBJECTS
 STATION_NAMES = {
@@ -307,7 +330,15 @@ TERMINAL_CODES = {
 # ERRORS
 def NO_TRAINS(station):
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Text("No trains for"),
+                render.Text("this station +"),
+                render.Text("branch at this"),
+                render.Text("time (%s)." % station),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Text("No trains for"),
                 render.Text("this station +"),
@@ -319,7 +350,14 @@ def NO_TRAINS(station):
 
 def API_ERROR(code):
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Text("An error (%s)" % code),
+                render.Text("occured while"),
+                render.Text("fetching data."),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Text("An error (%s)" % code),
                 render.Text("occured while"),
@@ -375,35 +413,43 @@ STATUS_COLORS = {
 
 # ICONS
 TERMINAL_ICONS = {
-    "HPA": base64.decode("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"),
-    "NYK": base64.decode("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"),
-    "NYP": base64.decode("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"),
-    "GCT": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAeUlEQVQ4jc2TwRGAMAgEhbEii7Aiy7Aii7AlfOEYXJCn9w3sEXIRM5tIx74MB+t2CtVJBMTGqAi6AeAYwQiawSFzRpB2xiZ5j3bcqxpN6tr6GSBumISvkKWsUpoDd/gKkmuIcjcPz4lff6EC0VXxFagw2xMCaIJsqgtNz0URrOj+YAAAAABJRU5ErkJggg=="),
-    "0NY": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAeUlEQVQ4jc2TwRGAMAgEhbEii7Aiy7Aii7AlfOEYXJCn9w3sEXIRM5tIx74MB+t2CtVJBMTGqAi6AeAYwQiawSFzRpB2xiZ5j3bcqxpN6tr6GSBumISvkKWsUpoDd/gKkmuIcjcPz4lff6EC0VXxFagw2xMCaIJsqgtNz0URrOj+YAAAAABJRU5ErkJggg=="),  # GCT
-    "LIC": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAW0lEQVQ4jWP8//8/AyWABUqjm8KIRS1WNUww3s+pxgw/pxrjtQ2bGiYcaokGowYMCwNYcIgjpzpsqRK3AcgpjT37LEEXUOwFRmhuxJclYV7AmplY0BThtQybIAA/XhUngpgyGgAAAABJRU5ErkJggg=="),
-    "ATL": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAkklEQVQ4jWP8//8/A5ngPwMDAyMTJZoZGBj+k2sAzBAGlvlLlxPlh8ToSEY0IUYGBob/LMRaB7NIS0WJwdzcHGYYI8uJQweINYPBws4BbhjMRSzGUYkMDAwMDGeXzWeAsXHxsQGSA/HanXuUGUCxCwafAYxpaWlkZYaZM2eSHo0wPuuT+3Bxyr1AQXZmYGBgYAAAL001ZFLLOJEAAAAASUVORK5CYII="),
-    "JAM": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAU0lEQVQ4jWP8//8/AyWAiSLdDAwMLGh8Yp3DiM2A/8gSBABcLbFewOkyisNg1AD8BhCVJtATEjJgRDIEZ/rAZwBejdgMQLaREMCalImyER1QHAsAceQKK8p1C5UAAAAASUVORK5CYII="),
-    "???": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAXUlEQVQ4jcWTwQ4AEAxDTfz/L89JIrS1hUQTF9a3ZjB3Lzdq4mwlGyqqQTPbg4BRaNOiEJZgFYyfAVChIaJu9KoiCWbzBj8BpDmagJozACr1EmXnZwkiQ5S/7f8MOgebDSaJuKC5AAAAAElFTkSuQmCC"),
+    "HPA": ICON_HPA_ASSET.readall(),
+    "NYK": ICON_NYP_ASSET.readall(),
+    "NYP": ICON_NYP_ASSET.readall(),
+    "GCT": ICON_GCT_ASSET.readall(),
+    "0NY": ICON_GCT_ASSET.readall(),  # GCT
+    "LIC": ICON_LIC_ASSET.readall(),
+    "ATL": ICON_ATL_ASSET.readall(),
+    "JAM": ICON_JAM_ASSET.readall(),
+    "???": ICON_UNKNOWN_ASSET.readall(),
 }
 BRANCH_ICONS = {
-    "Port Jefferson": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAWklEQVQ4jWP8//8/AyWAiSLdRBrwH42N4mRiXYDuTzifFC9gNYQuYTB4DGDExifWAKyaGRgYGFhI1IxuEMSA48ZWJKdny7PHEF6AcUjVDDeAFEPQ1TEOeG4EABFsGFA01buVAAAAAElFTkSuQmCC"),
-    "Montauk": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAgUlEQVQ4jWP8//8/Ay7gbGT8n4GBgWHvubOMuNSw4NTNwMCwe50mPmkGBgYGBiaCKgiB////Y+DO1tb/Pz8/QMGdra3/sallxBUGv748RJFg45HHGg4Ue4FiA3B6odHVHUWifvfOQeoFrAagOx+XGAMDjjBAj0IYwBaVgzQM6GoAALnHU+2DWDaGAAAAAElFTkSuQmCC"),
-    "Ronkonkoma": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAc0lEQVQ4jWP8//8/AyWAiSLdw8MARmNjY5yheOzAWgYGBgYGK4dg0l0A04zOJugCZMVsPPKMDAwMDL++PISrQXcN48/PDzC8ANOIDpANghvQ4OKGIrjtyQ2Gk9cfYjXAXFP+v5eMBorYwEfjwBvAOOC5EQD5nCh/cREDWAAAAABJRU5ErkJggg=="),
-    "Far Rockaway": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAc0lEQVQ4jd2TQQ6AMAgEF+Kj7ON6kcf1VRYvQiqpJoaTcqTMdkuBVBWZ4BT9M4EiXYv01x1lg1tlFwo1+iRO5zf6YZEOAGiVKYjM8v4EGmGDIhwcKgBdYsEY0XarbJc4wzPY+nEDX5zSuu2pWU7PAX1/mQ5DGkN2g4CZYQAAAABJRU5ErkJggg=="),
-    "Long Beach": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAnUlEQVQ4jWP8//8/AyWAiSLd1DCABZvgg8OzsPpLwTaNkaALHhye9f/NV2YGBgYGBnT6zI65GAajGADTLML9lwEXje46JmTN2JyNDt58ZUZRy4QswcDAgNd2GI3VBSYeyYwwQwgB5MBkRE9IZ3bM/Y/PdvSYwIgFE49kjKiCeQ1bNGK4AAbQYwSXwVhTIrYYwRVLFCdlnF4gFlDsAgCnD2mvPDFZlwAAAABJRU5ErkJggg=="),
-    "Babylon": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAW0lEQVQ4jWP8//8/AyWAiSLdw8MARlwSqSUpKKE7u2cOTrVYNSMbgM4nqJkUOUaiTcZnKswQYgxDVptakvKfoSo5hGjN6IZUJYf8h0ej6PsPRLsaWS3jaF5gAACVnDPbdc4FLwAAAABJRU5ErkJggg=="),
-    "Hempstead": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAfklEQVQ4jWP8//8/Ay7w5trq/wwMDAwiWqGMuNQwEdKMzibKACSbGUS0QvEagtMFxAIWfJJvrq0maADFLsAwAF+AYZPDMABflGGTw+uF2gOfGWoPfManhAZhQHcD8KaDZgde2ruAETk34ksDyAA5OlEMaHR1J8qA+t074QYAAGVdM4zN7qVFAAAAAElFTkSuQmCC"),
-    "West Hempstead": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAYElEQVQ4jdXRMQrAMAiF4WfpSUL2XsTLZy+5ip0Ea0Xckv6jkA+JJCKw3e0SAOhzEAqRBfSxpoide/jMdA9GHZU1fwb0Oah6AcBdwRecVAC88BQI+gAbfmIWMy/eYE/gAe8aJMshhRfQAAAAAElFTkSuQmCC"),
-    "Oyster Bay": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAfUlEQVQ4jcWTwQ2AIAxFH8bBjBfPXmQBTdzJCWQDL66GV5S2kmAiN0jfy28BF2OkZjVV9BeC9mZbnVl8DtsO0I2zFwUWVJTAgKfkOKQ16gxKYFWgwAD0x+LTvXULGSytTPA2NFNgRUfoX0xgwc/+NUExDPI7yKJqMID7/Tde6IAks03vXnsAAAAASUVORK5CYII="),
-    "Port Washington": base64.decode("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"),
-    "New Haven": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAl0lEQVQ4jWP8//8/AyWAiSLd1DCABV3g790ZBP3ErJzBCGMzoofBIz9tvAZI9+eiGEKUF75H3ICznxZORpHDaQCyJs4VGijiyF7AaQCyJmQD1aP+MiKLYxggt+kqigKYRnQDCboAm0Z0w/EaANMIMwibZpwGICvG5XSCLsBlIAb4//8/TvzQV+s/Pvn///9jpkRSAcWZCQCliGCbIEGiWQAAAABJRU5ErkJggg=="),
-    "Harlem": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAq0lEQVQ4ja2TMQ5CIQyGvxpXPYPxBCZu3MLDOBtnd6/h7GzS2SN4Bj1AXd4jwKNBxSYkwE+//LQgZkZPzD48Z8P4DaCqqGqXAzfmDb1ZIA9gQLQdQnABknQhTrz7FiBJAeYleTHAJAK+yk5cjF0QyNulqqy3L0xW2V7iVKAo4nOTF+t8W3DlwfKuVX0CGA8yFCuuHR3+/ZBKi5fTEYDd/lDVJ4CaxZYuvd/5DRntSyYAXS4qAAAAAElFTkSuQmCC"),
-    "Hudson": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAX0lEQVQ4jWP8//8/AzqwK7+GIXioU4sRQyEDAwMTNkFsAJuhOA3AZRs2Q3C6AJchRBtALMBpAC4/U+QCbN7CagBNohEXwDCAWL+T5AJ8UUp9L2CzDZ+3aJMXSAEUZyYAh9Qlp5cl7HIAAAAASUVORK5CYII="),
-    "New Canaan": base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAfElEQVQ4jaVTWw7AIAhrvf+duy+TyopzG4kRCC0vBUwkyfXOdp2JgCQdPMX9JAkAwwOnM9kJLEkxUwV1Fd1aqHNIhI8EHUkCA8A4zdRJJHhDeETwu4LtYE+CWnDd727fHuNJP1XgJMPB3VOu95Ks+2U736JLmmdpIQYH/QLxQKXCZoE0WAAAAABJRU5ErkJggg=="),
+    "Port Jefferson": BRANCH_PORT_JEFFERSON_ASSET.readall(),
+    "Montauk": BRANCH_MONTAUK_ASSET.readall(),
+    "Ronkonkoma": BRANCH_RONKONKOMA_ASSET.readall(),
+    "Far Rockaway": BRANCH_FAR_ROCKAWAY_ASSET.readall(),
+    "Long Beach": BRANCH_LONG_BEACH_ASSET.readall(),
+    "Babylon": BRANCH_BABYLON_ASSET.readall(),
+    "Hempstead": BRANCH_HEMPSTEAD_ASSET.readall(),
+    "West Hempstead": BRANCH_WEST_HEMPSTEAD_ASSET.readall(),
+    "Oyster Bay": BRANCH_OYSTER_BAY_ASSET.readall(),
+    "Port Washington": BRANCH_PORT_WASHINGTON_ASSET.readall(),
+    "New Haven": BRANCH_NEW_HAVEN_ASSET.readall(),
+    "Harlem": BRANCH_HARLEM_ASSET.readall(),
+    "Hudson": BRANCH_HUDSON_ASSET.readall(),
+    "New Canaan": BRANCH_NEW_CANAAN_ASSET.readall(),
 }
-ALERT_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAMAAAAICAYAAAA870V8AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAK0lEQVQImYXJMQoAIAzAwLT/f6U+QyHdxKHQbEdQOQtVkq9QHxLg7rA/MwqE2hG8taxbkwAAAABJRU5ErkJggg==")
 
 # MAIN CODE
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # get user settings
     station_code = config.str("station", DEFAULT_STATION)
@@ -490,7 +536,74 @@ def main(config):
 
     return render.Root(
         delay = 850,  # make sure we can make it through the stops before our window on the device ends
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Box(
+                    # branch color
+                    width = 64,
+                    height = 1,
+                    color = branch_color,
+                ),
+                render.Box(
+                    # alerts, if any
+                    width = 64,
+                    height = 1,
+                    color = "#ffe91f" if is_alert else "#000000",
+                ),
+                render.Row(
+                    children = [
+                        render.Padding(child = render.Image(train_icon), pad = (0, 0, 1, 0)),  # branch/terminal icon
+                        render.Column(children = [
+                            # train number, eta, peak info
+                            render.Row(expanded = True, main_align = "space_between", children = [
+                                render.Box(
+                                    child = render.Marquee(
+                                        child = render.Text(train_number),
+                                        align = "center",
+                                        width = 20,
+                                    ),
+                                    width = 20,
+                                    height = 8,
+                                    color = branch_color,
+                                ),  # make the train number look nice, use a marquee to scroll it in case it's longer than usual (ie special gameday trains)
+                                render.Animation(children = [
+                                    render.Text(stop_time.in_location("America/New_York").format("3:04"), color = train_otp_color),  # janky way of slowing this animation down
+                                    render.Text(stop_time.in_location("America/New_York").format("3:04"), color = train_otp_color),
+                                    render.Text(stop_time.in_location("America/New_York").format("3:04"), color = train_otp_color),
+                                    render.Text("%s %s" % ("▴" if is_peak else "▾", eta_str if eta != 0 else "Arr")),  # peak icon and eta, or "Arr"iving if it's zero.
+                                    render.Text("%s %s" % ("▴" if is_peak else "▾", eta_str if eta != 0 else "Arr")),
+                                    render.Text("%s %s" % ("▴" if is_peak else "▾", eta_str if eta != 0 else "Arr")),
+                                ]),
+                            ]),
+                            render.Row(children = [
+                                render.Text("%s " % stop_track_type),  # "Track" or "Platform"
+                                render.Text(stop_track, color = "#ffffff" if not track_change else STATUS_COLORS["ARRIVING"]),  # change the color if there's a track change to draw attention to it.
+                                render.Image(ALERT_ICON) if track_change else None,  # show the alert icon if there's been a track change
+                            ]),
+                        ]),
+                    ],
+                ),
+                render.Animation(children = [
+                    # stops
+                    render.Text(stop, font = "tb-8")
+                    for stop in next_stops[:-1]  # all but the last stop get 1 frame.
+                ] + [render.Text(next_stops[-1], font = "tb-8")] * 3),  # hold the last stop on screen longer
+                render.Padding(
+                    # consist
+                    child = render.Row(children = cars, expanded = True, main_align = "center"),
+                    pad = (1, 2, 0, 0),
+                ),
+                render.Row(expanded = True, main_align = "center", children = [
+                    # train loading and platform indicator
+                    render.Padding(pad = (0, 1, 0, 0), child = render.Box(width = 62, height = 1, color = status_color) if stop_status != "ARRIVING" else render.Animation(children = [
+                        # flash the "platform" if the train is arriving
+                        render.Box(width = 62, height = 1, color = STATUS_COLORS["ARRIVING"]),
+                        render.Box(width = 62, height = 1, color = STATUS_COLORS["BERTHED"]),
+                    ])),
+                ]),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Box(
                     # branch color

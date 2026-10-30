@@ -6,4 +6,11 @@ desc: Real Time spaces in Cambridge UK Car Parks.
 author: derekllaw
 fileName: campark.star
 packageName: campark
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - real-time
+  - utility
+published: '2024-02-08T17:34:44Z'
+updated: '2026-10-01T20:31:47Z'

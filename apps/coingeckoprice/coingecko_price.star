@@ -6,7 +6,6 @@ Author: Allen Schober (@aschober)
 Thanks: @saltedlolly as this is based on the digibyteprice app.
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
@@ -236,42 +235,22 @@ def coin_search(pattern):
     return search_results
 
 def get_json_from_cache_or_http(url, ttl_seconds):
-    cached_response = cache.get(url)
+    print("HTTP JSON Request: {}".format(url))
+    http_response = http.get(url, ttl_seconds = ttl_seconds)
+    if http_response.status_code != 200:
+        print("HTTP Request failed with status: {}".format(http_response.status_code))
+        return None
 
-    if cached_response != None:
-        print("Cache hit: {}".format(url))
-        data = json.decode(cached_response)
-    else:
-        print("HTTP JSON Request: {}".format(url))
-        http_response = http.get(url)
-        if http_response.status_code != 200:
-            fail("HTTP Request failed with status: {}".format(http_response.status_code))
-
-        # Store http response in cache keyed off URL
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, json.encode(http_response.json()), ttl_seconds = ttl_seconds)
-        data = http_response.json()
-
-    return data
+    return http_response.json()
 
 def get_body_from_cache_or_http(url, ttl_seconds):
-    cached_response = cache.get(url)
+    print("HTTP Body Request: {}".format(url))
+    http_response = http.get(url, ttl_seconds = ttl_seconds)
+    if http_response.status_code != 200:
+        print("HTTP Request failed with status: {}".format(http_response.status_code))
+        return None
 
-    if cached_response != None:
-        print("Cache hit: {}".format(url))
-        data = cached_response
-    else:
-        print("HTTP Body Request: {}".format(url))
-        http_response = http.get(url)
-        if http_response.status_code != 200:
-            fail("HTTP Request failed with status: {}".format(http_response.status_code))
-
-        # Store http response in cache keyed off URL
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, http_response.body(), ttl_seconds = ttl_seconds)
-        data = http_response.body()
-
-    return data
+    return http_response.body()
 
 def format_price_string(currency_price, currency_symbol, currency_symbol_setting, currency_code, currency_code_setting):
     print("  Price: %s" % currency_price)

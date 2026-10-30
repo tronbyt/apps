@@ -4,4 +4,11 @@ name: Pomodoro
 summary: Pomodoro Timer
 desc: A time management tool to break work into intervals.
 author: rwong2888
-recommended_interval: 1
+recommendedInterval: 1
+supports64x64: true
+category: lifestyle
+tags:
+  - focus
+  - productivity
+published: '2024-09-20T15:07:03Z'
+updated: '2026-10-01T22:22:03Z'

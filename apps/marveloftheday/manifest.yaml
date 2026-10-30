@@ -6,4 +6,14 @@ desc: Shows the name and image of a Marvel Comics character using the Marvel API
 author: flynnt
 fileName: marvel_of_the_day.star
 packageName: marveloftheday
-recommended_interval: 5
+recommendedInterval: 5
+broken: true
+brokenReason: API access closed
+supports64x64: true
+category: entertainment
+tags:
+  - media
+  - time
+  - music
+published: '2023-11-05T13:09:56Z'
+updated: '2026-10-01T21:48:48Z'

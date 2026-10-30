@@ -5,11 +5,13 @@ Description: Now playing with album art from WXPN, XPN2, and XPN Kids Corner.
 Author: radiocolin
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/wxpn_logo_base64.png", WXPN_LOGO_BASE64_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+WXPN_LOGO_BASE64 = WXPN_LOGO_BASE64_ASSET.readall()
 
 # Station URLs
 XPN_URL = "https://jetapi.streamguys.com/ca5a773facc7e544fe426038da93667b3898b0a6/scraper/d8539cb7-52fb-4687-8f52-46c14fbf3c8e/metadata"
@@ -20,7 +22,6 @@ KIDS_CORNER_URL = "https://jetapi.streamguys.com/ca5a773facc7e544fe426038da93667
 ITUNES_URL_TEMPLATE = "https://itunes.apple.com/search?term={}+{}&media=music&limit=1"
 
 # WXPN logo base64 (placeholder - you'll need to provide the actual base64 string)
-WXPN_LOGO_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAAAJBlWElmTU0AKgAAAAgABgEGAAMAAAABAAIAAAESAAMAAAABAAEAAAEaAAUAAAABAAAAVgEbAAUAAAABAAAAXgEoAAMAAAABAAIAAIdpAAQAAAABAAAAZgAAAAAAAABIAAAAAQAAAEgAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAAB6gAwAEAAAAAQAAAB4AAAAAcRvnIgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAm1pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpQaG90b21ldHJpY0ludGVycHJldGF0aW9uPjI8L3RpZmY6UGhvdG9tZXRyaWNJbnRlcnByZXRhdGlvbj4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+NzI8L3RpZmY6WFJlc29sdXRpb24+CiAgICAgICAgIDx0aWZmOllSZXNvbHV0aW9uPjcyPC90aWZmOllSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICAgICA8dGlmZjpDb21wcmVzc2lvbj4xPC90aWZmOkNvbXByZXNzaW9uPgogICAgICAgICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KsVruIwAABLNJREFUSA3tVltsFFUY/uayOzt76b2l0G1LaQlJK4kE9UGDISGaICZEkxoTjBg0atREHnwzRh980CdefeEJUhIBTUTe0BrkoiYUUmgBqfZeWrbbLjt7md3ZmfE7p7uhohhIE/vSP5mZ/5zzn//777vKwIfNPlaB1FXAlJBrwP9b5NdCvRqhvr+dl68rvEfD/otffi58qKzFHcHfI73CKmqYKnno5QHVhAIVvpcDlCAURYfvu1D0ap4X4Ltp8k20waFMnnwV94u8Z3DPg1+a5z1Dyvsuz9UgYaivtMCvy0cBgRUKl+Dao1C0AIWbqW8anleCGowT5C48AUSjyYL2QQ1thZu+Kp1QTBVexhM4kHZSo1bVQ/uG4FlCvgZuISVl1dhmfrlJoislSoYRrN5B4btwc9ehRXqgaiYca4jgG6CFuuFrUWixNjiJAZTmrsDo3MuzKJzFG9Bburh/EeGu3XDzC7BvHkeg+Sno8S4Up/oQiAvZCOxbfdCiLYR1ofsMl+Jl0bJrP9xiAWPH3kd8zwEYNQ0YOboP9U+8ipqOLZg8+w063vqS0Shg9sIpbNr7LmYunIZ141dsfuMT2Kl5mLUMP+nWka3U7aLr9Y+RX/gCobomhlvD+KmdSH77NrS6LVAVvQ6uNc+LSZiN6xHpeoHe1yMYq0Gk/WWE17fC9TxkfjuBuXPfIdzYIkGLuTRmT74HzYhCVQOMVgG/H/mc9aAhvvsAw13HqAWg6gYSA2cFEOq37ZSlIGRURV1KszU6yPj7PHyOheTDyVqoe2wHgtEqpEeHodYAd/reRHr6T+nVTP9x2D9MsJ5MuV4YPI/Z/Z/Bmh6BUVUL3YzK/cSlfox++jx1snBFccvHh+qzSlUzAHvmMpxcBjHmxUkvIj1+E5ENHVIwPzcBZxSof+kQYi3cI617+kUEHqetdlauQ02tMPaAkaqF6zgsKHYESXgcbCNDZyS43OU+bzLx7Sgmh2EvzCFgmsgnb8MauwrdMFAq2rCuH0V0Vy829R5E0Uph7PRh5nMdNn50ntXvSFW13dux7dg8va1H4vJPcDNsAZKiaaLrZI41I0RLxaZsJxojvOZe8soZ2PMzyIyxcjOTmP65GcXM4lLhRxsw9ePXsK71I/vLV8wV+5ktp4XZ26Tk4EXeScFj8d05+RqM9l5MnOlDZvicGAsY+/4wnFQCWi3x3CyUpX8gDLwSoGVTIgAUZPNr7L/sHPtarDvh5/6A6H9xUYv1kB+CMwI0fXAIna8cpFEnMP5OL4xnhEw7dY3D5RwRtaGarSglJsUsglbdTuS8GCCCxBBhWwXi0INB5qLAtQc91lGeZhYUs425inHbZgQS0Bu3M3yXOOjSTEeW/ZuB8SwHQ8OT8Iu3qauV/VtN+QzDm2dfd0sMMZBoSsVjiV5+ibKjIZIEL0isyYvKVMQvqViTF2uRI50V7LKYGMKlc+2f8hy5IrcCVFDZY8mXXxVQsbyPZ//dIyoQeeDw8XNTTE2EOkW+aYwk3l0uv5zn+b8Al+891IdeqBwgJue78NhngfzN2AcrWSEwvRK/UKVkGXB5hB4MKk5WCFxR/uj/oB79RgVrhd814BUG8OGvr1qo/wJn0/FZDYrxDQAAAABJRU5ErkJggg=="
 
 # Station configurations
 STATIONS = {
@@ -42,6 +43,7 @@ STATIONS = {
 }
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
     station_key = config.str("station", "xpn")
     station = STATIONS.get(station_key, STATIONS["xpn"])
 
@@ -49,7 +51,7 @@ def main(config):
     now_playing = get_now_playing(station["url"])
     if not now_playing:
         return render.Root(
-            child = render.Text("Unable to load WXPN data"),
+            child = render.Text("Unable to load WXPN data", font = "tb-8" if scale == 1 else "terminus-14"),
         )
 
     # Parse track info
@@ -62,7 +64,8 @@ def main(config):
 
     # Create the display
     return render.Root(
-        child = create_display(station, artist, title, album_art, station_key),
+        show_full_animation = True,
+        child = create_display(station, artist, title, album_art, station_key, scale),
     )
 
 def get_now_playing(url):
@@ -106,20 +109,20 @@ def get_album_art(artist, title):
 
     return None
 
-def create_display(station, artist, title, album_art_url, station_key):
+def create_display(station, artist, title, album_art_url, station_key, scale):
     """Create the main display layout"""
 
     # Top orange bar
     top_bar = render.Box(
-        width = 64,
-        height = 1,
+        width = 64 * scale,
+        height = 1 * scale,
         color = "#C17430",
     )
 
     # Bottom orange bar
     bottom_bar = render.Box(
-        width = 64,
-        height = 1,
+        width = 64 * scale,
+        height = 1 * scale,
         color = "#C17430",
     )
 
@@ -129,17 +132,17 @@ def create_display(station, artist, title, album_art_url, station_key):
         # Use the fetched image data directly
         album_art = render.Image(
             src = album_art_url,
-            width = 30,
-            height = 30,
+            width = 30 * scale,
+            height = 30 * scale,
         )
 
     # Fallback to WXPN logo if no album art
     if not album_art:
-        logo_data = base64.decode(WXPN_LOGO_BASE64)
+        logo_data = WXPN_LOGO_BASE64
         album_art = render.Image(
             src = logo_data,
-            width = 30,
-            height = 30,
+            width = 30 * scale,
+            height = 30 * scale,
         )
 
     # Station indicator at top
@@ -147,28 +150,32 @@ def create_display(station, artist, title, album_art_url, station_key):
     if station_key == "kids":
         station_display_name = "XPN Kids"
 
+    station_font = "tom-thumb" if scale == 1 else "terminus-12"
+    title_font = "6x10" if scale == 1 else "terminus-18"
+    artist_font = "5x8" if scale == 1 else "terminus-14"
+
     station_text = render.Text(
         station_display_name,
-        font = "tom-thumb",
+        font = station_font,
         color = "#FFFFFF",
     )
 
     # Spacer to give station name breathing room
     spacer = render.Box(
-        width = 1,
-        height = 2,
+        width = 1 * scale,
+        height = 2 * scale,
     )
 
     # Text content (right side) with single marquee
     title_text = render.Text(
         title,
-        font = "6x10",
+        font = title_font,
         color = "#FFFFFF",
     )
 
     artist_text = render.Text(
         artist,
-        font = "5x8",
+        font = artist_font,
         color = "#808080",
     )
 
@@ -181,7 +188,7 @@ def create_display(station, artist, title, album_art_url, station_key):
 
     # Single marquee for both title and artist
     track_marquee = render.Marquee(
-        width = 34,
+        width = 34 * scale,
         child = track_info,
         scroll_direction = "horizontal",
         align = "start",
@@ -203,8 +210,8 @@ def create_display(station, artist, title, album_art_url, station_key):
 
     # Content area between bars (30 pixels high)
     content_area = render.Box(
-        width = 64,
-        height = 30,
+        width = 64 * scale,
+        height = 30 * scale,
         child = content_row,
     )
 

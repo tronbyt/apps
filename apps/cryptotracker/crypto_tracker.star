@@ -10,16 +10,13 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 DEFAULT_SYMBOL = "BTC"
 RED_RGB = "#FF0000"
 GREEN_RGB = "#00FF00"
 WHITE_RGB = "#FFFFFF"
-
-PIN = """AV6+xWcEusHpmsVuv3T3x5sZCIs7M7pe4JOOypcu+Xo53jo5IBtjbh2OD9vDODM8GJtHVnquRu3J24R2BogCRRqEFy3O1ZzOwcT5NKRzuPESxZMKULP5gD7kcuqXu8xhmhTNbFC47t+oI1Vxntc7NbC7mJJRvQ=="""
 
 def display_symbol(crypto_symbol):
     "returns crypto symbol render"
@@ -126,7 +123,7 @@ def main(config):
     tr_format_percent = config.str("tr_format_percent", False) == "true"
     interval = "15min"
 
-    API_KEY = secret.decrypt(PIN) or config.get("dev_api_key")
+    API_KEY = config.get("api_key")
     API_URL = "https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol={s}&market=USD&interval={i}&outputsize=full&apikey={a}".format(s = symbol, i = interval, a = API_KEY)
 
     cache_name = "{}_price_data".format(symbol)
@@ -136,28 +133,48 @@ def main(config):
         r = json.decode(cached_data)
     else:
         print("Miss! Calling Alphavantage API.")
-        rep = http.get(API_URL)
+        rep = http.get(API_URL, ttl_seconds = 60 * 15)
         r = rep.json()
 
         if rep.status_code != 200:
-            print("Using cached data")
-            r = json.decode(cached_data)
-            print("Alphavantage API request failed with status %d, using cached data", rep.status_code)
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                fail("Alphavantage API request failed with status %d", rep.status_code)
 
-        if list(r.keys()) == ["Note"]:
-            print("Using cached data")
-            r = json.decode(cached_data)
-            print("Alphavantage API request failed with note %d, using cached data", r["Note"])
+        if "Note" in r:
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                print("Alphavantage API request failed with note %s" % r["Note"])
+                return render.Root(
+                    child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("API Limit Reached", color = "#FF0000")),
+                )
 
-        if list(r.keys()) == ["Error Message"]:
-            print("Using cached data")
-            r = json.decode(cached_data)
-            print("Alphavantage API request failed with error message %d, using cached data", r["Error Message"])
+        if "Error Message" in r:
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                fail("Alphavantage API request failed with error message %s" % r["Error Message"])
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_name, json.encode(r), ttl_seconds = 60 * 15)
+        if "Information" in r:
+            if cached_data != None:
+                print("Using cached data")
+                r = json.decode(cached_data)
+            else:
+                print("Alphavantage API request failed with information %s" % r["Information"])
+                return render.Root(
+                    child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("API Info: %s" % r["Information"], color = "#FF0000")),
+                )
 
-    timeseries = r["Time Series Crypto (15min)"]
+    timeseries = r.get("Time Series Crypto (15min)")
+    if not timeseries:
+        return render.Root(
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("No Data Available", color = "#FF0000")),
+        )
 
     dates = [val for val in timeseries.keys()]
 
@@ -180,9 +197,10 @@ def main(config):
     else:
         color = WHITE_RGB
 
+    # Centre the block on taller panels (64x64).
     return render.Root(
         delay = 75,
-        child = render.Column(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Column(
                     children = [
@@ -219,7 +237,7 @@ def main(config):
                     main_align = "center",
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():
@@ -252,6 +270,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Alphavantage API Key",
+                desc = "Your Alphavantage API Key.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "symbol",
                 name = "crypto symbol",

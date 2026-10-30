@@ -4,4 +4,14 @@ name: SANFL Ladder
 summary: Shows the SANFL Ladder
 desc: Shows the SANFL Ladder.
 author: M0ntyP
-recommended_interval: 5
+recommendedInterval: 5
+fileName: sanfl_ladder.star
+packageName: sanflladder
+supports64x64: true
+category: sports
+tags:
+  - ladder
+  - sanfl
+  - football
+published: '2025-03-30T20:06:32Z'
+updated: '2026-10-01T18:52:35Z'

@@ -6,4 +6,11 @@ desc: Show current US House floor activity in real-time, include live vote count
 author: Shaun Brown
 fileName: dome_watch.star
 packageName: domewatch
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: news
+tags:
+  - news
+  - real-time
+published: '2023-06-09T16:16:31Z'
+updated: '2026-10-01T20:55:01Z'

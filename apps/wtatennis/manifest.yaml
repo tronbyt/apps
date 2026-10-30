@@ -6,4 +6,10 @@ desc: Display tennis scores from a WTA tournament chosen in the dropdown. Shows 
 author: M0ntyP
 fileName: wta_tennis.star
 packageName: wtatennis
-recommended_interval: 5
+recommendedInterval: 5
+category: sports
+tags:
+  - real-time
+  - tennis
+published: '2023-04-11T18:06:52Z'
+updated: '2026-09-19T05:35:49Z'

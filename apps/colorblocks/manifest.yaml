@@ -6,4 +6,10 @@ desc: Display your Insight profile color blocks.
 author: Andrew Hefele
 fileName: colorblocks.star
 packageName: colorblocks
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: art
+tags:
+  - art
+published: '2023-02-01T15:45:39Z'
+updated: '2026-10-17T19:08:50Z'

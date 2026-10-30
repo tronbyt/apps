@@ -6,4 +6,11 @@ desc: Based on the Pokémon Pikachu virtual pet from the 90s.
 author: Kyle Stark
 fileName: petpikachu.star
 packageName: petpikachu
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: gaming
+tags:
+  - retro
+  - gaming
+published: '2022-07-18T19:19:29Z'
+updated: '2026-10-01T22:17:11Z'

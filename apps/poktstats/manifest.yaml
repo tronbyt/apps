@@ -2,8 +2,16 @@
 id: pokt-stats
 name: POKT Stats
 summary: POKT Price and Height
-desc: " Displays up-to-date statistics (currently POKT/USD price and latest block height) about the Pocket Networks blockchain for monitoring."
-author: al-bargsys
+desc: ' Displays up-to-date statistics (currently POKT/USD price and latest block height) about the Pocket Networks blockchain for monitoring.'
+author: bretep
 fileName: poktstats.star
 packageName: poktstats
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - crypto
+  - finance
+  - utility
+  - tracking
+published: '2023-02-01T21:35:47Z'
+updated: '2026-10-15T20:01:37Z'

@@ -6,4 +6,12 @@ desc: Display park hours, show times, boarding groups, and attraction wait times
 author: beyondutility
 fileName: park_time.star
 packageName: parktime
-recommended_interval: 5
+recommendedInterval: 5
+category: clocks
+tags:
+  - theme-parks
+  - wait-times
+  - local
+  - real-time
+published: '2023-05-26T17:41:23Z'
+updated: '2025-11-29T21:14:16Z'

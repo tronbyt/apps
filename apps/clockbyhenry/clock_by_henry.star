@@ -27,8 +27,19 @@ Author: Henry So, Jr.
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/digit_0.png", DIGIT_0_ASSET = "file")
+load("images/digit_1.png", DIGIT_1_ASSET = "file")
+load("images/digit_2.png", DIGIT_2_ASSET = "file")
+load("images/digit_3.png", DIGIT_3_ASSET = "file")
+load("images/digit_4.png", DIGIT_4_ASSET = "file")
+load("images/digit_5.png", DIGIT_5_ASSET = "file")
+load("images/digit_6.png", DIGIT_6_ASSET = "file")
+load("images/digit_7.png", DIGIT_7_ASSET = "file")
+load("images/digit_8.png", DIGIT_8_ASSET = "file")
+load("images/digit_9.png", DIGIT_9_ASSET = "file")
+load("images/digit_blank.png", DIGIT_BLANK_ASSET = "file")
+load("images/digit_colon.png", DIGIT_COLON_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -60,7 +71,7 @@ def main(config):
 
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
     now = config.get("time")
     now = (time.parse_time(now) if now else time.now()).in_location(timezone)
@@ -83,7 +94,7 @@ def main(config):
         (float(location["lat"]), float(location["lng"])) if location.get("lat") and location.get("lng") else None
     )
 
-    day_start = config.bool(P_DAY_START) or DEFAULT_DAY_START
+    day_start = config.get(P_DAY_START, DEFAULT_DAY_START)
     if day_start == "sunrise" and coords:
         day_start = sunrise.sunrise(coords[0], coords[1], now)
         if day_start == None:
@@ -96,7 +107,7 @@ def main(config):
     elif not re.match(r"^\d\d:\d\d$", day_start):
         day_start = DEFAULT_DAY_START
 
-    night_start = config.bool(P_NIGHT_START) or DEFAULT_NIGHT_START
+    night_start = config.get(P_NIGHT_START, DEFAULT_NIGHT_START)
     if night_start == "sunset" and coords:
         night_start = sunrise.sunset(coords[0], coords[1], now)
         if night_start == None:
@@ -412,16 +423,16 @@ SEASON_THEMES = {
 }
 
 DIGITS = {
-    "0": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAADZJREFUCNdjCA0NDWAIdRANYAhhYAxgCGAAogBWECHqEMDgIOogQC4BNgBiFMhQsPFgi0BWAgA+EBINLZKayAAAAABJRU5ErkJggg=="),
-    "1": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAClJREFUCNdjCA0NDWAIDWEEEgEgwgFEMACJADDBAiJEgEQIWAl1CKCVACzyFrviSepFAAAAAElFTkSuQmCC"),
-    "2": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAEVJREFUCNdtzbENACEMA0CnSP/Fsw8jGAnvv8o7CKQvaE6OCweSCKERRBId4fT6GDK6MePAomfR9orcYobhIlWjeH7Uyw/6sBR9nwYNSwAAAABJRU5ErkJggg=="),
-    "3": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAD9JREFUCNdlzKEBgDAMBdGrwGO6T9kggtt/FfgQBeZE8hLUQraioHNOdnR9cjsJHn1h8Dv74c6R7eLJyPsZbF3TmRSx6tdBGQAAAABJRU5ErkJggg=="),
-    "4": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAADNJREFUCNdjCA0NDWAIDWGAEQFwwgFOMIAIRhgRwgojAkRhhAOYYAACBBEaCtKBlQgNAAChxxM5EE3fuwAAAABJRU5ErkJggg=="),
-    "5": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAADdJREFUCNdjCA0NDWAIYGBAIVhDcRAMrCCCEaouNJRBAEg4YCdcQbKOoUB1DgxgAqxNFKQtNAAAyywUSY+7irwAAAAASUVORK5CYII="),
-    "6": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAEFJREFUCNdjCA0NDWAAIiDhACIYgEQII0iAFU6IAgkHMCHCCiRASiAEK4MAUMIBOxEAJlhB5oENZWAE2QE0AGQlAK5JEvS3wopyAAAAAElFTkSuQmCC"),
-    "7": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAADVJREFUCNdjCA0NDWBwYGAQQCJCQx1ABEMAMhHCiEIEsKIQDmBCFEYwgIlQKBECJhhhBMhKAMgsFcwfcB7aAAAAAElFTkSuQmCC"),
-    "8": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAADdJREFUCNdjCA0NDWAIZWANYAhhYAxgCGAAIgdWBgEGB1EHFAIkBpYFq0PTEcAK0oamA5c2kJUAs/wP2GwBpREAAAAASUVORK5CYII="),
-    "9": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA4AAAAYAgMAAAC3qSTEAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAEJJREFUCNdtzSEOADAIA8Ai8DP8hycg1v9/ZYVlbuZISNOCZIGIwoYVanDdjBzWH8dS6EHTj7yoj3jsKfUmml7T5AEj0RKOJbpXOwAAAABJRU5ErkJggg=="),
-    ":": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAcAAAAYAgMAAABLvA8OAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAABpJREFUCNdjCA1hQEMBIgwOLFAEZGMqwKYGANm5DGdVvFjRAAAAAElFTkSuQmCC"),
-    "_": base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAcAAAAYAQMAAAAMHHXeAAAABlBMVEUAAAD///+l2Z/dAAAADElEQVQI12NgIA0AAAAwAAHHqoWOAAAAAElFTkSuQmCC"),
+    "0": DIGIT_0_ASSET.readall(),
+    "1": DIGIT_1_ASSET.readall(),
+    "2": DIGIT_2_ASSET.readall(),
+    "3": DIGIT_3_ASSET.readall(),
+    "4": DIGIT_4_ASSET.readall(),
+    "5": DIGIT_5_ASSET.readall(),
+    "6": DIGIT_6_ASSET.readall(),
+    "7": DIGIT_7_ASSET.readall(),
+    "8": DIGIT_8_ASSET.readall(),
+    "9": DIGIT_9_ASSET.readall(),
+    ":": DIGIT_COLON_ASSET.readall(),
+    "_": DIGIT_BLANK_ASSET.readall(),
 }

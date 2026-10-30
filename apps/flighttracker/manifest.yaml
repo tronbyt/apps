@@ -6,4 +6,10 @@ desc: Tracks flights via given Flight Number or airport code.
 author: samuelsagarino
 fileName: flighttracker.star
 packageName: flighttracker
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - utility
+published: '2023-03-14T18:57:14Z'
+updated: '2026-10-01T21:08:18Z'

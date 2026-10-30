@@ -11,8 +11,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-DEFAULT_TIMEZONE = "America/New_York"
-JSON_ENDPOINT = "https://raw.githubusercontent.com/JohannesNE/literature-clock/refs/heads/master/docs/times/"
+JSON_ENDPOINT = "https://raw.githubusercontent.com/JohsEnevoldsen/literature-clock/refs/heads/master/docs/times/"
 QUOTE_FIRST = "quote_first"
 QUOTE_TIME = "quote_time_case"
 QUOTE_LAST = "quote_last"
@@ -58,7 +57,7 @@ def clean_string(text):
     return text.replace("<br>", "\n").replace("<br/>", "\n").lstrip(" ").rstrip(" ")
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
 
     fileTime = time.now().in_location(timezone)
 

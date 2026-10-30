@@ -6,48 +6,23 @@ Author: EslamMoh
 """
 
 load("animation.star", "animation")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/moon_icon.png", MOON_ICON_ASSET = "file")
+load("images/sun_icon.png", SUN_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+MOON_ICON = MOON_ICON_ASSET.readall()
+SUN_ICON = SUN_ICON_ASSET.readall()
 
 # Adhan prayer API URL
 PRAYER_TIME_BASE_URL = "http://api.aladhan.com/v1/timings/"
 
 # Load Moon icon from base64 encoded data
-MOON_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAABhGlDQ1BJQ0MgcHJvZmlsZQ
-AAKJF9kT1Iw0AcxV/TiiIVBTuIOGSoThZERR21CkWoEGqFVh1MLv2CJg1Jiouj4Fpw8GOx
-6uDirKuDqyAIfoA4OTopukiJ/0sKLWI8OO7Hu3uPu3eAUC8zzQqNAZpum6lEXMxkV8XOVw
-QRQgTT6JOZZcxJUhK+4+seAb7exXiW/7k/R4+asxgQEIlnmWHaxBvEU5u2wXmfOMKKskp8
-Tjxq0gWJH7muePzGueCywDMjZjo1TxwhFgttrLQxK5oa8SRxVNV0yhcyHquctzhr5Spr3p
-O/MJzTV5a5TnMICSxiCRJEKKiihDJsxGjVSbGQov24j3/Q9UvkUshVAiPHAirQILt+8D/4
-3a2Vnxj3ksJxoOPFcT6Ggc5doFFznO9jx2mcAMFn4Epv+St1YOaT9FpLix4BvdvAxXVLU/
-aAyx1g4MmQTdmVgjSFfB54P6NvygL9t0D3mtdbcx+nD0CaukreAAeHwEiBstd93t3V3tu/
-Z5r9/QBe53KfIhP12QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGA
-AAAAd0SU1FB+QDBBUeOG9t+GkAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBX
-gQ4XAAAATElEQVQoz2NkYGD4z0AiYGIgA7BgE/z/2hrOZhQ9StgmZA3Y+Bg2EbIBwyZiNZ
-AdEJRpQnYSNs8jA0b0yMWmAd2PTIQUYAsURrolIwA2fBgZWqCnTgAAAABJRU5ErkJggg==
-""")
 
 # Load Sun icon from base64 encoded data
-SUN_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAABhGlDQ1BJQ0MgcHJvZmlsZQ
-AAKJF9kT1Iw0AcxV/TiiIVBTuIOGSoThZERR21CkWoEGqFVh1MLv2CJg1Jiouj4Fpw8GOx
-6uDirKuDqyAIfoA4OTopukiJ/0sKLWI8OO7Hu3uPu3eAUC8zzQqNAZpum6lEXMxkV8XOVw
-QRQgTT6JOZZcxJUhK+4+seAb7exXiW/7k/R4+asxgQEIlnmWHaxBvEU5u2wXmfOMKKskp8
-Tjxq0gWJH7muePzGueCywDMjZjo1TxwhFgttrLQxK5oa8SRxVNV0yhcyHquctzhr5Spr3p
-O/MJzTV5a5TnMICSxiCRJEKKiihDJsxGjVSbGQov24j3/Q9UvkUshVAiPHAirQILt+8D/4
-3a2Vnxj3ksJxoOPFcT6Ggc5doFFznO9jx2mcAMFn4Epv+St1YOaT9FpLix4BvdvAxXVLU/
-aAyx1g4MmQTdmVgjSFfB54P6NvygL9t0D3mtdbcx+nD0CaukreAAeHwEiBstd93t3V3tu/
-Z5r9/QBe53KfIhP12QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGA
-AAAAd0SU1FB+QDBBQ5HxFglVAAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBX
-gQ4XAAAAYUlEQVQoz2NgYGD4jw3/f239H5ccEwMDA8P/19YMxABkdQRNRpdnhDJwmsgoeh
-TDRiZ8GnA5nYmQAmziLDABbM7ApZmFGMXo/mPCJohLMc6AQFeAyyCS44kBlwYCYqSnPQAb
-5W9EvIXnIQAAAABJRU5ErkJggg==
-""")
 
 # Default location and timezone data for prayer
 DEFAULT_LOCATION = """
@@ -83,6 +58,15 @@ def get_location(config):
 def get_method(config):
     return config.get("method", DEFAULT_METHOD)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = get_location(config)
     method = get_method(config)
@@ -101,7 +85,205 @@ def main(config):
     return render.Root(
         delay = 2000,
         max_age = 60,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Sequence(children = [
+                    animation.Transformation(
+                        child = render.Row(children = [
+                            render.Stack(
+                                children = [
+                                    render.Padding(
+                                        pad = (7, 17, 0, 0),
+                                        child = render.Box(
+                                            width = 17,
+                                            height = 7,
+                                            color = current_prayer_color("fajr", current_prayer)["box_color"],
+                                            child = render.WrappedText(
+                                                content = "FAJR",
+                                                font = "CG-pixel-3x5-mono",
+                                                align = "left",
+                                                width = 15,
+                                                color = current_prayer_color("fajr", current_prayer)["font_color"],
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (5, 24, 0, 0),
+                                        child = render.Box(
+                                            width = 22,
+                                            height = 8,
+                                            child = render.WrappedText(
+                                                content = prayers["Fajr"],
+                                                align = "left",
+                                                width = 22,
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (30, 17, 0, 0),
+                                        child = render.Box(
+                                            width = 29,
+                                            height = 7,
+                                            color = current_prayer_color("sunrise", current_prayer)["box_color"],
+                                            child = render.WrappedText(
+                                                content = "sunrise",
+                                                font = "CG-pixel-3x5-mono",
+                                                align = "left",
+                                                width = 27,
+                                                color = current_prayer_color("sunrise", current_prayer)["font_color"],
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (34, 24, 0, 0),
+                                        child = render.Box(
+                                            width = 22,
+                                            height = 8,
+                                            child = render.WrappedText(
+                                                content = prayers["Sunrise"],
+                                                align = "left",
+                                                width = 22,
+                                            ),
+                                        ),
+                                    ),
+                                ] + render_meta_data(PRAYER_ICON[current_prayer], next_prayer),
+                            ),
+                        ]),
+                        duration = 1,
+                        keyframes = keyframes(0),
+                    ),
+                    animation.Transformation(
+                        child = render.Row(children = [
+                            render.Stack(
+                                children = [
+                                    render.Padding(
+                                        pad = (7, 17, 0, 0),
+                                        child = render.Box(
+                                            width = 17,
+                                            height = 7,
+                                            color = current_prayer_color("duhr", current_prayer)["box_color"],
+                                            child = render.WrappedText(
+                                                content = "Duhr",
+                                                font = "CG-pixel-3x5-mono",
+                                                align = "left",
+                                                width = 15,
+                                                color = current_prayer_color("duhr", current_prayer)["font_color"],
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (5, 24, 0, 0),
+                                        child = render.Box(
+                                            width = 22,
+                                            height = 8,
+                                            child = render.WrappedText(
+                                                content = prayers["Dhuhr"],
+                                                align = "left",
+                                                width = 22,
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (38, 17, 0, 0),
+                                        child = render.Box(
+                                            width = 13,
+                                            height = 7,
+                                            color = current_prayer_color("asr", current_prayer)["box_color"],
+                                            child = render.WrappedText(
+                                                content = "Asr",
+                                                font = "CG-pixel-3x5-mono",
+                                                align = "left",
+                                                width = 11,
+                                                color = current_prayer_color("asr", current_prayer)["font_color"],
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (34, 24, 0, 0),
+                                        child = render.Box(
+                                            width = 22,
+                                            height = 8,
+                                            child = render.WrappedText(
+                                                content = prayers["Asr"],
+                                                align = "left",
+                                                width = 22,
+                                            ),
+                                        ),
+                                    ),
+                                ] + render_meta_data(PRAYER_ICON[current_prayer], next_prayer),
+                            ),
+                        ]),
+                        duration = 1,
+                        keyframes = keyframes(64),
+                    ),
+                    animation.Transformation(
+                        child = render.Row(children = [
+                            render.Stack(
+                                children = [
+                                    render.Padding(
+                                        pad = (5, 17, 0, 0),
+                                        child = render.Box(
+                                            width = 29,
+                                            height = 7,
+                                            color = current_prayer_color("maghrib", current_prayer)["box_color"],
+                                            child = render.WrappedText(
+                                                content = "MAGHRIB",
+                                                font = "CG-pixel-3x5-mono",
+                                                align = "left",
+                                                width = 26,
+                                                color = current_prayer_color("maghrib", current_prayer)["font_color"],
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (8, 24, 0, 0),
+                                        child = render.Box(
+                                            width = 22,
+                                            height = 8,
+                                            child = render.WrappedText(
+                                                content = prayers["Maghrib"],
+                                                align = "left",
+                                                width = 22,
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (42, 17, 0, 0),
+                                        child = render.Box(
+                                            width = 16,
+                                            height = 7,
+                                            color = current_prayer_color("isha", current_prayer)["box_color"],
+                                            child = render.WrappedText(
+                                                content = "ISHA",
+                                                font = "CG-pixel-3x5-mono",
+                                                align = "left",
+                                                width = 16,
+                                                color = current_prayer_color("isha", current_prayer)["font_color"],
+                                            ),
+                                        ),
+                                    ),
+                                    render.Padding(
+                                        pad = (40, 24, 0, 0),
+                                        child = render.Box(
+                                            width = 22,
+                                            height = 8,
+                                            child = render.WrappedText(
+                                                content = prayers["Isha"],
+                                                align = "left",
+                                                width = 22,
+                                            ),
+                                        ),
+                                    ),
+                                ] + render_meta_data(PRAYER_ICON[current_prayer], next_prayer),
+                            ),
+                        ]),
+                        duration = 1,
+                        keyframes = keyframes(64),
+                    ),
+                ]),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Sequence(children = [
                     animation.Transformation(

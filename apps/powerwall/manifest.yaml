@@ -6,4 +6,12 @@ desc: Show Tesla Powerwall battery percentage state.
 author: tabrindle
 fileName: powerwall.star
 packageName: powerwall
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: smart-home
+tags:
+  - tech
+  - utility
+  - smart-home
+published: '2023-11-03T17:10:35Z'
+updated: '2026-10-01T22:22:03Z'

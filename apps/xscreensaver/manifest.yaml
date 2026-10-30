@@ -1,3 +1,4 @@
+---
 id: xscreensaver
 name: XScreenSaver
 summary: Hundreds of animations
@@ -5,4 +6,10 @@ desc: Shows two hundred and sixty-five different XScreenSaver animations, all sc
 author: Greg Knauss and XScreenSaver
 fileName: xscreensaver.star
 packageName: xscreensaver
-recommended_interval: 5
+recommendedInterval: 5
+category: art
+tags:
+  - art
+  - retro
+published: '2023-04-19T13:44:15Z'
+updated: '2026-07-03T18:37:59Z'

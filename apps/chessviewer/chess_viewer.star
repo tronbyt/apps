@@ -5,10 +5,8 @@ Description: This app shows a visual representation of currently active chess ga
 Author: Neal Wright
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ### CONSTANTS ###
@@ -645,6 +643,7 @@ def get_player_games(username):
     games_url = "https://api.chess.com/pub/player/{}/games".format(username)
     req = http.get(
         url = games_url,
+        ttl_seconds = 240,
     )
     if req.status_code != 200:
         return False
@@ -748,24 +747,12 @@ def main(config):
     if username == "":
         games = FAMOUS_GAMES
     else:
-        user_cache_key = "username_{}".format(username)
-        games_cache_key = "games_{}".format(username)
-        cached_user = cache.get(user_cache_key)
-        if cached_user == None:
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(user_cache_key, "True", ttl_seconds = 3600)
-        cached_games = cache.get(games_cache_key)
-        if cached_games == None:
-            games_json = get_player_games(username)
-            if games_json == False:
-                games = FAMOUS_GAMES
-            else:
-                # TODO: Determine if this cache call can be converted to the new HTTP cache.
-                cache.set(games_cache_key, json.encode(games_json), ttl_seconds = 240)
-                games = get_games_dicts(games_json)
+        games_json = get_player_games(username)
+        if games_json == False:
+            games = FAMOUS_GAMES
         else:
-            games_json = json.decode(cached_games)
             games = get_games_dicts(games_json)
+
     if len(games) == 0:
         no_games_graphics = draw_no_games()
         return render.Root(
@@ -774,9 +761,9 @@ def main(config):
     game_board = draw_game_board(board_theme)
     game_boxes = draw_game_boxes(games, game_board, username, piece_theme, board_theme)
     return render.Root(
-        child = render.Animation(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(
             children = game_boxes,
-        ),
+        ))),
     )
 
 # Set up configuration options

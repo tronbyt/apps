@@ -82,11 +82,34 @@ Updated PLAYER_MAPPING
 
 v2.9.4
 Updated PLAYER_MAPPING
+
+v2.10
+Updated Tournament IDs for 2026 Season
+Updated timezone check
+
+v2.10.1
+Updated PLAYER_MAPPING
+
+v2.11
+Fixed bug that was showing 3rd round score as final round score
+
+v2.12
+Added different colour title bar for Playoff events, using "FedEx" purple
+Added different colour title bar for Signature events, using an orange colour
+Added opposite field event for the AP Inv...might be too late!
+Added more entries for Tournament renaming map
+
+v2.13 
+Changed winner font colour to gold, seems more fitting of a champion
+Handling for team events eg Zurich
+
+v2.14
+Updated PLAYER_MAPPING
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -95,7 +118,7 @@ API2 = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
 
 CACHE_TTL_SECS = 60
 DEFAULT_TIMEZONE = "Australia/Adelaide"
-THE_EXCEPTIONS = ["401703489", "401703521"]  # The Sentry and The Open
+THE_EXCEPTIONS = ["401811957"]  # The Open
 
 # List will be a work in progress
 PLAYER_MAPPING = """
@@ -114,57 +137,89 @@ PLAYER_MAPPING = """
     "4382434": "Norgaard",
     "4404992": "B.Griffin",
     "5962": "L.Griffin",
-    "686": "Z.Johnson"
+    "686": "Z.Johnson",
+    "9506": "J.Smith",
+    "5211425": "B.Brown",
+    "1407": "D.Brown",
+    "4877953": "S.T.Lee",
+    "5076011": "Dumont De",
+    "4355673": "B.Wu",
+    "4423323": "D.Wu",
+    "9127": "A.Svensson",
+    "4699329": "J.Svensson",
+    "4364865": "A.Fitzpatrick",
+    "9037": "M.Fitzpatrick",
+    "5724": "C.Kim"
 }
 """
 
 TOURNAMENT_MAPPING = """
 {
-    "401703491": "The AmEx",
-    "401703492": "Farmers Ins",
-    "401703493": "AT&T Pro-Am",
-    "401703495": "Genesis Inv",
-    "401703498": "Arnold Palm",
-    "401703500": "The Players",
-    "401703507": "Zurich Clas",
-    "401703506": "Puntacana",
-    "401703508": "The CJ Cup",
-    "401703501": "Valspar",
-    "401703502": "Houston Opn",
-    "401703503": "Texas Open",
-    "401703504": "The Masters",
-    "401703505": "Heritage",
-    "401703514": "Canadian Op",
-    "401703513": "Memorial",
-    "401703511": "PGA Champ",
+    "401811929": "The AmEx",
+    "401811930": "Farmers Ins",
+    "401811932": "AT&T Pro-Am",
+    "401811933": "Genesis Inv",
+    "401811935": "Arnold Palm",
+    "401811937": "The Players",
+    "401811943": "Zurich Clas",
+    "401811944": "Cadillac Ch",
+    "401811958": "Puntacana",
+    "401811948": "The CJ Cup",
+    "401811938": "Valspar",
+    "401811939": "Houston Op",
+    "401811940": "Texas Open",
+    "401811941": "The Masters",
+    "401811942": "Heritage",
+    "401811951": "Canadian Op",
+    "401811950": "Memorial",
+    "401811947": "PGA Champ",
     "401465538": "Barbasol",
-    "401703519": "Scottish",
-    "401703524": "Wyndham",
-    "401703525": "FedEx St.J",
-    "401703530": "BMW Champ",
-    "401558309": "Q-School",
-    "401703520": "ISCO Champ",
-    "401703522": "Barracuda",
-    "401703531": "TOUR CHAMP"
+    "401811955": "Scottish Op",
+    "401811961": "Wyndham",
+    "401811962": "FedEx St.J",
+    "401811963": "BMW Champ",
+    "401811964": "TOUR CHAMP",
+    "401811956": "ISCO Champ",
+    "401811945": "Truist Ch",
+    "401811946": "Myrtle Be",
+    "401811953": "Travelers"
 }
 """
 
 MAJOR_MAPPING = """
 {
-    "401703500": "#003360",
-    "401703504": "#006747",
-    "401703511": "#00205B",
-    "401703515": "#003865",
-    "401703521": "#1A1C3C"
+    "401811937": "#003361",
+    "401811941": "#006747",
+    "401811947": "#00205B",
+    "401811952": "#003865",
+    "401811957": "#1A1C3C",
+    "401811962": "#4d148c",
+    "401811963": "#4d148c",
+    "401811964": "#4d148c",
+    "401811935": "#965115",
+    "401811942": "#965115",
+    "401811944": "#965115",
+    "401811945": "#965115",
+    "401811950": "#965115",
+    "401811953": "#965115"
 }
 """
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     renderCategory = []
     i = 0
     mainFont = "CG-pixel-3x5-mono"
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     RotationSpeed = config.get("speed", "3")
     OppField = config.bool("OppFieldToggle")
     ColorGradient = config.get("ColorGradient", "False")
@@ -235,10 +290,10 @@ def main(config):
             stage = stage.replace("Round 3", "R3")
             stage = stage.replace("Round 4", "R4")
             stage = stage.replace("Playoff - Play Complete", "PO")
+            stage = stage.replace("Playoff - In Progress", "PO")
             stage = stage.replace(" - In Progress", "")
             stage = stage.replace(" - Suspended", "")
             stage = stage.replace(" - Play Complete", "")
-            stage = stage.replace(" - Playoff", "PO")
 
             if entries:
                 if stage != "F":
@@ -280,7 +335,8 @@ def main(config):
             return render.Root(
                 show_full_animation = True,
                 delay = int(RotationSpeed) * 1000,
-                child = render.Animation(children = renderCategory),
+                # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = renderCategory)))) if is_square() else render.Animation(children = renderCategory),
             )
 
         elif status == "pre":
@@ -297,7 +353,45 @@ def main(config):
             # show what event is coming up next
             return render.Root(
                 show_full_animation = True,
-                child = render.Column(
+                # Centre the block on the square (64x64); other panels unchanged.
+                child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                    main_align = "start",
+                    cross_align = "start",
+                    children = [
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Box(width = 64, height = 5, color = "#0039A6", child = render.Text(content = Title, color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Box(width = 64, height = 12, color = "#000", child = render.Text(content = "Next event...", color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Marquee(width = 64, height = 12, child = render.Text(content = PreTournamentName + " - " + Location, color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            cross_align = "end",
+                            children = [
+                                render.Box(width = 64, height = 10, color = "#000", child = render.Text(content = StartDate + " - " + EndDate, color = "#FFF", font = mainFont)),
+                            ],
+                        ),
+                    ],
+                ))) if is_square() else render.Column(
                     main_align = "start",
                     cross_align = "start",
                     children = [
@@ -353,14 +447,23 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
 
     for i in range(0, 4):
         if i + x < len(s):
-            playerID = s[i + x]["id"]
+            item = s[i + x]
+            playerID = item["id"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
                 playerName = Mapping[playerID]
-
+            elif "lastName" in item:
+                playerName = item["lastName"][:12]
             else:
-                playerName = s[i + x]["lastName"][:12]
+                playerName = item["name"]
+
+            # if team event, split the names
+            if "/" in playerName:
+                parts = playerName.split("/", 1)  # only split into two parts
+                first = parts[0][:4]
+                second = parts[1][:4] if len(parts) > 1 else ""
+                playerName = first + "/" + second
 
             score = s[i + x]["score"]
             displayScore = str(score)
@@ -379,9 +482,9 @@ def getPlayerScore(x, s, Title, TitleColor, ColorGradient, stage, state, Mapping
             # Players who have completed their round are shown in white, in progress rounds are in yellow which slowly transitions to white as the round progresses.
             playerFontColor = getPlayerFontColor(HolesCompleted, ColorGradient)
 
-            # if tournament is over, show winner in blue
+            # if tournament is over, show winner in gold
             if (i + x) == 0 and stage == "F":
-                playerFontColor = "#68f"
+                playerFontColor = "#d1b358"
 
             player = render.Row(
                 expanded = True,
@@ -438,21 +541,31 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
     LeaderTeeTimeFormat = time.parse_time(LeaderTeeTime, format = "2006-01-02T15:04Z").in_location(timezone)
     TimeDiff = LeaderTeeTimeFormat - time.now()
 
-    #print(TimeDiff)
     if TimeDiff.hours < 12:
         ShowTeeTimes = True
 
     for i in range(0, 4):
         ProgressStr = ""
         if i + x < len(s):
-            playerState = s[i + x]["status"]["state"]
-            playerID = s[i + x]["id"]
+            item = s[i + x]
+            playerState = item["status"]["state"]
+            playerID = item["id"]
+            period = item["status"]["period"]
 
             # Check for certain player IDs and outputs an altername name if needed
             if playerID in Mapping:
                 playerName = Mapping[playerID]
+            elif "lastName" in item:
+                playerName = item["lastName"][:12]
             else:
-                playerName = s[i + x]["lastName"][:12]
+                playerName = item["name"]
+
+            # if team event, split the names
+            if "/" in playerName:
+                parts = playerName.split("/", 1)  # only split into two parts
+                first = parts[0][:4]
+                second = parts[1][:4] if len(parts) > 1 else ""
+                playerName = first + "/" + second
 
             # check if they've played at least 1 hole this round
             if (s[i + x]["status"]["thru"]) > 0:
@@ -468,6 +581,7 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             # if the player hasn't started their round, show their tee time in your local time
             # also check its not a playoff
             # Only show tee times if its less than 12hrs until the leader tees off
+
             if playerState == "pre":
                 if s[i + x]["status"]["playoff"] != True:
                     if ShowTeeTimes == True:
@@ -497,8 +611,10 @@ def getPlayerProgress(x, s, t, Title, TitleColor, ColorGradient, stage, state, t
             if playerState == "post":
                 for i in range(0, len(t), 1):
                     if playerID == t[i]["id"]:
-                        CompletedRound = len(t[i]["linescores"]) - 2
-
+                        if period == 4:
+                            CompletedRound = 3
+                        else:
+                            CompletedRound = len(t[i]["linescores"]) - 2
                         RoundScore = t[i]["linescores"][CompletedRound]["value"]
                         ProgressStr = str(int(RoundScore))
 
@@ -588,11 +704,13 @@ def getPlayerFontColor(HolesCompleted, ColorGradient):
 def OppositeFieldCheck(ID):
     # check the ID of the event, and if its a tournament with an opposite field go to the second event in the API
     i = 0
-    if ID == "401703509":  # Truist -> Myrtle Beach
+    if ID == "401811945":  # Truist -> Myrtle Beach
         i = 1
-    elif ID == "401703521":  # The Open -> Barracuda
+    elif ID == "401811957":  # The Open -> Barracuda
         i = 1
-    elif ID == "401703519":  # Scottish Open -> ISCO Champ
+    elif ID == "401811955":  # Scottish Open -> ISCO Champ
+        i = 1
+    elif ID == "401811935":  # AP Inv -> Puerto Rico
         i = 1
     else:
         i = 0

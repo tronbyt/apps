@@ -57,7 +57,7 @@ def main(config):
     return display_fn(config)
 
 def display_next_race_event(config):
-    tz = config.get("$tz", DEFAULT_TIMEZONE)
+    tz = time.tz()
     now = time.now().in_location(tz)
     show_practice = config.bool(DISPLAY_PRACTICE_KEY, True)
     show_qualifying = config.bool(DISPLAY_QUALIFYING_KEY, True)
@@ -79,6 +79,12 @@ def display_next_race_event(config):
             end_ts = time.parse_time(brd["date_end"], BROADCAST_TIME_FORMAT).in_location(tz)
             if end_ts >= now and end_ts < broadcast_end_time:
                 race, broadcast, broadcast_end_time = event, brd, end_ts
+
+    if not race:
+        return render.Root(
+            child = render.WrappedText("No upcoming races found", color = "#ff0000"),
+        )
+
     print("rendering race {}, broadcast {}, end time {}".format(race["name"], broadcast["name"], broadcast_end_time))
 
     start_time = time.parse_time(broadcast["date_start"], BROADCAST_TIME_FORMAT).in_location(tz)
@@ -98,8 +104,8 @@ def display_next_race_event(config):
         ),
     )
 
-def display_current_standings(config):
-    tz = config.get("$tz", DEFAULT_TIMEZONE)
+def display_current_standings(_):
+    tz = time.tz()
     now = time.now().in_location(tz)
     standings = fetch_standings(now.year)
     rider_rows = [render_rider_row(r["rider"]["full_name"], r["points"]) for r in standings["classification"]]

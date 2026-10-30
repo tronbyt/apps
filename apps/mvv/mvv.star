@@ -5,7 +5,6 @@ Summary: MVV departures (Munich)
 Description: Departure times for the Münchner Verkehrsverbund (MVV).
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
@@ -112,21 +111,11 @@ def get_schema():
     )
 
 def request(url, params):
-    cache_id = url + "?" + "&".join([k + "=" + v for [k, v] in params.items()])
-    print("cache_id", cache_id)
-
-    body = cache.get(cache_id)
-    if body != None:
-        return body
-
-    res = http.get(url = url, params = params)
+    res = http.get(url = url, params = params, ttl_seconds = 60)
     print("url", res.url)
 
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (res.url, res.status_code, res.body()))
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_id, res.body(), ttl_seconds = 60)
 
     return res.body()
 

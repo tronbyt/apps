@@ -9,13 +9,23 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/icon_new.png", ICON_NEW_ASSET = "file")
+load("images/icon_restdb.png", ICON_RESTDB_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
 TTL_ICONS = 216000
 
-DEMO_PAGE = '[{"text":"create","colortext":"#FFFFFF","subtext":"","colorsubtext":"#FFFFFF","icon":"new","order":0,"name":"create"},{"text":"restdb.io","colortext":"#777777","subtext":"","colorsubtext":"#000000","icon":"restdb","order":1,"name":"restdb"},{"text":"database","colortext":"#FFFFFF","subtext":"","colorsubtext":"#FFFFFF","icon":"new","order":2,"name":"database"}]'
-DEMO_ICONS = '[{"name":"new","data":"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAFjSURBVDiNnVM9SEJhFD33+55PHQtxyASpIAqCoLChuaW1wam1qaW1HByEcHEwS4IgCApaKtzcoyFMs9B6GDRIQ0OLmf/P25BJ6nugnfF895x77r18QBuchAX/gAAAzkKFoCvOwzq0ASdhQY0uwbSKIsU5C3XoGJyHle8owTewD1Jf1A4d/SYGnVkLunq5ciYyXslFc1/Pe2MAQKapHnZHdFVPywYt0dzO+0+TgFqD44wJawCd28rKuqEBZwOjulQOAPhAdCFbtEEz2x8AwMxUe9oP22Y3twwTsBZ06YxrAJ4/dEEqWKYpf6G3XvQSNO1/k1J4QXTRZuJSaS4aiQfYQfNeNoT3dwdDg1+C7uEEhbC9+hiZNH03OHVnB/x6bKuU1BBLcfSZiTn7xGl4UBUnzN1jdwzq9ZKHGAsAJixqa75LnIETukgA8CElQqYjlLWYq5qLrhjGv4WbU+LUVDwIjL78N865hh+f5MFWAAAAAElFTkSuQmCC"},{"name":"restdb","data":"iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAC7SURBVDhP3ZMxCgIxEEVfwordFjZews4j6FVcbDyD11gs7GzsbLyEjeAFrG0srMSQcZTZYt2NWooPAjND+IH5P44EUtAR2CKMnKNxT4Sg0zIpEKcMXORgbSv6QPBWN3CBzMok+nqWFPiWfxYQT25lErXy9rRR5i9CR3LpslKfxrrqq03rVDmIBRtthjau6Gl41hKY+SUXm7Xi4oTYmjRP35ecrE2S3IGm8GzlW37Dxt3jZ9UO7Fnolj8Cd0fQOm4xx0POAAAAAElFTkSuQmCC"}]'
+DEMO_PAGE = json.encode([
+    {"text": "create", "colortext": "#FFFFFF", "subtext": "", "colorsubtext": "#FFFFFF", "icon": "new", "order": 0, "name": "create"},
+    {"text": "restdb.io", "colortext": "#777777", "subtext": "", "colorsubtext": "#000000", "icon": "restdb", "order": 1, "name": "restdb"},
+    {"text": "database", "colortext": "#FFFFFF", "subtext": "", "colorsubtext": "#FFFFFF", "icon": "new", "order": 2, "name": "database"},
+])
+
+DEMO_ICONS = json.encode([
+    {"name": "new", "data": base64.encode(ICON_NEW_ASSET.readall())},
+    {"name": "restdb", "data": base64.encode(ICON_RESTDB_ASSET.readall())},
+])
 
 def render_fail(rep):
     return render.Root(render.Box(render.WrappedText("%s" % rep.status_code), color = "#AA0000"))
@@ -62,7 +72,7 @@ def main(config):
 
     use_offline_data = False
 
-    if not db_name:
+    if not db_name or db_name == "offline":
         use_offline_data = True
         db_name = "offline"
         print("using offline data")
@@ -91,7 +101,12 @@ def main(config):
                 return render_fail(rep)
             body = rep.body()
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
+            if not body.startswith("{") and not body.startswith("["):
+                print("Response is not JSON: " + body[:100])
+                return render.Root(
+                    child = render.WrappedText("Invalid API Response", color = "#FF0000"),
+                )
+
             cache.set(data_cache_key, body, ttl_seconds = data_cache_time)
 
         items = json.decode(body)
@@ -119,7 +134,6 @@ def main(config):
         for name in icons:
             icon_cache_key = "{}-icon-{}".format(db_name, name)
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(icon_cache_key, icons[name], ttl_seconds = TTL_ICONS)
 
     if len(items) == 0:
@@ -169,7 +183,6 @@ def reset_icon_cache(db_name, api_key):
     for icon in json.decode(rep.body()):
         icon_cache_key = "{}-icon-{}".format(db_name, icon["name"])
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(icon_cache_key, "", ttl_seconds = TTL_ICONS)
 
     return render.Root(render.Box(render.WrappedText("icon cache reset"), color = "#FFA500"))
@@ -219,6 +232,7 @@ def get_schema():
                 name = "API key",
                 desc = "The API key to access restdb.io (read only is enough)",
                 icon = "user",
+                secret = True,
             ),
             schema.Text(
                 id = "cache_time",

@@ -6,17 +6,14 @@ Author: samshapiro13
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 ##### constants #####
 
 CTA_STATIONS_URL = "https://data.cityofchicago.org/resource/8pix-ypme.json"
 CTA_ARRIVALS_URL = "https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx"
-
-ENCRYPTED_ARRIVALS_API_KEY = "AV6+xWcEhAzrJFZmB5FlsB4E4pyYkKIPUE4vQpQtTPI7v6AS1NCuh2T/w1KoBWjGuZx+cx/4abjDo4sDdnFgBBxl+m8ETPNR2oZNM/QpQUNXI5lbtnaMcR/ydkkOj+/V7+96OW9F2tHn2ztHDBa2sHC6oEKEqrWPP9wqDyxpHzqA6EJ82ZQ="
 
 # Gets Hex color code for a given train line
 COLOR_MAP = {
@@ -116,19 +113,23 @@ def get_schema():
                 default = time_delay_options[0].value,
                 options = time_delay_options,
             ),
+            schema.Text(
+                id = "api_key",
+                name = "CTA API Key",
+                desc = "Your CTA L Tracker API Key.",
+                icon = "key",
+                secret = True,
+            ),
         ],
     )
 
 ##### main #####
 
-def fetch_cta_arrival_estimates(station_code):
+def fetch_cta_arrival_estimates(station_code, api_key):
     """
     Gets top 2 arrivals scheduled for the selected station
     from CTA Arrivals API
     """
-    api_key = secret.decrypt(ENCRYPTED_ARRIVALS_API_KEY)
-    if api_key == None:
-        api_key = ""
 
     response = http.get(CTA_ARRIVALS_URL, params = {"key": api_key, "mapid": station_code, "outputType": "JSON"}, ttl_seconds = 60)
 
@@ -194,20 +195,33 @@ def render_no_arrival_predications_data_available(widgetMode):
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     widgetMode = config.bool("$widget")
     selected_station = config.get("station", DEFAULT_STATION)
     destination_station = config.get("destination_name", DEFAULT_DESTINATION_STATION)
     time_delay = int(config.get("time_delay", "0"))
+    api_key = config.get("api_key")
 
-    arrival_predictions = fetch_cta_arrival_estimates(selected_station)
+    if not api_key:
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("CTA API Key not set")))
+
+    arrival_predictions = fetch_cta_arrival_estimates(selected_station, api_key)
     filter_arrivals = filter_arrival_predictions(arrival_predictions, destination_station, time_delay)
 
     if len(filter_arrivals) == 0:
         return render.Root(
             delay = 75,
             max_age = 60,
-            child = render_no_arrival_predications_data_available(widgetMode),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render_no_arrival_predications_data_available(widgetMode)),
         )
 
     if len(filter_arrivals) == 1:
@@ -216,7 +230,7 @@ def main(config):
             max_age = 60,
             child = render.Column(
                 expanded = True,
-                main_align = "start",
+                main_align = "center" if is_square() else "start",
                 children = [
                     render_arrival_prediction(filter_arrivals[0], widgetMode),
                     render.Box(
@@ -233,7 +247,7 @@ def main(config):
         max_age = 60,
         child = render.Column(
             expanded = True,
-            main_align = "start",
+            main_align = "center" if is_square() else "start",
             children = [
                 render_arrival_prediction(filter_arrivals[0], widgetMode),
                 render.Box(

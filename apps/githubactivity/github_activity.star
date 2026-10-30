@@ -9,11 +9,16 @@ Author: rs7q5
 #Created 20221117 RIS
 #Last Modified 20230607 RIS
 
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/issue_icon.png", ISSUE_ICON_ASSET = "file")
+load("images/people_icon.png", PEOPLE_ICON_ASSET = "file")
+load("images/pr_icon.png", PR_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+ISSUE_ICON = ISSUE_ICON_ASSET.readall()
+PEOPLE_ICON = PEOPLE_ICON_ASSET.readall()
+PR_ICON = PR_ICON_ASSET.readall()
 
 ############
 FONT = "tom-thumb"  #set font
@@ -51,15 +56,7 @@ GREEN_FILL2 = "#40c46380"  #GREEN FILL WITH OPACITY (alpha is 50%)
 #stuff for open issues/prs
 ISSUE_PR_COLOR = "#57ab5a"
 PEOPLE_COLOR = "#768390"
-ISSUE_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAnZJREFUOE+NU0tIlGEUPefO+MAHpGZGkSatggqJViZp7hQsWoz/zJTmVFAEqYsCd+quRQsziIJqfKTO6CJC0F0mmKsIqcBVmElQmc0iFdOZe2MGfjFB7Nt9j3O433kQ21ZNd01GXkHe/vgGSsRQokSeGGJKzHvTMB9bin0bbx7/48K4Fe/0OEdMvNWAnYSiEGAmaWlm3ABsDYJFgO+o8VfRpuinJHaTwB/2V6nwKozHACzQbFpF5iCJZagnR1RLjSwHcAi0j6L2NBKKvE4RXOhr2Jdu2g5YLYCXTOjwysbKzOj10VV3wrrHdVnZadll5pF6AOcBjq1TOlk1UeUtWjhwDoZrBrwX1UeRUOTzdm3cvT/sP6wiNwicAPGEvl5fsVjaHQjyNIF7I6HBmZ3A7rkvHCwTD25DEWOgL1CtylYj3vwuLOgar32wqXBgMLBX41ooXlkcCg79dAlqxm5l5C4utdJwmk5PIEQwoJDwcNPzIfdRCrxOH4hKGCYl3Ua2ktT3XAoINESnN9gCQ52Z3R8ODY26BE6fcxTmaQfgAIiCic5oY3TWva8PB+pIttAfDjYo6RjRP3J5IPq/E/h6Lzo0NLC+J3gGQDPN3q6uL3dvtW4nDZKWZqXnNBt5isGBYEk8gTYoDorq3ciVyPRuLvif+ctVpA2Cr0xmP3dPfiPUbpKYpGrXbjkwkVYzVEL4MJXEVAcoHQQrDIiaIrJcVDC71dKkdTnfl45S4CfgGGyKph3/dMHE4wOsFMQvM3yAyRdDfIXwZoNaTOI4DPkA56iJkc0uuH9OdQKJCijOAighkGmEl4a4AWsA5iGYWIdn6kVj/48k7i+RCic+VLxoAAAAAABJRU5ErkJggg==
-""")
-PR_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAbpJREFUOE/Nk7FPFEEUxr9vji1MoMBKO2JiB9hB0AIuMdECEiDssbtCdq81JobYWqCJiSbERhuIsCzk9nb3TowhWBIa/wUbC40NUQs7aWCe2bnc5SB7CaVTzvzm9973Zpe4xFoInalmNTkqQtnezCGl1CTIn6c8+bi3vHecnzk7zrhovkyDermnwAmdISFDA5D9BA4SP151I3f0TPCK5P0zrcu0Sr8aS7Uv3SLTQSV0Z6n4IYdKJfUYIjdTvz5c2XafkFwzF0SOQP7WWn9qVJPttsQI7E13QvWxKcAGgBkKvqZB7FYi7y4hawBvCbBKwRAoU9RSTqrJd9OwEby2r6ir1jKI9bySQD3NgtpncxY5cwp8nvr1ERNVqW9a62q7i84Qc3gx8iSvlPnxs+6cduQsNPykWcRcStAtu1jkPxLYmX1NnVjHRTNoRyhiTIT5Le+GVcIKgEetV8DbLKi/787eizGCxdCzoVAT4AWAe/le5se3zw2vB9MSRA+mAdmHRkUUVggw9eOJ89MvZloRdpeuW1q/E8EgKQMQvkmDOP8qO6sX03lGO/LGKLgDyI++vzyMH8Z/Lv59Rcw/79j7ERrrQ4EAAAAASUVORK5CYII=
-""")
-PEOPLE_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAd5JREFUOE+tk79rFFEQx7/z9q7QFEYhjb1NtIkIQasTLA3amMZKjlyTH3cbcnuc567P7HJedkN298QiQfIPpEiMnRFsAyEQFBVEREQ8sLJMsftGdnUvlxgDIb7qwZv5zHe+M49wwkMnzMdfgJoTXmPFl1mgI5T6OGdNvz2qyD5AzQ4nGdzuSfjKUGOeOf3yX5AuYMbz+sRu/hsBG0ITkiM+FRPPE1DICT7fbOgdww4fslDPvYa+kwG7AMP2bwO0KnL5C636+KckYMb2CwL0moGRvODtSNH334kkXbP8KL1lpOpsWCLixcMAWYIuF87lNJIEmgRwyzUr63st2P4NAdogYOVACwOuWbmUFao32wNxrH6AWXctPdhnYtIjwLLXMCaMeg8qK12ltt9OFAimKy2rvL3ngeMvgqnEoFdE6jMURSBcBTBEoIk5s/y0x5M3ffHPYSnlbgownOAJGBPMXPQsfTmrVpLydL92tpqoEkIUW42p5ZoTrjPzCIDNOI7uURJ0RuvvEGghc/bgzNPxgQueWbmevFXt4CYBLwCskWEHRQDPNE1cfHx/6v1hC1NvtgfjWL0DeNA19Q+p6j9+pS0kI/Ss8tJRK1t1gjtaxFstqX/J4gzHv/v/P9Nxf+cvOtjHXAVbbF4AAAAASUVORK5CYII=
-""")
+
 DEBUG = True
 
 ############
@@ -74,6 +71,9 @@ def main(config):
 
     #create parts of the final frame (error handling done in each of these)
     chart = contribution_chart(data, config)
+    if config.get("fullscreen_chart"):
+        # Centre the block on taller panels (64x64).
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = chart))
     activity_overview = contribution_activity(data)  #get the activity overview
 
     #get stats like total contributions (in last year), open issues/pulls, and followers/following
@@ -101,7 +101,8 @@ def main(config):
     return render.Root(
         delay = 100,  #speed up scroll text
         show_full_animation = True,
-        child = frame_final,
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = frame_final),
     )
 
 def get_schema():
@@ -126,6 +127,7 @@ def get_schema():
             name = "GitHub Personal Access Token",
             desc = "Personal Access token",
             icon = "lock",
+            secret = True,
         ),
         schema.Dropdown(
             id = "background_theme",
@@ -142,6 +144,13 @@ def get_schema():
             icon = "fillDrip",
             options = theme_opts,
             default = theme_opts[0].value,
+        ),
+        schema.Toggle(
+            id = "fullscreen_chart",
+            name = "Fullscreen chart",
+            desc = "Make the contributions chart fullscreen",
+            icon = "gear",
+            default = False,
         ),
     ]
 
@@ -233,6 +242,29 @@ def contribution_square(fill, background):
         child = render.Box(width = x1, height = x1, color = fill),
     )  #don't use padding otherwise have to distinguish between inner and outer edges
 
+def contribution_square_fullscreen(fill, background, isTopBotEdge):
+    #make github square for contribution
+    #size of squares
+    x1 = 4  #size of inner square
+    pad = 1
+    x2 = x1 + pad  #size of outer square
+
+    if isTopBotEdge:
+        return render.Box(
+            width = x2,
+            height = x1 - 1,
+            color = background,
+            child = render.Box(width = x1, height = x1 - 1, color = fill),
+        )
+
+    #return render.Padding(child=render.Box(width=x1,height=x1,color=color),pad=1,color=BACKGROUND_COLOR)
+    return render.Box(
+        width = x2,
+        height = x2,
+        color = background,
+        child = render.Box(width = x1, height = x1, color = fill),
+    )  #don't use padding otherwise have to distinguish between inner and outer edges
+
 def contribution_chart(data, config):
     #replicate the contributions chart that is seen on GitHub for the last 13 weeks
     ###########
@@ -240,6 +272,7 @@ def contribution_chart(data, config):
     background_name = config.str("background_theme", "Dark dimmed")
     empty_color, background_color = BACKGROUND_THEMES[background_name].values()
     fill_name = config.str("theme", "GitHub")
+    fullscreen_chart = config.bool("fullscreen_chart")
 
     if data == None:
         cdata = range(0, 13)  #only need to iterate through 13 weeks
@@ -275,14 +308,17 @@ def contribution_chart(data, config):
 
             #add extra padding around the top and left border squares
             top = 1 if j == 0 else 0  #padding to squares along the top edge
+            bottom = 1 if j == 6 else 0
             w.append(render.Padding(
-                child = contribution_square(ctmp, background_color),
-                pad = (left, top, 0, 0),
+                child = contribution_square_fullscreen(ctmp, background_color, (top or bottom)) if fullscreen_chart else contribution_square(ctmp, background_color),
+                pad = (0, 0, 0, top) if fullscreen_chart else (left, top, 0, 0),
                 color = background_color,
             ))
 
         #add empty squares for days that have not occurred yet
-        w.extend([contribution_square(background_color, background_color)] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
+        w.extend([
+            contribution_square_fullscreen(background_color, background_color, False) if fullscreen_chart else contribution_square(background_color, background_color),
+        ] * (7 - len(w)))  #should only ever be the last row, so no extra padding necessary on left or top edge
 
         cdata2.append(render.Column(children = w))
 

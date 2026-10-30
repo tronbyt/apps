@@ -5,9 +5,11 @@ Description: The App displays a random quote by Arthur Schopenhauer.
 Author: nelken
 """
 
-load("encoding/base64.star", "base64")
-load("render.star", "render")
+load("images/img_b64.jpg", IMG_B64_ASSET = "file")
+load("render.star", "canvas", "render")
 load("time.star", "time")
+
+IMG_B64 = IMG_B64_ASSET.readall()
 
 # Linear Congruential Generator as a workaround to pixlet not supporting random numbers
 def lcg(seed, a, c, m):
@@ -422,11 +424,19 @@ quotes = [
     },
 ]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     # the app design is inspired by the bofh quotes design
-    img_b64 = "/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAUABADASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAUHBv/EACMQAAEEAQMFAQEAAAAAAAAAAAECAwQRBQAhMQYHEjJBYYH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A3WKy+OxcllibjUSkyHktrc9lN7EgCyAPI0NLe4c7FOREtRI62nE2Fg0DRopBo8gfdRLrjuo6910IzD6GsHj3nG1tM7mUtKSUqUfgDiQBXG531PofcDqKPnZmWlSzMXOcC5TLopC6T4poD18RQFfBoEuRnuyMPBjLajhKLIUloBe1jdXJv90qVz/dGjQf/9k="
 
-    img = base64.decode(img_b64)
+    img = IMG_B64
     seed = time.now().nanosecond
     random_number = generate_random_number(seed, 444423295)
     random_number_mod = random_number % 99  # noticed better randomness with 99 than 100
@@ -434,7 +444,52 @@ def main():
     quote = selected_quote["quote"]
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            expanded = False,
+            children = [
+                render.Row(
+                    children = [
+                        render.Image(src = img),
+                        render.Column(
+                            expanded = False,
+                            children = [
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    color = "#0a0",
+                                    content = "Schopenhauer",
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    color = "#0a0",
+                                    content = " ",
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    color = "#0a0",
+                                    content = "Says:",
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Text(
+                    font = "CG-pixel-4x5-mono",
+                    color = "#0a0",
+                    content = " ",
+                ),
+                render.Marquee(
+                    width = 64,
+                    height = 16,
+                    child = render.WrappedText(
+                        font = "CG-pixel-3x5-mono",
+                        height = 16,
+                        linespacing = -1,
+                        content = ("%s" % quote),
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             expanded = False,
             children = [
                 render.Row(

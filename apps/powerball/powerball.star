@@ -5,8 +5,6 @@ Description: Shows up to date powerball numbers and next drawing.
 Author: AmillionAir
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 
@@ -15,24 +13,15 @@ Next_Draw_URL = "https://powerball.com/api/v1/estimates/powerball?_format=json"
 Winner_URL = "https://powerball.com/api/v1/draw-summary/powerball?_format=json"
 
 def main():
-    pb_cached = cache.get("pb_rate")
+    print("Calling powerball data.")
 
-    if pb_cached != None:
-        print("Hit! Displaying cached data.")
-        pb_data = json.decode(pb_cached)
-    else:
-        print("Miss! Calling powerball data.")
-
-    PB_NUMS = http.get(NUMBERS_URL).json()[0]["field_winning_numbers"]
-    Draw_Date = http.get(NUMBERS_URL).json()[0]["field_draw_date"]
-    Next_Draw_Date = http.get(Next_Draw_URL).json()[0]["field_next_draw_date"]
-    Winner = http.get(Winner_URL).json()[0]["field_primary_winner_states"]
-    Jackpot = http.get(Next_Draw_URL).json()[0]["field_prize_amount"]
+    PB_NUMS = http.get(NUMBERS_URL, ttl_seconds = 600).json()[0]["field_winning_numbers"]
+    Draw_Date = http.get(NUMBERS_URL, ttl_seconds = 600).json()[0]["field_draw_date"]
+    Next_Draw_Date = http.get(Next_Draw_URL, ttl_seconds = 600).json()[0]["field_next_draw_date"]
+    Winner = http.get(Winner_URL, ttl_seconds = 600).json()[0]["field_primary_winner_states"]
+    Jackpot = http.get(Next_Draw_URL, ttl_seconds = 600).json()[0]["field_prize_amount"]
 
     pb_data = dict(PB_NUMS = PB_NUMS, Draw_Date = Draw_Date, Next_Draw_Date = Next_Draw_Date, Winner = Winner, Jackpot = Jackpot)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set("pb_rate", json.encode(pb_data), ttl_seconds = 600)
 
     if pb_data["Winner"] == "None":
         Won = "0 Winners"

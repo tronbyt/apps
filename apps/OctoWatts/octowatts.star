@@ -6,12 +6,15 @@ Author: TomForeman86
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/icon.png", ICON_ASSET = "file")
+load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ICON = ICON_ASSET.readall()
 
 API_KEY = ""  # Replace with your Octopus Energy API key
 DEVICE_ID = ""  # Replace with your actual device ID, You can find your device id on your smart meter it will look like this 12-34-AB-CD-56-78-90-EF, there is more than one ID like this on your meters, take care to use the right one
@@ -26,8 +29,6 @@ DEMO_MODE = False  #Change to True for Demo Mode
 
 COLOR_SCALE_POS = ["#FFFB5E", "#FCE013", "#FCB913", "#FD3900", "#D01A0F", "#7C0A01"]
 COLOR_SCALE_NEG = ["#b7ffbf", "#95f985", "#4ded30", "#26d701", "#00c301", "#00ab08"]
-
-ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAACoUExURQAAAP2sMf6sM/6sMv2qNv2sMv+rM/2qOPmsMv+sMv2sNf2tNP2tM/2tMf2tMvmtM/2sM/6tNv2tMv6sMv6sMv6sM/+sMv+sMv6sMv6sMv+sMv+sMv+sMv6sMf+sMv+sMv6sM/2sNf6sNP6sM/uuNf6sMv+sMv+sMv+sMv+sMv+sMv6tMv2tMv6sMvyuMP2tMf6sMv2sMv6sMv+sMv6sMv6sMv+sMv///xmJN0wAAAA2dFJOUwAAAAAAAAAAAAAAAAAAAAAAAAqHWhGUxxseqvxpLsDPIgsNAwFF1+jFyKIcHKIBAw0LLqsRCh/vcn8AAAABYktHRDcwuLhHAAAAB3RJTUUH6AoNCiAYBWbKEQAAAGlJREFUCNcFwQcCgkAMBMDlImikqSBdDlS6Hcj/n+YMAEOpUxDSBjAtdY7ihLYwd5RmecF7Gw5fStFVfb3h3rQiXT+MEx7Poe9E2uaF9+dbaSl/7ML1uMjnlP0DjpTE0cKWBxCFwUpsAH/dWwkrzmInGQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNC0xMC0xM1QxMDozMjoxNCswMDowMKPJwsIAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjQtMTAtMTNUMTA6MzI6MTQrMDA6MDDSlHp+AAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI0LTEwLTEzVDEwOjMyOjI0KzAwOjAwCw5cQgAAAABJRU5ErkJggg==""")
 
 def main(config):
     APIKEY = config.str("API_KEY", API_KEY)
@@ -74,8 +75,8 @@ def main(config):
     else:
         # Generate a random data for DEMO_MODE
 
-        demand_value = random_in_range(1, RANGEMAX)
-        demand_average = int(float(demand_value / random_in_range(1, 100) * 10))
+        demand_value = random.number(1, RANGEMAX)
+        demand_average = int(float(demand_value / random.number(1, 100) * 10))
 
         if demand_value % 2 == 0:
             demand_value = -abs(demand_value)
@@ -103,19 +104,6 @@ def main(config):
     else:
         weights = generate_weights(percentage)
         return render_content("pie", None, None, demand_text, trend, trend_color, color, weights, None, None, None)
-
-def basic_random():
-    seed = str(time.now())[0:27].replace(":", "").replace(".", "").replace("-", "").replace(" ", "").replace("+", "")
-    seed = int(seed)
-    return (seed * 48271) % 2147483647
-
-def random_in_range(min_val, max_val):
-    # Generate a pseudo-random number
-    rand_value = basic_random()
-
-    # Scale to the desired range
-    range_size = max_val - min_val + 1
-    return min_val + (rand_value % range_size)
 
 def process_telemetry(telemetry):
     # Extract the latest demand value and compare with the previous one
@@ -371,6 +359,7 @@ def render_content(chart, pixels, pixels_border, demand_text, trend, trend_color
         delay = 100,
         child = render.Column(
             expanded = True,
+            main_align = "center",
             children = [
                 render.Box(height = 1),
                 common_row,
@@ -442,6 +431,7 @@ def get_schema():
                 name = "API_KEY",
                 desc = "Your Octopus API KEY ",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "DEVICE_ID",

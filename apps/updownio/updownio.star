@@ -5,20 +5,15 @@ Description: Updown.io checks your website's status by periodically sending an H
 Author: jcarbaugh
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
+load("images/logo_down_img.gif", LOGO_DOWN_IMG_ASSET = "file")
+load("images/logo_up_img.gif", LOGO_UP_IMG_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-ENCRYPTED_SALT = "AV6+xWcE9TSREL/cItw8d27I4uv2XsWMNf4y8zxIos6RXx2x0cFblymnW4uXVxPwnGnIEU/rR3sCVS0JGbxqlQC0flvFu/F6EpnGMEP7ippTCbhuQP9bvAMOHlu427aeoVekR+YhwQ40+T6yoKotytMMNO+YzH4f"
-
-LOGO_UP_IMG = base64.decode("""R0lGODdhIgAIAKIAAAAAAF9XTwCHUQDkNv/x6P///wAAAAAAACH5BAkAAAYALAAAAAAiAAgAAAM0CLrc/jCS6MabJJCpdv+ZVwkCCGBnimmauljwgs4u5qFKbClayJ2Z1KmFgpV2jh9lyWw2EwA7""")
-LOGO_DOWN_IMG = base64.decode("""R0lGODdhIgAIAKIAAAAAAP8ATX4lU19XT//x6P///wAAAAAAACH5BAkAAAYALAAAAAAiAAgAAAM0CLrc/jCS6MKbZJCpdv+ZVwkCCGBnimmauljwgs4u5qFKbClayJ2Z1KmFgpV2jh9lyWw2EwA7""")
+LOGO_DOWN_IMG = LOGO_DOWN_IMG_ASSET.readall()
+LOGO_UP_IMG = LOGO_UP_IMG_ASSET.readall()
 
 def main(config):
     api_key = config.str("api_key")
@@ -35,23 +30,9 @@ def main(config):
         }
         return render_up_screen(mock_data)
 
-    # Some notes about cache_key:
-    # 1. We combine api_key and check_token to prevent people from fetching other people's checks.
-    # 2. We hash the cache_key so the api_key and check_token aren't stored in plaintext in the cache.
-    # 3. We add a secret salt just for the fun of it.
-    salt = secret.decrypt(ENCRYPTED_SALT) or ""
-    cache_key = "check-{}".format(hash.sha256(salt + api_key + check_token))
-
-    data = cache.get(cache_key)
-    if data:
-        data = json.decode(data)
-    else:
-        headers = {"X-API-KEY": api_key}
-        resp = http.get("https://updown.io/api/checks/" + check_token + "?metrics=1", headers = headers)
-        data = resp.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(data), 60 * 5)
+    headers = {"X-API-KEY": api_key}
+    resp = http.get("https://updown.io/api/checks/" + check_token + "?metrics=1", headers = headers, ttl_seconds = 300)
+    data = resp.json()
 
     if data["down"]:
         return render_down_screen(data)
@@ -167,12 +148,21 @@ def get_schema():
                 name = "API Key",
                 desc = "Read-only API key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "check_token",
                 name = "Check Token",
                 desc = "The check unique token",
                 icon = "check",
+                secret = True,
+            ),
+            schema.Text(
+                id = "salt",
+                name = "Salt",
+                desc = "A secret salt for cache key hashing",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

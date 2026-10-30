@@ -7,9 +7,8 @@ Author: Aaron Brace
 
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 is_debug = True
@@ -56,7 +55,7 @@ PRICE_HISTORY_URL = "https://dpms.mcio.org/metals/v1/"
 REALTIME_QUOTE = "https://dpms.mcio.org/metals/v1/latest"
 
 def main(config):
-    API_KEY = secret.decrypt("AV6+xWcEXpR9hD3BS4eRwb8BRQcDiK9luQOfbbmE0O2NsiSKUif/WZ9Ooptn5uZh6HKbo0vDZVrluhuNE7/dzRWrxoPBQyIfdk2Y2o7DvxGnEbM1yLPziFGJ+D0Yo0sfztGgMlVCqn/eCCTywDQ2a7wBhs2BhF+i91MIdKTueUgZsDtJtmU=") or config.get("dev_api_key") or ""
+    API_KEY = config.get("dev_api_key") or ""
     PRECIOUS_METAL = "gold"
     GRAPH_PERIOD = "twentyfourhour"
     GOLDPRICETICKER_VERSION = "2.0"
@@ -71,7 +70,8 @@ def main(config):
 
     if (config.str("metal") == "version"):
         return render.Root(
-            child = render.Column(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 children = [
                     render.Marquee(
                         child = render.Text("Goldpriceticker version " + GOLDPRICETICKER_VERSION + "."),
@@ -86,7 +86,7 @@ def main(config):
                         width = 64,
                     ),
                 ],
-            ),
+            )),
         )
 
     # Precious metal markets are open almost 24x5, so its hard to determine what a closing price is. However according to Kitco, its 5PM
@@ -133,10 +133,11 @@ def main(config):
 
     if (httpresponse.status_code == 401):
         return render.Root(
-            child = render.Marquee(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Marquee(
                 child = render.Text("API Key Invalid"),
                 width = 64,
-            ),
+            )),
         )
     if httpresponse.status_code != 200:
         fail("Could not fetch " + GRAPH_PERIOD + " spot price history for URL " + PRICE_HISTORY_URL + GRAPH_PERIOD + "/" + PRECIOUS_METAL + " Error code %d" % (httpresponse.status_code))
@@ -262,7 +263,8 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             cross_align = "start",
             children = [
                 render.Box(
@@ -308,7 +310,7 @@ def main(config):
                 PLOT_SECTION,
                 # ),
             ],
-        ),
+        )),
     )
 
 def get_schema():
@@ -380,8 +382,9 @@ def get_schema():
             schema.Text(
                 id = "dev_api_key",
                 name = "API Key",
-                desc = "Test use only",
-                icon = "bomb",
+                desc = "API key for metals-dev API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

@@ -8,6 +8,7 @@ Author: Robert Ison
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+load("random.star", "random")
 
 DISPLAY_OPTIONS = [
     schema.Option(value = "random", display = "Display Random Rule every time"),
@@ -102,7 +103,8 @@ def main(config):
     else:
         seed = time.now().nanosecond
 
-    display_item = random_based_on_seed(seed, 1, 12)
+    random.seed(seed)
+    display_item = random.number(1, 12)
 
     return render.Root(
         render.Column(
@@ -125,10 +127,6 @@ def main(config):
         show_full_animation = True,
         delay = int(config.get("scroll", 45)),
     )
-
-def random_based_on_seed(seed, min, max):
-    remainder = seed % (max - min + 1)
-    return remainder + min
 
 def get_schema():
     return schema.Schema(

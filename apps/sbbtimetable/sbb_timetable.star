@@ -6,22 +6,14 @@ Description: Shows a timetable for a station in the Swiss Public Transport
     network.
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/error_icon.png", ERROR_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-ERROR_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/
-9hAAAAbklEQVQ4y72S0Q2AIAwFj8YRZBf2/2IXVtDU
-D6LRBAsIsUm/aHMvV8AoTUE1BbVmhMFyFv0x6KP7L8
-FFP1/1PYUUlgXYAFhj7k6JO7C0eJniQGqEWop5V2ih
-l/6FncDH3DUHvfT7zriDL/SpVzgA+N8ttq4TxtUAAA
-AASUVORK5CYII=
-""")
+ERROR_ICON = ERROR_ICON_ASSET.readall()
 
 # Define some constants
 SBB_URL = "https://fahrplan.search.ch/api/stationboard.json?show_delays=1&transportation_types=train"
@@ -96,24 +88,15 @@ def main(config):
     if skiptime < 0:
         skiptime = 0
 
-    # Check if we have the requested data in the cache
-    resp_cached = cache.get("sbb_%s" % station)
-    if resp_cached != None:
-        # Get the cached response
-        print("Hit! Displaying cached data.")
-        resp = json.decode(resp_cached)
-    else:
-        # Get a new reponse
-        print("Miss! Calling API.")
-        sbb_dict = {"stop": station}  # Provide the station with a dict, as this will be encoded
-        resp = http.get(SBB_URL, params = sbb_dict)
-        if resp.status_code != 200:
-            # Show an error message
-            return (display_error("API Error occured"))
+    # Get a new reponse
+    print("Miss! Calling API.")
+    sbb_dict = {"stop": station}  # Provide the station with a dict, as this will be encoded
+    resp = http.get(SBB_URL, params = sbb_dict, ttl_seconds = 120)
+    if resp.status_code != 200:
+        # Show an error message
+        return (display_error("API Error occured"))
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("sbb_%s" % station, resp.body(), ttl_seconds = 120)
-        resp = json.decode(resp.body())
+    resp = json.decode(resp.body())
 
     # Check if we got a valid response
     if "connections" not in resp:
@@ -133,8 +116,12 @@ def main(config):
                 break
 
         # Generate the board
+        # A departure row is about six pixels, so a 64x32 panel holds five and
+        # a square one holds ten. Bounded by what the API actually returned:
+        # the fixed five could already run off the end of a short response.
+        rows = 5 * canvas.height() // 32
         childRow = []
-        for i in range(startID, startID + 5):
+        for i in range(startID, min(startID + rows, len(resp["connections"]))):
             # Get the data from the response
             trainCategory = resp["connections"][i]["*G"]
             if trainCategory[0] == "S":
@@ -301,29 +288,20 @@ def main(config):
     )
 
 def search_station(pattern):
-    # Check if we have the requested data in the cache
-    resp_cached = cache.get("sbb_pattern_%s" % pattern)
-    if resp_cached != None:
-        # Get the cached response
-        print("Pattern Hit! Displaying cached data.")
-        resp = json.decode(resp_cached)
-    else:
-        # Get a new reponse
-        print("Pattern Miss! Calling API.")
-        sbb_dict = {"term": pattern}  # Provide the pattern with a dict, as this will be encoded
-        resp = http.get(SBB_URL_COMPLETION, params = sbb_dict)
-        if resp.status_code != 200:
-            # Return an error message
-            return [
-                schema.Option(
-                    display = "API Error",
-                    value = "API Error",
-                ),
-            ]
+    # Get a new reponse
+    print("Pattern Miss! Calling API.")
+    sbb_dict = {"term": pattern}  # Provide the pattern with a dict, as this will be encoded
+    resp = http.get(SBB_URL_COMPLETION, params = sbb_dict, ttl_seconds = 604800)
+    if resp.status_code != 200:
+        # Return an error message
+        return [
+            schema.Option(
+                display = "API Error",
+                value = "API Error",
+            ),
+        ]
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("sbb_pattern_%s" % pattern, resp.body(), ttl_seconds = 604800)
-        resp = json.decode(resp.body())
+    resp = json.decode(resp.body())
 
     # Check if the response is empty
     if len(resp) == 0:

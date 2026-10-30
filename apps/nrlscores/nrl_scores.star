@@ -19,7 +19,7 @@ Made draw in W-D-L records dynamic
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -31,13 +31,22 @@ LIVE_CACHE = 30  # 30 secs
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 DEFAULT_TEAM = "500011"
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     RotationSpeed = config.get("speed", "3")
     ViewSelection = config.get("View", "Live")
     TeamListSelection = config.get("TeamList", DEFAULT_TEAM)
     UpcomingSelection = config.get("Upcoming", "Record")
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
     renderDisplay = []
 
@@ -378,7 +387,14 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(RotationSpeed) * 1000,
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
+            children = [
+                render.Animation(
+                    children = renderDisplay,
+                ),
+            ],
+        )))) if is_square() else render.Column(
             children = [
                 render.Animation(
                     children = renderDisplay,

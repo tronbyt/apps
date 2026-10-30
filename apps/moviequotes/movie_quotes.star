@@ -5,12 +5,20 @@ Description: Random movie quote from AFI top 100 movie quotes.
 Author: Austin Fonacier
 """
 
-load("cache.star", "cache")
 load("encoding/csv.star", "csv")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     quote = get_random_quote()
@@ -18,7 +26,11 @@ def main():
     movie = quote[2]
     year = quote[3]
     return render.Root(
+        # The bands total 31 rows; on a square panel the column expands and
+        # spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly",
             children = [
                 render.Box(
                     height = 10,
@@ -77,14 +89,9 @@ def get_random_quote():
     return quotes[random_num]
 
 def get_all_quotes():
-    movie_csv_str = cache.get("movie_csv_str")
+    movie_csv_raw = http.get("https://raw.githubusercontent.com/wcmbishop/time-travel-movie-club/master/data-raw/afi-top-100-quotes.csv", ttl_seconds = 604800)
+    movie_csv_str = movie_csv_raw.body()
 
-    if movie_csv_str == None:
-        movie_csv_raw = http.get("https://raw.githubusercontent.com/wcmbishop/time-travel-movie-club/master/data-raw/afi-top-100-quotes.csv")
-        movie_csv_str = movie_csv_raw.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("movie_csv_str", movie_csv_str, ttl_seconds = 604800)
     quotes = csv.read_all(movie_csv_str, skip = 1)
     return quotes
 

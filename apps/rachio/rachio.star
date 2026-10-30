@@ -1,347 +1,676 @@
 """
 Applet: Rachio
 Summary: Rachio sprinkler system
-Description: View schedules and data for a Rachio sprinkler system.
+Description: View recent activity and inferred running status for a Rachio sprinkler system.
 Authors: Matt Fischer and Rob Ison
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("math.star", "math")
-load("render.star", "render")
+load("images/rachio_icon.png", RACHIO_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-RACHIO_ICON = base64.decode("""
-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
-URDRv4C6YMmClgWvIr0iyyLvRJlESaJ6oxWjE6Kbo1/HeMeUx0hjrWJXxl6K04gTxHXHY+Oj45vipxf6LNy5cDzBPqE44foi40V5iy4s1licvvj4EsUlnCVH
-EtGJMYktie85oZwGzvTSgKW1S6e4bO4u7hOeB28Hb5Lvyi/nTyS5JpUnPUp2Td6ePJninlKR8lTAFlQLnqf6p9alvk4LTduf9ik9Jr09A5eRmHFUSBGmCfsy
-tTPzMoezzLOKs6TLnJftXDYlChI1ZUPZi7K7xTTZz9SAxESyXjKa45ZTk/MmNzr3SJ5ynjBvYLnZ8k3LJ/J9879egVrBXdFboFuwtmB0pefK+lXQqqWrelfr
-ry5aPb7Gb82BtYS1aWt/KLQuLC98uS5mXU+RVtGaorH1futbixWKRcU3NrhsqNuI2ijYOLhp7qaqTR9LeCUXS61LK0rfb+ZuvviVzVeVX33akrRlsMyhbM9W
-zFbh1uvb3LcdKFcuzy8f2x6yvXMHY0fJjpc7l+y8UGFXUbeLsEuyS1oZXNldZVC1tep9dUr1SI1XTXutZu2m2te7ebuv7PHY01anVVda926vYO/Ner/6zgaj
-hop9mH05+x42Rjf2f836urlJo6m06cN+4X7pgYgDfc2Ozc0tmi1lrXCrpHXyYMLBy994f9Pdxmyrb6e3lx4ChySHHn+b+O31w0GHe4+wjrR9Z/hdbQe1o6QT
-6lzeOdWV0iXtjusePhp4tLfHpafje8vv9x/TPVZzXOV42QnCiaITn07mn5w+lXXq6enk02O9S3rvnIk9c60vvG/wbNDZ8+d8z53p9+w/ed71/LELzheOXmRd
-7LrkcKlzwH6g4wf7HzoGHQY7hxyHui87Xe4Znjd84or7ldNXva+euxZw7dLI/JHh61HXb95IuCG9ybv56Fb6ree3c27P3FlzF3235J7SvYr7mvcbfjT9sV3q
-ID0+6j068GDBgztj3LEnP2X/9H686CH5YcWEzkTzI9tHxyZ9Jy8/Xvh4/EnWk5mnxT8r/1z7zOTZd794/DIwFTs1/lz0/NOvm1+ov9j/0u5l73TY9P1XGa9m
-Xpe8UX9z4C3rbf+7mHcTM7nvse8rP5h+6PkY9PHup4xPn34D94Tz+3EBhusAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfoChQBGDl/1JFAAAAAGXRF
-WHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAcBJREFUKM9jYMAB2NnZsYozovH1EysY1MylxKWYmBgfPnvCfOf0xXnt2DWoe4Sy+ObfEZT7j2qE
-wZdnr9f03d+1CsJlhqv+EV7/kEcMro6F4b8Y4/8vDIwv2Hj5tCwFv735cPcqAwMDE1TaN/85Ox9c9WFrgSeBUrMNoCJP2XilwkoYGRmhNugnlt/SdmVgYBBg
-/D9NjUufg8lZkbfk8Juq+z/gRjxj5TEQ4X1+9iALAwMDg5oFxN3sjAzmirw+XMz8HCyf/6GHx0c5Q6iTxMUkIUIv/zFq73xlt/kZAwODNAdjoyz7bHUuuAYl
-GTkGBgYWBgYGVmYmZJO+/f/PwMAwyUmcgYHhz///aTe//mdgZGBg+AcNDAaGh8+eMihIoDng9KPPk6983vLx939YwLx/9RzqpH83T2DG6MP3v1Z+/PuVAWH5
-3zunoRquLew0/PKMAS8w/fHq4qwmRDy8WtMr8+szLtUiPz8/Wt71//9/hIb7u1b/Xdqgj80e8x+vWJY1Pt6NmjQYGBg+3rv2bPMcYxFedob/7rJcd1+8v3bl
-mtTFbafqYz7evYrTrczMzMzMzJC0zcLCwsLCgpJUGRkBSgGWGpO9IcIAAAAASUVORK5CYII=
-""")
+def is_square():
+    """True on a 64x64 panel.
 
-RACHIO_BLUE = "#06a6e2"
-ORANGE = "#e27306"
-WHITE = "#fff"
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
-ACCURACY_IN_MINUTES = 3  #We'll round to the nearest 3 minutes when calling Rachio API
-LONG_TTL_SECONDS = 7200
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
+
+RACHIO_ICON = RACHIO_ICON_ASSET.readall()
+
+RACHIO_BLUE = "#0070D2"
+RACHIO_SECONDARY_COLOR = "#00A676"
+
 RACHIO_URL = "https://api.rach.io/1/public"
-SAMPLE_DATA = [{"type": "WEATHER_INTELLIGENCE_CLIMATE_SKIP", "date": "Thursday 04:31AM", "summary": "Water all zones was scheduled for 10/03 at 04:26 AM (EDT), but will be skipped based on weather and soil conditions."}, {"type": "WEATHER_INTELLIGENCE_SKIP", "date": "Sunday 04:31AM", "summary": "Water all zones was scheduled for 10/06 at 04:28 AM (EDT), but was skipped due to PLUS weather network which observed 0.00 in and predicted 0.16 in precipitation compared to schedules's threshold of 0.13 in."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:45PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:48PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:50PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:51PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "SCHEDULE_STARTED", "date": "Tuesday 01:55PM", "summary": "Button press started Quick Run will run for 3 minutes."}, {"type": "WEATHER_INTELLIGENCE_SKIP", "date": "Thursday 04:31AM", "summary": "Water all zones was scheduled for 10/10 at 04:30 AM (EDT), but was skipped due to PLUS weather network which observed 5.10 in and predicted 3.96 in precipitation compared to schedules's threshold of 0.13 in."}, {"type": "WEATHER_INTELLIGENCE_CLIMATE_SKIP", "date": "Sunday 04:36AM", "summary": "Water all zones was scheduled for 10/13 at 04:32 AM (EDT), but will be skipped based on weather and soil conditions."}, {"type": "WEATHER_INTELLIGENCE_CLIMATE_SKIP", "date": "Thursday 04:36AM", "summary": "Water all zones was scheduled for 10/17 at 04:34 AM (EDT), but will be skipped based on weather and soil conditions."}, {"type": "SCHEDULE_STARTED", "date": "Saturday 06:11PM", "summary": "Quick Run will run for 1 minutes."}]
-SHORT_TTL_SECONDS = 600
+
+# Keep event request URLs stable within each three-minute bucket.
+ACCURACY_IN_MINUTES = 3
+SHORT_TTL_SECONDS = ACCURACY_IN_MINUTES * 60
+
+# Device/account information is cached for two hours.
+LONG_TTL_SECONDS = 7200
+
+LOOKBACK_DURATION = "168h"
+
+# This is a display safeguard, not proof that a run has stopped.
+INFERRED_ACTIVE_MAX_AGE = "3h"
 
 SCHED_START = "SCHEDULE_STARTED"
 SCHED_STOP = "SCHEDULE_COMPLETED"
-WEATHER_CLIMATE_SKIP = "WEATHER_INTELLIGENCE_CLIMATE_SKIP"
 WEATHER_SKIP = "WEATHER_INTELLIGENCE_SKIP"
+WEATHER_CLIMATE_SKIP = "WEATHER_INTELLIGENCE_CLIMATE_SKIP"
+WEATHER_FREEZE_SKIP = "WEATHER_INTELLIGENCE_FREEZE_SKIP"
 ZONE_STARTED = "ZONE_STARTED"
 
-def main(config):
-    tz = config.get("$tz", "America/New_York")
-    now = time.now().in_location(tz)
-    api_key = config.str("api_key", "")
-    delay = int(config.get("scroll", 45))
-    skip_when_empty = config.bool("skipwhenempty", False)
+SCHEDULE_EVENT_NAMES = {
+    SCHED_START: "Started",
+    SCHED_STOP: "Finished",
+    WEATHER_SKIP: "Rain Skip",
+    WEATHER_CLIMATE_SKIP: "Soil Saturation Skip",
+    WEATHER_FREEZE_SKIP: "Freeze Skip",
+}
 
-    if (api_key.strip() == ""):
-        return display_error_screen(now, "Please enter your API Key", "It can be found in the Rachio App", delay)
+def main(config):
+    tz = time.tz()
+    now = time.now().in_location(tz)
+
+    api_key = config.str("api_key", "").strip()
+    skip_when_empty = config.bool("skipwhenempty", True)
+
+    screen_width = canvas.width()
+    icon_width = 16
+    font = "5x8"
+    font_height = 8
+    font_width = 5
+
+    delay = int(config.str("scroll", "60"))
+
+    if canvas.is2x():
+        delay = int(delay / 2)
+        font = "terminus-16"
+        font_height = 16
+        font_width = 8
+
+    if api_key == "":
+        return display_error_screen(
+            now,
+            "Please enter your API key.",
+            "Find it in your Rachio account settings.",
+            delay,
+            screen_width,
+            icon_width,
+            font_height,
+            font,
+            font_width,
+        )
 
     devices = get_devices(api_key)
-    selected_device = config.str("device")
 
-    if (devices == None or selected_device == None or selected_device == ""):
-        if devices == None:
-            # No device selected, and no device available from the list, send an error
-            return display_error_screen(now, "No devices found.", "Make sure you have entered the correct API key and selected your display device", delay)
-        else:
-            selected_device = devices[0]["id"]
+    if devices == None:
+        return display_error_screen(
+            now,
+            "Unable to load Rachio devices.",
+            "Check API key or try again later.",
+            delay,
+            screen_width,
+            icon_width,
+            font_height,
+            font,
+            font_width,
+        )
 
-    # we have a selected device; otherwise, they've already been sent to the display_error_screen
+    if len(devices) == 0:
+        return display_error_screen(
+            now,
+            "No Rachio devices found.",
+            "Check your Rachio account.",
+            delay,
+            screen_width,
+            icon_width,
+            font_height,
+            font,
+            font_width,
+        )
 
-    now = time.now().in_location(tz)
+    selected_device = config.str("device", "")
 
-    # If we use the time to the millisecond, nothing will ever be cached and we'll hit our limit of rachio requests in a day
-    # So we'll round off to the nearest X minutes (They provide enough calls to give you 1 per minutes.)
-    # But in addition, let's go a few minutes into the future, no point in every making a call that could miss the most recent event.
-    now = time.now() + time.parse_duration("%sm" % str(ACCURACY_IN_MINUTES))
-    rounded_time = time.time(year = now.year, month = now.month, day = now.day, hour = now.hour, minute = round_to_nearest_X(now.minute, ACCURACY_IN_MINUTES), second = 0, location = tz)
+    if selected_device == None or selected_device == "":
+        selected_device = devices[0]["id"]
 
-    # The data they send is a little odd in that the there isn't a time stamp, but a time display.
-    # So to get the 'last' and 'next' event, you could get all the data at once, and parse through their time display
-    # OR, pull in past events and separate events to let them determine the cutoff on thier side
-    # now I can grab the latest past event and the first next event.
-    past_start = rounded_time + time.parse_duration("-160h")
+    device = get_selected_device(devices, selected_device)
 
-    #initialize
-    recent_events = None
-    current_events = None
+    if device == None:
+        return display_error_screen(
+            now,
+            "Selected device is unavailable.",
+            "Choose a device in app settings.",
+            delay,
+            screen_width,
+            icon_width,
+            font_height,
+            font,
+            font_width,
+        )
 
-    all_events = get_events(selected_device, api_key, past_start, rounded_time)
-    recent_events = get_selected_events(tz, all_events, False)
-    current_events = get_selected_events(tz, all_events, True)
+    # Use the next three-minute Unix-time boundary.
+    # This avoids constructing dates with minute = 60.
+    bucket_seconds = ACCURACY_IN_MINUTES * 60
+    rounded_unix = (
+        (int(now.unix) // bucket_seconds) + 1
+    ) * bucket_seconds
 
-    return render_rachio(tz, config, get_device_name(devices, selected_device), recent_events, current_events, now, delay, skip_when_empty)
+    rounded_time = time.from_timestamp(rounded_unix).in_location(tz)
+    past_start = rounded_time - time.parse_duration(LOOKBACK_DURATION)
 
-def get_device_name(devices, selected_device):
+    all_events = get_events(
+        selected_device,
+        api_key,
+        past_start,
+        rounded_time,
+    )
+
+    if all_events == None:
+        return display_error_screen(
+            now,
+            "Unable to load Rachio events.",
+            "Check API key or try again later.",
+            delay,
+            screen_width,
+            icon_width,
+            font_height,
+            font,
+            font_width,
+        )
+
+    events = normalize_events(all_events, now)
+
+    return render_rachio(
+        config = config,
+        device_name = device["name"],
+        events = events,
+        now = now,
+        tz = tz,
+        delay = delay,
+        skip_when_empty = skip_when_empty,
+        screen_width = screen_width,
+        icon_width = icon_width,
+        font_height = font_height,
+        font_width = font_width,
+        font = font,
+    )
+
+def get_selected_device(devices, selected_device):
     for device in devices:
         if device["id"] == selected_device:
-            return device["name"]
+            return device
 
-    return ""
+    return None
 
-def round_to_nearest_X(number_to_round, nearest_number):
-    return int(nearest_number * math.round(number_to_round / nearest_number))
+def get_latest_event(events):
+    latest = None
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
+    for event in events:
+        if latest == None:
+            latest = event
+        elif event["eventDate"] > latest["eventDate"]:
+            latest = event
+        elif event["eventDate"] == latest["eventDate"]:
+            # If timestamps tie, prefer a schedule completion over
+            # a start so we do not infer activity from that tie.
+            if event["type"] == SCHED_STOP:
+                latest = event
+
+    return latest
+
+def normalize_events(events, now):
+    normalized = []
+    now_ms = int(now.unix * 1000)
+
+    for event in events:
+        sub_type = event.get("subType")
+        event_date = event.get("eventDate")
+
+        if sub_type == None or event_date == None:
+            continue
+
+        relevant = (
+            sub_type in SCHEDULE_EVENT_NAMES or
+            sub_type == ZONE_STARTED
+        )
+
+        if not relevant:
+            continue
+
+        event_date = int(event_date)
+
+        # The query endpoint is in the future for stable caching.
+        # Do not display future-dated events as already occurring.
+        if event_date > now_ms:
+            continue
+
+        summary = event.get("summary") or ""
+
+        normalized.append({
+            "type": sub_type,
+            "display_type": SCHEDULE_EVENT_NAMES.get(
+                sub_type,
+                "Zone Started",
+            ),
+            "summary": summary.strip(),
+            "eventDate": event_date,
+            "zoneNumber": event.get("zoneNumber"),
+        })
+
+    return normalized
+
+def get_activity_state(events, now):
+    schedule_events = []
+    zone_events = []
+
+    for event in events:
+        if event["type"] in SCHEDULE_EVENT_NAMES:
+            schedule_events.append(event)
+        elif event["type"] == ZONE_STARTED:
+            zone_events.append(event)
+
+    latest_schedule = get_latest_event(schedule_events)
+    latest_zone = get_latest_event(zone_events)
+    latest_event = get_latest_event(events)
+
+    likely_active = False
+    associated_zone = None
+
+    if latest_schedule != None:
+        if latest_schedule["type"] == SCHED_START:
+            schedule_time = time.from_timestamp(
+                int(latest_schedule["eventDate"] // 1000),
+            )
+
+            schedule_age = now - schedule_time
+
+            if latest_zone != None:
+                zone_belongs_to_time_window = (
+                    latest_zone["eventDate"] >=
+                    latest_schedule["eventDate"]
+                )
+
+                if zone_belongs_to_time_window:
+                    associated_zone = latest_zone
+
+                    # Historical evidence only:
+                    # a schedule start followed by a zone start,
+                    # no later selected schedule event, and a
+                    # bounded age. This does not confirm water flow.
+                    likely_active = (
+                        schedule_age <=
+                        time.parse_duration(INFERRED_ACTIVE_MAX_AGE)
+                    )
+
+    return {
+        "latest_event": latest_event,
+        "latest_schedule": latest_schedule,
+        "latest_zone": latest_zone,
+        "associated_zone": associated_zone,
+        "likely_active": likely_active,
+    }
+
+def format_zone_detail(event, prefix = "Last zone"):
+    zone_number = event.get("zoneNumber")
+    summary = event.get("summary") or ""
+
+    label = prefix
+
+    if zone_number != None:
+        if str(zone_number) != "" and str(zone_number) != "0":
+            label = "%s %s" % (prefix, zone_number)
+
+    if summary != "":
+        return "%s: %s" % (label, summary)
+
+    return "%s started" % label
+
+def format_event_date(event, now, tz):
+    event_time = time.from_timestamp(
+        int(event["eventDate"] // 1000),
+    ).in_location(tz)
+
+    is_today = (
+        event_time.year == now.year and
+        event_time.month == now.month and
+        event_time.day == now.day
+    )
+
+    if is_today:
+        return "Today at " + event_time.format("3:04 PM")
+
+    return event_time.format("Mon, Jan 2") + " at " + event_time.format("3:04 PM")
+
+def add_padding_to_child_element(
+        element,
+        left = 0,
+        top = 0,
+        right = 0,
+        bottom = 0):
+    return render.Padding(
         pad = (left, top, right, bottom),
         child = element,
     )
 
-    return padded_element
+def build_display(
+        line_1,
+        line_2,
+        line_3,
+        line_4,
+        delay,
+        screen_width,
+        icon_width,
+        font_height,
+        font,
+        font_width):
+    header_width = max(1, screen_width - icon_width - 1)
 
-def display_error_screen(time, line_3, line_4 = "", delay = 45):
     return render.Root(
-        render.Column(
+        center_on_square(render.Column(
             children = [
                 render.Row(
                     main_align = "start",
                     cross_align = "start",
                     children = [
                         render.Image(src = RACHIO_ICON),
-                        render.Box(width = 1, height = 1, color = "#000"),
+                        render.Box(
+                            width = 1,
+                            height = 1,
+                            color = "#000",
+                        ),
                         render.Stack(
                             children = [
-                                render.Text(time.format("Jan 02"), color = RACHIO_BLUE),
-                                add_padding_to_child_element(render.Text(time.format("3:04 PM"), color = RACHIO_BLUE), 0, 8),
+                                render.Marquee(
+                                    width = header_width,
+                                    child = render.Text(
+                                        line_1,
+                                        font = font,
+                                        color = RACHIO_BLUE,
+                                    ),
+                                ),
+                                add_padding_to_child_element(
+                                    render.Marquee(
+                                        offset_start = len(line_1) * font_width,
+                                        width = header_width,
+                                        child = render.Text(
+                                            line_2,
+                                            font = font,
+                                            color = RACHIO_BLUE,
+                                        ),
+                                    ),
+                                    top = font_height,
+                                ),
                             ],
                         ),
                     ],
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(line_3, color = ORANGE),
+                    width = screen_width,
+                    child = render.Text(
+                        line_3,
+                        color = RACHIO_SECONDARY_COLOR,
+                        font = font,
+                    ),
                 ),
                 render.Marquee(
-                    offset_start = len(line_3) * 5,
-                    width = 64,
-                    child = render.Text(line_4, color = ORANGE),
+                    offset_start = len(line_3) * font_width,
+                    width = screen_width,
+                    child = render.Text(
+                        line_4,
+                        color = RACHIO_SECONDARY_COLOR,
+                        font = font,
+                    ),
                 ),
             ],
-        ),
+        )),
         show_full_animation = True,
         delay = delay,
     )
 
-def render_rachio(tz, config, device_name, recent_events, current_events, now, delay, skip_when_empty = True):
-    show_device_name = config.bool("title_display", True)
+def display_error_screen(
+        now,
+        line_3,
+        line_4 = "",
+        delay = 60,
+        screen_width = 64,
+        icon_width = 16,
+        font_height = 8,
+        font = "5x8",
+        font_width = 5):
+    return build_display(
+        line_1 = now.format("Jan 02"),
+        line_2 = now.format("3:04 PM"),
+        line_3 = line_3,
+        line_4 = line_4,
+        delay = delay,
+        screen_width = screen_width,
+        icon_width = icon_width,
+        font_height = font_height,
+        font = font,
+        font_width = font_width,
+    )
 
-    line_1 = "Rachio"
-    line_2 = now.format("Mon Jan 2")
-    line_3 = ""
-    line_4 = ""
-
-    if (show_device_name):
-        line_1 = device_name
-
-    show_recent_events = recent_events != None and len(recent_events) > 0
-
-    if (not show_recent_events):
+def render_rachio(
+        config,
+        device_name,
+        events,
+        now,
+        tz,
+        delay,
+        skip_when_empty = True,
+        screen_width = 64,
+        icon_width = 16,
+        font_height = 8,
+        font_width = 5,
+        font = "5x8"):
+    if len(events) == 0:
         if skip_when_empty:
             return []
-        else:
-            return display_error_screen(now, "No Events within a week.", "", delay)
 
-    # whew, made it with at least one event to display
+        return display_error_screen(
+            now = now,
+            line_3 = "No events within a week.",
+            line_4 = "",
+            delay = delay,
+            screen_width = screen_width,
+            icon_width = icon_width,
+            font_height = font_height,
+            font = font,
+            font_width = font_width,
+        )
 
-    #do we have any current events?
-    show_current_events = current_events != None and len(current_events) > 0
+    state = get_activity_state(events, now)
 
-    if show_recent_events:
-        latest_event = recent_events[len(recent_events) - 1]
+    latest_event = state["latest_event"]
+    latest_schedule = state["latest_schedule"]
+    latest_zone = state["latest_zone"]
+    likely_active = state["likely_active"]
 
-        #this current event is only relevant if the latest_event
-        if (latest_event["type"] and latest_event["type"] == SCHED_STOP):
-            show_current_events = False
+    show_device_name = config.bool("title_display", True)
+    line_1 = device_name if show_device_name else "Rachio"
+    line_4 = ""
 
-        preface = "Last"
-        if show_current_events:
-            preface = "Current"
+    if likely_active:
+        # Date and status refer to the schedule start.
+        displayed_event = latest_schedule
+        line_3 = "Likely active: Started"
+        line_4 = format_zone_detail(state["associated_zone"])
 
-        readable_date = time.from_timestamp(int(int(latest_event["eventDate"]) / 1000.0)).in_location(tz)
-        line_2 = readable_date.format("Mon Jan 2 at 3:04 PM")
-        line_3 = "%s: %s - %s" % (preface, latest_event["summary"], readable_date.format("Mon Jan 2 at 3:04 PM"))
+    elif latest_event["type"] == ZONE_STARTED:
+        # A zone start can exist without a matching selected
+        # schedule event. Show it as history, not live status.
+        displayed_event = latest_event
+        line_3 = "Last: Zone Started"
+        line_4 = format_zone_detail(latest_event)
 
-    if show_current_events:
-        current_event = current_events[len(current_events) - 1]
-        display = current_event["summary"].strip()
-        if len(display) > 0:
-            display = "Zone: %s" % display
+    else:
+        displayed_event = latest_event
+        line_3 = "Last: %s" % latest_event["display_type"]
 
-        if line_3 == "":
-            line_3 = display
-        else:
-            line_4 = display
+        if latest_event["type"] == SCHED_START:
+            # A start alone is insufficient to claim current activity.
+            line_4 = "Live status unconfirmed"
 
-    return render.Root(
-        render.Column(
-            children = [
-                render.Row(
-                    main_align = "start",
-                    cross_align = "start",
-                    children = [
-                        render.Image(src = RACHIO_ICON),
-                        render.Box(width = 1, height = 1, color = "#000"),
-                        render.Stack(
-                            children = [
-                                render.Marquee(width = 48, child = render.Text(line_1, color = RACHIO_BLUE)),
-                                add_padding_to_child_element(render.Marquee(offset_start = len(line_1) * 5, width = 48, child = render.Text(line_2, color = RACHIO_BLUE)), 0, 8),
-                            ],
-                        ),
-                    ],
-                ),
-                render.Marquee(
-                    width = 64,
-                    child = render.Text(line_3, color = ORANGE),
-                ),
-                render.Marquee(
-                    offset_start = len(line_3) * 5,
-                    width = 64,
-                    child = render.Text(line_4, color = ORANGE),
-                ),
-            ],
-        ),
-        show_full_animation = True,
+        elif latest_event["summary"] != "":
+            line_4 = latest_event["summary"]
+
+        elif latest_event["type"] == SCHED_STOP and latest_zone != None:
+            # Show a zone detail only if it falls between the
+            # latest known start and this completion.
+            run_starts = []
+
+            for event in events:
+                if event["type"] == SCHED_START:
+                    if event["eventDate"] <= latest_event["eventDate"]:
+                        run_starts.append(event)
+
+            run_start = get_latest_event(run_starts)
+
+            if run_start != None:
+                if (
+                    latest_zone["eventDate"] >= run_start["eventDate"] and
+                    latest_zone["eventDate"] <= latest_event["eventDate"]
+                ):
+                    line_4 = format_zone_detail(latest_zone)
+
+    line_2 = format_event_date(displayed_event, now, tz)
+
+    return build_display(
+        line_1 = line_1,
+        line_2 = line_2,
+        line_3 = line_3,
+        line_4 = line_4,
         delay = delay,
+        screen_width = screen_width,
+        icon_width = icon_width,
+        font_height = font_height,
+        font = font,
+        font_width = font_width,
     )
 
-def get_events(deviceId, api_key, start, end):
-    # Rachio uses MS from epoch, not seconds
-    start_time = start.unix * 1000
-    end_time = end.unix * 1000
-
-    event_url = "%s/device/%s/event?startTime=%d&endTime=%d" % (RACHIO_URL, deviceId, start_time, end_time)
-
-    event_response = http.get(url = event_url, headers = get_headers(api_key), ttl_seconds = SHORT_TTL_SECONDS)
-
-    if event_response.status_code != 200:
-        print("GET %s failed with status %d: %s" % (event_url, event_response.status_code, event_response.body()))
-        return None
-
-    return event_response.json()
-
-def get_selected_events(tz, events, current):
-    selected_sub_types = []
-    if current:
-        selected_sub_types = [ZONE_STARTED]
-    else:
-        selected_sub_types = [SCHED_START, SCHED_STOP, WEATHER_SKIP, WEATHER_CLIMATE_SKIP]
-
-    selected_events = []
-    for event in events:
-        if "subType" in event.keys():
-            if event["subType"] in selected_sub_types:
-                eventDateSecs = time.from_timestamp(int(event["eventDate"] / 1000)).in_location(tz)
-                parsedDate = eventDateSecs.format("Monday 03:04PM")
-                newEvent = dict(type = event["subType"], date = parsedDate, summary = event["summary"], eventDate = event["eventDate"])
-                selected_events.append(newEvent)
-
-    return selected_events
-
 def get_headers(api_key):
-    headers = {}
-    headers["Authorization"] = "Bearer %s" % api_key
-    return headers
+    return {
+        "Authorization": "Bearer %s" % api_key,
+    }
 
-def get_devices(api_key):
-    #Device Dictionary of IDs and names
-    device_information = []
+def get_events(device_id, api_key, start, end):
+    start_time = int(start.unix * 1000)
+    end_time = int(end.unix * 1000)
 
-    info_url = "%s/person/info" % RACHIO_URL
+    event_url = (
+        "%s/device/%s/event?startTime=%d&endTime=%d" %
+        (RACHIO_URL, device_id, start_time, end_time)
+    )
 
-    # cache for 1 hour, this should never change
-    response = http.get(url = info_url, headers = get_headers(api_key), ttl_seconds = LONG_TTL_SECONDS)
+    response = http.get(
+        url = event_url,
+        headers = get_headers(api_key),
+        ttl_seconds = SHORT_TTL_SECONDS,
+    )
 
     if response.status_code != 200:
-        print("Failed to retrieve person id: %d %s" % (response.status_code, response.body()))
+        print(
+            "Rachio event request failed with status %d" %
+            response.status_code,
+        )
         return None
-    else:
-        data = response.json()
-        person_id = data.get("id")
-        if not person_id:
-            return None
-        else:
-            person_url = "%s/person/%s" % (RACHIO_URL, person_id)
 
-            # cache for 1 hour, this should never change
-            person_response = http.get(url = person_url, headers = get_headers(api_key), ttl_seconds = LONG_TTL_SECONDS)
+    events = response.json()
 
-            if person_response.status_code != 200:
-                print("Failed to retrieve person data: %d %s" % (person_response.status_code, person_response.body()))
-                return None
-            else:
-                # Parse and print the response for the second call
-                person_data = person_response.json()
+    if type(events) != "list":
+        print("Rachio event response was not a list.")
+        return None
 
-                # Extract the 'devices' array
-                devices = person_data.get("devices", [])
+    return events
 
-            if not devices:
-                print("No devices found: %s" % person_data)
-                return None
-            else:
-                # List to store device ids
-                device_ids = []
+def get_devices(api_key):
+    info_url = "%s/person/info" % RACHIO_URL
 
-                # Loop through each device and extract the 'id' field
-                for device in devices:
-                    deviceId = device.get("id")
-                    if deviceId:
-                        new_device = {"id": deviceId, "name": device.get("name"), "status": device.get("status")}
-                        device_ids.append(deviceId)
-                        device_information.append(new_device)
+    response = http.get(
+        url = info_url,
+        headers = get_headers(api_key),
+        ttl_seconds = LONG_TTL_SECONDS,
+    )
+
+    if response.status_code != 200:
+        print(
+            "Rachio person-info request failed with status %d" %
+            response.status_code,
+        )
+        return None
+
+    data = response.json()
+
+    if type(data) != "dict":
+        print("Rachio person-info response was not an object.")
+        return None
+
+    person_id = data.get("id")
+
+    if not person_id:
+        print("Rachio person-info response had no person ID.")
+        return None
+
+    person_url = "%s/person/%s" % (RACHIO_URL, person_id)
+
+    person_response = http.get(
+        url = person_url,
+        headers = get_headers(api_key),
+        ttl_seconds = LONG_TTL_SECONDS,
+    )
+
+    if person_response.status_code != 200:
+        print(
+            "Rachio person request failed with status %d" %
+            person_response.status_code,
+        )
+        return None
+
+    person_data = person_response.json()
+
+    if type(person_data) != "dict":
+        print("Rachio person response was not an object.")
+        return None
+
+    devices = person_data.get("devices") or []
+
+    if type(devices) != "list":
+        print("Rachio devices field was not a list.")
+        return None
+
+    device_information = []
+
+    for device in devices:
+        device_id = device.get("id")
+
+        if device_id:
+            device_information.append({
+                "id": device_id,
+                "name": device.get("name") or "Rachio",
+                "status": device.get("status"),
+            })
 
     return device_information
 
 def generate_option_list_of_devices(api_key):
+    if api_key == None:
+        return []
+
+    api_key = api_key.strip()
+
+    if api_key == "":
+        return []
+
     devices = get_devices(api_key)
 
-    if (devices == None or len(devices) == 0):
+    if devices == None or len(devices) == 0:
         return []
 
     options = [
-        schema.Option(display = device["name"], value = device["id"])
+        schema.Option(
+            display = device["name"],
+            value = device["id"],
+        )
         for device in devices
     ]
 
@@ -378,13 +707,14 @@ def get_schema():
             schema.Text(
                 id = "api_key",
                 name = "Rachio API Key",
-                desc = "From the phone app or rachio.com you can acquire your API key. From the web app select Account Settings and GET API KEY",
+                desc = "Enter the API key from your Rachio account settings.",
                 icon = "key",
+                secret = True,
             ),
             schema.Toggle(
                 id = "title_display",
                 name = "Display Device Name",
-                desc = "Do you want the device name to appear on the screen?",
+                desc = "Show the device name on the screen.",
                 icon = "display",
                 default = True,
             ),
@@ -399,7 +729,7 @@ def get_schema():
             schema.Toggle(
                 id = "skipwhenempty",
                 name = "Skip when nothing to display",
-                desc = "Skip this app from the Tidbyt display if there are no Rachio events to display.",
+                desc = "Skip this app when there are no relevant Rachio events within a week.",
                 icon = "flipboard",
                 default = True,
             ),

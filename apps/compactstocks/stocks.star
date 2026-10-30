@@ -198,6 +198,7 @@ def get_schema():
                 name = "API Key",
                 desc = "https://apistocks.com/ API key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "symbol1",

@@ -6,4 +6,13 @@ desc: Displays the status of devices managed by your Workspace ONE UEM Tenant, i
 author: Craig Johnston
 fileName: wsonedevicesp.star
 packageName: wsonedevices
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - devices
+  - uem
+  - management
+  - tracking
+  - utility
+published: '2024-01-03T20:08:51Z'
+updated: '2025-12-05T22:28:51Z'

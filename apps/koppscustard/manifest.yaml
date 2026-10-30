@@ -6,4 +6,13 @@ desc: Get today's flavors at Kopp's Frozen Custard.
 author: Josiah Winslow
 fileName: kopps_custard.star
 packageName: koppscustard
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: food
+tags:
+  - flavor
+  - dessert
+  - lifestyle
+  - local
+published: '2023-06-09T15:58:32Z'
+updated: '2026-10-01T21:41:49Z'

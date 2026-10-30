@@ -106,12 +106,14 @@ daynightmap: 5
 deathvalleytemp: 5
 detailedmetar: 5
 feelslike: 5
+kilaueaactivity: 5
 knmialert: 5
 meteireann: 5
 metar: 5
 noaabuoy: 15
 noaatides: 60
 northernlights: 5
+okmesonet: 5
 nws_live_forecast: 5
 phaseofmoon: 5
 pollencount: 5

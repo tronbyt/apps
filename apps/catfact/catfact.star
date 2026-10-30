@@ -5,17 +5,15 @@ Description: Calls an external API and retrieves a random cat fact and renders i
 Author: broepke
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/cat_icon.png", CAT_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
+
+CAT_ICON = CAT_ICON_ASSET.readall()
 
 CAT_URL = "https://catfact.ninja/fact"
 
 # https://www.pixilart.com/art/tidycat-sr2866c333cb471
-CAT_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAACKADAAQAAAABAAAACAAAAACVhHtSAAAAVElEQVQYGV1OwRGAMAwqPfdzAqfTBXTBmOQOyjWfUCAFxP3GyMF1ojaH/BQR0cZ6JxQ+aNgF8nA3Sd+KAFYFx4ro2OfrY6swZrrXqf+duDSJexdqPwAMIrIbCvXsAAAAAElFTkSuQmCC
-""")
 
 def main():
     """Main entry point of the applicaiton.  Returns the rendering for the Tidbyt applet.
@@ -24,23 +22,13 @@ def main():
         render.Root: The rendering for the Tidbyt applet.
     """
 
-    fact_cached = cache.get("cat_fact_cached")
-    if fact_cached != None:
-        print("Hit! Displaying cached data.")
-        print(fact_cached)
-        response = fact_cached
-    else:
-        print("Miss! Calling Cat Fact API.")
-        rep = http.get(CAT_URL)
+    print("Calling Cat Fact API.")
+    rep = http.get(CAT_URL, ttl_seconds = 240)
 
-        if rep.status_code != 200:
-            fail("Request failed with status %d", rep.status_code)
+    if rep.status_code != 200:
+        fail("Request failed with status %d", rep.status_code)
 
-        print(fact_cached)
-        response = rep.json()["fact"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("cat_fact_cached", response, ttl_seconds = 240)
+    response = rep.json()["fact"]
 
     return render.Root(
         show_full_animation = True,
@@ -65,9 +53,10 @@ def main():
                     ],
                 ),
                 render.Marquee(
-                    height = 24,
+                    # the rows under the header: 24 on 64x32, 54 on square
+                    height = canvas.height() - 10,
                     scroll_direction = "vertical",
-                    offset_start = 24,
+                    offset_start = canvas.height() - 10,
                     child =
                         render.Column(
                             main_align = "space_between",

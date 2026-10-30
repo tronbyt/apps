@@ -182,6 +182,7 @@ def get_schema():
                 name = "Stripe API Key",
                 desc = "Create a new secret key in the `Standard keys` section (https://dashboard.stripe.com/apikeys).",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "store_name",

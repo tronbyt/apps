@@ -6,4 +6,10 @@ desc: Displays whether New York City alternate side parking (street cleaning) ru
 author: Adam Wojciechowski
 fileName: nyc_asp_status.star
 packageName: nycaspstatus
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - utility
+published: '2025-03-21T16:22:27Z'
+updated: '2026-10-01T22:12:18Z'

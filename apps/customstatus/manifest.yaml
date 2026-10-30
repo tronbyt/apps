@@ -6,4 +6,11 @@ desc: Share a custom status with coworkers.
 author: Brian Bell
 fileName: custom_status.star
 packageName: customstatus
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - tracking
+  - social
+  - utility
+published: '2023-02-21T19:41:43Z'
+updated: '2025-12-01T21:50:01Z'

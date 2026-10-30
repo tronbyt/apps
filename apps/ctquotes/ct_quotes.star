@@ -5,7 +5,6 @@ Description: Displays random quotes and animations from the classic RPG Chrono T
 Author: Jessica Chappell
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
@@ -22,7 +21,6 @@ QUOTE_FILE_VERSION = 1
 # QUOTE_FILE = "http://127.0.0.1:8088/quotes_v{}.json".format(str(QUOTE_FILE_VERSION))
 QUOTE_FILE = "https://raw.githubusercontent.com/jchappell82/ct-quotes-tidbyt/main/quotes_v{}.json".format(str(QUOTE_FILE_VERSION))
 BG_COLOR = "#222"
-QUOTE_CACHE_KEY = "ct_quote_data_v{}".format(str(QUOTE_FILE_VERSION))
 CACHE_TTL = 86400
 
 # Set these two variables to override the character and/or quote index
@@ -33,19 +31,12 @@ DEBUG_INDEX = None
 def load_quotes():
     """Load the quote file from cache or from github."""
 
-    quotes = cache.get("ct_quote_data")
+    req = http.get(QUOTE_FILE, ttl_seconds = CACHE_TTL)
+    if req.status_code != 200:
+        print("Request failed: " + str(req.status_code))
+        return {}
 
-    if not quotes:
-        req = http.get(QUOTE_FILE)
-        if req.status_code != 200:
-            print("Request failed: " + str(req.status_code))
-            return {}
-
-        quotes = req.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(QUOTE_CACHE_KEY, quotes, ttl_seconds = CACHE_TTL)
-
+    quotes = req.body()
     return json.decode(quotes)
 
 def get_random_quote(quote_data):

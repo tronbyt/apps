@@ -441,6 +441,7 @@ def get_schema():
                 name = "Password",
                 desc = "Your Weight Gurus password.",
                 icon = "lock",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "period",

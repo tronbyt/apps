@@ -1,4 +1,6 @@
 name: Build and Test
+permissions:
+  contents: read
 
 on:
   push:
@@ -6,21 +8,44 @@ on:
       - main
     tags:
       - "v*"
+  workflow_dispatch:
+      inputs:
+        skip_check_apps:
+          description: "Skip check-apps.sh (verified locally)"
+          type: boolean
+          default: false
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # Default (unset): catch-up since last successful main build.
+      # Set repo variable PIXLET_CHECK_ONLY_LAST_PUSH=true to pixlet-check only apps
+      # with .star changes in this push (no catch-up).
+      PIXLET_CHECK_ONLY_LAST_PUSH: ${{ vars.PIXLET_CHECK_ONLY_LAST_PUSH || 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup build agent
         run: ./.github/scripts/setup.sh
 
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install PyYAML
+
+      - name: Validate manifest categories
+        run: python3 .github/scripts/check-categories.py
+
       - name: Find last successful build
         id: lastsuccess
-        uses: SamhammerAG/last-successful-build-action@v7
+        if: env.PIXLET_CHECK_ONLY_LAST_PUSH != 'true'
+        uses: SamhammerAG/last-successful-build-action@v8
         with:
           branch: "main"
           workflow: "Build and Test"
@@ -29,12 +54,32 @@ jobs:
 
       - name: Determine targets
         id: targets
-        run: ./.github/scripts/determine-targets.sh
+        if: ${{ !inputs.skip_check_apps }}
         env:
-          BASE_SHA: ${{ steps.lastsuccess.outputs.sha }}
+          EVENT_BEFORE: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
+          LAST_SUCCESS_SHA: ${{ steps.lastsuccess.outputs.sha }}
+        run: |
+          zero="0000000000000000000000000000000000000000"
+          if [[ "${PIXLET_CHECK_ONLY_LAST_PUSH}" == "true" ]]; then
+            echo "Pixlet target mode: PIXLET_CHECK_ONLY_LAST_PUSH"
+            if [[ "${EVENT_BEFORE}" == "${zero}" ]]; then
+              echo "No previous commit on branch; skipping pixlet check targets"
+              echo "targets=" >> "${GITHUB_OUTPUT}"
+            else
+              BASE_SHA="${EVENT_BEFORE}" HEAD_SHA="${HEAD_SHA}" ./.github/scripts/determine-targets.sh
+            fi
+          else
+            echo "Pixlet target mode: since last successful build"
+            BASE_SHA="${LAST_SUCCESS_SHA}" HEAD_SHA="${HEAD_SHA}" ./.github/scripts/determine-targets.sh
+          fi
 
-      # - name: Check modified apps
-      #   run: ./.github/scripts/check-apps.sh
-      #   env:
-      #     TARGETS: "${{ steps.targets.outputs.targets }}"
+      - name: Check modified apps
+        if: ${{ !inputs.skip_check_apps && vars.SKIP_CHECK_APPS != 'true' }}
+        run: ./.github/scripts/check-apps.sh
+        env:
+          TARGETS: "${{ steps.targets.outputs.targets }}"
+
+      - name: Note skipped check
+        if: ${{ inputs.skip_check_apps || vars.SKIP_CHECK_APPS == 'true' }}
+        run: echo "::warning::check-apps skipped via manual override"

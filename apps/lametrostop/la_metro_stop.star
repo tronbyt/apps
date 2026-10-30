@@ -6,12 +6,10 @@ Author: connorwashere
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-API_KEY = "AV6+xWcErqad0ef53RLRO50TvZfNtiFFPyOfM0rQqEjNP6E5cIcPNuliIwHh60TMq0mz1uWHCWIAcgl1YNk/Rn1XgVnj+6XY+0k2xcd7PUfJCS/STzCali40J55xojx1zatNaVXjYMXzvNaigXJz0xBtE8gmh8HPvpec9zLhBPXS+NM9atf7SHtkxYZfd5cJEQ=="
 DEFAULT_STOP_ID = "METRRCA:2806"
 DEFAULT_LINE_NAME = "A"
 SHORTENED_NAMES = {
@@ -19,10 +17,24 @@ SHORTENED_NAMES = {
     "APU / Citrus College": "Azuza",
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     transit_stop_id = config.get("stop_id", DEFAULT_STOP_ID)
     transit_line = config.get("metro_line", DEFAULT_LINE_NAME)
-    api_key = secret.decrypt(API_KEY) or config.get("dev_api_key")
+    api_key = config.get("transit_api_key")
+    if not api_key:
+        return render.Root(
+            # On the square the message is wrapped and centred instead of clipped to one line; other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("No Transit App API Key provided.", font = "5x8", align = "center"))) if is_square() else render.Text("No Transit App API Key provided.", font = "5x8"),
+        )
     route_info = parse_api_response(get_times(transit_stop_id, api_key))
     stop_renders = []
     for stop_name in route_info:
@@ -35,7 +47,16 @@ def main(config):
     stop_renders.pop()
     return render.Root(
         delay = 120,
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            width = 64,
+            height = 32,
+            child = render.Column(
+                main_align = "start",
+                cross_align = "center",
+                children = stop_renders,
+            ),
+        ))) if is_square() else render.Box(
             width = 64,
             height = 32,
             child = render.Column(
@@ -133,6 +154,13 @@ def get_schema():
                 desc = "The metro stops line name using LA metro letter designations.",
                 icon = "l",
                 default = "A",
+            ),
+            schema.Text(
+                id = "transit_api_key",
+                name = "Transit App API Key",
+                desc = "A Transit App API key to access the Transit App API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

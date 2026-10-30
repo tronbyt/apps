@@ -267,6 +267,7 @@ def get_schema():
                 name = "Node pubkey (optional)",
                 desc = "Your own node's pubkey. Leave empty to get global lightning stats.",
                 icon = "key",
+                secret = True,
             ),
             schema.Generated(
                 id = "generated",

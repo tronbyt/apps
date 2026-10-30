@@ -6,4 +6,8 @@ desc: Display Arrival Times for TCAT Ithaca Buses at a Specific Stop.
 author: Harry Samuels
 fileName: tcat_bus_arrivals.star
 packageName: tcatbusarrivals
-recommended_interval: 5
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2022-08-04T18:35:27Z'
+updated: '2025-12-05T22:28:51Z'

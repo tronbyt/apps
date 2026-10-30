@@ -1,27 +1,77 @@
 """
 Applet: DigiByte Price
 Summary: Display DigiByte Price
-Description: Displays the current DigiByte price in one or two fiat currencies and/or in Satoshis. Data provided by CoinGecko. Updated every 10 minutes. If you would like an additional currency supported, pease let me know in the Tidbyt community Discord.
-Author: Olly Stedall @saltedlolly
+Description: Displays the current DigiByte price in up to four currencies, including Satoshis. Data provided by CoinGecko. Updated every 10 minutes. If you would like an additional currency supported, please let me know in the Tronbyt Discord.
+Author: DigiNode Tools
 Thanks: drudge, inxi, whyamihere, Amillion Air
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
+load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/dgb_icon.png", DGB_ICON_ASSET = "file")
+load("images/dgb_icon@2x.png", DGB_ICON_2X_ASSET = "file")
+load("images/dgb_icon_24.png", DGB_ICON_24_ASSET = "file")
+load("images/dgb_icon_28.png", DGB_ICON_28_ASSET = "file")
+load("images/dgb_icon_32.png", DGB_ICON_32_ASSET = "file")
+load("images/dgb_icon_36.png", DGB_ICON_36_ASSET = "file")
+load("images/dgb_icon_40.png", DGB_ICON_40_ASSET = "file")
+load("images/sats_symbol.png", SATS_SYMBOL_ASSET = "file")
+load("images/sats_symbol@2x.png", SATS_SYMBOL_2X_ASSET = "file")
+load("images/sats_symbol_stale.png", SATS_SYMBOL_STALE_ASSET = "file")
+load("images/sats_symbol_stale@2x.png", SATS_SYMBOL_STALE_2X_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+load("time.star", "time")
+
+DGB_ICON = DGB_ICON_ASSET.readall()
+DGB_ICON_2X = DGB_ICON_2X_ASSET.readall()
+SATS_SYMBOL = SATS_SYMBOL_ASSET.readall()
+SATS_SYMBOL_2X = SATS_SYMBOL_2X_ASSET.readall()
+SATS_SYMBOL_STALE = SATS_SYMBOL_STALE_ASSET.readall()
+SATS_SYMBOL_STALE_2X = SATS_SYMBOL_STALE_2X_ASSET.readall()
+
+# Logos for square displays, largest first: (size in pixels, image)
+SQUARE_ICONS = [
+    (40, DGB_ICON_40_ASSET.readall()),
+    (36, DGB_ICON_36_ASSET.readall()),
+    (32, DGB_ICON_32_ASSET.readall()),
+    (28, DGB_ICON_28_ASSET.readall()),
+    (24, DGB_ICON_24_ASSET.readall()),
+]
 
 print("----------------------------------------------------------------------------------------")
 
-DGB_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAdVJREFUOE9dVFtSw0AMk4HhLNn0iyPRtB/ciBmSnomfNuUqDMSMLG+yIR+ZPNayJD8MvAwwB5wPee8Gd7gDZvA4wjswTw+2nVcsfxGiosRBAcQjMepj5mM2g5vjTsAmdn0prwvzZwoBrVdmDdpBgSzEf74QsDKCowwEMljIEZOIg+E2OvqT4ToCh1OghAGU2wAB3dFJOILnUdQpoTLfmKRtAPozSenM12R0wdANv/yE6ygq/LplTXY7HjKYYJR4vzyYlSMVRclUodTuFsXJq/ovmQ1h9IOKZfQmiqt7glGipzpDGTwrKHCChdVO7xhnsHJcZH/+YARNrW7zV8nDZBu9RAsCR0ABtRpNKVndK+lLflQpPY3327SXXIasPT1ilRRo+Hxf8PxkYB0Y2J8kt9p4m7JZ3VHOapfI31Ha2uk0k3Eyn72jGogq//EDGR6GzcMcEdDMVA/MH3Us1ISkSnPXLkUaHDOohFF+HoiudkfQroZoDmQkQ5xyBZ6jqBo5xyQaUhe9ksliQYPqNvj+WfDy9rh1Vc6PuQXIbtY69lP4Ki/YO2TYZ1UqwShCrhUmupPNukaaZRENGobWdmjCcmcxMvbSvwWxf2UruAa5XUytHy1AXWx/2vAhVoi8DZsAAAAASUVORK5CYII=
-""")
+DIGIBYTE_PRICE_URL = "https://api.coingecko.com/api/v3/simple/price?ids=digibyte&vs_currencies=aud%2Ccad%2Ceur%2Cgbp%2Csats%2Cusd"
 
-SATS_SYMBOL = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAYAAAAHCAYAAAArkDztAAAAAXNSR0IArs4c6QAAAEJJREFUGFddjsENADEIwxL2nxlXQFv1zq8IxYC1SSAcluiJATr7VCQXM5nWiyH51Eu+htlSLZg8N37Ea5Dg+sq0tAAQLh4KW15wlwAAAABJRU5ErkJggg==
-""")
+# The last prices are kept for a day, and shown if CoinGecko can't be reached
+PRICE_CACHE_KEY = "dgb_prices"
+PRICE_CACHE_SECONDS = 86400
+
+# If CoinGecko can't be reached and the last prices are older than this, they are shown in amber
+PRICE_STALE_SECONDS = 1800
+PRICE_COLOR = "#ffffff"
+STALE_PRICE_COLOR = "#ffa500"
+
+# Symbol and country code for each fiat currency
+FIAT_CURRENCIES = {
+    "aud": ("$", "AU"),
+    "cad": ("$", "CA"),
+    "eur": ("€", "EU"),
+    "gbp": ("£", "UK"),
+    "usd": ("$", "US"),
+}
+
+COUNTRY_COLOR = "#2962fe"
+
+# Price fonts: (country code font, space before the country code, 2x SATS symbol)
+PRICE_FONTS = {
+    "terminus-16": ("tb-8", 2, True),
+    "terminus-14": ("tb-8", 2, True),
+    "terminus-12": ("CG-pixel-3x5-mono", 1, False),
+    "tb-8": ("CG-pixel-3x5-mono", 1, False),
+}
 
 #this list contains the currently supported fiat currencies
 MAIN_CURRENCY_LIST = {
@@ -48,6 +98,7 @@ ALT_CURRENCY_LIST = {
 DEFAULT_MAIN_CURRENCY = "USD"
 DEFAULT_SECOND_CURRENCY = "EUR"
 DEFAULT_THIRD_CURRENCY = "SATS"
+DEFAULT_FOURTH_CURRENCY = "None"
 DEFAULT_SHOW_COUNTRY = True
 
 def get_schema():
@@ -88,6 +139,14 @@ def get_schema():
                 default = DEFAULT_THIRD_CURRENCY,
                 options = alt_currency_options,
             ),
+            schema.Dropdown(
+                id = "fourth_currency",
+                name = "Fourth Currency",
+                desc = "Choose an additional currency to display the price in.",
+                icon = "moneyBill",
+                default = DEFAULT_FOURTH_CURRENCY,
+                options = alt_currency_options,
+            ),
             schema.Toggle(
                 id = "country_toggle",
                 name = "Display Country",
@@ -99,196 +158,150 @@ def get_schema():
     )
 
 def main(config):
-    DIGIBYTE_PRICE_URL = "https://api.coingecko.com/api/v3/simple/price?ids=digibyte&vs_currencies=aud%2Ccad%2Ceur%2Cgbp%2Csats%2Cusd"
-
-    main_currency = MAIN_CURRENCY_LIST.get(config.get("main_currency"), MAIN_CURRENCY_LIST[DEFAULT_MAIN_CURRENCY])
-    second_currency = ALT_CURRENCY_LIST.get(config.get("second_currency"), ALT_CURRENCY_LIST[DEFAULT_SECOND_CURRENCY])
-    third_currency = ALT_CURRENCY_LIST.get(config.get("third_currency"), ALT_CURRENCY_LIST[DEFAULT_THIRD_CURRENCY])
+    currencies = [
+        MAIN_CURRENCY_LIST.get(config.get("main_currency"), MAIN_CURRENCY_LIST[DEFAULT_MAIN_CURRENCY]),
+        ALT_CURRENCY_LIST.get(config.get("second_currency"), ALT_CURRENCY_LIST[DEFAULT_SECOND_CURRENCY]),
+        ALT_CURRENCY_LIST.get(config.get("third_currency"), ALT_CURRENCY_LIST[DEFAULT_THIRD_CURRENCY]),
+        ALT_CURRENCY_LIST.get(config.get("fourth_currency"), ALT_CURRENCY_LIST[DEFAULT_FOURTH_CURRENCY]),
+    ]
     country_toggle = config.bool("country_toggle", DEFAULT_SHOW_COUNTRY)
 
-    # LOOKUP CURRENT PRICES (OR RETRIEVE FROM CACHE)
-
-    # Get current prices from cache
-    dgb_price_aud_cached = cache.get("dgb_price_aud")
-    dgb_price_cad_cached = cache.get("dgb_price_cad")
-    dgb_price_eur_cached = cache.get("dgb_price_eur")
-    dgb_price_gbp_cached = cache.get("dgb_price_gbp")
-    dgb_price_sats_cached = cache.get("dgb_price_sats")
-    dgb_price_usd_cached = cache.get("dgb_price_usd")
-
-    if dgb_price_usd_cached != None:
-        print("Hit! Displaying cached data.")
-        dgb_price_aud = float(dgb_price_aud_cached)
-        dgb_price_cad = float(dgb_price_cad_cached)
-        dgb_price_eur = float(dgb_price_eur_cached)
-        dgb_price_gbp = float(dgb_price_gbp_cached)
-        dgb_price_sats = float(dgb_price_sats_cached)
-        dgb_price_usd = float(dgb_price_usd_cached)
+    prices, stale = get_prices()
+    if prices == None:
+        print("Error: No price data available")
+        rows = None
     else:
-        print("Miss! Calling CoinGecko API.")
-        dgbquery = http.get(DIGIBYTE_PRICE_URL)
-        if dgbquery.status_code != 200:
-            fail("Coingecko request failed with status %d", dgbquery.status_code)
+        rows = [price_row(currency, prices, country_toggle) for currency in currencies if currency != "none"]
+        for row in rows:
+            row["stale"] = stale
 
-        dgb_price_aud = dgbquery.json()["digibyte"]["aud"]
-        dgb_price_cad = dgbquery.json()["digibyte"]["cad"]
-        dgb_price_eur = dgbquery.json()["digibyte"]["eur"]
-        dgb_price_gbp = dgbquery.json()["digibyte"]["gbp"]
-        dgb_price_sats = dgbquery.json()["digibyte"]["sats"]
-        dgb_price_usd = dgbquery.json()["digibyte"]["usd"]
+    width, height = canvas.size()
+    if width == height:
+        return render_square(rows, width, height)
+    if canvas.is2x():
+        return render_wide(rows, DGB_ICON_2X, 36, ["terminus-16", "terminus-14", "terminus-12"], width, height)
+    return render_wide(rows, DGB_ICON, 18, ["tb-8"], width, height)
 
-        # Store prices in cache
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_aud", str(dgb_price_aud), ttl_seconds = 600)
+def get_prices():
+    # Returns the prices, and whether they are stale: the last prices fetched, shown because CoinGecko can't be
+    # reached, and older than PRICE_STALE_SECONDS
+    now = time.now().unix
+    res = http.get(DIGIBYTE_PRICE_URL, ttl_seconds = 600)
+    if res.status_code == 200:
+        prices = res.json().get("digibyte")
+        if prices and prices.get("usd") != None:
+            cache.set(PRICE_CACHE_KEY, json.encode({"prices": prices, "time": now}), ttl_seconds = PRICE_CACHE_SECONDS)
+            return prices, False
+    print("CoinGecko request failed with status %d" % res.status_code)
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_cad", str(dgb_price_cad), ttl_seconds = 600)
+    # Fall back to the last prices that were fetched
+    cached = cache.get(PRICE_CACHE_KEY)
+    if cached != None:
+        saved = json.decode(cached)
+        age = now - int(saved["time"])
+        print("Showing the last prices fetched, %d seconds ago" % age)
+        return saved["prices"], age > PRICE_STALE_SECONDS
+    return None, False
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_eur", str(dgb_price_eur), ttl_seconds = 600)
+def price_row(currency, prices, country_toggle):
+    # Returns the price text, the country code (or "") and whether it is the SATS price
+    price = prices.get(currency)
+    if price == None:
+        return {"text": "?", "country": "", "sats": currency == "sats"}
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_gbp", str(dgb_price_gbp), ttl_seconds = 600)
+    if currency == "sats":
+        sats = str(int(math.round(price * 100)))
+        return {"text": sats[0:-2] + "." + sats[-2:], "country": "", "sats": True}
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_sats", str(dgb_price_sats), ttl_seconds = 600)
+    symbol, country = FIAT_CURRENCIES[currency]
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("dgb_price_usd", str(dgb_price_usd), ttl_seconds = 600)
-
-    # Format SATS price
-    dgb_price_sats = str(int(math.round(dgb_price_sats * 100)))
-    dgb_price_sats = (dgb_price_sats[0:-2] + "." + dgb_price_sats[-2:])
-
-    #Setup price display variable
-    display_vec = []
-
-    # Check for catastrophic data failure (i.e. failed to get data from CoinGecko and no cache data is available to fall back on)
-    if dgb_price_usd != None:
-        data_available = True
+    # Round price to nearest whole number (used to decide how many decimal places to leave)
+    integer_digits = len(str(int(math.round(float(price)))))
+    if integer_digits <= 2:
+        text = str(int(math.round(price * 1000)))
+        text = "0" * (4 - len(text)) + text
+        text = text[0:-3] + "." + text[-3:]
+    elif integer_digits == 3:
+        text = str(int(math.round(price * 100)))
+        text = text[0:-2] + "." + text[-2:]
+    elif integer_digits == 4:
+        text = str(int(math.round(price * 10)))
+        text = text[0:-1] + "." + text[-1:]
     else:
-        data_available = False
-        display_error = render.Row(
+        text = str(int(math.round(price)))
+        if integer_digits >= 7:
+            country_toggle = False
+
+    return {"text": symbol + text, "country": country if country_toggle else "", "sats": False}
+
+def font_height(font):
+    return render.Text("0", font = font).size()[1]
+
+def row_width(row, font):
+    country_font, gap, big_sats = PRICE_FONTS[font]
+    width = render.Text(row["text"], font = font).size()[0]
+    if row["sats"]:
+        width += 12 if big_sats else 6
+    if row["country"]:
+        width += gap + render.Text(row["country"], font = country_font).size()[0]
+    return width
+
+def fits(rows, font, max_width, max_height):
+    if len(rows) * font_height(font) > max_height:
+        return False
+    for row in rows:
+        if row_width(row, font) > max_width:
+            return False
+    return True
+
+def render_row(row, font):
+    country_font, gap, big_sats = PRICE_FONTS[font]
+    stale = row.get("stale", False)
+    color = STALE_PRICE_COLOR if stale else PRICE_COLOR
+    if row["sats"]:
+        if stale:
+            symbol = SATS_SYMBOL_STALE_2X if big_sats else SATS_SYMBOL_STALE
+        else:
+            symbol = SATS_SYMBOL_2X if big_sats else SATS_SYMBOL
+        return render.Row(
+            cross_align = "center",
             children = [
-                render.Text("ERROR:", font = "CG-pixel-3x5-mono", color = "#FF0000"),
-                render.Text("Coingecko", font = "CG-pixel-3x5-mono"),
-                render.Text("unvailable!", font = "CG-pixel-3x5-mono"),
+                render.Image(src = symbol),
+                render.Text(row["text"], font = font, color = color),
             ],
         )
-        display_vec.append(display_error)
-        print("Error: No price data available")
+    if row["country"]:
+        return render.Row(
+            cross_align = "center",
+            children = [
+                render.Text(row["text"], font = font, color = color),
+                render.Box(width = gap, height = 1),
+                render.Text(row["country"], font = country_font, color = COUNTRY_COLOR),
+            ],
+        )
+    return render.Text(row["text"], font = font, color = color)
 
-    # DISPLAY PRICES
-    currency = ""
-    currency_price = ""
-    currency_symbol = ""
-    currency_country = ""
+def render_error():
+    return render.Column(
+        cross_align = "center",
+        children = [
+            render.Text("ERROR:", font = "CG-pixel-3x5-mono", color = "#FF0000"),
+            render.Text("CoinGecko", font = "CG-pixel-3x5-mono"),
+            render.Text("unavailable", font = "CG-pixel-3x5-mono"),
+        ],
+    )
 
-    if data_available:
-        # Setup each currency
-        for i in range(3):
-            if i == 0:
-                currency = main_currency
-                print("Main Currency:")
-            if i == 1:
-                currency = second_currency
-                print("Second Currency:")
-            if i == 2:
-                currency = third_currency
-                print("Third Currency:")
-
-            # Setup currency price
-            if currency == "none":
-                print("None")
-            elif currency == "aud":
-                currency_price = dgb_price_aud
-                currency_symbol = "$"
-                currency_country = "AU"
-                print("AUD")
-            elif currency == "cad":
-                currency_price = dgb_price_cad
-                currency_symbol = "$"
-                currency_country = "CA"
-                print("CAD")
-            elif currency == "eur":
-                currency_price = dgb_price_eur
-                currency_symbol = "€"
-                currency_country = "EU"
-                print("EUR")
-            elif currency == "gbp":
-                currency_price = dgb_price_gbp
-                currency_symbol = "£"
-                currency_country = "UK"
-                print("GBP")
-            elif currency == "usd":
-                currency_price = dgb_price_usd
-                currency_symbol = "$"
-                currency_country = "US"
-                print("USD")
-            elif currency == "sats":
-                currency_price = dgb_price_sats
-
-            # Setup sats price (trim and format)
-            if currency == "sats":
-                display_currency_price = render.Row(
-                    children = [
-                        render.Image(src = SATS_SYMBOL),
-                        render.Text("%s" % dgb_price_sats),
-                    ],
-                )
-                display_vec.append(display_currency_price)
-                print("SATS")
-
-            elif currency == "none":
-                display_currency_price = None
-            else:
-                # Setup currency price if not SATS
-
-                # Round price to nearest whole number (used to decide how many decimal places to leave)
-                currency_price_integer = str(int(math.round(float(currency_price))))
-
-                # Trim and format price
-                if len(currency_price_integer) <= 1:
-                    currency_price = str(int(math.round(currency_price * 1000)))
-                    if len(currency_price) < 4:
-                        currency_price = "0" + currency_price
-                    if len(currency_price) < 4:
-                        currency_price = "0" + currency_price
-                    if len(currency_price) < 4:
-                        currency_price = "0" + currency_price
-                    if len(currency_price) < 4:
-                        currency_price = "0" + currency_price
-                    currency_price = (currency_symbol + currency_price[0:-3] + "." + currency_price[-3:])
-                elif len(currency_price_integer) == 2:
-                    currency_price = str(int(math.round(currency_price * 1000)))
-                    currency_price = (currency_symbol + currency_price[0:-3] + "." + currency_price[-3:])
-                elif len(currency_price_integer) == 3:
-                    currency_price = str(int(math.round(currency_price * 100)))
-                    currency_price = (currency_symbol + currency_price[0:-2] + "." + currency_price[-2:])
-                elif len(currency_price_integer) == 4:
-                    currency_price = str(int(math.round(currency_price * 10)))
-                    currency_price = (currency_symbol + currency_price[0:-1] + "." + currency_price[-1:])
-                elif len(currency_price_integer) == 5 or 6:
-                    currency_price = str(int(math.round(currency_price)))
-                    currency_price = (currency_symbol + currency_price)
-                elif len(currency_price_integer) >= 7:
-                    currency_price = str(int(math.round(currency_price)))
-                    currency_price = (currency_symbol + currency_price)
-                    country_toggle = False
-
-                if country_toggle:
-                    display_currency_price = render.Row(
-                        cross_align = "center",
-                        children = [
-                            render.Text("%s" % currency_price),
-                            render.Box(width = 1, height = 1),
-                            render.Text("%s" % currency_country, font = "CG-pixel-3x5-mono", color = "#2962fe"),
-                        ],
-                    )
-                else:
-                    display_currency_price = render.Text("%s" % currency_price)
-
-                display_vec.append(display_currency_price)
+def render_wide(rows, icon, icon_size, fonts, width, height):
+    # 64x32 and 128x64: the prices go in a column beside the DigiByte logo, in the largest font that fits
+    if rows == None:
+        prices = [render_error()]
+    else:
+        font = fonts[-1]
+        for candidate in fonts:
+            if fits(rows, candidate, width - icon_size - 4, height):
+                font = candidate
+                break
+        prices = [render_row(row, font) for row in rows]
 
     return render.Root(
         child = render.Box(
@@ -297,15 +310,48 @@ def main(config):
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Image(src = DGB_ICON),
+                    render.Image(src = icon),
 
-                    # Column to hold pricing text evenly distrubuted accross 1-3 rows
+                    # Column to hold pricing text evenly distrubuted accross 1-4 rows
                     render.Column(
                         main_align = "space_evenly",
                         expanded = True,
-                        children = display_vec,
+                        children = prices,
                     ),
                 ],
+            ),
+        ),
+    )
+
+def render_square(rows, width, height):
+    # 64x64: the DigiByte logo goes at the top in the middle, with the prices beneath it. Use the largest font
+    # that leaves room for a logo, then the largest logo that fits above the prices.
+    gaps = 6  # Space above the logo, between the logo and the prices, and below the prices
+    if rows == None:
+        font, prices, prices_height = None, render_error(), 18
+    else:
+        font = "tb-8"
+        for candidate in PRICE_FONTS:
+            text_height = len(rows) * font_height(candidate)
+            if fits(rows, candidate, width, height) and height - gaps - text_height >= SQUARE_ICONS[-1][0]:
+                font = candidate
+                break
+        prices_height = len(rows) * font_height(font)
+        prices = render.Column(children = [render_row(row, font) for row in rows])
+
+    icon = SQUARE_ICONS[-1][1]
+    for size, image in SQUARE_ICONS:
+        if size + prices_height + gaps <= height:
+            icon = image
+            break
+
+    return render.Root(
+        child = render.Box(
+            render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [render.Image(src = icon), prices],
             ),
         ),
     )

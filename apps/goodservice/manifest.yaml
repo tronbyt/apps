@@ -6,4 +6,11 @@ desc: More accurate realtime New York City Subway arrival times for a selected s
 author: Sunny Ng
 fileName: goodservice.star
 packageName: goodservice
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - local
+  - utility
+published: '2022-05-02T16:52:48Z'
+updated: '2026-10-01T21:17:57Z'

@@ -35,11 +35,13 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/logo.png", LOGO_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 load("xpath.star", "xpath")
+
+LOGO = LOGO_ASSET.readall()
 
 def main(config):
     now = time.now().unix
@@ -49,7 +51,7 @@ def main(config):
 
     if not data or (now - data["timestamp"]) > EXPIRY:
         print("Getting " + URL)
-        api_key = API_KEY or config.get("api_key")
+        api_key = config.get("bgg_api_key")
         content = http.get(URL, headers = {"Authorization": "Bearer %s" % api_key})
         if content.status_code == 200:
             content = xpath.loads(content.body())
@@ -82,7 +84,6 @@ def main(config):
                         c["image"] = image
             data = content
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
             cache.set(KEY, json.encode(data), TTL)
             #print(json.encode(data))
 
@@ -120,13 +121,22 @@ def main(config):
 
     return render.Root(
         delay = DELAY_MS,
-        child = render.Animation(frames),
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(frames))),
     )
 
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Text(
+                id = "bgg_api_key",
+                name = "BoardGameGeek API Key",
+                desc = "Your BoardGameGeek API key. See https://boardgamegeek.com/wiki/page/BGG_XML_API2 for details.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )
 
 def get_image(url):
@@ -195,8 +205,6 @@ def scroll_frames(item, next_item):
         for offset in range(SCROLL_SIZE, SCROLL_LIMIT, SCROLL_SIZE)
     ]
 
-API_KEY = secret.decrypt("AV6+xWcERHMIh6gSb6efc8sw8opWeR5GxRZ12GWQ84b3iKtZA0Ks1iWJn7I+1Qv4IG30YAtVL4BfWFrGk5LEdPoAAQGvyJaQh+pP6Lntm/gCsyjUDH4DnbUQKWLlTojTQWOF5RgR9FeyEGU9Xf9xL37ITS7YXKm9MmPETM3om9OhL5TLflH0pcD5")
-
 URL = "http://boardgamegeek.com/xmlapi2/hot?type=boardgame"
 
 NAME_PATH_FMT = "/items/item[@rank=%s]/name/@value"
@@ -238,5 +246,3 @@ COLORS = [
 KEY = "hotness"
 TTL = 48 * 60 * 60
 EXPIRY = 3 * 60 * 60
-
-LOGO = base64.decode("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")

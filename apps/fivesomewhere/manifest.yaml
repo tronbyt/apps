@@ -6,4 +6,11 @@ desc: Displays a random timezone where it's currently in the 5 o'clock hour.
 author: grantmatheny
 fileName: five_somewhere.star
 packageName: fivesomewhere
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - clock
+  - utility
+published: '2022-05-04T02:06:20Z'
+updated: '2026-10-17T18:55:37Z'

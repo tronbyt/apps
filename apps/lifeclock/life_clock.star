@@ -128,7 +128,7 @@ def main(config):
     # Gets time zone and gets hour and minutes
     location = config.get("location")
     location = json.decode(location) if location else {}
-    timezone = location.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))
+    timezone = location.get("timezone", time.tz())
     now = time.now().in_location(timezone)
     hour = now.hour
     if not twenty_four_hour and hour > 12:

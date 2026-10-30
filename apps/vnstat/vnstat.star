@@ -1436,12 +1436,14 @@ def get_schema():
                 name = "API Key",
                 desc = "Your OPNsense API key for VNStat access",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "apiSecret",
                 name = "API Secret",
                 desc = "Your OPNsense API secret for VNStat access",
                 icon = "lock",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "animationType",

@@ -6,4 +6,11 @@ desc: Veja os prêmios das principais modalidades da loteria.
 author: Daniel Sitnik
 fileName: loterias.star
 packageName: loterias
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - gambling
+  - local
+  - utility
+published: '2024-02-01T22:49:43Z'
+updated: '2025-11-30T20:08:55Z'

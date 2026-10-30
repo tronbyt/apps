@@ -9,16 +9,17 @@ Author: thiagobrez
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("hash.star", "hash")
 load("http.star", "http")
+load("images/zenhub_icon.png", ZENHUB_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+ZENHUB_ICON = ZENHUB_ICON_ASSET.readall()
+
 ZENHUB_REST_API_URL = "https://api.zenhub.com"
 ZENHUB_GQL_API_URL = "https://api.zenhub.com/public/graphql"
-ZENHUB_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAN1JREFUKFM1jjFKA2EUhL9RVjC9hlitYBHwALoRIU3wBIIQ9QQWgWittQpu4Q0SQcgRkkbBoBcQCyXZIhK0T0hWePJ+sRtm5n3zlGYVk0Ej7msry4N+Xo9Ub04NDKXZjskMA+714B4btz8gQ4AkcTOoeE5rfIctiM3OKt5sXxekZDg3T/PvT8qPNT56Z+QXe0TFkt+g7WFuEszGI5bPu8S1S952u0TFNV9BSBw1J2Hwdf8L//J4pe42jfhJOjydBoLPvJ8sBuyBVR3+N/FfaF0VlGQzc9RLvKR0kAT9C5GsVRBZZKbEAAAAAElFTkSuQmCC""")
 
 issue_colors = [
     "#91e03a",  # ZH Green
@@ -229,6 +230,7 @@ def main(config):
                 "X-Authentication-Token": zenhub_rest_api_key,
                 "Content-Type": "application/json",
             },
+            ttl_seconds = 120,
         )
 
         if board_res.status_code != 200:
@@ -246,9 +248,6 @@ def main(config):
             pipeline_id = pipeline_id.pop()
         else:
             return render_error("Pipeline not found")
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("zenhubapp_pipeline_%s" % hash.md5(zenhub_gql_api_key), str(pipeline_id), ttl_seconds = 120)
 
     if issues_cache != None:
         print("[ZENHUB APP] Issues cache hit")
@@ -284,15 +283,13 @@ def main(config):
                     }
                 """,
             },
+            ttl_seconds = 120,
         )
 
         if issues_res.status_code != 200:
             return render_error("Invalid Zenhub config")
 
         issues = issues_res.json()["data"]["searchIssuesByPipeline"]["nodes"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("zenhubapp_issues_%s" % hash.md5(zenhub_gql_api_key), str(issues), ttl_seconds = 120)
 
     issue_rows = []
 
@@ -382,12 +379,14 @@ def get_schema():
                 name = "Zenhub REST API Token",
                 desc = "Your personal Zenhub REST API Token",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "zenhub_gql_api_key",
                 name = "Zenhub GraphQL Personal API Key",
                 desc = "Your personal Zenhub GraphQL API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "workspace_id",

@@ -1,9 +1,16 @@
 ---
-id: maya-glyphs
+id: mayaglyphs
 name: Maya Glyphs
-summary: Shows a random glpyh
-desc: Displays different syllabic glyphs from the Maya script and how to pronounce them.
-author: dinosaursrarr
-fileName: maya_glyphs.star
+summary: Show Maya glyphs
+desc: Displays random Maya glyphs.
+author: rs7q5
+fileName: mayaglyphs.star
 packageName: mayaglyphs
-recommended_interval: 5
+broken: true
+category: art
+tags:
+  - maya
+  - art
+  - news
+published: '2024-01-06T16:26:46Z'
+updated: '2025-12-05T22:28:51Z'

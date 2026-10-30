@@ -6,4 +6,12 @@ desc: Enjoy a retro animated experience with Shoppy, the entrepreneurs mascot.
 author: Shopify
 fileName: shopify_animation.star
 packageName: shopifyanimation
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - retro
+  - utility
+  - art
+published: '2022-11-30T23:34:00Z'
+updated: '2026-10-01T22:41:51Z'

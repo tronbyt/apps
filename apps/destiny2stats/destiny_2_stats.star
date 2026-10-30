@@ -5,26 +5,11 @@ Description: Gets the emblem, race, class, and light level of your most recently
 Author: brandontod97
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/error.png", ERROR_IMAGE = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
-
-DEFAULT_DISPLAY_NAME = secret.decrypt("""
-AV6+xWcEQzMLYpoXESTHjum6eunoCR0xllGtKSVY7mqZhMvFklc8EOND
-BOB8N0rTqWD0zVPiK7oM8DX+JSF49Edq/+tHIldHRpjToMx0ojWk0/tn
-vF/v05SPqQdbpH1Rhcarl4u/Olur28JCGs7Ne1Cu2bU=
-""") or "Placeholder"
-
-DEFAULT_DISPLAY_NAME_CODE = secret.decrypt("""
-AV6+xWcEdNoPkccJeNCM054AamFiuw9WZBrnh5QZqJeVZYXek9J5ObQBg
-fLx/16F8yXlEwXf+Bz3FuZtvbwX6sQgvyHZVfhdBta8ZwGivPqmhqW430
-4lua+JG0HZlRN+7A0omSRgzkDbnA==
-""") or "1234"
 
 API_BASE_URL = "https://www.bungie.net/platform"
 API_USER_PROFILE = API_BASE_URL + "/User/GetBungieNetUserById/"
@@ -32,76 +17,64 @@ API_SEARCH_BUNGIE_ID = API_BASE_URL + "/User/Search/GlobalName/0/"
 API_SEARCH_BUNGIE_ID_NAME = API_BASE_URL + "/Destiny2/SearchDestinyPlayerByBungieName/-1/"
 
 def main(config):
-    display_name = config.get("display_name", DEFAULT_DISPLAY_NAME)
-    display_name_code = config.get("display_name_code", DEFAULT_DISPLAY_NAME_CODE)
+    display_name = config.get("display_name")
+    display_name_code = config.get("display_name_code")
     show_id = config.bool("show_id", False)
     displayed_character = ""
 
-    api_key = secret.decrypt("""
-        AV6+xWcEa0PWnbSGOs6uaaycU788pvVazw2uNol96VTG7uJDCuhWFPR7m7Ak4obvv9BR+dJLrbDo5NVE
-        3hlX15hL20d39sGIlFT8jCi801zXvTBz8B+F/GEjmOcQRSWhiEExGURjDim3ZjHNU/dLyTJH72OZ+9vD
-        6oeiR880ujBdIQq8ZDg=
-        """) or config.get("dev_api_key")
+    api_key = config.get("api_key")
 
-    character_cached = cache.get("character" + display_name + display_name_code)
+    print("No cached data. Hitting API")
 
-    if character_cached != None:
-        print("Displaying cached character data")
-        displayed_character = json.decode(character_cached)
+    bungie_membership_id = ""
+    bungie_membership_type = ""
 
+    if api_key == None or display_name == None or display_name_code == None:
+        api_key = "null value"
+        display_name = "null value"
+        display_name_code = "null value"
+
+    apiResponse = http.post(
+        API_SEARCH_BUNGIE_ID_NAME,
+        headers = {"X-API-Key": api_key},
+        json_body = {"displayName": display_name, "displayNameCode": display_name_code},
+    )
+
+    if apiResponse.json()["ErrorStatus"] == "ApiInvalidOrExpiredKey" or len(apiResponse.json()["Response"]) == 0:
+        return render.Root(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                main_align = "center",
+                expanded = True,
+                children = [
+                    render.Box(
+                        height = 8,
+                        child = render.Text("Invalid API"),
+                    ),
+                    render.Box(
+                        height = 8,
+                        child = render.Text("or"),
+                    ),
+                    render.Box(
+                        height = 8,
+                        child = render.Text("Invalid ID"),
+                    ),
+                ],
+            )),
+        )
     else:
-        print("No cached data. Hitting API")
+        print("Recieved valid response")
+        bungie_membership_id = apiResponse.json()["Response"][0]["membershipId"]
+        bungie_membership_type = apiResponse.json()["Response"][0]["membershipType"]
 
-        bungie_membership_id = ""
-        bungie_membership_type = ""
-
-        if api_key == None or display_name == None or display_name_code == None:
-            api_key = "null value"
-            display_name = "null value"
-            display_name_code = "null value"
-
-        apiResponse = http.post(
-            API_SEARCH_BUNGIE_ID_NAME,
+        apiMembershipInfo = http.get(
+            API_BASE_URL + "/Destiny2/" + str(int(bungie_membership_type)) + "/Profile/" + bungie_membership_id + "/",
+            params = {"components": "Characters"},
             headers = {"X-API-Key": api_key},
-            json_body = {"displayName": display_name, "displayNameCode": display_name_code},
+            ttl_seconds = 300,
         )
 
-        if apiResponse.json()["ErrorStatus"] == "ApiInvalidOrExpiredKey" or len(apiResponse.json()["Response"]) == 0:
-            return render.Root(
-                child = render.Column(
-                    main_align = "center",
-                    expanded = True,
-                    children = [
-                        render.Box(
-                            height = 8,
-                            child = render.Text("Invalid API"),
-                        ),
-                        render.Box(
-                            height = 8,
-                            child = render.Text("or"),
-                        ),
-                        render.Box(
-                            height = 8,
-                            child = render.Text("Invalid ID"),
-                        ),
-                    ],
-                ),
-            )
-        else:
-            print("Recieved valid response")
-            bungie_membership_id = apiResponse.json()["Response"][0]["membershipId"]
-            bungie_membership_type = apiResponse.json()["Response"][0]["membershipType"]
-
-            apiMembershipInfo = http.get(
-                API_BASE_URL + "/Destiny2/" + str(int(bungie_membership_type)) + "/Profile/" + bungie_membership_id + "/",
-                params = {"components": "Characters"},
-                headers = {"X-API-Key": api_key},
-            )
-
-            displayed_character = apiMembershipInfo.json()["Response"]["characters"]["data"][get_last_played_character(apiMembershipInfo.json()["Response"]["characters"]["data"])]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set("character" + display_name + display_name_code, json.encode(displayed_character), ttl_seconds = 300)
+        displayed_character = apiMembershipInfo.json()["Response"]["characters"]["data"][get_last_played_character(apiMembershipInfo.json()["Response"]["characters"]["data"])]
 
     image = get_image("https://www.bungie.net" + displayed_character["emblemPath"])
 
@@ -131,7 +104,7 @@ def get_image(url):
         if response.status_code == 200:
             return response.body()
         else:
-            return base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAABKklEQVRYCe2VUY7DIAxEQ9UD9f6n6I3SDPCQMURVpUD6gbVbw2A8g4OTsG/b8XefPaEODCZ5Tv0Qn8gBZvCLiwNHASKdJcKSi7cImCHCk4uz3AFNZCMrQdkTU/ptBLD4YnCRf5/kqR7BScxQeAlYFQhHb+60h/p0hlm+tg13JyMc4RbTXNbDLP4tLibpvIgizuYcVGEiZh0PhtcGO/ZxJm9bATbLs/EXTLHeJEZm8yWk/hZkLAX6YD8/SVhy2EFvb17vt6EU8+8TcRpwJQdjrLknZY192f9XF9j2GPExIr8tQv8R2IjB4yVgVeD2ClTvAS58fnEyvcz7NhRP8y0Q6AOvUtDLXT2CXsBV5Mqjg4nDWhEwmhxSLyLeAS2OKjvE3lOJcgcAfODo+Qful09RLycDuQAAAABJRU5ErkJggg==""")
+            return ERROR_IMAGE.readall()
 
     # Should never get here.
     return ""
@@ -168,7 +141,8 @@ def get_character_race(race_value):
 
 def get_view(show_id, image, displayed_character, display_name, display_name_code):
     no_username_view = render.Root(
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             cross_align = "center",
             children = [
                 render.Image(src = image, width = 32, height = 32),
@@ -193,11 +167,12 @@ def get_view(show_id, image, displayed_character, display_name, display_name_cod
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
     username_view = render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             cross_align = "center",
             children = [
                 render.Row(
@@ -245,7 +220,7 @@ def get_view(show_id, image, displayed_character, display_name, display_name_cod
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
     if show_id:
@@ -257,6 +232,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Your Bungie API key.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "display_name",
                 name = "Display Name",

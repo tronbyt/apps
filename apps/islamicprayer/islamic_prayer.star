@@ -5,11 +5,10 @@ Description: Shows the daily Islamic prayer times for a given location.
 Author: Austin Fonacier
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -34,6 +33,15 @@ COLOR_7 = "#a17e4b"
 COLOR_8 = "#3c5453"
 ALL_COLORS = [COLOR_0, COLOR_1, COLOR_2, COLOR_3, COLOR_4, COLOR_5, COLOR_6, COLOR_7, COLOR_8]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     loc = location(config)
     latitude = loc["lat"]
@@ -50,7 +58,17 @@ def main(config):
 
     return render.Root(
         delay = int(config.str("speed", "70")),
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render_top_column(day, month, year),
+                # render.Box(
+                render.Animation(
+                    children = get_render_frames(prayer_timings, show_sunrise, non_color_mode),
+                ),
+                # )
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render_top_column(day, month, year),
                 # render.Box(
@@ -178,21 +196,12 @@ def prayer_timings_filter(pre_filtered_timings, show_sunrise):
     return filtered_prayer_times
 
 def fetch_prayer_times(latitude, longitude, month, year, prayer_calc_option):
-    cache_key = "prayer_{}/{}".format(month, year)
+    # API docs: https://aladhan.com/prayer-times-api#GetCalendar
+    api_url = "http://api.aladhan.com/v1/calendar?latitude={}&longitude={}&month={}&year={}&method={}".format(latitude, longitude, month, year, prayer_calc_option)
+    prayer_month_raw = http.get(api_url, ttl_seconds = ONE_MONTH)
+    prayer_month_body = prayer_month_raw.body()
 
-    cached_data = cache.get(cache_key)
-
-    if cached_data == None:
-        # API docs: https://aladhan.com/prayer-times-api#GetCalendar
-        api_url = "http://api.aladhan.com/v1/calendar?latitude={}&longitude={}&month={}&year={}&method={}".format(latitude, longitude, month, year, prayer_calc_option)
-        prayer_month_raw = http.get(api_url)
-        prayer_month_body = prayer_month_raw.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, prayer_month_body, ttl_seconds = ONE_MONTH)
-        cached_data = prayer_month_body
-
-    return json.decode(cached_data)
+    return json.decode(prayer_month_body)
 
 # Helper function for: 4 -> 04
 def day_to_str(day):

@@ -5,25 +5,24 @@ Description: Displays movie showtimes for American Cinematheque theaters in Los 
 Author: Platt Thompson & Jim Cummings
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/camera_icon.png", CAMERA_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+CAMERA_ICON = CAMERA_ICON_ASSET.readall()
 
 # ---------------------------------------------------------------------------- #
 #                                   CONSTANTS                                  #
 # ---------------------------------------------------------------------------- #
 
-CAMERA_ICON = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABUAAAAXCAYAAADk3wSdAAAAAXNSR0IArs4c6QAAAR1JREFUSEtjZGBgYFAwrPsPokEgszoMTJeH6DASkoPpQacZkQ1EN3h66yoMfeiWYjMYq6HqJppgtTfPXMfQA5PbOTsS7JMhbih6ZKB7DznMifE6yDyc4YIrvGDiIMsWrSokPkzRVd6/v43BI7QYLgyLQJChgQ5RcHFeMVMGkBg49j+/Oo3TYSCFIG9jSwmg5NWVX8qw/sAysOEgtSAxuKEgAXQAsowYQ0284hjObFuE3VBkF4MMI9ZQmGOwuhSfoci+gAUFzPtUMRSW22BZFmveh3kTX5jiikls2ZXo2CfZUEIJHZaTsKnD6lJkhcLSnvByFST+9ul2snIciiZkQ0HJ48H5pkFuKCWuxCilYMUcKGLwleyEIhYlzAa1oQARYMFWHZmc4wAAAABJRU5ErkJggg==")
-
-CINEMATHEQUE_SHOWTIMES_URL = "https://www.americancinematheque.com/wp-json/wp/v2/algolia_get_events?environment=production&startDate={start_time}&endDate={end_time}"
+CINEMATHEQUE_SHOWTIMES_URL = "https://www.americancinematheque.com/wp-json/wp/v2/algolia_get_events?environment=production_2026&startDate={start_time}&endDate={end_time}"
 
 THEATER_CODES = {
     "los feliz 3": 102,
     "aero theatre": 54,
+    "egyption theatre": 55,
     "other": 68,
 }
 
@@ -68,7 +67,7 @@ PT_TO_GMT_TIME_DIFFERENCE_IN_SECONDS = 28800
 # ---------------------------------------------------------------------------- #
 
 def get_showtime_color(movie_start_time, current_time):
-    start_time_hour = time.parse_time(movie_start_time, "15:04:05").hour
+    start_time_hour = time.parse_time(movie_start_time, "3:04 PM").hour
     hours_until_movie = int(start_time_hour) - current_time.hour
 
     return SHOWTIME_COLORS.get(hours_until_movie, "#222222")
@@ -136,18 +135,10 @@ def main(config):
         end_time = str(end_of_current_day_unix),
     )
 
-    all_locations_movie_list = cache.get("showtimes_data")
-
-    if all_locations_movie_list == None:
-        res = http.get(showtimes_url)
-        if res.status_code != 200:
-            return show_error_fetching_data()
-        all_locations_movie_list = res.json()["hits"]
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("showtimes_data", json.encode(all_locations_movie_list), ttl_seconds = HOUR_IN_SECONDS)
-    else:
-        all_locations_movie_list = json.decode(all_locations_movie_list)
+    res = http.get(showtimes_url, ttl_seconds = HOUR_IN_SECONDS)
+    if res.status_code != 200:
+        return show_error_fetching_data()
+    all_locations_movie_list = res.json()["hits"]
 
     # Exclude showtimes from other AC theaters as well as those with incomplete data
     single_location_movie_list = [movie for movie in all_locations_movie_list if local_theater_code in movie["event_location"]]
@@ -181,7 +172,8 @@ def main(config):
                             cross_align = "end",
                             children = [
                                 render.Text(
-                                    time.parse_time(movie["event_start_time"], "15:04:05").format("3:04"),
+                                    # time.parse_time(movie["event_start_time"], "15:04:05").format("3:04"),
+                                    time.parse_time(movie["event_start_time"], "3:04 PM").format("3:04"),
                                     font = "tom-thumb",
                                     color = get_showtime_color(movie["event_start_time"], current_time),
                                 )
@@ -220,6 +212,10 @@ def get_schema():
         schema.Option(
             display = "Aero Theatre",
             value = "Aero Theatre",
+        ),
+        schema.Option(
+            display = "Egyption Theatre",
+            value = "Egyption Theatre",
         ),
     ]
 

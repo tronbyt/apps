@@ -5,26 +5,21 @@ Description: Display Stock Ticker. No API Key Required. Configure upto 5 Symbols
 Author: Sunil Taneja
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/symbol_b64.png", SYMBOL_B64_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+SYMBOL_B64 = SYMBOL_B64_ASSET.readall()
+
 STOCK_QUOTE_URL = "https://finance-api.sapphire-digital.co/api/v1/multiquote?symbols=<symbols>&key=tidbyt"
-SYMBOL_B64 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAIxJREFUOE
-9jZGBg+M+ABl6UMqMLgfkS3X8xxBmRDYBpxKYQpBObPNwAkCQujdhcCFMLNgCf5u8f9jBwCrhg
-OB2mB6cBII3oANkguAEvSpn/ozsd2VZcbFiYMJJiALawoI0BIJsIhQFeLyA7lawwIMkAbOmAmF
-igXjqA5QVcqRFbSkRWS73MhBxwpGRnAGAwmUGS9KHUAAAAAElFTkSuQmCC
-""")
 
 # https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md
 # https://tidbyt.dev/docs/publish/publishing-apps
 
 P_LOCATION = "location"
-DEFAULT_TIMEZONE = "America/New_York"
 
 def main(config):
     location = config.get(P_LOCATION)
@@ -32,7 +27,7 @@ def main(config):
 
     timezone = location.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
     now = config.get("time")
     now = (time.parse_time(now) if now else time.now()).in_location(timezone)

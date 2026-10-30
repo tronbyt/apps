@@ -6,4 +6,12 @@ desc: Display various statistics of a public GitHub repo.
 author: rs7q5
 fileName: github_repo.star
 packageName: githubrepo
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - dev
+  - utility
+published: '2023-01-03T17:40:02Z'
+updated: '2026-10-01T21:17:57Z'

@@ -6,4 +6,10 @@ desc: Quotes for gold, platinum and silver.
 author: threeio
 fileName: precious_metals.star
 packageName: preciousmetals
-recommended_interval: 5
+recommendedInterval: 5
+category: finance
+tags:
+  - gold
+  - finance
+published: '2022-06-09T16:49:56Z'
+updated: '2025-11-30T19:58:27Z'

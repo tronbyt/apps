@@ -6,4 +6,12 @@ desc: Automata with simple rules but complex emergent behavior.
 author: alewando
 fileName: langtons_ant.star
 packageName: langtonsant
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: art
+tags:
+  - art
+  - gaming
+  - science
+published: '2023-03-23T11:21:16Z'
+updated: '2026-10-01T21:41:49Z'

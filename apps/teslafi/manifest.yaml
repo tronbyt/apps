@@ -6,4 +6,12 @@ desc: Shows your Teslas current Name, Charge in Mi/KM and battery %. Also shows 
 author: mrrobot245
 fileName: teslafi.star
 packageName: teslafi
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - smart-home
+published: '2022-08-22T14:30:54Z'
+updated: '2025-12-05T22:28:51Z'

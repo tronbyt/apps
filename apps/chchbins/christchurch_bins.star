@@ -5,14 +5,16 @@ Description: Show the next bin collection colour (recycle vs garbage) and date.
 Author: Tubo Shi
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/red_bin.png", RED_BIN_ASSET = "file")
+load("images/yellow_bin.png", YELLOW_BIN_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+RED_BIN = RED_BIN_ASSET.readall()
+YELLOW_BIN = YELLOW_BIN_ASSET.readall()
+
 CCC_BIN_URL = "https://ccc.govt.nz/services/rubbish-and-recycling/collections/getProperty?ID=%s"
-RED_BIN = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAdElEQVRIS2NkoDFgpLH5DIPOgv+k+phUH9DcApAHSLGEkVQfgC14K6NCMKSEn9wBqaGfBaR4m4EcH9DcAmIjDxRnZMfBf4b/Drgjj/EAONJGLRgNIngIYMvJo6kIJYEM1yAiWMpDigrCyuAqyKoPSDCfgQEAA7dnF4OsUrkAAAAASUVORK5CYII=")
-YELLOW_BIN = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAa0lEQVRIS2NkoDFgpLH5DIPOgv+k+phUH9DcApAHSLGEkVQfgC34/45wQDEKgdXQzwJSvM1Ajg9obgGxkQeKM7Lj4D/Dfwfcscd4ABxpoxaMBhE8BLDl5NFUhJJAhmsQEVHM06PCIewMJBUAuGBXFx4pJdgAAAAASUVORK5CYII=")
 
 def future_collections(collections):
     # returns a list of (date, material) tuple from the future

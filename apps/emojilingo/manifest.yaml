@@ -6,4 +6,11 @@ desc: Displays a random emoji and its unique short text annotation from the Unic
 author: Cedric Sam
 fileName: emoji_lingo.star
 packageName: emojilingo
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - emoji
+  - education
+published: '2022-08-04T18:41:13Z'
+updated: '2026-10-01T18:58:08Z'

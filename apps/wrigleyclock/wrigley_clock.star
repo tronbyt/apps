@@ -6,11 +6,11 @@ Author: Garrett W
 """
 
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
-def main(config):
-    timezone = config.get("$tz") or "America/Chicago"
+def main():
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     dev_width = 64
@@ -91,9 +91,16 @@ def main(config):
 
     return render.Root(
         delay = 500,
+        # The marquee is drawn as 70 plots in a fixed 64x32 coordinate space and
+        # is as wide as a panel gets, so it cannot be scaled up uniformly -- a
+        # taller-only scale would turn the clock face into an ellipse. Sizing
+        # the backing box to the canvas instead centres the scene on a panel
+        # with rows to spare, rather than hanging it from the top edge above a
+        # black half. It is letterboxed there, not filling the panel, so this
+        # does not claim supports64x64.
         child = render.Box(
-            width = 64,
-            height = 32,
+            width = canvas.width(),
+            height = canvas.height(),
             color = c,
             child = render.Stack(
                 children = [
@@ -613,7 +620,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, 14),
-                                                (-.5, 14),
+                                                (-0.5, 14),
                                             ],
                                             width = 32,
                                             height = 32,
@@ -624,7 +631,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, 13),
-                                                (-.5, 13),
+                                                (-0.5, 13),
                                             ],
                                             width = 32,
                                             height = 32,
@@ -635,7 +642,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, -12),
-                                                (-.5, -12),
+                                                (-0.5, -12),
                                             ],
                                             width = 32,
                                             height = 32,
@@ -646,7 +653,7 @@ def main(config):
                                         render.Plot(
                                             data = [
                                                 (-1, -11),
-                                                (-.5, -11),
+                                                (-0.5, -11),
                                             ],
                                             width = 32,
                                             height = 32,

@@ -4,4 +4,14 @@ name: Filters
 summary: 'Notification: filters'
 desc: Displays a notification that filters need to be replaced.
 author: savdagod
-recommended_interval: 5
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - smart-home
+  - productivity
+  - utility
+  - wide 2x support
+published: '2025-04-06T20:57:21Z'
+updated: '2026-10-01T21:00:02Z'

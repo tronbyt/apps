@@ -6,4 +6,10 @@ desc: Displays real-time departures for a New Jersey PATH station.
 author: karmeleon
 fileName: new_jersey_path.star
 packageName: newjerseypath
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - real-time
+published: '2023-03-23T10:59:38Z'
+updated: '2026-10-01T19:27:54Z'

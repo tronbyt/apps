@@ -5,31 +5,16 @@ Description: Show a random image post from a custom list of subreddits (up to 10
 Author: Nicole Brooks
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/error_img.png", ERROR_IMG_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
+
+ERROR_IMG = ERROR_IMG_ASSET.readall()
 
 DEFAULT_SUBREDDITS = ["blackcats", "aww", "eyebleach", "itookapicture", "cats", "pic", "otters", "plants"]
 APPROVED_FILETYPES = [".png", ".jpg", ".jpeg", ".bmp"]
-
-ERROR_IMG = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAACMAAAAjCAYAAAAe2bNZAAAAAXNSR0IArs4c6QAAAXJJREFUWEftlz1OAzEQhe1V
-+tCQnoarUADHgQJqUoTjAAVXoaEPDemjNZpEI00Wz4+fttiVkjLOe/k8nhmPc5rQJ0+IJc0D5vZy+dTl/KJFri/l
-+eNnt5briEbqq5Fh0+uuqKf41eckgRDN0LwKc7+6KAxy1f3n+e6P3xHQ2/b34IFommBqIGxAQDWYFk0Y5mahHxGb
-fO5PI9OqOcPICMhohiJzt1o+5JQ3VtjJtKTy+L7dvZIpognBcHV4MFxJbEoV1apx+8wZJiX9bkJCjmhCx2Ql5DB5
-2RDRhGCsvLHKU4uOpWEgc4RAjBHN/GBqOaDli5U3niYUGTka0G08vKm1YYfHiRYNebljp5xThjOMB8PrctTQNPOD
-4bzhHcnLUdsloglFxgrr2GtuziC7RDRuZCZV2kg3RTShPoMYI5owDL2f5PPDa3yy4fGfeJoQDOeMfFlSA7PKG9GE
-YOhHSGUgGreaxu4jnp/bZzyDMdcnBfMH+p/AM/kQywMAAAAASUVORK5CYII=
-""")
-REDDIT_CLIENT_SECRET = """
-AV6+xWcEQDjYVKYw9hSu4lxuC1MdSDyFJ3zXnGwK7/HBdz3nQRdorFSj40AXh3my9VvqL7ZAf8dvBNgPkpQz4a59
-SR1PButYX8EpyWhfH6RnR+laCcDbZBbZVLw19R2e6SwjO/XuSmSUXX4vRknYwfDR6VD+Ps40k8ljftkXDPB2UIoQ
-"""
 
 def main(config):
     # Build full sub list based on user options.
@@ -37,7 +22,7 @@ def main(config):
 
     # Get subreddit name and chosen post (pseudo)randomly.
     chosenSub = allSubs[getRandomNumber(len(allSubs))]
-    currentPost = getPosts(chosenSub)
+    currentPost = getPosts(chosenSub, config)
 
     # Render image/text
     if currentPost["id"] != "00000":
@@ -132,35 +117,16 @@ def buildSubPrefix(name):
     return formattedName
 
 # Gets either the cached posts or runs an API call to reddit for more.
-def getPosts(subname):
+def getPosts(subname, config):
     print("Pulling posts for subreddit " + subname)
-    cacheName = "reddit-image-posts-" + subname
-    cachedPosts = cache.get(cacheName)
-
-    # Check the cache and return a random post from the stored posts if able.
-    if cachedPosts != None:
-        print("Cache hit")
-        cachedPosts = json.decode(cachedPosts)
-        return setRandomPost(cachedPosts, subname)
 
     print("Cache miss, refreshing posts")
 
     # Pull access token from cache. If expired, get a new one.
-    accessToken = cache.get("reddit-image-posts-access-token")
-    if accessToken == None:
-        print("Access token expired, getting new one")
-        newTokenRes = getNewAccessToken()
-        if "error" in newTokenRes.keys() or newTokenRes["access_token"] == None:
-            return handleApiError(newTokenRes)
-        accessToken = newTokenRes["access_token"]
-
-        # Store in cache again
-        print("Caching new access token for 24 hours: " + accessToken)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("reddit-image-posts-access-token", accessToken, 24 * 60 * 60)
-    else:
-        print("Access token still good!")
+    newTokenRes = getNewAccessToken(config)
+    if "error" in newTokenRes.keys() or newTokenRes["access_token"] == None:
+        return handleApiError(newTokenRes)
+    accessToken = newTokenRes["access_token"]
 
     # In lieu of the cache, pull a new set of posts from the API.
     apiUrl = "https://oauth.reddit.com/r/" + subname + "/hot.json?limit=30"
@@ -171,6 +137,7 @@ def getPosts(subname):
             "User-Agent": "Tidbyt App: Reddit Image Shuffler",
             "Authorization": auth,
         },
+        ttl_seconds = 2 * 60 * 60,
     )
     if "application/json" not in rep.headers.get("Content-Type"):
         return handleApiError()
@@ -187,11 +154,6 @@ def getPosts(subname):
                 if posts[i]["data"]["url"].endswith(APPROVED_FILETYPES[j]):
                     allImagePosts.append(posts[i]["data"])
 
-        # Cache the posts for 2 hours
-        print("Caching " + subname + " posts")
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cacheName, json.encode(allImagePosts), 2 * 60 * 60)
         return setRandomPost(allImagePosts, subname)
 
 # Build an error display for users. Log error.
@@ -232,8 +194,8 @@ def setRandomPost(allImagePosts, subname):
 
 # Get a new reddit access token.
 # https://github.com/reddit-archive/reddit/wiki/OAuth2#application-only-oauth
-def getNewAccessToken():
-    authSecret = secret.decrypt(REDDIT_CLIENT_SECRET) or "thiswillfail"
+def getNewAccessToken(config):
+    authSecret = config.get("reddit_client_secret") or "thiswillfail"
     auth = tuple([
         "DxzJmjTSGHMt4Oj_8X7FkQ",
         authSecret,
@@ -251,6 +213,7 @@ def getNewAccessToken():
         auth = auth,
         form_body = body,
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 24 * 60 * 60,
     )
     data = res.json()
     return data
@@ -325,6 +288,13 @@ def get_schema():
                 desc = "In addition to custom subreddits, include defaults? (/r/cats, /r/otters, /r/blackcats, /r/plants, /r/itookapicture, /r/aww, /r/eyebleach, /r/pic)",
                 icon = "otter",
                 default = False,
+            ),
+            schema.Text(
+                id = "reddit_client_secret",
+                name = "Reddit Client Secret",
+                desc = "A Reddit client secret to access the Reddit API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

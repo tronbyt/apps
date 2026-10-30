@@ -4,4 +4,12 @@ name: Homefiniti
 summary: Homefiniti visitor stats
 desc: View live visitor stats of your Homefiniti-hosted website.
 author: Donald Mull Jr
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - sports
+  - tech
+  - utility
+published: '2024-09-20T15:05:07Z'
+updated: '2026-10-01T21:23:34Z'

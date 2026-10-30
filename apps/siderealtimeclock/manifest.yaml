@@ -4,4 +4,15 @@ name: Sidereal Time
 summary: A sidereal time clock
 desc: A clock that shows the current sidereal time and (optionally) the local time.
 author: Daniel Sitnik
-recommended_interval: 0
+recommendedInterval: 0
+fileName: sidereal_time.star
+packageName: siderealtimeclock
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - science
+  - clock
+  - utility
+published: '2024-11-24T00:05:22Z'
+updated: '2026-10-01T19:27:54Z'

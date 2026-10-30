@@ -6,4 +6,12 @@ desc: Shows a specific or random pixel art piece of characters from the Peanuts 
 author: michaelalbinson
 fileName: peanuts_pictures.star
 packageName: peanutspictures
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - art
+  - media
+  - retro
+published: '2023-07-27T14:39:22Z'
+updated: '2026-10-01T22:17:11Z'

@@ -8,7 +8,7 @@ Author: dinosaursrarr
 load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -78,8 +78,8 @@ def extract_station(station):
         print(station)
     return result
 
-def extract_stations(page, index):
-    raw = page["modules"]["data"][index]["data"]
+def extract_stations(module):
+    raw = module["data"]
     stations = [extract_station(s) for s in raw if s]
     return {s["id"]: s for s in stations if s}
 
@@ -87,13 +87,19 @@ def load_stations():
     resp = http.get(
         url = STATIONS_URL,
         headers = {
-            "User-Agent": "USER_AGENT",
+            "User-Agent": USER_AGENT,
         },
         ttl_seconds = 60,
     )
     page = html(resp.body())
-    raw = json.decode(page.find("div#main > script").text()[len(JSON_PREFIX):-2])
-    return extract_stations(raw, 0), extract_stations(raw, 1)
+    script = page.find("script#__NEXT_DATA__")
+    if not script:
+        fail("Could not find __NEXT_DATA__ script")
+
+    raw = json.decode(script.text())
+    modules = raw["props"]["pageProps"]["dehydratedState"]["queries"][0]["state"]["data"]["data"]
+
+    return extract_stations(modules[0]), extract_stations(modules[1])
 
 def render_station(station):
     return render.Padding(
@@ -194,13 +200,23 @@ def main(config):
     stations = dict(national, **local)
     station = stations[station]
 
+    # The three layers are placed for 32 rows; on a taller panel the stack
+    # sits in the middle.
     return render.Root(
-        child = render.Stack(
-            children = [
-                render_station(station),
-                render_program(station, show_synopsis, colour),
-                render_progress_bar(station, colour),
-            ],
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = [
+                        render_station(station),
+                        render_program(station, show_synopsis, colour),
+                        render_progress_bar(station, colour),
+                    ],
+                ),
+            ),
         ),
     )
 

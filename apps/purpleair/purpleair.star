@@ -8,12 +8,14 @@ Author: posburn
 # jvivona 20230821 - helped out @frame-shift to fix syntax error in code
 #                    while I was in there - removed the cache.star module dependency
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/range.png", RANGE_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+RANGE = RANGE_ASSET.readall()
 
 # DEFAULTS
 
@@ -29,6 +31,15 @@ PARTICLE_SENSOR_B = "Sensor B"
 # MAIN APP
 
 api_key = None
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     api_key = config.get("api_key")
@@ -81,7 +92,29 @@ def main(config):
             name = "%s\n(inside)" % name
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Box(
+                    width = 64,
+                    height = 32,
+                    color = BACKGROUND_COLOR,
+                    child = render.Column(
+                        children = [
+                            render.Stack(
+                                render_range(aqi),
+                            ),
+                            render.Padding(
+                                pad = (2, 2, 0, 0),
+                                child = render_animation(aqi, temp, humidity, name, show_title, show_temp, show_name, temp_unit),
+                            ),
+                        ],
+                        expanded = True,
+                        main_align = "space_evenly",
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Box(
                     width = 64,
@@ -120,6 +153,7 @@ def get_schema():
                 desc = "Specify the API key to use",
                 icon = "gear",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "sensor_id_direct",
@@ -560,7 +594,6 @@ CACHE_KEY_DATA = "purpleAirData"
 BACKGROUND_COLOR = "#21024D"
 
 # Images
-RANGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAEAAAAADCAYAAAAjpQkcAAAABHNCSVQICAgIfAhkiAAAAQ5JREFUKFONkm1ShDAQRHsS2I+r6bX0HHrMJYHENyGwYmHpj1SnZygq3fXs7eOl3segazTdhjPVc853oyTLUklFylV16tp9+eHbfjZVjkpYdemKLzP/wxfm1vy6zzUo2aiHuDeNymHQo0bmgyYNSvjJvSt7W4osZYV55o1ZcV7+9u+fr/UY3tYyCHtDrxEdnuVcAmE8bCI8Wr2E3VdKYcZu3/t3hNRCsJngqJ+9BC/j4Nd9JqCHSq72LXQLv/nIjiLwEyWJ4CFzunoJ293nmzfusXvbCLgQ9v4rAZEiVhIuvJ3XQcDS9IwAo5QDIacE8J8STwlwIlInYAvbCCDsSgJE+B7dCYCERkAP/V8CvgB8qhUiAN3IHAAAAABJRU5ErkJggg==")
 
 # AQI
 AQI_TITLE = ["Good", "Moderate", "Unhealthy for SG", "Unhealthy", "Very Unhealthy", "Hazardous"]

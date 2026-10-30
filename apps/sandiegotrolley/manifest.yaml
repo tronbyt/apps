@@ -6,4 +6,10 @@ desc: Shows scheduled and, when possible, live arrival times for San Diego MTS T
 author: Alex Serriere
 fileName: san_diego_trolley.star
 packageName: sandiegotrolley
-recommended_interval: 5
+recommendedInterval: 5
+broken: true
+supports64x64: true
+category: transit
+tags: []
+published: '2024-04-25T14:09:04Z'
+updated: '2026-10-01T22:30:43Z'

@@ -6,4 +6,9 @@ desc: A meme based on a webcomic series Gunshow illustrated by K.C. Green.
 author: zhaostu
 fileName: this_is_fine.star
 packageName: thisisfine
-recommended_interval: 5
+recommendedInterval: 5
+category: entertainment
+tags:
+  - art
+published: '2023-12-17T12:48:42Z'
+updated: '2025-11-29T23:55:39Z'

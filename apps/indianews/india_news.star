@@ -9,9 +9,8 @@ Author: vipulchhajer
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 #get dates to ping api
@@ -23,18 +22,42 @@ yesterdayf = yesterday.format("2006-01-02")
 #this is the API service for news
 NEWS_URL = "http://newsapi.org/v2/everything?q=india&searchIn=description&sortBy=popularity&from={}&to={}&domains=indiatimes.com,livemint.com,thehindu.com,indianexpress.com&language=en&apiKey=".format(yesterdayf, todayf)
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # set default api key
-    DEFAULT_API = secret.decrypt("AV6+xWcEX/4Xe45UOOKJO96fq/wjTvGwFn7rE8EUXwcONEWE7sG+eXYjEm5M+PmmS5GTV1NzbV3z3X5q7XWdN69xtfpB1KWMBedJf2kndTR6QWsBWZXizDHWDVMA5IUYO14Y7X2tlr+eKCuAZU7iri9BUTuBdO7+5sVRgPU3QoObSbsE9L8=")
+    API = config.get("news_api_key")
 
     #intialize headline randomizer
     random.seed(time.now().unix // 60)
     shift = random.number(0, 95)
 
     #Display error if no API found
-    if DEFAULT_API == None:
+    if API == None:
         return render.Root(
-            child = render.Column(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+                children = [
+                    render.Box(
+                        width = 64,
+                        height = 7,
+                        padding = 0,
+                        color = "#cccccc33",
+                        child = render.Text("India News", color = "#FF9933", font = "tom-thumb", offset = -1),
+                    ),
+                    render.WrappedText(
+                        content = "Missing API",
+                        width = 36,
+                    ),
+                ],
+            ))) if is_square() else render.Column(
                 children = [
                     render.Box(
                         width = 64,
@@ -52,7 +75,6 @@ def main(config):
         )
     else:
         #get data
-        API = DEFAULT_API
         NEWS_API_URL = NEWS_URL + API
         rep = http.get(url = NEWS_API_URL, ttl_seconds = 3600)  #update every 1 hour
         if rep.status_code != 200:
@@ -93,7 +115,7 @@ def main(config):
                         child = render.Text("India News", color = "#FF9933", font = "tom-thumb", offset = -1),
                     ),
                     render.Marquee(
-                        height = 32,
+                        height = max(32, canvas.height() - 7),  # 32 on 64x32 (unchanged), 57 on the square
                         scroll_direction = "vertical",
                         child = render.Column(
                             #main_align="space_between",
@@ -124,6 +146,13 @@ def get_schema():
                 icon = "gear",
                 default = scroll_speed[1].value,
                 options = scroll_speed,
+            ),
+            schema.Text(
+                id = "news_api_key",
+                name = "News API Key",
+                desc = "A News API key to access the News API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

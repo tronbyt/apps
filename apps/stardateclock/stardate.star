@@ -7,11 +7,13 @@ Author: Christian Dannie Storgaard (Cybolic)
 # This is compatible with the system described my Mike and Denise Okuda in their book "Star Trek: Chronology"
 # but based on current local time in order to be usable as a clock
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("images/background_img.png", BACKGROUND_IMG_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+BACKGROUND_IMG = BACKGROUND_IMG_ASSET.readall()
 
 # Constants
 DEFAULT_TIMEZONE = "UTC"
@@ -30,6 +32,15 @@ DEFAULT_LOCATION = json.encode({
     "timezone": DEFAULT_TIMEZONE,
     "locality": "Earth",
 })
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
@@ -68,7 +79,25 @@ def main(config):
         else:
             location_text = location["name"] if "name" in location else "Earth"
 
+    # The frame is a 64x32 graphic and the figures are placed against it, so
+    # on a taller panel the whole scene is centred rather than stretched or
+    # hung from the top edge.
+    scene_h = 32
+    if is_square():
+        scene_h = canvas.height()
+
     return render.Root(
+        child = render.Box(
+            width = canvas.width(),
+            height = scene_h,
+            child = stardate_scene(stardate_display, location_text, color_epoch),
+        ),
+    )
+
+def stardate_scene(stardate_display, location_text, color_epoch):
+    return render.Box(
+        width = 64,
+        height = 32,
         child = render.Stack(
             children = [
                 render.Image(
@@ -114,7 +143,7 @@ def main(config):
 
 def calculate_stardate(now):
     # TNG-style stardate calculation
-    base_year = 2323 # year 0 of TNG stardates (referenced in the episode "The Neutral Zone")
+    base_year = 2323  # year 0 of TNG stardates (referenced in the episode "The Neutral Zone")
     year = now.year
     day_of_year = calculate_day_of_year(now)
     days_in_year = 365 if not is_leap_year(year) else 366
@@ -132,7 +161,7 @@ def zero_pad(number, width):
 
 def calculate_day_of_year(date):
     cumulative_days_non_leap = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
-    cumulative_days_leap     = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
+    cumulative_days_leap = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
 
     day_of_year = date.day
     if is_leap_year(date.year):
@@ -199,7 +228,5 @@ def get_schema():
             ),
         ],
     )
-
-BACKGROUND_IMG = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAABIklEQVRo3u2UsW7CQAyG/1y753akUy7wCB2Yqhu78xqIudtRJjZeh27AVCEeAaQoUp7DXRoUIsIVkHKDbel0TuxE8uffTgDQ+OMLg5HDYPgObvbaLr467VAdN/hZex4AmsXvvxe9F35YEt4+k7NfW/NdO971HPrftXzMVkSzFdFkuiUAvZ7Dki7uLv/R+5ZfH1WDqI6baDK86EjPdgYQY+absrw1Il0j85/8UFzFXkIhCO1i780PxaMCCHWr1xGI2f1ndsC937ehJ3/bkK0pMDcBIAAEgAAQAAJAAAgAASAABIAA4AnAew/vvShAAHAH4JzjDcBayxNAWZYAAGMMSxW8aK3nSimkaYosy5DnObTWKIqCBYAEADnnYK2FMYadAn4B3tDB+yaBnyQAAAAASUVORK5CYII=""")
 
 # vi:et:sw=4:ts=4

@@ -6,6 +6,8 @@ Author: James Woglom
 """
 
 load("http.star", "http")
+load("humanize.star", "humanize")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
@@ -47,16 +49,21 @@ def add_children(config, *childs):
 
 def render_entity(entity_id, config):
     name = config.get(entity_id + "_name")
-    if not name:
-        name = config.get(entity_id)
     fetch = fetch_entity(entity_id, config)
     if not fetch:
         return 0, None
+    if not name:
+        name = fetch.get("attributes", {}).get("friendly_name") or config.get(entity_id)
 
-    count = int(fetch["state"])
+    state = fetch["state"]
+    isnum = (state.count(".") == 1 and state.replace(".", "").isdigit()) or state.isdigit()
+    count = float(state) if isnum else 0
+    display = humanize.comma(math.round(count * 10) / 10) if isnum else state
+
     unit = ""
     if config.bool("show_units") and "attributes" in fetch and "unit_of_measurement" in fetch["attributes"]:
         unit = fetch["attributes"]["unit_of_measurement"] + " "
+
     return count, render.Row(
         main_align = "space_between",
         expanded = True,
@@ -67,25 +74,19 @@ def render_entity(entity_id, config):
                 color = "#f1f1f1",
             ),
             render.Text(
-                content = num_format(fetch["state"]) + " " + unit,
+                content = "{} {}".format(display, unit),
                 font = "tb-8",
-                color = get_color(count, config),
+                color = get_color(count, config) if isnum else "#fff",
             ),
         ],
     )
 
-def num_format(raw):
-    num = raw + ""
-    if len(num) > 3:
-        return num[:-3] + "," + num[-3:]
-    return num
-
 def get_color(count, config):
     if not config.get("target_value"):
-        return "#ffffff"
+        return "#fff"
 
     range = ["#AD1A1A", "#ad3a1a", "#ad721a", "#ada11a", "#92ad1a", "#37ad1a"]
-    max_target = int(config.get("target_value"))
+    max_target = float(config.get("target_value"))
     if count >= max_target:
         return range[-1]
 
@@ -133,6 +134,7 @@ def get_schema():
                 name = "HomeAssistant Token",
                 desc = "HomeAssistant Token. Find in User Settings > Long-lived access tokens.",
                 icon = "book",
+                secret = True,
             ),
             schema.Toggle(
                 id = "sort_entities",

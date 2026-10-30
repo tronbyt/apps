@@ -5,7 +5,6 @@ Description: Shows league of legends champsions and their subtitle.
 Author: xl0lli
 """
 
-load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/csv.star", "csv")
 load("http.star", "http")
@@ -65,20 +64,13 @@ def main(config):
     )
 
 def get_data():
-    # Check our cache
-    league_champs = cache.get("league_champs")
-
     # If we don't have a cached version, fetch the data now
-    if league_champs == None:
-        request = http.get(CSV_ENDPOINT)
-        if request.status_code != 200:
-            print("Unexpected status code: " + request.status_code)
-            return []
+    request = http.get(CSV_ENDPOINT, ttl_seconds = CACHE_TTL)
+    if request.status_code != 200:
+        print("Unexpected status code: " + request.status_code)
+        return []
 
-        league_champs = request.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("league_champs", league_champs, ttl_seconds = CACHE_TTL)
+    league_champs = request.body()
 
     # Return our quotes, except for the header line
     return csv.read_all(league_champs, skip = 1)

@@ -5,11 +5,13 @@ Description: Get today's flavor at Culver's Frozen Custard.
 Author: Josiah Winslow
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/image_placeholder.gif", IMAGE_PLACEHOLDER_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+IMAGE_PLACEHOLDER = IMAGE_PLACEHOLDER_ASSET.readall()
 
 WIDTH = 64
 HEIGHT = 32
@@ -30,32 +32,6 @@ FONTS = ["10x20", "6x10-rounded", "tb-8", "tom-thumb"]
 # Default location is "Culver's of Sauk City, WI - Phillips Blvd"
 DEFAULT_RESTAURANT_LOCATION = "-89.729866027832,43.2706871032715"
 DEFAULT_BG_COLOR = WHITE
-IMAGE_PLACEHOLDER = base64.decode("""
-R0lGODlhKAAoAPcAAAAAAAchTQchTg0jSwoiTA8mTwckVQkjUAsmUgwlUgwmUw0mUwklVQsnVw8oUQs
-pWA8rXBAnVxApUhcsUhAqVhUtVhQtVxUtVxguVhEtWxUtWxUuWhcuXBkvWBguWxkvXBoxWRoyWxsyXB
-ozXBszXBs0XR00XBElYRcyYBkzYhs1YBs2Yh04ZB8xaiA4YCI7ZSM9ZyA6aCE9aSJBbihCbS1GcC5Hc
-SVLdylIcyxKdCxMdyxPejVNdzJPeThSez1UfEBYfy5WgilahjBfiipgjDljjzRokjxokzRvmj17pDp+
-p0JbgUZdgk1ghUplikxnjFFihlBkiFFliVFmiVRnildqi1lrjVlsjl9ujU9rkE9skFtokWBzk2RykmF
-0k2V4l2t6nD2Hrz2IsD+KsjmPuT2Su3CBn0yCq0aIsUONs0+Ks1SPt0GRuEKTukOUvEWWvEaXv0iTuU
-iVu0qXvUmZv3KEoHeIo0uawEybwU6ew06fxFugxliiyluozVut02Cpy2Cx1miy2W633Xe513C+42/C5
-33F5XLD6HTF63nM73vM73nR9nrS93vT93/S9X/T9n7U+IGQqoeUrYeVrpKatoC/26Otway0yK+4yLG7
-y7K8y7fAz7vC0ofE4IbN65DJ45rR6Z/W74DU94HU94fW943X94LV+IHX+oPY+4Xa/IXb/ofc/4jf/5f
-d+p7e+a3d8rTe8Yjg/4vl/6fh+rDi+Ljl+Lnn+8DJ1MjP2srR28vS3MzR3c3T3dDU3tfc5Mfp98/s98
-Dp+8nt/NHv/Mbw/9Hw/dfz/t32/+Lm6+Pm7Onr8O7w8+T2/uT4/+r4/uj7/+/+//X2+Pn7+/v8/Pz8/
-fz9/f39/v79/v7+/v7+/////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAACH5BAEKAAAALAAAAAAoACgAAAj/AAEIHEiwoMGDCBMqXMiwocOHECNKnEixokWDAw
-IEIHDR4AYLAyOwYPIFzBQaDEB23NDEh4UQKMz40kZT2zJLNCh0ROFLWQwWmmrSjLaFErIfOitKoKItE
-wRM2qYJnWapBRhkNFROzLBJmw2mUoXSTHbi0iUGFBf8oMkpmdiaUjnt0kbDwcQDZqZJoyl1mt+/fmte
-KTCRwaS3iIXaSQpxgQEbXrh4mUy5MmXJNgwsgMhiCpcrU0KLHk069BUuVWQ8lHFrF65csGPD1kW7du3
-XvXjYbUgixZQrVoILF16luHHjVGJsgLhiyRMn0KNDf6KlunUtWbQ4YRGxgxA2Y8KL/x8Thg+iQocOoV
-efSA2HiB+C6KFzp74bOHjgAFp1CtWpVqmccoosZywH0QQ3yDHHHHLAUckfbOzhSSONiHKKLbQ08kgqR
-xAGEQYyxEHHHHCAAk0nZIBCTCmzDMOMMMaQAokoQQwgEQto4MFGJc4UE8orwgTDjDPDDFNMMAImMsNE
-KSSR3y/D2NIMNMcYY4srrZByioapCLLCRBwggUcezbxCCyygVGIIJBQ+Ioooj6yyx3sSbTBEHmx8Asw
-gZbhBhh+ouPkmnLGoEcFEHdyAxxxswMHGgnIAcsojlFYaSxEeRoRBCkbgoUceedSnX4CopMIKK6mskU
-IIFPW2AxFIKFMRRhpp9JHIIYQEwgcaRaRAgkUuUNEFFED0kAMOOuzQww9ANIEFFTB05MISXNQRySTYY
-htJHV4w8UJHBC2wgAUlmFCCBQg8AO667Lbr7rvwxttuQAA7
-""")
 
 def get_image(url):
     rep = http.get(url, ttl_seconds = TTL_SECONDS)

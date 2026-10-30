@@ -6,4 +6,11 @@ desc: Displays league tables for various football leagues.
 author: plumbob86
 fileName: footballtable.star
 packageName: footballtable
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - nfl
+  - football
+published: '2023-11-09T15:23:28Z'
+updated: '2026-10-01T15:26:52Z'

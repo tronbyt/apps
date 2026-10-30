@@ -5,11 +5,17 @@ Description: Showing details of the mempool of Bitcoin, such as the latest block
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("images/box_orange_img.gif", BOX_ORANGE_IMG_ASSET = "file")
+load("images/box_purple_img.gif", BOX_PURPLE_IMG_ASSET = "file")
+load("images/line_img.gif", LINE_IMG_ASSET = "file")
+load("render.star", "canvas", "render")
 load("time.star", "time")
+
+BOX_ORANGE_IMG = BOX_ORANGE_IMG_ASSET.readall()
+BOX_PURPLE_IMG = BOX_PURPLE_IMG_ASSET.readall()
+LINE_IMG = LINE_IMG_ASSET.readall()
 
 DEFAULT_FIAT = "usd"
 URL_BLOCK_TIP_HEIGHT = "https://mempool.space/api/blocks/tip/height"
@@ -18,25 +24,19 @@ URL_FEES = "https://mempool.space/api/v1/fees/recommended"
 
 BOX_SIZE_WIDTH = 28
 BOX_SIZE_HEIGHT = 27
-BOX_ORANGE_IMG = base64.decode("""
-R0lGODlhHAAbAJEDAC0oJUA4NKp9DwAAACH5BAEAAAMALAAAAAAcABsAAAJMjI+pNz2wonQAyotatRi/LYTiSJbiBpjqiq4u2b5yLLt0rd54qe9j7wsBg0NfcXfEJWvLGSjIe0J/0qmwav2krCLNliuggEOOwVhQAAA7
-""")
-BOX_PURPLE_IMG = base64.decode("""
-R0lGODlhHAAbAJEDACklSDs5dFNL0wAAACH5BAEAAAMALAAAAAAcABsAAAJMjI+pNz2wonQAyotatRi/LYTiSJbiBpjqiq4u2b5yLLt0rd54qe9j7wsBg0NfcXfEJWvLGSjIe0J/0qmwav2krCLNliuggEOOwVhQAAA7
-""")
-
-LINE_IMG = base64.decode("""
-R0lGODlhAQAVAIABAP///wAAACH5BAEAAAEALAAAAAABABUAAAIHhIMGGMpaAAA7
-""")
 
 def get_mempool_data(url, ttl_seconds = 30):
     response = http.get(url = url, ttl_seconds = ttl_seconds)
     if response.status_code != 200:
-        fail("Mempool.space request failed with status %d @ %s", response.status_code, url)
+        print("Mempool.space request failed with status %d @ %s" % (response.status_code, url))
+        return None
     return response
 
 def create_orange_block():
-    fees = get_mempool_data(URL_FEES).json()
+    resp = get_mempool_data(URL_FEES)
+    if not resp:
+        return render.Box(width = BOX_SIZE_WIDTH, height = BOX_SIZE_HEIGHT, color = "#333")
+    fees = resp.json()
 
     return render.Stack(
         children = [
@@ -78,7 +78,10 @@ def create_orange_block():
     )
 
 def create_purple_block(block_tip_height = 1):
-    block_details = get_mempool_data("{}/{}".format(URL_BLOCK_DETAILS, block_tip_height)).json()[0]
+    resp = get_mempool_data("{}/{}".format(URL_BLOCK_DETAILS, block_tip_height))
+    if not resp:
+        return render.Box(width = BOX_SIZE_WIDTH, height = BOX_SIZE_HEIGHT, color = "#333")
+    block_details = resp.json()[0]
 
     return render.Stack(
         children = [
@@ -122,11 +125,65 @@ def create_purple_block(block_tip_height = 1):
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
-    block_tip_height = int(get_mempool_data(URL_BLOCK_TIP_HEIGHT).body())
+    resp = get_mempool_data(URL_BLOCK_TIP_HEIGHT)
+    if not resp:
+        return render.Root(
+            child = render.Box(
+                child = render.Text("API Error", color = "#F00"),
+            ),
+        )
+    block_tip_height = int(resp.body())
 
     box_orange = create_orange_block()
     box_purple = create_purple_block(block_tip_height)
+
+    # The two blocks are fixed 28x27 artwork and together they are as wide as
+    # a panel gets, so a square panel cannot make them bigger. It can give the
+    # block height a line of its own above them in a readable font, and
+    # centre the lot, instead of wedging the number over the purple block in
+    # the top half.
+    if is_square():
+        return render.Root(
+            max_age = 30,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Text(
+                        content = str(block_tip_height),
+                        color = "#09a3ba",
+                        font = "6x13",
+                    ),
+                    render.Row(
+                        main_align = "space_between",
+                        cross_align = "end",
+                        children = [
+                            box_orange,
+                            render.Padding(
+                                pad = (3, 1, 3, 1),
+                                child = render.Image(
+                                    src = LINE_IMG,
+                                    width = 1,
+                                    height = 21,
+                                ),
+                            ),
+                            box_purple,
+                        ],
+                    ),
+                ],
+            ),
+        )
 
     return render.Root(
         max_age = 30,

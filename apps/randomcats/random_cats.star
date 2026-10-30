@@ -5,57 +5,36 @@ Description: Shows random pictures of cats/gifs of cats from Cats as a Service (
 Author: mrrobot245
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def main(config):
-    if config.bool("gifs", True):
-        url = "https://cataas.com/cat/gif?height=32"
-    else:
-        url = "https://cataas.com/cat?height=32"
+    height = canvas.height()
+
+    cat_type = "/gif" if config.bool("gifs", True) else ""
+    url = "https://cataas.com/cat{}?height={}".format(cat_type, height)
+
+    # Preview
+    # url = https://cataas.com/cat/vHWxUr3RH8Gp0bke?height=" + str(height)
 
     imgSrc = get_cached(url)
 
-    children = []
-    children.append(
-        render.Row(
-            expanded = True,
-            main_align = "center",
-            children = [
-                render.Image(
-                    src = imgSrc,
-                    # width = 65,
-                    height = 32,
-                ),
-            ],
-        ),
-    )
     return render.Root(
-        # delay = 60,
-        child = render.Column(
-            main_align = "space_between",
-            cross_align = "center",
-            children = children,
+        child = render.Box(
+            child = render.Image(
+                src = imgSrc,
+                height = height,
+            ),
         ),
     )
 
 def get_cached(url, ttl_seconds = 20):
-    data = cache.get(url)
-    if data:
-        return data
-
-    res = http.get(url)
+    res = http.get(url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
         fail("status %d from %s: %s" % (res.status_code, url, res.body()))
 
-    data = res.body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(url, data, ttl_seconds = ttl_seconds)
-
-    return data
+    return res.body()
 
 def get_schema():
     return schema.Schema(

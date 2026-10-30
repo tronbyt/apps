@@ -46,26 +46,42 @@ Updated for 2025 season
 
 v2.5.1
 Handling for Western Bulldogs being referred to as original name of Footscray for their 100th anniversary
+
+v2.5.2
+Handling for Indigenous team names
+
+v2.6
+Updated for 2026 season
+Updated timezone check
+
+v2.7
+Squiggle API now requiring the current year to be added to all requests
+
+v2.7.1
+Bug fix: forgot to update the function calls for live games...
+
+v2.8
+Added User Agent info to API request as per new requirements from provider
 """
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 DEFAULT_TIMEZONE = "Australia/Adelaide"
 DEFAULT_TEAM = "10"  # Geelong #gocats
 
-MATCHES_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=73"
-LADDER_URL = "https://aflapi.afl.com.au/afl/v2/compseasons/73/ladders"
-ROUND_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=73&roundNumber="
+MATCHES_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=85"
+LADDER_URL = "https://aflapi.afl.com.au/afl/v2/compseasons/85/ladders"
+ROUND_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=85&roundNumber="
 TEAM_SUFFIX = "&teamId="
 
 SQUIGGLE_PREFIX = "https://api.squiggle.com.au/?q=games;round="
 INCOMPLETE_SUFFIX = ";complete=!100"
 COMPLETE_SUFFIX = ";complete=100"
-YEAR_SUFFIX = ";year=2025"
+YEAR_PREFIX = ";year="
 
 MATCH_CACHE = 21600
 LADDER_CACHE = 86400
@@ -77,7 +93,7 @@ def main(config):
     ViewSelection = config.get("View", "All")
     TeamListSelection = config.get("TeamList", DEFAULT_TEAM)
 
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     # Lets initialize!
@@ -102,6 +118,7 @@ def main(config):
 
     # Get the Current Round, according to the API
     CurrentRound = str(MatchesJSON["matches"][0]["compSeason"]["currentRoundNumber"])
+    YEAR = YEAR_PREFIX + str(MatchesJSON["matches"][0]["compSeason"]["name"])[0:4]
 
     if ViewSelection == "All" or ViewSelection == "Live":
         CURRENT_ROUND_URL = ROUND_URL + CurrentRound
@@ -113,7 +130,7 @@ def main(config):
     CurrentRoundJSON = json.decode(RoundData)
 
     # Use the Squiggle API for live games, cache data for 30 secs
-    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX
+    SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX + YEAR
 
     LiveData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
     LiveJSON = json.decode(LiveData)
@@ -188,7 +205,7 @@ def main(config):
 
             # We have a live game!
             if status == "LIVE":
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
 
             # if the game is complete, show the status and get the scores
@@ -215,9 +232,8 @@ def main(config):
         for x in range(0, GamesThisRound, 1):
             status = CurrentRoundJSON["matches"][x]["status"]
 
-            #print(status)
             if status == "LIVE":
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
                 LiveCount = LiveCount + 1
 
@@ -427,7 +443,7 @@ def main(config):
             # We have a live game!
             if status == "LIVE":
                 #print("LIVE")
-                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
+                LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR)
                 renderDisplay.extend(LiveOutput)
 
             # if the game is complete, show the status and get the scores
@@ -438,16 +454,16 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(RotationSpeed) * 1000,
-        child = render.Column(
-            children = [
-                render.Animation(
-                    children = renderDisplay,
-                ),
-            ],
+        # The frames are expanded 32-row Columns; bound them so taller panels
+        # (64x64) centre the scoreboard instead of stretching it from the top.
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Box(width = 64, height = 32, child = render.Animation(children = renderDisplay)),
         ),
     )
 
-def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
+def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x, YEAR):
     renderDisplay = []
 
     # get start time for the match in question
@@ -578,7 +594,7 @@ def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
     # So lets look at completed games for the round in Squiggle, match the team we're looking at and pass info to the showCompletedGame function
     if LiveMatch == False:
         CurrentRound = str(CurrentRoundJSON["matches"][0]["compSeason"]["currentRoundNumber"])
-        SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + COMPLETE_SUFFIX + YEAR_SUFFIX
+        SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + COMPLETE_SUFFIX + YEAR
         CompletedData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
         CompletedJSON = json.decode(CompletedData)
         CompletedMatches = len(CompletedJSON["games"])
@@ -913,7 +929,9 @@ def MoreOptions(View):
         return None
 
 def get_cachable_data(url, timeout):
-    res = http.get(url = url, ttl_seconds = timeout)
+    res = http.get(url = url, ttl_seconds = timeout, headers = {
+        "User-Agent": "Tronbyt Application (AFL Scores) - steve@schtev.com",
+    })
 
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))

@@ -5,10 +5,9 @@ Description: Pulls live VALORANT rank stats using henrikdev's Valorant API based
 Author: ohdxnte
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/default_emblem.png", DEFAULT_EMBLEM_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -51,29 +50,28 @@ def main(config):
     # call get api data function (check if have cache or make fresh api call) w/ ttl of 300 to not rate limit api
     user_stat_data = getAPIDataCacheOrHTTP(val_tag_api_link, data, ttl_seconds = 300)
 
+    #call user stats function passing in API JSON data and provided_val_tag_name
+    if user_stat_data == None:
+        return render.Root(
+            child = render.WrappedText("API Error / No Data", color = "#FF0000"),
+        )
+
     # encode json data for parsing later
     user_stat_data = json.encode(user_stat_data)
 
-    #call user stats function passing in API JSON data and provided_val_tag_name
-    if user_stat_data == None:
-        print("yo u aint got NO data my boy das not good")
-        # draft fail render screen here
-        # it wont reach this point as if it has no data it will either 404/error from api HTTP req OR it will default to #1 leaderboard spot
+    print("You have data, proceeding")
 
-    else:
-        print("You have data, proceeding")
+    # set data variables from cached/parsed json
+    rank = json.decode(user_stat_data)["data"]["current_data"]["currenttierpatched"]
+    json_image = json.decode(user_stat_data)["data"]["current_data"]["images"]["small"]
 
-        # set data variables from cached/parsed json
-        rank = json.decode(user_stat_data)["data"]["current_data"]["currenttierpatched"]
-        json_image = json.decode(user_stat_data)["data"]["current_data"]["images"]["small"]
+    # exception case if rank is set to none set text/image to unranked so it can still pass data
+    if rank == None:
+        rank = "Unranked"
+        json_image = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/0.png"
 
-        # exception case if rank is set to none set text/image to unranked so it can still pass data
-        if rank == None:
-            rank = "Unranked"
-            json_image = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/0.png"
-
-        # get base64 image from json png url
-        rank_image = getImage(json_image)
+    # get base64 image from json png url
+    rank_image = getImage(json_image)
 
     # render data
     print(provided_val_tag_name + ", " + rank)
@@ -81,22 +79,11 @@ def main(config):
 
 # caching!
 def getAPIDataCacheOrHTTP(val_tag_api_link, data, ttl_seconds):
-    user_cache = cache.get(data)
-    if user_cache != None:
-        print("Displaying cached user data")
-        rep = json.decode(user_cache)
-        data = rep.json()
-        print(data)
-    else:
-        print("No cached data. Hitting API")
-        rep = http.get(val_tag_api_link)
-        if rep.status_code != 200:
-            fail("VALORANT API request failed with status %d", rep.status_code)
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(val_tag_api_link, json.encode(rep.json()), ttl_seconds = ttl_seconds)
-        data = rep.json()
-        print("Hit API and cached data")
+    rep = http.get(val_tag_api_link, ttl_seconds = ttl_seconds)
+    if rep.status_code != 200:
+        print("VALORANT API request failed with status %d" % rep.status_code)
+        return None
+    data = rep.json()
     return data
 
 # get image from predefined json image url from stats api
@@ -104,19 +91,9 @@ def getImage(url, ttl_seconds = 3600):
     if not url:
         fail("No API string provided")
 
-    key = base64.encode(url)
-
-    data = cache.get(key)
-    if data != None:
-        return base64.decode(data)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = ttl_seconds)
     if res.status_code != 200:
-        return base64.decode("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAABKklEQVRYCe2VUY7DIAxEQ9UD9f6n6I3SDPCQMURVpUD6gbVbw2A8g4OTsG/b8XefPaEODCZ5Tv0Qn8gBZvCLiwNHASKdJcKSi7cImCHCk4uz3AFNZCMrQdkTU/ptBLD4YnCRf5/kqR7BScxQeAlYFQhHb+60h/p0hlm+tg13JyMc4RbTXNbDLP4tLibpvIgizuYcVGEiZh0PhtcGO/ZxJm9bATbLs/EXTLHeJEZm8yWk/hZkLAX6YD8/SVhy2EFvb17vt6EU8+8TcRpwJQdjrLknZY192f9XF9j2GPExIr8tQv8R2IjB4yVgVeD2ClTvAS58fnEyvcz7NhRP8y0Q6AOvUtDLXT2CXsBV5Mqjg4nDWhEwmhxSLyLeAS2OKjvE3lOJcgcAfODo+Qful09RLycDuQAAAABJRU5ErkJggg==""")
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = ttl_seconds)
-
+        return DEFAULT_EMBLEM_ASSET.readall()
     return res.body()
 
 def checkRank1(lb_data, provided_val_tag_name):

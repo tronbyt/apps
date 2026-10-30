@@ -1,8 +1,6 @@
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
@@ -112,9 +110,10 @@ def render_feed(feed, articles, colors, font, show_time, show_title, show_story,
         children = [
             render_header(feed, colors, header_height, logo_width),
             render.Marquee(
-                height = 32 - header_height,
+                # the rows under the header: 64 tall panels get twice as many
+                height = canvas.height() - header_height,
                 scroll_direction = "vertical",
-                offset_start = 32 - header_height,
+                offset_start = canvas.height() - header_height,
                 child = render.Column(
                     children = render_articles(articles, colors, font, show_time, show_title, show_story),
                 ),
@@ -146,14 +145,8 @@ def render_header(feed, colors, header_height, logo_width):
     )
 
 def render_logo(colors, width, height):
-    cached_logo = cache.get(NPR_LOGO_URL)
-
-    if cached_logo != None:
-        return render.Image(src = base64.decode(cached_logo), width = width, height = height)
-
-    res = http.get(NPR_LOGO_URL)
+    res = http.get(NPR_LOGO_URL, ttl_seconds = CACHE_TTL_SECONDS)
     if res.status_code == 200:
-        cache.set(NPR_LOGO_URL, base64.encode(res.body()), ttl_seconds = CACHE_TTL_SECONDS)
         return render.Image(src = res.body(), width = width, height = height)
 
     return render.Text("NPR", font = "tom-thumb", color = colors["background"])

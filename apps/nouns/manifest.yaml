@@ -6,4 +6,12 @@ desc: Displays the Noun currently under auctionand bid details.
 author: miracle2k
 fileName: nouns.star
 packageName: nouns
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - finance
+  - retro
+  - clock
+published: '2023-07-27T14:18:05Z'
+updated: '2026-10-01T22:07:01Z'

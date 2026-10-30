@@ -5,7 +5,7 @@ load("time.star", "time")
 
 def get_next_lunch(school_name):
     start = time.now()
-    end = start + time.parse_duration("%sh" % 24 * 7)
+    end = start + time.parse_duration("%sh" % 24 * 5)
 
     url = "https://api.mealviewer.com/api/v4/school/{}/{}/{}/0".format(
         school_name,

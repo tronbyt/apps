@@ -6,4 +6,12 @@ desc: This app fetches and displays the streamers you follow who are live.
 author: daltonclaybrook
 fileName: live_on_twitch.star
 packageName: liveontwitch
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - twitch
+  - real-time
+  - gaming
+published: '2023-11-04T19:54:49Z'
+updated: '2026-10-01T21:48:48Z'

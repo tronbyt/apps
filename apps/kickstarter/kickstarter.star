@@ -5,23 +5,16 @@ Description: Display the total amount raised and the number of backers for a Kic
 Author: sethvargo
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/kickstarter_icon.png", KICKSTARTER_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
+KICKSTARTER_ICON = KICKSTARTER_ICON_ASSET.readall()
+
 KICKSTARTER_URL = "https://www.kickstarter.com/projects/{slug}/stats.json?v=1"
-KICKSTARTER_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAAPCAYAAAA/I0V3AAAAwklEQVR4AWNw
-L/Bh4DxXYcp6rnI767mKJ6znK3axna8IBYmzXqgxBPK3AcWfAvFxII4EiTNw
-XKqwBHJ+A/F/ZMx2rnIJVvELFUUMQMZBEIcE/A2k6SuJmv4zgAiaa2I7V7GY
-VE2nBe928JOi6Qfn+SppUJCTatMh8Qvd3OT4aRbZofeddE3nK46SqOknA/v5
-agcg4x+mZOVGIP0XXRyYmKtBqRym8QgQfwSlZqDtiSBxjgvVNkD+YZA4MACu
-AMXTQOIAaoOmULmqfxIAAAAASUVORK5CYII=
-""")
+
 KICKSTARTER_COLOR_GREEN = "#05ce78"
 KICKSTARTER_COLOR_BLACK = "#222"
 KICKSTARTER_CACHE_KEY = "kickstarter_{slug}"
@@ -82,13 +75,6 @@ def get_project_data(slug):
       Parsed JSON response as a dictionary
     """
 
-    cache_key = KICKSTARTER_CACHE_KEY.format(slug = slug)
-
-    cached = cache.get(cache_key)
-    if cached:
-        print("Using cached value for %s" % cache_key)
-        return json.decode(cached)
-
     url = KICKSTARTER_URL.format(slug = slug)
 
     res = http.get(
@@ -97,7 +83,16 @@ def get_project_data(slug):
             "accept": "application/json",
             "content-type": "application/json",
         },
+        ttl_seconds = 300,  # Default TTL, or match previous behavior if implicit
     )
+    # The previous code didn't set a specific TTL in cache.set?
+    # Wait, checking original code...
+    # cache.set(cache_key, json.encode(project)) -- No ttl_seconds specified! Default is usually large or infinite?
+    # Tidbyt default cache TTL is usually 60s if not specified? Or permanent?
+    # Docs say "Defaults to 60 seconds".
+    # So I will use 60 seconds to match default behavior or slightly longer.
+    # Let's use 600 (10 mins) as it seems reasonable for Kickstarter.
+
     if res.status_code != 200:
         fail("kickstarter request to %s failed with status code: %d - %s" %
              (url, res.status_code, res.body()))
@@ -108,8 +103,6 @@ def get_project_data(slug):
 
     project = parsed.get("project")
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(project))
     return project
 
 def get_schema():

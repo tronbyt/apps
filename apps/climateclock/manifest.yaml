@@ -6,4 +6,12 @@ desc: The most important number in the world.
 author: Rob Kimball
 fileName: climate_clock.star
 packageName: climateclock
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: clocks
+tags:
+  - weather
+  - utility
+  - clock
+published: '2022-05-03T17:47:36Z'
+updated: '2026-10-01T20:31:47Z'

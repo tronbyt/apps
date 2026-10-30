@@ -1,45 +1,37 @@
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("humanize.star", "humanize")
+load("images/pokt_icon.png", POKT_ICON_ASSET = "file")
 load("render.star", "render")
 
-COINSTATS_PRICE_URL = "https://api.coinstats.app/public/v1/coins/pocket-network"
-PNI_HEIGHT_URL = "https://supply.research.pokt.network:8192/height"
-POKT_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IArs4c6QAAAQBJREFUSEu1lTEOwjAMRZ0KFQmJjZF7MHADFnbgFtyHCbFxBwYQYuYKqAudEZUQRSlKCY5ju4Jma+y8Oj9ftsmyrATFGq27MOwDbKeFIhvAxMAWRK3T4g128eO8gMSEmSQ4BrXHMdjf8/FfYA7oDlFgHLPf7YI1V8cqSm9QVSwlaaG+JFGw09Ila/RvBOaAgx5AfgutZosSK5ZkouIVeLK6luc8CX7L2Qp7F8PbBcdc8XPFHFjrb1IKzsdcE+JsyLrCh2JPS96uwX4bxFVSUI1EdRPaXwwsd2lj28VuJnY3yR0qsE0ab1J4PD8jQQOm5BJH09/BsVbZSQwcZndxoL4AMITkTbi6GN8AAAAASUVORK5CYII=
-""")
+POKT_ICON = POKT_ICON_ASSET.readall()
+
+# The price is from CoinGecko (free, no key). Pocket Network moved to its Shannon chain in 2025, so the block height
+# comes from Polkachu's public Shannon RPC node; the old PNI height endpoint and CoinStats' public API have gone.
+PRICE_URL = "https://api.coingecko.com/api/v3/simple/price?ids=pocket-network&vs_currencies=usd"
+HEIGHT_URL = "https://pocket-rpc.polkachu.com/status"
+
+def get_price():
+    rep = http.get(PRICE_URL, ttl_seconds = 1800)
+    if rep.status_code != 200:
+        print("CoinGecko request failed with status %d" % rep.status_code)
+        return None
+    price = rep.json().get("pocket-network", {}).get("usd")
+    return humanize.float("#.####", price) if price != None else None
+
+def get_height():
+    rep = http.get(HEIGHT_URL, ttl_seconds = 600)
+    if rep.status_code != 200:
+        print("Pocket Network RPC request failed with status %d" % rep.status_code)
+        return None
+    return rep.json().get("result", {}).get("sync_info", {}).get("latest_block_height")
 
 def main():
-    cached_price = cache.get("pokt_price")
-    cached_height = cache.get("pokt_height")
-
-    if cached_price != None:
-        print("cache hit! using cached price")
-        price = float(cached_price)
-    else:
-        print("cache miss! calling coinstats API")
-        rep = http.get(COINSTATS_PRICE_URL)
-        if rep.status_code != 200:
-            fail("Coinstats request failed with status %d", rep.status_code)
-        price = rep.json()["coin"]["price"]
-
-        # 2 hour cache for the price
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("pokt_price", str(float(price)), ttl_seconds = 7200)
-
-    if cached_height != None:
-        print("cache hit! using cached height")
-        height = int(cached_height)
-    else:
-        print("cache miss! calling PNI API")
-        rep = http.get(PNI_HEIGHT_URL)
-        if rep.status_code != 200:
-            fail("PNI Height request failed with status %d", rep.status_code)
-        height = rep.body()
-
-        # 10 minute cache for the height (15 minute block time)
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("pokt_height", str(int(height)), ttl_seconds = 600)
+    price = get_price()
+    height = get_height()
+    if price == None and height == None:
+        return []
+    price = price or "--"
+    height = height or "--"
 
     return render.Root(
         child = render.Box(
@@ -61,7 +53,7 @@ def main():
                         children = [
                             render.Text(content = "POKT", font = "Dina_r400-6"),
                             render.Text("$%s" % price),
-                            render.Text("%s" % height),
+                            render.Text(height),
                         ],
                     ),
                 ],

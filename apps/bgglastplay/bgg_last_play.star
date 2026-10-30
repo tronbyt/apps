@@ -8,7 +8,7 @@ Author: DanDobrick
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
@@ -88,7 +88,7 @@ def build_days_since_str(last_play_date, timezone):
             return "{} days since".format(days_since)
 
 def build_last_play(config, last_play_date, last_play_game):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     label_choice = config.get("label")
     days_since_str = build_days_since_str(last_play_date, timezone)
 
@@ -127,33 +127,31 @@ def build_last_play(config, last_play_date, last_play_game):
     return children
 
 def render_main(config, game_image, last_play_date, last_play_game):
-    return render.Root(
-        child = render.Stack(
-            children = [
-                render.Image(
-                    height = 35,
-                    width = 35,
-                    src = game_image,
-                ),
-                render.Box(
-                    color = "#00FF0000",
-                    child = render.Padding(
-                        pad = (0, 0, 0, 0),
-                        color = "#FF000000",
-                        child = render.Column(
-                            cross_align = "end",
-                            main_align = "start",
-                            expanded = False,
-                            children = build_last_play(config, last_play_date, last_play_game),
-                        ),
-                    ),
-                ),
-            ],
+    children = []
+    if game_image:
+        children.append(render.Image(height = 35, width = 35, src = game_image))
+
+    children.append(render.Box(
+        color = "#00FF0000",
+        child = render.Padding(
+            pad = (0, 0, 0, 0),
+            color = "#FF000000",
+            child = render.Column(
+                cross_align = "end",
+                main_align = "start",
+                expanded = False,
+                children = build_last_play(config, last_play_date, last_play_game),
+            ),
         ),
+    ))
+
+    return render.Root(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = children))),
     )
 
 def demo(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     yesterday_long = time.now().in_location(timezone) - time.parse_duration("86400s")
     yesterday = yesterday_long.format("2006-01-02")
     game_image = get_image(DEMO_GAME_ID)

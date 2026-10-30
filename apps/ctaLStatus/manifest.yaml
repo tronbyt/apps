@@ -6,4 +6,9 @@ desc: View the latest status of CTA 'L' Trains and any alerts associated with th
 author: sgomez72
 fileName: ctaLStatus.star
 packageName: ctalstatus
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags: []
+published: '2025-04-12T10:40:01Z'
+updated: '2026-10-01T18:17:08Z'

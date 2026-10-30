@@ -6,4 +6,12 @@ desc: Show your Partnermetrics app stats. Data is fetched from Partnermetrics.io
 author: Rishabh Tayal
 fileName: partnermetrics.star
 packageName: partnermetrics
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - sports
+  - utility
+published: '2023-03-23T15:12:33Z'
+updated: '2026-10-01T22:17:11Z'

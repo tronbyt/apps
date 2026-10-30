@@ -6,4 +6,10 @@ desc: Display the current Australian Football League standings and the next game
 author: andymcrae
 fileName: afl.star
 packageName: afl
-recommended_interval: 5
+recommendedInterval: 5
+category: sports
+tags:
+  - afl
+  - football
+published: '2022-06-09T16:52:13Z'
+updated: '2025-11-30T20:08:55Z'

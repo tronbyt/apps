@@ -5,11 +5,13 @@ Description: Display real-time current weather conditons provided by WeatherSTEM
 Author: jflood937
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/wind_icon.png", WIND_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+
+WIND_ICON = WIND_ICON_ASSET.readall()
 
 # The WeatherSTEM API endpoint used to retrieve current conditions data.
 #
@@ -25,7 +27,6 @@ cache_seconds = 240
 border_color = "#33c"
 
 # Weather icons used in display
-wind_icon = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAYAAAAPDoR2AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAcElEQVQImWP8//8/AzI4fhsiYKnKyMjEgAYsVRkZYWwWmEpk0LflEzMDAwMjY+h0TEkGBgaG+8cWcrB8uHtSio2b+xMrt+gvpr9//r55cYvx4ATHv2EM8f9Z+KU0nsOVszAwHJzgyBA2g+E/AwMDAwBGoyYA+tOwOwAAAABJRU5ErkJggg==""")
 
 # Sample data for preview - this is a subset of the full data available for rendering a preview image only
 sample_data = {
@@ -139,7 +140,7 @@ def main(config):
                         main_align = "space_evenly",  # Controls vertical alignment
                         cross_align = "center",  # Controls horizontal alignment
                         children = [
-                            render.Image(src = wind_icon),
+                            render.Image(src = WIND_ICON),
                             render.Text(
                                 content = wind_info,
                             ),
@@ -211,7 +212,7 @@ def deg_to_compass(degress):
        String containing named compass direction.
     """
 
-    val = int((degress / 22.5) + .5)
+    val = int((degress / 22.5) + 0.5)
     arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
     return arr[(val % 16)]
 
@@ -235,6 +236,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Private WeatherSTEM API Key. Register for free here https://www.weatherstem.com/register",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "station_id",

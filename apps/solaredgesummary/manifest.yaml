@@ -2,8 +2,15 @@
 id: solaredgesummary
 name: SolarEdgeSummary
 summary: SolarEdge system summary
-desc: Daily, monthly, annual and lifetime energy production and consumption monitor for your SolarEdge solar panels.
+desc: Daily, weekly, monthly, annual and lifetime energy production and consumption monitor for your SolarEdge solar panels.
 author: ckyr (credit to Ingmar Stein)
 fileName: solaredgesummary.star
 packageName: solaredgesummary
-recommended_interval: 30
+recommendedInterval: 30
+category: utilities
+tags:
+  - utility
+  - tracking
+  - smart-home
+published: '2025-10-18T00:45:15Z'
+updated: '2025-12-08T06:46:46Z'

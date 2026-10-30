@@ -5,8 +5,6 @@ Description: Shows train, BRT, ABRT, and bus departure times from the selected s
 Author: Jonathan Wescott and Alex Miller
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
@@ -20,22 +18,11 @@ def main(config):
     stop_code = config.get("stop_code", DEFAULT_STOP_CODE)
     stop_name = config.get("stop_name", DEFAULT_STOP_NAME)
     url = "https://svc.metrotransit.org/NexTripv2/" + stop_code + "?format=json"
-    cache_key = "MTT_rate_{0}".format(stop_code)
 
     #Cache Data
-    MTT_cached = cache.get(cache_key)
-
-    if MTT_cached != None:
-        print("Hit! Displaying cached data.")
-        MTT = json.decode(MTT_cached)
-        MTT_data = MTT
-    else:
-        print("Miss! Calling Transit data.")
-        MTT = http.get(url).json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(cache_key, json.encode(MTT), ttl_seconds = 30)
-        MTT_data = MTT
+    print("Miss! Calling Transit data.")
+    MTT = http.get(url, ttl_seconds = 30).json()
+    MTT_data = MTT
 
     print(MTT_data)
 

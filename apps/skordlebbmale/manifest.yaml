@@ -6,4 +6,11 @@ desc: This app gets male basketball data from the Skordle website to display on 
 author: Woolycoin437420
 fileName: skordle_bb_male.star
 packageName: skordlebbmale
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - sports
+  - gaming
+published: '2023-11-07T14:45:58Z'
+updated: '2026-10-01T18:17:06Z'

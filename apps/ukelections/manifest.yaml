@@ -6,4 +6,10 @@ desc: Details about upcoming elections in the United Kingdom.
 author: dinosaursrarr
 fileName: uk_elections.star
 packageName: ukelections
-recommended_interval: 5
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - news
+  - local
+published: '2023-06-27T19:00:46Z'
+updated: '2025-12-05T22:28:51Z'

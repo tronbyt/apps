@@ -6,4 +6,11 @@ desc: An animated javelina girl who is happy to see you!
 author: nicknmejia
 fileName: javelexi.star
 packageName: javelexi
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - art
+  - gaming
+published: '2023-04-11T19:33:48Z'
+updated: '2026-10-01T21:37:10Z'

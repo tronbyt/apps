@@ -4,4 +4,10 @@ name: LA Metro Arrivals
 summary: Arrivals for LA Metro rail
 desc: Show arrival times for LA Metro rail lines near a given location.
 author: talevy42, M0ntyP
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - utility
+published: '2024-04-29T14:19:24Z'
+updated: '2026-10-01T21:41:49Z'

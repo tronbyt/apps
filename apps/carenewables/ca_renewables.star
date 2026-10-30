@@ -5,14 +5,13 @@ Description: See how California is using renewable energy in its power grid righ
 Author: @sloanesturz
 """
 
-load("cache.star", "cache")
 load("encoding/csv.star", "csv")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("render.star", "render")
 load("schema.star", "schema")
 
-FUEL_URL = "https://www.caiso.com/outlook/SP/fuelsource.csv"
+FUEL_URL = "https://www.caiso.com/outlook/current/fuelsource.csv"
 
 # Large hydro and batteries are not officially 'green' but are certainly "clean" -- these can be toggled via the config
 
@@ -59,17 +58,10 @@ def title(name, amount, color):
 # 00:05,-4,3653,905,313,210,155,4,2244,10116,1756,322,6679,0
 # ...
 def get_raw_data():
-    cached = cache.get(CACHE_KEY)
-    if cached != None:
-        data = cached
-    else:
-        rep = http.get(FUEL_URL)
-        if rep.status_code != 200:
-            fail("Request failed with status %d", rep.status_code)
-        data = rep.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(CACHE_KEY, data, ttl_seconds = 60 * 5)
+    rep = http.get(FUEL_URL, ttl_seconds = 60 * 5)
+    if rep.status_code != 200:
+        fail("Request failed with status %d", rep.status_code)
+    data = rep.body()
 
     return data
 

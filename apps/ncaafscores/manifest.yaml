@@ -6,4 +6,12 @@ desc: Creating multiple app instances is no longer necessary. Just install once 
 author: LunchBox8484
 fileName: ncaaf_scores.star
 packageName: ncaafscores
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - utility
+  - ncaaf
+  - football
+published: '2022-08-18T14:51:01Z'
+updated: '2026-10-17T18:55:52Z'

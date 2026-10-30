@@ -6,23 +6,18 @@ Author: ColinCampbell
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+CHECKMARK = CHECKMARK_ASSET.readall()
 
 API_VALIDATOR_LIMIT = 10
 FULL_ROW_LIMIT = 30
 FULL_COLUMN_LIMIT = 11
-
-CHECKMARK = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAcAAAAFCAYAAACJmvbYAAAAAXNSR0IArs4c6QAAAERlW
-ElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAA
-AAB6ADAAQAAAABAAAABQAAAACrlow2AAAAIklEQVQIHWNgwAHknoX9xyoFl4AzoMrQ+Qw
-wARiNYRw2CQBc5RBwfuwjGAAAAABJRU5ErkJggg==
-""")
 
 def main(config):
     statuses = validator_statuses(config)
@@ -31,7 +26,8 @@ def main(config):
         status_rows = chunk_list(statuses, FULL_ROW_LIMIT)
 
         return render.Root(
-            child = render.Padding(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
                 child = render.Column(
                     children = [
                         render.Padding(
@@ -56,11 +52,12 @@ def main(config):
                     ],
                 ),
                 pad = 2,
-            ),
+            )),
         )
     else:
         return render.Root(
-            child = render.Padding(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
                 child = render.Column(
                     children = [
                         render.Padding(
@@ -71,7 +68,7 @@ def main(config):
                     ],
                 ),
                 pad = 2,
-            ),
+            )),
         )
 
 def header_status(statuses):
@@ -99,6 +96,7 @@ def get_schema():
                 name = "Beaconcha.in API Key",
                 desc = "The API key from your Beaconcha.in account used to load your validator data",
                 icon = "server",
+                secret = True,
             ),
             schema.Text(
                 id = "validators",
@@ -131,7 +129,6 @@ def validator_statuses(config):
 
     slot_statuses = all_slot_statuses[slot_status_drop_count:] if slot_status_drop_count > 0 else all_slot_statuses
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(cache_key, json.encode(slot_statuses), ttl_seconds = 600)
 
     empty_status_length = status_limit - len(slot_statuses)
@@ -220,19 +217,12 @@ def status_score(status):
         return 3
 
 def api_response(url):
-    json_response = cache.get(url)
-    if json_response == None:
-        print("No response cached, reloading from API")
-        response = http.get(url, headers = {
-            "accept": "application/json",
-        })
-        json_response = response.json()
+    print("Reloading from API")
+    response = http.get(url, headers = {
+        "accept": "application/json",
+    }, ttl_seconds = 60)
+    json_response = response.json()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, json.encode(json_response), ttl_seconds = 60)
-    else:
-        print("Found cached response, using that")
-        json_response = json.decode(json_response)
     return json_response
 
 def status_circle(status):

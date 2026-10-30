@@ -16,7 +16,6 @@ load("hmac.star", "hmac")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 LOCAL_MODE = False
@@ -25,8 +24,6 @@ LOCAL_API_KEY = None
 
 BASE_URL = "https://timetableapi.ptv.vic.gov.au"
 CACHE_TTL_SECS = 60
-ENCRYPTED_API_ID = "AV6+xWcEUFsKJsqPRm2NWEco08PVmBJ0/xLKFPb97mPipfV2hGzYDlDX8Dto1M0DadIGw2zXS4VsQdl+dRVPKJPr9ia2JhJuQ1dxqTVe9C17SZNl7NFtlWDHbOvx/Ht9oNaCg1QBuhaeiIsP6A=="
-ENCRYPTED_API_KEY = "AV6+xWcE/JHThbqzYMoWyDLVy1u238TC4dqKalBth5ycLUKFCf7BmUnF5vYB8sAE5S8NgXbD26KZ26b3cF69+mVqLWD3iCjKMPr18SxS5Yjnv/qcCM1nciJKLvr2De2asUtU0VqDirS9Vu6dGNqJHuslI4cRkLDikRMN3DvHqF6bYjFJBwP608eL"
 
 COLOR_CODE_BLACK = "#000000"
 COLOR_CODE_GREEN = "#00E400"
@@ -88,7 +85,7 @@ def main(config):
         stop = json.decode(json.decode(stop)["value"])
 
     if stop:
-        departures = get_departures(stop)
+        departures = get_departures(stop, config)
 
         # Render - API Credential Error
         if departures == -1:
@@ -259,10 +256,10 @@ def build_divider_invisible_row():
     )
 
 # API - GET Departures Data and Transform
-def get_departures(stop):
+def get_departures(stop, config):
     # Set API ID/KEY
-    api_id = LOCAL_API_ID if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_ID)
-    api_key = LOCAL_API_KEY if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_KEY)
+    api_id = LOCAL_API_ID if LOCAL_MODE else config.get("ptv_api_id")
+    api_key = LOCAL_API_KEY if LOCAL_MODE else config.get("ptv_api_key")
     if api_id == None or api_key == None:
         print("[ERROR]: Failed to retrieve API credentials")
         return -1
@@ -315,10 +312,10 @@ def get_departures(stop):
     return departures_data
 
 # API - GET Bus Stop Data and Transform
-def get_bus_stop(location):
+def get_bus_stop(location, config):
     # Set API ID/KEY
-    api_id = LOCAL_API_ID if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_ID)
-    api_key = LOCAL_API_KEY if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_KEY)
+    api_id = LOCAL_API_ID if LOCAL_MODE else config.get("ptv_api_id")
+    api_key = LOCAL_API_KEY if LOCAL_MODE else config.get("ptv_api_key")
     if api_id == None or api_key == None:
         print("[ERROR]: Failed to retrieve API credentials")
         return ""
@@ -411,6 +408,20 @@ def get_schema():
                 desc = "Find the nearest bus stops by location",
                 icon = "locationDot",
                 handler = get_bus_stop,
+            ),
+            schema.Text(
+                id = "ptv_api_id",
+                name = "PTV API ID",
+                desc = "A PTV API ID to access the PTV API.",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ptv_api_key",
+                name = "PTV API Key",
+                desc = "A PTV API key to access the PTV API.",
+                icon = "key",
+                secret = True,
             ),
         ],
     )

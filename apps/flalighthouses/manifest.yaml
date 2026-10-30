@@ -1,7 +1,18 @@
 ---
 id: fla-lighthouses
-name: FLA Lighthouses
+name: Florida Lighthouses
 summary: Displays Florida lighhouses
 desc: Displays Florida Lighhouse locations.
 author: Robert Ison
-recommended_interval: 5
+fileName: flalighthouses.star
+packageName: flalighthouses
+supports2x: true
+supports64x64: true
+recommendedInterval: 5
+category: travel
+tags:
+  - maps
+  - destinations
+  - nature
+published: '2024-09-03T16:51:06Z'
+updated: '2026-10-23T03:16:42Z'

@@ -6,4 +6,13 @@ desc: Displays recently added on Plex server. Recommended to set up a local prox
 author: noahpodgurski
 fileName: plex_recently_added.star
 packageName: plexrecentlyadded
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - plex
+  - media
+  - utility
+  - tech
+published: '2023-09-29T14:57:09Z'
+updated: '2026-10-01T22:22:03Z'

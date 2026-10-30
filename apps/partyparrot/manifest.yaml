@@ -6,4 +6,12 @@ desc: 12 different party parrots to choose from.
 author: tobyxdd
 fileName: parrot.star
 packageName: partyparrot
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: gaming
+tags:
+  - nature
+  - gaming
+  - music
+published: '2024-11-05T17:55:11Z'
+updated: '2026-10-01T22:17:11Z'

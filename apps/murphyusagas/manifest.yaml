@@ -6,4 +6,14 @@ desc: Display prices from selected Murphy USA station.
 author: jvivona
 fileName: murphy_usa_gas.star
 packageName: murphyusagas
-recommended_interval: 5
+recommendedInterval: 5
+broken: true
+brokenReason: API blocked by Incapsula WAF
+supports64x64: true
+category: utilities
+tags:
+  - gas-prices
+  - utility
+  - real-time
+published: '2023-02-08T18:12:33Z'
+updated: '2026-10-01T21:58:58Z'

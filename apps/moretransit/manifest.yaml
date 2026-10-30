@@ -6,4 +6,11 @@ desc: See next transit arrivals from TransSee. Optimized for NYC Subway and more
 author: gdcolella
 fileName: moretransit.star
 packageName: moretransit
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - local
+  - utility
+published: '2022-05-03T14:29:43Z'
+updated: '2026-10-01T21:58:58Z'

@@ -6,4 +6,10 @@ desc: Display fun information about the last shot recorded in visualizer.coffee.
 author: jeffbean
 fileName: visualizercoffee.star
 packageName: visualizercoffee
-recommended_interval: 5
+recommendedInterval: 5
+category: entertainment
+tags:
+  - sports
+  - visualizer
+published: '2024-03-21T13:42:04Z'
+updated: '2025-12-23T13:24:18Z'

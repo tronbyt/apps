@@ -5,25 +5,33 @@ Description: Shows next upcoming UFC event with date and time.
 Author: Stephen So
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
-load("render.star", "render")
+load("images/icon.png", ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("time.star", "time")
+
+ICON = ICON_ASSET.readall()
 
 now = time.now()
 nowyear = now.year
 url = "https://www.espn.com/mma/schedule/_/year/" + str(nowyear)
 
-ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABkAAAAICAYAAAAMY1RdAAAAAXNSR0IArs4c6QAAAWZJREFUOE91Ur1KA0EQ/mYWxIhIUtnZauDujGBpI9gJiuQFfAAbwdZGX0AQH8DCUgj4DPYmFyUvYKEk/hT+oJkZ2WMvXI7zir3dmW+/b+bbIYQvdc6yrZnFqpwyD0C07EMk0oqA7gSTXwr/OZH6J9EVmLdLqexIfukDq+bcXdA4S1QPi4SxCPWZzw3YqiKJVZtTBZgNchwBkon0mLtElGQJkaVr4LHtnORAL1JFXoxNRFQ7sdleMZddLlfdA3bJuU7o7DJR3f/PqqxL4MScO/b4scjGGnA7JWIA9Z3TzDuzi0j1IGX+AtGsj82L1D6AI3PuNGCGBowmXaqu9JhfiajuY1VdU8r8AqJGeOCdCLgpDMFvrDqTMj+AqOkxQ5HaJvBdaZXZc6y6WLbWiwiIOEzWyACXV2Vmb4lqo2xniYTS4ATMxgY85fkf1dY6MPQi7yBaqJya8OC5iKneJ2ZREVu0u8yRW/cHptSvjUBW6vcAAAAASUVORK5CYII=
-""")
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     rep = http.get(url, ttl_seconds = 3600)
 
     if rep.status_code != 200:
-        fail("get failed with status %d", rep.status_code)
+        print("ESPN schedule request failed with status %d" % rep.status_code)
+        return []
 
     doc = html(rep.body())
 
@@ -41,7 +49,8 @@ def main():
         rep1 = http.get(url1, ttl_seconds = 3600)
 
         if rep1.status_code != 200:
-            fail("get failed with status %d", rep1.status_code)
+            print("ESPN schedule request failed with status %d" % rep1.status_code)
+            return []
 
         doc = html(rep1.body())
 
@@ -59,8 +68,12 @@ def main():
     date = event_node.parent().siblings().eq(0).text()
     time = event_node.parent().siblings().eq(1).text()
 
+    # The logo-and-date block and the red event bar total 32 rows; on a
+    # square panel the column expands and spreads them down the panel.
     return render.Root(
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             children = [
                 render.Row(
                     children = [

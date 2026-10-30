@@ -4,4 +4,11 @@ name: Breadwinner
 summary: Breadwinner Tracker
 desc: A way to track your yeasty growth.
 author: JeffLac
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: lifestyle
+tags:
+  - lifestyle
+  - tech
+published: '2025-02-08T01:12:48Z'
+updated: '2026-10-01T17:59:41Z'

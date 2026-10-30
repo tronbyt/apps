@@ -6,16 +6,13 @@ Author: UnBurn
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/icon.png", ICON_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
-ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAN0lEQVQIW2PcsmXLfwY8gBGmYNKkSQx5eXkYSsEKQJIwAFNkmVHAcHzGBAasJsAkQZrgCnA5AwA+Gx6Nb5UO7QAAAABJRU5ErkJggg==
-""")
+ICON = ICON_ASSET.readall()
 
 ONE_HOUR_IN_SECONDS = 3600
 TEN_MINUTES_IN_SECONDS = 600
@@ -230,26 +227,24 @@ CONSOLES = [
     },
 ]
 
-encrypted_api_key = "AV6+xWcEbCjn7Cfz7MYqXyGzzOUfiAZwRw6SrglD7eLnZNiJL6XtjbuUPWyYPj5y3OoDK9qLs2u2Ea1koK5fVd8AKpT+EAEYzsEb+9C9Rk1yU03e1f7hy0Cn6EWSWOd+noco9u4nhfzz1jlvOotV6Gk64czlVBzqegsxDRd8Jvg6IoZ78/w="
-
-def auth_params():
+def auth_params(config):
     return {
-        "y": secret.decrypt(encrypted_api_key) or "",
+        "y": config.get("retroachievements_api_key") or "",
         "z": "",
     }
 
-def get_games_from_console(console_id):
+def get_games_from_console(config, console_id):
     endpoint = "%s/%s" % (RA_API_URL, "API_GetGameList.php")
 
-    params = auth_params()
+    params = auth_params(config)
     params.update({"f": "1", "i": console_id})
     games = http.get(endpoint, headers = {"User-Agent": "pixlet"}, params = params, ttl_seconds = ONE_HOUR_IN_SECONDS * 24 * 7).json()
     return games
 
-def get_game_info(game_id):
+def get_game_info(config, game_id):
     endpoint = "%s/%s" % (RA_API_URL, "API_GetGameExtended.php")
 
-    params = auth_params()
+    params = auth_params(config)
     params.update({"i": game_id})
     game_data = http.get(endpoint, headers = {"User-Agent": "pixlet"}, params = params, ttl_seconds = ONE_HOUR_IN_SECONDS).json()
     ra_aches = game_data["Achievements"]
@@ -272,8 +267,8 @@ def get_game_info(game_id):
         "achievements": achs,
     }
 
-def get_random_game_from_console(console_id):
-    console_games = get_games_from_console(console_id)
+def get_random_game_from_console(config, console_id):
+    console_games = get_games_from_console(config, console_id)
     game = console_games[random.number(0, len(console_games) - 1)]
     return str(int(game["ID"]))
 
@@ -286,16 +281,16 @@ def get_img_data(img_path):
     return http.get(endpoint, headers = {"User-Agent": "pixlet"}, ttl_seconds = ONE_HOUR_IN_SECONDS).body()
 
 def main(config):
-    if auth_params()["y"] == "":
+    if auth_params(config)["y"] == "":
         return []
 
     console = str(config.str("console", "6"))
     console_cache_key = "console-%s" % console
     game_id = cache.get(console_cache_key)
     if game_id == None:
-        game_id = get_random_game_from_any() if console == "0" else get_random_game_from_console(console)
+        game_id = get_random_game_from_any() if console == "0" else get_random_game_from_console(config, console)
         cache.set(console_cache_key, game_id, ttl_seconds = TEN_MINUTES_IN_SECONDS)
-    game = get_game_info(game_id)
+    game = get_game_info(config, game_id)
 
     total_achievements_count = len(game["achievements"])
 
@@ -363,6 +358,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "retroachievements_api_key",
+                name = "RetroAchievements API Key",
+                desc = "Your RetroAchievements API key. See https://retroachievements.org/api/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "console",
                 name = "Console",

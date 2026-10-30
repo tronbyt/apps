@@ -6,4 +6,12 @@ desc: Draws the evolution of one-dimensional cellular automata.
 author: dinosaursrarr
 fileName: cellularautomata.star
 packageName: cellularautomata
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: education
+tags:
+  - science
+  - gaming
+  - art
+published: '2023-03-23T12:36:07Z'
+updated: '2026-10-01T21:11:06Z'

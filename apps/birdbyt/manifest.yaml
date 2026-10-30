@@ -6,4 +6,12 @@ desc: Displays a random bird sighting near a specific location (data via Cornell
 author: Becky Sweger
 fileName: birdbyt.star
 packageName: birdbyt
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - nature
+  - weather
+  - local
+published: '2023-06-15T20:32:24Z'
+updated: '2026-10-01T20:24:07Z'

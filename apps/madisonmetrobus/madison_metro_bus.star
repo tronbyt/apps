@@ -8,16 +8,14 @@ Author: Corey Johnsen
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
-
-key = secret.decrypt("AV6+xWcE/7e28gqrgBzHffwU7Lqfe7ofS8MnQtKIcjgUk3BVlrc1H0+oI42zaCBrVcNM+hk/NBRzXbo+9cSb4k/QQWBbvzGwlL0PR6yJYb1nhhiv431Ic2WOactNFxN4APmVpn9gqI6viTaG")
-URL = "https://api.smsmybus.com/v1/getarrivals?key=" + str(key) + "&stopID="
 
 def main(config):
     next_n = int(config.get("next_n", 3))
     stop = config.get("stopID", 863)
     min_mins = int(config.get("min_mins", 2))
     updates = []
+    api_key = config.get("madison_metro_bus_api_key")
+    URL = "https://api.smsmybus.com/v1/getarrivals?key=" + str(api_key) + "&stopID="
 
     rep = http.get(URL + str(stop), ttl_seconds = 60)
 
@@ -50,6 +48,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "madison_metro_bus_api_key",
+                name = "Madison Metro Bus API Key",
+                desc = "Your Madison Metro Bus API key. See https://smsmybus.com/ for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "stopID",
                 name = "Stop ID",

@@ -8,7 +8,7 @@ Author: Kerry Bassett
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -41,6 +41,8 @@ TYPE_COLORS = {
 }
 
 def main(config):
+    is2x = canvas.is2x()
+    scale = 2 if is2x else 1
     random.seed(time.now().unix // 15)
     id_ = random.number(1, NUM_POKEMON)
     pokemon = get_pokemon(id_)
@@ -74,13 +76,13 @@ def main(config):
                     main_align = "center",
                     cross_align = "center",
                     children = [
-                        render.Box(width = 43),
+                        render.Box(width = 43 * scale),
                         render.Column(
                             children = [
-                                render.Box(height = 10),
+                                render.Box(height = 10 * scale),
                                 render.Image(
                                     src = sprite,
-                                    width = 20,
+                                    width = 20 * scale,
                                 ),
                             ],
                         ),
@@ -92,40 +94,41 @@ def main(config):
                     children = [
                         render.Box(
                             # Pokemon name
-                            width = 64,
-                            height = 10,
+                            width = canvas.width(),
+                            height = 10 * scale,
                             color = config.str("titleBackground", "#999"),
                             child = render.Marquee(
                                 scroll_direction = "horizontal",
-                                width = 60,
+                                width = 60 * scale,
                                 child = render.Text(
                                     content = "# " + str(id_) + " | " + name.upper(),
                                     color = config.str("titleForeground", "#000"),
+                                    font = "terminus-18" if is2x else "tb-8",
                                 ),
                             ),
                         ),
                         render.Box(
                             # Pokemon type 1
-                            width = 42,
-                            height = 10,
-                            padding = 1,
+                            width = 42 * scale,
+                            height = 10 * scale,
+                            padding = 1 * scale,
                             color = TYPE_COLORS[type1],
                             child = render.Text(
                                 content = type1.upper(),
                                 color = "#000",
-                                font = "CG-pixel-3x5-mono",
+                                font = "terminus-18" if is2x else "CG-pixel-3x5-mono",
                             ),
                         ),
                         render.Box(
                             # Pokemon type 2
-                            width = 42,
-                            height = 10,
-                            padding = 1,
+                            width = 42 * scale,
+                            height = 10 * scale,
+                            padding = 1 * scale,
                             color = TYPE_COLORS[type2],
                             child = render.Text(
                                 content = type2.upper(),
                                 color = "#000",
-                                font = "CG-pixel-3x5-mono",
+                                font = "terminus-18" if is2x else "CG-pixel-3x5-mono",
                             ),
                         ),
                     ],

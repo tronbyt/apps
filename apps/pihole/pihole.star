@@ -5,20 +5,25 @@ Description: Display Pi-hole blocking statistics on Tidbyt.
 Author: siva801
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("images/pihole_logo.png", PIHOLE_LOGO_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+PIHOLE_LOGO = PIHOLE_LOGO_ASSET.readall()
 
 HOST = ""
 API_KEY = ""
 VERSION = "v5"
 GREEN = "#00cc00"
 RED = "#ff4136"
-PIHOLE_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAPCAYAAADd/14OAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAhGVYSWZNTQAqAAAACAAFARIAAwAAAAEAAQAAARoABQAAAAEAAABKARsABQAAAAEAAABSASgAAwAAAAEAAgAAh2kABAAAAAEAAABaAAAAAAAAAEgAAAABAAAASAAAAAEAA6ABAAMAAAABAAEAAKACAAQAAAABAAAACqADAAQAAAABAAAADwAAAAAAolqGAAAACXBIWXMAAAsTAAALEwEAmpwYAAACymlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgICAgICAgICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iPgogICAgICAgICA8dGlmZjpZUmVzb2x1dGlvbj43MjwvdGlmZjpZUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6UmVzb2x1dGlvblVuaXQ+MjwvdGlmZjpSZXNvbHV0aW9uVW5pdD4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+NzI8L3RpZmY6WFJlc29sdXRpb24+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDxleGlmOlBpeGVsWERpbWVuc2lvbj4xMDA8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogICAgICAgICA8ZXhpZjpDb2xvclNwYWNlPjE8L2V4aWY6Q29sb3JTcGFjZT4KICAgICAgICAgPGV4aWY6UGl4ZWxZRGltZW5zaW9uPjE0NzwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgr+qcsGAAABt0lEQVQoFU2QvWtUURDFf+++t5t1s4/nipEYVAixsRL8QEGw879IIQFRLBbBwlRqFe0sREzEwjQpBFuNjSuCH8UqaMDKWIgoQVldk7ju7tuM5964mIG5M3PPmXNnLtWH1fnsSdZMG+n1sQZlZIcbFHzcai5y0TtXdVUSLv0cKtcx3Osj9FgvHIpzzqiOfUNUeTY6kuTtD51hc0mal45BbTTrvn0wxvN2r79M0faLHG2qP81OjbxK8/Gl8gpfS7dpFj/vtsT29jgZCEFVT4ViKZtgOZ1aeJxMz7xJFrFt+/x9va6hvBma4V+h/LL8j/zHOswEgo77njMwG2fOdmL9Cl3bRa7a5kvMDvAQW3BDKmYxHUsUi9gv+HYvwmYdtzwpeuSY1pDXvkBbGy8c2Ah/ubroKH+EyR0ircKV6I6j/RsKFc3Rinhxsc8Jr3Az5uV247iwnn/N9dUwLFJR4FDYzdOEbrAiJToS0SYtF0fUREAzcdT4pO6G/P2k0d0Dawd1PxFxQQHmHGfvOmxNAmEpv9h/PxdIDUn7RNud3wIOiDWPXWXz050I4fe/w2nlTXlLPuVJdWHK3V/RlKiIvdMq6AAAAABJRU5ErkJggg==
-""")
+
+# The two plots take whatever the panel has left under the header: 14 rows on
+# a 64x32 panel and 46 on a square one -- the difference between a sparkline
+# and a readable 24-hour query graph.
+PLOT_HEIGHT = canvas.height() - 18
+
 TTL_SECONDS = 60
 
 version_options = [
@@ -123,7 +128,7 @@ def main(config):
                     main_align = "space_around",
                     children = [
                         render.Marquee(
-                            width = 64,
+                            width = canvas.width(),
                             child = render.Text("Error! Check APP config.", color = RED),
                         ),
                     ],
@@ -189,16 +194,16 @@ def main(config):
                                 children = [
                                     render.Plot(
                                         data = list(enumerate(query_plot)),
-                                        width = 64,
-                                        height = 14,
+                                        width = canvas.width(),
+                                        height = PLOT_HEIGHT,
                                         color = GREEN,
                                         fill = True,
                                         y_lim = (0, max(query_plot)),
                                     ),
                                     render.Plot(
                                         data = list(enumerate(ad_plot)),
-                                        width = 64,
-                                        height = 14,
+                                        width = canvas.width(),
+                                        height = PLOT_HEIGHT,
                                         color = RED,
                                         fill = True,
                                         fill_color = "#660500",
@@ -227,6 +232,7 @@ def get_schema():
                 name = "API Key",
                 desc = "Pi-hole API Key",
                 icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "version",

@@ -6,4 +6,10 @@ desc: Displays Bitcoin's difficulty adjustment progress.
 author: PMK (@pmk)
 fileName: btcdifficulty.star
 packageName: btcdifficulty
-recommended_interval: 1
+recommendedInterval: 1
+supports64x64: true
+category: utilities
+tags:
+  - crypto
+published: '2024-02-08T19:06:44Z'
+updated: '2026-10-01T20:24:07Z'

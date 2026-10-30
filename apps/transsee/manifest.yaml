@@ -6,4 +6,10 @@ desc: Provides real-time transit predictions based on actual travel times for ov
 author: doconno@gmail.com
 fileName: transsee.star
 packageName: transsee
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - utility
+published: '2022-03-13T21:42:02Z'
+updated: '2026-10-01T19:16:27Z'

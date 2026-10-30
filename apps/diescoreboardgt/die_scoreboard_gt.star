@@ -5,21 +5,33 @@ Description: Beer Die scoreboard with dropdown menus to keep track of score. Cus
 Author: zachtempel3
 """
 
-load("encoding/base64.star", "base64")
+load("images/num_0.png", NUM_0_ASSET = "file")
+load("images/num_1.png", NUM_1_ASSET = "file")
+load("images/num_2.png", NUM_2_ASSET = "file")
+load("images/num_3.png", NUM_3_ASSET = "file")
+load("images/num_4.png", NUM_4_ASSET = "file")
+load("images/num_6.png", NUM_6_ASSET = "file")
+load("images/num_8.png", NUM_8_ASSET = "file")
+load("images/num_9.png", NUM_9_ASSET = "file")
+load("images/num_bizz.png", NUM_BIZZ_ASSET = "file")
+load("images/num_buzz.png", NUM_BUZZ_ASSET = "file")
+load("images/old_num_5.png", OLD_NUM_5_ASSET = "file")
+load("images/old_num_7.png", OLD_NUM_7_ASSET = "file")
+load("images/separator.png", SEPARATOR_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 
 NUMBER_IMGS = [
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAqSURBVHgBY7B/wDD/BMP5GQwPLPChAxIMDRwMYABkALn41QMNBBoLNBwAHrcge26o7fIAAAAASUVORK5CYII=""",  # 0
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAZSURBVHgBYwABDgYGCQYGC7xIAqyMgVT1AOfwBOG2xNZsAAAAAElFTkSuQmCC""",  # 1
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAsSURBVHgBY7B/wCB/goF/BgODBV4kAVQGVAxC8w8wHGBgeIAXnW8AKgMqBgBzoBbH0MZ6/gAAAABJRU5ErkJggg==""",  # 2
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAlSURBVHgBY7B/wCB/goF/BgODBV4kAVQGVAxRD+TiVw80EKIeAJk5DfdkeUVkAAAAAElFTkSuQmCC""",  # 3
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAsSURBVHgBYwCCBg6GAxIMDyzwIJCC+ScY7B+AkPwJBgYJBgYLPAisgANoNgDVyhQd//DRbQAAAABJRU5ErkJggg==""",  # 4
-    """iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADKSURBVFhH7Y5BDsIwEMTyEI78/2e8AZRqqgStU9p0p3DAki/VZN3yuN2f36K2lx9YvYq+WSr9Bzd9a4lX+o+r2VBDef6BK1T+/wM/8AMVGjhVtkEjp8o2aORU2QaNnCrboJFTZd+hoUPlIjR2qFyExg6Vi9DYoXIRGjtULkJjh8pFaOxQuQiNHSoXobFD5Rh6kKkyY+hRpsqMoUeZKrMNPcxQ5z9DjzPU+X3QgTPq7H7oyBl19hh0aEadOw4dm1Hn5qCDR9SZAaW8ALn9t6JfOjeAAAAAAElFTkSuQmCC""",  # bizz
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAsSURBVHgBY7RfyDhfkfH8RsYHCvjQAQegMqBisHpNxgMRjA/wovMngcqAigEwiCIRDKuGtwAAAABJRU5ErkJggg==""",  # 6
-    """iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAG9SURBVFhHxZXNUsMwDIQT7vD+Nx6Fdyp3ilddmY0i/6UDfDNpHcvaXTuhbMrXbfvAxdv/49kg9wKHY+63sr5cvD2AEKithIG5w6kDLBmcetALAkqIdw6bUPcAS2kNsPyDB9EwfhJ+tU6EmpVsLmKNGWrIKRPj0EJxaJiakM1FsGbHh6Nm+1uosQHsBXz7eqyNdb1vgXXVBGJqGu8BRGMPh9v2+hiiPmuO7xd8zJgDb8pADayYAwugHHbVwUMegou5pRE4beg6CwARCK6aqxCgl+F6DqdPJ3g6Ad9RFsZFM3NQTbNewhw1yMHMTwLjFmoOoWEvX06g6wF6TifQw80hBNRcvx3cA96eQP94B0TF4y44NGIoJdMfBnChWMsMItqT6WOuG6A1x+EUMQSHlZeWoJpj7JcVLxI3A6pgL2nWCEaBYh/WY077+gL4c/vcT6dhxUIrWCT2TAUwc1ACAG3KcOEYKvbFANO/Ayu71YvTTZoB4g/IjBhC9oJmtaHoDC1TDe1r4kZ+NUBGDLD0v6AHhEePaVS/zMwJrJzSJXoGf2KembTmlaeeyVB84plfDtAyX33RLgXIzK+94dv2Dew3EB1psnP6AAAAAElFTkSuQmCC""",  # buzz
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAmSURBVHgBY7B/wDD/BMP5GQwPLPChAxJAZUDFEPVALn71QAMh6gHctSR33GtExAAAAABJRU5ErkJggg==""",  # 8
-    """iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAuSURBVHgBY7B/wDD/BMP5GQwPLPChAxJAZUDFICR/goFBgoHBAh/in8EgD1IPAMkGGTcArQUNAAAAAElFTkSuQmCC""",  # 9
+    NUM_0_ASSET.readall(),  # 0
+    NUM_1_ASSET.readall(),  # 1
+    NUM_2_ASSET.readall(),  # 2
+    NUM_3_ASSET.readall(),  # 3
+    NUM_4_ASSET.readall(),  # 4
+    NUM_BIZZ_ASSET.readall(),  # bizz
+    NUM_6_ASSET.readall(),  # 6
+    NUM_BUZZ_ASSET.readall(),  # buzz
+    NUM_8_ASSET.readall(),  # 8
+    NUM_9_ASSET.readall(),  # 9
 ]
 
 def render_seperator():
@@ -27,9 +39,7 @@ def render_seperator():
         width = 2,
         height = 100,
         color = "#d30",
-        child = render.Image(src = base64.decode(
-            """iVBORw0KGgoAAAANSUhEUgAAAAQAAAAOAQAAAAAgEYC1AAAAAnRSTlMAAQGU/a4AAAAPSURBVHgBY0gAQzQAEQUAH5wCQbfIiwYAAAAASUVORK5CYII=""",
-        )),
+        child = render.Image(src = SEPARATOR_ASSET.readall()),
     )
 
 def get_num_image(num):
@@ -39,14 +49,14 @@ def get_num_image(num):
             width = 32,
             height = 32,
             color = "000",
-            child = render.Image(src = base64.decode(NUMBER_IMGS[specialNum])),
+            child = render.Image(src = NUMBER_IMGS[specialNum]),
         )
     else:
         return render.Box(
             width = 13,
             height = 32,
             color = "fff",
-            child = render.Image(src = base64.decode(NUMBER_IMGS[specialNum])),
+            child = render.Image(src = NUMBER_IMGS[specialNum]),
         )
 
 def main(config):
@@ -185,12 +195,6 @@ def get_schema():
     )
 
 OLD_NUMS = [
-    """
-    iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAuSURBVHgBY7B
-    /wDD/AMP5BoYHDPjQAQagMqBiEJI/wcAgwcBggQ/xzwAqAyoGABq+Fsfy3SMpAAAAAElFTkSuQmCC
-    """,  # 5
-    """
-    iVBORw0KGgoAAAANSUhEUgAAAA0AAAAgAQAAAADhos85AAAAAnRSTlMAAQGU/a4AAAAhSURBVHgBY7B
-    /wCB/goF/BgODBV4kwcDAwQAFHEAukeoB0jsHbnVM+9YAAAAASUVORK5CYII=
-    """,  # 7
+    OLD_NUM_5_ASSET.readall(),  # 5
+    OLD_NUM_7_ASSET.readall(),  # 7
 ]

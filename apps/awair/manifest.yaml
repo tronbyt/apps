@@ -6,4 +6,11 @@ desc: Display air quality data for an Awair device.
 author: tabrindle, flavorjones
 fileName: awair.star
 packageName: awair
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: smart-home
+tags:
+  - weather
+  - smart-home
+published: '2023-09-05T17:43:35Z'
+updated: '2026-10-01T20:09:53Z'

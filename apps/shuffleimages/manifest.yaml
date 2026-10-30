@@ -6,4 +6,11 @@ desc: Randomly displays an image from a user-specified list.
 author: rs7q5
 fileName: shuffle_images.star
 packageName: shuffleimages
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - art
+  - utility
+published: '2022-07-18T20:40:44Z'
+updated: '2026-10-01T19:49:38Z'

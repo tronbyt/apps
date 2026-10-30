@@ -5,30 +5,39 @@ Description: Get your current weather from your Netatmo weather station.
 Author: danmcclain
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/down_deg.png", DOWN_DEG_ASSET = "file")
+load("images/down_press.png", DOWN_PRESS_ASSET = "file")
+load("images/up_deg.png", UP_DEG_ASSET = "file")
+load("images/up_press.png", UP_PRESS_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 
-DOWN_DEG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAAC5JREFUGFdjZACBmcb/GdLPMoLZaAAhiKwIiY2qCyaBUwHMOhANtRLVCmT7oQoACOEVBpf67iYAAAAASUVORK5CYII=")
-UP_DEG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAAC5JREFUGFdjZICBmcb/4WwQI/0sI4gCEygAphCrApAkSAJGo5iAJIipAFkSzUYAQtIVBjuf38UAAAAASUVORK5CYII=")
-UP_PRESS = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAADBJREFUGFdjZICCmcYM/2FsEJ1+loERRIMJZABTiFUBSBIkAaNRTEAWxFCALIBuJQBQ0hUGX0wZ5wAAAABJRU5ErkJggg==")
-DOWN_PRESS = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAAXNSR0IArs4c6QAAADFJREFUGFdjZGBgYJhpzPA//SwDI4iNDuCCyIqQ2Si6YBI4FcCsA9EwK1GsQLYfpgAAFuEVBt9EUIYAAAAASUVORK5CYII=")
+DOWN_DEG = DOWN_DEG_ASSET.readall()
+DOWN_PRESS = DOWN_PRESS_ASSET.readall()
+UP_DEG = UP_DEG_ASSET.readall()
+UP_PRESS = UP_PRESS_ASSET.readall()
+
 OAUTH2_CLIENT_SECRET = secret.decrypt("AV6+xWcEY+xlza5nc6Vx3IhSZOD+MGdeVROlRBYrpIwypN5EIIncp7hyCiIQMGVnPS0Q1SlVfHZXB92095MTfHew3wzuEJ14ihbjpxbZNQJhuYA+4O3fR4GFjOTy98EfJobFvxLguAtnNE149hITsJeIxyKfnI2yHZFVgg2Y2pYHoHzSqA==")
 CLIENT_ID = "622106585db6d223df25fdf8"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     refresh_token = config.get("auth")
     fahrenheit = config.bool("fahrenheit")
 
     if refresh_token:
-        access_token = cache.get(refresh_token)
-
-        if access_token == None:
-            access_token = get_access_token(refresh_token)
+        access_token = get_access_token(refresh_token)
 
         res = http.get(
             url = "https://api.netatmo.com/api/getstationsdata",
@@ -86,7 +95,11 @@ def main(config):
         ),
     ))
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            expanded = True,
+            children = rows,
+        ))) if is_square() else render.Column(
             expanded = True,
             children = rows,
         ),
@@ -153,9 +166,6 @@ def oauth_handler(params):
     token_params = res.json()
     refresh_token = token_params["refresh_token"]
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, token_params["access_token"], ttl_seconds = int(token_params["expires_in"] - 30))
-
     return refresh_token
 
 def get_access_token(refresh_token):
@@ -171,6 +181,7 @@ def get_access_token(refresh_token):
             client_id = CLIENT_ID,
         ),
         form_encoding = "application/x-www-form-urlencoded",
+        ttl_seconds = 10500,  # roughly 3h (expires_in is usually 10800)
     )
     if res.status_code != 200:
         fail("token request failed with status code: %d - %s" %
@@ -179,9 +190,6 @@ def get_access_token(refresh_token):
     token_params = res.json()
     refresh_token = token_params["refresh_token"]
     access_token = token_params["access_token"]
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(refresh_token, access_token, ttl_seconds = int(token_params["expires_in"] - 30))
 
     return access_token
 

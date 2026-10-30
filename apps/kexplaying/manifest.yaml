@@ -6,4 +6,12 @@ desc: Displays song, artist, and info currently streaming on kexp.org.
 author: Ken Winke
 fileName: kexplaying.star
 packageName: kexplaying
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - music
+  - real-time
+  - media
+published: '2023-05-22T15:37:34Z'
+updated: '2026-10-01T17:41:43Z'

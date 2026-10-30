@@ -6,4 +6,11 @@ desc: Display the total amount raised and the number of backers for a Kickstarte
 author: sethvargo
 fileName: kickstarter.star
 packageName: kickstarter
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - finance
+  - utility
+published: '2022-08-04T18:11:24Z'
+updated: '2026-10-17T19:08:51Z'

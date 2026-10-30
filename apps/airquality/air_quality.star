@@ -5,14 +5,12 @@ Description: Monitor your local air quality with the OpenWeather Air Pollution A
 Author: Daniel Sitnik
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 # default location to be shown if none is configured, Tidbyt HQ :)
@@ -66,38 +64,31 @@ def main(config):
     pollutant_code = config.str("pollutant", "")
 
     # load api key
-    apikey = secret.decrypt(OW_API_KEY) or OW_DEV_API_KEY
+    apikey = config.str("api_key", "")
 
     # validate if api key was provided
-    if apikey in (None, ""):
-        dprint("No API Key provided in variable OW_DEV_API_KEY")
+    if apikey == "":
+        dprint("No API Key provided in config")
         return render.Root(
             render.Box(
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 child = render.Column(
                     main_align = "space_around",
                     cross_align = "center",
                     expanded = True,
                     children = [
                         render.Text("please"),
-                        render.Text("set variable"),
-                        render.Text("OW_DEV_API_KEY", color = "#0f0", font = "tom-thumb"),
+                        render.Text("set API key"),
+                        render.Text("in config", color = "#0f0", font = "tom-thumb"),
                     ],
                 ),
             ),
         )
 
     # try to load from cache
-    cache_key = "%s#%s" % (location["lat"], location["lng"])
-    data = cache.get(cache_key)
-
-    if data == None:
-        dprint("Data not found in cache")
-        data = get_data(location, apikey)
-    else:
-        dprint("Data loaded from cache")
-        data = json.decode(data)
+    dprint("Data not found in cache")
+    data = get_data(location, apikey)
 
     # use locality from selected place
     locality = location["locality"]
@@ -150,33 +141,37 @@ def main(config):
                     height = 8,
                     child = render.Text("AIR QUALITY", font = "tb-8", color = "#01ffff"),
                 ),
-                render.Row(
-                    children = [
-                        render.Padding(
-                            pad = 2,
-                            child = render.Circle(
-                                color = aqi_color,
-                                diameter = 20,
+                # Centre the body under the header on taller panels (64x64).
+                render.Box(
+                    height = canvas.height() - 8,
+                    child = render.Row(
+                        children = [
+                            render.Padding(
+                                pad = 2,
                                 child = render.Circle(
-                                    color = "#1a1a1a",
-                                    diameter = 16,
-                                    child = render.Marquee(
-                                        width = 10,
-                                        align = "center",
-                                        child = render.Text(aqi_text, font = "6x13", color = aqi_color),
+                                    color = aqi_color,
+                                    diameter = 20,
+                                    child = render.Circle(
+                                        color = "#1a1a1a",
+                                        diameter = 16,
+                                        child = render.Marquee(
+                                            width = 10,
+                                            align = "center",
+                                            child = render.Text(aqi_text, font = "6x13", color = aqi_color),
+                                        ),
                                     ),
                                 ),
                             ),
-                        ),
-                        # conditional separator bar when display_type is pollutants
-                        (render.Box(width = 1, height = 24, color = "#3b3b3b") if display_type == "pollutants" else None),
-                        render.Padding(
-                            pad = 2,
-                            child = render.Column(
-                                children = displayed_content,
+                            # conditional separator bar when display_type is pollutants
+                            (render.Box(width = 1, height = 24, color = "#3b3b3b") if display_type == "pollutants" else None),
+                            render.Padding(
+                                pad = 2,
+                                child = render.Column(
+                                    children = displayed_content,
+                                ),
                             ),
-                        ),
-                    ],
+                        ],
+                    ),
                 ),
             ],
         ),
@@ -196,6 +191,13 @@ def get_schema():
                 name = "Location",
                 desc = "Location for which to display air quality.",
                 icon = "locationDot",
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "OpenWeather API Key",
+                desc = "Your OpenWeather API key. See https://openweathermap.org/api/air-pollution for details.",
+                icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "display_type",
@@ -315,7 +317,7 @@ def get_data(location, apikey):
         "appid": apikey,
         "lat": str(lat),
         "lon": str(lon),
-    })
+    }, ttl_seconds = DEFAULT_CACHE)
 
     # check response code
     if res.status_code != 200:
@@ -348,13 +350,6 @@ def get_data(location, apikey):
     # remove excessive forecast data to alleviate cache
     for _ in range(0, len(data["list"]) - 13):
         data["list"].pop()
-
-    # cache results using lat#lon as the key
-    cache_key = "%s#%s" % (location["lat"], location["lng"])
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(data), ttl_seconds = DEFAULT_CACHE)
-    dprint("Data cached for %d seconds" % DEFAULT_CACHE)
 
     return data
 

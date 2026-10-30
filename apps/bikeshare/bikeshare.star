@@ -5,20 +5,20 @@ Description: Shows bike and parking availability for user selected bikeshare loc
 Author: snorremd
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/csv.star", "csv")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/bike_icon.png", BIKE_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+BIKE_ICON = BIKE_ICON_ASSET.readall()
 
 # URL to a CSV file containing the bikeshare providers supporting GBFS
 BIKESHARE_STATION_START = '{"url": "https://gbfs.urbansharing.com/bergenbysykkel.no/station_status.json", "station": { "station_id": "368", "name": "Festplassen", "address": "Christies gate 3A", "rental_uris": {"android": "bergenbysykkel://stations/368", "ios": "bergenbysykkel://stations/368"}, "lat": 60.391123958982405, "lon": 5.325713785893413, "capacity": 25 } }'
 BIKESHARE_STATION_STOP = '{"url": "https://gbfs.urbansharing.com/bergenbysykkel.no/station_status.json", "station": { "station_id": "1898", "name": "Kronstad", "address": "St. Olavs vei 15", "rental_uris": {"android": "bergenbysykkel://stations/1898", "ios": "bergenbysykkel://stations/1898"}, "lat": 60.3720506380196, "lon": 5.352659970408496, "capacity": 25 } }'
 
 # Renders a cute little green bike
-BIKE_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAADaADAAQAAAABAAAACQAAAABcSr5uAAAAhElEQVQYGWNkIAJUhnr8hylrX72DkQXGAdHokjA5oTwmMLPUdhsjiAEmYJIguvuwF9xUmDhMMYyPQmPTgE0M7DxkZ6GYAuSAbAFpfDfpH1gK5Ce4P2AmohsA4sPkQLpAfIgPgRyYSWDj0AiQbciGwTWBrUVTjMxFlgeHHrIpyJIwTejyAJ4kPPvu7EtQAAAAAElFTkSuQmCC""")
 
 # Used to fetch list of available Bikeshare companies and their general bikeshare feed specification APIs
 GBFS_LIST = "https://raw.githubusercontent.com/NABSA/gbfs/master/systems.csv"
@@ -27,24 +27,20 @@ GBFS_LIST = "https://raw.githubusercontent.com/NABSA/gbfs/master/systems.csv"
 USER_AGENT = "Tidbyt - Bikeshare (https://github.com/tidbyt/community/tree/main/apps/bikeshare)"
 
 def fetch_status(station):
-    station_json = cache.get(station["url"])
-    if station_json == None:
-        station_status_resp = http.get(
-            url = station["url"],
-            headers = {
-                "Accept": "application/json",
-                "User-Agent": USER_AGENT,
-            },
-        )
+    station_status_resp = http.get(
+        url = station["url"],
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": USER_AGENT,
+        },
+        ttl_seconds = 60,
+    )
 
-        if (station_status_resp.status_code != 200):
-            print("Bikeshare request failed with status %d", station_status_resp.status_code)
-            return []
+    if (station_status_resp.status_code != 200):
+        print("Bikeshare request failed with status %d", station_status_resp.status_code)
+        return []
 
-        station_json = station_status_resp.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(station["url"], station_json, ttl_seconds = 60)
+    station_json = station_status_resp.body()
 
     # Station status start
     statuses = json.decode(station_json)["data"]["stations"]
@@ -141,17 +137,13 @@ def bikeshare_to_option(bikeshare):
     )
 
 def get_bikeshare_providers():
-    bikeshare_csv = cache.get("bikeshare_csv")
-    if bikeshare_csv == None:
-        resp = http.get(
-            url = GBFS_LIST,
-        )
-        if resp.status_code != 200:
-            return []
-        bikeshare_csv = resp.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("bikeshare_csv", bikeshare_csv, ttl_seconds = 60 * 60 * 24)
+    resp = http.get(
+        url = GBFS_LIST,
+        ttl_seconds = 60 * 60 * 24,
+    )
+    if resp.status_code != 200:
+        return []
+    bikeshare_csv = resp.body()
 
     bikeshares = csv.read_all(
         source = bikeshare_csv,
@@ -163,36 +155,29 @@ def get_bikeshare_providers():
 
 # Look up discovery data for given gbfs url
 def gbfs_discovery(gbfs_url):
-    discovery_json = cache.get("gbfs_discovery_" + gbfs_url)
-    if discovery_json == None:
-        print("Fetching GBFS discovery data from " + gbfs_url)
-        resp = http.get(
-            url = gbfs_url,
-        )
-        if resp.status_code != 200:
-            return None
-        discovery_json = resp.body()
+    print("Fetching GBFS discovery data from " + gbfs_url)
+    resp = http.get(
+        url = gbfs_url,
+        ttl_seconds = 60 * 60 * 24,
+    )
+    if resp.status_code != 200:
+        return None
+    discovery_json = resp.body()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("gbfs_discovery_" + gbfs_url, discovery_json, ttl_seconds = 60 * 60 * 24)
     return json.decode(discovery_json)
 
 # Look up bikeshare locations for given url
 def bikeshare_stations(url):
-    resp_json = cache.get("bikeshare_stations_" + url)
-    if resp_json == None:
-        resp = http.get(
-            url = url,
-            headers = {
-                "User-Agent": USER_AGENT,
-            },
-        )
-        if resp.status_code != 200:
-            return []
-        resp_json = resp.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("bikeshare_stations_" + url, resp_json, ttl_seconds = 60 * 60 * 24)
+    resp = http.get(
+        url = url,
+        headers = {
+            "User-Agent": USER_AGENT,
+        },
+        ttl_seconds = 60 * 60 * 24,
+    )
+    if resp.status_code != 200:
+        return []
+    resp_json = resp.body()
 
     return json.decode(resp_json)
 

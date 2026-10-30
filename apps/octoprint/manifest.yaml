@@ -6,4 +6,11 @@ desc: Display current print's status and time remaining. Requires setting up por
 author: noahpodgurski
 fileName: octoprint.star
 packageName: octoprint
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: smart-home
+tags:
+  - tech
+  - smart-home
+published: '2023-07-13T17:49:07Z'
+updated: '2026-10-01T22:12:18Z'

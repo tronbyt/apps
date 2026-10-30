@@ -5,18 +5,16 @@ Description: Laat een willekeurig recente nieuwsbericht zien van de website nos.
 Author: PMK (@pmk)
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/logo.png", LOGO_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
-DEFAULT_CATEGORY = "nosnieuwsalgemeen"
+LOGO = LOGO_ASSET.readall()
 
-LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAGRJREFUeNpifCYnwgAEU4A4GogFGCDgAxAvBeIcRqACkGQmEDMxoIJ/QDwdpOA9VOd3yYevuUAyz+VFvwEpTpBJIAX/QYJASUZk7UBFYHF0YzEAE9RBMGMZ0NgfiHIkXm8CBBgAX08js92LI2MAAAAASUVORK5CYII=
-""")
+DEFAULT_CATEGORY = "nosnieuwsalgemeen"
 
 def get_news_feed(category = DEFAULT_CATEGORY, ttl_seconds = 60 * 5):
     url = "https://feeds.nos.nl/{}".format(category)
@@ -39,6 +37,15 @@ def get_image(image_url):
         fail("Image from nos.nl request failed with status %d @ %s", response.status_code, image_url)
     return response.body()
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     category = config.str("category", DEFAULT_CATEGORY)
 
@@ -51,10 +58,16 @@ def main(config):
         max_age = 60 * 5,
         child = render.Stack(
             children = [
-                render.Image(
-                    src = get_image(news_item["image"]),
-                    width = 64,
-                    height = 32,
+                # The feed serves a 16:9 photo; on a square panel it is shown
+                # at 64x36 across the middle rather than squashed into 64x64.
+                render.Box(
+                    width = canvas.width(),
+                    height = canvas.height(),
+                    child = render.Image(
+                        src = get_image(news_item["image"]),
+                        width = 64,
+                        height = 36 if is_square() else 32,
+                    ),
                 ),
                 render.Column(
                     main_align = "space_between",

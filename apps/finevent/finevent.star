@@ -6,9 +6,11 @@ Author: Rob Kimball
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/importance_high.png", IMPORTANCE_HIGH_ASSET = "file")
+load("images/importance_low.png", IMPORTANCE_LOW_ASSET = "file")
+load("images/importance_medium.png", IMPORTANCE_MEDIUM_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -364,24 +366,19 @@ ISO3166 = {
 }
 
 IMPORTANCE_ICONS = {
-    1: base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAEpJREFUKFNjZCASMOJTV1pa+h8k393dzYhXoZOT0395eXmG+fPnU6AQ2Tq8JiJLYij8n88AdjTjRAZG/ArDlf5/0/jKwN34ko4KAUofUQvpr/OmAAAAAElFTkSuQmCC"),
-    2: base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAFpJREFUKFNjZCASMOJTV1pa+h8k393dzYhXoZOT0395eXmG+fPnU6Dw/3I1sHWMkbcY8Zr4c4Xqf7YPtxkYMxgwFf7PZ4CYMpGBEb/CcKX/3zS+MnA3vqSjQgB3tVYLtGTHpgAAAABJRU5ErkJggg=="),
-    3: base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAFpJREFUKFNjZCASMOJT9/9j2X+QPCN/FyN+hT+P/Gf4c5OBkTuZAoX/l6tBrIu8xfgfn4k/V6j+Z/twm4ExgwFT4f98BogpExkY8SsMV/r/TeMrA3fjSzoqBABNA2YLBoHQ+QAAAABJRU5ErkJggg=="),
+    1: IMPORTANCE_LOW_ASSET.readall(),
+    2: IMPORTANCE_MEDIUM_ASSET.readall(),
+    3: IMPORTANCE_HIGH_ASSET.readall(),
 }
 
 def flag_api(country_name):
-    cache_prefix = "%s/%s/%s/" % ("finevent", "econ", "flags")
-    flag = cache.get(cache_prefix + country_name)
-    if not flag:
-        print("Getting %s flag from the flag CDN, ISO3166 code: %s" % (country_name, ISO3166.get(country_name)))
-        flag_resp = http.get("https://flagcdn.com/w20/%s.png" % ISO3166.get(country_name))
-        if flag_resp.status_code != 200:
-            flag = ISO3166.get(country_name)
-        else:
-            flag = flag_resp.body()
+    print("Getting %s flag from the flag CDN, ISO3166 code: %s" % (country_name, ISO3166.get(country_name)))
+    flag_resp = http.get("https://flagcdn.com/w20/%s.png" % ISO3166.get(country_name), ttl_seconds = 60 * 60 * 24 * 30)
+    if flag_resp.status_code != 200:
+        flag = ISO3166.get(country_name)
+    else:
+        flag = flag_resp.body()
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_prefix + country_name, flag, ttl_seconds = 60 * 60 * 24 * 30)  # keep for a month
     return flag
 
 def random(max):
@@ -389,7 +386,7 @@ def random(max):
     return (time.now().nanosecond // 1000) % max
 
 def main(config):
-    timezone = config.get("$tz", "America/New_York")
+    timezone = time.tz()
     countries = REGIONS.get(config.get("region"), [])
     future_events = config.bool("future")
     self_hide = config.bool("self-hide", DEFAULT_HIDDEN)
@@ -428,13 +425,19 @@ def main(config):
 
         if len(filtered_events):
             times = []
+            print("got " + str(len(filtered_events)) + " events")
             for event in filtered_events:
                 times.append(time.parse_time(event.get("Date", ""), format = DATEFMT).in_location(timezone))
-            next_release = abs(max([int((now - t).seconds) for t in times if t > now]))
-            print("Caching %s results as %s until next release in %s seconds" % (len(filtered_events), cache_id, next_release))
+            future_times = [int((now - t).seconds) for t in times if t > now]
+            if future_times:
+                next_release = abs(max(future_times))
+                print("Caching %s results as %s until next release in %s seconds" % (len(filtered_events), cache_id, next_release))
 
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(filtered_events), ttl_seconds = next_release)
+                cache.set(cache_id, json.encode(filtered_events), ttl_seconds = next_release)
+            else:
+                print("No future events found, caching for 1 hour")
+
+                cache.set(cache_id, json.encode(filtered_events), ttl_seconds = 3600)
     else:
         print("Displaying cached data from %s" % cache_id)
         filtered_events = json.decode(data)

@@ -6,4 +6,12 @@ desc: Displays your Fitbit recent weigh-ins.
 author: Robert Ison
 fileName: fitbitweight.star
 packageName: fitbitweight
-recommended_interval: 5
+recommendedInterval: 5
+supports2x: true
+category: utilities
+tags:
+  - lifestyle
+  - weight-tracking
+  - wide 2x support
+published: '2022-06-03T15:13:50Z'
+updated: '2026-01-21T05:42:19Z'

@@ -6,4 +6,12 @@ desc: Displays server stats (speeds and active counts) along with the progress o
 author: DoubleGremlin181
 fileName: qbittorrent.star
 packageName: qbittorrent
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+published: '2024-04-25T14:45:44Z'
+updated: '2026-10-01T22:22:03Z'

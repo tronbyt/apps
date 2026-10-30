@@ -6,4 +6,10 @@ desc: Displays a custom wanted poster based on an image you upload.
 author: Robert Ison
 fileName: wantedposter.star
 packageName: wantedposter
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: art
+tags:
+  - art
+published: '2022-05-03T15:32:56Z'
+updated: '2026-10-01T19:16:27Z'

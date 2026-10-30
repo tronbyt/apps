@@ -5,10 +5,9 @@ Description: Displays the next train between 2 stations for Metro North or Long 
 Author: rai
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -298,6 +297,15 @@ DEFAULT_LOCATION = """
 
 CACHE_TIMEOUT = 60  # will display inaccurate on-time performance if not 60 seconds.
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     widgetMode = config.bool("$widget")
     config_location = config.get("location", DEFAULT_LOCATION)
@@ -305,26 +313,18 @@ def main(config):
     timezone = location["timezone"]
     station_id = config.str("station_id", DEFAULT_STATION_ID)
     end_station_id = config.str("end_station_id", DEFAULT_END_STATION_ID)
-    cached_station = cache.get("%s" % station_id + "_arrivals")
-
-    if cached_station != None:
-        print("Displaying cached data.")
-        arrivals = json.decode(cached_station)
-    else:
-        print("Calling LIRR API.")
-        rep = http.get(
-            "%s" % API_ENDPOINT + "/arrivals/" + station_id,
-            headers = {
-                "authority": "backend-unified.mylirr.org",
-                "accept": "application/json, text/plain, */*",
-                "accept-language": "en-US,en;q=0.9",
-                "accept-version": "3.0",
-            },
-        )
-        arrivals = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("%s" % station_id + "_arrivals", rep.body(), ttl_seconds = CACHE_TIMEOUT)
+    print("Calling LIRR API.")
+    rep = http.get(
+        "%s" % API_ENDPOINT + "/arrivals/" + station_id,
+        headers = {
+            "authority": "backend-unified.mylirr.org",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US,en;q=0.9",
+            "accept-version": "3.0",
+        },
+        ttl_seconds = CACHE_TIMEOUT,
+    )
+    arrivals = rep.json()
 
     count = 0
     display = []
@@ -393,7 +393,10 @@ def main(config):
         children.append(render.Text(" found.", color = "#ccc", font = "6x13"))
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = children,
+        ))) if is_square() else render.Column(
             children = children,
         ),
     )

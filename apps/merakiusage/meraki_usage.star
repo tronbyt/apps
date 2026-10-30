@@ -5,11 +5,15 @@ Description: Monitor client usages for your Meraki network.
 Author: UnBurn
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/download_arrow.png", DOWNLOAD_ARROW_ASSET = "file")
+load("images/upload_arrow.png", UPLOAD_ARROW_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
+
+DOWNLOAD_ARROW = DOWNLOAD_ARROW_ASSET.readall()
+UPLOAD_ARROW = UPLOAD_ARROW_ASSET.readall()
 
 API_URL = "https://api.meraki.com/api/v1"
 KB_IN_GB = 1048576
@@ -44,9 +48,6 @@ fake_clients = [
         },
     },
 ]
-
-DOWNLOAD_ARROW = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAGCAYAAAAL+1RLAAAAIklEQVQIW2NkAIH/QAgDjAyMjCQIImuFGoFHO8wyoCUgJgAfhAwFkW3nPQAAAABJRU5ErkJggg==")
-UPLOAD_ARROW = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAGCAYAAAAL+1RLAAAAKElEQVQIW2NkgAK+Oa/+f0oRYwRxwQRIACYJkmBEFoBJYFeJVTs2QQCKmhaal5lvLwAAAABJRU5ErkJggg==")
 
 def get_usage_with_unit(num):
     val = math.round((num / (KB_IN_GB if num >= KB_IN_GB else KB_IN_MB)) * 100) / 100
@@ -99,11 +100,11 @@ def render_increase_number(num, color):
     for i in range(num_frames):
         rendered_value = math.round((increment * i) * 100) / 100
         renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
-        if (i / num_frames) > .75:
+        if (i / num_frames) > 0.75:
             renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
-        if (i / num_frames) > .90:
+        if (i / num_frames) > 0.90:
             renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
-        if (i / num_frames) > .95:
+        if (i / num_frames) > 0.95:
             renders.append(render.Text(content = "%s" % (rendered_value), color = color, font = "tom-thumb"))
 
     for i in range(500):
@@ -257,6 +258,7 @@ def get_schema():
                 name = "Cisco Meraki API key",
                 desc = "Your API Key to access your data",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "network_id",

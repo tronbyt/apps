@@ -5,13 +5,11 @@ Description: Shows bus departures times for AC Transit.
 Author: wshue0
 """
 
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 PREDICTIONS_URL = "https://api.actransit.org/transit/actrealtime/prediction"
@@ -23,7 +21,11 @@ AC_TRANSIT_TIME_LAYOUT = "20060102 15:04"
 
 def main(config):
     # Initialize API token, bus stop, and max predictions number with fallbacks
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("api_key")
+    api_key = config.get("api_key")
+    if not api_key:
+        return render.Root(
+            child = render.WrappedText("API key not set. Please configure.", color = "#ff0000"),
+        )
 
     stop_id = config.get("stop_id")
     if stop_id == None:
@@ -77,10 +79,10 @@ def main(config):
         return render.Root(
             delay = 60,
             child = render.Box(
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 child = render.Column(
-                    main_align = "start",
+                    main_align = "center",
                     cross_align = "center",
                     children = [
                         render.Row(
@@ -204,10 +206,10 @@ def main(config):
         return render.Root(
             delay = 120,
             child = render.Box(
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
                 child = render.Column(
-                    main_align = "start",
+                    main_align = "center",
                     cross_align = "center",
                     children = [
                         entry1,
@@ -289,9 +291,11 @@ def get_displayed_times(times, predictions_max):
     times = [str(t) if t != 0 else "now" for t in times]
     return "%s min" % ",".join(times)
 
-def get_stops(location):
+def get_stops(location, config):
     # Hits the AC Transit API to get a list of all stops and then returns the 20 nearest based on location
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or "390A953479513D55007D63462A08C068"
+    api_key = config.get("api_key")
+    if not api_key:
+        return [schema.Option(display = "API key not set", value = "")]
     loc = json.decode(location)
 
     res = http.get(
@@ -311,15 +315,11 @@ def get_stops(location):
 
 def get_times(stop_id, api_key):
     # Hits AC Transit's prediction api if there are no cache hits
-    cached = cache.get(stop_id)
-    if cached:
-        return json.decode(cached)
-    rep = http.get(PREDICTIONS_URL, params = {"stpid": stop_id, "token": api_key})
+    rep = http.get(PREDICTIONS_URL, params = {"stpid": stop_id, "token": api_key}, ttl_seconds = 20)
     if rep.status_code != 200:
-        fail("Predictions request failed with status ", rep.status_code)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(stop_id, rep.body(), ttl_seconds = 20)
+        # Instead of failing, return an empty list of predictions to trigger the 'No Data' display.
+        print("Predictions request failed with status ", rep.status_code)
+        return {"bustime-response": {"prd": []}}
 
     return rep.json()
 
@@ -349,6 +349,13 @@ def get_schema():
                         value = "3",
                     ),
                 ],
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "Your AC Transit API key. See https://api.actransit.org/transit/actrealtime/prediction for details.",
+                icon = "key",
+                secret = True,
             ),
             schema.LocationBased(
                 id = "stop_id",

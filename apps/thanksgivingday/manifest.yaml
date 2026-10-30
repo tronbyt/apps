@@ -6,4 +6,9 @@ desc: Simple daily countdown until Thanksgiving Day holiday in the U.S.
 author: J. Alex Cooney
 fileName: thanksgiving_day.star
 packageName: thanksgivingday
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - time
+published: '2023-11-07T14:43:20Z'
+updated: '2025-12-02T19:30:22Z'

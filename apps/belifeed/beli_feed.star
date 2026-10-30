@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -68,14 +68,7 @@ orderings = [
 API = "https://backoffice-service-t57o3dxfca-nn.a.run.app/api/"
 
 def get(path, ttl):
-    data = cache.get(path)
-    if data:
-        return json.decode(data)
-
-    data = http.get(API + path).body()
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(path, data, ttl_seconds = ttl)
+    data = http.get(API + path, ttl_seconds = ttl).body()
     return json.decode(data)
 
 def username_to_id(user):
@@ -180,7 +173,6 @@ def main(config):
     indexkey = user + mode + order + cutoff_str
     index = int(cache.get(indexkey) or 0)
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set(indexkey, str(index + 1), 600)  # Keep position in list for 10m
 
     if order == "random":
@@ -196,7 +188,8 @@ def main(config):
     if frame == None:
         return []
 
-    return render.Root(delay = 100, child = frame)
+    # The feed card is hand-placed for 64x32; bound and centre it on taller panels (64x64).
+    return render.Root(delay = 100, child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = frame)))
 
 def get_schema():
     return schema.Schema(

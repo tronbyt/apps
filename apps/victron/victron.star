@@ -162,6 +162,7 @@ def get_schema():
                 name = "VRM API Token",
                 desc = "Please provide your API token to access VRM",
                 icon = "user",
+                secret = True,
             ),
             schema.Text(
                 id = "installation_index",

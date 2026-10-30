@@ -6,23 +6,33 @@ Author: yonodactyl
 """
 
 load("cache.star", "cache")
-
-# LOAD MODULES
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
+load("images/tree_chopped_c3e9b02b.png", TREE_CHOPPED_c3e9b02b_ASSET = "file")
+load("images/tree_growing_6ea9c186.png", TREE_GROWING_6ea9c186_ASSET = "file")
+load("images/tree_grown.png", TREE_GROWN_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
+TREE_GROWN = TREE_GROWN_ASSET.readall()
+
 # CONSTANTS
-TREE_GROWN = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAEFJREFUGJVjYCAAGGGM5GO+/5El5lptZmRgYGBgImQCC4xxfu0PrAqIN+H5qV8M0Uy/GBgYGBiW/mPDVIAuQTQAABWCDdre18jnAAAAAElFTkSuQmCC"
-TREE_CHOPPED = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAD5JREFUGJVjYBh4wAhjSNra/59vJMjAwMDAkHjuPcPzwwcZGRgYGFiQVe+58BLKYsNunKSt/X9JW/v/JLkBAH+gDKm0ZxVNAAAAAElFTkSuQmCC"
-TREE_GROWING = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAFZJREFUGJVjYCAGJB/z/Y+Pz8DAwMCwIz/gPzINA4wwHYKVbxhcDMThEh4TNzAyMDAwsDAwMDDMtdrMCBG2xDCaCcaQtLWHSy79x4bdsZK29v+RFRIFADSSGQajlomuAAAAAElFTkSuQmCC"
+
+TREE_CHOPPED = TREE_CHOPPED_c3e9b02b_ASSET.readall()
+TREE_GROWING = TREE_GROWING_6ea9c186_ASSET.readall()
 
 GROWN_STATE = "GROWN"
 GROWING_STATE = "GROWING"
 CHOPPED_STATE = "CHOPPED"
+
+# The sprite for each tree state. Trees are cached as JSON, which can't hold the raw image data, so only the
+# state is stored and the sprite is chosen when the garden is drawn.
+SPRITES = {
+    GROWN_STATE: TREE_GROWN,
+    GROWING_STATE: TREE_GROWING,
+    CHOPPED_STATE: TREE_CHOPPED,
+}
 
 # MAIN
 def main(config):
@@ -50,21 +60,18 @@ def return_tree_states(id):
 
     # No cache exist - set to zero
     if chopped_count == None:
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("{id}-chopped_count".format(id = id), "0", ttl_seconds = 86400)
 
     # No cache exist - generate a new list of trees
     if cached_trees == None:
         encoded_list = generate_tree_list()
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("{id}-tree_list".format(id = id), encoded_list, ttl_seconds = 86400)
         return encoded_list
 
     # Found a cache and will use this data.
     updated_tree_list = update_tree_states(cached_trees, id)
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
     cache.set("{id}-tree_list".format(id = id), updated_tree_list, ttl_seconds = 86400)
     return updated_tree_list
 
@@ -78,7 +85,7 @@ def return_trees(tree_list):
         children = [
             render.Row(
                 children = [
-                    render.Image(src = base64.decode(tree["sprite"]))
+                    render.Image(src = SPRITES.get(tree["state"], TREE_GROWN))
                     for tree in column
                 ],
             )
@@ -98,7 +105,7 @@ def return_chopped_count(config, id):
             pad = (0, 0, 0, 0),
             child = render.Row(
                 children = [
-                    render.Image(src = base64.decode(TREE_GROWN), width = 8),
+                    render.Image(src = TREE_GROWN, width = 8),
                     render.Marquee(
                         width = 56,
                         child = render.Row(
@@ -126,7 +133,6 @@ def increment_chopped_count(garden_id):
         temp_count = int(chopped_count)
         temp_count += 1
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set("{id}-chopped_count".format(id = garden_id), str(temp_count), ttl_seconds = 86400)
 
 # Tree Growth Methods
@@ -151,20 +157,20 @@ def perform_growth(tree, garden_id):
 
     if tree_state == GROWN_STATE:
         increment_chopped_count(garden_id)
-        new_tree = update_tree_dict(new_tree, CHOPPED_STATE, TREE_CHOPPED, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(5, 60))
+        new_tree = update_tree_dict(new_tree, CHOPPED_STATE, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(5, 60))
     elif tree_state == GROWING_STATE:
-        new_tree = update_tree_dict(new_tree, GROWN_STATE, TREE_GROWN, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(30, 60))
+        new_tree = update_tree_dict(new_tree, GROWN_STATE, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(30, 60))
     else:
-        new_tree = update_tree_dict(new_tree, GROWING_STATE, TREE_GROWING, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(60, 60 * 2))
+        new_tree = update_tree_dict(new_tree, GROWING_STATE, str(time.now().format("2006-01-02T15:04:05Z07:00")), random.number(60, 60 * 2))
 
     return new_tree
 
-def update_tree_dict(new_tree, new_state, new_sprite, new_planted_date, new_duration):
+def update_tree_dict(new_tree, new_state, new_planted_date, new_duration):
     """
     To simplify the updating we use this helper method to make sure that we are DRY with our implementation.
     """
     new_tree["state"] = new_state
-    new_tree["sprite"] = new_sprite
+    new_tree.pop("sprite", None)  # Gardens cached by older versions stored (now corrupted) image data here
     new_tree["planted"] = new_planted_date
     new_tree["grow_duration"] = new_duration
 
@@ -197,7 +203,7 @@ def generate_tree_list():
     for _ in range(0, 3):  # The number of columns to iterate over (3 being the standard)
         row_array = []
         for _ in range(0, 8):  # The number of rows to iterate over (8 being the standard)
-            tree = dict(id = random.number(9999, 999999), state = GROWN_STATE, sprite = TREE_GROWN, planted = str(time.now().format("2006-01-02T15:04:05Z07:00")), grow_duration = random.number(5, 60))  # create our dictionary
+            tree = dict(id = random.number(9999, 999999), state = GROWN_STATE, planted = str(time.now().format("2006-01-02T15:04:05Z07:00")), grow_duration = random.number(5, 60))  # create our dictionary
             row_array.append(tree)
         column_array.append(row_array)
 

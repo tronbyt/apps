@@ -2,7 +2,7 @@
 
 This app displays the prayer times for today's date based on the user location and the method of prayer time calculation. The location, timezone and prayer time calculation method are configurable in Tidbyt app based on the user input.
 
-![](prayer_times.png)
+![](prayer_times.gif)
 
 ## Color Scheme
 

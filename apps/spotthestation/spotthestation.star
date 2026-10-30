@@ -1,394 +1,653 @@
 """
 Applet: SpotTheStation
 Summary: Next ISS visit overhead
-Description: Displays the next time the International Space Station will appear.
+Description: Displays the next visible International Space Station pass.
 Author: Robert Ison
 """
 
-load("cache.star", "cache")  #Caching
-load("encoding/base64.star", "base64")  #Used to read encoded image
-load("encoding/json.star", "json")  #Used to figure out timezone
-load("http.star", "http")  #HTTP Client
-load("math.star", "math")  #Used to calculate duration between timestamps
-load("re.star", "re")  #Used for Regular Expressions
-load("render.star", "render")
+load("encoding/json.star", "json")
+load("http.star", "http")
+load("images/iss_icon.png", ISS_ICON_ASSET = "file")
+load("images/iss_icon2.png", ISS_ICON2_ASSET = "file")
+load("images/iss_icon3.png", ISS_ICON3_ASSET = "file")
+load("images/iss_icon4.png", ISS_ICON4_ASSET = "file")
+load("images/iss_icon5.png", ISS_ICON5_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("time.star", "time")  #Used to display time and calcuate lenght of TTL cache
-load("xpath.star", "xpath")  #XPath Expressions to read XML RSS Feed
+load("time.star", "time")
 
-#Requires the RSS feed for your location from spotthestation.nasa.gov
-#Use the map tool to find the nearest location, click the blue marker then the "View sighting opportunities"
-#From this page click "RSS" to get the needed XML Feed for your location
-#Pass that into this app to have the next approach to your location listed on  your Tidbyt
+ISS_ICON = ISS_ICON_ASSET.readall()
+ISS_ICON2 = ISS_ICON2_ASSET.readall()
+ISS_ICON3 = ISS_ICON3_ASSET.readall()
+ISS_ICON4 = ISS_ICON4_ASSET.readall()
+ISS_ICON5 = ISS_ICON5_ASSET.readall()
 
-#Note on Timezones: The data from NASA on upcoming flyovers is in localtime but without timezone information.
-#To know when that time has past, we need to know the tidbyts location.
+# Set this to the actual width of the PNG assets.
+ISS_IMAGE_WIDTH = 16
 
-#We can calculate how long we can cache the XML, but let's set a minimum cache of 5 minutes just to be sure we aren't taxing servers
-#and a maximum of one week in case of bad data
-MINIMUM_CACHE_TIME_IN_SECONDS = 300
-MAXIMUM_CACHE_TIME_IN_SECONDS = 600000
+CACHE_DURATION = 86400
+PREDICTION_DAYS = 10
 
-# Load icon from base64 encoded data
-ISS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA1ElEQVQ4y5WTOw7DIBBEhygn4ThL7T5ufYmQ82xtWt/Eck4yKQLIBvzbBgkxTzs7C1AXcaMetdgfQQ7hBDxJEvBsPKYT4R5kI25A6ESoqhyGYQNJFgzgYcwH5DufyY4TwavvMU0TAMCJZDumNYMEATxK8XdZMIaQtWbHziVxCeDqjlfE6xlQVaGqGTSG0BDXET/L/iMEANB1HZxIFv9nA8SEKvuc55mqythRiuss4i0giVcA3IakTo4g6f5RpGCstbDWtrY1L1scpjn7aHt7f+u3ntYP6dzKrlS3n+0AAAAASUVORK5CYII=
-""")
+# Request broadly; all user-selected filters are applied locally.
+API_MIN_VISIBILITY = 1
+SPACE_STATION_ID = 25544
 
-ISS_ICON2 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAywFUG1eCAAAANpJREFUOMuVk7uNwzAQRB+Nq4TlkLHyc6omjlfPxlaqTgS7knFgkaAk6uNNCBCch52dJWxLfFG3rTgdQQ7hgiRJgqTGY8UQtAdZiBsQxRBkZur7fgHJFhwknPtH+itnthND4Pd+ZxxHAGIIxY5rzSBDILEWv55PHsNQtG7HziXxGqDqTlfE9QxkZphZAT2GoSHeRvyz7n+GANB1HTGEIv7MBuaENvY1TZPMTPp0lOM6i3gJmO3UAC5BVEFyJ0eQfH+r4hDgvPd471vbWpZtHqY7+2h7e//Vbz2tN1RXzK3nlhc3AAAAAElFTkSuQmCC
-""")
-
-ISS_ICON3 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAywYM2sy0QAAANpJREFUOMuVk7uNwzAQRB+Nq4TlkLHyc6omjlfPxlaqTgS7knFgkaAk6uNNCBCch52dJWxLfFG3rTgdQQ7hgiRJgqTGY8UQtAdZiBsQxRBkZur7fgHJFhwknPtH+itnthND4Pd+ZxxHAGIIxY5rzSBDILEWv55PHsNQtG7HziXxGqDqTlfE9QxkZphZAT2GoSHeRvyz7n+GANB1HTGEIv7MBuaENvY1TZPMTPp0lOM6i3gJyOIKwCWIKkju5AiS729VHAKc9x7vfWtby7LNw3RnH21v77/6raf1Bocyzax1x99PAAAAAElFTkSuQmCC
-""")
-
-ISS_ICON4 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAywoFbICfQAAANhJREFUOMulkzsOwyAQRIfIJ/Fxltp93PoSIefZ2m59E+ScZFIYEAb/omyDQMzTzg4AdRE/1KMWuzPIKZyAI0kCjjuXaUV4BNmIdyC0IlRVDsOwgUQLBnAw5g3yldZox4rg2feY5xkAYEWSHbM3gwgBHErxZ1kwTlPSmgM7t8QlgNkZ74jzGVBVoaoJNE7TjriOuCn7DxAAQNd1sCJJvM4GCAlV9um9p6qSa0cxrquIt4AozgC4BQk7eu9TJ2eQeN5kcay+2pblLLLHxjCDoydQfRz++1sv6wttM9GjkfVivgAAAABJRU5ErkJggg==
-""")
-
-ISS_ICON5 = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gMQAyw65gtzNQAAANlJREFUOMulkztuwzAQRB+DnMTHWdbq41aXMHOera1WNyGck4wLiwT1tYxsQ5DgPOzMkrAu8UF9rcXpCHIIFyRJEiRtXFY00x5kJt6AKJrJ3dX3/QxSLARIhPCLdKtrsRPN+LleGccRgGhW7YStDAoEEkvx3+PBfRiqNuzYOSVeAtSc6Yy4zUDujrtX0H0YNsTrEX8v+58gAHRdRzSr4lc2ME1oZV85Z7m79OqojOvdiOeAIm4AnIJMO+WcaydHkHLeZqAAgctFyyyax6Ypg70nsPo4+u9vfVtPbS/Ro5V9Dx8AAAAASUVORK5CYII=
-""")
+STATION_LOCATION_API = (
+    "https://api.n2yo.com/rest/v1/satellite/visualpasses/" +
+    "{space_station_id}/{latitude}/{longitude}/0/" +
+    "{days}/{min_visibility}/&apiKey={api_key}"
+)
 
 DEFAULT_LOCATION = """
 {
-	"lat": "40.6781784",
-	"lng": "-73.9441579",
-	"description": "Brooklyn, NY, USA",
-	"locality": "Brooklyn",
-	"place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
-	"timezone": "America/New_York"
+    "lat": "40.6781784",
+    "lng": "-73.9441579",
+    "description": "Brooklyn, NY, USA",
+    "locality": "Brooklyn",
+    "place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
+    "timezone": "America/New_York"
 }
 """
 
-def two_character_time_date_part(number):
-    if len(str(number)) == 1:
-        return "0" + str(number)
-    else:
-        return number
+SAMPLE_DATA = """
+{
+    "info": {
+        "satid": 25544,
+        "satname": "SPACE STATION",
+        "passescount": 1
+    },
+    "passes": [
+        {
+            "startAz": 332.18,
+            "startAzCompass": "NNW",
+            "startEl": 2.54,
+            "startUTC": 1767095020,
+            "maxAz": 40.05,
+            "maxAzCompass": "NE",
+            "maxEl": 19.95,
+            "maxUTC": 1767095320,
+            "endAz": 107.07,
+            "endAzCompass": "ESE",
+            "endEl": 0.3,
+            "endUTC": 1767095615,
+            "mag": -0.4,
+            "duration": 555,
+            "startVisibility": 1767095060
+        }
+    ]
+}
+"""
 
-def two_character_numeric_month_from_month_string(month):
-    dict = {
-        "Jan": "01",
-        "Feb": "02",
-        "Mar": "03",
-        "Apr": "04",
-        "May": "05",
-        "Jun": "06",
-        "Jul": "07",
-        "Aug": "08",
-        "Sep": "09",
-        "Oct": "10",
-        "Nov": "11",
-        "Dec": "12",
+def display_font():
+    return "terminus-16" if canvas.is2x() else "5x8"
+
+def character_width():
+    # Used to estimate text widths and stagger marquee starts.
+    return 8 if canvas.is2x() else 5
+
+def fit_or_scroll(text, width, color, font):
+    if len(text) * character_width() <= width:
+        return render.Text(
+            text,
+            color = color,
+            font = font,
+        )
+
+    return render.Marquee(
+        width = width,
+        child = render.Text(
+            text,
+            color = color,
+            font = font,
+        ),
+    )
+
+def magnitude_description(mag):
+    if mag == None or mag == 100000:
+        return "Brightness unknown"
+
+    mag = float(mag)
+
+    if mag < -3:
+        return "Extremely bright"
+    elif mag < -1:
+        return "Very bright"
+    elif mag < 0:
+        return "Bright"
+    elif mag < 2:
+        return "Naked-eye visibility"
+    elif mag < 4:
+        return "Dark skies preferred"
+    elif mag < 6:
+        return "Faint"
+    else:
+        return "Very faint"
+
+def compact_duration(seconds):
+    total = max(0, int(seconds))
+    hours = total // 3600
+    minutes = (total % 3600) // 60
+    secs = total % 60
+
+    if hours > 0:
+        return "{}h {}m".format(hours, minutes)
+
+    if minutes > 0:
+        if secs > 0:
+            return "{}m {}s".format(minutes, secs)
+        return "{}m".format(minutes)
+
+    return "{}s".format(secs)
+
+def format_locality(locality, ideal_length = 10):
+    if len(locality) <= ideal_length or "," not in locality:
+        return locality
+
+    return locality.split(",")[0].strip()
+
+def local_timestamp(timestamp, timezone):
+    return time.from_timestamp(
+        int(timestamp),
+        0,
+    ).in_location(timezone)
+
+def get_sample_data(current_time):
+    # Preserve the existing sample behavior: move it ten minutes
+    # into the future on each render.
+    data = json.decode(SAMPLE_DATA)
+    sample_pass = data["passes"][0]
+    shift = current_time + 600 - int(sample_pass["startUTC"])
+
+    for field in [
+        "startUTC",
+        "maxUTC",
+        "endUTC",
+        "startVisibility",
+    ]:
+        if field in sample_pass:
+            sample_pass[field] = int(sample_pass[field]) + shift
+
+    return data
+
+def filter_passes(
+        passes,
+        current_time,
+        minimum_duration,
+        notice_hours,
+        minimum_elevation):
+    upcoming_count = 0
+    duration_count = 0
+    elevation_count = 0
+    combined_count = 0
+    selected = None
+
+    for p in passes:
+        if type(p) != "dict":
+            continue
+
+        if p.get("startUTC") == None or p.get("endUTC") == None:
+            continue
+
+        if p.get("duration") == None or p.get("maxEl") == None:
+            continue
+
+        pass_start = int(p["startUTC"])
+        pass_end = int(p["endUTC"])
+
+        if pass_end <= pass_start or pass_end <= current_time:
+            continue
+
+        upcoming_count += 1
+
+        duration_ok = int(p["duration"]) >= minimum_duration
+        elevation_ok = float(p["maxEl"]) >= minimum_elevation
+
+        if duration_ok:
+            duration_count += 1
+
+        if elevation_ok:
+            elevation_count += 1
+
+        if not duration_ok or not elevation_ok:
+            continue
+
+        combined_count += 1
+
+        if notice_hours > 0:
+            if pass_start > current_time + notice_hours * 3600:
+                continue
+
+        if selected == None:
+            selected = p
+        elif pass_start < int(selected["startUTC"]):
+            selected = p
+
+    return {
+        "selected": selected,
+        "upcoming": upcoming_count,
+        "duration": duration_count,
+        "elevation": elevation_count,
+        "combined": combined_count,
     }
 
-    return dict.get(month)
+def no_match_message(
+        result,
+        minimum_duration,
+        notice_hours,
+        minimum_elevation):
+    if result["upcoming"] == 0:
+        return "No upcoming visible passes in cached predictions"
 
-def get_local_time(config):
-    timezone = json.decode(config.get("location", DEFAULT_LOCATION))["timezone"]
-    local_time = time.now().in_location(timezone)
-    return local_time
+    if result["duration"] == 0 and result["elevation"] == 0:
+        return "No passes meet the duration or elevation minimums"
 
-def get_local_offset(config):
-    """ Get Local Offset
+    if result["duration"] == 0:
+        return "No passes last at least {}".format(
+            compact_duration(minimum_duration),
+        )
 
-    Args:
-        config: Configuration Items to control how the app is displayed
-    Returns:
-        The the local offset based on your location
-    """
-    timezone = json.decode(config.get("location", DEFAULT_LOCATION))["timezone"]
-    local_time = time.now().in_location(timezone)
-    offset = str(local_time).split(" ")
+    if result["elevation"] == 0:
+        return "No passes reach {} deg".format(minimum_elevation)
 
-    if (offset[2][0:1] == "+"):
-        the_sign = "-"
-    else:
-        the_sign = "+"
+    if result["combined"] == 0:
+        return "No passes meet both duration and elevation settings"
 
-    if (len(offset) == 4):
-        return time.parse_duration(the_sign + str(int("04")) + "h")
-    else:
-        return time.parse_duration("+0h")
+    if notice_hours > 0:
+        return "No matching passes within {} hour{}".format(
+            notice_hours,
+            "" if notice_hours == 1 else "s",
+        )
 
-def get_timestamp_from_item(item):
-    """ Get Timestamp from item
+    return "No upcoming passes match your filters"
 
-    Args:
-        item: The item from the XML that has a timestamp
-    Returns:
-        an actual timestamp
-    """
-    description = item.replace("\n", "").replace("\t", "").split("<br/>")
-    item_date = description[0].replace("Date: ", "").split(" ")
-    item_time = description[1].replace("Time: ", "").split(" ")
-    timestamp = item_date[3] + "-" + two_character_numeric_month_from_month_string(item_date[1]) + "-" + two_character_time_date_part(item_date[2].replace(",", "")) + "T" + get_timestamp_time(item_time[0], item_time[1]) + ":00Z"  # + get_local_offset(config)
-    return timestamp
+def pass_time_label(sighting, current_time, timezone):
+    start = int(sighting["startUTC"])
+    end = int(sighting["endUTC"])
 
-def get_timestamp_time(time, meridiem):
-    time = time.split(":")
-    if meridiem == "PM":
-        time[0] = int(time[0]) + 12
+    if start <= current_time and current_time < end:
+        return "Visible now"
 
-    return str(time[0]) + ":" + time[1]
+    seconds_until = start - current_time
 
-def main(config):
-    """ Main
+    if seconds_until < 60:
+        return "In {}s".format(max(1, seconds_until))
 
-    Args:
-        config: Configuration Items to control how the app is displayed
-    Returns:
-        The display inforamtion for the Tidbyt
-    """
+    if seconds_until < 3600:
+        # Round up so 59m 59s does not become "In 59m".
+        minutes_until = (seconds_until + 59) // 60
+        return "In {}m".format(minutes_until)
 
-    show_instructions = config.bool("instructions", False)
-    if show_instructions:
-        return display_instructions()
+    local_now = local_timestamp(current_time, timezone)
+    local_start = local_timestamp(start, timezone)
 
-    #Defaults
-    current_local_time = get_local_time(config)
-    found_sighting_to_display = False
-    number_of_listed_sightings = 0
-    item_number_to_display = 0
-    time_of_next_sighting = None
-    time_of_furthest_known_sighting = None
-    location = "Invalid Location Data. You should have entered an RSS feed URL that looks like this: https://spotthestation.nasa.gov/sightings/xml_files/United_States_Florida_Orlando.xml"
-    row1 = ""
-    row2 = ""
-    row3 = ""
+    today = local_now.format("2006-01-02")
+    event_day = local_start.format("2006-01-02")
 
-    #Get Station Selected By User
-    ISS_FLYBY_XML_URL = config.get("SpotTheStationRSS") or "https://spotthestation.nasa.gov/sightings/xml_files/United_States_Florida_Orlando.xml"
+    # Find roughly noon tomorrow, away from midnight/DST edges.
+    local_hour = int(local_now.format("15"))
+    local_minute = int(local_now.format("04"))
+    tomorrow_probe = (
+        current_time +
+        (36 - local_hour) * 3600 -
+        local_minute * 60
+    )
+    tomorrow = local_timestamp(
+        tomorrow_probe,
+        timezone,
+    ).format("2006-01-02")
 
-    #cache is saved to the tidbyt server, not locally, so we need a unique key per location which so we can use the XML Url to distinguish
-    iss_xml_body = cache.get(ISS_FLYBY_XML_URL)
-    set_cache = False
-    if iss_xml_body == None:
-        iss_xml = http.get(ISS_FLYBY_XML_URL)
+    event_time = local_start.format("3:04 PM")
 
-        #print("Going to spotthestation.nasa.gov to get XML")
-        if iss_xml.status_code == 200:
-            iss_xml_body = iss_xml.body()
+    if event_day == today:
+        prefix = "Tonight" if int(local_start.format("15")) >= 18 else "Today"
+        return "{} {}".format(prefix, event_time)
 
-            #This XML Feed can have many sightings listed, both past and future
-            #So Let's find the first future sighting and display that
-            number_of_listed_sightings = iss_xml_body.count("<item>")
-            set_cache = True
-    else:
-        #print("Using cached XML")
-        number_of_listed_sightings = iss_xml_body.count("<item>")
+    if event_day == tomorrow:
+        return "Tomorrow {}".format(event_time)
 
-    if iss_xml_body == None:
-        row1 = "Invalid Data from spotthestation.nasa.gov. You should have entered an RSS feed URL that looks like this: https://spotthestation.nasa.gov/sightings/xml_files/United_States_Florida_Orlando.xml"
-        description = None
-    elif number_of_listed_sightings == 0:
-        row1 = "The station will not appear overhead for at least several days"
-        description = ""
-        location = xpath.loads(iss_xml_body).query("/rss/channel/description").replace("Satellite Sightings Information for ", "")
-    else:
-        #Find the next pass, but skip past times
-        for i in range(1, number_of_listed_sightings + 1):
-            current_query = "//item[" + str(i) + "]/description"
-            current_description = xpath.loads(iss_xml_body).query(current_query)
-            current_time_stamp = get_timestamp_from_item(current_description)
-            timezone = json.decode(config.get("location", DEFAULT_LOCATION))["timezone"]
-            current_item_time = time.parse_time(current_time_stamp).in_location(timezone) + get_local_offset(config)
+    return event_time
 
-            # We should add the duration of the sighting to the cutoff so the current sighting displays on the tidbyt
-            # Sound strange? I looked at the app when the ISS was overhead and it was on to the next sighting! Doh!
+def pass_details(sighting, current_time):
+    start = int(sighting["startUTC"])
+    end = int(sighting["endUTC"])
+    peak_time = sighting.get("maxUTC")
+    peak_elevation = int(float(sighting["maxEl"]))
 
-            duration_pattern = "Duration: (.+?) minute"
-            duration_match = re.match(duration_pattern, current_description)
-            duration_in_minutes = 0
-            if duration_match:
-                duration_string = duration_match[0][1]
-                if duration_string.isdigit():
-                    duration_in_minutes = int(duration_string)
+    start_direction = sighting.get("startAzCompass", "?")
+    peak_direction = sighting.get("maxAzCompass", "?")
+    end_direction = sighting.get("endAzCompass", "?")
+    brightness = magnitude_description(sighting.get("mag"))
 
-            duration = time.parse_duration("%sm" % duration_in_minutes)
+    if start <= current_time and current_time < end:
+        remaining = compact_duration(end - current_time)
 
-            if current_item_time + duration > current_local_time:
-                item_number_to_display = i
-                time_of_next_sighting = current_time_stamp
+        if peak_time != None and current_time < int(peak_time):
+            return (
+                "Ends in {} | Peak {} deg toward {} in {} | {}"
+            ).format(
+                remaining,
+                peak_elevation,
+                peak_direction,
+                compact_duration(int(peak_time) - current_time),
+                brightness,
+            )
 
-                # This is the next sighting, let's check to see if they want it displayed based on settings
-                hours_notice = int(config.get("notice_period", 0))
-                hours_until_sighting = (current_item_time - current_local_time).hours
+        if peak_time != None:
+            return "Ends in {} | Disappears toward {} | {}".format(
+                remaining,
+                end_direction,
+                brightness,
+            )
 
-                minimum_duration = int(config.get("minimum_duration", 0))
-                if ((hours_notice == 0 or hours_notice > hours_until_sighting) and duration_in_minutes >= minimum_duration):
-                    found_sighting_to_display = True
-                    break
-                else:
-                    found_sighting_to_display = False
+        return "Ends in {} | Peak {} deg toward {} | Ends {} | {}".format(
+            remaining,
+            peak_elevation,
+            peak_direction,
+            end_direction,
+            brightness,
+        )
 
-        #Only past events are in the XML, so we'll need to give an appropriate message
-        if (item_number_to_display == 0):
-            description = "The station will not appear overhead for at least several days"
-        else:
-            description = xpath.loads(iss_xml_body).query("/rss/channel/item[" + str(item_number_to_display) + "]/description")
+    return "{} > {} > {} | Peak {} deg | {} | {}".format(
+        start_direction,
+        peak_direction,
+        end_direction,
+        peak_elevation,
+        compact_duration(sighting["duration"]),
+        brightness,
+    )
 
-        location = xpath.loads(iss_xml_body).query("/rss/channel/description").replace("Satellite Sightings Information for ", "")
+def display_status(message, scroll_speed = 45):
+    font = display_font()
 
-    if (set_cache == True):
-        #The current XML is valid until the last known future listing
-        #So let's use that to figure our cache ttl
-        if (number_of_listed_sightings > item_number_to_display):
-            #Since there are more future sightings in the current XML
-            #Let's cache this XML as long as we have good data
-            current_query = "//item[" + str(number_of_listed_sightings) + "]/description"
-            current_description = xpath.loads(iss_xml_body).query(current_query)
-            current_time_stamp = get_timestamp_from_item(current_description)
-            time_of_furthest_known_sighting = current_time_stamp
-            date_diff = time.parse_time(time_of_furthest_known_sighting) - get_local_time(config)
-        elif (time_of_next_sighting == None):
-            date_diff = time.now() - time.now()
-        else:
-            date_diff = get_local_time(config) - get_local_time(config)  # time.parse_time(time_of_next_sighting) - get_local_time(config)
-
-        days = math.floor(date_diff.hours // 24)
-        hours = math.floor(date_diff.hours - days * 24)
-        minutes = math.floor(date_diff.minutes - (days * 24 * 60 + hours * 60))
-        seconds_xml_valid_for = minutes * 60 + hours * 60 * 60 + days * 24 * 60 * 60
-
-        #We have calculated the time this XML is good for, but to be cautious, we'll make sure it is within by setting max and min values
-        if seconds_xml_valid_for < MINIMUM_CACHE_TIME_IN_SECONDS:
-            seconds_xml_valid_for = MINIMUM_CACHE_TIME_IN_SECONDS
-        elif seconds_xml_valid_for > MAXIMUM_CACHE_TIME_IN_SECONDS:
-            seconds_xml_valid_for = MAXIMUM_CACHE_TIME_IN_SECONDS
-
-        cache.set(ISS_FLYBY_XML_URL, iss_xml_body, ttl_seconds = seconds_xml_valid_for)
-
-    if description == None:
-        description = "None"
-        row1 = "Error getting Data from spotTheStation.nasa.gov"
-    else:
-        i = 0
-        for item in description.split("<br/>"):
-            i += 1
-            item = item.replace("\n", "").replace("\t", "")
-
-            if (i < 2):
-                row2 += item.replace("Date: ", "").replace("Monday", "Mon").replace("Tuesday", "Tue").replace("Wednesday", "Wed").replace("Thursday", "Thu").replace("Friday", "Fri").replace("Saturday", "Sat").replace("Sunday", "Sun").replace(", 20", " '")
-            elif (i < 3):
-                row1 += item.replace("Time: ", "")
-            else:
-                row3 += item.replace("Duration: ", "For ").replace("Maximum Elevation:", "Max").replace("Approach:", "from").replace("Departure:", "to").replace("minute", "min")
-
-    if (found_sighting_to_display):
-        return get_display(location, row1, row2, row3, config)
-    else:
-        return []
-
-def display_instructions():
-    ##############################################################################################################################################################################################################################
-    instructions_1 = "Go to SpotTheStation.NASA.gov, zoom in on the map to find your location. Click on the blue map marker closest to your location, then click 'View sighting opportunities'."
-    instructions_2 = "Next, click the RSS icon listed under the location name. This will give you a page full of XML. No need to look at any of that, just copy the URL."
-    instructions_3 = "Enter that URL in the 'Spot the Station RSS' setting for this application. You're all set to be made aware of ISS passings! "
     return render.Root(
-        render.Column(
+        delay = scroll_speed,
+        show_full_animation = True,
+        child = render.Column(
             children = [
-                render.Marquee(
-                    width = 64,
-                    child = render.Text("Spot the Station", color = "#65d0e6", font = "5x8"),
+                fit_or_scroll(
+                    "Spot the Station",
+                    canvas.width(),
+                    "#65d0e6",
+                    font,
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(instructions_1, color = "#f4a306"),
-                ),
-                render.Marquee(
-                    offset_start = len(instructions_1) * 5,
-                    width = 64,
-                    child = render.Text(instructions_2, color = "#f4a306"),
-                ),
-                render.Marquee(
-                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
-                    width = 64,
-                    child = render.Text(instructions_3, color = "#f4a306"),
+                    width = canvas.width(),
+                    child = render.Text(
+                        message,
+                        color = "#f4a306",
+                        font = font,
+                    ),
                 ),
             ],
         ),
-        show_full_animation = True,
     )
 
-def get_display(location, row1, row2, row3, config):
+def main(config):
+    scroll_speed = int(config.get("scroll", "45"))
+
+    if config.bool("instructions", False):
+        return display_instructions(scroll_speed)
+
+    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    current_time = time.now().unix
+
+    api_key = (config.get("api_key", "") or "").strip()
+
+    minimum_duration = max(
+        0,
+        int(config.get("minimum_duration", "0")),
+    )
+    notice_hours = max(
+        0,
+        int(config.get("notice_period", "0")),
+    )
+    minimum_elevation = int(config.get("minimum_elevation", "5"))
+    hide_when_empty = config.bool("hide_when_empty", False)
+
+    is_sample_data = not api_key
+
+    if is_sample_data:
+        station_data = get_sample_data(current_time)
+    else:
+        # Changing display filters does not change this URL.
+        url = STATION_LOCATION_API.format(
+            space_station_id = SPACE_STATION_ID,
+            latitude = location["lat"],
+            longitude = location["lng"],
+            days = PREDICTION_DAYS,
+            min_visibility = API_MIN_VISIBILITY,
+            api_key = api_key,
+        )
+
+        resp = http.get(url, ttl_seconds = CACHE_DURATION)
+
+        if resp.status_code != 200:
+            return display_status(
+                "API request failed: HTTP {}".format(resp.status_code),
+                scroll_speed,
+            )
+
+        station_data = resp.json()
+
+        if type(station_data) != "dict":
+            return display_status(
+                "API returned an unexpected response",
+                scroll_speed,
+            )
+
+        # Avoid displaying raw error text that might contain
+        # request details or the API key.
+        if "error" in station_data:
+            return display_status(
+                "N2YO API error. Check your API key and account.",
+                scroll_speed,
+            )
+
+    passes = station_data.get("passes")
+
+    if type(passes) != "list":
+        return display_status(
+            "API response is missing a valid passes list",
+            scroll_speed,
+        )
+
+    result = filter_passes(
+        passes,
+        current_time,
+        minimum_duration,
+        notice_hours,
+        minimum_elevation,
+    )
+    sighting = result["selected"]
+
+    if sighting == None:
+        if hide_when_empty:
+            return []
+
+        message = no_match_message(
+            result,
+            minimum_duration,
+            notice_hours,
+            minimum_elevation,
+        )
+
+        if is_sample_data:
+            message = "Sample: " + message
+
+        return display_status(message, scroll_speed)
+
+    timezone = (
+        location.get("timezone") or
+        config.get("$tz") or
+        "America/New_York"
+    )
+
+    event_start = local_timestamp(
+        sighting["startUTC"],
+        timezone,
+    )
+
+    time_text = pass_time_label(
+        sighting,
+        current_time,
+        timezone,
+    )
+
+    details_text = pass_details(sighting, current_time)
+
+    # Keep exact local start time available when the main label
+    # shows a countdown, relative day, or ongoing-pass status.
+    date_text = "{} | Starts {}".format(
+        event_start.format("Jan 2, 2006"),
+        event_start.format("3:04 PM"),
+    )
+
+    if is_sample_data:
+        time_text = "Sample: " + time_text
+        details_text = "Sample only, not a real prediction | " + details_text
+
+    locality = (
+        location.get("locality") or
+        location.get("description") or
+        "Selected location"
+    )
+
+    return get_display(
+        format_locality(locality),
+        time_text,
+        date_text,
+        details_text,
+        scroll_speed,
+    )
+
+def display_instructions(scroll_speed = 45):
+    font = display_font()
+    char_width = character_width()
+
+    lines = [
+        "Spot the Station",
+        "1. Create a free N2YO.com account and generate an API key.",
+        "2. Enter your API key and select your location in settings.",
+        (
+            "3. Set duration, elevation, and notice filters. " +
+            "Predictions are cached for 24 hours. " +
+            "Turn off Display Instructions when finished."
+        ),
+    ]
+
+    children = []
+    offset = 0
+
+    for index in range(len(lines)):
+        text = lines[index]
+
+        children.append(
+            render.Marquee(
+                width = canvas.width(),
+                offset_start = offset,
+                child = render.Text(
+                    text,
+                    color = "#65d0e6" if index == 0 else "#f4a306",
+                    font = font,
+                ),
+            ),
+        )
+
+        # Start the next line shortly before this one finishes.
+        offset += max(
+            char_width * 4,
+            len(text) * char_width - canvas.width() // 4,
+        )
+
+    return render.Root(
+        delay = scroll_speed,
+        show_full_animation = True,
+        child = render.Column(children = children),
+    )
+
+def get_iss_animation():
+    frames = [
+        ISS_ICON,
+        ISS_ICON2,
+        ISS_ICON,
+        ISS_ICON3,
+        ISS_ICON,
+        ISS_ICON4,
+        ISS_ICON,
+        ISS_ICON5,
+        ISS_ICON,
+        ISS_ICON5,
+        ISS_ICON,
+        ISS_ICON5,
+        ISS_ICON,
+        ISS_ICON5,
+        ISS_ICON,
+        ISS_ICON5,
+        ISS_ICON,
+        ISS_ICON4,
+        ISS_ICON,
+        ISS_ICON3,
+        ISS_ICON,
+        ISS_ICON2,
+    ] + [ISS_ICON] * 11
+
+    return render.Animation(
+        children = [
+            render.Image(src = frame)
+            for frame in frames
+        ],
+    )
+
+def get_display(location, row1, row2, row3, scroll_speed = 45):
+    font = display_font()
+    text_width = canvas.width() - ISS_IMAGE_WIDTH
+
     return render.Root(
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
+        delay = scroll_speed,
         child = render.Column(
             children = [
-                render.Column(
+                render.Row(
                     children = [
-                        render.Row(
+                        get_iss_animation(),
+                        render.Column(
                             children = [
-                                render.Animation(
-                                    children = [
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON2),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON3),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON4),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON5),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON5),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON5),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON5),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON5),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON4),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON3),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON2),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                        render.Image(src = ISS_ICON),
-                                    ],
+                                fit_or_scroll(
+                                    location,
+                                    text_width,
+                                    "#0099FF",
+                                    font,
                                 ),
-                                render.Column(
-                                    children = [
-                                        render.Marquee(
-                                            width = 48,
-                                            child = render.Text(location, color = "#0099FF"),
-                                        ),
-                                        render.Marquee(
-                                            width = 35,
-                                            child = render.Text(row1, color = "#fff"),
-                                        ),
-                                    ],
+                                fit_or_scroll(
+                                    row1,
+                                    text_width,
+                                    "#fff",
+                                    font,
                                 ),
                             ],
                         ),
                     ],
                 ),
-                render.Marquee(
-                    width = 64,
-                    child = render.Text(row2, color = "#fff"),
+                fit_or_scroll(
+                    row2,
+                    canvas.width(),
+                    "#fff",
+                    font,
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(row3, color = "#ff0"),
+                    width = canvas.width(),
+                    child = render.Text(
+                        row3,
+                        color = "#ff0",
+                        font = font,
+                    ),
                 ),
             ],
         ),
     )
 
 def get_schema():
-    period_options = [
+    notice_period_options = [
         schema.Option(value = "1", display = "1 hour"),
         schema.Option(value = "2", display = "2 hours"),
         schema.Option(value = "3", display = "3 hours"),
@@ -399,82 +658,132 @@ def get_schema():
         schema.Option(value = "48", display = "2 days"),
         schema.Option(value = "72", display = "3 days"),
         schema.Option(value = "168", display = "1 week"),
-        schema.Option(value = "0", display = "Always Display Next Sighting if known"),
+        schema.Option(
+            value = "0",
+            display = "Always display next matching sighting if known",
+        ),
     ]
 
     minimum_duration_options = [
-        schema.Option(value = "1", display = "1 minute"),
-        schema.Option(value = "2", display = "2 minutes"),
-        schema.Option(value = "3", display = "3 minutes"),
-        schema.Option(value = "4", display = "4 minutes"),
-        schema.Option(value = "5", display = "5 minutes"),
-        schema.Option(value = "6", display = "6 minutes"),
-        schema.Option(value = "7", display = "7 minutes"),
-        schema.Option(value = "8", display = "8 minutes"),
-        schema.Option(value = "9", display = "9 minutes"),
-        schema.Option(value = "10", display = "10 minutes"),
-        schema.Option(value = "0", display = "Display regardless of duration"),
+        schema.Option(value = "60", display = "1 minute"),
+        schema.Option(value = "120", display = "2 minutes"),
+        schema.Option(value = "180", display = "3 minutes"),
+        schema.Option(value = "240", display = "4 minutes"),
+        schema.Option(value = "300", display = "5 minutes"),
+        schema.Option(value = "360", display = "6 minutes"),
+        schema.Option(value = "420", display = "7 minutes"),
+        schema.Option(value = "480", display = "8 minutes"),
+        schema.Option(value = "540", display = "9 minutes"),
+        schema.Option(value = "600", display = "10 minutes"),
+        schema.Option(
+            value = "0",
+            display = "Any returned pass (1 second or longer)",
+        ),
+    ]
+
+    minimum_elevation_options = [
+        schema.Option(
+            value = "5",
+            display = "Low passes or higher (5 degrees)",
+        ),
+        schema.Option(
+            value = "20",
+            display = "Moderate passes or higher (20 degrees)",
+        ),
+        schema.Option(
+            value = "40",
+            display = "High passes or higher (40 degrees)",
+        ),
+        schema.Option(
+            value = "60",
+            display = "Very high passes (60 degrees or higher)",
+        ),
     ]
 
     scroll_speed_options = [
-        schema.Option(
-            display = "Slow Scroll",
-            value = "60",
-        ),
-        schema.Option(
-            display = "Medium Scroll",
-            value = "45",
-        ),
-        schema.Option(
-            display = "Fast Scroll",
-            value = "30",
-        ),
+        schema.Option(value = "60", display = "Slow Scroll"),
+        schema.Option(value = "45", display = "Medium Scroll"),
+        schema.Option(value = "30", display = "Fast Scroll"),
     ]
 
     return schema.Schema(
         version = "1",
         fields = [
             schema.Text(
-                id = "SpotTheStationRSS",
-                name = "Spot the Station RSS",
+                id = "api_key",
+                name = "N2YO.com API Key",
                 icon = "locationArrow",
-                desc = "Go to spotthestation.nasa.gov Use the map tool to find the nearest location, click the blue marker then 'View sighting opportunities' then get the RSS feed URL.",
+                desc = (
+                    "Create a free N2YO.com account, then generate " +
+                    "an API key from your profile."
+                ),
+                secret = True,
             ),
             schema.Location(
                 id = "location",
                 name = "Location",
-                desc = "Location needed to calculate local time.",
+                desc = (
+                    "Used for pass predictions and the displayed " +
+                    "local date and time."
+                ),
                 icon = "locationDot",
             ),
             schema.Dropdown(
                 id = "notice_period",
                 name = "Notice Period",
-                desc = "Display when sighting is within...",
+                desc = (
+                    "Display matching passes within this period. " +
+                    "Applied locally to cached predictions."
+                ),
                 icon = "userClock",
-                options = period_options,
-                default = period_options[len(period_options) - 1].value,
+                options = notice_period_options,
+                default = "0",
             ),
             schema.Dropdown(
                 id = "minimum_duration",
                 name = "Minimum Duration",
-                desc = "Display sightings that are at least...",
+                desc = (
+                    "Minimum total visible duration. " +
+                    "Applied locally to cached predictions."
+                ),
                 icon = "stopwatch",
                 options = minimum_duration_options,
-                default = minimum_duration_options[len(minimum_duration_options) - 1].value,
+                default = "0",
+            ),
+            schema.Dropdown(
+                id = "minimum_elevation",
+                name = "Types of Passes",
+                desc = (
+                    "Minimum peak elevation above the horizon. " +
+                    "Applied locally to cached predictions."
+                ),
+                icon = "mountainSun",
+                options = minimum_elevation_options,
+                default = "5",
             ),
             schema.Dropdown(
                 id = "scroll",
                 name = "Scroll",
-                desc = "Scroll Speed",
+                desc = "Scroll speed",
                 icon = "scroll",
                 options = scroll_speed_options,
-                default = scroll_speed_options[1].value,
+                default = "45",
+            ),
+            schema.Toggle(
+                id = "hide_when_empty",
+                name = "Hide When No Matching Pass",
+                desc = (
+                    "Hide the app instead of showing a " +
+                    "no-matching-passes message."
+                ),
+                icon = "info",
+                default = False,
             ),
             schema.Toggle(
                 id = "instructions",
                 name = "Display Instructions",
                 desc = "",
-                icon = "book",  #"info",
+                icon = "book",
                 default = False,
             ),
         ],

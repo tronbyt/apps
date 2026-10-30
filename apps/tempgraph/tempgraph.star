@@ -518,6 +518,7 @@ def get_schema():
                 name = "WeatherAPI.com API Key",
                 desc = "API Key for WeatherAPI.com",
                 icon = "user",
+                secret = True,
             ),
             schema.Location(
                 id = "location",

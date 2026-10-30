@@ -6,4 +6,9 @@ desc: Real time information about your favorite transport line in Vienna.
 author: David B.C.
 fileName: wienerlinien_info.star
 packageName: wienerlinieninfo
-recommended_interval: 5
+recommendedInterval: 5
+category: transit
+tags:
+  - local
+published: '2023-03-23T11:59:23Z'
+updated: '2026-08-30T08:48:24Z'

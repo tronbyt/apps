@@ -4,4 +4,13 @@ name: FAA ATIS
 summary: ATIS runway information
 desc: Display FAA ATIS information (runways in use) for a given airport.
 author: Connick Shields
-recommended_interval: 5
+recommendedInterval: 5
+fileName: faa_atis.star
+packageName: faaatis
+supports64x64: true
+category: transit
+tags:
+  - weather
+  - utility
+published: '2025-04-05T23:56:59Z'
+updated: '2026-10-01T21:00:02Z'

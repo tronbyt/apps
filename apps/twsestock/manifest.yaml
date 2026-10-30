@@ -4,4 +4,13 @@ name: TWSE Stock
 summary: Display TWSE stocks
 desc: Configure up to 2 stocks to show.
 author: Mark Chu
-recommended_interval: 5
+recommendedInterval: 5
+fileName: twse_stock.star
+packageName: twsestock
+supports64x64: true
+category: finance
+tags:
+  - finance
+  - utility
+published: '2024-09-17T15:09:17Z'
+updated: '2026-10-01T19:16:27Z'

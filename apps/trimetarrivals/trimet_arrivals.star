@@ -1,13 +1,8 @@
-load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
-
-# tidbyt-rtpi-rotter
-KEY = "AV6+xWcE4VoXv5UpUq2c3zK5B5K1+sqEbwe94y0w0xjhMYBeLYdm0xyk8/baEAOvXDsbYHtageaL6hj7tknVAV9SQBS2Bz7v03TRSa7EVZ9p92dQCA3cAdYtCpPTM6FDwnxpi6MnoscsQ6/zsi7DKvf5t4vZYH90xZu57vwWHw=="
 
 DEFAULT_LOCATION = """
 {"lat":45.6,"lng":"-122.64","locality":"Portland, OR","timezone":"America/Los_Angeles"}
@@ -17,7 +12,7 @@ URL = "https://developer.trimet.org/ws/V2/arrivals?locIDs={}&appID={}&json=true"
 # URL = "https://developer.trimet.org/ws/V2/arrivals?locIDs={}&appID=3EE99DA9677E312D637CED197&json=true"
 
 def main(config):
-    api_key = secret.decrypt(KEY) or "3EE99DA9677E312D637CED197"
+    api_key = config.get("trimet_api_key") or "3EE99DA9677E312D637CED197"
     # print("api_key: %s" % api_key)
 
     # font_sm = config.get("font-sm", "tom-thumb")
@@ -31,19 +26,11 @@ def main(config):
 
     print("stop: %s" % stop)
 
-    stop_cached = cache.get("stop")
-    if stop_cached != None:
-        print("Hit! Displaying cached data.")
-        rep = json.decode(stop_cached)
-    else:
-        print("Miss! Calling TriMet API with")
-        response = http.get(URL.format(stop, api_key))
-        if response.status_code != 200:
-            fail("request failed with status %d", response.status_code)
-        rep = response.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("stop", json.encode(rep), ttl_seconds = 30)
+    print("Miss! Calling TriMet API with")
+    response = http.get(URL.format(stop, api_key), ttl_seconds = 30)
+    if response.status_code != 200:
+        fail("request failed with status %d", response.status_code)
+    rep = response.json()
 
     # print(rep["resultSet"])
     # arrival_data = rep["resultSet"]["arrival"][0]["fullSign"]
@@ -92,5 +79,12 @@ def get_schema():
             #     desc = "Location for which to display time.",
             #     icon = "locationDot",
             # ),
+            schema.Text(
+                id = "trimet_api_key",
+                name = "TriMet API Key",
+                desc = "A TriMet API key to access the TriMet API.",
+                icon = "key",
+                secret = True,
+            ),
         ],
     )

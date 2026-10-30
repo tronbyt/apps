@@ -6,4 +6,8 @@ desc: Shows train, BRT, ABRT, and bus departure times from the selected stop.
 author: Jonathan Wescott and Alex Miller
 fileName: mn_metro_transit.star
 packageName: mnmetrotransit
-recommended_interval: 5
+recommendedInterval: 5
+category: transit
+tags: []
+published: '2023-02-01T21:01:53Z'
+updated: '2025-12-05T22:28:51Z'

@@ -6,4 +6,10 @@ desc: Show PagerDuty incident stats and on-call status.
 author: Nick Penree
 fileName: pagerduty.star
 packageName: pagerduty
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tracking
+published: '2022-02-09T22:56:28Z'
+updated: '2026-10-01T22:17:11Z'

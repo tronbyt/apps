@@ -6,4 +6,9 @@ desc: Shows train arrivals for upcoming inbound and outbound trains at path trai
 author: Todd Greenberg
 fileName: path_train_schedule.star
 packageName: pathtrainschedule
-recommended_interval: 5
+recommendedInterval: 5
+category: transit
+tags:
+  - productivity
+published: '2022-03-02T23:52:07Z'
+updated: '2026-10-15T20:04:23Z'

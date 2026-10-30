@@ -6,14 +6,16 @@ Author: Reed Arneson
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/nhl_logo.png", NHL_LOGO_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+NHL_LOGO = NHL_LOGO_ASSET.readall()
 
 APP_VERSION = "2.3.0"
 
@@ -42,23 +44,6 @@ CACHE_SHUFFLETEAMS_SECONDS = 3600
 
 BASE_API_URL = "https://api-web.nhle.com"
 BASE_IMAGE_URL = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/{}.png&scale=crop&cquality=40&location=origin&w=80&h=80"
-
-NHL_LOGO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABAAAAATCAYAAACZZ43PAAAAAXNSR0IArs4c6QAABCdJREFUOE9jZIACAQEBBQMjo4AD+/ZNgImpamj4yElLf9y7d
-+9hmJiLu3vBmZMnN3z48OEBSIwRJhESEpJibG4RxM/Nda+qqmpNWGSkyveff6JsLUwZPnz4sKytre12eHRsKC8vr9KLJ4/WLVmyZA7cAJDtFZU1M2
-bNnqkmJSX5UUlR8cejR48ZhYSERJlZWBj+/v71hpOL69/ly5d5ONjZmVNSUx+VlZZmgFzBGBMT06enp2e2YuUqDk8fP+NvX748YGNjVZCXl2OYMmn
-iLZAtlZVVap8+fWLwDwhguHHjBkNzU+NZb1/fT7t27bnAWF1dXbNj1+7wkPBIna7Wpg8MDAwCMG/BaGVlld/tHR0MmRnpN96+fSu7es1agdramgvi
-UjJrGQUEBAwsrW0namtr282dPRNdL4O/vz+Dq6vbtcmTJ72/efOmNUhBS0srw5Zt2w8dP3o4HhyINnaOB9LSUuzzc3NQDAApvHbj+pETx479bmpuk
-Y6JjlIDKZg3fwHDrFmzD27ftsUBbICtg+OBvNxc+7SUZLABPDw87yZNniI0deqUA2fPnHGYNGnyRZD43LlzXr1//0GkobHRcOOG9QcXLFjgAPaCgb
-FJn7+vj0FTY6Ogqqrq6+KS0n8F+Xkf5sydx9jc1Pg6OzuHB2TAipUrfmhraQm4uXuoL1wwf//mzZuLGKura2s2b9kUrKenJygmJsYvKyt7va+3l83
-S2vqLr7ePwPHjxz5aWlrxV1VV8vb3TxSZPGXSLUkJCR4mZuYPf/4xbGJsb2/vOHX6tEd2do7+rJkz96tpqLPu2bWLUU5B4Q/IgLy8XH19fYML+QUF
-BjnZWbe+ffumJiAg8NDB0en3+0+fFzJOmz59wamTJ3UOHDjA/PHjR4MlS5fdUlJSkqhvqD//6MEDZikpKV7/gEC9gvy8j8hRHBkdw/D81et5jLNmz
-albsGCex6tXr+Tevn0rDQqwzVu3fLh3587/pORkyWNHj7Jt3bpVETl6REREbqqoabDz8guuZOzs7Ezcvn17WGBQsH1DfR1nTk7O0Xnz5olPnjJVob
-am+v6zZ89U0RNHbGLy17OnTx3k4+PfDYoFgdLS0t5jx45rKyjIi1+8ePFlcUmpeUpy0qd///7xoWv2CQh8cfP69YfaOroP1q9ZlQFOB87OzrbOLi7
-ZC+bPl66trbMBpfujR4/c37t3L+e/f//+6+kbPtfR01P5/fcf375d23f7+gf83LtrZ9e5c+cOw7NzcHCwnq6eQdHxU6cUP394JywhIcklISmp+PPX
-L4bXr17e//L58zcJcck3hkZGD/YeOtC3Y9OmSyjlAVLBYmBgZGrCy8erx8bOYWRubMDAysp65MqVK3fWrl175sOHDxeQvQV3AUYuYmBgMDc3j5CSk
-mJYv379CmzyIDEA/Aa7ZTTsFScAAAAASUVORK5CYII=
-""")
 
 # Some teams have abbr_fix due to inconsistent pattern by logo scrape source
 TEAMS_LIST = {
@@ -98,6 +83,15 @@ TEAMS_LIST = {
 }
 
 # Main App
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Get timezone and set today date
     currDate = get_current_date(config)
@@ -165,7 +159,26 @@ def main(config):
     if game_info["gameId"] == None:
         print("  - ERROR: No Games Found. Displaying NHL Logo.")
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                child = render.Column(
+                    expanded = True,
+                    main_align = "space_around",
+                    cross_align = "center",
+                    children = [
+                        render.Image(
+                            src = NHL_LOGO,
+                            width = 20,
+                            height = 20,
+                        ),
+                        render.Text(
+                            content = "No %s Games" % team_abbr,
+                            font = FONT_STYLE,
+                            color = "#ababab",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 child = render.Column(
                     expanded = True,
                     main_align = "space_around",
@@ -203,7 +216,89 @@ def main(config):
 
     # Main Display Render
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    expanded = True,
+                    main_align = "space_around",
+                    cross_align = "center",
+                    children = [
+                        render.Column(
+                            cross_align = "center",
+                            children = [
+                                render.Image(width = 18, height = 18, src = logo_away),
+                                render.Box(height = 1, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = TEAMS_LIST[game_info["teamId_away"]]["abbreviation"] + " " + game_info["goals_away"],
+                                    font = FONT_STYLE,
+                                    color = score_color_away,
+                                ),
+                            ],
+                        ),
+                        render.Column(
+                            cross_align = "center",
+                            main_align = "space evenly",
+                            children = [
+                                render.Box(height = 2, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = game_info["game_time"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                                render.Text(
+                                    content = "vs",
+                                    font = FONT_STYLE,
+                                    color = "#525252",
+                                ),
+                                render.Text(
+                                    content = game_info["game_period"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                                render.Box(height = 1, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = game_info["is_intermission"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                            ],
+                        ),
+                        render.Column(
+                            cross_align = "center",
+                            children = [
+                                render.Image(width = 18, height = 18, src = logo_home),
+                                render.Box(height = 1, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = game_info["goals_home"] + " " + TEAMS_LIST[game_info["teamId_home"]]["abbreviation"],
+                                    font = FONT_STYLE,
+                                    color = score_color_home,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Box(
+                    height = 9,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        children = [
+                            render.Marquee(
+                                offset_start = 16,
+                                offset_end = 16,
+                                width = 64,
+                                child = render.Text(
+                                    content = game_info["game_update"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     expanded = True,
@@ -588,32 +683,21 @@ def get_team(config):
     return teamId, team_abbr
 
 def get_team_logo(teamId):
-    # check cache for logo
-    cache_key = "logo_" + str(int(teamId))
-    logo = cache.get(cache_key)
-
-    if logo == None:
-        print("  - CACHE: No Logo found for teamid %s" % str(int(teamId)))
-
-        # janky abbrevations fix
-        if "abbr_fix" in TEAMS_LIST[teamId]:
-            abbr = TEAMS_LIST[teamId]["abbr_fix"]
-        else:
-            abbr = TEAMS_LIST[teamId]["abbreviation"]
-
-        url = BASE_IMAGE_URL.format(abbr)
-        print("  - HTTP.GET: %s" % url)
-        response = http.get(url)
-
-        if response.status_code != 200:
-            logo = NHL_LOGO
-        else:
-            logo = response.body()
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_key, logo, ttl_seconds = CACHE_LOGO_SECONDS)
+    # janky abbrevations fix
+    if "abbr_fix" in TEAMS_LIST[teamId]:
+        abbr = TEAMS_LIST[teamId]["abbr_fix"]
     else:
-        print("  - CACHE: Logo found for teamid %s" % str(int(teamId)))
+        abbr = TEAMS_LIST[teamId]["abbreviation"]
+
+    url = BASE_IMAGE_URL.format(abbr)
+    print("  - HTTP.GET: %s" % url)
+    response = http.get(url, ttl_seconds = CACHE_LOGO_SECONDS)
+
+    if response.status_code != 200:
+        logo = NHL_LOGO
+    else:
+        logo = response.body()
+
     return logo
 
 # Check what color to use for team abbreviation based on pp or empty net

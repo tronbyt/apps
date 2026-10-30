@@ -6,4 +6,12 @@ desc: Tracks the amount of time spent on the current Timeular activity.
 author: tommylin1212
 fileName: timeular_activity.star
 packageName: timeularactivity
-recommended_interval: 5
+recommendedInterval: 5
+category: utilities
+tags:
+  - tracking
+  - productivity
+  - utility
+  - focus
+published: '2023-12-07T17:57:42Z'
+updated: '2025-12-02T19:30:22Z'

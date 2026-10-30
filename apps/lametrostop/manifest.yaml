@@ -6,4 +6,9 @@ desc: Get departure times for LA metro train stop.
 author: connorwashere
 fileName: la_metro_stop.star
 packageName: lametrostop
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags: []
+published: '2023-06-09T15:44:00Z'
+updated: '2026-10-01T21:41:49Z'

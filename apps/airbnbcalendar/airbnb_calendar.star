@@ -5,17 +5,16 @@ Description: A calendar that shows the coming week of occupancy for multiple Air
 Author: Jed Schmidt
 """
 
-load("cache.star", "cache")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-SCREEN_HEIGHT = 32
-SCREEN_WIDTH = 64
+SCREEN_HEIGHT = canvas.height()
+SCREEN_WIDTH = canvas.width()
 MAX_LISTING_COUNT = 5
 DEFAULT_TIMEZONE = "America/New_York"
 DEFAULT_CHECKIN_HOUR = 15
@@ -60,17 +59,12 @@ def listing(url, height):
     if not re.match(r"^https://www\.airbnb\.com/calendar/ical/", url):
         return render.Text(content = "Invalid URL", font = "tom-thumb")
 
-    ical = cache.get(url)
-    if ical == None:
-        res = http.get(url)
+    res = http.get(url, ttl_seconds = 300)
 
-        if res.status_code != 200:
-            return render.Text(content = "HTTP error %d" % res.status_code, font = "tom-thumb")
+    if res.status_code != 200:
+        return render.Text(content = "HTTP error %d" % res.status_code, font = "tom-thumb")
 
-        ical = res.body()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set(url, ical, ttl_seconds = 300)
+    ical = res.body()
 
     dtstart_list = re.match(r"DTSTART;VALUE=DATE:(.{4})(.{2})(.{2})", ical)
     dtend_list = re.match(r"DTEND;VALUE=DATE:(.{4})(.{2})(.{2})", ical)
@@ -189,7 +183,7 @@ def grid(location):
 
 def main(config):
     count = int(config.get("count", "0"))
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
 
     stack = [grid(timezone)]
 

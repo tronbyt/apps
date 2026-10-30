@@ -21,7 +21,6 @@ load("hmac.star", "hmac")
 load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
 LOCAL_MODE = False
@@ -30,8 +29,6 @@ LOCAL_API_KEY = None
 
 BASE_URL = "https://timetableapi.ptv.vic.gov.au"
 CACHE_TTL_SECS = 60
-ENCRYPTED_API_ID = "AV6+xWcEVunEQ8Hfmjxvyso7/q0tQvMr5lmVqXY5SqIa3wgEbGnTQEfx26kAU/EMztJJYwKIiNNbL9PSWIxzTccdKDdJE6kcDICDwBJy30em6qo5vQBHhphBNy2R17Xb/pbz8OPT0sm6+XwiCQ=="
-ENCRYPTED_API_KEY = "AV6+xWcE+zx9jIl732gRf/QP+gF+n4kgZk06KPRzujW8XTnpZc/TMznuBRLcPZoqBtvkzo5OUvbI13hbngdFFPf+Fhd9aUWJiAWlPpmV0JXCkJc6HMnWwG9K9sV3TM89PZGmmXYWsHWW0eLFoWMi3Npn1YDCiQ2Pqi0aW5tMfBIaVyDrzVx9yYI6"
 
 COLOR_CODE_MERNDA_HURSTBRIDGE = "#D47664"
 COLOR_CODE_SUNBURY_CRAIGIEBURN_UPFIELD = "#F3B22C"
@@ -66,7 +63,7 @@ def main(config):
     color_code = get_train_line_color_code(route_name)
 
     if route_id and stop_id and direction_id:
-        departures = get_departures(route_id, stop_id, direction_id, route_name, stop_name, direction_data, color_code)
+        departures = get_departures(route_id, stop_id, direction_id, route_name, stop_name, direction_data, color_code, config)
 
         # print ("\n\n\n[DEBUG]: \
         #     \nschema_train_line: %s\
@@ -230,10 +227,10 @@ def build_divider_invisible_row():
     )
 
 # API - GET Departures Data and Transform
-def get_departures(route_id, stop_id, direction_id, route_name, stop_name, direction_data, color_code):
+def get_departures(route_id, stop_id, direction_id, route_name, stop_name, direction_data, color_code, config):
     # Set API ID/KEY
-    api_id = LOCAL_API_ID if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_ID)
-    api_key = LOCAL_API_KEY if LOCAL_MODE else secret.decrypt(ENCRYPTED_API_KEY)
+    api_id = config.get("api_id")
+    api_key = config.get("api_key")
     if api_id == None or api_key == None:
         print("[ERROR]: Failed to retrieve API credentials")
         return -1
@@ -2433,6 +2430,20 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_id",
+                name = "API User ID",
+                desc = "PTV Timetable API User ID",
+                icon = "user",
+                secret = True,
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "PTV Timetable API Key",
+                icon = "key",
+                secret = True,
+            ),
             schema.Dropdown(
                 id = "train-line",
                 name = "Train Line",

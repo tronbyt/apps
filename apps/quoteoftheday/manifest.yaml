@@ -6,4 +6,11 @@ desc: Provides inspirational, humorous or otherwise interesting quotes throughou
 author: Taylor White
 fileName: quote_of_the_day.star
 packageName: quoteoftheday
-recommended_interval: 5
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - art
+  - lifestyle
+  - time
+published: '2024-01-23T18:08:58Z'
+updated: '2025-12-02T19:30:22Z'

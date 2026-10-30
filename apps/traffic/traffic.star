@@ -7,13 +7,33 @@ Honorable Mention: LukiLeu, for the inspiration with Google Traffic
 """
 
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/bike_icon.png", BIKE_ICON_ASSET = "file")
+load("images/bike_icon2.png", BIKE_ICON2_ASSET = "file")
+load("images/car_icon.png", CAR_ICON_ASSET = "file")
+load("images/ebike_icon.png", EBIKE_ICON_ASSET = "file")
+load("images/flag_icon.png", FLAG_ICON_ASSET = "file")
+load("images/mtnbike_icon.png", MTNBIKE_ICON_ASSET = "file")
+load("images/pin_icon.png", PIN_ICON_ASSET = "file")
+load("images/train_icon.png", TRAIN_ICON_ASSET = "file")
+load("images/walk_icon.png", WALK_ICON_ASSET = "file")
+load("images/wheelchair_icon.png", WHEELCHAIR_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+BIKE_ICON = BIKE_ICON_ASSET.readall()
+BIKE_ICON2 = BIKE_ICON2_ASSET.readall()
+CAR_ICON = CAR_ICON_ASSET.readall()
+EBIKE_ICON = EBIKE_ICON_ASSET.readall()
+FLAG_ICON = FLAG_ICON_ASSET.readall()
+MTNBIKE_ICON = MTNBIKE_ICON_ASSET.readall()
+PIN_ICON = PIN_ICON_ASSET.readall()
+TRAIN_ICON = TRAIN_ICON_ASSET.readall()
+WALK_ICON = WALK_ICON_ASSET.readall()
+WHEELCHAIR_ICON = WHEELCHAIR_ICON_ASSET.readall()
 
 BING_URL = "http://dev.virtualearth.net/REST/v1"
 MQ_URL = "http://www.mapquestapi.com"
@@ -131,7 +151,7 @@ def bing_reverse_geo(coordinates, key):
         req_url = "%s/Locations/%s?key=%s" % (BING_URL, location, key)
         print("Requesting address from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["location"])
         response = request.json()
 
         if request.status_code != 200 or response.get("statusCode", False) != 200:
@@ -152,9 +172,6 @@ def bing_reverse_geo(coordinates, key):
             # We'll return address parts in a tuple and match the parts between origin/destination; we can then only
             # display the more broad information if parts don't match (i.e. traveling between cities or countries)
             address_parts = [first["address"].get(item, None) for item in ["addressLine", "locality", "adminDistrict", "countryRegion"]]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(address_parts), ttl_seconds = CACHE_TTL["location"])
 
     return address_parts
 
@@ -182,7 +199,7 @@ def mq_reverse_geo(coordinates, key):
         req_url = "%s/search/v2/radius?key=%s&origin=%s" % (MQ_URL, key, location)
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["location"])
         response = request.json()
 
         if request.status_code != 200 or response.get("info", {}).get("statusCode", False) != 0:
@@ -200,9 +217,6 @@ def mq_reverse_geo(coordinates, key):
             # We'll return address parts in a tuple and match the parts between origin/destination; we can then only
             # display the more broad information if parts don't match (i.e. traveling between cities or countries)
             address_parts = [first["fields"].get(item, None) for item in ["address", "city", "state", "country"]]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(address_parts), ttl_seconds = CACHE_TTL["location"])
 
     return address_parts
 
@@ -229,7 +243,7 @@ def ors_reverse_geo(coordinates, key):
         req_url = "%s/geocode/reverse?api_key=%s&point.lat=%s&point.lon=%s" % (ORS_URL, key, lat, lon)
         print("Requesting data from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["location"])
         response = request.json()
 
         if request.status_code != 200:
@@ -247,9 +261,6 @@ def ors_reverse_geo(coordinates, key):
             # We'll return address parts in a tuple and match the parts between origin/destination; we can then only
             # display the more broad information if parts don't match (i.e. traveling between cities or countries)
             address_parts = [first["properties"].get(item, None) for item in ["name", "locality", "region", "country_a"]]
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(address_parts), ttl_seconds = CACHE_TTL["location"])
 
     return address_parts
 
@@ -287,7 +298,7 @@ def ors_directions(origin, destination, mode, key, **kwargs):
         req_url = "%s/v2/directions/%s?api_key=%s&start=%s&end=%s" % (ORS_URL, mode, key, start, end)
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["directions"])
         response = request.json()
 
         if request.status_code != 200:
@@ -309,9 +320,6 @@ def ors_directions(origin, destination, mode, key, **kwargs):
 
         else:
             data = response
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(response), ttl_seconds = CACHE_TTL["directions"])
 
     features = data.get("features", [{}])[0]
     properties = features.get("properties", {})
@@ -367,7 +375,7 @@ def mq_directions(origin, destination, mode, key, **kwargs):
 
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["directions"])
         response = request.json()
 
         if request.status_code != 200 or response.get("info", {}).get("statuscode", False) != 0:
@@ -376,9 +384,6 @@ def mq_directions(origin, destination, mode, key, **kwargs):
             return msg, None
         else:
             data = response
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(response), ttl_seconds = CACHE_TTL["directions"])
 
     travel_time = int(data.get("route", {}).get("time", None))
     travel_time_with_traffic = int(data.get("route", {}).get("realTime", None))
@@ -430,7 +435,7 @@ def bing_directions(origin, destination, mode, key, **kwargs):
 
         print("Requesting directions from API: %s" % req_url)
 
-        request = http.get(req_url)
+        request = http.get(req_url, ttl_seconds = CACHE_TTL["bing"])
         response = request.json()
 
         if request.status_code != 200 or response.get("statusCode", False) != 200:
@@ -439,9 +444,6 @@ def bing_directions(origin, destination, mode, key, **kwargs):
             return msg, None
         else:
             data = response
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(cache_id, json.encode(response), ttl_seconds = CACHE_TTL["bing"])
 
     resources = []
     resource_sets = data.get("resourceSets", [])
@@ -782,6 +784,7 @@ def get_schema():
                 desc = "Enter your API Key from bingmapsportal.com/Application. Bringing your own key means all Tidbyt owners can use this app!",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "mq_auth",
@@ -789,6 +792,7 @@ def get_schema():
                 desc = "Enter your free or paid API Key from mapquestapi.com. Bringing your own key means all Tidbyt owners can use this app!",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
             schema.Text(
                 id = "ors_auth",
@@ -796,29 +800,10 @@ def get_schema():
                 desc = "Enter your free API Key from openrouteservice.org. Bringing your own key means all Tidbyt owners can use this app!",
                 icon = "userGear",
                 default = "",
+                secret = True,
             ),
         ],
     )
-
-FLAG_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAHhJREFUKFNj/H/20n9GYz1GBgKA8Wlx8f+HW7cy8LKzg5V+/vkTRQtIXPfiRUawwksrVzLw8/CAFXz88gXOhumwunEDoRAkCFIMUggDML7nkyeYCmGmIttPlEKQqVitBjn+ydu3YANh7gYrnDdv3v+kpCTCwUN1hQDajk8L9CuJKgAAAABJRU5ErkJggg==""")
-
-PIN_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAH9JREFUKFNjZEACVxkY/sO42gwMjMhycA5I0SMZGbic3JMnDMiKwQphijw2bmNgkJNhYHj0hGGHvxcDsmKwwu0yMmArPc5fYmAQEWRgePOeYYehHth0zydPwGpQFaKZiKEQ3X0wh2JYjexObIrgVsMkYSaj+5h8hTAnoAc2SBwAWAA5CwcOk+IAAAAASUVORK5CYII=""")
-
-BIKE_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAHZJREFUKFNjZCASMBKpjgGuMCSv6j9M05pJbWDxhNpuuBiKicc0NOASME1WN24wgjSAFf7/////cU1NBpAgiA/SYHn9OgNIDEQzggBIEYhGlgRpQNYMVoOsEGQazFSYOMxGuNUgAZDJyKEAUgwVR/iaUDARHY4AjrtI0FBsjcUAAAAASUVORK5CYII=""")
-
-EBIKE_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAIFJREFUKFNjZCASMBKpjgGuMCSv6j9M05pJbWDxhNpuuBiKiYrTPsMlYJruZ/GC1YCJ/////1ea/oUBJgjScC+ThwEkBqIZQQCkiOEQB4PS1TdgQZgGmOZ72iIMDHY/GOAKQSaDFMNMhRkAdgJIIcxqsDsYGVHcDFYMFSc9eAiFJwBxuUFqGPJnQwAAAABJRU5ErkJggg==""")
-
-MTNBIKE_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAHhJREFUKFNjZCASMBKpjgFFYUhe1X+QxjWT2sDiCbXdYP6C5lJGDBN91geAJUFgS+AGuDyYMW/ePLDkOsFNcEmQhqD3fmANSUlJjIwgRSAGTAKdDTMIrhAkALMWZCXMALhCZKtBpiGHAsxJYKv9TPTgjscXVESHIwCT6UBs1TrXkQAAAABJRU5ErkJggg==""")
-
-CAR_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAKxJREFUKFNjZCASMCKrO6ah8R9dn9WNG2A1cIUgRW/3XmHI2/idYekkUwbbxjMMh+tNwPpAisEKQYp2r7nE0HT1F1gCpACkEMaGK9wuI/Pfc8EOuK3bEzwYYHww+8kTRkaQIkL+4efhYWD8f5D9v3qhIVztgm8fwOwELgG42M3+8wyM8+bN+98xZRZDRU4aA4wGqUAXA3tGzcgCbv2tcyewijFOWLKOoBtBhgEAPI5MoAfdihMAAAAASUVORK5CYII=""")
-
-TRAIN_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAHZJREFUKFNjZICCefPm/YexkemkpCRGEB9M4FIE0wBSzLhh31GsJqGbDlZYmZ3C8OPHD4b+uUsYwpJbwWpWza1mQBYHKyxMjgFLoitEFmfkdV+IYvXPWyvBmtjVwlFsJ14h0Z4hOnhgDvn/2vo/o+hRcLhiEwMAfc5Cuz9XduwAAAAASUVORK5CYII=""")
-
-BIKE_ICON2 = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAP0lEQVQY042NsQ2AQBDDYjqWYMTbvzMNBR9AwtUpUXzJX1TU3Ysul/B+b0kC0MXD0CbVmTlQBej1kr2pP981J/H6Q0DDzqOfAAAAAElFTkSuQmCC""")
-
-WALK_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAQ0lEQVQY03WNQRLAMAgC2U7//2IjvTQd41huwCpS01rLtr391YGIOPwBZKZtC2BnSFJ9+RUvRA07CHBrUJ0Yr6fJXz3cmSHnOt8PoAAAAABJRU5ErkJggg==""")
-
-WHEELCHAIR_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAIVJREFUKFNjZEAC/////w/jMjIyMiLLoXCIVggyAaQY3TSQOIqJIAGf9QFg6zcHrGdA1gBXCDJph6wsw9TJJgxbAjdgGAAWgCnyfPKEkXnlF7CJf8N5MD2DrBCkCKYYWQOGibAg2S4j89+n9wbDnzBusFsx3AhT6PH4MVjB/4PsYKcQHY4AQ3FH0Sv7jXEAAAAASUVORK5CYII=""")
 
 MODE_ICONS = {
     "Driving": CAR_ICON,

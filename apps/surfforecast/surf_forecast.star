@@ -5,30 +5,45 @@ Description: Daily surf forecast for any spot on Surfline.
 Author: smith-kyle
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/icon_e.png", ICON_E_ASSET = "file")
+load("images/icon_n.png", ICON_N_ASSET = "file")
+load("images/icon_ne.png", ICON_NE_ASSET = "file")
+load("images/icon_nw.png", ICON_NW_ASSET = "file")
+load("images/icon_s.png", ICON_S_ASSET = "file")
+load("images/icon_se.png", ICON_SE_ASSET = "file")
+load("images/icon_sw.png", ICON_SW_ASSET = "file")
+load("images/icon_w.png", ICON_W_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
 
+ICON_E = ICON_E_ASSET.readall()
+ICON_N = ICON_N_ASSET.readall()
+ICON_NW = ICON_NW_ASSET.readall()
+ICON_S = ICON_S_ASSET.readall()
+ICON_SE = ICON_SE_ASSET.readall()
+ICON_SW = ICON_SW_ASSET.readall()
+ICON_W = ICON_W_ASSET.readall()
+
+ICON_NE = ICON_NE_ASSET.readall()
+
 SURFLINE_RATING_URL = "https://services.surfline.com/kbyg/spots/forecasts/rating?spotId={spot_id}&days=1&intervalHours=1&correctedWind=False"
 SURFLINE_WAVE_URL = "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={spot_id}&days=1&intervalHours=1"
 SURFLINE_WIND_URL = "https://services.surfline.com/kbyg/spots/forecasts/wind?spotId={spot_id}&days=1&intervalHours=1&corrected=False"
-SURFLINE_QUERY_URL = "https://services.surfline.com/onboarding/spots?query={query}&limit=5&offset=0&camsOnly=false"
+SURFLINE_QUERY_URL = "https://services.surfline.com/search/site?q={query}&querySize=5"
 
 COLOR_BY_SURFLINE_RATING = {
-    "FLAT": "#A2ACB9", #gray
-    "VERY_POOR": "#A2ACB9", #gray
-    "POOR": "#429CFF", #blue
-    "POOR_TO_FAIR": "#2FD2E8", #teal
-    "FAIR": "#18D64C", #green
-    "FAIR_TO_GOOD": "#FFD100", #yellow
-    "GOOD": "#FF8F00", #orange
-    "EPIC": "#DD452D", #red
+    "FLAT": "#A2ACB9",  #gray
+    "VERY_POOR": "#A2ACB9",  #gray
+    "POOR": "#429CFF",  #blue
+    "POOR_TO_FAIR": "#2FD2E8",  #teal
+    "FAIR": "#18D64C",  #green
+    "FAIR_TO_GOOD": "#FFD100",  #yellow
+    "GOOD": "#FF8F00",  #orange
+    "EPIC": "#DD452D",  #red
 }
 
 COLORS = {
@@ -52,14 +67,6 @@ DUSK_WIDTH = 1
 LONG_CACHE_TTL = 60 * 60
 SHORT_CACHE_TTL = 60 * 15
 
-ICON_S = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAGCAYAAAAL+1RLAAAAAXNSR0IArs4c6QAAAClJREFUGFdjZICC/////2dkZGQEccEECBAWBKmAqYbRYO3IEiBzsZoJABkvGANjBbRdAAAAAElFTkSuQmCC")
-ICON_SW = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAACpJREFUGFdjZEAD/////88IJhgZGUFyMDZcEFkSLAhSBVMNZsMEYUaDJAFiBBwCWd8MxQAAAABJRU5ErkJggg==")
-ICON_W = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAAXNSR0IArs4c6QAAACVJREFUGFdjZICC/////2dkZGSE8cEMkCCIRpGACcJUEtaByw4ASr0UAvY3+sgAAAAASUVORK5CYII=")
-ICON_NW = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAAClJREFUGFdj/P///38GJMAIAjBBEBsmBxaEScIk4IIgVTAFcC0wrSAJALtFHAJ+HdxnAAAAAElFTkSuQmCC")
-ICON_N = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAGCAYAAAAL+1RLAAAAAXNSR0IArs4c6QAAACpJREFUGFdjZICC/////2dkZGQEccEESAAmCZJgRBaAS+DUDjMCxUx0QQAY2xgDTjk8gQAAAABJRU5ErkJggg==")
-ICON_NE = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAACtJREFUGFdNjEEKAAAIwtz/H20YGHWxlook2Xa0wz/6PBgAsNp4wO11/JoBWA8b9g+V3gQAAAAASUVORK5CYII=""")
-ICON_E = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAAXNSR0IArs4c6QAAACdJREFUGFdjZEAC/////8/IyMgIEgITMACSAAuCAIyDrAC/Dlx2AADqrhQC9wOdGgAAAABJRU5ErkJggg==")
-ICON_SE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAACdJREFUGFdj/P///39GRkZGBiQA5iBLgNkwBTAJFEGYDhAN145sJgABbhv21OuJ2wAAAABJRU5ErkJggg==")
 ICONS_AND_DIRECTIONS = [
     (ICON_S, 0),
     (ICON_SW, 45),
@@ -95,7 +102,7 @@ def get_spot_id_from_config(config):
     return spot
 
 def get_display_name_from_config(config):
-    display_name = config.str("display_name") or 'default'  
+    display_name = config.str("display_name") or "default"
     # if display_name:
     #     return display_name
 
@@ -243,7 +250,7 @@ def get_wave_ft_to_pixel(state):
         return 1.5
     if biggets_wave < 24:
         return 1
-    return .5
+    return 0.5
 
 def get_top_bar_height(wave, wave_ft_to_pixel):
     min_height = wave["surf"]["raw"]["min"]
@@ -459,39 +466,31 @@ def render_flashing_bar(data):
         ],
     )
 
-def get(url):
-    rep = http.get(url)
+def get(url, ttl_seconds):
+    rep = http.get(url, ttl_seconds = ttl_seconds)
     if rep.status_code != 200:
         fail("Surfline request failed with status %d", rep.status_code)
     return rep.json()
 
-def get_response(url, cache_key, ttl_seconds):
-    response_cached = cache.get(cache_key)
-    if response_cached != None:
-        return json.decode(response_cached)
-
-    response = get(url)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json.encode(response), ttl_seconds = ttl_seconds)
-    return response
+def get_response(url, ttl_seconds):
+    return get(url, ttl_seconds)
 
 def get_wave_response(config):
     spot_id = get_spot_id_from_config(config)
-    return get_response(SURFLINE_WAVE_URL.format(spot_id = spot_id), "wave_response" + spot_id, SHORT_CACHE_TTL)
+    return get_response(SURFLINE_WAVE_URL.format(spot_id = spot_id), SHORT_CACHE_TTL)
 
 def get_rating_response(config):
     spot_id = get_spot_id_from_config(config)
-    return get_response(SURFLINE_RATING_URL.format(spot_id = spot_id), "rating_response" + spot_id, LONG_CACHE_TTL)
+    return get_response(SURFLINE_RATING_URL.format(spot_id = spot_id), LONG_CACHE_TTL)
 
 def get_wind_response(config):
     spot_id = get_spot_id_from_config(config)
-    return get_response(SURFLINE_WIND_URL.format(spot_id = spot_id), "wind_response" + spot_id, SHORT_CACHE_TTL)
+    return get_response(SURFLINE_WIND_URL.format(spot_id = spot_id), SHORT_CACHE_TTL)
 
 def get_animation_percentages():
     showing = [1 for _ in range(4)]
-    dimming_out = [.1 * n for n in range(10, 2, -1)]
-    dimming_in = [.1 * n for n in range(3, 11)]
+    dimming_out = [0.1 * n for n in range(10, 2, -1)]
+    dimming_in = [0.1 * n for n in range(3, 11)]
     return showing + dimming_out + dimming_in
 
 def transparent(color, p):
@@ -501,8 +500,9 @@ def transparent(color, p):
     return res
 
 def search_handler(text):
-    response = get(SURFLINE_QUERY_URL.format(query = text))
-    return [schema.Option(display = s["name"], value = s["_id"]) for s in response["spots"]]
+    response = get(SURFLINE_QUERY_URL.format(query = text), SHORT_CACHE_TTL)
+    hits = response[0].get("hits", {}).get("hits", []) if response else []
+    return [schema.Option(display = h["_source"]["name"], value = h["_id"]) for h in hits]
 
 def get_schema():
     min_height_options = [

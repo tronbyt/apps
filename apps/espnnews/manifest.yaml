@@ -6,4 +6,10 @@ desc: Displays the top three headlines from the Top Headlines section on ESPN or
 author: rs7q5
 fileName: espn_news.star
 packageName: espnnews
-recommended_interval: 10
+recommendedInterval: 10
+category: entertainment
+tags:
+  - news
+  - sports
+published: '2022-01-28T18:40:50Z'
+updated: '2025-12-02T19:30:22Z'

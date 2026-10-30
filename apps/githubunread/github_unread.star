@@ -5,19 +5,18 @@ Description: Displays the count of unread GitHub notifications.
 Author: ElliottAYoung
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("images/github_image.png", GITHUB_IMAGE_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-GITHUB_IMAGE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAz1BMVEVAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMBAeMD///8e3z+UAAAAQ3RSTlMALZHU9JAsB5b9lQa+vZfPZ9Ht7NVoyZSZAxAPBPwrnZOOJhzT8ur1+wUC10lB3Cklki6FrbI2M7D6NLwVFNBLAf6AQ5ZiAAAAAAFiS0dERPm0mMEAAAAHdElNRQfmDAMUOiNHbbR3AAAArklEQVQY0z2P1xaCQAxEB0FhsVewVwR77535/39yQfC+bGayyZkAEiWhapqaTOGHbgiGCDMd6gz/ZAMnx3yhyFKZlWqNlpwXtFFvAM0WEmx3kCS70TL0yD4q5CA2huQIDjX8GdOBS28S66kruzNyHhsLUoVJLlc/vZbNDbZit/cOR+B0vsiwHcC4XO3bHXgEUa0w+vO1eMtCXnTTw2NMwZZ8P8LSo+2KH/zwlaD+AhuBGQTkgvNPAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIyLTEyLTAzVDIwOjQxOjQ2KzAwOjAwQzjB5gAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMi0xMi0wM1QyMDozMjoxNiswMDowMLiJ2b4AAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjItMTItMDNUMjA6NTg6MzUrMDA6MDBjxr8LAAAAAElFTkSuQmCC")
+GITHUB_IMAGE = GITHUB_IMAGE_ASSET.readall()
 
 def fetch_notifications(access_token):
     return http.get(
         "https://api.github.com/notifications",
         headers = {"Accept": "application/vnd.github+json", "Authorization": "Bearer {}".format(access_token), "X-GitHub-Api-Version": "2022-11-28"},
+        ttl_seconds = 60,
     )
 
 def get_count(response):
@@ -35,7 +34,8 @@ def render_notifications(count):
         notification_word = "Notifications"
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Padding(
                     pad = (0, 2, 0, 0),
@@ -64,12 +64,13 @@ def render_notifications(count):
                     ],
                 ),
             ],
-        ),
+        ))),
     )
 
 def render_error(err):
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Padding(
                     pad = (0, 2, 0, 0),
@@ -87,7 +88,7 @@ def render_error(err):
                     ),
                 ),
             ],
-        ),
+        ))),
     )
 
 def main(config):
@@ -98,23 +99,14 @@ def main(config):
         A Root view to render to the app
     """
     access_token = config.get("access_token") or None
-    CACHE_KEY = "github_notifications/{}".format(access_token)
-
-    cache_results = cache.get(CACHE_KEY)
 
     if access_token:
-        if cache_results:
-            count = json.decode(cache_results)
-        else:
-            response = fetch_notifications(access_token)
+        response = fetch_notifications(access_token)
 
-            if response.status_code != 200:
-                return render_error("Error with Access Token.")
+        if response.status_code != 200:
+            return render_error("Error with Access Token.")
 
-            count = get_count(response.json())
-
-            # TODO: Determine if this cache call can be converted to the new HTTP cache.
-            cache.set(CACHE_KEY, json.encode(count), ttl_seconds = 60)
+        count = get_count(response.json())
 
         return render_notifications(count)
     else:
@@ -129,6 +121,7 @@ def get_schema():
                 name = "Github Personal Access Token",
                 desc = "Personal Access token",
                 icon = "lock",
+                secret = True,
             ),
         ],
     )

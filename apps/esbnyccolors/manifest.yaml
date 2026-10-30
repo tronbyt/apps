@@ -6,4 +6,12 @@ desc: Shows today's colors of the Empire State Building.
 author: sklose
 fileName: esb_nyc_colors.star
 packageName: esbnyccolors
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - local
+  - art
+  - utility
+published: '2023-11-19T17:41:28Z'
+updated: '2026-10-01T18:22:01Z'

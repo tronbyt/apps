@@ -6,4 +6,12 @@ desc: Black out Tidbyt during evenings (or whenever).
 author: mabroadfo1027
 fileName: blackout.star
 packageName: blackout
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: smart-home
+tags:
+  - tidbyt
+  - smart-home
+  - art
+published: '2022-09-02T14:34:12Z'
+updated: '2026-10-01T20:24:07Z'

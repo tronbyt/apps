@@ -77,7 +77,12 @@ def main(config):
     )
 
     if rep.status_code != 200:
-        fail("ENTUR request failed with status %d", rep.status_code)
+        print("ENTUR request failed with status %d" % rep.status_code)
+        return render.Root(
+            child = render.Box(
+                child = render.Text("API Error", color = "#F00"),
+            ),
+        )
 
     response_json = rep.json()
 

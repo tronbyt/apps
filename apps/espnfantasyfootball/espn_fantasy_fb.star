@@ -5,7 +5,6 @@ Description: Connects to your ESPN fantasy football league and randomly displays
 Author: jack_markle
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "render")
@@ -174,12 +173,14 @@ def get_schema():
                 name = "Cookie: espn_s2",
                 desc = "[NOT NEEDED FOR PUBLIC LEAGUES; MUST BE FOUND FROM COMPUTER BROWSER] To find your espn_s2 cookie value, log in to https://fantasy.espn.com/football. Once you're at your team's home page, right click anywhere on the page and click 'Inspect'. Once the inspector menu appears, in the top bar of the menu, select 'Application'. In the 'Application' page, on the right bar under 'Cookies', click https://fantasy.espn.com. The espn_s2 value should then displayed in the cookie list. Email your espn_s2 to yourself so you are able to copy it from your mobile device.",
                 icon = "user",
+                secret = True,
             ),
             schema.Text(
                 id = "schema_swid",
                 name = "Cookie: swid",
                 desc = "[NOT NEEDED FOR PUBLIC LEAGUES; MUST BE FOUND FROM COMPUTER BROWSER] To find your swid cookie value, log in to https://fantasy.espn.com/football. Once you're at your team's home page, right click anywhere on the page and click 'Inspect'. Once the inspector menu appears, in the top bar of the menu, select 'Application'. In the 'Application' page, on the right bar under 'Cookies', click https://fantasy.espn.com. The swid value should then displayed in the cookie list under the 'espnAuth' value. It should be a string of alphanumerics similar to: '{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}'. Email your swid to yourself so you are able to copy it from your mobile device.",
                 icon = "user",
+                secret = True,
             ),
         ],
     )
@@ -346,10 +347,4 @@ def convert_logo(logo_url):
     if response.status_code != 200:
         fail("Failed to load image")
 
-    image_data = response.body()
-
-    base64_image = base64.encode(image_data)
-
-    decoded_image = base64.decode(base64_image)
-
-    return decoded_image
+    return response.body()

@@ -5,14 +5,14 @@ Description: Gaze upon glorious marine life.
 Author: vlauffer
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
-load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/fail_image.png", FAIL_IMAGE_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+FAIL_IMAGE = FAIL_IMAGE_ASSET.readall()
 
 CACHE_TTL_SECONDS = 3600 * 24 * 7
 FISH_WIDTH = 40
@@ -22,8 +22,6 @@ OFFSET = 39
 
 FONTS = ["tb-8", "tom-thumb", "Dina_r400-6", "5x8"]
 FONT_DEFAULT = FONTS[0]
-
-FAIL_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAXwAAACqBAMAAABc2el/AAAAD1BMVEUAAAAAAACZAADEAAD/AAAd2XunAAAAAXRSTlMAQObYZgAAAQhJREFUeNrt3NENgyAUQFFXYIW3Qlfo/jP1ryYEyLNqo3LupxBz/BJJZFkkSZIkSZqgcrXw8fHx8fGfyC+llPI+o9eO0s+Aj4+Pj49/D/5Y3nqXdweqW1UDFas7uu0Z8PHx8fHxn8DPLiRa81qi9dp4dC0iIvDx8fHx8fF78xLABD++4ePj4+Pj4zfmjZcA+Pj4+Pj4+Fs2yLtTEh/eFb+1QR6N8PHx8fHxZ+Hv3gxPLBpiGD4+Pj4+/vT8LLXLj2T4+Pj4+Pj4+Pj4+Pj4+Ifxu381JaitffBKhI+Pj4+PPx8/u3LYc1pH/NaRZ5Tg4+Pj4+Nfhe88Tnx8fHx8/L/yJUmSJEm6cR+Kfy40dZeytgAAAABJRU5ErkJggg=="
 
 CONTENT_TITLES = ["Species Name", "Biology", "Location", "Habitat", "Physical Description", "Texture", "Taste"]
 
@@ -43,7 +41,7 @@ def main():
     fish_pic = fish["Species Illustration Photo"]["src"]
     if fish_pic == None:
         # print("No fish in this pond")
-        fish_pic = base64.decode(FAIL_IMAGE)
+        fish_pic = FAIL_IMAGE
     else:
         # print("Look at that fish!")
         fish_pic = get_fish_pic(fish_pic)
@@ -106,38 +104,18 @@ def main():
     )
 
 def get_fish_pic(url):
-    key = base64.encode(url)
-    fish_pic_cache = cache.get(key)
-
-    if fish_pic_cache != None:
-        # print("Caught one!")
-        return base64.decode(fish_pic_cache)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = CACHE_TTL_SECONDS, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
     if res.status_code != 200:
         fail("No fish here! Request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
 
-    # print("Let's catch this fish!")
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = CACHE_TTL_SECONDS)
     return res.body()
 
 def get_fish_barrel():
-    fish_barrel_cached = cache.get("fish_barrel")
-    fish_barrel = []
-    if fish_barrel_cached != None:
-        # print("My barrel is full of fish!")
-        fish_barrel = json.decode(fish_barrel_cached)
-
-    else:
-        # print("Let's go fishing!")
-        rep = http.get(FISH_WATCH_URL)
-        if rep.status_code != 200:
-            fail("FishWatch request failed with status %d", rep.status_code)
-        fish_barrel = rep.json()
-
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
-        cache.set("fish_barrel", json.encode(fish_barrel), ttl_seconds = CACHE_TTL_SECONDS)
+    # print("Let's go fishing!")
+    rep = http.get(FISH_WATCH_URL, ttl_seconds = CACHE_TTL_SECONDS, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
+    if rep.status_code != 200:
+        fail("FishWatch request failed with status %d", rep.status_code)
+    fish_barrel = rep.json()
 
     return fish_barrel
 

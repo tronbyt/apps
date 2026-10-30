@@ -6,21 +6,17 @@ listing the LibreNMS friendly hostnames of the devices that are alerting.
 Author: @jtinel
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/librenms_icon.png", LIBRENMS_ICON_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+LIBRENMS_ICON = LIBRENMS_ICON_ASSET.readall()
 
 ENDPOINT_ALERTS = "/api/v0/alerts"
 ENDPOINT_DEVICES = "/api/v0/devices"
 FRAME_DELAY_MS = 25
 CACHE_TTL_SECONDS = 30
-LIBRENMS_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAiklEQVQoU42SQRLAEAxF6wws
-a6dXcWhXqZ0u6wwpHTFEaG1MIn+en0Rsk3PrA1Q4BffMJu/dgLq8iNqADH6oGRIxEWRDsNaC
-c66r64KYCDITyo0CKqwiLEQPtLCNX9EXgRLrV5Dwh8iSZp6QOPW0Ii67R4loYZxTaffMY86z
-G0G7SVeJFbVj4HbvAYKAnd83qTc7AAAAAElFTkSuQmCC
-""")
 
 colors = {
     "red": "F92323",
@@ -50,6 +46,7 @@ def get_schema():
                 name = "LibreNMS API Key:",
                 desc = "API Key for the LibreNMS server. Create/manage keys from the LibreNMS web interface at Home -> Settings -> API Settings",
                 icon = "key",
+                secret = True,
             ),
         ],
     )
@@ -94,7 +91,26 @@ def print_line(color):
 def render_error(error_msg):
     return render.Root(
         delay = FRAME_DELAY_MS,
-        child = render.Box(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Box(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = [
+                    print_logo(),
+                    print_line(colors["white"]),
+                    render.Marquee(
+                        width = 64,
+                        offset_start = 48,
+                        offset_end = 64,
+                        align = "center",
+                        child = render.Text(
+                            content = error_msg,
+                        ),
+                    ),
+                ],
+            ),
+        )))) if is_square() else render.Box(
             child = render.Column(
                 expanded = True,
                 main_align = "space_evenly",
@@ -180,7 +196,15 @@ def render_output(alert_count, alerting_devices):
     # Render the output
     return render.Root(
         delay = FRAME_DELAY_MS,
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            height = 32,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = children,
+            ),
+        ))) if is_square() else render.Box(
             height = 32,
             child = render.Column(
                 expanded = True,
@@ -192,6 +216,15 @@ def render_output(alert_count, alerting_devices):
 
 def demo_data():
     return render_output(1, ", ".join(demo_alerting_devices))
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """ Display a count of LibreNMS alerts and a list of the alerting hosts.

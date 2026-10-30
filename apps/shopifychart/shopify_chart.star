@@ -5,20 +5,17 @@ Description: Display daily Shopify metrics and charts for revenue, orders, or un
 Author: kcharwood
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
-load("hash.star", "hash")
 load("http.star", "http")
+load("images/shopify_icon_data.png", SHOPIFY_ICON_DATA_ASSET = "file")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-SHOPIFY_ICON_DATA = """
-iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABI1BMVEUAAACWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0iWv0idw1TP4qzi7s3O4aqfxVjS5LGz0XvN4ajS5LDP4quix16tzW+81ovT5LK10n/q8tr2+vD+/v3D25epymmcw1PZ6L3f7Mj8/fr////9/vyZwU251YanyWXX57mvznSqy2rp8tm204Dd6sPX5rmkyGGgxVn6/PbG3Jvq8tuxz3emyWTV5bb4+/K304K+147l79Hy9+imyWPG3Jz0+Oyqy2v2+e/3+vHo8divznP///6bwlCcwlKkx2DF3Jqvz3TC2pWy0HjY57zs8979/vvJ3qGqy2zS47Dm79P5+/Tf7MfI3qCx0HibwlGXv0nUrRiRAAAAEnRSTlMAInq75vu8IKn9IVzzdv51/HlGNAFfAAAAAWJLR0QrJLnkCAAAAAFvck5UAc+id5oAAAEiSURBVCjPdVLnWgJBDMw17jiQsjZU7ChqBHsBC6BS7Nh7ef+n8JKscvh9zJ/cztwm2UkABIZp2Y5jR0wDwnC9qNKIen6Hj8VVCPHYL9+XUF1IJPX/wvcPDA4Na4Xv+DpPZmR0LDuus1EdT74nJqemZ2Zzc/N88oI+pZ/8wuISEpYLdEwZYDJfFJawwoQJEY5ZxNW19Q0SNpmwwOa4hdtqZ7dEQpkJGxyOe7h/gDlOdciEo4UKVlVN6hxpgVPlEY9PVJ2Fhk5lUWhi6/RMnbNwcSnFud0qZq6uVVv6bRKTlge2sVK+uS2JUCTzDbHk7v7h8e+FT2IJuGJi4bn28vrWev/4/ApMdEO2E77DtgMkewyq92iDYXmpzjK4XXvip/+tzw/wsDO/5t4LZQAAAABJRU5ErkJggg==
-"""
-SHOPIFY_ICON_IMAGE = base64.decode(SHOPIFY_ICON_DATA)
+SHOPIFY_ICON_DATA = SHOPIFY_ICON_DATA_ASSET.readall()
+
+SHOPIFY_ICON_IMAGE = SHOPIFY_ICON_DATA
 
 ERROR_404 = "Error.404"
 ERROR_401 = "Error.401"
@@ -220,6 +217,7 @@ def get_schema():
                 name = "API Token",
                 desc = "The API Token for your Shopify Private App",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "display_name",
@@ -429,29 +427,6 @@ def should_line_item_be_excluded(line_item, excluded_skus):
 
     return False
 
-def cache_orders(orders, start_time, store_name, api_token):
-    cache_key = get_cache_key(start_time, store_name, api_token)
-    print("💾 caching orders with key {}".format(cache_key))
-    json_orders = json.encode(orders)
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(cache_key, json_orders, ttl_seconds = 300)
-
-def get_cached_orders(start_time, store_name, api_token):
-    cache_key = get_cache_key(start_time, store_name, api_token)
-    print("💾 Checking cache key {}".format(cache_key))
-    raw_orders = cache.get(cache_key)
-    if raw_orders:
-        print("💾 Returning fetched orders from cache using key {}".format(cache_key))
-        orders = json.decode(raw_orders)
-        return orders
-    else:
-        return None
-
-def get_cache_key(start_time, store_name, api_token):
-    cache_key = "shopify_daily_chart_%s" % hash.sha1(start_time + store_name + api_token)
-    return cache_key
-
 def get_total_orders_count(store_name, api_token, start_time, since_id):
     parameters = {"limit": "250", "created_at_min": "{}Z".format(start_time), "status": "any"}
     if since_id:
@@ -468,9 +443,6 @@ def get_total_orders_count(store_name, api_token, start_time, since_id):
         return count
 
 def get_orders(store_name, api_token, start_time, since_id):
-    orders = get_cached_orders(start_time, store_name, api_token)
-    if orders:
-        return orders
     print("Getting orders since {}".format(start_time))
     orders = []
     order_count = get_total_orders_count(store_name, api_token, start_time, since_id)
@@ -495,8 +467,6 @@ def get_orders(store_name, api_token, start_time, since_id):
 
     orders = [o for o in orders if o["financial_status"] not in ["refunded", "voided"]]
     print("Fetched {} orders".format(len(orders)))
-    if orders:
-        cache_orders(orders, start_time, store_name, api_token)
     return orders
 
 def get_chunk_of_orders(store_name, api_token, start_time, since_id):
@@ -520,7 +490,7 @@ def flatten(xss):
 def make_shopify_request(store_name, api_token, endpoint, parameters):
     url = "https://{}.myshopify.com/admin/api/2022-04/{}.json".format(store_name, endpoint)
     headers = {"Content-Type": "application/json", "X-Shopify-Access-Token": api_token}
-    response = http.get(url = url, params = parameters, headers = headers)
+    response = http.get(url = url, params = parameters, headers = headers, ttl_seconds = 300)
     if response.status_code == 404:
         return ERROR_404
     elif response.status_code == 429:

@@ -7,16 +7,12 @@ Author: westy92
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 load("time.star", "time")
 
-CHECKIDAY_API_URL = "https://api.checkiday.com/tidbyt"
-DEFAULT_TIMEZONE = "America/Chicago"
+CHECKIDAY_API_URL = "https://api.apilayer.com/checkiday/events"
 
-# from `pixlet encrypt checkiday keyname`
-ENCRYPTED_API_KEY = "AV6+xWcE7vUHwx7qLifXHUI2DXOMaxbhi2MfvmX3ncE9iKFUnMf7u+wSBa54WvraCPkV4H38FTLxMVHFkWtX/jrf9tfo62NgCQux3T+MnV3CEDaENGLvjCSs2IzUPl0Z4EvEnWJ32UvmJaH70GDj0O5r1drwK1vpJ0XEm4/X5Ue5uQ=="
 DEFAULT_COLORS = ["#777", "#FFF"]
 CUSTOM_COLORS_BY_DATE = {
     (1, 1): ["#C0C0C0", "#D4AF37"],  # New Year's Day
@@ -35,6 +31,15 @@ CUSTOM_COLORS_BY_ID = {
     "5f5daecb0a55b46fae5236fb47a5f023": ["#952927", "#E76005", "#DDC001"],  # Thanksgiving
     "fe0eaf856243ba7aae05225e28fb0749": ["#29AAF2", "#214D6D"],  # Winter
 }
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     children = [
@@ -65,7 +70,9 @@ def main(config):
         child = render.Sequence(
             children = [
                 render.Marquee(
-                    height = 32,
+                    height = canvas.height(),
+                    # Short lists sit mid-panel on the square; 64x32 keeps its top-aligned look.
+                    align = "center" if is_square() else "start",
                     delay = 5,  # number of frames to wait at beginning
                     scroll_direction = "vertical",
                     child = render.Column(
@@ -80,6 +87,20 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "api_key",
+                name = "Checkiday API Key",
+                desc = "Free API key from apilayer.com/marketplace/checkiday-api.",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Toggle(
+                id = "free_plan",
+                name = "Free Plan",
+                desc = "Enable if using the free APILayer plan. Timezone is not supported on free plans.",
+                icon = "dollarSign",
+                default = True,
+            ),
             schema.Toggle(
                 id = "adult",
                 name = "NSFW Mode",
@@ -99,17 +120,28 @@ def get_schema():
 def get_timezone(config):
     location = config.get("location")
     loc = json.decode(location) if location else {}
-    return loc.get("timezone", config.get("$tz", DEFAULT_TIMEZONE))
+    return loc.get("timezone", time.tz())
 
 def get_events(config):
+    api_key = config.get("api_key", "")
+    if not api_key:
+        return [{"name": "Add API key in settings", "id": ""}]
+
     timezone = get_timezone(config)
-    adult = config.get("adult", "false")
-    api_key = secret.decrypt(ENCRYPTED_API_KEY) or config.get("dev_api_key", "")
-    url = CHECKIDAY_API_URL + "?apikey=" + api_key + "&adult=" + adult + "&timezone=" + timezone
+    adult = config.bool("adult")
     now = time.now().in_location(timezone)
     end_of_day = time.time(year = now.year, month = now.month, day = now.day, hour = 23, minute = 59, second = 59, location = timezone)
     time_left_in_day = end_of_day - now
-    rep = http.get(url, ttl_seconds = min(3600, time_left_in_day.seconds))  # cache until midnight or an hour, whichever is first
+    params = {"adult": str(adult).lower()}
+    if not config.bool("free_plan"):
+        params["timezone"] = timezone
+
+    rep = http.get(
+        CHECKIDAY_API_URL,
+        headers = {"apikey": api_key},
+        params = params,
+        ttl_seconds = int(min(3600, time_left_in_day.seconds)),  # cache until midnight or an hour, whichever is first
+    )
     if rep.status_code != 200:
         return [{"name": "Error loading holidays...", "id": ""}]
 

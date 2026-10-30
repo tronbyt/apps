@@ -5,12 +5,53 @@ Description: Animations from classic arcade video games.
 Author: Steve Otteson
 """
 
-load("encoding/base64.star", "base64")
+load("images/alien1_a.png", ALIEN1_A_ASSET = "file")
+load("images/alien1_b.png", ALIEN1_B_ASSET = "file")
+load("images/alien2_a.png", ALIEN2_A_ASSET = "file")
+load("images/alien2_b.png", ALIEN2_B_ASSET = "file")
+load("images/alien3_a.png", ALIEN3_A_ASSET = "file")
+load("images/alien3_b.png", ALIEN3_B_ASSET = "file")
+load("images/blue_1.png", BLUE_1_ASSET = "file")
+load("images/blue_2.png", BLUE_2_ASSET = "file")
+load("images/cyan_l1.png", CYAN_L1_ASSET = "file")
+load("images/cyan_l2.png", CYAN_L2_ASSET = "file")
+load("images/cyan_r1.png", CYAN_R1_ASSET = "file")
+load("images/cyan_r2.png", CYAN_R2_ASSET = "file")
+load("images/mspm_l1.png", MSPM_L1_ASSET = "file")
+load("images/mspm_l2.png", MSPM_L2_ASSET = "file")
+load("images/mspm_l3.png", MSPM_L3_ASSET = "file")
+load("images/mspm_r1.png", MSPM_R1_ASSET = "file")
+load("images/mspm_r2.png", MSPM_R2_ASSET = "file")
+load("images/mspm_r3.png", MSPM_R3_ASSET = "file")
+load("images/peach_l1.png", PEACH_L1_ASSET = "file")
+load("images/peach_l2.png", PEACH_L2_ASSET = "file")
+load("images/peach_r1.png", PEACH_R1_ASSET = "file")
+load("images/peach_r2.png", PEACH_R2_ASSET = "file")
+load("images/pink_l1.png", PINK_L1_ASSET = "file")
+load("images/pink_l2.png", PINK_L2_ASSET = "file")
+load("images/pink_r1.png", PINK_R1_ASSET = "file")
+load("images/pink_r2.png", PINK_R2_ASSET = "file")
+load("images/pm_1.png", PM_1_ASSET = "file")
+load("images/pm_l1.png", PM_L1_ASSET = "file")
+load("images/pm_l2.png", PM_L2_ASSET = "file")
+load("images/pm_r1.png", PM_R1_ASSET = "file")
+load("images/pm_r2.png", PM_R2_ASSET = "file")
+load("images/red_l1.png", RED_L1_ASSET = "file")
+load("images/red_l2.png", RED_L2_ASSET = "file")
+load("images/red_r1.png", RED_R1_ASSET = "file")
+load("images/red_r2.png", RED_R2_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+ALIEN1_A = ALIEN1_A_ASSET.readall()
+ALIEN1_B = ALIEN1_B_ASSET.readall()
+ALIEN2_A = ALIEN2_A_ASSET.readall()
+ALIEN2_B = ALIEN2_B_ASSET.readall()
+ALIEN3_A = ALIEN3_A_ASSET.readall()
+ALIEN3_B = ALIEN3_B_ASSET.readall()
 
 FRAME_WIDTH = 64
 FRAME_HEIGHT = 32
@@ -34,11 +75,11 @@ SPEED_ADJUST = {
 def main(config):
     animation = config.str("animation", PACMAN_ANIMATION)
     if animation == RANDOM_ANIMATION:
-        animation = ANIMATION_LIST.values()[rand(len(ANIMATION_LIST) - 1)]
+        animation = ANIMATION_LIST.values()[random.number(0, len(ANIMATION_LIST) - 1)]
 
     speed = int(config.str("speed", DEFAULT_SPEED))
     if speed < 0:
-        speed = rand(MIN_SPEED + MAX_SPEED + 1) + MAX_SPEED
+        speed = random.number(MAX_SPEED, MIN_SPEED)
 
     speed = speed * SPEED_ADJUST[animation]
     delay = speed * time.millisecond
@@ -61,11 +102,9 @@ def main(config):
 
     return render.Root(
         delay = delay.milliseconds,
-        child = render.Animation(allFrames),
+        # Frames are positioned within 64x32; bound and centre them on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(allFrames))),
     )
-
-def rand(ceiling):
-    return random.number(0, ceiling - 1)
 
 DEFAULT_SPEED = "30"
 
@@ -121,58 +160,58 @@ def get_schema():
 
 # Pac-Man
 
-Red_R1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAZ0lEQVR42mJkQAX/kdiMqFKMWBVhVcGIXx2yIhZkdffvgZiKSgirICL/lRiBQkxoongYLGh2OTuDyHsYIkDAhN+VyJ5mRFaKy60QEUYiTWVA9tbAKmVEjRtGbBHLBOcw4o5SCAkQYAClNyHYKAGFjAAAAABJRU5ErkJggg=="""
-Red_R2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAYUlEQVR42mJkQAX/kdiMqFKMWBVhVcGIXx2yIhZkdffvgZiKSgirICL/lRiBQkxoongYLGh2OTuDyHsYIkDAhN+VyJ5mRFaKy60QEUYiTWVA9tZgUIoz0pED4j8RXIAAAwAqjCfKmzaHIQAAAABJRU5ErkJggg=="""
-Red_L1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAYklEQVR42mJkQAX/kdiMqFKMWBVhVcGIXx2yIkaIuvv3QIoVlRCWoIkAKSa4KH4GA0SpszMIIQNMEZBS/K5E9jTjf2wuwyrCSKSpULcOBqWMqHHDiC1imVDiDU+UMjAABBgAABYhI/KsN1kAAAAASUVORK5CYII="""
-Red_L2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAW0lEQVR42mJkQAX/kdiMqFKMWBVhVcGIXx2yIkaIuvv3QIoVlRCWoIkAKSa4KH4GA0SpszMIIQNMEZBS/K5E9jTjf2wuwyrCSKSpULcOHqU4Ix05IP4TwQUIMACFXCcVNRT5FQAAAABJRU5ErkJggg=="""
-Pink_R1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAbklEQVR42mJkQAX/t/+Hsxk9GZGlGLEqQlEB08CIXx2yakZkdffVQaTiTYQiuAhQNROaKB4GC5pdzs4g8t40dBEgYMLvSmRPMyIrxeNWkLeINBXkAAaiAU2VIkc3kI3GRSiFxhtq4kCJUjAJEGAAKCwn3ZOFumYAAAAASUVORK5CYII="""
-Pink_R2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAaElEQVR42mJkQAX/t/+Hsxk9GZGlGLEqQlEB08CIXx2yakZkdffVQaTiTYQiuAhQNROaKB4GC5pdzs4g8t40dBEgYMLvSmRPMyIrxeNWkLeINBXkAAaiAR2Uokc6KhcaEMiew8UFCDAARh02V5LWH9sAAAAASUVORK5CYII="""
-Pink_L1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAa0lEQVR42mJkQAX/t/+Hsxk9GZGlGLEqQlEB08CIXx2yakaIuvvqICHFmwhpNBGgaia4KH4GEICUOjuDEDLAFAEpxe9KZE8zQpQSdCvIuUSaCnXrYFCKHN1ANhoXoRQab6iJAyVKwSRAgAEA7Ecnc313zkMAAAAASUVORK5CYII="""
-Pink_L2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAZElEQVR42mJkQAX/t/+Hsxk9GZGlGLEqQlEB08CIXx2yakaIuvvqICHFmwhpNBGgaia4KH4GEICUOjuDEDLAFAEpxe9KZE8zQpQSdCvIuUSaCnXr4FGKHumoXGhAIHsOFxcgwAAKRzXt/Z+p2AAAAABJRU5ErkJggg=="""
-Cyan_R1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAbElEQVR42mJkQAP//yPYjIzIMozYFaEoYURViksdkmoWZHX37oNIJUWEGqgIUAEjIxOaKB4GC5pVzs4QSQwRBgYmAq5E8jQjslKcblWEhACRpoIcQDSgrVLk6Aay0bgIpRAOauJAUQcmAQIMADWWIt9gASEJAAAAAElFTkSuQmCC"""
-Cyan_R2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAZ0lEQVR42mJkQAP//yPYjIzIMozYFaEoYURViksdkmoWZHX37oNIJUWEGqgIUAEjIxOaKB4GC5pVzs4QSQwRBgYmAq5E8jQjslKcblWEhACRpoIcQDSgh1LUSEfnQmML2XM4uAABBgAuqy7FKWj4UgAAAABJRU5ErkJggg=="""
-Cyan_L1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAZ0lEQVR42mJkQAP//yPYjIzIMozYFaEoYURViksdkmpGiLp790G0kiJCFl2EkZEJLoqfAQQgpc7OIIQMMEXASvG7EsnTjBClhN0K8haRpkLcOiiUIkc3kI3GRSiFcFATB4o6MAkQYACxziEr7ViBvwAAAABJRU5ErkJggg=="""
-Cyan_L2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAYklEQVR42mJkQAP//yPYjIzIMozYFaEoYURViksdkmpGiLp790G0kiJCFl2EkZEJLoqfAQQgpc7OIIQMMEXASvG7EsnTjBClhN0K8haRpkLcOoiUokY6Ohcaq8iew8EFCDAAquMtEaMaO1QAAAAASUVORK5CYII="""
-Peach_R1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAcElEQVR42mJkQAX/twfC2Yye65GlGLEqQlEB08CIXx2yakZkdffV1wFJxZtBcEVwEaBqJjRRPAwWNLucnUHkvWnoIkDAhN+VyJ5mRFaKx60gbxFpKsgBDEQDmipFjm4gG42LUAqNN9TEgRKlYBIgwACKxTFN5s4QAwAAAABJRU5ErkJggg=="""
-Peach_R2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAaklEQVR42mJkQAX/twfC2Yye65GlGLEqQlEB08CIXx2yakZkdffV1wFJxZtBcEVwEaBqJjRRPAwWNLucnUHkvWnoIkDAhN+VyJ5mRFaKx60gbxFpKsgBDEQDOihFj3RULjQgkD2HiwsQYADG/zefW11t3QAAAABJRU5ErkJggg=="""
-Peach_L1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAbUlEQVR42mJkQAX/twfC2Yye65GlGLEqQlEB08CIXx2yakaIuvvq64AMxZtBcGk0EaBqJrgofgYQgJQ6O4MQMsAUASnF70pkTzNClBJ0K8i5RJoKdetgUIoc3UA2GhehFBpvqIkDJUrBJECAAQB3PzDjbS2xbQAAAABJRU5ErkJggg=="""
-Peach_L2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAZklEQVR42mJkQAX/twfC2Yye65GlGLEqQlEB08CIXx2yakaIuvvq64AMxZtBcGk0EaBqJrgofgYQgJQ6O4MQMsAUASnF70pkTzNClBJ0K8i5RJoKdevgUYoe6ahcaEAgew4XFyDAALN5NzW64nz3AAAAAElFTkSuQmCC"""
-PM_1 = """iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAN0lEQVR42mJkQAL//yPzGBgZkdhYVWCqZsSvCK6UiYE4wEjQMAgg1ryBUkf1cCEhPoiJX4AAAwDqQA4Si0u90AAAAABJRU5ErkJggg=="""
-PM_R1 = """iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAQUlEQVR42mJkQAL//yPzGBgZkdhYVWCqZsSvCK6UiYE4wIjfMLgTWfBLwwELfmkC9mJqINZ9VA8XEuKDmPgFCDAAXgcSGtpg8gUAAAAASUVORK5CYII="""
-PM_R2 = """iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAATklEQVR42oyRwQ4AIAhCpfX/v2zdYoIuTuWeYIYgZfItgHfellChg9jsavluSEXNFDJ+FqpcB1VueHXN7VC/Fx3A78V0DnHsis//PQIMAOn8FBVaC87kAAAAAElFTkSuQmCC"""
-PM_L1 = """iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAQUlEQVR42mJkQAL//yPzGBgZkdhYVWCqZsSvCK6UiYE4wIjLcTjV4dfAiMcMZA0sRJrHQoL7aBAuRMUHMfELEGAAVl4WDFURo9cAAAAASUVORK5CYII="""
-PM_L2 = """iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAASUlEQVR42pSRSQ4AMAgCxfT/X7ZXIthYT0rGHUFWxVEA5D84ptHUCU2bbVCratX02dhxio5ca53L+bCC9C72fh//ODEbr3wFGAAhERIXQwReQQAAAABJRU5ErkJggg=="""
-Blue_1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAaElEQVR42mJkQAWKiv/h7Pv3GZGlGLEqQgZwDYz41SGrZiSoDq6aiYFogKL03rT1QITJhiolxnaIIxmJVIruAKKU4nIliouBDvi/fR2QhDBwsclyK3J0A9loXIRSCActcSCrg5AAAQYA8+9Mz7UBEeUAAAAASUVORK5CYII="""
-Blue_2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAYklEQVR42mJkQAWKiv/h7Pv3GZGlGLEqQgZwDYz41SGrZiSoDq6aiYFogKL03rT1QITJhiolxnaIIxmJVIruAKKU4nIliouBDvi/fR2QhDBwsSlwK1qko3GhbkA2GxcXIMAAE4lJ2S951wwAAAAASUVORK5CYII="""
+RED_R1 = RED_R1_ASSET.readall()
+RED_R2 = RED_R2_ASSET.readall()
+RED_L1 = RED_L1_ASSET.readall()
+RED_L2 = RED_L2_ASSET.readall()
+PINK_R1 = PINK_R1_ASSET.readall()
+PINK_R2 = PINK_R2_ASSET.readall()
+PINK_L1 = PINK_L1_ASSET.readall()
+PINK_L2 = PINK_L2_ASSET.readall()
+CYAN_R1 = CYAN_R1_ASSET.readall()
+CYAN_R2 = CYAN_R2_ASSET.readall()
+CYAN_L1 = CYAN_L1_ASSET.readall()
+CYAN_L2 = CYAN_L2_ASSET.readall()
+PEACH_R1 = PEACH_R1_ASSET.readall()
+PEACH_R2 = PEACH_R2_ASSET.readall()
+PEACH_L1 = PEACH_L1_ASSET.readall()
+PEACH_L2 = PEACH_L2_ASSET.readall()
+PM_1 = PM_1_ASSET.readall()
+PM_R1 = PM_R1_ASSET.readall()
+PM_R2 = PM_R2_ASSET.readall()
+PM_L1 = PM_L1_ASSET.readall()
+PM_L2 = PM_L2_ASSET.readall()
+BLUE_1 = BLUE_1_ASSET.readall()
+BLUE_2 = BLUE_2_ASSET.readall()
 
-#White_1 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAZ0lEQVR42pySUQ6AIAxDqfEi7P5ngqOIcTrKArrYD9LCW2gCSKNKOcyLgI8whVg2gHeOaXxyRm8prAHNgvw0Y3+jkdu1JIKoLxBCVy3Z75rrVUN3p77+6crPfXoXO6rBfQ7mdG0CDAAkbSfVbUPwiAAAAABJRU5ErkJggg=="""
-#White_2 = """iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAIAAACQKrqGAAAAYklEQVR42pyRUQrAIAxDzdhF7P3PpEdRWF2JRWdZvhJ91qBIs0pp5kXAW1hCLDuAb45pHDmjrxTWhGZBfpuxH2jkdi2JIOoLhNBdS/a35vrU0NWlr/+7uk93cTwEz97FLsAASOI2l+NAp0cAAAAASUVORK5CYII="""
-MsPM_L1 = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAIAAAB/6NG4AAAAaElEQVR42oxSQQ7AIAhrjR9x//8j2zQzIgxpOEGBNgCEkB4TdS+vRe7NZeUp6oermfSg+gG03iBzmTvVSqoulXScPDkKtO1gAYdLIomC9OyXzdN2x63IWbS6Tsqof/MfPYz+xOi+BRgADbUvf8YXEK8AAAAASUVORK5CYII="""
-MsPM_L2 = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAIAAAB/6NG4AAAAbUlEQVR42oxRAQoAIQjbjj7S/f+PFkZdmtgNIcht2gJSiNZC8e29SS9+dp6hTrz1uB7UuICqAlnDxBwg7VZMXqaW3e+bOX2YaBz6QF4SFMMu/71NgmGUtLPjTE4MWcGNh/Bz5WYcJOg0bu8mwADQCUCuMV1YSgAAAABJRU5ErkJggg=="""
-MsPM_L3 = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAIAAAB/6NG4AAAAaklEQVR42oxSWwrAIAxrZBdx979jFKsDaxcsfhTyaFM0k8XxvnoCtoGI4mIBPRhvJdV0muPe9LYOAROrJQBmk66UCLrlnLDiQAu2VNhThoK+ifZWbKcGe1y6uqzcUH83oYwL9U+OvZsAAwAhmCrEUB1tYAAAAABJRU5ErkJggg=="""
-MsPM_R1 = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAIAAAB/6NG4AAAAa0lEQVR42oyR0RHAIAhDg5vQ/XdMz7a2CrHK8eHJA0MEWvDK/7CeTieYDXR5gcPFaLImggD3ennXZD5PSQFCsTXdbHSvkhQNJgszRwqwi36erIOJDu7m6TbbSXqyrST+PBeDB1r2hE1OAQYAIrgve2BhAl4AAAAASUVORK5CYII="""
-MsPM_R2 = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAIAAAB/6NG4AAAAbUlEQVR42pxSQQ6AMAijix/B//8Rg9PJKC7GhsMySluyidyws9ZAZNNJgIndBmHXQtrMS1IAVb/svbIuKw7Q3R9JUGILpu6TAsRBbqTlBraPvD/arSStcpfyiQLWrhG+BOKzvaqD2OVMWvcQYAD3TD+u+Dql5QAAAABJRU5ErkJggg=="""
-MsPM_R3 = """iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAIAAAB/6NG4AAAAbUlEQVR42oxSQQ7AIAiz/sT9/49dkI04QCbhgFJLG2ztDc6sAys6VNLHcuoGuAYjFdyNChiDUlCyLYV/7gQADxrYaFd6JZMhLF269pbVXJ5AEzR5jDaLP9uJiFRS39GkE3rBxOKf5JTf5d8CDABWTyrDZeekXQAAAABJRU5ErkJggg=="""
+#WHITE_1 = WHITE_1_ASSET.readall()
+#WHITE_2 = WHITE_2_ASSET.readall()
+MSPM_L1 = MSPM_L1_ASSET.readall()
+MSPM_L2 = MSPM_L2_ASSET.readall()
+MSPM_L3 = MSPM_L3_ASSET.readall()
+MSPM_R1 = MSPM_R1_ASSET.readall()
+MSPM_R2 = MSPM_R2_ASSET.readall()
+MSPM_R3 = MSPM_R3_ASSET.readall()
 
 PACMANS = [
     [[PM_1, PM_R1, PM_R2, PM_R1], [PM_1, PM_L1, PM_L2, PM_L1]],
-    [[MsPM_R1, MsPM_R2, MsPM_R3, MsPM_R2], [MsPM_L1, MsPM_L2, MsPM_L3, MsPM_L2]],
+    [[MSPM_R1, MSPM_R2, MSPM_R3, MSPM_R2], [MSPM_L1, MSPM_L2, MSPM_L3, MSPM_L2]],
 ]
 
 GHOSTS = [
-    [[Red_R1, Red_R2], [Red_L1, Red_L2]],
-    [[Pink_R1, Pink_R2], [Pink_L1, Pink_L2]],
-    [[Cyan_R1, Cyan_R2], [Cyan_L1, Cyan_L2]],
-    [[Peach_R1, Peach_R2], [Peach_L1, Peach_L2]],
-    [[Blue_1, Blue_2], [Blue_1, Blue_2]],
+    [[RED_R1, RED_R2], [RED_L1, RED_L2]],
+    [[PINK_R1, PINK_R2], [PINK_L1, PINK_L2]],
+    [[CYAN_R1, CYAN_R2], [CYAN_L1, CYAN_L2]],
+    [[PEACH_R1, PEACH_R2], [PEACH_L1, PEACH_L2]],
+    [[BLUE_1, BLUE_2], [BLUE_1, BLUE_2]],
 ]
 
 # Not yet using a blinking ghost
 # GHOST_CHASED_BLINKING = [
-#     Blue_1,
-#     Blue_2,
-#     White_1,
-#     White_2,
+#     BLUE_1,
+#     BLUE_2,
+#     WHITE_1,
+#     WHITE_2,
 # ]
 
 SPRITE_WIDTH = 15
@@ -195,10 +234,10 @@ CHASED_GHOST = 4
 CHANCE_FOR_CHASED_GHOST = 2
 
 def pacman_get_frames():
-    yPos = rand(PM_NUM_Y_POSITIONS)
-    mspacman = rand(2) == 1
-    reverse = rand(2) == 1
-    whichGhost = rand(CHASING_GHOST_COUNT + CHANCE_FOR_CHASED_GHOST)
+    yPos = random.number(0, PM_NUM_Y_POSITIONS - 1)
+    mspacman = random.number(0, 1) == 1
+    reverse = random.number(0, 1) == 1
+    whichGhost = random.number(0, CHASING_GHOST_COUNT + CHANCE_FOR_CHASED_GHOST - 1)
     if whichGhost >= CHASING_GHOST_COUNT:
         whichGhost = CHASED_GHOST
 
@@ -245,9 +284,9 @@ def pacman_get_frame(xPos, yPos, mspacman, reverse, whichGhost):
         child =
             render.Row(
                 children = [
-                    render.Image(base64.decode(firstImage)),
+                    render.Image(firstImage),
                     render.Box(width = DIST_BETWEEN_SPRITES, height = 1, color = "#000"),
-                    render.Image(base64.decode(secondImage)),
+                    render.Image(secondImage),
                 ],
             ),
     )
@@ -259,17 +298,10 @@ ALIENS_PER_ROW = 3
 SPACE_BETWEEN_ALIENS = 4
 INVADER_ROW_WIDTH = (BIG_ALIEN_WIDTH * ALIENS_PER_ROW) + (SPACE_BETWEEN_ALIENS * (ALIENS_PER_ROW - 1))
 
-alien1_A = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAPElEQVR42mL8yXGFAQn8h9KMMAEmLJIobCYskiiKmLAZi8T+T9AKFmTV2NhMaAL/0dhgE5AF0E34DxBgAJjmFOHenXrNAAAAAElFTkSuQmCC"""
-alien1_B = """iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAPUlEQVR42mL8yXGFAQn8h9KMMAEmLJIobCYskiiKmLAZi8T+T9AKFmTV2NhMWCRhVvxHVsCIxQqwBoAAAwAbERDiEXss2wAAAABJRU5ErkJggg=="""
-alien2_A = """iVBORw0KGgoAAAANSUhEUgAAAAsAAAAICAYAAAAvOAWIAAAASklEQVR42nxPCQoAMAjS6OH7+Q7YRriaEESaFtFw0GcRL+7cwpCbSIULLgR+CyYCPYORN3HKXG9vhSOyBC9iU3cPAsrt+geHAAMA8jsQlUAQEDcAAAAASUVORK5CYII="""
-alien2_B = """iVBORw0KGgoAAAANSUhEUgAAAAsAAAAICAYAAAAvOAWIAAAASklEQVR42oRQgQkAIAibo8P73AosyrQEQbc5RUHFDO0puGPhtAYGaCYcdXEEXgN0An+G7DydIHJdg0wcEW0oydrQnZ+3HV9qAgwA+98Qkq04gCQAAAAASUVORK5CYII="""
-alien3_A = """iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAARUlEQVR42oRQQQoAMAjK6P9fdpcxhuUWdDBMLTBa6Qg3KENyAsgPuS3nYI8HPpFc/uZeokA5VHGkIXO3LgY4qLy+tQQYAHVUERDg61VsAAAAAElFTkSuQmCC"""
-alien3_B = """iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAARklEQVR42oRPQQoAMAia0f+/3NgOIzJb0EExNcSiqRQycCFSBrCPmI6ticeAXyXVn9I9OUTzKHH1aQz4LBAcD1Hr8luAAQBuTxEUquo0cAAAAABJRU5ErkJggg=="""
-
 SPACEINVADERS_IMAGES = [
-    [base64.decode(alien1_A), base64.decode(alien1_B)],
-    [base64.decode(alien2_A), base64.decode(alien2_B)],
-    [base64.decode(alien3_A), base64.decode(alien3_B)],
+    [ALIEN1_A, ALIEN1_B],
+    [ALIEN2_A, ALIEN2_B],
+    [ALIEN3_A, ALIEN3_B],
 ]
 
 SI_NUM_X_POSITIONS = FRAME_WIDTH - INVADER_ROW_WIDTH + 1
@@ -383,7 +415,7 @@ def centipede_get_frames():
     mushroomSprite = create_mushroom_sprite(colorScheme)
     mushroomMap = create_mushroom_map(mushroomSprite)
 
-    xDir = rand(2)
+    xDir = random.number(0, 1)
     if xDir == 0:
         xDir = -1
         centStartX = FRAME_WIDTH
@@ -589,8 +621,8 @@ def get_segment_render_child(centSprites, segmentIndex, history):
     )
 
 def add_mushroom(mushroomMap, mushroomSprite):
-    col = rand(CENT_NUM_COLS)
-    row = rand(CENT_NUM_ROWS)
+    col = random.number(0, CENT_NUM_COLS - 1)
+    row = random.number(0, CENT_NUM_ROWS - 1)
 
     x = col * CENT_SPRITE_WIDTH
     y = row * CENT_SPRITE_WIDTH
@@ -675,10 +707,10 @@ def get_color_scheme():
         {CENT_ORIG_BODY_COLOR: CENT_GREEN, CENT_ORIG_EYE_COLOR: CENT_MAGENTA, CENT_ORIG_LEG_COLOR: CENT_RED},
     ]
 
-    return colorSchemes[rand(len(colorSchemes))]
+    return colorSchemes[random.number(0, len(colorSchemes) - 1)]
 
 def create_mushroom_map(mushroomSprite):
-    mushroomCount = rand(CENT_MAX_MUSHROOMS - CENT_MIN_MUSHROOMS + 1) + CENT_MIN_MUSHROOMS
+    mushroomCount = random.number(CENT_MIN_MUSHROOMS, CENT_MAX_MUSHROOMS)
     mushroomMap = {}
     for _ in range(mushroomCount):
         add_mushroom(mushroomMap, mushroomSprite)

@@ -159,6 +159,7 @@ def get_schema():
                 name = "Steam API Key",
                 desc = "https://steamcommunity.com/dev/apikey",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "offlineStatus",

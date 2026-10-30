@@ -6,4 +6,12 @@ desc: Displays a GitHub badge for the status of the configured Action.
 author: Cavallando
 fileName: github_badge.star
 packageName: githubbadge
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tracking
+  - tech
+  - utility
+published: '2023-01-02T15:58:23Z'
+updated: '2026-10-01T21:17:57Z'

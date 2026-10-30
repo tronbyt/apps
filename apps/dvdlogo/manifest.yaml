@@ -6,4 +6,14 @@ desc: A screensaver from before the streaming era. Will it hit the corner this t
 author: Mack Ward
 fileName: dvd_logo.star
 packageName: dvdlogo
-recommended_interval: 5
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - retro
+  - clock
+  - utility
+  - wide 2x support
+published: '2022-01-17T18:26:24Z'
+updated: '2026-10-01T20:55:01Z'

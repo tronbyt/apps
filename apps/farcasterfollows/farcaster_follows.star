@@ -1,22 +1,23 @@
 load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/farcaster_icon_dark_bg.png", FARCASTER_ICON_DARK_BG_ASSET = "file")
+load("images/farcaster_icon_light_bg.png", FARCASTER_ICON_LIGHT_BG_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
+
+FARCASTER_ICON_DARK_BG = FARCASTER_ICON_DARK_BG_ASSET.readall()
+FARCASTER_ICON_LIGHT_BG = FARCASTER_ICON_LIGHT_BG_ASSET.readall()
 
 # 1. Copy logo from Figma as SVG: https://www.figma.com/file/E1RJ5DNTM8eHZpJI1bcaP3/Public-logo?node-id=1-2&t=4PuwjeL9pH70lnxv-0
 # 2. Crop & revert the colors (for dark), export to PNG.
 # 2. Resize to 19x19, using nearest neighbour (looks better than then the fuzzyness of bilinear)
 # 3. Copy to clipboard and convert to base64 using: https://onlineimagetools.com/convert-image-to-base64
-FARCASTER_ICON_DARK_BG = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAE6ADAAQAAAABAAAAEwAAAAAgb1CmAAAAm0lEQVQ4EdVUwQ2AIAyUxnFcyw0cww1cy3nQ1FBzFIoofPQh7aW9uxKtG8LjvT8kfnsSkeOe69VCJMJM6HoQCeEoAZ7rvGOajZdtSnBKkAYgGrPGkdZCh12dZe8M1VH5yXnRGRKxgM5RlGOTzGq08CKZVq3JTWc1zbrmh2TWZ2DhPPI9ZqlI3w3m2Bf9Tlj0Je67z8RBy16TTXsCeUMxD3VSGfcAAAAASUVORK5CYII=""")
-FARCASTER_ICON_LIGHT_BG = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAE6ADAAQAAAABAAAAEwAAAAAgb1CmAAAAmklEQVQ4EdVUyQ2AMAyjiHlYih0Ygh1YioVAQRi5URMC7Qce5JBjO1UhddezTNuO/G2c1zHJzPmqIYKwEKYWRCAckHCEbe7pvGSi16CaOlsz4kiLscOmzopnxuqs/OTcdcZEIqBrFpXcJLMGrb5LplUjteksMqwxPySzroHVl5XvNT2QPhuueS77nBj0JW/7P4MD7zICY0WsegA7BTRetiWv/QAAAABJRU5ErkJggg==""")
 
 def main(config):
     # https://gist.github.com/danromero/87be7035aab27bf6a603b2c956022370
     # pixlet encrypt farcasterfollows $KEY
-    api_key = secret.decrypt("AV6+xWcE3RYzxZ92Z9lOT0XBWIqjOpZ4hExHXbCOIC8XwninH1mJouAfj+JQTGcXuibmG/DhzhBxhlf7P6EjpEbzGcZmElq+jGX+aq8hvcZaLNawjsYIGWyQ93U36rvsdBoDr1VnTvLJDqshmWvdcZ9AZjYOTWYZ84vvEvXTNyOPnpcdTi3jDHRnWxu5LcyopG0OHRlCAveDeYxmPjfP95zT9N39O/YieSZyktJyd9TwC2+ORAgCve2otB7LfbkbvA==") or config.get("dev_api_key")
+    api_key = config.get("farcaster_api_key")
 
     username = config.str("who", "nix")
     count = get_followercount(username, api_key)
@@ -99,7 +100,6 @@ def get_followercount(username, api_key):
             fail("warpcaster request failed with status %d", rep.status_code)
         count = int(rep.json()["result"]["user"]["followerCount"])
 
-        # TODO: Determine if this cache call can be converted to the new HTTP cache.
         cache.set(key, str(int(count)), ttl_seconds = 240)
 
     return count
@@ -108,6 +108,13 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "farcaster_api_key",
+                name = "Farcaster API Key",
+                desc = "Your Farcaster API key. See https://warpcast.com/~/developers/api for details.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "who",
                 name = "Who?",

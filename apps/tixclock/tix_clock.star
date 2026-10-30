@@ -303,7 +303,7 @@ def main(config):
     loc = json.decode(location) if location else DEFAULT_LOCATION
     timezone = loc.get(
         "timezone",
-        config.get("$tz", DEFAULT_TIMEZONE),
+        time.tz(),
     )
 
     # Get the current time

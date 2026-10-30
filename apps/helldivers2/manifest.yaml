@@ -6,4 +6,12 @@ desc: Shows the current player count.
 author: Daniel Sitnik
 fileName: helldivers_2.star
 packageName: helldivers2
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - real-time
+  - gaming
+  - time
+published: '2024-03-18T15:46:27Z'
+updated: '2026-10-01T21:23:34Z'

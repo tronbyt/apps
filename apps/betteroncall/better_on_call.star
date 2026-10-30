@@ -105,6 +105,7 @@ def get_schema():
                 name = "API token",
                 desc = "Your Better Uptime API token.",
                 icon = "key",
+                secret = True,
             ),
         ],
     )

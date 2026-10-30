@@ -6,4 +6,9 @@ desc: MBTA bus and rail departure times. Updated to support Tronbyt.
 author: Marcus Better & Eric Pierce
 fileName: mbta.star
 packageName: mbta
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags: []
+published: '2022-02-01T21:38:47Z'
+updated: '2026-10-01T21:54:45Z'

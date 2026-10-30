@@ -6,7 +6,7 @@ Author: gmatthews1182
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FANTASY_BASE_ENDPOINT = "https://lm-api-reads.fantasy.espn.com/apis/v3/games/"
@@ -40,12 +40,14 @@ def get_schema():
                 name = "Cookie: espn_s2",
                 desc = "[NOT NEEDED FOR PUBLIC LEAGUES; MUST BE FOUND FROM COMPUTER BROWSER] To find your espn_s2 cookie value, log in to https://fantasy.espn.com/football. Once you're at your team's home page, right click anywhere on the page and click 'Inspect'. Once the inspector menu appears, in the top bar of the menu, select 'Application'. In the 'Application' page, on the right bar under 'Cookies', click https://fantasy.espn.com. The espn_s2 value should then displayed in the cookie list. Email your espn_s2 to yourself so you are able to copy it from your mobile device.",
                 icon = "user",
+                secret = True,
             ),
             schema.Text(
                 id = "schema_swid",
                 name = "Cookie: swid",
                 desc = "[NOT NEEDED FOR PUBLIC LEAGUES; MUST BE FOUND FROM COMPUTER BROWSER] To find your swid cookie value, log in to https://fantasy.espn.com/football. Once you're at your team's home page, right click anywhere on the page and click 'Inspect'. Once the inspector menu appears, in the top bar of the menu, select 'Application'. In the 'Application' page, on the right bar under 'Cookies', click https://fantasy.espn.com. The swid value should then displayed in the cookie list under the 'espnAuth' value. It should be a string of alphanumerics similar to: '{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}'. Email your swid to yourself so you are able to copy it from your mobile device.",
                 icon = "user",
+                secret = True,
             ),
         ],
     )
@@ -137,12 +139,13 @@ def main(config):
     return render.Root(
         delay = int("4") * 1000,
         show_full_animation = True,
-        child = render.Column(
+        # The team pages are expanded Columns; bound the block to 64x32 before centring it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             children = [
                 title,
                 render.Animation(children = render_category),  # Animated team display below
             ],
-        ),
+        ))),
     )
 
 def init_base_league(league_id, year, sport, espn_s2, swid):

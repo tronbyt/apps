@@ -6,4 +6,12 @@ desc: Display the whole energy flow for solar panels, powerwall, grid and house.
 author: lcervo
 filename: solar-powerwall.star
 packageName: solar-powerwall
-recommended_interval: 5
+recommendedInterval: 5
+fileName: solar_powerwall.star
+category: utilities
+tags:
+  - utility
+  - smart-home
+  - power-monitoring
+published: '2024-09-25T14:49:30Z'
+updated: '2026-10-13T21:34:12Z'

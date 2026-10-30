@@ -5,8 +5,6 @@ Description: Shows live scores for the selected Pakistani Super League T20 team.
 Author: M0ntyP
 """
 
-load("cache.star", "cache")
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -19,13 +17,12 @@ LiveGames_URL = "https://hs-consumer-api.espncricinfo.com/v1/pages/series/home?l
 Standings_URL = "https://hs-consumer-api.espncricinfo.com/v1/pages/series/standings?lang=en&seriesId=1332128"
 
 DEFAULT_TEAM = "5795"  # Islamabad
-DEFAULT_TIMEZONE = "Australia/Adelaide"
 MATCH_CACHE = 60
 ALL_MATCH_CACHE = 2 * 3600  # 2 hours
 STANDINGS_CACHE = 6 * 3600  # 6 hours
 
 def main(config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)
+    timezone = time.tz()
     now = time.now().in_location(timezone)
 
     SelectedTeam = config.get("TeamList", DEFAULT_TEAM)
@@ -599,18 +596,8 @@ def get_schema():
     )
 
 def get_cachable_data(url, timeout):
-    key = base64.encode(url)
-
-    data = cache.get(key)
-    if data != None:
-        #print("CACHED")
-        return base64.decode(data)
-
-    res = http.get(url = url)
+    res = http.get(url = url, ttl_seconds = timeout)
     if res.status_code != 200:
         fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
-
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(key, base64.encode(res.body()), ttl_seconds = timeout)
 
     return res.body()

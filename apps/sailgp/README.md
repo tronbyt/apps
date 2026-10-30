@@ -22,5 +22,13 @@ Displayed:
 
 ## Screenshot
 
-![](sailgp-nri.gif)
-![](sailgp-standings-with-flags.gif)
+![](sailgp.webp)
+
+## Data source
+
+Standings, schedule and flags are produced by
+[tidbyt-data-scripts](https://github.com/jvivona/tidbyt-data-scripts) and read
+from the public [tidbyt-data](https://github.com/jvivona/tidbyt-data) repo
+(`sailgp/standings.json`, `sailgp/nri.json`, `sailgp/flags.json`), so the device
+never hits SailGP directly. The standings count is not hard-coded — the display
+pages through however many teams are racing.

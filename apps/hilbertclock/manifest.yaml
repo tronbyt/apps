@@ -6,4 +6,12 @@ desc: Traces a Hilbert Curve on the background of a clock. The colors of the pix
 author: kevwoods
 fileName: hilbert_clock.star
 packageName: hilbertclock
-recommended_interval: 0
+recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - art
+  - clock
+  - science
+published: '2024-04-25T13:45:25Z'
+updated: '2026-10-01T21:23:34Z'

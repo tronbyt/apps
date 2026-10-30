@@ -1,15 +1,30 @@
 """
 Applet: OG Clock Remake with Weather
 Summary: OG Clock Remake with Location Configuration and Weather Display
-Description: Display the time in addition to current weather and humidity from either OpenWeather or National Weather Service (no API key required for NWS). To request an OpenWeather API key, see https://home.openweathermap.org/users/sign_up.
+Description: Display time plus current temperature and humidity from OpenWeather, National Weather Service, or an Ambient Weather station. Ambient Weather requires an Application Key and API Key from AmbientWeather.net.
 Author: g3rmanaviator
-Version: 1.0
+Version: 1.1
 
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("images/cloudy.png", CLOUDY_ASSET = "file")
+load("images/foggy.png", FOGGY_ASSET = "file")
+load("images/haily.png", HAILY_ASSET = "file")
+load("images/moony.png", MOONY_ASSET = "file")
+load("images/moonyish.png", MOONYISH_ASSET = "file")
+load("images/raindrop_icon.png", RAINDROP_ICON_ASSET = "file")
+load("images/rainy.png", RAINY_ASSET = "file")
+load("images/sleety.png", SLEETY_ASSET = "file")
+load("images/sleety2.png", SLEETY2_ASSET = "file")
+load("images/snowy.png", SNOWY_ASSET = "file")
+load("images/snowy2.png", SNOWY2_ASSET = "file")
+load("images/sunny.png", SUNNY_ASSET = "file")
+load("images/sunnyish.png", SUNNYISH_ASSET = "file")
+load("images/thundery.png", THUNDERY_ASSET = "file")
+load("images/tornady.png", TORNADY_ASSET = "file")
+load("images/windy.png", WINDY_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -26,83 +41,147 @@ DEFAULT_LOCATION = """
 """
 
 # Weather API URLs from Time & Weather
-NWS_GRID_FORECAST_POINT_URL = "https://api.weather.gov/points/{latitude},{longitude}"
-NWS_HOURLY_GRID_FORECAST_URL = "https://api.weather.gov/gridpoints/BOX/{gridX},{gridY}/forecast/hourly"
+NWS_POINTS_URL = "https://api.weather.gov/points/{latitude},{longitude}"
+NWS_STATIONS_URL = "https://api.weather.gov/gridpoints/{grid_id}/{grid_x},{grid_y}/stations"
+NWS_LATEST_OBSERVATION_URL = "{station_url}/observations/latest"
 OPENWEATHER_CURRWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units={units}&lang=en"
 OPENWEATHER_AIR_POLLUTION_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat={latitude}&lon={longitude}&appid={api_key}"
 OPENWEATHER_ONECALL_URL = "https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&exclude=minutely,hourly,daily,alerts&appid={api_key}&units={units}&lang=en"
+AMBIENT_WEATHER_DEVICES_URL = "https://rt.ambientweather.net/v1/devices"
 
 TEMP_COLOR_DEFAULT = "#FFFFFF"
 TIME_NIGHT_COLOR = "#333333"
 
 # Complete weather icons from Time & Weather
 WEATHER_ICONS = {
-    "cloudy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABHSURBVHjaxI/BDQAgCMTAjdh/iLKRPojGgManfQHpJZzIH3RfgBjM7JoA+gRYmau0228p2S1Udz8+s+6aGlSik9ayyfjLGABillSriIbjdwAAAABJRU5ErkJggg==
-""",
-    "foggy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABvSURBVHjalI+xDcAgDASfbMSEFBSM5YKC8tmAUZzCCkIQlHAVWOeXH/iHGz8k7eG9326Q1AeSfWcrjfa3NNmXqbXW12P63E0NVqyTW8tOxjkxRgvLOasqAFUtpQBoraWUziNDCABEpOeJSJ8fcA8APZp02VzAMvcAAAAASUVORK5CYII=
-""",
-    "haily.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABjSURBVHjapI/LDcAgDEMNG2Xv7GIGyC7uISpCtNBW9Smfl4+BdypjQjIDM1tOkNQpkn1mCY30MzTRNdHW2u0zvV4mB1ftPO3MApDUKxlv7vzbVzOJCADunm1J7g4gIr6dPgYAveR7WPNsUTIAAAAASUVORK5CYII=
-""",
-    "moony.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABESURBVHjaYmCgLmBE5vx/bY0iJ3oUizq4ImRpOGBCNx+bIhQb0SwlYB5R6vAYyYTmLDSlCM/hNwyunxHTQ8T6nSIAGAA1nBh8d3skkwAAAABJRU5ErkJggg==
-""",
-    "moonyish.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABnSURBVHjatNAxDoAgDAXQX84gm4eQGY8vc7kHhyhDFSVpExb/2LyUT4G1kDmVll8Ri+0GUmHvMxGAsNjvdsyiwXa5dqApn6/46AmzaOkAoFb7HZ1LyxQL6Uqv0rGf0/1MmhLhr/QBAAkLWK/QE7DqAAAAAElFTkSuQmCC
-""",
-    "rainy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABgSURBVHjaYmAgDjAic+bNmwdhJCUl4VQ3b948Q0NDCPv8+fNoqhkxFcHB+fPn4UoZcSlCU82EbBGmCrg4I5oPMAHEakZMz6KpIBcoTvvMwMAg4F2JxiYLYBoDYZMMAAMAIzEsSN19Ip8AAAAASUVORK5CYII=
-""",
-    "sleety.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABuSURBVHjaYmAgDjAic86f/w9hGBoy4tRx/vx/ODh//j9cD05FyKoJK0JTzQRReuECdsfAxRnRfIAJEH4S8K5EVqo47TOyZogsFMybdx/NVEwRKPj//z+aG+AiDGgWYTUGWZYB2R1wY1BcRiQADAAtrnieBFAHfQAAAABJRU5ErkJggg==
-""",
-    "sleety2.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABLSURBVHjaYmAgFZw//x/CUJz2GU0EAebNu48mgSkCBf///0czBi4CBQLelXiMQZbFbjABf+ARoa4/4AGG1RhkWRR/wY3B6VMqAMAAN35GO1pYhkoAAAAASUVORK5CYII=
-""",
-    "snowy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABYSURBVHjahI/JDQAhDAMJHdEwLZkOthTvAxShXMwrMo6DpV0A3MMY0jIAKgB1JzXd7rfJuPu2rhV/RnUxDTxVpwofGRyZ8zMPXjmQNDGqBKQxnirm2eMfAMWodYqa7/ycAAAAAElFTkSuQmCC
-""",
-    "snowy2.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAAySURBVHjaYmAgCZw//5+w+Lx597EqxSL+//9/rGYgixMyAxfAacZI8wcxAAAAAP//AwDMP0MnAPn91gAAAABJRU5ErkJggg==
-""",
-    "sunny.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABISURBVHjaYmAgG9SXyhIl9/+1NT49yNK4RFAM/v/aGp/VcEUQhEUpRBpi0f/X1v9f20AYEBGcGnCaR5r7iPIvCeFHlBxBABgALlQ+G9vS6kUAAAAASUVORK5CYII=
-""",
-    "sunnyish.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABWSURBVHjaYmAgG9SXyhIl9/+1NT49yNK4RFAM/v/aGp/VcEUQhF3pf2QAUwqxGqHhPzaAZh7j////8QcTIyMjAwMDE5GBygixF79hUHVYlcJVkAYAAwAEFUsViVL8ywAAAABJRU5ErkJggg==
-""",
-    "thundery.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABfSURBVHjarNC7DcAwCATQIxtRZxsGu5UYJEMkBRKyQP4UOVFg9CwLA2eR8UAyGjObOpKqGr27Fy0dZdw9qcxQ0df4UBc5l7JBT92JJMn3uaMWNwEg0OYzj1DSn9A63wDfPjgqyFON1wAAAABJRU5ErkJggg==
-""",
-    "tornady.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAB6SURBVHjapI/RDQMhDMXcU4eALViDMWCwZAzWYIuwRfuBlJOi67VS/W1MHvyOiLw+ICIiAjy3qqqlFCDn7O/HGEDvHXh4EmituaSqLp2eq7XWUNocoZdSMrMgnfft0loLmHN+WW1mYeadeikdYccmHHfRu/suqPzDewBSg1u5d9GMZAAAAABJRU5ErkJggg==
-""",
-    "windy.png": """
-iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAIAAAD9iXMrAAAAYElEQVR42mJiIA4wkaOuubn5////mGzs4PDhw3A2XCkLRCuQdHBwsLGxATIYGRnh6oBsoDZbW1sCzkI3D2IYUDces4kzD2IAxAwgiWYMAffBvYwzaJCDjUD4URRvAAEGAEibMzC5039xAAAAAElFTkSuQmCC
-""",
+    "cloudy.png": CLOUDY_ASSET.readall(),
+    "foggy.png": FOGGY_ASSET.readall(),
+    "haily.png": HAILY_ASSET.readall(),
+    "moony.png": MOONY_ASSET.readall(),
+    "moonyish.png": MOONYISH_ASSET.readall(),
+    "rainy.png": RAINY_ASSET.readall(),
+    "sleety.png": SLEETY_ASSET.readall(),
+    "sleety2.png": SLEETY2_ASSET.readall(),
+    "snowy.png": SNOWY_ASSET.readall(),
+    "snowy2.png": SNOWY2_ASSET.readall(),
+    "sunny.png": SUNNY_ASSET.readall(),
+    "sunnyish.png": SUNNYISH_ASSET.readall(),
+    "thundery.png": THUNDERY_ASSET.readall(),
+    "tornady.png": TORNADY_ASSET.readall(),
+    "windy.png": WINDY_ASSET.readall(),
 }
 
-RAINDROP_ICON = """
-iVBORw0KGgoAAAANSUhEUgAAAA4AAAASCAYAAABrXO8xAAAAzUlEQVR42mJgIBMw4pJYd+1jAZCyB+LEIC3+D+jyLDg0JQCpfihXAIgd0dUwYdGkgKQJBByAYg0ENQLBfKgtyKAeqNkAp0aovxxweHs+Vo1QJ9bjCUgDZCcj21iPxYnoIB+oWQCuEWpbAhHRB9JUgGxjPglxn4+s0YEEjQJAFzrANBqQmuRgGh+Qq/EACXo+ANPuAZjGRhI0LoDbCDQB5NREIjRdgFkCTwBAzQugmj/g0LQBlEtgWYwRS+4ARXIAECvA/ATSBHUVHAAEGADlNDsN6Dca6wAAAABJRU5ErkJggg==
-"""
+RAINDROP_ICON = RAINDROP_ICON_ASSET.readall()
 
 # Weather API functions from Time & Weather
-def get_nws_hourly_grid_forecast_url(lat, lon, ttl = 3600):
-    res = http.get(NWS_GRID_FORECAST_POINT_URL.format(
+def get_nws_observation_station(lat, lon, ttl = 3600):
+    # Get the grid point data
+    res = http.get(NWS_POINTS_URL.format(
         latitude = lat,
         longitude = lon,
     ), ttl_seconds = ttl)
     if res.status_code != 200:
-        fail("Could not obtain the grid forecast for a point location.", res.status_code)
-    return res.json()["properties"]["forecastHourly"]
+        fail("Could not obtain the grid point data.", res.status_code)
+
+    properties = res.json()["properties"]
+    grid_id = properties["gridId"]
+    grid_x = properties["gridX"]
+    grid_y = properties["gridY"]
+
+    # Get the stations list from the gridpoint
+    stations_url = NWS_STATIONS_URL.format(
+        grid_id = grid_id,
+        grid_x = grid_x,
+        grid_y = grid_y,
+    )
+    stations_res = http.get(stations_url, ttl_seconds = ttl)
+    if stations_res.status_code != 200:
+        fail("Could not obtain stations list.", stations_res.status_code)
+
+    # Get the first station from the observationStations list
+    observation_stations = stations_res.json()["observationStations"]
+    if len(observation_stations) == 0:
+        fail("No observation stations found for this location.")
+
+    first_station = observation_stations[0]
+    return first_station
+
+def get_nws_latest_observation(station_url, ttl = 300):
+    # Call the station's latest observation endpoint
+    latest_url = NWS_LATEST_OBSERVATION_URL.format(station_url = station_url)
+    res = http.get(latest_url, ttl_seconds = ttl)
+    if res.status_code != 200:
+        fail("Could not obtain latest observation.", res.status_code)
+    return res.json()
 
 def get_current_weather_conditions(url, ttl):
     res = http.get(url, ttl_seconds = ttl)
     if res.status_code != 200:
         fail("Current conditions request failed with status", res.status_code)
     return res.json()
+
+def get_ambient_weather_conditions(application_key, api_key, station_id, display_metric, now):
+    # The devices endpoint returns every station available to the supplied API key,
+    # with the most recent observation in each device's lastData object.
+    res = http.get(
+        url = AMBIENT_WEATHER_DEVICES_URL,
+        params = {
+            "applicationKey": application_key,
+            "apiKey": api_key,
+        },
+        ttl_seconds = 300,
+    )
+    if res.status_code != 200:
+        fail("Ambient Weather device request failed with status", res.status_code)
+
+    stations = res.json()
+    if len(stations) == 0:
+        fail("No Ambient Weather devices are available for this API key.")
+
+    station = stations[0]
+    if station_id:
+        station = None
+        for candidate in stations:
+            if candidate.get("macAddress") == station_id:
+                station = candidate
+                break
+        if station == None:
+            fail("Ambient Weather device was not found. Check the station MAC address.")
+
+    conditions = station.get("lastData", {})
+    temp_f = conditions.get("tempf")
+    if type(temp_f) == "int" or type(temp_f) == "float":
+        temperature = int(temp_f)
+        if display_metric:
+            temperature = int((temp_f - 32) * 5.0 / 9.0)
+    else:
+        temperature = "--"
+
+    # Ambient Weather supplies measurements rather than a weather-condition code.
+    # Use recent rain and wind when available; otherwise select a time-appropriate
+    # neutral sky icon.
+    hourly_rain = conditions.get("hourlyrainin")
+    wind_speed = conditions.get("windspeedmph")
+    if (type(hourly_rain) == "int" or type(hourly_rain) == "float") and hourly_rain > 0:
+        icon_ref = "rainy.png"
+    elif (type(wind_speed) == "int" or type(wind_speed) == "float") and wind_speed >= 20:
+        icon_ref = "windy.png"
+    elif now.hour >= 6 and now.hour < 19:
+        icon_ref = "sunnyish.png"
+    else:
+        icon_ref = "moonyish.png"
+
+    humidity = conditions.get("humidity")
+    if type(humidity) == "int" or type(humidity) == "float":
+        humidity = int(humidity)
+    else:
+        humidity = "--"
+
+    return {
+        "temp": temperature,
+        "humidity": humidity,
+        "icon_ref": icon_ref,
+    }
 
 def get_openweather_air_pollution(api_key, latitude, longitude):
     res = http.get(
@@ -231,11 +310,17 @@ def main(config):
     # Weather settings
     api_service = config.get("weatherApiService") or "OpenWeather"
     api_key = config.get("apiKey", "")
+    ambient_application_key = config.get("ambientApplicationKey", "")
+    ambient_station_id = config.get("ambientStationId", "")
     system_of_measurement = config.get("systemOfMeasurement", "Imperial").lower()
     temp_color = config.get("tempColor", TEMP_COLOR_DEFAULT)
 
     display_metric = (system_of_measurement == "metric")
-    display_sample = not (api_key) and api_service != "Open-Meteo" and api_service != "National Weather Service (NWS)"
+    display_sample = (
+        (api_service == "OpenWeather" or api_service == "OpenWeatherOneCall") and not api_key
+    ) or (
+        api_service == "Ambient Weather" and (not ambient_application_key or not api_key)
+    )
 
     # Format time components for proper blinking colon display
     if use_24_hour:
@@ -260,33 +345,63 @@ def main(config):
         result_current_conditions["temp"] = 14 if display_metric else 57
         result_current_conditions["humidity"] = 50
     elif api_service == "National Weather Service (NWS)":
-        hourly_forecast_url = get_nws_hourly_grid_forecast_url(latitude, longitude, 3600)
-        raw_current_conditions = get_current_weather_conditions(hourly_forecast_url, 300)["properties"]["periods"][0]
+        station_url = get_nws_observation_station(latitude, longitude, 3600)
+        observation_data = get_nws_latest_observation(station_url, 300)
 
-        result_current_conditions["icon"] = {"condition": str(raw_current_conditions["shortForecast"]).lower(), "daytime": raw_current_conditions["isDaytime"]}
-        temperature = int(raw_current_conditions["temperature"])
-        result_current_conditions["temp"] = int(temperature if raw_current_conditions["temperatureUnit"] == "F" and not (display_metric) else ((temperature - 32) * (5 / 9)))
+        properties = observation_data.get("properties", {})
 
-        icon_phrase = result_current_conditions["icon"]["condition"]
-        is_daytime = result_current_conditions["icon"]["daytime"]
-        if (icon_phrase == "sunny" or "fair" in icon_phrase or "clear" in icon_phrase) and is_daytime:
-            icon_ref = "sunny.png"
-        elif ("mostly sunny" in icon_phrase or "partly sunny" in icon_phrase or "few clouds" in icon_phrase or "partly cloudy" in icon_phrase) and is_daytime:
-            icon_ref = "sunnyish.png"
-        elif icon_phrase == "cloudy" or "mostly cloudy" in icon_phrase or "overcast" in icon_phrase:
-            icon_ref = "cloudy.png"
-        elif "rain" in icon_phrase:
-            icon_ref = "rainy.png"
-        elif "thunderstorm" in icon_phrase:
-            icon_ref = "thundery.png"
-        elif "snow" in icon_phrase:
-            icon_ref = "snowy2.png"
-        elif ("fair" in icon_phrase or "clear" in icon_phrase) and not (is_daytime):
-            icon_ref = "moony.png"
-        elif ("few clouds" in icon_phrase or "partly cloudy" in icon_phrase) and not (is_daytime):
-            icon_ref = "moonyish.png"
+        # Get temperature - NWS observations use Celsius by default
+        temp_data = properties.get("temperature", {})
+        temp_celsius = temp_data.get("value") if temp_data else None
+        if temp_celsius != None:
+            if display_metric:
+                result_current_conditions["temp"] = int(temp_celsius)
+            else:
+                result_current_conditions["temp"] = int((temp_celsius * 9.0 / 5.0) + 32)
+        else:
+            result_current_conditions["temp"] = "?"
 
-        result_current_conditions["humidity"] = int(raw_current_conditions["relativeHumidity"]["value"])
+        # Get humidity
+        humidity_data = properties.get("relativeHumidity", {})
+        humidity_value = humidity_data.get("value") if humidity_data else None
+        if humidity_value != None:
+            result_current_conditions["humidity"] = int(humidity_value)
+        else:
+            result_current_conditions["humidity"] = "?"
+
+        # Determine icon based on text description and time of day
+        text_description = properties.get("textDescription", "")
+        if text_description:
+            text_description = text_description.lower()
+
+        # Check if it's daytime (simple check - can be improved)
+        current_hour = now.hour
+        is_daytime = current_hour >= 6 and current_hour < 19
+
+        # Icon mapping based on text description
+        if text_description:
+            if ("clear" in text_description or "fair" in text_description) and is_daytime:
+                icon_ref = "sunny.png"
+            elif ("mostly clear" in text_description or "partly cloudy" in text_description or "few clouds" in text_description) and is_daytime:
+                icon_ref = "sunnyish.png"
+            elif "cloudy" in text_description or "overcast" in text_description:
+                icon_ref = "cloudy.png"
+            elif "rain" in text_description or "drizzle" in text_description:
+                icon_ref = "rainy.png"
+            elif "thunder" in text_description or "storm" in text_description:
+                icon_ref = "thundery.png"
+            elif "snow" in text_description:
+                icon_ref = "snowy2.png"
+            elif "fog" in text_description or "mist" in text_description:
+                icon_ref = "foggy.png"
+            elif ("clear" in text_description or "fair" in text_description) and not is_daytime:
+                icon_ref = "moony.png"
+            elif ("mostly clear" in text_description or "partly cloudy" in text_description) and not is_daytime:
+                icon_ref = "moonyish.png"
+            else:
+                icon_ref = "cloudy.png"  # default
+        else:
+            icon_ref = "cloudy.png"  # default if no description
 
     elif api_service == "OpenWeather":
         request_url = OPENWEATHER_CURRWEATHER_URL.format(
@@ -316,6 +431,8 @@ def main(config):
             icon_ref = "snowy2.png"
         elif icon_num == 731:
             icon_ref = "windy.png"
+        elif icon_num >= 701 and icon_num < 800:
+            icon_ref = "foggy.png"
         elif icon_num == 800 and "n" in icon_code:
             icon_ref = "moony.png"
         elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
@@ -349,20 +466,36 @@ def main(config):
             icon_ref = "snowy2.png"
         elif icon_num == 731:
             icon_ref = "windy.png"
+        elif icon_num >= 701 and icon_num < 800:
+            icon_ref = "foggy.png"
         elif icon_num == 800 and "n" in icon_code:
             icon_ref = "moony.png"
         elif icon_num >= 801 and icon_num <= 804 and "n" in icon_code:
             icon_ref = "moonyish.png"
 
+    elif api_service == "Ambient Weather":
+        ambient_conditions = get_ambient_weather_conditions(
+            application_key = ambient_application_key,
+            api_key = api_key,
+            station_id = ambient_station_id,
+            display_metric = display_metric,
+            now = now,
+        )
+        result_current_conditions["temp"] = ambient_conditions["temp"]
+        result_current_conditions["humidity"] = ambient_conditions["humidity"]
+        icon_ref = ambient_conditions["icon_ref"]
+
     # Prepare weather display components
     if icon_ref:
-        weather_image = render.Image(width = 16, height = 16, src = base64.decode(WEATHER_ICONS[icon_ref]))
+        weather_image = render.Image(width = 16, height = 16, src = WEATHER_ICONS[icon_ref])
     else:
         weather_image = render.Box(width = 16, height = 16)
 
     # Temperature and humidity display
+    show_unit = config.bool("show_temp_unit", True)
+    temp_unit = ("C" if display_metric else "F") if show_unit else ""
     temp_text = render.Text(
-        content = str(result_current_conditions.get("temp", "?")) + "°" + ("C" if display_metric else "F"),
+        content = str(result_current_conditions.get("temp", "?")) + "°" + temp_unit,
         font = "5x8",
         color = temp_color,
     )
@@ -472,13 +605,33 @@ def get_schema():
                         display = "OpenWeather (One Call API 3.0)",
                         value = "OpenWeatherOneCall",
                     ),
+                    schema.Option(
+                        display = "Ambient Weather",
+                        value = "Ambient Weather",
+                    ),
                 ],
             ),
             schema.Text(
                 id = "apiKey",
                 name = "API Key",
-                desc = "API key for weather data access (not needed for NWS)",
+                desc = "API key for the selected weather service (not needed for NWS)",
                 icon = "gear",
+                default = "",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ambientApplicationKey",
+                name = "Ambient Weather Application Key",
+                desc = "Application key from your AmbientWeather.net account. Required only when Ambient Weather is selected.",
+                icon = "key",
+                default = "",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ambientStationId",
+                name = "Ambient Weather Station MAC Address",
+                desc = "Optional. Select an Ambient Weatherstation by MAC address; leave blank to use the first available device.",
+                icon = "temperatureHalf",
                 default = "",
             ),
             schema.Dropdown(
@@ -504,6 +657,13 @@ def get_schema():
                 desc = "Color for temperature display",
                 icon = "brush",
                 default = TEMP_COLOR_DEFAULT,
+            ),
+            schema.Toggle(
+                id = "show_temp_unit",
+                name = "Show temperature unit",
+                desc = "Display C or F after temperature",
+                icon = "thermometer",
+                default = True,
             ),
             schema.Toggle(
                 id = "blink",

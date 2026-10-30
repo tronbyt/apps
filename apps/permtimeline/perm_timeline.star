@@ -5,12 +5,14 @@ Description: PERM Timeline offers a comprehensive view of the processing journey
 Author: Ihor Burenko
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/check_icon.png", CHECK_ICON_ASSET = "file")
 load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+CHECK_ICON = CHECK_ICON_ASSET.readall()
 
 timezone = "America/New_York"
 DATE_FORMAT = "2006-01-02"
@@ -18,13 +20,6 @@ PRINTABLE_DATE_FORMAT = "Jan 2 2006"
 
 DATA_URL = "https://perm-parser.onrender.com/api/parse"
 DEFAULT_APPLICATION_DATE = "2024-08-13T13:32:32.000Z"
-
-CHECK_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAACXBIWXMAAAsTAAALEwEAmpw
-YAAAAiUlEQVR4nGNggIFpdlEMU+2qwRjERgFT7SsZptj/ZJhq/x+Mp9j/DNpeMwmhE1lyqv1
-/z81l/3c+PPUXYtJUu2r9lUn/a07OAUvarc/7f/zF1f9KiyP/g62D2Gv/v+7kvP+r7uz/f+n
-N3f/i8wOgpoEUQK1gm+4CVgSXBFkLdywWR4LFUAAObwIAn3hf+d8jSA0AAAAASUVORK5CYII=
-""")
 
 COLOR_GREEN = "#00953E"
 COLOR_BLUE = "#0051ba"
@@ -37,8 +32,31 @@ def main(config):
     if rep.status_code != 200:
         fail("Backend request failed with status %d", rep.status_code)
 
-    today_completed = rep.json()["today_completed"]
-    days_to_approval = rep.json()["days_to_approval"]["value"]
+    today_completed_data = rep.json().get("today_completed")
+    days_to_approval_data = rep.json().get("days_to_approval")
+
+    if today_completed_data and "error" in today_completed_data:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Error: {}".format(today_completed_data["error"]),
+                width = 64,
+                align = "center",
+                color = "#ff0000",
+            ),
+        )
+
+    if days_to_approval_data and "error" in days_to_approval_data:
+        return render.Root(
+            child = render.WrappedText(
+                content = "Error: {}".format(days_to_approval_data["error"]),
+                width = 64,
+                align = "center",
+                color = "#ff0000",
+            ),
+        )
+
+    today_completed = today_completed_data
+    days_to_approval = days_to_approval_data["value"]
 
     calculated_dates = calculate_dates(days_to_approval, application_date)
 

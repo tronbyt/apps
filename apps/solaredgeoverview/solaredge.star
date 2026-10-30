@@ -40,7 +40,7 @@ V1DEMO_DATA = {
     "overview": {
         "lastUpdateTime": "2024-10-11 12:19:42",
         "lifeTimeData": {
-            "energy": 7.01093E10,
+            "energy": 7.01093e10,
         },
         "lastYearData": {
             "energy": 8447192.0,
@@ -258,6 +258,7 @@ def show_apikey_options(apiversion):
                 name = "v1 API KEY",
                 desc = "Contact your solar installer if necessary to obtain an API key",
                 icon = "key",
+                secret = True,
             ),
         ]
     else:
@@ -267,5 +268,6 @@ def show_apikey_options(apiversion):
                 name = "v2 User KEY",
                 desc = "Contact your solar installer if necessary to obtain an API key",
                 icon = "key",
+                secret = True,
             ),
         ]

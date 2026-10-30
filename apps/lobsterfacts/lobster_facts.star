@@ -5,14 +5,11 @@ Description: Displays a random lobster fact.
 Author: Marc ten Bosch
 """
 
-load("encoding/base64.star", "base64")
+load("images/the_icon.png", THE_ICON_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
-load("time.star", "time")
+load("render.star", "canvas", "render")
 
-THE_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABgAAAAVCAYAAABc6S4mAAABUElEQVQ4ja1VPU8DMQx10lv4EDOia4XE1LFi7MDQH8DPut/TkbFi7IoEMxsVe9XqRXL06sZJQPVyPvvs9+zYuTCOo0BWm/Vh/bwKeOIdenJ0CsdpLrwnAHVCvj9+0/P+8a4bBPEcp4L4yE4Y9APYGLg3uZLS+MjMtTRm8dfkbIMMtQQJVE7PhsvvIVEFYBBmldgXbE0ATcY2lA77cvue3t/mi6zL64swiG0PJNqee6xCCEXdEmRiyH2yBzY5T1RJPD9PU25ROkjTHgTiY22TB26njgdg8BxiDpJBrF6bqOoUcVXMlPXWuMaa084+Ep+N66a+7W4FfGFBL203+71K3ApKwVxB783bbBEn0okq+TzJe9AS3ZP97USmDzeXu4uYIZ9D74+pCsDb/RMHeZpdJ/3zayfxEORqH/Jt++8KVJA8H3znTdoE4EVjlp79TETkCC/EGgFV8sV4AAAAAElFTkSuQmCC
-""")
+THE_ICON = THE_ICON_ASSET.readall()
 
 FACTS = [
     "Male European lobsters live to 31 years old, and females to 54. One particularly long-lived female had was found to be 72 years old",
@@ -52,8 +49,6 @@ FACTS = [
 ]
 
 def main():
-    random.seed(time.now().unix)
-
     idx = random.number(0, len(FACTS) - 1)
     current_fact = FACTS[idx]
 
@@ -61,7 +56,8 @@ def main():
         child = render.Padding(
             pad = 1,
             child = render.Marquee(
-                height = 30,
+                # the panel less its 1px padding: 30 on 64x32, 62 on square
+                height = canvas.height() - 2,
                 child = render.Column(
                     cross_align = "center",
                     children = [

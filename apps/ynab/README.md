@@ -7,6 +7,7 @@ You will need to supply an access token associated with your YNAB account in ord
 Recent Enhancements:
 * Display recent transactions
 * Color differentiation if spending is outpacing monthly budget
+* Added Net Worth mode
 
 Possible Enhancements:
 * "Pin" categories to always display, regardless of current balance

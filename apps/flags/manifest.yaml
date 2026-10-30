@@ -6,4 +6,12 @@ desc: Displays a random or specific country flag.
 author: btjones
 fileName: flags.star
 packageName: flags
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - art
+  - local
+  - utility
+published: '2022-04-04T16:15:22Z'
+updated: '2026-10-01T21:08:18Z'

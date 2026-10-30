@@ -6,4 +6,11 @@ desc: Show top news stories from Rantingly.com.
 author: '@Mad-Chemist'
 fileName: rantinglynews.star
 packageName: rantinglynews
-recommended_interval: 10
+recommendedInterval: 10
+supports64x64: true
+category: news
+tags:
+  - news
+  - top-stories
+published: '2023-03-23T12:31:29Z'
+updated: '2026-10-01T19:49:38Z'

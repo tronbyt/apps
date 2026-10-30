@@ -5,9 +5,29 @@ Description: Use the display to show a contestant bid screen like on the show, f
 Author: Blkhwks19
 """
 
-load("encoding/base64.star", "base64")
+load("images/eight.png", EIGHT_ASSET = "file")
+load("images/five.png", FIVE_ASSET = "file")
+load("images/four.png", FOUR_ASSET = "file")
+load("images/nine.png", NINE_ASSET = "file")
+load("images/one.png", ONE_ASSET = "file")
+load("images/seven.png", SEVEN_ASSET = "file")
+load("images/six.png", SIX_ASSET = "file")
+load("images/three.png", THREE_ASSET = "file")
+load("images/two.png", TWO_ASSET = "file")
+load("images/zero.png", ZERO_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
+
+EIGHT = EIGHT_ASSET.readall()
+FIVE = FIVE_ASSET.readall()
+FOUR = FOUR_ASSET.readall()
+NINE = NINE_ASSET.readall()
+ONE = ONE_ASSET.readall()
+SEVEN = SEVEN_ASSET.readall()
+SIX = SIX_ASSET.readall()
+THREE = THREE_ASSET.readall()
+TWO = TWO_ASSET.readall()
+ZERO = ZERO_ASSET.readall()
 
 def main(config):
     amount = "%s" % config.str("bid_amount", "799")
@@ -119,43 +139,3 @@ def get_schema():
             ),
         ],
     )
-
-ZERO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAQElEQVRIS2P8DwQMVACMg9sgRiAgxZfIvkHx2qhB8GAcDSPCKWo0jEbDCBoCo8UI9qQwmkUoyCKEteJWMfiqbADcT9enuIINwgAAAABJRU5ErkJggg==
-""")
-
-ONE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAANElEQVRIS2NkoAD8BwKYdkYKzGEYNYhw6I2G0WgYQUNgNK9hTwqjWWQ0i4xmEbxpYHBnEQDNTHenh8ys/AAAAABJRU5ErkJggg==
-""")
-
-TWO = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAS0lEQVRIS2P8DwQMVACMg88gSnyF7BvGUYOwhsBoGBFOGLQJo8GX12jiIkYgIBzE2FWglEejBmENpNEwIpy6BnkYEfYAbhWDr8oGAOoXd9O0Tlr5AAAAAElFTkSuQmCC
-""")
-
-THREE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAS0lEQVRIS2P8DwQMVACMg88gSnyF7BvGUYOwhsBoGBFOGLQPI0ryHUrKHnwGEQ5eVBW0D+xRF8FDYDSwCScG2oQRJRkV2c2Dr8oGAKXkd6efGhJ/AAAAAElFTkSuQmCC
-""")
-
-FOUR = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAATklEQVRIS2NkoAD8BwKYdkYKzGGgjUEopjIykuRCFL2jBmGN3NEwIpzmaR9GhN2AWwUjsvMGh0GUuII2xcioiwjn/tEwGg0jMtMAcqYFAOfJn6e+YkLoAAAAAElFTkSuQmCC
-""")
-
-FIVE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAATElEQVRIS2P8DwQMVACMg9sgRiAg15coXhs1CGswjoYR4dQ1yMOIsAdwqxiEuZ8S7yCXZWQXGyAHjBpEOBpGw4jEMBrcNS1hz+BWAQCNQnfT4wjjHAAAAABJRU5ErkJggg==
-""")
-
-SIX = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAARElEQVRIS2P8DwQMVACMg9sgRiAg15coXhs1CGswjoYR4dQ1yMOIsAdwqxhmuR+5LKMo1kYNIpyqRsOIgjAirHUoZVoAIRGf0wyfapkAAAAASUVORK5CYII=
-""")
-
-SEVEN = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAN0lEQVRIS2P8DwQMVACMg88gSnyF7BvGUYOwhsBoGBFOGKNhNBpG0BAYLUawJ4XRLDKaRaAhAACaqXenRsActAAAAABJRU5ErkJggg==
-""")
-
-EIGHT = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAASUlEQVRIS2P8DwQMVACMg9sgRiAgxZfIvkHx2qhB8GAcDSPCKYr2YUTYDbhVjGZa7GFD+1gbLUZGixESci7OBEmCGRhKB1/uBwAFEsunJkN49QAAAABJRU5ErkJggg==
-""")
-
-NINE = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAS0lEQVRIS2P8DwQMVACMg9sgRiAgxZfIvkHx2qhB8GAcDSPCKYr2YUTYDbhVDMJMS4l3UAJ71CCsITAaRoQTxiAPo8Fd0xIOXtwqAIKDn6eMkxGXAAAAAElFTkSuQmCC
-""")

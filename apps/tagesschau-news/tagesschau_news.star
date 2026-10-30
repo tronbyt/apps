@@ -1,17 +1,7 @@
-load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("images/ard_logo_white.svg", ARD_LOGO_WHITE = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-
-ARD_LOGO_ENCODED_WHITE = "iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAFeSURBVHgBtVSBcYMwDBS5DuBOUG/QjMAGZYOyQdmgyQTpBrBB6QTQCegGsEHoBK5UnovP2JjkLn/3Z1uWX7Itm+gOSEITxhjFTcZ8ZmqmjEfmN7NOkmSga8CC78yzmdAxS7Cx7DLWW8Q0RAQHZOvzy5k9AmQxwR7cUzwBxayQQBpyKiGoI0KFHINlq5Cxcp1TRMwDQqlznsaZF3vpzdIT6GQL2XB8D4tsYSjQz0JCK6LK3ukOlyIRfuAzjwUDbQDX7Ahf/S/qERDxI/MR7VYMzCfpPND0SmgW56g1NzW2RVdA1v/OmQ4wRmszgv2stcN5tMwXuhFW8be2scDtacc591z82S5++DXMzo2k8JqaFdEGwZXj82aX02ILmCwd29rH8oo1HxSClVln4n/ACb6VO594FsgtftJUyC3ziy4PQ2zyaecYH/miw1kGsm7M8sn2a0fizTQQQKM7ogRX8QerO/tFhV/1pgAAAABJRU5ErkJggg=="
-ARD_LOGO_ENCODED = "iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAKASURBVHgBtZRNctpAEIW7Rww/VV6QEwTvEuSqaJkYXAUnAJ8AOEHICQgnMJzA9gnsnCBKxWatRSh7F90gpCqxhATT6RkBAYIcOyn3RqOemW96Wk8P4AkC0yZqDhWjOGxaYL2akyohQpEIJojqk5R46XoF/1HQw/K0h0hdICgyzCNCzyxGKhGAo/P8cial6u+Cb0BfO0HJisQFADkI1M/c5Qeuj5M/DrWDNhL2eHtREHQ+3+Qud0ITIH7UY8LZ8Wi858E9odsTx+GAF7dQUP3qS8FdzmWWAysWfDKBVFR3b/f8dFDQBhAN18M6p9oVOwBS4oLn9jk3WUGrB0GNFLUJqePebvZIg2az0OG+9uJ4yv0UxfV5KfNdzjfiODrh147OCXNdEi1++KNx4Wy5WB90ZEcnvOErKW4LQc18oK3Q1SHRkOeauoAVlLFNTg716OjltFmxw28apEh1d4G2I5PND5hRnLMEDfTQjoxE0CLzYQiVswby4QGx6KXPOi4ZqMC5AWRmCQBJeFpO8i73jHvch4cGMhTEc8NSZE0QFESWZeALzRndsR4fwdS3o++m0qyUvh5YMHfgP4KvzgpJbitMPxDcOWED/jG0UgxYCNdAk7T6wOWzJILSXwmoTQXczSr5l2WPGI2z3goqpdGnH8d4msrSIFTv5M/c/tU4X1/m3xyEb7WGCWi48wqVckgVe3q6nquWg/e1Eu3UasWOWnpPtcwesHGZtVi4D0PRk1l1nOaZiQdMe1xhlzV4fj0utFOhCfiHg5Rh+2Mhm95xvzHxU8Xi1qatQCUQBf3rm/xgm5Hq/LpqAdhamfLv8PnnOE/z2nuh61F7sVBFmJ+kgdbjF/18Nbj16wNhAAAAAElFTkSuQmCC"
-
-TIDBYT_HEIGHT = 32
-TIDBYT_WIDTH = 64
-HEADING_HEIGHT = 12
-TEXT_HEIGHT = TIDBYT_HEIGHT - HEADING_HEIGHT - 4
-TEXT_WIDTH = TIDBYT_WIDTH - 2
-CHARS_PER_LINE = 13
 
 def is_breaking(newsEntry):
     if "breakingNews" in newsEntry and newsEntry["breakingNews"]:
@@ -20,18 +10,6 @@ def is_breaking(newsEntry):
     # if "tags" in newsEntry and any([("tag" in tag and tag["tag"] == "Eilmeldung") for tag in newsEntry["tags"]]):
     #     return True
     return False
-
-def format_text(original_text):
-    lines = []
-    for line in original_text.split("\n"):
-        new_line = []
-        for word in line.split(" "):
-            append = word
-            if len(word) > CHARS_PER_LINE:
-                append = word[:CHARS_PER_LINE] + " " + word[CHARS_PER_LINE:]
-            new_line.append(append)
-        lines.append(" ".join(new_line))
-    return "\n".join(lines)
 
 def format_time(original_time):
     if "T" in original_time:
@@ -56,12 +34,23 @@ def get_most_important_headline():
     return None
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
+
+    # Layout constants
+    HEADING_HEIGHT = 12 * scale
+    TEXT_TOP_OFFSET = HEADING_HEIGHT + 3 * scale  # Offset where scrollable text starts
+    TEXT_HEIGHT = canvas.height() - TEXT_TOP_OFFSET - scale  # Available height for scrollable text
+    TEXT_DRAW_WIDTH = canvas.width() - (2 * scale)  # Width available for wrapped text
+
+    # Fonts
+    font_small = "CG-pixel-3x5-mono" if scale == 1 else "terminus-12"
+    font_normal = "5x8" if scale == 1 else "terminus-16"
+
     headline = get_most_important_headline()
     if not headline:
         return render.Root(render.Text(
             "Cannot refresh news",
-            # font family
-            font = "CG-pixel-3x5-mono",
+            font = font_small,
         ))
     title = headline["title"]
     topline = headline["topline"]
@@ -69,62 +58,82 @@ def main(config):
     formatted_date = format_time(date) if date else "No time available"
     news_is_urgent = is_breaking(headline)
 
-    if config and not news_is_urgent and config.bool("hide_if_not_urgent"):
+    if config and not news_is_urgent and config.bool("hide_if_not_urgent", False):
         return []
+
+    text_color = "#FFFF00" if news_is_urgent else "#FFFFFF"
+    text_content = render.Column(children = [
+        render.WrappedText(
+            content = ("+++ " if news_is_urgent else "") + topline + ":",
+            color = text_color,
+            font = font_normal,
+            width = TEXT_DRAW_WIDTH,
+            wordbreak = True,
+        ),
+        render.Padding(
+            render.WrappedText(
+                content = title + (" +++" if news_is_urgent else ""),
+                color = text_color,
+                font = font_normal,
+                width = TEXT_DRAW_WIDTH,
+                wordbreak = True,
+            ),
+            pad = (0, 2 * scale, 0, 0),
+        ),
+    ])
 
     return render.Root(
         render.Stack([
+            # 1. Background
             render.Box(
                 color = "#1e283f",
-                width = TIDBYT_WIDTH,
-                height = TIDBYT_HEIGHT,
+                width = canvas.width(),
+                height = canvas.height(),
             ),
-            render.Padding(pad = 1, child =
-                                        render.Column(
-                                            expanded = True,
-                                            children = [
-                                                render.Padding(
-                                                    child =
-                                                        render.Row(
-                                                            expanded = True,
-                                                            main_align = "space_between",
-                                                            children = [
-                                                                render.Image(height = HEADING_HEIGHT, src = base64.decode(ARD_LOGO_ENCODED_WHITE)),
-                                                                render.Text(
-                                                                    formatted_date,
-                                                                    # font family
-                                                                    font = "CG-pixel-3x5-mono",
-                                                                ),
-                                                            ],
-                                                            cross_align = "center",
-                                                        ),
-                                                    pad = 1,
-                                                ),
-                                                render.Marquee(
-                                                    height = TEXT_HEIGHT,
-                                                    scroll_direction = "vertical",
-                                                    delay = 20,
-                                                    child = render.Column(children = [
-                                                        render.WrappedText(
-                                                            content = ("+++ " if news_is_urgent else "") + format_text(topline) + ":",
-                                                            color = "#FFFF00" if news_is_urgent else "#FFFFFF",
-                                                            font = "5x8",
-                                                        ),
-                                                        render.Padding(
-                                                            render.WrappedText(
-                                                                content = format_text(title) + (" +++" if news_is_urgent else ""),
-                                                                color = "#FFFF00" if news_is_urgent else "#FFFFFF",
-                                                                font = "5x8",
-                                                            ),
-                                                            pad = (0, 2, 0, 0),
-                                                        ),
-                                                    ]),
-                                                ),
-                                            ],
-                                        )),
+
+            # 2. Scrolling Text Layer
+            render.Padding(
+                pad = (scale, TEXT_TOP_OFFSET, scale, scale),
+                child = render.Box(
+                    width = TEXT_DRAW_WIDTH,
+                    height = TEXT_HEIGHT,
+                    child = render.Marquee(
+                        height = TEXT_HEIGHT,
+                        scroll_direction = "vertical",
+                        offset_start = 0,
+                        offset_end = 16 * scale,
+                        delay = 40,
+                        child = text_content,
+                    ),
+                ),
+            ),
+
+            # 3. Header Layer
+            render.Padding(
+                pad = scale,
+                child = render.Box(
+                    color = "#1e283f",
+                    width = TEXT_DRAW_WIDTH,
+                    height = HEADING_HEIGHT + 2 * scale,
+                    child = render.Padding(
+                        pad = scale,
+                        child = render.Row(
+                            expanded = True,
+                            main_align = "space_between",
+                            children = [
+                                render.Image(height = HEADING_HEIGHT, src = ARD_LOGO_WHITE.readall()),
+                                render.Text(
+                                    formatted_date,
+                                    font = font_small,
+                                ),
+                            ],
+                            cross_align = "center",
+                        ),
+                    ),
+                ),
+            ),
         ]),
-        delay = 100,
-        show_full_animation = True,
+        delay = 100 // scale,
     )
 
 def get_schema():

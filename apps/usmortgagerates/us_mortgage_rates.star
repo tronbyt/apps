@@ -88,7 +88,7 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(id = "fred_api_key", name = "FRED API Key", desc = "FRED API key for authenticating requests.", icon = "key"),
+            schema.Text(id = "fred_api_key", name = "FRED API Key", desc = "FRED API key for authenticating requests.", icon = "key", secret = True),
             schema.Dropdown(id = "mortgage", name = "Mortgage Type", desc = "Which type of mortgage to track.", icon = "circle", default = mortgage_options[0].value, options = mortgage_options),
         ],
     )

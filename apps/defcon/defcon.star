@@ -1,18 +1,26 @@
 """
 Applet: DefCon
-Summary: Displays DefCon Status
-Description: Displays the estimated DefCon (Defense Condition) alert level for the U.S. The source of this is DefConLevel.com.
+Summary: Displays the estimated DEFCON status
+Description: Displays the unofficial estimated DEFCON (Defense Condition) alert level for the U.S. from DefConLevel.com, or a manually selected level.
 Author: Robert Ison
 """
 
+load("html.star", "html")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-DEF_CON_URL = "https://www.defconlevel.com/current-level.php"
-CACHE_TTL_SECONDS = 259200
-FONT = "6x13"
+DEF_CON_URL = "https://www.defconlevel.com/current-level"
+CACHE_TTL_SECONDS = 12 * 60 * 60
+DEFAULT_LEVEL = "0"
+
+IS_2X = canvas.is2x()
+SCALE = 2 if IS_2X else 1
+FONT = "terminus-32-light" if IS_2X else "6x13"
+INSTRUCTIONS_FONT = "terminus-16" if IS_2X else "5x8"
+
 DEF_CON_COLORS = ["#fff", "#ff0000", "#ffff00", "#00ff00", "#0000ff"]
+VALID_LEVELS = ["1", "2", "3", "4", "5"]
 
 display_options = [
     schema.Option(value = "5", display = "DEFCON 5 - Normal Readiness"),
@@ -20,127 +28,268 @@ display_options = [
     schema.Option(value = "3", display = "DEFCON 3 - High Caution"),
     schema.Option(value = "2", display = "DEFCON 2 - Risk of Impending Attack"),
     schema.Option(value = "1", display = "DEFCON 1 - Maximum Readiness"),
-    schema.Option(value = "0", display = "Actual DEFCON Level"),
+    schema.Option(value = "0", display = "Automatic - Website Estimate"),
 ]
 
+def fail_debug(step, message):
+    fail("DEFCON app error [" + step + "]: " + message)
+
+def normalize_level_text(text):
+    if text == None:
+        fail_debug("parse", "badge text was empty")
+
+    original = str(text)
+    normalized = " ".join(original.upper().split())
+
+    if normalized == "":
+        fail_debug("parse", "badge text was blank")
+
+    if normalized.startswith("DEFCON "):
+        normalized = normalized[len("DEFCON "):].strip()
+
+    if normalized not in VALID_LEVELS:
+        fail_debug("parse", "unexpected badge text: " + original)
+
+    return int(normalized)
+
+def get_defcon_level():
+    res = http.get(
+        url = DEF_CON_URL,
+        ttl_seconds = CACHE_TTL_SECONDS,
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; DefConTidbyt/1.0)",
+            "Accept": "text/html",
+        },
+    )
+
+    if res.status_code != 200:
+        fail_debug(
+            "http",
+            "GET " + DEF_CON_URL + " returned status " + str(res.status_code),
+        )
+
+    body = res.body()
+    if body == None:
+        fail_debug("http", "response body was None")
+
+    body = str(body)
+    if body.strip() == "":
+        fail_debug("http", "response body was empty")
+
+    page = html(body)
+    badge = page.find("span.badge-number")
+    if not badge:
+        fail_debug("html", "selector span.badge-number not found")
+
+    return normalize_level_text(badge.text())
+
+def get_selected_level(config):
+    level = str(config.get("list", DEFAULT_LEVEL)).strip()
+
+    if level == "0":
+        return get_defcon_level()
+
+    if level not in VALID_LEVELS:
+        fail_debug("config", "invalid selected level: " + level)
+
+    return int(level)
+
 def main(config):
-    show_instructions = config.bool("instructions", False)
-    if show_instructions:
+    if config.bool("instructions", False):
         return display_instructions()
 
-    position = config.get("list", display_options[0].value)
+    level = get_selected_level(config)
 
-    if position == "0":
-        res = http.get(url = DEF_CON_URL, ttl_seconds = CACHE_TTL_SECONDS, headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "Accept": "text/html"})
-        if res.status_code != 200:
-            fail("request to %s failed with status code: %d - %s" % (DEF_CON_URL, res.status_code, res.body()))
-
-        text_to_find = "OSINT Defcon Level: "
-        position = res.body().find(text_to_find) + len(text_to_find)
-        position = res.body()[position:position + 1]
-        if position.isdigit():
-            position = int(position)
-    else:
-        position = int(position)
+    width, height = canvas.size()
+    defcon_height = height // 2 - SCALE
 
     return render.Root(
-        render.Column(
+        delay = 1000,
+        child = render.Column(
+            expanded = True,
+            main_align = "space_between",
             children = [
-                render.Row(
-                    children = [
-                        render.Box(width = 64, height = 15, color = "#fff", child = render.Box(width = 64 - 2, height = 15 - 2, color = "#000", child = render.Text("DEFCON", color = "#fff", font = FONT))),
-                    ],
+                render.Box(
+                    width = width,
+                    height = defcon_height,
+                    color = "#fff",
+                    child = render.Box(
+                        width = width - 2 * SCALE,
+                        height = defcon_height - 2 * SCALE,
+                        color = "#000",
+                        child = render.Text(
+                            "DEFCON",
+                            color = "#fff",
+                            font = FONT,
+                        ),
+                    ),
                 ),
-                render.Row(
-                    children = [
-                        render.Box(width = 64, height = 1, color = "#000"),
-                    ],
+                render_defcon_display(
+                    config.bool("animate", True),
+                    level,
                 ),
-                render_defcon_display(config.bool("animate", True), position),
             ],
         ),
-        delay = 1000,
     )
 
-def render_defcon_display(animate, position):
-    if animate:
-        return render.Animation(children = get_defcon_display(position))
-    else:
-        return render.Stack(children = get_defcon_display(position))
+def render_defcon_display(animate, level):
+    if str(level) not in VALID_LEVELS:
+        fail_debug("render", "invalid render level: " + str(level))
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
-        pad = (left, top, right, bottom),
-        child = element,
+    level = int(level)
+    width = (canvas.width() // 5) - (1 if IS_2X else 0)
+    height = canvas.height() // 2
+
+    # Static mode builds only the five boxes it needs.
+    if not animate:
+        return render_defcon_row(level, width, height)
+
+    return render.Animation(
+        children = get_defcon_animation(level, width, height),
     )
-    return padded_element
 
-def get_defcon_display(position):
-    children = []
+def render_box(level, width, height, color):
+    return render.Box(
+        width = width,
+        height = height,
+        color = color,
+        child = render.Box(
+            width = width - 2 * SCALE,
+            height = height - 2 * SCALE,
+            color = "#000",
+            child = render.Padding(
+                pad = (0 if IS_2X else 1, 0, 0, 0),
+                child = render.Text(
+                    str(level),
+                    color = color,
+                    font = FONT,
+                ),
+            ),
+        ),
+    )
 
-    #add grey outlines of the 5 conditions
-    temp_group_of_children = []
+def render_defcon_row(level, width, height, grey_boxes = None):
+    boxes = []
+
     for i in range(5):
-        color = "#333"
-        temp_group_of_children.insert(len(children), add_padding_to_child_element(render.Box(width = 12, height = 16, color = color, child = render.Box(width = 12 - 2, height = 16 - 2, color = "#000", child = add_padding_to_child_element(render.Text(str(i + 1), color = color, font = FONT), 1))), i * 13))
+        if i + 1 == level:
+            boxes.append(
+                render_box(i + 1, width, height, DEF_CON_COLORS[i]),
+            )
+        elif grey_boxes != None:
+            boxes.append(grey_boxes[i])
+        else:
+            boxes.append(
+                render_box(i + 1, width, height, "#333"),
+            )
 
-    grey_box = render.Stack(temp_group_of_children)
-    children.insert(len(children), grey_box)
+    return render.Row(
+        expanded = True,
+        main_align = "space_between",
+        children = boxes,
+    )
 
-    color_box = None
+def get_defcon_animation(level, width, height):
+    grey_boxes = [
+        render_box(i + 1, width, height, "#333")
+        for i in range(5)
+    ]
 
-    # Flash each condition until the current condition
-    for i in range(4, -1, -1):
-        temp_group_of_children = []
-        color = "#333"
-        if (i + 1 >= position):
-            color = DEF_CON_COLORS[i]
-            temp_group_of_children.insert(len(children), grey_box)
-            temp_group_of_children.insert(len(children), add_padding_to_child_element(render.Box(width = 12, height = 16, color = color, child = render.Box(width = 12 - 2, height = 16 - 2, color = "#000", child = add_padding_to_child_element(render.Text(str(i + 1), color = color, font = FONT), 1))), i * 13))
-            color_box = render.Stack(temp_group_of_children)
-            children.insert(len(children), color_box)
+    grey_row = render.Row(
+        expanded = True,
+        main_align = "space_between",
+        children = grey_boxes,
+    )
 
-    # flash current
+    frames = [grey_row]
+    selected_row = None
+
+    # Highlight one level at a time, from 5 to the selected level.
+    for current_level in range(5, level - 1, -1):
+        selected_row = render_defcon_row(
+            current_level,
+            width,
+            height,
+            grey_boxes,
+        )
+        frames.append(selected_row)
+
+    # Blink the selected level three times.
     for _ in range(3):
-        children.insert(len(children), grey_box)
-        children.insert(len(children), color_box)
+        frames.append(grey_row)
+        frames.append(selected_row)
 
-    # hold on current a while longer
+    # Hold the selected level.
     for _ in range(3):
-        children.insert(len(children), color_box)
+        frames.append(selected_row)
 
-    return children
+    return frames
 
 def display_instructions():
-    ##############################################################################################################################################################################################################################
-    instructions_1 = "For security reasons, the U.S. military does not release the current DEFCON level. "
-    instructions_2 = "The source for this app is defconlevel.com which uses Open Source Intelligence to estimate the DEFCON level.  Default is to use the actual estimated DefCon level, but you can pick a level if you want. "
-    instructions_3 = "Defcon level 5 is the lowest alert level. The highest level reached was level 2 during the Cuban Missle Crisis. This display is based on the movie War Games (1983)."
+    width = canvas.width()
+
+    instructions_1 = (
+        "This app does not display an official U.S. military DEFCON level. "
+    )
+    instructions_2 = (
+        "The source is defconlevel.com, which uses open-source intelligence " +
+        "to estimate the DEFCON level. Automatic mode is the default, " +
+        "and the website response is cached for 12 hours. " +
+        "You can also select a level manually. "
+    )
+    instructions_3 = (
+        "DEFCON 5 is the lowest alert level; DEFCON 1 is the highest. " +
+        "This display is based on the movie WarGames (1983)."
+    )
+
+    text_1 = render.Text(
+        instructions_1,
+        color = DEF_CON_COLORS[1],
+        font = INSTRUCTIONS_FONT,
+    )
+    text_2 = render.Text(
+        instructions_2,
+        color = DEF_CON_COLORS[2],
+        font = INSTRUCTIONS_FONT,
+    )
+    text_3 = render.Text(
+        instructions_3,
+        color = DEF_CON_COLORS[3],
+        font = INSTRUCTIONS_FONT,
+    )
+
+    text_1_width, _ = text_1.size()
+    text_2_width, _ = text_2.size()
+
     return render.Root(
-        render.Column(
+        child = render.Column(
             children = [
                 render.Marquee(
-                    width = 64,
-                    child = render.Text("DEFCON", color = DEF_CON_COLORS[0], font = "5x8"),
+                    width = width,
+                    child = render.Text(
+                        "DEFCON",
+                        color = DEF_CON_COLORS[0],
+                        font = INSTRUCTIONS_FONT,
+                    ),
                 ),
                 render.Marquee(
-                    width = 64,
-                    child = render.Text(instructions_1, color = DEF_CON_COLORS[1]),
+                    width = width,
+                    child = text_1,
                 ),
                 render.Marquee(
-                    offset_start = len(instructions_1) * 5,
-                    width = 64,
-                    child = render.Text(instructions_2, color = DEF_CON_COLORS[2]),
+                    offset_start = text_1_width,
+                    width = width,
+                    child = text_2,
                 ),
                 render.Marquee(
-                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
-                    width = 64,
-                    child = render.Text(instructions_3, color = DEF_CON_COLORS[3]),
+                    offset_start = text_1_width + text_2_width,
+                    width = width,
+                    child = text_3,
                 ),
             ],
         ),
         show_full_animation = True,
-        delay = 45,
+        delay = 25 if IS_2X else 45,
     )
 
 def get_schema():
@@ -149,24 +298,27 @@ def get_schema():
         fields = [
             schema.Dropdown(
                 id = "list",
-                name = "Defcon List",
-                desc = "Defcon Level",
+                name = "DEFCON Level",
+                desc = "Use the website estimate or select a level manually.",
                 icon = "list",
-                default = display_options[0].value,
+                default = DEFAULT_LEVEL,
                 options = display_options,
             ),
             schema.Toggle(
                 id = "animate",
                 name = "Animate Display",
-                desc = "Do you want to see the display go from 5 to the current level or simply have a static display of the current level?",
-                icon = "play",  #"info",
+                desc = (
+                    "Count down from DEFCON 5 to the selected level " +
+                    "and blink, or show a static display."
+                ),
+                icon = "play",
                 default = True,
             ),
             schema.Toggle(
                 id = "instructions",
                 name = "Display Instructions",
-                desc = "",
-                icon = "book",  #"info",
+                desc = "Show information about the source and display.",
+                icon = "book",
                 default = False,
             ),
         ],

@@ -5,11 +5,14 @@ Description: Display time of the next buses for any Pittsburgh PRT bus stop.
 Author: ckingsford
 """
 
-load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("images/bus_in_icon.png", BUS_IN_ICON_ASSET = "file")
+load("images/bus_out_icon.png", BUS_OUT_ICON_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
+
+BUS_IN_ICON = BUS_IN_ICON_ASSET.readall()
+BUS_OUT_ICON = BUS_OUT_ICON_ASSET.readall()
 
 # Set to true to work on this locally; should be False for deployment.
 LOCAL_DEV = False
@@ -21,34 +24,6 @@ TIMES_TTL_SECONDS = 15
 
 # use a long TTL for the stop name since they change very rarely
 STOP_NAME_TTL_SECONDS = 600
-
-BUS_OUT_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABEAAAAHCAYAAADu4qZ8AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAg
-IQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAUGVYSWZNTQAqAAAACAACARIAAwAAAAEAAQAAh2kABA
-AAAAEAAAAmAAAAAAADoAEAAwAAAAEAAQAAoAIABAAAAAEAAAARoAMABAAAAAEAAAAHAAAAAHPu3z0AAAIvaVR
-YdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4Onht
-cHRrPSJYTVAgQ29yZSA2LjAuMCI+CiAgIDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvM
-Tk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+CiAgICAgIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiCi
-AgICAgICAgICAgIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIgogICAgICAgICA
-gICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDxleGlmOlBp
-eGVsWURpbWVuc2lvbj43PC9leGlmOlBpeGVsWURpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZ
-W5zaW9uPjE3PC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6Q29sb3JTcGFjZT4xPC9leG
-lmOkNvbG9yU3BhY2U+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiA
-gICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqD0JU7AAAAgUlEQVQY
-GWNsKCv7H9bXx0ARuMbC8j80cTUYk8NmmXvlPxNFLoBqZgTZfomREczV+/+fgVS23swLDGBDQCacnjQJai4Dg
-2leHpyNzsCmjkXrzx/GNCam/9ZA1QeOHmVwsLZmmPDvH7peOB+bOhaQ7Kx//xiBkv9BBsD4YAYWAps6AKC9Xl
-1Gw1UZAAAAAElFTkSuQmCC
-""")
-
-BUS_IN_ICON = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAABEAAAAHCAYAAADu4qZ8AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAY
-dpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEaADAAQAAAABAAAABwAAAABhM/EjAAAA
-fElEQVQYGWO8xsLyn4ECsKqoiIGBZe6V/yCDQhNXgzE5bCYKHAHXyghyyaV0A4ZLjIxgQb3//0lmM8LC5PSkSX
-CTTfPy4Gx0BjZ1LBP+/QOrswaSB44eZXCwtmaAiaEbAOKjq5v17x8jC4iASv4HGQACMDEwB40AqsBQBwBXhV/r
-O8Ek+wAAAABJRU5ErkJggg==
-""")
-
-DEV_API_KEY_ENCRYPTED = """AV6+xWcE61BPCHQ3V1S5Q9FlIz6KKPA2NhR45JUTWFDz/7f0UANHaBYMxsdJuCsFY88/CopT2XkKZzA7BBOjhjn6b/oH7G6Sbe3qSxPGc+dG9FG4z4AS5u+6qjzFmNJe3+LGFD0IZO4tAgv8Uob6TzbECuD4Ffg6DBgvfyOWMw=="""
 
 PRT_API_URL = "http://realtime.portauthority.org/bustime/api/v3/"
 PTR_RT_LIMIT_URL = "&rt={rtlimit}"
@@ -359,7 +334,7 @@ def main(config):
     line_pattern = ensure_valid_route_pattern(config.get("line_pattern"))
 
     # Decrypt the API key.
-    api_key = secret.decrypt(DEV_API_KEY_ENCRYPTED) or config.get("dev_api_key")
+    api_key = config.get("api_key")
 
     # Gather the data from the web.
     lines_times, stop_name, inbound = get_times(stop_number, line_pattern, api_key)
@@ -374,6 +349,13 @@ def get_schema():
     """
     fields = [
         schema.Text(
+            id = "api_key",
+            name = "PRT API Key",
+            desc = "Your Port Authority of Allegheny County (PRT) API key. See http://realtime.portauthority.org/bustime/api/v3/ for details.",
+            icon = "key",
+            secret = True,
+        ),
+        schema.Text(
             id = "stop_number",
             name = "Stop Number",
             desc = "Stop number to display",
@@ -386,16 +368,6 @@ def get_schema():
             icon = "bus",
         ),
     ]
-
-    if LOCAL_DEV:
-        fields.append(
-            schema.Text(
-                id = "dev_api_key",
-                name = "PRT API Key",
-                desc = "For local debugging",
-                icon = "key",
-            ),
-        )
 
     return schema.Schema(
         version = "1",

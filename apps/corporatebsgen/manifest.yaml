@@ -6,4 +6,10 @@ desc: Your go-to generator for top-tier corporate mumbo-jumbo. Need to sound imp
 author: Ryan Taylor
 fileName: corporate_bs_gen.star
 packageName: corporatebsgen
-recommended_interval: 5
+recommendedInterval: 5
+category: entertainment
+tags:
+  - finance
+  - productivity
+published: '2023-09-05T17:58:20Z'
+updated: '2025-11-29T23:55:39Z'

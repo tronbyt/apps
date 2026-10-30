@@ -6,4 +6,11 @@ desc: Generates random color and corresponding hex code.
 author: M0ntyP
 fileName: random_colors.star
 packageName: randomcolors
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - art
+  - utility
+published: '2023-01-03T14:42:07Z'
+updated: '2026-10-01T19:27:54Z'

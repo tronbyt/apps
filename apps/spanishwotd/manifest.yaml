@@ -6,4 +6,11 @@ desc: Displays the Spanish Word of the Day from SpanishDict.com.
 author: logancornelius
 fileName: spanish_wotd.star
 packageName: spanishwotd
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: education
+tags:
+  - education
+  - language-learning
+published: '2023-02-02T21:29:18Z'
+updated: '2026-10-01T19:16:27Z'

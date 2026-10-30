@@ -165,6 +165,7 @@ def get_schema():
                 name = "Finnhub API Key",
                 desc = "API key for Finnhub (available from https://finnhub.io)",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "stock1",

@@ -4,4 +4,14 @@ name: On Air
 summary: Displays On Air Sign
 desc: ' Displays ''On Air'' Sign that you turn on or off.'
 author: Robert Ison
-recommended_interval: 5
+recommendedInterval: 5
+fileName: on_air.star
+packageName: onair
+supports64x64: true
+category: utilities
+tags:
+  - utility
+  - tracking
+  - notification
+published: '2024-10-07T16:18:04Z'
+updated: '2026-10-01T19:27:54Z'

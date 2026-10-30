@@ -5,17 +5,20 @@ Description: This app shows your Letterboxd movie watching progress. It gets you
 Author: caropinzonsilva
 """
 
-load("encoding/base64.star", "base64")
 load("html.star", "html")
 load("http.star", "http")
+load("images/film_icon.png", FILM_ICON_ASSET = "file")
+load("images/half_star_icon.png", HALF_STAR_ICON_ASSET = "file")
+load("images/movie_icon.png", MOVIE_ICON_ASSET = "file")
+load("images/star_icon.png", STAR_ICON_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 
-MOVIE_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAA8AAAAUCAYAAABSx2cSAAAAAXNSR0IArs4c6QAAARRJREFUOE9jZCAN/IcqZwTRYAIP+P///38GRkaIMiQ2Ts0oGrBpglkGMgHsFGQbkPh4XQbXTEjDh2tL/gtoxaAYhk0ziv8+XFvCwHnhEsN3Az0GAa0YFH9jdTbIC7+Wl4M1wDTya0YzfLy+FGwwSIw9qouRUV9f/7+AgBBKgG+cngxWwBbZCdYAYoMAyDBkQzA0Hziwj+iYB2sGqV68eDGDrq4uWOM/Kycwvb9/Hph2LEzCyodrBsnCnL/vF8RykjTDDMClmekYxEswl6E4GyQBcjpMEl0xTs3IoXSOCxL6tNWMLV7+WjqCY4CgzVTRDMqHjNCMS5LNII2gZIica0AGMB/fzwiSwxb6IDmM/Iot6+FKrwBGp8SgTDL4MgAAAABJRU5ErkJggg==""")
-FILM_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAEAAAAAKCAYAAAAEqljUAAAAAXNSR0IArs4c6QAAAEBJREFUSEvtlkEOACAIw7r/P7pGE32EjAvhyrpBABlcUU2CysSeErClh6f+dcOl4ff5WKALKAGDLdAQ7Bmc/QgtuOqWBK/4CgUAAAAASUVORK5CYII=""")
-STAR_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAcAAAAICAYAAAA1BOUGAAAAAXNSR0IArs4c6QAAADhJREFUGFdjZMADGJHl/h/i+89o9wkuBmeAJGAKYQoYkQXRbQDrxKYApBu/scg6QaphpqDoxOYjAB0mGteXY+uuAAAAAElFTkSuQmCC""")
-HALF_STAR_ICON = base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAAcAAAAICAYAAAA1BOUGAAAAAXNSR0IArs4c6QAAADNJREFUGFdjZMADGJHl/h/i+89o9wkuBmeAJEAKUSRhgjATMHQiKyDeWJBx2OwD24/PKwAysRgJ69VfnQAAAABJRU5ErkJggg==""")
+FILM_ICON = FILM_ICON_ASSET.readall()
+HALF_STAR_ICON = HALF_STAR_ICON_ASSET.readall()
+MOVIE_ICON = MOVIE_ICON_ASSET.readall()
+STAR_ICON = STAR_ICON_ASSET.readall()
 
 # Schema definition for the app's configuration
 def get_schema():

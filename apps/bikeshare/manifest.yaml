@@ -6,4 +6,11 @@ desc: Shows bike and parking availability for user selected bikeshare locations.
 author: snorremd
 fileName: bikeshare.star
 packageName: bikeshare
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags:
+  - utility
+  - local
+published: '2022-08-18T20:04:37Z'
+updated: '2026-10-01T19:49:38Z'

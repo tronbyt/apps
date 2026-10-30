@@ -30,9 +30,12 @@ Author: Alan Fleming
 # See comments in the code for further attribution
 #
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
-load("render.star", "render")
+load("images/sunriseimage.png", SUNRISEIMAGE_ASSET = "file")
+load("images/sunriseimage@2x.png", SUNRISEIMAGE_2X_ASSET = "file")
+load("images/sunsetimage.png", SUNSETIMAGE_ASSET = "file")
+load("images/sunsetimage@2x.png", SUNSETIMAGE_2X_ASSET = "file")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
@@ -51,10 +54,19 @@ DEFAULT_24_HOUR = False
 DEFAULT_ITEMS_TO_DISPLAY = "both"
 
 # Images
-sunriseImage = """iVBORw0KGgoAAAANSUhEUgAAAB0AAAAOCAYAAADT0Rc6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAHaADAAQAAAABAAAADgAAAAD5O/sDAAAA8klEQVQ4Eb1UMQoCMRDMiWBlJdcKVoK1jfgjH+RnrrKQa6xtBVvRxgdEJjrLZkmOHHqmSXYzs5PZ5M65gYa/bX2u9DjaaHwAtstHlE4Fm/ms0nmIVPUxyuX2R3qjdG0FwYMg3fnDxLvzyUlsDvQ+WaHDlJg9aBBEcrWWLduBbDuE0WOREiRdC/e+05RbthEtzQ1iIB6L5hgq317v4bFpcboQpwrPJTGIf9peFBThzjv9PCIQSj4V4LRLxBxoIRxp4RCb10v81zPvjIW6YmnvYv/M/kFYCPNlNw2cUrzmar7NDx6LU6uknZS6S+GYs/X/Hr8A8WR14FqWMJkAAAAASUVORK5CYII="""
-sunsetImage = """iVBORw0KGgoAAAANSUhEUgAAAB0AAAAOCAYAAADT0Rc6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAHaADAAQAAAABAAAADgAAAAD5O/sDAAAAyElEQVQ4EWNgGADASAs7582b9x/Z3KSkJBR7UDjICqnBRrYc2WImahiOywxki5DV4LX0/2trlGBC1kgMG9mnyOpZkDkgSxhFj+IMckLyMLPQLcPlY5h6BpjvQDQMgyRh4nCFFDCw+gpuwbUzDAxaJmDj8YUAqfZjWIpiIcw0KlsMt/T/Qfb/DNd/wqzBTWuyMzDa/4Trw60QtwxYs+K0zySn0vtZvHj14pKHieN2Eo1kcAYTzPcwl8H4+NwBUouuDqYfnz66yAEAg+FU6JspIAwAAAAASUVORK5CYII="""
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, but it is a 2x panel and already uses the 2x artwork.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
+    scale = 2 if canvas.is2x() else 1
+
     # Get longditude and latitude from location
     location = json.decode(config.get("location", DEFAULT_LOCATION))
     lat = float(location["lat"])
@@ -87,20 +99,24 @@ def main(config):
 
     if itemsToDisplay == "both":
         top = render.Padding(
-            pad = (0, 2, 0, 0),
+            pad = (0, 2 * scale, 0, 0),
             child = render.Row(
                 expanded = True,
                 main_align = "start",
                 cross_align = "center",
                 children = [
-                    render.Image(src = base64.decode(sunriseImage)),
+                    render.Image(
+                        src = (SUNRISEIMAGE_2X_ASSET if scale == 2 else SUNRISEIMAGE_ASSET).readall(),
+                        width = 29 * scale,
+                        height = 14 * scale,
+                    ),
                     render.Text(sunriseText),
                 ],
             ),
         )
         middle = render.Box(
-            width = 64,
-            height = 1,
+            width = canvas.width(),
+            height = 1 * scale,
             color = "#a00",
         )
 
@@ -109,7 +125,11 @@ def main(config):
             main_align = "start",
             cross_align = "center",
             children = [
-                render.Image(src = base64.decode(sunsetImage)),
+                render.Image(
+                    src = (SUNSETIMAGE_2X_ASSET if scale == 2 else SUNSETIMAGE_ASSET).readall(),
+                    width = 29 * scale,
+                    height = 14 * scale,
+                ),
                 render.Text(sunsetText),
             ],
         )
@@ -118,15 +138,15 @@ def main(config):
         if itemsToDisplay == "sunrise":
             title = "Sunrise"
             text = sunriseText
-            image = sunriseImage
+            image = (SUNRISEIMAGE_2X_ASSET if scale == 2 else SUNRISEIMAGE_ASSET).readall()
 
         else:
             title = "Sunset"
             text = sunsetText
-            image = sunsetImage
+            image = (SUNSETIMAGE_2X_ASSET if scale == 2 else SUNSETIMAGE_ASSET).readall()
 
         top = render.Padding(
-            pad = (0, 2, 0, 4),
+            pad = (0, 2 * scale, 0, 4 * scale),
             child = render.Row(
                 expanded = True,
                 main_align = "center",
@@ -143,9 +163,27 @@ def main(config):
             main_align = "start",
             cross_align = "center",
             children = [
-                render.Image(src = base64.decode(image)),
+                render.Image(src = image),
                 render.Text(text),
             ],
+        )
+
+    # A square panel is 64 wide like 1x, so it keeps the 1x artwork -- the 2x
+    # sun is 58px wide and would leave six pixels for the time beside it. What
+    # it has is twice the rows, and the three blocks here total 29 of them, so
+    # on square they are spread down the panel instead of stacked against the
+    # top edge above a black half.
+    if is_square():
+        return render.Root(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                children = [
+                    top,
+                    middle,
+                    bottom,
+                ],
+            ),
         )
 
     return render.Root(

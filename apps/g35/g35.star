@@ -6,7 +6,7 @@ Author: samdotdesign
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 MTA_API_URL = "https://mta-api-ochre.vercel.app/by-id/G35"
@@ -31,7 +31,8 @@ def main():
     southbound = get_next_trains(station_data.get("S", []), 3)
 
     return render.Root(
-        child = render.Column(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             expanded = True,
             main_align = "space_between",
             cross_align = "start",
@@ -47,7 +48,7 @@ def main():
                 ),
                 render_api_status(None),
             ],
-        ),
+        ))),
     )
 
 def validate_data(data):
@@ -65,7 +66,8 @@ def validate_data(data):
 
 def render_error(message):
     return render.Root(
-        child = render.WrappedText(message, color = "#FF0000"),
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(message, color = "#FF0000")),
     )
 
 def render_api_status(error):

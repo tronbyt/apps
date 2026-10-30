@@ -6,4 +6,11 @@ desc: Shows baseball scores for the Minor Leagues.
 author: M0ntyP
 fileName: milb_scores.star
 packageName: milbscores
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - mlb
+  - baseball
+published: '2023-08-23T14:16:14Z'
+updated: '2026-10-01T21:54:45Z'

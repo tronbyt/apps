@@ -6,4 +6,9 @@ desc: Renders a tartan based on thread count instructions and displays it on scr
 author: dinosaursrarr
 fileName: tartan.star
 packageName: tartan
-recommended_interval: 5
+recommendedInterval: 5
+category: art
+tags:
+  - art
+published: '2022-06-09T17:22:53Z'
+updated: '2025-12-02T19:30:22Z'

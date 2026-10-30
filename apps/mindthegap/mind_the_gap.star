@@ -5,7 +5,7 @@ Description: Important advice for Londoners to remember at all times.
 Author: dinosaursrarr
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 YELLOW = "#fc0"
@@ -15,6 +15,11 @@ WHITE = "#fff"
 MESSAGE = "MIND THE GAP"
 TOAST_MESSAGE = "MIND THE    GAP"
 
+# The platform under the sign fills the rest of the panel. On a 64x32 panel
+# it was 20 rows and clipped by the panel, left as it was; on a square panel
+# it is the 42 rows the sign leaves.
+PLATFORM_HEIGHT = 20 if canvas.height() <= 32 else canvas.height() - 22
+
 def main(config):
     if config.bool("toast", False):
         message = TOAST_MESSAGE
@@ -23,7 +28,7 @@ def main(config):
 
     return render.Root(
         child = render.Box(
-            height = 32,
+            height = canvas.height(),
             width = 64,
             child = render.Column(
                 cross_align = "center",
@@ -53,7 +58,7 @@ def main(config):
                         color = YELLOW,
                     ),
                     render.Box(
-                        height = 20,
+                        height = PLATFORM_HEIGHT,
                         width = 64,
                         color = GREY,
                     ),

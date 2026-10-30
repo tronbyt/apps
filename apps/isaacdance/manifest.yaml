@@ -6,4 +6,12 @@ desc: This app presents the character Isaac from the franchise The Binding of Is
 author: Dylan Nashawaty
 fileName: isaac_dance.star
 packageName: isaacdance
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - retro
+  - gaming
+  - art
+published: '2024-03-07T21:34:27Z'
+updated: '2026-10-01T21:37:10Z'

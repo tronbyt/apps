@@ -12,8 +12,8 @@ load("encoding/json.star", "json")
 load("html.star", "html")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
-load("secret.star", "secret")
+load("render.star", "canvas", "render")
+load("schema.star", "schema")
 
 # Root url for the Moby Games API
 MOBY_GAMES_API_ROOT_URL = "https://api.mobygames.com/v1/"
@@ -21,9 +21,6 @@ MOBY_GAMES_API_ROOT_URL = "https://api.mobygames.com/v1/"
 # Random games API endpoint
 # See docs here: https://www.mobygames.com/info/api/#gamesrandom
 RANDOM_GAMES_API = MOBY_GAMES_API_ROOT_URL + "games/random?api_key={api_key}&limit=100&format=normal"
-
-# Encrypted API key for the Moby Games API, with the app id moby-games
-API_KEY_ENCRYPTED = "AV6+xWcEc6rPe1wSqCqAHZkWBJ4GSzaFNCqdo40f93LRwkKpGiZbRiUWNjvw/TlvYM0VvaAYmj/Adz1DPRZpxzfkT+rp4hZ0kv14oN56eXOH0v2vhCOos3bSQcSwl9C7Xr7UtLcfElIGR7piA/dXbEq31YTylXd9jDPvdUk/kw4KGlmlmSA="
 
 # MobyGames API requests are limited to 360 per hour, or one every 10 seconds
 # We can retrieve up to 100 games per request, and we cache the results for 1 hour,
@@ -159,7 +156,54 @@ def render_output(title, moby_score, description, first_platform_name, first_pla
     # Construct the output
     # That should be a row with two columns, where the left column is the thumbnail image, and the right column is the game title
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render.Column(
+                    children = [image_content],
+                ),
+                render.Column(
+                    children = [
+                        # Inside of a colored box, display the title and moby score in a marquee, like so: "Title (7.8)"
+                        render.Box(
+                            width = 40,
+                            height = 8,
+                            color = "#540007",
+                            child = render.Marquee(
+                                width = 40,
+                                child = render.Text(
+                                    font = "tb-8",
+                                    content = title + " (" + moby_score + ")",
+                                ),
+                            ),
+                        ),
+                        # Display the description in a vertical scrolling marquee
+                        render.Marquee(
+                            height = 19,
+                            scroll_direction = "vertical",
+                            child = render.WrappedText(
+                                font = "CG-pixel-4x5-mono",
+                                width = 40,
+                                content = description,
+                            ),
+                        ),
+                        # Inside of a colored box, display the first platform and release date in a scrolling marquee, like so: "Platform (YYYY-MM-DD)"
+                        render.Box(
+                            width = 40,
+                            height = 5,
+                            color = "#540007",
+                            child = render.Marquee(
+                                width = 40,
+                                child = render.Text(
+                                    font = "CG-pixel-4x5-mono",
+                                    content = first_platform_name + " " + first_platform_release_date,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render.Column(
                     children = [image_content],
@@ -211,6 +255,15 @@ def render_output(title, moby_score, description, first_platform_name, first_pla
 ### -------------------------------------------------- ###
 ###                  Main Applet Logic                 ###
 ### -------------------------------------------------- ###
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     """Main function, invoked by the Pixlet runtime
 
@@ -234,7 +287,7 @@ def main(config):
     bypass_cache = config.get("bypass_cache") != None and config.get("bypass_cache").lower() == "true"
 
     # Decrypt the hardcoded API key, or use the api_key config parameter if running locally
-    api_key = secret.decrypt(API_KEY_ENCRYPTED)
+    api_key = config.get("api_key")
     if api_key == None:
         debug_print(debug, "[Config] Unable to decrypt API key, falling back to api_key config parameter")
         api_key = config.get("api_key")
@@ -300,4 +353,18 @@ def main(config):
         first_platform_name = game_for_render["platform_name"],
         first_platform_release_date = game_for_render["first_release_date"],
         image_content = game_for_render["image_content"],
+    )
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "api_key",
+                name = "MobyGames API Key",
+                desc = "A MobyGames API key to access the MobyGames API.",
+                icon = "key",
+                secret = True,
+            ),
+        ],
     )

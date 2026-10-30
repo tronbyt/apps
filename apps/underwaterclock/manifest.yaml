@@ -6,4 +6,11 @@ desc: Displays the current time in an underwater scene that changes with the tim
 author: asea-aranion
 fileName: underwater_clock.star
 packageName: underwaterclock
-recommended_interval: 0
+recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - art
+  - clock
+published: '2024-03-30T12:32:21Z'
+updated: '2025-12-02T19:30:22Z'

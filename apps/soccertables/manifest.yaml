@@ -6,4 +6,10 @@ desc: Displays league tables from soccer leagues, showing team abbreviation, rec
 author: M0ntyP
 fileName: soccer_tables.star
 packageName: soccertables
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - soccer
+published: '2023-01-12T16:57:44Z'
+updated: '2026-10-01T15:26:52Z'

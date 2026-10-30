@@ -5,13 +5,17 @@ Description: Daily, monthly, annual and lifetime energy production and consumpti
 Author: ckyr (credit to ingmarstein for solaredge app)
 """
 
-load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
+load("images/plug_sum.gif", PLUG_SUM_ASSET = "file")
+load("images/sun_sum.png", SUN_SUM_ASSET = "file")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
+
+PLUG_SUM = PLUG_SUM_ASSET.readall()
+SUN_SUM = SUN_SUM_ASSET.readall()
 
 URL_ENERGY = "https://monitoringapi.solaredge.com/site/{}/energyDetails"
 URL_SITE = "https://monitoringapi.solaredge.com/site/{}/details"
@@ -25,99 +29,43 @@ RED = "#AA0000"
 GREEN = "#00FF00"
 WHITE = "#FFFFFF"
 
-# Icons
-SUN_SUM = base64.decode("""
-iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAJZlWElmTU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgExAAIAAAARAAAAWodpAAQAAAABAAAAbAAAAAAAAABIAAAAAQAAAEgAAAABd3d3Lmlua3NjYXBlLm9yZwAAAAOgAQADAAAAAQABAACgAgAEAAAAAQAAAAqgAwAEAAAAAQAAAAoAAAAAFL8o+gAAAAlwSFlzAAALEwAACxMBAJqcGAAAAi1pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+d3d3Lmlua3NjYXBlLm9yZzwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8dGlmZjpZUmVzb2x1dGlvbj43MjwvdGlmZjpZUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+NzI8L3RpZmY6WFJlc29sdXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgp0/eNQAAABK0lEQVQYGU2QvUpDQRCFz+xujJCACKKgFoKdjyAEa30AYyX+pIqgtfaCT2CV2ElQe7E26WMj2JqAYKGF5N549+7uuJNIyIEtZvg45+yAGYQppe3qmbypFYQxRODhc7UWmD9KW/ePXumu4cACJp3qtgJWiO4aRhYCsaIl93p8FMcDjh72Zf8hDPLcMd6FmcQKpOdmmsg8IH5Fgu3/nBc3W1cjMG3vncb4bmG+dKlndcUPnQWRQpYbm9qeIlP3wa3FCiM+9v0XSQoT5z7yQPSPYp5E81vtEOXCDZIcfmChywb2K4vRt+No4ZPO7o4KarGwUDI+tRc+c0YTrtnztwP1ypXW0zg60DIp/jQbzYb7tSeKVF0+IZCmsCpmRo4pd5JBpKHX4f2osjjJTpg/YduKRIzK4+cAAAAASUVORK5CYII=
-""")
-
-PLUG_SUM = base64.decode("""
-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
-""")
-
 def get_time_zone(site_id, api_key):
     """Get the timezone for the site."""
     url = URL_SITE.format(site_id)
     rep = http.get(url, params = {"api_key": api_key}, ttl_seconds = CACHE_TTL)
     default_tz = "Etc/UTC"
-    
+
     if rep.status_code == 200:
         data = json.decode(rep.body())
         if "details" in data and "location" in data["details"] and "timeZone" in data["details"]["location"]:
             default_tz = data["details"]["location"]["timeZone"]
-    
+
     return default_tz
 
-def get_energy_for_period(site_id, api_key, tz, time_unit):
-    """Get production and consumption energy for a time period."""
-    now = time.now().in_location(tz)
-    
-    if time_unit == "DAY":
-        start_string = humanize.time_format("yyyy-MM-dd 00:00:00", now)
-    elif time_unit == "MONTH":
-        start_string = humanize.time_format("yyyy-MM-01 00:00:00", now)
-    elif time_unit == "YEAR":
-        start_string = humanize.time_format("yyyy-01-01 00:00:00", now)
-    else:
-        return None, None
-    
-    now_string = humanize.time_format("yyyy-MM-dd HH:mm:ss", now)
-    
+def _fetch_and_process_energy(site_id, api_key, start_string, end_string, time_unit, log_prefix):
+    """Helper to fetch and process energy data."""
+    print("Requesting {} data from {} to {}".format(log_prefix, start_string, end_string))
+
     rep = http.get(
         URL_ENERGY.format(site_id),
         params = {
             "api_key": api_key,
             "startTime": start_string,
-            "endTime": now_string,
+            "endTime": end_string,
             "timeUnit": time_unit,
         },
         ttl_seconds = CACHE_TTL,
     )
-    
-    if rep.status_code != 200:
-        print("API error:", rep.status_code)
-        return None, None
-    
-    data = rep.json()["energyDetails"]
-    consumption = 0
-    production = 0
-    
-    for meter in data["meters"]:
-        if meter["type"] == "Consumption":
-            for value in meter["values"]:
-                consumption += value["value"]
-        elif meter["type"] == "Production":
-            for value in meter["values"]:
-                production += value["value"]
-    
-    return production, consumption
 
-def get_lifetime_energy(site_id, api_key, tz):
-    """Get lifetime production energy using energyDetails API."""
-    # Get installation date or use a very early date
-    now = time.now().in_location(tz)
-    start_string = "2000-01-01 00:00:00"  # Use early date to capture all history
-    now_string = humanize.time_format("yyyy-MM-dd HH:mm:ss", now)
-    
-    rep = http.get(
-        URL_ENERGY.format(site_id),
-        params = {
-            "api_key": api_key,
-            "startTime": start_string,
-            "endTime": now_string,
-            "timeUnit": "YEAR",
-        },
-        ttl_seconds = CACHE_TTL,
-    )
-    
     if rep.status_code != 200:
-        print("Lifetime API error:", rep.status_code, rep.body())
-        return None, None
-    
+        error_msg = "{} API error {}: {}".format(log_prefix, rep.status_code, rep.body())
+        print(error_msg)
+        return None, None, error_msg
+
     data = rep.json()["energyDetails"]
     consumption = 0
     production = 0
-    
-    # Sum all years
+
     for meter in data["meters"]:
         if meter["type"] == "Consumption":
             for value in meter["values"]:
@@ -127,11 +75,88 @@ def get_lifetime_energy(site_id, api_key, tz):
             for value in meter["values"]:
                 if value.get("value"):
                     production += value["value"]
-    
-    return production, consumption
+
+    return production, consumption, None
+
+def get_energy_for_period(site_id, api_key, tz, time_unit):
+    """Get production and consumption energy for a time period."""
+    now = time.now().in_location(tz)
+
+    day, month = now.day, now.month
+    if time_unit == "DAY":
+        pass
+    elif time_unit == "MONTH":
+        day = 1
+    elif time_unit == "YEAR":
+        day = 1
+        month = 1
+    else:
+        return None, None, "Invalid time unit"
+
+    start_time = time.time(
+        year = now.year,
+        month = month,
+        day = day,
+        hour = 0,
+        minute = 0,
+        second = 0,
+        location = tz,
+    )
+
+    # Format dates as YYYY-MM-DD HH:MM:SS
+    start_string = start_time.format("2006-01-02 15:04:05")
+    now_string = now.format("2006-01-02 15:04:05")
+
+    return _fetch_and_process_energy(site_id, api_key, start_string, now_string, time_unit, time_unit)
+
+def get_weekly_energy(site_id, api_key, tz):
+    """Get production and consumption energy for the last 7 days."""
+    now = time.now().in_location(tz)
+
+    # Calculate 7 days ago
+    seven_days_ago = now - time.parse_duration("144h")
+
+    # Start at midnight 7 days ago
+    start_time = time.time(
+        year = seven_days_ago.year,
+        month = seven_days_ago.month,
+        day = seven_days_ago.day,
+        hour = 0,
+        minute = 0,
+        second = 0,
+        location = tz,
+    )
+
+    # Format dates as YYYY-MM-DD HH:MM:SS
+    start_string = start_time.format("2006-01-02 15:04:05")
+    now_string = now.format("2006-01-02 15:04:05")
+
+    return _fetch_and_process_energy(site_id, api_key, start_string, now_string, "DAY", "WEEK")
+
+def get_lifetime_energy(site_id, api_key, tz):
+    """Get lifetime production energy using energyDetails API."""
+    now = time.now().in_location(tz)
+
+    # Use a far-past date to capture all history
+    start_time = time.time(
+        year = 2000,
+        month = 1,
+        day = 1,
+        hour = 0,
+        minute = 0,
+        second = 0,
+        location = tz,
+    )
+
+    start_string = start_time.format("2006-01-02 15:04:05")
+    now_string = now.format("2006-01-02 15:04:05")
+
+    return _fetch_and_process_energy(site_id, api_key, start_string, now_string, "YEAR", "LIFETIME")
 
 def format_energy(wh):
     """Format energy value with appropriate unit (kWh, MWh, or GWh)."""
+    if wh == None:
+        return "N/A"
     if wh >= 1000000000:  # >= 1 GWh
         return humanize.float("#,###.##", wh / 1000000000) + " GWh"
     elif wh >= 1000000:  # >= 1 MWh
@@ -191,43 +216,48 @@ def create_summary_frame(title, production, consumption):
         ],
     )
 
+def create_error_frame(message):
+    """Create an error display frame."""
+    return render.Box(
+        render.WrappedText(
+            content = message,
+            color = RED,
+            font = "tb-8",
+        ),
+    )
+
+def _add_energy_frame(frames, label, title, get_energy_func, site_id, api_key, tz, *args):
+    """Fetches energy data and adds the appropriate frame (summary or error)."""
+    prod, cons, err = get_energy_func(site_id, api_key, tz, *args)
+    if err:
+        print("{} error: {}".format(label, err))
+        frames.append(create_error_frame("{} Error".format(label)))
+    else:
+        frames.append(create_summary_frame(title, prod, cons))
+
 def main(config):
     api_key = config.str("api_key")
     site_id = config.str("site_id", "")
-    
+
     frames = []
-    
+
     # Get energy data
     if api_key and site_id:
         tz = get_time_zone(site_id, api_key)
-        
-        # Day
-        day_prod, day_cons = get_energy_for_period(site_id, api_key, tz, "DAY")
-        if day_prod == None:
-            return render.Root(render.Box(render.WrappedText("API Error", color = RED)))
-        frames.append(create_summary_frame("Energy Today", day_prod, day_cons))
-        
-        # Month
-        month_prod, month_cons = get_energy_for_period(site_id, api_key, tz, "MONTH")
-        if month_prod != None:
-            frames.append(create_summary_frame("Energy Month", month_prod, month_cons))
-        
-        # Year
-        year_prod, year_cons = get_energy_for_period(site_id, api_key, tz, "YEAR")
-        if year_prod != None:
-            frames.append(create_summary_frame("Energy Year", year_prod, year_cons))
-        
-        # Lifetime (sum all years)
-        lifetime_prod, lifetime_cons = get_lifetime_energy(site_id, api_key, tz)
-        if lifetime_prod != None:
-            frames.append(create_summary_frame("Energy Life", lifetime_prod, lifetime_cons))
+
+        _add_energy_frame(frames, "Day", "Energy Today", get_energy_for_period, site_id, api_key, tz, "DAY")
+        _add_energy_frame(frames, "Week", "Energy Week", get_weekly_energy, site_id, api_key, tz)
+        _add_energy_frame(frames, "Month", "Energy Month", get_energy_for_period, site_id, api_key, tz, "MONTH")
+        _add_energy_frame(frames, "Year", "Energy Year", get_energy_for_period, site_id, api_key, tz, "YEAR")
+        _add_energy_frame(frames, "Lifetime", "Energy Life", get_lifetime_energy, site_id, api_key, tz)
     else:
         # Demo data if no credentials
         frames.append(create_summary_frame("Energy Today", 6282, 3141))
+        frames.append(create_summary_frame("Energy Week", 43974, 21987))
         frames.append(create_summary_frame("Energy Month", 188460, 94230))
         frames.append(create_summary_frame("Energy Year", 2261520, 1130760))
         frames.append(create_summary_frame("Energy Life", 11307600, 0))
-    
+
     # Return animation with frames
     return render.Root(
         delay = 3000,  # 3 seconds per frame
@@ -243,6 +273,7 @@ def get_schema():
                 name = "API key",
                 desc = "API key for the SolarEdge monitoring API.",
                 icon = "key",
+                secret = True,
             ),
             schema.Text(
                 id = "site_id",

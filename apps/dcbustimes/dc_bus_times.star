@@ -6,24 +6,28 @@ Author: Steven Pressnall
 Version: 2.0 - Add option to show bus route details (Show Details)
 """
 
-load("cache.star", "cache")
-load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("secret.star", "secret")
 
 NEXTBUS_URL = "https://api.wmata.com/NextBusService.svc/json/jPredictions"
 DEFAULT_STOPID1 = "1001155"
 DEFAULT_STOPID2 = ""
-ENCRYPTED_API_KEY = "AV6+xWcES/gMdrg972dJlYM7I3LF3UXYTSPv/+lz7A7gYqYlVouA0V1Hp1KEE8PaE2OcMYwNZVTjuvAMxxW2rs+BgcBsJMwzB7UV8qNaD6VXM3LRHpKzTSywYBHqcoSFGkU/91Z1a/Raxnh0zvygyxKAcNypjFs/+ZW1qarI7+Xm/aqwt4g="
 
 def main(config):
     numPredictions = 0
     numPredictions2 = 0
     iMinutes = [0, 0, 0, 0, 0, 0, 0, 0]
 
-    apiKey = secret.decrypt(ENCRYPTED_API_KEY)
+    apiKey = config.get("apiKey")
+
+    if not apiKey:
+        return render.Root(
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
+                content = "Please configure API Key",
+                color = "#f00",
+            )),
+        )
 
     Bus = [render.Row(
         children = [
@@ -162,7 +166,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -187,7 +191,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 0,
                     offset_end = 32,
@@ -207,7 +211,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -235,7 +239,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 0,
                     offset_end = 32,
@@ -256,7 +260,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -287,7 +291,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 2,
                     offset_end = 32,
@@ -309,7 +313,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -343,7 +347,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 2,
                     offset_end = 32,
@@ -366,7 +370,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -403,7 +407,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 2,
                     offset_end = 32,
@@ -486,22 +490,23 @@ def main(config):
         )
 
 def GetTimes1(stopID, apiKey):
-    cached = cache.get(stopID)
-    if cached:
-        return json.decode(cached)
-
-    rep = http.get(NEXTBUS_URL, params = {"StopID": stopID}, headers = {"api_key": apiKey})
+    rep = http.get(NEXTBUS_URL, params = {"StopID": stopID}, headers = {"api_key": apiKey}, ttl_seconds = 20)
     if rep.status_code != 200:
         fail("NextBus request failed with status ", rep.status_code)
 
-    # TODO: Determine if this cache call can be converted to the new HTTP cache.
-    cache.set(stopID, rep.body(), ttl_seconds = 20)
     return rep.json()
 
 def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Text(
+                id = "apiKey",
+                name = "API Key",
+                desc = "Your WMATA API key.",
+                icon = "key",
+                secret = True,
+            ),
             schema.Text(
                 id = "StopID_1",
                 name = "Stop ID #1 (e.g. 1001155)",

@@ -6,4 +6,12 @@ desc: Displays events that happened on today's date.
 author: Andrew Hefele
 fileName: onthisday.star
 packageName: onthisday
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: reference
+tags:
+  - education
+  - news
+  - utility
+published: '2023-02-01T21:53:00Z'
+updated: '2026-10-01T18:38:43Z'

@@ -6,4 +6,10 @@ desc: Shows the latest published headline on DailyWire.com.
 author: bmdelaune
 fileName: dw_headline.star
 packageName: dwheadline
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: news
+tags:
+  - news
+published: '2022-04-04T16:09:05Z'
+updated: '2026-10-13T21:34:12Z'

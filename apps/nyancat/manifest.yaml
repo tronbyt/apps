@@ -6,4 +6,11 @@ desc: An animated cartoon cat with a Pop-Tart for a torso.
 author: Mack Ward
 fileName: nyan_cat.star
 packageName: nyancat
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - art
+  - media
+published: '2022-01-11T18:22:03Z'
+updated: '2026-10-01T22:12:18Z'

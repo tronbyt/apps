@@ -6,4 +6,10 @@ desc: Displays 2024 Paris Olympic gold, silver, and bronze medal count by countr
 author: James Woglom
 fileName: olympicmedals.star
 packageName: olympicmedals
-recommended_interval: 5
+recommendedInterval: 5
+category: sports
+tags:
+  - olympics
+  - medals
+published: '2024-07-29T16:24:52Z'
+updated: '2025-11-30T20:08:55Z'

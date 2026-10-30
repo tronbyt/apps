@@ -6,4 +6,12 @@ desc: Lists all One Piece characters celebrating their birthday today.
 author: raymbartlett
 fileName: one_piece_bdays.star
 packageName: onepiecebdays
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - lifestyle
+  - media
+  - anime
+published: '2023-06-02T14:32:00Z'
+updated: '2026-10-01T22:12:18Z'

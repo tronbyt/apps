@@ -6,4 +6,12 @@ desc: A collection of Spectro Cloud images with a clock.
 author: Karl Cardenas
 fileName: spectro_cloud.star
 packageName: spectrocloudclock
-recommended_interval: 0
+recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - weather
+  - art
+  - utility
+published: '2024-09-18T17:07:13Z'
+updated: '2025-12-01T21:50:01Z'

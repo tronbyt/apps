@@ -6,4 +6,12 @@ desc: Displays the local air quality index from a nearby PurpleAir sensor. Choos
 author: posburn
 fileName: purpleair.star
 packageName: purpleair
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - weather
+  - nature
+  - utility
+published: '2022-03-14T23:19:33Z'
+updated: '2026-10-01T22:22:03Z'

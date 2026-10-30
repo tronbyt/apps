@@ -6,4 +6,12 @@ desc: Picks an Oblique Strategy at random and displays it.
 author: '@parsnbl'
 fileName: obliquestrategies.star
 packageName: obliquestrategies
-recommended_interval: 5
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - time
+  - art
+  - lifestyle
+published: '2023-03-23T12:23:54Z'
+updated: '2026-10-01T19:04:39Z'

@@ -18,7 +18,7 @@ load("animation.star", "animation")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -58,7 +58,7 @@ EASE_IN_OUT = "ease_in_out"
 
 DISPLAY_VALUES = {
     "cup": ["cup", "#333333", "#fff", "NASCAR Cup"],
-    "xfinity": ["xfinity", "#4427ad", "#fff", "Xfinity Series"],
+    "xfinity": ["xfinity", "#4427ad", "#fff", "O'Reilly Series"],
     "trucks": ["trucks", "#990000", "#fff", "Craftsman Trucks"],
     "mfg": "MFG Pts / Wins",
     "own": "Ownr Pts / Wins",
@@ -66,6 +66,15 @@ DISPLAY_VALUES = {
     "ply": "Drvr Playoff Pos",
     "nri": "Next Race",
 }
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     series = config.get("NASCAR_Series", DEFAULT_SERIES)
@@ -82,7 +91,12 @@ def main(config):
 
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                title_box(series, data_display),
+            ] + text,
+        ))) if is_square() else render.Column(
             children = [
                 title_box(series, data_display),
             ] + text,
@@ -94,7 +108,7 @@ def main(config):
 # ###################################################
 
 def nextrace(api_data, config):
-    timezone = config.get("$tz", DEFAULT_TIMEZONE)  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
+    timezone = time.tz()  # Utilize special timezone variable to get TZ - otherwise assume US Eastern w/DST
     date_and_time = api_data["Race_Date"]
     date_and_time3 = time.parse_time(date_and_time, "2006-01-02T15:04:05-0700").in_location(timezone)
     date_str = date_and_time3.format("Jan 2" if config.bool("is_us_date_format", DEFAULT_DATE_US) else "2 Jan").title()  #current format of your current date str
@@ -319,7 +333,7 @@ def get_schema():
                         value = "cup",
                     ),
                     schema.Option(
-                        display = "NASCAR Xfinity Series",
+                        display = "NASCAR O'Reilly Auto Parts Series",
                         value = "xfinity",
                     ),
                     schema.Option(
