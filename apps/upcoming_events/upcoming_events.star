@@ -123,8 +123,8 @@ def main(config):
                                     ),
                                     render.Padding(
                                         pad = (1, 0, 0, 0),
-                                        child = render.Text(content = event["formattedTime"], font = "tom-thumb", color=str(altRowColor)),
-                                    )
+                                        child = render.Text(content = event["formattedTime"], font = "tom-thumb", color = str(altRowColor)),
+                                    ),
                                 ],
                             ),
                         ],
