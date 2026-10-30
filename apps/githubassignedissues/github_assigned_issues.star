@@ -256,7 +256,8 @@ def main(config):
             closed_count = get_count(closed_response)
 
         min_tasks = int(config.get("min_tasks", "0"))
-        if min_tasks > 0 and open_count <= min_tasks:
+        show = min_tasks == 0 or open_count >= min_tasks
+        if not show:
             return []
 
         return render_assigned_tasks(
@@ -303,7 +304,7 @@ def get_schema():
             schema.Text(
                 id = "min_tasks",
                 name = "Minimum open tasks",
-                desc = "Only display when you have more than this many open assigned issues. Use 0 to always show.",
+                desc = "Only display when you have at least this many open assigned issues. Use 0 to always show.",
                 icon = "eye",
                 default = "0",
             ),
