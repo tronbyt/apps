@@ -59,6 +59,7 @@ def main(config):
 
                 event["date"] = eventDate  # Keep as UTC for comparison
                 event["formattedDate"] = localEventDate.format("01/02")  # Display in local timezone
+                event["formattedTime"] = eventDate.in_location(timezone).format("15:04")
 
             if line.startswith("DTSTART;VALUE=DATE:"):
                 dateString = line.split(":")[1].replace("\x0d", "")
@@ -91,6 +92,7 @@ def main(config):
 
                 event["date"] = eventDate
                 event["formattedDate"] = eventDate.in_location(timezone).format("01/02")
+                event["formattedTime"] = eventDate.in_location(timezone).format("15:04")
 
     maxEvents = int(config.get("number_of_events", "5"))
     events = sorted(events, key = lambda x: x["date"])[:maxEvents]
@@ -102,6 +104,7 @@ def main(config):
     if len(events) > 0:
         for event in events:
             rowColor = "#ffc300" if ((counter % 2) == 0) else "#a2d9ce"
+            altRowColor = "#a2d9ce" if ((counter % 2) == 0) else "#ffc300"
             layout.append(
                 render.Padding(
                     pad = (0, 0, 0, 3),
@@ -118,6 +121,10 @@ def main(config):
                                         pad = (1, 0, 0, 0),
                                         child = render.Text(content = event["formattedDate"], font = "tom-thumb"),
                                     ),
+                                    render.Padding(
+                                        pad = (1, 0, 0, 0),
+                                        child = render.Text(content = event["formattedTime"], font = "tom-thumb", color=str(altRowColor)),
+                                    )
                                 ],
                             ),
                         ],
