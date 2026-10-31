@@ -1,0 +1,17 @@
+---
+id: afl-ladder
+name: AFL Ladder
+summary: Shows the AFL Ladder
+desc: Shows the AFL Ladder with option for rotation speed.
+author: M0ntyP
+fileName: afl_ladder.star
+packageName: aflladder
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - real-time
+  - afl
+  - football
+published: '2023-03-23T12:25:31Z'
+updated: '2026-10-01T18:58:08Z'

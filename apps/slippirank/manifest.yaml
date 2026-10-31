@@ -1,0 +1,16 @@
+---
+id: slippirank
+name: SlippiRank
+summary: Shows slippi rank
+desc: Shows current rank from SSBM Slippi profile.
+author: noahpodgurski
+fileName: slippirank.star
+packageName: slippirank
+broken: true
+recommendedInterval: 5
+category: gaming
+tags:
+  - sports
+  - gaming
+published: '2023-06-09T15:02:25Z'
+updated: '2025-12-05T22:28:51Z'

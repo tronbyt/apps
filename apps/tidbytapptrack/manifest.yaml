@@ -1,0 +1,17 @@
+---
+id: tidbyt-app-track
+name: Tidbyt App Track
+summary: Track apps on Tidbyt
+desc: Track the Tidbyt app page and see new listings.
+author: UnBurn
+fileName: tidbyt_app_track.star
+packageName: tidbytapptrack
+recommendedInterval: 60
+category: utilities
+tags:
+  - tidbyt
+  - tracking
+  - utility
+  - tech
+published: '2023-12-07T17:51:56Z'
+updated: '2025-11-29T23:55:39Z'

@@ -1,0 +1,12 @@
+---
+id: news
+name: News
+summary: News feed display
+desc: Select an RSS feed and receive the latest headlines in return.
+author: JeffLac
+recommendedInterval: 10
+category: news
+tags:
+  - news
+published: '2025-03-13T20:51:36Z'
+updated: '2025-12-06T09:07:16Z'

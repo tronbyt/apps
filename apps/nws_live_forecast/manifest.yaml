@@ -1,0 +1,17 @@
+---
+id: nws-live-forecast
+name: NWS Live Forecast
+summary: Weather forecast from NWS
+desc: ' National Weather Service data showing the current temperature and weather forecast for today and tomorrow.'
+author: czarandy
+fileName: nws_live_forecast.star
+packageName: nws_live_forecast
+recommendedInterval: 5
+supports64x64: true
+category: weather
+tags:
+  - weather
+  - nws
+  - real-time
+published: '2023-09-05T18:06:16Z'
+updated: '2026-10-01T22:12:18Z'

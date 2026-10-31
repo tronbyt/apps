@@ -1,0 +1,19 @@
+---
+id: pokedex
+name: Pokedex
+summary: Display a random Pokemon
+desc: Display a random Pokemon alongside its name, number, height, and weight.
+author: Mack Ward
+fileName: pokedex.star
+packageName: pokedex
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: gaming
+tags:
+  - gaming
+  - retro
+  - utility
+  - wide 2x support
+published: '2022-01-17T19:19:28Z'
+updated: '2026-10-01T22:22:03Z'

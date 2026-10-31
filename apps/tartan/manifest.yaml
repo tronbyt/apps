@@ -1,0 +1,14 @@
+---
+id: tartan
+name: Tartan
+summary: Weaves tartans to look at
+desc: Renders a tartan based on thread count instructions and displays it on screen.
+author: dinosaursrarr
+fileName: tartan.star
+packageName: tartan
+recommendedInterval: 5
+category: art
+tags:
+  - art
+published: '2022-06-09T17:22:53Z'
+updated: '2025-12-02T19:30:22Z'

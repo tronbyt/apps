@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Live Tennis - Tronbyt App</title>
+        <meta name="description" content="Live WTA, Challenger, ITF">
+        <link rel="canonical" href="https://apps.tronbyt.com/details/livetennis">
+        <meta property="og:site_name" content="Tronbyt App Viewer">
+        <meta property="og:title" content="Live Tennis - Tronbyt App">
+        <meta property="og:description" content="Live WTA, Challenger, ITF">
+        <meta property="og:url" content="https://apps.tronbyt.com/details/livetennis">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="https://apps.tronbyt.com/cards/livetennis-cd3d2fdacb.png">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Live Tennis on a Tronbyt display">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Live Tennis - Tronbyt App">
+        <meta name="twitter:description" content="Live WTA, Challenger, ITF">
+        <meta name="twitter:image" content="https://apps.tronbyt.com/cards/livetennis-cd3d2fdacb.png">
+        <meta name="twitter:image:alt" content="Live Tennis on a Tronbyt display">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Live Tennis","description":"Live scores for the circuits ESPN does not carry. Every other tennis app in this repo reads site.api.espn.com, which serves exactly two tennis leagues, atp and wta, so Challenger and ITF have no app at all. This one reads the whole live slate from the Live Tennis API (livetennisapi.com) instead: pick Challenger, ITF, WTA or all tours and it shows whatever is on court right now, no tournament to choose. Per match: both surnames, the set score, the games in the current set and the point in the current game, with a green ball beside the server and a red bar beside a player holding break point. Rotates through the live matches, walking further down the slate each refresh. Needs a free API key (no card), whose quota is 100 requests a day: at the recommended 15 minute interval that is 1440/15 = 96 a day, and the response is cached for 900 seconds so the app cannot poll harder than that whatever the device asks.","url":"https://apps.tronbyt.com/details/livetennis","image":"https://apps.tronbyt.com/cards/livetennis-cd3d2fdacb.png","applicationCategory":"Tronbyt app","applicationSubCategory":"sports","operatingSystem":"Tronbyt","keywords":"real-time, tennis, sports","author":{"@type":"Person","name":"Ben Abulafia"},"datePublished":"2026-09-13T05:33:52Z","dateModified":"2026-10-01T21:48:48Z"}</script>
+        <meta name="app-name" content="livetennis">
+        <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/200508996?s=48&v=4">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../style.css">
+    </head>
+
+    <body>
+        <div class="container py-4">
+            <div class="viewer-header mb-4">
+                <h1 class="main-title mb-0">
+                    <a href="../index.html" class="home-link" title="Tronbyt App Viewer home">
+                        <img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4" alt="">
+                        <span class="title-full">Tronbyt App Viewer</span>
+                        <span class="title-short">App Viewer</span>
+                    </a>
+                </h1>
+            </div>
+
+            <a href="../index.html" class="btn btn-secondary mb-3">← Back
+                to Apps</a>
+
+            <div class="mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
+                    <label class="form-check-label" for="dot-matrix-toggle">
+                        Enable dot matrix overlay
+                    </label>
+                </div>
+            </div>
+
+            <div id="app-content">
+                <h1>Live Tennis</h1>
+                <p>Live WTA, Challenger, ITF</p>
+                <p>Live scores for the circuits ESPN does not carry. Every other tennis app in this repo reads site.api.espn.com, which serves exactly two tennis leagues, atp and wta, so Challenger and ITF have no app at all. This one reads the whole live slate from the Live Tennis API (livetennisapi.com) instead: pick Challenger, ITF, WTA or all tours and it shows whatever is on court right now, no tournament to choose. Per match: both surnames, the set score, the games in the current set and the point in the current game, with a green ball beside the server and a red bar beside a player holding break point. Rotates through the live matches, walking further down the slate each refresh. Needs a free API key (no card), whose quota is 100 requests a day: at the recommended 15 minute interval that is 1440/15 = 96 a day, and the response is cached for 900 seconds so the app cannot poll harder than that whatever the device asks.</p>
+                <p>By <a href="../authors/ben-abulafia">Ben Abulafia</a></p>
+                <p>Tags: <a href="../index.html?tag=real-time">real-time</a>, <a href="../index.html?tag=tennis">tennis</a>, <a href="../index.html?tag=sports">sports</a></p>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+        <script type="module" src="../main.js"></script>
+    </body>
+
+</html>

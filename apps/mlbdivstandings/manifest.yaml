@@ -1,0 +1,16 @@
+---
+id: mlbdivstandings
+name: MlbDivStandings
+summary: MLB Division Standings
+desc: Display the standings for the MLB division of your choice.
+author: Jake Manske
+fileName: mlbdivstandings.star
+packageName: mlbdivstandings
+recommendedInterval: 5
+supports64x64: true
+category: sports
+tags:
+  - mlb
+  - baseball
+published: '2023-09-06T13:53:38Z'
+updated: '2026-10-01T15:26:52Z'

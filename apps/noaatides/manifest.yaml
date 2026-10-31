@@ -1,0 +1,17 @@
+---
+id: noaa-tides
+name: NOAA Tides
+summary: Display NOAA Tides
+desc: Display daily tides from NOAA stations.
+author: tavdog
+fileName: noaa_tides.star
+packageName: noaatides
+recommendedInterval: 60
+supports64x64: true
+category: weather
+tags:
+  - weather
+  - nature
+  - utility
+published: '2022-09-02T13:55:52Z'
+updated: '2026-10-17T18:55:05Z'

@@ -1,0 +1,15 @@
+---
+id: petitions-please
+name: Petitions Please
+summary: Tell MPs to do something
+desc: Shows currently popular petitions for the UK Parliament and HM Government with a QR link for signing.
+author: dinosaursrarr
+fileName: petitions_please.star
+packageName: petitionsplease
+recommendedInterval: 5
+category: utilities
+tags:
+  - news
+  - tech
+published: '2023-06-27T19:00:27Z'
+updated: '2025-11-29T23:55:39Z'

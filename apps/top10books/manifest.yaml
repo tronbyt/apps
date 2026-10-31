@@ -1,0 +1,15 @@
+---
+id: top-10-books
+name: Top 10 Books
+summary: Top 10 books from B&N top
+desc: Displays the current top 10 books on Barnes & Nobles top 100 book list.
+author: shhhmuck
+fileName: top_10_books.star
+packageName: top10books
+recommendedInterval: 5
+category: entertainment
+tags:
+  - education
+  - sports
+published: '2024-02-08T17:35:32Z'
+updated: '2025-11-29T17:52:33Z'

@@ -1,0 +1,18 @@
+---
+id: local-tides
+name: Local Tides
+summary: Graph local tides
+desc: Display the local tides graph and the times of the next two tide events.
+author: J. Keybl
+fileName: local_tides.star
+packageName: localtides
+recommendedInterval: 5
+supports64x64: true
+category: weather
+tags:
+  - weather
+  - water-level
+  - science
+  - utility
+published: '2023-06-09T15:50:57Z'
+updated: '2026-10-01T21:48:48Z'

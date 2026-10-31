@@ -1,0 +1,17 @@
+---
+id: paraland
+name: Paraland
+summary: Shows hand drawn landscapes
+desc: See cool hand drawn pixel art landscapes from your Tidbyt.
+author: yonodactyl
+fileName: paraland.star
+packageName: paraland
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - art
+  - nature
+  - music
+published: '2023-01-03T19:35:38Z'
+updated: '2026-10-17T18:55:58Z'

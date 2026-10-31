@@ -1,0 +1,17 @@
+---
+id: indego
+name: Indego
+summary: Indego bike share
+desc: Shows available bikes and docks at an Indego station.
+author: radiocolin
+supports2x: true
+supports64x64: true
+fileName: indego.star
+packageName: indego
+recommendedInterval: 5
+category: transit
+tags:
+  - tracking
+  - utility
+published: '2023-06-28T18:40:35Z'
+updated: '2026-10-23T23:58:02Z'

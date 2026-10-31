@@ -1,0 +1,16 @@
+---
+id: weather-dashboard
+name: Weather Dashboard
+summary: Display's local weather
+desc: Displays weather information from a local Ambient Weather station. Requires an api and application key from your station to function properly.
+author: ckelley-1992
+fileName: weather_dashboard.star
+packageName: weatherdashboard
+category: weather
+tags:
+  - weather
+  - local
+  - art
+  - utility
+published: '2023-03-30T16:35:04Z'
+updated: '2025-12-05T22:28:51Z'
