@@ -1,0 +1,18 @@
+---
+id: github-assigned-issues
+name: GitHub Assigned Issues
+summary: GitHub assigned issue count
+desc: Displays open GitHub issues assigned to you, optionally with closed counts as open - closed.
+author: tavdog
+fileName: github_assigned_issues.star
+packageName: githubassignedissues
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - github
+published: '2026-10-29T22:14:28Z'
+updated: '2026-10-29T22:55:38Z'

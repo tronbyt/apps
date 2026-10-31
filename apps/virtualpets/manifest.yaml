@@ -1,0 +1,17 @@
+---
+id: virtual-pets
+name: Virtual Pets
+summary: Virtual pets
+desc: Choose and name your own pet while watching the environment change with the seasons and time of day!
+author: frame-shift
+fileName: virtual_pets.star
+packageName: virtualpets
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - gaming
+  - time
+  - art
+published: '2024-02-08T18:15:15Z'
+updated: '2026-10-01T19:16:27Z'

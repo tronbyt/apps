@@ -1,0 +1,17 @@
+---
+id: countdown-clock
+name: Countdown Clock
+summary: Countdown to an event
+desc: Display the days, hours, and minutes remaining to a specified event.
+author: CubsAaron
+fileName: countdown_clock.star
+packageName: countdownclock
+recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - utility
+  - tracking
+published: '2022-03-13T21:43:26Z'
+updated: '2026-10-01T17:41:43Z'

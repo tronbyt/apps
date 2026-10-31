@@ -1,0 +1,16 @@
+---
+id: roblox
+name: Roblox
+summary: Online friends & games
+desc: Real time views of your Roblox experiences.
+author: Chad Milburn / CODESTRONG
+fileName: roblox.star
+packageName: roblox
+recommendedInterval: 5
+category: gaming
+tags:
+  - gaming
+  - media
+  - real-time
+published: '2022-09-22T16:04:12Z'
+updated: '2026-10-14T10:56:52Z'

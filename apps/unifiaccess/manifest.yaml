@@ -1,0 +1,18 @@
+---
+id: unifi-access
+name: UniFi Access
+summary: Doors and entry log
+desc: Shows the most recent UniFi Access door opening - who badged in, which door, and how long ago - above a lock board that colours every door green for locked and amber for unlocked. A refused badge turns the whole entry red. When nothing has been opened it lists the doors instead. Access has no cloud API, so the display reads your Access API server directly on port 12445, which means it has to resolve that server's hostname and trust the certificate that server presents. Your console's remote-access hostname will not do - that certificate covers port 443 only, and nothing answers on 12445 with it. Give the Access API server a certificate of its own, or front it with a reverse proxy that already has one.
+author: nsluke
+fileName: unifi_access.star
+packageName: unifiaccess
+supports2x: true
+recommendedInterval: 1
+category: smart-home
+tags:
+  - tech
+  - smart-home
+  - real-time
+  - wide 2x support
+published: '2026-08-31T21:20:49Z'
+updated: '2026-08-31T21:20:49Z'
