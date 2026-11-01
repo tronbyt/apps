@@ -14,7 +14,7 @@ load("time.star", "time")
 # Built every two hours from esbnyc.com/about/tower-lights. Each day carries
 # up to 4 hex colors in title order, a pattern (static, sparkle, sparkle-mast,
 # rotating) and, for a rotation through several color sets such as a run of flags, frames.
-FEED_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/main/esbnyc/lights.json"
+FEED_URL = "https://tidbyt.apis.ajcomputers.com/esbnyc/lights.json"
 TIMEZONE = "America/New_York"
 MAX_COLORS = 4
 
