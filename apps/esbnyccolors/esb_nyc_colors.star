@@ -12,8 +12,8 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 # Built every two hours from esbnyc.com/about/tower-lights. Each day carries
-# up to 4 hex colors in title order, a pattern (static, sparkle, rotating) and,
-# for a rotation through several color sets such as a run of flags, frames.
+# up to 4 hex colors in title order, a pattern (static, sparkle, sparkle-mast,
+# rotating) and, for a rotation through several color sets such as a run of flags, frames.
 FEED_URL = "https://raw.githubusercontent.com/jvivona/tidbyt-data/main/esbnyc/lights.json"
 TIMEZONE = "America/New_York"
 MAX_COLORS = 4
@@ -33,6 +33,8 @@ ROTATE_MS = 1000
 SPARKLE_MS = 200
 SPARKLE_STEPS = 10
 SPARKLE_DOTS = 5
+SPARKLE_MAST = "sparkle-mast"
+SPARKLE_MAST_DOTS = 2
 SPARKLE_COLOR = "#fff"
 
 FONT_TITLE = "terminus-12" if IS_2X else "tom-thumb"
@@ -93,12 +95,13 @@ def color_frames(day, pattern):
 
 def animated(draw, frames, pattern, delay, sparkle_areas):
     """``draw(colors)`` for each frame, held long enough to read, or sparkling."""
-    if pattern == "sparkle":
+    if pattern == "sparkle" or pattern == SPARKLE_MAST:
         base = draw(frames[0])
         hold = max(1, SPARKLE_MS // delay)
+        count = SPARKLE_MAST_DOTS if pattern == SPARKLE_MAST else SPARKLE_DOTS
         children = []
         for _ in range(SPARKLE_STEPS):
-            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas))] * hold)
+            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, count))] * hold)
         return render.Animation(children = children)
 
     if len(frames) == 1:
@@ -109,10 +112,10 @@ def animated(draw, frames, pattern, delay, sparkle_areas):
         children.extend([draw(colors)] * hold)
     return render.Animation(children = children)
 
-def sparkles(areas):
+def sparkles(areas, count):
     """A few white dots, each inside one of the lit areas (x, y, w, h)."""
     dots = []
-    for _ in range(SPARKLE_DOTS):
+    for _ in range(count):
         x, y, w, h = areas[random.number(0, len(areas) - 1)]
         dots.append(render.Padding(
             pad = (x + random.number(0, w - WS), y + random.number(0, h - VS), 0, 0),
@@ -145,13 +148,14 @@ def tower(colors):
             rows.append(render.Box(width = w * WS, height = h * VS, color = colors[i % len(colors)]))
     return render.Column(cross_align = "center", children = rows)
 
-def tower_areas():
-    """Where sparkles can land on the tower: the crown down, not the antenna."""
+def tower_areas(pattern):
+    """Where sparkles can land on the tower: only the antenna for a mast
+    sparkle, otherwise the crown down."""
     areas = []
     y = 0
     for i, section in enumerate(TOWER):
         for w, h in section:
-            if i > 0:
+            if (i == 0) == (pattern == SPARKLE_MAST):
                 areas.append(((TOWER_WIDTH - w * WS) // 2, y, w * WS, h * VS))
             y += h * VS
     return areas
@@ -176,7 +180,8 @@ def render_horizontally(day, frames, pattern):
     rows.append(animated(
         lambda colors: nested_boxes(colors, WIDTH, box_height),
         frames,
-        pattern,
+        # The boxes have no mast to sparkle.
+        "static" if pattern == SPARKLE_MAST else pattern,
         DELAY_HORIZONTAL,
         [(0, 0, WIDTH, box_height)],
     ))
@@ -230,7 +235,7 @@ def render_vertically(day, frames, pattern):
         delay = DELAY_VERTICAL,
         child = render.Row(
             children = [
-                animated(tower, frames, pattern, DELAY_VERTICAL, tower_areas()),
+                animated(tower, frames, pattern, DELAY_VERTICAL, tower_areas(pattern)),
                 render.Padding(pad = (WS, 0, 0, 0), child = marquee),
             ],
         ),
