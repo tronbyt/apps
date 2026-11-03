@@ -7,6 +7,7 @@ author: Bennett Schoonerman
 fileName: gc_daily_pick.star
 packageName: gcdailypick
 supports2x: true
+supports64x64: true
 recommendedInterval: 10
 category: finance
 tags:
