@@ -19,18 +19,18 @@ TRANSFORM_DURATION = 250
 
 GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1z4UprVH5z79gc85e_inF0NDzAD7pmmExNme1V17Ne-c/export?format=csv&"
 SOURCE_SHEETS = {
-    "guitar_center": "gid=1900080353",
-    "musicians_friend": "gid=1879148122",
+    "guitar-center": "gid=1900080353",
+    "musicians-friend": "gid=1879148122",
 }
 
 SOURCE_OPTIONS = [
     schema.Option(
         display = "Guitar Center",
-        value = "guitar_center",
+        value = "guitar-center",
     ),
     schema.Option(
         display = "Musician's Friend",
-        value = "musicians_friend",
+        value = "musicians-friend",
     ),
 ]
 
@@ -97,7 +97,21 @@ def parseDealRow(raw_csv):
     return latest_row
 
 def getDailyPick(source_name):
-    selected_sheet = SOURCE_SHEETS.get(source_name, SOURCE_SHEETS["guitar_center"])
+    # try and get it from the render API first, if that fails, fall back to the Google Sheet
+    render_api_url = "https://dailydealsapi.onrender.com/api/v1/deals/" + source_name + "/latest"
+    resp = http.get(url = render_api_url)
+    if resp.status_code == 200:
+        respData = resp.json()["deal"]
+        return {
+            "itemName": respData.get("title", "Daily Pick"),
+            "originalPrice": respData.get("originalPrice", "$0.00"),
+            "savings": respData.get("discount", "$0.00"),
+            "price": respData.get("price", "$0.00"),
+            "dealImage": fetchDealImage(respData.get("image", "")),
+        }
+
+    # fallback to the Google Sheet if the render API fails
+    selected_sheet = SOURCE_SHEETS.get(source_name, SOURCE_SHEETS["guitar-center"])
     sheet_url = GOOGLE_SHEET_CSV_URL + selected_sheet
     resp = http.get(url = sheet_url, ttl_seconds = CACHE_TTL)
     row = parseDealRow(resp.body())
@@ -124,20 +138,17 @@ def getDailyPick(source_name):
     }
 
 def getBrandLabel(source_name):
-    if source_name == "musicians_friend":
+    if source_name == "musicians-friend":
         return "MF"
     return "GC"
 
 def getBrandLogo(source_name):
-    if source_name == "musicians_friend":
+    if source_name == "musicians-friend":
         return MUSICIANS_FRIEND_LOGO_ASSET.readall()
     return GUITAR_CENTER_LOGO_ASSET.readall()
 
 def main(config):
-    source_name = config.get("source", "guitar_center")
-    if source_name not in SOURCE_SHEETS:
-        source_name = "guitar_center"
-
+    source_name = config.get("source", "guitar-center")
     data = getDailyPick(source_name)
     brand_label = getBrandLabel(source_name)
     brand_logo = getBrandLogo(source_name)
