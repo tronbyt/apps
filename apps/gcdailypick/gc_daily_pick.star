@@ -17,6 +17,12 @@ CACHE_TTL = 3600
 SCALE = 2 if canvas.is2x() else 1
 TRANSFORM_DURATION = 250
 
+WIDTH, HEIGHT = canvas.size()
+
+def is_square():
+    w, h = canvas.size()
+    return h == w
+
 GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1z4UprVH5z79gc85e_inF0NDzAD7pmmExNme1V17Ne-c/export?format=csv&"
 SOURCE_SHEETS = {
     "guitar-center": "gid=1900080353",
@@ -160,6 +166,44 @@ def main(config):
     )
     if data["dealImage"] != "":
         deal_image = render.Image(width = 24 * SCALE, height = 24 * SCALE, src = data["dealImage"])
+
+    # if its a square just render them stacked, no slide in animation
+    if is_square():
+        return render.Root(
+            child = render.Column(
+                children = [
+                    render.Image(brand_logo, width = WIDTH, height = int(HEIGHT / 2)),
+                    render.Box(
+                        width = WIDTH,
+                        height = int(HEIGHT / 2),
+                        color = "#020202",
+                        child = render.Column(
+                            children = [
+                                render.Marquee(
+                                    width = WIDTH,
+                                    child = render.Text(data["itemName"], ""),
+                                    offset_start = 4,
+                                    offset_end = WIDTH * 2
+                                ),
+                                render.Row(
+                                    children = [
+                                        render.Column(
+                                            children = [
+                                                render.Box(width = 40, height = 8, child = render.Row(children = [render.Text(content = data["originalPrice"])])),
+                                                render.Box(width = 40, height = 8, child = render.Text(content = "-" + data["savings"], color = "#EA202E")),
+                                                render.Box(width = 40, height = 1, child = render.Row(children = [render.Box(width = 30, height = 1, color = "#ccc")])),
+                                                render.Box(width = 40, height = 8, child = render.Text(content = data["price"], color = "#85BB65")),
+                                            ],
+                                        ),
+                                        deal_image,
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
 
     # print(data)
     return render.Root(
