@@ -171,12 +171,12 @@ def tower(colors):
 
 def tower_areas(pattern):
     """Where sparkles can land on the tower: only the antenna for a mast
-    sparkle, otherwise the crown down."""
+    sparkle, all of it for a rotating sparkle, otherwise the crown down."""
     areas = []
     y = 0
     for i, section in enumerate(TOWER):
         for w, h in section:
-            if (i == 0) == (pattern == SPARKLE_MAST):
+            if pattern == ROTATING_SPARKLE or (i == 0) == (pattern == SPARKLE_MAST):
                 areas.append(((TOWER_WIDTH - w * WS) // 2, y, w * WS, h * VS))
             y += h * VS
     return areas
