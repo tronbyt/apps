@@ -1,0 +1,13 @@
+---
+id: euromillions
+name: EuroMillions
+summary: EuroMillions results
+desc: Results for the most recent draw of the EuroMillions transnational lottery.
+author: dinosaursrarr
+fileName: euromillions.star
+packageName: euromillions
+recommendedInterval: 5
+category: gaming
+tags: []
+published: '2023-03-27T14:49:57Z'
+updated: '2025-12-05T22:28:51Z'

@@ -1,0 +1,17 @@
+---
+id: company-clock
+name: Company Clock
+summary: Clock from Lethal Company
+desc: Displays a rendition of the clock from the game "Lethal Company".
+author: qqvq-d
+fileName: company_clock.star
+packageName: companyclock
+recommendedInterval: 0
+supports64x64: true
+category: clocks
+tags:
+  - retro
+  - clock
+  - gaming
+published: '2024-04-29T14:13:22Z'
+updated: '2026-10-01T19:09:45Z'

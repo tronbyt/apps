@@ -1,0 +1,14 @@
+---
+id: nsbyt
+name: NS Timetable
+summary: NS Timetable
+desc: Shows a timetable for a station in the Dutch Railways.
+author: tim.hanssen
+fileName: nsbyt.star
+packageName: nsbyt
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags: []
+published: '2023-03-02T16:32:12Z'
+updated: '2026-10-01T22:12:18Z'

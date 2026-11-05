@@ -1,0 +1,15 @@
+---
+id: minecraft-realms
+name: Minecraft Realms
+summary: Minecraft Realms Status
+desc: Displays information about a Minecraft Realms server you play on.
+author: Michael Maxwell
+recommendedInterval: 5
+fileName: minecraft_realms.star
+packageName: minecraftrealms
+supports64x64: true
+category: utilities
+tags:
+  - gaming
+published: '2024-09-20T14:59:09Z'
+updated: '2026-10-01T21:54:45Z'

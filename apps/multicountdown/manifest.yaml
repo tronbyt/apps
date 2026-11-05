@@ -1,0 +1,18 @@
+---
+id: multicountdown
+name: MultiCountdown
+summary: Multi event countdown
+desc: A clock that counts down to a series of events, one time or daily.
+author: BestDistress
+fileName: multicountdown.star
+packageName: multicountdown
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - clock
+  - utility
+  - time
+  - productivity
+published: '2023-11-10T18:36:01Z'
+updated: '2026-10-01T19:27:54Z'

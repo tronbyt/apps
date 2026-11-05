@@ -1,0 +1,16 @@
+---
+id: text-scrolling
+name: Text Scrolling
+summary: Displays a scrolling text
+desc: Displays a scrolling text.
+author: savedagod, gabe565
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - art
+  - utility
+  - wide 2x support
+published: '2025-04-06T20:57:21Z'
+updated: '2026-10-01T19:16:27Z'

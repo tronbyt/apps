@@ -1,0 +1,19 @@
+---
+id: colorado14ers
+name: Colorado14ers
+summary: Colorado 14ers Tracker
+desc: Track your Colorado 14ers.
+author: Robert Ison
+category: travel
+tags:
+  - lifestyle
+  - nature
+  - sports
+  - hiking
+fileName: colorado14ers.star
+packageName: colorado14ers
+supports2x: true
+supports64x64: true
+recommendedInterval: 5
+published: '2024-07-29T16:23:58Z'
+updated: '2026-10-28T04:00:39Z'

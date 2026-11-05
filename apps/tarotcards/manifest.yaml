@@ -1,0 +1,14 @@
+---
+id: tarot-cards
+name: Tarot Cards
+summary: Draw tarot cards
+desc: Displays random tarot card spreads with their images, names, and meanings.
+author: frame-shift
+fileName: tarot_cards.star
+packageName: tarotcards
+recommendedInterval: 60
+category: entertainment
+tags:
+  - lifestyle
+published: '2023-10-07T18:33:59Z'
+updated: '2025-12-17T01:48:35Z'

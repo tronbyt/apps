@@ -1,0 +1,17 @@
+---
+id: daily-reminder
+name: Daily Reminder
+summary: A daily reminder app
+desc: Set a reminder for each day of week.
+author: sepowitz
+fileName: daily_reminder.star
+packageName: dailyreminder
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - productivity
+  - time
+  - utility
+published: '2023-01-12T16:47:04Z'
+updated: '2026-10-17T18:55:19Z'
