@@ -30,7 +30,7 @@ IS_2X = canvas.is2x()
 # Marquees move a pixel a frame, so 2x halves the delay to keep the speed.
 DELAY_HORIZONTAL = 25 if IS_2X else 50
 DELAY_VERTICAL = 50 if IS_2X else 100
-ROTATE_MS = 1000
+ROTATE_MS = 1500
 SPARKLE_MS = 200
 SPARKLE_STEPS = 10
 SPARKLE_DOTS = 5
@@ -122,12 +122,15 @@ def animated(draw, frames, pattern, delay, sparkle_areas):
 
 def rotating_sparkle(draw, frames, delay, sparkle_areas):
     """Each color set in turn for ROTATE_MS, sparkling all the while."""
+    per_set = max(1, ROTATE_MS // delay)
     hold = max(1, SPARKLE_MS // delay)
     children = []
     for colors in frames:
         base = draw(colors)
-        for _ in range(max(1, ROTATE_MS // SPARKLE_MS)):
-            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, SPARKLE_DOTS))] * hold)
+
+        # The last sparkle is cut short when SPARKLE_MS doesn't divide ROTATE_MS.
+        for shown in range(0, per_set, hold):
+            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, SPARKLE_DOTS))] * min(hold, per_set - shown))
     return render.Animation(children = children)
 
 def sparkles(areas, count):
