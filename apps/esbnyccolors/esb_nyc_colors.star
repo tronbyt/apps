@@ -13,7 +13,8 @@ load("time.star", "time")
 
 # Built every two hours from esbnyc.com/about/tower-lights. Each day carries
 # up to 4 hex colors in title order, a pattern (static, sparkle, sparkle-mast,
-# rotating) and, for a rotation through several color sets such as a run of flags, frames.
+# rotating, rotating-sparkle) and, for a rotation through several color sets
+# such as a run of flags, frames.
 FEED_URL = "https://tidbyt.apis.ajcomputers.com/esbnyc/lights.json"
 TIMEZONE = "America/New_York"
 MAX_COLORS = 4
@@ -29,13 +30,17 @@ IS_2X = canvas.is2x()
 # Marquees move a pixel a frame, so 2x halves the delay to keep the speed.
 DELAY_HORIZONTAL = 25 if IS_2X else 50
 DELAY_VERTICAL = 50 if IS_2X else 100
-ROTATE_MS = 1000
+ROTATE_MS = 1500
 SPARKLE_MS = 200
 SPARKLE_STEPS = 10
 SPARKLE_DOTS = 5
 SPARKLE_MAST = "sparkle-mast"
 SPARKLE_MAST_DOTS = 2
 SPARKLE_COLOR = "#fff"
+
+# Multi-colored sparkle (New Year's): the color sets rotate with white
+# sparkles over them.
+ROTATING_SPARKLE = "rotating-sparkle"
 
 FONT_TITLE = "terminus-12" if IS_2X else "tom-thumb"
 FONT_TITLE_HEIGHT = 12 if IS_2X else 6
@@ -86,7 +91,7 @@ def color_frames(day, pattern):
     the title's colors along by one each step.
     """
     colors = day["colors"][:MAX_COLORS]
-    if pattern != "rotating":
+    if pattern != "rotating" and pattern != ROTATING_SPARKLE:
         return [colors]
     frames = [f[:MAX_COLORS] for f in (day.get("frames") or []) if f]
     if frames:
@@ -104,12 +109,28 @@ def animated(draw, frames, pattern, delay, sparkle_areas):
             children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, count))] * hold)
         return render.Animation(children = children)
 
+    if pattern == ROTATING_SPARKLE:
+        return rotating_sparkle(draw, frames, delay, sparkle_areas)
+
     if len(frames) == 1:
         return draw(frames[0])
     hold = max(1, ROTATE_MS // delay)
     children = []
     for colors in frames:
         children.extend([draw(colors)] * hold)
+    return render.Animation(children = children)
+
+def rotating_sparkle(draw, frames, delay, sparkle_areas):
+    """Each color set in turn for ROTATE_MS, sparkling all the while."""
+    per_set = max(1, ROTATE_MS // delay)
+    hold = max(1, SPARKLE_MS // delay)
+    children = []
+    for colors in frames:
+        base = draw(colors)
+
+        # The last sparkle is cut short when SPARKLE_MS doesn't divide ROTATE_MS.
+        for shown in range(0, per_set, hold):
+            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, SPARKLE_DOTS))] * min(hold, per_set - shown))
     return render.Animation(children = children)
 
 def sparkles(areas, count):
@@ -150,12 +171,12 @@ def tower(colors):
 
 def tower_areas(pattern):
     """Where sparkles can land on the tower: only the antenna for a mast
-    sparkle, otherwise the crown down."""
+    sparkle, all of it for a rotating sparkle, otherwise the crown down."""
     areas = []
     y = 0
     for i, section in enumerate(TOWER):
         for w, h in section:
-            if (i == 0) == (pattern == SPARKLE_MAST):
+            if pattern == ROTATING_SPARKLE or (i == 0) == (pattern == SPARKLE_MAST):
                 areas.append(((TOWER_WIDTH - w * WS) // 2, y, w * WS, h * VS))
             y += h * VS
     return areas
