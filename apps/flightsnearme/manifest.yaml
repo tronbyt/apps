@@ -1,0 +1,10 @@
+---
+id: flights-near-me
+name: Flight Overhead
+summary: Flights near you
+desc: Nearby flight callsign, route, aircraft, altitude and speed with airline logos. Requires a self-hosted compatible flight service; see README.md.
+author: davidozhang
+fileName: flights.star
+packageName: flightsnearme
+category: transit
+recommendedInterval: 1
