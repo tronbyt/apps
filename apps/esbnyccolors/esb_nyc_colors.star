@@ -38,10 +38,9 @@ SPARKLE_MAST = "sparkle-mast"
 SPARKLE_MAST_DOTS = 2
 SPARKLE_COLOR = "#fff"
 
-# Multi-colored sparkle (New Year's fireworks): the color sets rotate and dots
-# in the day's colors burst over them.
+# Multi-colored sparkle (New Year's): the color sets rotate with white
+# sparkles over them.
 ROTATING_SPARKLE = "rotating-sparkle"
-FIREWORK_DOTS = 6
 
 FONT_TITLE = "terminus-12" if IS_2X else "tom-thumb"
 FONT_TITLE_HEIGHT = 12 if IS_2X else 6
@@ -107,11 +106,11 @@ def animated(draw, frames, pattern, delay, sparkle_areas):
         count = SPARKLE_MAST_DOTS if pattern == SPARKLE_MAST else SPARKLE_DOTS
         children = []
         for _ in range(SPARKLE_STEPS):
-            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, count, [SPARKLE_COLOR]))] * hold)
+            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, count))] * hold)
         return render.Animation(children = children)
 
     if pattern == ROTATING_SPARKLE:
-        return fireworks(draw, frames, delay, sparkle_areas)
+        return rotating_sparkle(draw, frames, delay, sparkle_areas)
 
     if len(frames) == 1:
         return draw(frames[0])
@@ -121,32 +120,24 @@ def animated(draw, frames, pattern, delay, sparkle_areas):
         children.extend([draw(colors)] * hold)
     return render.Animation(children = children)
 
-def fireworks(draw, frames, delay, sparkle_areas):
-    """Each color set in turn for ROTATE_MS, with dots in all of the day's
-    colors sparkling over it."""
-    palette = []
-    for colors in frames:
-        for color in colors:
-            if color not in palette:
-                palette.append(color)
-    if len(palette) < 2:
-        palette.append(SPARKLE_COLOR)
+def rotating_sparkle(draw, frames, delay, sparkle_areas):
+    """Each color set in turn for ROTATE_MS, sparkling all the while."""
     hold = max(1, SPARKLE_MS // delay)
     children = []
     for colors in frames:
         base = draw(colors)
         for _ in range(max(1, ROTATE_MS // SPARKLE_MS)):
-            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, FIREWORK_DOTS, palette))] * hold)
+            children.extend([render.Stack(children = [base] + sparkles(sparkle_areas, SPARKLE_DOTS))] * hold)
     return render.Animation(children = children)
 
-def sparkles(areas, count, palette):
-    """Dots in the palette's colors, each inside one of the lit areas (x, y, w, h)."""
+def sparkles(areas, count):
+    """A few white dots, each inside one of the lit areas (x, y, w, h)."""
     dots = []
     for _ in range(count):
         x, y, w, h = areas[random.number(0, len(areas) - 1)]
         dots.append(render.Padding(
             pad = (x + random.number(0, w - WS), y + random.number(0, h - VS), 0, 0),
-            child = render.Box(width = WS, height = VS, color = palette[random.number(0, len(palette) - 1)]),
+            child = render.Box(width = WS, height = VS, color = SPARKLE_COLOR),
         ))
     return dots
 
