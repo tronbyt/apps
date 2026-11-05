@@ -1,11 +1,12 @@
 """
 Applet: Art Deco Clock
 Summary: Clock with art deco themes
-Description: A clock framed in art deco ornament. Choose from Gatsby gold, Sunburst, Skyline, Emerald fan and Miami streamline themes.
+Description: A clock framed in art deco ornament. Choose from Gatsby gold, Sunburst, Skyline, Emerald fan and Miami streamline themes, or a random one each time.
 Author: Jeremy Blaker
 """
 
 load("math.star", "math")
+load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -275,7 +276,10 @@ THEME_ORDER = ["gatsby", "sunburst", "skyline", "emerald", "miami"]
 # Main --------------------------------------------------------------------------
 
 def main(config):
-    theme = THEMES.get(config.get("theme", DEFAULT_THEME), THEMES[DEFAULT_THEME])
+    theme_id = config.get("theme", DEFAULT_THEME)
+    if theme_id == "random":
+        theme_id = THEME_ORDER[random.number(0, len(THEME_ORDER) - 1)]
+    theme = THEMES.get(theme_id, THEMES[DEFAULT_THEME])
     timezone = config.get("$tz", DEFAULT_TIMEZONE)
     now = time.now().in_location(timezone)
 
@@ -316,7 +320,8 @@ def get_schema():
                 desc = "The art deco style to display.",
                 icon = "palette",
                 default = DEFAULT_THEME,
-                options = [schema.Option(display = THEMES[k]["name"], value = k) for k in THEME_ORDER],
+                options = [schema.Option(display = THEMES[k]["name"], value = k) for k in THEME_ORDER] +
+                          [schema.Option(display = "Random", value = "random")],
             ),
             schema.Toggle(
                 id = "24hour",
