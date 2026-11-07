@@ -103,7 +103,7 @@ def main(config):
     return render.Root(
         delay = delay.milliseconds,
         # Frames are positioned within 64x32; bound and centre them on taller panels (64x64).
-        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(allFrames))),
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(children = [render.Box(width = 64, height = 32), render.Animation(allFrames)])),
     )
 
 DEFAULT_SPEED = "30"
