@@ -20,9 +20,12 @@ Captures both the hardware pollutant LED bar and the environmental metrics displ
   - Seamlessly shifts Column 1 from CO2 (ppm) to PM1.0 (µg/m³), Column 2 to PM2.5, and Column 3 to PM10, while configuring the LED bar for PM2.5.
 - **Label Contrast / Color Options**:
   - Customize the metric labels and units (`CO2`, `PM2.5`, `VOC`, `ppm`, `ug`, etc.) with choices for **Bright White (High Contrast)**, **Muted Grey (Classic)**, **Warm Gold**, **Cool Cyan**, or a **Custom Color** picker to ensure maximum legibility against ambient and tinted backgrounds.
-- **Dual Connection Support**:
+- **Three Connection Options**:
   - **Direct Local Network (Default)**: Connects directly to the monitor's local HTTP API (e.g. `http://192.168.1.50` or `http://airgradient.local`).
   - **Home Assistant**: Query Home Assistant sensors directly using a Long-Lived Access Token, with support for entity prefixes and per-sensor overrides.
+  - **AirGradient Cloud (API Key)**: Reads the monitor's latest readings from the [AirGradient public API](https://api.airgradient.com/public/docs/api/v1/), so the Tronbyt server doesn't need to be on the same network as the monitor. Uses the corrected values shown on the AirGradient dashboard. You need:
+    - **Location ID**: the numeric ID shown at [Settings → Locations](https://app.airgradient.com/settings/location). This is **not** the Place ID shown under Place settings.
+    - **API Key**: your place's API key from [Settings → Place → API](https://app.airgradient.com/settings/place?tab=4).
 - **Native 2x & 1x Support**:
   - Full 128×64 resolution support matching the native OLED resolution of the AirGradient ONE.
   - Pixel-perfect 64×32 standard rendering.
