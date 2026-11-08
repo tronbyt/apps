@@ -30,6 +30,49 @@ MAX_TEAM_RESULTS = 25
 # caller can skip the cycle rather than report a problem the user can't fix.
 FETCH_FAILED = "fetch_failed"
 
+# Longest team abbreviation that still fits beside an opponent on a 64px row.
+# Measured, not guessed: five normal characters a side clears the panel, and
+# the widest real pairing ("AVE M" vs "CUMBT") lands flush against the edge
+# without losing a glyph.
+MAX_ABBREV_LENGTH = 5
+
+# "No override". A dropdown option cannot carry an empty value, so the
+# device default needs a name of its own.
+TIMEZONE_DEVICE = "device"
+
+# Timezones offered in the config UI, as (label, IANA name).
+#
+# This is a dropdown rather than a free text box because `in_location` raises
+# on an unknown zone and Starlark has no way to catch it: one typo took the
+# whole render down. The list is also the allow-list `resolve_timezone`
+# checks, so a stale or hand-edited value can't reintroduce the crash.
+TIMEZONE_CHOICES = [
+    ("Follow the device", TIMEZONE_DEVICE),
+    ("Eastern", "America/New_York"),
+    ("Central", "America/Chicago"),
+    ("Mountain", "America/Denver"),
+    ("Arizona (no DST)", "America/Phoenix"),
+    ("Pacific", "America/Los_Angeles"),
+    ("Alaska", "America/Anchorage"),
+    ("Hawaii", "Pacific/Honolulu"),
+    ("UTC", "UTC"),
+    ("London", "Europe/London"),
+    ("Central European", "Europe/Berlin"),
+    ("Tokyo", "Asia/Tokyo"),
+    ("Sydney", "Australia/Sydney"),
+]
+
+TIMEZONE_VALUES = [choice[1] for choice in TIMEZONE_CHOICES]
+
+# States ESPN reports that mean "no kickoff to count down to", mapped to the
+# banner shown in place of the countdown.
+BANNER_STATUSES = {
+    "in_progress": ("IN PROGRESS", "#FFFF00"),
+    "final": ("FINAL", "#AAAAAA"),
+    "postponed": ("POSTPONED", "#FFA500"),
+    "canceled": ("CANCELED", "#FFA500"),
+}
+
 # Default configuration
 DEFAULT_TEAM_ID = "245"  # Example: Texas A&M
 FALLBACK_TIMEZONE = "America/Chicago"
@@ -103,9 +146,14 @@ def resolve_team_id(config):
     selection = config.get("team", "")
     if selection:
         if selection.startswith("{"):
-            team_id = json.decode(selection).get("value", "")
-            if team_id:
-                return team_id
+            # Only decode what at least looks whole: json.decode raises on
+            # malformed input, and there is no catching it in Starlark.
+            if selection.endswith("}"):
+                team_id = json.decode(selection).get("value", "")
+                if team_id:
+                    return team_id
+            else:
+                print("Ignoring malformed team selection")
         else:
             return selection
 
@@ -131,7 +179,13 @@ def search_teams(pattern):
         print("Error fetching team list: HTTP %d" % response.status_code)
         return []
 
-    leagues = response.json().get("sports", [{}])[0].get("leagues", [])
+    # Indexed rather than defaulted: a [{}] default only covers a missing
+    # key, so an empty list would still be indexed out of range.
+    sports = response.json().get("sports", [])
+    if len(sports) == 0:
+        return []
+
+    leagues = sports[0].get("leagues", [])
     if len(leagues) == 0:
         return []
 
@@ -179,8 +233,15 @@ def resolve_timezone(config):
     """
 
     override = config.get("timezone", "")
-    if override:
-        return override
+    if override and override != TIMEZONE_DEVICE:
+        if override in TIMEZONE_VALUES:
+            return override
+
+        # `in_location` raises on a zone it doesn't know and Starlark has no
+        # way to catch that, so an unrecognised override is dropped rather
+        # than passed on to crash the render. The picker can no longer
+        # produce one; a value hand-edited or left by an older install can.
+        print("Ignoring unknown timezone: %s" % override)
 
     # tronbyt-server's pixlet exposes the device timezone as time.tz().
     # Guard the lookup so the app still runs on builds without it.
@@ -237,9 +298,58 @@ def get_next_game(team_id, timezone):
     # Parse next event
     return parse_game_event(next_event, team_id, timezone)
 
+def scoreboard_months(now):
+    """
+    The two months the fallback searches, as the YYYYMM strings the
+    scoreboard endpoint accepts.
+
+    The endpoint rejects a "YYYYMMDD-YYYYMMDD" range outright with HTTP 400,
+    whatever the span, so the search is done a month at a time.
+
+    Args:
+        now: Current time, already pinned to the display timezone
+
+    Returns:
+        List of two YYYYMM strings: this month and the next
+    """
+
+    first_of_month = time.parse_time(now.format("2006-01") + "-01", format = "2006-01-02")
+
+    # 45 days past the 1st always lands inside the following month whatever
+    # its length, and rolls the year over by itself. Starlark has no calendar
+    # arithmetic to do this directly.
+    next_month = first_of_month + time.parse_duration("1080h")
+
+    return [now.format("200601"), next_month.format("200601")]
+
+def event_involves_team(event, team_id):
+    """
+    Reports whether an ESPN event has the given team on either side.
+
+    Args:
+        event: Event data from the scoreboard payload
+        team_id: ESPN team ID to look for
+
+    Returns:
+        True if the team is one of the competitors
+    """
+
+    for competition in event.get("competitions", []):
+        for competitor in competition.get("competitors", []):
+            if str(competitor.get("id", "")) == str(team_id):
+                return True
+            if str(competitor.get("team", {}).get("id", "")) == str(team_id):
+                return True
+
+    return False
+
 def get_next_game_from_scoreboard(team_id, timezone):
     """
-    Fallback method to fetch game from scoreboard API.
+    Fallback for teams whose own payload carries no nextEvent.
+
+    The scoreboard only covers FBS, so this cannot help a smaller-division
+    team. That is fine: when the search comes up empty it returns None, and
+    the caller shows "NO GAME" rather than blanking the panel.
 
     Args:
         team_id: ESPN team ID
@@ -250,38 +360,59 @@ def get_next_game_from_scoreboard(team_id, timezone):
         FETCH_FAILED if ESPN could not be reached
     """
 
-    # Get current date and next 30 days
-    now = time.now()
-    end_date = now + time.parse_duration("720h")  # 30 days
+    now = time.now().in_location(timezone)
 
-    date_range = "%s-%s" % (
-        now.format("20060102"),
-        end_date.format("20060102"),
-    )
+    for month in scoreboard_months(now):
+        url = "%s/scoreboard?dates=%s&groups=80" % (ESPN_API_BASE, month)
+        response = http.get(url, ttl_seconds = API_TTL_SECONDS)
 
-    url = "%s/scoreboard?dates=%s&groups=80" % (ESPN_API_BASE, date_range)
+        if response.status_code != 200:
+            print("Error fetching scoreboard: HTTP %d" % response.status_code)
+            return FETCH_FAILED
 
-    response = http.get(url, ttl_seconds = API_TTL_SECONDS)
+        # The payload is not in date order, so take the earliest kickoff
+        # still ahead of us rather than the first match encountered.
+        best_event = None
+        best_kickoff = None
 
-    if response.status_code != 200:
-        print("Error fetching scoreboard: HTTP %d" % response.status_code)
-        return FETCH_FAILED
+        for event in response.json().get("events", []):
+            if not event_involves_team(event, team_id):
+                continue
 
-    scoreboard_data = response.json()
-    events = scoreboard_data.get("events", [])
+            date_str = event.get("date", "")
+            if not date_str:
+                continue
 
-    # Find the next game for this team
-    for event in events:
-        competitions = event.get("competitions", [])
-        for competition in competitions:
-            competitors = competition.get("competitors", [])
+            kickoff = parse_espn_time(date_str).in_location(timezone)
+            if kickoff < now:
+                continue
 
-            # Check if this game involves our team
-            for competitor in competitors:
-                if competitor.get("id") == team_id or competitor.get("team", {}).get("id") == team_id:
-                    return parse_game_event(event, team_id, timezone)
+            if best_kickoff == None or kickoff < best_kickoff:
+                best_event = event
+                best_kickoff = kickoff
+
+        # Anything found this month beats anything in the next one.
+        if best_event != None:
+            return parse_game_event(best_event, team_id, timezone)
 
     return None
+
+def parse_espn_time(date_str):
+    """
+    Parses a kickoff timestamp as ESPN writes it.
+
+    Args:
+        date_str: Either "YYYY-MM-DDTHH:MMZ" or full RFC3339
+
+    Returns:
+        time object in UTC
+    """
+
+    if date_str.endswith("Z") and date_str.count(":") == 1:
+        # Minute precision, which the default RFC3339 parse rejects
+        return time.parse_time(date_str, format = "2006-01-02T15:04Z")
+
+    return time.parse_time(date_str)
 
 def parse_game_event(event, team_id, timezone):
     """
@@ -346,23 +477,14 @@ def parse_game_event(event, team_id, timezone):
 
     # Get team names (use abbreviation for compact display)
     # Always show: OUR_TEAM vs OPPONENT
-    our_team = our_team_data.get("abbreviation", our_team_data.get("name", "TEAM"))
-    opponent = opponent_team_data.get("abbreviation", opponent_team_data.get("name", "OPP"))
+    our_team = short_name(our_team_data, "TEAM")
+    opponent = short_name(opponent_team_data, "OPP")
 
     # Get game date/time
     # ESPN API returns time in UTC (with "Z" suffix)
     date_str = event.get("date", "")
     if date_str:
-        # Parse the time from ESPN
-        if date_str.endswith("Z") and date_str.count(":") == 1:
-            # Format: "YYYY-MM-DDTHH:MMZ" (no seconds)
-            parsed_time = time.parse_time(date_str, format = "2006-01-02T15:04Z")
-        else:
-            # Try RFC3339 format (with seconds)
-            parsed_time = time.parse_time(date_str)
-
-        # Convert to the display timezone
-        game_time = parsed_time.in_location(timezone)
+        game_time = parse_espn_time(date_str).in_location(timezone)
     else:
         game_time = time.now().in_location(timezone)
 
@@ -390,6 +512,17 @@ def parse_game_event(event, team_id, timezone):
         # Game is underway. This outranks the countdown, which would otherwise
         # claim every kickoff that falls on today's date.
         game_status = "in_progress"
+    elif status_name == "STATUS_POSTPONED":
+        game_status = "postponed"
+    elif status_name in ("STATUS_CANCELED", "STATUS_CANCELLED"):
+        game_status = "canceled"
+    elif status_state == "post":
+        # The game has been played. ESPN usually moves nextEvent on within the
+        # hour, but until it does there is no kickoff left to count down to -
+        # without this the panel sat at "0m" until midnight, as though the
+        # game were seconds away. Postponed and cancelled games land on this
+        # same state, which is why they are separated out above.
+        game_status = "final"
     elif game_date == current_date and time_until_game.seconds > 0:
         # It's game day and game hasn't started yet - show countdown
         game_status = "countdown"
@@ -413,6 +546,25 @@ def parse_game_event(event, team_id, timezone):
         "status": game_status,
         "countdown_text": countdown_text,
     }
+
+def short_name(team_data, fallback):
+    """
+    Picks a team label that fits the matchup row.
+
+    ESPN's abbreviations run to nine characters outside FBS, which overflowed
+    the 64px row and cut the opponent in half ("GRANDVIEW vs F").
+
+    Args:
+        team_data: Team object from the ESPN payload
+        fallback: Label to use when the payload names the team neither way
+
+    Returns:
+        Display label, at most MAX_ABBREV_LENGTH characters
+    """
+
+    name = team_data.get("abbreviation", "") or team_data.get("name", "") or fallback
+
+    return name[:MAX_ABBREV_LENGTH]
 
 def format_countdown(duration):
     """
@@ -501,13 +653,14 @@ def render_game_display(our_team, opponent, is_home_game, kickoff_date, kickoff_
     ]
 
     # Add status-specific content based on game state
-    if game_status == "in_progress":
-        # Game is in progress: Show "IN PROGRESS"
+    if game_status in BANNER_STATUSES:
+        # Nothing to count down to - say what the game is doing instead.
+        label, label_color = BANNER_STATUSES[game_status]
         children.append(
             render.Text(
-                content = "IN PROGRESS",
+                content = label,
                 font = "tb-8",
-                color = "#FFFF00",
+                color = label_color,
             ),
         )
     elif game_status == "countdown":
@@ -629,12 +782,16 @@ def get_schema():
                 icon = "football",
                 handler = search_teams,
             ),
-            schema.Text(
+            schema.Dropdown(
                 id = "timezone",
                 name = "Timezone",
-                desc = "Override the device timezone (e.g. America/Chicago). Leave empty to follow the device.",
+                desc = "Leave on \"Follow the device\" unless this one app should show a different zone.",
                 icon = "clock",
-                default = "",
+                default = TIMEZONE_DEVICE,
+                options = [
+                    schema.Option(display = label, value = value)
+                    for label, value in TIMEZONE_CHOICES
+                ],
             ),
         ],
     )
