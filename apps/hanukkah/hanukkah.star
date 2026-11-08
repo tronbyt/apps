@@ -54,7 +54,7 @@ def main():
         candles = []
         offset_widths = [0, 80, 96, 112, 136, 152, 168, 184]
         for i in range(0, num_candles):
-            candles.append(render.Box(width = offset_widths[i], child = render.Image(src = CANDLE_IMAGE)))
+            candles.append(render.Box(width = offset_widths[i], height = 32, child = render.Image(src = CANDLE_IMAGE)))
         candles.append(render.Image(src = MAIN_MENORAH_IMAGE))
         main_child = render.Stack(children = candles)
 
