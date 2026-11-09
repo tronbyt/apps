@@ -60,10 +60,10 @@ COLOR_CLEAR = "#00000000"
 
 # NWS flood categories, lowest first, with the colors NWS hydrographs use
 FLOOD_LEVELS = [
-    {"key": "action", "name": "NEAR FLOOD", "color": "#FFE14D"},
-    {"key": "minor", "name": "MINOR FLOOD", "color": "#FF8C00"},
-    {"key": "moderate", "name": "MODERATE FLOOD", "color": "#FF2828"},
-    {"key": "major", "name": "MAJOR FLOOD", "color": "#C040FF"},
+    {"rank": 0, "key": "action", "name": "NEAR FLOOD", "color": "#FFE14D"},
+    {"rank": 1, "key": "minor", "name": "MINOR FLOOD", "color": "#FF8C00"},
+    {"rank": 2, "key": "moderate", "name": "MODERATE FLOOD", "color": "#FF2828"},
+    {"rank": 3, "key": "major", "name": "MAJOR FLOOD", "color": "#C040FF"},
 ]
 
 # NWPS reports POSIX time zones; used for crest times only when the device has none set
@@ -177,7 +177,26 @@ def parse_site_id(raw):
 # --- Data ---
 
 def parse_time_csv(s):
-    return time.parse_time(s, format = "2006-01-02 15:04:05-07:00").unix
+    # "2026-11-02 00:00:00+00:00" today; also accepts the JSON form ("T" separator, "Z")
+    # and fractional seconds. Returns None for anything else, since a parse error would
+    # fail the whole render (Starlark can't catch it).
+    s = s.strip()
+    if len(s) < 20 or s[4] != "-" or s[7] != "-" or s[10] not in " T" or s[13] != ":" or s[16] != ":":
+        return None
+    if not (s[:4] + s[5:7] + s[8:10] + s[11:13] + s[14:16] + s[17:19]).isdigit():
+        return None
+    zone = s[19:].lstrip(".0123456789")
+    if zone != "Z" and not (len(zone) == 6 and zone[0] in "+-" and zone[3] == ":" and (zone[1:3] + zone[4:6]).isdigit()):
+        return None
+    return time.parse_time(s[:10] + " " + s[11:], format = "2006-01-02 15:04:05Z07:00").unix
+
+def is_number(s):
+    # Plain decimal like "8.17" or "-0.5"; float() would fail the render on anything else
+    body = s[1:] if s.startswith("-") else s
+    parts = body.split(".")
+    if len(parts) > 2 or not "".join(parts).isdigit():
+        return False
+    return True
 
 def fetch_usgs_series(site, param, period):
     # Returns ([(unix, value)], status). CSV is a tenth the size of the GeoJSON.
@@ -210,10 +229,11 @@ def fetch_usgs_series(site, param, period):
     for row in rows[1:]:
         if len(row) <= ti or len(row) <= vi or not row[ti] or not row[vi]:
             continue
-        v = row[vi]
-        if not v.replace(".", "").replace("-", "").isdigit():
+        v = row[vi].strip()
+        t = parse_time_csv(row[ti])
+        if t == None or not is_number(v):
             continue
-        points.append((parse_time_csv(row[ti]), float(v)))
+        points.append((t, float(v)))
     return sorted(points, key = lambda p: p[0]), 200
 
 def fetch_usgs_name(site):
@@ -228,12 +248,12 @@ def fetch_usgs_name(site):
     return props.get("monitoring_location_name")
 
 def fetch_nwps_gauge(site):
-    # NWPS looks gauges up by USGS site number. 404 means NWS doesn't track this gauge:
-    # no forecast and no flood stages, but the readings still work.
+    # Returns (gauge, status). NWPS looks gauges up by USGS site number. 404 means NWS
+    # doesn't track this gauge: no forecast and no flood stages, but the readings still work.
     resp = http.get("%s/gauges/%s" % (NWPS_API, site), ttl_seconds = READINGS_TTL)
     if resp.status_code != 200:
-        return None
-    return resp.json()
+        return None, resp.status_code
+    return resp.json(), 200
 
 def fetch_nwps_forecast(lid):
     resp = http.get("%s/gauges/%s/stageflow/forecast" % (NWPS_API, lid), ttl_seconds = FORECAST_TTL)
@@ -272,7 +292,7 @@ def nwps_flow(nwps):
         return float(v)
     return None
 
-def load_gauge(site, label, days):
+def load_gauge(site, label, days, now_unix):
     # Returns (gauge, status). gauge is None when there's nothing to show.
     obs, status = fetch_usgs_series(site, PARAM_STAGE, "P%dD" % days)
     if obs == None:
@@ -280,7 +300,12 @@ def load_gauge(site, label, days):
     if not obs:
         return None, 404
 
-    nwps = fetch_nwps_gauge(site)
+    nwps, nwps_status = fetch_nwps_gauge(site)
+    if nwps_status in TRANSIENT_STATUSES:
+        # NWPS is down, not "this gauge has no forecast". Showing the readings alone would
+        # silently drop the flood stages and change the label, so treat it like any other
+        # brief outage.
+        return None, nwps_status
     forecast = []
     if nwps and nwps.get("lid"):
         forecast = fetch_nwps_forecast(nwps["lid"])
@@ -300,14 +325,18 @@ def load_gauge(site, label, days):
         flow = flow,
         levels = flood_levels(nwps),
         zone = NWPS_ZONES.get((nwps or {}).get("timeZone", "")),
+        now_unix = now_unix,
     ), 200
 
-def make_gauge(site, label, obs, forecast, flow, levels, zone):
+def make_gauge(site, label, obs, forecast, flow, levels, zone, now_unix):
     latest_t, latest = obs[-1]
+    stale = now_unix - latest_t > STALE_SECONDS
 
-    # Forecast points after the latest reading, no further ahead than the history goes back
-    horizon = latest_t + (latest_t - obs[0][0])
-    forecast = [p for p in forecast if p[0] > latest_t and p[0] <= horizon]
+    # Forecast points after the latest reading. The chart shows no more forecast than it
+    # shows history; the crest and flood alert use all of it.
+    forecast = [p for p in forecast if p[0] > latest_t]
+    horizon = latest_t + max(latest_t - obs[0][0], 86400)
+    chart_forecast = [p for p in forecast if p[0] <= horizon]
 
     # Trend over the last few hours
     before = None
@@ -320,10 +349,12 @@ def make_gauge(site, label, obs, forecast, flow, levels, zone):
     elif before != None and before - latest > TREND_FT:
         trend = -1
 
-    # Highest forecast point, if it's above the current level
+    # Highest forecast point still ahead of the clock, if it's above the current level.
+    # When the gauge has stopped reporting, forecast points between its last reading and
+    # now have already happened, so they can't be the crest.
     crest = None
     for p in forecast:
-        if p[1] > latest + 0.05 and (crest == None or p[1] > crest[1]):
+        if p[0] > now_unix and p[1] > latest + 0.05 and (crest == None or p[1] > crest[1]):
             crest = p
 
     return {
@@ -331,8 +362,10 @@ def make_gauge(site, label, obs, forecast, flow, levels, zone):
         "label": label,
         "obs": obs,
         "forecast": forecast,
+        "chart_forecast": chart_forecast,
         "latest_t": latest_t,
         "latest": latest,
+        "stale": stale,
         "trend": trend,
         "crest": crest,
         "flow": flow,
@@ -348,19 +381,19 @@ def category(stage, levels):
             found = (lvl_stage, lvl)
     return found
 
-def flood_index(cat):
-    if cat == None:
-        return -1
-    for i, lvl in enumerate(FLOOD_LEVELS):
-        if lvl["key"] == cat[1]["key"]:
-            return i
-    return -1
+def alert_rank(gauge):
+    # 0 for action stage up to 3 for major flooding; -1 when there's no alert
+    cat = alert_category(gauge)
+    return cat[1]["rank"] if cat != None else -1
 
 def alert_category(gauge):
-    # Worst flood level now or in the forecast
-    peak = gauge["latest"]
-    if gauge["crest"] != None and gauge["crest"][1] > peak:
+    # Worst flood level now or in the forecast. A stale reading isn't "now", so it only
+    # counts while it's fresh.
+    peak = None if gauge["stale"] else gauge["latest"]
+    if gauge["crest"] != None and (peak == None or gauge["crest"][1] > peak):
         peak = gauge["crest"][1]
+    if peak == None:
+        return None
     return category(peak, gauge["levels"])
 
 def demo_gauge(now_unix, days):
@@ -384,7 +417,7 @@ def demo_gauge(now_unix, days):
             v = 54.2 - 0.18 * (h - 60)
         forecast.append((now_unix + h * 3600, v))
     levels = [(37.0, FLOOD_LEVELS[0]), (52.0, FLOOD_LEVELS[1]), (60.0, FLOOD_LEVELS[2]), (66.0, FLOOD_LEVELS[3])]
-    return make_gauge("08108700", "BRAZOS NR BRYAN", obs, forecast, 61200.0, levels, "America/Chicago")
+    return make_gauge("08108700", "BRAZOS NR BRYAN", obs, forecast, 61200.0, levels, "America/Chicago", now_unix)
 
 # --- Drawing ---
 
@@ -444,6 +477,9 @@ def vline_dotted(h, color):
 def downsample(points, t0, t1, n):
     # Average into n time slots so the plot has at most one point per column
     span = float(t1 - t0)
+    if span <= 0:
+        # A single reading (or several at one instant): nothing to spread across columns
+        return [p for p in points if p[0] == t0]
     sums = [0.0] * n
     counts = [0] * n
     for t, v in points:
@@ -468,15 +504,18 @@ def value_color(gauge, now_unix):
 
 def chart(gauge, w, h, flood_view = False):
     # Hydrograph: readings filled blue, forecast in amber, dotted "now" line, dashed flood stages
+    # The flood view shows the whole forecast, so the crest is on the chart even when
+    # it's further out than the history goes back
     t_now = gauge["latest_t"]
     t0 = gauge["obs"][0][0]
-    t1 = gauge["forecast"][-1][0] if gauge["forecast"] else t_now
+    upcoming = gauge["forecast"] if flood_view else gauge["chart_forecast"]
+    t1 = upcoming[-1][0] if upcoming else t_now
     if t1 <= t0:
         t1 = t0 + 1
 
     obs = downsample(gauge["obs"], t0, t_now, w)
     obs.append((t_now, gauge["latest"]))
-    forecast = [(t_now, gauge["latest"])] + gauge["forecast"]
+    forecast = [(t_now, gauge["latest"])] + upcoming
 
     values = [v for _, v in obs] + [v for _, v in forecast]
     lo = min(values)
@@ -574,7 +613,7 @@ def glance_screen(gauge, now_unix):
         chart(gauge, w, chart_h),
     ])
 
-def flood_screen(gauge, now_unix, opts):
+def flood_screen(gauge, now_unix, tz):
     # Screen C: gauge name on a band in the flood color, flood level, crest, and the hydrograph with flood stages
     L = layout()
     s = L["s"]
@@ -594,8 +633,8 @@ def flood_screen(gauge, now_unix, opts):
 
     crest = gauge["crest"]
     if crest != None and crest[1] >= cat[0]:
-        when = time.from_timestamp(int(crest[0])).in_location(opts["tz"])
-        today = time.from_timestamp(now_unix).in_location(opts["tz"])
+        when = time.from_timestamp(int(crest[0])).in_location(tz)
+        today = time.from_timestamp(now_unix).in_location(tz)
         day = "TODAY" if when.format("2006-01-02") == today.format("2006-01-02") else when.format("Mon").upper()
         hour = when.format("3PM")
         v = format_stage(crest[1])
@@ -623,6 +662,13 @@ def flood_screen(gauge, now_unix, opts):
         chart(gauge, w, chart_h, flood_view = True),
     ])
 
+def stub_message(status):
+    if status == 404:
+        return "NO READINGS"
+    elif status in TRANSIENT_STATUSES:
+        return "NO RESPONSE"
+    return "ERROR %d" % status
+
 def pair_row(gauge, w, h, now_unix):
     # One half of screen D: label and stage on the left, sparkline on the right
     L = layout()
@@ -634,7 +680,7 @@ def pair_row(gauge, w, h, now_unix):
         return render.Box(width = w, height = h, child = render.Padding(pad = (0, s, 0, 0), child = render.Column(expanded = True, children = [
             render.Row(expanded = True, children = [render.Text(fit_label(gauge["label"], L["small"], w), font = L["small"], color = COLOR_LABEL)]),
             render.Box(width = 1, height = s),
-            render.Row(expanded = True, children = [render.Text("NO READINGS", font = L["small"], color = COLOR_STALE)]),
+            render.Row(expanded = True, children = [render.Text(stub_message(gauge["error"]), font = L["small"], color = COLOR_STALE)]),
         ])))
 
     value = render.Row(cross_align = "center", children = [
@@ -706,18 +752,19 @@ def main(config):
 
         rows = []
         for site, label in sites:
-            gauge, status = load_gauge(site, label, days)
-            if gauge == None and status in TRANSIENT_STATUSES:
-                # Keep showing the last good frame until the API recovers
-                return []
+            gauge, status = load_gauge(site, label, days, now_unix)
             if gauge == None:
-                # A wrong site number, or a gauge with no water level readings
+                # A wrong site number, a gauge with no water level readings, or an API that's
+                # briefly down. The other gauge, if any, still shows.
                 gauge = {"error": status, "label": label or ("USGS " + site), "site": site}
             rows.append(gauge)
 
         gauges = [g for g in rows if not g.get("error")]
         if not gauges:
             g = rows[0]
+            if g["error"] in TRANSIENT_STATUSES:
+                # Keep showing the last good frame until the API recovers
+                return []
             if g["error"] == 404:
                 return render_message("USGS " + g["site"], ["No water level", "readings in", "%d days" % days])
             return render_message("USGS " + g["site"], ["API error", str(g["error"])])
@@ -726,16 +773,15 @@ def main(config):
 
     if not tz:
         tz = gauges[0]["zone"] or "America/Chicago"
-    opts = {"tz": tz}
 
     # Which gauges get the flood screen
     min_alert = {"action": 0, "minor": 1}.get(alert, 99)
-    flooding = [g for g in gauges if flood_index(alert_category(g)) >= min_alert]
+    flooding = [g for g in gauges if alert_rank(g) >= min_alert]
 
     if pair != None:
-        screens = [pair_screen(pair, now_unix)] + [flood_screen(g, now_unix, opts) for g in flooding]
+        screens = [pair_screen(pair, now_unix)] + [flood_screen(g, now_unix, tz) for g in flooding]
     elif flooding:
-        screens = [flood_screen(gauges[0], now_unix, opts)]
+        screens = [flood_screen(gauges[0], now_unix, tz)]
     else:
         screens = [glance_screen(gauges[0], now_unix)]
 

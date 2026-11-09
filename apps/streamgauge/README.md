@@ -8,7 +8,9 @@ Water level at one or two USGS stream gauges: the last few days of readings and,
 - **Two gauges**: one row per gauge, each with its name, stage, trend arrow and a small chart.
 - **Flood screen**: the gauge name on a band colored by flood level, the level (near flood, minor, moderate or major flood), when and how high the river is forecast to crest, and a chart with the flood stages drawn as dotted lines. With two gauges, the flood screen follows the two-gauge screen for each gauge that's flooding.
 
-The stage turns yellow, orange, red or purple when the river is at a flood stage, and turns grey if the gauge hasn't reported for 3 hours.
+The stage turns yellow, orange, red or purple when the river is at a flood stage, and turns grey if the gauge hasn't reported for 3 hours. A grey reading doesn't trigger the flood screen on its own; only the forecast can while the gauge is silent.
+
+With two gauges, if one can't be reached its row says so and the other keeps updating.
 
 ## Setup
 
@@ -32,7 +34,7 @@ Forecasts and flood stages come from the National Weather Service, which forecas
 
 - **USGS Site Number** and **Second Site Number**: leave the second one empty to show one gauge.
 - **Label** and **Second Label**: a short name to show instead of the gauge's name. By default the app shortens the name (for example "Brazos River near Bryan" becomes "BRAZOS NR BRYAN") and drops words that don't fit.
-- **History**: 3, 7 or 14 days of readings. The forecast adds up to as many days again.
+- **History**: 3, 7 or 14 days of readings. The forecast adds up to as many days again. The flood screen always checks, and charts, the whole forecast, so a short history never hides a coming crest.
 - **Flood Screen**: switch to the flood screen when the river reaches, or is forecast to reach, the gauge's action stage ("near flood"), its flood stage (minor flooding), or never.
 
 ## Data
