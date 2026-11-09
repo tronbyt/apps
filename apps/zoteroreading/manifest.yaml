@@ -1,0 +1,15 @@
+---
+id: zotero-reading
+name: Zotero Reading
+summary: Your latest highlighted paper
+desc: Shows the paper you most recently highlighted in Zotero, with an optional reading streak, a two-person reading buddies view, and a gentle nudge when you haven't read in a while.
+author: kalxed
+fileName: zoteroreading.star
+packageName: zoteroreading
+category: education
+tags:
+  - zotero
+  - reading
+  - research
+published: '2026-11-08T21:00:26Z'
+updated: '2026-11-08T21:00:26Z'
