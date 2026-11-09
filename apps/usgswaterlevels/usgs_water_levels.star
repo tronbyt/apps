@@ -6,6 +6,7 @@ Displays local lake and river water levels as a graph using USGS data
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -14,9 +15,54 @@ load("time.star", "time")
 DEFAULT_SITE_ID = "04294500"
 CACHE_TTL_SECONDS = 3600  # 1 hour
 USGS_API_BASE = "https://api.waterdata.usgs.gov/ogcapi/v0/collections"
+USGS_SQUID = "https://api.waterdata.usgs.gov/squid/monitoring-locations"
+
+GAUGE_SEARCH_RADIUS_KM = 25
+GAUGE_PICKER_LIMIT = 50
+GAUGE_PICKER_TTL = 86400
+STREAM_SITE_TYPES = ["ST", "ST-CA", "ST-DCH", "ST-TS", "LK"]
+
+# Parameters this app can display (lake + river dropdowns)
+PICKER_PARAMS = [
+    "62614",
+    "00062",
+    "62610",
+    "62611",
+    "00065",
+    "00060",
+    "72255",
+    "00048",
+    "00010",
+    "00095",
+]
+
+production = True
+debug_site_selection = False
+default_location = """{
+	"lat": "44.476",
+	"lng": "-73.212",
+	"description": "Burlington, VT, USA",
+	"timezone": "America/New_York"
+}"""
+
+def debug_site(msg):
+    if debug_site_selection:
+        print("usgs-water-levels site: " + msg)
 
 def main(config):
-    site_id = normalize_site_id(config.get("site_id", DEFAULT_SITE_ID))
+    site_id, bad_site = resolve_site(config, "site_id", "site_id_picker", DEFAULT_SITE_ID)
+    if bad_site:
+        return render.Root(
+            child = render.Column(
+                children = [
+                    render.Text("USGS Water Levels", color = "#4A90E2"),
+                    render.Text("Invalid site ID", color = "#FF6B6B", font = "tom-thumb"),
+                ],
+            ),
+        )
+    if not site_id:
+        site_id = DEFAULT_SITE_ID
+    debug_site("using site: " + site_id)
     water_body_type = config.get("water_body_type", "0")  # 0 for lakes, 1 for rivers
     param_code = config.get("param_code", "auto")  # auto or specific code
     custom_display_name = config.get("display_name", "")
@@ -111,11 +157,177 @@ def main(config):
         ),
     )
 
+def parse_site_id(raw):
+    s = (raw or "").strip().upper()
+    i = s.find("USGS-")
+    if i >= 0:
+        s = s[i + 5:]
+    run = ""
+    for c in s.elems():
+        if c.isdigit():
+            run += c
+        elif run:
+            if len(run) >= 8:
+                break
+            run = ""
+    if len(run) >= 8 and len(run) <= 15:
+        return run
+    return None
+
 def normalize_site_id(site_id):
-    site_id = site_id.strip()
+    parsed = parse_site_id(site_id)
+    if parsed:
+        return parsed
+    site_id = (site_id or "").strip()
     if site_id.startswith("USGS-"):
         site_id = site_id[5:]
     return site_id
+
+def gauge_bounding_box(lat, lng, radius_km):
+    R = 6371.0
+    lat_r = math.radians(lat)
+    dlat = math.degrees(radius_km / R)
+    dlng = math.degrees(radius_km / R / math.cos(lat_r))
+    return (lng - dlng, lat - dlat, lng + dlng, lat + dlat)
+
+def haversine_km(lat1, lng1, lat2, lng2):
+    R = 6371.0
+    dlat = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+    a = math.pow(math.sin(dlat / 2), 2) + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.pow(math.sin(dlng / 2), 2)
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+def has_picker_data(props):
+    for p in props.get("observedParameters") or []:
+        if p in PICKER_PARAMS:
+            return True
+    return False
+
+def build_squid_gauge_url(bbox, since_date):
+    min_lng, min_lat, max_lng, max_lat = bbox
+    query = "mimeType=application/json&pageSize=%d" % GAUGE_PICKER_LIMIT
+    query += "&boundingBox=%s,%s,%s,%s" % (min_lng, min_lat, max_lng, max_lat)
+    query += "&dataCollectedSinceDatetime=" + since_date
+    query += "&dataType=Continuous%20values"
+    for code in STREAM_SITE_TYPES:
+        query += "&siteTypeCode=" + code
+    return USGS_SQUID + "?" + query
+
+def fetch_squid_gauges(lat, lng):
+    since_date = (time.now() - time.parse_duration("8760h")).format("2006-01-02")
+    bbox = gauge_bounding_box(lat, lng, GAUGE_SEARCH_RADIUS_KM)
+    resp = http.get(build_squid_gauge_url(bbox, since_date), ttl_seconds = GAUGE_PICKER_TTL)
+    if resp.status_code != 200:
+        return []
+
+    seen = {}
+    rows = []
+    for f in (resp.json() or {}).get("features") or []:
+        props = f.get("properties") or {}
+        if not has_picker_data(props):
+            continue
+        site = parse_site_id(props.get("monitoringLocationIdentifier"))
+        if not site or site in seen:
+            continue
+        geom = f.get("geometry") or {}
+        coords = geom.get("coordinates") or []
+        if len(coords) < 2:
+            continue
+        glng = float(coords[0])
+        glat = float(coords[1])
+        name = props.get("monitoringLocationName") or ("USGS " + site)
+        rows.append({
+            "site": site,
+            "name": name,
+            "dist": haversine_km(lat, lng, glat, glng),
+        })
+        seen[site] = True
+    return sorted(rows, key = lambda r: r["dist"])
+
+def gauge_picker_label(site, name):
+    if len(name) > 40:
+        name = name[:40]
+    return site + " — " + name
+
+def get_nearby_gauges(location):
+    loc = json.decode(location)
+    lat = float(loc["lat"])
+    lng = float(loc["lng"])
+    place = loc.get("description") or (loc.get("lat") + "," + loc.get("lng"))
+    rows = fetch_squid_gauges(lat, lng)
+    if not rows:
+        debug_site('picker search at "%s": no gauges in bbox' % place)
+        return [
+            schema.Option(
+                display = "No gauges found — use site ID below",
+                value = "",
+            ),
+        ]
+    options = []
+    for row in rows:
+        options.append(schema.Option(
+            display = gauge_picker_label(row["site"], row["name"]),
+            value = row["site"],
+        ))
+    debug_site('picker search at "%s": %d gauge(s)' % (place, len(options)))
+    return options
+
+def picker_site_value(raw):
+    raw = (raw or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("{"):
+        raw = (json.decode(raw).get("value") or "").strip()
+    if not raw:
+        return None
+    return parse_site_id(raw)
+
+def resolve_site(config, manual_key, picker_key, default):
+    manual = (config.get(manual_key) or "").strip()
+    if manual:
+        site = parse_site_id(manual)
+        if site == None:
+            debug_site("%s: invalid manual entry %r" % (picker_key, manual))
+            return None, True
+        debug_site("%s: manual override -> %s" % (picker_key, site))
+        return site, False
+    picker_raw = (config.get(picker_key) or "").strip()
+    site = picker_site_value(picker_raw)
+    if site:
+        display = ""
+        if picker_raw.startswith("{"):
+            display = (json.decode(picker_raw).get("display") or "").strip()
+        if display:
+            debug_site('%s: picker -> %s ("%s")' % (picker_key, site, display))
+        else:
+            debug_site("%s: picker -> %s" % (picker_key, site))
+        return site, False
+    if default:
+        debug_site("%s: default -> %s" % (picker_key, default))
+        return default, False
+    debug_site("%s: none selected" % picker_key)
+    return None, False
+
+def gauge_picker_field(id, name, desc):
+    if production:
+        return schema.LocationBased(
+            id = id,
+            name = name,
+            desc = desc,
+            icon = "locationDot",
+            handler = get_nearby_gauges,
+        )
+    options = get_nearby_gauges(default_location)
+    if not options:
+        options = [schema.Option(display = DEFAULT_SITE_ID, value = DEFAULT_SITE_ID)]
+    return schema.Dropdown(
+        id = id,
+        name = name,
+        desc = desc + " (local preview uses gauges near Burlington, VT).",
+        icon = "locationDot",
+        default = options[0].value,
+        options = options,
+    )
 
 def monitoring_location_id(site_id):
     return "USGS-" + normalize_site_id(site_id)
@@ -464,16 +676,20 @@ def param_options_for_water_body(water_body_type):
     ]
 
 def get_schema():
-    # Configuration schema for the app
+    picker_desc = "Lake and stream sites with recent data within about %d km of your location." % GAUGE_SEARCH_RADIUS_KM
     return schema.Schema(
         version = "1",
         fields = [
+            gauge_picker_field(
+                "site_id_picker",
+                "Nearby Site",
+                picker_desc,
+            ),
             schema.Text(
                 id = "site_id",
                 name = "USGS Site ID",
-                desc = "Enter the USGS site ID (e.g. 04294500 or USGS-04294500)",
+                desc = "Optional override. Site number (e.g. 04294500 or USGS-04294500) or a waterdata.usgs.gov link.",
                 icon = "water",
-                default = DEFAULT_SITE_ID,
             ),
             schema.Text(
                 id = "display_name",
