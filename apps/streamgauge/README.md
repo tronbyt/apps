@@ -14,15 +14,15 @@ With two gauges, if one can't be reached its row says so and the other keeps upd
 
 ## Setup
 
-You need the gauge's **USGS site number**: 8 to 15 digits, such as `08108700`.
+Pick a **nearby gauge** from the location-based list (USGS stream and lake sites with recent stage data within about 25 km), or enter a **USGS site number** manually: 8 to 15 digits, such as `08108700`. The site number field overrides the picker.
 
-To find it:
+To find a site number by hand:
 
 1. Open the [USGS National Water Dashboard](https://dashboard.waterdata.usgs.gov/) and zoom to your river.
 2. Click a gauge. The pop-up shows its name and site number.
 3. Or, on the gauge's page on waterdata.usgs.gov, take the number from the address bar: `https://waterdata.usgs.gov/monitoring-location/USGS-08108700/` is site `08108700`.
 
-You can paste the whole page link into the app's site number field; it picks out the number.
+You can paste the whole page link into the site number field; it picks out the number.
 
 The gauge has to measure water level (gage height, parameter 00065). Most river gauges do; some measure only flow, or lake elevation, and those show "No water level readings".
 
@@ -32,7 +32,8 @@ Forecasts and flood stages come from the National Weather Service, which forecas
 
 ## Options
 
-- **USGS Site Number** and **Second Site Number**: leave the second one empty to show one gauge.
+- **Nearby Gauge** / **Second Nearby Gauge**: choose a place, then a gauge from the list. Optional second gauge for the split screen.
+- **USGS Site Number** and **Second Site Number**: optional overrides for either gauge.
 - **Label** and **Second Label**: a short name to show instead of the gauge's name. By default the app shortens the name (for example "Brazos River near Bryan" becomes "BRAZOS NR BRYAN") and drops words that don't fit.
 - **History**: 3, 7 or 14 days of readings. The forecast adds up to as many days again. The flood screen always checks, and charts, the whole forecast, so a short history never hides a coming crest.
 - **Flood Screen**: switch to the flood screen when the river reaches, or is forecast to reach, the gauge's action stage ("near flood"), its flood stage (minor flooding), or never.

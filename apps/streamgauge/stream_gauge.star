@@ -6,6 +6,7 @@ Author: tscott98
 """
 
 load("encoding/csv.star", "csv")
+load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
 load("render.star", "canvas", "render")
@@ -14,6 +15,27 @@ load("time.star", "time")
 
 # Readings: USGS Water Data API (https://api.waterdata.usgs.gov/)
 USGS_API = "https://api.waterdata.usgs.gov/ogcapi/v0/collections"
+USGS_SQUID = "https://api.waterdata.usgs.gov/squid/monitoring-locations"
+
+# Nearby-gauge picker (schema.LocationBased)
+GAUGE_SEARCH_RADIUS_KM = 25
+GAUGE_PICKER_LIMIT = 50
+GAUGE_PICKER_TTL = 86400
+STREAM_SITE_TYPES = ["ST", "ST-CA", "ST-DCH", "ST-TS", "LK"]
+
+# LocationBased handlers run on Tronbyt only; pixlet serve uses a fixed-location dropdown.
+production = True
+debug_site_selection = False
+default_location = """{
+	"lat": "30.674",
+	"lng": "-96.370",
+	"description": "Bryan, TX, USA",
+	"timezone": "America/Chicago"
+}"""
+
+def debug_site(msg):
+    if debug_site_selection:
+        print("streamgauge site: " + msg)
 
 # Forecasts and flood stages: NOAA National Water Prediction Service (https://api.water.noaa.gov/nwps/v1/docs/)
 NWPS_API = "https://api.water.noaa.gov/nwps/v1"
@@ -173,6 +195,134 @@ def parse_site_id(raw):
     if len(run) >= 8 and len(run) <= 15:
         return run
     return None
+
+def gauge_bounding_box(lat, lng, radius_km):
+    R = 6371.0
+    lat_r = math.radians(lat)
+    dlat = math.degrees(radius_km / R)
+    dlng = math.degrees(radius_km / R / math.cos(lat_r))
+    return (lng - dlng, lat - dlat, lng + dlng, lat + dlat)
+
+def haversine_km(lat1, lng1, lat2, lng2):
+    R = 6371.0
+    dlat = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+    a = math.pow(math.sin(dlat / 2), 2) + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.pow(math.sin(dlng / 2), 2)
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+def has_stage_reading(props):
+    for p in props.get("observedParameters") or []:
+        if p == PARAM_STAGE:
+            return True
+    return False
+
+def build_squid_gauge_url(bbox, since_date):
+    min_lng, min_lat, max_lng, max_lat = bbox
+    query = "mimeType=application/json&pageSize=%d" % GAUGE_PICKER_LIMIT
+    query += "&boundingBox=%s,%s,%s,%s" % (min_lng, min_lat, max_lng, max_lat)
+    query += "&dataCollectedSinceDatetime=" + since_date
+    query += "&dataType=Continuous%20values"
+    for code in STREAM_SITE_TYPES:
+        query += "&siteTypeCode=" + code
+    return USGS_SQUID + "?" + query
+
+def fetch_squid_gauges(lat, lng):
+    since_date = (time.now() - time.parse_duration("8760h")).format("2006-01-02")
+    bbox = gauge_bounding_box(lat, lng, GAUGE_SEARCH_RADIUS_KM)
+    resp = http.get(build_squid_gauge_url(bbox, since_date), ttl_seconds = GAUGE_PICKER_TTL)
+    if resp.status_code != 200:
+        return []
+
+    seen = {}
+    rows = []
+    for f in (resp.json() or {}).get("features") or []:
+        props = f.get("properties") or {}
+        if not has_stage_reading(props):
+            continue
+        site = parse_site_id(props.get("monitoringLocationIdentifier"))
+        if not site or site in seen:
+            continue
+        geom = f.get("geometry") or {}
+        coords = geom.get("coordinates") or []
+        if len(coords) < 2:
+            continue
+        glng = float(coords[0])
+        glat = float(coords[1])
+        name = props.get("monitoringLocationName") or ("USGS " + site)
+        rows.append({
+            "site": site,
+            "name": name,
+            "dist": haversine_km(lat, lng, glat, glng),
+        })
+        seen[site] = True
+    return sorted(rows, key = lambda r: r["dist"])
+
+def gauge_picker_label(site, name):
+    label = short_name(name)
+    if not label:
+        label = name
+    if len(label) > 36:
+        label = label[:36]
+    return site + " — " + label
+
+def get_nearby_gauges(location):
+    loc = json.decode(location)
+    lat = float(loc["lat"])
+    lng = float(loc["lng"])
+    place = loc.get("description") or (loc.get("lat") + "," + loc.get("lng"))
+    rows = fetch_squid_gauges(lat, lng)
+    if not rows:
+        debug_site('picker search at "%s": no gauges in bbox' % place)
+        return [
+            schema.Option(
+                display = "No gauges found — use site number below",
+                value = "",
+            ),
+        ]
+    options = []
+    for row in rows:
+        options.append(schema.Option(
+            display = gauge_picker_label(row["site"], row["name"]),
+            value = row["site"],
+        ))
+    debug_site('picker search at "%s": %d gauge(s)' % (place, len(options)))
+    return options
+
+def picker_site_value(raw):
+    raw = (raw or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("{"):
+        raw = (json.decode(raw).get("value") or "").strip()
+    if not raw:
+        return None
+    return parse_site_id(raw)
+
+def resolve_site(config, manual_key, picker_key, default):
+    manual = (config.get(manual_key) or "").strip()
+    if manual:
+        site = parse_site_id(manual)
+        if site == None:
+            debug_site("%s: invalid manual entry %r" % (picker_key, manual))
+            return None, True
+        debug_site("%s: manual override -> %s" % (picker_key, site))
+        return site, False
+    picker_raw = (config.get(picker_key) or "").strip()
+    site = picker_site_value(picker_raw)
+    if site:
+        display = ""
+        if picker_raw.startswith("{"):
+            display = (json.decode(picker_raw).get("display") or "").strip()
+        if display:
+            debug_site('%s: picker -> %s ("%s")' % (picker_key, site, display))
+        else:
+            debug_site("%s: picker -> %s" % (picker_key, site))
+        return site, False
+    if default:
+        debug_site("%s: default -> %s" % (picker_key, default))
+        return default, False
+    debug_site("%s: none selected" % picker_key)
+    return None, False
 
 # --- Data ---
 
@@ -734,21 +884,25 @@ def main(config):
     if config.get("demo") == "flood":
         gauges = [demo_gauge(now_unix, days)]
     else:
-        raw = [
-            (config.get("site1", DEFAULT_SITE), (config.get("label1") or "").strip().upper()),
-            (config.get("site2", ""), (config.get("label2") or "").strip().upper()),
-        ]
+        label1 = (config.get("label1") or "").strip().upper()
+        label2 = (config.get("label2") or "").strip().upper()
+        site1, bad1 = resolve_site(config, "site1", "site1_picker", DEFAULT_SITE)
+        if bad1:
+            return render_message("Stream Gauge", ["Site 1 should", "be a USGS", "site number"])
+        site2, bad2 = resolve_site(config, "site2", "site2_picker", "")
+        if bad2:
+            return render_message("Stream Gauge", ["Site 2 should", "be a USGS", "site number"])
+
         sites = []
-        for i, (site_raw, label) in enumerate(raw):
-            if not (site_raw or "").strip():
-                continue
-            site = parse_site_id(site_raw)
-            if site == None:
-                return render_message("Stream Gauge", ["Site %d should" % (i + 1), "be a USGS", "site number"])
-            if site not in [x[0] for x in sites]:
-                sites.append((site, label))
+        if site1 and site1 not in [s[0] for s in sites]:
+            sites.append((site1, label1))
+        if site2 and site2 not in [s[0] for s in sites]:
+            sites.append((site2, label2))
         if not sites:
             sites = [(DEFAULT_SITE, "")]
+
+        for i, (site, label) in enumerate(sites):
+            debug_site("using site %d: %s (label=%r)" % (i + 1, site, label))
 
         rows = []
         for site, label in sites:
@@ -794,16 +948,44 @@ def main(config):
         child = render.Animation(children = screens),
     )
 
+def gauge_picker_field(id, name, desc, optional = False):
+    if production:
+        return schema.LocationBased(
+            id = id,
+            name = name,
+            desc = desc,
+            icon = "locationDot",
+            handler = get_nearby_gauges,
+        )
+    options = get_nearby_gauges(default_location)
+    if not options:
+        options = [schema.Option(display = DEFAULT_SITE, value = DEFAULT_SITE)]
+    if optional:
+        options = [schema.Option(display = "None", value = "")] + options
+    return schema.Dropdown(
+        id = id,
+        name = name,
+        desc = desc + " (local preview uses gauges near Bryan, TX).",
+        icon = "locationDot",
+        default = "" if optional else options[0].value,
+        options = options,
+    )
+
 def get_schema():
+    picker_desc = "Stream or lake gauges with recent stage data within about %d km of your location." % GAUGE_SEARCH_RADIUS_KM
     return schema.Schema(
         version = "1",
         fields = [
+            gauge_picker_field(
+                "site1_picker",
+                "Nearby Gauge",
+                picker_desc,
+            ),
             schema.Text(
                 id = "site1",
                 name = "USGS Site Number",
-                desc = "8 to 15 digits, from the gauge's page on waterdata.usgs.gov (for example 08108700). Pasting the page link works too.",
+                desc = "Optional override. 8 to 15 digits from waterdata.usgs.gov (for example 08108700), or paste the gauge page link.",
                 icon = "water",
-                default = DEFAULT_SITE,
             ),
             schema.Text(
                 id = "label1",
@@ -811,10 +993,16 @@ def get_schema():
                 desc = "Optional short name to show instead of the gauge's name",
                 icon = "tag",
             ),
+            gauge_picker_field(
+                "site2_picker",
+                "Second Nearby Gauge",
+                "Optional. " + picker_desc,
+                optional = True,
+            ),
             schema.Text(
                 id = "site2",
                 name = "Second Site Number",
-                desc = "Optional. Shows both gauges on one screen.",
+                desc = "Optional override for the second gauge.",
                 icon = "water",
             ),
             schema.Text(
