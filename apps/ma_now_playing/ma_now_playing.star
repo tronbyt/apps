@@ -49,10 +49,10 @@ def layout():
             art = 48,
             gap = 6,
             bar = 4,
-            title = "terminus-16",
-            small = "terminus-12",
+            title = "terminus-18",
+            small = "terminus-14",
             clock = "terminus-32",
-            date = "terminus-14",
+            date = "terminus-16",
         )
     return struct(
         w = w,
@@ -409,7 +409,7 @@ def setup_screen(L):
         children = [
             render.Row(cross_align = "center", children = [glyph("note", WHITE, s), render.Box(width = 3 * s, height = 1), text("NOW PLAYING", L.small, WHITE)]),
             render.Box(width = 1, height = 3 * s),
-            render.WrappedText(content = "Add your Music Assistant URL and token", font = L.small, color = GREY, width = L.w - 4 * s, align = "center"),
+            render.WrappedText(content = "Add your Music Assistant URL and token", font = "terminus-12" if s == 2 else L.small, color = GREY, width = L.w - 4 * s, align = "center"),
         ],
     )))
 
